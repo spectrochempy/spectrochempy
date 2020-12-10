@@ -9,9 +9,9 @@
 # Testing examples and notebooks (Py version) in docs
 # ----------------------------------------------------------------------------------------------------------------------
 
-import os
 from glob import glob
 
+import os
 import pytest
 
 path = os.getcwd()
@@ -24,8 +24,8 @@ def example_run(path):
     import subprocess
 
     pipe = None
-    so=None
-    serr=None
+    so = None
+    serr = None
     try:
         pipe = subprocess.Popen(
                 ["python", path, '--nodisplay'],
@@ -35,6 +35,7 @@ def example_run(path):
         pass
 
     return pipe.returncode, so, serr
+
 
 # ......................................................................................................................
 @pytest.mark.parametrize('example', glob(os.path.join(path, '..', 'user', '**', '*.py'), recursive=True))

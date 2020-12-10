@@ -7,28 +7,21 @@
 
 __all__ = ['Project']
 
-import os
-import io
-import uuid
-import json
-import warnings
-import pathlib
 from copy import copy as cpy
-# from collections import OrderedDict
 
+import uuid
+import pathlib
 import dill
 from functools import wraps
-
 from traitlets import (Dict, Instance, Unicode, This, default)
 
-import spectrochempy as scp
-from spectrochempy.core import general_preferences, config_manager, config_dir, app, debug_
-from spectrochempy.application import ProjectPreferences
+from spectrochempy.core import general_preferences, config_manager
 from spectrochempy.core.dataset.nddataset import NDDataset, NDIO
 from spectrochempy.core.scripts.script import Script
-from spectrochempy.utils import Meta, SpectroChemPyWarning, make_zipfile, ScpFile
+from spectrochempy.utils import Meta
 from spectrochempy.core.project.baseproject import AbstractProject
-from spectrochempy.utils import get_filename, pathclean, json_serialiser
+
+# from collections import OrderedDict
 
 cfg = config_manager
 preferences = general_preferences
@@ -430,7 +423,6 @@ class Project(AbstractProject, NDIO):
             return 'Project'
         else:
             return name == 'Project'
-
 
     def copy(self):
         """

@@ -920,8 +920,8 @@ class NDDataset(
 
         """
         import spectrochempy as scp
-        return scp.NDPanel(self, **kwargs)
 
+        return scp.NDPanel(self, **kwargs)
 
     # ..................................................................................................................
     def to_xarray(self, **kwargs):

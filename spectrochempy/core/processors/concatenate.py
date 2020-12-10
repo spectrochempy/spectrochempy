@@ -15,7 +15,6 @@ from warnings import warn
 from orderedset import OrderedSet
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-# from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.ndarray import DEFAULT_DIM_NAME
 from spectrochempy.utils import SpectroChemPyWarning, DimensionsCompatibilityError
@@ -122,7 +121,7 @@ def concatenate(*datasets, **kwargs):
 
     # The number of dimensions is expected to be the same for all datasets
     if len(list(set(rndims))) > 1:
-        raise DimensionsCompatibilityError(f"Only NDDataset with the same number of dimensions can be concatenated.")
+        raise DimensionsCompatibilityError("Only NDDataset with the same number of dimensions can be concatenated.")
 
     rcompat = list(map(list, list(map(set, list(zip(*rshapes))))))
 
@@ -166,8 +165,8 @@ def concatenate(*datasets, **kwargs):
     for i, item in enumerate(zip(*rshapes)):
         if i != axis and len(set(item)) > 1:
             raise DimensionsCompatibilityError(
-                "Datasets must have the same shape for all dimensions except the one along which the"
-                " concatenation is performed")
+                    "Datasets must have the same shape for all dimensions except the one along which the"
+                    " concatenation is performed")
 
     # Check unit compatibility
     # ------------------------------------------------------------------------------------------------------------------

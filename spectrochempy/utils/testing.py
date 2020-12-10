@@ -43,7 +43,6 @@ from numpy.testing import (
 # ======================================================================================================================
 
 def _compare_datasets(this, other, approx=False, decimal=6):
-
     from spectrochempy.core.dataset.ndarray import NDArray
     from spectrochempy.units import ur, Quantity
     from spectrochempy.utils.exceptions import ComparisonFailure
@@ -132,9 +131,10 @@ def _compare_datasets(this, other, approx=False, decimal=6):
 
                 eq &= np.all(sattr == oattr)
                 if not eq:
-                    raise ComparisonFailure(f"attributes `{attr}` are not equals or one is missing: \n{sattr} != {oattr}")
+                    raise ComparisonFailure(
+                        f"attributes `{attr}` are not equals or one is missing: \n{sattr} != {oattr}")
             else:
-                raise ComparisonFailure(f'{other } has no units')
+                raise ComparisonFailure(f'{other} has no units')
 
     return True
 
@@ -151,9 +151,10 @@ def assert_dataset_equal(nd1, nd2):
     assert_dataset_almost_equal(nd1, nd2, approx=False)
     return True
 
+
 # ......................................................................................................................
 def assert_dataset_almost_equal(nd1, nd2, **kwargs):
-    decimal = kwargs.get('decimal',_significant_decimal(np.max(nd1.ptp().data)))
+    decimal = kwargs.get('decimal', _significant_decimal(np.max(nd1.ptp().data)))
     approx = kwargs.get('approx', True)
     _compare_datasets(nd1, nd2, approx=approx, decimal=decimal)
     return True
@@ -162,10 +163,11 @@ def assert_dataset_almost_equal(nd1, nd2, **kwargs):
 def assert_project_equal(proj1, proj2, **kwargs):
     assert_project_almost_equal(proj1, proj2, approx=False)
     return True
+
+
 # ......................................................................................................................
 def assert_project_almost_equal(proj1, proj2, **kwargs):
 
-    compare = True
     for nd1, nd2 in zip(proj1.datasets, proj2.datasets):
         _compare_datasets(nd1, nd2, **kwargs)
 
@@ -180,11 +182,11 @@ def assert_project_almost_equal(proj1, proj2, **kwargs):
 
 # ......................................................................................................................
 def assert_script_equal(sc1, sc2, **kwargs):
-
     from spectrochempy.utils.exceptions import ComparisonFailure
 
     if sc1 != sc2:
         raise ComparisonFailure(f'Scripts are differents: {sc1.content} != {sc2.content}')
+
 
 # ======================================================================================================================
 # RandomSeedContext
@@ -238,6 +240,7 @@ class RandomSeedContext(object):
 # .............................................................................
 def assert_equal_units(unit1, unit2):
     from pint import DimensionalityError
+
     try:
         x = (1. * unit1) / (1. * unit2)
     except DimensionalityError:

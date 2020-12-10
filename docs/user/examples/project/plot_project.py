@@ -20,16 +20,16 @@ from spectrochempy.utils.testing import assert_project_equal
 
 proj = scp.Project(
 
-    # subprojects
-    scp.Project(name='P350', label=r'$\mathrm{M_P}\,(623\,K)$'),
-    scp.Project(name='A350', label=r'$\mathrm{M_A}\,(623\,K)$'),
-    scp.Project(name='B350', label=r'$\mathrm{M_B}\,(623\,K)$'),
+        # subprojects
+        scp.Project(name='P350', label=r'$\mathrm{M_P}\,(623\,K)$'),
+        scp.Project(name='A350', label=r'$\mathrm{M_A}\,(623\,K)$'),
+        scp.Project(name='B350', label=r'$\mathrm{M_B}\,(623\,K)$'),
 
-    # attributes
-    name='project_1',
-    label='main project',
+        # attributes
+        name='project_1',
+        label='main project',
 
-)
+        )
 
 assert proj.projects_names == ['A350', 'B350', 'P350']
 
@@ -55,7 +55,6 @@ print(proj.A350.TG)
 
 f = proj.save(confirm=False)
 assert f.name == 'project_1.pscp'
-
 
 ##############################################################################
 # RELOAD the project from disk as newproj
@@ -108,4 +107,4 @@ proj['tgscatter'] = scp.Script('tgscatter', script_source_2)
 
 proj.tgscatter()
 
-#scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
+# scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

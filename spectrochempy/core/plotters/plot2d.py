@@ -20,26 +20,24 @@ __dataset_methods__ = __all__
 # standard imports
 # ----------------------------------------------------------------------------------------------------------------------
 from copy import copy as cpy
-# import sys
-
-# ----------------------------------------------------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------------------------------------------------
 
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
-# from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
-import plotly.graph_objects as go
-from matplotlib import cm
-
-# ----------------------------------------------------------------------------------------------------------------------
-# local imports
-# ----------------------------------------------------------------------------------------------------------------------
+# from matplotlib import cm
 
 from spectrochempy.core.plotters.utils import make_label
 from spectrochempy.core import project_preferences, general_preferences
+
+
+# import sys
+# ----------------------------------------------------------------------------------------------------------------------
+# third party imports
+# ----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+# local imports
+# ----------------------------------------------------------------------------------------------------------------------
 
 
 # from spectrochempy.core import info_, debug_, error_, warning_
@@ -60,6 +58,7 @@ def plot_map(dataset, **kwargs):
     """
     if dataset.ndim < 2:
         from spectrochempy import plot_1D
+
         return plot_1D(dataset, **kwargs)
 
     kwargs['method'] = 'map'
@@ -80,6 +79,7 @@ def plot_stack(dataset, **kwargs):
     """
     if dataset.ndim < 2:
         from spectrochempy import plot_1D
+
         return plot_1D(dataset, **kwargs)
 
     kwargs['method'] = 'stack'
@@ -100,6 +100,7 @@ def plot_image(dataset, **kwargs):
     """
     if dataset.ndim < 2:
         from spectrochempy import plot_1D
+
         return plot_1D(dataset, **kwargs)
 
     kwargs['method'] = 'image'
@@ -120,6 +121,7 @@ def plot_surface(dataset, **kwargs):
     """
     if dataset.ndim < 2:
         from spectrochempy import plot_1D
+
         return plot_1D(dataset, **kwargs)
 
     kwargs['method'] = 'surface'
@@ -166,6 +168,7 @@ def plot_2D(dataset, **kwargs):
 
     if dataset.ndim < 2:
         from spectrochempy import plot_1D
+
         return plot_1D(dataset, **kwargs)
 
     # if plotly excute plotly routine not this one
@@ -305,7 +308,7 @@ def plot_2D(dataset, **kwargs):
 
     ax.set_xlim(xlim)
 
-    xscale = kwargs.get("xscale", "linear")
+    # xscale = kwargs.get("xscale", "linear")
     # ax.set_xscale(xscale, nonposx='mask')
 
     # set the ordinates axis

@@ -20,24 +20,25 @@
 # <div class='alert alert-info'>
 #
 # **NOTE**: By default, all matplolib figures will be plotted **inline** in this notebook.
-# to change this behaviour, uncomment (which means: remove the #) the next line (which must be placed before importing the  ``spectrochempy.api`` library!
+# to change this behaviour, uncomment (which means: remove the #) the next line (which must be placed before
+# importing the  ``spectrochempy.api`` library!
 #
 # </div>
 
 # %%
-from spectrochempy import *
+
+# %%
+from spectrochempy import *   # noqa: F403
 
 # %% [markdown]
 # Let's first import a NDDataset from a file:
-
-# %%
-import os
 
 dataset = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
 print(dataset.description)
 
 # %% [markdown]
-# To plot a dataset, use the `plot` command (generic plot). As the current NDDataset is 2D, a contour plot is displayed by default.
+# To plot a dataset, use the `plot` command (generic plot). As the current NDDataset is 2D, a contour plot is
+# displayed by default.
 
 # %%
 _ = dataset.plot(colorbar=True)  # plot the source.
@@ -92,10 +93,12 @@ _ = dataset.plot(style=['sans', 'paper', 'grayscale'], colorbar=True)
 # New styles can also be created, using a simple dictionary:
 
 # %%
-mystyle = {'image.cmap': 'magma',
-           'font.size': 10,
-           'font.weight': 'bold',
-           'axes.grid': True}
+mystyle = {
+        'image.cmap': 'magma',
+        'font.size': 10,
+        'font.weight': 'bold',
+        'axes.grid': True
+        }
 # TODO: store these styles for further use
 _ = dataset.plot(style=mystyle)
 
@@ -108,7 +111,8 @@ _ = dataset.plot(style=mystyle)
 
 # %% [markdown]
 # ## Changing axis
-# The `y` axis with timestamp in the above plots is not very informative, lets rescale it in hours and change the origin.
+# The `y` axis with timestamp in the above plots is not very informative, lets rescale it in hours and change the
+# origin.
 
 # %%
 dataset.y -= dataset.y[0]  # change origin

@@ -601,7 +601,8 @@ def _read_spa(*args, **kwargs):
     # Set origin, description, history, date
     dataset.origin = "omnic"
     dataset.description = kwargs.get('description', f'Omnic title: {spa_title}\nOmnic filename: {filename.name}')
-    dataset.history = str(datetime.now()) + ':imported from spa files ; '
+    dataset.history = str(datetime.now()) + ':imported from spa files'
+    dataset.history = history
     dataset._date = datetime.now()
     dataset._modified = dataset.date
 

@@ -12,8 +12,9 @@ EFA analysis example
 In this example, we perform the Evolving Factor Analysis
 
 """
-import spectrochempy as scp
 import os
+
+import spectrochempy as scp
 
 # sphinx_gallery_thumbnail_number = 2
 

@@ -16,8 +16,11 @@
 # %% [markdown]
 # # The NDPanel object
 
+import numpy as np
+
 # %%
-from spectrochempy import *
+import spectrochempy as scp
+from spectrochempy.units import ur
 
 # %% [markdown]
 #  <div class="alert alert">
@@ -28,13 +31,15 @@ from spectrochempy import *
 #
 # `NDPanel` objects are very similar to `NDDataset` in the sense they can contain array and coordinates.
 #
-# However unlike `NDDataset`s, `NDPanel`s can contain several arrays whith different shapes, units and/or coordinates. They can store heterogeneous data coming for example from different types of experiments. Arrays present in `NDPanel` can be aligned during objects initialization.
+# However unlike `NDDataset`s, `NDPanel`s can contain several arrays whith different shapes, units and/or
+# coordinates. They can store heterogeneous data coming for example from different types of experiments. Arrays
+# present in `NDPanel` can be aligned during objects initialization.
 
 # %% [markdown]
 # ## Creating a NDPanel object
 
 # %%
-NDPanel()
+scp.NDPanel()
 
 # %% [markdown]
 # Above we have created an empty panel. To create a more interesting panels, we need to add some datasets.
@@ -50,29 +55,30 @@ NDPanel()
 
 # %%
 # create a first random array
-a = np.random.rand(6,8)
+a = np.random.rand(6, 8)
 # make to coordinate's arrays for both dimensions
-cx = Coord(np.linspace(600,4000,8), units='cm^-1', title='wavenumber')
-cy = Coord(np.linspace(0,10,6), units='s', title='time')
+cx = scp.Coord(np.linspace(600, 4000, 8), units='cm^-1', title='wavenumber')
+cy = scp.Coord(np.linspace(0, 10, 6), units='s', title='time')
 # create the dataset
-nda = NDDataset(a, coordset=(cy, cx), name='a', title='dataset a', units='eV')
+nda = scp.NDDataset(a, coordset=(cy, cx), name='a', title='dataset a', units='eV')
 nda
 
 # %%
 # create a second dataset
-b = np.random.rand(10,8)
-cz = Coord(np.linspace(600,4000,8), units='cm^-1', title='wavenumber')
-cu = Coord(np.linspace(0,10,10), units='s', title='time')
-ndb = NDDataset(b, coordset=(cu, cz), name='b', title='dataset b', units='eV')
+b = np.random.rand(10, 8)
+cz = scp.Coord(np.linspace(600, 4000, 8), units='cm^-1', title='wavenumber')
+cu = scp.Coord(np.linspace(0, 10, 10), units='s', title='time')
+ndb = scp.NDDataset(b, coordset=(cu, cz), name='b', title='dataset b', units='eV')
 ndb
 
 # %% [markdown]
-# This second dataset has the same `x` coordinates than the first one, but differs by the second (actually its shape is different).
+# This second dataset has the same `x` coordinates than the first one, but differs by the second (actually its shape
+# is different).
 #
 # Now we will create a NDPanel using these two datasets
 
 # %%
-ndp = NDPanel(nda, ndb)
+ndp = scp.NDPanel(nda, ndb)
 ndp
 
 # %% [markdown]
@@ -103,46 +109,44 @@ ndp.coordset
 
 # %%
 # no merging of the dimensions (4 distinct dimensions)
-ndp = NDPanel(nda, ndb, merge=False)
+ndp = scp.NDPanel(nda, ndb, merge=False)
 ndp
 
 # %%
 # merging of the dimensions, but no alignment of the coordinates (dimensions x for both dataset
 # have the same coordinates so they are merged)
-ndp = NDPanel(nda, ndb, merge=True, align=None)
+ndp = scp.NDPanel(nda, ndb, merge=True, align=None)
 ndp.dims
 
 # %%
 # the default behavior
-ndp = NDPanel(nda, ndb, merge=True, align='outer')
+ndp = scp.NDPanel(nda, ndb, merge=True, align='outer')
 ndp
 
 # %%
 # get only intersection
-ndp = NDPanel(nda, ndb, merge=True, align='inner')
+ndp = scp.NDPanel(nda, ndb, merge=True, align='inner')
 ndp
-
-
 
 # %%
 # Align on the first dataset
-ndp = NDPanel(nda, ndb, merge=True, align='first')
+ndp = scp.NDPanel(nda, ndb, merge=True, align='first')
 ndp
 
 # %%
 # Align on the last dataset
-ndp = NDPanel(nda, ndb, merge=True, align='last')
+ndp = scp.NDPanel(nda, ndb, merge=True, align='last')
 ndp
 
 # %% [markdown]
 # ## Mathematics with NDPanels
 
 # %%
-ndp = NDPanel(nda, ndb, merge=True, align='outer')
+ndp = scp.NDPanel(nda, ndb, merge=True, align='outer')
 ndp
 
 # %%
-sqrt(ndp)
+np.sqrt(ndp)
 
 # %% [markdown]
 # The function is automatically applied to all contained arrays
@@ -151,20 +155,24 @@ sqrt(ndp)
 # Simple arithmetics is also possible - The operations are dispatched on all internal dataset individually.
 
 # %%
--2*ndp+10.
+-2 * ndp + 10.
 
 # %% [markdown]
 # Of course units must be compatibles.
 #
-# For addition and subtraction, if the units of scalar is not given, it is assumed compatible : that's why the above operation worked. But below it does'nt work because the dataset have `eV` units, not `cm`.
+# For addition and subtraction, if the units of scalar is not given, it is assumed compatible : that's why the above
+# operation worked. But below it does'nt work because the dataset have `eV` units, not `cm`.
 
 # %%
 try:
-    2*ndp+10*ur.cm
-except:
-    error_("DimensionalityError: Cannot convert from '[length]' to '[length] ** 2 * [mass] / [time] ** 2', Units must be compatible for the `add` operator")
+    2 * ndp + 10 * ur.cm
+except scp.DimensionalityError:
+    scp.error_(
+            "DimensionalityError: Cannot convert from '[length]' to '[length] ** 2 * [mass] / [time] ** 2', "
+            "Units must be "
+            "compatible for the `add` operator")
 
 # %%
-2*ndp+10*ur.eV
+2 * ndp + 10 * ur.eV
 
 # %%

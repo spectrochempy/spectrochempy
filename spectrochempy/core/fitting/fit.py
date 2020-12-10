@@ -21,27 +21,24 @@ __dataset_methods__ = []
 import sys
 import re
 from warnings import warn
-
-# ----------------------------------------------------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------------------------------------------------
-
 from traitlets import (HasTraits, Bool, Any, List, Instance)
 import numpy as np
 # IPython
 from IPython import display
 
+from spectrochempy.core.fitting.parameters import ParameterScript
+from spectrochempy.core.fitting.models import getmodel
+from spectrochempy.core.fitting.optimization import optimize
+from spectrochempy.utils import htmldoc
+from spectrochempy.core import info_
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# third party imports
+# ----------------------------------------------------------------------------------------------------------------------
 # ----------------------------------------------------------------------------------------------------------------------
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
-
-from spectrochempy.core.fitting.parameters import ParameterScript
-from spectrochempy.core.fitting.models import getmodel
-
-from spectrochempy.core.fitting.optimization import optimize
-from spectrochempy.utils import htmldoc
-
-from spectrochempy.core import info_
 
 
 # ======================================================================================================================

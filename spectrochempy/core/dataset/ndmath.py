@@ -18,11 +18,11 @@ __dataset_methods__ = []
 # Standard python imports
 # ======================================================================================================================
 import copy as cpy
+
 import functools
 import sys
 import operator
 import types
-
 # ======================================================================================================================
 # third-party imports
 # ======================================================================================================================
@@ -44,7 +44,8 @@ from spectrochempy.core import warning_, error_
 thismodule = sys.modules[__name__]
 
 
-def get_name(x): return str(x.name if hasattr(x, 'name') else x)
+def get_name(x):
+    return str(x.name if hasattr(x, 'name') else x)
 
 
 DIMENSIONLESS = ur('dimensionless').units
@@ -1305,6 +1306,7 @@ class NDMath(object):
         new = self.copy()
         if returntype == 'NDDataset' and not new.implements('NDDataset'):
             from spectrochempy.core.dataset.nddataset import NDDataset
+
             new = NDDataset(new)
 
         new._data = cpy.deepcopy(data)

@@ -10,7 +10,6 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 
 
 def test_read_write_json(IR_dataset_2D):
-
     ds = IR_dataset_2D
 
     f = ds.write('try2D.json')
@@ -28,8 +27,8 @@ def test_read_write_json(IR_dataset_2D):
 
     f.unlink()
 
-def test_write_nmr_to_json(NMR_dataset_1D):
 
+def test_write_nmr_to_json(NMR_dataset_1D):
     nd = NMR_dataset_1D
     nd.name = "nmr_1d"
 

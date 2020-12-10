@@ -16,28 +16,19 @@ __all__ = ['NDArray']
 # standard imports
 # ======================================================================================================================
 
-from datetime import datetime
 import copy as cpy
+
+from datetime import datetime
 import warnings
 import re
 import textwrap
 import uuid
 import itertools
-
-# ======================================================================================================================
-# Third party imports
-# ======================================================================================================================
-
 from traitlets import List, Unicode, Instance, Bool, Union, Int, Any, HasTraits, default, validate
 from pint.errors import DimensionalityError
 import numpy as np
-import pandas as pd
 from pandas.core.generic import NDFrame, Index
 from traittypes import Array
-
-# ======================================================================================================================
-# local imports
-# ======================================================================================================================
 
 from spectrochempy.units import Unit, ur, Quantity, set_nmr_context
 from spectrochempy.core import info_, error_, print_
@@ -46,6 +37,13 @@ from spectrochempy.utils import (
     is_number, numpyprintoptions, insert_masked_print, docstrings, SpectroChemPyWarning,
     make_new_object, convert_to_html,
     )
+
+# ======================================================================================================================
+# Third party imports
+# ======================================================================================================================
+# ======================================================================================================================
+# local imports
+# ======================================================================================================================
 
 # ======================================================================================================================
 # constants
@@ -1251,7 +1249,6 @@ class NDArray(HasTraits):
 
     @property
     def roi_values(self):
-        offset = self.offset
         if self.units is None:
             return list(np.array(self.roi) - self.offset)
         else:

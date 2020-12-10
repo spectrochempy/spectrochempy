@@ -29,7 +29,7 @@
 # large number of method to import in the API namespace.
 
 # %%
-from spectrochempy import *
+# from spectrochempy import *  # noqa: F403
 
 # %% [markdown]
 # This is a simple way to do this, but you can also import method only when
@@ -54,6 +54,7 @@ mydataset = NDDataset()
 
 # %%
 import spectrochempy as scp
+from spectrochempy.units import Quantity, ur
 
 mydataset = scp.NDDataset()
 
@@ -64,7 +65,7 @@ mydataset = scp.NDDataset()
 # To get a list of all available methods or objects, type the following command (*remove the leading #, first*):
 
 # %%
-#APIref
+# APIref
 
 
 # %% [markdown]
@@ -79,7 +80,7 @@ mydataset = scp.NDDataset()
 try:
     from spectrochempy import toto
 except ImportError as e:
-    error_("OOPS, THAT'S AN IMPORT ERROR! : %s" % e)
+    scp.error_("OOPS, THAT'S AN IMPORT ERROR! : %s" % e)
 
 # %% [markdown]
 # The error will stop the execution if not catched.
@@ -88,8 +89,8 @@ except ImportError as e:
 
 # %%
 try:
-    from spectrochempy import toto
-except:
+    from spectrochempy import toto  # noqa: F811, F401
+except Exception:
     pass
 
 # %% [markdown]
@@ -98,14 +99,14 @@ except:
 # Many options of the API can be set up
 
 # %%
-set_loglevel(INFO)
+scp.set_loglevel(scp.INFO)
 
 # %% [markdown]
 # In the above cell, we have set the **log** level to display ``info`` messages, such as this one:
 
 # %%
-info_('this is an info message!')
-debug_('this is a debug message!')
+scp.info_('this is an info message!')
+scp.debug_('this is a debug message!')
 
 # %% [markdown]
 # Only the info message is displayed, as expected.
@@ -113,20 +114,20 @@ debug_('this is a debug message!')
 # If we change it to ``DEBUG``, we should get the two messages
 
 # %%
-set_loglevel(DEBUG)
+scp.set_loglevel(scp.DEBUG)
 
-info_('this is an info message!')
-debug_('this is a debug message!')
+scp.info_('this is an info message!')
+scp.debug_('this is a debug message!')
 
 # %% [markdown]
 # Let's now come back to a standard level of message for the rest of the Tutorial.
 
 # %%
-set_loglevel(WARNING)
+scp.set_loglevel(scp.WARNING)
 
-info_('this is an info message!')
-debug_('this is a debug message!')
-warning_('this is a warning message!')
+scp.info_('this is an info message!')
+scp.debug_('this is a debug message!')
+scp.warning_('this is a warning message!')
 
 # %% [markdown]
 # ### Access to scientific libraries
@@ -141,6 +142,8 @@ warning_('this is a warning message!')
 # your system.
 
 # %%
+import numpy as np
+from matplotlib import pyplot as plt
 # %matplotlib inline
 x = np.linspace(0, 2 * np.pi, 100)
 y = np.sin(x)
@@ -179,6 +182,7 @@ xa[1] * 2.5
 # For instance, in the following we read data from a series of FTIR experiments, provided  by the OMNIC software:
 
 # %%
+import os
 nd = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
 
 # %% [markdown]
@@ -200,7 +204,7 @@ print(nd)
 # A much Longer (and colored) information text can be obtained using the spectrochempy provided ``print_`` function.
 
 # %%
-print_(nd)
+scp.print_(nd)
 
 # %% [markdown]
 # * **Displaying html**, inside a jupyter notebook, by just typing the name of the dataset (must be the last

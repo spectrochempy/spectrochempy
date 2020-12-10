@@ -9,8 +9,8 @@ from spectrochempy.core.scripts.script import Script
 from spectrochempy.utils import testing
 from spectrochempy.utils.exceptions import ComparisonFailure
 
-def test_compare(IR_dataset_1D, simple_project):
 
+def test_compare(IR_dataset_1D, simple_project):
     # dataset comparison
 
     nd1 = IR_dataset_1D.copy()
@@ -19,7 +19,7 @@ def test_compare(IR_dataset_1D, simple_project):
     testing.assert_dataset_equal(nd1, nd2)
 
     nd3 = nd1.copy()
-    nd3.title='ddd'
+    nd3.title = 'ddd'
 
     with testing.raises(ComparisonFailure):
         testing.assert_dataset_equal(nd1, nd3)

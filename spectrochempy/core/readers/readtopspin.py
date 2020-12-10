@@ -12,27 +12,15 @@
 __all__ = ['read_topspin', 'read_bruker_nmr']
 __dataset_methods__ = __all__
 
-# ======================================================================================================================
-# Standard python imports
-# ======================================================================================================================
-
 import re
-
-# ======================================================================================================================
-# Third party imports
-# ======================================================================================================================
 import numpy as np
-from nmrglue.fileio.bruker import read as read_fid, read_pdata, read_lowmem
 from quaternion import as_quat_array
 
-# ======================================================================================================================
-# Local imports
-# ======================================================================================================================
-from spectrochempy.core import general_preferences as prefs, debug_, info_, warning_
-
+from nmrglue.fileio.bruker import read as read_fid, read_pdata, read_lowmem
+from spectrochempy.core import debug_
 from spectrochempy.utils.meta import Meta
 from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.units import ur, Quantity
+from spectrochempy.units import ur
 from spectrochempy.utils.exceptions import deprecated
 from spectrochempy.core.readers.importer import docstrings, Importer, importermethod
 
@@ -808,7 +796,7 @@ def _read_topspin(*args, **kwargs):
     debug_('Bruker TOPSPIN import')
 
     dataset, path = args
-    content = kwargs.get('content', None)
+#    content = kwargs.get('content', None)
 
     # is-it a processed dataset (1r, 2rr ....
     processed = True if path.match('pdata/*/*') else False

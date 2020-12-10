@@ -22,8 +22,6 @@ __all__ = ['NDPlot',
 # ----------------------------------------------------------------------------------------------------------------------
 
 import os
-import warnings
-
 from cycler import cycler
 import matplotlib as mpl
 # from mpl_toolkits.mplot3d import Axes3D
@@ -37,11 +35,10 @@ from traitlets import Dict, HasTraits, Instance, Union, default
 from spectrochempy.utils import (
     is_sequence,
     docstrings, NBlack, NBlue, NGreen, NRed,
-    get_figure, get_plotly_figure,
+    get_figure,
     )
 from spectrochempy.core import general_preferences, project_preferences
 from spectrochempy.core import error_
-
 from spectrochempy.core.plotters.plot1d import plot_1D
 from spectrochempy.core.plotters.plot3d import plot_3D
 from spectrochempy.core.plotters.plot2d import plot_2D

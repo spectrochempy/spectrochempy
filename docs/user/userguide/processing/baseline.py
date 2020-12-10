@@ -17,10 +17,11 @@
 # # Baseline corrections
 
 # %%
-from spectrochempy import *
+import spectrochempy as scp
+import os
 
 # %%
-dataset = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
+dataset = scp.NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
 dataset
 
 # %%
@@ -31,7 +32,7 @@ s = s - s[-1]
 # Important note that we use floating point number
 # integer would mean points, not wavenumbers!
 
-basc = BaselineCorrection(s)
+basc = scp.BaselineCorrection(s)
 
 ranges = [[1261.86, 1285.89],
           [1556.30, 1568.26],

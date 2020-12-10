@@ -9,8 +9,8 @@ __all__ = ['read_zip']
 __dataset_methods__ = __all__
 
 import io
+
 from spectrochempy.core.readers.importer import docstrings, Importer, importermethod
-from spectrochempy.utils import pathclean
 
 
 # ======================================================================================================================
@@ -125,7 +125,9 @@ def _read_zip(*args, **kwargs):
         for file in filelist:
             if not file.is_dir() and file.filename.startswith(parent) and 'DS_Store' not in file.filename:
                 # read it
-                datasets.append(NDDataset.read({file.filename:zf.read(file.filename)}))
+                datasets.append(NDDataset.read({
+                                                       file.filename: zf.read(file.filename)
+                                                       }))
                 count += 1
                 if count == only:
                     break

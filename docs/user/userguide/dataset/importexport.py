@@ -20,7 +20,10 @@
 # As usual we start by importing the SpectroChemPy API
 
 # %%
-from spectrochempy import *
+# let check if the `datadir` directory exists
+
+# %%
+from spectrochempy import *   # noqa: F403
 
 # %% [markdown]
 # ## Data directory
@@ -33,13 +36,10 @@ from spectrochempy import *
 # <div class='alert alert-info'>
 #
 # **NOTE:**
-# In import function calls, if we do not specify the **datadir**, the application will first look in this directory by default, if it doesn't find the path in the current directory.
+# In import function calls, if we do not specify the **datadir**, the application will first look in this directory
+# by default, if it doesn't find the path in the current directory.
 #
 # </div>
-
-# %%
-# let check if the `datadir` directory exists
-import os
 datadir = general_preferences.datadir
 if os.path.exists(datadir):
     print(datadir)
@@ -65,7 +65,7 @@ if os.path.exists(datadir):
 
 # %%
 path = general_preferences.datadir
-fs = FileSelector(path = path, filters=['spg','spa'])
+fs = FileSelector(path=path, filters=['spg', 'spa'])
 fs
 
 # %% [markdown]
@@ -73,7 +73,6 @@ fs
 
 # %%
 fs.value, fs.path, fs.fullpath
-
 
 # %% [markdown]
 # ##  Infrared spectroscopy OMNIC file Import (.spg extension)
@@ -95,7 +94,7 @@ _ = dataset.plot(method='stack')
 # Now, lets load a NMR dataset (in the Bruker format).
 
 # %%
-path = os.path.join(datadir, 'nmrdata','bruker', 'tests', 'nmr','topspin_1d')
+path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d')
 ndd = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
 ndd
 

@@ -18,7 +18,6 @@ elements can be accessed by key, but also by attributes, *e.g.*
 
 # import sys
 import copy
-from collections import OrderedDict
 
 import numpy as np
 
@@ -121,8 +120,8 @@ class Meta(object):  # HasTraits):
 
         elif not self.readonly:
             self._data.update({
-                                      key: value
-                                      })
+                    key: value
+                    })
         else:
             raise ValueError('the metadata `{}` is read only'.format(key))
 
@@ -148,7 +147,7 @@ class Meta(object):  # HasTraits):
         for k, v in m1.items():
             if isinstance(v, list):
                 for i, ve in enumerate(v):
-                        eq &= np.all(ve == m2[k][i])
+                    eq &= np.all(ve == m2[k][i])
             else:
                 eq &= np.all(v == m2[k])
         return eq

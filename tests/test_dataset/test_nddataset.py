@@ -10,7 +10,6 @@ Tests for the nddataset module
 
 """
 import os
-
 import numpy as np
 import pytest
 from numpy.random import rand
@@ -546,6 +545,7 @@ def test_nddataset_slicing_by_values(ds1):
 
 def test_nddataset_slicing_out_limits(caplog, ds1):
     import logging
+
     logger = logging.getLogger('SpectroChemPy')
     logger.propagate = True
     caplog.set_level(logging.DEBUG)
@@ -1544,7 +1544,5 @@ def test_nddataset_xarray_export_w_spa():
     info_(na)
     da = na.to_xarray()
     info_(da)
-
-
 
 # EOF

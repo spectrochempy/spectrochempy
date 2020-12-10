@@ -17,18 +17,20 @@ __all__ = ['NDIO', 'SCPY_SUFFIX']
 import io
 import json
 import pathlib
-
 from numpy.lib.npyio import zipfile_factory
 from traitlets import HasTraits, Instance
 
 from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.core.dataset.ndcoordset import CoordSet
-from spectrochempy.units import Quantity, Unit
 from spectrochempy.core import debug_
 from spectrochempy.utils import SpectroChemPyException
 from spectrochempy.utils import pathclean, check_filenames, ScpFile, check_filename_to_save, json_serialiser
 
-SCPY_SUFFIX = {'NDDataset':'.scp', 'NDPanel':'.mscp', 'Project':'.pscp'}
+SCPY_SUFFIX = {
+        'NDDataset': '.scp',
+        'NDPanel': '.mscp',
+        'Project': '.pscp'
+        }
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Utilities
@@ -61,7 +63,6 @@ class NDIO(HasTraits):
         else:
             return None
 
-
     @property
     def filename(self):
         """
@@ -91,7 +92,7 @@ class NDIO(HasTraits):
         the default suffix for the given type of object.
 
         """
-        if self._filename and  self._filename.suffix:
+        if self._filename and self._filename.suffix:
             return self._filename.suffix
         else:
             klass = self.implements()
@@ -263,7 +264,6 @@ class NDIO(HasTraits):
         """
         content = kwargs.get('content', None)
 
-
         if content:
             fid = io.BytesIO(content)
         else:
@@ -305,8 +305,7 @@ class NDIO(HasTraits):
 
         debug_('Dumps')
         js = json_serialiser(self, encoding=encoding)
-        return json.dumps(js, indent = 2)
-
+        return json.dumps(js, indent=2)
 
     @classmethod
     def loads(cls, js):
@@ -331,7 +330,7 @@ class NDIO(HasTraits):
 
                     elif key in ['_coordset']:
                         coords = [item_to_attr(Coord(), v) for v in val['coords']]
-                        if  val['is_same_dim']:
+                        if val['is_same_dim']:
                             obj.set_coordset(coords)
                         else:
                             obj.set_coordset(*coords)
@@ -362,6 +361,7 @@ class NDIO(HasTraits):
                     raise TypeError(f'for {key} {e}')
 
             return obj
+
         # ........................
 
         new = item_to_attr(cls(), js)

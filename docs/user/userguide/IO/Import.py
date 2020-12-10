@@ -23,14 +23,18 @@
 # First, let's ``import spectrochempy as scp`` in the current
 # namespace, so that all spectrochempy commands will be called as ```scp.method(<method parameters>)```.
 
-# %% {"incorrectly_encoded_metadata": "{\"jupyter\": {\"outputs_hidden\": false}, \"pycharm\": {\"name\": \"#%%\\n\"}} import spectrochempy as scp"}
+# %% {"incorrectly_encoded_metadata": "{\"jupyter\": {\"outputs_hidden\": false}, \"pycharm\": {\"name\":
+# \"#%%\\n\"}} import spectrochempy as scp"}
 import spectrochempy as scp
 
 # %% [markdown]
 # ## Dialog boxes
 #
 # Retrieving Files and Directories, in day-to-day work is often made through Dialog Boxes. While we do not recommend
-# this procedure for advanced usage (see below), it is quite easy to do that with SCPy. To do so, we can use the `read` function which open a dialog, allowing the selection of data file form various origin. By default, the native SCPy type of data is proposed (file suffix: `.scp`). The desired type of files to display can be choosen in a dropdown field.
+# this procedure for advanced usage (see below), it is quite easy to do that with SCPy. To do so, we can use the
+# `read` function which open a dialog, allowing the selection of data file form various origin. By default,
+# the native SCPy type of data is proposed (file suffix: `.scp`). The desired type of files to display can be choosen
+# in a dropdown field.
 
 # %%
 X = scp.read()
@@ -46,7 +50,8 @@ X = scp.read()
 #
 # > **Note**: the dialog box does not necessarily pops up in the foreground: check your task bar !
 #
-# Printing the returned NDDataset object X should read like this, with indication of the dataset `shape`, *i.e.,* the `y` and  `x` dimension sizes:
+# Printing the returned NDDataset object X should read like this, with indication of the dataset `shape`, *i.e.,
+# * the `y` and  `x` dimension sizes:
 
 # %%
 print(X)
@@ -111,7 +116,8 @@ scp.read_omnic('irdata/subdir')
 #
 # and will open the dialog box at the root directory of the `C:` drive.
 #
-# > **Note**: You can avoid using the form `\\` or the use of raw strings by using conventional slash `/`. In python they play the path separator
+# > **Note**: You can avoid using the form `\\` or the use of raw strings by using conventional slash `/`. In python
+# they play the path separator
 # > role, as well in Windows than in other unix-based system (Linux, OSX, ...)
 #
 
@@ -163,7 +169,8 @@ X = scp.read_omnic(directory=r'C:\users\Brian')
 #     OSError: Can't find this filename C:\users\Brian\s\life\wodger.spg
 #
 # In this respect, a good practice consists in using relative pathnames in scripts and notebooks.
-# Fortunately, Spectrochempy readers use relative paths. If the given path is not absolute, then spectrochempy will search
+# Fortunately, Spectrochempy readers use relative paths. If the given path is not absolute, then spectrochempy will
+# search
 # in the current directory. Hence the opening of the `spg` file from scripts in `welease.ipynb` can be made
 # by the command:
 #

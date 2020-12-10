@@ -36,7 +36,7 @@
 # **Below (and in the next sections), we try to give an almost complete view of the NDDataset features.**
 
 # %%
-from spectrochempy import *
+from spectrochempy import *     # noqa: F403
 
 # %% [markdown]
 # Multidimensional array are defined in Spectrochempy using the ``NDDataset`` object.
@@ -64,7 +64,6 @@ from spectrochempy import *
 # %%
 d1D = NDDataset([10., 20., 30.])
 print_(d1D)
-
 
 # %% [markdown]
 # <div class='alert-info'>
@@ -133,13 +132,13 @@ d1D
 # Some attributes are useful to check this kind of information:
 
 # %%
-d1D.shape # the shape of 1D contain only one dimension size
+d1D.shape  # the shape of 1D contain only one dimension size
 
 # %%
-d1D.ndim # the number of dimensions
+d1D.ndim  # the number of dimensions
 
 # %%
-d1D.dims # the name of the dimension (it has been automatically attributed)
+d1D.dims  # the name of the dimension (it has been automatically attributed)
 
 # %% [markdown]
 # **Note**: The names of the dimensions are set automatically. But they can be changed, with the limitation that the
@@ -158,9 +157,9 @@ d1D.dims
 # To create a nD NDDataset, we have to provide a nD-array like object to the NDDataset instance constructor
 
 # %%
-a = np.random.rand(2,4,6)   # note here that np (for numpy space has been automatically
-                            # imported with spectrochempy, thus no need to use the
-                            # classical `import numpy as np`)
+a = np.random.rand(2, 4, 6)  # note here that np (for numpy space has been automatically
+# imported with spectrochempy, thus no need to use the
+# classical `import numpy as np`)
 a
 
 # %%
@@ -169,15 +168,15 @@ d2D.title = 'Energy'
 d2D.name = '3D dataset creation'
 d2D.history = 'created from scratch'
 d2D.description = 'Some example'
-d2D.dims = ['v','u','t']
+d2D.dims = ['v', 'u', 't']
 d2D
 
 # %% [markdown]
 # We can also add all information in a single statement
 
 # %%
-d2D = NDDataset(a, dims = ['v','u','t'], title = 'Energy', name = '3D_dataset',
-                history = 'created from scratch', description = 'a single line creation example')
+d2D = NDDataset(a, dims=['v', 'u', 't'], title='Energy', name='3D_dataset',
+                history='created from scratch', description='a single line creation example')
 d2D
 
 # %% [markdown]
@@ -209,11 +208,11 @@ d1D  # note the eV symbol of the units added to the values field below
 # This allows to make units-aware calculations:
 
 # %%
-np.sqrt(d1D) # note the results en eV^0.5
+np.sqrt(d1D)  # note the results en eV^0.5
 
 # %%
-time = 5.*ur.second   # ur is a registry containing all available units
-d1D/time              # here we get results in eV/s
+time = 5. * ur.second  # ur is a registry containing all available units
+d1D / time  # here we get results in eV/s
 
 # %% [markdown]
 # Conversion can be done between different units transparently
@@ -239,16 +238,16 @@ d1D.to('K')
 d2D.coordset  # no coordinates, so it returns nothing (None)
 
 # %%
-d2D.t       # the same for coordinate  u, v, t which are not yet set
+d2D.t  # the same for coordinate  u, v, t which are not yet set
 
 # %% [markdown]
 # To add coordinates, on way is to set them one by one:
 
 # %%
-d2D.t = np.arange(6)*.1 # we need a sequence of 6 values for `t` dimension (see shape above)
+d2D.t = np.arange(6) * .1  # we need a sequence of 6 values for `t` dimension (see shape above)
 d2D.t.title = 'time'
 d2D.t.units = 'seconds'
-d2D.coordset # now return a list of coordinates
+d2D.coordset  # now return a list of coordinates
 
 # %%
 d2D.t
@@ -257,7 +256,7 @@ d2D.t
 d2D.coordset('t')  # Alternative way to get a given coordinates
 
 # %%
-d2D['t'] # another alternative way to get a given coordinates
+d2D['t']  # another alternative way to get a given coordinates
 
 # %% [markdown]
 # The two other coordinates u and v are still undefined
@@ -305,12 +304,13 @@ d2D.time
 # sequence must be equal to the size of a dimension
 
 # %%
-from datetime import datetime, timedelta, time
+from datetime import timedelta
+
 timedelta()
 
 # %%
 start = timedelta(0)
-times = [start + timedelta(seconds=x*60) for x in range(6)]
+times = [start + timedelta(seconds=x * 60) for x in range(6)]
 d2D.t = None
 d2D.t.labels = times
 d2D.t.title = 'time'
@@ -334,7 +334,7 @@ d2D.time
 # refer to the first.
 
 # %%
-a = np.diag((3,3,2.5))
+a = np.diag((3, 3, 2.5))
 nd = NDDataset(a, coordset=CoordSet(x=np.arange(3), y='x'))
 nd
 
@@ -380,8 +380,8 @@ coord1
 
 # %%
 nd_data = np.array(
-    [np.array([np.sin(coord2.data * 2. * np.pi / 4000.) * np.exp(-y / 60.) for y in coord1.data]) * float(t)
-     for t in coord0.data]) ** 2
+        [np.array([np.sin(coord2.data * 2. * np.pi / 4000.) * np.exp(-y / 60.) for y in coord1.data]) * float(t)
+         for t in coord0.data]) ** 2
 
 # %% [markdown]
 # The dataset is now created with these data and axis. All needed information are passed as parameter of the
@@ -389,11 +389,11 @@ nd_data = np.array(
 
 # %%
 d3D = NDDataset(nd_data,
-                      name = 'mydataset',
-                      coordset=[coord0, coord1, coord2],
-                      title='Absorbance',
-                      units='absorbance'
-                      )
+                name='mydataset',
+                coordset=[coord0, coord1, coord2],
+                title='Absorbance',
+                units='absorbance'
+                )
 
 d3D.description = """Dataset example created for this tutorial.
 It's a 3-D dataset (with dimensionless intensity)"""
@@ -411,10 +411,10 @@ d3D
 
 # %%
 d3D = NDDataset(nd_data,
-                      name = 'mydataset',
-                      title='Absorbance',
-                      units='absorbance'
-                      )
+                name='mydataset',
+                title='Absorbance',
+                units='absorbance'
+                )
 d3D.description = """Dataset example created for this tutorial.
 It's a 3-D dataset (with dimensionless intensity)"""
 
@@ -422,20 +422,23 @@ d3D.author = 'Blake & Mortimer'
 d3D
 
 # %%
-d3D.set_coordset(x=coord2, y=coord1, z=coord0)          # syntax 1
-d3D.set_coordset({'x':coord2, 'y':coord1, 'z':coord0})  # syntax 2
+d3D.set_coordset(x=coord2, y=coord1, z=coord0)  # syntax 1
+d3D.set_coordset({
+        'x': coord2,
+        'y': coord1,
+        'z': coord0
+        })  # syntax 2
 d3D
 
 # %% [markdown]
 # One can add several coordinates to the same dimension
 
 # %%
-coord2b = Coord([1,2,3], units='millitesla', title='magnetic field')
+coord2b = Coord([1, 2, 3], units='millitesla', title='magnetic field')
 
 # %%
 d3D.set_coordset(x=CoordSet(coord2, coord2b), y=coord1, z=coord0)
 d3D
-
 
 # %% [markdown]
 # Some additional information about coordinate setting syntax
@@ -443,21 +446,29 @@ d3D
 # %%
 # A. fist syntax (probably the safer because the name of the dimension is specified, so this is less prone to errors!)
 d3D.set_coordset(x=CoordSet(coord2, coord2b), y=coord1, z=coord0)
-d3D.set_coordset(x=[coord2, coord2b], y=coord1, z=coord0) # equivalent
+d3D.set_coordset(x=[coord2, coord2b], y=coord1, z=coord0)  # equivalent
 
 # B. second syntax in the order of the dimensions: z,y,x (if no swap or transpopse has been performed)
 d3D.set_coordset(coord0, coord1, [coord2, coord2b])
 d3D.set_coordset((coord0, coord1, [coord2, coord2b]))  # equivalent
 
 # C. third syntax (from a dictionary)
-d3D.set_coordset({'z':coord0, 'y':coord1, 'x':[coord2, coord2b]})
+d3D.set_coordset({
+        'z': coord0,
+        'y': coord1,
+        'x': [coord2, coord2b]
+        })
 
 # D. Fourth syntax (from another coordset)
-d3D.set_coordset(**CoordSet(z=coord0, y=coord1, x=[coord2, coord2b]))   # note the **
+d3D.set_coordset(**CoordSet(z=coord0, y=coord1, x=[coord2, coord2b]))  # note the **
 
 # It is also possible to use the coords property (with slightly less possibility)
 d3D.coordset = coord0, coord1, [coord2, coord2b]
-d3D.coordset = {'z':coord0, 'y':coord1, 'x':[coord2, coord2b]}
+d3D.coordset = {
+        'z': coord0,
+        'y': coord1,
+        'x': [coord2, coord2b]
+        }
 d3D.coordset = CoordSet(z=coord0, y=coord1, x=[coord2, coord2b])
 
 # %% [markdown]
@@ -491,14 +502,15 @@ d3D_copy = d3D[:]
 # Finally, it is also possible to initialize a dataset using an existing one:
 
 # %%
-d3Dduplicate = NDDataset(d3D, name='duplicate of %s'%d3D.name , units='absorbance')
+d3Dduplicate = NDDataset(d3D, name='duplicate of %s' % d3D.name, units='absorbance')
 d3Dduplicate
 
 # %% [markdown]
 # ### Other ways to create NDDatasets
 #
 # Some numpy creation function can be used to set up the initial dataset array:
-# [numpy array creation routines](https://docs.scipy.org/doc/numpy/reference/routines.array-creation.html#routines-array-creation)
+# [numpy array creation routines](https://docs.scipy.org/doc/numpy/reference/routines.array-creation.html#routines
+# -array-creation)
 #
 
 # %%
@@ -511,7 +523,7 @@ do
 
 # %%
 df = full((2, 2), fill_value=1.25, units='radians',
-     title='with only float=1.25')
+          title='with only float=1.25')
 df
 
 # %% [markdown]
@@ -519,7 +531,7 @@ df
 
 # %%
 do = ones((2, 3), dtype=bool)
-do[1,1]=0
+do[1, 1] = 0
 do
 
 # %% [markdown]
@@ -528,7 +540,6 @@ do
 # %%
 df = full_like(d3D, dtype=np.float64, fill_value=2.5)
 df
-
 
 # %% [markdown]
 # ## Importing from external dataset
@@ -765,7 +776,7 @@ da
 # row)
 
 # %%
-da = NDDataset(np.arange(40).reshape(10,4))
+da = NDDataset(np.arange(40).reshape(10, 4))
 da
 
 # %%
@@ -780,7 +791,7 @@ dac
 # quaternion).
 
 # %%
-daq = da.set_quaternion()   # equivalently one can use the set_hypercomplex method
+daq = da.set_quaternion()  # equivalently one can use the set_hypercomplex method
 daq
 
 # %% pycharm={"name": "#%%\n"}

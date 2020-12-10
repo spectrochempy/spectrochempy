@@ -10,10 +10,7 @@
 
 """
 # import os as os
-import numpy as np
-from datetime import datetime
 
-from spectrochempy.core import debug_
 from spectrochempy.core.writers.exporter import docstrings, Exporter, exportermethod
 
 __all__ = ['write_excel']

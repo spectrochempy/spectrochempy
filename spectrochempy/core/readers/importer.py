@@ -13,8 +13,7 @@ __dataset_methods__ = __all__
 
 from warnings import warn
 from datetime import datetime
-
-from traitlets import HasTraits, default, List, Dict, Type, Any, Unicode
+from traitlets import HasTraits, List, Dict, Type, Unicode
 
 from spectrochempy.utils import pathclean, check_filename_to_open, docstrings
 from spectrochempy.utils.exceptions import DimensionsCompatibilityError, ProtocolError
@@ -104,9 +103,6 @@ class Importer(HasTraits):
                 # here files are read from the disk using filenames
                 self._switch_protocol(key, self.files, **kwargs)
 
-
-
-
         if len(self.datasets) == 1:
             nd = self.datasets[0]  # a single dataset is returned
             name = kwargs.pop('name', None)
@@ -117,10 +113,10 @@ class Importer(HasTraits):
         else:
             nds = self.datasets
             names = kwargs.pop('names', None)
-            if names and len(names)==len(nds):
+            if names and len(names) == len(nds):
                 for nd, name in zip(nds, names):
                     nd.name = name
-            elif names and len(names)!=len(nds):
+            elif names and len(names) != len(nds):
                 warn('length of the `names` list and of the list of datsets mismatch - names not applied')
             return nds
 
@@ -137,6 +133,7 @@ class Importer(HasTraits):
         else:
             # by default returned objtype is NDDataset (import here to avoid circular import)
             from spectrochempy import NDDataset
+
             self.objtype = kwargs.pop('objtype', NDDataset)
 
         return args, kwargs
@@ -392,14 +389,14 @@ def _read_(*args, **kwargs):
         # try scp format
         try:
             return dataset.load(filename, **kwargs)
-        except:
+        except Exception:
             # lets try some common format
             for key in ['omnic', 'opus', 'topspin', 'labspec', 'matlab', 'jdx', 'json']:
                 try:
                     _read = getattr(dataset, f"read_{key}")
                     f = f'{filename}.{key}'
                     return _read(f, **kwargs)
-                except:
+                except Exception:
                     pass
             raise NotImplementedError
 

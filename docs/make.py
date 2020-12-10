@@ -17,29 +17,29 @@ where optional parameters indicates which job(s) is(are) to perform.
 
 """
 
+from glob import iglob
+
 import argparse
 import os
 import shutil
 import sys
 import warnings
 import zipfile
-from glob import iglob
-
 import json5 as json
 import numpy as np
 import requests
 from jinja2 import Template
 from skimage.io import imread, imsave
 from skimage.transform import resize
-from spectrochempy import version
-from spectrochempy.utils import sh
 from sphinx.application import Sphinx
 from sphinx.deprecation import RemovedInSphinx50Warning, RemovedInSphinx40Warning
+
+from spectrochempy import version
+from spectrochempy.utils import sh
 
 warnings.filterwarnings(action='ignore', module='matplotlib', category=UserWarning)
 warnings.filterwarnings(action='ignore', category=RemovedInSphinx50Warning)
 warnings.filterwarnings(action='ignore', category=RemovedInSphinx40Warning)
-
 
 # CONSTANT
 PROJECT = "spectrochempy"
@@ -188,7 +188,7 @@ class BuildDocumentation(object):
         if builder == 'latex':
             self.resize_img(GALLERYDIR, size=580.)
 
-        #when it is terminated suppress all ipynb to avoid problems with
+        # when it is terminated suppress all ipynb to avoid problems with
         # jupyter lab abd jupytex
         self.delnb()
 
@@ -347,7 +347,8 @@ class BuildDocumentation(object):
 
         def get(milestone, label):
             print("getting list of issues with label ", label)
-            issues = API_GITHUB_URL + "/search/issues?q=repo:"+REPO_URI+"+milestone:" + milestone + "+is:closed+label:" + label
+            issues = API_GITHUB_URL + "/search/issues?q=repo:" + REPO_URI
+            issues += "+milestone:" + milestone + "+is:closed+label:" + label
             return json.loads(requests.get(issues).text)['items']
 
         # Create a versionlog file for the current target
@@ -372,7 +373,7 @@ class BuildDocumentation(object):
             with open(filename, 'r') as f:
                 history += "\n\n"
                 nh = f.read().strip()
-                vc = ".".join(filename.split('.')[1:4])
+                # vc = ".".join(filename.split('.')[1:4])
                 nh = nh.replace(':orphan:', '')
                 history += nh
         history += '\n'

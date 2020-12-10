@@ -17,17 +17,23 @@
 # %% [markdown]
 # # Mathematical operations
 
+import numpy as np
+
 # %%
-from spectrochempy import *
+import spectrochempy as scp
 
 # %% [markdown]
 # ## Ufuncs (Universal Numpy's functions)
-# A universal function (or `ufunc` in short) is a function that operates on numpy arrays in an element-by-element fashion, supporting array broadcasting, type casting, and several other standard features. That is, a `ufunc` is a “vectorized” wrapper for a function that takes a fixed number of specific inputs and produces a fixed number of specific outputs.
+# A universal function (or `ufunc` in short) is a function that operates on numpy arrays in an element-by-element
+# fashion, supporting array broadcasting, type casting, and several other standard features. That is, a `ufunc` is a
+# “vectorized” wrapper for a function that takes a fixed number of specific inputs and produces a fixed number of
+# specific outputs.
 #
-# For instance, in numpy to calculate the square root of each element of a given nd-array, we can write something like this using the `np.sqrt` functions :
+# For instance, in numpy to calculate the square root of each element of a given nd-array, we can write something
+# like this using the `np.sqrt` functions :
 
 # %%
-x = np.array([1.,2.,3.,4.,6.])
+x = np.array([1., 2., 3., 4., 6.])
 np.sqrt(x)
 
 # %% [markdown]
@@ -36,7 +42,7 @@ np.sqrt(x)
 # The interesting thing, it that `ufunc`'s can also work with `NDDataset`.
 
 # %%
-dx = NDDataset(x)
+dx = scp.NDDataset(x)
 np.sqrt(dx)
 
 # %% [markdown]
@@ -47,11 +53,12 @@ np.sqrt(dx)
 # %%
 x = np.arange(6.)
 y = np.arange(8.)
-pnl = NDPanel(x, y)
+pnl = scp.NDPanel(x, y)
 np.sqrt(pnl)
 
 # %% [markdown]
-# As observed in the example above, in this case a `NDPanel`is returned on which each internal datasets have been transformed by the `ufunc`.
+# As observed in the example above, in this case a `NDPanel`is returned on which each internal datasets have been
+# transformed by the `ufunc`.
 
 # %% [markdown]
 # It is worth to note, that in spectrochempy, when can use internal equivalent of these `ufunc`'s.
@@ -59,15 +66,13 @@ np.sqrt(pnl)
 # For instance, the square root can be calculated using the following syntax:
 
 # %%
-import spectrochempy as scp
 scp.sqrt(dx)
 
 # %% [markdown]
 # or
 
 # %%
-from spectrochempy import *
-sqrt(dx)
+scp.sqrt(dx)
 
 # %% [markdown]
 # ## List of UFuncs working on `NDDataset`:
@@ -77,7 +82,8 @@ sqrt(dx)
 # ### Functions affecting magnitudes of the number but keeping units
 # * [negative](#negative)(x, \*\*kwargs): Numerical negative, element-wise.
 # * [absolute](#abs)(x, \*\*kwargs): Calculate the absolute value, element-wise. Alias: [abs](#abs)
-# * [fabs](#abs)(x, \*\*kwargs): Calculate the absolute value, element-wise. Complex values are not handled, use [absolute](#absolute) to find the absolute values of complex data.
+# * [fabs](#abs)(x, \*\*kwargs): Calculate the absolute value, element-wise. Complex values are not handled,
+# use [absolute](#absolute) to find the absolute values of complex data.
 # * [conj](#)(x, \*\*kwargs): Return the complex conjugate, element-wise.
 # * [rint](#rint)(x, \*\*kwargs) :Round to the nearest integer, element-wise.
 # * [floor](#floor)(x, \*\*kwargs): Return the floor of the input, element-wise.
@@ -133,8 +139,10 @@ sqrt(dx)
 # * [add](#add)(x1, x2, \*\*kwargs): Add arguments élement-wise.
 # * [subtract](#subtract)(x1, x2, \*\*kwargs): Subtract arguments, element-wise.
 # * [multiply](#multiply)(x1, x2, \*\*kwargs): Multiply arguments element-wise.
-# * [divide](#divide) or [true_divide](#true_divide)(x1, x2, \*\*kwargs): Returns a true division of the inputs, element-wise.
-# * [floor_divide](#floor_divide)(x1, x2, \*\*kwargs): Return the largest integer smaller or equal to the division of the inputs.
+# * [divide](#divide) or [true_divide](#true_divide)(x1, x2, \*\*kwargs): Returns a true division of the inputs,
+# element-wise.
+# * [floor_divide](#floor_divide)(x1, x2, \*\*kwargs): Return the largest integer smaller or equal to the division of
+# the inputs.
 # * [mod](#mod) or [remainder](#remainder)(x1, x2,\*\*kwargs): Return element-wise remainder of division.
 # * [fmod](#fmod)(x1, x2, \*\*kwargs): Return the element-wise remainder of division.
 # * [logaddexp](#logaddexp)(x1, x2,\*\*kwargs): Logarithm of the sum of exponentiations of the inputs.
@@ -145,18 +153,21 @@ sqrt(dx)
 
 # %% [markdown]
 # ## Usage
-# To demonstrate the use of mathematical operations on spectrochempy object, we will first load an experimental 2D dataset.
+# To demonstrate the use of mathematical operations on spectrochempy object, we will first load an experimental 2D
+# dataset.
 
 # %%
 # import a dataset to check the ufuncs
-dataset = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
+import os
+dataset = scp.NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
 dataset
 
 # %% [markdown]
-# This dataset will be artificially modified already using some mathematical operation (subtraction with a scalar) to present negative values.
+# This dataset will be artificially modified already using some mathematical operation (subtraction with a scalar) to
+# present negative values.
 
 # %%
-dataset = dataset - 2.     # add an offset to make that some of the values become negative
+dataset = dataset - 2.  # add an offset to make that some of the values become negative
 dataset
 
 # %%
@@ -164,7 +175,7 @@ dataset = dataset.clip(1.8)  # additionally limit the upper values using the cli
 dataset
 
 # %%
-_ = dataset.plot(figsize=(6,2.5))
+_ = dataset.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ### Unary functions
@@ -178,7 +189,7 @@ _ = dataset.plot(figsize=(6,2.5))
 
 # %%
 out = np.negative(dataset)
-_ = out.plot(figsize=(6,2.5))
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### abs
@@ -188,7 +199,7 @@ _ = out.plot(figsize=(6,2.5))
 
 # %%
 out = np.abs(dataset)
-_ = out.plot(figsize=(6,2.5))
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### rint
@@ -196,7 +207,7 @@ _ = out.plot(figsize=(6,2.5))
 
 # %%
 out = np.rint(dataset)
-_ = out.plot(figsize=(6,2.5))  # not that title is not modified for this ufunc
+_ = out.plot(figsize=(6, 2.5))  # not that title is not modified for this ufunc
 
 # %% [markdown]
 # ##### floor
@@ -204,7 +215,7 @@ _ = out.plot(figsize=(6,2.5))  # not that title is not modified for this ufunc
 
 # %%
 out = np.floor(dataset)
-_ = out.plot(figsize=(6,2.5))
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### ceil
@@ -212,7 +223,7 @@ _ = out.plot(figsize=(6,2.5))
 
 # %%
 out = np.ceil(dataset)
-_ = out.plot(figsize=(6,2.5))
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### trunc
@@ -220,7 +231,7 @@ _ = out.plot(figsize=(6,2.5))
 
 # %%
 out = np.trunc(dataset)
-_ = out.plot(figsize=(6,2.5))
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # #### Functions affecting magnitudes of the number but also units
@@ -228,9 +239,9 @@ _ = out.plot(figsize=(6,2.5))
 # Return the non-negative square-root of an array, element-wise.
 
 # %%
-out = np.sqrt(dataset)   # as they are some negative elements, return dataset has complex dtype.
-_ = out.real.plot(figsize=(6,2.5))
-_ = out.imag.plot(figsize=(6,2.5))
+out = np.sqrt(dataset)  # as they are some negative elements, return dataset has complex dtype.
+_ = out.real.plot(figsize=(6, 2.5))
+_ = out.imag.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### square
@@ -238,7 +249,7 @@ _ = out.imag.plot(figsize=(6,2.5))
 
 # %%
 out = np.square(dataset)
-_ = out.plot(figsize=(6,2.5))
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### cbrt
@@ -246,15 +257,15 @@ _ = out.plot(figsize=(6,2.5))
 
 # %%
 out = np.cbrt(dataset)
-_ = out.plot(figsize=(6,2.5))
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### reciprocal
 # Return the reciprocal of the argument, element-wise.
 
 # %%
-out = np.reciprocal(dataset+3.)
-_ = out.plot(figsize=(6,2.5))
+out = np.reciprocal(dataset + 3.)
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # #### Functions that require no units or dimensionless units for inputs. Returns dimensionless objects.
@@ -265,17 +276,17 @@ _ = out.plot(figsize=(6,2.5))
 
 # %%
 out = np.exp(dataset)
-_ = out.plot(figsize=(6,2.5))
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # Obviously numpy exponential functions applies only to dimensionless array. Else an error is generated.
 
 # %%
-x = NDDataset(np.arange(5), units='m')
+x = scp.NDDataset(np.arange(5), units='m')
 try:
     np.exp(x)  # A dimensionality error will be generated
-except DimensionalityError as e:
-    #error_(e)
+except scp.DimensionalityError:
+    # error_(e)
     print('Dimensionality error issued!')
 
 # %% [markdown]
@@ -284,7 +295,7 @@ except DimensionalityError as e:
 
 # %%
 out = np.exp2(dataset)
-_ = out.plot(figsize=(6,2.5))
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### expm1
@@ -292,7 +303,7 @@ _ = out.plot(figsize=(6,2.5))
 
 # %%
 out = np.expm1(dataset)
-_ = out.plot(figsize=(6,2.5))
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### log
@@ -300,7 +311,7 @@ _ = out.plot(figsize=(6,2.5))
 
 # %%
 out = np.log(dataset)
-_ = out.plot(figsize=(6,2.5))
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### log2
@@ -308,7 +319,7 @@ _ = out.plot(figsize=(6,2.5))
 
 # %%
 out = np.log2(dataset)
-_ = out.plot(figsize=(6,2.5))
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### log10
@@ -316,7 +327,7 @@ _ = out.plot(figsize=(6,2.5))
 
 # %%
 out = np.log10(dataset)
-_ = out.plot(figsize=(6,2.5))
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### log1p
@@ -324,7 +335,7 @@ _ = out.plot(figsize=(6,2.5))
 
 # %%
 out = np.log1p(dataset)
-_ = out.plot(figsize=(6,2.5))
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # #### Functions that return numpy arrays (*Work only for NDDataset*)
@@ -337,7 +348,7 @@ _ = out.plot(figsize=(6,2.5))
 np.sign(dataset)
 
 # %%
-np.logical_not(dataset<0)
+np.logical_not(dataset < 0)
 
 # %% [markdown]
 # ##### isfinite
@@ -376,7 +387,7 @@ np.signbit(dataset)
 
 # %%
 out = np.sin(dataset)
-_ = out.plot(figsize=(6,2.5))
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### cos
@@ -384,15 +395,15 @@ _ = out.plot(figsize=(6,2.5))
 
 # %%
 out = np.cos(dataset)
-_ = out.plot(figsize=(6,2.5))
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### tan
 # Compute tangent element-wise.
 
 # %%
-out = np.tan(dataset/np.max(dataset))
-_ = out.plot(figsize=(6,2.5))
+out = np.tan(dataset / np.max(dataset))
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### arcsin
@@ -400,7 +411,7 @@ _ = out.plot(figsize=(6,2.5))
 
 # %%
 out = np.arcsin(dataset)
-_ = out.plot(figsize=(6,2.5))
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### arccos
@@ -408,7 +419,7 @@ _ = out.plot(figsize=(6,2.5))
 
 # %%
 out = np.arccos(dataset)
-_ = out.plot(figsize=(6,2.5))
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### arctan
@@ -416,38 +427,41 @@ _ = out.plot(figsize=(6,2.5))
 
 # %%
 out = np.arctan(dataset)
-_ = out.plot(figsize=(6,2.5))
-
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### arctan2
 # Element-wise arc tangent of x1/x2 choosing the quadrant correctly.
 #
-# The quadrant (i.e., branch) is chosen so that arctan2(x1, x2) is the signed angle in radians between the ray ending at the origin and passing through the point (1,0), and the ray ending at the origin and passing through the point (x2, x1).
+# The quadrant (i.e., branch) is chosen so that arctan2(x1, x2) is the signed angle in radians between the ray ending
+# at the origin and passing through the point (1,0), and the ray ending at the origin and passing through the point (
+# x2, x1).
 
 # %%
-out = np.arctan2(dataset, dataset*2.)
-_ = out.plot(figsize=(6,2.5))
+out = np.arctan2(dataset, dataset * 2.)
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # #### Angle units conversion
 
 # %% [markdown]
 # ##### rad2deg
-# Convert angles from radians to degrees (warning: unitless or dimensionless are assumed to be radians, so no error will be issued).
+# Convert angles from radians to degrees (warning: unitless or dimensionless are assumed to be radians, so no error
+# will be issued).
 
 
 # %% [markdown]
-# for instance, if we take the z axis (the data magintude) in the figure above, it's expressed in radians. We can change to degrees easily.
+# for instance, if we take the z axis (the data magintude) in the figure above, it's expressed in radians. We can
+# change to degrees easily.
 
 
 # %%
 out = np.rad2deg(dataset)
-out.title = 'data' # just to avoid a too long title
-_ = out.plot(figsize=(6,2.5))
+out.title = 'data'  # just to avoid a too long title
+_ = out.plot(figsize=(6, 2.5))
 
 # %%
-pi = NDDataset(Quantity(np.pi,'dimensionless'))
+pi = scp.NDDataset(scp.Quantity(np.pi, 'dimensionless'))
 np.sin(pi).data, np.sin(np.rad2deg(pi)).data
 
 # %% [markdown]
@@ -458,7 +472,7 @@ np.sin(pi).data, np.sin(np.rad2deg(pi)).data
 # %%
 out = np.deg2rad(out)
 out.title = 'data'
-_ = out.plot(figsize=(6,2.5))
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # #### Hyperbolic functions
@@ -469,8 +483,7 @@ _ = out.plot(figsize=(6,2.5))
 
 # %%
 out = np.sinh(dataset)
-_ = out.plot(figsize=(6,2.5))
-
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### cosh
@@ -478,8 +491,7 @@ _ = out.plot(figsize=(6,2.5))
 
 # %%
 out = np.cosh(dataset)
-_ = out.plot(figsize=(6,2.5))
-
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### tanh
@@ -487,8 +499,7 @@ _ = out.plot(figsize=(6,2.5))
 
 # %%
 out = np.tanh(dataset)
-_ = out.plot(figsize=(6,2.5))
-
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### arcsinh
@@ -496,8 +507,7 @@ _ = out.plot(figsize=(6,2.5))
 
 # %%
 out = np.arcsinh(dataset)
-_ = out.plot(figsize=(6,2.5))
-
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### arccosh
@@ -509,16 +519,15 @@ _ = out.plot(figsize=(6,2.5))
 
 # %%
 out = np.arctanh(dataset)
-_ = out.plot(figsize=(6,2.5))
-
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ### Binary functions
 
 # %%
 dataset2 = np.exp(dataset)  # create a second dataset
-_ = dataset.plot(figsize=(6,2.5))
-_ = dataset2.plot(figsize=(6,2.5))
+_ = dataset.plot(figsize=(6, 2.5))
+_ = dataset2.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # #### Arithmetics
@@ -529,8 +538,7 @@ _ = dataset2.plot(figsize=(6,2.5))
 
 # %%
 out = np.add(dataset, dataset2)
-_ = out.plot(figsize=(6,2.5))
-
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### subtract
@@ -538,8 +546,7 @@ _ = out.plot(figsize=(6,2.5))
 
 # %%
 out = np.subtract(dataset, dataset2)
-_ = out.plot(figsize=(6,2.5))
-
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### multiply
@@ -547,8 +554,7 @@ _ = out.plot(figsize=(6,2.5))
 
 # %%
 out = np.multiply(dataset, dataset2)
-_ = out.plot(figsize=(6,2.5))
-
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### divide
@@ -558,8 +564,7 @@ _ = out.plot(figsize=(6,2.5))
 
 # %%
 out = np.divide(dataset, dataset2)
-_ = out.plot(figsize=(6,2.5))
-
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### floor_divide
@@ -567,8 +572,7 @@ _ = out.plot(figsize=(6,2.5))
 
 # %%
 out = np.floor_divide(dataset, dataset2)
-_ = out.plot(figsize=(6,2.5))
-
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### mod
@@ -578,19 +582,18 @@ _ = out.plot(figsize=(6,2.5))
 
 # %%
 out = np.mod(dataset, dataset2)
-_ = out.plot(figsize=(6,2.5))
-
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### fmod
 # Return element-wise remainder of division.
 #
-# **Note**: For `fmod`, the sign of result is the sign of the dividend, while for remainder the sign of the result is the sign of the divisor.
+# **Note**: For `fmod`, the sign of result is the sign of the dividend, while for remainder the sign of the result is
+# the sign of the divisor.
 
 # %%
 out = np.fmod(dataset, dataset2)
-_ = out.plot(figsize=(6,2.5))
-
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### logaddexp
@@ -614,10 +617,10 @@ _ = out.plot(figsize=(6,2.5))
 # ```
 
 # %%
-#h = np.heaviside(dataset, dataset2)       (TODO: do not work - apparently with the new version of pint!)
-#_ = h.plot(figsize=(6,2.5))
-#out = dataset * h
-#_ = out.plot(figsize=(6,2.5))
+# h = np.heaviside(dataset, dataset2)       (TODO: do not work - apparently with the new version of pint!)
+# _ = h.plot(figsize=(6,2.5))
+# out = dataset * h
+# _ = out.plot(figsize=(6,2.5))
 
 
 # %% [markdown]

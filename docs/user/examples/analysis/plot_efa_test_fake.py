@@ -12,8 +12,9 @@ EFA analysis example
 In this example, we perform the Evolving Factor Analysis
 
 """
-import spectrochempy as scp
 import numpy as np
+
+import spectrochempy as scp
 
 ############################################################
 # Upload and preprocess a dataset
@@ -58,4 +59,4 @@ both.T.plot(yscale="log")
 c = efa.get_conc(npc, cutoff=cut)
 c.T.plot()
 
-#scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
+# scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

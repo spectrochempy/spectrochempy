@@ -52,13 +52,13 @@ class DimensionsCompatibilityError(SpectroChemPyException):
 
     """
 
+
 # ----------------------------------------------------------------------------------------------------------------------
 class ComparisonFailure(SpectroChemPyException):
     """
     Exception raised when object are not comparable
 
     """
-
 
 
 class ProtocolError(SpectroChemPyException):

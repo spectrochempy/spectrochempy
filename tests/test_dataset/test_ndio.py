@@ -16,7 +16,7 @@ from spectrochempy.utils.testing import assert_dataset_equal
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core import general_preferences as prefs
 from spectrochempy.utils.testing import assert_array_equal
-from spectrochempy.utils import pathclean, json_decoder
+from spectrochempy.utils import pathclean
 
 irdatadir = pathclean(prefs.datadir) / "irdata"
 nmrdatadir = pathclean(prefs.datadir) / "nmrdata" / "bruker" / "tests" / "nmr"
@@ -26,7 +26,6 @@ cwd = pathlib.Path.cwd()
 # Basic
 # ----------------------------------------------------------------------------------------------------------------------
 def test_ndio_generic(NMR_dataset_1D):
-
     nmr = NMR_dataset_1D
     assert nmr.directory == nmrdatadir
 
@@ -45,7 +44,7 @@ def test_ndio_generic(NMR_dataset_1D):
     # as it has been already saved, we should not get dialogs
     f = nd.save()
     assert nd.filename == 'NMR_1D.scp'
-    #return
+    # return
 
     # now it opens a dialog and the name can be changed
     f1 = nmr.save_as()
@@ -67,8 +66,6 @@ def test_ndio_generic(NMR_dataset_1D):
     dl = NDDataset.load('essai')
     # assert dl.directory == cwd
     assert_array_equal(dl.data, nmr.data)
-
-
 
 
 def test_ndio_2D(IR_dataset_2D):

@@ -11,27 +11,11 @@
 __all__ = ['read_json']
 __dataset_methods__ = __all__
 
-# ----------------------------------------------------------------------------------------------------------------------
-# standard imports
-# ----------------------------------------------------------------------------------------------------------------------
-
 import json
-import base64
 import io
-from datetime import datetime
-import pickle
-
-import numpy as np
 
 from spectrochempy.core import debug_
-from spectrochempy.core.dataset.nddataset import NDIO
-from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.core.dataset.ndcoordset import CoordSet
-from spectrochempy.utils.meta import Meta
-from spectrochempy.units import Unit, Quantity
-from spectrochempy.core.dataset.ndio import NDIO
-from spectrochempy.utils import get_filename, json_decoder
-from spectrochempy.core import general_preferences as prefs
+from spectrochempy.utils import json_decoder
 from spectrochempy.core.readers.importer import docstrings, Importer, importermethod
 
 
@@ -96,7 +80,6 @@ def read_json(*args, **kwargs):
 
 @importermethod
 def _read_json(*args, **kwargs):
-
     debug_("reading a json file")
 
     # read json file

@@ -9,12 +9,11 @@
 
 import plotly.graph_objects as go
 import numpy as np
-from matplotlib.ticker import MaxNLocator
 
 from spectrochempy.utils import colorscale
 from spectrochempy.core import project_preferences
 
-from time import time as tm
+# from matplotlib.ticker import MaxNLocator
 
 __all__ = ['plotly', 'plotly_stack']
 __dataset_methods__ = __all__
@@ -200,7 +199,7 @@ def plotly(dataset, **kwargs):
     # Other properties
     # ------------------------------------------------------------------------------------------------------------------
 
-    colorbar = kwargs.get('colorbar', prefs.colorbar)
+    # colorbar = kwargs.get('colorbar', prefs.colorbar)
 
     cmap = kwargs.get('cmap', 'viridis')
 
@@ -224,24 +223,24 @@ def plotly(dataset, **kwargs):
             cmap = kwargs.get('colormap',
                               kwargs.get('cmap', prefs.colormap_stack))
 
-    lw = kwargs.get('linewidth', kwargs.get('lw',
-                                            prefs.pen_linewidth))
+    # lw = kwargs.get('linewidth', kwargs.get('lw',
+    #                                       prefs.pen_linewidth))
 
-    alpha = kwargs.get('calpha', prefs.contour_alpha)
+    # alpha = kwargs.get('calpha', prefs.contour_alpha)
 
-    antialiased = kwargs.get('antialiased', prefs.antialiased)
+    # antialiased = kwargs.get('antialiased', prefs.antialiased)
 
-    rcount = kwargs.get('rcount', prefs.rcount)
+    # rcount = kwargs.get('rcount', prefs.rcount)
 
-    ccount = kwargs.get('ccount', prefs.ccount)
+    # ccount = kwargs.get('ccount', prefs.ccount)
 
     number_x_labels = prefs.number_of_x_labels
-    number_y_labels = prefs.number_of_y_labels
+    # number_y_labels = prefs.number_of_y_labels
 
     # ax.xaxis.set_major_locator(MaxNLocator(nbins=number_x_labels))
     # ax.yaxis.set_major_locator(MaxNLocator(nbins=number_y_labels))
-    x_locator = MaxNLocator(nbins=number_x_labels)
-    y_locator = MaxNLocator(nbins=number_y_labels)
+    # x_locator = MaxNLocator(nbins=number_x_labels)
+    # y_locator = MaxNLocator(nbins=number_y_labels)
 
     # if method not in ['surface']:
     #    ax.xaxis.set_ticks_position('bottom')
@@ -259,12 +258,12 @@ def plotly(dataset, **kwargs):
     # set the abscissa axis
     # ------------------------------------------------------------------------------------------------------------------
 
-    discrete_data = False
+    # discrete_data = False
     if x is not None and (not x.is_empty or x.is_labeled):
         xdata = x.data
         if not np.any(xdata):
             if x.is_labeled:
-                discrete_data = True
+                # discrete_data = True
                 # take into account the fact that sometimes axis have just labels
                 xdata = range(1, len(x.labels) + 1)
             # TODO it would be more convenient if the data attribute returned the correct values
@@ -287,7 +286,7 @@ def plotly(dataset, **kwargs):
     if kwargs.get('x_reverse', kwargs.get('reverse', x.reversed if x else False)):
         xlim.reverse()
 
-    xscale = kwargs.get("xscale", "linear")
+    # xscale = kwargs.get("xscale", "linear")
 
     fig.update_layout(
             dict(
@@ -322,7 +321,7 @@ def plotly(dataset, **kwargs):
     ylim[-1] = min(ylim[-1], yl[-1])
     ylim[0] = max(ylim[0], yl[0])
 
-    yscale = kwargs.get("yscale", "linear")
+    # yscale = kwargs.get("yscale", "linear")
 
     fig.update_layout(
             dict(
@@ -384,11 +383,15 @@ def plotly(dataset, **kwargs):
                                  font_size=12,
                                  font_family="Rockwell"
                                  ),
-                         hovertemplate=f'{getattr(trace, dimx).alt_title}:' + ' %{x:.2f} ' + f'{getattr(trace, dimx).units:~P}<br>'
-                                                                                             f'{y_string}'
-                                                                                             f'{trace.alt_title}:' +
-                                       ' %{y:.2f} ' + f'{trace.units:~P}'
-                                                                                                                                    '<extra></extra>',
+                         hovertemplate=f'{getattr(trace, dimx).alt_title}:'
+                                       ' %{x:.2f} '
+                                       f'{getattr(trace, dimx).units:~P}'
+                                       f'<br>'
+                                       f'{y_string}'
+                                       f'{trace.alt_title}:'
+                                       ' %{y:.2f} '
+                                       f'{trace.units:~P}'
+                                       '<extra></extra>',
                          mode='lines',
                          type='scattergl',
                          connectgaps=False,
@@ -480,7 +483,7 @@ def _make_axis(axis,
 
 def point_line_distance(x0, y0, x1, y1, x2, y2):
     return np.abs((x2 - x1) * (y1 - y0) - (x1 - x0) * (y2 - y1)) / np.sqrt(
-        (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1))
+            (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1))
 
 
 def calc_distances(p, start=None, end=None):
@@ -493,7 +496,7 @@ def calc_distances(p, start=None, end=None):
     dimx = p.dims[-1]
     x = getattr(p, dimx).data
     z = p.data
-    ny = z.shape[0]
+    # ny = z.shape[0]
     if start is None:
         start = 0
     if end is None:

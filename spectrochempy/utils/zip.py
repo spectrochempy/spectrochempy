@@ -9,9 +9,7 @@
 import os
 import json
 from collections.abc import Mapping
-
 from numpy.lib.format import read_array
-from numpy.compat import asstr
 
 from spectrochempy.utils import json_decoder
 
@@ -36,6 +34,7 @@ def make_zipfile(file, **kwargs):
 
     """
     import zipfile
+
     kwargs['allowZip64'] = True
     return zipfile.ZipFile(file, **kwargs)
 
@@ -131,6 +130,7 @@ class ScpFile(Mapping):
 
         elif member and ext in ['.scp']:
             from spectrochempy.core.dataset.nddataset import NDDataset
+
             # f = io.BytesIO(self.zip.read(key))
             content = self.zip.read(key)
             return NDDataset.load(key, content=content)

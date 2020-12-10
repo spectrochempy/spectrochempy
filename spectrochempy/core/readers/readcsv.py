@@ -127,7 +127,7 @@ def _read_csv(*args, **kwargs):
             fid = _open()
             d = np.loadtxt(fid, unpack=True, delimiter=_delimiter)
             fid.close()
-        except Exception as e:
+        except Exception:
             # in french, very often the decimal '.' is replaced by a
             # comma:  Let's try to correct this
             if fid:

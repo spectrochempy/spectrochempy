@@ -20,7 +20,6 @@ processing, analysis, etc...
 
 import os
 import sys
-import time
 import warnings
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -110,13 +109,14 @@ __all__ += ['info_', 'debug_', 'error_', 'warning_', 'print_']
 # Progress bar
 # ======================================================================================================================
 pbar_count = 0
-if os.environ.get('USE_TQDM', 'Yes') == 'Yes' and "/bin/scpy" not in sys.argv[0]:  # deactivate for console scripts
-    pbar = tqdm(total=1211)
-    pbar.set_description('Loading SpectroChemPy API')
-    val_tqdm = [1, 39, 52, 83, 83, 89, 92, 93, 94, 95, 96, 97, 98, 99, 100]
 
-    def _pbar_update(close=None):
-        global pbar_count
+
+def _pbar_update(close=None):
+    global pbar_count
+    if os.environ.get('USE_TQDM', 'Yes') == 'Yes' and "/bin/scpy" not in sys.argv[0]:  # deactivate for console scripts
+        pbar = tqdm(total=1211)
+        pbar.set_description('Loading SpectroChemPy API')
+        val_tqdm = [1, 39, 52, 83, 83, 89, 92, 93, 94, 95, 96, 97, 98, 99, 100]
 
         if close:
             pbar.clear()
@@ -124,10 +124,9 @@ if os.environ.get('USE_TQDM', 'Yes') == 'Yes' and "/bin/scpy" not in sys.argv[0]
         else:
             pbar.update(val_tqdm[pbar_count])
             pbar_count += 1
-else:
-
-    def _pbar_update():
+    else:
         pass
+
 
 # ======================================================================================================================
 # loading module libraries
@@ -141,20 +140,7 @@ app = SpectroChemPy()
 __all__ += ['app']
 
 from spectrochempy.application import (  # noqa: E402
-    __version__ as version,
-    __release__ as release,
-    __copyright__ as copyright,
-    __license__ as license,
-    __release_date__ as release_date,
-    __author__ as authors,
-    __contributor__ as contributors,
-    __url__ as url,
-    DEBUG,
     WARNING,
-    ERROR,
-    CRITICAL,
-    INFO,
-    available_styles,
     )
 
 general_preferences = app.general_preferences
@@ -163,6 +149,7 @@ description = app.description
 long_description = app.long_description
 config_manager = app.config_manager
 config_dir = app.config_dir
+
 
 # datadir = app.datadir
 
@@ -230,7 +217,6 @@ This packages contains most of the core methods expose in the spectrochempy API.
 """
 # constants
 # ----------------------------------------------------------------------------------------------------------------------
-from spectrochempy.utils import show, MASKED, NOMASK, EPSILON, INPLACE  # noqa: E402
 
 __all__ += ['show', 'MASKED', 'NOMASK', 'EPSILON', 'INPLACE']
 
@@ -358,14 +344,11 @@ _started = app.start()
 
 warnings.filterwarnings(action='ignore', module='matplotlib', category=UserWarning)
 
-
 # ----------------------------------------------------------------------------------------------------------------------
 # File Dialogs
 # ----------------------------------------------------------------------------------------------------------------------
 
 # can not be in utils due to circular imports
-import sys
-
 __all__ += ['open_dialog', 'save_dialog']
 
 USE_QT = general_preferences.use_qt
@@ -374,6 +357,7 @@ if USE_QT:
 
     try:
         from PyQt5 import QtWidgets
+
         GUI = QtWidgets.QApplication(sys.argv)
         FileDialog = QtWidgets.QFileDialog
 
@@ -383,6 +367,7 @@ if USE_QT:
 
 if not USE_QT:
     from tkinter import filedialog
+
 
 # ------------------------------------------------------------------------------------------------------------------
 # Private functions
@@ -466,6 +451,7 @@ class _TKFileDialogs:
 
     def __init__(self):
         import tkinter as tk
+
         root = tk.Tk()
         root.withdraw()
         root.overrideredirect(True)
@@ -593,6 +579,7 @@ def save_dialog(filename='',
                                             filters)
 
     from spectrochempy.utils.file import pathclean
+
     return pathclean(f)
 
 

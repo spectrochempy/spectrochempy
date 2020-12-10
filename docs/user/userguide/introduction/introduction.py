@@ -279,7 +279,7 @@ fs
 # %% nbsphinx="hidden"
 # THESE THREE LINES ARE JUST HERE FOR BUILDING THE DOCUMENTATION AND TESTING
 # THEY SHOULD BE COMMENTED FOR AN INTERACTIVE USE OF THIS TUTORIAL
-fs.fullpath = sop.join(path,'CO@Mo_Al2O3.SPG')
+fs.fullpath = sop.join(path, 'CO@Mo_Al2O3.SPG')
 fs.value = 'CO@Mo_Al2O3.SPG'
 
 # %%
@@ -305,7 +305,10 @@ _ = ax.set_title(fs.value)  # add a title
 # But a simple and fast methods is to use `lambda` function.
 
 # %%
-def fid(t, w, T2): return (np.cos(2. * np.pi * w * t) + 1j * np.sin(2. * np.pi * w * t)) * np.exp(-t / T2)
+def fid(t, w, T2):
+    return (np.cos(2. * np.pi * w * t) + 1j * np.sin(2. * np.pi * w * t)) * np.exp(-t / T2)
+
+
 # in this model function we generate a sinusoidal time (t) evolution with an angular frequency w, and a relaxation T2.
 
 

@@ -13,7 +13,6 @@ from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndpanel import NDPanel
 from spectrochempy.utils.testing import raises
-from spectrochempy.utils import json_serialiser
 
 
 def test_ndpanel_init():
@@ -72,10 +71,9 @@ def test_ndpanel_init():
     assert panel['arr1'].dims == ['y', 'x']
     assert panel['arr2'].dims == ['z', 'x']
 
-    js = json_serialiser(panel, encoding=None)
+    # js = json_serialiser(panel, encoding=None)
     f = panel.save()
     panel2 = NDPanel.load(f)
-
 
     # TODO: works on alignment (seems broken)
     # dataset alignment during init (cy and cy2 can be aligned) but the title must be the same
@@ -105,12 +103,11 @@ def test_ndpanel_init():
     info_(panel)
 
     # test save and load
-    js = json_serialiser(panel, encoding=None)
+    # js = json_serialiser(panel, encoding=None)
     f = panel.save_as('mypanel')
     print(f)
-    js2 = NDPanel.load(f, json=True)
+    # js2 = NDPanel.load(f, json=True)
     info_(panel2)
-
 
 
 # ============================================================================

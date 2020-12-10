@@ -26,7 +26,6 @@ def test_read_write_jdx(IR_dataset_2D):
     f = X.write_jdx()
     assert f.stem == X.name
 
-
     Y = NDDataset.read_jcamp(f, name='xxx')
     assert Y.name == 'xxx'
 

@@ -17,10 +17,11 @@
 # # Units
 
 # %% [markdown]
-# Spectrochempy can do calculations with units - it uses [pint](https://pint.readthedocs.io) to define and perform operation on data with units.
+# Spectrochempy can do calculations with units - it uses [pint](https://pint.readthedocs.io) to define and perform
+# operation on data with units.
 
 # %%
-from spectrochempy import *
+from spectrochempy import *  # noqa: F403
 
 # %% [markdown]
 # ## Create quantities

@@ -23,9 +23,10 @@
 #
 # Let's first import spectrochempy:
 
+import os
+
 # %% {"jupyter": {"outputs_hidden": false}, "pycharm": {"name": "#%%\n"}}
 import spectrochempy as scp
-import os
 
 # %% [markdown]
 # ## Supported file formats
@@ -144,7 +145,8 @@ X.y = X.y - X.y[0]
 X.y
 
 # %% [markdown]
-# It is also possible to use the ability of Scpy to handle unit changes. For this one can use the  `to` or `ito` (inplace) methods.
+# It is also possible to use the ability of Scpy to handle unit changes. For this one can use the  `to` or `ito` (
+# inplace) methods.
 #
 #     val = val.to(some_units)
 #     val.ito(some_units)   # the same inplace

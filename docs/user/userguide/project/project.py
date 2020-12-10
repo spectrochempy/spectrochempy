@@ -17,11 +17,11 @@
 # %% [markdown]
 # # Project management
 
+from pathlib import Path
+
 # %%
 from spectrochempy import NDDataset, Project
 from spectrochempy import general_preferences as prefs
-
-from pathlib import Path
 
 # %% [markdown]
 # ## Project creation
@@ -59,8 +59,8 @@ proj
 # %%
 datadir = Path(prefs.datadir)
 path = datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr'
-nd1 = NDDataset.read_topspin(path/'topspin_1d', expno=1, remove_digital_filter=True, name = "NMR_1D")
-nd2 = NDDataset.read_topspin(path/'topspin_2d', expno=1, remove_digital_filter=True, name='NMR_2D')
+nd1 = NDDataset.read_topspin(path / 'topspin_1d', expno=1, remove_digital_filter=True, name="NMR_1D")
+nd2 = NDDataset.read_topspin(path / 'topspin_2d', expno=1, remove_digital_filter=True, name='NMR_2D')
 
 # %% [markdown]
 # To add it to the project, we use the `add_dataset` function for a single dataset:
@@ -107,7 +107,9 @@ proj.NMR_1D
 _ = proj.NMR_1D.plot()
 
 # %% [markdown]
-# However this work only if the name contains no space, dot, comma, colon, etc. The only special character allowed is the underscore `_`.  If the name is not respecting this, then it is possible to use the following syntax (as a project behave as a dictionary). For example:
+# However this work only if the name contains no space, dot, comma, colon, etc. The only special character allowed is
+# the underscore `_`.  If the name is not respecting this, then it is possible to use the following syntax (as a
+# project behave as a dictionary). For example:
 
 # %%
 proj['NMR_1D'].data

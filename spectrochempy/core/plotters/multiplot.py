@@ -329,10 +329,7 @@ def multiplot(datasets=[], labels=[], nrow=1, ncol=1,
             _sharey = None
             _sharez = None
             # on the type of the plot and
-            if ((irow == icol and irow == 0) or  # axe11
-                    (sharex == 'col' and irow == 0) or  # axe1*
-                    (sharey == 'row' and icol == 0)):  # axe*1
-
+            if ((irow == icol and irow == 0) or (sharex == 'col' and irow == 0) or (sharey == 'row' and icol == 0)):
                 ax = fig.add_subplot(nrow, ncol, irow * ncol + icol + 1)
 
             else:

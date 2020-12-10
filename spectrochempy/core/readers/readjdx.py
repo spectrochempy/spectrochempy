@@ -23,6 +23,7 @@ from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.readers.importer import docstrings, Importer, importermethod
 from spectrochempy.utils.exceptions import deprecated
 
+
 # ======================================================================================================================
 # Public functions
 # ======================================================================================================================

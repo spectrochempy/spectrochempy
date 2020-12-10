@@ -21,15 +21,18 @@
 # expected to have read the [Import](../IO/import.ipynb), [Import IR](../IO/importIR.ipynb),
 # [slicing](../processing/slicing.ipynb) tutorials. First lets import the modules that will be used in this tutorial:
 
-# %% execution={"iopub.execute_input": "2020-06-22T12:21:23.143Z", "iopub.status.busy": "2020-06-22T12:21:23.097Z", "iopub.status.idle": "2020-06-22T12:21:29.376Z", "shell.execute_reply": "2020-06-22T12:21:29.348Z"}
-import spectrochempy as scp
 import matplotlib.pyplot as plt  # will be used for some plots
+
+# %% execution={"iopub.execute_input": "2020-06-22T12:21:23.143Z", "iopub.status.busy": "2020-06-22T12:21:23.097Z",
+# "iopub.status.idle": "2020-06-22T12:21:29.376Z", "shell.execute_reply": "2020-06-22T12:21:29.348Z"}
+import spectrochempy as scp
 
 # %% [markdown]
 # Second, import and plot a typical IR dataset (CO adsorption on supported CoMo catalyst in the 2300-1900 cm-1 region)
 # that will be used throughout:
 
-# %% execution={"iopub.execute_input": "2020-06-22T12:21:31.950Z", "iopub.status.busy": "2020-06-22T12:21:31.942Z", "iopub.status.idle": "2020-06-22T12:21:31.987Z", "shell.execute_reply": "2020-06-22T12:21:31.994Z"}
+# %% execution={"iopub.execute_input": "2020-06-22T12:21:31.950Z", "iopub.status.busy": "2020-06-22T12:21:31.942Z",
+# "iopub.status.idle": "2020-06-22T12:21:31.987Z", "shell.execute_reply": "2020-06-22T12:21:31.994Z"}
 X = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG')[:, 2300.:1900.]
 
 # %% [markdown]
@@ -58,7 +61,8 @@ X = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG')[:, 2300.:1900.]
 #    This feature doesn't work (for now in with `jupyter lab` but with `Jupyter notebook` it is OK.
 #    (It is commented below to avoir problem when generating this documentation)
 #
-# %% execution={"iopub.execute_input": "2020-06-22T12:21:38.304Z", "iopub.status.busy": "2020-06-22T12:21:38.285Z", "iopub.status.idle": "2020-06-22T12:21:38.801Z", "shell.execute_reply": "2020-06-22T12:21:38.971Z"}
+# %% execution={"iopub.execute_input": "2020-06-22T12:21:38.304Z", "iopub.status.busy": "2020-06-22T12:21:38.285Z",
+# "iopub.status.idle": "2020-06-22T12:21:38.801Z", "shell.execute_reply": "2020-06-22T12:21:38.971Z"}
 # #%matplotlib widget
 ax = X.plot(cmap='Dark2')
 
@@ -144,7 +148,6 @@ plt.figure()  # classic instructions for a xy plot in matplotlib.
 plt.plot(time, maxwn, 'o-')
 plt.xlabel("acquisition time / min")
 plt.ylabel("wavenumber at maximum / cm$^{-1}$")
-
 
 # %% [markdown]
 # ###  Options of `find_peaks()`
@@ -368,7 +371,6 @@ for w in (prop['left_ips'][0], prop['right_ips'][0]):
 print('{:>16}: {:<8.4f}'.format("peak_maximum", peak.x.data[0]))
 for key in prop:
     print('{:>16}: {:<8.4f}'.format(key[:-1], prop[key][0]))
-
 
 # %% [markdown]
 # -- this is the end of this tutorial --

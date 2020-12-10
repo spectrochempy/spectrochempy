@@ -11,11 +11,10 @@
 __all__ = ['write']
 __dataset_methods__ = __all__
 
-from warnings import warn
-
-from traitlets import HasTraits, Any, List
+from traitlets import HasTraits, Any
 
 from spectrochempy.utils import pathclean, check_filename_to_save, docstrings, patterns
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 class Exporter(HasTraits):
