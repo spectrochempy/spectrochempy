@@ -82,7 +82,7 @@ before_script:
 script:
   - if [[ $TEST = true ]]; then
       echo "RUNNING TESTS";
-      flake8
+      flake8;
       coverage run -m pytest -v -k tests;
       pytest -v -k docs/tests;
 
