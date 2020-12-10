@@ -11,6 +11,7 @@ __all__ = ['SpectroChemPyWarning',
            'SpectroChemPyException',
            'UnitsCompatibilityError',
            'DimensionsCompatibilityError',
+           'ComparisonFailure',
            'ProtocolError',
            'deprecated',
            ]
@@ -50,6 +51,14 @@ class DimensionsCompatibilityError(SpectroChemPyException):
     Exception raised when dimensions are not compatible for concatenation for instance
 
     """
+
+# ----------------------------------------------------------------------------------------------------------------------
+class ComparisonFailure(SpectroChemPyException):
+    """
+    Exception raised when object are not comparable
+
+    """
+
 
 
 class ProtocolError(SpectroChemPyException):

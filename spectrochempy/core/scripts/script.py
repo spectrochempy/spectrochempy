@@ -53,6 +53,14 @@ class Script(HasTraits):
 
         return self.execute(*args)
 
+    def __eq__(self, other):
+        if self._content == other.content:
+            return True
+        return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
     # ------------------------------------------------------------------------------------------------------------------
     # properties
     # ------------------------------------------------------------------------------------------------------------------

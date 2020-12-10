@@ -144,13 +144,15 @@ class NDIO(HasTraits):
         # by default we save the file in the self.directory and with the name + suffix depending
         # on the current object type
         if self.directory is None:
-            self.filename = pathclean('.') / self.name
+            filename = pathclean('.') / self.name
+            self.filename = filename  # <- this will set self.directory too.
 
         filename = self.directory / self.name
+
         default_suffix = SCPY_SUFFIX[self.implements()]
         filename = filename.with_suffix(default_suffix)
 
-        if not filename.exists():
+        if not filename.exists() and kwargs.get('confirm', True):
             # never saved
             kwargs['caption'] = f'Save the current {self.implements()} as ... '
             return self.save_as(filename, **kwargs)
@@ -341,22 +343,16 @@ class NDIO(HasTraits):
                         obj.datasets = datasets
 
                     elif key in ['_projects']:
-                        for k, v in val.items():
-                            project = item_to_attr(Project(name=k), v)
-                            obj.add_project(project, name=k)
+                        projects = [item_to_attr(Project(name=k), v) for k, v in val.items()]
+                        obj.projects = projects
 
                     elif key in ['_scripts']:
-                        for k, v in val.items():
-                            script = item_to_attr(Script(name=k), v)
-                            obj.add_script(script, name=k)
+                        scripts = [item_to_attr(Script(name=k), v) for k, v in val.items()]
+                        obj.scripts = scripts
 
                     elif key in ['_parent']:
                         # automatically set
                         pass
-                        # if not val:
-                        #     setattr(obj, key, None)
-                        # else:
-                        #     setattr(obj, key, obj.parent)
 
                     else:
                         # print(key, val)

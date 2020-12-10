@@ -149,11 +149,6 @@ class EFA(HasTraits):
         -------
 
         """
-        # M, K = self.f.shape
-        # if n_pc is None:
-        #    n_pc = K
-        # n_pc = min(K, n_pc)
-
         f = self.f
         if cutoff is not None:
             f.data = np.max((f.data, np.ones_like(f.data) * cutoff), axis=0)
@@ -170,11 +165,6 @@ class EFA(HasTraits):
         -------
 
         """
-        # M, K = self.b.shape
-        # if n_pc is None:
-        #    n_pc = K
-        # n_pc = min(K, n_pc)
-
         b = self.b
         if cutoff is not None:
             b.data = np.max((b.data, np.ones_like(b.data) * cutoff), axis=0)

@@ -68,8 +68,7 @@ def test_ndio_generic(NMR_dataset_1D):
     # assert dl.directory == cwd
     assert_array_equal(dl.data, nmr.data)
 
-    for f in list(cwd.parent.parent.glob('**/*.scp')):
-        f.unlink()
+
 
 
 def test_ndio_2D(IR_dataset_2D):

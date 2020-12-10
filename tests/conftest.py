@@ -10,6 +10,8 @@
 # import os
 
 from os import environ
+import pathlib
+
 import numpy as np
 import pytest
 
@@ -22,6 +24,8 @@ from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndcomplex import NDComplexArray
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndpanel import NDPanel
+from spectrochempy.core.scripts.script import Script
+from spectrochempy.core.project.project import Project
 from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core import general_preferences as prefs
@@ -46,6 +50,26 @@ def ip(session_ip):
     yield session_ip
 
 
+def pytest_sessionfinish(session, exitstatus):
+    """ whole test run finishes. """
+
+    # cleaning
+    cwd = pathlib.Path(__file__).parent.parent
+
+    for f in list(cwd.glob('**/*.?scp')):
+        f.unlink()
+    for f in list(cwd.glob('**/*.jdx')):
+        f.unlink()
+    for f in list(cwd.glob('**/*.json')):
+        f.unlink()
+    for f in list(cwd.glob('**/*.log')):
+        f.unlink()
+
+    docs = cwd / 'docs'
+    for f in list(docs.glob('**/*.ipynb')):
+        f.unlink()
+
+
 # ======================================================================================================================
 # FIXTURES
 # ======================================================================================================================
@@ -58,6 +82,7 @@ datadir = pathclean(prefs.datadir)
 environ['TEST_FILE'] = str(datadir / 'irdata' / 'nh4y-activation.spg')
 environ['TEST_FOLDER'] = str(datadir / 'irdata' / 'subdir')
 environ['TEST_NMR_FOLDER'] = str(datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'topspin_2d')
+
 
 # create reference arrays
 # ----------------------------------------------------------------------------------------------------------------------
@@ -293,3 +318,35 @@ def dataframe():
     for ax, name in zip(arr.axes, ['time', 'temperature']):
         ax.name = name
     return arr.copy()
+
+
+# fixture Project
+# ----------------------------------------------------------------------------------------------------------------------
+
+@pytest.yield_fixture(scope="function")
+def simple_project():
+
+    proj = Project(
+
+            # subprojects
+            Project(name='P350', label=r'$\mathrm{M_P}\,(623\,K)$'),
+            Project(name='A350', label=r'$\mathrm{M_A}\,(623\,K)$'),
+            Project(name='B350', label=r'$\mathrm{M_B}\,(623\,K)$'),
+
+            # attributes
+            name='project_1',
+            label='main project',
+
+            )
+
+    assert proj.projects_names == ['A350', 'B350', 'P350']
+
+    ir = NDDataset([1.1, 2.2, 3.3], coordset=[[1, 2, 3]])
+    tg = NDDataset([1, 3, 4], coordset=[[1, 2, 3]])
+    proj.A350['IR'] = ir
+    proj.A350['TG'] = tg
+    script_source = 'set_loglevel(INFO)\n' \
+                    'info_(f"samples contained in the project are {proj.projects_names}")'
+
+    proj['print_info'] = Script('print_info', script_source)
+    return proj

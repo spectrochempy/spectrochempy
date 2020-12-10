@@ -13,6 +13,7 @@ In this example, we create a Project from scratch
 
 """
 import spectrochempy as scp
+from spectrochempy.utils.testing import assert_project_equal
 
 ##############################################################################
 # Let's assume we have three subproject to group in a single project
@@ -49,20 +50,18 @@ print(proj.A350.label)
 print(proj.A350.TG)
 
 ##############################################################################
-# Save this project
+# Save this project with the default name `<proj.name>.pscp`
 # (it will be saved in the default SpectroChemPy's project directory location
 
-proj.save('project_1')
+f = proj.save(confirm=False)
+assert f.name == 'project_1.pscp'
 
 
 ##############################################################################
 # RELOAD the project from disk as newproj
 
 newproj = scp.Project.load('project_1')
-print(newproj)
-
-assert str(newproj) == str(proj)
-assert newproj.A350.label == proj.A350.label
+assert_project_equal(newproj, proj)
 
 ##############################################################################
 # Now we add a script to the original proj

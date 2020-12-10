@@ -1,16 +1,18 @@
-#! python3
-# -*- coding: utf-8 -*-
+#  -*- coding: utf-8 -*-
 
-# ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
+#  =====================================================================================================================
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
+#  =====================================================================================================================
+
 
 __all__ = ["assert_equal",
            "assert_array_equal",
            "assert_array_almost_equal",
            'assert_dataset_equal',
            'assert_dataset_almost_equal',
+           'assert_project_equal',
+           'assert_project_almost_equal',
            "assert_approx_equal",
            "assert_raises",
            "raises",
@@ -41,8 +43,10 @@ from numpy.testing import (
 # ======================================================================================================================
 
 def _compare_datasets(this, other, approx=False, decimal=6):
+
     from spectrochempy.core.dataset.ndarray import NDArray
     from spectrochempy.units import ur, Quantity
+    from spectrochempy.utils.exceptions import ComparisonFailure
 
     eq = True
 
@@ -55,18 +59,18 @@ def _compare_datasets(this, other, approx=False, decimal=6):
             otherdata = other
             otherunits = False
         else:
-            return f'{this} and {other} objects are too different to be compared.'
+            raise ComparisonFailure(f'{this} and {other} objects are too different to be compared.')
 
         if not this.has_units and not otherunits:
             eq = np.all(this._data == otherdata)
         elif this.has_units and otherunits:
             eq = np.all(this._data * this._units == otherdata * otherunits)
         else:
-            return f'units of {this} and {other} objects does not match'
+            raise ComparisonFailure(f'units of {this} and {other} objects does not match')
         return eq
 
     attrs = this.__dir__()
-    for attr in ('filename', 'plotmeta', 'name', 'description', 'history', 'date', 'modified', 'modeldata',
+    for attr in ('filename', 'plotmeta', 'description', 'history', 'date', 'modified', 'modeldata',
                  'origin', 'roi', 'offset', 'name'):
         # these attibutes are not used for comparison (comparison based on data and units!)
         if attr in attrs:
@@ -83,37 +87,37 @@ def _compare_datasets(this, other, approx=False, decimal=6):
                 oattr = getattr(other, f'_{attr}')
                 # to avoid deprecation warning issue for unequal array
                 if (sattr is None and oattr is not None):
-                    return f'{attr} of {this} is None.'
+                    raise ComparisonFailure(f'{attr} of {this} is None.')
                 if (oattr is None and sattr is not None):
-                    return f'{attr} of {other} is None.'
+                    raise ComparisonFailure(f'{attr} of {other} is None.')
                 if hasattr(oattr, 'size') and hasattr(sattr, 'size') and oattr.size != sattr.size:
                     # particular case of mask
                     if attr != 'mask':
-                        return f'sizes of {attr} are different.'
+                        raise ComparisonFailure(f'sizes of {attr} are different.')
                     else:
                         if other.mask != this.mask:
-                            return f'{this} and {other} object\'s masks are different.'
+                            raise ComparisonFailure(f'{this} and {other} object\'s masks are different.')
                 if attr in ['data', 'mask']:
                     if approx:
                         try:
                             assert_array_almost_equal(sattr, oattr, decimal=decimal)
                         except AssertionError as e:
-                            return f'{this} and {other} object\'s {attr} are too different.\n{e}'
+                            raise ComparisonFailure(f'{this} and {other} object\'s {attr} are too different.\n{e}')
                     else:
                         try:
                             assert_array_equal(sattr, oattr)
                         except AssertionError as e:
-                            return f'{this} and {other} object\'s {attr} are not equals..\n{e}'
+                            raise ComparisonFailure(f'{this} and {other} object\'s {attr} are not equals..\n{e}')
                 elif attr in ['coords']:
                     for item in zip(sattr, oattr):
                         decimal = _significant_decimal(np.max(item[0].ptp().data))
                         res = _compare_datasets(*item, approx=approx, decimal=decimal)
-                        if res is not None:
-                            return f'coords differs:\n{res}'
+                        if not res:
+                            raise ComparisonFailure(f'coords differs:\n{res}')
                 else:
                     eq &= np.all(sattr == oattr)
                 if not eq:
-                    return f'{this} and {other} object\'s {attr} are different.'
+                    raise ComparisonFailure(f'{this} and {other} object\'s {attr} are different.')
             else:
                 return False
         else:
@@ -128,12 +132,11 @@ def _compare_datasets(this, other, approx=False, decimal=6):
 
                 eq &= np.all(sattr == oattr)
                 if not eq:
-                    # debug_(f"attributes `{attr}` are not equals or one is missing: \n{sattr} != {oattr}")
-                    return False
+                    raise ComparisonFailure(f"attributes `{attr}` are not equals or one is missing: \n{sattr} != {oattr}")
             else:
-                return False
+                raise ComparisonFailure(f'{other } has no units')
 
-    return None
+    return True
 
 
 def _significant_decimal(x):
@@ -145,20 +148,43 @@ def _significant_decimal(x):
 
 # ......................................................................................................................
 def assert_dataset_equal(nd1, nd2):
-    if _compare_datasets(nd1, nd2) is None:
-        return
+    assert_dataset_almost_equal(nd1, nd2, approx=False)
+    return True
 
-    raise AssertionError('NDDatasets are not equals')
+# ......................................................................................................................
+def assert_dataset_almost_equal(nd1, nd2, **kwargs):
+    decimal = kwargs.get('decimal',_significant_decimal(np.max(nd1.ptp().data)))
+    approx = kwargs.get('approx', True)
+    _compare_datasets(nd1, nd2, approx=approx, decimal=decimal)
+    return True
+
+
+def assert_project_equal(proj1, proj2, **kwargs):
+    assert_project_almost_equal(proj1, proj2, approx=False)
+    return True
+# ......................................................................................................................
+def assert_project_almost_equal(proj1, proj2, **kwargs):
+
+    compare = True
+    for nd1, nd2 in zip(proj1.datasets, proj2.datasets):
+        _compare_datasets(nd1, nd2, **kwargs)
+
+    for pr1, pr2 in zip(proj1.projects, proj2.projects):
+        assert_project_almost_equal(pr1, pr2, **kwargs)
+
+    for sc1, sc2 in zip(proj1.scripts, proj2.scripts):
+        assert_script_equal(sc1, sc2, **kwargs)
+
+    return True
 
 
 # ......................................................................................................................
-def assert_dataset_almost_equal(nd1, nd2):
-    decimal = _significant_decimal(np.max(nd1.ptp().data))
-    if _compare_datasets(nd1, nd2, approx=True, decimal=decimal) is None:
-        return
+def assert_script_equal(sc1, sc2, **kwargs):
 
-    raise AssertionError('NDDatasets are not almost equals')
+    from spectrochempy.utils.exceptions import ComparisonFailure
 
+    if sc1 != sc2:
+        raise ComparisonFailure(f'Scripts are differents: {sc1.content} != {sc2.content}')
 
 # ======================================================================================================================
 # RandomSeedContext

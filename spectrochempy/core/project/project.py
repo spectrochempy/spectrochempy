@@ -222,16 +222,14 @@ class Project(AbstractProject, NDIO):
     def __dir__(self):
         return ['name', 'meta', 'parent', 'datasets', 'projects', 'scripts', ]
 
-    def _cpy__(self):
+    def __copy__(self):
         new = Project()
-        new.name = self.name + 'cpy'
+        new.name = self.name + '*'
         for item in self.__dir__():
             if item == 'name':
                 continue
             item = "_" + item
             setattr(new, item, cpy(getattr(self, item)))
-            if item == '_projects':
-                print()
         return new
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -340,7 +338,7 @@ class Project(AbstractProject, NDIO):
     @datasets.setter
     def datasets(self, datasets):
 
-        self.add_datasets(datasets)
+        self.add_datasets(*datasets)
 
     # ..................................................................................................................
     @property
@@ -365,6 +363,11 @@ class Project(AbstractProject, NDIO):
             p.append(self._projects[name])
         return p
 
+    @projects.setter
+    def projects(self, projects):
+
+        self.add_projects(*projects)
+
     # ..................................................................................................................
     @property
     def scripts_names(self):
@@ -387,6 +390,11 @@ class Project(AbstractProject, NDIO):
         for name in self.scripts_names:
             s.append(self._scripts[name])
         return s
+
+    @scripts.setter
+    def scripts(self, scripts):
+
+        self.add_scripts(*scripts)
 
     @property
     def allnames(self):
@@ -429,10 +437,11 @@ class Project(AbstractProject, NDIO):
         Make an exact copy of the current project
 
         """
-        return cpy(self)
+        return self.__copy__()
 
-    # ..................................................................................................................
+    # ------------------------------------------------------------------------------------------------------------------
     # dataset items
+    # ------------------------------------------------------------------------------------------------------------------
 
     # ..................................................................................................................
     def add_datasets(self, *datasets):
@@ -512,8 +521,9 @@ class Project(AbstractProject, NDIO):
             v._parent = None
         self._datasets = {}
 
-    # ..................................................................................................................
+    # ------------------------------------------------------------------------------------------------------------------
     # project items
+    # ------------------------------------------------------------------------------------------------------------------
 
     # ..................................................................................................................
     def add_projects(self, *projects):
@@ -569,8 +579,9 @@ class Project(AbstractProject, NDIO):
             v._parent = None
         self._projects = {}
 
-    # ..................................................................................................................
+    # ------------------------------------------------------------------------------------------------------------------
     # script items
+    # ------------------------------------------------------------------------------------------------------------------
 
     # ..................................................................................................................
     def add_scripts(self, *scripts):

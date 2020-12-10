@@ -77,8 +77,8 @@ efa.b.T.plot(yscale="log")
 n_pc = 2
 cut = np.max(efa.f[:, n_pc].data)
 
-f2 = efa.cut_f(n_pc=2, cutoff=cut)
-b2 = efa.cut_b(n_pc=2, cutoff=cut)
+f2 = efa.cut_f(cutoff=cut)
+b2 = efa.cut_b(cutoff=cut)
 # we concatenate the datasets to plot them in a single figure
 both = scp.concatenate(f2, b2)
 both.T.plot(yscale="log")

@@ -27,9 +27,10 @@ jobs:
       - BUILDOCS=true
       - CONDAPY=3.8
 
-# limit got clone depth to 50 commits (this means that pull requests must be done with less than 50 commit changes)
-# git:
-#  depth: 50
+# limit got clone depth to 200 commits
+# this means that pull requests must be done with less than 200 commit changes
+git:
+  depth: 200
 
 cache:
   apt: true
@@ -81,8 +82,10 @@ before_script:
 script:
   - if [[ $TEST = true ]]; then
       echo "RUNNING TESTS";
-      mkdir $HOME/spectrochempy/projects;
-      coverage run -m pytest -v --flake8 -k tests;
+      flake8
+      coverage run -m pytest -v -k tests;
+      pytest -v -k docs/tests;
+
     elif [[ $DEPLOY = true ]]; then
       echo "BUILDING AND UPLOADING ON ANACONDA";
       bash .ci/scripts/conda-upload.sh;
