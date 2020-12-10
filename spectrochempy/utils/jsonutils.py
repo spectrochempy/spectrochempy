@@ -16,6 +16,7 @@ import numpy as np
 
 from spectrochempy.units import Quantity, Unit
 
+
 __all__ = ['json_serialiser', 'json_decoder']
 
 
@@ -57,17 +58,20 @@ def json_serialiser(byte_obj, encoding=None):
     """
     Return a serialised json object
     """
+    from spectrochempy.core import debug_
+
+    debug_(str(byte_obj))
 
     if byte_obj is None:
         return None
 
     elif hasattr(byte_obj, 'implements'):
 
-        objnames = dir(byte_obj)
+        objnames = byte_obj.__dir__()
         dic = {}
         for name in objnames:
 
-            if name=='readonly':
+            if name=='readonly'or (name == 'dims' and 'datasets' in objnames):
                 val = getattr(byte_obj, name)
             else:
                 val = getattr(byte_obj, f'_{name}')

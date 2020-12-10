@@ -105,9 +105,7 @@ def test_ndpanel_init():
     info_(panel)
 
     # test save and load
-
     js = json_serialiser(panel, encoding=None)
-
     f = panel.save_as('mypanel')
     print(f)
     js2 = NDPanel.load(f, json=True)

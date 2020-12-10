@@ -114,8 +114,8 @@ class NDPanel(
 
     # ..................................................................................................................
     def __dir__(self):
-        return ['datasets', 'dims', 'coordset', 'meta', 'plotmeta',
-                'name', 'title', 'description', 'history', 'date', 'modified'] + NDIO().__dir__()
+        return ['datasets', 'coordset', 'dims', 'name', 'title', 'meta', 'plotmeta',
+                'description', 'history', 'date', 'modified'] + NDIO().__dir__()
 
     # ..................................................................................................................
     def __getitem__(self, item):

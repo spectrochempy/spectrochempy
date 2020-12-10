@@ -363,7 +363,7 @@ class NDIO(HasTraits):
                         setattr(obj, key, val)
 
                 except Exception as e:
-                    raise TypeError(f'for {key} {val}')
+                    raise TypeError(f'for {key} {e}')
 
             return obj
         # ........................

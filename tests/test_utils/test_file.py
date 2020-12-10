@@ -24,14 +24,12 @@ from spectrochempy.utils import get_filename
 
 def test_get_filename():
     # should read in the default prefs.datadir (and for testing we fix the name to environ['TEST_FILE']
-    f = get_filename(filetypes=["OMNIC files (*.sp*)",
-                                "SpectroChemPy files (*.scp)",
-                                "all files (*)"])
+    f = get_filename(filetypes=["OMNIC files (*.spg *.spa *.srs)",
+                                "SpectroChemPy files (*.scp)"])
     assert isinstance(f, dict)
 
-    f = get_filename(filetypes=["OMNIC files (*.sp*)",
-                                "SpectroChemPy files (*.scp)",
-                                "all files (*)"],
+    f = get_filename(filetypes=["OMNIC files (*.spg *.spa *.srs)",
+                                "SpectroChemPy files (*.scp)"],
                      dictionary=False)
     assert isinstance(f, list)
     assert isinstance(f[0], Path)

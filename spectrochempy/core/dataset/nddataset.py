@@ -192,8 +192,7 @@ class NDDataset(
 
     # ..................................................................................................................
     def __dir__(self):
-        return ['data', 'dims', 'mask', 'units',
-                'meta', 'plotmeta', 'name', 'title', 'coordset', 'description',
+        return ['coordset', 'dims', 'data', 'name', 'title', 'mask', 'units', 'meta', 'plotmeta', 'description',
                 'history', 'date', 'modified', 'modeldata', 'origin', 'roi', 'offset'] + NDIO().__dir__()
 
     # ..................................................................................................................
