@@ -486,6 +486,8 @@ class Project(AbstractProject, NDIO):
         dataset.parent = self
         if name is None:
             name = dataset.name
+        else:
+            dataset.name = name
         self._datasets[name] = dataset
 
     # ..................................................................................................................
@@ -545,6 +547,8 @@ class Project(AbstractProject, NDIO):
         proj.parent = self
         if name is None:
             name = proj.name
+        else:
+            proj.name = name
         self._projects[name] = proj
 
     # ..................................................................................................................
@@ -604,6 +608,8 @@ class Project(AbstractProject, NDIO):
         script.parent = self
         if name is None:
             name = script.name
+        else:
+            script.name = name
         self._scripts[name] = script
 
     # ..................................................................................................................

@@ -75,26 +75,15 @@ print(proj)
 print('*******************************************')
 
 ##############################################################################
-# save but do not change the original data
-
-proj.save('project_1', overwrite_data=False)
-
-##############################################################################
-# RELOAD it
-
-newproj = scp.Project.load('project_1')
-print(newproj)
-
-##############################################################################
 # Execute a script
 
-scp.run_script(newproj.print_info)
+scp.run_script(proj.print_info)
 
 ##############################################################################
 # Another way to do the same thing is ith the following syntax (which may
 # seem simpler
 
-newproj.print_info()
+proj.print_info()
 
 ###############################################################################
 # Finally lets use a more useful script

@@ -114,6 +114,7 @@ class NDPanel(
 
     # ..................................................................................................................
     def __dir__(self):
+        # Warning : keep the order of the first elements (needed for save/load operations
         return ['datasets', 'coordset', 'dims', 'name', 'title', 'meta', 'plotmeta',
                 'description', 'history', 'date', 'modified'] + NDIO().__dir__()
 

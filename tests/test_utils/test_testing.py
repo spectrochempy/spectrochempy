@@ -30,7 +30,7 @@ def test_compare(IR_dataset_1D, simple_project):
     with testing.raises(ComparisonFailure):
         testing.assert_dataset_equal(nd1, nd4)
 
-    testing.assert_dataset_almost_equal(nd1, nd4)
+    testing.assert_dataset_almost_equal(nd1, nd4, decimal=3)
 
     with testing.raises(ComparisonFailure):
         testing.assert_dataset_almost_equal(nd1, nd4, decimal=4)

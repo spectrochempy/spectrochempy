@@ -109,14 +109,15 @@ __all__ += ['info_', 'debug_', 'error_', 'warning_', 'print_']
 # Progress bar
 # ======================================================================================================================
 pbar_count = 0
-
+pbar = tqdm(total=1211)
+pbar.set_description('Loading SpectroChemPy API')
+val_tqdm = [1, 39, 52, 83, 83, 89, 92, 93, 94, 95, 96, 97, 98, 99, 100]
 
 def _pbar_update(close=None):
+
     global pbar_count
+
     if os.environ.get('USE_TQDM', 'Yes') == 'Yes' and "/bin/scpy" not in sys.argv[0]:  # deactivate for console scripts
-        pbar = tqdm(total=1211)
-        pbar.set_description('Loading SpectroChemPy API')
-        val_tqdm = [1, 39, 52, 83, 83, 89, 92, 93, 94, 95, 96, 97, 98, 99, 100]
 
         if close:
             pbar.clear()
@@ -140,7 +141,20 @@ app = SpectroChemPy()
 __all__ += ['app']
 
 from spectrochempy.application import (  # noqa: E402
+    __version__ as version,
+    __release__ as release,
+    __copyright__ as copyright,
+    __license__ as license,
+    __release_date__ as release_date,
+    __author__ as authors,
+    __contributor__ as contributors,
+    __url__ as url,
+    DEBUG,
     WARNING,
+    ERROR,
+    CRITICAL,
+    INFO,
+    available_styles,
     )
 
 general_preferences = app.general_preferences
@@ -217,6 +231,7 @@ This packages contains most of the core methods expose in the spectrochempy API.
 """
 # constants
 # ----------------------------------------------------------------------------------------------------------------------
+from spectrochempy.utils import show, MASKED, NOMASK, EPSILON, INPLACE  # noqa: E402
 
 __all__ += ['show', 'MASKED', 'NOMASK', 'EPSILON', 'INPLACE']
 

@@ -127,7 +127,7 @@ proj
 # #### Saving
 
 # %%
-proj.save('NMR')
+proj.save_as('NMR')
 
 # %% [markdown]
 # #### Loading

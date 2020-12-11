@@ -160,6 +160,8 @@ class NDIO(HasTraits):
 
         # was already saved previously with this name,
         # in this case we do not display a dialog and overwrite the same file
+
+        self.name = filename.stem
         return self.dump(filename, **kwargs)
 
     # ..................................................................................................................
@@ -288,7 +290,7 @@ class NDIO(HasTraits):
             raise SpectroChemPyException("Undefined error!")
 
         js = obj[obj.files[0]]
-        if kwargs.get('json'):
+        if kwargs.get('json', False):
             return js
 
         new = cls.loads(js)
@@ -329,11 +331,12 @@ class NDIO(HasTraits):
                         setattr(obj, key, item_to_attr(getattr(obj, key), val))
 
                     elif key in ['_coordset']:
-                        coords = [item_to_attr(Coord(), v) for v in val['coords']]
+                        _coords = [item_to_attr(Coord(), v) for v in val['coords']]
                         if val['is_same_dim']:
-                            obj.set_coordset(coords)
+                            obj.set_coordset(_coords)
                         else:
-                            obj.set_coordset(*coords)
+                            coords = dict((c.name, c) for c in _coords)
+                            obj.set_coordset(coords)
                         obj._name = val['name']
                         obj._references = val['references']
 

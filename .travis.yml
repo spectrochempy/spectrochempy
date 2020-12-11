@@ -28,9 +28,9 @@ jobs:
       - CONDAPY=3.8
 
 # limit got clone depth to 200 commits
-# this means that pull requests must be done with less than 200 commit changes
+# this means that pull requests must be done with less than 300 commit changes
 git:
-  depth: 200
+  depth: 300
 
 cache:
   apt: true

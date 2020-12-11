@@ -107,9 +107,8 @@ def _compare_datasets(this, other, approx=False, decimal=6):
                             assert_array_equal(sattr, oattr)
                         except AssertionError as e:
                             raise ComparisonFailure(f'{this} and {other} object\'s {attr} are not equals..\n{e}')
-                elif attr in ['coords']:
+                elif attr in ['coordset']:
                     for item in zip(sattr, oattr):
-                        decimal = _significant_decimal(np.max(item[0].ptp().data))
                         res = _compare_datasets(*item, approx=approx, decimal=decimal)
                         if not res:
                             raise ComparisonFailure(f'coords differs:\n{res}')
@@ -139,13 +138,6 @@ def _compare_datasets(this, other, approx=False, decimal=6):
     return True
 
 
-def _significant_decimal(x):
-    for decimal in range(7):
-        if np.round(x / 1.e4, decimal) > 0:
-            break
-    return decimal
-
-
 # ......................................................................................................................
 def assert_dataset_equal(nd1, nd2):
     assert_dataset_almost_equal(nd1, nd2, approx=False)
@@ -154,7 +146,7 @@ def assert_dataset_equal(nd1, nd2):
 
 # ......................................................................................................................
 def assert_dataset_almost_equal(nd1, nd2, **kwargs):
-    decimal = kwargs.get('decimal', _significant_decimal(np.max(nd1.ptp().data)))
+    decimal = kwargs.get('decimal', 6)
     approx = kwargs.get('approx', True)
     _compare_datasets(nd1, nd2, approx=approx, decimal=decimal)
     return True

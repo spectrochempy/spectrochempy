@@ -192,7 +192,8 @@ class NDDataset(
 
     # ..................................................................................................................
     def __dir__(self):
-        return ['coordset', 'dims', 'data', 'name', 'title', 'mask', 'units', 'meta', 'plotmeta', 'description',
+        # WARNING: be carefull to keep order of the three first elements! Needed for save/load operations
+        return ['dims', 'coordset', 'data', 'name', 'title', 'mask', 'units', 'meta', 'plotmeta', 'description',
                 'history', 'date', 'modified', 'modeldata', 'origin', 'roi', 'offset'] + NDIO().__dir__()
 
     # ..................................................................................................................

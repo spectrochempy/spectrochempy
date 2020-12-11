@@ -17,5 +17,12 @@ testdata_url = Path('https://drive.google.com/drive/folders/1rfc9O7jK6v_SbygzJHo
 
 wodger = testdata_url / 'wodger.spg'
 
-with urllib.request.urlopen(str(testdata_url)) as f:
-    file = f.read().decode('utf-8')
+try:
+
+    with urllib.request.urlopen(str(testdata_url)) as f:
+        file = f.read().decode('utf-8')
+
+except Exception:
+
+    pass
+    # TODO: WIP

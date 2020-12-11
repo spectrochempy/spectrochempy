@@ -35,9 +35,9 @@ dataset.plot_stack()
 
 efa = scp.EFA(dataset)
 
-f = efa.cut_f(n_pc=7)
+f = efa.cut_f()
 f.plot()
-b = efa.cut_b(n_pc=7)
+b = efa.cut_b()
 
 f.T.plot(yscale="log", labels=f.y.labels, legend='best')
 b.T.plot(yscale="log")
@@ -50,8 +50,8 @@ b.T.plot(yscale="log")
 npc = 4
 cut = np.max(f[:, npc].data)
 
-f = efa.cut_f(n_pc=4, cutoff=cut)
-b = efa.cut_b(n_pc=4, cutoff=cut)
+f = efa.cut_f(cutoff=cut)
+b = efa.cut_b(cutoff=cut)
 # we concatenate the datasets to plot them in a single figure
 both = scp.concatenate(f, b)
 both.T.plot(yscale="log")

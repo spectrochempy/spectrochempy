@@ -94,7 +94,7 @@ def test_project_with_script():
     f = proj.save()
 
     newproj = Project.load('HIZECOKE_TEST')
-    print(newproj)
+    # print(newproj)
     assert str(newproj) == str(proj)
     assert newproj.A350.label == proj.A350.label
 
@@ -107,7 +107,7 @@ def test_project_with_script():
 
     proj['print_info'] = Script('print_info', script_source)
 
-    print(proj)
+    # print(proj)
 
     # save but do not chnge the original data
     proj.save_as('HIZECOKE_TEST', overwrite_data=False)

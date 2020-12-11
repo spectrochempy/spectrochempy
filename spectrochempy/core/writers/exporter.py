@@ -32,7 +32,6 @@ class Exporter(HasTraits):
                 ('jcamp', 'JCAMP-DX files (*.jdx *dx)'),
                 ('csv', 'CSV files (*.csv)'),
                 ('excel', 'Microsoft Excel files (*.xls)'),
-                ('json', 'JSON files (*.json)')
                 ]
 
         self.filetypes = dict(FILETYPES)
@@ -122,7 +121,7 @@ def write(*args, **kwargs):
     See Also
     --------
     save : generic function for saving a NDDataset in SpectroChemPy format
-    write_spc, write_json, write_matlab, write_jcamp, write_excel, write_csv
+    write_spc, write_matlab, write_jcamp, write_excel, write_csv
 
     """
     exporter = Exporter()

@@ -93,8 +93,6 @@ def json_serialiser(byte_obj, encoding=None):
     elif isinstance(byte_obj, dict):
         dic = {}
         for k, v in byte_obj.items():
-            #if hasattr(v, 'implements'):
-            #    v = json_serialiser(v, encoding=encoding)
             dic[k] = json_serialiser(v, encoding=encoding)
 
         return dic

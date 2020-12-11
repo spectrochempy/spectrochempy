@@ -45,7 +45,6 @@ class Importer(HasTraits):
                 ('jcamp', 'JCAMP-DX files (*.jdx *.dx)'),
                 ('csv', 'CSV files (*.csv)'),
                 ('excel', 'Microsoft Excel files (*.xls)'),
-                ('json', 'JSON files (*.json)'),
                 ('zip', 'Compressed folder of data files (*.zip)'),
                 #  ('all', 'All files (*.*)')
                 ]
@@ -391,7 +390,7 @@ def _read_(*args, **kwargs):
             return dataset.load(filename, **kwargs)
         except Exception:
             # lets try some common format
-            for key in ['omnic', 'opus', 'topspin', 'labspec', 'matlab', 'jdx', 'json']:
+            for key in ['omnic', 'opus', 'topspin', 'labspec', 'matlab', 'jdx']:
                 try:
                     _read = getattr(dataset, f"read_{key}")
                     f = f'{filename}.{key}'

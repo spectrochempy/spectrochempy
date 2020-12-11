@@ -114,7 +114,29 @@ def pathclean(paths):
     return paths
 
 
+def _get_file_for_protocol(f, **kwargs):
+    protocol = kwargs.get('protocol', None)
+    if protocol is not None:
+        if isinstance(protocol, str):
+            if protocol in ['ALL']:
+                protocol = '*'
+            if protocol in ['opus']:
+                protocol = '*.0*'
+            protocol = [protocol]
+
+        lst = []
+        for p in protocol:
+            lst.extend(list(f.parent.glob(f'{f.stem}.{p}')))
+        if not lst:
+            return None
+        else:
+            return f.parent / lst[0]
+
 def check_filenames(*args, **kwargs):
+
+    from spectrochempy.core import general_preferences as prefs
+    datadir = pathclean(prefs.datadir)
+
     filenames = None
 
     if args:
@@ -172,21 +194,29 @@ def check_filenames(*args, **kwargs):
                         'Keyword `directory` will be ignored!')
             elif not directory and kw_directory:
                 filename = kw_directory / filename
+
             # check if the file exists here
-            filename
             if not directory or str(directory).startswith('.'):
                 # search first in the current directory
                 directory = Path.cwd()
-            f = directory / filename
-            if f.exists():
-                filename = f
-            else:
-                from spectrochempy.core import general_preferences as prefs
 
-                directory = pathclean(prefs.datadir)
-                f = directory / filename
+            f = directory / filename
+
+            fexist = None
+            if f.exists():
+                fexist = f
+            else:
+                fexist = _get_file_for_protocol(f, **kwargs)
+
+            if fexist is None:
+                f = datadir / filename
                 if f.exists():
-                    filename = f
+                    fexist = f
+                else:
+                    fexist = _get_file_for_protocol(f, **kwargs)
+
+            if fexist:
+                filename = fexist
 
             # particular case for topspin where filename can be provided as a directory only
             # use of expno and procno

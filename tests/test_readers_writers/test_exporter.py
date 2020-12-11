@@ -11,7 +11,7 @@ import pytest
 
 import spectrochempy as scp
 from spectrochempy import NDDataset, general_preferences as prefs
-from spectrochempy.utils import pathclean
+from spectrochempy.utils import pathclean, testing
 
 irdatadir = pathclean(prefs.datadir) / "irdata"
 cwd = Path.cwd()
@@ -30,7 +30,7 @@ def test_write():
     assert filename == cwd / 'essai.scp'
 
     nd2 = NDDataset.load(filename)
-    assert nd2 == nd
+    testing.assert_dataset_equal(nd2,nd)
     filename.unlink()
 
     # if the filename is omitted, the a dialog is opened to select a name (and a protocol)

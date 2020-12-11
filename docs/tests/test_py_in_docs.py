@@ -13,11 +13,14 @@ from glob import glob
 
 import os
 import pytest
+from pathlib import Path
 
-path = os.getcwd()
-if "/tests" in path:
-    path = path[:path.find('/tests')]
+path = Path.cwd()
 
+scripts = list((path.parent / 'user' ).glob( '**/*.py'))
+for item in scripts[:]:
+    if 'checkpoints' in str(item):
+        scripts.remove(item)
 
 # ......................................................................................................................
 def example_run(path):
@@ -38,14 +41,12 @@ def example_run(path):
 
 
 # ......................................................................................................................
-@pytest.mark.parametrize('example', glob(os.path.join(path, '..', 'user', '**', '*.py'), recursive=True))
+@pytest.mark.parametrize('example', scripts)
 def test_example(example):
-    name = os.path.basename(example)
-    if (name in [__name__ + '.py', 'conf.py', 'builddocs.py', 'apigen.py'] or 'auto_examples' in example):
-        return
 
     # some test will failed due to the magic commands or for other known reasons
     # SKIP THEM
+    name = example.name
     if (name in ['tuto2_agir_IR_processing.py',
                  'tuto3_agir_tg_processing.py',
                  'agir_setup_figure.py',
@@ -56,7 +57,7 @@ def test_example(example):
         print(example, ' ---> test skipped - DO IT MANUALLY')
         return
 
-    if os.path.exists(example) and os.path.splitext(example)[-1] == '.py':
+    if example.suffix == '.py':
         e, message, err = example_run(example)
         print(e, message.decode('utf8'), err)
         assert not e, message.decode('utf8')
