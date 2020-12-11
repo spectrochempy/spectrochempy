@@ -163,7 +163,7 @@ class IRIS:
         K.set_coordset(y=p, x=Coord(eps, title='epsilon'))
         for i, p_i in enumerate(pval):
             for j, eps_j in enumerate(eps):
-                K.data[i, j] = w[j] * ker(p_i, eps_j)
+                K._data[i, j] = w[j] * ker(p_i, eps_j)
 
         # Define S matrix (sharpness), see function Smat() below
         S = Smat(eps)
