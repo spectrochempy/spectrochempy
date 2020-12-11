@@ -18,6 +18,7 @@ __all__ = ['diag', 'dot', 'empty', 'empty_like', 'zeros', 'eye', 'identity', 'ze
 # ----------------------------------------------------------------------------------------------------------------------
 
 import numpy as np
+
 from spectrochempy.core.dataset.nddataset import NDDataset
 # from spectrochempy.core.dataset.ndcoordset import CoordSet
 # from spectrochempy.core.dataset.ndcoord import Coord
@@ -55,55 +56,16 @@ def empty(shape, dtype=None, **kwargs):
 
     Examples
     --------
-    >>> import spectrochempy as scp # doctest: +ELLIPSIS
+    >>> import spectrochempy as scp
 
-    >>> scp.empty([2, 2]) # doctest: +ELLIPSIS
-    NDDataset: [[...]] unitless
+    >>> scp.empty([2, 2])
+    NDDataset: [float64] unitless (shape: (y:2, x:2))
 
     >>> scp.empty([2, 2], dtype=int, units='s') # doctest: +ELLIPSIS
-    NDDataset: [[...]] s
+    NDDataset: [int64] s (shape: (y:2, x:2))
 
     """
     return NDDataset(np.empty(shape, dtype=np.dtype(dtype)), **kwargs)
-
-
-def empty_like(a, dtype=None):
-    """
-    Return a new array with the same shape and type as a given array.
-
-    Parameters
-    ----------
-    a : array_like
-        The shape and data-type of `a` define these same attributes of the
-        returned array.
-    dtype : data-type, optional
-        Overrides the data type of the result.
-
-    Returns
-    -------
-    out : ndarray
-        Array of uninitialized (arbitrary) data with the same
-        shape and type as `a`.
-
-    See Also
-    --------
-    ones_like : Return an array of ones with shape and type of input.
-    zeros_like : Return an array of zeros with shape and type of input.
-    empty : Return a new uninitialized array.
-    ones : Return a new array setting values to one.
-    zeros : Return a new array setting values to zero.
-
-    Notes
-    -----
-    This function does *not* initialize the returned array; to do that use
-    for instance `zeros_like`, `ones_like` or `full_like` instead.  It may be
-    marginally faster than the functions that do set the array values.
-
-    """
-    new = a.copy()
-    if dtype:
-        new._dtype = np.dtype(dtype)
-    return new
 
 
 def zeros(shape, dtype=None, **kwargs):
@@ -131,16 +93,14 @@ def zeros(shape, dtype=None, **kwargs):
     Examples
     --------
     >>> import spectrochempy as scp
-    >>> scp.zeros(5)
-    NDDataset: [   0.000,    0.000,    0.000,    0.000,    0.000] unitless
-
-    >>> scp.zeros((5,), dtype=np.int)
-    NDDataset: [       0,        0,        0,        0,        0] unitless
-
-    >>> s = (2,2)
-    >>> scp.zeros(s, units='m')
-    NDDataset: [[   0.000,    0.000],
-                [   0.000,    0.000]] m
+    >>> nd = scp.zeros(5)
+    >>> nd
+    NDDataset: [float64] unitless (size: 5)
+    >>> nd.values
+    array([       0,        0,        0,        0,        0])
+    >>> nd = scp.zeros((5,10), dtype=np.int, units='absorbance')
+    >>> nd
+    NDDataset: [int64] a.u. (shape: (y:5, x:10))
 
     """
     return NDDataset(np.zeros(shape, dtype=np.dtype(dtype)), **kwargs)
@@ -171,15 +131,26 @@ def ones(shape, dtype=None, **kwargs):
     Examples
     --------
     >>> import spectrochempy as scp
-    >>> scp.ones(5, units='km')
-    NDDataset: [   1.000,    1.000,    1.000,    1.000,    1.000] km
-
-    >>> scp.ones((5,), dtype=np.int, mask=[True, False, False, False, True])
-    NDDataset: [  --,        1,        1,        1,   --] unitless
-
-    >>> scp.ones((2, 2))
-    NDDataset: [[   1.000,    1.000],
-                [   1.000,    1.000]] unitless
+    >>> nd = scp.ones(5, units='km')
+    >>> nd
+    NDDataset: [float64] km (size: 5)
+    >>> nd.values
+    <Quantity([       1        1        1        1        1], 'kilometer')>
+    >>> nd = scp.ones((5,), dtype=np.int, mask=[True, False, False, False, True])
+    >>> nd
+    NDDataset: [int64] unitless (size: 5)
+    >>> nd.values
+    masked_array(data=[  --,        1,        1,        1,   --],
+                 mask=[  True,   False,   False,   False,   True],
+           fill_value=999999)
+    >>> nd = scp.ones((5,), dtype=np.int, mask=[True, False, False, False, True], units='joule')
+    >>> nd
+    NDDataset: [int64] J (size: 5)
+    >>> nd.values
+    <Quantity([  --        1        1        1   --], 'joule')>
+    >>> scp.ones((2, 2)).values
+    array([[       1,        1],
+           [       1,        1]])
 
     """
     return NDDataset(np.ones(shape, dtype=np.dtype(dtype)), **kwargs)
@@ -207,10 +178,11 @@ def identity(N, dtype=None, **kwargs):
 
     Examples
     --------
+    >>> import spectrochempy as scp
     >>> scp.identity(3).data
-    array([[1.,  0.,  0.],
-           [0.,  1.,  0.],
-           [0.,  0.,  1.]])
+    array([[       1,        0,        0],
+           [       0,        1,        0],
+           [       0,        0,        1]])
 
     """
     return eye(N, dtype=dtype, **kwargs)
@@ -250,106 +222,15 @@ def eye(N, M=None, k=0, dtype=float, order='C', **kwargs):
     Examples
     --------
     >>> np.eye(2, dtype=int)
-    array([[1, 0],
-           [0, 1]])
+    array([[       1,        0],
+           [       0,        1]])
     >>> np.eye(3, k=1)
-    array([[0.,  1.,  0.],
-           [0.,  0.,  1.],
-           [0.,  0.,  0.]])
+    array([[       0,        1,        0],
+           [       0,        0,        1],
+           [       0,        0,        0]])
 
     """
     return NDDataset(np.eye(N, M, k, dtype, order), **kwargs)
-
-
-def zeros_like(a, dtype=None, ):
-    """
-    Return a |NDDataset| of zeros with the same shape and type as a given
-    array.
-
-    Parameters
-    ----------
-    a : |NDDataset|
-    dtype : data-type, optional
-        Overrides the data type of the result.
-
-    Returns
-    -------
-    out : |NDDataset|
-        Array of zeros with the same shape and type as `a`.
-
-    See Also
-    --------
-    ones_like : Return an array of ones with shape and type of input.
-    empty_like : Return an empty array with shape and type of input.
-    zeros : Return a new array setting values to zero.
-    ones : Return a new array setting values to one.
-    empty : Return a new uninitialized array.
-
-    Examples
-    --------
-    >>> import spectrochempy as scp
-    >>> x = np.arange(6)
-    >>> x = x.reshape((2, 3))
-    >>> x = NDDataset(x, units='s')
-    >>> x
-    NDDataset: [[       0,        1,        2],
-                [       3,        4,        5]] s
-    >>> scp.zeros_like(x)
-    NDDataset: [[       0,        0,        0],
-                [       0,        0,        0]] s
-
-    """
-    new = a.copy()
-    if dtype:
-        new._dtype = np.dtype(dtype)
-    new.data = np.zeros_like(a, dtype=np.dtype(dtype))
-    return new
-
-
-def ones_like(a, dtype=None):
-    """
-    Return |NDDataset| of ones with the same shape and type as a given array.
-
-    It preserves original mask, units, and coordset
-
-    Parameters
-    ----------
-    a : |NDDataset|
-    dtype : data-type, optional
-        Overrides the data type of the result.
-
-    Returns
-    -------
-    out : |NDDataset|
-        Array of ones with the same shape and type as `a`.
-
-    See Also
-    --------
-    zeros_like : Return an array of zeros with shape and type of input.
-    empty_like : Return an empty array with shape and type of input.
-    zeros : Return a new array setting values to zero.
-    ones : Return a new array setting values to one.
-    empty : Return a new uninitialized array.
-
-    Examples
-    --------
-    >>> import spectrochempy as scp
-    >>> x = np.arange(6)
-    >>> x = x.reshape((2, 3))
-    >>> x = NDDataset(x, units='s')
-    >>> x
-    NDDataset: [[       0,        1,        2],
-                [       3,        4,        5]] s
-    >>> scp.ones_like(x)
-    NDDataset: [[       1,        1,        1],
-                [       1,        1,        1]] s
-
-    """
-    new = a.copy()
-    if dtype:
-        new._dtype = np.dtype(dtype)
-    new.data = np.ones_like(a, dtype=np.dtype(dtype))
-    return new
 
 
 def full(shape, fill_value, dtype=None, **kwargs):
@@ -387,66 +268,13 @@ def full(shape, fill_value, dtype=None, **kwargs):
     --------
     >>> import spectrochempy as scp
     >>> scp.full((2, 2), np.inf)
-    NDDataset: [[     inf,      inf],
-                [     inf,      inf]] unitless
+    NDDataset: [float64] unitless (shape: (y:2, x:2))
     >>> scp.full((2, 2), 10, dtype=np.int)
-    NDDataset: [[      10,       10],
-                [      10,       10]] unitless
+    NDDataset: [int64] unitless (shape: (y:2, x:2))
 
     """
     return NDDataset(np.full(shape, fill_value=fill_value, dtype=np.dtype(dtype)),
                      **kwargs)
-
-
-def full_like(a, fill_value, dtype=None):
-    """
-    Return a |NDDataset| with the same shape and type as a given array.
-
-    Parameters
-    ----------
-    a : |NDDataset| or array-like
-    fill_value : scalar
-        Fill value.
-    dtype : data-type, optional
-        Overrides the data type of the result.
-
-    Returns
-    -------
-    array-like
-        Array of `fill_value` with the same shape and type as `a`.
-
-    See Also
-    --------
-    zeros_like : Return an array of zeros with shape and type of input.
-    ones_like : Return an array of ones with shape and type of input.
-    empty_like : Return an empty array with shape and type of input.
-    zeros : Return a new array setting values to zero.
-    ones : Return a new array setting values to one.
-    empty : Return a new uninitialized array.
-    full : Fill a new array.
-
-    Examples
-    --------
-    >>> import spectrochempy as scp
-
-    >>> x = np.arange(6, dtype=int)
-    >>> scp.full_like(x, 1)
-    array([       1,        1,        1,        1,        1,        1])
-
-    >>> x = NDDataset(x, units='m')
-    >>> scp.full_like(x, 0.1)
-    NDDataset: [       0,        0,        0,        0,        0,        0] m
-    >>> scp.full_like(x, 0.1, dtype=np.double)
-    NDDataset: [   0.100,    0.100,    0.100,    0.100,    0.100,    0.100] m
-    >>> scp.full_like(x, np.nan, dtype=np.double)
-    NDDataset: [     nan,      nan,      nan,      nan,      nan,      nan] m
-
-    """
-    new = a.copy()
-    if dtype:
-        new._dtype = np.dtype(dtype)
-    new.data = np.full_like(a, fill_value=fill_value, dtype=np.dtype(dtype))
-    return new
 
 
 # ............................................................................
@@ -627,6 +455,194 @@ def diag(dataset, k=0):
     if coords:
         new.set_coordset(coords)
 
+    return new
+
+
+def empty_like(a, dtype=None, units=None):
+    """
+    Return a new array with the same shape and type as a given array.
+
+    Parameters
+    ----------
+    a : array_like
+        The shape and data-type of `a` define these same attributes of the
+        returned array.
+    dtype : data-type, optional
+        Overrides the data type of the result.
+
+    Returns
+    -------
+    out : ndarray
+        Array of uninitialized (arbitrary) data with the same
+        shape and type as `a`.
+
+    See Also
+    --------
+    ones_like : Return an array of ones with shape and type of input.
+    zeros_like : Return an array of zeros with shape and type of input.
+    empty : Return a new uninitialized array.
+    ones : Return a new array setting values to one.
+    zeros : Return a new array setting values to zero.
+
+    Notes
+    -----
+    This function does *not* initialize the returned array; to do that use
+    for instance `zeros_like`, `ones_like` or `full_like` instead.  It may be
+    marginally faster than the functions that do set the array values.
+
+    """
+
+    return _like(a, dtype=dtype, units=units)
+
+
+def zeros_like(a, dtype=None, units=None):
+    """
+    Return a |NDDataset| of zeros with the same shape and type as a given
+    array.
+
+    Parameters
+    ----------
+    a : |NDDataset|
+    dtype : data-type, optional
+        Overrides the data type of the result.
+
+    Returns
+    -------
+    out : |NDDataset|
+        Array of zeros with the same shape and type as `a`.
+
+    See Also
+    --------
+    ones_like : Return an array of ones with shape and type of input.
+    empty_like : Return an empty array with shape and type of input.
+    zeros : Return a new array setting values to zero.
+    ones : Return a new array setting values to one.
+    empty : Return a new uninitialized array.
+
+    Examples
+    --------
+    >>> import spectrochempy as scp
+    >>> x = np.arange(6)
+    >>> x = x.reshape((2, 3))
+    >>> nd = scp.NDDataset(x, units='s')
+    >>> nd
+    NDDataset: [int64] s (shape: (y:2, x:3))
+    >>> nd.values
+     <Quantity([[       0        1        2]
+     [       3        4        5]], 'second')>
+    >>> nd = scp.zeros_like(nd)
+    >>> nd
+    NDDataset: [int64] s (shape: (y:2, x:3))
+    >>> nd.values
+        <Quantity([[       0        0        0]
+     [       0        0        0]], 'second')>
+
+
+    """
+    return _like(a, fill_value=0.0, dtype=dtype, units=units)
+
+
+def ones_like(a, dtype=None, units=None):
+    """
+    Return |NDDataset| of ones with the same shape and type as a given array.
+
+    It preserves original mask, units, and coordset
+
+    Parameters
+    ----------
+    a : |NDDataset|
+    dtype : data-type, optional
+        Overrides the data type of the result.
+
+    Returns
+    -------
+    out : |NDDataset|
+        Array of ones with the same shape and type as `a`.
+
+    See Also
+    --------
+    zeros_like : Return an array of zeros with shape and type of input.
+    empty_like : Return an empty array with shape and type of input.
+    zeros : Return a new array setting values to zero.
+    ones : Return a new array setting values to one.
+    empty : Return a new uninitialized array.
+
+    Examples
+    --------
+    >>> import spectrochempy as scp
+    >>> x = np.arange(6)
+    >>> x = x.reshape((2, 3))
+    >>> x = scp.NDDataset(x, units='s')
+    >>> x
+    NDDataset: [int64] s (shape: (y:2, x:3))
+    >>> scp.ones_like(x, dtype=float, units='J')
+    NDDataset: [float64] J (shape: (y:2, x:3))
+
+    """
+    return _like(a, fill_value=1.0, dtype=dtype, units=units)
+
+
+def full_like(a, fill_value, dtype=None, units=None):
+    """
+    Return a |NDDataset| with the same shape and type as a given array.
+
+    Parameters
+    ----------
+    a : |NDDataset| or array-like
+    fill_value : scalar
+        Fill value.
+    dtype : data-type, optional
+        Overrides the data type of the result.
+
+    Returns
+    -------
+    array-like
+        Array of `fill_value` with the same shape and type as `a`.
+
+    See Also
+    --------
+    zeros_like : Return an array of zeros with shape and type of input.
+    ones_like : Return an array of ones with shape and type of input.
+    empty_like : Return an empty array with shape and type of input.
+    zeros : Return a new array setting values to zero.
+    ones : Return a new array setting values to one.
+    empty : Return a new uninitialized array.
+    full : Fill a new array.
+
+    Examples
+    --------
+    >>> import spectrochempy as scp
+
+    >>> x = np.arange(6, dtype=int)
+    >>> nd = scp.full_like(x, 1)
+    >>> nd
+    NDDataset: [int64] unitless (size: 6)
+    >>> nd.values
+    array([       1,        1,        1,        1,        1,        1])
+    >>> x = scp.NDDataset(x, units='m')
+    >>> scp.full_like(x, 0.1).values
+    <Quantity([       0        0        0        0        0        0], 'meter')>
+    >>> scp.full_like(x, 0.1, dtype=np.double).values
+    <Quantity([     0.1      0.1      0.1      0.1      0.1      0.1], 'meter')>
+    >>> scp.full_like(x, np.nan, dtype=np.double).values
+    <Quantity([     nan     nan      nan      nan      nan      nan], 'meter')>
+
+    """
+    return _like(a, fill_value=fill_value, dtype=dtype, units=units)
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Private methods
+#
+
+def _like(a, fill_value=None, dtype=None, units=None):
+    new = NDDataset(a.copy())
+    if dtype is not None:
+        new = new.astype(np.dtype(dtype))
+    if fill_value is not None:
+        new.data = np.full_like(new, fill_value=fill_value)
+    if units is not None:
+        new.ito(units, force=True)
     return new
 
 

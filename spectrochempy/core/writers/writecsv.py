@@ -37,7 +37,10 @@ def write_csv(*args, **kwargs):
     --------
 
     The extension will be added automatically
-    >>> X.write_csv('myfile')
+    # >>> import spectrochempy as scp
+    # >>> ds = scp.NDDataset([1,2,3])
+    # >>> f = ds.write_csv('myfile')
+    # f.name = myfile.csv
 
     """
     exporter = Exporter()

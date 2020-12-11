@@ -23,19 +23,21 @@ Bug reports should :
     You can format the code using `GitHub Flavored Markdown
     <http://github.github.com/github-flavored-markdown/>`_
 
-    .. sourcecode:: ipython
+    .. sourcecode:: python
 
         >>> import spectrochempy as scp
-        >>> nd = scp.NDDataset(...)
-        ...
+        SpectroChemPy's API ...
+        >>> nd = scp.NDDataset()
+
 
 #.  Include the full version string of |scpy|. You can use the
     built in property
 
-    .. sourcecode:: ipython
+    .. sourcecode:: python
 
-        >>> import spectrochempy as scp
-        >>> scp.version
+        >>> print(scp.version)
+        0.1.23...
+
 
 #. Explain why the current behavior is wrong/not desired and what you expect instead.
 

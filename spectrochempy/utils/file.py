@@ -65,7 +65,7 @@ def pathclean(paths):
     Using unix/mac way to write paths
     >>> filename = pathclean('irdata/nh4y-activation.spg')
     >>> filename.suffix
-    '.spx'
+    '.spg'
     >>> filename.parent.name
     'irdata'
 
@@ -131,6 +131,7 @@ def _get_file_for_protocol(f, **kwargs):
             return None
         else:
             return f.parent / lst[0]
+
 
 def check_filenames(*args, **kwargs):
 

@@ -115,8 +115,9 @@ def write(*args, **kwargs):
     write a dataset (providing a windows type filename relative to the default ``Datadir``)
 
     >>> nd = read_opus('irdata/OPUS')
-    >>> nd.write('irdata/mydataset.scp')
-
+    >>> f = nd.write('opus.scp')
+    >>> f.name
+    'opus.scp'
 
     See Also
     --------

@@ -113,6 +113,7 @@ pbar = tqdm(total=1211)
 pbar.set_description('Loading SpectroChemPy API')
 val_tqdm = [1, 39, 52, 83, 83, 89, 92, 93, 94, 95, 96, 97, 98, 99, 100]
 
+
 def _pbar_update(close=None):
 
     global pbar_count

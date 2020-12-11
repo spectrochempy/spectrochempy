@@ -40,7 +40,7 @@ def read_zip(*args, **kwargs):
     >>> from spectrochempy import NDDataset
     >>> A = NDDataset.read_zip('agirdata/P350/FTIR/FTIR.zip', only=50, origin='omnic')
     >>> print(A)
-    NDDataset: [float64] a.u. (shape: (y:50, x:2842))
+    NDDataset: [float64]  a.u. (shape: (y:50, x:2843))
 
     See Also
     --------
@@ -126,8 +126,8 @@ def _read_zip(*args, **kwargs):
             if not file.is_dir() and file.filename.startswith(parent) and 'DS_Store' not in file.filename:
                 # read it
                 datasets.append(NDDataset.read({
-                                                       file.filename: zf.read(file.filename)
-                                                       }))
+                        file.filename: zf.read(file.filename)
+                        }, origin=kwargs.get('origin', None)))
                 count += 1
                 if count == only:
                     break

@@ -1119,7 +1119,7 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
         All configuration must have been done before calling this function
         """
 
-        print(f'{sys.argv}')
+        # print(f'{sys.argv}')
 
         return self._start()
 

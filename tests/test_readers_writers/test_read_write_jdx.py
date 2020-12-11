@@ -6,7 +6,7 @@
 # ======================================================================================================================
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils.testing import assert_dataset_almost_equal, assert_array_almost_equal
+from spectrochempy.utils.testing import assert_dataset_almost_equal
 
 
 def test_read_write_jdx(IR_dataset_2D):

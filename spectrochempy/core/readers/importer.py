@@ -275,7 +275,7 @@ def read(*args, **kwargs):
     Examples
     ---------
 
-    >>> from spectrochempy import read
+    >>> from spectrochempy import NDDataset, read_opus
 
     Reading a single OPUS file  (providing a windows type filename relative to the default ``Datadir``)
 
@@ -322,8 +322,7 @@ def read(*args, **kwargs):
 
     Read without a filename. This has the effect of opening a dialog for file(s) selection
 
-    >>> read_opus() # doctest: +ELLIPSIS
-    ...
+    >>> nd = read_opus()
 
     Read in a directory (assume that only OPUS files are present in the directory
     (else we must use the generic `read` function instead)

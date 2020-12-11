@@ -30,7 +30,7 @@ def test_write():
     assert filename == cwd / 'essai.scp'
 
     nd2 = NDDataset.load(filename)
-    testing.assert_dataset_equal(nd2,nd)
+    testing.assert_dataset_equal(nd2, nd)
     filename.unlink()
 
     # if the filename is omitted, the a dialog is opened to select a name (and a protocol)

@@ -83,8 +83,8 @@ class Coord(NDMath, NDArray):
 
         >>> arr = np.arange(1.,12.,2.)
         >>> c0 = Coord(data=arr, title='frequency', units='Hz')
-        >>> c0     # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-        Coord: [   1.000,    3.000,    5.000,    7.000,    9.000,   11.000] Hz
+        >>> c0
+        Coord: [float64]  Hz (size: 6)
 
         We can take a series of str to create a non numerical but labelled
         axis :
@@ -94,17 +94,13 @@ class Coord(NDMath, NDArray):
         ['a', 'b', 'c', 'd', 'e', 'f']
 
         >>> c1 = Coord(labels=tarr, title='mylabels')
-        >>> c1   # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-        Coord: [a, b, c, d, e, f]
-
-        >>> print(c1) # doctest: +NORMALIZE_WHITESPACE
-        title : Mylabels
-        labels : [a b c d e f]
+        >>> c1
+        Coord: [labels] [  a   b   c   d   e   f] (size: 6)
 
         """
         super(Coord, self).__init__(data, **kwargs)
-
-        assert self.ndim <= 1
+        if self.ndim > 1:
+            raise ValueError('Only one 1D arrays can be used to define coordinates')
 
     # ..................................................................................................................
     def implements(self, name=None):

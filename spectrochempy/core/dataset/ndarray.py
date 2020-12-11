@@ -1196,7 +1196,12 @@ class NDArray(HasTraits):
         """
 
         if self._data is not None:
-            data = self._uarray(self._data - self._offset, self._units)
+            if self.is_masked:
+                data = self._umasked(self.masked_data - self._offset, self._mask)
+                if self._units:
+                    return Quantity(data, self._units)
+            else:
+                data = self._uarray(self._data - self._offset, self._units)
             if self.size > 1:
                 return data
             else:
@@ -1292,10 +1297,7 @@ class NDArray(HasTraits):
         --------
         >>> nd1 = NDArray([1.+2.j,2.+ 3.j])
         >>> nd1
-        NDArray: [   1.000+2.000j,    2.000+3.000j] unitless
-        >>> print(nd1)
-        R[   1.000    2.000]
-        I[   2.000    3.000]
+        NDArray: [complex128] unitless (size: 2)
         >>> nd2 = nd1
         >>> nd2 is nd1
         True
@@ -1406,19 +1408,22 @@ class NDArray(HasTraits):
 
         Examples
         --------
-        >>> nd1 = NDArray([1.+2.j,2.+ 3.j], units='meters')
-        >>> print(nd1)
-        R[   1.000    2.000] m
-        I[   2.000    3.000] m
-        >>> nd2 = NDArray([1.+2.j,2.+ 3.j], units='seconds')
+        >>> from spectrochempy import NDDataset
+
+        >>> nd1 = NDDataset([1.+2.j,2.+ 3.j], units='meters')
+        >>> nd1
+        NDDataset: [complex128] m (size: 2)
+        >>> nd2 = NDDataset([1.+2.j,2.+ 3.j], units='seconds')
         >>> nd1.is_units_compatible(nd2)
         False
         >>> nd1.ito('minutes', force=True)
-        NDArray: [   1.000+2.000j,    2.000+3.000j] min
+        NDDataset: [complex128] min (size: 2)
         >>> nd1.is_units_compatible(nd2)
         True
-        >>> nd2[0].data == nd1[0].data
+        >>> nd2[0].values * 60. == nd1[0].values
         True
+
+
         """
         try:
             other.to(self.units, inplace=False)
@@ -1570,34 +1575,36 @@ class NDArray(HasTraits):
 
         Examples
         --------
+
         >>> np.random.seed(12345)
         >>> ndd = NDArray( data = np.random.random((3, 3)),
         ...                mask = [[True, False, False],
         ...                        [False, True, False],
         ...                        [False, False, True]],
         ...                units = 'meters')
-        >>> print(ndd)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-        [[  --    0.316    0.184]
-         [   0.205   --    0.596]
-         [   0.965    0.653   --]] m
+        >>> print(ndd)
+        NDArray: [float64] m (shape: (y:3, x:3))
+
         We want to change the units to seconds for instance
         but there is no relation with meters,
         so an error is generated during the change
+
         >>> ndd.to('second')
         Traceback (most recent call last):
         ...
-        pint.errors.DimensionalityError : Cannot convert from 'meter' ([length]) to 'second' ([time])
+        pint.errors.DimensionalityError: Cannot convert from 'meter' ([length]) to 'second' ([time])
+
         However, we can force the change
+
         >>> ndd.to('second', force=True)
-        NDArray: [[  --,    0.316,    0.184],
-                  [   0.205,   --,    0.596],
-                  [   0.965,    0.653,   --]] s
+        NDArray: [float64] s (shape: (y:3, x:3))
+
         By default the conversion is not done inplace, so the original is not
         modified :
-        >>> print(ndd) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-        [[  --    0.316    0.184]
-         [   0.205   --    0.596]
-         [   0.965    0.653   --]] m
+
+        >>> print(ndd)
+        NDArray: [float64] m (shape: (y:3, x:3))
+
         """
         if inplace:
             new = self
@@ -1802,33 +1809,34 @@ class NDArray(HasTraits):
         numpyprintoptions(precision=4, edgeitems=0, spc=1, linewidth=120)
 
         prefix = type(self).__name__ + ': '
-        print_unit = True
         units = ''
 
+        size = ''
         if not self.is_empty:
 
-            # if self._data is not None:
-            #    data = self.umasked_data
-            # else:
-            #    # no data but labels
-            #    data = self.get_labels()
+            if self._data is not None:
 
-            if self._data is None:
-                print_unit = False
-
-            # if isinstance(data, Quantity):
-            #    data = data.magnitude                   # TODO:   Check why it is not used???
-
-            if print_unit:
+                dtype = self.dtype
+                data = ''
+                if self.implements('Coord'):
+                    size = f" (size: {self._data.size})"
                 units = ' {:~K}'.format(self.units) if self.has_units else ' unitless'
 
-            body = f"[{self.dtype}]"
+            else:
+                # no data but labels
+                lab = self.get_labels()
+                data = f' {lab}'
+                size = f" (size: {len(lab)})"
+                dtype = 'labels'
+
+            body = f"[{dtype}]{data}"
 
         else:
+            size = ''
             body = 'empty'
 
         numpyprintoptions()
-        return ''.join([prefix, body, units])
+        return ''.join([prefix, body, units, size])
 
     # ..................................................................................................................
     def _repr_html_(self):

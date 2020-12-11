@@ -32,15 +32,15 @@ jobs:
 git:
   depth: 300
 
-cache:
-  apt: true
+# cache:
+# apt: true
 
 addons:
   apt:
     update: true
     packages:
       - xvfb
-      - texlive-full
+#      - texlive-full
 
 # install miniconda and create environment
 before_install:
@@ -83,8 +83,8 @@ script:
   - if [[ $TEST = true ]]; then
       echo "RUNNING TESTS";
       flake8;
-      coverage run -m pytest -v -k tests;
-      pytest -v -k docs/tests;
+      coverage run -m pytest -v -k "not test_example" --nodisplay;
+      pytest -v -k "test_example" --nodisplay;
 
     elif [[ $DEPLOY = true ]]; then
       echo "BUILDING AND UPLOADING ON ANACONDA";
@@ -94,7 +94,7 @@ script:
       echo "BUILDING DOCS"
       echo "cloning spectrochempy.github.io repository";
       git clone --branch=gh-pages --single-branch https://github.com/spectrochempy/spectrochempy.git $HOME/spectrochempy_docs/html;
-      python docs/make.py --clean -C --sync --html --pdf;
+      python docs/make.py --clean -C --sync --html;
     fi
 
 # command to notify code-climate

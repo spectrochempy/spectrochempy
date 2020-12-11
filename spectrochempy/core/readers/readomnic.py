@@ -113,8 +113,7 @@ def read_omnic(*args, **kwargs):
 
     Read without a filename. This has the effect of opening a dialog for file(s) selection
 
-    >>> read_omnic() # doctest: +ELLIPSIS
-    ...
+    >>> nd = read_omnic()
 
     Read in a directory (assume that only OPUS files are present in the directory
     (else we must use the generic `read` function instead)

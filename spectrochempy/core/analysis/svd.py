@@ -76,14 +76,14 @@ class SVD(HasTraits):
 
         Examples
         --------
-        >>> dataset = NDDataset.load('mydataset.scp')
+        >>> dataset = NDDataset.read('irdata/nh4y-activation.spg')
         >>> svd = SVD(dataset)
         >>> print(svd.ev.data)
-        [11848.225  633.980 ...    0.001    0.001]
+        [1.185e+04      634 ... 0.001089 0.000975]
         >>> print(svd.ev_cum.data)
-        [  94.539   99.598 ...  100.000  100.000]
+        [   94.54     99.6 ...      100      100]
         >>> print(svd.ev_ratio.data)
-        [  94.539    5.059 ...    0.000    0.000]
+        [   94.54    5.059 ... 8.687e-06 7.779e-06]
 
         """
 

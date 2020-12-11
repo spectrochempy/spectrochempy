@@ -106,7 +106,7 @@ def test_coord():
                    title='wavelength')
     assert coord0.units is None
     assert coord0.data[0] == 4000.
-    assert repr(coord0) == "Coord: [float64] unitless"
+    assert repr(coord0) == 'Coord: [float64] unitless (size: 10)'
 
     info_('\n' + str(coord0))
 
@@ -120,7 +120,7 @@ def test_coord():
     assert coord0.units.dimensionless
     assert coord0.units.scaling == 1.
     assert coord0.data[0] == 4000.
-    assert repr(coord0) == "Coord: [float64]"
+    assert repr(coord0) == 'Coord: [float64]  (size: 10)'
 
     # scaled dimensionless coordinates
 
@@ -131,7 +131,7 @@ def test_coord():
                    title='wavelength')
     assert coord0.units.dimensionless
     assert coord0.data[0] == 4000.  # <- displayed data to be multiplied by the scale factor
-    assert repr(coord0) == "Coord: [float64] scaled-dimensionless (0.001)"
+    assert repr(coord0) == 'Coord: [float64] scaled-dimensionless (0.001) (size: 10)'
 
     coord0 = Coord(data=np.linspace(4000, 1000, 10),
                    labels=list('abcdefghij'),
@@ -141,7 +141,7 @@ def test_coord():
 
     assert coord0.units.dimensionless
     assert coord0.data[0] == 4000.  # <- displayed data to be multiplied by the scale factor
-    assert repr(coord0) == "Coord: [float64] scaled-dimensionless (0.001)"
+    assert repr(coord0) == 'Coord: [float64] scaled-dimensionless (0.001) (size: 10)'
     info_('\n' + str(coord0))
 
     coord0 = Coord(data=np.linspace(4000, 1000, 10),
@@ -152,7 +152,7 @@ def test_coord():
     assert not coord0.units.dimensionless
     assert coord0.units.scaling == 1.
     assert coord0.data[0] == 4000.
-    assert repr(coord0) == "Coord: [float64] m^2.s^-1"
+    assert repr(coord0) == 'Coord: [float64] m^2.s^-1 (size: 10)'
 
     # comparison
 

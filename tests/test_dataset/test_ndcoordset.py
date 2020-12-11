@@ -83,7 +83,7 @@ def test_coordset_init(coord0, coord1, coord2):
 
     info_(str(coord0))
     info_(repr(coord0))
-    assert repr(coord0) == "Coord: [float64] cm^-1"
+    assert repr(coord0) == 'Coord: [float64] cm^-1 (size: 10)'
 
     coords = CoordSet(coord0, coord0.copy())
     info_(str(coords))
@@ -203,7 +203,7 @@ def test_coordset_get(coord0, coord1, coord2):
     coords = CoordSet(coord2, [coord0, coord0.copy()], coord1)
 
     coord = coords['temperature']
-    assert str(coord) == 'Coord: [float64] K'
+    assert str(coord) == 'Coord: [float64] K (size: 3)'
     assert coord.name == 'z'
 
     coord = coords['wavenumber']

@@ -9,18 +9,16 @@
 # Testing examples and notebooks (Py version) in docs
 # ----------------------------------------------------------------------------------------------------------------------
 
-from glob import glob
-
-import os
 import pytest
 from pathlib import Path
 
 path = Path.cwd()
 
-scripts = list((path.parent / 'user' ).glob( '**/*.py'))
+scripts = list((path.parent / 'user').glob('**/*.py'))
 for item in scripts[:]:
     if 'checkpoints' in str(item):
         scripts.remove(item)
+
 
 # ......................................................................................................................
 def example_run(path):
@@ -43,7 +41,6 @@ def example_run(path):
 # ......................................................................................................................
 @pytest.mark.parametrize('example', scripts)
 def test_example(example):
-
     # some test will failed due to the magic commands or for other known reasons
     # SKIP THEM
     name = example.name

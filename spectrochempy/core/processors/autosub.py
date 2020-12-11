@@ -72,16 +72,16 @@ def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False
     ---------
 
     >>> import os
-    >>> from spectrochempy import * #doctest: +ELLIPSIS
+    >>> from spectrochempy import *
     <BLANKLINE>
     ...
     <BLANKLINE>
     >>> path_A = 'irdata/nh4y-activation.spg'
     >>> A = NDDataset.read(path_A, protocol='omnic')
-    >>> ref = A[:,0]  # let's subtrack the first column
+    >>> ref = A[0,:]  # let's subtrack the first row
     >>> B = A.autosub(ref, [3900., 3700.], [1600., 1500.], inplace=False)
-    >>> B #doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    NDDataset: [[...]] a.u.
+    >>> B
+    NDDataset: [float32]  a.u. (shape: (y:55, x:5549))
 
     """
 
@@ -111,8 +111,7 @@ def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False
         new = new.swapaxes(axis, -1)
         swaped = True
 
-    # TODO: detect the case where the ref is not exactly
-    # with same coords: interpolate?
+    # TODO: detect the case where the ref is not exactly with same coords: interpolate?
 
     # selection of the multiple ranges
 

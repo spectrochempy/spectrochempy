@@ -236,7 +236,7 @@ class NDMath(object):
     >>> from spectrochempy import *
     >>> ds = NDDataset([1.,2.,3.])
     >>> np.sin(ds)
-        NDDataset: [   0.841,    0.909,    0.141] unitless
+    NDDataset: [float64] unitless (size: 3)
 
     In this particular case (*i.e.*, `np.sin` ufuncs) , the `ds` units must be
     `unitless`, `dimensionless` or angle-units : `radians` or `degrees`,
@@ -247,16 +247,18 @@ class NDMath(object):
     --------
 
     >>> from spectrochempy import *
-    >>> dataset = NDDataset.load('mydataset.scp')
-    >>> dataset             # doctest: +ELLIPSIS
-    NDDataset: [[   2.057,    2.061, ...,    2.013,    2.012],
-                [   2.033,    2.037, ...,    1.913,    1.911],
-                ...,
-                [   1.794,    1.791, ...,    1.198,    1.198],
-                [   1.816,    1.815, ...,    1.240,    1.238]] a.u.
-    >>> np.negative(dataset) # doctest: +ELLIPSIS
-    NDDataset: [[  -2.057, ... -1.238]] a.u.
-
+    >>> nd1 = NDDataset.read('wodger.spg')
+    >>> nd1
+    NDDataset: [float32]  a.u. (shape: (y:2, x:5549))
+    >>> nd1.data
+    array([[   2.005,    2.003, ...,    1.826,    1.831],
+           [   1.983,    1.984, ...,    1.698,    1.704]], dtype=float32)
+    >>> nd2 = np.negative(nd1)
+    >>> nd2
+    NDDataset: [float32]  a.u. (shape: (y:2, x:5549))
+    >>> nd2.data
+    array([[  -2.005,   -2.003, ...,   -1.826,   -1.831],
+           [  -1.983,   -1.984, ...,   -1.698,   -1.704]], dtype=float32)
 
     """
 

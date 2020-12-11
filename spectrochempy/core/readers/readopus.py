@@ -56,7 +56,7 @@ def read_opus(*args, **kwargs):
     Reading a single OPUS file  (providing a unix/python type filename relative to the default ``Datadir``)
     Note that here read_opus is called as a classmethod of the NDDataset class
 
-    >>> NDDataset.read_opus('irdata/OPUS/test.0000')
+    >>> scp.NDDataset.read_opus('irdata/OPUS/test.0000')
     NDDataset: [float32] a.u. (shape: (y:1, x:2567))
 
     Single file specified with pathlib.Path object
@@ -93,8 +93,7 @@ def read_opus(*args, **kwargs):
 
     Read without a filename. This has the effect of opening a dialog for file(s) selection
 
-    >>> scp.read_opus() # doctest: +ELLIPSIS
-    ...
+    >>> nd = scp.read_opus()
 
     Read in a directory (assume that only OPUS files are present in the directory
     (else we must use the generic `read` function instead)

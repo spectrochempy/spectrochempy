@@ -102,6 +102,9 @@ def concatenate(*datasets, **kwargs):
         if isinstance(datasets[0], (list, tuple)):
             datasets = datasets[0]
 
+    # make a copy of the objects (in order that input data are not modified)
+    datasets = [ds.copy() for ds in datasets]
+
     # try to cast of dataset to NDDataset
     for i, item in enumerate(datasets):
         if not isinstance(item, NDDataset):
@@ -263,6 +266,8 @@ def concatenate(*datasets, **kwargs):
             coords[dim]._labels = np.concatenate(labels)
 
     out = NDDataset(data, coordset=coords, mask=mask, units=units)
+    for ss in sss:
+        ss = ss.squeeze()
 
     thist = 'Stack' if axis == 0 else 'Concatenation'
 
@@ -319,8 +324,8 @@ def stack(*datasets):
     >>> A = NDDataset.read('irdata/nh4y-activation.spg', protocol='omnic')
     >>> B = NDDataset.read('irdata/nh4y-activation.scp')
     >>> C = NDDataset.stack( A, B)
-    >>> print(C) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    NDDataset: [float32] a.u. (shape: (y:110, x:5549))
+    >>> print(C)
+    NDDataset: [float32]  a.u. (shape: (z:2, y:55, x:5549))
 
     """
 
