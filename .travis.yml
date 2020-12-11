@@ -83,8 +83,7 @@ script:
   - if [[ $TEST = true ]]; then
       echo "RUNNING TESTS";
       flake8;
-      coverage run -m pytest -v -k "not test_example" --nodisplay;
-      pytest -v -k "test_example" --nodisplay;
+      coverage run -m pytest -v
 
     elif [[ $DEPLOY = true ]]; then
       echo "BUILDING AND UPLOADING ON ANACONDA";
