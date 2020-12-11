@@ -547,7 +547,7 @@ def _planeFit(points):
 
 def _svdbase(data, args=None, retw=False):
     # Apply a planar baseline correction to 2D data
-
+    import pandas as pd   # TODO: suppress this need
     if not args:
         window = 0.05
         step = 5
