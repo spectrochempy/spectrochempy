@@ -29,7 +29,6 @@ dependencies:
     - numba
     - numpy
     - orderedset
-    - pandas
     - pint
     - plotly
     - pyqt
@@ -81,7 +80,9 @@ dependencies:
     # - datashader
     # - scikit-learn
 
-    # pip only for docs
+
     - pip
     - pip:
         - autodoc_traits
+        - dash_defer_js_import
+        - dash-ace

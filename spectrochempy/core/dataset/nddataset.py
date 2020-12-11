@@ -19,7 +19,6 @@ import textwrap
 import warnings
 from datetime import datetime
 import numpy as np
-from pandas.core.generic import NDFrame
 from traitlets import HasTraits, List, Unicode, Instance, Bool, All, Float, validate, observe, default
 from traittypes import Array
 
@@ -492,10 +491,6 @@ class NDDataset(
         # as we can't write super().data = data, we call _set_data
         # see comment in the data.setter of NDArray
         super()._set_data(data)
-
-        if isinstance(data, NDFrame):  # and hasattr(self, "coords"):  # case of the NDDataset subclass
-            coords = [Coord(item.values, title=item.name) for item in data.axes]
-            self.set_coordset(*coords)
 
     # .................................................................................................................
     @property

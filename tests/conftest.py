@@ -297,29 +297,6 @@ def NMR_dataset_2D():
     dataset = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True, name="NMR_2D")
     return dataset.copy()
 
-
-# Some panda structure for dataset initialization
-# ----------------------------------------------------------------------------------------------------------------------
-
-@pytest.fixture(scope="function")
-def series():
-    import pandas as pd
-    with RandomSeedContext(2345):
-        arr = pd.Series(np.random.randn(4), index=np.arange(4) * 10.)
-    arr.index.name = 'un nom'
-    return arr.copy()
-
-
-@pytest.fixture(scope="function")
-def dataframe():
-    import pandas as pd
-    with RandomSeedContext(23451):
-        arr = pd.DataFrame(np.random.randn(6, 4), index=list(np.arange(6) * 10.), columns=list(np.arange(4) * 10.))
-    for ax, name in zip(arr.axes, ['time', 'temperature']):
-        ax.name = name
-    return arr.copy()
-
-
 # fixture Project
 # ----------------------------------------------------------------------------------------------------------------------
 

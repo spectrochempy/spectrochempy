@@ -27,7 +27,6 @@ import itertools
 from traitlets import List, Unicode, Instance, Bool, Union, Int, Any, HasTraits, default, validate
 from pint.errors import DimensionalityError
 import numpy as np
-from pandas.core.generic import NDFrame, Index
 from traittypes import Array
 
 from spectrochempy.units import Unit, ur, Quantity, set_nmr_context
@@ -526,14 +525,10 @@ class NDArray(HasTraits):
         |ndarray| - The `data` array.
 
         If there is no data but labels, then the labels are returned instead of data.
-        If there is an offset the data are returned relative to the offset
 
         """
 
-        if self._data is not None:
-            return self._data - self.offset
-        else:
-            return None
+        return self._data
 
     # ..................................................................................................................
     @data.setter
@@ -545,6 +540,21 @@ class NDArray(HasTraits):
         # we use an intermediate function that can be called from a subclass
 
         self._set_data(data)
+
+    # ..................................................................................................................
+    @property
+    def data_with_offset(self):
+        """
+        |ndarray| - The `data` array relative to the offset.
+
+        If there is an offset the data are returned relative to the offset
+
+        """
+
+        if self._data is not None:
+            return self._data - self.offset
+        else:
+            return None
 
     # ..................................................................................................................
     def _set_data(self, data):
@@ -567,15 +577,6 @@ class NDArray(HasTraits):
                 except AttributeError:
                     # some attribute of NDDataset are missing in NDArray
                     pass
-
-        elif isinstance(data, NDFrame):  # pandas object
-            # debug_("init data with data from pandas NDFrame object")
-            self._data = data.values
-
-        elif isinstance(data, Index):  # pandas index object
-            # debug_("init data with data from a pandas Index")
-            self._data = data.values
-            self._title = data.name
 
         elif isinstance(data, Quantity):
             # debug_("init data with data from a Quantity object")

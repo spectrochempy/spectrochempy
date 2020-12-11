@@ -66,7 +66,7 @@ param = {
         'kernel': 'langmuir'
         }
 
-iris = scp.IRIS(X_, param, verbose=False)
+iris = scp.IRIS(X_, param, verbose=True)
 iris.plotlcurve()
 iris.plotdistribution(-7)
 iris.plotmerit(-7)
@@ -80,7 +80,7 @@ param = {
         'kernel': 'langmuir'
         }
 
-iris = scp.IRIS(X_, param, verbose=False)
+iris = scp.IRIS(X_, param, verbose=True)
 iris.plotlcurve()
 iris.plotdistribution(-1)
 iris.plotmerit(-1)

@@ -1503,31 +1503,6 @@ def test_nddataset_apply_funcs(IR_dataset_1D):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-# Pandas
-# ----------------------------------------------------------------------------------------------------------------------
-
-def test_nddataset_init_pandas(series, dataframe):
-    # init with pandas
-    dx = series
-    da = NDDataset(dx)
-    assert isinstance(da, NDDataset)
-    assert_equal(da.dtype, dx.values.dtype)
-    assert_equal(da.shape, dx.shape)
-    assert_array_equal(da.data, dx.values)
-
-    dx = dataframe
-    da = NDDataset(dx)
-    assert isinstance(da, NDDataset)
-    for i, coord in enumerate(da.coordset):
-        assert isinstance(coord, Coord)
-    assert da.coordset.titles == ['temperature', 'time']  # sort was applied on the coordinates
-    assert da.dims == ['y', 'x']
-    assert_equal(da.dtype, dx.values.dtype)
-    assert_equal(da.shape, dx.shape)
-    assert_array_equal(da.data, dx.values)
-    info_(da)
-
-
 # Xarray
 # ----------------------------------------------------------------------------------------------------------------------
 
