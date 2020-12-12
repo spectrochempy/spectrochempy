@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie,
+#  Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in
+#  the root directory                         =
 # ======================================================================================================================
 
 
 """This module essentially define a class :class:`Isotopes` which handle all
-necessary features of NMR nuclei, such as their spin, larmor frequency and so on.
+necessary features of NMR nuclei, such as their spin, larmor frequency and
+so on.
 
 """
 __all__ = ['Isotopes']
@@ -15,32 +18,23 @@ __all__ = ['Isotopes']
 # ======================================================================================================================
 # Standard imports
 # ======================================================================================================================
-import os
+import pathlib
 import re
 from fractions import Fraction
 import numpy as np
-import pandas as pd
-from io import StringIO
-
-# ======================================================================================================================
-# Third-party imports
-# ======================================================================================================================
-from traitlets import (
-    HasTraits,
-    Unicode, Instance,
-    )
 
 # ======================================================================================================================
 # Local imports
 # ======================================================================================================================
 from spectrochempy.units import ur
-from spectrochempy.core import info_, warning_, general_preferences as prefs
+from spectrochempy.core import general_preferences as prefs
+from spectrochempy.utils import Meta
 
 
 # ======================================================================================================================
 # Isotopes class
 # ======================================================================================================================
-class Isotopes(HasTraits):
+class Isotopes(Meta):
     """
     This class defines useful properties of nuclei. [#]_
 
@@ -85,25 +79,14 @@ class Isotopes(HasTraits):
     Fraction(5, 2)
     >>> isotope.symbol
     'Al'
+    >>> isotope.nucleus = 'Al27'
+    >>> isotope.name
+    'aluminium'
 
 
     """
 
-    isotopes = Instance(pd.DataFrame)
-
-    _nucleus = Unicode()
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # nucleus (has an alias isotope, for the getter property only)
-    # ------------------------------------------------------------------------------------------------------------------
-    @property
-    def nucleus(self):
-        """The current isotope(alias for nucleus)"""
-        return self._nucleus
-
-    @nucleus.setter
-    def nucleus(self, value):
-        self._nucleus = value
+    _nucleus = ''
 
     # ------------------------------------------------------------------------------------------------------------------
     # isotope / alias of nucleus
@@ -120,7 +103,7 @@ class Isotopes(HasTraits):
     @property
     def spin(self):
         """Spin quantum number of the current nucleus"""
-        return Fraction(self.isotopes.loc[self.nucleus]['spin'])
+        return Fraction(self[self.nucleus]['spin'])
 
     # ===========================================================================
     # Z
@@ -128,7 +111,7 @@ class Isotopes(HasTraits):
     @property
     def Z(self):
         """Atomic number  of the current nucleus"""
-        return self.isotopes.loc[self.nucleus]['Z']
+        return self[self.nucleus]['Z']
 
     # ===========================================================================
     # A
@@ -136,7 +119,7 @@ class Isotopes(HasTraits):
     @property
     def A(self):
         """Atomic mass  of the current nucleus"""
-        return self.isotopes.loc[self.nucleus]['A']
+        return self[self.nucleus]['A']
 
     # ===========================================================================
     # full name
@@ -144,7 +127,7 @@ class Isotopes(HasTraits):
     @property
     def name(self):
         """the name of the nucleus"""
-        return self.isotopes.loc[self.nucleus]['name'].strip()
+        return self[self.nucleus]['name'].strip()
 
     # ===========================================================================
     # gamma
@@ -153,7 +136,7 @@ class Isotopes(HasTraits):
     def gamma(self):
         """gyromagnetic ratio of the current nucleus"""
         muN = ur.elementary_charge / ur.proton_mass / 2. / (2. * np.pi)
-        return (self.isotopes.loc[self.nucleus]['gn'] * muN).to('MHz/T')
+        return (self[self.nucleus]['gamma'] * muN).to('MHz/T')
 
     # ===========================================================================
     # _get_abundance
@@ -161,7 +144,7 @@ class Isotopes(HasTraits):
     @property
     def abundance(self):
         """natural abundance in percent of the current nucleus"""
-        return self.isotopes.loc[self.nucleus]['abundance']
+        return self[self.nucleus]['abundance']
 
     # ===========================================================================
     # _get_Q
@@ -175,8 +158,7 @@ class Isotopes(HasTraits):
 
         """
         try:
-            return float(self.isotopes.loc[self.nucleus][
-                             'quadrupole']) * 1000. * ur.mbarn
+            return float(self[self.nucleus]['Q']) * 1000. * ur.mbarn
         except Exception:
             return 0. * ur.barn
 
@@ -186,7 +168,7 @@ class Isotopes(HasTraits):
     @property
     def symbol(self):
         """Symbol of the current nucleus"""
-        return self.isotopes.loc[self._nucleus].symbol.strip()
+        return self[self.nucleus]['symbol'].strip()
 
     # ------------------------------------------------------------------------------------------------------------------
     # Stability
@@ -197,19 +179,43 @@ class Isotopes(HasTraits):
         The stability of the current nucleus
 
         """
-        return self.isotopes.loc[self.nucleus].stability.strip()
+        return self[self.nucleus]['stability'].strip()
+
+    @property
+    def nucleus(self):
+        return self._get_nucleus(self._nucleus)
+
+    def _get_nucleus(self, nuc):
+
+        if nuc in list(self.keys()):
+            return nuc
+
+        p = re.compile(r'^([A-Z,a-z]+)[_-]*([0-9]+$)')
+        m = re.match(p, nuc).groups()
+
+        nuc = m[1] + m[0]  # transform "e.g., Al27->27Al, ou AL-27 to 27Al"
+        if nuc in list(self.keys()):
+            return nuc
+
+        else:
+            raise KeyError(f'Unknown isotope symbol : {nuc}')
 
     # ------------------------------------------------------------------------------------------------------------------
     # initializer
     # ------------------------------------------------------------------------------------------------------------------
     def __init__(self, nucleus='1H'):
         # filename = resource_filename(PKG, 'isotopes.csv')
-        DATABASES = prefs.databases
-        filename = os.path.join(DATABASES, 'isotopes.csv')
-        with open(filename) as f:
-            txt = f.read().replace(" ", "")
-        self.isotopes = pd.read_csv(StringIO(txt), index_col=0)
-        self._nucleus = nucleus
+        DATABASES = pathlib.Path(prefs.databases)
+        filename = DATABASES / 'isotopes.csv'
+        txt = filename.read_text()
+        arr = txt.replace(" ", "").split('\n')
+        keys = arr[0].split(',')
+        dic = {}
+        for line in arr[1:]:
+            vals = line.split(',')
+            dic[vals[0]] = dict(zip(keys[1:], vals[1:]))
+        self._data = self._isotopes_validate(dic)
+        self.nucleus = nucleus
 
     # ------------------------------------------------------------------------------------------------------------------
     # Private interface
@@ -223,31 +229,41 @@ class Isotopes(HasTraits):
     def _repr_html_(self):
         return "<sup>%s</sup>%s [%s]" % (self.A, self.symbol, self.spin)
 
-    def __getattr__(self, item):
-        """
-        when an attribute is not found, try to interpret or return an informative message
-        """
+    def __getattr__(self, key):
+        key = self._get_nucleus(key)
+        if key != self.nucleus:
+            return Isotopes(key)
+        else:
+            return self[key]
 
-        # it may be a nucleus but in a inverted format
-        # try:
-        p = re.compile(r'^([A-Z,a-z]+)[_-]*([0-9]+$)')
-        m = re.match(p, item).groups()
+    def __setattr__(self, key, value):
+        if key not in ['nucleus', 'readonly', '_data', '_trait_notifiers', '_trait_values', '_trait_validators',
+                       '_cross_validation_lock']:
+            self[key] = value
+        elif key == 'nucleus':
+            self.__dict__['_nucleus'] = value
+        else:
+            self.__dict__[key] = value  # to avoid a recursive call  # we can not use  # self._readonly = value!
 
-        nucleus = m[1] + m[0]  # transform "e.g., Al27->27Al, ou AL-27 to 27Al"
-        if nucleus in self.isotopes.index.values:
-            self.nucleus = nucleus
-            return self
+    def _isotopes_validate(self, pv):
 
-        warning_('The isotope attribute {0} does not exists!'.format(item))
-        return None
+        for key, item in pv.items():
+            if not key or not item:
+                continue
 
-    # ------------------------------------------------------------------------------------------------------------------
-    # events
-    # ------------------------------------------------------------------------------------------------------------------
-    def __nucleus_changed(self):
-        info_('Current nucleus has been set to {}'.format(self.nucleus))
+            pv[key] = {'name': item['name'],
+                       'symbol': item['symbol'],
+                       'A': int(item['A']),
+                       'Q': float(item['quadrupole']),
+                       'Z': int(item['Z']),
+                       'gamma': float(item['gn']),
+                       'spin': float(item['spin']),
+                       'abundance': float(item['abundance']),
+                       'stablity': item['stability'], }
+
+        return pv
 
 
-# ======================================================================================================================
+#   ======================================================================================================================
 if __name__ == '__main__':
     pass

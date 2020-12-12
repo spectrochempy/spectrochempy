@@ -952,10 +952,7 @@ class NDDataset(
         # ----------
         # data: array_like
         #     Values for this array. Must be an ``numpy.ndarray``, ndarray like,
-        #     or castable to an ``ndarray``. If a self-described xarray or pandas
-        #     object, attempts are made to use this array's metadata to fill in
-        #     other unspecified arguments. A view of the array's data is used
-        #     instead of a copy if possible.
+        #     or castable to an ``ndarray``.
         # coords: sequence or dict of array_like objects, optional
         #     Coordinates (tick labels) to use for indexing along each dimension.
         #     If dict-like, should be a mapping from dimension names to the

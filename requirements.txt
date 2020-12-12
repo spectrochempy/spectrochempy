@@ -14,7 +14,6 @@ matplotlib
 numba
 numpy
 orderedset
-pandas
 pint
 plotly
 pyqt
@@ -24,7 +23,6 @@ scipy
 tqdm
 traitlets
 traittypes
-xarray
 xlrd
 
 # for Dash
@@ -44,12 +42,3 @@ ipywidgets
 ipympl
 jupyterlab
 nodejs
-
-# dev
-sphinx_rtd_theme
-json5
-scikit-image
-sphinx
-pytest
-cycler
-

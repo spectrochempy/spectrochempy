@@ -76,10 +76,6 @@ class Meta(object):  # HasTraits):
 
     _data = {}
 
-    # @default('_data')
-    # def _get_data(self):
-    #    return {}
-
     # ------------------------------------------------------------------------------------------------------------------
     # public attributes
     # ------------------------------------------------------------------------------------------------------------------
@@ -114,10 +110,8 @@ class Meta(object):  # HasTraits):
         return self[key]
 
     def __setitem__(self, key, value):
-
         if key in ['readonly'] or key.startswith('_'):
             raise KeyError('`{}` can not be used as a metadata key'.format(key))
-
         elif not self.readonly:
             self._data.update({
                     key: value

@@ -196,10 +196,6 @@ class assymvoigtmodel(object):
         return
 
     def f(self, x, ampl, width, ratio, assym, pos, **kargs):
-        try:
-            x = x.values  # case pandas
-        except Exception:
-            pass
         g = 2. * width / (1. + np.exp(assym * (x - pos)))
         # sigmoid variation of width
         w = ratio * self.lorentz(x, g, pos) \

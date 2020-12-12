@@ -27,3 +27,11 @@ anaconda-client
 
 # pip only
 autodoc_traits
+
+# dev
+sphinx_rtd_theme
+json5
+scikit-image
+sphinx
+pytest
+cycler
