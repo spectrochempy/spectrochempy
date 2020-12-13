@@ -19,7 +19,7 @@ from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndmath import unary_ufuncs, binary_ufuncs, comp_ufuncs
-from spectrochempy.units.units import ur, Quantity
+from spectrochempy.units.units import ur, Quantity, Unit
 from spectrochempy.utils import (MASKED, TYPE_FLOAT, TYPE_INTEGER)
 from spectrochempy.utils.testing import (
     assert_array_equal,
@@ -702,3 +702,81 @@ def test_simple_arithmetic_on_full_dataset():
                                                 'nh4y-activation.spg'))
     dataset - dataset[0]
     # suppress the first spectrum to all other spectra in the series
+
+
+def test_array_creation():
+
+    from spectrochempy import NDDataset, empty_like, full_like
+
+    x = np.arange(6, dtype=int)
+    ds = NDDataset.full_like(x, 1)
+    assert np.all(ds.data == np.full((6,), 1))
+
+    ds1 = full_like(ds, np.nan, dtype=np.double, units='m')
+    assert ds1.units==Unit('m')
+
+    ds2 = empty_like(ds, dtype=np.double, units='s')
+    assert str(ds2) == 'NDDataset: [float64] s (size: 6)'
+
+    c1 = Coord.full((6,), 0.1)
+    assert c1.size == 6
+
+    c2 = Coord.linspace(1, 20, 200, units='m',  name='mycoord')
+    assert c2.name == 'mycoord'
+    assert c2.size == 200
+    assert c2[-1].data ==  20
+    assert c2[0].values == Quantity(1, 'm')
+
+    c3 = Coord.arange(1, 20.0001, 1, units='s',  name='mycoord')
+    assert c3.name == 'mycoord'
+    assert c3.size == 20
+    assert c3[-1].data ==  20
+    assert c3[0].values == Quantity(1, 's')
+
+
+    # df = full_like(ds1, dtype=np.complex128, fill_value=2.5)
+    # assert df.units == ds1.units
+    #
+    # df = zeros_like(ds1, dtype=np.complex128)
+    # assert df.units == ds1.units
+    #
+    # df = ones_like(ds1, dtype=np.complex128)
+    # assert df.units == ds1.units
+    #
+    # df = empty_like(ds1, dtype=np.complex128)
+    # assert df.units == ds1.units
+    #
+    # df = zeros((2, 3), dtype='int64', units='km')
+    # assert df.shape == (2, 3)
+    # assert df.dtype == 'int64'
+    # assert df.units == ur.km
+    #
+    # df = ones((2, 3), dtype='complex128', units='km')
+    # assert df.shape == (2, 3)
+    # assert df.dtype == 'complex128'
+    # assert df.units == ur.km
+    #
+    # df = full((2, 3), 100, dtype='float32', units='km')
+    # assert df.shape == (2, 3)
+    # assert df.dtype == 'float32'
+    # assert df.units == ur.km
+    #
+    # df = eye(3, k=0, dtype='float64', units='eV')
+    # assert df.shape == (3, 3)
+    # assert df.dtype == 'float64'
+    # assert df.units == ur.eV
+    #
+    # assert df[0, 0].data.squeeze() == 1
+    # assert df[0, 1].data.squeeze() == 0
+    #
+    # df = eye(3, k=1, dtype='float64', units='m')
+    # assert df.shape == (3, 3)
+    # assert df.dtype == 'float64'
+    # assert df.units == ur.m
+    #
+    # assert df[0, 0].data.squeeze() == 0
+    # assert df[0, 1].data.squeeze() == 1
+    #
+    # df = identity(2, units='m')
+    # df.units = ur.m
+    # assert np.all(df.data == np.array([[1., 0.], [0., 1.]]))

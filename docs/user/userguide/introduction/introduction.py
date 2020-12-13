@@ -18,7 +18,7 @@
 # ## Introduction
 
 # %% [reduction] [markdown]
-# Here we will quickly present the SpectroChemPy library for manipulating multidimensional arrays with features such as 
+# Here we will quickly present the SpectroChemPy library for manipulating multidimensional arrays with features such as
 # coordinate and unit management.
 
 # %% [markdown]
@@ -26,14 +26,15 @@
 
 # %%
 import spectrochempy as scp
-from spectrochempy import NDDataset, CoordSet, Coord
+from spectrochempy.core import NDDataset, CoordSet, Coord
+import numpy as np
 
 # %% [reduction] [markdown]
 # In many aspects the manipulation of the main object of SpectroChemPy is very close to `mumpy`, a popular library in the python world for scientific computation .
 #
 # Actually, the Spectrochempy library is built from numpy arrays. And therefore it supports many methods similar to numpy.
 #
-# We are not going to repeat here the basics of numpy which will be supposed to be known at least in a rudimentary way. For a detailed presentation of the library numpy, it will certainly be interesting to consult for example the following tutorial: [numpy quikstart](https://numpy.org/doc/stable/user/quickstart.html).  
+# We are not going to repeat here the basics of numpy which will be supposed to be known at least in a rudimentary way. For a detailed presentation of the library numpy, it will certainly be interesting to consult for example the following tutorial: [numpy quikstart](https://numpy.org/doc/stable/user/quickstart.html).
 
 # %% [markdown]
 # ### NDDataset
@@ -77,15 +78,15 @@ b = scp.zeros((2, 3, 2)) # Create an NDDataset of all zeros
 b
 
 # %% [markdown]
-# * some other functions (See the API reference for more details) 
+# * some other functions (See the API reference for more details)
 #
 #   - scp.ones(shape, value) -> create a dataset with all one's values.
 #   - scp.full(shape, value) -> create a dataset with a given initial value
 #   - scp.empty(shape) -> create an empty dataset (data not initialised)
 #   - scp.eye(N) -> Create a N x N identity matrix
-#   
+#
 #   ...
-#   
+#
 
 # %%
 scp.arange(10,12) # create a rank 1 NDDataset with successive elements from 1 to 20, in steps of 3 (21 not ingluded)
@@ -98,10 +99,10 @@ scp.linspace(-5, 5, 50, endpoint=True) # create a rank 1 NDDataset of 50 values 
 
 # %% [reduction]
 #### Importing data from files
-Suppose you want to draw a nice plot with the results of experiments - It is possible to do this purely
-using the numpy and matplotlib libraries, but we suggest using the tools included in SpectroChemPy for this task.
+#Suppose you want to draw a nice plot with the results of experiments - It is possible to do this purely
+#using the numpy and matplotlib libraries, but we suggest using the tools included in SpectroChemPy for this task.
 
-First, some spectroscopic data import functions are defined in SpectroChemPy and can be used in a convenient way.
+#First, some spectroscopic data import functions are defined in SpectroChemPy and can be used in a convenient way.
 #
 # See the [Import-Export User Guide] (https://www.spectrochempy.fr/dev/user/userguide/dataset/4_importexport.html).
 # **Warning:** *This is in progress*.
@@ -126,7 +127,7 @@ fs
 # THESE THREE LINES ARE JUST THERE TO BUILD THE DOCUMENTATION AND TESTS
 # THEY MUST BE COMMENTED FOR AN INTERACTIVE USE OF THIS TUTORIAL
 fs.fullpath = sop.join(path, 'CO@Mo_Al2O3.SPG')
-fs.value = "CO@Mo_Al2O3.SPG
+fs.value = "CO@Mo_Al2O3.SPG"
 
 
 fs.fullpath # retrieves the path selected in the previous step
@@ -137,7 +138,7 @@ data
 
 
 ax = data.plot() # now plot it
-= ax.set_title(fs.value) # add a title
+ax.set_title(fs.value) # add a title
 
 
 # %% [reduction]
@@ -183,7 +184,7 @@ ndfid.plot()
 
 # %%
 a = np.full((5, 3), 10.)  # A 2D table with 5 rows and 3 columns
-b = np.array([[1, 2, 3, 4, 5]) # A 2D table with & row and 5 columns
+#b = np.array([[1, 2, 3, 4, 5]) # A 2D table with & row and 5 columns
 
 # %% [markdown]
 # It is clear that the addition of a and b which is done in an elementary way cannot be used in this case because

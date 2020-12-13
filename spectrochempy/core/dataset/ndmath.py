@@ -22,7 +22,7 @@ import copy as cpy
 import functools
 import sys
 import operator
-import types
+
 # ======================================================================================================================
 # third-party imports
 # ======================================================================================================================
@@ -35,7 +35,7 @@ from orderedset import OrderedSet
 # ======================================================================================================================
 from spectrochempy.units.units import ur, Quantity, DimensionalityError
 from spectrochempy.core.dataset.ndarray import NDArray
-from spectrochempy.utils import docstrings, MaskedArray, NOMASK
+from spectrochempy.utils import docstrings, MaskedArray, NOMASK, make_func_from, is_sequence
 from spectrochempy.core import warning_, error_
 
 # ======================================================================================================================
@@ -55,44 +55,6 @@ TYPEPRIORITY = {
         'NDDataset': 3,
         'NDPanel': 4
         }
-
-
-# ======================================================================================================================
-# function signature
-# ======================================================================================================================
-
-def _codechange(code_obj, changes):
-    code = types.CodeType
-    names = ['co_argcount', 'co_nlocals', 'co_stacksize', 'co_flags', 'co_code', 'co_consts', 'co_names', 'co_varnames',
-             'co_filename', 'co_name', 'co_firstlineno', 'co_lnotab', 'co_freevars', 'co_cellvars']
-    if hasattr(code, 'co_kwonlyargcount'):
-        names.insert(1, 'co_kwonlyargcount')
-    if hasattr(code, 'co_posonlyargcount'):
-        names.insert(1, 'co_posonlyargcount')
-    values = [changes.get(name, getattr(code_obj, name)) for name in names]
-    return code(*values)
-
-
-def make_func_from(func, first=None):
-    """
-    Create a new func with its arguments from another func and a new signature
-
-    """
-    code_obj = func.__code__
-    new_varnames = list(code_obj.co_varnames)
-    if first:
-        new_varnames[0] = first
-    new_varnames = tuple(new_varnames)
-    new_code_obj = _codechange(code_obj, changes={
-            'co_varnames': new_varnames
-            })
-    modified = types.FunctionType(new_code_obj,
-                                  func.__globals__,
-                                  func.__name__,
-                                  func.__defaults__,
-                                  func.__closure__)
-    modified.__doc__ = func.__doc__
-    return modified
 
 
 unary_str = """
@@ -704,6 +666,605 @@ class NDMath(object):
 
         ma = self.max(keepdims=True)
         return ma.coordset
+
+    @classmethod
+    def rand(cls, *args):
+
+        return cls(np.random.rand(*args))
+
+    # ..................................................................................................................
+    @classmethod
+    def arange(cls, start=0, stop=None, step=None, dtype=None, **kwargs):
+        """
+
+        """
+        return cls(np.arange(start, stop, step, dtype=np.dtype(dtype)), **kwargs)
+
+    @classmethod
+    def linspace(cls, start, stop, num=50, endpoint=True, retstep=False, dtype=None, axis=0, **kwargs):
+        """
+        Return evenly spaced numbers over a specified interval.
+
+        Returns num evenly spaced samples, calculated over the interval [start, stop]. The endpoint of the interval
+        can optionally be excluded.
+
+        Parameters
+        ----------
+        start : array_like
+            The starting value of the sequence.
+        stop : array_like
+            The end value of the sequence, unless endpoint is set to False.
+            In that case, the sequence consists of all but the last of num + 1 evenly spaced samples, so that stop is
+            excluded. Note that the step size changes when endpoint is False.
+        num : int, optional
+            Number of samples to generate. Default is 50. Must be non-negative.
+        endpoint : bool, optional
+            If True, stop is the last sample. Otherwise, it is not included. Default is True.
+        retstep : bool, optional
+            If True, return (samples, step), where step is the spacing between samples.
+        dtype : dtype, optional
+            The type of the array. If dtype is not given, infer the data type from the other input arguments.
+        axis : int, optional
+            The axis in the result to store the samples. Relevant only if start or stop are array-like.
+            By default (0), the samples will be along a new axis inserted at the beginning.
+            Use -1 to get an axis at the end.
+        **kwargs : any
+            keywords argument used when creating the returned object, such as units, name, title, ...
+
+        Returns
+        -------
+        samples : ndarray
+            There are num equally spaced samples in the closed interval [start, stop] or the half-open interval
+            [start, stop) (depending on whether endpoint is True or False).
+        step : float, optional
+            Only returned if retstep is True
+            Size of spacing between samples.
+
+
+        """
+
+        return cls(np.linspace(start, stop, num=num, endpoint=endpoint, retstep=retstep, dtype=dtype, axis=axis),
+                   **kwargs)
+
+    @classmethod
+    def logspace(cls, start, stop, num=50, endpoint=True, base=10.0, dtype=None, axis=0, **kwargs):
+        """
+        Return numbers spaced evenly on a log scale.
+
+        In linear space, the sequence starts at ``base ** start``
+        (`base` to the power of `start`) and ends with ``base ** stop``
+        (see `endpoint` below).
+
+        Parameters
+        ----------
+        start : array_like
+            ``base ** start`` is the starting value of the sequence.
+        stop : array_like
+            ``base ** stop`` is the final value of the sequence, unless `endpoint`
+            is False.  In that case, ``num + 1`` values are spaced over the
+            interval in log-space, of which all but the last (a sequence of
+            length `num`) are returned.
+        num : integer, optional
+            Number of samples to generate.  Default is 50.
+        endpoint : boolean, optional
+            If true, `stop` is the last sample. Otherwise, it is not included.
+            Default is True.
+        base : float, optional
+            The base of the log space. The step size between the elements in
+            ``ln(samples) / ln(base)`` (or ``log_base(samples)``) is uniform.
+            Default is 10.0.
+        dtype : dtype
+            The type of the output array.  If `dtype` is not given, infer the data
+            type from the other input arguments.
+        axis : int, optional
+            The axis in the result to store the samples.  Relevant only if start
+            or stop are array-like.  By default (0), the samples will be along a
+            new axis inserted at the beginning. Use -1 to get an axis at the end.
+            .. versionadded:: 1.16.0
+        Returns
+        -------
+        samples : ndarray
+            `num` samples, equally spaced on a log scale.
+        See Also
+        --------
+        arange : Similar to linspace, with the step size specified instead of the
+                 number of samples. Note that, when used with a float endpoint, the
+                 endpoint may or may not be included.
+        linspace : Similar to logspace, but with the samples uniformly distributed
+                   in linear space, instead of log space.
+        geomspace : Similar to logspace, but with endpoints specified directly.
+        Notes
+        -----
+        Logspace is equivalent to the code
+        >>> y = np.linspace(start, stop, num=num, endpoint=endpoint)
+        ... # doctest: +SKIP
+        >>> power(base, y).astype(dtype)
+        ... # doctest: +SKIP
+
+        """
+        return cls(np.logspace(start, stop, num=50, endpoint=True, base=10.0, dtype=None, axis=0),
+                   **kwargs)
+
+    @classmethod
+    def identity(cls, N, dtype=None, **kwargs):
+        """
+        Return the identity |NDDataset| of a given shape.
+
+        The identity array is a square array with ones on
+        the main diagonal.
+
+        Parameters
+        ----------
+        N : int
+            Number of rows (and columns) in `n` x `n` output.
+        dtype : data-type, optional
+            Data-type of the output.  Defaults to ``float``.
+
+        Returns
+        -------
+        out : nddataset
+            `n` x `n` array with its main diagonal set to one,
+            and all other elements 0.
+
+        Examples
+        --------
+        >>> import spectrochempy as scp
+        >>> scp.identity(3).data
+        array([[       1,        0,        0],
+               [       0,        1,        0],
+               [       0,        0,        1]])
+
+        """
+        return cls.eye(N, dtype=dtype, **kwargs)
+
+    @classmethod
+    def eye(cls, N, M=None, k=0, dtype=float, order='C', **kwargs):
+        """
+        Return a 2-D array with ones on the diagonal and zeros elsewhere.
+
+        Parameters
+        ----------
+        N : int
+            Number of rows in the output.
+        M : int, optional
+            Number of columns in the output. If None, defaults to `N`.
+        k : int, optional
+            Index of the diagonal: 0 (the default) refers to the main diagonal,
+            a positive value refers to an upper diagonal, and a negative value
+            to a lower diagonal.
+        dtype : data-type, optional
+            Data-type of the returned array.
+        order : {'C', 'F'}, optional
+            Whether the output should be stored in row-major (C-style) or
+            column-major (Fortran-style) order in memory.
+
+        Returns
+        -------
+        I : NDDataset of shape (N,M)
+            An array where all elements are equal to zero, except for the `k`-th
+            diagonal, whose values are equal to one.
+
+        See Also
+        --------
+        identity : equivalent function with k=0.
+        diag : diagonal 2-D NDDataset from a 1-D array specified by the user.
+
+        Examples
+        --------
+        >>> np.eye(2, dtype=int)
+        array([[       1,        0],
+               [       0,        1]])
+        >>> np.eye(3, k=1)
+        array([[       0,        1,        0],
+               [       0,        0,        1],
+               [       0,        0,        0]])
+
+        """
+        return cls(np.eye(N, M, k, dtype, order), **kwargs)
+
+
+    @classmethod
+    def empty(cls, *args, **kwargs):
+        """
+        Return a new |NDDataset| of given shape and type,  without initializing
+        entries.
+
+        Parameters
+        ----------
+        shape : int or tuple of int
+            Shape of the empty array
+        dtype : data-type, optional
+            Desired output data-type.
+
+        Returns
+        -------
+        out : |NDDataset|
+            Array of uninitialized (arbitrary) data of the given shape, dtype, and
+            order.  Object arrays will be initialized to None.
+
+        See Also
+        --------
+        empty_like, zeros, ones
+
+        Notes
+        -----
+        `empty`, unlike `zeros`, does not set the array values to zero,
+        and may therefore be marginally faster.  On the other hand, it requires
+        the user to manually set all the values in the array, and should be
+        used with caution.
+
+        Examples
+        --------
+
+        >>> from spectrochempy import Coord, NDDataset
+
+        >>> Coord.empty([3])
+        Coord: [float64] unitless (size: 3)
+
+        >>> NDDataset.empty([2, 2], dtype=int, units='s')
+        NDDataset: [int64] s (shape: (y:2, x:2))
+
+        """
+        args = list(args)
+        shape = args.pop(0)
+        dtype = kwargs.pop('dtype', None)
+
+        return cls(np.empty(shape, dtype=dtype), **kwargs)
+
+    @classmethod
+    def zeros(cls, *args, **kwargs):
+        """
+        Return a new |NDDataset| of given shape and type, filled with zeros.
+
+        Parameters
+        ----------
+        shape : int or sequence of ints
+            Shape of the new array, e.g., ``(2, 3)`` or ``2``.
+        dtype : data-type, optional
+            The desired data-type for the array, e.g., `numpy.int8`.  Default is
+            `numpy.float64`.
+        **kwargs : keyword args to pass to the |NDDataset| constructor
+
+        Returns
+        -------
+        out : |NDDataset|
+            Array of zeros with the given shape, dtype.
+
+        See Also
+        --------
+        ones, zeros_like
+
+        Examples
+        --------
+        >>> import spectrochempy as scp
+        >>> nd = scp.zeros(5)
+        >>> nd
+        NDDataset: [float64] unitless (size: 5)
+        >>> nd.values
+        array([       0,        0,        0,        0,        0])
+        >>> nd = scp.zeros((5,10), dtype=np.int, units='absorbance')
+        >>> nd
+        NDDataset: [int64] a.u. (shape: (y:5, x:10))
+
+        """
+        args = list(args)
+        shape = args.pop(0)
+        dtype = kwargs.pop('dtype', None)
+
+        return cls(np.zeros(shape, dtype=dtype), **kwargs)
+
+    @classmethod
+    def ones(cls, *args, **kwargs):
+        """
+        Return a new |NDDataset| of given shape and type, filled with ones.
+
+        Parameters
+        ----------
+        shape : int or sequence of ints
+            Shape of the new array, e.g., ``(2, 3)`` or ``2``.
+        dtype : data-type, optional
+            The desired data-type for the array, e.g., `numpy.int8`.  Default is
+            `numpy.float64`.
+        **kwargs : keyword args to pass to the |NDDataset| constructor
+
+        Returns
+        -------
+        out : |NDDataset|
+            Array of ones with the given shape, dtype.
+
+        See Also
+        --------
+        zeros, ones_like
+
+        Examples
+        --------
+        >>> import spectrochempy as scp
+        >>> nd = scp.ones(5, units='km')
+        >>> nd
+        NDDataset: [float64] km (size: 5)
+        >>> nd.values
+        <Quantity([       1        1        1        1        1], 'kilometer')>
+        >>> nd = scp.ones((5,), dtype=np.int, mask=[True, False, False, False, True])
+        >>> nd
+        NDDataset: [int64] unitless (size: 5)
+        >>> nd.values
+        masked_array(data=[  --,        1,        1,        1,   --],
+                     mask=[  True,   False,   False,   False,   True],
+               fill_value=999999)
+        >>> nd = scp.ones((5,), dtype=np.int, mask=[True, False, False, False, True], units='joule')
+        >>> nd
+        NDDataset: [int64] J (size: 5)
+        >>> nd.values
+        <Quantity([  --        1        1        1   --], 'joule')>
+        >>> scp.ones((2, 2)).values
+        array([[       1,        1],
+               [       1,        1]])
+
+        """
+        args = list(args)
+        shape = args.pop(0)
+        dtype = kwargs.pop('dtype', None)
+
+        return cls(np.ones(shape, dtype=dtype), **kwargs)
+
+    @classmethod
+    def full(cls, *args, **kwargs):
+        """
+        Return a new |NDDataset| of given shape and type, filled with `fill_value`.
+
+        Parameters
+        ----------
+        shape : int or sequence of ints
+            Shape of the new array, e.g., ``(2, 3)`` or ``2``.
+        fill_value : scalar
+            Fill value.
+        dtype : data-type, optional
+            The desired data-type for the array, e.g., `np.int8`.  Default
+            is `float`, but will change to `np.array(fill_value).dtype` in a
+            future release.
+        **kwargs : keyword args to pass to the |NDDataset| constructor
+
+        Returns
+        -------
+        out : |NDDataset|
+            Array of `fill_value` with the given shape, dtype, and order.
+
+        See Also
+        --------
+        zeros_like : Return an array of zeros with shape and type of input.
+        ones_like : Return an array of ones with shape and type of input.
+        empty_like : Return an empty array with shape and type of input.
+        full_like : Fill an array with shape and type of input.
+        zeros : Return a new array setting values to zero.
+        ones : Return a new array setting values to one.
+        empty : Return a new uninitialized array.
+
+        Examples
+        --------
+        >>> from spectrochempy import Coord, NDDataset
+        >>> Coord.full((2, ), np.inf)
+        Coord: [float64] unitless (size: 2)
+        >>> NDDataset.full((2, 2), 10, dtype=np.int)
+        NDDataset: [int64] unitless (shape: (y:2, x:2))
+
+        """
+        args = list(args)
+        shape = args.pop(0)
+        fill_value = kwargs.pop('fill_value', args.pop(0))
+        dtype = kwargs.pop('dtype', None)
+
+        return cls(np.full(shape, fill_value, dtype=dtype), **kwargs)
+
+    @classmethod
+    def empty_like(cls, *args, **kwargs):
+        """
+        Return a new array with the same shape and type as a given array.
+
+        Parameters
+        ----------
+        a : array_like
+            The shape and data-type of `a` define these same attributes of the
+            returned array.
+        dtype : data-type, optional
+            Overrides the data type of the result.
+
+        Returns
+        -------
+        out : ndarray
+            Array of uninitialized (arbitrary) data with the same
+            shape and type as `a`.
+
+        See Also
+        --------
+        ones_like : Return an array of ones with shape and type of input.
+        zeros_like : Return an array of zeros with shape and type of input.
+        empty : Return a new uninitialized array.
+        ones : Return a new array setting values to one.
+        zeros : Return a new array setting values to zero.
+
+        Notes
+        -----
+        This function does *not* initialize the returned array; to do that use
+        for instance `zeros_like`, `ones_like` or `full_like` instead.  It may be
+        marginally faster than the functions that do set the array values.
+
+        """
+
+        return NDMath._like(cls, *args, **kwargs)
+
+    @classmethod
+    def zeros_like(cls, *args, **kwargs):
+        """
+        Return a |NDDataset| of zeros with the same shape and type as a given
+        array.
+
+        Parameters
+        ----------
+        a : |NDDataset|
+        dtype : data-type, optional
+            Overrides the data type of the result.
+
+        Returns
+        -------
+        out : |NDDataset|
+            Array of zeros with the same shape and type as `a`.
+
+        See Also
+        --------
+        ones_like : Return an array of ones with shape and type of input.
+        empty_like : Return an empty array with shape and type of input.
+        zeros : Return a new array setting values to zero.
+        ones : Return a new array setting values to one.
+        empty : Return a new uninitialized array.
+
+        Examples
+        --------
+        >>> import spectrochempy as scp
+        >>> x = np.arange(6)
+        >>> x = x.reshape((2, 3))
+        >>> nd = scp.NDDataset(x, units='s')
+        >>> nd
+        NDDataset: [int64] s (shape: (y:2, x:3))
+        >>> nd.values
+         <Quantity([[       0        1        2]
+         [       3        4        5]], 'second')>
+        >>> nd = scp.zeros_like(nd)
+        >>> nd
+        NDDataset: [int64] s (shape: (y:2, x:3))
+        >>> nd.values
+            <Quantity([[       0        0        0]
+         [       0        0        0]], 'second')>
+
+
+        """
+        return NDMath._like(cls, *args, fill_value=0.0, **kwargs)
+
+    @classmethod
+    def ones_like(cls, *args, **kwargs):
+        """
+        Return |NDDataset| of ones with the same shape and type as a given array.
+
+        It preserves original mask, units, and coordset
+
+        Parameters
+        ----------
+        a : |NDDataset|
+        dtype : data-type, optional
+            Overrides the data type of the result.
+
+        Returns
+        -------
+        out : |NDDataset|
+            Array of ones with the same shape and type as `a`.
+
+        See Also
+        --------
+        zeros_like : Return an array of zeros with shape and type of input.
+        empty_like : Return an empty array with shape and type of input.
+        zeros : Return a new array setting values to zero.
+        ones : Return a new array setting values to one.
+        empty : Return a new uninitialized array.
+
+        Examples
+        --------
+        >>> import spectrochempy as scp
+        >>> x = np.arange(6)
+        >>> x = x.reshape((2, 3))
+        >>> x = scp.NDDataset(x, units='s')
+        >>> x
+        NDDataset: [int64] s (shape: (y:2, x:3))
+        >>> scp.ones_like(x, dtype=float, units='J')
+        NDDataset: [float64] J (shape: (y:2, x:3))
+
+        """
+
+        return NDMath._like(cls, *args, fill_value=1.0, **kwargs)
+
+    @classmethod
+    def full_like(cls, *args, **kwargs):
+        """
+        Return a |NDDataset| with the same shape and type as a given array.
+
+        Parameters
+        ----------
+        a : |NDDataset| or array-like
+        fill_value : scalar
+            Fill value.
+        dtype : data-type, optional
+            Overrides the data type of the result.
+
+        Returns
+        -------
+        array-like
+            Array of `fill_value` with the same shape and type as `a`.
+
+        See Also
+        --------
+        zeros_like : Return an array of zeros with shape and type of input.
+        ones_like : Return an array of ones with shape and type of input.
+        empty_like : Return an empty array with shape and type of input.
+        zeros : Return a new array setting values to zero.
+        ones : Return a new array setting values to one.
+        empty : Return a new uninitialized array.
+        full : Fill a new array.
+
+        Examples
+        --------
+        >>> from spectrochempy import NDDataset, full_like
+
+        >>> x = np.arange(6, dtype=int)
+        >>> nd = full_like(x, 1)
+        >>> nd
+        NDDataset: [int64] unitless (size: 6)
+        >>> nd.values
+        array([       1,        1,        1,        1,        1,        1])
+        >>> x = NDDataset(x, units='m')
+        >>> NDDataset.full_like(x, 0.1).values
+        <Quantity([       0        0        0        0        0        0], 'meter')>
+        >>> full_like(x, 0.1, dtype=np.double).values
+        <Quantity([     0.1      0.1      0.1      0.1      0.1      0.1], 'meter')>
+        >>> full_like(x, np.nan, dtype=np.double).values
+        <Quantity([     nan     nan      nan      nan      nan      nan], 'meter')>
+
+        """
+        return NDMath._like(cls, *args, **kwargs)
+
+    # ----------------------------------------------------------------------------------------------------------------------
+    # Private methods
+    #
+
+    @classmethod
+    def _like(cls, *args, **kwargs):
+
+        from spectrochempy import NDDataset
+
+        args = list(args)
+
+        if isinstance(args[0], NDArray):
+            a = args.pop(0)
+            new = type(a)(np.empty_like(a.data))
+
+        elif issubclass(args[0], NDArray):
+            new = args.pop(0)()  # copy type
+
+            if isinstance(args[0], NDArray):
+                new._data = np.empty_like(args.pop(0).data)
+            elif is_sequence(args[0]):
+                # by default we produce a NDDataset
+                new = NDDataset(np.empty_like(args.pop(0)))
+
+        fill_value = kwargs.pop('fill_value', args.pop(0) if args else None)
+        dtype = kwargs.pop('dtype', None)
+        units = kwargs.pop('units', None)
+        if dtype is not None:
+            new = new.astype(np.dtype(dtype))
+        if fill_value is not None:
+            new._data = np.full_like(new.data, fill_value=fill_value)
+        if units is not None:
+            new.ito(units, force=True)
+        return new
+
+
 
     # ------------------------------------------------------------------------------------------------------------------
     # private methods
@@ -1441,6 +2002,15 @@ __all__ += ['abs',
             'sum',
             'var',
             ]
+
+# make some API functions
+__all__ += ['empty_like', 'zeros_like', 'ones_like', 'full_like']
+
+empty_like = make_func_from(NDMath.empty_like, first='dataset')
+zeros_like = make_func_from(NDMath.zeros_like, first='dataset')
+ones_like = make_func_from(NDMath.ones_like, first='dataset')
+full_like = make_func_from(NDMath.full_like)
+
 
 # ======================================================================================================================
 if __name__ == '__main__':

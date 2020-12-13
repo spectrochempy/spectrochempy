@@ -127,6 +127,7 @@ def _pbar_update(close=None):
 
         if close:
             pbar.clear()
+            pbar.close()
             pbar_count = 0
         else:
             pbar.update(val_tqdm[pbar_count])

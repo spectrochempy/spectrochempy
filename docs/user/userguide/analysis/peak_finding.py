@@ -15,83 +15,101 @@
 # ---
 
 # %% [markdown]
-# # Peak finding, part 1: maxima
+# # TUTORIAL: Peak finding, part 1: maxima
 #
 # This tutorial shows how to find peaks and determine peak maxima with spectrochempy. As prerequisite, the user is
 # expected to have read the [Import](../IO/import.ipynb), [Import IR](../IO/importIR.ipynb),
 # [slicing](../processing/slicing.ipynb) tutorials. First lets import the modules that will be used in this tutorial:
 #
-# import matplotlib.pyplot as plt  # will be used for some plots
 
-# %% execution={"iopub.execute_input": "2020-06-22T12:21:23.143Z", "iopub.status.busy": "2020-06-22T12:21:23.097Z",
-# "iopub.status.idle": "2020-06-22T12:21:29.376Z", "shell.execute_reply": "2020-06-22T12:21:29.348Z"}
-import spectrochempy as scp
+# %% [markdown] execution={"iopub.execute_input": "2020-06-22T12:21:23.143Z", "iopub.status.busy": "2020-06-22T12:21:23.097Z",
+# ####  `%matplotlib qt`  or `%matplotlib widget`
 
 # %% [markdown]
-# Second, import and plot a typical IR dataset (CO adsorption on supported CoMo catalyst in the 2300-1900 cm-1 region)
-# that will be used throughout:
-
-# %% execution={"iopub.execute_input": "2020-06-22T12:21:31.950Z", "iopub.status.busy": "2020-06-22T12:21:31.942Z",
-# "iopub.status.idle": "2020-06-22T12:21:31.987Z", "shell.execute_reply": "2020-06-22T12:21:31.994Z"}
-X = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG')[:, 2300.:1900.]
-
-# %% [markdown]
-# ## Find maxima by manual inspection of the plot
+# In `Jupyter Lab` (or `Jupyter Notebook`) the use of the **"magic command "** `%matplotlib widget` triggers the interactive drawing. This process is integrated in the Notebook with basic tools to navigate inside the figure. As shown below, from top to bottom of the
+# sidebar :
 #
-# The use of the "magic command" `%matplotlib widget` in a notebook triggers the plotting of interactive plots
-# integrated in the notebook with basic tools to navigate inside the plot. As shown below from top to bottom of the
-# side bar:
-#
-# - hide/show the tools,
-# - reset view ('home'),
-# - previous view ('left arrow'),
-# - next view ('right arrow),
-# - move ('arrow cross'),
-# - zoom ('rectangle'),
-# - save image ('floppy disc').
+# - hide/show tools,
+# - reset the view ("home"),
+# - previous view ( left arrow ),
+# - next view ( right arrow ),
+# - move ("arrow cross"),
+# - zoom ( rectangle ),
+# - save the image ("disk").
 #
 # <img src="figures/widgetsmode.png" alt="widgets mode" width="700" align="center" />
 #
-# Another possibility is to use `%matplotlib qt` instead. In this case, the plot is generated
+# In recent versions of **SpectroChemPy** (i.e. from versions > 0.1.21) this is the default setting and you do not need to run this command . 
+# Another possibility is to use the magic command `%matplotlib qt` instead. In this case the plot is generated in an external window, with some interactive capability. 
 #
-# In this interactive mode, the current abscissa and ordinates are indicated when the mouse pointer is displaced in
-# the plot area.
+# <div class = "alert alert alert warning">
+# <WARNING: </b> This selection must be made before loading the API, otherwise it will not be taken into account (and the widget <em>%matplotlib</em> will be used by default)
+# </div>
 #
-#    **Note**:
-#    This feature doesn't work (for now in with `jupyter lab` but with `Jupyter notebook` it is OK.
-#    (It is commented below to avoir problem when generating this documentation)
+# In both these interactive mode, the current `x` and `y` coordinate values are shown when the mouse pointer is moved inside  the plot limits.
 #
-# %% execution={"iopub.execute_input": "2020-06-22T12:21:38.304Z", "iopub.status.busy": "2020-06-22T12:21:38.285Z",
-# "iopub.status.idle": "2020-06-22T12:21:38.801Z", "shell.execute_reply": "2020-06-22T12:21:38.971Z"}
-# #%matplotlib widget
-ax = X.plot(cmap='Dark2')
+# If you prefer to generate static plots (for a laboratory notebook for example), just enter `%matplotlib inline`.
 
+# %% [markdown]
+# Well, this said, let's us start the tutorial by importaning some data
+
+# %% [markdown]
+# ## Loading an expeirmental dataset
+
+# %% [markdown]
+# A typical IR dataset (CO adsorption on supported CoMo catalyst in the 2300-1900 cm-1 region)  will be used throughout.
+#
+# Fist we need to loas the API.
+
+# %% execution={"iopub.execute_input": "2020-06-22T12:21:23.143Z", "iopub.status.busy": "2020-06-22T12:21:23.097Z",
+import spectrochempy as scp
+
+# %% [markdown]
+# Then we load the data using the genric API method  `read` (the type of data is inferred from the extension) 
+
+# %% execution={"iopub.execute_input": "2020-06-22T12:21:31.950Z", "iopub.status.busy": "2020-06-22T12:21:31.942Z",
+ds = scp.read('irdata/CO@Mo_Al2O3.SPG')
+
+# %% [markdown]
+# Let's set some preferences for plotting
+
+# %%
+ds.plotmeta.method_1D = 'scatter+pen'
+ds.plotmeta.method_2D = 'stack'
+ds.plotmeta.colormap_stack='Dark2'
+
+# %% [markdown] execution={"iopub.execute_input": "2020-06-22T12:21:31.950Z", "iopub.status.busy": "2020-06-22T12:21:31.942Z",
+# We select the desired region and plot it.
+
+# %% execution={"iopub.execute_input": "2020-06-22T12:21:31.950Z", "iopub.status.busy": "2020-06-22T12:21:31.942Z",
+reg = ds[:, 2300.:1900.]
+_ = reg.plot()
+
+# %% [markdown]
+# ## Find maxima by manual inspection of the plot
 # %% Once a given maximum has been approximately located manually with the mouse, it is possible to obtain [markdown]
 # For instance, after zooming on the highest peak of the last spectrum,
-# one finds that it is locate at ~ 2115.5 cm$^{-1}$. The exact coordinate can the be obtained using the following code
+# one finds that it is locate at ~ 2115.5 cm$^{-1}$. The exact x-coordinate value can the be obtained using the following code
 # (see the [slicing tutorial](../processing/slicing.ipynb) for more info):
 
 # %%
-# X.x[2115.5] returns a Coord object of 1 element, its data attribute is a ndarray which first (and only) element
-# is indexed '0':
-X.x[2115.5].data[0]
+pos = reg.x[2115.5].values
+pos
 
 # %% [markdown]
-# The value of the absorbance can be also obtained using:
+# We can easily get the list of all individual maximas at this position
 
 # %%
-X[-1, 2115.5].data[0, 0]
+maximas = reg[:, pos.m].squeeze()
+_ = maximas.plot(marker='s', ls='--', color='blue')
 
-# %% ### Note: on Magics Technically, a "magic command", invoked by the % sign, controls the behaviour of [markdown]
-# #### Note on "magics"
-# A 'magic command' introduced with the % sign  are enhancements added over the normal python code. In the
-# present case (`%matplotlib widget`), a particular matplotlib backend is triggered *once and
-# for all in the current ipython session*. The only way to change it back to the previous one (`%matplotlib inline`
-# which is the default) requires restarting the Ipython Kernel in the menu of Jupyter.
-#
-# Another useful "magic" for interactive plots is `%matplotlib qt` (also definitive in the current session),
-# which will generate interactive plots in separate and independant windows, which is usually faster and more fluid,
-# in particular for complex plots.
+# %% execution={"iopub.execute_input": "2020-06-22T12:21:38.304Z", "iopub.status.busy": "2020-06-22T12:21:38.285Z",
+ax = reg.plot()
+x = pos.max()
+y = maximas.max()
+_ = ax.annotate(f'{x:~0.2fP} {y:~.3fP}', xy=(2115.5, maximas.max()), xytext=(30,-20), textcoords='offset points',
+            bbox=dict(boxstyle="round4,pad=.7", fc="0.9"), arrowprops=dict(arrowstyle="->", 
+                                                                           connectionstyle="angle3"))
 
 # %% [markdown]
 # ## Find maxima with an automated method: `find_peaks()`
@@ -114,26 +132,22 @@ peaks.x  # "peaks" is a NDDataset. Its x Coord gives the peak position
 # The code below shows how the peaks found by this method can be marked:
 
 # %%
-X.plot(cmap='Dark2')
-for peak in peaks:  # loop over peaks
-    plt.plot(peaks.x, peaks.data.T, 'v',
-             color='black')  # the data field must be transposed for plot; 'v' is the triangle_down marker
+ax = X.plot(colormap='Dark2')
+(peaks+0.01).plot_scatter(ax=ax, marker='v', color='black', clear=False, data_only=True, ylim=(-0.01, 0.30))
 
 # %% [markdown]
 # and for the whole dataset:
 
 # %%
-X.plot(cmap='Dark2')
+ax = X.plot(colormap='magma')
 for s in X:  # loop over rows (= spectra)
     peaks, prop = s.find_peaks()  # find peaks
-
-    for peak in peaks:  # loop over peaks
-        plt.plot(peaks.x, peaks.data.T, 'v', color='black')
+    (peaks+0.01).plot_scatter(ax=ax, marker='v', color='red', clear=False, data_only=True, ylim=(-0.01, 0.30))
 
 # %% [markdown]
 # It should be noted that this method finds only true maxima, not shoulders (!). For the detection of such underlying
 # peaks, the use of methods based on derivatives or advanced detection methods - which will be treated in separate
-# tutorial - are required. Once ther maxima of a given peak have been found, it is possible, for instance,
+# tutorial - are required. Once their maxima of a given peak have been found, it is possible, for instance,
 # to plot its evolution with, e.g. the time. For instance for the peaks located at 2220-2180 cm$^{-1}$:
 
 # %%
@@ -141,13 +155,12 @@ maxwn = []  # empty list, will contain wavenumbers at the maximum
 for s in X:  # loop over  spectra
     peak, prop = s[:, 2220.:2180.].find_peaks()  # find peak
     maxwn.append(peak.x.data[0])  # append the wavenumber
+time = (X.y - X.y[0]).to("minute") # return a NDDataset of time in minutes, relative to the 1st spectrum
 
-time = (X.y - X.y[0]).to("minute").data  # return a ndarray of time in minutes, relative to the 1st spectrum
-
-plt.figure()  # classic instructions for a xy plot in matplotlib.
-plt.plot(time, maxwn, 'o-')
-plt.xlabel("acquisition time / min")
-plt.ylabel("wavenumber at maximum / cm$^{-1}$")
+coordm = scp.Coord(maxwn, title="wavenumber at maximum", units="1 /cm")
+nd = scp.NDDataset(time.data, coordset=[coordm], title="acquisition time", units=time.units)
+nd.plot_scatter(rcolor='blue', marker ='s')
+scp.show()
 
 # %% [markdown]
 # ###  Options of `find_peaks()`

@@ -32,7 +32,7 @@ from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.core.dataset.ndplot import NDPlot
 from spectrochempy.core import error_, warning_
 from spectrochempy.utils import (
-    colored_output, SpectroChemPyException, get_user_and_node, docstrings,
+    colored_output, SpectroChemPyException, docstrings,
     SpectroChemPyWarning,
     )
 
@@ -59,14 +59,6 @@ class NDDataset(
     The main N-dimensional dataset class used by |scpy|.
 
     """
-    author = Unicode(get_user_and_node(),
-                     desc='Name of the author of this dataset',
-                     config=True)
-
-    # private metadata in addition to those of the base NDArray class
-    _modified = Instance(datetime)
-    _description = Unicode()
-    _history = List(Unicode())
 
     # coordinates
     _coordset = Instance(CoordSet, allow_none=True)
@@ -95,8 +87,6 @@ class NDDataset(
                  coordset=None,
                  coordunits=None,
                  coordtitles=None,
-                 description='',
-                 history='',
                  **kwargs):
         """
         Parameters
@@ -109,8 +99,6 @@ class NDDataset(
             the `coord` and `labels` for all dimensions of the `data`.
             Multiple `coord`'s can be specified in an |CoordSet| instance
             for each dimension.
-        description : str, optional
-            A optional description of the nd-dataset.
 
         Notes
         -----
@@ -177,13 +165,6 @@ class NDDataset(
 
             if _coordset and set(_coordset) != {Coord()}:  # if they are no coordinates do nothing
                 self.set_coordset(*_coordset)
-
-        if description:
-            self.description = description
-
-        self._history = []
-        if history:
-            self.history = history
 
     # ------------------------------------------------------------------------------------------------------------------
     # special methods
@@ -491,34 +472,6 @@ class NDDataset(
         # as we can't write super().data = data, we call _set_data
         # see comment in the data.setter of NDArray
         super()._set_data(data)
-
-    # .................................................................................................................
-    @property
-    def description(self):
-        """
-        str - Provides a description of the underlying data
-
-        """
-        return self._description
-
-    # ..................................................................................................................
-    @description.setter
-    def description(self, value):
-        self._description = value
-
-    # ..................................................................................................................
-    @property
-    def history(self):
-        """
-        List of strings - Describes the history of actions made on this array
-
-        """
-        return self._history
-
-    # ..................................................................................................................
-    @history.setter
-    def history(self, value):
-        self._history.append(value)
 
     # ..................................................................................................................
     @property

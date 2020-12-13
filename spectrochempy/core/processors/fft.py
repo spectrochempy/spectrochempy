@@ -32,7 +32,7 @@ from scipy.interpolate import interp1d
 from nmrglue.process.proc_base import largest_power_of_2, zf_size
 from .. import error_
 from ...units import ur
-from ..dataset.npy import zeros_like
+from ..dataset.ndmath import zeros_like
 from .apodization import hamming
 from .concatenate import concatenate
 

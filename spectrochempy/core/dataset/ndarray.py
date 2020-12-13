@@ -34,7 +34,7 @@ from spectrochempy.core import info_, error_, print_
 from spectrochempy.utils import (
     TYPE_INTEGER, TYPE_FLOAT, Meta, MaskedConstant, MASKED, NOMASK, INPLACE, is_sequence,
     is_number, numpyprintoptions, insert_masked_print, docstrings, SpectroChemPyWarning,
-    make_new_object, convert_to_html,
+    make_new_object, convert_to_html, get_user_and_node
     )
 
 # ======================================================================================================================
@@ -90,6 +90,10 @@ class NDArray(HasTraits):
     _units = Instance(Unit, allow_none=True)
     _offset = Any()
     _roi = List(allow_none=True)
+    _author = Unicode(get_user_and_node())
+    _modified = Instance(datetime)
+    _description = Unicode()
+    _history = List(Unicode())
 
     # metadata
     _meta = Instance(Meta, allow_none=True)
@@ -158,6 +162,11 @@ class NDArray(HasTraits):
         meta : dict-like object, optional.
             Additional metadata for this object. Must be dict-like but no
             further restriction is placed on meta.
+        author : str, optional
+            name(s) of the author(s) of this dataset. BNy default, name of the computer note where this dataset is
+            created.
+        description : str, optional
+            A optional description of the nd-dataset.
         copy : bool, optional
             Perform a copy of the passed object.
 
@@ -194,6 +203,17 @@ class NDArray(HasTraits):
 
         self.name = kwargs.pop('name', None)
 
+        self.description = kwargs.pop('description', "")
+
+        author = kwargs.get('author')
+        if author:
+            self.author = author
+
+        self._history = []
+        history = kwargs.pop('history', None)
+        if history is not None:
+            self.history = history
+
         # process eventual kwargs, adressing HasTrait class
         # super().__init__(**kwargs)   <-- cause problem of deprecation warning.
 
@@ -225,7 +245,8 @@ class NDArray(HasTraits):
 
     # ..................................................................................................................
     def __dir__(self):
-        return ['data', 'dims', 'mask', 'labels', 'units', 'meta', 'title', 'name', 'origin', 'roi', 'offset']
+        return ['data', 'dims', 'mask', 'labels', 'units', 'meta', 'title', 'name', 'origin', 'roi', 'offset',
+                'description', 'history']
 
     # ..................................................................................................................
     def __hash__(self):
@@ -663,6 +684,49 @@ class NDArray(HasTraits):
                                  f"{DEFAULT_DIM_NAME[::-1]}.")
 
         self._dims = tuple(values)
+
+    # .................................................................................................................
+    @property
+    def description(self):
+        """
+        str - Provides a description of the underlying data
+
+        """
+        return self._description
+
+    # ..................................................................................................................
+    @description.setter
+    def description(self, value):
+        self._description = value
+
+    # .................................................................................................................
+    @property
+    def author(self):
+        """
+        str - creator of the array
+
+        """
+        return self._author
+
+    # ..................................................................................................................
+    @author.setter
+    def author(self, value):
+        self._author = value
+
+
+    # ..................................................................................................................
+    @property
+    def history(self):
+        """
+        List of strings - Describes the history of actions made on this array
+
+        """
+        return self._history
+
+    # ..................................................................................................................
+    @history.setter
+    def history(self, value):
+        self._history.append(value)
 
     # ..................................................................................................................
     @property

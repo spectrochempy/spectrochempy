@@ -17,6 +17,8 @@ __all__ = ['NDIO', 'SCPY_SUFFIX']
 import io
 import json
 import pathlib
+
+import numpy as np
 from numpy.lib.npyio import zipfile_factory
 from traitlets import HasTraits, Instance
 
@@ -25,11 +27,7 @@ from spectrochempy.core import debug_
 from spectrochempy.utils import SpectroChemPyException
 from spectrochempy.utils import pathclean, check_filenames, ScpFile, check_filename_to_save, json_serialiser
 
-SCPY_SUFFIX = {
-        'NDDataset': '.scp',
-        'NDPanel': '.mscp',
-        'Project': '.pscp'
-        }
+SCPY_SUFFIX = {'NDDataset': '.scp', 'NDPanel': '.mscp', 'Project': '.pscp'}
 
 
 # ----------------------------------------------------------------------------------------------------------------------

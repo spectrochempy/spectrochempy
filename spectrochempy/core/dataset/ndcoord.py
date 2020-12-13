@@ -26,7 +26,6 @@ from traitlets import Bool, observe, All, Unicode
 # ----------------------------------------------------------------------------------------------------------------------
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndmath import NDMath, set_operators
-# from spectrochempy.core import info_, debug_, error_, warning_
 from spectrochempy.utils import (docstrings, colored_output, NOMASK, spacing)
 
 

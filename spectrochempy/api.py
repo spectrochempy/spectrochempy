@@ -156,6 +156,11 @@ def set_backend():
 
 set_backend()
 
+# a usefull utilities for dealing with path
+from spectrochempy.utils import pathclean
+__all__ += ['pathclean']
+
+
 # warnings.filterwarnings(action='ignore', module='matplotlib', category=UserWarning)
 # warnings.filterwarnings(action="error", category=DeprecationWarning)
 

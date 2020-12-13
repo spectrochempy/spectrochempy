@@ -21,6 +21,7 @@
 # %%
 import spectrochempy as scp
 from spectrochempy.units import ur
+import numpy as np
 
 # %% [markdown]
 #  <div class="alert alert">
@@ -57,8 +58,8 @@ scp.NDPanel()
 # create a first random array
 a = np.random.rand(6, 8)
 # make to coordinate's arrays for both dimensions
-cx = scp.Coord(np.linspace(600, 4000, 8), units='cm^-1', title='wavenumber')
-cy = scp.Coord(np.linspace(0, 10, 6), units='s', title='time')
+cx = scp.Coord.linspace(600, 4000, 8, units='cm^-1', title='wavenumber')
+cy = scp.Coord.linspace(0, 10, 6, units='s', title='time')
 # create the dataset
 nda = scp.NDDataset(a, coordset=(cy, cx), name='a', title='dataset a', units='eV')
 nda

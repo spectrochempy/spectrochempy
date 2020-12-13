@@ -33,6 +33,7 @@ from spectrochempy.core import general_preferences as prefs
 from spectrochempy.utils.testing import RandomSeedContext
 from spectrochempy.utils import pathclean
 
+import spectrochempy as scp
 
 # initialize a ipython session before calling spectrochempy
 # ----------------------------------------------------------------------------------------------------------------------

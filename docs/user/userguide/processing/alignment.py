@@ -33,7 +33,8 @@ import spectrochempy as scp
 # required aligned coordinates.
 
 # %%
-dataset = scp.NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
+
+dataset = scp.NDDataset.read_omnic('irdata/nh4y-activation.spg')
 dataset.y = dataset.y - dataset.y[0]  # remove offset in the time
 dataset.y.title = 'Time'
 _ = dataset.plot_map(colormap='viridis', colorbar=True)
@@ -156,5 +157,5 @@ _ = scp.multiplot_map(datasets=[dataset, ndadd], colormap='viridis', sharex=0, s
 
 # %%
 
-
+scp.show()
 # %%

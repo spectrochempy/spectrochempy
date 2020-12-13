@@ -62,78 +62,72 @@ Getting Started
 ****************
 
 * :doc:`gettingstarted/whyscpy`
-* :doc:`gettingstarted/changelog`
-* :doc:`gettingstarted/install/index`
-* :doc:`gettingstarted/license`
+* :doc:`gettingstarted/overview`
+* :doc:`gettingstarted/generated/auto_examples/index`
+* :doc:`user/reference/install/index`
 
 .. toctree::
-    :maxdepth: 3
+    :maxdepth: 1
     :hidden:
     :caption: Getting Started
 
     gettingstarted/whyscpy
-    gettingstarted/changelog
-    gettingstarted/install/index
-    gettingstarted/license
+    gettingstarted/overview.ipynb
+    Examples <gettingstarted/generated/auto_examples/index>
+    Installation <user/reference/install/index>
+
+.. _userguide:
 
 ***********************
-User Guide
+User's Guide
 ***********************
 
-* :doc:`user/userguide/index`
-* :doc:`gallery/auto_examples/index`
-* :doc:`user/faq`
+* :doc:`user/userguide/introduction`
+* :doc:`user/userguide/objects`
+* :doc:`user/userguide/processing`
+* :doc:`user/userguide/analysis`
+* :doc:`user/userguide/units`
+* :doc:`user/userguide/import_export`
+* :doc:`user/userguide/plotting`
+* :doc:`user/userguide/databases`
 
 .. toctree::
-    :maxdepth: 3
-    :hidden:
-    :caption: User Guide
+    :maxdepth: 2
+    :caption: User's Guide
 
-    user/userguide/index
-    gallery/auto_examples/index
-    user/faq
+    user/userguide/introduction
+    user/userguide/objects
+    user/userguide/processing
+    user/userguide/analysis
+    user/userguide/units
+    user/userguide/import_export
+    user/userguide/plotting
+    user/userguide/databases
 
-****************
-Reference
-****************
+***********************
+Reference & Help
+***********************
 
-* :doc:`reference/index`
-* :doc:`reference/preference`
-* :doc:`reference/databases`
-
-.. toctree::
-    :maxdepth: 3
-    :hidden:
-    :caption: Reference
-
-    reference/index
-    reference/preference
-
-**************
-Contributing
-**************
-
-* :doc:`contributing/issues`
+* :doc:`user/reference/changelog`
+* :doc:`user/reference/index`
+* :doc:`user/reference/preference`
+* :doc:`user/reference/faq`
+* :doc:`user/reference/dev/issues`
+* :doc:`user/reference/dev/examples`
+* :doc:`user/reference/dev/contributing`
 
 .. toctree::
-    :maxdepth: 3
+    :maxdepth: 1
     :hidden:
-    :caption: Contributing
+    :caption: Reference & Help
 
-    contributing/issues
-
-*******************
-developer's corner
-*******************
-
-* :doc:`dev/contributing`
-
-.. toctree::
-    :maxdepth: 3
-    :hidden:
-    :caption: developer's corner
-
-    dev/contributing
+    user/reference/changelog
+    user/reference/index
+    user/reference/preference
+    user/reference/faq
+    Bug reports & feature request <user/reference/dev/issues>
+    Sharing examples <user/reference/dev/examples>
+    user/reference/dev/contributing
 
 ********
 Credits
@@ -141,13 +135,15 @@ Credits
 
 * :doc:`credits/credits`
 * :doc:`credits/citing`
+* :doc:`credits/license`
 * :doc:`credits/seealso`
 
 .. toctree::
-    :maxdepth: 3
+    :maxdepth: 1
     :hidden:
     :caption: Credits
 
     credits/credits
     credits/citing
+    credits/license
     credits/seealso

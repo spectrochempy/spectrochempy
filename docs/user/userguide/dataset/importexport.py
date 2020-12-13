@@ -23,7 +23,7 @@
 # let check if the `datadir` directory exists
 
 # %%
-from spectrochempy import *   # noqa: F403
+import spectrochempy as scp # noqa: F403
 
 # %% [markdown]
 # ## Data directory
@@ -64,8 +64,8 @@ from spectrochempy import *   # noqa: F403
 # </div>
 
 # %%
-path = general_preferences.datadir
-fs = FileSelector(path=path, filters=['spg', 'spa'])
+datadir= scp.general_preferences.datadir
+fs = scp.FileSelector(path=datadir, filters=['spg', 'spa'])
 fs
 
 # %% [markdown]
@@ -79,7 +79,7 @@ fs.value, fs.path, fs.fullpath
 #
 
 # %%
-dataset = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
+dataset = scp.NDDataset.read_omnic('irdata/nh4y-activation.spg')
 dataset
 
 # %%
@@ -94,8 +94,8 @@ _ = dataset.plot(method='stack')
 # Now, lets load a NMR dataset (in the Bruker format).
 
 # %%
-path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d')
-ndd = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+path = 'nmrdata/bruker/tests/nmr/topspin_1d'
+ndd = scp.NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
 ndd
 
 # %%

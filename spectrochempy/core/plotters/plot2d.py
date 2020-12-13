@@ -27,8 +27,9 @@ import matplotlib as mpl
 import numpy as np
 # from matplotlib import cm
 
-from spectrochempy.core.plotters.utils import make_label
+from spectrochempy.core.plotters.plotutils import make_label
 from spectrochempy.core import project_preferences, general_preferences
+from spectrochempy.utils import Meta
 
 
 # import sys
@@ -178,7 +179,7 @@ def plot_2D(dataset, **kwargs):
     # get all plot preferences
     # ------------------------------------------------------------------------------------------------------------------
 
-    prefs = dataset.plotmeta
+    prefs = Meta()
 
     # method of plot
     # ------------------------------------------------------------------------------------------------------------------
@@ -191,6 +192,9 @@ def plot_2D(dataset, **kwargs):
         # surface specific setting
         if method not in ['surface']:
             prefs['colorbar'] = False
+
+    # get plotmeta stored with dataset
+    prefs.update(dataset.plotmeta)
 
     if method is None:
         method = prefs.method_2D

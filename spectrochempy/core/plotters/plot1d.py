@@ -16,9 +16,9 @@ Module containing 1D plotting function(s)
 """
 
 __all__ = ['plot_1D', 'plot_lines', 'plot_pen', 'plot_scatter', 'plot_bar',
-           'plot_multiple']
+           'plot_multiple', 'plot_scatter_pen']
 
-__dataset_methods__ = ['plot_1D', 'plot_lines', 'plot_pen', 'plot_scatter', 'plot_bar']
+__dataset_methods__ = ['plot_1D', 'plot_lines', 'plot_pen', 'plot_scatter', 'plot_bar', 'plot_scatter_pen']
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
@@ -28,8 +28,9 @@ import numpy as np
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
 from spectrochempy.core import project_preferences
-from .utils import make_label
+from .plotutils import make_label
 from ...utils import is_sequence, deprecated
+from spectrochempy.utils import Meta
 
 
 # from pyqtgraph.functions import mkPen
@@ -81,6 +82,21 @@ def plot_pen(dataset, **kwargs):
 
     """
     kwargs['method'] = 'pen'
+    if kwargs.get('use_plotly', False):
+        return dataset.plotly(**kwargs)
+    else:
+        return plot_1D(dataset, **kwargs)
+
+# plot pen (default) ---------------------------------------------------------
+
+def plot_scatter_pen(dataset, **kwargs):
+    """
+    Plot a 1D dataset with solid pen by default.
+
+    Alias of plot (with `method` argument set to ``pen``.
+
+    """
+    kwargs['method'] = 'scatter+pen'
     if kwargs.get('use_plotly', False):
         return dataset.plotly(**kwargs)
     else:
@@ -278,10 +294,13 @@ def plot_1D(dataset, **kwargs):
     # get all plot preferences
     # ------------------------------------------------------------------------------------------------------------------
 
-    prefs = dataset.plotmeta
+    prefs = Meta()
     if not prefs.style:
         # not yet set, initialize with default project preferences
         prefs.update(project_preferences.to_dict())
+
+    # get plotmeta stored with dataset
+    prefs.update(dataset.plotmeta)
 
     use_mpl = kwargs.pop('use_mpl', True)  # by default we use matplotlib for plotting (which is faster but
     # wich is hardly  interactive)

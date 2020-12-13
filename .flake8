@@ -1,5 +1,5 @@
 [flake8]
-ignore = E402 E126 E123 W503 W504 F405
+ignore = E402 E126 E123 W503 W504 F405 F403
 max-line-length = 120
 max-complexity = 100
 select = C,E,F,W,N8
@@ -11,5 +11,4 @@ exclude =
     gui
     docs/sphinxext
     # docs/user/userguide
-    docs/user/tutorials
     *.ipynb_checkpoints

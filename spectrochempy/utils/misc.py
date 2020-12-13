@@ -9,6 +9,19 @@
 Various methods and classes used in other part of the program
 
 """
+import re
+import os
+import sys
+from operator import itemgetter
+from contextlib import contextmanager
+import functools
+from datetime import datetime
+import uuid
+import types
+
+import numpy as np
+
+
 __all__ = [
 
         "TYPE_INTEGER",
@@ -16,6 +29,7 @@ __all__ = [
         "TYPE_FLOAT",
         "EPSILON",
         "INPLACE",
+        'make_func_from',
         "make_new_object",
         "getdocfrom",
         "dict_compare",
@@ -34,15 +48,7 @@ __all__ = [
         #
         ]
 
-import re
-from operator import itemgetter
-import os
-import numpy as np
-import sys
-from contextlib import contextmanager
-import functools
-from datetime import datetime
-import uuid
+
 
 #
 # constants
@@ -56,6 +62,43 @@ EPSILON = epsilon = np.finfo(float).eps
 
 INPLACE = "INPLACE"
 "Flag used to specify inplace slicing"
+
+# ======================================================================================================================
+# function signature
+# ======================================================================================================================
+
+def _codechange(code_obj, changes):
+    code = types.CodeType
+    names = ['co_argcount', 'co_nlocals', 'co_stacksize', 'co_flags', 'co_code', 'co_consts', 'co_names', 'co_varnames',
+             'co_filename', 'co_name', 'co_firstlineno', 'co_lnotab', 'co_freevars', 'co_cellvars']
+    if hasattr(code, 'co_kwonlyargcount'):
+        names.insert(1, 'co_kwonlyargcount')
+    if hasattr(code, 'co_posonlyargcount'):
+        names.insert(1, 'co_posonlyargcount')
+    values = [changes.get(name, getattr(code_obj, name)) for name in names]
+    return code(*values)
+
+
+def make_func_from(func, first=None):
+    """
+    Create a new func with its arguments from another func and a new signature
+
+    """
+    code_obj = func.__code__
+    new_varnames = list(code_obj.co_varnames)
+    if first:
+        new_varnames[0] = first
+    new_varnames = tuple(new_varnames)
+    new_code_obj = _codechange(code_obj, changes={
+            'co_varnames': new_varnames
+    })
+    modified = types.FunctionType(new_code_obj,
+                                  func.__globals__,
+                                  func.__name__,
+                                  func.__defaults__,
+                                  func.__closure__)
+    modified.__doc__ = func.__doc__
+    return modified
 
 
 def make_new_object(obj):

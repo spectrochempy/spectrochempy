@@ -21,6 +21,7 @@
 
 # %%
 import spectrochempy as scp
+import numpy as np
 
 # %% [markdown]
 # ## Ufuncs (Universal Numpy's functions)
@@ -33,6 +34,7 @@ import spectrochempy as scp
 # like this using the `np.sqrt` functions :
 
 # %%
+
 x = np.array([1., 2., 3., 4., 6.])
 np.sqrt(x)
 

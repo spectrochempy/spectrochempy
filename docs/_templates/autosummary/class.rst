@@ -27,7 +27,7 @@
 {% endif %}
 {% endblock %}
 
-.. include:: /gen_modules/backreferences/{{fullname}}.examples
+.. include:: /gettingstarted/generated/backreferences/{{fullname}}.examples
 
 .. raw:: html
 

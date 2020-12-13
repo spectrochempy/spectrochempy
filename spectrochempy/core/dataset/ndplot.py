@@ -131,7 +131,7 @@ class NDPlot(HasTraits):
         # Find or guess the adequate plotter
         # -----------------------------------
 
-        _plotter = getattr(self, 'plot_{}'.format(method), None)
+        _plotter = getattr(self, f"plot_{method.replace('+','_')}", None)
         if _plotter is None:
             # no plotter found
             error_('The specified plotter for method '

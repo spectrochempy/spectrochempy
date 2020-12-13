@@ -29,7 +29,7 @@ from traitlets import HasTraits, Instance
 # local imports
 # ----------------------------------------------------------------------------
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.npy import dot, zeros
+from spectrochempy.core.dataset.npy import dot
 from spectrochempy.core import info_, set_loglevel, INFO
 
 
@@ -156,17 +156,17 @@ class SIMPLISMA(HasTraits):
         # ---------------------------------------------------
         # purity 'spectra' (generally spectra if X is passed,
         # but could also be concentrations if X.T is passed)
-        Pt = zeros((n_pc, X.shape[-1]))
+        Pt = NDDataset.zeros((n_pc, X.shape[-1]))
         Pt.name = 'Purity spectra'
         Pt.set_coordset(y=Pt.y, x=X.x)
         Pt.y.title = '# pure compound'
 
         # weight matrix
-        w = zeros((n_pc, X.shape[-1]))
+        w = NDDataset.zeros((n_pc, X.shape[-1]))
         w.set_coordset(y=Pt.y, x=X.x)
 
         # Stdev spectrum
-        s = zeros((n_pc, X.shape[-1]))
+        s = NDDataset.zeros((n_pc, X.shape[-1]))
         s.name = 'Standard deviation spectra'
         s.set_coordset(y=Pt.y, x=X.x)
 
@@ -175,13 +175,13 @@ class SIMPLISMA(HasTraits):
         maxPCoordinate = [0] * n_pc
 
         # Concentration matrix
-        C = zeros((X.shape[-2], n_pc))
+        C = NDDataset.zeros((X.shape[-2], n_pc))
         C.name = 'Relative Concentrations'
         C.set_coordset(y=X.y, x=C.x)
         C.x.title = '# pure compound'
 
         # Pure component spectral profiles
-        St = zeros((n_pc, X.shape[-1]))
+        St = NDDataset.zeros((n_pc, X.shape[-1]))
         St.name = 'Pure compound spectra'
         St.set_coordset(y=Pt.y, x=X.x)
 

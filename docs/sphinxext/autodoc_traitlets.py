@@ -1,13 +1,28 @@
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+#       jupytext_version: 1.6.0
+# ---
+
+# %%
 """autodoc extension for configurable traitlets
 
 Borrowed from https://github.com/dask/dask-gateway/blob/master/docs/sphinxext/autodoc_traitlets.py
 
 """
 
+# %%
 from traitlets import TraitType, Undefined
 from sphinx.ext.autodoc import DataDocumenter, ModuleDocumenter
 
 
+# %%
 class ConfigurableDocumenter(ModuleDocumenter):
     """Specialized Documenter subclass for traits with config=True"""
 
@@ -35,6 +50,7 @@ class ConfigurableDocumenter(ModuleDocumenter):
         pass
 
 
+# %%
 class TraitDocumenter(DataDocumenter):
     objtype = "trait"
     directivetype = "data"
@@ -61,6 +77,7 @@ class TraitDocumenter(DataDocumenter):
         return super().add_directive_header(sig)
 
 
+# %%
 def setup(app):
     app.add_autodocumenter(ConfigurableDocumenter)
     app.add_autodocumenter(TraitDocumenter)
