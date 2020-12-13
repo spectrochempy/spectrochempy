@@ -13,15 +13,15 @@ On Mac OSX system you access to this file by typing in the terminal:
 
 .. sourcecode:: bash
 
-    $ cd ~/.spectrochempy
-    $ open spectrochempy.ini
+    $ cd ~/.spectrochempy/config
+    $ open spectrochempy_cfg.py
 
 
 On Linux system, the second command can be replaced by:
 
 .. sourcecode:: bash
 
-    $ nano spectrochempy.ini
+    $ nano spectrochempy_cfg.py
 
 
 or whatever you prefer to read and edit a text file.

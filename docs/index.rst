@@ -49,12 +49,12 @@ Among its major features:
 
 .. warning::
 
-	**This software is not yet publicly released**.
-    
-	|scpy| is still experimental and under active development.
-	Its current design is subject to major changes, reorganizations,
-	bugs and crashes!!! Please report any issues to the
-	`Issue Tracker  <https://redmine.spectrochempy.fr/projects/spectrochempy/issues>`_
+    **This software is not yet publicly released**.
+
+    |scpy| is still experimental and under active development.
+    Its current design is subject to major changes, reorganizations,
+    bugs and crashes!!! Please report any issues to the
+    `Issue Tracker  <https://redmine.spectrochempy.fr/projects/spectrochempy/issues>`_
 
 
 ****************
@@ -62,84 +62,92 @@ Getting Started
 ****************
 
 * :doc:`gettingstarted/whyscpy`
+* :doc:`gettingstarted/changelog`
 * :doc:`gettingstarted/install/index`
-* :doc:`api/changelog`
 * :doc:`gettingstarted/license`
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
     :hidden:
     :caption: Getting Started
 
     gettingstarted/whyscpy
+    gettingstarted/changelog
     gettingstarted/install/index
-    api/changelog
     gettingstarted/license
 
 ***********************
-User Guide & Tutorials
+User Guide
 ***********************
 
 * :doc:`user/userguide/index`
 * :doc:`gallery/auto_examples/index`
+* :doc:`user/faq`
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
     :hidden:
-    :caption: User Guide & Tutorials
+    :caption: User Guide
 
-	user/userguide/index
-	gallery/auto_examples/index
+    user/userguide/index
+    gallery/auto_examples/index
+    user/faq
 
 ****************
 Reference
 ****************
 
-* :doc:`api/index`
-* :doc:`api/preference`
-* :doc:`api/databases`
+* :doc:`reference/index`
+* :doc:`reference/preference`
+* :doc:`reference/databases`
 
 .. toctree::
     :maxdepth: 3
     :hidden:
     :caption: Reference
 
-    api/index
-    api/preference
-    api/databases
+    reference/index
+    reference/preference
 
 **************
 Contributing
 **************
 
-* :doc:`dev/faq`
-* :doc:`dev/issues`
-* :doc:`dev/development`
+* :doc:`contributing/issues`
 
 .. toctree::
     :maxdepth: 3
     :hidden:
     :caption: Contributing
 
-	dev/faq
-    dev/issues
-    dev/contribu
+    contributing/issues
+
+*******************
+developer's corner
+*******************
+
+* :doc:`dev/contributing`
+
+.. toctree::
+    :maxdepth: 3
+    :hidden:
+    :caption: developer's corner
+
+    dev/contributing
 
 ********
 Credits
 ********
 
-* :doc:`main/credits`
-* :doc:`main/citing`
-* :doc:`main/seealso`
-   
+* :doc:`credits/credits`
+* :doc:`credits/citing`
+* :doc:`credits/seealso`
+
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
     :hidden:
     :caption: Credits
 
-    main/credits
-    main/citing
-    main/seealso
-
-
+    credits/credits
+    credits/citing
+    credits/seealso

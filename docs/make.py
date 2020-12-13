@@ -17,10 +17,7 @@ where optional parameters indicates which job(s) is(are) to perform.
 
 """
 
-from glob import iglob
-
 import argparse
-import os
 import shutil
 import sys
 import warnings
@@ -29,6 +26,8 @@ import json5 as json
 import numpy as np
 import requests
 from jinja2 import Template
+from pathlib import Path
+
 from skimage.io import imread, imsave
 from skimage.transform import resize
 from sphinx.application import Sphinx
@@ -48,21 +47,20 @@ API_GITHUB_URL = "https://api.github.com"
 URL_SCPY = "spectrochempy.github.io/spectrochempy"
 
 # PATHS
-HOME = os.environ.get('HOME', os.path.expanduser('~'))
-DOCDIR = os.path.dirname(os.path.abspath(__file__))
-PROJECTDIR = os.path.dirname(DOCDIR)
-SOURCESDIR = os.path.join(PROJECTDIR, PROJECT)
-USERDIR = os.path.join(DOCDIR, "user")
-TEMPLATES = os.path.join(DOCDIR, '_templates')
-TUTORIALS = os.path.join(USERDIR, "tutorials", "*", "*.py")
-USERGUIDE = os.path.join(USERDIR, "userguide", "*", "*.py")
-API = os.path.join(DOCDIR, 'api', 'generated')
-GALLERYDIR = os.path.join(DOCDIR, "gallery")
-DOCREPO = os.path.join(HOME, "spectrochempy_docs")
-DOCTREES = os.path.join(DOCREPO, "~doctrees")
-HTML = os.path.join(DOCREPO, "html")
-LATEX = os.path.join(DOCREPO, 'latex')
-DOWNLOADS = os.path.join(HTML, 'downloads')
+HOME = Path().home()
+DOCDIR = Path(__file__).parent
+PROJECTDIR = DOCDIR.parent
+SOURCESDIR = PROJECTDIR / PROJECT
+USERDIR = DOCDIR / 'user'
+TEMPLATES = DOCDIR / '_templates'
+USERGUIDE = list(map(str, (USERDIR / "userguide").glob("**/*.py")))
+API = DOCDIR / 'reference' / 'generated'
+GALLERYDIR = DOCDIR / "gallery"
+DOCREPO =  HOME / "spectrochempy_docs"
+DOCTREES = DOCREPO / "~doctrees"
+HTML =  DOCREPO / "html"
+LATEX = DOCREPO / 'latex'
+DOWNLOADS = HTML / 'downloads'
 
 __all__ = []
 
@@ -155,8 +153,10 @@ class BuildDocumentation(object):
         if builder not in ['html', 'latex']:
             raise ValueError('Not a supported builder: Must be "html" or "latex"')
 
-        BUILDDIR = os.path.join(DOCREPO, builder)
-        print(f'building {builder.upper()} documentation ({doc_version.capitalize()} version : {version})')
+        BUILDDIR = DOCREPO / builder
+        print(f'\n{"*"*80}\n'
+              f'building {builder.upper()} documentation ({doc_version.capitalize()} version : {version})'
+              f'\n{"*"*80}\n')
 
         self.make_changelog()
 
@@ -164,6 +164,8 @@ class BuildDocumentation(object):
         if clean:
             self.clean(builder)
         self.make_dirs()
+
+        self.sync_notebooks()
 
         # run sphinx
         srcdir = confdir = DOCDIR
@@ -174,10 +176,11 @@ class BuildDocumentation(object):
         sp.build()
 
         print(f"\n{'-' * 130}\nBuild finished. The {builder.upper()} pages "
-              f"are in {os.path.normpath(outdir)}.")
+              f"are in {outdir}.")
 
         # do some cleaning
-        shutil.rmtree(os.path.join('docs', 'auto_examples'), ignore_errors=True)
+        if clean:
+            shutil.rmtree( GALLERYDIR / 'auto_examples', ignore_errors=True)
 
         if builder == 'html':
             self.make_redirection_page()
@@ -197,10 +200,10 @@ class BuildDocumentation(object):
     def resize_img(folder, size):
         # image resizing mainly for pdf doc
 
-        for img in iglob(os.path.join(folder, '**', '*.png'), recursive=True):
+        for img in folder.rglob('**/*.png'):
             if not img.endswith('.png'):
                 continue
-            filename = os.path.join(folder, img)
+            filename = folder / img
             image = imread(filename)
             h, l, c = image.shape
             ratio = 1.
@@ -218,7 +221,7 @@ class BuildDocumentation(object):
         # Generate the PDF documentation
 
         doc_version = self.doc_version
-        LATEXDIR = f"{LATEX}/{doc_version}"
+        LATEXDIR = LATEX / doc_version
         print('Started to build pdf from latex using make.... '
               'Wait until a new message appear (it is a long! compilation) ')
 
@@ -232,22 +235,22 @@ class BuildDocumentation(object):
         sh(f"cd {LATEXDIR}; lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex")
 
         print("move pdf file in the download dir")
-        sh(f"cp {os.path.join(LATEXDIR, PROJECT)}.pdf {DOWNLOADS}/{doc_version}-{PROJECT}.pdf")
+        sh(f"cp {LATEXDIR / PROJECT}.pdf {DOWNLOADS}/{doc_version}-{PROJECT}.pdf")
 
     # ..................................................................................................................
     def sync_notebooks(self):
         # Use  jupytext to sync py and ipynb files in userguide and tutorials
 
-        sh.jupytext("--sync", f"{USERGUIDE}", silent=True)
-        sh.jupytext("--sync", f"{TUTORIALS}", silent=True)
+        for item in USERGUIDE:
+            sh.jupytext("--sync" ,item ,silent=False)
 
     # ..................................................................................................................
     def delnb(self):
         # Remove all ipynb before git commit
 
-        for nb in iglob(os.path.join(USERDIR, '**', '*.ipynb'), recursive=True):
+        for nb in USERDIR.rglob('**/*.ipynb'):
             sh.rm(nb)
-        for nbch in iglob(os.path.join(USERDIR, '**', '.ipynb_checkpoints'), recursive=True):
+        for nbch in USERDIR.glob('**/.ipynb_checkpoints'):
             sh(f'rm -r {nbch}')
 
     # ..................................................................................................................
@@ -255,29 +258,28 @@ class BuildDocumentation(object):
         # make tutorials.zip
 
         # clean notebooks output
-        for nb in iglob(os.path.join(DOCDIR, '**', '*.ipynb'), recursive=True):
+        for nb in DOCDIR.rglob('**/*.ipynb'):
             # This will erase all notebook output
             sh(f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {nb}", silent=True)
 
         # make zip of all ipynb
         def zipdir(path, dest, ziph):
             # ziph is zipfile handle
-            for nb in iglob(os.path.join(path, '**', '*.ipynb'), recursive=True):
-                # # remove outputs
-                if '.ipynb_checkpoints' in nb:
+            for nb in path.rglob('**/*.ipynb'):
+                if '.ipynb_checkpoints' in nb.parent.suffix:
                     continue
-                basename = os.path.basename(nb).split(".ipynb")[0]
+                basename = nb.stem
                 sh(f"jupyter nbconvert {nb} --to notebook"
                    f" --ClearOutputPreprocessor.enabled=True"
                    f" --stdout > out_{basename}.ipynb")
                 sh(f"rm {nb}", silent=True)
                 sh(f"mv out_{basename}.ipynb {nb}", silent=True)
-                arcnb = nb.replace(path, dest)
+                arcnb = str(nb).replace(str(path), str(dest))
                 ziph.write(nb, arcname=arcnb)
 
         zipf = zipfile.ZipFile('~notebooks.zip', 'w', zipfile.ZIP_STORED)
         zipdir(USERDIR, 'notebooks', zipf)
-        zipdir(os.path.join(GALLERYDIR, 'auto_examples'), os.path.join('notebooks', 'examples'), zipf)
+        zipdir(GALLERYDIR / 'auto_examples', Path('notebooks') / 'examples', zipf)
         zipf.close()
 
         sh(f"mv ~notebooks.zip {DOWNLOADS}/{self.doc_version}-{PROJECT}-notebooks.zip")
@@ -295,7 +297,7 @@ class BuildDocumentation(object):
         <body></body>
         </html>
         """
-        with open(os.path.join(HTML, 'index.html'), 'w') as f:
+        with open(HTML / 'index.html', 'w') as f:
             f.write(html)
 
     # ..................................................................................................................
@@ -304,9 +306,9 @@ class BuildDocumentation(object):
 
         doc_version = self.doc_version
 
-        shutil.rmtree(os.path.join(HTML, doc_version), ignore_errors=True)
-        shutil.rmtree(os.path.join(LATEX, doc_version), ignore_errors=True)
-        shutil.rmtree(os.path.join(DOCTREES, doc_version), ignore_errors=True)
+        shutil.rmtree(HTML / doc_version, ignore_errors=True)
+        shutil.rmtree(LATEX / doc_version, ignore_errors=True)
+        shutil.rmtree(DOCTREES / doc_version, ignore_errors=True)
         shutil.rmtree(API, ignore_errors=True)
         shutil.rmtree(GALLERYDIR, ignore_errors=True)
 
@@ -318,29 +320,30 @@ class BuildDocumentation(object):
 
         # Create regular directories.
         build_dirs = [
-                os.path.join(DOCTREES, doc_version),
-                os.path.join(HTML, doc_version),
-                os.path.join(LATEX, doc_version),
+                DOCTREES / doc_version,
+                HTML / doc_version,
+                LATEX / doc_version,
                 DOWNLOADS,
-                os.path.join(DOCDIR, '_static'),
+                DOCDIR / '_static',
                 ]
         for d in build_dirs:
-            os.makedirs(d, exist_ok=True)
+            Path.mkdir(d, exist_ok=True)
 
     # ..................................................................................................................
     def make_changelog(self):
         # Utility to update changelog (using the GITHUB API)
 
+        print(f'\n{"-"*80}\nMake Change  logs\n')
         print("getting latest release tag")
-        LATEST = os.path.join(API_GITHUB_URL, "repos", REPO_URI, "releases", "latest")
+        LATEST = f'{API_GITHUB_URL}/repos/{REPO_URI}/releases/latest'
         tag = json.loads(requests.get(LATEST).text)['tag_name']
 
         milestone = self.doc_version
-        print(milestone)
+
         if milestone == 'latest':
             # we build the latest
             tag = tag.split('.')
-            milestone = f"{tag[0]}.{tag[1]}.{int(tag[2]) + 1}"  # TODO: this will not work if we change the minor or
+            milestone = f"{tag[0]}.{tag[1]}.{int(tag[2]) }"  # TODO: this will not work if we change the minor or
             # major
         else:
             milestone = tag
@@ -348,27 +351,34 @@ class BuildDocumentation(object):
         def get(milestone, label):
             print("getting list of issues with label ", label)
             issues = API_GITHUB_URL + "/search/issues?q=repo:" + REPO_URI
-            issues += "+milestone:" + milestone + "+is:closed+label:" + label
+            issues += "+milestone:" + milestone + "+is:closed"
+            if label != "pr":
+                issues += "+label:" + label
+            else:
+                issues += "+type:pr"
             return json.loads(requests.get(issues).text)['items']
 
         # Create a versionlog file for the current target
+        prs = get(milestone, "pr")
         bugs = get(milestone, "bug")
         features = get(milestone, "enhancement")
         tasks = get(milestone, "task")
 
-        with open(os.path.join(TEMPLATES, 'versionlog.rst'), 'r') as f:
+        with open(TEMPLATES / 'versionlog.rst', 'r') as f:
             template = Template(f.read())
-        out = template.render(target=milestone, bugs=bugs, features=features, tasks=tasks)
+        out = template.render(target=milestone, prs=prs, bugs=bugs, features=features, tasks=tasks)
 
-        with open(os.path.join(DOCDIR, 'versionlogs', f'versionlog.{milestone}.rst'), 'w') as f:
+        change = DOCDIR / 'versionlogs' / f'versionlog.{milestone}.rst'
+        with open(change, 'w') as f:
             f.write(out)
+            print(f'\n{"-" * 80}\nversion {milestone} log written to:\n{change}\n{"-"*80}')
 
         # make the full version history
-        lhist = sorted(iglob(os.path.join(DOCDIR, 'versionlogs', '*.rst')))
+        lhist = sorted(DOCDIR.glob('versionlogs/*.rst'))
         lhist.reverse()
         history = ""
         for filename in lhist:
-            if '.'.join(filename.split('.')[-4:-1]) > milestone:
+            if filename.stem.replace('versionlog.','') > milestone:
                 continue  # do not take into account future version for change log - obviously!
             with open(filename, 'r') as f:
                 history += "\n\n"
@@ -378,16 +388,16 @@ class BuildDocumentation(object):
                 history += nh
         history += '\n'
 
-        with open(os.path.join(TEMPLATES, 'changelog.rst'), 'r') as f:
+        with open( TEMPLATES / 'changelog.rst', 'r') as f:
             template = Template(f.read())
         out = template.render(history=history)
 
-        outfile = os.path.join(DOCDIR, 'api', 'changelog.rst')
+        outfile = DOCDIR / 'gettingstarted' / 'changelog.rst'
         with open(outfile, 'w') as f:
             f.write(out)
+            print(f'`Complete what\'s new` log written to:\n{outfile}\n{"-" * 80}')
 
-        sh.pandoc(outfile, '-f', 'rst', '-t', 'markdown', '-o',
-                  os.path.join(PROJECTDIR, 'CHANGELOG.md'))
+        sh.pandoc(outfile, '-f', 'rst', '-t', 'markdown', '-o', PROJECTDIR / 'CHANGELOG.md')
 
         return
 
@@ -395,4 +405,7 @@ class BuildDocumentation(object):
 Build = BuildDocumentation()
 
 if __name__ == '__main__':
+    from os import environ
+    environ['DOC_BUILDING'] = 'yes'
     Build()
+    del environ['DOC_BUILDING']

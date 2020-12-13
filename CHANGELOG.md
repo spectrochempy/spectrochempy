@@ -2,6 +2,9 @@
 
 ## Version 0.1.22
 
+-   [\#146](https://api.github.com/repos/spectrochempy/spectrochempy/issues/146)
+    : 3.8 compatibility + some fixes
+
 ### Bugs fixed
 
 -   FIX

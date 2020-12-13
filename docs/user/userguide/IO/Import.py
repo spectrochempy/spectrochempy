@@ -23,7 +23,7 @@
 # First, let's ``import spectrochempy as scp`` in the current
 # namespace, so that all spectrochempy commands will be called as ```scp.method(<method parameters>)```.
 
-# %% {"incorrectly_encoded_metadata": "{\"jupyter\": {\"outputs_hidden\": false}, \"pycharm\": {\"name\":
+# %% {"incorrectly_encoded_metadata": "{\"incorrectly_encoded_metadata\": \"{\\\"jupyter\\\": {\\\"outputs_hidden\\\": false}, \\\"pycharm\\\": {\\\"name\\\":"}
 # \"#%%\\n\"}} import spectrochempy as scp"}
 import spectrochempy as scp
 

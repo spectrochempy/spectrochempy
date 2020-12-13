@@ -11,7 +11,7 @@ our NDDataset objects
 
 """
 __all__ = ['diag', 'dot', 'empty', 'empty_like', 'zeros', 'eye', 'identity', 'zeros_like', 'ones',
-           'ones_like', 'full', 'full_like']
+           'ones_like', 'full', 'full_like', 'arange', 'linspace']
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
@@ -66,6 +66,57 @@ def empty(shape, dtype=None, **kwargs):
 
     """
     return NDDataset(np.empty(shape, dtype=np.dtype(dtype)), **kwargs)
+
+
+def arange(start=0, stop=None, step=None, dtype=None, **kwargs):
+    """
+
+    """
+    return NDDataset(np.arange(start, stop, step, dtype=np.dtype(dtype)), **kwargs)
+
+
+def linspace(start, stop, num=50, endpoint=True, dtype=None, **kwargs):
+
+    return NDDataset(np.linspace(start, stop, num=50, endpoint=True), **kwargs)
+
+
+
+def zeros(shape, dtype=None, **kwargs):
+    """
+    Return a new |NDDataset| of given shape and type, filled with zeros.
+
+    Parameters
+    ----------
+    shape : int or sequence of ints
+        Shape of the new array, e.g., ``(2, 3)`` or ``2``.
+    dtype : data-type, optional
+        The desired data-type for the array, e.g., `numpy.int8`.  Default is
+        `numpy.float64`.
+    **kwargs : keyword args to pass to the |NDDataset| constructor
+
+    Returns
+    -------
+    out : |NDDataset|
+        Array of zeros with the given shape, dtype.
+
+    See Also
+    --------
+    ones, zeros_like
+
+    Examples
+    --------
+    >>> import spectrochempy as scp
+    >>> nd = scp.zeros(5)
+    >>> nd
+    NDDataset: [float64] unitless (size: 5)
+    >>> nd.values
+    array([       0,        0,        0,        0,        0])
+    >>> nd = scp.zeros((5,10), dtype=np.int, units='absorbance')
+    >>> nd
+    NDDataset: [int64] a.u. (shape: (y:5, x:10))
+
+    """
+    return NDDataset(np.zeros(shape, dtype=np.dtype(dtype)), **kwargs)
 
 
 def zeros(shape, dtype=None, **kwargs):

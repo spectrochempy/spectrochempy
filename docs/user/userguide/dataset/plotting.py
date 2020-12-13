@@ -32,9 +32,9 @@ from spectrochempy import *   # noqa: F403
 
 # %% [markdown]
 # Let's first import a NDDataset from a file:
-
-dataset = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
-print(dataset.description)
+#
+# dataset = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
+# print(dataset.description)
 
 # %% [markdown]
 # To plot a dataset, use the `plot` command (generic plot). As the current NDDataset is 2D, a contour plot is

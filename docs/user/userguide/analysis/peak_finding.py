@@ -20,8 +20,8 @@
 # This tutorial shows how to find peaks and determine peak maxima with spectrochempy. As prerequisite, the user is
 # expected to have read the [Import](../IO/import.ipynb), [Import IR](../IO/importIR.ipynb),
 # [slicing](../processing/slicing.ipynb) tutorials. First lets import the modules that will be used in this tutorial:
-
-import matplotlib.pyplot as plt  # will be used for some plots
+#
+# import matplotlib.pyplot as plt  # will be used for some plots
 
 # %% execution={"iopub.execute_input": "2020-06-22T12:21:23.143Z", "iopub.status.busy": "2020-06-22T12:21:23.097Z",
 # "iopub.status.idle": "2020-06-22T12:21:29.376Z", "shell.execute_reply": "2020-06-22T12:21:29.348Z"}

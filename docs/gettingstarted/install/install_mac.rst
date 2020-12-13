@@ -1,20 +1,20 @@
 .. _install_mac:
 
-Installation Guide for Mac and linux
-====================================
+Installation Guide for Mac OSX
+===============================
 
 Installation
 -------------
 
 .. _conda_mac:
 
-The following steps have been checked only with OSX-Catalina but should work
-with previous versions as well.
+The following steps have been checked only with OSX-Catalina but should work with previous versions as well and
+hopfully on the more recent OSX version.
 
-We highly recommend that all new users install |scpy| interface via Conda. You
-can install Spectrochempy in a dedicated environment (recommended, steps 4.
-and 5. below). You can also use your base environment or an existing
-environment (then skip steps 4. and 5.)
+As said before, we highly recommend that all new users install |scpy|
+interface via Conda. You can install |scpy| in a dedicated
+environment (recommended, steps 4. and 5. below). You can also use your base environment or an existing environment
+(then skip steps 4. and 5.)
 
 #.  Open a terminal and update conda:
 
@@ -22,19 +22,23 @@ environment (then skip steps 4. and 5.)
 
         (base)  ~ $ conda update conda
 
-    you exact prompt may be different depending on the shell you are using and
-    its configuration
+    your exact prompt may be different depending on the shell you are using and its configuration
 
-#.  Add channels to get specific packages:
+#.  Add channels to the base configuration to simplify the installation of specific packages from different sources:
 
     .. sourcecode:: bash
 
+        (base)  ~ $ conda config --add channels spectrocat
         (base)  ~ $ conda config --add channels conda-forge
         (base)  ~ $ conda config --add channels cantera
-        (base)  ~ $ conda config --add channels spectrocat
 
-#.  **Recommended**: you can create a dedicated environment. We will name it
-    `scpy` in this example
+    Note that the last line about cantera is only require if you intend to work the kinetics modules of |scpy|.
+
+#.  **Recommended**: you should create a dedicated environment in order to
+    isolate the changes made on the installed library from any other previous
+    installation for another applcation.
+
+    We will name this new environment :`scpy` in this example
 
     .. sourcecode:: bash
 
@@ -142,4 +146,3 @@ Spectrochempy is likely functional !
 
 The recommended next step is to proceed to the :ref:`userguide` or the
 :ref:`tutorials`
-

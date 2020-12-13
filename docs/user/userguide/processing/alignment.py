@@ -15,8 +15,8 @@
 
 # %% [markdown]
 # # Alignment of datasets
-
-import os
+#
+# import os
 
 # %%
 import spectrochempy as scp

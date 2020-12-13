@@ -51,7 +51,7 @@
 
    -  **mask**,
    -  **units**,
-   -  and **coords**.
+   -  and **coordset**.
 
    Additional metadata can also be added to the instances of this class
    through the ``meta`` properties.

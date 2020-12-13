@@ -16,8 +16,8 @@
 
 # %% [markdown]
 # # Project management
-
-from pathlib import Path
+#
+# from pathlib import Path
 
 # %%
 from spectrochempy import NDDataset, Project

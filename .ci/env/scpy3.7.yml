@@ -29,7 +29,6 @@ dependencies:
     - numba
     - numpy
     - orderedset
-    - pandas
     - pint
     - plotly
     - pyqt

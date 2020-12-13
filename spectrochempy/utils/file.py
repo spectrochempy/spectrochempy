@@ -319,7 +319,7 @@ def get_filename(*filenames, **kwargs):
     from spectrochempy.api import NO_DISPLAY, NO_DIALOG
     from spectrochempy.core import open_dialog
 
-    NODIAL = NO_DIALOG
+    NODIAL = NO_DIALOG or 'DOC_BUILDING' in environ  # suppress dialog when doc is built or during full testing
 
     # allowed filetypes
     # -----------------
@@ -550,14 +550,16 @@ def check_filename_to_save(dataset, filename=None, save_as=True, **kwargs):
     from spectrochempy.api import NO_DIALOG
     from spectrochempy.core import save_dialog
 
+    NODIAL = NO_DIALOG or 'DOC_BUILDING' in environ
+
     if not filename or save_as:
 
         # no filename provided
-        if filename is None or (NO_DIALOG and pathclean(filename).resolve().is_dir()):
+        if filename is None or (NODIAL and pathclean(filename).resolve().is_dir()):
             filename = dataset.name
             filename = filename + kwargs.get('suffix', '.scp')
 
-        if not NO_DIALOG:
+        if not NODIAL:
             filename = save_dialog(caption=kwargs.get('caption', 'Save as ...'),
                                    filename=filename,
                                    filters=kwargs.get('filetypes', ['All file types (*.*)']))

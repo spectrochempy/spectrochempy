@@ -4,8 +4,9 @@
 Examples Gallery
 ================
 
-Many example on how to use of the API can be found in this gallery
+Many examples on the use of the API can be found in this gallery. Notebook and standalone python scripts can be
+downloaded using the link at the bottom of each example.
 
-.. contents:: Contents
+.. contents:: Table of Contents
    :local:
-   :depth: 2
+   :depth: 3

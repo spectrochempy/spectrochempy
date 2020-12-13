@@ -16,8 +16,8 @@
 
 # %% [markdown]
 # # Mathematical operations
-
-import numpy as np
+#
+# import numpy as np
 
 # %%
 import spectrochempy as scp

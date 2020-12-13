@@ -40,9 +40,9 @@ from spectrochempy import *   # noqa: F403
 # by default, if it doesn't find the path in the current directory.
 #
 # </div>
-datadir = general_preferences.datadir
-if os.path.exists(datadir):
-    print(datadir)
+# datadir = general_preferences.datadir
+# if os.path.exists(datadir):
+#     print(datadir)
 
 # %%
 # !cd C:\Users\christian\anaconda3\envs\scpy\lib\site-packages\scp_data\testdata

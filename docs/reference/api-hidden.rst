@@ -1,5 +1,4 @@
 .. Generate API reference pages, but don't display these in tables.
-.. method copied from xarray
 
 :orphan:
 
@@ -12,7 +11,7 @@
    NDDataset.ab
    NDDataset.abs
    NDDataset.absolute
-   NDDataset.add_coords
+   NDDataset.add_coordset
    NDDataset.add_traits
    NDDataset.align
    NDDataset.all
@@ -39,7 +38,7 @@
    NDDataset.cumprod
    NDDataset.cumproduct
    NDDataset.cumsum
-   NDDataset.delete_coords
+   NDDataset.delete_coordset
    NDDataset.detrend
    NDDataset.diag
    NDDataset.em
@@ -99,7 +98,7 @@
    NDDataset.save
    NDDataset.savgol_filter
    NDDataset.set_complex
-   NDDataset.set_coords
+   NDDataset.set_coordset
    NDDataset.set_coordtitles
    NDDataset.set_coordunits
    NDDataset.set_hypercomplex
@@ -119,10 +118,7 @@
    NDDataset.swapaxes
    NDDataset.take
    NDDataset.to
-   NDDataset.to_dataframe
-   NDDataset.to_pandas
    NDDataset.to_panel
-   NDDataset.to_xarray
    NDDataset.trait_events
    NDDataset.trait_metadata
    NDDataset.trait_names
@@ -135,4 +131,3 @@
    NDDataset.var
    NDDataset.write
    NDDataset.write_jdx
-

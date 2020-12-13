@@ -22,8 +22,8 @@
 # expected to have read the [Import Tutorial](Import.ipynb).
 #
 # Let's first import spectrochempy:
-
-import os
+#
+# import os
 
 # %% {"jupyter": {"outputs_hidden": false}, "pycharm": {"name": "#%%\n"}}
 import spectrochempy as scp

@@ -1,4 +1,4 @@
-.. _api_loading:
+.. _api_reference:
 
 .. currentmodule:: spectrochempy
 
@@ -142,8 +142,6 @@ Export a NDDataset
     :nosignatures:
     :toctree: generated/
 
-    to_xarray
-    to_dataframe
     write_jdx
 
 
@@ -154,9 +152,9 @@ Coordinates manipulation
     :nosignatures:
     :toctree: generated/
 
-    add_coords
+    add_coordset
     coord
-    delete_coords
+    delete_coordset
 
 
 Select data in a NDDataset

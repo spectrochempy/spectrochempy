@@ -19,6 +19,7 @@ processing, analysis, etc...
 #                                 FutureWarning, UserWarning))
 
 import os
+from os import environ
 import sys
 import warnings
 
@@ -109,20 +110,24 @@ __all__ += ['info_', 'debug_', 'error_', 'warning_', 'print_']
 # Progress bar
 # ======================================================================================================================
 pbar_count = 0
-pbar = tqdm(total=1211)
-pbar.set_description('Loading SpectroChemPy API')
-val_tqdm = [1, 39, 52, 83, 83, 89, 92, 93, 94, 95, 96, 97, 98, 99, 100]
+
+USE_TQDM = environ.get('USE_TQDM', 'Yes') == 'Yes' and 'DOC_BUILDING'not in environ and "/bin/scpy" not in sys.argv[0]
+
+if USE_TQDM:
+    pbar = tqdm(total=1211)
+    pbar.set_description('Loading SpectroChemPy API')
+    val_tqdm = [1, 39, 52, 83, 83, 89, 92, 93, 94, 95, 96, 97, 98, 99, 100]
 
 
 def _pbar_update(close=None):
 
     global pbar_count
 
-    if os.environ.get('USE_TQDM', 'Yes') == 'Yes' and "/bin/scpy" not in sys.argv[0]:  # deactivate for console scripts
+    if USE_TQDM:
 
         if close:
             pbar.clear()
-            pbar.close()
+            pbar_count = 0
         else:
             pbar.update(val_tqdm[pbar_count])
             pbar_count += 1

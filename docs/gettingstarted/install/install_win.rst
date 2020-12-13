@@ -37,8 +37,8 @@ can install Spectrochempy in a dedicated environment (recommended, steps 4. and
     .. sourcecode:: bat
 
         (base) C:\<yourDefaultPath>> conda config --add channels conda-forge
-        (base) C:\<yourDefaultPath>> conda config --add channels cantera
         (base) C:\<yourDefaultPath>> conda config --add channels spectrocat
+        (base) C:\<yourDefaultPath>> conda config --add channels cantera
 
 #.  **Recommended**: you can create a dedicated environment. We will name it
     `scpy` in this example
@@ -138,4 +138,3 @@ Spectrochempy is likely functional !
 
 The recommended next step is to proceed to the :ref:`userguide` or the
 :ref:`tutorials`
-
