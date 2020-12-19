@@ -19,7 +19,7 @@ __dataset_methods__ = []
 # ----------------------------------------------------------------------------------------------------------------------
 
 import numpy as np
-from datetime import datetime
+from datetime import datetime, timezone
 from traitlets import HasTraits, Instance
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -95,7 +95,7 @@ class EFA(HasTraits):
                       coordset=[X.y, Coord(range(K))],
                       title='EigenValues',
                       description='Forward EFA of ' + X.name,
-                      history=str(datetime.now()) + ': created by spectrochempy ')
+                      history=str(datetime.now(timezone.utc)) + ': created by spectrochempy ')
 
         # in case some row are masked, take this into account, by masking
         # the corresponding rows of f
@@ -121,7 +121,7 @@ class EFA(HasTraits):
                       coordset=[X.y, Coord(range(K))],
                       title='EigenValues',
                       name='Backward EFA of ' + X.name,
-                      history=str(datetime.now()) + ': created by spectrochempy ')
+                      history=str(datetime.now(timezone.utc)) + ': created by spectrochempy ')
 
         b[masked_rows] = MASKED
 
@@ -203,7 +203,7 @@ class EFA(HasTraits):
                       name='C_EFA[{}]'.format(self._X.name),
                       title='relative concentration',
                       description='Concentration profile from EFA',
-                      history=str(datetime.now()) + ': created by spectrochempy')
+                      history=str(datetime.now(timezone.utc)) + ': created by spectrochempy')
         if self._X.is_masked:
             masked_rows = np.all(self._X.mask, axis=-1)
         else:

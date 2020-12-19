@@ -19,9 +19,37 @@ from spectrochempy.utils.testing import (
     assert_approx_equal,
     )
 
+
 # TODO: a lot of repetition - must be simplified with some logics
 
 typequaternion = np.dtype(np.quaternion)
+
+
+
+def test_ndarray_comparison(ndarray, ndarrayunit, ndarraycplx, ndarrayquaternion):
+    # test comparison
+
+    nd1 = ndarray.copy()
+
+    assert nd1 == ndarray
+    assert nd1 is not ndarray
+
+    nd2 = ndarrayunit.copy()
+    assert nd2 == ndarrayunit
+
+    assert nd1 != nd2
+    assert not nd1 == nd2
+
+    nd3 = ndarraycplx.copy()
+    assert nd3 == ndarraycplx
+
+    nd4 = ndarrayquaternion.copy()
+    assert nd4 == ndarrayquaternion
+
+    assert nd1 != 'xxxx'
+
+    nd2n = nd2.to(None, force=True)
+    assert nd2n != nd2
 
 
 def test_ndcomplex_init_quaternion_witharray():
@@ -317,6 +345,9 @@ def test_ndcomplex_squeeze(ndarrayunit):
     nd1 = nd.set_complex()
     assert nd1.shape == (10, 4)
     info_(nd1)
+    print(nd1)
+    print_(nd1)
+    print(nd1._repr_html_())
 
     d = nd[..., 0]
     d = d.squeeze()

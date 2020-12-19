@@ -21,10 +21,10 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndmath import unary_ufuncs, binary_ufuncs, comp_ufuncs
 from spectrochempy.units.units import ur, Quantity, Unit
 from spectrochempy.utils import (MASKED, TYPE_FLOAT, TYPE_INTEGER)
-from spectrochempy.utils.testing import (
-    assert_array_equal,
-    assert_equal_units,
-    )
+from spectrochempy.utils.testing import assert_array_equal, assert_equal_units, assert_dataset_equal, RandomSeedContext
+
+
+import spectrochempy as scp
 
 typequaternion = np.dtype(np.quaternion)
 
@@ -47,12 +47,13 @@ def test_ndmath_show():
 # -----------
 @pytest.mark.parametrize(('name', 'comment'), unary_ufuncs().items())
 def test_ndmath_unary_ufuncs_simple_data(nd2d, pnl, name, comment):
+
     nd1 = nd2d.copy() / 1.e+10  # divide to avoid some overflow in exp ufuncs
+
     info_(f"\n{name}   # {comment}")
 
-    # simple NDDataset
-    # -----------------
-    info_(nd1)
+    # simple unitless NDDataset
+    # --------------------------
     print_(nd1)
     assert nd1.unitless
 
@@ -62,28 +63,31 @@ def test_ndmath_unary_ufuncs_simple_data(nd2d, pnl, name, comment):
     # assert isinstance(r, NDDataset)
 
     # NDDataset with units
-    # ----------
+    # ---------------------
     nd1.units = ur.absorbance
-    info_('units ', nd1)
+    info_('units ', nd1.units)
     f = getattr(np, name)
 
     # TODO: some ufunc suppress the units! see pint.
     skip = False
-    try:
-        f(Quantity(1., nd1.units)).units
-    except TypeError as e:
-        error_(f"{name} :", e)
-        skip = True
-    except AttributeError:
-        if name in ['positive', 'fabs', 'cbrt', 'spacing',
-                    'signbit', 'isnan', 'isinf', 'isfinite', 'logical_not',
-                    'log2', 'log10', 'log1p', 'exp2', 'expm1']:
-            pass  # already solved
-        else:
-            info_(f"\n =======> {name} remove units! \n")
-    except DimensionalityError as e:
-        error_(f"{name} :", e)
-        skip = True
+
+    # if name not in NDDataset.__remove_units__:
+    #
+    #     try:
+    #         f(Quantity(1., nd1.units)).units
+    #     except TypeError as e:
+    #         error_(f"{name} :", e)
+    #         skip = True
+    #     except AttributeError:
+    #         if name in ['positive', 'fabs', 'cbrt', 'spacing',
+    #                     'signbit', 'isnan', 'isinf', 'isfinite', 'logical_not',
+    #                     'log2', 'log10', 'log1p', 'exp2', 'expm1']:
+    #             pass  # already solved
+    #         else:
+    #             info_(f"\n =======> {name} remove units! \n")
+    #     except DimensionalityError as e:
+    #         error_(f"{name} :", e)
+    #         skip = True
 
     if not skip:
         try:
@@ -106,7 +110,7 @@ def test_ndmath_unary_ufuncs_simple_data(nd2d, pnl, name, comment):
 
     # NDPanel
     # -----------------
-    if name not in ['sign', 'logical_not', 'isnan', 'isfinite', 'isinf', 'signbit', ]:
+    if name not in ['sign','logical_not', 'isnan', 'isfinite', 'isneginf', 'isinf', 'signbit', 'fix']:
         info_('panel before', pnl)
 
         f = getattr(np, name)
@@ -125,7 +129,7 @@ def test_bug_lost_dimensionless_units():
     import os
     dataset = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
     assert dataset.units == 'absorbance'
-    dataset = dataset - 2.  # artificially make negative some of the values
+    dataset = dataset - 2. - 50. # artificially make negative some of the values
     assert dataset.units == 'absorbance'
 
     dataset = dataset.clip(-2., 2.)
@@ -780,3 +784,132 @@ def test_array_creation():
     # df = identity(2, units='m')
     # df.units = ur.m
     # assert np.all(df.data == np.array([[1., 0.], [0., 1.]]))
+
+def test_api_methods():
+
+    ref = NDDataset(np.diag((3,3.4,2.3)), units='m', title='something')
+
+    # Three forms should return the same NDDataset
+    print("\n ds = scp.diag((3,3.4,2.3), units='m', title='something')")
+    ds = scp.diag((3,3.4,2.3), units='m', title='something')
+    assert_dataset_equal(ds, ref)
+
+    print("\n ds = NDDataset.diag((3, 3.4, 2.3), units='m', title='something')")
+    ds = NDDataset.diag((3, 3.4, 2.3), units='m', title='something')
+    assert_dataset_equal(ds, ref)
+
+    print("\n ds = NDDataset().diag((3, 3.4, 2.3), units='m', title='something')")
+    ds = NDDataset((3, 3.4, 2.3)).diag(units='m', title='something')
+    assert_dataset_equal(ds, ref)
+
+    # and this too
+    ds1 = NDDataset((3,3.4,2.3), units='s', title='another')
+
+    with pytest.raises(TypeError):
+        # "Units are  already set in the first object!"
+        ds = scp.diag(ds1, units='m', title='something')
+
+    print("\n ds = scp.diag(ds1, title='something')")
+    ds = scp.diag(ds1, title='something')
+    ds.ito("m", force=True)
+    assert_dataset_equal(ds, ref)
+
+    print('*'*50)
+    print("\n ds = ds1.diag(units='m', title='something')")
+    ds = ds1.diag(units='m', title='something')
+    assert_dataset_equal(ds, ref)
+
+def test_nddataset_max_min_with_1D_real(IR_dataset_1D):
+    # test on a 1D NDDataset
+    nd1 = IR_dataset_1D
+    nd1[1] = True
+    assert nd1.is_masked
+    info_(nd1)
+    assert "[float32]" in str(nd1)
+    mx = nd1.max()
+    assert mx == Quantity(6.0, 'absorbance')
+    mx = nd1.max(keepdims=1)
+    assert isinstance(mx, NDDataset)
+    # assert mx.data == pytest.approx(6.0)
+
+
+def test_nddataset_max_with_2D_real(IR_dataset_2D):
+    # test on a 2D NDDataset
+    nd2 = IR_dataset_2D
+    nd2 = nd2[:, 4000.:1300.]
+    ndmt = nd2.min()  # no axis specified
+    info_(ndmt)
+    nd2m = nd2.max('y')  # axis selected
+    info_(nd2m)
+    nd2m2 = nd2.min('x')  # axis selected
+    info_(nd2m2)
+    pass
+
+
+def test_nddataset_fancy_indexing():
+    # numpy vs dataset
+    rand = np.random.RandomState(42)
+    x = rand.randint(100, size=10)
+
+    # single value indexing
+    info_(x[3], x[7], x[2])
+    dx = NDDataset(x)
+    assert (dx[3].data, dx[7].data, dx[2].data) == (x[3], x[7], x[2])
+
+    # slice indexing
+    info_(x[3:7])
+    assert_array_equal(dx[3:7].data, x[3:7])
+
+    # boolean indexing
+    info_(x[x > 52])
+    assert_array_equal(dx[x > 52].data, x[x > 52])
+
+    # fancy indexing
+    ind = [3, 7, 4]
+    info_(x[ind])
+    assert_array_equal(dx[ind].data, x[ind])
+
+    ind = np.array([[3, 7], [4, 5]])
+    info_(x[ind])
+    assert_array_equal(dx[ind].data, x[ind])
+
+    with RandomSeedContext(1234):
+        a = np.random.random((3, 5)).round(1)
+    c = (np.arange(3), np.arange(5))
+    nd = NDDataset(a, coordset=c)
+    info_(nd)
+    a = nd[[1, 0, 2]]
+    info_(a)
+    a = nd[np.array([1, 0])]
+    info_(a)
+
+
+def test_nddataset_extrema():
+    with RandomSeedContext(1234):
+        a = np.random.random((3, 5)).round(1)
+    c = (np.arange(3) * 10.0 * ur.s, np.arange(5) * 7.0 * ur.kg)
+    nd = NDDataset(a, coordset=c, units='m')
+    info_(nd)
+
+    mi = nd.min()
+    assert mi == Quantity(0.2, 'meter')
+
+    ma = nd.max()
+    assert ma == Quantity(1.0, 'meter')
+
+    ma = np.max(nd, keepdims=True)
+    assert isinstance(ma, NDDataset)
+    assert ma.shape == (1, 1)
+    assert ma.x.data == np.array([21])
+    assert ma.y.data == np.array([10])
+
+    mi = nd.min(keepdims=True)
+    assert isinstance(mi, NDDataset)
+
+    info_('_____________________________')
+    mi1 = nd.min(dim='y')
+    info_('minimum', mi1)
+    # ma1 = nd.max('x')
+    # info_('X :', ma1)
+    # ma2 = nd.max('y')
+    # info_('Y :', ma2)

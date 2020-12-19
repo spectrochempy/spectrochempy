@@ -176,8 +176,8 @@ def _read_opus(*args, **kwargs):
     dataset.name = filename.name
     dataset.origin = "opus"
     dataset.description = 'Dataset from opus files. \n'
-    dataset.history = str(datetime.now()) + ': import from opus files \n'
-    dataset._date = datetime.now()
+    dataset.history = str(datetime.now(timezone.utc)) + ': import from opus files \n'
+    dataset._date = datetime.now(timezone.utc)
     dataset._modified = dataset.date
 
     return dataset

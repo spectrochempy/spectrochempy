@@ -11,7 +11,7 @@ __dataset_methods__ = ['find_peaks']
 
 import scipy.signal
 import numpy as np
-from datetime import datetime
+from datetime import datetime, timezone
 
 """wrappers of scipy.signal peak finding functions"""
 
@@ -171,6 +171,8 @@ def find_peaks(X, height=None, window_length=3, threshold=None, distance=None,
     if X.ndim > 2 or (X.ndim == 2 and len(X.y) > 1):
         raise ValueError("Works only for 1D NDDataset or a 2D NDdataset with `len(X.y) <= 1`")
 
+    X = X.squeeze()
+
     if window_length % 2 == 0:
         raise ValueError("window_length must be an odd integer")
 
@@ -193,7 +195,7 @@ def find_peaks(X, height=None, window_length=3, threshold=None, distance=None,
         if isinstance(plateau_size, float):
             plateau_size = int(round(plateau_size / step))
 
-    data = X.data.squeeze()
+    data = X.data
     peaks, properties = scipy.signal.find_peaks(data, height=height, threshold=threshold,
                                                 distance=distance, prominence=prominence, width=width, wlen=wlen,
                                                 rel_height=rel_height, plateau_size=plateau_size)
@@ -248,6 +250,6 @@ def find_peaks(X, height=None, window_length=3, threshold=None, distance=None,
                 properties['plateau_sizes'][i] = np.abs(properties['left_edges'][i] - properties['right_edges'][i])
 
     out.name = 'peaks of ' + X.name
-    out.history[-1] = str(datetime.now()) + f': find_peaks(): {len(peaks)} peak(s) found'
+    out.history[-1] = str(datetime.now(timezone.utc)) + f': find_peaks(): {len(peaks)} peak(s) found'
 
     return out, properties

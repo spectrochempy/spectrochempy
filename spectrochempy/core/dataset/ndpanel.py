@@ -20,7 +20,7 @@ __dataset_methods__ = []
 
 # import itertools
 import textwrap
-# from datetime import datetime
+# from datetime import datetime, timezone
 # import warnings
 # import uuid
 
@@ -115,7 +115,7 @@ class NDPanel(
     # ..................................................................................................................
     def __dir__(self):
         # Warning : keep the order of the first elements (needed for save/load operations
-        return ['datasets', 'coordset', 'dims', 'name', 'title', 'meta', 'plotmeta',
+        return ['datasets', 'coordset', 'dims', 'name', 'title', 'meta', 'preferences',
                 'description', 'history', 'date', 'modified'] + NDIO().__dir__()
 
     # ..................................................................................................................

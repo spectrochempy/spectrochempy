@@ -8,10 +8,10 @@
 import pytest
 
 from spectrochempy.core import info_
-
+from spectrochempy.core.dataset.nddataset import  NDDataset
 
 def test_findpeaks(IR_dataset_1D):
-    dataset = IR_dataset_1D.copy()
+    dataset = IR_dataset_1D
     info_(dataset)
 
     peaks, properties = dataset[1800.0:1300.0].find_peaks(height=1.5, distance=50.0, width=0.0)

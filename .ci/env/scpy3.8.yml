@@ -21,6 +21,7 @@ dependencies:
     - colorama
     - dash
     - dash-bootstrap-components
+    - dash-daq
     - dill
     - docrep
     - ipython

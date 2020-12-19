@@ -15,7 +15,6 @@ import dill
 from functools import wraps
 from traitlets import (Dict, Instance, Unicode, This, default)
 
-from spectrochempy.core import general_preferences, config_manager
 from spectrochempy.core.dataset.nddataset import NDDataset, NDIO
 from spectrochempy.core.scripts.script import Script
 from spectrochempy.utils import Meta
@@ -23,8 +22,8 @@ from spectrochempy.core.project.baseproject import AbstractProject
 
 # from collections import OrderedDict
 
-cfg = config_manager
-preferences = general_preferences
+#cfg = config_manager
+#preferences = general_preferences
 
 
 # ======================================================================================================================

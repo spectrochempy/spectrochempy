@@ -18,6 +18,7 @@ elements can be accessed by key, but also by attributes, *e.g.*
 
 # import sys
 import copy
+import json
 
 import numpy as np
 
@@ -81,6 +82,8 @@ class Meta(object):  # HasTraits):
     # ------------------------------------------------------------------------------------------------------------------
 
     readonly = False  # Bool(False)
+    parent = None
+    name = None
 
     # ------------------------------------------------------------------------------------------------------------------
     # special methods
@@ -93,13 +96,15 @@ class Meta(object):  # HasTraits):
             The dictionary can be already inited with some keywords.
 
         """
+        self.parent = data.pop('parent', None)
+        self.name = data.pop('name', None)
         self._data = data
 
     def __dir__(self):
-        return ['data', 'readonly']
+        return ['data', 'readonly', 'parent', 'name']
 
     def __setattr__(self, key, value):
-        if key not in ['readonly', '_data', '_trait_values', '_trait_notifiers',
+        if key not in ['readonly', 'parent', 'name',  '_data', '_trait_values', '_trait_notifiers',
                        '_trait_validators', '_cross_validation_lock']:
             self[key] = value
         else:
@@ -107,10 +112,12 @@ class Meta(object):  # HasTraits):
             # we can not use self._readonly = value!
 
     def __getattr__(self, key):
+        if key.startswith('_ipython') or key.startswith('_repr'):
+            raise AttributeError
         return self[key]
 
     def __setitem__(self, key, value):
-        if key in ['readonly'] or key.startswith('_'):
+        if key in self.__dir__() or key.startswith('_'):
             raise KeyError('`{}` can not be used as a metadata key'.format(key))
         elif not self.readonly:
             self._data.update({
@@ -129,6 +136,8 @@ class Meta(object):  # HasTraits):
         ret = self.__class__()
         ret.update(copy.deepcopy(self._data))
         ret.readonly = self.readonly
+        ret.parent = self.parent
+        ret.name = self.name
         return ret
 
     def __deepcopy__(self, memo=None):
@@ -155,6 +164,10 @@ class Meta(object):  # HasTraits):
 
     def __str__(self):
         return str(self._data)
+
+    def _repr_html_(self):
+        s = json.dumps(self._data, sort_keys=True, indent=4)
+        return s.replace('\n','<br/>').replace(' ','&nbsp;')
 
     # ------------------------------------------------------------------------------------------------------------------
     # public methods
@@ -286,6 +299,9 @@ class Meta(object):  # HasTraits):
         newmeta = self.copy()
 
         newmeta.readonly = False
+        newmeta.parent = None
+        newmeta.name = None
+
         for key in self:
             if is_sequence(self[key]) and len(self[key]) > 1:
                 X = newmeta[key]
@@ -294,6 +310,9 @@ class Meta(object):  # HasTraits):
                 newmeta[key] = self[key]
 
         newmeta.readonly = self.readonly
+        newmeta.parent = self.parent
+        newmeta.name = self.name
+
         if not inplace:
             return newmeta
         else:
@@ -315,6 +334,9 @@ class Meta(object):  # HasTraits):
         newmeta = self.copy()
 
         newmeta.readonly = False
+        newmeta.parent = None
+        newmeta.name = None
+
         for key in self:
             if is_sequence(self[key]) and len(self[key]) > 1:
                 newmeta[key] = type(self[key])()
@@ -324,6 +346,9 @@ class Meta(object):  # HasTraits):
                 newmeta[key] = self[key]
 
         newmeta.readonly = self.readonly
+        newmeta.parent = self.parent
+        newmeta.name = self.name
+
         if not inplace:
             return newmeta
         else:

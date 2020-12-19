@@ -181,10 +181,10 @@ def fit_to_concentrations(C, externalConc, external_to_C_idx, reactive_phase, pa
         print('         Initial parameters: {}'.format(guess_param))
         print('         Initial function value: {}'.format(objective(guess_param, param_to_optimize, C, externalConc,
                                                                      external_to_C_idx, reactive_phase)))
-    tic = datetime.datetime.now()
+    tic = datetime.datetime.now(datetime.timezone.utc)
     res = minimize(objective, guess_param, args=(param_to_optimize, C, externalConc, external_to_C_idx, reactive_phase),
                    method=method, bounds=bounds, tol=tol, options=options)
-    toc = datetime.datetime.now()
+    toc = datetime.datetime.now(datetime.timezone.utc)
     guess_param = res.x
     if options['disp']:
         print('         Optimization time: {}'.format((toc - tic)))

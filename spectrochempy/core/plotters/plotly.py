@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 import numpy as np
 
 from spectrochempy.utils import colorscale
-from spectrochempy.core import project_preferences
+from spectrochempy.core import dataset_preferences, project_preferences
 
 # from matplotlib.ticker import MaxNLocator
 
@@ -97,7 +97,7 @@ def plotly(dataset, **kwargs):
     # get all plot preferences
     # ------------------------------------------------------------------------------------------------------------------
 
-    prefs = dataset.plotmeta
+    prefs = dataset.preferences
 
     # method of plot
     # ------------------------------------------------------------------------------------------------------------------
@@ -105,7 +105,7 @@ def plotly(dataset, **kwargs):
 
     if not prefs.style:
         # not yet set, initialize with default project preferences
-        prefs.update(project_preferences.to_dict())
+        prefs.update(dataset_preferences.to_dict())
 
         # surface specific setting
         if method not in ['surface']:
@@ -206,9 +206,9 @@ def plotly(dataset, **kwargs):
     # viridis is the default setting,
     # so we assume that it must be overwritten here
     # except if style is grayscale which is a particular case.
-    styles = kwargs.get('style', prefs.style)
+    style = kwargs.get('style', prefs.style)
 
-    if styles and "grayscale" not in styles and cmap == "viridis":
+    if style and "grayscale" not in style and cmap == "viridis":
 
         if method in ['map', 'image']:
             cmap = kwargs.get('colormap',

@@ -288,7 +288,7 @@ def concatenate(*datasets, **kwargs):
         out.description += ', {}'.format(dataset.name)
 
     out.description += ' )'
-    out._date = out._modified = datetime.datetime.now()
+    out._date = out._modified = datetime.datetime.now(datetime.timezone.utc)
     out._history = [str(out.date) + ': Created by %s' % thist]
 
     return out

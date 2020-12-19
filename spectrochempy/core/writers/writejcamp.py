@@ -11,7 +11,7 @@
 """
 # import os as os
 import numpy as np
-from datetime import datetime
+from datetime import datetime, timezone
 
 from spectrochempy.core import debug_
 from spectrochempy.core.writers.exporter import docstrings, Exporter, exportermethod
@@ -95,7 +95,7 @@ def _write_jcamp(*args, **kwargs):
                     timestamp_index = i
 
         if timestamp_index is None:
-            timestamp = datetime.now()
+            timestamp = datetime.now(timezone.utc)
 
         for i in range(dataset.shape[0]):
 

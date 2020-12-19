@@ -4,10 +4,10 @@ _internal.classic_mode                   : True
 agg.path.chunksize                       : 20000
 animation.bitrate                        : -1
 animation.codec                          : mpeg4
-animation.convert_args                   :
+animation.convert_args                   : 
 animation.convert_path                   : convert
 animation.embed_limit                    : 20.0
-animation.ffmpeg_args                    :
+animation.ffmpeg_args                    : 
 animation.ffmpeg_path                    : ffmpeg
 animation.frame_format                   : png
 animation.html                           : none
@@ -15,22 +15,22 @@ animation.writer                         : ffmpeg
 axes.autolimit_mode                      : data
 axes.axisbelow                           : True
 axes.edgecolor                           : k
-axes.facecolor                           : #F0F0F0
+axes.facecolor                           : F0F0F0
 axes.formatter.limits                    : -7, 7
 axes.formatter.min_exponent              : 0
 axes.formatter.offset_threshold          : 4
 axes.formatter.use_locale                : False
 axes.formatter.use_mathtext              : False
 axes.formatter.useoffset                 : True
-axes.grid                                : False
-axes.grid.axis                           : both
+axes.grid                                : True
+axes.grid.axis                           : x
 axes.grid.which                          : major
-axes.labelcolor                          : k
+axes.labelcolor                          : blue
 axes.labelpad                            : 5.0
-axes.labelsize                           : 10.0
+axes.labelsize                           : 14.0
 axes.labelweight                         : normal
 axes.linewidth                           : 1.0
-axes.prop_cycle                          : cycler('color', ['#0072B2', '#009E73', '#D55E00', '#CC79A7', '#F0E442', '#56B4E9'])
+axes.prop_cycle                          : cycler('color', ['0072B2', '009E73', 'D55E00', 'CC79A7', 'F0E442', '56B4E9'])
 axes.spines.bottom                       : True
 axes.spines.left                         : True
 axes.spines.right                        : True
@@ -46,7 +46,7 @@ axes.xmargin                             : 0.0
 axes.ymargin                             : 0.0
 axes3d.grid                              : True
 
-backend                                  : module://backend_interagg
+backend                                  : agg
 backend_fallback                         : False
 boxplot.bootstrap                        : None
 boxplot.boxprops.color                   : b
@@ -123,13 +123,13 @@ figure.subplot.top                       : 0.98
 figure.subplot.wspace                    : 0.0
 figure.titlesize                         : 12.0
 figure.titleweight                       : normal
-font.cursive                             : Apple Chancery,        Textile,        Zapf Chancery,        Sand,        Script MT,        Felipa,        cursive
-font.family                              : sans-serif
-font.fantasy                             : Comic Sans MS,        Chicago,        Charcoal,        ImpactWestern,        Humor Sans,        fantasy
-font.monospace                           : DejaVu Sans Mono,        Andale Mono,        Nimbus Mono L,        Courier New,        Courier,        Fixed,        Terminal,        monospace
+font.cursive                             : Apple Chancery,  Textile,  Zapf Chancery,  Sand,  Script MT,  Felipa,  cursive
+font.family                              : monospace
+font.fantasy                             : Comic Sans MS,  Chicago,  Charcoal,  ImpactWestern,  Humor Sans,  fantasy
+font.monospace                           : DejaVu Sans Mono,  Andale Mono,  Nimbus Mono L,  Courier New,  Courier,  Fixed,  Terminal,  monospace
 font.sans-serif                          : DejaVu Sans, Arial, Liberation Sans, Bitstream Vera Sans, sans-serif
-font.serif                               : Times New Roman,        Times,        Palatino,        DejaVu Serif,        Computer Modern Roman,        New Century Schoolbook,       serif
-font.size                                : 10.0
+font.serif                               : Times New Roman,  Times,  Palatino,  DejaVu Serif,  Computer Modern Roman,  New Century Schoolbook,  serif
+font.size                                : 14.0
 font.stretch                             : normal
 font.style                               : normal
 font.variant                             : normal
@@ -163,7 +163,7 @@ keymap.help                              : f1
 keymap.home                              : h, r, home
 keymap.pan                               : p
 keymap.quit                              : ctrl+w, cmd+w
-keymap.quit_all                          :
+keymap.quit_all                          : 
 keymap.save                              : s, ctrl+s
 keymap.xscale                            : k, L
 keymap.yscale                            : l
@@ -175,7 +175,7 @@ legend.columnspacing                     : 0.5
 legend.edgecolor                         : inherit
 legend.facecolor                         : inherit
 legend.fancybox                          : False
-legend.fontsize                          : 9.0
+legend.fontsize                          : 11.0
 legend.framealpha                        : None
 legend.frameon                           : False
 legend.handleheight                      : 0.7
@@ -207,13 +207,13 @@ lines.solid_capstyle                     : round
 lines.solid_joinstyle                    : round
 
 markers.fillstyle                        : full
-mathtext.bf                              : dejavusans:bold
+mathtext.bf                              : monospace:bold
 mathtext.cal                             : cursive
 mathtext.default                         : regular
 mathtext.fallback                        : cm
-mathtext.fontset                         : dejavusans
-mathtext.it                              : dejavusans:italic
-mathtext.rm                              : dejavusans
+mathtext.fontset                         : custom
+mathtext.it                              : monospace:italic
+mathtext.rm                              : monospace
 mathtext.sf                              : sans\-serif
 mathtext.tt                              : monospace
 mpl_toolkits.legacy_colorbar             : True
@@ -223,7 +223,7 @@ patch.edgecolor                          : k
 patch.facecolor                          : 4C72B0
 patch.force_edgecolor                    : False
 patch.linewidth                          : 0.3
-path.effects                             :
+path.effects                             : 
 path.simplify                            : True
 path.simplify_threshold                  : 0.111111111111
 path.sketch                              : None
@@ -233,7 +233,7 @@ pdf.compression                          : 6
 pdf.fonttype                             : 3
 pdf.inheritcolor                         : False
 pdf.use14corefonts                       : False
-pgf.preamble                             :
+pgf.preamble                             : 
 pgf.rcfonts                              : True
 pgf.texsystem                            : xelatex
 polaraxes.grid                           : True
@@ -244,7 +244,7 @@ ps.useafm                                : False
 ps.usedistiller                          : None
 
 savefig.bbox                             : standard
-savefig.directory                        :
+savefig.directory                        : 
 savefig.dpi                              : 100.0
 savefig.edgecolor                        : white
 savefig.facecolor                        : white
@@ -263,7 +263,7 @@ text.color                               : .15
 text.hinting                             : auto
 text.hinting_factor                      : 8
 text.kerning_factor                      : 0
-text.latex.preamble                      :
+text.latex.preamble                      : 
 text.usetex                              : False
 timezone                                 : UTC
 tk.window_focus                          : False
@@ -280,7 +280,7 @@ xtick.bottom                             : True
 xtick.color                              : .15
 xtick.direction                          : out
 xtick.labelbottom                        : True
-xtick.labelsize                          : 10.0
+xtick.labelsize                          : 14.0
 xtick.labeltop                           : False
 xtick.major.bottom                       : True
 xtick.major.pad                          : 4.0
@@ -301,7 +301,7 @@ ytick.color                              : .15
 ytick.direction                          : out
 ytick.labelleft                          : True
 ytick.labelright                         : False
-ytick.labelsize                          : 10.0
+ytick.labelsize                          : 14.0
 ytick.left                               : True
 ytick.major.left                         : True
 ytick.major.pad                          : 4.0
@@ -316,6 +316,7 @@ ytick.minor.visible                      : False
 ytick.minor.width                        : 0.5
 ytick.right                              : True
 
+
 ##
 ## ADDITIONAL PARAMETERS FOR SPECTROCHEMPY
 ##
@@ -326,7 +327,7 @@ ytick.right                              : True
 ##@show_projections                      : False
 ##@show_projection_x                     : False
 ##@show_projection_y                     : False
-##@colormap                              : viridis
+##@colormap                              : jet
 ##@max_lines_in_stack                    : 1000
 ##@simplify                              : False
 ##@number_of_x_labels                    : 5

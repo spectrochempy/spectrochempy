@@ -42,7 +42,9 @@ dataset = scp.NDDataset.read_omnic(
 # %% [markdown]
 # plot generic
 # %%
-ax = dataset[0].plot()
+ax = dataset[0].plot(color='blue')
+ax = dataset[0].plot_pen(color='red')
+ax = dataset[0].plot_scatter(mfc='red')
 
 # %% [markdown]
 # plot generic style

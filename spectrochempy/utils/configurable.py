@@ -5,8 +5,11 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
+from matplotlib import cycler
+
 from traitlets.config.configurable import Configurable
 from traitlets import All, observe
+from traitlets import Bool, Unicode, Integer, Float
 
 __all__ = ["MetaConfigurable"]
 
@@ -44,14 +47,21 @@ class MetaConfigurable(Configurable):
             return
 
         if change.name in self.traits(config=True):
-            self.cfg.update(self.jsonfile, {
-                    self.__class__.__name__: {
-                            change.name: change.new,
-                            }
-                    })
+
+            value = change.new
+            if isinstance(value, type(cycler)):
+                value = str(value)
+
+            try:
+                self.cfg.update(self.jsonfile, {
+                        self.__class__.__name__: {
+                                change.name: value,
+                                }
+                        })
+            except:
+                print()
 
             self.updated = True
-
 
 # ======================================================================================================================
 if __name__ == '__main__':

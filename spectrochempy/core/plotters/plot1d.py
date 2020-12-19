@@ -25,15 +25,12 @@ __dataset_methods__ = ['plot_1D', 'plot_lines', 'plot_pen', 'plot_scatter', 'plo
 # ----------------------------------------------------------------------------------------------------------------------
 
 import numpy as np
+import matplotlib as mpl
+from matplotlib import cycler
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
-from spectrochempy.core import project_preferences
 from .plotutils import make_label
 from ...utils import is_sequence, deprecated
-from spectrochempy.utils import Meta
-
-
-# from pyqtgraph.functions import mkPen
 
 # ----------------------------------------------------------------------------------------------------------------------
 # localimports
@@ -280,55 +277,55 @@ def plot_1D(dataset, **kwargs):
 
     """
 
+    # Get preferences
+    # ------------------------------------------------------------------------------------------------------------------
+
+    prefs = dataset.preferences
+
+    # before going further, check if the style is passed in the parameters
+    style = kwargs.pop('style', None)
+    if style is not None:
+        prefs.style = style
+    # else we assume this has been set before calling plot()
+
+    prefs.set_latex_font(prefs.font.family)  # reset latex settings
+
+    # Redirections ?
+    # ------------------------------------------------------------------------------------------------------------------
+
+    # should we redirect the plotting to another method
+    if dataset._squeeze_ndim > 1:
+        return dataset.plot_2D(**kwargs)
+
     # if plotly execute plotly routine not this one
-    if kwargs.get('use_plotly', False):
-        # we use the 2D routine for 1D and 2D
+    if kwargs.get('use_plotly', prefs.use_plotly):
         return dataset.plotly(**kwargs)
 
-    # make a copy
+    # Method of plot
     # ------------------------------------------------------------------------------------------------------------------
 
-    new = dataset.copy()
-    new = new.squeeze()
-
-    # get all plot preferences
-    # ------------------------------------------------------------------------------------------------------------------
-
-    prefs = Meta()
-    if not prefs.style:
-        # not yet set, initialize with default project preferences
-        prefs.update(project_preferences.to_dict())
-
-    # get plotmeta stored with dataset
-    prefs.update(dataset.plotmeta)
-
-    use_mpl = kwargs.pop('use_mpl', True)  # by default we use matplotlib for plotting (which is faster but
-    # wich is hardly  interactive)
-
-    # If no method parameters was provided when this function was called,
-    # we first look in the meta parameters of the dataset for the defaults
-
-    method = kwargs.pop('method', prefs.method_1D)
+    method = kwargs.get('method', prefs.method_1D)
 
     # some addtional options may exists in kwargs
     pen = kwargs.pop('pen', False)  # lines and pen synonyms
+    scatter = kwargs.pop('scatter', False)
 
     # final choice of method
     pen = (method == 'pen') or pen
-    scatter = (method == 'scatter') and not pen
-    scatterpen = ((method == 'scatter') and pen) or (method == 'scatter+pen')
+    scatter = (method == 'scatter' and not pen) or scatter
+    scatterpen = ((method == 'scatter' or scatter) and pen) or (method == 'scatter+pen')
     bar = (method == 'bar')
 
-    # Figure setup
-    # ------------------------------------------------------------------------------------------------------------------
+    # often we do need to plot only data when plotting on top of a previous plot
+    data_only = kwargs.get('data_only', False)
 
-    new._figure_setup(pen=pen or scatterpen, scatter=scatter or scatterpen, **kwargs)
+    # Get the data to plot
+    # -------------------------------------------------------------------------------------------------------------------
 
-    ax = new.ndaxes['main']
-    ax.prefs = prefs
-
-    # plot method
-    # ------------------------------------------------------------------------------------------------------------------
+    new = dataset  # .copy()
+    if new.size > 1:
+        # dont' apply to array of size one to preserve the x coordinate!!!!
+        new = new.squeeze()
 
     # is that a plot with twin axis
     is_twinx = kwargs.pop('twinx', None) is not None
@@ -337,36 +334,47 @@ def plot_1D(dataset, **kwargs):
     show_complex = kwargs.pop('show_complex', False)
 
     # some pen or scatter property
-    color = kwargs.get('color', kwargs.get('c', prefs.pen_color))
-    lw = kwargs.get('linewidth', kwargs.get('lw', prefs.pen_linewidth))
-    ls = kwargs.get('linestyle', kwargs.get('ls', prefs.pen_linestyle))
-    marker = kwargs.get('marker', kwargs.get('m', prefs.marker))
-    markersize = kwargs.get('markersize', kwargs.get('ms', prefs.markersize))
-    markevery = kwargs.get('markevery', kwargs.get('me', prefs.markevery))
-    markerfacecolor = kwargs.get('markerfacecolor',
-                                 kwargs.get('mfc', prefs.pen_color))
-    markeredgecolor = kwargs.get('markeredgecolor',
-                                 kwargs.get('mec', '#000000'))
+    color = kwargs.get('color', kwargs.get('c', 'auto'))
+    lw = kwargs.get('linewidth', kwargs.get('lw', 'auto'))
+    ls = kwargs.get('linestyle', kwargs.get('ls', 'auto'))
+    marker = kwargs.get('marker', kwargs.get('m', 'auto'))
+    markersize = kwargs.get('markersize', kwargs.get('ms',prefs.lines_markersize))
+    markevery = kwargs.get('markevery', kwargs.get('me', 1))
+    markerfacecolor = kwargs.get('markerfacecolor', kwargs.get('mfc', 'auto'))
+    markeredgecolor = kwargs.get('markeredgecolor', kwargs.get('mec', 'k'))
+
+    # Figure setup  #
+    # ------------------------------------------------------------------------------------------------------------------
+    new._figure_setup(ndim=1, scatter=scatter, scatterpen=scatterpen, **kwargs)
+
+    ax = new.ndaxes['main']
+
+    # If no method parameters was provided when this function was called,
+    # we first look in the meta parameters of the dataset for the defaults
+
+    # Other ax properties that can be passed as arguments
+    # ------------------------------------------------------------------------------------------------------------------
+
     number_x_labels = prefs.number_of_x_labels
     number_y_labels = prefs.number_of_y_labels
+    ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
+    ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
+    ax.xaxis.set_ticks_position('bottom')
+    if not is_twinx:
+        # do not move these label for twin axes!
+        ax.yaxis.set_ticks_position('left')
 
-    if use_mpl:
-        ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
-        ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
-        ax.xaxis.set_ticks_position('bottom')
-        if not is_twinx:
-            # do not move these label for twin axes!
-            ax.yaxis.set_ticks_position('left')
-
-        # the next lines are to avoid multipliers in axis scale
-        formatter = ScalarFormatter(useOffset=False)
-        ax.xaxis.set_major_formatter(formatter)
-        ax.yaxis.set_major_formatter(formatter)
+    # the next lines are to avoid multipliers in axis scale
+    formatter = ScalarFormatter(useOffset=False)
+    ax.xaxis.set_major_formatter(formatter)
+    ax.yaxis.set_major_formatter(formatter)
 
     xscale = kwargs.get('xscale', 'linear')
     yscale = kwargs.get('yscale', 'linear')
     ax.set_xscale(xscale, nonposx='mask')
     ax.set_yscale(yscale, nonposy='mask')
+
+    ax.grid(prefs.axes_grid)
 
     # ------------------------------------------------------------------------------------------------------------------
     # plot the dataset
@@ -444,19 +452,19 @@ def plot_1D(dataset, **kwargs):
         ax.plot(xdata, modeldata.T, ls=':', lw='2', label=label)  # TODO: improve this!!!
 
     # line attributes
-    if (pen or scatterpen) and color != 'AUTO':
+    if (pen or scatterpen) and not (isinstance(color,str) and color.upper()=='AUTO'):
         # set the color if defined in the preferences or options
         line.set_color(color)
 
-    if (pen or scatterpen) and lw != 'AUTO':
+    if (pen or scatterpen) and lw.upper() != 'AUTO':
         # set the line width if defined in the preferences or options
         line.set_linewidth(lw)
 
-    if (pen or scatterpen) and ls != 'AUTO':
+    if (pen or scatterpen) and ls.upper() != 'AUTO':
         # set the line style if defined in the preferences or options
         line.set_linestyle(ls)
 
-    if (scatter or scatterpen) and marker != 'AUTO':
+    if (scatter or scatterpen) and marker.upper() != 'AUTO':
         # set the line style if defined in the preferences or options
         line.set_marker(marker)
 
@@ -466,33 +474,34 @@ def plot_1D(dataset, **kwargs):
 
     data_only = kwargs.get('data_only', False)
 
-    # abscissa limits?
-    xl = [xdata[0], xdata[-1]]
-    xl.sort()
+    if len(xdata) > 1:
+        # abscissa limits?
+        xl = [xdata[0], xdata[-1]]
+        xl.sort()
 
-    if bar or len(xdata) < number_x_labels + 1:
-        # extend the axis so that the labels are not too close to the limits
-        inc = (xdata[1] - xdata[0]) * .5
-        xl = [xl[0] - inc, xl[1] + inc]
+        if bar or len(xdata) < number_x_labels + 1:
+            # extend the axis so that the labels are not too close to the limits
+            inc = (xdata[1] - xdata[0]) * .5
+            xl = [xl[0] - inc, xl[1] + inc]
 
-    # ordinates limits?
-    amp = np.ma.ptp(z.masked_data) / 50.
-    zl = [np.ma.min(z.masked_data) - amp, np.ma.max(z.masked_data) + amp]
+        # ordinates limits?
+        amp = np.ma.ptp(z.masked_data) / 50.
+        zl = [np.ma.min(z.masked_data) - amp, np.ma.max(z.masked_data) + amp]
 
-    # check if some data ar not already present on the graph
-    # and take care of their limits
-    multiplelines = 2 if kwargs.get('show_zero', False) else 1
-    if len(ax.lines) > multiplelines:
-        # get the previous xlim and zlim
-        xlim = list(ax.get_xlim())
-        xl[-1] = max(xlim[-1], xl[-1])
-        xl[0] = min(xlim[0], xl[0])
+        # check if some data are not already present on the graph
+        # and take care of their limits
+        multiplelines = 2 if kwargs.get('show_zero', False) else 1
+        if len(ax.lines) > multiplelines and not show_complex:
+            # get the previous xlim and zlim
+            xlim = list(ax.get_xlim())
+            xl[-1] = max(xlim[-1], xl[-1])
+            xl[0] = min(xlim[0], xl[0])
 
-        zlim = list(ax.get_ylim())
-        zl[-1] = max(zlim[-1], zl[-1])
-        zl[0] = min(zlim[0], zl[0])
+            zlim = list(ax.get_ylim())
+            zl[-1] = max(zlim[-1], zl[-1])
+            zl[0] = min(zlim[0], zl[0])
 
-    if data_only:
+    if data_only or len(xdata) == 1:
         xl = ax.get_xlim()
 
     xlim = list(kwargs.get('xlim', xl))  # we read the argument xlim
@@ -503,7 +512,7 @@ def plot_1D(dataset, **kwargs):
     if kwargs.get('x_reverse', kwargs.get('reverse', x.reversed if x else False)):
         xlim.reverse()
 
-    if data_only:
+    if data_only or len(xdata) == 1:
         zl = ax.get_ylim()
 
     zlim = list(kwargs.get('zlim', kwargs.get('ylim', zl)))
@@ -549,7 +558,7 @@ def plot_1D(dataset, **kwargs):
 
     zlabel = kwargs.get("zlabel", None)
     if not zlabel:
-        zlabel = make_label(new, 'z', use_mpl)
+        zlabel = make_label(new, 'z')
 
     # ax.set_ylabel(zlabel)
 
@@ -574,6 +583,12 @@ def plot_1D(dataset, **kwargs):
         ax.set_title(new.name)
 
     new._plot_resume(dataset, **kwargs)
+
+    # masks
+    if kwargs.get('show_mask', False):
+
+        ax.fill_between(xdata, zdata.min() - 1., zdata.max() + 1, where=new.mask, facecolor='#FFEEEE', alpha=0.3)
+
 
     return ax
 

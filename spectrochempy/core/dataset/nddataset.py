@@ -17,9 +17,9 @@ __all__ = ['NDDataset']
 
 import textwrap
 import warnings
-from datetime import datetime
+from datetime import datetime, timezone
 import numpy as np
-from traitlets import HasTraits, List, Unicode, Instance, Bool, All, Float, validate, observe, default
+from traitlets import HasTraits, Instance, Bool, Float, validate, default
 from traittypes import Array
 
 from spectrochempy.core.project.baseproject import AbstractProject
@@ -27,7 +27,7 @@ from spectrochempy.core.dataset.ndarray import NDArray, DEFAULT_DIM_NAME
 from spectrochempy.core.dataset.ndcomplex import NDComplexArray
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.ndcoordset import CoordSet
-from spectrochempy.core.dataset.ndmath import NDMath, set_operators, make_func_from
+from spectrochempy.core.dataset.ndmath import NDMath, set_operators, set_api_methods, make_func_from
 from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.core.dataset.ndplot import NDPlot
 from spectrochempy.core import error_, warning_
@@ -120,7 +120,6 @@ class NDDataset(
         super().__init__(data, **kwargs)
 
         self._parent = None
-        self._modified = self._date
 
         # eventually set the coordinates with optional units and title
 
@@ -173,8 +172,9 @@ class NDDataset(
     # ..................................................................................................................
     def __dir__(self):
         # WARNING: be carefull to keep order of the three first elements! Needed for save/load operations
-        return ['dims', 'coordset', 'data', 'name', 'title', 'mask', 'units', 'meta', 'plotmeta', 'description',
-                'history', 'date', 'modified', 'modeldata', 'origin', 'roi', 'offset'] + NDIO().__dir__()
+        return ['dims', 'coordset', 'data', 'name', 'title', 'mask', 'units', 'meta', 'preferences',
+                'author', 'description', 'history', 'date', 'modified', 'modeldata', 'origin', 'roi',
+                'offset'] + NDIO().__dir__()
 
     # ..................................................................................................................
     def __getitem__(self, items):
@@ -302,7 +302,7 @@ class NDDataset(
     # ..................................................................................................................
     def __eq__(self, other, attrs=None):
         attrs = self.__dir__()
-        for attr in ('filename', 'plotmeta', 'name', 'description', 'history', 'date', 'modified', 'modeldata',
+        for attr in ('filename', 'preferences', 'name', 'description', 'history', 'date', 'modified', 'modeldata',
                      'origin', 'roi', 'offset'):
             # these attibutes are not used for comparison (comparison based on data and units!)
             attrs.remove(attr)
@@ -410,15 +410,6 @@ class NDDataset(
         """
         if self._coordset is not None:
             return self._coordset.units
-
-    # ..................................................................................................................
-    @property
-    def modified(self):
-        """
-        `Datetime` object - Date of modification (readonly property).
-
-        """
-        return self._modified
 
     # ..................................................................................................................
     @property
@@ -1078,24 +1069,6 @@ class NDDataset(
         # debug_('dims have been updated')
 
     # ..................................................................................................................
-    @observe(All)
-    def _anytrait_changed(self, change):
-
-        # ex: change {
-        #   'owner': object, # The HasTraits instance
-        #   'new': 6, # The new value
-        #   'old': 5, # The old value
-        #   'name': "foo", # The name of the changed trait
-        #   'type': 'change', # The event type of the notification, usually 'change'
-        # }
-
-        if change['name'] in ["_date", "_modified", "trait_added"]:
-            return
-
-        # all the time -> update modified date
-        self._modified = datetime.now()
-
-        return
 
 
 # ======================================================================================================================
@@ -1145,3 +1118,6 @@ __all__ += ['abs',
 # ======================================================================================================================
 
 set_operators(NDDataset, priority=100000)
+
+methods = ['diag', 'identity', 'eye']
+set_api_methods(NDDataset, methods)

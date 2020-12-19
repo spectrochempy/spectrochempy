@@ -327,7 +327,7 @@ class NDIO(HasTraits):
                     if val is None:
                         pass
 
-                    elif key in ['_meta', '_plotmeta']:
+                    elif key in ['_meta', '_preferences']:
                         setattr(obj, key, item_to_attr(getattr(obj, key), val))
 
                     elif key in ['_coordset']:
@@ -364,8 +364,6 @@ class NDIO(HasTraits):
                     raise TypeError(f'for {key} {e}')
 
             return obj
-
-        # ........................
 
         new = item_to_attr(cls(), js)
         return new

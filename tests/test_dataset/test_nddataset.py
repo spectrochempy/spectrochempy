@@ -759,8 +759,6 @@ def test_nddataset_comparison():
 
 
 def test_nddataset_repr_html():
-    nd = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
-    nd.T._repr_html_()
 
     dx = np.random.random((10, 100, 3))
 
@@ -898,8 +896,8 @@ def test_nddataset_multiple_axis(ref_ds, coord0, coord1, coord2, coord2b, dsm): 
     assert da.coordset['magnetic field'] == coord2b + 100 * ur.millitesla
 
 
-def test_nddataset_coords_manipulation(IR_dataset_2D):
-    dataset = IR_dataset_2D.copy()
+def test_nddataset_coords_manipulation(dsm):
+    dataset = dsm.copy()
     coord0 = dataset.coordset['y']
     coord0 -= coord0[0]  # remove first element
     info_(coord0)
@@ -915,8 +913,8 @@ def test_nddataset_square_dataset_with_identical_coordinates():
 
 # ### Test masks ######
 
-def test_nddataset_use_of_mask(IR_dataset_1D):
-    nd = IR_dataset_1D.copy()
+def test_nddataset_use_of_mask(dsm):
+    nd = dsm
     info_(nd)
     nd[950.:1260.] = MASKED
     info_(nd)
@@ -942,102 +940,6 @@ def test_nddataset_bug_fixe_figopeninnotebookwithoutplot():
     assert da2._fig is None  # no figure should open
 
 
-def test_nddataset_max_min_with_1D_real(IR_dataset_1D):
-    # test on a 1D NDDataset
-    nd1 = IR_dataset_1D
-    nd1[1] = True
-    assert nd1.is_masked
-    info_(nd1)
-    assert "[float32]" in str(nd1)
-    mx = nd1.max()
-    assert mx == Quantity(6.0, 'absorbance')
-    mx = nd1.max(keepdims=1)
-    assert isinstance(mx, NDDataset)
-    # assert mx.data == pytest.approx(6.0)
-
-
-def test_nddataset_max_with_2D_real(IR_dataset_2D):
-    # test on a 2D NDDataset
-    nd2 = IR_dataset_2D
-    nd2 = nd2[:, 4000.:1300.]
-    ndmt = nd2.min()  # no axis specified
-    info_(ndmt)
-    nd2m = nd2.max('y')  # axis selected
-    info_(nd2m)
-    nd2m2 = nd2.min('x')  # axis selected
-    info_(nd2m2)
-    pass
-
-
-def test_nddataset_fancy_indexing():
-    # numpy vs dataset
-    rand = np.random.RandomState(42)
-    x = rand.randint(100, size=10)
-
-    # single value indexing
-    info_(x[3], x[7], x[2])
-    dx = NDDataset(x)
-    assert (dx[3].data, dx[7].data, dx[2].data) == (x[3], x[7], x[2])
-
-    # slice indexing
-    info_(x[3:7])
-    assert_array_equal(dx[3:7].data, x[3:7])
-
-    # boolean indexing
-    info_(x[x > 52])
-    assert_array_equal(dx[x > 52].data, x[x > 52])
-
-    # fancy indexing
-    ind = [3, 7, 4]
-    info_(x[ind])
-    assert_array_equal(dx[ind].data, x[ind])
-
-    ind = np.array([[3, 7], [4, 5]])
-    info_(x[ind])
-    assert_array_equal(dx[ind].data, x[ind])
-
-    with RandomSeedContext(1234):
-        a = np.random.random((3, 5)).round(1)
-    c = (np.arange(3), np.arange(5))
-    nd = NDDataset(a, coordset=c)
-    info_(nd)
-    a = nd[[1, 0, 2]]
-    info_(a)
-    a = nd[np.array([1, 0])]
-    info_(a)
-
-
-def test_nddataset_extrema():
-    with RandomSeedContext(1234):
-        a = np.random.random((3, 5)).round(1)
-    c = (np.arange(3) * 10.0 * ur.s, np.arange(5) * 7.0 * ur.kg)
-    nd = NDDataset(a, coordset=c, units='m')
-    info_(nd)
-
-    mi = nd.min()
-    assert mi == Quantity(0.2, 'meter')
-
-    ma = nd.max()
-    assert ma == Quantity(1.0, 'meter')
-
-    ma = np.max(nd, keepdims=True)
-    assert isinstance(ma, NDDataset)
-    assert ma.shape == (1, 1)
-    assert ma.x.data == np.array([21])
-    assert ma.y.data == np.array([10])
-
-    mi = nd.min(keepdims=True)
-    assert isinstance(mi, NDDataset)
-
-    info_('_____________________________')
-    mi1 = nd.min(dim='y')
-    info_('minimum', mi1)
-    # ma1 = nd.max('x')
-    # info_('X :', ma1)
-    # ma2 = nd.max('y')
-    # info_('Y :', ma2)
-
-
 def test_nddataset_bug_par_arnaud():
     import spectrochempy as scp
     import numpy as np
@@ -1058,8 +960,8 @@ def test_nddataset_bug_par_arnaud():
     info_('taille dimension 0:' + str(ds2.data.shape[0]))
 
 
-def test_nddataset_bug_13(IR_dataset_1D):
-    nd = IR_dataset_1D
+def test_nddataset_bug_13():
+    nd = NDDataset.read('irdata/nh4y-activation.spg')[0]
     info_(nd)
     info_(type(nd.x).__name__)
     info_('\n coord %s' % nd.x)
@@ -1492,32 +1394,11 @@ def test_nddataset_issue_29_mulitlabels():
     print_(DS['alpha', 'e':'f'])
 
 
-def test_nddataset_apply_funcs(IR_dataset_1D):
+def test_nddataset_apply_funcs(dsm):
     # convert to masked array
-    out = np.ma.array(IR_dataset_1D)
-    IR_dataset_1D[1] = MASKED
-    out = np.ma.array(IR_dataset_1D)
-    out = np.array(IR_dataset_1D)
+    out = np.ma.array(dsm)
+    dsm[1] = MASKED
+    out = np.ma.array(dsm)
+    out = np.array(dsm)
 
     print(out)
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-# Xarray
-# ----------------------------------------------------------------------------------------------------------------------
-
-# TODO:  dataset from xarray
-
-def test_nddataset_xarray_export(IR_dataset_2D):
-    nd = IR_dataset_2D.copy()
-    da = nd.to_xarray()
-    info_(da)
-
-
-def test_nddataset_xarray_export_w_spa():
-    na = NDDataset.read_omnic(os.path.join('irdata', 'subdir', '7_CZ0-100 Pd_101.SPA'))
-    info_(na)
-    da = na.to_xarray()
-    info_(da)
-
-# EOF

@@ -12,7 +12,7 @@
 """
 
 """
-__all__ = ['plot_2D', 'plot_map', 'plot_stack', 'plot_image', 'plot_surface']
+__all__ = ['plot_2D', 'plot_map', 'plot_stack', 'plot_image', 'plot_surface', 'plot_waterfall']
 
 __dataset_methods__ = __all__
 
@@ -25,11 +25,8 @@ from matplotlib.ticker import MaxNLocator, ScalarFormatter
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
-# from matplotlib import cm
 
 from spectrochempy.core.plotters.plotutils import make_label
-from spectrochempy.core import project_preferences, general_preferences
-from spectrochempy.utils import Meta
 
 
 # import sys
@@ -132,6 +129,27 @@ def plot_surface(dataset, **kwargs):
         return plot_2D(dataset, **kwargs)
 
 
+# waterfall plot -----------------------------------------------------------------
+
+def plot_waterfall(dataset, **kwargs):
+    """
+    Plot a 2D dataset as a a 3D-waterfall plot.
+
+    Alias of plot_2D (with `method` argument set to ``waterfall``.
+
+    """
+    if dataset.ndim < 2:
+        from spectrochempy import plot_1D
+
+        return plot_1D(dataset, **kwargs)
+
+    kwargs['method'] = 'waterfall'
+    if kwargs.get('use_plotly', False):
+        return dataset.plotly(**kwargs)
+    else:
+        return plot_2D(dataset, **kwargs)
+
+
 # generic plot (default stack plot) -------------------------------------------
 
 def plot_2D(dataset, **kwargs):
@@ -140,16 +158,50 @@ def plot_2D(dataset, **kwargs):
 
     Parameters
     ----------
-    dataset : :class:`~spectrochempy.ddataset.nddataset.NDDataset` to plot
+    dataset : :class:`~spectrochempy.ddataset.nddataset.NDDataset`
+        The dataset to plot
+    ax : |Axes| instance. Optional.
+        The axe where to plot. The default is the current axe or to create a new one if is None.
+    clear : `bool`, optional, default=`True`.
+        Should we plot on the ax previously used or create a new figure?
+    figsize : tuple, optional.
+        The figure size expressed as a tuple (w,h) in inch.
 
+    Other Parameters
+    -----------------
+    method : ['stack', 'map', 'image', 'surface', 'waterfall'] , optional.
+        The method of plot of the dataset, which will determine the plotter to use. Default is stack
+
+
+    fontsize : int, optional
+        The font size in pixels, default is 10 (or read from preferences)
+
+    style : str
+    autolayout : `bool`, optional, default=True
+        if True, layout will be set automatically
+    output : str
+        A string containing a path to a filename. The output format is deduced
+        from the extension of the filename. If the filename has no extension,
+        the value of the rc parameter savefig.format is used.
+    dpi : [ None | scalar > 0]
+        The resolution in dots per inch. If None it will default to the
+        value savefig.dpi in the matplotlibrc file.
+
+
+    colorbar :
+    transposed :
+    clear :
+    ax :
+    twinx :
+    use_plotly : bool, optional
+        Should we use plotly instead of mpl for plotting. Default to `preferences.use_plotly`  (default=False)
     data_only : `bool` [optional, default=`False`]
-
         Only the plot is done. No addition of axes or label specifications
         (current if any or automatic settings are kept.
-
+    method : str [optional among ``map``, ``stack``, ``image`` or ``3D``]
+        The type of plot,
     projections : `bool` [optional, default=False]
 
-    method : str [optional among ``map``, ``stack`` or ``image`` , default=``stack``]
 
     style : str, optional, default='notebook'
         Matplotlib stylesheet (use `available_style` to get a list of available
@@ -167,87 +219,67 @@ def plot_2D(dataset, **kwargs):
 
     """
 
-    if dataset.ndim < 2:
-        from spectrochempy import plot_1D
+    # Get preferences
+    # ------------------------------------------------------------------------------------------------------------------
 
-        return plot_1D(dataset, **kwargs)
+    prefs = dataset.preferences
 
-    # if plotly excute plotly routine not this one
-    if kwargs.get('use_plotly', False):
+    # before going further, check if the style is passed in the parameters
+    style = kwargs.pop('style', None)
+    if style is not None:
+        prefs.style = style
+    # else we assume this has been set before calling plot()
+
+    prefs.set_latex_font(prefs.font.family)  # reset latex settings
+
+    # Redirections ?
+    # ------------------------------------------------------------------------------------------------------------------
+
+    # should we redirect the plotting to another method
+    if dataset._squeeze_ndim < 2:
+        return dataset.plot_1D(**kwargs)
+
+    # if plotly execute plotly routine not this one
+    if kwargs.get('use_plotly', prefs.use_plotly):
         return dataset.plotly(**kwargs)
 
-    # get all plot preferences
+    # Method of plot
     # ------------------------------------------------------------------------------------------------------------------
 
-    prefs = Meta()
+    method = kwargs.get('method', prefs.method_2D)
+    # do not display colorbar if it's not a surface plot
+    # except if we have asked to d so
 
-    # method of plot
-    # ------------------------------------------------------------------------------------------------------------------
-    method = kwargs.get('method', None)
-
-    if not prefs.style:
-        # not yet set, initialize with default project preferences
-        prefs.update(project_preferences.to_dict())
-
-        # surface specific setting
-        if method not in ['surface']:
-            prefs['colorbar'] = False
-
-    # get plotmeta stored with dataset
-    prefs.update(dataset.plotmeta)
-
-    if method is None:
-        method = prefs.method_2D
-
+    # often we do need to plot only data when plotting on top of a previous plot
     data_only = kwargs.get('data_only', False)
 
-    data_transposed = kwargs.get('data_transposed', False)
+    # Get the data to plot
+    # -------------------------------------------------------------------------------------------------------------------
 
-    if data_transposed:
+    # if we want to plot the transposed dataset
+    transposed = kwargs.get('transposed', False)
+    if transposed:
         new = dataset.copy().T  # transpose dataset
         nameadd = '.T'
     else:
         new = dataset  # .copy()
         nameadd = ''
-
     new = new.squeeze()
 
-    # figure setup
+    if kwargs.get('y_reverse', False):
+        new = new[::-1]
+
+    # Figure setup
     # ------------------------------------------------------------------------------------------------------------------
     new._figure_setup(ndim=2, **kwargs)
+
     ax = new.ndaxes['main']
     ax.name = ax.name + nameadd
 
-    # Other properties
+    # Other properties that can be passed as arguments
     # ------------------------------------------------------------------------------------------------------------------
 
-    colorbar = kwargs.get('colorbar', prefs.colorbar)
-
-    cmap = "viridis"
-
-    # viridis is the default setting,
-    # so we assume that it must be overwritten here
-    # except if style is grayscale which is a particular case.
-    styles = kwargs.get('style', prefs.style)
-
-    if styles and "grayscale" not in styles and cmap == "viridis":
-
-        if method in ['map', 'image']:
-            cmap = kwargs.get('colormap',
-                              kwargs.get('cmap', prefs.colormap))
-        elif data_transposed:
-            cmap = kwargs.get('colormap',
-                              kwargs.get('cmap', prefs.colormap_transposed))
-        elif method in ['surface']:
-            cmap = kwargs.get('colormap',
-                              kwargs.get('cmap', prefs.colormap_surface))
-        else:
-            cmap = kwargs.get('colormap',
-                              kwargs.get('cmap', prefs.colormap_stack))
-
-    lw = kwargs.get('linewidth', kwargs.get('lw',
-                                            prefs.pen_linewidth))
-
+    lw = kwargs.get('linewidth', kwargs.get('lw', prefs.lines_linewidth))
     alpha = kwargs.get('calpha', prefs.contour_alpha)
 
     antialiased = kwargs.get('antialiased', prefs.antialiased)
@@ -258,9 +290,20 @@ def plot_2D(dataset, **kwargs):
 
     number_x_labels = prefs.number_of_x_labels
     number_y_labels = prefs.number_of_y_labels
+    number_z_labels = prefs.number_of_z_labels
 
-    ax.xaxis.set_major_locator(MaxNLocator(nbins=number_x_labels))
-    ax.yaxis.set_major_locator(MaxNLocator(nbins=number_y_labels))
+    if method in ['waterfall']:
+        nxl = number_x_labels * 2
+        nyl = number_z_labels * 2
+    elif method in ['stack']:
+        nxl = number_x_labels
+        nyl = number_z_labels
+    else:
+        nxl = number_x_labels
+        nyl = number_y_labels
+
+    ax.xaxis.set_major_locator(MaxNLocator(nbins=nxl))
+    ax.yaxis.set_major_locator(MaxNLocator(nbins=nyl))
     if method not in ['surface']:
         ax.xaxis.set_ticks_position('bottom')
         ax.yaxis.set_ticks_position('left')
@@ -281,6 +324,7 @@ def plot_2D(dataset, **kwargs):
     x = getattr(new, dimx)
     xsize = new.shape[-1]
     discrete_data = False
+
     if x is not None and (not x.is_empty or x.is_labeled):
         xdata = x.data
         if not np.any(xdata):
@@ -358,12 +402,12 @@ def plot_2D(dataset, **kwargs):
 
     zlim = kwargs.get('zlim', (zdata.min(), zdata.max()))
 
-    if method in ['stack']:
+    if method in ['stack', 'waterfall']:
 
         # the z axis info
         # ---------------
         # zl = (np.min(np.ma.min(ys)), np.max(np.ma.max(ys)))
-        amp = np.ma.ptp(zdata) / 50.
+        amp = 0  # np.ma.ptp(zdata) / 50.
         zl = (np.min(np.ma.min(zdata) - amp), np.max(np.ma.max(zdata)) + amp)
         zlim = list(kwargs.get('zlim', zl))
         zlim.sort()
@@ -400,9 +444,11 @@ def plot_2D(dataset, **kwargs):
 
     # ------------------------------------------------------------------------------------------------------------------
     # plot the dataset
-    # by default contours are plotted
     # ------------------------------------------------------------------------------------------------------------------
+    ax.grid(prefs.axes_grid)
+
     normalize = kwargs.get('normalize', None)
+    cmap = kwargs.get('colormap', kwargs.get('cmap', prefs.colormap))
 
     if method in ['map', 'image', 'surface']:
         zmin, zmax = zlim
@@ -412,26 +458,29 @@ def plot_2D(dataset, **kwargs):
 
     if method in ['surface']:
         X, Y = np.meshgrid(xdata, ydata)
-        Z = zdata
+        Z = zdata.copy()
 
-        # Plot the surface.
-        surf = ax.plot_surface(X, Y, Z, cmap=cmap, linewidth=lw,
-                               antialiased=antialiased,
-                               rcount=rcount, ccount=ccount,
-                               norm=norm,
-                               )
+        # masker data not taken into account in surface plot
+        Z[dataset.mask] = np.nan
+
+        # Plot the surface.  #TODO : imporve this (or remove it)
+        ax.plot_surface(X, Y, Z, cmap=cmap, linewidth=lw, antialiased=antialiased,  # rcount=rcount, ccount=ccount,
+                        edgecolor='k', norm=norm, )
+
+    if method in ['waterfall']:
+        _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwargs)
 
     elif method in ['image']:
+
+        cmap = kwargs.get('cmap', kwargs.get('image_cmap', prefs.image_cmap))
         if discrete_data:
             method = 'map'
+
         else:
-            # image plot
-            # ----------
             kwargs['nlevels'] = 500
             if not hasattr(new, 'clevels') or new.clevels is None:
-                new.clevels = clevels(zdata, **kwargs)
-            c = ax.contourf(xdata, ydata, zdata,
-                            new.clevels, linewidths=lw, alpha=alpha)
+                new.clevels = _get_clevels(zdata, prefs, **kwargs)
+            c = ax.contourf(xdata, ydata, zdata, new.clevels, linewidths=lw, alpha=alpha)
             c.set_cmap(cmap)
             c.set_norm(norm)
 
@@ -454,10 +503,9 @@ def plot_2D(dataset, **kwargs):
             # contour plot
             # -------------
             if not hasattr(new, 'clevels') or new.clevels is None:
-                new.clevels = clevels(zdata, **kwargs)
+                new.clevels = _get_clevels(zdata, prefs, **kwargs)
 
-            c = ax.contour(xdata, ydata, zdata,
-                           new.clevels, linewidths=lw, alpha=alpha)
+            c = ax.contour(xdata, ydata, zdata, new.clevels, linewidths=lw, alpha=alpha)
             c.set_cmap(cmap)
             c.set_norm(norm)
 
@@ -471,8 +519,7 @@ def plot_2D(dataset, **kwargs):
         # map colors using the colormap
 
         vmin, vmax = ylim
-        norm = mpl.colors.Normalize(vmin=vmin,
-                                    vmax=vmax)  # we normalize to the max time
+        norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)  # we normalize to the max time
         if normalize is not None:
             norm.vmax = normalize
 
@@ -484,7 +531,7 @@ def plot_2D(dataset, **kwargs):
 
         clear = kwargs.get('clear', True)
         lines = []
-        if not clear and not data_transposed:
+        if not clear and not transposed:
             lines.extend(ax.lines)  # keep the old lines
 
         line0, = ax.plot(xdata, zdata[0], lw=lw, picker=True)
@@ -502,17 +549,24 @@ def plot_2D(dataset, **kwargs):
         new._ax_lines = lines[:]
 
         # but display only a subset of them in order to accelerate the drawing
-        maxlines = kwargs.get('maxlines',
-                              general_preferences.max_lines_in_stack)
+        maxlines = kwargs.get('maxlines', prefs.max_lines_in_stack)
         # debug_('max number of lines %d' % maxlines)
         setpy = max(len(new._ax_lines) // maxlines, 1)
         ax.lines = new._ax_lines[::setpy]  # displayed ax lines
 
-    if data_only:
+    if data_only or method in ['waterfall']:
         # if data only (we will not set axes and labels
         # it was probably done already in a previous plot
         new._plot_resume(dataset, **kwargs)
         return ax
+
+    # display a title
+    # ------------------------------------------------------------------------------------------------------------------
+    title = kwargs.get('title', None)
+    if title:
+        ax.set_title(title)
+    elif kwargs.get('plottitle', False):
+        ax.set_title(new.name)
 
     # ------------------------------------------------------------------------------------------------------------------
     # labels
@@ -524,8 +578,6 @@ def plot_2D(dataset, **kwargs):
     if not xlabel:
         xlabel = make_label(x, new.dims[-1])
     ax.set_xlabel(xlabel)
-
-    # x tick labels
 
     uselabelx = kwargs.get('uselabel_x', False)
     if x and x.is_labeled and (uselabelx or not np.any(x.data)) and len(x.labels) < number_x_labels + 1:
@@ -567,29 +619,18 @@ def plot_2D(dataset, **kwargs):
     else:
         ax.set_yticks([])
 
-    if colorbar and 'surface' not in method:
-
-        if not hasattr(new, '_axcb') or not new._axcb:
+    if 'colorbar' in new.ndaxes:
+        if 'surface' not in method and (not hasattr(new, '_axcb') or not new._axcb):
             axec = new.ndaxes['colorbar']
             axec.name = axec.name + nameadd
             new._axcb = mpl.colorbar.ColorbarBase(axec, cmap=plt.get_cmap(cmap), norm=norm)
             new._axcb.set_label(zlabel)
-            # new._axcb.ax.yaxis.set_major_formatter(y_formatter)
-            # #this doesn't work
-    elif colorbar:
-        new._fig.colorbar(surf, shrink=0.5, aspect=10)
+        else:
+            new._fig.colorbar(surf, shrink=0.5, aspect=10)
 
     # do we display the zero line
     if kwargs.get('show_zero', False):
         ax.haxlines()
-
-    # display a title
-    # ------------------------------------------------------------------------------------------------------------------
-    title = kwargs.get('title', None)
-    if title:
-        ax.set_title(title)
-    elif kwargs.get('plottitle', False):
-        ax.set_title(new.name)
 
     new._plot_resume(dataset, **kwargs)
 
@@ -597,20 +638,160 @@ def plot_2D(dataset, **kwargs):
 
 
 # ======================================================================================================================
-# clevels
+# Waterfall
 # ======================================================================================================================
 
-def clevels(data, **kwargs):
-    """Utility function to determine contours levels
-    """
+def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwargs):
+    degazim = kwargs.get('azim', 10)
+    degelev = kwargs.get('elev', 30)
+
+    azim = np.deg2rad(degazim)
+    elev = np.deg2rad(degelev)
+
+    # transformation function Axes coordinates to Data coordinates
+    transA2D = lambda x, y: ax.transData.inverted().transform(ax.transAxes.transform((x, y)))
+
+    # expansion in Axes coordinates
+    xe, ze = np.sin(azim), np.sin(elev)
+
+    incx, incz = transA2D(1 + xe, 1 + ze) - np.array((xlim[-1], zlim[-1]))
+    fx = lambda y: (y - ydata[0]) * incx / (ydata[-1] - ydata[0])
+    fz = lambda y: (y - ydata[0]) * incz / (ydata[-1] - ydata[0])
+
+    zs = incz * 0.05
+    base = zdata.min() - zs
+
+    for i, row in enumerate(zdata):
+        y = ydata[i]
+        x = xdata + fx(y)
+        z = row + fz(y)  # row.masked_data[0]
+        ma = z.max()
+        z2 = base + fz(y)
+        line = mpl.lines.Line2D(x, z, color='k')
+        line.set_label(f"{ydata[i]}")
+        line.set_zorder(row.size + 1 - i)
+        poly = plt.fill_between(x, z, z2, alpha=1, facecolors="w",
+                                edgecolors="0.85" if i > 0 and i < ydata.size - 1 else 'k')
+        poly.set_zorder(row.size + 1 - i)
+        ax.add_collection(poly)
+        ax.add_line(line)
+
+    (x0, y0), (x1, y1) = transA2D(0, 0), transA2D(1 + xe + .15, 1 + ze)
+    ax.set_xlim((x0, x1))
+    ax.set_ylim((y0 - zs - .05, ma * 1.1))
+
+    ax.set_facecolor('w')
+    ax.vlines(x=xdata[-1] + incx, ymin=zdata.min() - zs + incz, ymax=ax.get_ylim()[-1], color='k')
+    ax.vlines(x=xdata[0] + incx, ymin=zdata.min() - zs + incz, ymax=ax.get_ylim()[-1], color='k')
+    ax.vlines(x=xdata[0], ymin=y0 - zs, ymax=ax.get_ylim()[-1] - incz, color='k', zorder=5000)
+    v1 = ax.vlines(x=xdata[0], ymin=y0 - zs, ymax=ax.get_ylim()[-1] - incz, color='k', zorder=5000)
+
+    x = [xdata[0], xdata[0] + incx, xdata[-1] + incx]
+    z = [ax.get_ylim()[-1] - incz, ax.get_ylim()[-1], ax.get_ylim()[-1]]
+    x2 = [xdata[0], xdata[-1], xdata[-1] + incx]
+    z2 = [y0 - zs, y0 - zs, y0 - zs + incz]
+    poly = plt.fill_between(x, z, z2, alpha=1, facecolors=".95", edgecolors="w")
+    ax.add_collection(poly)
+    poly = plt.fill_between(x2, z, z2, alpha=1, facecolors=".95", edgecolors="w")
+    ax.add_collection(poly)
+
+    line = mpl.lines.Line2D(x, np.array(z), color='k', zorder=50000)
+    ax.add_line(line)
+    line = mpl.lines.Line2D(x2, np.array(z2), color='k', zorder=50000)
+    ax.add_line(line)
+
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    ax.spines['left'].set_visible(False)
+    ax.spines['bottom'].set_visible(False)
+
+    # xticks (xaxis)
+    ticks = ax.get_xticks()
+    newticks = []
+    xt = sorted(xlim)
+    for tick in ticks:
+        if tick >= xt[0] and tick <= xt[1]:
+            newticks.append(tick)
+    ax.set_xticks(newticks)
+
+    # yticks (zaxis)
+    ticks = ax.get_yticks()
+    newticks = []
+    zt = [y0, ax.get_ylim()[-1] - incz]
+    for tick in ticks:
+        if tick >= zt[0] and tick <= zt[1]:
+            newticks.append(tick)
+    _ = ax.set_yticks(newticks)
+
+    # make yaxis
+    ctx = lambda x: (ax.transData.inverted().transform((x, 0)) - ax.transData.inverted().transform((0, 0)))[0]
+    yt = [y for y in np.linspace(ylim[0], ylim[-1], 5)]
+    for y in yt:
+        xmin = xdata[-1] + fx(y)
+        xmax = xdata[-1] + fx(y) + ctx(3.5)
+        pos = y0 - zs + fz(y)
+        ax.hlines(pos, xmin, xmax, zorder=50000)
+        lab = ax.text(xmax + ctx(8), pos, f"{y:.0f}", va='center')
+
+    # display a title
+    # ------------------------------------------------------------------------------------------------------------------
+    title = kwargs.get('title', None)
+    if title:
+        ax.set_title(title)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # labels
+    # ------------------------------------------------------------------------------------------------------------------
+
+    # x label
+    # ------------------------------------------------------------------------------------------------------------------
+    xlabel = kwargs.get("xlabel", None)
+    if not xlabel:
+        xlabel = make_label(new.x, 'x')
+    ax.set_xlabel(xlabel, x=(ax.bbox._bbox.x0 + ax.bbox._bbox.x1) / 2 - xe)
+
+    # y label
+    # ------------------------------------------------------------------------------------------------------------------
+    ylabel = kwargs.get("ylabel", None)
+    if not ylabel:
+        ylabel = make_label(new.y, 'y')
+    ym = (ylim[0] + ylim[1]) / 2
+    x = xdata[-1] + fx(ym)
+    z = y0 - zs + fz(ym)
+    offset = prefs.font.size * (len(lab._text)) + 30
+    iz = ax.transData.transform((0, incz + z))[1] - ax.transData.transform((0, z))[1]
+    ix = ax.transData.transform((incx + x, 0))[0] -  ax.transData.transform((x, 0))[0]
+    angle = np.rad2deg(np.arctan(iz/ix))
+    ax.annotate(ylabel, (x, z), xytext=(offset, 0), xycoords='data', textcoords='offset pixels', ha='center',
+                va='center', rotation=angle)
+
+    # z label
+    # ------------------------------------------------------------------------------------------------------------------
+    zlabel = kwargs.get("zlabel", None)
+    if not zlabel:
+        zlabel = make_label(new, 'value')
+
+    # do we display the z axis?
+    if kwargs.get('show_z', True):
+        ax.set_ylabel(zlabel, y=(ax.bbox._bbox.y0 + 1 - ze) / 2)
+    else:
+        ax.set_yticks([])
+
+
+# ======================================================================================================================
+# get clevels
+# ======================================================================================================================
+
+def _get_clevels(data, prefs, **kwargs):
+    # Utility function to determine contours levels
 
     # contours
     maximum = data.max()
+
     # minimum = -maximum
 
-    nlevels = kwargs.get('nlevels', kwargs.get('nc',
-                                               project_preferences.number_of_contours))
-    start = kwargs.get('start', project_preferences.contour_start) * maximum
+    nlevels = kwargs.get('nlevels', kwargs.get('nc', prefs.number_of_contours))
+    start = kwargs.get('start', prefs.contour_start) * maximum
     negative = kwargs.get('negative', True)
     if negative < 0:
         negative = True

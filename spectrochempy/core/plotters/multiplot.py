@@ -24,7 +24,6 @@ from matplotlib.tight_layout import (
     )
 import matplotlib as mpl
 
-from spectrochempy.core.dataset.ndplot import _set_figure_style
 from spectrochempy.utils import is_sequence
 
 
@@ -256,10 +255,6 @@ def multiplot(datasets=[], labels=[], nrow=1, ncol=1,
 
     # create the subplots and plot the ndarrays
     # ------------------------------------------------------------------------------------------------------------------
-
-    # first make style
-    _set_figure_style(**kwargs)
-
     mpl.rcParams['figure.autolayout'] = False
 
     figsize = kwargs.pop('figsize', None)

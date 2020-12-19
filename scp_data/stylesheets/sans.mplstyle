@@ -1,14 +1,14 @@
 # sans (equivalent to scpy: default)
 # ----------------------------------------------------------------------------------------------------------------------
 
-axes.prop_cycle: cycler('color', ['0072B2', '009E73', 'D55E00', 'CC79A7', 'F0E442', '56B4E9'])
+axes.prop_cycle: cycler('color', ['#0072B2', '#009E73', '#D55E00', '#CC79A7', '#F0E442', '#56B4E9'])
 
 axes.titlesize: 14
 axes.grid: False
 
 image.cmap: viridis
 
-figure.figsize         : 6.8, 4.4
+figure.figsize         : 6.8, 4.45
 figure.dpi             : 96
 figure.facecolor       : white
 figure.edgecolor       : white
@@ -69,3 +69,26 @@ mathtext.cal     : cursive
 mathtext.default : rm
 
 text.usetex      : False
+
+##
+## ADDITIONAL PARAMETERS FOR SPECTROCHEMPY
+##
+##@method_1D                             : pen
+##@method_2D                             : stack
+##@method_3D                             : surface
+##@colorbar                              : True
+##@show_projections                      : False
+##@show_projection_x                     : False
+##@show_projection_y                     : False
+##@colormap                              : viridis
+##@max_lines_in_stack                    : 1000
+##@simplify                              : False
+##@number_of_x_labels                    : 5
+##@number_of_y_labels                    : 5
+##@number_of_z_labels                    : 5
+##@number_of_contours                    : 50
+##@contour_alpha                         : 1.0
+##@contour_start                         : 0.05
+##@antialiased                           : True
+##@rcount                                : 50
+##@ccount                                : 50

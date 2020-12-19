@@ -36,7 +36,16 @@
 # **Below (and in the next sections), we try to give an almost complete view of the NDDataset features.**
 
 # %%
-from spectrochempy import *     # noqa: F403
+import spectrochempy as scp
+
+a = scp.diag((3, 3, 2.5))
+a= scp.diag((3, 3, 2.5))
+
+# %% [markdown]
+# For a convenient usage of units, we will also import `ur` the unit registry which contains all available units.
+
+# %%
+from spectrochempy import ur
 
 # %% [markdown]
 # Multidimensional array are defined in Spectrochempy using the ``NDDataset`` object.
@@ -62,16 +71,31 @@ from spectrochempy import *     # noqa: F403
 # In the following example, a minimal 1D dataset is created from a simple list, to which we can add some metadata:
 
 # %%
-d1D = NDDataset([10., 20., 30.])
-print_(d1D)
+d1D = scp.NDDataset([10., 20., 30.],
+                    name="Dataset N1",
+                    author='Blake and Mortimer',
+                    description='A dataset from scratch')
+
+d1D
 
 # %% [markdown]
 # <div class='alert-info'>
 #
-# **Note**: In the above code, we use of `print_` (with an underscore) not the usual `print` function.
-# The `print` output only a short line of information
+# **Note**: In the above code, run in a notebook, the output of d1D is in html for a nice display.
+#
+#  To get the same effect, from a console script, one can use `print_` (with an underscore) and not the usual python function `print`. As you can see below, the `print` function only gives a short summary of the information, while the `print_` method gives more detailed output
 #
 # </div>
+
+# %%
+print(d1D)
+
+# %%
+from spectrochempy import print_
+print_(d1D)
+
+# %% [markdown]
+# ### Plotting
 
 # %%
 d1D.plot()
@@ -93,16 +117,17 @@ d1D
 # operation with these objects:
 
 # %%
-np.sqrt(d1D ** 3)
+from numpy import sqrt
+sqrt(d1D)
 
 # %%
 d1D + d1D / 2.
 
 # %% [markdown]
-# As seen above, there is some metadata taht are automatically added to the dataset:
+# As seen above, there is some metadata that are automatically added to the dataset:
 #
 # * **`id`**     : This is a unique identifier for the object
-# * **`author`** : author determined from the computer name
+# * **`author`** : author determined from the computer name if not provided
 # * **`created`**: date/time of creation
 # * **`modified`**: date/time of modification
 #
@@ -154,17 +179,19 @@ d1D.dims
 # ### nD-Dataset (multidimensional dataset)
 
 # %% [markdown]
-# To create a nD NDDataset, we have to provide a nD-array like object to the NDDataset instance constructor
+# To create a nD NDDataset, we can provide a nD-array like object to the NDDataset instance constructor
 
 # %%
-a = np.random.rand(2, 4, 6)  # note here that np (for numpy space has been automatically
+from numpy.random import rand
+a = rand(2, 4, 6)  # note here that np (for numpy space has been automatically
 # imported with spectrochempy, thus no need to use the
 # classical `import numpy as np`)
 a
 
 # %%
-d2D = NDDataset(a)
+d2D = scp.NDDataset(a)
 d2D.title = 'Energy'
+d2D.author = 'Someone'
 d2D.name = '3D dataset creation'
 d2D.history = 'created from scratch'
 d2D.description = 'Some example'
@@ -175,8 +202,11 @@ d2D
 # We can also add all information in a single statement
 
 # %%
-d2D = NDDataset(a, dims=['v', 'u', 't'], title='Energy', name='3D_dataset',
-                history='created from scratch', description='a single line creation example')
+d2D = scp.NDDataset(a, dims=['v', 'u', 't'], title='Energy',
+                    author='Someone',
+                    name='3D_dataset',
+                    history='created from scratch',
+                    description='a single statement creation example')
 d2D
 
 # %% [markdown]
@@ -208,7 +238,10 @@ d1D  # note the eV symbol of the units added to the values field below
 # This allows to make units-aware calculations:
 
 # %%
-np.sqrt(d1D)  # note the results en eV^0.5
+d1D ** 2  # note the results in eV^2
+
+# %%
+sqrt(d1D)  # note the result in e^0.5
 
 # %%
 time = 5. * ur.second  # ur is a registry containing all available units
@@ -244,7 +277,7 @@ d2D.t  # the same for coordinate  u, v, t which are not yet set
 # To add coordinates, on way is to set them one by one:
 
 # %%
-d2D.t = np.arange(6) * .1  # we need a sequence of 6 values for `t` dimension (see shape above)
+d2D.t = scp.Coord.arange(6) * .1  # we need a sequence of 6 values for `t` dimension (see shape above)
 d2D.t.title = 'time'
 d2D.t.units = 'seconds'
 d2D.coordset  # now return a list of coordinates
@@ -286,7 +319,7 @@ d2D.v.has_data, d2D.v.is_empty
 try:
     d2D.x
 except KeyError:
-    error_('not found')
+    scp.error_('not found')
 
 # %% [markdown]
 # In some case it can also be usefull to get a coordinate from its title instead of its name (the limitation is that if
@@ -334,8 +367,11 @@ d2D.time
 # refer to the first.
 
 # %%
-a = np.diag((3, 3, 2.5))
-nd = NDDataset(a, coordset=CoordSet(x=np.arange(3), y='x'))
+a = scp.NDDataset.diag((3, 3, 2.5))
+a
+
+# %%
+nd = scp.NDDataset(a, coordset=scp.CoordSet(x=np.arange(3), y='x'))
 nd
 
 # %% [markdown]

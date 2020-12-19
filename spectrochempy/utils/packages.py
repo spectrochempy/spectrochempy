@@ -11,7 +11,7 @@ from pkgutil import walk_packages
 
 from traitlets import import_item
 
-__all__ = ['list_packages', 'generate_api']
+__all__ = ['list_packages', 'generate_api', 'get_pkg_path']
 
 
 # ======================================================================================================================
@@ -76,6 +76,16 @@ def generate_api(api_path):
 
     return __all__
 
+def get_pkg_path(data_name, package=None):
+    data_name = os.path.normpath(data_name)
+
+    path = os.path.dirname(import_item(package).__file__)
+    path = os.path.join(path, data_name)
+
+    if not os.path.isdir(path):  # pragma: no cover
+        return os.path.dirname(path)
+
+    return path
 
 # ======================================================================================================================
 

@@ -15,7 +15,7 @@ __dataset_methods__ = __all__
 import warnings
 import locale
 import io
-from datetime import datetime
+from datetime import datetime, timezone
 
 import numpy as np
 
@@ -166,8 +166,8 @@ def _read_csv(*args, **kwargs):
     dataset.units = kwargs.get('units', None)
     dataset.description = kwargs.get('description',
                                      '"name" ' + 'read from .csv file')
-    dataset.history = str(datetime.now()) + ':read from .csv file \n'
-    dataset._date = datetime.now()
+    dataset.history = str(datetime.now(timezone.utc)) + ':read from .csv file \n'
+    dataset._date = datetime.now(timezone.utc)
     dataset._modified = dataset.date
 
     # here we can check some particular format
@@ -196,11 +196,11 @@ def _add_omnic_info(dataset, **kwargs):
     dataset.title = 'Absorbance'
     dataset.name = name
     dataset.description = ('Dataset from .csv file: {}\n'.format(desc))
-    dataset.history = str(datetime.now()) + ':read from omnic exported csv file \n'
+    dataset.history = str(datetime.now(timezone.utc)) + ':read from omnic exported csv file \n'
     dataset.origin = 'omnic'
 
     # Set the NDDataset date
-    dataset._date = datetime.now()
+    dataset._date = datetime.now(timezone.utc)
     dataset._modified = dataset.date
 
     # x axis

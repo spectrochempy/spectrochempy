@@ -69,7 +69,7 @@ def _compare_datasets(this, other, approx=False, decimal=6):
         return eq
 
     attrs = this.__dir__()
-    for attr in ('filename', 'plotmeta', 'description', 'history', 'date', 'modified', 'modeldata',
+    for attr in ('filename', 'preferences', 'description', 'history', 'date', 'modified', 'modeldata',
                  'origin', 'roi', 'offset', 'name'):
         # these attibutes are not used for comparison (comparison based on data and units!)
         if attr in attrs:
@@ -85,9 +85,9 @@ def _compare_datasets(this, other, approx=False, decimal=6):
             if hasattr(other, f'_{attr}'):
                 oattr = getattr(other, f'_{attr}')
                 # to avoid deprecation warning issue for unequal array
-                if (sattr is None and oattr is not None):
+                if sattr is None and oattr is not None:
                     raise ComparisonFailure(f'{attr} of {this} is None.')
-                if (oattr is None and sattr is not None):
+                if oattr is None and sattr is not None:
                     raise ComparisonFailure(f'{attr} of {other} is None.')
                 if hasattr(oattr, 'size') and hasattr(sattr, 'size') and oattr.size != sattr.size:
                     # particular case of mask
@@ -108,10 +108,15 @@ def _compare_datasets(this, other, approx=False, decimal=6):
                         except AssertionError as e:
                             raise ComparisonFailure(f'{this} and {other} object\'s {attr} are not equals..\n{e}')
                 elif attr in ['coordset']:
-                    for item in zip(sattr, oattr):
-                        res = _compare_datasets(*item, approx=approx, decimal=decimal)
-                        if not res:
-                            raise ComparisonFailure(f'coords differs:\n{res}')
+                    if (sattr is None and oattr is not None) or (oattr is None and sattr is not None):
+                        raise ComparisonFailure('One of the coordset is None')
+                    elif sattr is None and oattr is None:
+                        res = True
+                    else:
+                        for item in zip(sattr, oattr):
+                            res = _compare_datasets(*item, approx=approx, decimal=decimal)
+                            if not res:
+                                raise ComparisonFailure(f'coords differs:\n{res}')
                 else:
                     eq &= np.all(sattr == oattr)
                 if not eq:

@@ -135,7 +135,7 @@ def _read_txt(*args, **kwargs):
     dataset.description = 'Spectrum acquisition : ' + str(date_acq)
 
     # Set the NDDataset date
-    dataset._date = datetime.datetime.now()
+    dataset._date = datetime.datetime.now(datetime.timezone.utc)
     dataset._modified = dataset.date
 
     # Set origin, description and history

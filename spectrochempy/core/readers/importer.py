@@ -12,7 +12,7 @@ __all__ = ['read']
 __dataset_methods__ = __all__
 
 from warnings import warn
-from datetime import datetime
+from datetime import datetime, timezone
 from traitlets import HasTraits, List, Dict, Type, Unicode
 
 from spectrochempy.utils import pathclean, check_filename_to_open, docstrings
@@ -194,7 +194,7 @@ class Importer(HasTraits):
                 dataset = self.objtype.stack(datasets)
                 if kwargs.pop("sortbydate", True):
                     dataset.sort(dim='y', inplace=True)
-                    dataset.history = str(datetime.now()) + ':sorted by date'
+                    dataset.history = str(datetime.now(timezone.utc)) + ':sorted by date'
                 datasets = [dataset]
 
             except DimensionsCompatibilityError as e:

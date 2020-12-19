@@ -68,7 +68,7 @@ def plot_3D(dataset, **kwargs):
     # # get all plot preferences
     # # ------------------------
     #
-    # prefs = dataset.plotmeta
+    # prefs = dataset.preferences
     # if not prefs.style:
     #     # not yet set, initialize with default project preferences
     #     prefs.update(project_preferences.to_dict())

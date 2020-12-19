@@ -161,11 +161,12 @@ from spectrochempy.application import (  # noqa: E402
     ERROR,
     CRITICAL,
     INFO,
-    available_styles,
     )
 
 general_preferences = app.general_preferences
 project_preferences = app.project_preferences
+dataset_preferences = app.dataset_preferences
+matplotlib_preferences = app.matplotlib_preferences
 description = app.description
 long_description = app.long_description
 config_manager = app.config_manager
@@ -190,10 +191,11 @@ __all__ += [
         'CRITICAL',
         'INFO',
         'project_preferences',
+        'dataset_preferences',
         'general_preferences',
+        'matplotlib_preferences',
         'config_manager',
         'config_dir',
-        'available_styles',
         'set_loglevel',
         'get_loglevel',
 
@@ -209,13 +211,6 @@ __all__ += [
         'description',
         'long_description'
         ]
-
-# load the default style
-# print("mpl_config_dir", mpl.get_configdir(), plt.style.available)
-try:
-    plt.style.use(project_preferences.style)
-except Exception:
-    pass  # if the scp styles are not yet installed, ignore it
 
 # IPython methods
 # ----------------------------------------------------------------------------------------------------------------------

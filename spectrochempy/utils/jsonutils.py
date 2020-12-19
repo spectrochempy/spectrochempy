@@ -8,7 +8,7 @@
 """JSON utilities
 
 """
-from datetime import datetime
+from datetime import datetime, timezone
 import pickle
 import base64
 import pathlib

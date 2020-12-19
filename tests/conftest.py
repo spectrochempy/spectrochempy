@@ -18,22 +18,24 @@ import pytest
 try:
     # work only if spectrochempy is installed
     import spectrochempy
-except ModuleNotFoundError:
+except ModuleNotFoundError: # pragma: no cover
     raise ModuleNotFoundError('You must install spectrochempy and its dependencies before executing tests!')
+
+from spectrochempy.core import general_preferences as prefs
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndcomplex import NDComplexArray
+from spectrochempy.core.dataset.ndcoordset import CoordSet
+from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndpanel import NDPanel
 from spectrochempy.core.scripts.script import Script
 from spectrochempy.core.project.project import Project
-from spectrochempy.core.dataset.ndcoordset import CoordSet
-from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.core import general_preferences as prefs
-
-from spectrochempy.utils.testing import RandomSeedContext
 from spectrochempy.utils import pathclean
+from spectrochempy.utils.testing import RandomSeedContext
 
-import spectrochempy as scp
+# ======================================================================================================================
+# FIXTURES
+# ======================================================================================================================
 
 # initialize a ipython session before calling spectrochempy
 # ----------------------------------------------------------------------------------------------------------------------
@@ -51,7 +53,7 @@ def ip(session_ip):
     yield session_ip
 
 
-def pytest_sessionfinish(session, exitstatus):
+def pytest_sessionfinish(session, exitstatus): # pragma: no cover
     """ whole test run finishes. """
 
     # cleaning
@@ -70,11 +72,6 @@ def pytest_sessionfinish(session, exitstatus):
     for f in list(docs.glob('**/*.ipynb')):
         f.unlink()
 
-
-# ======================================================================================================================
-# FIXTURES
-# ======================================================================================================================
-
 # set test file and folder in environment
 # set a test file in environment
 
@@ -85,6 +82,7 @@ environ['TEST_FOLDER'] = str(datadir / 'irdata' / 'subdir')
 environ['TEST_NMR_FOLDER'] = str(datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'topspin_2d')
 
 
+# ----------------------------------------------------------------------------------------------------------------------
 # create reference arrays
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -98,6 +96,7 @@ ref3d_mask = ref3d_data < -3
 ref3d_2_mask = ref3d_2_data < -2
 
 
+# ----------------------------------------------------------------------------------------------------------------------
 # Fixtures: some NDArray's
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -114,7 +113,7 @@ def refmask():
 @pytest.fixture(scope="function")
 def ndarray():
     # return a simple ndarray with some data
-    return NDArray(ref_data, copy=True).copy()
+    return NDArray(ref_data, desc= "An array", copy=True).copy()
 
 
 @pytest.fixture(scope="function")
@@ -126,9 +125,10 @@ def ndarrayunit():
 @pytest.fixture(scope="function")
 def ndarraymask():
     # return a simple ndarray with some data and units
-    return NDArray(ref_data, mask=ref_mask, units='m/s', copy=True).copy()
+    return NDArray(ref_data, mask=ref_mask, units='m/s', history='Creation with mask', copy=True).copy()
 
 
+# ----------------------------------------------------------------------------------------------------------------------
 # Fixtures: Some NDComplex's array
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -143,7 +143,7 @@ def ndarrayquaternion():
     # return a quaternion ndarray
     return NDComplexArray(ref_data, units='m/s', dtype=np.quaternion, copy=True).copy()
 
-
+# ----------------------------------------------------------------------------------------------------------------------
 # Fixtures: Some NDDatasets
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -243,8 +243,9 @@ def dsm():
     return NDDataset(ref3d_data, coordset=[coord0_, coord1_, coordmultiple], mask=ref3d_mask, title='Absorbance',
                      units='absorbance').copy()
 
-
+# ----------------------------------------------------------------------------------------------------------------------
 # NDPanel
+# ----------------------------------------------------------------------------------------------------------------------
 
 @pytest.fixture(scope="function")
 def pnl():
@@ -260,10 +261,8 @@ def pnl():
     assert pnl.dims == ['x', 'y']
     return pnl.copy()
 
-
 # Fixtures:  IR spectra (SPG)
 # ----------------------------------------------------------------------------------------------------------------------
-
 
 dataset = NDDataset.read_omnic(datadir/'irdata'/'nh4y-activation.spg')
 
@@ -282,6 +281,7 @@ def IR_dataset_1D():
     return nd
 
 
+# ----------------------------------------------------------------------------------------------------------------------
 # Fixture: NMR spectra
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -298,6 +298,9 @@ def NMR_dataset_2D():
     dataset = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True, name="NMR_2D")
     return dataset.copy()
 
+
+
+# ----------------------------------------------------------------------------------------------------------------------
 # fixture Project
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -315,7 +318,7 @@ def simple_project():
             name='project_1',
             label='main project',
 
-            )
+    )
 
     assert proj.projects_names == ['A350', 'B350', 'P350']
 

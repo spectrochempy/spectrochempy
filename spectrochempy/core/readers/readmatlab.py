@@ -14,7 +14,7 @@ __dataset_methods__ = __all__
 
 import io
 from warnings import warn
-from datetime import datetime
+from datetime import datetime, timezone
 
 import numpy as np
 import scipy.io as sio
@@ -99,7 +99,7 @@ def _read_mat(*args, **kwargs):
             # this is an array of numbers
             dataset.data = data
             dataset.name = name
-            dataset.history = str(datetime.now()) + ':imported from .mat file \n'
+            dataset.history = str(datetime.now(timezone.utc)) + ':imported from .mat file \n'
             # TODO: reshape from fortran/Matlab order to C opder
             # for 3D or higher datasets ?
             datasets.append(dataset)
@@ -217,7 +217,7 @@ def _read_dso(dataset, name, data):
         for i in data['history'][0][0][0][0]:
             dataset.history.append(i)
 
-        dataset.history = (str(datetime.now()) + ': Imported by spectrochempy ')
+        dataset.history = (str(datetime.now(timezone.utc)) + ': Imported by spectrochempy ')
     return dataset
 
 

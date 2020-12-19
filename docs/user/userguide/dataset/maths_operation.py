@@ -16,11 +16,9 @@
 
 # %% [markdown]
 # # Mathematical operations
-#
-# import numpy as np
 
 # %%
-import spectrochempy as scp
+from spectrochempy import *
 import numpy as np
 
 # %% [markdown]
@@ -34,7 +32,6 @@ import numpy as np
 # like this using the `np.sqrt` functions :
 
 # %%
-
 x = np.array([1., 2., 3., 4., 6.])
 np.sqrt(x)
 
@@ -44,7 +41,7 @@ np.sqrt(x)
 # The interesting thing, it that `ufunc`'s can also work with `NDDataset`.
 
 # %%
-dx = scp.NDDataset(x)
+dx = NDDataset(x)
 np.sqrt(dx)
 
 # %% [markdown]
@@ -55,7 +52,7 @@ np.sqrt(dx)
 # %%
 x = np.arange(6.)
 y = np.arange(8.)
-pnl = scp.NDPanel(x, y)
+pnl = NDPanel(x, y)
 np.sqrt(pnl)
 
 # %% [markdown]
@@ -68,13 +65,7 @@ np.sqrt(pnl)
 # For instance, the square root can be calculated using the following syntax:
 
 # %%
-scp.sqrt(dx)
-
-# %% [markdown]
-# or
-
-# %%
-scp.sqrt(dx)
+sqrt(dx)
 
 # %% [markdown]
 # ## List of UFuncs working on `NDDataset`:
@@ -119,7 +110,6 @@ scp.sqrt(dx)
 # * [sin](#sin)(x, \*\*kwargs): Trigonometric sine, element-wise.
 # * [cos](#cos)(x, \*\*kwargs): Trigonometric cosine element-wise.
 # * [tan](#tan)(x, \*\*kwargs): Compute tangent element-wise.
-#
 # * [arcsin](#arcsin)(x, \*\*kwargs): Inverse sine, element-wise.
 # * [arccos](#arccos)(x, \*\*kwargs): Trigonometric inverse cosine, element-wise.
 # * [arctan](#arctan)(x, \*\*kwargs): Trigonometric inverse tangent, element-wise.
@@ -147,11 +137,6 @@ scp.sqrt(dx)
 # the inputs.
 # * [mod](#mod) or [remainder](#remainder)(x1, x2,\*\*kwargs): Return element-wise remainder of division.
 # * [fmod](#fmod)(x1, x2, \*\*kwargs): Return the element-wise remainder of division.
-# * [logaddexp](#logaddexp)(x1, x2,\*\*kwargs): Logarithm of the sum of exponentiations of the inputs.
-# * [logaddexp2](#logaddexp2)(x1, x2, \*\*kwargs): Logarithm of the sum of exponentiations of the inputs in base-2.
-# * [heaviside](#heaviside)(x1, x2, \*\*kwargs): Compute the Heaviside step function.
-#
-#
 
 # %% [markdown]
 # ## Usage
@@ -159,25 +144,25 @@ scp.sqrt(dx)
 # dataset.
 
 # %%
-# import a dataset to check the ufuncs
-import os
-dataset = scp.NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
-dataset
+d2D= NDDataset.read_omnic('irdata/nh4y-activation.spg')
+
+d2D.plotpreferences.figure_figsize=(6,2.5)
+d2D.plotpreferences.method_2D = 'stack'
+
+_ = d2D.plot(figsize=(6,6))
+
+# let's select only the first row of the 2D dataset
+dataset = d2D[0].squeeze()   # squeeze is used to remove the residual size 1 dimension
+_ = dataset.plot()
 
 # %% [markdown]
 # This dataset will be artificially modified already using some mathematical operation (subtraction with a scalar) to
-# present negative values.
+# present negative values and we will also mask some data
 
 # %%
-dataset = dataset - 2.  # add an offset to make that some of the values become negative
-dataset
-
-# %%
-dataset = dataset.clip(1.8)  # additionally limit the upper values using the clip
-dataset
-
-# %%
-_ = dataset.plot(figsize=(6, 2.5))
+dataset = dataset - 2.             # add an offset to make that some of the values become negative
+dataset[880.:1230.] = MASKED      # additionally we mask some data
+_ = dataset.plot()
 
 # %% [markdown]
 # ### Unary functions
@@ -190,8 +175,8 @@ _ = dataset.plot(figsize=(6, 2.5))
 # Numerical negative, element-wise, keep units
 
 # %%
-out = np.negative(dataset)
-_ = out.plot(figsize=(6, 2.5))
+out = np.negative(dataset)         # the same results is obtained using out=-dataset
+_ = out.plot(figsize=(6, 2.5), show_mask=True)
 
 # %% [markdown]
 # ##### abs
@@ -242,8 +227,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.sqrt(dataset)  # as they are some negative elements, return dataset has complex dtype.
-_ = out.real.plot(figsize=(6, 2.5))
-_ = out.imag.plot(figsize=(6, 2.5))
+_ = out.plot_1D(show_complex=True, figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### square
@@ -259,7 +243,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.cbrt(dataset)
-_ = out.plot(figsize=(6, 2.5))
+_ = out.plot_1D(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### reciprocal
@@ -284,12 +268,11 @@ _ = out.plot(figsize=(6, 2.5))
 # Obviously numpy exponential functions applies only to dimensionless array. Else an error is generated.
 
 # %%
-x = scp.NDDataset(np.arange(5), units='m')
+x = NDDataset(np.arange(5), units='m')
 try:
     np.exp(x)  # A dimensionality error will be generated
-except scp.DimensionalityError:
-    # error_(e)
-    print('Dimensionality error issued!')
+except DimensionalityError as e:
+    error_(e)
 
 # %% [markdown]
 # ##### exp2
@@ -310,9 +293,15 @@ _ = out.plot(figsize=(6, 2.5))
 # %% [markdown]
 # ##### log
 # Natural logarithm, element-wise.
+#
+# This doesn't generate un error for negative numbrs, but the output is masked for those values
 
 # %%
 out = np.log(dataset)
+ax = out.plot(figsize=(6, 2.5), show_mask=True)
+
+# %%
+out = np.log(dataset-dataset.min())
 _ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
@@ -381,7 +370,9 @@ np.isnan(dataset)
 np.signbit(dataset)
 
 # %% [markdown]
-# #### Trigonometric functions. Require unitless dataset or radians.
+# #### Trigonometric functions. Require dimensionless/unitless  dataset or radians.
+#
+# In the below examples, unit of data in dataset is absorbance (then dimensionless)
 
 # %% [markdown]
 # ##### sin
@@ -432,18 +423,6 @@ out = np.arctan(dataset)
 _ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
-# ##### arctan2
-# Element-wise arc tangent of x1/x2 choosing the quadrant correctly.
-#
-# The quadrant (i.e., branch) is chosen so that arctan2(x1, x2) is the signed angle in radians between the ray ending
-# at the origin and passing through the point (1,0), and the ray ending at the origin and passing through the point (
-# x2, x1).
-
-# %%
-out = np.arctan2(dataset, dataset * 2.)
-_ = out.plot(figsize=(6, 2.5))
-
-# %% [markdown]
 # #### Angle units conversion
 
 # %% [markdown]
@@ -461,10 +440,6 @@ _ = out.plot(figsize=(6, 2.5))
 out = np.rad2deg(dataset)
 out.title = 'data'  # just to avoid a too long title
 _ = out.plot(figsize=(6, 2.5))
-
-# %%
-pi = scp.NDDataset(scp.Quantity(np.pi, 'dimensionless'))
-np.sin(pi).data, np.sin(np.rad2deg(pi)).data
 
 # %% [markdown]
 # ##### deg2rad
@@ -515,6 +490,10 @@ _ = out.plot(figsize=(6, 2.5))
 # ##### arccosh
 # Inverse hyperbolic cosine, element-wise.
 
+# %%
+out = np.arccosh(dataset)
+_ = out.plot(figsize=(6, 2.5))
+
 # %% [markdown]
 # ##### arctanh
 # Inverse hyperbolic tangent element-wise.
@@ -527,7 +506,8 @@ _ = out.plot(figsize=(6, 2.5))
 # ### Binary functions
 
 # %%
-dataset2 = np.exp(dataset)  # create a second dataset
+dataset2 = np.reciprocal(dataset+3) # create a second dataset
+dataset2[5000.:4000.] = MASKED
 _ = dataset.plot(figsize=(6, 2.5))
 _ = dataset2.plot(figsize=(6, 2.5))
 
@@ -596,41 +576,3 @@ _ = out.plot(figsize=(6, 2.5))
 # %%
 out = np.fmod(dataset, dataset2)
 _ = out.plot(figsize=(6, 2.5))
-
-# %% [markdown]
-# ##### logaddexp
-# Logarithm of the sum of exponentiations of the inputs.
-# ##### logaddexp2
-# Logarithm of the sum of exponentiations of the inputs in base-2.
-
-# %%
-# out = np.logaddexp2(dataset, dataset2)   (TODO: do not work - apparently with the new version of pint!)
-# _ = out.plot(figsize=(6,2.5))
-
-
-# %% [markdown]
-# ##### heaviside
-# Compute the Heaviside step function.
-#
-# ```
-#                       0   if x1 < 0
-# heaviside(x1, x2) =  x2   if x1 == 0
-#                       1   if x1 > 0
-# ```
-
-# %%
-# h = np.heaviside(dataset, dataset2)       (TODO: do not work - apparently with the new version of pint!)
-# _ = h.plot(figsize=(6,2.5))
-# out = dataset * h
-# _ = out.plot(figsize=(6,2.5))
-
-
-# %% [markdown]
-# #### Logical and comparison operations
-
-# %% [markdown]
-# ##### logical_not
-# Compute the truth value of NOT x element-wise.
-
-# %%
-np.logical_not(dataset)

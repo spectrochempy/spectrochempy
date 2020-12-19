@@ -35,7 +35,7 @@ from spectrochempy.core import project_preferences
 from spectrochempy.core.analysis.svd import SVD
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.npy import diag, dot
+from spectrochempy.core.dataset.npy import dot
 from spectrochempy.utils import docstrings, NRed, NBlue
 
 
@@ -133,7 +133,7 @@ class PCA(HasTraits):
         # perform SVD
         # -----------
         svd = SVD(Xsc)
-        sigma = diag(svd.s)
+        sigma = svd.s.diag()
         U = svd.U
         VT = svd.VT
 

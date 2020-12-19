@@ -262,16 +262,16 @@ def _read_jdx(*args, **kwargs):
     dataset.origin = "omnic"
     dataset.description = "Dataset from jdx: '{0}'".format(jdx_title)
 
-    dataset.history = str(datetime.now()) + ':imported from jdx file \n'
+    dataset.history = str(datetime.now(timezone.utc)) + ':imported from jdx file \n'
 
     if sortbydate:
         dataset.sort(dim='x', inplace=True)
-        dataset.history = str(datetime.now()) + ':sorted by date\n'
+        dataset.history = str(datetime.now(timezone.utc)) + ':sorted by date\n'
     # Todo: make sure that the lowest index correspond to the largest wavenumber
     #  for compatibility with dataset created by read_omnic:
 
     # Set the NDDataset date
-    dataset._date = datetime.now()
+    dataset._date = datetime.now(timezone.utc)
     dataset._modified = dataset.date
 
     return dataset

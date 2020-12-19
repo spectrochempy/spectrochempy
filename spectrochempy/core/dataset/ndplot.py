@@ -11,42 +11,266 @@ methods for a |NDDataset| are defined.
 
 """
 
-__all__ = ['NDPlot',
-           'plot',
-
-           # styles and colors
-           '_set_figure_style'
-           ]
+__all__ = ['NDPlot', 'plot']
 
 # Python and third parties imports
 # ----------------------------------------------------------------------------------------------------------------------
+import re
+import textwrap
 
-import os
+from pathlib import Path
 from cycler import cycler
 import matplotlib as mpl
 # from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import pyplot as plt
 import plotly.graph_objects as go
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from traitlets import Dict, HasTraits, Instance, Union, default
+from traitlets import Dict, HasTraits, Instance, Union, default, TraitError, Unicode
 
 # local import
 # ----------------------------------------------------------------------------------------------------------------------
-from spectrochempy.utils import (
-    is_sequence,
-    docstrings, NBlack, NBlue, NGreen, NRed,
-    get_figure,
-    )
-from spectrochempy.core import general_preferences, project_preferences
-from spectrochempy.core import error_
+from spectrochempy.utils import (is_sequence, docstrings, NBlack, NBlue, NGreen, NRed, get_figure, Meta, pathclean)
+
+from spectrochempy.core import general_preferences, dataset_preferences, project_preferences, matplotlib_preferences
+from spectrochempy.core import error_, warning_
 from spectrochempy.core.plotters.plot1d import plot_1D
 from spectrochempy.core.plotters.plot3d import plot_3D
 from spectrochempy.core.plotters.plot2d import plot_2D
-from spectrochempy.utils.meta import Meta
+
 
 # from spectrochempy.utils import deprecated
 
-prefs = general_preferences
+# ======================================================================================================================
+# Management of the preferences for datasets
+# ======================================================================================================================
+
+class Preferences(Meta):
+    """
+    Preferences management
+
+
+    """
+
+    def __init__(self, **data):
+        super().__init__(**data)
+
+    def __getitem__(self, key):
+
+        # search on the preferences
+        if self.parent is not None:
+            res = getattr(self.parent, f'{self.name}_{key}')
+        elif hasattr(matplotlib_preferences, key):
+            res = getattr(matplotlib_preferences, key)
+        elif hasattr(dataset_preferences, key):
+            res = getattr(dataset_preferences, key)
+        elif hasattr(project_preferences, key):
+            res = getattr(project_preferences, key)
+        elif hasattr(general_preferences, key):
+            res = getattr(general_preferences, key)
+        else:
+            alias = self._get_alias(key)
+            if alias:
+                if isinstance(alias, list):
+                    res = Preferences(parent=self, name=key, **dict([(n, getattr(self, f'{key}_{n}')) for n in alias]))
+                else:
+                    res = getattr(self, alias)
+            else:
+                res = super().__getitem__(key)
+                if res is None:
+                    error_(
+                            f'not found {key}')  # key = key.replace('_','.').replace('...', '_').replace('..',
+                    # '-')  #  # res = mpl.rcParams[key]
+
+        return res
+
+    def __setitem__(self, key, value):
+
+        # also change the corresponding preferences
+        if hasattr(matplotlib_preferences, key):
+            try:
+                setattr(matplotlib_preferences, key, value)
+            except TraitError:
+                value = type(matplotlib_preferences.traits()[key].default_value)(value)
+                setattr(matplotlib_preferences, key, value)
+        elif hasattr(dataset_preferences, key):
+            setattr(dataset_preferences, key, value)
+        elif hasattr(project_preferences, key):
+            setattr(project_preferences, key, value)
+        elif hasattr(general_preferences, key):
+            setattr(general_preferences, key, value)
+        elif key in self.keys():
+            newkey = f'{self.name}_{key}'
+            setattr(matplotlib_preferences, newkey, value)
+            self.parent[newkey] = value
+            return
+        else:
+            # try to find an alias for matplotlib values
+            alias = self._get_alias(key)
+            if alias:
+                newkey = f'{alias}_{key}'
+                setattr(matplotlib_preferences, newkey, value)
+                self.parent[newkey] = value
+            else:
+                error_(f'not found {key}')
+            return
+
+        super().__setitem__(key, value)
+
+        # # ........................ TO WORK ON  ## from spectrochempy.core import general_preferences,
+        # config_manager  # # read json files in the pscp file (obj[f])  # # then write it in the main config  #   #
+        # directory  # f = 'ProjectPreferences.json'  # if f in obj.files:  # TODO: work on this  #     prefjsonfile
+        #  = os.path.join(config_dir, f)  #     with open(prefjsonfile, 'w') as fd:  #         json.dump(obj[f], fd,
+        #  indent=4)  #     # we must also reinit preferences  #     app.init_all_preferences()  #  #    #  #
+        #  app.load_config_file(prefjsonfile)  #     app.project_preferences = ProjectPreferences(config=app.config,
+        #  parent=app)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Private methods
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def _get_alias(self, key):
+
+        alias = []
+        lkeyp = (len(key) + 1)
+
+        regex = r"[a-zA-Z0-9_]*(?:\b|_)" + key + "(?:\b|_)[a-zA-Z0-9_]*"
+        for item in matplotlib_preferences.trait_names():
+            matches = re.match(regex, item)
+            if matches is not None:
+                alias.append(item)
+
+        if alias:
+
+            starts = any([par.startswith(key) for par in alias])
+            ends = any([par.endswith(key) for par in alias])
+
+            if len(alias) > 1:
+                if alias[0].endswith(key) and (not starts and self.parent is not None):
+                    # it is a member of a group but we don't know which one:
+                    raise KeyError(
+                            f'Found several keys for {key}: {alias}, so it is ambigous. Please choose on one of them')
+                else:
+                    if any([par.startswith(key) for par in alias]):
+                        # we return the group of parameters
+                        pars = []
+                        for par in alias:
+                            if par.startswith(key):
+                                pars.append(par[lkeyp:])
+                        return pars
+            else:
+                return alias[0][:-lkeyp]
+
+        raise KeyError(f'{key} not found in matplolib preferences')
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Public methods
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def reset(self):
+
+        # remove the user json file to reset to defaults
+        config_dir = pathclean(general_preferences.cfg.config_dir)
+        for f in config_dir.glob('*.json'):
+            f.unlink()
+
+        matplotlib_preferences._apply_style('scpy')
+        self.style = 'scpy'
+
+        # reset also non-matplolib preferences
+        nonmplpars = ['method_1D', 'method_2D', 'method_3D', 'colorbar', 'show_projections', 'show_projection_x',
+                      'show_projection_y', 'colormap', 'max_lines_in_stack', 'simplify', 'number_of_x_labels',
+                      'number_of_y_labels', 'number_of_z_labels', 'number_of_contours', 'contour_alpha',
+                      'contour_start', 'antialiased', 'rcount', 'ccount']
+        for par in nonmplpars:
+            setattr(self, par, matplotlib_preferences.traits()[par].default_value)
+
+        self._data = {}
+
+    def all(self):
+        """
+        List all parameters with their current and default value
+        """
+        for key in matplotlib_preferences.trait_names(config=True):
+            self.help(key)
+
+    def help(self, key):
+        """
+        Display information on a given parameter
+
+        Parameters
+        ----------
+        key: str
+            name of the parameter for which we want information
+
+        """
+        from spectrochempy.utils import colored, TBold
+        value = self[key]
+        trait = matplotlib_preferences.traits()[key]
+        default = trait.default_value
+        thelp = trait.help.replace('\n', ' ').replace('\t', ' ')
+        sav = ''
+        while thelp != sav:
+            sav = thelp
+            thelp = thelp.replace('  ', ' ')
+        help = '\n'.join(textwrap.wrap(thelp, 100, initial_indent=' ' * 20, subsequent_indent=' ' * 20))
+
+        value = colored(value, 'GREEN')
+        default = colored(default, 'BLUE')
+
+        print(TBold(f"{key} = {value} \t[default: {default}]"))
+        print(f"{help}\n")
+
+    def makestyle(self, filename='mydefault', to_mpl=False):
+
+        if filename.startswith('scpy'):
+            error_('`scpy` is READ-ONLY. Please use an another style name.')
+            return
+
+        txt = ""
+        sline = ""
+
+        for key in mpl.rcParams.keys():
+            if key in ['animation.avconv_args', 'animation.avconv_path', 'animation.html_args', 'keymap.all_axes',
+                       'mathtext.fallback_to_cm', 'validate_bool_maybe_none', 'savefig.jpeg_quality',
+                       'text.latex.preview']:
+                continue
+            val = str(mpl.rcParams[key])
+            sav = ''
+            while val != sav:
+                sav = val
+                val = val.replace('  ', ' ')
+            line = f'{key:40s} : {val}\n'
+            if line[0] != sline:
+                txt += '\n'
+                sline = line[0]
+            if key not in ['axes.prop_cycle']:
+                line = line.replace('[', '').replace(']', "").replace('\'', '').replace('"', '')
+            if key == 'savefig.bbox':
+                line = f'{key:40s} : standard\n'
+            txt += line.replace("#", '')
+
+        # Non matplotlib parameters,
+        # some parameters are not saved in matplotlib style sheets so we willa dd them here
+        nonmplpars = ['method_1D', 'method_2D', 'method_3D', 'colorbar', 'show_projections', 'show_projection_x',
+                      'show_projection_y', 'colormap', 'max_lines_in_stack', 'simplify', 'number_of_x_labels',
+                      'number_of_y_labels', 'number_of_z_labels', 'number_of_contours', 'contour_alpha',
+                      'contour_start', 'antialiased', 'rcount', 'ccount']
+        txt += '\n\n##\n## ADDITIONAL PARAMETERS FOR SPECTROCHEMPY\n##\n'
+        for par in nonmplpars:
+            txt += f"##@{par:37s} : {getattr(self, par)}\n"
+
+        stylesheet = (pathclean(self.stylesheets) / filename).with_suffix('.mplstyle')
+        stylesheet.write_text(txt)
+
+        if to_mpl:
+            # make it also accessible to pyplot
+            stylelib = (pathclean(mpl.get_configdir()) / 'stylelib' / filename).with_suffix('.mplstyle')
+            stylelib.write_text(txt)
+
+        matplotlib_preferences.traits()['style'].trait_types.append(Unicode(filename))
+        self.style=filename
+        return self.style
+
 
 
 # ======================================================================================================================
@@ -65,16 +289,14 @@ class NDPlot(HasTraits):
     _ax = Instance(plt.Axes, allow_none=True)
 
     # The figure on which this NDArray can be plotted
-    _fig = Union((Instance(plt.Figure),
-                  Instance(go.Figure)
-                  ), allow_none=True)
+    _fig = Union((Instance(plt.Figure), Instance(go.Figure)), allow_none=True)
 
     # The axes on which this dataset and other elements such as projections
     # and colorbar can be plotted
     _ndaxes = Dict(Instance(plt.Axes))
 
     # add metadata to store plot parameters
-    _plotmeta = Instance(Meta, allow_none=True)
+    _preferences = Instance(Preferences, allow_none=True)
 
     # ------------------------------------------------------------------------------------------------------------------
     # generic plotter and plot related methods or properties
@@ -85,40 +307,10 @@ class NDPlot(HasTraits):
     @docstrings.dedent
     def plot(self, **kwargs):
         """
-        Generic plot function for
-        a |NDDataset| which
-        actually delegate the work to a plotter defined by the parameter ``method``.
-
-        Parameters
-        ----------
-        method : str, optional
-            The method of plot of the dataset, which will determine the
-            plotter to use. For instance, for 2D data, it can be `map`,
-            `stack` or `image` among other method.
-        ax : |Axes| instance. Optional, default:current or new one
-            The axe where to plot
-        figsize : tuple, optional, default is mpl.rcParams['figure.figsize']
-            The figure size
-        fontsize : int, optional
-            The font size in pixels, default is 10 (or read from preferences)
-        clear : `bool`, optional, default=`True`.
-            Should we plot on the ax previously used or create a new figure?
-        style : str
-        autolayout : `bool`, optional, default=True
-            if True, layout will be set automatically
-        output : str
-            A string containing a path to a filename. The output format is deduced
-            from the extension of the filename. If the filename has no extension,
-            the value of the rc parameter savefig.format is used.
-        dpi : [ None | scalar > 0]
-            The resolution in dots per inch. If None it will default to the
-            value savefig.dpi in the matplotlibrc file.
+        Generic plot function for a |NDDataset| which actually delegate the work to a plotter defined by the
+        parameter ``method``.
 
         """
-
-        # color cycle
-        # prop_cycle = options.prop_cycle
-        # mpl.rcParams['axes.prop_cycle']= r" cycler('color', %s) " % prop_cycle
 
         # --------------------------------------------------------------------
         # select plotter depending on the dimension of the data
@@ -131,7 +323,7 @@ class NDPlot(HasTraits):
         # Find or guess the adequate plotter
         # -----------------------------------
 
-        _plotter = getattr(self, f"plot_{method.replace('+','_')}", None)
+        _plotter = getattr(self, f"plot_{method.replace('+', '_')}", None)
         if _plotter is None:
             # no plotter found
             error_('The specified plotter for method '
@@ -199,16 +391,11 @@ class NDPlot(HasTraits):
     # ..................................................................................................................
     def _figure_setup(self, ndim=1, **kwargs):
 
-        method = kwargs.get('method', project_preferences.method_2D)
+        prefs = self.preferences
+
+        method = prefs.method_2D if ndim == 2 else prefs.method_1D
+        method = kwargs.get('method', method)
         ax3d = '3d' if method in ['surface'] else None
-
-        _set_figure_style(**kwargs)
-
-        self._figsize = mpl.rcParams['figure.figsize'] = \
-            kwargs.get('figsize', mpl.rcParams['figure.figsize'])
-
-        mpl.rcParams[
-            'figure.autolayout'] = kwargs.pop('autolayout', True)
 
         # Get current figure information
         # ------------------------------
@@ -231,15 +418,9 @@ class NDPlot(HasTraits):
                 self.ndaxes['main'] = ax
                 self.ndaxes['twin'] = tax
             else:
-                raise ValueError(
-                        '{} is not recognized as a valid Axe'.format(tax))
+                raise ValueError(f'{tax} is not recognized as a valid Axe')
 
-        # get the current figure (or the last used)
-        self._fig = get_figure(clear)
-
-        # save parameter used by this figure for eventually using it later
-        # (e.g. see testing.py -> wrapper)
-        self._fig.rcParams = plt.rcParams.copy()
+        self._fig = get_figure(preferences=prefs, **kwargs)
 
         if clear:
             self._ndaxes = {}  # reset ndaxes
@@ -252,8 +433,7 @@ class NDPlot(HasTraits):
                 ax.name = 'main'
                 self.ndaxes['main'] = ax
             else:
-                raise ValueError(
-                        '{} is not recognized as a valid Axe'.format(ax))
+                raise ValueError('{} is not recognized as a valid Axe'.format(ax))
 
         elif self._fig.get_axes():
             # no ax parameters in keywords, so we need to get those existing
@@ -265,21 +445,23 @@ class NDPlot(HasTraits):
             ax.name = 'main'
             self.ndaxes['main'] = ax
 
-        if ax is not None and kwargs.pop('scatter', False):
-            ax.set_prop_cycle(
-                    cycler('color',
-                           [NBlack, NBlue, NRed, NGreen, 'magenta', 'cyan'] *
-                           2) +
-                    cycler('linestyle',
-                           ['-', '--', ':', '-.'] * 3) +
-                    cycler('marker',
-                           ['o', 's', '^'] * 4))
+        # set the prop_cycle according to preference
+        prop_cycle = eval(prefs.axes.prop_cycle)
+        if isinstance(prop_cycle, str):
+            # not yet evaluated
+            prop_cycle = eval(prop_cycle)
+
+        colors= prop_cycle.by_key()['color']
+        linestyles = ['-', '--', ':','-.']
+        markers = ['o', 's', '^']
+        if ax is not None and (kwargs.pop('scatter', False) or kwargs.pop('scatterpen', False)):
+            ax.set_prop_cycle(cycler('color', colors * len(linestyles) * len(markers)) +
+                              cycler('linestyle', linestyles * len(colors) * len(markers)) +
+                              cycler('marker', markers * len(colors) * len(linestyles) ))
         elif ax is not None and kwargs.pop('pen', False):
             ax.set_prop_cycle(
-                    cycler('color',
-                           [NBlack, NBlue, NRed, NGreen]) +
-                    cycler('linestyle',
-                           ['-', '--', ':', '-.']))
+                    cycler('color', colors * len(linestyles)) +
+                    cycler('linestyle', linestyles * len(colors)))
 
         # Get the number of the present figure
         self._fignum = self._fig.number
@@ -294,19 +476,17 @@ class NDPlot(HasTraits):
         if ndim == 2:
             # TODO: also the case of 3D
 
-            method = kwargs.get('method', self.plotmeta.method_2D)
-
             # show projections (only useful for map or image)
             # ------------------------------------------------
 
-            colorbar = kwargs.get('colorbar', self.plotmeta.colorbar)
+            self.colorbar = colorbar = kwargs.get('colorbar', prefs.colorbar)
 
-            proj = kwargs.get('proj', self.plotmeta.show_projections)
+            proj = kwargs.get('proj', prefs.show_projections)
             # TODO: tell the axis by title.
 
-            xproj = kwargs.get('xproj', self.plotmeta.show_projection_x)
+            xproj = kwargs.get('xproj', prefs.show_projection_x)
 
-            yproj = kwargs.get('yproj', self.plotmeta.show_projection_y)
+            yproj = kwargs.get('yproj', prefs.show_projection_y)
 
             SHOWXPROJ = (proj or xproj) and method in ['map', 'image']
             SHOWYPROJ = (proj or yproj) and method in ['map', 'image']
@@ -320,33 +500,27 @@ class NDPlot(HasTraits):
             # This is necessary for projections and colorbar
 
             self._divider = None
-            if (SHOWXPROJ or SHOWYPROJ or colorbar) \
-                    and self._divider is None:
+            if (SHOWXPROJ or SHOWYPROJ or colorbar) and self._divider is None:
                 self._divider = make_axes_locatable(ax)
 
             divider = self._divider
 
             if SHOWXPROJ:
-                axex = divider.append_axes("top", 1.01, pad=0.01, sharex=ax,
-                                           frameon=0, yticks=[])
+                axex = divider.append_axes("top", 1.01, pad=0.01, sharex=ax, frameon=0, yticks=[])
                 axex.tick_params(bottom='off', top='off')
-                plt.setp(axex.get_xticklabels() + axex.get_yticklabels(),
-                         visible=False)
+                plt.setp(axex.get_xticklabels() + axex.get_yticklabels(), visible=False)
                 axex.name = 'xproj'
                 self.ndaxes['xproj'] = axex
 
             if SHOWYPROJ:
-                axey = divider.append_axes("right", 1.01, pad=0.01, sharey=ax,
-                                           frameon=0, xticks=[])
+                axey = divider.append_axes("right", 1.01, pad=0.01, sharey=ax, frameon=0, xticks=[])
                 axey.tick_params(right='off', left='off')
-                plt.setp(axey.get_xticklabels() + axey.get_yticklabels(),
-                         visible=False)
+                plt.setp(axey.get_xticklabels() + axey.get_yticklabels(), visible=False)
                 axey.name = 'yproj'
                 self.ndaxes['yproj'] = axey
 
             if colorbar and not ax3d:
-                axec = divider.append_axes("right", .15, pad=0.1, frameon=0,
-                                           xticks=[], yticks=[])
+                axec = divider.append_axes("right", .15, pad=0.1, frameon=0, xticks=[], yticks=[])
                 axec.tick_params(right='off', left='off')
                 # plt.setp(axec.get_xticklabels(), visible=False)
                 axec.name = 'colorbar'
@@ -402,8 +576,7 @@ class NDPlot(HasTraits):
                         kws[k.strip()] = eval(v)
                     else:
                         ags.append(eval(item))
-                getattr(self.ndaxes['main'], com)(*ags,
-                                                  **kws)  # TODO:improve this
+                getattr(self.ndaxes['main'], com)(*ags, **kws)  # TODO:improve this
 
         # output command should be after all plot commands
 
@@ -432,25 +605,25 @@ class NDPlot(HasTraits):
     # ------------------------------------------------------------------------------------------------------------------
 
     # ..................................................................................................................
-    @default('_plotmeta')
-    def _plotmeta_default(self):
-        return Meta()
+    @default('_preferences')
+    def _preferences_default(self):
+        return Preferences()
 
     # ..................................................................................................................
     @property
-    def plotmeta(self):
+    def preferences(self):
         """
         |Meta| instance object - Additional metadata.
 
         """
-        return self._plotmeta
+        return self._preferences
 
     # ..................................................................................................................
-    @plotmeta.setter
-    def plotmeta(self, plotmeta):
-        # property.setter for plotmeta
-        if plotmeta is not None:
-            self._plotmeta.update(plotmeta)
+    @preferences.setter
+    def preferences(self, preferences):
+        # property.setter for preferences
+        if preferences is not None:
+            self._preferences.update(preferences)
 
     # ..................................................................................................................
     @property
@@ -555,58 +728,6 @@ class NDPlot(HasTraits):
 
         """
         return self._divider
-
-
-# .............................................................................
-def _set_figure_style(**kwargs):
-    # set temporarily a new style if any
-
-    # debug_('set style')
-
-    # first, reset to default
-    plt.style.use('classic')
-    try:  # try because if the installation is not correct, this 'scpy' style
-        # may not be found
-        plt.style.use('scpy')
-    except OSError:
-        # scpy not found! may be due to a failing installation
-        # make a basic style here
-        # get the local version if it exists:
-        try:
-            plt.style.use(os.path.join(prefs.stylesheets, 'scpy.mplstyle'))
-        except OSError:
-            pass
-
-    # now get the required style from args
-    style = kwargs.get('style', None)
-
-    if style:
-        # if a style was passed, then we use it
-        if not is_sequence(style):
-            style = [style]
-        if isinstance(style, dict):
-            style = [style]
-        try:
-            plt.style.use(style)
-        except OSError:
-            # try a local version
-            plt.style.use(os.path.join(prefs.stylesheets, style[0] + '.mplstyle'))
-
-    else:
-        # else, we try to use the preferences
-        if project_preferences.style == 'scpy':
-            # already used
-            return
-
-        plt.style.use(project_preferences.style)
-        # and set some of the parameters here
-        fontsize = mpl.rcParams['font.size'] = \
-            kwargs.get('fontsize', mpl.rcParams['font.size'])
-        mpl.rcParams['legend.fontsize'] = int(fontsize * .8)
-        mpl.rcParams['xtick.labelsize'] = int(fontsize)
-        mpl.rcParams['ytick.labelsize'] = int(fontsize)
-        mpl.rcParams['axes.prop_cycle'] = (
-                cycler('color', [NBlack, NBlue, NRed, NGreen]))
 
 
 # .............................................................................

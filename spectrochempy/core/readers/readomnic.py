@@ -482,8 +482,7 @@ def _read_spg(*args, **kwargs):
     dataset.description = kwargs.get('description', f'Omnic title: {spg_title}\nOmnic filename: {filename}')
 
     # Set the NDDataset date
-    dataset._date = datetime.now()
-    dataset._modified = dataset.date
+    dataset._date = datetime.now(timezone.utc)
 
     # Set origin, description and history
     dataset.history = str(dataset.date) + ':imported from spg file {} ; '.format(filename)
@@ -600,10 +599,9 @@ def _read_spa(*args, **kwargs):
     # Set origin, description, history, date
     dataset.origin = "omnic"
     dataset.description = kwargs.get('description', f'Omnic title: {spa_title}\nOmnic filename: {filename.name}')
-    dataset.history = str(datetime.now()) + ':imported from spa files'
+    dataset.history = str(datetime.now(timezone.utc)) + ':imported from spa files'
     dataset.history = history
-    dataset._date = datetime.now()
-    dataset._modified = dataset.date
+    dataset._date = datetime.now(timezone.utc)
 
     return dataset
 
@@ -690,7 +688,7 @@ def _read_srs(*args, **kwargs):
                 background.title = 'volts'
                 background.origin = 'omnic'
                 background.description = 'background from omnic srs file.'
-                background.history = str(datetime.now()) + ':imported from srs file'
+                background.history = str(datetime.now(timezone.utc)) + ':imported from srs file'
 
             else:  # this is likely the first interferogram of the series
                 found = True
@@ -742,7 +740,7 @@ def _read_srs(*args, **kwargs):
     dataset.origin = "omnic"
     dataset.description = kwargs.get('description', 'Dataset from omnic srs file.')
 
-    dataset.history = str(datetime.now()) + ':imported from srs file {} ; '.format(filename)
+    dataset.history = str(datetime.now(timezone.utc)) + ':imported from srs file {} ; '.format(filename)
 
     # uncomment below to load the last datafield
     # has the same dimension as the time axis
@@ -769,7 +767,7 @@ def _read_srs(*args, **kwargs):
     # X.title = '?'
     # X.origin = 'omnic'
     # X.description = 'unknown'
-    # X.history = str(datetime.now()) + ':imported from srs
+    # X.history = str(datetime.now(timezone.utc)) + ':imported from srs
 
     fid.close()
 

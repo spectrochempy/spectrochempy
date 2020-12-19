@@ -8,9 +8,9 @@
 import numpy as np
 import pytest
 
-from spectrochempy.core.dataset.npy import dot, diag
+from spectrochempy.core.dataset.npy import dot
 from spectrochempy.units import ur
-
+from spectrochempy import diag
 
 def test_npy(ds1):
     # functions that keep units
@@ -33,9 +33,8 @@ def test_npy(ds1):
     assert df.ndim == 2
     assert df.size == d.x.size ** 2
 
-    # if no dataset then it is equivalent to np.diag
     df = diag(ds.data)
-    assert isinstance(df, np.ndarray)
+    assert df.implements('NDDataset')
 
     # DOT
     a = ds  # 2D dataset

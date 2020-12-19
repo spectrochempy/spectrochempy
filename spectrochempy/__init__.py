@@ -42,6 +42,7 @@
 
 # check for update
 import sys
+
 from time import time
 from pathlib import Path
 

@@ -10,6 +10,8 @@ from matplotlib import pyplot as plt
 import plotly.graph_objects as go
 import numpy as np
 
+from .meta import Meta
+
 __all__ = ['cmyk2rgb', 'NBlack', 'NRed', 'NBlue', 'NGreen',
            'figure', 'show', 'get_figure',
            # Plotly specific
@@ -53,7 +55,7 @@ NGreen = cmyk2rgb(85, 0, 60, 10)
 
 
 # .............................................................................
-def figure(**kwargs):
+def figure(preferences=Meta(), **kwargs):
     """
     Method to open a new figure
 
@@ -61,9 +63,11 @@ def figure(**kwargs):
     ----------
     kwargs : any
         keywords arguments to be passed to the matplotlib figure constructor.
+    preferences : Meta dictionary
+        per object saved plot configuration
 
     """
-    return get_figure(clear=True, **kwargs)
+    return get_figure(preferences=preferences, **kwargs)
 
 
 # .............................................................................
@@ -76,21 +80,38 @@ def show():
 
     if not NO_DISPLAY:
 
-        if get_figure(clear=False):  # True to avoid opening a new one
+        if get_figure(clear=False):
             plt.show(block=True)
 
 
 # .............................................................................
-def get_figure(clear=True, **kwargs):
+def get_figure(**kwargs):
     """
     Get the figure where to plot.
 
     Parameters
     ----------
     clear : bool
-        if False the last used figure is used.
-    kwargs : any
-        keywords arguments to be passed to the matplotlib figure constructor.
+        if False the last used figure is returned
+    figsize : 2-tuple of floats, default: rcParams["figure.figsize"] (default: [6.4, 4.8])
+        Figure dimension (width, height) in inches.
+    dpi : float, default: rcParams["figure.dpi"] (default: 100.0)
+        Dots per inch.
+    facecolor : default: rcParams["figure.facecolor"] (default: 'white')
+        The figure patch facecolor.
+    edgecolor : default: preferences.figure_edgecolor (default: 'white')
+        The figure patch edge color.
+    frameon : bool, default: preferences.figure_frameon (default: True)
+        If False, suppress drawing the figure background patch.
+    tight_layout : bool or dict, default: preferences.figure.autolayout (default: False)
+        If False use subplotpars. If True adjust subplot parameters using tight_layout with default padding.
+        When providing a dict containing the keys pad, w_pad, h_pad, and rect,
+        the default tight_layout paddings will be overridden.
+    constrained_layout : bool, default: preferences.figure_constrained_layout (default: False)
+        If True use constrained layout to adjust positioning of plot elements.
+        Like tight_layout, but designed to be more flexible. See Constrained Layout Guide for examples.
+    preferences : Meta object,
+        per object plot configuration
 
     Returns
     -------
@@ -100,9 +121,39 @@ def get_figure(clear=True, **kwargs):
 
     n = plt.get_fignums()
 
+    clear = kwargs.get('clear', True)
+
     if not n or clear:
         # create a figure
-        return plt.figure(**kwargs)
+        prefs = kwargs.pop('preferences', None)
+
+        figsize = kwargs.get('figsize', prefs.figure_figsize)
+        dpi = kwargs.get('dpi', prefs.figure_dpi)
+        facecolor = kwargs.get('facecolor', prefs.figure_facecolor)
+        edgecolor = kwargs.get('edgecolor', prefs.figure_edgecolor)
+        frameon = kwargs.get('frameon', prefs.figure_frameon)
+        tight_layout = kwargs.get('autolayout', prefs.figure_autolayout)
+
+        # get the current figure (or the last used)
+        fig = plt.figure(figsize=figsize)
+
+        fig.set_dpi(dpi)
+        fig.set_frameon(frameon)
+        try:
+            fig.set_edgecolor(edgecolor)
+        except ValueError:
+            fig.set_edgecolor(eval(edgecolor))
+        try:
+            fig.set_facecolor(facecolor)
+        except ValueError:
+            try:
+                fig.set_facecolor(eval(facecolor))
+            except:
+                fig.set_facecolor('#' + eval(facecolor))
+        fig.set_dpi(dpi)
+        fig.set_tight_layout(tight_layout)
+
+        return fig
 
     # a figure already exists - if several we take the last
     return plt.figure(n[-1])

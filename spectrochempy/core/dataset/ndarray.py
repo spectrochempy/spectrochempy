@@ -17,25 +17,23 @@ __all__ = ['NDArray']
 # ======================================================================================================================
 
 import copy as cpy
-
-from datetime import datetime
+from datetime import datetime, timezone
 import warnings
 import re
 import textwrap
 import uuid
 import itertools
-from traitlets import List, Unicode, Instance, Bool, Union, Int, Any, HasTraits, default, validate
+
+from traitlets import List, Unicode, Instance, Bool, Union, Int, Any, HasTraits, default, validate, observe, All
 from pint.errors import DimensionalityError
 import numpy as np
 from traittypes import Array
 
 from spectrochempy.units import Unit, ur, Quantity, set_nmr_context
 from spectrochempy.core import info_, error_, print_
-from spectrochempy.utils import (
-    TYPE_INTEGER, TYPE_FLOAT, Meta, MaskedConstant, MASKED, NOMASK, INPLACE, is_sequence,
-    is_number, numpyprintoptions, insert_masked_print, docstrings, SpectroChemPyWarning,
-    make_new_object, convert_to_html, get_user_and_node
-    )
+from spectrochempy.utils import (TYPE_INTEGER, TYPE_FLOAT, Meta, MaskedConstant, MASKED, NOMASK, INPLACE, is_sequence,
+                                 is_number, numpyprintoptions, insert_masked_print, docstrings, SpectroChemPyWarning,
+                                 make_new_object, convert_to_html, get_user_and_node)
 
 # ======================================================================================================================
 # Third party imports
@@ -90,10 +88,10 @@ class NDArray(HasTraits):
     _units = Instance(Unit, allow_none=True)
     _offset = Any()
     _roi = List(allow_none=True)
-    _author = Unicode(get_user_and_node())
+    _author = Unicode()
     _modified = Instance(datetime)
     _description = Unicode()
-    _history = List(Unicode())
+    _history = List(Unicode(), allow_none=True)
 
     # metadata
     _meta = Instance(Meta, allow_none=True)
@@ -117,7 +115,7 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     @docstrings.get_sections(base='NDArray')
     @docstrings.dedent
-    def __init__(self, data=None, **kwargs):
+    def __init__(self, data=None, *args, **kwargs):
         """
         Parameters
         ----------
@@ -166,13 +164,17 @@ class NDArray(HasTraits):
             name(s) of the author(s) of this dataset. BNy default, name of the computer note where this dataset is
             created.
         description : str, optional
-            A optional description of the nd-dataset.
+            A optional description of the nd-dataset. A shorter alias is `desc`
+        history : str, optional
+            A string to add to the object history
         copy : bool, optional
-            Perform a copy of the passed object.
+            Perform a copy of the passed object. Default is False
 
         """
+
         # creation date
-        self._date = datetime.now()
+
+        self._date = datetime.now(timezone.utc)
 
         # by default, we try to keep a reference to the data, not copy them
         self._copy = kwargs.pop('copy', False)  #
@@ -184,18 +186,17 @@ class NDArray(HasTraits):
         if data is not None:
             self.data = data
 
-        if 'dims' in kwargs.keys():
-            self.dims = kwargs.pop('dims')
-
         if self._labels_allowed:
             self.labels = kwargs.pop('labels', None)
 
-        self.title = kwargs.pop('dlabel', None)
-        self.title = kwargs.pop('title', self.title)  # title and dlabel are aliased
+        self.title = kwargs.pop('title', self.title)
 
         mask = kwargs.pop('mask', NOMASK)
         if mask is not NOMASK:
             self.mask = mask
+
+        if 'dims' in kwargs.keys():
+            self.dims = kwargs.pop('dims')
 
         self.units = kwargs.pop('units', None)
 
@@ -203,19 +204,21 @@ class NDArray(HasTraits):
 
         self.name = kwargs.pop('name', None)
 
-        self.description = kwargs.pop('description', "")
+        self.description = kwargs.pop('description', kwargs.pop('desc', ""))
 
-        author = kwargs.get('author')
+        author = kwargs.pop('author', get_user_and_node() )
         if author:
             self.author = author
 
-        self._history = []
         history = kwargs.pop('history', None)
         if history is not None:
             self.history = history
 
-        # process eventual kwargs, adressing HasTrait class
-        # super().__init__(**kwargs)   <-- cause problem of deprecation warning.
+        self._modified = self._date
+
+        # call to the super class
+        super().__init__(*args, **kwargs)
+
 
     # ..................................................................................................................
     def implements(self, name=None):
@@ -246,7 +249,7 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     def __dir__(self):
         return ['data', 'dims', 'mask', 'labels', 'units', 'meta', 'title', 'name', 'origin', 'roi', 'offset',
-                'description', 'history']
+                'author', 'description', 'history']
 
     # ..................................................................................................................
     def __hash__(self):
@@ -266,25 +269,23 @@ class NDArray(HasTraits):
             elif isinstance(other, (float, int, np.ndarray)):
                 otherdata = other
                 otherunits = False
-            else:
+            else: # pragma: no cover
                 return False
 
             if not self.has_units and not otherunits:
                 eq = np.all(self._data == otherdata)
             elif self.has_units and otherunits:
                 eq = np.all(self._data * self._units == otherdata * otherunits)
-            else:
+            else:  # pragma: no cover
                 return False
             return eq
 
         if attrs is None:
             attrs = self.__dir__()
 
-        # if 'title' in attrs:
-        #    attrs.remove('title')  #TODO: should we use title for comparison?
-
-        if 'name' in attrs:
-            attrs.remove('name')
+        for attr in ['name', 'history']:
+            if  attr in attrs:
+                attrs.remove(attr)
 
         for attr in attrs:
             if attr != 'units':
@@ -492,11 +493,6 @@ class NDArray(HasTraits):
         return DEFAULT_DIM_NAME[-self.ndim:]
 
     # ..................................................................................................................
-    @default('_date')
-    def _date_default(self):
-        return datetime(1970, 1, 1, 0, 0)
-
-    # ..................................................................................................................
     @default('_id')
     def _id_default(self):
         # a unique id
@@ -598,6 +594,7 @@ class NDArray(HasTraits):
                 except AttributeError:
                     # some attribute of NDDataset are missing in NDArray
                     pass
+            self.history = f'Copied from object:{data.name}'
 
         elif isinstance(data, Quantity):
             # debug_("init data with data from a Quantity object")
@@ -694,6 +691,9 @@ class NDArray(HasTraits):
         """
         return self._description
 
+    desc = description
+    desc.__doc__ = """Alias to the description attribute"""
+
     # ..................................................................................................................
     @description.setter
     def description(self, value):
@@ -727,22 +727,6 @@ class NDArray(HasTraits):
     @history.setter
     def history(self, value):
         self._history.append(value)
-
-    # ..................................................................................................................
-    @property
-    def dlabel(self):
-        """
-        str - An user friendly data label.
-
-        It's an alias of the `title` property
-
-        """
-        return self.title
-
-    # ..................................................................................................................
-    @dlabel.setter
-    def dlabel(self, dlabel):
-        self.title = dlabel
 
     # ..................................................................................................................
     @property
@@ -792,7 +776,8 @@ class NDArray(HasTraits):
             warnings.warn('We cannot set the labels for multidimentional data - Thus, these labels are ignored',
                           SpectroChemPyWarning)
         else:
-            # make sure labels array is of type np.ndarray
+
+            # make sure labels array is of type np.ndarray or Quantity arrays
             if not isinstance(labels, np.ndarray):
                 labels = np.array(labels, subok=True, copy=True).astype(object, copy=False)
 
@@ -890,6 +875,15 @@ class NDArray(HasTraits):
 
     # ..................................................................................................................
     @property
+    def modified(self):
+        """
+        `Datetime` object - Date of modification (readonly property).
+
+        """
+        return self._modified
+
+    # ..................................................................................................................
+    @property
     def origin(self):
         """
         str - origin of the data
@@ -966,6 +960,10 @@ class NDArray(HasTraits):
 
         """
         return self._units
+
+    # ..................................................................................................................
+    magnitude = data
+    m = data
 
     # ..................................................................................................................
     @units.setter
@@ -1473,7 +1471,7 @@ class NDArray(HasTraits):
 
         Examples
         --------
-        >>> from spectrochempy import NDDataset
+        >>> from spectrochempy import *
 
         >>> nd1 = NDDataset([1.+2.j,2.+ 3.j], units='meters')
         >>> nd1
@@ -2195,3 +2193,23 @@ class NDArray(HasTraits):
             return Quantity(uar, units)
         else:
             return uar
+
+    # ..................................................................................................................
+    @observe(All)
+    def _anytrait_changed(self, change):
+
+        # ex: change {
+        #   'owner': object, # The HasTraits instance
+        #   'new': 6, # The new value
+        #   'old': 5, # The old value
+        #   'name': "foo", # The name of the changed trait
+        #   'type': 'change', # The event type of the notification, usually 'change'
+        # }
+
+        if change['name'] in ["_date", "_modified", "trait_added"]:
+            return
+
+        # all the time -> update modified date
+        self._modified = datetime.now(timezone.utc)
+
+        return

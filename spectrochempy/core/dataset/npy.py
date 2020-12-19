@@ -10,7 +10,7 @@ In this module, we define basic functions adapted from numpy but able to handle
 our NDDataset objects
 
 """
-__all__ = ['diag', 'dot']
+__all__ = [ 'dot']
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
@@ -114,96 +114,6 @@ def dot(a, b, strict=True, out=None):
         new.units = a.units * b.units
 
     return new
-
-
-# ............................................................................
-def diag(dataset, k=0):
-    """
-    Extract a diagonal or construct a diagonal array.
-
-    See the more detailed documentation for ``numpy.diagonal`` if you use this
-    function to extract a diagonal and wish to write to the resulting array;
-    whether it returns a copy or a view depends on what version of numpy you
-    are using.
-
-    Adapted from numpy (licence #TO ADD)
-
-    Parameters
-    ----------
-    v : array_like
-        If `v` is a 2-D array, return a copy of its `k`-th diagonal.
-        If `v` is a 1-D array, return a 2-D array with `v` on the `k`-th
-        diagonal.
-
-    Returns
-    -------
-    out : ndarray
-        The extracted diagonal or constructed diagonal array.
-
-    """
-    # TODO: fix this - other diagonals
-    # k : int, optional
-    # Diagonal in question. The default is 0. Use `k>0` for diagonals
-    # above the main diagonal, and `k<0` for diagonals below the main
-    # diagonal.
-
-    # check if we have the correct input
-    # ------------------------------------------------------------------------------------------------------------------
-
-    if not isinstance(dataset, NDDataset):
-        # must be a numpy object or something non valid. Let numpy deal with this
-        return np.diag(dataset)
-
-    s = dataset.data.shape
-
-    if len(s) == 1:
-        # construct a diagonal array
-        # --------------------------
-        data = np.diag(dataset.data)
-        mask = NOMASK
-        if dataset.is_masked:
-            size = dataset.size
-            m = np.repeat(dataset.mask, size).reshape(size, size)
-            mask = m | m.T
-        coords = None
-        if dataset.coordset is not None:
-            coords = dataset.coordset
-        history = 'Diagonal array build from the 1D dataset'
-        units = dataset.units
-        dims = dataset.dims * 2
-
-    elif len(s) == 2:
-        # extract a diagonal
-        # ------------------
-        data = np.diagonal(dataset.data, k).copy()
-        mask = NOMASK
-        if dataset.is_masked:
-            mask = np.diagonal(dataset.mask, k).copy()
-        coords = None
-        if dataset.coordset is not None:
-            coords = [dataset.coordset[0]]  # TODO: this is likely not
-            #       correct for k != 0
-        history = 'Diagonal of rank %d extracted from original dataset' % k
-        units = dataset.units
-        dims = dataset.dims[-1]
-
-    else:
-        raise ValueError("Input must be 1- or 2-d.")
-
-    # make the output
-    # ------------------------------------------------------------------------------------------------------------------
-    new = dataset.copy()
-    new._data = data
-    new._mask = mask
-    new.history = history
-    new.units = units
-    new.dims = dims
-
-    if coords:
-        new.set_coordset(coords)
-
-    return new
-
 
 # ======================================================================================================================
 if __name__ == '__main__':

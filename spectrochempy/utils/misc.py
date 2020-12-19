@@ -15,7 +15,7 @@ import sys
 from operator import itemgetter
 from contextlib import contextmanager
 import functools
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 import types
 
@@ -23,7 +23,6 @@ import numpy as np
 
 
 __all__ = [
-
         "TYPE_INTEGER",
         "TYPE_COMPLEX",
         "TYPE_FLOAT",
@@ -44,8 +43,6 @@ __all__ = [
         'makestr',
         'srepr',
         "spacing",
-
-        #
         ]
 
 
@@ -90,7 +87,7 @@ def make_func_from(func, first=None):
         new_varnames[0] = first
     new_varnames = tuple(new_varnames)
     new_code_obj = _codechange(code_obj, changes={
-            'co_varnames': new_varnames
+            'co_varnames': new_varnames,
     })
     modified = types.FunctionType(new_code_obj,
                                   func.__globals__,
@@ -119,7 +116,7 @@ def make_new_object(obj):
 
     # new id and date
     new._id = "{}_{}".format(type(obj).__name__, str(uuid.uuid1()).split('-')[0])
-    new._date = datetime.now()
+    new._date = datetime.now(timezone.utc)
 
     return new
 
