@@ -17,7 +17,7 @@ from os.path import join
 
 import pytest
 
-from spectrochempy.core import general_preferences as prefs
+from spectrochempy.core import preferences as prefs
 from spectrochempy.api import NO_DISPLAY
 from spectrochempy.utils import get_filename
 

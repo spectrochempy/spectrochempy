@@ -33,7 +33,7 @@ from pkg_resources import get_distribution, DistributionNotFound
 from setuptools_scm import get_version
 from traitlets.config.configurable import Config
 from traitlets.config.application import Application
-from traitlets import (Bool, Unicode, List, Tuple, Integer, Float, Enum, Any, HasTraits, Instance, default, observe,
+from traitlets import (Bool, Unicode, List, Integer, Union, HasTraits, Instance, default, observe,
                        import_item, )
 from traitlets.config.manager import BaseJSONConfigManager
 import matplotlib as mpl
@@ -315,7 +315,7 @@ class DataDir(HasTraits):
     # public methods
     # ------------------------------------------------------------------------------------------------------------------
 
-    path = Unicode()
+    path = Instance(Path)
 
     def listing(self):
         """
@@ -326,15 +326,17 @@ class DataDir(HasTraits):
         listing : str
 
         """
-        strg = os.path.basename(self.path) + "\n"
+        strg = f'{self.path.name}\n' #  os.path.basename(self.path) + "\n"
 
         def _listdir(s, initial, ns):
             ns += 1
-            for f in glob.glob(os.path.join(initial, '*')):
-                fb = os.path.basename(f)
+            for f in pathclean(initial).glob('*'): #glob.glob(os.path.join(initial, '*')):
+                fb = f.name # os.path.basename(f)
+                if fb.startswith('.'):
+                    continue
                 if not fb.startswith('acqu') and not fb.startswith('pulse') and fb not in ['ser', 'fid']:
                     s += "   " * ns + "|__" + "%s\n" % fb
-                if os.path.isdir(f):
+                if f.is_dir():
                     s = _listdir(s, f, ns)
             return s
 
@@ -359,7 +361,7 @@ class DataDir(HasTraits):
     @default('path')
     def _get_path_default(self):
         # the spectra path in package data
-        return get_pkg_path('testdata', 'scp_data')
+        return Path(get_pkg_path('testdata', 'scp_data'))
 
     # ------------------------------------------------------------------------------------------------------------------
     # private methods
@@ -382,13 +384,6 @@ class GeneralPreferences(MetaConfigurable):
 
     They should be accessible from the main API
 
-    Examples
-    --------
-
-    >>> import spectrochempy as scp # doctest: +ELLIPSIS
-
-    >>> delimiter = scp.general_preferences.csv_delimiter
-
 
     """
 
@@ -407,7 +402,8 @@ class GeneralPreferences(MetaConfigurable):
 
     use_dev_version = Bool(True, help='use latest development versions').tag(config=True)
 
-    datadir = Unicode(help='Directory where to look for data by default').tag(config=True, type="folder")
+    datadir = Union((Instance(Path), Unicode()), help='Directory where to look for data by default').tag(config=True,
+                                                                                              type="folder")
 
     @default('datadir')
     def _get_default_datadir(self):
@@ -415,14 +411,14 @@ class GeneralPreferences(MetaConfigurable):
 
     @observe('datadir')
     def _datadir_changed(self, change):
-        self.parent.datadir.path = change['new']
+        self.parent.datadir.path = pathclean(change['new'])
 
     databases = Unicode(help='Directory where to look for database files such as csv').tag(config=True, type="folder")
 
     @default('databases')
     def _get_databases_default(self):
         # the spectra path in package data
-        return _get_pkg_datadir_path('databases', 'scp_data')
+        return Path(get_pkg_path(('databases', 'scp_data')))
 
     cloudURL = Unicode(help='URL where to look for data by default if not found on datadir').tag(config=True,
                                                                                                  type="folder")
@@ -698,7 +694,7 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
         super().__init__(*args, **kwargs)
         self.datadir = DataDir()  # config=self.config)
 
-        self.general_preferences = GeneralPreferences(config=self.config, parent=self)
+        self.preferences = GeneralPreferences(config=self.config, parent=self)
         self.dataset_preferences = DatasetPreferences(config=self.config, parent=self)
         self.project_preferences = ProjectPreferences(config=self.config, parent=self)
         self.matplotlib_preferences = MatplotlibPreferences(config=self.config, parent=self)
@@ -882,8 +878,8 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
             debug('API already started. Nothing done!')
             return
 
-        self.logs.debug("show info on loading %s" % self.general_preferences.show_info_on_loading)
-        if self.general_preferences.show_info_on_loading:
+        self.logs.debug("show info on loading %s" % self.preferences.show_info_on_loading)
+        if self.preferences.show_info_on_loading:
             info_string = "SpectroChemPy's API - v.{}\n" \
                           "© Copyright {}".format(__version__, __copyright__)
             ip = get_ipython()

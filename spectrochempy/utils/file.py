@@ -82,7 +82,7 @@ def pathclean(paths):
     >>> filename.parent.name
     'irdata'
 
-    >>> from spectrochempy import general_preferences as prefs
+    >>> from spectrochempy import preferences as prefs
     >>> datadir = prefs.datadir
     >>> fullpath = datadir / filename
 
@@ -135,7 +135,7 @@ def _get_file_for_protocol(f, **kwargs):
 
 def check_filenames(*args, **kwargs):
 
-    from spectrochempy.core import general_preferences as prefs
+    from spectrochempy.core import preferences as prefs
     datadir = pathclean(prefs.datadir)
 
     filenames = None
@@ -315,7 +315,7 @@ def get_filename(*filenames, **kwargs):
 
     """
 
-    from spectrochempy.core import general_preferences as prefs
+    from spectrochempy.core import preferences as prefs
     from spectrochempy.api import NO_DISPLAY, NO_DIALOG
     from spectrochempy.core import open_dialog
 
@@ -506,7 +506,7 @@ def readdirname(directory):
 
     """
 
-    from spectrochempy.core import general_preferences as prefs
+    from spectrochempy.core import preferences as prefs
     from spectrochempy.api import NO_DISPLAY, NO_DIALOG
     from spectrochempy.core import open_dialog
 

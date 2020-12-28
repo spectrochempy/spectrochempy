@@ -108,7 +108,7 @@ scp.NDDataset.linspace(-5, 5, 50, endpoint=True) # create a rank 1 NDDataset of 
 # I will give an example, using OMNIC data.
 
 # %%
-datadir = scp.pathclean(scp.general_preferences.datadir) # this is a path as long as it points to an example data set.
+datadir = scp.pathclean(scp.preferences.datadir) # this is a path as long as it points to an example data set.
 # it can be replaced by any other path
 
 # %% nbsphinx="hidden"
@@ -138,7 +138,7 @@ def fid(t, w, T2) :
         # probably passed as quantity strings
         w = (scp.Quantity(w) * 2 * pir).to("radian/s")
         T2 = scp.Quantity(T2)
-    return (cos(t * w) + 1j * sin(t * w)) * exp(-t / T2)   
+    return (cos(t * w) + 1j * sin(t * w)) * exp(-t / T2)
 
 # in this model function, we generate a sinusoidal time evolution (t) with an angular frequency w, and a relaxation T2.
 

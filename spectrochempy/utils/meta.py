@@ -105,7 +105,7 @@ class Meta(object):  # HasTraits):
 
     def __setattr__(self, key, value):
         if key not in ['readonly', 'parent', 'name',  '_data', '_trait_values', '_trait_notifiers',
-                       '_trait_validators', '_cross_validation_lock']:
+                       '_trait_validators', '_cross_validation_lock', '__wrapped__']:
             self[key] = value
         else:
             self.__dict__[key] = value  # to avoid a recursive call
@@ -114,6 +114,8 @@ class Meta(object):  # HasTraits):
     def __getattr__(self, key):
         if key.startswith('_ipython') or key.startswith('_repr'):
             raise AttributeError
+        if  key in ['__wrapped__']:
+            return False
         return self[key]
 
     def __setitem__(self, key, value):

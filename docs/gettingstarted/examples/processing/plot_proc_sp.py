@@ -34,7 +34,7 @@ In this example, we use sine bell or squared sine bell window multiplication to 
 import spectrochempy as scp
 import os
 
-path = os.path.join(scp.general_preferences.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d')
+path = os.path.join(scp.preferences.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d')
 dataset1D = scp.read_topspin(path, expno=1, remove_digital_filter=True)
 
 # %% [markdown]

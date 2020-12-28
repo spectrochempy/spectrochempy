@@ -41,7 +41,7 @@ from spectrochempy import *
 # For instance, in the following we read data from a series of FTIR experiments, provided  by the OMNIC software:
 
 # %%
-datadir = pathclean(general_preferences.datadir)
+datadir = pathclean(preferences.datadir)
 ds = NDDataset.read_omnic(datadir / 'irdata' / 'nh4y-activation.spg')
 
 # %% [markdown]
@@ -61,7 +61,7 @@ _ = ds.plot(method='stack', colormap='jet', colorbar=True)
 
 # %%
 region = ds[:, 4000.0:2000.0]
-_ = region.plot(method='map', colormap='magma') 
+_ = region.plot(method='map', colormap='magma')
 
 # %% [markdown]
 # ### Maths on datasets

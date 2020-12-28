@@ -20,7 +20,7 @@
 # from pathlib import Path
 
 # %%
-from spectrochempy import NDDataset, Project, general_preferences as prefs, pathclean
+from spectrochempy import NDDataset, Project, preferences as prefs, pathclean
 
 # %% [markdown]
 # ## Project creation

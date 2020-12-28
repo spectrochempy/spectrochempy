@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.7.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -49,9 +49,10 @@ ds.y = ds.y.to('minutes')
 # Let's set some preferences for plotting
 
 # %%
-ds.plotpreferences.method_1D = 'scatter+pen'
-ds.plotpreferences.method_2D = 'stack'
-ds.plotpreferences.colormap_stack='Dark2'
+prefs = ds.preferences
+prefs.method_1D = 'scatter+pen'
+prefs.method_2D = 'stack'
+prefs.colormap = 'Dark2'
 
 # %% [markdown] execution={"iopub.execute_input": "2020-06-22T12:21:31.950Z", "iopub.status.busy": "2020-06-22T12:21:31.942Z",
 # We select the desired region and plot it.
@@ -82,6 +83,7 @@ _ = maximas.plot(marker='s', ls='--', color='blue')
 ax = reg.plot()
 x = pos.max()
 y = maximas.max()
+ax.set_ylim(-0.01, 0.3)
 _ = ax.annotate(f'{x:~0.2fP} {y:~.3fP}', xy=(2115.5, maximas.max()), xytext=(30,-20), textcoords='offset points',
             bbox=dict(boxstyle="round4,pad=.7", fc="0.9"), arrowprops=dict(arrowstyle="->",
                                                                            connectionstyle="angle3"))
@@ -152,7 +154,7 @@ positions = [ s.find_peaks()[0].x.values.m  for s in reg[:, 2220.:2180.]]
 # Make a NDDataset
 evol = scp.NDDataset(positions, title="Wavenumber at the maximum", units="1 /cm")
 evol.x = scp.Coord(reg.y, title='Acquisition time')   # the x coordinate is st to the acquisition time for each specra
-evol.plotpreferences.method_1D = 'scatter+pen'
+evol.preferences.method_1D = 'scatter+pen'
 
 # plot it
 _ = evol.plot(ls=':')
@@ -381,7 +383,7 @@ _ = ax.axvline(wr, linestyle='--', color='green')
 # user defined parameters ------------------------------
 
 s = reg[-1]       # define a single-row NDDataset
-s.plotpreferences.method_1D = 'pen'
+s.preferences.method_1D = 'pen'
 
 # peak selection parameters; should be set to return a single peak
 height = 0.08      # minimal height or min and max heights)

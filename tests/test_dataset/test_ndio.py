@@ -14,7 +14,7 @@ import pytest
 
 from spectrochempy.utils.testing import assert_dataset_equal
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core import general_preferences as prefs
+from spectrochempy.core import preferences as prefs
 from spectrochempy.utils.testing import assert_array_equal
 from spectrochempy.utils import pathclean
 

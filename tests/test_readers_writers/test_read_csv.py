@@ -8,7 +8,7 @@
 from pathlib import Path
 
 import spectrochempy as scp
-from spectrochempy.core import general_preferences as prefs
+from spectrochempy.core import preferences as prefs
 from spectrochempy.core.dataset.nddataset import NDDataset
 
 

@@ -12,7 +12,7 @@ import pytest
 
 import spectrochempy as scp
 from spectrochempy import NDDataset
-from spectrochempy import general_preferences as prefs
+from spectrochempy import preferences as prefs
 
 
 # ......................................................................................................................

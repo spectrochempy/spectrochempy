@@ -27,7 +27,7 @@ import numpy as np
 # Local imports
 # ======================================================================================================================
 from spectrochempy.units import ur
-from spectrochempy.core import general_preferences as prefs
+from spectrochempy.core import preferences as prefs
 from spectrochempy.utils import Meta
 
 

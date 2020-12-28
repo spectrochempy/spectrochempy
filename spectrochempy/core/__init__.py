@@ -163,7 +163,7 @@ from spectrochempy.application import (  # noqa: E402
     INFO,
     )
 
-general_preferences = app.general_preferences
+preferences = app.preferences
 project_preferences = app.project_preferences
 dataset_preferences = app.dataset_preferences
 matplotlib_preferences = app.matplotlib_preferences
@@ -176,11 +176,11 @@ config_dir = app.config_dir
 # datadir = app.datadir
 
 def set_loglevel(level=WARNING):
-    general_preferences.log_level = level
+    preferences.log_level = level
 
 
 def get_loglevel():
-    return general_preferences.log_level
+    return preferences.log_level
 
 
 __all__ += [
@@ -192,7 +192,7 @@ __all__ += [
         'INFO',
         'project_preferences',
         'dataset_preferences',
-        'general_preferences',
+        'preferences',
         'matplotlib_preferences',
         'config_manager',
         'config_dir',
@@ -368,7 +368,7 @@ warnings.filterwarnings(action='ignore', module='matplotlib', category=UserWarni
 # can not be in utils due to circular imports
 __all__ += ['open_dialog', 'save_dialog']
 
-USE_QT = general_preferences.use_qt
+USE_QT = preferences.use_qt
 
 if USE_QT:
 

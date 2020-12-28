@@ -21,7 +21,7 @@ try:
 except ModuleNotFoundError: # pragma: no cover
     raise ModuleNotFoundError('You must install spectrochempy and its dependencies before executing tests!')
 
-from spectrochempy.core import general_preferences as prefs
+from spectrochempy.core import preferences as prefs
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndcomplex import NDComplexArray
 from spectrochempy.core.dataset.ndcoordset import CoordSet

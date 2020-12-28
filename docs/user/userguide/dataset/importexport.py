@@ -40,7 +40,7 @@ import spectrochempy as scp # noqa: F403
 # by default, if it doesn't find the path in the current directory.
 #
 # </div>
-# datadir = general_preferences.datadir
+# datadir = preferences.datadir
 # if os.path.exists(datadir):
 #     print(datadir)
 
@@ -64,7 +64,7 @@ import spectrochempy as scp # noqa: F403
 # </div>
 
 # %%
-datadir= scp.general_preferences.datadir
+datadir= scp.preferences.datadir
 fs = scp.FileSelector(path=datadir, filters=['spg', 'spa'])
 fs
 

@@ -38,7 +38,7 @@ import os
 # `datadir.path` contains the path to a default data directory.
 
 # %%
-datadir = scp.general_preferences.datadir
+datadir = scp.preferences.datadir
 
 path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d')
 

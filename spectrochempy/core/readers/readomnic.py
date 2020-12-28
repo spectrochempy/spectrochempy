@@ -129,8 +129,8 @@ def read_omnic(*args, **kwargs):
 
     An example, where bytes contents are passed directly to the read_omnic method.
 
-    >>> from spectrochempy import general_preferences
-    >>> datadir = Path(general_preferences.datadir)
+    >>> from spectrochempy import preferences
+    >>> datadir = preferences.datadir
     >>> filename1 = datadir / 'irdata' / 'subdir' / '7_CZ0-100 Pd_101.SPA'
     >>> content1 = filename1.read_bytes()
     >>> filename2 = datadir / 'wodger.spg'

@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.7.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -36,13 +36,26 @@
 # **Below (and in the next sections), we try to give an almost complete view of the NDDataset features.**
 
 # %%
+# %load_ext autoreload
+# %autoreload 2
+
+# %%
 import spectrochempy as scp
 
-a = scp.diag((3, 3, 2.5))
-a= scp.diag((3, 3, 2.5))
+# %% [markdown]
+# As we will make some reference to the `numpy` library, we also import it here.
+
+# %%
+import numpy as np
 
 # %% [markdown]
-# For a convenient usage of units, we will also import `ur` the unit registry which contains all available units.
+# We additionnaly import the three main SpectroChemPy objects that we will use through this tutorial
+
+# %%
+from spectrochempy import NDDataset, CoordSet, Coord
+
+# %% [markdown]
+# For a convenient usage of units, we will also directly import `ur`, the unit registry which contains all available units.
 
 # %%
 from spectrochempy import ur
@@ -71,10 +84,10 @@ from spectrochempy import ur
 # In the following example, a minimal 1D dataset is created from a simple list, to which we can add some metadata:
 
 # %%
-d1D = scp.NDDataset([10., 20., 30.],
-                    name="Dataset N1",
-                    author='Blake and Mortimer',
-                    description='A dataset from scratch')
+d1D = NDDataset([10., 20., 30.],
+                name="Dataset N1",
+                author='Blake and Mortimer',
+                description='A dataset from scratch')
 
 d1D
 
@@ -91,24 +104,14 @@ d1D
 print(d1D)
 
 # %%
-from spectrochempy import print_
-print_(d1D)
+scp.print_(d1D)
 
 # %% [markdown]
 # ### Plotting
 
 # %%
-d1D.plot()
-
-# %%
-print(d1D)
-
-# %% [markdown]
-# To get a rich display of the dataset, we can simply type on the last line of the cell: This output a html version of
-# the information string.
-
-# %%
-d1D
+d1D.plot(figsize=(3,2));      # note the ';' at the end of the line
+                 # this suppress undesired output of the cell other than the plot
 
 # %% [markdown]
 # Except few addtional metadata such `author`, `created` ..., there is not much
@@ -117,8 +120,7 @@ d1D
 # operation with these objects:
 
 # %%
-from numpy import sqrt
-sqrt(d1D)
+np.sqrt(d1D)
 
 # %%
 d1D + d1D / 2.
@@ -182,45 +184,44 @@ d1D.dims
 # To create a nD NDDataset, we can provide a nD-array like object to the NDDataset instance constructor
 
 # %%
-from numpy.random import rand
-a = rand(2, 4, 6)  # note here that np (for numpy space has been automatically
-# imported with spectrochempy, thus no need to use the
-# classical `import numpy as np`)
+a = np.random.rand(2, 4, 6)
 a
 
 # %%
-d2D = scp.NDDataset(a)
-d2D.title = 'Energy'
-d2D.author = 'Someone'
-d2D.name = '3D dataset creation'
-d2D.history = 'created from scratch'
-d2D.description = 'Some example'
-d2D.dims = ['v', 'u', 't']
-d2D
+d3D = NDDataset(a)
+d3D.title = 'Energy'
+d3D.author = 'Someone'
+d3D.name = '3D dataset creation'
+d3D.history = 'created from scratch'
+d3D.description = 'Some example'
+d3D.dims = ['u', 'v', 't']
+d3D
 
 # %% [markdown]
 # We can also add all information in a single statement
 
 # %%
-d2D = scp.NDDataset(a, dims=['v', 'u', 't'], title='Energy',
-                    author='Someone',
-                    name='3D_dataset',
-                    history='created from scratch',
-                    description='a single statement creation example')
-d2D
+d3D = NDDataset(a,
+                dims=['u', 'v', 't'],
+                title='Energy',
+                author='Someone',
+                name='3D_dataset',
+                history='created from scratch',
+                description='a single statement creation example')
+d3D
 
 # %% [markdown]
 # Three names are attributed at the creation (if they are not provided with the `dims` attribute, then the name are:
 # 'z','y','x' automatically attributed)
 
 # %%
-d2D.dims
+d3D.dims
 
 # %%
-d2D.ndim
+d3D.ndim
 
 # %%
-d2D.shape
+d3D.shape
 
 # %% [markdown]
 # ### Units
@@ -229,7 +230,7 @@ d2D.shape
 # One interesting possibility for a NDDataset is to have defined units for the internal data.
 
 # %%
-d1D.units = 'eV'
+d1D.units = ur.eV  # ur is a registry containing all available units
 
 # %%
 d1D  # note the eV symbol of the units added to the values field below
@@ -241,10 +242,10 @@ d1D  # note the eV symbol of the units added to the values field below
 d1D ** 2  # note the results in eV^2
 
 # %%
-sqrt(d1D)  # note the result in e^0.5
+np.sqrt(d1D)  # note the result in e^0.5
 
 # %%
-time = 5. * ur.second  # ur is a registry containing all available units
+time = 5. * ur.second
 d1D / time  # here we get results in eV/s
 
 # %% [markdown]
@@ -260,7 +261,7 @@ d1D.to('K')
 # ### Coordinates
 
 # %% [markdown]
-# The above created `d2D` dataset has 3 dimensions, but no coordinate for these dimensions. Here arises a big difference
+# The above created `d3D` dataset has 3 dimensions, but no coordinate for these dimensions. Here arises a big difference
 # with simple `numpy`-arrays:
 # * We can add coordinates to each dimensions of a NDDataset.
 
@@ -268,58 +269,55 @@ d1D.to('K')
 # To get the list of all defined coordinates, we can use the `coords` attribute:
 
 # %%
-d2D.coordset  # no coordinates, so it returns nothing (None)
+d3D.coordset  # no coordinates, so it returns nothing (None)
 
 # %%
-d2D.t  # the same for coordinate  u, v, t which are not yet set
+d3D.t  # the same for coordinate  t, v, u which are not yet set
 
 # %% [markdown]
 # To add coordinates, on way is to set them one by one:
 
 # %%
-d2D.t = scp.Coord.arange(6) * .1  # we need a sequence of 6 values for `t` dimension (see shape above)
-d2D.t.title = 'time'
-d2D.t.units = 'seconds'
-d2D.coordset  # now return a list of coordinates
+d3D.t = Coord.arange(6) * .1  # we need a sequence of 6 values for `t` dimension (see shape above)
+d3D.t.title = 'time'
+d3D.t.units = ur.seconds
+d3D.coordset  # now return a list of coordinates
 
 # %%
-d2D.t
+d3D.t
 
 # %%
-d2D.coordset('t')  # Alternative way to get a given coordinates
+d3D.coordset('t')  # Alternative way to get a given coordinates
 
 # %%
-d2D['t']  # another alternative way to get a given coordinates
+d3D['t']  # another alternative way to get a given coordinates
 
 # %% [markdown]
 # The two other coordinates u and v are still undefined
 
 # %%
-d2D.u
-
-# %%
-d2D.v
+d3D.u, d3D.v
 
 # %% [markdown]
 # When the dataset is printed, only the information for the existing coordinates is given.
 
 # %%
-d2D
+d3D
 
 # %% [markdown]
 # Programatically, we can use the attribute `is_empty` or `has_data` to check this
 
 # %%
-d2D.v.has_data, d2D.v.is_empty
+d3D.v.has_data, d3D.v.is_empty
 
 # %% [markdown]
 # An error is raised when a coordinate doesn't exist
 
 # %%
 try:
-    d2D.x
-except KeyError:
-    scp.error_('not found')
+    d3D.x
+except KeyError as e:
+    scp.error_(e)
 
 # %% [markdown]
 # In some case it can also be usefull to get a coordinate from its title instead of its name (the limitation is that if
@@ -327,201 +325,291 @@ except KeyError:
 # returned - this can be ambiguous)
 
 # %%
-d2D['time']
+d3D['time']
 
 # %%
-d2D.time
+d3D.time
+
+# %% [markdown]
+# ### Labels
 
 # %% [markdown]
 # It is possible to use labels instead of numerical coordinates. They are sequence of objects .The length of the
-# sequence must be equal to the size of a dimension
+# sequence must be equal to the size of a dimension.
+
+# %% [markdown]
+# The labels can be simple strings, *e.g.,*
+
+# %%
+tags = list('ab')
+d3D.u.title = 'some tags'
+d3D.u.labels = tags          #TODO: avoid repetition
+d3D
+
+# %% [markdown]
+# or more complex objects.
+#
+# For instance here we use datetime.timedelta objets:
 
 # %%
 from datetime import timedelta
-
-timedelta()
-
-# %%
 start = timedelta(0)
 times = [start + timedelta(seconds=x * 60) for x in range(6)]
-d2D.t = None
-d2D.t.labels = times
-d2D.t.title = 'time'
-d2D
-
-# %%
-tags = list('abcdef')
-d2D.t.labels = tags
-d2D
+d3D.t = None
+d3D.t.labels = times
+d3D.t.title = 'time'
+d3D
 
 # %% [markdown]
 # In this case, getting a coordinate that doesn't possess numerical data but labels, will return the labels
 
 # %%
-d2D.time
+d3D.time
 
 # %% [markdown]
-# Sometimes it is not necessary to have different coordinates for the various axes.
+# ### Masks
+
+# %%
+#TODO
+
+# %% [markdown]
+# ## More insight on coordinates
+
+# %% [markdown]
+# ### Sharing coordinates between dimensions
+
+# %% [markdown]
+# Sometimes it is not necessary to have different coordinates for the each axes. Some can be shared between axes.
 #
-# For example, if we have a square matrix with the same coordinate in the two dimensions, the second dimension can
-# refer to the first.
+# For example, if we have a square matrix with the same coordinate in the two dimensions, the second dimension can refer to the first. Here we create a square 2D dataset, using the `diag` method:
 
 # %%
-a = scp.NDDataset.diag((3, 3, 2.5))
-a
-
-# %%
-nd = scp.NDDataset(a, coordset=scp.CoordSet(x=np.arange(3), y='x'))
+nd = NDDataset.diag((3, 3, 2.5))
 nd
 
 # %% [markdown]
-# ## Create a NDDataset: full example
-#
-# There are many ways to create `NDDataset` objects.
-#
-# Above we have created a `NDDataset` from a simple list, but also from a `numpy.ndarray`).
-#
-# Below is an example of a 3D-Dataset created from a ``numpy.ndarray`` to which axes for each dimension can be added at
-# creation.
-#
-# Let's first create the 3 one-dimensional coordinates, for which we can define `labels`, `units`, and `masks`!
+# and then we add the same coordinate for both dimensions
 
 # %%
-coord0 = Coord(data=np.linspace(4000., 1000., 100),
-               labels=None,
-               mask=None,
-               units="cm^-1",
-               title='wavenumber')
-
-coord1 = Coord(data=np.linspace(0., 60., 60),
-               labels=None,
-               mask=None,
-               units="minutes",
-               title='time-on-stream')
-
-coord2 = Coord(data=np.linspace(200., 300., 3),
-               labels=['cold', 'normal', 'hot'],
-               mask=None,
-               units="K",
-               title='temperature')
+coordx = Coord.arange(3)
+nd.set_coordset(x=coordx, y='x')
+nd
 
 # %% [markdown]
-# Here is the displayed info for coord1 for instance:
-
-# %%
-coord1
+# ### Setting coordinates using `set_coordset`
 
 # %% [markdown]
-# Now we create some 3D data (a ``numpy.ndarray``):
+# Lets create 3 `Coord` objects to be use a s coordinates for the 3 dimensions of the previous d3D dataset.
 
 # %%
-nd_data = np.array(
-        [np.array([np.sin(coord2.data * 2. * np.pi / 4000.) * np.exp(-y / 60.) for y in coord1.data]) * float(t)
-         for t in coord0.data]) ** 2
+d3D.dims = ['t', 'v', 'u']
+s0, s1, s2 = d3D.shape
+coord0 = Coord.linspace(10., 100., s0, units='m', title='distance')
+coord1 = Coord.linspace(20., 25., s1, units='K', title='temperature')
+coord2 = Coord.linspace(0., 1000., s2, units='hour', title='elapsed time')
 
 # %% [markdown]
-# The dataset is now created with these data and axis. All needed information are passed as parameter of the
-# NDDataset instance constructor.
+# #### Syntax 1
 
 # %%
-d3D = NDDataset(nd_data,
-                name='mydataset',
-                coordset=[coord0, coord1, coord2],
-                title='Absorbance',
-                units='absorbance'
-                )
-
-d3D.description = """Dataset example created for this tutorial.
-It's a 3-D dataset (with dimensionless intensity)"""
-
-d3D.author = 'Blake & Mortimer'
-
-# %% [markdown]
-# We can get some information about this object:
-
-# %%
+d3D.set_coordset(u=coord2, v=coord1, t=coord0)
 d3D
 
 # %% [markdown]
-# One can set all the coordinates independantly
+# #### Syntax 2
 
 # %%
-d3D = NDDataset(nd_data,
-                name='mydataset',
-                title='Absorbance',
-                units='absorbance'
-                )
-d3D.description = """Dataset example created for this tutorial.
-It's a 3-D dataset (with dimensionless intensity)"""
-
-d3D.author = 'Blake & Mortimer'
-d3D
-
-# %%
-d3D.set_coordset(x=coord2, y=coord1, z=coord0)  # syntax 1
 d3D.set_coordset({
-        'x': coord2,
-        'y': coord1,
-        'z': coord0
-        })  # syntax 2
+        'u': coord2,
+        'v': coord1,
+        't': coord0
+})
 d3D
 
 # %% [markdown]
-# One can add several coordinates to the same dimension
+# ### Adding several coordinates to a single dimension
+# We can add several coordinates to the same dimension
 
 # %%
-coord2b = Coord([1, 2, 3], units='millitesla', title='magnetic field')
+coord1b = Coord([1, 2, 3, 4], units='millitesla', title='magnetic field')
 
 # %%
-d3D.set_coordset(x=CoordSet(coord2, coord2b), y=coord1, z=coord0)
+d3D.set_coordset(u=coord2, v=[coord1, coord1b], t=coord0)
 d3D
 
 # %% [markdown]
+# We can retrieve the various coordinates for a single dimention easily:
+
+# %%
+d3D.v_1
+
+# %% [markdown]
+# ### Summary of the coordinate setting syntax
 # Some additional information about coordinate setting syntax
 
+# %% [markdown]
+# **A.** First syntax (probably the safer because the name of the dimension is specified, so this is less prone to errors!)
+
 # %%
-# A. fist syntax (probably the safer because the name of the dimension is specified, so this is less prone to errors!)
-d3D.set_coordset(x=CoordSet(coord2, coord2b), y=coord1, z=coord0)
-d3D.set_coordset(x=[coord2, coord2b], y=coord1, z=coord0)  # equivalent
-
-# B. second syntax in the order of the dimensions: z,y,x (if no swap or transpopse has been performed)
-d3D.set_coordset(coord0, coord1, [coord2, coord2b])
-d3D.set_coordset((coord0, coord1, [coord2, coord2b]))  # equivalent
-
-# C. third syntax (from a dictionary)
-d3D.set_coordset({
-        'z': coord0,
-        'y': coord1,
-        'x': [coord2, coord2b]
-        })
-
-# D. Fourth syntax (from another coordset)
-d3D.set_coordset(**CoordSet(z=coord0, y=coord1, x=[coord2, coord2b]))  # note the **
-
-# It is also possible to use the coords property (with slightly less possibility)
-d3D.coordset = coord0, coord1, [coord2, coord2b]
-d3D.coordset = {
-        'z': coord0,
-        'y': coord1,
-        'x': [coord2, coord2b]
-        }
-d3D.coordset = CoordSet(z=coord0, y=coord1, x=[coord2, coord2b])
+d3D.set_coordset(u=coord2, v=[coord1, coord1b], t=coord0)
+# or equivalent
+d3D.set_coordset(u=coord2, v=CoordSet(coord1, coord1b), t=coord0)
+d3D
 
 # %% [markdown]
-# WARNING: do not use list for setting multiples coordinates! use tuples
+# **B.** Second syntax assuming the coordinates are given in the order of the dimensions. 
+#
+# Remember that we can check this order using the `dims` attribute of a NDDataset
 
 # %%
+d3D.dims
+
+# %%
+d3D.set_coordset((coord0, [coord1, coord1b], coord2 )) 
+# or equivalent
+d3D.set_coordset(coord0, CoordSet(coord1, coord1b), coord2)
+d3D
+
+# %% [markdown]
+# **C.** Third syntax (from a dictionary)
+
+# %%
+d3D.set_coordset({
+        't': coord0,
+        'u': coord2,
+        'v': [coord1, coord1b]
+})
+d3D
+
+# %% [markdown]
+# **D.** It is also possible to use directly the `coordset` property
+
+# %%
+d3D.coordset = coord0, [coord1, coord1b], coord2
+d3D
+
+# %%
+d3D.coordset = {
+        't': coord0,
+        'u': coord2,
+        'v': [coord1, coord1b]
+}
+d3D
+
+# %%
+d3D.coordset = CoordSet(t=coord0, u=coord2, v=[coord1, coord1b])
+d3D
+
+# %% [markdown]
+# <div class='alert-box alert-warning'><b>WARNING</b>: do not use list for setting multiples coordinates! use tuples</div>
+
+# %% [markdown]
 # This raise an error (list have another signification: it's used to set a "same dim" CoordSet see example A or B)
+
+# %%
 try:
     d3D.coordset = [coord0, coord1, coord2]
 except ValueError:
-    error_('Coordinates must be of the same size for a dimension with multiple coordinates')
-
-# This works (not a tuple `()`, not a list `[]`)
-d3D.coordset = (coord0, coord1, coord2)
+    scp.error_('Coordinates must be of the same size for a dimension with multiple coordinates')
 
 # %% [markdown]
-# ## Copying existing NDDataset
+# This works : it use a tuple `()`, not a list `[]` 
+
+# %%
+d3D.coordset = (coord0, coord1, coord2) # equivalent to d3D.coordset = coord0, coord1, coord2
+d3D
+
+# %% [markdown]
+# **E.** Setting the coordinates individually
+
+# %% [markdown]
+# Either a single coordinate
+
+# %%
+d3D.u = coord2
+d3D
+# %% [markdown]
+# or multiple coordinates for a single dimension
+
+# %%
+d3D.v = [coord1, coord1b]
+d3D
+# %% [markdown]
+# or using a CoorSet object.
+
+# %%
+d3D.v = CoordSet(coord1, coord1b)
+d3D
+
+# %% [markdown]
+# ## Other methods to create NDDataset
+#
+# There are many ways to create `NDDataset` objects.
+#
+# Let's first create 2 coordinate objects, for which we can define `labels` and `units`! Note the use of the function `linspace`to generate the data.
+
+# %%
+c0 = Coord.linspace( start=4000., stop=1000., num=5, labels=None, units="cm^-1", title='wavenumber')
+
+# %%
+c1 = Coord.linspace(10., 40., 3, labels=['Cold', 'RT', 'Hot'], units="K", title='temperature')
+
+# %% [markdown]
+# The full coordset will be the following
+
+# %%
+cs = CoordSet(c0, c1)
+cs
+
+# %% [markdown]
+# Now we will generate the full dataset, using a ``fromfunction`` method. All needed information are passed as parameter of the NDDataset instance constructor.
+
+# %% [markdown]
+# #### Create a dataset from a function
+
+# %%
+func = lambda x,y,extra : x * y / extra
+
+# %%
+ds = NDDataset.fromfunction(func,
+                            extra = 100 * ur.cm**-1,     # extra arguments passed to the function
+                            coordset=cs,
+                            name='mydataset',
+                            title='Absorbance',
+                            units=None)     # when None, units will be determined from the function results
+
+ds.description = """Dataset example created for this tutorial.
+It's a 2-D dataset"""
+
+ds.author = 'Blake & Mortimer'
+ds
+
+# %% [markdown]
+# #### Using numpy-like constructors of NDDatasets
+
+# %%
+dz = NDDataset.zeros((5, 3), coordset=cs,  units='meters', title='Datasets with only zeros')
+
+# %%
+do = NDDataset.ones((5, 3), coordset=cs, units='kilograms', title='Datasets with only ones')
+
+# %%
+df = NDDataset.full((5, 3), fill_value=1.25, coordset=cs, units='radians', title='with only float=1.25')
+df
+
+# %% [markdown]
+# As with numpy, it is also possible to take another dataset as a template:
+
+# %%
+df = NDDataset.full_like(d3D, dtype=np.int64, fill_value=2)
+df
+
+# %%
+nd = NDDataset.diag((3, 3, 2.5))
+nd
+
+# %% [markdown]
+# #### Copying existing NDDataset
 #
 # To copy an existing dataset, this is as simple as:
 
@@ -542,42 +630,6 @@ d3Dduplicate = NDDataset(d3D, name='duplicate of %s' % d3D.name, units='absorban
 d3Dduplicate
 
 # %% [markdown]
-# ### Other ways to create NDDatasets
-#
-# Some numpy creation function can be used to set up the initial dataset array:
-# [numpy array creation routines](https://docs.scipy.org/doc/numpy/reference/routines.array-creation.html#routines
-# -array-creation)
-#
-
-# %%
-dz = zeros((2, 2), units='meters', title='Datasets with only zeros')
-dz
-
-# %%
-do = ones((2, 2), units='kilograms', title='Datasets with only ones')
-do
-
-# %%
-df = full((2, 2), fill_value=1.25, units='radians',
-          title='with only float=1.25')
-df
-
-# %% [markdown]
-# As with numpy, it is also possible to take another dataset as a template:
-
-# %%
-do = ones((2, 3), dtype=bool)
-do[1, 1] = 0
-do
-
-# %% [markdown]
-# Now we use the previous dataset ``do`` as a template, for the shape, but we can change the `dtype`.
-
-# %%
-df = full_like(d3D, dtype=np.float64, fill_value=2.5)
-df
-
-# %% [markdown]
 # ## Importing from external dataset
 #
 # NDDataset can be created from the importation of external data
@@ -586,20 +638,21 @@ df
 
 # %%
 # let check if this directory exists and display its actual content:
-import os
-
-datadir = general_preferences.datadir
-if os.path.exists(datadir):
-    # let's display only the last part of the path
-    print(os.path.basename(datadir))
+datadir = scp.preferences.datadir
+if datadir.exists():
+    print(datadir.name)
 
 # %% [markdown]
 # ###  Reading a IR dataset saved by OMNIC (.spg extension)
-#
+
+# %%
+dataset = NDDataset.read_omnic(datadir / 'irdata/nh4y-activation.spg')
+
+# %% [markdown]
 # Even if we do not specify the **datadir**, the application first look in tht directory by default.
 
 # %%
-dataset = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
+dataset = NDDataset.read_omnic('irdata/nh4y-activation.spg')
 dataset
 
 # %% [markdown]

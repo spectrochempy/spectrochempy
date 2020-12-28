@@ -23,7 +23,7 @@ from spectrochempy.core.project.baseproject import AbstractProject
 # from collections import OrderedDict
 
 #cfg = config_manager
-#preferences = general_preferences
+#preferences = preferences
 
 
 # ======================================================================================================================

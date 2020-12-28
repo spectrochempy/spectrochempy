@@ -8,10 +8,10 @@
 import os
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core import general_preferences, show
+from spectrochempy.core import preferences, show
 from spectrochempy.core.plotters.multiplot import multiplot, multiplot_map, multiplot_stack
 
-prefs = general_preferences
+prefs = preferences
 
 
 def test_multiplot():

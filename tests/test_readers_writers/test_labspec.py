@@ -15,7 +15,7 @@ from spectrochempy.utils.exceptions import ProtocolError
 
 def test_read_labspec():
 
-    # datadir = scp.general_preferences.datadir
+    # datadir = scp.preferences.datadir
     ramandir = Path('ramandata')
 
     A = scp.read_labspec('Activation.txt', directory=ramandir)

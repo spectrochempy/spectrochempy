@@ -80,16 +80,17 @@ class CoordSet(HasTraits):
             both way to initialize the coordinates to avoid such conflicts.
         y, z, u, ... : |NDarray|, |NDArray| subclass or |CoordSet|
             Same as `x` for the others dimensions.
-        is_same_dim : bool, optional, default:False
-            if true, all elements of coords describes a single dimension.
-            By default, this is false, which means that each item describes
-            a different dimension.
+        dims : list of string, optional
+            Names of the dims to use corresponding to the coordinates. If not given, standard names are used: x, y, ...
 
         """
 
         self._copy = kwargs.pop('copy', True)
         self._sorted = kwargs.pop('sorted', True)
+
         keepnames = kwargs.pop('keepnames', False)
+        # if keepnames is false and the names of the dimensions are not passed in kwargs, then use dims if not none
+        dims = kwargs.pop('dims', None)
 
         self.name = kwargs.pop('name', None)
 
@@ -102,8 +103,8 @@ class CoordSet(HasTraits):
         # some cleaning
         if coords:
 
-            if all([(isinstance(coords[i], (np.ndarray, NDArray, list, CoordSet))
-                     or coords[i] is None) for i in range(len(coords))]):
+            if all([(isinstance(coords[i], (np.ndarray, NDArray, list, CoordSet)) or coords[i] is None)
+                    for i in range(len(coords))]):
                 # Any instance of a NDArray can be accepted as coordinates for a dimension.
                 # If an instance of CoordSet is found, this means that all
                 # coordinates in this set describe the same axis
@@ -138,8 +139,12 @@ class CoordSet(HasTraits):
                     coord = cpy.deepcopy(coord)
 
                 if not keepnames:
-                    coord.name = self.available_names.pop()  # take the last available name of
-                    # available names list
+                    if dims is None:
+                        # take the last available name of available names list
+                        coord.name = self.available_names.pop(-1)
+                    else:
+                        # use the provided list of dims
+                        coord.name = dims.pop(-1)
 
                 self._append(coord)  # append the coord (but instead of append,
                 # use assignation -in _append - to fire the
@@ -149,22 +154,23 @@ class CoordSet(HasTraits):
         # ------------------------------
 
         for key, coord in list(kwargs.items())[:]:
-            # remove the already user kwarg (Fix: deprecation warning in Traitlets - all args, kwargs must be used)
+            # remove the already used kwargs (Fix: deprecation warning in Traitlets - all args, kwargs must be used)
             del kwargs[key]
 
             # prepare values to be either Coord or CoordSet
             if isinstance(coord, (list, tuple)):
-                coord = CoordSet(coord, sorted=False)  # make sure in this case it becomes a CoordSet instance
+                coord = CoordSet(*coord, sorted=False)  # make sure in this case it becomes a CoordSet instance
 
             elif isinstance(coord, np.ndarray) or coord is None:
                 coord = Coord(coord, copy=True)  # make sure it's a Coord
                 # (even if it is None -> Coord(None)
+
             elif isinstance(coord, str) and coord in DEFAULT_DIM_NAME:
                 # may be a reference to another coordinates (e.g. same coordinates for various dimensions)
                 self._references[key] = coord  # store this reference
                 continue
 
-            # populate the coords with coord and coord's name.
+            # Populate the coords with coord and coord's name.
             if isinstance(coord, (NDArray, Coord, CoordSet)):
                 if key in self.available_names or (
                         len(key) == 2 and key.startswith('_') and key[1] in list("123456789")):
@@ -178,7 +184,7 @@ class CoordSet(HasTraits):
                     # append when a coordinate with this name is already set in passed arg.
                     # replace it
                     idx = self.names.index(key)
-                    coord.ame = key
+                    coord.name = key
                     self._coords[idx] = coord
 
                 else:
@@ -429,7 +435,7 @@ class CoordSet(HasTraits):
     # public methods
     # ------------------------------------------------------------------------------------------------------------------
     # ..................................................................................................................
-    def copy(self):
+    def copy(self,  keepname=False):
         """
         Make a disconnected copy of the current coords.
 
@@ -491,6 +497,9 @@ class CoordSet(HasTraits):
             self._append(item)
 
         for k, item in kwargs.items():
+            if isinstance(item, CoordSet):
+                # try to keep this parameter to True!
+                item._is_same_dim = True
             self[k] = item
 
     # ..................................................................................................................
@@ -605,8 +614,10 @@ class CoordSet(HasTraits):
         if not isinstance(coord, tuple):
             coord = (coord,)
         if self._coords:
+            # some coordinates already present, prepend the new one
             self._coords = (*coord,) + tuple(self._coords)  # instead of append, fire the validation process
         else:
+            # no coordinates yet, start a new tuple of coordinate
             self._coords = (*coord,)
 
     # ..................................................................................................................
@@ -765,9 +776,15 @@ class CoordSet(HasTraits):
 
     # ..................................................................................................................
     def __setitem__(self, index, coord):
-        coord = coord.copy(keepname=True)  # to avoid modifying the original
-        if isinstance(index, str):
+        try:
+            coord = coord.copy(keepname=True)  # to avoid modifying the original
+        except TypeError as e:
+            if isinstance(coord, list):
+                coord = [c.copy(keepname=True) for c in coord[:]]
+            else:
+                raise e
 
+        if isinstance(index, str):
             # find by name
             if index in self.names:
                 idx = self.names.index(index)
@@ -939,7 +956,11 @@ class CoordSet(HasTraits):
     # ..................................................................................................................
     def __copy__(self):
         coords = self.__class__(tuple(cpy.copy(ax) for ax in self), keepnames=True)
+        # name must be changed
         coords.name = self.name
+        # ans is_same_dim too for coordset
+        if self.implements('CoordSet'):
+            coords._is_same_dim = self.is_same_dim
         return coords
 
         # ..................................................................................................................

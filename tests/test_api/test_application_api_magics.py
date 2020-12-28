@@ -9,6 +9,7 @@ from subprocess import Popen, PIPE
 import pytest
 
 from spectrochempy import APIref, set_loglevel, get_loglevel, warning_, version
+import spectrochempy as scp
 
 set_loglevel('WARNING')
 
@@ -19,6 +20,11 @@ def test_api():
     assert 'np' in APIref
     assert 'NDDataset' in APIref
     assert 'abs' in APIref
+
+def test_datadir():
+    datadir = scp.DATADIR
+    from spectrochempy.application import DataDir
+    print(DataDir().listing())
 
 
 def test_version():
@@ -45,20 +51,18 @@ def test_magic_addscript(ip):
 
     ip.run_cell("from spectrochempy import *")
 
-    assert "available_styles" in ip.user_ns.keys()
-    print(ip.user_ns.keys())
-    ip.run_cell("print(available_styles())", store_history=True)
+    assert "preferences" in ip.user_ns.keys()
+
+    ip.run_cell("print(preferences.available_styles)", store_history=True)
     ip.run_cell("project = Project()", store_history=True)
-    x = ip.run_line_magic('addscript', '-p project -o style -n available_styles 2')
-    # script with the definition of the function
-    # `available_styles` content of cell 2
+    x = ip.run_line_magic('addscript', '-p project -o prefs -n preferences 2')
 
     print("x", x)
-    assert x.strip() == 'Script style created.'
+    assert x.strip() == 'Script prefs created.'
 
     # with cell contents
-    x = ip.run_cell('%%addscript -p project -o essai -n available_styles\n'
-                    'print(available_styles())')
+    x = ip.run_cell('%%addscript -p project -o essai -n preferences\n'
+                    'print(preferences.available_styles)')
 
     print('result\n', x.result)
     assert x.result.strip() == 'Script essai created.'

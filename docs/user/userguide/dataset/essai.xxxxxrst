@@ -813,7 +813,7 @@
       # let check if this directory exists and display its actual content:
       import os
 
-      datadir = general_preferences.datadir
+      datadir = preferences.datadir
       if os.path.exists(datadir):
           # let's display only the last part of the path
           print(os.path.basename(datadir))

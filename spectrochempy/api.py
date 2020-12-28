@@ -124,7 +124,7 @@ if not IN_IPYTHON:
 
 # a usefull utilities for dealing with path
 from spectrochempy.utils import pathclean
-DATADIR = pathclean(general_preferences.datadir)
+DATADIR = pathclean(preferences.datadir)
 
 __all__ += ['pathclean', 'DATADIR']
 

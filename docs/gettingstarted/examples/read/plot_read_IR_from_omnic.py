@@ -38,7 +38,7 @@ import os
 # Loading and stacked plot of the original
 
 # %%
-datadir = scp.general_preferences.datadir
+datadir = scp.preferences.datadir
 
 dataset = scp.NDDataset.read_omnic(os.path.join(datadir,
                                                 'irdata', 'nh4y-activation.spg'))

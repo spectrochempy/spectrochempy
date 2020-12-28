@@ -103,7 +103,7 @@ print(X.description)
 # - `title` (not to be confused with the `name` of the dataset) describes the nature of data (here absorbance)
 #
 # - "values" shows a sample of the first and last data and their units when they exist (here a.u. for absorbance units).
-# The numerical values ar accessed through the`data` attibute and the units throut `units` attribute.
+# The numerical values ar accessed through the`data` attribute and the units throut `units` attribute.
 
 # %%
 print(X.data)
@@ -145,6 +145,10 @@ X.y = X.y - X.y[0]
 X.y
 
 # %% [markdown]
+# Note that you can also use the inplace subtract operator to perform the same operation.
+X.y -= X.y[0]
+
+# %% [markdown]
 # It is also possible to use the ability of Scpy to handle unit changes. For this one can use the  `to` or `ito` (
 # inplace) methods.
 #
@@ -156,21 +160,20 @@ X.y.ito("minute")
 X.y
 
 # %% [markdown]
-# Note that the valued that are displayed are rounded, not the values stored internally. Hence, the relative time in
+# Note that the values that are displayed are rounded, not the values stored internally. Hence, the relative time in
 # minutes of the last spectrum is:
 
 # %%
-# the last item of a NDDataset such as X can be referred by a negative index (-1). The values of the Coord object
-# are accessed through the `values` attribute:
-tf = X[-1].y.values
+# The values of the Coord object are accessed through the `values` attribute. To get the last values correpsonding to
+# the last row of the X dataset, you can use:
+tf = X.y.values[-1]
 tf
 
 # %% [markdown]
-# which gives the exact time in seconds:
+# Negative index in python indicates the position in a sequence from the end, so -1 indicate the last element.
 
-# %%
-tf.ito('s')
-tf
+# %% [markdown]
+# which gives the exact time inn minutes.
 
 # %% [markdown]
 # Finally, if the time axis needs to be shifted by 2 minutes for instance, it is also very easy to do so:
@@ -178,6 +181,11 @@ tf
 # %%
 X.y = X.y + 2
 X.y
+
+# %% [markdown]
+# or using the inplace add operator:
+X.y += 2
+
 
 # %% [markdown]
 # **Note: The order of spectra**
@@ -197,8 +205,8 @@ X2 = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG', sortbydate=False)
 # instance, the following will inverse the order of the first dimension:
 
 # %%
-X = X[::-1, :]  # reorders the NDDataset along the first dimension going backward
-X.y  # displays the `y` dimension
+X = X[::-1]  # reorders the NDDataset along the first dimension going backward
+X.y          # displays the `y` dimension
 
 # %% [markdown]
 # **Note: Case of groups with different wavenumbers**
@@ -222,7 +230,7 @@ Y
 
 # %% [markdown]
 # The omnic reader can also import several spa files together, providing that they share a common axis for the
-# wavenumbers. Tis is the case of the following files in the irdata/subdir directory: "7_CZ0-100 Pd_101.SPA", ...,
+# wavenumbers. This is the case of the following files in the irdata/subdir directory: "7_CZ0-100 Pd_101.SPA", ...,
 # "7_CZ0-100 Pd_104.spa". It is possible to import them in a single NDDataset by using the list of filenames
 # in the function call:
 
@@ -232,11 +240,11 @@ X = scp.read_omnic(list_files, directory='irdata/subdir')
 print(X)
 
 # %% [markdown]
-# In such a case ase these .spa files are alone in the directory, a very convenient is the read_dir() method
-# that will gather the .spa files together:
+# In such a case ase these .spa files are alone in the directory, a very convenient is to call the read_omnic method
+# using only the directory path as argument that will gather the .spa files together:
 
 # %%
-X = scp.read_dir('irdata/subdir')
+X = scp.read_omnic('irdata/subdir')
 print(X)
 
 # %% [markdown] {"pycharm": {"name": "#%% md\n"}}
@@ -259,19 +267,19 @@ print(Z)
 # or:
 
 # %%
-Z2 = scp.read_dir('irdata/OPUS')
+Z2 = scp.read_opus('irdata/OPUS')
 print(Z2)
 
 # %% [markdown]
-# Note that supplementary informations as to the imported spectra can be obtained by the direct use of
+# Note that supplementary informations can be obtained by the direct use of
 # `brukeropusreader`. For instance:
 
 # %%
 from brukeropusreader import read_file  # noqa: E402
 
-opusfile = os.path.join(scp.general_preferences.datadir, "irdata", "OPUS", "test.0000")  # the full pathname of the file
-Z3 = read_file(opusfile)  # returns a dictionary of the data and metadata extracted
-Z3.keys()  # returns the key of the dictionary
+opusfile = scp.DATADIR / "irdata" / "OPUS" / "test.0000"  # the full pathn of the file
+Z3 = read_file(opusfile)                                  # returns a dictionary of the data and metadata extracted
+Z3.keys()                                                 # returns the key of the dictionary
 
 # %%
 Z3['Optik']  # looks what is the Optik block:
@@ -290,18 +298,17 @@ Z3['Optik']  # looks what is the Optik block:
 # Hence, for instance, the first dataset can be saved in the JCAMP-DX format:
 
 # %%
-X.write_jdx('CO@Mo_Al2O3.jdx')
+X.write_jcamp('CO@Mo_Al2O3.jdx', save_as=False)   # Put save_as to True to open a dialog
 
 # %% [markdown]
 # then used (and maybe changed) by a 3rd party software, and re-imported in spectrochempy:
 
 # %%
-newX = scp.read_jdx('CO@Mo_Al2O3.jdx')
-os.remove('CO@Mo_Al2O3.jdx')
+newX = scp.read_jcamp('CO@Mo_Al2O3.jdx')
 print(newX)
 
 # %% [markdown]
-# It is important to note here that the conversion to JCAMP-DX changes the ast digits of absorbances and wavenumbers:
+# It is important to note here that the conversion to JCAMP-DX changes the last digits of absorbances and wavenumbers:
 
 # %%
 print('Mean change in absorbance: {}'.format((X.data - newX.data).mean()))

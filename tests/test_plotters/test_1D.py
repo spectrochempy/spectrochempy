@@ -5,10 +5,10 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-from spectrochempy import plot_multiple, general_preferences, NDDataset, os, show
+from spectrochempy import plot_multiple, preferences, NDDataset, os, show
 from spectrochempy.utils.testing import figures_dir, same_images
 
-prefs = general_preferences
+prefs = preferences
 
 
 # @pytest.mark.skip

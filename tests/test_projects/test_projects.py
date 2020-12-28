@@ -9,9 +9,9 @@
 from spectrochempy.core.project.project import Project
 from spectrochempy.core.scripts.script import Script, run_script
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core import general_preferences, INPLACE
+from spectrochempy.core import preferences, INPLACE
 
-prefs = general_preferences
+prefs = preferences
 
 
 # Basic

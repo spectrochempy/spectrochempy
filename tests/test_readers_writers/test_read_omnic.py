@@ -10,7 +10,7 @@ import os
 
 import spectrochempy as scp
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core import general_preferences as prefs
+from spectrochempy.core import preferences as prefs
 
 
 def test_read_omnic():

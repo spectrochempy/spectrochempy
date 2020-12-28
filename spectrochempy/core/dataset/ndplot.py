@@ -31,7 +31,7 @@ from traitlets import Dict, HasTraits, Instance, Union, default, TraitError, Uni
 # ----------------------------------------------------------------------------------------------------------------------
 from spectrochempy.utils import (is_sequence, docstrings, NBlack, NBlue, NGreen, NRed, get_figure, Meta, pathclean)
 
-from spectrochempy.core import general_preferences, dataset_preferences, project_preferences, matplotlib_preferences
+from spectrochempy.core import preferences, dataset_preferences, project_preferences, matplotlib_preferences
 from spectrochempy.core import error_, warning_
 from spectrochempy.core.plotters.plot1d import plot_1D
 from spectrochempy.core.plotters.plot3d import plot_3D
@@ -65,8 +65,8 @@ class Preferences(Meta):
             res = getattr(dataset_preferences, key)
         elif hasattr(project_preferences, key):
             res = getattr(project_preferences, key)
-        elif hasattr(general_preferences, key):
-            res = getattr(general_preferences, key)
+        elif hasattr(preferences, key):
+            res = getattr(preferences, key)
         else:
             alias = self._get_alias(key)
             if alias:
@@ -96,8 +96,8 @@ class Preferences(Meta):
             setattr(dataset_preferences, key, value)
         elif hasattr(project_preferences, key):
             setattr(project_preferences, key, value)
-        elif hasattr(general_preferences, key):
-            setattr(general_preferences, key, value)
+        elif hasattr(preferences, key):
+            setattr(preferences, key, value)
         elif key in self.keys():
             newkey = f'{self.name}_{key}'
             setattr(matplotlib_preferences, newkey, value)
@@ -116,7 +116,7 @@ class Preferences(Meta):
 
         super().__setitem__(key, value)
 
-        # # ........................ TO WORK ON  ## from spectrochempy.core import general_preferences,
+        # # ........................ TO WORK ON  ## from spectrochempy.core import preferences,
         # config_manager  # # read json files in the pscp file (obj[f])  # # then write it in the main config  #   #
         # directory  # f = 'ProjectPreferences.json'  # if f in obj.files:  # TODO: work on this  #     prefjsonfile
         #  = os.path.join(config_dir, f)  #     with open(prefjsonfile, 'w') as fd:  #         json.dump(obj[f], fd,
@@ -169,7 +169,7 @@ class Preferences(Meta):
     def reset(self):
 
         # remove the user json file to reset to defaults
-        config_dir = pathclean(general_preferences.cfg.config_dir)
+        config_dir = pathclean(preferences.cfg.config_dir)
         for f in config_dir.glob('*.json'):
             f.unlink()
 

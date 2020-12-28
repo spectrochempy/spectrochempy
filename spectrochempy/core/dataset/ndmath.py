@@ -59,7 +59,7 @@ class class_or_instance_method(object):
     def __get__(self, instance, cls):
 
         def func(*args, **kwargs):
-            print(instance, cls, args, kwargs, self.method.__name__)
+            # print(instance, cls, args, kwargs, self.method.__name__)
 
             if instance is not None:
                 obj = instance
@@ -460,6 +460,7 @@ class NDMath(object):
 
         return self._reduce_method('sum', *args, **kwargs)
 
+
     def prod(self, *args, **kwargs):
         """product along axis"""
 
@@ -615,6 +616,89 @@ class NDMath(object):
             warning_('dimensions to remove for coordinates must be specified. By default the fist is kept. ')
 
         return self._reduce_method('diag', **kwargs)
+
+    # ..................................................................................................................
+    @classmethod
+    def fromfunction(cls, function, *, shape=None, coordset=None, dtype=float,
+                     name=None, title=None, units=None, **kwargs):
+        """
+        Construct a nddataset by executing a function over each coordinate.
+
+        The resulting array therefore has a value ``fn(x, y, z)`` at
+        coordinate ``(x, y, z)``.
+
+        Parameters
+        ----------
+        function : callable
+            The function is called with N parameters, where N is the rank of
+            `shape` or from the provided ``coordset`.
+        shape : (N,) tuple of ints, optional
+            Shape of the output array, which also determines the shape of
+            the coordinate arrays passed to `function`. It is optional only if
+            `coordset` is None.
+        name : str, optional
+            Dataset name
+        title : str, optional
+            Dataset title (see |NDDataset.title|)
+        units : str, optional
+            Dataset units.
+            When None, units will be determined from the function results
+        coordset : |Coordset| instance, optional
+            If provided, this determine the shape and coordinates of each dimension of
+            the returned |NDDataset|. If shape is also passed it will be ignored.
+        dtype : data-type, optional
+            Data-type of the coordinate arrays passed to `function`.
+            By default, `dtype` is float.
+
+        Returns
+        -------
+        fromfunction : any
+            The result of the call to `function` is passed back directly.
+            Therefore the shape of `fromfunction` is completely determined by
+            `function`.
+
+        Notes
+        -----
+        Keywords **kwargs are passed to `function`.
+
+        Examples
+        --------
+        >>> np.fromfunction(lambda i, j: i == j, (3, 3), dtype=int)
+        array([[ True, False, False],
+               [False,  True, False],
+               [False, False,  True]])
+
+        >>> np.fromfunction(lambda i, j: i + j, (3, 3), dtype=int)
+        array([[0, 1, 2],
+               [1, 2, 3],
+               [2, 3, 4]])
+
+        """
+        if coordset is not None:
+            shape = coordset.sizes[::-1]
+
+        args = np.indices(shape, dtype=dtype)
+
+        argsunits = [0] * len(shape)
+        if coordset is not None:
+            for i, co in enumerate(coordset):
+                k = len(shape) - 1 - i
+                args[i] = (args[i].swapaxes(k, -1) * co.data[np.newaxis]).swapaxes(k, -1)
+                if units is None and co.has_units:
+                    argsunits[i] = Quantity(1, co.units)
+        kwargsunits = {}
+        for k, v in kwargs.items():
+            if isinstance(v, Quantity) or hasattr(v, 'has_units'):
+                kwargs[k] = v.m
+                kwargsunits[k] = Quantity(1., v.u)
+            else:
+                kwargsunits[k] = 1
+        data = function(*args, **kwargs)
+        if units is None:
+            q = function(*argsunits, **kwargsunits)
+            units = q.units
+
+        return cls(data, coordset=coordset, name=name, title=title, units=units)
 
     # ..................................................................................................................
     def clip(self, *args, **kwargs):
@@ -1141,7 +1225,7 @@ class NDMath(object):
         return cls(np.ones(shape, dtype=dtype), **kwargs)
 
     @classmethod
-    def full(cls, *args, **kwargs):
+    def full(cls, shape, fill_value=0.0, dtype=None, **kwargs):
         """
         Return a new |NDDataset| of given shape and type, filled with `fill_value`.
 
@@ -1152,9 +1236,7 @@ class NDMath(object):
         fill_value : scalar
             Fill value.
         dtype : data-type, optional
-            The desired data-type for the array, e.g., `np.int8`.  Default
-            is `float`, but will change to `np.array(fill_value).dtype` in a
-            future release.
+            The desired data-type for the array, e.g., `np.int8`.  Default is fill_value.dtype.
         **kwargs : keyword args to pass to the |NDDataset| constructor
 
         Returns
@@ -1181,10 +1263,8 @@ class NDMath(object):
         NDDataset: [int64] unitless (shape: (y:2, x:2))
 
         """
-        args = list(args)
-        shape = args.pop(0)
-        fill_value = kwargs.pop('fill_value', args.pop(0))
-        dtype = kwargs.pop('dtype', None)
+        if dtype is None:
+            dtype = kwargs.pop('dtype', np.array(fill_value).dtype)
 
         return cls(np.full(shape, fill_value, dtype=dtype), **kwargs)
 
@@ -1379,22 +1459,31 @@ class NDMath(object):
 
         elif issubclass(args[0], NDArray):
             new = args.pop(0)()  # copy type
-
-            if isinstance(args[0], NDArray):
-                new._data = np.empty_like(args.pop(0).data)
-            elif is_sequence(args[0]):
+            ds = args.pop(0)     # get the template object
+            if isinstance(ds, NDArray):
+                new._data = np.empty_like(ds.data)
+                new._dims = ds.dims.copy()
+                new._mask = ds.mask.copy()
+                if hasattr(ds, 'coordset'):
+                    new._coordset = ds.coordset
+                new._units = ds.units
+                new._title = ds.title
+            elif is_sequence(ds):
                 # by default we produce a NDDataset
-                new = NDDataset(np.empty_like(args.pop(0)))
+                new._data = NDDataset(np.empty_like(ds))
 
         fill_value = kwargs.pop('fill_value', args.pop(0) if args else None)
         dtype = kwargs.pop('dtype', None)
         units = kwargs.pop('units', None)
+        coordset = kwargs.pop('coordset', None)
         if dtype is not None:
             new = new.astype(np.dtype(dtype))
         if fill_value is not None:
             new._data = np.full_like(new.data, fill_value=fill_value)
         if units is not None:
             new.ito(units, force=True)
+        if coordset is not None:
+            new._coordset = coordset
         return new
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -1539,7 +1628,7 @@ class NDMath(object):
                     return new
 
             # particular case of functions that returns Dataset with no coordinates
-            if axis is None and op in ['sum', 'prod', 'mean', 'var', 'std']:
+            if axis is None and op in ['sum', 'trapz', 'prod', 'mean', 'var', 'std']:
                 # delete all coordinates
                 new._coordset = None
 
@@ -2124,7 +2213,7 @@ sum = make_func_from(NDMath.sum, first='dataset')
 var = make_func_from(NDMath.var, first='dataset')
 
 __all__ += ['abs', 'amax', 'amin', 'argmin', 'argmax', 'array', 'clip', 'cumsum',  # 'diag',
-            'mean', 'pipe', 'ptp', 'round', 'std', 'sum', 'var', ]
+            'mean', 'pipe', 'ptp', 'round', 'std', 'sum', 'var']
 
 # make some API functions
 __all__ += ['empty_like', 'zeros_like', 'ones_like', 'full_like']
@@ -2132,7 +2221,7 @@ __all__ += ['empty_like', 'zeros_like', 'ones_like', 'full_like']
 empty_like = make_func_from(NDMath.empty_like, first='dataset')
 zeros_like = make_func_from(NDMath.zeros_like, first='dataset')
 ones_like = make_func_from(NDMath.ones_like, first='dataset')
-full_like = make_func_from(NDMath.full_like)
+full_like = make_func_from(NDMath.full_like, first='dataset')
 
 
 def set_api_methods(cls, methods):

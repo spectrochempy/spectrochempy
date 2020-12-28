@@ -7,9 +7,9 @@
 
 import pytest
 
-from spectrochempy import general_preferences, plt, os
+from spectrochempy import preferences, plt, os
 
-prefs = general_preferences
+prefs = preferences
 
 styles = ['poster', 'talk', 'scpy', 'sans', 'serif', 'grayscale', 'notebook', 'paper']
 

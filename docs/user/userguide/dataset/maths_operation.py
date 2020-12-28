@@ -146,10 +146,11 @@ sqrt(dx)
 # %%
 d2D= NDDataset.read_omnic('irdata/nh4y-activation.spg')
 
-d2D.plotpreferences.figure_figsize=(6,2.5)
-d2D.plotpreferences.method_2D = 'stack'
+prefs = d2D.preferences
+prefs.figure_figsize=(6,2.5)
+prefs.method_2D = 'stack'
 
-_ = d2D.plot(figsize=(6,6))
+_ = d2D.plot()
 
 # let's select only the first row of the 2D dataset
 dataset = d2D[0].squeeze()   # squeeze is used to remove the residual size 1 dimension

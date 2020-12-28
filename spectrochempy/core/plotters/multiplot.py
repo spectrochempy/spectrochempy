@@ -27,7 +27,7 @@ import matplotlib as mpl
 from spectrochempy.utils import is_sequence
 
 
-# from spectrochempy.core import general_preferences, project_preferences
+# from spectrochempy.core import preferences, project_preferences
 
 
 # .............................................................................

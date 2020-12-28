@@ -35,7 +35,7 @@ import os
 # this also import the os namespace
 
 # sp.set_loglevel('DEBUG')
-datadir = scp.general_preferences.datadir
+datadir = scp.preferences.datadir
 dataset = scp.NDDataset.read_omnic(
     os.path.join(datadir, 'irdata', 'nh4y-activation.spg'))
 

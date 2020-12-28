@@ -229,7 +229,7 @@ class NDDataset(
         if item in ["__numpy_ufunc__", "interface", '_pytestfixturefunction', '__dataclass_fields__',
                     '_ipython_canary_method_should_not_exist_',
                     '_baseclass', '_fill_value',
-                    '_ax_lines', '_axcb', 'clevels', '__wrapped__',
+                    '_ax_lines', '_axcb', 'clevels', '__wrapped__', 'coords',
                     '__await__', '__aiter__'] \
                 or '_validate' in item or '_changed' in item:
             # raise an error so that traits, ipython operation and more ... will be handled correctly
@@ -291,7 +291,21 @@ class NDDataset(
                     self.set_coordset(dict((self.dims[i], None) for i in range(self.ndim)))
                 idx = self._coordset.names.index(key)
                 _coordset = self._coordset
-                _coordset[idx] = Coord(value, name=key)
+                listcoord = False
+                if isinstance(value, list):
+                    listcoord = all([isinstance(item, Coord) for item in value])
+                if listcoord:
+                    _coordset[idx] = list(CoordSet(value).to_dict().values())[0]
+                    _coordset[idx].name = key
+                    _coordset[idx]._is_same_dim = True
+                elif isinstance(value, CoordSet):
+                    if len(value)>1:
+                        value = CoordSet(value)
+                    _coordset[idx] = list(value.to_dict().values())[0]
+                    _coordset[idx].name = key
+                    _coordset[idx]._is_same_dim = True
+                else:
+                    _coordset[idx] = Coord(value, name=key)
                 _coordset = self._valid_coordset(_coordset)
                 self._coordset.set(_coordset)
             else:
@@ -373,7 +387,7 @@ class NDDataset(
                     idx = self._get_dims_index(coord.name)[0]  # idx in self.dims
                     if size != self._data.shape[idx]:
                         raise ValueError(
-                                f'the size of a coordinates array must None or be equal'
+                                f'the size of a coordinates array must be None or be equal'
                                 f' to that of the respective `{coord.name}`'
                                 f' data dimension but coordinate size={size} != data shape[{idx}]='
                                 f'{self._data.shape[idx]}')
@@ -532,7 +546,7 @@ class NDDataset(
     # ------------------------------------------------------------------------------------------------------------------
 
     # ..................................................................................................................
-    def add_coordset(self, *args, **kwargs):
+    def add_coordset(self, *args, dims=None, **kwargs):
         """
         Add one or a set of coordinates from a dataset or panel
 
@@ -549,8 +563,10 @@ class NDDataset(
             return
 
         if self._coordset is None:
-            self._coordset = CoordSet(*args, **kwargs)
+            # make the whole coordset at once
+            self._coordset = CoordSet(*args, dims=dims, **kwargs)
         else:
+            # add one coordinate
             self._coordset._append(*args, **kwargs)
 
         if self._coordset:
@@ -632,7 +648,7 @@ class NDDataset(
 
         """
         self._coordset = None
-        self.add_coordset(*args, **kwargs)
+        self.add_coordset(*args, dims=self.dims, **kwargs)
 
     # ..................................................................................................................
     def set_coordtitles(self, *args, **kwargs):

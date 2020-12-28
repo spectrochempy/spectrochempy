@@ -97,9 +97,11 @@ class Coord(NDMath, NDArray):
         Coord: [labels] [  a   b   c   d   e   f] (size: 6)
 
         """
+
         super(Coord, self).__init__(data, **kwargs)
-        if self.ndim > 1:
-            raise ValueError('Only one 1D arrays can be used to define coordinates')
+
+        if len(self.shape) > 1:
+                raise ValueError('Only one 1D arrays can be used to define coordinates')
 
     # ..................................................................................................................
     def implements(self, name=None):
@@ -153,7 +155,7 @@ class Coord(NDMath, NDArray):
         ndim = super().ndim
         if ndim > 1:
             raise ValueError("Coordinate's array should be 1-dimensional!")
-        return 1
+        return ndim
 
     # ..................................................................................................................
     @property

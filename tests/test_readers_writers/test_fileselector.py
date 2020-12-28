@@ -11,11 +11,11 @@ This module is for testing fileselector.py
 """
 
 from spectrochempy.widgets.fileselector import FileSelector
-from spectrochempy.core import general_preferences
+from spectrochempy.core import preferences
 
 
 def test_fileselector():
-    path = general_preferences.datadir
+    path = preferences.datadir
     fs = FileSelector(path=path, filters='spg')
 
     assert fs.path.endswith('testdata/')
@@ -24,7 +24,7 @@ def test_fileselector():
 
 
 def test_issues_61():
-    path = general_preferences.datadir + "/"
+    path = preferences.datadir + "/"
     fs = FileSelector(path=path, filters='spg')
 
     assert fs.path.endswith('testdata/')
