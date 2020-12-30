@@ -8,7 +8,7 @@
 This module implements the class |Coord|.
 """
 
-__all__ = ['Coord']
+__all__ = ['Coord', 'LinearCoord']
 
 # ----------------------------------------------------------------------------------------------------------------------
 # standard imports
@@ -98,7 +98,7 @@ class Coord(NDMath, NDArray):
 
         """
 
-        super(Coord, self).__init__(data, **kwargs)
+        super().__init__(data=data, **kwargs)
 
         if len(self.shape) > 1:
                 raise ValueError('Only one 1D arrays can be used to define coordinates')
@@ -161,11 +161,6 @@ class Coord(NDMath, NDArray):
     @property
     def T(self):  # no transpose
         return self
-
-    # ..................................................................................................................
-    @property
-    def date(self):
-        return None
 
     # ..................................................................................................................
     # @property
@@ -256,7 +251,7 @@ class Coord(NDMath, NDArray):
         # remove some methods with respect to the full NDArray
         # as they are not usefull for Coord.
         return ['data', 'labels', 'units', 'meta', 'title', 'name',
-                'offset', 'roi']
+                'offset', 'increment', 'linear', 'roi']
 
     # ..................................................................................................................
     def __getitem__(self, items, return_index=False):
@@ -326,10 +321,53 @@ class Coord(NDMath, NDArray):
         #   'type': 'change', # The event type of the notification, usually 'change'
         # }
         # debug_(f'changes in Coord: {change.name}')
-        pass
+
+        if change.name in ['_linear', '_increment', '_offset', '_size']:
+            super()._anytrait_changed(change)
 
 
-# ======================================================================================================================
+class LinearCoord(Coord):
+
+    docstrings.delete_params('NDArray.parameters', 'data', 'mask')
+
+    # ..................................................................................................................
+    @docstrings.dedent
+    def __init__(self, *args, offset=0.0, increment=1.0, **kwargs):
+        """
+        Linear coordinates.
+
+        Such coordinates correspond to a ascending or descending linear sequence of values, fully determined by two
+        parameters, i.e., an offset (off) and an increment (inc) : `data = i*inc + off`
+
+        Parameters
+        ----------
+        data : a 1D array-like object, optional
+            wWen provided, the `size` parameters is adjusted to the size of the array, and a linearization of the
+            array is performed (only if it is possible: regular spacing in the 1.e5 relative accuracy)
+        offset : float, optional
+            If omitted a value of 0.0 is taken for tje coordinate offset.
+        increment : float, optional
+            If omitted a value of 1.0 is taken for the coordinate increment.
+        %(NDArray.parameters.no_data|mask)s
+
+
+        """
+        super().__init__(*args, **kwargs)
+
+        if not self.linear:
+            # in case it was not already a linear array
+            self.offset = offset
+            self.increment = increment
+            self.linear = True
+
+
+
+
+
+
+
+
+    # ======================================================================================================================
 # Set the operators
 # ======================================================================================================================
 set_operators(Coord, priority=50)

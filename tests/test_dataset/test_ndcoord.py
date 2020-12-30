@@ -10,11 +10,11 @@ from copy import copy
 import numpy as np
 import pytest
 
-from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.core.dataset.ndcoord import Coord, LinearCoord
+from spectrochempy.core.readers.importer import read
 from spectrochempy.units import ur, Quantity
 from spectrochempy.utils.testing import assert_array_equal, assert_equal_units
-from spectrochempy.core import info_, debug_
-
+from spectrochempy.core import info_, print_, debug_
 
 # ======================================================================================================================
 # Coord
@@ -362,3 +362,49 @@ def test_coord_not_implemented(name):
                    title='wavelength')
     with pytest.raises(NotImplementedError):
         getattr(coord0, name)()
+
+def test_linearcoord():
+
+    coord1 = Coord([1, 2.5, 4, 5])
+
+    coord2 = Coord(np.array([1, 2.5, 4, 5]))
+    assert coord2 == coord1
+
+    coord3 = Coord(range(10))
+
+    coord4 = Coord(np.arange(10))
+    assert coord4 == coord3
+
+    coord5 = coord4.copy()
+    coord5.offset = 1.0
+    assert np.all(coord5.data == coord4.data + 1.0)
+
+    assert coord5 is not None
+    coord5.linear = True
+    print_('Linear coordinate', coord5)
+
+    coord6 = Coord(linear=True, offset=2.0, increment=2.0, size=10)
+    assert np.all(coord6.data == (coord4.data + 1.0) * 2.)
+
+    # %%
+    coord7 = LinearCoord(offset=2.0, increment=2.0, size=10)
+    print_(coord7)
+
+    # %%
+    X = read('irdata/CO@Mo_Al2O3.SPG')
+    print_(X.x)
+    XX = X.x.copy()
+    X.x.linear = True
+    print_((X.x.data - XX.data).ptp(), X.x.increment,
+           (X.x.data - XX.data).ptp() * 100 / X.x.increment)  # TODO : why such a difference!!!!
+    print(X.x._data)
+
+    print(X.x.offset)
+    X.x.ito('m^-1')
+    print(X.x.offset_value)
+
+    coord0 = LinearCoord.linspace(200., 300., 3, labels=['cold', 'normal', 'hot'], units="K", title='temperature')
+    coord1 = LinearCoord.linspace(0., 60., 100, labels=None, units="minutes", title='time-on-stream')
+    coord2 = LinearCoord.linspace(4000., 1000., 100, labels=None, units="cm^-1", title='wavenumber')
+
+    print(coord0.size, coord1.size, coord2.size)

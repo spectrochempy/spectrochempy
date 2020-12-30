@@ -900,7 +900,7 @@ class NDMath(object):
         return cls(np.arange(start, stop, step, dtype=np.dtype(dtype)), **kwargs)
 
     @classmethod
-    def linspace(cls, start, stop, num=50, endpoint=True, retstep=False, dtype=None, axis=0, **kwargs):
+    def linspace(cls, start, stop, num=50, endpoint=True, retstep=False, dtype=None, **kwargs):
         """
         Return evenly spaced numbers over a specified interval.
 
@@ -923,10 +923,6 @@ class NDMath(object):
             If True, return (samples, step), where step is the spacing between samples.
         dtype : dtype, optional
             The type of the array. If dtype is not given, infer the data type from the other input arguments.
-        axis : int, optional
-            The axis in the result to store the samples. Relevant only if start or stop are array-like.
-            By default (0), the samples will be along a new axis inserted at the beginning.
-            Use -1 to get an axis at the end.
         **kwargs : any
             keywords argument used when creating the returned object, such as units, name, title, ...
 
@@ -942,11 +938,10 @@ class NDMath(object):
 
         """
 
-        return cls(np.linspace(start, stop, num=num, endpoint=endpoint, retstep=retstep, dtype=dtype, axis=axis),
-                   **kwargs)
+        return cls(np.linspace(start, stop, num=num, endpoint=endpoint, retstep=retstep, dtype=dtype), **kwargs)
 
     @classmethod
-    def logspace(cls, start, stop, num=50, endpoint=True, base=10.0, dtype=None, axis=0, **kwargs):
+    def logspace(cls, start, stop, num=50, endpoint=True, base=10.0, dtype=None, **kwargs):
         """
         Return numbers spaced evenly on a log scale.
 
@@ -975,11 +970,7 @@ class NDMath(object):
         dtype : dtype
             The type of the output array.  If `dtype` is not given, infer the data
             type from the other input arguments.
-        axis : int, optional
-            The axis in the result to store the samples.  Relevant only if start
-            or stop are array-like.  By default (0), the samples will be along a
-            new axis inserted at the beginning. Use -1 to get an axis at the end.
-            .. versionadded:: 1.16.0
+
         Returns
         -------
         samples : ndarray
@@ -1001,7 +992,7 @@ class NDMath(object):
         ... # doctest: +SKIP
 
         """
-        return cls(np.logspace(start, stop, num=50, endpoint=True, base=10.0, dtype=None, axis=0), **kwargs)
+        return cls(np.logspace(start, stop, num=num, endpoint=endpoint, base=base, dtype=dtype), **kwargs)
 
     @classmethod
     def identity(cls, N, dtype=None, **kwargs):

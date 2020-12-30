@@ -52,7 +52,8 @@ import numpy as np
 # We additionnaly import the three main SpectroChemPy objects that we will use through this tutorial
 
 # %%
-from spectrochempy import NDDataset, CoordSet, Coord
+from spectrochempy import NDDataset, CoordSet, Coord, LinearCoord
+
 
 # %% [markdown]
 # For a convenient usage of units, we will also directly import `ur`, the unit registry which contains all available units.
@@ -457,7 +458,7 @@ d3D.set_coordset(u=coord2, v=CoordSet(coord1, coord1b), t=coord0)
 d3D
 
 # %% [markdown]
-# **B.** Second syntax assuming the coordinates are given in the order of the dimensions. 
+# **B.** Second syntax assuming the coordinates are given in the order of the dimensions.
 #
 # Remember that we can check this order using the `dims` attribute of a NDDataset
 
@@ -465,7 +466,7 @@ d3D
 d3D.dims
 
 # %%
-d3D.set_coordset((coord0, [coord1, coord1b], coord2 )) 
+d3D.set_coordset((coord0, [coord1, coord1b], coord2 ))
 # or equivalent
 d3D.set_coordset(coord0, CoordSet(coord1, coord1b), coord2)
 d3D
@@ -513,7 +514,7 @@ except ValueError:
     scp.error_('Coordinates must be of the same size for a dimension with multiple coordinates')
 
 # %% [markdown]
-# This works : it use a tuple `()`, not a list `[]` 
+# This works : it use a tuple `()`, not a list `[]`
 
 # %%
 d3D.coordset = (coord0, coord1, coord2) # equivalent to d3D.coordset = coord0, coord1, coord2

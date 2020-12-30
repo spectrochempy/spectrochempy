@@ -71,14 +71,14 @@ X
 #
 # - `name` is the name of the group of spectra as it appears in the .spg file. OMNIC sets this name to the .spg
 # filename used at the creation of the group. In this example, the name ("Group sust Mo_Al2O3_base line.SPG") differs
-# from the filemane ("CO@Mo_Al2O3.SPG") because the latter has been changed from outside OMNIC (directly in th OS).
+# from the filemane ("CO@Mo_Al2O3.SPG") because the latter has been changed from outside OMNIC (directly in the OS).
 #
 # - `author` is that of the creator of the NDDataset (not of the .spg file, which, to our knowledge, does not have
-# thus type of attribute). The string is composed of the username and of the machine name as given by the OS:
-# usermane@machinename.
+# this type of attribute). The string is composed of the username and of the machine name as given by the OS:
+# username@machinename. It can be accessed and changed using `X.author`
 #
-# - "created" is the creation date of the NDDataset (again not that of the .spg file). The actual name of the attribute
-# is `date` and can be accessed (or even changed) using `X.date`
+# - "created" is the creation date of the NDDataset (again not that of the .spg file). It can be accessed (or even
+# changed) using `X.created`
 #
 # - `description` indicates the complete pathname of the .spg file. As the pathname is also given in the history (below)
 # , it can be a good practice to give a self explaining description of the group, for instance:

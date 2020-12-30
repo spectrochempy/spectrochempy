@@ -156,11 +156,11 @@ class NDComplexArray(NDArray):
         """
         try:
             return super().is_masked
-        except Exception:
+        except Exception as e:
             if self._data.dtype == typequaternion:
                 return np.any(self._mask['I'])
             else:
-                raise Exception()
+                raise e
 
     # ..................................................................................................................
     @property
@@ -332,7 +332,7 @@ class NDComplexArray(NDArray):
 
         new = self.copy()
 
-        ma = self._masked_data
+        ma = self.masked_data
 
         if select == 'REAL':
             select = 'R' * self.ndim
