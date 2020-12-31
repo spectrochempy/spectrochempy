@@ -36,7 +36,8 @@ ds
 # %% [markdown]
 # It's a series of 55 spectra.
 #
-# For the demonstration select only the first 20 on a limited region from 1250 to 1800 cm$^{-1}$ (Do not forget to use floating numbers for slicing)
+# For the demonstration select only the first 20 on a limited region from 1250 to 1800 cm$^{-1}$ (Do not forget to
+# use floating numbers for slicing)
 
 # %%
 X = ds[:20, 1250.0:1800.]
@@ -54,7 +55,7 @@ X.y.title = 'Acquisition time'
 
 # %%
 prefs = X.preferences
-prefs.figure.figsize = (6,3)
+prefs.figure.figsize = (6, 3)
 prefs.colormap = 'Dark2'
 prefs.colorbar = True
 X.plot();
@@ -64,9 +65,8 @@ X.plot();
 
 # %%
 blc = scp.BaselineCorrection(X)
-regions = ([1740., 1800.0],
-           [1550., 1570.],
-           [1250., 1300.])     # define 3 regions where we want the baseline to reach zero.
+regions = (
+        [1740., 1800.0], [1550., 1570.], [1250., 1300.])  # define 3 regions where we want the baseline to reach zero.
 Xcorr = blc.compute(*regions)  # compute the corrected NDDataset
 
 Xcorr.plot();
@@ -82,16 +82,15 @@ intsimps = Xcorr.simps(dim='x')
 # As you can see both method give almost the same results in this case
 
 # %%
-scp.plot_multiple(method='scatter', ms=5,
-              datasets=[inttrapz, intsimps],
-              labels=['trapzoidal rule', 'simpson\' rule'], legend='best');
-
+scp.plot_multiple(method='scatter', ms=5, datasets=[inttrapz, intsimps], labels=['trapzoidal rule', 'simpson\' rule'],
+                  legend='best');
 
 # %% [markdown]
-# The difference between the trapezoidal and simpson integration methods is visualized below. In this case they are extremly close. 
+# The difference between the trapezoidal and simpson integration methods is visualized below. In this case they are
+# extremly close.
 
 # %%
-diff = ((inttrapz-intsimps)*100./intsimps)
+diff = ((inttrapz - intsimps) * 100. / intsimps)
 diff.title = 'Difference'
 diff.units = 'percent'
 diff.plot(scatter=True, ms=5);

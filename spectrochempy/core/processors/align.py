@@ -285,10 +285,16 @@ def align(dataset, *others, **kwargs):
             dim_loc = new_coord._loc2index(sorted(coord_data))
             loc = tuple(prepend_keys + [dim_loc])
 
-            new_obj.data = new_obj_data
-            # new_obj.mask = MASKED  # mask all the data -we will unmask later the relevant data in the next step
-            # new_obj[loc] = False   # remove the mask for the selected part of the array
-            new_obj.data[loc] = obj.data
+            new_obj._data = new_obj_data
+
+            # mask all the data -we will unmask later the relevant data in the next step
+            new_obj.mask = MASKED
+
+            # remove the mask for the selected part of the array
+            new_obj.mask[loc] = False
+
+            # set the data for the loc
+            new_obj._data[loc] = obj.data
 
             # update the coordinates
             new_coordset = obj.coordset.copy()
@@ -318,7 +324,7 @@ def align(dataset, *others, **kwargs):
     for index, object in _objects.items():
         is_panel = object['is_panel']
         obj = object['obj']
-        obj[np.where(np.isnan(obj))] = MASKED  # mask NaN values
+        # obj[np.where(np.isnan(obj))] = MASKED  # mask NaN values
         obj[np.where(np.isnan(obj))] = 99999999999999.  # replace NaN values (to simplify comparisons)
         idx = int(object['idx'])
         if not is_panel:

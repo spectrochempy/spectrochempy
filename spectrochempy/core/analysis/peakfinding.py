@@ -22,9 +22,8 @@ from datetime import datetime, timezone
 # argrelmax(data[, axis, order, mode]) 	Calculate the relative maxima of data.
 # argrelextrema(data, comparator[, axis, ...]) 	Calculate the relative extrema of data.
 
-def find_peaks(dataset, height=None, window_length=3, threshold=None, distance=None,
-               prominence=None, width=None, wlen=None, rel_height=0.5,
-               plateau_size=None, use_coord=True):
+def find_peaks(dataset, height=None, window_length=3, threshold=None, distance=None, prominence=None, width=None,
+               wlen=None, rel_height=0.5, plateau_size=None, use_coord=True):
     """
     Wrapper and extension of scpy.signal.find_peaks(). Find peaks inside a 1D NDDataset based on peak properties.
     This function finds all local maxima by simple comparison of neighbouring values. Optionally, a subset of these
@@ -196,13 +195,13 @@ def find_peaks(dataset, height=None, window_length=3, threshold=None, distance=N
             plateau_size = int(round(plateau_size / step))
 
     data = X.data
-    peaks, properties = scipy.signal.find_peaks(data, height=height, threshold=threshold,
-                                                distance=distance, prominence=prominence, width=width, wlen=wlen,
-                                                rel_height=rel_height, plateau_size=plateau_size)
+    peaks, properties = scipy.signal.find_peaks(data, height=height, threshold=threshold, distance=distance,
+                                                prominence=prominence, width=width, wlen=wlen, rel_height=rel_height,
+                                                plateau_size=plateau_size)
 
-    #if dataset.ndim == 1:
+    # if dataset.ndim == 1:
     out = X[peaks]
-    #else:  # ndim == 2
+    # else:  # ndim == 2
     #    out = dataset[:, peaks]
 
     if window_length > 1:

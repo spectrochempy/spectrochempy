@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 import numpy as np
 
 from spectrochempy.utils import colorscale
-from spectrochempy.core import dataset_preferences, project_preferences
+from spectrochempy.core import dataset_preferences
 
 # from matplotlib.ticker import MaxNLocator
 

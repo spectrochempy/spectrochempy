@@ -25,11 +25,14 @@
 
 # %%
 from spectrochempy import *
+
 # %% [markdown]
 # ## Loading the data
 
 # %% [markdown]
-# For sake of demonstration of the plotting capabilities of SpectroChemPy (based on [Matplotlib](https://matplotlib.org)), let's first import a NDDataset from a file and make some (optional) preparation of the data to display.
+# For sake of demonstration of the plotting capabilities of SpectroChemPy (based on [Matplotlib](
+# https://matplotlib.org)), let's first import a NDDataset from a file and make some (optional) preparation of the
+# data to display.
 
 # %%
 dataset = NDDataset.read('irdata/nh4y-activation.spg')
@@ -61,11 +64,13 @@ dataset[:, 1290.:920.] = MASKED
 # ## Selecting the output window
 
 # %% [markdown]
-# For the examples below, we use inline matplotlib figures (non interactive): this can be forced using the magic function before loading spectrochempy.:
+# For the examples below, we use inline matplotlib figures (non interactive): this can be forced using the magic
+# function before loading spectrochempy.:
 # ```ipython
 # %matplotlib inline
 # ```
-# but it is also the default in `Jupyter lab` (so we don't really need to specify this). Note that when such magic function has been used, it is not possible to change the setting, except by resseting the notebook kernel.
+# but it is also the default in `Jupyter lab` (so we don't really need to specify this). Note that when such magic
+# function has been used, it is not possible to change the setting, except by resseting the notebook kernel.
 #
 # If one wants interactive displays (with selection, zooming, etc...) one can use:
 # ```ipython
@@ -76,7 +81,8 @@ dataset[:, 1290.:920.] = MASKED
 # ```ipython
 #     In []: %matplotlib
 # ```
-# which has the effect of displaying the figures in independant windows using default matplotlib backend (e.g., `Tk`), with all the interactivity of matplotlib.
+# which has the effect of displaying the figures in independant windows using default matplotlib backend (e.g.,
+# `Tk`), with all the interactivity of matplotlib.
 #
 # But you can explicitly request a different GUI backend::
 # ```ipython
@@ -112,13 +118,14 @@ _ = dataset.plot()
 # ## Changing the aspect of the plot
 
 # %% [markdown]
-# We can change the default plot configuration for this dataset (see below for an overview of the available configuration parameters.
+# We can change the default plot configuration for this dataset (see below for an overview of the available
+# configuration parameters.
 
 # %%
-prefs.figure.figsize = (6,3)         # The default figsize is (6.8,4.4)
-prefs.colorbar = True                # This add a color bar on a side
-prefs.colormap = 'magma'             # The default colormap is viridis
-prefs.axes.facecolor = '.95'         # Make the graph background colored in a ligth gray
+prefs.figure.figsize = (6, 3)  # The default figsize is (6.8,4.4)
+prefs.colorbar = True  # This add a color bar on a side
+prefs.colormap = 'magma'  # The default colormap is viridis
+prefs.axes.facecolor = '.95'  # Make the graph background colored in a ligth gray
 prefs.axes.grid = True
 
 _ = dataset.plot()
@@ -146,9 +153,8 @@ _ = dataset.plot()
 
 # %%
 prefs.reset()
-d1D = dataset[-1]   # select the last row of the previous 2D dataset
+d1D = dataset[-1]  # select the last row of the previous 2D dataset
 _ = d1D.plot(color='r')
-
 
 # %% [markdown]
 # ## Adding titles and annotations
@@ -166,7 +172,7 @@ prefs.colormap = 'terrain'
 prefs.font.family = 'monospace'
 
 ax = dataset.plot()
-ax.grid(False)          # This temporary suppress the grid after the plot is done - not saved in prefs
+ax.grid(False)  # This temporary suppress the grid after the plot is done - not saved in prefs
 
 # set title
 title = ax.set_title('NH$_4$Y IR spectra during activation')
@@ -178,25 +184,20 @@ title.set_fontsize(14)
 ax.text(1200., 1, 'Masked region\n (saturation)', rotation=90)
 
 # put some fancy annotations (see matplotlib documentation to learn how to design this)
-_ = ax.annotate('OH groups',
-                xy=(3600., 1.25),
-                xytext=(-10,-50),
-                textcoords='offset points',
-                arrowprops=dict(arrowstyle="fancy",
-                            color="0.5",
-                            shrinkB=5,
-                            connectionstyle="arc3,rad=-0.3",
-                            ),
-               )
+_ = ax.annotate('OH groups', xy=(3600., 1.25), xytext=(-10, -50), textcoords='offset points',
+                arrowprops=dict(arrowstyle="fancy", color="0.5", shrinkB=5, connectionstyle="arc3,rad=-0.3", ), )
 
 # %% [markdown]
-# More information about annotation can be found in the [matplotlib documentation:  annotations](https://matplotlib.org/tutorials/text/annotations.html)
+# More information about annotation can be found in the [matplotlib documentation:  annotations](
+# https://matplotlib.org/tutorials/text/annotations.html)
 
 # %% [markdown]
 # ## Changing the plot style using matpotlib style sheets
 
 # %% [markdown]
-#  The easiest way to to change the plot style may be to use presetted style such as those used in [matplotlib styles](https://matplotlib.org/3.3.3/tutorials/introductory/customizing.html). This is directly included in the preferences of SpectroChemPy
+#  The easiest way to to change the plot style may be to use presetted style such as those used in [matplotlib
+#  styles](https://matplotlib.org/3.3.3/tutorials/introductory/customizing.html). This is directly included in the
+#  preferences of SpectroChemPy
 
 # %%
 prefs.style = 'grayscale'
@@ -224,9 +225,8 @@ ax = dataset.plot(colorbar=True)
 # Style specification can also be done directly in the plot method:
 
 # %%
-prefs.colormap='magma'
-ax = dataset.plot(style=['scpy','paper'])
-
+prefs.colormap = 'magma'
+ax = dataset.plot(style=['scpy', 'paper'])
 
 # %% [markdown]
 # To get a list of all available styles :
@@ -245,7 +245,8 @@ ax = dataset.plot()
 # ## Create your own style
 
 # %% [markdown]
-# If you want to create your own style for later use, you can use the command  `makestyle` (**warning**: you can not use `scpy`
+# If you want to create your own style for later use, you can use the command  `makestyle` (**warning**: you can not
+# use `scpy`
 # which is the READONLY default style).
 
 # %%
@@ -277,11 +278,11 @@ prefs.makestyle()
 
 # %%
 prefs.reset()
-_ = dataset.plot()          # plot with the default scpy style
+_ = dataset.plot()  # plot with the default scpy style
 
 # %%
 prefs.style = 'mydefault'
-_ = dataset.plot()          # plot with our own style
+_ = dataset.plot()  # plot with our own style
 
 # %% [markdown]
 # ## Changing the type of plot
@@ -294,26 +295,26 @@ _ = dataset.plot()          # plot with our own style
 # %%
 prefs.reset()
 
-prefs.method_2D = 'map'   # this will change permanently the type of 2D plot
+prefs.method_2D = 'map'  # this will change permanently the type of 2D plot
 prefs.colormap = 'magma'
-prefs.figure_figsize = (5,3)
+prefs.figure_figsize = (5, 3)
 ax = dataset.plot()
 
 # %% [markdown]
-# You can also, for an individual plot use specialised plot commands, such as plot_stack, plot_map, plot_waterfall, or plot_image:
+# You can also, for an individual plot use specialised plot commands, such as plot_stack, plot_map, plot_waterfall,
+# or plot_image:
 
 # %%
 prefs.axes_facecolor = 'white'
-ax = dataset.plot_image(colorbar=True)   # will use image_cmap preference!
+ax = dataset.plot_image(colorbar=True)  # will use image_cmap preference!
 
 # %%
 prefs.reset()
-_ = dataset.plot_waterfall(figsize=(7,4), y_reverse=True)
+_ = dataset.plot_waterfall(figsize=(7, 4), y_reverse=True)
 
 # %%
 prefs.style = 'seaborn-paper'
 ax = dataset[3].plot(scatter=True, pen=False, me=30, ms=5)
-
 
 # %% [markdown]
 # ## Plotting several dataset on the same figure
@@ -322,9 +323,9 @@ ax = dataset[3].plot(scatter=True, pen=False, me=30, ms=5)
 # We can plot several datasets on the same figure using the `clear` argument.
 
 # %%
-nspec = int(len(dataset)/4)
-ds1 = dataset[:nspec]    # split the dataset into too parts
-ds2 = dataset[nspec:]-2. # add an ofset to the second part
+nspec = int(len(dataset) / 4)
+ds1 = dataset[:nspec]  # split the dataset into too parts
+ds2 = dataset[nspec:] - 2.  # add an ofset to the second part
 
 ax1 = ds1.plot_stack()
 ax = ds2.plot_stack(clear=False, zlim=(-2.5, 4))
@@ -334,13 +335,11 @@ ax = ds2.plot_stack(clear=False, zlim=(-2.5, 4))
 
 # %%
 datasets = [dataset[0], dataset[10], dataset[20], dataset[50], dataset[53]]
-labels = ['sample {}'.format(label) for label in
-          ["S1", "S10", "S20", "S50", "S53"]]
+labels = ['sample {}'.format(label) for label in ["S1", "S10", "S20", "S50", "S53"]]
 prefs.reset()
 prefs.axes.facecolor = '.99'
 prefs.axes.grid = True
-ax = plot_multiple(method='scatter', me=10,
-                  datasets=datasets, labels=labels, legend='best')
+ax = plot_multiple(method='scatter', me=10, datasets=datasets, labels=labels, legend='best')
 
 # %% [markdown]
 # ## Overview of the main configuration parameters
@@ -356,9 +355,11 @@ prefs
 # <div class="alert alert-block alert-warning">
 #     <b>Warning</b> :
 # Note that in the `dataset.preferences` dictionary (`prefs`), the parameters have a slightly different name, e.g.,
-#     <b>figure_figsize</b> instead of <b>figure.fisize</b> which is the matplotlib syntax (In spectrochempy, dot (`.`) cannot be used in paremeter name, and thus it is replaced by an underscore (`_`))
+#     <b>figure_figsize</b> instead of <b>figure.fisize</b> which is the matplotlib syntax (In spectrochempy,
+#     dot (`.`) cannot be used in paremeter name, and thus it is replaced by an underscore (`_`))
 #
-# Actually, in the jupyter notebook, or in scripts, both syntax can be used to read or write most of the preferences entries
+# Actually, in the jupyter notebook, or in scripts, both syntax can be used to read or write most of the preferences
+# entries
 #
 #  </div>
 
@@ -386,7 +387,7 @@ prefs.all()
 # %%
 prefs.font.family = 'fantasy'
 with plt.xkcd():
-    #print(mpl.rcParams)
+    # print(mpl.rcParams)
     prefs.lines.linewidth = 2
-    ax = dataset[-1].plot(figsize=(7.5,4))
+    ax = dataset[-1].plot(figsize=(7.5, 4))
     ax.text(2800., 1.5, "A XKCD plot! This is fun...")

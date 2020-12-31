@@ -20,7 +20,7 @@
 # As usual we start by importing the SpectroChemPy API
 
 # %%
-import spectrochempy as scp # noqa: F403
+import spectrochempy as scp  # noqa: F403
 
 # %% [markdown]
 # ## Data directory
@@ -61,7 +61,7 @@ import spectrochempy as scp # noqa: F403
 # </div>
 
 # %%
-datadir= scp.preferences.datadir
+datadir = scp.preferences.datadir
 fs = scp.FileSelector(path=datadir, filters=['spg', 'spa'])
 fs
 

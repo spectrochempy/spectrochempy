@@ -103,8 +103,8 @@ class CoordSet(HasTraits):
         # some cleaning
         if coords:
 
-            if all([(isinstance(coords[i], (np.ndarray, NDArray, list, CoordSet)) or coords[i] is None)
-                    for i in range(len(coords))]):
+            if all([(isinstance(coords[i], (np.ndarray, NDArray, list, CoordSet)) or coords[i] is None) for i in
+                    range(len(coords))]):
                 # Any instance of a NDArray can be accepted as coordinates for a dimension.
                 # If an instance of CoordSet is found, this means that all
                 # coordinates in this set describe the same axis
@@ -146,8 +146,8 @@ class CoordSet(HasTraits):
                         # use the provided list of dims
                         coord.name = dims.pop(-1)
 
-                self._append(coord)  # append the coord (but instead of append,
-                # use assignation -in _append - to fire the
+                self._append(
+                    coord)  # append the coord (but instead of append,  # use assignation -in _append - to fire the
                 # validation process )
 
         # now evaluate keywords argument
@@ -162,8 +162,7 @@ class CoordSet(HasTraits):
                 coord = CoordSet(*coord, sorted=False)  # make sure in this case it becomes a CoordSet instance
 
             elif isinstance(coord, np.ndarray) or coord is None:
-                coord = Coord(coord, copy=True)  # make sure it's a Coord
-                # (even if it is None -> Coord(None)
+                coord = Coord(coord, copy=True)  # make sure it's a Coord  # (even if it is None -> Coord(None)
 
             elif isinstance(coord, str) and coord in DEFAULT_DIM_NAME:
                 # may be a reference to another coordinates (e.g. same coordinates for various dimensions)
@@ -235,8 +234,8 @@ class CoordSet(HasTraits):
 
         for id, coord in enumerate(coords):
             if coord and not isinstance(coord, (Coord, CoordSet)):
-                raise TypeError('At this point all passed coordinates should be of type Coord or CoordSet!')
-                # coord = Coord(coord)
+                raise TypeError(
+                    'At this point all passed coordinates should be of type Coord or CoordSet!')  # coord = Coord(coord)
             coords[id] = coord
 
         for coord in coords:
@@ -409,8 +408,7 @@ class CoordSet(HasTraits):
             if isinstance(item, NDArray):
                 _titles.append(item.title if item.title else item.name)  # TODO:name
             elif isinstance(item, CoordSet):
-                _titles.append(
-                        [el.title if el.title else el.name for el in item])  # TODO:name
+                _titles.append([el.title if el.title else el.name for el in item])  # TODO:name
             else:
                 raise ValueError('Something wrong with the titles!')
         return _titles
@@ -435,7 +433,7 @@ class CoordSet(HasTraits):
     # public methods
     # ------------------------------------------------------------------------------------------------------------------
     # ..................................................................................................................
-    def copy(self,  keepname=False):
+    def copy(self, keepname=False):
         """
         Make a disconnected copy of the current coords.
 
@@ -833,8 +831,8 @@ class CoordSet(HasTraits):
                 pass
 
             # add the new coordinates
-            if index in self.available_names or \
-                    (len(index) == 2 and index.startswith('_') and index[1] in list("123456789")):
+            if index in self.available_names or (
+                    len(index) == 2 and index.startswith('_') and index[1] in list("123456789")):
                 coord.name = index
                 self._coords.append(coord)
                 return

@@ -22,7 +22,7 @@ def install_styles():
     """
     try:
         import matplotlib as mpl
-    except:
+    except ImportError:
         warnings.warn('Sorry, but we cannot install mpl plotting styles '
                       'if MatPlotLib is not installed.\n'
                       'Please install MatPlotLib using:\n'
@@ -87,7 +87,7 @@ setup_args = dict(
                      "Programming Language :: Python :: 3.8", ], platforms=['Windows', 'Mac OS X', 'Linux'],
 
         # packages discovery
-        zip_safe=False, packages=find_packages() + packages, include_package_data=True, # requirements
+        zip_safe=False, packages=find_packages() + packages, include_package_data=True,  # requirements
         python_requires=">=3.7", setup_requires=['setuptools_scm', 'matplotlib'], install_requires=[],
         # install_requires(dev=__DEV__),
         # tests_require=extras_require['tests'],
@@ -98,7 +98,7 @@ setup_args = dict(
         # entry points for scripts
         # scripts = {'scripts/launch_api.py'},
         entry_points={'console_scripts': ['scpy_gui=spectrochempy.gui.scpy_gui:main',
-                'scpy_update=spectrochempy.scripts.scpy_update:main'], }, )
+                                          'scpy_update=spectrochempy.scripts.scpy_update:main'], }, )
 
 # ======================================================================================================================
 if __name__ == '__main__':

@@ -3,56 +3,48 @@ import pathlib
 from textwrap import indent
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
-from matplotlib import cycler
-
-from traitlets import Bool, Unicode, List, Tuple, Integer, Int, Float, Enum, Any, observe, All
 
 template = r'''## ############################################ ##
 ## DO NOT MODIFY                                ##
 ## Module generated using .ci/scripts/makeprefs ##
 ##################################################
-
 import matplotlib as mpl
 from matplotlib import cycler
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
 from traitlets import Bool, Unicode, Tuple, Integer, Float, Enum
-
 from spectrochempy.utils import MetaConfigurable
-
 class MatplotlibPreferences(MetaConfigurable):
     """
     This is a port of matplotlib.rcParams to our configuration system (traitlets)
-    
-    """
 
+    """
     name = Unicode("MatplotlibPreferences")
     description = Unicode("Options for Matplotlib")
     updated = Bool(False)
-
-    # ------------------------------------------------------------------------------------------------------------------  
-    # Configuration entries  
+    #
+    ------------------------------------------------------------------------------------------------------------------
+    # Configuration entries
     # ------------------------------------------------------------------------------------------------------------------
-    
-{list_of_traits}
 
+{list_of_traits}
     # ..................................................................................................................
     def __init__(self, **kwargs):
-    
+
         super().__init__(jsonfile='MatplotlibPreferences', **kwargs)
-        
+
     # Alias
     # -----
     @property
     def colormap(self):
         return self.image_cmap
-        
+
     @colormap.setter
     def colormap(self, val):
         self.image_cmap = val
-    
+
 '''
+
 
 def get_fontsize(fontsize):
     if fontsize == 'None':
@@ -62,8 +54,9 @@ def get_fontsize(fontsize):
     try:
         t.set_fontsize(fontsize)
         return str(round(t.get_fontsize(), 2))
-    except:
+    except Exception:
         return fontsize
+
 
 def get_color(color):
     prop_cycle = plt.rcParams['axes.prop_cycle']
@@ -74,11 +67,10 @@ def get_color(color):
     else:
         return f"'{color}'"
 
+
 plt.style.use('scpy')
-
 lst = []
-comments=[]
-
+comments = []
 with open(mpl.matplotlib_fname(), 'r') as f:
     content = f.readlines()
 for line in content[:]:
@@ -106,43 +98,34 @@ for i, rawline in enumerate(content):
             item[i] = item[i].strip()
         lst.append(item)
         comments.append([rawline[1:]])
-
-
 # try to convert these items in spectrochempy pref
-
 text = ""
 for id, item in enumerate(lst):
-
     name = value = obj = None
-
     name = item[0]
-
     try:
-        value = mpl.rcParams[name] #item[1]
+        value = mpl.rcParams[name]  # item[1]
     except KeyError:
         # print( "no key ", name, ' in rcParams')
         continue
     help = item[2]
-
     # try to determine the type and kind
     val = ''
     kind = ""
-
     # case of sizes:
     if "size" in name and "figsize" not in name and 'papersize' not in name:
         try:
             val = get_fontsize(value)
             obj = 'Unicode'
-        except:
+        except Exception:
             pass
-
     elif name.endswith('marker'):
         obj = 'Enum'
         val = f"list(Line2D.markers.keys()), default_value='{value}'"
     elif name.endswith('linestyle'):
         obj = 'Enum'
         val = f"list(Line2D.lineStyles.keys()), default_value='{value}'"
-    elif name.endswith('color') and not 'force_' in name:
+    elif name.endswith('color') and 'force_' not in name:
         obj = 'Unicode'
         val = get_color(value)
         kind = "color"
@@ -170,31 +153,25 @@ for id, item in enumerate(lst):
             elif val is None or isinstance(val, str):
                 val = f"'{val}'".replace(r"\\", r"\\\\")
                 obj = 'Unicode'
-
         except NameError:
             print(item, "NameError", value)
             value = value.replace(r"\\", r"\\\\").replace("'", '"')
             val = f"'{value}'"
             obj = 'Unicode'
-
         except SyntaxError:
             print(item, "SyntaxError", value)
             value = value.replace(r"\\", r"\\\\").replace("'", '"')
             val = f'"{value}"'
             obj = 'Unicode'
-
-        except:
+        except Exception:
             val = value
             obj = 'Any'
-
         if obj is None:
             print()
-
-    #val = f'mpl.rcParams["{name}"]'
-
-    help = help.replace("'", '"').replace("    "," ").replace("   "," ").replace("  "," ")
+    # val = f'mpl.rcParams["{name}"]'
+    help = help.replace("'", '"').replace("    ", " ").replace("   ", " ").replace("  ", " ")
     text += '\n'
-    for  comment in comments[id]:
+    for comment in comments[id]:
         text += f'## {comment}'
     if text[-1] != '\n':
         text += '\n'
@@ -206,10 +183,7 @@ for id, item in enumerate(lst):
         eval(name_)
     except Exception as e:
         print(e)
-
     text += f'{field}\n'
-
-text = template.format(list_of_traits = indent(text, '    '))
-
+text = template.format(list_of_traits=indent(text, '    '))
 filename = pathlib.Path(__file__).parent.parent.parent / 'spectrochempy' / '~matplotlib_preferences.py'
 filename.write_text(text)

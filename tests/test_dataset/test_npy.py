@@ -11,6 +11,7 @@ import pytest
 from spectrochempy.core.dataset.npy import dot
 from spectrochempy import diag
 
+
 def test_npy(ds1):
     # functions that keep units
 

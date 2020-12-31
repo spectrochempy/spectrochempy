@@ -104,17 +104,16 @@ class Meta(object):  # HasTraits):
         return ['data', 'readonly', 'parent', 'name']
 
     def __setattr__(self, key, value):
-        if key not in ['readonly', 'parent', 'name',  '_data', '_trait_values', '_trait_notifiers',
-                       '_trait_validators', '_cross_validation_lock', '__wrapped__']:
+        if key not in ['readonly', 'parent', 'name', '_data', '_trait_values', '_trait_notifiers', '_trait_validators',
+                       '_cross_validation_lock', '__wrapped__']:
             self[key] = value
         else:
-            self.__dict__[key] = value  # to avoid a recursive call
-            # we can not use self._readonly = value!
+            self.__dict__[key] = value  # to avoid a recursive call  # we can not use self._readonly = value!
 
     def __getattr__(self, key):
         if key.startswith('_ipython') or key.startswith('_repr'):
             raise AttributeError
-        if  key in ['__wrapped__']:
+        if key in ['__wrapped__']:
             return False
         return self[key]
 
@@ -122,9 +121,7 @@ class Meta(object):  # HasTraits):
         if key in self.__dir__() or key.startswith('_'):
             raise KeyError('`{}` can not be used as a metadata key'.format(key))
         elif not self.readonly:
-            self._data.update({
-                    key: value
-                    })
+            self._data.update({key: value})
         else:
             raise ValueError('the metadata `{}` is read only'.format(key))
 
@@ -169,7 +166,7 @@ class Meta(object):  # HasTraits):
 
     def _repr_html_(self):
         s = json.dumps(self._data, sort_keys=True, indent=4)
-        return s.replace('\n','<br/>').replace(' ','&nbsp;')
+        return s.replace('\n', '<br/>').replace(' ', '&nbsp;')
 
     # ------------------------------------------------------------------------------------------------------------------
     # public methods

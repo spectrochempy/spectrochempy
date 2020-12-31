@@ -31,7 +31,6 @@ from traitlets import HasTraits, Instance
 # ----------------------------------------------------------------------------------------------------------------------
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
-from spectrochempy.core import dataset_preferences
 from spectrochempy.core.analysis.svd import SVD
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset

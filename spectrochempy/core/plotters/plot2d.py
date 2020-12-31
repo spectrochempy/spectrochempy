@@ -284,9 +284,9 @@ def plot_2D(dataset, **kwargs):
 
     antialiased = kwargs.get('antialiased', prefs.antialiased)
 
-    rcount = kwargs.get('rcount', prefs.rcount)
+    #    rcount = kwargs.get('rcount', prefs.rcount)
 
-    ccount = kwargs.get('ccount', prefs.ccount)
+    #    ccount = kwargs.get('ccount', prefs.ccount)
 
     number_x_labels = prefs.number_of_x_labels
     number_y_labels = prefs.number_of_y_labels
@@ -625,8 +625,8 @@ def plot_2D(dataset, **kwargs):
             axec.name = axec.name + nameadd
             new._axcb = mpl.colorbar.ColorbarBase(axec, cmap=plt.get_cmap(cmap), norm=norm)
             new._axcb.set_label(zlabel)
-        else:
-            new._fig.colorbar(surf, shrink=0.5, aspect=10)
+    #        else:
+    #            new._fig.colorbar(surf, shrink=0.5, aspect=10)
 
     # do we display the zero line
     if kwargs.get('show_zero', False):
@@ -649,14 +649,19 @@ def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwa
     elev = np.deg2rad(degelev)
 
     # transformation function Axes coordinates to Data coordinates
-    transA2D = lambda x, y: ax.transData.inverted().transform(ax.transAxes.transform((x, y)))
+    def transA2D(x, y):
+        return ax.transData.inverted().transform(ax.transAxes.transform((x, y)))
 
     # expansion in Axes coordinates
     xe, ze = np.sin(azim), np.sin(elev)
 
     incx, incz = transA2D(1 + xe, 1 + ze) - np.array((xlim[-1], zlim[-1]))
-    fx = lambda y: (y - ydata[0]) * incx / (ydata[-1] - ydata[0])
-    fz = lambda y: (y - ydata[0]) * incz / (ydata[-1] - ydata[0])
+
+    def fx(y):
+        return (y - ydata[0]) * incx / (ydata[-1] - ydata[0])
+
+    def fz(y):
+        return (y - ydata[0]) * incz / (ydata[-1] - ydata[0])
 
     zs = incz * 0.05
     base = zdata.min() - zs
@@ -676,7 +681,7 @@ def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwa
         ax.add_collection(poly)
         ax.add_line(line)
 
-    (x0, y0), (x1, y1) = transA2D(0, 0), transA2D(1 + xe + .15, 1 + ze)
+    (x0, y0), (x1, _) = transA2D(0, 0), transA2D(1 + xe + .15, 1 + ze)
     ax.set_xlim((x0, x1))
     ax.set_ylim((y0 - zs - .05, ma * 1.1))
 
@@ -684,7 +689,7 @@ def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwa
     ax.vlines(x=xdata[-1] + incx, ymin=zdata.min() - zs + incz, ymax=ax.get_ylim()[-1], color='k')
     ax.vlines(x=xdata[0] + incx, ymin=zdata.min() - zs + incz, ymax=ax.get_ylim()[-1], color='k')
     ax.vlines(x=xdata[0], ymin=y0 - zs, ymax=ax.get_ylim()[-1] - incz, color='k', zorder=5000)
-    v1 = ax.vlines(x=xdata[0], ymin=y0 - zs, ymax=ax.get_ylim()[-1] - incz, color='k', zorder=5000)
+    ax.vlines(x=xdata[0], ymin=y0 - zs, ymax=ax.get_ylim()[-1] - incz, color='k', zorder=5000)
 
     x = [xdata[0], xdata[0] + incx, xdata[-1] + incx]
     z = [ax.get_ylim()[-1] - incz, ax.get_ylim()[-1], ax.get_ylim()[-1]]
@@ -724,7 +729,9 @@ def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwa
     _ = ax.set_yticks(newticks)
 
     # make yaxis
-    ctx = lambda x: (ax.transData.inverted().transform((x, 0)) - ax.transData.inverted().transform((0, 0)))[0]
+    def ctx(x):
+        return (ax.transData.inverted().transform((x, 0)) - ax.transData.inverted().transform((0, 0)))[0]
+
     yt = [y for y in np.linspace(ylim[0], ylim[-1], 5)]
     for y in yt:
         xmin = xdata[-1] + fx(y)
@@ -760,8 +767,8 @@ def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwa
     z = y0 - zs + fz(ym)
     offset = prefs.font.size * (len(lab._text)) + 30
     iz = ax.transData.transform((0, incz + z))[1] - ax.transData.transform((0, z))[1]
-    ix = ax.transData.transform((incx + x, 0))[0] -  ax.transData.transform((x, 0))[0]
-    angle = np.rad2deg(np.arctan(iz/ix))
+    ix = ax.transData.transform((incx + x, 0))[0] - ax.transData.transform((x, 0))[0]
+    angle = np.rad2deg(np.arctan(iz / ix))
     ax.annotate(ylabel, (x, z), xytext=(offset, 0), xycoords='data', textcoords='offset pixels', ha='center',
                 va='center', rotation=angle)
 

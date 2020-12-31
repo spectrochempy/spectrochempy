@@ -24,16 +24,17 @@ import textwrap
 import uuid
 import itertools
 
-from traitlets import List, Unicode, Instance, Bool, Union, Float, Integer, HasTraits, default, validate, observe, All
+from traitlets import (List, Unicode, Instance, Bool, Union, CFloat, Integer, CInt, HasTraits, default, validate,
+                       observe, All)
 from pint.errors import DimensionalityError
 import numpy as np
 from traittypes import Array
 
 from spectrochempy.units import Unit, ur, Quantity, set_nmr_context
 from spectrochempy.core import info_, error_, print_
-from spectrochempy.utils import (TYPE_INTEGER, TYPE_FLOAT, TYPE_BOOL, Meta, MaskedConstant, MASKED, NOMASK, INPLACE,
-                                 is_sequence, is_number, numpyprintoptions, insert_masked_print, docstrings,
-                                 SpectroChemPyWarning, make_new_object, convert_to_html, get_user_and_node)
+from spectrochempy.utils import (TYPE_INTEGER, TYPE_FLOAT, Meta, MaskedConstant, MASKED,
+                                 NOMASK, INPLACE, is_sequence, is_number, numpyprintoptions, insert_masked_print,
+                                 docstrings, SpectroChemPyWarning, make_new_object, convert_to_html, get_user_and_node)
 
 # ======================================================================================================================
 # Third party imports
@@ -103,9 +104,9 @@ class NDArray(HasTraits):
     _history = List(Unicode(), allow_none=True)
     _meta = Instance(Meta, allow_none=True)
 
-    # for offset and linear data generation
-    _offset = Union((Float(), Integer(), Instance(Quantity)), )
-    _increment = Union((Float(), Integer(), Instance(Quantity)), )
+    # for linear data generation
+    _offset = Union((CFloat(), CInt(), Instance(Quantity)), )
+    _increment = Union((CFloat(), CInt(), Instance(Quantity)), )
     _size = Integer(0)
     _linear = Bool(False)
 
@@ -652,15 +653,13 @@ class NDArray(HasTraits):
         if not self.linear or self._data is None:
             return
 
-        self.linear = False # to avoid action of the observer
+        self.linear = False  # to avoid action of the observer
 
         if self._squeeze_ndim > 1:
             error_("Linearization is only implemented for 1D data")
             return
 
         data = self._data.squeeze()
-        # if an offset is already present, take data relative to it
-        data = data + self.offset
 
         # try to find an increment
         inc = np.diff(data)
@@ -1062,17 +1061,6 @@ class NDArray(HasTraits):
     # Public Methods and Properties
     # ------------------------------------------------------------------------------------------------------------------
 
-    @property
-    def alt_title(self):
-        # title provided in case of offset
-        if self._title:
-            # case of timestamp - they must be modified if there is an offset!
-            if 'timestamp' in self._title.lower() and self.offset:
-                return 'Time'
-            return self._title
-        else:
-            return "<untitled>"
-
     # ..................................................................................................................
     def asfortranarray(self):
         """
@@ -1190,15 +1178,15 @@ class NDArray(HasTraits):
         |ndarray| - The `data` array.
 
         If there is no data but labels, then the labels are returned instead of data.
-        If there is an offset the data are returned relative to the offset
 
         """
         if self._data is None and not self.linear:
             return None
+
         elif self.linear:
             return np.arange(self.size) * self._increment + self._offset
 
-        return (self._data + self._offset).astype(self._data.dtype)
+        return self._data
 
     # ..................................................................................................................
     @data.setter
@@ -1403,17 +1391,6 @@ class NDArray(HasTraits):
 
         """
         return not (self.name == self.id)
-
-    # ..................................................................................................................
-    @property
-    def has_offset(self):
-        """
-        bool - True is the data are relative to an offset
-
-        """
-        if self._offset:
-            return True
-        return False
 
     # ..................................................................................................................
     @property
@@ -1723,7 +1700,10 @@ class NDArray(HasTraits):
     @property
     def limits(self):
         """list - range of the data"""
-        return [self.data.min(), self.data.max()] if self.data is not None else None
+        if self.data is None:
+            return None
+
+        return [self.data.min(), self.data.max()]
 
     # ..................................................................................................................
     @property
@@ -1880,18 +1860,6 @@ class NDArray(HasTraits):
     def origin(self, origin):
         self._origin = origin
 
-    # ..................................................................................................................
-    @property
-    def raw_data(self):
-        """
-        |ndarray| - The raw `data` without offset.
-
-        """
-        if self._data is not None:
-            return self._data
-        else:
-            return None
-
     @property
     def real(self):
         return self
@@ -1931,7 +1899,7 @@ class NDArray(HasTraits):
         For only labelled array, there is no data, so it is the 1D and the size is the size of the array of labels.
         """
         if self.linear:
-            return (self._size, )
+            return (self._size,)
 
         if self.data is None and self.is_labeled:
             return (self.labels.shape[0],)
@@ -2302,4 +2270,4 @@ class NDArray(HasTraits):
         elif self.is_labeled:
             return self._labels[()]
 
-    value = values   # alias
+    value = values  # alias

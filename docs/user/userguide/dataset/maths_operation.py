@@ -45,21 +45,6 @@ dx = NDDataset(x)
 np.sqrt(dx)
 
 # %% [markdown]
-# In this case a `NDDataset` object is returned.
-#
-# A subset of `ufunc`'s also work works with `NDPanel`. Ufunc is then broadcasted to all internal arrays.
-
-# %%
-x = np.arange(6.)
-y = np.arange(8.)
-pnl = NDPanel(x, y)
-np.sqrt(pnl)
-
-# %% [markdown]
-# As observed in the example above, in this case a `NDPanel`is returned on which each internal datasets have been
-# transformed by the `ufunc`.
-
-# %% [markdown]
 # It is worth to note, that in spectrochempy, when can use internal equivalent of these `ufunc`'s.
 #
 # For instance, the square root can be calculated using the following syntax:
@@ -144,16 +129,16 @@ sqrt(dx)
 # dataset.
 
 # %%
-d2D= NDDataset.read_omnic('irdata/nh4y-activation.spg')
+d2D = NDDataset.read_omnic('irdata/nh4y-activation.spg')
 
 prefs = d2D.preferences
-prefs.figure_figsize=(6,2.5)
+prefs.figure_figsize = (6, 2.5)
 prefs.method_2D = 'stack'
 
 _ = d2D.plot()
 
 # let's select only the first row of the 2D dataset
-dataset = d2D[0].squeeze()   # squeeze is used to remove the residual size 1 dimension
+dataset = d2D[0].squeeze()  # squeeze is used to remove the residual size 1 dimension
 _ = dataset.plot()
 
 # %% [markdown]
@@ -161,8 +146,8 @@ _ = dataset.plot()
 # present negative values and we will also mask some data
 
 # %%
-dataset = dataset - 2.             # add an offset to make that some of the values become negative
-dataset[880.:1230.] = MASKED      # additionally we mask some data
+dataset = dataset - 2.  # add an offset to make that some of the values become negative
+dataset[880.:1230.] = MASKED  # additionally we mask some data
 _ = dataset.plot()
 
 # %% [markdown]
@@ -176,7 +161,7 @@ _ = dataset.plot()
 # Numerical negative, element-wise, keep units
 
 # %%
-out = np.negative(dataset)         # the same results is obtained using out=-dataset
+out = np.negative(dataset)  # the same results is obtained using out=-dataset
 _ = out.plot(figsize=(6, 2.5), show_mask=True)
 
 # %% [markdown]
@@ -302,7 +287,7 @@ out = np.log(dataset)
 ax = out.plot(figsize=(6, 2.5), show_mask=True)
 
 # %%
-out = np.log(dataset-dataset.min())
+out = np.log(dataset - dataset.min())
 _ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
@@ -507,7 +492,7 @@ _ = out.plot(figsize=(6, 2.5))
 # ### Binary functions
 
 # %%
-dataset2 = np.reciprocal(dataset+3) # create a second dataset
+dataset2 = np.reciprocal(dataset + 3)  # create a second dataset
 dataset2[5000.:4000.] = MASKED
 _ = dataset.plot(figsize=(6, 2.5))
 _ = dataset2.plot(figsize=(6, 2.5))

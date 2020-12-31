@@ -39,7 +39,7 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert d0.name == d0.id
     assert d0.title == '<untitled>'
     assert d0.ndim == 0
-    assert d0.size == None
+    assert d0.size is None
     assert not d0.is_masked
     assert d0.dtype is None
     assert d0.unitless
@@ -172,8 +172,8 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert d8.title == '<untitled>'
     assert d8.description == 'with mask'
     assert d8.desc == d8.description
-    assert len(ndarraymask.history) == 1   # one line already in
-    assert len(d8.history) == 2   # copy added
+    assert len(ndarraymask.history) == 1  # one line already in
+    assert len(d8.history) == 2  # copy added
     info_('\n', d8)
 
     # intialisation with only labels
@@ -198,9 +198,7 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert d11.author == 'Blake'
     info_('\n', d11)
 
-    assert '[  a   b ...   i   j]' in  d11._repr_html_()
-    # comparison
-
+    assert '[  a   b ...   i   j]' in d11._repr_html_()  # comparison
 
 
 def test_ndarray_copy():

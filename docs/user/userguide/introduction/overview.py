@@ -27,7 +27,7 @@
 # large number of method to import in the API namespace.
 
 # %%
-from spectrochempy import *
+from spectrochempy import * # noqa:  F401
 
 # %% [markdown]
 # This is a simple way to do this, but you can also import method only when

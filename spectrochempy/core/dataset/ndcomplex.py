@@ -125,8 +125,7 @@ class NDComplexArray(NDArray):
         if self._data is None:
             return False
 
-        return (self._data.dtype in TYPE_COMPLEX) or (
-                self._data.dtype == typequaternion)
+        return (self._data.dtype in TYPE_COMPLEX) or (self._data.dtype == typequaternion)
 
     # ..................................................................................................................
     @property
@@ -210,7 +209,7 @@ class NDComplexArray(NDArray):
             # get the imaginary part (vector part)
             # q = a + bi + cj + dk  ->   qi = bi+cj+dk
             as_float_array(ma)[..., 0] = 0  # keep only the imaginary part
-            new._data = ma #.data
+            new._data = ma  # .data
         else:
             raise TypeError('dtype %s not recognized' % str(ma.dtype))
 
@@ -266,6 +265,21 @@ class NDComplexArray(NDArray):
         if not self.is_quaternion:
             raise TypeError('Not a quaternion\'s array')
         return self.part('II')
+
+    # ..................................................................................................................
+    @property
+    def limits(self):
+        """list - range of the data"""
+        if self.data is None:
+            return None
+
+        if self.data.dtype in TYPE_COMPLEX:
+            return [self.data.real.min(), self.data.imag.max()]
+        elif self.data.dtype == np.quaternion:
+            data = as_float_array(self.data)[..., 0]
+            return [data.min(), data.max()]
+        else:
+            return [self.data.min(), self.data.max()]
 
     # ------------------------------------------------------------------------------------------------------------------
     # Public methods
@@ -508,8 +522,7 @@ class NDComplexArray(NDArray):
         return out
 
     # ..................................................................................................................
-    def _str_value(self, sep='\n', ufmt=' {:~K}',
-                   header="       values: ... \n"):
+    def _str_value(self, sep='\n', ufmt=' {:~K}', header="       values: ... \n"):
         prefix = ['']
         if self.is_empty:
             return header + '{}'.format(textwrap.indent('empty', ' ' * 9))
@@ -530,17 +543,14 @@ class NDComplexArray(NDArray):
                 dtype = self.dtype
                 mask_string = f'--{dtype}'
                 ds = insert_masked_print(ds, mask_string=mask_string)
-            body = np.array2string(
-                    ds, separator=' ',
-                    prefix=pref)
+            body = np.array2string(ds, separator=' ', prefix=pref)
             body = body.replace('\n', sep)
             text = ''.join([pref, body, units])
             text += sep
             return text
 
         text = ''
-        if 'I' not in ''.join(
-                prefix):  # case of pure real data (not hypercomplex)
+        if 'I' not in ''.join(prefix):  # case of pure real data (not hypercomplex)
             if self._data is not None:
                 data = self.umasked_data
                 if isinstance(data, Quantity):

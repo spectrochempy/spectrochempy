@@ -52,11 +52,11 @@ import numpy as np
 # We additionnaly import the three main SpectroChemPy objects that we will use through this tutorial
 
 # %%
-from spectrochempy import NDDataset, CoordSet, Coord, LinearCoord
-
+from spectrochempy import NDDataset, CoordSet, Coord
 
 # %% [markdown]
-# For a convenient usage of units, we will also directly import `ur`, the unit registry which contains all available units.
+# For a convenient usage of units, we will also directly import `ur`, the unit registry which contains all available
+# units.
 
 # %%
 from spectrochempy import ur
@@ -85,10 +85,7 @@ from spectrochempy import ur
 # In the following example, a minimal 1D dataset is created from a simple list, to which we can add some metadata:
 
 # %%
-d1D = NDDataset([10., 20., 30.],
-                name="Dataset N1",
-                author='Blake and Mortimer',
-                description='A dataset from scratch')
+d1D = NDDataset([10., 20., 30.], name="Dataset N1", author='Blake and Mortimer', description='A dataset from scratch')
 
 d1D
 
@@ -97,7 +94,9 @@ d1D
 #
 # **Note**: In the above code, run in a notebook, the output of d1D is in html for a nice display.
 #
-#  To get the same effect, from a console script, one can use `print_` (with an underscore) and not the usual python function `print`. As you can see below, the `print` function only gives a short summary of the information, while the `print_` method gives more detailed output
+#  To get the same effect, from a console script, one can use `print_` (with an underscore) and not the usual python
+#  function `print`. As you can see below, the `print` function only gives a short summary of the information,
+#  while the `print_` method gives more detailed output
 #
 # </div>
 
@@ -111,8 +110,8 @@ scp.print_(d1D)
 # ### Plotting
 
 # %%
-d1D.plot(figsize=(3,2));      # note the ';' at the end of the line
-                 # this suppress undesired output of the cell other than the plot
+d1D.plot(figsize=(3, 2));  # note the ';' at the end of the line
+# this suppress undesired output of the cell other than the plot
 
 # %% [markdown]
 # Except few addtional metadata such `author`, `created` ..., there is not much
@@ -202,13 +201,8 @@ d3D
 # We can also add all information in a single statement
 
 # %%
-d3D = NDDataset(a,
-                dims=['u', 'v', 't'],
-                title='Energy',
-                author='Someone',
-                name='3D_dataset',
-                history='created from scratch',
-                description='a single statement creation example')
+d3D = NDDataset(a, dims=['u', 'v', 't'], title='Energy', author='Someone', name='3D_dataset',
+                history='created from scratch', description='a single statement creation example')
 d3D
 
 # %% [markdown]
@@ -344,7 +338,7 @@ d3D.time
 # %%
 tags = list('ab')
 d3D.u.title = 'some tags'
-d3D.u.labels = tags          #TODO: avoid repetition
+d3D.u.labels = tags  # TODO: avoid repetition
 d3D
 
 # %% [markdown]
@@ -354,6 +348,7 @@ d3D
 
 # %%
 from datetime import timedelta
+
 start = timedelta(0)
 times = [start + timedelta(seconds=x * 60) for x in range(6)]
 d3D.t = None
@@ -371,7 +366,7 @@ d3D.time
 # ### Masks
 
 # %%
-#TODO
+# TODO
 
 # %% [markdown]
 # ## More insight on coordinates
@@ -382,7 +377,8 @@ d3D.time
 # %% [markdown]
 # Sometimes it is not necessary to have different coordinates for the each axes. Some can be shared between axes.
 #
-# For example, if we have a square matrix with the same coordinate in the two dimensions, the second dimension can refer to the first. Here we create a square 2D dataset, using the `diag` method:
+# For example, if we have a square matrix with the same coordinate in the two dimensions, the second dimension can
+# refer to the first. Here we create a square 2D dataset, using the `diag` method:
 
 # %%
 nd = NDDataset.diag((3, 3, 2.5))
@@ -420,11 +416,7 @@ d3D
 # #### Syntax 2
 
 # %%
-d3D.set_coordset({
-        'u': coord2,
-        'v': coord1,
-        't': coord0
-})
+d3D.set_coordset({'u': coord2, 'v': coord1, 't': coord0})
 d3D
 
 # %% [markdown]
@@ -449,7 +441,8 @@ d3D.v_1
 # Some additional information about coordinate setting syntax
 
 # %% [markdown]
-# **A.** First syntax (probably the safer because the name of the dimension is specified, so this is less prone to errors!)
+# **A.** First syntax (probably the safer because the name of the dimension is specified, so this is less prone to
+# errors!)
 
 # %%
 d3D.set_coordset(u=coord2, v=[coord1, coord1b], t=coord0)
@@ -466,7 +459,7 @@ d3D
 d3D.dims
 
 # %%
-d3D.set_coordset((coord0, [coord1, coord1b], coord2 ))
+d3D.set_coordset((coord0, [coord1, coord1b], coord2))
 # or equivalent
 d3D.set_coordset(coord0, CoordSet(coord1, coord1b), coord2)
 d3D
@@ -475,11 +468,7 @@ d3D
 # **C.** Third syntax (from a dictionary)
 
 # %%
-d3D.set_coordset({
-        't': coord0,
-        'u': coord2,
-        'v': [coord1, coord1b]
-})
+d3D.set_coordset({'t': coord0, 'u': coord2, 'v': [coord1, coord1b]})
 d3D
 
 # %% [markdown]
@@ -490,11 +479,7 @@ d3D.coordset = coord0, [coord1, coord1b], coord2
 d3D
 
 # %%
-d3D.coordset = {
-        't': coord0,
-        'u': coord2,
-        'v': [coord1, coord1b]
-}
+d3D.coordset = {'t': coord0, 'u': coord2, 'v': [coord1, coord1b]}
 d3D
 
 # %%
@@ -502,7 +487,8 @@ d3D.coordset = CoordSet(t=coord0, u=coord2, v=[coord1, coord1b])
 d3D
 
 # %% [markdown]
-# <div class='alert-box alert-warning'><b>WARNING</b>: do not use list for setting multiples coordinates! use tuples</div>
+# <div class='alert-box alert-warning'><b>WARNING</b>: do not use list for setting multiples coordinates! use
+# tuples</div>
 
 # %% [markdown]
 # This raise an error (list have another signification: it's used to set a "same dim" CoordSet see example A or B)
@@ -517,7 +503,7 @@ except ValueError:
 # This works : it use a tuple `()`, not a list `[]`
 
 # %%
-d3D.coordset = (coord0, coord1, coord2) # equivalent to d3D.coordset = coord0, coord1, coord2
+d3D.coordset = (coord0, coord1, coord2)  # equivalent to d3D.coordset = coord0, coord1, coord2
 d3D
 
 # %% [markdown]
@@ -547,10 +533,11 @@ d3D
 #
 # There are many ways to create `NDDataset` objects.
 #
-# Let's first create 2 coordinate objects, for which we can define `labels` and `units`! Note the use of the function `linspace`to generate the data.
+# Let's first create 2 coordinate objects, for which we can define `labels` and `units`! Note the use of the function
+# `linspace`to generate the data.
 
 # %%
-c0 = Coord.linspace( start=4000., stop=1000., num=5, labels=None, units="cm^-1", title='wavenumber')
+c0 = Coord.linspace(start=4000., stop=1000., num=5, labels=None, units="cm^-1", title='wavenumber')
 
 # %%
 c1 = Coord.linspace(10., 40., 3, labels=['Cold', 'RT', 'Hot'], units="K", title='temperature')
@@ -562,22 +549,23 @@ c1 = Coord.linspace(10., 40., 3, labels=['Cold', 'RT', 'Hot'], units="K", title=
 cs = CoordSet(c0, c1)
 cs
 
+
 # %% [markdown]
-# Now we will generate the full dataset, using a ``fromfunction`` method. All needed information are passed as parameter of the NDDataset instance constructor.
+# Now we will generate the full dataset, using a ``fromfunction`` method. All needed information are passed as
+# parameter of the NDDataset instance constructor.
 
 # %% [markdown]
 # #### Create a dataset from a function
 
 # %%
-func = lambda x,y,extra : x * y / extra
+def func(x, y, extra):
+    return x * y / extra
+
 
 # %%
-ds = NDDataset.fromfunction(func,
-                            extra = 100 * ur.cm**-1,     # extra arguments passed to the function
-                            coordset=cs,
-                            name='mydataset',
-                            title='Absorbance',
-                            units=None)     # when None, units will be determined from the function results
+ds = NDDataset.fromfunction(func, extra=100 * ur.cm ** -1,  # extra arguments passed to the function
+                            coordset=cs, name='mydataset', title='Absorbance',
+                            units=None)  # when None, units will be determined from the function results
 
 ds.description = """Dataset example created for this tutorial.
 It's a 2-D dataset"""
@@ -589,7 +577,7 @@ ds
 # #### Using numpy-like constructors of NDDatasets
 
 # %%
-dz = NDDataset.zeros((5, 3), coordset=cs,  units='meters', title='Datasets with only zeros')
+dz = NDDataset.zeros((5, 3), coordset=cs, units='meters', title='Datasets with only zeros')
 
 # %%
 do = NDDataset.ones((5, 3), coordset=cs, units='kilograms', title='Datasets with only ones')
@@ -671,6 +659,7 @@ dataset
 # 3. by labels, using a slice such as ['monday':'friday'], ...
 
 # %%
+
 new = d3D[..., 0]
 new
 
@@ -678,7 +667,8 @@ new
 # or using the axes labels:
 
 # %%
-new = d3D[..., 'hot']
+d3D.t.labels = ['close', 'far']
+new = d3D['far']
 new
 
 # %% [markdown]
@@ -687,11 +677,11 @@ new
 # Floats are used for slicing by values
 
 # %%
-correct = d3D[2000.]
+correct = dataset[:, 2000.]
 correct
 
 # %%
-outside_limits = d3D[2000]
+outside_limits = dataset[2000]
 
 # %% [markdown]
 # <div class='alert alert-info'>
@@ -707,7 +697,7 @@ outside_limits = d3D[2000]
 # One can mixed slicing methods for different dimension:
 
 # %%
-new = d3D[4000.0:2000., 0, 'normal':'hot']
+new = d3D['close', 3., 0]  # TODO: slicing one various coordinateswhen several coordinates are present
 new
 
 # %% [markdown]
@@ -721,7 +711,7 @@ new
 # Now, lets load a NMR dataset (in the Bruker format).
 
 # %%
-path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d')
+path = datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'topspin_1d'
 
 # load the data in a new dataset
 ndd = NDDataset()
@@ -733,7 +723,7 @@ ndd
 _ = ndd.plot(color='blue')
 
 # %%
-path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_2d')
+path = datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'topspin_2d'
 
 # load the data directly (no need to create the dataset first)
 ndd2 = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
@@ -749,7 +739,7 @@ ndd2
 # ### IR data
 
 # %%
-dataset = NDDataset.read_omnic(os.path.join(datadir, 'irdata', 'nh4y-activation.spg'))
+dataset = NDDataset.read_omnic(datadir / 'irdata' / 'nh4y-activation.spg')
 dataset
 
 # %%
@@ -771,7 +761,7 @@ dataset.max()
 # Masking values in a dataset is straigthforward. Just set a value `masked` or True for those data you want to mask.
 
 # %%
-dataset[1290.:890.] = MASKED
+dataset[1290.:890.] = scp.MASKED
 
 # %% [markdown]
 # Now the max function return the  correct position
@@ -843,8 +833,8 @@ da.units = ur.cm
 
 try:
     np.log10(da)
-except DimensionalityError as e:
-    error_(e)
+except scp.DimensionalityError as e:
+    scp.error_(e)
 
 # %% [markdown]
 # ## Complex or hypercomplex NDDatasets

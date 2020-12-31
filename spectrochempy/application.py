@@ -17,8 +17,6 @@ __all__ = []
 # standard imports
 # ----------------------------------------------------------------------------------------------------------------------
 
-import glob
-
 import os
 import sys
 import logging
@@ -27,18 +25,15 @@ import datetime
 import warnings
 import pprint
 import json
-import shutil as sh
 from pathlib import Path
 from pkg_resources import get_distribution, DistributionNotFound
 from setuptools_scm import get_version
 from traitlets.config.configurable import Config
 from traitlets.config.application import Application
-from traitlets import (Bool, Unicode, List, Integer, Union, HasTraits, Instance, default, observe,
-                       import_item, )
+from traitlets import Bool, Unicode, List, Integer, Union, HasTraits, Instance, default, observe
 from traitlets.config.manager import BaseJSONConfigManager
 import matplotlib as mpl
 from matplotlib import pyplot as plt
-from matplotlib import cycler
 from IPython import get_ipython
 from IPython.core.interactiveshell import InteractiveShell
 from IPython.core.magic import (Magics, magics_class, line_cell_magic)
@@ -326,12 +321,12 @@ class DataDir(HasTraits):
         listing : str
 
         """
-        strg = f'{self.path.name}\n' #  os.path.basename(self.path) + "\n"
+        strg = f'{self.path.name}\n'  # os.path.basename(self.path) + "\n"
 
         def _listdir(s, initial, ns):
             ns += 1
-            for f in pathclean(initial).glob('*'): #glob.glob(os.path.join(initial, '*')):
-                fb = f.name # os.path.basename(f)
+            for f in pathclean(initial).glob('*'):  # glob.glob(os.path.join(initial, '*')):
+                fb = f.name  # os.path.basename(f)
                 if fb.startswith('.'):
                     continue
                 if not fb.startswith('acqu') and not fb.startswith('pulse') and fb not in ['ser', 'fid']:
@@ -403,7 +398,7 @@ class GeneralPreferences(MetaConfigurable):
     use_dev_version = Bool(True, help='use latest development versions').tag(config=True)
 
     datadir = Union((Instance(Path), Unicode()), help='Directory where to look for data by default').tag(config=True,
-                                                                                              type="folder")
+                                                                                                         type="folder")
 
     @default('datadir')
     def _get_default_datadir(self):
@@ -413,8 +408,8 @@ class GeneralPreferences(MetaConfigurable):
     def _datadir_changed(self, change):
         self.parent.datadir.path = pathclean(change['new'])
 
-    databases = Union((Instance(Path), Unicode()), help='Directory where to look for database files such as csv'
-                      ).tag(config=True, type="folder")
+    databases = Union((Instance(Path), Unicode()), help='Directory where to look for database files such as csv').tag(
+        config=True, type="folder")
 
     @default('databases')
     def _get_databases_default(self):
@@ -472,7 +467,6 @@ class DatasetPreferences(MetaConfigurable):
     # ------------------------------------------------------------------------------------------------------------------
 
     def __init__(self, **kwargs):
-
         super(DatasetPreferences, self).__init__(jsonfile='DatasetPreferences', **kwargs)
 
 
@@ -534,7 +528,7 @@ class ProjectPreferences(MetaConfigurable):
     autoload_project = Bool(False, help='Automatic loading of the last project at startup').tag(config=True)
 
     show_close_dialog = Bool(True, help='Display the close project dialog project changing or on application exit').tag(
-        config=True)
+            config=True)
 
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -646,7 +640,7 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
             self.config_manager.update(self.config_file_name, {self.__class__.__name__: {change.name: change.new, }})
 
     startup_filename = Unicode(os.path.join('irdata', 'nh4y-activation.spg'), help='File name to load at startup').tag(
-        config=True, type='file')
+            config=True, type='file')
 
     show_config = Bool(help="Dump configuration to stdout at startup").tag(config=True)
 
@@ -675,14 +669,14 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
                    port='SpectroChemPy.port', )
 
     flags = dict(debug=({'SpectroChemPy': {'log_level': DEBUG}}, "Set log_level to DEBUG - most verbose mode"),
-            info=({'SpectroChemPy': {'log_level': INFO}}, "Set log_level to INFO - verbose mode"),
-            quiet=({'SpectroChemPy': {'log_level': ERROR}}, "Set log_level to ERROR - no verbosity at all"),
-            nodisplay=({'SpectroChemPy': {'nodisplay': True}}, "Set NO DISPLAY mode to true - no graphics at all"),
-            reset_config=({'SpectroChemPy': {'reset_config': True}}, "Reset config to default"), show_config=(
-            {'SpectroChemPy': {'show_config': True, }}, "Show the application's configuration (human-readable "
-                                                        "format)"), show_config_json=(
-            {'SpectroChemPy': {'show_config_json': True, }}, "Show the application's configuration (json "
-                                                             "format)"), )
+                 info=({'SpectroChemPy': {'log_level': INFO}}, "Set log_level to INFO - verbose mode"),
+                 quiet=({'SpectroChemPy': {'log_level': ERROR}}, "Set log_level to ERROR - no verbosity at all"),
+                 nodisplay=({'SpectroChemPy': {'nodisplay': True}}, "Set NO DISPLAY mode to true - no graphics at all"),
+                 reset_config=({'SpectroChemPy': {'reset_config': True}}, "Reset config to default"), show_config=(
+                {'SpectroChemPy': {'show_config': True, }}, "Show the application's configuration (human-readable "
+                                                            "format)"), show_config_json=(
+                {'SpectroChemPy': {'show_config_json': True, }}, "Show the application's configuration (json "
+                                                                 "format)"), )
 
     classes = List([GeneralPreferences, DatasetPreferences, ProjectPreferences, MatplotlibPreferences, DataDir, ])
 
@@ -866,7 +860,6 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
 
         return self._start()
 
-
     # ------------------------------------------------------------------------------------------------------------------
     # Private methods
     # ------------------------------------------------------------------------------------------------------------------
@@ -898,7 +891,7 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
                 mpl.rcParams[rckey] = getattr(self.matplotlib_preferences, key)
             except ValueError:
                 mpl.rcParams[rckey] = getattr(self.matplotlib_preferences, key).replace('\'', '')
-            except AttributeError as e:
+            except AttributeError:
                 # print(f'{e} -> you may want to add it to MatplotlibPreferences.py')
                 pass
 

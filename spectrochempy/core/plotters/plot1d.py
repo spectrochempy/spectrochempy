@@ -15,8 +15,7 @@ Module containing 1D plotting function(s)
 
 """
 
-__all__ = ['plot_1D', 'plot_lines', 'plot_pen', 'plot_scatter', 'plot_bar',
-           'plot_multiple', 'plot_scatter_pen']
+__all__ = ['plot_1D', 'plot_lines', 'plot_pen', 'plot_scatter', 'plot_bar', 'plot_multiple', 'plot_scatter_pen']
 
 __dataset_methods__ = ['plot_1D', 'plot_lines', 'plot_pen', 'plot_scatter', 'plot_bar', 'plot_scatter_pen']
 
@@ -25,12 +24,11 @@ __dataset_methods__ = ['plot_1D', 'plot_lines', 'plot_pen', 'plot_scatter', 'plo
 # ----------------------------------------------------------------------------------------------------------------------
 
 import numpy as np
-import matplotlib as mpl
-from matplotlib import cycler
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
 from .plotutils import make_label
 from ...utils import is_sequence, deprecated
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # localimports
@@ -84,6 +82,7 @@ def plot_pen(dataset, **kwargs):
     else:
         return plot_1D(dataset, **kwargs)
 
+
 # plot pen (default) ---------------------------------------------------------
 
 def plot_scatter_pen(dataset, **kwargs):
@@ -118,8 +117,7 @@ def plot_bar(dataset, **kwargs):
 
 # plot multiple --------------------------------------------------------------
 
-def plot_multiple(datasets, method='scatter', pen=True,
-                  labels=None, **kwargs):
+def plot_multiple(datasets, method='scatter', pen=True, labels=None, **kwargs):
     """
     Plot a series of 1D datasets as a scatter plot
     with optional lines between markers.
@@ -167,27 +165,15 @@ def plot_multiple(datasets, method='scatter', pen=True,
 
     for s in datasets:  # , colors, markers):
 
-        ax = s.plot(method=method,
-                    pen=pen,
-                    marker='AUTO',
-                    color='AUTO',
-                    ls='AUTO',
-                    clear=clear,
-                    **kwargs)
-        clear = False
-        # clear=False is necessary for the next plot to say
-        # that we will plot on the same figure
+        ax = s.plot(method=method, pen=pen, marker='AUTO', color='AUTO', ls='AUTO', clear=clear, **kwargs)
+        clear = False  # clear=False is necessary for the next plot to say  # that we will plot on the same figure
 
     # scale all plots
     if legend is not None:
-        _ = ax.legend(ax.lines, labels, shadow=True, loc=legend,
-                      frameon=True, facecolor='lightyellow')
+        _ = ax.legend(ax.lines, labels, shadow=True, loc=legend, frameon=True, facecolor='lightyellow')
 
     # now we can output the final figure
-    kw = {
-            'output': output,
-            'commands': commands
-            }
+    kw = {'output': output, 'commands': commands}
     datasets[0]._plot_resume(datasets[-1], **kw)
 
     return ax
@@ -338,7 +324,7 @@ def plot_1D(dataset, **kwargs):
     lw = kwargs.get('linewidth', kwargs.get('lw', 'auto'))
     ls = kwargs.get('linestyle', kwargs.get('ls', 'auto'))
     marker = kwargs.get('marker', kwargs.get('m', 'auto'))
-    markersize = kwargs.get('markersize', kwargs.get('ms',prefs.lines_markersize))
+    markersize = kwargs.get('markersize', kwargs.get('ms', prefs.lines_markersize))
     markevery = kwargs.get('markevery', kwargs.get('me', 1))
     markerfacecolor = kwargs.get('markerfacecolor', kwargs.get('mfc', 'auto'))
     markeredgecolor = kwargs.get('markeredgecolor', kwargs.get('mec', 'k'))
@@ -413,34 +399,23 @@ def plot_1D(dataset, **kwargs):
     label = kwargs.get('label', None)
     if scatterpen:
         # pen + scatter
-        line, = ax.plot(xdata, zdata.T,
-                        # marker = marker,
-                        markersize=markersize,
-                        markevery=markevery,
-                        markeredgewidth=1.,
+        line, = ax.plot(xdata, zdata.T,  # marker = marker,
+                        markersize=markersize, markevery=markevery, markeredgewidth=1.,
                         # markerfacecolor = markerfacecolor,
-                        markeredgecolor=markeredgecolor,
-                        label=label)
+                        markeredgecolor=markeredgecolor, label=label)
     elif scatter:
         # scatter only
-        line, = ax.plot(xdata, zdata.T,
-                        ls="",
-                        # marker = marker,
-                        markersize=markersize,
-                        markeredgewidth=1.,
-                        markevery=markevery,
-                        markerfacecolor=markerfacecolor,
-                        markeredgecolor=markeredgecolor,
-                        label=label)
+        line, = ax.plot(xdata, zdata.T, ls="",  # marker = marker,
+                        markersize=markersize, markeredgewidth=1., markevery=markevery, markerfacecolor=markerfacecolor,
+                        markeredgecolor=markeredgecolor, label=label)
     elif pen:
         # pen only
         line, = ax.plot(xdata, zdata.T, marker="", label=label)
 
     elif bar:
         # bar only
-        line = ax.bar(xdata, zdata.squeeze(), color=color,
-                      edgecolor='k', align='center', label=label)
-        # barwidth = line[0].get_width()
+        line = ax.bar(xdata, zdata.squeeze(), color=color, edgecolor='k', align='center',
+                      label=label)  # barwidth = line[0].get_width()
 
     if show_complex and pen:
         # add the imaginaly part for pen only plot
@@ -452,11 +427,11 @@ def plot_1D(dataset, **kwargs):
         ax.plot(xdata, modeldata.T, ls=':', lw='2', label=label)  # TODO: improve this!!!
 
     # line attributes
-    if (pen or scatterpen) and not (isinstance(color,str) and color.upper()=='AUTO'):
+    if (pen or scatterpen) and not (isinstance(color, str) and color.upper() == 'AUTO'):
         # set the color if defined in the preferences or options
         line.set_color(color)
 
-    if (pen or scatterpen) and not (isinstance(lw,str) and lw.upper() == 'AUTO'):
+    if (pen or scatterpen) and not (isinstance(lw, str) and lw.upper() == 'AUTO'):
         # set the line width if defined in the preferences or options
         line.set_linewidth(lw)
 
@@ -588,7 +563,6 @@ def plot_1D(dataset, **kwargs):
     if kwargs.get('show_mask', False):
 
         ax.fill_between(xdata, zdata.min() - 1., zdata.max() + 1, where=new.mask, facecolor='#FFEEEE', alpha=0.3)
-
 
     return ax
 

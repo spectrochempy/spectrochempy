@@ -8,7 +8,7 @@
 import pytest
 
 from spectrochempy.core import info_
-from spectrochempy.core.dataset.nddataset import  NDDataset
+
 
 def test_findpeaks(IR_dataset_1D):
     dataset = IR_dataset_1D

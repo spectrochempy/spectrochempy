@@ -21,32 +21,9 @@ import types
 
 import numpy as np
 
-
-__all__ = [
-        "TYPE_INTEGER",
-        "TYPE_COMPLEX",
-        "TYPE_FLOAT",
-        "TYPE_BOOL",
-        "EPSILON",
-        "INPLACE",
-        'make_func_from',
-        "make_new_object",
-        "getdocfrom",
-        "dict_compare",
-        'htmldoc',
-        "ignored",
-        "is_iterable",
-        "is_sequence",
-        "is_number",
-        "silence",
-        "makedirs",
-        "multisort",
-        'makestr',
-        'srepr',
-        "spacing",
-        ]
-
-
+__all__ = ["TYPE_INTEGER", "TYPE_COMPLEX", "TYPE_FLOAT", "TYPE_BOOL", "EPSILON", "INPLACE", 'make_func_from',
+           "make_new_object", "getdocfrom", "dict_compare", 'htmldoc', "ignored", "is_iterable", "is_sequence",
+           "is_number", "silence", "makedirs", "multisort", 'makestr', 'srepr', "spacing", ]
 
 #
 # constants
@@ -61,6 +38,7 @@ EPSILON = epsilon = np.finfo(float).eps
 
 INPLACE = "INPLACE"
 "Flag used to specify inplace slicing"
+
 
 # ======================================================================================================================
 # function signature
@@ -88,14 +66,8 @@ def make_func_from(func, first=None):
     if first:
         new_varnames[0] = first
     new_varnames = tuple(new_varnames)
-    new_code_obj = _codechange(code_obj, changes={
-            'co_varnames': new_varnames,
-    })
-    modified = types.FunctionType(new_code_obj,
-                                  func.__globals__,
-                                  func.__name__,
-                                  func.__defaults__,
-                                  func.__closure__)
+    new_code_obj = _codechange(code_obj, changes={'co_varnames': new_varnames, })
+    modified = types.FunctionType(new_code_obj, func.__globals__, func.__name__, func.__defaults__, func.__closure__)
     modified.__doc__ = func.__doc__
     return modified
 

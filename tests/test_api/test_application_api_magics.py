@@ -9,7 +9,6 @@ from subprocess import Popen, PIPE
 import pytest
 
 from spectrochempy import APIref, set_loglevel, get_loglevel, warning_, version
-import spectrochempy as scp
 
 set_loglevel('WARNING')
 
@@ -21,8 +20,8 @@ def test_api():
     assert 'NDDataset' in APIref
     assert 'abs' in APIref
 
+
 def test_datadir():
-    datadir = scp.DATADIR
     from spectrochempy.application import DataDir
     print(DataDir().listing())
 

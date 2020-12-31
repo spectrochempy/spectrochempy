@@ -101,7 +101,7 @@ class Coord(NDMath, NDArray):
         super().__init__(data=data, **kwargs)
 
         if len(self.shape) > 1:
-                raise ValueError('Only one 1D arrays can be used to define coordinates')
+            raise ValueError('Only one 1D arrays can be used to define coordinates')
 
     # ..................................................................................................................
     def implements(self, name=None):
@@ -133,8 +133,7 @@ class Coord(NDMath, NDArray):
             return True
         return False
 
-        # Return a correct result only if the data are sorted
-        # return bool(self.data[0] > self.data[-1])
+        # Return a correct result only if the data are sorted  # return bool(self.data[0] > self.data[-1])
 
     # ------------------------------------------------------------------------------------------------------------------
     # hidden properties (for the documentation, only - we remove the docstring)
@@ -250,8 +249,7 @@ class Coord(NDMath, NDArray):
     def __dir__(self):
         # remove some methods with respect to the full NDArray
         # as they are not usefull for Coord.
-        return ['data', 'labels', 'units', 'meta', 'title', 'name',
-                'offset', 'increment', 'linear', 'roi']
+        return ['data', 'labels', 'units', 'meta', 'title', 'name', 'offset', 'increment', 'linear', 'roi']
 
     # ..................................................................................................................
     def __getitem__(self, items, return_index=False):
@@ -327,7 +325,6 @@ class Coord(NDMath, NDArray):
 
 
 class LinearCoord(Coord):
-
     docstrings.delete_params('NDArray.parameters', 'data', 'mask')
 
     # ..................................................................................................................
@@ -360,14 +357,9 @@ class LinearCoord(Coord):
             self.increment = increment
             self.linear = True
 
-
-
-
-
-
-
-
     # ======================================================================================================================
+
+
 # Set the operators
 # ======================================================================================================================
 set_operators(Coord, priority=50)

@@ -18,7 +18,6 @@ __all__ = ['NDPlot', 'plot']
 import re
 import textwrap
 
-from pathlib import Path
 from cycler import cycler
 import matplotlib as mpl
 # from mpl_toolkits.mplot3d import Axes3D
@@ -29,10 +28,10 @@ from traitlets import Dict, HasTraits, Instance, Union, default, TraitError, Uni
 
 # local import
 # ----------------------------------------------------------------------------------------------------------------------
-from spectrochempy.utils import (is_sequence, docstrings, NBlack, NBlue, NGreen, NRed, get_figure, Meta, pathclean)
+from spectrochempy.utils import docstrings, get_figure, Meta, pathclean
 
 from spectrochempy.core import preferences, dataset_preferences, project_preferences, matplotlib_preferences
-from spectrochempy.core import error_, warning_
+from spectrochempy.core import error_
 from spectrochempy.core.plotters.plot1d import plot_1D
 from spectrochempy.core.plotters.plot3d import plot_3D
 from spectrochempy.core.plotters.plot2d import plot_2D
@@ -116,11 +115,11 @@ class Preferences(Meta):
 
         super().__setitem__(key, value)
 
-        # # ........................ TO WORK ON  ## from spectrochempy.core import preferences,
-        # config_manager  # # read json files in the pscp file (obj[f])  # # then write it in the main config  #   #
-        # directory  # f = 'ProjectPreferences.json'  # if f in obj.files:  # TODO: work on this  #     prefjsonfile
-        #  = os.path.join(config_dir, f)  #     with open(prefjsonfile, 'w') as fd:  #         json.dump(obj[f], fd,
-        #  indent=4)  #     # we must also reinit preferences  #     app.init_all_preferences()  #  #    #  #
+        # # ........................ TO WORK ON  ## from spectrochempy.core import preferences,  # config_manager  #
+        # read json files in the pscp file (obj[f])  # # then write it in the main config  #   #  # directory  # f =
+        # 'ProjectPreferences.json'  # if f in obj.files:  # TODO: work on this  #     prefjsonfile  #  =  #
+        #  os.path.join(config_dir, f)  #     with open(prefjsonfile, 'w') as fd:  #         json.dump(obj[f], fd,
+        #  indent=4)  #     # we must also reinit preferences  #     app.init_all_preferences()  #  #    #  #  #  #
         #  app.load_config_file(prefjsonfile)  #     app.project_preferences = ProjectPreferences(config=app.config,
         #  parent=app)
 
@@ -142,7 +141,7 @@ class Preferences(Meta):
         if alias:
 
             starts = any([par.startswith(key) for par in alias])
-            ends = any([par.endswith(key) for par in alias])
+            # ends = any([par.endswith(key) for par in alias])
 
             if len(alias) > 1:
                 if alias[0].endswith(key) and (not starts and self.parent is not None):
@@ -268,9 +267,8 @@ class Preferences(Meta):
             stylelib.write_text(txt)
 
         matplotlib_preferences.traits()['style'].trait_types.append(Unicode(filename))
-        self.style=filename
+        self.style = filename
         return self.style
-
 
 
 # ======================================================================================================================
@@ -451,17 +449,18 @@ class NDPlot(HasTraits):
             # not yet evaluated
             prop_cycle = eval(prop_cycle)
 
-        colors= prop_cycle.by_key()['color']
-        linestyles = ['-', '--', ':','-.']
+        colors = prop_cycle.by_key()['color']
+        linestyles = ['-', '--', ':', '-.']
         markers = ['o', 's', '^']
         if ax is not None and (kwargs.pop('scatter', False) or kwargs.pop('scatterpen', False)):
-            ax.set_prop_cycle(cycler('color', colors * len(linestyles) * len(markers)) +
-                              cycler('linestyle', linestyles * len(colors) * len(markers)) +
-                              cycler('marker', markers * len(colors) * len(linestyles) ))
+            ax.set_prop_cycle(cycler('color', colors * len(linestyles) * len(markers)) + cycler('linestyle',
+                                                                                                linestyles * len(
+                                                                                                        colors) * len(
+                                                                                                        markers)) +
+                              cycler(
+                    'marker', markers * len(colors) * len(linestyles)))
         elif ax is not None and kwargs.pop('pen', False):
-            ax.set_prop_cycle(
-                    cycler('color', colors * len(linestyles)) +
-                    cycler('linestyle', linestyles * len(colors)))
+            ax.set_prop_cycle(cycler('color', colors * len(linestyles)) + cycler('linestyle', linestyles * len(colors)))
 
         # Get the number of the present figure
         self._fignum = self._fig.number

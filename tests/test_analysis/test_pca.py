@@ -26,8 +26,6 @@ except ImportError:
     pass
 
 
-
-
 # test pca
 # ---------
 

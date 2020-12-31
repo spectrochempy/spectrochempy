@@ -17,7 +17,6 @@
 import sys
 
 import matplotlib as mpl
-from matplotlib import pyplot as plt
 
 from IPython.core.interactiveshell import InteractiveShell
 from IPython import get_ipython
@@ -78,10 +77,9 @@ if mpl.get_backend() == 'module://backend_interagg':
 else:
     IN_PYCHARM_SCIMODE = False
 
-
 if not (IN_IPYTHON and kernel) and not IN_PYCHARM_SCIMODE and not NO_DISPLAY:
-    backend = mpl.rcParams['backend'] # 'Qt5Agg'
-    mpl.use( backend, force=True)
+    backend = mpl.rcParams['backend']  # 'Qt5Agg'
+    mpl.use(backend, force=True)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Now we can start loading the API
@@ -92,44 +90,44 @@ from spectrochempy import core  # noqa: E402
 
 __all__ += core.__all__
 
-
 if not IN_IPYTHON:
     # needed in windows terminal - but must not be inited in Jupyter notebook
     from colorama import init as initcolor
 
     initcolor()
 
-
 # def set_backend():
 
-    # workaround this problem https://github.com/jupyter/notebook/issues/3385
-    # ip.magic('matplotlib notebook')
+# workaround this problem https://github.com/jupyter/notebook/issues/3385
+# ip.magic('matplotlib notebook')
 
-    # if IN_IPYTHON and kernel and not NO_DISPLAY:
-    #     try:
-    #         if 'ipykernel_launcher' in sys.argv[0] and \
-    #                 "--InlineBackend.rc={'figure.dpi': 96}" in sys.argv:
-    #             # We are running from NBSphinx - the plot must be inline to show up.
-    #             ip.magic('matplotlib inline')
-    #         else:
-    #             # Do not set the widget backend.... do not work most of the time after upbgrade of the various
-    #             # library and
-    #             # jupyter!!! ...
-    #             ip.magic('matplotlib inline')  # widget
-    #     except Exception:
-    #         ip.magic('matplotlib qt')
-    #
+# if IN_IPYTHON and kernel and not NO_DISPLAY:
+#     try:
+#         if 'ipykernel_launcher' in sys.argv[0] and \
+#                 "--InlineBackend.rc={'figure.dpi': 96}" in sys.argv:
+#             # We are running from NBSphinx - the plot must be inline to show up.
+#             ip.magic('matplotlib inline')
+#         else:
+#             # Do not set the widget backend.... do not work most of the time after upbgrade of the various
+#             # library and
+#             # jupyter!!! ...
+#             ip.magic('matplotlib inline')  # widget
+#     except Exception:
+#         ip.magic('matplotlib qt')
+#
 
 # set_backend()
 
 # a usefull utilities for dealing with path
 from spectrochempy.utils import pathclean
+
 DATADIR = pathclean(preferences.datadir)
 
 __all__ += ['pathclean', 'DATADIR']
 
 import warnings
-warnings.filterwarnings(action='ignore', module='matplotlib') #, category=UserWarning)
+
+warnings.filterwarnings(action='ignore', module='matplotlib')  # , category=UserWarning)
 # warnings.filterwarnings(action="error", category=DeprecationWarning)
 
 # ==============================================================================

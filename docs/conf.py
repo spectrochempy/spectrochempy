@@ -575,7 +575,7 @@ exclusions = (
 
 # %%
 def autodoc_skip_member(app, what, name, obj, skip, options):
-    doc = True if obj.__doc__ is not None else False
+    # doc = True if obj.__doc__ is not None else False
     exclude = name in exclusions or 'trait' in name or name.startswith('_')  # or not doc
     return skip or exclude
 

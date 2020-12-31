@@ -22,7 +22,6 @@ import copy as cpy
 import functools
 import sys
 import operator
-import inspect
 
 # ======================================================================================================================
 # third-party imports
@@ -30,13 +29,14 @@ import inspect
 import numpy as np
 from warnings import catch_warnings
 from orderedset import OrderedSet
+from quaternion import as_float_array
 
 # ======================================================================================================================
 # Local imports
 # ======================================================================================================================
 from spectrochempy.units.units import ur, Quantity, DimensionalityError
 from spectrochempy.core.dataset.ndarray import NDArray
-from spectrochempy.utils import docstrings, MaskedArray, NOMASK, make_func_from, is_sequence
+from spectrochempy.utils import docstrings, MaskedArray, NOMASK, make_func_from, is_sequence, TYPE_COMPLEX
 from spectrochempy.core import warning_, error_
 
 
@@ -138,7 +138,7 @@ arccosh(x [, out, where, casting, order, …])    Inverse hyperbolic cosine, ele
 arctanh(x [, out, where, casting, order, …])    Inverse hyperbolic tangent element-wise.
 
 degrees(x [, out, where, casting, order, …])     Convert angles from radians to degrees.
-radians(x [, out, where, casting, order, …])     Convert angles from degrees to radians. 
+radians(x [, out, where, casting, order, …])     Convert angles from degrees to radians.
 deg2rad(x [, out, where, casting, order, …])     Convert angles from degrees to radians.
 rad2deg(x [, out, where, casting, order, …])     Convert angles from radians to degrees.
 
@@ -352,7 +352,7 @@ class NDMath(object):
         if inputtype == 'NDPanel':
 
             # Some ufunc can not be applied to panels
-            if fname in ['sign', 'logical_not', 'isnan', 'isfinite', 'isinf', 'signbit' ]:
+            if fname in ['sign', 'logical_not', 'isnan', 'isfinite', 'isinf', 'signbit']:
                 raise NotImplementedError(f'`{fname}` ufunc is not implemented for NDPanel objects.')
 
             # if we have a NDPanel, process the ufuncs on all datasets
@@ -368,7 +368,7 @@ class NDMath(object):
 
         else:
             # Some ufunc can not be applied to panels
-            if fname in ['sign', 'logical_not', 'isnan', 'isfinite', 'isinf', 'signbit' ]:
+            if fname in ['sign', 'logical_not', 'isnan', 'isfinite', 'isinf', 'signbit']:
                 return (getattr(np, fname))(inputs[0].masked_data)
 
             # case of a dataset
@@ -460,7 +460,6 @@ class NDMath(object):
         """sum along axis"""
 
         return self._reduce_method('sum', *args, **kwargs)
-
 
     def prod(self, *args, **kwargs):
         """product along axis"""
@@ -620,8 +619,8 @@ class NDMath(object):
 
     # ..................................................................................................................
     @classmethod
-    def fromfunction(cls, function, *, shape=None, coordset=None, dtype=float,
-                     name=None, title=None, units=None, **kwargs):
+    def fromfunction(cls, function, *, shape=None, coordset=None, dtype=float, name=None, title=None, units=None,
+                     **kwargs):
         """
         Construct a nddataset by executing a function over each coordinate.
 
@@ -1451,7 +1450,7 @@ class NDMath(object):
 
         elif issubclass(args[0], NDArray):
             new = args.pop(0)()  # copy type
-            ds = args.pop(0)     # get the template object
+            ds = args.pop(0)  # get the template object
             if isinstance(ds, NDArray):
                 new._data = np.empty_like(ds.data)
                 new._dims = ds.dims.copy()
@@ -1724,7 +1723,7 @@ class NDMath(object):
         if objtype == 'NDPanel':
 
             # Some ufunc can not be applied to panels
-            if fname in ['sign', 'logical_not', 'isnan', 'isfinite', 'isinf', 'signbit' ]:
+            if fname in ['sign', 'logical_not', 'isnan', 'isfinite', 'isinf', 'signbit']:
                 raise TypeError(f'`{fname}` ufunc is not implemented for NDPanel objects.')
 
             # Iterate on all internal dataset of the panel
@@ -1746,17 +1745,19 @@ class NDMath(object):
 
         # Get the underlying data: If one of the input is masked, we will work with masked array
         if ismasked and isdataset:
-            d = obj._umasked(obj._data, obj.mask)
+            d = obj._umasked(obj.data, obj.mask)
         else:
-            d = obj._data
+            d = obj.data
 
         # Do we have units?
         # we create a quantity q that will be used for unit calculation (without dealing with the whole object
         def reduce_(magnitude):
-            while hasattr(magnitude, 'size') and magnitude.size > 1:
-                magnitude = magnitude[0]
-                if hasattr(magnitude, 'squeeze'):
-                    magnitude = magnitude.squeeze()
+            if hasattr(magnitude, 'dtype'):
+                if magnitude.dtype in TYPE_COMPLEX:
+                    magnitude = magnitude.real
+                elif magnitude.dtype == np.quaternion:
+                    magnitude = as_float_array(magnitude)[..., 0]
+                magnitude = magnitude.max()
             return magnitude
 
         q = reduce_(d)
@@ -1838,7 +1839,6 @@ class NDMath(object):
 
             return _units
 
-
         # define an arbitrary quantity `q` on which to perform the units calculation
 
         units = UNITLESS
@@ -1850,7 +1850,11 @@ class NDMath(object):
 
             for i, otherq in enumerate(otherqs[:]):
                 if hasattr(otherq, 'units'):
-                    otherqs[i] = otherq.m * check_require_units(fname, otherq.units)
+                    if np.ma.isMaskedArray(otherq):
+                        otherqm = otherq.m.data
+                    else:
+                        otherqm = otherq.m
+                    otherqs[i] = otherqm * check_require_units(fname, otherq.units)
                 else:
 
                     # here we want to change the behavior a pint regarding the addition of scalar to quantity
@@ -1896,10 +1900,10 @@ class NDMath(object):
                     if np.any(d < 0):
                         d = d.astype(np.complex128)
 
-                if fname == "sqrt":   # do not work with masked array
-                    data = d ** (1./2.)
+                if fname == "sqrt":  # do not work with masked array
+                    data = d ** (1. / 2.)
                 elif fname == 'cbrt':
-                    data = np.sign(d) * np.abs(d) ** (1./3.)
+                    data = np.sign(d) * np.abs(d) ** (1. / 3.)
                 else:
                     data = getattr(np, fname)(d, *args)
 

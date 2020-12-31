@@ -29,9 +29,7 @@ def list_packages(package):
     # http://stackoverflow.com/questions/1707709
 
     names = [package.__name__]
-    for __, name, __ in walk_packages(package.__path__,
-                                      prefix=package.__name__ + '.',
-                                      onerror=lambda x: None):
+    for __, name, __ in walk_packages(package.__path__, prefix=package.__name__ + '.', onerror=lambda x: None):
         names.append(name)
 
     return names
@@ -76,6 +74,7 @@ def generate_api(api_path):
 
     return __all__
 
+
 def get_pkg_path(data_name, package=None):
     data_name = os.path.normpath(data_name)
 
@@ -86,6 +85,7 @@ def get_pkg_path(data_name, package=None):
         return os.path.dirname(path)
 
     return path
+
 
 # ======================================================================================================================
 

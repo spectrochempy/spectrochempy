@@ -9,7 +9,6 @@
 Tests for the nddataset module
 
 """
-import os
 import numpy as np
 import pytest
 from numpy.random import rand
@@ -168,12 +167,8 @@ def test_nddataset_coordset():
     coord1 = np.arange(7)
     coord2 = np.arange(3) * 100.
 
-    da = NDDataset(dx,
-                   coordset=(coord0, coord1, coord2),
-                   title='absorbance',
-                   coordtitles=['wavelength', 'time-on-stream', 'temperature'],
-                   coordunits=['cm^-1', 's', 'K'],
-                   )
+    da = NDDataset(dx, coordset=(coord0, coord1, coord2), title='absorbance',
+                   coordtitles=['wavelength', 'time-on-stream', 'temperature'], coordunits=['cm^-1', 's', 'K'], )
 
     assert da.shape == (10, 7, 3)
     assert da.coordset.titles == ['temperature', 'time-on-stream', 'wavelength']
@@ -202,12 +197,8 @@ def test_nddataset_coordset():
     cadd = Coord(labels=['d%d' % i for i in range(6)])
     coordtitles = ['wavelength', 'time-on-stream', 'temperature']
     coordunits = ['cm^-1', 's', None]
-    daa = NDDataset(dx,
-                    coordset=[coord0, coord1, coord2, cadd, coord2.copy()],
-                    title='absorbance',
-                    coordtitles=coordtitles,
-                    coordunits=coordunits,
-                    )
+    daa = NDDataset(dx, coordset=[coord0, coord1, coord2, cadd, coord2.copy()], title='absorbance',
+                    coordtitles=coordtitles, coordunits=coordunits, )
     assert daa.coordset.titles == coordtitles[::-1]
     assert daa.dims == ['z', 'y', 'x']
     info_(daa)
@@ -219,9 +210,7 @@ def test_nddataset_coordset():
     cd = CoordSet(x=cc, y=c1)
     print_(cd)
 
-    ds = NDDataset([1, 2, 3, 6, 8, 0],
-                   coordset=cd,
-                   units='m')
+    ds = NDDataset([1, 2, 3, 6, 8, 0], coordset=cd, units='m')
     assert ds.dims == ['x']
     assert ds.x == cc
     ds.history = 'essai: 1'
@@ -254,20 +243,12 @@ def test_nddataset_coords_indexer():
     coord2 = np.linspace(20, 30, 10)
 
     with pytest.raises(ValueError):  # wrong lenth
-        da = NDDataset(dx,
-                       coordset=[coord0, coord1, coord2],
-                       title='absorbance',
-                       coordtitles=['wavelength', 'time-on-stream', 'temperature'],
-                       coordunits=['cm^-1', 's', 'K'],
-                       )
+        da = NDDataset(dx, coordset=[coord0, coord1, coord2], title='absorbance',
+                       coordtitles=['wavelength', 'time-on-stream', 'temperature'], coordunits=['cm^-1', 's', 'K'], )
 
     coord1 = np.linspace(0, 60, 100)
-    da = NDDataset(dx,
-                   coordset=[coord0, coord1, coord2],
-                   title='absorbance',
-                   coordtitles=['wavelength', 'time-on-stream', 'temperature'],
-                   coordunits=['cm^-1', 's', 'K'],
-                   )
+    da = NDDataset(dx, coordset=[coord0, coord1, coord2], title='absorbance',
+                   coordtitles=['wavelength', 'time-on-stream', 'temperature'], coordunits=['cm^-1', 's', 'K'], )
 
     assert da.shape == (10, 100, 10)
     coords = da.coordset
@@ -307,8 +288,7 @@ def test_nddataset_str_repr(ds1):
 
 
 def test_nddataset_mask_valid():
-    NDDataset(np.random.random((10, 10)),
-              mask=np.random.random((10, 10)) > 0.5)
+    NDDataset(np.random.random((10, 10)), mask=np.random.random((10, 10)) > 0.5)
 
 
 def test_nddataset_copy_ref():
@@ -523,9 +503,7 @@ def test_nddataset_slicing_by_label(ds1):
     hot = da[..., "hot"]
     print_(hot)
 
-    # TODO: find a way to use such syntax
-    # hot2 = da["x.hot"]
-    # assert hot == hot2
+    # TODO: find a way to use such syntax  # hot2 = da["x.hot"]  # assert hot == hot2
 
 
 def test_nddataset_slicing_by_values(ds1):
@@ -671,24 +649,18 @@ def test_nddataset_unmasked_in_operation_with_masked_numpy_array():
     result2 = np_arr_masked * ndd
     # Numpy masked  array return a masked array in this case
     # assert result2.is_masked
-    assert np.all(result2.mask == np_mask)
-    # assert np.all(result2[~result2.mask].data == -ndd.data[~np_mask])
+    assert np.all(result2.mask == np_mask)  # assert np.all(result2[~result2.mask].data == -ndd.data[~np_mask])
 
 
 @pytest.mark.parametrize('shape', [(10,), (5, 5), (3, 10, 10)])
 def test_nddataset_mask_invalid_shape(shape):
     with pytest.raises(ValueError) as exc:
         with RandomSeedContext(789):
-            NDDataset(np.random.random((10, 10)),
-                      mask=np.random.random(shape) > 0.5)
+            NDDataset(np.random.random((10, 10)), mask=np.random.random(shape) > 0.5)
     assert exc.value.args[0] == 'mask {} and data (10, 10) shape mismatch!'.format(shape)
 
 
-@pytest.mark.parametrize('mask_in', [
-        np.array([True, False]),
-        np.array([1, 0]),
-        [True, False],
-        [1, 0]])
+@pytest.mark.parametrize('mask_in', [np.array([True, False]), np.array([1, 0]), [True, False], [1, 0]])
 def test_nddataset_mask_init_without_np_array(mask_in):
     ndd = NDDataset(np.array([1, 1]), mask=mask_in)
     assert (ndd.mask == mask_in).all()
@@ -710,9 +682,9 @@ def test_nddataset_with_mask_acts_like_masked_array():
     for result in [result1, result2, result3, result4]:
         assert result.is_masked
         # Result mask should match input mask because other has no mask
-        assert np.all(result.mask == input_mask)
-        # TODO:IndexError: in the future, 0-d boolean arrays will be interpreted as a valid boolean index
-        # assert np.all(result[~result.mask].data == - input_data[~input_mask])
+        assert np.all(
+                result.mask == input_mask)  # TODO:IndexError: in the future, 0-d boolean arrays will be interpreted
+        # as a  # valid boolean index  # assert np.all(result[~result.mask].data == - input_data[~input_mask])
 
 
 def test_nddataset_creationdate():
@@ -734,10 +706,7 @@ def test_nddataset_title():
 
 
 def test_nddataset_real_imag():
-    na = np.array(
-            [[1. + 2.j, 2. + 0j],
-             [1.3 + 2.j, 2. + 0.5j],
-             [1. + 4.2j, 2. + 3j]])
+    na = np.array([[1. + 2.j, 2. + 0j], [1.3 + 2.j, 2. + 0.5j], [1. + 4.2j, 2. + 3j]])
 
     nd = NDDataset(na)
 
@@ -759,37 +728,21 @@ def test_nddataset_comparison():
 
 
 def test_nddataset_repr_html():
-
     dx = np.random.random((10, 100, 3))
 
-    coord0 = Coord(data=np.linspace(4000., 1000., 10),
-                   labels='a b c d e f g h i j'.split(),
-                   mask=None,
-                   units="cm^-1",
+    coord0 = Coord(data=np.linspace(4000., 1000., 10), labels='a b c d e f g h i j'.split(), mask=None, units="cm^-1",
                    title='wavelength')
 
-    coord1 = Coord(data=np.linspace(0., 60., 100),
-                   labels=None,
-                   mask=None,
-                   units="s",
-                   title='time-on-stream')
+    coord1 = Coord(data=np.linspace(0., 60., 100), labels=None, mask=None, units="s", title='time-on-stream')
 
-    coord2 = Coord(data=np.linspace(200., 300., 3),
-                   labels=['cold', 'normal', 'hot'],
-                   mask=None,
-                   units="K",
+    coord2 = Coord(data=np.linspace(200., 300., 3), labels=['cold', 'normal', 'hot'], mask=None, units="K",
                    title='temperature')
 
-    da = NDDataset(dx,
-                   coordset=[coord0, coord1, coord2],
-                   title='absorbance',
-                   units='absorbance'
-                   )
+    da = NDDataset(dx, coordset=[coord0, coord1, coord2], title='absorbance', units='absorbance')
 
     info_(da)
     a = da._repr_html_()
-    info_(a)
-    # assert "<strong>Units</strong></td><td style='text-align:left'>absorbance</td>" in a
+    info_(a)  # assert "<strong>Units</strong></td><td style='text-align:left'>absorbance</td>" in a
 
 
 # ### Metadata ################################################################
@@ -993,10 +946,7 @@ def test_nddataset_create_from_complex_data():
     assert nd.shape == (2,)
 
     # 2D (complex in the last dimension - automatic detection)
-    nd = NDDataset([[1. + 2.j, 2. + 0j],
-                    [1.3 + 2.j, 2. + 0.5j],
-                    [1. + 4.2j, 2. + 3j]
-                    ])
+    nd = NDDataset([[1. + 2.j, 2. + 0j], [1.3 + 2.j, 2. + 0.5j], [1. + 4.2j, 2. + 3j]])
 
     assert nd.data.size == 6
     assert nd.size == 6
@@ -1004,11 +954,7 @@ def test_nddataset_create_from_complex_data():
     assert nd.shape == (3, 2)
 
     # 2D quaternion
-    nd = NDDataset([[1., 2.],
-                    [1.3, 2.],
-                    [1., 2.],
-                    [1., 2.],
-                    ], dtype=typequaternion)
+    nd = NDDataset([[1., 2.], [1.3, 2.], [1., 2.], [1., 2.], ], dtype=typequaternion)
 
     assert nd.data.size == 2
     assert nd.size == 2
@@ -1047,8 +993,7 @@ def test_nddataset_create_from_complex_data_with_units():
     nd.ito('cm^-1')
 
     # 2D
-    nd2 = NDDataset(
-            [[1. + 2.j, 2. + 0j], [1.3 + 2.j, 2. + 0.5j], [1. + 4.2j, 2. + 3j]])
+    nd2 = NDDataset([[1. + 2.j, 2. + 0j], [1.3 + 2.j, 2. + 0.5j], [1. + 4.2j, 2. + 3j]])
 
     assert nd2.data.size == 6
     assert nd2.size == 6
@@ -1062,9 +1007,7 @@ def test_nddataset_create_from_complex_data_with_units():
 
 @pytest.mark.skip()
 def test_nddataset_real_imag_quaternion():
-    na = np.array(
-            [[1. + 2.j, 2. + 0j, 1.3 + 2.j],
-             [2. + 0.5j, 1. + 4.2j, 2. + 3j]])
+    na = np.array([[1. + 2.j, 2. + 0j, 1.3 + 2.j], [2. + 0.5j, 1. + 4.2j, 2. + 3j]])
 
     nd = NDDataset(na)
 
@@ -1077,11 +1020,7 @@ def test_nddataset_real_imag_quaternion():
     assert nd.is_quaternion
     assert nd.shape == (1, 3)
 
-    na = np.array(
-            [[1. + 2.j, 2. + 0j],
-             [1.3 + 2.j, 2. + 0.5j],
-             [1. + 4.2j, 2. + 3j],
-             [5. + 4.2j, 2. + 3j]])
+    na = np.array([[1. + 2.j, 2. + 0j], [1.3 + 2.j, 2. + 0.5j], [1. + 4.2j, 2. + 3j], [5. + 4.2j, 2. + 3j]])
 
     nd = NDDataset(na)
     nd.set_quaternion(inplace=True)
@@ -1089,21 +1028,15 @@ def test_nddataset_real_imag_quaternion():
 
     assert_array_equal(nd.real.data, na[::2, :].real)
 
-    nb = np.array(
-            [[0. + 2.j, 0. + 0j],
-             [1.3 + 2.j, 2. + 0.5j],
-             [0. + 4.2j, 0. + 3j],
-             [5. + 4.2j, 2. + 3j]])
+    nb = np.array([[0. + 2.j, 0. + 0j], [1.3 + 2.j, 2. + 0.5j], [0. + 4.2j, 0. + 3j], [5. + 4.2j, 2. + 3j]])
     ndj = NDDataset(nb, dtype=quaternion)
 
     assert nd.imag == ndj
 
 
 def test_nddataset_quaternion():
-    na0 = np.array([[1., 2., 2., 0., 0., 0.],
-                    [1.3, 2., 2., 0.5, 1., 1.],
-                    [1, 4.2, 2., 3., 2., 2.],
-                    [5., 4.2, 2., 3., 3., 3.]])
+    na0 = np.array(
+            [[1., 2., 2., 0., 0., 0.], [1.3, 2., 2., 0.5, 1., 1.], [1, 4.2, 2., 3., 2., 2.], [5., 4.2, 2., 3., 3., 3.]])
 
     nd = NDDataset(na0)
     assert nd.shape == (4, 6)

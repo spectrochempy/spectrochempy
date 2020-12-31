@@ -364,7 +364,7 @@ class NDIO(HasTraits):
                         pass
 
                     else:
-                        if isinstance(val, TYPE_BOOL) and key=='_mask':
+                        if isinstance(val, TYPE_BOOL) and key == '_mask':
                             val = np.bool_(val)
                         setattr(obj, key, val)
 

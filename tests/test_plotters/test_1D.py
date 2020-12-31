@@ -5,7 +5,8 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-from spectrochempy import plot_multiple, preferences, NDDataset, os, show
+from spectrochempy import preferences, NDDataset, os, show
+
 # TODO: from spectrochempy.utils.testing import figures_dir, same_images
 
 prefs = preferences
@@ -13,8 +14,7 @@ prefs = preferences
 
 # @pytest.mark.skip
 def test_1D():
-    dataset = NDDataset.read_omnic(
-            os.path.join(prefs.datadir, 'irdata', 'nh4y-activation.spg'))
+    dataset = NDDataset.read_omnic(os.path.join(prefs.datadir, 'irdata', 'nh4y-activation.spg'))
 
     # get first spectrum
     nd0 = dataset[0]

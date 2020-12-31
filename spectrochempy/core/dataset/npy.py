@@ -10,7 +10,7 @@ In this module, we define basic functions adapted from numpy but able to handle
 our NDDataset objects
 
 """
-__all__ = [ 'dot']
+__all__ = ['dot']
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
@@ -21,7 +21,7 @@ import numpy as np
 from spectrochempy.core.dataset.nddataset import NDDataset
 # from spectrochempy.core.dataset.ndcoordset import CoordSet
 # from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.utils import NOMASK, make_new_object
+from spectrochempy.utils import make_new_object
 
 
 # ............................................................................
@@ -114,6 +114,7 @@ def dot(a, b, strict=True, out=None):
         new.units = a.units * b.units
 
     return new
+
 
 # ======================================================================================================================
 if __name__ == '__main__':

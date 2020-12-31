@@ -20,10 +20,11 @@ from spectrochempy.core.scripts.script import Script
 from spectrochempy.utils import Meta
 from spectrochempy.core.project.baseproject import AbstractProject
 
+
 # from collections import OrderedDict
 
-#cfg = config_manager
-#preferences = preferences
+# cfg = config_manager
+# preferences = preferences
 
 
 # ======================================================================================================================
@@ -104,8 +105,7 @@ class Project(AbstractProject, NDIO):
 
     # ..................................................................................................................
     def _get_from_type(self, name):
-        pass
-        # TODO: ???
+        pass  # TODO: ???
 
     # ..................................................................................................................
     def _repr_html_(self):
@@ -174,8 +174,7 @@ class Project(AbstractProject, NDIO):
             return self.meta[item]
 
         else:
-            raise AttributeError(
-                    "`%s` has no attribute `%s`" % (type(self).__name__, item))
+            raise AttributeError("`%s` has no attribute `%s`" % (type(self).__name__, item))
 
     # ..................................................................................................................
     def __iter__(self):

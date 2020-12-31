@@ -12,9 +12,7 @@ import numpy as np
 
 from .meta import Meta
 
-__all__ = ['cmyk2rgb', 'NBlack', 'NRed', 'NBlue', 'NGreen',
-           'figure', 'show', 'get_figure',
-           # Plotly specific
+__all__ = ['cmyk2rgb', 'NBlack', 'NRed', 'NBlue', 'NGreen', 'figure', 'show', 'get_figure',  # Plotly specific
            'get_plotly_figure', 'colorscale']
 
 
@@ -148,7 +146,7 @@ def get_figure(**kwargs):
         except ValueError:
             try:
                 fig.set_facecolor(eval(facecolor))
-            except:
+            except ValueError:
                 fig.set_facecolor('#' + eval(facecolor))
         fig.set_dpi(dpi)
         fig.set_tight_layout(tight_layout)

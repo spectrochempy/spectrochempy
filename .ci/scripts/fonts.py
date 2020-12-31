@@ -13,7 +13,7 @@ from matplotlib import get_cachedir
 # Copy files over
 _dir_data = Path(re.sub('/matplotlibrc$', '', matplotlib_fname()))
 
-dir_source =  Path(__file__).parent.parent.parent / 'scp_data' / 'fonts'
+dir_source = Path(__file__).parent.parent.parent / 'scp_data' / 'fonts'
 if not dir_source.exists():
     raise IOError(f'directory {dir_source} not found!')
 
@@ -29,6 +29,6 @@ for file in dir_source.glob('*.[ot]tf'):
 # Delete cache
 dir_cache = Path(get_cachedir())
 for file in list(dir_cache.glob('*.cache')) + list(dir_cache.glob('font*')):
-    if not file.is_dir(): # don't dump the tex.cache folder... because dunno why
+    if not file.is_dir():  # don't dump the tex.cache folder... because dunno why
         file.unlink()
         print(f'Deleted font cache {file}.')

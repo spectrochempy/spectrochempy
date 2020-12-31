@@ -11,6 +11,7 @@ __dataset_methods__ = ['simps', 'trapz']
 
 import scipy.integrate
 
+
 def trapz(dataset, *args, **kwargs):
     """
 
@@ -63,6 +64,7 @@ def trapz(dataset, *args, **kwargs):
 
     return new
 
+
 def simps(dataset, *args, **kwargs):
     """
     Wrapper of scpy.integrate.simps() : Integrate y(x) using samples along the given axis and the composite
@@ -107,7 +109,7 @@ def simps(dataset, *args, **kwargs):
     kwargs['axis'] = axis
     kwargs.pop('dim', None)
 
-    data = scipy.integrate.simps(dataset.data, x=dataset.coord(dim).data, axis=axis, even=kwargs.get('even','avg'))
+    data = scipy.integrate.simps(dataset.data, x=dataset.coord(dim).data, axis=axis, even=kwargs.get('even', 'avg'))
     if dataset.coord(dim).reversed:
         data *= -1
 

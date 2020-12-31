@@ -19,7 +19,8 @@
 # %% [markdown]
 # The purpose of this page is to give you some quick examples of what can be done with SpectroChemPy.
 #
-# See the [gallery of examples](generated/auto_examples/index.html) and consult the [user's guide](../user/index.html) for more information on using SpectroChemPy
+# See the [gallery of examples](generated/auto_examples/index.html) and consult the [user's guide](
+# ../user/index.html) for more information on using SpectroChemPy
 #
 # Before using the package, we must load the **API
 # (Application Programming Interface)**
@@ -67,9 +68,9 @@ _ = region.plot(method='map', colormap='magma')
 # ### Maths on datasets
 
 # %%
-region.y -= region.y[0]     # make y coordinate reative to the first point
+region.y -= region.y[0]  # make y coordinate reative to the first point
 region.y.title = 'time of dehydratatioin'
-region -= region[0]         # suppress the last spectra to all
+region -= region[0]  # suppress the last spectra to all
 _ = region.plot(colorbar=True)
 
 # %% [markdown]
@@ -92,7 +93,7 @@ _ = smoothed.plot(colormap='magma')
 region = ds[:, 4000.0:2000.0]
 smoothed = region.smooth(window_length=51, window='hanning')
 blc = BaselineCorrection(smoothed, method='multivariate', interpolation='pchip', npc=5)
-basc = blc.compute([2000.,2300.], [3800.,3900.])
+basc = blc.compute([2000., 2300.], [3800., 3900.])
 
 # %%
 _ = basc.plot()
@@ -104,9 +105,8 @@ _ = basc.plot()
 
 # %%
 ds = NDDataset.read_omnic(datadir / 'irdata' / 'CO@Mo_Al2O3.SPG')[:, 2250.:1950.]
-pressure = [0.00300, 0.00400, 0.00900, 0.01400, 0.02100, 0.02600, 0.03600,
-            0.05100, 0.09300, 0.15000, 0.20300, 0.30000, 0.40400, 0.50300,
-            0.60200, 0.70200, 0.80100, 0.90500, 1.00400]
+pressure = [0.00300, 0.00400, 0.00900, 0.01400, 0.02100, 0.02600, 0.03600, 0.05100, 0.09300, 0.15000, 0.20300, 0.30000,
+            0.40400, 0.50300, 0.60200, 0.70200, 0.80100, 0.90500, 1.00400]
 ds.y = Coord(pressure, title='Pressure', units='torr')
 _ = ds.plot(colormap='magma')
 
