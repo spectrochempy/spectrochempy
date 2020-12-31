@@ -27,7 +27,7 @@ from spectrochempy.core.dataset.ndcomplex import NDComplexArray
 from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndpanel import NDPanel
+# TODO: from spectrochempy.core.dataset.ndpanel import NDPanel
 from spectrochempy.core.scripts.script import Script
 from spectrochempy.core.project.project import Project
 from spectrochempy.utils import pathclean
@@ -243,23 +243,23 @@ def dsm():
     return NDDataset(ref3d_data, coordset=[coord0_, coord1_, coordmultiple], mask=ref3d_mask, title='Absorbance',
                      units='absorbance').copy()
 
-# ----------------------------------------------------------------------------------------------------------------------
-# NDPanel
-# ----------------------------------------------------------------------------------------------------------------------
-
-@pytest.fixture(scope="function")
-def pnl():
-    with RandomSeedContext(12345):
-        arr1 = np.random.rand(10, 20)
-        arr2 = np.random.rand(20, 12)
-    cy1 = Coord(np.arange(10), title='ty', units='s')
-    cy2 = Coord(np.arange(12), title='ty', units='s')
-    cx = Coord(np.arange(20), title='tx', units='km')
-    nd1 = NDDataset(arr1, coordset=(cy1, cx), name='arr1')
-    nd2 = NDDataset(arr2, coordset=(cy2, cx), dims=['x', 'y'], name='arr2')
-    pnl = NDPanel(nd1, nd2)
-    assert pnl.dims == ['x', 'y']
-    return pnl.copy()
+# # ----------------------------------------------------------------------------------------------------------------------
+# # NDPanel
+# # ----------------------------------------------------------------------------------------------------------------------
+#
+# @pytest.fixture(scope="function")
+# def pnl():
+#     with RandomSeedContext(12345):
+#         arr1 = np.random.rand(10, 20)
+#         arr2 = np.random.rand(20, 12)
+#     cy1 = Coord(np.arange(10), title='ty', units='s')
+#     cy2 = Coord(np.arange(12), title='ty', units='s')
+#     cx = Coord(np.arange(20), title='tx', units='km')
+#     nd1 = NDDataset(arr1, coordset=(cy1, cx), name='arr1')
+#     nd2 = NDDataset(arr2, coordset=(cy2, cx), dims=['x', 'y'], name='arr2')
+#     pnl = NDPanel(nd1, nd2)
+#     assert pnl.dims == ['x', 'y']
+#     return pnl.copy()
 
 # Fixtures:  IR spectra (SPG)
 # ----------------------------------------------------------------------------------------------------------------------

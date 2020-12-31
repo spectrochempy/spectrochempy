@@ -602,7 +602,7 @@ df
 # As with numpy, it is also possible to take another dataset as a template:
 
 # %%
-df = NDDataset.full_like(d3D, dtype=np.int64, fill_value=2)
+df = NDDataset.full_like(d3D, dtype='int', fill_value=2)
 df
 
 # %%

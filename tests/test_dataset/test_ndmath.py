@@ -46,7 +46,7 @@ def test_ndmath_show():
 # UNARY MATHS
 # -----------
 @pytest.mark.parametrize(('name', 'comment'), unary_ufuncs().items())
-def test_ndmath_unary_ufuncs_simple_data(nd2d, pnl, name, comment):
+def test_ndmath_unary_ufuncs_simple_data(nd2d, name, comment):
 
     nd1 = nd2d.copy() / 1.e+10  # divide to avoid some overflow in exp ufuncs
 
@@ -108,17 +108,17 @@ def test_ndmath_unary_ufuncs_simple_data(nd2d, pnl, name, comment):
         except DimensionalityError as e:
             error_(f"{name}: ", e)
 
-    # NDPanel
-    # -----------------
-    if name not in ['sign','logical_not', 'isnan', 'isfinite', 'isneginf', 'isinf', 'signbit', 'fix']:
-        info_('panel before', pnl)
-
-        f = getattr(np, name)
-        try:
-            r = f(pnl)
-            info_('panel after ', r)
-        except TypeError as e:
-            error_(e)
+    # # NDPanel
+    # # -----------------
+    # if name not in ['sign','logical_not', 'isnan', 'isfinite', 'isneginf', 'isinf', 'signbit', 'fix']:
+    #     info_('panel before', pnl)
+    #
+    #     f = getattr(np, name)
+    #     try:
+    #         r = f(pnl)
+    #         info_('panel after ', r)
+    #     except TypeError as e:
+    #         error_(e)
 
     info_('-' * 60)
     info_(' ')
@@ -143,7 +143,7 @@ def test_bug_lost_dimensionless_units():
 # ------------
 
 @pytest.mark.parametrize(('name', 'comment'), binary_ufuncs().items())
-def test_ndmath_binary_ufuncs_two_datasets(nd2d, pnl, name, comment):
+def test_ndmath_binary_ufuncs_two_datasets(nd2d, name, comment):
     nd1 = nd2d.copy()
     nd2 = nd1.copy() * np.ones_like(nd1) * .01
 
@@ -170,7 +170,7 @@ def test_ndmath_binary_ufuncs_two_datasets(nd2d, pnl, name, comment):
 
 # COMP Methods
 @pytest.mark.parametrize(('name', 'comment'), comp_ufuncs().items())
-def test_ndmath_comp_ufuncs_two_datasets(nd2d, pnl, name, comment):
+def test_ndmath_comp_ufuncs_two_datasets(nd2d, name, comment):
     nd1 = nd2d.copy()
     nd2 = nd1.copy() + np.ones_like(nd1) * .001
 
@@ -195,7 +195,7 @@ def test_ndmath_comp_ufuncs_two_datasets(nd2d, pnl, name, comment):
 
 
 @pytest.mark.parametrize(('name', 'comment'), binary_ufuncs().items())
-def test_ndmath_binary_ufuncs_scalar(nd2d, pnl, name, comment):
+def test_ndmath_binary_ufuncs_scalar(nd2d, name, comment):
     nd1 = nd2d.copy()
     nd2 = 2.
 

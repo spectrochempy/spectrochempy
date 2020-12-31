@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 import numpy as np
 
 from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.core import preferences as prefs
+from spectrochempy.core import dataset_preferences as prefs
 from spectrochempy.core.readers.importer import docstrings, Importer, importermethod
 
 try:
@@ -60,7 +60,7 @@ def read_csv(*args, **kwargs):
     Examples
     ---------
 
-    >>> from spectrochempy import NDDataset
+    >>> from spectrochempy import *
     >>> NDDataset.read_csv('agirdata/P350/TGA/tg.csv')
     NDDataset: [float64] unitless (shape: (y:1, x:3247))
 

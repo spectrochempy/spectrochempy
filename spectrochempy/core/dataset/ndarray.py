@@ -24,16 +24,16 @@ import textwrap
 import uuid
 import itertools
 
-from traitlets import List, Unicode, Instance, Bool, Union, Float, Int, Any, HasTraits, default, validate, observe, All
+from traitlets import List, Unicode, Instance, Bool, Union, Float, Integer, HasTraits, default, validate, observe, All
 from pint.errors import DimensionalityError
 import numpy as np
 from traittypes import Array
 
 from spectrochempy.units import Unit, ur, Quantity, set_nmr_context
 from spectrochempy.core import info_, error_, print_
-from spectrochempy.utils import (TYPE_INTEGER, TYPE_FLOAT, Meta, MaskedConstant, MASKED, NOMASK, INPLACE, is_sequence,
-                                 is_number, numpyprintoptions, insert_masked_print, docstrings, SpectroChemPyWarning,
-                                 make_new_object, convert_to_html, get_user_and_node)
+from spectrochempy.utils import (TYPE_INTEGER, TYPE_FLOAT, TYPE_BOOL, Meta, MaskedConstant, MASKED, NOMASK, INPLACE,
+                                 is_sequence, is_number, numpyprintoptions, insert_masked_print, docstrings,
+                                 SpectroChemPyWarning, make_new_object, convert_to_html, get_user_and_node)
 
 # ======================================================================================================================
 # Third party imports
@@ -60,6 +60,7 @@ numpyprintoptions()
 # ======================================================================================================================
 
 
+# noinspection PyPep8Naming
 class NDArray(HasTraits):
     """
     The basic |NDArray| object.
@@ -103,9 +104,9 @@ class NDArray(HasTraits):
     _meta = Instance(Meta, allow_none=True)
 
     # for offset and linear data generation
-    _offset = Union((Float(), Int(), Instance(Quantity)), )
-    _increment = Union((Float(), Int(), Instance(Quantity)), )
-    _size = Int(allow_none=True)
+    _offset = Union((Float(), Integer(), Instance(Quantity)), )
+    _increment = Union((Float(), Integer(), Instance(Quantity)), )
+    _size = Integer(0)
     _linear = Bool(False)
 
     # metadata
@@ -122,7 +123,7 @@ class NDArray(HasTraits):
     # serve as coordinates labelling.
 
     # other settings
-    _text_width = Int(120)
+    _text_width = Integer(120)
     _html_output = Bool(False)
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -195,7 +196,7 @@ class NDArray(HasTraits):
                 else:
                     return False
             else:
-                # unitlesss and dimensionless are supposed equals
+                # no unit and dimensionless are supposed equals
                 sattr = self._units
                 if sattr is None:
                     sattr = ur.dimensionless
@@ -341,7 +342,7 @@ class NDArray(HasTraits):
         self._linear = kwargs.pop('linear', False)
         self._increment = kwargs.pop('increment', 1.0)
         self._offset = kwargs.pop('offset', 0.0)
-        self._size = kwargs.pop('size', None)
+        self._size = kwargs.pop('size', 0)
 
         self.data = data
 
@@ -475,7 +476,7 @@ class NDArray(HasTraits):
         elif 'label' in by and self.is_labeled:
             labels = self._labels
             if len(self._labels.shape) > 1:
-                # multidimentional labels
+                # multidimensional labels
                 if not pos:
                     pos = 0
                     # try to find a pos in the by string
@@ -602,7 +603,7 @@ class NDArray(HasTraits):
                 if key < 0:  # reverse indexing
                     axis, dim = self.get_axis(dim)
                     start = self._data.shape[axis] + key
-            stop = start + 1  # in order to keep an unsqueezed slice
+            stop = start + 1  # in order to keep an non squeezed slice
             return slice(start, stop, 1)
         else:
             start, stop, step = key.start, key.stop, key.step
@@ -676,7 +677,7 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     def _loc2index(self, loc, dim=None):
         # Return the index of a location (label or values such as coordinates) along a 1D array.
-        # Do not apply for multidimensionnal arrays (ndim>1)
+        # Do not apply for multidimensional arrays (ndim>1)
         if self.ndim > 1:
             raise NotImplementedError(f'not implemented for {type(self).__name__} objects which are not 1-dimensional '
                                       f'(current ndim:{self.ndim})')
@@ -697,7 +698,7 @@ class NDArray(HasTraits):
                            f'The closest limit index is returned')
                     error = 'out_of_limits'
                 index = (np.abs(data - loc)).argmin()
-                # TODO: add some precison to this result
+                # TODO: add some precision to this result
                 if not error:
                     return index
                 else:
@@ -707,7 +708,7 @@ class NDArray(HasTraits):
                 # TODO: is there a simpler way to do this with numpy functions
                 index = []
                 for lo in loc:
-                    index.append((np.abs(data - lo)).argmin())  # TODO: add some precison to this result
+                    index.append((np.abs(data - lo)).argmin())  # TODO: add some precision to this result
                 return index
 
             elif isinstance(loc, datetime):
@@ -1094,7 +1095,7 @@ class NDArray(HasTraits):
             typecode or data-type to which the array is cast.
 
         """
-        if self.linear:
+        if not self.linear:
             self._data = self._data.astype(dtype, **kwargs)
         else:
             self._increment = np.array(self._increment).astype(dtype, **kwargs)[()]
@@ -1197,7 +1198,7 @@ class NDArray(HasTraits):
         elif self.linear:
             return np.arange(self.size) * self._increment + self._offset
 
-        return self._data + self._offset
+        return (self._data + self._offset).astype(self._data.dtype)
 
     # ..................................................................................................................
     @data.setter
@@ -1380,7 +1381,7 @@ class NDArray(HasTraits):
         if self.labels.ndim > 1:
             return self.labels[level]
         else:
-            return self._abels
+            return self._labels
 
     # ..................................................................................................................
     @property
@@ -1562,7 +1563,7 @@ class NDArray(HasTraits):
 
         self._linear = val
         if val and self.data is not None:
-            # linearization of the data, if possible
+            # linearisation of the data, if possible
             self._linearize()
 
     # ..................................................................................................................
@@ -2300,3 +2301,5 @@ class NDArray(HasTraits):
                 return data.squeeze()[()]
         elif self.is_labeled:
             return self._labels[()]
+
+    value = values   # alias

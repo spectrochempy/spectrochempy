@@ -29,7 +29,7 @@ class Script(HasTraits):
     _priority = Float(min=0., max=100.)
     _parent = Instance(AbstractProject, allow_none=True)
 
-    def __init__(self, name, content=None, parent=None, priority=50.):
+    def __init__(self, name='unamed_script', content=None, parent=None, priority=50.):
         """
         Parameters
         ----------

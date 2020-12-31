@@ -75,7 +75,7 @@ nd2.dims, nd4.dims
 nd2a, nd4a = scp.align(nd2, nd4, dim='y', method='outer')
 
 # %% [markdown]
-# New we can perform an addition without any problem
+# Now we can perform an addition without any problem
 
 # %%
 ndadd = nd2a + nd4a

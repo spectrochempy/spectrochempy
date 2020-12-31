@@ -545,7 +545,7 @@ def readdirname(directory):
 
 
 # ......................................................................................................................
-def check_filename_to_save(dataset, filename=None, save_as=True, **kwargs):
+def check_filename_to_save(dataset, filename=None, save_as=True, confirm=True, **kwargs):
 
     from spectrochempy.api import NO_DIALOG
     from spectrochempy.core import save_dialog
@@ -559,7 +559,7 @@ def check_filename_to_save(dataset, filename=None, save_as=True, **kwargs):
             filename = dataset.name
             filename = filename + kwargs.get('suffix', '.scp')
 
-        if not NODIAL:
+        if not NODIAL and confirm:
             filename = save_dialog(caption=kwargs.get('caption', 'Save as ...'),
                                    filename=filename,
                                    filters=kwargs.get('filetypes', ['All file types (*.*)']))

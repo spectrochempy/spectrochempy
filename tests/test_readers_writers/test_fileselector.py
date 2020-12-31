@@ -15,7 +15,7 @@ from spectrochempy.core import preferences
 
 
 def test_fileselector():
-    path = preferences.datadir
+    path = str(preferences.datadir)
     fs = FileSelector(path=path, filters='spg')
 
     assert fs.path.endswith('testdata/')
@@ -24,7 +24,7 @@ def test_fileselector():
 
 
 def test_issues_61():
-    path = preferences.datadir + "/"
+    path = str(preferences.datadir) + "/"
     fs = FileSelector(path=path, filters='spg')
 
     assert fs.path.endswith('testdata/')

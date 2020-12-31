@@ -9,8 +9,7 @@ from spectrochempy import NDDataset, show, preferences as prefs
 
 
 def test_plot2D():
-    A = NDDataset.read_omnic('irdata/nh4y-activation.spg',
-                             directory=prefs.datadir)
+    A = NDDataset.read_omnic('irdata/nh4y-activation.spg')
     A.y -= A.y[0]
     A.y.to('hour', inplace=True)
     A.y.title = u'Aquisition time'
@@ -18,14 +17,14 @@ def test_plot2D():
     A.copy().plot_stack(data_transposed=True)
     A.copy().plot_image(style=['sans', 'paper'], fontsize=9)
 
-    mystyle = {
-            'image.cmap': 'magma',
-            'font.size': 10,
-            'font.weight': 'bold',
-            'axes.grid': True
-            }
-    # TODO: store these styles for further use
-    A.plot(style=mystyle)
+    # use preferences
+    prefs = A.preferences
+    prefs.reset()
+    prefs.image.cmap ='magma'
+    prefs.font.size =  10
+    prefs.font.weight = 'bold'
+    prefs.axes.grid =  True
+    A.plot()
     A.plot(style=['sans', 'paper', 'grayscale'], colorbar=False)
     show()
     pass
@@ -38,7 +37,7 @@ def test_plotly2D():
     A.y.to('hour', inplace=True)
     A.y.title = u'Aquisition time'
 
-    A.copy().plot(use_plotly=True)
+    # TODO: A.copy().plot(use_plotly=True)
 
 
 # ======================================================================================================================

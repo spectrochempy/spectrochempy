@@ -20,12 +20,13 @@ import pathlib
 
 import numpy as np
 from numpy.lib.npyio import zipfile_factory
-from traitlets import HasTraits, Instance
+from traitlets import HasTraits, Instance, Union, Unicode
 
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core import debug_
 from spectrochempy.utils import SpectroChemPyException
 from spectrochempy.utils import pathclean, check_filenames, ScpFile, check_filename_to_save, json_serialiser
+from spectrochempy.utils import TYPE_BOOL
 
 SCPY_SUFFIX = {'NDDataset': '.scp', 'NDPanel': '.mscp', 'Project': '.pscp'}
 
@@ -46,7 +47,7 @@ class NDIO(HasTraits):
 
     """
 
-    _filename = Instance(pathlib.Path, allow_none=True)
+    _filename = Union((Instance(pathlib.Path), Unicode()), allow_none=True)
 
     @property
     def directory(self):
@@ -245,7 +246,7 @@ class NDIO(HasTraits):
 
         Examples
         --------
-        >>> from spectrochempy import NDDataset
+        >>> from spectrochempy import *
         >>> nd1 = NDDataset.read('irdata/nh4y-activation.spg')
         >>> f = nd1.save()
         >>> f.name
@@ -319,8 +320,13 @@ class NDIO(HasTraits):
         # .........................
         def item_to_attr(obj, dic):
             for key, val in dic.items():
+
                 try:
-                    if hasattr(obj, f'_{key}') and key not in ['readonly']:
+                    if 'readonly' in dic.keys() and key in ['readonly', 'name']:
+                        # case of the meta and preferences
+                        pass
+
+                    elif hasattr(obj, f'_{key}'):
                         # use the hidden attribute if it exists
                         key = f'_{key}'
 
@@ -341,15 +347,16 @@ class NDIO(HasTraits):
                         obj._references = val['references']
 
                     elif key in ['_datasets']:
-                        datasets = [item_to_attr(NDDataset(name=k), v) for k, v in val.items()]
+                        # datasets = [item_to_attr(NDDataset(name=k), v) for k, v in val.items()]
+                        datasets = [item_to_attr(NDDataset(), js) for js in val]
                         obj.datasets = datasets
 
                     elif key in ['_projects']:
-                        projects = [item_to_attr(Project(name=k), v) for k, v in val.items()]
+                        projects = [item_to_attr(Project(), js) for js in val]
                         obj.projects = projects
 
                     elif key in ['_scripts']:
-                        scripts = [item_to_attr(Script(name=k), v) for k, v in val.items()]
+                        scripts = [item_to_attr(Script(), js) for js in val]
                         obj.scripts = scripts
 
                     elif key in ['_parent']:
@@ -357,7 +364,8 @@ class NDIO(HasTraits):
                         pass
 
                     else:
-                        # print(key, val)
+                        if isinstance(val, TYPE_BOOL) and key=='_mask':
+                            val = np.bool_(val)
                         setattr(obj, key, val)
 
                 except Exception as e:

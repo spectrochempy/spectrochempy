@@ -298,7 +298,7 @@ Z3['Optik']  # looks what is the Optik block:
 # Hence, for instance, the first dataset can be saved in the JCAMP-DX format:
 
 # %%
-X.write_jcamp('CO@Mo_Al2O3.jdx', save_as=False)   # Put save_as to True to open a dialog
+X.write_jcamp('CO@Mo_Al2O3.jdx', confirm=False)
 
 # %% [markdown]
 # then used (and maybe changed) by a 3rd party software, and re-imported in spectrochempy:

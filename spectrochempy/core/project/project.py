@@ -193,14 +193,14 @@ class Project(AbstractProject, NDIO):
             ns += 1
             sep = "   " * ns
 
-            for k, v in project._projects.items():
+            for k, v in sorted(project._projects.items()):
                 s += "{} ⤷ {} (sub-project)\n".format(sep, k)
                 s = _listproj(s, v, ns)  # recursive call
 
-            for k, v in project._datasets.items():
+            for k, v in sorted(project._datasets.items()):
                 s += "{} ⤷ {} (dataset)\n".format(sep, k)
 
-            for k, v in project._scripts.items():
+            for k, v in sorted(project._scripts.items()):
                 s += "{} ⤷ {} (script)\n".format(sep, k)
 
             if len(s) == lens:

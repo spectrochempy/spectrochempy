@@ -41,7 +41,7 @@ import spectrochempy as scp
 ds = scp.read('irdata/CO@Mo_Al2O3.SPG')
 
 # %%
-ds.y -= ds.y[0]  # start time a 0 for the  first spectrum
+ds.y.offset = ds.y.data[0]  # start time a 0 for the  first spectrum
 ds.y.title = 'Time'
 ds.y = ds.y.to('minutes')
 
@@ -52,6 +52,7 @@ ds.y = ds.y.to('minutes')
 prefs = ds.preferences
 prefs.method_1D = 'scatter+pen'
 prefs.method_2D = 'stack'
+prefs.colorbar = True
 prefs.colormap = 'Dark2'
 
 # %% [markdown] execution={"iopub.execute_input": "2020-06-22T12:21:31.950Z", "iopub.status.busy": "2020-06-22T12:21:31.942Z",
@@ -301,7 +302,7 @@ wl, wr = properties['left_bases'][0], properties['right_bases'][0]
                                              # wavenumbers of of left and right bases
 for w in (wl, wr):
     ax.axvline(w, linestyle='--')            # add vertical line at the bases
-    ax.plot(w, s[w], 'v', color='red')       # and a red mark
+    ax.plot(w, s[w].data, 'v', color='red')  # and a red mark  #TODO: add functtion to plot this easily
 ax = ax.set_xlim(2310.0, 1900.0)             # change x limits to better see the 'left_base'
 
 # %% It leads to base marks at their expected locations. We can further check that the prominence of the [markdown]

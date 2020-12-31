@@ -413,12 +413,13 @@ class GeneralPreferences(MetaConfigurable):
     def _datadir_changed(self, change):
         self.parent.datadir.path = pathclean(change['new'])
 
-    databases = Unicode(help='Directory where to look for database files such as csv').tag(config=True, type="folder")
+    databases = Union((Instance(Path), Unicode()), help='Directory where to look for database files such as csv'
+                      ).tag(config=True, type="folder")
 
     @default('databases')
     def _get_databases_default(self):
         # the spectra path in package data
-        return Path(get_pkg_path(('databases', 'scp_data')))
+        return Path(get_pkg_path('databases', 'scp_data'))
 
     cloudURL = Unicode(help='URL where to look for data by default if not found on datadir').tag(config=True,
                                                                                                  type="folder")

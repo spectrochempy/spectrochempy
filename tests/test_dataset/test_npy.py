@@ -9,7 +9,6 @@ import numpy as np
 import pytest
 
 from spectrochempy.core.dataset.npy import dot
-from spectrochempy.units import ur
 from spectrochempy import diag
 
 def test_npy(ds1):

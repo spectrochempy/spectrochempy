@@ -31,7 +31,7 @@ from traitlets import HasTraits, Instance
 # ----------------------------------------------------------------------------------------------------------------------
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
-from spectrochempy.core import project_preferences
+from spectrochempy.core import dataset_preferences
 from spectrochempy.core.analysis.svd import SVD
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
@@ -97,6 +97,7 @@ class PCA(HasTraits):
             :math:`X' = (X - min(X)) / (max(X)-min(X))`
 
         """
+        self.prefs = dataset.preferences
 
         self.X = X = dataset
 
@@ -483,9 +484,8 @@ class PCA(HasTraits):
                               c=colors,
                               cmap=colormap)
 
-            number_x_labels = project_preferences.number_of_x_labels  # get
-            # from config
-            number_y_labels = project_preferences.number_of_y_labels
+            number_x_labels = self.prefs.number_of_x_labels  # get from config
+            number_y_labels = self.prefs.number_of_y_labels
             # the next two line are to avoid multipliers in axis scale
             y_formatter = ScalarFormatter(useOffset=False)
             ax.yaxis.set_major_formatter(y_formatter)

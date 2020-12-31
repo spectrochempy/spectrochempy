@@ -22,7 +22,7 @@ from datetime import datetime, timezone
 # argrelmax(data[, axis, order, mode]) 	Calculate the relative maxima of data.
 # argrelextrema(data, comparator[, axis, ...]) 	Calculate the relative extrema of data.
 
-def find_peaks(X, height=None, window_length=3, threshold=None, distance=None,
+def find_peaks(dataset, height=None, window_length=3, threshold=None, distance=None,
                prominence=None, width=None, wlen=None, rel_height=0.5,
                plateau_size=None, use_coord=True):
     """
@@ -32,7 +32,7 @@ def find_peaks(X, height=None, window_length=3, threshold=None, distance=None,
 
     Parameters
     ----------
-    x : |NDDataset|
+    dataset : |NDDataset|
         A 1D NDDataset or a 2D NDdataset with `len(X.y) == 1`
     height : number or ndarray or sequence, optional
         Required height of peaks. Either a number, ``None``, an array matching
@@ -168,10 +168,10 @@ def find_peaks(X, height=None, window_length=3, threshold=None, distance=None,
 
     """
 
-    if X.ndim > 2 or (X.ndim == 2 and len(X.y) > 1):
-        raise ValueError("Works only for 1D NDDataset or a 2D NDdataset with `len(X.y) <= 1`")
+    X = dataset.squeeze()
 
-    X = X.squeeze()
+    if X.ndim > 1:
+        raise ValueError("Works only for 1D NDDataset or a 2D NDdataset with `len(X.y) <= 1`")
 
     if window_length % 2 == 0:
         raise ValueError("window_length must be an odd integer")
@@ -183,16 +183,16 @@ def find_peaks(X, height=None, window_length=3, threshold=None, distance=None,
     if use_coord and X.coordset is not None:
         step = np.abs(X.x.data[-1] - X.x.data[0]) / (len(X.x) - 1)
 
-        if isinstance(distance, float):
+        if distance is not None:
             distance = int(round(distance / step))
 
-        if isinstance(width, float):
+        if width is not None:
             width = int(round(width / step))
 
-        if isinstance(wlen, float):
+        if wlen is not None:
             wlen = int(round(wlen / step))
 
-        if isinstance(plateau_size, float):
+        if plateau_size is not None:
             plateau_size = int(round(plateau_size / step))
 
     data = X.data
@@ -200,17 +200,17 @@ def find_peaks(X, height=None, window_length=3, threshold=None, distance=None,
                                                 distance=distance, prominence=prominence, width=width, wlen=wlen,
                                                 rel_height=rel_height, plateau_size=plateau_size)
 
-    if X.ndim == 1:
-        out = X[peaks]
-    else:  # ndim == 2
-        out = X[:, peaks]
+    #if dataset.ndim == 1:
+    out = X[peaks]
+    #else:  # ndim == 2
+    #    out = dataset[:, peaks]
 
     if window_length > 1:
         # quadratic interpolation to find the maximum
         for i, peak in enumerate(peaks):
             y = data[peak - window_length // 2:peak + window_length // 2 + 1]
             if use_coord and X.coordset is not None:
-                x = X.x[peak - window_length // 2:peak + window_length // 2 + 1]
+                x = X.x.data[peak - window_length // 2:peak + window_length // 2 + 1]
             else:
                 x = range(peak - window_length // 2, peak + window_length // 2 + 1)
 

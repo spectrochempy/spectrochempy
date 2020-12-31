@@ -74,7 +74,7 @@ class class_or_instance_method(object):
             else:
                 obj = cls(*args, **kwargs)
 
-            return self.method(obj, *args, **kwargs)
+            return self.method(obj, **kwargs)  # *args,
 
         return func
 
@@ -322,8 +322,9 @@ class NDMath(object):
 
     @property
     def __array_struct__(self):
-        self._mask = self.umasked_data.mask
-        return self._data.__array_struct__
+        if hasattr(self.umasked_data, 'mask'):
+            self._mask = self.umasked_data.mask
+        return self.data.__array_struct__
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
 
@@ -593,9 +594,9 @@ class NDMath(object):
 
             new.data = data
             new.mask = mask
+            new._dims = dims
             if coordset is not None:
                 new.set_coordset(coordset)
-            new._dims = dims
             new.history = 'Diagonal array build from the 1D dataset'
             return new
 
@@ -613,7 +614,7 @@ class NDMath(object):
         # As we reduce a 2D to a 1D we must specified which is the dimension for the coordinates to keep!
 
         if not kwargs.get("axis", kwargs.get("dims", kwargs.get("dim", None))):
-            warning_('dimensions to remove for coordinates must be specified. By default the fist is kept. ')
+            warning_('Dimensions to remove for coordinates must be specified. By default the first is kept. ')
 
         return self._reduce_method('diag', **kwargs)
 

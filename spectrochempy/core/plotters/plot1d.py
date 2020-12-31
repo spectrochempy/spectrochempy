@@ -456,7 +456,7 @@ def plot_1D(dataset, **kwargs):
         # set the color if defined in the preferences or options
         line.set_color(color)
 
-    if (pen or scatterpen) and lw.upper() != 'AUTO':
+    if (pen or scatterpen) and not (isinstance(lw,str) and lw.upper() == 'AUTO'):
         # set the line width if defined in the preferences or options
         line.set_linewidth(lw)
 

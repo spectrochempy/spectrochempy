@@ -200,7 +200,7 @@ class NDComplexArray(NDArray):
         if not new.has_complex_dims:
             return None
 
-        ma = new._masked_data
+        ma = new.masked_data
         if ma.dtype in TYPE_FLOAT:
             new._data = np.zeros_like(ma.data)
         elif ma.dtype in TYPE_COMPLEX:
@@ -210,7 +210,7 @@ class NDComplexArray(NDArray):
             # get the imaginary part (vector part)
             # q = a + bi + cj + dk  ->   qi = bi+cj+dk
             as_float_array(ma)[..., 0] = 0  # keep only the imaginary part
-            new._data = ma.data
+            new._data = ma #.data
         else:
             raise TypeError('dtype %s not recognized' % str(ma.dtype))
 
