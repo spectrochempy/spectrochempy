@@ -220,7 +220,7 @@ class MatplotlibPreferences(MetaConfigurable):
     mathtext_tt = Unicode('monospace', help=r'''''').tag(config=True, kind='')
     mathtext_it = Unicode("dejavusans:italic", help=r'''italic''').tag(config=True, kind='')
     mathtext_bf = Unicode("dejavusans:bold", help=r'''bold''').tag(config=True, kind='')
-    mathtext_sf = Unicode('sans-serif', help=r'''''').tag(config=True, kind='')
+    mathtext_sf = Unicode('sans\-serif', help=r'''''').tag(config=True, kind='')
     mathtext_fontset = Unicode('dejavusans', help=r'''Should be "dejavusans" (default),
                                "dejavuserif", "cm" (Computer Modern), "stix", "stixsans" or "custom"''').tag(
             config=True, kind='')
@@ -263,9 +263,8 @@ class MatplotlibPreferences(MetaConfigurable):
                                     relative to an offset when the data range is small compared to the minimum
                                     absolute value of the data.''').tag(config=True, kind='')
     axes_formatter_offset_threshold = Integer(4, help=r'''When useoffset is True, the offset
-     will be used when it can remove
-     at least this number of significant
-     digits from tick labels.''').tag(config=True, kind='')
+     will be used when it can remove at least this number of significant digits from tick labels.''').tag(
+            config=True, kind='')
     axes_unicode_minus = Bool(True, help=r'''use unicode for the minus symbol rather than hyphen. See
                                 http://en.wikipedia.org/wiki/Plus_and_minus_signs#Character_codes''').tag(config=True,
                                                                                                           kind='')
