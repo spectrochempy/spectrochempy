@@ -50,7 +50,7 @@ def is_kernel():
     return getattr(get_ipython(), 'kernel', None) is not None  # pragma: no cover
 
 
-class _ExecCommand():
+class _ExecCommand:
 
     def __init__(self, command):
         """
@@ -58,7 +58,6 @@ class _ExecCommand():
         Parameters
         ----------
         command: shell command to execute
-        perror: error management
 
         """
         self.commands = [command]
@@ -76,6 +75,7 @@ class _ExecCommand():
         return proc.stdout
 
 
+# noinspection PyPep8Naming
 class sh(object):
     """
     Utility to run subprocess run command as if they were functions

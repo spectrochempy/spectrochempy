@@ -220,7 +220,7 @@ class MatplotlibPreferences(MetaConfigurable):
     mathtext_tt = Unicode('monospace', help=r'''''').tag(config=True, kind='')
     mathtext_it = Unicode("dejavusans:italic", help=r'''italic''').tag(config=True, kind='')
     mathtext_bf = Unicode("dejavusans:bold", help=r'''bold''').tag(config=True, kind='')
-    mathtext_sf = Unicode('sans\-serif', help=r'''''').tag(config=True, kind='')
+    mathtext_sf = Unicode('sans\-serif', help=r'''''').tag(config=True, kind='')  # noqa: W605
     mathtext_fontset = Unicode('dejavusans', help=r'''Should be "dejavusans" (default),
                                "dejavuserif", "cm" (Computer Modern), "stix", "stixsans" or "custom"''').tag(
             config=True, kind='')

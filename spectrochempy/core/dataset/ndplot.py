@@ -231,7 +231,10 @@ class Preferences(Meta):
         for key in mpl.rcParams.keys():
             if key in ['animation.avconv_args', 'animation.avconv_path', 'animation.html_args', 'keymap.all_axes',
                        'mathtext.fallback_to_cm', 'validate_bool_maybe_none', 'savefig.jpeg_quality',
-                       'text.latex.preview']:
+                       'text.latex.preview', 'backend', 'backend_fallback', 'date.epoch', 'docstring.hardcopy',
+                       'figure.max_open_warning', 'figure.raise_window', 'interactive', 'savefig.directory',
+                       'timezone', 'tk.window_focus', 'toolbar', 'webagg.address', 'webagg.open_in_browser',
+                       'webagg.port', 'webagg.port_retries']:
                 continue
             val = str(mpl.rcParams[key])
             sav = ''

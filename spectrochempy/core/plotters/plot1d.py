@@ -357,8 +357,9 @@ def plot_1D(dataset, **kwargs):
 
     xscale = kwargs.get('xscale', 'linear')
     yscale = kwargs.get('yscale', 'linear')
-    ax.set_xscale(xscale, nonpositive='mask')
-    ax.set_yscale(yscale, nonpositive='mask')
+
+    ax.set_xscale(xscale)
+    ax.set_yscale(yscale)
 
     ax.grid(prefs.axes_grid)
 

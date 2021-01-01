@@ -15,7 +15,7 @@ nmrdir = Path('nmrdata/bruker/tests/nmr')
 
 def test_deprecated():
     with pytest.deprecated_call():
-        scp.read_topspin(nmrdir / 'topspin_2d', expno=1, remove_digital_filter=True)
+        scp.read_bruker_nmr(nmrdir / 'topspin_2d', expno=1, remove_digital_filter=True)
 
 
 def test_read_topspin():

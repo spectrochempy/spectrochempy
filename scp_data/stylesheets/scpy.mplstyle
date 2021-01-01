@@ -46,8 +46,6 @@ axes.xmargin                             : 0.0
 axes.ymargin                             : 0.0
 axes3d.grid                              : True
 
-backend                                  : module://backend_interagg
-backend_fallback                         : False
 boxplot.bootstrap                        : None
 boxplot.boxprops.color                   : b
 boxplot.boxprops.linestyle               : -
@@ -97,8 +95,6 @@ date.autoformatter.minute                : %H:%M:%S.%f
 date.autoformatter.month                 : %b %Y
 date.autoformatter.second                : %H:%M:%S.%f
 date.autoformatter.year                  : %Y
-date.epoch                               : 1970-01-01T00:00:00
-docstring.hardcopy                       : False
 
 errorbar.capsize                         : 3.0
 
@@ -113,8 +109,6 @@ figure.edgecolor                         : white
 figure.facecolor                         : white
 figure.figsize                           : 6.8, 4.4
 figure.frameon                           : True
-figure.max_open_warning                  : 30
-figure.raise_window                      : True
 figure.subplot.bottom                    : 0.12
 figure.subplot.hspace                    : 0.0
 figure.subplot.left                      : 0.15
@@ -151,7 +145,6 @@ image.interpolation                      : bilinear
 image.lut                                : 256
 image.origin                             : upper
 image.resample                           : False
-interactive                              : True
 
 keymap.back                              : left, c, backspace
 keymap.copy                              : ctrl+c, cmd+c
@@ -244,7 +237,6 @@ ps.useafm                                : False
 ps.usedistiller                          : None
 
 savefig.bbox                             : standard
-savefig.directory                        :
 savefig.dpi                              : 100.0
 savefig.edgecolor                        : white
 savefig.facecolor                        : white
@@ -265,14 +257,6 @@ text.hinting_factor                      : 8
 text.kerning_factor                      : 0
 text.latex.preamble                      :
 text.usetex                              : False
-timezone                                 : UTC
-tk.window_focus                          : False
-toolbar                                  : toolbar2
-
-webagg.address                           : 127.0.0.1
-webagg.open_in_browser                   : True
-webagg.port                              : 8988
-webagg.port_retries                      : 50
 
 xaxis.labellocation                      : center
 xtick.alignment                          : center
