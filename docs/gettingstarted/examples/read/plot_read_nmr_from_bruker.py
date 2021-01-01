@@ -46,7 +46,7 @@ path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d')
 # load the data in a new dataset
 
 # %%
-ndd = scp.NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+ndd = scp.NDDataset.read_topspin(path, expno=1, remove_digital_filter=True)
 
 # %% [markdown]
 # view it...

@@ -295,7 +295,7 @@ def NMR_dataset_1D():
 @pytest.fixture(scope="function")
 def NMR_dataset_2D():
     path = datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'topspin_2d' / '1' / 'ser'
-    dataset = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True, name="NMR_2D")
+    dataset = NDDataset.read_topspin(path, expno=1, remove_digital_filter=True, name="NMR_2D")
     return dataset.copy()
 
 

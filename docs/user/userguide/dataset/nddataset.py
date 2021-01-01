@@ -715,7 +715,7 @@ path = datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'topspin_1d'
 
 # load the data in a new dataset
 ndd = NDDataset()
-ndd.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+ndd.read_topspin(path, expno=1, remove_digital_filter=True)
 ndd
 
 # %%
@@ -726,7 +726,7 @@ _ = ndd.plot(color='blue')
 path = datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'topspin_2d'
 
 # load the data directly (no need to create the dataset first)
-ndd2 = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+ndd2 = NDDataset.read_topspin(path, expno=1, remove_digital_filter=True)
 
 # view it...
 ndd2.x.to('s')

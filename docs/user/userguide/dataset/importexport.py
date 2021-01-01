@@ -92,7 +92,7 @@ _ = dataset.plot(method='stack')
 
 # %%
 path = 'nmrdata/bruker/tests/nmr/topspin_1d'
-ndd = scp.NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+ndd = scp.NDDataset.read_topspin(path, expno=1, remove_digital_filter=True)
 ndd
 
 # %%

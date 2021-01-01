@@ -31,7 +31,7 @@ import os
 # %%
 # reead an experimental spectra
 path = os.path.join('nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d')
-dataset = scp.NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+dataset = scp.NDDataset.read_topspin(path, expno=1, remove_digital_filter=True)
 dataset = dataset / dataset.max()  # normalization
 # store original data
 nd = dataset.copy()

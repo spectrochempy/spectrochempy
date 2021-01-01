@@ -357,7 +357,7 @@ def plot_2D(dataset, **kwargs):
     ax.set_xlim(xlim)
 
     # xscale = kwargs.get("xscale", "linear")
-    # ax.set_xscale(xscale, nonposx='mask')
+    # ax.set_xscale(xscale, nonpositive='mask')
 
     # set the ordinates axis
     # ------------------------------------------------------------------------------------------------------------------

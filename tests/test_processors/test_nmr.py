@@ -29,7 +29,7 @@ def test_nmr_reader_1D():
 
     # load the data in a new dataset
     ndd = NDDataset()
-    ndd.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+    ndd.read_topspin(path, expno=1, remove_digital_filter=True)
     assert ndd.__str__() == 'NDDataset: [complex128] unitless (size: 12411)'
     assert "<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'> " \
            " coordinates</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px " \
@@ -164,7 +164,7 @@ def test_nmr_manual_1D_phasing(NMR_dataset_1D):
 
 def test_nmr_auto_1D_phasing():
     path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d')
-    ndd = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+    ndd = NDDataset.read_topspin(path, expno=1, remove_digital_filter=True)
     ndd /= ndd.real.data.max()  # normalize
     ndd.em(10. * ur.Hz, inplace=True)
     transf = ndd.fft(tdeff=8192, size=2 ** 15)
@@ -194,7 +194,7 @@ def test_nmr_auto_1D_phasing():
 
 def test_nmr_multiple_manual_1D_phasing():
     path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d')
-    ndd = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+    ndd = NDDataset.read_topspin(path, expno=1, remove_digital_filter=True)
     ndd /= ndd.real.data.max()  # normalize
     ndd.em(10. * ur.Hz)  # inplace broadening
 
@@ -214,7 +214,7 @@ def test_nmr_multiple_manual_1D_phasing():
 
 def test_nmr_multiple_auto_1D_phasing():
     path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d')
-    ndd = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+    ndd = NDDataset.read_topspin(path, expno=1, remove_digital_filter=True)
     ndd /= ndd.real.data.max()  # normalize
     ndd.em(10. * ur.Hz)  # inplace broadening
 
@@ -240,7 +240,7 @@ def test_nmr_reader_2D():
 
     # load the data in a new dataset
     ndd = NDDataset()
-    ndd.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+    ndd.read_topspin(path, expno=1, remove_digital_filter=True)
     assert ndd.__str__() == "NDDataset: [quaternion] unitless (shape: (y:96, x:948))"
     assert "<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px;" in ndd._repr_html_()
 
