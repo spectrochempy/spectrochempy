@@ -69,8 +69,8 @@ def generate_api(api_path):
 
             # some  methods are class method of NDDatasets
             if item in dmethods:
-                from spectrochempy.core.dataset.nddataset import NDIO
-                setattr(NDIO, item, getattr(pkg, item))
+                from spectrochempy.core.dataset.nddataset import NDDataset
+                setattr(NDDataset, item, getattr(pkg, item))
 
     return __all__
 

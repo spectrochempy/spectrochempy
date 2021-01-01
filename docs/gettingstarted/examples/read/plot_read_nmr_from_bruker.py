@@ -8,11 +8,10 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.7.1
 # ---
 
 # %%
-# %matplotlib inline
 
 # %%
 
@@ -27,7 +26,6 @@ Loading of experimental 1D NMR data
 ===================================
 
 In this example, we load a NMR dataset (in the Bruker format) and plot it.
-
 """
 
 # %%

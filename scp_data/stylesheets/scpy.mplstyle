@@ -15,7 +15,7 @@ animation.writer                         : ffmpeg
 axes.autolimit_mode                      : data
 axes.axisbelow                           : True
 axes.edgecolor                           : k
-axes.facecolor                           : #F0F0F0
+axes.facecolor                           : F0F0F0
 axes.formatter.limits                    : -7, 7
 axes.formatter.min_exponent              : 0
 axes.formatter.offset_threshold          : 4

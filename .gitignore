@@ -78,10 +78,8 @@ docs/index.doctree
 generated/
 dist/
 build/
-docs/gen_modules/
-docs/gallery/auto_examples/
-docs/gallery/gen_modules/
-docs/gallery/backreferences/
+*/gen_modules/
+gallery
 docs/modules/
 docs/savefig/
 docs/_templates_old

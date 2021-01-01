@@ -268,7 +268,7 @@ class MatplotlibPreferences(MetaConfigurable):
     axes_unicode_minus = Bool(True, help=r'''use unicode for the minus symbol rather than hyphen. See
                                 http://en.wikipedia.org/wiki/Plus_and_minus_signs#Character_codes''').tag(config=True,
                                                                                                           kind='')
-    axes_prop_cycle = Unicode("cycler('color', ['#0072B2', '#009E73', '#D55E00', '#CC79A7', '#F0E442', '#56B4E9'])",
+    axes_prop_cycle = Unicode("cycler('color', ['007200', '009E73', 'D55E00', 'CC79A7', 'F0E442', '56B4E9'])",
                               help=r'''color cycle for plot lines as list of string colorspecs: single letter,
                             long name, or web-style hex''').tag(config=True, kind='function')
     axes_autolimit_mode = Unicode('data', help=r'''How to scale axes limits to the data. Use "data" to use data

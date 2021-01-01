@@ -20,6 +20,7 @@ import textwrap
 
 from cycler import cycler
 import matplotlib as mpl
+from matplotlib.colors import to_rgba
 # from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import pyplot as plt
 import plotly.graph_objects as go
@@ -453,6 +454,17 @@ class NDPlot(HasTraits):
             prop_cycle = eval(prop_cycle)
 
         colors = prop_cycle.by_key()['color']
+        for i, c in enumerate(colors):
+            try:
+                c = to_rgba(c)
+                colors[i] = c
+            except:
+                try:
+                    c = to_rgba(f'#{c}')
+                    colors[i] = c
+                except:
+                    raise Exception
+
         linestyles = ['-', '--', ':', '-.']
         markers = ['o', 's', '^']
         if ax is not None and (kwargs.pop('scatter', False) or kwargs.pop('scatterpen', False)):

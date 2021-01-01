@@ -10,5 +10,5 @@ exclude =
     .idea
     gui
     docs/sphinxext
-    # docs/user/userguide
+    # docs/userguide
     *.ipynb_checkpoints

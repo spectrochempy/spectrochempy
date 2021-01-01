@@ -101,20 +101,20 @@ if not IN_IPYTHON:
 # workaround this problem https://github.com/jupyter/notebook/issues/3385
 # ip.magic('matplotlib notebook')
 
-# if IN_IPYTHON and kernel and not NO_DISPLAY:
-#     try:
-#         if 'ipykernel_launcher' in sys.argv[0] and \
-#                 "--InlineBackend.rc={'figure.dpi': 96}" in sys.argv:
-#             # We are running from NBSphinx - the plot must be inline to show up.
-#             ip.magic('matplotlib inline')
-#         else:
-#             # Do not set the widget backend.... do not work most of the time after upbgrade of the various
-#             # library and
-#             # jupyter!!! ...
-#             ip.magic('matplotlib inline')  # widget
-#     except Exception:
-#         ip.magic('matplotlib qt')
-#
+if IN_IPYTHON and kernel and not NO_DISPLAY:
+    try:
+        if 'ipykernel_launcher' in sys.argv[0] and \
+                "--InlineBackend.rc={'figure.dpi': 96}" in sys.argv:
+            # We are running from NBSphinx - the plot must be inline to show up.
+            ip.magic('matplotlib inline')
+        else:
+            # Do not set the widget backend.... do not work most of the time after upbgrade of the various
+            # library and
+            # jupyter!!! ...
+            ip.magic('matplotlib inline')  # widget
+    except Exception:
+        ip.magic('matplotlib qt')
+
 
 # set_backend()
 

@@ -8,11 +8,10 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.7.1
 # ---
 
 # %%
-# %matplotlib inline
 
 # %%
 
@@ -27,7 +26,6 @@ Loading an IR (omnic SPG) experimental file
 ============================================
 
 Here we load an experimental SPG file (OMNIC) and plot it.
-
 """
 
 # %%

@@ -3,7 +3,7 @@
 .. _home:
 
 #####################################################################
-SpectroChemPy: Processing, analysing and modelling spectroscopic data
+Processing, analysing and modelling spectroscopic data
 #####################################################################
 
 .. toctree::
@@ -56,6 +56,10 @@ Among its major features:
     bugs and crashes!!! Please report any issues to the
     `Issue Tracker  <https://redmine.spectrochempy.fr/projects/spectrochempy/issues>`_
 
+.. toctree::
+   :hidden:
+
+   Home <self>
 
 ****************
 Getting Started
@@ -63,8 +67,8 @@ Getting Started
 
 * :doc:`gettingstarted/whyscpy`
 * :doc:`gettingstarted/overview`
-* :doc:`gettingstarted/generated/auto_examples/index`
-* :doc:`user/reference/install/index`
+* :doc:`gettingstarted/gallery/auto_examples/index`
+* :doc:`gettingstarted/install/index`
 
 .. toctree::
     :maxdepth: 1
@@ -72,62 +76,66 @@ Getting Started
     :caption: Getting Started
 
     gettingstarted/whyscpy
-    gettingstarted/overview.ipynb
-    Examples <gettingstarted/generated/auto_examples/index>
-    Installation <user/reference/install/index>
+    gettingstarted/overview
+    Examples <gettingstarted/gallery/auto_examples/index>
+    Installation <gettingstarted/install/index>
+
 
 .. _userguide:
+
 
 ***********************
 User's Guide
 ***********************
 
-* :doc:`user/userguide/introduction`
-* :doc:`user/userguide/objects`
-* :doc:`user/userguide/processing`
-* :doc:`user/userguide/analysis`
-* :doc:`user/userguide/units`
-* :doc:`user/userguide/import_export`
-* :doc:`user/userguide/plotting`
-* :doc:`user/userguide/databases`
+* :doc:`userguide/introduction/index`
+* :doc:`userguide/objects`
+* :doc:`userguide/units/index`
+* :doc:`userguide/import_export/index`
+* :doc:`userguide/plotting/index`
+* :doc:`userguide/processing/index`
+* :doc:`userguide/analysis/index`
+* :doc:`userguide/databases/index`
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
+    :hidden:
     :caption: User's Guide
 
-    user/userguide/introduction
-    user/userguide/objects
-    user/userguide/processing
-    user/userguide/analysis
-    user/userguide/units
-    user/userguide/import_export
-    user/userguide/plotting
-    user/userguide/databases
+    userguide/introduction/index
+    userguide/objects
+    userguide/units/index
+    userguide/import_export/index
+    userguide/plotting/index
+    userguide/processing/index
+    userguide/analysis/index
+    userguide/databases/index
 
 ***********************
 Reference & Help
 ***********************
 
-* :doc:`user/reference/changelog`
-* :doc:`user/reference/index`
-* :doc:`user/reference/preference`
-* :doc:`user/reference/faq`
-* :doc:`user/reference/dev/issues`
-* :doc:`user/reference/dev/examples`
-* :doc:`user/reference/dev/contributing`
+* :doc:`userguide/reference/changelog`
+* :doc:`userguide/reference/index`
+* :doc:`userguide/reference/preference`
+* :doc:`userguide/reference/faq`
+* :doc:`devguide/issues`
+* :doc:`devguide/examples`
+* :doc:`devguide/contributing`
 
 .. toctree::
     :maxdepth: 1
     :hidden:
     :caption: Reference & Help
 
-    user/reference/changelog
-    user/reference/index
-    user/reference/preference
-    user/reference/faq
-    Bug reports & feature request <user/reference/dev/issues>
-    Sharing examples <user/reference/dev/examples>
-    user/reference/dev/contributing
+    userguide/reference/changelog
+    userguide/reference/index
+    userguide/reference/preference
+    userguide/reference/faq
+    Bug reports & feature request <devguide/issues>
+    Sharing examples <devguide/examples>
+    devguide/contributing
+
 
 ********
 Credits

@@ -217,11 +217,11 @@ def importermethod(func):
 
 @docstrings.get_sections(base='read_method', sections=['Parameters', 'Other Parameters'])
 @docstrings.dedent
-def read(*args, **kwargs):
+def read(*paths, **kwargs):
     """
     Parameters
     ----------
-    *args : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
+    path : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
         The data source(s) can be specified by the name or a list of name for the file(s) to be loaded:
 
         *e.g.,( file1, file2, ...,  **kwargs )*
@@ -275,17 +275,17 @@ def read(*args, **kwargs):
     Examples
     ---------
 
-    >>> from spectrochempy import NDDataset, read_opus
+    >>> from spectrochempy import NDDataset, read
 
     Reading a single OPUS file  (providing a windows type filename relative to the default ``Datadir``)
 
-    >>> read_opus('irdata\\\\OPUS\\\\test.0000')
+    >>> read('irdata\\\\OPUS\\\\test.0000')
     NDDataset: [float32] a.u. (shape: (y:1, x:2567))
 
     Reading a single OPUS file  (providing a unix/python type filename relative to the default ``Datadir``)
     Note that here read_opus is called as a classmethod of the NDDataset class
 
-    >>> NDDataset.read_opus('irdata/OPUS/test.0000')
+    >>> NDDataset.read('irdata/OPUS/test.0000')
     NDDataset: [float32] a.u. (shape: (y:1, x:2567))
 
     Single file specified with pathlib.Path object
@@ -293,12 +293,12 @@ def read(*args, **kwargs):
     >>> from pathlib import Path
     >>> folder = Path('irdata/OPUS')
     >>> p = folder / 'test.0000'
-    >>> read_opus(p)
+    >>> read(p)
     NDDataset: [float32] a.u. (shape: (y:1, x:2567))
 
     Multiple files not merged (return a list of datasets). Note that a directory is specified
 
-    >>> l = read_opus('test.0000', 'test.0001', 'test.0002', directory='irdata/OPUS')
+    >>> l = read('test.0000', 'test.0001', 'test.0002', directory='irdata/OPUS')
     >>> len(l)
     3
     >>> l[0]
@@ -306,41 +306,46 @@ def read(*args, **kwargs):
 
     Multiple files merged as the `merge` keyword is set to true
 
-    >>> read_opus('test.0000', 'test.0001', 'test.0002', directory='irdata/OPUS', merge=True)
+    >>> read('test.0000', 'test.0001', 'test.0002', directory='irdata/OPUS', merge=True)
     NDDataset: [float32] a.u. (shape: (y:3, x:2567))
 
     Multiple files to merge : they are passed as a list instead of using the keyword `merge`
 
-    >>> read_opus(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS')
+    >>> read(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS')
     NDDataset: [float32] a.u. (shape: (y:3, x:2567))
 
     Multiple files not merged : they are passed as a list but `merge` is set to false
 
-    >>> l = read_opus(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS', merge=False)
+    >>> l = read(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS', merge=False)
     >>> len(l)
     3
 
     Read without a filename. This has the effect of opening a dialog for file(s) selection
 
-    >>> nd = read_opus()
+    >>> nd = read()
 
     Read in a directory (assume that only OPUS files are present in the directory
     (else we must use the generic `read` function instead)
 
-    >>> l = read_opus(directory='irdata/OPUS')
+    >>> l = read(directory='irdata/OPUS')
     >>> len(l)
     4
 
     Again we can use merge to stack all 4 spectra if thet have compatible dimensions.
 
-    >>> read_opus(directory='irdata/OPUS', merge=True)
+    >>> read(directory='irdata/OPUS', merge=True)
     NDDataset: [float32] a.u. (shape: (y:4, x:2567))
 
     See Also
     --------
     read_topspin: read TopSpin Bruker NMR spectra. Equivalent to set protocol='topspin'.
     read_omnic: read Omnic spectra
-    read_spg: Read Omnic *.spg spectra read_spa, read_srs, read_csv, read_matlab, read_zip
+    read_spg: Read Omnic *.spg grouped spectra
+    read_spa: Read Omnic *.Spa single spectra
+    read_srs: Read Omnic series
+    read_csv: Read CSV files
+    read_zip: Read Zip files
+    read_matlab: Read Matlab files
 
     """
 
@@ -358,7 +363,7 @@ def read(*args, **kwargs):
         except KeyError:
             raise ProtocolError(protocol, list(importer.protocols.values()))
 
-    return importer(*args, **kwargs)
+    return importer(*paths, **kwargs)
 
 
 # ......................................................................................................................

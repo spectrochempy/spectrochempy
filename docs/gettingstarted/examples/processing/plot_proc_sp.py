@@ -8,11 +8,10 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.7.1
 # ---
 
 # %%
-# %matplotlib inline
 
 # %%
 
@@ -27,7 +26,6 @@ Sine bell and squared Sine bell window multiplication
 =====================================================
 
 In this example, we use sine bell or squared sine bell window multiplication to apodize a NMR signal in the time domain.
-
 """
 
 # %%

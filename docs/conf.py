@@ -8,7 +8,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.7.1
 # ---
 
 # %%
@@ -156,6 +156,11 @@ pygments_style = 'sphinx'
 # A list of ignored prefixes for module index sorting.
 # modindex_common_prefix = []
 
+
+# %%
+# Show Todo box
+todo_include_todos = True
+
 # %% [markdown]
 # This is added to the end of RST files - a good place to put substitutions to
 # be used globally.
@@ -202,6 +207,7 @@ rst_epilog = """
 .. |Axes| replace:: :class:`~matplotlib.Axes`
 
 .. |userguide| replace:: :ref:`userguide`
+
 
 """
 
@@ -449,7 +455,7 @@ pdf_language = "en_EN"
 # %%
 sphinx_gallery_conf = {
         'plot_gallery': 'True',
-        'backreferences_dir': 'gettingstarted/generated/backreferences',
+        'backreferences_dir': 'gettingstarted/gallery/backreferences',
         'doc_module': ('spectrochempy',),
         'reference_url': {
                 'spectrochempy': None,
@@ -457,7 +463,7 @@ sphinx_gallery_conf = {
         # path to the examples scripts
         'examples_dirs': 'gettingstarted/examples',
         # path where to save gallery generated examples=======
-        'gallery_dirs': 'gettingstarted/generated/auto_examples',
+        'gallery_dirs': 'gettingstarted/gallery/auto_examples',
         'abort_on_example_error': False,
         'expected_failing_examples': [],
         'download_all_examples': False,

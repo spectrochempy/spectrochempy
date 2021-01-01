@@ -5,7 +5,7 @@
 
 .. autofunction:: {{ objname }}
 
-.. include:: /gettingstarted/generated/backreferences/{{fullname}}.examples
+.. include:: /gettingstarted/gallery/backreferences/{{fullname}}.examples
 
 .. raw:: html
 
