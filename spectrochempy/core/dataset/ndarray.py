@@ -32,9 +32,9 @@ from traittypes import Array
 
 from spectrochempy.units import Unit, ur, Quantity, set_nmr_context
 from spectrochempy.core import info_, error_, print_
-from spectrochempy.utils import (TYPE_INTEGER, TYPE_FLOAT, Meta, MaskedConstant, MASKED,
-                                 NOMASK, INPLACE, is_sequence, is_number, numpyprintoptions, insert_masked_print,
-                                 docstrings, SpectroChemPyWarning, make_new_object, convert_to_html, get_user_and_node)
+from spectrochempy.utils import (TYPE_INTEGER, TYPE_FLOAT, Meta, MaskedConstant, MASKED, NOMASK, INPLACE, is_sequence,
+                                 is_number, numpyprintoptions, insert_masked_print, docstrings, SpectroChemPyWarning,
+                                 make_new_object, convert_to_html, get_user_and_node)
 
 # ======================================================================================================================
 # Third party imports
@@ -710,7 +710,6 @@ class NDArray(HasTraits):
                     index.append((np.abs(data - lo)).argmin())  # TODO: add some precision to this result
                 return index
 
-
             elif self.is_labeled:
 
                 # TODO: look in all row of labels
@@ -724,7 +723,6 @@ class NDArray(HasTraits):
             elif isinstance(loc, datetime):
                 # not implemented yet
                 raise NotImplementedError("datetime as location is not yet impemented")  # TODO: date!
-
 
             else:
                 raise IndexError(f'Could not find this location: {loc}')

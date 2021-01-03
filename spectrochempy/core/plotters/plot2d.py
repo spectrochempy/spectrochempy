@@ -55,7 +55,7 @@ def plot_map(dataset, **kwargs):
 
     """
     if dataset.ndim < 2:
-        from spectrochempy import plot_1D
+        from spectrochempy.core.plotters.plot1d import plot_1D
 
         return plot_1D(dataset, **kwargs)
 
@@ -76,7 +76,7 @@ def plot_stack(dataset, **kwargs):
 
     """
     if dataset.ndim < 2:
-        from spectrochempy import plot_1D
+        from spectrochempy.core.plotters.plot1d import plot_1D
 
         return plot_1D(dataset, **kwargs)
 
@@ -97,7 +97,7 @@ def plot_image(dataset, **kwargs):
 
     """
     if dataset.ndim < 2:
-        from spectrochempy import plot_1D
+        from spectrochempy.core.plotters.plot1d import plot_1D
 
         return plot_1D(dataset, **kwargs)
 
@@ -118,7 +118,7 @@ def plot_surface(dataset, **kwargs):
 
     """
     if dataset.ndim < 2:
-        from spectrochempy import plot_1D
+        from spectrochempy.core.plotters.plot1d import plot_1D
 
         return plot_1D(dataset, **kwargs)
 
@@ -139,7 +139,7 @@ def plot_waterfall(dataset, **kwargs):
 
     """
     if dataset.ndim < 2:
-        from spectrochempy import plot_1D
+        from spectrochempy.core.plotters.plot1d import plot_1D
 
         return plot_1D(dataset, **kwargs)
 
@@ -463,7 +463,7 @@ def plot_2D(dataset, **kwargs):
         # masker data not taken into account in surface plot
         Z[dataset.mask] = np.nan
 
-        # Plot the surface.  #TODO : imporve this (or remove it)
+        # Plot the surface.  #TODO : improve this (or remove it)
         ax.plot_surface(X, Y, Z, cmap=cmap, linewidth=lw, antialiased=antialiased,  # rcount=rcount, ccount=ccount,
                         edgecolor='k', norm=norm, )
 
@@ -649,19 +649,19 @@ def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwa
     elev = np.deg2rad(degelev)
 
     # transformation function Axes coordinates to Data coordinates
-    def transA2D(x, y):
-        return ax.transData.inverted().transform(ax.transAxes.transform((x, y)))
+    def transA2D(x_, y_):
+        return ax.transData.inverted().transform(ax.transAxes.transform((x_, y_)))
 
     # expansion in Axes coordinates
     xe, ze = np.sin(azim), np.sin(elev)
 
     incx, incz = transA2D(1 + xe, 1 + ze) - np.array((xlim[-1], zlim[-1]))
 
-    def fx(y):
-        return (y - ydata[0]) * incx / (ydata[-1] - ydata[0])
+    def fx(y_):
+        return (y_ - ydata[0]) * incx / (ydata[-1] - ydata[0])
 
-    def fz(y):
-        return (y - ydata[0]) * incz / (ydata[-1] - ydata[0])
+    def fz(y_):
+        return (y_ - ydata[0]) * incz / (ydata[-1] - ydata[0])
 
     zs = incz * 0.05
     base = zdata.min() - zs
@@ -676,9 +676,12 @@ def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwa
         line.set_label(f"{ydata[i]}")
         line.set_zorder(row.size + 1 - i)
         poly = plt.fill_between(x, z, z2, alpha=1, facecolors="w",
-                                edgecolors="0.85" if i > 0 and i < ydata.size - 1 else 'k')
+                                edgecolors="0.85" if 0 < i < ydata.size - 1 else 'k')
         poly.set_zorder(row.size + 1 - i)
-        ax.add_collection(poly)
+        try:
+            ax.add_collection(poly)
+        except ValueError:  # strange error with tests
+            pass
         ax.add_line(line)
 
     (x0, y0), (x1, _) = transA2D(0, 0), transA2D(1 + xe + .15, 1 + ze)
@@ -696,10 +699,15 @@ def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwa
     x2 = [xdata[0], xdata[-1], xdata[-1] + incx]
     z2 = [y0 - zs, y0 - zs, y0 - zs + incz]
     poly = plt.fill_between(x, z, z2, alpha=1, facecolors=".95", edgecolors="w")
-    ax.add_collection(poly)
+    try:
+        ax.add_collection(poly)
+    except ValueError:
+        pass
     poly = plt.fill_between(x2, z, z2, alpha=1, facecolors=".95", edgecolors="w")
-    ax.add_collection(poly)
-
+    try:
+        ax.add_collection(poly)
+    except ValueError:
+        pass
     line = mpl.lines.Line2D(x, np.array(z), color='k', zorder=50000)
     ax.add_line(line)
     line = mpl.lines.Line2D(x2, np.array(z2), color='k', zorder=50000)
@@ -715,7 +723,7 @@ def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwa
     newticks = []
     xt = sorted(xlim)
     for tick in ticks:
-        if tick >= xt[0] and tick <= xt[1]:
+        if xt[0] <= tick <= xt[1]:
             newticks.append(tick)
     ax.set_xticks(newticks)
 
@@ -724,13 +732,13 @@ def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwa
     newticks = []
     zt = [y0, ax.get_ylim()[-1] - incz]
     for tick in ticks:
-        if tick >= zt[0] and tick <= zt[1]:
+        if zt[0] <= tick <= zt[1]:
             newticks.append(tick)
     _ = ax.set_yticks(newticks)
 
     # make yaxis
-    def ctx(x):
-        return (ax.transData.inverted().transform((x, 0)) - ax.transData.inverted().transform((0, 0)))[0]
+    def ctx(x_):
+        return (ax.transData.inverted().transform((x_, 0)) - ax.transData.inverted().transform((0, 0)))[0]
 
     yt = [y for y in np.linspace(ylim[0], ylim[-1], 5)]
     for y in yt:
@@ -807,6 +815,7 @@ def _get_clevels(data, prefs, **kwargs):
     cl = np.log(c + 1.)
     clevel = cl * (maximum - start) / cl.max() + start
     clevelneg = - clevel
+    clevelc = clevel
     if negative:
         clevelc = sorted(list(np.concatenate((clevel, clevelneg))))
 

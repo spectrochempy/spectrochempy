@@ -20,7 +20,9 @@
 # analyzing spectroscopic data, initially for internal purposes in the
 # [LCS (https://www.lcs.ensicaen.fr)](https://www.lcs.ensicaen.fr).
 #
-# **SpectroChemPy** is essentially a library written in python language and which proposes objects (`NDDataset`, *NDPanel(not yet available)* and `Project`) to contain data, equipped with methods to analyze, transform or display this data in a simple way by the user.
+# **SpectroChemPy** is essentially a library written in python language and which proposes objects (`NDDataset`,
+# *NDPanel(not yet available)* and `Project`) to contain data, equipped with methods to analyze, transform or display
+# this data in a simple way by the user.
 #
 # The processed data are mainly spectroscopic data from techniques such as IR, Raman or NMR, but they are not limited
 # to this type of application, as any type of numerical data arranged in tabular form can generally serve as the main
@@ -43,25 +45,30 @@
 # %% [markdown]
 # ## Loading the API
 #
-# Before using SpectroChemPy, we need to load the **API (Application Programming Interface)**: it exposes many objects and functions.
+# Before using SpectroChemPy, we need to load the **API (Application Programming Interface)**: it exposes many
+# objects and functions.
 #
 # To load the API, you must import it using one of the following syntax.
 #
-# In the first syntax we load the library into a namespace called `scp` (you can choose whatever you want - except something already in use):
+# In the first syntax we load the library into a namespace called `scp` (you can choose whatever you want - except
+# something already in use):
 
 # %%
-import spectrochempy as scp     #SYNTAX 1
+import spectrochempy as scp  # SYNTAX 1
 nd = scp.NDDataset()
+
 
 # %% [markdown]
 # or in the second syntax, with a wild `*` import.
 
 # %%
-from spectrochempy import *      # SYNTAX 2
+from spectrochempy import *
 nd = NDDataset()
 
 # %% [markdown]
-# With the second syntax, as often in python, the access to objects/functions can be greatly simplified. For example, we can use "NDDataset" without a prefix instead of `scp.NDDataset` which is the first syntax) but there is always a risk of overwriting some variables or functions already present in the namespace.
+# With the second syntax, as often in python, the access to objects/functions can be greatly simplified. For example,
+# we can use "NDDataset" without a prefix instead of `scp.NDDataset` which is the first syntax) but there is always a
+# risk of overwriting some variables or functions already present in the namespace.
 # Therefore, the first syntax is generally highly recommended.
 #
 # Alternatively, you can also load only the onbjects and function required by your application:
@@ -69,6 +76,7 @@ nd = NDDataset()
 
 # %%
 from spectrochempy import NDDataset
+
 nd = NDDataset()
 
 # %% [markdown]
@@ -138,7 +146,8 @@ scp.debug_('this is a debug message!')
 # ## Units
 
 # %% [markdown]
-# The objets **ur**, **Quantity**  allows the manipulation of data with units, thanks to pint. (see [Units and Quantities](../units/index.ipynb))
+# The objets **ur**, **Quantity**  allows the manipulation of data with units, thanks to pint. (see [Units and
+# Quantities](../units/index.ipynb))
 #
 # * **ur**: the unit registry
 # * **Quantity**: a scalar or an array with some units
@@ -165,6 +174,7 @@ xa[1] * 2.5
 
 # %%
 import os
+
 nd = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
 
 # %% [markdown]

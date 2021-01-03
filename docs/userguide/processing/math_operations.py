@@ -125,22 +125,23 @@ sqrt(dx)
 
 # %% [markdown]
 # ## Usage
-# To demonstrate the use of mathematical operations on spectrochempy object, we will first load an experimental 2D dataset.
+# To demonstrate the use of mathematical operations on spectrochempy object, we will first load an experimental 2D
+# dataset.
 
 # %%
 d2D = NDDataset.read_omnic('irdata/nh4y-activation.spg')
 prefs = d2D.preferences
 prefs.colormap = 'magma'
 prefs.colorbar = False
-prefs.figure.figsize = (6,3)
+prefs.figure.figsize = (6, 3)
 _ = d2D.plot()
 
 # %% [markdown]
-# Let's select only the first row of the 2D dataset ( the `squeeze` method is used to remove 
+# Let's select only the first row of the 2D dataset ( the `squeeze` method is used to remove
 # the residual size 1 dimension). In addition we mask the saturated region.
 
 # %%
-dataset = d2D[0].squeeze() 
+dataset = d2D[0].squeeze()
 _ = dataset.plot()
 
 # %% [markdown]
@@ -148,7 +149,7 @@ _ = dataset.plot()
 # present negative values and we will also mask some data
 
 # %%
-dataset = dataset - 2.        # add an offset to make that some of the values become negative
+dataset = dataset - 2.  # add an offset to make that some of the values become negative
 dataset[1290.:890.] = MASKED  # additionally we mask some data
 _ = dataset.plot()
 
@@ -605,4 +606,3 @@ daq
 
 # %% pycharm={"name": "#%%\n"}
 daq.dtype
-

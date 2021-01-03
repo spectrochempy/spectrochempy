@@ -88,28 +88,28 @@ Getting Started
 User's Guide
 ***********************
 
-* :doc:`userguide/introduction/index`
+* :doc:`userguide/introduction/introduction`
 * :doc:`userguide/objects`
-* :doc:`userguide/units/index`
-* :doc:`userguide/import_export/index`
-* :doc:`userguide/plotting/index`
-* :doc:`userguide/processing/index`
-* :doc:`userguide/analysis/index`
-* :doc:`userguide/databases/index`
+* :doc:`userguide/units/units`
+* :doc:`userguide/import_export/import_export`
+* :doc:`userguide/plotting/plotting`
+* :doc:`userguide/processing/processing`
+* :doc:`userguide/analysis/analysis`
+* :doc:`userguide/databases/databases`
 
 .. toctree::
     :maxdepth: 1
     :hidden:
     :caption: User's Guide
 
-    userguide/introduction/index
+    userguide/introduction/introduction
     userguide/objects
-    userguide/units/index
-    userguide/import_export/index
-    userguide/plotting/index
-    userguide/processing/index
-    userguide/analysis/index
-    userguide/databases/index
+    userguide/units/units
+    userguide/import_export/import_export
+    userguide/plotting/plotting
+    userguide/processing/processing
+    userguide/analysis/analysis
+    userguide/databases/databases
 
 ***********************
 Reference & Help

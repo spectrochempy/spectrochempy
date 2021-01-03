@@ -26,9 +26,6 @@
 # %%
 import spectrochempy as scp
 
-# %%
-scp.preferences.datadir
-
 # %% [markdown]
 # ## Dialog boxes
 #
@@ -70,7 +67,8 @@ print(X)
 # <div class='alert alert-info'>
 # <b>Note</b>
 #
-# By default the Dialog Box opens in the last directory you have used. However if a directory path is specified, the the dialog should open from this diectory.
+# By default the Dialog Box opens in the last directory you have used. However if a directory path is specified, the
+# dialog should open from this directory.
 # </div>
 
 # %%
@@ -108,7 +106,7 @@ scp.read_omnic('irdata/subdir')
 # above commands can be used with the indication of the path to a directory, and/or to a filename.
 #
 # If only a directory is indicated, the dialog box will open in this directory.
-#     
+#
 # Note that on Windows the path separator is a backslash `\`. However, in many contexts,
 # backslash is also used as an escape character in order to represent non-printable characters. To avoid problems,
 # either it has to be escaped itself,  a double backslash or one can also use raw string literals
@@ -125,16 +123,16 @@ scp.read_omnic('irdata/subdir')
 #
 # ```python
 # X = scp.read_omnic(directory=r'C:\users\Brian')
-# ``` 
+# ```
 #
 # and will open the dialog box at the root directory of the `C:` drive.
 #
 # You can avoid using the form `\\` or the use of raw strings by using conventional slash `/`. In python
 # they play the path separator role, as well in Windows than in other unix-based system (Linux, OSX, ...)
-#     
+#
 # ```python
 # X = scp.read_omnic(directory='C:/users/Brian')
-# ``` 
+# ```
 
 # %% [markdown]
 # If a `filename` is passed in argument, like here:
@@ -203,16 +201,16 @@ scp.read_omnic('irdata/subdir')
 # import os
 # os.getcwd()              # returns the absolute path of the current working directory preferences.datadir
 # os.path.expanduser("~")  # returns the home directory of the user
-# os.path.join('path1','path2','path3', ...)   # intelligently concatenates path components 
+# os.path.join('path1','path2','path3', ...)   # intelligently concatenates path components
 #                                              # using the system seprator (`/`or `\\`)
 # ```
 #
 # Using `Pathlib` is even simpler:
 # ```python
 # from pathlib import Path
-# Path.cwd()               # returns the absolute path of the current working directory 
-# Path.home()              # returns the home directory of the user           
-# Path('path1') / 'path2' / 'path3' / '...'   # intelligently concatenates path components 
+# Path.cwd()               # returns the absolute path of the current working directory
+# Path.home()              # returns the home directory of the user
+# Path('path1') / 'path2' / 'path3' / '...'   # intelligently concatenates path components
 # ```
 #
 #  The interested readers will find more details on the use of these modules here:
@@ -234,12 +232,6 @@ DATADIR
 
 # %%
 X = scp.read_omnic(DATADIR / 'wodger.spg')
-
-# %%
-from pathlib import Path
-DATADIR = scp.preferences.datadir = Path.cwd()
-scp.preferences.use_qt=True
-
 
 # %% [markdown]
 # It can be set to another pathname *permanently* (i.e., even after computer restart) by a new assignment:
@@ -350,4 +342,3 @@ ndd
 # %%
 # view it...
 _ = ndd.plot(color='blue')
-

@@ -21,7 +21,6 @@ import matplotlib as mpl
 from IPython.core.interactiveshell import InteractiveShell
 from IPython import get_ipython
 
-__all__ = ['IN_IPYTHON', 'NO_DISPLAY', 'ip', 'kernel']
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Check the environment for plotting
@@ -81,14 +80,17 @@ if not (IN_IPYTHON and kernel) and not IN_PYCHARM_SCIMODE and not NO_DISPLAY:
     backend = mpl.rcParams['backend']  # 'Qt5Agg'
     mpl.use(backend, force=True)
 
+ALL = ['NO_DISPLAY', 'NO_DIALOG']
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Now we can start loading the API
 # ----------------------------------------------------------------------------------------------------------------------
 # import the core api
+from spectrochempy import core
 from spectrochempy.core import *  # noqa: F403, F401, E402
-from spectrochempy import core  # noqa: E402
 
-__all__ += core.__all__
+ALL += core.__all__
+
 
 if not IN_IPYTHON:
     # needed in windows terminal - but must not be inited in Jupyter notebook
@@ -123,7 +125,7 @@ from spectrochempy.utils import pathclean
 
 DATADIR = pathclean(preferences.datadir)
 
-__all__ += ['pathclean', 'DATADIR']
+__all__ = ['pathclean', 'DATADIR'] + ALL
 
 import warnings
 

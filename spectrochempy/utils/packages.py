@@ -40,6 +40,7 @@ def generate_api(api_path):
     # name of the package
 
     dirname, name = os.path.split(os.path.split(api_path)[0])
+
     if not dirname.endswith('spectrochempy'):
         dirname, _name = os.path.split(dirname)
         name = _name + '.' + name
@@ -61,6 +62,7 @@ def generate_api(api_path):
             continue
         a = getattr(pkg, '__all__', [])
         dmethods = getattr(pkg, '__dataset_methods__', [])
+
         __all__ += a
         for item in a:
 

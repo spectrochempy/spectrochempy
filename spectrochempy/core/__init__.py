@@ -40,8 +40,9 @@ warnings.filterwarnings("ignore")
 # ======================================================================================================================
 
 __all__ = [
-        # Useful librairies alias for the end user avoiding to load them
-        # --------------------------------------------------------------
+
+        # Useful librairies alias for the end user avoiding to load them when wild card import is used
+        # --------------------------------------------------------------------------------------------
 
         'np', 'plt', 'scipy', 'os', 'sys', 'mpl',
 
@@ -217,20 +218,8 @@ __all__ += [
 # we put them before so that we can eventually overwrite them
 
 _pbar_update()
-# from IPython.core.display import *          # noqa: E402,F403,F401
-# from IPython.core import display            # noqa: E402
 
-# __all__.extend(display.__all__)
 
-# from IPython.lib.display import *           # noqa: E402,F401,F403
-# from IPython.lib import display             # noqa: E402
-
-# __all__.extend(display.__all__)
-
-"""
-This packages contains most of the core methods expose in the spectrochempy API.
-
-"""
 # constants
 # ----------------------------------------------------------------------------------------------------------------------
 from spectrochempy.utils import show, MASKED, NOMASK, EPSILON, INPLACE  # noqa: E402

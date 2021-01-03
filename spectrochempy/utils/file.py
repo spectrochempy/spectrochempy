@@ -316,7 +316,7 @@ def get_filename(*filenames, **kwargs):
     """
 
     from spectrochempy.core import preferences as prefs
-    from spectrochempy.api import NO_DISPLAY, NO_DIALOG
+    from spectrochempy import NO_DISPLAY, NO_DIALOG
     from spectrochempy.core import open_dialog
 
     NODIAL = NO_DIALOG or 'DOC_BUILDING' in environ  # suppress dialog when doc is built or during full testing
@@ -507,7 +507,7 @@ def readdirname(directory):
     """
 
     from spectrochempy.core import preferences as prefs
-    from spectrochempy.api import NO_DISPLAY, NO_DIALOG
+    from spectrochempy import NO_DISPLAY, NO_DIALOG
     from spectrochempy.core import open_dialog
 
     data_dir = pathclean(prefs.datadir)
@@ -547,7 +547,7 @@ def readdirname(directory):
 # ......................................................................................................................
 def check_filename_to_save(dataset, filename=None, save_as=True, confirm=True, **kwargs):
 
-    from spectrochempy.api import NO_DIALOG
+    from spectrochempy import NO_DIALOG
     from spectrochempy.core import save_dialog
 
     NODIAL = NO_DIALOG or 'DOC_BUILDING' in environ

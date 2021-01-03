@@ -19,7 +19,8 @@
 # # Markdown Cheat Sheet
 
 # %% [markdown]
-# Copied and adapted from __[this guide](https://www.ibm.com/support/knowledgecenter/en/SSGNPV_2.0.0/dsx/markd-jupyter.html)__!
+# Copied and adapted
+# from __[this guide](https://www.ibm.com/support/knowledgecenter/en/SSGNPV_2.0.0/dsx/markd-jupyter.html)__!
 #
 # This Markdown cheat sheet provides a quick overview of all the Markdown syntax elements to format Markdown cells in
 # Jupyter notebooks.
@@ -147,14 +148,14 @@
 # * Yellow boxes (alert-warning)
 # * Green boxes (alert-success)
 # * Red boxes (alert-danger)
-#     
+#
 # ```
 # <div class="alert alert-block alert-info">
 # <b>Tip:</b>  For example use blue boxes to highlight a tip.
 # If it’s a note, you don’t have to include the word “Note”.
 # </div>
 # ```
-#     
+#
 # <div class="alert alert-block alert-info">
 # <b>Tip:</b> For example use blue boxes to highlight a tip.
 # If it’s a note, you don’t have to include the word “Note”.

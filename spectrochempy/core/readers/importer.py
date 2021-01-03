@@ -131,7 +131,7 @@ class Importer(HasTraits):
 
         else:
             # by default returned objtype is NDDataset (import here to avoid circular import)
-            from spectrochempy import NDDataset
+            from spectrochempy.core.dataset.nddataset import NDDataset
 
             self.objtype = kwargs.pop('objtype', NDDataset)
 

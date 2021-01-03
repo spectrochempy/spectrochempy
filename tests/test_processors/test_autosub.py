@@ -10,7 +10,7 @@
 
 import numpy as np
 
-from spectrochempy.api import show
+from spectrochempy import show
 from spectrochempy.core.processors.autosub import autosub
 
 

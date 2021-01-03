@@ -18,11 +18,12 @@
 # %% [markdown]
 # # Slicing datasets
 #
-# Here we shows how to handle NDDatasets using python slicing. 
+# Here we shows how to handle NDDatasets using python slicing.
 
 
 # %%
 import numpy as np
+
 import spectrochempy as scp
 
 # %% [markdown]
@@ -54,7 +55,7 @@ print(X[::-2])  # a negative step will slice backward, starting from 'to', endin
 # %%
 X = np.random.rand(10, 10)  # genarates a 10x10 array filled with random values
 print(X.shape)
-print(X[2:5, :].shape)    # slices along the 1st dimension, X[2:5,] is equivalent
+print(X[2:5, :].shape)  # slices along the 1st dimension, X[2:5,] is equivalent
 print(X[2:5, ::2].shape)  # same slice along 1st dimension and takes one 1 column out of two along the second
 
 # %% [markdown]
@@ -80,9 +81,9 @@ X.y.title = 'Time'
 X
 
 # %%
-prefs = X.preferences          # set up general preferences for plotting
+prefs = X.preferences  # set up general preferences for plotting
 prefs.colormap = 'Dark2'
-prefs.figure.figsize = (7,3)
+prefs.figure.figsize = (7, 3)
 
 # %%
 _ = X.plot()  # assignment to _ avoids the display of the text ouput from plot. We want only the plot
@@ -116,7 +117,8 @@ X[:, 200:1000:2].x  # as the Coord can be sliced, the same is obtained with: X.x
 # ### Slicing with coordinates
 #
 # Now the spectroscopist is generally interested in a particular region of the spectrum, for instance,
-# 2300-1900 cm$^{-1}$. Can you easily guess the indexes that one should use to spectrum this region ? probably not without a calculator! ...
+# 2300-1900 cm$^{-1}$. Can you easily guess the indexes that one should use to spectrum this region ? probably not
+# without a calculator! ...
 #
 # Fortunately, a simple mechanism has been implemented in SpectroChemPy for this purpose: the use of floats instead
 # of integers will slice the NDDataset at the corresponding coordinates. For instance to select the 2300-1900 cm$^{
@@ -143,10 +145,11 @@ X[60.].y  # X[60.] slices the spectrum,  .y returns the corresponding `y` axis.
 # ### Slicing with labels
 
 # %% [markdown]
-# The X dataset have several lists of labels in the y dimension. Let's display the first series (which is compose of dtetime objects)
+# The X dataset have several lists of labels in the y dimension. Let's display the first series (which is compose of
+# dtetime objects)
 
 # %%
-for i,item in enumerate(X.y.labels[:,0]):
+for i, item in enumerate(X.y.labels[:, 0]):
     print(i, '->', item, type(item))
 
 # %% [markdown]
@@ -154,23 +157,23 @@ for i,item in enumerate(X.y.labels[:,0]):
 
 # %%
 from datetime import datetime, timezone
-date1 = datetime(2016,10,18,15,24,4, tzinfo=timezone.utc)
+
+date1 = datetime(2016, 10, 18, 15, 24, 4, tzinfo=timezone.utc)
 X[date1] == X[10]
 
 # %% [markdown]
 # One can mixed slicing methods for different dimension:
 
 # %%
-d = X[date1, 2000.:2300.] 
+d = X[date1, 2000.:2300.]
 _ = d.plot()
-
 
 # %% [markdown]
 # We can also take a range of labels
 
 # %%
-date2 = datetime(2016,10,18,15,52,3, tzinfo=timezone.utc)
-d = X[date1:date2, 2000.:2300.] 
+date2 = datetime(2016, 10, 18, 15, 52, 3, tzinfo=timezone.utc)
+d = X[date1:date2, 2000.:2300.]
 _ = d.plot()
 
 # %% [markdown]
@@ -181,6 +184,6 @@ _ = d.plot()
 # <b>Todo</b>
 #
 #    Slicing dataset with multiple coordinates on one dimension
-#     
+#
 #    Add advanced slicing by array of indexes, array of bool,  ...
 # </div>

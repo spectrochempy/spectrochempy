@@ -39,7 +39,7 @@ NDDataset
    :glob:
    :maxdepth: 2
 
-   dataset/index
+   dataset/dataset
 
 Project
 *******
@@ -54,7 +54,7 @@ Project
    :glob:
    :maxdepth: 2
 
-   project/index
+   project/project
 
 Script
 ******

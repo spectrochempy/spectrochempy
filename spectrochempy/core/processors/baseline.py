@@ -23,16 +23,17 @@ from traitlets import Int, Instance, HasTraits, Float, Unicode, Tuple, List
 from matplotlib.widgets import SpanSelector
 import matplotlib.pyplot as plt
 
-# ----------------------------------------------------------------------------------------------------------------------
-# localimports
-# ----------------------------------------------------------------------------------------------------------------------
-
 from ..dataset.ndcoordrange import CoordRange
 from ..plotters.multiplot import multiplot
 from ..dataset.nddataset import NDDataset
 from ...utils import docstrings, TYPE_INTEGER, TYPE_FLOAT
 from .smooth import smooth
 from .. import error_, debug_
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# localimports
+# ----------------------------------------------------------------------------------------------------------------------
 
 
 class BaselineCorrection(HasTraits):
@@ -63,10 +64,7 @@ class BaselineCorrection(HasTraits):
 
     @docstrings.get_sections(base='BaselineCorrection', sections=['Parameters', 'Other Parameters'])
     @docstrings.dedent
-    def __init__(self,
-                 dataset,
-                 *ranges,
-                 **kwargs):
+    def __init__(self, dataset, *ranges, **kwargs):
         """
         Parameters
         ----------
@@ -130,18 +128,17 @@ class BaselineCorrection(HasTraits):
         if not ranges:
             # look in the kwargs
             ranges = kwargs.pop('ranges', ())
-        if isinstance(ranges, tuple) and len(ranges)==1:
-            ranges = ranges[0]   # probably passed with no start to the compute function
+        if isinstance(ranges, tuple) and len(ranges) == 1:
+            ranges = ranges[0]  # probably passed with no start to the compute function
         if not isinstance(ranges, (list, tuple)):
             ranges = list(ranges)
         if not ranges:
             return
 
         if len(ranges) == 2:
-                if (isinstance(ranges[0], TYPE_INTEGER + TYPE_FLOAT) and
-                    isinstance(ranges[1], TYPE_INTEGER + TYPE_FLOAT)):
-                    # a pair a values, we intepret this as a single range
-                    ranges = [[ranges[0], ranges[1]]]
+            if (isinstance(ranges[0], TYPE_INTEGER + TYPE_FLOAT) and isinstance(ranges[1], TYPE_INTEGER + TYPE_FLOAT)):
+                # a pair a values, we intepret this as a single range
+                ranges = [[ranges[0], ranges[1]]]
         # find the single values
         for item in ranges:
             if isinstance(item, TYPE_INTEGER + TYPE_FLOAT):
@@ -236,8 +233,8 @@ class BaselineCorrection(HasTraits):
                 if np.any(np.isnan(sbase)):
                     sbase[np.isnan(sbase)] = 0
 
-                polycoef = np.polynomial.polynomial.polyfit(xbase.data, sbase.data.T,
-                                                            deg=self.order, rcond=None, full=False)
+                polycoef = np.polynomial.polynomial.polyfit(xbase.data, sbase.data.T, deg=self.order, rcond=None,
+                                                            full=False)
                 baseline = np.polynomial.polynomial.polyval(coords.data, polycoef)
 
             elif self.interpolation == 'pchip':
@@ -265,8 +262,7 @@ class BaselineCorrection(HasTraits):
                     baseline_loadings[i] = y(coords)
 
             elif self.interpolation == 'polynomial':
-                polycoef = np.polynomial.polynomial.polyfit(xbase.data, Pt.T,
-                                                            deg=self.order, rcond=None, full=False)
+                polycoef = np.polynomial.polynomial.polyfit(xbase.data, Pt.T, deg=self.order, rcond=None, full=False)
 
                 baseline_loadings = np.polynomial.polynomial.polyval(coords.data, polycoef)
 
@@ -301,7 +297,7 @@ class BaselineCorrection(HasTraits):
         if self.sps:
             for sp in self.sps:
                 sp.remove()
-        self.sps=[]
+        self.sps = []
         self.ranges = list(CoordRange(*self.ranges))
         for x in self.ranges:
             x.sort()
@@ -323,14 +319,8 @@ class BaselineCorrection(HasTraits):
 
         datasets = [self.dataset, self.dataset]
         labels = ['Click on left button & Span to set regions.'
-                  'Click on right button on a region to remove it.',
-                  'Baseline corrected dataset preview']
-        axes = multiplot(datasets, labels,
-                         method='stack',
-                         sharex=True,
-                         nrow=2,
-                         ncol=1,
-                         figsize=self.figsize,
+                  'Click on right button on a region to remove it.', 'Baseline corrected dataset preview']
+        axes = multiplot(datasets, labels, method='stack', sharex=True, nrow=2, ncol=1, figsize=self.figsize,
                          suptitle='INTERACTIVE BASELINE CORRECTION')
 
         fig = plt.gcf()
@@ -339,24 +329,20 @@ class BaselineCorrection(HasTraits):
         ax1 = axes['axe11']
         ax2 = axes['axe21']
 
-
         self._extendranges(*ranges, **kwargs)
         self.ranges = list(CoordRange(*self.ranges))
         self.show_regions(ax1)
-
 
         def show_basecor(ax2):
 
             corrected = self.compute()
 
             ax2.clear()
-            ax2.set_title('Baseline corrected dataset preview',
-                          fontweight='bold', fontsize=8)
+            ax2.set_title('Baseline corrected dataset preview', fontweight='bold', fontsize=8)
             if self.zoompreview > 1:
                 zb = 1.  # self.zoompreview
                 zlim = [corrected.data.min() / zb, corrected.data.max() / zb]
-                _ = corrected.plot_stack(ax=ax2, colorbar=False,
-                                         zlim=zlim, clear=False)
+                _ = corrected.plot_stack(ax=ax2, colorbar=False, zlim=zlim, clear=False)
             else:
                 _ = corrected.plot_stack(ax=ax2, colorbar=False, clear=False)
 
@@ -377,12 +363,11 @@ class BaselineCorrection(HasTraits):
                         self.ranges.remove(r)
                         self.show_regions(ax1)
                         show_basecor(ax2)
-                        fig.canvas.draw()  #_idle
+                        fig.canvas.draw()  # _idle
 
         _ = fig.canvas.mpl_connect('button_press_event', onclick)
 
-        _ = SpanSelector(ax1, onselect, 'horizontal', minspan=5,
-                         button=[1], useblit=True,
+        _ = SpanSelector(ax1, onselect, 'horizontal', minspan=5, button=[1], useblit=True,
                          rectprops=dict(alpha=0.5, facecolor='blue'))
 
         fig.canvas.draw()
@@ -571,7 +556,7 @@ def _planeFit(points):
 
 def _svdbase(data, args=None, retw=False):
     # Apply a planar baseline correction to 2D data
-    import pandas as pd   # TODO: suppress this need
+    import pandas as pd  # TODO: suppress this need
     if not args:
         window = 0.05
         step = 5

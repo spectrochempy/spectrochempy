@@ -46,6 +46,8 @@ import sys
 from time import time
 from pathlib import Path
 
+__all__ = ['api']
+
 if '/bin/scpy_update' not in sys.argv[0]:  # avoid indefinite loop of calls this process
 
     p = Path('~/.spectrochempy/tmp')
@@ -63,10 +65,11 @@ if '/bin/scpy_update' not in sys.argv[0]:  # avoid indefinite loop of calls this
         q.write_text(str(time()))
 
 # import the main api
-from spectrochempy.api import *  # noqa: F403,F401
 from spectrochempy import api
+from spectrochempy.api import *
 
-__all__ = api.__all__
+__all__ += api.__all__
+
 
 
 # ==============================================================================

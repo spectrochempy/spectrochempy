@@ -19,20 +19,20 @@ __dataset_methods__ = __all__
 
 from io import StringIO
 
-# ----------------------------------------------------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------------------------------------------------
-
 import numpy as np
 import requests
 
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.core import error_
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# third party imports
+# ----------------------------------------------------------------------------------------------------------------------
 # ----------------------------------------------------------------------------------------------------------------------
 # local imports
 # ----------------------------------------------------------------------------------------------------------------------
-
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoord import Coord
-
 
 # ............................................................................
 def download_IRIS():
@@ -45,7 +45,8 @@ def download_IRIS():
     try:
         connection = True
         response = requests.get(url, stream=True, timeout=10)
-    except requests.ConnectTimeout:
+    except Exception as e:
+        error_(e)
         connection = False
 
     if connection:  # Download data
@@ -60,17 +61,12 @@ def download_IRIS():
             labels = np.loadtxt(fil, delimiter=',', usecols=(4,), dtype='|S')
             labels = list((lab.decode("utf8") for lab in labels))
         except Exception:
-            raise IOError(
-                    '{} is not a .csv file or its structure cannot be recognized')
+            raise IOError('{} is not a .csv file or its structure cannot be recognized')
 
         coordx = Coord(labels=['sepal_length', 'sepal width', 'petal_length', 'petal_width'], title='features')
         coordy = Coord(labels=labels, title='samples')
 
-        new = NDDataset(data,
-                        coordset=[coordy, coordx],
-                        title='size',
-                        name='IRIS Dataset',
-                        units='cm')
+        new = NDDataset(data, coordset=[coordy, coordx], title='size', name='IRIS Dataset', units='cm')
 
         new.history = 'Loaded from UC Irvine machine learning repository'
 
@@ -78,31 +74,26 @@ def download_IRIS():
 
     else:
         # Cannot download - use the scikit-learn dataset (if scikit-learn is installed)
-        from spectrochempy.core import HAS_SCIKITLEARN
 
-        if HAS_SCIKITLEARN:
+        try:
             from sklearn import datasets
-
-            # import some data to play with
-            data = datasets.load_iris()
-
-            coordx = Coord(labels=['sepal_length', 'sepal width', 'petal_length', 'petal_width'], title='features')
-            labels = [data.target_names[i] for i in data.target]
-            coordy = Coord(labels=labels, title='samples')
-
-            new = NDDataset(data.data,
-                            coordset=[coordy, coordx],
-                            title='size',
-                            name='IRIS Dataset',
-                            units='cm')
-
-            new.history = 'Loaded from scikit-learn datasets'
-
-            return new
-
-        else:
-
+        except ImportError:
             raise IOError('Failed in uploading the IRIS dataset!')
+
+        # import some data to play with
+        data = datasets.load_iris()
+
+        coordx = Coord(labels=['sepal_length', 'sepal width', 'petal_length', 'petal_width'], title='features')
+        labels = [data.target_names[i] for i in data.target]
+        coordy = Coord(labels=labels, title='samples')
+
+        new = NDDataset(data.data, coordset=[coordy, coordx], title='size', name='IRIS Dataset', units='cm')
+
+        new.history = 'Loaded from scikit-learn datasets'
+
+        return new
+
+
 
 
 # ======================================================================================================================

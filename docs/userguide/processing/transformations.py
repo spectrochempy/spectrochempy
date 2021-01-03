@@ -28,7 +28,7 @@ dataset
 
 # %%
 prefs = dataset.preferences
-prefs.figure.figsize = (6,3)
+prefs.figure.figsize = (6, 3)
 prefs.colormap = 'Dark2'
 prefs.colorbar = True
 ax = dataset.plot()
@@ -44,7 +44,8 @@ ax = dataset.plot()
 dataset.max()
 
 # %% [markdown]
-# One way is to apply the max function to only a part of the spectrum (using [slicing](slicing)). Another way is to mask the undesired data.
+# One way is to apply the max function to only a part of the spectrum (using [slicing](slicing)). Another way is to
+# mask the undesired data.
 #
 # Masking values in this case is straigthforward. Just set a value `masked` or True for those data you want to mask.
 
@@ -65,7 +66,7 @@ _ = dataset.plot_stack()
 dataset.max()
 
 # %% [markdown]
-# To clear this mask, we can simply do: 
+# To clear this mask, we can simply do:
 
 # %%
 dataset.remove_masks()
@@ -78,7 +79,7 @@ _ = dataset.plot()
 # Dataset can be transposed
 
 # %%
-dataset[:, 1290.:890.] = MASKED   # we mask the unwanted colomns
+dataset[:, 1290.:890.] = MASKED  # we mask the unwanted colomns
 datasetT = dataset.T
 datasetT
 
@@ -97,7 +98,9 @@ _ = datasetT.plot()
 # ## Changing units
 
 # %% [markdown]
-# Units of the data and coordinates can be changed, but only towards compatible units. For instance, data are in absorbance units, which are dimensionless (**a.u**). So a dimensionless units such as **radian** is allowed, even if in this case it maks very little sense. 
+# Units of the data and coordinates can be changed, but only towards compatible units. For instance, data are in
+# absorbance units, which are dimensionless (**a.u**). So a dimensionless units such as **radian** is allowed,
+# even if in this case it maks very little sense.
 
 # %%
 dataset.units = 'radian'
@@ -122,7 +125,8 @@ d = dataset.to('meter', force=True)
 print(d.units)
 
 # %% [markdown]
-# When units are compatible there is no problem to modify it. For instance, we can change the `y` dimension units (Time) to hours. Her we use the inplace transformation `ito`.
+# When units are compatible there is no problem to modify it. For instance, we can change the `y` dimension units (
+# Time) to hours. Her we use the inplace transformation `ito`.
 
 # %%
 dataset.y.ito('hours')

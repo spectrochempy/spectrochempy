@@ -36,7 +36,7 @@ X[:, 1290.:890.] = scp.MASKED
 
 # %%
 prefs = X.preferences
-prefs.figure.figsize = (7,3)
+prefs.figure.figsize = (7, 3)
 prefs.colormap = 'magma'
 _ = X.plot()
 
@@ -119,10 +119,12 @@ _ = Xcorr.plot()
 #
 # The previous correction was made using the default parameters for the interpolation ,i.e. an interpolation using
 # cubic Hermite spline interpolation: `interpolation='pchip'` (`pchip` stands for **P**iecewise **C**ubic **H**ermite
-# **I**nterpolating **P**olynomial). This option triggers the use of [scipy.interpolate.PchipInterpolator()](https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.PchipInterpolator.html) to which we refer
+# **I**nterpolating **P**olynomial). This option triggers the use of [scipy.interpolate.PchipInterpolator()](
+# https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.PchipInterpolator.html) to which we refer
 # the interested readers. The other interpolation method is the classical polynomial interpolation
 # (`interpolation='polynomial'`) in which case the order can also be set (e.g. `order=3`, the default value being 6).
-# In this case, the base methods used for the interpolation are those of the [polynomial module](https://numpy.org/doc/stable/reference/routines.polynomials.polynomial.html) of spectrochempy, in particular the
+# In this case, the base methods used for the interpolation are those of the [polynomial module](
+# https://numpy.org/doc/stable/reference/routines.polynomials.polynomial.html) of spectrochempy, in particular the
 # [polyfit()](https://numpy.org/doc/stable/reference/generated/numpy.polynomial.polynomial.polyfit.html#numpy
 # .polynomial.polynomial.polyfit) method.
 #
@@ -213,13 +215,8 @@ npc = 3  # only used for 'multivariate'
 blc = scp.BaselineCorrection(X)
 Xcorr = blc.compute(*ranges, interpolation=interpolation, order=order, method=method, npc=npc)
 
-axes = scp.multiplot([X,Xcorr], 
-                 labels=['Original', 'Baseline corrected'],
-                 sharex=True,
-                 nrow=2,
-                 ncol=1,
-                 figsize=(7,6),
-                 dpi=96)
+axes = scp.multiplot([X, Xcorr], labels=['Original', 'Baseline corrected'], sharex=True, nrow=2, ncol=1, figsize=(7, 6),
+                     dpi=96)
 blc.show_regions(axes['axe21'])
 
 # %% [markdown]

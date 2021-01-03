@@ -58,7 +58,8 @@ from spectrochempy import ur
 # %% [markdown]
 # Multidimensional array are defined in Spectrochempy using the `NDDataset` object.
 #
-# `NDDataset` objects mostly behave as numpy's `numpy.ndarray` (see for instance __[numpy quikstart tutorial](https://numpy.org/doc/stable/user/quickstart.html)__).
+# `NDDataset` objects mostly behave as numpy's `numpy.ndarray`
+# (see for instance __[numpy quikstart tutorial](https://numpy.org/doc/stable/user/quickstart.html)__).
 
 # %% [markdown]
 # However, unlike raw numpy's ndarray, the presence of optional properties make them (hopefully) more appropriate for
@@ -83,7 +84,7 @@ d1D
 # %% [markdown]
 # <div class='alert alert-info'>
 #     <b>Note</b>
-#     
+#
 #  In the above code, run in a notebook, the output of d1D is in html for a nice display.
 #
 #  To get the same effect, from a console script, one can use `print_` (with an underscore) and not the usual python
@@ -99,7 +100,7 @@ print(d1D)
 scp.print_(d1D)
 
 # %%
-_ = d1D.plot(figsize=(3, 2))  
+_ = d1D.plot(figsize=(3, 2))
 
 # %% [markdown]
 # Except few addtional metadata such `author`, `created` ..., there is not much
@@ -471,7 +472,7 @@ d3D
 # %% [markdown]
 # <div class='alert alert-warning'>
 # <b>WARNING</b>
-#     
+#
 # Do not use list for setting multiples coordinates! use tuples
 # </div>
 
@@ -617,7 +618,7 @@ if datadir.exists():
     print(datadir.name)
 
 # %% [markdown]
-# Let's load grouped IR spectra acquired using OMNIC: 
+# Let's load grouped IR spectra acquired using OMNIC:
 
 # %%
 nd = NDDataset.read_omnic(datadir / 'irdata/nh4y-activation.spg')
