@@ -15,7 +15,7 @@
 # ---
 
 # %% [markdown]
-# # Plotting a NDDataset
+# # Plotting
 
 # %% [markdown]
 # ## Load the API

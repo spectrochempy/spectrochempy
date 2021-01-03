@@ -5,12 +5,13 @@ Processing
 
 .. toctree::
    :glob:
-   :maxdepth: 2
+   :maxdepth: 3
+
 
    transformations
    math_operations
+   slicing
    smoothing
    apodization
-   slicing
    baseline
    alignment

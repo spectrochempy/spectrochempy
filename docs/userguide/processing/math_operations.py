@@ -14,76 +14,6 @@
 #     name: python3
 # ---
 
-# %%
-from spectrochempy import *
-
-dataset = NDDataset.read_omnic('irdata/nh4y-activation.spg')
-dataset.y -= dataset.y[0]
-dataset.y.title = 'Time'
-dataset
-
-# %% [markdown]
-# ### Ufuncs with NDDataset with units
-#
-# When NDDataset have units, some restrictions apply on the use of ufuncs:
-#
-# Some function functions accept only dimensionless quantities. This is the
-# case for example of logarithmic functions: :`exp` and `log`.
-
-# %%
-np.log10(da)
-
-# %%
-dataset.units = ur.cm
-
-try:
-    np.log10(da)
-except scp.DimensionalityError as e:
-    scp.error_(e)
-
-# %% [markdown]
-# ## Complex or hypercomplex NDDatasets
-#
-#
-# NDDataset objects with complex data are handled differently than in
-# `numpy.ndarray`.
-#
-# Instead, complex data are stored by interlacing the real and imaginary part.
-# This allows the definition of data that can be complex in several axis, and *e
-# .g.,* allows 2D-hypercomplex array that can be transposed (useful for NMR data).
-
-# %%
-da = NDDataset([[1. + 2.j, 2. + 0j], [1.3 + 2.j, 2. + 0.5j], [1. + 4.2j, 2. + 3j], [5. + 4.2j, 2. + 3j]])
-da
-
-# %% [markdown]
-# A dataset of type float can be transformed into a complex dataset (using two cionsecutive rows to create a complex
-# row)
-
-# %%
-da = NDDataset(np.arange(40).reshape(10, 4))
-da
-
-# %%
-dac = da.set_complex()
-dac
-
-# %% [markdown]
-# Note the `x`dimension size is divided by a factor of two
-
-# %% [markdown]
-# A dataset which is complex in two dimensions is called hypercomplex (it's datatype in SpectroChemPy is set to
-# quaternion).
-
-# %%
-daq = da.set_quaternion()  # equivalently one can use the set_hypercomplex method
-daq
-
-# %% pycharm={"name": "#%%\n"}
-daq.dtype
-
-
-
 # %% [markdown]
 # # Mathematical operations
 
@@ -195,20 +125,22 @@ sqrt(dx)
 
 # %% [markdown]
 # ## Usage
-# To demonstrate the use of mathematical operations on spectrochempy object, we will first load an experimental 2D
-# dataset.
+# To demonstrate the use of mathematical operations on spectrochempy object, we will first load an experimental 2D dataset.
 
 # %%
 d2D = NDDataset.read_omnic('irdata/nh4y-activation.spg')
-
 prefs = d2D.preferences
-prefs.figure_figsize = (6, 2.5)
-prefs.method_2D = 'stack'
-
+prefs.colormap = 'magma'
+prefs.colorbar = False
+prefs.figure.figsize = (6,3)
 _ = d2D.plot()
 
-# let's select only the first row of the 2D dataset
-dataset = d2D[0].squeeze()  # squeeze is used to remove the residual size 1 dimension
+# %% [markdown]
+# Let's select only the first row of the 2D dataset ( the `squeeze` method is used to remove 
+# the residual size 1 dimension). In addition we mask the saturated region.
+
+# %%
+dataset = d2D[0].squeeze() 
 _ = dataset.plot()
 
 # %% [markdown]
@@ -216,8 +148,8 @@ _ = dataset.plot()
 # present negative values and we will also mask some data
 
 # %%
-dataset = dataset - 2.  # add an offset to make that some of the values become negative
-dataset[880.:1230.] = MASKED  # additionally we mask some data
+dataset = dataset - 2.        # add an offset to make that some of the values become negative
+dataset[1290.:890.] = MASKED  # additionally we mask some data
 _ = dataset.plot()
 
 # %% [markdown]
@@ -633,13 +565,44 @@ _ = out.plot(figsize=(6, 2.5))
 out = np.fmod(dataset, dataset2)
 _ = out.plot(figsize=(6, 2.5))
 
-# %%
-data = 10**(-dataset.data)
+# %% [markdown]
+# ## Complex or hypercomplex NDDatasets
+#
+#
+# NDDataset objects with complex data are handled differently than in
+# `numpy.ndarray`.
+#
+# Instead, complex data are stored by interlacing the real and imaginary part.
+# This allows the definition of data that can be complex in several axis, and *e
+# .g.,* allows 2D-hypercomplex array that can be transposed (useful for NMR data).
 
 # %%
-dataset.data = - np.log10(data)
+da = NDDataset([[1. + 2.j, 2. + 0j], [1.3 + 2.j, 2. + 0.5j], [1. + 4.2j, 2. + 3j], [5. + 4.2j, 2. + 3j]])
+da
+
+# %% [markdown]
+# A dataset of type float can be transformed into a complex dataset (using two cionsecutive rows to create a complex
+# row)
 
 # %%
-dataset.plot()
+da = NDDataset(np.arange(40).reshape(10, 4))
+da
 
 # %%
+dac = da.set_complex()
+dac
+
+# %% [markdown]
+# Note the `x`dimension size is divided by a factor of two
+
+# %% [markdown]
+# A dataset which is complex in two dimensions is called hypercomplex (it's datatype in SpectroChemPy is set to
+# quaternion).
+
+# %%
+daq = da.set_quaternion()  # equivalently one can use the set_hypercomplex method
+daq
+
+# %% pycharm={"name": "#%%\n"}
+daq.dtype
+

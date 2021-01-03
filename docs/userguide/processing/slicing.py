@@ -9,69 +9,16 @@
 #       format_name: percent
 #       format_version: '1.3'
 #       jupytext_version: 1.7.1
+#   kernelspec:
+#     display_name: Python 3
+#     language: python
+#     name: python3
 # ---
 
 # %% [markdown]
-# # Slicing NDDatasets
+# # Slicing datasets
 #
-# This tutorial shows how to handle NDDatasets using python slicing. As prerequisite, the user is
-# expected to have read the [Import Tutorials](../IO/Import.ipynb).
-
-# %% [markdown]
-# ## Slicing a NDDataset
-
-# %% [markdown]
-# NDDataset can be sliced like conventional numpy-array...
-#
-# *e.g.,*:
-#
-# 1. by index, using a slice such as [3], [0:10], [:, 3:4], [..., 5:10], ...
-#
-# 2. by values, using a slice such as [3000.0:3500.0], [..., 300.0], ...
-#
-# 3. by labels, using a slice such as ['monday':'friday'], ...
-
-# %%
-
-new = d3D[..., 0]
-new
-
-# %% [markdown]
-# or using the axes labels:
-
-# %%
-d3D.t.labels = ['close', 'far']
-new = d3D['far']
-new
-
-# %% [markdown]
-# Be sure to use the correct type for slicing.
-#
-# Floats are used for slicing by values
-
-# %%
-correct = dataset[:, 2000.]
-correct
-
-# %%
-outside_limits = dataset[2000]
-
-# %% [markdown]
-# <div class='alert alert-info'>
-#
-# **NOTE:**
-# If one use an integer value (2000), then the slicing is made **by index not by value**, and in the following
-# particular case, an `Error` is issued as index 2000 does not exists (size along axis `x` (axis:0) is only 100, so
-# that index vary between 0 and 99!).
-#
-# </div>
-
-# %% [markdown]
-# One can mixed slicing methods for different dimension:
-
-# %%
-new = d3D['close', 3., 0]  # TODO: slicing one various coordinateswhen several coordinates are present
-new
+# Here we shows how to handle NDDatasets using python slicing. 
 
 
 # %%
@@ -79,7 +26,7 @@ import numpy as np
 import spectrochempy as scp
 
 # %% [markdown]
-# # 1.1 What is the slicing ?
+# ## What is the slicing ?
 #
 # The slicing of a list or an array means taking elements from a given index (or set of indexes) to another index (or
 # set of indexes). Slicing is specified using the colon operator `:` with a `from` and `to` index before and after
@@ -107,25 +54,41 @@ print(X[::-2])  # a negative step will slice backward, starting from 'to', endin
 # %%
 X = np.random.rand(10, 10)  # genarates a 10x10 array filled with random values
 print(X.shape)
-print(X[2:5, :].shape)  # slices along the 1st dimension, X[2:5,] is equivalent
+print(X[2:5, :].shape)    # slices along the 1st dimension, X[2:5,] is equivalent
 print(X[2:5, ::2].shape)  # same slice along 1st dimension and takes one 1 column out of two along the second
 
 # %% [markdown]
-# ## 1.2. Slicing of NDDataset
+# ## Slicing of NDDataset
+#
+# NDDataset can be sliced like conventional numpy-array with some additional features
+#
+# *e.g.,*:
+#
+# 1. by index, using a slice such as [3], [0:10], [:, 3:4], [..., 5:10], ...
+#
+# 2. by values (coordinates), using a slice such as [3000.0:3500.0], [..., 300.0], ...
+#
+# 3. by labels, using a slice such as ['monday':'friday'], ...
 #
 # Let's import a group of IR spectra, look at its content and plot it:
 
 # %%
 X = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG', description='CO adsorption, diff spectra')
-X.y = (X.y - X[0].y).to("minute")
+X.y -= X.y[0]
+X.y.ito("minute")
+X.y.title = 'Time'
 X
 
 # %%
-# the "magic" below enables to get a plot in the Notebook. Use qt instead of inline to have an interactive plot
-subplot = X.plot()  # assignment avoids the display of e.g. <matplotlib.axes._subplots.AxesSubplot at 0x294076b93c8>
+prefs = X.preferences          # set up general preferences for plotting
+prefs.colormap = 'Dark2'
+prefs.figure.figsize = (7,3)
+
+# %%
+_ = X.plot()  # assignment to _ avoids the display of the text ouput from plot. We want only the plot
 
 # %% [markdown]
-# ## 1.2.1 Slicing with indexes
+# ### Slicing with indexes
 #
 # The classical slicing, using integers, can be used. For instance, along the 1st dimension:
 
@@ -150,13 +113,12 @@ print(X[0:3, 200:1000:2])  # 3 first spectra, one wavenumbers out of 2, frm inde
 X[:, 200:1000:2].x  # as the Coord can be sliced, the same is obtained with: X.x[200:1000:2]
 
 # %% [markdown]
-# ## 1.2.2 Slicing with coordinates
+# ### Slicing with coordinates
 #
 # Now the spectroscopist is generally interested in a particular region of the spectrum, for instance,
-# 2300-1900 cm$^{-1}$. Can you easily guess the indexes that one should use to spectrum this region ? probably not
-# without a calculator...
+# 2300-1900 cm$^{-1}$. Can you easily guess the indexes that one should use to spectrum this region ? probably not without a calculator! ...
 #
-# Fortunately, a simple mechanism has been implemented in spectrochempy for this purpose: the use of floats instead
+# Fortunately, a simple mechanism has been implemented in SpectroChemPy for this purpose: the use of floats instead
 # of integers will slice the NDDataset at the corresponding coordinates. For instance to select the 2300-1900 cm$^{
 # -1}$ region:
 
@@ -178,5 +140,47 @@ subplot = X[80.:180., 2300.:1900.].plot()
 X[60.].y  # X[60.] slices the spectrum,  .y returns the corresponding `y` axis.
 
 # %% [markdown]
-# --- End of Tutorial ---
-#    (todo: add advanced slicing by array of indexes, array of bool,  )
+# ### Slicing with labels
+
+# %% [markdown]
+# The X dataset have several lists of labels in the y dimension. Let's display the first series (which is compose of dtetime objects)
+
+# %%
+for i,item in enumerate(X.y.labels[:,0]):
+    print(i, '->', item, type(item))
+
+# %% [markdown]
+# Let's slice using the date at index 10. We can check that the slicing is correct
+
+# %%
+from datetime import datetime, timezone
+date1 = datetime(2016,10,18,15,24,4, tzinfo=timezone.utc)
+X[date1] == X[10]
+
+# %% [markdown]
+# One can mixed slicing methods for different dimension:
+
+# %%
+d = X[date1, 2000.:2300.] 
+_ = d.plot()
+
+
+# %% [markdown]
+# We can also take a range of labels
+
+# %%
+date2 = datetime(2016,10,18,15,52,3, tzinfo=timezone.utc)
+d = X[date1:date2, 2000.:2300.] 
+_ = d.plot()
+
+# %% [markdown]
+# ### Slicing dataset with multiple coordinates on one dimension
+
+# %% [markdown]
+# <div class='alert alert-warning'>
+# <b>Todo</b>
+#
+#    Slicing dataset with multiple coordinates on one dimension
+#     
+#    Add advanced slicing by array of indexes, array of bool,  ...
+# </div>

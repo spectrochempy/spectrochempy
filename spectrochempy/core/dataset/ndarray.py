@@ -710,9 +710,6 @@ class NDArray(HasTraits):
                     index.append((np.abs(data - lo)).argmin())  # TODO: add some precision to this result
                 return index
 
-            elif isinstance(loc, datetime):
-                # not implemented yet
-                raise NotImplementedError("datetime as location is not yet impemented")  # TODO: date!
 
             elif self.is_labeled:
 
@@ -723,6 +720,11 @@ class NDArray(HasTraits):
                     return indexes[0]
                 else:
                     raise IndexError(f'Could not find this label: {loc}')
+
+            elif isinstance(loc, datetime):
+                # not implemented yet
+                raise NotImplementedError("datetime as location is not yet impemented")  # TODO: date!
+
 
             else:
                 raise IndexError(f'Could not find this location: {loc}')
