@@ -379,7 +379,7 @@ def multiplot(datasets=[], labels=[], nrow=1, ncol=1,
                          data_transposed=transposed,
                          **kwargs)
 
-            ax.set_title(label, fontsize=12)
+            ax.set_title(label, fontsize=8)
             if sharex and irow < nrow - 1:
                 ax.xaxis.label.set_visible(False)
             if sharey and icol > 0:

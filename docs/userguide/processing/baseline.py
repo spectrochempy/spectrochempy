@@ -36,7 +36,7 @@ X[:, 1290.:890.] = scp.MASKED
 
 # %%
 prefs = X.preferences
-prefs.figure.figsize = (6,3)
+prefs.figure.figsize = (7,3)
 prefs.colormap = 'magma'
 _ = X.plot()
 
@@ -86,28 +86,26 @@ _ = X.detrend(type='constant').plot()
 # Each spectral range is defined by a list of two values indicating the limits of the spectral ranges, e.g. `[4500.,
 # 3500.]` to
 # select the 4500-3500 cm$^{-1}$ range. Note that the ordering has no importance and using `[3500.0, 4500.]` would
-# lead to exactly the same result. At present it is not possible to formally pick a single wavenumber. For instance
-# using `[3750.]` would lead to an error. A workaround is to repeat the wavenumber, for instance: `[3750.,3750.]`.
+# lead to exactly the same result. It is also possible to formally pick a single wavenumber `3750.`.
 #
 # The first step is then to select the verious regions that we expect to belong to the baseline
 
 # %%
-ranges_tuple = [5900.0, 5400.0], 4550., [4500., 4000.], [2100., 2000.0], [1550., 1555.]
+ranges = [5900.0, 5400.0], 4550., [4500., 4000.], [2100., 2000.0], [1550., 1555.]
 
 # %% [markdown]
-# After selection of the baseline ranges, the baseline correction can be made using a sequence of 2 commands (the
-# 3rd one will plot the result):
+# After selection of the baseline ranges, the baseline correction can be made using a sequence of 2 commands:
 #
-# * Initialize an instance of BaselineCorrection
+# 1. Initialize an instance of BaselineCorrection
 
 # %%
 blc = scp.BaselineCorrection(X)
 
 # %% [markdown]
-# * compute baseline other the ranges
+# 2. compute baseline other the ranges
 
 # %%
-Xcorr = blc.compute(*ranges_tuple)
+Xcorr = blc.compute(ranges)
 
 # %% [markdown]
 # * plot the result (blc.corrected.plot() would lead to the same result)
@@ -136,9 +134,42 @@ _ = Xcorr.plot()
 # %%
 ranges = [[5900.0, 5400.0], [4000., 4500.], [2100., 2000.0], [1550., 1555.]]
 
+# %% [markdown]
+# <div class='alert alert-warning'>
+# <b>Warning</b>
+#
+# if you use a tuple to define the sequences of ranges:
+#
+# ```ranges = [5900.0, 5400.0], [4000., 4500.], [2100., 2000.0], [1550., 1555.]```
+#
+# or
+#
+# ```ranges = ([5900.0, 5400.0], [4000., 4500.], [2100., 2000.0], [1550., 1555.])```
+#
+# then you can call `compute` by directly pass the ranges tuple, or you can unpack it as below.
+#
+# ```blc.compute(ranges, ....)```
+#
+#
+# if you you use a list instead of tuples:
+#
+# ```ranges = [[5900.0, 5400.0], [4000., 4500.], [2100., 2000.0], [1550., 1555.]]```
+#
+# then you **MUST UNPACK** the element when calling `compute`:
+#
+# ```blc.compute(*ranges, ....)```
+#
+#
+# </div>
+
 # %%
-blc.compute(*ranges, interpolation='polynomial', order=6)  # the use of * will unpack the elements of the list
-subplot6 = blc.corrected.plot()  # the 'corrected' attribute contains the corrected NDDataset.
+blc.compute(*ranges, interpolation='polynomial', order=6)
+
+# %% [markdown]
+# The `corrected` attribute contains the corrected NDDataset.
+
+# %%
+_ = blc.corrected.plot()
 
 # %% [markdown]
 # ### Multivariate method
@@ -160,94 +191,49 @@ subplot6 = blc.corrected.plot()  # the 'corrected' attribute contains the correc
 # over time. Typical optimum values are `npc=2` or `npc=3` (see Exercises below).
 
 # %%
-blc.compute(*ranges, interpolation='pchip', method='multivariate', npc=2)  # * unpacks the elements of the list
-subplot8 = blc.corrected.plot()  # the 'corrected' attribute contains the corrected dataset
+blc.compute(*ranges, interpolation='pchip', method='multivariate', npc=2)
+_ = blc.corrected.plot()
 
 # %% [markdown]
 # ### Code snippet for 'advanced' baseline correction
-# It can be useful in some instances to visualize the selected ranges to correct the baseline 'almost-interactively'
-# (a truly interactive widget is under development !). This can be done using the [axvspan()]
-# (https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.axvspan.html) method of the standard matplotlib library
-# and the following code in which the user can change any of the parameters and look at the changes after re-running
+# The following code in which the user can change any of the parameters and look at the changes after re-running
 # the cell:
 
 # %%
-# user defined parameters ------------------------
-NDDataset = X  # uncorrected dataset
-ranges = [[5900.0, 5400.0], [4000., 4500.], [2100., 2000.0], [1550., 1555.], [1250.0, 1300.], [800., 850.]]
+# user defined parameters
+# -----------------------
+ranges = [5900.0, 5400.0], [4000., 4500.], [2100., 2000.0], [1550., 1555.], [1250.0, 1300.], [800., 850.]
 interpolation = 'pchip'  # choose 'polynomial' or 'pchip'
 order = 5  # only used for 'polynomial'
 method = 'sequential'  # choose 'sequential' or 'multivariate'
 npc = 3  # only used for 'multivariate'
-# --------------------------------------------------
+
 # code: compute baseline, plot original and corrected NDDatasets and ranges
-blc = scp.BaselineCorrection(NDDataset)
-blc.compute(*ranges, interpolation=interpolation, order=order, method=method, npc=npc)
-NDDataset.plot()  # plot original NDDataset
-plt.gca().get_xaxis().set_visible(False)  # and remove xaxis info
-blc.corrected.plot()
-for r in ranges:  # loop over the ranges
-    plt.axvspan(r[0], r[1], facecolor='lightgreen')  # plot a rectangular area in each range
+# -------------------------------------------------------------------------
+blc = scp.BaselineCorrection(X)
+Xcorr = blc.compute(*ranges, interpolation=interpolation, order=order, method=method, npc=npc)
+
+axes = scp.multiplot([X,Xcorr], 
+                 labels=['Original', 'Baseline corrected'],
+                 sharex=True,
+                 nrow=2,
+                 ncol=1,
+                 figsize=(7,6),
+                 dpi=96)
+blc.show_regions(axes['axe21'])
 
 # %% [markdown]
-# ## 3.5. Exercises
+# <div class='alert alert-info'>
+#     <b>Exercises</b>
 #
-# basic:
+# **basic:**
 # - write commands to subtract (i) the first spectrum from a dataset and (ii) the mean spectrum from a dataset
 # - write a code to correct the baseline of the last 10 spectra of the above dataset in the 4000-3500 cm$^{-1}$ range
 #
-# intermediate:
+# **intermediate:**
 # - what would be the parameters to use in 'advanced' baseline correction to mimic 'detrend' ? Write a code to check
 # your answer.
 #
-# advanced:
+# **advanced:**
 # - simulate noisy spectra with baseline drifts and compare the performances of `multivariate` vs `sequential` methods
-
-# %% [markdown]
-# -- end of this tutorial -- Now, you should be ready to correct the baseline of your own data :-)
-
-# # Baseline corrections
-
-# %%
-import spectrochempy as scp
-import os
-
-# %%
-dataset = scp.NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
-dataset
-
-# %%
-# # %matplotlib qt
-s = dataset[:, 1260.0:5999.0]
-s = s - s[-1]
-
-# Important note that we use floating point number
-# integer would mean points, not wavenumbers!
-
-basc = scp.BaselineCorrection(s)
-
-ranges = [[1261.86, 1285.89],
-          [1556.30, 1568.26],
-          [1795.00, 1956.75],
-          [3766.03, 3915.81],
-          [4574.26, 4616.04],
-          [4980.10, 4998.01],
-          [5437.52, 5994.70]]  # predefined ranges
-
-_ = basc.run(*ranges, method='multivariate',
-             interpolation='pchip',
-             npc=5,
-             figsize=(6, 6),
-             zoompreview=4)
-
-# %% [markdown]
-# The regions used to set the baseline are accessible using the `ranges` attibute:
-
-# %%
-ranges = basc.ranges
-print(ranges)
-
-# %%
-_ = basc.corrected.plot_stack()
-
-# %%
+# </div>

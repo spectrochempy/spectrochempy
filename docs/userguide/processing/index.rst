@@ -14,4 +14,5 @@ Processing
    smoothing
    apodization
    baseline
+   interactive_baseline
    alignment

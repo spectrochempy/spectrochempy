@@ -19,7 +19,7 @@ __dataset_methods__ = ['ab']
 
 import numpy as np
 import scipy.interpolate
-from traitlets import (Int, Instance, HasTraits, Float, Unicode, Tuple)
+from traitlets import Int, Instance, HasTraits, Float, Unicode, Tuple, List
 from matplotlib.widgets import SpanSelector
 import matplotlib.pyplot as plt
 
@@ -58,7 +58,8 @@ class BaselineCorrection(HasTraits):
     order = Int(6, min=1, allow_none=True)
     npc = Int(5, min=1, allow_none=True)
     zoompreview = Float(1.)
-    figsize = Tuple((8, 6))
+    figsize = Tuple((7, 5))
+    sps = List()
 
     @docstrings.get_sections(base='BaselineCorrection', sections=['Parameters', 'Other Parameters'])
     @docstrings.dedent
@@ -123,13 +124,15 @@ class BaselineCorrection(HasTraits):
         self.ranges = [[x[0], x[2]], [x[-3], x[-1]]]
         self._extendranges(*ranges, **kwargs)
         self.ranges = CoordRange(*self.ranges)
-
+        self.spc = []
 
     def _extendranges(self, *ranges, **kwargs):
         if not ranges:
             # look in the kwargs
             ranges = kwargs.pop('ranges', ())
-        if not isinstance(ranges, list):
+        if isinstance(ranges, tuple) and len(ranges)==1:
+            ranges = ranges[0]   # probably passed with no start to the compute function
+        if not isinstance(ranges, (list, tuple)):
             ranges = list(ranges)
         if not ranges:
             return
@@ -294,6 +297,17 @@ class BaselineCorrection(HasTraits):
         self.corrected = new
         return new
 
+    def show_regions(self, ax):
+        if self.sps:
+            for sp in self.sps:
+                sp.remove()
+        self.sps=[]
+        self.ranges = list(CoordRange(*self.ranges))
+        for x in self.ranges:
+            x.sort()
+            sp = ax.axvspan(x[0], x[1], facecolor='#2ca02c', alpha=0.5)
+            self.sps.append(sp)
+
     @docstrings.dedent
     def run(self, *ranges, **kwargs):
         """
@@ -305,10 +319,11 @@ class BaselineCorrection(HasTraits):
 
         """
         self._setup(**kwargs)
+        self.sps = []
 
         datasets = [self.dataset, self.dataset]
-        labels = ['\nClick & span with left mouse button to set a baseline region.',
-                  '\nClick on right button on a region to remove it.',
+        labels = ['Click on left button & Span to set regions.'
+                  'Click on right button on a region to remove it.',
                   'Baseline corrected dataset preview']
         axes = multiplot(datasets, labels,
                          method='stack',
@@ -324,16 +339,11 @@ class BaselineCorrection(HasTraits):
         ax1 = axes['axe11']
         ax2 = axes['axe21']
 
-        sps = []
 
         self._extendranges(*ranges, **kwargs)
         self.ranges = list(CoordRange(*self.ranges))
+        self.show_regions(ax1)
 
-        for x in self.ranges:
-            x.sort()
-            # y = list(ax1.get_ylim())
-            sp = ax1.axvspan(x[0], x[1], facecolor='#2ca02c', alpha=0.5)
-            sps.append(sp)
 
         def show_basecor(ax2):
 
@@ -341,7 +351,7 @@ class BaselineCorrection(HasTraits):
 
             ax2.clear()
             ax2.set_title('Baseline corrected dataset preview',
-                          fontweight='bold')
+                          fontweight='bold', fontsize=8)
             if self.zoompreview > 1:
                 zb = 1.  # self.zoompreview
                 zlim = [corrected.data.min() / zb, corrected.data.max() / zb]
@@ -354,8 +364,7 @@ class BaselineCorrection(HasTraits):
 
         def onselect(xmin, xmax):
             self.ranges.append([xmin, xmax])
-            sp = ax1.axvspan(xmin, xmax, facecolor='#2ca02c', alpha=0.5)
-            sps.append(sp)
+            self.show_regions(ax1)
             show_basecor(ax2)
             fig.canvas.draw()
 
@@ -366,11 +375,9 @@ class BaselineCorrection(HasTraits):
                         continue
                     else:
                         self.ranges.remove(r)
-                        sp = sps[i]
-                        sps.remove(sp)
-                        sp.remove()
+                        self.show_regions(ax1)
                         show_basecor(ax2)
-                        fig.canvas.draw_idle()
+                        fig.canvas.draw()  #_idle
 
         _ = fig.canvas.mpl_connect('button_press_event', onclick)
 

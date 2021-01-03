@@ -468,6 +468,7 @@ class MatplotlibPreferences(MetaConfigurable):
     is the amplitude of the wiggle perpendicular to the line (in pixels). *length* is the length of
                           the wiggle along the line (in pixels). *randomness* is the factor by which the length is
                           randomly scaled.''').tag(config=True, kind='')
+
     # ==================================================================================================================
     # NON MATPLOTLIB OPTIONS
     # ==================================================================================================================
@@ -483,6 +484,7 @@ class MatplotlibPreferences(MetaConfigurable):
     method_2D = Enum(['map', 'image', 'stack', 'surface', '3D'], default_value='stack',
                      help='Default plot methods for 2D datasets').tag(config=True)
     method_3D = Enum(['surface'], default_value='surface', help='Default plot methods for 3D datasets').tag(config=True)
+
     # - 2d
     # ------
     colorbar = Bool(False, help='Show color bar for 2D plots').tag(config=True)
@@ -493,6 +495,7 @@ class MatplotlibPreferences(MetaConfigurable):
                     help=r'''A colormap name, gray etc...  (equivalent to image_cmap''').tag(config=True)
     max_lines_in_stack = Integer(1000, min=1, help='Maximum number of lines to plot in stack plots').tag(config=True)
     simplify = Bool(help='Matplotlib path simplification for improving performance').tag(config=True, group='mpl')
+
     # -1d
     # ---_
     # antialias = Bool(True, help='Antialiasing')
