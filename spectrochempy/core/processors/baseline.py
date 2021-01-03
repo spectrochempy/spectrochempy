@@ -30,7 +30,7 @@ import matplotlib.pyplot as plt
 from ..dataset.ndcoordrange import CoordRange
 from ..plotters.multiplot import multiplot
 from ..dataset.nddataset import NDDataset
-from ...utils import docstrings
+from ...utils import docstrings, TYPE_INTEGER, TYPE_FLOAT
 from .smooth import smooth
 from .. import error_, debug_
 
@@ -121,9 +121,30 @@ class BaselineCorrection(HasTraits):
         x = getattr(dataset, self.dim).data
 
         self.ranges = [[x[0], x[2]], [x[-3], x[-1]]]
+        self._extendranges(*ranges, **kwargs)
+        self.ranges = CoordRange(*self.ranges)
 
-        if ranges:
-            self.ranges.extend(ranges)
+
+    def _extendranges(self, *ranges, **kwargs):
+        if not ranges:
+            # look in the kwargs
+            ranges = kwargs.pop('ranges', ())
+        if not isinstance(ranges, list):
+            ranges = list(ranges)
+        if not ranges:
+            return
+
+        if len(ranges) == 2:
+                if (isinstance(ranges[0], TYPE_INTEGER + TYPE_FLOAT) and
+                    isinstance(ranges[1], TYPE_INTEGER + TYPE_FLOAT)):
+                    # a pair a values, we intepret this as a single range
+                    ranges = [[ranges[0], ranges[1]]]
+        # find the single values
+        for item in ranges:
+            if isinstance(item, TYPE_INTEGER + TYPE_FLOAT):
+                # a single numerical value: intepret this as a single range
+                item = [item, item]
+            self.ranges.append(item)
 
     # ..................................................................................................................
     def _setup(self, **kwargs):
@@ -188,10 +209,8 @@ class BaselineCorrection(HasTraits):
         coords = new.coordset[self.dim]
         baseline = np.zeros_like(new)
 
-        if ranges:
-            self.ranges.extend(ranges)
-
-        ranges = CoordRange(*self.ranges)
+        self._extendranges(*ranges, **kwargs)
+        self.ranges = ranges = CoordRange(*self.ranges)
 
         # Extract: Sbase: the matrix of data corresponding to ranges
         #          xbase: the xaxis values corresponding to ranges
@@ -307,10 +326,8 @@ class BaselineCorrection(HasTraits):
 
         sps = []
 
-        if ranges:
-            self.ranges.extend(ranges)
-
-        self.ranges = list(self.ranges)
+        self._extendranges(*ranges, **kwargs)
+        self.ranges = list(CoordRange(*self.ranges))
 
         for x in self.ranges:
             x.sort()
