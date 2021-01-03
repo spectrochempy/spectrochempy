@@ -4,7 +4,7 @@
 #  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
+from pathlib import Path
 from matplotlib import cycler
 
 from traitlets.config.configurable import Configurable
@@ -48,7 +48,7 @@ class MetaConfigurable(Configurable):
         if change.name in self.traits(config=True):
 
             value = change.new
-            if isinstance(value, type(cycler)):
+            if isinstance(value, (type(cycler), Path)):
                 value = str(value)
 
             self.cfg.update(self.jsonfile, {self.__class__.__name__: {change.name: value, }})

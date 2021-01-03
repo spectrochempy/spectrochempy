@@ -168,10 +168,11 @@ class Preferences(Meta):
 
     def reset(self):
 
-        # remove the user json file to reset to defaults
+        # remove the matplotlib_user json file to reset to defaults
         config_dir = pathclean(preferences.cfg.config_dir)
-        for f in config_dir.glob('*.json'):
-            f.unlink()
+        #for f in config_dir.glob('.json'):
+        f = config_dir / 'MatplotlibPreferences.json'
+        f.unlink()
 
         matplotlib_preferences._apply_style('scpy')
         self.style = 'scpy'

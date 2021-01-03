@@ -202,7 +202,7 @@ _ = blc.corrected.plot()
 # %%
 # user defined parameters
 # -----------------------
-ranges = [5900.0, 5400.0], [4000., 4500.], [2100., 2000.0], [1550., 1555.], [1250.0, 1300.], [800., 850.]
+ranges = [5900.0, 5400.0], [4000., 4500.], 4550., [2100., 2000.0], [1550., 1555.], [1250.0, 1300.], [800., 850.]
 interpolation = 'pchip'  # choose 'polynomial' or 'pchip'
 order = 5  # only used for 'polynomial'
 method = 'sequential'  # choose 'sequential' or 'multivariate'

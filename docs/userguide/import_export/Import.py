@@ -26,6 +26,9 @@
 # %%
 import spectrochempy as scp
 
+# %%
+scp.preferences.datadir
+
 # %% [markdown]
 # ## Dialog boxes
 #
@@ -41,13 +44,17 @@ X = scp.read()
 # %% [markdown]
 # The dialog box such as shown in this image:
 #
-# <center><img id='drawings' width='600px'  src='./figures/read.png'></img></center>
+# <center><img id='drawings' width='600px'  src='./images/read.png'></img></center>
 #
 # The dialog Box allows selecting the file which data will be loaded in the variable `X`. Try for instance to run the
 # cell below, and select an omnic spg datafile (select the .spg extension), which you can find in the `irdata`
 # directory.
 #
-# > **Note**: the dialog box does not necessarily pops up in the foreground: check your task bar !
+# <div class='alert alert-warning'>
+# <b>Tip</b>
+#
+# the dialog box does not necessarily pops up in the foreground: check your task bar !
+# </div>
 #
 # Printing the returned NDDataset object X should read like this, with indication of the dataset `shape`, *i.e.,
 # * the `y` and  `x` dimension sizes:
@@ -60,8 +67,11 @@ print(X)
 # select any file (*e.g.,* by pressing 'cancel' in th Dialog Box, the result will be `None`, as nothing has been loaded
 # in `X`.
 #
-# **Note**: By default the Dialog Box opens in the current directory, *i.e.*, the directory in which this notebook is
-# run. However if a directory path is specified, the the dialog should open from this diectory.
+# <div class='alert alert-info'>
+# <b>Note</b>
+#
+# By default the Dialog Box opens in the last directory you have used. However if a directory path is specified, the the dialog should open from this diectory.
+# </div>
 
 # %%
 scp.read_omnic('irdata/subdir')
@@ -76,7 +86,6 @@ scp.read_omnic('irdata/subdir')
 #     - `read_labspec` to open LABSPEC6 files - this assume they have been exported as *.txt files
 #     - `read_topspin` to open Bruker Topspin NMR files
 #     - `read_csv` to open csv files
-#     - `read_json` to open JSON files
 #     - `read_jcamp` to open an IR JCAMP-DX datafile
 #     - `read_matlab` to open MATLAB (.mat) files including Eingenvector's Dataset objects
 #
@@ -99,35 +108,39 @@ scp.read_omnic('irdata/subdir')
 # above commands can be used with the indication of the path to a directory, and/or to a filename.
 #
 # If only a directory is indicated, the dialog box will open in this directory.
-# > Note that on Windows the path separator is a backslash `\`. However, in many contexts,
-# > backslash is also used as an escape character in order to represent non-printable characters. To avoid problems,
-# > either it has to be escaped itself, sing a double backslash or one can also use raw string literals
-# > to represent Windows paths. These are string literals that have an `r` prepended to them. In raw string literals
-# > the `\` represents a literal backslash: `r'C:\users\Brian'`:
+#     
+# Note that on Windows the path separator is a backslash `\`. However, in many contexts,
+# backslash is also used as an escape character in order to represent non-printable characters. To avoid problems,
+# either it has to be escaped itself,  a double backslash or one can also use raw string literals
+# to represent Windows paths. These are string literals that have an `r` prepended to them. In raw string literals
+# the `\` represents a literal backslash: `r'C:\users\Brian'`:
 #
 # For instance, on Windows systems, the two following commands are fully equivalent:
 #
-#     X = scp.read_omnic(directory='C:\\users\\Brian')
+# ```python
+# X = scp.read_omnic(directory='C:\\users\\Brian')
+# ```
 #
 # or
 #
-#     X = scp.read_omnic(directory=r'C:\users\Brian')
+# ```python
+# X = scp.read_omnic(directory=r'C:\users\Brian')
+# ``` 
 #
 # and will open the dialog box at the root directory of the `C:` drive.
 #
-# > **Note**: You can avoid using the form `\\` or the use of raw strings by using conventional slash `/`. In python
-# they play the path separator
-# > role, as well in Windows than in other unix-based system (Linux, OSX, ...)
-#
-
-# %%
-X = scp.read_omnic(directory=r'C:\users\Brian')
+# You can avoid using the form `\\` or the use of raw strings by using conventional slash `/`. In python
+# they play the path separator role, as well in Windows than in other unix-based system (Linux, OSX, ...)
+#     
+# ```python
+# X = scp.read_omnic(directory='C:/users/Brian')
+# ``` 
 
 # %% [markdown]
 # If a `filename` is passed in argument, like here:
-#
-#     X = scp.read_omnic('wodger.spg', directory='C:/')
-#
+# ```python
+# X = scp.read_omnic('wodger.spg', directory='C:/')
+# ```
 # then SpectroChemPy will attempt opening a file named `wodger.spg` supposedly located in `C:\`.
 #
 #
@@ -135,13 +148,15 @@ X = scp.read_omnic(directory=r'C:\users\Brian')
 # commands are all equivalent and will allow opening the file:
 #
 # - using only the full pathname of the file:
-#
-#       X = scp.read_omnic('C:/users/Brian/s/Life/wodger.spg')
+# ```python
+# X = scp.read_omnic('C:/users/Brian/s/Life/wodger.spg')
+# ```
 #
 # - or using a combination of directory and file pathnames:
-#
-#       X = scp.read_omnic('wodger.spg', directory='C:/users/Brian/s/Life'
-#       X = scp.read_omnic('Life/wodger.spg', directory='C:/users/Brian/s')
+# ```python
+# X = scp.read_omnic('wodger.spg', directory='C:/users/Brian/s/Life'
+# X = scp.read_omnic('Life/wodger.spg', directory='C:/users/Brian/s')
+# ```
 #
 # - etc...
 
@@ -164,36 +179,43 @@ X = scp.read_omnic(directory=r'C:\users\Brian')
 #
 # Then running this project in John's Linux computer (e.g. in `\home\john\s_copy`) will certainly result in execution
 # errors if absolute paths are used in the notebook:
-#
-#     OSError: Can't find this filename C:\users\Brian\s\life\wodger.spg
-#
+# ```python
+# OSError: Can't find this filename C:\users\Brian\s\life\wodger.spg
+# ```
 # In this respect, a good practice consists in using relative pathnames in scripts and notebooks.
-# Fortunately, Spectrochempy readers use relative paths. If the given path is not absolute, then spectrochempy will
-# search
-# in the current directory. Hence the opening of the `spg` file from scripts in `welease.ipynb` can be made
+# Fortunately, SpectroChemPy readers use relative paths. If the given path is not absolute, then SpectroChemPy will
+# search in the current directory. Hence the opening of the `spg` file from scripts in `welease.ipynb` can be made
 # by the command:
-#
-#     X = scp.read_omnic('Life/wodger.spg'))
-#
+# ```python
+# X = scp.read_omnic('Life/wodger.spg')
+# ```
 # or:
-#
-#     X = scp.read_omnic('wodger.spg', directory='Life')
+# ```python
+# X = scp.read_omnic('wodger.spg', directory='Life')
+# ```
 #
 # ## Good practice: use `os` or `pathlib` modules
 #
 # In python, working with pathnames is classically done with dedicated modules such as `os` or `pathlib` python modules.
-# As `os` is automatically imported with Scpy, we mention the following methods that can be particularly useful:
+# With `os` we mention the following methods that can be particularly useful:
 #
-# - `os.getcwd()`: returns the absolute path of the current working directory (i.e., the directory of the script)
+# ```python
+# import os
+# os.getcwd()              # returns the absolute path of the current working directory preferences.datadir
+# os.path.expanduser("~")  # returns the home directory of the user
+# os.path.join('path1','path2','path3', ...)   # intelligently concatenates path components 
+#                                              # using the system seprator (`/`or `\\`)
+# ```
 #
-# - `os.path.expanduser("~")` : returns the home directory of the user (e.g., the `C:\users\<username>` path on WIN
-# platforms or `/home/<username>` on linux)
-# - `os.path.join()`: intelligently concatenates path components.
+# Using `Pathlib` is even simpler:
+# ```python
+# from pathlib import Path
+# Path.cwd()               # returns the absolute path of the current working directory 
+# Path.home()              # returns the home directory of the user           
+# Path('path1') / 'path2' / 'path3' / '...'   # intelligently concatenates path components 
+# ```
 #
-#
-# The interested readers will find more details on the use of these modules here:
-#
-#
+#  The interested readers will find more details on the use of these modules here:
 # - [os - Miscellaneous operating system interfaces](https://docs.python.org/3/library/os.html)
 # - [pathlib — Object-oriented filesystem paths](https://docs.python.org/3/library/pathlib.html)
 #
@@ -204,13 +226,20 @@ X = scp.read_omnic(directory=r'C:\users\Brian')
 # time as spectrochempy. By default, `datadir` points in the 'scp_data\testdata' folder of SCPy:
 
 # %%
-import os
+DATADIR = scp.preferences.datadir
+DATADIR
 
-print(os.getcwd())
-X = scp.read_omnic('wodger.spg')
+# %% [markdown]
+# DATADIR is already a pathlib object and so can be used easily
 
 # %%
-print(scp.preferences.datadir)
+X = scp.read_omnic(DATADIR / 'wodger.spg')
+
+# %%
+from pathlib import Path
+DATADIR = scp.preferences.datadir = Path.cwd()
+scp.preferences.use_qt=True
+
 
 # %% [markdown]
 # It can be set to another pathname *permanently* (i.e., even after computer restart) by a new assignment:
@@ -235,3 +264,90 @@ print(scp.preferences.datadir)
 # --- This is the end of the tutorial ---
 #
 #
+
+# %% [markdown]
+# # Import and export of NDDataset objects
+
+# %% [markdown]
+# As usual we start by importing the SpectroChemPy API
+
+# %%
+import spectrochempy as scp  # noqa: F403
+
+# %% [markdown]
+# ## Data directory
+#
+# The builtin **datadir** variable contains a path to our *test*'s data.
+#
+# However it is always possible to specify alternative locations: Any existing file path can be specified in import
+# functions calls.
+#
+# <div class='alert alert-info'>
+#
+# **NOTE:**
+# In import function calls, if we do not specify the **datadir**, the application will first look in this directory
+# by default, if it doesn't find the path in the current directory.
+#
+# </div>
+# datadir = preferences.datadir
+# if os.path.exists(datadir):
+#     print(datadir)
+
+# %%
+# !cd C:\Users\christian\anaconda3\envs\scpy\lib\site-packages\scp_data\testdata
+
+# %%
+# !dir
+
+# %% [markdown]
+# ## File selector widget
+
+# %% [markdown]
+# A widget is provided to help with the selection of file names or directory.
+#
+# <div class ="alert alert-warning">
+#
+# **WARNING:**
+# Experimental feature - subject to changes
+#
+# </div>
+
+# %%
+datadir = scp.preferences.datadir
+fs = scp.FileSelector(path=datadir, filters=['spg', 'spa'])
+fs
+
+# %% [markdown]
+# After validation of the selection, one can read the path and name of the selected files.
+
+# %%
+fs.value, fs.path, fs.fullpath
+
+# %% [markdown]
+# ##  Infrared spectroscopy OMNIC file Import (.spg extension)
+#
+
+# %%
+dataset = scp.NDDataset.read_omnic('irdata/nh4y-activation.spg')
+dataset
+
+# %%
+# view it...
+_ = dataset.plot(method='stack')
+
+# %% [markdown]
+#
+# ## NMR Bruker data Import
+
+# %% [markdown]
+# Now, lets load a NMR dataset (in the Bruker format).
+
+# %%
+path = 'nmrdata/bruker/tests/nmr/topspin_1d'
+ndd = scp.NDDataset.read_topspin(path, expno=1, remove_digital_filter=True)
+ndd
+
+# %%
+# view it...
+_ = ndd.plot(color='blue')
+
