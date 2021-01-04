@@ -26,6 +26,7 @@ import warnings
 import pprint
 import json
 from pathlib import Path
+
 from pkg_resources import get_distribution, DistributionNotFound
 from setuptools_scm import get_version
 from traitlets.config.configurable import Config
@@ -43,8 +44,7 @@ from IPython.utils.text import get_text_list
 from IPython.display import publish_display_data, clear_output
 from jinja2 import Template
 
-from spectrochempy.utils import MetaConfigurable
-from spectrochempy.utils import pathclean, get_pkg_path
+from spectrochempy.utils import MetaConfigurable, pathclean, get_pkg_path
 from .matplotlib_preferences import MatplotlibPreferences
 
 # set the default style
@@ -409,7 +409,7 @@ class GeneralPreferences(MetaConfigurable):
         self.parent.datadir.path = pathclean(change['new'])
 
     databases = Union((Instance(Path), Unicode()), help='Directory where to look for database files such as csv').tag(
-        config=True, type="folder")
+            config=True, type="folder")
 
     @default('databases')
     def _get_databases_default(self):
@@ -619,6 +619,8 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
     def _get_default_config_manager(self):
         return BaseJSONConfigManager(config_dir=self.config_dir)
 
+    log_format = Unicode("%(highlevel)s %(message)s", help="The Logging format template", ).tag(config=True)
+
     debug = Bool(True, help='Set DEBUG mode, with full outputs').tag(config=True)
     """Flag to set debugging mode"""
 
@@ -687,17 +689,11 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
     def __init__(self, *args, **kwargs):
 
         super().__init__(*args, **kwargs)
-        self.datadir = DataDir()  # config=self.config)
 
-        self.preferences = GeneralPreferences(config=self.config, parent=self)
-        self.dataset_preferences = DatasetPreferences(config=self.config, parent=self)
-        self.project_preferences = ProjectPreferences(config=self.config, parent=self)
-        self.matplotlib_preferences = MatplotlibPreferences(config=self.config, parent=self)
         self.logs = self.log  # we change the noame in order to avoid latter conflict with numpy.log
 
         self.initialize()
 
-    # @catch_config_error
     def initialize(self, argv=None):
         """
         Initialisation function for the API applications
@@ -743,7 +739,7 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
         # Get preferences from the config file and init everything
         # ---------------------------------------------------------------------
 
-        self.init_all_preferences()
+        self._init_all_preferences()
 
         # we catch warnings and error for a ligther display to the end-user.
         # except if we are in debugging mode
@@ -751,7 +747,7 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
         # warning handler
         # --------------------------------------------------------------------
         def send_warnings_to_log(message, category):
-            self.logs.warning('%s:  %s' % (category.__name__, message))
+            self.logs.warning(f'{category.__name__} - {message}')
             return
 
         warnings.showwarning = send_warnings_to_log
@@ -768,7 +764,7 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
                 if self.log_level == logging.DEBUG:
                     shell.showtraceback((etype, evalue, tb), tb_offset=tb_offset)
                 else:
-                    self.logs.error("%s: %s" % (etype.__name__, evalue))
+                    self.logs.error(f"{etype.__name__}: {evalue}")
 
             ip.set_custom_exc((Exception,), _custom_exc)
 
@@ -777,7 +773,7 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
             if ip is not None:
                 ip.register_magics(SpectroChemPyMagics)
 
-    def init_all_preferences(self):
+    def _init_all_preferences(self):
 
         # Get preferences from the config file
         # ---------------------------------------------------------------------
@@ -785,18 +781,22 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
         if not self.config:
             self.config = Config()
 
+        configfiles = []
         if self.config_file_name:
             config_file = os.path.join(self.config_dir, self.config_file_name)
+            configfiles.append(config_file)
 
-            if self.reset_config:
-                # remove the user json file to reset to defaults
-                lis = os.listdir(self.config_dir)
-                for f in lis:
-                    if f.endswith('.json'):
-                        jsonname = os.path.join(self.config_dir, f)
+            lis = os.listdir(self.config_dir)
+            for f in lis:
+                if f.endswith('.json'):
+                    jsonname = os.path.join(self.config_dir, f)
+                    if self.reset_config:
+                        # remove the user json file to reset to defaults
                         os.remove(jsonname)
+                    else:
+                        configfiles.append(jsonname)
 
-            for cfgname in [config_file, ]:
+            for cfgname in configfiles:
                 self.load_config_file(cfgname)
                 if cfgname not in self._loaded_config_files:
                     self._loaded_config_files.append(cfgname)
@@ -804,6 +804,12 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
         # Eventually write the default config file
         # --------------------------------------
         self._make_default_config_file()
+
+        self.datadir = DataDir(config=self.config)
+        self.preferences = GeneralPreferences(config=self.config, parent=self)
+        self.dataset_preferences = DatasetPreferences(config=self.config, parent=self)
+        self.project_preferences = ProjectPreferences(config=self.config, parent=self)
+        self.matplotlib_preferences = MatplotlibPreferences(config=self.config, parent=self)
 
     def start_show_config(self, **kwargs):
         """start function used when show_config is True"""

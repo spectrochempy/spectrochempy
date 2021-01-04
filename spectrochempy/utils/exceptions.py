@@ -36,7 +36,6 @@ class SpectroChemPyException(Exception):
 
     """
 
-
 # ----------------------------------------------------------------------------------------------------------------------
 class UnitsCompatibilityError(SpectroChemPyException):
     """
@@ -60,6 +59,13 @@ class ComparisonFailure(SpectroChemPyException):
 
     """
 
+
+# ----------------------------------------------------------------------------------------------------------------------
+class CoordinateMismatchError(SpectroChemPyException):
+    """
+    Exception raised when object coordinates differ
+
+    """
 
 class ProtocolError(SpectroChemPyException):
 

@@ -70,27 +70,28 @@ def _compare_datasets(this, other, approx=False, decimal=6):
                 oattr = getattr(other, f'_{attr}')
                 # to avoid deprecation warning issue for unequal array
                 if sattr is None and oattr is not None:
-                    raise ComparisonFailure(f'{attr} of {this} is None.')
+                    raise ComparisonFailure(f'`{attr}` of {this} is None.')
                 if oattr is None and sattr is not None:
                     raise ComparisonFailure(f'{attr} of {other} is None.')
                 if hasattr(oattr, 'size') and hasattr(sattr, 'size') and oattr.size != sattr.size:
                     # particular case of mask
                     if attr != 'mask':
-                        raise ComparisonFailure(f'sizes of {attr} are different.')
+                        raise ComparisonFailure(f'sizes of `{attr}` are different.')
                     else:
                         if other.mask != this.mask:
-                            raise ComparisonFailure(f'{this} and {other} object\'s masks are different.')
+                            raise ComparisonFailure(f'{this} and {other} masks are different.')
                 if attr in ['data', 'mask']:
                     if approx:
                         try:
                             assert_array_almost_equal(sattr, oattr, decimal=decimal)
                         except AssertionError as e:
-                            raise ComparisonFailure(f'{this} and {other} object\'s {attr} are too different.\n{e}')
+                            raise ComparisonFailure(f'The `{attr} attributes of {this} and {other} are too different.\
+                            n{e}')
                     else:
                         try:
                             assert_array_equal(sattr, oattr)
                         except AssertionError as e:
-                            raise ComparisonFailure(f'{this} and {other} object\'s {attr} are not equals..\n{e}')
+                            raise ComparisonFailure(f'The `{attr}` attributes of {this} and {other} are not equals.\n{e}')
                 elif attr in ['coordset']:
                     if (sattr is None and oattr is not None) or (oattr is None and sattr is not None):
                         raise ComparisonFailure('One of the coordset is None')
@@ -104,7 +105,7 @@ def _compare_datasets(this, other, approx=False, decimal=6):
                 else:
                     eq &= np.all(sattr == oattr)
                 if not eq:
-                    raise ComparisonFailure(f'{this} and {other} object\'s {attr} are different.')
+                    raise ComparisonFailure(f'The {attr} attributes of {this} and {other} are different.')
             else:
                 return False
         else:
@@ -139,6 +140,7 @@ def assert_dataset_almost_equal(nd1, nd2, **kwargs):
     approx = kwargs.get('approx', True)
     _compare_datasets(nd1, nd2, approx=approx, decimal=decimal)
     return True
+
 
 
 def assert_project_equal(proj1, proj2, **kwargs):

@@ -170,7 +170,6 @@ class Preferences(Meta):
 
         # remove the matplotlib_user json file to reset to defaults
         config_dir = pathclean(preferences.cfg.config_dir)
-        #for f in config_dir.glob('.json'):
         f = config_dir / 'MatplotlibPreferences.json'
         f.unlink()
 
@@ -459,12 +458,12 @@ class NDPlot(HasTraits):
             try:
                 c = to_rgba(c)
                 colors[i] = c
-            except:
+            except ValueError:
                 try:
                     c = to_rgba(f'#{c}')
                     colors[i] = c
-                except:
-                    raise Exception
+                except ValueError as e:
+                    raise e
 
         linestyles = ['-', '--', ':', '-.']
         markers = ['o', 's', '^']

@@ -7,8 +7,6 @@
 # suppress test for PEP8 in this file
 # flake8: noqa
 
-# import os
-
 from os import environ
 import pathlib
 

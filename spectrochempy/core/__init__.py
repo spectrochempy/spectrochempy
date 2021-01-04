@@ -84,12 +84,16 @@ def debug_(*args, **kwargs):
     for a in args:
         s += pstr(a, **kwargs) + ' '
         s = s.replace('\0', '').strip()
-    app.logs.debug(s)
+    try:
+        app.logs.debug(s)
+    except NameError:
+        # works only if app if already loaded
+        pass
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 def error_(*args, **kwargs):
-    s = ""
+    s = type(args[0]).__name__+": "
     for a in args:
         s += pstr(a, **kwargs) + ' '
         s = s.replace('\0', '').strip()

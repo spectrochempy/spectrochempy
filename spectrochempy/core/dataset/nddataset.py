@@ -433,6 +433,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
         It's a readonly property. Use set_coords to change one or more coordinates at once.
 
         """
+        if self._coordset and  all(c.is_empty for c in self._coordset):
+            # all coordinates are empty, this is equivalent to None for the coordset
+            return None
         return self._coordset
 
     # ..................................................................................................................

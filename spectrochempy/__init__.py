@@ -66,10 +66,9 @@ if '/bin/scpy_update' not in sys.argv[0]:  # avoid indefinite loop of calls this
 
 # import the main api
 from spectrochempy import api
-from spectrochempy.api import *
+from spectrochempy.api import *  # noqa: F401
 
 __all__ += api.__all__
-
 
 
 # ==============================================================================

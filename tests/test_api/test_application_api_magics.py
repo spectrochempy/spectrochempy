@@ -76,3 +76,11 @@ def test_console_subprocess():
     output, error = res.communicate()
     assert "nh4y-activation.spg'" in error.decode("utf-8")
     assert 'A.Travert & C.Fernandez @ LCS' in output.decode("utf-8")
+
+
+def test_config(capsys):
+    from spectrochempy.application import SpectroChemPy
+    app = SpectroChemPy(show_config_json=True)
+    app.start()
+    out, err = capsys.readouterr()
+    assert 'SpectroChemPy' in out

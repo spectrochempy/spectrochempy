@@ -18,16 +18,15 @@ __dataset_methods__ = []
 # Standard python imports
 # ======================================================================================================================
 import copy as cpy
-
 import functools
 import sys
 import operator
+from warnings import catch_warnings
 
 # ======================================================================================================================
 # third-party imports
 # ======================================================================================================================
 import numpy as np
-from warnings import catch_warnings
 from orderedset import OrderedSet
 from quaternion import as_float_array
 
@@ -38,6 +37,8 @@ from spectrochempy.units.units import ur, Quantity, DimensionalityError
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.utils import docstrings, MaskedArray, NOMASK, make_func_from, is_sequence, TYPE_COMPLEX
 from spectrochempy.core import warning_, error_
+from spectrochempy.utils.testing import assert_dataset_equal
+from spectrochempy.utils.exceptions import ComparisonFailure, CoordinateMismatchError
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -1739,8 +1740,7 @@ class NDMath(object):
             # Return a list of datasets
             return datasets
 
-        # Our first object is a NDdataset or a Coord ------------------------------------------------------------------
-
+        # Our first object is a NDdataset ------------------------------------------------------------------------------
         isdataset = (objtype == 'NDDataset')
 
         # Get the underlying data: If one of the input is masked, we will work with masked array
@@ -1750,7 +1750,7 @@ class NDMath(object):
             d = obj.data
 
         # Do we have units?
-        # we create a quantity q that will be used for unit calculation (without dealing with the whole object
+        # We create a quantity q that will be used for unit calculations (without dealing with the whole object)
         def reduce_(magnitude):
             if hasattr(magnitude, 'dtype'):
                 if magnitude.dtype in TYPE_COMPLEX:
@@ -1769,24 +1769,10 @@ class NDMath(object):
         args = []
         otherqs = []
 
+        # If other is None, then it is a unary operation we can pass the following
         if other is not None:
 
-            # If inputs are all datasets
-            if isdataset and (othertype == 'NDDataset') and (other._coordset != obj._coordset):
-                # here it can be several situations:
-                # One acceptable situation could be that we have a single value
-                if other._squeeze_ndim == 0:
-                    pass
-
-                # or that we suppress or add a row to the whole dataset
-                elif other._squeeze_ndim == 1 and obj._data.shape[-1] != other._data.size:
-                    raise ValueError("coordinate's sizes do not match")
-
-                elif other._squeeze_ndim > 1 and obj.coordset and other.coordset and not (
-                        obj._coordset[0].is_empty and obj._coordset[0].is_empty) and not np.all(
-                        obj._coordset[0]._data == other._coordset[0]._data):
-                    raise ValueError("coordinate's values do not match")
-
+            # First the units may require to be compatible, and if thet are sometimes they may need to be rescales
             if othertype in ['NDDataset', 'Coord']:
 
                 # rescale according to units
@@ -1794,12 +1780,45 @@ class NDMath(object):
                     if hasattr(obj, 'units'):
                         # obj is a Quantity
                         if compatible_units:
+                            # adapt the other units to that of object
                             other.ito(obj.units)
 
-                arg = other._data
+            # If all inputs are datasets BUT coordset mismatch.
+            if isdataset and (othertype == 'NDDataset') and (other._coordset != obj._coordset):
+
+                obc = obj.coordset
+                otc = other.coordset
+
+                # here we can have several situations:
+                # -----------------------------------
+                # One acceptable situation could be that we have a single value
+                if other._squeeze_ndim == 0 or ((obc is None or obc.is_empty) and (otc is None or otc.is_empty)):
+                    pass
+
+                # Another acceptable situation is that we suppress the other NDDataset is 1D, with compatible
+                # coordinates in the x dimension
+                elif other._squeeze_ndim >= 1:
+                    try:
+                        assert_dataset_equal(obc[obj.dims[-1]], otc[other.dims[-1]])
+                    except ComparisonFailure as e:
+                        raise CoordinateMismatchError(str(e))
+
+                # if other is multidimentional and as we are talking about element wise operation, we assume
+                # tha all coordinates must match
+                if other._squeeze_ndim > 1:
+                    for idx in range(obj.ndim - 2):
+                        try:
+                            assert_dataset_equal(obc[obj.dims[idx]], otc[other.dims[idx]])
+                        except ComparisonFailure as e:
+                            raise CoordinateMismatchError(str(e))
+
+            if othertype in ['NDDataset', 'Coord']:
+
                 # mask?
                 if ismasked:
-                    arg = other._umasked(arg, other._mask)
+                    arg = other._umasked(other._data, other._mask)
+                else:
+                    arg = other._data
 
             else:
                 # Not a NDArray.
