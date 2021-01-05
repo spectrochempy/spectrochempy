@@ -15,7 +15,7 @@
 # ---
 
 # %% [markdown]
-# # TUTORIAL: Peak Maxima Finding
+# # Tutorial: Peak Maxima Finding
 #
 # This tutorial shows how to find peaks and determine peak maxima with spectrochempy. As prerequisite, the user is
 # expected to have read the [Import](../IO/import.ipynb), [Import IR](../IO/importIR.ipynb),

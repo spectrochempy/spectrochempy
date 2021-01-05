@@ -14,7 +14,7 @@
 # ---
 
 # %% [markdown]
-# # MCR ALS
+# # tutorial: MCR ALS
 
 # %%
 import spectrochempy as scp
