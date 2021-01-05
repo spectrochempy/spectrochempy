@@ -32,8 +32,9 @@ of overwriting some variables or functions already present in the namespace.
 Therefore, the first syntax is generally highly recommended.
 
 
+*********************
 The NDDataset object
-***
+*********************
 
 The NDDataset is the main object use by |scpy|.
 
@@ -156,9 +157,9 @@ Select data in a NDDataset
     take
     clip
 
-
+********************
 Plotting functions
--------------------
+********************
 
 .. autosummary::
     :nosignatures:
@@ -177,8 +178,9 @@ Plotting functions
     plot_3D
 
 
+************
 Processing
------------
+************
 
 Transformations
 ~~~~~~~~~~~~~~~~
@@ -194,8 +196,6 @@ Transformations
     transpose
     set_complex
     set_quaternion
-
-
 
 Unary mathematical operations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -290,9 +290,9 @@ Other processing operations
     smooth
 
 
-
+********************
 Project management
---------------------
+********************
 
 .. autosummary::
     :nosignatures:
@@ -300,8 +300,9 @@ Project management
 
     Project
 
+**********
 Scripting
-----------
+**********
 
 This is rather experimental
 
@@ -311,9 +312,9 @@ This is rather experimental
 
     Script
 
-
+**********
 Utilities
-----------
+**********
 
 .. autosummary::
     :nosignatures:

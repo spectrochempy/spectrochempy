@@ -1,10 +1,10 @@
 
 Fork and clone our GitHub repository
-=====================================
+************************************
 
-Before cloning the SpectroChemPy GitHub directory, we need a working git installation.
+Before cloning the SpectroChemPy GitHub directory, we need a working `git` installation.
 
-## Install git
+Install git
 
 [Git](https://git-scm.com) is a free and open source distributed control system used in well-known software
 repositories, such as [GitHub](https://github.com) or [Bitbucket](https://bitbucket.org).  For this project, we use a [GitHub](https://github.com) repository.
