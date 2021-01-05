@@ -29,7 +29,7 @@ Clean, build, and release the HTML and PDF documentation for SpectroChemPy.
 where optional parameters indicates which job(s) is(are) to perform.
 
 """
-
+from os import environ
 import argparse
 import shutil
 import sys
@@ -55,7 +55,8 @@ warnings.filterwarnings(action='ignore', category=RemovedInSphinx40Warning)
 
 # CONSTANT
 PROJECTNAME = "spectrochempy"
-REPO_URI = f"spectrochempy/{PROJECTNAME}"
+owner = environ.get('ANACONDA_USER', 'spectrochempy')
+REPO_URI = f"{owner}/{PROJECTNAME}"
 API_GITHUB_URL = "https://api.github.com"
 URL_SCPY = "spectrochempy.github.io/spectrochempy"
 
@@ -361,15 +362,16 @@ class BuildDocumentation(object):
 
         print(f'\n{"-" * 80}\nMake `changelogs`\n{"-" * 80}')
         print("Getting latest release tag")
-        LATEST = f'{API_GITHUB_URL}/repos/{REPO_URI}/releases/latest'
-        tag = json.loads(requests.get(LATEST).text)['tag_name']
+        ALL = f'{API_GITHUB_URL}/repos/{REPO_URI}/releases'
+        tag = json.loads(requests.get(ALL).text)[0]['tag_name']
 
         milestone = self.doc_version
 
         if milestone == 'latest':
             # we build the latest
             tag = tag.split('.')
-            milestone = f"{tag[0]}.{tag[1]}.{int(tag[2])}"
+            tag3 = '.'+tag[3] if len(tag)==4 else ''
+            milestone = f"{tag[0]}.{tag[1]}.{int(tag[2])}{tag3}"
         else:
             milestone = tag
 
