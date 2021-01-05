@@ -44,6 +44,7 @@ class LSTSQ(HasTraits):
             are ignored and replaced by the `X` data.
 
         """
+        super().__init__()
 
         if len(datasets) > 2 or len(datasets) < 1:
             raise ValueError('one or two dataset at max are expected')

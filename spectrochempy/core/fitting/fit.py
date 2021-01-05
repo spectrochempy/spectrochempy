@@ -111,7 +111,7 @@ class Fit(HasTraits):
 
         for exp_idx, dataset in enumerate(self.datasets):
             dataset.modeldata, dataset.modelnames, dataset.model_A, dataset.model_a, dataset.model_b = \
-                self._get_modeldata(dataset, exp_idx)
+                self._get_modeldata(dataset, exp_idx)  # lgtm [py/mismatched-multiple-assignment]
 
     # *******************************************************************************
     # public methodss

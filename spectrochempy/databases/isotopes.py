@@ -34,7 +34,7 @@ from spectrochempy.utils import Meta
 # ======================================================================================================================
 # Isotopes class
 # ======================================================================================================================
-class Isotopes(Meta):
+class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
     """
     This class defines useful properties of nuclei. [#]_
 

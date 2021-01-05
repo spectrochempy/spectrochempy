@@ -38,7 +38,7 @@ class MCRALS(HasTraits):
     log = Instance(str)
     """str - Log of the MCS-ALS iterations"""
 
-    def __init__(self, X, guess, **kwargs):
+    def __init__(self, X, guess, **kwargs):   # lgtm [py/missing-call-to-init]
         """
         Parameters
         ----------

@@ -15,7 +15,7 @@ __all__ = ["MetaConfigurable"]
 
 class MetaConfigurable(Configurable):
 
-    def __init__(self, jsonfile=None, **kwargs):
+    def __init__(self, jsonfile=None, **kwargs):  # lgtm [py/missing-call-to-init]
 
         super().__init__(**kwargs)
 

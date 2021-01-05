@@ -48,6 +48,8 @@ class NNMF(HasTraits):
         kwargs['tol'] : tolerance for a relative stopping condition
         kwargs['maxtime'], kwargs['maxit'] : limit of time and iterations
         """
+        super().__init__()
+
         tol = kwargs.get('tol', 0.1)
 
         maxtime = kwargs.get('maxtime', 60)

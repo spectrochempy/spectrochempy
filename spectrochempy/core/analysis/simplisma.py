@@ -48,6 +48,7 @@ class SIMPLISMA(HasTraits):
 
     """
 
+
     St = Instance(NDDataset)
     C = Instance(NDDataset)
     X = Instance(NDDataset)
@@ -82,6 +83,8 @@ class SIMPLISMA(HasTraits):
         --------
 
         """
+
+        super().__init__()
 
         # ------------------------------------------------------------------------
         # Utility functions
@@ -394,14 +397,6 @@ class SIMPLISMA(HasTraits):
         self.C = C
         self.St = St
         self.s = s
-
-    # ------------------------------------------------------------------------
-    # Special methods
-    # ------------------------------------------------------------------------
-
-    # ------------------------------------------------------------------------
-    # Public methods
-    # ------------------------------------------------------------------------
 
     def reconstruct(self):
         """

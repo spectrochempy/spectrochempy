@@ -67,6 +67,8 @@ class Project(AbstractProject, NDIO):
         meta : any other attributes to described the project
 
         """
+        super().__init__()
+
         self.parent = None
         self.name = name
 
