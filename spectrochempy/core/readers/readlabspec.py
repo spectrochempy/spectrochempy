@@ -149,20 +149,20 @@ def _transf_meta(y, meta):
     # such as the acquisition date of the spectra and returns a list with the acquisition in datetime format,
     # the list of effective dates for each spectrum
 
-    def val_from_key_wo_time_units(k):
-        for key in meta:
-            h, m, s = 0, 0, 0
-            if k in key:
-                _, units = key.split(k)
-                units = units.strip()[1:-1]
-                if units == 's':
-                    s = meta[key]
-                elif units == 'mm:ss':
-                    m, s = meta[key].split(':')
-                elif units == 'hh:mm':
-                    h, m = meta[key].split(':')
-                break
-        return datetime.timedelta(seconds=int(s), minutes=int(m), hours=int(h))
+    # def val_from_key_wo_time_units(k):
+    #     for key in meta:
+    #         h, m, s = 0, 0, 0
+    #         if k in key:
+    #             _, units = key.split(k)
+    #             units = units.strip()[1:-1]
+    #             if units == 's':
+    #                 s = meta[key]
+    #             elif units == 'mm:ss':
+    #                 m, s = meta[key].split(':')
+    #             elif units == 'hh:mm':
+    #                 h, m = meta[key].split(':')
+    #             break
+    #     return datetime.timedelta(seconds=int(s), minutes=int(m), hours=int(h))
 
     if meta:
         try:

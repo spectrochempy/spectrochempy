@@ -318,8 +318,8 @@ class BaselineCorrection(HasTraits):
         self.sps = []
 
         datasets = [self.dataset, self.dataset]
-        labels = ['Click on left button & Span to set regions.'
-                  'Click on right button on a region to remove it.', 'Baseline corrected dataset preview']
+        labels = ['Click on left button & Span to set regions. Click on right button on a region to remove it.',
+                  'Baseline corrected dataset preview']
         axes = multiplot(datasets, labels, method='stack', sharex=True, nrow=2, ncol=1, figsize=self.figsize,
                          suptitle='INTERACTIVE BASELINE CORRECTION')
 

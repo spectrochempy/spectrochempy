@@ -263,6 +263,8 @@ class Isotopes(Meta):
 
         return pv
 
+    def __eq__(self, other):
+        raise NotImplementedError
 
 #   ======================================================================================================================
 if __name__ == '__main__':

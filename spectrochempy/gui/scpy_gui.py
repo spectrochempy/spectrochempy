@@ -73,7 +73,8 @@ def main():
     port = scp.app.port
     for i in range(10):
         try:
-            _open_browser = lambda: webbrowser.open_new(f'http://127.0.0.1:{port + i}/')
+            _open_browser = \
+                lambda: webbrowser.open_new(f'http://127.0.0.1:{port + i}/')  # lgtm [py/loop-variable-capture]
             Timer(1, _open_browser).start()
             app.run_server(debug=debug, port=port + i)
             break

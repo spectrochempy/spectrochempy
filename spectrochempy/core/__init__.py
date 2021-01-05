@@ -608,10 +608,8 @@ def open_dialog(single=True,
         caption = 'Select a folder'
         f = klass._open_existing_directory(caption=caption, directory=str(directory))
     elif single:
-        caption = 'Select file'
         f = klass._open_filename(filters=filters)
     else:
-        caption = 'Select file(s)'
         f = klass._open_multiple_filenames(filters=filters)
 
     from spectrochempy.utils.file import pathclean

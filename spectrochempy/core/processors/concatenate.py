@@ -266,8 +266,8 @@ def concatenate(*datasets, **kwargs):
             coords[dim]._labels = np.concatenate(labels)
 
     out = NDDataset(data, coordset=coords, mask=mask, units=units)
-    for ss in sss:
-        ss = ss.squeeze()
+    # for ss in sss:
+    #     ss = ss.squeeze()
 
     thist = 'Stack' if axis == 0 else 'Concatenation'
 
