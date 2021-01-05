@@ -2,7 +2,6 @@
 # ---
 # jupyter:
 #   jupytext:
-#     cell_metadata_filter: -all
 #     formats: ipynb,py:percent
 #     text_representation:
 #       extension: .py
@@ -15,9 +14,9 @@
 #     name: python3
 # ---
 
-# %%
-# ## Starting Jupyter lab
-
+# %% [markdown]
+# # Starting Jupyter lab
+#
 # Currently **SpectroChemPy** can be used as a library for python scripts.
 #
 # For ease of use, we recommend using the
@@ -38,7 +37,7 @@
 # ```bash
 # $ jupyter lab
 # ```
-
+#
 # Your default browser should now be open, and the window should look like
 # this:
 #
@@ -46,9 +45,9 @@
 #
 # From there, it is quite easy to create notebooks or to navigate to
 # already existing ones.
-
+#
 # ## Create a new Jupyter notebook
-
+#
 # * Click on the Notebook python 3 icon
 # * A new notebook is created
 # * Enter your first command, in the displayed cell, and type `SHIFT+ENTER` to run the code
@@ -58,15 +57,15 @@
 # * You can rename the notebook using context menu in the sidebar
 #
 # <img src='images/enter_code.png' />
-
+#
 # * Then you can click on the `+` sign to create a new cell. This cell is by default a Code cell which can contain
 # Python code, but you can also enter some text, in Markdown format. Choose the content type of the cell in the
 # dropdown menu, or by typing `ESC+M`.
 # <img src='images/enter_md.png' />
-
+#
 # ## Markdown cheat sheet
-# To get more infromation on Markdown format, you can look [here](mdcheatsheet.ipynb).
-
+# To get more information on Markdown format, you can look [here](mdcheatsheet.ipynb).
+#
 # ## Using the application in a web browser
 #
 # <div class='alert alert-warning'>

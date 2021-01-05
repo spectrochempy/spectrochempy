@@ -39,7 +39,7 @@
 # procedure](../../gettingstarted/install/index.rst).
 # </div>
 
-# %% [markdown]
+# %% [markdown] nbsphinx-toctree={"maxdepth": 3}
 # [interface](interface.ipynb)
 
 # %% [markdown]
@@ -265,5 +265,5 @@ _ = nds.plot(method='stack')
 # %% [markdown]
 # This was a short overview of the possibilities. To go further you can **Continue with ...**
 
-# %% [markdown] nbsphinx-toctree={"maxdepth": 2}
+# %% [markdown] nbsphinx-toctree={"maxdepth": 3}
 # [Data Structures](../objects.rst)
