@@ -23,10 +23,6 @@ from os import environ
 import sys
 import warnings
 
-# ----------------------------------------------------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------------------------------------------------
-
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
@@ -49,7 +45,7 @@ __all__ = [
         # methods and objects from other packages will be added
         # later on this module (see below)
 
-        ]
+]
 
 # ======================================================================================================================
 # logging functions
@@ -93,7 +89,9 @@ def debug_(*args, **kwargs):
 
 # ----------------------------------------------------------------------------------------------------------------------
 def error_(*args, **kwargs):
-    s = type(args[0]).__name__+": "
+    s = ''
+    if not isinstance(args[0], str):
+        s += type(args[0]).__name__ + ": "
     for a in args:
         s += pstr(a, **kwargs) + ' '
         s = s.replace('\0', '').strip()
@@ -116,7 +114,7 @@ __all__ += ['info_', 'debug_', 'error_', 'warning_', 'print_']
 # ======================================================================================================================
 pbar_count = 0
 
-USE_TQDM = environ.get('USE_TQDM', 'Yes') == 'Yes' and 'DOC_BUILDING'not in environ and "/bin/scpy" not in sys.argv[0]
+USE_TQDM = environ.get('USE_TQDM', 'Yes') == 'Yes' and 'DOC_BUILDING' not in environ and "/bin/scpy" not in sys.argv[0]
 
 if USE_TQDM:
     pbar = tqdm(total=1211)
@@ -125,7 +123,6 @@ if USE_TQDM:
 
 
 def _pbar_update(close=None):
-
     global pbar_count
 
     if USE_TQDM:
@@ -222,7 +219,6 @@ __all__ += [
 # we put them before so that we can eventually overwrite them
 
 _pbar_update()
-
 
 # constants
 # ----------------------------------------------------------------------------------------------------------------------
@@ -501,8 +497,7 @@ class _TKFileDialogs:
         return filetypes
 
     # noinspection PyRedundantParentheses
-    def _open_filename(self,
-                       filters=None):
+    def _open_filename(self, filters=None):
 
         filename = filedialog.askopenfilename(
                 parent=self.root,

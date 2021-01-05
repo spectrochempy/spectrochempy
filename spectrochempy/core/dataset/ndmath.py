@@ -38,7 +38,7 @@ from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.utils import docstrings, MaskedArray, NOMASK, make_func_from, is_sequence, TYPE_COMPLEX
 from spectrochempy.core import warning_, error_
 from spectrochempy.utils.testing import assert_dataset_equal
-from spectrochempy.utils.exceptions import ComparisonFailure, CoordinateMismatchError
+from spectrochempy.utils.exceptions import CoordinateMismatchError
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -1800,7 +1800,7 @@ class NDMath(object):
                 elif other._squeeze_ndim >= 1:
                     try:
                         assert_dataset_equal(obc[obj.dims[-1]], otc[other.dims[-1]])
-                    except ComparisonFailure as e:
+                    except AssertionError as e:
                         raise CoordinateMismatchError(str(e))
 
                 # if other is multidimentional and as we are talking about element wise operation, we assume
@@ -1809,7 +1809,7 @@ class NDMath(object):
                     for idx in range(obj.ndim - 2):
                         try:
                             assert_dataset_equal(obc[obj.dims[idx]], otc[other.dims[idx]])
-                        except ComparisonFailure as e:
+                        except AssertionError as e:
                             raise CoordinateMismatchError(str(e))
 
             if othertype in ['NDDataset', 'Coord']:
@@ -2231,12 +2231,17 @@ __all__ += ['abs', 'amax', 'amin', 'argmin', 'argmax', 'array', 'clip', 'cumsum'
             'mean', 'pipe', 'ptp', 'round', 'std', 'sum', 'var']
 
 # make some API functions
-__all__ += ['empty_like', 'zeros_like', 'ones_like', 'full_like']
+__all__ += ['empty_like', 'zeros_like', 'ones_like', 'full_like',
+            'empty', 'zeros', 'ones', 'full']
 
 empty_like = make_func_from(NDMath.empty_like, first='dataset')
 zeros_like = make_func_from(NDMath.zeros_like, first='dataset')
 ones_like = make_func_from(NDMath.ones_like, first='dataset')
 full_like = make_func_from(NDMath.full_like, first='dataset')
+empty = make_func_from(NDMath.empty, first='dataset')
+zeros = make_func_from(NDMath.zeros, first='dataset')
+ones = make_func_from(NDMath.ones, first='dataset')
+full = make_func_from(NDMath.full, first='dataset')
 
 
 def set_api_methods(cls, methods):

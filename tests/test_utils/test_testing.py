@@ -7,7 +7,6 @@
 
 from spectrochempy.core.scripts.script import Script
 from spectrochempy.utils import testing
-from spectrochempy.utils.exceptions import ComparisonFailure
 
 
 def test_compare(IR_dataset_1D, simple_project):
@@ -21,18 +20,18 @@ def test_compare(IR_dataset_1D, simple_project):
     nd3 = nd1.copy()
     nd3.title = 'ddd'
 
-    with testing.raises(ComparisonFailure):
+    with testing.raises(AssertionError):
         testing.assert_dataset_equal(nd1, nd3)
 
     nd4 = nd1.copy()
     nd4.data += 0.001
 
-    with testing.raises(ComparisonFailure):
+    with testing.raises(AssertionError):
         testing.assert_dataset_equal(nd1, nd4)
 
     testing.assert_dataset_almost_equal(nd1, nd4, decimal=3)
 
-    with testing.raises(ComparisonFailure):
+    with testing.raises(AssertionError):
         testing.assert_dataset_almost_equal(nd1, nd4, decimal=4)
 
     # project comparison
@@ -47,5 +46,5 @@ def test_compare(IR_dataset_1D, simple_project):
     proj3 = proj2.copy()
     proj3.add_script(Script(content='print()', name='just_a_try'))
 
-    with testing.raises(ComparisonFailure):
+    with testing.raises(AssertionError):
         testing.assert_project_equal(proj1, proj3)

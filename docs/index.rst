@@ -49,8 +49,6 @@ Among its major features:
 
 .. warning::
 
-    **This software is not yet publicly released**.
-
     |scpy| is still experimental and under active development.
     Its current design is subject to major changes, reorganizations,
     bugs and crashes!!! Please report any issues to the
@@ -91,7 +89,7 @@ User's Guide
 * :doc:`userguide/introduction/introduction`
 * :doc:`userguide/objects`
 * :doc:`userguide/units/units`
-* :doc:`userguide/import_export/import_export`
+* :doc:`userguide/importexport/importexport`
 * :doc:`userguide/plotting/plotting`
 * :doc:`userguide/processing/processing`
 * :doc:`userguide/analysis/analysis`
@@ -105,7 +103,7 @@ User's Guide
     userguide/introduction/introduction
     userguide/objects
     userguide/units/units
-    userguide/import_export/import_export
+    userguide/importexport/importexport
     userguide/plotting/plotting
     userguide/processing/processing
     userguide/analysis/analysis

@@ -2,7 +2,6 @@
 # ---
 # jupyter:
 #   jupytext:
-#     cell_metadata_json: true
 #     formats: ipynb,py:percent
 #     text_representation:
 #       extension: .py
@@ -15,8 +14,8 @@
 #     name: python3
 # ---
 
-# %% [markdown] {"pycharm": {"is_executing": false, "name": "#%% md\n"}}
-# # Import Data
+# %% [markdown]
+# # Tutorial: Import Data
 #
 # This tutorial shows how to import data in **SpectroChemPy (SCPy)**.
 #
@@ -67,8 +66,8 @@ print(X)
 # <div class='alert alert-info'>
 # <b>Note</b>
 #
-# By default the Dialog Box opens in the last directory you have used. However if a directory path is specified, the
-# dialog should open from this directory.
+# By default the Dialog Box opens in the last directory you have used. However if a directory path is specified,
+# the dialog should open from this diectory.
 # </div>
 
 # %%
@@ -159,7 +158,7 @@ scp.read_omnic('irdata/subdir')
 # - etc...
 
 # %% [markdown]
-# ## A good practice: use relative paths
+# ### A good practice: use relative paths
 #
 # The above directives require explicitly writing the absolute pathnames, which are virtually always computer specific.
 # If, for instance, Brian has a project organised in a folder (`s`) with a directory dedicated to input data (`Life`)
@@ -192,7 +191,7 @@ scp.read_omnic('irdata/subdir')
 # X = scp.read_omnic('wodger.spg', directory='Life')
 # ```
 #
-# ## Good practice: use `os` or `pathlib` modules
+# ### Good practice: use `os` or `pathlib` modules
 #
 # In python, working with pathnames is classically done with dedicated modules such as `os` or `pathlib` python modules.
 # With `os` we mention the following methods that can be particularly useful:
@@ -221,7 +220,7 @@ scp.read_omnic('irdata/subdir')
 #
 # Spectrochempy also comes with the definition of a second default directory path where to look at the data:
 # the `datadir` directory. It is defined in the variable `preferences.datadir` which is imported at the same
-# time as spectrochempy. By default, `datadir` points in the 'scp_data\testdata' folder of SCPy:
+# time as spectrochempy. By default, `datadir` points in the 'scp_data\testdata' folder of SpectroChemPy:
 
 # %%
 DATADIR = scp.preferences.datadir
@@ -237,7 +236,7 @@ X = scp.read_omnic(DATADIR / 'wodger.spg')
 # It can be set to another pathname *permanently* (i.e., even after computer restart) by a new assignment:
 #
 # ```
-# preferences.datadir = 'C:/users/Brian/s/Life'`
+# scp.preferences.datadir = 'C:/users/Brian/s/Life'`
 # ```
 #
 # This will change the default value in the SCPy preference file located in the hidden folder
@@ -251,45 +250,6 @@ X = scp.read_omnic(DATADIR / 'wodger.spg')
 #    3. try in `datadir`
 #    4. if none of these works: generate an OSError (file or directory not found)
 #
-
-# %% [markdown]
-# --- This is the end of the tutorial ---
-#
-#
-
-# %% [markdown]
-# # Import and export of NDDataset objects
-
-# %% [markdown]
-# As usual we start by importing the SpectroChemPy API
-
-# %%
-import spectrochempy as scp  # noqa: F403
-
-# %% [markdown]
-# ## Data directory
-#
-# The builtin **datadir** variable contains a path to our *test*'s data.
-#
-# However it is always possible to specify alternative locations: Any existing file path can be specified in import
-# functions calls.
-#
-# <div class='alert alert-info'>
-#
-# **NOTE:**
-# In import function calls, if we do not specify the **datadir**, the application will first look in this directory
-# by default, if it doesn't find the path in the current directory.
-#
-# </div>
-# datadir = preferences.datadir
-# if os.path.exists(datadir):
-#     print(datadir)
-
-# %%
-# !cd C:\Users\christian\anaconda3\envs\scpy\lib\site-packages\scp_data\testdata
-
-# %%
-# !dir
 
 # %% [markdown]
 # ## File selector widget
@@ -314,31 +274,3 @@ fs
 
 # %%
 fs.value, fs.path, fs.fullpath
-
-# %% [markdown]
-# ##  Infrared spectroscopy OMNIC file Import (.spg extension)
-#
-
-# %%
-dataset = scp.NDDataset.read_omnic('irdata/nh4y-activation.spg')
-dataset
-
-# %%
-# view it...
-_ = dataset.plot(method='stack')
-
-# %% [markdown]
-#
-# ## NMR Bruker data Import
-
-# %% [markdown]
-# Now, lets load a NMR dataset (in the Bruker format).
-
-# %%
-path = 'nmrdata/bruker/tests/nmr/topspin_1d'
-ndd = scp.NDDataset.read_topspin(path, expno=1, remove_digital_filter=True)
-ndd
-
-# %%
-# view it...
-_ = ndd.plot(color='blue')

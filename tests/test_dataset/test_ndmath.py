@@ -22,7 +22,7 @@ from spectrochempy.core.dataset.ndmath import unary_ufuncs, binary_ufuncs, comp_
 from spectrochempy.units.units import ur, Quantity, Unit
 from spectrochempy.utils import (MASKED, TYPE_FLOAT, TYPE_INTEGER)
 from spectrochempy.utils.testing import assert_array_equal, assert_equal_units, assert_dataset_equal, RandomSeedContext
-
+from spectrochempy.utils.exceptions import CoordinateMismatchError
 import spectrochempy as scp
 
 typequaternion = np.dtype(np.quaternion)
@@ -459,13 +459,13 @@ def test_nddataset_add_mismatch_coords():
     coord2 = Coord(np.arange(1., 5.5, 1.))
     d1 = NDDataset(np.ones((5, 5)), coordset=[coord1, coord2])
     d2 = NDDataset(np.ones((5, 5)), coordset=[coord2, coord1])
-    with pytest.raises(ValueError) as exc:
+    with pytest.raises(CoordinateMismatchError) as exc:
         d1 -= d2
-    assert exc.value.args[0] == "coordinate's values do not match"
-    with pytest.raises(ValueError) as exc:
+    assert str(exc.value).startswith('\nCoord.data attributes are not equal')
+    with pytest.raises(CoordinateMismatchError) as exc:
         d1 += d2
-    assert exc.value.args[
-               0] == "coordinate's values do not match"  # TODO= make more tests like this for various functions
+    assert str(exc.value).startswith(
+        '\nCoord.data attributes are not equal')  # TODO= make more tests like this for various functions
 
 
 def test_nddataset_add_mismatch_units():
@@ -525,16 +525,6 @@ def test_nddataset_substract_with_numpy_array():
     d3 = d2 - d1 * .5
     assert isinstance(d3, NDDataset)
     assert np.all(d3.data == 0.5)
-
-
-def test_nddataset_subtract_mismatch_coords():
-    coord1 = Coord(np.arange(5.))
-    coord2 = Coord(np.arange(1., 5.5, 1.))
-    d1 = NDDataset(np.ones((5, 5)), coordset=[coord1, coord2])
-    d2 = NDDataset(np.ones((5, 5)), coordset=[coord2, coord1])
-    with pytest.raises(ValueError) as exc:
-        d1 -= d2
-    assert exc.value.args[0] == "coordinate's values do not match"
 
 
 def test_nddataset_binary_operation_with_other_1D():

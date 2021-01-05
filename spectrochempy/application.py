@@ -306,10 +306,6 @@ class DataDir(HasTraits):
 
     """
 
-    # ------------------------------------------------------------------------------------------------------------------
-    # public methods
-    # ------------------------------------------------------------------------------------------------------------------
-
     path = Instance(Path)
 
     def listing(self):
@@ -319,6 +315,7 @@ class DataDir(HasTraits):
         Returns
         -------
         listing : str
+            Display of the datadir content
 
         """
         strg = f'{self.path.name}\n'  # os.path.basename(self.path) + "\n"
@@ -342,37 +339,23 @@ class DataDir(HasTraits):
         # to work with --help-all
         """"""  # TODO: make some useful help
 
-    # ------------------------------------------------------------------------------------------------------------------
-    # special methods
-    # ------------------------------------------------------------------------------------------------------------------
-
     def __str__(self):
         return self.listing()
 
-    # ------------------------------------------------------------------------------------------------------------------
-    # initialization
-    # ------------------------------------------------------------------------------------------------------------------
+    def _repr_html_(self):
+        # _repr_html is needed to output in notebooks
+        return self.listing().replace('\n', '<br/>').replace(" ", "&nbsp;")
 
     @default('path')
     def _get_path_default(self):
         # the spectra path in package data
         return Path(get_pkg_path('testdata', 'scp_data'))
 
-    # ------------------------------------------------------------------------------------------------------------------
-    # private methods
-    # ------------------------------------------------------------------------------------------------------------------
-
-    def _repr_html_(self):
-        # _repr_html is needed to output in notebooks
-        return self.listing().replace('\n', '<br/>').replace(" ", "&nbsp;")
-
 
 # ======================================================================================================================
 # General Preferences
 # ======================================================================================================================
 
-
-# ======================================================================================================================
 class GeneralPreferences(MetaConfigurable):
     """
     Preferences that apply to the |scpy| application in general
@@ -390,39 +373,38 @@ class GeneralPreferences(MetaConfigurable):
     # Gonfiguration entries
     # ------------------------------------------------------------------------------------------------------------------
 
-    use_qt = Bool(False, help='Use QT for dialog instead of TK wich is the default. '
-                              'If True the PyQt libraries mut be installed').tag(config=True)
-
-    show_info_on_loading = Bool(True, help='Display info on loading').tag(config=True)
-
-    use_dev_version = Bool(True, help='use latest development versions').tag(config=True)
-
-    datadir = Union((Instance(Path), Unicode()), help='Directory where to look for data by default').tag(config=True,
-                                                                                                         type="folder")
-
-    @default('datadir')
-    def _get_default_datadir(self):
-        return self.parent.datadir.path
-
-    @observe('datadir')
-    def _datadir_changed(self, change):
-        self.parent.datadir.path = pathclean(change['new'])
-
+    cloudURL = Unicode(help='URL where to look for data by default if not found on datadir').tag(config=True,
+                                                                                                 type="folder")
     databases = Union((Instance(Path), Unicode()), help='Directory where to look for database files such as csv').tag(
             config=True, type="folder")
+    datadir = Union((Instance(Path), Unicode()), help='Directory where to look for data by default').tag(config=True,
+                                                                                                         type="folder")
+    show_info_on_loading = Bool(True, help='Display info on loading').tag(config=True)
+    use_qt = Bool(False, help='Use QT for dialog instead of TK wich is the default. '
+                              'If True the PyQt libraries must be installed').tag(config=True)
 
+    # ..................................................................................................................
+    @default('cloudURL')
+    def _get_default_cloudURL(self):
+        return 'https://drive.google.com/drive/folders/1rfc9O7jK6v_SbygzJHoFEXXxYY3wIqmh?usp=sharing'
+
+    # ..................................................................................................................
     @default('databases')
     def _get_databases_default(self):
         # the spectra path in package data
         return Path(get_pkg_path('databases', 'scp_data'))
 
-    cloudURL = Unicode(help='URL where to look for data by default if not found on datadir').tag(config=True,
-                                                                                                 type="folder")
+    # ..................................................................................................................
+    @default('datadir')
+    def _get_default_datadir(self):
+        return self.parent.datadir.path
 
-    @default('cloudURL')
-    def _get_default_cloudURL(self):
-        return 'https://drive.google.com/drive/folders/1rfc9O7jK6v_SbygzJHoFEXXxYY3wIqmh?usp=sharing'
+    # ..................................................................................................................
+    @observe('datadir')
+    def _datadir_changed(self, change):
+        self.parent.datadir.path = pathclean(change['new'])
 
+    # ..................................................................................................................
     @property
     def log_level(self):
         """
@@ -430,6 +412,7 @@ class GeneralPreferences(MetaConfigurable):
         """
         return self.parent.log_level
 
+    # ..................................................................................................................
     @log_level.setter
     def log_level(self, value):
         if isinstance(value, str):
@@ -440,7 +423,7 @@ class GeneralPreferences(MetaConfigurable):
                               'or ERROR')
         self.parent.log_level = value
 
-    # ------------------------------------------------------------------------------------------------------------------
+    # ..................................................................................................................
     def __init__(self, **kwargs):
         super().__init__(jsonfile='GeneralPreferences', **kwargs)
 
@@ -451,7 +434,6 @@ class DatasetPreferences(MetaConfigurable):
     Per nddataset preferences
 
     """
-
     name = Unicode('DatasetPreferences')
     description = Unicode('Options for datasets')
     updated = Bool(False)
@@ -460,12 +442,9 @@ class DatasetPreferences(MetaConfigurable):
     # Configuration entries
     # ------------------------------------------------------------------------------------------------------------------
 
-    # IMPORT SETTINGS FOR DATASETS
-
     csv_delimiter = Unicode(',', help='CSV data delimiter').tag(config=True)
 
-    # ------------------------------------------------------------------------------------------------------------------
-
+    # ..................................................................................................................
     def __init__(self, **kwargs):
         super(DatasetPreferences, self).__init__(jsonfile='DatasetPreferences', **kwargs)
 
@@ -484,28 +463,19 @@ class ProjectPreferences(MetaConfigurable):
     # ------------------------------------------------------------------------------------------------------------------
     # Configuration entries
     # ------------------------------------------------------------------------------------------------------------------
+
+    autoload_project = Bool(False, help='Automatic loading of the last project at startup').tag(config=True)
+    autosave_projects = Bool(False, help='Automatic saving of the current project').tag(config=True)
     project_directory = Unicode(help='Directory where projects are stored by default').tag(config=True, type='folder')
+    show_close_dialog = Bool(True, help='Display the close project dialog project changing or on application exit').tag(
+            config=True)
 
     @default('project_directory')
     def _get_default_project_directory(self):
-        """
-        Determines the SpectroChemPy project directory name and
-        creates the directory if it doesn't exist.
-
-        This directory is typically ``$HOME/spectrochempy/projects``,
-        but if the
-        SCP_PROJECTS_HOME environment variable is set and the
-        ``$SCP_PROJECTS_HOME`` directory exists, it will be that
-        directory.
-
-        If neither exists, the former will be created.
-
-        Returns
-        -------
-        dir : str
-            The absolute path to the projects directory.
-
-        """
+        # Determines the SpectroChemPy project directory name and creates the directory if it doesn't exist.
+        # This directory is typically ``$HOME/spectrochempy/projects``, but if the SCP_PROJECTS_HOME environment
+        # variable is set and the `$SCP_PROJECTS_HOME` directory exists, it will be that directory.
+        # If neither exists, the former will be created.
 
         # first look for SCP_PROJECTS_HOME
         scp = os.environ.get('SCP_PROJECTS_HOME')
@@ -523,15 +493,7 @@ class ProjectPreferences(MetaConfigurable):
 
         return os.path.abspath(scp)
 
-    autosave_projects = Bool(False, help='Automatic saving of the current project').tag(config=True)
-
-    autoload_project = Bool(False, help='Automatic loading of the last project at startup').tag(config=True)
-
-    show_close_dialog = Bool(True, help='Display the close project dialog project changing or on application exit').tag(
-            config=True)
-
-    # ------------------------------------------------------------------------------------------------------------------
-
+    # ..................................................................................................................
     def __init__(self, **kwargs):
 
         super().__init__(jsonfile='ProjectPreferences', **kwargs)
@@ -541,8 +503,6 @@ class ProjectPreferences(MetaConfigurable):
 # Application
 # ======================================================================================================================
 
-
-# ======================================================================================================================
 class SpectroChemPy(Application):
     """
     This class SpectroChemPy is the main class, containing most of the setup,
@@ -788,9 +748,9 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
 
             lis = os.listdir(self.config_dir)
             for f in lis:
-                if f.endswith('.json'):
+                if f.endswith('.json') :
                     jsonname = os.path.join(self.config_dir, f)
-                    if self.reset_config:
+                    if self.reset_config or f == 'MatplotlibPreferences.json':
                         # remove the user json file to reset to defaults
                         os.remove(jsonname)
                     else:

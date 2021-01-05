@@ -10,26 +10,72 @@ __all__ = ["assert_equal", "assert_array_equal", "assert_array_almost_equal", 'a
            'assert_dataset_almost_equal', 'assert_project_equal', 'assert_project_almost_equal', "assert_approx_equal",
            "assert_raises", "raises", "catch_warnings", "RandomSeedContext", ]
 
+import operator
 import functools
-# import tempfile
 import warnings
-import pytest
-import numpy as np
 
+import numpy as np
 # import matplotlib.pyplot as plt
-# from matplotlib.testing.compare import calculate_rms, ImageComparisonFailure
+# from matplotlib.testing.compare import calculate_rms, ImageAssertionError
 from numpy.testing import (assert_equal, assert_array_equal, assert_array_almost_equal, assert_approx_equal,
-                           assert_raises, )
+                           assert_raises, assert_array_compare)
 
 
 # ======================================================================================================================
 # NDDataset comparison
 # ======================================================================================================================
+def gisinf(x):
+    """like isinf, but always raise an error if type not supported instead of
+    returning a TypeError object.
 
-def _compare_datasets(this, other, approx=False, decimal=6):
+    Notes
+    -----
+    isinf and other ufunc sometimes return a NotImplementedType object instead
+    of raising any exception. This function is a wrapper to make sure an
+    exception is always raised.
+
+    This should be removed once this problem is solved at the Ufunc level."""
+    from numpy.core import isinf, errstate
+    with errstate(invalid='ignore'):
+        st = isinf(x)
+        if isinstance(st, type(NotImplemented)):
+            raise TypeError("isinf not supported for this type")
+    return st
+
+
+def compare_datasets(this, other, approx=False, decimal=6):
     from spectrochempy.core.dataset.ndarray import NDArray
     from spectrochempy.units import ur, Quantity
-    from spectrochempy.utils.exceptions import ComparisonFailure
+
+    def compare(x, y):
+        from numpy.core import number, float_, result_type, array
+        from numpy.core.numerictypes import issubdtype
+        from numpy.core.fromnumeric import any as npany
+
+        try:
+            if npany(gisinf(x)) or npany(gisinf(y)):
+                xinfid = gisinf(x)
+                yinfid = gisinf(y)
+                if not (xinfid == yinfid).all():
+                    return False
+                # if one item, x and y is +- inf
+                if x.size == y.size == 1:
+                    return x == y
+                x = x[~xinfid]
+                y = y[~yinfid]
+        except (TypeError, NotImplementedError):
+            pass
+
+        # make sure y is an inexact type to avoid abs(MIN_INT); will cause
+        # casting of x later.
+        dtype = result_type(y, 1.)
+        y = array(y, dtype=dtype, copy=False, subok=True)
+        z = abs(x - y)
+
+        if not issubdtype(z.dtype, number):
+            z = z.astype(float_)  # handle object arrays
+
+        return z < 1.5 * 10.0 ** (-decimal)
 
     eq = True
 
@@ -42,16 +88,17 @@ def _compare_datasets(this, other, approx=False, decimal=6):
             otherdata = other
             otherunits = False
         else:
-            raise ComparisonFailure(f'{this} and {other} objects are too different to be compared.')
+            raise AssertionError(f'{this} and {other} objects are too different to be compared.')
 
         if not this.has_units and not otherunits:
             eq = np.all(this._data == otherdata)
         elif this.has_units and otherunits:
             eq = np.all(this._data * this._units == otherdata * otherunits)
         else:
-            raise ComparisonFailure(f'units of {this} and {other} objects does not match')
+            raise AssertionError(f'units of {this} and {other} objects does not match')
         return eq
 
+    thistype = this.implements()
     attrs = this.__dir__()
     for attr in ('filename', 'preferences', 'description', 'history', 'date', 'modified', 'modeldata', 'origin', 'roi',
                  'offset', 'name'):
@@ -70,42 +117,39 @@ def _compare_datasets(this, other, approx=False, decimal=6):
                 oattr = getattr(other, f'_{attr}')
                 # to avoid deprecation warning issue for unequal array
                 if sattr is None and oattr is not None:
-                    raise ComparisonFailure(f'`{attr}` of {this} is None.')
+                    raise AssertionError(f'`{attr}` of {this} is None.')
                 if oattr is None and sattr is not None:
-                    raise ComparisonFailure(f'{attr} of {other} is None.')
+                    raise AssertionError(f'{attr} of {other} is None.')
                 if hasattr(oattr, 'size') and hasattr(sattr, 'size') and oattr.size != sattr.size:
                     # particular case of mask
                     if attr != 'mask':
-                        raise ComparisonFailure(f'sizes of `{attr}` are different.')
+                        raise AssertionError(f'{thistype}.{attr} sizes are different.')
                     else:
                         if other.mask != this.mask:
-                            raise ComparisonFailure(f'{this} and {other} masks are different.')
+                            raise AssertionError(f'{this} and {other} masks are different.')
                 if attr in ['data', 'mask']:
                     if approx:
-                        try:
-                            assert_array_almost_equal(sattr, oattr, decimal=decimal)
-                        except AssertionError as e:
-                            raise ComparisonFailure(f'The `{attr} attributes of {this} and {other} are too different.\
-                            n{e}')
+                        assert_array_compare(compare, sattr, oattr, header=(
+                                f'{thistype}.{attr} attributes are not almost equal to %d decimals' % decimal),
+                                             precision=decimal)
                     else:
-                        try:
-                            assert_array_equal(sattr, oattr)
-                        except AssertionError as e:
-                            raise ComparisonFailure(f'The `{attr}` attributes of {this} and {other} are not equals.\n{e}')
+                        assert_array_compare(operator.__eq__, sattr, oattr,
+                                             header=f'{thistype}.{attr} attributes are not equal')
+
                 elif attr in ['coordset']:
                     if (sattr is None and oattr is not None) or (oattr is None and sattr is not None):
-                        raise ComparisonFailure('One of the coordset is None')
+                        raise AssertionError('One of the coordset is None')
                     elif sattr is None and oattr is None:
                         res = True
                     else:
                         for item in zip(sattr, oattr):
-                            res = _compare_datasets(*item, approx=approx, decimal=decimal)
+                            res = compare_datasets(*item, approx=approx, decimal=decimal)
                             if not res:
-                                raise ComparisonFailure(f'coords differs:\n{res}')
+                                raise AssertionError(f'coords differs:\n{res}')
                 else:
                     eq &= np.all(sattr == oattr)
                 if not eq:
-                    raise ComparisonFailure(f'The {attr} attributes of {this} and {other} are different.')
+                    raise AssertionError(f'The {attr} attributes of {this} and {other} are different.')
             else:
                 return False
         else:
@@ -120,10 +164,9 @@ def _compare_datasets(this, other, approx=False, decimal=6):
 
                 eq &= np.all(sattr == oattr)
                 if not eq:
-                    raise ComparisonFailure(
-                            f"attributes `{attr}` are not equals or one is missing: \n{sattr} != {oattr}")
+                    raise AssertionError(f"attributes `{attr}` are not equals or one is missing: \n{sattr} != {oattr}")
             else:
-                raise ComparisonFailure(f'{other} has no units')
+                raise AssertionError(f'{other} has no units')
 
     return True
 
@@ -138,9 +181,8 @@ def assert_dataset_equal(nd1, nd2):
 def assert_dataset_almost_equal(nd1, nd2, **kwargs):
     decimal = kwargs.get('decimal', 6)
     approx = kwargs.get('approx', True)
-    _compare_datasets(nd1, nd2, approx=approx, decimal=decimal)
+    compare_datasets(nd1, nd2, approx=approx, decimal=decimal)
     return True
-
 
 
 def assert_project_equal(proj1, proj2, **kwargs):
@@ -151,7 +193,7 @@ def assert_project_equal(proj1, proj2, **kwargs):
 # ......................................................................................................................
 def assert_project_almost_equal(proj1, proj2, **kwargs):
     for nd1, nd2 in zip(proj1.datasets, proj2.datasets):
-        _compare_datasets(nd1, nd2, **kwargs)
+        compare_datasets(nd1, nd2, **kwargs)
 
     for pr1, pr2 in zip(proj1.projects, proj2.projects):
         assert_project_almost_equal(pr1, pr2, **kwargs)
@@ -164,10 +206,8 @@ def assert_project_almost_equal(proj1, proj2, **kwargs):
 
 # ......................................................................................................................
 def assert_script_equal(sc1, sc2, **kwargs):
-    from spectrochempy.utils.exceptions import ComparisonFailure
-
     if sc1 != sc2:
-        raise ComparisonFailure(f'Scripts are differents: {sc1.content} != {sc2.content}')
+        raise AssertionError(f'Scripts are differents: {sc1.content} != {sc2.content}')
 
 
 # ======================================================================================================================
@@ -259,11 +299,13 @@ class raises(object):
     def __call__(self, func):
         @functools.wraps(func)
         def run_raises_test(*args, **kwargs):
+            import pytest
             pytest.raises(self._exc, func, *args, **kwargs)
 
         return run_raises_test
 
     def __enter__(self):
+        import pytest
         self._ctx = pytest.raises(self._exc)
         return self._ctx.__enter__()
 
@@ -567,7 +609,7 @@ class catch_warnings(warnings.catch_warnings):
 #                 if errors and not REDO_ON_TYPEERROR:
 #                     # raise an error if one of the image is different from the
 #                     # reference image
-#                     raise ImageComparisonFailure("\n" + errors)
+#                     raise ImageAssertionError("\n" + errors)
 #
 #                 if not REDO_ON_TYPEERROR:
 #                     break

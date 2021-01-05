@@ -25,10 +25,9 @@
 # We first import spectrochempy, the other libraries used in this tutorial, and a sample dataset (
 # nh4y-activation.spg) from which we extract a noisy part:
 
-import numpy as np
-
 # %%
 import spectrochempy as scp
+import numpy as np
 
 # %%
 X = scp.read_omnic('irdata//nh4y-activation.spg')  # import spectra

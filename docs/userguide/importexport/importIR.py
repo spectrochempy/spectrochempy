@@ -15,17 +15,15 @@
 #     name: python3
 # ---
 
-# %% [markdown] {"pycharm": {"is_executing": false, "name": "#%% md\n"}}
-# # Import IR Data
+# %% [markdown]
+# # Tutorial: Import IR Data
 #
 # This tutorial shows the specifics related to infrared data import in Spectrochempy. As prerequisite, the user is
 # expected to have read the [Import Tutorial](Import.ipynb).
 #
 # Let's first import spectrochempy:
-#
-# import os
 
-# %% {"jupyter": {"outputs_hidden": false}, "pycharm": {"name": "#%%\n"}}
+# %%
 import spectrochempy as scp
 
 # %% [markdown]
@@ -35,8 +33,9 @@ import spectrochempy as scp
 # to IR data:
 #
 # - `read_omnic()` to open omnic (spa and spg) files
-# - `read_bruker_opus()` to open Opus (*.0, ...) files
-# - `read_jdx()` to open an IR JCAMP-DX datafile
+# - `read_opus()` to open Opus (*.0, ...) files
+# - `read_jcamp()` to open an IR JCAMP-DX datafile
+# - `read()` which is the generic reader. The type of data is then deduced from the file extension.
 #
 # General purpose data exchange formats such as  \*.csv or \*.mat will be treated in another tutorial (yet to come...)
 # can also be read using:
@@ -77,7 +76,7 @@ X
 # this type of attribute). The string is composed of the username and of the machine name as given by the OS:
 # username@machinename. It can be accessed and changed using `X.author`
 #
-# - "created" is the creation date of the NDDataset (again not that of the .spg file). It can be accessed (or even
+# - `created` is the creation date of the NDDataset (again not that of the .spg file). It can be accessed (or even
 # changed) using `X.created`
 #
 # - `description` indicates the complete pathname of the .spg file. As the pathname is also given in the history (below)
@@ -85,14 +84,14 @@ X
 
 # %%
 X.description = 'CO adsorption on CoMo/Al2O3, difference spectra'
-print(X.description)
+X.description
 
 # %% [markdown]
 # or directly at the import:
 
 # %%
 X = scp.read_omnic('irdata//CO@Mo_Al2O3.SPG', description='CO@CoMo/Al2O3, diff spectra')
-print(X.description)
+X.description
 
 # %% [markdown]
 # - `history` records changes made to the dataset. Here, right after its creation, it has been sorted by date
@@ -100,72 +99,97 @@ print(X.description)
 #
 # Then come the attributes related to the data themselves:
 #
-# - `title` (not to be confused with the `name` of the dataset) describes the nature of data (here absorbance)
+# - `title` (not to be confused with the `name` of the dataset) describes the nature of data (here **absorbance**)
 #
-# - "values" shows a sample of the first and last data and their units when they exist (here a.u. for absorbance units).
-# The numerical values ar accessed through the`data` attribute and the units throut `units` attribute.
+# - `values` shows the data as quantity (with their units when they exist - here a.u. for absorbance units).
+#
+# - The numerical values ar accessed through the`data` attribute and the units throught `units` attribute.
 
 # %%
-print(X.data)
-print(X.units)
+X.values
+
+# %%
+X.data
+
+# %%
+X.units  # TODO: correct this display
 
 # %% [markdown]
 # - `shape` is the same as the ndarray `shape` attribute and gives the shape of the data array, here 19 x 3112.
 #
 # Then come the attributes related to the dimensions of the dataset.
 #
-#
-# - the `x` dimension has one coordinate made of the 3112 the wavenumbers.
-#
-#
-# - the `y` dimension contains:
+# - `x`: this dimension has one coordinate (a `Coord` object) made of the 3112 the wavenumbers.
+
+# %%
+print(X.x)
+X.x
+
+# %% [markdown]
+# - `y`: this dimension contains:
 #
 #     - one coordinate made of the 19 acquisition timestamps
-#
 #     - two labels
-#
 #         - the acquision date (UTC) of each spectrum
-#
 #         - the name of each spectrum.
-#
-#
-# Note that the `x` and `y` dimensions are the second and first dimension respectively. Hence, `X[i,j]` will return
-# the absorbance of the ith spetrum at the jth  wavenumber.
-#
-# **Note: acquisition dates and `y` axis**
+
+# %%
+print(X.y)
+X.y
+
+# %% [markdown]
+# - `dims`: Note that the `x` and `y` dimensions are the second and first dimension respectively. Hence, `X[i,
+# j]` will return
+# the absorbance of the ith spectrum at the jth  wavenumber. However, this is subject to change, for instance if you
+# perform ooperation on you data such as [Transposition](../processing/transformations#Transposition). At any time
+# the attribute `dims`gives the correct names (which can be modified) and order of the dimensions.
+
+# %%
+X.dims
+
+# %% [markdown]
+# #### Acquisition dates and `y` axis
 #
 # The acquisition timestamps are the *Unix times* of the acquisition, i.e. the time elapsed in seconds since the
-# reference date of Jan 1st 1970, 00:00:00 UTC. In OMNIC, the acquisition time is that of the start of the acquisison.
+# reference date of Jan 1st 1970, 00:00:00 UTC.
+
+# %%
+X.y.values
+
+# %% [markdown]
+# In OMNIC, the acquisition time is that of the start of the acquisison.
 # As such these may be not convenient to use directly (they are currently in the order of 1.5 billion...)
 # With this respect, it can be convenient to shift the origin of time coordinate to that of the 1st spectrum,
 # which has the index `0`:
 
 # %%
 X.y = X.y - X.y[0]
-X.y
+X.y.values
 
 # %% [markdown]
 # Note that you can also use the inplace subtract operator to perform the same operation.
-# X.y -= X.y[0]
+
+# %%
+X.y -= X.y[0]
 
 # %% [markdown]
-# It is also possible to use the ability of Scpy to handle unit changes. For this one can use the  `to` or `ito` (
+# It is also possible to use the ability of SpectroChemPy to handle unit changes. For this one can use the `to` or
+# `ito` (
 # inplace) methods.
-#
-#     val = val.to(some_units)
-#     val.ito(some_units)   # the same inplace
+# ```python
+# val = val.to(some_units)
+# val.ito(some_units)   # the same inplace
+# ```
 
 # %%
 X.y.ito("minute")
-X.y
+X.y.values
 
 # %% [markdown]
-# Note that the values that are displayed are rounded, not the values stored internally. Hence, the relative time in
-# minutes of the last spectrum is:
+# As shown above, the values of the `Coord` object are accessed through the `values` attribute. To get the last
+# values corresponding to the last row of the `X` dataset, you can use:
 
 # %%
-# The values of the Coord object are accessed through the `values` attribute. To get the last values correpsonding to
-# the last row of the X dataset, you can use:
 tf = X.y.values[-1]
 tf
 
@@ -173,22 +197,21 @@ tf
 # Negative index in python indicates the position in a sequence from the end, so -1 indicate the last element.
 
 # %% [markdown]
-# which gives the exact time inn minutes.
-
-# %% [markdown]
-# Finally, if the time axis needs to be shifted by 2 minutes for instance, it is also very easy to do so:
+# Finally, if for instance you want the `x` time axis to be shifted by 2 minutes, it is also very easy to do so:
 
 # %%
 X.y = X.y + 2
-X.y
+X.y.values
 
 # %% [markdown]
 # or using the inplace add operator:
+# ```python
 # X.y += 2
+# ```
 
 
 # %% [markdown]
-# **Note: The order of spectra**
+# #### The order of spectra
 #
 # The order of spectra in OMNIC .spg files depends depends on the order in which the spectra were included in the OMNIC
 # window before the group was saved. By default, sepctrochempy reorders the spectra by acquisistion date but the
@@ -201,16 +224,18 @@ X2 = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG', sortbydate=False)
 # In the present case this will not change nothing because the spectra in the OMNIC file wre already ordered by
 # increasing data.
 #
-# Finally, it is worth mentioning that the NDDatasets can generally be manipulated as numpy ndarray. Hence, for
+# Finally, it is worth mentioning that a `NDDataset` can generally be manipulated as numpy ndarray. Hence, for
 # instance, the following will inverse the order of the first dimension:
 
 # %%
 X = X[::-1]  # reorders the NDDataset along the first dimension going backward
-X.y          # displays the `y` dimension
+X.y.values  # displays the `y` dimension
 
 # %% [markdown]
-# **Note: Case of groups with different wavenumbers**
+# <div class='alert alert-info'>
+# <b>Note</b>
 #
+# **Case of groups with different wavenumbers**<br/>
 # An OMNIC .spg file can contain spectra having different wavenumber axes (e.g. different spacings or wavenumber
 # ranges). In its current implementation, the spg reader will purposedly return an error because such spectra
 # *cannot* be included in a single NDdataset which, by definition, contains items that share common axes or dimensions !
@@ -247,6 +272,18 @@ print(X)
 X = scp.read_omnic('irdata/subdir')
 print(X)
 
+# %% [markdown]
+# <div class='alert alert-warning'>
+# <b>Warning</b>
+#
+# There is a difference in specifiying the directory to read as an argument as above or as a keyword like here:
+# ```python
+# X = scp.read_omnic(directory='irdata/subdir')
+# ```
+# in the latter case, a **dialog** is opened to select files in the given directory, while in the former,
+# the file are read silently and concatenated (if possible).
+# </div>
+
 # %% [markdown] {"pycharm": {"name": "#%% md\n"}}
 # ## Import of Bruker OPUS files
 #
@@ -278,8 +315,9 @@ print(Z2)
 from brukeropusreader import read_file  # noqa: E402
 
 opusfile = scp.DATADIR / "irdata" / "OPUS" / "test.0000"  # the full pathn of the file
-Z3 = read_file(opusfile)                                  # returns a dictionary of the data and metadata extracted
-Z3.keys()                                                 # returns the key of the dictionary
+Z3 = read_file(opusfile)  # returns a dictionary of the data and metadata extracted
+for key in Z3:
+    print(key)
 
 # %%
 Z3['Optik']  # looks what is the Optik block:
@@ -298,30 +336,50 @@ Z3['Optik']  # looks what is the Optik block:
 # Hence, for instance, the first dataset can be saved in the JCAMP-DX format:
 
 # %%
-X.write_jcamp('CO@Mo_Al2O3.jdx', confirm=False)
+S0 = X[0]
+print(S0)
+S0.write_jcamp('CO@Mo_Al2O3_0.jdx', confirm=False);
 
 # %% [markdown]
-# then used (and maybe changed) by a 3rd party software, and re-imported in spectrochempy:
+# Then used (and maybe changed) by a 3rd party software, and re-imported in spectrochempy:
 
 # %%
-newX = scp.read_jcamp('CO@Mo_Al2O3.jdx')
-print(newX)
+newS0 = scp.read_jcamp('CO@Mo_Al2O3_0.jdx')
+print(newS0)
+
 
 # %% [markdown]
 # It is important to note here that the conversion to JCAMP-DX changes the last digits of absorbances and wavenumbers:
 
 # %%
-print('Mean change in absorbance: {}'.format((X.data - newX.data).mean()))
-print('Mean change in wavenumber: {}'.format((X.x.data - newX.x.data).mean()))
+def difference(x, y):
+    from numpy import max, abs
+    nonzero = (y.data != 0)
+    error = abs(x.data - y.data)
+    max_rel_error = max(error[nonzero] / abs(y.data[nonzero]))
+    return max(error), max_rel_error
+
+
+# %%
+max_error, max_rel_error = difference(S0, newS0)
+print(f'Max absolute difference in absorbance: {max_error:.3g}')
+print(f'Max relative difference in absorbance: {max_rel_error:.3g}')
+
+# %%
+max_error, max_rel_error = difference(S0.x, newS0.x)
+print(f'Max absolute difference in wavenumber: {max_error:.3g}')
+print(f'Max relative difference in wavenumber: {max_rel_error:.3g}')
 
 # %% [markdown]
-# This is much beyond the experimental accuracy but can lead to undesirable effects. For instance:
+# This is much beyond the experimental accuracy but can lead to undesirable effects.
+#
+# For instance:
 
 # %%
 try:
-    X - newX
-except ValueError as e:
-    print(e)
+    S0 - newS0
+except Exception as e:
+    scp.error_(e)
 
 # %% [markdown]
 # returns an error because of the small shift of coordinates. We will see in another tutorial how to re-align datasets

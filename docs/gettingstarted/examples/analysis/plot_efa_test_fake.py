@@ -28,9 +28,8 @@ EFA analysis example
 In this example, we perform the Evolving Factor Analysis
 """
 # %%
-import numpy as np
-
 import spectrochempy as scp
+import numpy as np
 
 # %% [markdown]
 # Upload and preprocess a dataset

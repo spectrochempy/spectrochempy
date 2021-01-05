@@ -146,18 +146,6 @@ Export a NDDataset
     write_jcamp
 
 
-Coordinates manipulation
--------------------------
-
-.. autosummary::
-    :nosignatures:
-    :toctree: generated/
-
-    add_coordset
-    coord
-    delete_coordset
-
-
 Select data in a NDDataset
 --------------------------
 

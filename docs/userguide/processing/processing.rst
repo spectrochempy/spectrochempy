@@ -4,9 +4,7 @@ Processing
 **********
 
 .. toctree::
-   :glob:
    :maxdepth: 3
-
 
    transformations
    math_operations
