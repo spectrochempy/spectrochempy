@@ -15,7 +15,7 @@
 # ---
 
 # %% [markdown]
-# # Tutorial: Peak Maxima Finding
+# # Peak Maxima Finding
 #
 # This tutorial shows how to find peaks and determine peak maxima with spectrochempy. As prerequisite, the user is
 # expected to have read the [Import](../IO/import.ipynb), [Import IR](../IO/importIR.ipynb),
@@ -25,7 +25,7 @@
 # %% [markdown]
 # Fist, as usual, we need to load the API.
 
-# %% execution={"iopub.execute_input": "2020-06-22T12:21:23.143Z", "iopub.status.busy": "2020-06-22T12:21:23.097Z",
+# %%
 import spectrochempy as scp
 
 # %% [markdown]
@@ -37,7 +37,7 @@ import spectrochempy as scp
 # %% [markdown]
 # We load the data using the generic API method  `read` (the type of data is inferred from the extension)
 
-# %% execution={"iopub.execute_input": "2020-06-22T12:21:31.950Z", "iopub.status.busy": "2020-06-22T12:21:31.942Z",
+# %%
 ds = scp.read('irdata/CO@Mo_Al2O3.SPG')
 
 # %%
@@ -55,11 +55,10 @@ prefs.method_2D = 'stack'
 prefs.colorbar = True
 prefs.colormap = 'Dark2'
 
-# %% [markdown] execution={"iopub.execute_input": "2020-06-22T12:21:31.950Z", "iopub.status.busy":
-# "2020-06-22T12:21:31.942Z",
+# %% [markdown]
 # We select the desired region and plot it.
 
-# %% execution={"iopub.execute_input": "2020-06-22T12:21:31.950Z", "iopub.status.busy": "2020-06-22T12:21:31.942Z",
+# %%
 reg = ds[:, 2300.:1900.]
 _ = reg.plot()
 

@@ -14,7 +14,7 @@
 # ---
 
 # %% [markdown]
-# # tutorial: Peak integration
+# # Peak integration
 #
 # This tutorial shows how to find peak maxima and determine peak areas with spectrochempy. As prerequisite,
 # the user is expected to have read the [Import](../IO/import.ipynb), [Import IR](../IO/importIR.ipynb),

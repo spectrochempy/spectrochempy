@@ -84,7 +84,8 @@ GALLERY = GETTINGSTARTED / 'gallery'
 
 PY = list(SRC.glob(('**/*.py')))
 for f in PY[:]:
-    if 'generated' in f.parts or '.ipynb_checkpoints' in f.parts or 'gallery' in f.parts:
+    if ('generated' in f.parts or '.ipynb_checkpoints' in f.parts or 'gallery' in f.parts
+            or 'examples' in f.parts or 'sphinxext' in f.parts):
         PY.remove(f)
     if f.name in ['conf.py', 'make.py']:
         PY.remove(f)

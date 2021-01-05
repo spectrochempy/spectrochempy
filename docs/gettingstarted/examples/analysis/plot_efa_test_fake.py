@@ -1,40 +1,23 @@
 # -*- coding: utf-8 -*-
-# ---
-# jupyter:
-#   jupytext:
-#     cell_metadata_filter: -all
-#     formats: ipynb,py:percent
-#     text_representation:
-#       extension: .py
-#       format_name: percent
-#       format_version: '1.3'
-#       jupytext_version: 1.7.1
-# ---
-
-# %%
-
-# %%
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-# %% [markdown]
 """
 EFA analysis example
 ======================
 
 In this example, we perform the Evolving Factor Analysis
+
 """
-# %%
 import spectrochempy as scp
 import numpy as np
 
-# %% [markdown]
+############################################################
 # Upload and preprocess a dataset
 
-# %%
 dataset = scp.read("irdata/nh4y-activation.spg")
 
 # columns masking
@@ -46,10 +29,9 @@ dataset = scp.read("irdata/nh4y-activation.spg")
 
 dataset.plot_stack()
 
-# %% [markdown]
+############################################################
 #  Evolving Factor Analysis
 
-# %%
 efa = scp.EFA(dataset)
 
 f = efa.cut_f()
@@ -59,12 +41,11 @@ b = efa.cut_b()
 f.T.plot(yscale="log", labels=f.y.labels, legend='best')
 b.T.plot(yscale="log")
 
-# %% [markdown]
+##############################################################################
 # Clearly we can retain 4 components, in agreement with what was used to
 # generate the data - we set the cutof of the 5th components
 #
 
-# %%
 npc = 4
 cut = np.max(f[:, npc].data)
 

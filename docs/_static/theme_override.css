@@ -43,3 +43,45 @@ table.docutils td {
     white-space: unset;
     word-wrap: break-word;
 }
+
+
+div.output {
+    font-size: 10px;
+    line-height: 1.4;
+}
+
+/*
+Nb Sphinx and sphinx gallery
+*/
+
+div[class^="highlight-default"] pre, div[class^="highlight-python3"] pre {
+    border: 1px #ccc solid;
+    background-color: #f7f7f7;
+    border-left-color: green;
+    border-left-width: medium;
+}
+
+div[class^="highlight-bash"] pre {
+    border: 1px #ccc solid;
+    background-color: #f7f7f7;
+    border-left-color: blue;
+    border-left-width: medium;
+}
+
+div.output, div.output_area, div.output_subarea {
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.nbinput .prompt,
+.nboutput .prompt {
+    display: none;
+}
+
+div.nbinput.container div.input_area {
+    border: 1px #ccc solid;
+    padding: 5px;
+    background-color: #f7f7f7;
+    border-left-color: green;
+    border-left-width: medium;
+}

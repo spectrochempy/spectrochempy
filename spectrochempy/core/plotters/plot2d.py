@@ -282,12 +282,6 @@ def plot_2D(dataset, **kwargs):
     lw = kwargs.get('linewidth', kwargs.get('lw', prefs.lines_linewidth))
     alpha = kwargs.get('calpha', prefs.contour_alpha)
 
-    antialiased = kwargs.get('antialiased', prefs.antialiased)
-
-    #    rcount = kwargs.get('rcount', prefs.rcount)
-
-    #    ccount = kwargs.get('ccount', prefs.ccount)
-
     number_x_labels = prefs.number_of_x_labels
     number_y_labels = prefs.number_of_y_labels
     number_z_labels = prefs.number_of_z_labels
@@ -356,8 +350,8 @@ def plot_2D(dataset, **kwargs):
 
     ax.set_xlim(xlim)
 
-    # xscale = kwargs.get("xscale", "linear")
-    # ax.set_xscale(xscale, nonpositive='mask')
+    xscale = kwargs.get("xscale", "linear")
+    ax.set_xscale(xscale, nonpositive='mask')
 
     # set the ordinates axis
     # ------------------------------------------------------------------------------------------------------------------
@@ -390,7 +384,7 @@ def plot_2D(dataset, **kwargs):
     ylim[0] = max(ylim[0], yl[0])
 
     yscale = kwargs.get("yscale", "linear")
-    #   ax.set_yscale(yscale)
+    ax.set_yscale(yscale)
 
     # z intensity (by default we plot real part of the data)
     # ------------------------------------------------------------------------------------------------------------------
@@ -464,7 +458,13 @@ def plot_2D(dataset, **kwargs):
         Z[dataset.mask] = np.nan
 
         # Plot the surface.  #TODO : improve this (or remove it)
-        ax.plot_surface(X, Y, Z, cmap=cmap, linewidth=lw, antialiased=antialiased,  # rcount=rcount, ccount=ccount,
+
+        antialiased = kwargs.get('antialiased', prefs.antialiased)
+        rcount = kwargs.get('rcount', prefs.rcount)
+        ccount = kwargs.get('ccount', prefs.ccount)
+        ax.set_facecolor('w')
+        ax.plot_surface(X, Y, Z, cmap=cmap, linewidth=lw, antialiased=antialiased,
+                        rcount=rcount, ccount=ccount,
                         edgecolor='k', norm=norm, )
 
     if method in ['waterfall']:

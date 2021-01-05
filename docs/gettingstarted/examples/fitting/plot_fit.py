@@ -1,56 +1,39 @@
 # -*- coding: utf-8 -*-
-# ---
-# jupyter:
-#   jupytext:
-#     cell_metadata_filter: -all
-#     formats: ipynb,py:percent
-#     text_representation:
-#       extension: .py
-#       format_name: percent
-#       format_version: '1.3'
-#       jupytext_version: 1.7.1
-# ---
-
-# %%
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-# %% [markdown]
 """
 
 Fitting 1D dataset
 ------------------
 In this example, we find the least  square solution of a simple linear
 equation.
+
 """
-# %%
 # sphinx_gallery_thumbnail_number = 2
 
 import spectrochempy as scp
 import os
 
-# %% [markdown]
+########################################################################
 #  Let's take an IR spectrum
 
-# %%
 nd = scp.NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
 
-# %% [markdown]
+########################################################################
 # where we select only region (OH region)
 
-# %%
 ndOH = nd[54, 3700.:3400.]
 
 ndOH.plot()
 
-# %% [markdown]
+########################################################################
 # Perform a Fit
 # Fit parameters are defined in a script (a single text as below)
 
-# %%
 
 script = """
 #-----------------------------------------------------------
@@ -87,27 +70,24 @@ shape: assymvoigtmodel
 
 """
 
-# %% [markdown]
+##############################################################################
 # create a fit object
 
-# %%
 f1 = scp.Fit(ndOH, script, silent=True)
 
-# %% [markdown]
+##############################################################################
 # Show plot and the starting model before the fit (of course it is advisable
 # to be as close as possible of a good expectation
 
-# %%
 f1.dry_run()
 
 ndOH.plot(plot_model=True)
 
 f1.run(maxiter=1000)
 
-# %% [markdown]
+##############################################################################
 # Show the result after 1000 iterations
 
-# %%
 ndOH.plot(plot_model=True)
 
 # scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

@@ -14,13 +14,13 @@
 # ---
 
 # %% [markdown]
-# # tutorial: MCR ALS
+# # MCR ALS
 
 # %%
 import spectrochempy as scp
 
 # %% [markdown]
-# ## 1. Introduction
+# ## Introduction
 #
 # MCR-ALS (standing for Multivariate Curve Resolution - Alternating Least Squares) is a popular method for resolving a
 # set (or several sets) of spectra $X$ of an evolving mixture (or a set of mixtures) into the spectra $S^t$ of 'pure'
@@ -34,7 +34,7 @@ import spectrochempy as scp
 # In, this tutorial the application of MCS-ALS as implemented in Scpy to a 'classical' dataset form the literature is
 # presented.
 #
-# ## 2. The (minimal) dataset
+# ## The (minimal) dataset
 #
 # In this example, we perform the MCR ALS optimization of a dataset corresponding to a HPLC-DAD run, from Jaumot et al.
 # Chemolab, 76 (2005),
@@ -88,7 +88,7 @@ X
 surf = X.plot_surface(colorbar=True, linewidth=.2, ccount=100, figsize=(10, 5))
 
 # %% [markdown]
-# ## 3 Initial guess and MCR ALS optimization
+# ## Initial guess and MCR ALS optimization
 #
 # The ALS optimization of the MCR equation above requires the input of a guess for either the concentration matrix
 # $C_0$ or the spectra matrix $S^t_0$. Given the data matrix $X$, the lacking initial matrix ($S^t_0$ or $C_0$,
@@ -99,7 +99,7 @@ surf = X.plot_surface(colorbar=True, linewidth=.2, ccount=100, figsize=(10, 5))
 #
 # $$ C_0 = X {S^t_0}^t  \left( S_0^t {S_0^t}^t \right)^{-1} $$
 #
-# ### 3.1. Case of initial spectral profiles
+# ### Case of initial spectral profiles
 # The matrix spure provided in the initial dataset is a guess for the spectral profiles. Let's name it 'St0',
 # and plot it:
 
@@ -112,7 +112,7 @@ _ = St0.plot()
 # but this is not very important. The key point is that the 'wavelength' dimension is compatible with the data 'X',
 # which is indeed the case (both have a legth of 95). If it was not, an error would be generated in the following.
 #
-# #### 3.1.1 ALS Optimization
+# #### ALS Optimization
 # With this guess 'St0' and the dataset 'X' we can create a MCRALS object. At this point of the tutorial, we will use
 # all the default parameters except for the 'verbose' option which is swiched on to have a summary
 # of the ALS iterations:
@@ -155,7 +155,7 @@ mcr = scp.MCRALS(X, St0, param={'tol': 0.001}, verbose='True')
 mcr = scp.MCRALS(X, St0, param={'tol': 0.001, 'maxit': 10}, verbose='True')
 
 # %% [markdown]
-# #### 3.1.2 Solutions
+# #### Solutions
 #
 # The solutions of the MCR ALS optimization are the optimized concentration and pure spectra matrices. They can be
 # obtained by the MCRALS.transform() method. let's remake an MCRALS object with the default settings,
@@ -179,7 +179,7 @@ _ = mcr1.C.T.plot()
 _ = mcr1.St.plot()
 
 # %% [markdown]
-# #### 3.1.3 A basic illustration of the rotational ambiguity
+# #### A basic illustration of the rotational ambiguity
 # We have thus obtained the elution profiles of the four pure species. Note that the 'concentration' values are very
 # low. This results from the fact that the absorbance values in X are on the order of 0-1 while the absorbances of
 # the initial pure spectra are of the order of 10^4. As can be seen above, the absorbance of the final spectra is of
@@ -209,7 +209,7 @@ _ = mcr3.C.T.plot()
 # This is a basic example of the well known rotational ambiguity of the MCS ALS solutions.
 
 # %% [markdown]
-# ### 3.2 Guessing the concentration profile with PCA + EFA
+# ### Guessing the concentration profile with PCA + EFA
 #
 # Generally, in MCR ALS, the initial guess cannot be obtained independently of the experimental data 'x'.
 # In such a case, one has to rely on 'X' to obtained (i) the number of pure species  and (ii) their initial
@@ -217,7 +217,7 @@ _ = mcr3.C.T.plot()
 # data while the concentrations or spectral profiles can be estimated using procedures such EFA of SIMPLISMA.
 # The following will illustrate the use of PCA followed by EFA
 #
-# #### 3.2.1 Use of PCA to assess the number of pure species
+# #### Use of PCA to assess the number of pure species
 #
 # Let's first analyse our dataset using PCA and plot a screeplot:
 
@@ -252,7 +252,7 @@ S3, LT3 = pca.reduce(n_pc='auto')
 S3.shape
 
 # %% [markdown]
-# #### 3.2.2 determination of initial concentrations using EFA
+# #### Determination of initial concentrations using EFA
 #
 # Once the number of components has been determined, the initial concentration matrix is obtained very easily using EFA:
 #
@@ -273,7 +273,7 @@ _ = mcr4.C.T.plot()
 _ = mcr4.St.plot()
 
 # %% [markdown]
-# ## 4. Augmented datasets
+# ## Augmented datasets
 
 # %% [markdown]
 # The 'MATRIX' dataset is a columnwise augmented dataset consisting into 5 successive runs:
@@ -289,9 +289,8 @@ X2 = A[3]
 X2.title = 'absorbance'
 X2.set_coordset(None, None)
 X2.set_coordtitles(y='elution time', x='wavelength')
-
+X2.preferences
 surf = X2.plot_surface(colorbar=True, linewidth=.2, ccount=100, figsize=(10, 5))
-
 _ = X2.plot(method='map')
 
 # %%

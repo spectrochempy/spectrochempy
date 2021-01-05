@@ -48,7 +48,6 @@ class SIMPLISMA(HasTraits):
 
     """
 
-
     St = Instance(NDDataset)
     C = Instance(NDDataset)
     X = Instance(NDDataset)

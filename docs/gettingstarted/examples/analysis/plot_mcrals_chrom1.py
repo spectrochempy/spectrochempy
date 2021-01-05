@@ -1,26 +1,10 @@
 # -*- coding: utf-8 -*-
-# ---
-# jupyter:
-#   jupytext:
-#     cell_metadata_filter: -all
-#     formats: ipynb,py:percent
-#     text_representation:
-#       extension: .py
-#       format_name: percent
-#       format_version: '1.3'
-#       jupytext_version: 1.7.1
-# ---
-
-# %%
-
-# %%
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-# %% [markdown]
 """
 MCR ALS optimization example (original example from Jaumot)
 ===========================================================
@@ -34,21 +18,19 @@ This dataset (and others) can be loaded from the `"Multivariate Curve Resolution
 <https://mcrals.wordpress.com/download/example-data-sets>`_
 
 For the user convenience, this dataset is present in the `datadir`of SpectroChemPy as 'als2004dataset.MAT'
+
 """
-# %%
 import spectrochempy as scp
 
-# %% [markdown]
+########################################################################################################################
 # Load the dataset
-# %%
 datasets = scp.read_matlab("matlabdata/als2004dataset.MAT")
 
-# %% [markdown]
+########################################################################################################################
 # As the .mat file contains 6 matrices, 6 NDDataset objects are returned:
-# %%
 print('\n NDDataset names: ' + str([ds.name for ds in datasets]))
 
-# %% [markdown]
+########################################################################################################################
 # We are interested in the first dataset ('m1') that contains a single HPLS-DAD run (51x96)  dataset.
 # As usual, the 51 rows correspond to the 'time axis' of the HPLC run, and the 96 columns to the 'wavelength' axis
 # of the UV spectra. The original dataset does not contain information as to the actual time and wavelength coordinates.
@@ -57,27 +39,23 @@ print('\n NDDataset names: ' + str([ds.name for ds in datasets]))
 # The second dataset 'spure' is a (4x96) guess of spectral profiles.
 #
 # Load the experimental data as X and the guess:
-# %%
 X = datasets[0]
 guess = datasets[1]
 
-# %% [markdown]
+########################################################################################################################
 # Create a MCR-ALS object with the default settings
 # The verbose option can be set True to get a summary of optimization steps
-# %%
 mcr = scp.MCRALS(X, guess, verbose=False)
 
-# %% [markdown]
+########################################################################################################################
 # The optimization has converged. We can get the concentration (C) and pure spectra profiles (St)
 # and plot them
-# %%
 _ = mcr.C.T.plot()
 _ = mcr.St.plot()
 
-# %% [markdown]
+########################################################################################################################
 # Finally, plots the reconstructed dataset  (X_hat = C St) vs original dataset (X)
 # an residuals. The fit is good and comparable with the original paper.
-# %%
 X_hat = mcr.plotmerit()
 
 # scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

@@ -67,6 +67,7 @@ sys.path.insert(0, os.path.join(source, "docs", "sphinxext"))
 extensions = \
     [
             'nbsphinx',
+            'sphinx_copybutton',
             'sphinx.ext.mathjax',
             'sphinx.ext.autodoc',
             'sphinx.ext.doctest',
@@ -468,6 +469,13 @@ sphinx_gallery_conf = {
         'expected_failing_examples': [],
         'download_all_examples': False,
         }
+suppress_warnings = [
+        'sphinx_gallery',
+]
+# MYST_NB
+# execution_excludepatterns = ['gettingstarted/gallery/auto_examples', 'sphinxext']
+# jupyter_execute_notebooks = "cache"
+# execution_allow_errors=True
 
 # %% [markdown]
 # nbsphinx ---------------------------------------------------------------------
@@ -484,6 +492,12 @@ nbsphinx_execute_arguments = [
 nbsphinx_execute = 'always'
 nbsphinx_allow_errors = True
 nbsphinx_timeout = 180
+nbsphinx_prolog = """
+.. raw:: html
+
+"""
+copybutton_prompt_text = r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.\.\.: | {5,8}: "
+copybutton_prompt_is_regexp = True
 
 # %%
 # Use this kernel instead of the one stored in the notebook metadata:

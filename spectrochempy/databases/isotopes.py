@@ -266,6 +266,7 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
     def __eq__(self, other):
         raise NotImplementedError
 
+
 #   ======================================================================================================================
 if __name__ == '__main__':
     pass

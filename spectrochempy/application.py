@@ -748,7 +748,7 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
 
             lis = os.listdir(self.config_dir)
             for f in lis:
-                if f.endswith('.json') :
+                if f.endswith('.json'):
                     jsonname = os.path.join(self.config_dir, f)
                     if self.reset_config or f == 'MatplotlibPreferences.json':
                         # remove the user json file to reset to defaults

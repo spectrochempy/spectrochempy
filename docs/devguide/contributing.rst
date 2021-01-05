@@ -38,7 +38,7 @@ Basic contributions
     tutorials
     examples
 
-Avanced Contributions
+Avanced contributions
 ----------------------
 
   * :ref:`contributing.building_documentation`

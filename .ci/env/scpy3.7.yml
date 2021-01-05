@@ -70,6 +70,7 @@ dependencies:
     - nbsphinx
     - jupyter_sphinx
     - json5
+    - sphinx-copybutton
 
     # DEV: build
     - conda-build

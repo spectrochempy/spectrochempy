@@ -16,7 +16,7 @@
 # ---
 
 # %% [markdown]
-# # Tutorial: Import IR Data
+# # Import IR Data
 #
 # This tutorial shows the specifics related to infrared data import in Spectrochempy. As prerequisite, the user is
 # expected to have read the [Import Tutorial](Import.ipynb).
