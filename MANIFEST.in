@@ -1,4 +1,9 @@
 include LICENSE MANIFEST.in README.md
-graft tests
-recursive-include scp_data *
-recursive-include spectrochempy/gui/assets *
+prune docs
+prune tests
+prune .ci
+prune .github
+recursive-include scp_data/*
+spectrochempy/gui/assets/*
+exclude Icon*
+exclude .*
