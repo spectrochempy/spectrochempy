@@ -74,7 +74,6 @@ dependencies:
 
     # DEV: build
     - conda-build
-    - conda-verify
     - anaconda-client
 
     # optional

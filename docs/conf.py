@@ -169,11 +169,11 @@ todo_include_todos = True
 # %%
 rst_epilog = """
 
+.. |scpy| replace:: **SpectroChemPy**
+
 .. |ndarray| replace:: :class:`~numpy.ndarray`
 
 .. |ma.ndarray| replace:: :class:`~numpy.ma.array`
-
-.. |scpy| replace:: **SpectroChemPy**
 
 .. |Project| replace:: :class:`~spectrochempy.core.projects.project.Project`
 

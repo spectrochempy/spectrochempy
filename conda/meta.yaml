@@ -31,7 +31,6 @@ requirements:
     - setuptools_scm
     - nodejs
     - jupyterlab
-    - conda-verify
 
   run:
     - cantera

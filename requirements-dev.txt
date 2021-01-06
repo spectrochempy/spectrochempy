@@ -1,15 +1,45 @@
--r requirements.txt
+# This file is auto-generated from environment.yml, do not modify.
+# See that file for comments about the need/usage of each dependency.
 
-# ADDITIONAL PACKAGES FOR DEVELOPMENT
-
-# DEV: just for testing
+cantera
+quadprog
+brukeropusreader
+quaternion
+nmrglue
+colorama
+dash
+dash-bootstrap-components
+dash-daq
+dill
+docrep
+ipython
+jinja2
+matplotlib
+numba
+numpy
+orderedset
+pint
+plotly
+pyqt5
+requests
+scipy
+tqdm
+traitlets
+traittypes
+xlrd
+setuptools
+setuptools_scm
+gitpython
+ipywidgets
+ipympl
+jupyterlab
+nodejs
 pytest
 pytest-doctestplus
 pytest-flake8
 scikit-image
 coverage
-
-# DEV: code and docs
+pre-commit
 jupyter-dash
 jupytext
 sphinx
@@ -19,19 +49,10 @@ sphinx-gallery
 nbsphinx
 jupyter_sphinx
 json5
-
-# DEV: build
+sphinx-copybutton
 conda-build
-conda-verify
 anaconda-client
-
-# pip only
+pip
 autodoc_traits
-
-# dev
-sphinx_rtd_theme
-json5
-scikit-image
-sphinx
-pytest
-cycler
+dash_defer_js_import
+dash-ace

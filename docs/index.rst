@@ -10,11 +10,9 @@ Processing, analysing and modelling spectroscopic data
     :hidden:
     :caption: Table of Content
 
-
 .. toctree::
     :hidden:
     :caption: Summary
-
 
 |scpy| is a framework for processing, analyzing and modeling **Spectro**\ scopic
 data for **Chem**\ istry with **Py**\ thon. It is a cross platform software,
@@ -28,11 +26,11 @@ Among its major features:
     smoothing, apodization...
 #.  Manipulate single or multiple datasets: concatenation, splitting, alignment
     along given dimensions, ...
-#.  Explore data with exploratory analyses methods such as `SVD`, `PCA`, `EFA`
+#.  Explore data with exploratory analyses methods such as ``SVD``, ``PCA``, ``EFA``
     and visualization capabilities ...
 #.  Modelling single or multiple datasets with curve fitting / curve modelling
-    (`MCR-ALS`) methods...
-#.  Export data and analyses to various formats: `csv`, `xls`, `JCAMP-DX`,  ...
+    (``MCR-ALS``) methods...
+#.  Export data and analyses to various formats: ``csv``, ``xls``, ``JCAMP-DX``,  ...
 #.  Embed the complete workflow from raw data import to final analyses in a
     Project Manager
 
@@ -52,7 +50,7 @@ Among its major features:
     |scpy| is still experimental and under active development.
     Its current design is subject to major changes, reorganizations,
     bugs and crashes!!! Please report any issues to the
-    `Issue Tracker  <https://redmine.spectrochempy.fr/projects/spectrochempy/issues>`_
+    `Issue Tracker <https://github.com/spectrochempy/spectrochempy/issues>`__
 
 .. toctree::
    :hidden:
@@ -78,9 +76,7 @@ Getting Started
     Examples <gettingstarted/gallery/auto_examples/index>
     Installation <gettingstarted/install/index>
 
-
 .. _userguide:
-
 
 ***********************
 User's Guide
@@ -131,7 +127,7 @@ Reference & Help
     userguide/reference/preference
     userguide/reference/faq
     Bug reports & feature request <devguide/issues>
-    Sharing examples <devguide/examples>
+    Sharing examples & tutorials <devguide/examples>
     devguide/contributing
 
 
