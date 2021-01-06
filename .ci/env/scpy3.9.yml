@@ -70,6 +70,7 @@ dependencies:
     - nbsphinx
     - jupyter_sphinx
     - json5
+    - sphinx-copybutton
 
     # DEV: build
     - conda-build
@@ -81,7 +82,7 @@ dependencies:
     # - datashader
     # - scikit-learn
 
-    # pip only for docs
+
     - pip
     - pip:
         - autodoc_traits
