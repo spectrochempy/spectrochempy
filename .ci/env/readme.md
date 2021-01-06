@@ -7,32 +7,28 @@ In this directory, two yaml file serve for the creation of initial environments:
   ```bash
       $ conda deactivate
       $ conda env create -f=.ci/env/scpy.yml
-
-    ```
+  ```
   Modify the ``.ci/env/scpy.yml`` string with the full path if you are not in the top-level spectrochempy directory (
   where you have unzipped the spectrochempy package).
 
   This will create a ``scpy`` environment, that can be activated using
-
-   ```bash
+  
+```bash
       $ conda activate scpy
-
-    ```
+```
 
 * scpy-dev is recommended for a developper:
-
-  ```bash
+  
+```bash
       $ conda deactivate
       $ conda env create -f=.ci/env/scpy-dev.yml
-
-    ```
+```
 
   This will create a ``scpy`` environment, that can be activated using
 
-   ```bash
+```bash
       $ conda activate scpy-dev
-
-    ```
+```
 
 To check that the environments have been sussefully created, use:
 
@@ -42,7 +38,7 @@ $ conda env list
 
 This shoud return something like:
 
-```
+```shell
 # conda environments:
 #
 base                     /Users/username/miniconda3

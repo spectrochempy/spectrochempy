@@ -66,26 +66,26 @@ dataset[:, 1290.:920.] = MASKED
 # %% [markdown]
 # For the examples below, we use inline matplotlib figures (non interactive): this can be forced using the magic
 # function before loading spectrochempy.:
-# ```ipython
+# ```ipython3
 # %matplotlib inline
 # ```
 # but it is also the default in `Jupyter lab` (so we don't really need to specify this). Note that when such magic
 # function has been used, it is not possible to change the setting, except by resseting the notebook kernel.
 #
 # If one wants interactive displays (with selection, zooming, etc...) one can use:
-# ```ipython
+# ```ipython3
 #     In []: %matplotlib widget
 # ```
 # However, this suffer (at least for us) some incompatibilities in `jupyter lab`... it is worth to try!
 # If you can not get it working in `jupyter lab` and you need interactivity, you can use the following:
-# ```ipython
+# ```ipython3
 #     In []: %matplotlib
 # ```
 # which has the effect of displaying the figures in independant windows using default matplotlib backend (e.g.,
 # `Tk`), with all the interactivity of matplotlib.
 #
 # But you can explicitly request a different GUI backend::
-# ```ipython
+# ```ipython3
 #     In []: %matplotlib qt
 # ```
 #

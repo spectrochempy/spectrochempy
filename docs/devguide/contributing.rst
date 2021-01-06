@@ -55,7 +55,6 @@ Contribute to the code
 
 * [[Install and configure miniconda]]
 * [[Install and configure PyCharm]]
-* [[Fork and clone our GitHub repository]]
 * [[Python style guide]]
 * [[Add new methods to SpectroChemPy]]
 * [[Code testing and coverage]]

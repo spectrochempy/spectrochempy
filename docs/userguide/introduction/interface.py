@@ -51,7 +51,7 @@
 # * Click on the Notebook python 3 icon
 # * A new notebook is created
 # * Enter your first command, in the displayed cell, and type `SHIFT+ENTER` to run the code
-# ```python
+# ```ipython3
 # from spectrochempy import *
 # ```
 # * You can rename the notebook using context menu in the sidebar

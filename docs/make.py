@@ -24,7 +24,6 @@ Clean, build, and release the HTML and PDF documentation for SpectroChemPy.
 
 ```bash
   python make.py [options]
-
 ```
 where optional parameters indicates which job(s) is(are) to perform.
 

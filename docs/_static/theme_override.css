@@ -45,28 +45,22 @@ table.docutils td {
 }
 
 
-div.output {
-    font-size: 10px;
-    line-height: 1.4;
-}
+/*div.output {*/
+/*    font-size: 10px;*/
+/*    line-height: 1.4;*/
+/*}*/
 
-/*
-Nb Sphinx and sphinx gallery
-*/
+/*!**/
+/*Nb Sphinx and sphinx gallery*/
+/**!*/
 
-div[class^="highlight-default"] pre, div[class^="highlight-python3"] pre {
-    border: 1px #ccc solid;
-    background-color: #f7f7f7;
-    border-left-color: green;
-    border-left-width: medium;
-}
+/*div[class^="highlight-default"] pre, div[class^="highlight-ipython3"] pre , div[class^="highlight-python"] pre {*/
+/*    border: 1px #ccc solid;*/
+/*    background-color: #f7f7f7;*/
+/*    border-left-color: green;*/
+/*    border-left-width: medium;*/
+/*}*/
 
-div[class^="highlight-bash"] pre {
-    border: 1px #ccc solid;
-    background-color: #f7f7f7;
-    border-left-color: blue;
-    border-left-width: medium;
-}
 
 div.output, div.output_area, div.output_subarea {
     font-size: 12px;
@@ -78,10 +72,21 @@ div.output, div.output_area, div.output_subarea {
     display: none;
 }
 
-div.nbinput.container div.input_area {
-    border: 1px #ccc solid;
-    padding: 5px;
-    background-color: #f7f7f7;
-    border-left-color: green;
-    border-left-width: medium;
+/*div.input_area {*/
+/*    border: 1px #ccc solid;*/
+/*    padding: 5px;*/
+/*    background-color: #f7f7f7;*/
+/*    border-left-color: green;*/
+/*    border-left-width: medium;*/
+/*}*/
+
+/*div[class^="highlight-bash"] pre {*/
+/*    border: 1px #ccc solid;*/
+/*    background-color: #f7f7f7;*/
+/*    border-left-color: blue;*/
+/*    border-left-width: medium;*/
+/*}*/
+
+div.highlight, .highlight-default, .highlight-ipython3, .highlight-python, div.input-area{
+    background: #f5f5f5;
 }

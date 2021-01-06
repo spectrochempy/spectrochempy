@@ -176,7 +176,7 @@ X.y -= X.y[0]
 # It is also possible to use the ability of SpectroChemPy to handle unit changes. For this one can use the `to` or
 # `ito` (
 # inplace) methods.
-# ```python
+# ```ipython3
 # val = val.to(some_units)
 # val.ito(some_units)   # the same inplace
 # ```
@@ -205,7 +205,7 @@ X.y.values
 
 # %% [markdown]
 # or using the inplace add operator:
-# ```python
+# ```ipython3
 # X.y += 2
 # ```
 
@@ -277,7 +277,7 @@ print(X)
 # <b>Warning</b>
 #
 # There is a difference in specifiying the directory to read as an argument as above or as a keyword like here:
-# ```python
+# ```ipython3
 # X = scp.read_omnic(directory='irdata/subdir')
 # ```
 # in the latter case, a **dialog** is opened to select files in the given directory, while in the former,
@@ -385,6 +385,3 @@ except Exception as e:
 # returns an error because of the small shift of coordinates. We will see in another tutorial how to re-align datasets
 # and deal with these small problems. It is worth noticing that similar distorsions arise in commercial softwares,...
 # except that the user is not notified.
-
-# %% [markdown]
-# -- this is the end of this tutorial --

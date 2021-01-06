@@ -114,13 +114,13 @@ scp.read_omnic('irdata/subdir')
 #
 # For instance, on Windows systems, the two following commands are fully equivalent:
 #
-# ```python
+# ```ipython3
 # X = scp.read_omnic(directory='C:\\users\\Brian')
 # ```
 #
 # or
 #
-# ```python
+# ```ipython3
 # X = scp.read_omnic(directory=r'C:\users\Brian')
 # ```
 #
@@ -129,13 +129,13 @@ scp.read_omnic('irdata/subdir')
 # You can avoid using the form `\\` or the use of raw strings by using conventional slash `/`. In python
 # they play the path separator role, as well in Windows than in other unix-based system (Linux, OSX, ...)
 #
-# ```python
+# ```ipython3
 # X = scp.read_omnic(directory='C:/users/Brian')
 # ```
 
 # %% [markdown]
 # If a `filename` is passed in argument, like here:
-# ```python
+# ```ipython3
 # X = scp.read_omnic('wodger.spg', directory='C:/')
 # ```
 # then SpectroChemPy will attempt opening a file named `wodger.spg` supposedly located in `C:\`.
@@ -145,12 +145,12 @@ scp.read_omnic('irdata/subdir')
 # commands are all equivalent and will allow opening the file:
 #
 # - using only the full pathname of the file:
-# ```python
+# ```ipython3
 # X = scp.read_omnic('C:/users/Brian/s/Life/wodger.spg')
 # ```
 #
 # - or using a combination of directory and file pathnames:
-# ```python
+# ```ipython3
 # X = scp.read_omnic('wodger.spg', directory='C:/users/Brian/s/Life'
 # X = scp.read_omnic('Life/wodger.spg', directory='C:/users/Brian/s')
 # ```
@@ -176,18 +176,18 @@ scp.read_omnic('irdata/subdir')
 #
 # Then running this project in John's Linux computer (e.g. in `\home\john\s_copy`) will certainly result in execution
 # errors if absolute paths are used in the notebook:
-# ```python
+# ```text
 # OSError: Can't find this filename C:\users\Brian\s\life\wodger.spg
 # ```
 # In this respect, a good practice consists in using relative pathnames in scripts and notebooks.
 # Fortunately, SpectroChemPy readers use relative paths. If the given path is not absolute, then SpectroChemPy will
 # search in the current directory. Hence the opening of the `spg` file from scripts in `welease.ipynb` can be made
 # by the command:
-# ```python
+# ```ipython3
 # X = scp.read_omnic('Life/wodger.spg')
 # ```
 # or:
-# ```python
+# ```ipython3
 # X = scp.read_omnic('wodger.spg', directory='Life')
 # ```
 #
@@ -196,7 +196,7 @@ scp.read_omnic('irdata/subdir')
 # In python, working with pathnames is classically done with dedicated modules such as `os` or `pathlib` python modules.
 # With `os` we mention the following methods that can be particularly useful:
 #
-# ```python
+# ```ipython3
 # import os
 # os.getcwd()              # returns the absolute path of the current working directory preferences.datadir
 # os.path.expanduser("~")  # returns the home directory of the user
@@ -205,7 +205,7 @@ scp.read_omnic('irdata/subdir')
 # ```
 #
 # Using `Pathlib` is even simpler:
-# ```python
+# ```ipython3
 # from pathlib import Path
 # Path.cwd()               # returns the absolute path of the current working directory
 # Path.home()              # returns the home directory of the user
@@ -235,8 +235,8 @@ X = scp.read_omnic(DATADIR / 'wodger.spg')
 # %% [markdown]
 # It can be set to another pathname *permanently* (i.e., even after computer restart) by a new assignment:
 #
-# ```
-# scp.preferences.datadir = 'C:/users/Brian/s/Life'`
+# ```ipython3
+# scp.preferences.datadir = 'C:/users/Brian/s/Life'
 # ```
 #
 # This will change the default value in the SCPy preference file located in the hidden folder
@@ -257,12 +257,6 @@ X = scp.read_omnic(DATADIR / 'wodger.spg')
 # %% [markdown]
 # A widget is provided to help with the selection of file names or directory.
 #
-# <div class ="alert alert-warning">
-#
-# **WARNING:**
-# Experimental feature - subject to changes
-#
-# </div>
 
 # %%
 datadir = scp.preferences.datadir

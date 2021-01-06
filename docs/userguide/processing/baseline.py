@@ -142,24 +142,34 @@ ranges = [[5900.0, 5400.0], [4000., 4500.], [2100., 2000.0], [1550., 1555.]]
 #
 # if you use a tuple to define the sequences of ranges:
 #
-# ```ranges = [5900.0, 5400.0], [4000., 4500.], [2100., 2000.0], [1550., 1555.]```
+# ```ipython3
+# ranges = [5900.0, 5400.0], [4000., 4500.], [2100., 2000.0], [1550., 1555.]
+# ```
 #
 # or
 #
-# ```ranges = ([5900.0, 5400.0], [4000., 4500.], [2100., 2000.0], [1550., 1555.])```
+# ```ipython3
+# ranges = ([5900.0, 5400.0], [4000., 4500.], [2100., 2000.0], [1550., 1555.])
+# ```
 #
 # then you can call `compute` by directly pass the ranges tuple, or you can unpack it as below.
 #
-# ```blc.compute(ranges, ....)```
+# ```ipython3
+# blc.compute(ranges, ....)
+# ```
 #
 #
 # if you you use a list instead of tuples:
 #
-# ```ranges = [[5900.0, 5400.0], [4000., 4500.], [2100., 2000.0], [1550., 1555.]]```
+# ```ipython3
+# ranges = [[5900.0, 5400.0], [4000., 4500.], [2100., 2000.0], [1550., 1555.]]
+# ```
 #
 # then you **MUST UNPACK** the element when calling `compute`:
 #
-# ```blc.compute(*ranges, ....)```
+# ```ipython3
+# blc.compute(*ranges, ....)
+# ```
 #
 #
 # </div>

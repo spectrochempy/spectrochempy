@@ -30,7 +30,7 @@
 
 # %% [markdown]
 # Use the number sign (#) followed by a blank space for notebook titles and section headings, e.g.:
-# ```
+# ```md
 # # for titles
 # ## for major headings
 # ### for subheadings
