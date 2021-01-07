@@ -675,31 +675,49 @@ class NDMath(object):
                [2, 3, 4]])
 
         """
+        from spectrochempy.core.dataset.ndcoordset import CoordSet
         if coordset is not None:
-            shape = coordset.sizes[::-1]
+            if not isinstance(coordset, CoordSet):
+                coordset = CoordSet(*coordset)
 
-        args = np.indices(shape, dtype=dtype)
+            shape = coordset.sizes
 
-        argsunits = [0] * len(shape)
+        idx = np.indices(shape)
+
+        args = [0] * len(shape)
         if coordset is not None:
             for i, co in enumerate(coordset):
-                k = len(shape) - 1 - i
-                args[i] = (args[i].swapaxes(k, -1) * co.data[np.newaxis]).swapaxes(k, -1)
+                args[i] = co.data[idx[i]]
                 if units is None and co.has_units:
-                    argsunits[i] = Quantity(1, co.units)
-        kwargsunits = {}
-        for k, v in kwargs.items():
-            if isinstance(v, Quantity) or hasattr(v, 'has_units'):
-                kwargs[k] = v.m
-                kwargsunits[k] = Quantity(1., v.u)
-            else:
-                kwargsunits[k] = 1
-        data = function(*args, **kwargs)
-        if units is None:
-            q = function(*argsunits, **kwargsunits)
-            units = q.units
+                    args[i] = Quantity(args[i], co.units)
 
-        return cls(data, coordset=coordset, name=name, title=title, units=units)
+        data = function(*args, **kwargs)
+
+        # argsunits = [1] * len(shape)
+        # if coordset is not None:
+        #     for i, co in enumerate(coordset):
+        #         args[i] = co.data[idx[i]]
+        #         if units is None and co.has_units:
+        #             argsunits[i] = Quantity(1, co.units)
+        #
+        # kwargsunits = {}
+        # for k, v in kwargs.items():
+        #     if isinstance(v, Quantity) or hasattr(v, 'has_units'):
+        #         kwargs[k] = v.m
+        #         kwargsunits[k] = Quantity(1., v.u)
+        #     else:
+        #         kwargsunits[k] = 1
+        #
+        # data = function(*args, **kwargs)
+        #
+        # if units is None:
+        #     q = function(*argsunits, **kwargsunits)
+        #     if hasattr(q, 'units'):
+        #         units = q.units
+
+        data = data.T
+        dims = coordset.names[::-1]
+        return cls(data, coordset=coordset, dims=dims, name=name, title=title, units=units)
 
     # ..................................................................................................................
     def clip(self, *args, **kwargs):
@@ -2231,8 +2249,7 @@ __all__ += ['abs', 'amax', 'amin', 'argmin', 'argmax', 'array', 'clip', 'cumsum'
             'mean', 'pipe', 'ptp', 'round', 'std', 'sum', 'var']
 
 # make some API functions
-__all__ += ['empty_like', 'zeros_like', 'ones_like', 'full_like',
-            'empty', 'zeros', 'ones', 'full']
+__all__ += ['empty_like', 'zeros_like', 'ones_like', 'full_like', 'empty', 'zeros', 'ones', 'full']
 
 empty_like = make_func_from(NDMath.empty_like, first='dataset')
 zeros_like = make_func_from(NDMath.zeros_like, first='dataset')

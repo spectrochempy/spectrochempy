@@ -1,7 +1,9 @@
 # ---
 # jupyter:
 #   jupytext:
+#     cell_metadata_json: true
 #     formats: ipynb,py:percent
+#     notebook_metadata_filter: all
 #     text_representation:
 #       extension: .py
 #       format_name: percent
@@ -24,7 +26,7 @@
 # *NDPanel(not yet available)* and `Project`) to contain data, equipped with methods to analyze, transform or display
 # this data in a simple way by the user.
 #
-# The processed data are mainly spectroscopic data from techniques such as IR, Raman or NMR, but they are not limited
+#  The processed data are mainly spectroscopic data from techniques such as IR, Raman or NMR, but they are not limited
 # to this type of application, as any type of numerical data arranged in tabular form can generally serve as the main
 # input.
 
@@ -39,7 +41,7 @@
 # procedure](../../gettingstarted/install/index.rst).
 # </div>
 
-# %% [markdown] nbsphinx-toctree={"maxdepth": 3}
+# %% [markdown] {"nbsphinx-toctree": {"maxdepth": 3}}
 # [interface](interface.ipynb)
 
 # %% [markdown]
@@ -208,6 +210,14 @@ nd
 # %% [markdown]
 # ### Plotting a dataset
 #
+# First, we can set some general plotting preferences for this dataset
+
+# %%
+prefs = nd.preferences
+prefs.reset()
+prefs.figure.figsize = (6, 3)
+
+# %% [markdown]
 # Let's plot first a 1D spectrum (for instance one row of nd)
 
 # %%
@@ -228,10 +238,11 @@ _ = col.plot_scatter()
 _ = nd.plot(method='stack')  # or nd.plot_stack()
 
 # %% [markdown]
-# or as a contour plot:
+# or as an image plot:
 
 # %%
-_ = nd.plot(method='map')  # or nd.plot_map()
+prefs.colormap = 'magma'
+_ = nd.plot(method='image')  # or nd.plot_image()
 
 # %% [markdown]
 # Note that as we plot wavenumbers as abcissa, by convention the coordinates direction is reversed.
@@ -253,11 +264,15 @@ ref = nd[0]
 _ = ref.plot()
 
 # %% [markdown]
-# Now suppress this ref spectrum to all other spectra of the whole dataset
+# Now suppress this ref spectrum to all other spectra of the whole dataset (additionally we mask the region of
+# saturation
 
 # %%
+prefs.colormap = 'jet'
+prefs.colorbar = True
 nds = nd - ref
-_ = nds.plot(method='stack')
+nds[:, 1290.:890.] = scp.MASKED
+_ = nds.plot_stack()
 
 # %% [markdown]
 # More details on available on available processing and analysis function will be given later in this user guide.
@@ -265,5 +280,5 @@ _ = nds.plot(method='stack')
 # %% [markdown]
 # This was a short overview of the possibilities. To go further you can **Continue with ...**
 
-# %% [markdown] nbsphinx-toctree={"maxdepth": 3}
-# [Data Structures](../objects.rst)
+# %% [markdown] {"nbsphinx-toctree": {"maxdepth": 3}}
+# [Data structures](../objects.rst)

@@ -4,6 +4,7 @@
 #   jupytext:
 #     cell_metadata_filter: title,-all
 #     formats: ipynb,py:percent
+#     notebook_metadata_filter: all
 #     text_representation:
 #       extension: .py
 #       format_name: percent

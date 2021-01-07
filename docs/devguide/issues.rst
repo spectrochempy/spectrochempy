@@ -1,4 +1,4 @@
-.. _contributing.issues:
+.. __contributing.bugs_report:
 
 Reporting Issues
 =================
@@ -37,4 +37,4 @@ Bug reports should :
 
 #. Explain why the current behavior is wrong/not desired and what you expect instead.
 
-The issue will then show up to the |scpy| community and be open to comments/ideas from others.
+The issue will then ishow up to the |scpy| community and be open to comments/ideas from others.

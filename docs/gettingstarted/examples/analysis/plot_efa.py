@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+# flake8: noqa
 # ======================================================================================================================
 #  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
@@ -12,10 +12,11 @@ EFA analysis example
 In this example, we perform the Evolving Factor Analysis
 
 """
+########################################################################################################################
+# sphinx_gallery_thumbnail_number = 2
+
 import spectrochempy as scp
 import os
-
-# sphinx_gallery_thumbnail_number = 2
 
 ########################################################################################################################
 # Upload and preprocess a dataset
@@ -34,7 +35,7 @@ dataset[:, 5997.0:5993.0] = scp.MASKED
 # difference spectra
 
 dataset -= dataset[-1]
-dataset.plot_stack()  # figure 1
+dataset.plot_stack()
 
 ########################################################################################################################
 # column masking for bad columns
@@ -48,7 +49,7 @@ efa = scp.EFA(dataset)
 
 ########################################################################################################################
 # Show results
-
+#
 npc = 4
 c = efa.get_conc(npc)
 c.T.plot()

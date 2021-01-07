@@ -9,9 +9,9 @@
 This module implements the `BaselineCorrection` class for baseline corrections.
 
 """
-__all__ = ['BaselineCorrection', 'ab']
+__all__ = ['BaselineCorrection', 'ab', 'abc']
 
-__dataset_methods__ = ['ab']
+__dataset_methods__ = ['ab', 'abc']
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
@@ -28,7 +28,7 @@ from ..plotters.multiplot import multiplot
 from ..dataset.nddataset import NDDataset
 from ...utils import docstrings, TYPE_INTEGER, TYPE_FLOAT
 from .smooth import smooth
-from .. import error_, debug_
+from .. import debug_
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -454,13 +454,6 @@ def ab(dataset, dim=-1, **kwargs):
         new.swapaxes(axis, -1, inplace=True)  # must be done in  place
         swaped = True
 
-    # select the last coordinates and check the unit validity
-    lastcoord = new.coordset[dim]
-    if (lastcoord.units.dimensionality != '1/[time]' and lastcoord.units != 'ppm'):
-        error_('`ab` apply only to dimensions with [frequency] dimensionality or with ppm units\n'
-               'Baseline correction processing was thus cancelled')
-        return new
-
     base = _basecor(new.data.real, **kwargs)
 
     if not dryrun:
@@ -473,6 +466,10 @@ def ab(dataset, dim=-1, **kwargs):
         new.swapaxes(axis, -1, inplace=True)  # must be done inplace
 
     return new
+
+
+abc = ab
+abc.__doc__ = ab.__doc__
 
 
 # =======================================================================================================================

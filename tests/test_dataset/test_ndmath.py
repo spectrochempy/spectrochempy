@@ -465,7 +465,7 @@ def test_nddataset_add_mismatch_coords():
     with pytest.raises(CoordinateMismatchError) as exc:
         d1 += d2
     assert str(exc.value).startswith(
-        '\nCoord.data attributes are not equal')  # TODO= make more tests like this for various functions
+            '\nCoord.data attributes are not equal')  # TODO= make more tests like this for various functions
 
 
 def test_nddataset_add_mismatch_units():
@@ -782,3 +782,61 @@ def test_nddataset_extrema():
     info_('_____________________________')
     mi1 = nd.min(dim='y')
     info_('minimum', mi1)  # ma1 = nd.max('x')  # info_('X :', ma1)  # ma2 = nd.max('y')  # info_('Y :', ma2)
+
+
+def test_fromfunction():
+    # 1D
+    def func1(t, v):
+        d = v * t
+        return d
+
+    time = Coord.linspace(0, 9, 10)
+    distance = NDDataset.fromfunction(func1, v=134, coordset=CoordSet(t=time))
+    assert distance.dims == ['t']
+    assert_array_equal(distance.data, np.fromfunction(func1, (10,), v=134))
+
+    # 2D
+    def func2(x, y):
+        d = x + 1 / y
+        return d
+
+    c0 = Coord.linspace(0, 9, 3)
+    c1 = Coord.linspace(10, 20, 2)
+
+    # implicit ordering of coords (y,x)
+    distance = NDDataset.fromfunction(func2, coordset=CoordSet(c1, c0))
+    assert distance.shape == (2, 3)
+    assert distance.dims == ['y', 'x']
+
+    # or equivalent
+    distance = NDDataset.fromfunction(func2, coordset=[c1, c0])
+    assert distance.shape == (2, 3)
+    assert distance.dims == ['y', 'x']
+
+    # explicit ordering of coords (y,x)  #
+    distance = NDDataset.fromfunction(func2, coordset=CoordSet(u=c0, v=c1))
+
+    assert distance.shape == (2, 3)
+    assert distance.dims == ['v', 'u']
+    assert distance[0, 2].data == distance.u[2].data + 1. / distance.v[0].data
+
+    # with units
+    def func3(x, y):
+        d = x + y
+        return d
+
+    c0u = Coord.linspace(0, 9, 3, units='km')
+    c1u = Coord.linspace(10, 20, 2, units='m')
+    distance = NDDataset.fromfunction(func3, coordset=CoordSet(u=c0u, v=c1u))
+
+    assert distance.shape == (2, 3)
+    assert distance.dims == ['v', 'u']
+    assert distance[0, 2].values == distance.u[2].values + distance.v[0].values
+
+    c0u = Coord.linspace(0, 9, 3, units='km')
+    c1u = Coord.linspace(10, 20, 2, units='m^-1')
+    distance = NDDataset.fromfunction(func2, coordset=CoordSet(u=c0u, v=c1u))
+
+    assert distance.shape == (2, 3)
+    assert distance.dims == ['v', 'u']
+    assert distance[0, 2].values == distance.u[2].values + 1. / distance.v[0].values

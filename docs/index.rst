@@ -88,6 +88,7 @@ User's Guide
 * :doc:`userguide/importexport/importexport`
 * :doc:`userguide/plotting/plotting`
 * :doc:`userguide/processing/processing`
+* :doc:`userguide/fitting/fitting`
 * :doc:`userguide/analysis/analysis`
 * :doc:`userguide/databases/databases`
 
@@ -102,6 +103,7 @@ User's Guide
     userguide/importexport/importexport
     userguide/plotting/plotting
     userguide/processing/processing
+    userguide/fitting/fitting
     userguide/analysis/analysis
     userguide/databases/databases
 

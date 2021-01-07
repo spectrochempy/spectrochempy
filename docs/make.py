@@ -84,8 +84,9 @@ GALLERY = GETTINGSTARTED / 'gallery'
 
 PY = list(SRC.glob(('**/*.py')))
 for f in PY[:]:
-    if ('generated' in f.parts or '.ipynb_checkpoints' in f.parts or 'gallery' in f.parts
-            or 'examples' in f.parts or 'sphinxext' in f.parts):
+    if (
+            'generated' in f.parts or '.ipynb_checkpoints' in f.parts or 'gallery' in f.parts or 'examples' in
+            f.parts or 'sphinxext' in f.parts):
         PY.remove(f)
     if f.name in ['conf.py', 'make.py']:
         PY.remove(f)
@@ -260,7 +261,8 @@ class BuildDocumentation(object):
             if difftime > .5:
                 # may be modified
                 count += 1
-                sh.jupytext("--set-formats", "ipynb,py:percent", "--sync", item, silent=False)
+                sh.jupytext("--update-metadata", '{"jupytext": {"notebook_metadata_filter":"all"}}', "--set-formats",
+                            "ipynb,py:percent", "--sync", item, silent=False)
             else:
                 print('\tNo sync needed.')
         if count == 0:
@@ -369,7 +371,7 @@ class BuildDocumentation(object):
         if milestone == 'latest':
             # we build the latest
             tag = tag.split('.')
-            tag3 = '.'+tag[3] if len(tag)==4 else ''
+            tag3 = '.' + tag[3] if len(tag) == 4 else ''
             milestone = f"{tag[0]}.{tag[1]}.{int(tag[2])}{tag3}"
         else:
             milestone = tag

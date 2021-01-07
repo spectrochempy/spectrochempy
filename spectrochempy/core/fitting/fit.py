@@ -30,7 +30,7 @@ from spectrochempy.core.fitting.parameters import ParameterScript
 from spectrochempy.core.fitting.models import getmodel
 from spectrochempy.core.fitting.optimization import optimize
 from spectrochempy.utils import htmldoc
-from spectrochempy.core import info_
+from spectrochempy.core import preferences, info_, INFO
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -70,7 +70,7 @@ class Fit(HasTraits):
 
     """
 
-    silent = Bool(True)
+    silent = Bool(False)
 
     _ = Any()
 
@@ -82,7 +82,7 @@ class Fit(HasTraits):
     # initialisation
     # *******************************************************************************
 
-    def __init__(self, *args, **kargs):
+    def __init__(self, *args, **kwargs):
 
         if args:
             # look in args
@@ -106,8 +106,9 @@ class Fit(HasTraits):
         # sequence = kargs.get('sequence', 'ideal_pulse')
         # self.sequence = PulseSequence(type=sequence)
 
-        self.mode = kargs.get('mode', None)
-        self.method = kargs.get('method', None)
+        self.mode = kwargs.pop('mode', None)
+        self.method = kwargs.pop('method', None)
+        self.silent = kwargs.pop('silent', False)
 
         for exp_idx, dataset in enumerate(self.datasets):
             dataset.modeldata, dataset.modelnames, dataset.model_A, dataset.model_a, dataset.model_b = \
@@ -167,6 +168,9 @@ class Fit(HasTraits):
         """
 
         if not self.silent:
+            level = preferences.log_level
+            if level > INFO:
+                preferences.log_level = INFO
             info_('*' * 50)
             info_('  Entering fitting procedure')
             info_('*' * 50)
@@ -229,7 +233,7 @@ class Fit(HasTraits):
                 som += np.sum(data[0] ** 2)
 
             chi2 = np.sqrt(chi2 / som)
-
+            # reset log_level
             return chi2
 
         # end chi2 function ---------------------------------------------------
@@ -245,11 +249,9 @@ class Fit(HasTraits):
             if niter % everyiter != 0:
                 return
 
-            info_(kwargs)
-            info_(args)
             if not self.silent:
                 display.clear_output(wait=True)
-                print(("Iterations: %d, Calls: %d (chi2: %.5f)" % (
+                info_(("Iterations: %d, Calls: %d (chi2: %.5f)" % (
                         niter, ncalls, chi2)))
                 sys.stdout.flush()
 
@@ -286,6 +288,10 @@ class Fit(HasTraits):
         for exp_idx, dataset in enumerate(self.datasets):
             dataset.modeldata, dataset.modelnames, dataset.model_A, dataset.model_a, dataset.model_b = \
                 self._get_modeldata(dataset, exp_idx)
+
+        # Reset Log_level
+        if not self.silent:
+            preferences.log_level = level
 
         return
 

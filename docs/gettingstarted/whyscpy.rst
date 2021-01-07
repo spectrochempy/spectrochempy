@@ -11,7 +11,7 @@ Why |scpy|  ?
 
 The |scpy| project was developed to provide advanced tools for processing and
 analyzing spectroscopic data, initially for internal purposes in the
-`LCS <https://www.lcs.ensicaen.fr/>`_, for the following reasons:
+`LCS <https://www.lcs.ensicaen.fr/>`__, for the following reasons:
 
 Designed for Open Science
 ==========================
@@ -36,13 +36,13 @@ In particular, |scpy| :
 - allows to integrate the content of a particular job (data, scripts, notebooks, ...) into a dedicated data structure
   ("Project"), guaranteeing a complete follow-up from the import of raw data to the final results..
 
-.. Note::
+.. note::
 
     SpectroChemPy does not guarantee "data integrity", in that the validity of the raw data and the correct use of the
     processing and analysis tools is the responsibility of the user.
 
     SpectroChemPy is probably not free of bugs in some (hopefully rare) cases. In any case, critical bugs affecting data
-    integrity will be reported in the documentation for the version(s) of SpectroChemPy concerned, allowing the source
+    integrity will be reported in the documentation for the version(s) of |scpy| concerned, allowing the source
     of these errors to be traced.
 
 Open souce software on an open source platform
@@ -56,8 +56,8 @@ students leaving a group with their data, etc.
 It was important for us to be able to share spectroscopic data / data processing tools / data analysis tools with our
 colleagues, without imposing a financial burden on them... or pushing them to use cracked copies.
 
-SpectroChemPy is free of charge and under a free software license
-(`Licence [CeCILL-B]<https://cecill.info/index.en.html>`_). CeCILL-B follows the principle of the popular BSD license
+|scpy| is free of charge and under a free software license
+(`Licence [CeCILL-B] <https://cecill.info/index.en.html>`__). CeCILL-B follows the principle of the popular BSD license
 and its variants (Apache, X11 or W3C among others). In exchange for strong citation obligations (in all software
 incorporating a program covered by CeCILL-B and also through a Web site), the author authorizes the reuse of its
 software without any other constraints.
@@ -66,34 +66,32 @@ Powered by Python
 ==================
 
 Python is probably the most popular, open-source language used by Data Scientists. It is extensible and cross-platform,
-allowing SpectroChemPy to be used in an entirely open-source software environment. |scpy| uses state-of-the-art
-libraries for numerical computation (`numpy <https://numpy.org/>`_ , `scipy <https://www.scipy.org/>`_) and
-visualization (`matplotlib <https://matplotlib.org/>`_).
+allowing |scpy| to be used in an entirely open-source software environment. |scpy| uses state-of-the-art
+libraries for numerical computation (`numpy <https://numpy.org/>`__, `scipy <https://www.scipy.org/>`__) and
+visualization (`matplotlib <https://matplotlib.org/>`__).
 
 As the Python community is extremely dynamic, all users should easily find resources to solve specific needs that are
-not (yet) directly or completely satisfied by SpectroChemPy.
+not (yet) directly or completely satisfied by |scpy|.
 
 We also rely on the motivated members of this community (of which you are a part), to contribute to the improvement of
-SpectroChemPy through (:ref:`contributing.bug_reports`), or contributions to the code (Developer's guide).
-, or contributions to the
-code (:ref:`develguide`)
+|scpy| through (:ref:`_contributing.bugs_report`), or contributions to the code (:ref:`develguide`).
 
-Why NOT spectrochempy ?
+Why NOT |scpy| ?
 ========================
 
-You might **NOT** want to use spectrochempy if:
+You might **NOT** want to use |scpy| if:
 
 - you are resistant to command line code (Python) or scripts. Since
-  SpectroChemPy is essentially an Application Programming Interface (API), it
-  requires writing commands and small scripts. Spectrochempy's documentation and resources contain fully documented
+  |scpy| is essentially an Application Programming Interface (API), it
+  requires writing commands and small scripts. its documentation and resources contain fully documented
   examples (see :ref:`examples-index`) and tutorials (see :ref:`userguide`),  which should be easy to transpose into
   your own data. In particular, the use of Jupyter notebooks mixing texts, code blocks and figures, so that basic
   procedures (data import, basic processing and analysis, etc...) do not require much programming knowledge.
 
-- you are working on spectroscopic data that are difficult to process, including spectrochemistry (currently mainly
+- you are working on spectroscopic data that are difficult to process, including |scpy| (currently mainly
   focused on optical spectroscopy and NMR) because some components or tools (e.g. importing your raw data, ...) are
-  missing: please suggest new features that should be added (:ref:`contributing.bug_reports`). We will take into
-  consideration all suggestions to make spectrochemistry more widely and easily usable.
+  missing: please suggest new features that should be added (:ref:`_contributing.bugs_report`). We will take into
+  consideration all suggestions to make |scpy| more widely and easily usable.
 
 - you are working on very sensitive data (health, chemical safety, plant production, ...) and cannot take the risk to
   use a software under development and subject to bugs and changes before "maturity". We do not dispute this!
@@ -103,4 +101,4 @@ You might **NOT** want to use spectrochempy if:
   improvements/functionality)!
 
 - you are fully satisfied with your current tools. "The heart has its reasons, of which the reason knows nothing". We
-  don't dispute that either, but we are open to your opinion and suggestions (:ref:`contributing.bug_reports`)!
+  don't dispute that either, but we are open to your opinion and suggestions (:ref:`_contributing.bugs_report`)!

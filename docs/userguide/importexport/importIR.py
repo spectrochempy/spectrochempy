@@ -4,6 +4,7 @@
 #   jupytext:
 #     cell_metadata_json: true
 #     formats: ipynb,py:percent
+#     notebook_metadata_filter: all
 #     text_representation:
 #       extension: .py
 #       format_name: percent
@@ -13,6 +14,16 @@
 #     display_name: Python 3
 #     language: python
 #     name: python3
+#   language_info:
+#     codemirror_mode:
+#       name: ipython
+#       version: 3
+#     file_extension: .py
+#     mimetype: text/x-python
+#     name: python
+#     nbconvert_exporter: python
+#     pygments_lexer: ipython3
+#     version: 3.7.9
 # ---
 
 # %% [markdown]
@@ -45,8 +56,7 @@ import spectrochempy as scp
 #
 # ## Import of OMNIC files
 #
-# [Thermo Scientific OMNIC](https://www.thermofisher.com/search/browse/category/us/fr/602580/FTIR%2C+NIR+%26amp%3B+
-# Raman+Software+%26amp%3B+Libraries)
+# [Thermo Scientific OMNIC](https://www.thermofisher.com/search/browse/category/us/fr/602580/FTIR%2C+NIR+%26amp%3B+Raman+Software+%26amp%3B+Libraries) # noqa: E501
 # software have two proprietary binary file formats:
 # - .spa files that handle single spectra
 # - .spg files which contain a group of spectra
