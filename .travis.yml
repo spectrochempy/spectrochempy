@@ -91,6 +91,7 @@ script:
 
     elif [[ $BUILDOCS = true ]]; then
       echo "BUILDING DOCS"
+      mkdir $HOME/spectrochempy_docs;
       echo "cloning spectrochempy.github.io repository";
       git clone --branch=gh-pages --single-branch https://github.com/spectrochempy/spectrochempy.git $HOME/spectrochempy_docs/html;
       python docs/make.py --clean --html;
