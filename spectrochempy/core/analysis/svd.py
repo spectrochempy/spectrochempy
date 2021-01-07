@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 """
@@ -76,14 +76,14 @@ class SVD(HasTraits):
 
         Examples
         --------
-        >>> dataset = NDDataset.load('mydataset.scp')
+        >>> dataset = NDDataset.read('irdata/nh4y-activation.spg')
         >>> svd = SVD(dataset)
         >>> print(svd.ev.data)
-        [11848.225  633.980 ...    0.001    0.001]
+        [1.185e+04      634 ... 0.001089 0.000975]
         >>> print(svd.ev_cum.data)
-        [  94.539   99.598 ...  100.000  100.000]
+        [   94.54     99.6 ...      100      100]
         >>> print(svd.ev_ratio.data)
-        [  94.539    5.059 ...    0.000    0.000]
+        [   94.54    5.059 ... 8.687e-06 7.779e-06]
 
         """
 
@@ -185,7 +185,7 @@ class SVD(HasTraits):
             U = NDDataset(U)
             U.name = 'U'
             U.title = 'left singular vectors of ' + X.name
-            U.set_coords(x=Coord(labels=['#%d' % (i + 1) for i in range(KU)], title='Components'), y=X.y)
+            U.set_coordset(x=Coord(labels=['#%d' % (i + 1) for i in range(KU)], title='Components'), y=X.y)
             U.description = 'left singular vectors of ' + X.name
             U.history = 'Created by SVD \n'
 
@@ -195,7 +195,7 @@ class SVD(HasTraits):
             VT = NDDataset(VT)
             VT.name = 'V.T'
             VT.title = 'Loadings (V.t) of ' + X.name
-            VT.set_coords(x=X.x, y=Coord(labels=['#%d' % (i + 1) for i in range(KV)], title='Components'))
+            VT.set_coordset(x=X.x, y=Coord(labels=['#%d' % (i + 1) for i in range(KV)], title='Components'))
             VT.description = (
                     'Loadings obtained by singular value decomposition of ' + X.name)
             VT.history = (str(VT.modified) + ': Created by SVD \n')
@@ -215,7 +215,7 @@ class SVD(HasTraits):
     def __repr__(self):
         if self._compute_uv:
             return '<svd: U%s, s(%s), VT%s>' % (
-                self.U.shape, self.s.size, self.VT.shape)
+                    self.U.shape, self.s.size, self.VT.shape)
         else:
             return '<svd: s(%s), U, VT:not computed>' % (self.s.size,)
 
@@ -230,7 +230,7 @@ class SVD(HasTraits):
         sv = self.s.copy()
         sv.name = 'sv'
         sv.title = 'Singular values'
-        sv.set_coords(Coord(None, labels=['#%d' % (i + 1) for i in range(size)], title='Components'))
+        sv.set_coordset(Coord(None, labels=['#%d' % (i + 1) for i in range(size)], title='Components'))
         return sv
 
     @property
@@ -240,7 +240,7 @@ class SVD(HasTraits):
         ev = self.s ** 2 / (size - 1)
         ev.name = 'ev'
         ev.title = 'Explained variance'
-        ev.set_coords(Coord(None, labels=['#%d' % (i + 1) for i in range(size)], title='Components'))
+        ev.set_coordset(Coord(None, labels=['#%d' % (i + 1) for i in range(size)], title='Components'))
         return ev
 
     @property

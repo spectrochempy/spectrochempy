@@ -1,64 +1,213 @@
-#! python3
-# -*- coding: utf-8 -*-
+#  -*- coding: utf-8 -*-
 
-# ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
+#  =====================================================================================================================
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
+#  =====================================================================================================================
 
-__all__ = ["assert_equal",
-           "assert_array_equal",
-           "assert_array_almost_equal",
-           "assert_approx_equal",
-           "assert_raises",
-           "raises",
-           "catch_warnings",
-           "RandomSeedContext",
-           "EPSILON",
-           "is_sequence",
-           "preferences",
-           "datadir"
-           ]
 
-import os
+__all__ = ["assert_equal", "assert_array_equal", "assert_array_almost_equal", 'assert_dataset_equal',
+           'assert_dataset_almost_equal', 'assert_project_equal', 'assert_project_almost_equal', "assert_approx_equal",
+           "assert_raises", "raises", "catch_warnings", "RandomSeedContext", ]
+
+import operator
 import functools
-import tempfile
 import warnings
-import pytest
+
 import numpy as np
-
-import matplotlib.pyplot as plt
-from matplotlib.testing.compare import calculate_rms, ImageComparisonFailure
-from numpy.testing import (assert_equal, assert_array_equal,
-                           assert_array_almost_equal, assert_approx_equal, assert_raises)
-
-
-#  we defer import in order to avoid importing all the spectroscopy namespace
-def preferences():
-    from spectrochempy.core import app
-    return app
+# import matplotlib.pyplot as plt
+# from matplotlib.testing.compare import calculate_rms, ImageAssertionError
+from numpy.testing import (assert_equal, assert_array_equal, assert_array_almost_equal, assert_approx_equal,
+                           assert_raises, assert_array_compare)
 
 
-preferences = preferences()
+# ======================================================================================================================
+# NDDataset comparison
+# ======================================================================================================================
+def gisinf(x):
+    """like isinf, but always raise an error if type not supported instead of
+    returning a TypeError object.
+
+    Notes
+    -----
+    isinf and other ufunc sometimes return a NotImplementedType object instead
+    of raising any exception. This function is a wrapper to make sure an
+    exception is always raised.
+
+    This should be removed once this problem is solved at the Ufunc level."""
+    from numpy.core import isinf, errstate
+    with errstate(invalid='ignore'):
+        st = isinf(x)
+        if isinstance(st, type(NotImplemented)):
+            raise TypeError("isinf not supported for this type")
+    return st
 
 
-def datadir():
-    from spectrochempy.core import app
-    return app.datadir.path
+def compare_datasets(this, other, approx=False, decimal=6):
+    from spectrochempy.core.dataset.ndarray import NDArray
+    from spectrochempy.units import ur, Quantity
+
+    def compare(x, y):
+        from numpy.core import number, float_, result_type, array
+        from numpy.core.numerictypes import issubdtype
+        from numpy.core.fromnumeric import any as npany
+
+        try:
+            if npany(gisinf(x)) or npany(gisinf(y)):
+                xinfid = gisinf(x)
+                yinfid = gisinf(y)
+                if not (xinfid == yinfid).all():
+                    return False
+                # if one item, x and y is +- inf
+                if x.size == y.size == 1:
+                    return x == y
+                x = x[~xinfid]
+                y = y[~yinfid]
+        except (TypeError, NotImplementedError):
+            pass
+
+        # make sure y is an inexact type to avoid abs(MIN_INT); will cause
+        # casting of x later.
+        dtype = result_type(y, 1.)
+        y = array(y, dtype=dtype, copy=False, subok=True)
+        z = abs(x - y)
+
+        if not issubdtype(z.dtype, number):
+            z = z.astype(float_)  # handle object arrays
+
+        return z < 1.5 * 10.0 ** (-decimal)
+
+    eq = True
+
+    if not isinstance(other, NDArray):
+        # try to make some assumption to make useful comparison.
+        if isinstance(other, Quantity):
+            otherdata = other.magnitude
+            otherunits = other.units
+        elif isinstance(other, (float, int, np.ndarray)):
+            otherdata = other
+            otherunits = False
+        else:
+            raise AssertionError(f'{this} and {other} objects are too different to be compared.')
+
+        if not this.has_units and not otherunits:
+            eq = np.all(this._data == otherdata)
+        elif this.has_units and otherunits:
+            eq = np.all(this._data * this._units == otherdata * otherunits)
+        else:
+            raise AssertionError(f'units of {this} and {other} objects does not match')
+        return eq
+
+    thistype = this.implements()
+    attrs = this.__dir__()
+    for attr in ('filename', 'preferences', 'description', 'history', 'date', 'modified', 'modeldata', 'origin', 'roi',
+                 'offset', 'name'):
+        # these attibutes are not used for comparison (comparison based on data and units!)
+        if attr in attrs:
+            if attr in attrs:
+                attrs.remove(attr)
+
+    # if 'title' in attrs:
+    #    attrs.remove('title')  #TODO: should we use title for comparison?
+
+    for attr in attrs:
+        if attr != 'units':
+            sattr = getattr(this, f'_{attr}')
+            if hasattr(other, f'_{attr}'):
+                oattr = getattr(other, f'_{attr}')
+                # to avoid deprecation warning issue for unequal array
+                if sattr is None and oattr is not None:
+                    raise AssertionError(f'`{attr}` of {this} is None.')
+                if oattr is None and sattr is not None:
+                    raise AssertionError(f'{attr} of {other} is None.')
+                if hasattr(oattr, 'size') and hasattr(sattr, 'size') and oattr.size != sattr.size:
+                    # particular case of mask
+                    if attr != 'mask':
+                        raise AssertionError(f'{thistype}.{attr} sizes are different.')
+                    else:
+                        if other.mask != this.mask:
+                            raise AssertionError(f'{this} and {other} masks are different.')
+                if attr in ['data', 'mask']:
+                    if approx:
+                        assert_array_compare(compare, sattr, oattr, header=(
+                                f'{thistype}.{attr} attributes are not almost equal to %d decimals' % decimal),
+                                             precision=decimal)
+                    else:
+                        assert_array_compare(operator.__eq__, sattr, oattr,
+                                             header=f'{thistype}.{attr} attributes are not equal')
+
+                elif attr in ['coordset']:
+                    if (sattr is None and oattr is not None) or (oattr is None and sattr is not None):
+                        raise AssertionError('One of the coordset is None')
+                    elif sattr is None and oattr is None:
+                        res = True
+                    else:
+                        for item in zip(sattr, oattr):
+                            res = compare_datasets(*item, approx=approx, decimal=decimal)
+                            if not res:
+                                raise AssertionError(f'coords differs:\n{res}')
+                else:
+                    eq &= np.all(sattr == oattr)
+                if not eq:
+                    raise AssertionError(f'The {attr} attributes of {this} and {other} are different.')
+            else:
+                return False
+        else:
+            # unitlesss and dimensionless are supposed equals
+            sattr = this._units
+            if sattr is None:
+                sattr = ur.dimensionless
+            if hasattr(other, '_units'):
+                oattr = other._units
+                if oattr is None:
+                    oattr = ur.dimensionless
+
+                eq &= np.all(sattr == oattr)
+                if not eq:
+                    raise AssertionError(f"attributes `{attr}` are not equals or one is missing: \n{sattr} != {oattr}")
+            else:
+                raise AssertionError(f'{other} has no units')
+
+    return True
 
 
-datadir = datadir()
-
-figures_dir = os.path.join(os.path.expanduser("~"), ".spectrochempy", "figures")
-os.makedirs(figures_dir, exist_ok=True)
-
-
-# utilities
-def is_sequence(arg):
-    return (not hasattr(arg, 'strip')) and hasattr(arg, "__iter__")
+# ......................................................................................................................
+def assert_dataset_equal(nd1, nd2):
+    assert_dataset_almost_equal(nd1, nd2, approx=False)
+    return True
 
 
-EPSILON = epsilon = np.finfo(float).eps
+# ......................................................................................................................
+def assert_dataset_almost_equal(nd1, nd2, **kwargs):
+    decimal = kwargs.get('decimal', 6)
+    approx = kwargs.get('approx', True)
+    compare_datasets(nd1, nd2, approx=approx, decimal=decimal)
+    return True
+
+
+def assert_project_equal(proj1, proj2, **kwargs):
+    assert_project_almost_equal(proj1, proj2, approx=False)
+    return True
+
+
+# ......................................................................................................................
+def assert_project_almost_equal(proj1, proj2, **kwargs):
+    for nd1, nd2 in zip(proj1.datasets, proj2.datasets):
+        compare_datasets(nd1, nd2, **kwargs)
+
+    for pr1, pr2 in zip(proj1.projects, proj2.projects):
+        assert_project_almost_equal(pr1, pr2, **kwargs)
+
+    for sc1, sc2 in zip(proj1.scripts, proj2.scripts):
+        assert_script_equal(sc1, sc2, **kwargs)
+
+    return True
+
+
+# ......................................................................................................................
+def assert_script_equal(sc1, sc2, **kwargs):
+    if sc1 != sc2:
+        raise AssertionError(f'Scripts are differents: {sc1.content} != {sc2.content}')
 
 
 # ======================================================================================================================
@@ -113,6 +262,7 @@ class RandomSeedContext(object):
 # .............................................................................
 def assert_equal_units(unit1, unit2):
     from pint import DimensionalityError
+
     try:
         x = (1. * unit1) / (1. * unit2)
     except DimensionalityError:
@@ -149,11 +299,13 @@ class raises(object):
     def __call__(self, func):
         @functools.wraps(func)
         def run_raises_test(*args, **kwargs):
+            import pytest
             pytest.raises(self._exc, func, *args, **kwargs)
 
         return run_raises_test
 
     def __enter__(self):
+        import pytest
         self._ctx = pytest.raises(self._exc)
         return self._ctx.__enter__()
 
@@ -202,281 +354,271 @@ class catch_warnings(warnings.catch_warnings):
         pass
 
 
+# TODO: work on this
+# #
 # ----------------------------------------------------------------------------------------------------------------------
-# Testing examples and notebooks (Py version) in docs
+# # Matplotlib testing utilities
+# #
 # ----------------------------------------------------------------------------------------------------------------------
-
-# .............................................................................
-def example_run(path):
-    import subprocess
-
-    pipe = None
-    try:
-        pipe = subprocess.Popen(
-            ["python", path, '--nodisplay'],
-            stdout=subprocess.PIPE)
-        (so, serr) = pipe.communicate()
-    except Exception:
-        pass
-
-    return pipe.returncode, so, serr
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-# Matplotlib testing utilities
-# ----------------------------------------------------------------------------------------------------------------------
-
-# .............................................................................
-def _compute_rms(x, y):
-    return calculate_rms(x, y)
-
-
-# .............................................................................
-def _image_compare(imgpath1, imgpath2, REDO_ON_TYPEERROR):
-    # compare two images saved in files imgpath1 and imgpath2
-
-    from matplotlib.pyplot import imread
-    from skimage.measure import compare_ssim as ssim
-
-    # read image
-    try:
-        img1 = imread(imgpath1)
-    except IOError:
-        img1 = imread(imgpath1 + '.png')
-    try:
-        img2 = imread(imgpath2)
-    except IOError:
-        img2 = imread(imgpath2 + '.png')
-
-    try:
-        sim = ssim(img1, img2,
-                   data_range=img1.max() - img2.min(),
-                   multichannel=True) * 100.
-        rms = _compute_rms(img1, img2)
-
-    except ValueError:
-        rms = sim = -1
-
-    except TypeError as e:
-        # this happen sometimes and erratically during testing using
-        # pytest-xdist (parallele testing). This is work-around the problem
-        if e.args[0] == "unsupported operand type(s) " \
-                        "for - : 'PngImageFile' and 'int'" and not REDO_ON_TYPEERROR:
-            REDO_ON_TYPEERROR = True
-            rms = sim = -1
-        else:
-            raise
-
-    return (sim, rms, REDO_ON_TYPEERROR)
-
-
-# .............................................................................
-def compare_images(imgpath1, imgpath2,
-                   max_rms=None,
-                   min_similarity=None, ):
-    sim, rms, _ = _image_compare(imgpath1, imgpath2, False)
-
-    CHECKSIM = (min_similarity is not None)
-    SIM = min_similarity if CHECKSIM else 100. - EPSILON
-    MESSSIM = "(similarity : {:.2f}%)".format(sim)
-    CHECKRMS = (max_rms is not None and not CHECKSIM)
-    RMS = max_rms if CHECKRMS else EPSILON
-    MESSRMS = "(rms : {:.2f})".format(rms)
-
-    if sim < 0 or rms < 0:
-        message = "Sizes of the images are different"
-    elif CHECKRMS and rms <= RMS:
-        message = "identical images {}".format(MESSRMS)
-    elif (CHECKSIM or not CHECKRMS) and sim >= SIM:
-        message = "identical/similar images {}".format(MESSSIM)
-    else:
-        message = "different images {}".format(MESSSIM)
-
-    return message
-
-
-# .............................................................................
-def same_images(imgpath1, imgpath2):
-    if compare_images(imgpath1, imgpath2).startswith('identical'):
-        return True
-
-
-# .............................................................................
-def image_comparison(reference=None,
-                     extension=None,
-                     max_rms=None,
-                     min_similarity=None,
-                     force_creation=False,
-                     savedpi=150):
-    """
-    image file comparison decorator.
-
-    Performs a comparison of the images generated by the decorated function.
-    If none of min_similarity and max_rms if set,
-    automatic similarity check is done :
-
-    Parameters
-    ----------
-    reference : list of image filename for the references
-
-        List the image filenames of the reference figures
-        (located in ``.spectrochempy/figures``) which correspond in
-        the same order to
-        the various figures created in the decorated fonction. if
-        these files doesn't exist an error is generated, except if the
-        force_creation argument is True. This should allow the creation
-        of a reference figures, the first time the corresponding figures are
-        created.
-
-    extension : str, optional, default=``png``
-
-        Extension to be used to save figure, among
-        (eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba, svg, svgz, tif, tiff)
-
-    force_creation : `bool`, optional, default=`False`.
-
-        if this flag is True, the figures created in the decorated function are
-        saved in the reference figures directory (``.spectrocchempy/figures``)
-
-    min_similarity : float (percent).
-
-        If set, then it will be used to decide if an image is the same (similar)
-        or not. In this case max_rms is not used.
-
-    max_rms : float
-
-        rms stands for `Root Mean Square`. If set, then it will
-        be used to decide if an image is the same
-        (less than the acceptable rms). Not used if min_similarity also set.
-
-    savedpi : int, optional, default=150
-
-        dot per inch of the generated figures
-
-    """
-
-    if not reference:
-        raise ValueError('no reference image provided. Stopped')
-
-    if not extension:
-        extension = 'png'
-
-    if not is_sequence(reference):
-        reference = list(reference)
-
-    def make_image_comparison(func):
-
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-
-            # check the existence of the file if force creation is False
-            for ref in reference:
-                filename = os.path.join(figures_dir,
-                                        '{}.{}'.format(ref, extension))
-                if not os.path.exists(filename) and not force_creation:
-                    raise ValueError(
-                        'One or more reference file do not exist.\n'
-                        'Creation can be forced from the generated '
-                        'figure, by setting force_creation flag to True')
-
-            # get the nums of the already existing figures
-            # that, obviously,should not considered in
-            # this comparison
-            fignums = plt.get_fignums()
-
-            # execute the function generating the figures
-            # rest style to basic 'lcs' style
-            _ = func(*args, **kwargs)
-
-            # get the new fignums if any
-            curfignums = plt.get_fignums()
-            for x in fignums:
-                # remove not newly created
-                curfignums.remove(x)
-
-            if not curfignums:
-                # no figure where generated
-                raise RuntimeError(f'No figure was generated by the "{func.__name__}" function. Stopped')
-
-            if len(reference) != len(curfignums):
-                raise ValueError("number of reference figures provided doesn't match the number of generated figures.")
-
-            # Comparison
-            REDO_ON_TYPEERROR = False
-
-            while True:
-                errors = ""
-                for fignum, ref in zip(curfignums, reference):
-                    referfile = os.path.join(figures_dir,
-                                             '{}.{}'.format(ref, extension))
-
-                    fig = plt.figure(fignum)  # work around to set
-                    # the correct style: we
-                    # we have saved the rcParams
-                    # in the figure attributes
-                    plt.rcParams.update(fig.rcParams)
-                    fig = plt.figure(fignum)
-
-                    if force_creation:
-                        # make the figure for reference and bypass
-                        # the rest of the test
-                        tmpfile = referfile
-                    else:
-                        # else we create a temporary file to save the figure
-                        fd, tmpfile = tempfile.mkstemp(
-                            prefix='temp{}-'.format(fignum),
-                            suffix='.{}'.format(extension), text=True)
-                        os.close(fd)
-
-                    fig.savefig(tmpfile, dpi=savedpi)
-
-                    sim, rms = 100.0, 0.0
-                    if not force_creation:
-                        # we do not need to loose time
-                        # if we have just created the figure
-                        sim, rms, REDO_ON_TYPEERROR = _image_compare(referfile,
-                                                                     tmpfile,
-                                                                     REDO_ON_TYPEERROR)
-
-                    CHECKSIM = (min_similarity is not None)
-                    SIM = min_similarity if CHECKSIM else 100. - EPSILON
-                    MESSSIM = "(similarity : {:.2f}%)".format(sim)
-                    CHECKRMS = (max_rms is not None and not CHECKSIM)
-                    RMS = max_rms if CHECKRMS else EPSILON
-                    MESSRMS = "(rms : {:.2f})".format(rms)
-
-                    if sim < 0 or rms < 0:
-                        message = "Sizes of the images are different"
-                    elif CHECKRMS and rms <= RMS:
-                        message = "identical images {}".format(MESSRMS)
-                    elif (CHECKSIM or not CHECKRMS) and sim >= SIM:
-                        message = "identical/similar images {}".format(MESSSIM)
-                    else:
-                        message = "different images {}".format(MESSSIM)
-
-                    message += "\n\t reference : {}".format(
-                        os.path.basename(referfile))
-                    message += "\n\t generated : {}\n".format(
-                        tmpfile)
-
-                    if not message.startswith("identical"):
-                        errors += message
-                    else:
-                        print(message)
-
-                if errors and not REDO_ON_TYPEERROR:
-                    # raise an error if one of the image is different from the
-                    # reference image
-                    raise ImageComparisonFailure("\n" + errors)
-
-                if not REDO_ON_TYPEERROR:
-                    break
-
-            return
-
-        return wrapper
-
-    return make_image_comparison
+#
+# figures_dir = os.path.join(os.path.expanduser("~"), ".spectrochempy", "figures")
+# os.makedirs(figures_dir, exist_ok=True)
+#
+#
+# # .............................................................................
+# def _compute_rms(x, y):
+#     return calculate_rms(x, y)
+#
+#
+# # .............................................................................
+# def _image_compare(imgpath1, imgpath2, REDO_ON_TYPEERROR):
+#     # compare two images saved in files imgpath1 and imgpath2
+#
+#     from matplotlib.pyplot import imread
+#     from skimage.measure import compare_ssim as ssim
+#
+#     # read image
+#     try:
+#         img1 = imread(imgpath1)
+#     except IOError:
+#         img1 = imread(imgpath1 + '.png')
+#     try:
+#         img2 = imread(imgpath2)
+#     except IOError:
+#         img2 = imread(imgpath2 + '.png')
+#
+#     try:
+#         sim = ssim(img1, img2,
+#                    data_range=img1.max() - img2.min(),
+#                    multichannel=True) * 100.
+#         rms = _compute_rms(img1, img2)
+#
+#     except ValueError:
+#         rms = sim = -1
+#
+#     except TypeError as e:
+#         # this happen sometimes and erratically during testing using
+#         # pytest-xdist (parallele testing). This is work-around the problem
+#         if e.args[0] == "unsupported operand type(s) " \
+#                         "for - : 'PngImageFile' and 'int'" and not REDO_ON_TYPEERROR:
+#             REDO_ON_TYPEERROR = True
+#             rms = sim = -1
+#         else:
+#             raise
+#
+#     return (sim, rms, REDO_ON_TYPEERROR)
+#
+#
+# # .............................................................................
+# def compare_images(imgpath1, imgpath2,
+#                    max_rms=None,
+#                    min_similarity=None, ):
+#     sim, rms, _ = _image_compare(imgpath1, imgpath2, False)
+#
+#     EPSILON = np.finfo(float).eps
+#     CHECKSIM = (min_similarity is not None)
+#     SIM = min_similarity if CHECKSIM else 100. - EPSILON
+#     MESSSIM = "(similarity : {:.2f}%)".format(sim)
+#     CHECKRMS = (max_rms is not None and not CHECKSIM)
+#     RMS = max_rms if CHECKRMS else EPSILON
+#     MESSRMS = "(rms : {:.2f})".format(rms)
+#
+#     if sim < 0 or rms < 0:
+#         message = "Sizes of the images are different"
+#     elif CHECKRMS and rms <= RMS:
+#         message = "identical images {}".format(MESSRMS)
+#     elif (CHECKSIM or not CHECKRMS) and sim >= SIM:
+#         message = "identical/similar images {}".format(MESSSIM)
+#     else:
+#         message = "different images {}".format(MESSSIM)
+#
+#     return message
+#
+#
+# # .............................................................................
+# def same_images(imgpath1, imgpath2):
+#     if compare_images(imgpath1, imgpath2).startswith('identical'):
+#         return True
+#
+#
+# # .............................................................................
+# def image_comparison(reference=None,
+#                      extension=None,
+#                      max_rms=None,
+#                      min_similarity=None,
+#                      force_creation=False,
+#                      savedpi=150):
+#     """
+#     image file comparison decorator.
+#
+#     Performs a comparison of the images generated by the decorated function.
+#     If none of min_similarity and max_rms if set,
+#     automatic similarity check is done :
+#
+#     Parameters
+#     ----------
+#     reference : list of image filename for the references
+#
+#         List the image filenames of the reference figures
+#         (located in ``.spectrochempy/figures``) which correspond in
+#         the same order to
+#         the various figures created in the decorated fonction. if
+#         these files doesn't exist an error is generated, except if the
+#         force_creation argument is True. This should allow the creation
+#         of a reference figures, the first time the corresponding figures are
+#         created.
+#
+#     extension : str, optional, default=``png``
+#
+#         Extension to be used to save figure, among
+#         (eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba, svg, svgz, tif, tiff)
+#
+#     force_creation : `bool`, optional, default=`False`.
+#
+#         if this flag is True, the figures created in the decorated function are
+#         saved in the reference figures directory (``.spectrocchempy/figures``)
+#
+#     min_similarity : float (percent).
+#
+#         If set, then it will be used to decide if an image is the same (similar)
+#         or not. In this case max_rms is not used.
+#
+#     max_rms : float
+#
+#         rms stands for `Root Mean Square`. If set, then it will
+#         be used to decide if an image is the same
+#         (less than the acceptable rms). Not used if min_similarity also set.
+#
+#     savedpi : int, optional, default=150
+#
+#         dot per inch of the generated figures
+#
+#     """
+#     from spectrochempy.utils import is_sequence
+#
+#     if not reference:
+#         raise ValueError('no reference image provided. Stopped')
+#
+#     if not extension:
+#         extension = 'png'
+#
+#     if not is_sequence(reference):
+#         reference = list(reference)
+#
+#     def make_image_comparison(func):
+#
+#         @functools.wraps(func)
+#         def wrapper(*args, **kwargs):
+#
+#             # check the existence of the file if force creation is False
+#             for ref in reference:
+#                 filename = os.path.join(figures_dir,
+#                                         '{}.{}'.format(ref, extension))
+#                 if not os.path.exists(filename) and not force_creation:
+#                     raise ValueError(
+#                             'One or more reference file do not exist.\n'
+#                             'Creation can be forced from the generated '
+#                             'figure, by setting force_creation flag to True')
+#
+#             # get the nums of the already existing figures
+#             # that, obviously,should not considered in
+#             # this comparison
+#             fignums = plt.get_fignums()
+#
+#             # execute the function generating the figures
+#             # rest style to basic 'lcs' style
+#             _ = func(*args, **kwargs)
+#
+#             # get the new fignums if any
+#             curfignums = plt.get_fignums()
+#             for x in fignums:
+#                 # remove not newly created
+#                 curfignums.remove(x)
+#
+#             if not curfignums:
+#                 # no figure where generated
+#                 raise RuntimeError(f'No figure was generated by the "{func.__name__}" function. Stopped')
+#
+#             if len(reference) != len(curfignums):
+#                 raise ValueError("number of reference figures provided doesn't match the number of generated
+#                 figures.")
+#
+#             # Comparison
+#             REDO_ON_TYPEERROR = False
+#
+#             while True:
+#                 errors = ""
+#                 for fignum, ref in zip(curfignums, reference):
+#                     referfile = os.path.join(figures_dir,
+#                                              '{}.{}'.format(ref, extension))
+#
+#                     fig = plt.figure(fignum)  # work around to set
+#                     # the correct style: we
+#                     # we have saved the rcParams
+#                     # in the figure attributes
+#                     plt.rcParams.update(fig.rcParams)
+#                     fig = plt.figure(fignum)
+#
+#                     if force_creation:
+#                         # make the figure for reference and bypass
+#                         # the rest of the test
+#                         tmpfile = referfile
+#                     else:
+#                         # else we create a temporary file to save the figure
+#                         fd, tmpfile = tempfile.mkstemp(
+#                                 prefix='temp{}-'.format(fignum),
+#                                 suffix='.{}'.format(extension), text=True)
+#                         os.close(fd)
+#
+#                     fig.savefig(tmpfile, dpi=savedpi)
+#
+#                     sim, rms = 100.0, 0.0
+#                     if not force_creation:
+#                         # we do not need to loose time
+#                         # if we have just created the figure
+#                         sim, rms, REDO_ON_TYPEERROR = _image_compare(referfile,
+#                                                                      tmpfile,
+#                                                                      REDO_ON_TYPEERROR)
+#                     EPSILON = np.finfo(float).eps
+#                     CHECKSIM = (min_similarity is not None)
+#                     SIM = min_similarity if CHECKSIM else 100. - EPSILON
+#                     MESSSIM = "(similarity : {:.2f}%)".format(sim)
+#                     CHECKRMS = (max_rms is not None and not CHECKSIM)
+#                     RMS = max_rms if CHECKRMS else EPSILON
+#                     MESSRMS = "(rms : {:.2f})".format(rms)
+#
+#                     if sim < 0 or rms < 0:
+#                         message = "Sizes of the images are different"
+#                     elif CHECKRMS and rms <= RMS:
+#                         message = "identical images {}".format(MESSRMS)
+#                     elif (CHECKSIM or not CHECKRMS) and sim >= SIM:
+#                         message = "identical/similar images {}".format(MESSSIM)
+#                     else:
+#                         message = "different images {}".format(MESSSIM)
+#
+#                     message += "\n\t reference : {}".format(
+#                             os.path.basename(referfile))
+#                     message += "\n\t generated : {}\n".format(
+#                             tmpfile)
+#
+#                     if not message.startswith("identical"):
+#                         errors += message
+#                     else:
+#                         print(message)
+#
+#                 if errors and not REDO_ON_TYPEERROR:
+#                     # raise an error if one of the image is different from the
+#                     # reference image
+#                     raise ImageAssertionError("\n" + errors)
+#
+#                 if not REDO_ON_TYPEERROR:
+#                     break
+#
+#             return
+#
+#         return wrapper
+#
+#     return make_image_comparison
 
 
 # ----------------------------------------------------------------------------------------------------------------------

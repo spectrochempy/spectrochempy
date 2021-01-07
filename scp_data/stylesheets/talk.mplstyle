@@ -1,4 +1,5 @@
 # Seaborn talk context
+
 figure.figsize: 10.4, 7.15
 axes.labelsize: 14.3
 axes.titlesize: 15.6

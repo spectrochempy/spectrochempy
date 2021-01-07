@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-
-# ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
+# ==============================================================================
+#  Copyright (©) 2015-2020
+#  LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
+#  See full LICENSE agreement in the root directory
+# ==============================================================================
 
 """
 This module define the class |NDIO| in which input/output standard
@@ -11,47 +12,32 @@ methods for a |NDDataset| are defined.
 
 """
 
-__all__ = ['NDIO']
+__all__ = ['NDIO', 'SCPY_SUFFIX']
 
-__dataset_methods__ = []
-
-# ----------------------------------------------------------------------------------------------------------------------
-# Python imports
-# ----------------------------------------------------------------------------------------------------------------------
-
-import os
-import datetime
+import io
 import json
-import warnings
-
-# ----------------------------------------------------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------------------------------------------------
+import pathlib
 
 import numpy as np
-import matplotlib.pyplot as plt
-from numpy.compat import asstr
-from numpy.lib.format import write_array
-from numpy.lib.npyio import zipfile_factory, NpzFile
-from traitlets import HasTraits, Unicode
+from numpy.lib.npyio import zipfile_factory
+from traitlets import HasTraits, Instance, Union, Unicode
 
-# ----------------------------------------------------------------------------------------------------------------------
-# local import
-# ----------------------------------------------------------------------------------------------------------------------
-
-# from .ndarray import NDArray
 from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.core.dataset.ndcoordset import CoordSet
-from spectrochempy.utils import SpectroChemPyWarning
-from spectrochempy.utils.meta import Meta
-from spectrochempy.units import Unit, Quantity
-from spectrochempy.core import general_preferences as prefs
-# from spectrochempy.core import info_, debug_, error_, warning_
+from spectrochempy.core import debug_
+from spectrochempy.utils import SpectroChemPyException
+from spectrochempy.utils import pathclean, check_filenames, ScpFile, check_filename_to_save, json_serialiser
+from spectrochempy.utils import TYPE_BOOL
+
+SCPY_SUFFIX = {'NDDataset': '.scp', 'NDPanel': '.mscp', 'Project': '.pscp'}
 
 
-# ==============================================================================
+# ----------------------------------------------------------------------------------------------------------------------
+# Utilities
+# ----------------------------------------------------------------------------------------------------------------------
+
+# ======================================================================================================================
 # Class NDIO to handle I/O of datasets
-# ==============================================================================
+# ======================================================================================================================
 
 class NDIO(HasTraits):
     """
@@ -61,48 +47,126 @@ class NDIO(HasTraits):
 
     """
 
-    _filename = Unicode()
-
-    @property
-    def filename(self):
-        """
-        str - current filename for this dataset.
-
-        """
-        if self._filename:
-            return os.path.basename(self._filename)
-        else:
-            return self.name
-
-    @filename.setter
-    def filename(self, fname):
-        self._filename = fname
+    _filename = Union((Instance(pathlib.Path), Unicode()), allow_none=True)
 
     @property
     def directory(self):
         """
-        str - current directory for this dataset.
+        `Pathlib` object - current directory for this dataset
+
+        ReadOnly property - automaticall set when the filename is updated if it contains a parent on its path
 
         """
         if self._filename:
-            return os.path.dirname(self._filename)
+            return pathclean(self._filename).parent.resolve()
         else:
-            return ''
+            return None
+
+    @property
+    def filename(self):
+        """
+        `Pathlib` object - current filename for this dataset.
+
+        """
+        if self._filename:
+            return self._filename.stem + self.suffix
+        else:
+            return None
+
+    @filename.setter
+    def filename(self, val):
+        self._filename = pathclean(val)
+
+    @property
+    def filetype(self):
+        klass = self.implements()
+        return [f'SpectroChemPy {klass} file (*{SCPY_SUFFIX[klass]})']
+
+    @property
+    def suffix(self):
+        """
+        filename suffix
+
+        Read Only property - automatically set when the filename is updated if it has a suffix, else give
+        the default suffix for the given type of object.
+
+        """
+        if self._filename and self._filename.suffix:
+            return self._filename.suffix
+        else:
+            klass = self.implements()
+            return SCPY_SUFFIX[klass]
 
     # ------------------------------------------------------------------------------------------------------------------
-    # special methods
+    # Special methods
     # ------------------------------------------------------------------------------------------------------------------
 
     def __dir__(self):
         return ['filename', ]
 
     # ------------------------------------------------------------------------------------------------------------------
-    # Generic save function
+    # Public methods
     # ------------------------------------------------------------------------------------------------------------------
 
-    def save(self, filename='', **kwargs):
+    # ..................................................................................................................
+    def save(self, **kwargs):
         """
-        Save the current |NDDataset| (default extension : ``.scp`` ).
+        Save the current object in SpectroChemPy format.
+
+        Default extension is *.scp for |NDDataset|'s, *.nscp for |NDPanel|'s, and *.pscp for |Project|'s.
+
+        See Also
+        ---------
+        save_as : save current object with a different name and/or directory
+        write : export current object to different format
+
+        Examples
+        ---------
+
+        read some data from an OMNIC file
+        >>> import spectrochempy as scp
+        >>> nd = scp.read_omnic('wodger.spg')
+        >>> assert nd.name == 'wodger'
+
+        write it in SpectroChemPy format (.scp)
+        (return a `pathlib` object)
+        >>> filename = nd.save()
+
+        check the existence of the scp fie
+        >>> assert filename.is_file()
+        >>> assert filename.name == 'wodger.scp'
+
+        Remove this file
+        >>> filename.unlink()
+
+        """
+
+        # by default we save the file in the self.directory and with the name + suffix depending
+        # on the current object type
+        if self.directory is None:
+            filename = pathclean('.') / self.name
+            self.filename = filename  # <- this will set self.directory too.
+
+        filename = self.directory / self.name
+
+        default_suffix = SCPY_SUFFIX[self.implements()]
+        filename = filename.with_suffix(default_suffix)
+
+        if not filename.exists() and kwargs.get('confirm', True):
+            # never saved
+            kwargs['caption'] = f'Save the current {self.implements()} as ... '
+            return self.save_as(filename, **kwargs)
+
+        # was already saved previously with this name,
+        # in this case we do not display a dialog and overwrite the same file
+
+        self.name = filename.stem
+        return self.dump(filename, **kwargs)
+
+    # ..................................................................................................................
+    def save_as(self, filename='', **kwargs):
+        """
+        Save the current |NDDataset| in SpectroChemPy format (*.scp)
 
         Parameters
         ----------
@@ -114,13 +178,22 @@ class NDIO(HasTraits):
 
         Examples
         ---------
-        Read some experimental data and then save in our proprietary format
-        **scp**
 
-        >>> from spectrochempy import * #doctest: +ELLIPSIS
+        read some data from an OMNIC file
+        >>> import spectrochempy as scp
+        >>> nd = scp.read_omnic('wodger.spg')
+        >>> assert nd.name == 'wodger'
 
-        >>> mydataset = NDDataset.read_omnic('irdata/nh4y-activation.spg')
-        >>> mydataset.save('mydataset.scp')
+        write it in SpectroChemPy format (.scp)
+        (return a `pathlib` object)
+        >>> filename = nd.save_as('new_wodger')
+
+        check the existence of the scp fie
+        >>> assert filename.is_file()
+        >>> assert filename.name == 'new_wodger.scp'
+
+        Remove this file
+        >>> filename.unlink()
 
         Notes
         -----
@@ -128,315 +201,45 @@ class NDIO(HasTraits):
 
         See Also
         ---------
-        write
+        save : save current dataset
+        write : export current dataset to different format
 
         """
-
-        directory = kwargs.get("directory", prefs.datadir)
-
-        if not filename:
-            # the current file name or default filename (id)
-            filename = self.filename
-            if self.directory:
-                directory = self.directory
-
-        if not os.path.exists(directory):
-            raise IOError("directory doesn't exists!")
-
-        if not filename.endswith('.scp'):
-            filename = filename + '.scp'
-
-        if os.path.isdir(directory):
-            filename = os.path.expanduser(os.path.join(directory, filename))
+        if filename:
+            # we have a filename
+            # by default it use the saved directory
+            filename = pathclean(filename)
+            if self.directory and self.directory != filename.parent.resolve():
+                filename = self.directory / filename
         else:
-            warnings.warn('Provided directory is a file, '
-                          'so we use its parent directory',
-                          SpectroChemPyWarning)
-            filename = os.path.join(os.path.dirname(directory), filename)
+            filename = self.directory
 
-        # Import is postponed to here since zipfile depends on gzip, an optional
-        # component of the so-called standard library.
-        import zipfile
-        # Import deferred for startup time improvement
-        import tempfile
-
-        zipf = zipfile_factory(filename, mode="w",
-                               compression=zipfile.ZIP_DEFLATED)
-
-        # Stage data in a temporary file on disk, before writing to zip.
-        fd, tmpfile = tempfile.mkstemp(suffix='-spectrochempy.scp')
-        os.close(fd)
-
-        pars = {}
-        objnames = self.__dir__()
-
-        def _loop_on_obj(_names, obj=self, level=''):
-            """Recursive scan on NDDataset objects"""
-
-            for key in _names:
-
-                val = getattr(obj, f"_{key}")
-
-                if isinstance(val, np.ndarray):
-
-                    with open(tmpfile, 'wb') as fid:
-                        write_array(fid, np.asanyarray(val), allow_pickle=True)
-
-                    zipf.write(tmpfile, arcname=level + key + '.npy')
-
-                elif isinstance(val, CoordSet):
-
-                    for v in val._coords:
-                        _objnames = dir(v)
-                        if isinstance(v, Coord):
-                            _loop_on_obj(_objnames, obj=v, level=f"coord_{v.name}_")
-                        elif isinstance(v, CoordSet):
-                            _objnames.remove('coords')
-                            _loop_on_obj(_objnames, obj=v, level=f"coordset_{v.name}_")
-                            for vi in v:
-                                _objnames = dir(vi)
-                                _loop_on_obj(_objnames, obj=vi, level=f"coordset_{v.name}_coord_{vi.name[1:]}_")
-
-                elif isinstance(val, datetime.datetime):
-
-                    pars[level + key] = val.timestamp()
-
-                elif isinstance(val, np.dtype):
-
-                    pars[level + key] = str(val)
-
-                elif isinstance(val, Unit):
-
-                    pars[level + key] = str(val)
-
-                elif isinstance(val, Meta):
-                    d = val.to_dict()
-                    # we must handle Quantities
-                    for k, v in d.items():
-                        if isinstance(v, list):
-                            for i, item in enumerate(v):
-                                if isinstance(item, Quantity):
-                                    item = list(item.to_tuple())
-                                    if isinstance(item[0], np.ndarray):
-                                        item[0] = item[0].tolist()
-                                    d[k][i] = tuple(item)
-                    pars[level + key] = d
-
-                elif val is None:
-                    continue
-
-                elif isinstance(val, dict) and key == 'axes':
-                    # do not save the matplotlib axes
-                    continue
-
-                elif isinstance(val, (plt.Figure, plt.Axes)):
-                    # pass the figures and Axe
-                    continue
-
-                else:
-                    pars[level + key] = val
-
-        _loop_on_obj(objnames)
-
-        with open(tmpfile, 'w') as f:
-            f.write(json.dumps(pars))
-
-        zipf.write(tmpfile, arcname='pars.json')
-
-        os.remove(tmpfile)
-
-        zipf.close()
-
-        self._filename = filename
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # Generic load function
-    # ------------------------------------------------------------------------------------------------------------------
-
-    @staticmethod
-    def _load(cls,
-              fid='',
-              protocol=None,
-              **kwargs
-              ):
-
-        filename = None
-
-        # case where load was call directly from the API
-        # e.g.,  A= scp.load("dataset.scp")
-        # In this case we need to define cls as a NDDataset class
-        if isinstance(cls(), NDIO):
-            # not run as a class method of NDDataset
-            from spectrochempy import NDDataset
-            cls = NDDataset
-
-        if protocol is not None and protocol not in ['scp']:
-            # TODO: case where fp is a file object
-            filename = fid
-            return cls.read(filename, protocol=protocol)
-
-        if isinstance(fid, str) and protocol is None:
-            filename, ext = os.path.splitext(fid)
-            try:
-                return cls.read(fid, protocol=ext[1:])
-            except Exception:
-                pass
-
-        if isinstance(fid, str):
-            # this is a filename
-
-            filename = fid
-            directory = kwargs.get("directory", prefs.datadir)
-            if not filename:
-                raise IOError('no filename provided!')
-            else:
-                filename = os.path.expanduser(
-                    os.path.join(directory, filename))
-                try:
-                    # cast to file in the testdata directory
-                    # TODO: add possibility to search in several directory
-                    fid = open(filename, 'rb')
-                except Exception:
-                    if not filename.endswith('.scp'):
-                        filename = filename + '.scp'
-                    try:
-                        # try again
-                        fid = open(filename, 'rb')
-                    except Exception:
-                        # try the working directory
-                        filename = os.path.join(os.getcwd(), filename)
-                        try:
-                            fid = open(filename, 'rb')
-                        except IOError:
-                            raise IOError('no valid filename provided')
-
-        # get zip file
-        obj = NpzFile(fid, allow_pickle=True)
-
-        # debug_(str(obj.files) + '\n')
-
-        # interpret
-        coords = None
-        new = cls()
-
-        for key, val in list(obj.items()):
-            if key.startswith('coord_'):
-                if not coords:
-                    coords = {}
-                els = key.split('_')
-                dim = els[1]
-                if dim not in coords.keys():
-                    coords[dim] = Coord()
-                setattr(coords[dim], "_%s" % els[2], val)
-
-            if key.startswith('coordset_'):
-                if not coords:
-                    coords = {}
-                els = key.split('_')
-                dim = els[1]
-                idx = "_" + els[3]
-                if dim not in coords.keys():
-                    coords[dim] = CoordSet({idx: Coord()})
-                if idx not in coords[dim].names:
-                    coords[dim].set(**{idx: Coord()})
-                setattr(coords[dim][idx], "_%s" % els[4], val)
-
-            elif key == "pars.json":
-                pars = json.loads(asstr(val))
-            else:
-                setattr(new, "_%s" % key, val)
-
-        def setattributes(clss, key, val):
-            # utility function to set the attributes
-            if key in ['modified', 'date']:
-                val = datetime.datetime.fromtimestamp(val)
-                setattr(clss, "_%s" % key, val)
-            elif key == 'meta':
-                # handle the case were quantity were saved
-                for k, v in val.items():
-                    if isinstance(v, list):
-                        for i, item in enumerate(v):
-                            if isinstance(item, (list, tuple)):
-                                try:
-                                    v[i] = Quantity.from_tuple(item)
-                                except TypeError:
-                                    # not a quantity
-                                    pass
-                        val[k] = v
-                clss.meta.update(val)
-            elif key == 'plotmeta':
-                # handle the case were quantity were saved
-                for k, v in val.items():
-                    if isinstance(v, list):
-                        for i, item in enumerate(v):
-                            if isinstance(item, (list, tuple)):
-                                try:
-                                    v[i] = Quantity.from_tuple(item)
-                                except TypeError:
-                                    # not a quantity
-                                    pass
-                        val[k] = v
-                clss.plotmeta.update(val)
-            elif key in ['units']:
-                setattr(clss, key, val)
-            elif key in ['dtype']:
-                setattr(clss, "_%s" % key, np.dtype(val))
-            else:
-                setattr(clss, "_%s" % key, val)
-
-        for key, val in list(pars.items()):
-
-            if key.startswith('coord_'):
-
-                els = key.split('_')
-                dim = els[1]
-                setattributes(coords[dim], els[2], val)
-
-            elif key.startswith('coordset_'):
-                els = key.split('_')
-                dim = els[1]
-                if key.endswith("is_same_dim"):
-                    setattributes(coords[dim], "is_same_dim", val)
-                elif key.endswith("name"):
-                    setattributes(coords[dim], "name", val)
-                elif key.endswith("references"):
-                    setattributes(coords[dim], "references", val)
-                else:
-                    idx = "_" + els[3]
-                    setattributes(coords[dim][idx], els[4], val)
-            else:
-
-                setattributes(new, key, val)
+        # suffix must be specified which correspond to the type of the object to save
+        default_suffix = SCPY_SUFFIX[self.implements()]
+        filename = filename.with_suffix(default_suffix)
+        kwargs['filetypes'] = self.filetype
+        kwargs['caption'] = f'Save the current {self.implements()} as ... '
+        filename = check_filename_to_save(self, filename, save_as=True, **kwargs)
 
         if filename:
-            new._filename = filename
+            self.filename = filename
+            return self.dump(filename, **kwargs)
 
-        if coords:
-            new.set_coords(coords)
-
-        return new
-
+    # ..................................................................................................................
     @classmethod
-    def load(cls,
-             fid='',
-             protocol=None,
-             directory=prefs.datadir,
-             **kwargs
-             ):
+    def load(cls, filename, **kwargs):
         """
-        Load a list of dataset objects saved as a pickle files ( e.g., '*.scp' file).
+        open a data from a '*.scp' file.
 
         It's a class method, that can be used directly on the class,
         without prior opening of a class instance.
 
         Parameters
         ----------
-        fid : list of `str` or `file` objects
-            The names of the files to read (or the file objects).
-        protocol : str, optional, default:'scp'
-            The default type for loading.
-        directory : str, optional, default:`prefs.datadir`
-            The directory from where to load the file.
+        filename :  `str`, `pathlib` or `file` objects
+            The name of the file to read (or a file objects.
+        content : str, optional
+             The optional content of the file(s) to be loaded as a binary string
         kwargs : optional keyword parameters.
             Any additional keyword(s) to pass to the actual reader.
 
@@ -444,18 +247,11 @@ class NDIO(HasTraits):
         Examples
         --------
         >>> from spectrochempy import *
-        >>> mydataset = NDDataset.load('mydataset.scp')
-        >>> print(mydataset)
-        <BLANKLINE>
-        ...
-
-        by default, directory for saving is the `data`.
-        So the same thing can be done simply by :
-
-        >>> mydataset = NDDataset.load('mydataset.scp')
-        >>> print(mydataset)
-        <BLANKLINE>
-        ...
+        >>> nd1 = NDDataset.read('irdata/nh4y-activation.spg')
+        >>> f = nd1.save()
+        >>> f.name
+        'nh4y-activation.scp'
+        >>> nd2 = NDDataset.load(f)
 
 
         Notes
@@ -464,130 +260,161 @@ class NDIO(HasTraits):
 
         See Also
         --------
-        read, save
+        read : import dataset from various orgines
+        save : save the current dataset
 
 
         """
-        datasets = []
-        files = fid
-        if not isinstance(fid, (list, tuple)):
-            files = [fid]
+        content = kwargs.get('content', None)
 
-        for f in files:  # lgtm [py/iteration-string-and-sequence]
-            nd = NDIO._load(cls, fid=f, protocol=protocol, directory=directory, **kwargs)
-            datasets.append(nd)
+        if content:
+            fid = io.BytesIO(content)
+        else:
+            # be sure to convert filename to a pathlib object with the default suffix
+            filename = pathclean(filename)
+            suffix = cls().suffix
+            filename = filename.with_suffix(suffix)
+            if kwargs.get('directory', None) is not None:
+                filename = pathclean(kwargs.get('directory')) / filename
+            if not filename.exists():
+                filename = check_filenames(filename, **kwargs)[0]
+            fid = open(filename, 'rb')
 
-            # TODO: allow a concatenation or stack if possible
+        # get zip file
+        try:
+            obj = ScpFile(fid)
+        except FileNotFoundError:
+            raise SpectroChemPyException(f"File {filename} doesn't exist!")
+        except Exception as e:
+            if str(e) == 'File is not a zip file':
+                raise SpectroChemPyException("File not in 'scp' format!")
+            raise SpectroChemPyException("Undefined error!")
 
-        if len(datasets) == 1:
-            return datasets[0]
+        js = obj[obj.files[0]]
+        if kwargs.get('json', False):
+            return js
 
-    # ------------------------------------------------------------------------------------------------------------------
-    # Generic read function
-    # ------------------------------------------------------------------------------------------------------------------
+        new = cls.loads(js)
+
+        fid.close()
+
+        if filename:
+            filename = pathclean(filename)
+            new._filename = filename
+            new.name = filename.stem
+        return new
+
+    def dumps(self, encoding=None):
+
+        debug_('Dumps')
+        js = json_serialiser(self, encoding=encoding)
+        return json.dumps(js, indent=2)
 
     @classmethod
-    def read(cls, filename=None, **kwargs):
+    def loads(cls, js):
+
+        from spectrochempy.core.project.project import Project
+        from spectrochempy.core.dataset.nddataset import NDDataset
+        from spectrochempy.core.scripts.script import Script
+
+        # .........................
+        def item_to_attr(obj, dic):
+            for key, val in dic.items():
+
+                try:
+                    if 'readonly' in dic.keys() and key in ['readonly', 'name']:
+                        # case of the meta and preferences
+                        pass
+
+                    elif hasattr(obj, f'_{key}'):
+                        # use the hidden attribute if it exists
+                        key = f'_{key}'
+
+                    if val is None:
+                        pass
+
+                    elif key in ['_meta', '_preferences']:
+                        setattr(obj, key, item_to_attr(getattr(obj, key), val))
+
+                    elif key in ['_coordset']:
+                        _coords = [item_to_attr(Coord(), v) for v in val['coords']]
+                        if val['is_same_dim']:
+                            obj.set_coordset(_coords)
+                        else:
+                            coords = dict((c.name, c) for c in _coords)
+                            obj.set_coordset(coords)
+                        obj._name = val['name']
+                        obj._references = val['references']
+
+                    elif key in ['_datasets']:
+                        # datasets = [item_to_attr(NDDataset(name=k), v) for k, v in val.items()]
+                        datasets = [item_to_attr(NDDataset(), js) for js in val]
+                        obj.datasets = datasets
+
+                    elif key in ['_projects']:
+                        projects = [item_to_attr(Project(), js) for js in val]
+                        obj.projects = projects
+
+                    elif key in ['_scripts']:
+                        scripts = [item_to_attr(Script(), js) for js in val]
+                        obj.scripts = scripts
+
+                    elif key in ['_parent']:
+                        # automatically set
+                        pass
+
+                    else:
+                        if isinstance(val, TYPE_BOOL) and key == '_mask':
+                            val = np.bool_(val)
+                        setattr(obj, key, val)
+
+                except Exception as e:
+                    raise TypeError(f'for {key} {e}')
+
+            return obj
+
+        new = item_to_attr(cls(), js)
+        return new
+
+    # ..................................................................................................................
+    def dump(self, filename, **kwargs):
         """
-        Generic read function. It's like `load` a class method.
+        Save the current object into compressed native spectrochempy format
 
         Parameters
         ----------
-        filename : str
-            The path to the file to be read. If it is not provided,
-            at least a protocol must be given.
-        protocol : str
-            Protocol used for reading. If not provided, the correct protocol
-            is evaluated from the file name extension.
-            Existing protocol: 'scp', 'omnic', 'opus', 'matlab', 'jdx', 'csv', ...
-        kwargs : optional keyword parameters
-            Any additional keyword to pass to the actual reader
-
-        See Also
-        --------
-        load
+        filename: str of  `pathlib` object
+            File name where to save the current object. Extension
 
         """
 
-        protocol = kwargs.pop('protocol', None)
-        sortbydate = kwargs.pop('sortbydate', True)
+        # Stage data in a temporary file on disk, before writing to zip.
+        import zipfile
+        import tempfile
 
-        if filename is None and protocol is None:
-            raise ValueError('read method require a parameter ``filename`` '
-                             'or at least a protocol such as `scp`, `omnic`, ... !')
+        zipf = zipfile_factory(filename, mode="w", compression=zipfile.ZIP_DEFLATED)
+        _, tmpfile = tempfile.mkstemp(suffix='-spectrochempy')
 
-        if filename is not None and protocol is None:
-            # try to estimate the protocol from the file name extension
-            _, extension = os.path.splitext(filename)
-            if len(extension) > 0:
-                protocol = extension[1:].lower()
+        tmpfile = pathclean(tmpfile)
 
-        if protocol == 'scp':
-            # default reader
-            return cls.load(filename, protocol='scp', **kwargs)
+        js = self.dumps(encoding='base64')
 
-            # try:
-            # find the adequate reader
-        _reader = getattr(cls, 'read_{}'.format(protocol))
-        return _reader(filename, sortbydate=sortbydate, **kwargs)
+        tmpfile.write_bytes(js.encode('utf-8'))
 
-    # ------------------------------------------------------------------------------------------------------------------
-    # Generic write function
-    # ------------------------------------------------------------------------------------------------------------------
+        zipf.write(tmpfile, arcname=f'{self.name}.json')
 
-    def write(self, filename, **kwargs):
-        """
-        Generic write function which actually delegate the work to an
-        writer defined by the parameter ``protocol``.
+        tmpfile.unlink()
 
-        Parameters
-        ----------
-        filename : str
-            The path to the file to be read
-        protocol : str
-            The protocol used to write the
-            |NDDataset| in a file,
-            which will determine the exporter to use.
-        kwargs : optional keyword parameters
-            Any additional keyword to pass to the actual exporter
+        zipf.close()
 
-        See Also
-        --------
-        save
+        self.filename = filename
+        self.name = filename.stem
 
-        """
-        protocol = kwargs.pop('protocol', None)
+        return filename
 
-        if not protocol:
-            # try to estimate the protocol from the file name extension
-            _, extension = os.path.splitext(filename)
-            if len(extension) > 0:
-                protocol = extension[1:].lower()
-
-        if protocol == 'scp':
-            return self.save(filename)
-
-        # find the adequate reader
-
-        try:
-            # find the adequate reader
-            _writer = getattr(self, 'write_{}'.format(protocol))
-            return _writer(filename, **kwargs)
-
-        except Exception:
-
-            raise AttributeError(f'The specified writter for protocol `{protocol}` was not found!')
-
-
-# make some methods accessible from the main scp API
-# ----------------------------------------------------------------------------------------------------------------------
-
-load = NDIO.load
-read = NDIO.read
-write = NDIO.write
-
-__all__ += ['load', 'read', 'write']
 
 # ======================================================================================================================
 if __name__ == '__main__':
     pass
+
+# EOF

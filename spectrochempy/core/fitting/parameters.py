@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
@@ -142,7 +142,7 @@ class FitParameters(UserDict):
                 val = str(self.data[key])
 
                 return "%s: %10.4f, %s, %s \n" % (
-                    keystring, float(val), lob, upb)
+                        keystring, float(val), lob, upb)
 
         # ..............................................................
 
@@ -377,7 +377,7 @@ class ParameterScript(HasTraits):
             s = line.split(':')
             if len(s) != 2:
                 raise ValueError(
-                    'Cannot interpret line %d: A semi-column is missing?' % lc)
+                        'Cannot interpret line %d: A semi-column is missing?' % lc)
 
             key, values = s
             key = key.strip().lower()
@@ -395,14 +395,14 @@ class ParameterScript(HasTraits):
                 shape = values.lower().strip()
                 if shape is None:  # or (shape not in self._list_of_models and shape not in self._list_of_baselines):
                     raise ValueError(
-                        'Shape of this model "%s" was not specified or is not implemented' % shape)
+                            'Shape of this model "%s" was not specified or is not implemented' % shape)
                 fp.model[modlabel] = shape
                 common = False
                 continue
             elif key.startswith("experiment"):  # must be in common
                 if not common:
                     raise ValueError(
-                        "'experiment_...' specification was found outside the common block.")
+                            "'experiment_...' specification was found outside the common block.")
                 if "variables" in key:
                     expvars = values.lower().strip()
                     expvars = expvars.replace(',', ' ').replace(';', ' ')
@@ -412,7 +412,7 @@ class ParameterScript(HasTraits):
             else:
                 if modlabel is None and not common:
                     raise ValueError(
-                        "The first definition should be a label for a model or a block of variables or constants.")
+                            "The first definition should be a label for a model or a block of variables or constants.")
                 # get the parameters
                 if key.startswith('*'):
                     fixed = True
@@ -428,7 +428,7 @@ class ParameterScript(HasTraits):
                     key = key[1:].strip()
                 else:
                     raise ValueError(
-                        'Cannot interpret line %d: A parameter definition must start with *,$ or >' % lc)
+                            'Cannot interpret line %d: A parameter definition must start with *,$ or >' % lc)
 
                 # store this parameter
                 s = values.split(',')
@@ -439,7 +439,7 @@ class ParameterScript(HasTraits):
                         s[1:] = s[2:]
                 if len(s) > 3:
                     raise ValueError(
-                        'line %d: value, min, max should be defined in this order' % lc)
+                            'line %d: value, min, max should be defined in this order' % lc)
                 elif len(s) == 2:
                     raise ValueError('only two items in line %d' % lc)
                     # s.append('none')
@@ -470,11 +470,11 @@ class ParameterScript(HasTraits):
                         # if the parameter is already a list, that's ok if the number of parameters is ok
                         if len(val) != fp.expnumber:
                             raise ValueError(
-                                'the number of parameters for %s is not the number of experiments.' % len(
-                                    val))
+                                    'the number of parameters for %s is not the number of experiments.' % len(
+                                            val))
                         if key not in fp.expvars:
                             raise ValueError(
-                                'parameter %s is not declared as variable' % key)
+                                    'parameter %s is not declared as variable' % key)
                     else:
                         if key in fp.expvars:
                             # we create a list of parameters corresponding

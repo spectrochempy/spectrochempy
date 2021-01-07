@@ -50,7 +50,7 @@ You find a problem, want to suggest enhancements or want to look at the current 
 ## Citing SpectroChemPy
 
 When using SpectroChemPy for your own work, you are kindly requested to cite it this way:
-```text
+```
 Arnaud Travert & Christian Fernandez, (2020) SpectroChemPy (Version 0.1). Zenodo. http://doi.org/10.5281/zenodo.3823841
 ```
 

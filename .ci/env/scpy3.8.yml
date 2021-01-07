@@ -4,6 +4,7 @@ channels:
     - spectrocat
     - cantera
     - cantera/label/dev
+    - plotly
     - defaults
 
 dependencies:
@@ -16,8 +17,12 @@ dependencies:
     - quaternion
     - nmrglue
 
-  # for the core package
+    # for the core package
     - colorama
+    - dash
+    - dash-bootstrap-components
+    - dash-daq
+    - dill
     - docrep
     - ipython
     - jinja2
@@ -25,8 +30,8 @@ dependencies:
     - numba
     - numpy
     - orderedset
-    - pandas
     - pint
+    - plotly
     - pyqt
     - requests
     - scipy
@@ -34,28 +39,29 @@ dependencies:
     - traitlets
     - traittypes
 
-  # to be suppressed when code change is finished
+    # to be suppressed when code change is finished
     - xlrd
 
-  # mainly for install and a bit more...
+    # mainly for install and a bit more...
     - setuptools
     - setuptools_scm
     - git
 
-  # need this, because the API is mainly designed to run in Jupyter notebook
+    # need this, because the API is mainly designed to run in Jupyter notebook
     - ipywidgets
     - ipympl
     - jupyterlab
     - nodejs
 
-  # DEV: just for testing
+    # DEV: just for testing
     - pytest
-    # - pytest-tornasync
+    - pytest-doctestplus
     - pytest-flake8
     - scikit-image
     - coverage
 
-  # DEV: docs
+    # DEV: code and docs
+    - jupyter-dash
     - jupytext
     - sphinx
     - sphinx_rtd_theme
@@ -64,20 +70,20 @@ dependencies:
     - nbsphinx
     - jupyter_sphinx
     - json5
+    - sphinx-copybutton
 
-  # DEV: build
+    # DEV: build
     - conda-build
-    - conda-verify
     - anaconda-client
-  # - twine
 
-  # optional
-  # - xarray
-  # - datashader
-  # - scikit-learn
+    # optional
+    # - xarray
+    # - datashader
+    # - scikit-learn
 
-  # pip only for docs
+
     - pip
     - pip:
         - autodoc_traits
-
+        - dash_defer_js_import
+        - dash-ace

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
@@ -11,9 +11,7 @@ __dataset_methods__ = ['find_peaks']
 
 import scipy.signal
 import numpy as np
-from datetime import datetime
-
-
+from datetime import datetime, timezone
 
 """wrappers of scipy.signal peak finding functions"""
 
@@ -24,9 +22,8 @@ from datetime import datetime
 # argrelmax(data[, axis, order, mode]) 	Calculate the relative maxima of data.
 # argrelextrema(data, comparator[, axis, ...]) 	Calculate the relative extrema of data.
 
-def find_peaks(X, height=None, window_length=3, threshold=None, distance=None,
-               prominence=None, width=None, wlen=None, rel_height=0.5,
-               plateau_size=None, use_coord=True):
+def find_peaks(dataset, height=None, window_length=3, threshold=None, distance=None, prominence=None, width=None,
+               wlen=None, rel_height=0.5, plateau_size=None, use_coord=True):
     """
     Wrapper and extension of scpy.signal.find_peaks(). Find peaks inside a 1D NDDataset based on peak properties.
     This function finds all local maxima by simple comparison of neighbouring values. Optionally, a subset of these
@@ -34,7 +31,7 @@ def find_peaks(X, height=None, window_length=3, threshold=None, distance=None,
 
     Parameters
     ----------
-    x : |NDDataset|
+    dataset : |NDDataset|
         A 1D NDDataset or a 2D NDdataset with `len(X.y) == 1`
     height : number or ndarray or sequence, optional
         Required height of peaks. Either a number, ``None``, an array matching
@@ -70,7 +67,7 @@ def find_peaks(X, height=None, window_length=3, threshold=None, distance=None,
         one of the arguments `prominence` or `width` is given. Floats are interpreted
         as measured along the 'x' Coord; ints are interpreted as a number of points.
         See argument len` in `peak_prominences` of the scipy documentation for a full
-         description of its effects.
+        description of its effects.
     rel_height : float, optional,
         Used for calculation of the peaks width, thus it is only used if `width`
         is given. See argument  `rel_height` in `peak_widths` of the scipy documentation
@@ -170,50 +167,51 @@ def find_peaks(X, height=None, window_length=3, threshold=None, distance=None,
 
     """
 
-    if X.ndim > 2 or (X.ndim == 2 and len(X.y) > 1):
+    X = dataset.squeeze()
+
+    if X.ndim > 1:
         raise ValueError("Works only for 1D NDDataset or a 2D NDdataset with `len(X.y) <= 1`")
 
     if window_length % 2 == 0:
         raise ValueError("window_length must be an odd integer")
 
-
     # if the following parameters are entered as floats, the coordinates are used. Else, they will
     # be treated as indices as in scipy.signal.find_peak()
 
     # transform coord (if exists) to index
-    if use_coord and X.coords is not None:
-        step = np.abs(X.x.data[-1] - X.x.data[0])/(len(X.x) - 1)
+    if use_coord and X.coordset is not None:
+        step = np.abs(X.x.data[-1] - X.x.data[0]) / (len(X.x) - 1)
 
-        if isinstance(distance, float):
+        if distance is not None:
             distance = int(round(distance / step))
 
-        if isinstance(width, float):
+        if width is not None:
             width = int(round(width / step))
 
-        if isinstance(wlen, float):
+        if wlen is not None:
             wlen = int(round(wlen / step))
 
-        if isinstance(plateau_size, float):
+        if plateau_size is not None:
             plateau_size = int(round(plateau_size / step))
 
-    data = X.data.squeeze()
-    peaks, properties = scipy.signal.find_peaks(data, height=height, threshold=threshold,
-                                                distance=distance, prominence=prominence, width=width, wlen=wlen,
-                                                rel_height=rel_height, plateau_size=plateau_size)
+    data = X.data
+    peaks, properties = scipy.signal.find_peaks(data, height=height, threshold=threshold, distance=distance,
+                                                prominence=prominence, width=width, wlen=wlen, rel_height=rel_height,
+                                                plateau_size=plateau_size)
 
-    if X.ndim == 1:
-        out = X[peaks]
-    else: # ndim == 2
-       out = X[:, peaks]
+    # if dataset.ndim == 1:
+    out = X[peaks]
+    # else:  # ndim == 2
+    #    out = dataset[:, peaks]
 
     if window_length > 1:
         # quadratic interpolation to find the maximum
         for i, peak in enumerate(peaks):
-            y = data[peak - window_length//2:peak + window_length//2 + 1]
-            if use_coord and X.coords is not None:
-                x = X.x[peak - window_length//2:peak + window_length//2 + 1]
+            y = data[peak - window_length // 2:peak + window_length // 2 + 1]
+            if use_coord and X.coordset is not None:
+                x = X.x.data[peak - window_length // 2:peak + window_length // 2 + 1]
             else:
-                x = range(peak - window_length//2, peak + window_length//2 + 1)
+                x = range(peak - window_length // 2, peak + window_length // 2 + 1)
 
             coef = np.polyfit(x, y, 2)
 
@@ -227,7 +225,7 @@ def find_peaks(X, height=None, window_length=3, threshold=None, distance=None,
             out.x.data[i] = x_at_max
 
     # transform back index to coord
-    if use_coord and X.coords is not None:
+    if use_coord and X.coordset is not None:
         for key in ('left_bases', 'right_bases', 'left_edges', 'right_edges'):  # values are int type
             if key in properties:
                 properties[key] = properties[key].astype('float64')
@@ -251,6 +249,6 @@ def find_peaks(X, height=None, window_length=3, threshold=None, distance=None,
                 properties['plateau_sizes'][i] = np.abs(properties['left_edges'][i] - properties['right_edges'][i])
 
     out.name = 'peaks of ' + X.name
-    out.history[-1] = str(datetime.now()) + f': find_peaks(): {len(peaks)} peak(s) found'
+    out.history[-1] = str(datetime.now(timezone.utc)) + f': find_peaks(): {len(peaks)} peak(s) found'
 
     return out, properties

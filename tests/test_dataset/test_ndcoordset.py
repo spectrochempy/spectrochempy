@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
@@ -47,7 +47,11 @@ def test_coordset_init(coord0, coord1, coord2):
     coordsc = CoordSet(x=coord2, y=coord3, z=coord0)  # third syntax
     assert coordsc.names == ['x', 'y', 'z']
 
-    coordsc1 = CoordSet({'x': coord2, 'y': coord3, 'z': coord0})
+    coordsc1 = CoordSet({
+            'x': coord2,
+            'y': coord3,
+            'z': coord0
+            })
     assert coordsc1.names == ['x', 'y', 'z']
 
     coordsd = CoordSet(coord3, x=coord2, y=coord3, z=coord0)  # conflict (keyw replace args)
@@ -79,7 +83,7 @@ def test_coordset_init(coord0, coord1, coord2):
 
     info_(str(coord0))
     info_(repr(coord0))
-    assert repr(coord0) == "Coord: [float64] cm^-1"
+    assert repr(coord0) == 'Coord: [float64] cm^-1 (size: 10)'
 
     coords = CoordSet(coord0, coord0.copy())
     info_(str(coords))
@@ -199,7 +203,7 @@ def test_coordset_get(coord0, coord1, coord2):
     coords = CoordSet(coord2, [coord0, coord0.copy()], coord1)
 
     coord = coords['temperature']
-    assert str(coord) == 'Coord: [float64] K'
+    assert str(coord) == 'Coord: [float64] K (size: 3)'
     assert coord.name == 'z'
 
     coord = coords['wavenumber']
@@ -273,14 +277,6 @@ def test_coordset_sizes(coord0, coord1):
     assert coord0.size != coord0[:7].size
     with pytest.raises(ValueError):
         coords = CoordSet([coord0, coord0[:7]], coord1)
-
-
-def test_coordset_to_index(coord0, coord1):
-    coordsa = CoordSet(coord0)
-    coordsa.to_index()
-
-    coordsb = CoordSet(coord0, coord1)
-    coordsb.to_index()
 
 
 def test_coordset_update(coord0, coord1):

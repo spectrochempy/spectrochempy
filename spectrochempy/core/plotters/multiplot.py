@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
@@ -18,13 +18,16 @@ __dataset_methods__ = []
 
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.tight_layout import (get_renderer, get_tight_layout_figure,
-                                     get_subplotspec_list)
+from matplotlib.tight_layout import (
+    get_renderer, get_tight_layout_figure,
+    get_subplotspec_list,
+    )
 import matplotlib as mpl
 
-from spectrochempy.core.dataset.ndplot import _set_figure_style
 from spectrochempy.utils import is_sequence
-# from spectrochempy.core import general_preferences, project_preferences
+
+
+# from spectrochempy.core import preferences, project_preferences
 
 
 # .............................................................................
@@ -252,10 +255,6 @@ def multiplot(datasets=[], labels=[], nrow=1, ncol=1,
 
     # create the subplots and plot the ndarrays
     # ------------------------------------------------------------------------------------------------------------------
-
-    # first make style
-    _set_figure_style(**kwargs)
-
     mpl.rcParams['figure.autolayout'] = False
 
     figsize = kwargs.pop('figsize', None)
@@ -325,10 +324,7 @@ def multiplot(datasets=[], labels=[], nrow=1, ncol=1,
             _sharey = None
             _sharez = None
             # on the type of the plot and
-            if ((irow == icol and irow == 0) or  # axe11
-                    (sharex == 'col' and irow == 0) or  # axe1*
-                    (sharey == 'row' and icol == 0)):  # axe*1
-
+            if ((irow == icol and irow == 0) or (sharex == 'col' and irow == 0) or (sharey == 'row' and icol == 0)):
                 ax = fig.add_subplot(nrow, ncol, irow * ncol + icol + 1)
 
             else:
@@ -383,7 +379,7 @@ def multiplot(datasets=[], labels=[], nrow=1, ncol=1,
                          data_transposed=transposed,
                          **kwargs)
 
-            ax.set_title(label, fontsize=12)
+            ax.set_title(label, fontsize=8)
             if sharex and irow < nrow - 1:
                 ax.xaxis.label.set_visible(False)
             if sharey and icol > 0:

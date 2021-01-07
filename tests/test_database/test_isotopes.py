@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-from spectrochempy import Isotopes
-import numpy as np
+from spectrochempy import Isotopes, ur
 
 
 def test_isotopes():
@@ -21,13 +20,6 @@ def test_isotopes():
     assert (isotope.spin == 5 / 2)
     assert (isotope.symbol == 'Al')
 
-    isotope = Isotopes('129Xe')
-    print((isotope.name))
-    print((isotope.spin))
-    print((isotope.symbol))
-    isotope.nucleus = '27Al'  # we change the isotope`inplace`
-    print((isotope.name))
-    print((isotope.spin))
-    print((isotope.symbol))
-    print((isotope.H_2.Q))
-    print((isotope.H_2.gamma.to('MHz/T') / 2. / np.pi))
+    assert isinstance(isotope.H_2, Isotopes)
+    assert round(isotope.H_2.Q, 2) == 2.86 * ur.millibarn
+    assert round(isotope.H_1.gamma * 9.4 * ur.tesla, 0) == 400 * ur.MHz

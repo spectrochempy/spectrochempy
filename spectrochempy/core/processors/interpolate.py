@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
@@ -13,6 +13,7 @@ This module defines functions related to interpolations
 __all__ = ['interpolate']
 
 __dataset_methods__ = __all__
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports

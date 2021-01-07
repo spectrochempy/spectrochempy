@@ -1,163 +1,196 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-"""This module to extend NDDataset with the import methods method.
+"""This module extend NDDataset with the import method for OPUS generated data files.
 
 """
 __all__ = ['read_opus']
-
 __dataset_methods__ = __all__
 
-# ----------------------------------------------------------------------------------------------------------------------
-# standard imports
-# ----------------------------------------------------------------------------------------------------------------------
-
-
-from brukeropusreader import read_file
-from warnings import warn
+import io
+import numpy as np
 from datetime import datetime, timezone, timedelta
 from numpy import linspace
 
-# ----------------------------------------------------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------------------------------------------------
-# ----------------------------------------------------------------------------------------------------------------------
-# local imports
-# ----------------------------------------------------------------------------------------------------------------------
-from spectrochempy.core import debug_
-from spectrochempy.core.dataset.nddataset import NDDataset
+from brukeropusreader.opus_parser import parse_data, parse_meta
 from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.utils import readfilename
+from spectrochempy.core.readers.importer import docstrings, Importer, importermethod
+from spectrochempy.core import debug_
 
 
 # ======================================================================================================================
 # Public functions
 # ======================================================================================================================
 
-# .............................................................................
-def read_opus(dataset=None, **kwargs):
-    """Open Bruker Opus file(s) and group them in a single dataset. Only the spectrum is
+# ......................................................................................................................
+@docstrings.dedent
+def read_opus(*args, **kwargs):
+    """
+    Open Bruker OPUS file(s) and eventually group them in a single dataset. Only Absorbance spectra are
     extracted ("AB" field). Returns an error if dimensions are incompatibles.
 
     Parameters
-    ----------
-    filename : `None`, `str`, or list of `str`
-        Filename of the file(s) to load. If `None` : opens a dialog box to select
-         files. If `str` : a single filename. It list of str :
-        a list of filenames.
-    directory : str, optional, default="".
-        From where to read the specified filename. If not specified, read in
-        the defaults datadir.
+    -----------
+    %(read_method.parameters.no_origin|csv_delimiter)s
+
 
     Returns
-    -------
-    dataset : |NDDataset|
-        A dataset corresponding to the (set of) bruker file(s).
+    --------
+    out : NDDataset| or list of |NDDataset|
+        The dataset or a list of dataset corresponding to a (set of) OPUS file(s).
 
     Examples
-    --------
-    >>> A = NDDataset.read_opus('irdata\\spectrum.0001')
-    >>> print(A)
-    NDDataset: [float64] a.u. (shape: (y:1, x:2568))
+    ---------
 
+    >>> import spectrochempy as scp
+
+    Reading a single OPUS file  (providing a windows type filename relative to the default ``Datadir``)
+
+    >>> scp.read_opus('irdata\\\\OPUS\\\\test.0000')
+    NDDataset: [float32] a.u. (shape: (y:1, x:2567))
+
+    Reading a single OPUS file  (providing a unix/python type filename relative to the default ``Datadir``)
+    Note that here read_opus is called as a classmethod of the NDDataset class
+
+    >>> scp.NDDataset.read_opus('irdata/OPUS/test.0000')
+    NDDataset: [float32] a.u. (shape: (y:1, x:2567))
+
+    Single file specified with pathlib.Path object
+
+    >>> from pathlib import Path
+    >>> folder = Path('irdata/OPUS')
+    >>> p = folder / 'test.0000'
+    >>> read_opus(p)
+    NDDataset: [float32] a.u. (shape: (y:1, x:2567))
+
+    Multiple files not merged (return a list of datasets). Note that a directory is specified
+
+    >>> l = scp.read_opus('test.0000', 'test.0001', 'test.0002', directory='irdata/OPUS')
+    >>> len(l)
+    3
+    >>> l[0]
+    NDDataset: [float32] a.u. (shape: (y:1, x:2567))
+
+    Multiple files merged as the `merge` keyword is set to true
+
+    >>> scp.read_opus('test.0000', 'test.0001', 'test.0002', directory='irdata/OPUS', merge=True)
+    NDDataset: [float32] a.u. (shape: (y:3, x:2567))
+
+    Multiple files to merge : they are passed as a list instead of using the keyword `merge`
+
+    >>> scp.read_opus(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS')
+    NDDataset: [float32] a.u. (shape: (y:3, x:2567))
+
+    Multiple files not merged : they are passed as a list but `merge` is set to false
+
+    >>> l = scp.read_opus(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS', merge=False)
+    >>> len(l)
+    3
+
+    Read without a filename. This has the effect of opening a dialog for file(s) selection
+
+    >>> nd = scp.read_opus()
+
+    Read in a directory (assume that only OPUS files are present in the directory
+    (else we must use the generic `read` function instead)
+
+    >>> l = scp.read_opus(directory='irdata/OPUS')
+    >>> len(l)
+    4
+
+    Again we can use merge to stack all 4 spectra if thet have compatible dimensions.
+
+    >>> scp.read_opus(directory='irdata/OPUS', merge=True)
+    NDDataset: [float32] a.u. (shape: (y:4, x:2567))
+
+    See Also
+    --------
+    read : Generic read method
+    read_topspin, read_omnic, read_spg, read_spa, read_srs, read_csv, read_matlab, read_zip
 
     """
 
-    debug_("reading bruker opus files")
+    kwargs['filetypes'] = ['Bruker OPUS files (*.[0-9]*)']
+    kwargs['protocol'] = ['opus']
+    importer = Importer()
+    return importer(*args, **kwargs)
 
-    # filename will be given by a keyword parameter except if the first parameters is already
-    # the filename
-    filename = kwargs.get('filename', None)
 
-    # check if the first parameter is a dataset because we allow not to pass it
-    if not isinstance(dataset, NDDataset):
-        # probably did not specify a dataset
-        # so the first parameters must be the filename
-        if isinstance(dataset, (str, list)) and dataset != '':
-            filename = dataset
+# ======================================================================================================================
+# Private Functions
+# ======================================================================================================================
 
-    # check if directory was specified
-    directory = kwargs.get("directory", None)
-    sortbydate = kwargs.get("sortbydate", True)
+# ......................................................................................................................
+@importermethod
+def _read_opus(*args, **kwargs):
+    debug_('Bruker OPUS import')
 
-    # returns a list of files to read
-    files = readfilename(filename,
-                         directory=directory,
-                         filetypes=['Bruker files (*.*)',
-                                    'all files (*)'],
-                         dictionary=False)
-    # todo: see how to use regular expression in Qt filters
+    dataset, filename = args
+    content = kwargs.get('content', None)
 
-    if not files:
-        # there is no files, return nothing
-        return None
+    if content:
+        fid = io.BytesIO(content)
+    else:
+        fid = open(filename, 'rb')
 
-    xaxis = None
-    intensities = []
-    names = []
-    acquisitiondates = []
-    timestamps = []
-    for file in files:
-        opus_data = read_file(file)
-        try:
-            opus_data["AB"]
-        except KeyError:  # not an absorbance spectrum
-            warn("opus file {} could not be read".format(file))
-            continue
+    opus_data = _read_data(fid)
 
+    # data
+    try:
         npt = opus_data['AB Data Parameter']['NPT']
-        fxv = opus_data['AB Data Parameter']['FXV']
-        lxv = opus_data['AB Data Parameter']['LXV']
-        xdata = linspace(fxv, lxv, npt)
+        data = opus_data["AB"][:npt]
+        dataset.data = np.array(data[np.newaxis], dtype='float32')
+    except KeyError:
+        raise IOError(f"{filename} is not an Absorbance spectrum. It cannot be read with the `read_opus` import method")
 
-        if not xaxis:
-            xaxis = Coord(xdata, title='Wavenumbers', units='cm^-1')
+    # xaxis
+    fxv = opus_data['AB Data Parameter']['FXV']
+    lxv = opus_data['AB Data Parameter']['LXV']
+    xdata = linspace(fxv, lxv, npt)
+    xaxis = Coord(xdata, title='Wavenumbers', units='cm^-1')
 
-        elif (xdata != xaxis.data).any():
-            raise ValueError("spectra have incompatible dimensions (xaxis)")
-
-        intensities.append(opus_data["AB"][:npt])
-        names.append(opus_data["Sample"]['SNM'])
-        acqdate = opus_data["AB Data Parameter"]["DAT"]
-        acqtime = opus_data["AB Data Parameter"]["TIM"]
-        GMT_offset_hour = float(acqtime.split('GMT')[1].split(')')[0])
-        date_time = datetime.strptime(acqdate + '_' + acqtime.split()[0],
-                                      '%d/%m/%Y_%H:%M:%S.%f')
-        UTC_date_time = date_time - timedelta(hours=GMT_offset_hour)
-        UTC_date_time = UTC_date_time.replace(tzinfo=timezone.utc)
-        # Transform to timestamp for storage in the Coord object
-        # use datetime.fromtimestamp(d, timezone.utc)) to transform back to datetime
-        timestamp = UTC_date_time.timestamp()
-        acquisitiondates.append(UTC_date_time)
-        timestamps.append(timestamp)
-
-    # return if none of the files could be read:
-    if not xaxis:
-        return
-
-    yaxis = Coord(timestamps,
+    # yaxis
+    name = opus_data["Sample"]['SNM']
+    acqdate = opus_data["AB Data Parameter"]["DAT"]
+    acqtime = opus_data["AB Data Parameter"]["TIM"]
+    gmt_offset_hour = float(acqtime.split('GMT')[1].split(')')[0])
+    date_time = datetime.strptime(acqdate + '_' + acqtime.split()[0], '%d/%m/%Y_%H:%M:%S.%f')
+    utc_dt = date_time - timedelta(hours=gmt_offset_hour)
+    utc_dt = utc_dt.replace(tzinfo=timezone.utc)
+    timestamp = utc_dt.timestamp()
+    yaxis = Coord([timestamp],
                   title='Acquisition timestamp (GMT)',
                   units='s',
-                  labels=(acquisitiondates, names))
+                  labels=([utc_dt], [name]))
 
-    dataset = NDDataset(intensities)
-    dataset.set_coords(y=yaxis, x=xaxis)
+    # set dataset's Coordset
+    dataset.set_coordset(y=yaxis, x=xaxis)
     dataset.units = 'absorbance'
     dataset.title = 'Absorbance'
 
-    # Set origin, description and history
+    # Set name, origin, description and history
+    dataset.name = filename.name
     dataset.origin = "opus"
     dataset.description = 'Dataset from opus files. \n'
-
-    if sortbydate:
-        dataset.sort(dim='y', inplace=True)
-
-    dataset.history = str(datetime.now()) + ': import from opus files \n'
-    dataset._date = datetime.now()
+    dataset.history = str(datetime.now(timezone.utc)) + ': import from opus files \n'
+    dataset._date = datetime.now(timezone.utc)
     dataset._modified = dataset.date
 
     return dataset
+
+
+# ......................................................................................................................
+def _read_data(fid):
+    data = fid.read()
+    meta_data = parse_meta(data)
+    opus_data = parse_data(data, meta_data)
+    return opus_data
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+if __name__ == '__main__':
+    pass

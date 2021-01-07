@@ -173,22 +173,26 @@ def fit_to_concentrations(C, externalConc, external_to_C_idx, reactive_phase, pa
     method = kwargs.get("method", "Nelder-Mead")
     bounds = kwargs.get("bounds", None)
     tol = kwargs.get("tol", None)
-    options = kwargs.get("options", {'disp': True})
+    options = kwargs.get("options", {
+            'disp': True
+            })
     if options['disp']:
         print('Optimization of the parameters.')
         print('         Initial parameters: {}'.format(guess_param))
         print('         Initial function value: {}'.format(objective(guess_param, param_to_optimize, C, externalConc,
                                                                      external_to_C_idx, reactive_phase)))
-    tic = datetime.datetime.now()
+    tic = datetime.datetime.now(datetime.timezone.utc)
     res = minimize(objective, guess_param, args=(param_to_optimize, C, externalConc, external_to_C_idx, reactive_phase),
                    method=method, bounds=bounds, tol=tol, options=options)
-    toc = datetime.datetime.now()
+    toc = datetime.datetime.now(datetime.timezone.utc)
     guess_param = res.x
     if options['disp']:
         print('         Optimization time: {}'.format((toc - tic)))
         print('         Final parameters: {}'.format(guess_param))
     Ckin = concentrations_vs_time(reactive_phase, C.y, returnNDDataset=True)
     newargs = (reactive_phase, param_to_optimize, guess_param)
-    return {'concentrations': Ckin,
+    return {
+            'concentrations': Ckin,
             'results': res,
-            'new_args': newargs}
+            'new_args': newargs
+            }

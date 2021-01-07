@@ -1,52 +1,38 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-"""This module extend NDDataset with some import methods.
+"""
+This module provides methods for reading data in a directory
 
 """
 __all__ = ['read_dir', 'read_carroucell']
-
 __dataset_methods__ = __all__
-
-# ----------------------------------------------------------------------------------------------------------------------
-# standard imports
-# ----------------------------------------------------------------------------------------------------------------------
 
 import os
 import warnings
 import datetime
+
 import scipy.interpolate
-
-# ----------------------------------------------------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------------------------------------------------
-
 import numpy as np
-
-# ----------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------
-
 import xlrd
-
-# ----------------------------------------------------------------------------
-# ----------------------------------------------------------------------------------------------------------------------
-# local imports
-# ----------------------------------------------------------------------------------------------------------------------
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.utils import readfilename, readdirname
+from spectrochempy.utils import get_filename, readdirname
 from spectrochempy.core import info_, print_
+from spectrochempy.core.readers.importer import docstrings, importermethod, Importer
 
 
-# function for reading data in a directory
-# ----------------------------------------------------------------------------------------------------------------------
-def read_dir(dataset=None, directory=None, **kwargs):
+# ======================================================================================================================
+# Public functions
+# ======================================================================================================================
+
+@docstrings.dedent
+def read_dir(*args, **kwargs):
     """
     Open readable files in a directory and store data/metadata in a dataset or
     a list of datasets according to the following rules :
@@ -63,118 +49,38 @@ def read_dir(dataset=None, directory=None, **kwargs):
     native format for spectrochempy : *.scp).
 
     Parameters
-    ----------
-    dataset : `NDDataset`
-        The dataset to store the data and metadata.
-        If None, a NDDataset is created
-    directory : str, optional.
-        If not specified, opens a dialog box.
-    parent_dir : str, optional.
-        The parent directory where to look at
-    sortbydate : bool, optional,  default:True.
-        Sort spectra by acquisition date
-    recursive : bool, optional,  default=False.
-        Read also subfolders
+    -----------
+    %(read_method.parameters.no_origin|csv_delimiter)s
+
+    Other Parameters
+    -----------------
+    %(read_method.other_parameters)s
 
     Returns
     --------
-    nddataset : |NDDataset| or list of |NDDataset|
+    out : |NDDataset| or list of |NDDataset|
+
+    See Also
+    --------
+    read : Generic read method
+    read_omnic, read_spg, read_spa, read_srs, read_opus, read_topspin, read_csv, read_matlab, read_zip
 
     Examples
     --------
     >>> A = NDDataset.read_dir('irdata')
-    >>> print(A)
-    [NDDataset: [[ ...
+    >>> A
+    [NDDataset: [...
 
     >>> B = NDDataset.read_dir()
 
     """
-
-    # debug_("starting reading in a folder")
-
-    # check if the first parameter is a dataset
-    # because we allow not to pass it
-    if not isinstance(dataset, NDDataset):
-        # probably did not specify a dataset
-        # so the first parameter must be the directory
-        if isinstance(dataset, str) and dataset != '':
-            directory = dataset
-
-    parent_dir = kwargs.get('parent_dir', None)
-    directory = readdirname(directory, parent_dir=parent_dir)
-
-    if not directory:
-        # probably cancel has been chosen in the open dialog
-        info_("No directory was selected.")
-        return
-
-    datasets = []
-
-    recursive = kwargs.get('recursive', False)
-    if recursive:
-        for i, root in enumerate(os.walk(directory)):
-            if i == 0:
-                pass  # debug_("reading root directory")
-            else:
-                pass  # debug_("reading subdirectory")
-            datasets += _read_single_dir(root[0], **kwargs)
-    else:
-        # debug_("reading root directory only")
-        datasets += _read_single_dir(directory, **kwargs)
-
-    if len(datasets) == 1:
-        # debug_("finished read_dir()")
-        return datasets[0]  # a single dataset is returned
-
-    # debug_("finished read_dir()")
-    return datasets  # several datasets returned
+    kwargs['listdir'] = True
+    importer = Importer()
+    return importer(*args, **kwargs)
 
 
-def _read_single_dir(directory, **kwargs):
-    # lists all filenames of readable files in directory:
-    filenames = [os.path.join(directory, f) for f in os.listdir(directory)
-                 if os.path.isfile(os.path.join(directory, f))]
-
-    datasets = []
-
-    if not filenames:
-        # debug_("empty directory")
-        return datasets
-
-    files = readfilename(filenames, directory=directory)
-
-    for extension in files.keys():
-        if extension == '.spg':
-            for filename in files[extension]:
-                datasets.append(NDDataset.read_omnic(filename, **kwargs))
-
-        elif extension == '.spa':
-            datasets.append(NDDataset.read_omnic(files[extension], **kwargs))
-
-        elif extension == '.csv':
-            datasets.append(NDDataset.read_csv(filename=files[extension], **kwargs))
-
-        elif extension == '.scp':
-            datasets.append(NDDataset.read(files[extension], protocol='scp'))
-
-        elif extension == '.mat':
-            for filename in files[extension]:
-                matlist = NDDataset.read_matlab(filename)
-                for mat in matlist:
-                    datasets.append(mat)
-
-        elif extension == 'opus':
-            datasets.append(NDDataset.read_opus(files[extension], **kwargs))
-
-        # else the files are not (yet) readable
-        else:
-            pass
-    # TODO: extend to other implemented readers (NMR !)
-    return datasets
-
-
-# function for reading data in a directory
-# --------------------------------------
+# TODO: make an importer function, when a test directory will be provided.
+# ......................................................................................................................
 def read_carroucell(dataset=None, directory=None, **kwargs):
     """
     Open .spa files in a directory after a carroucell experiment.
@@ -198,18 +104,14 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
         If None, a NDDataset is created
     directory : str, optional.
         If not specified, opens a dialog box.
-    parent_dir : str, optional.
-        The parent directory where to look at
     spectra : arraylike of 2 int (min, max), optional, default=None
         The first and last spectrum to be loaded as determined by their number.
          If None all spectra are loaded
     discardbg : bool, optional, default=True
         If True : do not load background (sample #9)
-
     delta_clocks : int, optional, default=0
         Difference in seconds between the clocks used for spectra and temperature acquisition.
         Defined as t(thermocouple clock) - t(spectrometer clock).
-
 
     Returns
     --------
@@ -229,8 +131,7 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
         if isinstance(dataset, str) and dataset != '':
             directory = dataset
 
-    parent_dir = kwargs.get('parent_dir', None)
-    directory = readdirname(directory, parent_dir=parent_dir)
+    directory = readdirname(directory)
 
     if not directory:
         # probably cancel has been chosen in the open dialog
@@ -246,8 +147,7 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
 
     # get the sorted list of spa files in the directory
     spafiles = sorted([f for f in os.listdir(directory)
-                       if (os.path.isfile(os.path.join(directory, f))
-                           and f[-4:].lower() == '.spa')])
+                       if (os.path.isfile(os.path.join(directory, f)) and f[-4:].lower() == '.spa')])
 
     # discard BKG files
     if discardbg:
@@ -257,13 +157,10 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
     if spectra is not None:
         [min, max] = spectra
         if discardbg:
-            spafiles = sorted([f for f in spafiles if min <= int(f.split('_')[2][:-4]) <= max
-                               and 'BCKG' not in f])
+            spafiles = sorted([f for f in spafiles if min <= int(f.split('_')[2][:-4]) <= max and 'BCKG' not in f])
         if not discardbg:
-            spafilespec = sorted([f for f in spafiles if min <= int(f.split('_')[2][:-4]) <= max
-                                  and 'BCKG' not in f])
-            spafileback = sorted([f for f in spafiles if min <= int(f.split('_')[2][:-6]) <= max
-                                  and 'BCKG' in f])
+            spafilespec = sorted([f for f in spafiles if min <= int(f.split('_')[2][:-4]) <= max and 'BCKG' not in f])
+            spafileback = sorted([f for f in spafiles if min <= int(f.split('_')[2][:-6]) <= max and 'BCKG' in f])
             spafiles = spafilespec + spafileback
 
     curfilelist = [spafiles[0]]
@@ -304,7 +201,7 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
             for i in range(9, sheet.nrows):
                 try:
                     time = datetime.datetime.strptime(sheet.cell(i, 0).value, '%d/%m/%y %H:%M:%S').replace(
-                        tzinfo=datetime.timezone.utc)
+                            tzinfo=datetime.timezone.utc)
                     if ti <= time <= tf:
                         t.append(time)
                         T.append(sheet.cell(i, 4).value)
@@ -335,6 +232,26 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
     # debug_("finished read_dir()")
     # several datasets returned, sorted by sample #
     return sorted(datasets, key=lambda ds: int(ds.name.split('_')[0]))
+
+
+# ======================================================================================================================
+# Private functions
+# ======================================================================================================================
+
+@importermethod
+def _read_dir(*args, **kwargs):
+    _, directory = args
+    directory = readdirname(directory)
+    files = get_filename(directory, **kwargs)
+    datasets = []
+    for key in files.keys():
+        if key:
+            importer = Importer()
+            nd = importer(files[key], **kwargs)
+            if not isinstance(nd, list):
+                nd = [nd]
+            datasets.extend(nd)
+    return datasets
 
 
 if __name__ == '__main__':

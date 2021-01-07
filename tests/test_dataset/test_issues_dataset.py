@@ -1,5 +1,5 @@
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
@@ -36,10 +36,10 @@ def test_fix_issue_20():
     assert X.__str__() == 'NDDataset: [float32] a.u. (shape: (y:19, x:3112))'
 
     # slicing a NDDataset with an integer is OK for the coord:
-    assert X[:, 100].x.__str__() == 'Coord: [float64] cm^-1'
+    assert X[:, 100].x.__str__() == 'Coord: [float64] cm^-1 (size: 1)'
 
     # The explicit slicing of the coord is OK !
-    assert X.x[[100, 120]].__str__() == 'Coord: [float64] cm^-1'
+    assert X.x[[100, 120]].__str__() == 'Coord: [float64] cm^-1 (size: 2)'
 
     # slicing the NDDataset with an integer array is also OK (fixed #20)
     assert X[:, [100, 120]].x.__str__() == X.x[[100, 120]].__str__()

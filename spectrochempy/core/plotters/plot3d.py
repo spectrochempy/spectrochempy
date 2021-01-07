@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
@@ -13,6 +13,7 @@ This module should be able to handle a large set of plot types.
 __all__ = ['plot_3D']
 
 __dataset_methods__ = []
+
 
 # ----------------------------------------------------------------------------
 # local imports
@@ -67,7 +68,7 @@ def plot_3D(dataset, **kwargs):
     # # get all plot preferences
     # # ------------------------
     #
-    # prefs = dataset.plotmeta
+    # prefs = dataset.preferences
     # if not prefs.style:
     #     # not yet set, initialize with default project preferences
     #     prefs.update(project_preferences.to_dict())
@@ -81,12 +82,12 @@ def plot_3D(dataset, **kwargs):
     # if widget is not None:
     #     if hasattr(widget, 'implements') and widget.implements('PyQtGraphWidget'):
     #         # let's go to a particular treament for the pyqtgraph plots
-    #         kwargs['usempl'] = usempl = False
+    #         kwargs['use_mpl'] = use_mpl = False
     #         # we try to have a commmon interface for both plot library
     #         kwargs['ax'] = ax = widget  # return qt_plot_1D(dataset, **kwargs)
     #     else:
     #         # this must be a matplotlibwidget
-    #         kwargs['usempl'] = usempl = True
+    #         kwargs['use_mpl'] = use_mpl = True
     #         fig = widget.fig
     #         kwargs['ax'] = ax = fig.gca()
     #

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
@@ -83,7 +83,7 @@ def _apodize(dataset, method, apod=None, **kwargs):
         new.swapaxes(axis, -1, inplace=True)  # must be done in  place
         swaped = True
 
-    x = new.coords[dim]
+    x = new.coordset[dim]
     if not x.unitless and not x.dimensionless and x.units.dimensionality != '[time]':
         error_('apply only to dimensions with [time] dimensionality\n'
                'apodization processing was thus cancelled')
@@ -238,7 +238,8 @@ def em(dataset, lb=1, shifted=0, **kwargs):
 
     # Should we return the apodization array?
     if kwargs.pop('retfunc', False):
-        apodcurve = type(out)(apodcurve, coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
+        apodcurve = type(out)(apodcurve, coordset=[out.coordset(out.dims[-1])])  # make a dataset from the ndarray
+        # apodcurve
         return out, apodcurve
 
     return out
@@ -338,10 +339,12 @@ def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
     out, apodcurve = _apodize(dataset, func, (gb, lb, shifted), **kwargs)
 
     if kwargs.pop('retfunc', False):
-        apodcurve = type(out)(apodcurve, coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
+        apodcurve = type(out)(apodcurve, coordset=[out.coordset(out.dims[-1])])  # make a dataset from the ndarray
+        # apodcurve
         return out, apodcurve
 
     return out
+
 
 # ======================================================================================================================
 @docstrings.dedent
@@ -414,7 +417,8 @@ def sp(dataset, ssb=1, pow=1, **kwargs):
     out, apodcurve = _apodize(dataset, func, (ssb, pow), **kwargs)
 
     if kwargs.pop('retfunc', False):
-        apodcurve = type(out)(apodcurve, coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
+        apodcurve = type(out)(apodcurve, coordset=[out.coordset(out.dims[-1])])  # make a dataset from the ndarray
+        # apodcurve
         return out, apodcurve
     return out
 
@@ -456,6 +460,7 @@ def qsin(dataset, ssb=1, **kwargs):
 
     """
     return sp(dataset, ssb=ssb, pow=2, **kwargs)
+
 
 # ================================================================================================
 
@@ -503,10 +508,12 @@ def hamming(dataset, **kwargs):
 
     # Should we return the apodization array?
     if kwargs.pop('retfunc', False):
-        apodcurve = type(out)(apodcurve, coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
+        apodcurve = type(out)(apodcurve, coordset=[out.coordset(out.dims[-1])])  # make a dataset from the ndarray
+        # apodcurve
         return out, apodcurve
 
     return out
+
 
 @docstrings.dedent
 def triang(dataset, **kwargs):
@@ -548,10 +555,12 @@ def triang(dataset, **kwargs):
 
     # Should we return the apodization array?
     if kwargs.pop('retfunc', False):
-        apodcurve = type(out)(apodcurve, coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
+        apodcurve = type(out)(apodcurve, coordset=[out.coordset(out.dims[-1])])  # make a dataset from the ndarray
+        # apodcurve
         return out, apodcurve
 
     return out
+
 
 @docstrings.dedent
 def bartlett(dataset, **kwargs):
@@ -591,10 +600,12 @@ def bartlett(dataset, **kwargs):
 
     # Should we return the apodization array?
     if kwargs.pop('retfunc', False):
-        apodcurve = type(out)(apodcurve, coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
+        apodcurve = type(out)(apodcurve, coordset=[out.coordset(out.dims[-1])])  # make a dataset from the ndarray
+        # apodcurve
         return out, apodcurve
 
     return out
+
 
 @docstrings.dedent
 def blackmanharris(dataset, **kwargs):
@@ -635,10 +646,11 @@ def blackmanharris(dataset, **kwargs):
     # Should we return the apodization array?
     if kwargs.pop('retfunc', False):
         apodcurve = type(out)(apodcurve,
-                              coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
+                              coordset=[out.coordset(out.dims[-1])])  # make a dataset from the ndarray apodcurve
         return out, apodcurve
 
     return out
+
 
 @docstrings.dedent
 def mertz(dataset, zpd, **kwargs):
@@ -684,7 +696,7 @@ def mertz(dataset, zpd, **kwargs):
     # Should we return the apodization array?
     if kwargs.pop('retfunc', False):
         apodcurve = type(out)(apodcurve,
-                              coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
+                              coordset=[out.coordset(out.dims[-1])])  # make a dataset from the ndarray apodcurve
         return out, apodcurve
 
     return out

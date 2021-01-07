@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
@@ -28,7 +28,7 @@ def _make_spectra_matrix(pos, width, ampl):
 
     st = np.vstack(s)
     st = NDDataset(data=st, units='absorbance', title='absorbance',
-                   coords=[range(len(st)), x])
+                   coordset=[range(len(st)), x])
 
     return st
 
@@ -44,7 +44,7 @@ def _make_concentrations_matrix(*profiles):
     ct = np.vstack(c)
     ct = ct - ct.min()
     ct = ct / np.sum(ct, axis=0)
-    ct = NDDataset(data=ct, title='concentration', coords=[range(len(ct)), t])
+    ct = NDDataset(data=ct, title='concentration', coordset=[range(len(ct)), t])
 
     return ct
 
@@ -77,10 +77,18 @@ def generate_fake():
     POS = (6000., 4000., 2000., 2500.)
     WIDTH = (6000., 1000., 600., 800.)
     AMPL = (100., 100., 20., 50.)
-    def C1(t): return t * .05 + .01  # linear evolution of the baseline
-    def C2(t): return np.exp(-t / .5) * .3 + .1
-    def C3(t): return np.exp(-t / 3.) * .7
-    def C4(t): return 1. - C2(t) - C3(t)
+
+    def C1(t):
+        return t * .05 + .01  # linear evolution of the baseline
+
+    def C2(t):
+        return np.exp(-t / .5) * .3 + .1
+
+    def C3(t):
+        return np.exp(-t / 3.) * .7
+
+    def C4(t):
+        return 1. - C2(t) - C3(t)
 
     spec = _make_spectra_matrix(POS, WIDTH, AMPL)
     spec.plot_stack(colorbar=False)

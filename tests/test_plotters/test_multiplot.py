@@ -1,22 +1,22 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
 import os
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core import general_preferences, show
+from spectrochempy.core import preferences, show
 from spectrochempy.core.plotters.multiplot import multiplot, multiplot_map, multiplot_stack
 
-prefs = general_preferences
+prefs = preferences
 
 
 def test_multiplot():
     dataset = NDDataset.read_omnic(
-        os.path.join(prefs.datadir, 'irdata', 'nh4y-activation.spg'))[:, 0:20]
+            os.path.join(prefs.datadir, 'irdata', 'nh4y-activation.spg'))[:, 0:20]
 
     datasets = [dataset, dataset * 1.1, dataset * 1.2, dataset * 1.3]
     labels = ['sample {}'.format(label) for label in

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 """
@@ -125,8 +125,7 @@ class NDComplexArray(NDArray):
         if self._data is None:
             return False
 
-        return (self._data.dtype in TYPE_COMPLEX) or (
-                self._data.dtype == typequaternion)
+        return (self._data.dtype in TYPE_COMPLEX) or (self._data.dtype == typequaternion)
 
     # ..................................................................................................................
     @property
@@ -156,11 +155,11 @@ class NDComplexArray(NDArray):
         """
         try:
             return super().is_masked
-        except Exception:
+        except Exception as e:
             if self._data.dtype == typequaternion:
                 return np.any(self._mask['I'])
             else:
-                raise Exception()
+                raise e
 
     # ..................................................................................................................
     @property
@@ -200,7 +199,7 @@ class NDComplexArray(NDArray):
         if not new.has_complex_dims:
             return None
 
-        ma = new._masked_data
+        ma = new.masked_data
         if ma.dtype in TYPE_FLOAT:
             new._data = np.zeros_like(ma.data)
         elif ma.dtype in TYPE_COMPLEX:
@@ -210,7 +209,7 @@ class NDComplexArray(NDArray):
             # get the imaginary part (vector part)
             # q = a + bi + cj + dk  ->   qi = bi+cj+dk
             as_float_array(ma)[..., 0] = 0  # keep only the imaginary part
-            new._data = ma.data
+            new._data = ma  # .data
         else:
             raise TypeError('dtype %s not recognized' % str(ma.dtype))
 
@@ -266,6 +265,21 @@ class NDComplexArray(NDArray):
         if not self.is_quaternion:
             raise TypeError('Not a quaternion\'s array')
         return self.part('II')
+
+    # ..................................................................................................................
+    @property
+    def limits(self):
+        """list - range of the data"""
+        if self.data is None:
+            return None
+
+        if self.data.dtype in TYPE_COMPLEX:
+            return [self.data.real.min(), self.data.imag.max()]
+        elif self.data.dtype == np.quaternion:
+            data = as_float_array(self.data)[..., 0]
+            return [data.min(), data.max()]
+        else:
+            return [self.data.min(), self.data.max()]
 
     # ------------------------------------------------------------------------------------------------------------------
     # Public methods
@@ -332,7 +346,7 @@ class NDComplexArray(NDArray):
 
         new = self.copy()
 
-        ma = self._masked_data
+        ma = self.masked_data
 
         if select == 'REAL':
             select = 'R' * self.ndim
@@ -508,8 +522,7 @@ class NDComplexArray(NDArray):
         return out
 
     # ..................................................................................................................
-    def _str_value(self, sep='\n', ufmt=' {:~K}',
-                   header="       values: ... \n"):
+    def _str_value(self, sep='\n', ufmt=' {:~K}', header="       values: ... \n"):
         prefix = ['']
         if self.is_empty:
             return header + '{}'.format(textwrap.indent('empty', ' ' * 9))
@@ -530,17 +543,14 @@ class NDComplexArray(NDArray):
                 dtype = self.dtype
                 mask_string = f'--{dtype}'
                 ds = insert_masked_print(ds, mask_string=mask_string)
-            body = np.array2string(
-                ds, separator=' ',
-                prefix=pref)
+            body = np.array2string(ds, separator=' ', prefix=pref)
             body = body.replace('\n', sep)
             text = ''.join([pref, body, units])
             text += sep
             return text
 
         text = ''
-        if 'I' not in ''.join(
-                prefix):  # case of pure real data (not hypercomplex)
+        if 'I' not in ''.join(prefix):  # case of pure real data (not hypercomplex)
             if self._data is not None:
                 data = self.umasked_data
                 if isinstance(data, Quantity):
@@ -596,7 +606,7 @@ class NDComplexArray(NDArray):
         if data.dtype not in TYPE_COMPLEX:
             if data.shape[1] % 2 != 0:
                 raise ValueError(
-                    "An array of real data to be transformed to quaternion must have even number of columns!.")
+                        "An array of real data to be transformed to quaternion must have even number of columns!.")
             # convert to double precision complex
             data = self._make_complex(data)
 

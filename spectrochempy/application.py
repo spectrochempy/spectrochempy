@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
@@ -18,7 +18,6 @@ __all__ = []
 # ----------------------------------------------------------------------------------------------------------------------
 
 import os
-import glob
 import sys
 import logging
 import subprocess
@@ -26,29 +25,18 @@ import datetime
 import warnings
 import pprint
 import json
-import shutil as sh
-import asyncio
-
-# ----------------------------------------------------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------------------------------------------------
+from pathlib import Path
 
 from pkg_resources import get_distribution, DistributionNotFound
 from setuptools_scm import get_version
-
 from traitlets.config.configurable import Config
 from traitlets.config.application import Application
-from traitlets import (Bool, Unicode, List, Dict, Integer, Float, Enum,
-                       HasTraits, Instance, default, observe, import_item, )
+from traitlets import Bool, Unicode, List, Integer, Union, HasTraits, Instance, default, observe
 from traitlets.config.manager import BaseJSONConfigManager
-
 import matplotlib as mpl
 from matplotlib import pyplot as plt
-from matplotlib.lines import Line2D
-
 from IPython import get_ipython
 from IPython.core.interactiveshell import InteractiveShell
-
 from IPython.core.magic import (Magics, magics_class, line_cell_magic)
 from IPython.core.magics.code import extract_symbols
 from IPython.core.error import UsageError
@@ -56,11 +44,11 @@ from IPython.utils.text import get_text_list
 from IPython.display import publish_display_data, clear_output
 from jinja2 import Template
 
-# ----------------------------------------------------------------------------------------------------------------------
-# local import
-# ----------------------------------------------------------------------------------------------------------------------
+from spectrochempy.utils import MetaConfigurable, pathclean, get_pkg_path
+from .matplotlib_preferences import MatplotlibPreferences
 
-from spectrochempy.utils import MetaConfigurable
+# set the default style
+plt.style.use(['classic', 'scpy'])
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Log levels
@@ -129,8 +117,7 @@ def display_info_string(**kwargs):
     message = kwargs.get('message', 'info ')
 
     template = Template(_template)
-    html = template.render({'logo': logo,
-                            'message': message.strip().replace('\n', '<br/>')})
+    html = template.render({'logo': logo, 'message': message.strip().replace('\n', '<br/>')})
     publish_display_data(data={'text/html': html})
 
 
@@ -145,8 +132,7 @@ except DistributionNotFound:  # pragma: no cover
     __release__ = '--not set--'
 
 try:
-    __version__ = get_version(root='..',
-                              relative_to=__file__)
+    __version__ = get_version(root='..', relative_to=__file__)
     "Version string of this package"
 except LookupError:  # pragma: no cover
     __version__ = __release__
@@ -166,8 +152,7 @@ __copyright__ = _get_copyright()
 
 # .............................................................................
 def _get_release_date():
-    return subprocess.getoutput(
-            "git log -1 --tags --date='short' --format='%ad'")
+    return subprocess.getoutput("git log -1 --tags --date='short' --format='%ad'")
 
 
 __release_date__ = _get_release_date()
@@ -187,59 +172,6 @@ __contributor__ = ""
 
 __license__ = "CeCILL-B license"
 "Licence of this package"
-
-# colorsmaps and plot styles
-# ----------------------------------------------------------------------------------------------------------------------
-
-cmaps = ['viridis', 'plasma', 'inferno', 'magma', 'Greys', 'Purples', 'Blues',
-         'Greens', 'Oranges', 'Reds', 'YlOrBr', 'YlOrRd', 'OrRd', 'PuRd', 'RdPu',
-         'BuPu', 'GnBu', 'PuBu', 'YlGnBu', 'PuBuGn', 'BuGn', 'YlGn', 'binary',
-         'gist_yarg', 'gist_gray', 'gray', 'bone', 'pink', 'spring', 'summer',
-         'autumn', 'winter', 'cool', 'Wistia', 'hot', 'afmhot', 'gist_heat',
-         'copper', 'PiYG', 'PRGn', 'BrBG', 'PuOr', 'RdGy', 'RdBu', 'RdYlBu',
-         'RdYlGn', 'Spectral', 'coolwarm', 'bwr', 'seismic', 'Pastel1', 'Pastel2',
-         'Paired', 'Accent', 'Dark2', 'Set1', 'Set2', 'Set3', 'tab10', 'tab20',
-         'tab20b', 'tab20c', 'flag', 'prism', 'ocean', 'gist_earth', 'terrain',
-         'gist_stern', 'gnuplot', 'gnuplot2', 'CMRmap', 'cubehelix', 'brg', 'hsv',
-         'gist_rainbow', 'rainbow', 'jet', 'nipy_spectral', 'gist_ncar']
-
-markers = list((Line2D.markers.keys()))
-markers.remove('')
-markers.remove(' ')
-linestyles = list((Line2D.lineStyles.keys()))
-linestyles.remove('')
-linestyles.remove(' ')
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-# available matplotlib styles (equivalent of plt.style.available)
-# ----------------------------------------------------------------------------------------------------------------------
-
-def available_styles():
-    """
-    All matplotlib `styles <https://matplotlib.org/users/style_sheets.html>`_
-    which are available in |scpy|
-
-    Returns
-    -------
-    A list of matplotlib styles
-
-    """
-    # Todo: Make this list extensible programmatically (adding files to stylelib)
-
-    cfgdir = mpl.get_configdir()
-
-    stylelib = os.path.join(cfgdir, 'stylelib')
-
-    styles = plt.style.available
-    if os.path.isdir(stylelib):
-        listdir = os.listdir(stylelib)
-        for style in listdir:
-            if style.endswith('.mplstyle'):
-                styles.append(style[:-9])
-    styles = list(set(styles))  # in order to remove possible duplicates
-
-    return styles
 
 
 # ======================================================================================================================
@@ -345,9 +277,7 @@ class SpectroChemPyMagics(Magics):
             if len(not_found) == 1:
                 warnings.warn('The symbol `%s` was not found' % not_found[0])
             elif len(not_found) > 1:
-                warnings.warn(
-                    'The symbols %s were not found' % get_text_list(not_found,
-                                                                    wrap_item_with='`'))
+                warnings.warn('The symbols %s were not found' % get_text_list(not_found, wrap_item_with='`'))
 
             contents = '\n'.join(blocks)
 
@@ -356,41 +286,27 @@ class SpectroChemPyMagics(Magics):
 
         # import delayed to avoid circular import error
         from spectrochempy.core.scripts.script import Script
+
         script = Script(name, content=contents)
         projobj[name] = script
 
         return "Script {} created.".format(name)
 
-        # @line_magic  # def runscript(self, pars=''):  #     """  #  #
-        # """  #     opts, args = self.parse_options(pars, '')  #  #     if
-        # not args:  #         raise UsageError('Missing script name')  #  #
-        # return args
+        # @line_magic  # def runscript(self, pars=''):  #     """  #  #  # """  #     opts,
+        # args = self.parse_options(pars, '')  #  #     if  # not args:  #         raise UsageError('Missing script
+        # name')  #  #  # return args
 
 
 # ======================================================================================================================
 # DataDir class
 # ======================================================================================================================
 
-def _get_pkg_datadir_path(data_name, package=None):
-    data_name = os.path.normpath(data_name)
-
-    path = os.path.dirname(import_item(package).__file__)
-    path = os.path.join(path, data_name)
-
-    if not os.path.isdir(path):  # pragma: no cover
-        return os.path.dirname(path)
-
-    return path
-
-
 class DataDir(HasTraits):
-    """ A class used to determine the path to the testdata directory. """
+    """ A class used to determine the path to the testdata directory.
 
-    # ------------------------------------------------------------------------------------------------------------------
-    # public methods
-    # ------------------------------------------------------------------------------------------------------------------
+    """
 
-    path = Unicode()
+    path = Instance(Path)
 
     def listing(self):
         """
@@ -399,18 +315,20 @@ class DataDir(HasTraits):
         Returns
         -------
         listing : str
+            Display of the datadir content
 
         """
-        strg = os.path.basename(self.path) + "\n"
+        strg = f'{self.path.name}\n'  # os.path.basename(self.path) + "\n"
 
         def _listdir(s, initial, ns):
             ns += 1
-            for f in glob.glob(os.path.join(initial, '*')):
-                fb = os.path.basename(f)
-                if not fb.startswith('acqu') and not fb.startswith(
-                        'pulse') and fb not in ['ser', 'fid']:
+            for f in pathclean(initial).glob('*'):  # glob.glob(os.path.join(initial, '*')):
+                fb = f.name  # os.path.basename(f)
+                if fb.startswith('.'):
+                    continue
+                if not fb.startswith('acqu') and not fb.startswith('pulse') and fb not in ['ser', 'fid']:
                     s += "   " * ns + "|__" + "%s\n" % fb
-                if os.path.isdir(f):
+                if f.is_dir():
                     s = _listdir(s, f, ns)
             return s
 
@@ -421,149 +339,72 @@ class DataDir(HasTraits):
         # to work with --help-all
         """"""  # TODO: make some useful help
 
-    # ------------------------------------------------------------------------------------------------------------------
-    # special methods
-    # ------------------------------------------------------------------------------------------------------------------
-
     def __str__(self):
         return self.listing()
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # initialization
-    # ------------------------------------------------------------------------------------------------------------------
-
-    @default('path')
-    def _get_path_default(self):
-        # the spectra path in package data
-        return _get_pkg_datadir_path('testdata', 'scp_data')
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # private methods
-    # ------------------------------------------------------------------------------------------------------------------
 
     def _repr_html_(self):
         # _repr_html is needed to output in notebooks
         return self.listing().replace('\n', '<br/>').replace(" ", "&nbsp;")
+
+    @default('path')
+    def _get_path_default(self):
+        # the spectra path in package data
+        return Path(get_pkg_path('testdata', 'scp_data'))
 
 
 # ======================================================================================================================
 # General Preferences
 # ======================================================================================================================
 
-
-# ======================================================================================================================
 class GeneralPreferences(MetaConfigurable):
     """
     Preferences that apply to the |scpy| application in general
 
     They should be accessible from the main API
 
-    Examples
-    --------
-
-    >>> import spectrochempy as scp # doctest: +ELLIPSIS
-
-    >>> delimiter = scp.general_preferences.csv_delimiter
-
 
     """
 
+    name = Unicode('GeneralPreferences')
+    description = Unicode('General options for the SpectroChemPy application')
     updated = Bool(False)
 
-    def __init__(self, **kwargs):
-        super(GeneralPreferences, self).__init__(**kwargs)
-
-    # various settings
+    # ------------------------------------------------------------------------------------------------------------------
+    # Gonfiguration entries
     # ------------------------------------------------------------------------------------------------------------------
 
-    show_info_on_loading = Bool(True, help='Display info on loading').tag(
-        config=True)
+    cloudURL = Unicode(help='URL where to look for data by default if not found on datadir').tag(config=True,
+                                                                                                 type="folder")
+    databases = Union((Instance(Path), Unicode()), help='Directory where to look for database files such as csv').tag(
+            config=True, type="folder")
+    datadir = Union((Instance(Path), Unicode()), help='Directory where to look for data by default').tag(config=True,
+                                                                                                         type="folder")
+    show_info_on_loading = Bool(True, help='Display info on loading').tag(config=True)
+    use_qt = Bool(False, help='Use QT for dialog instead of TK wich is the default. '
+                              'If True the PyQt libraries must be installed').tag(config=True)
 
-    show_close_dialog = Bool(True, help='Display the close project dialog'
-                                        ' project changing or on '
-                                        'application exit').tag(config=True)
+    # ..................................................................................................................
+    @default('cloudURL')
+    def _get_default_cloudURL(self):
+        return 'https://drive.google.com/drive/folders/1rfc9O7jK6v_SbygzJHoFEXXxYY3wIqmh?usp=sharing'
 
-    csv_delimiter = Unicode(',', help='CSV data delimiter').tag(config=True)
-
-    project_directory = Unicode(help='Directory where projects are '
-                                     'stored by default').tag(config=True,
-                                                              type='folder')
-
-    use_dev_version = Bool(True, help='use latest development versions').tag(config=True)
-
-    @default('project_directory')
-    def _get_default_project_directory(self):
-        """
-        Determines the SpectroChemPy project directory name and
-        creates the directory if it doesn't exist.
-
-        This directory is typically ``$HOME/spectrochempy/projects``,
-        but if the
-        SCP_PROJECTS_HOME environment variable is set and the
-        ``$SCP_PROJECTS_HOME`` directory exists, it will be that
-        directory.
-
-        If neither exists, the former will be created.
-
-        Returns
-        -------
-        dir : str
-            The absolute path to the projects directory.
-
-        """
-
-        # first look for SCP_PROJECTS_HOME
-        scp = os.environ.get('SCP_PROJECTS_HOME')
-
-        if scp is not None and os.path.exists(scp):
-            return os.path.abspath(scp)
-
-        scp = os.path.join(os.path.expanduser('~'), 'spectrochempy',
-                           'projects')
-
-        if not os.path.exists(scp):
-            os.makedirs(scp, exist_ok=True)
-
-        elif not os.path.isdir(scp):
-            raise IOError('Intended Projects directory is actually a file.')
-
-        return os.path.abspath(scp)
-
-    autosave_projects = Bool(False, help='Automatic saving of the current '
-                                         'project').tag(config=True)
-
-    autoload_project = Bool(False, help='Automatic loading of the last '
-                                        'project at startup').tag(config=True)
-
-    datadir = Unicode(help='Directory where to look for data by '
-                           'default').tag(config=True, type="folder")
-
-    stylesheets = Unicode(help='Directory where to look for local defined '
-                               ' matplotlib styles when they are not in the '
-                               ' standard location').tag(config=True,
-                                                         type="folder")
-
-    databases = Unicode(help='Directory where to look for database files '
-                             'such as csv').tag(config=True, type="folder")
-
-    @default('stylesheets')
-    def _get_stylesheets_default(self):
-        # the spectra path in package data
-        return _get_pkg_datadir_path('stylesheets', 'scp_data')
-
+    # ..................................................................................................................
     @default('databases')
     def _get_databases_default(self):
         # the spectra path in package data
-        return _get_pkg_datadir_path('databases', 'scp_data')
+        return Path(get_pkg_path('databases', 'scp_data'))
 
+    # ..................................................................................................................
     @default('datadir')
     def _get_default_datadir(self):
         return self.parent.datadir.path
 
+    # ..................................................................................................................
     @observe('datadir')
     def _datadir_changed(self, change):
-        self.parent.datadir.path = change['new']
+        self.parent.datadir.path = pathclean(change['new'])
 
+    # ..................................................................................................................
     @property
     def log_level(self):
         """
@@ -571,6 +412,7 @@ class GeneralPreferences(MetaConfigurable):
         """
         return self.parent.log_level
 
+    # ..................................................................................................................
     @log_level.setter
     def log_level(self, value):
         if isinstance(value, str):
@@ -581,214 +423,92 @@ class GeneralPreferences(MetaConfigurable):
                               'or ERROR')
         self.parent.log_level = value
 
+    # ..................................................................................................................
+    def __init__(self, **kwargs):
+        super().__init__(jsonfile='GeneralPreferences', **kwargs)
+
+
+# ======================================================================================================================
+class DatasetPreferences(MetaConfigurable):
+    """
+    Per nddataset preferences
+
+    """
+    name = Unicode('DatasetPreferences')
+    description = Unicode('Options for datasets')
+    updated = Bool(False)
+
     # ------------------------------------------------------------------------------------------------------------------
-    # General configuration for plotting
-    # ------------------------------------------------------------------------------------------------------------------
-
-    leftbuttonpan = Bool(True, help="LeftButtonPan: If false, left button "
-                                    "drags a rubber band for "
-                                    "zooming in viewbox").tag(config=True, )
-
-    background_color = Unicode('#EFEFEF',
-                               help='Background color for plots').tag(
-        config=True, type='color')
-
-    foreground_color = Unicode('#000000',
-                               help='Foreground color for plots elements').tag(
-        config=True, type='color')
-
-    antialias = Bool(True, help='Antialiasing')
-
-    # matplotlib specific  group
+    # Configuration entries
     # ------------------------------------------------------------------------------------------------------------------
 
-    max_lines_in_stack = Integer(1000, min=1, help='Maximum number of lines to'
-                                                   ' plot in stack plots').tag(
-        config=True)
+    csv_delimiter = Unicode(',', help='CSV data delimiter').tag(config=True)
 
-    usempl = Bool(help='Use MatPlotLib for plotting (slow but mode suitable '
-                       'for printing)').tag(config=True, group='mpl')
-
-    simplify = Bool(help='Matplotlib path simplification for improving '
-                         'performance').tag(config=True, group='mpl')
-
-    @observe('simplify')
-    def _simplify_changed(self, change):
-        plt.rcParams['path.simplify'] = change.new
-        plt.rcParams['path.simplify_threshold'] = 1.
+    # ..................................................................................................................
+    def __init__(self, **kwargs):
+        super(DatasetPreferences, self).__init__(jsonfile='DatasetPreferences', **kwargs)
 
 
 # ======================================================================================================================
 class ProjectPreferences(MetaConfigurable):
     """
-    Per project preferences
-
-    include plotting and views preference for the included datasets
+    Project preferences
 
     """
 
+    name = Unicode('ProjectPreferences')
+    description = Unicode('Options for projects')
     updated = Bool(False)
 
+    # ------------------------------------------------------------------------------------------------------------------
+    # Configuration entries
+    # ------------------------------------------------------------------------------------------------------------------
+
+    autoload_project = Bool(False, help='Automatic loading of the last project at startup').tag(config=True)
+    autosave_projects = Bool(False, help='Automatic saving of the current project').tag(config=True)
+    project_directory = Unicode(help='Directory where projects are stored by default').tag(config=True, type='folder')
+    show_close_dialog = Bool(True, help='Display the close project dialog project changing or on application exit').tag(
+            config=True)
+
+    @default('project_directory')
+    def _get_default_project_directory(self):
+        # Determines the SpectroChemPy project directory name and creates the directory if it doesn't exist.
+        # This directory is typically ``$HOME/spectrochempy/projects``, but if the SCP_PROJECTS_HOME environment
+        # variable is set and the `$SCP_PROJECTS_HOME` directory exists, it will be that directory.
+        # If neither exists, the former will be created.
+
+        # first look for SCP_PROJECTS_HOME
+        scp = os.environ.get('SCP_PROJECTS_HOME')
+
+        if scp is not None and os.path.exists(scp):
+            return os.path.abspath(scp)
+
+        scp = os.path.join(os.path.expanduser('~'), 'spectrochempy', 'projects')
+
+        if not os.path.exists(scp):
+            os.makedirs(scp, exist_ok=True)
+
+        elif not os.path.isdir(scp):
+            raise IOError('Intended Projects directory is actually a file.')
+
+        return os.path.abspath(scp)
+
+    # ..................................................................................................................
     def __init__(self, **kwargs):
-        super(ProjectPreferences, self).__init__(jsonfile='ProjectPreferences',
-                                                 **kwargs)
 
-    # ------------------------------------------------------------------------------------------------------------------
-    # attributes
-    # ------------------------------------------------------------------------------------------------------------------
-
-    name = Unicode('ProjectPreferences')
-
-    description = Unicode('Options for datasets, e.g., for plotting')
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # configuration
-    # ------------------------------------------------------------------------------------------------------------------
-
-    # ..................................................................................................................
-    _styles = available_styles()
-    if 'scpy' not in _styles:
-        _styles.append('scpy')
-    style = Enum(_styles, default_value='scpy', help='Basic matplotlib style to use').tag(config=True, type='list')
-
-    @observe('style')
-    def _style_changed(self, change):
-        plt.style.use(change.new)
-
-    # ..................................................................................................................
-    use_latex = Bool(True, help='Use latex for plotting labels and texts').tag(
-        config=True)
-
-    @observe('use_latex')
-    def _use_latex_changed(self, change):
-        mpl.rc('text', usetex=change.new)
-
-    # ..................................................................................................................
-    latex_preamble = Unicode(r"""\usepackage{siunitx}
-                            \sisetup{detect-all}
-                            \usepackage{times} # set the normal font here
-                            \usepackage{sansmath}
-                            # load up the sansmath so that math -> helvet
-                            \sansmath
-                            """,
-                             help='Latex preamble for matplotlib outputs'
-                             ).tag(config=True, type='text')
-
-    @observe('latex_preamble')
-    def _set_latex_preamble(self, change):
-        mpl.rcParams['text.latex.preamble'] = change.new.split('\n')
-
-    # ------------------------------------------------------------------------------------------------------------------
-
-    # 1D options
-    # ------------------------------------------------------------------------------------------------------------------
-
-    method_1D = Enum(['pen', 'scatter', 'scatter+pen', 'bar'],
-                     default_value='pen',
-                     help='Default plot methods for 1D datasets').tag(config=True, type='list')
-
-    # 2D/3D options
-    # ----------
-
-    method_2D = Enum(['map', 'image', 'stack', 'surface', '3D'], default_value='stack',
-                     help='Default plot methods for 2D datasets').tag(config=True, type='list')
-
-    # method_3D = Enum(['surface'], default_value='surface',
-    #                 help='Default plot methods for 3D datasets').tag(
-    #    config=True, type='list')
-
-    colorbar = Bool(True, help='Show color bar for 2D plots').tag(config=True)
-
-    show_projections = Bool(False, help='Show all projections').tag(config=True)
-
-    show_projection_x = Bool(False, help='Show projection along x').tag(config=True)
-
-    show_projection_y = Bool(False, help='Show projection along y').tag(config=True)
-
-    number_of_x_labels = Integer(5, min=3, help='Number of X labels').tag(config=True)
-
-    number_of_y_labels = Integer(5, min=3, help='Number of Y labels').tag(config=True)
-
-    number_of_z_labels = Integer(5, min=3, help='Number of Z labels').tag(config=True)
-
-    number_of_contours = Integer(50, min=10, help='Number of contours').tag(config=True)
-
-    contour_alpha = Float(1.00, min=0., max=1.0, help='Transparency of the contours').tag(config=True)
-
-    contour_start = Float(0.05, min=0.001, help='Fraction of the maximum '
-                                                'for starting contour '
-                                                'levels').tag(config=True)
-
-    antialiased = Bool(True, help='antialiased option for surface plot').tag(config=True)
-
-    rcount = Integer(50, help='rcount (steps in the row mode) for surface plot').tag(config=True)
-
-    ccount = Integer(50, help='ccount (steps in the column mode) for surface plot').tag(config=True)
-
-    # colors / style
-    # ------------------------------------------------------------------------------------------------------------------
-
-    pen_linewidth = Float(.70, min=0, help='Default pen width').tag(
-        config=True)
-
-    pen_color = Unicode('#000000', help='Default pen color for 1D plots').tag(
-        config=True, type='color')
-
-    pen_linestyle = Enum(linestyles, default_value=linestyles[0],
-                         help='Default pen style for 1D plots').tag(
-        config=True, type='list')
-
-    marker = Enum(markers, default_value=markers[2],
-                  help='Default symbols for 1D scatter plots').tag(config=True,
-                                                                   type='list')
-
-    markersize = Float(5.0, min=.5, help='Default symbol size for scatter '
-                                         'plots').tag(config=True)
-
-    colormap = Enum(cmaps, default_value='jet',
-                    help='Default colormap for contour plots').tag(config=True,
-                                                                   type='list')
-
-    colormap_stack = Enum(cmaps, default_value='viridis',
-                          help='Default colormap for stack plots').tag(
-        config=True, type='list')
-
-    colormap_surface = Enum(cmaps, default_value='jet',
-                            help='Default colormap for surface plots').tag(
-        config=True, type='list')
-
-    colormap_transposed = Enum(cmaps, default_value='magma',
-                               help='Default colormap for transposed stack '
-                                    'plots').tag(config=True, type='list')
+        super().__init__(jsonfile='ProjectPreferences', **kwargs)
 
 
 # ======================================================================================================================
 # Application
 # ======================================================================================================================
 
-
-# ======================================================================================================================
 class SpectroChemPy(Application):
     """
     This class SpectroChemPy is the main class, containing most of the setup,
     configuration and more.
 
     """
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # initialization
-    # ------------------------------------------------------------------------------------------------------------------
-
-    def __init__(self, *args, **kwargs):
-
-        super().__init__(*args, **kwargs)
-        self.logs = self.log  # we change the noame in order to avoid latter conflict with numpy.log
-
-        self.initialize()
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # applications attributes
-    # ------------------------------------------------------------------------------------------------------------------
 
     icon = Unicode('scpy.png')
     "Icon for the application"
@@ -799,9 +519,7 @@ class SpectroChemPy(Application):
     name = Unicode('SpectroChemPy')
     "Running name of the application"
 
-    description = Unicode('SpectroChemPy is a '
-                          'framework for processing, '
-                          'analysing and modelling Spectroscopic data for '
+    description = Unicode('SpectroChemPy is a framework for processing, analysing and modelling Spectroscopic data for '
                           'Chemistry with Python.')
     "Short description of the |scpy| application"
 
@@ -811,34 +529,22 @@ class SpectroChemPy(Application):
     @default('long_description')
     def _get_long_description(self):
         desc = """
-        Welcome to <strong>SpectroChemPy</strong> Application<br><br>
-        <p><strong>SpectroChemPy</strong> is a framework for processing,
-        analysing and
-        modelling <strong>Spectro</>scopic data for <strong>Chem</strong>istry
-        with
-        <strong>Py</strong>thon. It is a cross platform software, running on
-        Linux,
-        Windows or OS X.</p><br><br>
-        <strong>version:</strong> {version}<br>
-        <strong>Authors:</strong> {authors}<br>
-        <strong>License:</strong> {license}<br>
-        <div class='warning'> SpectroChemPy is still experimental and under active
-        development. Its current design and functionalities are subject to major
-        changes, reorganizations, bugs and crashes!!!. Please report any issues
-        to the
-        <a url='https://redmine.spectrochempy.fr/projects/spectrochempy/issues'>Issue Tracker<a>
-        </div><br><br>
-        When using <strong>SpectroChemPy</strong> for your own work, you are
-        kindly requested to cite it this way:
-        <pre>
-        Arnaud Travert & Christian Fernandez,
-        SpectroChemPy, a framework for processing, analysing and modelling of
-        Spectroscopic data for Chemistry with Python https://www.spectrochempy.fr, (version {version})
-        Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of
-        Caen/CNRS, 2019
-        </pre>
-        </p>
-        """.format(version=__release__, authors=__author__, license=__license__)
+Welcome to <strong>SpectroChemPy</strong> Application<br><br>
+<p><strong>SpectroChemPy</strong> is a framework for processing, analysing and modelling
+ <strong>Spectro</>scopic data for <strong>Chem</strong>istry with <strong>Py</strong>thon.
+ It is a cross platform software, running on Linux, Windows or OS X.</p><br><br>
+<strong>version:</strong> {version}<br>
+<strong>Authors:</strong> {authors}<br>
+<strong>License:</strong> {license}<br>
+<div class='warning'> SpectroChemPy is still experimental and under active development. Its current design and
+ functionalities are subject to major changes, reorganizations, bugs and crashes!!!. Please report any issues
+to the <a url='https://redmine.spectrochempy.fr/projects/spectrochempy/issues'>Issue Tracker<a>
+</div><br><br>
+When using <strong>SpectroChemPy</strong> for your own work, you are kindly requested to cite it this way:
+<pre>Arnaud Travert & Christian Fernandez, SpectroChemPy, a framework for processing, analysing and modelling of
+Spectroscopic data for Chemistry with Python https://www.spectrochempy.fr, (version {version})
+Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 2019
+</pre></p>""".format(version=__release__, authors=__author__, license=__license__)
 
         return desc
 
@@ -850,22 +556,17 @@ class SpectroChemPy(Application):
     # ------------------------------------------------------------------------------------------------------------------
     _loaded_config_files = List()
 
-    reset_config = Bool(False, help='Should we restore a default '
-                                    'configuration ?').tag(config=True)
-    """Flag: True if one wants to reset settings to the original config
-    defaults"""
+    reset_config = Bool(False, help='Should we restore a default configuration ?').tag(config=True)
+    """Flag: True if one wants to reset settings to the original config defaults"""
 
-    config_file_name = Unicode(None, help="Configuration file name").tag(
-        config=True)
+    config_file_name = Unicode(None, help="Configuration file name").tag(config=True)
     """Configuration file name"""
 
     @default('config_file_name')
     def _get_config_file_name_default(self):
         return str(self.name).lower() + '_cfg'
 
-    config_dir = Unicode(None,
-                         help="Set the configuration directory location").tag(
-        config=True)
+    config_dir = Unicode(None, help="Set the configuration directory location").tag(config=True)
     """Configuration directory"""
 
     @default('config_dir')
@@ -878,55 +579,32 @@ class SpectroChemPy(Application):
     def _get_default_config_manager(self):
         return BaseJSONConfigManager(config_dir=self.config_dir)
 
-    # Logger at startup
-    # ------------------------------------------------------------------------------------------------------------------
+    log_format = Unicode("%(highlevel)s %(message)s", help="The Logging format template", ).tag(config=True)
 
-    debug = Bool(True, help='Set DEBUG mode, with full outputs').tag(
-        config=True)
+    debug = Bool(True, help='Set DEBUG mode, with full outputs').tag(config=True)
     """Flag to set debugging mode"""
-    info = Bool(False, help='Set INFO mode, with msg outputs').tag(
-        config=True)
+
+    info = Bool(False, help='Set INFO mode, with msg outputs').tag(config=True)
     """Flag to set info mode"""
-    quiet = Bool(False, help='Set Quiet mode, with minimal outputs').tag(
-        config=True)
+
+    quiet = Bool(False, help='Set Quiet mode, with minimal outputs').tag(config=True)
     """Flag to set in fully quite mode (even no warnings)"""
-    nodisplay = Bool(False, help='Set NO DISPLAY mode, i.e., no graphics '
-                                 'outputs').tag(config=True)
+
+    nodisplay = Bool(False, help='Set NO DISPLAY mode, i.e., no graphics outputs').tag(config=True)
     """Flag to set in NO DISPLAY mode """
 
-    # last project
-    # ------------------------------------------------------------------------------------------------------------------
-
-    last_project = Unicode('', help='Last used project').tag(config=True,
-                                                             type='project')
+    last_project = Unicode('', help='Last used project').tag(config=True, type='project')
+    """Last used project"""
 
     @observe('last_project')
     def _last_project_changed(self, change):
-        # update configuration
-
         if change.name in self.traits(config=True):
-            self.config_manager.update(self.config_file_name, {
-                self.__class__.__name__: {change.name: change.new, }
-            })
+            self.config_manager.update(self.config_file_name, {self.__class__.__name__: {change.name: change.new, }})
 
-    # filename to load at startup
-    # ------------------------------------------------------------------------------------------------------------------
-    startup_filename = Unicode(os.path.join('irdata', 'nh4y-activation.spg'),
-                               help='File name to load at startup').tag(
-        config=True, type='file')
+    startup_filename = Unicode(os.path.join('irdata', 'nh4y-activation.spg'), help='File name to load at startup').tag(
+            config=True, type='file')
 
-    # TESTING
-    # ------------------------------------------------------------------------------------------------------------------
-
-    show_config = Bool(help="Dump configuration to stdout at startup").tag(
-        config=True)
-
-    show_config_json = Bool(help="Dump configuration to stdout (as JSON)").tag(
-        config=True)
-
-    @observe('show_config_json')
-    def _show_config_json_changed(self, change):
-        self.show_config = change.new
+    show_config = Bool(help="Dump configuration to stdout at startup").tag(config=True)
 
     @observe('show_config')
     def _show_config_changed(self, change):
@@ -934,45 +612,48 @@ class SpectroChemPy(Application):
             self._save_start = self.start
             self.start = self.start_show_config
 
+    show_config_json = Bool(help="Dump configuration to stdout (as JSON)").tag(config=True)
+
+    @observe('show_config_json')
+    def _show_config_json_changed(self, change):
+        self.show_config = change.new
+
     test = Bool(False, help='test flag').tag(config=True)
     """Flag to set the application in testing mode"""
+
+    port = Integer(7000, help='Dash server port').tag(config=True)
+    """Dash server port"""
 
     # Command line interface
     # ------------------------------------------------------------------------------------------------------------------
 
-    aliases = Dict(
-        dict(test='SpectroChemPy.test',
-             p='SpectroChemPy.last_project',
-             f='SpectroChemPy.startup_filename',
-             ))
+    aliases = dict(test='SpectroChemPy.test', project='SpectroChemPy.last_project', f='SpectroChemPy.startup_filename',
+                   port='SpectroChemPy.port', )
 
-    flags = Dict(
-        dict(
-            debug=({'SpectroChemPy': {'log_level': DEBUG}},
-                   "Set log_level to DEBUG - most verbose mode"),
-            info=({'SpectroChemPy': {'log_level': INFO}},
-                  "Set log_level to INFO - verbose mode"),
-            quiet=({'SpectroChemPy': {'log_level': ERROR}},
-                   "Set log_level to ERROR - no verbosity at all"),
-            nodisplay=({'SpectroChemPy': {'nodisplay': True}},
-                       "Set NO DISPLAY mode to true - no graphics at all"),
-            reset_config=(
-                {'SpectroChemPy': {'reset_config': True}}, "Reset config to default"),
-            show_config=({'SpectroChemPy': {'show_config': True, }},
-                         "Show the application's configuration (human-readable "
-                         "format)"),
-            show_config_json=({'SpectroChemPy': {'show_config_json': True, }},
-                              "Show the application's configuration (json "
-                              "format)"),
-        ))
+    flags = dict(debug=({'SpectroChemPy': {'log_level': DEBUG}}, "Set log_level to DEBUG - most verbose mode"),
+                 info=({'SpectroChemPy': {'log_level': INFO}}, "Set log_level to INFO - verbose mode"),
+                 quiet=({'SpectroChemPy': {'log_level': ERROR}}, "Set log_level to ERROR - no verbosity at all"),
+                 nodisplay=({'SpectroChemPy': {'nodisplay': True}}, "Set NO DISPLAY mode to true - no graphics at all"),
+                 reset_config=({'SpectroChemPy': {'reset_config': True}}, "Reset config to default"), show_config=(
+                {'SpectroChemPy': {'show_config': True, }}, "Show the application's configuration (human-readable "
+                                                            "format)"), show_config_json=(
+                {'SpectroChemPy': {'show_config_json': True, }}, "Show the application's configuration (json "
+                                                                 "format)"), )
 
-    classes = List([GeneralPreferences, ProjectPreferences, DataDir, ])
+    classes = List([GeneralPreferences, DatasetPreferences, ProjectPreferences, MatplotlibPreferences, DataDir, ])
 
     # ------------------------------------------------------------------------------------------------------------------
     # Initialisation of the application
     # ------------------------------------------------------------------------------------------------------------------
 
-    # @catch_config_error
+    def __init__(self, *args, **kwargs):
+
+        super().__init__(*args, **kwargs)
+
+        self.logs = self.log  # we change the noame in order to avoid latter conflict with numpy.log
+
+        self.initialize()
+
     def initialize(self, argv=None):
         """
         Initialisation function for the API applications
@@ -999,34 +680,34 @@ class SpectroChemPy(Application):
 
         self.logs.debug("scpy command line arguments are: %s" % " ".join(sys.argv))
 
-        # workaround the problem with argument not in our aliases or flags
-        # e.g., when using pytest options or setup.py options
-
-        options = []
-        for item in sys.argv[:]:
-            for k in list(self.flags.keys()):
-                if item.startswith("--" + k) or k in ['--help', '--help-all']:
-                    options.append(item)
-                continue
-            for k in list(self.aliases.keys()):
-                if item.startswith("-" + k) or k in ['h', ]:
-                    options.append(item)
-
         if not IN_IPYTHON:
-            self.parse_command_line(options)
+            # remove argument not known by spectrochempy
+            if 'make.py' in sys.argv[0] or 'pytest' in sys.argv[0]:  # building docs
+                options = []
+                for item in sys.argv[:]:
+                    for k in list(self.flags.keys()):
+                        if item.startswith("--" + k) or k in ['--help', '--help-all']:
+                            options.append(item)
+                        continue
+                    for k in list(self.aliases.keys()):
+                        if item.startswith("-" + k) or k in ['h', ]:
+                            options.append(item)
+                self.parse_command_line(options)
+            else:
+                self.parse_command_line(sys.argv)
 
         # Get preferences from the config file and init everything
         # ---------------------------------------------------------------------
 
-        self.init_all_preferences()
+        self._init_all_preferences()
 
         # we catch warnings and error for a ligther display to the end-user.
         # except if we are in debugging mode
 
         # warning handler
         # --------------------------------------------------------------------
-        def send_warnings_to_log(message, category, filename, lineno, *args):
-            self.logs.warning('%s:  %s' % (category.__name__, message))
+        def send_warnings_to_log(message, category):
+            self.logs.warning(f'{category.__name__} - {message}')
             return
 
         warnings.showwarning = send_warnings_to_log
@@ -1041,10 +722,9 @@ class SpectroChemPy(Application):
             def _custom_exc(shell, etype, evalue, tb, tb_offset=None):
 
                 if self.log_level == logging.DEBUG:
-                    shell.showtraceback((etype, evalue, tb),
-                                        tb_offset=tb_offset)
+                    shell.showtraceback((etype, evalue, tb), tb_offset=tb_offset)
                 else:
-                    self.logs.error("%s: %s" % (etype.__name__, evalue))
+                    self.logs.error(f"{etype.__name__}: {evalue}")
 
             ip.set_custom_exc((Exception,), _custom_exc)
 
@@ -1053,46 +733,43 @@ class SpectroChemPy(Application):
             if ip is not None:
                 ip.register_magics(SpectroChemPyMagics)
 
-    def init_all_preferences(self):
+    def _init_all_preferences(self):
 
         # Get preferences from the config file
         # ---------------------------------------------------------------------
 
-        if self.config_file_name:
-            config_file = os.path.join(self.config_dir, self.config_file_name)
-
-            if self.reset_config:
-                # remove the user json file to reset to defaults
-                lis = os.listdir(self.config_dir)
-                for f in lis:
-                    if f.endswith('.json'):
-                        jsonname = os.path.join(self.config_dir, f)
-                        os.remove(jsonname)
-
+        if not self.config:
             self.config = Config()
 
-            for cfgname in [config_file, ]:
+        configfiles = []
+        if self.config_file_name:
+            config_file = os.path.join(self.config_dir, self.config_file_name)
+            configfiles.append(config_file)
+
+            lis = os.listdir(self.config_dir)
+            for f in lis:
+                if f.endswith('.json'):
+                    jsonname = os.path.join(self.config_dir, f)
+                    if self.reset_config or f == 'MatplotlibPreferences.json':
+                        # remove the user json file to reset to defaults
+                        os.remove(jsonname)
+                    else:
+                        configfiles.append(jsonname)
+
+            for cfgname in configfiles:
                 self.load_config_file(cfgname)
                 if cfgname not in self._loaded_config_files:
                     self._loaded_config_files.append(cfgname)
 
-        # add other preferences
-        # ---------------------------------------------------------------------
-
-        self.datadir = DataDir()  # config=self.config)
-        self.general_preferences = GeneralPreferences(config=self.config,
-                                                      parent=self)
-
-        # Before setting default preference for project, check if the installation of some styles was already done
-        # if not do it now.
-        self._install_styles()
-
-        self.project_preferences = ProjectPreferences(config=self.config,
-                                                      parent=self)
-
         # Eventually write the default config file
         # --------------------------------------
         self._make_default_config_file()
+
+        self.datadir = DataDir(config=self.config)
+        self.preferences = GeneralPreferences(config=self.config, parent=self)
+        self.dataset_preferences = DatasetPreferences(config=self.config, parent=self)
+        self.project_preferences = ProjectPreferences(config=self.config, parent=self)
+        self.matplotlib_preferences = MatplotlibPreferences(config=self.config, parent=self)
 
     def start_show_config(self, **kwargs):
         """start function used when show_config is True"""
@@ -1105,8 +782,7 @@ class SpectroChemPy(Application):
                 cls_config.pop('show_config_json', None)
 
         if self.show_config_json:
-            json.dump(config, sys.stdout, indent=1, sort_keys=True,
-                      default=repr)
+            json.dump(config, sys.stdout, indent=1, sort_keys=True, default=repr)
             # add trailing newlines
             sys.stdout.write('\n')
             print()
@@ -1129,36 +805,11 @@ class SpectroChemPy(Application):
                 pformat_kwargs['compact'] = True
             for traitname in sorted(class_config):
                 value = class_config[traitname]
-                print('  .{} = {}'.format(traitname,
-                                          pprint.pformat(value, **pformat_kwargs), ))
+                print('  .{} = {}'.format(traitname, pprint.pformat(value, **pformat_kwargs), ))
         print()
 
         # now run the actual start function
         return self._start()
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # matplotlib style installation
-    # ------------------------------------------------------------------------------------------------------------------
-
-    def _install_styles(self):
-        # install all plotting styles in the matplotlib stylelib library if they are not yet present
-
-        cfgdir = mpl.get_configdir()
-        stylelib = os.path.join(cfgdir, 'stylelib')
-        if not os.path.exists(stylelib):
-            # create it so we can install our styles
-            os.mkdir(stylelib)
-        else:
-            # are the styles already installed?
-            if os.path.exists(os.path.join(stylelib, 'scpy.mplstyle')):
-                return True
-
-        styles_path = self.general_preferences.stylesheets
-        styles = os.listdir(styles_path)
-        for style in styles:
-            src = os.path.join(styles_path, style)
-            dest = os.path.join(stylelib, style)
-            sh.copy(src, dest)
 
     # ------------------------------------------------------------------------------------------------------------------
     # start the application
@@ -1170,7 +821,14 @@ class SpectroChemPy(Application):
 
         All configuration must have been done before calling this function
         """
+
+        # print(f'{sys.argv}')
+
         return self._start()
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Private methods
+    # ------------------------------------------------------------------------------------------------------------------
 
     def _start(self):
 
@@ -1180,8 +838,8 @@ class SpectroChemPy(Application):
             debug('API already started. Nothing done!')
             return
 
-        self.logs.debug("show info on loading %s" % self.general_preferences.show_info_on_loading)
-        if self.general_preferences.show_info_on_loading:
+        self.logs.debug("show info on loading %s" % self.preferences.show_info_on_loading)
+        if self.preferences.show_info_on_loading:
             info_string = "SpectroChemPy's API - v.{}\n" \
                           "© Copyright {}".format(__version__, __copyright__)
             ip = get_ipython()
@@ -1189,8 +847,21 @@ class SpectroChemPy(Application):
                 display_info_string(message=info_string.strip())
 
             else:
-                if "/bin/scpy" not in sys.argv[0]:   # deactivate for console scripts
+                if "/bin/scpy" not in sys.argv[0]:  # deactivate for console scripts
                     print(info_string.strip())
+
+        # force update of rcParams
+        for rckey in mpl.rcParams.keys():
+            key = rckey.replace('_', '__').replace('.', '_').replace('-', '___')
+            try:
+                mpl.rcParams[rckey] = getattr(self.matplotlib_preferences, key)
+            except ValueError:
+                mpl.rcParams[rckey] = getattr(self.matplotlib_preferences, key).replace('\'', '')
+            except AttributeError:
+                # print(f'{e} -> you may want to add it to MatplotlibPreferences.py')
+                pass
+
+        self.matplotlib_preferences.set_latex_font(self.matplotlib_preferences.font_family)
 
         self.running = True
 
@@ -1198,17 +869,13 @@ class SpectroChemPy(Application):
 
         return True
 
-    # ------------------------------------------------------------------------------------------------------------------
-    # Private methods
-    # ------------------------------------------------------------------------------------------------------------------
-
     # ..................................................................................................................
     def _make_default_config_file(self):
         """auto generate default config file."""
 
         fname = os.path.join(self.config_dir, self.config_file_name + '.py')
 
-        if not os.path.exists(fname):
+        if not os.path.exists(fname) or self.reset_config:
             s = self.generate_config_file()
             self.logs.info("Generating default config file: %r" % fname)
             with open(fname, 'w') as f:
@@ -1217,8 +884,7 @@ class SpectroChemPy(Application):
     # ..................................................................................................................
     @staticmethod
     def _find_or_create_spectrochempy_dir(directory):
-        directory = os.path.join(os.path.expanduser('~'), '.spectrochempy',
-                                 directory)
+        directory = os.path.join(os.path.expanduser('~'), '.spectrochempy', directory)
 
         if not os.path.exists(directory):
             os.makedirs(directory, exist_ok=True)
@@ -1256,8 +922,7 @@ class SpectroChemPy(Application):
         if scp is not None and os.path.exists(scp):
             return os.path.abspath(scp)
 
-        return os.path.abspath(
-            self._find_or_create_spectrochempy_dir('config'))
+        return os.path.abspath(self._find_or_create_spectrochempy_dir('config'))
 
     # ------------------------------------------------------------------------------------------------------------------
     # Events from Application
@@ -1274,8 +939,7 @@ class SpectroChemPy(Application):
         self.logs.level = self.log_level
         for handler in self.logs.handlers:
             handler.level = self.log_level
-        self.logs.info("changed default log_level to {}".format(
-            logging.getLevelName(change.new)))
+        self.logs.info("changed default log_level to {}".format(logging.getLevelName(change.new)))
 
 
 # ======================================================================================================================

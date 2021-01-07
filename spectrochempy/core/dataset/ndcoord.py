@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 """
 This module implements the class |Coord|.
 """
 
-__all__ = ['Coord']
+__all__ = ['Coord', 'LinearCoord']
 
 # ----------------------------------------------------------------------------------------------------------------------
 # standard imports
@@ -26,7 +26,6 @@ from traitlets import Bool, observe, All, Unicode
 # ----------------------------------------------------------------------------------------------------------------------
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndmath import NDMath, set_operators
-# from spectrochempy.core import info_, debug_, error_, warning_
 from spectrochempy.utils import (docstrings, colored_output, NOMASK, spacing)
 
 
@@ -83,8 +82,8 @@ class Coord(NDMath, NDArray):
 
         >>> arr = np.arange(1.,12.,2.)
         >>> c0 = Coord(data=arr, title='frequency', units='Hz')
-        >>> c0     # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-        Coord: [   1.000,    3.000,    5.000,    7.000,    9.000,   11.000] Hz
+        >>> c0
+        Coord: [float64]  Hz (size: 6)
 
         We can take a series of str to create a non numerical but labelled
         axis :
@@ -94,17 +93,15 @@ class Coord(NDMath, NDArray):
         ['a', 'b', 'c', 'd', 'e', 'f']
 
         >>> c1 = Coord(labels=tarr, title='mylabels')
-        >>> c1   # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-        Coord: [a, b, c, d, e, f]
-
-        >>> print(c1) # doctest: +NORMALIZE_WHITESPACE
-        title : Mylabels
-        labels : [a b c d e f]
+        >>> c1
+        Coord: [labels] [  a   b   c   d   e   f] (size: 6)
 
         """
-        super(Coord, self).__init__(data, **kwargs)
 
-        assert self.ndim <= 1
+        super().__init__(data=data, **kwargs)
+
+        if len(self.shape) > 1:
+            raise ValueError('Only one 1D arrays can be used to define coordinates')
 
     # ..................................................................................................................
     def implements(self, name=None):
@@ -136,8 +133,7 @@ class Coord(NDMath, NDArray):
             return True
         return False
 
-        # Return a correct result only if the data are sorted
-        # return bool(self.data[0] > self.data[-1])
+        # Return a correct result only if the data are sorted  # return bool(self.data[0] > self.data[-1])
 
     # ------------------------------------------------------------------------------------------------------------------
     # hidden properties (for the documentation, only - we remove the docstring)
@@ -158,17 +154,12 @@ class Coord(NDMath, NDArray):
         ndim = super().ndim
         if ndim > 1:
             raise ValueError("Coordinate's array should be 1-dimensional!")
-        return 1
+        return ndim
 
     # ..................................................................................................................
     @property
     def T(self):  # no transpose
         return self
-
-    # ..................................................................................................................
-    @property
-    def date(self):
-        return None
 
     # ..................................................................................................................
     # @property
@@ -258,8 +249,7 @@ class Coord(NDMath, NDArray):
     def __dir__(self):
         # remove some methods with respect to the full NDArray
         # as they are not usefull for Coord.
-        # dtype must stay first item
-        return ['data', 'labels', 'units', 'meta', 'title', 'name', 'origin']
+        return ['data', 'labels', 'units', 'meta', 'title', 'name', 'offset', 'increment', 'linear', 'roi']
 
     # ..................................................................................................................
     def __getitem__(self, items, return_index=False):
@@ -329,10 +319,47 @@ class Coord(NDMath, NDArray):
         #   'type': 'change', # The event type of the notification, usually 'change'
         # }
         # debug_(f'changes in Coord: {change.name}')
-        pass
+
+        if change.name in ['_linear', '_increment', '_offset', '_size']:
+            super()._anytrait_changed(change)
 
 
-# ======================================================================================================================
+class LinearCoord(Coord):
+    docstrings.delete_params('NDArray.parameters', 'data', 'mask')
+
+    # ..................................................................................................................
+    @docstrings.dedent
+    def __init__(self, *args, offset=0.0, increment=1.0, **kwargs):
+        """
+        Linear coordinates.
+
+        Such coordinates correspond to a ascending or descending linear sequence of values, fully determined by two
+        parameters, i.e., an offset (off) and an increment (inc) : `data = i*inc + off`
+
+        Parameters
+        ----------
+        data : a 1D array-like object, optional
+            wWen provided, the `size` parameters is adjusted to the size of the array, and a linearization of the
+            array is performed (only if it is possible: regular spacing in the 1.e5 relative accuracy)
+        offset : float, optional
+            If omitted a value of 0.0 is taken for tje coordinate offset.
+        increment : float, optional
+            If omitted a value of 1.0 is taken for the coordinate increment.
+        %(NDArray.parameters.no_data|mask)s
+
+
+        """
+        super().__init__(*args, **kwargs)
+
+        if not self.linear:
+            # in case it was not already a linear array
+            self.offset = offset
+            self.increment = increment
+            self.linear = True
+
+    # ======================================================================================================================
+
+
 # Set the operators
 # ======================================================================================================================
 set_operators(Coord, priority=50)

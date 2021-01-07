@@ -6,12 +6,12 @@ dist: xenial
 jobs:
   fast_finish: true
   include:
-    - stage: pytest-linux
+    - stage: pytest-linux-3.7
       if: branch NOT IN (feature/travis-deploy,feature/travis-docs)
       env:
       - TEST=true
       - CONDAPY=3.7
-    - stage: pytest-linux
+    - stage: pytest-linux-3.8
       if: branch NOT IN (feature/travis-deploy,feature/travis-docs)
       env:
       - TEST=true
@@ -20,22 +20,27 @@ jobs:
       if: branch IN (master,feature/travis-deploy) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}$/
       env:
       - DEPLOY=true
-      - CONDAPY=3.7
+      - CONDAPY=3.8
     - stage: build-docs
       if: type != pull_request AND (branch IN (master,feature/travis-docs) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}$/)
       env:
       - BUILDOCS=true
-      - CONDAPY=3.7
+      - CONDAPY=3.8
 
-# limit got clone depth to 50 commits (this means that pull requests must be done with less than 50 commit changes)
+# limit got clone depth to 200 commits
+# this means that pull requests must be done with less than 300 commit changes
 git:
-  depth: 50
+  depth: 300
+
+# cache:
+# apt: true
 
 addons:
   apt:
     update: true
     packages:
       - xvfb
+#      - texlive-full
 
 # install miniconda and create environment
 before_install:
@@ -77,8 +82,9 @@ before_script:
 script:
   - if [[ $TEST = true ]]; then
       echo "RUNNING TESTS";
-      coverage run -m pytest -v --flake8 -k "not test_example" --nodisplay;
-      pytest -v --flake8 -k "test_example" --nodisplay;
+      flake8;
+      coverage run -m pytest -v
+
     elif [[ $DEPLOY = true ]]; then
       echo "BUILDING AND UPLOADING ON ANACONDA";
       bash .ci/scripts/conda-upload.sh;
@@ -87,8 +93,7 @@ script:
       echo "BUILDING DOCS"
       echo "cloning spectrochempy.github.io repository";
       git clone --branch=gh-pages --single-branch https://github.com/spectrochempy/spectrochempy.git $HOME/spectrochempy_docs/html;
-      apt-get install texlive-full;
-      python docs/make.py --clean --sync --html --pdf;
+      python docs/make.py --clean -C --sync --html;
     fi
 
 # command to notify code-climate

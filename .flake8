@@ -1,0 +1,14 @@
+[flake8]
+ignore = E402 E126 E123 W503 W504 F405 F403 E703
+max-line-length = 120
+max-complexity = 100
+select = C,E,F,W,N8
+count = True
+statistics = True
+exclude =
+    # exclude test, and some other folder for now (may be done later)
+    .idea
+    gui
+    docs/sphinxext
+    # docs/userguide
+    *.ipynb_checkpoints

@@ -1,28 +1,27 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-import numpy as np
 from copy import copy, deepcopy
-from datetime import datetime
-import pytest
+from datetime import datetime, timezone
 
+import numpy as np
+import pytest
 from pint.errors import DimensionalityError
 
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core import info_
 from spectrochempy.units import ur, Quantity
-from spectrochempy.utils import (SpectroChemPyWarning,
-                                 INPLACE, MASKED,
-                                 TYPE_INTEGER, TYPE_FLOAT)
-from spectrochempy.utils.testing import (assert_equal, assert_array_equal,
-                                         raises, catch_warnings)
+from spectrochempy.utils import SpectroChemPyWarning, INPLACE, MASKED, TYPE_INTEGER, TYPE_FLOAT
+from spectrochempy.utils.testing import assert_equal, assert_array_equal, raises, catch_warnings
 
 
-#  TEST INITIALIZATION
+# ----------------------------------------------------------------------------------------------------------------------
+#  NDARRAY INITIALIZATION
+# ----------------------------------------------------------------------------------------------------------------------
 
 def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     # initialisation with null array
@@ -40,7 +39,7 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert d0.name == d0.id
     assert d0.title == '<untitled>'
     assert d0.ndim == 0
-    assert d0.size == 0
+    assert d0.size is None
     assert not d0.is_masked
     assert d0.dtype is None
     assert d0.unitless
@@ -57,7 +56,7 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     d0.data = [1, 2, 3]  # put some data
     assert_array_equal(d0.data, np.array([1, 2, 3]))
     assert d0.dtype in TYPE_INTEGER
-    assert d0.date.date() == datetime.today().date()
+    assert d0.date.date() == datetime.now(timezone.utc).date()
     d0.date = datetime(2005, 10, 12)
     d0.date = "25/12/2025"
     assert d0.date == datetime(2025, 12, 25, 0, 0)
@@ -69,7 +68,7 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     d0.meta.something = "a_value"
     assert d0.meta.something == "a_value"
     info_('\n', d0[1])
-    assert d0[1] == 2  # only a single element so we get a squeezed array
+    assert d0[1].value == 2  # only a single element so we get a squeezed array
     d0.units = 'absorbance'
     assert d0.units == ur.absorbance
     info_('\n', d0[2])
@@ -134,7 +133,8 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert d6.dims == ['y', 'x']
     assert d6.size == refarray.size
     assert_array_equal(d6.data, refarray)
-    assert d6.data is ndarraymask.data  # by default we do not copy
+    assert d6._data is ndarraymask._data  # by default we do not copy
+    # d6.data and ndarraym ask.data are however different due to the addition of un offset
     assert d6.is_masked
     assert_array_equal(d6.mask, refmask)
     assert d6.mask is ndarraymask.mask  # no copy by default
@@ -165,11 +165,15 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
 
     # dtype specified
 
-    d8 = NDArray(ndarraymask, dtype=np.int64)
+    d8 = NDArray(ndarraymask, desc='with mask', dtype=np.int64)
     assert d8.shape == refarray.shape
     assert d8.data.dtype == np.int64
     assert d8.dims == ['y', 'x']
     assert d8.title == '<untitled>'
+    assert d8.description == 'with mask'
+    assert d8.desc == d8.description
+    assert len(ndarraymask.history) == 1  # one line already in
+    assert len(d8.history) == 2  # copy added
     info_('\n', d8)
 
     # intialisation with only labels
@@ -179,18 +183,26 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     info_('\n', d9)
 
     # fortran order
+
     x = ndarraymask.copy()
     x.asfortranarray()
     d10 = NDArray(x)
     assert d10 == x
     assert d10.data.flags['F_CONTIGUOUS']
+    info_('\n', d10)
+
+    # changing dims name
+    d11 = NDArray(labels='a b c d e f g h i j'.split(), title='labeled', dims=['q'], author='Blake',
+                  history='Created from scratch')
+    assert d11.dims == ['q']
+    assert d11.author == 'Blake'
+    info_('\n', d11)
+
+    assert '[  a   b ...   i   j]' in d11._repr_html_()  # comparison
 
 
 def test_ndarray_copy():
-    d0 = NDArray(np.linspace(4000, 1000, 10),
-                 labels='a  b  c  d  e  f  g  h  i  j'.split(),
-                 units='s',
-                 mask=False,
+    d0 = NDArray(np.linspace(4000, 1000, 10), labels='a  b  c  d  e  f  g  h  i  j'.split(), units='s', mask=False,
                  title='wavelength')
     d0[5] = MASKED
 
@@ -202,11 +214,8 @@ def test_ndarray_copy():
     assert_array_equal(d1.mask, d0.mask)
 
     d0 = NDArray(np.linspace(4000, 1000, 10),
-                 labels=['a  b  c  d  e  f  g  h  i  j'.split(),
-                         'bc cd de ef ab fg gh hi ja ij'.split()],
-                 units='s',
-                 mask=False,
-                 title='wavelength')
+                 labels=['a  b  c  d  e  f  g  h  i  j'.split(), 'bc cd de ef ab fg gh hi ja ij'.split()], units='s',
+                 mask=False, title='wavelength')
     d0[5] = MASKED
 
     d1 = d0.copy()
@@ -223,61 +232,10 @@ def test_ndarray_copy():
     assert d3 == d0
 
 
-def test_ndarray_comparison(ndarray, ndarrayunit, ndarraycplx, ndarrayquaternion):
-    # test comparison
-
-    nd1 = ndarray.copy()
-
-    assert nd1 == ndarray
-    assert nd1 is not ndarray
-
-    nd2 = ndarrayunit.copy()
-    assert nd2 == ndarrayunit
-
-    assert nd1 != nd2
-    assert not nd1 == nd2
-
-    nd3 = ndarraycplx.copy()
-    assert nd3 == ndarraycplx
-
-    nd4 = ndarrayquaternion.copy()
-    assert nd4 == ndarrayquaternion
-
-    assert nd1 != 'xxxx'
-
-    nd2n = nd2.to(None, force=True)
-    assert nd2n != nd2
-
-
-def test_ndarray_to_pandas(ndarray, ndarrayunit, ndarraycplx, ndarrayquaternion):
-    import pandas as pd
-
-    nd = ndarray[0].squeeze()
-    p = nd.to_pandas()
-    info_(p)
-    assert isinstance(p, pd.Index)
-
-    nd.units = 'km'
-    p = nd.to_pandas()
-    info_(p)
-    assert isinstance(p, pd.MultiIndex)
-
-    nd = ndarray.copy()
-    with pytest.raises(NotImplementedError):  # TODO: implement this
-        p = nd.to_pandas()
-
-    with pytest.raises(ValueError):
-        nd = NDArray()
-        nd.to_pandas()
-
-
 def test_ndarray_sort():
     # labels and sort
 
-    d0 = NDArray(np.linspace(4000, 1000, 10),
-                 labels='a b c d e f g h i j'.split(),
-                 units='s',
-                 mask=False,
+    d0 = NDArray(np.linspace(4000, 1000, 10), labels='a b c d e f g h i j'.split(), units='s', mask=False,
                  title='wavelength')
 
     assert d0.is_labeled
@@ -435,8 +393,7 @@ def test_ndarray_methods(refarray, ndarray, ndarrayunit):
 
     np.random.seed(12345)
     ndd = NDArray(data=np.random.random((3, 3)),
-                  mask=[[True, False, False], [False, True, False],
-                        [False, False, True]], units='meters')
+                  mask=[[True, False, False], [False, True, False], [False, False, True]], units='meters')
 
     with raises(Exception):
         ndd.to('second')
@@ -446,10 +403,8 @@ def test_ndarray_methods(refarray, ndarray, ndarrayunit):
 
     np.random.seed(12345)
     d = np.random.random((4, 3))
-    d3 = NDArray(d, units=ur.Hz,
-                 mask=[[False, True, False], [False, True, False],
-                       [False, True, False], [True, False, False]]
-                 )  # with units & mask
+    d3 = NDArray(d, units=ur.Hz, mask=[[False, True, False], [False, True, False], [False, True, False],
+                                       [True, False, False]])  # with units & mask
     assert d3.shape == (4, 3)
     assert d3._data.shape == (4, 3)
     assert d3.dims == ['y', 'x']
@@ -561,7 +516,6 @@ def test_ndarray_slicing(refarray, ndarray):
 
 
 def test_dim_names_specified(ndarray):
-
     nd = ndarray.copy()
     assert not nd.is_masked
     assert nd.dims == ['y', 'x']
@@ -579,8 +533,7 @@ def test_dim_names_specified(ndarray):
 def test_ndarray_slice_labels():
     # slicing only-label array
 
-    d0 = NDArray(labels='a b c d e f g h i j'.split(),
-                 title='labelled')
+    d0 = NDArray(labels='a b c d e f g h i j'.split(), title='labelled')
     assert d0.is_labeled
     info_('\n', repr(d0))
     info_("\n", d0)

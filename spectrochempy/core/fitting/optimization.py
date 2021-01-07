@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
@@ -31,7 +31,6 @@ def optimize(func, fp0, args=(), constraints={}, method="SIMPLEX",
              maxfun=None, maxiter=1000,
              ftol=1e-8, xtol=1e-8,
              callback=None):
-
     """
 
     Parameters
@@ -125,7 +124,8 @@ def optimize(func, fp0, args=(), constraints={}, method="SIMPLEX",
         result = scipy.optimize.basinhopping(internal_func, par,
                                              niter=100, T=1.0, stepsize=0.5,
                                              minimizer_kwargs={
-                                                 'args': tuple(args)},
+                                                     'args': tuple(args)
+                                                     },
                                              take_step=None,
                                              accept_test=None,
                                              callback=internal_callback,

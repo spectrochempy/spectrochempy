@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-# noinspection PyUnresolvedReferences
-from spectrochempy import (show,
-                           BaselineCorrection,
-                           NDDataset,
-                           ur)
+import os
 
 import pytest
-import os
+
+# noinspection PyUnresolvedReferences
+from spectrochempy import (
+    show,
+    BaselineCorrection,
+    NDDataset,
+    ur,
+    )
 
 path = os.path.dirname(os.path.abspath(__file__))
 
@@ -57,7 +60,6 @@ def test_basecor_multivariate(IR_dataset_2D):
 
 
 def test_notebook_basecor_bug():
-
     dataset = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
 
     s = dataset[:, 1260.0:5999.0]

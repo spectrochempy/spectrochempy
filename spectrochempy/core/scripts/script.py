@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
 import re
 import ast
 
-from traitlets import (HasTraits, Unicode, validate, TraitError, Instance,
-                       Float, )
+from traitlets import (
+    HasTraits, Unicode, validate, TraitError, Instance,
+    Float,
+    )
 
 from spectrochempy.core.project.baseproject import AbstractProject
 from spectrochempy.core import error_
@@ -23,11 +25,11 @@ class Script(HasTraits):
 
     """
     _name = Unicode()
-    _content = Unicode()
+    _content = Unicode(allow_none=True)
     _priority = Float(min=0., max=100.)
     _parent = Instance(AbstractProject, allow_none=True)
 
-    def __init__(self, name, content="", parent=None, priority=50.):
+    def __init__(self, name='unamed_script', content=None, parent=None, priority=50.):
         """
         Parameters
         ----------
@@ -50,6 +52,14 @@ class Script(HasTraits):
     def __call__(self, *args):
 
         return self.execute(*args)
+
+    def __eq__(self, other):
+        if self._content == other.content:
+            return True
+        return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     # ------------------------------------------------------------------------------------------------------------------
     # properties
@@ -85,9 +95,12 @@ class Script(HasTraits):
 
     @validate('_content')
     def _content_validate(self, proposal):
+
         pv = proposal['value']
-        if len(pv) < 1:
+        if len(pv) < 1:  # do not allow null but None
             raise TraitError("Script content must be non Null!")
+        if pv is None:
+            return
 
         try:
             ast.parse(pv)
@@ -105,8 +118,23 @@ class Script(HasTraits):
         self._parent = value
 
     # ------------------------------------------------------------------------------------------------------------------
-    # private methods
+    # prublic methods
     # ------------------------------------------------------------------------------------------------------------------
+    # ..................................................................................................................
+    def implements(self, name=None):
+        """
+        Utility to check if the current object implement `Project`.
+
+        Rather than isinstance(obj, Project) use object.implements('Project').
+
+        This is useful to check type without importing the module
+
+        """
+        if name is None:
+            return 'Script'
+        else:
+            return name == 'Script'
+
     def execute(self, localvars=None):
         co = 'from spectrochempy import *\n' \
              'import spectrochempy as scp\n' + self._content
@@ -129,9 +157,9 @@ class Script(HasTraits):
             # let's try to substitute the parent to the missing name
             regex = re.compile(r"'(\w+)'")
             s = regex.search(e.args[0]).group(1)
-            localvars[s] = self.parent                        # lgtm [py/modification-of-locals]
-                                                              # TODO: check if this a real error or not  (need to come
-                                                              #  back on this later)
+            localvars[s] = self.parent  # lgtm [py/modification-of-locals]
+            # TODO: check if this a real error or not  (need to come
+            #  back on this later)
         try:
             exec(code, globals(), localvars)
         except NameError as e:

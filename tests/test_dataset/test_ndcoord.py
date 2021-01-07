@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
@@ -10,12 +10,11 @@ from copy import copy
 import numpy as np
 import pytest
 
-from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.core.dataset.ndcoord import Coord, LinearCoord
+from spectrochempy.core.readers.importer import read
 from spectrochempy.units import ur, Quantity
-
 from spectrochempy.utils.testing import assert_array_equal, assert_equal_units
-
-from spectrochempy.core import info_, debug_
+from spectrochempy.core import info_, print_, debug_
 
 
 # ======================================================================================================================
@@ -99,83 +98,55 @@ def test_coord():
 
     # unitless coordinates
 
-    coord0 = Coord(data=np.linspace(4000, 1000, 10),
-                   labels=list('abcdefghij'),
-                   mask=None,
-                   units=None,
+    coord0 = Coord(data=np.linspace(4000, 1000, 10), labels=list('abcdefghij'), mask=None, units=None,
                    title='wavelength')
     assert coord0.units is None
     assert coord0.data[0] == 4000.
-    assert repr(coord0) == "Coord: [float64] unitless"
+    assert repr(coord0) == 'Coord: [float64] unitless (size: 10)'
 
     info_('\n' + str(coord0))
 
     # dimensionless coordinates
 
-    coord0 = Coord(data=np.linspace(4000, 1000, 10),
-                   labels=list('abcdefghij'),
-                   mask=None,
-                   units=ur.dimensionless,
+    coord0 = Coord(data=np.linspace(4000, 1000, 10), labels=list('abcdefghij'), mask=None, units=ur.dimensionless,
                    title='wavelength')
     assert coord0.units.dimensionless
     assert coord0.units.scaling == 1.
     assert coord0.data[0] == 4000.
-    assert repr(coord0) == "Coord: [float64]"
+    assert repr(coord0) == 'Coord: [float64]  (size: 10)'
 
     # scaled dimensionless coordinates
 
-    coord0 = Coord(data=np.linspace(4000, 1000, 10),
-                   labels=list('abcdefghij'),
-                   mask=None,
-                   units='m/km',
+    coord0 = Coord(data=np.linspace(4000, 1000, 10), labels=list('abcdefghij'), mask=None, units='m/km',
                    title='wavelength')
     assert coord0.units.dimensionless
     assert coord0.data[0] == 4000.  # <- displayed data to be multiplied by the scale factor
-    assert repr(coord0) == "Coord: [float64] scaled-dimensionless (0.001)"
+    assert repr(coord0) == 'Coord: [float64] scaled-dimensionless (0.001) (size: 10)'
 
-    coord0 = Coord(data=np.linspace(4000, 1000, 10),
-                   labels=list('abcdefghij'),
-                   mask=None,
-                   units=ur.m / ur.km,
+    coord0 = Coord(data=np.linspace(4000, 1000, 10), labels=list('abcdefghij'), mask=None, units=ur.m / ur.km,
                    title='wavelength')
 
     assert coord0.units.dimensionless
     assert coord0.data[0] == 4000.  # <- displayed data to be multiplied by the scale factor
-    assert repr(coord0) == "Coord: [float64] scaled-dimensionless (0.001)"
+    assert repr(coord0) == 'Coord: [float64] scaled-dimensionless (0.001) (size: 10)'
     info_('\n' + str(coord0))
 
-    coord0 = Coord(data=np.linspace(4000, 1000, 10),
-                   labels=list('abcdefghij'),
-                   mask=None,
-                   units="m^2/s",
+    coord0 = Coord(data=np.linspace(4000, 1000, 10), labels=list('abcdefghij'), mask=None, units="m^2/s",
                    title='wavelength')
     assert not coord0.units.dimensionless
     assert coord0.units.scaling == 1.
     assert coord0.data[0] == 4000.
-    assert repr(coord0) == "Coord: [float64] m^2.s^-1"
+    assert repr(coord0) == 'Coord: [float64] m^2.s^-1 (size: 10)'
 
     # comparison
 
-    coord0 = Coord(data=np.linspace(4000, 1000, 10),
-                   labels=list('abcdefghij'),
-                   mask=None,
-                   title='wavelength')
-    coord0b = Coord(data=np.linspace(4000, 1000, 10),
-                    labels='a b c d e f g h i j'.split(),
-                    mask=None,
+    coord0 = Coord(data=np.linspace(4000, 1000, 10), labels=list('abcdefghij'), mask=None, title='wavelength')
+    coord0b = Coord(data=np.linspace(4000, 1000, 10), labels='a b c d e f g h i j'.split(), mask=None,
                     title='wavelength')
-    coord1 = Coord(data=np.linspace(4000, 1000, 10),
-                   labels='a b c d e f g h i j'.split(),
-                   mask=None,
-                   title='titi')
-    coord2 = Coord(data=np.linspace(4000, 1000, 10),
-                   labels='b c d e f g h i j a'.split(),
-                   mask=None,
+    coord1 = Coord(data=np.linspace(4000, 1000, 10), labels='a b c d e f g h i j'.split(), mask=None, title='titi')
+    coord2 = Coord(data=np.linspace(4000, 1000, 10), labels='b c d e f g h i j a'.split(), mask=None,
                    title='wavelength')
-    coord3 = Coord(data=np.linspace(4000, 1000, 10),
-                   labels=None,
-                   mask=None,
-                   title='wavelength')
+    coord3 = Coord(data=np.linspace(4000, 1000, 10), labels=None, mask=None, title='wavelength')
 
     assert coord0 == coord0b
     assert coord0 != coord1  # different title
@@ -184,10 +155,7 @@ def test_coord():
 
     # init from another coord
 
-    coord0 = Coord(data=np.linspace(4000, 1000, 10),
-                   labels=list('abcdefghij'),
-                   units='s',
-                   mask=None,
+    coord0 = Coord(data=np.linspace(4000, 1000, 10), labels=list('abcdefghij'), units='s', mask=None,
                    title='wavelength')
 
     coord1 = Coord(coord0)
@@ -200,10 +168,7 @@ def test_coord():
 
     # sort
 
-    coord0 = Coord(data=np.linspace(4000, 1000, 10),
-                   labels=list('abcdefghij'),
-                   units='s',
-                   mask=None,
+    coord0 = Coord(data=np.linspace(4000, 1000, 10), labels=list('abcdefghij'), units='s', mask=None,
                    title='wavelength')
     assert coord0.is_labeled
     ax = coord0._sort()
@@ -215,10 +180,7 @@ def test_coord():
 
     # copy
 
-    coord0 = Coord(data=np.linspace(4000, 1000, 10),
-                   labels=list('abcdefghij'),
-                   units='s',
-                   mask=None,
+    coord0 = Coord(data=np.linspace(4000, 1000, 10), labels=list('abcdefghij'), units='s', mask=None,
                    title='wavelength')
 
     coord1 = coord0.copy()
@@ -237,35 +199,18 @@ def test_coord():
 
     # automatic reversing for wavenumbers
 
-    coord0 = Coord(data=np.linspace(4000, 1000, 10),
-                   units='cm^-1',
-                   mask=None,
-                   title='wavenumbers')
+    coord0 = Coord(data=np.linspace(4000, 1000, 10), units='cm^-1', mask=None, title='wavenumbers')
     assert coord0.reversed
-
-    # not implemented
-
-    coord0 = Coord(data=np.linspace(4000, 1000, 10),
-                   units='cm^-1',
-                   mask=None,
-                   title='wavelength')
-    with pytest.raises(AttributeError):
-        coord0.real
 
 
 def test_coord_slicing():
     # slicing by index
 
-    coord0 = Coord(data=np.linspace(4000, 1000, 10),
-                   mask=None,
-                   title='wavelength')
+    coord0 = Coord(data=np.linspace(4000, 1000, 10), mask=None, title='wavelength')
 
     assert coord0[0] == 4000.0
 
-    coord1 = Coord(data=np.linspace(4000, 1000, 10),
-                   units='cm^-1',
-                   mask=None,
-                   title='wavelength')
+    coord1 = Coord(data=np.linspace(4000, 1000, 10), units='cm^-1', mask=None, title='wavelength')
     c1 = coord1[0]
     assert isinstance(c1.values, Quantity)
     assert coord1[0].values == 4000.0 * (1. / ur.cm)
@@ -274,11 +219,7 @@ def test_coord_slicing():
 
     labs = list('abcdefghij')
 
-    coord0 = Coord(data=np.linspace(4000, 1000, 10),
-                   labels=labs,
-                   units='cm^-1',
-                   mask=None,
-                   title='wavelength')
+    coord0 = Coord(data=np.linspace(4000, 1000, 10), labels=labs, units='cm^-1', mask=None, title='wavelength')
 
     assert coord0[0].values == 4000.0 * (1. / ur.cm)
     assert isinstance(coord0[0].values, Quantity)
@@ -299,19 +240,12 @@ def test_coord_slicing():
 # ----------------------------------------------------------------------------------------------------------------------
 
 # first operand has units km, second is a scalar with units m
-@pytest.mark.parametrize(('operation', 'result_units'), [
-                             ('__add__', ur.km),
-                             ('__sub__', ur.km),
-                             ('__mul__', ur.km * ur.m),
-                             ('__truediv__', ur.km / ur.m)
-                          ]
-                         )
+@pytest.mark.parametrize(('operation', 'result_units'),
+                         [('__add__', ur.km), ('__sub__', ur.km), ('__mul__', ur.km * ur.m),
+                          ('__truediv__', ur.km / ur.m)])
 def test_coord_unit_conversion_operators_a(operation, result_units):
     print(operation, result_units)
-    in_km = Coord(data=np.linspace(4000, 1000, 10),
-                  units='km',
-                  mask=None,
-                  title='something')
+    in_km = Coord(data=np.linspace(4000, 1000, 10), units='km', mask=None, title='something')
 
     scalar_in_m = 2. * ur.m
 
@@ -322,16 +256,12 @@ def test_coord_unit_conversion_operators_a(operation, result_units):
     assert_equal_units(combined.units, result_units)
 
 
-UNARY_MATH = ["fabs", "ceil", "floor", "negative", "reciprocal",
-              "rint", "sqrt", "square"]
+UNARY_MATH = ["fabs", "ceil", "floor", "negative", "reciprocal", "rint", "sqrt", "square"]
 
 
 @pytest.mark.parametrize('name', UNARY_MATH)
 def test_coord_unary_ufuncs_simple_data(name):
-    coord0 = Coord(data=np.linspace(4000, 1000, 10),
-                   units='km',
-                   mask=None,
-                   title='something')
+    coord0 = Coord(data=np.linspace(4000, 1000, 10), units='km', mask=None, title='something')
 
     f = getattr(np, name)
     r = f(coord0)
@@ -339,14 +269,9 @@ def test_coord_unary_ufuncs_simple_data(name):
 
 
 # first operand has units km, second is a scalar unitless
-@pytest.mark.parametrize(('operation', 'result_units'), [
-    ('__mul__', ur.km),
-    ('__truediv__', ur.km)])
+@pytest.mark.parametrize(('operation', 'result_units'), [('__mul__', ur.km), ('__truediv__', ur.km)])
 def test_coord_unit_conversion_operators(operation, result_units):
-    in_km = Coord(data=np.linspace(4000, 1000, 10),
-                  units='km',
-                  mask=None,
-                  title='something')
+    in_km = Coord(data=np.linspace(4000, 1000, 10), units='km', mask=None, title='something')
 
     scalar = 2.
 
@@ -357,17 +282,57 @@ def test_coord_unit_conversion_operators(operation, result_units):
     assert_equal_units(combined.units, result_units)
 
 
-NOTIMPL = ['cumsum', 'mean',
-           'pipe', 'remove_masks',
-           'std', 'sum', 'swapaxes'
-           ]
+NOTIMPL = ['cumsum', 'mean', 'pipe', 'remove_masks', 'std', 'sum', 'swapaxes']
 
 
 @pytest.mark.parametrize('name', NOTIMPL)
 def test_coord_not_implemented(name):
-    coord0 = Coord(data=np.linspace(4000, 1000, 10),
-                   units='cm^-1',
-                   mask=None,
-                   title='wavelength')
+    coord0 = Coord(data=np.linspace(4000, 1000, 10), units='cm^-1', mask=None, title='wavelength')
     with pytest.raises(NotImplementedError):
         getattr(coord0, name)()
+
+
+def test_linearcoord():
+    coord1 = Coord([1, 2.5, 4, 5])
+
+    coord2 = Coord(np.array([1, 2.5, 4, 5]))
+    assert coord2 == coord1
+
+    coord3 = Coord(range(10))
+
+    coord4 = Coord(np.arange(10))
+    assert coord4 == coord3
+
+    coord5 = coord4.copy()
+    coord5 += 1
+    assert np.all(coord5.data == coord4.data + 1)
+
+    assert coord5 is not None
+    coord5.linear = True
+    print_('Linear coordinate', coord5)
+
+    coord6 = Coord(linear=True, offset=2.0, increment=2.0, size=10)
+    assert np.all(coord6.data == (coord4.data + 1.0) * 2.)
+
+    # %%
+    coord7 = LinearCoord(offset=2.0, increment=2.0, size=10)
+    print_(coord7)
+
+    # %%
+    X = read('irdata/CO@Mo_Al2O3.SPG')
+    print_(X.x)
+    XX = X.x.copy()
+    X.x.linear = True
+    print_((X.x.data - XX.data).ptp(), X.x.increment,
+           (X.x.data - XX.data).ptp() * 100 / X.x.increment)  # TODO : why such a difference!!!!
+    print(X.x._data)
+
+    print(X.x.offset)
+    X.x.ito('m^-1')
+    print(X.x.offset_value)
+
+    coord0 = LinearCoord.linspace(200., 300., 3, labels=['cold', 'normal', 'hot'], units="K", title='temperature')
+    coord1 = LinearCoord.linspace(0., 60., 100, labels=None, units="minutes", title='time-on-stream')
+    coord2 = LinearCoord.linspace(4000., 1000., 100, labels=None, units="cm^-1", title='wavenumber')
+
+    print(coord0.size, coord1.size, coord2.size)

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
@@ -31,11 +31,10 @@ from traitlets import HasTraits, Instance
 # ----------------------------------------------------------------------------------------------------------------------
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
-from spectrochempy.core import project_preferences
 from spectrochempy.core.analysis.svd import SVD
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.npy import diag, dot
+from spectrochempy.core.dataset.npy import dot
 from spectrochempy.utils import docstrings, NRed, NBlue
 
 
@@ -97,6 +96,7 @@ class PCA(HasTraits):
             :math:`X' = (X - min(X)) / (max(X)-min(X))`
 
         """
+        self.prefs = dataset.preferences
 
         self.X = X = dataset
 
@@ -133,7 +133,7 @@ class PCA(HasTraits):
         # perform SVD
         # -----------
         svd = SVD(Xsc)
-        sigma = diag(svd.s)
+        sigma = svd.s.diag()
         U = svd.U
         VT = svd.VT
 
@@ -150,8 +150,8 @@ class PCA(HasTraits):
 
         S = dot(U, sigma)
         S.title = 'scores (S) of ' + X.name
-        S.set_coords(y=X.y, x=Coord(None, labels=['#%d' % (i + 1) for i in range(svd.s.size)],
-                                    title='principal component'))
+        S.set_coordset(y=X.y, x=Coord(None, labels=['#%d' % (i + 1) for i in range(svd.s.size)],
+                                      title='principal component'))
 
         S.description = 'scores (S) of ' + X.name
         S.history = 'Created by PCA'
@@ -483,9 +483,8 @@ class PCA(HasTraits):
                               c=colors,
                               cmap=colormap)
 
-            number_x_labels = project_preferences.number_of_x_labels  # get
-            # from config
-            number_y_labels = project_preferences.number_of_y_labels
+            number_x_labels = self.prefs.number_of_x_labels  # get from config
+            number_y_labels = self.prefs.number_of_y_labels
             # the next two line are to avoid multipliers in axis scale
             y_formatter = ScalarFormatter(useOffset=False)
             ax.yaxis.set_major_formatter(y_formatter)

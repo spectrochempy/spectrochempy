@@ -1,38 +1,36 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
 __all__ = ['Project']
 
-import os
-import uuid
-import json
-import warnings
 from copy import copy as cpy
-# from collections import OrderedDict
 
+import uuid
+import pathlib
+import dill
 from functools import wraps
-
 from traitlets import (Dict, Instance, Unicode, This, default)
 
-from spectrochempy.core import general_preferences, config_manager, config_dir, project_preferences, app
-from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.nddataset import NDDataset, NDIO
 from spectrochempy.core.scripts.script import Script
-from spectrochempy.utils import Meta, SpectroChemPyWarning, make_zipfile, ScpFile
+from spectrochempy.utils import Meta
 from spectrochempy.core.project.baseproject import AbstractProject
-# from spectrochempy.units.units import Quantity
 
-cfg = config_manager
-preferences = general_preferences
+
+# from collections import OrderedDict
+
+# cfg = config_manager
+# preferences = preferences
 
 
 # ======================================================================================================================
 # Project class
 # ======================================================================================================================
-class Project(AbstractProject):
+class Project(AbstractProject, NDIO):
     """A manager for multiple projects and datasets in a main project
 
     """
@@ -46,7 +44,8 @@ class Project(AbstractProject):
     _scripts = Dict(Instance(Script))
     _others = Dict()
     _meta = Instance(Meta)
-    _filename = Unicode()
+
+    _filename = Instance(pathlib.Path, allow_none=True)
 
     # ..................................................................................................................
     def __init__(self, *args, argnames=None, name=None, **meta):
@@ -68,6 +67,8 @@ class Project(AbstractProject):
         meta : any other attributes to described the project
 
         """
+        super().__init__()
+
         self.parent = None
         self.name = name
 
@@ -106,8 +107,7 @@ class Project(AbstractProject):
 
     # ..................................................................................................................
     def _get_from_type(self, name):
-        pass
-        # TODO: ???
+        pass  # TODO: ???
 
     # ..................................................................................................................
     def _repr_html_(self):
@@ -176,8 +176,7 @@ class Project(AbstractProject):
             return self.meta[item]
 
         else:
-            raise AttributeError(
-                "`%s` has no attribute `%s`" % (type(self).__name__, item))
+            raise AttributeError("`%s` has no attribute `%s`" % (type(self).__name__, item))
 
     # ..................................................................................................................
     def __iter__(self):
@@ -195,14 +194,14 @@ class Project(AbstractProject):
             ns += 1
             sep = "   " * ns
 
-            for k, v in project._projects.items():
+            for k, v in sorted(project._projects.items()):
                 s += "{} ⤷ {} (sub-project)\n".format(sep, k)
                 s = _listproj(s, v, ns)  # recursive call
 
-            for k, v in project._datasets.items():
+            for k, v in sorted(project._datasets.items()):
                 s += "{} ⤷ {} (dataset)\n".format(sep, k)
 
-            for k, v in project._scripts.items():
+            for k, v in sorted(project._scripts.items()):
                 s += "{} ⤷ {} (script)\n".format(sep, k)
 
             if len(s) == lens:
@@ -216,16 +215,14 @@ class Project(AbstractProject):
     def __dir__(self):
         return ['name', 'meta', 'parent', 'datasets', 'projects', 'scripts', ]
 
-    def _cpy__(self):
+    def __copy__(self):
         new = Project()
-        new.name = self.name + 'cpy'
+        new.name = self.name + '*'
         for item in self.__dir__():
             if item == 'name':
                 continue
             item = "_" + item
             setattr(new, item, cpy(getattr(self, item)))
-            if item == '_projects':
-                print()
         return new
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -331,6 +328,11 @@ class Project(AbstractProject):
             d.append(self._datasets[name])
         return d
 
+    @datasets.setter
+    def datasets(self, datasets):
+
+        self.add_datasets(*datasets)
+
     # ..................................................................................................................
     @property
     def projects_names(self):
@@ -353,6 +355,11 @@ class Project(AbstractProject):
         for name in self.projects_names:
             p.append(self._projects[name])
         return p
+
+    @projects.setter
+    def projects(self, projects):
+
+        self.add_projects(*projects)
 
     # ..................................................................................................................
     @property
@@ -377,6 +384,11 @@ class Project(AbstractProject):
             s.append(self._scripts[name])
         return s
 
+    @scripts.setter
+    def scripts(self, scripts):
+
+        self.add_scripts(*scripts)
+
     @property
     def allnames(self):
         """
@@ -393,41 +405,35 @@ class Project(AbstractProject):
         """
         return list(self._datasets.items()) + list(self._projects.items()) + list(self._scripts.items())
 
-    @property
-    def filename(self):
-        """
-        str - current filename for this project.
-
-        """
-        if self._filename:
-            return os.path.basename(self._filename)
-        else:
-            return self.id
-
-    @property
-    def directory(self):
-        """
-        str - current directory for this project.
-
-        """
-        if self._filename:
-            return os.path.dirname(self._filename)
-        else:
-            return ''
-
     # ------------------------------------------------------------------------------------------------------------------
     # Public methods
     # ------------------------------------------------------------------------------------------------------------------
+
+    # ..................................................................................................................
+    def implements(self, name=None):
+        """
+        Utility to check if the current object implement `Project`.
+
+        Rather than isinstance(obj, Project) use object.implements('Project').
+
+        This is useful to check type without importing the module
+
+        """
+        if name is None:
+            return 'Project'
+        else:
+            return name == 'Project'
 
     def copy(self):
         """
         Make an exact copy of the current project
 
         """
-        return cpy(self)
+        return self.__copy__()
 
-    # ..................................................................................................................
+    # ------------------------------------------------------------------------------------------------------------------
     # dataset items
+    # ------------------------------------------------------------------------------------------------------------------
 
     # ..................................................................................................................
     def add_datasets(self, *datasets):
@@ -480,6 +486,8 @@ class Project(AbstractProject):
         dataset.parent = self
         if name is None:
             name = dataset.name
+        else:
+            dataset.name = name
         self._datasets[name] = dataset
 
     # ..................................................................................................................
@@ -507,8 +515,9 @@ class Project(AbstractProject):
             v._parent = None
         self._datasets = {}
 
-    # ..................................................................................................................
+    # ------------------------------------------------------------------------------------------------------------------
     # project items
+    # ------------------------------------------------------------------------------------------------------------------
 
     # ..................................................................................................................
     def add_projects(self, *projects):
@@ -538,6 +547,8 @@ class Project(AbstractProject):
         proj.parent = self
         if name is None:
             name = proj.name
+        else:
+            proj.name = name
         self._projects[name] = proj
 
     # ..................................................................................................................
@@ -564,8 +575,9 @@ class Project(AbstractProject):
             v._parent = None
         self._projects = {}
 
-    # ..................................................................................................................
+    # ------------------------------------------------------------------------------------------------------------------
     # script items
+    # ------------------------------------------------------------------------------------------------------------------
 
     # ..................................................................................................................
     def add_scripts(self, *scripts):
@@ -596,6 +608,8 @@ class Project(AbstractProject):
         script.parent = self
         if name is None:
             name = script.name
+        else:
+            script.name = name
         self._scripts[name] = script
 
     # ..................................................................................................................
@@ -608,251 +622,6 @@ class Project(AbstractProject):
         for v in self._scripts.values():
             v._parent = None
         self._scripts = {}
-
-    # ..................................................................................................................
-    def save(self, filename=None, directory=None, overwrite_data=True,
-             **kwargs):
-        """
-        Save the current project
-        (default extension : ``.pscp`` ).
-
-        Parameters
-        ----------
-        filename : str
-            The filename of the file where to save the current dataset
-        directory : str, optional.
-            If the destination path is not given, the project will be saved in
-            the default location defined in the configuration options.
-        overwrite_data : bool
-            If True the default, everything is saved, even if the data
-            already exists (overwrite. If False, only other object or
-            attributes can be changed. This allow to keep the original data
-            intact. Processing step that may change this data can be saved in
-            scripts.
-
-        See Also
-        --------
-        load
-
-        """
-
-        # get the filename associated to this project
-
-        directory = kwargs.get("directory", general_preferences.project_directory)
-
-        if not filename:
-            # the current file name or default filename (project name)
-            filename = self.name
-            if self.directory:
-                directory = self.directory
-
-        if not os.path.exists(directory):
-            raise IOError("directory doesn't exists!")
-
-        if not filename.endswith('.pscp'):
-            filename = filename + '.pscp'
-
-        if os.path.isdir(directory):
-            filename = os.path.expanduser(os.path.join(directory, filename))
-        else:
-            warnings.warn('Provided directory is a file, '
-                          'so we use its parent directory',
-                          SpectroChemPyWarning)
-            directory = os.path.dirname(directory)
-            filename = os.path.join(directory, filename)
-
-        # Handle the case when we want to preserve the data (partial saving
-        # of scripts)
-
-        global savedproj, keepdata
-        keepdata = False
-        if not overwrite_data and os.path.exists(filename):
-            # We need to check if the file already exists, as we want not to
-            # change the original data
-            keepdata = True
-            # get the original project
-            savedproj = Project.load(filename)
-
-        # Imports deferred for startup time improvement
-
-        import zipfile
-        import tempfile
-
-        compression = zipfile.ZIP_DEFLATED
-        zipf = make_zipfile(filename, mode="w", compression=compression)
-
-        # Stage data in a temporary file on disk, before writing to zip.
-        fd, tmpfile = tempfile.mkstemp(suffix='-spectrochempy.pscp.scp')
-        os.close(fd)
-
-        pars = {}
-        objnames = self.__dir__()
-
-        def _loop_on_obj(_names, obj=self, parent='', level='main.'):
-
-            for key in _names:
-
-                val = getattr(obj, "_%s" % key)
-                if val is None:
-                    # ignore None - when reading if something is missing it
-                    # will be considered as None anyways
-                    continue
-
-                elif key == 'projects':
-                    pars[level + key] = []
-                    for k, proj in val.items():
-                        _objnames = dir(proj)
-                        _loop_on_obj(_objnames, obj=proj, parent=level[:-1],
-                                     level=k + '.')
-                        pars[level + key].append(k)
-
-                elif key == 'datasets':
-                    pars[level + key] = []
-                    for k, ds in val.items():
-                        if not keepdata:
-                            ds.save(filename=tmpfile)
-                        else:
-                            # we take the saved version
-                            if level == 'main.':
-                                savedproj[k].save(filename=tmpfile)
-                            else:
-                                savedproj[level[:-1]][k].save(filename=tmpfile)
-                        fn = '%s%s.scp' % (level, k)
-                        zipf.write(tmpfile, arcname=fn)
-                        pars[level + key].append(fn)
-
-                elif key == 'scripts':
-                    pars[level + key] = []
-                    for k, sc in val.items():
-                        _objnames = dir(sc)
-                        _loop_on_obj(_objnames, obj=sc, parent=level[:-1],
-                                     level=k + '.')
-                        pars[level + key].append(k)
-
-                elif isinstance(val, Meta):
-                    # we assume that objects in the meta objects
-                    # are all json serialisable #TODO: could be imporved.
-                    pars[level + key] = val.to_dict()
-
-                elif key == 'parent':
-                    pars[level + key] = parent
-
-                else:
-                    # probably some string
-                    pars[level + key] = val
-
-        # Recursive scan on Project content
-        _loop_on_obj(objnames)
-
-        with open(tmpfile, 'w') as f:
-            f.write(json.dumps(pars, sort_keys=True, indent=2))
-        zipf.write(tmpfile, arcname='pars.json')
-
-        # add also the preference json in the zipfile
-        prefjsonfile = os.path.join(config_dir, 'ProjectPreferences.json')
-        if os.path.exists(prefjsonfile):
-            zipf.write(prefjsonfile, arcname='ProjectPreferences.json')
-
-        # resume the saving process
-        os.remove(tmpfile)
-        zipf.close()
-
-        self._filename = filename
-
-    @classmethod
-    def load(cls, filename='', directory=None, **kwargs):
-        """Load a project file ( extension : ``.pscp``).
-
-        It's a class method, that can be used directly on the class,
-        without prior opening of a class instance.
-
-        Parameters
-        ----------
-        filename : str
-            The filename to the file to be read.
-        directory : str, optional
-            The directory from where to load the file. If this information is
-            not given, the project will be loaded if possible from
-            the default location defined in the configuration options.
-
-        See Also
-        --------
-        save
-
-
-        """
-        # TODO: use pathlib instead of os.path? may simplify the code.
-
-        if not filename:
-            raise IOError('no filename provided!')
-
-        directory, filename = os.path.split(filename)
-
-        if not os.path.exists(directory):
-            directory = kwargs.get("directory",
-                                   preferences.project_directory)
-        elif kwargs.get("directory", None) is not None:
-            warnings.warn("got multiple directory information. Use that "
-                          "obtained "
-                          "from filename!", SpectroChemPyWarning)
-
-        filename = os.path.expanduser(os.path.join(directory, filename))
-        if (not os.path.exists(filename) or os.path.isdir(filename)
-            # this may happen when the zip has been decompressed externally (we ignore this)
-            ) and not filename.endswith('.pscp'):
-            filename = filename + '.pscp'
-            if not os.path.exists(filename):
-                raise IOError('no valid project filename provided')
-
-        fid = open(filename, 'rb')
-
-        # open the zip file as a dict-like object
-        obj = ScpFile(fid)
-
-        # read json files in the pscp file (obj[f])
-        # then write it in the main config directory
-        f = 'ProjectPreferences.json'
-        if f in obj.files:   #TODO: work on this
-            prefjsonfile = os.path.join(config_dir, f)
-            with open(prefjsonfile, 'w') as fd:
-                json.dump(obj[f], fd, indent=4)
-            # we must also reinit preferences
-            app.init_all_preferences()
-            app.load_config_file(prefjsonfile)
-            app.project_preferences = ProjectPreferences(config=app.config, parent=app)
-
-        # make a project (or a subclass of it, so we use cls)
-        pars = obj['pars.json']
-
-        def _make_project(_cls, pars, obj, pname):
-
-            args = []
-            argnames = []
-
-            projects = pars['%s.projects' % pname]
-            for item in projects:
-                args.append(_make_project(Project, pars, obj, item))
-                argnames.append(item)
-
-            datasets = pars['%s.datasets' % pname]
-            for item in datasets:
-                args.append(obj[item])
-                item = item.split('.')
-                argnames.append(item[-2])
-
-            scripts = pars['%s.scripts' % pname]
-            for item in scripts:
-                args.append(Script(item, pars['%s.content' % item]))
-                argnames.append(item)
-
-            name = pars['%s.name' % pname]
-            meta = pars['%s.meta' % pname]
-
-            new = _cls(*args, argnames=argnames, name=name, **meta)
-
-            return new
-
-        return _make_project(cls, pars, obj, 'main')
 
 
 def makescript(priority=50):

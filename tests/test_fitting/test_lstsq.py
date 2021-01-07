@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-import spectrochempy.core as sc
 import numpy as np
-
 import matplotlib.pyplot as plt
+
+import spectrochempy.core as sc
 
 
 # ............................................................................
@@ -46,7 +46,7 @@ def test_implicit_lstsq():
                  title='time')
 
     d = sc.NDDataset(data=[-1, 0.2, 0.9, 2.1],
-                     coords=[t],
+                     coordset=[t],
                      units='kilometer',
                      title='distance')
 

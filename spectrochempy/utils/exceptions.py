@@ -1,19 +1,14 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
 import warnings
-# from .print import pstr
 
-__all__ = ['SpectroChemPyWarning',
-           'SpectroChemPyDeprecationWarning',
-           'SpectroChemPyException',
-           'UnitsCompatibilityError',
-           'deprecated',
-           ]
+__all__ = ['SpectroChemPyWarning', 'SpectroChemPyException', 'UnitsCompatibilityError', 'DimensionsCompatibilityError',
+           'CoordinateMismatchError', 'ProtocolError', 'deprecated', ]
 
 
 # ======================================================================================================================
@@ -24,14 +19,6 @@ __all__ = ['SpectroChemPyWarning',
 class SpectroChemPyWarning(Warning):
     """
     The base warning class for SpectroChemPy warnings.
-
-    """
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-class SpectroChemPyDeprecationWarning(SpectroChemPyWarning):
-    """
-    A warning class to indicate that something is deprecated.
 
     """
 
@@ -53,6 +40,29 @@ class UnitsCompatibilityError(SpectroChemPyException):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
+class DimensionsCompatibilityError(SpectroChemPyException):
+    """
+    Exception raised when dimensions are not compatible for concatenation for instance
+
+    """
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+class CoordinateMismatchError(SpectroChemPyException):
+    """
+    Exception raised when object coordinates differ
+
+    """
+
+
+class ProtocolError(SpectroChemPyException):
+
+    def __init__(self, protocol, available_protocols):
+        print(f'The `{protocol}` protocol is unknown or not yet implemented:\n'
+              f'it is expected to be one of {tuple(available_protocols)}')
+
+
+# ----------------------------------------------------------------------------------------------------------------------
 def deprecated(message):
     """
     Deprecation decorator
@@ -66,9 +76,7 @@ def deprecated(message):
 
     def deprecation_decorator(func):
         def wrapper(*args, **kwargs):
-            warnings.warn("The function `{} is deprecated : {}".format(
-                func.__name__, message),
-                SpectroChemPyDeprecationWarning)
+            warnings.warn("The function `{} is deprecated : {}".format(func.__name__, message), DeprecationWarning)
             return func(*args, **kwargs)
 
         return wrapper

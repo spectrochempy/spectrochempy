@@ -2,7 +2,7 @@
 
 #
 # =============================================================================
-# Copyright (©) 2015-2020 LCS
+# Copyright (©) 2015-2021 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -83,16 +83,18 @@ class SIMPLISMA(HasTraits):
 
         """
 
+        super().__init__()
+
         # ------------------------------------------------------------------------
         # Utility functions
         # ------------------------------------------------------------------------
         def figures_of_merit(X, maxPIndex, C, St, j):
             # return %explained variance and stdev of residuals when the jth compound is added
-            C.data[:, j] = X.data[:, maxPIndex[j]]
-            St.data[0:j + 1, :] = np.linalg.lstsq(C.data[:, 0:j + 1], X.data, rcond=None)[0]
+            C[:, j] = X[:, maxPIndex[j]]
+            St[0:j + 1, :] = np.linalg.lstsq(C.data[:, 0:j + 1], X.data, rcond=None)[0]
             Xhat = dot(C[:, 0:j + 1], St[0:j + 1, :])
             res = Xhat - X
-            stdev_res = np.std(res.data)
+            stdev_res = np.std(res)
             rsquare = 1 - np.linalg.norm(res) ** 2 / np.linalg.norm(X) ** 2
             return rsquare, stdev_res
 
@@ -156,34 +158,34 @@ class SIMPLISMA(HasTraits):
         # ---------------------------------------------------
         # purity 'spectra' (generally spectra if X is passed,
         # but could also be concentrations if X.T is passed)
-        Pt = NDDataset(np.zeros((n_pc, X.shape[-1])))
+        Pt = NDDataset.zeros((n_pc, X.shape[-1]))
         Pt.name = 'Purity spectra'
-        Pt.set_coords(y=Pt.y, x=X.x)
+        Pt.set_coordset(y=Pt.y, x=X.x)
         Pt.y.title = '# pure compound'
 
         # weight matrix
-        w = NDDataset(np.zeros((n_pc, X.shape[-1])))
-        w.set_coords(y=Pt.y, x=X.x)
+        w = NDDataset.zeros((n_pc, X.shape[-1]))
+        w.set_coordset(y=Pt.y, x=X.x)
 
         # Stdev spectrum
-        s = NDDataset(np.zeros((n_pc, X.shape[-1])))
+        s = NDDataset.zeros((n_pc, X.shape[-1]))
         s.name = 'Standard deviation spectra'
-        s.set_coords(y=Pt.y, x=X.x)
+        s.set_coordset(y=Pt.y, x=X.x)
 
         # maximum purity indexes and coordinates
         maxPIndex = [0] * n_pc
         maxPCoordinate = [0] * n_pc
 
         # Concentration matrix
-        C = NDDataset(np.zeros((X.shape[-2], n_pc)))
+        C = NDDataset.zeros((X.shape[-2], n_pc))
         C.name = 'Relative Concentrations'
-        C.set_coords(y=X.y, x=C.x)
+        C.set_coordset(y=X.y, x=C.x)
         C.x.title = '# pure compound'
 
         # Pure component spectral profiles
-        St = NDDataset(np.zeros((n_pc, X.shape[-1])))
+        St = NDDataset.zeros((n_pc, X.shape[-1]))
         St.name = 'Pure compound spectra'
-        St.set_coords(y=Pt.y, x=X.x)
+        St.set_coordset(y=Pt.y, x=X.x)
 
         # Compute Statistics
         # ------------------
@@ -347,7 +349,7 @@ class SIMPLISMA(HasTraits):
                     if ans.lower() == 'r':
                         maxPCoordinate[j] = 0
                         maxPIndex[j] = 0
-                        logs += f'   |--> rejected pure variable #{j+1}\n'
+                        logs += f'   |--> rejected pure variable #{j + 1}\n'
                         j = j - 1
 
                     elif ans.lower() == 'a':
@@ -394,14 +396,6 @@ class SIMPLISMA(HasTraits):
         self.C = C
         self.St = St
         self.s = s
-
-    # ------------------------------------------------------------------------
-    # Special methods
-    # ------------------------------------------------------------------------
-
-    # ------------------------------------------------------------------------
-    # Public methods
-    # ------------------------------------------------------------------------
 
     def reconstruct(self):
         """

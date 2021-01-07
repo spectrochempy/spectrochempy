@@ -1,21 +1,42 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 # suppress test for PEP8 in this file
 # flake8: noqa
 
-import os
+from os import environ
+import pathlib
+
 import numpy as np
-import pandas as pd
 import pytest
 
+try:
+    # work only if spectrochempy is installed
+    import spectrochempy
+except ModuleNotFoundError: # pragma: no cover
+    raise ModuleNotFoundError('You must install spectrochempy and its dependencies before executing tests!')
+
+from spectrochempy.core import preferences as prefs
+from spectrochempy.core.dataset.ndarray import NDArray
+from spectrochempy.core.dataset.ndcomplex import NDComplexArray
+from spectrochempy.core.dataset.ndcoordset import CoordSet
+from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.core.dataset.nddataset import NDDataset
+# TODO: from spectrochempy.core.dataset.ndpanel import NDPanel
+from spectrochempy.core.scripts.script import Script
+from spectrochempy.core.project.project import Project
+from spectrochempy.utils import pathclean
+from spectrochempy.utils.testing import RandomSeedContext
+
+# ======================================================================================================================
+# FIXTURES
+# ======================================================================================================================
 
 # initialize a ipython session before calling spectrochempy
 # ----------------------------------------------------------------------------------------------------------------------
-
 @pytest.fixture(scope='session')
 def session_ip():
     try:
@@ -30,39 +51,36 @@ def ip(session_ip):
     yield session_ip
 
 
-# ======================================================================================================================
-# FIXTURES
-# ======================================================================================================================
-try:
-    # work only if spectrochempy is installed
-    from spectrochempy.core import app
-except ModuleNotFoundError:
-    raise ModuleNotFoundError('You must install spectrochempy and its dependencies '
-                              'before executing tests!')
-from spectrochempy.core.dataset.ndarray import NDArray
-from spectrochempy.core.dataset.ndcomplex import NDComplexArray
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndpanel import NDPanel
-from spectrochempy.core.dataset.ndcoordset import CoordSet
-from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.utils.testing import RandomSeedContext
-from spectrochempy.core import general_preferences as prefs
+def pytest_sessionfinish(session, exitstatus): # pragma: no cover
+    """ whole test run finishes. """
+
+    # cleaning
+    cwd = pathlib.Path(__file__).parent.parent
+
+    for f in list(cwd.glob('**/*.?scp')):
+        f.unlink()
+    for f in list(cwd.glob('**/*.jdx')):
+        f.unlink()
+    for f in list(cwd.glob('**/*.json')):
+        f.unlink()
+    for f in list(cwd.glob('**/*.log')):
+        f.unlink()
+
+    docs = cwd / 'docs'
+    for f in list(docs.glob('**/*.ipynb')):
+        f.unlink()
+
+# set test file and folder in environment
+# set a test file in environment
+
+datadir = pathclean(prefs.datadir)
+
+environ['TEST_FILE'] = str(datadir / 'irdata' / 'nh4y-activation.spg')
+environ['TEST_FOLDER'] = str(datadir / 'irdata' / 'subdir')
+environ['TEST_NMR_FOLDER'] = str(datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'topspin_2d')
 
 
-# Handle command line argument for spectrochempy
 # ----------------------------------------------------------------------------------------------------------------------
-
-def pytest_cmdline_preparse(config, args):
-    for item in args[:]:
-        for k in list(app.flags.keys()):
-            if item.startswith("--" + k) or k in ['--help', '--help-all']:
-                args.remove(item)
-            continue
-        for k in list(app.aliases.keys()):
-            if item.startswith("-" + k) or k in ['h', ]:
-                args.remove.append(item)
-
-
 # create reference arrays
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -76,6 +94,7 @@ ref3d_mask = ref3d_data < -3
 ref3d_2_mask = ref3d_2_data < -2
 
 
+# ----------------------------------------------------------------------------------------------------------------------
 # Fixtures: some NDArray's
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -92,7 +111,7 @@ def refmask():
 @pytest.fixture(scope="function")
 def ndarray():
     # return a simple ndarray with some data
-    return NDArray(ref_data, copy=True).copy()
+    return NDArray(ref_data, desc= "An array", copy=True).copy()
 
 
 @pytest.fixture(scope="function")
@@ -104,9 +123,10 @@ def ndarrayunit():
 @pytest.fixture(scope="function")
 def ndarraymask():
     # return a simple ndarray with some data and units
-    return NDArray(ref_data, mask=ref_mask, units='m/s', copy=True).copy()
+    return NDArray(ref_data, mask=ref_mask, units='m/s', history='Creation with mask', copy=True).copy()
 
 
+# ----------------------------------------------------------------------------------------------------------------------
 # Fixtures: Some NDComplex's array
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -121,7 +141,7 @@ def ndarrayquaternion():
     # return a quaternion ndarray
     return NDComplexArray(ref_data, units='m/s', dtype=np.quaternion, copy=True).copy()
 
-
+# ----------------------------------------------------------------------------------------------------------------------
 # Fixtures: Some NDDatasets
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -203,13 +223,13 @@ def ref_ds():
 @pytest.fixture(scope="function")
 def ds1():
     # a dataset with coordinates
-    return NDDataset(ref3d_data, coords=[coord0_, coord1_, coord2_], title='Absorbance', units='absorbance').copy()
+    return NDDataset(ref3d_data, coordset=[coord0_, coord1_, coord2_], title='Absorbance', units='absorbance').copy()
 
 
 @pytest.fixture(scope="function")
 def ds2():
     # another dataset
-    return NDDataset(ref3d_2_data, coords=[coord0_2_, coord1_2_, coord2_2_], title='Absorbance',
+    return NDDataset(ref3d_2_data, coordset=[coord0_2_, coord1_2_, coord2_2_], title='Absorbance',
                      units='absorbance').copy()
 
 
@@ -218,113 +238,94 @@ def dsm():
     # dataset with coords containing several axis and a mask
 
     coordmultiple = CoordSet(coord2_, coord2b_)
-    return NDDataset(ref3d_data, coords=[coord0_, coord1_, coordmultiple], mask=ref3d_mask, title='Absorbance',
+    return NDDataset(ref3d_data, coordset=[coord0_, coord1_, coordmultiple], mask=ref3d_mask, title='Absorbance',
                      units='absorbance').copy()
 
-
-# NDPanel
-@pytest.fixture(scope="function")
-def pnl():
-    with RandomSeedContext(12345):
-        arr1 = np.random.rand(10, 20)
-        arr2 = np.random.rand(20, 12)
-    cy1 = Coord(np.arange(10), title='ty', units='s')
-    cy2 = Coord(np.arange(12), title='ty', units='s')
-    cx = Coord(np.arange(20), title='tx', units='km')
-    nd1 = NDDataset(arr1, coords=(cy1, cx), name='arr1')
-    nd2 = NDDataset(arr2, coords=(cy2, cx), dims=['x', 'y'], name='arr2')
-    pnl = NDPanel(nd1, nd2)
-    assert pnl.dims == ['x', 'y']
-    return pnl.copy()
-
+# # ----------------------------------------------------------------------------------------------------------------------
+# # NDPanel
+# # ----------------------------------------------------------------------------------------------------------------------
+#
+# @pytest.fixture(scope="function")
+# def pnl():
+#     with RandomSeedContext(12345):
+#         arr1 = np.random.rand(10, 20)
+#         arr2 = np.random.rand(20, 12)
+#     cy1 = Coord(np.arange(10), title='ty', units='s')
+#     cy2 = Coord(np.arange(12), title='ty', units='s')
+#     cx = Coord(np.arange(20), title='tx', units='km')
+#     nd1 = NDDataset(arr1, coordset=(cy1, cx), name='arr1')
+#     nd2 = NDDataset(arr2, coordset=(cy2, cx), dims=['x', 'y'], name='arr2')
+#     pnl = NDPanel(nd1, nd2)
+#     assert pnl.dims == ['x', 'y']
+#     return pnl.copy()
 
 # Fixtures:  IR spectra (SPG)
 # ----------------------------------------------------------------------------------------------------------------------
 
-directory = prefs.datadir
-dataset = NDDataset.read_omnic(os.path.join(directory, 'irdata', 'nh4y-activation.spg'))
+dataset = NDDataset.read_omnic(datadir/'irdata'/'nh4y-activation.spg')
 
 
 @pytest.fixture(scope="function")
 def IR_dataset_2D():
-    return dataset.copy()
+    nd = dataset.copy()
+    nd.name = 'IR_2D'
+    return nd
 
 
 @pytest.fixture(scope="function")
 def IR_dataset_1D():
-    return dataset[0].squeeze().copy()
+    nd = dataset[0].squeeze().copy()
+    nd.name = 'IR_1D'
+    return nd
 
 
-@pytest.fixture(scope="function")
-def IR_scp_1():
-    directory = prefs.datadir
-    dataset = NDDataset.load(os.path.join(directory, 'irdata', 'nh4.scp'))
-    return dataset.copy()
-
-
+# ----------------------------------------------------------------------------------------------------------------------
 # Fixture: NMR spectra
 # ----------------------------------------------------------------------------------------------------------------------
 
 @pytest.fixture(scope="function")
 def NMR_dataset_1D():
-    directory = prefs.datadir
-    path = os.path.join(directory, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
-    dataset = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
-    return dataset.copy()
-
-
-@pytest.fixture(scope="function")
-def NMR_dataset_1D_1H():
-    directory = prefs.datadir
-    path = os.path.join(directory, 'nmrdata', 'bruker', 'tests', 'nmr', 'tpa')
-    dataset = NDDataset.read_bruker_nmr(path, expno=10, remove_digital_filter=True)
+    path = datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'topspin_1d' / '1' / 'fid'
+    dataset = NDDataset.read_topspin(path, remove_digital_filter=True, name='NMR_1D')
     return dataset.copy()
 
 
 @pytest.fixture(scope="function")
 def NMR_dataset_2D():
-    directory = prefs.datadir
-    path = os.path.join(directory, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_2d')
-    dataset = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+    path = datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'topspin_2d' / '1' / 'ser'
+    dataset = NDDataset.read_topspin(path, expno=1, remove_digital_filter=True, name="NMR_2D")
     return dataset.copy()
 
 
-# Some panda structure for dataset initialization
+
+# ----------------------------------------------------------------------------------------------------------------------
+# fixture Project
 # ----------------------------------------------------------------------------------------------------------------------
 
-@pytest.fixture(scope="function")
-def series():
-    with RandomSeedContext(2345):
-        arr = pd.Series(np.random.randn(4), index=np.arange(4) * 10.)
-    arr.index.name = 'un nom'
-    return arr.copy()
+@pytest.yield_fixture(scope="function")
+def simple_project():
 
+    proj = Project(
 
-@pytest.fixture(scope="function")
-def dataframe():
-    with RandomSeedContext(23451):
-        arr = pd.DataFrame(np.random.randn(6, 4), index=np.arange(6) * 10., columns=np.arange(4) * 10.)
-    for ax, name in zip(arr.axes, ['time', 'temperature']):
-        ax.name = name
-    return arr.copy()
+            # subprojects
+            Project(name='P350', label=r'$\mathrm{M_P}\,(623\,K)$'),
+            Project(name='A350', label=r'$\mathrm{M_A}\,(623\,K)$'),
+            Project(name='B350', label=r'$\mathrm{M_B}\,(623\,K)$'),
 
-# Panel is removed from Panda
-# @pytest.fixture(scope="function")
-# def panel():
-#     shape = (7, 6, 5)
-#     with RandomSeedContext(23452):
-#         arr = pd.Panel(data = np.random.randn(*shape), items=np.arange(shape[0]) * 10.,
-#                        major_axis=np.arange(shape[1]) * 10.,
-#                        minor_axis=np.arange(shape[2]) * 10.)
-#     for ax, name in zip(arr.axes, ['axe0', 'axe1', 'axe2']):
-#         ax.name = name
-#     return arr.copy()
+            # attributes
+            name='project_1',
+            label='main project',
 
-# GUI Fixtures
-# ----------------------------------------------------------------------------------------------------------------------
+    )
 
-# from pyqtgraph import mkQApp
+    assert proj.projects_names == ['A350', 'B350', 'P350']
 
-# @pytest.fixture(scope="module")
-# def app():
-#    return mkQApp()
+    ir = NDDataset([1.1, 2.2, 3.3], coordset=[[1, 2, 3]])
+    tg = NDDataset([1, 3, 4], coordset=[[1, 2, 3]])
+    proj.A350['IR'] = ir
+    proj.A350['TG'] = tg
+    script_source = 'set_loglevel(INFO)\n' \
+                    'info_(f"samples contained in the project are {proj.projects_names}")'
+
+    proj['print_info'] = Script('print_info', script_source)
+    return proj

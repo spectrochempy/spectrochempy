@@ -1,8 +1,9 @@
 import numpy as np
 import re
+from colorama import Fore, Style
+
 from . import NOMASK
 from .misc import TYPE_INTEGER, TYPE_COMPLEX, TYPE_FLOAT
-from colorama import Fore, Style
 
 __all__ = ['numpyprintoptions', 'insert_masked_print',
            'TBold', 'TRed', 'TGreen', 'TBlue', 'TCyan', 'TMagenta',
@@ -11,7 +12,7 @@ __all__ = ['numpyprintoptions', 'insert_masked_print',
 
 def pstr(object, **kwargs):
     if hasattr(object, 'implements') \
-            and object.implements() in ['NDArray', 'NDDataset', 'NDPanel', 'Coord', 'CoordSet']:
+            and object.implements() in ['NDArray', 'NDComplexArrray', 'NDDataset', 'NDPanel', 'Coord', 'CoordSet']:
         return object._cstr(**kwargs).strip()
     else:
         return str(object).strip()
@@ -21,28 +22,36 @@ def pstr(object, **kwargs):
 # Terminal colors and styles
 # ======================================================================================================================
 
-def TBold(text): return Style.BRIGHT + str(text) + Style.RESET_ALL
+def TBold(text):
+    return Style.BRIGHT + str(text) + Style.RESET_ALL
 
 
-def TRed(text): return Fore.RED + str(text) + Fore.RESET
+def TRed(text):
+    return Fore.RED + str(text) + Fore.RESET
 
 
-def TGreen(text): return Fore.GREEN + str(text) + Fore.RESET
+def TGreen(text):
+    return Fore.GREEN + str(text) + Fore.RESET
 
 
-def TBlue(text): return Fore.BLUE + str(text) + Fore.RESET
+def TBlue(text):
+    return Fore.BLUE + str(text) + Fore.RESET
 
 
-def TMagenta(text): return Fore.MAGENTA + str(text) + Fore.RESET
+def TMagenta(text):
+    return Fore.MAGENTA + str(text) + Fore.RESET
 
 
-def TYellow(text): return Fore.YELLOW + str(text) + Fore.RESET
+def TYellow(text):
+    return Fore.YELLOW + str(text) + Fore.RESET
 
 
-def TCyan(text): return Fore.CYAN + str(text) + Fore.RESET
+def TCyan(text):
+    return Fore.CYAN + str(text) + Fore.RESET
 
 
-def TBlack(text): return Fore.BLACK + str(text) + Fore.RESET
+def TBlack(text):
+    return Fore.BLACK + str(text) + Fore.RESET
 
 
 def colored(text, color):
@@ -51,7 +60,6 @@ def colored(text, color):
 
 
 def colored_output(out):
-
     regex = r"^(\W*(DIMENSION|DATA).*)$"
     subst = TBold(r"\1")
     out = re.sub(regex, subst, out, 0, re.MULTILINE)
@@ -121,7 +129,7 @@ def convert_to_html(obj):
     # noinspection PyPep8
     def subst(match):
         return "<div><font color='darkcyan'>{}</font></div>".format(
-            match.group(0).replace('\n', '<br/>').replace('\0', ''))
+                match.group(0).replace('\n', '<br/>').replace('\0', ''))
 
     out = re.sub(regex, subst, out, 0, re.MULTILINE)
 
@@ -130,7 +138,7 @@ def convert_to_html(obj):
     # noinspection PyPep8
     def subst(match):
         return "<div><font color='blue'>{}</font></div>".format(
-            match.group(0).replace('\n', '<br/>').replace('\0', ''))
+                match.group(0).replace('\n', '<br/>').replace('\0', ''))
 
     out = re.sub(regex, subst, out, 0, re.MULTILINE)
 
@@ -160,6 +168,7 @@ def convert_to_html(obj):
 # ======================================================================================================================
 
 class _MaskedPrintOption(object):
+
     # """
     # Handle the string used to represent missing data in a masked array.
     # copied from numpy.ma.core
@@ -359,20 +368,20 @@ def numpyprintoptions(precision=4, threshold=6, edgeitems=2, suppress=True,
 
         elif isinstance(x, TYPE_FLOAT):
             fmt = '{:{lspace}.0{prec}g}'.format(
-                x,
-                prec=precision,  # - 1,
-                lspace=precision + spc)
+                    x,
+                    prec=precision,  # - 1,
+                    lspace=precision + spc)
 
         elif isinstance(x, TYPE_COMPLEX):
             fmt = '{:{lspace}.0{prec}g}{:+{lc}.0{prec}g}j'.format(
-                x.real, x.imag, prec=precision - 1,
-                lspace=precision + spc,
-                lc=precision)
+                    x.real, x.imag, prec=precision - 1,
+                    lspace=precision + spc,
+                    lc=precision)
 
         elif isinstance(x, TYPE_INTEGER):
             fmt = '{:>{lspace}d}'.format(
-                x,
-                lspace=precision + spc)
+                    x,
+                    lspace=precision + spc)
 
         else:
             fmt = '  {}'.format(x)
@@ -382,8 +391,8 @@ def numpyprintoptions(precision=4, threshold=6, edgeitems=2, suppress=True,
     if not formatter:
         spc = 4
         formatter = {
-            'all': _format_object,
-        }
+                'all': _format_object,
+                }
 
     np.set_printoptions(precision=precision, threshold=threshold,
                         edgeitems=edgeitems, suppress=suppress,

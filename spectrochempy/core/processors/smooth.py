@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
@@ -77,12 +77,12 @@ def smooth(dataset, window_length=5, window='flat', **kwargs):
         return new
 
     wind = {
-        'flat': np.ones,
-        'hanning': np.hanning,
-        'hamming': np.hamming,
-        'bartlett': np.bartlett,
-        'blackman': np.blackman,
-    }
+            'flat': np.ones,
+            'hanning': np.hanning,
+            'hamming': np.hamming,
+            'bartlett': np.bartlett,
+            'blackman': np.blackman,
+            }
     if not callable(window):
         if window not in wind.keys():
             error_("Window must be a callable or a string among 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'")

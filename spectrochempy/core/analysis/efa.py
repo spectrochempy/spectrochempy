@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
@@ -19,7 +19,7 @@ __dataset_methods__ = []
 # ----------------------------------------------------------------------------------------------------------------------
 
 import numpy as np
-from datetime import datetime
+from datetime import datetime, timezone
 from traitlets import HasTraits, Instance
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -31,6 +31,8 @@ from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.utils import docstrings, MASKED
 from spectrochempy.core.analysis.svd import SVD
+
+
 # from spectrochempy.core.plotters.plot1d import plot_multiple
 # from spectrochempy.utils import show
 
@@ -90,10 +92,10 @@ class EFA(HasTraits):
         # --------------------------------------------------------------------
 
         f = NDDataset(np.zeros((M, K)),
-                      coords=[X.y, Coord(range(K))],
+                      coordset=[X.y, Coord(range(K))],
                       title='EigenValues',
                       description='Forward EFA of ' + X.name,
-                      history=str(datetime.now()) + ': created by spectrochempy ')
+                      history=str(datetime.now(timezone.utc)) + ': created by spectrochempy ')
 
         # in case some row are masked, take this into account, by masking
         # the corresponding rows of f
@@ -116,10 +118,10 @@ class EFA(HasTraits):
         # --------------------------------------------------------------------
 
         b = NDDataset(np.zeros((M, K)),
-                      coords=[X.y, Coord(range(K))],
+                      coordset=[X.y, Coord(range(K))],
                       title='EigenValues',
                       name='Backward EFA of ' + X.name,
-                      history=str(datetime.now()) + ': created by spectrochempy ')
+                      history=str(datetime.now(timezone.utc)) + ': created by spectrochempy ')
 
         b[masked_rows] = MASKED
 
@@ -136,45 +138,33 @@ class EFA(HasTraits):
         self.f = f
         self.b = b
 
-    def cut_f(self, n_pc=None, cutoff=None):
+    def cut_f(self, cutoff=None):
         """
 
         Parameters
         ----------
-        n_pc
         cutoff
 
         Returns
         -------
 
         """
-        # M, K = self.f.shape
-        # if n_pc is None:
-        #    n_pc = K
-        # n_pc = min(K, n_pc)
-
         f = self.f
         if cutoff is not None:
             f.data = np.max((f.data, np.ones_like(f.data) * cutoff), axis=0)
         return f
 
-    def cut_b(self, n_pc=None, cutoff=None):
+    def cut_b(self, cutoff=None):
         """
 
         Parameters
         ----------
-        n_pc
         cutoff
 
         Returns
         -------
 
         """
-        # M, K = self.b.shape
-        # if n_pc is None:
-        #    n_pc = K
-        # n_pc = min(K, n_pc)
-
         b = self.b
         if cutoff is not None:
             b.data = np.max((b.data, np.ones_like(b.data) * cutoff), axis=0)
@@ -204,16 +194,16 @@ class EFA(HasTraits):
             n_pc = K
         n_pc = min(K, n_pc)
 
-        f = self.cut_f(n_pc, cutoff)
-        b = self.cut_b(n_pc, cutoff)
+        f = self.cut_f(cutoff)
+        b = self.cut_b(cutoff)
 
         xcoord = Coord(range(n_pc), title='PS#')
         c = NDDataset(np.zeros((M, n_pc)),
-                      coords=CoordSet(y=self._X.y, x=xcoord),
+                      coordset=CoordSet(y=self._X.y, x=xcoord),
                       name='C_EFA[{}]'.format(self._X.name),
                       title='relative concentration',
                       description='Concentration profile from EFA',
-                      history=str(datetime.now()) + ': created by spectrochempy')
+                      history=str(datetime.now(timezone.utc)) + ': created by spectrochempy')
         if self._X.is_masked:
             masked_rows = np.all(self._X.mask, axis=-1)
         else:

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
@@ -11,7 +11,7 @@ from spectrochempy.core import info_
 
 
 def test_findpeaks(IR_dataset_1D):
-    dataset = IR_dataset_1D.copy()
+    dataset = IR_dataset_1D
     info_(dataset)
 
     peaks, properties = dataset[1800.0:1300.0].find_peaks(height=1.5, distance=50.0, width=0.0)

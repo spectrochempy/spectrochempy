@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
@@ -48,6 +48,8 @@ class NNMF(HasTraits):
         kwargs['tol'] : tolerance for a relative stopping condition
         kwargs['maxtime'], kwargs['maxit'] : limit of time and iterations
         """
+        super().__init__()
+
         tol = kwargs.get('tol', 0.1)
 
         maxtime = kwargs.get('maxtime', 60)
@@ -169,6 +171,6 @@ class NNMF(HasTraits):
                 stdout.write('.')
 
         info_(
-            '\nIter = {} Final proj-grad norm {:.3f}'.format(myiter,
-                                                             projnorm))
+                '\nIter = {} Final proj-grad norm {:.3f}'.format(myiter,
+                                                                 projnorm))
         return W, H

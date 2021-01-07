@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
@@ -72,16 +72,16 @@ def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False
     ---------
 
     >>> import os
-    >>> from spectrochempy import * #doctest: +ELLIPSIS
+    >>> from spectrochempy import *
     <BLANKLINE>
     ...
     <BLANKLINE>
     >>> path_A = 'irdata/nh4y-activation.spg'
-    >>> A = NDDataset.load(path_A, protocol='omnic')
-    >>> ref = A[:,0]  # let's subtrack the first column
+    >>> A = NDDataset.read(path_A, protocol='omnic')
+    >>> ref = A[0,:]  # let's subtrack the first row
     >>> B = A.autosub(ref, [3900., 3700.], [1600., 1500.], inplace=False)
-    >>> B #doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    NDDataset: [[...]] a.u.
+    >>> B
+    NDDataset: [float32]  a.u. (shape: (y:55, x:5549))
 
     """
 
@@ -111,8 +111,7 @@ def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False
         new = new.swapaxes(axis, -1)
         swaped = True
 
-    # TODO: detect the case where the ref is not exactly
-    # with same coords: interpolate?
+    # TODO: detect the case where the ref is not exactly with same coords: interpolate?
 
     # selection of the multiple ranges
 
@@ -120,7 +119,7 @@ def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False
     ranges = tuple(np.array(ranges, dtype=float))
     # must be float to be considered as frequency for instance
 
-    coords = new.coords[-1]
+    coords = new.coordset[-1]
     xrange = CoordRange(*ranges, reversed=coords.reversed)
 
     s = []
@@ -173,10 +172,9 @@ def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False
         new = new.swapaxes(axis, -1)
 
     new.history = str(
-        new.modified) + ': ' + 'Automatic subtraction of:' + ref.name + '\n'
+            new.modified) + ': ' + 'Automatic subtraction of:' + ref.name + '\n'
 
     if return_coefs:
         return new, x
     else:
         return new
-

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
@@ -9,13 +9,19 @@ __all__ = ['get_user_and_node',
            'get_user',
            'get_node',
            'is_kernel',
-           'sh'
+           'sh',
+           'is_windows',
            ]
 
 import getpass
 import platform
 import sys
 from subprocess import run, PIPE, STDOUT
+
+
+def is_windows():
+    win = 'Windows' in platform.platform()
+    return win
 
 
 def get_user():
@@ -44,7 +50,7 @@ def is_kernel():
     return getattr(get_ipython(), 'kernel', None) is not None  # pragma: no cover
 
 
-class _ExecCommand():
+class _ExecCommand:
 
     def __init__(self, command):
         """
@@ -52,7 +58,6 @@ class _ExecCommand():
         Parameters
         ----------
         command: shell command to execute
-        perror: error management
 
         """
         self.commands = [command]
@@ -70,6 +75,7 @@ class _ExecCommand():
         return proc.stdout
 
 
+# noinspection PyPep8Naming
 class sh(object):
     """
     Utility to run subprocess run command as if they were functions

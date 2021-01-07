@@ -1,30 +1,39 @@
-# for the core package
-numpy
-scipy
-pandas
-matplotlib
-traitlets
-pint
-quaternion
-pyqt
-colorama
-tqdm
-ipython
-numba
-cantera
-quadprog
-brukeropusreader
-requests
-jinja2
-nmrglue
-docrep
-orderedset
-traittypes
+# specific from anaconda spctrocat channel
+brukeropusreader~=1.3.6
+nmrglue~=0.8.1
+quadprog~=0.1.7
 
-# to be suppressed when code change is finished
+# for the core package
+cantera
+colorama
+dill
+docrep
+ipython
+jinja2
+matplotlib
+numba
+numpy
+orderedset
+pint
+plotly
+pyqt
+quaternion
+requests
+scipy
+tqdm
+traitlets
+traittypes
 xlrd
 
+# for Dash
+dash
+dash-bootstrap-components
+dash-daq
+dash-ace
+dash_defer_js_import
+
 # mainly for install and a bit more...
+setuptools
 setuptools_scm
 git
 

@@ -1,6 +1,9 @@
 {% set name = "SpectroChemPy" %}
+
 {% set version = environ['VERSION'] %}
+
 {% set devstring = environ['DEVSTRING'] %}
+
 
 package:
   name: "{{ name|lower }}"
@@ -28,30 +31,35 @@ requirements:
     - setuptools_scm
     - nodejs
     - jupyterlab
-    - conda-verify
+
   run:
-    - numpy
-    - scipy
-    - pandas
-    - matplotlib
-    - traitlets
-    - pint
-    - quaternion
-    - pyqt
-    - colorama
-    - tqdm
-    - ipython
-    - numba
     - cantera
     - quadprog
     - brukeropusreader
-    - requests
-    - jinja2
+    - quaternion
     - nmrglue
+    - colorama
+    - dash
+    - dash-bootstrap-components
+    - dash-daq
+    - dill
     - docrep
+    - ipython
+    - jinja2
+    - matplotlib
+    - numba
+    - numpy
     - orderedset
+    - pint
+    - plotly
+    - pyqt
+    - requests
+    - scipy
+    - tqdm
+    - traitlets
     - traittypes
     - xlrd
+    - setuptools
     - setuptools_scm
     - git
     - ipywidgets

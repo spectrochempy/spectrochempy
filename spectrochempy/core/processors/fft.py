@@ -32,9 +32,10 @@ from scipy.interpolate import interp1d
 from nmrglue.process.proc_base import largest_power_of_2, zf_size
 from .. import error_
 from ...units import ur
-from ..dataset.npy import zeros_like
+from ..dataset.ndmath import zeros_like
 from .apodization import hamming
 from .concatenate import concatenate
+
 
 def get_zpd(dataset, dim='x', mode='max'):
     r"""
@@ -74,16 +75,16 @@ def ifft(dataset, size=None, inplace=False, **kwargs):
 def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=True, **kwargs):
     r"""
     Apply a complex fast fourier transform.
-    
+
     For multidimensional NDDataset or NDPanels,
     the apodization is by default performed on the last dimension.
-    
+
     The data in the last dimension MUST be in time-domain (or without dimension)
     or an error is raised.
-    
+
     To make reverse Fourier transform, i.e., from frequency to time domain, use the `ifft` transform
     (or equivalently, the `inv=True` parameters.
-    
+
     Parameters
     ----------
     size : int, optional
@@ -103,7 +104,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
         If True, and data are from NMR, then a ppm scale is calculated instead of frequency.
     **kwargs :
         other parameters (see other parameters)
-    
+
     Other Parameters
     ----------------
     tdeff : int, optional
@@ -116,7 +117,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
 
     """
     # datatype
-    is_nmr = dataset.origin.lower() in ["bruker", ]
+    is_nmr = dataset.origin.lower() in ["topspin", ]
     is_ir = dataset.origin.lower() in ["omnic", ]
 
     # On which axis do we want to apodize? (get axis from arguments)
@@ -131,7 +132,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
         swaped = True
 
     # select the last coordinates
-    lastcoord = dataset.coords[dim]
+    lastcoord = dataset.coordset[dim]
 
     if not inv and not lastcoord.dimensionless \
             and lastcoord.units.dimensionality != '[time]':
@@ -206,24 +207,24 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
         if not np.all(zpd[0] == zpd):
             raise ValueError("zpd should be at the same index")
         zpd = zpd[0]
-        narrowed = hamming(new[:, 0: 2*zpd])
+        narrowed = hamming(new[:, 0: 2 * zpd])
         mirrored = concatenate(narrowed[:, zpd:], narrowed[:, :zpd])
         spectrum = np.fft.rfft(mirrored.data)
         phase_angle = np.arctan(spectrum.imag, spectrum.real)
         initx = np.arange(phase_angle.shape[1])
         interpolate_phase_angle = interp1d(initx, phase_angle)
 
-        zeroed = concatenate(zeros_like(new[:, zpd+1:]), new)
-        apodized = hamming(zeroed) #mertz(new, zpd)
-        zpd = len(apodized.x)//2
+        zeroed = concatenate(zeros_like(new[:, zpd + 1:]), new)
+        apodized = hamming(zeroed)  # mertz(new, zpd)
+        zpd = len(apodized.x) // 2
         mirrored = concatenate(apodized[:, zpd:], apodized[:, 0:zpd])
 
-        wavenumbers = np.fft.rfftfreq(mirrored.shape[1], 3.165090310992977e-05*2)
+        wavenumbers = np.fft.rfftfreq(mirrored.shape[1], 3.165090310992977e-05 * 2)
 
         spectrum = np.fft.rfft(mirrored.data)
         plt.plot(wavenumbers, spectrum[0])
         plt.show()
-        newx = np.arange(spectrum.shape[1])*max(initx)/max(np.arange(spectrum.shape[1]))
+        newx = np.arange(spectrum.shape[1]) * max(initx) / max(np.arange(spectrum.shape[1]))
         phase_angle = interpolate_phase_angle(newx)
         spectrum = spectrum.real * np.cos(phase_angle) + spectrum.imag * np.sin(phase_angle)
 
@@ -290,7 +291,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
                 nucleus = ""
             newcoord.title = fr"$\delta\ {nucleus}$"
 
-    new.coords[-1] = newcoord
+    new.coordset[-1] = newcoord
 
     # if some phase related metadata do not exist yet, initialize them
     new.meta.readonly = False
@@ -299,7 +300,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
         new.meta.phased = [False] * new.ndim
 
     if not new.meta.pivot:
-        new.meta.pivot = [float(abs(new).max().coords[i].data) * new.coords[i].units for i in
+        new.meta.pivot = [float(abs(new).max().coordset[i].data) * new.coordset[i].units for i in
                           range(new.ndim)]  # create pivot metadata
 
     # applied the stored phases
@@ -313,8 +314,8 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
     if swaped:
         new.swapaxes(axis, -1, inplace=True)  # must be done inplace
 
-    new.history = f'fft applied on dimension {dim}'
-
+    s = 'ifft' if inv else 'fft'
+    new.history = f'{s} applied on dimension {dim}'
     return new
 
 

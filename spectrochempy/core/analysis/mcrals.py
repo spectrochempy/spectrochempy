@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 """
@@ -38,7 +38,7 @@ class MCRALS(HasTraits):
     log = Instance(str)
     """str - Log of the MCS-ALS iterations"""
 
-    def __init__(self, X, guess, **kwargs):
+    def __init__(self, X, guess, **kwargs):   # lgtm [py/missing-call-to-init]
         """
         Parameters
         ----------
@@ -187,25 +187,25 @@ class MCRALS(HasTraits):
         # ------------------------------------------------------------------------
 
         if initConc:
-            if C.coords is None:
-                C.set_coords(y=X.y, x=C.x)
+            if C.coordset is None:
+                C.set_coordset(y=X.y, x=C.x)
             St = NDDataset(np.linalg.lstsq(C.data, X.data, rcond=None)[0])
             St.name = 'Pure spectra profile, mcs-als of ' + X.name
             St.title = X.title
             cy = C.x.copy() if C.x else None
             cx = X.x.copy() if X.x else None
-            St.set_coords(y=cy, x=cx)
+            St.set_coordset(y=cy, x=cx)
 
         if initSpec:
-            if St.coords is None:
-                St.set_coords(y=St.y, x=X.x)
+            if St.coordset is None:
+                St.set_coordset(y=St.y, x=X.x)
             Ct = np.linalg.lstsq(St.data.T, X.data.T, rcond=None)[0]
             C = NDDataset(Ct.T)
             C.name = 'Pure conc. profile, mcs-als of ' + X.name
             C.title = 'Concentration'
             cx = St.y.copy() if St.y else None
             cy = X.y.copy() if X.y else None
-            C.set_coords(y=cy, x=cx)
+            C.set_coordset(y=cy, x=cx)
 
         change = tol + 1
         stdev = X.std()  # .data[0]

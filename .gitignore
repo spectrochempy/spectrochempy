@@ -78,10 +78,8 @@ docs/index.doctree
 generated/
 dist/
 build/
-docs/gen_modules/
-docs/gallery/auto_examples/
-docs/gallery/gen_modules/
-docs/gallery/backreferences/
+*/gen_modules/
+gallery
 docs/modules/
 docs/savefig/
 docs/_templates_old
@@ -90,6 +88,9 @@ docs/_templates_old
 # ----------------------------------------------------------------------------------------------------------------------
 tests/figures
 /tests_extern_packages/
+*.*scp
+*.json
+*.jdx
 
 # latex
 # ----------------------------------------------------------------------------------------------------------------------
@@ -97,25 +98,12 @@ tests/figures
 
 # data
 # ----------------------------------------------------------------------------------------------------------------------
-*.scp
 scpy.svg
 *.sample
 scp_data/testdata/figures
-1r
-1i
-2rr
-2ri
-2ir
-2ii
-3rrr
-3rri
-3rir
-3rii
-3irr
-3iri
-3iir
-3iii
+audita.txt
 auditp.txt
+clevels
 
 # Docker / bitbucket
 # ----------------------------------------------------------------------------------------------------------------------
@@ -137,3 +125,13 @@ var/
 .coverage
 
 saved_pkglist.txt
+
+
+scp_data/testdata/nmrdata/bruker/tests/nmr/exam1d_13C
+scp_data/testdata/nmrdata/bruker/tests/nmr/exam1d_1H
+#scp_data/testdata/nmrdata/bruker/tests/nmr/exam2d_HC
+scp_data/testdata/nmrdata/bruker/tests/nmr/exam2d_HH
+scp_data/testdata/nmrdata/bruker/tests/nmr/exam_CMCse_1
+scp_data/testdata/nmrdata/bruker/tests/nmr/exam_CMCse_2
+scp_data/testdata/nmrdata/bruker/tests/nmr/exam_CMCse_3
+Icon*

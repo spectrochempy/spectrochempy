@@ -1,17 +1,21 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
+from pathlib import Path
+from matplotlib import cycler
 
 from traitlets.config.configurable import Configurable
 from traitlets import All, observe
 
+__all__ = ["MetaConfigurable"]
+
 
 class MetaConfigurable(Configurable):
 
-    def __init__(self, jsonfile=None, **kwargs):
+    def __init__(self, jsonfile=None, **kwargs):  # lgtm [py/missing-call-to-init]
 
         super().__init__(**kwargs)
 
@@ -30,7 +34,7 @@ class MetaConfigurable(Configurable):
 
         """
         d = {}
-        for k,v in self.traits(config=True).items():
+        for k, v in self.traits(config=True).items():
             d[k] = v.default_value
         return d
 
@@ -42,9 +46,12 @@ class MetaConfigurable(Configurable):
             return
 
         if change.name in self.traits(config=True):
-            self.cfg.update(self.jsonfile, {
-                self.__class__.__name__: {change.name: change.new, }
-            })
+
+            value = change.new
+            if isinstance(value, (type(cycler), Path)):
+                value = str(value)
+
+            self.cfg.update(self.jsonfile, {self.__class__.__name__: {change.name: value, }})
 
             self.updated = True
 

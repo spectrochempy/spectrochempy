@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
@@ -9,40 +9,21 @@
 Various methods and classes used in other part of the program
 
 """
-__all__ = [
-
-    "TYPE_INTEGER",
-    "TYPE_COMPLEX",
-    "TYPE_FLOAT",
-    "EPSILON",
-    "INPLACE",
-    "make_new_object",
-    "getdocfrom",
-    "dict_compare",
-    'htmldoc',
-    "ignored",
-    "is_iterable",
-    "is_sequence",
-    "is_number",
-    "silence",
-    "makedirs",
-    "multisort",
-    'makestr',
-    'srepr',
-    "spacing",
-
-    #
-]
-
 import re
-from operator import itemgetter
 import os
-import numpy as np
 import sys
+from operator import itemgetter
 from contextlib import contextmanager
 import functools
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
+import types
+
+import numpy as np
+
+__all__ = ["TYPE_INTEGER", "TYPE_COMPLEX", "TYPE_FLOAT", "TYPE_BOOL", "EPSILON", "INPLACE", 'make_func_from',
+           "make_new_object", "getdocfrom", "dict_compare", 'htmldoc', "ignored", "is_iterable", "is_sequence",
+           "is_number", "silence", "makedirs", "multisort", 'makestr', 'srepr', "spacing", ]
 
 #
 # constants
@@ -50,12 +31,46 @@ import uuid
 TYPE_INTEGER = (int, np.int_, np.int32, np.int64)
 TYPE_FLOAT = (float, np.float_, np.float32, np.float64)
 TYPE_COMPLEX = (complex, np.complex_, np.complex64, np.complex128)
+TYPE_BOOL = (bool, np.bool, np.bool_)
 
 EPSILON = epsilon = np.finfo(float).eps
 "Minimum value before considering it as zero value"
 
 INPLACE = "INPLACE"
 "Flag used to specify inplace slicing"
+
+
+# ======================================================================================================================
+# function signature
+# ======================================================================================================================
+
+def _codechange(code_obj, changes):
+    code = types.CodeType
+    names = ['co_argcount', 'co_nlocals', 'co_stacksize', 'co_flags', 'co_code', 'co_consts', 'co_names', 'co_varnames',
+             'co_filename', 'co_name', 'co_firstlineno', 'co_lnotab', 'co_freevars', 'co_cellvars']
+    if hasattr(code, 'co_kwonlyargcount'):
+        names.insert(1, 'co_kwonlyargcount')
+    if hasattr(code, 'co_posonlyargcount'):
+        names.insert(1, 'co_posonlyargcount')
+    values = [changes.get(name, getattr(code_obj, name)) for name in names]
+    return code(*values)
+
+
+def make_func_from(func, first=None):
+    """
+    Create a new func with its arguments from another func and a new signature
+
+    """
+    code_obj = func.__code__
+    new_varnames = list(code_obj.co_varnames)
+    if first:
+        new_varnames[0] = first
+    new_varnames = tuple(new_varnames)
+    new_code_obj = _codechange(code_obj, changes={'co_varnames': new_varnames, })
+    modified = types.FunctionType(new_code_obj, func.__globals__, func.__name__, func.__defaults__, func.__closure__)
+    modified.__doc__ = func.__doc__
+    return modified
+
 
 def make_new_object(obj):
     """
@@ -75,7 +90,7 @@ def make_new_object(obj):
 
     # new id and date
     new._id = "{}_{}".format(type(obj).__name__, str(uuid.uuid1()).split('-')[0])
-    new._date = datetime.now()
+    new._date = datetime.now(timezone.utc)
 
     return new
 

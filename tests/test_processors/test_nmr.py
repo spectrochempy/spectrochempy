@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
@@ -11,7 +11,7 @@ import os
 import numpy as np
 import pytest
 
-from spectrochempy.core import general_preferences as prefs
+from spectrochempy.core import preferences as prefs
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.units import ur
 from spectrochempy.utils import show
@@ -25,11 +25,11 @@ pytestmark = pytest.mark.skip("all tests still WIP")
 # Reader
 
 def test_nmr_reader_1D():
-    path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
+    path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d')
 
     # load the data in a new dataset
     ndd = NDDataset()
-    ndd.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+    ndd.read_topspin(path, expno=1, remove_digital_filter=True)
     assert ndd.__str__() == 'NDDataset: [complex128] unitless (size: 12411)'
     assert "<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'> " \
            " coordinates</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px " \
@@ -163,8 +163,8 @@ def test_nmr_manual_1D_phasing(NMR_dataset_1D):
 
 
 def test_nmr_auto_1D_phasing():
-    path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
-    ndd = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+    path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d')
+    ndd = NDDataset.read_topspin(path, expno=1, remove_digital_filter=True)
     ndd /= ndd.real.data.max()  # normalize
     ndd.em(10. * ur.Hz, inplace=True)
     transf = ndd.fft(tdeff=8192, size=2 ** 15)
@@ -193,8 +193,8 @@ def test_nmr_auto_1D_phasing():
 
 
 def test_nmr_multiple_manual_1D_phasing():
-    path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
-    ndd = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+    path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d')
+    ndd = NDDataset.read_topspin(path, expno=1, remove_digital_filter=True)
     ndd /= ndd.real.data.max()  # normalize
     ndd.em(10. * ur.Hz)  # inplace broadening
 
@@ -213,8 +213,8 @@ def test_nmr_multiple_manual_1D_phasing():
 
 
 def test_nmr_multiple_auto_1D_phasing():
-    path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
-    ndd = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+    path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d')
+    ndd = NDDataset.read_topspin(path, expno=1, remove_digital_filter=True)
     ndd /= ndd.real.data.max()  # normalize
     ndd.em(10. * ur.Hz)  # inplace broadening
 
@@ -236,11 +236,11 @@ def test_nmr_multiple_auto_1D_phasing():
 # #### 2D NMR ########
 
 def test_nmr_reader_2D():
-    path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_2d')
+    path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_2d')
 
     # load the data in a new dataset
     ndd = NDDataset()
-    ndd.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+    ndd.read_topspin(path, expno=1, remove_digital_filter=True)
     assert ndd.__str__() == "NDDataset: [quaternion] unitless (shape: (y:96, x:948))"
     assert "<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px;" in ndd._repr_html_()
 

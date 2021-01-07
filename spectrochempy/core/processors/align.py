@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
@@ -11,7 +11,6 @@ This module defines functions related to NDDataset or NDPanel alignment.
 """
 
 __all__ = ['align']
-
 __dataset_methods__ = __all__
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -159,17 +158,26 @@ def align(dataset, *others, **kwargs):
 
             for k, v in object.datasets.items():
                 # set the coordset into the NDDataset object (temporary: this will be unset at the end)
-                v.coords = object.coords
-                _objects[_nobj] = {'obj': v, 'idx': idx, 'is_panel': True, 'key': k}
+                v.coordset = object.coordset
+                _objects[_nobj] = {
+                        'obj': v,
+                        'idx': idx,
+                        'is_panel': True,
+                        'key': k
+                        }
                 _nobj += 1
 
         else:
-            _objects[_nobj] = {'obj': object, 'idx': idx, 'is_panel': False}
+            _objects[_nobj] = {
+                    'obj': object,
+                    'idx': idx,
+                    'is_panel': False
+                    }
             _nobj += 1
 
     _last = _nobj - 1
 
-    # get the reference object (by default the fist, except if method if set  to 'last'
+    # get the reference object (by default the first, except if method if set to 'last'
     ref_obj_index = 0
     if method == 'last':
         ref_obj_index = _last
@@ -186,15 +194,15 @@ def align(dataset, *others, **kwargs):
 
         # as we will sort their coordinates at some point, we need to know if the coordinates need to be reversed at
         # the end of the alignment process
-        reversed = ref_obj.coords[dim].reversed
+        reversed = ref_obj.coordset[dim].reversed
         if reversed:
             ref_obj.sort(descend=False, dim=dim, inplace=True)
 
         # get the coordset corresponding to the reference object
-        ref_obj_coords = ref_obj.coords
+        ref_obj_coordset = ref_obj.coordset
 
         # get the coordinate for the reference dimension
-        ref_coord = ref_obj_coords[dim]
+        ref_coord = ref_obj_coordset[dim]
 
         # as we will sort their coordinates at some point, we need to know if the coordinates need to be reversed at
         # the end of the alignment process
@@ -216,7 +224,7 @@ def align(dataset, *others, **kwargs):
                 obj.sort(descend=False, dim=dim, inplace=True)
 
             # get the current objet coordinates and check compatibility
-            coord = obj.coords[dim]
+            coord = obj.coordset[dim]
             if not coord.is_units_compatible(ref_coord):
                 # not compatible, stop everything
                 raise UnitsCompatibilityError('NDataset to align must have compatible units!')
@@ -271,27 +279,33 @@ def align(dataset, *others, **kwargs):
                 new_obj = obj
 
             # update the data and mask
-            coord = obj.coords[dim]
+            coord = obj.coordset[dim]
             coord_data = set(coord.data)
 
             dim_loc = new_coord._loc2index(sorted(coord_data))
             loc = tuple(prepend_keys + [dim_loc])
 
-            new_obj.data = new_obj_data
-            # new_obj.mask = MASKED  # mask all the data -we will unmask later the relevant data in the next step
-            # new_obj[loc] = False   # remove the mask for the selected part of the array
-            new_obj.data[loc] = obj.data
+            new_obj._data = new_obj_data
+
+            # mask all the data -we will unmask later the relevant data in the next step
+            new_obj.mask = MASKED
+
+            # remove the mask for the selected part of the array
+            new_obj.mask[loc] = False
+
+            # set the data for the loc
+            new_obj._data[loc] = obj.data
 
             # update the coordinates
-            new_coords = obj.coords.copy()
+            new_coordset = obj.coordset.copy()
             if coord.is_labeled:
                 label_shape = list(coord.labels.shape)
                 label_shape[0] = new_coord.size
                 new_coord._labels = np.zeros(tuple(label_shape)).astype(coord.labels.dtype)
                 new_coord._labels[:] = '--'
                 new_coord._labels[dim_loc] = coord.labels
-            setattr(new_coords, dim, new_coord)
-            new_obj._coords = new_coords
+            setattr(new_coordset, dim, new_coord)
+            new_obj._coordset = new_coordset
 
             # reversed?
             if reversed:
@@ -310,18 +324,18 @@ def align(dataset, *others, **kwargs):
     for index, object in _objects.items():
         is_panel = object['is_panel']
         obj = object['obj']
-        obj[np.where(np.isnan(obj))] = MASKED  # mask NaN values
+        # obj[np.where(np.isnan(obj))] = MASKED  # mask NaN values
         obj[np.where(np.isnan(obj))] = 99999999999999.  # replace NaN values (to simplify comparisons)
         idx = int(object['idx'])
         if not is_panel:
             objects[idx] = obj
         else:
             key = object['key']
-            coords = obj.coords
-            obj.delete_coords()  # NDDataset in NDPanel are stored without coords
+            coordset = obj.coordset
+            obj.delete_coordset()  # NDDataset in NDPanel are stored without coordset
             objects[idx].datasets[key] = obj
             for dim in obj.dims:
-                setattr(objects[idx], dim, getattr(coords, dim))
+                setattr(objects[idx], dim, getattr(coordset, dim))
 
     return tuple(objects)
 
@@ -329,7 +343,7 @@ def align(dataset, *others, **kwargs):
     #
     #     # reorders dataset and reference in ascending order
     #     is_sorted = False
-    #     if dataset.coords(axis).reversed:
+    #     if dataset.coordset(axis).reversed:
     #         datasetordered = dataset.sort(axis, descend=False)
     #         refordered = ref.sort(refaxis, descend=False)
     #         is_sorted = True
@@ -338,13 +352,13 @@ def align(dataset, *others, **kwargs):
     #         refordered = ref.copy()
     #
     #     try:
-    #         datasetordered.coords(axis).to(refordered.coords(refaxis).units)
+    #         datasetordered.coordset(axis).to(refordered.coordset(refaxis).units)
     #     except:
     #         raise ValueError(
     #             'units of the dataset and reference axes on which interpolate are not compatible')
     #
-    #     oldaxisdata = datasetordered.coords(axis).data
-    #     refaxisdata = refordered.coords(refaxis).data  # TODO: at the end restore the original order
+    #     oldaxisdata = datasetordered.coordset(axis).data
+    #     refaxisdata = refordered.coordset(refaxis).data  # TODO: at the end restore the original order
     #
     #     method = kwargs.pop('method', 'linear')
     #     fill_value = kwargs.pop('fill_value', np.NaN)
@@ -369,7 +383,7 @@ def align(dataset, *others, **kwargs):
     #     else:
     #         newmask = NOMASK
     #
-    #     # interpolate_axis = interpolator(datasetordered.coords(axis).data)
+    #     # interpolate_axis = interpolator(datasetordered.coordset(axis).data)
     #     # newaxisdata = interpolate_axis(refaxisdata)
     #     newaxisdata = refaxisdata.copy()
     #
@@ -403,7 +417,7 @@ def align(dataset, *others, **kwargs):
     #     out.history = '{}: Aligned along dim {} with respect to dataset {} using coords {} \n'.format(
     #         str(dataset.modified), axis, ref.name, ref.coords[refaxis].title)
     #
-    #     if is_sorted and out.coords(axis).reversed:
+    #     if is_sorted and out.coordset(axis).reversed:
     #         out.sort(axis, descend=True, inplace=True)
     #         ref.sort(refaxis, descend=True, inplace=True)
     #

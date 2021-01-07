@@ -2,60 +2,69 @@
 
 .. _home:
 
-SpectroChemPy: Processing, analysing and modelling spectroscopic data
+#####################################################################
+Processing, analysing and modelling spectroscopic data
 #####################################################################
 
 .. toctree::
     :hidden:
     :caption: Table of Content
 
-
 .. toctree::
     :hidden:
     :caption: Summary
 
-
-|scpy| is a framework for processing, analyzing and modeling **Spectro**\ scopic data for **Chem**\ istry with **Py**\ thon.
-It is a cross platform software, running on Linux, Windows or OS X.
+|scpy| is a framework for processing, analyzing and modeling **Spectro**\ scopic
+data for **Chem**\ istry with **Py**\ thon. It is a cross platform software,
+running on Linux, Windows or OS X.
 
 Among its major features:
 
-#.  Import data from experiments or modeling programs with their *metatdata* (title, units, coordinates, ...)
-#.  Preprocess these data: baseline correction, (automatic) subtraction, smoothing, apodization...
-#.  Manipulate single or multiple datasets: concatenation, splitting, alignment along given dimensions, ...
-#.  Explore data with exploratory analyses methods such as `SVD`, `PCA`, `EFA` and visualization capabilities ...
-#.  Modelling single or multiple datasets with curve fitting / curve modelling (`MCR-ALS`) methods...
-#.  Export data and analyses to various formats: `csv`, `xls`, `JCAMP-DX`,  ...
-#.  Embed the complete workflow from raw data import to final analyses in a Project Manager
+#.  Import data from experiments or modeling programs with their *metatdata*
+    (title, units, coordinates, ...)
+#.  Preprocess these data: baseline correction, (automatic) subtraction,
+    smoothing, apodization...
+#.  Manipulate single or multiple datasets: concatenation, splitting, alignment
+    along given dimensions, ...
+#.  Explore data with exploratory analyses methods such as ``SVD``, ``PCA``, ``EFA``
+    and visualization capabilities ...
+#.  Modelling single or multiple datasets with curve fitting / curve modelling
+    (``MCR-ALS``) methods...
+#.  Export data and analyses to various formats: ``csv``, ``xls``, ``JCAMP-DX``,  ...
+#.  Embed the complete workflow from raw data import to final analyses in a
+    Project Manager
 
 .. only:: html
 
-    .. image:: https://anaconda.org/spectrocat/spectrochempy/badges/version.svg
-        :target: https://anaconda.org/spectrocat/spectrochempy
+   .. image:: https://anaconda.org/spectrocat/spectrochempy/badges/version.svg
+      :target: https://anaconda.org/spectrocat/spectrochempy
 
-    .. image:: https://anaconda.org/spectrocat/spectrochempy/badges/platforms.svg
-        :target: https://anaconda.org/spectrocat/spectrochempy
+   .. image:: https://anaconda.org/spectrocat/spectrochempy/badges/platforms.svg
+      :target: https://anaconda.org/spectrocat/spectrochempy
 
-    .. image:: https://anaconda.org/spectrocat/spectrochempy/badges/latest_release_date.svg
-        :target: https://anaconda.org/spectrocat/spectrochempy
-
+   .. image:: https://anaconda.org/spectrocat/spectrochempy/badges/latest_release_date.svg
+      :target: https://anaconda.org/spectrocat/spectrochempy
 
 .. warning::
 
-    **This software is not yet publicly released**.
-    
     |scpy| is still experimental and under active development.
     Its current design is subject to major changes, reorganizations,
     bugs and crashes!!! Please report any issues to the
-    `Issue Tracker  <https://redmine.spectrochempy.fr/projects/spectrochempy/issues>`_
+    `Issue Tracker <https://github.com/spectrochempy/spectrochempy/issues>`__
 
+.. toctree::
+   :hidden:
 
+   Home <self>
+
+****************
 Getting Started
 ****************
 
 * :doc:`gettingstarted/whyscpy`
+* :doc:`gettingstarted/overview`
+* :doc:`gettingstarted/gallery/auto_examples/index`
 * :doc:`gettingstarted/install/index`
-* :doc:`gettingstarted/license`
 
 .. toctree::
     :maxdepth: 1
@@ -63,61 +72,82 @@ Getting Started
     :caption: Getting Started
 
     gettingstarted/whyscpy
-    gettingstarted/install/index
-    gettingstarted/license
+    gettingstarted/overview
+    Examples <gettingstarted/gallery/auto_examples/index>
+    Installation <gettingstarted/install/index>
 
-.. usage was removed for now
+.. _userguide:
 
-User Guide
-***********
+***********************
+User's Guide
+***********************
 
-* :doc:`user/userguide/index`
-* :doc:`user/tutorials/index`
-* :doc:`gallery/auto_examples/index`
-
-.. toctree::
-    :maxdepth: 1
-    :hidden:
-    :caption: User Guide & Tutorials
-
-    user/userguide/index
-    user/tutorials/index
-    gallery/auto_examples/index
-
-Help & Reference
-****************
-
-* :doc:`api/changelog`
-* :doc:`api/index`
-* :doc:`api/preference`
-* :doc:`dev/issues`
-* :doc:`dev/contributing`
+* :doc:`userguide/introduction/introduction`
+* :doc:`userguide/objects`
+* :doc:`userguide/units/units`
+* :doc:`userguide/importexport/importexport`
+* :doc:`userguide/plotting/plotting`
+* :doc:`userguide/processing/processing`
+* :doc:`userguide/fitting/fitting`
+* :doc:`userguide/analysis/analysis`
+* :doc:`userguide/databases/databases`
 
 .. toctree::
     :maxdepth: 1
     :hidden:
-    :caption: Help & Reference
+    :caption: User's Guide
 
-    api/changelog
-    api/index
-    api/preference
-    dev/issues
-    dev/contributing
+    userguide/introduction/introduction
+    userguide/objects
+    userguide/units/units
+    userguide/importexport/importexport
+    userguide/plotting/plotting
+    userguide/processing/processing
+    userguide/fitting/fitting
+    userguide/analysis/analysis
+    userguide/databases/databases
 
+***********************
+Reference & Help
+***********************
+
+* :doc:`userguide/reference/changelog`
+* :doc:`userguide/reference/index`
+* :doc:`userguide/reference/preference`
+* :doc:`userguide/reference/faq`
+* :doc:`devguide/issues`
+* :doc:`devguide/examples`
+* :doc:`devguide/contributing`
+
+.. toctree::
+    :maxdepth: 1
+    :hidden:
+    :caption: Reference & Help
+
+    userguide/reference/changelog
+    userguide/reference/index
+    userguide/reference/preference
+    userguide/reference/faq
+    Bug reports & feature request <devguide/issues>
+    Sharing examples & tutorials <devguide/examples>
+    devguide/contributing
+
+
+********
 Credits
-*********
+********
 
-* :doc:`main/credits`
-* :doc:`main/citing`
-* :doc:`main/seealso`
-   
+* :doc:`credits/credits`
+* :doc:`credits/citing`
+* :doc:`credits/license`
+* :doc:`credits/seealso`
+
 .. toctree::
     :maxdepth: 1
     :hidden:
     :caption: Credits
 
-    main/credits
-    main/citing
-    main/seealso
-
-
+    credits/credits
+    credits/citing
+    credits/license
+    credits/seealso

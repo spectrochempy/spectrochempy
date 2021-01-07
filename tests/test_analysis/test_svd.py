@@ -1,24 +1,26 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
 """ Tests for the SVD class
 
 """
+from numpy.testing import assert_allclose
+
 from spectrochempy.core.analysis.svd import SVD
 from spectrochempy.utils import MASKED
 from spectrochempy.core import info_
-from numpy.testing import assert_allclose
 
 
 # test svd
 # -----------
 
 def test_svd(IR_dataset_2D):
-    dataset = IR_dataset_2D.copy()
+
+    dataset = IR_dataset_2D
     info_(dataset)
 
     svd = SVD(dataset)

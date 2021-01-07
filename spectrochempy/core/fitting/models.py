@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
@@ -196,10 +196,6 @@ class assymvoigtmodel(object):
         return
 
     def f(self, x, ampl, width, ratio, assym, pos, **kargs):
-        try:
-            x = x.values  # case pandas
-        except Exception:
-            pass
         g = 2. * width / (1. + np.exp(assym * (x - pos)))
         # sigmoid variation of width
         w = ratio * self.lorentz(x, g, pos) \

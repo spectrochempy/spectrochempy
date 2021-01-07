@@ -62,3 +62,26 @@ mathtext.rm      : serif
 mathtext.it      : serif:italic
 
 text.usetex      : True
+
+##
+## ADDITIONAL PARAMETERS FOR SPECTROCHEMPY
+##
+##@method_1D                             : pen
+##@method_2D                             : stack
+##@method_3D                             : surface
+##@colorbar                              : True
+##@show_projections                      : False
+##@show_projection_x                     : False
+##@show_projection_y                     : False
+##@colormap                              : viridis
+##@max_lines_in_stack                    : 1000
+##@simplify                              : False
+##@number_of_x_labels                    : 5
+##@number_of_y_labels                    : 5
+##@number_of_z_labels                    : 5
+##@number_of_contours                    : 50
+##@contour_alpha                         : 1.0
+##@contour_start                         : 0.05
+##@antialiased                           : True
+##@rcount                                : 50
+##@ccount                                : 50

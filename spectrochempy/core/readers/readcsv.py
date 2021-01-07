@@ -1,24 +1,27 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-__all__ = ['read_zip', 'read_csv']
-
+__all__ = ['read_csv']
 __dataset_methods__ = __all__
 
 # ----------------------------------------------------------------------------------------------------------------------
-# standard imports
+# standard and other imports
 # ----------------------------------------------------------------------------------------------------------------------
 
-import os
-import shutil
 import warnings
-from io import StringIO
-from datetime import datetime
 import locale
+import io
+from datetime import datetime, timezone
+
+import numpy as np
+
+from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.core import dataset_preferences as prefs
+from spectrochempy.core.readers.importer import docstrings, Importer, importermethod
 
 try:
     locale.setlocale(locale.LC_ALL, 'en_US')  # to avoid problems with date format
@@ -28,331 +31,207 @@ except Exception:
     except Exception:
         warnings.warn('Could not set locale: en_US or en_US.utf8')
 
-# ----------------------------------------------------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------------------------------------------------
-
-import numpy as np
-from numpy.lib.npyio import NpzFile
-
-# ----------------------------------------------------------------------------------------------------------------------
-# Local imports
-# ----------------------------------------------------------------------------------------------------------------------
-from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.processors.concatenate import stack
-from spectrochempy.core import general_preferences as prefs
-from spectrochempy.utils import (readfilename, is_sequence)
-
 
 # ======================================================================================================================
 # Public functions
 # ======================================================================================================================
 
-def read_zip(*args, **kwargs):
-    """Open a zipped list of .csv files  and set data/metadata in the
-    current dataset
+# NOTE: Warning @docstrings doesnt't work if % sign are present in the docstring. We need to double it %% !
 
-    Parameters
-    ----------
-    filename : str
-        filename of the file to load
-    directory : str, optional, default="".
-        From where to read the specified filename. If not sperfied, read in
-        the current directory.
-
-    Returns
-    -------
-    dataset : |NDDataset|
-
-    Examples
-    --------
-    >>> A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip', origin='omnic')
-    >>> print(A)
-    <BLANKLINE>
-      name/id :  ...
-
-    """
-    # debug_("reading zipped folder of *.csv files")
-
-    # filename will be given by a keyword parameter except the first parameters
-    # is already the filename
-    if args and args[0]:
-        filename = args[0]
-    else:
-        filename = None
-    filename = kwargs.pop('filename', filename)
-
-    nd = _read(filename=filename, filter='zip file (*.zip);', **kwargs)
-
-    return nd
-
-
-# .............................................................................
+@docstrings.dedent
 def read_csv(*args, **kwargs):
-    """Open a *.csv file or a list of *.csv files and set data/metadata
+    """
+    Open a *.csv file or a list of *.csv files and set data/metadata
     in the current dataset
 
     Parameters
-    ----------
-    filename : str
-        filename of the file to load
-    directory : str, optional, default="".
-        From where to read the specified filename. If not specified, read in
-        the current directory then it the test directory.
+    ------
+    %(read_method.parameters)s
+
+    Other Parameters
+    -----------------
+    %(read_method.other_parameters)s
 
     Returns
-    -------
-    dataset : |NDDataset|
+    --------
+    out : NDDataset| or list of |NDDataset|
+        The dataset or a list of dataset corresponding to a (set of) .csv file(s).
 
     Examples
-    --------
-    >>> A = NDDataset.read_csv('agirdata/A350/TGA/tg.csv')
-    >>> print(A)
-    <BLANKLINE>
-      name/id : ...
+    ---------
+
+    >>> from spectrochempy import *
+    >>> NDDataset.read_csv('agirdata/P350/TGA/tg.csv')
+    NDDataset: [float64] unitless (shape: (y:1, x:3247))
+
+    Additional information can be stored in the dataset if the origin is given
+    (known origin for now : tga or omnic)
+    # TODO: define some template to allow adding new origins
+
+    >>> NDDataset.read_csv('agirdata/P350/TGA/tg.csv', origin='tga')
+    NDDataset: [float64] wt.%% (shape: (y:1, x:3247))
+
+    Sometimes the delimiteur needs to be adjusted
+
+    >>> NDDataset.read_csv('irdata/IR.CSV', directory=prefs.datadir, origin='omnic', csv_delimiter=',')
+    NDDataset: [float64] a.u. (shape: (y:1, x:3736))
 
     Notes
     -----
     This is limited to 1D array - csv file must have two columns [index, data]
     without header
 
+    See Also
+    --------
+    read : Generic read method
+    read_zip, read_jdx, read_matlab, read_omnic, read_opus, read_topspin
+
+
     """
-    # TODO: to allow header and nd-data
-
-    # debug_("reading csv files")
-
-    # filename will be given by a keyword parameter except the first parameters
-    # is already the filename
-    if args and args[0]:
-        filename = args[0]
-    else:
-        filename = None
-    filename = kwargs.pop('filename', filename)
-
-    nd = _read(filename=filename, filters=['csv files (*.csv)', 'All files (*)'])
-
-    return nd
+    kwargs['filetypes'] = ['CSV files (*.csv)']
+    kwargs['protocol'] = ['csv']
+    importer = Importer()
+    return importer(*args, **kwargs)
 
 
 # ======================================================================================================================
-# private functions
+# Private functions
 # ======================================================================================================================
 
-# .............................................................................
-def _read(filename, **kwargs):
-    # check if directory was specified
-    directory = kwargs.get("directory", None)
+@importermethod
+def _read_csv(*args, **kwargs):
+    # read csv file
+    dataset, filename = args
+    content = kwargs.get('content', None)
+    delimiter = kwargs.get("csv_delimiter", prefs.csv_delimiter)
 
-    # returns a list of files to read
-    filters = kwargs.get('filters', ['All files (*)'])
-    files = readfilename(filename,
-                         directory=directory,
-                         filters=filters)
-
-    if not files:
-        # there is no files, return nothing
-        return None
-
-    datasets = []
-    for extension in files.keys():
-
-        for filename in files[extension]:
-            if extension == '.zip':
-                # zip returns a list, so we extend the list of datasets
-                datasets.extend(_read_zip(filename, **kwargs))
-
-            elif extension == '.csv':
-                csv = _read_csv(filename, **kwargs)
-                # check is it is a list of datasets or a single
-                if isinstance(csv, NDDataset):
-                    datasets.append(csv)
-                elif is_sequence(csv):
-                    datasets.extend(csv)
-            else:
-                # try another format!
-                dat = NDDataset.read(filename, protocol=extension[1:],
-                                     sortbydate=True, **kwargs)
-                if isinstance(dat, NDDataset):
-                    datasets.append(dat)
-                elif is_sequence(dat):
-                    datasets.extend(dat)
-
-    # and stack them along the y-dimension into a single file - this assume they are compatible
-    if len(datasets) > 1:
-        new = stack(datasets)
-    else:
-        # else, squeeze a unidimensional dataset
-        new = datasets[0].squeeze()
-
-    # now we return the results
-    return new
-
-
-# .............................................................................
-def _read_zip(filename, **kwargs):
-    if not os.path.exists(filename):
-        print('Sorry but this filename (%s) does not exists!' % filename)
-        return None
-
-    origin = kwargs.get('origin', None)
-    if origin is None:
-        origin = 'unknown'
-        raise NotImplementedError("Sorry, but reading a zip file with origin of "
-                                  "type '%s' is not implemented. Please"
-                                  "set the keyword 'origin'." % origin)
-
-    temp = os.path.join(os.path.dirname(filename), '~temp')
-    # basename = os.path.splitext(os.path.basename(filename))[0]
-
-    obj = NpzFile(filename)
-    # unzip(filename, temp)
-    # unzipfilename = os.path.join(temp, basename, basename)
-
-    # get all .csv in the zip
-    # filelist = os.listdir(unzipfilename)
-    filelist = sorted(obj.files)
-
-    # read all .csv files?
-    only = kwargs.pop('only', len(filelist))
-
-    datasets = []
-
-    for f in filelist:
-
-        if not f.endswith('.csv') or f.startswith('__MACOSX'):
-            continue  # bypass non-csv files
-
-        # debug_('reading %s ...' % (f))
-
-        datasets.append(_read_csv(filename=f, fid=obj[f], **kwargs))
-        if len(datasets) + 1 > only:
-            break
-
-    shutil.rmtree(temp, ignore_errors=True)
-
-    return datasets
-
-
-# .............................................................................
-def _read_csv(filename='', fid=None, **kwargs):
-    # this is limited to 1D array (two columns reading!)
-    # TODO: improve this for 2D with header
-
-    if not isinstance(fid, bytes) and not os.path.exists(filename):
-        raise IOError("{} file doesn't exists!".format(filename))
-
-    delimiter = kwargs.get("delimiter", prefs.csv_delimiter)
-    try:
-        if isinstance(fid, bytes):
-            f = StringIO(fid.decode("utf-8"))
+    def _open():
+        if content is not None:
+            f = io.StringIO(content.decode("utf-8"))
         else:
-            f = filename
-        d = np.loadtxt(f, delimiter=delimiter)
+            f = open(filename, 'r')
+        return f
+
+    try:
+        fid = _open()
+        d = np.loadtxt(fid, unpack=True, delimiter=delimiter)
+        fid.close()
     except ValueError:
         # it might be that the delimiter is not correct (default is ','), but
         # french excel export with the french locale for instance, use ";".
         _delimiter = ';'
         try:
-            d = np.loadtxt(f, delimiter=_delimiter)
+            fid = _open()
+            if fid:
+                fid.close()
+            fid = _open()
+            d = np.loadtxt(fid, unpack=True, delimiter=_delimiter)
+            fid.close()
         except Exception:
             # in french, very often the decimal '.' is replaced by a
             # comma:  Let's try to correct this
-            if not isinstance(f, StringIO):
-                with open(f, "r") as f_:
-                    txt = f_.read()
+            if fid:
+                fid.close()
+            if not isinstance(fid, io.StringIO):
+                with open(fid, "r") as fid_:
+                    txt = fid_.read()
             else:
-                txt = f.read()
+                txt = fid.read()
             txt = txt.replace(',', '.')
-            fil = StringIO(txt)
+            fil = io.StringIO(txt)
             try:
-                d = np.loadtxt(fil, delimiter=delimiter)
+                d = np.loadtxt(fil, unpack=True, delimiter=delimiter)
             except Exception:
                 raise IOError(
-                    '{} is not a .csv file or its structure cannot be recognized')
+                        '{} is not a .csv file or its structure cannot be recognized')
 
-    # transpose d so the the rows becomes the last dimensions
-    d = d.T
-
-    # First column should now be the x coordinates
+    # First column is the x coordinates
     coordx = Coord(d[0])
 
-    # create a second coordinate for dimension x of size 1
+    # create a second coordinate for dimension y of size 1
     coordy = Coord([0])
 
     # and data is the second column -  we make it a vector
     data = d[1].reshape((1, coordx.size))
 
-    # create the dataset
-    new = NDDataset(data, coords=(coordy, coordx))
+    # update the dataset
+    dataset.data = data
+    dataset.set_coordset(y=coordy, x=coordx)
 
     # set the additional attributes
-    name = os.path.splitext(os.path.basename(filename))[0]
-    new.name = kwargs.get('name', name)
-    new.title = kwargs.get('title', None)
-    new.units = kwargs.get('units', None)
-    new.description = kwargs.get('description',
-                                 '"name" ' + 'read from .csv file')
-    new.history = str(datetime.now()) + ':read from .csv file \n'
-    new._date = datetime.now()
-    new._modified = new.date
+    name = filename.stem
+    dataset.filename = filename
+    dataset.name = kwargs.get('name', name)
+    dataset.title = kwargs.get('title', None)
+    dataset.units = kwargs.get('units', None)
+    dataset.description = kwargs.get('description',
+                                     '"name" ' + 'read from .csv file')
+    dataset.history = str(datetime.now(timezone.utc)) + ':read from .csv file \n'
+    dataset._date = datetime.now(timezone.utc)
+    dataset._modified = dataset.date
 
     # here we can check some particular format
     origin = kwargs.get('origin', '')
     if 'omnic' in origin:
         # this will be treated as csv export from omnic (IR data)
-        new = _add_omnic_info(new, **kwargs)
+        dataset = _add_omnic_info(dataset, **kwargs)
     elif 'tga' in origin:
         # this will be treated as csv export from tga analysis
-        new = _add_tga_info(new, **kwargs)
-
-    return new
+        dataset = _add_tga_info(dataset, **kwargs)
+    elif origin:
+        origin = kwargs.get('origin', None)
+        raise NotImplementedError(f"Sorry, but reading a csv file with '{origin}' origin is not implemented. "
+                                  "Please, remove or set the keyword 'origin'\n "
+                                  '(Up to now implemented csv files are: `omnic`, `tga`)')
+    return dataset
 
 
 # .............................................................................
 def _add_omnic_info(dataset, **kwargs):
     # get the time and name
     name = desc = dataset.name
-    name, dat = name.split('_')
-
-    # if needed convert weekday name to English
-    dat = dat.replace('Lun', 'Mon')
-    dat = dat[:3].replace('Mar', 'Tue') + dat[3:]
-    dat = dat.replace('Mer', 'Wed')
-    dat = dat.replace('Jeu', 'Thu')
-    dat = dat.replace('Ven', 'Fri')
-    dat = dat.replace('Sam', 'Sat')
-    dat = dat.replace('Dim', 'Sun')
-    # convert month name to English
-    dat = dat.replace('Aout', 'Aug')
-
-    # get the dates
-    acqdate = datetime.strptime(dat, "%a %b %d %H-%M-%S %Y")
-
-    # Transform back to timestamp for storage in the Coord object
-    # use datetime.fromtimestamp(d, timezone.utc))
-    # to transform back to datetime obkct
-    timestamp = acqdate.timestamp()
 
     # modify the dataset metadata
     dataset.units = 'absorbance'
     dataset.title = 'Absorbance'
     dataset.name = name
-    dataset.y = Coord(np.array([timestamp]), name='y')
-    dataset.set_coordtitles(y='Acquisition timestamp (GMT)', x='Wavenumbers')
-    dataset.x.units = 'cm^-1'
-    dataset.y.labels = np.array([[acqdate], [name]])
-    dataset.y.units = 's'
-
-    # Set description and history
-    dataset.description = (
-        'Dataset from .csv file: {}\n'.format(desc))
-
-    dataset.history = str(datetime.now()) + ':read from spg file \n'
+    dataset.description = ('Dataset from .csv file: {}\n'.format(desc))
+    dataset.history = str(datetime.now(timezone.utc)) + ':read from omnic exported csv file \n'
+    dataset.origin = 'omnic'
 
     # Set the NDDataset date
-    dataset._date = datetime.now()
+    dataset._date = datetime.now(timezone.utc)
     dataset._modified = dataset.date
+
+    # x axis
+    dataset.x.units = 'cm^-1'
+
+    # y axis ?
+    if '_' in name:
+        name, dat = name.split('_')
+        # if needed convert weekday name to English
+        dat = dat.replace('Lun', 'Mon')
+        dat = dat[:3].replace('Mar', 'Tue') + dat[3:]
+        dat = dat.replace('Mer', 'Wed')
+        dat = dat.replace('Jeu', 'Thu')
+        dat = dat.replace('Ven', 'Fri')
+        dat = dat.replace('Sam', 'Sat')
+        dat = dat.replace('Dim', 'Sun')
+        # convert month name to English
+        dat = dat.replace('Aout', 'Aug')
+
+        # get the dates
+        acqdate = datetime.strptime(dat, "%a %b %d %H-%M-%S %Y")
+
+        # Transform back to timestamp for storage in the Coord object
+        # use datetime.fromtimestamp(d, timezone.utc))
+        # to transform back to datetime obkct
+        timestamp = acqdate.timestamp()
+
+        dataset.y = Coord(np.array([timestamp]), name='y')
+        dataset.set_coordtitles(y='Acquisition timestamp (GMT)', x='Wavenumbers')
+        dataset.y.labels = np.array([[acqdate], [name]])
+        dataset.y.units = 's'
 
     return dataset
 
@@ -364,12 +243,11 @@ def _add_tga_info(dataset, **kwargs):
     dataset.units = 'weight_percent'
     dataset.x.title = 'Time-on-stream'
     dataset.title = 'Mass change'
+    dataset.origin = 'tga'
 
     return dataset
 
 
-# ======================================================================================================================
-# tests
-# ======================================================================================================================
+# ----------------------------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
     pass

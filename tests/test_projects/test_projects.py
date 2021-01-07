@@ -1,40 +1,21 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-import os
 
-from spectrochempy import Project, general_preferences, NDDataset, INPLACE, Script, run_script
-from spectrochempy.utils.testing import assert_array_equal
+from spectrochempy.core.project.project import Project
+from spectrochempy.core.scripts.script import Script, run_script
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core import preferences, INPLACE
 
-prefs = general_preferences
+prefs = preferences
 
 
 # Basic
 # --------------------------------------------------------------------------------------------------------
-
-def test_save_and_load_file_with_nofilename(IR_dataset_2D):
-    A = IR_dataset_2D.copy()
-    A.save()
-
-    # no directory for saving passed ... it must be in data
-    path = os.path.join(prefs.datadir, A.filename)
-    assert os.path.exists(path)
-    assert A.directory == prefs.datadir
-
-    B = NDDataset.load(path)
-    assert B.description == A.description
-    assert_array_equal(A.data, B.data)
-
-    # the filename should be stored in the object just loaded
-    assert B.filename == A.filename
-    assert B.directory == prefs.datadir
-
-    os.remove(path)
-
 
 def test_project(ds1, ds2, dsm):
     myp = Project(name='AGIR processing', method='stack')
@@ -110,12 +91,10 @@ def test_project_with_script():
     print(proj)
     print(proj.A350.label)
 
-    proj.save('HIZECOKE_TEST')
+    f = proj.save()
 
     newproj = Project.load('HIZECOKE_TEST')
-
-    print(newproj)
-
+    # print(newproj)
     assert str(newproj) == str(proj)
     assert newproj.A350.label == proj.A350.label
 
@@ -128,10 +107,10 @@ def test_project_with_script():
 
     proj['print_info'] = Script('print_info', script_source)
 
-    print(proj)
+    # print(proj)
 
     # save but do not chnge the original data
-    proj.save('HIZECOKE_TEST', overwrite_data=False)
+    proj.save_as('HIZECOKE_TEST', overwrite_data=False)
 
     newproj = Project.load('HIZECOKE_TEST')
 
@@ -144,7 +123,7 @@ def test_project_with_script():
     # attemps to resolve locals
     newproj.print_info()
 
-    proj.save('HIZECOKE_TEST')
+    proj.save_as('HIZECOKE_TEST')
     newproj = Project.load('HIZECOKE_TEST')
 
 
@@ -156,21 +135,4 @@ def test_save_and_load_project(ds1, ds2):
 
     myp.add_datasets(ds1, ds2)
 
-    myp.save('PROCESS')
-
-
-def test_save_and_load_nmr_project():
-    myp = Project(name='process')
-
-    path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr',
-                        'bruker_1d')
-
-    # load the data in a new dataset
-    ndd = NDDataset(name='NMR_1D')
-    ndd.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
-
-    myp.add_dataset(ndd)
-    myp.save('NMR_1')
-
-    # now load it
-    Project.load('NMR_1')
+    myp.save()

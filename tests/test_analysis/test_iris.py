@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
@@ -23,9 +23,9 @@ def test_IRIS():
          0.05100, 0.09300, 0.15000, 0.20300, 0.30000, 0.40400, 0.50300,
          0.60200, 0.70200, 0.80100, 0.90500, 1.00400]
 
-    X.coords.update(y=Coord(p, title='pressure', units='torr'))
+    X.coordset.update(y=Coord(p, title='pressure', units='torr'))
     # Using the `update` method is mandatory because it will preserve the name.
-    # Indeed, setting using X.coords[0] = Coord(...) fails unless name is specified: Coord(..., name='y')
+    # Indeed, setting using X.coordset[0] = Coord(...) fails unless name is specified: Coord(..., name='y')
 
     # set the optimization parameters, perform the analysis
     # and plot the results

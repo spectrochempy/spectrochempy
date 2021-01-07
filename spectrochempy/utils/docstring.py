@@ -36,10 +36,12 @@ def indent(text, num=4):
 def append_original_doc(parent, num=0):
     """Return an iterator that append the docstring of the given `parent`
     function to the applied function"""
+
     def func(func):
         func.__doc__ = func.__doc__ and func.__doc__ + indent(
-            parent.__doc__, num)
+                parent.__doc__, num)
         return func
+
     return func
 
 
@@ -49,17 +51,18 @@ _docstrings.get_sections(base='DocstringProcessor.get_sections')(
         dedent(DocstringProcessor.get_sections))
 
 
+# noinspection PyDefaultArgument
 class SpectroChemPyDocstringProcessor(DocstringProcessor):
     """
     A :class:`docrep.DocstringProcessor` subclass with possible types section
     """
 
     param_like_sections = DocstringProcessor.param_like_sections + [
-        'Possible types']
+            'Possible types']
 
     @_docstrings.dedent
     def get_sections(self, s=None, base=None, sections=[
-        'Parameters', 'Other Parameters', 'Returns', 'Possible types']):
+            'Parameters', 'Other Parameters', 'Returns', 'Possible types']):
         """
         Extract the specified sections out of the given string
 
@@ -76,7 +79,7 @@ class SpectroChemPyDocstringProcessor(DocstringProcessor):
             The replaced string
         """
         return super(SpectroChemPyDocstringProcessor, self).get_sections(
-            s, base, sections)
+                s, base, sections)
 
 
 del _docstrings
@@ -112,8 +115,8 @@ docstrings.get_sections(docstrings.dedent(
     object
         Same object or a copy depending on the `inplace` flag.
 
-    """
-), 'generic_method', sections=['Parameters', 'Returns'])
+        """
+        ), 'generic_method', sections=['Parameters', 'Returns'])
 
 docstrings.keep_params('generic_method.parameters', 'dim')
 docstrings.keep_params('generic_method.parameters', 'dims')

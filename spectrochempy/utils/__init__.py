@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
@@ -15,23 +15,25 @@ Package containing various utilities classes and functions.
 
 # masked arrays
 # ----------------------------------------------------------------------------------------------------------------------
-from numpy.ma.core import masked as MASKED, nomask as NOMASK, MaskedArray, MaskedConstant   # noqa: F401
+from numpy.ma.core import masked as MASKED, nomask as NOMASK, MaskedArray, MaskedConstant  # noqa: F401
 
 # import util files content
 # ----------------------------------------------------------------------------------------------------------------------
-from .exceptions import *       # noqa: F403, F401
-from .fake import *             # noqa: F403, F401
-from .file import *             # noqa: F403, F401
-from .misc import *             # noqa: F403, F401
-from .print import *            # noqa: F403, F401
-from .system import *           # noqa: F403, F401
-# from .excel import *            # noqa: F403, F401
-from .matplolib_utils import *  # noqa: F403, F401
-from .arrays import *           # noqa: F403, F401
-from .docstring import *        # noqa: F403, F401
-from .meta import *             # noqa: F403, F401
-from .configurable import MetaConfigurable  # noqa: F403, F401
-
+from .arrays import *  # noqa: F403, F401
+from .configurable import *  # noqa: F403, F401
+from .docstring import *  # noqa: F403, F401
+from .exceptions import *  # noqa: F403, F401
+from .fake import *  # noqa: F403, F401
+from .file import *  # noqa: F403, F401
+from .jsonutils import *  # noqa: F403, F401
+from .meta import *  # noqa: F403, F401
+from .misc import *  # noqa: F403, F401
+from .print import *  # noqa: F403, F401
+# from .excel import *          # noqa: F403, F401
+from .packages import *  # noqa: F403, F401
+from .plots import *  # noqa: F403, F401
+from .system import *  # noqa: F403, F401
+from .zip import *  # noqa: F403, F401
 
 #
 # # internal utilities

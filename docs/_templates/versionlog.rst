@@ -1,7 +1,13 @@
 :orphan:
+
 {% if bugs or features or tasks %}
 Version {{ target }}
 -----------------------------------
+{% if prs  %}
+{% for item in prs  %}
+* `#{{ item["number"] }} <{{ item["url"] }}>`_ : {{ item["title"] }}
+{%- endfor %}
+{%- endif %}
 {% if bugs  %}
 Bugs fixed
 ~~~~~~~~~~~
@@ -24,4 +30,3 @@ Tasks terminated
 {%- endfor %}
 {%- endif %}
 {%- endif %}
-

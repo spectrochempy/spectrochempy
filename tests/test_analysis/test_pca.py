@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
@@ -20,6 +20,7 @@ from spectrochempy.utils.testing import assert_array_almost_equal
 HAS_SCIKITLEARN = False
 try:
     from sklearn.decomposition import PCA as sklPCA
+
     HAS_SCIKITLEARN = True
 except ImportError:
     pass
@@ -28,8 +29,8 @@ except ImportError:
 # test pca
 # ---------
 
-def test_pca(IR_dataset_2D):
-    dataset = IR_dataset_2D.copy()
+def test_pca():
+    dataset = NDDataset.read('irdata/nh4y-activation.spg')
 
     # with masks
     dataset[:, 1240.0:920.0] = MASKED  # do not forget to use float in slicing
@@ -53,8 +54,7 @@ def test_pca(IR_dataset_2D):
 
 
 @pytest.mark.skipif(not HAS_SCIKITLEARN, reason="scikit-learn library not loaded")
-def test_compare_scikit_learn(IR_dataset_2D):
-
+def test_compare_scikit_learn():
     X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
 
     pcas = sklPCA(n_components=2)
@@ -70,7 +70,8 @@ def test_compare_scikit_learn(IR_dataset_2D):
     assert_array_almost_equal(pca.sv.data, pcas.singular_values_)
     assert_array_almost_equal(pca.ev_ratio.data, pcas.explained_variance_ratio_ * 100.)
 
-    X = IR_dataset_2D.data
+    dataset = NDDataset.read('irdata/nh4y-activation.spg')
+    X = dataset.data
 
     pcas = sklPCA(n_components=5)
     pcas.fit(X)
