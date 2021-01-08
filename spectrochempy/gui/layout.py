@@ -4,10 +4,8 @@
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
 """
 This module implements the base |Dash| class.
-
 """
 
 __all__ = []
@@ -117,7 +115,6 @@ https://github.com/spectrochempy/spectrochempy
 ##### License
 
 [CeCILL-B FREE SOFTWARE LICENSE AGREEMENT](https://cecill.info/licences/Licence_CeCILL-B_V1-en.html)
-
 
 """, className='markdown', ),
                     className='control-tab')

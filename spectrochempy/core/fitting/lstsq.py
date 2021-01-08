@@ -43,7 +43,6 @@ class LSTSQ(HasTraits):
             coordinates exists.
             If two datasets `X`, and `Y` are given, the `x` coordinates of `Y`
             are ignored and replaced by the `X` data.
-
         """
         super().__init__()
 
@@ -80,7 +79,6 @@ class LSTSQ(HasTraits):
         Returns
         -------
         Quantity or NDDataset, depending on the dimension of the linear system.
-
         """
         P = self._P
         X = self.X
@@ -115,7 +113,6 @@ class LSTSQ(HasTraits):
         Returns
         -------
         |NDDataset|
-
         """
         A, B = self.transform()
 
@@ -134,7 +131,6 @@ class NNLS(HasTraits):
     Least-squares solution to a linear matrix equation with non-negativity constraints
 
     This is a wrapper to the `scipy.optimize.nnls`` function
-
     """
 
     X = Instance(NDArray)
@@ -154,7 +150,6 @@ class NNLS(HasTraits):
         maxiter: int, optional
             Maximum number of iterations, optional.
             Default is ``3 * X.shape``.
-
         """
         super().__init__()
 
@@ -189,7 +184,6 @@ class NNLS(HasTraits):
         Returns
         -------
         Quantity or NDDataset, depending on the dimension of the linear system.
-
         """
         P = self._P
         X = self.X
@@ -224,7 +218,6 @@ class NNLS(HasTraits):
         Returns
         -------
         |NDDataset|
-
         """
         A, B = self.transform()
 
@@ -245,7 +238,6 @@ class CurveFit(HasTraits):
     It assumes Y = f(X, *params) + eps.
 
     This is a wrapper to the `scipy.optimize.curve_fit`` function
-
     """
 
     X = Instance(NDArray)
@@ -265,7 +257,6 @@ class CurveFit(HasTraits):
         maxiter: int, optional
             Maximum number of iterations, optional.
             Default is ``3 * X.shape``.
-
         """
         super().__init__()
 
@@ -300,7 +291,6 @@ class CurveFit(HasTraits):
         Returns
         -------
         Quantity or NDDataset, depending on the dimension of the linear system.
-
         """
         P = self._P
         X = self.X
@@ -335,7 +325,6 @@ class CurveFit(HasTraits):
         Returns
         -------
         |NDDataset|
-
         """
         A, B = self.transform()
 

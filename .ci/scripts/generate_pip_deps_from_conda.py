@@ -121,9 +121,9 @@ if __name__ == "__main__":
         action="store_true",
         help="compare whether the two files are equivalent",
     )
-    argparser.add_argument(
-        "--azure", action="store_true", help="show the output in azure-pipelines format"
-    )
+    # argparser.add_argument(
+    #     "--azure", action="store_true", help="show the output in azure-pipelines format"
+    # )
     args = argparser.parse_args()
 
     repo_path = os.path.dirname(
@@ -139,9 +139,9 @@ if __name__ == "__main__":
             f"`requirements-dev.txt` has to be generated with `{sys.argv[0]}` after "
             "`environment.yml` is modified.\n"
         )
-        if args.azure:
-            msg = (
-                f"##vso[task.logissue type=error;sourcepath=requirements-dev.txt]{msg}"
-            )
-        sys.stderr.write(msg)
+        # if args.azure:
+        #     msg = (
+        #         f"##vso[task.logissue type=error;sourcepath=requirements-dev.txt]{msg}"
+        #     )
+        # sys.stderr.write(msg)
     sys.exit(res)

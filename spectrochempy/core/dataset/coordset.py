@@ -28,7 +28,7 @@ from traitlets import HasTraits, List, Bool, Unicode, observe, All, validate, de
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
 from spectrochempy.core.dataset.ndarray import NDArray, DEFAULT_DIM_NAME
-from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.utils import is_sequence, colored_output, convert_to_html
 
 
@@ -37,8 +37,41 @@ from spectrochempy.utils import is_sequence, colored_output, convert_to_html
 # ======================================================================================================================
 class CoordSet(HasTraits):
     """
-    A collection of Coord objects for a NDArray object with a validation
-    method.
+    A collection of Coord objects for a NDArray object with validation.
+
+    This object is an iterable containing a collection of Coord objects.
+
+    See Also
+    --------
+    Coord : Explicit coordinates object.
+    LinearCoord : Implicit coordinates object.
+    NDDataset: The main object of SpectroChempy which makes use of CoordSet.
+
+    Examples
+    --------
+    >>> from spectrochempy import Coord, CoordSet
+
+    Define 4 coordinates, with two for the same dimension
+
+    >>> coord0 = Coord.linspace(10., 100., 5, units='m', title='distance')
+    >>> coord1 = Coord.linspace(20., 25., 4, units='K', title='temperature')
+    >>> coord1b = Coord.linspace(1., 10., 4, units='millitesla', title='magnetic field')
+    >>> coord2 = Coord.linspace(0., 1000., 6, units='hour', title='elapsed time')
+
+    Now create a coordset
+
+    >>> cs = CoordSet(t=coord0, u=coord2, v=[coord1, coord1b])
+
+    Display some coordinates
+
+    >>> cs.u
+    Coord: [float64] hr (size: 6)
+
+    >>> cs.v
+    CoordSet: [_1:temperature, _2:magnetic field]
+
+    >>> cs.v_1
+    Coord: [float64] K (size: 4)
     """
     # Hidden attributes containing the collection of objects
     _id = Unicode()
@@ -82,7 +115,6 @@ class CoordSet(HasTraits):
             Same as `x` for the others dimensions.
         dims : list of string, optional
             Names of the dims to use corresponding to the coordinates. If not given, standard names are used: x, y, ...
-
         """
 
         self._copy = kwargs.pop('copy', True)
@@ -215,7 +247,6 @@ class CoordSet(HasTraits):
         Rather than isinstance(obj, CoordSet) use object.implements('CoordSet').
 
         This is useful to check type without importing the module
-
         """
         if name is None:
             return 'CoordSet'
@@ -304,7 +335,6 @@ class CoordSet(HasTraits):
     def has_defined_name(self):
         """
         bool - True is the name has been defined
-
         """
         return not (self.name == self.id)
 
@@ -425,7 +455,6 @@ class CoordSet(HasTraits):
     def units(self):
         """
         list - Units of the coords in the current coords
-
         """
         return [item.units for item in self]
 
@@ -441,7 +470,6 @@ class CoordSet(HasTraits):
         -------
         object
             an exact copy of the current object
-
         """
         return self.__copy__()
 
@@ -454,7 +482,6 @@ class CoordSet(HasTraits):
         -------
         out : list
             list of all coordinates names (including reference to other coordinates)
-
         """
         keys = []
         if self.names:
@@ -475,7 +502,6 @@ class CoordSet(HasTraits):
 
         Returns
         -------
-
         """
         if not args and not kwargs:
             return
@@ -518,7 +544,6 @@ class CoordSet(HasTraits):
         kwargs : str
             keyword attribution of the titles. The keys must be valid names among the coordinate's name list. This
             is the recommended way to set titles as this will be less prone to errors.
-
         """
         if len(args) == 1 and (is_sequence(args[0]) or isinstance(args[0], CoordSet)):
             args = args[0]
@@ -554,7 +579,6 @@ class CoordSet(HasTraits):
             is the recommended way to set units as this will be less prone to errors.
         force : bool, optional, default=False
             whether or not the new units must be compatible with the current units. See the `Coord`.`to` method.
-
         """
         force = kwargs.pop('force', False)
 
@@ -581,7 +605,6 @@ class CoordSet(HasTraits):
         -------
         out : dict
             A dictionary where keys are the names of the coordinates, and the values the coordinates themselves
-
         """
         return dict(zip(self.names, self._coords))
 
@@ -593,7 +616,6 @@ class CoordSet(HasTraits):
         Parameters
         ----------
         kwarg : Only keywords among the CoordSet.names are allowed - they denotes the name of a dimension.
-
         """
         dims = kwargs.keys()
         for dim in list(dims)[:]:

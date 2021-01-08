@@ -5,11 +5,9 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 #  See full LICENSE agreement in the root directory
 # ==============================================================================
-
 """
 This module define the class |NDIO| in which input/output standard
 methods for a |NDDataset| are defined.
-
 """
 
 __all__ = ['NDIO', 'SCPY_SUFFIX']
@@ -22,7 +20,7 @@ import numpy as np
 from numpy.lib.npyio import zipfile_factory
 from traitlets import HasTraits, Instance, Union, Unicode
 
-from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core import debug_
 from spectrochempy.utils import SpectroChemPyException
 from spectrochempy.utils import pathclean, check_filenames, ScpFile, check_filename_to_save, json_serialiser
@@ -44,7 +42,6 @@ class NDIO(HasTraits):
     Import/export interface from |NDDataset|
 
     This class is used as basic import/export interface of the |NDDataset|.
-
     """
 
     _filename = Union((Instance(pathlib.Path), Unicode()), allow_none=True)
@@ -55,7 +52,6 @@ class NDIO(HasTraits):
         `Pathlib` object - current directory for this dataset
 
         ReadOnly property - automaticall set when the filename is updated if it contains a parent on its path
-
         """
         if self._filename:
             return pathclean(self._filename).parent.resolve()
@@ -66,7 +62,6 @@ class NDIO(HasTraits):
     def filename(self):
         """
         `Pathlib` object - current filename for this dataset.
-
         """
         if self._filename:
             return self._filename.stem + self.suffix
@@ -89,7 +84,6 @@ class NDIO(HasTraits):
 
         Read Only property - automatically set when the filename is updated if it has a suffix, else give
         the default suffix for the given type of object.
-
         """
         if self._filename and self._filename.suffix:
             return self._filename.suffix
@@ -138,7 +132,6 @@ class NDIO(HasTraits):
 
         Remove this file
         >>> filename.unlink()
-
         """
 
         # by default we save the file in the self.directory and with the name + suffix depending
@@ -203,7 +196,6 @@ class NDIO(HasTraits):
         ---------
         save : save current dataset
         write : export current dataset to different format
-
         """
         if filename:
             # we have a filename
@@ -262,8 +254,6 @@ class NDIO(HasTraits):
         --------
         read : import dataset from various orgines
         save : save the current dataset
-
-
         """
         content = kwargs.get('content', None)
 
@@ -385,7 +375,6 @@ class NDIO(HasTraits):
         ----------
         filename: str of  `pathlib` object
             File name where to save the current object. Extension
-
         """
 
         # Stage data in a temporary file on disk, before writing to zip.

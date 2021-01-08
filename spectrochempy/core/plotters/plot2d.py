@@ -8,9 +8,8 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
-
 """
-
+Plotters
 """
 __all__ = ['plot_2D', 'plot_map', 'plot_stack', 'plot_image', 'plot_surface', 'plot_waterfall']
 
@@ -52,7 +51,6 @@ def plot_map(dataset, **kwargs):
     Plot a 2D dataset as a contoured map.
 
     Alias of plot_2D (with `method` argument set to ``map``.
-
     """
     if dataset.ndim < 2:
         from spectrochempy.core.plotters.plot1d import plot_1D
@@ -73,7 +71,6 @@ def plot_stack(dataset, **kwargs):
     Plot a 2D dataset as a stacked plot.
 
     Alias of plot_2D (with `method` argument set to ``stack``).
-
     """
     if dataset.ndim < 2:
         from spectrochempy.core.plotters.plot1d import plot_1D
@@ -94,7 +91,6 @@ def plot_image(dataset, **kwargs):
     Plot a 2D dataset as an image plot.
 
     Alias of plot_2D (with `method` argument set to ``image``).
-
     """
     if dataset.ndim < 2:
         from spectrochempy.core.plotters.plot1d import plot_1D
@@ -115,7 +111,6 @@ def plot_surface(dataset, **kwargs):
     Plot a 2D dataset as a a 3D-surface.
 
     Alias of plot_2D (with `method` argument set to ``surface``.
-
     """
     if dataset.ndim < 2:
         from spectrochempy.core.plotters.plot1d import plot_1D
@@ -136,7 +131,6 @@ def plot_waterfall(dataset, **kwargs):
     Plot a 2D dataset as a a 3D-waterfall plot.
 
     Alias of plot_2D (with `method` argument set to ``waterfall``.
-
     """
     if dataset.ndim < 2:
         from spectrochempy.core.plotters.plot1d import plot_1D
@@ -216,7 +210,6 @@ def plot_2D(dataset, **kwargs):
     x_reverse : `bool` or None [optional, default=None
 
     kwargs : additional keywords
-
     """
 
     # Get preferences

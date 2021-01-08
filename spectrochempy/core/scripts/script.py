@@ -21,8 +21,9 @@ __all__ = ['Script', 'run_script', 'run_all_scripts']
 
 class Script(HasTraits):
     """
-    Executable script associated to a project
+    Executable scripts.
 
+    The scripts can be used in a project.
     """
     _name = Unicode()
     _content = Unicode(allow_none=True)
@@ -33,9 +34,13 @@ class Script(HasTraits):
         """
         Parameters
         ----------
-        name
-        content
-        parent
+        name : str
+            Name of the script .
+            The name should be unique.
+        content : str
+            Content of sthe script
+        parent : instance of |Project|
+            Parent project
         """
         self.name = name
         self.content = content
@@ -50,7 +55,6 @@ class Script(HasTraits):
         return ['name', 'content', 'parent']
 
     def __call__(self, *args):
-
         return self.execute(*args)
 
     def __eq__(self, other):
@@ -126,9 +130,7 @@ class Script(HasTraits):
         Utility to check if the current object implement `Project`.
 
         Rather than isinstance(obj, Project) use object.implements('Project').
-
         This is useful to check type without importing the module
-
         """
         if name is None:
             return 'Script'
@@ -182,7 +184,6 @@ def run_script(script, localvars=None):
     Returns
     -------
     output of the script if any
-
     """
 
     return script.execute(localvars)
@@ -196,7 +197,6 @@ def run_all_scripts(project):
     ----------
     project : project instance
         The project in which the scripts have to be executed
-
     """
     # TODO: complete this run_all_script function
 

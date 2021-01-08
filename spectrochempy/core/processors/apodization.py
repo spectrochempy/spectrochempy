@@ -20,15 +20,13 @@ from scipy.signal.windows import bartlett as scpy_bartlett
 # Local imports
 # ======================================================================================================================
 from spectrochempy.units import ur, Quantity
-from spectrochempy.utils import EPSILON, docstrings
+from spectrochempy.utils import EPSILON
 from spectrochempy.core import error_
 
 
 # ======================================================================================================================
 # Private module methods
 # ======================================================================================================================
-@docstrings.get_sections(base='apodize', sections=['Other Parameters', 'Returns'])
-@docstrings.dedent
 def _apodize(dataset, method, apod=None, **kwargs):
     """
 
@@ -59,11 +57,10 @@ def _apodize(dataset, method, apod=None, **kwargs):
 
     Returns
     -------
-    out : |NDDataset| or |NDPanel|.
-        The apodized dataset
-    apod_arr : ndarray,
+    apodized
+        |NDDataset| or |NDPanel|.
+    apod_arr
         The apodization array only if 'retfunc' is True.
-
     """
 
     # output dataset inplace (by default) or not
@@ -161,7 +158,6 @@ def _apodize(dataset, method, apod=None, **kwargs):
 # ======================================================================================================================
 # Public module methods
 # ======================================================================================================================
-@docstrings.dedent
 def em(dataset, lb=1, shifted=0, **kwargs):
     r"""
     Calculate exponential apodization.
@@ -197,16 +193,28 @@ def em(dataset, lb=1, shifted=0, **kwargs):
 
     Other Parameters
     ----------------
-    %(apodize.other_parameters)s
+    dim : str or int, keyword parameter, optional, default='x'.
+        Specify on which dimension to apply the apodization method. If `dim` is specified as an integer it is equivalent
+        to the usual `axis` numpy parameter.
+    inv : bool, keyword parameter, optional, default=False.
+        True for inverse apodization.
+    rev : bool, keyword parameter, optional, default=False.
+        True to reverse the apodization before applying it to the data.
+    inplace : bool, keyword parameter, optional, default=False.
+        True if we make the transform inplace.  If False, the function return a new dataset
+    retfunc : bool, keyword parameter, optional, default=False
+        True to return the apodization array along with the apodized object
 
     Returns
     -------
-    %(apodize.returns)s
+    apodized
+        |NDDataset| or |NDPanel|.
+    apod_arr
+        The apodization array only if 'retfunc' is True.
 
     See Also
     --------
     gm, sp, sine, sinm, qsin
-
     """
 
     # what's the line broadening ?
@@ -245,8 +253,7 @@ def em(dataset, lb=1, shifted=0, **kwargs):
     return out
 
 
-# ======================================================================================================================
-@docstrings.dedent
+# ......................................................................................................................
 def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
     r"""
     Calculate lorentz-to-gauss apodization.
@@ -285,16 +292,28 @@ def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
 
     Other Parameters
     ----------------
-    %(apodize.other_parameters)s
+    dim : str or int, keyword parameter, optional, default='x'.
+        Specify on which dimension to apply the apodization method. If `dim` is specified as an integer it is equivalent
+        to the usual `axis` numpy parameter.
+    inv : bool, keyword parameter, optional, default=False.
+        True for inverse apodization.
+    rev : bool, keyword parameter, optional, default=False.
+        True to reverse the apodization before applying it to the data.
+    inplace : bool, keyword parameter, optional, default=False.
+        True if we make the transform inplace.  If False, the function return a new dataset
+    retfunc : bool, keyword parameter, optional, default=False
+        True to return the apodization array along with the apodized object
 
     Returns
     -------
-    %(apodize.returns)s
+    apodized
+        |NDDataset| or |NDPanel|.
+    apod_arr
+        The apodization array only if 'retfunc' is True.
 
     See Also
     --------
     em, sp, sine, sinm, qsin
-
     """
 
     # what's the line broadening ?
@@ -346,8 +365,7 @@ def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
     return out
 
 
-# ======================================================================================================================
-@docstrings.dedent
+# ......................................................................................................................
 def sp(dataset, ssb=1, pow=1, **kwargs):
     r"""
     Calculate apodization with a Sine window multiplication.
@@ -381,16 +399,28 @@ def sp(dataset, ssb=1, pow=1, **kwargs):
 
     Other Parameters
     ----------------
-    %(apodize.other_parameters)s
+    dim : str or int, keyword parameter, optional, default='x'.
+        Specify on which dimension to apply the apodization method. If `dim` is specified as an integer it is equivalent
+        to the usual `axis` numpy parameter.
+    inv : bool, keyword parameter, optional, default=False.
+        True for inverse apodization.
+    rev : bool, keyword parameter, optional, default=False.
+        True to reverse the apodization before applying it to the data.
+    inplace : bool, keyword parameter, optional, default=False.
+        True if we make the transform inplace.  If False, the function return a new dataset
+    retfunc : bool, keyword parameter, optional, default=False
+        True to return the apodization array along with the apodized object
 
     Returns
     -------
-    %(apodize.returns)s
+    apodized
+        |NDDataset| or |NDPanel|.
+    apod_arr
+        The apodization array only if 'retfunc' is True.
 
     See Also
     --------
     em, gm, sine, sinm, qsin
-
     """
 
     # ssb
@@ -423,7 +453,7 @@ def sp(dataset, ssb=1, pow=1, **kwargs):
     return out
 
 
-# ======================================================================================================================
+# ......................................................................................................................
 def sine(dataset, *args, **kwargs):
     """
     Strictly equivalent to :meth:`sp`.
@@ -431,12 +461,11 @@ def sine(dataset, *args, **kwargs):
     See Also
     --------
     em, gm, sp, sinm, qsin
-
     """
     return sp(dataset, *args, **kwargs)
 
 
-# ======================================================================================================================
+# ......................................................................................................................
 def sinm(dataset, ssb=1, **kwargs):
     """
     Equivalent to :meth:`sp`, with pow = 1 (sine bell apodization window).
@@ -444,12 +473,11 @@ def sinm(dataset, ssb=1, **kwargs):
     See Also
     --------
     em, gm, sp, sine, qsin
-
     """
     return sp(dataset, ssb=ssb, pow=1, **kwargs)
 
 
-# ======================================================================================================================
+# ......................................................................................................................
 def qsin(dataset, ssb=1, **kwargs):
     """
     Equivalent to :meth:`sp`, with pow = 2 (squared sine bell apodization window).
@@ -457,14 +485,11 @@ def qsin(dataset, ssb=1, **kwargs):
     See Also
     --------
     em, gm, sp, sine, sinm
-
     """
     return sp(dataset, ssb=ssb, pow=2, **kwargs)
 
 
-# ================================================================================================
-
-@docstrings.dedent
+# ......................................................................................................................
 def hamming(dataset, **kwargs):
     r"""
     Calculate Hamming (== Happ-Genzel) apodization.
@@ -488,16 +513,28 @@ def hamming(dataset, **kwargs):
 
     Other Parameters
     ----------------
-    %(apodize.other_parameters)s
+    dim : str or int, keyword parameter, optional, default='x'.
+        Specify on which dimension to apply the apodization method. If `dim` is specified as an integer it is equivalent
+        to the usual `axis` numpy parameter.
+    inv : bool, keyword parameter, optional, default=False.
+        True for inverse apodization.
+    rev : bool, keyword parameter, optional, default=False.
+        True to reverse the apodization before applying it to the data.
+    inplace : bool, keyword parameter, optional, default=False.
+        True if we make the transform inplace.  If False, the function return a new dataset
+    retfunc : bool, keyword parameter, optional, default=False
+        True to return the apodization array along with the apodized object
 
     Returns
     -------
-    %(apodize.returns)s
+    apodized
+        |NDDataset| or |NDPanel|.
+    apod_arr
+        The apodization array only if 'retfunc' is True.
 
     See Also
     --------
     gm, sp, sine, sinm, qsin
-
     """
 
     def func(x):
@@ -515,7 +552,6 @@ def hamming(dataset, **kwargs):
     return out
 
 
-@docstrings.dedent
 def triang(dataset, **kwargs):
     r"""
     Calculate triangular apodization with non-null extremities and maximum value normalized to 1
@@ -529,22 +565,26 @@ def triang(dataset, **kwargs):
 
     The functional form of apodization is the scpy.signal.triang
 
-
-    Parameters
-    ----------
-    dataset : |NDDataset| or |NDPanel|.
-        Input dataset or panel
-
     Other Parameters
     ----------------
-    %(apodize.other_parameters)s
+    dim : str or int, keyword parameter, optional, default='x'.
+        Specify on which dimension to apply the apodization method. If `dim` is specified as an integer it is equivalent
+        to the usual `axis` numpy parameter.
+    inv : bool, keyword parameter, optional, default=False.
+        True for inverse apodization.
+    rev : bool, keyword parameter, optional, default=False.
+        True to reverse the apodization before applying it to the data.
+    inplace : bool, keyword parameter, optional, default=False.
+        True if we make the transform inplace.  If False, the function return a new dataset
+    retfunc : bool, keyword parameter, optional, default=False
+        True to return the apodization array along with the apodized object
 
     Returns
     -------
-    %(apodize.returns)s
-
-
-
+    apodized
+        |NDDataset| or |NDPanel|.
+    apod_arr
+        The apodization array only if 'retfunc' is True.
     """
 
     def func(x):
@@ -562,7 +602,6 @@ def triang(dataset, **kwargs):
     return out
 
 
-@docstrings.dedent
 def bartlett(dataset, **kwargs):
     r"""
     Calculate Bartlett apodization (triangular window with end points at zero)
@@ -582,14 +621,24 @@ def bartlett(dataset, **kwargs):
 
     Other Parameters
     ----------------
-    %(apodize.other_parameters)s
+    dim : str or int, keyword parameter, optional, default='x'.
+        Specify on which dimension to apply the apodization method. If `dim` is specified as an integer it is equivalent
+        to the usual `axis` numpy parameter.
+    inv : bool, keyword parameter, optional, default=False.
+        True for inverse apodization.
+    rev : bool, keyword parameter, optional, default=False.
+        True to reverse the apodization before applying it to the data.
+    inplace : bool, keyword parameter, optional, default=False.
+        True if we make the transform inplace.  If False, the function return a new dataset
+    retfunc : bool, keyword parameter, optional, default=False
+        True to return the apodization array along with the apodized object
 
     Returns
     -------
-    %(apodize.returns)s
-
-
-
+    apodized
+        |NDDataset| or |NDPanel|.
+    apod_arr
+        The apodization array only if 'retfunc' is True.
     """
 
     def func(x):
@@ -607,7 +656,6 @@ def bartlett(dataset, **kwargs):
     return out
 
 
-@docstrings.dedent
 def blackmanharris(dataset, **kwargs):
     r"""
     Calculate a minimum 4-term Blackman-Harris apodization
@@ -627,14 +675,24 @@ def blackmanharris(dataset, **kwargs):
 
     Other Parameters
     ----------------
-    %(apodize.other_parameters)s
+    dim : str or int, keyword parameter, optional, default='x'.
+        Specify on which dimension to apply the apodization method. If `dim` is specified as an integer it is equivalent
+        to the usual `axis` numpy parameter.
+    inv : bool, keyword parameter, optional, default=False.
+        True for inverse apodization.
+    rev : bool, keyword parameter, optional, default=False.
+        True to reverse the apodization before applying it to the data.
+    inplace : bool, keyword parameter, optional, default=False.
+        True if we make the transform inplace.  If False, the function return a new dataset
+    retfunc : bool, keyword parameter, optional, default=False
+        True to return the apodization array along with the apodized object
 
     Returns
     -------
-    %(apodize.returns)s
-
-
-
+    apodized
+        |NDDataset| or |NDPanel|.
+    apod_arr
+        The apodization array only if 'retfunc' is True.
     """
 
     def func(x):
@@ -652,7 +710,6 @@ def blackmanharris(dataset, **kwargs):
     return out
 
 
-@docstrings.dedent
 def mertz(dataset, zpd, **kwargs):
     r"""
     Calculate asymetric Mertz apodization
@@ -672,14 +729,24 @@ def mertz(dataset, zpd, **kwargs):
 
     Other Parameters
     ----------------
-    %(apodize.other_parameters)s
+    dim : str or int, keyword parameter, optional, default='x'.
+        Specify on which dimension to apply the apodization method. If `dim` is specified as an integer it is equivalent
+        to the usual `axis` numpy parameter.
+    inv : bool, keyword parameter, optional, default=False.
+        True for inverse apodization.
+    rev : bool, keyword parameter, optional, default=False.
+        True to reverse the apodization before applying it to the data.
+    inplace : bool, keyword parameter, optional, default=False.
+        True if we make the transform inplace.  If False, the function return a new dataset
+    retfunc : bool, keyword parameter, optional, default=False
+        True to return the apodization array along with the apodized object
 
     Returns
     -------
-    %(apodize.returns)s
-
-
-
+    apodized
+        |NDDataset| or |NDPanel|.
+    apod_arr
+        The apodization array only if 'retfunc' is True.
     """
 
     def func(x, zpd):

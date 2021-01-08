@@ -5,9 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 """
-This module implements a subclass of |NDArray| with complex/quaternion related
-attributes.
-
+This module implements a subclass of |NDArray| with complex/quaternion related attributes.
 """
 
 __all__ = ['NDComplexArray', ]
@@ -32,8 +30,7 @@ from quaternion import as_float_array, as_quat_array
 # Local imports
 # ======================================================================================================================
 from .ndarray import NDArray
-from ...utils import (SpectroChemPyWarning, NOMASK, TYPE_FLOAT, TYPE_COMPLEX, insert_masked_print, docstrings)
-# from ...core import info_, debug_, error_, warning_
+from ...utils import SpectroChemPyWarning, NOMASK, TYPE_FLOAT, TYPE_COMPLEX, insert_masked_print
 from ...units.units import Quantity
 
 # ======================================================================================================================
@@ -49,14 +46,81 @@ typequaternion = np.dtype(np.quaternion)
 
 class NDComplexArray(NDArray):
     """
-    This class provides the complex/quaternion related functionalities
-    to |NDArray|
+    This class provides the complex/quaternion related functionalities to |NDArray|.
 
+    It is a subclass bringing complex and quaternion related attributes.
+
+    See Also
+    --------
+    NDDataset : Object which subclass |NDArray| with the addition of coordinates.
+
+    Examples
+    --------
+    >>> from spectrochempy import NDComplexArray
+    >>> myarray = NDComplexArray([1. + 0j, 2., 3.])
+    >>> myarray
+    NDComplexArray: [complex128] unitless (size: 3)
     """
 
     # ..................................................................................................................
     def __init__(self, data=None, **kwargs):
-        # TODO take the doc from NDArray
+        """
+        Parameters
+        ----------
+        data : array of complex number or quaternion.
+            Data array contained in the object. The data can be a list, a tuple, a |ndarray|, a ndarray-like,
+            a |NDArray| or any subclass of |NDArray|. Any size or shape of data is accepted. If not given, an empty
+            |NDArray| will be inited.
+            At the initialisation the provided data will be eventually casted to a numpy-ndarray.
+            If a subclass of |NDArray| is passed which already contains some mask, labels, or units, these elements will
+            be used to accordingly set those of the created object. If possible, the provided data will not be copied
+            for `data` input, but will be passed by reference, so you should make a copy of the `data` before passing
+            them if that's the desired behavior or set the `copy` argument to True.
+
+        Other Parameters
+        ----------------
+        dtype : str or dtype, optional, default=np.float64
+            If specified, the data will be casted to this dtype, else the type of the data will be used
+        dims : list of chars, optional.
+            if specified the list must have a length equal to the number od data dimensions (ndim) and the chars must be
+            taken among among x,y,z,u,v,w or t. If not specified, the dimension names are automatically attributed in
+            this order.
+        name : str, optional
+            A user friendly name for this object. If not given, the automatic `id` given at the object creation will be
+            used as a name.
+        labels : array of objects, optional
+            Labels for the `data`. labels can be used only for 1D-datasets.
+            The labels array may have an additional dimension, meaning several series of labels for the same data.
+            The given array can be a list, a tuple, a |ndarray|, a ndarray-like, a |NDArray| or any subclass of
+            |NDArray|.
+        mask : array of bool or `NOMASK`, optional
+            Mask for the data. The mask array must have the same shape as the data. The given array can be a list,
+            a tuple, or a |ndarray|. Each values in the array must be `False` where the data are *valid* and True when
+            they are not (like in numpy masked arrays). If `data` is already a :class:`~numpy.ma.MaskedArray`, or any
+            array object (such as a |NDArray| or subclass of it), providing a `mask` here will causes the mask from the
+            masked array to be ignored.
+        units : |Unit| instance or str, optional
+            Units of the data. If data is a |Quantity| then `units` is set to the unit of the `data`; if a unit is also
+            explicitly provided an error is raised. Handling of units use the `pint <https://pint.readthedocs.org/>`_
+            package.
+        title : str, optional
+            The title of the dimension. It will later be used for instance for labelling plots of the data.
+            It is optional but recommended to give a title to each ndarray.
+        dlabel :  str, optional.
+            Alias of `title`.
+        meta : dict-like object, optional.
+            Additional metadata for this object. Must be dict-like but no
+            further restriction is placed on meta.
+        author : str, optional.
+            name(s) of the author(s) of this dataset. BNy default, name of the computer note where this dataset is
+            created.
+        description : str, optional.
+            A optional description of the nd-dataset. A shorter alias is `desc`.
+        history : str, optional.
+            A string to add to the object history.
+        copy : bool, optional
+            Perform a copy of the passed object. Default is False.
+        """
 
         super().__init__(data=data, **kwargs)
 
@@ -67,8 +131,6 @@ class NDComplexArray(NDArray):
 
         Rather than isinstance(obj, NDComplexArrray) use object.implements('NDComplexArray').
         This is useful to check type without importing the module
-
-
         """
         if name is None:
             return 'NDComplexArray'
@@ -286,19 +348,22 @@ class NDComplexArray(NDArray):
     # ------------------------------------------------------------------------------------------------------------------
 
     # ..................................................................................................................
-    @docstrings.dedent
     def conjugate(self, dims='x', inplace=False):
         """
         Conjugate of the NDDataset in the specified dimension
 
         Parameters
         ----------
-        %(generic_method.parameters.dims|inplace)s
+        dims : int, str or tuple of int or str, optional, default=(0,)
+            Dimension names or indexes along which the method should be applied.
+        inplace : bool, optional, default=False
+            Flag to say that the method return a new object (default)
+            or not (inplace=True)
 
         Returns
         -------
-        %(generic_method.returns.object)s
-
+        conjugated
+            Same object or a copy depending on the ``inplace`` flag.
 
         See Also
         --------
@@ -397,7 +462,6 @@ class NDComplexArray(NDArray):
         return new
 
     # ..................................................................................................................
-    @docstrings.dedent
     def set_complex(self, inplace=False):
         """
         Set the object data as complex.
@@ -410,16 +474,18 @@ class NDComplexArray(NDArray):
 
         Parameters
         ----------
-        %(generic_method.parameters.inplace)s
+        inplace : bool, optional, default=False
+            Flag to say that the method return a new object (default)
+            or not (inplace=True)
 
         Returns
         -------
-        %(generic_method.returns)s
+        out
+            Same object or a copy depending on the ``inplace`` flag.
 
         See Also
         --------
         set_quaternion, has_complex_dims, is_complex, is_quaternion
-
         """
         if not inplace:  # default is to return a new array
             new = self.copy()
@@ -435,19 +501,20 @@ class NDComplexArray(NDArray):
         return new
 
     # ..................................................................................................................
-    @docstrings.dedent
     def set_quaternion(self, inplace=False):
         """
         Set the object data as quaternion
 
         Parameters
         ----------
-        %(generic_method.parameters.inplace)s
+        inplace : bool, optional, default=False
+            Flag to say that the method return a new object (default)
+            or not (inplace=True)
 
         Returns
         -------
-        %(generic_method.returns)s
-
+        out
+            Same object or a copy depending on the ``inplace`` flag.
         """
         if not inplace:  # default is to return a new array
             new = self.copy()
@@ -463,7 +530,22 @@ class NDComplexArray(NDArray):
 
     # ..................................................................................................................
     def transpose(self, *dims, inplace=False):
-        # TODO get doc from NDArray
+        """
+        Transpose the complex array.
+
+        Parameters
+        ----------
+        dims : int, str or tuple of int or str, optional, default=(0,)
+            Dimension names or indexes along which the method should be applied.
+        inplace : bool, optional, default=False
+            Flag to say that the method return a new object (default)
+            or not (inplace=True)
+
+        Returns
+        -------
+        transposed
+            Same object or a copy depending on the ``inplace`` flag.
+        """
 
         new = super().transpose(*dims, inplace=inplace)
 
@@ -477,7 +559,24 @@ class NDComplexArray(NDArray):
         return new
 
     def swapaxes(self, dim1, dim2, inplace=False):
-        # TODO get doc from NDArray
+        """
+        Swap dimension the complex array.
+
+        Swapaxes and swapdims are alias.
+
+        Parameters
+        ----------
+        dims : int, str or tuple of int or str, optional, default=(0,)
+            Dimension names or indexes along which the method should be applied.
+        inplace : bool, optional, default=False
+            Flag to say that the method return a new object (default)
+            or not (inplace=True)
+
+        Returns
+        -------
+        transposed
+            Same object or a copy depending on the ``inplace`` flag.
+        """
 
         new = super().swapaxes(dim1, dim2, inplace=inplace)
 
@@ -492,6 +591,8 @@ class NDComplexArray(NDArray):
             new._data = q.reshape(new.shape)
 
         return new
+
+    swapdims = swapaxes
 
     # ------------------------------------------------------------------------------------------------------------------
     # private methods

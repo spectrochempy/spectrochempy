@@ -5,8 +5,8 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 #  =====================================================================================================================
 #
-"""JSON utilities
-
+"""
+JSON utilities
 """
 from datetime import datetime
 import pickle
@@ -26,7 +26,6 @@ __all__ = ['json_serialiser', 'json_decoder']
 
 def json_decoder(dic):
     """Decode a serialised ison object
-
     """
 
     if "__class__" in dic:

@@ -87,3 +87,4 @@ dependencies:
         - autodoc_traits
         - dash_defer_js_import
         - dash-ace
+        - git+https://github.com/numpy/numpydoc

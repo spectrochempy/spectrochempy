@@ -4,8 +4,6 @@
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
-
 """
 Model parameters handling
 """
@@ -190,7 +188,6 @@ class FitParameters(UserDict):
         ------
         value : float or bool
             Value of the string, or False, if there is an error
-
         """
         res = False
 
@@ -325,7 +322,6 @@ class FitParameters(UserDict):
 class ParameterScript(HasTraits):
     """
     This class allow some manipulation of the parameter list for modelling
-
     """
 
     fp = Instance(FitParameters)

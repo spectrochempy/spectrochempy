@@ -290,7 +290,6 @@ X2 = A[3]
 X2.title = 'absorbance'
 X2.set_coordset(None, None)
 X2.set_coordtitles(y='elution time', x='wavelength')
-X2.preferences
 surf = X2.plot_surface(colorbar=True, linewidth=.2, ccount=100, figsize=(10, 5))
 _ = X2.plot(method='map')
 

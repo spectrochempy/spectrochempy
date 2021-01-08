@@ -4,11 +4,11 @@
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
 """
-This module define the `application` on which the API rely. It also define
-the default application preferences and IPython magic functions.
+This module define the `application` on which the API rely.
 
+It also define
+the default application preferences and IPython magic functions.
 """
 
 __all__ = []
@@ -181,7 +181,6 @@ __license__ = "CeCILL-B license"
 class SpectroChemPyMagics(Magics):
     """
     This class implements the addscript ipython magic function.
-
     """
 
     @line_cell_magic
@@ -230,8 +229,6 @@ class SpectroChemPyMagics(Magics):
            In[4]: %addscript MyClass
 
            In[5]: %addscript mymodule.myfunction
-
-
         """
         opts, args = self.parse_options(pars, 'p:o:s:n:a')
 
@@ -303,7 +300,6 @@ class SpectroChemPyMagics(Magics):
 
 class DataDir(HasTraits):
     """ A class used to determine the path to the testdata directory.
-
     """
 
     path = Instance(Path)
@@ -316,7 +312,6 @@ class DataDir(HasTraits):
         -------
         listing : str
             Display of the datadir content
-
         """
         strg = f'{self.path.name}\n'  # os.path.basename(self.path) + "\n"
 
@@ -361,8 +356,6 @@ class GeneralPreferences(MetaConfigurable):
     Preferences that apply to the |scpy| application in general
 
     They should be accessible from the main API
-
-
     """
 
     name = Unicode('GeneralPreferences')
@@ -432,7 +425,6 @@ class GeneralPreferences(MetaConfigurable):
 class DatasetPreferences(MetaConfigurable):
     """
     Per nddataset preferences
-
     """
     name = Unicode('DatasetPreferences')
     description = Unicode('Options for datasets')
@@ -453,7 +445,6 @@ class DatasetPreferences(MetaConfigurable):
 class ProjectPreferences(MetaConfigurable):
     """
     Project preferences
-
     """
 
     name = Unicode('ProjectPreferences')
@@ -507,7 +498,6 @@ class SpectroChemPy(Application):
     """
     This class SpectroChemPy is the main class, containing most of the setup,
     configuration and more.
-
     """
 
     icon = Unicode('scpy.png')
@@ -662,7 +652,6 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
         ----------
         argv :  List, [optional].
             List of configuration parameters.
-
         """
 
         # parse the argv
@@ -913,7 +902,6 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
         -------
         config_dir : str
             The absolute path to the configuration directory.
-
         """
 
         # first look for SCP_CONFIG_HOME

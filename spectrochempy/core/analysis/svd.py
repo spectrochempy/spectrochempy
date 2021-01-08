@@ -6,7 +6,6 @@
 # ======================================================================================================================
 """
 This module implements the Singular Value Decomposition (SVD) class.
-
 """
 
 __all__ = ['SVD']
@@ -23,16 +22,12 @@ import numpy as np
 # ----------------------------------------------------------------------------------------------------------------------
 # local imports
 # ----------------------------------------------------------------------------------------------------------------------
-
-# from spectrochempy.core.dataset.ndcoordset import CoordSet
-from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndarray import MASKED
-from spectrochempy.utils import docstrings
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-
 class SVD(HasTraits):
     """
     Performs a Singular Value Decomposition of a dataset.
@@ -43,7 +38,6 @@ class SVD(HasTraits):
 
     If the dataset contains masked values, the corresponding ranges are
     ignored in the calculation.
-
     """
 
     U = Instance(NDDataset, allow_none=True)
@@ -55,8 +49,6 @@ class SVD(HasTraits):
     VT = Instance(NDDataset, allow_none=True)
     """|NDDataset| - Contains a transpose matrix of the Loadings. Its shape depends on `full_matrices`"""
 
-    @docstrings.get_sections(base='SVD')
-    @docstrings.dedent
     def __init__(self, dataset, full_matrices=False, compute_uv=True):
         """
         Parameters
@@ -84,7 +76,6 @@ class SVD(HasTraits):
         [   94.54     99.6 ...      100      100]
         >>> print(svd.ev_ratio.data)
         [   94.54    5.059 ... 8.687e-06 7.779e-06]
-
         """
 
         self._compute_uv = compute_uv
@@ -276,7 +267,6 @@ class SVD(HasTraits):
         Notes
         -----
         Copied and modified from scikit-learn.utils.extmath (BSD 3 Licence)
-
         """
 
         if u_based_decision:

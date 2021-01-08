@@ -63,7 +63,6 @@ def figure(preferences=Meta(), **kwargs):
         keywords arguments to be passed to the matplotlib figure constructor.
     preferences : Meta dictionary
         per object saved plot configuration
-
     """
     return get_figure(preferences=preferences, **kwargs)
 
@@ -72,7 +71,6 @@ def figure(preferences=Meta(), **kwargs):
 def show():
     """
     Method to force the `matplotlib` figure display
-
     """
     from spectrochempy import NO_DISPLAY
 
@@ -114,7 +112,6 @@ def get_figure(**kwargs):
     Returns
     -------
     matplotlib figure instance
-
     """
 
     n = plt.get_fignums()
@@ -175,7 +172,6 @@ def get_plotly_figure(clear=True, fig=None, **kwargs):
     Returns
     -------
     Plotly figure instance
-
     """
 
     if clear or fig is None:

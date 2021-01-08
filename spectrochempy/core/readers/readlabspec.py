@@ -9,7 +9,6 @@
 #
 
 """This module extend NDDataset with the import method for Labspec *.txt generated data files.
-
 """
 
 __all__ = ['read_labspec', 'read_txt']
@@ -19,45 +18,76 @@ import io
 import datetime
 import numpy as np
 
-from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.core.readers.importer import docstrings, importermethod, Importer
+from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.readers.importer import importermethod, Importer
 from spectrochempy.utils import Meta
 
 
 # ======================================================================================================================
 # Public functions
 # ======================================================================================================================
-
-# ......................................................................................................................
-@docstrings.dedent
 def read_labspec(*args, **kwargs):
     """
-    Converts a single Raman spectrum or a series of Raman spectra (*.txt file created by Labspec software) to a valid
-    SpectroChemPy NDDataset or a list of NDDataset
+    Converts a single Raman spectrum or a series of Raman spectra
+
+    Files to open are *.txt file created by Labspec software
 
     Parameters
     ----------
-    args
-    kwargs
+    path : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
+        The data source(s) can be specified by the name or a list of name for the file(s) to be loaded:
+
+        *e.g.,( file1, file2, ...,  **kwargs )*
+
+        If the list of filenames are enclosed into brackets:
+
+        *e.g.,* ( **[** *file1, file2, ...* **]**, **kwargs *)*
+
+        The returned datasets are merged to form a single dataset,
+        except if `merge` is set to False. If a source is not provided (i.e. no `filename`, nor `content`),
+        a dialog box will be opened to select files.
+    protocol : {'scp', 'omnic', 'opus', 'topspin', 'matlab', 'jcamp', 'csv', 'excel'}, optional
+        Protocol used for reading. If not provided, the correct protocol
+        is inferred (whnever it is possible) from the file name extension.
+    directory : str, optional
+        From where to read the specified `filename`. If not specified, read in the default ``datadir`` specified in
+        SpectroChemPy Preferences.
+    merge : bool, optional
+        Default value is False. If True, and several filenames have been provided as arguments,
+        then a single dataset with merged (stacked along the first
+        dimension) is returned (default=False)
+    sortbydate : bool, optional
+        Sort multiple spectra by acquisition date (default=True)
+    description: str, optional
+        A Custom description.
+    content : bytes object, optional
+        Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
+        The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
+        to handle drag and drop of files into a Browser.
+        For exemples on how to use this feature, one can look in the ``tests/tests_readers`` directory
+
+    Other Parameters
+    ----------------
+    listdir : bool, optional
+        If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
+        is True. It is assumed that all the files correspond to current reading protocol (default=True)
+    recursive : bool, optional
+        Read also in subfolders. (default=False)
 
     Returns
     -------
-    out : NDDataset| or list of |NDDataset|
-        The dataset or a list of dataset corresponding to a (set of) .txt file(s).
-
-    Examples
-    --------
-
-    >>> A=read_txt('ramandata/Activation.txt')
-
+    out
+        |NDDataset| or list of |NDDataset|
 
     See Also
     --------
     read : Generic read method
     read_dir : Read a set of data from a directory
 
+    Examples
+    --------
 
-
+    >>> A=read_txt('ramandata/Activation.txt')
     """
 
     kwargs['filetypes'] = ['LABSPEC exported files (*.txt)']

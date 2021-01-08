@@ -4,11 +4,8 @@
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
 """
-In this module, we define basic functions adapted from numpy but able to handle
-our NDDataset objects
-
+In this module, we define basic functions adapted from numpy but able to handle our NDDataset objects
 """
 __all__ = ['dot']
 
@@ -19,8 +16,6 @@ __all__ = ['dot']
 import numpy as np
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-# from spectrochempy.core.dataset.ndcoordset import CoordSet
-# from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.utils import make_new_object
 
 
@@ -55,7 +50,6 @@ def dot(a, b, strict=True, out=None):
     --------
     numpy.dot : Equivalent function for ndarrays.
     numpy.ma.dot : Equivalent function for masked ndarrays
-
     """
     # if not a.implements('NDDataset'):
     #     raise TypeError('A dataset of type NDDataset is  '

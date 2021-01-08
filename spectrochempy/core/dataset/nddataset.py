@@ -7,10 +7,8 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
-
 """
 This module implements the |NDDataset| class.
-
 """
 
 __all__ = ['NDDataset']
@@ -25,20 +23,20 @@ from traittypes import Array
 from spectrochempy.core.project.baseproject import AbstractProject
 from spectrochempy.core.dataset.ndarray import NDArray, DEFAULT_DIM_NAME
 from spectrochempy.core.dataset.ndcomplex import NDComplexArray
-from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.core.dataset.ndcoordset import CoordSet
+from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.ndmath import NDMath, set_operators, set_api_methods, make_func_from
 from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.core.dataset.ndplot import NDPlot
 from spectrochempy.core import error_, warning_
-from spectrochempy.utils import (colored_output, SpectroChemPyException, docstrings, SpectroChemPyWarning, )
+from spectrochempy.utils import (colored_output, SpectroChemPyException, SpectroChemPyWarning, )
 
 HAS_XARRAY = False
 try:
     import xarray as xr
-
     HAS_XARRAY = True
 except ImportError:
+    xr = None
     pass
 
 
@@ -46,10 +44,26 @@ except ImportError:
 # NDDataset class definition
 # ======================================================================================================================
 
-class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
+class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     """
     The main N-dimensional dataset class used by |scpy|.
 
+    The NDDataset is the main object use by SpectroChemPy. Like numpy ndarrays, NDDataset have the capability to be
+    sliced, sorted and subject to mathematical operations. But, in addition, NDDataset may have units, can be masked
+    and each dimensions can have coordinates also with units. This make NDDataset aware of unit compatibility, e.g.,
+    for binary operation such as additions or subtraction or during the application of mathematical operations.
+    In addition or in replacement of numerical data for coordinates, NDDataset can also have labeled coordinates where
+    labels can be different kind of objects (strings, datetime, numpy nd.ndarray or othe NDDatasets, etc…).
+
+    See Also
+    --------
+    Coord : Explicit coordinates object associated with the dimensions of a |NDDataset|.
+    Project : A set of sub|Project|s and |NDDataset|s with associated |Script|s.
+
+    Examples
+    --------
+    >>> from spectrochempy import NDDataset
+    >>> nd = NDDataset([1., 2., 3.], units='km', title='distance')
     """
 
     # coordinates
@@ -69,23 +83,74 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
     # ------------------------------------------------------------------------------------------------------------------
     # initialisation
     # ------------------------------------------------------------------------------------------------------------------
-
-    docstrings.delete_params('NDArray.parameters', 'labels')
-
     # ..................................................................................................................
-    @docstrings.dedent
     def __init__(self, data=None, coordset=None, coordunits=None, coordtitles=None, **kwargs):
         """
         Parameters
         ----------
-        %(NDArray.parameters.no_labels)s
+        data : array of floats
+            Data array contained in the object. The data can be a list, a tuple, a |ndarray|, a ndarray-like,
+            a |NDArray| or any subclass of |NDArray|. Any size or shape of data is accepted. If not given, an empty
+            |NDArray| will be inited.
+            At the initialisation the provided data will be eventually casted to a numpy-ndarray.
+            If a subclass of |NDArray| is passed which already contains some mask, labels, or units, these elements will
+            be used to accordingly set those of the created object. If possible, the provided data will not be copied
+            for `data` input, but will be passed by reference, so you should make a copy of the `data` before passing
+            them if that's the desired behavior or set the `copy` argument to True.
         coordset : An instance of |CoordSet|, optional
-            `coords` contains the coordinates for the different
-            dimensions of the `data`. if `coords` is provided, it must
-            specified
-            the `coord` and `labels` for all dimensions of the `data`.
-            Multiple `coord`'s can be specified in an |CoordSet| instance
-            for each dimension.
+            `coords` contains the coordinates for the different dimensions of the `data`. if `coords` is provided,
+            it must specified the `coord` and `labels` for all dimensions of the `data`.
+            Multiple `coord`'s can be specified in an |CoordSet| instance for each dimension.
+        coordunits : list, optional.
+            A list of units corresponding to the dimensions in the order of the coordset
+        coordtitles : list, optional.
+            A list of titles corresponding of the dimensions in the order of the coordset
+        **kwargs
+            See other parameters
+
+        Other Parameters
+        ----------------
+        dtype : str or dtype, optional, default=np.float64
+            If specified, the data will be casted to this dtype, else the type of the data will be used
+        dims : list of chars, optional.
+            if specified the list must have a length equal to the number od data dimensions (ndim) and the chars must be
+            taken among among x,y,z,u,v,w or t. If not specified, the dimension names are automatically attributed in
+            this order.
+        name : str, optional
+            A user friendly name for this object. If not given, the automatic `id` given at the object creation will be
+            used as a name.
+        labels : array of objects, optional
+            Labels for the `data`. labels can be used only for 1D-datasets.
+            The labels array may have an additional dimension, meaning several series of labels for the same data.
+            The given array can be a list, a tuple, a |ndarray|, a ndarray-like, a |NDArray| or any subclass of
+            |NDArray|.
+        mask : array of bool or `NOMASK`, optional
+            Mask for the data. The mask array must have the same shape as the data. The given array can be a list,
+            a tuple, or a |ndarray|. Each values in the array must be `False` where the data are *valid* and True when
+            they are not (like in numpy masked arrays). If `data` is already a :class:`~numpy.ma.MaskedArray`, or any
+            array object (such as a |NDArray| or subclass of it), providing a `mask` here will causes the mask from the
+            masked array to be ignored.
+        units : |Unit| instance or str, optional
+            Units of the data. If data is a |Quantity| then `units` is set to the unit of the `data`; if a unit is also
+            explicitly provided an error is raised. Handling of units use the `pint <https://pint.readthedocs.org/>`_
+            package.
+        title : str, optional
+            The title of the dimension. It will later be used for instance for labelling plots of the data.
+            It is optional but recommended to give a title to each ndarray.
+        dlabel :  str, optional.
+            Alias of `title`.
+        meta : dict-like object, optional.
+            Additional metadata for this object. Must be dict-like but no
+            further restriction is placed on meta.
+        author : str, optional.
+            name(s) of the author(s) of this dataset. BNy default, name of the computer note where this dataset is
+            created.
+        description : str, optional.
+            A optional description of the nd-dataset. A shorter alias is `desc`.
+        history : str, optional.
+            A string to add to the object history.
+        copy : bool, optional
+            Perform a copy of the passed object. Default is False.
 
         Notes
         -----
@@ -102,7 +167,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
         >>> x = NDDataset([1,2,3])
         >>> print(x.data) # doctest: +NORMALIZE_WHITESPACE
         [       1        2        3]
-
         """
         super().__init__(data, **kwargs)
 
@@ -392,7 +456,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
         list - list of the |Coord| titles.
 
         Read only property. Use set_coordtitle to eventually set titles
-
         """
         if self._coordset is not None:
             return self._coordset.titles
@@ -404,7 +467,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
         list - list of the |Coord| units
 
         Read only property. Use set_coordunits to eventually set units
-
         """
         if self._coordset is not None:
             return self._coordset.units
@@ -416,7 +478,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
         Transposed |NDDataset|.
 
         The same object is returned if `ndim` is less than 2.
-
         """
         return self.transpose()
 
@@ -432,7 +493,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
         dimensions of the dataset.
 
         It's a readonly property. Use set_coords to change one or more coordinates at once.
-
         """
         if self._coordset and all(c.is_empty for c in self._coordset):
             # all coordinates are empty, this is equivalent to None for the coordset
@@ -454,7 +514,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
         |ndarray|, The `data` array.
 
         If there is no data but labels, then the labels are returned instead of data.
-
         """
         return super().data
 
@@ -470,7 +529,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
     def modeldata(self):
         """
         |ndarray| - models data eventually generated by modelling of the data
-
         """
         return self._modeldata
 
@@ -484,7 +542,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
     def parent(self):
         """
         |Project| instance - The parent project of the dataset.
-
         """
         return self._parent
 
@@ -538,8 +595,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
         ----------
         args : Coord object(s)
         kwargs :
-
-
         """
         if not args and not kwargs:
             # reset coordinates
@@ -574,7 +629,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
         -------
         |Coord|
             Coordinates along the given axis.
-
         """
         idx = self._get_dims_index(dim)[0]  # should generate an error if the
         # dimension name is not recognized
@@ -598,7 +652,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
     def delete_coordset(self):
         """
         Delete all coordinate settings
-
         """
         self._coordset = None
 
@@ -609,7 +662,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
 
         Rather than isinstance(obj, NDDataset) use object.implements('NDDataset').
         This is useful to check type without importing the module
-
         """
 
         if name is None:
@@ -629,7 +681,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
         See Also
         --------
         add_coords, set_coordtitles, set_coordunits
-
         """
         self._coordset = None
         self.add_coordset(*args, dims=self.dims, **kwargs)
@@ -638,7 +689,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
     def set_coordtitles(self, *args, **kwargs):
         """
         Set titles of the one or more coordinates
-
         """
         self._coordset.set_titles(*args, **kwargs)
 
@@ -646,7 +696,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
     def set_coordunits(self, *args, **kwargs):
         """
         Set units of the one or more coordinates
-
         """
         self._coordset.set_units(*args, **kwargs)
 
@@ -663,7 +712,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
     #    raise NotImplementedError
 
     # ..................................................................................................................
-    @docstrings.dedent
     def sort(self, **kwargs):
         """
         Returns the dataset sorted along a given dimension
@@ -682,12 +730,13 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
         descend : `bool`, optional, default=`False`.
             If true the dataset is sorted in a descending direction. Default is False  except if coordinates
             are reversed.
-        %(generic_method.parameters.inplace)s
+        inplace : bool, optional, default=`False`
+            Flag to say that the method return a new object (default)
+            or not (inplace=True)
 
         Returns
         -------
-        %(generic_method.returns)s
-
+        sorted_dataset
         """
 
         inplace = kwargs.get('inplace', False)
@@ -756,6 +805,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
             Selects a subset of the single-dimensional entries in the
             shape. If a dimension (dim) is selected with shape entry greater than
             one, an error is raised.
+        inplace : bool, optional, default=`False`
+            Flag to say that the method return a new object (default)
+            or not (inplace=True)
 
         Returns
         -------
@@ -786,7 +838,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
         return new
 
     # ..................................................................................................................
-    @docstrings.dedent
     def swapaxes(self, dim1, dim2, inplace=False):
         """
         Interchange two dimensions of a NDDataset.
@@ -797,16 +848,17 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
             First axis.
         dim2 : int
             Second axis.
-        %(generic_method.parameters.inplace)s
+        inplace : bool, optional, default=`False`
+            Flag to say that the method return a new object (default)
+            or not (inplace=True)
 
         Returns
         -------
-        %(generic_method.returns)s
+        swaped_dataset
 
         See Also
         --------
         transpose
-
         """
 
         new = super().swapaxes(dim1, dim2, inplace=inplace)
@@ -825,7 +877,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
 
         Returns
         -------
-
         """
 
         # handle the various syntax to pass the axis
@@ -845,23 +896,23 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
         new = self[index]
         return new
 
-    # ..................................................................................................................
-    def to_panel(self, **kwargs):
-        """
-        Transform the current |NDDataset| to a new |NDPanel| object
-
-        Parameters
-        ----------
-        **kwargs : additional keyword arguments
-
-        Returns
-        -------
-        object : A |NDPanel| object
-
-        """
-        import spectrochempy as scp
-
-        return scp.NDPanel(self, **kwargs)
+    # # ................................................................................................................
+    # def to_panel(self, **kwargs):
+    #     """
+    #     Transform the current |NDDataset| to a new |NDPanel| object
+    #
+    #     Parameters
+    #     ----------
+    #     **kwargs : additional keyword arguments
+    #
+    #     Returns
+    #     -------
+    #     object : A |NDPanel| object
+    #
+    #     """
+    #     import spectrochempy as scp
+    #
+    #     return scp.NDPanel(self, **kwargs)
 
     # ..................................................................................................................
     def to_xarray(self, **kwargs):
@@ -874,7 +925,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
         Returns
         -------
         object : a xarray.DataArray object
-
         """
         # Information about DataArray from the DataArray docstring
         #
@@ -942,7 +992,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
         return da
 
     # ..................................................................................................................
-    @docstrings.dedent
     def transpose(self, *dims, inplace=False):
         """
         Permute the dimensions of a NDDataset.
@@ -952,16 +1001,17 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
         dims : sequence of dimension indexes or names, optional.
             By default, reverse the dimensions, otherwise permute the dimensions
             according to the values given.
-        %(generic_method.parameters.inplace)s
+        inplace : bool, optional, default=`False`
+            Flag to say that the method return a new object (default)
+            or not (inplace=True)
 
         Returns
         -------
-        %(generic_method.returns)s
+        transposed_array
 
         See Also
         --------
         swapaxes
-
         """
         new = super().transpose(*dims, inplace=inplace)
         new.history = f'Data transposed between dims: {dims}' if dims else ''
@@ -1023,7 +1073,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray, ):
             return out.rstrip()
 
     # ..................................................................................................................
-    def _loc2index(self, loc, dim):
+    def _loc2index(self, loc, dim=-1):
         # Return the index of a location (label or coordinates) along the dim
         # This can work only if `coords` exists.
 

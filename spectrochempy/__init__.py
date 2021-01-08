@@ -39,6 +39,12 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 # ======================================================================================================================
+"""
+SpectroChemPy API.
+
+SpectroChemPy is a framework for processing, analyzing and modeling Spectroscopic data for Chemistry with Python.
+It is a cross platform software, running on Linux, Windows or OS X.
+"""
 
 # check for update
 import sys

@@ -15,8 +15,8 @@ from pint.errors import (DimensionalityError)
 from quaternion import quaternion
 
 from spectrochempy.core import info_, error_, print_
-from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.core.dataset.ndcoordset import CoordSet
+from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndmath import unary_ufuncs, binary_ufuncs, comp_ufuncs
 from spectrochempy.units.units import ur, Quantity, Unit

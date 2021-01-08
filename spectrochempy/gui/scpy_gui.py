@@ -4,15 +4,12 @@
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
 """
 SpectroChemPy DashBoard: Dash Application
 
 Note
 ----
-
-    Run this app with the command `scpy` in a terminal and then visit http://127.0.0.1:8050/ in your web browser.
-
+Run this app with the command `scpy` in a terminal and then visit http://127.0.0.1:8050/ in your web browser.
 """
 
 import webbrowser

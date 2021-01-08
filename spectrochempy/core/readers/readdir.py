@@ -4,10 +4,8 @@
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
 """
 This module provides methods for reading data in a directory
-
 """
 __all__ = ['read_dir', 'read_carroucell']
 __dataset_methods__ = __all__
@@ -21,17 +19,15 @@ import numpy as np
 import xlrd
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.utils import get_filename, readdirname
 from spectrochempy.core import info_, print_
-from spectrochempy.core.readers.importer import docstrings, importermethod, Importer
+from spectrochempy.core.readers.importer import importermethod, Importer
 
 
 # ======================================================================================================================
 # Public functions
 # ======================================================================================================================
-
-@docstrings.dedent
 def read_dir(*args, **kwargs):
     """
     Open readable files in a directory and store data/metadata in a dataset or
@@ -48,17 +44,10 @@ def read_dir(*args, **kwargs):
     Only implemented for OMNIC files (*.spa, *.spg), Bruker Opus files (*.[0-9]*), *.csv, *.mat and the
     native format for spectrochempy : *.scp).
 
-    Parameters
-    -----------
-    %(read_method.parameters.no_origin|csv_delimiter)s
-
-    Other Parameters
-    -----------------
-    %(read_method.other_parameters)s
-
     Returns
     --------
-    out : |NDDataset| or list of |NDDataset|
+    out
+        |NDDataset| or list of |NDDataset|
 
     See Also
     --------
@@ -72,7 +61,6 @@ def read_dir(*args, **kwargs):
     [NDDataset: [...
 
     >>> B = NDDataset.read_dir()
-
     """
     kwargs['listdir'] = True
     importer = Importer()
@@ -119,7 +107,6 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
 
     Examples
     --------
-
     """
 
     # debug_("starting reading in a folder")

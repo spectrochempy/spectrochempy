@@ -4,9 +4,8 @@
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
-"""The core interface to the Pint library
-
+"""
+The core interface to the Pint library
 """
 
 __all__ = ['Unit', 'Quantity', 'ur', 'set_nmr_context', 'DimensionalityError']

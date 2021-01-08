@@ -12,6 +12,5 @@ __all__ = ['interleaved2complex']
 def interleaved2complex(data):
     """
     Make a complex array from interleaved data
-
     """
     return data[..., ::2] + 1j * data[..., 1::2]

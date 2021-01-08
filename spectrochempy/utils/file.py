@@ -4,10 +4,8 @@
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
 """
 file utilities
-
 """
 from os import environ
 
@@ -85,7 +83,6 @@ def pathclean(paths):
     >>> from spectrochempy import preferences as prefs
     >>> datadir = prefs.datadir
     >>> fullpath = datadir / filename
-
     """
     from spectrochempy.utils import is_windows
 
@@ -311,8 +308,6 @@ def get_filename(*filenames, **kwargs):
 
     Examples
     --------
-
-
     """
 
     from spectrochempy.core import preferences as prefs
@@ -503,7 +498,6 @@ def readdirname(directory):
     --------
     out: `pathlib.Path` object
         valid directory name
-
     """
 
     from spectrochempy.core import preferences as prefs

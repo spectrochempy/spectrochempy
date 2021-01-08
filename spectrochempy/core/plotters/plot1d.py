@@ -8,11 +8,8 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
-
-
 """
 Module containing 1D plotting function(s)
-
 """
 
 __all__ = ['plot_1D', 'plot_lines', 'plot_pen', 'plot_scatter', 'plot_bar', 'plot_multiple', 'plot_scatter_pen']
@@ -41,7 +38,6 @@ def plot_scatter(dataset, **kwargs):
     Plot a 1D dataset as a scatter plot (points can be added on lines).
 
     Alias of plot (with `method` argument set to ``scatter``.
-
     """
     kwargs['method'] = 'scatter'
     if kwargs.get('use_plotly', False):
@@ -58,7 +54,6 @@ def plot_lines(dataset, **kwargs):
     Plot a 1D dataset with solid lines by default.
 
     Alias of plot (with `method` argument set to ``lines``.
-
     """
     kwargs['method'] = 'pen'
     if kwargs.get('use_plotly', False):
@@ -74,7 +69,6 @@ def plot_pen(dataset, **kwargs):
     Plot a 1D dataset with solid pen by default.
 
     Alias of plot (with `method` argument set to ``pen``.
-
     """
     kwargs['method'] = 'pen'
     if kwargs.get('use_plotly', False):
@@ -90,7 +84,6 @@ def plot_scatter_pen(dataset, **kwargs):
     Plot a 1D dataset with solid pen by default.
 
     Alias of plot (with `method` argument set to ``pen``.
-
     """
     kwargs['method'] = 'scatter+pen'
     if kwargs.get('use_plotly', False):
@@ -106,7 +99,6 @@ def plot_bar(dataset, **kwargs):
     Plot a 1D dataset with bars.
 
     Alias of plot (with `method` argument set to ``bar``.
-
     """
     kwargs['method'] = 'bar'
     if kwargs.get('use_plotly', False):
@@ -132,7 +124,6 @@ def plot_multiple(datasets, method='scatter', pen=True, labels=None, **kwargs):
     labels : a list of str, optional
         labels used for the legend.
     **kwargs : other parameters that will be passed to the plot1D function
-
     """
     if not is_sequence(datasets):
         # we need a sequence. Else it is a single plot.
@@ -260,7 +251,6 @@ def plot_1D(dataset, **kwargs):
     vshift : float, optional
         vertically shift the line from its baseline
     kwargs : additional keywords
-
     """
 
     # Get preferences

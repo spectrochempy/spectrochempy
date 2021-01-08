@@ -19,9 +19,9 @@ from datetime import datetime, timezone
 
 import numpy as np
 
-from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core import dataset_preferences as prefs
-from spectrochempy.core.readers.importer import docstrings, Importer, importermethod
+from spectrochempy.core.readers.importer import Importer, importermethod
 
 try:
     locale.setlocale(locale.LC_ALL, 'en_US')  # to avoid problems with date format
@@ -35,27 +35,63 @@ except Exception:
 # ======================================================================================================================
 # Public functions
 # ======================================================================================================================
-
-# NOTE: Warning @docstrings doesnt't work if % sign are present in the docstring. We need to double it %% !
-
-@docstrings.dedent
 def read_csv(*args, **kwargs):
     """
     Open a *.csv file or a list of *.csv files and set data/metadata
     in the current dataset
 
     Parameters
-    ------
-    %(read_method.parameters)s
+    ----------
+    path : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
+        The data source(s) can be specified by the name or a list of name for the file(s) to be loaded:
+
+        *e.g.,( file1, file2, ...,  **kwargs )*
+
+        If the list of filenames are enclosed into brackets:
+
+        *e.g.,* ( **[** *file1, file2, ...* **]**, **kwargs *)*
+
+        The returned datasets are merged to form a single dataset,
+        except if `merge` is set to False. If a source is not provided (i.e. no `filename`, nor `content`),
+        a dialog box will be opened to select files.
+    protocol : {'scp', 'omnic', 'opus', 'topspin', 'matlab', 'jcamp', 'csv', 'excel'}, optional
+        Protocol used for reading. If not provided, the correct protocol
+        is inferred (whnever it is possible) from the file name extension.
+    directory : str, optional
+        From where to read the specified `filename`. If not specified, read in the default ``datadir`` specified in
+        SpectroChemPy Preferences.
+    merge : bool, optional
+        Default value is False. If True, and several filenames have been provided as arguments,
+        then a single dataset with merged (stacked along the first
+        dimension) is returned (default=False)
+    sortbydate : bool, optional
+        Sort multiple spectra by acquisition date (default=True)
+    description: str, optional
+        A Custom description.
+    origin : {'omnic', 'tga'}, optional
+        in order to properly interpret CSV file it can be necessary to set the origin of the spectra.
+        Up to now only 'omnic' and 'tga' have been implemented.
+    csv_delimiter : str, optional
+        Set the column delimiter in CSV file.
+        By default it is the one set in SpectroChemPy ``Preferences``.
+    content : bytes object, optional
+        Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
+        The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
+        to handle drag and drop of files into a Browser.
+        For exemples on how to use this feature, one can look in the ``tests/tests_readers`` directory
 
     Other Parameters
-    -----------------
-    %(read_method.other_parameters)s
+    ----------------
+    listdir : bool, optional
+        If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
+        is True. It is assumed that all the files correspond to current reading protocol (default=True)
+    recursive : bool, optional
+        Read also in subfolders. (default=False)
 
     Returns
     --------
-    out : NDDataset| or list of |NDDataset|
-        The dataset or a list of dataset corresponding to a (set of) .csv file(s).
+    out :
+        |NDDataset| or list of |NDDataset|
 
     Examples
     ---------
@@ -85,8 +121,6 @@ def read_csv(*args, **kwargs):
     --------
     read : Generic read method
     read_zip, read_jdx, read_matlab, read_omnic, read_opus, read_topspin
-
-
     """
     kwargs['filetypes'] = ['CSV files (*.csv)']
     kwargs['protocol'] = ['csv']

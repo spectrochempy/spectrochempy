@@ -4,11 +4,8 @@
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
 """
-This module defines the class |NDPlot| in which generic plot
-methods for a |NDDataset| are defined.
-
+This module defines the class |NDPlot| in which generic plot methods for a |NDDataset| are defined.
 """
 
 __all__ = ['NDPlot', 'plot']
@@ -29,7 +26,7 @@ from traitlets import Dict, HasTraits, Instance, Union, default, TraitError, Uni
 
 # local import
 # ----------------------------------------------------------------------------------------------------------------------
-from spectrochempy.utils import docstrings, get_figure, Meta, pathclean
+from spectrochempy.utils import get_figure, Meta, pathclean
 
 from spectrochempy.core import preferences, dataset_preferences, project_preferences, matplotlib_preferences
 from spectrochempy.core import error_
@@ -47,8 +44,6 @@ from spectrochempy.core.plotters.plot2d import plot_2D
 class Preferences(Meta):
     """
     Preferences management
-
-
     """
 
     def __init__(self, **data):
@@ -202,7 +197,6 @@ class Preferences(Meta):
         ----------
         key: str
             name of the parameter for which we want information
-
         """
         from spectrochempy.utils import colored, TBold
         value = self[key]
@@ -285,7 +279,6 @@ class NDPlot(HasTraits):
     Plotting interface for |NDDataset|
 
     This class is used as basic plotting interface of the |NDDataset|.
-
     """
 
     # variable containing the matplotlib axis defined for a NDArray object
@@ -304,15 +297,11 @@ class NDPlot(HasTraits):
     # ------------------------------------------------------------------------------------------------------------------
     # generic plotter and plot related methods or properties
     # ------------------------------------------------------------------------------------------------------------------
-
-    # ..................................................................................................................
-    @docstrings.get_sections(base='plot')
-    @docstrings.dedent
     def plot(self, **kwargs):
         """
-        Generic plot function for a |NDDataset| which actually delegate the work to a plotter defined by the
-        parameter ``method``.
+        Generic plot function.
 
+        This apply to a |NDDataset| but actually delegate the work to a plotter defined by the parameter ``method``.
         """
 
         # --------------------------------------------------------------------
@@ -345,23 +334,21 @@ class NDPlot(HasTraits):
     # ..................................................................................................................
     def plot_generic(self, **kwargs):
         """
-        The generic plotter. It try to guess an adequate basic plot for the data.
-        Other method of plotters are defined explicitely in the `viewer` package.
+        The generic plotter.
+
+        It try to guess an adequate basic plot for the data. Other method of plotters are defined explicitely in the
+        ``plotters`` package.
 
         Parameters
         ----------
-
         ax : :class:`matplotlib.axe`
-
             the viewplot where to plot.
-
         kwargs : optional additional arguments
 
         Returns
         -------
-
-        ax : return the handler to ax where the main plot was done
-
+        ax
+            Return the handler to ax where the main plot was done
         """
 
         if self._squeeze_ndim == 1:
@@ -629,7 +616,6 @@ class NDPlot(HasTraits):
     def preferences(self):
         """
         |Meta| instance object - Additional metadata.
-
         """
         return self._preferences
 
@@ -645,7 +631,6 @@ class NDPlot(HasTraits):
     def fig(self):
         """
         Matplotlib figure associated to this dataset
-
         """
         return self._fig
 
@@ -654,7 +639,6 @@ class NDPlot(HasTraits):
     def fignum(self):
         """
         Matplotlib figure associated to this dataset
-
         """
         return self._fignum
 
@@ -686,7 +670,6 @@ class NDPlot(HasTraits):
     def ax(self):
         """
         the main matplotlib axe associated to this dataset
-
         """
         return self._ndaxes['main']
 
@@ -695,7 +678,6 @@ class NDPlot(HasTraits):
     def axT(self):
         """
         the matplotlib axe associated to the transposed dataset
-
         """
         return self._ndaxes['mainT']
 
@@ -704,7 +686,6 @@ class NDPlot(HasTraits):
     def axec(self):
         """
         Matplotlib colorbar axe associated to this dataset
-
         """
         return self._ndaxes['colorbar']
 
@@ -713,7 +694,6 @@ class NDPlot(HasTraits):
     def axecT(self):
         """
         Matplotlib colorbar axe associated to the transposed dataset
-
         """
         return self._ndaxes['colorbarT']
 
@@ -722,7 +702,6 @@ class NDPlot(HasTraits):
     def axex(self):
         """
         Matplotlib projection x axe associated to this dataset
-
         """
         return self._ndaxes['xproj']
 
@@ -731,7 +710,6 @@ class NDPlot(HasTraits):
     def axey(self):
         """
         Matplotlib projection y axe associated to this dataset
-
         """
         return self._ndaxes['yproj']
 
@@ -740,7 +718,6 @@ class NDPlot(HasTraits):
     def divider(self):
         """
         Matplotlib plot divider
-
         """
         return self._divider
 

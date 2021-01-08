@@ -77,14 +77,15 @@ Finally, a range of coordinates can be represented by the object: CoordRange.
     :toctree: generated/
 
     Coord
+    LinearCoord
     CoordSet
     CoordRange
+
 
 Creating NDDataset
 -------------------
 
-A NDDataset can be created using the NDDataset class constructor,
-for instance here we create a dataset from a random
+A NDDataset can be created using the NDDataset class constructor, for instance here we create a dataset from a random
 two dimensional array:
 
 .. ipython:: python

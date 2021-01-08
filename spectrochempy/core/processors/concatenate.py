@@ -15,7 +15,7 @@ from warnings import warn
 from orderedset import OrderedSet
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.ndarray import DEFAULT_DIM_NAME
 from spectrochempy.utils import SpectroChemPyWarning, DimensionsCompatibilityError
 
@@ -90,7 +90,6 @@ def concatenate(*datasets, **kwargs):
     >>> G = A[0].concatenate(B[0], force_stack=True)
     >>> A[0].shape, B[0].shape, G.shape
     ((1, 5549), (1, 5549), (2, 5549))
-
     """
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -326,7 +325,6 @@ def stack(*datasets):
     >>> C = NDDataset.stack( A, B)
     >>> print(C)
     NDDataset: [float32]  a.u. (shape: (z:2, y:55, x:5549))
-
     """
 
     return concatenate(*datasets, force_stack=True)

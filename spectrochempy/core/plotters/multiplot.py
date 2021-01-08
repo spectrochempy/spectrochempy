@@ -4,10 +4,8 @@
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
 """
 Module containing multiplot function(s)
-
 """
 
 __all__ = ['multiplot', 'multiplot_map', 'multiplot_stack',
@@ -36,7 +34,6 @@ def multiplot_scatter(datasets, **kwargs):
     Plot a multiplot with 1D scatter type plots.
 
     Alias of multiplot (with `method` argument set to ``scatter``.
-
     """
     kwargs['method'] = 'scatter'
     return multiplot(datasets, **kwargs)
@@ -48,7 +45,6 @@ def multiplot_lines(datasets, **kwargs):
     Plot a multiplot with 1D linetype plots.
 
     Alias of multiplot (with `method` argument set to ``lines``.
-
     """
     kwargs['method'] = 'lines'
     return multiplot(datasets, **kwargs)
@@ -60,7 +56,6 @@ def multiplot_stack(datasets, **kwargs):
     Plot a multiplot with 2D stack type plots.
 
     Alias of multiplot (with `method` argument set to ``stack``.
-
     """
     kwargs['method'] = 'stack'
     return multiplot(datasets, **kwargs)
@@ -72,7 +67,6 @@ def multiplot_map(datasets, **kwargs):
     Plot a multiplot with 2D map type plots.
 
     Alias of multiplot (with `method` argument set to ``map``.
-
     """
     kwargs['method'] = 'map'
     return multiplot(datasets, **kwargs)
@@ -84,7 +78,6 @@ def multiplot_image(datasets, **kwargs):
     Plot a multiplot with 2D image type plots.
 
     Alias of multiplot (with `method` argument set to ``image``.
-
     """
     kwargs['method'] = 'image'
     return multiplot(datasets, **kwargs)
@@ -98,7 +91,6 @@ def plot_with_transposed(dataset, **kwargs):
     axe.
 
     Alias of plot_2D (with `method` argument set to ``with_transposed``).
-
     """
     kwargs['method'] = 'with_transposed'
     axes = multiplot(dataset, **kwargs)
@@ -212,7 +204,6 @@ def multiplot(datasets=[], labels=[], nrow=1, ncol=1,
         title of the figure to display on top
 
     suptitle_color : color
-
     """
 
     # some basic checking

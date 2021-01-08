@@ -4,11 +4,9 @@
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
 """
 In this module, methods are provided to download external datasets
 from public database.
-
 """
 __all__ = ['download_IRIS']
 __dataset_methods__ = __all__
@@ -23,7 +21,7 @@ import numpy as np
 import requests
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core import error_
 
 
@@ -33,12 +31,18 @@ from spectrochempy.core import error_
 # ----------------------------------------------------------------------------------------------------------------------
 # local imports
 # ----------------------------------------------------------------------------------------------------------------------
-
 # ............................................................................
 def download_IRIS():
     """
-    Upload the classical IRIS dataset from the UCI distant repository
+    Upload the classical IRIS dataset.
 
+    The IRIS dataset is a classical example for machine learning.It is downloaded from
+    the [UCI distant repository](https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data)
+
+    Returns
+    -------
+    downloaded
+        The IRIS dataset.
     """
     url = "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data"
 

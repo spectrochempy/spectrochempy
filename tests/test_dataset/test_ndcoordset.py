@@ -12,8 +12,8 @@ import pytest
 
 from spectrochempy.core import info_, print_
 from spectrochempy.core.dataset.ndarray import NDArray
-from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.core.dataset.ndcoordset import CoordSet
+from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.units import ur, DimensionalityError
 
 

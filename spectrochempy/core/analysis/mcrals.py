@@ -6,7 +6,6 @@
 # ======================================================================================================================
 """
 This module implements the MCRALS class.
-
 """
 
 __all__ = ['MCRALS']
@@ -26,7 +25,6 @@ from spectrochempy.core import info_, set_loglevel, INFO
 class MCRALS(HasTraits):
     """
     Performs MCR-ALS of a dataset knowing the initial C or St matrix
-
     """
 
     C = Instance(NDDataset)
@@ -105,7 +103,6 @@ class MCRALS(HasTraits):
             the final spectral profiles
         self.log :
             logs
-
         """
 
         verbose = kwargs.get('verbose', False)
@@ -384,7 +381,6 @@ class MCRALS(HasTraits):
         -------
         X_hat : |NDDataset|
             The reconstructed dataset based on the MCS-ALS optimization.
-
         """
 
         # reconstruct from concentration and spectra profiles
@@ -404,7 +400,6 @@ class MCRALS(HasTraits):
         Returns
         -------
         axes
-
         """
         colX, colXhat, colRes = kwargs.get('colors', ['blue', 'green', 'red'])
 

@@ -4,10 +4,8 @@
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
 """
 This module implements the IRIS class.
-
 """
 __all__ = ['IRIS']
 __dataset_methods__ = []
@@ -17,7 +15,7 @@ import quadprog
 from matplotlib import pyplot as plt
 from scipy import optimize
 
-from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 
 
@@ -55,7 +53,6 @@ class IRIS:
             If set to True, prints informations during the 2D IRIS  analysis.
             In a
             ny case, the same information is returned in self._log
-
         """
         # check options
         # defines the kernel
@@ -209,7 +206,6 @@ class IRIS:
                 returns:
                 --------
                 f, RSS and SM for a given regularization parameter
-
                 """
                 fi = np.zeros((len(eps), len(X.x.data)))
                 if verbose:
@@ -229,7 +225,6 @@ class IRIS:
                 """
                 returns the Menger curvature of a triplet of
                 points. x, y = sets of 3 cartesian coordinates
-
                 """
 
                 numerator = 2 * (x[0] * y[1] + x[1] * y[2] + x[2] * y[0]
@@ -356,7 +351,6 @@ class IRIS:
         -------
         X_hat : |NDDataset|
             The reconstructed dataset.
-
         """
         X_hat = NDDataset(np.zeros((self.f.z.size, self.X.y.size, self.X.x.size)),
                           title=self.X.title, units=self.X.units)
@@ -381,7 +375,6 @@ class IRIS:
         Returns
         -------
         ax : subplot axis
-
         """
 
         fig = plt.figure()
@@ -410,7 +403,6 @@ class IRIS:
         Returns
         -------
         list of axes
-
         """
 
         colX, colXhat, colRes = kwargs.get('colors', ['blue', 'green', 'red'])
@@ -445,7 +437,6 @@ class IRIS:
         Returns
         -------
         list of axes
-
         """
 
         axeslist = []

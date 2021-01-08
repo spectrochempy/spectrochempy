@@ -16,8 +16,8 @@ from pint.errors import (UndefinedUnitError, DimensionalityError)
 from quaternion import quaternion
 
 from spectrochempy.core import info_, print_
-from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.core.dataset.ndcoordset import CoordSet
+from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.units import ur, Quantity
 from spectrochempy.utils import MASKED, NOMASK, TYPE_FLOAT, TYPE_INTEGER, Meta, SpectroChemPyException
@@ -168,7 +168,8 @@ def test_nddataset_coordset():
     coord2 = np.arange(3) * 100.
 
     da = NDDataset(dx, coordset=(coord0, coord1, coord2), title='absorbance',
-                   coordtitles=['wavelength', 'time-on-stream', 'temperature'], coordunits=['cm^-1', 's', 'K'], )
+                   coordtitles=['wavelength', 'time-on-stream', 'temperature'],
+                   coordunits=['cm^-1', 's', 'K'], )
 
     assert da.shape == (10, 7, 3)
     assert da.coordset.titles == ['temperature', 'time-on-stream', 'wavelength']

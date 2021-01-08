@@ -7,10 +7,8 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
 # =============================================================================
-
 """
 This module implement the SIMPLISMA class.
-
 """
 
 __all__ = ['SIMPLISMA']
@@ -45,7 +43,6 @@ class SIMPLISMA(HasTraits):
     Chemometrics and Intelligent Laboratory Systems, 36, 1997, 3-16.
 
     TODO : adapt to 3DDataset ?
-
     """
 
     St = Instance(NDDataset)
@@ -80,7 +77,6 @@ class SIMPLISMA(HasTraits):
 
         Examples
         --------
-
         """
 
         super().__init__()
@@ -407,7 +403,6 @@ class SIMPLISMA(HasTraits):
         -------
         X_hat : |NDDataset|
             The reconstructed dataset based on the SIMPLISMA Analysis.
-
         """
 
         # reconstruct from concentration and spectra profiles
@@ -425,7 +420,6 @@ class SIMPLISMA(HasTraits):
         Returns
         -------
         ax : subplot
-
         """
 
         colX, colXhat, colRes = kwargs.get('colors', ['blue', 'green', 'red'])
