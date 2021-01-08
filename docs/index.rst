@@ -113,7 +113,6 @@ Reference & Help
 
 * :doc:`userguide/reference/changelog`
 * :doc:`userguide/reference/index`
-* :doc:`userguide/reference/preference`
 * :doc:`userguide/reference/faq`
 * :doc:`devguide/issues`
 * :doc:`devguide/examples`
@@ -126,7 +125,6 @@ Reference & Help
 
     userguide/reference/changelog
     userguide/reference/index
-    userguide/reference/preference
     userguide/reference/faq
     Bug reports & feature request <devguide/issues>
     Sharing examples & tutorials <devguide/examples>
