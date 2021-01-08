@@ -329,6 +329,8 @@ class BuildDocumentation(object):
     def clean(self, builder):
         # Clean/remove the built documentation.
 
+        print(f'\n{"-" * 80}\nCleaning\n{"-" * 80}')
+
         doc_version = self.doc_version
 
         if builder == 'html':
@@ -351,7 +353,15 @@ class BuildDocumentation(object):
         doc_version = self.doc_version
 
         # Create regular directories.
-        build_dirs = [DOCTREES / doc_version, HTML / doc_version, LATEX / doc_version, DOWNLOADS, DOCS / '_static', ]
+        build_dirs = [
+                DOCTREES,
+                HTML,
+                LATEX,
+                DOCTREES / doc_version,
+                HTML / doc_version,
+                LATEX / doc_version,
+                DOWNLOADS,
+        ]
         for d in build_dirs:
             if not d.exists():
                 print(f'Make dir {d}')
