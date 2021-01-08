@@ -28,15 +28,11 @@ or whatever you prefer to read and edit a text file.
 
 .. currentmodule:: spectrochempy
 
-API Configuration
-------------------
-
-.. autoconfigurable:: spectrochempy.application.SpectroChemPy
-
 General Preferences
 --------------------
 
 .. autoconfigurable:: spectrochempy.application.GeneralPreferences
+
 
 Dataset preferences
 --------------------
