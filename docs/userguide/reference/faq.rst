@@ -1,6 +1,6 @@
 .. _faq:
 
-Frequently Asked Questions (FAQ)
+Frequently asked questions (FAQ)
 ================================
 
 .. contents:: Table of Contents

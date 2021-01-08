@@ -1,6 +1,6 @@
 .. _see_also:
 
-See Also
+See also
 ========
 
 If you are looking for intuitive GUI for spectroscopic data,
@@ -16,8 +16,3 @@ coordinates, we advise to look at `pandas <https://pandas.pydata.org>`_ and
 If you are interested by plotting data using matplotlib based graphic
 framework, `seaborn <https://seaborn.pydata.org>`_ or `bokeh <https://bokeh
 .pydata.org/en/latest/>`_ may be what you are looking for.
-
-
-
-
-

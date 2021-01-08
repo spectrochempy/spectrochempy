@@ -12,7 +12,8 @@ Usage:
     generated with this script:
     $ python .ci/scripts/generate_pip_deps_from_conda.py --compare
 
-Copied from https://github.com/pandas-dev/pandas/scripts/generate_pip_deps_from_conda.py
+Copied and modified from https://github.com/pandas-dev/pandas/scripts/generate_pip_deps_from_conda.py (BSD 3-Clause
+License)
 
 """
 import argparse

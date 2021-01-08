@@ -115,7 +115,7 @@ on Pypi, we are not supporting this method.
    (scpy)  ~ $ pip install spectrochempy
 
 
-Install a developper version from sources (Advanced usage)
+Install a developper version from sources (advanced usage)
 ----------------------------------------------------------
 
 Installation of the developper version is described here:  :ref:`develguide`.

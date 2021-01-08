@@ -5,10 +5,11 @@ Validate that the titles in the rst files follow the proper capitalization conve
 Print the titles that do not follow the convention.
 
 Usage::
-.ci/scripts/validate_rst_title_capitalization.py doc/source/development/contributing.rst
-.ci/scripts/validate_rst_title_capitalization.py doc/source/
+.ci/scripts/validate_rst_title_capitalization.py docs/devguide/contributing.rst
+.ci/scripts/validate_rst_title_capitalization.py docs
 
-Copied from https://github.com/pandas-dev/pandas/scripts/validate_rst_title_capitalization.py
+Copied and modified from https://github.com/pandas-dev/pandas/scripts/validate_rst_title_capitalization.py (BSD
+3-Clause License)
 
 """
 import argparse
@@ -26,18 +27,29 @@ CAPITALIZATION_EXCEPTIONS = {
         "NDArray",
         "Coord",
         "CoordSet",
+        "CoordRange",
+        "_coordset",
         "Quantity",
         "Units",
-        "Frequently",
-        "Asked",
-        "Questions",
         "FAQ",
         "GUI",
         "Import",
         "Export",
-        "plot1D",
-        "plot_2D",
-        "domnload_IRIS",
+        "1D",
+        "2D",
+        "3D",
+        "_1D",
+        "_2D",
+        "_3D",
+        "IRIS",
+        "_IRIS",
+        "NMR",
+        "MCR",
+        "ALS",
+        "LSTSQ",
+        "EFA",
+        "BaselineCorrection",
+        "Jaumot"
 
 }
 
@@ -120,7 +132,7 @@ def find_titles(rst_file: str) -> Iterable[Tuple[str, int]]:
                     and line_chars.pop() in symbols
                     and len(line) == len(previous_line)
             ):
-                yield re.sub(r"[`\*_]", "", previous_line), i
+                yield re.sub(r"[`\*]", "", previous_line), i  # r"[`\*_]"
             previous_line = line
 
 
