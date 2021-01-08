@@ -15,7 +15,7 @@
 # ---
 
 # %% [markdown]
-# # Units and Quantities
+# # Units & Quantities
 
 # %% [markdown]
 # Spectrochempy can do calculations with units - it uses [pint](https://pint.readthedocs.io) to define and perform

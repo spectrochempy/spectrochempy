@@ -1,6 +1,6 @@
 .. _userguide.objects:
 
-Data Structures
+Data structures
 ###############
 
 

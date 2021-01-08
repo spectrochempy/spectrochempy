@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
 """
-
 Convert the conda environment.yml to the pip requirements-dev.txt,
 or check that they have the same packages (for the CI)
-
-Copied from https://github.com/pandas-dev/pandas/scripts/generate_pip_deps_from_conda.py
 
 Usage:
 
     Generate `requirements-dev.txt`
-    $ python scripts/generate_pip_deps_from_conda.py
+    $ python .ci/scripts/generate_pip_deps_from_conda.py
 
     Compare and fail (exit status != 0) if `requirements-dev.txt` has not been
     generated with this script:
-    $ python scripts/generate_pip_deps_from_conda.py --compare
+    $ python .ci/scripts/generate_pip_deps_from_conda.py --compare
+
+Copied from https://github.com/pandas-dev/pandas/scripts/generate_pip_deps_from_conda.py
 
 """
 import argparse

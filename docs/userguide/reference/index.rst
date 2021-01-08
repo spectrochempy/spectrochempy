@@ -97,7 +97,7 @@ two dimensional array:
 (see the User Guide for examples on how to use this constructor.)
 
 
-Creation using Numpy-like functions
+Creation using numpy-like functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 These functions mimics numpy equivalent, but output a NDDataset object
 

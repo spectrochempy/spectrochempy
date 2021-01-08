@@ -10,8 +10,8 @@ Frequently Asked Questions (FAQ)
 General
 -------
 
-Where are the Preferences saved?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Where are the preference's files saved?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Typically, the main application preference file is saved in a hidden directory located in your home user directory:
 
