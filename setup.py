@@ -33,7 +33,7 @@ def install_styles():
         return
 
     # install all plotting styles in the matplotlib stylelib library
-    stylesheets = Path(__file__).parent / "scp_data" / "stylesheets"
+    stylesheets = Path("scp_data") / "stylesheets"
     if not stylesheets.exists():
         raise IOError(f"can't find the stylesheets from SpectroChemPy {str(stylesheets)}. Installation incomplete!")
 
