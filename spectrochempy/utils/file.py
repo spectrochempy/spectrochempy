@@ -532,7 +532,6 @@ def readdirname(directory):
         if not NO_DISPLAY and not NO_DIALOG:  # this is for allowing test to continue in the background
             directory = open_dialog(single=False,
                                     directory=working_dir,
-                                    caption='Select directory',
                                     filters='directory')
 
         return pathclean(directory)

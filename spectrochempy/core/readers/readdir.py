@@ -39,11 +39,6 @@ def read_dir(*args, **kwargs):
       into single NDDataset, providing their unique dimension are compatible. If not,
       an error is generated.
 
-    Notes
-    ------
-    Only implemented for OMNIC files (*.spa, *.spg), Bruker Opus files (*.[0-9]*), *.csv, *.mat and the
-    native format for spectrochempy : *.scp).
-
     Returns
     --------
     out
@@ -54,8 +49,14 @@ def read_dir(*args, **kwargs):
     read : Generic read method
     read_omnic, read_spg, read_spa, read_srs, read_opus, read_topspin, read_csv, read_matlab, read_zip
 
+    Notes
+    ------
+    Only implemented for OMNIC files (*.spa, *.spg), Bruker Opus files (*.[0-9]*), *.csv, *.mat and the
+    native format for spectrochempy : *.scp).
+
     Examples
     --------
+    >>> from spectrochempy import NDDataset
     >>> A = NDDataset.read_dir('irdata')
     >>> A
     [NDDataset: [...

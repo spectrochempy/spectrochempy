@@ -36,7 +36,7 @@ from .. import debug_
 
 class BaselineCorrection(HasTraits):
     """
-    Baseline Correction processor
+    Baseline Correction processor.
 
     2 methods are proposed :
 
@@ -46,6 +46,56 @@ class BaselineCorrection(HasTraits):
       and calculation of the modelled baseline spectra.
 
     Interactive mode is proposed using the interactive function : :meth:`run`.
+
+    Parameters
+    ----------
+    dataset : |NDDataset|
+        The dataset to be transformed.
+    *ranges : a variable number of pair-tuples
+        The regions taken into account for the manual baseline correction.
+    **kwargs : dict
+        See other parameters.
+
+    Other Parameters
+    ----------------
+    dim : str or int, keyword parameter, optional, default='x'.
+        Specify on which dimension to apply the apodization method. If `dim` is specified as an integer
+        it is equivalent  to the usual `axis` numpy parameter.
+    method : str, keyword parameter, optional, default='multivariate'
+        Correction method among ['multivariate','sequential']
+    interpolation : string, keyword parameter, optional, default='polynomial'
+        Interpolation method for the computation of the baseline, among ['polynomial','pchip']
+    order : int, keyword parameter, optional, default=6
+        If the correction method polynomial, this give the polynomial order to use.
+    npc : int, keyword parameter, optional, default=5
+        Number of components to keep for the ``multivariate`` method
+    zoompreview : float, keyword parameter, optional, default=1.0
+        The zoom factor for the preview in interactive mode
+    figsize : tuple, keyword parameter, optional, default=(8, 6)
+        Size of the figure to display in inch
+
+    See Also
+    --------
+    abc : Automatic baseline correction.
+
+    Examples
+    --------
+    .. plot::
+        :include-source:
+
+        from spectrochempy import *
+        nd = NDDataset.read_omnic(os.path.join('irdata',
+                                    'nh4y-activation.spg'))
+        ndp = nd[:, 1291.0:5999.0]
+        bc = BaselineCorrection(ndp,method='multivariate',
+                                    interpolation='pchip',
+                                    npc=8)
+        ranges=[[5996., 5998.], [1290., 1300.],
+                [2205., 2301.], [5380., 5979.],
+                [3736., 5125.]]
+        span = bc.compute(*ranges)
+        _ = bc.corrected.plot_stack()
+        show()
     """
     dataset = Instance(NDDataset)
     corrected = Instance(NDDataset)
@@ -59,52 +109,8 @@ class BaselineCorrection(HasTraits):
     figsize = Tuple((7, 5))
     sps = List()
 
+    # ..................................................................................................................
     def __init__(self, dataset, *ranges, **kwargs):
-        """
-        Parameters
-        ----------
-        dataset : |NDDataset|
-            The dataset to be transformed
-        *ranges : a variable number of pair-tuples
-            The regions taken into account for the manual baseline correction.
-
-        Other Parameters
-        ----------------
-        dim : str or int, keyword parameter, optional, default='x'.
-            Specify on which dimension to apply the apodization method. If `dim` is specified as an integer
-            it is equivalent  to the usual `axis` numpy parameter.
-        method : str, keyword parameter, optional, default='multivariate'
-            Correction method among ['multivariate','sequential']
-        interpolation : string, keyword parameter, optional, default='polynomial'
-            Interpolation method for the computation of the baseline, among ['polynomial','pchip']
-        order : int, keyword parameter, optional, default=6
-            If the correction method polynomial, this give the polynomial order to use.
-        npc : int, keyword parameter, optional, default=5
-            Number of components to keep for the ``multivariate`` method
-        zoompreview : float, keyword parameter, optional, default=1.0
-            The zoom factor for the preview in interactive mode
-        figsize : tuple, keyword parameter, optional, default=(8, 6)
-            Size of the figure to display in inch
-
-        Examples
-        --------
-        .. plot::
-            :include-source:
-
-            from spectrochempy import *
-            nd = NDDataset.read_omnic(os.path.join('irdata',
-                                        'nh4y-activation.spg'))
-            ndp = nd[:, 1291.0:5999.0]
-            bc = BaselineCorrection(ndp,method='multivariate',
-                                        interpolation='pchip',
-                                        npc=8)
-            ranges=[[5996., 5998.], [1290., 1300.],
-                    [2205., 2301.], [5380., 5979.],
-                    [3736., 5125.]]
-            span = bc.compute(*ranges)
-            _ = bc.corrected.plot_stack()
-            show()
-        """
         self.dataset = dataset
         self.corrected = self.dataset.copy()
 
@@ -117,6 +123,7 @@ class BaselineCorrection(HasTraits):
         self.ranges = CoordRange(*self.ranges)
         self.spc = []
 
+    # ..................................................................................................................
     def _extendranges(self, *ranges, **kwargs):
         if not ranges:
             # look in the kwargs
@@ -171,6 +178,8 @@ class BaselineCorrection(HasTraits):
         ----------
         *ranges : a variable number of pair-tuples
             The regions taken into account for the manual baseline correction.
+        **kwargs : dict
+            See other parameters.
 
         Other Parameters
         ----------------
@@ -318,6 +327,8 @@ class BaselineCorrection(HasTraits):
         ----------
         *ranges : a variable number of pair-tuples
             The regions taken into account for the manual baseline correction.
+        **kwargs : dict
+            See other parameter of method compute.
         """
         self._setup(**kwargs)
         self.sps = []
@@ -381,43 +392,70 @@ class BaselineCorrection(HasTraits):
 
 
 # ======================================================================================================================
-# ab
+# abc # TODO: some work to perform on this
 # ======================================================================================================================
-def ab(dataset, dim=-1, **kwargs):
+def abc(dataset, dim=-1, **kwargs):
     """
-    Automatic baseline correction
+    Automatic baseline correction.
+
+    Various algorithms are provided to calculate the baseline automatically.
 
     Parameters
     ----------
-    source: a source instance
-    basetype: string, optional, default: 'linear'
-        see notes - available = linear, basf, ...
-    window: float/int, optional, default is 0.05
-        if float <1 then the corresponding percentage ot the axis size is taken as window
-    nbzone: int, optional, default is 32
+    dataset : a [NDDataset| instance
+        The dataset where to calculate the baseline.
+    dim : str or int, optional
+        The dataset dimentsion where to calculate the baseline. Default is -1.
+    **kwargs : dict
+        See other parameters.
+
+    Returns
+    -------
+    baseline_corrected
+        A baseline corrected dataset.
+    baseline_only
+        Only the baseline (apply must be set to False).
+    baseline_points
+        Points where the baseline is calculated (return_points must be set to True).
+
+    Other Parameters
+    ----------------
+    basetype : string, optional, default: 'linear'
+        See notes - available = linear, basf, ...
+    window : float/int, optional, default is 0.05
+        If float <1 then the corresponding percentage ot the axis size is taken as window.
+    nbzone : int, optional, default is 32
         Number of zones. We will divide the size of the last axis by this number
-        to determine the number of points in each zone (nw)
-    mult: int
-        A multiplicator. determine the number of point for the database calculation (nw*mult<n base points)
-    nstd: int, optional, default is 2 times the standard error
-        Another multiplicator. Multiply the standard error to determine the region in which points are from the baseline
-    polynom: bool, optional, default is True
+        to determine the number of points in each zone (nw).
+    mult : int
+        A multiplicator. determine the number of point for the database calculation (nw*mult<n base points).
+    nstd : int, optional, default is 2 times the standard error
+        Another multiplicator. Multiply the standard error to determine the region in which points are from the
+        baseline.
+    polynom : bool, optional, default is True
         If True a polynom is computed for the base line, else an interpolation is achieved betwwen points.
-    porder: int, default is 6
+    porder : int, default is 6
         Order of the polynom to fit on the baseline points
-    return_pts: bool, optional, default is False
-        If True, the points abscissa used to determine the baseline are returned
-    apply: bool, optional, default is True
-        if apply is False, the data are not modified only the baseline is returned
-    return_pts: bool, optional, default is False
-        if True, the baseline reference points are returned
-    axis: optional, default is -1
+    return_points : bool, optional, default is False
+        If True, the points abscissa used to determine the baseline are returned.
+    apply : bool, optional, default is True
+        If apply is False, the data are not modified only the baseline is returned.
+    return_pts : bool, optional, default is False
+        If True, the baseline reference points are returned.
+
+    See Also
+    --------
+    BaselineCorrection : Manual baseline corrections.
 
     Notes
     -----
     #TODO: description of these algorithms
     * linear -
     * basf -
+
+    Examples
+    --------
+    To be done
     """
     # # options evaluation
     # parser = argparse.ArgumentParser(description='BC processing.', usage="""
@@ -472,8 +510,8 @@ def ab(dataset, dim=-1, **kwargs):
     return new
 
 
-abc = ab
-abc.__doc__ = ab.__doc__
+ab = abc
+ab.__doc__ = abc.__doc__
 
 
 # =======================================================================================================================

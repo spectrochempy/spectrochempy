@@ -96,7 +96,7 @@ def read_csv(*args, **kwargs):
     Examples
     ---------
 
-    >>> from spectrochempy import *
+    >>> from spectrochempy import NDDataset, preferences as prefs
     >>> NDDataset.read_csv('agirdata/P350/TGA/tg.csv')
     NDDataset: [float64] unitless (shape: (y:1, x:3247))
 

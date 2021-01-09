@@ -37,27 +37,27 @@ from .apodization import hamming
 from .concatenate import concatenate
 
 
-def get_zpd(dataset, dim='x', mode='max'):
-    r"""
-    Find the zero path difference (zpd) positions. For multidimensional NDDataset
-    the search is performed along the last dimension
+def get_zpd(dataset, dim=-1, mode='max'):
+    """
+    Find the zero path difference (zpd) positions.
+
+    For multidimensional NDDataset the search is by default performed along the last dimension
 
     Parameter
     ---------
-    dataset : NDDataset
-    dim: int or str, dimension along which to make the search. Default = 'x' == -1
+    dataset : |NDDataset|
+        The dataset on which to search for zpd
+    dim: int or str, optional
+        Dimension along which to make the search. Default=-1.
 
-    Returns:
-        The indexes
+    Returns
+    -------
+    index
+        zero path difference index
     """
-    if isinstance(dim, int):
-        axis = dim
-    elif dim == 'x':
-        axis = -1
-    elif dim == 'y':
-        axis = -2
-    elif dim == 'z':
-        axis = -3
+    # On which axis do we want to work (get axis from arguments)
+    axis, dim = dataset.get_axis(dim, negative_axis=True)
+
     if mode == 'max':
         return np.argmax(dataset.data, axis=axis)
     elif mode == 'abs':
@@ -65,9 +65,10 @@ def get_zpd(dataset, dim='x', mode='max'):
 
 
 def ifft(dataset, size=None, inplace=False, **kwargs):
-    r"""
+    """
     Apply inverse fast fourier transform.
-    (see `fft` documentation.)
+
+    See `fft` documentation.
     """
     return fft(dataset, size=size, inv=True, inplace=inplace, **kwargs)
 
@@ -109,8 +110,8 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
 
     Returns
     -------
-    object
-        transformed |NDDataset|.
+    out
+        Transformed |NDDataset|.
 
     Other Parameters
     ----------------
@@ -126,7 +127,6 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
 
     # The last dimension is always the dimension on which we apply the fourier transform.
     # If needed, we swap the dimensions to be sure to be in this situation
-
     swaped = False
     if axis != -1:
         dataset.swapaxes(axis, -1, inplace=True)  # must be done in  place

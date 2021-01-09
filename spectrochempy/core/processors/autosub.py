@@ -37,45 +37,45 @@ def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False
 
     Parameters
     ----------
-    dataset : |NDDataset|.
-        Dataset to which we want to subtract the reference data
-    ref : |NDDataset|.
-         1D reference data, with a size maching the axis to subtract
-         (axis parameter) #TODO : optionally use title of axis
-    ranges : pair(s) of values.
+    dataset : |NDDataset|
+        Dataset to which we want to subtract the reference data.
+    ref : |NDDataset|
+         1D reference data, with a size maching the axis to subtract.
+         (axis parameter).  # TODO : optionally use title of axis.
+    *ranges : pair(s) of values
         Any number of pairs is allowed.
-        Coord range(s) in which the variance is minimized
-    dim : `str` or `int`, optional, default='x'.
+        Coord range(s) in which the variance is minimized.
+    dim : `str` or `int`, optional, default='x'
         Tells on which dimension to perform the subtraction.
         If dim is an integer it refers to the axis index.
-    method : str, optional, default='vardiff'.
-        'vardiff': minimize the difference of the variance
-        'ssdiff': minimize the sum of sqares difference of sum of squares
-    return_coefs : `bool`, optional, default=`False`.
-         returns the table of coefficients
-    inplace : `bool`, optional, default=`False`.
+    method : str, optional, default='vardiff'
+        'vardiff': minimize the difference of the variance.
+        'ssdiff': minimize the sum of sqares difference of sum of squares.
+    return_coefs : `bool`, optional, default=`False`
+         Returns the table of coefficients.
+    inplace : `bool`, optional, default=`False`
         True if the subtraction is done in place.
-        In this case we do not need to catch the function output
+        In this case we do not need to catch the function output.
 
     Returns
     --------
-    out : |NDDataset|.
+    out : |NDDataset|
         The subtracted dataset.
     coefs : `ndarray`.
         The table of subtraction coeffcients
         (only if `return_coefs` is set to `True`).
 
+    See Also
+    --------
+    BaselineCorrection : Manual baseline corrections.
+    abc : Automatic baseline corrections.
+
     Examples
     ---------
-
-    >>> import os
-    >>> from spectrochempy import *
-    <BLANKLINE>
-    ...
-    <BLANKLINE>
+    >>> from spectrochempy import NDDataset
     >>> path_A = 'irdata/nh4y-activation.spg'
     >>> A = NDDataset.read(path_A, protocol='omnic')
-    >>> ref = A[0,:]  # let's subtrack the first row
+    >>> ref = A[0, :]  # let's subtrack the first row
     >>> B = A.autosub(ref, [3900., 3700.], [1600., 1500.], inplace=False)
     >>> B
     NDDataset: [float32]  a.u. (shape: (y:55, x:5549))
