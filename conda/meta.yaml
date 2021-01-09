@@ -43,7 +43,6 @@ requirements:
     - dash-bootstrap-components
     - dash-daq
     - dill
-    - docrep
     - ipython
     - jinja2
     - matplotlib

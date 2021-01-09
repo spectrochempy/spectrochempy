@@ -24,8 +24,8 @@ dependencies:
     - dill
     - ipython
     - jinja2
-    - matplotlib
     - mamba
+    - matplotlib
     - numba
     - numpy
     - orderedset
