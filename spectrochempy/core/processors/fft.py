@@ -87,33 +87,35 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
 
     Parameters
     ----------
+    dataset : |NDDataset|
+        The dataset on which to apply the fft transformation.
     size : int, optional
-        size of the transformed dataset dimension - a shorter parameter is `si`. by default, the size is the closest
-        power of two greater than the data size
+        Size of the transformed dataset dimension - a shorter parameter is `si`. by default, the size is the closest
+        power of two greater than the data size.
     sizeff : int, optional
         The number of effective data point to take into account for the transformation. By default it is equal to the
         data size, but may be smaller.
     inv : bool, optional, default=False
-        if True, an inverse Fourier transform is performed - size parameter is not taken into account
-    inplace : bool, optional, default=False.
-        True if we make the transform inplace.  If False, the function return a new dataset
-    dim : str or int, optional, default='x'.
+        If True, an inverse Fourier transform is performed - size parameter is not taken into account.
+    inplace : bool, optional, default=False
+        True if we make the transform inplace.  If False, the function return a new dataset.
+    dim : str or int, optional, default='x'
         Specify on which dimension to apply this method. If `dim` is specified as an integer it is equivalent
         to the usual `axis` numpy parameter.
     ppm : bool, optional, default=True
         If True, and data are from NMR, then a ppm scale is calculated instead of frequency.
-    **kwargs :
-        other parameters (see other parameters)
+    **kwargs : dict
+        Other parameters (see other parameters).
+
+    Returns
+    -------
+    object
+        transformed |NDDataset|.
 
     Other Parameters
     ----------------
     tdeff : int, optional
-        alias of sizeff (specific to NMR). If both sizeff and tdeff are passed, sizeff has the priority.
-
-    Returns
-    -------
-    object : nd-dataset or nd-array
-        transformed dataset
+        Alias of sizeff (specific to NMR). If both sizeff and tdeff are passed, sizeff has the priority.
     """
     # datatype
     is_nmr = dataset.origin.lower() in ["topspin", ]

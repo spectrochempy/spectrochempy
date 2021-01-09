@@ -23,13 +23,17 @@ def smooth(dataset, window_length=5, window='flat', **kwargs):
     Parameters
     ----------
     dataset :  |NDDataset| or a ndarray-like object
-        Input object
-
-    window_length:  int, optional, default=5
-        the dimension of the smoothing window; must be an odd integer
+        Input object.
+    window_length :  int, optional, default=5
+        The dimension of the smoothing window; must be an odd integer.
     window : str, optional, default='flat'
-        the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'.
+        The type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'.
         flat window will produce a moving average smoothing.
+
+    Returns
+    -------
+    smoothed
+        Same type as input dataset.
 
     Other Parameters
     ----------------
@@ -38,14 +42,6 @@ def smooth(dataset, window_length=5, window='flat', **kwargs):
         to the usual `axis` numpy parameter.
     inplace : bool, optional, default=False.
         True if we make the transform inplace.  If False, the function return a new object
-
-
-    Returns
-    -------
-    out : same type as input dataset
-        the smoothed object
-
-    TODO: implement this for NDPanel too
     """
 
     if not kwargs.pop('inplace', False):
@@ -83,6 +79,7 @@ def smooth(dataset, window_length=5, window='flat', **kwargs):
             'bartlett': np.bartlett,
             'blackman': np.blackman,
             }
+
     if not callable(window):
         if window not in wind.keys():
             error_("Window must be a callable or a string among 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'")

@@ -32,7 +32,9 @@ from spectrochempy.core.project.baseproject import AbstractProject
 # ======================================================================================================================
 class Project(AbstractProject, NDIO):
     """
-    A manager for multiple projects and datasets in a main project
+    A manager for multiple projects and datasets in a main project.
+
+    It can handle multiple daatset, sub-projects, and scripts.
     """
 
     _id = Unicode()

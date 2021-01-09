@@ -382,6 +382,9 @@ def main(func_name, prefix, errors, output_format, ignore_deprecated):
 
 
 if __name__ == "__main__":
+
+    os.environ['DOC_BUILDING'] = 'yes'
+
     format_opts = "default", "json", "actions"
     func_help = (
         "function or method to validate (e.g. spectrochempy.NDDataset.read) "
@@ -426,12 +429,14 @@ if __name__ == "__main__":
     )
 
     args = argparser.parse_args()
-    sys.exit(
-        main(
+
+    res = main(
             args.function,
             args.prefix,
             args.errors.split(",") if args.errors else None,
             args.format,
             args.ignore_deprecated,
-        )
     )
+
+    del os.environ['DOC_BUILDING']
+    sys.exit(res)
