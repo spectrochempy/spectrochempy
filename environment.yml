@@ -22,10 +22,10 @@ dependencies:
     - dash-bootstrap-components
     - dash-daq
     - dill
-    - docrep
     - ipython
     - jinja2
     - matplotlib
+    - mamba
     - numba
     - numpy
     - orderedset

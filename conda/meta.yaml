@@ -47,6 +47,7 @@ requirements:
     - ipython
     - jinja2
     - matplotlib
+    - mamba
     - numba
     - numpy
     - orderedset
