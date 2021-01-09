@@ -41,6 +41,8 @@ class Script(HasTraits):
             Content of sthe script
         parent : instance of |Project|
             Parent project
+        priority: int
+            Default=50
         """
         self.name = name
         self.content = content

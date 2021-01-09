@@ -22,7 +22,7 @@ import scipy.signal
 
 def savgol_filter(dataset, window_length=5, polyorder=0, deriv=0, delta=1.0, dim='x', mode='interp', cval=0.0):
     """
-    Apply a Savitzky-Golay filter to a NDDataset()
+    Apply a Savitzky-Golay filter to a NDDataset.
 
     Wrapper of scpy.signal.savgol(). If dataset has dimension greater than 1,
     dim determines the axis along which the filter is applied.
@@ -41,7 +41,7 @@ def savgol_filter(dataset, window_length=5, polyorder=0, deriv=0, delta=1.0, dim
         The default is 0, which means to filter the data without differentiating.
     delta : float, optional
         The spacing of the samples to which the filter will be applied. This is only used if deriv > 0. Default is 1.0.
-    dim : str. Optional, default='x'.
+    dim : str, optional, default='x'
         Along which axis to perform the alignment.
     mode : str, optional
         Must be ‘mirror’, ‘constant’, ‘nearest’, ‘wrap’ or ‘interp’. This determines the type of extension to use for
@@ -113,7 +113,7 @@ def detrend(dataset, dim='x', type='linear', bp=0, overwrite_data=False):
     Parameters
     ----------
     dataset :  |NDDataset|
-        The input data
+        The input data.
     dim : str, optional, default='x'
         The dimension, along which to detrend the data. By default this is the 'x' dimension.
     type : str among ['linear', 'constant'}, optional, default='linear'
@@ -129,8 +129,8 @@ def detrend(dataset, dim='x', type='linear', bp=0, overwrite_data=False):
 
     Returns
     -------
-    ret : NDDataset
-        The detrended input data.
+    ret
+        The detrended |NDDataset|.
     """
     if dim == 'x':
         axis = -1
