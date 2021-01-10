@@ -59,7 +59,7 @@ ERROR_MSGS = {
     "EX02": "Examples do not pass tests:\n{doctest_log}",
     "EX03": "flake8 error: {error_code} {error_message}{times_happening}",
     "EX04": "Do not import {imported_library}, as it is imported "
-    "automatically for the examples (numpy as np, spectrochempy as spc)",
+    "automatically for the examples (numpy as np, spectrochempy as scp)",
 }
 
 
@@ -150,10 +150,13 @@ class SpectroChemPyDocstring(Docstring):
 
     @property
     def examples_errors(self):
-        flags = doctest.NORMALIZE_WHITESPACE | doctest.IGNORE_EXCEPTION_DETAIL
+        flags = doctest.NORMALIZE_WHITESPACE
+        flags |= doctest.ELLIPSIS
+        flags |= doctest.IGNORE_EXCEPTION_DETAIL
+
         finder = doctest.DocTestFinder()
         runner = doctest.DocTestRunner(optionflags=flags)
-        context = {"np": numpy, "spc": spectrochempy}
+        context = {"np": numpy, "scp": spectrochempy}
         error_msgs = ""
         for test in finder.find(self.raw_doc, self.name, globs=context):
             f = StringIO()

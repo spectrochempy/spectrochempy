@@ -20,7 +20,8 @@ import scipy.signal
 # argrelmax(data[, axis, order, mode]) 	Calculate the relative maxima of data.
 # argrelextrema(data, comparator[, axis, ...]) 	Calculate the relative extrema of data.
 
-def savgol_filter(dataset, window_length=5, polyorder=0, deriv=0, delta=1.0, dim='x', mode='interp', cval=0.0):
+def savgol_filter(dataset, window_length=5, polyorder=0, deriv=0, delta=1.0,
+                  mode='interp', cval=0.0, **kwargs):
     """
     Apply a Savitzky-Golay filter to a NDDataset.
 
@@ -41,8 +42,6 @@ def savgol_filter(dataset, window_length=5, polyorder=0, deriv=0, delta=1.0, dim
         The default is 0, which means to filter the data without differentiating.
     delta : float, optional
         The spacing of the samples to which the filter will be applied. This is only used if deriv > 0. Default is 1.0.
-    dim : str, optional, default='x'
-        Along which axis to perform the alignment.
     mode : str, optional
         Must be ‘mirror’, ‘constant’, ‘nearest’, ‘wrap’ or ‘interp’. This determines the type of extension to use for
         the padded signal to which the filter is applied. When mode is ‘constant’, the padding value is given by cval.
@@ -52,11 +51,21 @@ def savgol_filter(dataset, window_length=5, polyorder=0, deriv=0, delta=1.0, dim
         last window_length // 2 output values.
     cval : scalar, optional
         Value to fill past the edges of the input if mode is ‘constant’. Default is 0.0.
+    **kwargs : dict
+        See other parameters.
 
     Returns
     -------
     NDDataset: same shape as x. data units are removed when deriv > 1
         The filtered data.
+
+    Other Parameters
+    ----------------
+    dim : str or int, optional, default='x'.
+        Specify on which dimension to apply this method. If `dim` is specified as an integer it is equivalent
+        to the usual `axis` numpy parameter.
+    inplace : bool, optional, default=False.
+        True if we make the transform inplace.  If False, the function return a new object
 
     Notes
     -----
@@ -84,31 +93,53 @@ def savgol_filter(dataset, window_length=5, polyorder=0, deriv=0, delta=1.0, dim
     'nearest'  | 1  1  1 | 1  2  3  4  5  6  7  8 | 8  8  8
     'constant' | 0  0  0 | 1  2  3  4  5  6  7  8 | 0  0  0
     'wrap'     | 6  7  8 | 1  2  3  4  5  6  7  8 | 1  2  3
+
+    See Also
+    ---------
+    smooth : Smooth the data using a window with requested size.
+
+    Examples
+    --------
+    >>> dataset = scp.read('irdata/nh4y-activation.spg')
+    >>> dataset.savgol_filter(window_length=5, polyorder=0)
+    NDDataset: [float32] a.u. (shape: (y:55, x:5549))
     """
 
-    if dim == 'x':
-        axis = -1
-    if dim == 'y':
-        axis = -2
-    if dim == 'z':
-        axis = -3
+    if not kwargs.pop('inplace', False):
+        # default
+        new = dataset.copy()
+    else:
+        new = dataset
 
-    data = scipy.signal.savgol_filter(dataset.data, window_length, polyorder,
+    is_ndarray = False
+    axis = kwargs.pop('dim', kwargs.pop('axis', -1))
+    if hasattr(new, 'get_axis'):
+        axis, dim = new.get_axis(axis, negative_axis=True)
+        data = new.data
+    else:
+        is_ndarray = True
+        data = new
+
+    data = scipy.signal.savgol_filter(data, window_length, polyorder,
                                       deriv, delta, axis, mode, cval)
 
-    out = dataset.copy()
-    if deriv == 0:
-        out.data = data * dataset.units
+    if not is_ndarray:
+        if deriv != 0 and dataset.coord(dim).reversed:
+            data = data * (-1) ** deriv
+        new.data = data
     else:
-        out.data = data
-        if dataset.coord([dim]).reversed:
-            out.data = out.data * (-1) ** deriv
-    return out
+        new = data
 
+    if not is_ndarray:
+        new.history = f'savgol_filter applied (window_length={window_length}, polyorder={polyorder}, ' \
+                      f'deriv={deriv}, delta={delta}, mode={mode}, cval={cval}'
+    return new
 
-def detrend(dataset, dim='x', type='linear', bp=0, overwrite_data=False):
+def detrend(dataset, type='linear', bp=0, **kwargs):
     """
-    Wrapper of scpy.signal.detrend(). Remove linear trend along dim from dataset.
+    Remove linear trend along dim from dataset.
+
+    Wrapper of scpy.signal.detrend().
 
     Parameters
     ----------
@@ -124,22 +155,54 @@ def detrend(dataset, dim='x', type='linear', bp=0, overwrite_data=False):
         A sequence of break points. If given, an individual linear fit is
         performed for each part of `data` between two break points.
         Break points are specified as indices into `data`.
-    overwrite_data : bool, optional, Default=False
-        If True, perform in place detrending and avoid a copy.
+    **kwargs : dict
+        See other parameters.
 
     Returns
     -------
-    ret
+    detrended
         The detrended |NDDataset|.
-    """
-    if dim == 'x':
-        axis = -1
-    if dim == 'y':
-        axis = -2
-    if dim == 'z':
-        axis = -3
 
-    data = scipy.signal.detrend(dataset.data, axis=axis, type=type, bp=bp)
-    out = dataset.copy()
-    out.data = data
-    return out
+    Other Parameters
+    ----------------
+    dim : str or int, optional, default='x'.
+        Specify on which dimension to apply this method. If `dim` is specified as an integer it is equivalent
+        to the usual `axis` numpy parameter.
+    inplace : bool, optional, default=False.
+        True if we make the transform inplace.  If False, the function return a new object
+
+    See Also
+    --------
+    BaselineCorrection : Manual baseline correction.
+    abs : Automatic baseline correction.
+    autosub : Subtraction of reference.
+
+    Examples
+    --------
+    >>> dataset = scp.read("irdata/nh4y-activation.spg")
+    >>> dataset.detrend(type='constant')
+    NDDataset: [float32] a.u. (shape: (y:55, x:5549))
+    """
+    if not kwargs.pop('inplace', False):
+        # default
+        new = dataset.copy()
+    else:
+        new = dataset
+
+    is_ndarray = False
+    axis = kwargs.pop('dim', kwargs.pop('axis', -1))
+    if hasattr(new, 'get_axis'):
+        axis, dim = new.get_axis(axis, negative_axis=True)
+        data = new.data
+    else:
+        is_ndarray = True
+        data = new
+
+    data = scipy.signal.detrend(data, axis=axis, type=type, bp=bp)
+
+    if is_ndarray:
+        return data
+
+    new.data = data
+
+    return new
