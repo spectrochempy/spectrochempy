@@ -56,9 +56,10 @@ class class_or_instance_method(object):
 
     def __get__(self, instance, cls):
 
-        def func(*args, **kwargs):
-            # print(instance, cls, args, kwargs, self.method.__name__)
+        def func(*dataset, **kwargs):
+            from spectrochempy.core.dataset.nddataset import NDDataset
 
+            args = list(dataset)
             if instance is not None:
                 obj = instance
 
@@ -70,9 +71,15 @@ class class_or_instance_method(object):
                         obj.ito(v, force=True)
 
             else:
-                obj = cls(*args, **kwargs)
+                try:
+                    dataset = args.pop(0)
+                    obj = cls(dataset, **kwargs)
+                except TypeError:
+                    if issubclass(cls, NDMath):
+                        # probably a call from the API
+                        obj = NDDataset(dataset, **kwargs)
 
-            return self.method(obj, **kwargs)  # *args,
+            return self.method(obj, *args, **kwargs)  # *args,
 
         return func
 
@@ -273,13 +280,13 @@ class NDMath(object):
     >>> from spectrochempy import *
     >>> nd1 = NDDataset.read('wodger.spg')
     >>> nd1
-    NDDataset: [float32]  a.u. (shape: (y:2, x:5549))
+    NDDataset: [float32] a.u. (shape: (y:2, x:5549))
     >>> nd1.data
     array([[   2.005,    2.003, ...,    1.826,    1.831],
            [   1.983,    1.984, ...,    1.698,    1.704]], dtype=float32)
     >>> nd2 = np.negative(nd1)
     >>> nd2
-    NDDataset: [float32]  a.u. (shape: (y:2, x:5549))
+    NDDataset: [float32] a.u. (shape: (y:2, x:5549))
     >>> nd2.data
     array([[  -2.005,   -2.003, ...,   -1.826,   -1.831],
            [  -1.983,   -1.984, ...,   -1.698,   -1.704]], dtype=float32)
@@ -647,14 +654,14 @@ class NDMath(object):
         Examples
         --------
         >>> np.fromfunction(lambda i, j: i == j, (3, 3), dtype=int)
-        array([[ True, False, False],
-               [False,  True, False],
-               [False, False,  True]])
+        array([[  True,   False,   False],
+               [  False,   True,   False],
+               [  False,   False,   True]])
 
         >>> np.fromfunction(lambda i, j: i + j, (3, 3), dtype=int)
-        array([[0, 1, 2],
-               [1, 2, 3],
-               [2, 3, 4]])
+        array([[       0,        1,        2],
+               [       1,        2,        3],
+               [       2,        3,        4]])
         """
         from spectrochempy.core.dataset.coordset import CoordSet
         if coordset is not None:
@@ -1191,8 +1198,8 @@ class NDMath(object):
         """
         return NDMath._create(shape, fill_value=1.0, **kwargs)
 
-    @staticmethod
-    def full(shape, fill_value=0.0, dtype=None, **kwargs):
+    @class_or_instance_method
+    def full(self, shape, fill_value=0.0, dtype=None, **kwargs):
         """
         Return a new |NDDataset| of given shape and type, filled with `fill_value`.
 
@@ -1229,10 +1236,10 @@ class NDMath(object):
         >>> NDDataset.full((2, 2), 10, dtype=np.int)
         NDDataset: [int64] unitless (shape: (y:2, x:2))
         """
-        return NDMath._create(shape, fill_value=fill_value, **kwargs)
+        return NDMath._create(self, shape, fill_value=fill_value, **kwargs)
 
-    @classmethod
-    def empty_like(cls, *args, **kwargs):
+    @class_or_instance_method
+    def empty_like(self, *args, **kwargs):
         """
         Return a new array with the same shape and type as a given array.
 
@@ -1267,8 +1274,8 @@ class NDMath(object):
 
         return NDMath._like(cls, *args, **kwargs)
 
-    @classmethod
-    def zeros_like(cls, *args, **kwargs):
+    @class_or_instance_method
+    def zeros_like(self, *args, **kwargs):
         """
         Return a |NDDataset| of zeros with the same shape and type as a given
         array.
@@ -1310,10 +1317,10 @@ class NDMath(object):
             <Quantity([[       0        0        0]
          [       0        0        0]], 'second')>
         """
-        return NDMath._like(cls, *args, fill_value=0.0, **kwargs)
+        return NDMath._like(self, *args, fill_value=0.0, **kwargs)
 
-    @classmethod
-    def ones_like(cls, *args, **kwargs):
+    @class_or_instance_method
+    def ones_like(self, *args, **kwargs):
         """
         Return |NDDataset| of ones with the same shape and type as a given array.
 
@@ -1350,25 +1357,35 @@ class NDMath(object):
         NDDataset: [float64] J (shape: (y:2, x:3))
         """
 
-        return NDMath._like(cls, *args, fill_value=1.0, **kwargs)
+        return NDMath._like(self, *args, fill_value=1.0, **kwargs)
 
-    @classmethod
-    def full_like(cls, *args, **kwargs):
+    @class_or_instance_method
+    def full_like(self, dataset, fill_value=0.0, dtype=None, **kwargs):
         """
         Return a |NDDataset| with the same shape and type as a given array.
 
         Parameters
         ----------
-        a : |NDDataset| or array-like
+        dataset: |NDDataset| or array-like
+            Object from which to copy the array structure.
         fill_value : scalar
             Fill value.
         dtype : data-type, optional
             Overrides the data type of the result.
+        **kwargs : dict
+            See other parameters.
 
         Returns
         -------
         array-like
             Array of `fill_value` with the same shape and type as `a`.
+
+        Other Parameters
+        ----------------
+        units : str or ur instance
+            Units of the returned object. If not provided, try to copy from the input object.
+        coordset : list or Coordset object
+            Coordinates for the returned objet. If not provided, try to copy from the input object.
 
         See Also
         --------
@@ -1387,8 +1404,6 @@ class NDMath(object):
         >>> x = np.arange(6, dtype=int)
         >>> nd = full_like(x, 1)
         >>> nd
-        NDDataset: [int64] unitless (size: 6)
-        >>> nd.values
         array([       1,        1,        1,        1,        1,        1])
         >>> x = NDDataset(x, units='m')
         >>> NDDataset.full_like(x, 0.1).values
@@ -1398,7 +1413,7 @@ class NDMath(object):
         >>> full_like(x, np.nan, dtype=np.double).values
         <Quantity([     nan     nan      nan      nan      nan      nan], 'meter')>
         """
-        return NDMath._like(cls, *args, **kwargs)
+        return NDMath._like(self, dataset, fill_value, dtype, **kwargs)
 
     # ----------------------------------------------------------------------------------------------------------------------
     # Private methods
@@ -1419,31 +1434,34 @@ class NDMath(object):
         else:
             return NDDataset(np.empty(shape, dtype=dtype), **kwargs)
 
-    @classmethod
-    def _like(cls, *args, **kwargs):
+    @staticmethod
+    def _like(*args, **kwargs):
 
         from spectrochempy.core.dataset.nddataset import NDDataset
 
         args = list(args)
 
         if isinstance(args[0], NDArray):
-            a = args.pop(0)
-            new = type(a)(np.empty_like(a.data))
+            ds = args.pop(0)
+            new = ds.copy()
 
         elif issubclass(args[0], NDArray):
+            # Coord(), or NDDataset() instance
             new = args.pop(0)()  # copy type
-            ds = args.pop(0)  # get the template object
-            if isinstance(ds, NDArray):
-                new._data = np.empty_like(ds.data)
-                new._dims = ds.dims.copy()
-                new._mask = ds.mask.copy()
-                if hasattr(ds, 'coordset'):
-                    new._coordset = ds.coordset
-                new._units = ds.units
-                new._title = ds.title
-            elif is_sequence(ds):
-                # by default we produce a NDDataset
-                new._data = NDDataset(np.empty_like(ds))
+            ds = args.pop(0)    # get the template object
+
+        if isinstance(ds, NDArray):
+            new._data = np.empty_like(ds.data)
+            new._dims = ds.dims.copy()
+            new._mask = ds.mask.copy()
+            if hasattr(ds, 'coordset'):
+                new._coordset = ds.coordset
+            new._units = ds.units
+            new._title = ds.title
+
+        elif is_sequence(ds):
+            # by default we produce a NDDataset
+            new._data = NDDataset(np.empty_like(ds))
 
         fill_value = kwargs.pop('fill_value', args.pop(0) if args else None)
         dtype = kwargs.pop('dtype', None)

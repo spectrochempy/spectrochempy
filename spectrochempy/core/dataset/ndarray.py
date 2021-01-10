@@ -1114,10 +1114,11 @@ class NDArray(HasTraits):
         Parameters
         ----------
         deep : bool, optional
-            If True a deepcopy is performed which is the default behavior
+            If True a deepcopy is performed which is the default behavior.
         memo : Not used
-            This parameter ensure compatibility with deepcopy() from the copy
-            package.
+            This parameter ensure compatibility with deepcopy() from the copy package.
+        keepname : bool
+            If True keep the same name for the copied object.
 
         Returns
         -------
@@ -1126,7 +1127,8 @@ class NDArray(HasTraits):
 
         Examples
         --------
-        >>> nd1 = NDArray([1.+2.j,2.+ 3.j])
+        >>> from spectrochempy import NDArray
+        >>> nd1 = NDArray([1. + 2.j, 2. + 3.j])
         >>> nd1
         NDArray: [complex128] unitless (size: 2)
         >>> nd2 = nd1

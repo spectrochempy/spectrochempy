@@ -145,8 +145,6 @@ def detrend(dataset, type='linear', bp=0, **kwargs):
     ----------
     dataset :  |NDDataset|
         The input data.
-    dim : str, optional, default='x'
-        The dimension, along which to detrend the data. By default this is the 'x' dimension.
     type : str among ['linear', 'constant'}, optional, default='linear'
         The type of detrending. If ``type == 'linear'`` (default),
         the result of a linear least-squares fit to `data` is subtracted from `data`.

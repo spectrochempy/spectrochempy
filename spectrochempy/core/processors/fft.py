@@ -64,17 +64,50 @@ def get_zpd(dataset, dim=-1, mode='max'):
         return np.argmax(np.abs(dataset.data), axis=axis)
 
 
-def ifft(dataset, size=None, inplace=False, **kwargs):
+def ifft(dataset, size=None, **kwargs):
     """
-    Apply inverse fast fourier transform.
+    Apply a inverse fast fourier transform.
 
-    See `fft` documentation.
+    For multidimensional NDDataset or NDPanels,
+    the apodization is by default performed on the last dimension.
+
+    The data in the last dimension MUST be in frequency (or without dimension)
+    or an error is raised.
+
+    To make direct Fourier transform, i.e., from frequency to time domain, use the `fft` transform.
+
+    Parameters
+    ----------
+    dataset : |NDDataset|
+        The dataset on which to apply the fft transformation.
+    size : int, optional
+        Size of the transformed dataset dimension - a shorter parameter is `si`. by default, the size is the closest
+        power of two greater than the data size.
+    **kwargs : dict
+        Other parameters (see other parameters).
+
+    Returns
+    -------
+    out
+        Transformed |NDDataset|.
+
+    Other Parameters
+    ----------------
+    dim : str or int, optional, default='x'.
+        Specify on which dimension to apply this method. If `dim` is specified as an integer it is equivalent
+        to the usual `axis` numpy parameter.
+    inplace : bool, optional, default=False.
+        True if we make the transform inplace.  If False, the function return a new object
+
+    See Also
+    --------
+    fft : Direct Fourier transform.
     """
     return fft(dataset, size=size, inv=True, inplace=inplace, **kwargs)
 
 
-def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=True, **kwargs):
-    r"""
+def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
+    """
     Apply a complex fast fourier transform.
 
     For multidimensional NDDataset or NDPanels,
@@ -98,11 +131,6 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
         data size, but may be smaller.
     inv : bool, optional, default=False
         If True, an inverse Fourier transform is performed - size parameter is not taken into account.
-    inplace : bool, optional, default=False
-        True if we make the transform inplace.  If False, the function return a new dataset.
-    dim : str or int, optional, default='x'
-        Specify on which dimension to apply this method. If `dim` is specified as an integer it is equivalent
-        to the usual `axis` numpy parameter.
     ppm : bool, optional, default=True
         If True, and data are from NMR, then a ppm scale is calculated instead of frequency.
     **kwargs : dict
@@ -115,14 +143,24 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
 
     Other Parameters
     ----------------
+    dim : str or int, optional, default='x'.
+        Specify on which dimension to apply this method. If `dim` is specified as an integer it is equivalent
+        to the usual `axis` numpy parameter.
+    inplace : bool, optional, default=False.
+        True if we make the transform inplace.  If False, the function return a new object
     tdeff : int, optional
         Alias of sizeff (specific to NMR). If both sizeff and tdeff are passed, sizeff has the priority.
+
+    See Also
+    --------
+    ifft : Inverse Fourier transform.
     """
     # datatype
     is_nmr = dataset.origin.lower() in ["topspin", ]
-    is_ir = dataset.origin.lower() in ["omnic", ]
+    is_ir = dataset.origin.lower() in ["omnic", "opus"]
 
     # On which axis do we want to apodize? (get axis from arguments)
+    dim = kwargs.pop('dim', kwargs.pop('axis', -1))
     axis, dim = dataset.get_axis(dim, negative_axis=True)
 
     # The last dimension is always the dimension on which we apply the fourier transform.
@@ -152,6 +190,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
     # TODO: other tests data spacing and so on.
 
     # output dataset inplace or not
+    inplace = kwargs.pop('inplace')
     if not inplace:  # default
         new = dataset.copy()  # copy to be sure not to modify this dataset
     else:
