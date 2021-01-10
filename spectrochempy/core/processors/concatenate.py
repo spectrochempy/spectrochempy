@@ -299,34 +299,34 @@ def concatenate(*datasets, **kwargs):
 
 def stack(*datasets):
     """
-    Stack of |NDDataset| objects along the first dimension
+    Stack of |NDDataset| objects along the first dimension.
 
     Any number of |NDDataset| objects can be stacked. For this operation
     to be defined the following must be true :
 
     #. all inputs must be valid dataset objects,
     #. units of data and axis must be compatible (rescaling is applied
-       automatically if necessary)
+       automatically if necessary).
 
     The remaining dimension sizes must match along all dimension but the first.
 
     Parameters
     ----------
     *datasets : a series of |NDDataset|
-        The dataset to be stacked to the current dataset
+        The dataset to be stacked to the current dataset.
 
     Returns
     --------
-    out : |NDDataset|
-        A dataset created from the stack of the `datasets` datasets
+    out
+        A |NDDataset| created from the stack of the `datasets` datasets.
 
     Examples
     --------
-    >>> from spectrochempy import * # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> from spectrochempy import *
     ...
     >>> A = NDDataset.read('irdata/nh4y-activation.spg', protocol='omnic')
     >>> B = NDDataset.read('irdata/nh4y-activation.scp')
-    >>> C = NDDataset.stack( A, B)
+    >>> C = NDDataset.stack(A, B)
     >>> print(C)
     NDDataset: [float32]  a.u. (shape: (z:2, y:55, x:5549))
     """

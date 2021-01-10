@@ -80,45 +80,38 @@ class CoordRange(HasTraits):
     ranges = List(Range())
     reversed = Bool()
 
-    def __init__(self):
+    # ..................................................................................................................
+    def __call__(self, *ranges, **kwargs):
         """
         Set of ordered, non intersecting intervals.
 
-        e.g. [[a, b], [c, d]] with a < b < c < d or a > b > c > d.
+        An ordered set of ranges is contructed from the inputs and returned.
+        *e.g.,* [[a, b], [c, d]] with a < b < c < d or a > b > c > d.
+
+        Parameters
+        -----------
+        *ranges :  iterable
+            An interval or a set of intervals.
+            set of  intervals. If none is given, the range will be a set of an empty interval [[]]. The interval
+            limits do not need to be ordered, and the intervals do not need to be distincts.
+        **kwargs : dict
+            See other parameters.
+
+        Returns
+        -------
+        ordered
+            list of ranges.
+
+        Other Parameters
+        ----------------
+        reversed : bool, optional
+            The intervals are ranked by decreasing order if True or increasing order if False.
 
         Examples
         --------
         >>> from spectrochempy import CoordRange
         >>> CoordRange([1, 4], [7, 5], [6, 10])
         [[1, 4], [5, 10]]
-        """
-
-    # ..................................................................................................................
-    def __call__(self, *ranges, **kwargs):
-        """
-        The calling function of the CoordRange object
-
-        An ordered set of ranges is contructed from the inputs and returned
-
-        Parameters
-        -----------
-        *ranges :  iterable
-            An interval or a set of intervals.
-            set of  intervals. If none is given, the range
-            will be a set of an empty interval [[]]. The interval limits do not
-            need to be ordered, and the intervals do not need to be distincts.
-        **kwargs : dict
-            See other paremeters
-
-        Other Parameters
-        ----------------
-        reversed : bool, optional.
-            The intervals are ranked by decreasing order if True
-            or increasing order if False.
-
-        Returns
-        -------
-        ordered list of ranges
         """
 
         self.reversed = kwargs.get('reversed', False)
@@ -167,7 +160,6 @@ class CoordRange(HasTraits):
             for range in self.ranges:
                 range.reverse()
             self.ranges.reverse()
-
 
 CoordRange = CoordRange()
 

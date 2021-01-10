@@ -425,6 +425,9 @@ def get_filename(*filenames, **kwargs):
             elif NODIAL and kwargs.get('protocol', None) == ['topspin']:
                 directory = readdirname(environ.get('TEST_NMR_FOLDER'))
 
+            if directory is None:
+                return None
+
             filenames = []
 
             if kwargs.get('protocol', None) != ['topspin']:

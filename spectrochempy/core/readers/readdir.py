@@ -28,10 +28,12 @@ from spectrochempy.core.readers.importer import importermethod, Importer
 # ======================================================================================================================
 # Public functions
 # ======================================================================================================================
-def read_dir(*args, **kwargs):
+def read_dir(directory=None, **kwargs):
     """
-    Open readable files in a directory and store data/metadata in a dataset or
-    a list of datasets according to the following rules :
+    Read an entire directory.
+
+    Open a list of readable files in a and store data/metadata in a dataset or a list of datasets according to the
+    following rules :
 
     * 2D spectroscopic data (e.g. valid *.spg files or matlab arrays, etc...) from
       distinct files are stored in distinct NDdatasets.
@@ -39,14 +41,19 @@ def read_dir(*args, **kwargs):
       into single NDDataset, providing their unique dimension are compatible. If not,
       an error is generated.
 
+    Parameters
+    ----------
+    directory : str or pathlib
+        Folder where are located the files to read.
+
     Returns
     --------
     out
-        |NDDataset| or list of |NDDataset|
+        |NDDataset| or list of |NDDataset|.
 
     See Also
     --------
-    read : Generic read method
+    read : Generic read method.
     read_omnic, read_spg, read_spa, read_srs, read_opus, read_topspin, read_csv, read_matlab, read_zip
 
     Notes
@@ -58,13 +65,14 @@ def read_dir(*args, **kwargs):
     --------
     >>> from spectrochempy import NDDataset
     >>> A = NDDataset.read_dir('irdata')
-    >>> A
-    [NDDataset: [...
+    >>> len(A)
+    3
 
     >>> B = NDDataset.read_dir()
     """
     kwargs['listdir'] = True
     importer = Importer()
+    args = [directory]
     return importer(*args, **kwargs)
 
 

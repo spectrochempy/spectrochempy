@@ -117,6 +117,7 @@ These functions mimics numpy equivalent, but output a NDDataset object
     eye
     identity
 
+
 Import of data from external sources
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -158,6 +159,7 @@ Select data in a NDDataset
     take
     clip
 
+
 ********************
 Plotting functions
 ********************
@@ -197,6 +199,7 @@ Transformations
     transpose
     set_complex
     set_quaternion
+
 
 Unary mathematical operations
 -----------------------------
@@ -255,6 +258,7 @@ Unary mathematical operations
     sum
     var
 
+
 Binary mathematical operations
 -------------------------------
 
@@ -263,6 +267,7 @@ Binary mathematical operations
     :toctree: generated/
 
     dot
+
 
 Other processing operations
 ----------------------------
@@ -301,11 +306,13 @@ Project management
 
     Project
 
+
 **********
 Scripting
 **********
 
 This is rather experimental
+
 
 .. autosummary::
     :nosignatures:

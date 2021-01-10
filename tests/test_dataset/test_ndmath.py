@@ -618,11 +618,41 @@ def test_simple_arithmetic_on_full_dataset():
 
 
 def test_array_creation():
-    from spectrochempy import NDDataset, empty_like, full_like
+    from spectrochempy import Coord, NDDataset, empty_like, full_like
 
-    x = np.arange(6, dtype=int)
-    ds = NDDataset.full_like(x, 1)
-    assert np.all(ds.data == np.full((6,), 1))
+    # from a list
+    x = [1,2,3]
+
+    # _like as an API method
+    ds = scp.full_like(x,2)
+    assert np.all(ds.data == np.full((3,), 2))
+    assert ds.implements('NDDataset')
+
+    # _like as a classmethod
+    ds = Coord.full_like(x, 2)
+    assert np.all(ds.data == np.full((3,), 2))
+    assert ds.implements('Coord')
+
+    # _like as an instance method
+    ds = NDDataset(x).full_like(2)
+    assert np.all(ds.data == np.full((3,), 2))
+    assert ds.implements('NDDataset')
+
+    # from an array
+    x = np.array([1,2,3])
+
+    ds = Coord(x).full_like(2)
+    assert np.all(ds.data == np.full((3,), 2))
+    assert ds.implements('Coord')
+
+    # from a NDArray subclass with units
+    x = Coord([1,2,3], units='km')
+    ds = scp.full_like(x,2)
+    assert np.all(ds.data == np.full((3,), 2))
+    assert ds.implements('NDDataset')
+    assert ds.units == ur.km
+
+
 
     ds1 = full_like(ds, np.nan, dtype=np.double, units='m')
     assert ds1.units == Unit('m')
