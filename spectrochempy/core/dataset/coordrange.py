@@ -76,20 +76,22 @@ class Range(List):
 # CoordRange
 # ======================================================================================================================
 class CoordRange(HasTraits):
-    """
-    Set of ordered, non intersecting intervals.
-
-    e.g. [[a, b], [c, d]] with a < b < c < d or a > b > c > d.
-
-    Examples
-    --------
-    >>> from spectrochempy import CoordRange
-    >>> CoordRange([1, 4], [7, 5], [6, 10])
-    [[1, 4], [5, 10]]
-    """
     # TODO: May use also units ???
     ranges = List(Range())
     reversed = Bool()
+
+    def __init__(self):
+        """
+        Set of ordered, non intersecting intervals.
+
+        e.g. [[a, b], [c, d]] with a < b < c < d or a > b > c > d.
+
+        Examples
+        --------
+        >>> from spectrochempy import CoordRange
+        >>> CoordRange([1, 4], [7, 5], [6, 10])
+        [[1, 4], [5, 10]]
+        """
 
     # ..................................................................................................................
     def __call__(self, *ranges, **kwargs):
@@ -100,11 +102,16 @@ class CoordRange(HasTraits):
 
         Parameters
         -----------
-        ranges :  iterable
+        *ranges :  iterable
             An interval or a set of intervals.
             set of  intervals. If none is given, the range
             will be a set of an empty interval [[]]. The interval limits do not
             need to be ordered, and the intervals do not need to be distincts.
+        **kwargs : dict
+            See other paremeters
+
+        Other Parameters
+        ----------------
         reversed : bool, optional.
             The intervals are ranked by decreasing order if True
             or increasing order if False.

@@ -26,7 +26,7 @@ To use the API, you must import it using one of the following syntax:
     nd = NDDataset()
 
 With the second syntax, as often in python, the access to objects/functions
-can be greatly simplified. For example, we can use "NDDataset" without a prefix
+can be greatly simplified. For example, we can use `NDDataset` without a prefix
 instead of `scp.NDDataset` which is the first syntax) but there is always a risk
 of overwriting some variables or functions already present in the namespace.
 Therefore, the first syntax is generally highly recommended.
@@ -184,7 +184,7 @@ Processing
 ************
 
 Transformations
-~~~~~~~~~~~~~~~~
+---------------
 
 .. autosummary::
     :nosignatures:
@@ -199,7 +199,7 @@ Transformations
     set_quaternion
 
 Unary mathematical operations
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------
 
 .. autosummary::
     :nosignatures:
@@ -256,7 +256,7 @@ Unary mathematical operations
     var
 
 Binary mathematical operations
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------
 
 .. autosummary::
     :nosignatures:
@@ -265,7 +265,7 @@ Binary mathematical operations
     dot
 
 Other processing operations
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 .. autosummary::
     :nosignatures:

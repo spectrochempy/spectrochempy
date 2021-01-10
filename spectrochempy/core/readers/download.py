@@ -32,6 +32,16 @@ def download_IRIS():
     -------
     downloaded
         The IRIS dataset.
+
+    See Also
+    --------
+    read : Ro read data from experimental data.
+
+    Examples
+    --------
+    Upload a dataset form a distant server
+
+    >>> dataset = scp.download_IRIS()
     """
     url = "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data"
 

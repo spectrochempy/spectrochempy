@@ -151,7 +151,6 @@ logical_not(x [, out, where, casting, …])       Compute the truth value of NOT
 signbit(x, [, out, where, casting, order, …])   Returns element-wise True where signbit is set (less than zero).
 """
 
-
 def unary_ufuncs():
     liste = unary_str.split("\n")
     ufuncs = {}
@@ -162,13 +161,6 @@ def unary_ufuncs():
             string = item[1].split(')')
             ufuncs[item[0]] = f'({string[0]}) -> {string[1].strip()}'
     return ufuncs
-
-
-# print(unary_ufuncs())
-for func in unary_ufuncs():
-    # print(func)
-    setattr(thismodule, func, getattr(np, func))
-    __all__ += [func]
 
 binary_str = """
 
@@ -1073,7 +1065,9 @@ class NDMath(object):
     @staticmethod
     def empty(shape, **kwargs):
         """
-        Return a new |NDDataset| of given shape and type,  without initializing entries.
+        Return a new |NDDataset| of given shape and type, without initializing entries.
+
+        Rhis is a wrapper to the numpy
 
         Parameters
         ----------
@@ -2142,9 +2136,48 @@ def _get_op(name):
     return getattr(operator, _op_str(name))
 
 
+class _ufunc:
+
+    def __init__(self, name):
+        self.name = name
+        self.ufunc = getattr(np, name)
+
+    def __call__(self, *args, **kwargs):
+        return self.ufunc(*args, **kwargs)
+
+    @property
+    def __doc__(self):
+        doc = f"""
+            {unary_ufuncs()[self.name].split('->')[-1].strip()}
+
+            wrapper of the numpy.ufunc function ``np.{self.name}'(*args, **kwargs)``.
+
+            Parameters
+            ----------
+            *args : NDDataset
+                |NDDataset| to pass to the numpy function.
+            **kwargs : dict
+                See other parameters.
+                
+            See Also
+            --------
+            np.{self.name} : The corresponding numpy ufunc.
+            
+            Examples
+            --------
+            See `np.{self.name} <https://numpy.org/doc/stable/reference/generated/numpy.{self.name}.html>`_
+            """
+        return doc #.strip()
+
+def set_ufuncs(cls):
+
+    for func in unary_ufuncs():
+        setattr(cls, func, _ufunc(func))
+        setattr(thismodule, func, _ufunc(func))
+        thismodule.__all__ += [func]
+
 # ..................................................................................................................
 def set_operators(cls, priority=50):
-    # adapted from Xarray
 
     cls.__array_priority__ = priority
 

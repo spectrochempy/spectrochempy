@@ -61,29 +61,6 @@ numpyprintoptions()
 
 # noinspection PyPep8Naming
 class NDArray(HasTraits):
-    """
-    The basic |NDArray| object.
-
-    The |NDArray| class is an array (numpy |ndarray|-like) container, usually not intended to be used directly,
-    as its basic functionalities may be quite limited, but to be subclassed.
-
-    Indeed, both the classes |NDDataset| and |Coord| which respectively implement a full dataset (with
-    coordinates)  and the coordinates in a given dimension, are derived from |NDArray| in |scpy|.
-
-    The key distinction from raw numpy |ndarray| is the presence of optional properties such as dimension names,
-    labels, masks, units and/or extensible metadata dictionary.
-
-    See Also
-    --------
-    NDDataset : Object which subclass |NDArray| with the addition of coordinates.
-    Coord : Explicit coordinates object.
-    LinearCoord : Implicit coordinates objet.
-
-    Examples
-    --------
-    >>> from spectrochempy import NDArray
-    >>> myarray = NDArray([1., 2., 3.])
-    """
 
     # hidden properties
 
@@ -138,6 +115,17 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     def __init__(self, data=None, **kwargs):
         """
+        The basic |NDArray| object.
+
+        The |NDArray| class is an array (numpy |ndarray|-like) container, usually not intended to be used directly,
+        as its basic functionalities may be quite limited, but to be subclassed.
+
+        Indeed, both the classes |NDDataset| and |Coord| which respectively implement a full dataset (with
+        coordinates)  and the coordinates in a given dimension, are derived from |NDArray| in |scpy|.
+
+        The key distinction from raw numpy |ndarray| is the presence of optional properties such as dimension names,
+        labels, masks, units and/or extensible metadata dictionary.
+
         Parameters
         ----------
         data : array of floats
@@ -193,6 +181,17 @@ class NDArray(HasTraits):
             A string to add to the object history.
         copy : bool, optional
             Perform a copy of the passed object. Default is False.
+
+        See Also
+        --------
+        NDDataset : Object which subclass |NDArray| with the addition of coordinates.
+        Coord : Explicit coordinates object.
+        LinearCoord : Implicit coordinates objet.
+
+        Examples
+        --------
+        >>> from spectrochempy import NDArray
+        >>> myarray = NDArray([1., 2., 3.])
         """
 
         # creation date
@@ -1068,6 +1067,15 @@ class NDArray(HasTraits):
     # ------------------------------------------------------------------------------------------------------------------
     # Public Methods and Properties
     # ------------------------------------------------------------------------------------------------------------------
+    def asfortranarray(self):
+        """
+        Make data and mask (ndim >= 1) laid out in Fortran order in memory.
+        """
+        # data and mask will be converted to F_CONTIGUOUS mode
+        if not self._data.flags['F_CONTIGUOUS']:
+            self._data = np.asfortranarray(self._data)
+            if self.is_masked:
+                self._mask = np.asfortranarray(self._mask)
 
     def astype(self, dtype=None, **kwargs):
         """

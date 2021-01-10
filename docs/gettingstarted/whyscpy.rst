@@ -74,7 +74,7 @@ As the Python community is extremely dynamic, all users should easily find resou
 not (yet) directly or completely satisfied by |scpy|.
 
 We also rely on the motivated members of this community (of which you are a part), to contribute to the improvement of
-|scpy| through (:ref:`_contributing.bugs_report`), or contributions to the code (:ref:`develguide`).
+|scpy| through (:ref:`contributing.bugs_report`), or contributions to the code (:ref:`develguide`).
 
 Why NOT |scpy| ?
 ========================
@@ -90,7 +90,7 @@ You might **NOT** want to use |scpy| if:
 
 - you are working on spectroscopic data that are difficult to process, including |scpy| (currently mainly
   focused on optical spectroscopy and NMR) because some components or tools (e.g. importing your raw data, ...) are
-  missing: please suggest new features that should be added (:ref:`_contributing.bugs_report`). We will take into
+  missing: please suggest new features that should be added (:ref:`contributing.bugs_report`). We will take into
   consideration all suggestions to make |scpy| more widely and easily usable.
 
 - you are working on very sensitive data (health, chemical safety, plant production, ...) and cannot take the risk to
@@ -101,4 +101,4 @@ You might **NOT** want to use |scpy| if:
   improvements/functionality)!
 
 - you are fully satisfied with your current tools. "The heart has its reasons, of which the reason knows nothing". We
-  don't dispute that either, but we are open to your opinion and suggestions (:ref:`_contributing.bugs_report`)!
+  don't dispute that either, but we are open to your opinion and suggestions (:ref:`contributing.bugs_report`)!
