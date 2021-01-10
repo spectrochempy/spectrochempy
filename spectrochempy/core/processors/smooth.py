@@ -29,6 +29,8 @@ def smooth(dataset, window_length=5, window='flat', **kwargs):
     window : str, optional, default='flat'
         The type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'.
         flat window will produce a moving average smoothing.
+    **kwargs : dict
+        See other parameters.
 
     Returns
     -------
@@ -42,6 +44,16 @@ def smooth(dataset, window_length=5, window='flat', **kwargs):
         to the usual `axis` numpy parameter.
     inplace : bool, optional, default=False.
         True if we make the transform inplace.  If False, the function return a new object
+
+    See Also
+    --------
+    savgol_filter : Apply a Savitzky-Golay filter.
+
+    Examples
+    --------
+    >>> ds = scp.read("irdata/nh4y-activation.spg")
+    >>> ds.smooth(window_length=11)
+    NDDataset: [float64] a.u. (shape: (y:55, x:5549))
     """
 
     if not kwargs.pop('inplace', False):
