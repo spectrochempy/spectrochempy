@@ -33,44 +33,7 @@ from spectrochempy.utils import colored_output, NOMASK, spacing
 # Coord
 # ======================================================================================================================
 class Coord(NDMath, NDArray):
-    """
-    Coordinates for a dataset along a given axis.
 
-    The coordinates of a |NDDataset| can be created using the |Coord| object.
-    This is a single dimension array with either numerical (float) values or
-    labels (str, `Datetime` objects, or any other kind of objects) to
-    represent the coordinates. Only a one numerical axis can be defined,
-    but labels can be multiple.
-
-    See Also
-    --------
-    NDDataset : Main SpectroChemPy object: an array with masks, units and coordinates.
-    LinearCoord : Implicit linear coordinates.
-
-    Examples
-    --------
-    We first import the object from the api :
-
-    >>> from spectrochempy import Coord
-
-    We then create a numpy |ndarray| and use it as the numerical `data`
-    axis of our new |Coord| object.
-
-    >>> c0 = Coord.arange(1., 12., 2., title='frequency', units='Hz')
-    >>> c0
-    Coord: [float64] Hz (size: 6)
-
-    We can take a series of str to create a non numerical but labelled
-    axis :
-
-    >>> tarr = list('abcdef')
-    >>> tarr
-    ['a', 'b', 'c', 'd', 'e', 'f']
-
-    >>> c1 = Coord(labels=tarr, title='mylabels')
-    >>> c1
-    Coord: [labels] [  a   b   c   d   e   f] (size: 6)
-    """
     _copy = Bool()
 
     _html_output = False
@@ -81,6 +44,14 @@ class Coord(NDMath, NDArray):
     # ------------------------------------------------------------------------------------------------------------------
     def __init__(self, data=None, **kwargs):
         """
+        Explicit coordinates for a dataset along a given axis.
+
+        The coordinates of a |NDDataset| can be created using the |Coord| object.
+        This is a single dimension array with either numerical (float) values or
+        labels (str, `Datetime` objects, or any other kind of objects) to
+        represent the coordinates. Only a one numerical axis can be defined,
+        but labels can be multiple.
+
         Parameters
         -----------
         data : ndarray, tuple or list
@@ -129,6 +100,35 @@ class Coord(NDMath, NDArray):
             Perform a copy of the passed object. Default is False.
         linear : bool, optional
             If set to True, the coordinate is considered as a ``LinearCoord`` object.
+
+        See Also
+        --------
+        NDDataset : Main SpectroChemPy object: an array with masks, units and coordinates.
+        LinearCoord : Implicit linear coordinates.
+
+        Examples
+        --------
+        We first import the object from the api :
+
+        >>> from spectrochempy import Coord
+
+        We then create a numpy |ndarray| and use it as the numerical `data`
+        axis of our new |Coord| object.
+
+        >>> c0 = Coord.arange(1., 12., 2., title='frequency', units='Hz')
+        >>> c0
+        Coord: [float64] Hz (size: 6)
+
+        We can take a series of str to create a non numerical but labelled
+        axis :
+
+        >>> tarr = list('abcdef')
+        >>> tarr
+        ['a', 'b', 'c', 'd', 'e', 'f']
+
+        >>> c1 = Coord(labels=tarr, title='mylabels')
+        >>> c1
+        Coord: [labels] [  a   b   c   d   e   f] (size: 6)
         """
 
         super().__init__(data=data, **kwargs)
@@ -356,37 +356,19 @@ class Coord(NDMath, NDArray):
 
 
 class LinearCoord(Coord):
-    """
-    Linear coordinates.
 
-    Such coordinates correspond to a ascending or descending linear sequence of values, fully determined by two
-    parameters, i.e., an offset (off) and an increment (inc) :
-
-    .. math::
-
-        \\mathrm{data} = i*\\mathrm{inc} + \\mathrm{off}
-
-    See Also
-    --------
-    NDDataset : Main SpectroChemPy object: an array with masks, units and coordinates.
-    Coord : Explicit coordinates.
-
-    Examples
-    --------
-    >>> from spectrochempy import LinearCoord, Coord
-
-    To create a linear coordinate, we need to specify an offset, an increment and
-    the size of the data
-
-    >>> c1 = LinearCoord(offset=2.0, increment=2.0, size=10)
-
-    Alternatively, linear coordinate can be created using the ``linear`` keyword
-
-    >>> c2 = Coord(linear=True, offset=2.0, increment=2.0, size=10)
-    >>> assert (c1 == c2).all()
-    """
     def __init__(self, *args, offset=0.0, increment=1.0, **kwargs):
         """
+        Linear coordinates.
+
+        Such coordinates correspond to a ascending or descending linear sequence of values, fully determined
+        by two
+        parameters, i.e., an offset (off) and an increment (inc) :
+
+        .. math::
+
+            \\mathrm{data} = i*\\mathrm{inc} + \\mathrm{off}
+
         Parameters
         ----------
         data : a 1D array-like object, optional
@@ -427,6 +409,25 @@ class LinearCoord(Coord):
             further restriction is placed on meta.
         copy : bool, optional
             Perform a copy of the passed object. Default is False.
+
+        See Also
+        --------
+        NDDataset : Main SpectroChemPy object: an array with masks, units and coordinates.
+        Coord : Explicit coordinates.
+
+        Examples
+        --------
+        >>> from spectrochempy import LinearCoord, Coord
+
+        To create a linear coordinate, we need to specify an offset, an increment and
+        the size of the data
+
+        >>> c1 = LinearCoord(offset=2.0, increment=2.0, size=10)
+
+        Alternatively, linear coordinate can be created using the ``linear`` keyword
+
+        >>> c2 = Coord(linear=True, offset=2.0, increment=2.0, size=10)
+        >>> assert (c1 == c2).all()
         """
 
         super().__init__(*args, **kwargs)

@@ -45,26 +45,14 @@ typequaternion = np.dtype(np.quaternion)
 # ======================================================================================================================
 
 class NDComplexArray(NDArray):
-    """
-    This class provides the complex/quaternion related functionalities to |NDArray|.
-
-    It is a subclass bringing complex and quaternion related attributes.
-
-    See Also
-    --------
-    NDDataset : Object which subclass |NDArray| with the addition of coordinates.
-
-    Examples
-    --------
-    >>> from spectrochempy import NDComplexArray
-    >>> myarray = NDComplexArray([1. + 0j, 2., 3.])
-    >>> myarray
-    NDComplexArray: [complex128] unitless (size: 3)
-    """
 
     # ..................................................................................................................
     def __init__(self, data=None, **kwargs):
         """
+        This class provides the complex/quaternion related functionalities to |NDArray|.
+
+        It is a subclass bringing complex and quaternion related attributes.
+
         Parameters
         ----------
         data : array of complex number or quaternion.
@@ -120,6 +108,17 @@ class NDComplexArray(NDArray):
             A string to add to the object history.
         copy : bool, optional
             Perform a copy of the passed object. Default is False.
+
+        See Also
+        --------
+        NDDataset : Object which subclass |NDArray| with the addition of coordinates.
+
+        Examples
+        --------
+        >>> from spectrochempy import NDComplexArray
+        >>> myarray = NDComplexArray([1. + 0j, 2., 3.])
+        >>> myarray
+        NDComplexArray: [complex128] unitless (size: 3)
         """
 
         super().__init__(data=data, **kwargs)

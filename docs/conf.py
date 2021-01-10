@@ -573,7 +573,7 @@ numpydoc_show_class_members = False
 numpydoc_use_plots = True
 
 # %%
-autoclass_content = 'both'  # Both the class’ and the __init__ method’s docstring are concatenated and inserted.
+autoclass_content = 'init'  # Both the class’ and the __init__ method’s docstring are concatenated and inserted.
 
 # %%
 autodoc_default_flags = ['autosummary']

@@ -26,7 +26,6 @@
    NDDataset.argmax
    NDDataset.argmin
    NDDataset.around
-   NDDataset.asfortranarray
    NDDataset.astype
    NDDataset.autosub
    NDDataset.class_own_trait_events
@@ -121,7 +120,6 @@
    NDDataset.swapaxes
    NDDataset.take
    NDDataset.to
-   NDDataset.to_panel
    NDDataset.trait_events
    NDDataset.trait_metadata
    NDDataset.trait_names
@@ -242,7 +240,6 @@
    NDDataset.swapaxes
    NDDataset.take
    NDDataset.to
-   NDDataset.to_panel
    NDDataset.trait_events
    NDDataset.trait_metadata
    NDDataset.trait_names

@@ -14,5 +14,5 @@ There are two ways to do this:
 * Use the discussion forums and attach your files, which we will take into account
   after revisions, mentioning of course the origin and the possible copyright.
 
-* Create a pull request: For this operation, if you are a newcomer with the `git` version system, please refer to the
-:ref:`develguide`  section .
+* Create a pull request: For this operation, if you are a newcomer with the `git` version system,
+  please refer to the :ref:`develguide`  section .

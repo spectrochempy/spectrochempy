@@ -1,4 +1,4 @@
-.. __contributing.bugs_report:
+.. _contributing.bugs_report:
 
 Reporting Issues
 =================

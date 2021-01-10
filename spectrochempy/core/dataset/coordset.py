@@ -36,43 +36,7 @@ from spectrochempy.utils import is_sequence, colored_output, convert_to_html
 # CoordSet
 # ======================================================================================================================
 class CoordSet(HasTraits):
-    """
-    A collection of Coord objects for a NDArray object with validation.
 
-    This object is an iterable containing a collection of Coord objects.
-
-    See Also
-    --------
-    Coord : Explicit coordinates object.
-    LinearCoord : Implicit coordinates object.
-    NDDataset: The main object of SpectroChempy which makes use of CoordSet.
-
-    Examples
-    --------
-    >>> from spectrochempy import Coord, CoordSet
-
-    Define 4 coordinates, with two for the same dimension
-
-    >>> coord0 = Coord.linspace(10., 100., 5, units='m', title='distance')
-    >>> coord1 = Coord.linspace(20., 25., 4, units='K', title='temperature')
-    >>> coord1b = Coord.linspace(1., 10., 4, units='millitesla', title='magnetic field')
-    >>> coord2 = Coord.linspace(0., 1000., 6, units='hour', title='elapsed time')
-
-    Now create a coordset
-
-    >>> cs = CoordSet(t=coord0, u=coord2, v=[coord1, coord1b])
-
-    Display some coordinates
-
-    >>> cs.u
-    Coord: [float64] hr (size: 6)
-
-    >>> cs.v
-    CoordSet: [_1:temperature, _2:magnetic field]
-
-    >>> cs.v_1
-    Coord: [float64] K (size: 4)
-    """
     # Hidden attributes containing the collection of objects
     _id = Unicode()
     _coords = List(allow_none=True)
@@ -97,15 +61,24 @@ class CoordSet(HasTraits):
     # ..................................................................................................................
     def __init__(self, *coords, **kwargs):
         """
+        A collection of Coord objects for a NDArray object with validation.
+
+        This object is an iterable containing a collection of Coord objects.
+
         Parameters
         ----------
-        coords : |NDarray|, |NDArray| subclass or |CoordSet| sequence of objects.
+        *coords : |NDarray|, |NDArray| subclass or |CoordSet| sequence of objects.
             If an instance of CoordSet is found, instead of an array, this means
             that all coordinates in this coords describe the same axis.
             It is assumed that the coordinates are passed in the order of the
             dimensions of a nD numpy array (
             `row-major <https://docs.scipy.org/doc/numpy-1.14.1/glossary.html#term-row-major>`_
             order), i.e., for a 3d object : 'z', 'y', 'x'.
+        **kwargs: dict
+            See other parameters.
+
+        Other Parameters
+        ----------------
         x : |NDarray|, |NDArray| subclass or |CoordSet|
             A single coordinate associated to the 'x'-dimension.
             If a coord was already passed in the argument, this will overwrite
@@ -115,6 +88,38 @@ class CoordSet(HasTraits):
             Same as `x` for the others dimensions.
         dims : list of string, optional
             Names of the dims to use corresponding to the coordinates. If not given, standard names are used: x, y, ...
+
+        See Also
+        --------
+        Coord : Explicit coordinates object.
+        LinearCoord : Implicit coordinates object.
+        NDDataset: The main object of SpectroChempy which makes use of CoordSet.
+
+        Examples
+        --------
+        >>> from spectrochempy import Coord, CoordSet
+
+        Define 4 coordinates, with two for the same dimension
+
+        >>> coord0 = Coord.linspace(10., 100., 5, units='m', title='distance')
+        >>> coord1 = Coord.linspace(20., 25., 4, units='K', title='temperature')
+        >>> coord1b = Coord.linspace(1., 10., 4, units='millitesla', title='magnetic field')
+        >>> coord2 = Coord.linspace(0., 1000., 6, units='hour', title='elapsed time')
+
+        Now create a coordset
+
+        >>> cs = CoordSet(t=coord0, u=coord2, v=[coord1, coord1b])
+
+        Display some coordinates
+
+        >>> cs.u
+        Coord: [float64] hr (size: 6)
+
+        >>> cs.v
+        CoordSet: [_1:temperature, _2:magnetic field]
+
+        >>> cs.v_1
+        Coord: [float64] K (size: 4)
         """
 
         self._copy = kwargs.pop('copy', True)

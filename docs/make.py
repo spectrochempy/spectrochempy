@@ -54,8 +54,7 @@ warnings.filterwarnings(action='ignore', category=RemovedInSphinx40Warning)
 
 # CONSTANT
 PROJECTNAME = "spectrochempy"
-owner = environ.get('ANACONDA_USER', 'spectrochempy')
-REPO_URI = f"{owner}/{PROJECTNAME}"
+REPO_URI = f"spectrochempy/{PROJECTNAME}"
 API_GITHUB_URL = "https://api.github.com"
 URL_SCPY = "spectrochempy.github.io/spectrochempy"
 
@@ -125,7 +124,6 @@ class BuildDocumentation(object):
         parser.add_argument("--api", help="execute a full regeneration of the api", action="store_true")
         parser.add_argument("-R", "--release", help="release the current version documentation on website",
                             action="store_true")
-        parser.add_argument("-C", "--changelogs", help="update changelogs using the github issues", action="store_true")
         parser.add_argument("--all", help="Build all docs", action="store_true")
 
         args = parser.parse_args()
@@ -136,8 +134,6 @@ class BuildDocumentation(object):
 
         self.regenerate_api = args.api
 
-        if args.changelogs:
-            self.make_changelog()
         if args.clean and args.html:
             self.clean('html')
         if args.clean and args.pdf:
@@ -153,7 +149,6 @@ class BuildDocumentation(object):
             self.delnb()
         if args.all:
             self.delnb()
-            self.make_changelog()
             self.make_docs('html', clean=True)
             self.make_docs('latex', clean=True)
             self.make_pdf()
@@ -175,6 +170,8 @@ class BuildDocumentation(object):
 
         # update modified notebooks
         self.sync_notebooks()
+
+        self.make_changelog()
 
         if builder not in ['html', 'latex']:
             raise ValueError('Not a supported builder: Must be "html" or "latex"')
@@ -369,76 +366,14 @@ class BuildDocumentation(object):
 
     # ..................................................................................................................
     def make_changelog(self):
-        # Utility to update changelog (using the GITHUB API)
 
         print(f'\n{"-" * 80}\nMake `changelogs`\n{"-" * 80}')
-        print("Getting latest release tag")
-        ALL = f'{API_GITHUB_URL}/repos/{REPO_URI}/releases'
-        tag = json.loads(requests.get(ALL).text)[0]['tag_name']
-
-        milestone = self.doc_version
-
-        if milestone == 'latest':
-            # we build the latest
-            tag = tag.split('.')
-            tag3 = '.' + tag[3] if len(tag) == 4 else ''
-            milestone = f"{tag[0]}.{tag[1]}.{int(tag[2])}{tag3}"
-        else:
-            milestone = tag
-
-        def get(milestone, label):
-            print("Getting list of issues with label ", label)
-            issues = API_GITHUB_URL + "/search/issues?q=repo:" + REPO_URI
-            issues += "+milestone:" + milestone + "+is:closed"
-            if label != "pr":
-                issues += "+label:" + label
-            else:
-                issues += "+type:pr"
-            return json.loads(requests.get(issues).text)['items']
-
-        # Create a versionlog file for the current target
-        prs = get(milestone, "pr")
-        bugs = get(milestone, "bug")
-        features = get(milestone, "enhancement")
-        tasks = get(milestone, "task")
-
-        with open(TEMPLATES / 'versionlog.rst', 'r') as f:
-            template = Template(f.read())
-        out = template.render(target=milestone, prs=prs, bugs=bugs, features=features, tasks=tasks)
-
-        change = DOCS / 'versionlogs' / f'versionlog.{milestone}.rst'
-        with open(change, 'w') as f:
-            f.write(out)
-            print(f'version.{milestone}.log written to:\n{change}')
-
-        # make the full version history
-        lhist = sorted(DOCS.glob('versionlogs/*.rst'))
-        lhist.reverse()
-        history = ""
-        for filename in lhist:
-            if filename.stem.replace('versionlog.', '') > milestone:
-                continue  # do not take into account future version for change log - obviously!
-            with open(filename, 'r') as f:
-                history += "\n\n"
-                nh = f.read().strip()
-                # vc = ".".join(filename.split('.')[1:4])
-                nh = nh.replace(':orphan:', '')
-                history += nh
-        history += '\n'
-
-        with open(TEMPLATES / 'changelog.rst', 'r') as f:
-            template = Template(f.read())
-        out = template.render(history=history)
 
         outfile = REFERENCE / 'changelog.rst'
 
-        with open(outfile, 'w') as f:
-            f.write(out)
-            print(f'`Complete what\'s new` log written to:\n{outfile}\n')
+        sh.pandoc(PROJECT / 'CHANGELOG.md', '-f', 'markdown', '-t', 'rst', '-o', outfile)
 
-        sh.pandoc(outfile, '-f', 'rst', '-t', 'markdown', '-o', PROJECT / 'CHANGELOG.md')
-
-        return
+        print(f'`Complete what\'s new` log written to:\n{outfile}\n')
 
 
 # %%
