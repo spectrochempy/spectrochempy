@@ -23,7 +23,7 @@ from numba import jit
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
 
-from spectrochempy.core.dataset.coordrange import CoordRange
+from spectrochempy.core.dataset.coordrange import trim_ranges
 
 
 def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False, inplace=False):
@@ -116,7 +116,7 @@ def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False
     # must be float to be considered as frequency for instance
 
     coords = new.coordset[-1]
-    xrange = CoordRange(*ranges, reversed=coords.reversed)
+    xrange = trim_ranges(*ranges, reversed=coords.reversed)
 
     s = []
     r = []

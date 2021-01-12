@@ -5,7 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 """
-This module implements three classes |Coord|, |CoordSet| and |CoordRange|.
+This module implements class |CoordSet|.
 """
 
 __all__ = ['CoordSet']

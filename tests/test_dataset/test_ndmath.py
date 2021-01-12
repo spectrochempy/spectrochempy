@@ -580,7 +580,9 @@ def test_nddataset_divide_with_numpy_array():
 
 # first operand has units km, second has units m
 @pytest.mark.parametrize(('operation', 'result_units'),
-                         [('__add__', ur.km), ('__sub__', ur.km), ('__mul__', ur.km * ur.m),
+                         [('__add__', ur.km),
+                          ('__sub__', ur.km),
+                          ('__mul__', ur.km * ur.m),
                           ('__truediv__', ur.km / ur.m)])
 def test_ndmath_unit_conversion_operators(operation, result_units):
     in_km = NDDataset(np.array([1, 1]), units=ur.km)
@@ -617,8 +619,8 @@ def test_simple_arithmetic_on_full_dataset():
     dataset - dataset[0]  # suppress the first spectrum to all other spectra in the series
 
 
-def test_array_creation():
-    from spectrochempy import Coord, NDDataset, empty_like, full_like
+def test_array_creation_like():
+    from spectrochempy import Coord, NDDataset
 
     # from a list
     x = [1,2,3]
@@ -652,16 +654,48 @@ def test_array_creation():
     assert ds.implements('NDDataset')
     assert ds.units == ur.km
 
-
-
-    ds1 = full_like(ds, np.nan, dtype=np.double, units='m')
+    ds1 = scp.full_like(ds, np.nan, dtype=np.double, units='m')
     assert ds1.units == Unit('m')
 
-    ds2 = empty_like(ds, dtype=np.double, units='s')
-    assert str(ds2) == 'NDDataset: [float64] s (size: 6)'
+    # change of units is forced
+    ds2 = scp.full_like(ds, 2, dtype=np.double, units='s')
+    assert ds2.units == ur.s
 
-    c1 = Coord.full((6,), 0.1)
-    assert c1.size == 6
+    # other like creation functions
+    nd = scp.empty_like(ds, dtype=np.double, units='m')
+    assert str(nd) == 'NDDataset: [float64] m (size: 3)'
+    assert nd.dtype == np.dtype(np.double)
+
+    nd = scp.zeros_like(ds, dtype=np.double, units='m')
+    assert str(nd) == 'NDDataset: [float64] m (size: 3)'
+    assert np.all(nd.data == np.zeros((3,)))
+
+    nd = scp.ones_like(ds, dtype=np.double, units='m')
+    assert str(nd) == 'NDDataset: [float64] m (size: 3)'
+    assert np.all(nd.data == np.ones((3,)))
+
+
+def test_array_creation():
+
+    ds = NDDataset.ones((6,))
+    ds = scp.full((6,), 0.1)
+    assert ds.size == 6
+    assert str(ds) == 'NDDataset: [float64] unitless (size: 6)'
+
+    ds = Coord.full((6,), 0.1)
+    assert ds.size == 6
+    assert str(ds) == 'Coord: [float64] unitless (size: 6)'
+
+    ds = Coord.zeros((6,), units='km')
+    assert ds.size == 6
+    assert str(ds) == 'Coord: [float64] km (size: 6)'
+
+    ds = NDDataset.ones((6,), units='absorbance', dtype='complex128')
+    assert ds.size == 6
+    assert str(ds) == 'NDDataset: [complex128] a.u. (size: 6)'
+    assert ds[0].data == 1. + 0j
+
+    ######
 
     c2 = Coord.linspace(1, 20, 200, units='m', name='mycoord')
     assert c2.name == 'mycoord'
@@ -675,19 +709,15 @@ def test_array_creation():
     assert c3[-1].data == 20
     assert c3[0].values == Quantity(1, 's')
 
-    # df = full_like(ds1, dtype=np.complex128, fill_value=2.5)  # assert df.units == ds1.units  #  # df = zeros_like(
-    # ds1, dtype=np.complex128)  # assert df.units == ds1.units  #  # df = ones_like(ds1, dtype=np.complex128)  #  #
-    # assert df.units == ds1.units  #  # df = empty_like(ds1, dtype=np.complex128)  # assert df.units == ds1.units  #
-    # df = zeros((2, 3), dtype='int64', units='km')  # assert df.shape == (2, 3)  # assert df.dtype == 'int64'  #  #
-    # assert df.units == ur.km  #  # df = ones((2, 3), dtype='complex128', units='km')  # assert df.shape == (2,
-    # 3)  # assert df.dtype == 'complex128'  # assert df.units == ur.km  #  # df = full((2, 3), 100, dtype='float32',
-    # units='km')  # assert df.shape == (2, 3)  # assert df.dtype == 'float32'  # assert df.units == ur.km  #  # df =
-    # eye(3, k=0, dtype='float64', units='eV')  # assert df.shape == (3, 3)  # assert df.dtype == 'float64'  # assert
-    # df.units == ur.eV  #  # assert df[0, 0].data.squeeze() == 1  # assert df[0, 1].data.squeeze() == 0  #  # df =
-    # eye(3, k=1, dtype='float64', units='m')  # assert df.shape == (3, 3)  # assert df.dtype == 'float64'  # assert
-    # df.units == ur.m  #  # assert df[0, 0].data.squeeze() == 0  # assert df[0, 1].data.squeeze() == 1  #  # df =  #
-    # identity(2, units='m')  # df.units = ur.m  # assert np.all(df.data == np.array([[1., 0.], [0., 1.]]))
+    ds1 = scp.NDDataset.eye(2, dtype=int)
+    assert str(ds1) == 'NDDataset: [int64] unitless (shape: (y:2, x:2))'
+    ds = scp.eye(3, k=1, units='km')
+    assert (ds.data == np.eye(3, k=1)).all()
+    assert ds.units == ur.km
 
+    ds = scp.identity(3, units='km')
+    assert (ds.data == np.identity(3,)).all()
+    assert ds.units == ur.km
 
 def test_api_methods():
     ref = NDDataset(np.diag((3, 3.4, 2.3)), units='m', title='something')

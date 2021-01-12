@@ -243,7 +243,7 @@ class NDArray(HasTraits):
         self._modified = self._date
 
         # call to the super class
-        super().__init__(**kwargs)
+        # super().__init__(**kwargs)
 
     # ------------------------------------------------------------------------------------------------------------------
     # special methods

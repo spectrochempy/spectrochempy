@@ -677,7 +677,7 @@ class NDComplexArray(NDArray):
         if data.dtype in TYPE_COMPLEX:
             return data.astype(np.complex128)
 
-        if data.shape[1] % 2 != 0:
+        if data.shape[-1] % 2 != 0:
             raise ValueError("An array of real data to be transformed to complex must have an even number of columns!.")
 
         data = data.astype(np.float64)

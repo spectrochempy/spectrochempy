@@ -21,7 +21,7 @@ from traitlets import Int, Instance, HasTraits, Float, Unicode, Tuple, List
 from matplotlib.widgets import SpanSelector
 import matplotlib.pyplot as plt
 
-from ..dataset.coordrange import CoordRange
+from ..dataset.coordrange import trim_ranges
 from ..plotters.multiplot import multiplot
 from ..dataset.nddataset import NDDataset
 from ...utils import TYPE_INTEGER, TYPE_FLOAT
@@ -120,7 +120,7 @@ class BaselineCorrection(HasTraits):
 
         self.ranges = [[x[0], x[2]], [x[-3], x[-1]]]
         self._extendranges(*ranges, **kwargs)
-        self.ranges = CoordRange(*self.ranges)
+        self.ranges = trim_ranges(*self.ranges)
         self.spc = []
 
     # ..................................................................................................................
@@ -223,7 +223,7 @@ class BaselineCorrection(HasTraits):
         baseline = np.zeros_like(new)
 
         self._extendranges(*ranges, **kwargs)
-        self.ranges = ranges = CoordRange(*self.ranges)
+        self.ranges = ranges = trim_ranges(*self.ranges)
 
         # Extract: Sbase: the matrix of data corresponding to ranges
         #          xbase: the xaxis values corresponding to ranges
@@ -312,7 +312,7 @@ class BaselineCorrection(HasTraits):
             for sp in self.sps:
                 sp.remove()
         self.sps = []
-        self.ranges = list(CoordRange(*self.ranges))
+        self.ranges = list(trim_ranges(*self.ranges))
         for x in self.ranges:
             x.sort()
             sp = ax.axvspan(x[0], x[1], facecolor='#2ca02c', alpha=0.5)
@@ -346,7 +346,7 @@ class BaselineCorrection(HasTraits):
         ax2 = axes['axe21']
 
         self._extendranges(*ranges, **kwargs)
-        self.ranges = list(CoordRange(*self.ranges))
+        self.ranges = list(trim_ranges(*self.ranges))
         self.show_regions(ax1)
 
         def show_basecor(ax2):
