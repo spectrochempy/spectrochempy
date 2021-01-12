@@ -19,7 +19,6 @@ from numpy.ma.core import masked as MASKED, nomask as NOMASK, MaskedArray, Maske
 # import util files content
 # ----------------------------------------------------------------------------------------------------------------------
 from .arrays import *
-from .configurable import *
 from .exceptions import *
 from .fake import *
 from .file import *
@@ -30,4 +29,5 @@ from .print import *
 from .packages import *
 from .plots import *
 from .system import *
+from .traitlets import *
 from .zip import *

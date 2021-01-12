@@ -27,7 +27,6 @@ CAPITALIZATION_EXCEPTIONS = {
         "NDArray",
         "Coord",
         "CoordSet",
-        "CoordRange",
         "_coordset",
         "Quantity",
         "Units",

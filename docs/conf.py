@@ -127,7 +127,7 @@ exclude_patterns = []
 exclude_patterns.append('_templates')
 exclude_patterns.append('_static')
 exclude_patterns.append('**.ipynb_checkpoints')
-exclude_patterns.append('gen_modules')
+exclude_patterns.append('gallery')
 exclude_patterns.append('~temp')
 
 # %%
@@ -186,8 +186,6 @@ rst_epilog = """
 .. |NDPanel| replace:: :class:`~spectrochempy.core.dataset.ndpanel.NDPanel`
 
 .. |Coord| replace:: :class:`~spectrochempy.core.dataset.ndcoord.Coord`
-
-.. |CoordRange| replace:: :class:`~spectrochempy.core.dataset.ndcoordrange.CoordRange`
 
 .. |CoordSet| replace:: :class:`~spectrochempy.core.dataset.ndcoordset.CoordSet`
 
@@ -573,7 +571,7 @@ numpydoc_show_class_members = False
 numpydoc_use_plots = True
 
 # %%
-autoclass_content = 'init'  # Both the class’ and the __init__ method’s docstring are concatenated and inserted.
+autoclass_content = 'both'  # Both the class’ and the __init__ method’s docstring are concatenated and inserted.
 
 # %%
 autodoc_default_flags = ['autosummary']
@@ -583,7 +581,7 @@ exclusions = (
         'with_traceback', 'with_traceback', 'observe', 'unobserve', 'observe',
         'cross_validation_lock', 'unobserve_all', 'class_config_rst_doc',
         'class_config_section', 'class_get_help', 'class_print_help',
-        'section_names', 'update_config', 'clear_instance',
+        'section_names', 'update_config', 'clear_instance', "notify_change",
         'document_config_options', 'flatten_flags', 'generate_config_file',
         'initialize_subcommand', 'initialized', 'instance',
         'json_config_loader_class', 'launch_instance', 'setup_instance',
@@ -599,8 +597,26 @@ def autodoc_skip_member(app, what, name, obj, skip, options):
     exclude = name in exclusions or 'trait' in name or name.startswith('_')  # or not doc
     return skip or exclude
 
+def shorter_signature(app, what, name, obj, options, signature, return_annotation):
+    """Prevent displaying self in signture."""
+    if what not in ('function', 'method', 'class') or signature is None:
+        return
+
+    import re
+    new_sig = signature
+    if inspect.isfunction(obj) or inspect.isclass(obj) or inspect.ismethod(obj):
+        sig_obj = obj if not inspect.isclass(obj) else obj.__init__
+        sig_re = '\((self|cls)?,?\s*(.*?)\)\:'
+        try:
+            new_sig = ' '.join(re.search(sig_re, inspect.getsource(sig_obj), re.S).group(2).replace('\n', '').split())
+        except Exception as e:
+            print(sig_obj)
+            raise e
+        new_sig = '(' + new_sig + ')'
+    return new_sig, return_annotation
 
 # %%
 def setup(app):
     app.connect('autodoc-skip-member', autodoc_skip_member)
+    app.connect('autodoc-process-signature', shorter_signature)
     app.add_stylesheet("theme_override.css")  # also can be a full URL

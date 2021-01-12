@@ -7,27 +7,27 @@
 
 from traitlets import TraitError, HasTraits
 
-from spectrochempy.core.dataset.coordrange import CoordRange, Range
+from spectrochempy.core.dataset.coordrange import trim_ranges
+from spectrochempy.utils import Range
 from spectrochempy.utils.testing import raises
 
 
 # ======================================================================================================================
-# CoordRange
+# trim_ranges
 # ======================================================================================================================
 
-def test_coordrange():
-    r = CoordRange()
+def test_trim_ranges():
+    r = trim_ranges()
     assert r == []
 
-    r = CoordRange(3, 2)
+    r = trim_ranges(3, 2)
     assert r[0] == [2, 3]
 
-    r = CoordRange((3, 2), (4.4, 10), (4, 5))
+    r = trim_ranges((3, 2), (4.4, 10), (4, 5))
     assert r[-1] == [4, 10]
     assert r == [[2, 3], [4, 10]]
 
-    r = CoordRange((3, 2), (4.4, 10), (4, 5),
-                   reversed=True)
+    r = trim_ranges((3, 2), (4.4, 10), (4, 5), reversed=True)
     assert r == [[10, 4], [3, 2]]
 
 
