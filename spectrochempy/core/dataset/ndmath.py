@@ -11,30 +11,20 @@ This module implements the |NDMath| class.
 __all__ = ['NDMath', ]
 __dataset_methods__ = []
 
-# ======================================================================================================================
-# Standard python imports
-# ======================================================================================================================
 import copy as cpy
 import functools
 import inspect
-import decorator
 import sys
 import operator
 from warnings import catch_warnings
 
-# ======================================================================================================================
-# third-party imports
-# ======================================================================================================================
 import numpy as np
 from orderedset import OrderedSet
 from quaternion import as_float_array
 
-# ======================================================================================================================
-# Local imports
-# ======================================================================================================================
 from spectrochempy.units.units import ur, Quantity, DimensionalityError
 from spectrochempy.core.dataset.ndarray import NDArray
-from spectrochempy.utils import MaskedArray, NOMASK, make_func_from, is_sequence, TYPE_COMPLEX
+from spectrochempy.utils import MaskedArray, NOMASK, TYPE_COMPLEX
 from spectrochempy.core import warning_, error_
 from spectrochempy.utils.testing import assert_dataset_equal
 from spectrochempy.utils.exceptions import CoordinateMismatchError
@@ -43,56 +33,19 @@ from spectrochempy.utils.exceptions import CoordinateMismatchError
 # ======================================================================================================================
 # utilities
 # ======================================================================================================================
-thismodule = sys.modules[__name__]
 
+def _reduce_method(method):
+    method.reduce = True
+    return method
 
-class _create_like_method(object):
-    # This decorator is designed as a replacement of @classmethod.
-    # It accepts instance or class
+class _from_numpy_method(object):
+    # Decorator
+    # ---------
+    # This decorator assumes that the signature starts always by : (cls, ...)
+    # the second positional only argument can be `dataset` - in this case this mean that the function apply on a
+    # dataset
 
-    def __init__(self, method):
-        self.method = method
-
-    def __get__(self, instance, cls):
-
-        @functools.wraps(self.method)
-        def func(dataset, *args, **kwargs):
-            from spectrochempy.core.dataset.nddataset import NDDataset
-
-            args = list(args)
-            if instance is not None:
-                obj = instance
-                args = [dataset] + args
-
-            else:
-                try:
-                    obj = cls(dataset)
-                except TypeError:
-                    if issubclass(cls, NDMath):
-                        # Probably a call from the API !
-                        # We return a NDDataset object
-                        obj = NDDataset(dataset)
-
-            # replace some of the attribute
-            for k, v in list(kwargs.items())[:]:
-                if k in dir(obj) and k != 'units':
-                    setattr(obj, k, v)
-                    del kwargs[k]
-                if k == 'units':
-                    obj.ito(v, force=True)
-                    del kwargs[k]
-
-            method = self.method.__name__
-            obj._data = getattr(np, method)(obj._data, *args, **kwargs)
-            return obj
-
-        return func
-        #return decorator.decorate(self.method, func)
-
-
-class _create_method(object):
-    # This decorator is designed as a replacement of @classmethod.
-    # It accepts instance or class
+    reduce = False
 
     def __init__(self, method):
         self.method = method
@@ -104,33 +57,167 @@ class _create_method(object):
 
             from spectrochempy.core.dataset.nddataset import NDDataset
             from spectrochempy.core.dataset.coord import Coord
-
-            if instance is not None:
-                klass = type(instance)
-
-            elif issubclass(cls, (NDDataset, Coord)):
-                klass = cls
-
-            else:
-                # Probably a call from the API !
-                # We return a NDDataset object
-                klass = NDDataset
-
-            kw = {}
-            keys = dir(klass())
-            for k in list(kwargs.keys())[:]:
-                if k not in keys or k=='dtype':
-                   kw[k] = kwargs[k]
-                   del kwargs[k]
+            from spectrochempy.core.dataset.coordset import CoordSet
 
             method = self.method.__name__
-            obj = klass(getattr(np, method)(*args, **kw), **kwargs)
-            return obj
+            pars = inspect.signature(self.method).parameters
+
+            args = list(args)
+            klass = NDDataset  # by default
+            new = klass()
+
+            if 'dataset' not in pars:
+                if instance is not None:
+                    klass = type(instance)
+                elif issubclass(cls, (NDDataset, Coord)):
+                    klass = cls
+                else:
+                    # Probably a call from the API !
+                    # We return a NDDataset class constructor
+                    klass = NDDataset
+            else:
+                # determine the input object
+                if instance is not None:
+                    # the call is made as an attributes of the instance
+                    # instance.method(...)
+                    new = instance.copy()
+                    args.insert(0, new)
+                else:
+                    dataset = cpy.copy(args[0])
+                    try:
+                        # call as a classmethod
+                        # class.method(dataset, ...)
+                        new = cls(dataset)
+                    except TypeError:
+                        if issubclass(cls, NDMath):
+                            # Probably a call from the API !
+                            # spc.method(dataset, ...)
+                            new = dataset
+                            if not isinstance(new, NDArray):
+                                # we have only an array-like dataset
+                                # make a NDDataset object from it
+                                new = NDDataset(dataset)
+
+            argpos = []
+            dim = None
+            for par in pars.values():
+                if par.name in ['self', 'cls', 'kwargs']: #  or (par.name == 'dataset' and instance is not None):
+                    continue
+                argpos.append(args.pop(0) if args else kwargs.pop(par.name, par.default))
+                if par.name == 'dim':
+                    dim = argpos[-1]
+                    axis, dim = new.get_axis(dim, allows_none=True)   # np function require an axis not a dim
+                    argpos[-1] = axis
+
+            # in principle args should be void at this point
+            assert not args
+
+            # -----------------------------
+            # Creation from scratch methods
+            # -----------------------------
+
+            if 'dataset' not in pars:
+                # separate object keyword from other specific to the function
+                kw = {}
+                keys = dir(klass())
+                for k in list(kwargs.keys())[:]:
+                    if k not in keys:
+                        kw[k] = kwargs[k]
+                        del kwargs[k]
+                kwargs['kw'] = kw
+
+                # now call the np function and make the object
+                new = self.method(klass, *argpos, **kwargs)
+                if new.implements('NDDataset'):
+                    new.history = f'Created using method : {method}'   # (args:{argpos}, kwargs:{kwargs})'
+                return new
+
+            # -----------------------------
+            # Create from an existing array
+            # ------------------------------
+
+            # Replace some of the attribute according to the kwargs
+            for k, v in list(kwargs.items())[:]:
+                if k != 'units':
+                    setattr(new, k, v)
+                    del kwargs[k]
+                else:
+                    new.ito(v, force=True)
+                    del kwargs[k]
+
+            # case of creation like method
+            # ............................
+
+            if not self.reduce:   #  _like' in method:
+
+                new = self.method(new, *argpos)
+                if new.implements('NDDataset'):
+                    new.history = f'Created using method : {method}'  # (args:{argpos}, kwargs:{kw})'
+                return new
+
+            else:
+
+                # reduce methods
+                # ...............
+
+                keepunits = kwargs.pop('keepunits', True)
+
+                # particular case of argmax and argmin that only return indexes
+                if method in ['argmin', 'argmax']:
+                    idx = getattr(np, method)(new.real.masked_data, arg)
+                    idx = np.unravel_index(idx, new.shape)
+                    if new.ndim == 1:
+                        idx = idx[0]
+                    return idx
+
+                # particular case of max and min
+                if axis is None and method in ['max', 'amax', 'min', 'amin']:
+                    if method.startswith('a'):
+                        method = method[1:]
+                    idx = getattr(np, "arg" + method)(new.real.masked_data)
+                    idx = np.unravel_index(idx, new.shape)
+                    new = new[idx]
+
+                else:
+                    # apply the numpy operator on the masked data
+                    new = self.method(new, *argpos)
+
+                    if not isinstance(new, (NDDataset, Coord)):
+                        # if a numpy array or a scalar is returned after reduction
+                        return new
+
+                    # particular case of functions that returns Dataset with no coordinates
+                    if axis is None and method in ['sum', 'trapz', 'prod', 'mean', 'var', 'std']:
+                        # delete all coordinates
+                        new._coordset = None
+
+                    # Here we must reduce the corresponding coordinates
+                    elif axis is not None:
+                        # set the new dims
+                        dim = new._dims[axis]
+                        if method in ['diagonal']:
+                            # the specified dim it the coordinates to keep
+                            new._dims = [dim]
+                        else:
+                            # the specifed coordinate is in princple the one that is reduced
+                            del new._dims[axis]
+
+                        # set the new coordinates
+                        if new._coordset:
+                            idx = new._coordset.names.index(dim)
+
+                            if method in ['diagonal']:
+                                new._coordset = CoordSet({dim:new._coordset.coords[idx][:new.size]})
+                            else:
+                                del new._coordset.coords[idx]
+
+                new.history = f'Dataset resulting from application of `{method}` method'
+                return new
 
         return func
 
 
-def get_name(x):
+def _get_name(x):
     return str(x.name if hasattr(x, 'name') else x)
 
 
@@ -198,7 +285,8 @@ logical_not(x [, out, where, casting, …])       Compute the truth value of NOT
 signbit(x, [, out, where, casting, order, …])   Returns element-wise True where signbit is set (less than zero).
 """
 
-def unary_ufuncs():
+
+def _unary_ufuncs():
     liste = unary_str.split("\n")
     ufuncs = {}
     for item in liste:
@@ -208,6 +296,7 @@ def unary_ufuncs():
             string = item[1].split(')')
             ufuncs[item[0]] = f'({string[0]}) -> {string[1].strip()}'
     return ufuncs
+
 
 binary_str = """
 
@@ -226,7 +315,7 @@ copysign(x1, x2 [, out, where, casting, …])    Change the sign of x1 to that o
 """
 
 
-def binary_ufuncs():
+def _binary_ufuncs():
     liste = binary_str.split("\n")
     ufuncs = {}
     for item in liste:
@@ -252,7 +341,7 @@ equal(x1, x2 [, out, where, casting, …])           Return (x1 == x2) element-w
 """
 
 
-def comp_ufuncs():
+def _comp_ufuncs():
     liste = comp_str.split("\n")
     ufuncs = {}
     for item in liste:
@@ -274,7 +363,7 @@ logical_xor(x1, x2 [, out, where, …])          Compute the truth value of x1 X
 """
 
 
-def logical_binary_ufuncs():
+def _logical_binary_ufuncs():
     liste = logical_binary_str.split("\n")
     ufuncs = {}
     for item in liste:
@@ -422,6 +511,7 @@ class NDMath(object):
     # ------------------------------------------------------------------------------------------------------------------
 
     # ..................................................................................................................
+    @_from_numpy_method
     def abs(self, inplace=False):
         """
         Returns the absolute value of a complex array.
@@ -430,7 +520,7 @@ class NDMath(object):
         ----------
         inplace : bool, optional, default=False
             Flag to say that the method return a new object (default)
-            or not (inplace=True)
+            or not (inplace=True).
 
         Returns
         -------
@@ -453,6 +543,253 @@ class NDMath(object):
         return new
 
     absolute = abs
+
+    # ..................................................................................................................
+    @_reduce_method
+    @_from_numpy_method
+    def all(cls, dataset, dim=None, keepdims=False):
+        """
+        Test whether all array elements along a given axis evaluate to True.
+
+        Parameters
+        ----------
+        dataset : array_like
+            Input array or object that can be converted to an array.
+        dim : None or int or str, optional
+            Axis or axes along which a logical AND reduction is performed.
+            The default (``axis=None``) is to perform a logical AND over all
+            the dimensions of the input array. `axis` may be negative, in
+            which case it counts from the last to the first axis.
+        keepdims : bool, optional
+            If this is set to True, the axes which are reduced are left
+            in the result as dimensions with size one. With this option,
+            the result will broadcast correctly against the input array.
+            If the default value is passed, then `keepdims` will not be
+            passed through to the `all` method of sub-classes of
+            `ndarray`, however any non-default value will be.  If the
+            sub-class' method does not implement `keepdims` any
+            exceptions will be raised.
+
+        Returns
+        -------
+        all
+            A new boolean or array is returned unless `out` is specified,
+            in which case a reference to `out` is returned.
+
+        See Also
+        --------
+        any : Test whether any element along a given axis evaluates to True.
+
+        Notes
+        -----
+        Not a Number (NaN), positive infinity and negative infinity
+        evaluate to `True` because these are not equal to zero.
+        """
+        data = dataset
+        if hasattr(dataset, 'implements') and dataset.implements() in ['NDDataset', 'Coord']:
+            data = dataset.data
+        data = np.all(data, dim, keepdims=False)
+        return data
+
+    # ..................................................................................................................
+    @_reduce_method
+    @_from_numpy_method
+    def amax(self, a, dim=None, keepdims=None, initial=None , where=None, **kwargs):
+        """
+        Return the maximum of the dataset or maxima along given dimensions.
+
+        Parameters
+        ----------
+        dataset : array_like
+            Input array or object that can be converted to an array.
+        dim : None or int or dimension name or tuple of int or dimensions, optional
+            dimension or dimensions along which to operate.  By default, flattened input is used.
+            If this is a tuple, the maximum is selected over multiple dimensions,
+            instead of a single dimension or all the dimensions as before.
+        out : nddataset, optional
+            Alternative output dataset in which to place the result.  Must
+            be of the same shape and buffer length as the expected output.
+            See `ufuncs-output-type` for more details.
+        keepdims : bool, optional
+            If this is set to True, the axes which are reduced are left
+            in the result as dimensions with size one. With this option,
+            the result will broadcast correctly against the input array.
+        initial : scalar, optional
+            The minimum value of an output element. Must be present to allow
+            computation on empty slice.
+        where : array_like of bool, optional
+            Elements to compare for the maximum. See `~numpy.ufunc.reduce`
+            for details.
+
+        Returns
+        -------
+        amax
+            Maximum of the data. If `dim` is None, the result is a scalar value.
+            If `dim` is given, the result is an array of dimension ``ndim - 1``.
+
+        See Also
+        --------
+        amin :
+            The minimum value of a dataset along a given dimension, propagating any NaNs.
+        nanmin :
+            The minimum value of a dataset along a given dimension, ignoring any NaNs.
+        minimum :
+            Element-wise minimum of two datasets, propagating any NaNs.
+        fmin :
+            Element-wise minimum of two datasets, ignoring any NaNs.
+        argmin :
+            Return the indices or coordinates of the minimum values.
+        nanmax, maximum, fmax
+        """
+
+        return self._reduce_method('max', *args, **kwargs)
+
+    max = amax
+
+    # ..................................................................................................................
+    def amin(self, *args, **kwargs):
+        """
+        Return the maximum of the dataset or maxima along given dimensions.
+
+        Parameters
+        ----------
+        dim : None or int or dimension name or tuple of int or dimensions, optional
+            dimension or dimensions along which to operate.  By default, flattened input is used.
+            If this is a tuple, the minimum is selected over multiple dimensions,
+            instead of a single dimension or all the dimensions as before.
+        axis : alias for dim
+            Compatibility with Numpy syntax.
+        out : nddataset, optional
+            Alternative output dataset in which to place the result.  Must
+            be of the same shape and buffer length as the expected output.
+            See `ufuncs-output-type` for more details.
+        keepdims : bool, optional
+            If this is set to True, the dimensions which are reduced are left
+            in the result as dimensions with size one. With this option,
+            the result will broadcast correctly against the input array.
+        initial : scalar, optional
+            The minimum value of an output element. Must be present to allow
+            computation on empty slice.
+        where : array_like of bool, optional
+            Elements to compare for the minimum.
+
+        Returns
+        -------
+        amin : ndarray or scalar
+            Minimum of the data. If `dim` is None, the result is a scalar value.
+            If `dim` is given, the result is an array of dimension ``ndim - 1``.
+
+        See Also
+        --------
+        amax : The maximum value of a dataset along a given dimension, propagating any NaNs.
+        nanmax : The maximum value of a dataset along a given dimension, ignoring any NaNs.
+        maximum : Element-wise maximum of two datasets, propagating any NaNs.
+        fmax : Element-wise maximum of two datasets, ignoring any NaNs.
+        argmax : Return the indices or coordinates of the maximum values.
+        nanmin, minimum, fmin
+        """
+        return self._reduce_method('amin', *args, **kwargs)
+
+    min = amin
+
+    # ..................................................................................................................
+    @_reduce_method
+    @_from_numpy_method
+    def any(cls, dataset, dim=None, keepdims=False):
+        """
+        Test whether any array element along a given axis evaluates to True.
+
+        Returns single boolean unless `dim` is not ``None``
+
+        Parameters
+        ----------
+        dataset : array_like
+            Input array or object that can be converted to an array.
+        dim : None or int or tuple of ints, optional
+            Axis or axes along which a logical OR reduction is performed.
+            The default (``axis=None``) is to perform a logical OR over all
+            the dimensions of the input array. `axis` may be negative, in
+            which case it counts from the last to the first axis.
+        keepdims : bool, optional
+            If this is set to True, the axes which are reduced are left
+            in the result as dimensions with size one. With this option,
+            the result will broadcast correctly against the input array.
+            If the default value is passed, then `keepdims` will not be
+            passed through to the `any` method of sub-classes of
+            `ndarray`, however any non-default value will be.  If the
+            sub-class' method does not implement `keepdims` any
+            exceptions will be raised.
+
+        See Also
+        --------
+        all : Test whether all array elements along a given axis evaluate to True.
+
+        Returns
+        -------
+        any
+            A new boolean or `ndarray` is returned.
+        """
+
+        data = dataset
+        if hasattr(dataset, 'implements') and dataset.implements() in ['NDDataset', 'Coord']:
+            data = dataset.data
+        data = np.any(data, dim, keepdims=False)
+        return data
+
+    # ..................................................................................................................
+    @_from_numpy_method
+    def arange(cls, start=0, stop=None, step=None, dtype=None, **kwargs):
+        """
+        Return evenly spaced values within a given interval.
+
+        Values are generated within the half-open interval [start, stop).
+
+        Parameters
+        ----------
+        start : number, optional
+            Start of interval. The interval includes this value. The default start value is 0.
+        stop : number
+            End of interval. The interval does not include this value, except in some cases
+            where step is not an integer and floating point round-off affects the length of out.
+            It might be prefereble to use inspace in such case.
+        step : number, optional
+            Spacing between values. For any output out, this is the distance between two adjacent values,
+            out[i+1] - out[i]. The default step size is 1. If step is specified as a position argument,
+            start must also be given.
+        dtype : dtype
+            The type of the output array. If dtype is not given, infer the data type from the other input arguments.
+        **kwargs : dict
+            Keywords argument used when creating the returned object, such as units, name, title, ...
+
+        Returns
+        -------
+        out
+            Array of evenly spaced values.
+
+        See also
+        --------
+        linspace : Evenly spaced numbers with careful handling of endpoints.
+
+        Examples
+        --------
+        >>> Coord.arange(1, 20.0001, 1, units='s', name='mycoord')
+        """
+
+        return cls(np.arange(start, stop, step, dtype), **kwargs)
+
+
+    # ..................................................................................................................
+    def argmax(self, *args, **kwargs):
+        """indexes of maximum of data along axis"""
+
+        return self._reduce_method('argmax', *args, **kwargs)
+
+    # ..................................................................................................................
+    def argmin(self, *args, **kwargs):
+        """indexes of minimum of data along axis"""
+
+        return self._reduce_method('argmin', *args, **kwargs)
+
 
     def pipe(self, func, *args, **kwargs):
         """Apply func(self, *args, **kwargs)
@@ -489,12 +826,29 @@ class NDMath(object):
 
     # ..................................................................................................................
     def sum(self, *args, **kwargs):
-        """sum along axis"""
+        """sum along a dimension"""
 
         return self._reduce_method('sum', *args, **kwargs)
 
+    def to_array(self):
+        """
+        Return a numpy masked array (i.e., other NDDataset attributes are lost.
+
+        Examples
+        ========
+        >>> a = scp.to_array(dataset)
+
+        equivalent to:
+
+        >>> a = np.ma.array(dataset)
+        or
+        >>> a= dataset.masked_data
+        """
+        return np.ma.array(self)
+
+
     def prod(self, *args, **kwargs):
-        """product along axis"""
+        """product along a dimension"""
 
         return self._reduce_method('prod', *args, **kwargs)
 
@@ -541,7 +895,7 @@ class NDMath(object):
         ----------
         axis : None or int, optional
             Dimension along which to find the peaks.
-            If None, the operation is made on the first dimension
+            If None, the operation is made on the first dimension.
         keepdims : bool, optional
             If this is set to True, the dimensions which are reduced are left
             in the result as dimensions with size one. With this option,
@@ -556,21 +910,8 @@ class NDMath(object):
         return self._reduce_method('ptp', *args, **kwargs)
 
     # ..................................................................................................................
-    def all(self, *args, **kwargs):
-        """Test whether all array elements along a given axis evaluate to True."""
-
-        return self._reduce_method('all', *args, keepunits=False, **kwargs)
-
-    # ..................................................................................................................
-    def any(self, *args, **kwargs):
-        """Test whether any array elements along a given axis evaluate to True."""
-
-        return self._reduce_method('any', *args, keepunits=False, **kwargs)
-
-    sometrue = any
-
-    # ............................................................................
-    def diag(self, *args, **kwargs):
+    @_from_numpy_method
+    def diag(cls, dataset, offset=0, **kwargs):
         """
         Extract a diagonal or construct a diagonal array.
 
@@ -579,27 +920,23 @@ class NDMath(object):
         whether it returns a copy or a view depends on what version of numpy you
         are using.
 
-        Adapted from numpy (licence #TO ADD)
-
         Parameters
         ----------
-        v : array_like
-            If `v` is a 2-D array, return a copy of its `k`-th diagonal.
-            If `v` is a 1-D array, return a 2-D array with `v` on the `k`-th
+        dataset : array_like
+            If `dataset` is a 2-D array, return a copy of its `k`-th diagonal.
+            If `dataset` is a 1-D array, return a 2-D array with `v` on the `k`-th.
             diagonal.
+        offset : int, optional
+            Diagonal in question. The default is 0. Use offset>0 for diagonals above the main diagonal, and offset<0 for
+            diagonals below the main diagonal.
 
         Returns
         -------
-        out : ndarray
+        out
             The extracted diagonal or constructed diagonal array.
         """
-        # TODO: fix this - other diagonals
-        # k : int, optional
-        # Diagonal in question. The default is 0. Use `k>0` for diagonals
-        # above the main diagonal, and `k<0` for diagonals below the main
-        # diagonal.
 
-        new = self.copy()
+        new = cls
 
         if new.ndim == 1:
 
@@ -625,126 +962,61 @@ class NDMath(object):
             new._dims = dims
             if coordset is not None:
                 new.set_coordset(coordset)
-            new.history = 'Diagonal array build from the 1D dataset'
             return new
 
         elif new.ndim == 2:
+
             # extract a diagonal
             # ------------------
-            return new._diag(**kwargs)
+            return new.diagonal(offset=offset, **kwargs)
 
         else:
             raise ValueError("Input must be 1- or 2-d.")
 
     # ..................................................................................................................
-    def _diag(self, **kwargs):
-        """take diagonal of a 2D array"""
-        # As we reduce a 2D to a 1D we must specified which is the dimension for the coordinates to keep!
-
-        if not kwargs.get("axis", kwargs.get("dims", kwargs.get("dim", None))):
-            warning_('Dimensions to remove for coordinates must be specified. By default the first is kept. ')
-
-        return self._reduce_method('diag', **kwargs)
-
-    # ..................................................................................................................
-    @classmethod
-    def fromfunction(cls, function, *, shape=None, coordset=None, dtype=float, name=None, title=None, units=None,
-                     **kwargs):
+    @_reduce_method
+    @_from_numpy_method
+    def diagonal(cls, dataset, offset=0, dim='x', dtype=None, **kwargs):
         """
-        Construct a nddataset by executing a function over each coordinate.
+        Return the diagonal of a 2D array.
 
-        The resulting array therefore has a value ``fn(x, y, z)`` at
-        coordinate ``(x, y, z)``.
+        As we reduce a 2D to a 1D we must specified which is the dimension for the coordinates to keep!.
 
         Parameters
         ----------
-        function : callable
-            The function is called with N parameters, where N is the rank of
-            `shape` or from the provided ``coordset`.
-        shape : (N,) tuple of ints, optional
-            Shape of the output array, which also determines the shape of
-            the coordinate arrays passed to `function`. It is optional only if
-            `coordset` is None.
-        name : str, optional
-            Dataset name
-        title : str, optional
-            Dataset title (see |NDDataset.title|)
-        units : str, optional
-            Dataset units.
-            When None, units will be determined from the function results
-        coordset : |Coordset| instance, optional
-            If provided, this determine the shape and coordinates of each dimension of
-            the returned |NDDataset|. If shape is also passed it will be ignored.
-        dtype : data-type, optional
-            Data-type of the coordinate arrays passed to `function`.
-            By default, `dtype` is float.
+        dataset : |NDDataset| or array-like
+            Object from which to extract the diagonal.
+        offset : int, optional
+            Offset of the diagonal from the main diagonal.  Can be positive or
+            negative.  Defaults to main diagonal (0).
+        dim : str, optional
+            Dimension to keep for coordinates. By default it is the last (-1, `x` or another name if the default
+            dimension name has been modified).
+        dtype : dtype, optional
+            The type of the returned array.
+        **kwargs : dict
+            Additional keyword parameters to be passed to the NDDataset constructor.
 
         Returns
         -------
-        fromfunction : any
-            The result of the call to `function` is passed back directly.
-            Therefore the shape of `fromfunction` is completely determined by
-            `function`.
+        1d_array
+            The diagonal of the input array.
 
-        Notes
-        -----
-        Keywords **kwargs are passed to `function`.
+        See Also
+        --------
+        diag : Extract a diagonal or construct a diagonal array.
 
         Examples
         --------
-        >>> np.fromfunction(lambda i, j: i == j, (3, 3), dtype=int)
-        array([[  True,   False,   False],
-               [  False,   True,   False],
-               [  False,   False,   True]])
-
-        >>> np.fromfunction(lambda i, j: i + j, (3, 3), dtype=int)
-        array([[       0,        1,        2],
-               [       1,        2,        3],
-               [       2,        3,        4]])
+        >>> nd = scp.full((2, 2), 0.5, units='s', title='initial')
+        >>> nd
+        NDDataset: [float64] s (shape: (y:2, x:2))
+        >>> nd.diagonal(title='diag')
         """
-        from spectrochempy.core.dataset.coordset import CoordSet
-        if coordset is not None:
-            if not isinstance(coordset, CoordSet):
-                coordset = CoordSet(*coordset)
 
-            shape = coordset.sizes
-
-        idx = np.indices(shape)
-
-        args = [0] * len(shape)
-        if coordset is not None:
-            for i, co in enumerate(coordset):
-                args[i] = co.data[idx[i]]
-                if units is None and co.has_units:
-                    args[i] = Quantity(args[i], co.units)
-
-        data = function(*args, **kwargs)
-
-        # argsunits = [1] * len(shape)
-        # if coordset is not None:
-        #     for i, co in enumerate(coordset):
-        #         args[i] = co.data[idx[i]]
-        #         if units is None and co.has_units:
-        #             argsunits[i] = Quantity(1, co.units)
-        #
-        # kwargsunits = {}
-        # for k, v in kwargs.items():
-        #     if isinstance(v, Quantity) or hasattr(v, 'has_units'):
-        #         kwargs[k] = v.m
-        #         kwargsunits[k] = Quantity(1., v.u)
-        #     else:
-        #         kwargsunits[k] = 1
-        #
-        # data = function(*args, **kwargs)
-        #
-        # if units is None:
-        #     q = function(*argsunits, **kwargsunits)
-        #     if hasattr(q, 'units'):
-        #         units = q.units
-
-        data = data.T
-        dims = coordset.names[::-1]
-        return cls(data, coordset=coordset, dims=dims, name=name, title=title, units=units)
+        cls._data = np.diagonal(dataset, offset).astype(dtype)
+        cls._history = []
+        return cls
 
     # ..................................................................................................................
     def clip(self, *args, **kwargs):
@@ -800,122 +1072,6 @@ class NDMath(object):
     around = round_ = round
 
     # ..................................................................................................................
-    def amin(self, *args, **kwargs):
-        """
-        Return the maximum of the dataset or maxima along given dimensions.
-
-        Parameters
-        ----------
-        dim : None or int or dimension name or tuple of int or dimensions, optional
-            dimension or dimensions along which to operate.  By default, flattened input is used.
-            If this is a tuple, the minimum is selected over multiple dimensions,
-            instead of a single dimension or all the dimensions as before.
-        axis : alias for dim
-            Compatibility with Numpy syntax
-        out : nddataset, optional
-            Alternative output dataset in which to place the result.  Must
-            be of the same shape and buffer length as the expected output.
-            See `ufuncs-output-type` for more details.
-        keepdims : bool, optional
-            If this is set to True, the dimensions which are reduced are left
-            in the result as dimensions with size one. With this option,
-            the result will broadcast correctly against the input array.
-        initial : scalar, optional
-            The minimum value of an output element. Must be present to allow
-            computation on empty slice.
-        where : array_like of bool, optional
-            Elements to compare for the minimum.
-
-        Returns
-        -------
-        amin : ndarray or scalar
-            Minimum of the data. If `dim` is None, the result is a scalar value.
-            If `dim` is given, the result is an array of dimension ``ndim - 1``.
-
-        See Also
-        --------
-        amax :
-            The maximum value of a dataset along a given dimension, propagating any NaNs.
-        nanmax :
-            The maximum value of a dataset along a given dimension, ignoring any NaNs.
-        maximum :
-            Element-wise maximum of two datasets, propagating any NaNs.
-        fmax :
-            Element-wise maximum of two datasets, ignoring any NaNs.
-        argmax :
-            Return the indices or coordinates of the maximum values.
-        nanmin, minimum, fmin
-        """
-        return self._reduce_method('amin', *args, **kwargs)
-
-    min = amin
-
-    # ..................................................................................................................
-    def max(self, *args, **kwargs):
-        """
-        Return the maximum of the dataset or maxima along given dimensions.
-
-        Parameters
-        ----------
-        dim : None or int or dimension name or tuple of int or dimensions, optional
-            dimension or dimensions along which to operate.  By default, flattened input is used.
-            If this is a tuple, the maximum is selected over multiple dimensions,
-            instead of a single dimension or all the dimensions as before.
-        axis : alias for dim
-            Compatibility with Numpy syntax
-        out : nddataset, optional
-            Alternative output dataset in which to place the result.  Must
-            be of the same shape and buffer length as the expected output.
-            See `ufuncs-output-type` for more details.
-        keepdims : bool, optional
-            If this is set to True, the axes which are reduced are left
-            in the result as dimensions with size one. With this option,
-            the result will broadcast correctly against the input array.
-        initial : scalar, optional
-            The minimum value of an output element. Must be present to allow
-            computation on empty slice.
-        where : array_like of bool, optional
-            Elements to compare for the maximum. See `~numpy.ufunc.reduce`
-            for details.
-
-        Returns
-        -------
-        amax : ndarray or scalar
-            Maximum of the data. If `dim` is None, the result is a scalar value.
-            If `dim` is given, the result is an array of dimension ``ndim - 1``.
-
-        See Also
-        --------
-        amin :
-            The minimum value of a dataset along a given dimension, propagating any NaNs.
-        nanmin :
-            The minimum value of a dataset along a given dimension, ignoring any NaNs.
-        minimum :
-            Element-wise minimum of two datasets, propagating any NaNs.
-        fmin :
-            Element-wise minimum of two datasets, ignoring any NaNs.
-        argmin :
-            Return the indices or coordinates of the minimum values.
-        nanmax, maximum, fmax
-        """
-
-        return self._reduce_method('max', *args, **kwargs)
-
-    amax = max
-
-    # ..................................................................................................................
-    def argmin(self, *args, **kwargs):
-        """indexes of minimum of data along axis"""
-
-        return self._reduce_method('argmin', *args, **kwargs)
-
-    # ..................................................................................................................
-    def argmax(self, *args, **kwargs):
-        """indexes of maximum of data along axis"""
-
-        return self._reduce_method('argmax', *args, **kwargs)
-
-    # ..................................................................................................................
     def coordmin(self, *args, **kwargs):
         """Coordinates of minimum of data along axis"""
 
@@ -929,19 +1085,39 @@ class NDMath(object):
         ma = self.max(keepdims=True)
         return ma.coordset
 
-    @classmethod
-    def rand(cls, *args):
-
-        return cls(np.random.rand(*args))
-
-    # ..................................................................................................................
-    @classmethod
-    def arange(cls, start=0, stop=None, step=None, dtype=None, **kwargs):
+    @_from_numpy_method
+    def random(cls, size=None, dtype=None, **kwargs):
         """
-        """
-        return cls(np.arange(start, stop, step, dtype=np.dtype(dtype)), **kwargs)
+        Return random floats in the half-open interval [0.0, 1.0).
 
-    @classmethod
+        Results are from the “continuous uniform” distribution over the stated interval.
+        To sample :math:`\mathrm{Uniform}[a, b), b > a` multiply the output of random by (b-a) and add a:
+
+            (b - a) * random() + a
+
+        Parameters
+        ----------
+        size : int or tuple of ints, optional
+            Output shape. If the given shape is, e.g., (m, n, k), then m * n * k samples are drawn.
+            Default is None, in which case a single value is returned.
+        dtype : dtype, optional
+            Desired dtype of the result, only float64 and float32 are supported.
+            The default value is np.float64.
+        **kwargs : dict
+            Keywords argument used when creating the returned object, such as units, name, title, ...
+
+        Returns
+        -------
+        float or ndarray of floats
+            Array of random floats of shape size (unless size=None, in which case a single float is returned).
+        """
+        from numpy.random import default_rng
+        rng = default_rng()
+
+        return cls(rng.random(size, dtype), **kwargs)
+
+
+    @_from_numpy_method
     def linspace(cls, start, stop, num=50, endpoint=True, retstep=False, dtype=None, **kwargs):
         """
         Return evenly spaced numbers over a specified interval.
@@ -965,8 +1141,8 @@ class NDMath(object):
             If True, return (samples, step), where step is the spacing between samples.
         dtype : dtype, optional
             The type of the array. If dtype is not given, infer the data type from the other input arguments.
-        **kwargs : any
-            keywords argument used when creating the returned object, such as units, name, title, ...
+        **kwargs : dict
+            Keywords argument used when creating the returned object, such as units, name, title, ...
 
         Returns
         -------
@@ -978,9 +1154,9 @@ class NDMath(object):
             Size of spacing between samples.
         """
 
-        return cls(np.linspace(start, stop, num=num, endpoint=endpoint, retstep=retstep, dtype=dtype), **kwargs)
+        return cls(np.linspace(start, stop, num, endpoint, retstep, dtype), **kwargs)
 
-    @classmethod
+    @_from_numpy_method
     def logspace(cls, start, stop, num=50, endpoint=True, base=10.0, dtype=None, **kwargs):
         """
         Return numbers spaced evenly on a log scale.
@@ -1010,11 +1186,14 @@ class NDMath(object):
         dtype : dtype
             The type of the output array.  If `dtype` is not given, infer the data
             type from the other input arguments.
+        **kwargs : dict
+            Keywords argument used when creating the returned object, such as units, name, title, ...
 
         Returns
         -------
-        samples : ndarray
+        out
             `num` samples, equally spaced on a log scale.
+
         See Also
         --------
         arange : Similar to linspace, with the step size specified instead of the
@@ -1023,18 +1202,56 @@ class NDMath(object):
         linspace : Similar to logspace, but with the samples uniformly distributed
                    in linear space, instead of log space.
         geomspace : Similar to logspace, but with endpoints specified directly.
-        Notes
-        -----
-        Logspace is equivalent to the code
-        >>> y = np.linspace(start, stop, num=num, endpoint=endpoint)
-        ... # doctest: +SKIP
-        >>> power(base, y).astype(dtype)
-        ... # doctest: +SKIP
         """
-        return cls(np.logspace(start, stop, num=num, endpoint=endpoint, base=base, dtype=dtype), **kwargs)
 
-    @_create_method
-    def identity(cls, N, dtype=None, **kwargs):
+        return cls(np.logspace(start, stop, num, endpoint, base, dtype), **kwargs)
+
+    @_from_numpy_method
+    def geomspace(cls, start, stop, num=50, endpoint=True, dtype=None, **kwargs):
+        """
+        Return numbers spaced evenly on a log scale (a geometric progression).
+
+        This is similar to `logspace`, but with endpoints specified directly.
+        Each output sample is a constant multiple of the previous.
+
+        Parameters
+        ----------
+        start : number
+            The starting value of the sequence.
+        stop : number
+            The final value of the sequence, unless `endpoint` is False.
+            In that case, ``num + 1`` values are spaced over the
+            interval in log-space, of which all but the last (a sequence of
+            length `num`) are returned.
+        num : integer, optional
+            Number of samples to generate.  Default is 50.
+        endpoint : boolean, optional
+            If true, `stop` is the last sample. Otherwise, it is not included.
+            Default is True.
+        dtype : dtype
+            The type of the output array.  If `dtype` is not given, infer the data
+            type from the other input arguments.
+        **kwargs : dict
+            Keywords argument used when creating the returned object, such as units, name, title, ...
+
+        Returns
+        -------
+        out
+            `num` samples, equally spaced on a log scale.
+        See Also
+        --------
+        logspace : Similar to geomspace, but with endpoints specified using log
+                   and base.
+        linspace : Similar to geomspace, but with arithmetic instead of geometric
+                   progression.
+        arange : Similar to linspace, with the step size specified instead of the
+                 number of samples.
+        """
+
+        return cls(np.geomspace(start, stop, num, endpoint, dtype), **kwargs)
+
+    @_from_numpy_method
+    def identity(cls, n, dtype=None, **kwargs):
         """
         Return the identity |NDDataset| of a given shape.
 
@@ -1043,7 +1260,7 @@ class NDMath(object):
 
         Parameters
         ----------
-        N : int
+        n : int
             Number of rows (and columns) in `n` x `n` output.
         dtype : data-type, optional
             Data-type of the output.  Defaults to ``float``.
@@ -1068,10 +1285,11 @@ class NDMath(object):
                [       0,        1,        0],
                [       0,        0,        1]])
         """
-        return
 
-    @_create_method
-    def eye(self, N, M=None, k=0, dtype=float, **kwargs):
+        return cls(np.identity(n, dtype), **kwargs)
+
+    @_from_numpy_method
+    def eye(cls, N, M=None, k=0, dtype=float, **kwargs):
         """
         Return a 2-D array with ones on the diagonal and zeros elsewhere.
 
@@ -1111,10 +1329,11 @@ class NDMath(object):
          [       0        0        1]
          [       0        0        0]], 'kilometer')>
         """
-        return
 
-    @_create_method
-    def empty(self, shape, dtype=None, **kwargs):
+        return cls(np.eye(N, M, k, dtype), **kwargs)
+
+    @_from_numpy_method
+    def empty(cls, shape, dtype=None, **kwargs):
         """
         Return a new |NDDataset| of given shape and type, without initializing entries.
 
@@ -1164,10 +1383,11 @@ class NDMath(object):
         >>> NDDataset.empty([2, 2], dtype=int, units='s')
         NDDataset: [int64] s (shape: (y:2, x:2))
         """
-        return
 
-    @_create_method
-    def zeros(self, shape, dtype=None, **kwargs):
+        return cls(np.empty(shape, dtype), **kwargs)
+
+    @_from_numpy_method
+    def zeros(cls, shape, dtype=None, **kwargs):
         """
         Return a new |NDDataset| of given shape and type, filled with zeros.
 
@@ -1217,10 +1437,11 @@ class NDMath(object):
         >>> nd
         NDDataset: [int64] a.u. (shape: (y:5, x:10))
         """
-        return
 
-    @_create_method
-    def ones(self, shape, dtype=None, **kwargs):
+        return cls(np.zeros(shape, dtype), **kwargs)
+
+    @_from_numpy_method
+    def ones(cls, shape, dtype=None, **kwargs):
         """
         Return a new |NDDataset| of given shape and type, filled with ones.
 
@@ -1279,10 +1500,11 @@ class NDMath(object):
         array([[       1,        1],
                [       1,        1]])
         """
-        return
 
-    @_create_method
-    def full(self, shape, fill_value=0.0, dtype=None, **kwargs):
+        return cls(np.ones(shape, dtype), **kwargs)
+
+    @_from_numpy_method
+    def full(cls, shape, fill_value=0.0, dtype=None, **kwargs):
         """
         Return a new |NDDataset| of given shape and type, filled with `fill_value`.
 
@@ -1327,12 +1549,16 @@ class NDMath(object):
         >>> NDDataset.full((2, 2), 10, dtype=np.int)
         NDDataset: [int64] unitless (shape: (y:2, x:2))
         """
-        return
 
-    @_create_like_method
-    def empty_like(self, dataset, dtype=None, **kwargs):
+        return cls(np.full(shape, fill_value, dtype), **kwargs)
+
+    @_from_numpy_method
+    def empty_like(cls, dataset, dtype=None, **kwargs):
         """
-        Return a new array with the same shape and type as a given array.
+        Return a new uninitialized |NDDataset|.
+
+        The returned |NDDataset| have the same shape and type as a given array. Units, coordset, ... can be added in
+        kwargs.
 
         Parameters
         ----------
@@ -1357,7 +1583,7 @@ class NDMath(object):
 
         See Also
         --------
-        full_like : Return an array with a given fill value with shape and type of the input
+        full_like : Return an array with a given fill value with shape and type of the input.
         ones_like : Return an array of ones with shape and type of input.
         zeros_like : Return an array of zeros with shape and type of input.
         empty : Return a new uninitialized array.
@@ -1371,13 +1597,17 @@ class NDMath(object):
         for instance `zeros_like`, `ones_like` or `full_like` instead.  It may be
         marginally faster than the functions that do set the array values.
         """
-        return
 
-    @_create_like_method
-    def zeros_like(self, dataset, dtype=None, **kwargs):
+        cls._data = np.empty_like(dataset, dtype)
+        return cls
+
+    @_from_numpy_method
+    def zeros_like(cls, dataset, dtype=None, **kwargs):
         """
-        Return a |NDDataset| of zeros with the same shape and type as a given
-        array.
+        Return a |NDDataset| of zeros.
+
+        The returned |NDDataset| have the same shape and type as a given array. Units, coordset, ... can be added in
+        kwargs.
 
         Parameters
         ----------
@@ -1402,7 +1632,7 @@ class NDMath(object):
 
         See Also
         --------
-        full_like : Return an array with a given fill value with shape and type of the input
+        full_like : Return an array with a given fill value with shape and type of the input.
         ones_like : Return an array of ones with shape and type of input.
         empty_like : Return an empty array with shape and type of input.
         zeros : Return a new array setting values to zero.
@@ -1412,7 +1642,6 @@ class NDMath(object):
 
         Examples
         --------
-        >>> import spectrochempy as scp
         >>> x = np.arange(6)
         >>> x = x.reshape((2, 3))
         >>> nd = scp.NDDataset(x, units='s')
@@ -1428,14 +1657,17 @@ class NDMath(object):
             <Quantity([[       0        0        0]
          [       0        0        0]], 'second')>
         """
-        return
 
-    @_create_like_method
-    def ones_like(self, dataset, dtype=None, **kwargs):
+        cls._data = np.zeros_like(dataset, dtype)
+        return cls
+
+    @_from_numpy_method
+    def ones_like(cls, dataset, dtype=None, **kwargs):
         """
-        Return |NDDataset| of ones with the same shape and type as a given array.
+        Return |NDDataset| of ones.
 
-        It preserves original mask, units, and coordset
+        The returned |NDDataset| have the same shape and type as a given array. Units, coordset, ... can be added in
+        kwargs.
 
         Parameters
         ----------
@@ -1460,7 +1692,7 @@ class NDMath(object):
 
         See Also
         --------
-        full_like : Return an array with a given fill value with shape and type of the input
+        full_like : Return an array with a given fill value with shape and type of the input.
         zeros_like : Return an array of zeros with shape and type of input.
         empty_like : Return an empty array with shape and type of input.
         zeros : Return a new array setting values to zero.
@@ -1470,7 +1702,6 @@ class NDMath(object):
 
         Examples
         --------
-        >>> import spectrochempy as scp
         >>> x = np.arange(6)
         >>> x = x.reshape((2, 3))
         >>> x = scp.NDDataset(x, units='s')
@@ -1479,12 +1710,17 @@ class NDMath(object):
         >>> scp.ones_like(x, dtype=float, units='J')
         NDDataset: [float64] J (shape: (y:2, x:3))
         """
-        return
 
-    @_create_like_method
-    def full_like(self, dataset, fill_value=0.0, dtype=None, **kwargs):
+        cls._data = np.ones_like(dataset, dtype)
+        return cls
+
+    @_from_numpy_method
+    def full_like(cls, dataset, fill_value=0.0, dtype=None, **kwargs):
         """
-        Return a |NDDataset| with the same shape and type as a given array.
+        Return a |NDDataset| of fill_value.
+
+        The returned |NDDataset| have the same shape and type as a given array. Units, coordset, ... can be added in
+        kwargs
 
         Parameters
         ----------
@@ -1555,7 +1791,123 @@ class NDMath(object):
         >>> scp.full_like(x, np.nan, dtype=np.double).values
         <Quantity([     nan     nan      nan      nan      nan      nan], 'meter')>
         """
-        return
+
+        cls._data = np.full_like(dataset, fill_value, dtype)
+        return cls
+
+    # ..................................................................................................................
+    @_from_numpy_method
+    def fromfunction(cls, function, shape=None, dtype=float, units=None, coordset=None, **kwargs):
+        """
+        Construct a nddataset by executing a function over each coordinate.
+
+        The resulting array therefore has a value ``fn(x, y, z)`` at coordinate ``(x, y, z)``.
+
+        Parameters
+        ----------
+        function : callable
+            The function is called with N parameters, where N is the rank of
+            `shape` or from the provided ``coordset`.
+        shape : (N,) tuple of ints, optional
+            Shape of the output array, which also determines the shape of
+            the coordinate arrays passed to `function`. It is optional only if
+            `coordset` is None.
+        dtype : data-type, optional
+            Data-type of the coordinate arrays passed to `function`.
+            By default, `dtype` is float.
+        units : str, optional
+            Dataset units.
+            When None, units will be determined from the function results.
+        coordset : |Coordset| instance, optional
+            If provided, this determine the shape and coordinates of each dimension of
+            the returned |NDDataset|. If shape is also passed it will be ignored.
+        **kwargs : dict
+            Other kwargs are passed to the final object constructor.
+
+        Returns
+        -------
+        dataset
+            The result of the call to `function` is passed back directly.
+            Therefore the shape of `fromfunction` is completely determined by
+            `function`.
+
+        See Also
+        --------
+        fromiter : Make a dataset from an iterable.
+
+        Examples
+        --------
+        Create a 1D NDDataset from a function
+
+        >>> def func1(t, v):
+        ...     d = v * t
+        ...     return d
+        ...
+        ...
+        ...
+        >>> time = scp.Coord.linspace(0, 60, 10, units='min')
+        >>> d = scp.NDDataset.fromfunction(func1, v=scp.Quantity(134, 'km/hour'), coordset=scp.CoordSet(t=time))
+        >>> d.dims
+        ['t']
+        >>> d
+        NDDataset: [float64] km (size: 10)
+        """
+
+        from spectrochempy.core.dataset.coordset import CoordSet
+
+        if coordset is not None:
+            if not isinstance(coordset, CoordSet):
+                coordset = CoordSet(*coordset)
+            shape = coordset.sizes
+
+        idx = np.indices(shape)
+
+        args = [0] * len(shape)
+        if coordset is not None:
+            for i, co in enumerate(coordset):
+                args[i] = co.data[idx[i]]
+                if units is None and co.has_units:
+                    args[i] = Quantity(args[i], co.units)
+
+        kw = kwargs.pop('kw', {})
+        data = function(*args, **kw)
+
+        data = data.T
+        dims = coordset.names[::-1]
+        new = cls(data, coordset=coordset, dims=dims, units=units, **kwargs)
+        new.ito_reduced_units()
+        return new
+
+    @_from_numpy_method
+    def fromiter(cls, iterable, dtype=np.float64, count=-1, ):
+        """
+        Create a new 1-dimensional array from an iterable object.
+
+        Parameters
+        ----------
+        iterable : iterable object
+            An iterable object providing data for the array.
+        dtype : data-type
+            The data-type of the returned array.
+        count : int, optional
+            The number of items to read from iterable. The default is -1, which means all data is read.
+
+        Returns
+        -------
+        nddataset
+            The output array.
+
+        Notes
+        -----
+            Specify count to improve performance. It allows fromiter to pre-allocate the output array,
+            instead of resizing it on demand.
+
+        Examples
+        --------
+        >>> iterable = (x*x for x in range(5))
+        >>> scp.fromiter(iterable, float, units='km')
+        array([  0.,   1.,   4.,   9.,  16.])
+        """
 
     # ------------------------------------------------------------------------------------------------------------------
     # private methods
@@ -2127,7 +2479,7 @@ class NDMath(object):
             fm, objs = self._check_order(fname, objs)
 
             if hasattr(self, 'history'):
-                history = f'Binary operation {fm.__name__} with `{get_name(objs[-1])}` has been performed'
+                history = f'Binary operation {fm.__name__} with `{_get_name(objs[-1])}` has been performed'
             else:
                 history = None
 
@@ -2158,7 +2510,7 @@ class NDMath(object):
         def func(self, other):
             fname = f.__name__
             if hasattr(self, 'history'):
-                self.history = f'Inplace binary op: {fname}  with `{get_name(other)}` '
+                self.history = f'Inplace binary op: {fname}  with `{_get_name(other)}` '
             # else:
             #    history = None
             objs = [self, other]
@@ -2246,7 +2598,7 @@ class _ufunc:
     @property
     def __doc__(self):
         doc = f"""
-            {unary_ufuncs()[self.name].split('->')[-1].strip()}
+            {_unary_ufuncs()[self.name].split('->')[-1].strip()}
 
             wrapper of the numpy.ufunc function ``np.{self.name}'(*args, **kwargs)``.
 
@@ -2256,26 +2608,31 @@ class _ufunc:
                 |NDDataset| to pass to the numpy function.
             **kwargs : dict
                 See other parameters.
-                
+
             See Also
             --------
             np.{self.name} : The corresponding numpy ufunc.
-            
+
             Examples
             --------
             See `np.{self.name} <https://numpy.org/doc/stable/reference/generated/numpy.{self.name}.html>`_
             """
-        return doc #.strip()
+        return doc
 
-def set_ufuncs(cls):
 
-    for func in unary_ufuncs():
+thismodule = sys.modules[__name__]
+
+
+def _set_ufuncs(cls):
+
+    for func in _unary_ufuncs():
         setattr(cls, func, _ufunc(func))
         setattr(thismodule, func, _ufunc(func))
         thismodule.__all__ += [func]
 
+
 # ..................................................................................................................
-def set_operators(cls, priority=50):
+def _set_operators(cls, priority=50):
 
     cls.__array_priority__ = priority
 
@@ -2297,67 +2654,29 @@ def set_operators(cls, priority=50):
 # ----------------------------------------------------------------------------------------------------------------------
 # make some NDMath operation accessible from the spectrochempy API
 
-abs = make_func_from(NDMath.abs, first='dataset')
-
-amax = make_func_from(NDMath.amax, first='dataset')
-
-amin = make_func_from(NDMath.amin, first='dataset')
-
-argmax = make_func_from(NDMath.argmax, first='dataset')
-
-argmin = make_func_from(NDMath.argmin, first='dataset')
-
-array = make_func_from(np.ma.array, first='dataset')
-array.__doc__ = """
-Return a numpy masked array (i.e., other NDDataset attributes are lost.
-
-Examples
-========
-
->>> a = array(dataset)
-
-equivalent to:
-
->>> a = np.ma.array(dataset)
-or
->>> a= dataset.masked_data
-"""
-
-clip = make_func_from(NDMath.clip, first='dataset')
-
-cumsum = make_func_from(NDMath.cumsum, first='dataset')
-
-# diag = NDMath.diag
-
-mean = make_func_from(NDMath.mean, first='dataset')
-
-pipe = make_func_from(NDMath.pipe, first='dataset')
-
-ptp = make_func_from(NDMath.ptp, first='dataset')
-
-round = make_func_from(NDMath.round, first='dataset')
-
-std = make_func_from(NDMath.std, first='dataset')
-
-sum = make_func_from(NDMath.sum, first='dataset')
-
-var = make_func_from(NDMath.var, first='dataset')
-
-__all__ += ['abs', 'amax', 'amin', 'argmin', 'argmax', 'array', 'clip', 'cumsum',  # 'diag',
-            'mean', 'pipe', 'ptp', 'round', 'std', 'sum', 'var']
 
 # make some API functions
-al = ['empty_like', 'zeros_like', 'ones_like', 'full_like',
-            'empty', 'zeros', 'ones', 'full', 'eye', 'identity']
+api_funcs = [ # creation functions
+             'empty_like', 'zeros_like', 'ones_like', 'full_like',
+             'empty', 'zeros', 'ones', 'full',
+             'eye', 'identity', 'random',
+             'linspace', 'arange', 'logspace', 'geomspace',
+             'fromfunction',
+             #
+             'diagonal', 'diag',
+             'sum', 'cumsum', 'mean', 'std', 'var',
+             'abs', 'amax', 'amin', 'argmin', 'argmax',
+             'round', 'clip',
+             'ptp',
+             'pipe',
+             'to_array',
+             #
+             'all', 'any',
+             ]
 
-for funcname in al:
+for funcname in api_funcs:
     setattr(thismodule, funcname, getattr(NDMath, funcname))
     thismodule.__all__.append(funcname)
-
-def set_api_methods(cls, methods):
-    import spectrochempy as scp
-    for method in methods:
-        setattr(scp, method, getattr(cls, method))
 
 
 # ======================================================================================================================

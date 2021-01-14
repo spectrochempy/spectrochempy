@@ -25,7 +25,7 @@ from traitlets import Bool, observe, All, Unicode
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
 from spectrochempy.core.dataset.ndarray import NDArray
-from spectrochempy.core.dataset.ndmath import NDMath, set_operators
+from spectrochempy.core.dataset.ndmath import NDMath, _set_operators
 from spectrochempy.utils import colored_output, NOMASK, spacing
 
 
@@ -443,7 +443,7 @@ class LinearCoord(Coord):
 
 # Set the operators
 # ======================================================================================================================
-set_operators(Coord, priority=50)
+_set_operators(Coord, priority=50)
 
 # ======================================================================================================================
 if __name__ == '__main__':

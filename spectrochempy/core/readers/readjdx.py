@@ -28,6 +28,7 @@ from spectrochempy.utils.exceptions import deprecated
 def read_jcamp(*args, **kwargs):
     """
     Open Infrared JCAMP-DX files with extension ``.jdx`` or ``.dx``.
+
     Limited to AFFN encoding (see R. S. McDonald and Paul A. Wilks,
     JCAMP-DX: A Standard Form for Exchange of Infrared Spectra in Computer Readable Form,
     Appl. Spec., 1988, 1, 151–162. doi:10.1366/0003702884428734.)
@@ -55,33 +56,33 @@ def read_jcamp(*args, **kwargs):
     merge : bool, optional
         Default value is False. If True, and several filenames have been provided as arguments,
         then a single dataset with merged (stacked along the first
-        dimension) is returned (default=False)
+        dimension) is returned (default=False).
     sortbydate : bool, optional
-        Sort multiple spectra by acquisition date (default=True)
+        Sort multiple spectra by acquisition date (default=True).
     description: str, optional
         A Custom description.
     content : bytes object, optional
         Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
         The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
-        For exemples on how to use this feature, one can look in the ``tests/tests_readers`` directory
+        For exemples on how to use this feature, one can look in the ``tests/tests_readers`` directory.
 
     Other Parameters
     ----------------
     listdir : bool, optional
         If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
-        is True. It is assumed that all the files correspond to current reading protocol (default=True)
+        is True. It is assumed that all the files correspond to current reading protocol (default=True).
     recursive : bool, optional
-        Read also in subfolders. (default=False)
+        Read also in subfolders. (default=False).
 
     Returns
     --------
     out
-        NDDataset| or list of |NDDataset|
+        NDDataset| or list of |NDDataset|.
 
     See Also
     ---------
-    read : Generic read method
+    read : Generic read method.
     read_csv, read_zip, read_matlab, read_omnic, read_opus, read_topspin
     """
     kwargs['filetypes'] = ['JCAMP-DX files (*.jdx *.dx)']

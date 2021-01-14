@@ -180,9 +180,9 @@ def em(dataset, lb=1, shifted=0, **kwargs):
 
     Parameters
     ----------
-    dataset : |NDDataset| or |NDPanel|.
-        Input dataset or panel
-    lb : float or |Quantity|, optional, default=1 Hz.
+    dataset : |NDDataset| or |NDPanel|
+        Input dataset or panel.
+    lb : float or |Quantity|, optional, default=1 Hz
         Exponential line broadening,
         If it is not a quantity with units,
         it is assumed to be a broadening expressed in Hz.
@@ -276,12 +276,12 @@ def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
     Parameters
     ----------
     dataset : |NDDataset|  or |NDPanel|.
-        Dataset we want to apodize using an Lorentz Multiplication
-    lb : float or `quantity`, optional, default=0 Hz.
-        inverse exponential width.
+        Dataset we want to apodize using an Lorentz Multiplication.
+    lb : float or `quantity`, optional, default=0 Hz
+        Inverse exponential width.
         If it is not a quantity with units,
         it is assumed to be a broadening expressed in Hz.
-    gb : float or `quantity`, optional, default=1 Hz.
+    gb : float or `quantity`, optional, default=1 Hz
         Gaussian broadening width.
         If it is not a quantity with units,
         it is assumed to be a broadening expressed in Hz.
@@ -292,17 +292,17 @@ def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
 
     Other Parameters
     ----------------
-    dim : str or int, keyword parameter, optional, default='x'.
-        Specify on which dimension to apply the apodization method. If `dim` is specified as an integer it is equivalent
-        to the usual `axis` numpy parameter.
-    inv : bool, keyword parameter, optional, default=False.
+    dim : str or int, keyword parameter, optional, default='x'
+        Specify on which dimension to apply the apodization method. If `dim` is specified as an integer it is
+        equivalent to the usual `axis` numpy parameter.
+    inv : bool, keyword parameter, optional, default=False
         True for inverse apodization.
-    rev : bool, keyword parameter, optional, default=False.
+    rev : bool, keyword parameter, optional, default=False
         True to reverse the apodization before applying it to the data.
-    inplace : bool, keyword parameter, optional, default=False.
+    inplace : bool, keyword parameter, optional, default=False
         True if we make the transform inplace.  If False, the function return a new dataset
     retfunc : bool, keyword parameter, optional, default=False
-        True to return the apodization array along with the apodized object
+        True to return the apodization array along with the apodized object.
 
     Returns
     -------
@@ -387,29 +387,29 @@ def sp(dataset, ssb=1, pow=1, **kwargs):
 
     Parameters
     ----------
-    dataset : |NDDataset| or |NDPanel|.
-        Dataset we want to apodize using Sine Bell or Squared Sine Bell window multiplication
-    sbb : int or float, optional, default=1.
+    dataset : |NDDataset| or |NDPanel|
+        Dataset we want to apodize using Sine Bell or Squared Sine Bell window multiplication.
+    sbb : int or float, optional, default=1
         This processing parameter mimics the behaviour of the SSB parameter on bruker TOPSPIN software:
         Typical values are 1 for a pure sine function and 2 for a pure cosine function.
         Values greater than 2 give a mixed sine/cosine function. Note that all values smaller than 2, for example 0,
         have the same effect as :math:`\text{ssb}=1`, namely a pure sine function.
-    pow : enum [1,2], optional, default=1.
-        exponent value - If pow=2 a Squared Sine Bell window multiplication is performed.
+    pow : enum [1,2], optional, default=1
+        Exponent value - If pow=2 a Squared Sine Bell window multiplication is performed.
 
     Other Parameters
     ----------------
-    dim : str or int, keyword parameter, optional, default='x'.
+    dim : str or int, keyword parameter, optional, default='x'
         Specify on which dimension to apply the apodization method. If `dim` is specified as an integer it is equivalent
         to the usual `axis` numpy parameter.
-    inv : bool, keyword parameter, optional, default=False.
+    inv : bool, keyword parameter, optional, default=False
         True for inverse apodization.
-    rev : bool, keyword parameter, optional, default=False.
+    rev : bool, keyword parameter, optional, default=False
         True to reverse the apodization before applying it to the data.
-    inplace : bool, keyword parameter, optional, default=False.
-        True if we make the transform inplace.  If False, the function return a new dataset
+    inplace : bool, keyword parameter, optional, default=False
+        True if we make the transform inplace.  If False, the function return a new dataset.
     retfunc : bool, keyword parameter, optional, default=False
-        True to return the apodization array along with the apodized object
+        True to return the apodization array along with the apodized object.
 
     Returns
     -------

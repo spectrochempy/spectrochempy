@@ -135,6 +135,7 @@ def savgol_filter(dataset, window_length=5, polyorder=0, deriv=0, delta=1.0,
                       f'deriv={deriv}, delta={delta}, mode={mode}, cval={cval}'
     return new
 
+
 def detrend(dataset, type='linear', bp=0, **kwargs):
     """
     Remove linear trend along dim from dataset.

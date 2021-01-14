@@ -85,7 +85,7 @@ datasetT = dataset.T
 datasetT
 
 # %% [markdown]
-# As it can be observed the dimension `x`and `y`have been exchanged, *e.g.* the originalshape was **(x:5549, y:55)**,
+# As it can be observed the dimension `x`and `y`have been exchanged, *e.g.* the originalshape was **(x: 5549, y: 55)**,
 # and after transposition it is **(y:55, x:5549)**.
 # (the dimension names stay the same, but the index of the corresponding axis are exchanged).
 

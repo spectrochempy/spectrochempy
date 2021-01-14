@@ -17,8 +17,8 @@ from spectrochempy.core.readers.importer import Importer, importermethod
 # Public functions
 # ======================================================================================================================
 def read_zip(*args, **kwargs):
-    """Open a zipped list of data files and set data/metadata in the
-    current dataset
+    """
+    Open a zipped list of data files.
 
     Parameters
     ----------
@@ -43,9 +43,9 @@ def read_zip(*args, **kwargs):
     merge : bool, optional
         Default value is False. If True, and several filenames have been provided as arguments,
         then a single dataset with merged (stacked along the first
-        dimension) is returned (default=False)
+        dimension) is returned (default=False).
     sortbydate : bool, optional
-        Sort multiple spectra by acquisition date (default=True)
+        Sort multiple spectra by acquisition date (default=True).
     description: str, optional
         A Custom description.
     origin : {'omnic', 'tga'}, optional
@@ -58,20 +58,20 @@ def read_zip(*args, **kwargs):
         Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
         The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
-        For exemples on how to use this feature, one can look in the ``tests/tests_readers`` directory
+        For exemples on how to use this feature, one can look in the ``tests/tests_readers`` directory.
 
     Other Parameters
     ----------------
     listdir : bool, optional
         If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
-        is True. It is assumed that all the files correspond to current reading protocol (default=True)
+        is True. It is assumed that all the files correspond to current reading protocol (default=True).
     recursive : bool, optional
-        Read also in subfolders. (default=False)
+        Read also in subfolders. (default=False).
 
     Returns
     -------
-    out : NDDataset| or list of |NDDataset|
-        The dataset or a list of dataset corresponding to a (set of) .zip file(s).
+    out
+        The NDDataset| or list of |NDDataset| corresponding to a (set of) .zip file(s).
 
     Examples
     --------

@@ -18,11 +18,12 @@ from spectrochempy.core import info_, error_, print_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndmath import unary_ufuncs, binary_ufuncs, comp_ufuncs
+from spectrochempy.core.dataset.ndmath import _unary_ufuncs, _binary_ufuncs, _comp_ufuncs
 from spectrochempy.units.units import ur, Quantity, Unit
 from spectrochempy.utils import (MASKED, TYPE_FLOAT, TYPE_INTEGER)
 from spectrochempy.utils.testing import assert_array_equal, assert_equal_units, assert_dataset_equal, RandomSeedContext
 from spectrochempy.utils.exceptions import CoordinateMismatchError
+
 import spectrochempy as scp
 
 typequaternion = np.dtype(np.quaternion)
@@ -35,16 +36,16 @@ typequaternion = np.dtype(np.quaternion)
 
 def test_ndmath_show():
     info_()
-    for item in unary_ufuncs().items():
+    for item in _unary_ufuncs().items():
         info_(*item)
 
-    for item in binary_ufuncs().items():
+    for item in _binary_ufuncs().items():
         info_(*item)
 
 
 # UNARY MATHS
 # -----------
-@pytest.mark.parametrize(('name', 'comment'), unary_ufuncs().items())
+@pytest.mark.parametrize(('name', 'comment'), _unary_ufuncs().items())
 def test_ndmath_unary_ufuncs_simple_data(nd2d, name, comment):
     nd1 = nd2d.copy() / 1.e+10  # divide to avoid some overflow in exp ufuncs
 
@@ -122,7 +123,7 @@ def test_ndmath_unary_ufuncs_simple_data(nd2d, name, comment):
 
 
 def test_bug_lost_dimensionless_units():
-    from spectrochempy import print_
+    from spectrochempy.core import print_
     import os
     dataset = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
     assert dataset.units == 'absorbance'
@@ -139,7 +140,7 @@ def test_bug_lost_dimensionless_units():
 # BINARY MATH
 # ------------
 
-@pytest.mark.parametrize(('name', 'comment'), binary_ufuncs().items())
+@pytest.mark.parametrize(('name', 'comment'), _binary_ufuncs().items())
 def test_ndmath_binary_ufuncs_two_datasets(nd2d, name, comment):
     nd1 = nd2d.copy()
     nd2 = nd1.copy() * np.ones_like(nd1) * .01
@@ -166,7 +167,7 @@ def test_ndmath_binary_ufuncs_two_datasets(nd2d, name, comment):
 
 
 # COMP Methods
-@pytest.mark.parametrize(('name', 'comment'), comp_ufuncs().items())
+@pytest.mark.parametrize(('name', 'comment'), _comp_ufuncs().items())
 def test_ndmath_comp_ufuncs_two_datasets(nd2d, name, comment):
     nd1 = nd2d.copy()
     nd2 = nd1.copy() + np.ones_like(nd1) * .001
@@ -191,7 +192,7 @@ def test_ndmath_comp_ufuncs_two_datasets(nd2d, name, comment):
     assert isinstance(r, NDDataset)
 
 
-@pytest.mark.parametrize(('name', 'comment'), binary_ufuncs().items())
+@pytest.mark.parametrize(('name', 'comment'), _binary_ufuncs().items())
 def test_ndmath_binary_ufuncs_scalar(nd2d, name, comment):
     nd1 = nd2d.copy()
     nd2 = 2.
@@ -608,10 +609,6 @@ def test_arithmetic_unit_calculation(unit1, unit2, op, result_units):
         assert_equal_units(ndd1_method(ndd2).units, result_units)
 
 
-# ----------------------------------------------------------------------------------------------------------------------
-# additional tests made following some bug fixes
-# ----------------------------------------------------------------------------------------------------------------------
-
 def test_simple_arithmetic_on_full_dataset():
     # due to a bug in notebook with the following
     import os
@@ -619,14 +616,17 @@ def test_simple_arithmetic_on_full_dataset():
     dataset - dataset[0]  # suppress the first spectrum to all other spectra in the series
 
 
-def test_array_creation_like():
-    from spectrochempy import Coord, NDDataset
+def test_ndmath_and_api_methods():
+
+    # CREATION _LIKE METHODS
+    # ----------------------
 
     # from a list
-    x = [1,2,3]
+    x = [1, 2, 3]
 
     # _like as an API method
-    ds = scp.full_like(x,2)
+    ds = NDDataset(x).full_like(2.5, title='empty')
+    ds = scp.full_like(x, 2)
     assert np.all(ds.data == np.full((3,), 2))
     assert ds.implements('NDDataset')
 
@@ -640,18 +640,23 @@ def test_array_creation_like():
     assert np.all(ds.data == np.full((3,), 2))
     assert ds.implements('NDDataset')
 
+    # _like as an instance method
+    ds = NDDataset(x).empty_like(title='empty')
+    assert ds.implements('NDDataset')
+    assert ds.title == 'empty'
+
     # from an array
-    x = np.array([1,2,3])
+    x = np.array([1, 2, 3])
 
     ds = Coord(x).full_like(2)
     assert np.all(ds.data == np.full((3,), 2))
     assert ds.implements('Coord')
 
     # from a NDArray subclass with units
-    x = Coord([1,2,3], units='km')
-    ds = scp.full_like(x,2)
+    x = Coord([1, 2, 3], units='km')
+    ds = scp.full_like(x, 2)
     assert np.all(ds.data == np.full((3,), 2))
-    assert ds.implements('NDDataset')
+    assert ds.implements('Coord')
     assert ds.units == ur.km
 
     ds1 = scp.full_like(ds, np.nan, dtype=np.double, units='m')
@@ -663,39 +668,46 @@ def test_array_creation_like():
 
     # other like creation functions
     nd = scp.empty_like(ds, dtype=np.double, units='m')
-    assert str(nd) == 'NDDataset: [float64] m (size: 3)'
+    assert str(nd) == 'Coord: [float64] m (size: 3)'
     assert nd.dtype == np.dtype(np.double)
 
     nd = scp.zeros_like(ds, dtype=np.double, units='m')
-    assert str(nd) == 'NDDataset: [float64] m (size: 3)'
+    assert str(nd) == 'Coord: [float64] m (size: 3)'
     assert np.all(nd.data == np.zeros((3,)))
 
     nd = scp.ones_like(ds, dtype=np.double, units='m')
-    assert str(nd) == 'NDDataset: [float64] m (size: 3)'
+    assert str(nd) == 'Coord: [float64] m (size: 3)'
     assert np.all(nd.data == np.ones((3,)))
 
+    # FULL
+    # ----
 
-def test_array_creation():
+    ds = Coord.full((6,), 0.1)
+    assert ds.size == 6
+    assert str(ds) == 'Coord: [float64] unitless (size: 6)'
+
+    # ZEROS
+    # -----
+
+    ds = Coord.zeros((6,), units='km')
+    assert ds.size == 6
+    assert str(ds) == 'Coord: [float64] km (size: 6)'
+
+    # ONES
+    # ----
 
     ds = NDDataset.ones((6,))
     ds = scp.full((6,), 0.1)
     assert ds.size == 6
     assert str(ds) == 'NDDataset: [float64] unitless (size: 6)'
 
-    ds = Coord.full((6,), 0.1)
-    assert ds.size == 6
-    assert str(ds) == 'Coord: [float64] unitless (size: 6)'
-
-    ds = Coord.zeros((6,), units='km')
-    assert ds.size == 6
-    assert str(ds) == 'Coord: [float64] km (size: 6)'
-
     ds = NDDataset.ones((6,), units='absorbance', dtype='complex128')
     assert ds.size == 6
     assert str(ds) == 'NDDataset: [complex128] a.u. (size: 6)'
     assert ds[0].data == 1. + 0j
 
-    ######
+    # LINSPACE
+    # --------
 
     c2 = Coord.linspace(1, 20, 200, units='m', name='mycoord')
     assert c2.name == 'mycoord'
@@ -703,11 +715,17 @@ def test_array_creation():
     assert c2[-1].data == 20
     assert c2[0].values == Quantity(1, 'm')
 
+    # ARANGE
+    # -------
+
     c3 = Coord.arange(1, 20.0001, 1, units='s', name='mycoord')
     assert c3.name == 'mycoord'
     assert c3.size == 20
     assert c3[-1].data == 20
     assert c3[0].values == Quantity(1, 's')
+
+    # EYE
+    # ----
 
     ds1 = scp.NDDataset.eye(2, dtype=int)
     assert str(ds1) == 'NDDataset: [int64] unitless (shape: (y:2, x:2))'
@@ -715,42 +733,103 @@ def test_array_creation():
     assert (ds.data == np.eye(3, k=1)).all()
     assert ds.units == ur.km
 
+    # IDENTITY
+    # --------
+
     ds = scp.identity(3, units='km')
     assert (ds.data == np.identity(3,)).all()
     assert ds.units == ur.km
 
-def test_api_methods():
+    # RANDOM
+    # ------
+
+    ds = scp.random((3,3), units='km')
+    assert str(ds) == 'NDDataset: [float64] km (shape: (y:3, x:3))'
+
+    # adding coordset
+    c1 = Coord.linspace(1, 20, 200, units='m', name='axe_x')
+    ds = scp.random((200, ), units='km', coordset=scp.CoordSet(x=c1))
+
+    # DIAGONAL
+    # --------
+
+    # extract diagonal
+    nd = scp.full((2, 2), 0.5, units='s', title='initial')
+    assert str(nd) == "NDDataset: [float64] s (shape: (y:2, x:2))"
+    ndd = scp.diagonal(nd, title='diag')
+    assert str(ndd) == 'NDDataset: [float64] s (size: 2)'
+    assert ndd.units == Unit('s')
+
+    cx = scp.Coord([0, 1])
+    cy = scp.Coord([2, 5])
+    nd = NDDataset.full((2, 2), 0.5, units='s', coordset=scp.CoordSet(cx, cy), title='initial')
+    assert str(nd) == "NDDataset: [float64] s (shape: (y:2, x:2))"
+    ndd = nd.diagonal(title='diag2')
+    assert str(ndd) == 'NDDataset: [float64] s (size: 2)'
+    assert ndd.units == Unit('s')
+    assert ndd.title == 'diag2'
+
+    cx = scp.Coord([0, 1, 2])
+    cy = scp.Coord([2, 5])
+    nd = NDDataset.full((2, 3), 0.5, units='s', coordset=scp.CoordSet(x=cx, y=cy), title='initial')
+    assert str(nd) == "NDDataset: [float64] s (shape: (y:2, x:3))"
+    ndd = nd.diagonal(title='diag3')
+    assert str(ndd) == 'NDDataset: [float64] s (size: 2)'
+    assert ndd.units == Unit('s')
+    assert ndd.title == 'diag3'
+    assert_array_equal(nd.x.data[:ndd.x.size], ndd.x.data)
+
+    ndd = nd.diagonal(title='diag4', dim='y')
+    assert str(ndd) == 'NDDataset: [float64] s (size: 2)'
+    assert ndd.units == Unit('s')
+    assert ndd.title == 'diag4'
+    assert_array_equal(nd.y.data[:ndd.y.size], ndd.y.data)
+
+    # DIAG
+    # ----
+
     ref = NDDataset(np.diag((3, 3.4, 2.3)), units='m', title='something')
 
     # Three forms should return the same NDDataset
-    print("\n ds = scp.diag((3,3.4,2.3), units='m', title='something')")
     ds = scp.diag((3, 3.4, 2.3), units='m', title='something')
     assert_dataset_equal(ds, ref)
 
-    print("\n ds = NDDataset.diag((3, 3.4, 2.3), units='m', title='something')")
     ds = NDDataset.diag((3, 3.4, 2.3), units='m', title='something')
     assert_dataset_equal(ds, ref)
 
-    print("\n ds = NDDataset().diag((3, 3.4, 2.3), units='m', title='something')")
     ds = NDDataset((3, 3.4, 2.3)).diag(units='m', title='something')
     assert_dataset_equal(ds, ref)
 
     # and this too
     ds1 = NDDataset((3, 3.4, 2.3), units='s', title='another')
 
-    with pytest.raises(TypeError):
-        # "Units are  already set in the first object!"
-        ds = scp.diag(ds1, units='m', title='something')
-
-    print("\n ds = scp.diag(ds1, title='something')")
-    ds = scp.diag(ds1, title='something')
-    ds.ito("m", force=True)
+    ds = scp.diag(ds1, units='m', title='something')
     assert_dataset_equal(ds, ref)
 
-    print('*' * 50)
-    print("\n ds = ds1.diag(units='m', title='something')")
     ds = ds1.diag(units='m', title='something')
     assert_dataset_equal(ds, ref)
+
+    # BOOL : ALL and ANY
+    # ------------------
+
+    ds = NDDataset([[True,False],[True,True]])
+    b = np.all(ds)
+    assert not b
+
+    b = scp.all(ds)
+    assert not b
+
+    b = ds.all()
+    assert not b
+
+    b = NDDataset.any(ds)
+    assert b
+
+    b  = ds.all(dim='y')
+    assert_array_equal(b, np.array([ True, False]))
+
+    b  = ds.any(dim='y')
+    assert_array_equal(b, np.array([ True, True]))
 
 
 def test_nddataset_max_min_with_1D_real(IR_dataset_1D):
@@ -850,10 +929,15 @@ def test_fromfunction():
         d = v * t
         return d
 
-    time = Coord.linspace(0, 9, 10)
+    time = Coord.linspace(0, 9, 10,)
     distance = NDDataset.fromfunction(func1, v=134, coordset=CoordSet(t=time))
     assert distance.dims == ['t']
     assert_array_equal(distance.data, np.fromfunction(func1, (10,), v=134))
+
+    time = Coord.linspace(0, 90, 10, units='min')
+    distance = NDDataset.fromfunction(func1, v=Quantity(134, 'km/hour'), coordset=CoordSet(t=time))
+    assert distance.dims == ['t']
+    assert_array_equal(distance.data, np.fromfunction(func1, (10,), v=134)*10/60)
 
     # 2D
     def func2(x, y):

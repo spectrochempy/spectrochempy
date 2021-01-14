@@ -215,9 +215,11 @@ def importermethod(func):
 # ----------------------------------------------------------------------------------------------------------------------
 def read(*paths, **kwargs):
     """
+    Generic read method
+
     Parameters
     ----------
-    path : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
+    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
         The data source(s) can be specified by the name or a list of name for the file(s) to be loaded:
 
         *e.g.,( file1, file2, ...,  **kwargs )*
@@ -238,13 +240,13 @@ def read(*paths, **kwargs):
     merge : bool, optional
         Default value is False. If True, and several filenames have been provided as arguments,
         then a single dataset with merged (stacked along the first
-        dimension) is returned (default=False)
+        dimension) is returned (default=False).
     sortbydate : bool, optional
-        Sort multiple spectra by acquisition date (default=True)
-    description: str, optional
+        Sort multiple spectra by acquisition date (default=True).
+    description : str, optional
         A Custom description.
     origin : {'omnic', 'tga'}, optional
-        in order to properly interpret CSV file it can be necessary to set the origin of the spectra.
+        In order to properly interpret CSV file it can be necessary to set the origin of the spectra.
         Up to now only 'omnic' and 'tga' have been implemented.
     csv_delimiter : str, optional
         Set the column delimiter in CSV file.
@@ -253,7 +255,7 @@ def read(*paths, **kwargs):
         Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
         The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
-        For exemples on how to use this feature, one can look in the ``tests/tests_readers`` directory
+        For exemples on how to use this feature, one can look in the ``tests/tests_readers`` directory.
 
     Other Parameters
     ----------------
@@ -266,7 +268,7 @@ def read(*paths, **kwargs):
     Returns
     --------
     out
-        NDDataset| or list of |NDDataset|
+        NDDataset| or list of |NDDataset|.
 
     Examples
     ---------
@@ -294,10 +296,10 @@ def read(*paths, **kwargs):
 
     Multiple files not merged (return a list of datasets). Note that a directory is specified
 
-    >>> l = read('test.0000', 'test.0001', 'test.0002', directory='irdata/OPUS')
-    >>> len(l)
+    >>> le = read('test.0000', 'test.0001', 'test.0002', directory='irdata/OPUS')
+    >>> len(le)
     3
-    >>> l[0]
+    >>> le[0]
     NDDataset: [float32] a.u. (shape: (y:1, x:2567))
 
     Multiple files merged as the `merge` keyword is set to true
@@ -312,8 +314,8 @@ def read(*paths, **kwargs):
 
     Multiple files not merged : they are passed as a list but `merge` is set to false
 
-    >>> l = read(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS', merge=False)
-    >>> len(l)
+    >>> le = read(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS', merge=False)
+    >>> len(le)
     3
 
     Read without a filename. This has the effect of opening a dialog for file(s) selection
@@ -323,8 +325,8 @@ def read(*paths, **kwargs):
     Read in a directory (assume that only OPUS files are present in the directory
     (else we must use the generic `read` function instead)
 
-    >>> l = read(directory='irdata/OPUS')
-    >>> len(l)
+    >>> le = read(directory='irdata/OPUS')
+    >>> len(le)
     4
 
     Again we can use merge to stack all 4 spectra if thet have compatible dimensions.

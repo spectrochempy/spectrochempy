@@ -34,7 +34,7 @@ class SVD(HasTraits):
 
     The SVD is commonly written as :math:`X = U \\Sigma V^{T}`.
 
-    This class has the attributes : U, s = diag(S) and VT=V:math:`^T`.
+    This class has the attributes : U, s = diag(S) and VT=V :math:`^T`.
 
     If the dataset contains masked values, the corresponding ranges are
     ignored in the calculation.
@@ -63,7 +63,7 @@ class SVD(HasTraits):
             (k, N), respectively, where k = min(M, N).
             Otherwise the shapes will be (M, M) and (N, N),
             respectively.
-        compute_uv : bool, optional, default:True.
+        compute_uv : bool, optional, default: True.
             Whether or not to compute U and VT in addition to s.
 
         Examples

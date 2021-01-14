@@ -153,26 +153,23 @@ def plot_2D(dataset, **kwargs):
     Parameters
     ----------
     dataset : :class:`~spectrochempy.ddataset.nddataset.NDDataset`
-        The dataset to plot
-    ax : |Axes| instance. Optional.
+        The dataset to plot.
+    ax : |Axes| instance. Optional
         The axe where to plot. The default is the current axe or to create a new one if is None.
-    clear : `bool`, optional, default=`True`.
-        Should we plot on the ax previously used or create a new figure?
-    figsize : tuple, optional.
+    clear : `bool`, optional, default=`True`
+        Should we plot on the ax previously used or create a new figure?.
+    figsize : tuple, optional
         The figure size expressed as a tuple (w,h) in inch.
 
     Other Parameters
     -----------------
-    method : ['stack', 'map', 'image', 'surface', 'waterfall'] , optional.
+    method : ['stack', 'map', 'image', 'surface', 'waterfall'] , optional
         The method of plot of the dataset, which will determine the plotter to use. Default is stack
-
-
     fontsize : int, optional
-        The font size in pixels, default is 10 (or read from preferences)
-
+        The font size in pixels, default is 10 (or read from preferences).
     style : str
     autolayout : `bool`, optional, default=True
-        if True, layout will be set automatically
+        if True, layout will be set automatically.
     output : str
         A string containing a path to a filename. The output format is deduced
         from the extension of the filename. If the filename has no extension,
@@ -180,8 +177,6 @@ def plot_2D(dataset, **kwargs):
     dpi : [ None | scalar > 0]
         The resolution in dots per inch. If None it will default to the
         value savefig.dpi in the matplotlibrc file.
-
-
     colorbar :
     transposed :
     clear :
@@ -195,20 +190,15 @@ def plot_2D(dataset, **kwargs):
     method : str [optional among ``map``, ``stack``, ``image`` or ``3D``]
         The type of plot,
     projections : `bool` [optional, default=False]
-
-
     style : str, optional, default='notebook'
         Matplotlib stylesheet (use `available_style` to get a list of available
         styles for plotting
-
     reverse : `bool` or None [optional, default=None
         In principle, coordinates run from left to right, except for wavenumbers
         (e.g., FTIR spectra) or ppm (e.g., NMR), that spectrochempy
         will try to guess. But if reverse is set, then this is the
         setting which will be taken into account.
-
     x_reverse : `bool` or None [optional, default=None
-
     kwargs : additional keywords
     """
 

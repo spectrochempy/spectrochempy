@@ -69,23 +69,23 @@ def make_func_from(func, first=None):
     return modified
 
 
-def make_new_object(obj):
+def make_new_object(objtype):
     """
     Make a new object of type obj
 
     Parameters
     ----------
-    obj : the poject type
+    objtype : the object type
 
     Returns
     -------
     new : the new object of same type.
     """
 
-    new = type(obj)()
+    new = type(objtype)()
 
     # new id and date
-    new._id = "{}_{}".format(type(obj).__name__, str(uuid.uuid1()).split('-')[0])
+    new._id = "{}_{}".format(type(objtype).__name__, str(uuid.uuid1()).split('-')[0])
     new._date = datetime.now(timezone.utc)
 
     return new

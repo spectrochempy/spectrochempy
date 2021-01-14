@@ -597,8 +597,11 @@ def autodoc_skip_member(app, what, name, obj, skip, options):
     exclude = name in exclusions or 'trait' in name or name.startswith('_')  # or not doc
     return skip or exclude
 
+
 def shorter_signature(app, what, name, obj, options, signature, return_annotation):
-    """Prevent displaying self in signture."""
+    """
+    Prevent displaying self in signature.
+    """
     if what not in ('function', 'method', 'class') or signature is None:
         return
 
@@ -606,7 +609,7 @@ def shorter_signature(app, what, name, obj, options, signature, return_annotatio
     new_sig = signature
     if inspect.isfunction(obj) or inspect.isclass(obj) or inspect.ismethod(obj):
         sig_obj = obj if not inspect.isclass(obj) else obj.__init__
-        sig_re = '\((self|cls)?,?\s*(.*?)\)\:'
+        sig_re = r'\((self|cls)?,?\s*(.*?)\)\:'
         try:
             new_sig = ' '.join(re.search(sig_re, inspect.getsource(sig_obj), re.S).group(2).replace('\n', '').split())
         except Exception as e:
@@ -614,6 +617,7 @@ def shorter_signature(app, what, name, obj, options, signature, return_annotatio
             raise e
         new_sig = '(' + new_sig + ')'
     return new_sig, return_annotation
+
 
 # %%
 def setup(app):
