@@ -81,11 +81,11 @@ def read_dir(directory=None, **kwargs):
 def read_carroucell(dataset=None, directory=None, **kwargs):
     """
     Open .spa files in a directory after a carroucell experiment.
+
     The files for a given sample are grouped in NDDatasets (sorted by acquisition date).
     The NDDatasets are returned in a list sorted by sample number.
     When the file containing the temperature data is present, the temperature is read
     and assigned as a label to each spectrum.
-
 
     Notes
     ------
@@ -98,21 +98,22 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
     ----------
     dataset : `NDDataset`
         The dataset to store the data and metadata.
-        If None, a NDDataset is created
-    directory : str, optional.
+        If None, a NDDataset is created.
+    directory : str, optional
         If not specified, opens a dialog box.
     spectra : arraylike of 2 int (min, max), optional, default=None
         The first and last spectrum to be loaded as determined by their number.
-         If None all spectra are loaded
+         If None all spectra are loaded.
     discardbg : bool, optional, default=True
-        If True : do not load background (sample #9)
+        If True : do not load background (sample #9).
     delta_clocks : int, optional, default=0
         Difference in seconds between the clocks used for spectra and temperature acquisition.
         Defined as t(thermocouple clock) - t(spectrometer clock).
 
     Returns
     --------
-    nddataset : |NDDataset| or list of |NDDataset|
+    nddataset
+        |NDDataset| or list of |NDDataset|.
 
     Examples
     --------

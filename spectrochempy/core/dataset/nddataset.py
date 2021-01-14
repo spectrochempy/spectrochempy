@@ -15,6 +15,7 @@ __all__ = ['NDDataset']
 
 import textwrap
 import warnings
+import sys
 
 import numpy as np
 from traitlets import HasTraits, Instance, Bool, Float, validate, default
@@ -25,7 +26,7 @@ from spectrochempy.core.dataset.ndarray import NDArray, DEFAULT_DIM_NAME
 from spectrochempy.core.dataset.ndcomplex import NDComplexArray
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
-from spectrochempy.core.dataset.ndmath import NDMath, set_ufuncs, set_operators, set_api_methods, make_func_from
+from spectrochempy.core.dataset.ndmath import NDMath, _set_ufuncs, _set_operators
 from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.core.dataset.ndplot import NDPlot
 from spectrochempy.core import error_, warning_
@@ -72,8 +73,8 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         sliced, sorted and subject to mathematical operations. But, in addition, NDDataset may have units, can be masked
         and each dimensions can have coordinates also with units. This make NDDataset aware of unit compatibility, e.g.,
         for binary operation such as additions or subtraction or during the application of mathematical operations.
-        In addition or in replacement of numerical data for coordinates, NDDataset can also have labeled coordinates where
-        labels can be different kind of objects (strings, datetime, numpy nd.ndarray or othe NDDatasets, etc…).
+        In addition or in replacement of numerical data for coordinates, NDDataset can also have labeled coordinates
+        where labels can be different kind of objects (strings, datetime, numpy nd.ndarray or othe NDDatasets, etc…).
 
         Parameters
         ----------
@@ -539,7 +540,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         else:
             self.set_coordset(coords)
 
-
     # ..................................................................................................................
     @property
     def coordtitles(self):
@@ -578,6 +578,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         # as we can't write super().data = data, we call _set_data
         # see comment in the data.setter of NDArray
         super()._set_data(data)
+
     # ..................................................................................................................
     def delete_coordset(self):
         """
@@ -665,6 +666,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             # from the current project.
             self._parent.remove_dataset(self.name)
         self._parent = value
+
     # ..................................................................................................................
     def set_coordset(self, *args, **kwargs):
         """
@@ -710,8 +712,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     # ..................................................................................................................
     def sort(self, **kwargs):
         """
-        Returns the dataset sorted along a given dimension
-        (by default, the last dimension [axis=-1]) using the numeric or label values
+        Returns the dataset sorted along a given dimension.
+
+        (by default, the last dimension [axis=-1]) using the numeric or label values.
 
         Parameters
         ----------
@@ -719,16 +722,16 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             dimension index or name along which to sort.
         pos : int , optional
             If labels are multidimensional  - allow to sort on a define
-            row of labels : labels[pos]. Experimental : Not yet checked
-        by : str among ['value', 'label'], optional, default=``value``.
+            row of labels : labels[pos]. Experimental : Not yet checked.
+        by : str among ['value', 'label'], optional, default=``value``
             Indicate if the sorting is following the order of labels or
             numeric coord values.
-        descend : `bool`, optional, default=`False`.
+        descend : `bool`, optional, default=`False`
             If true the dataset is sorted in a descending direction. Default is False  except if coordinates
             are reversed.
         inplace : bool, optional, default=`False`
             Flag to say that the method return a new object (default)
-            or not (inplace=True)
+            or not (inplace=True).
 
         Returns
         -------
@@ -803,11 +806,11 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             one, an error is raised.
         inplace : bool, optional, default=`False`
             Flag to say that the method return a new object (default)
-            or not (inplace=True)
+            or not (inplace=True).
 
         Returns
         -------
-        squeezed : same object type
+        squeezed
             The input array, but with all or a subset of the
             dimensions of length 1 removed.
 
@@ -815,7 +818,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         ------
         ValueError
             If `dim` is not `None`, and the dimension being squeezed is not
-            of length 1
+            of length 1.
         """
         # make a copy of the original dims
         old = self.dims[:]
@@ -846,7 +849,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             Second axis.
         inplace : bool, optional, default=`False`
             Flag to say that the method return a new object (default)
-            or not (inplace=True)
+            or not (inplace=True).
 
         Returns
         -------
@@ -1004,12 +1007,12 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         Parameters
         ----------
-        dims : sequence of dimension indexes or names, optional.
+        dims : sequence of dimension indexes or names, optional
             By default, reverse the dimensions, otherwise permute the dimensions
             according to the values given.
         inplace : bool, optional, default=`False`
             Flag to say that the method return a new object (default)
-            or not (inplace=True)
+            or not (inplace=True).
 
         Returns
         -------
@@ -1017,7 +1020,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         See Also
         --------
-        swapaxes
+        swapaxes : Interchange two dimensions of a NDDataset.
         """
         new = super().transpose(*dims, inplace=inplace)
         new.history = f'Data transposed between dims: {dims}' if dims else ''
@@ -1124,37 +1127,20 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 # ======================================================================================================================
 
 # make some NDDataset operation accessible from the spectrochempy API
-# We want a slightly different docstring so we cannot just make:
-#     func = NDDataset.func
-#
-# TODO: needs to revise this
+thismodule = sys.modules[__name__]
 
-copy = make_func_from(NDDataset.copy, first='dataset')
-sort = make_func_from(NDDataset.sort, first='dataset')
-squeeze = make_func_from(NDDataset.squeeze, first='dataset')
-swapaxes = make_func_from(NDDataset.swapaxes, first='dataset')
-transpose = make_func_from(NDDataset.transpose, first='dataset')
-to_xarray = make_func_from(NDDataset.to_xarray, first='dataset')
-take = make_func_from(NDDataset.take, first='dataset')
+api_funcs = ['sort', 'copy', 'squeeze', 'swapaxes', 'transpose', 'to_xarray', 'take', 'abs',
+             'conjugate', 'set_complex', 'set_quaternion']
 
-__all__ += ['sort', 'copy', 'squeeze', 'swapaxes', 'transpose', 'to_xarray', 'take', ]
+# todo: chack the fact that some function are defined also in ndmath
+for funcname in api_funcs:
+    setattr(thismodule, funcname, getattr(NDDataset, funcname))
 
-# The following operation act only on complex NDDataset
-abs = make_func_from(NDDataset.abs, first='dataset')
-conjugate = make_func_from(NDDataset.conjugate, first='dataset')  # defined in ndarray
-conj = make_func_from(conjugate)
-conj.__doc__ = "Short alias of `conjugate` "
-set_complex = make_func_from(NDDataset.set_complex, first='dataset')
-set_quaternion = make_func_from(NDDataset.set_quaternion, first='dataset')
-
-__all__ += ['abs', 'conjugate', 'conj', 'set_complex', 'set_quaternion', ]
+    thismodule.__all__.append(funcname)
 
 # ======================================================================================================================
 # Set the operators
 # ======================================================================================================================
 
-set_operators(NDDataset, priority=100000)
-set_ufuncs(NDDataset)
-
-methods = ['diag', 'identity', 'eye']
-set_api_methods(NDDataset, methods)
+_set_operators(NDDataset, priority=100000)
+_set_ufuncs(NDDataset)

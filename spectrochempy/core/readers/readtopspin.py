@@ -732,29 +732,29 @@ def _remove_digital_filter(dic, data):
 # ======================================================================================================================
 def read_topspin(*args, **kwargs):
     """
-    Import Bruker dataset
+    Import Bruker dataset.
 
     Parameters
     ----------
     path : str, optional
         path of the Bruker directory. It path is None, at least the parameters
         `data`, `user`, `name`, `expno` must be provided.
-    data : str,
-        main storage directory, optional
+    data : str
+        main storage directory, optional.
     user : str, optional
-        user name of the dataset
+        user name of the dataset.
     name : str, optional
-        name of the dataset
+        name of the dataset.
     expno : int, optional
-        experiment number
+        experiment number.
     expnos : list, optional
-        A list of expno
+        A list of expno.
     processed : bool, optioanl, default is False
-        should we load already bruker processed files
+        should we load already bruker processed files.
     procno : int
-        processing number
+        processing number.
     silent : bool
-        should we output details
+        should we output details.
     """
     kwargs['filetypes'] = ['Bruker TOPSPIN fid\'s or processed data files (fid ser 1[r|i] 2[r|i]* 3[r|i]*)',
                            'Compressed TOPSPIN data directories (*.zip)']

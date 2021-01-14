@@ -13,6 +13,7 @@ __all__ = __slots__ = ['trim_ranges']
 from traitlets import HasTraits, List, Bool
 from spectrochempy.utils.traitlets import Range
 
+
 # ======================================================================================================================
 # _CoordRange
 # ======================================================================================================================
@@ -98,7 +99,7 @@ def trim_ranges(*ranges, reversed=False):
     >>> spc.trim_ranges([1, 4], [7, 5], [6, 10])
     [[1, 4], [5, 10]]
     """
-    return _CoordRange(*ranges, reversed).ranges
+    return _CoordRange(*ranges, reversed=reversed).ranges
 
 
 # ======================================================================================================================

@@ -7,8 +7,6 @@
 
 import sys
 import os
-import inspect
-import decorator
 from pkgutil import walk_packages
 
 from traitlets import import_item

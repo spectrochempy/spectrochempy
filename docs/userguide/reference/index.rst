@@ -70,7 +70,6 @@ Coordinates related objects
 NDDataset in SpectroChemPy in contrast to numpy nd-arrays can have coordinates for each dimension.
 The individual coordinates are represented by a specific object: Coord.
 All coordinates of an NDDataset are grouped in a particular object: CoordSet.
-Finally, a range of coordinates can be represented by the object: CoordRange.
 
 .. autosummary::
     :nosignatures:
@@ -79,11 +78,10 @@ Finally, a range of coordinates can be represented by the object: CoordRange.
     Coord
     LinearCoord
     CoordSet
-    CoordRange
 
 
-Creating NDDataset
--------------------
+Creating NDDataset from existing data
+-------------------------------------
 
 A NDDataset can be created using the NDDataset class constructor, for instance here we create a dataset from a random
 two dimensional array:
@@ -95,8 +93,17 @@ two dimensional array:
     nd = NDDataset(X)
 
 
-(see the User Guide for examples on how to use this constructor.)
+(see the :ref:`userguide` for a large set of examples on how to use this constructor.)
 
+Other possibility are using the following methods
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    copy
+    fromfunction
+    read
 
 Creation using numpy-like functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -116,7 +123,6 @@ These functions mimics numpy equivalent, but output a NDDataset object
     full_like
     eye
     identity
-
 
 Import of data from external sources
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

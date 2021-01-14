@@ -82,7 +82,7 @@ def simps(dataset, *args, **kwargs):
     axis : int, optional
         When dim is not used, this is the axis along which to integrate. Default is the last axis.
     even : str {'avg', 'first', 'last'}, optional
-        'avg' : Average two results:1) use the first N-2 intervals with
+        'avg' : Average two results: 1) use the first N-2 intervals with
                   a trapezoidal rule on the last interval and 2) use the last
                   N-2 intervals with a trapezoidal rule on the first interval.
         'first' : Use Simpson's rule for the first N-2 intervals with

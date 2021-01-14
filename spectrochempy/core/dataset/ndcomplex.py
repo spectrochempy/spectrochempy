@@ -349,7 +349,7 @@ class NDComplexArray(NDArray):
     # ..................................................................................................................
     def conjugate(self, dims='x', inplace=False):
         """
-        Conjugate of the NDDataset in the specified dimension
+        Conjugate of the NDDataset in the specified dimension.
 
         Parameters
         ----------
@@ -357,7 +357,7 @@ class NDComplexArray(NDArray):
             Dimension names or indexes along which the method should be applied.
         inplace : bool, optional, default=False
             Flag to say that the method return a new object (default)
-            or not (inplace=True)
+            or not (inplace=True).
 
         Returns
         -------
@@ -475,7 +475,7 @@ class NDComplexArray(NDArray):
         ----------
         inplace : bool, optional, default=False
             Flag to say that the method return a new object (default)
-            or not (inplace=True)
+            or not (inplace=True).
 
         Returns
         -------
@@ -502,13 +502,13 @@ class NDComplexArray(NDArray):
     # ..................................................................................................................
     def set_quaternion(self, inplace=False):
         """
-        Set the object data as quaternion
+        Set the object data as quaternion.
 
         Parameters
         ----------
         inplace : bool, optional, default=False
             Flag to say that the method return a new object (default)
-            or not (inplace=True)
+            or not (inplace=True).
 
         Returns
         -------

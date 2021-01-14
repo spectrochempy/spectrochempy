@@ -10,7 +10,6 @@
    NDDataset
    Coord
    LinearCoord
-   CoordRange
    Project
    Script
 
@@ -43,9 +42,11 @@
    NDDataset.cumsum
    NDDataset.detrend
    NDDataset.diag
+   NDDataset.diagonal
    NDDataset.em
    NDDataset.fft
    NDDataset.find_peaks
+   NDDataset.fromfunction
    NDDataset.get_axis
    NDDataset.get_labels
    NDDataset.gm

@@ -103,7 +103,7 @@ def ifft(dataset, size=None, **kwargs):
     --------
     fft : Direct Fourier transform.
     """
-    return fft(dataset, size=size, inv=True, inplace=inplace, **kwargs)
+    return fft(dataset, size=size, inv=True, **kwargs)
 
 
 def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):

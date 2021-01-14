@@ -36,10 +36,7 @@ import warnings
 import zipfile
 from pathlib import Path
 
-import json5 as json
 import numpy as np
-import requests
-from jinja2 import Template
 from skimage.io import imread, imsave
 from skimage.transform import resize
 from sphinx.application import Sphinx
@@ -381,7 +378,6 @@ Build = BuildDocumentation()
 
 # %%
 if __name__ == '__main__':
-    from os import environ
 
     environ['DOC_BUILDING'] = 'yes'
     Build()

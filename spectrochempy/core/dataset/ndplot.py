@@ -578,7 +578,7 @@ class NDPlot(HasTraits):
                         kws[k.strip()] = eval(v)
                     else:
                         ags.append(eval(item))
-                getattr(self.ndaxes['main'], com)(*ags, **kws)  # TODO:improve this
+                getattr(self.ndaxes['main'], com)(*ags, **kws)  # TODO: improve this
 
         # output command should be after all plot commands
 

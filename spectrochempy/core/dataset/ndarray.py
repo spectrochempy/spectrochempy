@@ -566,7 +566,10 @@ class NDArray(HasTraits):
         if dims is None:
             return
 
-        if not is_sequence(dims):
+        if is_sequence(dims):
+            if np.all([d is None for d in dims]):
+                return
+        else:
             dims = [dims]
 
         axis = []
@@ -1319,6 +1322,8 @@ class NDArray(HasTraits):
             or 'dims'
         negative_axis : bool, optional, default=False.
             If True a negative index is returned for the axis value (-1 for the last dimension, etc...)
+        allows_none : bool, optional, default=False
+            If True, if input is none then None is returned.
 
         Returns
         -------
@@ -1331,7 +1336,7 @@ class NDArray(HasTraits):
         dims = self._get_dims_from_args(*args, **kwargs)
         axis = self._get_dims_index(dims)
         allows_none = kwargs.get('allows_none', False)
-        if axis is None and dims is None and allows_none:
+        if axis is None and allows_none:
             return None, None
         axis = axis[0] if axis else self.ndim - 1  # None
         dim = self.dims[axis]
@@ -1616,16 +1621,49 @@ class NDArray(HasTraits):
         force : bool, optional, default=`False`
             If True the change of units is forced, even for incompatible units
 
-        Returns
-        -------
-        object
-            same object with new units.
+        See Also
+        --------
+        to : Rescaling of the current object data to different units
+        to_base_units : Rescaling of the current object data to different units
+        ito_base_units : Inplace rescaling of the current object data to different units
+        to_reduced_units : Rescaling to reduced units.
+        ito_reduced_units : Rescaling to reduced units.
+        """
+        self.to(other, inplace=True, force=force)
+
+    # ..................................................................................................................
+    def ito_base_units(self):
+        """
+        Inplace rescaling to base units.
 
         See Also
         --------
-        to
+        to : Rescaling of the current object data to different units
+        ito : Inplace rescaling of the current object data to different units
+        to_base_units : Rescaling of the current object data to different units
+        to_reduced_units : Rescaling to redunced units.
+        ito_reduced_units : Inplace rescaling to reduced units.
         """
-        return self.to(other, inplace=True, force=force)
+        self.to_base_units(inplace=True)
+
+    # ..................................................................................................................
+    def ito_reduced_units(self):
+        """
+        Quantity scaled in place to reduced units, inplace.
+
+        Scaling to reduced units means, one unit per
+        dimension. This will not reduce compound units (e.g., 'J/kg' will not
+        be reduced to m**2/s**2)
+
+        See Also
+        --------
+        to : Rescaling of the current object data to different units
+        ito : Inplace rescaling of the current object data to different units
+        to_base_units : Rescaling of the current object data to different units
+        ito_base_units : Inplace rescaling of the current object data to different units
+        to_reduced_units : Rescaling to reduced units.
+        """
+        self.to_reduced_units(inplace=True)
 
     # ..................................................................................................................
     @property
@@ -2050,9 +2088,17 @@ class NDArray(HasTraits):
         force : bool, optional, default=False
             If True the change of units is forced, even for incompatible units
 
-         Returns
+        Returns
         -------
-        %(generic_method.returns.object)s
+        rescaled
+
+        See Also
+        --------
+        ito : Inplace rescaling of the current object data to different units
+        to_base_units : Rescaling of the current object data to different units
+        ito_base_units : Inplace rescaling of the current object data to different units
+        to_reduced_units : Rescaling to reduced_units.
+        ito_reduced_units : Inplace rescaling to reduced units.
 
         Examples
         --------
@@ -2084,10 +2130,6 @@ class NDArray(HasTraits):
 
         >>> print(ndd)
         NDArray: [float64] m (shape: (y:3, x:3))
-
-        See Also
-        --------
-        ito : change units inplace
         """
         if inplace:
             new = self
@@ -2138,8 +2180,69 @@ class NDArray(HasTraits):
                 new._units = units
             else:
                 warnings.warn("There is no units for this NDArray!", SpectroChemPyWarning)
-        # if not inplace:
-        return new
+
+        if not inplace:
+            return new
+
+    def to_base_units(self, inplace=False):
+        """
+        Return NDDataset rescaled to base units.
+
+        Parameters
+        ----------
+        inplace : bool
+            If True the rescaling is done in place
+
+        Returns
+        -------
+        rescaled
+            A rescaled NDDataset
+
+        """
+        q = Quantity(1., self.units)
+        q.ito_base_units()
+
+        if not inplace:
+            new = self.copy()
+        else:
+            new = self
+
+        new.ito(q.units)
+
+        if not inplace:
+            return new
+
+    def to_reduced_units(self, inplace=False):
+        """
+        Return Quantity scaled in place to reduced units
+
+        Reduced units means one unit per
+        dimension. This will not reduce compound units (e.g., 'J/kg' will not
+        be reduced to m**2/s**2),
+
+        Parameters
+        ----------
+        inplace : bool
+            If True the rescaling is done in place
+
+        Returns
+        -------
+        rescaled
+            A rescaled NDDataset
+
+        """
+        q = Quantity(1., self.units)
+        q.ito_reduced_units()
+
+        if not inplace:
+            new = self.copy()
+        else:
+            new = self
+
+        new.ito(q.units)
+
+        if not inplace:
+            return new
 
     # ..................................................................................................................
     def transpose(self, *dims, inplace=False):
