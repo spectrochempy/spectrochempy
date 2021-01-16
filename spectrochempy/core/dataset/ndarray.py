@@ -1984,7 +1984,9 @@ class NDArray(HasTraits):
             s = np.array(new.shape)
             dims = np.argwhere(s == 1).squeeze().tolist()
         axis = self._get_dims_index(dims)
-        # debug_(f"axis:{axis}<-dims:{dims}")
+        if axis is None:
+            # nothing to squeeze
+            return new, axis
 
         # recompute new dims
         for i in axis[::-1]:

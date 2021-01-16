@@ -369,18 +369,6 @@ def test_ndmath_reduce_quantity(IR_dataset_2D):
     assert ds.units == s.units
 
 
-def test_ndmath_absolute_of_complex():
-    ndd = NDDataset([1., 2. + 1j, 3.])
-
-    val = np.abs(ndd)
-    info_(val)
-
-    val = ndd[1] * 1.2 - 10.
-
-    val = np.abs(val)
-    info_(val)
-
-
 def test_ndmath_absolute_of_quaternion():
     na0 = np.array(
             [[1., 2., 2., 0., 0., 0.], [1.3, 2., 2., 0.5, 1., 1.], [1, 4.2, 2., 3., 2., 2.], [5., 4.2, 2., 3., 3., 3.]])
@@ -616,7 +604,7 @@ def test_simple_arithmetic_on_full_dataset():
     dataset - dataset[0]  # suppress the first spectrum to all other spectra in the series
 
 
-def test_ndmath_and_api_methods():
+def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
 
     # CREATION _LIKE METHODS
     # ----------------------
@@ -831,99 +819,129 @@ def test_ndmath_and_api_methods():
     b  = ds.any(dim='y')
     assert_array_equal(b, np.array([ True, True]))
 
+   # ARGMAX, MAX
+   # -----------
 
-def test_nddataset_max_min_with_1D_real(IR_dataset_1D):
-    # test on a 1D NDDataset
     nd1 = IR_dataset_1D
-    nd1[1] = True
+    nd1[1290.:890.] = MASKED
     assert nd1.is_masked
-    info_(nd1)
-    assert "[float32]" in str(nd1)
+    assert str(nd1) == 'NDDataset: [float32] a.u. (size: 5549)'
+
+    idx = nd1.argmax()
+    assert idx == 3122
+
     mx = nd1.max()
-    assert mx == Quantity(6.0, 'absorbance')
-    mx = nd1.max(keepdims=1)
-    assert isinstance(mx, NDDataset)  # assert mx.data == pytest.approx(6.0)
+    # alternative
+    mx = scp.max(nd1)
+    mx = NDDataset.max(nd1)
+    assert mx == Quantity(3.8080601692199707, 'absorbance')
 
+    mxk = nd1.max(keepdims=1)
+    assert isinstance(mxk, NDDataset)
+    assert str(mxk) == 'NDDataset: [float32] a.u. (size: 1)'
+    assert mxk.values == mx
 
-def test_nddataset_max_with_2D_real(IR_dataset_2D):
     # test on a 2D NDDataset
     nd2 = IR_dataset_2D
-    nd2 = nd2[:, 4000.:1300.]
-    ndmt = nd2.min()  # no axis specified
-    info_(ndmt)
+    nd2[:, 1290.:890.] = MASKED
+
+    mx = nd2.max()  # no axis specified
+    assert mx == Quantity(3.8080601692199707, 'absorbance')
+    mxk = nd2.max(keepdims=True)
+    assert str(mxk) == 'NDDataset: [float32] a.u. (shape: (y:1, x:1))'
+
     nd2m = nd2.max('y')  # axis selected
-    info_(nd2m)
+    ax = nd2m.plot()
+    nd2[0].plot(ax=ax, clear=False)
+    scp.show()
+
+    nd2m2 = nd2.max('x')  # axis selected
+    nd2m2.plot()
+    scp.show()
+
+    nd2m = nd2.max('y', keepdims=True)
+    assert nd2m.shape == (1,5549)
+
+    nd2m = nd2.max('x', keepdims=True)
+    assert nd2m.shape == (55, 1)
+
+    mx = nd2.min()  # no axis specified
+    assert mx == Quantity(-0.022955093532800674, 'absorbance')
+    mxk = nd2.min(keepdims=True)
+    assert str(mxk) == 'NDDataset: [float32] a.u. (shape: (y:1, x:1))'
+
+    nd2m = nd2.min('y')  # axis selected
+    ax = nd2m.plot()
+    nd2[0].plot(ax=ax, clear=False)
+    scp.show()
+
     nd2m2 = nd2.min('x')  # axis selected
-    info_(nd2m2)
-    pass
+    nd2m2.plot()
+    scp.show()
 
+    nd2m = nd2.min('y', keepdims=True)
+    assert nd2m.shape == (1, 5549)
 
-def test_nddataset_fancy_indexing():
-    # numpy vs dataset
-    rand = np.random.RandomState(42)
-    x = rand.randint(100, size=10)
+    nd2m = nd2.min('x', keepdims=True)
+    assert nd2m.shape == (55, 1)
 
-    # single value indexing
-    info_(x[3], x[7], x[2])
-    dx = NDDataset(x)
-    assert (dx[3].data, dx[7].data, dx[2].data) == (x[3], x[7], x[2])
+    # CLIP
+    # ----
+    nd3 = nd2 - 2.
+    assert nd3.units == nd2.units
+    nd3c = nd3.clip(-.5, 1.)
+    assert nd3c.max().m == 1.
+    assert nd3c.min().m == -.5
 
-    # slice indexing
-    info_(x[3:7])
-    assert_array_equal(dx[3:7].data, x[3:7])
+    # COORDMIN AND COORDMAX
+    # ---------------------
+    cm = nd2.coordmin()
+    assert cm['x'] == Quantity(2039.386, 'cm^-1')
 
-    # boolean indexing
-    info_(x[x > 52])
-    assert_array_equal(dx[x > 52].data, x[x > 52])
+    cm = nd2.coordmin(dim='y')
+    assert cm.size == 5549
 
-    # fancy indexing
-    ind = [3, 7, 4]
-    info_(x[ind])
-    assert_array_equal(dx[ind].data, x[ind])
+    cm = nd2.coordmin(dim='x')
+    assert cm.size == 55
 
-    ind = np.array([[3, 7], [4, 5]])
-    info_(x[ind])
-    assert_array_equal(dx[ind].data, x[ind])
+    cm = nd2.coordmax(dim='y')
+    assert cm.size == 5549
+    cm.plot()
+    scp.show()
 
-    with RandomSeedContext(1234):
-        a = np.random.random((3, 5)).round(1)
-    c = (np.arange(3), np.arange(5))
-    nd = NDDataset(a, coordset=c)
-    info_(nd)
-    a = nd[[1, 0, 2]]
-    info_(a)
-    a = nd[np.array([1, 0])]
-    info_(a)
+    cm = nd2.coordmax(dim='x')
+    assert cm.size == 55
 
+    cm = scp.coordmin(nd2, dim='x')
+    assert cm.size == 55
 
-def test_nddataset_extrema():
-    with RandomSeedContext(1234):
-        a = np.random.random((3, 5)).round(1)
-    c = (np.arange(3) * 10.0 * ur.s, np.arange(5) * 7.0 * ur.kg)
-    nd = NDDataset(a, coordset=c, units='m')
-    info_(nd)
+    cm = scp.coordmax(nd2, dim='x')
+    assert cm.size == 55
 
-    mi = nd.min()
-    assert mi == Quantity(0.2, 'meter')
+    # ABS
+    # ----
+    nd2a = scp.abs(nd2)
+    mxa = nd2a.min()
+    assert mxa > 0
 
-    ma = nd.max()
-    assert ma == Quantity(1.0, 'meter')
+    nd2a = NDDataset.abs(nd2)
+    mxa = nd2a.min()
+    assert mxa > 0
 
-    ma = np.max(nd, keepdims=True)
-    assert isinstance(ma, NDDataset)
-    assert ma.shape == (1, 1)
-    assert ma.x.data == np.array([21])
-    assert ma.y.data == np.array([10])
+    nd2a = np.abs(nd2)
+    mxa = nd2a.min()
+    assert mxa > 0
 
-    mi = nd.min(keepdims=True)
-    assert isinstance(mi, NDDataset)
+    ndd = NDDataset([1., 2. + 1j, 3.])
+    val = np.abs(ndd)
+    info_(val)
 
-    info_('_____________________________')
-    mi1 = nd.min(dim='y')
-    info_('minimum', mi1)  # ma1 = nd.max('x')  # info_('X :', ma1)  # ma2 = nd.max('y')  # info_('Y :', ma2)
+    val = ndd[1] * 1.2 - 10.
+    val = np.abs(val)
+    info_(val)
 
-
-def test_fromfunction():
+    # FROMFUNCTION
+    # ------------
     # 1D
     def func1(t, v):
         d = v * t
@@ -984,3 +1002,47 @@ def test_fromfunction():
     assert distance.shape == (2, 3)
     assert distance.dims == ['v', 'u']
     assert distance[0, 2].values == distance.u[2].values + 1. / distance.v[0].values
+
+    # FROMITER
+    # --------
+    iterable = (x * x for x in range(5))
+    nit = scp.fromiter(iterable, float, units='km')
+    assert str(nit) == 'NDDataset: [float64] km (size: 5)'
+    assert_array_equal(nit.data, np.array([0,1,4,9,16]))
+
+def test_nddataset_fancy_indexing():
+    # numpy vs dataset
+    rand = np.random.RandomState(42)
+    x = rand.randint(100, size=10)
+
+    # single value indexing
+    info_(x[3], x[7], x[2])
+    dx = NDDataset(x)
+    assert (dx[3].data, dx[7].data, dx[2].data) == (x[3], x[7], x[2])
+
+    # slice indexing
+    info_(x[3:7])
+    assert_array_equal(dx[3:7].data, x[3:7])
+
+    # boolean indexing
+    info_(x[x > 52])
+    assert_array_equal(dx[x > 52].data, x[x > 52])
+
+    # fancy indexing
+    ind = [3, 7, 4]
+    info_(x[ind])
+    assert_array_equal(dx[ind].data, x[ind])
+
+    ind = np.array([[3, 7], [4, 5]])
+    info_(x[ind])
+    assert_array_equal(dx[ind].data, x[ind])
+
+    with RandomSeedContext(1234):
+        a = np.random.random((3, 5)).round(1)
+    c = (np.arange(3), np.arange(5))
+    nd = NDDataset(a, coordset=c)
+    info_(nd)
+    a = nd[[1, 0, 2]]
+    info_(a)
+    a = nd[np.array([1, 0])]
+    info_(a)

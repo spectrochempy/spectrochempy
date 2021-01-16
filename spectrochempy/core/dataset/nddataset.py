@@ -826,7 +826,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         # squeeze the data and determine which axis must be squeezed
         new, axis = super().squeeze(*dims, inplace=inplace, return_axis=True)
 
-        if new._coordset is not None:
+        if axis is not None and new._coordset is not None:
             # if there are coordinates they have to be squeezed as well (remove
             # coordinate for the squeezed axis)
 
@@ -1129,8 +1129,8 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 # make some NDDataset operation accessible from the spectrochempy API
 thismodule = sys.modules[__name__]
 
-api_funcs = ['sort', 'copy', 'squeeze', 'swapaxes', 'transpose', 'to_xarray', 'take', 'abs',
-             'conjugate', 'set_complex', 'set_quaternion']
+api_funcs = ['sort', 'copy', 'squeeze', 'swapaxes', 'transpose', 'to_xarray', 'take',
+             'set_complex', 'set_quaternion']
 
 # todo: chack the fact that some function are defined also in ndmath
 for funcname in api_funcs:

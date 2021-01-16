@@ -25,11 +25,10 @@ To use the API, you must import it using one of the following syntax:
     from spectrochempy import *
     nd = NDDataset()
 
-With the second syntax, as often in python, the access to objects/functions
-can be greatly simplified. For example, we can use `NDDataset` without a prefix
-instead of `scp.NDDataset` which is the first syntax) but there is always a risk
-of overwriting some variables or functions already present in the namespace.
-Therefore, the first syntax is generally highly recommended.
+With the second syntax, as often in python, the access to objects/functions can be greatly simplified. For example,
+we can use `NDDataset` without a prefix instead of `scp.NDDataset` which is the first syntax) but there is always a risk
+of overwriting some variables or functions already present in the namespace. Therefore, the first syntax is generally
+highly recommended.
 
 
 *********************
@@ -38,24 +37,16 @@ The NDDataset object
 
 The NDDataset is the main object use by |scpy|.
 
-Like numpy ndarrays, NDDataset have the capability to be sliced,
-sorted and subject to mathematical operations.
+Like numpy ndarrays, NDDataset have the capability to be sliced, sorted and subject to mathematical operations.
 
-But, in addition, NDDataset may have units, can be masked and each
-dimensions can have coordinates also with units. This make NDDataset
-aware of unit compatibility, *e.g.*, for binary operation such as
-additions or subtraction or during the application of mathematical
-operations. In addition or in replacement of numerical data for
-coordinates, NDDataset can also have labeled coordinates where labels
-can be different kind of objects (strings, datetime, numpy nd.ndarray
-or othe NDDatasets, etc...).
+But, in addition, NDDataset may have units, can be masked and each dimensions can have coordinates also with units.
+This make NDDataset aware of unit compatibility, *e.g.*, for binary operation such as additions or subtraction or
+during the application of mathematical operations. In addition or in replacement of numerical data for coordinates,
+NDDataset can also have labeled coordinates where labels can be different kind of objects (strings, datetime, numpy
+nd.ndarray or othe NDDatasets, etc...).
 
-This offers a lot of flexibility in using NDDatasets that, we hope,
-will be useful for applications. See the **Tutorials** for more
-information about such possible applications.
-
-**SpectroChemPy** provides another kind of data structure,
-aggregating several datasets: **NDPanel**: See
+This offers a lot of flexibility in using NDDatasets that, we hope, will be useful for applications. See the
+**Tutorials** for more information about such possible applications.
 
 .. autosummary::
     :nosignatures:
@@ -63,13 +54,13 @@ aggregating several datasets: **NDPanel**: See
 
     NDDataset
 
-
+***************************
 Coordinates related objects
----------------------------
+***************************
 
-NDDataset in SpectroChemPy in contrast to numpy nd-arrays can have coordinates for each dimension.
-The individual coordinates are represented by a specific object: Coord.
-All coordinates of an NDDataset are grouped in a particular object: CoordSet.
+|NDDataset| in |scpy| in contrast to numpy nd-arrays can have coordinates for each dimension.
+The individual coordinates are represented by a specific object: |Coord|.
+All coordinates of an |NDDataset| are grouped in a particular object: |CoordSet|.
 
 .. autosummary::
     :nosignatures:
@@ -80,11 +71,12 @@ All coordinates of an NDDataset are grouped in a particular object: CoordSet.
     CoordSet
 
 
-Creating NDDataset from existing data
--------------------------------------
+*******************
+Creating NDDataset
+*******************
 
-A NDDataset can be created using the NDDataset class constructor, for instance here we create a dataset from a random
-two dimensional array:
+A |NDDataset| can be created using the |NDDataset| class constructor, for instance here we create a dataset from a
+random two dimensional array:
 
 .. ipython:: python
 
@@ -92,21 +84,31 @@ two dimensional array:
     X = np.random.random((4,4))
     nd = NDDataset(X)
 
+The above code in |scpy| can be simplified using the ``random`` creation method:
+
+.. ipython:: python
+
+    X = NDDataset.random((4,4))
+
 
 (see the :ref:`userguide` for a large set of examples on how to use this constructor.)
 
-Other possibility are using the following methods
+Other possibilities e.g. are to use the following methods
 
 .. autosummary::
     :nosignatures:
     :toctree: generated/
 
     copy
+    arange
+    linspace
+    logspace
+    geomspace
     fromfunction
-    read
+    fromiter
 
 Creation using numpy-like functions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+===================================
 These functions mimics numpy equivalent, but output a NDDataset object
 
 .. autosummary::
@@ -125,7 +127,7 @@ These functions mimics numpy equivalent, but output a NDDataset object
     identity
 
 Import of data from external sources
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+====================================
 
 .. autosummary::
     :nosignatures:
@@ -146,7 +148,7 @@ Import of data from external sources
 
 
 Export a NDDataset
--------------------
+==================
 
 .. autosummary::
     :nosignatures:
@@ -156,7 +158,7 @@ Export a NDDataset
 
 
 Select data in a NDDataset
---------------------------
+==========================
 
 .. autosummary::
     :nosignatures:
@@ -192,7 +194,7 @@ Processing
 ************
 
 Transformations
----------------
+================
 
 .. autosummary::
     :nosignatures:
@@ -208,7 +210,7 @@ Transformations
 
 
 Unary mathematical operations
------------------------------
+==============================
 
 .. autosummary::
     :nosignatures:
@@ -266,7 +268,7 @@ Unary mathematical operations
 
 
 Binary mathematical operations
--------------------------------
+==============================
 
 .. autosummary::
     :nosignatures:
@@ -276,7 +278,7 @@ Binary mathematical operations
 
 
 Other processing operations
-----------------------------
+============================
 
 .. autosummary::
     :nosignatures:
