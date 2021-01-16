@@ -4,10 +4,8 @@
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
 """
 This module implements the `BaselineCorrection` class for baseline corrections.
-
 """
 __all__ = ['BaselineCorrection', 'ab', 'abc']
 
@@ -23,10 +21,10 @@ from traitlets import Int, Instance, HasTraits, Float, Unicode, Tuple, List
 from matplotlib.widgets import SpanSelector
 import matplotlib.pyplot as plt
 
-from ..dataset.ndcoordrange import CoordRange
+from ..dataset.coordrange import CoordRange
 from ..plotters.multiplot import multiplot
 from ..dataset.nddataset import NDDataset
-from ...utils import docstrings, TYPE_INTEGER, TYPE_FLOAT
+from ...utils import TYPE_INTEGER, TYPE_FLOAT
 from .smooth import smooth
 from .. import debug_
 
@@ -48,7 +46,6 @@ class BaselineCorrection(HasTraits):
       and calculation of the modelled baseline spectra.
 
     Interactive mode is proposed using the interactive function : :meth:`run`.
-
     """
     dataset = Instance(NDDataset)
     corrected = Instance(NDDataset)
@@ -62,8 +59,6 @@ class BaselineCorrection(HasTraits):
     figsize = Tuple((7, 5))
     sps = List()
 
-    @docstrings.get_sections(base='BaselineCorrection', sections=['Parameters', 'Other Parameters'])
-    @docstrings.dedent
     def __init__(self, dataset, *ranges, **kwargs):
         """
         Parameters
@@ -93,7 +88,6 @@ class BaselineCorrection(HasTraits):
 
         Examples
         --------
-
         .. plot::
             :include-source:
 
@@ -110,7 +104,6 @@ class BaselineCorrection(HasTraits):
             span = bc.compute(*ranges)
             _ = bc.corrected.plot_stack()
             show()
-
         """
         self.dataset = dataset
         self.corrected = self.dataset.copy()
@@ -170,21 +163,32 @@ class BaselineCorrection(HasTraits):
         return self.compute(*ranges, **kwargs)
 
     # ..................................................................................................................
-    docstrings.delete_params('BaselineCorrection.other_parameters', 'dataset')
-
-    @docstrings.dedent
     def compute(self, *ranges, **kwargs):
         """
         Base function for dataset baseline correction.
 
         Parameters
         ----------
-        %(BaselineCorrection.parameters.no_dataset)s
+        *ranges : a variable number of pair-tuples
+            The regions taken into account for the manual baseline correction.
 
         Other Parameters
         ----------------
-        %(BaselineCorrection.other_parameters)s
-
+        dim : str or int, keyword parameter, optional, default='x'.
+            Specify on which dimension to apply the apodization method. If `dim` is specified as an integer
+            it is equivalent  to the usual `axis` numpy parameter.
+        method : str, keyword parameter, optional, default='multivariate'
+            Correction method among ['multivariate','sequential']
+        interpolation : string, keyword parameter, optional, default='polynomial'
+            Interpolation method for the computation of the baseline, among ['polynomial','pchip']
+        order : int, keyword parameter, optional, default=6
+            If the correction method polynomial, this give the polynomial order to use.
+        npc : int, keyword parameter, optional, default=5
+            Number of components to keep for the ``multivariate`` method
+        zoompreview : float, keyword parameter, optional, default=1.0
+            The zoom factor for the preview in interactive mode
+        figsize : tuple, keyword parameter, optional, default=(8, 6)
+            Size of the figure to display in inch
         """
 
         self._setup(**kwargs)
@@ -293,6 +297,7 @@ class BaselineCorrection(HasTraits):
         self.corrected = new
         return new
 
+    # ..................................................................................................................
     def show_regions(self, ax):
         if self.sps:
             for sp in self.sps:
@@ -304,15 +309,15 @@ class BaselineCorrection(HasTraits):
             sp = ax.axvspan(x[0], x[1], facecolor='#2ca02c', alpha=0.5)
             self.sps.append(sp)
 
-    @docstrings.dedent
+    # ..................................................................................................................
     def run(self, *ranges, **kwargs):
         """
         Interactive version of the baseline correction.
 
         Parameters
         ----------
-        %(BaselineCorrection.parameters.no_dataset)s
-
+        *ranges : a variable number of pair-tuples
+            The regions taken into account for the manual baseline correction.
         """
         self._setup(**kwargs)
         self.sps = []
@@ -413,7 +418,6 @@ def ab(dataset, dim=-1, **kwargs):
     #TODO: description of these algorithms
     * linear -
     * basf -
-
     """
     # # options evaluation
     # parser = argparse.ArgumentParser(description='BC processing.', usage="""

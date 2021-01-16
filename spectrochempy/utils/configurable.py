@@ -31,7 +31,6 @@ class MetaConfigurable(Configurable):
         -------
         dict
             A regular dictionary
-
         """
         d = {}
         for k, v in self.traits(config=True).items():

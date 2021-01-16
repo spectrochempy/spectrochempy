@@ -22,20 +22,9 @@ from traitlets import (HasTraits, List, Bool, TraitError)
 
 class Range(List):
     """
-    Create a trait with two values defining an ordered range of values,
-    with an optional sampling parameters
+    The trait-type Range.
 
-    Parameters
-    ----------
-
-    trait : TraitType [ optional ]
-        the type for restricting the contents of the Container.
-        If unspecified, types are not checked.
-
-    default_value : SequenceType [ optional ]
-        The default value for the Trait.  Must be list/tuple/set, and
-        will be cast to the container type.
-
+    Create a trait with two values defining an ordered range of values
     """
     klass = list
     _cast_types = (tuple,)
@@ -44,8 +33,18 @@ class Range(List):
     info_text = 'an ordered interval trait'
     allow_none = True
 
-    def __init__(self, default_value=None, **kwargs):
+    def __init__(self, trait=None, default_value=None, **kwargs):
+        """
+        Parameters
+        ----------
+        trait : TraitType [ optional ]
+            The type for restricting the contents of the Container.
+            If unspecified, types are not checked.
 
+        default_value : SequenceType [ optional ]
+            The default value for the Trait.  Must be list/tuple/set, and
+            will be cast to the container type.
+        """
         super(Range, self).__init__(trait=None, default_value=default_value,
                                     **kwargs)
 
@@ -77,8 +76,16 @@ class Range(List):
 # CoordRange
 # ======================================================================================================================
 class CoordRange(HasTraits):
-    """Set of ordered, non intersecting intervals
+    """
+    Set of ordered, non intersecting intervals.
+
     e.g. [[a, b], [c, d]] with a < b < c < d or a > b > c > d.
+
+    Examples
+    --------
+    >>> from spectrochempy import CoordRange
+    >>> CoordRange([1, 4], [7, 5], [6, 10])
+    [[1, 4], [5, 10]]
     """
     # TODO: May use also units ???
     ranges = List(Range())
@@ -87,6 +94,10 @@ class CoordRange(HasTraits):
     # ..................................................................................................................
     def __call__(self, *ranges, **kwargs):
         """
+        The calling function of the CoordRange object
+
+        An ordered set of ranges is contructed from the inputs and returned
+
         Parameters
         -----------
         ranges :  iterable
@@ -97,8 +108,12 @@ class CoordRange(HasTraits):
         reversed : bool, optional.
             The intervals are ranked by decreasing order if True
             or increasing order if False.
+
+        Returns
+        -------
+        ordered list of ranges
         """
-        # super(CoordRange, self).__init__(**kwargs)
+
         self.reversed = kwargs.get('reversed', False)
         if len(ranges) == 0:
             # first case: no argument passed, returns an empty range

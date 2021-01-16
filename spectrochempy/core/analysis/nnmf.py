@@ -4,10 +4,8 @@
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
 """
 This module implement the NNMF (Non Negative Matrix Factorization) class
-
 """
 # TODO: create  tests
 
@@ -37,7 +35,6 @@ class NNMF(HasTraits):
     Copyright (c) 2005-2008 Chih-Jen Lin
     All rights reserved.
     Python/numpy translation : Anthony Di Franco ;
-
     """
 
     def __init__(self, X, Ci, Sti, **kwargs):

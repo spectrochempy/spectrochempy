@@ -81,8 +81,20 @@ def concentrations_vs_time(reactive_phase, t, reactorNet=None, returnNDDataset=F
 
 
 def modify_rate(reactive_phase, i_reaction, rate):
-    """ Changes one of the rates  of a cantera reactive phase.
-        """
+    """
+    Changes one of the rates  of a cantera reactive phase.
+
+    Parameters
+    ----------
+    reactive_phase :
+    i_reaction :
+    rate :
+
+    Returns
+    -------
+    reactive_phase
+    """
+
     rxn = reactive_phase.reaction(i_reaction)
     rxn.rate = rate
     reactive_phase.modify_reaction(i_reaction, rxn)
@@ -136,7 +148,7 @@ def modify_reactive_phase(reactive_phase, param_to_change, param_value):
 
 
 def fit_to_concentrations(C, externalConc, external_to_C_idx, reactive_phase, param_to_optimize, guess_param, **kwargs):
-    r"""
+    """
     Function fitting rate parameters and concentrations to a given concentration profile.
 
     Parameters
@@ -162,7 +174,6 @@ def fit_to_concentrations(C, externalConc, external_to_C_idx, reactive_phase, pa
     Returns
     ----------
     a dictionary
-
     """
 
     def objective(param_value, param_to_optimize, C, externalConc, external_to_C_idx, surface):

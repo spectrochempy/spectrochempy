@@ -26,14 +26,15 @@ from traitlets import Bool, observe, All, Unicode
 # ----------------------------------------------------------------------------------------------------------------------
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndmath import NDMath, set_operators
-from spectrochempy.utils import (docstrings, colored_output, NOMASK, spacing)
+from spectrochempy.utils import colored_output, NOMASK, spacing
 
 
 # ======================================================================================================================
 # Coord
 # ======================================================================================================================
 class Coord(NDMath, NDArray):
-    """Coordinates for a dataset along a given axis.
+    """
+    Coordinates for a dataset along a given axis.
 
     The coordinates of a |NDDataset| can be created using the |Coord| object.
     This is a single dimension array with either numerical (float) values or
@@ -41,6 +42,34 @@ class Coord(NDMath, NDArray):
     represent the coordinates. Only a one numerical axis can be defined,
     but labels can be multiple.
 
+    See Also
+    --------
+    NDDataset : Main SpectroChemPy object: an array with masks, units and coordinates.
+    LinearCoord : Implicit linear coordinates.
+
+    Examples
+    --------
+    We first import the object from the api :
+
+    >>> from spectrochempy import Coord
+
+    We then create a numpy |ndarray| and use it as the numerical `data`
+    axis of our new |Coord| object.
+
+    >>> c0 = Coord.arange(1., 12., 2., title='frequency', units='Hz')
+    >>> c0
+    Coord: [float64] Hz (size: 6)
+
+    We can take a series of str to create a non numerical but labelled
+    axis :
+
+    >>> tarr = list('abcdef')
+    >>> tarr
+    ['a', 'b', 'c', 'd', 'e', 'f']
+
+    >>> c1 = Coord(labels=tarr, title='mylabels')
+    >>> c1
+    Coord: [labels] [  a   b   c   d   e   f] (size: 6)
     """
     _copy = Bool()
 
@@ -50,10 +79,6 @@ class Coord(NDMath, NDArray):
     # ------------------------------------------------------------------------------------------------------------------
     # initialization
     # ------------------------------------------------------------------------------------------------------------------
-    docstrings.delete_params('NDArray.parameters', 'data', 'mask')
-
-    # ..................................................................................................................
-    @docstrings.dedent
     def __init__(self, data=None, **kwargs):
         """
         Parameters
@@ -69,33 +94,41 @@ class Coord(NDMath, NDArray):
             but will be passed by reference, so you should make a copy the
             `data` before passing it in the object constructor if that's the
             desired behavior or set the `copy` argument to True.
-        %(NDArray.parameters.no_data|mask)s
+        **kwargs
+            See other parameters
 
-        Examples
-        --------
-        We first import the object from the api :
-
-        >>> from spectrochempy import *
-
-        We then create a numpy |ndarray| and use it as the numerical `data`
-        axis of our new |Coord| object.
-
-        >>> arr = np.arange(1.,12.,2.)
-        >>> c0 = Coord(data=arr, title='frequency', units='Hz')
-        >>> c0
-        Coord: [float64]  Hz (size: 6)
-
-        We can take a series of str to create a non numerical but labelled
-        axis :
-
-        >>> tarr = list('abcdef')
-        >>> tarr
-        ['a', 'b', 'c', 'd', 'e', 'f']
-
-        >>> c1 = Coord(labels=tarr, title='mylabels')
-        >>> c1
-        Coord: [labels] [  a   b   c   d   e   f] (size: 6)
-
+        Other Parameters
+        ----------------
+        dtype : str or dtype, optional, default=np.float64
+            If specified, the data will be casted to this dtype, else the type of the data will be used
+        dims : list of chars, optional.
+            if specified the list must have a length equal to the number od data dimensions (ndim) and the chars must be
+            taken among among x,y,z,u,v,w or t. If not specified, the dimension names are automatically attributed in
+            this order.
+        name : str, optional
+            A user friendly name for this object. If not given, the automatic `id` given at the object creation will be
+            used as a name.
+        labels : array of objects, optional
+            Labels for the `data`. labels can be used only for 1D-datasets.
+            The labels array may have an additional dimension, meaning several series of labels for the same data.
+            The given array can be a list, a tuple, a |ndarray|, a ndarray-like, a |NDArray| or any subclass of
+            |NDArray|.
+        units : |Unit| instance or str, optional
+            Units of the data. If data is a |Quantity| then `units` is set to the unit of the `data`; if a unit is also
+            explicitly provided an error is raised. Handling of units use the `pint <https://pint.readthedocs.org/>`_
+            package.
+        title : str, optional
+            The title of the dimension. It will later be used for instance for labelling plots of the data.
+            It is optional but recommended to give a title to each ndarray.
+        dlabel :  str, optional.
+            Alias of `title`.
+        meta : dict-like object, optional.
+            Additional metadata for this object. Must be dict-like but no
+            further restriction is placed on meta.
+        copy : bool, optional
+            Perform a copy of the passed object. Default is False.
+        linear : bool, optional
+            If set to True, the coordinate is considered as a ``LinearCoord`` object.
         """
 
         super().__init__(data=data, **kwargs)
@@ -111,7 +144,6 @@ class Coord(NDMath, NDArray):
         Rather than isinstance(obj, Coord) use object.implements('Coord').
 
         This is useful to check type without importing the module
-
         """
 
         if name is None:
@@ -127,7 +159,6 @@ class Coord(NDMath, NDArray):
     def reversed(self):
         """bool - Whether the axis is reversed (readonly
         property).
-
         """
         if self.units in ['1 / centimeter', 'ppm']:
             return True
@@ -325,17 +356,37 @@ class Coord(NDMath, NDArray):
 
 
 class LinearCoord(Coord):
-    docstrings.delete_params('NDArray.parameters', 'data', 'mask')
+    """
+    Linear coordinates.
 
-    # ..................................................................................................................
-    @docstrings.dedent
+    Such coordinates correspond to a ascending or descending linear sequence of values, fully determined by two
+    parameters, i.e., an offset (off) and an increment (inc) :
+
+    .. math::
+
+        \\mathrm{data} = i*\\mathrm{inc} + \\mathrm{off}
+
+    See Also
+    --------
+    NDDataset : Main SpectroChemPy object: an array with masks, units and coordinates.
+    Coord : Explicit coordinates.
+
+    Examples
+    --------
+    >>> from spectrochempy import LinearCoord, Coord
+
+    To create a linear coordinate, we need to specify an offset, an increment and
+    the size of the data
+
+    >>> c1 = LinearCoord(offset=2.0, increment=2.0, size=10)
+
+    Alternatively, linear coordinate can be created using the ``linear`` keyword
+
+    >>> c2 = Coord(linear=True, offset=2.0, increment=2.0, size=10)
+    >>> assert (c1 == c2).all()
+    """
     def __init__(self, *args, offset=0.0, increment=1.0, **kwargs):
         """
-        Linear coordinates.
-
-        Such coordinates correspond to a ascending or descending linear sequence of values, fully determined by two
-        parameters, i.e., an offset (off) and an increment (inc) : `data = i*inc + off`
-
         Parameters
         ----------
         data : a 1D array-like object, optional
@@ -345,10 +396,39 @@ class LinearCoord(Coord):
             If omitted a value of 0.0 is taken for tje coordinate offset.
         increment : float, optional
             If omitted a value of 1.0 is taken for the coordinate increment.
-        %(NDArray.parameters.no_data|mask)s
 
-
+        Other Parameters
+        ----------------
+        dtype : str or dtype, optional, default=np.float64
+            If specified, the data will be casted to this dtype, else the type of the data will be used
+        dims : list of chars, optional.
+            if specified the list must have a length equal to the number od data dimensions (ndim) and the chars must be
+            taken among among x,y,z,u,v,w or t. If not specified, the dimension names are automatically attributed in
+            this order.
+        name : str, optional
+            A user friendly name for this object. If not given, the automatic `id` given at the object creation will be
+            used as a name.
+        labels : array of objects, optional
+            Labels for the `data`. labels can be used only for 1D-datasets.
+            The labels array may have an additional dimension, meaning several series of labels for the same data.
+            The given array can be a list, a tuple, a |ndarray|, a ndarray-like, a |NDArray| or any subclass of
+            |NDArray|.
+        units : |Unit| instance or str, optional
+            Units of the data. If data is a |Quantity| then `units` is set to the unit of the `data`; if a unit is also
+            explicitly provided an error is raised. Handling of units use the `pint <https://pint.readthedocs.org/>`_
+            package.
+        title : str, optional
+            The title of the dimension. It will later be used for instance for labelling plots of the data.
+            It is optional but recommended to give a title to each ndarray.
+        dlabel :  str, optional.
+            Alias of `title`.
+        meta : dict-like object, optional.
+            Additional metadata for this object. Must be dict-like but no
+            further restriction is placed on meta.
+        copy : bool, optional
+            Perform a copy of the passed object. Default is False.
         """
+
         super().__init__(*args, **kwargs)
 
         if not self.linear:

@@ -6,12 +6,12 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in
 #  the root directory                         =
 # ======================================================================================================================
+"""
+Database isotopes for NMR
 
-
-"""This module essentially define a class :class:`Isotopes` which handle all
+This module essentially define a class :class:`Isotopes` which handle all
 necessary features of NMR nuclei, such as their spin, larmor frequency and
 so on.
-
 """
 __all__ = ['Isotopes']
 
@@ -82,8 +82,6 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
     >>> isotope.nucleus = 'Al27'
     >>> isotope.name
     'aluminium'
-
-
     """
 
     _nucleus = ''
@@ -155,7 +153,6 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
         """
         Electric quadrupole moment in barn '
                       'of the current nucleus
-
         """
         try:
             return float(self[self.nucleus]['Q']) * 1000. * ur.mbarn
@@ -177,7 +174,6 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
     def stability(self):
         """
         The stability of the current nucleus
-
         """
         return self[self.nucleus]['stability'].strip()
 

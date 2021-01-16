@@ -114,7 +114,6 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
     -------
     object : nd-dataset or nd-array
         transformed dataset
-
     """
     # datatype
     is_nmr = dataset.origin.lower() in ["topspin", ]

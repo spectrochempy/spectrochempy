@@ -22,7 +22,7 @@ import numpy as np
 ########################################################################################################################
 # Generate a test dataset
 # ----------------------------------------------------------------------------------------------------------------------
-# 1) Simulated Chromatogram
+# 1) simulated chromatogram
 # *************************
 
 t = scp.Coord(np.arange(15), units='minutes', title='time')  # time coordinates
@@ -35,7 +35,7 @@ data[1, 5:11] = [1, 3, 5, 3, 1, 0.5]  # compound 2
 dsc = scp.NDDataset(data=data, coords=[c, t])
 
 ########################################################################################################################
-# 2) Absorption spectra
+# 2) absorption spectra
 # **********************
 
 spec = np.array([[2., 3., 4., 2.], [3., 4., 2., 1.]])
@@ -44,7 +44,7 @@ w = scp.Coord(np.arange(1, 5, 1), units='nm', title='wavelength')
 dss = scp.NDDataset(data=spec, coords=[c, w])
 
 ########################################################################################################################
-# 3) Simulated data matrix
+# 3) simulated data matrix
 # ************************
 
 dataset = scp.dot(dsc.T, dss)
@@ -54,8 +54,8 @@ dataset.title = 'intensity'
 dataset.plot()
 
 ########################################################################################################################
-# 4) Evolving Factor Analysis
-# ***************************
+# 4) evolving factor analysis (EFA)
+# *********************************
 
 efa = scp.EFA(dataset)
 

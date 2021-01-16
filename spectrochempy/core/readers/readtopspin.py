@@ -5,7 +5,6 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-
 """ Bruker file (single dimension FID or multidimensional SER) importers
 """
 
@@ -19,10 +18,10 @@ from quaternion import as_quat_array
 from nmrglue.fileio.bruker import read as read_fid, read_pdata, read_lowmem
 from spectrochempy.core import debug_
 from spectrochempy.utils.meta import Meta
-from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.units import ur
 from spectrochempy.utils.exceptions import deprecated
-from spectrochempy.core.readers.importer import docstrings, Importer, importermethod
+from spectrochempy.core.readers.importer import Importer, importermethod
 
 # ======================================================================================================================
 # Constants
@@ -635,8 +634,6 @@ def _remove_digital_filter(dic, data):
     Remove the digital filter from Bruker data.
     nmrglue modified Digital Filter Processing
     """
-    # debug_('Bruker digital filter...')
-
     if 'acqus' not in dic:
         raise KeyError("dictionary does not contain acqus parameters")
 
@@ -666,7 +663,6 @@ def _remove_digital_filter(dic, data):
             if decim not in bruker_dsp_table[dspfvs]:
                 raise KeyError("decim not in lookup table")
             phase = bruker_dsp_table[dspfvs][decim]
-
     # fft
     si = data.shape[-1]
     pdata = np.fft.fftshift(np.fft.fft(data, si, axis=-1), -1) / float(
@@ -732,11 +728,8 @@ def _remove_digital_filter(dic, data):
 
 
 # ======================================================================================================================
-# bruker topspin import function
+# Bruker topspin import function
 # ======================================================================================================================
-
-# ......................................................................................................................
-@docstrings.dedent
 def read_topspin(*args, **kwargs):
     """
     Import Bruker dataset
@@ -762,7 +755,6 @@ def read_topspin(*args, **kwargs):
         processing number
     silent : bool
         should we output details
-
     """
     kwargs['filetypes'] = ['Bruker TOPSPIN fid\'s or processed data files (fid ser 1[r|i] 2[r|i]* 3[r|i]*)',
                            'Compressed TOPSPIN data directories (*.zip)']

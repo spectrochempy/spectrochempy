@@ -22,8 +22,8 @@ except ModuleNotFoundError: # pragma: no cover
 from spectrochempy.core import preferences as prefs
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndcomplex import NDComplexArray
-from spectrochempy.core.dataset.ndcoordset import CoordSet
-from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.core.dataset.coordset import CoordSet
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 # TODO: from spectrochempy.core.dataset.ndpanel import NDPanel
 from spectrochempy.core.scripts.script import Script

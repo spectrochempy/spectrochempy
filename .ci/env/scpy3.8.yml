@@ -23,9 +23,9 @@ dependencies:
     - dash-bootstrap-components
     - dash-daq
     - dill
-    - docrep
     - ipython
     - jinja2
+    - mamba
     - matplotlib
     - numba
     - numpy

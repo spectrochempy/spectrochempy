@@ -28,6 +28,7 @@ def test_is_kernel():
     res = is_kernel()
     assert not res
 
+
 @pytest.mark.skip('problem with one of the commit - look at this later')
 def test_sh():
     res = sh.git('show', 'HEAD')

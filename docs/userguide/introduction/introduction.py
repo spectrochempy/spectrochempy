@@ -155,14 +155,16 @@ scp.debug_('this is a debug message!')
 # * **Quantity**: a scalar or an array with some units
 
 # %%
+from spectrochempy import ur   # to simplify further writting
 ur.cm / ur.s
 
 # %%
-x = Quantity(10., ur.cm / ur.s)
+x = scp.Quantity(10., ur.cm / ur.s)
 x * 2.
 
 # %%
-xa = Quantity(np.array((1, 2)), 'km')
+import numpy as np
+xa = scp.Quantity(np.array((1, 2)), 'km')
 xa[1] * 2.5
 
 # %% [markdown]

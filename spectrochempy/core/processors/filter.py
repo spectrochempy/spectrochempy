@@ -84,7 +84,6 @@ def savgol_filter(dataset, window_length=5, polyorder=0, deriv=0, delta=1.0, dim
     'nearest'  | 1  1  1 | 1  2  3  4  5  6  7  8 | 8  8  8
     'constant' | 0  0  0 | 1  2  3  4  5  6  7  8 | 0  0  0
     'wrap'     | 6  7  8 | 1  2  3  4  5  6  7  8 | 1  2  3
-
     """
 
     if dim == 'x':

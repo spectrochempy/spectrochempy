@@ -3,11 +3,8 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 #  =====================================================================================================================
 #
-
 """
 Download data from Google Drive to the local directory
-
-
 """
 
 from pathlib import Path

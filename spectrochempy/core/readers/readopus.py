@@ -4,9 +4,8 @@
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
-"""This module extend NDDataset with the import method for OPUS generated data files.
-
+"""
+This module extend NDDataset with the import method for OPUS generated data files.
 """
 __all__ = ['read_opus']
 __dataset_methods__ = __all__
@@ -17,26 +16,60 @@ from datetime import datetime, timezone, timedelta
 from numpy import linspace
 
 from brukeropusreader.opus_parser import parse_data, parse_meta
-from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.core.readers.importer import docstrings, Importer, importermethod
+from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.readers.importer import Importer, importermethod
 from spectrochempy.core import debug_
 
 
 # ======================================================================================================================
 # Public functions
 # ======================================================================================================================
-
-# ......................................................................................................................
-@docstrings.dedent
 def read_opus(*args, **kwargs):
     """
     Open Bruker OPUS file(s) and eventually group them in a single dataset. Only Absorbance spectra are
     extracted ("AB" field). Returns an error if dimensions are incompatibles.
 
-    Parameters
+        Parameters
     -----------
-    %(read_method.parameters.no_origin|csv_delimiter)s
+    path : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
+        The data source(s) can be specified by the name or a list of name for the file(s) to be loaded:
 
+        *e.g.,( file1, file2, ...,  **kwargs )*
+
+        If the list of filenames are enclosed into brackets:
+
+        *e.g.,* ( **[** *file1, file2, ...* **]**, **kwargs *)*
+
+        The returned datasets are merged to form a single dataset,
+        except if `merge` is set to False. If a source is not provided (i.e. no `filename`, nor `content`),
+        a dialog box will be opened to select files.
+    protocol : {'scp', 'omnic', 'opus', 'topspin', 'matlab', 'jcamp', 'csv', 'excel'}, optional
+        Protocol used for reading. If not provided, the correct protocol
+        is inferred (whnever it is possible) from the file name extension.
+    directory : str, optional
+        From where to read the specified `filename`. If not specified, read in the default ``datadir`` specified in
+        SpectroChemPy Preferences.
+    merge : bool, optional
+        Default value is False. If True, and several filenames have been provided as arguments,
+        then a single dataset with merged (stacked along the first
+        dimension) is returned (default=False)
+    sortbydate : bool, optional
+        Sort multiple spectra by acquisition date (default=True)
+    description: str, optional
+        A Custom description.
+    content : bytes object, optional
+        Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
+        The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
+        to handle drag and drop of files into a Browser.
+        For exemples on how to use this feature, one can look in the ``tests/tests_readers`` directory
+
+    Other Parameters
+    -----------------
+    listdir : bool, optional
+        If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
+        is True. It is assumed that all the files correspond to current reading protocol (default=True)
+    recursive : bool, optional
+        Read also in subfolders. (default=False)
 
     Returns
     --------
@@ -111,7 +144,6 @@ def read_opus(*args, **kwargs):
     --------
     read : Generic read method
     read_topspin, read_omnic, read_spg, read_spa, read_srs, read_csv, read_matlab, read_zip
-
     """
 
     kwargs['filetypes'] = ['Bruker OPUS files (*.[0-9]*)']

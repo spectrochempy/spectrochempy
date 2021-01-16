@@ -4,11 +4,11 @@
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
 """
+Fake data for testing
+
 This module implements routines to generate fake data that can be used for
 testing our various |scpy| analysis methods
-
 """
 __all__ = ['generate_fake']
 
@@ -16,7 +16,7 @@ import numpy as np
 
 
 def _make_spectra_matrix(pos, width, ampl):
-    from spectrochempy.core.dataset.ndcoord import Coord
+    from spectrochempy.core.dataset.coord import Coord
     from spectrochempy.core.dataset.nddataset import NDDataset
     from spectrochempy.core.fitting.models import gaussianmodel
 
@@ -34,7 +34,7 @@ def _make_spectra_matrix(pos, width, ampl):
 
 
 def _make_concentrations_matrix(*profiles):
-    from spectrochempy.core.dataset.ndcoord import Coord
+    from spectrochempy.core.dataset.coord import Coord
     from spectrochempy.core.dataset.nddataset import NDDataset
 
     t = Coord(np.linspace(0, 10, 50), units='hour', title='time')
@@ -61,7 +61,6 @@ def _generate_2D_spectra(concentrations, spectra):
     Returns
     -------
     |NDDataset|
-
     """
     from spectrochempy.core.dataset.npy import dot
 

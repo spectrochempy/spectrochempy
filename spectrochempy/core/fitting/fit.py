@@ -4,11 +4,8 @@
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
 """
 Module to perform fitting of 1D or n-D spectral data.
-
-
 """
 __all__ = ['Fit']
 
@@ -67,7 +64,6 @@ class Fit(HasTraits):
     script : Unicode
         A string representation of the fp dict,
         which can be used as input for other a fit (read-only)
-
     """
 
     silent = Bool(False)
@@ -121,7 +117,6 @@ class Fit(HasTraits):
     @staticmethod
     def script_default():
         """ Return a default script
-
         """
         return """
         #-----------------------------------------------------------
@@ -148,7 +143,6 @@ class Fit(HasTraits):
             $ pos:   0.0, -100.0, 100.0
             > ratio: gratio
             $ width: 1.0, 0, 100
-
         """
 
     def dry_run(self):
@@ -164,7 +158,6 @@ class Fit(HasTraits):
         every : int, number of function call between two displays
         method : str, ether 'simplex' or 'hopping'
         dryrun : bool
-
         """
 
         if not self.silent:

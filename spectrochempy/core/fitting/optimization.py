@@ -48,7 +48,6 @@ def optimize(func, fp0, args=(), constraints={}, method="SIMPLEX",
 
     Returns
     -------
-
     """
 
     global keys

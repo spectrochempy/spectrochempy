@@ -30,7 +30,6 @@ def plotly_map(dataset, **kwargs):
     Plot a 2D dataset as a contoured map.
 
     Alias of plot_2D (with `method` argument set to ``map``.
-
     """
     kwargs['method'] = 'map'
     return plotly(dataset, **kwargs)
@@ -43,7 +42,6 @@ def plotly_stack(dataset, **kwargs):
     Plot a 2D dataset as a stacked plot.
 
     Alias of plot_2D (with `method` argument set to ``stack``).
-
     """
     kwargs['method'] = 'stack'
     return plotly(dataset, **kwargs)
@@ -56,7 +54,6 @@ def plotly_image(dataset, **kwargs):
     Plot a 2D dataset as an image plot.
 
     Alias of plot_2D (with `method` argument set to ``image``).
-
     """
     kwargs['method'] = 'image'
     return plotly(dataset, **kwargs)
@@ -69,7 +66,6 @@ def plotly_surface(dataset, **kwargs):
     Plot a 2D dataset as a a 3D-surface.
 
     Alias of plot_2D (with `method` argument set to ``surface``.
-
     """
     kwargs['method'] = 'surface'
     return plotly(dataset, **kwargs)
@@ -92,7 +88,6 @@ def plotly(dataset, **kwargs):
     -------
     figure
         A plotly figure
-
     """
     # get all plot preferences
     # ------------------------------------------------------------------------------------------------------------------
@@ -491,7 +486,6 @@ def calc_distances(p, start=None, end=None):
     Parameters
     ----------
     p : |NDDataset|
-
     """
     dimx = p.dims[-1]
     x = getattr(p, dimx).data
@@ -547,7 +541,6 @@ def _compress(ds, optimisation=None):
     Returns
     -------
     a list a (x,y) traces
-
     """
     sizey, sizex = ds.shape
 

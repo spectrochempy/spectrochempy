@@ -19,7 +19,6 @@ __all__ = ['SpectroChemPyWarning', 'SpectroChemPyException', 'UnitsCompatibility
 class SpectroChemPyWarning(Warning):
     """
     The base warning class for SpectroChemPy warnings.
-
     """
 
 
@@ -27,7 +26,6 @@ class SpectroChemPyWarning(Warning):
 class SpectroChemPyException(Exception):
     """
     The base exception class for SpectroChemPy
-
     """
 
 
@@ -35,7 +33,6 @@ class SpectroChemPyException(Exception):
 class UnitsCompatibilityError(SpectroChemPyException):
     """
     Exception raised when units are not compatible, preventing some mathematical operations
-
     """
 
 
@@ -43,7 +40,6 @@ class UnitsCompatibilityError(SpectroChemPyException):
 class DimensionsCompatibilityError(SpectroChemPyException):
     """
     Exception raised when dimensions are not compatible for concatenation for instance
-
     """
 
 
@@ -51,7 +47,6 @@ class DimensionsCompatibilityError(SpectroChemPyException):
 class CoordinateMismatchError(SpectroChemPyException):
     """
     Exception raised when object coordinates differ
-
     """
 
 
@@ -71,7 +66,6 @@ def deprecated(message):
     ----------
     message : str,
         the deprecation message
-
     """
 
     def deprecation_decorator(func):

@@ -4,10 +4,8 @@
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
 """
 This module implement the PCA (Principal Component Analysis) class.
-
 """
 
 __all__ = ['PCA']
@@ -32,10 +30,10 @@ from traitlets import HasTraits, Instance
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
 from spectrochempy.core.analysis.svd import SVD
-from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.npy import dot
-from spectrochempy.utils import docstrings, NRed, NBlue
+from spectrochempy.utils import NRed, NBlue
 
 
 # ======================================================================================================================
@@ -58,7 +56,6 @@ class PCA(HasTraits):
 
     If the dataset `X` contains masked values, these values are silently
     ignored in the calculation.
-
     """
     LT = Instance(NDDataset)
     S = Instance(NDDataset)
@@ -74,9 +71,6 @@ class PCA(HasTraits):
     """|NDDataset| - Cumulative Explained Variances."""
 
     # ..................................................................................................................
-    docstrings.keep_params('SVD.parameters', 'dataset')
-
-    @docstrings.dedent
     def __init__(self, dataset,
                  centered=True,
                  standardized=False,
@@ -94,7 +88,6 @@ class PCA(HasTraits):
         scaled : bool, optional, default:False
             If True the data are scaled in the interval [0-1] :
             :math:`X' = (X - min(X)) / (max(X)-min(X))`
-
         """
         self.prefs = dataset.preferences
 
@@ -246,7 +239,6 @@ class PCA(HasTraits):
         This implements the method of Thomas P. Minka :
         Automatic Choice of Dimensionality for PCA. NIPS 2000 : 598-604.
         Copied and modified from scikit-learn.decomposition.pca (BSD-3 license)
-
         """
         spectrum = self.ev.data
         M, N = self.X.shape
@@ -292,7 +284,6 @@ class PCA(HasTraits):
         -----
         Copied and modified from _infer_dimensions in
         scikit-learn.decomposition.pca (BSD-3 license).
-
         """
         n_ev = self.ev.size
         ll = np.empty(n_ev)
@@ -323,8 +314,6 @@ class PCA(HasTraits):
         -------
         S, LT : |NDDataset| objects.
             n_pc loadings and their corresponding scores for each observations.
-
-
         """
 
         # get n_pc (automatic or determined by the n_pc arguments)
@@ -355,7 +344,6 @@ class PCA(HasTraits):
         -------
         X_reconstructed : |NDDataset|
             The reconstructed dataset based on n_pc principal components.
-
         """
 
         # get n_pc (automatic or determined by the n_pc arguments)
@@ -388,7 +376,6 @@ class PCA(HasTraits):
         ----------
         n_pc : int, optional
             The number of components to print.
-
         """
         # get n_pc (automatic or determined by the n_pc arguments)
         n_pc = self._get_n_pc(n_pc)
@@ -403,7 +390,6 @@ class PCA(HasTraits):
         ----------
         n_pc : int
             Number of components to plot.
-
         """
         # get n_pc (automatic or determined by the n_pc arguments) - min = 3
         n_pc = max(self._get_n_pc(n_pc), 3)
@@ -444,7 +430,6 @@ class PCA(HasTraits):
             If 'index', then the colors of each n_scores is mapped sequentially
             on the colormap. If labels, the labels of the n_observation are
             used for color mapping.
-
         """
 
         if isinstance(pcs[0], (list, tuple, set)):

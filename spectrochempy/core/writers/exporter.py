@@ -5,15 +5,15 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 #  =====================================================================================================================
 #
-"""This module define a generic class to import files and contents.
-
+"""
+This module define a generic class to import files and contents.
 """
 __all__ = ['write']
 __dataset_methods__ = __all__
 
 from traitlets import HasTraits, Any
 
-from spectrochempy.utils import pathclean, check_filename_to_save, docstrings, patterns
+from spectrochempy.utils import pathclean, check_filename_to_save, patterns
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -86,9 +86,6 @@ def exportermethod(func):
 # ----------------------------------------------------------------------------------------------------------------------
 # Generic Read function
 # ----------------------------------------------------------------------------------------------------------------------
-
-@docstrings.get_sections(base='write_method', sections=['Parameters', 'Other Parameters'])
-@docstrings.dedent
 def write(*args, **kwargs):
     """
     Parameters
@@ -106,7 +103,6 @@ def write(*args, **kwargs):
         Set the column delimiter in CSV file.
         By default it is the one set in SpectroChemPy `Preferences`.
 
-
     Examples
     ---------
 
@@ -123,7 +119,6 @@ def write(*args, **kwargs):
     --------
     save : generic function for saving a NDDataset in SpectroChemPy format
     write_spc, write_matlab, write_jcamp, write_excel, write_csv
-
     """
     exporter = Exporter()
     return exporter(*args, **kwargs)

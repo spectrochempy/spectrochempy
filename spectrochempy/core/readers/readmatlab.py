@@ -6,7 +6,6 @@
 # ======================================================================================================================
 
 """Plugin module to extend NDDataset with the import methods method.
-
 """
 
 __all__ = ['read_matlab', 'read_mat']
@@ -20,15 +19,12 @@ import numpy as np
 import scipy.io as sio
 
 from spectrochempy.core.dataset.nddataset import NDDataset, Coord
-from spectrochempy.core.readers.importer import docstrings, Importer, importermethod
+from spectrochempy.core.readers.importer import Importer, importermethod
 
 
 # ======================================================================================================================
 # Public functions
 # ======================================================================================================================
-
-# ......................................................................................................................
-@docstrings.dedent
 def read_matlab(*args, **kwargs):
     """
     Open a matlab file with extension ``.mat`` and returns its content as a list
@@ -38,12 +34,46 @@ def read_matlab(*args, **kwargs):
     content not recognized by SpectroChemPy is returned as a tuple (name, object)
 
     Parameters
-    ----------
-    %(read_method.parameters.no_origin|csv_delimiter)s
+    -----------
+    path : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
+        The data source(s) can be specified by the name or a list of name for the file(s) to be loaded:
+
+        *e.g.,( file1, file2, ...,  **kwargs )*
+
+        If the list of filenames are enclosed into brackets:
+
+        *e.g.,* ( **[** *file1, file2, ...* **]**, **kwargs *)*
+
+        The returned datasets are merged to form a single dataset,
+        except if `merge` is set to False. If a source is not provided (i.e. no `filename`, nor `content`),
+        a dialog box will be opened to select files.
+    protocol : {'scp', 'omnic', 'opus', 'topspin', 'matlab', 'jcamp', 'csv', 'excel'}, optional
+        Protocol used for reading. If not provided, the correct protocol
+        is inferred (whnever it is possible) from the file name extension.
+    directory : str, optional
+        From where to read the specified `filename`. If not specified, read in the default ``datadir`` specified in
+        SpectroChemPy Preferences.
+    merge : bool, optional
+        Default value is False. If True, and several filenames have been provided as arguments,
+        then a single dataset with merged (stacked along the first
+        dimension) is returned (default=False)
+    sortbydate : bool, optional
+        Sort multiple spectra by acquisition date (default=True)
+    description: str, optional
+        A Custom description.
+    content : bytes object, optional
+        Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
+        The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
+        to handle drag and drop of files into a Browser.
+        For exemples on how to use this feature, one can look in the ``tests/tests_readers`` directory
 
     Other Parameters
-    ----------------
-    %(read_method.other_parameters)s
+    -----------------
+    listdir : bool, optional
+        If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
+        is True. It is assumed that all the files correspond to current reading protocol (default=True)
+    recursive : bool, optional
+        Read also in subfolders. (default=False)
 
     Returns
     -------
@@ -53,7 +83,6 @@ def read_matlab(*args, **kwargs):
     See Also
     --------
     read, read_csv, read_zip, read_jdx, read_omnic, read_opus, read_topspin
-
     """
     kwargs['filetypes'] = ['MATLAB files (*.mat *.dso)']
     kwargs['protocol'] = ['matlab', 'mat', 'dso']

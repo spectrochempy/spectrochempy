@@ -4,10 +4,8 @@
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
 """
 This module defines functions related to NDDataset or NDPanel alignment.
-
 """
 
 __all__ = ['align']
@@ -43,7 +41,6 @@ def can_merge_or_align(coord1, coord2):
     -------
     can_merge, can_align : tuple of bools
         Two flags about merge and alignment possibility
-
     """
     if (coord1 == coord2):
         # same coordinates
@@ -117,7 +114,6 @@ def align(dataset, *others, **kwargs):
     ------
     ValueError
         issued when the dimensions given in `dim` or `dims` argument are not compatibles (units, titles, etc...)
-
     """
     # TODO: Perform an alignment along numeric labels
     # TODO: add example in docs

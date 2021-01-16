@@ -296,7 +296,6 @@ def insert_masked_print(ds, mask_string='--'):
     -----------
     ds : |NDDataset| instance
     mask_string : str
-
     """
 
     mask = ds._mask
@@ -345,8 +344,6 @@ def numpyprintoptions(precision=4, threshold=6, edgeitems=2, suppress=True,
     spc
     linewidth
     kargs
-
-
     """
 
     def _format_object(x):

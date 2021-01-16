@@ -38,7 +38,6 @@ def get_user_and_node():
 
 def is_kernel():
     """ Check if we are running from IPython
-
     """
     # from http://stackoverflow.com
     # /questions/34091701/determine-if-were-in-an-ipython-notebook-session
@@ -58,7 +57,6 @@ class _ExecCommand:
         Parameters
         ----------
         command: shell command to execute
-
         """
         self.commands = [command]
 
@@ -79,7 +77,6 @@ class _ExecCommand:
 class sh(object):
     """
     Utility to run subprocess run command as if they were functions
-
     """
 
     def __getattr__(self, command):

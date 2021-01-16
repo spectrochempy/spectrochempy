@@ -31,8 +31,8 @@ from spectrochempy.core.project.baseproject import AbstractProject
 # Project class
 # ======================================================================================================================
 class Project(AbstractProject, NDIO):
-    """A manager for multiple projects and datasets in a main project
-
+    """
+    A manager for multiple projects and datasets in a main project
     """
 
     _id = Unicode()
@@ -65,7 +65,6 @@ class Project(AbstractProject, NDIO):
             The name of the project.  If the name is not provided, it will
             be generated automatically.
         meta : any other attributes to described the project
-
         """
         super().__init__()
 
@@ -239,7 +238,6 @@ class Project(AbstractProject, NDIO):
     def id(self):
         """
         str - Readonly object identifier.
-
         """
         return self._id
 
@@ -249,7 +247,6 @@ class Project(AbstractProject, NDIO):
         """
         str - An user friendly name for the project. The default is
         automatically generated.
-
         """
         return self._name
 
@@ -268,7 +265,6 @@ class Project(AbstractProject, NDIO):
         """
         project - instance of the Project which is the parent (if any) of the
         current project.
-
         """
         return self._parent
 
@@ -297,9 +293,10 @@ class Project(AbstractProject, NDIO):
     @property
     def meta(self):
         """
-        meta - instance of Meta that contains all attribute except the name,
-        id and parent of the current project.
+        meta - metadata for the project
 
+        meta contains all attribute except the name,
+        id and parent of the current project.
         """
         return self._meta
 
@@ -307,9 +304,8 @@ class Project(AbstractProject, NDIO):
     @property
     def datasets_names(self):
         """
-        list - names of all dataset included in this project
+        list - names of all dataset included in this project.
         (does not return those located in sub-folders).
-
         """
         lst = self._datasets.keys()
         lst = sorted(lst)
@@ -321,7 +317,6 @@ class Project(AbstractProject, NDIO):
         """
         list - datasets included in this project excluding those
         located in subprojects.
-
         """
         d = []
         for name in self.datasets_names:
@@ -338,7 +333,6 @@ class Project(AbstractProject, NDIO):
     def projects_names(self):
         """
         list - names of all subprojects included in this project.
-
         """
         lst = self._projects.keys()
         lst = sorted(lst)
@@ -349,7 +343,6 @@ class Project(AbstractProject, NDIO):
     def projects(self):
         """
         list - subprojects included in this project.
-
         """
         p = []
         for name in self.projects_names:
@@ -366,7 +359,6 @@ class Project(AbstractProject, NDIO):
     def scripts_names(self):
         """
         list - names of all scripts included in this project.
-
         """
         lst = self._scripts.keys()
         lst = sorted(lst)
@@ -377,7 +369,6 @@ class Project(AbstractProject, NDIO):
     def scripts(self):
         """
         list - scripts included in this project.
-
         """
         s = []
         for name in self.scripts_names:
@@ -393,7 +384,6 @@ class Project(AbstractProject, NDIO):
     def allnames(self):
         """
         list - names of all objects contained in this project
-
         """
         return self.datasets_names + self.projects_names + self.scripts_names
 
@@ -401,7 +391,6 @@ class Project(AbstractProject, NDIO):
     def allitems(self):
         """
         list - all items contained in this project
-
         """
         return list(self._datasets.items()) + list(self._projects.items()) + list(self._scripts.items())
 
@@ -415,9 +404,7 @@ class Project(AbstractProject, NDIO):
         Utility to check if the current object implement `Project`.
 
         Rather than isinstance(obj, Project) use object.implements('Project').
-
-        This is useful to check type without importing the module
-
+        This is useful to check type without importing the module.
         """
         if name is None:
             return 'Project'
@@ -426,8 +413,7 @@ class Project(AbstractProject, NDIO):
 
     def copy(self):
         """
-        Make an exact copy of the current project
-
+        Make an exact copy of the current project.
         """
         return self.__copy__()
 
@@ -449,12 +435,10 @@ class Project(AbstractProject, NDIO):
 
         Examples
         --------
-
         Assuming that ds1, ds2 and ds3 are already defined datasets :
 
         >>> proj = Project()
         >>> proj.add_datasets(ds1, ds2, ds3) # doctest: +SKIP
-
         """
         for ds in datasets:
             self.add_dataset(ds)
@@ -475,12 +459,10 @@ class Project(AbstractProject, NDIO):
 
         Examples
         --------
-
         Assuming that ds1 is an already defined dataset :
 
         >>> proj = Project()
         >>> proj.add_dataset(ds1, name='Toto') # doctest: +SKIP
-
         """
 
         dataset.parent = self
@@ -493,14 +475,12 @@ class Project(AbstractProject, NDIO):
     # ..................................................................................................................
     def remove_dataset(self, name):
         """
-        Remove a dataset from the project
+        Remove a dataset from the project.
 
         Parameters
         ----------
         name : str
             Name of the dataset to remove.
-
-
         """
         self._datasets[name]._parent = None  # remove the parent info
         del self._datasets[name]  # remove the object from the list of datasets
@@ -508,8 +488,7 @@ class Project(AbstractProject, NDIO):
     # ..................................................................................................................
     def remove_all_dataset(self):
         """
-        Remove all dataset from the project
-
+        Remove all dataset from the project.
         """
         for v in self._datasets.values():
             v._parent = None
@@ -527,8 +506,7 @@ class Project(AbstractProject, NDIO):
         Parameters
         ----------
         projects : project instances
-
-
+            The projects to add to the current ones.
         """
         for proj in projects:
             self.add_project(proj)
@@ -541,8 +519,7 @@ class Project(AbstractProject, NDIO):
         Parameters
         ----------
         proj : a project instance
-
-
+            A project to add to the current one
         """
         proj.parent = self
         if name is None:
@@ -560,7 +537,6 @@ class Project(AbstractProject, NDIO):
         ----------
         name : str
             Name of the project to remove
-
         """
         self._projects[name]._parent = None
         del self._projects[name]
@@ -569,7 +545,6 @@ class Project(AbstractProject, NDIO):
     def remove_all_project(self):
         """
         remove all projects from the current project.
-
         """
         for v in self._projects.values():
             v._parent = None
@@ -587,8 +562,6 @@ class Project(AbstractProject, NDIO):
          Parameters
          ----------
          scripts : |Script| instances
-
-
          """
         for sc in scripts:
             self.add_script(sc)
@@ -602,8 +575,6 @@ class Project(AbstractProject, NDIO):
         ----------
         script : a |Script| instance
         name : str
-
-
         """
         script.parent = self
         if name is None:

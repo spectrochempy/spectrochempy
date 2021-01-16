@@ -4,11 +4,8 @@
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
-
 """
 Plugin module to perform automatic subtraction of ref on a dataset.
-
 """
 __all__ = ['autosub']
 
@@ -26,7 +23,7 @@ from numba import jit
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
 
-from spectrochempy.core.dataset.ndcoordrange import CoordRange
+from spectrochempy.core.dataset.coordrange import CoordRange
 
 
 def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False, inplace=False):
@@ -82,7 +79,6 @@ def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False
     >>> B = A.autosub(ref, [3900., 3700.], [1600., 1500.], inplace=False)
     >>> B
     NDDataset: [float32]  a.u. (shape: (y:55, x:5549))
-
     """
 
     # output dataset

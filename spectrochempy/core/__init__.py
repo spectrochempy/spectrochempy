@@ -4,11 +4,10 @@
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
 """
-Package defining the *core* methods of the |scpy| API such as plotting,
-processing, analysis, etc...
+Package defining the *core* methods of the |scpy| API.
 
+Most the API methods such as plotting, processing, analysis, etc...
 """
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -329,7 +328,6 @@ __all__ += api.__all__
 def APIref():
     """
     Helper to display public objects and methods from the API
-
     """
     a = __all__[:]
     a = sorted(a)
@@ -420,7 +418,6 @@ class _QTFileDialogs:
             filters=None):
         """
         Return one or several files to open
-
         """
         options = FileDialog.DontUseNativeDialog
         files, _ = FileDialog.getOpenFileNames(parent,
@@ -514,7 +511,6 @@ class _TKFileDialogs:
             filters=None):
         """
         Return one or several files to open
-
         """
 
         filename = filedialog.askopenfilenames(
@@ -570,7 +566,6 @@ def save_dialog(filename='',
                 filters=("All Files (*)")):
     """
     Return a file where to save
-
     """
     if USE_QT:
         f = _QTFileDialogs._save_filename(filename,
@@ -595,7 +590,6 @@ def open_dialog(single=True,
                 ):
     """
     Return one or several files to open
-
     """
     if USE_QT:
         klass = _QTFileDialogs

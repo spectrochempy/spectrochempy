@@ -32,7 +32,6 @@ def trapz(dataset, *args, **kwargs):
     -------
     trapz : |NDDataset|
         Definite integral as approximated by trapezoidal rule.
-
     """
 
     # handle the various syntax to pass the axis
@@ -95,7 +94,6 @@ def simps(dataset, *args, **kwargs):
     -------
     simps : |NDDataset|
         Definite integral as approximated using the composite Simpson's rule.
-
     """
 
     # handle the various syntax to pass the axis

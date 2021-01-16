@@ -27,10 +27,8 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # ----------------------------------------------------------------------------------------------------------------------
-
 """
 Widgets for the Jupyter notebook and Jupyter lab
-
 """
 from contextlib import contextmanager
 
@@ -101,7 +99,6 @@ class FileSelector(Base):
 
     The current path is stored in ``.path`` and the current selection is stored
     in ``.value``.
-
     """
 
     def __init__(self, done_callback=None, path=None, filters=None):

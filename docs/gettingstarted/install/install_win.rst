@@ -79,12 +79,29 @@ can install Spectrochempy in a dedicated environment (recommended, steps 4. and
 
 #. Install |scpy|
 
+   The conda installer has to solve all packages dependencies and is definitely
+   a bit slow. So we recommand to install `mamba <https://github.com/mamba-org/mamba>`__
+   as a drop-in replacement via:
+
+   .. sourcecode:: bash
+
+        (scpy) C:\<yourDefaultPath>> conda install mamba
+
+   To install a stable version of spectrochempy, then you just have to do :
+
+   .. sourcecode:: bash
+
+        (scpy) C:\<yourDefaultPath>> mamba install spectrochempy
+
+   or if you rather prefer not to use mamba:
+
    .. sourcecode:: bat
 
         (scpy) C:\<yourDefaultPath>> conda install spectrochempy
 
    This can take time, depending on your python installation and the number of
    missing packages.
+
 
    If you prefer to deal with the latest development version, you must use the
    following command to install from the
@@ -93,7 +110,7 @@ can install Spectrochempy in a dedicated environment (recommended, steps 4. and
 
    .. sourcecode:: bat
 
-        (scpy) C:\<yourDefaultPath>> conda install -c spectrocat/label/dev spectrochempy
+        (scpy) C:\<yourDefaultPath>> mamba install -c spectrocat/label/dev spectrochempy
 
 Install using pip
 -----------------
@@ -105,7 +122,7 @@ on Pypi, we are not supporting this method.
 
    (scpy)  C:\<yourDefaultPath>>  pip install spectrochempy
 
-Install a developper version from sources (Advanced usage)
+Install a developper version from sources (advanced usage)
 ----------------------------------------------------------
 
 Installation of the developper version is described here:  :ref:`develguide`.

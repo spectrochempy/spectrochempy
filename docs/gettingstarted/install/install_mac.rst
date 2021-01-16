@@ -8,12 +8,14 @@ Installation
 
 .. _conda_mac:
 
-The following steps have been checked only with OSX-Catalina but should work with previous versions as well and
+The following steps have been checked only with OSX-Catalina but should work
+with previous versions as well and
 hopfully on the more recent OSX version.
 
 As said before, we highly recommend that all new users install |scpy|
 interface via Conda. You can install |scpy| in a dedicated
-environment (recommended, steps 4. and 5. below). You can also use your base environment or an existing environment
+environment (recommended, steps 4. and 5. below). You can also use your base
+environment or an existing environment
 (then skip steps 4. and 5.)
 
 #.  Open a terminal and update conda:
@@ -22,9 +24,11 @@ environment (recommended, steps 4. and 5. below). You can also use your base env
 
         (base)  ~ $ conda update conda
 
-    your exact prompt may be different depending on the shell you are using and its configuration
+    your exact prompt may be different depending on the shell you are using and
+    its configuration
 
-#.  Add channels to the base configuration to simplify the installation of specific packages from different sources:
+#.  Add channels to the base configuration to simplify the installation of
+    specific packages from different sources:
 
     .. sourcecode:: bash
 
@@ -32,7 +36,8 @@ environment (recommended, steps 4. and 5. below). You can also use your base env
         (base)  ~ $ conda config --add channels conda-forge
         (base)  ~ $ conda config --add channels cantera
 
-    Note that the last line about cantera is only require if you intend to work the kinetics modules of |scpy|.
+    Note that the last line about cantera is only require if you intend to work
+    the kinetics modules of |scpy|.
 
 #.  **Recommended**: you should create a dedicated environment in order to
     isolate the changes made on the installed library from any other previous
@@ -85,11 +90,26 @@ environment (recommended, steps 4. and 5. below). You can also use your base env
 
 #. Install |scpy|
 
-   To install a stable version, just type :
+   The conda installer has to solve all packages dependencies and is definitely
+   a bit slow. So we recommand to install `mamba <https://github.com/mamba-org/mamba>`__
+   as a drop-in replacement via:
+
+   .. sourcecode:: bash
+
+        scpy)  ~ $ conda install mamba
+
+   To install a stable version of spectrochempy, then you just have to do :
+
+   .. sourcecode:: bash
+
+        (scpy)  ~ $ mamba install spectrochempy
+
+   or if you rather prefer not to use mamba:
 
    .. sourcecode:: bash
 
         (scpy)  ~ $ conda install spectrochempy
+
 
    This can take time, depending on your python installation and the number of
    missing packages.
@@ -101,7 +121,7 @@ environment (recommended, steps 4. and 5. below). You can also use your base env
 
    .. sourcecode:: bash
 
-        (scpy)  ~ $ conda install -c spectrocat/label/dev spectrochempy
+        (scpy)  ~ $ mamba install -c spectrocat/label/dev spectrochempy
 
 
 Install using pip
@@ -115,7 +135,7 @@ on Pypi, we are not supporting this method.
    (scpy)  ~ $ pip install spectrochempy
 
 
-Install a developper version from sources (Advanced usage)
+Install a developper version from sources (advanced usage)
 ----------------------------------------------------------
 
 Installation of the developper version is described here:  :ref:`develguide`.

@@ -6,7 +6,6 @@
 #  =====================================================================================================================
 #
 """This module define a generic class to import files and contents.
-
 """
 __all__ = ['read']
 __dataset_methods__ = __all__
@@ -15,7 +14,7 @@ from warnings import warn
 from datetime import datetime, timezone
 from traitlets import HasTraits, List, Dict, Type, Unicode
 
-from spectrochempy.utils import pathclean, check_filename_to_open, docstrings
+from spectrochempy.utils import pathclean, check_filename_to_open
 from spectrochempy.utils.exceptions import DimensionsCompatibilityError, ProtocolError
 
 
@@ -214,9 +213,6 @@ def importermethod(func):
 # ----------------------------------------------------------------------------------------------------------------------
 # Generic Read function
 # ----------------------------------------------------------------------------------------------------------------------
-
-@docstrings.get_sections(base='read_method', sections=['Parameters', 'Other Parameters'])
-@docstrings.dedent
 def read(*paths, **kwargs):
     """
     Parameters
@@ -252,7 +248,7 @@ def read(*paths, **kwargs):
         Up to now only 'omnic' and 'tga' have been implemented.
     csv_delimiter : str, optional
         Set the column delimiter in CSV file.
-        By default it is the one set in SpectroChemPy `Preferences`.
+        By default it is the one set in SpectroChemPy ``Preferences``.
     content : bytes object, optional
         Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
         The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
@@ -269,8 +265,8 @@ def read(*paths, **kwargs):
 
     Returns
     --------
-    out : NDDataset| or list of |NDDataset|
-        The dataset or a list of dataset corresponding to a (set of) OPUS file(s).
+    out
+        NDDataset| or list of |NDDataset|
 
     Examples
     ---------
@@ -346,7 +342,6 @@ def read(*paths, **kwargs):
     read_csv: Read CSV files
     read_zip: Read Zip files
     read_matlab: Read Matlab files
-
     """
 
     importer = Importer()
@@ -403,9 +398,6 @@ def _read_(*args, **kwargs):
                     pass
             raise NotImplementedError
 
-
-# ......................................................................................................................
-docstrings.delete_params('read_method.parameters', 'origin', 'csv_delimiter')
 
 # ----------------------------------------------------------------------------------------------------------------------
 if __name__ == '__main__':

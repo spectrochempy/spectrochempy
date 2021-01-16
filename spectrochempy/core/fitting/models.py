@@ -4,10 +4,8 @@
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
 """
 This module holds the definitions all the various models
-
 """
 
 __all__ = []
@@ -32,7 +30,6 @@ class polynomialbaseline(object):
 
     .. math::
         f(x) = ampl * \\sum_{i=2}^{max} c_i*x^i
-
     """
     args = ['ampl']
     args.extend(['c_%d' % i for i in range(2, 11)])
@@ -90,7 +87,6 @@ class gaussianmodel(object):
         f(x) = \\frac{ampl}{\\sqrt{2 \\pi \\sigma^2} } \\exp({\\frac{-(x-pos)^2}{2 \\sigma^2}})
 
     where :math:`\\sigma = \\frac{width}{2.3548}`
-
     """
     args = ['ampl', 'width', 'pos']
     script = """MODEL: line%(id)d\nshape: gaussianmodel
@@ -118,7 +114,6 @@ class lorentzianmodel(object):
         f(x) = \\frac{ampl * \\lambda}{\\pi [(x-pos)^2+ \\lambda^2]}
 
     where :math:`\\lambda = \\frac{width}{2}`
-
     """
     args = ['ampl', 'width', 'pos']
     script = """MODEL: line%(id)d\nshape: lorentzianmodel
@@ -141,7 +136,6 @@ class voigtmodel(object):
     """
     A Voigt model constructed as the convolution of a :class:`GaussianModel` and
     a :class:`LorentzianModel` -- commonly used for spectral line fitting.
-
     """
     args = ['ampl', 'width', 'ratio', 'pos']
     script = """MODEL: line%(id)d\nshape: voigtmodel
@@ -171,7 +165,6 @@ class assymvoigtmodel(object):
     """
     An assymetric Voigt model
     A. L. Stancik and E. B. Brauns, Vibrational Spectroscopy, 2008, 47, 66-69
-
     """
     args = ['ampl', 'width', 'ratio', 'assym', 'pos']
     script = """MODEL: line%(id)d\nshape: voigtmodel
@@ -234,7 +227,6 @@ def getmodel(x, y=None, modelname=None, par=None, **kargs):
     -------
     ndarray : float
         an array containing the calculated model.
-
     """
     model = par.model[modelname]
     modelcls = globals()[model]

@@ -6,7 +6,7 @@
 # ======================================================================================================================
 
 """
-MCR ALS optimization example (original example from Jaumot)
+MCR-ALS optimization example (original example from Jaumot)
 ===========================================================
 
 In this example, we perform the MCR ALS optimization of a dataset

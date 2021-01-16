@@ -4,10 +4,8 @@
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
 """
 Various methods and classes used in other part of the program
-
 """
 import re
 import os
@@ -59,7 +57,6 @@ def _codechange(code_obj, changes):
 def make_func_from(func, first=None):
     """
     Create a new func with its arguments from another func and a new signature
-
     """
     code_obj = func.__code__
     new_varnames = list(code_obj.co_varnames)
@@ -83,7 +80,6 @@ def make_new_object(obj):
     Returns
     -------
     new : the new object of same type.
-
     """
 
     new = type(obj)()
@@ -118,7 +114,6 @@ except ImportError:
             >>> import os
             >>> with ignored(OSError):
             ...     os.remove('file-that-does-not-exist')
-
         """
 
         try:
@@ -134,7 +129,6 @@ except ImportError:
 class _DummyFile(object):
     """
     A writeable object.
-
     """
 
     def write(self, s):
@@ -149,7 +143,6 @@ class _DummyFile(object):
 def silence():
     """
     A context manager that silences sys.stdout and sys.stderr.
-
     """
 
     old_stdout = sys.stdout
@@ -191,7 +184,6 @@ def gt_eps(arr):
     --------
     bool : results ot checking
         True means that at least some values are greater than epsilon
-
     """
     return np.any(arr > EPSILON)
 
@@ -270,7 +262,6 @@ def dict_compare(d1, d2, check_equal_only=True):
         set() set() {'a'} {'b'}
         >>> dict_compare(x, y)
         False
-
     """
     # from http://stackoverflow.com/questions/4527942/comparing-two-dictionaries-in-python
     # modified to account for the comparison of list objects
@@ -335,7 +326,6 @@ def htmldoc(text):
     -------
     out : str
         the html string
-
     """
     p = re.compile("^(?P<name>.*:)(.*)", re.MULTILINE)  # To get the keywords
     html = p.sub(r'<b>\1</b>\2', text)
@@ -370,7 +360,6 @@ def srepr(arg):
 def makestr(li):
     """
     make a string from a list of string
-
     """
 
     if is_sequence(li):
@@ -406,7 +395,6 @@ def spacing(arr):
     Returns
     -------
     out : float or array
-
     """
     spacings = np.diff(arr)
     # we need to take into account only the significative digits ( but round to some decimals doesn't work

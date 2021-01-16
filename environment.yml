@@ -22,9 +22,9 @@ dependencies:
     - dash-bootstrap-components
     - dash-daq
     - dill
-    - docrep
     - ipython
     - jinja2
+    - mamba
     - matplotlib
     - numba
     - numpy
@@ -87,3 +87,4 @@ dependencies:
         - autodoc_traits
         - dash_defer_js_import
         - dash-ace
+        - git+https://github.com/numpy/numpydoc

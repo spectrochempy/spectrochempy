@@ -4,10 +4,8 @@
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
 """
 This module implement the EFA (Evolving Factor Analysis) class.
-
 """
 
 __all__ = ['EFA']
@@ -27,9 +25,9 @@ from traitlets import HasTraits, Instance
 # ----------------------------------------------------------------------------------------------------------------------
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoordset import CoordSet
-from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.utils import docstrings, MASKED
+from spectrochempy.core.dataset.coordset import CoordSet
+from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.utils import MASKED
 from spectrochempy.core.analysis.svd import SVD
 
 
@@ -43,7 +41,6 @@ class EFA(HasTraits):
 
     Performs an Evolving Factor Analysis (forward and reverse) of
     the |NDDataset| `X`.
-
     """
 
     f = Instance(NDDataset)
@@ -52,15 +49,15 @@ class EFA(HasTraits):
     b = Instance(NDDataset)
     """|NDDataset| - Eigenvalues for the backward analysis"""
 
-    docstrings.keep_params('SVD.parameters', 'dataset')
-
-    @docstrings.dedent
     def __init__(self, dataset):
         """
         Parameters
         ----------
-        %(SVD.parameters.dataset)s
-
+        dataset : |NDDataset| object
+            The dataset X has shape (M, N). M is the number of
+            observations (for examples a series of IR spectra) while N
+            is the number of features (for example the wavenumbers measured
+            in each IR spectrum).
         """
         # check if we have the correct input
         # ----------------------------------
@@ -147,7 +144,6 @@ class EFA(HasTraits):
 
         Returns
         -------
-
         """
         f = self.f
         if cutoff is not None:
@@ -163,7 +159,6 @@ class EFA(HasTraits):
 
         Returns
         -------
-
         """
         b = self.b
         if cutoff is not None:
@@ -187,7 +182,6 @@ class EFA(HasTraits):
         --------
         |NDDataset|
             Concentration profile
-
         """
         M, K = self.f.shape
         if n_pc is None:

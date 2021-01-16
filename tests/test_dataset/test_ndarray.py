@@ -182,15 +182,6 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert d9.is_labeled
     info_('\n', d9)
 
-    # fortran order
-
-    x = ndarraymask.copy()
-    x.asfortranarray()
-    d10 = NDArray(x)
-    assert d10 == x
-    assert d10.data.flags['F_CONTIGUOUS']
-    info_('\n', d10)
-
     # changing dims name
     d11 = NDArray(labels='a b c d e f g h i j'.split(), title='labeled', dims=['q'], author='Blake',
                   history='Created from scratch')

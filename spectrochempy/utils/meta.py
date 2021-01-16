@@ -4,14 +4,13 @@
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
-"""This module mainly contains the definition of a Meta class object
+"""
+This module mainly contains the definition of a Meta class object
 
 Such object is particularly used in `SpectrochemPy` by the |NDDataset| object
 to store metadata. Like a regular dictionary, the
 elements can be accessed by key, but also by attributes, *e.g.*
 ``a = meta['key']`` give the same results as ``a = meta.key``.
-
 """
 
 # from traitlets import HasTraits, Dict, Bool, default
@@ -68,7 +67,6 @@ class Meta(object):  # HasTraits):
     a string
 
     .. rubric:: Methods
-
     """
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -94,7 +92,6 @@ class Meta(object):  # HasTraits):
         ----------
         **data : keywords
             The dictionary can be already inited with some keywords.
-
         """
         self.parent = data.pop('parent', None)
         self.name = data.pop('name', None)
@@ -185,7 +182,6 @@ class Meta(object):  # HasTraits):
         -------
         dict
             A regular dictionary
-
         """
 
         return self._data
@@ -197,7 +193,6 @@ class Meta(object):  # HasTraits):
         ----------
         :param key:
         :return:
-
         """
         return self._data.get(key, default)
 
@@ -210,7 +205,6 @@ class Meta(object):  # HasTraits):
         d : dict-like object
             Any dict-like object can be used, such as `dict`, traits `Dict` or
             another `Meta` object.
-
         """
 
         if isinstance(d, Meta) or hasattr(d, '_data'):
@@ -255,7 +249,6 @@ class Meta(object):  # HasTraits):
         ...     print(key)
         si
         td
-
         """
         return [key for key in self]
 
@@ -274,8 +267,6 @@ class Meta(object):  # HasTraits):
         >>> m.si = 20
         >>> print(m.items())
         [('si', 20), ('td', 10)]
-
-
         """
         return [(key, self[key]) for key in self]
 
@@ -292,7 +283,6 @@ class Meta(object):  # HasTraits):
 
         Returns
         -------
-
         """
 
         newmeta = self.copy()
@@ -327,7 +317,6 @@ class Meta(object):  # HasTraits):
 
         Returns
         -------
-
         """
 
         newmeta = self.copy()

@@ -31,7 +31,6 @@ def make_zipfile(file, **kwargs):
     constructor.
 
     (adapted from numpy)
-
     """
     import zipfile
 
@@ -60,7 +59,6 @@ class ScpFile(Mapping):   # lgtm [py/missing-equals]
         List of all files in the archive with a ``.npy`` extension.
     zip : ZipFile instance
         The ZipFile object initialized with the zipped archive.
-
     """
 
     def __init__(self, fid):
@@ -70,7 +68,6 @@ class ScpFile(Mapping):   # lgtm [py/missing-equals]
         fid : file or str
             The zipped archive to open. This is either a file-like object
             or a string containing the path to the archive.
-
         """
         _zip = make_zipfile(fid)
 
@@ -91,7 +88,6 @@ class ScpFile(Mapping):   # lgtm [py/missing-equals]
     def close(self):
         """
         Close the file.
-
         """
         if self.zip is not None:
             self.zip.close()

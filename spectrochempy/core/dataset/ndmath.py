@@ -4,10 +4,8 @@
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
 """
 This module implements the |NDMath| class.
-
 """
 
 __all__ = ['NDMath', ]
@@ -35,7 +33,7 @@ from quaternion import as_float_array
 # ======================================================================================================================
 from spectrochempy.units.units import ur, Quantity, DimensionalityError
 from spectrochempy.core.dataset.ndarray import NDArray
-from spectrochempy.utils import docstrings, MaskedArray, NOMASK, make_func_from, is_sequence, TYPE_COMPLEX
+from spectrochempy.utils import MaskedArray, NOMASK, make_func_from, is_sequence, TYPE_COMPLEX
 from spectrochempy.core import warning_, error_
 from spectrochempy.utils.testing import assert_dataset_equal
 from spectrochempy.utils.exceptions import CoordinateMismatchError
@@ -51,7 +49,6 @@ class class_or_instance_method(object):
     This decorator is designed as a replacement of @classmethod.
 
     It accept instance or class
-
     """
 
     def __init__(self, method):
@@ -152,7 +149,6 @@ isnan(x [, out, where, casting, order, …])      Test element-wise for NaN and 
 logical_not(x [, out, where, casting, …])       Compute the truth value of NOT x element-wise.
 
 signbit(x, [, out, where, casting, order, …])   Returns element-wise True where signbit is set (less than zero).
-
 """
 
 
@@ -188,7 +184,6 @@ add(x1, x2 [, out, where, casting, order, …])    Add arguments element-wise.
 subtract(x1, x2 [, out, where, casting, …])    Subtract arguments, element-wise.
 
 copysign(x1, x2 [, out, where, casting, …])    Change the sign of x1 to that of x2, element-wise.
-
 """
 
 
@@ -215,7 +210,6 @@ less(x1, x2 [, out, where, casting, …])            Return the truth value of (
 less_equal(x1, x2 [, out, where, casting, …])      Return the truth value of (x1 =< x2) element-wise.
 not_equal(x1, x2 [, out, where, casting, …])       Return (x1 != x2) element-wise.
 equal(x1, x2 [, out, where, casting, …])           Return (x1 == x2) element-wise.
-
 """
 
 
@@ -238,7 +232,6 @@ logical_binary_str = """
 logical_and(x1, x2 [, out, where, …])          Compute the truth value of x1 AND x2 element-wise.
 logical_or(x1, x2 [, out, where, casting, …])  Compute the truth value of x1 OR x2 element-wise.
 logical_xor(x1, x2 [, out, where, …])          Compute the truth value of x1 XOR x2, element-wise.
-
 """
 
 
@@ -298,7 +291,6 @@ class NDMath(object):
     >>> nd2.data
     array([[  -2.005,   -2.003, ...,   -1.826,   -1.831],
            [  -1.983,   -1.984, ...,   -1.698,   -1.704]], dtype=float32)
-
     """
 
     __radian = 'radian'
@@ -391,19 +383,20 @@ class NDMath(object):
     # ------------------------------------------------------------------------------------------------------------------
 
     # ..................................................................................................................
-    @docstrings.dedent
     def abs(self, inplace=False):
         """
         Returns the absolute value of a complex array.
 
         Parameters
         ----------
-        %(generic_method.parameters.inplace)s
+        inplace : bool, optional, default=False
+            Flag to say that the method return a new object (default)
+            or not (inplace=True)
 
         Returns
         -------
-        %(generic_method.returns)s
-
+        out
+            Same object or a copy depending on the ``inplace`` flag.
         """
         if inplace:
             new = self
@@ -444,7 +437,6 @@ class NDMath(object):
         -----
         Use ``.pipe`` when chaining together functions that expect
         a |NDDataset|.
-
         """
         if isinstance(func, tuple):
             func, target = func
@@ -520,7 +512,6 @@ class NDMath(object):
         -------
         ptp : nddataset
             A new dataset holding the result.
-
         """
 
         return self._reduce_method('ptp', *args, **kwargs)
@@ -563,7 +554,6 @@ class NDMath(object):
         -------
         out : ndarray
             The extracted diagonal or constructed diagonal array.
-
         """
         # TODO: fix this - other diagonals
         # k : int, optional
@@ -673,9 +663,8 @@ class NDMath(object):
         array([[0, 1, 2],
                [1, 2, 3],
                [2, 3, 4]])
-
         """
-        from spectrochempy.core.dataset.ndcoordset import CoordSet
+        from spectrochempy.core.dataset.coordset import CoordSet
         if coordset is not None:
             if not isinstance(coordset, CoordSet):
                 coordset = CoordSet(*coordset)
@@ -749,7 +738,6 @@ class NDMath(object):
             An array with the elements of `a`, but where values
             < `a_min` are replaced with `a_min`, and those > `a_max`
             with `a_max`.
-
         """
         if len(args) > 2 or len(args) == 0:
             raise ValueError('Clip requires at least one argument or at most two arguments')
@@ -819,7 +807,6 @@ class NDMath(object):
         argmax :
             Return the indices or coordinates of the maximum values.
         nanmin, minimum, fmin
-
         """
         return self._reduce_method('amin', *args, **kwargs)
 
@@ -872,7 +859,6 @@ class NDMath(object):
         argmin :
             Return the indices or coordinates of the minimum values.
         nanmax, maximum, fmax
-
         """
 
         return self._reduce_method('max', *args, **kwargs)
@@ -914,7 +900,6 @@ class NDMath(object):
     @classmethod
     def arange(cls, start=0, stop=None, step=None, dtype=None, **kwargs):
         """
-
         """
         return cls(np.arange(start, stop, step, dtype=np.dtype(dtype)), **kwargs)
 
@@ -953,8 +938,6 @@ class NDMath(object):
         step : float, optional
             Only returned if retstep is True
             Size of spacing between samples.
-
-
         """
 
         return cls(np.linspace(start, stop, num=num, endpoint=endpoint, retstep=retstep, dtype=dtype), **kwargs)
@@ -1009,7 +992,6 @@ class NDMath(object):
         ... # doctest: +SKIP
         >>> power(base, y).astype(dtype)
         ... # doctest: +SKIP
-
         """
         return cls(np.logspace(start, stop, num=num, endpoint=endpoint, base=base, dtype=dtype), **kwargs)
 
@@ -1041,7 +1023,6 @@ class NDMath(object):
         array([[       1,        0,        0],
                [       0,        1,        0],
                [       0,        0,        1]])
-
         """
         return cls.eye(N, dtype=dtype, **kwargs)
 
@@ -1086,15 +1067,13 @@ class NDMath(object):
         array([[       0,        1,        0],
                [       0,        0,        1],
                [       0,        0,        0]])
-
         """
         return cls(np.eye(N, M, k, dtype, order), **kwargs)
 
-    @classmethod
-    def empty(cls, *args, **kwargs):
+    @staticmethod
+    def empty(shape, **kwargs):
         """
-        Return a new |NDDataset| of given shape and type,  without initializing
-        entries.
+        Return a new |NDDataset| of given shape and type,  without initializing entries.
 
         Parameters
         ----------
@@ -1122,24 +1101,15 @@ class NDMath(object):
 
         Examples
         --------
-
         >>> from spectrochempy import *
-
-        >>> Coord.empty([3])
-        Coord: [float64] unitless (size: 3)
 
         >>> NDDataset.empty([2, 2], dtype=int, units='s')
         NDDataset: [int64] s (shape: (y:2, x:2))
-
         """
-        args = list(args)
-        shape = args.pop(0)
-        dtype = kwargs.pop('dtype', None)
+        return NDMath._create(shape, fill_value=None, **kwargs)
 
-        return cls(np.empty(shape, dtype=dtype), **kwargs)
-
-    @classmethod
-    def zeros(cls, *args, **kwargs):
+    @staticmethod
+    def zeros(shape, **kwargs):
         """
         Return a new |NDDataset| of given shape and type, filled with zeros.
 
@@ -1164,24 +1134,22 @@ class NDMath(object):
         Examples
         --------
         >>> import spectrochempy as scp
-        >>> nd = scp.zeros(5)
+        >>> nd = scp.NDDataset.zeros(6)
+        >>> nd
+        NDDataset: [float64] unitless (size: 6)
+        >>> nd = scp.zeros((5, ))
         >>> nd
         NDDataset: [float64] unitless (size: 5)
         >>> nd.values
         array([       0,        0,        0,        0,        0])
-        >>> nd = scp.zeros((5,10), dtype=np.int, units='absorbance')
+        >>> nd = scp.zeros((5, 10), dtype=np.int, units='absorbance')
         >>> nd
         NDDataset: [int64] a.u. (shape: (y:5, x:10))
-
         """
-        args = list(args)
-        shape = args.pop(0)
-        dtype = kwargs.pop('dtype', None)
+        return NDMath._create(shape, fill_value=0.0, **kwargs)
 
-        return cls(np.zeros(shape, dtype=dtype), **kwargs)
-
-    @classmethod
-    def ones(cls, *args, **kwargs):
+    @staticmethod
+    def ones(shape, **kwargs):
         """
         Return a new |NDDataset| of given shape and type, filled with ones.
 
@@ -1226,16 +1194,11 @@ class NDMath(object):
         >>> scp.ones((2, 2)).values
         array([[       1,        1],
                [       1,        1]])
-
         """
-        args = list(args)
-        shape = args.pop(0)
-        dtype = kwargs.pop('dtype', None)
+        return NDMath._create(shape, fill_value=1.0, **kwargs)
 
-        return cls(np.ones(shape, dtype=dtype), **kwargs)
-
-    @classmethod
-    def full(cls, shape, fill_value=0.0, dtype=None, **kwargs):
+    @staticmethod
+    def full(shape, fill_value=0.0, dtype=None, **kwargs):
         """
         Return a new |NDDataset| of given shape and type, filled with `fill_value`.
 
@@ -1271,12 +1234,8 @@ class NDMath(object):
         Coord: [float64] unitless (size: 2)
         >>> NDDataset.full((2, 2), 10, dtype=np.int)
         NDDataset: [int64] unitless (shape: (y:2, x:2))
-
         """
-        if dtype is None:
-            dtype = kwargs.pop('dtype', np.array(fill_value).dtype)
-
-        return cls(np.full(shape, fill_value, dtype=dtype), **kwargs)
+        return NDMath._create(shape, fill_value=fill_value, **kwargs)
 
     @classmethod
     def empty_like(cls, *args, **kwargs):
@@ -1310,7 +1269,6 @@ class NDMath(object):
         This function does *not* initialize the returned array; to do that use
         for instance `zeros_like`, `ones_like` or `full_like` instead.  It may be
         marginally faster than the functions that do set the array values.
-
         """
 
         return NDMath._like(cls, *args, **kwargs)
@@ -1357,8 +1315,6 @@ class NDMath(object):
         >>> nd.values
             <Quantity([[       0        0        0]
          [       0        0        0]], 'second')>
-
-
         """
         return NDMath._like(cls, *args, fill_value=0.0, **kwargs)
 
@@ -1398,7 +1354,6 @@ class NDMath(object):
         NDDataset: [int64] s (shape: (y:2, x:3))
         >>> scp.ones_like(x, dtype=float, units='J')
         NDDataset: [float64] J (shape: (y:2, x:3))
-
         """
 
         return NDMath._like(cls, *args, fill_value=1.0, **kwargs)
@@ -1448,13 +1403,27 @@ class NDMath(object):
         <Quantity([     0.1      0.1      0.1      0.1      0.1      0.1], 'meter')>
         >>> full_like(x, np.nan, dtype=np.double).values
         <Quantity([     nan     nan      nan      nan      nan      nan], 'meter')>
-
         """
         return NDMath._like(cls, *args, **kwargs)
 
     # ----------------------------------------------------------------------------------------------------------------------
     # Private methods
     #
+
+    @staticmethod
+    def _create(*args, **kwargs):
+
+        from spectrochempy.core.dataset.nddataset import NDDataset
+
+        args = list(args)
+        shape = args.pop(0)
+        fill_value = kwargs.pop('fill_value', 0.0)
+        dtype = kwargs.pop('dtype', None)
+
+        if fill_value is not None:
+            return NDDataset(np.full(shape, fill_value=fill_value, dtype=dtype), **kwargs)
+        else:
+            return NDDataset(np.empty(shape, dtype=dtype), **kwargs)
 
     @classmethod
     def _like(cls, *args, **kwargs):
@@ -2222,7 +2191,6 @@ equivalent to:
 >>> a = np.ma.array(dataset)
 or
 >>> a= dataset.masked_data
-
 """
 
 clip = make_func_from(NDMath.clip, first='dataset')
@@ -2255,10 +2223,10 @@ empty_like = make_func_from(NDMath.empty_like, first='dataset')
 zeros_like = make_func_from(NDMath.zeros_like, first='dataset')
 ones_like = make_func_from(NDMath.ones_like, first='dataset')
 full_like = make_func_from(NDMath.full_like, first='dataset')
-empty = make_func_from(NDMath.empty, first='dataset')
-zeros = make_func_from(NDMath.zeros, first='dataset')
-ones = make_func_from(NDMath.ones, first='dataset')
-full = make_func_from(NDMath.full, first='dataset')
+empty = make_func_from(NDMath.empty)
+zeros = make_func_from(NDMath.zeros)
+ones = make_func_from(NDMath.ones)
+full = make_func_from(NDMath.full)
 
 
 def set_api_methods(cls, methods):

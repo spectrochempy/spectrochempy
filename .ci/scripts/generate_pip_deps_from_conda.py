@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 """
-
 Convert the conda environment.yml to the pip requirements-dev.txt,
 or check that they have the same packages (for the CI)
-
-Copied from https://github.com/pandas-dev/pandas/scripts/generate_pip_deps_from_conda.py
 
 Usage:
 
     Generate `requirements-dev.txt`
-    $ python scripts/generate_pip_deps_from_conda.py
+    $ python .ci/scripts/generate_pip_deps_from_conda.py
 
     Compare and fail (exit status != 0) if `requirements-dev.txt` has not been
     generated with this script:
-    $ python scripts/generate_pip_deps_from_conda.py --compare
+    $ python .ci/scripts/generate_pip_deps_from_conda.py --compare
+
+Copied and modified from https://github.com/pandas-dev/pandas/scripts/generate_pip_deps_from_conda.py (BSD 3-Clause
+License)
 
 """
 import argparse
@@ -121,9 +121,9 @@ if __name__ == "__main__":
         action="store_true",
         help="compare whether the two files are equivalent",
     )
-    argparser.add_argument(
-        "--azure", action="store_true", help="show the output in azure-pipelines format"
-    )
+    # argparser.add_argument(
+    #     "--azure", action="store_true", help="show the output in azure-pipelines format"
+    # )
     args = argparser.parse_args()
 
     repo_path = os.path.dirname(
@@ -139,9 +139,10 @@ if __name__ == "__main__":
             f"`requirements-dev.txt` has to be generated with `{sys.argv[0]}` after "
             "`environment.yml` is modified.\n"
         )
-        if args.azure:
-            msg = (
-                f"##vso[task.logissue type=error;sourcepath=requirements-dev.txt]{msg}"
-            )
-        sys.stderr.write(msg)
+        # if args.azure:
+        #     msg = (
+        #         f"##vso[task.logissue type=error;sourcepath=requirements-dev.txt]{msg}"
+        #     )
+        # sys.stderr.write(msg)
+
     sys.exit(res)

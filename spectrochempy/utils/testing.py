@@ -237,7 +237,6 @@ class RandomSeedContext(object):
 
             randarr = random.randn(100)
             ... run your test using `randarr` ...
-
     """
 
     def __init__(self, seed):
@@ -288,7 +287,6 @@ class raises(object):
     flexible).
 
     (Copied from Astropy, licence BSD-3)
-
     """
 
     # pep-8 naming exception -- this is a decorator class
@@ -333,7 +331,6 @@ class catch_warnings(warnings.catch_warnings):
         assert len(w) > 0
 
     (Copied from Astropy, licence BSD-3)
-
     """
 
     def __init__(self, *classes):

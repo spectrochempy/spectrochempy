@@ -164,7 +164,6 @@ def find_peaks(dataset, height=None, window_length=3, threshold=None, distance=N
     * Use `wlen` to reduce the time it takes to evaluate the conditions for
       `prominence` or `width` if `x` is large or has many local maxima
       (see `peak_prominences`).
-
     """
 
     X = dataset.squeeze()
