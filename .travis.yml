@@ -17,12 +17,12 @@ jobs:
       - TEST=true
       - CONDAPY=3.8
     - stage: conda-deploy
-      if: branch IN (master,feature/travis-deploy) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}$/
+      if: branch IN (master,feature/travis-deploy) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/
       env:
       - DEPLOY=true
       - CONDAPY=3.8
     - stage: build-docs
-      if: type != pull_request AND (branch IN (master,feature/travis-docs) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}$/)
+      if: type != pull_request AND (branch IN (master,feature/travis-docs) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/)
       env:
       - BUILDOCS=true
       - CONDAPY=3.8
