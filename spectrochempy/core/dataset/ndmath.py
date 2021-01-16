@@ -175,10 +175,10 @@ class _from_numpy_method(object):
                     # if a numpy array or a scalar is returned after reduction
                     return new
 
-                # particular case of functions that returns Dataset with no coordinates
-                if dim is None and method in ['sum', 'trapz', 'prod', 'mean', 'var', 'std']:
-                    # delete all coordinates
-                    new._coordset = None
+                # # particular case of functions that returns Dataset with no coordinates
+                # if dim is None and method in ['sum', 'trapz', 'prod', 'mean', 'var', 'std']:
+                #     # delete all coordinates
+                #     new._coordset = None
 
                 new.history = f'Dataset resulting from application of `{method}` method'
                 return new
@@ -1648,7 +1648,7 @@ class NDMath(object):
     # ..................................................................................................................
     @_reduce_method
     @_from_numpy_method
-    def mean(self, dataset, dim=None, dtype=None, keepdims=False, **kwargs):
+    def mean(cls, dataset, dim=None, dtype=None, keepdims=False, **kwargs):
         """
         Compute the arithmetic mean along the specified axis.
 
@@ -1708,7 +1708,37 @@ class NDMath(object):
         0.55000000074505806 # may vary
         """
 
-        return self._reduce_method('mean', *args, **kwargs)
+        axis, dim = cls.get_axis(dim, allows_none=True)
+        m = np.ma.mean(dataset, axis=axis, keepdims=keepdims)
+
+        if np.isscalar(m):
+            if cls.units is not None:
+                return Quantity(m, cls.units)
+            else:
+                return m
+
+        dims = cls.dims
+        cls._data = m.data
+        cls._mask = m.mask
+
+        # Here we must eventually reduce the corresponding coordinates
+        if hasattr(cls, 'coordset'):
+            coordset = cls.coordset
+            if coordset is not None:
+                if dim is not None:
+                    idx = coordset.names.index(dim)
+                    if not keepdims:
+                        del coordset.coords[idx]
+                        dims.remove(dim)
+                    else:
+                        coordset.coords[idx].data = [0, ]
+                else:
+                    # dim being None we remove the coordset
+                    cls.set_coordset(None)
+
+        cls.dims = dims
+
+        return cls
 
     def pipe(self, func, *args, **kwargs):
         """Apply func(self, *args, **kwargs)
