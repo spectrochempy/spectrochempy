@@ -46,8 +46,8 @@ conda config -q --add channels spectrocat
 conda config -q --set channel_priority flexible
 
 PKG_FILE="$CONDA_BLD_PATH/$OS/$PKG_NAME_VERSION"
-echo "---> Building $PKG_FILE"
-conda build conda
+echo "---> Building $PKG_FILE using mamba as a solver"
+conda mambabuild conda
 
 echo "---> Uploading $PKG_FILE"
 if [[ $TRAVIS_BRANCH == "master" ]]; then
