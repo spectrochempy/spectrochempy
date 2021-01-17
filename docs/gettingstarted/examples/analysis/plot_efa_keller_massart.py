@@ -51,7 +51,7 @@ dataset = scp.dot(dsc.T, dss)
 dataset.data = np.random.normal(dataset.data, .2)
 dataset.title = 'intensity'
 
-dataset.plot()
+dataset.plot();
 
 ########################################################################################################################
 # 4) evolving factor analysis (EFA)
@@ -63,9 +63,9 @@ efa = scp.EFA(dataset)
 # Plots of the log(EV) for the forward and backward analysis
 #
 
-efa.f.T.plot(yscale="log", legend=efa.f.y.labels)
+efa.f_ev.T.plot(yscale="log", legend=efa.f_ev.y.labels)
 
-efa.b.T.plot(yscale="log")
+efa.b_ev.T.plot(yscale="log");
 
 ########################################################################################################################
 # Looking at these EFA curves, it is quite obvious that only two components
@@ -75,13 +75,14 @@ efa.b.T.plot(yscale="log")
 # and so we can use it to set a cut of values
 
 n_pc = 2
-cut = np.max(efa.f[:, n_pc].data)
+efa.cutoff = np.max(efa.f_ev[:, n_pc].data)
 
-f2 = efa.cut_f(cutoff=cut)
-b2 = efa.cut_b(cutoff=cut)
+f2 = efa.f_ev
+b2 = efa.b_ev
+
 # we concatenate the datasets to plot them in a single figure
 both = scp.concatenate(f2, b2)
-both.T.plot(yscale="log")
+both.T.plot(yscale="log");
 
 # TODO: add "legend" keyword in NDDataset.plot()
 
@@ -89,8 +90,8 @@ both.T.plot(yscale="log")
 ########################################################################################################################
 # Get the abstract concentration profile based on the FIFO EFA analysis
 #
-
+efa.cutoff = None
 c = efa.get_conc(n_pc)
-c.T.plot()
+c.T.plot();
 
 # scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

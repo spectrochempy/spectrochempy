@@ -104,7 +104,7 @@ def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False
 
     swaped = False
     if axis != -1:
-        new = new.swapaxes(axis, -1)
+        new = new.swapdims(axis, -1)
         swaped = True
 
     # TODO: detect the case where the ref is not exactly with same coords: interpolate?
@@ -165,7 +165,7 @@ def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False
     new._data -= np.dot(x.reshape(-1, 1), ref.data.reshape(1, -1))
 
     if swaped:
-        new = new.swapaxes(axis, -1)
+        new = new.swapdims(axis, -1)
 
     new.history = str(
             new.modified) + ': ' + 'Automatic subtraction of:' + ref.name + '\n'

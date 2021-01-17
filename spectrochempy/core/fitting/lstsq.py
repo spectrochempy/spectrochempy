@@ -7,7 +7,7 @@
 
 # TODO: create tests
 
-__all__ = ['LSTSQ', 'NNLS']
+__all__ = ['CurveFit', 'LSTSQ', 'NNLS']
 
 import numpy as np
 import scipy.optimize as sopt

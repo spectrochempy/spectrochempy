@@ -234,20 +234,24 @@ class NDArray(HasTraits):
 
         author = kwargs.pop('author', get_user_and_node())
         if author:
-            self.author = author
+            try:
+                self.author = author
+            except AttributeError:
+                pass
 
         history = kwargs.pop('history', None)
         if history is not None:
-            self.history = history
+            try:
+                self.history = history
+            except AttributeError:
+                pass
 
         self._modified = self._date
-
-        # call to the super class
-        # super().__init__(**kwargs)
 
     # ------------------------------------------------------------------------------------------------------------------
     # special methods
     # ------------------------------------------------------------------------------------------------------------------
+
     # ..................................................................................................................
     def __copy__(self):
         return self.copy(deep=False)
@@ -908,7 +912,10 @@ class NDArray(HasTraits):
                 except AttributeError:
                     # some attribute of NDDataset are missing in NDArray
                     pass
-            self.history = f'Copied from object:{data.name}'
+            try:
+                self.history = f'Copied from object:{data.name}'
+            except AttributeError:
+                pass
 
         elif isinstance(data, Quantity):
             # debug_("init data with data from a Quantity object")
@@ -1527,7 +1534,7 @@ class NDArray(HasTraits):
     @property
     def linear(self):
         """
-        Bool - flag to specify if the data can be constructed using a linear variation
+        bool - flag to specify if the data can be constructed using a linear variation
         """
         return self._linear
 
@@ -1896,7 +1903,7 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     @property
     def roi(self):
-        """list - ROI limits"""
+        """list - region of interest (ROI) limits"""
         if self._roi is None:
             self._roi = self.limits
         return self._roi
@@ -2003,7 +2010,7 @@ class NDArray(HasTraits):
         return new
 
     # ..................................................................................................................
-    def swapaxes(self, dim1, dim2, inplace=False):
+    def swapdims(self, dim1, dim2, inplace=False):
         """
         Interchange two dims of a NDArray.
 
@@ -2044,6 +2051,9 @@ class NDArray(HasTraits):
 
         new._meta = new._meta.swap(*axis, inplace=False)
         return new
+
+    swapaxes = swapdims
+    swapaxes.__doc__ = 'Alias of `swapdims`'
 
     # ..................................................................................................................
     @property
@@ -2152,7 +2162,7 @@ class NDArray(HasTraits):
             units = ur.Unit(other)
         if self.has_units:
             try:
-                if new.origin in ['topspin', 'nmr']:
+                if new._origin in ['topspin', 'nmr']:
                     # its nmr data
                     set_nmr_context(new.meta.larmor)
                     with ur.context('nmr'):
@@ -2188,7 +2198,7 @@ class NDArray(HasTraits):
 
     def to_base_units(self, inplace=False):
         """
-        Return NDDataset rescaled to base units.
+        Return an array rescaled to base units.
 
         Parameters
         ----------
@@ -2198,7 +2208,7 @@ class NDArray(HasTraits):
         Returns
         -------
         rescaled
-            A rescaled NDDataset
+            A rescaled array
 
         """
         q = Quantity(1., self.units)
@@ -2216,7 +2226,7 @@ class NDArray(HasTraits):
 
     def to_reduced_units(self, inplace=False):
         """
-        Return Quantity scaled in place to reduced units
+        Return an array scaled in place to reduced units
 
         Reduced units means one unit per
         dimension. This will not reduce compound units (e.g., 'J/kg' will not
@@ -2230,7 +2240,7 @@ class NDArray(HasTraits):
         Returns
         -------
         rescaled
-            A rescaled NDDataset
+            A rescaled array
 
         """
         q = Quantity(1., self.units)
@@ -2249,11 +2259,11 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     def transpose(self, *dims, inplace=False):
         """
-        Permute the dimensions of a NDArray.
+        Permute the dimensions of an array.
 
         Parameters
         ----------
-        dims : list int or str
+        *dims : list int or str
             Sequence of dimension indexes or names, optional.
             By default, reverse the dimensions, otherwise permute the dimensions
             according to the values given. If specified the list of dimension
@@ -2264,11 +2274,12 @@ class NDArray(HasTraits):
 
         Returns
         -------
-        transposed_array
+        transpose
+            A transposed array
 
         See Also
         --------
-        swapaxes
+        swapdims : Interchange two dimensions of an array.
         """
         if not inplace:
             new = self.copy()
@@ -2293,7 +2304,7 @@ class NDArray(HasTraits):
     @property
     def umasked_data(self):
         """
-        |ndarray|, dtype:object - The actual array with mask and unit
+        |Quantity| - The actual array with mask and unit
 
         (Readonly property).
         """
@@ -2305,7 +2316,7 @@ class NDArray(HasTraits):
     @property
     def unitless(self):
         """
-        bool - True if the `data` have `units` (Readonly property).
+        `bool` - True if the `data` does not have `units` (Readonly property).
         """
         return not self.has_units
 
@@ -2340,8 +2351,7 @@ class NDArray(HasTraits):
     @property
     def values(self):
         """
-        |ndarray|, dtype:object - The actual values (data, units)
-        contained in this object (Readonly property).
+        |Quantity| - The actual values (data, units) contained in this object (Readonly property).
         """
 
         if self.data is not None:
@@ -2358,4 +2368,9 @@ class NDArray(HasTraits):
         elif self.is_labeled:
             return self._labels[()]
 
-    value = values  # alias
+    @property
+    def value(self):
+        """
+        Alias of `values`.
+        """
+        return self.values

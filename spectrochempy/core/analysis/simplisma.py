@@ -19,9 +19,9 @@ __dataset_methods__ = []
 # imports
 # ----------------------------------------------------------------------------
 import numpy as np
-# import matplotlib.pyplot as plt
+
 import warnings
-from traitlets import HasTraits, Instance
+from traitlets import HasTraits, Instance, Unicode
 
 # ----------------------------------------------------------------------------
 # local imports
@@ -37,7 +37,7 @@ from spectrochempy.core import info_, set_loglevel, INFO
 
 class SIMPLISMA(HasTraits):
     """
-    SIMPLe to use Interactive Self-modeling Mixture Analysis
+    SIMPLe to use Interactive Self-modeling Mixture Analysis.
 
     This class performs a SIMPLISMA analysis of a 2D |NDDataset|. The algorithm is adapted from Windig's paper,
     Chemometrics and Intelligent Laboratory Systems, 36, 1997, 3-16.
@@ -45,38 +45,30 @@ class SIMPLISMA(HasTraits):
     TODO : adapt to 3DDataset ?
     """
 
-    St = Instance(NDDataset)
-    C = Instance(NDDataset)
-    X = Instance(NDDataset)
+    _St = Instance(NDDataset)
+    _C = Instance(NDDataset)
+    _X = Instance(NDDataset)
+    _Pt = Instance(NDDataset)
+    _s = Instance(NDDataset)
+    _logs = Unicode
 
-    def __init__(self, X, **kwargs):
+    def __init__(self, dataset, **kwargs):
         """
         Parameters
         ----------
-        X : |NDDataset|
+        dataset : |NDDataset|
             A 2D dataset containing the data matrix (spectra in rows).
         interactive : bool, optional, default=False
             If True, the determination of purest variables is carried out interactively
         n_pc : int, optional, default=2 in non-interactive mode; 100 in interactive mode
             The maximum number of pure compounds. Used only for non interactive analysis
-            (the default in interative mode (100) will never be reached in practice)
+            (the default in interative mode (100) will never be reached in practice).
         tol : float, optional, default=0.1
             The convergence criterion on the percent of unexplained variance.
         noise : float or int, optional, default=5
             A correction factor (%) for low intensity variables (0 - no offset, 15 - large offset).
         verbose : bool, optional, default=True
-            If true some information is given during the analysis
-
-        Attributes
-        ----------
-        X : the original dataset
-        St : spectra of pure compounds
-        C : intensities ('concentrations') of pure compounds in spectra
-        Pt : purity spectra
-        s : standard deviation spectra
-
-        Examples
-        --------
+            If True some information is given during the analysis.
         """
 
         super().__init__()
@@ -109,6 +101,8 @@ class SIMPLISMA(HasTraits):
         # ------------------------------------------------------------------------
         # Check data
         # ------------------------------------------------------------------------
+
+        X = dataset
 
         if len(X.shape) != 2:
             raise ValueError('For now, SIMPLISMA only handles 2D Datasets')
@@ -386,12 +380,55 @@ class SIMPLISMA(HasTraits):
         C.description = 'Concentration/contribution matrix from SIMPLISMA:\n' + logs
         St.description = 'Pure compound spectra matrix from SIMPLISMA:\n' + logs
         s.description = 'Standard deviation spectra matrix from SIMPLISMA:\n' + logs
-        self.log = logs
-        self.X = X
-        self.Pt = Pt
-        self.C = C
-        self.St = St
-        self.s = s
+
+        self._logs = logs
+        self._X = X
+        self._Pt = Pt
+        self._C = C
+        self._St = St
+        self._s = s
+
+    @property
+    def X(self):
+        """
+        The original dataset.
+        """
+        return self._X
+
+    @property
+    def St(self):
+        """
+        Spectra of pure compounds.
+        """
+        return self._St
+
+    @property
+    def C(self):
+        """
+         Intensities ('concentrations') of pure compounds in spectra.
+        """
+        return self._C
+
+    @property
+    def Pt(self):
+        """
+        Purity spectra.
+        """
+        return self._Pt
+
+    @property
+    def s(self):
+        """
+        Standard deviation spectra.
+        """
+        return self._s
+
+    @property
+    def logs(self):
+        """
+        Logs ouptut.
+        """
+        return self._logs
 
     def reconstruct(self):
         """
@@ -401,14 +438,14 @@ class SIMPLISMA(HasTraits):
 
         Returns
         -------
-        X_hat : |NDDataset|
+        X_hat
             The reconstructed dataset based on the SIMPLISMA Analysis.
         """
 
         # reconstruct from concentration and spectra profiles
 
         X_hat = dot(self.C, self.St)
-        X_hat.description = 'Dataset reconstructed by SIMPLISMA\n' + self.log
+        X_hat.description = 'Dataset reconstructed by SIMPLISMA\n' + self.logs
         X_hat.title = 'X_hat: ' + self.X.title
         return X_hat
 
@@ -416,10 +453,15 @@ class SIMPLISMA(HasTraits):
         """
         Plots the input dataset, reconstructed dataset and residuals
 
+        Parameters
+        ----------
+        **kwargs : dict
+            Plotting parameters
 
         Returns
         -------
-        ax : subplot
+        ax
+            subplot
         """
 
         colX, colXhat, colRes = kwargs.get('colors', ['blue', 'green', 'red'])

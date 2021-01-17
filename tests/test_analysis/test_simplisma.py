@@ -26,4 +26,4 @@ def test_simplisma():
     pure.C.T.plot()
     pure.St.plot()
     pure.plotmerit()
-    assert '3     29      29.0     0.0072     0.9981' in pure.log
+    assert '3     29      29.0     0.0072     0.9981' in pure.logs

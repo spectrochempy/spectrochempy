@@ -210,7 +210,7 @@ class BaselineCorrection(HasTraits):
 
         swaped = False
         if self.axis != -1:
-            new.swapaxes(self.axis, -1, inplace=True)
+            new.swapdims(self.axis, -1, inplace=True)
             swaped = True
 
         # most of the time we need sorted axis, so let's do it now
@@ -301,7 +301,7 @@ class BaselineCorrection(HasTraits):
             new.history = 'Pchip. \n'
 
         if swaped:
-            new = new.swapaxes(self.axis, -1)
+            new = new.swapdims(self.axis, -1)
 
         self.corrected = new
         return new
@@ -493,7 +493,7 @@ def abc(dataset, dim=-1, **kwargs):
     axis, dim = new.get_axis(dim, negative_axis=True)
     swaped = False
     if axis != -1:
-        new.swapaxes(axis, -1, inplace=True)  # must be done in  place
+        new.swapdims(axis, -1, inplace=True)  # must be done in  place
         swaped = True
 
     base = _basecor(new.data.real, **kwargs)
@@ -505,13 +505,17 @@ def abc(dataset, dim=-1, **kwargs):
 
     # restore original data order if it was swaped
     if swaped:
-        new.swapaxes(axis, -1, inplace=True)  # must be done inplace
+        new.swapdims(axis, -1, inplace=True)  # must be done inplace
 
     return new
 
 
-ab = abc
-ab.__doc__ = abc.__doc__
+# ......................................................................................................................
+def ab(dataset, dim=-1, **kwargs):
+    """
+    Alias of `abc`
+    """
+    return abs(dataset, dim, **kwargs)
 
 
 # =======================================================================================================================

@@ -196,10 +196,10 @@ TYPEPRIORITY = {'Coord': 2, 'NDDataset': 3, 'NDPanel': 4}
 unary_str = """
 
 negative(x [, out, where, casting, order, …])    Numerical negative, element-wise.
-abs(x [, out, where, casting, order, …])    Calculate the absolute value element-wise (alias of absolute).
+abs(x [, out, where, casting, order, …])         Calculate the absolute value element-wise (alias of absolute).
 absolute(x [, out, where, casting, order, …])    Calculate the absolute value element-wise.
-fabs(x [, out, where, casting, order, …])    Compute the absolute values element-wise.
-rint(x [, out, where, casting, order, …])    Round elements of the array to the nearest integer.
+fabs(x [, out, where, casting, order, …])        Compute the absolute values element-wise.
+rint(x [, out, where, casting, order, …])        Round elements of the array to the nearest integer.
 floor(x [, out, where, casting, order, …])    Return the floor of the input, element-wise.
 ceil(x [, out, where, casting, order, …])    Return the ceiling of the input, element-wise.
 trunc(x [, out, where, casting, order, …])    Return the truncated value of the input, element-wise.
@@ -509,8 +509,9 @@ class NDMath(object):
             data = np.ma.sqrt(dataset.real ** 2 + dataset.imag ** 2)
 
         else:
-            data = np.ma.sqrt(dataset.real ** 2 + dataset.part('IR') ** 2 + dataset.part('RI') ** 2 +
-                              dataset.part('II') ** 2, dtype=dtype)
+            data = np.ma.sqrt(
+                dataset.real ** 2 + dataset.part('IR') ** 2 + dataset.part('RI') ** 2 + dataset.part('II') ** 2,
+                dtype=dtype)
             cls._is_quaternion = False
 
         cls._data = data.data
@@ -547,7 +548,7 @@ class NDMath(object):
 
         if cls.is_quaternion:
             # TODO:
-            dataset = dataset.swapaxes(axis, -1)
+            dataset = dataset.swapdims(axis, -1)
             dataset[..., 1::2] = - dataset[..., 1::2]
             dataset = dataset(axis, -1)
         else:
@@ -2360,22 +2361,6 @@ class NDMath(object):
 
         return cls
 
-    def to_array(self):
-        """
-        Return a numpy masked array (i.e., other NDDataset attributes are lost.
-
-        Examples
-        ========
-        >>> a = scp.to_array(dataset)
-
-        equivalent to:
-
-        >>> a = np.ma.array(dataset)
-        or
-        >>> a= dataset.masked_data
-        """
-        return np.ma.array(self)
-
     # ..................................................................................................................
     @_reduce_method
     @_from_numpy_method
@@ -3108,7 +3093,6 @@ UNARY_OPS = ['neg', 'pos', 'abs']
 
 # binary operators
 CMP_BINARY_OPS = ['lt', 'le', 'ge', 'gt']
-
 NUM_BINARY_OPS = ['add', 'sub', 'and', 'xor', 'or', 'mul', 'truediv', 'floordiv', 'pow']
 
 
@@ -3136,22 +3120,38 @@ class _ufunc:
         doc = f"""
             {_unary_ufuncs()[self.name].split('->')[-1].strip()}
 
-            wrapper of the numpy.ufunc function ``np.{self.name}'(*args, **kwargs)``.
+            Wrapper of the numpy.ufunc function ``np.{self.name}(dataset)``.
 
             Parameters
             ----------
-            *args : NDDataset
-                |NDDataset| to pass to the numpy function.
-            **kwargs : dict
-                See other parameters.
+            dataset : array-like
+                object to pass to the numpy function.
+
+            Returns
+            -------
+            out
+                |NDDataset|
+
+            Notes
+            -----
+            Numpy Ufuncs referenced in our documentation can be directly applied to |NDDataset| or |Coord| type
+            of SpectrochemPy objects.
+            Most of these Ufuncs, however, instead of returning a numpy array, will return the same type of object.
 
             See Also
             --------
-            np.{self.name} : The corresponding numpy ufunc.
+            `numpy <https://numpy.org/doc/stable/reference/generated/numpy.{self.name}.html>`_ :
+                Corresponding numpy Ufunc.
 
             Examples
             --------
-            See `np.{self.name} <https://numpy.org/doc/stable/reference/generated/numpy.{self.name}.html>`_
+
+            >>> ds = scp.read('wodger.spg')
+            >>> ds_transformed = scp.{self.name}(ds)
+
+            Numpy Ufuncs can also be transparently applied directly to SpectroChemPy object
+
+            >>> ds_transformed = np.{self.name}(ds)
             """
         return doc
 
@@ -3161,7 +3161,7 @@ thismodule = sys.modules[__name__]
 
 def _set_ufuncs(cls):
     for func in _unary_ufuncs():
-        setattr(cls, func, _ufunc(func))
+        # setattr(cls, func, _ufunc(func))
         setattr(thismodule, func, _ufunc(func))
         thismodule.__all__ += [func]
 
@@ -3195,9 +3195,7 @@ api_funcs = [  # creation functions
         'empty_like', 'zeros_like', 'ones_like', 'full_like', 'empty', 'zeros', 'ones', 'full', 'eye', 'identity',
         'random', 'linspace', 'arange', 'logspace', 'geomspace', 'fromfunction', 'fromiter',  #
         'diagonal', 'diag', 'sum', 'average', 'mean', 'std', 'var', 'amax', 'amin', 'min', 'max', 'argmin', 'argmax',
-        'cumsum', 'coordmin', 'coordmax', 'clip', 'ptp', 'pipe', 'to_array',  #
-        'abs', 'conjugate', 'absolute', 'conj',
-        'all', 'any', ]
+        'cumsum', 'coordmin', 'coordmax', 'clip', 'ptp', 'pipe', 'abs', 'conjugate', 'absolute', 'conj', 'all', 'any', ]
 
 for funcname in api_funcs:
     setattr(thismodule, funcname, getattr(NDMath, funcname))

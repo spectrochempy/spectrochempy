@@ -349,24 +349,24 @@ def test_nddataset_masked_array_input():
     assert_array_equal(nd.data, marr.data)
 
 
-def test_nddataset_swapaxes(nd1d, nd2d, ref_ds, ds1):
+def test_nddataset_swapdims(nd1d, nd2d, ref_ds, ds1):
     nd1 = nd1d.copy()
     nd2 = nd2d.copy()
     nd3 = ds1.copy()
 
-    # swapaxes needs 2D at least
+    # swapdims needs 2D at least
     info_("swap 1D - should do nothing")
     assert nd1.shape == (10,)
-    nd1s = nd1.swapaxes(1, 0)
+    nd1s = nd1.swapdims(1, 0)
     assert_equal(nd1s.data, nd1.data)
 
     info_("swap 2D no coords \n" + str(nd2))
-    nd2s = nd2.swapaxes(1, 0)
+    nd2s = nd2.swapdims(1, 0)
     assert nd2s.dims == nd2.dims[::-1]
 
     info_("swap 2D \n", nd3)
     assert nd3.shape == ref_ds.shape
-    nd3s = nd3.swapaxes(1, 0)
+    nd3s = nd3.swapdims(1, 0)
     ref = ref_ds
     refs = np.swapaxes(ref, 1, 0)
     assert nd3.shape == ref.shape  # original unchanged
@@ -375,7 +375,7 @@ def test_nddataset_swapaxes(nd1d, nd2d, ref_ds, ds1):
     assert nd3s.dims[:2] == nd3.dims[:2][::-1]
 
     info_("swap 2D inplace")
-    nd3s = nd3.swapaxes(1, 0, inplace=True)
+    nd3s = nd3.swapdims(1, 0, inplace=True)
     assert nd3.shape == refs.shape  # original changed
     assert nd3s is nd3  # objects should be the same
     info_(nd3s)
@@ -388,7 +388,7 @@ def test_nddataset_swapaxes(nd1d, nd2d, ref_ds, ds1):
     assert nd3s is not nd3
     info_(nd3s)
 
-    # TODO: add check for swapaxes of all elements of a dataset such as meta
+    # TODO: add check for swapdims of all elements of a dataset such as meta
 
 
 # ################################## TEST SLICING################################
@@ -1046,8 +1046,8 @@ def test_nddataset_quaternion():
 
     nd.set_quaternion()
 
-    # test swapaxes
-    nds = nd.swapaxes(0, 1)
+    # test swapdims
+    nds = nd.swapdims(0, 1)
     info_(nds)
 
     assert_array_equal(nd.data.T, nds.data)
@@ -1189,7 +1189,7 @@ def test_nddataset_init_complex_1D_with_mask():
     assert d1R._mask.shape == (5,)
 
 
-def test_nddataset_transpose_swapaxes(ds1):
+def test_nddataset_transpose_swapdims(ds1):
     nd = ds1.copy()
     info_(nd)
     ndt = nd.T

@@ -390,7 +390,7 @@ def test_ndarray_methods(refarray, ndarray, ndarrayunit):
         ndd.to('second')
     ndd.to('second', force=True)
 
-    # swapaxes
+    # swapdims
 
     np.random.seed(12345)
     d = np.random.random((4, 3))
@@ -399,7 +399,7 @@ def test_ndarray_methods(refarray, ndarray, ndarrayunit):
     assert d3.shape == (4, 3)
     assert d3._data.shape == (4, 3)
     assert d3.dims == ['y', 'x']
-    d4 = d3.swapaxes(0, 1)
+    d4 = d3.swapdims(0, 1)
     assert d4.dims == ['x', 'y']
     assert d4.shape == (3, 4)
     assert d4._data.shape == (3, 4)

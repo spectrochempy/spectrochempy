@@ -282,7 +282,7 @@ def test_coord_unit_conversion_operators(operation, result_units):
     assert_equal_units(combined.units, result_units)
 
 
-NOTIMPL = ['mean', 'pipe', 'remove_masks', 'std', 'sum', 'swapaxes']
+NOTIMPL = ['mean', 'pipe', 'remove_masks', 'std', 'sum', 'swapdims']
 
 
 @pytest.mark.parametrize('name', NOTIMPL)

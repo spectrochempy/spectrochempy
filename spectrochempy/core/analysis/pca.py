@@ -57,41 +57,39 @@ class PCA(HasTraits):
     If the dataset `X` contains masked values, these values are silently
     ignored in the calculation.
     """
-    LT = Instance(NDDataset)
-    S = Instance(NDDataset)
-    X = Instance(NDDataset)
+    _LT = Instance(NDDataset)
+    _S = Instance(NDDataset)
+    _X = Instance(NDDataset)
 
-    ev = Instance(NDDataset)
+    _ev = Instance(NDDataset)
     """|NDDataset| - Explained variances (The eigenvalues of the covariance matrix)."""
 
-    ev_ratio = Instance(NDDataset)
+    _ev_ratio = Instance(NDDataset)
     """|NDDataset| - Explained variance per singular values."""
 
-    ev_cum = Instance(NDDataset)
+    _ev_cum = Instance(NDDataset)
     """|NDDataset| - Cumulative Explained Variances."""
 
     # ..................................................................................................................
-    def __init__(self, dataset,
-                 centered=True,
-                 standardized=False,
-                 scaled=False):
+    def __init__(self, dataset, centered=True, standardized=False, scaled=False):
         """
         Parameters
         ----------
-        %(SVD.parameters.dataset)s
+        dataset : |NDDataset| object
+            The input dataset has shape (M, N). M is the number of
+            observations (for examples a series of IR spectra) while N
+            is the number of features (for example the wavenumbers measured
+            in each IR spectrum).
         centered : bool, optional, default:True
-            If True the data are centered around the mean values :
-            :math:`X' = X - mean(X)`.
+            If True the data are centered around the mean values: :math:`X' = X - mean(X)`.
         standardized : bool, optional, default:False
-            If True the data are scaled to unit standard deviation :
-            :math:`X' = X / \\sigma`.
+            If True the data are scaled to unit standard deviation: :math:`X' = X / \\sigma`.
         scaled : bool, optional, default:False
-            If True the data are scaled in the interval [0-1] :
-            :math:`X' = (X - min(X)) / (max(X)-min(X))`
+            If True the data are scaled in the interval [0-1]: :math:`X' = (X - min(X)) / (max(X)-min(X))`
         """
         self.prefs = dataset.preferences
 
-        self.X = X = dataset
+        self._X = X = dataset
 
         Xsc = X.copy()
 
@@ -143,29 +141,29 @@ class PCA(HasTraits):
 
         S = dot(U, sigma)
         S.title = 'scores (S) of ' + X.name
-        S.set_coordset(y=X.y, x=Coord(None, labels=['#%d' % (i + 1) for i in range(svd.s.size)],
-                                      title='principal component'))
+        S.set_coordset(y=X.y,
+                       x=Coord(None, labels=['#%d' % (i + 1) for i in range(svd.s.size)], title='principal component'))
 
         S.description = 'scores (S) of ' + X.name
         S.history = 'Created by PCA'
 
-        self.LT = LT
-        self.S = S
+        self._LT = LT
+        self._S = S
 
         # other attributes
         # ----------------
 
-        self.sv = svd.sv
-        self.sv.x.title = 'PC #'
+        self._sv = svd.sv
+        self._sv.x.title = 'PC #'
 
-        self.ev = svd.ev
-        self.ev.x.title = 'PC #'
+        self._ev = svd.ev
+        self._ev.x.title = 'PC #'
 
-        self.ev_ratio = svd.ev_ratio
-        self.ev_ratio.x.title = 'PC #'
+        self._ev_ratio = svd.ev_ratio
+        self._ev_ratio.x.title = 'PC #'
 
-        self.ev_cum = svd.ev_cum
-        self.ev_cum.x.title = 'PC #'
+        self._ev_cum = svd.ev_cum
+        self._ev_cum.x.title = 'PC #'
 
         return
 
@@ -182,8 +180,7 @@ class PCA(HasTraits):
 
         n_pc = min(n_pc, len(self.ev.data))
         for i in range(n_pc):
-            tup = (
-                    i + 1, np.sqrt(self.ev.data[i]), self.ev_ratio.data[i], self.ev_cum.data[i])
+            tup = (i + 1, np.sqrt(self.ev.data[i]), self.ev_ratio.data[i], self.ev_cum.data[i])
             s += '#{}  \t{:8.3e}\t\t {:6.3f}\t      {:6.3f}\n'.format(*tup)
 
         return s
@@ -240,8 +237,8 @@ class PCA(HasTraits):
         Automatic Choice of Dimensionality for PCA. NIPS 2000 : 598-604.
         Copied and modified from scikit-learn.decomposition.pca (BSD-3 license)
         """
-        spectrum = self.ev.data
-        M, N = self.X.shape
+        spectrum = self._ev.data
+        M, N = self._X.shape
 
         if rank > len(spectrum):
             raise ValueError("The tested rank cannot exceed the rank of the"
@@ -249,8 +246,7 @@ class PCA(HasTraits):
 
         pu = -rank * np.log(2.)
         for i in range(rank):
-            pu += (gammaln((N - i) / 2.) - np.log(np.pi) * (
-                    N - i) / 2.)
+            pu += (gammaln((N - i) / 2.) - np.log(np.pi) * (N - i) / 2.)
 
         pl = np.sum(np.log(spectrum[:rank]))
         pl = -pl * M / 2.
@@ -270,8 +266,7 @@ class PCA(HasTraits):
         spectrum_[rank:N] = v
         for i in range(rank):
             for j in range(i + 1, len(spectrum)):
-                pa += np.log((spectrum[i] - spectrum[j]) * (
-                        1. / spectrum_[j] - 1. / spectrum_[i])) + np.log(M)
+                pa += np.log((spectrum[i] - spectrum[j]) * (1. / spectrum_[j] - 1. / spectrum_[i])) + np.log(M)
 
         ll = pu + pl + pv + pp - pa / 2. - rank * np.log(M) / 2.
 
@@ -285,7 +280,7 @@ class PCA(HasTraits):
         Copied and modified from _infer_dimensions in
         scikit-learn.decomposition.pca (BSD-3 license).
         """
-        n_ev = self.ev.size
+        n_ev = self._ev.size
         ll = np.empty(n_ev)
         for rank in range(n_ev):
             ll[rank] = self._assess_dimension_(rank)
@@ -322,8 +317,8 @@ class PCA(HasTraits):
         # scores (S) and loading (L^T) matrices
         # ------------------------------------
 
-        S = self.S[:, :n_pc]
-        LT = self.LT[:n_pc]
+        S = self._S[:, :n_pc]
+        LT = self._LT[:n_pc]
 
         return S, LT
 
@@ -350,8 +345,8 @@ class PCA(HasTraits):
         n_pc = self._get_n_pc(n_pc)
 
         # reconstruct from scores and loadings using n_pc components
-        S = self.S[:, :n_pc]
-        LT = self.LT[:n_pc]
+        S = self._S[:, :n_pc]
+        LT = self._LT[:n_pc]
 
         X = dot(S, LT)
 
@@ -365,12 +360,12 @@ class PCA(HasTraits):
             X += self._center
 
         X.history = f'PCA reconstructed Dataset with {n_pc} principal components'
-        X.title = self.X.title
+        X.title = self._X.title
         return X
 
     def printev(self, n_pc=None):
-        """prints figures of merit : eigenvalues and explained variance
-        for the first n_pc PS's.
+        """
+        Prints figures of merit : eigenvalues and explained variance for the first n_pc PS's.
 
         Parameters
         ----------
@@ -399,24 +394,16 @@ class PCA(HasTraits):
         ylim1, ylim2 = kwargs.get('ylims', [(0, 100), 'auto'])
 
         if ylim2 == 'auto':
-            y1 = np.around(self.ev_ratio.data[0] * .95, -1)
+            y1 = np.around(self._ev_ratio.data[0] * .95, -1)
             y2 = 101.
             ylim2 = (y1, y2)
 
-        ax1 = self.ev_ratio[:n_pc].plot_bar(ylim=ylim1,
-                                            color=color1,
-                                            title='Scree plot')
-        ax2 = self.ev_cum[:n_pc].plot_scatter(ylim=ylim2,
-                                              color=color2,
-                                              pen=True,
-                                              markersize=7.,
-                                              twinx=ax1
-                                              )
+        ax1 = self._ev_ratio[:n_pc].plot_bar(ylim=ylim1, color=color1, title='Scree plot')
+        ax2 = self._ev_cum[:n_pc].plot_scatter(ylim=ylim2, color=color2, pen=True, markersize=7., twinx=ax1)
         ax1.set_title('Scree plot')
         return ax1, ax2
 
-    def scoreplot(self, *pcs, colormap='viridis', color_mapping='index',
-                  **kwargs):
+    def scoreplot(self, *pcs, colormap='viridis', color_mapping='index', **kwargs):
         """
         2D or 3D scoreplot of samples.
 
@@ -441,15 +428,15 @@ class PCA(HasTraits):
         # colors
         if color_mapping == 'index':
 
-            if np.any(self.S.y.data):
-                colors = self.S.y.data
+            if np.any(self._S.y.data):
+                colors = self._S.y.data
             else:
-                colors = np.array(range(self.S.shape[0]))
+                colors = np.array(range(self._S.shape[0]))
 
         elif color_mapping == 'labels':
 
-            labels = list(set(self.S.y.labels))
-            colors = [labels.index(lab) for lab in self.S.y.labels]
+            labels = list(set(self._S.y.labels))
+            colors = [labels.index(lab) for lab in self._S.y.labels]
 
         if len(pcs) == 2:
             # bidimentional score plot
@@ -458,14 +445,9 @@ class PCA(HasTraits):
             ax = fig.add_subplot(111)
             ax.set_title('Score plot')
 
-            ax.set_xlabel('PC# {} ({:.3f}%)'.format(
-                    pcs[0] + 1, self.ev_ratio.data[pcs[0]]))
-            ax.set_ylabel('PC# {} ({:.3f}%)'.format(
-                    pcs[1] + 1, self.ev_ratio.data[pcs[1]]))
-            axsc = ax.scatter(self.S.masked_data[:, pcs[0]],
-                              self.S.masked_data[:, pcs[1]],
-                              s=30,
-                              c=colors,
+            ax.set_xlabel('PC# {} ({:.3f}%)'.format(pcs[0] + 1, self._ev_ratio.data[pcs[0]]))
+            ax.set_ylabel('PC# {} ({:.3f}%)'.format(pcs[1] + 1, self._ev_ratio.data[pcs[1]]))
+            axsc = ax.scatter(self._S.masked_data[:, pcs[0]], self._S.masked_data[:, pcs[1]], s=30, c=colors,
                               cmap=colormap)
 
             number_x_labels = self.prefs.number_of_x_labels  # get from config
@@ -483,23 +465,11 @@ class PCA(HasTraits):
             plt.figure(**kwargs)
             ax = plt.axes(projection='3d')
             ax.set_title('Score plot')
-            ax.set_xlabel(
-                    'PC# {} ({:.3f}%)'.format(pcs[0] + 1, self.ev_ratio.data[pcs[
-                        0]]))
-            ax.set_ylabel(
-                    'PC# {} ({:.3f}%)'.format(pcs[1] + 1, self.ev_ratio.data[pcs[
-                        1]]))
-            ax.set_zlabel(
-                    'PC# {} ({:.3f}%)'.format(pcs[2] + 1, self.ev_ratio.data[pcs[
-                        2]]))
-            axsc = ax.scatter(self.S.masked_data[:, pcs[0]],
-                              self.S.masked_data[:, pcs[1]],
-                              self.S.masked_data[:, pcs[2]],
-                              zdir='z',
-                              s=30,
-                              c=colors,
-                              cmap=colormap,
-                              depthshade=True)
+            ax.set_xlabel('PC# {} ({:.3f}%)'.format(pcs[0] + 1, self._ev_ratio.data[pcs[0]]))
+            ax.set_ylabel('PC# {} ({:.3f}%)'.format(pcs[1] + 1, self._ev_ratio.data[pcs[1]]))
+            ax.set_zlabel('PC# {} ({:.3f}%)'.format(pcs[2] + 1, self._ev_ratio.data[pcs[2]]))
+            axsc = ax.scatter(self._S.masked_data[:, pcs[0]], self._S.masked_data[:, pcs[1]],
+                              self._S.masked_data[:, pcs[2]], zdir='z', s=30, c=colors, cmap=colormap, depthshade=True)
 
         if color_mapping == 'labels':
             import matplotlib.patches as mpatches
@@ -508,12 +478,55 @@ class PCA(HasTraits):
             for lab in labels:
                 i = labels.index(lab)
                 c = axsc.get_cmap().colors[int(255 / (len(labels) - 1) * i)]
-                leg.append(mpatches.Patch(color=c,
-                                          label=lab))
+                leg.append(mpatches.Patch(color=c, label=lab))
 
             ax.legend(handles=leg, loc='best')
 
         return ax
+
+    @property
+    def LT(self):
+        """
+        LT
+        """
+        return self._LT
+
+    @property
+    def S(self):
+        """
+        S
+        """
+        return self._S
+
+    @property
+    def X(self):
+        """
+        X
+        """
+        return self._X
+
+    @property
+    def ev(self):
+        """
+        |NDDataset| - Explained variances
+
+        (The eigenvalues of the covariance matrix).
+        """
+        return self._ev
+
+    @property
+    def ev_ratio(self):
+        """
+        |NDDataset| - Explained variance per singular values.
+        """
+        return self._ev_ratio
+
+    @property
+    def ev_cum(self):
+        """
+        |NDDataset| - Cumulative Explained Variances.
+        """
+        return self._ev_cum
 
 
 # ============================================================================

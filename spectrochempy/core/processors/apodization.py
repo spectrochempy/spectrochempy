@@ -77,7 +77,7 @@ def _apodize(dataset, method, apod=None, **kwargs):
 
     swaped = False
     if axis != -1:
-        new.swapaxes(axis, -1, inplace=True)  # must be done in  place
+        new.swapdims(axis, -1, inplace=True)  # must be done in  place
         swaped = True
 
     x = new.coordset[dim]
@@ -113,7 +113,7 @@ def _apodize(dataset, method, apod=None, **kwargs):
 
     # restore original data order if it was swaped
     if swaped:
-        new.swapaxes(axis, -1, inplace=True)  # must be done inplace
+        new.swapdims(axis, -1, inplace=True)  # must be done inplace
 
     # TODO: improve display of apod parameters
 

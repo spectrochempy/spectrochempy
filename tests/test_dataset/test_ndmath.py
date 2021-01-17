@@ -496,9 +496,9 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     assert ds.implements('NDDataset')
 
     # _like as a classmethod
-    ds = Coord.full_like(x, 2)
+    ds = NDDataset.full_like(x, 2)
     assert np.all(ds.data == np.full((3,), 2))
-    assert ds.implements('Coord')
+    assert ds.implements('NDDataset')
 
     # _like as an instance method
     ds = NDDataset(x).full_like(2)
@@ -513,15 +513,15 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     # from an array
     x = np.array([1, 2, 3])
 
-    ds = Coord(x).full_like(2)
+    ds = NDDataset(x).full_like(2)
     assert np.all(ds.data == np.full((3,), 2))
-    assert ds.implements('Coord')
+    assert ds.implements('NDDataset')
 
     # from a NDArray subclass with units
-    x = Coord([1, 2, 3], units='km')
+    x = NDDataset([1, 2, 3], units='km')
     ds = scp.full_like(x, 2)
     assert np.all(ds.data == np.full((3,), 2))
-    assert ds.implements('Coord')
+    assert ds.implements('NDDataset')
     assert ds.units == ur.km
 
     ds1 = scp.full_like(ds, np.nan, dtype=np.double, units='m')
@@ -533,30 +533,30 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
 
     # other like creation functions
     nd = scp.empty_like(ds, dtype=np.double, units='m')
-    assert str(nd) == 'Coord: [float64] m (size: 3)'
+    assert str(nd) == 'NDDataset: [float64] m (size: 3)'
     assert nd.dtype == np.dtype(np.double)
 
     nd = scp.zeros_like(ds, dtype=np.double, units='m')
-    assert str(nd) == 'Coord: [float64] m (size: 3)'
+    assert str(nd) == 'NDDataset: [float64] m (size: 3)'
     assert np.all(nd.data == np.zeros((3,)))
 
     nd = scp.ones_like(ds, dtype=np.double, units='m')
-    assert str(nd) == 'Coord: [float64] m (size: 3)'
+    assert str(nd) == 'NDDataset: [float64] m (size: 3)'
     assert np.all(nd.data == np.ones((3,)))
 
     # FULL
     # ----
 
-    ds = Coord.full((6,), 0.1)
+    ds = NDDataset.full((6,), 0.1)
     assert ds.size == 6
-    assert str(ds) == 'Coord: [float64] unitless (size: 6)'
+    assert str(ds) == 'NDDataset: [float64] unitless (size: 6)'
 
     # ZEROS
     # -----
 
-    ds = Coord.zeros((6,), units='km')
+    ds = NDDataset.zeros((6,), units='km')
     assert ds.size == 6
-    assert str(ds) == 'Coord: [float64] km (size: 6)'
+    assert str(ds) == 'NDDataset: [float64] km (size: 6)'
 
     # ONES
     # ----

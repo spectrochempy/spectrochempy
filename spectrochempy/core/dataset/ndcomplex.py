@@ -226,8 +226,7 @@ class NDComplexArray(NDArray):
     @property
     def real(self):
         """
-        |ndarray|, dtype:float - The array with real part of the `data` (
-        Readonly property).
+        array - The array with real part of the `data` (Readonly property).
         """
         new = self.copy()
         if not new.has_complex_dims:
@@ -253,8 +252,7 @@ class NDComplexArray(NDArray):
     @property
     def imag(self):
         """
-        |ndarray|, dtype:float - The array with imaginary part of the `data`
-        (Readonly property).
+        array - The array with imaginary part of the `data` (Readonly property).
         """
         new = self.copy()
         if not new.has_complex_dims:
@@ -282,7 +280,7 @@ class NDComplexArray(NDArray):
     @property
     def RR(self):
         """
-        |ndarray|, dtype:float - The array with real part in both dimension of
+        array - The array with real part in both dimension of
         hypercomplex 2D `data` (Readonly property).
         this is equivalent to the `real` property
         """
@@ -294,7 +292,7 @@ class NDComplexArray(NDArray):
     @property
     def RI(self):
         """
-        |ndarray|, dtype:float - The array with real-imaginary part of
+        array - The array with real-imaginary part of
         hypercomplex 2D `data` (Readonly property).
         """
         if self.ndim != 2:
@@ -305,8 +303,7 @@ class NDComplexArray(NDArray):
     @property
     def IR(self):
         """
-        |ndarray|, dtype:float - The array with imaginary-real part of
-        hypercomplex 2D `data` (Readonly property).
+        array - The array with imaginary-real part of hypercomplex 2D `data` (Readonly property).
         """
         if self.ndim != 2:
             raise TypeError('Not a two dimensional array')
@@ -318,8 +315,7 @@ class NDComplexArray(NDArray):
     @property
     def II(self):
         """
-        |ndarray|, dtype:float - The array with imaginary-imaginary part of
-        hypercomplex 2D data (Readonly property).
+        array - The array with imaginary-imaginary part of hypercomplex 2D data (Readonly property).
         """
         if self.ndim != 2:
             raise TypeError('Not a two dimensional array')
@@ -330,7 +326,9 @@ class NDComplexArray(NDArray):
     # ..................................................................................................................
     @property
     def limits(self):
-        """list - range of the data"""
+        """
+        list - range of the data
+        """
         if self.data is None:
             return None
 
@@ -429,7 +427,7 @@ class NDComplexArray(NDArray):
 
         When nD-dimensional array are set to complex, we assume that it is along the first dimension.
         Two succesives rows are merged to form a complex rows. This means that the number of row must be even
-        If the complexity is to be applied in other dimension, either transpose/swapaxes your data before applying this
+        If the complexity is to be applied in other dimension, either transpose/swapdims your data before applying this
         function in order that the complex dimension is the first in the array.
 
         Parameters
@@ -487,6 +485,7 @@ class NDComplexArray(NDArray):
         return new
 
     set_hypercomplex = set_quaternion
+    set_hypercomplex.__doc__ = 'Alias of set_quaternion'
 
     # ..................................................................................................................
     def transpose(self, *dims, inplace=False):
@@ -518,11 +517,11 @@ class NDComplexArray(NDArray):
 
         return new
 
-    def swapaxes(self, dim1, dim2, inplace=False):
+    def swapdims(self, dim1, dim2, inplace=False):
         """
         Swap dimension the complex array.
 
-        Swapaxes and swapdims are alias.
+        swapdims and swapaxes are alias.
 
         Parameters
         ----------
@@ -538,10 +537,10 @@ class NDComplexArray(NDArray):
             Same object or a copy depending on the ``inplace`` flag.
         """
 
-        new = super().swapaxes(dim1, dim2, inplace=inplace)
+        new = super().swapdims(dim1, dim2, inplace=inplace)
 
         # we need also to swap the quaternion
-        # WARNING: this work only for 2D - when swapaxes is equivalent to a 2D transpose
+        # WARNING: this work only for 2D - when swapdims is equivalent to a 2D transpose
         # TODO: implement something for any n-D array (n>2)
         if self.is_quaternion:
             # here if it is is_quaternion
@@ -551,8 +550,6 @@ class NDComplexArray(NDArray):
             new._data = q.reshape(new.shape)
 
         return new
-
-    swapdims = swapaxes
 
     # ------------------------------------------------------------------------------------------------------------------
     # private methods

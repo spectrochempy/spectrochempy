@@ -588,13 +588,16 @@ exclusions = (
         'load_config_file',
         'parse_command_line', 'print_alias_help', 'print_description',
         'print_examples', 'print_flag_help', 'print_help', 'print_subcommands',
-        'print_version', 'python_config_loader_class', 'raises', '_*')
+        'print_version', 'python_config_loader_class', 'raises', '_*',
+        'unobserve', 'unobserve_all', 'trait_events', 'trait_metadata', 'trait_names', 'trait', 'setup_instance',
+        'set_trait', 'on_trait_change', 'observe', 'notify_change', 'hold_trait_notifications', 'has_trait',
+        'class_traits', 'class_trait_names', 'class_own_traits', 'class_own_trait_events', 'add_traits')
 
 
 # %%
 def autodoc_skip_member(app, what, name, obj, skip, options):
-    # doc = True if obj.__doc__ is not None else False
-    exclude = name in exclusions or 'trait' in name or name.startswith('_')  # or not doc
+    doc = True if obj.__doc__ is not None else False
+    exclude = name in exclusions or 'trait' in name or name.startswith('_') or not doc
     return skip or exclude
 
 
@@ -602,11 +605,16 @@ def shorter_signature(app, what, name, obj, options, signature, return_annotatio
     """
     Prevent displaying self in signature.
     """
-    if what not in ('function', 'method', 'class') or signature is None:
+    if what == 'data':
+        signature = '(dataset)'
+        what = 'function'
+
+    if what not in ('function', 'method', 'class', 'data') or signature is None:
         return
 
     import re
     new_sig = signature
+
     if inspect.isfunction(obj) or inspect.isclass(obj) or inspect.ismethod(obj):
         sig_obj = obj if not inspect.isclass(obj) else obj.__init__
         sig_re = r'\((self|cls)?,?\s*(.*?)\)\:'

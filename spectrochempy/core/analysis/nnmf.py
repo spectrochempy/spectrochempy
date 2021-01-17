@@ -39,11 +39,20 @@ class NNMF(HasTraits):
 
     def __init__(self, X, Ci, Sti, **kwargs):
         """
+        Parameters
+        ==========
         self.C, self.St = nnmf(X, Ci, Sti,**kwargs)
         C,St : output solution
         Ci,Sti : initial solution
-        kwargs['tol'] : tolerance for a relative stopping condition
-        kwargs['maxtime'], kwargs['maxit'] : limit of time and iterations
+
+        Other Parameters
+        ================
+        tol : float, optional
+            Tolerance for a relative stopping condition.
+        maxtime : float, optional
+            Time limit.
+        maxit : float
+            Limit for iterations
         """
         super().__init__()
 

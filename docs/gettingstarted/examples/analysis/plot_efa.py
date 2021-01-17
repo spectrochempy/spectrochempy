@@ -35,7 +35,7 @@ dataset[:, 5997.0:5993.0] = scp.MASKED
 # difference spectra
 
 dataset -= dataset[-1]
-dataset.plot_stack()
+dataset.plot_stack();
 
 ########################################################################################################################
 # column masking for bad columns
@@ -52,6 +52,6 @@ efa = scp.EFA(dataset)
 #
 npc = 4
 c = efa.get_conc(npc)
-c.T.plot()
+c.T.plot();
 
-# scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
+# scp.show()  # Uncomment to show plot if needed (not necessary in jupyter notebook)

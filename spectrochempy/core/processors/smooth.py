@@ -71,7 +71,7 @@ def smooth(dataset, window_length=5, window='flat', **kwargs):
 
     swaped = False
     if axis != -1:
-        new.swapaxes(axis, -1, inplace=True)  # must be done in  place
+        new.swapdims(axis, -1, inplace=True)  # must be done in  place
         swaped = True
 
     if (window_length % 2) != 1:
@@ -111,7 +111,7 @@ def smooth(dataset, window_length=5, window='flat', **kwargs):
 
         # restore original data order if it was swaped
         if swaped:
-            new.swapaxes(axis, -1, inplace=True)  # must be done inplace
+            new.swapdims(axis, -1, inplace=True)  # must be done inplace
     else:
         new = data
 

@@ -7,6 +7,8 @@
 API reference
 ##############
 
+.. contents:: Table of Contents
+
 ****************
 Loading the API
 ****************
@@ -93,51 +95,65 @@ The above code in |scpy| can be simplified using the ``random`` creation method:
 
 (see the :ref:`userguide` for a large set of examples on how to use this constructor.)
 
-Other possibilities e.g. are to use the following methods
+Many SpectroChemPy methods mimics numpy equivalent, but output a NDDataset object.
 
-.. autosummary::
-    :nosignatures:
-    :toctree: generated/
-
-    copy
-    arange
-    linspace
-    logspace
-    geomspace
-    fromfunction
-    fromiter
-
-Creation using numpy-like functions
-===================================
-These functions mimics numpy equivalent, but output a NDDataset object
+Basic creation methods
+=======================
 
 .. autosummary::
     :nosignatures:
     :toctree: generated/
 
     empty
-    empty_like
     zeros
-    zeros_like
     ones
-    ones_like
     full
+    empty_like
+    zeros_like
+    ones_like
     full_like
     eye
     identity
+    random
+    diag
 
-Import of data from external sources
+Creation from existing data
+============================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    copy
+    fromfunction
+    fromiter
+
+Creation from numerical ranges
+==============================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    arange
+    linspace
+    logspace
+    geomspace
+
+Creation from from external sources
 ====================================
 
 .. autosummary::
     :nosignatures:
     :toctree: generated/
 
+    read
     read_omnic
     read_spg
     read_spa
     read_srs
     read_opus
+    read_labspec
     read_topspin
     read_zip
     read_csv
@@ -146,26 +162,31 @@ Import of data from external sources
     read_dir
     read_carroucell
 
-
+******************
 Export a NDDataset
-==================
+******************
 
 .. autosummary::
     :nosignatures:
     :toctree: generated/
 
+    NDDataset.save
+    NDDataset.save_as
+    load
+    write
     write_jcamp
+    to_array
+    to_xarray
 
-
+**************************
 Select data in a NDDataset
-==========================
+**************************
 
 .. autosummary::
     :nosignatures:
     :toctree: generated/
 
     take
-    clip
 
 
 ********************
@@ -186,27 +207,188 @@ Plotting functions
     plot_stack
     plot_image
     plot_surface
-    plot_3D
-
+    plot_waterfall
 
 ************
 Processing
 ************
 
-Transformations
-================
+Transpose-like oprations
+========================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    transpose
+    NDDataset.T
+    swapdims
+
+Changing number of dimensions
+=============================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    squeeze
+    expand_dims
+
+Changing type
+==============
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    set_complex
+    set_hypercomplex
+    set_quaternion
+    asfortranarray
+
+Joining or splitting datasets
+=============================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    concatenate
+    stack
+    split
+
+Indexing
+========
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    diag
+    diagonal
+    take
+
+Sorting
+=======
 
 .. autosummary::
     :nosignatures:
     :toctree: generated/
 
     sort
-    copy
-    squeeze
-    swapaxes
-    transpose
-    set_complex
-    set_quaternion
+
+Minimum and maximum
+===================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    argmin
+    argmax
+    coordmin
+    coordmax
+    min
+    max
+    ptp
+
+Clipping and rounding
+=====================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    clip
+    rint
+    floor
+    ceil
+    fix
+    trunc
+    around
+    round_
+
+
+Algebra
+========
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    dot
+    SVD
+    LSTSQ
+    NNLS
+
+Logic functions
+================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    all
+    any
+    sign
+
+Sums, integal, difference
+==========================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    sum
+    cumsum
+    trapz
+    simps
+    diff
+
+Complex
+=======
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    NDDataset.real
+    NDDataset.imag
+    NDDataset.RR
+    NDDataset.RI
+    NDDataset.IR
+    NDDataset.II
+    part
+    conj
+    conjugate
+    abs
+    absolute
+
+Masks
+=====
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    remove_masks
+
+Units manipulation
+===================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    to
+    to_base_units
+    to_reduced_units
+    ito
+    ito_base_units
+    ito_reduced_units
+    is_units_compatible
+    deg2rad
+    rad2deg
 
 
 Unary mathematical operations
@@ -216,14 +398,8 @@ Unary mathematical operations
     :nosignatures:
     :toctree: generated/
 
-    abs
-    conjugate
-    conj
-    negative
-    absolute
     fabs
-    rint
-    sign
+    negative
     exp
     exp2
     log
@@ -247,62 +423,112 @@ Unary mathematical operations
     arcsinh
     arccosh
     arctanh
-    deg2rad
-    rad2deg
-    floor
-    ceil
-    trunc
-    amax
-    amin
-    argmin
-    argmax
-    cumsum
-    diag
-    mean
-    pipe
-    ptp
-    round
-    std
-    sum
-    var
 
-
-Binary mathematical operations
-==============================
+Statistical operations
+=======================
 
 .. autosummary::
     :nosignatures:
     :toctree: generated/
 
-    dot
+    mean
+    average
+    std
+    sum
+    var
 
 
-Other processing operations
-============================
+Baseline correction
+====================
 
 .. autosummary::
     :nosignatures:
     :toctree: generated/
 
     BaselineCorrection
-    align
     autosub
     ab
+    abc
+    detrend
+
+Fourier transform
+==================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    fft
+    ifft
+
+Smoothing, apodization
+=======================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    savgol_filter
+    smooth
+    bartlett
+    blackmanharris
+    hamming
+    mertz
+    triang
     em
     gm
     sp
     sine
     qsin
     sinm
-    concatenate
-    stack
-    fft
-    ifft
-    detrend
-    savgol_filter
-    interpolate
-    smooth
 
+Alignment, interpolation
+========================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    align
+    interpolate
+
+Miscellaneous
+=============
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    pipe
+
+********************
+Fitting
+********************
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    Fit
+    CurveFit
+    LSTSQ
+    NNLS
+
+*******************
+Analysis
+*******************
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    find_peaks
+    EFA
+    PCA
+    NNMF
+    SIMPLISMA
+    MCRALS
+    IRIS
 
 ********************
 Project management
@@ -335,5 +561,6 @@ Utilities
 .. autosummary::
     :nosignatures:
     :toctree: generated/
+
 
     download_IRIS

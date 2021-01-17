@@ -730,38 +730,78 @@ def _remove_digital_filter(dic, data):
 # ======================================================================================================================
 # Bruker topspin import function
 # ======================================================================================================================
-def read_topspin(*args, **kwargs):
+def read_topspin(*paths, **kwargs):
     """
-    Import Bruker dataset.
+    Open Bruker TOPSPIN (NMR) dataset.
 
     Parameters
     ----------
-    path : str, optional
-        path of the Bruker directory. It path is None, at least the parameters
-        `data`, `user`, `name`, `expno` must be provided.
-    data : str
-        main storage directory, optional.
-    user : str, optional
-        user name of the dataset.
-    name : str, optional
-        name of the dataset.
+    *paths : str, optional
+        Paths of the Bruker directories to read.
+    **kwargs : dict
+        See other parameters.
+
+    Returns
+    --------
+    read_topspin
+        |NDDataset| or list of |NDDataset|.
+
+    Other Parameters
+    ----------------
     expno : int, optional
         experiment number.
-    expnos : list, optional
-        A list of expno.
-    processed : bool, optioanl, default is False
-        should we load already bruker processed files.
     procno : int
         processing number.
-    silent : bool
-        should we output details.
+    protocol : {'scp', 'omnic', 'opus', 'topspin', 'matlab', 'jcamp', 'csv', 'excel'}, optional
+        Protocol used for reading. If not provided, the correct protocol
+        is inferred (whnever it is possible) from the file name extension.
+    directory : str, optional
+        From where to read the specified `filename`. If not specified, read in the default ``datadir`` specified in
+        SpectroChemPy Preferences.
+    merge : bool, optional
+        Default value is False. If True, and several filenames have been provided as arguments,
+        then a single dataset with merged (stacked along the first
+        dimension) is returned (default=False).
+    sortbydate : bool, optional
+        Sort multiple spectra by acquisition date (default=True).
+    description : str, optional
+        A Custom description.
+    origin : {'omnic', 'tga'}, optional
+        In order to properly interpret CSV file it can be necessary to set the origin of the spectra.
+        Up to now only 'omnic' and 'tga' have been implemented.
+    csv_delimiter : str, optional
+        Set the column delimiter in CSV file.
+        By default it is the one set in SpectroChemPy ``Preferences``.
+    content : bytes object, optional
+        Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
+        The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
+        to handle drag and drop of files into a Browser.
+        For exemples on how to use this feature, one can look in the ``tests/tests_readers`` directory.
+    listdir : bool, optional
+        If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
+        is True. It is assumed that all the files correspond to current reading protocol (default=True)
+    recursive : bool, optional
+        Read also in subfolders. (default=False)
+
+    See Also
+    --------
+    read_topspin : Read TopSpin Bruker NMR spectra.
+    read_omnic : Read Omnic spectra.
+    read_opus : Read OPUS spectra.
+    read_labspec : Read Raman LABSPEC spectra.
+    read_spg : Read Omnic *.spg grouped spectra.
+    read_spa : Read Omnic *.Spa single spectra.
+    read_srs : Read Omnic series.
+    read_csv : Read CSV files.
+    read_zip : Read Zip files.
+    read_matlab : Read Matlab files.
     """
     kwargs['filetypes'] = ['Bruker TOPSPIN fid\'s or processed data files (fid ser 1[r|i] 2[r|i]* 3[r|i]*)',
                            'Compressed TOPSPIN data directories (*.zip)']
     kwargs['protocol'] = ['topspin']
 
     importer = Importer()
-    return importer(*args, **kwargs)
+    return importer(*paths, **kwargs)
 
 
 @deprecated("read_bruker_nmr reading method is deprecated and may be removed in next versions "
@@ -1025,7 +1065,7 @@ def _read_topspin(*args, **kwargs):
 
             coord = Coord(np.arange(size) * deltaf + first)
             coord.meta.larmor = meta.sfo1[axis]  # needed for ppm transformation
-            coord.origin = 'nmr'
+            coord._origin = 'nmr'
             coord.ito('ppm')
             if meta.nuc1 is not None:
                 nuc1 = meta.nuc1[axis]

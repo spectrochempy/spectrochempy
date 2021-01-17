@@ -41,14 +41,16 @@ def get_zpd(dataset, dim=-1, mode='max'):
     """
     Find the zero path difference (zpd) positions.
 
-    For multidimensional NDDataset the search is by default performed along the last dimension
+    For multidimensional NDDataset the search is by default performed along the last dimension.
 
-    Parameter
-    ---------
+    Parameters
+    ----------
     dataset : |NDDataset|
         The dataset on which to search for zpd
     dim: int or str, optional
         Dimension along which to make the search. Default=-1.
+    mode : enum('max','abs'), optional
+        Mode of selection. Default = 'max'.
 
     Returns
     -------
@@ -167,7 +169,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
     # If needed, we swap the dimensions to be sure to be in this situation
     swaped = False
     if axis != -1:
-        dataset.swapaxes(axis, -1, inplace=True)  # must be done in  place
+        dataset.swapdims(axis, -1, inplace=True)  # must be done in  place
         swaped = True
 
     # select the last coordinates
@@ -352,7 +354,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
 
     # restore original data order if it was swaped
     if swaped:
-        new.swapaxes(axis, -1, inplace=True)  # must be done inplace
+        new.swapdims(axis, -1, inplace=True)  # must be done inplace
 
     s = 'ifft' if inv else 'fft'
     new.history = f'{s} applied on dimension {dim}'

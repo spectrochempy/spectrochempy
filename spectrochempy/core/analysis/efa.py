@@ -18,7 +18,7 @@ __dataset_methods__ = []
 
 import numpy as np
 from datetime import datetime, timezone
-from traitlets import HasTraits, Instance
+from traitlets import HasTraits, Instance, Float
 
 # ----------------------------------------------------------------------------------------------------------------------
 # localimports
@@ -37,27 +37,25 @@ from spectrochempy.core.analysis.svd import SVD
 
 class EFA(HasTraits):
     """
-    Evolving Factor Analysis
+    Evolving Factor Analysis.
 
-    Performs an Evolving Factor Analysis (forward and reverse) of
-    the |NDDataset| `X`.
+    Performs an Evolving Factor Analysis (forward and reverse) of the input |NDDataset|.
     """
 
-    f = Instance(NDDataset)
-    """|NDDataset| - Eigenvalues for the forward analysis"""
-
-    b = Instance(NDDataset)
-    """|NDDataset| - Eigenvalues for the backward analysis"""
+    _f_ev = Instance(NDDataset)
+    _b_ev = Instance(NDDataset)
+    _cutoff = Float(allow_none=True)
 
     def __init__(self, dataset):
         """
         Parameters
         ----------
         dataset : |NDDataset| object
-            The dataset X has shape (M, N). M is the number of
+            The input dataset has shape (M, N). M is the number of
             observations (for examples a series of IR spectra) while N
             is the number of features (for example the wavenumbers measured
             in each IR spectrum).
+
         """
         # check if we have the correct input
         # ----------------------------------
@@ -132,40 +130,41 @@ class EFA(HasTraits):
             else:
                 b[i] = MASKED
 
-        self.f = f
-        self.b = b
+        self._f_ev = f
+        self._b_ev = b
 
-    def cut_f(self, cutoff=None):
+    @property
+    def cutoff(self):
         """
-
-        Parameters
-        ----------
-        cutoff
-
-        Returns
-        -------
+        float - cutoff value
         """
-        f = self.f
-        if cutoff is not None:
-            f.data = np.max((f.data, np.ones_like(f.data) * cutoff), axis=0)
+        return self._cutoff
+
+    @cutoff.setter
+    def cutoff(self, val):
+        self._cutoff = val
+
+    @property
+    def f_ev(self):
+        """
+        |NDDataset| - Eigenvalues for the forward analysis
+        """
+        f = self._f_ev
+        if self._cutoff is not None:
+            f.data = np.max((f.data, np.ones_like(f.data) * self._cutoff), axis=0)
         return f
 
-    def cut_b(self, cutoff=None):
+    @property
+    def b_ev(self):
         """
-
-        Parameters
-        ----------
-        cutoff
-
-        Returns
-        -------
+        |NDDataset| - Eigenvalues for the backward analysis
         """
-        b = self.b
-        if cutoff is not None:
-            b.data = np.max((b.data, np.ones_like(b.data) * cutoff), axis=0)
+        b = self._b_ev
+        if self.cutoff is not None:
+            b.data = np.max((b.data, np.ones_like(b.data) * self.cutoff), axis=0)
         return b
 
-    def get_conc(self, n_pc=None, cutoff=None):
+    def get_conc(self, n_pc=None):
         """
         Computes abstract concentration profile (first in - first out)
 
@@ -174,22 +173,19 @@ class EFA(HasTraits):
         n_pc : int, optional, default:3
             Number of pure species for which the concentration profile must be
             computed.
-        order : str, [not used]
-        plot : bool, optional, default:True
-            whether or not to display a graph with the concentration profiles
 
         Returns
         --------
-        |NDDataset|
-            Concentration profile
+        concentrations
+            Concentration profile.
         """
-        M, K = self.f.shape
+        M, K = self.f_ev.shape
         if n_pc is None:
             n_pc = K
         n_pc = min(K, n_pc)
 
-        f = self.cut_f(cutoff)
-        b = self.cut_b(cutoff)
+        f = self.f_ev
+        b = self.b_ev
 
         xcoord = Coord(range(n_pc), title='PS#')
         c = NDDataset(np.zeros((M, n_pc)),

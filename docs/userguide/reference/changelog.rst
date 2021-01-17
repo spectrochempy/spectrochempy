@@ -1,55 +1,46 @@
 What's new
 ==========
 
+Version 0.2.1
+-------------
+
+**TASKS** \* Documentaion revisited and hopefully improved. Still some
+work to be done. \* NDMath (mathematical and datasett creation routines)
+module revisited.
+
+**BUGS FIXED** \* Fix a problem with importing the API
+
 Version 0.2.0
 -------------
 
-**NEW FEATURES**
+**NEW FEATURES** \* Copyright update \* Requirements and env yml files
+updated, \* Dtype parameter was not taken into account during
+initialisation of NDArrays \* Use of the coordinates in math operation
+improved \* Added ROI and Offset properties to NDArrays \* Readers /
+Writers revisited \* Bruker TOPSPIN reader \* Added LabSpec reader for
+.txt exported files \* Simplified the format of scp file - now zipped
+JSON files. \* Rewriting json serialiser \* Add function pathclean to
+the API \* Add some array creation function to NDMath \* Refactoring
+plotting preferences system \* Baseline correction now accept single
+value for ranges \* Add a waterfall plot \* Refactoring plot2D and 1D
+methods \* Added Simpson’rule integration \* Addition of multiple
+coordinates to a dimension works better \* Added Linear coordinates \*
+Test for NDDataset dtype change at initialisation \* Added subdir of txt
+files in ramandata \* Comparison of datasets improved in testing.py \*
+Comparison of datasets and projects
 
--  Copyright update
--  Requirements and env yml files updated,
--  Dtype parameter was not taken into account during initialisation of
-   NDArrays
--  Use of the coordinates in math operation improved
--  Added ROI and Offset properties to NDArrays
--  Readers / Writers revisited
--  Bruker TOPSPIN reader
--  Added LabSpec reader for .txt exported files
--  Simplified the format of scp file - now zipped JSON files.
--  Rewriting json serialiser
--  Add function pathclean to the API
--  Add some array creation function to NDMath
--  Refactoring plotting preferences system
--  Baseline correction now accept single value for ranges
--  Add a waterfall plot
--  Refactoring plot2D and 1D methods
--  Added Simpson’rule integration
--  Addition of multiple coordinates to a dimension works better
--  Added Linear coordinates
--  Test for NDDataset dtype change at initialisation
--  Added subdir of txt files in ramandata
--  Comparison of datasets improved in testing.py
--  Comparison of datasets and projects
-
-**BUGS FIXED**
-
--  Math function behavior for coords
--  Color normalisation on the full range for colorscale
--  Configuration settings in the main application
--  Compatibility read_zip with py3.7
--  NDpanel temporary removed from the master
--  2D IRIS fixed
--  Trapz integration to return NDDataset
--  Suppressed a forgotten sleep statement that was slowing down the
-   SpectroChemPy initialisation
--  Error in SIMPLISMA (changed affectations such as C.data[…] =
-   something by C[…] = something
--  Cleaning mplstyle about non-style parameters and fix makestyle
--  Argument of set_xscale
--  Use read_topspin instead of the deprecated function read_bruker_nmr
--  Some issues with interactive baseline
--  Baseline and fitting tutorials
--  Removed dependency of isotopes.py to pandas
+**BUGS FIXED** \* Math function behavior for coords \* Color
+normalisation on the full range for colorscale \* Configuration settings
+in the main application \* Compatibility read_zip with py3.7 \* NDpanel
+temporary removed from the master \* 2D IRIS fixed \* Trapz integration
+to return NDDataset \* Suppressed a forgotten sleep statement that was
+slowing down the SpectroChemPy initialisation \* Error in SIMPLISMA
+(changed affectations such as C.data[…] = something by C[…] = something
+\* Cleaning mplstyle about non-style parameters and fix makestyle \*
+Argument of set_xscale \* Use read_topspin instead of the deprecated
+function read_bruker_nmr \* Some issues with interactive baseline \*
+Baseline and fitting tutorials \* Removed dependency of isotopes.py to
+pandas
 
 Version 0.1.x
 -------------

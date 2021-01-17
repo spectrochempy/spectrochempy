@@ -11,7 +11,6 @@ from os import environ
 
 import re
 import warnings
-import numpy as np
 from pathlib import Path, WindowsPath, PosixPath
 
 __all__ = ['get_filename', 'readdirname', 'pathclean', 'patterns',
@@ -589,7 +588,7 @@ def check_filename_to_open(*args, **kwargs):
                 key: filenames
                 }
 
-    elif len(args)>0 and args[0] is not None:
+    elif len(args) > 0 and args[0] is not None:
         # args where passed so in this case we have directly byte contents instead of filenames only
         contents = filenames
         return {

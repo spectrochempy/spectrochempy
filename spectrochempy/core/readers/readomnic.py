@@ -93,14 +93,14 @@ def read_omnic(*paths, **kwargs):
     --------
     read : Generic read method.
     read_dir : Read a set of data from a directory.
-    read_spg : Read Omnic files *.spg
-    read_spa : Read Omnic files *.spa
-    read_srs : Read Omnic files *.srs
-    read_opus : Read Bruker OPUS files
-    read_topspin : Read TopSpin NMR files
-    read_csv : Read *.csv
-    read_matlab : Read MATLAB files *.mat
-    read_zip : Read zipped group of files
+    read_spg : Read Omnic files *.spg.
+    read_spa : Read Omnic files *.spa.
+    read_srs : Read Omnic files *.srs.
+    read_opus : Read Bruker OPUS files.
+    read_topspin : Read TopSpin NMR files.
+    read_csv : Read *.csv.
+    read_matlab : Read MATLAB files *.mat.
+    read_zip : Read zipped group of files.
 
     Examples
     ---------
@@ -138,7 +138,7 @@ def read_omnic(*paths, **kwargs):
 
     Multiple files merged as the `merge` keyword is set to true
 
-    >>> read_omnic('irdata/nh4y-activation.spg', 'wodger.spg', merge=True)
+    >>> scp.read_omnic('irdata/nh4y-activation.spg', 'wodger.spg', merge=True)
     NDDataset: [float32] a.u. (shape: (y:57, x:5549))
 
     Multiple files to merge : they are passed as a list (note the brakets) instead of using the keyword `merge`
@@ -175,10 +175,10 @@ def read_omnic(*paths, **kwargs):
     >>> content1 = filename1.read_bytes()
     >>> filename2 = datadir / 'wodger.spg'
     >>> content2 = filename2.read_bytes()
-    >>> listnd = scp.read_omnic({filename1.name:content1, filename2.name:content2})
+    >>> listnd = scp.read_omnic({filename1.name: content1, filename2.name: content2})
     >>> len(listnd)
     2
-    >>> scp.read_omnic({filename1.name:content1, filename2.name:content2}, merge=True)
+    >>> scp.read_omnic({filename1.name: content1, filename2.name: content2}, merge=True)
     NDDataset: [float32] a.u. (shape: (y:3, x:5549))
     """
 
@@ -207,10 +207,12 @@ def read_spg(*paths, **kwargs):
         The returned datasets are merged to form a single dataset,
         except if `merge` is set to False. If a source is not provided (i.e. no `filename`, nor `content`),
         a dialog box will be opened to select files.
+    **kwargs : dict
+        See other parameters.
 
     Returns
     --------
-    out
+    read_spg
         The dataset or a list of dataset corresponding to a (set of) .spg file(s).
 
     Other Parameters
@@ -241,14 +243,14 @@ def read_spg(*paths, **kwargs):
     --------
     read : Generic read method.
     read_dir : Read a set of data from a directory.
-    read_omnnic : Read Omnic files
-    read_spa : Read Omnic files *.spa
-    read_srs : Read Omnic files *.srs
-    read_opus : Read Bruker OPUS files
-    read_topspin : Read TopSpin NMR files
-    read_csv : Read *.csv
-    read_matlab : Read MATLAB files *.mat
-    read_zip : Read zipped group of files
+    read_omnnic : Read Omnic files.
+    read_spa : Read Omnic files *.spa.
+    read_srs : Read Omnic files *.srs.
+    read_opus : Read Bruker OPUS files.
+    read_topspin : Read TopSpin NMR files.
+    read_csv : Read *.csv.
+    read_matlab : Read MATLAB files *.mat.
+    read_zip : Read zipped group of files.
 
     Notes
     -----
@@ -288,6 +290,16 @@ def read_spa(*paths, **kwargs):
         The returned datasets are merged to form a single dataset,
         except if `merge` is set to False. If a source is not provided (i.e. no `filename`, nor `content`),
         a dialog box will be opened to select files.
+    **kwargs : dict
+        See other parameters.
+
+    Returns
+    --------
+    read_spa
+        The dataset or a list of dataset corresponding to a (set of) .spg file(s).
+
+    Other Parameters
+    -----------------
     protocol : {'scp', 'omnic', 'opus', 'topspin', 'matlab', 'jcamp', 'csv', 'excel'}, optional
         Protocol used for reading. If not provided, the correct protocol
         is inferred (whnever it is possible) from the file name extension.
@@ -307,28 +319,28 @@ def read_spa(*paths, **kwargs):
         The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
         For exemples on how to use this feature, one can look in the ``tests/tests_readers`` directory.
-
-    Other Parameters
-    -----------------
     listdir : bool, optional
         If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
         is True. It is assumed that all the files correspond to current reading protocol (default=True).
     recursive : bool, optional
         Read also in subfolders. (default=False).
 
-    Returns
+    See Also
     --------
-    out : NDDataset| or list of |NDDataset|
-        The dataset or a list of dataset corresponding to a (set of) .spa file(s).
+    read : Generic read method.
+    read_topspin : Read TopSpin Bruker NMR spectra.
+    read_omnic : Read Omnic spectra.
+    read_opus : Read OPUS spectra.
+    read_labspec : Read Raman LABSPEC spectra.
+    read_spg : Read Omnic *.spg grouped spectra.
+    read_srs : Read Omnic series.
+    read_csv : Read CSV files.
+    read_zip : Read Zip files.
+    read_matlab : Read Matlab files.
 
     Notes
     -----
     This method is an alias of ``read_omnic``, except that the type of file is contrain to *.spa.
-
-    See Also
-    --------
-    read : Generic read method
-    read_omnic, read_spg, read_srs, read_opus
 
     Examples
     ---------
@@ -367,6 +379,16 @@ def read_srs(*paths, **kwargs):
         The returned datasets are merged to form a single dataset,
         except if `merge` is set to False. If a source is not provided (i.e. no `filename`, nor `content`),
         a dialog box will be opened to select files.
+    **kwargs : dict
+        See other parameters.
+
+    Returns
+    --------
+    read_srs
+        The dataset or a list of dataset corresponding to a (set of) .spg file(s).
+
+    Other Parameters
+    -----------------
     protocol : {'scp', 'omnic', 'opus', 'topspin', 'matlab', 'jcamp', 'csv', 'excel'}, optional
         Protocol used for reading. If not provided, the correct protocol
         is inferred (whnever it is possible) from the file name extension.
@@ -386,19 +408,24 @@ def read_srs(*paths, **kwargs):
         The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
         For exemples on how to use this feature, one can look in the ``tests/tests_readers`` directory.
-
-    Other Parameters
-    -----------------
     listdir : bool, optional
         If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
         is True. It is assumed that all the files correspond to current reading protocol (default=True)
     recursive : bool, optional
         Read also in subfolders. (default=False).
 
-    Returns
+    See Also
     --------
-    out : NDDataset| or list of |NDDataset|
-        The dataset or a list of dataset corresponding to a (set of) .srs file(s).
+    read : Generic read method.
+    read_topspin : Read TopSpin Bruker NMR spectra.
+    read_omnic : Read Omnic spectra.
+    read_opus : Read OPUS spectra.
+    read_labspec : Read Raman LABSPEC spectra.
+    read_spg : Read Omnic *.spg grouped spectra.
+    read_spa : Read Omnic *.Spa single spectra.
+    read_csv : Read CSV files.
+    read_zip : Read Zip files.
+    read_matlab : Read Matlab files.
 
     Notes
     -----

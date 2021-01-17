@@ -48,7 +48,7 @@ class Exporter(HasTraits):
         try:
             if 'filetypes' not in kwargs:
                 kwargs['filetypes'] = list(self.filetypes.values())
-                if args:  # filename
+                if args and args[0] is not None:  # filename
                     protocol = self.protocols[pathclean(args[0]).suffix]
                     kwargs['filetypes'] = [self.filetypes[protocol]]
             filename = check_filename_to_save(self.object, *args, **kwargs)
@@ -86,12 +86,26 @@ def exportermethod(func):
 # ----------------------------------------------------------------------------------------------------------------------
 # Generic Read function
 # ----------------------------------------------------------------------------------------------------------------------
-def write(*args, **kwargs):
+def write(dataset, filename=None, **kwargs):
     """
+    Write  the current dataset.
+
     Parameters
     ----------
-    filename: str or pathlib objet, optional
-        If not provided, a dialog is opened to select a file for writing
+    dataset : |NDDataset|
+        Dataset to write.
+    filename : str or pathlib objet, optional
+        If not provided, a dialog is opened to select a file for writing.
+    **kwargs : dict
+        See other parameters.
+
+    Returns
+    -------
+    output_path
+        Path of the output file.
+
+    Other Parameters
+    ----------------
     protocol : {'scp', 'matlab', 'jcamp', 'csv', 'excel'}, optional
         Protocol used for writing. If not provided, the correct protocol
         is inferred (whnever it is possible) from the file name extension.
@@ -103,25 +117,21 @@ def write(*args, **kwargs):
         Set the column delimiter in CSV file.
         By default it is the one set in SpectroChemPy `Preferences`.
 
+    See Also
+    --------
+    save : Generic function for saving a NDDataset in SpectroChemPy format.
+
     Examples
     ---------
-
-    >>> from spectrochempy import read_opus, write
-
     write a dataset (providing a windows type filename relative to the default ``Datadir``)
 
-    >>> nd = read_opus('irdata/OPUS')
+    >>> nd = scp.read_opus('irdata/OPUS')
     >>> f = nd.write('opus.scp')
     >>> f.name
     'opus.scp'
-
-    See Also
-    --------
-    save : generic function for saving a NDDataset in SpectroChemPy format
-    write_spc, write_matlab, write_jcamp, write_excel, write_csv
     """
     exporter = Exporter()
-    return exporter(*args, **kwargs)
+    return exporter(dataset, filename, **kwargs)
 
 
 # ......................................................................................................................

@@ -165,9 +165,6 @@ class BuildDocumentation(object):
 
         doc_version = self.doc_version
 
-        # update modified notebooks
-        self.sync_notebooks()
-
         self.make_changelog()
 
         if builder not in ['html', 'latex']:
@@ -183,6 +180,12 @@ class BuildDocumentation(object):
             print('CLEAN:')
             self.clean(builder)
         self.make_dirs()
+
+        # update modified notebooks
+        self.sync_notebooks()
+
+        shutil.rmtree(API, ignore_errors=True)
+        print(f'remove {API}')
 
         # run sphinx
         print(f'\n{builder.upper()} BUILDING:')

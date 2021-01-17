@@ -54,7 +54,7 @@ class SVD(HasTraits):
         Parameters
         -----------
         dataset : |NDDataset| object
-            The dataset X has shape (M, N). M is the number of
+            The input dataset has shape (M, N). M is the number of
             observations (for examples a series of IR spectra) while N
             is the number of features (for example the wavenumbers measured
             in each IR spectrum).
@@ -169,7 +169,7 @@ class SVD(HasTraits):
             # Sign correction to ensure deterministic output from SVD.
             # This doesn't work will full_matrices=True.
             if not full_matrices:
-                U, VT = self.svd_flip(U, VT)
+                U, VT = self._svd_flip(U, VT)
 
             # Returns U as a NDDataset object
             # --------------------------------
@@ -252,7 +252,7 @@ class SVD(HasTraits):
         ratio.units = 'percent'
         return ratio
 
-    def svd_flip(self, U, VT, u_based_decision=True):
+    def _svd_flip(self, U, VT, u_based_decision=True):
         """
         Sign correction to ensure deterministic output from SVD.
         Adjusts the columns of u and the rows of v such that the loadings in the

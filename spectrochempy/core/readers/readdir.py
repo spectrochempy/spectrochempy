@@ -48,18 +48,20 @@ def read_dir(directory=None, **kwargs):
 
     Returns
     --------
-    out
+    read_dir
         |NDDataset| or list of |NDDataset|.
 
     See Also
-    --------
-    read : Generic read method.
-    read_omnic, read_spg, read_spa, read_srs, read_opus, read_topspin, read_csv, read_matlab, read_zip
-
-    Notes
     ------
-    Only implemented for OMNIC files (*.spa, *.spg), Bruker Opus files (*.[0-9]*), *.csv, *.mat and the
-    native format for spectrochempy : *.scp).
+    read_topspin : Read TopSpin Bruker NMR spectra.
+    read_omnic : Read Omnic spectra.
+    read_opus : Read OPUS spectra.
+    read_spg : Read Omnic *.spg grouped spectra.
+    read_spa : Read Omnic *.Spa single spectra.
+    read_srs : Read Omnic series.
+    read_csv : Read CSV files.
+    read_zip : Read Zip files.
+    read_matlab : Read Matlab files.
 
     Examples
     --------
@@ -85,13 +87,6 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
     When the file containing the temperature data is present, the temperature is read
     and assigned as a label to each spectrum.
 
-    Notes
-    ------
-    All files are expected to be present in the same directory and their filenames
-    are expected to be in the format : X_samplename_YYY.spa
-    and for the backround files : X_BCKG_YYYBG.spa
-    where X is the sample holder number and YYY the spectrum number.
-
     Parameters
     ----------
     dataset : `NDDataset`
@@ -112,6 +107,25 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
     --------
     nddataset
         |NDDataset| or list of |NDDataset|.
+
+    See Also
+    --------
+    read_topspin : Read TopSpin Bruker NMR spectra.
+    read_omnic : Read Omnic spectra.
+    read_opus : Read OPUS spectra.
+    read_spg : Read Omnic *.spg grouped spectra.
+    read_spa : Read Omnic *.Spa single spectra.
+    read_srs : Read Omnic series.
+    read_csv : Read CSV files.
+    read_zip : Read Zip files.
+    read_matlab : Read Matlab files.
+
+    Notes
+    ------
+    All files are expected to be present in the same directory and their filenames
+    are expected to be in the format : X_samplename_YYY.spa
+    and for the backround files : X_BCKG_YYYBG.spa
+    where X is the sample holder number and YYY the spectrum number.
 
     Examples
     --------

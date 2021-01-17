@@ -836,8 +836,29 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         return new
 
+    def expand_dims(self, dim=None):
+        """
+        Expand the shape of an array.
+
+        Insert a new axis that will appear at the `axis` position in the expanded array shape.
+
+        Parameters
+        ----------
+        dim : int or str
+            Position in the expanded axes where the new axis (or axes) is placed.
+
+        Returns
+        -------
+        result : ndarray
+            View of `a` with the number of dimensions increased.
+
+        See Also
+        --------
+        squeeze : The inverse operation, removing singleton dimensions
+        """
+        # TODO
     # ..................................................................................................................
-    def swapaxes(self, dim1, dim2, inplace=False):
+    def swapdims(self, dim1, dim2, inplace=False):
         """
         Interchange two dimensions of a NDDataset.
 
@@ -860,7 +881,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         transpose
         """
 
-        new = super().swapaxes(dim1, dim2, inplace=inplace)
+        new = super().swapdims(dim1, dim2, inplace=inplace)
         new.history = f'Data swapped between dims {dim1} and {dim2}'
         return new
 
@@ -922,6 +943,22 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     #     import spectrochempy as scp
     #
     #     return scp.NDPanel(self, **kwargs)
+
+    def to_array(self):
+        """
+        Return a numpy masked array (i.e., other NDDataset attributes are lost.
+
+        Examples
+        ========
+        >>> a = scp.to_array(dataset)
+
+        equivalent to:
+
+        >>> a = np.ma.array(dataset)
+        or
+        >>> a= dataset.masked_data
+        """
+        return np.ma.array(self)
 
     # ..................................................................................................................
     def to_xarray(self, **kwargs):
@@ -1020,7 +1057,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         See Also
         --------
-        swapaxes : Interchange two dimensions of a NDDataset.
+        swapdims : Interchange two dimensions of a NDDataset.
         """
         new = super().transpose(*dims, inplace=inplace)
         new.history = f'Data transposed between dims: {dims}' if dims else ''
@@ -1129,8 +1166,28 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 # make some NDDataset operation accessible from the spectrochempy API
 thismodule = sys.modules[__name__]
 
-api_funcs = ['sort', 'copy', 'squeeze', 'swapaxes', 'transpose', 'to_xarray', 'take',
-             'set_complex', 'set_quaternion']
+api_funcs = ['sort',
+             'copy',
+             'squeeze',
+             'swapdims',
+             'transpose',
+             'to_array',
+             'to_xarray',
+             'take',
+             'set_complex',
+             'set_quaternion',
+             'set_hypercomplex',
+             'part',
+             'to',
+             'to_base_units',
+             'to_reduced_units',
+             'ito',
+             'ito_base_units',
+             'ito_reduced_units',
+             'is_units_compatible',
+             'remove_masks',
+
+             ]
 
 # todo: chack the fact that some function are defined also in ndmath
 for funcname in api_funcs:
