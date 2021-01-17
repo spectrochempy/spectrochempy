@@ -11,7 +11,7 @@ the specified function or method.
 
 Usage::
     $ .ci/scripts/validate_docstrings.py
-    $ .ci.scripts/validate_docstrings.py spectrochempy.NDDataset.read
+    $ .ci/scripts/validate_docstrings.py spectrochempy.NDDataset.read
 
 Copied and modified from https://github.com/pandas-dev/pandas/scripts/validate_docstrings.py (BSD 3-Clause License)
 """
