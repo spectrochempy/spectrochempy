@@ -258,13 +258,6 @@ def test_ndcomplex_complex(ndarraycplx):
     assert ndr.size == nd.size
     assert not ndr.is_complex
 
-    nd = ndarraycplx.copy()
-
-    ndc = nd.conjugate()
-    assert_array_equal(ndc.data.imag, -nd.data.imag)
-    assert ndc.is_complex
-    assert ndc.size == nd.size
-
 
 def test_ndcomplex_str_representation_for_complex():
     nd1 = NDComplexArray([1. + 2.j, 2. + 3.j])

@@ -20,10 +20,9 @@ from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndmath import _unary_ufuncs, _binary_ufuncs, _comp_ufuncs
 from spectrochempy.units.units import ur, Quantity, Unit
-from spectrochempy.utils import (MASKED, TYPE_FLOAT, TYPE_INTEGER)
+from spectrochempy.utils import MASKED
 from spectrochempy.utils.testing import assert_array_equal, assert_equal_units, assert_dataset_equal, RandomSeedContext
 from spectrochempy.utils.exceptions import CoordinateMismatchError
-
 import spectrochempy as scp
 
 typequaternion = np.dtype(np.quaternion)
@@ -222,7 +221,7 @@ def test_ndmath_binary_ufuncs_scalar(nd2d, name, comment):
 # non ufuncs
 # ----------------------------------------------------------------------------------------------------------------------
 
-REDUCE_KEEPDIMS_METHODS = ['max', 'min', 'amax', 'amin', 'round', 'around', 'clip', 'cumsum', ]
+REDUCE_KEEPDIMS_METHODS = ['max', 'min', 'amax', 'amin', 'round', 'around', 'clip', 'cumsum']
 
 REDUCE_KEEPUNITS_METHODS = ['sum', 'mean', 'std', 'ptp', ]
 
@@ -248,125 +247,6 @@ def test_ndmath_classmethod_implementation(nd2d, name):
             pass
         else:
             raise TypeError(*e.args)
-
-
-def test_ndmath_max(IR_dataset_2D):
-    # full test of max with various arguments
-    ds = IR_dataset_2D.copy()
-    ds2 = ds.copy()
-    ds2._units = None
-
-    # by default, this should return a single value or quantity
-    ma = ds.max()
-    assert isinstance(ma, Quantity)
-    ma2 = ds2.max()
-    assert isinstance(ma2, ds2.data.dtype.type)
-
-    # with keepdims True, a NDDataset is returned
-    ma = ds.max(keepdims=True)
-    assert isinstance(ma, NDDataset)
-
-
-# Test for the return type of dataset fonctions
-@pytest.mark.parametrize(('operation', 'restype', 'args', 'kwargs'),
-                         [  # (name, (type res 1D, type res 2D), args, kwargs, type),
-
-                                 ('np.amax', (TYPE_FLOAT, Quantity), None, {}),
-                                 ('np.amin', (TYPE_FLOAT, Quantity), None, {}),
-                                 ('np.max', (TYPE_FLOAT, Quantity), None, {}),
-                                 ('np.min', (TYPE_FLOAT, Quantity), None, {}),
-                                 ('np.sum', (TYPE_FLOAT, Quantity), None, {}),
-                                 ('np.mean', (TYPE_FLOAT, Quantity), None, {}),
-                                 ('np.var', (TYPE_FLOAT, Quantity), None, {}),
-                                 ('np.std', (TYPE_FLOAT, Quantity), None, {}),
-                                 ('np.argmax', (TYPE_INTEGER, tuple), None, {}),
-                                 ('np.argmin', (TYPE_INTEGER, tuple), None, {}),
-
-                                 ('np.max', NDDataset, None, {'keepdims': True}),
-                                 ('np.sum', NDDataset, None, {'keepdims': True}),
-                                 ('np.mean', (NDDataset), None, {'keepdims': True}),
-                                 ('np.std', (NDDataset), None, {'keepdims': True}),
-                                 ('np.var', (NDDataset), None, {'keepdims': True}),
-
-                                 ('np.max', (TYPE_FLOAT, NDDataset), None, {'axis': 0}),
-                                 ('max', (TYPE_FLOAT, NDDataset), None, {'dim': 'x'}),
-                                 ('np.sum', (TYPE_FLOAT, NDDataset), None, {'axis': 0}),
-                                 ('sum', (TYPE_FLOAT, NDDataset), None, {'dim': 'x'}),
-
-                                 ('np.max', (NDDataset), None, {'axis': 0, 'keepdims': True}),
-                                 ('max', (NDDataset), None, {'dim': 'x', 'keepdims': True}),
-                                 ('np.mean', (NDDataset), None, {'axis': 0, 'keepdims': True}),
-                                 ('mean', (NDDataset), None, {'dim': 'x', 'keepdims': True}),
-
-                                 ('np.cumsum', NDDataset, None, {}), ('cumsum', NDDataset, None, {}),
-                                 ('np.cumsum', NDDataset, None, {'axis': 0}), ('cumsum', NDDataset, None, {'axis': 0}),
-
-                                 ('np.ptp', (TYPE_FLOAT, NDDataset), None, {}),
-                                 ('np.ptp', (TYPE_FLOAT, NDDataset), None, {'axis': 0}),
-                                 ('ptp', (TYPE_FLOAT, NDDataset), None, {'dim': 'x'}),
-
-                                 ('np.all', np.bool_, None, {}), ('np.any', np.bool_, None, {}),
-
-                                 ('np.clip', NDDataset, (2., 5.), {}),
-
-                                 ('np.around', NDDataset, (-1,), {}), ('np.round', NDDataset, (-1,), {}),
-
-                         ])
-def test_ndmath_non_ufunc_functions(operation, restype, args, kwargs):
-    def runop(a, args=(), kwargs={}):
-
-        method = not operation.startswith('np.')
-        if args:
-            res = getattr(a, operation)(*args, **kwargs) if method else getattr(np, operation[3:])(a, *args, **kwargs)
-        else:
-            res = getattr(a, operation)(**kwargs) if method else getattr(np, operation[3:])(a, **kwargs)
-        return res
-
-    # duplicate the result type
-    if not isinstance(restype, tuple):
-        restype = (restype, restype)
-
-    # with 1D
-    # -------
-    d1D = np.ma.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], mask=[0, 0, 0, 0, 0, 0, 0, 0, 1, 0])
-
-    ds1 = NDDataset(d1D, dtype='float64')
-    coord0 = Coord(np.arange(10) * .1)
-    ds1.set_coordset(coord0, )
-    info_('\n\n1D' + '-' * 50)
-    info_(str(ds1))
-    info_('-' * 50)
-    dsy = runop(ds1, args, kwargs)
-    assert isinstance(dsy, restype[0])
-    info_(dsy)
-    info_("result operation {} : {}".format(operation, str(dsy)))
-    info_('-' * 50)
-
-    # with 2D
-    # -------
-    d2D = np.ma.array([[3, -1., 2, 4, 10], [5, 60, 8, -7.7, 0], [3.1, -1.5, 2.5, 4.3, 10.], [1, 6., 8.5, 77., -200.]])
-
-    d2D[3, 3] = np.ma.masked
-    ds2 = NDDataset(d2D, dtype='float64')
-    coord0 = Coord(np.arange(4) * .1)
-    coord1 = Coord(np.arange(5) * .2)
-    ds2.set_coordset(coord0, coord1)
-    ds2.units = ur.m
-    info_('\n\n2D' + '-' * 50)
-    info_(str(ds2))
-    info_('-' * 50)
-    dsy = runop(ds2, args, kwargs)
-    assert isinstance(dsy, restype[1])
-    info_(dsy)
-    info_("result operation {} : {}".format(operation, str(dsy)))
-    info_('-' * 50)
-
-
-def test_ndmath_reduce_quantity(IR_dataset_2D):
-    # must keep units
-    ds = IR_dataset_2D.copy()
-    s = ds.sum()
-    assert ds.units == s.units
 
 
 def test_ndmath_absolute_of_quaternion():
@@ -569,9 +449,7 @@ def test_nddataset_divide_with_numpy_array():
 
 # first operand has units km, second has units m
 @pytest.mark.parametrize(('operation', 'result_units'),
-                         [('__add__', ur.km),
-                          ('__sub__', ur.km),
-                          ('__mul__', ur.km * ur.m),
+                         [('__add__', ur.km), ('__sub__', ur.km), ('__mul__', ur.km * ur.m),
                           ('__truediv__', ur.km / ur.m)])
 def test_ndmath_unit_conversion_operators(operation, result_units):
     in_km = NDDataset(np.array([1, 1]), units=ur.km)
@@ -605,7 +483,6 @@ def test_simple_arithmetic_on_full_dataset():
 
 
 def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
-
     # CREATION _LIKE METHODS
     # ----------------------
 
@@ -725,18 +602,18 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     # --------
 
     ds = scp.identity(3, units='km')
-    assert (ds.data == np.identity(3,)).all()
+    assert (ds.data == np.identity(3, )).all()
     assert ds.units == ur.km
 
     # RANDOM
     # ------
 
-    ds = scp.random((3,3), units='km')
+    ds = scp.random((3, 3), units='km')
     assert str(ds) == 'NDDataset: [float64] km (shape: (y:3, x:3))'
 
     # adding coordset
     c1 = Coord.linspace(1, 20, 200, units='m', name='axe_x')
-    ds = scp.random((200, ), units='km', coordset=scp.CoordSet(x=c1))
+    ds = scp.random((200,), units='km', coordset=scp.CoordSet(x=c1))
 
     # DIAGONAL
     # --------
@@ -800,7 +677,7 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     # BOOL : ALL and ANY
     # ------------------
 
-    ds = NDDataset([[True,False],[True,True]])
+    ds = NDDataset([[True, False], [True, True]])
     b = np.all(ds)
     assert not b
 
@@ -813,14 +690,14 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     b = NDDataset.any(ds)
     assert b
 
-    b  = ds.all(dim='y')
-    assert_array_equal(b, np.array([ True, False]))
+    b = ds.all(dim='y')
+    assert_array_equal(b, np.array([True, False]))
 
-    b  = ds.any(dim='y')
-    assert_array_equal(b, np.array([ True, True]))
+    b = ds.any(dim='y')
+    assert_array_equal(b, np.array([True, True]))
 
-   # ARGMAX, MAX
-   # -----------
+    # ARGMAX, MAX
+    # -----------
 
     nd1 = IR_dataset_1D
     nd1[1290.:890.] = MASKED
@@ -860,7 +737,7 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     scp.show()
 
     nd2m = nd2.max('y', keepdims=True)
-    assert nd2m.shape == (1,5549)
+    assert nd2m.shape == (1, 5549)
 
     nd2m = nd2.max('x', keepdims=True)
     assert nd2m.shape == (55, 1)
@@ -947,7 +824,7 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
         d = v * t
         return d
 
-    time = Coord.linspace(0, 9, 10,)
+    time = Coord.linspace(0, 9, 10, )
     distance = NDDataset.fromfunction(func1, v=134, coordset=CoordSet(t=time))
     assert distance.dims == ['t']
     assert_array_equal(distance.data, np.fromfunction(func1, (10,), v=134))
@@ -955,7 +832,7 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     time = Coord.linspace(0, 90, 10, units='min')
     distance = NDDataset.fromfunction(func1, v=Quantity(134, 'km/hour'), coordset=CoordSet(t=time))
     assert distance.dims == ['t']
-    assert_array_equal(distance.data, np.fromfunction(func1, (10,), v=134)*10/60)
+    assert_array_equal(distance.data, np.fromfunction(func1, (10,), v=134) * 10 / 60)
 
     # 2D
     def func2(x, y):
@@ -1008,7 +885,24 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     iterable = (x * x for x in range(5))
     nit = scp.fromiter(iterable, float, units='km')
     assert str(nit) == 'NDDataset: [float64] km (size: 5)'
-    assert_array_equal(nit.data, np.array([0,1,4,9,16]))
+    assert_array_equal(nit.data, np.array([0, 1, 4, 9, 16]))
+
+    # MEAN, AVERAGE
+    # -----
+    nd = IR_dataset_2D.copy()
+    m = scp.mean(nd)
+    assert m == Quantity(1.1586077386961373, "absorbance")
+
+    m = scp.average(nd)
+    assert m == Quantity(1.1586077386961373, "absorbance")
+
+    mx = scp.mean(nd, keepdims=True)
+    assert mx.shape == (1, 1)
+
+    mxd = scp.mean(nd, dim='y')
+    assert str(mxd) == 'NDDataset: [float64] a.u. (size: 5549)'
+    assert str(mxd.x) == 'Coord: [float64] cm^-1 (size: 5549)'
+
 
 def test_nddataset_fancy_indexing():
     # numpy vs dataset

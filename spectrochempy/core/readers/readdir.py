@@ -63,17 +63,15 @@ def read_dir(directory=None, **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy import NDDataset
-    >>> A = NDDataset.read_dir('irdata')
+    >>> A = scp.read_dir('irdata')
     >>> len(A)
     3
 
-    >>> B = NDDataset.read_dir()
+    >>> B = scp.NDDataset.read_dir()
     """
     kwargs['listdir'] = True
     importer = Importer()
-    args = [directory]
-    return importer(*args, **kwargs)
+    return importer(directory, **kwargs)
 
 
 # TODO: make an importer function, when a test directory will be provided.

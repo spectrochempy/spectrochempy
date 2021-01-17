@@ -104,17 +104,15 @@ def read_omnic(*paths, **kwargs):
 
     Examples
     ---------
-    >>> from spectrochempy import read_omnic, NDDataset
-
     Reading a single OMNIC file  (providing a windows type filename relative to the default ``datadir``)
 
-    >>> read_omnic('irdata\\\\nh4y-activation.spg')
+    >>> scp.read_omnic('irdata\\\\nh4y-activation.spg')
     NDDataset: [float32] a.u. (shape: (y:55, x:5549))
 
     Reading a single OMNIC file  (providing a unix/python type filename relative to the default ``datadir``)
     Note that here read_omnic is called as a classmethod of the NDDataset class
 
-    >>> NDDataset.read_omnic('irdata/nh4y-activation.spg')
+    >>> scp.NDDataset.read_omnic('irdata/nh4y-activation.spg')
     NDDataset: [float32] a.u. (shape: (y:55, x:5549))
 
     Single file specified with pathlib.Path object
@@ -122,17 +120,17 @@ def read_omnic(*paths, **kwargs):
     >>> from pathlib import Path
     >>> folder = Path('irdata')
     >>> p = folder / 'nh4y-activation.spg'
-    >>> read_omnic(p)
+    >>> scp.read_omnic(p)
     NDDataset: [float32] a.u. (shape: (y:55, x:5549))
 
     The diretory can also be specified independantly, either as a string or a pathlib object
 
-    >>> read_omnic('nh4y-activation.spg', directory=folder)
+    >>> scp.read_omnic('nh4y-activation.spg', directory=folder)
     NDDataset: [float32] a.u. (shape: (y:55, x:5549))
 
     Multiple files not merged (return a list of datasets)
 
-    >>> le = read_omnic('irdata/nh4y-activation.spg', 'wodger.spg')
+    >>> le = scp.read_omnic('irdata/nh4y-activation.spg', 'wodger.spg')
     >>> len(le)
     2
     >>> le[1]
@@ -145,43 +143,42 @@ def read_omnic(*paths, **kwargs):
 
     Multiple files to merge : they are passed as a list (note the brakets) instead of using the keyword `merge`
 
-    >>> read_omnic(['irdata/nh4y-activation.spg', 'wodger.spg'])
+    >>> scp.read_omnic(['irdata/nh4y-activation.spg', 'wodger.spg'])
     NDDataset: [float32] a.u. (shape: (y:57, x:5549))
 
     Multiple files not merged : they are passed as a list but `merge` is set to false
 
-    >>> l2 = read_omnic(['irdata/nh4y-activation.spg', 'wodger.spg'], merge=False)
+    >>> l2 = scp.read_omnic(['irdata/nh4y-activation.spg', 'wodger.spg'], merge=False)
     >>> len(l2)
     2
 
     Read without a filename. This has the effect of opening a dialog for file(s) selection
 
-    >>> nd = read_omnic()
+    >>> nd = scp.read_omnic()
 
     Read in a directory (assume that only OPUS files are present in the directory
     (else we must use the generic `read` function instead)
 
-    >>> l3 = read_omnic(directory='irdata/subdir/1-20')
+    >>> l3 = scp.read_omnic(directory='irdata/subdir/1-20')
     >>> len(l3)
     3
 
     Again we can use merge to stack all 4 spectra if thet have compatible dimensions.
 
-    >>> read_omnic(directory='irdata/subdir', merge=True)
+    >>> scp.read_omnic(directory='irdata/subdir', merge=True)
     NDDataset: [float32] a.u. (shape: (y:4, x:5549))
 
     An example, where bytes contents are passed directly to the read_omnic method.
 
-    >>> from spectrochempy import preferences
-    >>> datadir = preferences.datadir
+    >>> datadir = scp.preferences.datadir
     >>> filename1 = datadir / 'irdata' / 'subdir' / '7_CZ0-100 Pd_101.SPA'
     >>> content1 = filename1.read_bytes()
     >>> filename2 = datadir / 'wodger.spg'
     >>> content2 = filename2.read_bytes()
-    >>> listnd = NDDataset.read_omnic({filename1.name:content1, filename2.name:content2})
+    >>> listnd = scp.read_omnic({filename1.name:content1, filename2.name:content2})
     >>> len(listnd)
     2
-    >>> NDDataset.read_omnic({filename1.name:content1, filename2.name:content2}, merge=True)
+    >>> scp.read_omnic({filename1.name:content1, filename2.name:content2}, merge=True)
     NDDataset: [float32] a.u. (shape: (y:3, x:5549))
     """
 
@@ -198,7 +195,7 @@ def read_spg(*paths, **kwargs):
 
     Parameters
     -----------
-    *path : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
+    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
         The data source(s) can be specified by the name or a list of name for the file(s) to be loaded:
 
         *e.g.,( file1, file2, ...,  **kwargs )*
@@ -260,9 +257,7 @@ def read_spg(*paths, **kwargs):
     Examples
     ---------
 
-    >>> from spectrochempy import read_spg
-
-    >>> read_spg('irdata/nh4y-activation.spg')
+    >>> scp.read_spg('irdata/nh4y-activation.spg')
     NDDataset: [float32] a.u. (shape: (y:55, x:5549))
 
     See ``read_omnic`` for more examples of use
@@ -271,17 +266,17 @@ def read_spg(*paths, **kwargs):
     kwargs['filetypes'] = ['OMNIC files (*.spg)']
     kwargs['protocol'] = ['spg']
     importer = Importer()
-    return importer(*args, **kwargs)
+    return importer(*paths, **kwargs)
 
 
 # ......................................................................................................................
-def read_spa(*args, **kwargs):
+def read_spa(*paths, **kwargs):
     """
     Open a Thermo Nicolet file or a list of files with extension ``.spa``.
 
     Parameters
     -----------
-    path : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
+    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
         The data source(s) can be specified by the name or a list of name for the file(s) to be loaded:
 
         *e.g.,( file1, file2, ...,  **kwargs )*
@@ -338,12 +333,10 @@ def read_spa(*args, **kwargs):
     Examples
     ---------
 
-    >>> from spectrochempy import read_spa
-
-    >>> read_spa('irdata/subdir/20-50/7_CZ0-100 Pd_21.SPA')
+    >>> scp.read_spa('irdata/subdir/20-50/7_CZ0-100 Pd_21.SPA')
     NDDataset: [float32] a.u. (shape: (y:1, x:5549))
 
-    >>> read_spa(directory='irdata/subdir', merge=True)
+    >>> scp.read_spa(directory='irdata/subdir', merge=True)
     NDDataset: [float32] a.u. (shape: (y:4, x:5549))
 
     See ``read_omnic`` for more examples of use
@@ -352,17 +345,17 @@ def read_spa(*args, **kwargs):
     kwargs['filetypes'] = ['OMNIC files (*.spa)']
     kwargs['protocol'] = ['spa']
     importer = Importer()
-    return importer(*args, **kwargs)
+    return importer(*paths, **kwargs)
 
 
 # ......................................................................................................................
-def read_srs(*args, **kwargs):
+def read_srs(*paths, **kwargs):
     """
     Open a Thermo Nicolet file or a list of files with extension ``.srs``.
 
     Parameters
     -----------
-    path : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
+    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
         The data source(s) can be specified by the name or a list of name for the file(s) to be loaded:
 
         *e.g.,( file1, file2, ...,  **kwargs )*
@@ -414,8 +407,7 @@ def read_srs(*args, **kwargs):
     Examples
     ---------
 
-    >>> from spectrochempy import read_srs
-    >>> read_srs()
+    >>> scp.read_srs()
 
     # TODO: gives an example - need a file in irdata
 
@@ -430,7 +422,7 @@ def read_srs(*args, **kwargs):
     kwargs['filetypes'] = ['OMNIC series (*.srs)']
     kwargs['protocol'] = ['srs']
     importer = Importer()
-    return importer(*args, **kwargs)
+    return importer(*paths, **kwargs)
 
 
 # ======================================================================================================================

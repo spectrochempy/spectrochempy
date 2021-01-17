@@ -345,45 +345,6 @@ class NDComplexArray(NDArray):
     # ------------------------------------------------------------------------------------------------------------------
     # Public methods
     # ------------------------------------------------------------------------------------------------------------------
-    #
-    # # ..................................................................................................................
-    # def conjugate(self, dims='x', inplace=False):
-    #     """
-    #     Conjugate of the NDDataset in the specified dimension.
-    #
-    #     Parameters
-    #     ----------
-    #     dims : int, str or tuple of int or str, optional, default=(0,)
-    #         Dimension names or indexes along which the method should be applied.
-    #     inplace : bool, optional, default=False
-    #         Flag to say that the method return a new object (default)
-    #         or not (inplace=True).
-    #
-    #     Returns
-    #     -------
-    #     conjugated
-    #         Same object or a copy depending on the ``inplace`` flag.
-    #
-    #     See Also
-    #     --------
-    #     conj, real, imag, RR, RI, IR, II, part, set_complex, is_complex
-    #     """
-    #     if not inplace:  # default is to return a new array
-    #         new = self.copy()
-    #     else:
-    #         new = self  # work inplace
-    #
-    #     dims = self._get_dims_from_args()
-    #     axis = self._get_dims_index(dims)
-    #
-    #     if new.is_quaternion:
-    #         # TODO:
-    #         new.swapaxes(axis, -1, inplace=True)
-    #         new._data[..., 1::2] = - new._data[..., 1::2]
-    #         new.swapaxes(axis, -1, inplace=True)
-    #     else:
-    #         new._data = new._data.conj()
-    #     return new
 
     # ..................................................................................................................
     def part(self, select='REAL'):

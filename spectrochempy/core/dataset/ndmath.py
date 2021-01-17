@@ -24,7 +24,7 @@ from quaternion import as_float_array
 
 from spectrochempy.units.units import ur, Quantity, DimensionalityError
 from spectrochempy.core.dataset.ndarray import NDArray
-from spectrochempy.utils import MaskedArray, NOMASK, TYPE_COMPLEX
+from spectrochempy.utils import NOMASK, TYPE_COMPLEX
 from spectrochempy.core import warning_, error_
 from spectrochempy.utils.testing import assert_dataset_equal
 from spectrochempy.utils.exceptions import CoordinateMismatchError
@@ -45,6 +45,7 @@ def _reduce_method(method):
     #
     method.reduce = True
     return method
+
 
 class _from_numpy_method(object):
     # Decorator
@@ -106,9 +107,9 @@ class _from_numpy_method(object):
                                 new = NDDataset(dataset)
 
             argpos = []
-            dim = None
+
             for par in pars.values():
-                if par.name in ['self', 'cls', 'kwargs']: #  or (par.name == 'dataset' and instance is not None):
+                if par.name in ['self', 'cls', 'kwargs']:  # or (par.name == 'dataset' and instance is not None):
                     continue
                 argpos.append(args.pop(0) if args else kwargs.pop(par.name, par.default))
 
@@ -131,7 +132,7 @@ class _from_numpy_method(object):
                 # now call the np function and make the object
                 new = self.method(klass, *argpos, **kwargs)
                 if new.implements('NDDataset'):
-                    new.history = f'Created using method : {method}'   # (args:{argpos}, kwargs:{kwargs})'
+                    new.history = f'Created using method : {method}'  # (args:{argpos}, kwargs:{kwargs})'
                 return new
 
             # -----------------------------
@@ -154,7 +155,7 @@ class _from_numpy_method(object):
             # case of creation like method
             # ............................
 
-            if not self.reduce:   #  _like' in method:
+            if not self.reduce:  # _like' in method:
 
                 new = self.method(new, *argpos)
                 if new.implements('NDDataset'):
@@ -165,8 +166,6 @@ class _from_numpy_method(object):
 
                 # reduce methods
                 # ...............
-
-                keepunits = kwargs.pop('keepunits', True)
 
                 # apply the numpy operator on the masked data
                 new = self.method(new, *argpos)
@@ -201,8 +200,6 @@ abs(x [, out, where, casting, order, …])    Calculate the absolute value eleme
 absolute(x [, out, where, casting, order, …])    Calculate the absolute value element-wise.
 fabs(x [, out, where, casting, order, …])    Compute the absolute values element-wise.
 rint(x [, out, where, casting, order, …])    Round elements of the array to the nearest integer.
-conj(x [, out, where, casting, order, …])    Return the complex conjugate, element-wise.
-conjugate(x [, out, where, casting, order, …])    Return the complex conjugate, element-wise. (alias of conj).
 floor(x [, out, where, casting, order, …])    Return the floor of the input, element-wise.
 ceil(x [, out, where, casting, order, …])    Return the ceiling of the input, element-wise.
 trunc(x [, out, where, casting, order, …])    Return the truncated value of the input, element-wise.
@@ -401,7 +398,7 @@ class NDMath(object):
                        'tanh': __radian, 'radians': __degree, 'degrees': __radian, 'deg2rad': __degree,
                        'rad2deg': __radian, 'logaddexp': DIMENSIONLESS, 'logaddexp2': DIMENSIONLESS}
     __compatible_units = ['add', 'sub', 'iadd', 'isub', 'maximum', 'minimum', 'fmin', 'fmax', 'lt', 'le', 'ge', 'gt']
-    __complex_funcs = ['real', 'imag', 'conjugate', 'absolute', 'conj', 'abs']
+    __complex_funcs = ['real', 'imag', 'absolute', 'abs']
     __keep_title = ['negative', 'absolute', 'abs', 'fabs', 'rint', 'floor', 'ceil', 'trunc', 'add', 'subtract']
     __remove_title = ['multiply', 'divide', 'true_divide', 'floor_divide', 'mod', 'fmod', 'remainder', 'logaddexp',
                       'logaddexp2']
@@ -411,12 +408,14 @@ class NDMath(object):
     # the following methods are to give NDArray based class
     # a behavior similar to np.ndarray regarding the ufuncs
 
+    # ..................................................................................................................
     @property
     def __array_struct__(self):
         if hasattr(self.umasked_data, 'mask'):
             self._mask = self.umasked_data.mask
         return self.data.__array_struct__
 
+    # ..................................................................................................................
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
 
         fname = ufunc.__name__
@@ -480,41 +479,86 @@ class NDMath(object):
     # public methods
     # ------------------------------------------------------------------------------------------------------------------
 
-    # # ..................................................................................................................
-    # @_from_numpy_method
-    # def absolute(cls, dataset):
-    #     """
-    #     Calculate the absolute value element-wise.
-    #
-    #     `abs` is a shorthand for this function. For complex input, a + ib, the absolute value is :math:`\sqrt{ a^2 + b^2
-    #     }`.
-    #
-    #     Parameters
-    #     ----------
-    #     dataset : array_like
-    #         Input array or object that can be converted to an array.
-    #
-    #     Returns
-    #     -------
-    #     absolute
-    #         An ndarray containing the absolute value of each element in dataset.
-    #     """
-    #
-    #     if not cls.has_complex_dims:
-    #         data = np.fabs(dataset)  # not a complex, return fabs should be faster
-    #
-    #     elif not cls.is_quaternion:
-    #         data = np.sqrt(dataset.real ** 2 + dataset.imag ** 2)
-    #
-    #     else:
-    #         data = np.sqrt(dataset.real ** 2 + dataset.part('IR') ** 2 + dataset.part('RI') ** 2 +
-    #                        dataset.part('II') ** 2)
-    #         cls._is_quaternion = False
-    #
-    #     cls._data =data
-    #     return cls
-    #
-    # abs = absolute
+    # ..................................................................................................................
+
+    @_from_numpy_method
+    def absolute(cls, dataset, dtype=None):
+        """
+        Calculate the absolute value element-wise.
+
+        `abs` is a shorthand for this function. For complex input, a + ib, the absolute value is
+        :math:`\\sqrt{ a^2 + b^2}`.
+
+        Parameters
+        ----------
+        dataset : array_like
+            Input array or object that can be converted to an array.
+        dtype : dtype
+            The type of the output array. If dtype is not given, infer the data type from the other input arguments.
+
+        Returns
+        -------
+        absolute
+            An ndarray containing the absolute value of each element in dataset.
+        """
+
+        if not cls.has_complex_dims:
+            data = np.ma.fabs(dataset, dtype=dtype)  # not a complex, return fabs should be faster
+
+        elif not cls.is_quaternion:
+            data = np.ma.sqrt(dataset.real ** 2 + dataset.imag ** 2)
+
+        else:
+            data = np.ma.sqrt(dataset.real ** 2 + dataset.part('IR') ** 2 + dataset.part('RI') ** 2 +
+                              dataset.part('II') ** 2, dtype=dtype)
+            cls._is_quaternion = False
+
+        cls._data = data.data
+        cls._mask = data.mask
+
+        return cls
+
+    abs = absolute
+
+    # ..................................................................................................................
+    @_from_numpy_method
+    def conjugate(cls, dataset, dim='x'):
+        """
+        Conjugate of the NDDataset in the specified dimension.
+
+        Parameters
+        ----------
+        dataset : array_like
+            Input array or object that can be converted to an array.
+        dim : int, str, optional, default=(0,)
+            Dimension names or indexes along which the method should be applied.
+
+        Returns
+        -------
+        conjugated
+            Same object or a copy depending on the ``inplace`` flag.
+
+        See Also
+        --------
+        conj, real, imag, RR, RI, IR, II, part, set_complex, is_complex
+        """
+
+        axis, dim = cls.get_axis(dim, allows_none=True)
+
+        if cls.is_quaternion:
+            # TODO:
+            dataset = dataset.swapaxes(axis, -1)
+            dataset[..., 1::2] = - dataset[..., 1::2]
+            dataset = dataset(axis, -1)
+        else:
+            dataset = np.ma.conjugate(dataset)
+
+        cls._data = dataset.data
+        cls._mask = dataset.mask
+
+        return cls
+
+    conj = conjugate
 
     # ..................................................................................................................
     @_reduce_method
@@ -621,7 +665,7 @@ class NDMath(object):
                         del coordset.coords[idx]
                         dims.remove(dim)
                     else:
-                        coordset.coords[idx].data = [0,]
+                        coordset.coords[idx].data = [0, ]
                 else:
                     # find the coordinates
                     idx = np.ma.argmax(dataset)
@@ -629,7 +673,7 @@ class NDMath(object):
 
                     coord = {}
                     for i, item in enumerate(c[::-1]):
-                        dim = dims[-(i+1)]
+                        dim = dims[-(i + 1)]
                         id = coordset.names.index(dim)
                         coord[dim] = coordset.coords[id][item]
                     cls.set_coordset(coord)
@@ -699,7 +743,7 @@ class NDMath(object):
                         del coordset.coords[idx]
                         dims.remove(dim)
                     else:
-                        coordset.coords[idx].data = [0,]
+                        coordset.coords[idx].data = [0, ]
                 else:
                     # find the coordinates
                     idx = np.ma.argmin(dataset)
@@ -707,7 +751,7 @@ class NDMath(object):
 
                     coord = {}
                     for i, item in enumerate(c[::-1]):
-                        dim = dims[-(i+1)]
+                        dim = dims[-(i + 1)]
                         id = coordset.names.index(dim)
                         coord[dim] = coordset.coords[id][item]
                     cls.set_coordset(coord)
@@ -801,7 +845,6 @@ class NDMath(object):
 
         return cls(np.arange(start, stop, step, dtype), **kwargs)
 
-
     # ..................................................................................................................
     @_reduce_method
     @_from_numpy_method
@@ -825,6 +868,112 @@ class NDMath(object):
         if cls.ndim > 1 and axis is None:
             idx = np.unravel_index(idx, cls.shape)
         return idx
+
+    @_reduce_method
+    @_from_numpy_method
+    def average(cls, dataset, dim=None, weights=None, returned=False):
+        """
+        Compute the weighted average along the specified axis.
+
+        Parameters
+        ----------
+        dataset : array_like
+            Array containing data to be averaged.
+        dim : None or int or dimension name or tuple of int or dimensions, optional
+            Dimension or dimensions along which to operate.  By default, flattened input is used.
+            If this is a tuple, the minimum is selected over multiple dimensions,
+            instead of a single dimension or all the dimensions as before.
+        weights : array_like, optional
+            An array of weights associated with the values in `dataset`. Each value in
+            `a` contributes to the average according to its associated weight.
+            The weights array can either be 1-D (in which case its length must be
+            the size of `dataset` along the given axis) or of the same shape as `dataset`.
+            If `weights=None`, then all data in `dataset` are assumed to have a
+            weight equal to one.  The 1-D calculation is::
+
+                avg = sum(a * weights) / sum(weights)
+
+            The only constraint on `weights` is that `sum(weights)` must not be 0.
+        returned : bool, optional
+            Default is `False`. If `True`, the tuple (`average`, `sum_of_weights`)
+            is returned, otherwise only the average is returned.
+            If `weights=None`, `sum_of_weights` is equivalent to the number of
+            elements over which the average is taken.
+
+        Returns
+        -------
+        average, [sum_of_weights]
+            Return the average along the specified axis. When `returned` is `True`,
+            return a tuple with the average as the first element and the sum
+            of the weights as the second element. `sum_of_weights` is of the
+            same type as `retval`. The result dtype follows a genereal pattern.
+            If `weights` is None, the result dtype will be that of `a` , or ``float64``
+            if `a` is integral. Otherwise, if `weights` is not None and `a` is non-
+            integral, the result type will be the type of lowest precision capable of
+            representing values of both `a` and `weights`. If `a` happens to be
+            integral, the previous rules still applies but the result dtype will
+            at least be ``float64``.
+
+        Raises
+        ------
+        ZeroDivisionError
+            When all weights along axis are zero. See `numpy.ma.average` for a
+            version robust to this type of error.
+        TypeError
+            When the length of 1D `weights` is not the same as the shape of `a`
+            along axis.
+
+        See Also
+        --------
+        mean : Compute the arithmetic mean along the specified axis.
+
+        Examples
+        --------
+        >>> nd = scp.read('irdata/nh4y-activation.spg')
+        >>> nd
+        NDDataset: [float32] a.u. (shape: (y:55, x:5549))
+        >>> scp.average(nd)
+        <Quantity(1.2508586645126343, 'absorbance')>
+        >>> m = scp.average(nd, dim='y')
+        >>> m
+        NDDataset: [float32] a.u. (size: 5549)
+        >>> m.x
+        Coord: [float64] cm^-1 (size: 5549)
+        >>> m = scp.average(nd, dim='y', weights=np.arange(55))
+        >>> m.data
+        array([   1.789,    1.789, ...,    1.222,     1.22])
+        """
+
+        axis, dim = cls.get_axis(dim, allows_none=True)
+        m, retval = np.ma.average(dataset, axis=axis, weights=weights, returned=True)
+
+        if np.isscalar(m):
+            if cls.units is not None:
+                return Quantity(m, cls.units)
+            else:
+                return m
+
+        dims = cls.dims
+        cls._data = m.data
+        cls._mask = m.mask
+
+        # Here we must eventually reduce the corresponding coordinates
+        if hasattr(cls, 'coordset'):
+            coordset = cls.coordset
+            if coordset is not None:
+                if dim is not None:
+                    idx = coordset.names.index(dim)
+                    del coordset.coords[idx]
+                    dims.remove(dim)
+                else:
+                    # dim being None we remove the coordset
+                    cls.set_coordset(None)
+
+        cls.dims = dims
+        if returned:
+            return cls, retval
+        else:
+            return cls
 
     # ..................................................................................................................
     @_from_numpy_method
@@ -881,40 +1030,6 @@ class NDMath(object):
     # ..................................................................................................................
     @_reduce_method
     @_from_numpy_method
-    def coordmin(cls, dataset, dim=None):
-        """Coordinates of minimum of data along axis"""
-
-        if not cls.implements('NDDataset') or cls.coordset is None:
-            raise Exception('Method ``oordmin` apply only on NDDataset and if it has defined coordinates')
-
-        axis, dim = cls.get_axis(dim, allows_none=True)
-        idx = np.ma.argmin(dataset, axis, fill_value=1e30)
-        dims = cls.dims
-        coordset = cls.coordset
-        if axis is None:
-            c = np.unravel_index(idx, cls.shape)
-            coord = {}
-            for i, item in enumerate(c[::-1]):
-                dim = dims[-(i + 1)]
-                icoord = coordset.names.index(dim)
-                coord[dim] = coordset.coords[icoord][item].values
-            return coord
-        else:
-            icoord = coordset.names.index(dim)
-            coord = coordset.coords[icoord][idx]
-            data = coord.data
-            units = coord.units
-            mask = np.all(dataset.mask == True, axis)
-            title = coord.title
-            del coordset.coords[icoord]
-            dims.remove(dim)
-            new = type(cls)(data, units=units, dims=dims, coordset=coordset, mask=mask,
-                            title=f'{title} at minimum along {dim}')
-            return new
-
-    # ..................................................................................................................
-    @_reduce_method
-    @_from_numpy_method
     def coordmax(cls, dataset, dim=-1):
         """Coordinates of maximum of data along axis"""
 
@@ -938,13 +1053,96 @@ class NDMath(object):
             coord = coordset.coords[icoord][idx]
             data = coord.data
             units = coord.units
-            mask = np.all(dataset.mask == True, axis)
+            mask = np.all(dataset.mask, axis)
             title = coord.title
             del coordset.coords[icoord]
             dims.remove(dim)
             new = type(cls)(data, units=units, dims=dims, coordset=coordset, mask=mask,
                             title=f'{title} at maximum along {dim}')
             return new
+
+    # ..................................................................................................................
+    @_reduce_method
+    @_from_numpy_method
+    def coordmin(cls, dataset, dim=None):
+        """Coordinates of minimum of data along axis"""
+
+        if not cls.implements('NDDataset') or cls.coordset is None:
+            raise Exception('Method ``oordmin` apply only on NDDataset and if it has defined coordinates')
+
+        axis, dim = cls.get_axis(dim, allows_none=True)
+        idx = np.ma.argmin(dataset, axis, fill_value=1e30)
+        dims = cls.dims
+        coordset = cls.coordset
+        if axis is None:
+            c = np.unravel_index(idx, cls.shape)
+            coord = {}
+            for i, item in enumerate(c[::-1]):
+                dim = dims[-(i + 1)]
+                icoord = coordset.names.index(dim)
+                coord[dim] = coordset.coords[icoord][item].values
+            return coord
+        else:
+            icoord = coordset.names.index(dim)
+            coord = coordset.coords[icoord][idx]
+            data = coord.data
+            units = coord.units
+            mask = np.all(dataset.mask, axis)
+            title = coord.title
+            del coordset.coords[icoord]
+            dims.remove(dim)
+            new = type(cls)(data, units=units, dims=dims, coordset=coordset, mask=mask,
+                            title=f'{title} at minimum along {dim}')
+            return new
+
+    # ..................................................................................................................
+    @_from_numpy_method
+    def cumsum(cls, dataset, dim=None, dtype=None):
+        """
+        Return the cumulative sum of the elements along a given axis.
+
+        Parameters
+        ----------
+        dataset : array_like
+            Calculate the cumulative sum of these values.
+        dim : None or int or dimension name , optional
+            Dimension or dimensions along which to operate.  By default, flattened input is used.
+        dtype : dtype, optional
+            Type to use in computing the standard deviation. For arrays of
+            integer type the default is float64, for arrays of float types it is
+            the same as the array type.
+
+        Returns
+        -------
+        sum
+            A new array containing the cumulative sum.
+
+        See Also
+        --------
+        sum : Sum array elements.
+        trapz : Integration of array values using the composite trapezoidal rule.
+        diff :  Calculate the n-th discrete difference along given axis.
+
+        Examples
+        --------
+        >>> nd = scp.read('irdata/nh4y-activation.spg')
+        >>> nd
+        NDDataset: [float32] a.u. (shape: (y:55, x:5549))
+        >>> scp.sum(nd)
+        <Quantity(381755.8125, 'absorbance')>
+        >>> scp.sum(nd, keepdims=True)
+        NDDataset: [float32] a.u. (shape: (y:1, x:1))
+        >>> m = scp.sum(nd, dim='y')
+        >>> m
+        NDDataset: [float32] a.u. (size: 5549)
+        >>> m.data
+        array([   100.7,    100.7, ...,       74,    73.98], dtype=float32)
+        """
+
+        axis, dim = cls.get_axis(dim, allows_none=True)
+        data = np.ma.cumsum(dataset, axis=axis, dtype=dtype)
+        cls._data = data
+        return cls
 
     # ..................................................................................................................
     @_from_numpy_method
@@ -1343,7 +1541,6 @@ class NDMath(object):
 
         return cls(np.fromiter(iterable, dtype=dtype, count=count), **kwargs)
 
-
     @_from_numpy_method
     def full(cls, shape, fill_value=0.0, dtype=None, **kwargs):
         """
@@ -1648,7 +1845,7 @@ class NDMath(object):
     # ..................................................................................................................
     @_reduce_method
     @_from_numpy_method
-    def mean(cls, dataset, dim=None, dtype=None, keepdims=False, **kwargs):
+    def mean(cls, dataset, dim=None, dtype=None, keepdims=False):
         """
         Compute the arithmetic mean along the specified axis.
 
@@ -1659,10 +1856,8 @@ class NDMath(object):
         ----------
         dataset : array_like
             Array containing numbers whose mean is desired.
-        dim : None or int or dimension name or tuple of int or dimensions, optional
-            dimension or dimensions along which to operate.  By default, flattened input is used.
-            If this is a tuple, the minimum is selected over multiple dimensions,
-            instead of a single dimension or all the dimensions as before.
+        dim : None or int or dimension name, optional
+            Dimension or dimensions along which to operate.
         dtype : data-type, optional
             Type to use in computing the mean.  For integer inputs, the default
             is `float64`; for floating point inputs, it is the same as the
@@ -1675,13 +1870,13 @@ class NDMath(object):
         Returns
         -------
         mean
-            Returns a new array containing the mean values,
-            otherwise a reference to the output array is returned.
+            A new array containing the mean values.
 
         See Also
         --------
-        average : Weighted average
-        std, var, nanmean, nanstd, nanvar
+        average : Weighted average.
+        std : Standard deviation values along axis.
+        var : Variance values along axis.
 
         Notes
         -----
@@ -1690,26 +1885,22 @@ class NDMath(object):
 
         Examples
         --------
-        >>> a = np.array([[1, 2], [3, 4]])
-        >>> np.mean(a)
-        2.5
-        >>> np.mean(a, axis=0)
-        array([2., 3.])
-        >>> np.mean(a, axis=1)
-        array([1.5, 3.5])
-        In single precision, `mean` can be inaccurate:
-        >>> a = np.zeros((2, 512*512), dtype=np.float32)
-        >>> a[0, :] = 1.0
-        >>> a[1, :] = 0.1
-        >>> np.mean(a)
-        0.54999924
-        Computing the mean in float64 is more accurate:
-        >>> np.mean(a, dtype=np.float64)
-        0.55000000074505806 # may vary
+        >>> nd = scp.read('irdata/nh4y-activation.spg')
+        >>> nd
+        NDDataset: [float32] a.u. (shape: (y:55, x:5549))
+        >>> scp.mean(nd)
+        <Quantity(1.2508586645126343, 'absorbance')>
+        >>> scp.mean(nd, keepdims=True)
+        NDDataset: [float32] a.u. (shape: (y:1, x:1))
+        >>> m = scp.mean(nd, dim='y')
+        >>> m
+        NDDataset: [float32] a.u. (size: 5549)
+        >>> m.x
+        Coord: [float64] cm^-1 (size: 5549)
         """
 
         axis, dim = cls.get_axis(dim, allows_none=True)
-        m = np.ma.mean(dataset, axis=axis, keepdims=keepdims)
+        m = np.ma.mean(dataset, axis=axis, dtype=dtype, keepdims=keepdims)
 
         if np.isscalar(m):
             if cls.units is not None:
@@ -1739,205 +1930,6 @@ class NDMath(object):
         cls.dims = dims
 
         return cls
-
-    def pipe(self, func, *args, **kwargs):
-        """Apply func(self, *args, **kwargs)
-
-        Parameters
-        ----------
-        func : function
-            function to apply to the |NDDataset|.
-            `*args`, and `**kwargs` are passed into `func`.
-            Alternatively a `(callable, data_keyword)` tuple where
-            `data_keyword` is a string indicating the keyword of
-            `callable` that expects the array object.
-        *args : positional arguments passed into `func`.
-        **kwargs : keyword arguments passed into `func`.
-
-        Returns
-        -------
-        pipe
-           the return type of `func`.
-
-        Notes
-        -----
-        Use ``.pipe`` when chaining together functions that expect
-        a |NDDataset|.
-        """
-        if isinstance(func, tuple):
-            func, target = func
-            if target in kwargs:
-                error_(f'{target} is both the pipe target and a keyword argument. Operation not applied!')
-                return self
-            kwargs[target] = self
-            return func(*args, **kwargs)
-
-        return func(self, *args, **kwargs)
-
-    # ..................................................................................................................
-    def sum(self, *args, **kwargs):
-        """sum along a dimension"""
-
-        return self._reduce_method('sum', *args, **kwargs)
-
-    def to_array(self):
-        """
-        Return a numpy masked array (i.e., other NDDataset attributes are lost.
-
-        Examples
-        ========
-        >>> a = scp.to_array(dataset)
-
-        equivalent to:
-
-        >>> a = np.ma.array(dataset)
-        or
-        >>> a= dataset.masked_data
-        """
-        return np.ma.array(self)
-
-
-    def prod(self, *args, **kwargs):
-        """product along a dimension"""
-
-        return self._reduce_method('prod', *args, **kwargs)
-
-    product = prod
-
-
-
-    # ..................................................................................................................
-    def var(self, *args, **kwargs):
-        """variance values along axis"""
-
-        return self._reduce_method('var', *args, **kwargs)
-
-    # ..................................................................................................................
-    def std(self, *args, **kwargs):
-        """Standard deviation values along axis"""
-
-        return self._reduce_method('std', *args, **kwargs)
-
-    # ..................................................................................................................
-    def ptp(self, *args, **kwargs):
-        """
-        Range of values (maximum - minimum) along a dimension.
-
-        The name of the function comes from the acronym for 'peak to peak'.
-
-        Parameters
-        ----------
-        axis : None or int, optional
-            Dimension along which to find the peaks.
-            If None, the operation is made on the first dimension.
-        keepdims : bool, optional
-            If this is set to True, the dimensions which are reduced are left
-            in the result as dimensions with size one. With this option,
-            the result will broadcast correctly against the input dataset.
-
-        Returns
-        -------
-        ptp
-            A new dataset holding the result.
-        """
-
-        return self._reduce_method('ptp', *args, **kwargs)
-
-
-
-    # ..................................................................................................................
-    def round(self, *args, **kwargs):
-        """Round an array to the given number of decimals.."""
-
-        return self._method('round', *args, **kwargs)
-
-    around = round_ = round
-
-
-    @_from_numpy_method
-    def random(cls, size=None, dtype=None, **kwargs):
-        """
-        Return random floats in the half-open interval [0.0, 1.0).
-
-        Results are from the “continuous uniform” distribution over the stated interval.
-        To sample :math:`\mathrm{Uniform}[a, b), b > a` multiply the output of random by (b-a) and add a:
-
-            (b - a) * random() + a
-
-        Parameters
-        ----------
-        size : int or tuple of ints, optional
-            Output shape. If the given shape is, e.g., (m, n, k), then m * n * k samples are drawn.
-            Default is None, in which case a single value is returned.
-        dtype : dtype, optional
-            Desired dtype of the result, only float64 and float32 are supported.
-            The default value is np.float64.
-        **kwargs : dict
-            Keywords argument used when creating the returned object, such as units, name, title, ...
-
-        Returns
-        -------
-        random
-            Array of random floats of shape size (unless size=None, in which case a single float is returned).
-        """
-        from numpy.random import default_rng
-        rng = default_rng()
-
-        return cls(rng.random(size, dtype), **kwargs)
-
-    @_from_numpy_method
-    def zeros(cls, shape, dtype=None, **kwargs):
-        """
-        Return a new |NDDataset| of given shape and type, filled with zeros.
-
-        Parameters
-        ----------
-        shape : int or sequence of ints
-            Shape of the new array, e.g., ``(2, 3)`` or ``2``.
-        dtype : data-type, optional
-            The desired data-type for the array, e.g., `numpy.int8`.  Default is
-            `numpy.float64`.
-        **kwargs : dict
-            See other parameters.
-
-        Returns
-        -------
-        zeros
-            Array of zeros.
-
-        Other Parameters
-        ----------------
-        units : str or ur instance
-            Units of the returned object. If not provided, try to copy from the input object.
-        coordset : list or Coordset object
-            Coordinates for the returned objet. If not provided, try to copy from the input object.
-
-        See Also
-        --------
-        zeros_like : Return an array of zeros with shape and type of input.
-        ones_like : Return an array of ones with shape and type of input.
-        empty_like : Return an empty array with shape and type of input.
-        full_like : Fill an array with shape and type of input.
-        ones : Return a new array setting values to 1.
-        empty : Return a new uninitialized array.
-        full : Fill a new array.
-
-        Examples
-        --------
-        >>> nd = scp.NDDataset.zeros(6)
-        >>> nd
-        NDDataset: [float64] unitless (size: 6)
-        >>> nd = scp.zeros((5, ))
-        >>> nd
-        NDDataset: [float64] unitless (size: 5)
-        >>> nd.values
-        array([       0,        0,        0,        0,        0])
-        >>> nd = scp.zeros((5, 10), dtype=np.int, units='absorbance')
-        >>> nd
-        NDDataset: [int64] a.u. (shape: (y:5, x:10))
-        """
-
-        return cls(np.zeros(shape, dtype), **kwargs)
 
     @_from_numpy_method
     def ones(cls, shape, dtype=None, **kwargs):
@@ -2003,6 +1995,551 @@ class NDMath(object):
         return cls(np.ones(shape, dtype), **kwargs)
 
     @_from_numpy_method
+    def ones_like(cls, dataset, dtype=None, **kwargs):
+        """
+        Return |NDDataset| of ones.
+
+        The returned |NDDataset| have the same shape and type as a given array. Units, coordset, ... can be added in
+        kwargs.
+
+        Parameters
+        ----------
+        dataset : |NDDataset| or array-like
+            Object from which to copy the array structure.
+        dtype : data-type, optional
+            Overrides the data type of the result.
+        **kwargs : dict
+            See other parameters.
+
+        Returns
+        -------
+        oneslike
+            Array of `1` with the same shape and type as `dataset`.
+
+        Other Parameters
+        ----------------
+        units : str or ur instance
+            Units of the returned object. If not provided, try to copy from the input object.
+        coordset : list or Coordset object
+            Coordinates for the returned objet. If not provided, try to copy from the input object.
+
+        See Also
+        --------
+        full_like : Return an array with a given fill value with shape and type of the input.
+        zeros_like : Return an array of zeros with shape and type of input.
+        empty_like : Return an empty array with shape and type of input.
+        zeros : Return a new array setting values to zero.
+        ones : Return a new array setting values to one.
+        empty : Return a new uninitialized array.
+        full : Fill a new array.
+
+        Examples
+        --------
+        >>> x = np.arange(6)
+        >>> x = x.reshape((2, 3))
+        >>> x = scp.NDDataset(x, units='s')
+        >>> x
+        NDDataset: [int64] s (shape: (y:2, x:3))
+        >>> scp.ones_like(x, dtype=float, units='J')
+        NDDataset: [float64] J (shape: (y:2, x:3))
+        """
+
+        cls._data = np.ones_like(dataset, dtype)
+        return cls
+
+    def pipe(self, func, *args, **kwargs):
+        """Apply func(self, *args, **kwargs)
+
+        Parameters
+        ----------
+        func : function
+            function to apply to the |NDDataset|.
+            `*args`, and `**kwargs` are passed into `func`.
+            Alternatively a `(callable, data_keyword)` tuple where
+            `data_keyword` is a string indicating the keyword of
+            `callable` that expects the array object.
+        *args : positional arguments passed into `func`.
+        **kwargs : keyword arguments passed into `func`.
+
+        Returns
+        -------
+        pipe
+           the return type of `func`.
+
+        Notes
+        -----
+        Use ``.pipe`` when chaining together functions that expect
+        a |NDDataset|.
+        """
+        if isinstance(func, tuple):
+            func, target = func
+            if target in kwargs:
+                error_(f'{target} is both the pipe target and a keyword argument. Operation not applied!')
+                return self
+            kwargs[target] = self
+            return func(*args, **kwargs)
+
+        return func(self, *args, **kwargs)
+
+    # ..................................................................................................................
+    @_reduce_method
+    @_from_numpy_method
+    def ptp(cls, dataset, dim=None, keepdims=False):
+        """
+        Range of values (maximum - minimum) along a dimension.
+
+        The name of the function comes from the acronym for 'peak to peak'.
+
+        Parameters
+        ----------
+        dim : None or int or dimension name, optional
+            Dimension along which to find the peaks.
+            If None, the operation is made on the first dimension.
+        keepdims : bool, optional
+            If this is set to True, the dimensions which are reduced are left
+            in the result as dimensions with size one. With this option,
+            the result will broadcast correctly against the input dataset.
+
+        Returns
+        -------
+        ptp
+            A new dataset holding the result.
+        """
+
+        axis, dim = cls.get_axis(dim, allows_none=True)
+        m = np.ma.ptp(dataset, axis=axis, keepdims=keepdims)
+
+        if np.isscalar(m):
+            if cls.units is not None:
+                return Quantity(m, cls.units)
+            else:
+                return m
+
+        dims = cls.dims
+        cls._data = m.data
+        cls._mask = m.mask
+
+        # Here we must eventually reduce the corresponding coordinates
+        if hasattr(cls, 'coordset'):
+            coordset = cls.coordset
+            if coordset is not None:
+                if dim is not None:
+                    idx = coordset.names.index(dim)
+                    if not keepdims:
+                        del coordset.coords[idx]
+                        dims.remove(dim)
+                    else:
+                        coordset.coords[idx].data = [0, ]
+                else:
+                    # dim being None we remove the coordset
+                    cls.set_coordset(None)
+
+        cls.dims = dims
+
+        return cls
+
+    @_from_numpy_method
+    def random(cls, size=None, dtype=None, **kwargs):
+        """
+        Return random floats in the half-open interval [0.0, 1.0).
+
+        Results are from the “continuous uniform” distribution over the stated interval.
+        To sample :math:`\\mathrm{Uniform}[a, b), b > a` multiply the output of random by (b-a) and add a:
+
+            (b - a) * random() + a
+
+        Parameters
+        ----------
+        size : int or tuple of ints, optional
+            Output shape. If the given shape is, e.g., (m, n, k), then m * n * k samples are drawn.
+            Default is None, in which case a single value is returned.
+        dtype : dtype, optional
+            Desired dtype of the result, only float64 and float32 are supported.
+            The default value is np.float64.
+        **kwargs : dict
+            Keywords argument used when creating the returned object, such as units, name, title, ...
+
+        Returns
+        -------
+        random
+            Array of random floats of shape size (unless size=None, in which case a single float is returned).
+        """
+        from numpy.random import default_rng
+        rng = default_rng()
+
+        return cls(rng.random(size, dtype), **kwargs)
+
+    # ..................................................................................................................
+    @_reduce_method
+    @_from_numpy_method
+    def std(cls, dataset, dim=None, dtype=None, ddof=0, keepdims=False):
+        """
+        Compute the standard deviation along the specified axis.
+
+        Returns the standard deviation, a measure of the spread of a distribution,
+        of the array elements. The standard deviation is computed for the
+        flattened array by default, otherwise over the specified axis.
+
+        Parameters
+        ----------
+        dataset : array_like
+            Calculate the standard deviation of these values.
+        dim : None or int or dimension name , optional
+            Dimension or dimensions along which to operate.  By default, flattened input is used.
+        dtype : dtype, optional
+            Type to use in computing the standard deviation. For arrays of
+            integer type the default is float64, for arrays of float types it is
+            the same as the array type.
+        ddof : int, optional
+            Means Delta Degrees of Freedom.  The divisor used in calculations
+            is ``N - ddof``, where ``N`` represents the number of elements.
+            By default `ddof` is zero.
+        keepdims : bool, optional
+            If this is set to True, the dimensions which are reduced are left
+            in the result as dimensions with size one. With this option,
+            the result will broadcast correctly against the input array.
+
+        Returns
+        -------
+        std
+            A new array containing the standard deviation.
+
+        See Also
+        --------
+        var : Variance values along axis.
+        mean : Compute the arithmetic mean along the specified axis.
+
+        Notes
+        -----
+        The standard deviation is the square root of the average of the squared
+        deviations from the mean, i.e., ``std = sqrt(mean(abs(x - x.mean())**2))``.
+
+        The average squared deviation is normally calculated as
+        ``x.sum() / N``, where ``N = len(x)``.  If, however, `ddof` is specified,
+        the divisor ``N - ddof`` is used instead. In standard statistical
+        practice, ``ddof=1`` provides an unbiased estimator of the variance
+        of the infinite population. ``ddof=0`` provides a maximum likelihood
+        estimate of the variance for normally distributed variables. The
+        standard deviation computed in this function is the square root of
+        the estimated variance, so even with ``ddof=1``, it will not be an
+        unbiased estimate of the standard deviation per se.
+
+        Note that, for complex numbers, `std` takes the absolute
+        value before squaring, so that the result is always real and nonnegative.
+        For floating-point input, the *std* is computed using the same
+        precision the input has. Depending on the input data, this can cause
+        the results to be inaccurate, especially for float32 (see example below).
+        Specifying a higher-accuracy accumulator using the `dtype` keyword can
+        alleviate this issue.
+
+        Examples
+        --------
+        >>> nd = scp.read('irdata/nh4y-activation.spg')
+        >>> nd
+        NDDataset: [float32] a.u. (shape: (y:55, x:5549))
+        >>> scp.std(nd)
+        <Quantity(0.8079720139503479, 'absorbance')>
+        >>> scp.std(nd, keepdims=True)
+        NDDataset: [float32] a.u. (shape: (y:1, x:1))
+        >>> m = scp.std(nd, dim='y')
+        >>> m
+        NDDataset: [float32] a.u. (size: 5549)
+        >>> m.data
+        array([ 0.08521,  0.08543, ...,    0.251,   0.2537], dtype=float32)
+        """
+
+        axis, dim = cls.get_axis(dim, allows_none=True)
+        m = np.ma.std(dataset, axis=axis, dtype=dtype, ddof=ddof, keepdims=keepdims)
+
+        if np.isscalar(m):
+            if cls.units is not None:
+                return Quantity(m, cls.units)
+            else:
+                return m
+
+        dims = cls.dims
+        cls._data = m.data
+        cls._mask = m.mask
+
+        # Here we must eventually reduce the corresponding coordinates
+        if hasattr(cls, 'coordset'):
+            coordset = cls.coordset
+            if coordset is not None:
+                if dim is not None:
+                    idx = coordset.names.index(dim)
+                    if not keepdims:
+                        del coordset.coords[idx]
+                        dims.remove(dim)
+                    else:
+                        coordset.coords[idx].data = [0, ]
+                else:
+                    # dim being None we remove the coordset
+                    cls.set_coordset(None)
+
+        cls.dims = dims
+
+        return cls
+
+    # ..................................................................................................................
+    @_reduce_method
+    @_from_numpy_method
+    def sum(cls, dataset, dim=None, dtype=None, keepdims=False):
+        """
+        Sum of array elements over a given axis.
+
+        Parameters
+        ----------
+        dataset : array_like
+            Calculate the sum of these values.
+        dim : None or int or dimension name , optional
+            Dimension or dimensions along which to operate.  By default, flattened input is used.
+        dtype : dtype, optional
+            Type to use in computing the standard deviation. For arrays of
+            integer type the default is float64, for arrays of float types it is
+            the same as the array type.
+        keepdims : bool, optional
+            If this is set to True, the dimensions which are reduced are left
+            in the result as dimensions with size one. With this option,
+            the result will broadcast correctly against the input array.
+
+        Returns
+        -------
+        sum
+            A new array containing the sum.
+
+        See Also
+        --------
+        mean : Compute the arithmetic mean along the specified axis.
+        trapz : Integration of array values using the composite trapezoidal rule.
+
+        Examples
+        --------
+        >>> nd = scp.read('irdata/nh4y-activation.spg')
+        >>> nd
+        NDDataset: [float32] a.u. (shape: (y:55, x:5549))
+        >>> scp.sum(nd)
+        <Quantity(381755.8125, 'absorbance')>
+        >>> scp.sum(nd, keepdims=True)
+        NDDataset: [float32] a.u. (shape: (y:1, x:1))
+        >>> m = scp.sum(nd, dim='y')
+        >>> m
+        NDDataset: [float32] a.u. (size: 5549)
+        >>> m.data
+        array([   100.7,    100.7, ...,       74,    73.98], dtype=float32)
+        """
+
+        axis, dim = cls.get_axis(dim, allows_none=True)
+        m = np.ma.sum(dataset, axis=axis, dtype=dtype, keepdims=keepdims)
+
+        if np.isscalar(m):
+            if cls.units is not None:
+                return Quantity(m, cls.units)
+            else:
+                return m
+
+        dims = cls.dims
+        cls._data = m.data
+        cls._mask = m.mask
+
+        # Here we must eventually reduce the corresponding coordinates
+        if hasattr(cls, 'coordset'):
+            coordset = cls.coordset
+            if coordset is not None:
+                if dim is not None:
+                    idx = coordset.names.index(dim)
+                    if not keepdims:
+                        del coordset.coords[idx]
+                        dims.remove(dim)
+                    else:
+                        coordset.coords[idx].data = [0, ]
+                else:
+                    # dim being None we remove the coordset
+                    cls.set_coordset(None)
+
+        cls.dims = dims
+
+        return cls
+
+    def to_array(self):
+        """
+        Return a numpy masked array (i.e., other NDDataset attributes are lost.
+
+        Examples
+        ========
+        >>> a = scp.to_array(dataset)
+
+        equivalent to:
+
+        >>> a = np.ma.array(dataset)
+        or
+        >>> a= dataset.masked_data
+        """
+        return np.ma.array(self)
+
+    # ..................................................................................................................
+    @_reduce_method
+    @_from_numpy_method
+    def var(cls, dataset, dim=None, dtype=None, ddof=0, keepdims=False):
+        """
+        Compute the variance along the specified axis.
+
+        Returns the variance of the array elements, a measure of the spread of a
+        distribution.  The variance is computed for the flattened array by
+        default, otherwise over the specified axis.
+
+        Parameters
+        ----------
+        dataset : array_like
+            Array containing numbers whose variance is desired.
+        dim : None or int or dimension name , optional
+            Dimension or dimensions along which to operate.  By default, flattened input is used.
+        dtype : dtype, optional
+            Type to use in computing the standard deviation. For arrays of
+            integer type the default is float64, for arrays of float types it is
+            the same as the array type.
+        ddof : int, optional
+            Means Delta Degrees of Freedom.  The divisor used in calculations
+            is ``N - ddof``, where ``N`` represents the number of elements.
+            By default `ddof` is zero.
+        keepdims : bool, optional
+            If this is set to True, the dimensions which are reduced are left
+            in the result as dimensions with size one. With this option,
+            the result will broadcast correctly against the input array.
+
+        Returns
+        -------
+        var
+            A new array containing the standard deviation.
+
+        See Also
+        --------
+        std : Standard deviation values along axis.
+        mean : Compute the arithmetic mean along the specified axis.
+
+        Notes
+        -----
+        The variance is the average of the squared deviations from the mean,
+        i.e.,  ``var = mean(abs(x - x.mean())**2)``.
+
+        The mean is normally calculated as ``x.sum() / N``, where ``N = len(x)``.
+        If, however, `ddof` is specified, the divisor ``N - ddof`` is used
+        instead.  In standard statistical practice, ``ddof=1`` provides an
+        unbiased estimator of the variance of a hypothetical infinite population.
+        ``ddof=0`` provides a maximum likelihood estimate of the variance for
+        normally distributed variables.
+
+        Note that for complex numbers, the absolute value is taken before
+        squaring, so that the result is always real and nonnegative.
+
+        For floating-point input, the variance is computed using the same
+        precision the input has.  Depending on the input data, this can cause
+        the results to be inaccurate, especially for `float32` (see example
+        below).  Specifying a higher-accuracy accumulator using the ``dtype``
+        keyword can alleviate this issue.
+
+        Examples
+        --------
+        >>> nd = scp.read('irdata/nh4y-activation.spg')
+        >>> nd
+        NDDataset: [float32] a.u. (shape: (y:55, x:5549))
+        >>> scp.var(nd)
+        <Quantity(0.6528187990188599, 'absorbance')>
+        >>> scp.var(nd, keepdims=True)
+        NDDataset: [float32] a.u. (shape: (y:1, x:1))
+        >>> m = scp.var(nd, dim='y')
+        >>> m
+        NDDataset: [float32] a.u. (size: 5549)
+        >>> m.data
+        array([0.007262, 0.007299, ...,  0.06298,  0.06438], dtype=float32)
+        """
+
+        axis, dim = cls.get_axis(dim, allows_none=True)
+        m = np.ma.var(dataset, axis=axis, dtype=dtype, ddof=ddof, keepdims=keepdims)
+
+        if np.isscalar(m):
+            if cls.units is not None:
+                return Quantity(m, cls.units)
+            else:
+                return m
+
+        dims = cls.dims
+        cls._data = m.data
+        cls._mask = m.mask
+
+        # Here we must eventually reduce the corresponding coordinates
+        if hasattr(cls, 'coordset'):
+            coordset = cls.coordset
+            if coordset is not None:
+                if dim is not None:
+                    idx = coordset.names.index(dim)
+                    if not keepdims:
+                        del coordset.coords[idx]
+                        dims.remove(dim)
+                    else:
+                        coordset.coords[idx].data = [0, ]
+                else:
+                    # dim being None we remove the coordset
+                    cls.set_coordset(None)
+
+        cls.dims = dims
+
+        return cls
+
+    @_from_numpy_method
+    def zeros(cls, shape, dtype=None, **kwargs):
+        """
+        Return a new |NDDataset| of given shape and type, filled with zeros.
+
+        Parameters
+        ----------
+        shape : int or sequence of ints
+            Shape of the new array, e.g., ``(2, 3)`` or ``2``.
+        dtype : data-type, optional
+            The desired data-type for the array, e.g., `numpy.int8`.  Default is
+            `numpy.float64`.
+        **kwargs : dict
+            See other parameters.
+
+        Returns
+        -------
+        zeros
+            Array of zeros.
+
+        Other Parameters
+        ----------------
+        units : str or ur instance
+            Units of the returned object. If not provided, try to copy from the input object.
+        coordset : list or Coordset object
+            Coordinates for the returned objet. If not provided, try to copy from the input object.
+
+        See Also
+        --------
+        zeros_like : Return an array of zeros with shape and type of input.
+        ones_like : Return an array of ones with shape and type of input.
+        empty_like : Return an empty array with shape and type of input.
+        full_like : Fill an array with shape and type of input.
+        ones : Return a new array setting values to 1.
+        empty : Return a new uninitialized array.
+        full : Fill a new array.
+
+        Examples
+        --------
+        >>> nd = scp.NDDataset.zeros(6)
+        >>> nd
+        NDDataset: [float64] unitless (size: 6)
+        >>> nd = scp.zeros((5, ))
+        >>> nd
+        NDDataset: [float64] unitless (size: 5)
+        >>> nd.values
+        array([       0,        0,        0,        0,        0])
+        >>> nd = scp.zeros((5, 10), dtype=np.int, units='absorbance')
+        >>> nd
+        NDDataset: [int64] a.u. (shape: (y:5, x:10))
+        """
+
+        return cls(np.zeros(shape, dtype), **kwargs)
+
+    @_from_numpy_method
     def zeros_like(cls, dataset, dtype=None, **kwargs):
         """
         Return a |NDDataset| of zeros.
@@ -2062,216 +2599,9 @@ class NDMath(object):
         cls._data = np.zeros_like(dataset, dtype)
         return cls
 
-    @_from_numpy_method
-    def ones_like(cls, dataset, dtype=None, **kwargs):
-        """
-        Return |NDDataset| of ones.
-
-        The returned |NDDataset| have the same shape and type as a given array. Units, coordset, ... can be added in
-        kwargs.
-
-        Parameters
-        ----------
-        dataset : |NDDataset| or array-like
-            Object from which to copy the array structure.
-        dtype : data-type, optional
-            Overrides the data type of the result.
-        **kwargs : dict
-            See other parameters.
-
-        Returns
-        -------
-        oneslike
-            Array of `1` with the same shape and type as `dataset`.
-
-        Other Parameters
-        ----------------
-        units : str or ur instance
-            Units of the returned object. If not provided, try to copy from the input object.
-        coordset : list or Coordset object
-            Coordinates for the returned objet. If not provided, try to copy from the input object.
-
-        See Also
-        --------
-        full_like : Return an array with a given fill value with shape and type of the input.
-        zeros_like : Return an array of zeros with shape and type of input.
-        empty_like : Return an empty array with shape and type of input.
-        zeros : Return a new array setting values to zero.
-        ones : Return a new array setting values to one.
-        empty : Return a new uninitialized array.
-        full : Fill a new array.
-
-        Examples
-        --------
-        >>> x = np.arange(6)
-        >>> x = x.reshape((2, 3))
-        >>> x = scp.NDDataset(x, units='s')
-        >>> x
-        NDDataset: [int64] s (shape: (y:2, x:3))
-        >>> scp.ones_like(x, dtype=float, units='J')
-        NDDataset: [float64] J (shape: (y:2, x:3))
-        """
-
-        cls._data = np.ones_like(dataset, dtype)
-        return cls
-
     # ------------------------------------------------------------------------------------------------------------------
     # private methods
     # ------------------------------------------------------------------------------------------------------------------
-
-    # Methods without dataset reduction
-    def _method(self, op, *args, **kwargs):
-
-        new = self.copy()
-
-        if new.implements('NDPanel'):
-            # if we have a NDPanel, iterate on all internal dataset of the panel
-            datasets = []
-            for k, v in new.datasets.items():
-                v._coordset = new.coordset
-                v.name = k
-                datasets.append(getattr(np, op)(v))
-
-            # recreate a panel object
-            panel = type(new)(*datasets, merge=True, align=None)
-            panel.history = f'Panel resulting from application of `{op}` method'
-
-            # return it
-            return panel
-
-        if args:
-            kwargs['dim'] = args[0]
-            args = []
-
-        # handle the various syntax to pass the axis
-        dims = self._get_dims_from_args(*args, **kwargs)
-        axis = self._get_dims_index(dims)
-        axis = axis[0] if axis and not self.is_1d else None
-        if axis is not None:
-            kwargs['axis'] = axis
-
-        # dim and dims keyword not accepted by the np function, so remove it
-        kwargs.pop('dims', None)
-        kwargs.pop('dim', None)
-
-        # they may be a problem if some kwargs have units
-        for k, v in kwargs.items():
-            if hasattr(v, 'units'):
-                kwargs[k] = v.m
-
-        # apply the numpy operator on the masked data
-        arr = getattr(np, op)(self.masked_data, *args, **kwargs)
-
-        if isinstance(arr, MaskedArray):
-            new._data = arr.data
-            new._mask = arr.mask
-
-        elif isinstance(arr, np.ndarray):
-            new._data = arr
-            new._mask = NOMASK
-
-        # particular case of functions that returns Dataset with no coordinates
-        if axis is None and op in ['cumsum', 'cumprod']:
-            # delete all coordinates
-            new._coordset.data = None
-
-        # Here we must reduce the corresponding coordinates
-        elif axis is not None:
-            dim = new._dims[axis]
-            if op not in ['cumsum', 'cumprod']:
-                del new._dims[axis]
-            if new.implements('NDDataset') and new._coordset and (dim in new._coordset.names):
-                idx = new._coordset.names.index(dim)
-                del new._coordset.coords[idx]
-
-        new.history = f'Dataset resulting from application of `{op}` method'
-        return new
-
-    # Methods with dataset reduction
-    def _reduce_method(self, op, *args, **kwargs):
-        # TODO: make change to handle complex and quaternion
-        new = self.copy()
-
-        keepdims = kwargs.get('keepdims', False)
-        keepunits = kwargs.pop('keepunits', True)
-
-        if args:
-            kwargs['dim'] = args[0]
-            args = []
-
-        # handle the various syntax to pass the axis
-        dims = self._get_dims_from_args(*args, **kwargs)
-        axis = self._get_dims_index(dims)
-        axis = axis[0] if axis and not self.is_1d else None
-        kwargs['axis'] = axis
-
-        # dim and dims keyword not accepted by the np function, so remove it
-        kwargs.pop('dims', None)
-        kwargs.pop('dim', None)
-        if op in ['diag']:
-            # also remove axis
-            kwargs.pop('axis', None)
-
-        # particular case of ptp
-        if axis is None and not self.is_1d and op in ['ptp']:
-            kwargs['axis'] = axis = -1
-
-        # particular case of argmax and argmin that only return indexes
-        if op in ['argmin', 'argmax']:
-            kwargs.pop('keepdims', None)
-            idx = getattr(np, op)(self.real.masked_data, **kwargs)
-            idx = np.unravel_index(idx, self.shape)
-            if self.ndim == 1:
-                idx = idx[0]
-            return idx
-
-        # particular case of max and min
-        if axis is None and keepdims and op in ['max', 'amax', 'min', 'amin']:
-            if op.startswith('a'):
-                op = op[1:]
-            idx = getattr(np, "arg" + op)(self.real.masked_data)
-            idx = np.unravel_index(idx, self.shape)
-            new = self[idx]
-
-        else:
-            # apply the numpy operator on the masked data
-            arr = getattr(np, op)(self.real.masked_data, *args, **kwargs)
-
-            # simpler case where we return a scalar value or a quantity
-
-            if isinstance(arr, MaskedArray):
-                new._data = arr.data
-                new._mask = arr.mask
-
-            elif isinstance(arr, np.ndarray):
-                new._data = arr
-                new._mask = NOMASK
-
-            else:
-                # simpler case for a returned scalar or quantity
-                if new.has_units and keepunits:
-                    new = arr * new._units
-                else:
-                    new = arr
-                if not keepdims:
-                    return new
-
-            # particular case of functions that returns Dataset with no coordinates
-            if axis is None and op in ['sum', 'trapz', 'prod', 'mean', 'var', 'std']:
-                # delete all coordinates
-                new._coordset = None
-
-            # Here we must reduce the corresponding coordinates
-            elif axis is not None:
-                dim = new._dims[axis]
-                if not keepdims:
-                    del new._dims[axis]
-                if new.implements('NDDataset') and new._coordset and (dim in new._coordset.names):
-                    idx = new._coordset.names.index(dim)
-                    del new._coordset.coords[idx]
-
-        new.history = f'Reduced dataset resulting from application of `{op}` method'
-        return new
 
     # ..................................................................................................................
     def _op(self, f, inputs, isufunc=False):
@@ -2830,7 +3160,6 @@ thismodule = sys.modules[__name__]
 
 
 def _set_ufuncs(cls):
-
     for func in _unary_ufuncs():
         setattr(cls, func, _ufunc(func))
         setattr(thismodule, func, _ufunc(func))
@@ -2839,7 +3168,6 @@ def _set_ufuncs(cls):
 
 # ..................................................................................................................
 def _set_operators(cls, priority=50):
-
     cls.__array_priority__ = priority
 
     # unary ops
@@ -2855,37 +3183,25 @@ def _set_operators(cls, priority=50):
 
         setattr(cls, _op_str('i' + name), cls._inplace_binary_op(_get_op('i' + name)))
 
+
 # ----------------------------------------------------------------------------------------------------------------------
 # module functions
 # ----------------------------------------------------------------------------------------------------------------------
 # make some NDMath operation accessible from the spectrochempy API
 
 
-
 # make some API functions
-api_funcs = [ # creation functions
-             'empty_like', 'zeros_like', 'ones_like', 'full_like',
-             'empty', 'zeros', 'ones', 'full',
-             'eye', 'identity', 'random',
-             'linspace', 'arange', 'logspace', 'geomspace',
-             'fromfunction', 'fromiter',
-             #
-             'diagonal', 'diag',
-             'sum', 'mean', 'std', 'var',
-             'amax', 'amin', 'min', 'max', 'argmin', 'argmax', 'coordmin', 'coordmax',
-
-             'round', 'clip',
-             'ptp',
-             'pipe',
-             'to_array',
-             #
-             'all', 'any',
-             ]
+api_funcs = [  # creation functions
+        'empty_like', 'zeros_like', 'ones_like', 'full_like', 'empty', 'zeros', 'ones', 'full', 'eye', 'identity',
+        'random', 'linspace', 'arange', 'logspace', 'geomspace', 'fromfunction', 'fromiter',  #
+        'diagonal', 'diag', 'sum', 'average', 'mean', 'std', 'var', 'amax', 'amin', 'min', 'max', 'argmin', 'argmax',
+        'cumsum', 'coordmin', 'coordmax', 'clip', 'ptp', 'pipe', 'to_array',  #
+        'abs', 'conjugate', 'absolute', 'conj',
+        'all', 'any', ]
 
 for funcname in api_funcs:
     setattr(thismodule, funcname, getattr(NDMath, funcname))
     thismodule.__all__.append(funcname)
-
 
 # ======================================================================================================================
 if __name__ == '__main__':
