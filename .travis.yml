@@ -115,13 +115,3 @@ deploy:
       all_branches: true
       repo: spectrochempy/spectrochempy
       condition: $BUILDOCS = true
-  - provider: pypi
-    username: spectrocat
-    password: $PYPI_PASSWORD
-    skip_existing: true
-    distributions: "sdist bdist_wheel"
-    edge: true # opt in to dpl v2
-    on:
-      tags: true
-      repo: spectrochempy/spectrochempy
-      condition: $DEPLOY = true
