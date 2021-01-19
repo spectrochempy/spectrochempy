@@ -18,7 +18,7 @@ def test_read_labspec():
     A = scp.read_labspec('Activation.txt', directory=ramandir)
     A.plot()
 
-    A = scp.read_labspec('532nm-191216-Si 200µ.txt', directory=ramandir)
+    A = scp.read_labspec('532nm-191216-Si 200mu.txt', directory=ramandir)
     A.plot()
 
     A = scp.read_labspec('serie190214-1.txt', directory=ramandir)
