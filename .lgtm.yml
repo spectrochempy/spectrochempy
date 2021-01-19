@@ -1,5 +1,7 @@
 queries:
-  - exclude: py/import-and-import-from
+  - exclude:
+      - py/import-and-import-from
+      - py/call-to-non-callable
 extraction:
   python:
     python_setup:
@@ -17,5 +19,3 @@ extraction:
         - "scp_data"
         - "*.egg_info/"
         - "tests/"
-
-
