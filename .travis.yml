@@ -6,26 +6,21 @@ dist: xenial
 jobs:
   fast_finish: true
   include:
-    - stage: pytest-linux-3.7
+    - stage: pytest-linux-3.9
       if: branch NOT IN (feature/travis-deploy,feature/travis-docs)
       env:
       - TEST=true
-      - CONDAPY=3.7
-    - stage: pytest-linux-3.8
-      if: branch NOT IN (feature/travis-deploy,feature/travis-docs)
-      env:
-      - TEST=true
-      - CONDAPY=3.8
+      - CONDAPY=3.9
     - stage: conda-deploy
       if: branch IN (master,feature/travis-deploy) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/
       env:
       - DEPLOY=true
-      - CONDAPY=3.8
+      - CONDAPY=3.9
     - stage: build-docs
       if: type != pull_request AND (branch IN (master,feature/travis-docs) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/)
       env:
       - BUILDOCS=true
-      - CONDAPY=3.8
+      - CONDAPY=3.9
 
 # limit got clone depth to 200 commits
 # this means that pull requests must be done with less than 300 commit changes

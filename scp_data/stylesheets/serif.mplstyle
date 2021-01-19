@@ -61,7 +61,7 @@ mathtext.default : rm
 mathtext.rm      : serif
 mathtext.it      : serif:italic
 
-text.usetex      : True
+text.usetex      : False
 
 ##
 ## ADDITIONAL PARAMETERS FOR SPECTROCHEMPY
