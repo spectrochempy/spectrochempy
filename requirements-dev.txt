@@ -11,11 +11,10 @@ dash
 dash-bootstrap-components
 dash-daq
 dill
-docrep
 ipython
 jinja2
+mamba
 matplotlib
-numba
 numpy
 orderedset
 pint
@@ -51,9 +50,10 @@ jupyter_sphinx
 json5
 sphinx-copybutton
 conda-build
+boa
 anaconda-client
 pip
 autodoc_traits
 dash_defer_js_import
 dash-ace
-- git+https://github.com/numpy/numpydoc
+git+https://github.com/numpy/numpydoc

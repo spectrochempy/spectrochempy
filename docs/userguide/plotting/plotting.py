@@ -8,12 +8,14 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.7.1
+#       jupytext_version: 1.9.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
 #     name: python3
 # ---
+
+# flake8 : noqa
 
 # %% [markdown]
 # # Plotting
@@ -85,7 +87,7 @@ dataset[:, 1290.:920.] = MASKED
 # which has the effect of displaying the figures in independant windows using default matplotlib backend (e.g.,
 # `Tk`), with all the interactivity of matplotlib.
 #
-# But you can explicitly request a different GUI backend::
+# But you can explicitly request a different GUI backend:
 # ```ipython3
 #     In []: %matplotlib qt
 # ```
@@ -113,7 +115,7 @@ dataset[:, 1290.:920.] = MASKED
 # %%
 prefs = dataset.preferences
 prefs.reset()  # Reset to default plot preferences
-_ = dataset.plot()
+dataset.plot();
 
 # %% [markdown]
 # ## Changing the aspect of the plot
@@ -129,7 +131,7 @@ prefs.colormap = 'magma'  # The default colormap is viridis
 prefs.axes.facecolor = '.95'  # Make the graph background colored in a ligth gray
 prefs.axes.grid = True
 
-_ = dataset.plot()
+dataset.plot();
 
 # %% [markdown]
 # <div class="alert alert-block alert-info">
@@ -139,15 +141,15 @@ _ = dataset.plot()
 
 # %%
 prefs.font.family = 'serif'
-_ = dataset.plot()
+dataset.plot();
 
 # %%
 prefs.font.family = 'cursive'
-_ = dataset.plot()
+dataset.plot();
 
 # %%
 prefs.font.family = 'monospace'
-_ = dataset.plot()
+dataset.plot();
 
 # %% [markdown]
 # ## Plotting 1D datasets
@@ -155,7 +157,7 @@ _ = dataset.plot()
 # %%
 prefs.reset()
 d1D = dataset[-1]  # select the last row of the previous 2D dataset
-_ = d1D.plot(color='r')
+d1D.plot(color='r');
 
 # %% [markdown]
 # ## Adding titles and annotations
@@ -202,11 +204,11 @@ _ = ax.annotate('OH groups', xy=(3600., 1.25), xytext=(-10, -50), textcoords='of
 
 # %%
 prefs.style = 'grayscale'
-_ = dataset.plot()
+dataset.plot();
 
 # %%
 prefs.style = 'ggplot'
-_ = dataset.plot()
+dataset.plot();
 
 # %% [markdown]
 # Other styles are :
@@ -220,14 +222,14 @@ _ = dataset.plot()
 # %%
 prefs.reset()
 prefs.style = 'grayscale', 'paper'
-ax = dataset.plot(colorbar=True)
+dataset.plot(colorbar=True);
 
 # %% [markdown]
 # Style specification can also be done directly in the plot method:
 
 # %%
 prefs.colormap = 'magma'
-ax = dataset.plot(style=['scpy', 'paper'])
+dataset.plot(style=['scpy', 'paper']);
 
 # %% [markdown]
 # To get a list of all available styles :
@@ -240,7 +242,7 @@ prefs.available_styles
 
 # %%
 prefs.reset()
-ax = dataset.plot()
+dataset.plot();
 
 # %% [markdown]
 # ## Create your own style
@@ -273,17 +275,17 @@ prefs.axes.labelcolor = 'blue'
 prefs.axes.grid = True
 prefs.axes.grid_axis = 'x'
 
-_ = dataset.plot()
+dataset.plot();
 
 prefs.makestyle()
 
 # %%
 prefs.reset()
-_ = dataset.plot()  # plot with the default scpy style
+dataset.plot();  # plot with the default scpy style
 
 # %%
 prefs.style = 'mydefault'
-_ = dataset.plot()  # plot with our own style
+dataset.plot();  # plot with our own style
 
 # %% [markdown]
 # ## Changing the type of plot
@@ -299,7 +301,7 @@ prefs.reset()
 prefs.method_2D = 'map'  # this will change permanently the type of 2D plot
 prefs.colormap = 'magma'
 prefs.figure_figsize = (5, 3)
-ax = dataset.plot()
+dataset.plot();
 
 # %% [markdown]
 # You can also, for an individual plot use specialised plot commands, such as plot_stack, plot_map, plot_waterfall,
@@ -307,15 +309,15 @@ ax = dataset.plot()
 
 # %%
 prefs.axes_facecolor = 'white'
-ax = dataset.plot_image(colorbar=True)  # will use image_cmap preference!
+dataset.plot_image(colorbar=True);  # will use image_cmap preference!
 
 # %%
 prefs.reset()
-_ = dataset.plot_waterfall(figsize=(7, 4), y_reverse=True)
+dataset.plot_waterfall(figsize=(7, 4), y_reverse=True);
 
 # %%
 prefs.style = 'seaborn-paper'
-ax = dataset[3].plot(scatter=True, pen=False, me=30, ms=5)
+dataset[3].plot(scatter=True, pen=False, me=30, ms=5)
 
 # %% [markdown]
 # ## Plotting several dataset on the same figure
@@ -329,7 +331,7 @@ ds1 = dataset[:nspec]  # split the dataset into too parts
 ds2 = dataset[nspec:] - 2.  # add an ofset to the second part
 
 ax1 = ds1.plot_stack()
-ax = ds2.plot_stack(clear=False, zlim=(-2.5, 4))
+ds2.plot_stack(ax=ax1, clear=False, zlim=(-2.5, 4));
 
 # %% [markdown]
 # For 1D datasets only, you can also use the `plot_multiple`mathod:
@@ -340,7 +342,7 @@ labels = ['sample {}'.format(label) for label in ["S1", "S10", "S20", "S50", "S5
 prefs.reset()
 prefs.axes.facecolor = '.99'
 prefs.axes.grid = True
-ax = plot_multiple(method='scatter', me=10, datasets=datasets, labels=labels, legend='best')
+plot_multiple(method='scatter', me=10, datasets=datasets, labels=labels, legend='best');
 
 # %% [markdown]
 # ## Overview of the main configuration parameters
@@ -387,6 +389,7 @@ prefs.all()
 
 # %%
 prefs.font.family = 'fantasy'
+import matplotlib.pyplot as plt
 with plt.xkcd():
     # print(mpl.rcParams)
     prefs.lines.linewidth = 2

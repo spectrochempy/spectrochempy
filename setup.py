@@ -80,11 +80,16 @@ setup_args = dict(
         url='http:/www.spectrochempy.fr', description='Processing, analysis and modelling Spectroscopic data for '
                                                       'Chemistry with Python',
         long_description=Path('README.md').read_text(), long_description_content_type="text/markdown",
-        classifiers=["Development Status :: 3 - Alpha", "Topic :: Utilities", "Topic :: Scientific/Engineering",
-                     "Topic :: Software Development :: Libraries", "Intended Audience :: Science/Research",
+        classifiers=["Development Status :: 3 - Alpha",
+                     "Topic :: Utilities", "Topic :: Scientific/Engineering",
+                     "Topic :: Software Development :: Libraries",
+                     "Intended Audience :: Science/Research",
                      "License :: CeCILL-B Free Software License Agreement (CECILL-B)",
-                     "Operating System :: OS Independent", "Programming Language :: Python :: 3.7",
-                     "Programming Language :: Python :: 3.8", ], platforms=['Windows', 'Mac OS X', 'Linux'],
+                     "Operating System :: OS Independent",
+                     "Programming Language :: Python :: 3.7",
+                     "Programming Language :: Python :: 3.8",
+                     "Programming Language :: Python :: 3.9", ],
+        platforms=['Windows', 'Mac OS X', 'Linux'],
 
         # packages discovery
         zip_safe=False, packages=find_packages() + packages, include_package_data=True,  # requirements
