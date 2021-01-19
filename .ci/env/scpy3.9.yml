@@ -27,7 +27,6 @@ dependencies:
     - jinja2
     - mamba
     - matplotlib
-    - numba
     - numpy
     - orderedset
     - pint

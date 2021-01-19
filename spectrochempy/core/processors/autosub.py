@@ -17,7 +17,7 @@ __dataset_methods__ = __all__
 
 import numpy as np
 from scipy.optimize import minimize_scalar
-from numba import jit
+# from numba import jit
 
 # ----------------------------------------------------------------------------------------------------------------------
 # localimports
@@ -144,7 +144,7 @@ def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False
         else:
             raise ValueError('Not implemented for method={}'.format(method))
 
-    @jit(cache=True)
+    # @jit(cache=True)
     def _minim():
         # table of subtraction coefficients
         x = []
