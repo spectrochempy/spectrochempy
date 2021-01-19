@@ -8,113 +8,25 @@
 This module implements the class |CoordRange|.
 """
 
-__all__ = ['CoordRange']
+__all__ = __slots__ = ['trim_ranges']
 
-# ----------------------------------------------------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------------------------------------------------
-from traitlets import (HasTraits, List, Bool, TraitError)
+from traitlets import HasTraits, List, Bool
+from spectrochempy.utils.traitlets import Range
 
 
 # ======================================================================================================================
-# Range trait type
+# _CoordRange
 # ======================================================================================================================
+class _CoordRange(HasTraits):
 
-class Range(List):
-    """
-    The trait-type Range.
-
-    Create a trait with two values defining an ordered range of values
-    """
-    klass = list
-    _cast_types = (tuple,)
-
-    # Describe the trait type
-    info_text = 'an ordered interval trait'
-    allow_none = True
-
-    def __init__(self, trait=None, default_value=None, **kwargs):
-        """
-        Parameters
-        ----------
-        trait : TraitType [ optional ]
-            The type for restricting the contents of the Container.
-            If unspecified, types are not checked.
-
-        default_value : SequenceType [ optional ]
-            The default value for the Trait.  Must be list/tuple/set, and
-            will be cast to the container type.
-        """
-        super(Range, self).__init__(trait=None, default_value=default_value,
-                                    **kwargs)
-
-    def length_error(self, obj, value):
-        e = "The '%s' trait of '%s' instance must be of length 2 exactly," \
-            " but a value of %s was specified." \
-            % (self.name, type(obj), value)
-        raise TraitError(e)
-
-    def validate_elements(self, obj, value):
-        if value is None or len(value) == 0:
-            return
-        length = len(value)
-        if length != 2:
-            self.length_error(obj, value)
-        value.sort()
-        value = super(Range, self).validate_elements(obj, value)
-        return value
-
-    def validate(self, obj, value):
-
-        value = super(Range, self).validate(object, value)
-        value = self.validate_elements(obj, value)
-
-        return value
-
-
-# ======================================================================================================================
-# CoordRange
-# ======================================================================================================================
-class CoordRange(HasTraits):
-    """
-    Set of ordered, non intersecting intervals.
-
-    e.g. [[a, b], [c, d]] with a < b < c < d or a > b > c > d.
-
-    Examples
-    --------
-    >>> from spectrochempy import CoordRange
-    >>> CoordRange([1, 4], [7, 5], [6, 10])
-    [[1, 4], [5, 10]]
-    """
     # TODO: May use also units ???
     ranges = List(Range())
     reversed = Bool()
 
     # ..................................................................................................................
-    def __call__(self, *ranges, **kwargs):
-        """
-        The calling function of the CoordRange object
+    def __init__(self, *ranges, reversed=False):
 
-        An ordered set of ranges is contructed from the inputs and returned
-
-        Parameters
-        -----------
-        ranges :  iterable
-            An interval or a set of intervals.
-            set of  intervals. If none is given, the range
-            will be a set of an empty interval [[]]. The interval limits do not
-            need to be ordered, and the intervals do not need to be distincts.
-        reversed : bool, optional.
-            The intervals are ranked by decreasing order if True
-            or increasing order if False.
-
-        Returns
-        -------
-        ordered list of ranges
-        """
-
-        self.reversed = kwargs.get('reversed', False)
+        self.reversed = reversed
         if len(ranges) == 0:
             # first case: no argument passed, returns an empty range
             self.ranges = []
@@ -126,16 +38,15 @@ class CoordRange(HasTraits):
             self.ranges = [list(map(float, ranges))]
         else:
             # third case: a set of pairs of scalars has been passed
-            self._cleanranges(ranges)
+            self._clean_ranges(ranges)
         if self.ranges:
-            self._cleanranges(self.ranges)
-        return self.ranges
+            self._clean_ranges(self.ranges)
 
     # ------------------------------------------------------------------------------------------------------------------
     # private methods
     # ------------------------------------------------------------------------------------------------------------------
     # ..................................................................................................................
-    def _cleanranges(self, ranges):
+    def _clean_ranges(self, ranges):
         """Sort and merge overlapping ranges
         It works as follows::
         1. orders each interval
@@ -162,7 +73,34 @@ class CoordRange(HasTraits):
             self.ranges.reverse()
 
 
-CoordRange = CoordRange()
+def trim_ranges(*ranges, reversed=False):
+    """
+    Set of ordered, non intersecting intervals.
+
+    An ordered set of ranges is contructed from the inputs and returned.
+    *e.g.,* [[a, b], [c, d]] with a < b < c < d or a > b > c > d.
+
+    Parameters
+    -----------
+    *ranges :  iterable
+        An interval or a set of intervals.
+        set of  intervals. If none is given, the range will be a set of an empty interval [[]]. The interval
+        limits do not need to be ordered, and the intervals do not need to be distincts.
+    reversed : bool, optional
+        The intervals are ranked by decreasing order if True or increasing order if False.
+
+    Returns
+    -------
+    ordered
+        list of ranges.
+
+    Examples
+    --------
+    >>> spc.trim_ranges([1, 4], [7, 5], [6, 10])
+    [[1, 4], [5, 10]]
+    """
+    return _CoordRange(*ranges, reversed=reversed).ranges
+
 
 # ======================================================================================================================
 if __name__ == '__main__':

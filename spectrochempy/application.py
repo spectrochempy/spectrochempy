@@ -48,7 +48,7 @@ from spectrochempy.utils import MetaConfigurable, pathclean, get_pkg_path
 from .matplotlib_preferences import MatplotlibPreferences
 
 # set the default style
-# plt.style.use(['classic', 'scpy'])   <-- cause problem when scpy is not properly installed
+# plt.style.use(['classic', 'scpy'])    <--- a workaround to solve the problem with
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Log levels

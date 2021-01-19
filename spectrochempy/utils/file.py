@@ -425,6 +425,9 @@ def get_filename(*filenames, **kwargs):
             elif NODIAL and kwargs.get('protocol', None) == ['topspin']:
                 directory = readdirname(environ.get('TEST_NMR_FOLDER'))
 
+            if directory is None:
+                return None
+
             filenames = []
 
             if kwargs.get('protocol', None) != ['topspin']:
@@ -532,7 +535,6 @@ def readdirname(directory):
         if not NO_DISPLAY and not NO_DIALOG:  # this is for allowing test to continue in the background
             directory = open_dialog(single=False,
                                     directory=working_dir,
-                                    caption='Select directory',
                                     filters='directory')
 
         return pathclean(directory)
@@ -586,7 +588,7 @@ def check_filename_to_open(*args, **kwargs):
                 key: filenames
                 }
 
-    elif args:
+    elif len(args) > 0 and args[0] is not None:
         # args where passed so in this case we have directly byte contents instead of filenames only
         contents = filenames
         return {

@@ -61,29 +61,6 @@ numpyprintoptions()
 
 # noinspection PyPep8Naming
 class NDArray(HasTraits):
-    """
-    The basic |NDArray| object.
-
-    The |NDArray| class is an array (numpy |ndarray|-like) container, usually not intended to be used directly,
-    as its basic functionalities may be quite limited, but to be subclassed.
-
-    Indeed, both the classes |NDDataset| and |Coord| which respectively implement a full dataset (with
-    coordinates)  and the coordinates in a given dimension, are derived from |NDArray| in |scpy|.
-
-    The key distinction from raw numpy |ndarray| is the presence of optional properties such as dimension names,
-    labels, masks, units and/or extensible metadata dictionary.
-
-    See Also
-    --------
-    NDDataset : Object which subclass |NDArray| with the addition of coordinates.
-    Coord : Explicit coordinates object.
-    LinearCoord : Implicit coordinates objet.
-
-    Examples
-    --------
-    >>> from spectrochempy import NDArray
-    >>> myarray = NDArray([1., 2., 3.])
-    """
 
     # hidden properties
 
@@ -138,6 +115,17 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     def __init__(self, data=None, **kwargs):
         """
+        The basic |NDArray| object.
+
+        The |NDArray| class is an array (numpy |ndarray|-like) container, usually not intended to be used directly,
+        as its basic functionalities may be quite limited, but to be subclassed.
+
+        Indeed, both the classes |NDDataset| and |Coord| which respectively implement a full dataset (with
+        coordinates)  and the coordinates in a given dimension, are derived from |NDArray| in |scpy|.
+
+        The key distinction from raw numpy |ndarray| is the presence of optional properties such as dimension names,
+        labels, masks, units and/or extensible metadata dictionary.
+
         Parameters
         ----------
         data : array of floats
@@ -193,6 +181,17 @@ class NDArray(HasTraits):
             A string to add to the object history.
         copy : bool, optional
             Perform a copy of the passed object. Default is False.
+
+        See Also
+        --------
+        NDDataset : Object which subclass |NDArray| with the addition of coordinates.
+        Coord : Explicit coordinates object.
+        LinearCoord : Implicit coordinates objet.
+
+        Examples
+        --------
+        >>> from spectrochempy import NDArray
+        >>> myarray = NDArray([1., 2., 3.])
         """
 
         # creation date
@@ -235,20 +234,24 @@ class NDArray(HasTraits):
 
         author = kwargs.pop('author', get_user_and_node())
         if author:
-            self.author = author
+            try:
+                self.author = author
+            except AttributeError:
+                pass
 
         history = kwargs.pop('history', None)
         if history is not None:
-            self.history = history
+            try:
+                self.history = history
+            except AttributeError:
+                pass
 
         self._modified = self._date
-
-        # call to the super class
-        super().__init__(**kwargs)
 
     # ------------------------------------------------------------------------------------------------------------------
     # special methods
     # ------------------------------------------------------------------------------------------------------------------
+
     # ..................................................................................................................
     def __copy__(self):
         return self.copy(deep=False)
@@ -567,7 +570,10 @@ class NDArray(HasTraits):
         if dims is None:
             return
 
-        if not is_sequence(dims):
+        if is_sequence(dims):
+            if np.all([d is None for d in dims]):
+                return
+        else:
             dims = [dims]
 
         axis = []
@@ -906,7 +912,10 @@ class NDArray(HasTraits):
                 except AttributeError:
                     # some attribute of NDDataset are missing in NDArray
                     pass
-            self.history = f'Copied from object:{data.name}'
+            try:
+                self.history = f'Copied from object:{data.name}'
+            except AttributeError:
+                pass
 
         elif isinstance(data, Quantity):
             # debug_("init data with data from a Quantity object")
@@ -1068,6 +1077,15 @@ class NDArray(HasTraits):
     # ------------------------------------------------------------------------------------------------------------------
     # Public Methods and Properties
     # ------------------------------------------------------------------------------------------------------------------
+    def asfortranarray(self):
+        """
+        Make data and mask (ndim >= 1) laid out in Fortran order in memory.
+        """
+        # data and mask will be converted to F_CONTIGUOUS mode
+        if not self._data.flags['F_CONTIGUOUS']:
+            self._data = np.asfortranarray(self._data)
+            if self.is_masked:
+                self._mask = np.asfortranarray(self._mask)
 
     def astype(self, dtype=None, **kwargs):
         """
@@ -1106,10 +1124,11 @@ class NDArray(HasTraits):
         Parameters
         ----------
         deep : bool, optional
-            If True a deepcopy is performed which is the default behavior
+            If True a deepcopy is performed which is the default behavior.
         memo : Not used
-            This parameter ensure compatibility with deepcopy() from the copy
-            package.
+            This parameter ensure compatibility with deepcopy() from the copy package.
+        keepname : bool
+            If True keep the same name for the copied object.
 
         Returns
         -------
@@ -1118,7 +1137,8 @@ class NDArray(HasTraits):
 
         Examples
         --------
-        >>> nd1 = NDArray([1.+2.j,2.+ 3.j])
+        >>> from spectrochempy import NDArray
+        >>> nd1 = NDArray([1. + 2.j, 2. + 3.j])
         >>> nd1
         NDArray: [complex128] unitless (size: 2)
         >>> nd2 = nd1
@@ -1309,6 +1329,8 @@ class NDArray(HasTraits):
             or 'dims'
         negative_axis : bool, optional, default=False.
             If True a negative index is returned for the axis value (-1 for the last dimension, etc...)
+        allows_none : bool, optional, default=False
+            If True, if input is none then None is returned.
 
         Returns
         -------
@@ -1321,7 +1343,7 @@ class NDArray(HasTraits):
         dims = self._get_dims_from_args(*args, **kwargs)
         axis = self._get_dims_index(dims)
         allows_none = kwargs.get('allows_none', False)
-        if axis is None and dims is None and allows_none:
+        if axis is None and allows_none:
             return None, None
         axis = axis[0] if axis else self.ndim - 1  # None
         dim = self.dims[axis]
@@ -1512,7 +1534,7 @@ class NDArray(HasTraits):
     @property
     def linear(self):
         """
-        Bool - flag to specify if the data can be constructed using a linear variation
+        bool - flag to specify if the data can be constructed using a linear variation
         """
         return self._linear
 
@@ -1606,16 +1628,49 @@ class NDArray(HasTraits):
         force : bool, optional, default=`False`
             If True the change of units is forced, even for incompatible units
 
-        Returns
-        -------
-        object
-            same object with new units.
+        See Also
+        --------
+        to : Rescaling of the current object data to different units
+        to_base_units : Rescaling of the current object data to different units
+        ito_base_units : Inplace rescaling of the current object data to different units
+        to_reduced_units : Rescaling to reduced units.
+        ito_reduced_units : Rescaling to reduced units.
+        """
+        self.to(other, inplace=True, force=force)
+
+    # ..................................................................................................................
+    def ito_base_units(self):
+        """
+        Inplace rescaling to base units.
 
         See Also
         --------
-        to
+        to : Rescaling of the current object data to different units
+        ito : Inplace rescaling of the current object data to different units
+        to_base_units : Rescaling of the current object data to different units
+        to_reduced_units : Rescaling to redunced units.
+        ito_reduced_units : Inplace rescaling to reduced units.
         """
-        return self.to(other, inplace=True, force=force)
+        self.to_base_units(inplace=True)
+
+    # ..................................................................................................................
+    def ito_reduced_units(self):
+        """
+        Quantity scaled in place to reduced units, inplace.
+
+        Scaling to reduced units means, one unit per
+        dimension. This will not reduce compound units (e.g., 'J/kg' will not
+        be reduced to m**2/s**2)
+
+        See Also
+        --------
+        to : Rescaling of the current object data to different units
+        ito : Inplace rescaling of the current object data to different units
+        to_base_units : Rescaling of the current object data to different units
+        ito_base_units : Inplace rescaling of the current object data to different units
+        to_reduced_units : Rescaling to reduced units.
+        """
+        self.to_reduced_units(inplace=True)
 
     # ..................................................................................................................
     @property
@@ -1848,7 +1903,7 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     @property
     def roi(self):
-        """list - ROI limits"""
+        """list - region of interest (ROI) limits"""
         if self._roi is None:
             self._roi = self.limits
         return self._roi
@@ -1936,7 +1991,9 @@ class NDArray(HasTraits):
             s = np.array(new.shape)
             dims = np.argwhere(s == 1).squeeze().tolist()
         axis = self._get_dims_index(dims)
-        # debug_(f"axis:{axis}<-dims:{dims}")
+        if axis is None:
+            # nothing to squeeze
+            return new, axis
 
         # recompute new dims
         for i in axis[::-1]:
@@ -1953,7 +2010,7 @@ class NDArray(HasTraits):
         return new
 
     # ..................................................................................................................
-    def swapaxes(self, dim1, dim2, inplace=False):
+    def swapdims(self, dim1, dim2, inplace=False):
         """
         Interchange two dims of a NDArray.
 
@@ -1994,6 +2051,9 @@ class NDArray(HasTraits):
 
         new._meta = new._meta.swap(*axis, inplace=False)
         return new
+
+    swapaxes = swapdims
+    swapaxes.__doc__ = 'Alias of `swapdims`'
 
     # ..................................................................................................................
     @property
@@ -2040,9 +2100,17 @@ class NDArray(HasTraits):
         force : bool, optional, default=False
             If True the change of units is forced, even for incompatible units
 
-         Returns
+        Returns
         -------
-        %(generic_method.returns.object)s
+        rescaled
+
+        See Also
+        --------
+        ito : Inplace rescaling of the current object data to different units
+        to_base_units : Rescaling of the current object data to different units
+        ito_base_units : Inplace rescaling of the current object data to different units
+        to_reduced_units : Rescaling to reduced_units.
+        ito_reduced_units : Inplace rescaling to reduced units.
 
         Examples
         --------
@@ -2074,10 +2142,6 @@ class NDArray(HasTraits):
 
         >>> print(ndd)
         NDArray: [float64] m (shape: (y:3, x:3))
-
-        See Also
-        --------
-        ito : change units inplace
         """
         if inplace:
             new = self
@@ -2098,7 +2162,7 @@ class NDArray(HasTraits):
             units = ur.Unit(other)
         if self.has_units:
             try:
-                if new.origin in ['topspin', 'nmr']:
+                if new._origin in ['topspin', 'nmr']:
                     # its nmr data
                     set_nmr_context(new.meta.larmor)
                     with ur.context('nmr'):
@@ -2128,17 +2192,78 @@ class NDArray(HasTraits):
                 new._units = units
             else:
                 warnings.warn("There is no units for this NDArray!", SpectroChemPyWarning)
-        # if not inplace:
-        return new
+
+        if not inplace:
+            return new
+
+    def to_base_units(self, inplace=False):
+        """
+        Return an array rescaled to base units.
+
+        Parameters
+        ----------
+        inplace : bool
+            If True the rescaling is done in place
+
+        Returns
+        -------
+        rescaled
+            A rescaled array
+
+        """
+        q = Quantity(1., self.units)
+        q.ito_base_units()
+
+        if not inplace:
+            new = self.copy()
+        else:
+            new = self
+
+        new.ito(q.units)
+
+        if not inplace:
+            return new
+
+    def to_reduced_units(self, inplace=False):
+        """
+        Return an array scaled in place to reduced units
+
+        Reduced units means one unit per
+        dimension. This will not reduce compound units (e.g., 'J/kg' will not
+        be reduced to m**2/s**2),
+
+        Parameters
+        ----------
+        inplace : bool
+            If True the rescaling is done in place
+
+        Returns
+        -------
+        rescaled
+            A rescaled array
+
+        """
+        q = Quantity(1., self.units)
+        q.ito_reduced_units()
+
+        if not inplace:
+            new = self.copy()
+        else:
+            new = self
+
+        new.ito(q.units)
+
+        if not inplace:
+            return new
 
     # ..................................................................................................................
     def transpose(self, *dims, inplace=False):
         """
-        Permute the dimensions of a NDArray.
+        Permute the dimensions of an array.
 
         Parameters
         ----------
-        dims : list int or str
+        *dims : list int or str
             Sequence of dimension indexes or names, optional.
             By default, reverse the dimensions, otherwise permute the dimensions
             according to the values given. If specified the list of dimension
@@ -2149,11 +2274,12 @@ class NDArray(HasTraits):
 
         Returns
         -------
-        transposed_array
+        transpose
+            A transposed array
 
         See Also
         --------
-        swapaxes
+        swapdims : Interchange two dimensions of an array.
         """
         if not inplace:
             new = self.copy()
@@ -2178,7 +2304,7 @@ class NDArray(HasTraits):
     @property
     def umasked_data(self):
         """
-        |ndarray|, dtype:object - The actual array with mask and unit
+        |Quantity| - The actual array with mask and unit
 
         (Readonly property).
         """
@@ -2190,7 +2316,7 @@ class NDArray(HasTraits):
     @property
     def unitless(self):
         """
-        bool - True if the `data` have `units` (Readonly property).
+        `bool` - True if the `data` does not have `units` (Readonly property).
         """
         return not self.has_units
 
@@ -2225,8 +2351,7 @@ class NDArray(HasTraits):
     @property
     def values(self):
         """
-        |ndarray|, dtype:object - The actual values (data, units)
-        contained in this object (Readonly property).
+        |Quantity| - The actual values (data, units) contained in this object (Readonly property).
         """
 
         if self.data is not None:
@@ -2243,4 +2368,9 @@ class NDArray(HasTraits):
         elif self.is_labeled:
             return self._labels[()]
 
-    value = values  # alias
+    @property
+    def value(self):
+        """
+        Alias of `values`.
+        """
+        return self.values

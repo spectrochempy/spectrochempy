@@ -44,7 +44,7 @@ def test_MCRALS_no_coords():
     mcr2 = MCRALS(X, guess, param=param, verbose=False)
     mcr2.plotmerit()
 
-    assert 'converged !' in mcr2.log[-15:]
+    assert 'converged !' in mcr2.logs[-15:]
 
 
 def test_MCRALS():
@@ -88,7 +88,7 @@ def test_MCRALS():
     mcr2 = MCRALS(X, guess, param=param, verbose=False)
     mcr.plotmerit()
 
-    assert 'converged !' in mcr2.log[-15:]
+    assert 'converged !' in mcr2.logs[-15:]
 
     show()
 

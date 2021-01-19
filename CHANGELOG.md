@@ -1,249 +1,105 @@
 # What\'s new
 
-## Version 0.1.22
+## Version 0.2.1
 
--   [\#146](https://api.github.com/repos/spectrochempy/spectrochempy/issues/146)
-    : 3.8 compatibility + some fixes
+**TASKS**
 
-### Bugs fixed
+* Documentation largely revisited and hopefully improved. *Still some work to be done*.
+  
+* NDMath (mathematical and dataset creation routines) module revisited. *Still some work to be done*.
 
--   FIX
-    [\#140](https://api.github.com/repos/spectrochempy/spectrochempy/issues/140)
-    : compatibilyTraitlets 5.0
--   FIX
-    [\#72](https://api.github.com/repos/spectrochempy/spectrochempy/issues/72)
-    : Matplotlib widgets not working (in jupyter Lab)
--   FIX
-    [\#71](https://api.github.com/repos/spectrochempy/spectrochempy/issues/71)
-    : interactive baseline not working (in Jupyter Lab)
+**NEW FEATURE**
 
-### Tasks terminated
+* Changed CoordRange behavior
 
--   [\#145](https://api.github.com/repos/spectrochempy/spectrochempy/issues/145)
-    : Compatibility with py-3.8
--   [\#144](https://api.github.com/repos/spectrochempy/spectrochempy/issues/144)
-    : remove ipynb file after building docs
+**BUGS FIXED**
 
-## Version 0.1.21
+* Fix a problem with importing the API
 
-### Bugs fixed
+* Fix dim handling in processing functions
 
--   FIX
-    [\#142](https://api.github.com/repos/spectrochempy/spectrochempy/issues/142)
-    : Fail in test due to units
--   FIX
-    [\#140](https://api.github.com/repos/spectrochempy/spectrochempy/issues/140)
-    : compatibilyTraitlets 5.0
--   FIX
-    [\#138](https://api.github.com/repos/spectrochempy/spectrochempy/issues/138)
-    : build doc fails: make.py
--   FIX
-    [\#133](https://api.github.com/repos/spectrochempy/spectrochempy/issues/133)
-    : error with last version of docrep
--   FIX
-    [\#132](https://api.github.com/repos/spectrochempy/spectrochempy/issues/132)
-    : FIX: Unit display
--   FIX
-    [\#128](https://api.github.com/repos/spectrochempy/spectrochempy/issues/128)
-    : FIX: modify the way update are checked.
--   FIX
-    [\#127](https://api.github.com/repos/spectrochempy/spectrochempy/issues/127)
-    : FIX: an indentation error
+## Version 0.2.0
 
-### Tasks terminated
+**NEW FEATURES**
 
--   [\#123](https://api.github.com/repos/spectrochempy/spectrochempy/issues/123)
-    : Revise the API reference generation
+* Copyright update
+  
+* Requirements and env yml files updated.
 
-## Version 0.1.20
+* Use of the coordinates in math operation improved.
+  
+* Added ROI and Offset properties to NDArrays.
+  
+* Readers / Writers revisited.
 
-### Bugs fixed
+* Bruker TOPSPIN reader.
+  
+* Added LabSpec reader for .txt exported files 
 
--   FIX
-    [\#116](https://api.github.com/repos/spectrochempy/spectrochempy/issues/116)
-    : CI: try to fix bug on deploy
--   FIX
-    [\#115](https://api.github.com/repos/spectrochempy/spectrochempy/issues/115)
-    : CI: revise the changelog script in make.py
--   FIX
-    [\#87](https://api.github.com/repos/spectrochempy/spectrochempy/issues/87)
-    : Check for update not working
--   FIX
-    [\#76](https://api.github.com/repos/spectrochempy/spectrochempy/issues/76)
-    : read_opus() shifts the xaxis
--   FIX
-    [\#27](https://api.github.com/repos/spectrochempy/spectrochempy/issues/27)
-    : Solve pint version \> 0.9 incompatibilities
--   FIX
-    [\#17](https://api.github.com/repos/spectrochempy/spectrochempy/issues/17)
-    : Doc building using sphinx generates some warnings
+* Simplified the format of scp file - now zipped JSON files.
 
-### Features added
+* Rewriting json serialiser
 
--   [\#114](https://api.github.com/repos/spectrochempy/spectrochempy/issues/114)
-    : CI: Travis deploy and build doc improved
--   [\#111](https://api.github.com/repos/spectrochempy/spectrochempy/issues/111)
-    : TravisCI automatic uploading to pypi
--   [\#110](https://api.github.com/repos/spectrochempy/spectrochempy/issues/110)
-    : TravisCI to build docs automatically
--   [\#105](https://api.github.com/repos/spectrochempy/spectrochempy/issues/105)
-    : CI: continuing setup
--   [\#102](https://api.github.com/repos/spectrochempy/spectrochempy/issues/102)
-    : Travis docs building
--   [\#101](https://api.github.com/repos/spectrochempy/spectrochempy/issues/101)
-    : Feature/travis deploy - taking into account restrictions regarding
-    secure keys
--   [\#98](https://api.github.com/repos/spectrochempy/spectrochempy/issues/98)
-    : PEP8 + Travis CI setup
--   [\#93](https://api.github.com/repos/spectrochempy/spectrochempy/issues/93)
-    : find_peaks() should makes use of Coord instead on indices
--   [\#90](https://api.github.com/repos/spectrochempy/spectrochempy/issues/90)
-    : make smooth() and savgol_filter() more consistent
--   [\#46](https://api.github.com/repos/spectrochempy/spectrochempy/issues/46)
-    : Tutorials on IR data import
+* Add function pathclean to the API
 
-### Tasks terminated
+* Add some array creation function to NDMath
 
--   [\#75](https://api.github.com/repos/spectrochempy/spectrochempy/issues/75)
-    : Automate building of docs for new release and dev version.
--   [\#49](https://api.github.com/repos/spectrochempy/spectrochempy/issues/49)
-    : Remove nmrglue from spectrochempy/extern
+* Refactoring plotting preferences system
 
-## Version 0.1.19
+* Baseline correction now accept single value for ranges
 
-### Bugs fixed
+* Add a waterfall plot
 
--   FIX
-    [\#74](https://api.github.com/repos/spectrochempy/spectrochempy/issues/74)
-    : Fix warning issued during tests
--   FIX
-    [\#69](https://api.github.com/repos/spectrochempy/spectrochempy/issues/69)
-    : allow passing description to read_omnic
--   FIX
-    [\#65](https://api.github.com/repos/spectrochempy/spectrochempy/issues/65)
-    : Installation of matplotlib styles
--   FIX
-    [\#63](https://api.github.com/repos/spectrochempy/spectrochempy/issues/63)
-    : The file selector does not work when the path has a final slash.
--   FIX
-    [\#59](https://api.github.com/repos/spectrochempy/spectrochempy/issues/59)
-    : Conda install is not working on linux (sometimes!)
--   FIX
-    [\#48](https://api.github.com/repos/spectrochempy/spectrochempy/issues/48)
-    : Deprecation warning with numpy elementwise == comparison
+* Refactoring plot2D and 1D methods
 
-### Features added
+* Added Simpson'rule integration
 
--   [\#67](https://api.github.com/repos/spectrochempy/spectrochempy/issues/67)
-    : MCR-ALS improved
--   [\#66](https://api.github.com/repos/spectrochempy/spectrochempy/issues/66)
-    : improve changelog display
+* Addition of multiple coordinates to a dimension works better
 
-### Tasks terminated
+* Added Linear coordinates (EXPERIMENTAL)
 
--   [\#70](https://api.github.com/repos/spectrochempy/spectrochempy/issues/70)
-    : Set rules on Github for new commits
--   [\#50](https://api.github.com/repos/spectrochempy/spectrochempy/issues/50)
-    : Set up of workflows when pushing on GitHub
--   [\#40](https://api.github.com/repos/spectrochempy/spectrochempy/issues/40)
-    : Automate building and deployment of new releases
+* Test for NDDataset dtype change at initialisation
 
-## Version 0.1.18
+* Added subdir of txt files in ramandata
 
-### Bugs fixed
+* Comparison of datasets improved in testing.py
 
--   FIX
-    [\#64](https://api.github.com/repos/spectrochempy/spectrochempy/issues/64)
-    : Install of the matplotlib styles doesn\'t work during setup
--   FIX
-    [\#62](https://api.github.com/repos/spectrochempy/spectrochempy/issues/62)
-    : Generic read function do not open a dialog when called without
-    argument
--   FIX
-    [\#58](https://api.github.com/repos/spectrochempy/spectrochempy/issues/58)
-    : Wrong instruction in install guides (MAC and WIN
+* Comparison of datasets and projects
 
-### Features added
+**BUGS FIXED**
 
--   [\#54](https://api.github.com/repos/spectrochempy/spectrochempy/issues/54)
-    : implement the numpy equivalent method [astype]{.title-ref}
--   [\#53](https://api.github.com/repos/spectrochempy/spectrochempy/issues/53)
-    : Add new numpy equivalent functions such as np.eyes, np.identity.
--   [\#45](https://api.github.com/repos/spectrochempy/spectrochempy/issues/45)
-    : Bruker Opus Import
+* Dtype parameter was not taken into account during initialisation of NDArrays.
+  
+* Math function behavior for coords
+  
+* Color normalisation on the full range for colorscale
+  
+* Configuration settings in the main application
+  
+* Compatibility read_zip with py3.7
+  
+* NDpanel temporary removed from the master
+  
+* 2D IRIS fixed
+  
+* Trapz integration to return NDDataset
+  
+* Suppressed a forgotten sleep statement that was slowing down the SpectroChemPy initialisation.
+  
+* Error in SIMPLISMA (changed affectations such as C.data[...] = something by C[...] = something.
+  
+* Cleaning mplstyle about non-style parameters and fix makestyle.
+  
+* Argument of set_xscale.
+  
+* Use read_topspin instead of the deprecated function read_bruker_nmr.
+  
+* Some issues with interactive baseline.
+  
+* Baseline and fitting tutorials.
+  
+* Removed dependency of isotopes.py to pandas
 
-### Tasks terminated
+## Version 0.1.x
 
--   [\#61](https://api.github.com/repos/spectrochempy/spectrochempy/issues/61)
-    : Make a repository on github. Get a DOI number for it.
--   [\#56](https://api.github.com/repos/spectrochempy/spectrochempy/issues/56)
-    : Add nmrglue to our conda channel - and remove it from extern
--   [\#52](https://api.github.com/repos/spectrochempy/spectrochempy/issues/52)
-    : Add brukeropusreader to our conda channel
--   [\#51](https://api.github.com/repos/spectrochempy/spectrochempy/issues/51)
-    : Add a linux quadprog version into our conda channel
-
-## Version 0.1.17
-
-### Bugs fixed
-
--   FIX
-    [\#44](https://api.github.com/repos/spectrochempy/spectrochempy/issues/44)
-    : TQDM generate errors during doc building in examples.
--   FIX
-    [\#38](https://api.github.com/repos/spectrochempy/spectrochempy/issues/38)
-    : Tutorial notebooks that contain a dialog for filename do not run
-    silently during sphinx build.
--   FIX
-    [\#37](https://api.github.com/repos/spectrochempy/spectrochempy/issues/37)
-    : QT error in doc
--   FIX
-    [\#33](https://api.github.com/repos/spectrochempy/spectrochempy/issues/33)
-    : Size of the figures in pdf documentation often too wide.
--   FIX
-    [\#30](https://api.github.com/repos/spectrochempy/spectrochempy/issues/30)
-    : Fix doctrings and rst files so that the pdf manual get correct
-    with titles and sections
--   FIX
-    [\#28](https://api.github.com/repos/spectrochempy/spectrochempy/issues/28)
-    : loose coord when slicing by integer array
--   FIX
-    [\#26](https://api.github.com/repos/spectrochempy/spectrochempy/issues/26)
-    : Test Console don\'t pass on WINDOWS
--   FIX
-    [\#23](https://api.github.com/repos/spectrochempy/spectrochempy/issues/23)
-    : pca reconstruction for an omnic dataset
--   FIX
-    [\#15](https://api.github.com/repos/spectrochempy/spectrochempy/issues/15)
-    : Fix doc RST syntax
-
-### Features added
-
--   [\#42](https://api.github.com/repos/spectrochempy/spectrochempy/issues/42)
-    : Add a progress bar during loading of the library
--   [\#39](https://api.github.com/repos/spectrochempy/spectrochempy/issues/39)
-    : make changelog automatic when making the doc
--   [\#35](https://api.github.com/repos/spectrochempy/spectrochempy/issues/35)
-    : Check for new version at the program start up
--   [\#32](https://api.github.com/repos/spectrochempy/spectrochempy/issues/32)
-    : The autosub function does not return the subtraction coefficients
--   [\#16](https://api.github.com/repos/spectrochempy/spectrochempy/issues/16)
-    : Create an importer to get the issues from Bitbucket and start the
-    issue tracker here.
-
-### Tasks terminated
-
--   [\#29](https://api.github.com/repos/spectrochempy/spectrochempy/issues/29)
-    : import data: tutorial, examples, tests
--   [\#25](https://api.github.com/repos/spectrochempy/spectrochempy/issues/25)
-    : Conda Recipe
--   [\#13](https://api.github.com/repos/spectrochempy/spectrochempy/issues/13)
-    : Redmine website configuration
-
-## Version 0.1.16
-
--   Initial version released as pypi and conda package
-
-## Versions 0.1.0
-
--   initial Development version
+* Initial development versions

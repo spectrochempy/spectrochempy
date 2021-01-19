@@ -1,6 +1,9 @@
+![titre](titre.png)
 ## What is SpectroChemPy?
 
-SpectroChemPy is a framework for processing, analyzing and modeling Spectroscopic data for Chemistry with Python. It is a cross platform software, running on Linux, Windows or OS X.
+SpectroChemPy (SCPy) is a framework for processing, analyzing and modeling 
+Spectroscopic data for Chemistry with Python. It is a cross platform software, 
+running on Linux, Windows or OS X.
 
 ||| 
 |---:|:---|

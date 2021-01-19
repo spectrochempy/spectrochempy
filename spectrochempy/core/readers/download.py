@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
 # ======================================================================================================================
 """
 In this module, methods are provided to download external datasets
@@ -10,10 +10,6 @@ from public database.
 """
 __all__ = ['download_IRIS']
 __dataset_methods__ = __all__
-
-# ----------------------------------------------------------------------------------------------------------------------
-# standard imports
-# ----------------------------------------------------------------------------------------------------------------------
 
 from io import StringIO
 
@@ -25,13 +21,7 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core import error_
 
 
-# ----------------------------------------------------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------------------------------------------------
-# ----------------------------------------------------------------------------------------------------------------------
-# local imports
-# ----------------------------------------------------------------------------------------------------------------------
-# ............................................................................
+# ......................................................................................................................
 def download_IRIS():
     """
     Upload the classical IRIS dataset.
@@ -43,6 +33,16 @@ def download_IRIS():
     -------
     downloaded
         The IRIS dataset.
+
+    See Also
+    --------
+    read : Ro read data from experimental data.
+
+    Examples
+    --------
+    Upload a dataset form a distant server
+
+    >>> dataset = scp.download_IRIS()
     """
     url = "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data"
 

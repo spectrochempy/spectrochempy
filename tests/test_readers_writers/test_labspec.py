@@ -7,10 +7,7 @@
 
 from pathlib import Path
 
-import pytest
-
 import spectrochempy as scp
-from spectrochempy.utils.exceptions import ProtocolError
 
 
 def test_read_labspec():
@@ -32,13 +29,6 @@ def test_read_labspec():
     A.plot()
 
     B = scp.read(protocol='labspec', directory=ramandir)
-
-    # this does not work
-    with pytest.raises(ProtocolError):
-        B = scp.read(protocol='txt', directory=ramandir)
-
-    # but this for compatibility with older code works
-    B = scp.read_txt(directory=ramandir)
 
     # this pack all spectra of the subdir directory
     B = scp.read_dir(directory=ramandir / 'subdir')

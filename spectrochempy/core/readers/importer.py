@@ -215,9 +215,13 @@ def importermethod(func):
 # ----------------------------------------------------------------------------------------------------------------------
 def read(*paths, **kwargs):
     """
+    Generic read method.
+
+    This method is generally abble to load experimental files based on extensions.
+
     Parameters
     ----------
-    path : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
+    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
         The data source(s) can be specified by the name or a list of name for the file(s) to be loaded:
 
         *e.g.,( file1, file2, ...,  **kwargs )*
@@ -229,6 +233,16 @@ def read(*paths, **kwargs):
         The returned datasets are merged to form a single dataset,
         except if `merge` is set to False. If a source is not provided (i.e. no `filename`, nor `content`),
         a dialog box will be opened to select files.
+    **kwargs : dict
+        See other parameters.
+
+    Returns
+    --------
+    read
+        |NDDataset| or list of |NDDataset|.
+
+    Other Parameters
+    ----------------
     protocol : {'scp', 'omnic', 'opus', 'topspin', 'matlab', 'jcamp', 'csv', 'excel'}, optional
         Protocol used for reading. If not provided, the correct protocol
         is inferred (whnever it is possible) from the file name extension.
@@ -238,13 +252,13 @@ def read(*paths, **kwargs):
     merge : bool, optional
         Default value is False. If True, and several filenames have been provided as arguments,
         then a single dataset with merged (stacked along the first
-        dimension) is returned (default=False)
+        dimension) is returned (default=False).
     sortbydate : bool, optional
-        Sort multiple spectra by acquisition date (default=True)
-    description: str, optional
+        Sort multiple spectra by acquisition date (default=True).
+    description : str, optional
         A Custom description.
     origin : {'omnic', 'tga'}, optional
-        in order to properly interpret CSV file it can be necessary to set the origin of the spectra.
+        In order to properly interpret CSV file it can be necessary to set the origin of the spectra.
         Up to now only 'omnic' and 'tga' have been implemented.
     csv_delimiter : str, optional
         Set the column delimiter in CSV file.
@@ -253,35 +267,37 @@ def read(*paths, **kwargs):
         Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
         The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
-        For exemples on how to use this feature, one can look in the ``tests/tests_readers`` directory
-
-    Other Parameters
-    ----------------
+        For exemples on how to use this feature, one can look in the ``tests/tests_readers`` directory.
     listdir : bool, optional
         If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
         is True. It is assumed that all the files correspond to current reading protocol (default=True)
     recursive : bool, optional
         Read also in subfolders. (default=False)
 
-    Returns
+    See Also
     --------
-    out
-        NDDataset| or list of |NDDataset|
+    read_topspin : Read TopSpin Bruker NMR spectra.
+    read_omnic : Read Omnic spectra.
+    read_opus : Read OPUS spectra.
+    read_labspec : Read Raman LABSPEC spectra.
+    read_spg : Read Omnic *.spg grouped spectra.
+    read_spa : Read Omnic *.Spa single spectra.
+    read_srs : Read Omnic series.
+    read_csv : Read CSV files.
+    read_zip : Read Zip files.
+    read_matlab : Read Matlab files.
 
     Examples
     ---------
-
-    >>> from spectrochempy import NDDataset, read
-
     Reading a single OPUS file  (providing a windows type filename relative to the default ``Datadir``)
 
-    >>> read('irdata\\\\OPUS\\\\test.0000')
+    >>> scp.read('irdata\\\\OPUS\\\\test.0000')
     NDDataset: [float32] a.u. (shape: (y:1, x:2567))
 
     Reading a single OPUS file  (providing a unix/python type filename relative to the default ``Datadir``)
     Note that here read_opus is called as a classmethod of the NDDataset class
 
-    >>> NDDataset.read('irdata/OPUS/test.0000')
+    >>> scp.NDDataset.read('irdata/OPUS/test.0000')
     NDDataset: [float32] a.u. (shape: (y:1, x:2567))
 
     Single file specified with pathlib.Path object
@@ -289,59 +305,48 @@ def read(*paths, **kwargs):
     >>> from pathlib import Path
     >>> folder = Path('irdata/OPUS')
     >>> p = folder / 'test.0000'
-    >>> read(p)
+    >>> scp.read(p)
     NDDataset: [float32] a.u. (shape: (y:1, x:2567))
 
     Multiple files not merged (return a list of datasets). Note that a directory is specified
 
-    >>> l = read('test.0000', 'test.0001', 'test.0002', directory='irdata/OPUS')
-    >>> len(l)
+    >>> le = scp.read('test.0000', 'test.0001', 'test.0002', directory='irdata/OPUS')
+    >>> len(le)
     3
-    >>> l[0]
+    >>> le[0]
     NDDataset: [float32] a.u. (shape: (y:1, x:2567))
 
     Multiple files merged as the `merge` keyword is set to true
 
-    >>> read('test.0000', 'test.0001', 'test.0002', directory='irdata/OPUS', merge=True)
+    >>> scp.read('test.0000', 'test.0001', 'test.0002', directory='irdata/OPUS', merge=True)
     NDDataset: [float32] a.u. (shape: (y:3, x:2567))
 
     Multiple files to merge : they are passed as a list instead of using the keyword `merge`
 
-    >>> read(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS')
+    >>> scp.read(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS')
     NDDataset: [float32] a.u. (shape: (y:3, x:2567))
 
     Multiple files not merged : they are passed as a list but `merge` is set to false
 
-    >>> l = read(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS', merge=False)
-    >>> len(l)
+    >>> le = scp.read(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS', merge=False)
+    >>> len(le)
     3
 
     Read without a filename. This has the effect of opening a dialog for file(s) selection
 
-    >>> nd = read()
+    >>> nd = scp.read()
 
     Read in a directory (assume that only OPUS files are present in the directory
     (else we must use the generic `read` function instead)
 
-    >>> l = read(directory='irdata/OPUS')
-    >>> len(l)
-    4
+    >>> le = scp.read(directory='irdata/OPUS')
+    >>> len(le)
+    2
 
     Again we can use merge to stack all 4 spectra if thet have compatible dimensions.
 
-    >>> read(directory='irdata/OPUS', merge=True)
-    NDDataset: [float32] a.u. (shape: (y:4, x:2567))
-
-    See Also
-    --------
-    read_topspin: read TopSpin Bruker NMR spectra. Equivalent to set protocol='topspin'.
-    read_omnic: read Omnic spectra
-    read_spg: Read Omnic *.spg grouped spectra
-    read_spa: Read Omnic *.Spa single spectra
-    read_srs: Read Omnic series
-    read_csv: Read CSV files
-    read_zip: Read Zip files
-    read_matlab: Read Matlab files
+    >>> scp.read(directory='irdata/OPUS', merge=True)
+    [NDDataset: [float32] a.u. (shape: (y:1, x:5549)), NDDataset: [float32] a.u. (shape: (y:4, x:2567))]
     """
 
     importer = Importer()

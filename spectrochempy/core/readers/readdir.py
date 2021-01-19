@@ -28,10 +28,12 @@ from spectrochempy.core.readers.importer import importermethod, Importer
 # ======================================================================================================================
 # Public functions
 # ======================================================================================================================
-def read_dir(*args, **kwargs):
+def read_dir(directory=None, **kwargs):
     """
-    Open readable files in a directory and store data/metadata in a dataset or
-    a list of datasets according to the following rules :
+    Read an entire directory.
+
+    Open a list of readable files in a and store data/metadata in a dataset or a list of datasets according to the
+    following rules :
 
     * 2D spectroscopic data (e.g. valid *.spg files or matlab arrays, etc...) from
       distinct files are stored in distinct NDdatasets.
@@ -39,32 +41,39 @@ def read_dir(*args, **kwargs):
       into single NDDataset, providing their unique dimension are compatible. If not,
       an error is generated.
 
-    Notes
-    ------
-    Only implemented for OMNIC files (*.spa, *.spg), Bruker Opus files (*.[0-9]*), *.csv, *.mat and the
-    native format for spectrochempy : *.scp).
+    Parameters
+    ----------
+    directory : str or pathlib
+        Folder where are located the files to read.
 
     Returns
     --------
-    out
-        |NDDataset| or list of |NDDataset|
+    read_dir
+        |NDDataset| or list of |NDDataset|.
 
     See Also
-    --------
-    read : Generic read method
-    read_omnic, read_spg, read_spa, read_srs, read_opus, read_topspin, read_csv, read_matlab, read_zip
+    ------
+    read_topspin : Read TopSpin Bruker NMR spectra.
+    read_omnic : Read Omnic spectra.
+    read_opus : Read OPUS spectra.
+    read_spg : Read Omnic *.spg grouped spectra.
+    read_spa : Read Omnic *.Spa single spectra.
+    read_srs : Read Omnic series.
+    read_csv : Read CSV files.
+    read_zip : Read Zip files.
+    read_matlab : Read Matlab files.
 
     Examples
     --------
-    >>> A = NDDataset.read_dir('irdata')
-    >>> A
-    [NDDataset: [...
+    >>> A = scp.read_dir('irdata')
+    >>> len(A)
+    3
 
-    >>> B = NDDataset.read_dir()
+    >>> B = scp.NDDataset.read_dir()
     """
     kwargs['listdir'] = True
     importer = Importer()
-    return importer(*args, **kwargs)
+    return importer(directory, **kwargs)
 
 
 # TODO: make an importer function, when a test directory will be provided.
@@ -72,11 +81,44 @@ def read_dir(*args, **kwargs):
 def read_carroucell(dataset=None, directory=None, **kwargs):
     """
     Open .spa files in a directory after a carroucell experiment.
+
     The files for a given sample are grouped in NDDatasets (sorted by acquisition date).
     The NDDatasets are returned in a list sorted by sample number.
     When the file containing the temperature data is present, the temperature is read
     and assigned as a label to each spectrum.
 
+    Parameters
+    ----------
+    dataset : `NDDataset`
+        The dataset to store the data and metadata.
+        If None, a NDDataset is created.
+    directory : str, optional
+        If not specified, opens a dialog box.
+    spectra : arraylike of 2 int (min, max), optional, default=None
+        The first and last spectrum to be loaded as determined by their number.
+         If None all spectra are loaded.
+    discardbg : bool, optional, default=True
+        If True : do not load background (sample #9).
+    delta_clocks : int, optional, default=0
+        Difference in seconds between the clocks used for spectra and temperature acquisition.
+        Defined as t(thermocouple clock) - t(spectrometer clock).
+
+    Returns
+    --------
+    nddataset
+        |NDDataset| or list of |NDDataset|.
+
+    See Also
+    --------
+    read_topspin : Read TopSpin Bruker NMR spectra.
+    read_omnic : Read Omnic spectra.
+    read_opus : Read OPUS spectra.
+    read_spg : Read Omnic *.spg grouped spectra.
+    read_spa : Read Omnic *.Spa single spectra.
+    read_srs : Read Omnic series.
+    read_csv : Read CSV files.
+    read_zip : Read Zip files.
+    read_matlab : Read Matlab files.
 
     Notes
     ------
@@ -84,26 +126,6 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
     are expected to be in the format : X_samplename_YYY.spa
     and for the backround files : X_BCKG_YYYBG.spa
     where X is the sample holder number and YYY the spectrum number.
-
-    Parameters
-    ----------
-    dataset : `NDDataset`
-        The dataset to store the data and metadata.
-        If None, a NDDataset is created
-    directory : str, optional.
-        If not specified, opens a dialog box.
-    spectra : arraylike of 2 int (min, max), optional, default=None
-        The first and last spectrum to be loaded as determined by their number.
-         If None all spectra are loaded
-    discardbg : bool, optional, default=True
-        If True : do not load background (sample #9)
-    delta_clocks : int, optional, default=0
-        Difference in seconds between the clocks used for spectra and temperature acquisition.
-        Defined as t(thermocouple clock) - t(spectrometer clock).
-
-    Returns
-    --------
-    nddataset : |NDDataset| or list of |NDDataset|
 
     Examples
     --------

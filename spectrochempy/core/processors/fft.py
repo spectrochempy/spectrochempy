@@ -37,43 +37,79 @@ from .apodization import hamming
 from .concatenate import concatenate
 
 
-def get_zpd(dataset, dim='x', mode='max'):
-    r"""
-    Find the zero path difference (zpd) positions. For multidimensional NDDataset
-    the search is performed along the last dimension
-
-    Parameter
-    ---------
-    dataset : NDDataset
-    dim: int or str, dimension along which to make the search. Default = 'x' == -1
-
-    Returns:
-        The indexes
+def get_zpd(dataset, dim=-1, mode='max'):
     """
-    if isinstance(dim, int):
-        axis = dim
-    elif dim == 'x':
-        axis = -1
-    elif dim == 'y':
-        axis = -2
-    elif dim == 'z':
-        axis = -3
+    Find the zero path difference (zpd) positions.
+
+    For multidimensional NDDataset the search is by default performed along the last dimension.
+
+    Parameters
+    ----------
+    dataset : |NDDataset|
+        The dataset on which to search for zpd
+    dim: int or str, optional
+        Dimension along which to make the search. Default=-1.
+    mode : enum('max','abs'), optional
+        Mode of selection. Default = 'max'.
+
+    Returns
+    -------
+    index
+        zero path difference index
+    """
+    # On which axis do we want to work (get axis from arguments)
+    axis, dim = dataset.get_axis(dim, negative_axis=True)
+
     if mode == 'max':
         return np.argmax(dataset.data, axis=axis)
     elif mode == 'abs':
         return np.argmax(np.abs(dataset.data), axis=axis)
 
 
-def ifft(dataset, size=None, inplace=False, **kwargs):
-    r"""
-    Apply inverse fast fourier transform.
-    (see `fft` documentation.)
+def ifft(dataset, size=None, **kwargs):
     """
-    return fft(dataset, size=size, inv=True, inplace=inplace, **kwargs)
+    Apply a inverse fast fourier transform.
+
+    For multidimensional NDDataset or NDPanels,
+    the apodization is by default performed on the last dimension.
+
+    The data in the last dimension MUST be in frequency (or without dimension)
+    or an error is raised.
+
+    To make direct Fourier transform, i.e., from frequency to time domain, use the `fft` transform.
+
+    Parameters
+    ----------
+    dataset : |NDDataset|
+        The dataset on which to apply the fft transformation.
+    size : int, optional
+        Size of the transformed dataset dimension - a shorter parameter is `si`. by default, the size is the closest
+        power of two greater than the data size.
+    **kwargs : dict
+        Other parameters (see other parameters).
+
+    Returns
+    -------
+    out
+        Transformed |NDDataset|.
+
+    Other Parameters
+    ----------------
+    dim : str or int, optional, default='x'.
+        Specify on which dimension to apply this method. If `dim` is specified as an integer it is equivalent
+        to the usual `axis` numpy parameter.
+    inplace : bool, optional, default=False.
+        True if we make the transform inplace.  If False, the function return a new object
+
+    See Also
+    --------
+    fft : Direct Fourier transform.
+    """
+    return fft(dataset, size=size, inv=True, **kwargs)
 
 
-def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=True, **kwargs):
-    r"""
+def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
+    """
     Apply a complex fast fourier transform.
 
     For multidimensional NDDataset or NDPanels,
@@ -87,47 +123,53 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
 
     Parameters
     ----------
+    dataset : |NDDataset|
+        The dataset on which to apply the fft transformation.
     size : int, optional
-        size of the transformed dataset dimension - a shorter parameter is `si`. by default, the size is the closest
-        power of two greater than the data size
+        Size of the transformed dataset dimension - a shorter parameter is `si`. by default, the size is the closest
+        power of two greater than the data size.
     sizeff : int, optional
         The number of effective data point to take into account for the transformation. By default it is equal to the
         data size, but may be smaller.
     inv : bool, optional, default=False
-        if True, an inverse Fourier transform is performed - size parameter is not taken into account
-    inplace : bool, optional, default=False.
-        True if we make the transform inplace.  If False, the function return a new dataset
-    dim : str or int, optional, default='x'.
-        Specify on which dimension to apply this method. If `dim` is specified as an integer it is equivalent
-        to the usual `axis` numpy parameter.
+        If True, an inverse Fourier transform is performed - size parameter is not taken into account.
     ppm : bool, optional, default=True
         If True, and data are from NMR, then a ppm scale is calculated instead of frequency.
-    **kwargs :
-        other parameters (see other parameters)
-
-    Other Parameters
-    ----------------
-    tdeff : int, optional
-        alias of sizeff (specific to NMR). If both sizeff and tdeff are passed, sizeff has the priority.
+    **kwargs : dict
+        Other parameters (see other parameters).
 
     Returns
     -------
-    object : nd-dataset or nd-array
-        transformed dataset
+    out
+        Transformed |NDDataset|.
+
+    Other Parameters
+    ----------------
+    dim : str or int, optional, default='x'.
+        Specify on which dimension to apply this method. If `dim` is specified as an integer it is equivalent
+        to the usual `axis` numpy parameter.
+    inplace : bool, optional, default=False.
+        True if we make the transform inplace.  If False, the function return a new object
+    tdeff : int, optional
+        Alias of sizeff (specific to NMR). If both sizeff and tdeff are passed, sizeff has the priority.
+
+    See Also
+    --------
+    ifft : Inverse Fourier transform.
     """
     # datatype
     is_nmr = dataset.origin.lower() in ["topspin", ]
-    is_ir = dataset.origin.lower() in ["omnic", ]
+    is_ir = dataset.origin.lower() in ["omnic", "opus"]
 
     # On which axis do we want to apodize? (get axis from arguments)
+    dim = kwargs.pop('dim', kwargs.pop('axis', -1))
     axis, dim = dataset.get_axis(dim, negative_axis=True)
 
     # The last dimension is always the dimension on which we apply the fourier transform.
     # If needed, we swap the dimensions to be sure to be in this situation
-
     swaped = False
     if axis != -1:
-        dataset.swapaxes(axis, -1, inplace=True)  # must be done in  place
+        dataset.swapdims(axis, -1, inplace=True)  # must be done in  place
         swaped = True
 
     # select the last coordinates
@@ -150,6 +192,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
     # TODO: other tests data spacing and so on.
 
     # output dataset inplace or not
+    inplace = kwargs.pop('inplace')
     if not inplace:  # default
         new = dataset.copy()  # copy to be sure not to modify this dataset
     else:
@@ -311,7 +354,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
 
     # restore original data order if it was swaped
     if swaped:
-        new.swapaxes(axis, -1, inplace=True)  # must be done inplace
+        new.swapdims(axis, -1, inplace=True)  # must be done inplace
 
     s = 'ifft' if inv else 'fft'
     new.history = f'{s} applied on dimension {dim}'

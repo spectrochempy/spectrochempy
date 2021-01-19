@@ -67,7 +67,8 @@ def generate_api(api_path):
         for item in a:
 
             # set general method for the current package API
-            setattr(api, item, getattr(pkg, item))
+            obj = getattr(pkg, item)
+            setattr(api, item, obj)
 
             # some  methods are class method of NDDatasets
             if item in dmethods:

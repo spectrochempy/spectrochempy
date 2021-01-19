@@ -11,7 +11,7 @@ the specified function or method.
 
 Usage::
     $ .ci/scripts/validate_docstrings.py
-    $ .ci.scripts/validate_docstrings.py spectrochempy.NDDataset.read
+    $ .ci/scripts/validate_docstrings.py spectrochempy.NDDataset.read
 
 Copied and modified from https://github.com/pandas-dev/pandas/scripts/validate_docstrings.py (BSD 3-Clause License)
 """
@@ -59,7 +59,7 @@ ERROR_MSGS = {
     "EX02": "Examples do not pass tests:\n{doctest_log}",
     "EX03": "flake8 error: {error_code} {error_message}{times_happening}",
     "EX04": "Do not import {imported_library}, as it is imported "
-    "automatically for the examples (numpy as np, spectrochempy as spc)",
+    "automatically for the examples (numpy as np, spectrochempy as scp)",
 }
 
 
@@ -150,10 +150,13 @@ class SpectroChemPyDocstring(Docstring):
 
     @property
     def examples_errors(self):
-        flags = doctest.NORMALIZE_WHITESPACE | doctest.IGNORE_EXCEPTION_DETAIL
+        flags = doctest.NORMALIZE_WHITESPACE
+        flags |= doctest.ELLIPSIS
+        flags |= doctest.IGNORE_EXCEPTION_DETAIL
+
         finder = doctest.DocTestFinder()
         runner = doctest.DocTestRunner(optionflags=flags)
-        context = {"np": numpy, "spc": spectrochempy}
+        context = {"np": numpy, "scp": spectrochempy}
         error_msgs = ""
         for test in finder.find(self.raw_doc, self.name, globs=context):
             f = StringIO()
@@ -382,6 +385,9 @@ def main(func_name, prefix, errors, output_format, ignore_deprecated):
 
 
 if __name__ == "__main__":
+
+    os.environ['DOC_BUILDING'] = 'yes'
+
     format_opts = "default", "json", "actions"
     func_help = (
         "function or method to validate (e.g. spectrochempy.NDDataset.read) "
@@ -426,12 +432,14 @@ if __name__ == "__main__":
     )
 
     args = argparser.parse_args()
-    sys.exit(
-        main(
+
+    res = main(
             args.function,
             args.prefix,
             args.errors.split(",") if args.errors else None,
             args.format,
             args.ignore_deprecated,
-        )
     )
+
+    del os.environ['DOC_BUILDING']
+    sys.exit(res)

@@ -13,7 +13,7 @@ __all__ = ['MCRALS']
 __dataset_methods__ = []
 
 import numpy as np
-from traitlets import HasTraits, Instance
+from traitlets import HasTraits, Instance, Dict, Unicode
 # from collections.abc import Iterable
 
 from spectrochempy.core.dataset.nddataset import NDDataset
@@ -24,88 +24,74 @@ from spectrochempy.core import info_, set_loglevel, INFO
 
 class MCRALS(HasTraits):
     """
-    Performs MCR-ALS of a dataset knowing the initial C or St matrix
+    Performs MCR-ALS of a dataset knowing the initial C or St matrix.
     """
 
-    C = Instance(NDDataset)
-    """|NDDataset| - Concentration profile of pure species"""
-    St = Instance(NDDataset)
-    """|NDDataset| - Spectra profile of pure species"""
-    param = Instance(dict)
-    """dict - Parameters of the MCS-ALS optimization"""
-    log = Instance(str)
-    """str - Log of the MCS-ALS iterations"""
+    _X = Instance(NDDataset)
+    _C = Instance(NDDataset, allow_none=True)
+    _extC = Instance(NDDataset, allow_none=True)
+    _extOutput = Instance(NDDataset, allow_none=True)
+    _St = Instance(NDDataset, allow_none=True)
+    _logs = Unicode
+    _params = Dict()
 
-    def __init__(self, X, guess, **kwargs):   # lgtm [py/missing-call-to-init]
+    def __init__(self, dataset, guess, **kwargs):   # lgtm [py/missing-call-to-init]
         """
         Parameters
         ----------
-        X : |NDDataset|
+        dataset : |NDDataset|
             The dataset on which to perform the MCR-ALS analysis
         guess : |NDDataset|
             Initial concentration or spectra
-        param : dict
-            Dict of optimization parameters with the following keys :
-
-            * tol : float, optional,  default=0.1
-                convergence criterion on the change of resisuals.
-                (percent change of standard deviation of residuals).
-            * maxit : int, optional, default=50
-                maximum number of ALS minimizations.
-            * maxdiv : int, optional, default=5.
-                maximum number of successive non-converging iterations.
-            * nonnegConc : list or tuple, default=Default [0, 1, ...] (only non-negative concentrations)
-                index of species having non-negative concentration profiles. For instance [0, 2] indicates that species
-                #0 and #2 have non-negative conc profiles while species #1 can have negative concentrations.
-            * unimodConc : list or tuple, Default=[0, 1, ...] (only unimodal concentration profiles)
-                index of species having unimodal concentrationsprofiles.
-            * closureConc : list or tuple, Default=None  (no closure)
-                index of species subjected to a closure constraint.
-            * extConc: list or tuple, Default None (no external concentration).
-                index of species for which a concentration profile is provided by an external function.
-            *  getExtlConc : callable
-                an external function that will provide `n_ext` concentration profiles:
-                    getExtConc(C, extConc, ext_to_C_idx, *args) -> extC
-
-                or
-                    getExtConc(C, extConc, ext_to_C_idx, *args) -> (extC, out2, out3, ...)
-
-                where C is the current concentration matrix, *args are the parameters needed to completely
-                specify the function, extC is a  nadarray or NDDataset of shape (C.y, n_ext), and out1, out2, ... are
-                supplementary outputs returned by the function (e.g. optimized rate parameters)
-            * args : tuple, optional.
-                Extra arguments passed to the external function
-            * external_to_C_idx : array or tuple, Default=np.arange(next)
-                indicates the correspondence between the indexes of external chemical
-                profiles and the columns of the C matrix. [1, None, 0] indicates that the first external profile is the
-                second pure species (index 1).
-            * nonnegSpec : list or tuple, Default [1, ..., 1]  (only non-negative spectra)
-                indicates species having non-negative spectra
-            * unimodSpec : list or tuple, Default [0, ..., 0]  (no unimodal concentration profiles)
-                indicates species having unimodal spectra
         verbose : bool
             If set to True, prints a summary of residuals and residuals change at each iteration. default = False.
-            In any case, the same information is returned in self._log
+            In any case, the same information is returned in self.logs
+        **kwargs : dict
+            Optimization parameters : See Other Parameters.
 
-        Attributes
-        ----------
-        self.X :
-            the original dataset
-        self.param :
-            the parameters used to perform the MCR als
-        self.extC :
-            the last concentration profiles including external profiles
-        self.extOutput :
-            the last output of the external function used to get
-        self.C :
-            the final concentration profiles
-        self.St :
-            the final spectral profiles
-        self.log :
-            logs
+        Other Parameters
+        ----------------
+        tol : float, optional,  default=0.1
+            Convergence criterion on the change of resisuals.
+            (percent change of standard deviation of residuals).
+        maxit : int, optional, default=50
+            Maximum number of ALS minimizations.
+        maxdiv : int, optional, default=5.
+            Maximum number of successive non-converging iterations.
+        nonnegConc : list or tuple, default=Default [0, 1, ...] (only non-negative concentrations)
+            Index of species having non-negative concentration profiles. For instance [0, 2] indicates that species
+            #0 and #2 have non-negative conc profiles while species #1 can have negative concentrations.
+        unimodConc : list or tuple, Default=[0, 1, ...] (only unimodal concentration profiles)
+            index of species having unimodal concentrationsprofiles.
+        closureConc : list or tuple, Default=None  (no closure)
+            Index of species subjected to a closure constraint.
+        extConc: list or tuple, Default None (no external concentration).
+            Index of species for which a concentration profile is provided by an external function.
+        getExtlConc : callable
+            An external function that will provide `n_ext` concentration profiles:
+
+            getExtConc(C, extConc, ext_to_C_idx, *args) -> extC
+
+            or
+
+            getExtConc(C, extConc, ext_to_C_idx, *args) -> (extC, out2, out3, ...)
+
+            where C is the current concentration matrix, *args are the parameters needed to completely
+            specify the function, extC is a  nadarray or NDDataset of shape (C.y, n_ext), and out1, out2, ... are
+            supplementary outputs returned by the function (e.g. optimized rate parameters)
+        args : tuple, optional.
+            Extra arguments passed to the external function
+        external_to_C_idx : array or tuple, Default=np.arange(next)
+            Indicates the correspondence between the indexes of external chemical
+            profiles and the columns of the C matrix. [1, None, 0] indicates that the first external profile is the
+            second pure species (index 1).
+        nonnegSpec : list or tuple, Default [1, ..., 1]  (only non-negative spectra)
+            Indicates species having non-negative spectra
+        unimodSpec : list or tuple, Default [0, ..., 0]  (no unimodal concentration profiles)
+            Indicates species having unimodal spectra
         """
 
-        verbose = kwargs.get('verbose', False)
+        verbose = kwargs.pop('verbose', False)
         if verbose:
             set_loglevel(INFO)
 
@@ -116,6 +102,8 @@ class MCRALS(HasTraits):
 
         if type(guess) is np.ndarray:
             guess = NDDataset(guess)
+
+        X = dataset
 
         if X.shape[0] == guess.shape[0]:
             initConc = True
@@ -142,41 +130,39 @@ class MCRALS(HasTraits):
         # ------------------------------------------------------------------------
 
         # TODO: make a preference  file to set this kwargs
-        param = kwargs.get('param', dict())
-
         # optimization
 
-        tol = param.get('tol', 0.1)
-        maxit = param.get('maxit', 50)
-        maxdiv = param.get('maxdiv', 5)
+        tol = kwargs.get('tol', 0.1)
+        maxit = kwargs.get('maxit', 50)
+        maxdiv = kwargs.get('maxdiv', 5)
 
         # constraints on concentrations
-        nonnegConc = param.get('nonnegConc', np.arange(nspecies))
-        unimodConc = param.get('unimodConc', np.arange(nspecies))
-        unimodTol = param.get('unimodTol', 1.1)
-        unimodMod = param.get('unimodMod', 'strict')
-        closureConc = param.get('closureConc', None)
+        nonnegConc = kwargs.get('nonnegConc', np.arange(nspecies))
+        unimodConc = kwargs.get('unimodConc', np.arange(nspecies))
+        unimodTol = kwargs.get('unimodTol', 1.1)
+        unimodMod = kwargs.get('unimodMod', 'strict')
+        closureConc = kwargs.get('closureConc', None)
         if closureConc is not None:
-            closureTarget = param.get('closureTarget', np.ones(ny))
-            closureMethod = param.get('closureMethod', 'scaling')
-        monoDecConc = param.get('monoDecConc', None)
-        monoDecTol = param.get('monoDecTol', 1.1)
-        monoIncConc = param.get('monoIncConc', None)
-        monoIncTol = param.get('monoIncTol', 1.1)
-        externalConc = param.get('externalConc', None)
+            closureTarget = kwargs.get('closureTarget', np.ones(ny))
+            closureMethod = kwargs.get('closureMethod', 'scaling')
+        monoDecConc = kwargs.get('monoDecConc', None)
+        monoDecTol = kwargs.get('monoDecTol', 1.1)
+        monoIncConc = kwargs.get('monoIncConc', None)
+        monoIncTol = kwargs.get('monoIncTol', 1.1)
+        externalConc = kwargs.get('externalConc', None)
         if externalConc is not None:
-            external_to_C_idx = param.get('external_to_C_idx', np.arange(nspecies))
+            external_to_C_idx = kwargs.get('external_to_C_idx', np.arange(nspecies))
         if externalConc is not None:
             try:
-                getExternalConc = param.get('getExternalConc')
+                getExternalConc = kwargs.get('getExternalConc')
             except Exception:
                 raise ValueError('A function must be given to get the external concentration profile(s)')
-            external_to_C_idx = param.get('external_to_C_idx', externalConc)
-            args = param.get('args', ())
+            external_to_C_idx = kwargs.get('external_to_C_idx', externalConc)
+            args = kwargs.get('args', ())
 
         # constraints on spectra
-        nonnegSpec = param.get('nonnegSpec', np.arange(nspecies))
-        normSpec = param.get('normSpec', None)
+        nonnegSpec = kwargs.get('nonnegSpec', np.arange(nspecies))
+        normSpec = kwargs.get('normSpec', None)
 
         # TODO: add unimodal constraint on spectra
 
@@ -298,12 +284,12 @@ class MCRALS(HasTraits):
                 C.data[:, externalConc] = extC[:, external_to_C_idx]
 
             # stores C in C_hard and recompute C for consistency (soft modeling)
-            Chard = C.copy()
+            # Chard = C.copy()       # TODO: not used?
             C.data = np.linalg.lstsq(St.data.T, X.data.T, rcond=None)[0].T
 
             St.data = np.linalg.lstsq(C.data, X.data, rcond=None)[0]
             # stores St in Stsoft
-            Stsoft = St.copy()
+            # Stsoft = St.copy()     # TODO: not used?
 
             # Force non-negative spectra
             # --------------------------
@@ -357,19 +343,70 @@ class MCRALS(HasTraits):
                 logs += logline + '\n'
                 info_(logline)
 
-        self.X = X
-        self.param = param
-        self.Chard = Chard
-        self.C = C
+        self._X = X
+        self._params = kwargs
+
+        self._C = C
         if externalConc is not None:
-            self.extC = extC
-            self.extOutput = extOutput
+            self._extC = extC
+            self._extOutput = extOutput
         else:
-            self.extC = None
-            self.extOutput = None
-        self.Stsoft = Stsoft
-        self.St = St
-        self.log = logs
+            self._extC = None
+            self._extOutput = None
+        self._St = St
+        self._logs = logs
+
+        # self._Stsoft = Stsoft
+        # self._Chard = Chard
+
+    @property
+    def X(self):
+        """
+        The original dataset.
+        """
+        return self._X
+
+    @property
+    def extC(self):
+        """
+        The last concentration profiles including external profiles.
+        """
+        return self._extC
+
+    @property
+    def extOutput(self):
+        """
+        The last output of the external function used to get.
+        """
+        return self._extOutput
+
+    @property
+    def C(self):
+        """
+        The final concentration profiles.
+        """
+        return self._C
+
+    @property
+    def St(self):
+        """
+        The final spectra profiles.
+        """
+        return self._St
+
+    @property
+    def params(self):
+        """
+        the parameters used to perform the MCR als.
+        """
+        return self._params
+
+    @property
+    def logs(self):
+        """
+        Logs output.
+        """
+        return self._logs
 
     def reconstruct(self):
         """
@@ -399,7 +436,8 @@ class MCRALS(HasTraits):
 
         Returns
         -------
-        axes
+        ax
+            subplot
         """
         colX, colXhat, colRes = kwargs.get('colors', ['blue', 'green', 'red'])
 

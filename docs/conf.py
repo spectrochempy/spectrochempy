@@ -127,7 +127,7 @@ exclude_patterns = []
 exclude_patterns.append('_templates')
 exclude_patterns.append('_static')
 exclude_patterns.append('**.ipynb_checkpoints')
-exclude_patterns.append('gen_modules')
+exclude_patterns.append('gallery')
 exclude_patterns.append('~temp')
 
 # %%
@@ -186,8 +186,6 @@ rst_epilog = """
 .. |NDPanel| replace:: :class:`~spectrochempy.core.dataset.ndpanel.NDPanel`
 
 .. |Coord| replace:: :class:`~spectrochempy.core.dataset.ndcoord.Coord`
-
-.. |CoordRange| replace:: :class:`~spectrochempy.core.dataset.ndcoordrange.CoordRange`
 
 .. |CoordSet| replace:: :class:`~spectrochempy.core.dataset.ndcoordset.CoordSet`
 
@@ -583,24 +581,54 @@ exclusions = (
         'with_traceback', 'with_traceback', 'observe', 'unobserve', 'observe',
         'cross_validation_lock', 'unobserve_all', 'class_config_rst_doc',
         'class_config_section', 'class_get_help', 'class_print_help',
-        'section_names', 'update_config', 'clear_instance',
+        'section_names', 'update_config', 'clear_instance', "notify_change",
         'document_config_options', 'flatten_flags', 'generate_config_file',
         'initialize_subcommand', 'initialized', 'instance',
         'json_config_loader_class', 'launch_instance', 'setup_instance',
         'load_config_file',
         'parse_command_line', 'print_alias_help', 'print_description',
         'print_examples', 'print_flag_help', 'print_help', 'print_subcommands',
-        'print_version', 'python_config_loader_class', 'raises', '_*')
+        'print_version', 'python_config_loader_class', 'raises', '_*',
+        'unobserve', 'unobserve_all', 'trait_events', 'trait_metadata', 'trait_names', 'trait', 'setup_instance',
+        'set_trait', 'on_trait_change', 'observe', 'notify_change', 'hold_trait_notifications', 'has_trait',
+        'class_traits', 'class_trait_names', 'class_own_traits', 'class_own_trait_events', 'add_traits')
 
 
 # %%
 def autodoc_skip_member(app, what, name, obj, skip, options):
-    # doc = True if obj.__doc__ is not None else False
-    exclude = name in exclusions or 'trait' in name or name.startswith('_')  # or not doc
+    doc = True if obj.__doc__ is not None else False
+    exclude = name in exclusions or 'trait' in name or name.startswith('_') or not doc
     return skip or exclude
+
+
+def shorter_signature(app, what, name, obj, options, signature, return_annotation):
+    """
+    Prevent displaying self in signature.
+    """
+    if what == 'data':
+        signature = '(dataset)'
+        what = 'function'
+
+    if what not in ('function', 'method', 'class', 'data') or signature is None:
+        return
+
+    import re
+    new_sig = signature
+
+    if inspect.isfunction(obj) or inspect.isclass(obj) or inspect.ismethod(obj):
+        sig_obj = obj if not inspect.isclass(obj) else obj.__init__
+        sig_re = r'\((self|cls)?,?\s*(.*?)\)\:'
+        try:
+            new_sig = ' '.join(re.search(sig_re, inspect.getsource(sig_obj), re.S).group(2).replace('\n', '').split())
+        except Exception as e:
+            print(sig_obj)
+            raise e
+        new_sig = '(' + new_sig + ')'
+    return new_sig, return_annotation
 
 
 # %%
 def setup(app):
     app.connect('autodoc-skip-member', autodoc_skip_member)
+    app.connect('autodoc-process-signature', shorter_signature)
     app.add_stylesheet("theme_override.css")  # also can be a full URL

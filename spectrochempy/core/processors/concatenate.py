@@ -22,10 +22,10 @@ from spectrochempy.utils import SpectroChemPyWarning, DimensionsCompatibilityErr
 
 def concatenate(*datasets, **kwargs):
     """
-    Concatenation of |NDDataset| objects along a given axis (by default
-    the last)
+    Concatenation of |NDDataset| objects along a given axis.
 
-    Any number of |NDDataset| objects can be concatenated. For this operation
+    Any number of |NDDataset| objects can be concatenated (by default
+    the last on the last dimension). For this operation
     to be defined the following must be true :
 
         #. all inputs must be valid |NDDataset| objects;
@@ -40,33 +40,35 @@ def concatenate(*datasets, **kwargs):
         The dataset(s) to be concatenated to the current dataset. The datasets
         must have the same shape, except in the dimension corresponding to axis
         (the last, by default).
+    **kwargs : dict
+        See other parameters.
+
+    Returns
+    --------
+    out
+        A |NDDataset| created from the contenations of the |NDDataset| input objects.
+
+    Other Parameters
+    ----------------
     dims : str, optional, default='x'
-        The dimension along which the operation is applied
-    axis : int, optional, default=None
-        Alternative to the the dim keyword. Direct specification of the axis index to use for concatenation.
+        The dimension along which the operation is applied.
     force_stack : bool, optional, default=False
         If True, the dataset are stacked instead of being concatenated. This means that a new dimension is prepended
         to each dataset before being stacked, except if one of the dimension is of size one. If this case the datasets
         are squeezed before stacking. The stacking is only possible is the shape of the various datasets are identical.
         This process is equivalent of using the method `stack`.
 
-    Returns
-    --------
-    out : |NDDataset|
-        A dataset created from the contenations of the |NDDataset| input
-        objects
-
     See Also
     ---------
-    stack
+    stack : Stack of |NDDataset| objects along the first dimension.
 
     Examples
     --------
-    >>> from spectrochempy import * # doctest: +ELLIPSIS
+    >>> from spectrochempy import *
     ...
     >>> A = NDDataset.read('irdata/nh4y-activation.spg', protocol='omnic')
     >>> B = NDDataset.read('irdata/nh4y-activation.scp')
-    >>> C = NDDataset.concatenate( A[10:], B[3:5], A[:10], axis=0)
+    >>> C = NDDataset.concatenate(A[10:], B[3:5], A[:10], axis=0)
     >>> A[10:].shape, B[3:5].shape, A[:10].shape, C.shape
     ((45, 5549), (2, 5549), (10, 5549), (57, 5549))
 
@@ -82,11 +84,13 @@ def concatenate(*datasets, **kwargs):
 
     Stacking of datasets:
     for nDimensional datasets (with the same shape), a new dimension is added
+
     >>> F = A.concatenate(B, force_stack=True)
     >>> A.shape, B.shape, F.shape
     ((55, 5549), (55, 5549), (2, 55, 5549))
 
     If one of the dimensions is of size one, then this dimension is removed before stacking
+
     >>> G = A[0].concatenate(B[0], force_stack=True)
     >>> A[0].shape, B[0].shape, G.shape
     ((1, 5549), (1, 5549), (2, 5549))
@@ -295,34 +299,34 @@ def concatenate(*datasets, **kwargs):
 
 def stack(*datasets):
     """
-    Stack of |NDDataset| objects along the first dimension
+    Stack of |NDDataset| objects along the first dimension.
 
     Any number of |NDDataset| objects can be stacked. For this operation
     to be defined the following must be true :
 
     #. all inputs must be valid dataset objects,
     #. units of data and axis must be compatible (rescaling is applied
-       automatically if necessary)
+       automatically if necessary).
 
     The remaining dimension sizes must match along all dimension but the first.
 
     Parameters
     ----------
     *datasets : a series of |NDDataset|
-        The dataset to be stacked to the current dataset
+        The dataset to be stacked to the current dataset.
 
     Returns
     --------
-    out : |NDDataset|
-        A dataset created from the stack of the `datasets` datasets
+    out
+        A |NDDataset| created from the stack of the `datasets` datasets.
 
     Examples
     --------
-    >>> from spectrochempy import * # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> from spectrochempy import *
     ...
     >>> A = NDDataset.read('irdata/nh4y-activation.spg', protocol='omnic')
     >>> B = NDDataset.read('irdata/nh4y-activation.scp')
-    >>> C = NDDataset.stack( A, B)
+    >>> C = NDDataset.stack(A, B)
     >>> print(C)
     NDDataset: [float32]  a.u. (shape: (z:2, y:55, x:5549))
     """

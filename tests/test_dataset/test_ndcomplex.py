@@ -60,7 +60,7 @@ def test_ndcomplex_init_quaternion_witharray():
     d1 = d1.set_quaternion()
     assert_array_equal(d1.real.data, [[0, 4], [8, 12], [16, 20]])
 
-    d1 = d0.swapaxes(1, 0)
+    d1 = d0.swapdims(1, 0)
     assert d1.shape == (2, 3)
     assert_array_equal(d1.real.data, [[0, 8, 16], [4, 12, 20]])
     assert d1[0, 0].values == quaternion(0, 3, 2, 1)
@@ -137,7 +137,7 @@ def test_ndcomplex_init_complex_with_mask():
     assert d3[1, 1].values.magnitude == d[1, 1]
 
 
-def test_ndcomplex_swapaxes():
+def test_ndcomplex_swapdims():
     np.random.seed(12345)
     d = np.random.random((4, 3)) * np.exp(.1j)
     d3 = NDComplexArray(d, units=ur.Hz, mask=[[False, True, False], [False, True, False], [False, True, False],
@@ -147,7 +147,7 @@ def test_ndcomplex_swapaxes():
     assert d3.has_complex_dims
     assert not d3.is_quaternion
     assert d3.dims == ['y', 'x']
-    d4 = d3.swapaxes(0, 1)
+    d4 = d3.swapdims(0, 1)
     assert d4.dims == ['x', 'y']
     assert d4.shape == (3, 4)
     assert d4._data.shape == (3, 4)
@@ -258,13 +258,6 @@ def test_ndcomplex_complex(ndarraycplx):
     assert ndr.size == nd.size
     assert not ndr.is_complex
 
-    nd = ndarraycplx.copy()
-
-    ndc = nd.conjugate()
-    assert_array_equal(ndc.data.imag, -nd.data.imag)
-    assert ndc.is_complex
-    assert ndc.size == nd.size
-
 
 def test_ndcomplex_str_representation_for_complex():
     nd1 = NDComplexArray([1. + 2.j, 2. + 3.j])
@@ -290,7 +283,7 @@ def test_ndcomplex_real_imag_quaternion():
     assert d3i.dtype == typequaternion
 
 
-def test_ndcomplex_swapaxes_quaternion():
+def test_ndcomplex_swapdims_quaternion():
     np.random.seed(12345)
     d = np.random.random((4, 3)) * np.exp(.1j)
 
@@ -304,7 +297,7 @@ def test_ndcomplex_swapaxes_quaternion():
 
     w, x, y, z = as_float_array(d3.data).T
 
-    d4 = d3.swapaxes(0, 1)
+    d4 = d3.swapdims(0, 1)
 
     assert d4.shape == (3, 2)
     assert d4._data.shape == (3, 2)

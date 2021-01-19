@@ -29,12 +29,6 @@ Finally, **Project** is a structure that allow agregating NDDatasets, NDPanels a
 NDDataset
 *********
 
-.. autosummary::
-    :nosignatures:
-    :toctree: reference/generated/
-
-    spectrochempy.NDDataset
-
 .. toctree::
    :glob:
    :maxdepth: 2
@@ -44,12 +38,6 @@ NDDataset
 Project
 *******
 
-.. autosummary::
-    :nosignatures:
-    :toctree: reference/generated/
-
-    spectrochempy.Project
-
 .. toctree::
    :glob:
    :maxdepth: 2
@@ -58,12 +46,6 @@ Project
 
 Script
 ******
-
-.. autosummary::
-    :nosignatures:
-    :toctree: reference/generated/
-
-    spectrochempy.Script
 
 .. todo::
 
