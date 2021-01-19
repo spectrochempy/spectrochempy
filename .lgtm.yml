@@ -1,7 +1,6 @@
 queries:
-  - exclude:
-      - py/import-and-import-from
-      - py/call-to-non-callable
+  - exclude: py/import-and-import-from
+  - exclude: py/call-to-non-callable
 extraction:
   python:
     python_setup:
