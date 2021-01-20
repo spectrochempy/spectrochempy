@@ -120,7 +120,7 @@ We'll now install |scpy| in development mode following 2 steps:
 
 1. Create and activate the environment. This will create a new environment and will not touch
    any of your other existing environments, nor any existing Python installation.
-
+   (conda installer is somewhat very slow, this is why we prefer to replace it by `mamba <https://https://github.com/mamba-org/mamba>`__
 .. sourcecode:: bash
 
    conda update conda
@@ -128,7 +128,8 @@ We'll now install |scpy| in development mode following 2 steps:
    conda config --add channels cantera
    conda config --add channels spectrocat
    conda config --set channel_priority flexible
-   conda env create -f environment.yml
+   conda install mamba
+   mamba env create -f environment.yml
    conda activate scpy-dev
 
 2. Install |scpy|

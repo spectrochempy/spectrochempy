@@ -135,3 +135,6 @@ scp_data/testdata/nmrdata/bruker/tests/nmr/exam_CMCse_1
 scp_data/testdata/nmrdata/bruker/tests/nmr/exam_CMCse_2
 scp_data/testdata/nmrdata/bruker/tests/nmr/exam_CMCse_3
 Icon*
+
+# Html Documentation
+/spectrochempy_docs/

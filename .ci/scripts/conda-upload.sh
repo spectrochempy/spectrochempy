@@ -56,6 +56,12 @@ if [[ $TRAVIS_BRANCH == "master" ]]; then
   if [[ $TRAVIS_PULL_REQUEST == false ]]; then
     anaconda -t "$CONDA_UPLOAD_TOKEN" upload --force -u "$ANACONDA_USER" -l dev "$PKG_FILE";
   fi;
+elif [[ $TRAVIS_BRANCH == "feature/travis-deploy" ]]; then
+  ## We build the a test version (i.e.the latest development version)
+  ## This is a "test" release
+  if [[ $TRAVIS_PULL_REQUEST == false ]]; then
+    anaconda -t "$CONDA_UPLOAD_TOKEN" upload --force -u "$ANACONDA_USER" -l test "$PKG_FILE";
+  fi;
 elif [[ $TRAVIS_BRANCH == "$TRAVIS_TAG" ]]; then
   ## This is a "main" release
   if [[ $TRAVIS_PULL_REQUEST == false ]]; then
