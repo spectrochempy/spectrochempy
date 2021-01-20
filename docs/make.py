@@ -314,7 +314,7 @@ class BuildDocumentation(object):
         <html>
         <head>
         <title>redirect to the dev version of the documentation</title>
-        <meta http-equiv="refresh" content="0; URL=https://{URL_SCPY}/stable">
+        <meta http-equiv="refresh" content="0; URL=https://{URL_SCPY}/latest">
         </head>
         <body></body>
         </html>
