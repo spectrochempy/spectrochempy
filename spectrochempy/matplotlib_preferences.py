@@ -560,7 +560,7 @@ class MatplotlibPreferences(MetaConfigurable):
             self.mathtext_it = 'dejavusans:italic'
             update_rcParams()
         elif family == 'serif':
-            self.text_usetex = True
+            self.text_usetex = False
             self.mathtext_fontset = 'dejavuserif'
             self.mathtext_bf = 'dejavuserif:bold'
             self.mathtext_cal = 'cursive'
