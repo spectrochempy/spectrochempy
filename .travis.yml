@@ -22,10 +22,10 @@ jobs:
       - BUILDOCS=true
       - CONDAPY=3.9
 
-# limit got clone depth to 200 commits
-# this means that pull requests must be done with less than 300 commit changes
+# limit got clone depth to 50 commits
+# this means that pull requests must be done with less than 50 commit changes
 git:
-  depth: 300
+  depth: 50
 
 # cache:
 # apt: true
