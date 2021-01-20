@@ -56,15 +56,15 @@ API_GITHUB_URL = "https://api.github.com"
 URL_SCPY = "spectrochempy.github.io/spectrochempy"
 
 # GENERAL PATHS
-HOME = Path().home()
-DOCREPO = HOME / "spectrochempy_docs"
+DOCS = Path(__file__).parent
+TEMPLATES = DOCS / '_templates'
+PROJECT = DOCS.parent
+DOCREPO = PROJECT / "spectrochempy_docs"
+print(DOCREPO)
 DOCTREES = DOCREPO / "~doctrees"
 HTML = DOCREPO / "html"
 LATEX = DOCREPO / 'latex'
 DOWNLOADS = HTML / 'downloads'
-DOCS = Path(__file__).parent
-TEMPLATES = DOCS / '_templates'
-PROJECT = DOCS.parent
 SOURCES = PROJECT / PROJECTNAME
 
 # DOCUMENTATION SRC PATH
@@ -351,6 +351,7 @@ class BuildDocumentation(object):
 
         # Create regular directories.
         build_dirs = [
+                DOCREPO,
                 DOCTREES,
                 HTML,
                 LATEX,
