@@ -59,8 +59,7 @@ URL_SCPY = "spectrochempy.github.io/spectrochempy"
 DOCS = Path(__file__).parent
 TEMPLATES = DOCS / '_templates'
 PROJECT = DOCS.parent
-DOCREPO = PROJECT / "spectrochempy_docs"
-print(DOCREPO)
+DOCREPO = Path().home() / "spectrochempy_docs"
 DOCTREES = DOCREPO / "~doctrees"
 HTML = DOCREPO / "html"
 LATEX = DOCREPO / 'latex'
