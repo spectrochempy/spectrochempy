@@ -13,6 +13,16 @@
 #     display_name: Python 3
 #     language: python
 #     name: python3
+#   language_info:
+#     codemirror_mode:
+#       name: ipython
+#       version: 3
+#     file_extension: .py
+#     mimetype: text/x-python
+#     name: python
+#     nbconvert_exporter: python
+#     pygments_lexer: ipython3
+#     version: 3.8.6
 # ---
 
 # %%
@@ -137,15 +147,11 @@ dataset.plot();
 # %% [markdown]
 # <div class="alert alert-block alert-info">
 #     <b>Tip: </b> Note that, by default, <b>sans-serif</b> font are used for all text in the figure.
-#     But if you prefer, <b>serif</b>, <b>cursive</b> or <b>monospace</b> font can be used instead.
+#     But if you prefer, <b>serif</b>, or <b>monospace</b> font can be used instead.
 # </div>
 
 # %%
 prefs.font.family = 'serif'
-dataset.plot();
-
-# %%
-prefs.font.family = 'cursive'
 dataset.plot();
 
 # %%
@@ -396,3 +402,13 @@ with plt.xkcd():
     prefs.lines.linewidth = 2
     ax = dataset[-1].plot(figsize=(7.5, 4))
     ax.text(2800., 1.5, "A XKCD plot! This is fun...")
+
+# %% [markdown]
+# If you get the error: "findfont: Font family ['Humor Sans'] not found. Falling back to DejaVu Sans.", it might be necessary to install the required font. For the above `Humor Sans` is required. 
+# * You can download it [here](https://github.com/shreyankg/xkcd-desktop/blob/master/Humor-Sans.ttf). 
+# * Install the `ttf` file into your system font's directory 
+#     - for windows: `C:/windows/fonts`
+#     - osx: `~/Library/Fonts/` 
+#     - linux: `/usr/share/fonts/truetype`
+# * Then you must delete the matplotlib font cache: Go to `<your-home-folder>/.matplotlib` and delete files such as:  `fontlist...`
+#
