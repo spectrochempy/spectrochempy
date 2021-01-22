@@ -21,7 +21,6 @@ dependencies:
   - ipywidgets
   - widgetsnbextension
   - xlrd
-  - numba
   - pandas
   - cantera
   - quadprog
@@ -31,4 +30,3 @@ dependencies:
   # test
   - pytest
   - scikit-image
-

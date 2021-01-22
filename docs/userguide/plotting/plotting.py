@@ -25,9 +25,6 @@
 #     version: 3.9.1
 # ---
 
-# %%
-# flake8 : noqa
-
 # %% [markdown]
 # # Plotting
 
@@ -127,9 +124,6 @@ prefs = dataset.preferences
 prefs.reset()        # Reset to default plot preferences
 _ = dataset.plot()
 
-# %%
-plt.rcParams
-
 # %% [markdown]
 # <div class="alert alert-block alert-info">
 # <b>Tip: </b>
@@ -158,25 +152,13 @@ _ = dataset.plot()
 # But if you prefer, <b>serif</b>, or <b>monospace</b> font can be used instead:
 
 # %%
-#plt.style.use(['classic'])
-
 prefs.font.family = 'serif'
-# plt.rcParams['font.serif']=['Times New Roman',
-#                          'Times',
-#                          'Palatino',
-#                          'DejaVu Serif',
-#                          'Computer Modern Roman',
-#                          'New Century Schoolbook',
-#                          'serif']
-dataset.plot();
+_ = dataset.plot()
 
 
 # %%
 prefs.font.family = 'monospace'
 _ = dataset.plot()
-
-# %%
-plt.rcParams
 
 # %% [markdown]
 # ## Plotting 1D datasets
@@ -231,11 +213,11 @@ _ = ax.annotate('OH groups', xy=(3600., 1.25), xytext=(-10, -50), textcoords='of
 
 # %%
 prefs.style = 'grayscale'
-dataset.plot();
+_ = dataset.plot()
 
 # %%
 prefs.style = 'ggplot'
-dataset.plot();
+_ = dataset.plot()
 
 # %% [markdown]
 # Other styles are :
@@ -249,14 +231,14 @@ dataset.plot();
 # %%
 prefs.reset()
 prefs.style = 'grayscale', 'paper'
-dataset.plot(colorbar=True);
+_ = dataset.plot(colorbar=True)
 
 # %% [markdown]
 # Style specification can also be done directly in the plot method:
 
 # %%
 prefs.colormap = 'magma'
-dataset.plot(style=['scpy', 'paper']);
+_ = dataset.plot(style=['scpy', 'paper'])
 
 # %% [markdown]
 # To get a list of all available styles :
@@ -269,7 +251,7 @@ prefs.available_styles
 
 # %%
 prefs.reset()
-dataset.plot();
+_ = dataset.plot()
 
 # %% [markdown]
 # ## Create your own style
@@ -302,17 +284,17 @@ prefs.axes.labelcolor = 'blue'
 prefs.axes.grid = True
 prefs.axes.grid_axis = 'x'
 
-dataset.plot();
+_ = dataset.plot();
 
 prefs.makestyle()
 
 # %%
 prefs.reset()
-dataset.plot();  # plot with the default scpy style
+_ = dataset.plot()  # plot with the default scpy style
 
 # %%
 prefs.style = 'mydefault'
-dataset.plot();  # plot with our own style
+_ = dataset.plot()  # plot with our own style
 
 # %% [markdown]
 # ## Changing the type of plot
@@ -328,7 +310,7 @@ prefs.reset()
 prefs.method_2D = 'map'  # this will change permanently the type of 2D plot
 prefs.colormap = 'magma'
 prefs.figure_figsize = (5, 3)
-dataset.plot();
+_ = dataset.plot()
 
 # %% [markdown]
 # You can also, for an individual plot use specialised plot commands, such as plot_stack, plot_map, plot_waterfall,
@@ -336,15 +318,15 @@ dataset.plot();
 
 # %%
 prefs.axes_facecolor = 'white'
-dataset.plot_image(colorbar=True);  # will use image_cmap preference!
+_ = dataset.plot_image(colorbar=True)  # will use image_cmap preference!
 
 # %%
 prefs.reset()
-dataset.plot_waterfall(figsize=(7, 4), y_reverse=True);
+_ = dataset.plot_waterfall(figsize=(7, 4), y_reverse=True)
 
 # %%
 prefs.style = 'seaborn-paper'
-dataset[3].plot(scatter=True, pen=False, me=30, ms=5)
+_ = dataset[3].plot(scatter=True, pen=False, me=30, ms=5)
 
 # %% [markdown]
 # ## Plotting several dataset on the same figure
@@ -358,7 +340,7 @@ ds1 = dataset[:nspec]  # split the dataset into too parts
 ds2 = dataset[nspec:] - 2.  # add an ofset to the second part
 
 ax1 = ds1.plot_stack()
-ds2.plot_stack(ax=ax1, clear=False, zlim=(-2.5, 4));
+_ = ds2.plot_stack(ax=ax1, clear=False, zlim=(-2.5, 4))
 
 # %% [markdown]
 # For 1D datasets only, you can also use the `plot_multiple`mathod:
@@ -369,7 +351,7 @@ labels = ['sample {}'.format(label) for label in ["S1", "S10", "S20", "S50", "S5
 prefs.reset()
 prefs.axes.facecolor = '.99'
 prefs.axes.grid = True
-plot_multiple(method='scatter', me=10, datasets=datasets, labels=labels, legend='best');
+_ = plot_multiple(method='scatter', me=10, datasets=datasets, labels=labels, legend='best')
 
 # %% [markdown]
 # ## Overview of the main configuration parameters
@@ -432,9 +414,3 @@ with plt.xkcd():
 #     - linux: `/usr/share/fonts/truetype`
 # * Then you must delete the matplotlib font cache: Go to `<your-home-folder>/.matplotlib` and delete files such as:  `fontlist...`
 #
-
-# %% [markdown]
-# import matplotlib.font_manager
-# fm = matplotlib.font_manager.json_load(os.path.expanduser("~/.cache/matplotlib/fontlist-v330.json"))
-# fm.findfont("serif", rebuild_if_missing=False)
-# fm.findfont("serif", fontext="afm", rebuild_if_missing=False)
