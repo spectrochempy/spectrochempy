@@ -100,10 +100,10 @@ setup_args = dict(
         # post-commands
         cmdclass={'develop': PostDevelopCommand, 'install': PostInstallCommand, },
 
-        # entry points for scripts
-        # scripts = {'scripts/launch_api.py'},
-        entry_points={'console_scripts': ['scpy_gui=spectrochempy.gui.scpy_gui:main',
-                                          'scpy_update=spectrochempy.scripts.scpy_update:main'], }, )
+        # # entry points for scripts
+        # # scripts = {'scripts/launch_api.py'},
+        # entry_points={'console_scripts': ['scpy_gui=spectrochempy.gui.scpy_gui:main',
+        #                                   'scpy_update=spectrochempy.scripts.scpy_update:main'], }, )
 
 # ======================================================================================================================
 if __name__ == '__main__':
