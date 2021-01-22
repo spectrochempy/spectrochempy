@@ -24,7 +24,6 @@ dependencies:
   - ipython
   - jinja2
   - matplotlib
-  - numba
   - numpy
   - orderedset
   - pandas
