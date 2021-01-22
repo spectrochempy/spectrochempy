@@ -103,7 +103,8 @@ setup_args = dict(
         # # entry points for scripts
         # # scripts = {'scripts/launch_api.py'},
         # entry_points={'console_scripts': ['scpy_gui=spectrochempy.gui.scpy_gui:main',
-        #                                   'scpy_update=spectrochempy.scripts.scpy_update:main'], }, )
+        #                                   'scpy_update=spectrochempy.scripts.scpy_update:main'], },
+)
 
 # ======================================================================================================================
 if __name__ == '__main__':
