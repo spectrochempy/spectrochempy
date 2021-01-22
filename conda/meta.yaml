@@ -47,7 +47,6 @@ requirements:
     - jinja2
     - matplotlib
     - mamba
-    - numba
     - numpy
     - orderedset
     - pint
