@@ -117,12 +117,7 @@ figure.subplot.top                       : 0.98
 figure.subplot.wspace                    : 0.0
 figure.titlesize                         : 12.0
 figure.titleweight                       : normal
-font.cursive                             : Apple Chancery,        Textile,        Zapf Chancery,        Sand,        Script MT,        Felipa,        cursive
 font.family                              : sans-serif
-font.fantasy                             : Comic Sans MS,        Chicago,        Charcoal,        ImpactWestern,        Humor Sans,        fantasy
-font.monospace                           : DejaVu Sans Mono,        Andale Mono,        Nimbus Mono L,        Courier New,        Courier,        Fixed,        Terminal,        monospace
-font.sans-serif                          : DejaVu Sans, Arial, Liberation Sans, Bitstream Vera Sans, sans-serif
-font.serif                               : Times New Roman,        Times,        Palatino,        DejaVu Serif,        Computer Modern Roman,        New Century Schoolbook,       serif
 font.size                                : 10.0
 font.stretch                             : normal
 font.style                               : normal

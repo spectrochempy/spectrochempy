@@ -1,9 +1,9 @@
 
-_internal.classic_mode                   : False
+_internal.classic_mode                   : True
 
 agg.path.chunksize                       : 20000
 animation.bitrate                        : -1
-animation.codec                          : h264
+animation.codec                          : mpeg4
 animation.convert_args                   : 
 animation.convert_path                   : convert
 animation.embed_limit                    : 20.0
@@ -47,29 +47,29 @@ axes.ymargin                             : 0.0
 axes3d.grid                              : True
 
 boxplot.bootstrap                        : None
-boxplot.boxprops.color                   : black
+boxplot.boxprops.color                   : b
 boxplot.boxprops.linestyle               : -
 boxplot.boxprops.linewidth               : 1.0
-boxplot.capprops.color                   : black
+boxplot.capprops.color                   : k
 boxplot.capprops.linestyle               : -
 boxplot.capprops.linewidth               : 1.0
-boxplot.flierprops.color                 : black
+boxplot.flierprops.color                 : b
 boxplot.flierprops.linestyle             : none
 boxplot.flierprops.linewidth             : 1.0
-boxplot.flierprops.marker                : o
-boxplot.flierprops.markeredgecolor       : black
+boxplot.flierprops.marker                : +
+boxplot.flierprops.markeredgecolor       : k
 boxplot.flierprops.markeredgewidth       : 1.0
-boxplot.flierprops.markerfacecolor       : none
+boxplot.flierprops.markerfacecolor       : auto
 boxplot.flierprops.markersize            : 6.0
 boxplot.meanline                         : False
-boxplot.meanprops.color                  : C2
-boxplot.meanprops.linestyle              : --
+boxplot.meanprops.color                  : r
+boxplot.meanprops.linestyle              : -
 boxplot.meanprops.linewidth              : 1.0
-boxplot.meanprops.marker                 : ^
-boxplot.meanprops.markeredgecolor        : C2
-boxplot.meanprops.markerfacecolor        : C2
+boxplot.meanprops.marker                 : s
+boxplot.meanprops.markeredgecolor        : k
+boxplot.meanprops.markerfacecolor        : r
 boxplot.meanprops.markersize             : 6.0
-boxplot.medianprops.color                : C1
+boxplot.medianprops.color                : r
 boxplot.medianprops.linestyle            : -
 boxplot.medianprops.linewidth            : 1.0
 boxplot.notch                            : False
@@ -79,8 +79,8 @@ boxplot.showcaps                         : True
 boxplot.showfliers                       : True
 boxplot.showmeans                        : False
 boxplot.vertical                         : True
-boxplot.whiskerprops.color               : black
-boxplot.whiskerprops.linestyle           : -
+boxplot.whiskerprops.color               : b
+boxplot.whiskerprops.linestyle           : --
 boxplot.whiskerprops.linewidth           : 1.0
 boxplot.whiskers                         : 1.5
 
@@ -117,12 +117,12 @@ figure.subplot.top                       : 0.98
 figure.subplot.wspace                    : 0.0
 figure.titlesize                         : 12.0
 figure.titleweight                       : normal
-font.cursive                             : Apple Chancery,  Textile,  Zapf Chancery,  Sand,  Script MT,  Felipa,  cursive
+font.cursive                             : Apple Chancery, Textile, Zapf Chancery, Sand, Script MT, Felipa, cursive
 font.family                              : monospace
-font.fantasy                             : Comic Sans MS,  Chicago,  Charcoal,  ImpactWestern,  Humor Sans,  fantasy
-font.monospace                           : DejaVu Sans Mono,  Andale Mono,  Nimbus Mono L,  Courier New,  Courier,  Fixed,  Terminal,  monospace
-font.sans-serif                          : DejaVu Sans, Bitstream Vera Sans, Computer Modern Sans Serif, Lucida Grande, Verdana, Geneva, Lucid, Arial, Helvetica, Avant Garde, sans-serif
-font.serif                               : Times New Roman,  Times,  Palatino,  DejaVu Serif,  Computer Modern Roman,  New Century Schoolbook,  serif
+font.fantasy                             : Comic Sans MS, Chicago, Charcoal, ImpactWestern, Humor Sans, fantasy
+font.monospace                           : DejaVu Sans Mono, Andale Mono, Nimbus Mono L, Courier New, Courier, Fixed, Terminal, monospace
+font.sans-serif                          : DejaVu Sans, Lucida Grande, Verdana, Geneva, Lucid, Arial, Helvetica, Avant Garde, sans-serif
+font.serif                               : DejaVu Serif, New Century Schoolbook, Century Schoolbook L, Utopia, ITC Bookman, Bookman, Nimbus Roman No9 L, Times New Roman, Times, Palatino, Charter, serif
 font.size                                : 14.0
 font.stretch                             : normal
 font.style                               : normal
@@ -146,16 +146,16 @@ image.lut                                : 256
 image.origin                             : upper
 image.resample                           : False
 
-keymap.back                              : left, c, backspace, MouseButton.BACK
+keymap.back                              : left, c, backspace
 keymap.copy                              : ctrl+c, cmd+c
-keymap.forward                           : right, v, MouseButton.FORWARD
+keymap.forward                           : right, v
 keymap.fullscreen                        : f, ctrl+f
 keymap.grid                              : g
 keymap.grid_minor                        : G
 keymap.help                              : f1
 keymap.home                              : h, r, home
 keymap.pan                               : p
-keymap.quit                              : ctrl+w, cmd+w, q
+keymap.quit                              : ctrl+w, cmd+w
 keymap.quit_all                          : 
 keymap.save                              : s, ctrl+s
 keymap.xscale                            : k, L
@@ -280,7 +280,7 @@ xtick.minor.width                        : 0.5
 xtick.top                                : True
 
 yaxis.labellocation                      : center
-ytick.alignment                          : center_baseline
+ytick.alignment                          : center
 ytick.color                              : .15
 ytick.direction                          : out
 ytick.labelleft                          : True

@@ -150,22 +150,7 @@ class MatplotlibPreferences(MetaConfigurable):
     font_size = Float(10.0, help=r'''The default fontsize. Special text sizes can be defined relative to font.size,
                       using the following values: xx-small, x-small, small, medium, large, x-large, xx-large,
                       larger, or smaller''').tag(config=True, kind='')
-    # font.serif          : DejaVu Serif, Bitstream Vera Serif, New Century Schoolbook, Century Schoolbook L,
-    # Utopia, ITC Bookman, Bookman, Nimbus Roman No9 L, Times New Roman, Times, Palatino, Charter, serif
-    font_serif = List(
-            ["Times New Roman", "Times", "Palatino", "DejaVu Serif", "Computer Modern Roman", "New Century Schoolbook",
-             "serif"], help=r'''''').tag(config=True, kind='')
-    font_sans_serif = List(["DejaVu Sans", "Arial", "Liberation Sans", "Bitstream Vera Sans", "sans-serif"],
-                           help=r'''''').tag(config=True, kind='')
-    font_cursive = List(["Apple Chancery", "Textile", "Zapf Chancery", "Sand", "Script MT", "Felipa", "cursive"],
-                        help=r'''''').tag(config=True, kind='')
-    font_fantasy = List(
-            ["Humor Sans", "Comic Neue", "Comic Sans MS", "Chicago", "Charcoal", "ImpactWestern", "xkcd", "fantasy"],
-            help=r'''''').tag(config=True, kind='')
-    font_monospace = List(["DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Computer Modern Typewriter", "Andale Mono",
-                           "Nimbus Mono L", "Courier New", "Courier", "Fixed", "Terminal", "monospace"],
-                          help=r'''''').tag(config=True, kind='')
-    #
+
     # TEXT
     # text properties used by text.Text.  See
     # http://matplotlib.org/api/artist_api.html#module-matplotlib.text for more
@@ -679,6 +664,7 @@ class MatplotlibPreferences(MetaConfigurable):
                             value = type(self.traits()[name_].default_args)(map(float, value.split(',')))
                         except Exception:
                             value = type(self.traits()[name_].default_args)(value.split(','))
+                            value = tuple(map(str.strip, value))
                     else:
                         value = type(self.traits()[name_].default_value)(eval(value))
                 except Exception as e:
@@ -721,6 +707,8 @@ class MatplotlibPreferences(MetaConfigurable):
         if change.name in self.trait_names(config=True):
             key = self.to_rc_key(change.name)
             if key in mpl.rcParams:
+                if key.startswith('font'):
+                    print()
                 try:
                     mpl.rcParams[key] = change.new
                 except ValueError:
