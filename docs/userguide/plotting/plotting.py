@@ -22,7 +22,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.8.6
+#     version: 3.9.1
 # ---
 
 # %%
@@ -88,21 +88,20 @@ dataset[:, 1290.:920.] = MASKED
 #
 # If one wants interactive displays (with selection, zooming, etc...) one can use:
 # ```ipython3
-#     In []: %matplotlib widget
+#     %matplotlib widget
 # ```
 # However, this suffer (at least for us) some incompatibilities in `jupyter lab`... it is worth to try!
 # If you can not get it working in `jupyter lab` and you need interactivity, you can use the following:
 # ```ipython3
-#     In []: %matplotlib
+#     %matplotlib
 # ```
 # which has the effect of displaying the figures in independant windows using default matplotlib backend (e.g.,
 # `Tk`), with all the interactivity of matplotlib.
 #
 # But you can explicitly request a different GUI backend:
 # ```ipython3
-#     In []: %matplotlib qt
+#     %matplotlib qt
 # ```
-#
 
 # %%
 # # %matplotlib
@@ -125,8 +124,18 @@ dataset[:, 1290.:920.] = MASKED
 
 # %%
 prefs = dataset.preferences
-prefs.reset()  # Reset to default plot preferences
-dataset.plot();
+prefs.reset()        # Reset to default plot preferences
+_ = dataset.plot()
+
+# %%
+plt.rcParams
+
+# %% [markdown]
+# <div class="alert alert-block alert-info">
+# <b>Tip: </b>
+#
+# Note, in the line above, that we used ` _ = ... `  syntax. This is to avoid any ouput but the plot from this statement.
+# </div>
 
 # %% [markdown]
 # ## Changing the aspect of the plot
@@ -142,21 +151,32 @@ prefs.colormap = 'magma'  # The default colormap is viridis
 prefs.axes.facecolor = '.95'  # Make the graph background colored in a ligth gray
 prefs.axes.grid = True
 
-dataset.plot();
+_ = dataset.plot()
 
 # %% [markdown]
-# <div class="alert alert-block alert-info">
-#     <b>Tip: </b> Note that, by default, <b>sans-serif</b> font are used for all text in the figure.
-#     But if you prefer, <b>serif</b>, or <b>monospace</b> font can be used instead.
-# </div>
+# Note that, by default, <b>sans-serif</b> font are used for all text in the figure.
+# But if you prefer, <b>serif</b>, or <b>monospace</b> font can be used instead:
 
 # %%
+#plt.style.use(['classic'])
+
 prefs.font.family = 'serif'
+# plt.rcParams['font.serif']=['Times New Roman',
+#                          'Times',
+#                          'Palatino',
+#                          'DejaVu Serif',
+#                          'Computer Modern Roman',
+#                          'New Century Schoolbook',
+#                          'serif']
 dataset.plot();
+
 
 # %%
 prefs.font.family = 'monospace'
-dataset.plot();
+_ = dataset.plot()
+
+# %%
+plt.rcParams
 
 # %% [markdown]
 # ## Plotting 1D datasets
@@ -164,7 +184,7 @@ dataset.plot();
 # %%
 prefs.reset()
 d1D = dataset[-1]  # select the last row of the previous 2D dataset
-d1D.plot(color='r');
+_ = d1D.plot(color='r')
 
 # %% [markdown]
 # ## Adding titles and annotations
@@ -404,11 +424,17 @@ with plt.xkcd():
     ax.text(2800., 1.5, "A XKCD plot! This is fun...")
 
 # %% [markdown]
-# If you get the error: "findfont: Font family ['Humor Sans'] not found. Falling back to DejaVu Sans.", it might be necessary to install the required font. For the above `Humor Sans` is required. 
-# * You can download it [here](https://github.com/shreyankg/xkcd-desktop/blob/master/Humor-Sans.ttf). 
-# * Install the `ttf` file into your system font's directory 
+# If you get the error: "findfont: Font family ['Humor Sans'] not found. Falling back to DejaVu Sans.", it might be necessary to install the required font. For the above `Humor Sans` is required.
+# * You can download it [here](https://github.com/shreyankg/xkcd-desktop/blob/master/Humor-Sans.ttf).
+# * Install the `ttf` file into your system font's directory
 #     - for windows: `C:/windows/fonts`
-#     - osx: `~/Library/Fonts/` 
+#     - osx: `~/Library/Fonts/`
 #     - linux: `/usr/share/fonts/truetype`
 # * Then you must delete the matplotlib font cache: Go to `<your-home-folder>/.matplotlib` and delete files such as:  `fontlist...`
 #
+
+# %% [markdown]
+# import matplotlib.font_manager
+# fm = matplotlib.font_manager.json_load(os.path.expanduser("~/.cache/matplotlib/fontlist-v330.json"))
+# fm.findfont("serif", rebuild_if_missing=False)
+# fm.findfont("serif", fontext="afm", rebuild_if_missing=False)

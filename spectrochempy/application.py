@@ -34,7 +34,7 @@ from traitlets.config.application import Application
 from traitlets import Bool, Unicode, List, Integer, Union, HasTraits, Instance, default, observe
 from traitlets.config.manager import BaseJSONConfigManager
 import matplotlib as mpl
-# from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt
 from IPython import get_ipython
 from IPython.core.interactiveshell import InteractiveShell
 from IPython.core.magic import (Magics, magics_class, line_cell_magic)
@@ -48,7 +48,7 @@ from spectrochempy.utils import MetaConfigurable, pathclean, get_pkg_path
 from .matplotlib_preferences import MatplotlibPreferences
 
 # set the default style
-# plt.style.use(['classic', 'scpy'])    <--- a workaround to solve the problem with
+plt.style.use(['classic']) #, 'scpy'])    <--- a workaround to solve the problem with
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Log levels

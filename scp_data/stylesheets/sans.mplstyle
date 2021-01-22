@@ -25,8 +25,6 @@ savefig.facecolor: white
 savefig.edgecolor: white
 
 font.family      : sans-serif
-font.sans-serif  : DejaVu Sans, Arial, Liberation Sans, Bitstream Vera Sans, sans-serif
-font.serif       : Times New Roman, Times, Palatino, DejaVu Serif, Computer Modern Roman, New Century Schoolbook,serif
 font.size        : 10
 font.style       : normal
 font.weight      : normal
