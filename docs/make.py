@@ -307,15 +307,21 @@ class BuildDocumentation(object):
 
     # ..................................................................................................................
     def make_redirection_page(self, ):
-        # create an index page a the site root to redirect to stable version
+        # create an index page a the site root to redirect to latest version
 
         html = f"""
         <html>
         <head>
-        <title>redirect to the dev version of the documentation</title>
+        <title>Redirect to the dev version of the documentation</title>
         <meta http-equiv="refresh" content="0; URL=https://{URL_SCPY}/latest">
         </head>
-        <body></body>
+        <body>
+        <p>
+        We have moved away from the <strong>spectrochempy.github.io</strong> domain. 
+        If you're not automatically redirected, please visit us at 
+        <a href="https://{URL_SCPY}">{URL_SCPY}</a>.
+        </p>
+        </body>
         </html>
         """
         with open(HTML / 'index.html', 'w') as f:
