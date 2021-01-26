@@ -57,9 +57,12 @@ def generate_api(api_path):
         try:
             pkg = import_item(pkg)
         except Exception:
+            if not hasattr(pkg, '__all__'):
+                continue
             raise ImportError(pkg)
         if not hasattr(pkg, '__all__'):
             continue
+
         a = getattr(pkg, '__all__', [])
         dmethods = getattr(pkg, '__dataset_methods__', [])
 

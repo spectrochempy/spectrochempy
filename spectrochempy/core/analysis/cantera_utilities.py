@@ -6,15 +6,22 @@
 #
 # ---------------------------------------------------------------------------------
 
-__all__ = ['coverages_vs_time', 'concentrations_vs_time', 'modify_rate',
-           'modify_reactive_phase', 'fit_to_concentrations']
 
-import cantera as ct
+import importlib
 import datetime
 import numpy as np
 from scipy.optimize import minimize
 
+__all__ = ['coverages_vs_time', 'concentrations_vs_time', 'modify_rate', 'modify_reactive_phase',
+           'fit_to_concentrations']
+
+HAS_CANTERA = importlib.util.find_spec("cantera")
+
+if HAS_CANTERA:
+    import cantera as ct
+
 from spectrochempy.core.dataset.nddataset import NDDataset, Coord
+from spectrochempy.utils.exception import SpectroChemPyException
 
 
 def coverages_vs_time(surface, t, returnNDDataset=False):
@@ -54,6 +61,9 @@ def concentrations_vs_time(reactive_phase, t, reactorNet=None, returnNDDataset=F
     return_NDDataset: boolean, if True returns the concentration matrix as a NDDataset, else as a np.ndarray
     default: False
     '''
+    if not HAS_CANTERA:
+        raise SpectroChemPyException('Cantera is not available : please install it before continuing:  \n'
+                                     'conda install -c cantera cantera')
 
     if type(reactive_phase) is ct.composite.Interface:
         concentrations = coverages_vs_time(reactive_phase, t, returnNDDataset) * reactive_phase.site_density
@@ -107,6 +117,10 @@ def modify_reactive_phase(reactive_phase, param_to_change, param_value):
     site_density, coverages, concentrations,
     pre-exponential factor, temperature_exponent, activation_energy
     """
+    if not HAS_CANTERA:
+        raise SpectroChemPyException('Cantera is not available : please install it before continuing:  \n'
+                                     'conda install -c cantera cantera')
+
     # check some parameters
     if type(reactive_phase) is not ct.composite.Interface:
         raise ValueError('only implemented of ct.composite.Interface')
