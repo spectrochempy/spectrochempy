@@ -7,8 +7,6 @@ channels:
   - defaults
 
 dependencies:
-  - python=3.8
-
   # from spectrocat channel
   - quadprog
   - brukeropusreader
@@ -20,7 +18,6 @@ dependencies:
   - dash
   - dash-bootstrap-components
   - dill
-  - docrep
   - ipython
   - jinja2
   - matplotlib

@@ -2,8 +2,8 @@ name: scpy3.9
 channels:
     - conda-forge
     - spectrocat
-    - cantera
     - cantera/label/dev
+    - cantera
     - plotly
     - defaults
 
@@ -31,7 +31,6 @@ dependencies:
     - orderedset
     - pint
     - plotly
-    - pyqt
     - requests
     - scipy
     - tqdm

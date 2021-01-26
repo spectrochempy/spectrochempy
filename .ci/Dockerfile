@@ -10,10 +10,11 @@ RUN conda update conda && \
     conda install -c conda-forge mamba
 
 # We will use a YAML file present in the docker build context to create the environment
-COPY --chown=${NB_UID}:${NB_GID} .ci/env/scpy${py_ver}.yml /home/$NB_USER/tmp/
+COPY --chown=${NB_UID}:${NB_GID} env/scpy${py_ver}.yml /home/$NB_USER/tmp/
 RUN cd /home/$NB_USER/tmp/ && \
     mamba env create -p $CONDA_DIR/envs/$CONDA_ENV -f scpy${py_ver}.yml && \
-    conda clean --all -f -y
+    conda clean --all -f -y && \
+    rm -rf /home/$NB_USER/tmp
 
 ## Link it to jupyter
 RUN $CONDA_DIR/envs/$CONDA_ENV/bin/python -m ipykernel install --user --name=$CONDA_ENV && \
@@ -24,13 +25,9 @@ RUN $CONDA_DIR/envs/$CONDA_ENV/bin/python -m ipykernel install --user --name=$CO
 ENV PATH $CONDA_DIR/envs/$CONDA_ENV/bin:$PATH
 
 # Make this environment to be the default one
-ENV CONDA_DEFAULT_ENV $CONDA_ENV
+ENV CONDA_DEFAULT_ENV $CONDA_DIR/envs/$CONDA_ENV
 
-# Load spectrochempy
-COPY --chown=${NB_UID}:${NB_GID} . /home/$NB_USER/spectrochempy/
+# Install spectrochempy
+RUN python -m pip install git+https://github.com/spectrochempy/spectrochempy.git
 
-# Install spectrochempy in development mode
-RUN cd /home/$NB_USER/spectrochempy/ && \
-    $CONDA_DIR/envs/$CONDA_ENV/bin/python -m pip install -e .
-
-WORKDIR $HOME/work
+WORKDIR /home/$NB_USER/work

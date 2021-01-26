@@ -47,6 +47,7 @@ installation step whether you are on mac/linux systems, or on Windows.
 
 * :doc:`install_mac`
 * :doc:`install_win`
+* :doc:`install_docker`
 
 .. toctree::
     :maxdepth: 2
@@ -54,3 +55,4 @@ installation step whether you are on mac/linux systems, or on Windows.
 
     install_mac
     install_win
+    install_docker
