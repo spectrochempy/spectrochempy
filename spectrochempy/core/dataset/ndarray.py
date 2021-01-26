@@ -2173,6 +2173,21 @@ class NDArray(HasTraits):
                 scale = q.magnitude
                 new._units = q.units
 
+                # particular case of dimensionless units: absorbance and transmittance
+
+                if self.units in [ur.transmittance, ur.absolute_transmittance]:
+                    if units == ur.absorbance:
+                        new._data = -np.log10(new._data * scale)
+                        scale = 1.
+                        if new.title == 'Transmittance':
+                            new._title = 'Absorbance'
+
+                elif self.units == ur.absorbance:
+                    if units in [ur.transmittance, ur.absolute_transmittance]:
+                        new._data = 10.**(-new._data)
+                        if new.title == 'Absorbance':
+                            new._title = 'Transmittance'
+
                 if not self.linear:
                     new._data = new._data * scale  # new * scale #
                 else:

@@ -2967,6 +2967,7 @@ class NDMath(object):
                 # only the three above type have math capabilities in spectrochempy.
                 pass
 
+        flagpow = True
         # it may be necessary to change the object order regarding the types
         if returntype in ['NDPanel', 'NDDataset', 'Coord'] and objtypes[0] != returntype:
 
@@ -2981,10 +2982,17 @@ class NDMath(object):
             elif fname in ['isub', 'sub', 'subtract']:
                 fname = 'add'
                 inputs[0] = np.negative(inputs[0])
+            elif fname in ['pow']:
+                fname = 'exp'
+                inputs[0] *= np.log(inputs[1])
+                inputs = inputs[:1]
             else:
                 raise NotImplementedError()
 
-        f = getattr(operator, fname)
+        if fname in ['exp']:
+            f = getattr(np, fname)
+        else:
+            f = getattr(operator, fname)
         return f, inputs
 
     # ..................................................................................................................
