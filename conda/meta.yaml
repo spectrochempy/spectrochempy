@@ -45,13 +45,12 @@ requirements:
     - dill
     - ipython
     - jinja2
-    - matplotlib
     - mamba
+    - matplotlib
     - numpy
     - orderedset
     - pint
     - plotly
-    - pyqt
     - requests
     - scipy
     - tqdm

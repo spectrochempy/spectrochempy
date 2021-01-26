@@ -101,7 +101,7 @@ dataset[:, 1290.:920.] = MASKED
 # ```
 
 # %%
-# # %matplotlib
+# %matplotlib widget
 
 # %% [markdown]
 # ## Using Plotly (experimental)

@@ -11,18 +11,14 @@ The core interface to the Pint library
 __all__ = ['Unit', 'Quantity', 'ur', 'set_nmr_context', 'DimensionalityError']
 
 from warnings import warn
+import numpy as np
 
-from pint import set_application_registry
-from pint import UnitRegistry, DimensionalityError
-from pint.unit import UnitsContainer
-from pint.quantity import _Quantity as Quantity
+from pint import set_application_registry, UnitRegistry, DimensionalityError, formatting, Context
 # from pint.measurement import _Measurement as Measure
-from pint.unit import _Unit as Unit
-from pint import formatting
+from pint.unit import UnitsContainer, _Unit as Unit, UnitDefinition
+from pint.quantity import _Quantity as Quantity
 from pint.formatting import siunitx_format_unit
-from pint import Context
 from pint.converters import ScaleConverter
-from pint.unit import UnitDefinition
 
 # ======================================================================================================================
 # Modify the pint behaviour
@@ -44,42 +40,20 @@ def _pretty_fmt_exponent(num):
     return ret
 
 
-formats = {
-        'P': {  # Pretty format.
-                'as_ratio': False,  # True in pint
-                'single_denominator': False,
-                'product_fmt': '·',
-                'division_fmt': '/',
-                'power_fmt': '{}{}',
-                'parentheses_fmt': '({})',
-                'exp_call': _pretty_fmt_exponent,
-                },
-        'L': {  # spectrochempy Latex format.
-                'as_ratio': False,  # True in pint
-                'single_denominator': True,
-                'product_fmt': r' \cdot ',
-                'division_fmt': r'\frac[{}][{}]',
-                'power_fmt': '{}^[{}]',
-                'parentheses_fmt': r'\left({}\right)',
-                },
-        'H': {  # spectrochempy HTML format.
-                'as_ratio': False,  # True in pint
-                'single_denominator': False,
-                'product_fmt': r'.',
-                'division_fmt': r'{}/{}',
-                'power_fmt': '{}<sup>{}</sup>',
-                'parentheses_fmt': r'{}',
-                },
-        'K': {  # spectrochempy Compact format.
-                'as_ratio': False,
-                'single_denominator': False,
-                'product_fmt': '.',
-                'division_fmt': '/',
-                'power_fmt': '{}^{}',
-                'parentheses_fmt': r'({})',
-                },
+formats = {'P': {  # Pretty format.
+        'as_ratio': False,  # True in pint
+        'single_denominator': False, 'product_fmt': '·', 'division_fmt': '/', 'power_fmt': '{}{}',
+        'parentheses_fmt': '({})', 'exp_call': _pretty_fmt_exponent, }, 'L': {  # spectrochempy Latex format.
+        'as_ratio': False,  # True in pint
+        'single_denominator': True, 'product_fmt': r' \cdot ', 'division_fmt': r'\frac[{}][{}]', 'power_fmt': '{}^[{}]',
+        'parentheses_fmt': r'\left({}\right)', }, 'H': {  # spectrochempy HTML format.
+        'as_ratio': False,  # True in pint
+        'single_denominator': False, 'product_fmt': r'.', 'division_fmt': r'{}/{}', 'power_fmt': '{}<sup>{}</sup>',
+        'parentheses_fmt': r'{}', }, 'K': {  # spectrochempy Compact format.
+        'as_ratio': False, 'single_denominator': False, 'product_fmt': '.', 'division_fmt': '/', 'power_fmt': '{}^{}',
+        'parentheses_fmt': r'({})', },
 
-        }
+}
 
 formatting._FORMATS.update(formats)
 formatting._KNOWN_TYPES = frozenset(list(formatting._FORMATS.keys()) + ['~'])
@@ -114,39 +88,24 @@ def __format__(self, spec):
     if '~' in spec or 'K' in spec or 'T' in spec or 'L' in spec:  # spectrochempy modified
         if self.dimensionless and 'absorbance' not in self._units:
             if self._units == 'ppm':
-                units = UnitsContainer({
-                                               'ppm': 1
-                                               })
-            elif self._units == 'percent':
-                units = UnitsContainer({
-                                               '%': 1
-                                               })
+                units = UnitsContainer({'ppm': 1})
+            elif self._units in ['percent', 'transmittance']:
+                units = UnitsContainer({'%': 1})
             elif self._units == 'weight_percent':
-                units = UnitsContainer({
-                                               'wt.%': 1
-                                               })
+                units = UnitsContainer({'wt.%': 1})
             elif self._units == 'radian':
-                units = UnitsContainer({
-                                               'rad': 1
-                                               })
+                units = UnitsContainer({'rad': 1})
             elif self._units == 'degree':
-                units = UnitsContainer({
-                                               'deg': 1
-                                               })
+                units = UnitsContainer({'deg': 1})
             # elif self._units == 'absorbance':
             #    units = UnitsContainer({'a.u.': 1})
             elif abs(self.scaling - 1.) < 1.e-10:
-                units = UnitsContainer({
-                                               '': 1
-                                               })
+                units = UnitsContainer({'': 1})
             else:
-                units = UnitsContainer(
-                        {
-                                'scaled-dimensionless (%.2g)' % self.scaling: 1
-                                })
+                units = UnitsContainer({'scaled-dimensionless (%.2g)' % self.scaling: 1})
         else:
-            units = UnitsContainer(dict((self._REGISTRY._get_symbol(key), value)
-                                        for key, value in list(self._units.items())))
+            units = UnitsContainer(
+                dict((self._REGISTRY._get_symbol(key), value) for key, value in list(self._units.items())))
         spec = spec.replace('~', '')
     else:
         units = self._units
@@ -161,27 +120,34 @@ def __format__(self, spec):
 setattr(Unit, '__format__', __format__)
 
 if globals().get('U_', None) is None:
+
     # filename = resource_filename(PKG, 'spectrochempy.txt')
     U_ = UnitRegistry(on_redefinition='ignore')  # filename)
+
+    U_.define('__wrapped__ = 1')  # <- hack to avoid an error with pytest (doctest activated)
+
+    U_.define('transmittance = 1. / 100. ')
+    U_.define('absolute_transmittance = 1. ')
+    #U_.define(UnitDefinition('absolute_transmittance', 'abs_trans', (), # ScaleConverter(100.0)))
+    U_.define('absorbance = 1. = a.u.')
+    U_.define('Kubelka_Munk = 1. = K.M.')
+
+    U_.define('ppm = 1. = ppm')
+
+    U_.define(UnitDefinition('percent', 'pct', (), ScaleConverter(1 / 100.0)))
+    U_.define(UnitDefinition('weight_percent', 'wt_pct', (), ScaleConverter(1 / 100.0)))
+
+    U_.default_format = ''  # .2fK'
+    Q_ = U_.Quantity
+    Q_.default_format = ''  # .2fK'
+
     set_application_registry(U_)
-    U_.enable_contexts('spectroscopy', 'boltzmann', 'chemistry')
     del UnitRegistry  # to avoid importing it
 
 else:
     warn('Unit registry was already set up. Bypassed the new loading')
 
-U_.define('__wrapped__ = 1')  # <- hack to avoid an error with pytest (doctest activated)
-U_.define('ppm = 1. = ppm')
-U_.define('absorbance = 1. = a.u.')
-U_.define('Kubelka_Munk = 1. = K.M.')
-
-U_.define(UnitDefinition('percent', 'pct', (), ScaleConverter(1 / 100.0)))
-U_.define(UnitDefinition('weight_percent', 'wt_pct', (), ScaleConverter(1 / 100.0)))
-
-U_.default_format = ''  # .2fK'
-Q_ = U_.Quantity
-Q_.default_format = ''  # .2fK'
-
+U_.enable_contexts('spectroscopy', 'boltzmann', 'chemistry')
 
 # Context for NMR
 # ----------------------------------------------------------------------------------------------------------------------
@@ -237,16 +203,10 @@ def set_nmr_context(larmor):
         larmor = larmor * U_.MHz
 
     if 'nmr' not in list(U_._contexts.keys()):
-        c = Context('nmr', defaults={
-                'larmor': larmor
-                })
+        c = Context('nmr', defaults={'larmor': larmor})
 
-        c.add_transformation('[]', '[frequency]',
-                             lambda U_, x, **kwargs: x * kwargs.get(
-                                     'larmor') / 1.e6)
-        c.add_transformation('[frequency]', '[]',
-                             lambda U_, x, **kwargs: x * 1.e6 / kwargs.get(
-                                     'larmor'))
+        c.add_transformation('[]', '[frequency]', lambda U_, x, **kwargs: x * kwargs.get('larmor') / 1.e6)
+        c.add_transformation('[frequency]', '[]', lambda U_, x, **kwargs: x * 1.e6 / kwargs.get('larmor'))
         U_.add_context(c)
 
     else:

@@ -1,6 +1,13 @@
 # What\'s new
 
-## Version 0.2.1
+## Version 0.2.5
+
+**TASKS**
+
+* Docker image building
+
+
+## Version 0.2.4
 
 **TASKS**
 

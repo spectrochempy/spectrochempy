@@ -19,9 +19,10 @@ can install Spectrochempy in a dedicated environment (recommended, steps 4. and
 #.  Open a command prompt (Select the Start button and type cmd), or preferably
     open the Anaconda Prompt in the Anaconda start Menu.
 
-    .. image:: images/Aprompt.png
+    .. image:: images/prompt.png
        :width: 200
        :alt: Anaconda Prompt
+
 
 #.  Update conda (yes, even if you have just installed the distribution...):
 
