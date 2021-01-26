@@ -13,7 +13,6 @@ dependencies:
   - nmrglue
 
   # for the core package
-  - cantera
   - colorama
   - dash
   - dash-bootstrap-components
