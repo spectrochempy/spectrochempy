@@ -2,17 +2,17 @@
 FROM jupyter/minimal-notebook:latest
 
 # Choose python 3.9 version
-ARG py_ver=3.9
-ENV CONDA_ENV scpy${py_ver}
+ARG PY_VERSION=3.9
+ENV CONDA_ENV scpy$PY_VERSION
 
 # Use mamba for faster building
 RUN conda update conda && \
     conda install -c conda-forge mamba
 
 # We will use a YAML file present in the docker build context to create the environment
-COPY --chown=${NB_UID}:${NB_GID} env/scpy${py_ver}.yml /home/$NB_USER/tmp/
+COPY --chown=${NB_UID}:${NB_GID} env/scpy$PY_VERSION.yml /home/$NB_USER/tmp/
 RUN cd /home/$NB_USER/tmp/ && \
-    mamba env create -p $CONDA_DIR/envs/$CONDA_ENV -f scpy${py_ver}.yml && \
+    mamba env create -p $CONDA_DIR/envs/$CONDA_ENV -f scpy$PY_VERSION.yml && \
     conda clean --all -f -y && \
     rm -rf /home/$NB_USER/tmp
 
@@ -28,6 +28,7 @@ ENV PATH $CONDA_DIR/envs/$CONDA_ENV/bin:$PATH
 ENV CONDA_DEFAULT_ENV $CONDA_DIR/envs/$CONDA_ENV
 
 # Install spectrochempy
-RUN python -m pip install git+https://github.com/spectrochempy/spectrochempy.git
+ARG BRANCH=master
+RUN python -m pip install git+https://github.com/spectrochempy/spectrochempy.git@${BRANCH}
 
 WORKDIR /home/$NB_USER/work
