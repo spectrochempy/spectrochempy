@@ -7,17 +7,17 @@ jobs:
   fast_finish: true
   include:
     - stage: pytest-linux-3.9
-      if: branch NOT IN (master,feature/travis-deploy,feature/travis-docs)
+      if: branch NOT IN (master)
       env:
       - TEST=true
       - CONDAPY=3.9
     - stage: conda-deploy
-      if: type != pull_request AND branch IN (master,feature/travis-deploy) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/
+      if: type != pull_request AND branch IN (master, develop) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/
       env:
       - DEPLOY=true
       - CONDAPY=3.8
     - stage: build-docs
-      if: type != pull_request AND (branch IN (master,feature/travis-docs) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/)
+      if: type != pull_request AND (branch IN (master, develop) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/)
       env:
       - BUILDOCS=true
       - CONDAPY=3.7
@@ -49,14 +49,14 @@ before_install:
   - echo "creating scpy$CONDAPY environment";
   - source "$HOME/miniconda/etc/profile.d/conda.sh";
   - hash -r;
-  - conda config --set always_yes yes --set changeps1 no;
+  - conda config --set always_yes yes;
   - conda update -q conda;
   - conda config --add channels conda-forge;
-  - conda config --add channels cantera;
   - conda config --add channels spectrocat;
   - conda config --set channel_priority flexible;
-  - conda install mamba
-  - mamba env create -q -f .ci/env/scpy$CONDAPY.yml;
+  - conda install mamba jinja2
+  - $HOME/miniconda/bin/python .ci/env/env_create.py -v $CONDAPY --dev scpy$CONDAPY.yml
+  - mamba env create -f .ci/env/scpy$CONDAPY.yml;
 
 # create env and install scpy from sources
 install:

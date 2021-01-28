@@ -2967,7 +2967,6 @@ class NDMath(object):
                 # only the three above type have math capabilities in spectrochempy.
                 pass
 
-        flagpow = True
         # it may be necessary to change the object order regarding the types
         if returntype in ['NDPanel', 'NDDataset', 'Coord'] and objtypes[0] != returntype:
 

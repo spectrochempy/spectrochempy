@@ -8,6 +8,8 @@ Version 0.2.5
 
 -  Docker image building
 
+-  cantera installation optional
+
 Version 0.2.4
 -------------
 
