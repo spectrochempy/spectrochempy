@@ -9,21 +9,24 @@ import atexit
 import warnings
 import shutil
 from pathlib import Path
+import re
 
 from setuptools import setup, find_packages
 from setuptools.command.develop import develop as _develop
 from setuptools.command.install import install as _install
 
 
-def install_styles():
+def _install_mpl():
     """
-    Install matplotlib styles
-
+    Install matplotlib styles and fonts
+ 
     """
     try:
-        import matplotlib as mpl
+        import matplotlib as mpl    
+        from matplotlib import matplotlib_fname
+        from matplotlib import get_cachedir
     except ImportError:
-        warnings.warn('Sorry, but we cannot install mpl plotting styles '
+        warnings.warn('Sorry, but we cannot install mpl plotting styles and fonts '
                       'if MatPlotLib is not installed.\n'
                       'Please install MatPlotLib using:\n'
                       '  pip install matplotlib\n'
@@ -35,7 +38,8 @@ def install_styles():
     # install all plotting styles in the matplotlib stylelib library
     stylesheets = Path("scp_data") / "stylesheets"
     if not stylesheets.exists():
-        raise IOError(f"can't find the stylesheets from SpectroChemPy {str(stylesheets)}. Installation incomplete!")
+        raise IOError(f"Can't find the stylesheets from SpectroChemPy {str(stylesheets)}.\n"
+                      f"Installation incomplete!")
 
     cfgdir = Path(mpl.get_configdir())
     stylelib = cfgdir / 'stylelib'
@@ -46,14 +50,42 @@ def install_styles():
     for src in styles:
         dest = stylelib / src.name
         shutil.copy(src, dest)
-    print(f'STYLESHEETS installed in {stylesheets}')
+    print(f'Stylesheets installed in {stylesheets}')
+
+    # install fonts in mpl-data
+    # https://stackoverflow.com/a/47743010
+
+    # Copy files over
+    _dir_data = Path(re.sub('/matplotlibrc$', '', matplotlib_fname()))
+
+    dir_source = Path(__file__).parent.parent.parent / 'scp_data' / 'fonts'
+    if not dir_source.exists():
+        raise IOError(f'directory {dir_source} not found!')
+
+    dir_dest = _dir_data.parent / 'fonts' / 'ttf'
+    if not dir_dest.exists():
+        dir_dest.mkdir(parents=True, exist_ok=True)
+        pi
+    # print(f'Transfering .ttf and .otf files from {dir_source} to {dir_dest}.')
+    for file in dir_source.glob('*.[ot]tf'):
+        if not (dir_dest / file.name).exists():
+            print(f'Adding font "{file.name}".')
+            shutil.copy(file, dir_dest)
+            if (dir_dest / file.name).exists():
+                print('success')
+    # Delete cache
+    dir_cache = Path(get_cachedir())
+    for file in list(dir_cache.glob('*.cache')) + list(dir_cache.glob('font*')):
+        if not file.is_dir():  # don't dump the tex.cache folder... because dunno why
+            file.unlink()
+            print(f'Deleted font cache {file}.')
 
 
 class PostInstallCommand(_install):
     """Post-installation for installation mode."""
 
     def run(self):
-        atexit.register(install_styles)
+        atexit.register(_install_mpl)
         _install.run(self)
 
 
@@ -61,18 +93,12 @@ class PostDevelopCommand(_develop):
     """Post-installation for development mode."""
 
     def run(self):
-        def installstyles():
-            return install_styles()
-
+        atexit.register(_install_mpl)
         _develop.run(self)
-        atexit.register(installstyles)
-
 
 # Data for setuptools
 packages = []
-
 setup_args = dict(
-
         # packages informations
         name="spectrochempy", use_scm_version=True, license="CeCILL-B Free Software",
         author="Arnaud Travert & Christian Fernandez", author_email="contact (at) spectrochempy.fr",
@@ -90,15 +116,19 @@ setup_args = dict(
                      "Programming Language :: Python :: 3.8",
                      "Programming Language :: Python :: 3.9", ],
         platforms=['Windows', 'Mac OS X', 'Linux'],
-
         # packages discovery
-        zip_safe=False, packages=find_packages() + packages, include_package_data=True,  # requirements
-        python_requires=">=3.7", setup_requires=['setuptools_scm', 'matplotlib'], install_requires=[],
+        zip_safe=False, 
+        packages=find_packages() + packages, 
+        include_package_data=True,  # requirements
+        python_requires=">=3.7", 
+        setup_requires=['setuptools_scm', 'matplotlib'], 
+        install_requires=['matplotlib'],
         # install_requires(dev=__DEV__),
         # tests_require=extras_require['tests'],
 
         # post-commands
-        cmdclass={'develop': PostDevelopCommand, 'install': PostInstallCommand, },
+        cmdclass={'develop': PostDevelopCommand, 
+                  'install': PostInstallCommand, },
 
         # # entry points for scripts
         # # scripts = {'scripts/launch_api.py'},

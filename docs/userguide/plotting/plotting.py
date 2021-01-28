@@ -22,7 +22,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.9.1
+#     version: 3.9.0
 # ---
 
 # %% [markdown]
@@ -107,7 +107,7 @@ dataset[:, 1290.:920.] = MASKED
 # ## Using Plotly (experimental)
 
 # %% [markdown]
-# For a better experience of interactivity inside a notebook, Spectro£ChemPy also offer the possibillity to use Plotly.
+# For a better experience of interactivity inside a notebook, SpectroChemPy also offer the possibillity to use Plotly.
 #
 # See the dedicated tutorial: [here](...)
 

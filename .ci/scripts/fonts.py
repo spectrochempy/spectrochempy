@@ -17,15 +17,16 @@ dir_source = Path(__file__).parent.parent.parent / 'scp_data' / 'fonts'
 if not dir_source.exists():
     raise IOError(f'directory {dir_source} not found!')
 
-dir_dest = _dir_data / 'fonts' / 'ttf'
+dir_dest = _dir_data.parent / 'fonts' / 'ttf'
 if not dir_dest.exists():
-    dir_dest.mkdir(parents=True)
+    dir_dest.mkdir(parents=True, exist_ok=True)
 # print(f'Transfering .ttf and .otf files from {dir_source} to {dir_dest}.')
 for file in dir_source.glob('*.[ot]tf'):
     if not (dir_dest / file.name).exists():
         print(f'Adding font "{file.name}".')
         shutil.copy(file, dir_dest)
-
+        if (dir_dest / file.name).exists():
+            print('success')
 # Delete cache
 dir_cache = Path(get_cachedir())
 for file in list(dir_cache.glob('*.cache')) + list(dir_cache.glob('font*')):

@@ -1,17 +1,22 @@
 # Choose the minimal jupyter image: https://jupyter-docker-stacks.readthedocs.io/en/latest/using/selecting.html
-FROM jupyter/minimal-notebook:latest
+FROM jupyter/base-notebook:latest
 
-# Choose python 3.9 version
-ARG PY_VERSION=3.9
+# Choose python 3.8 version
+ARG PY_VERSION=3.8
+ARG DEV=''
+ARG DASH=''
+ARG CANTERA=''
+
 ENV CONDA_ENV scpy$PY_VERSION
 
 # Use mamba for faster building
 RUN conda update conda && \
     conda install -c conda-forge mamba
 
-# We will use a YAML file present in the docker build context to create the environment
-COPY --chown=${NB_UID}:${NB_GID} env/scpy$PY_VERSION.yml /home/$NB_USER/tmp/
+# We will first create a YAML file and then use it to create the environment
+COPY --chown=${NB_UID}:${NB_GID} env/env* /home/$NB_USER/tmp/
 RUN cd /home/$NB_USER/tmp/ && \
+    python env_create.py -v $PY_VERSION $DEV $DASH $CANTERA scpy$PY_VERSION.yml && \
     mamba env create -p $CONDA_DIR/envs/$CONDA_ENV -f scpy$PY_VERSION.yml && \
     conda clean --all -f -y && \
     rm -rf /home/$NB_USER/tmp

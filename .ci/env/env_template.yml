@@ -1,36 +1,37 @@
-name: scpy3.7
+name: scpy{{ VERSION }}
 channels:
     - conda-forge
     - spectrocat
-    - cantera
-    - cantera/label/dev
+    {%- if DASH %}
     - plotly
+    {%- endif %}
     - defaults
+    {%- if CANTERA %}
+    - cantera
+    {%- endif %}
 
 dependencies:
-    - python=3.7
+    - python={{ VERSION }}
 
     # specific
     - quadprog
     - brukeropusreader
     - quaternion
     - nmrglue
+    {%- if CANTERA %}
+    - cantera
+    {%- endif %}
 
     # for the core package
     - colorama
-    - dash
-    - dash-bootstrap-components
-    - dash-daq
     - dill
     - ipython
     - jinja2
     - mamba
-    - matplotlib
+    - matplotlib-base
     - numpy
     - orderedset
     - pint
-    - plotly
-    - pyqt
     - requests
     - scipy
     - tqdm
@@ -51,6 +52,7 @@ dependencies:
     - jupyterlab
     - nodejs
 
+    {% if DEV %}
     # DEV: just for testing
     - pytest
     - pytest-doctestplus
@@ -59,7 +61,6 @@ dependencies:
     - coverage
 
     # DEV: code and docs
-    - jupyter-dash
     - jupytext
     - sphinx
     - sphinx_rtd_theme
@@ -79,10 +80,23 @@ dependencies:
     # - xarray
     # - datashader
     # - scikit-learn
-
-
+    {% endif %}
+    {%- if DASH %}
+    # dash and plotly
+    - plotly
+    - dash
+    - dash-bootstrap-components
+    - dash-daq
+    - jupyter-dash
+    {%- endif %}
+    {%- if DEV or DASH%}
     - pip
     - pip:
+        {%- if DEV %}
         - autodoc_traits
+        {%- endif %}
+        {%- if DASH %}
         - dash_defer_js_import
         - dash-ace
+        {%- endif %}
+    {%- endif %}

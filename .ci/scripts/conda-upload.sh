@@ -28,9 +28,6 @@ if [[ -z $DEVSTRING ]]; then
 fi
 PKG_NAME_VERSION="$PKG_NAME-$VERSION-$DEVSTRING.tar.bz2"
 
-## Avoid uploading automatically
-conda config --set anaconda_upload no
-
 export VERSION=$VERSION
 export DEVSTRING=$DEVSTRING
 
@@ -38,10 +35,10 @@ export CONDA_BLD_PATH="$HOME/conda-bld"
 mkdir -p "$CONDA_BLD_PATH"
 
 ## configure conda
-conda config -q --set always_yes yes --set changeps1 no
 conda update -q -n base conda
+conda config -q --set anaconda_upload no
+conda config -q --set always_yes yes
 conda config -q --add channels conda-forge
-conda config -q --add channels cantera
 conda config -q --add channels spectrocat
 conda config -q --set channel_priority flexible
 

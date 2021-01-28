@@ -113,7 +113,6 @@ class BuildDocumentation(object):
 
         parser.add_argument("-H", "--html", help="create html pages", action="store_true")
         parser.add_argument("-P", "--pdf", help="create pdf manual", action="store_true")
-        parser.add_argument("-T", "--tutorials", help="zip notebook tutorials for downloads", action="store_true")
         parser.add_argument("--clean", help="clean for a full regeneration of the documentation", action="store_true")
         parser.add_argument("--delnb", help="delete all ipynb", action="store_true")
         parser.add_argument("-m", "--message", default='DOCS: updated', help='optional git commit message')
@@ -132,17 +131,21 @@ class BuildDocumentation(object):
 
         if args.clean and args.html:
             self.clean('html')
+
         if args.clean and args.pdf:
             self.clean('latex')
+
+        if args.delnb:
+            self.delnb()
+
         if args.html:
             self.make_docs('html')
+            self.make_tutorials()
+
         if args.pdf:
             self.make_docs('latex')
             self.make_pdf()
-        if args.tutorials:
-            self.make_tutorials()
-        if args.delnb:
-            self.delnb()
+
         if args.all:
             self.delnb()
             self.make_docs('html', clean=True)
