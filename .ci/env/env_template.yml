@@ -2,9 +2,6 @@ name: scpy{{ VERSION }}
 channels:
     - conda-forge
     - spectrocat
-    {%- if DASH %}
-    - plotly
-    {%- endif %}
     - defaults
     {%- if CANTERA %}
     - cantera
@@ -32,6 +29,7 @@ dependencies:
     - numpy
     - orderedset
     - pint
+    - plotly
     - requests
     - scipy
     - tqdm
@@ -82,8 +80,7 @@ dependencies:
     # - scikit-learn
     {% endif %}
     {%- if DASH %}
-    # dash and plotly
-    - plotly
+    # dash
     - dash
     - dash-bootstrap-components
     - dash-daq

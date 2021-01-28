@@ -46,6 +46,7 @@ requirements:
     - numpy
     - orderedset
     - pint
+    - plotly
     - requests
     - scipy
     - tqdm

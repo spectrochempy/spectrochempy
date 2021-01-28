@@ -49,14 +49,14 @@ before_install:
   - echo "creating scpy$CONDAPY environment";
   - source "$HOME/miniconda/etc/profile.d/conda.sh";
   - hash -r;
-  - conda config --set always_yes yes --set changeps1 no;
+  - conda config --set always_yes yes;
   - conda update -q conda;
   - conda config --add channels conda-forge;
   - conda config --add channels spectrocat;
   - conda config --set channel_priority flexible;
   - conda install mamba jinja2
-  - python .ci/env/env_create.py -v $CONDAPY --dev scpy$CONDAPY.yml
-  - mamba env create -q -f .ci/env/scpy$CONDAPY.yml;
+  - $HOME/miniconda/bin/python .ci/env/env_create.py -v $CONDAPY --dev scpy$CONDAPY.yml
+  - mamba env create -f .ci/env/scpy$CONDAPY.yml;
 
 # create env and install scpy from sources
 install:
