@@ -22,7 +22,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.9.0
+#     version: 3.9.1
 # ---
 
 # %% [markdown]
@@ -101,7 +101,7 @@ dataset[:, 1290.:920.] = MASKED
 # ```
 
 # %%
-# %matplotlib widget
+# # %matplotlib widget
 
 # %% [markdown]
 # ## Using Plotly (experimental)
