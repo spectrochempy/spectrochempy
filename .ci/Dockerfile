@@ -11,7 +11,7 @@ ENV CONDA_ENV scpy$PY_VERSION
 
 # Use mamba for faster building
 RUN conda update conda && \
-    conda install -c conda-forge mamba
+    conda install -c conda-forge mamba jinja2
 
 # We will first create a YAML file and then use it to create the environment
 COPY --chown=${NB_UID}:${NB_GID} env/env* /home/$NB_USER/tmp/
