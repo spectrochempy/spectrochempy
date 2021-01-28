@@ -44,11 +44,14 @@ Installation of |scpy|
 
 |scpy| installation is very similar on the various platform, except the syntax of some command. We propose here the
 installation step whether you are on mac/linux systems, or on Windows.
+Additionaly it is possible to use a docker container.
 
 * :doc:`install_mac`
 * :doc:`install_win`
 * :doc:`install_docker`
 * :doc:`install_sources`
+* :doc:`install_adds`
+
 .. toctree::
     :maxdepth: 3
     :hidden:
@@ -57,3 +60,4 @@ installation step whether you are on mac/linux systems, or on Windows.
     install_win
     install_docker
     install_sources
+    install_adds

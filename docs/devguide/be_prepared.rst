@@ -30,7 +30,7 @@ Git is a free and open source distributed control system used in well-known soft
 `GitHub <https://github.com>`__ or `Bitbucket <https://bitbucket.org>`__. For this project, we use a GitHub
 repository: `spectrochempy repository <https://github.com/spectrochempy/spectrochempy>`__.
 
-Depending on your operating system you may refer to these pages for installation instructions:
+Depending on your operating system, you may refer to these pages for installation instructions:
 
 -  `Download Git for macOS <https://git-scm.com/download/mac>`__ (One trivial option is to install `XCode <https://developer.apple.com/xcode/>`__ which is shipped with the git system).
 
@@ -49,7 +49,7 @@ Depending on your operating system you may refer to these pages for installation
 
        conda install git
 
-To check whether or not *git* is correctly installed, use:
+To check whether or not *git* is correctly installed, use
 
 .. sourcecode:: bash
 
