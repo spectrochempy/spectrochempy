@@ -64,9 +64,16 @@ Create a conda environment
 
 * ``cd`` to the |scpy| source directory (*i.e.,* ``spectrochempy`` created previously)
 
-* Create and activate an environment using python v.3.x. 
 
-  This will create a new environment and will not touch
+* Generate an environment file using the script ``env_create.py``:
+
+  .. sourcecode:: bash
+
+     $ python .ci/env/env_create.py -v 3.9 --dev scpy_dev.yml
+
+  This will create the ``scpy_dev.yml`` file that we will use in the next step.
+
+* Create and activate the environment using python 3.9. This will create a new environment and will not touch
   any of your other existing environments, nor any existing Python installation.
   (conda installer is somewhat very slow, this is why we prefer to replace it by `mamba <https://https://github.com/mamba-org/mamba>`__
 
@@ -74,25 +81,24 @@ Create a conda environment
 
      $ conda update conda
      $ conda install -c conda-forge mamba 
-     $ mamba env create -n scpy -f environment.yml
-     $ conda activate scpy
+     $ mamba env create -n scpy_dev -f scpy_dev.yml
+     $ conda activate scpy_dev
 
   If you prefer to work with ``3.7`` or ``3.8`` python version, you just change ``-v 3.9`` by ``-v 3.8`` or ``3.7``.
-  Of course, you can also name your environment differently by replacing ``scpy`` by the name of your choice.
 
 Install |scpy| in this environment
 ----------------------------------
 
 .. sourcecode:: bash
 
-   (scpy) $ python -m pip install .
+   $ python -m pip install .
 
 
 At this point you should be able to ``import spectrochempy``:
 
 .. sourcecode:: bash
 
-   (scpy) $ python
+   (scpy_dev) $ python
 
 
 This start an interpreter in which you can check your installation.
