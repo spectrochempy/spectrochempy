@@ -19,10 +19,10 @@ from setuptools.command.install import install as _install
 def _install_mpl():
     """
     Install matplotlib styles and fonts
- 
+
     """
     try:
-        import matplotlib as mpl    
+        import matplotlib as mpl
         from matplotlib import matplotlib_fname
         from matplotlib import get_cachedir
     except ImportError:
@@ -65,14 +65,14 @@ def _install_mpl():
     dir_dest = _dir_data.parent / 'fonts' / 'ttf'
     if not dir_dest.exists():
         dir_dest.mkdir(parents=True, exist_ok=True)
-        pi
-    # print(f'Transfering .ttf and .otf files from {dir_source} to {dir_dest}.')
+
     for file in dir_source.glob('*.[ot]tf'):
         if not (dir_dest / file.name).exists():
             print(f'Adding font "{file.name}".')
             shutil.copy(file, dir_dest)
             if (dir_dest / file.name).exists():
                 print('success')
+
     # Delete cache
     dir_cache = Path(get_cachedir())
     for file in list(dir_cache.glob('*.cache')) + list(dir_cache.glob('font*')):
@@ -96,6 +96,7 @@ class PostDevelopCommand(_develop):
         atexit.register(_install_mpl)
         _develop.run(self)
 
+
 # Data for setuptools
 packages = []
 setup_args = dict(
@@ -117,17 +118,17 @@ setup_args = dict(
                      "Programming Language :: Python :: 3.9", ],
         platforms=['Windows', 'Mac OS X', 'Linux'],
         # packages discovery
-        zip_safe=False, 
-        packages=find_packages() + packages, 
+        zip_safe=False,
+        packages=find_packages() + packages,
         include_package_data=True,  # requirements
-        python_requires=">=3.7", 
-        setup_requires=['setuptools_scm', 'matplotlib'], 
+        python_requires=">=3.7",
+        setup_requires=['setuptools_scm', 'matplotlib'],
         install_requires=['matplotlib'],
         # install_requires(dev=__DEV__),
         # tests_require=extras_require['tests'],
 
         # post-commands
-        cmdclass={'develop': PostDevelopCommand, 
+        cmdclass={'develop': PostDevelopCommand,
                   'install': PostInstallCommand, },
 
         # # entry points for scripts

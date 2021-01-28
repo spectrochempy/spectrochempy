@@ -320,8 +320,8 @@ class BuildDocumentation(object):
         </head>
         <body>
         <p>
-        We have moved away from the <strong>spectrochempy.github.io</strong> domain. 
-        If you're not automatically redirected, please visit us at 
+        We have moved away from the <strong>spectrochempy.github.io</strong> domain.
+        If you're not automatically redirected, please visit us at
         <a href="https://{URL_SCPY}">{URL_SCPY}</a>.
         </p>
         </body>

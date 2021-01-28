@@ -47,10 +47,10 @@ It is a cross platform software, running on Linux, Windows or OS X.
 """
 
 # check for update
-import sys
+# import sys
 
-from time import time
-from pathlib import Path
+# from time import time
+# from pathlib import Path
 
 __all__ = ['api']
 

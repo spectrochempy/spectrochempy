@@ -54,6 +54,7 @@ def test_fix_issue_58():
     assert X.y.units == ur.minute
     assert X.y[0].data == [2]  # check that the addition is correctly done 2 min
 
+
 def test_fix_issue_186():
 
     import spectrochempy as scp
@@ -74,7 +75,6 @@ def test_fix_issue_186():
     da = dt.to('absorbance')
     da.plot()
     scp.show()
-
 
     dt.ito('transmittance')
     dt.plot()

@@ -128,7 +128,8 @@ _ = dataset.plot()
 # <div class="alert alert-block alert-info">
 # <b>Tip: </b>
 #
-# Note, in the line above, that we used ` _ = ... `  syntax. This is to avoid any ouput but the plot from this statement.
+# Note, in the line above, that we used ` _ = ... `  syntax.
+# This is to avoid any ouput but the plot from this statement.
 # </div>
 
 # %% [markdown]
@@ -404,13 +405,3 @@ with plt.xkcd():
     prefs.lines.linewidth = 2
     ax = dataset[-1].plot(figsize=(7.5, 4))
     ax.text(2800., 1.5, "A XKCD plot! This is fun...")
-
-# %% [markdown]
-# If you get the error: "findfont: Font family ['Humor Sans'] not found. Falling back to DejaVu Sans.", it might be necessary to install the required font. For the above `Humor Sans` is required.
-# * You can download it [here](https://github.com/shreyankg/xkcd-desktop/blob/master/Humor-Sans.ttf).
-# * Install the `ttf` file into your system font's directory
-#     - for windows: `C:/windows/fonts`
-#     - osx: `~/Library/Fonts/`
-#     - linux: `/usr/share/fonts/truetype`
-# * Then you must delete the matplotlib font cache: Go to `<your-home-folder>/.matplotlib` and delete files such as:  `fontlist...`
-#

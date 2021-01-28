@@ -11,7 +11,6 @@ The core interface to the Pint library
 __all__ = ['Unit', 'Quantity', 'ur', 'set_nmr_context', 'DimensionalityError']
 
 from warnings import warn
-import numpy as np
 
 from pint import set_application_registry, UnitRegistry, DimensionalityError, formatting, Context
 # from pint.measurement import _Measurement as Measure
@@ -128,7 +127,6 @@ if globals().get('U_', None) is None:
 
     U_.define('transmittance = 1. / 100. ')
     U_.define('absolute_transmittance = 1. ')
-    #U_.define(UnitDefinition('absolute_transmittance', 'abs_trans', (), # ScaleConverter(100.0)))
     U_.define('absorbance = 1. = a.u.')
     U_.define('Kubelka_Munk = 1. = K.M.')
 
@@ -149,18 +147,18 @@ else:
 
 U_.enable_contexts('spectroscopy', 'boltzmann', 'chemistry')
 
+
 # Context for NMR
 # ----------------------------------------------------------------------------------------------------------------------
-
 def set_nmr_context(larmor):
-    """Set a NMR context relative to the given Larmor frequency
+    """
+    Set a NMR context relative to the given Larmor frequency
 
     Parameters
     ----------
     larmor : Quantity or float
         The Larmor frequency of the current nucleus.
         If it is not a quantity it is assumed to be given in MHz
-
 
     Examples
     --------
