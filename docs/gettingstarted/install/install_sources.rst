@@ -1,7 +1,7 @@
 .. _install_sources:
 
-Installation from sources (development version)
-===============================================
+Installation from sources (master or develop versions)
+======================================================
 
 Installing git
 ---------------
