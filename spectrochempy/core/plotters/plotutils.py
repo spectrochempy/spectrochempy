@@ -26,8 +26,7 @@ def make_label(ss, lab='<no_axe_label>', use_mpl=True):
         label = 'values'
 
     if use_mpl:
-        if ss.units is not None and str(ss.units) not in ['dimensionless',
-        'absolute_transmittance']:
+        if ss.units is not None and str(ss.units) not in ['dimensionless', 'absolute_transmittance']:
             units = r"/\ {:~L}".format(ss.units)
             units = units.replace('%', r'\%')
         else:

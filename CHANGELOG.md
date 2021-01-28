@@ -6,6 +6,15 @@
 
 * Docker image building
 
+**NEW FEATURES**
+
+* cantera installation optional
+
+* use of pyqt for matplotlib optional
+
+**BUGS FIXED**
+
+* added fonts in order to solve missing fonts problems on linux and windows
 
 ## Version 0.2.4
 
@@ -15,7 +24,7 @@
   
 * NDMath (mathematical and dataset creation routines) module revisited. *Still some work to be done*.
 
-**NEW FEATURE**
+**NEW FEATURES**
 
 * Changed CoordRange behavior
 

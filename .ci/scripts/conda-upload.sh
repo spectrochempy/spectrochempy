@@ -28,9 +28,6 @@ if [[ -z $DEVSTRING ]]; then
 fi
 PKG_NAME_VERSION="$PKG_NAME-$VERSION-$DEVSTRING.tar.bz2"
 
-## Avoid uploading automatically
-conda config --set anaconda_upload no
-
 export VERSION=$VERSION
 export DEVSTRING=$DEVSTRING
 
@@ -38,10 +35,10 @@ export CONDA_BLD_PATH="$HOME/conda-bld"
 mkdir -p "$CONDA_BLD_PATH"
 
 ## configure conda
-conda config -q --set always_yes yes --set changeps1 no
 conda update -q -n base conda
+conda config -q --set anaconda_upload no
+conda config -q --set always_yes yes
 conda config -q --add channels conda-forge
-conda config -q --add channels cantera
 conda config -q --add channels spectrocat
 conda config -q --set channel_priority flexible
 
@@ -51,14 +48,14 @@ conda mambabuild conda
 
 echo "---> Uploading $PKG_FILE"
 if [[ $TRAVIS_BRANCH == "master" ]]; then
-  ## We build the current master release (i.e.the latest development version)
-  ## This is a "dev" release
+  ## We build the current master branch (i.e.the latest development version)
+  ## This is a "dev" version
   if [[ $TRAVIS_PULL_REQUEST == false ]]; then
     anaconda -t "$CONDA_UPLOAD_TOKEN" upload --force -u "$ANACONDA_USER" -l dev "$PKG_FILE";
   fi;
-elif [[ $TRAVIS_BRANCH == "feature/travis-deploy" ]]; then
+elif [[ $TRAVIS_BRANCH == "develop" ]]; then
   ## We build the a test version (i.e.the latest development version)
-  ## This is a "test" release
+  ## This is a "test" version
   if [[ $TRAVIS_PULL_REQUEST == false ]]; then
     anaconda -t "$CONDA_UPLOAD_TOKEN" upload --force -u "$ANACONDA_USER" -l test "$PKG_FILE";
   fi;

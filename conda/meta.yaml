@@ -38,14 +38,11 @@ requirements:
     - quaternion
     - nmrglue
     - colorama
-    - dash
-    - dash-bootstrap-components
-    - dash-daq
     - dill
     - ipython
     - jinja2
     - mamba
-    - matplotlib
+    - matplotlib-base
     - numpy
     - orderedset
     - pint
