@@ -20,7 +20,7 @@ env = Path(__file__).parent
 tempfile = env / "env_template.yml"
 template = Template(tempfile.read_text('utf-8'))
 
-name = args.name.split(".")[0]
+name = ".".join(args.name.split(".")[:-1])
 
 out = template.render(NAME=name, VERSION=args.version, DEV=args.dev, DASH=args.dash, CANTERA=args.cantera)
 
