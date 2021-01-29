@@ -18,6 +18,7 @@ __all__ = []
 # ----------------------------------------------------------------------------------------------------------------------
 
 import os
+import re
 import sys
 import logging
 import subprocess
@@ -27,7 +28,8 @@ import pprint
 import json
 from pathlib import Path
 
-from pkg_resources import get_distribution, DistributionNotFound
+from pkg_resources import parse_version, get_distribution, DistributionNotFound
+import requests
 from setuptools_scm import get_version
 from traitlets.config.configurable import Config
 from traitlets.config.application import Application
@@ -46,7 +48,6 @@ from jinja2 import Template
 
 from spectrochempy.utils import MetaConfigurable, pathclean, get_pkg_path
 from .matplotlib_preferences import MatplotlibPreferences
-
 
 # set the default style
 plt.style.use(['classic'])
@@ -820,6 +821,32 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
     # Private methods
     # ------------------------------------------------------------------------------------------------------------------
 
+    def _check_for_updates(self):
+        # Gets version
+        conda_url = "https://anaconda.org/spectrocat/spectrochempy/files"
+        try:
+            response = requests.get(conda_url)
+        except requests.exceptions.RequestException:
+            return None
+
+        regex = r"\/\d{1,2}\.\d{1,2}\.\d{1,2}\/download\/noarch" \
+                r"\/spectrochempy-(\d{1,2}\.\d{1,2}\.\d{1,2})\-(dev\d{1,2}|stable).tar.bz2"
+        matches = re.finditer(regex, response.text, re.MULTILINE)
+        vavailables = []
+        for matchNum, match in enumerate(matches):
+            v = match[1]
+            vavailables.append(v)
+
+        old = parse_version(__version__)
+
+        new_version = None
+        for key in vavailables:
+            new = parse_version(key)
+            if new > old:
+                new_version = key
+
+        return new_version
+
     def _start(self):
 
         debug = self.logs.debug
@@ -829,6 +856,7 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
             return
 
         self.logs.debug("show info on loading %s" % self.preferences.show_info_on_loading)
+
         if self.preferences.show_info_on_loading:
             info_string = "SpectroChemPy's API - v.{}\n" \
                           "© Copyright {}".format(__version__, __copyright__)
@@ -839,6 +867,13 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
             else:
                 if "/bin/scpy" not in sys.argv[0]:  # deactivate for console scripts
                     print(info_string.strip())
+
+            new_version = self._check_for_updates()
+            if new_version:
+
+                self.logs.warning(f"You are running SpectrocChemPy-{__version__} but version {new_version} is " \
+                                  f"available. \nPlease consider updating for bug fixes and new features! Use:\n" \
+                                  f"                   conda update -c spectrocat spectrochempy")
 
         # force update of rcParams
         for rckey in mpl.rcParams.keys():
