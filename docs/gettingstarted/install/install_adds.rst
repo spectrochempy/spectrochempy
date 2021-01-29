@@ -29,13 +29,13 @@ for the development version.
 QT
 --
 
-IF you like to have the matplotlib qt backend for your plots, you need to install the pyqt library (this is rather build).
+IF you like to have the matplotlib qt backend for your plots, you need to install the pyqt library.
 
 .. sourcecode:: bash
 
    $ mamba install pyqt
 
-Then you can use i.e., the qt backend in notebooks using the magic line:
+Then you can use *e.g.,* the qt backend in notebooks using the IPython "magic" line:
 
 .. sourcecode:: ipython
 

@@ -42,7 +42,7 @@ can install Spectrochempy in a dedicated environment (recommended, steps 4. and
         (base) C:\<yourDefaultPath>> conda config --add channels cantera
 
 #.  **Recommended**: you can create a dedicated environment. We will name it
-    `scpy` in this example
+    `scpy` in this example but of course you can use whatever name you want.
 
     .. sourcecode:: bat
 
