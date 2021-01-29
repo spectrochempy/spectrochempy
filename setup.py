@@ -85,7 +85,7 @@ class PostInstallCommand(_install):
     """Post-installation for installation mode."""
 
     def run(self):
-        atexit.register(_install_mpl)
+        _install_mpl()
         _install.run(self)
 
 
@@ -93,7 +93,7 @@ class PostDevelopCommand(_develop):
     """Post-installation for development mode."""
 
     def run(self):
-        atexit.register(_install_mpl)
+        _install_mpl()
         _develop.run(self)
 
 
@@ -131,10 +131,10 @@ setup_args = dict(
         cmdclass={'develop': PostDevelopCommand,
                   'install': PostInstallCommand, },
 
-        # # entry points for scripts
+        # scripts
         # # scripts = {'scripts/launch_api.py'},
-        # entry_points={'console_scripts': ['scpy_gui=spectrochempy.gui.scpy_gui:main',
-        #                                   'scpy_update=spectrochempy.scripts.scpy_update:main'], },
+        entry_points={'console_scripts': [ # 'scpy_gui=spectrochempy.gui.scpy_gui:main',
+                                          'scpy_update=spectrochempy.scripts.scpy_update:main'], },
 )
 
 # ======================================================================================================================
