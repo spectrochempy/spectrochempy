@@ -64,7 +64,7 @@ install:
   - source "$HOME/miniconda/etc/profile.d/conda.sh";
   - conda activate scpy$CONDAPY;
   - git fetch --tags;
-  - pip install .;
+  - python setup.py install;
 
 # command to install code-climate dependencies
 before_script:

@@ -101,7 +101,7 @@ dataset[:, 1290.:920.] = MASKED
 # ```
 
 # %%
-# # %matplotlib widget
+# %matplotlib inline
 
 # %% [markdown]
 # ## Using Plotly (experimental)
@@ -404,4 +404,4 @@ with plt.xkcd():
     # print(mpl.rcParams)
     prefs.lines.linewidth = 2
     ax = dataset[-1].plot(figsize=(7.5, 4))
-    ax.text(2800., 1.5, "A XKCD plot! This is fun...")
+    ax.text(2800., 1.5, "A XKCD plot!...")

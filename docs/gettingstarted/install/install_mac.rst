@@ -43,7 +43,8 @@ environment or an existing environment
     isolate the changes made on the installed library from any other previous
     installation for another applcation.
 
-    We will name this new environment :`scpy` in this example
+    We will name this new environment `scpy` in this example
+    but of course you can use whatever name you want.
 
     .. sourcecode:: bash
 
@@ -124,22 +125,6 @@ environment or an existing environment
         (scpy)  ~ $ mamba install -c spectrocat/label/dev spectrochempy
 
 
-Install using pip
------------------
-
-|scpy| can be installed using `pip`. However, although the package is provided
-on Pypi, we are not supporting this method.
-
-.. sourcecode:: bash
-
-   (scpy)  ~ $ pip install spectrochempy
-
-
-Install a developper version from sources (advanced usage)
-----------------------------------------------------------
-
-Installation of the developper version is described here:  :ref:`develguide`.
-
 Check the Installation
 -----------------------
 
@@ -164,5 +149,4 @@ Spectrochempy is likely functional !
     SpectroChemPy's API - v.0.1.17
     © Copyright 2014-2020 - A.Travert & C.Fernandez @ LCS
 
-The recommended next step is to proceed to the :ref:`userguide` or the
-:ref:`tutorials`
+The recommended next step is to proceed to the :ref:`userguide`.
