@@ -408,7 +408,6 @@ class Callbacks(object):
             if ctx and 'new' in ctx[0]['prop_id'] and ctx[0]['value'] is not None:
                 return 'Untitled (edit to chnge this name)', False, False, False
             elif ctx and 'new' in ctx[0]['prop_id'] and ctx[0]['value'] is not None:
-                pass
                 return
 
         # Set masks
