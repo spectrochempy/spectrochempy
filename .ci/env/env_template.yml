@@ -36,8 +36,6 @@ dependencies:
     - tqdm
     - traitlets
     - traittypes
-
-    # to be suppressed when code change is finished
     - xlrd
 
     # mainly for install and a bit more...
