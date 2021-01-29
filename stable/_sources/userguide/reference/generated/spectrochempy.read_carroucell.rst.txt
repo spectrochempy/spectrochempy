@@ -1,0 +1,13 @@
+
+spectrochempy.read\_carroucell
+==============================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: read_carroucell
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.read_carroucell.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

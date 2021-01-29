@@ -1,0 +1,375 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "fatal-psychology",
+   "metadata": {},
+   "source": [
+    "# Apodization"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "terminal-tokyo",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import spectrochempy as scp\n",
+    "from spectrochempy.units import ur\n",
+    "import os"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "opposite-tucson",
+   "metadata": {},
+   "source": [
+    "## Introduction\n",
+    "\n",
+    "As an example, apodization is a transformation particularly useful for preprocessing NMR time domain data before\n",
+    "Fourier transformation. It generally help for signal to noise improvement."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "progressive-macintosh",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# reead an experimental spectra\n",
+    "path = os.path.join('nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d')\n",
+    "dataset = scp.NDDataset.read_topspin(path, expno=1, remove_digital_filter=True)\n",
+    "dataset = dataset / dataset.max()  # normalization\n",
+    "# store original data\n",
+    "nd = dataset.copy()\n",
+    "\n",
+    "# show data\n",
+    "nd"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "moderate-expression",
+   "metadata": {},
+   "source": [
+    "### Plot of the Real and Imaginary original data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "negative-catering",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "_ = nd.plot(xlim=(0., 15000.))\n",
+    "_ = nd.plot(imag=True, data_only=True, clear=False, color='r')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "corporate-community",
+   "metadata": {},
+   "source": [
+    "### Exponential multiplication"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "peaceful-geometry",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "_ = nd.plot(xlim=(0., 15000.))\n",
+    "_ = nd.em(lb=300. * ur.Hz)\n",
+    "_ = nd.plot(data_only=True, clear=False, color='g')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "unauthorized-effects",
+   "metadata": {},
+   "source": [
+    "**Warning:** processing function are most of the time applied inplace. Use `inplace=False` option to avoid this if\n",
+    "necessary"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "armed-panama",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "nd = dataset.copy()  # to go back to the original data\n",
+    "_ = nd.plot(xlim=(0., 5000.))\n",
+    "ndlb = nd.em(lb=300. * ur.Hz, inplace=False)  # ndlb contain the processed data\n",
+    "_ = nd.plot(data_only=True, clear=False, color='g')  # nd dataset remain unchanged\n",
+    "_ = ndlb.plot(data_only=True, clear=False, color='b')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "painful-milton",
+   "metadata": {},
+   "source": [
+    "Of course, imaginary data are also transformed at the same time"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "negative-shuttle",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "_ = nd.plot(imag=True, xlim=(0, 5000), color='r')\n",
+    "_ = ndlb.plot(imag=True, data_only=True, clear=False, color='b')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "modern-slovenia",
+   "metadata": {},
+   "source": [
+    "If we want to display the apodization function, we can use the `retfunc=True` parameter."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "periodic-chest",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "nd = dataset.copy()\n",
+    "_ = nd.plot(xlim=(0., 5000.))\n",
+    "ndlb, apod = nd.em(lb=300. * ur.Hz, inplace=False,\n",
+    "                   retfunc=True)  # ndlb contain the processed data and apod the apodization function\n",
+    "_ = ndlb.plot(data_only=True, clear=False, color='b')\n",
+    "_ = apod.plot(data_only=True, clear=False, color='m', linestyle='--')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "earned-mandate",
+   "metadata": {},
+   "source": [
+    "#### Shifted apodization"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "central-interview",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "nd = dataset.copy()\n",
+    "_ = nd.plot(xlim=(0., 5000.))\n",
+    "ndlb, apod = nd.em(lb=300. * ur.Hz, shifted=1000 * ur.us, inplace=False,\n",
+    "                   retfunc=True)  # ndlb contain the processed data and apod the apodization function\n",
+    "_ = ndlb.plot(data_only=True, clear=False, color='b')\n",
+    "_ = apod.plot(data_only=True, clear=False, color='m', linestyle='--')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "colonial-symposium",
+   "metadata": {},
+   "source": [
+    "### Other apodization functions"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "little-slave",
+   "metadata": {},
+   "source": [
+    "#### Gaussian-Lorentzian appodization"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "soviet-onion",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "nd = dataset.copy()\n",
+    "lb = 10.\n",
+    "gb = 200.\n",
+    "ndlg, apod = nd.gm(lb=lb, gb=gb, inplace=False, retfunc=True)\n",
+    "_ = nd.plot(xlim=(0., 5000.))\n",
+    "_ = ndlg.plot(data_only=True, clear=False, color='b')\n",
+    "_ = apod.plot(data_only=True, clear=False, color='m', linestyle='--')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "arabic-hostel",
+   "metadata": {},
+   "source": [
+    "#### Shifted Gaussian-Lorentzian apodization"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "common-journalism",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "nd = dataset.copy()\n",
+    "lb = 10.\n",
+    "gb = 200.\n",
+    "ndlg, apod = nd.gm(lb=lb, gb=gb, shifted=2000 * ur.us, inplace=False, retfunc=True)\n",
+    "_ = nd.plot(xlim=(0., 5000.))\n",
+    "_ = ndlg.plot(data_only=True, clear=False, color='b')\n",
+    "_ = apod.plot(data_only=True, clear=False, color='m', linestyle='--')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "fancy-victor",
+   "metadata": {},
+   "source": [
+    "#### Apodization using sine window multiplication\n",
+    "\n",
+    "The`sp`  apodization is by default performed on the last dimension.\n",
+    "\n",
+    "Functional form of apodization window (cfBruker TOPSPIN manual): $sp(t) = \\sin(\\frac{(\\pi - \\phi) t }{\\text{aq}} +\n",
+    "\\phi)^{pow}$\n",
+    "\n",
+    "where\n",
+    "* $0 < t < \\text{aq}$ and  $\\phi = \\pi ⁄ \\text{sbb}$ when $\\text{ssb} \\ge 2$\n",
+    "\n",
+    "or\n",
+    "*    $\\phi = 0$ when $\\text{ssb} < 2$\n",
+    "\n",
+    "$\\text{aq}$ is an acquisition status parameter and $\\text{ssb}$ is a processing parameter (see below) and $\\text{\n",
+    "pow}$ is an exponent equal to 1 for a sine bell window or 2 for a squared sine bell window.\n",
+    "\n",
+    "The $\\text{ssb}$ parameter mimics the behaviour of the `SSB` parameter on bruker TOPSPIN software:\n",
+    "* Typical values are 1 for a pure sine function and 2 for a pure cosine function.\n",
+    "* Values greater than 2 give a mixed sine/cosine function. Note that all values smaller than 2, for example 0,\n",
+    "have the same effect as $\\text{ssb}=1$, namely a pure sine function.\n",
+    "\n",
+    "**Shortcuts**:\n",
+    "* `sine` is strictly a alias of `sp`\n",
+    "* `sinm` is equivalent to `sp` with $\\text{pow}=1$\n",
+    "* `qsin` is equivalent to `sp` with $\\text{pow}=2$\n",
+    "\n",
+    "Below are several examples of `sinm` and `qsin` apodization functions."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "streaming-coast",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "nd = dataset.copy()\n",
+    "_ = nd.plot()\n",
+    "\n",
+    "new, curve = nd.qsin(ssb=3, retfunc=True)\n",
+    "_ = curve.plot(color='r', clear=False)\n",
+    "_ = new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color='r', clear=False)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "independent-synthetic",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "nd = dataset.copy()\n",
+    "_ = nd.plot()\n",
+    "\n",
+    "new, curve = nd.sinm(ssb=1, retfunc=True)\n",
+    "_ = curve.plot(color='b', clear=False)\n",
+    "_ = new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color='b', clear=False)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cosmetic-confidentiality",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "nd = dataset.copy()\n",
+    "_ = nd.plot()\n",
+    "\n",
+    "new, curve = nd.sinm(ssb=3, retfunc=True)\n",
+    "_ = curve.plot(color='b', ls='--', clear=False)\n",
+    "_ = new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color='b', clear=False)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "musical-newfoundland",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "nd = dataset.copy()\n",
+    "_ = nd.plot()\n",
+    "\n",
+    "new, curve = nd.qsin(ssb=2, retfunc=True)\n",
+    "_ = curve.plot(color='m', clear=False)\n",
+    "_ = new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color='m', clear=False)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "living-milton",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "nd = dataset.copy()\n",
+    "_ = nd.plot()\n",
+    "\n",
+    "new, curve = nd.qsin(ssb=1, retfunc=True)\n",
+    "_ = curve.plot(color='g', clear=False)\n",
+    "_ = new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color='g', clear=False)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "british-funds",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "correct-stable",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "jupytext": {
+   "encoding": "# -*- coding: utf-8 -*-",
+   "formats": "ipynb,py:percent",
+   "notebook_metadata_filter": "all"
+  },
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

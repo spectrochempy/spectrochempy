@@ -1,0 +1,13 @@
+
+spectrochempy.qsin
+==================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: qsin
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.qsin.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

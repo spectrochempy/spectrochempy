@@ -1,0 +1,13 @@
+
+spectrochempy.conj
+==================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: conj
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.conj.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

@@ -1,0 +1,13 @@
+
+spectrochempy.identity
+======================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: identity
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.identity.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

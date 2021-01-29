@@ -1,0 +1,13 @@
+
+spectrochempy.NDDataset.plotly\_stack
+=====================================
+
+.. currentmodule:: spectrochempy
+
+.. automethod:: NDDataset.plotly_stack
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.NDDataset.plotly_stack.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

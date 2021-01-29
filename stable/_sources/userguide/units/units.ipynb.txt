@@ -1,0 +1,306 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "veterinary-strand",
+   "metadata": {},
+   "source": [
+    "# Units & Quantities"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "black-judge",
+   "metadata": {},
+   "source": [
+    "Spectrochempy can do calculations with units - it uses [pint](https://pint.readthedocs.io) to define and perform\n",
+    "operation on data with units."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "gentle-extraction",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from spectrochempy import *  # noqa: F403"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cheap-ranch",
+   "metadata": {},
+   "source": [
+    "## Create quantities\n",
+    "\n",
+    "to create quantity, use for instance, one of the following expression:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "monthly-fortune",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "Quantity('10.0 cm^-1')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "occupational-johnston",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "Quantity(1.0, 'cm^-1/hour')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "enhanced-insured",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "Quantity(10.0, ur.cm / ur.km)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "premium-airline",
+   "metadata": {},
+   "source": [
+    "or may be (?) simpler,"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "muslim-beijing",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "10.0 * ur.meter / ur.gram / ur.volt"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "circular-penguin",
+   "metadata": {},
+   "source": [
+    "`ur` stands for **unit registry**, which handle many type of units\n",
+    "(and conversion between them)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "concerned-asbestos",
+   "metadata": {},
+   "source": [
+    "## Do arithmetics with units"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "imported-junior",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "a = 900 * ur.km\n",
+    "b = 4.5 * ur.hours\n",
+    "a / b"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "mechanical-reunion",
+   "metadata": {},
+   "source": [
+    "Such calculations can also be done using the following syntax, using a string expression"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "forward-annotation",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "Quantity(\"900 km / (8 hours)\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "usual-baseline",
+   "metadata": {},
+   "source": [
+    "## Convert between units"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "embedded-dance",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c = a / b\n",
+    "c.to('cm/s')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "vocal-wealth",
+   "metadata": {},
+   "source": [
+    "We can make the conversion *inplace* using *ito* instead of *to*"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "social-analyst",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c.ito('m/s')\n",
+    "c"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "combined-medicaid",
+   "metadata": {},
+   "source": [
+    "## Do math operations with consistent units"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "retained-promotion",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "x = 10 * ur.radians\n",
+    "np.sin(x)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "funny-trinity",
+   "metadata": {},
+   "source": [
+    "Consistency of the units are checked!"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "amber-european",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "x = 10 * ur.meters\n",
+    "np.sqrt(x)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "later-palestine",
+   "metadata": {},
+   "source": [
+    "but this is wrong..."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "steady-statement",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "x = 10 * ur.meters\n",
+    "try:\n",
+    "    np.cos(x)\n",
+    "except DimensionalityError as e:\n",
+    "    error_(e)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "advisory-conditions",
+   "metadata": {},
+   "source": [
+    "Units can be set for NDDataset data and/or Coordinates"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "lesser-strip",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ds = NDDataset([1., 2., 3.], units='g/cm^3', title='concentration')\n",
+    "ds"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "indirect-haven",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ds.to('kg/m^3')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "external-suffering",
+   "metadata": {},
+   "source": [
+    "One can do transparent calculation using the units"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "first-cattle",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "volume = Quantity(\"2 m^3\")\n",
+    "ds1 = ds * volume\n",
+    "ds1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "coral-improvement",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ds1 / ds"
+   ]
+  }
+ ],
+ "metadata": {
+  "jupytext": {
+   "formats": "ipynb,py:percent",
+   "notebook_metadata_filter": "all"
+  },
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

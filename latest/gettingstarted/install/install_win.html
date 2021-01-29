@@ -1,0 +1,436 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Installation Guide for Windows &mdash; SpectroChemPy v0.2.5.dev8 0.2.5.dev8 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_override.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery-dataframe.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery-rendered-html.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/scpy.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Install a Docker container" href="install_docker.html" />
+    <link rel="prev" title="Installation Guide for Mac OSX" href="install_mac.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html">
+          
+
+          
+            
+            <img src="../../_static/scpy.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.5.dev8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> SpectroChemPy </span>
+        version: latest
+        <span class="fa fa-caret-down"></span>
+      </span>
+        <div class="rst-other-versions">
+            <dl>
+                <dt>Other versions</dt>
+                
+                    
+                
+                    
+                        <dd><a href="https://spectrochempy.github.io/spectrochempy/stable/index.html">STABLE</a></dd>
+                    
+                
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Downloads</dt>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/latest-spectrochempy.pdf">PDF</a></dd>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/latest-spectrochempy-notebooks.zip">Notebooks</a></dd>
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Sources on GitHub</dt>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
+
+            </dl>
+
+        </div>
+    </div>
+
+    
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Home</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../whyscpy.html">Why <strong>SpectroChemPy</strong>  ?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gallery/auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Installation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="index.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#installation-of-scpy">Installation of <strong>SpectroChemPy</strong></a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">User's Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/introduction/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/objects.html">Data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/units/units.html">Units &amp; Quantities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/importexport/importexport.html">Import &amp; Export</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/plotting/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/processing/processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/fitting/fitting.html">Fitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/analysis/analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/databases/databases.html">Databases</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference &amp; Help</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/reference/changelog.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/reference/index.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/reference/faq.html">Frequently asked questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/examples.html">Adding new tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/examples.html#adding-your-examples-to-the-gallery">Adding your examples to the gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/contributing.html">Developer’s Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/citing.html">Citing  <strong>SpectroChemPy</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/seealso.html">See also</a></li>
+</ul>
+
+            
+          
+
+
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SpectroChemPy v0.2.5.dev8</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Installation guide</a> &raquo;</li>
+        
+      <li>Installation Guide for Windows</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../_sources/gettingstarted/install/install_win.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    
+    
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="installation-guide-for-windows">
+<span id="install-win"></span><h1>Installation Guide for Windows<a class="headerlink" href="#installation-guide-for-windows" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p id="conda-win">The following steps have been checked only with windows 10 but should work with
+previous versions as well.</p>
+<p>We highly recommend that all new users install <strong>SpectroChemPy</strong> interface via Conda. You
+can install Spectrochempy in a dedicated environment (recommended, steps 4. and
+5. below). You can also use your base environment or an existing environment
+(then skip steps 4. and 5.)</p>
+<ol class="arabic">
+<li><p>Open a command prompt (Select the Start button and type cmd), or preferably
+open the Anaconda Prompt in the Anaconda start Menu.</p>
+<a class="reference internal image-reference" href="../../_images/prompt.png"><img alt="Anaconda Prompt" src="../../_images/prompt.png" style="width: 200px;" /></a>
+</li>
+<li><p>Update conda (yes, even if you have just installed the distribution…):</p>
+<div class="highlight-bat notranslate"><div class="highlight"><pre><span></span><span class="p">(</span>base<span class="p">)</span> C:\<span class="p">&lt;</span>yourDefaultPath<span class="p">&gt;&gt;</span> conda update conda
+</pre></div>
+</div>
+<p>where <code class="xref py py-obj docutils literal notranslate"><span class="pre">&lt;yourDefaultPath&gt;</span></code> is you default workspace directory (often:
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">C:\Users\</span></code>)</p>
+</li>
+<li><p>Add channels to get specific packages:</p>
+<div class="highlight-bat notranslate"><div class="highlight"><pre><span></span><span class="p">(</span>base<span class="p">)</span> C:\<span class="p">&lt;</span>yourDefaultPath<span class="p">&gt;&gt;</span> conda config --add channels conda-forge
+<span class="p">(</span>base<span class="p">)</span> C:\<span class="p">&lt;</span>yourDefaultPath<span class="p">&gt;&gt;</span> conda config --add channels spectrocat
+<span class="p">(</span>base<span class="p">)</span> C:\<span class="p">&lt;</span>yourDefaultPath<span class="p">&gt;&gt;</span> conda config --add channels cantera
+</pre></div>
+</div>
+</li>
+<li><p><strong>Recommended</strong>: you can create a dedicated environment. We will name it
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">scpy</span></code> in this example but of course you can use whatever name you want.</p>
+<div class="highlight-bat notranslate"><div class="highlight"><pre><span></span><span class="p">(</span>base<span class="p">)</span> C:\<span class="p">&lt;</span>yourDefaultPath<span class="p">&gt;&gt;</span> conda create --name scpy
+</pre></div>
+</div>
+<p>Switch to this environment. At this point, <code class="xref py py-obj docutils literal notranslate"><span class="pre">(scpy)</span></code> should
+appear before the prompt instead of <code class="xref py py-obj docutils literal notranslate"><span class="pre">(base)</span></code>.</p>
+<div class="highlight-bat notranslate"><div class="highlight"><pre><span></span><span class="p">(</span>base<span class="p">)</span> C:\<span class="p">&lt;</span>yourDefaultPath<span class="p">&gt;&gt;</span> conda activate scpy
+<span class="p">(</span>scpy<span class="p">)</span> C:\<span class="p">&lt;</span>yourDefaultPath<span class="p">&gt;</span>&gt;
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You can make the scipy environment permanent by creating and using the
+following batch file (.bat)</p>
+<div class="highlight-bat notranslate"><div class="highlight"><pre><span></span><span class="p">@</span><span class="c1">REM launch a cmd window in scpy environment (path should beadapted)</span>
+<span class="p">@</span><span class="k">CALL</span> <span class="k">CD</span> C:\<span class="p">&lt;</span>yourWorkingFolder&gt;
+<span class="p">@</span><span class="k">CALL</span> CMD /K C:\<span class="p">&lt;</span>yourAnacondaFolder<span class="p">&gt;</span>\Scripts\activate.bat scpy
+</pre></div>
+</div>
+<p>This script, where <code class="xref py py-obj docutils literal notranslate"><span class="pre">&lt;yourAnacondaFolder&gt;</span></code> is the installation directory
+of your Miniconda/Anaconda distribution
+will open a command prompt  in  C:\&lt;yourWorkingFolder&gt; with the <code class="xref py py-obj docutils literal notranslate"><span class="pre">scpy</span></code>
+environment activated.</p>
+<p>Save the .bat file, for instance in
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">C:\&lt;yourAnacondaFolder&gt;Scriptsactivate-scpy.bat</span></code>,
+create a shortcut, name it, for instance, <code class="xref py py-obj docutils literal notranslate"><span class="pre">Anaconda</span> <span class="pre">prompt</span> <span class="pre">(scpy)</span></code>
+and place it in an easily accessible place (e.g. the Windows Startmenu
+Folder).</p>
+</div>
+</li>
+<li><p>Install <strong>SpectroChemPy</strong></p>
+<p>The conda installer has to solve all packages dependencies and is definitely
+a bit slow. So we recommand to install <a class="reference external" href="https://github.com/mamba-org/mamba">mamba</a>
+as a drop-in replacement via:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">(</span>scpy<span class="o">)</span> C:<span class="se">\&lt;</span>yourDefaultPath&gt;&gt; conda install mamba
+</pre></div>
+</div>
+<p>To install a stable version of spectrochempy, then you just have to do :</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">(</span>scpy<span class="o">)</span> C:<span class="se">\&lt;</span>yourDefaultPath&gt;&gt; mamba install spectrochempy
+</pre></div>
+</div>
+<p>or if you rather prefer not to use mamba:</p>
+<div class="highlight-bat notranslate"><div class="highlight"><pre><span></span><span class="p">(</span>scpy<span class="p">)</span> C:\<span class="p">&lt;</span>yourDefaultPath<span class="p">&gt;&gt;</span> conda install spectrochempy
+</pre></div>
+</div>
+<p>This can take time, depending on your python installation and the number of
+missing packages.</p>
+<p>If you prefer to deal with the latest development version, you must use the
+following command to install from the
+<a class="reference external" href="https://anaconda.org/spectrocat/spectrochempy">spectrocat/label/dev</a>
+channel instead of the <code class="xref py py-obj docutils literal notranslate"><span class="pre">spectrocat</span></code> channel:</p>
+<div class="highlight-bat notranslate"><div class="highlight"><pre><span></span><span class="p">(</span>scpy<span class="p">)</span> C:\<span class="p">&lt;</span>yourDefaultPath<span class="p">&gt;&gt;</span> mamba install -c spectrocat/label/dev spectrochempy
+</pre></div>
+</div>
+</li>
+</ol>
+</div>
+<div class="section" id="check-the-installation">
+<h2>Check the Installation<a class="headerlink" href="#check-the-installation" title="Permalink to this headline">¶</a></h2>
+<p>Check the installation by running a
+<a class="reference external" href="https://ipython.readthedocs.io/en/stable/">IPython</a> session by issuing in
+the terminal the following command:</p>
+<div class="highlight-bat notranslate"><div class="highlight"><pre><span></span><span class="p">(</span>scpy<span class="p">)</span> C:\<span class="p">&lt;</span>yourDefaultPath<span class="p">&gt;&gt;</span> ipython
+</pre></div>
+</div>
+<p>Then execute the following command:</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">from</span> <span class="nn">spectrochempy</span> <span class="kn">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+<p>If this goes well, you should see the following output, indicating that
+Spectrochempy is likely functional !</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="n">SpectroChemPy</span><span class="s1">&#39;s API - v.0.1.17</span>
+<span class="err">©</span> <span class="n">Copyright</span> <span class="mi">2014</span><span class="o">-</span><span class="mi">2020</span> <span class="o">-</span> <span class="n">A</span><span class="o">.</span><span class="n">Travert</span> <span class="o">&amp;</span> <span class="n">C</span><span class="o">.</span><span class="n">Fernandez</span> <span class="o">@</span> <span class="n">LCS</span>
+</pre></div>
+</div>
+<p>The recommended next step is to proceed to the <a class="reference internal" href="../../index.html#userguide"><span class="std std-ref">User’s Guide</span></a>.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="install_docker.html" class="btn btn-neutral float-right" title="Install a Docker container" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="install_mac.html" class="btn btn-neutral float-left" title="Installation Guide for Mac OSX" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2014-2021 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">
+        Last updated on Jan 29, 2021.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

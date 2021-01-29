@@ -1,0 +1,2136 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Plotting &mdash; SpectroChemPy v0.2.5.dev8 0.2.5.dev8 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_override.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery-dataframe.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery-rendered-html.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/scpy.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Processing" href="../processing/processing.html" />
+    <link rel="prev" title="Import IR Data" href="../importexport/importIR.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html">
+          
+
+          
+            
+            <img src="../../_static/scpy.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.5.dev8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> SpectroChemPy </span>
+        version: latest
+        <span class="fa fa-caret-down"></span>
+      </span>
+        <div class="rst-other-versions">
+            <dl>
+                <dt>Other versions</dt>
+                
+                    
+                
+                    
+                        <dd><a href="https://spectrochempy.github.io/spectrochempy/stable/index.html">STABLE</a></dd>
+                    
+                
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Downloads</dt>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/latest-spectrochempy.pdf">PDF</a></dd>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/latest-spectrochempy-notebooks.zip">Notebooks</a></dd>
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Sources on GitHub</dt>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
+
+            </dl>
+
+        </div>
+    </div>
+
+    
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Home</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/whyscpy.html">Why <strong>SpectroChemPy</strong>  ?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/gallery/auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/install/index.html">Installation</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../objects.html">Data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../units/units.html">Units &amp; Quantities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../importexport/importexport.html">Import &amp; Export</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Plotting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Load-the-API">Load the API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Loading-the-data">Loading the data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Preparing-the-data">Preparing the data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Selecting-the-output-window">Selecting the output window</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Using-Plotly-(experimental)">Using Plotly (experimental)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Default-plotting">Default plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Changing-the-aspect-of-the-plot">Changing the aspect of the plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Plotting-1D-datasets">Plotting 1D datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Adding-titles-and-annotations">Adding titles and annotations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Changing-the-plot-style-using-matpotlib-style-sheets">Changing the plot style using matpotlib style sheets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Create-your-own-style">Create your own style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Changing-the-type-of-plot">Changing the type of plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Plotting-several-dataset-on-the-same-figure">Plotting several dataset on the same figure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Overview-of-the-main-configuration-parameters">Overview of the main configuration parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#A-last-graph-for-the-road-and-fun…">A last graph for the road and fun…</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../processing/processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fitting/fitting.html">Fitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analysis/analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../databases/databases.html">Databases</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference &amp; Help</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/changelog.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/faq.html">Frequently asked questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/examples.html">Adding new tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/examples.html#adding-your-examples-to-the-gallery">Adding your examples to the gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/contributing.html">Developer’s Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/citing.html">Citing  <strong>SpectroChemPy</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/seealso.html">See also</a></li>
+</ul>
+
+            
+          
+
+
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SpectroChemPy v0.2.5.dev8</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Plotting</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../_sources/userguide/plotting/plotting.ipynb.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    
+    
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt a.copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="Plotting">
+<h1>Plotting<a class="headerlink" href="#Plotting" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="Load-the-API">
+<h2>Load the API<a class="headerlink" href="#Load-the-API" title="Permalink to this headline">¶</a></h2>
+<p>First, before anything else, we import the spectrochempy API:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">spectrochempy</span> <span class="kn">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<table><tr><td>
+
+<img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAAlw
+SFlzAAAJOgAACToB8GSSSgAAAetpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6
+bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDUuNC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8x
+OTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAg
+eG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIgogICAgICAgICAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMu
+YWRvYmUuY29tL3RpZmYvMS4wLyI+CiAgICAgICAgIDx4bXA6Q3JlYXRvclRvb2w+bWF0cGxvdGxpYiB2ZXJzaW9uIDIuMS4wLCBo
+dHRwOi8vbWF0cGxvdGxpYi5vcmcvPC94bXA6Q3JlYXRvclRvb2w+CiAgICAgICAgIDx0aWZmOk9yaWVudGF0aW9uPjE8L3RpZmY6
+T3JpZW50YXRpb24+CiAgICAgIDwvcmRmOkRlc2NyaXB0aW9uPgogICA8L3JkZjpSREY+CjwveDp4bXBtZXRhPgqNQaNYAAAGiUlE
+QVRIDY1We4xU1Rn/3XPuYx47u8w+hnU38hTcuoUEt/6D2y4RB0ME1BoEd9taJaKh9CFiN7YGp7appUAMNmktMZFoJTYVLVQ0smsy
+26CN0SU1QgsuFAaW3WVmx33N677O6XfuyoIxTXqSO/fec+75fd93vt/3/UbDV0aKSZmCpkFMLz3T9utuu2N+o98aDSMBKVAo89z5
+y+zEz3ZafcCOfvWdlGCalqKn1Bf71CygTd+mf1esSOnpdMpTb+vWpTZuWVfe3jLPa5tzHYNm0T5N0gpdkkHaDBeGBU6d1/t/fyS8
++/CbqdfUvmsx1PuMgc2bNxv79u1zgd31r+7JH1jbIZKxWRXAcYUQ8IWvBfBXNjEuJWPgMA02NR7C3/pYT9fjdZ3A9tGrWF8YSJHn
+qcDz3y7q2T967PZv+gnYJdd1mEZ+62zGDQV/dQgKhmLzDNOXCEWM3j6eTT5Y3w78dOBKJLR1PQf+4ivPj76UPZnssBN+wbM9Aet/
+AV81Mf1EEULXYfOobvX2WWQk0aoioXwwSmirOlioY0mu8BIouzYl7P8GV3vpqCCEZvlFz769w08oLDWvyKIyL1asSm28d6WfzA97
+ztvvV1kexUMsmhlkULEkuGYmFYC6AvfUrITnwUKl5K79lkjeSSRRTCTbQPd95e1WzMbZSya74XoXAxctCllCnbECMOjZNGRwvzIX
+nD85wbkMmKK+U045Dtdi8Qp+SAxU2GTg2bYlC9224pgvmSb54vkVTBQYyhUt2KjAMyMmPjwRQW5Mh2WKwJhlBh6jVGagFM84wZnQ
+4bpC0Rt4pk1PbSt0NDcxDA5xryosDHWgtbM0DGZDWLSoiDMDYeQnGVrmOThxLozB0RAaahzkJzjKNqcIQBymJFMkOlN8Dqjpg0XY
+Tx5xO/QbmmUrqIjGJznq47TqTaClKYfjp+PInLMwnOdYvtQBZ2XcunQY+VwIo4U4muoFEjVEFE6lQyEUKzHYfgQG9ylCyngU+Cxj
+tOqxCDGHcCsOMCs6iQul5ZiStdATYxjMZXDLTUVwLY8Jey4uOh2IxjwsrP8UXJYxUrkZrghBahzV5iXU6gNkq0Z1EzIsUBUSCV2n
+EOHo0LVxHCpuxabJJdhi5PFnvw5vLXwXIfNZvD/+JNo/X40NegE54sUaazl+UL8XD1x+FB9Ijjt4EQfdGN6J/x131LwIV9ap/AYs
+0x1fz1ZKFbh6A7qKy/By9Dg6G36Ep91vUJJ15Cqr0Z67E8/HzmBrw1OwxWyM+3Mo6BAuSB17oyfx0Oyl2DN0Hqs/70Cx6hBCvESF
+UY1ShWXZZEE7OTAYxZzaPH4TuoiusZvRnunFy2NbiHYuBp2vB66srX4vMEjpRKPxKXmnoQ4+Mn4DPiv8CYcrs3GfNUXJLtM+alSO
+hrMj/KT+wBNW3+E/2liywNO3iSflbaFva/+stGDTxE0E9Sjaox8HBhxpEamzMGSEaFKg+mjEddzDh1MxTDq3YV1kGBsjfwW3S9Cq
+anjmko+ndlb1UR3s6K8JlfphNWq9Ew/7c61T2BB/EbcaNkb8GBaE0tANH7/M34PLdhJDzjIcL9xPbdTG6zyM72Y+wXPHmvB489No
+fm0b5HnbQ9Rgp/7DSSd29AeVvPeNyK6JcYl/yQVi5dBjuGvoV/gaJe47s45QUxrDmcYX0MBsdF7egvXZ7+O0vZA4X8QmOQWjlSK7
+RDz5wIM30gp9UbWcGjXxhzdDu1SiNSpx6kcQB57rPnr/3dlkZarWLnlRq5oPET1dOCIOk4wALib9eeS5iygfhkd09H0DWphB/+gs
++PcOAS+ssrFmmXXgVfR0de9cpbAJfH3Q1jofW9DZk56dDcVsq9YcsoUMEd1qyLoT3BX1YiyHMJuk97hyjqIoE91t+NcTLeN0ZrfM
+oXatZbu6G0h4VG+ibqq0IJVK6cAjo6serG3vSUezCMct0yQeSOFJSUImqb2qbknUpDqlZxE0QZ+ZUpSlZx79h4Nda6zef9dlk121
+JDjbR5XggPRZlRnS6bRQRtLpn4++cuie/Yvn2svmNxuLw9WCcYIl4fEoTEGiSTUqJdfgU+8ROqf1iMkLzS389YtNPXc/PH8l8ONB
+JZkHD+4JtD04HmVEDWWErmBhzV2/2LB1bemJG6krzv2S6NOHUgtEP0Oif5pE/3fHoruP7N8RiP61GArzSwbUhJJQpXJKiKbfr/3b
+IhKq76sKPUdF9NW/LSqfSn6vjv8C45H/6FSgvZQAAAAASUVORK5CYII='
+     style='height:25px; border-radius:12px; display:inline-block; float:left; vertical-align:middle'></img>
+
+</td><td>
+
+&nbsp;&nbsp;<span style='font-size:12px'>SpectroChemPy's API - v.0.2.5.dev8<br/>© Copyright 2014-2021 - A.Travert & C.Fernandez @ LCS</span>
+
+</td></tr></table>
+</div></div>
+</div>
+</div>
+<div class="section" id="Loading-the-data">
+<h2>Loading the data<a class="headerlink" href="#Loading-the-data" title="Permalink to this headline">¶</a></h2>
+<p>For sake of demonstration of the plotting capabilities of SpectroChemPy (based on <a class="reference external" href="https://matplotlib.org">Matplotlib</a>), let’s first import a NDDataset from a file and make some (optional) preparation of the data to display.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">dataset</span> <span class="o">=</span> <span class="n">NDDataset</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;irdata/nh4y-activation.spg&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Preparing-the-data">
+<h2>Preparing the data<a class="headerlink" href="#Preparing-the-data" title="Permalink to this headline">¶</a></h2>
+<p>We keep only the region that we want to display</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[:,</span> <span class="mf">4000.</span><span class="p">:</span><span class="mf">650.</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p>We change the y coordinated so that times start at 0 and put it in minutes</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">dataset</span><span class="o">.</span><span class="n">y</span> <span class="o">-=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">dataset</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">ito</span><span class="p">(</span><span class="s2">&quot;minutes&quot;</span><span class="p">)</span>
+<span class="n">dataset</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Time on stream&#39;</span>
+</pre></div>
+</div>
+</div>
+<p>We will also mask a region that we do not want to display</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">dataset</span><span class="p">[:,</span> <span class="mf">1290.</span><span class="p">:</span><span class="mf">920.</span><span class="p">]</span> <span class="o">=</span> <span class="n">MASKED</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Selecting-the-output-window">
+<h2>Selecting the output window<a class="headerlink" href="#Selecting-the-output-window" title="Permalink to this headline">¶</a></h2>
+<p>For the examples below, we use inline matplotlib figures (non interactive): this can be forced using the magic function before loading spectrochempy.:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+</pre></div>
+</div>
+<p>but it is also the default in <code class="docutils literal notranslate"><span class="pre">Jupyter</span> <span class="pre">lab</span></code> (so we don’t really need to specify this). Note that when such magic function has been used, it is not possible to change the setting, except by resseting the notebook kernel.</p>
+<p>If one wants interactive displays (with selection, zooming, etc…) one can use:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> widget
+</pre></div>
+</div>
+<p>However, this suffer (at least for us) some incompatibilities in <code class="docutils literal notranslate"><span class="pre">jupyter</span> <span class="pre">lab</span></code>… it is worth to try! If you can not get it working in <code class="docutils literal notranslate"><span class="pre">jupyter</span> <span class="pre">lab</span></code> and you need interactivity, you can use the following:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span>
+</pre></div>
+</div>
+<p>which has the effect of displaying the figures in independant windows using default matplotlib backend (e.g., <code class="docutils literal notranslate"><span class="pre">Tk</span></code>), with all the interactivity of matplotlib.</p>
+<p>But you can explicitly request a different GUI backend:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> qt
+</pre></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Using-Plotly-(experimental)">
+<h2>Using Plotly (experimental)<a class="headerlink" href="#Using-Plotly-(experimental)" title="Permalink to this headline">¶</a></h2>
+<p>For a better experience of interactivity inside a notebook, SpectroChemPy also offer the possibillity to use Plotly.</p>
+<p>See the dedicated tutorial: <a class="reference external" href="...">here</a></p>
+</div>
+<div class="section" id="Default-plotting">
+<h2>Default plotting<a class="headerlink" href="#Default-plotting" title="Permalink to this headline">¶</a></h2>
+<p>To plot the previously loaded dataset, it is very simple: we use the <code class="docutils literal notranslate"><span class="pre">plot</span></code> command (generic plot).</p>
+<p>The current NDDataset is 2D, a <strong>stack plot</strong> is displayed by default, with a <strong>viridis</strong> colormap.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">preferences</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>        <span class="c1"># Reset to default plot preferences</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_plotting_plotting_21_0.png" src="../../_images/userguide_plotting_plotting_21_0.png" />
+</div>
+</div>
+<div class="alert alert-block alert-info"><p>Tip:</p>
+<p>Note, in the line above, that we used <code class="docutils literal notranslate"><span class="pre">_</span> <span class="pre">=</span> <span class="pre">...</span></code> syntax. This is to avoid any ouput but the plot from this statement.</p>
+</div></div>
+<div class="section" id="Changing-the-aspect-of-the-plot">
+<h2>Changing the aspect of the plot<a class="headerlink" href="#Changing-the-aspect-of-the-plot" title="Permalink to this headline">¶</a></h2>
+<p>We can change the default plot configuration for this dataset (see below for an overview of the available configuration parameters.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>  <span class="c1"># The default figsize is (6.8,4.4)</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">colorbar</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># This add a color bar on a side</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">colormap</span> <span class="o">=</span> <span class="s1">&#39;magma&#39;</span>  <span class="c1"># The default colormap is viridis</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">facecolor</span> <span class="o">=</span> <span class="s1">&#39;.95&#39;</span>  <span class="c1"># Make the graph background colored in a ligth gray</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="n">_</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_plotting_plotting_25_0.png" src="../../_images/userguide_plotting_plotting_25_0.png" />
+</div>
+</div>
+<p>Note that, by default, sans-serif font are used for all text in the figure. But if you prefer, serif, or monospace font can be used instead:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">family</span> <span class="o">=</span> <span class="s1">&#39;serif&#39;</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_plotting_plotting_27_1.png" src="../../_images/userguide_plotting_plotting_27_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">family</span> <span class="o">=</span> <span class="s1">&#39;monospace&#39;</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_plotting_plotting_28_1.png" src="../../_images/userguide_plotting_plotting_28_1.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Plotting-1D-datasets">
+<h2>Plotting 1D datasets<a class="headerlink" href="#Plotting-1D-datasets" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+<span class="n">d1D</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># select the last row of the previous 2D dataset</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">d1D</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_plotting_plotting_30_1.png" src="../../_images/userguide_plotting_plotting_30_1.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Adding-titles-and-annotations">
+<h2>Adding titles and annotations<a class="headerlink" href="#Adding-titles-and-annotations" title="Permalink to this headline">¶</a></h2>
+<p>The plot function return a reference to the subplot <code class="docutils literal notranslate"><span class="pre">ax</span></code> on which the data have been plotted. We can then use this reference to modify some element of the plot.</p>
+<p>For example, here we add a title and some annotations:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">colorbar</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">colormap</span> <span class="o">=</span> <span class="s1">&#39;terrain&#39;</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">family</span> <span class="o">=</span> <span class="s1">&#39;monospace&#39;</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># This temporary suppress the grid after the plot is done - not saved in prefs</span>
+
+<span class="c1"># set title</span>
+<span class="n">title</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;NH$_4$Y IR spectra during activation&#39;</span><span class="p">)</span>
+<span class="n">title</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+<span class="n">title</span><span class="o">.</span><span class="n">set_fontstyle</span><span class="p">(</span><span class="s1">&#39;italic&#39;</span><span class="p">)</span>
+<span class="n">title</span><span class="o">.</span><span class="n">set_fontsize</span><span class="p">(</span><span class="mi">14</span><span class="p">)</span>
+
+<span class="c1"># put some text</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">1200.</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Masked region</span><span class="se">\n</span><span class="s1"> (saturation)&#39;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
+
+<span class="c1"># put some fancy annotations (see matplotlib documentation to learn how to design this)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="s1">&#39;OH groups&#39;</span><span class="p">,</span> <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">3600.</span><span class="p">,</span> <span class="mf">1.25</span><span class="p">),</span> <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">50</span><span class="p">),</span> <span class="n">textcoords</span><span class="o">=</span><span class="s1">&#39;offset points&#39;</span><span class="p">,</span>
+                <span class="n">arrowprops</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">arrowstyle</span><span class="o">=</span><span class="s2">&quot;fancy&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;0.5&quot;</span><span class="p">,</span> <span class="n">shrinkB</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">connectionstyle</span><span class="o">=</span><span class="s2">&quot;arc3,rad=-0.3&quot;</span><span class="p">,</span> <span class="p">),</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_plotting_plotting_33_1.png" src="../../_images/userguide_plotting_plotting_33_1.png" />
+</div>
+</div>
+<p>More information about annotation can be found in the <a class="reference external" href="https://matplotlib.org/tutorials/text/annotations.html">matplotlib documentation: annotations</a></p>
+</div>
+<div class="section" id="Changing-the-plot-style-using-matpotlib-style-sheets">
+<h2>Changing the plot style using matpotlib style sheets<a class="headerlink" href="#Changing-the-plot-style-using-matpotlib-style-sheets" title="Permalink to this headline">¶</a></h2>
+<p>The easiest way to to change the plot style may be to use presetted style such as those used in <a class="reference external" href="https://matplotlib.org/3.3.3/tutorials/introductory/customizing.html">matplotlib styles</a>. This is directly included in the preferences of SpectroChemPy</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span><span class="o">.</span><span class="n">style</span> <span class="o">=</span> <span class="s1">&#39;grayscale&#39;</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_plotting_plotting_37_1.png" src="../../_images/userguide_plotting_plotting_37_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span><span class="o">.</span><span class="n">style</span> <span class="o">=</span> <span class="s1">&#39;ggplot&#39;</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_plotting_plotting_38_0.png" src="../../_images/userguide_plotting_plotting_38_0.png" />
+</div>
+</div>
+<p>Other styles are : * paper , which create figure suitable for two columns article (fig width: 3.4 inch) * poster * talk</p>
+<p>the styles can be combined:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">style</span> <span class="o">=</span> <span class="s1">&#39;grayscale&#39;</span><span class="p">,</span> <span class="s1">&#39;paper&#39;</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_plotting_plotting_41_1.png" src="../../_images/userguide_plotting_plotting_41_1.png" />
+</div>
+</div>
+<p>Style specification can also be done directly in the plot method:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span><span class="o">.</span><span class="n">colormap</span> <span class="o">=</span> <span class="s1">&#39;magma&#39;</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;scpy&#39;</span><span class="p">,</span> <span class="s1">&#39;paper&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_plotting_plotting_43_1.png" src="../../_images/userguide_plotting_plotting_43_1.png" />
+</div>
+</div>
+<p>To get a list of all available styles :</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span><span class="o">.</span><span class="n">available_styles</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;fivethirtyeight&#39;,
+ &#39;seaborn-darkgrid&#39;,
+ &#39;seaborn-poster&#39;,
+ &#39;scpy&#39;,
+ &#39;seaborn-pastel&#39;,
+ &#39;poster&#39;,
+ &#39;dark_background&#39;,
+ &#39;mydefault&#39;,
+ &#39;seaborn-white&#39;,
+ &#39;seaborn-muted&#39;,
+ &#39;grayscale&#39;,
+ &#39;seaborn-paper&#39;,
+ &#39;seaborn-deep&#39;,
+ &#39;seaborn-ticks&#39;,
+ &#39;sans&#39;,
+ &#39;seaborn-talk&#39;,
+ &#39;_classic_test_patch&#39;,
+ &#39;seaborn-notebook&#39;,
+ &#39;seaborn-whitegrid&#39;,
+ &#39;seaborn-dark&#39;,
+ &#39;fast&#39;,
+ &#39;notebook&#39;,
+ &#39;classic&#39;,
+ &#39;paper&#39;,
+ &#39;seaborn&#39;,
+ &#39;seaborn-bright&#39;,
+ &#39;serif&#39;,
+ &#39;seaborn-dark-palette&#39;,
+ &#39;tableau-colorblind10&#39;,
+ &#39;talk&#39;,
+ &#39;bmh&#39;,
+ &#39;seaborn-colorblind&#39;,
+ &#39;ggplot&#39;,
+ &#39;Solarize_Light2&#39;]
+</pre></div></div>
+</div>
+<p>Now to restore the default setting, you can use the reset function</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_plotting_plotting_47_1.png" src="../../_images/userguide_plotting_plotting_47_1.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Create-your-own-style">
+<h2>Create your own style<a class="headerlink" href="#Create-your-own-style" title="Permalink to this headline">¶</a></h2>
+<p>If you want to create your own style for later use, you can use the command <code class="docutils literal notranslate"><span class="pre">makestyle</span></code> (<strong>warning</strong>: you can not use <code class="docutils literal notranslate"><span class="pre">scpy</span></code> which is the READONLY default style).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span><span class="o">.</span><span class="n">makestyle</span><span class="p">(</span><span class="s1">&#39;scpy&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ ERROR | `scpy` is READ-ONLY. Please use an another style name.
+</pre></div></div>
+</div>
+<p>If no name is provided a default name is used :<code class="docutils literal notranslate"><span class="pre">mydefault</span></code></p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span><span class="o">.</span><span class="n">makestyle</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&#39;mydefault&#39;
+</pre></div></div>
+</div>
+<p><strong>Example:</strong></p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">colorbar</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">colormap</span> <span class="o">=</span> <span class="s1">&#39;jet&#39;</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">family</span> <span class="o">=</span> <span class="s1">&#39;monospace&#39;</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="mi">14</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">labelcolor</span> <span class="o">=</span> <span class="s1">&#39;blue&#39;</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">grid_axis</span> <span class="o">=</span> <span class="s1">&#39;x&#39;</span>
+
+<span class="n">_</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">plot</span><span class="p">();</span>
+
+<span class="n">prefs</span><span class="o">.</span><span class="n">makestyle</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&#39;mydefault&#39;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_plotting_plotting_54_2.png" src="../../_images/userguide_plotting_plotting_54_2.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>  <span class="c1"># plot with the default scpy style</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_plotting_plotting_55_1.png" src="../../_images/userguide_plotting_plotting_55_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span><span class="o">.</span><span class="n">style</span> <span class="o">=</span> <span class="s1">&#39;mydefault&#39;</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>  <span class="c1"># plot with our own style</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_plotting_plotting_56_1.png" src="../../_images/userguide_plotting_plotting_56_1.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Changing-the-type-of-plot">
+<h2>Changing the type of plot<a class="headerlink" href="#Changing-the-type-of-plot" title="Permalink to this headline">¶</a></h2>
+<p>By default, plots are done in stack mode.</p>
+<p>If you like to have contour plot, you can use:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+<span class="n">prefs</span><span class="o">.</span><span class="n">method_2D</span> <span class="o">=</span> <span class="s1">&#39;map&#39;</span>  <span class="c1"># this will change permanently the type of 2D plot</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">colormap</span> <span class="o">=</span> <span class="s1">&#39;magma&#39;</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">figure_figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_plotting_plotting_59_1.png" src="../../_images/userguide_plotting_plotting_59_1.png" />
+</div>
+</div>
+<p>You can also, for an individual plot use specialised plot commands, such as plot_stack, plot_map, plot_waterfall, or plot_image:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span><span class="o">.</span><span class="n">axes_facecolor</span> <span class="o">=</span> <span class="s1">&#39;white&#39;</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">plot_image</span><span class="p">(</span><span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># will use image_cmap preference!</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_plotting_plotting_61_0.png" src="../../_images/userguide_plotting_plotting_61_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">plot_waterfall</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">y_reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_plotting_plotting_62_0.png" src="../../_images/userguide_plotting_plotting_62_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span><span class="o">.</span><span class="n">style</span> <span class="o">=</span> <span class="s1">&#39;seaborn-paper&#39;</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">scatter</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">me</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">ms</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_plotting_plotting_63_0.png" src="../../_images/userguide_plotting_plotting_63_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Plotting-several-dataset-on-the-same-figure">
+<h2>Plotting several dataset on the same figure<a class="headerlink" href="#Plotting-several-dataset-on-the-same-figure" title="Permalink to this headline">¶</a></h2>
+<p>We can plot several datasets on the same figure using the <code class="docutils literal notranslate"><span class="pre">clear</span></code> argument.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">nspec</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>
+<span class="n">ds1</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[:</span><span class="n">nspec</span><span class="p">]</span>  <span class="c1"># split the dataset into too parts</span>
+<span class="n">ds2</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="n">nspec</span><span class="p">:]</span> <span class="o">-</span> <span class="mf">2.</span>  <span class="c1"># add an ofset to the second part</span>
+
+<span class="n">ax1</span> <span class="o">=</span> <span class="n">ds1</span><span class="o">.</span><span class="n">plot_stack</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">ds2</span><span class="o">.</span><span class="n">plot_stack</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span> <span class="n">clear</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">zlim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">2.5</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_plotting_plotting_66_0.png" src="../../_images/userguide_plotting_plotting_66_0.png" />
+</div>
+</div>
+<p>For 1D datasets only, you can also use the <code class="docutils literal notranslate"><span class="pre">plot_multiple</span></code>mathod:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">datasets</span> <span class="o">=</span> <span class="p">[</span><span class="n">dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="mi">10</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="mi">20</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="mi">50</span><span class="p">],</span> <span class="n">dataset</span><span class="p">[</span><span class="mi">53</span><span class="p">]]</span>
+<span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;sample </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;S1&quot;</span><span class="p">,</span> <span class="s2">&quot;S10&quot;</span><span class="p">,</span> <span class="s2">&quot;S20&quot;</span><span class="p">,</span> <span class="s2">&quot;S50&quot;</span><span class="p">,</span> <span class="s2">&quot;S53&quot;</span><span class="p">]]</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">facecolor</span> <span class="o">=</span> <span class="s1">&#39;.99&#39;</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">plot_multiple</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;scatter&#39;</span><span class="p">,</span> <span class="n">me</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">datasets</span><span class="o">=</span><span class="n">datasets</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_plotting_plotting_68_0.png" src="../../_images/userguide_plotting_plotting_68_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Overview-of-the-main-configuration-parameters">
+<h2>Overview of the main configuration parameters<a class="headerlink" href="#Overview-of-the-main-configuration-parameters" title="Permalink to this headline">¶</a></h2>
+<p>To display a dictionary of the current settings (<strong>compared to those set by default</strong> at API startup), you can simply type :</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+{<br/>&nbsp;&nbsp;&nbsp;&nbsp;"axes_facecolor":&nbsp;".99",<br/>&nbsp;&nbsp;&nbsp;&nbsp;"axes_grid":&nbsp;true<br/>}</div>
+</div>
+<div class="alert alert-block alert-warning"><p>Warning : Note that in the <code class="docutils literal notranslate"><span class="pre">dataset.preferences</span></code> dictionary (<code class="docutils literal notranslate"><span class="pre">prefs</span></code>), the parameters have a slightly different name, e.g., figure_figsize instead of figure.fisize which is the matplotlib syntax (In spectrochempy, dot (<code class="docutils literal notranslate"><span class="pre">.</span></code>) cannot be used in paremeter name, and thus it is replaced by an underscore (<code class="docutils literal notranslate"><span class="pre">_</span></code>))</p>
+<p>Actually, in the jupyter notebook, or in scripts, both syntax can be used to read or write most of the preferences entries</p>
+</div><p>To display the current values of <strong>all parameters</strong> correspondint to one group, e.g. <code class="docutils literal notranslate"><span class="pre">lines</span></code>, type:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span><span class="o">.</span><span class="n">lines</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+{<br/>&nbsp;&nbsp;&nbsp;&nbsp;"antialiased":&nbsp;true,<br/>&nbsp;&nbsp;&nbsp;&nbsp;"color":&nbsp;"b",<br/>&nbsp;&nbsp;&nbsp;&nbsp;"dash_capstyle":&nbsp;"butt",<br/>&nbsp;&nbsp;&nbsp;&nbsp;"dash_joinstyle":&nbsp;"round",<br/>&nbsp;&nbsp;&nbsp;&nbsp;"dashdot_pattern":&nbsp;[<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.0,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.0,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.0,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.0<br/>&nbsp;&nbsp;&nbsp;&nbsp;],<br/>&nbsp;&nbsp;&nbsp;&nbsp;"dashed_pattern":&nbsp;[<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.0,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.0<br/>&nbsp;&nbsp;&nbsp;&nbsp;],<br/>&nbsp;&nbsp;&nbsp;&nbsp;"dotted_pattern":&nbsp;[<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.0,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.0<br/>&nbsp;&nbsp;&nbsp;&nbsp;],<br/>&nbsp;&nbsp;&nbsp;&nbsp;"linestyle":&nbsp;"-",<br/>&nbsp;&nbsp;&nbsp;&nbsp;"linewidth":&nbsp;0.75,<br/>&nbsp;&nbsp;&nbsp;&nbsp;"marker":&nbsp;"None",<br/>&nbsp;&nbsp;&nbsp;&nbsp;"markeredgecolor":&nbsp;"auto",<br/>&nbsp;&nbsp;&nbsp;&nbsp;"markeredgewidth":&nbsp;0.0,<br/>&nbsp;&nbsp;&nbsp;&nbsp;"markerfacecolor":&nbsp;"auto",<br/>&nbsp;&nbsp;&nbsp;&nbsp;"markersize":&nbsp;7.0,<br/>&nbsp;&nbsp;&nbsp;&nbsp;"scale_dashes":&nbsp;false,<br/>&nbsp;&nbsp;&nbsp;&nbsp;"solid_capstyle":&nbsp;"round",<br/>&nbsp;&nbsp;&nbsp;&nbsp;"solid_joinstyle":&nbsp;"round"<br/>}</div>
+</div>
+<p>To display <strong>help</strong> on a single parameter, type:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span><span class="o">.</span><span class="n">help</span><span class="p">(</span><span class="s1">&#39;lines_linewidth&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-bold">lines_linewidth = </span><span class="ansi-green-intense-fg ansi-bold">0.75</span><span class="ansi-bold">      [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.75</span><span class="ansi-bold">]</span>
+                    line width in points
+
+</pre></div></div>
+</div>
+<p>To view <strong>all parameters</strong>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-bold">agg_path_chunksize = </span><span class="ansi-green-intense-fg ansi-bold">20000</span><span class="ansi-bold">  [default: </span><span class="ansi-blue-intense-fg ansi-bold">20000</span><span class="ansi-bold">]</span>
+                    0 to disable; values in the range 10000 to 100000 can improve speed slightly and
+                    prevent an Agg rendering failure when plotting very large data sets, especially
+                    if they are very gappy. It may cause minor artifacts, though. A value of 20000
+                    is probably a good starting point.
+
+<span class="ansi-bold">antialiased = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">  [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+                    antialiased option for surface plot
+
+<span class="ansi-bold">axes3d_grid = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">  [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+                    display grid on 3d axes
+
+<span class="ansi-bold">axes_autolimit_mode = </span><span class="ansi-green-intense-fg ansi-bold">data</span><span class="ansi-bold">  [default: </span><span class="ansi-blue-intense-fg ansi-bold">data</span><span class="ansi-bold">]</span>
+                    How to scale axes limits to the data. Use &#34;data&#34; to use data limits, plus some
+                    margin. Use &#34;round_number&#34; move to the nearest &#34;round&#34; number
+
+<span class="ansi-bold">axes_axisbelow = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">       [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+                    whether axis gridlines and ticks are below the axes elements (lines, text, etc)
+
+<span class="ansi-bold">axes_edgecolor = </span><span class="ansi-green-intense-fg ansi-bold">k</span><span class="ansi-bold">  [default: </span><span class="ansi-blue-intense-fg ansi-bold">black</span><span class="ansi-bold">]</span>
+                    axes edge color
+
+<span class="ansi-bold">axes_facecolor = </span><span class="ansi-green-intense-fg ansi-bold">.99</span><span class="ansi-bold">        [default: </span><span class="ansi-blue-intense-fg ansi-bold">F0F0F0</span><span class="ansi-bold">]</span>
+                    axes background color
+
+<span class="ansi-bold">axes_formatter_limits = </span><span class="ansi-green-intense-fg ansi-bold">(-7.0, 7.0)</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">traitlets.Undefined</span><span class="ansi-bold">]</span>
+                    use scientific notation if log10 of the axis range is smaller than the first or
+                    larger than the second
+
+<span class="ansi-bold">axes_formatter_offset_threshold = </span><span class="ansi-green-intense-fg ansi-bold">4</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">4</span><span class="ansi-bold">]</span>
+                    When useoffset is True, the offset will be used when it can remove at least this
+                    number of significant digits from tick labels.
+
+<span class="ansi-bold">axes_formatter_use_locale = </span><span class="ansi-green-intense-fg ansi-bold">False</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">False</span><span class="ansi-bold">]</span>
+                    When True, format tick labels according to the user&#34;s locale. For example, use
+                    &#34;,&#34; as a decimal separator in the fr_FR locale.
+
+<span class="ansi-bold">axes_formatter_use_mathtext = </span><span class="ansi-green-intense-fg ansi-bold">False</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">False</span><span class="ansi-bold">]</span>
+                    When True, use mathtext for scientific notation.
+
+<span class="ansi-bold">axes_formatter_useoffset = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">     [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+                    If True, the tick label formatter will default to labeling ticks relative to an
+                    offset when the data range is small compared to the minimum absolute value of
+                    the data.
+
+<span class="ansi-bold">axes_grid = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">False</span><span class="ansi-bold">]</span>
+                    display grid or not
+
+<span class="ansi-bold">axes_grid_axis = </span><span class="ansi-green-intense-fg ansi-bold">both</span><span class="ansi-bold">       [default: </span><span class="ansi-blue-intense-fg ansi-bold">both</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">axes_grid_which = </span><span class="ansi-green-intense-fg ansi-bold">major</span><span class="ansi-bold">     [default: </span><span class="ansi-blue-intense-fg ansi-bold">major</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">axes_labelcolor = </span><span class="ansi-green-intense-fg ansi-bold">k</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">black</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">axes_labelpad = </span><span class="ansi-green-intense-fg ansi-bold">5.0</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">4.0</span><span class="ansi-bold">]</span>
+                    space between label and axis
+
+<span class="ansi-bold">axes_labelsize = </span><span class="ansi-green-intense-fg ansi-bold">10.0</span><span class="ansi-bold">       [default: </span><span class="ansi-blue-intense-fg ansi-bold">10.0</span><span class="ansi-bold">]</span>
+                    fontsize of the x any y labels
+
+<span class="ansi-bold">axes_labelweight = </span><span class="ansi-green-intense-fg ansi-bold">normal</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">normal</span><span class="ansi-bold">]</span>
+                    weight of the x and y labels
+
+<span class="ansi-bold">axes_linewidth = </span><span class="ansi-green-intense-fg ansi-bold">1.0</span><span class="ansi-bold">        [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.8</span><span class="ansi-bold">]</span>
+                    edge linewidth
+
+<span class="ansi-bold">axes_prop_cycle = </span><span class="ansi-green-intense-fg ansi-bold">cycler(&#39;color&#39;, [&#39;0072B2&#39;, &#39;009E73&#39;, &#39;D55E00&#39;, &#39;CC79A7&#39;, &#39;F0E442&#39;, &#39;56B4E9&#39;])</span><span class="ansi-bold">     [default: </span><span class="ansi-blue-intense-fg ansi-bold">cycler(&#39;color&#39;, [&#39;007200&#39;, &#39;009E73&#39;, &#39;D55E00&#39;, &#39;CC79A7&#39;, &#39;F0E442&#39;, &#39;56B4E9&#39;])</span><span class="ansi-bold">]</span>
+                    color cycle for plot lines as list of string colorspecs: single letter, long
+                    name, or web-style hex
+
+<span class="ansi-bold">axes_spines_bottom = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">axes_spines_left = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">     [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">axes_spines_right = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">axes_spines_top = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">      [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">axes_titlepad = </span><span class="ansi-green-intense-fg ansi-bold">5.0</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">5.0</span><span class="ansi-bold">]</span>
+                    pad between axes and title in points
+
+<span class="ansi-bold">axes_titlesize = </span><span class="ansi-green-intense-fg ansi-bold">14.0</span><span class="ansi-bold">       [default: </span><span class="ansi-blue-intense-fg ansi-bold">14.0</span><span class="ansi-bold">]</span>
+                    fontsize of the axes title
+
+<span class="ansi-bold">axes_titleweight = </span><span class="ansi-green-intense-fg ansi-bold">normal</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">normal</span><span class="ansi-bold">]</span>
+                    font weight for axes title
+
+<span class="ansi-bold">axes_titley = </span><span class="ansi-green-intense-fg ansi-bold">1.0</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">1.0</span><span class="ansi-bold">]</span>
+                    at the top, no autopositioning.
+
+<span class="ansi-bold">axes_unicode_minus = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+                    use unicode for the minus symbol rather than hyphen. See
+                    http://en.wikipedia.org/wiki/Plus_and_minus_signs#Character_codes
+
+<span class="ansi-bold">axes_xmargin = </span><span class="ansi-green-intense-fg ansi-bold">0.0</span><span class="ansi-bold">  [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.05</span><span class="ansi-bold">]</span>
+                    x margin. See `axes.Axes.margins`
+
+<span class="ansi-bold">axes_ymargin = </span><span class="ansi-green-intense-fg ansi-bold">0.0</span><span class="ansi-bold">  [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.05</span><span class="ansi-bold">]</span>
+                    y margin See `axes.Axes.margins`
+
+<span class="ansi-bold">ccount = </span><span class="ansi-green-intense-fg ansi-bold">50</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">50</span><span class="ansi-bold">]</span>
+                    ccount (steps in the column mode) for surface plot
+
+<span class="ansi-bold">colorbar = </span><span class="ansi-green-intense-fg ansi-bold">False</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">False</span><span class="ansi-bold">]</span>
+                    Show color bar for 2D plots
+
+<span class="ansi-bold">colormap = </span><span class="ansi-green-intense-fg ansi-bold">viridis</span><span class="ansi-bold">  [default: </span><span class="ansi-blue-intense-fg ansi-bold">viridis</span><span class="ansi-bold">]</span>
+                    A colormap name, gray etc... (equivalent to image_cmap
+
+<span class="ansi-bold">contour_alpha = </span><span class="ansi-green-intense-fg ansi-bold">1.0</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">1.0</span><span class="ansi-bold">]</span>
+                    Transparency of the contours
+
+<span class="ansi-bold">contour_corner_mask = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">  [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+                    True | False | legacy
+
+<span class="ansi-bold">contour_negative_linestyle = </span><span class="ansi-green-intense-fg ansi-bold">dashed</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">dashed</span><span class="ansi-bold">]</span>
+                    dashed | solid
+
+<span class="ansi-bold">contour_start = </span><span class="ansi-green-intense-fg ansi-bold">0.05</span><span class="ansi-bold">        [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.05</span><span class="ansi-bold">]</span>
+                    Fraction of the maximum for starting contour levels
+
+<span class="ansi-bold">date_autoformatter_day = </span><span class="ansi-green-intense-fg ansi-bold">%b %d %Y</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">%b %d %Y</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">date_autoformatter_hour = </span><span class="ansi-green-intense-fg ansi-bold">%H:%M:%S</span><span class="ansi-bold">  [default: </span><span class="ansi-blue-intense-fg ansi-bold">%H:%M:%S</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">date_autoformatter_microsecond = </span><span class="ansi-green-intense-fg ansi-bold">%H:%M:%S.%f</span><span class="ansi-bold">        [default: </span><span class="ansi-blue-intense-fg ansi-bold">%H:%M:%S.%f</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">date_autoformatter_minute = </span><span class="ansi-green-intense-fg ansi-bold">%H:%M:%S.%f</span><span class="ansi-bold">     [default: </span><span class="ansi-blue-intense-fg ansi-bold">%H:%M:%S.%f</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">date_autoformatter_month = </span><span class="ansi-green-intense-fg ansi-bold">%b %Y</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">%b %Y</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">date_autoformatter_second = </span><span class="ansi-green-intense-fg ansi-bold">%H:%M:%S.%f</span><span class="ansi-bold">     [default: </span><span class="ansi-blue-intense-fg ansi-bold">%H:%M:%S.%f</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">date_autoformatter_year = </span><span class="ansi-green-intense-fg ansi-bold">%Y</span><span class="ansi-bold">        [default: </span><span class="ansi-blue-intense-fg ansi-bold">%Y</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">errorbar_capsize = </span><span class="ansi-green-intense-fg ansi-bold">3.0</span><span class="ansi-bold">      [default: </span><span class="ansi-blue-intense-fg ansi-bold">1.0</span><span class="ansi-bold">]</span>
+                    length of end cap on error bars in pixels
+
+<span class="ansi-bold">figure_autolayout = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+                    When True, automatically adjust subplot parameters to make the plot fit the
+                    figure
+
+<span class="ansi-bold">figure_dpi = </span><span class="ansi-green-intense-fg ansi-bold">96.0</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">96.0</span><span class="ansi-bold">]</span>
+                    figure dots per inch
+
+<span class="ansi-bold">figure_edgecolor = </span><span class="ansi-green-intense-fg ansi-bold">white</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">white</span><span class="ansi-bold">]</span>
+                    figure edgecolor
+
+<span class="ansi-bold">figure_facecolor = </span><span class="ansi-green-intense-fg ansi-bold">white</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">white</span><span class="ansi-bold">]</span>
+                    figure facecolor; 0.75 is scalar gray
+
+<span class="ansi-bold">figure_figsize = </span><span class="ansi-green-intense-fg ansi-bold">(6.8, 4.4)</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">traitlets.Undefined</span><span class="ansi-bold">]</span>
+                    figure size in inches
+
+<span class="ansi-bold">figure_frameon = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">       [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+                    Show figure frame
+
+<span class="ansi-bold">figure_max_open_warning = </span><span class="ansi-green-intense-fg ansi-bold">30</span><span class="ansi-bold">        [default: </span><span class="ansi-blue-intense-fg ansi-bold">30</span><span class="ansi-bold">]</span>
+                    The maximum number of figures to open through the pyplot interface before
+                    emitting a warning. If less than one this feature is disabled.
+
+<span class="ansi-bold">figure_subplot_bottom = </span><span class="ansi-green-intense-fg ansi-bold">0.12</span><span class="ansi-bold">        [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.12</span><span class="ansi-bold">]</span>
+                    the bottom of the subplots of the figure
+
+<span class="ansi-bold">figure_subplot_hspace = </span><span class="ansi-green-intense-fg ansi-bold">0.0</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.0</span><span class="ansi-bold">]</span>
+                    the amount of height reserved for white space between subplots, expressed as a
+                    fraction of the average axis height
+
+<span class="ansi-bold">figure_subplot_left = </span><span class="ansi-green-intense-fg ansi-bold">0.15</span><span class="ansi-bold">  [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.15</span><span class="ansi-bold">]</span>
+                    the left side of the subplots of the figure
+
+<span class="ansi-bold">figure_subplot_right = </span><span class="ansi-green-intense-fg ansi-bold">0.95</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.95</span><span class="ansi-bold">]</span>
+                    the right side of the subplots of the figure
+
+<span class="ansi-bold">figure_subplot_top = </span><span class="ansi-green-intense-fg ansi-bold">0.98</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.98</span><span class="ansi-bold">]</span>
+                    the top of the subplots of the figure
+
+<span class="ansi-bold">figure_subplot_wspace = </span><span class="ansi-green-intense-fg ansi-bold">0.0</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.0</span><span class="ansi-bold">]</span>
+                    the amount of width reserved for blank space between subplots, expressed as a
+                    fraction of the average axis width
+
+<span class="ansi-bold">figure_titlesize = </span><span class="ansi-green-intense-fg ansi-bold">12.0</span><span class="ansi-bold">     [default: </span><span class="ansi-blue-intense-fg ansi-bold">12.0</span><span class="ansi-bold">]</span>
+                    size of the figure title (Figure.suptitle())
+
+<span class="ansi-bold">figure_titleweight = </span><span class="ansi-green-intense-fg ansi-bold">normal</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">normal</span><span class="ansi-bold">]</span>
+                    weight of the figure title
+
+<span class="ansi-bold">font_family = </span><span class="ansi-green-intense-fg ansi-bold">sans-serif</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">sans-serif</span><span class="ansi-bold">]</span>
+                    sans-serif|serif|cursive|monospace|fantasy
+
+<span class="ansi-bold">font_size = </span><span class="ansi-green-intense-fg ansi-bold">10.0</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">10.0</span><span class="ansi-bold">]</span>
+                    The default fontsize. Special text sizes can be defined relative to font.size,
+                    using the following values: xx-small, x-small, small, medium, large, x-large,
+                    xx-large, larger, or smaller
+
+<span class="ansi-bold">font_style = </span><span class="ansi-green-intense-fg ansi-bold">normal</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">normal</span><span class="ansi-bold">]</span>
+                    normal (or roman), italic or oblique
+
+<span class="ansi-bold">font_variant = </span><span class="ansi-green-intense-fg ansi-bold">normal</span><span class="ansi-bold">       [default: </span><span class="ansi-blue-intense-fg ansi-bold">normal</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">font_weight = </span><span class="ansi-green-intense-fg ansi-bold">normal</span><span class="ansi-bold">        [default: </span><span class="ansi-blue-intense-fg ansi-bold">normal</span><span class="ansi-bold">]</span>
+                    100|200|300|normal or 400|500|600|bold or 700|800|900|bolder|lighter
+
+<span class="ansi-bold">grid_alpha = </span><span class="ansi-green-intense-fg ansi-bold">1.0</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">1.0</span><span class="ansi-bold">]</span>
+                    transparency, between 0.0 and 1.0
+
+<span class="ansi-bold">grid_color = </span><span class="ansi-green-intense-fg ansi-bold">.85</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">.85</span><span class="ansi-bold">]</span>
+                    grid color
+
+<span class="ansi-bold">grid_linestyle = </span><span class="ansi-green-intense-fg ansi-bold">-</span><span class="ansi-bold">  [default: </span><span class="ansi-blue-intense-fg ansi-bold">-</span><span class="ansi-bold">]</span>
+                    solid
+
+<span class="ansi-bold">grid_linewidth = </span><span class="ansi-green-intense-fg ansi-bold">0.85</span><span class="ansi-bold">       [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.85</span><span class="ansi-bold">]</span>
+                    in points
+
+<span class="ansi-bold">hatch_color = </span><span class="ansi-green-intense-fg ansi-bold">k</span><span class="ansi-bold">     [default: </span><span class="ansi-blue-intense-fg ansi-bold">black</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">hatch_linewidth = </span><span class="ansi-green-intense-fg ansi-bold">1.0</span><span class="ansi-bold">       [default: </span><span class="ansi-blue-intense-fg ansi-bold">1.0</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">hist_bins = </span><span class="ansi-green-intense-fg ansi-bold">10</span><span class="ansi-bold">      [default: </span><span class="ansi-blue-intense-fg ansi-bold">traitlets.Undefined</span><span class="ansi-bold">]</span>
+                    The default number of histogram bins. If Numpy 1.11 or later is installed, may
+                    also be `auto`
+
+<span class="ansi-bold">image_aspect = </span><span class="ansi-green-intense-fg ansi-bold">equal</span><span class="ansi-bold">        [default: </span><span class="ansi-blue-intense-fg ansi-bold">equal</span><span class="ansi-bold">]</span>
+                    equal | auto | a number
+
+<span class="ansi-bold">image_cmap = </span><span class="ansi-green-intense-fg ansi-bold">viridis</span><span class="ansi-bold">        [default: </span><span class="ansi-blue-intense-fg ansi-bold">viridis</span><span class="ansi-bold">]</span>
+                    A colormap name, gray etc...
+
+<span class="ansi-bold">image_composite_image = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">        [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+                    When True, all the images on a set of axes are combined into a single composite
+                    image before saving a figure as a vector graphics file, such as a PDF.
+
+<span class="ansi-bold">image_interpolation = </span><span class="ansi-green-intense-fg ansi-bold">bilinear</span><span class="ansi-bold">      [default: </span><span class="ansi-blue-intense-fg ansi-bold">antialiased</span><span class="ansi-bold">]</span>
+                    see help(imshow) for options
+
+<span class="ansi-bold">image_lut = </span><span class="ansi-green-intense-fg ansi-bold">256</span><span class="ansi-bold">     [default: </span><span class="ansi-blue-intense-fg ansi-bold">256</span><span class="ansi-bold">]</span>
+                    the size of the colormap lookup table
+
+<span class="ansi-bold">image_origin = </span><span class="ansi-green-intense-fg ansi-bold">upper</span><span class="ansi-bold">        [default: </span><span class="ansi-blue-intense-fg ansi-bold">upper</span><span class="ansi-bold">]</span>
+                    lower | upper
+
+<span class="ansi-bold">image_resample = </span><span class="ansi-green-intense-fg ansi-bold">False</span><span class="ansi-bold">      [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">latex_preamble = </span><span class="ansi-green-intense-fg ansi-bold">\usepackage{siunitx}
+                            \sisetup{detect-all}
+                            \usepackage{times} # set the normal font here
+                            \usepackage{sansmath}
+                            # load up the sansmath so that math -&gt; helvet
+                            \sansmath
+                            </span><span class="ansi-bold">     [default: </span><span class="ansi-blue-intense-fg ansi-bold">\usepackage{siunitx}
+                            \sisetup{detect-all}
+                            \usepackage{times} # set the normal font here
+                            \usepackage{sansmath}
+                            # load up the sansmath so that math -&gt; helvet
+                            \sansmath
+                            </span><span class="ansi-bold">]</span>
+                    Latex preamble for matplotlib outputs IMPROPER USE OF THIS FEATURE WILL LEAD TO
+                    LATEX FAILURES. preamble is a comma separated list of LaTeX statements that are
+                    included in the LaTeX document preamble. An example: text.latex.preamble :
+                    \usepackage{bm},\usepackage{euler} The following packages are always loaded with
+                    usetex, so beware of package collisions: color, geometry, graphicx, type1cm,
+                    textcomp. Adobe Postscript (PSSNFS) font packages may also be loaded, depending
+                    on your font settings.
+
+<span class="ansi-bold">legend_borderaxespad = </span><span class="ansi-green-intense-fg ansi-bold">0.5</span><span class="ansi-bold">  [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.5</span><span class="ansi-bold">]</span>
+                    the border between the axes and legend edge
+
+<span class="ansi-bold">legend_borderpad = </span><span class="ansi-green-intense-fg ansi-bold">0.4</span><span class="ansi-bold">      [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.4</span><span class="ansi-bold">]</span>
+                    border whitespace
+
+<span class="ansi-bold">legend_columnspacing = </span><span class="ansi-green-intense-fg ansi-bold">0.5</span><span class="ansi-bold">  [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.5</span><span class="ansi-bold">]</span>
+                    column separation
+
+<span class="ansi-bold">legend_edgecolor = </span><span class="ansi-green-intense-fg ansi-bold">inherit</span><span class="ansi-bold">  [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.8</span><span class="ansi-bold">]</span>
+                    background patch boundary color
+
+<span class="ansi-bold">legend_facecolor = </span><span class="ansi-green-intense-fg ansi-bold">inherit</span><span class="ansi-bold">  [default: </span><span class="ansi-blue-intense-fg ansi-bold">inherit</span><span class="ansi-bold">]</span>
+                    inherit from axes.facecolor; or color spec
+
+<span class="ansi-bold">legend_fancybox = </span><span class="ansi-green-intense-fg ansi-bold">False</span><span class="ansi-bold">     [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+                    if True, use a rounded box for the legend background, else a rectangle
+
+<span class="ansi-bold">legend_fontsize = </span><span class="ansi-green-intense-fg ansi-bold">9.0</span><span class="ansi-bold">       [default: </span><span class="ansi-blue-intense-fg ansi-bold">9.0</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">legend_framealpha = </span><span class="ansi-green-intense-fg ansi-bold">None</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">traitlets.Undefined</span><span class="ansi-bold">]</span>
+                    legend patch transparency
+
+<span class="ansi-bold">legend_frameon = </span><span class="ansi-green-intense-fg ansi-bold">False</span><span class="ansi-bold">      [default: </span><span class="ansi-blue-intense-fg ansi-bold">False</span><span class="ansi-bold">]</span>
+                    if True, draw the legend on a background patch
+
+<span class="ansi-bold">legend_handleheight = </span><span class="ansi-green-intense-fg ansi-bold">0.7</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.7</span><span class="ansi-bold">]</span>
+                    the height of the legend handle
+
+<span class="ansi-bold">legend_handlelength = </span><span class="ansi-green-intense-fg ansi-bold">2.0</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">2.0</span><span class="ansi-bold">]</span>
+                    the length of the legend lines
+
+<span class="ansi-bold">legend_handletextpad = </span><span class="ansi-green-intense-fg ansi-bold">0.1</span><span class="ansi-bold">  [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.1</span><span class="ansi-bold">]</span>
+                    the space between the legend line and legend text
+
+<span class="ansi-bold">legend_labelspacing = </span><span class="ansi-green-intense-fg ansi-bold">0.2</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.2</span><span class="ansi-bold">]</span>
+                    the vertical space between the legend entries
+
+<span class="ansi-bold">legend_loc = </span><span class="ansi-green-intense-fg ansi-bold">upper right</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">best</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">legend_markerscale = </span><span class="ansi-green-intense-fg ansi-bold">1.0</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">1.0</span><span class="ansi-bold">]</span>
+                    the relative size of legend markers vs. original
+
+<span class="ansi-bold">legend_numpoints = </span><span class="ansi-green-intense-fg ansi-bold">1</span><span class="ansi-bold">        [default: </span><span class="ansi-blue-intense-fg ansi-bold">1</span><span class="ansi-bold">]</span>
+                    the number of marker points in the legend line
+
+<span class="ansi-bold">legend_scatterpoints = </span><span class="ansi-green-intense-fg ansi-bold">1</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">1</span><span class="ansi-bold">]</span>
+                    number of scatter points
+
+<span class="ansi-bold">legend_shadow = </span><span class="ansi-green-intense-fg ansi-bold">False</span><span class="ansi-bold">       [default: </span><span class="ansi-blue-intense-fg ansi-bold">False</span><span class="ansi-bold">]</span>
+                    if True, give background a shadow effect
+
+<span class="ansi-bold">lines_antialiased = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+                    render lines in antialiased (no jaggies)
+
+<span class="ansi-bold">lines_color = </span><span class="ansi-green-intense-fg ansi-bold">b</span><span class="ansi-bold">     [default: </span><span class="ansi-blue-intense-fg ansi-bold">b</span><span class="ansi-bold">]</span>
+                    has no affect on plot(); see axes.prop_cycle
+
+<span class="ansi-bold">lines_dash_capstyle = </span><span class="ansi-green-intense-fg ansi-bold">butt</span><span class="ansi-bold">  [default: </span><span class="ansi-blue-intense-fg ansi-bold">butt</span><span class="ansi-bold">]</span>
+                    butt|round|projecting
+
+<span class="ansi-bold">lines_dash_joinstyle = </span><span class="ansi-green-intense-fg ansi-bold">round</span><span class="ansi-bold">        [default: </span><span class="ansi-blue-intense-fg ansi-bold">round</span><span class="ansi-bold">]</span>
+                    miter|round|bevel
+
+<span class="ansi-bold">lines_dashdot_pattern = </span><span class="ansi-green-intense-fg ansi-bold">(3.0, 5.0, 1.0, 5.0)</span><span class="ansi-bold">        [default: </span><span class="ansi-blue-intense-fg ansi-bold">traitlets.Undefined</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">lines_dashed_pattern = </span><span class="ansi-green-intense-fg ansi-bold">(6.0, 6.0)</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">traitlets.Undefined</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">lines_dotted_pattern = </span><span class="ansi-green-intense-fg ansi-bold">(1.0, 3.0)</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">traitlets.Undefined</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">lines_linestyle = </span><span class="ansi-green-intense-fg ansi-bold">-</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">-</span><span class="ansi-bold">]</span>
+                    solid line
+
+<span class="ansi-bold">lines_linewidth = </span><span class="ansi-green-intense-fg ansi-bold">0.75</span><span class="ansi-bold">      [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.75</span><span class="ansi-bold">]</span>
+                    line width in points
+
+<span class="ansi-bold">lines_marker = </span><span class="ansi-green-intense-fg ansi-bold">None</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">None</span><span class="ansi-bold">]</span>
+                    the default marker
+
+<span class="ansi-bold">lines_markeredgecolor = </span><span class="ansi-green-intense-fg ansi-bold">auto</span><span class="ansi-bold">        [default: </span><span class="ansi-blue-intense-fg ansi-bold">auto</span><span class="ansi-bold">]</span>
+                    the default markeredgecolor
+
+<span class="ansi-bold">lines_markeredgewidth = </span><span class="ansi-green-intense-fg ansi-bold">0.0</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.0</span><span class="ansi-bold">]</span>
+                    the line width around the marker symbol
+
+<span class="ansi-bold">lines_markerfacecolor = </span><span class="ansi-green-intense-fg ansi-bold">auto</span><span class="ansi-bold">        [default: </span><span class="ansi-blue-intense-fg ansi-bold">auto</span><span class="ansi-bold">]</span>
+                    the default markerfacecolor
+
+<span class="ansi-bold">lines_markersize = </span><span class="ansi-green-intense-fg ansi-bold">7.0</span><span class="ansi-bold">      [default: </span><span class="ansi-blue-intense-fg ansi-bold">7.0</span><span class="ansi-bold">]</span>
+                    markersize, in points
+
+<span class="ansi-bold">lines_scale_dashes = </span><span class="ansi-green-intense-fg ansi-bold">False</span><span class="ansi-bold">  [default: </span><span class="ansi-blue-intense-fg ansi-bold">False</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">lines_solid_capstyle = </span><span class="ansi-green-intense-fg ansi-bold">round</span><span class="ansi-bold">        [default: </span><span class="ansi-blue-intense-fg ansi-bold">round</span><span class="ansi-bold">]</span>
+                    butt|round|projecting
+
+<span class="ansi-bold">lines_solid_joinstyle = </span><span class="ansi-green-intense-fg ansi-bold">round</span><span class="ansi-bold">       [default: </span><span class="ansi-blue-intense-fg ansi-bold">round</span><span class="ansi-bold">]</span>
+                    miter|round|bevel
+
+<span class="ansi-bold">markers_fillstyle = </span><span class="ansi-green-intense-fg ansi-bold">full</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">full</span><span class="ansi-bold">]</span>
+                    full|left|right|bottom|top|none
+
+<span class="ansi-bold">mathtext_bf = </span><span class="ansi-green-intense-fg ansi-bold">dejavusans:bold</span><span class="ansi-bold">       [default: </span><span class="ansi-blue-intense-fg ansi-bold">dejavusans:bold</span><span class="ansi-bold">]</span>
+                    bold
+
+<span class="ansi-bold">mathtext_cal = </span><span class="ansi-green-intense-fg ansi-bold">cursive</span><span class="ansi-bold">      [default: </span><span class="ansi-blue-intense-fg ansi-bold">cursive</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">mathtext_default = </span><span class="ansi-green-intense-fg ansi-bold">regular</span><span class="ansi-bold">  [default: </span><span class="ansi-blue-intense-fg ansi-bold">regular</span><span class="ansi-bold">]</span>
+                    The default font to use for math. Can be any of the LaTeX font names, including
+                    the special name &#34;regular&#34; for the same font used in regular text.
+
+<span class="ansi-bold">mathtext_fallback_to_cm = </span><span class="ansi-green-intense-fg ansi-bold">False</span><span class="ansi-bold">     [default: </span><span class="ansi-blue-intense-fg ansi-bold">False</span><span class="ansi-bold">]</span>
+                    When True, use symbols from the Computer Modern fonts when a symbol can not be
+                    found in one of the custom math fonts.
+
+<span class="ansi-bold">mathtext_fontset = </span><span class="ansi-green-intense-fg ansi-bold">dejavusans</span><span class="ansi-bold">       [default: </span><span class="ansi-blue-intense-fg ansi-bold">dejavusans</span><span class="ansi-bold">]</span>
+                    Should be &#34;dejavusans&#34; (default), &#34;dejavuserif&#34;, &#34;cm&#34; (Computer Modern), &#34;stix&#34;,
+                    &#34;stixsans&#34; or &#34;custom&#34;
+
+<span class="ansi-bold">mathtext_it = </span><span class="ansi-green-intense-fg ansi-bold">dejavusans:italic</span><span class="ansi-bold">     [default: </span><span class="ansi-blue-intense-fg ansi-bold">dejavusans:italic</span><span class="ansi-bold">]</span>
+                    italic
+
+<span class="ansi-bold">mathtext_rm = </span><span class="ansi-green-intense-fg ansi-bold">dejavusans</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">dejavusans</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">mathtext_sf = </span><span class="ansi-green-intense-fg ansi-bold">sans\-serif</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">sans\-serif</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">mathtext_tt = </span><span class="ansi-green-intense-fg ansi-bold">monospace</span><span class="ansi-bold">     [default: </span><span class="ansi-blue-intense-fg ansi-bold">monospace</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">max_lines_in_stack = </span><span class="ansi-green-intense-fg ansi-bold">1000</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">1000</span><span class="ansi-bold">]</span>
+                    Maximum number of lines to plot in stack plots
+
+<span class="ansi-bold">method_1D = </span><span class="ansi-green-intense-fg ansi-bold">pen</span><span class="ansi-bold">     [default: </span><span class="ansi-blue-intense-fg ansi-bold">pen</span><span class="ansi-bold">]</span>
+                    Default plot methods for 1D datasets
+
+<span class="ansi-bold">method_2D = </span><span class="ansi-green-intense-fg ansi-bold">stack</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">stack</span><span class="ansi-bold">]</span>
+                    Default plot methods for 2D datasets
+
+<span class="ansi-bold">method_3D = </span><span class="ansi-green-intense-fg ansi-bold">surface</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">surface</span><span class="ansi-bold">]</span>
+                    Default plot methods for 3D datasets
+
+<span class="ansi-bold">number_of_contours = </span><span class="ansi-green-intense-fg ansi-bold">50</span><span class="ansi-bold">     [default: </span><span class="ansi-blue-intense-fg ansi-bold">50</span><span class="ansi-bold">]</span>
+                    Number of contours
+
+<span class="ansi-bold">number_of_x_labels = </span><span class="ansi-green-intense-fg ansi-bold">5</span><span class="ansi-bold">      [default: </span><span class="ansi-blue-intense-fg ansi-bold">5</span><span class="ansi-bold">]</span>
+                    Number of X labels
+
+<span class="ansi-bold">number_of_y_labels = </span><span class="ansi-green-intense-fg ansi-bold">5</span><span class="ansi-bold">      [default: </span><span class="ansi-blue-intense-fg ansi-bold">5</span><span class="ansi-bold">]</span>
+                    Number of Y labels
+
+<span class="ansi-bold">number_of_z_labels = </span><span class="ansi-green-intense-fg ansi-bold">5</span><span class="ansi-bold">      [default: </span><span class="ansi-blue-intense-fg ansi-bold">5</span><span class="ansi-bold">]</span>
+                    Number of Z labels
+
+<span class="ansi-bold">patch_antialiased = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+                    render patches in antialiased (no jaggies)
+
+<span class="ansi-bold">patch_edgecolor = </span><span class="ansi-green-intense-fg ansi-bold">k</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">black</span><span class="ansi-bold">]</span>
+                    if forced, or patch is not filled
+
+<span class="ansi-bold">patch_facecolor = </span><span class="ansi-green-intense-fg ansi-bold">4C72B0</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">4C72B0</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">patch_force_edgecolor = </span><span class="ansi-green-intense-fg ansi-bold">False</span><span class="ansi-bold">       [default: </span><span class="ansi-blue-intense-fg ansi-bold">False</span><span class="ansi-bold">]</span>
+                    True to always use edgecolor
+
+<span class="ansi-bold">patch_linewidth = </span><span class="ansi-green-intense-fg ansi-bold">0.3</span><span class="ansi-bold">       [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.3</span><span class="ansi-bold">]</span>
+                    edge width in points.
+
+<span class="ansi-bold">path_simplify = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">        [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+                    When True, simplify paths by removing &#34;invisible&#34; points to reduce file size and
+                    increase rendering speed
+
+<span class="ansi-bold">path_simplify_threshold = </span><span class="ansi-green-intense-fg ansi-bold">0.111111111111</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.111111111111</span><span class="ansi-bold">]</span>
+                    The threshold of similarity below which vertices will be removed in the
+                    simplification process
+
+<span class="ansi-bold">path_sketch = </span><span class="ansi-green-intense-fg ansi-bold">None</span><span class="ansi-bold">  [default: </span><span class="ansi-blue-intense-fg ansi-bold">None</span><span class="ansi-bold">]</span>
+                    May be none, or a 3-tuple of the form (scale, length, randomness). *scale* is
+                    the amplitude of the wiggle perpendicular to the line (in pixels). *length* is
+                    the length of the wiggle along the line (in pixels). *randomness* is the factor
+                    by which the length is randomly scaled.
+
+<span class="ansi-bold">path_snap = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+                    When True, rectilinear axis-aligned paths will be snapped to the nearest pixel
+                    when certain criteria are met. When False, paths will never be snapped.
+
+<span class="ansi-bold">polaraxes_grid = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">       [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+                    display grid on polar axes
+
+<span class="ansi-bold">rcount = </span><span class="ansi-green-intense-fg ansi-bold">50</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">50</span><span class="ansi-bold">]</span>
+                    rcount (steps in the row mode) for surface plot
+
+<span class="ansi-bold">savefig_bbox = </span><span class="ansi-green-intense-fg ansi-bold">standard</span><span class="ansi-bold">     [default: </span><span class="ansi-blue-intense-fg ansi-bold">standard</span><span class="ansi-bold">]</span>
+                    &#34;tight&#34; or &#34;standard&#34;. &#34;tight&#34; is incompatible with pipe-based animation
+                    backends but will workd with temporary file based ones: e.g. setting
+                    animation.writer to ffmpeg will not work, use ffmpeg_file instead
+
+<span class="ansi-bold">savefig_directory = </span><span class="ansi-bold">     [default: </span><span class="ansi-bold">]</span>
+                    default directory in savefig dialog box, leave empty to always use current
+                    working directory
+
+<span class="ansi-bold">savefig_dpi = </span><span class="ansi-green-intense-fg ansi-bold">100.0</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">300</span><span class="ansi-bold">]</span>
+                    figure dots per inch or &#34;figure&#34;
+
+<span class="ansi-bold">savefig_edgecolor = </span><span class="ansi-green-intense-fg ansi-bold">white</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">white</span><span class="ansi-bold">]</span>
+                    figure edgecolor when saving
+
+<span class="ansi-bold">savefig_facecolor = </span><span class="ansi-green-intense-fg ansi-bold">white</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">white</span><span class="ansi-bold">]</span>
+                    figure facecolor when saving
+
+<span class="ansi-bold">savefig_format = </span><span class="ansi-green-intense-fg ansi-bold">png</span><span class="ansi-bold">        [default: </span><span class="ansi-blue-intense-fg ansi-bold">png</span><span class="ansi-bold">]</span>
+                    png, ps, pdf, svg
+
+<span class="ansi-bold">savefig_jpeg_quality = </span><span class="ansi-green-intense-fg ansi-bold">95</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">95</span><span class="ansi-bold">]</span>
+                    when a jpeg is saved, the default quality parameter.
+
+<span class="ansi-bold">savefig_pad_inches = </span><span class="ansi-green-intense-fg ansi-bold">0.1</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.1</span><span class="ansi-bold">]</span>
+                    Padding to be used when bbox is set to &#34;tight&#34;
+
+<span class="ansi-bold">savefig_transparent = </span><span class="ansi-green-intense-fg ansi-bold">False</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">False</span><span class="ansi-bold">]</span>
+                    setting that controls whether figures are saved with a transparent background by
+                    default
+
+<span class="ansi-bold">scatter_marker = </span><span class="ansi-green-intense-fg ansi-bold">o</span><span class="ansi-bold">  [default: </span><span class="ansi-blue-intense-fg ansi-bold">o</span><span class="ansi-bold">]</span>
+                    The default marker type for scatter plots.
+
+<span class="ansi-bold">show_projection_x = </span><span class="ansi-green-intense-fg ansi-bold">False</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">False</span><span class="ansi-bold">]</span>
+                    Show projection along x
+
+<span class="ansi-bold">show_projection_y = </span><span class="ansi-green-intense-fg ansi-bold">False</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">False</span><span class="ansi-bold">]</span>
+                    Show projection along y
+
+<span class="ansi-bold">show_projections = </span><span class="ansi-green-intense-fg ansi-bold">False</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">False</span><span class="ansi-bold">]</span>
+                    Show all projections
+
+<span class="ansi-bold">simplify = </span><span class="ansi-green-intense-fg ansi-bold">False</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">False</span><span class="ansi-bold">]</span>
+                    Matplotlib path simplification for improving performance
+
+<span class="ansi-bold">style = </span><span class="ansi-green-intense-fg ansi-bold">scpy</span><span class="ansi-bold">        [default: </span><span class="ansi-blue-intense-fg ansi-bold">traitlets.Undefined</span><span class="ansi-bold">]</span>
+                    Basic matplotlib style to use
+
+<span class="ansi-bold">stylesheets = </span><span class="ansi-green-intense-fg ansi-bold">/home/travis/miniconda/envs/scpy3.7/lib/python3.7/site-packages/scp_data/stylesheets</span><span class="ansi-bold">  [default: </span><span class="ansi-bold">]</span>
+                    Directory where to look for local defined matplotlib styles when they are not in
+                    the standard location
+
+<span class="ansi-bold">text_antialiased = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">     [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+                    If True (default), the text will be antialiased. This only affects the Agg
+                    backend.
+
+<span class="ansi-bold">text_color = </span><span class="ansi-green-intense-fg ansi-bold">.15</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">.15</span><span class="ansi-bold">]</span>
+
+
+<span class="ansi-bold">text_hinting = </span><span class="ansi-green-intense-fg ansi-bold">auto</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">auto</span><span class="ansi-bold">]</span>
+                    May be one of the following: &#39;none&#39;: Perform no hinting * &#39;auto&#39;: Use freetype&#39;s
+                    autohinter * &#39;native&#39;: Use the hinting information in the font file, if
+                    available, and if your freetype library supports it * &#39;either&#39;: Use the native
+                    hinting information or the autohinter if none is available. For backward
+                    compatibility, this value may also be True === &#39;auto&#39; or False === &#39;none&#39;.
+
+<span class="ansi-bold">text_hinting_factor = </span><span class="ansi-green-intense-fg ansi-bold">8.0</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">8</span><span class="ansi-bold">]</span>
+                    Specifies the amount of softness for hinting in the horizontal direction. A
+                    value of 1 will hint to full pixels. A value of 2 will hint to half pixels etc.
+
+<span class="ansi-bold">text_usetex = </span><span class="ansi-green-intense-fg ansi-bold">False</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">False</span><span class="ansi-bold">]</span>
+                    use latex for all text handling. The following fonts are supported through the
+                    usual rc parameter settings: new century schoolbook, bookman, times, palatino,
+                    zapf chancery, charter, serif, sans-serif, helvetica, avant garde, courier,
+                    monospace, computer modern roman, computer modern sans serif, computer modern
+                    typewriter. If another font is desired which can loaded using the LaTeX
+                    \usepackage command, please inquire at the matplotlib mailing list
+
+<span class="ansi-bold">timezone = </span><span class="ansi-green-intense-fg ansi-bold">UTC</span><span class="ansi-bold">      [default: </span><span class="ansi-blue-intense-fg ansi-bold">UTC</span><span class="ansi-bold">]</span>
+                    a pytz timezone string, e.g., US/Central or Europe/Paris
+
+<span class="ansi-bold">use_plotly = </span><span class="ansi-green-intense-fg ansi-bold">False</span><span class="ansi-bold">  [default: </span><span class="ansi-blue-intense-fg ansi-bold">False</span><span class="ansi-bold">]</span>
+                    Use Plotly instead of MatPlotLib for plotting (mode Matplotlib more suitable for
+                    printing publication ready figures)
+
+<span class="ansi-bold">xtick_bottom = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+                    draw ticks on the bottom side
+
+<span class="ansi-bold">xtick_color = </span><span class="ansi-green-intense-fg ansi-bold">.15</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">.15</span><span class="ansi-bold">]</span>
+                    color of the tick labels
+
+<span class="ansi-bold">xtick_direction = </span><span class="ansi-green-intense-fg ansi-bold">out</span><span class="ansi-bold">       [default: </span><span class="ansi-blue-intense-fg ansi-bold">out</span><span class="ansi-bold">]</span>
+                    direction
+
+<span class="ansi-bold">xtick_labelsize = </span><span class="ansi-green-intense-fg ansi-bold">10.0</span><span class="ansi-bold">      [default: </span><span class="ansi-blue-intense-fg ansi-bold">10.0</span><span class="ansi-bold">]</span>
+                    fontsize of the tick labels
+
+<span class="ansi-bold">xtick_major_bottom = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+                    draw x axis bottom major ticks
+
+<span class="ansi-bold">xtick_major_pad = </span><span class="ansi-green-intense-fg ansi-bold">4.0</span><span class="ansi-bold">       [default: </span><span class="ansi-blue-intense-fg ansi-bold">3.5</span><span class="ansi-bold">]</span>
+                    distance to major tick label in points
+
+<span class="ansi-bold">xtick_major_size = </span><span class="ansi-green-intense-fg ansi-bold">4.0</span><span class="ansi-bold">      [default: </span><span class="ansi-blue-intense-fg ansi-bold">3.5</span><span class="ansi-bold">]</span>
+                    major tick size in points
+
+<span class="ansi-bold">xtick_major_top = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">      [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+                    draw x axis top major ticks
+
+<span class="ansi-bold">xtick_major_width = </span><span class="ansi-green-intense-fg ansi-bold">0.5</span><span class="ansi-bold">     [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.8</span><span class="ansi-bold">]</span>
+                    major tick width in points
+
+<span class="ansi-bold">xtick_minor_bottom = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+                    draw x axis bottom minor ticks
+
+<span class="ansi-bold">xtick_minor_pad = </span><span class="ansi-green-intense-fg ansi-bold">4.0</span><span class="ansi-bold">       [default: </span><span class="ansi-blue-intense-fg ansi-bold">3.4</span><span class="ansi-bold">]</span>
+                    distance to the minor tick label in points
+
+<span class="ansi-bold">xtick_minor_size = </span><span class="ansi-green-intense-fg ansi-bold">2.0</span><span class="ansi-bold">      [default: </span><span class="ansi-blue-intense-fg ansi-bold">2.0</span><span class="ansi-bold">]</span>
+                    minor tick size in points
+
+<span class="ansi-bold">xtick_minor_top = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">      [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+                    draw x axis top minor ticks
+
+<span class="ansi-bold">xtick_minor_visible = </span><span class="ansi-green-intense-fg ansi-bold">False</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">False</span><span class="ansi-bold">]</span>
+                    visibility of minor ticks on x-axis
+
+<span class="ansi-bold">xtick_minor_width = </span><span class="ansi-green-intense-fg ansi-bold">0.5</span><span class="ansi-bold">     [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.6</span><span class="ansi-bold">]</span>
+                    minor tick width in points
+
+<span class="ansi-bold">xtick_top = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">False</span><span class="ansi-bold">]</span>
+                    draw ticks on the top side
+
+<span class="ansi-bold">ytick_color = </span><span class="ansi-green-intense-fg ansi-bold">.15</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">.15</span><span class="ansi-bold">]</span>
+                    color of the tick labels
+
+<span class="ansi-bold">ytick_direction = </span><span class="ansi-green-intense-fg ansi-bold">out</span><span class="ansi-bold">       [default: </span><span class="ansi-blue-intense-fg ansi-bold">out</span><span class="ansi-bold">]</span>
+                    direction
+
+<span class="ansi-bold">ytick_labelsize = </span><span class="ansi-green-intense-fg ansi-bold">10.0</span><span class="ansi-bold">      [default: </span><span class="ansi-blue-intense-fg ansi-bold">10.0</span><span class="ansi-bold">]</span>
+                    fontsize of the tick labels
+
+<span class="ansi-bold">ytick_left = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">   [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+                    draw ticks on the left side
+
+<span class="ansi-bold">ytick_major_left = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">     [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+                    draw y axis left major ticks
+
+<span class="ansi-bold">ytick_major_pad = </span><span class="ansi-green-intense-fg ansi-bold">4.0</span><span class="ansi-bold">       [default: </span><span class="ansi-blue-intense-fg ansi-bold">3.5</span><span class="ansi-bold">]</span>
+                    distance to major tick label in points
+
+<span class="ansi-bold">ytick_major_right = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+                    draw y axis right major ticks
+
+<span class="ansi-bold">ytick_major_size = </span><span class="ansi-green-intense-fg ansi-bold">4.0</span><span class="ansi-bold">      [default: </span><span class="ansi-blue-intense-fg ansi-bold">3.5</span><span class="ansi-bold">]</span>
+                    major tick size in points
+
+<span class="ansi-bold">ytick_major_width = </span><span class="ansi-green-intense-fg ansi-bold">0.5</span><span class="ansi-bold">     [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.8</span><span class="ansi-bold">]</span>
+                    major tick width in points
+
+<span class="ansi-bold">ytick_minor_left = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">     [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+                    draw y axis left minor ticks
+
+<span class="ansi-bold">ytick_minor_pad = </span><span class="ansi-green-intense-fg ansi-bold">4.0</span><span class="ansi-bold">       [default: </span><span class="ansi-blue-intense-fg ansi-bold">3.4</span><span class="ansi-bold">]</span>
+                    distance to the minor tick label in points
+
+<span class="ansi-bold">ytick_minor_right = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">    [default: </span><span class="ansi-blue-intense-fg ansi-bold">True</span><span class="ansi-bold">]</span>
+                    draw y axis right minor ticks
+
+<span class="ansi-bold">ytick_minor_size = </span><span class="ansi-green-intense-fg ansi-bold">2.0</span><span class="ansi-bold">      [default: </span><span class="ansi-blue-intense-fg ansi-bold">2.0</span><span class="ansi-bold">]</span>
+                    minor tick size in points
+
+<span class="ansi-bold">ytick_minor_visible = </span><span class="ansi-green-intense-fg ansi-bold">False</span><span class="ansi-bold">         [default: </span><span class="ansi-blue-intense-fg ansi-bold">False</span><span class="ansi-bold">]</span>
+                    visibility of minor ticks on y-axis
+
+<span class="ansi-bold">ytick_minor_width = </span><span class="ansi-green-intense-fg ansi-bold">0.5</span><span class="ansi-bold">     [default: </span><span class="ansi-blue-intense-fg ansi-bold">0.6</span><span class="ansi-bold">]</span>
+                    minor tick width in points
+
+<span class="ansi-bold">ytick_right = </span><span class="ansi-green-intense-fg ansi-bold">True</span><span class="ansi-bold">  [default: </span><span class="ansi-blue-intense-fg ansi-bold">False</span><span class="ansi-bold">]</span>
+                    draw ticks on the right side
+
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="A-last-graph-for-the-road-and-fun…">
+<h2>A last graph for the road and fun…<a class="headerlink" href="#A-last-graph-for-the-road-and-fun…" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">family</span> <span class="o">=</span> <span class="s1">&#39;fantasy&#39;</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="k">with</span> <span class="n">plt</span><span class="o">.</span><span class="n">xkcd</span><span class="p">():</span>
+    <span class="c1"># print(mpl.rcParams)</span>
+    <span class="n">prefs</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">linewidth</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">7.5</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">2800.</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="s2">&quot;A XKCD plot!...&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_plotting_plotting_80_1.png" src="../../_images/userguide_plotting_plotting_80_1.png" />
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="../processing/processing.html" class="btn btn-neutral float-right" title="Processing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../importexport/importIR.html" class="btn btn-neutral float-left" title="Import IR Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2014-2021 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">
+        Last updated on Jan 29, 2021.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

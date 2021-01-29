@@ -1,0 +1,420 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>spectrochempy.savgol_filter &mdash; SpectroChemPy v0.2.5 0.2.5 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_override.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery-dataframe.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery-rendered-html.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/scpy.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="spectrochempy.smooth" href="spectrochempy.smooth.html" />
+    <link rel="prev" title="spectrochempy.ifft" href="spectrochempy.ifft.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/scpy.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> SpectroChemPy </span>
+        version: stable
+        <span class="fa fa-caret-down"></span>
+      </span>
+        <div class="rst-other-versions">
+            <dl>
+                <dt>Other versions</dt>
+                
+                    
+                        <dd><a href="https://spectrochempy.github.io/spectrochempy/latest/index.html"">LATEST</a></dd>
+                    
+                
+                    
+                
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Downloads</dt>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/stable-spectrochempy.pdf">PDF</a></dd>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/stable-spectrochempy-notebooks.zip">Notebooks</a></dd>
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Sources on GitHub</dt>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
+
+            </dl>
+
+        </div>
+    </div>
+
+    
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/whyscpy.html">Why <strong>SpectroChemPy</strong>  ?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/gallery/auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/install/index.html">Installation</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../objects.html">Data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../units/units.html">Units &amp; Quantities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../importexport/importexport.html">Import &amp; Export</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plotting/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../processing/processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../fitting/fitting.html">Fitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analysis/analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../databases/databases.html">Databases</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference &amp; Help</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#loading-the-api">Loading the API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#the-nddataset-object">The NDDataset object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#coordinates-related-objects">Coordinates related objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#creating-nddataset">Creating NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#export-a-nddataset">Export a NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#select-data-in-a-nddataset">Select data in a NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#plotting-functions">Plotting functions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#processing">Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#fitting">Fitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#analysis">Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#project-management">Project management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#scripting">Scripting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#utilities">Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently asked questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/examples.html">Adding new tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/examples.html#adding-your-examples-to-the-gallery">Adding your examples to the gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/contributing.html">Developer’s Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/citing.html">Citing  <strong>SpectroChemPy</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/seealso.html">See also</a></li>
+</ul>
+
+            
+          
+
+
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SpectroChemPy v0.2.5</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">API reference</a> &raquo;</li>
+        
+      <li>spectrochempy.savgol_filter</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../../_sources/userguide/reference/generated/spectrochempy.savgol_filter.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    
+    
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="spectrochempy-savgol-filter">
+<h1>spectrochempy.savgol_filter<a class="headerlink" href="#spectrochempy-savgol-filter" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt id="spectrochempy.savgol_filter">
+<code class="sig-name descname">savgol_filter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataset</span></em>, <em class="sig-param"><span class="n">window_length</span><span class="o">=</span><span class="default_value">5</span></em>, <em class="sig-param"><span class="n">polyorder</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">deriv</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">delta</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'interp'</span></em>, <em class="sig-param"><span class="n">cval</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy/core/processors/filter.py#L23-L136"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spectrochempy.savgol_filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply a Savitzky-Golay filter to a NDDataset.</p>
+<p>Wrapper of scpy.signal.savgol(). If dataset has dimension greater than 1,
+dim determines the axis along which the filter is applied.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> (<em>|NDDataset|</em>) – The data to be filtered. If dataset.data is not a single or double precision floating point array,
+it will be converted to type numpy.float64 before filtering.</p></li>
+<li><p><strong>window_length</strong> (<em>int</em>) – The length of the filter window (i.e. the number of coefficients). window_length must be a positive odd integer.</p></li>
+<li><p><strong>polyorder</strong> (<em>int</em>) – The order of the polynomial used to fit the NDDataset. polyorder must be less than window_length.</p></li>
+<li><p><strong>deriv</strong> (<em>int, optional</em>) – The order of the derivative to compute. This must be a nonnegative integer.
+The default is 0, which means to filter the data without differentiating.</p></li>
+<li><p><strong>delta</strong> (<em>float, optional</em>) – The spacing of the samples to which the filter will be applied. This is only used if deriv &gt; 0. Default is 1.0.</p></li>
+<li><p><strong>mode</strong> (<em>str, optional</em>) – Must be ‘mirror’, ‘constant’, ‘nearest’, ‘wrap’ or ‘interp’. This determines the type of extension to use for
+the padded signal to which the filter is applied. When mode is ‘constant’, the padding value is given by cval.
+See :py:scipy.signal.savgol_filter: for more details on ‘mirror’, ‘constant’, ‘wrap’, and ‘nearest’.
+When the ‘interp’ mode is selected (the default), no extension is used. Instead, a degree polyorder polynomial
+is fit to the last window_length values of the edges, and this polynomial is used to evaluate the
+last window_length // 2 output values.</p></li>
+<li><p><strong>cval</strong> (<em>scalar, optional</em>) – Value to fill past the edges of the input if mode is ‘constant’. Default is 0.0.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – See other parameters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>NDDataset</strong> (<em>same shape as x. data units are removed when deriv &gt; 1</em>) – The filtered data.</p>
+</dd>
+<dt class="field-odd">Other Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dim</strong> (<em>str or int, optional, default=’x’.</em>) – Specify on which dimension to apply this method. If <code class="xref py py-obj docutils literal notranslate"><span class="pre">dim</span></code> is specified as an integer it is equivalent
+to the usual <code class="xref py py-obj docutils literal notranslate"><span class="pre">axis</span></code> numpy parameter.</p></li>
+<li><p><strong>inplace</strong> (<em>bool, optional, default=False.</em>) – True if we make the transform inplace.  If False, the function return a new object</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Even spacing of the axis coordinates is NOT checked. Be aware that Savitzky-Golay algorithm
+is based on indexes, not on coordinates.</p>
+<dl class="simple">
+<dt>Details on the <code class="xref py py-obj docutils literal notranslate"><span class="pre">mode</span></code> options:</dt><dd><dl class="simple">
+<dt>‘mirror’:</dt><dd><p>Repeats the values at the edges in reverse order.  The value
+closest to the edge is not included.</p>
+</dd>
+<dt>‘nearest’:</dt><dd><p>The extension contains the nearest input value.</p>
+</dd>
+<dt>‘constant’:</dt><dd><p>The extension contains the value given by the <code class="xref py py-obj docutils literal notranslate"><span class="pre">cval</span></code> argument.</p>
+</dd>
+<dt>‘wrap’:</dt><dd><p>The extension contains the values from the other end of the array.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>For example, if the input is [1, 2, 3, 4, 5, 6, 7, 8], and
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">window_length</span></code> is 7, the following shows the extended data for
+the various <code class="xref py py-obj docutils literal notranslate"><span class="pre">mode</span></code> options (assuming <code class="xref py py-obj docutils literal notranslate"><span class="pre">cval</span></code> is 0):</p>
+<p>mode       |   Ext   |         Input          |   Ext
+———–+———+————————+———
+‘mirror’   | 4  3  2 | 1  2  3  4  5  6  7  8 | 7  6  5
+‘nearest’  | 1  1  1 | 1  2  3  4  5  6  7  8 | 8  8  8
+‘constant’ | 0  0  0 | 1  2  3  4  5  6  7  8 | 0  0  0
+‘wrap’     | 6  7  8 | 1  2  3  4  5  6  7  8 | 1  2  3</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="spectrochempy.smooth.html#spectrochempy.smooth" title="spectrochempy.smooth"><code class="xref py py-obj docutils literal notranslate"><span class="pre">smooth</span></code></a></dt><dd><p>Smooth the data using a window with requested size.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;irdata/nh4y-activation.spg&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span><span class="o">.</span><span class="n">savgol_filter</span><span class="p">(</span><span class="n">window_length</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">polyorder</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="go">NDDataset: [float32] a.u. (shape: (y:55, x:5549))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<div style='clear:both'></div></div>
+
+
+           </div>
+           
+          </div>
+
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="spectrochempy.smooth.html" class="btn btn-neutral float-right" title="spectrochempy.smooth" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="spectrochempy.ifft.html" class="btn btn-neutral float-left" title="spectrochempy.ifft" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2014-2021 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">
+        Last updated on Jan 29, 2021.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

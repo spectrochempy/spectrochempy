@@ -1,0 +1,13 @@
+
+spectrochempy.swapdims
+======================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: swapdims
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.swapdims.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

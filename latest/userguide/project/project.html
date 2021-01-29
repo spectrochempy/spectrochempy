@@ -1,0 +1,1053 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Project management &mdash; SpectroChemPy v0.2.5.dev8 0.2.5.dev8 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_override.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery-dataframe.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery-rendered-html.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/scpy.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Units &amp; Quantities" href="../units/units.html" />
+    <link rel="prev" title="The NDDataset object" href="../dataset/dataset.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html">
+          
+
+          
+            
+            <img src="../../_static/scpy.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.5.dev8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> SpectroChemPy </span>
+        version: latest
+        <span class="fa fa-caret-down"></span>
+      </span>
+        <div class="rst-other-versions">
+            <dl>
+                <dt>Other versions</dt>
+                
+                    
+                
+                    
+                        <dd><a href="https://spectrochempy.github.io/spectrochempy/stable/index.html">STABLE</a></dd>
+                    
+                
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Downloads</dt>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/latest-spectrochempy.pdf">PDF</a></dd>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/latest-spectrochempy-notebooks.zip">Notebooks</a></dd>
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Sources on GitHub</dt>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
+
+            </dl>
+
+        </div>
+    </div>
+
+    
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Home</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/whyscpy.html">Why <strong>SpectroChemPy</strong>  ?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/gallery/auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/install/index.html">Installation</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../introduction/introduction.html">Introduction</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../introduction/introduction.html#How-to-get-started">How to get started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction/introduction.html#Loading-the-API">Loading the API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction/introduction.html#API-Configuration">API Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction/introduction.html#Units">Units</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../introduction/introduction.html#NDDataset,-the-main-object">NDDataset, the main object</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="../objects.html">Data structures</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../objects.html#nddataset">NDDataset</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../objects.html#project">Project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../objects.html#script">Script</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../units/units.html">Units &amp; Quantities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../importexport/importexport.html">Import &amp; Export</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plotting/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../processing/processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fitting/fitting.html">Fitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analysis/analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../databases/databases.html">Databases</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference &amp; Help</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/changelog.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/faq.html">Frequently asked questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/examples.html">Adding new tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/examples.html#adding-your-examples-to-the-gallery">Adding your examples to the gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/contributing.html">Developer’s Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/citing.html">Citing  <strong>SpectroChemPy</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/seealso.html">See also</a></li>
+</ul>
+
+            
+          
+
+
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SpectroChemPy v0.2.5.dev8</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../introduction/introduction.html">Introduction</a> &raquo;</li>
+        
+          <li><a href="../objects.html">Data structures</a> &raquo;</li>
+        
+      <li>Project management</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../_sources/userguide/project/project.ipynb.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    
+    
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt a.copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="Project-management">
+<h1>Project management<a class="headerlink" href="#Project-management" title="Permalink to this headline">¶</a></h1>
+<p>from pathlib import Path</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">spectrochempy</span> <span class="kn">import</span> <span class="n">NDDataset</span><span class="p">,</span> <span class="n">Project</span><span class="p">,</span> <span class="n">preferences</span> <span class="k">as</span> <span class="n">prefs</span><span class="p">,</span> <span class="n">pathclean</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<table><tr><td>
+
+<img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAAlw
+SFlzAAAJOgAACToB8GSSSgAAAetpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6
+bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDUuNC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8x
+OTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAg
+eG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIgogICAgICAgICAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMu
+YWRvYmUuY29tL3RpZmYvMS4wLyI+CiAgICAgICAgIDx4bXA6Q3JlYXRvclRvb2w+bWF0cGxvdGxpYiB2ZXJzaW9uIDIuMS4wLCBo
+dHRwOi8vbWF0cGxvdGxpYi5vcmcvPC94bXA6Q3JlYXRvclRvb2w+CiAgICAgICAgIDx0aWZmOk9yaWVudGF0aW9uPjE8L3RpZmY6
+T3JpZW50YXRpb24+CiAgICAgIDwvcmRmOkRlc2NyaXB0aW9uPgogICA8L3JkZjpSREY+CjwveDp4bXBtZXRhPgqNQaNYAAAGiUlE
+QVRIDY1We4xU1Rn/3XPuYx47u8w+hnU38hTcuoUEt/6D2y4RB0ME1BoEd9taJaKh9CFiN7YGp7appUAMNmktMZFoJTYVLVQ0smsy
+26CN0SU1QgsuFAaW3WVmx33N677O6XfuyoIxTXqSO/fec+75fd93vt/3/UbDV0aKSZmCpkFMLz3T9utuu2N+o98aDSMBKVAo89z5
+y+zEz3ZafcCOfvWdlGCalqKn1Bf71CygTd+mf1esSOnpdMpTb+vWpTZuWVfe3jLPa5tzHYNm0T5N0gpdkkHaDBeGBU6d1/t/fyS8
++/CbqdfUvmsx1PuMgc2bNxv79u1zgd31r+7JH1jbIZKxWRXAcYUQ8IWvBfBXNjEuJWPgMA02NR7C3/pYT9fjdZ3A9tGrWF8YSJHn
+qcDz3y7q2T967PZv+gnYJdd1mEZ+62zGDQV/dQgKhmLzDNOXCEWM3j6eTT5Y3w78dOBKJLR1PQf+4ivPj76UPZnssBN+wbM9Aet/
+AV81Mf1EEULXYfOobvX2WWQk0aoioXwwSmirOlioY0mu8BIouzYl7P8GV3vpqCCEZvlFz769w08oLDWvyKIyL1asSm28d6WfzA97
+ztvvV1kexUMsmhlkULEkuGYmFYC6AvfUrITnwUKl5K79lkjeSSRRTCTbQPd95e1WzMbZSya74XoXAxctCllCnbECMOjZNGRwvzIX
+nD85wbkMmKK+U045Dtdi8Qp+SAxU2GTg2bYlC9224pgvmSb54vkVTBQYyhUt2KjAMyMmPjwRQW5Mh2WKwJhlBh6jVGagFM84wZnQ
+4bpC0Rt4pk1PbSt0NDcxDA5xryosDHWgtbM0DGZDWLSoiDMDYeQnGVrmOThxLozB0RAaahzkJzjKNqcIQBymJFMkOlN8Dqjpg0XY
+Tx5xO/QbmmUrqIjGJznq47TqTaClKYfjp+PInLMwnOdYvtQBZ2XcunQY+VwIo4U4muoFEjVEFE6lQyEUKzHYfgQG9ylCyngU+Cxj
+tOqxCDGHcCsOMCs6iQul5ZiStdATYxjMZXDLTUVwLY8Jey4uOh2IxjwsrP8UXJYxUrkZrghBahzV5iXU6gNkq0Z1EzIsUBUSCV2n
+EOHo0LVxHCpuxabJJdhi5PFnvw5vLXwXIfNZvD/+JNo/X40NegE54sUaazl+UL8XD1x+FB9Ijjt4EQfdGN6J/x131LwIV9ap/AYs
+0x1fz1ZKFbh6A7qKy/By9Dg6G36Ep91vUJJ15Cqr0Z67E8/HzmBrw1OwxWyM+3Mo6BAuSB17oyfx0Oyl2DN0Hqs/70Cx6hBCvESF
+UY1ShWXZZEE7OTAYxZzaPH4TuoiusZvRnunFy2NbiHYuBp2vB66srX4vMEjpRKPxKXmnoQ4+Mn4DPiv8CYcrs3GfNUXJLtM+alSO
+hrMj/KT+wBNW3+E/2liywNO3iSflbaFva/+stGDTxE0E9Sjaox8HBhxpEamzMGSEaFKg+mjEddzDh1MxTDq3YV1kGBsjfwW3S9Cq
+anjmko+ndlb1UR3s6K8JlfphNWq9Ew/7c61T2BB/EbcaNkb8GBaE0tANH7/M34PLdhJDzjIcL9xPbdTG6zyM72Y+wXPHmvB489No
+fm0b5HnbQ9Rgp/7DSSd29AeVvPeNyK6JcYl/yQVi5dBjuGvoV/gaJe47s45QUxrDmcYX0MBsdF7egvXZ7+O0vZA4X8QmOQWjlSK7
+RDz5wIM30gp9UbWcGjXxhzdDu1SiNSpx6kcQB57rPnr/3dlkZarWLnlRq5oPET1dOCIOk4wALib9eeS5iygfhkd09H0DWphB/+gs
++PcOAS+ssrFmmXXgVfR0de9cpbAJfH3Q1jofW9DZk56dDcVsq9YcsoUMEd1qyLoT3BX1YiyHMJuk97hyjqIoE91t+NcTLeN0ZrfM
+oXatZbu6G0h4VG+ibqq0IJVK6cAjo6serG3vSUezCMct0yQeSOFJSUImqb2qbknUpDqlZxE0QZ+ZUpSlZx79h4Nda6zef9dlk121
+JDjbR5XggPRZlRnS6bRQRtLpn4++cuie/Yvn2svmNxuLw9WCcYIl4fEoTEGiSTUqJdfgU+8ROqf1iMkLzS389YtNPXc/PH8l8ONB
+JZkHD+4JtD04HmVEDWWErmBhzV2/2LB1bemJG6krzv2S6NOHUgtEP0Oif5pE/3fHoruP7N8RiP61GArzSwbUhJJQpXJKiKbfr/3b
+IhKq76sKPUdF9NW/LSqfSn6vjv8C45H/6FSgvZQAAAAASUVORK5CYII='
+     style='height:25px; border-radius:12px; display:inline-block; float:left; vertical-align:middle'></img>
+
+</td><td>
+
+&nbsp;&nbsp;<span style='font-size:12px'>SpectroChemPy's API - v.0.2.5.dev8<br/>© Copyright 2014-2021 - A.Travert & C.Fernandez @ LCS</span>
+
+</td></tr></table>
+</div></div>
+</div>
+<div class="section" id="Project-creation">
+<h2>Project creation<a class="headerlink" href="#Project-creation" title="Permalink to this headline">¶</a></h2>
+<p>We can easily create a new project to store various datasets</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">proj</span> <span class="o">=</span> <span class="n">Project</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>As we did not specify a name, a name has been attributed automatically:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">proj</span><span class="o">.</span><span class="n">name</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&#39;Project-3aa58724&#39;
+</pre></div></div>
+</div>
+<hr class="docutils" />
+<p>To get the signature of the object, one can use the usual ‘?’. Uncomment the following line to check</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>Project<span class="o">?</span>
+</pre></div>
+</div>
+</div>
+<hr class="docutils" />
+<p>Let’s change this name</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">proj</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;myNMRdata&#39;</span>
+<span class="n">proj</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+Project&nbsp;myNMRdata:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(empty&nbsp;project)</div>
+</div>
+<p>Now we will add a dataset to the project.</p>
+<p>First we read the dataset (here some NMR data) and we give it some name (e.g. ‘nmr n°1’)</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">datadir</span> <span class="o">=</span> <span class="n">pathclean</span><span class="p">(</span><span class="n">prefs</span><span class="o">.</span><span class="n">datadir</span><span class="p">)</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">datadir</span> <span class="o">/</span> <span class="s1">&#39;nmrdata&#39;</span> <span class="o">/</span> <span class="s1">&#39;bruker&#39;</span> <span class="o">/</span> <span class="s1">&#39;tests&#39;</span> <span class="o">/</span> <span class="s1">&#39;nmr&#39;</span>
+<span class="n">nd1</span> <span class="o">=</span> <span class="n">NDDataset</span><span class="o">.</span><span class="n">read_topspin</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;topspin_1d&#39;</span><span class="p">,</span> <span class="n">expno</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">remove_digital_filter</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;NMR_1D&quot;</span><span class="p">)</span>
+<span class="n">nd2</span> <span class="o">=</span> <span class="n">NDDataset</span><span class="o">.</span><span class="n">read_topspin</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;topspin_2d&#39;</span><span class="p">,</span> <span class="n">expno</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">remove_digital_filter</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;NMR_2D&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>To add it to the project, we use the <code class="docutils literal notranslate"><span class="pre">add_dataset</span></code> function for a single dataset:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">proj</span><span class="o">.</span><span class="n">add_datasets</span><span class="p">(</span><span class="n">nd1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>or <code class="docutils literal notranslate"><span class="pre">add_datasets</span></code> for several datasets.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">proj</span><span class="o">.</span><span class="n">add_datasets</span><span class="p">(</span><span class="n">nd1</span><span class="p">,</span> <span class="n">nd2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Display its structure</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">proj</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+Project&nbsp;myNMRdata:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;⤷&nbsp;NMR_1D&nbsp;(dataset)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;⤷&nbsp;NMR_2D&nbsp;(dataset)</div>
+</div>
+<p>It is also possible to add other projects as sub-project (using the <code class="docutils literal notranslate"><span class="pre">add_project</span></code>)</p>
+</div>
+<div class="section" id="Remove-an-element-from-a-project">
+<h2>Remove an element from a project<a class="headerlink" href="#Remove-an-element-from-a-project" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">proj</span><span class="o">.</span><span class="n">remove_dataset</span><span class="p">(</span><span class="s1">&#39;NMR_1D&#39;</span><span class="p">)</span>
+<span class="n">proj</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+Project&nbsp;myNMRdata:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;⤷&nbsp;NMR_2D&nbsp;(dataset)</div>
+</div>
+</div>
+<div class="section" id="Get-project’s-elements">
+<h2>Get project’s elements<a class="headerlink" href="#Get-project’s-elements" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">proj</span><span class="o">.</span><span class="n">add_datasets</span><span class="p">(</span><span class="n">nd1</span><span class="p">,</span> <span class="n">nd2</span><span class="p">)</span>
+<span class="n">proj</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+Project&nbsp;myNMRdata:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;⤷&nbsp;NMR_1D&nbsp;(dataset)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;⤷&nbsp;NMR_2D&nbsp;(dataset)</div>
+</div>
+<p>We can just use the name of the element as a project attribute.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">proj</span><span class="o">.</span><span class="n">NMR_1D</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<table style='background:transparent'>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>         name</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> NMR_1D</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>       author</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> travis@travis-job-ffb5927d-55f8-4ad7-9731-7da026825ebd</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>      created</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 2021-01-29 13:16:42.733778+00:00</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><strong>          DATA </strong></td><td style='text-align:left; padding-bottom:0px; padding-top:0px; padding-top:10px; '><hr/></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        title</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> intensity</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>       values</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='blue'>         R[    1078     2284 ...   0.2342  -0.1008]<br/>         I[   -1037    -2200 ...  0.06203 -0.05273]</font></div></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>         size</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 12411 (complex)</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><strong>     DIMENSION `x`</strong></td><td style='text-align:left; padding-bottom:0px; padding-top:0px; padding-top:10px; '><hr/></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>         size</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 12411</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        title</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> F1 acquisition time</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>  coordinates</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='blue'>[       0        4 ... 4.964e+04 4.964e+04] µs</font></div></td><tr>
+</table></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">_</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">NMR_1D</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_project_project_25_0.png" src="../../_images/userguide_project_project_25_0.png" />
+</div>
+</div>
+<p>However this work only if the name contains no space, dot, comma, colon, etc. The only special character allowed is the underscore <code class="docutils literal notranslate"><span class="pre">_</span></code>. If the name is not respecting this, then it is possible to use the following syntax (as a project behave as a dictionary). For example:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">proj</span><span class="p">[</span><span class="s1">&#39;NMR_1D&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+array([1.08e+03-1.04e+03j, 2.28e+03-2.2e+03j, ...,    0.234+0.062j,   -0.101-0.0527j])
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">proj</span><span class="o">.</span><span class="n">NMR_2D</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<table style='background:transparent'>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>         name</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> NMR_2D</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>       author</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> travis@travis-job-ffb5927d-55f8-4ad7-9731-7da026825ebd</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>      created</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 2021-01-29 13:16:42.756000+00:00</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><strong>          DATA </strong></td><td style='text-align:left; padding-bottom:0px; padding-top:0px; padding-top:10px; '><hr/></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        title</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> intensity</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>       values</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='blue'>         RR[[ -0.2238  -0.1985 ...  -0.1662  0.03262]<br/>            [-0.006566   0.0282 ... -0.02949 -0.06717]<br/>            ...<br/>            [       0        0 ...        0        0]<br/>            [       0        0 ...        0        0]]<br/>         RI[[ 0.06219   0.1467 ...  0.04565  0.03068]<br/>            [-0.05969 -0.08752 ... -0.05134 -0.05994]<br/>            ...<br/>            [      -0       -0 ...       -0       -0]<br/>            [      -0       -0 ...       -0       -0]]<br/>         IR[[ -0.1623  -0.0563 ...  0.02654 -0.01094]<br/>            [  0.1344 -0.006515 ... -0.08239  0.00516]<br/>            ...<br/>            [       0        0 ...        0        0]<br/>            [       0        0 ...        0        0]]<br/>         II[[-0.003312 -0.001535 ...  0.02067 -0.08058]<br/>            [-0.05685   0.1174 ...  0.05831 -0.003414]<br/>            ...<br/>            [      -0       -0 ...       -0       -0]<br/>            [      -0       -0 ...       -0       -0]]</font></div></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        shape</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> (y:96(complex), x:948(complex))</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><strong>     DIMENSION `x`</strong></td><td style='text-align:left; padding-bottom:0px; padding-top:0px; padding-top:10px; '><hr/></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>         size</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 948</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        title</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> F2 acquisition time</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>  coordinates</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='blue'>[       0       48 ... 4.541e+04 4.546e+04] µs</font></div></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><strong>     DIMENSION `y`</strong></td><td style='text-align:left; padding-bottom:0px; padding-top:0px; padding-top:10px; '><hr/></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>         size</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 96</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        title</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> F1 acquisition time</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>  coordinates</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='blue'>[       0       74 ...     6956     7030] µs</font></div></td><tr>
+</table></div>
+</div>
+</div>
+<div class="section" id="Saving-and-loading-projects">
+<h2>Saving and loading projects<a class="headerlink" href="#Saving-and-loading-projects" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">proj</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+Project&nbsp;myNMRdata:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;⤷&nbsp;NMR_1D&nbsp;(dataset)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;⤷&nbsp;NMR_2D&nbsp;(dataset)</div>
+</div>
+<div class="section" id="Saving">
+<h3>Saving<a class="headerlink" href="#Saving" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">proj</span><span class="o">.</span><span class="n">save_as</span><span class="p">(</span><span class="s1">&#39;NMR&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+PosixPath(&#39;/home/travis/build/spectrochempy/spectrochempy/docs/userguide/project/NMR.pscp&#39;)
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Loading">
+<h3>Loading<a class="headerlink" href="#Loading" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">proj2</span> <span class="o">=</span> <span class="n">Project</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;NMR&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">proj2</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+Project&nbsp;NMR:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;⤷&nbsp;NMR_1D&nbsp;(dataset)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;⤷&nbsp;NMR_2D&nbsp;(dataset)</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">_</span> <span class="o">=</span> <span class="n">proj2</span><span class="o">.</span><span class="n">NMR_1D</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_project_project_36_0.png" src="../../_images/userguide_project_project_36_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">proj2</span><span class="o">.</span><span class="n">NMR_2D</span>  <span class="c1"># TODO: something wrong there!</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<table style='background:transparent'>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>         name</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> NMR_2D</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>       author</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> travis@travis-job-ffb5927d-55f8-4ad7-9731-7da026825ebd</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>      created</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 2021-01-29 13:16:42.756000+00:00</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><strong>          DATA </strong></td><td style='text-align:left; padding-bottom:0px; padding-top:0px; padding-top:10px; '><hr/></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        title</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> intensity</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>       values</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='blue'>         RR[[ -0.2238  -0.1985 ...  -0.1662  0.03262]<br/>            [-0.006566   0.0282 ... -0.02949 -0.06717]<br/>            ...<br/>            [       0        0 ...        0        0]<br/>            [       0        0 ...        0        0]]<br/>         RI[[ 0.06219   0.1467 ...  0.04565  0.03068]<br/>            [-0.05969 -0.08752 ... -0.05134 -0.05994]<br/>            ...<br/>            [      -0       -0 ...       -0       -0]<br/>            [      -0       -0 ...       -0       -0]]<br/>         IR[[ -0.1623  -0.0563 ...  0.02654 -0.01094]<br/>            [  0.1344 -0.006515 ... -0.08239  0.00516]<br/>            ...<br/>            [       0        0 ...        0        0]<br/>            [       0        0 ...        0        0]]<br/>         II[[-0.003312 -0.001535 ...  0.02067 -0.08058]<br/>            [-0.05685   0.1174 ...  0.05831 -0.003414]<br/>            ...<br/>            [      -0       -0 ...       -0       -0]<br/>            [      -0       -0 ...       -0       -0]]</font></div></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        shape</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> (y:96(complex), x:948(complex))</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><strong>     DIMENSION `x`</strong></td><td style='text-align:left; padding-bottom:0px; padding-top:0px; padding-top:10px; '><hr/></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>         size</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 948</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        title</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> F2 acquisition time</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>  coordinates</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='blue'>[       0       48 ... 4.541e+04 4.546e+04] µs</font></div></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><strong>     DIMENSION `y`</strong></td><td style='text-align:left; padding-bottom:0px; padding-top:0px; padding-top:10px; '><hr/></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>         size</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 96</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        title</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> F1 acquisition time</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>  coordinates</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='blue'>[       0       74 ...     6956     7030] µs</font></div></td><tr>
+</table></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">proj</span><span class="o">.</span><span class="n">NMR_2D</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;AxesSubplot:xlabel=&#39;F2 acquisition time $\\mathrm{/\\ \\mathrm{µs}}$&#39;, ylabel=&#39;intensity $\\mathrm{}$&#39;&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_project_project_38_1.png" src="../../_images/userguide_project_project_38_1.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="../units/units.html" class="btn btn-neutral float-right" title="Units &amp; Quantities" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../dataset/dataset.html" class="btn btn-neutral float-left" title="The NDDataset object" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2014-2021 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">
+        Last updated on Jan 29, 2021.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

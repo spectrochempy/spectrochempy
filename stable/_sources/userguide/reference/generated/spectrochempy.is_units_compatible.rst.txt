@@ -1,0 +1,13 @@
+
+spectrochempy.is\_units\_compatible
+===================================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: is_units_compatible
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.is_units_compatible.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

@@ -1,0 +1,8 @@
+.. _credits:
+
+Acknowledgments
+================
+
+.. todo
+
+

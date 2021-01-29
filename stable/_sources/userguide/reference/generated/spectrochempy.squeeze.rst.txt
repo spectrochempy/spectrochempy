@@ -1,0 +1,13 @@
+
+spectrochempy.squeeze
+=====================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: squeeze
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.squeeze.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

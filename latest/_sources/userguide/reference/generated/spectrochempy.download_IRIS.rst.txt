@@ -1,0 +1,13 @@
+
+spectrochempy.download\_IRIS
+============================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: download_IRIS
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.download_IRIS.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

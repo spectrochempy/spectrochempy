@@ -1,0 +1,13 @@
+
+spectrochempy.write
+===================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: write
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.write.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

@@ -1,0 +1,6 @@
+spectrochempy.round\_
+=====================
+
+.. currentmodule:: spectrochempy
+
+.. autodata:: round_

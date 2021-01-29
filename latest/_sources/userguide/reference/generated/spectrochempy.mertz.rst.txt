@@ -1,0 +1,13 @@
+
+spectrochempy.mertz
+===================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: mertz
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.mertz.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

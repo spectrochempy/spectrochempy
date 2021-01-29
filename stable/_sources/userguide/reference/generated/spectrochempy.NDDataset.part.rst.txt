@@ -1,0 +1,13 @@
+
+spectrochempy.NDDataset.part
+============================
+
+.. currentmodule:: spectrochempy
+
+.. automethod:: NDDataset.part
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.NDDataset.part.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

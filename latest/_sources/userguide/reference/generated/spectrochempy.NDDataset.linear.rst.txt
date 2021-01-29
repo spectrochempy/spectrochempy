@@ -1,0 +1,6 @@
+spectrochempy.NDDataset.linear
+==============================
+
+.. currentmodule:: spectrochempy
+
+.. autoproperty:: NDDataset.linear

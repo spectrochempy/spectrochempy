@@ -1,0 +1,13 @@
+
+spectrochempy.read\_omnic
+=========================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: read_omnic
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.read_omnic.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

@@ -1,0 +1,37 @@
+spectrochempy.SIMPLISMA
+=======================
+
+.. currentmodule:: spectrochempy
+
+.. autoclass:: SIMPLISMA
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+
+      ~SIMPLISMA.plotmerit
+      ~SIMPLISMA.reconstruct
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :nosignatures:
+
+
+      ~SIMPLISMA.C
+      ~SIMPLISMA.Pt
+      ~SIMPLISMA.St
+      ~SIMPLISMA.X
+      ~SIMPLISMA.logs
+      ~SIMPLISMA.s
+
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.SIMPLISMA.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

@@ -1,0 +1,13 @@
+
+spectrochempy.blackmanharris
+============================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: blackmanharris
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.blackmanharris.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

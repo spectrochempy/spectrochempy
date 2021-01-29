@@ -1,0 +1,13 @@
+
+spectrochempy.plot\_pen
+=======================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: plot_pen
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.plot_pen.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

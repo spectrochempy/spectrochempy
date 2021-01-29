@@ -1,0 +1,13 @@
+
+spectrochempy.std
+=================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: std
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.std.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

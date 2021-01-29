@@ -1,0 +1,13 @@
+
+spectrochempy.arange
+====================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: arange
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.arange.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

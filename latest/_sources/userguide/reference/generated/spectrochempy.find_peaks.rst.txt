@@ -1,0 +1,13 @@
+
+spectrochempy.find\_peaks
+=========================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: find_peaks
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.find_peaks.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

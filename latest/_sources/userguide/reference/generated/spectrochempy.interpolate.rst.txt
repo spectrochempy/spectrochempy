@@ -1,0 +1,13 @@
+
+spectrochempy.interpolate
+=========================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: interpolate
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.interpolate.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

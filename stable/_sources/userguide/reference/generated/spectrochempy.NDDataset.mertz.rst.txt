@@ -1,0 +1,13 @@
+
+spectrochempy.NDDataset.mertz
+=============================
+
+.. currentmodule:: spectrochempy
+
+.. automethod:: NDDataset.mertz
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.NDDataset.mertz.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

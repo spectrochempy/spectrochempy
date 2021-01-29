@@ -1,0 +1,13 @@
+
+spectrochempy.ones\_like
+========================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: ones_like
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.ones_like.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

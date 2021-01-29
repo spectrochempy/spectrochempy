@@ -1,0 +1,13 @@
+
+spectrochempy.logspace
+======================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: logspace
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.logspace.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

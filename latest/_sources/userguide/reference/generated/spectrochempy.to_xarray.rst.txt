@@ -1,0 +1,13 @@
+
+spectrochempy.to\_xarray
+========================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: to_xarray
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.to_xarray.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

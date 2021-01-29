@@ -1,0 +1,438 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>spectrochempy.MCRALS &mdash; SpectroChemPy v0.2.5.dev8 0.2.5.dev8 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_override.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery-dataframe.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery-rendered-html.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/scpy.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="spectrochempy.IRIS" href="spectrochempy.IRIS.html" />
+    <link rel="prev" title="spectrochempy.SIMPLISMA" href="spectrochempy.SIMPLISMA.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/scpy.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.5.dev8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> SpectroChemPy </span>
+        version: latest
+        <span class="fa fa-caret-down"></span>
+      </span>
+        <div class="rst-other-versions">
+            <dl>
+                <dt>Other versions</dt>
+                
+                    
+                
+                    
+                        <dd><a href="https://spectrochempy.github.io/spectrochempy/stable/index.html">STABLE</a></dd>
+                    
+                
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Downloads</dt>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/latest-spectrochempy.pdf">PDF</a></dd>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/latest-spectrochempy-notebooks.zip">Notebooks</a></dd>
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Sources on GitHub</dt>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
+
+            </dl>
+
+        </div>
+    </div>
+
+    
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/whyscpy.html">Why <strong>SpectroChemPy</strong>  ?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/gallery/auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/install/index.html">Installation</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../objects.html">Data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../units/units.html">Units &amp; Quantities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../importexport/importexport.html">Import &amp; Export</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plotting/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../processing/processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../fitting/fitting.html">Fitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analysis/analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../databases/databases.html">Databases</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference &amp; Help</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#loading-the-api">Loading the API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#the-nddataset-object">The NDDataset object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#coordinates-related-objects">Coordinates related objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#creating-nddataset">Creating NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#export-a-nddataset">Export a NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#select-data-in-a-nddataset">Select data in a NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#plotting-functions">Plotting functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#processing">Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#fitting">Fitting</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#analysis">Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#project-management">Project management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#scripting">Scripting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#utilities">Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently asked questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/examples.html">Adding new tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/examples.html#adding-your-examples-to-the-gallery">Adding your examples to the gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/contributing.html">Developer’s Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/citing.html">Citing  <strong>SpectroChemPy</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/seealso.html">See also</a></li>
+</ul>
+
+            
+          
+
+
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SpectroChemPy v0.2.5.dev8</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">API reference</a> &raquo;</li>
+        
+      <li>spectrochempy.MCRALS</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../../_sources/userguide/reference/generated/spectrochempy.MCRALS.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    
+    
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="spectrochempy-mcrals">
+<h1>spectrochempy.MCRALS<a class="headerlink" href="#spectrochempy-mcrals" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="spectrochempy.MCRALS">
+<em class="property">class </em><code class="sig-name descname">MCRALS</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataset</span></em>, <em class="sig-param"><span class="n">guess</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy/core/analysis/mcrals.py#L25-L455"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spectrochempy.MCRALS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs MCR-ALS of a dataset knowing the initial C or St matrix.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> (<em>|NDDataset|</em>) – The dataset on which to perform the MCR-ALS analysis</p></li>
+<li><p><strong>guess</strong> (<em>|NDDataset|</em>) – Initial concentration or spectra</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – If set to True, prints a summary of residuals and residuals change at each iteration. default = False.
+In any case, the same information is returned in self.logs</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – Optimization parameters : See Other Parameters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Other Parameters</dt>
+<dd class="field-even"><ul>
+<li><p><strong>tol</strong> (<em>float, optional,  default=0.1</em>) – Convergence criterion on the change of resisuals.
+(percent change of standard deviation of residuals).</p></li>
+<li><p><strong>maxit</strong> (<em>int, optional, default=50</em>) – Maximum number of ALS minimizations.</p></li>
+<li><p><strong>maxdiv</strong> (<em>int, optional, default=5.</em>) – Maximum number of successive non-converging iterations.</p></li>
+<li><p><strong>nonnegConc</strong> (<em>list or tuple, default=Default [0, 1, …] (only non-negative concentrations)</em>) – Index of species having non-negative concentration profiles. For instance [0, 2] indicates that species
+#0 and #2 have non-negative conc profiles while species #1 can have negative concentrations.</p></li>
+<li><p><strong>unimodConc</strong> (<em>list or tuple, Default=[0, 1, …] (only unimodal concentration profiles)</em>) – index of species having unimodal concentrationsprofiles.</p></li>
+<li><p><strong>closureConc</strong> (<em>list or tuple, Default=None  (no closure)</em>) – Index of species subjected to a closure constraint.</p></li>
+<li><p><strong>extConc</strong> (<em>list or tuple, Default None (no external concentration).</em>) – Index of species for which a concentration profile is provided by an external function.</p></li>
+<li><p><strong>getExtlConc</strong> (<em>callable</em>) – An external function that will provide <code class="xref py py-obj docutils literal notranslate"><span class="pre">n_ext</span></code> concentration profiles:</p>
+<p>getExtConc(C, extConc, ext_to_C_idx, <a href="#id1"><span class="problematic" id="id2">*</span></a>args) -&gt; extC</p>
+<p>or</p>
+<p>getExtConc(C, extConc, ext_to_C_idx, <a href="#id3"><span class="problematic" id="id4">*</span></a>args) -&gt; (extC, out2, out3, …)</p>
+<p>where C is the current concentration matrix, <a href="#id5"><span class="problematic" id="id6">*</span></a>args are the parameters needed to completely
+specify the function, extC is a  nadarray or NDDataset of shape (C.y, n_ext), and out1, out2, … are
+supplementary outputs returned by the function (e.g. optimized rate parameters)</p>
+</li>
+<li><p><strong>args</strong> (<em>tuple, optional.</em>) – Extra arguments passed to the external function</p></li>
+<li><p><strong>external_to_C_idx</strong> (<em>array or tuple, Default=np.arange(next)</em>) – Indicates the correspondence between the indexes of external chemical
+profiles and the columns of the C matrix. [1, None, 0] indicates that the first external profile is the
+second pure species (index 1).</p></li>
+<li><p><strong>nonnegSpec</strong> (<em>list or tuple, Default [1, …, 1]  (only non-negative spectra)</em>) – Indicates species having non-negative spectra</p></li>
+<li><p><strong>unimodSpec</strong> (<em>list or tuple, Default [0, …, 0]  (no unimodal concentration profiles)</em>) – Indicates species having unimodal spectra</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.MCRALS.plotmerit.html#spectrochempy.MCRALS.plotmerit" title="spectrochempy.MCRALS.plotmerit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plotmerit</span></code></a></p></td>
+<td><p>Plots the input dataset, reconstructed dataset and residuals</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.MCRALS.reconstruct.html#spectrochempy.MCRALS.reconstruct" title="spectrochempy.MCRALS.reconstruct"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reconstruct</span></code></a></p></td>
+<td><p>Transform data back to the original space.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.MCRALS.C.html#spectrochempy.MCRALS.C" title="spectrochempy.MCRALS.C"><code class="xref py py-obj docutils literal notranslate"><span class="pre">C</span></code></a></p></td>
+<td><p>The final concentration profiles.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.MCRALS.St.html#spectrochempy.MCRALS.St" title="spectrochempy.MCRALS.St"><code class="xref py py-obj docutils literal notranslate"><span class="pre">St</span></code></a></p></td>
+<td><p>The final spectra profiles.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.MCRALS.X.html#spectrochempy.MCRALS.X" title="spectrochempy.MCRALS.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a></p></td>
+<td><p>The original dataset.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.MCRALS.extC.html#spectrochempy.MCRALS.extC" title="spectrochempy.MCRALS.extC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extC</span></code></a></p></td>
+<td><p>The last concentration profiles including external profiles.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.MCRALS.extOutput.html#spectrochempy.MCRALS.extOutput" title="spectrochempy.MCRALS.extOutput"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extOutput</span></code></a></p></td>
+<td><p>The last output of the external function used to get.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.MCRALS.logs.html#spectrochempy.MCRALS.logs" title="spectrochempy.MCRALS.logs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logs</span></code></a></p></td>
+<td><p>Logs output.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.MCRALS.params.html#spectrochempy.MCRALS.params" title="spectrochempy.MCRALS.params"><code class="xref py py-obj docutils literal notranslate"><span class="pre">params</span></code></a></p></td>
+<td><p>the parameters used to perform the MCR als.</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="section" id="examples-using-spectrochempy-mcrals">
+<h2>Examples using <code class="docutils literal notranslate"><span class="pre">spectrochempy.MCRALS</span></code><a class="headerlink" href="#examples-using-spectrochempy-mcrals" title="Permalink to this headline">¶</a></h2>
+<div class="sphx-glr-thumbcontainer" tooltip="In this example, we perform the MCR ALS optimization of a dataset corresponding to a HPLC-DAD r..."><div class="figure align-default" id="id7">
+<img alt="MCR-ALS optimization example (original example from Jaumot)" src="../../../_images/sphx_glr_plot_mcrals_chrom1_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../../../gettingstarted/gallery/auto_examples/analysis/plot_mcrals_chrom1.html#sphx-glr-gettingstarted-gallery-auto-examples-analysis-plot-mcrals-chrom1-py"><span class="std std-ref">MCR-ALS optimization example (original example from Jaumot)</span></a></span><a class="headerlink" href="#id7" title="Permalink to this image">¶</a></p>
+</div>
+</div><div style='clear:both'></div></div>
+</div>
+
+
+           </div>
+           
+          </div>
+
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="spectrochempy.IRIS.html" class="btn btn-neutral float-right" title="spectrochempy.IRIS" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="spectrochempy.SIMPLISMA.html" class="btn btn-neutral float-left" title="spectrochempy.SIMPLISMA" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2014-2021 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">
+        Last updated on Jan 29, 2021.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

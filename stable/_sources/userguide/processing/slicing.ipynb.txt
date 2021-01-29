@@ -1,0 +1,395 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "adjusted-salmon",
+   "metadata": {
+    "lines_to_next_cell": 2
+   },
+   "source": [
+    "# Slicing datasets\n",
+    "\n",
+    "Here we shows how to handle NDDatasets using python slicing."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "patent-fifteen",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "\n",
+    "import spectrochempy as scp"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "streaming-permit",
+   "metadata": {},
+   "source": [
+    "## What is the slicing ?\n",
+    "\n",
+    "The slicing of a list or an array means taking elements from a given index (or set of indexes) to another index (or\n",
+    "set of indexes). Slicing is specified using the colon operator `:` with a `from` and `to` index before and after\n",
+    "the first column, and a `step` after the second column. Hence a slice of the object `X` will be set as:\n",
+    "\n",
+    "`X[from:to:step]`\n",
+    "\n",
+    "and will extend from the ‘from’ index, ends one item before the ‘to’ index and with an increment of `step`between\n",
+    "each index. When not given the default values are respectively 0 (i.e. starts at the 1st index), length in the\n",
+    "dimension (stops at the last index), and 1.\n",
+    "\n",
+    "Let's first illustrate the concept on a 1D example:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "going-concord",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X = np.arange(10)  # generates a 1D array of 10 elements from 0 to 9\n",
+    "print(X)\n",
+    "print(X[2:5])  # selects all elements from 2 to 4\n",
+    "print(X[::2])  # selects one out of two elements\n",
+    "print(X[:-3])  # a negative index will be counted from the end of the array\n",
+    "print(X[::-2])  # a negative step will slice backward, starting from 'to', ending at 'from'"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "naval-petite",
+   "metadata": {},
+   "source": [
+    "The same applies to multidimensional arrays by indicating slices separated by commas:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "spoken-carrier",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X = np.random.rand(10, 10)  # genarates a 10x10 array filled with random values\n",
+    "print(X.shape)\n",
+    "print(X[2:5, :].shape)  # slices along the 1st dimension, X[2:5,] is equivalent\n",
+    "print(X[2:5, ::2].shape)  # same slice along 1st dimension and takes one 1 column out of two along the second"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "early-qualification",
+   "metadata": {},
+   "source": [
+    "## Slicing of NDDataset\n",
+    "\n",
+    "NDDataset can be sliced like conventional numpy-array with some additional features\n",
+    "\n",
+    "*e.g.,*:\n",
+    "\n",
+    "1. by index, using a slice such as [3], [0:10], [:, 3:4], [..., 5:10], ...\n",
+    "\n",
+    "2. by values (coordinates), using a slice such as [3000.0:3500.0], [..., 300.0], ...\n",
+    "\n",
+    "3. by labels, using a slice such as ['monday':'friday'], ...\n",
+    "\n",
+    "Let's import a group of IR spectra, look at its content and plot it:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "productive-practitioner",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG', description='CO adsorption, diff spectra')\n",
+    "X.y -= X.y[0]\n",
+    "X.y.ito(\"minute\")\n",
+    "X.y.title = 'Time'\n",
+    "X"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "norwegian-newman",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "prefs = X.preferences  # set up general preferences for plotting\n",
+    "prefs.colormap = 'Dark2'\n",
+    "prefs.figure.figsize = (7, 3)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "previous-measurement",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "_ = X.plot()  # assignment to _ avoids the display of the text ouput from plot. We want only the plot"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "contained-meter",
+   "metadata": {},
+   "source": [
+    "### Slicing with indexes\n",
+    "\n",
+    "The classical slicing, using integers, can be used. For instance, along the 1st dimension:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "working-museum",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(X[:4])  # selects the first four spectra\n",
+    "print(X[-3:])  # selects the last three spectra\n",
+    "print(X[::2])  # selects one spectrum out of 2"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "accessible-fiction",
+   "metadata": {},
+   "source": [
+    "The same can be made along the second dimension, simultanesly or not with the first one. For instance"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "honest-palestine",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(X[:, ::2])  # all spectra, one wavenumber out of 2   (note the bug: X[,::2] generates an error)\n",
+    "print(X[0:3, 200:1000:2])  # 3 first spectra, one wavenumbers out of 2, frm index 200 to 1000"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "closed-dealing",
+   "metadata": {
+    "title": "Would you easily guess which wavenumber range have been actually selected ?.... probably not because"
+   },
+   "source": [
+    "the relationship between the index and the wavenumber is not straightforward as it depends on the the value of the\n",
+    "first wavenumber, the wavenumber spacing, and whether the wavenumbers are arranged in ascending or descending\n",
+    "order... Here is the answer:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "great-thriller",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X[:, 200:1000:2].x  # as the Coord can be sliced, the same is obtained with: X.x[200:1000:2]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "physical-floating",
+   "metadata": {},
+   "source": [
+    "### Slicing with coordinates\n",
+    "\n",
+    "Now the spectroscopist is generally interested in a particular region of the spectrum, for instance,\n",
+    "2300-1900 cm$^{-1}$. Can you easily guess the indexes that one should use to spectrum this region ? probably not\n",
+    "without a calculator! ...\n",
+    "\n",
+    "Fortunately, a simple mechanism has been implemented in SpectroChemPy for this purpose: the use of floats instead\n",
+    "of integers will slice the NDDataset at the corresponding coordinates. For instance to select the 2300-1900 cm$^{\n",
+    "-1}$ region:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "formed-istanbul",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "subplot = X[:, 2300.0:1900.0:].plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "bright-material",
+   "metadata": {},
+   "source": [
+    "The same mechanism can be used along the first dimension (`y`). For instance, to select and plot the same region and\n",
+    "the spectra recorded between 80 and 180 minutes:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "eight-component",
+   "metadata": {
+    "lines_to_next_cell": 0
+   },
+   "outputs": [],
+   "source": [
+    "# Note that a decimal point is enough to get a float\n",
+    "# and that a warning is raised if one or several values are beyond the limits\n",
+    "subplot = X[80.:180., 2300.:1900.].plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "chief-practice",
+   "metadata": {},
+   "source": [
+    "Similarly, the spectrum recorded at the time the closest to 60 mins can be selected using a float:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "extended-buffer",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X[60.].y  # X[60.] slices the spectrum,  .y returns the corresponding `y` axis."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "quiet-threat",
+   "metadata": {},
+   "source": [
+    "### Slicing with labels"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "concerned-tractor",
+   "metadata": {},
+   "source": [
+    "The X dataset have several lists of labels in the y dimension. Let's display the first series (which is compose of\n",
+    "dtetime objects)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cathedral-better",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for i, item in enumerate(X.y.labels[:, 0]):\n",
+    "    print(i, '->', item, type(item))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "caring-galaxy",
+   "metadata": {},
+   "source": [
+    "Let's slice using the date at index 10. We can check that the slicing is correct"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "mounted-headline",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from datetime import datetime, timezone\n",
+    "\n",
+    "date1 = datetime(2016, 10, 18, 15, 24, 4, tzinfo=timezone.utc)\n",
+    "X[date1] == X[10]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "functioning-virgin",
+   "metadata": {},
+   "source": [
+    "One can mixed slicing methods for different dimension:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "mounted-display",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "d = X[date1, 2000.:2300.]\n",
+    "_ = d.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "thousand-witch",
+   "metadata": {},
+   "source": [
+    "We can also take a range of labels"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "lovely-offer",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "date2 = datetime(2016, 10, 18, 15, 52, 3, tzinfo=timezone.utc)\n",
+    "d = X[date1:date2, 2000.:2300.]\n",
+    "_ = d.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "gothic-quilt",
+   "metadata": {},
+   "source": [
+    "### Slicing dataset with multiple coordinates on one dimension"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "young-immune",
+   "metadata": {},
+   "source": [
+    "<div class='alert alert-warning'>\n",
+    "<b>Todo</b>\n",
+    "\n",
+    "   Slicing dataset with multiple coordinates on one dimension\n",
+    "\n",
+    "   Add advanced slicing by array of indexes, array of bool,  ...\n",
+    "</div>"
+   ]
+  }
+ ],
+ "metadata": {
+  "jupytext": {
+   "cell_metadata_filter": "title,-all",
+   "encoding": "# -*- coding: utf-8 -*-",
+   "formats": "ipynb,py:percent",
+   "notebook_metadata_filter": "all"
+  },
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

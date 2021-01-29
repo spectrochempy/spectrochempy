@@ -1,0 +1,13 @@
+
+spectrochempy.fft
+=================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: fft
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.fft.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

@@ -1,0 +1,13 @@
+
+spectrochempy.dot
+=================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: dot
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.dot.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

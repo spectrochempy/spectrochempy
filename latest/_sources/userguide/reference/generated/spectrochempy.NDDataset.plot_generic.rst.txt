@@ -1,0 +1,13 @@
+
+spectrochempy.NDDataset.plot\_generic
+=====================================
+
+.. currentmodule:: spectrochempy
+
+.. automethod:: NDDataset.plot_generic
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.NDDataset.plot_generic.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

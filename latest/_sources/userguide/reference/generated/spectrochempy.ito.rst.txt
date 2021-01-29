@@ -1,0 +1,13 @@
+
+spectrochempy.ito
+=================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: ito
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.ito.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

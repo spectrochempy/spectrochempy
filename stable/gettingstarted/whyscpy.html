@@ -1,0 +1,419 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Why SpectroChemPy ? &mdash; SpectroChemPy v0.2.5 0.2.5 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_override.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/gallery-dataframe.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/gallery-rendered-html.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../_static/scpy.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Overview" href="overview.html" />
+    <link rel="prev" title="Processing, analysing and modelling spectroscopic data" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/scpy.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> SpectroChemPy </span>
+        version: stable
+        <span class="fa fa-caret-down"></span>
+      </span>
+        <div class="rst-other-versions">
+            <dl>
+                <dt>Other versions</dt>
+                
+                    
+                        <dd><a href="https://spectrochempy.github.io/spectrochempy/latest/index.html"">LATEST</a></dd>
+                    
+                
+                    
+                
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Downloads</dt>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/stable-spectrochempy.pdf">PDF</a></dd>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/stable-spectrochempy-notebooks.zip">Notebooks</a></dd>
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Sources on GitHub</dt>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
+
+            </dl>
+
+        </div>
+    </div>
+
+    
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Why <strong>SpectroChemPy</strong>  ?</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#designed-for-open-science">Designed for Open Science</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#open-souce-software-on-an-open-source-platform">Open souce software on an open source platform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#powered-by-python">Powered by Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#why-not-scpy">Why NOT <strong>SpectroChemPy</strong> ?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gallery/auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install/index.html">Installation</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/introduction/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/objects.html">Data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/units/units.html">Units &amp; Quantities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/importexport/importexport.html">Import &amp; Export</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/plotting/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/processing/processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/fitting/fitting.html">Fitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/analysis/analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/databases/databases.html">Databases</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference &amp; Help</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/reference/changelog.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/reference/index.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/reference/faq.html">Frequently asked questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../devguide/examples.html">Adding new tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../devguide/examples.html#adding-your-examples-to-the-gallery">Adding your examples to the gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../devguide/contributing.html">Developer’s Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../credits/citing.html">Citing  <strong>SpectroChemPy</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../credits/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../credits/seealso.html">See also</a></li>
+</ul>
+
+            
+          
+
+
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SpectroChemPy v0.2.5</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Why <strong>SpectroChemPy</strong>  ?</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/gettingstarted/whyscpy.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    
+    
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="why-scpy">
+<span id="whyscpy"></span><h1>Why <strong>SpectroChemPy</strong>  ?<a class="headerlink" href="#why-scpy" title="Permalink to this headline">¶</a></h1>
+<p><strong>Table of contents</strong></p>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#designed-for-open-science" id="id1">Designed for Open Science</a></p></li>
+<li><p><a class="reference internal" href="#open-souce-software-on-an-open-source-platform" id="id2">Open souce software on an open source platform</a></p></li>
+<li><p><a class="reference internal" href="#powered-by-python" id="id3">Powered by Python</a></p></li>
+<li><p><a class="reference internal" href="#why-not-scpy" id="id4">Why NOT <strong>SpectroChemPy</strong> ?</a></p></li>
+</ul>
+</div>
+<p>The <strong>SpectroChemPy</strong> project was developed to provide advanced tools for processing and
+analyzing spectroscopic data, initially for internal purposes in the
+<a class="reference external" href="https://www.lcs.ensicaen.fr/">LCS</a>, for the following reasons:</p>
+<div class="section" id="designed-for-open-science">
+<h2><a class="toc-backref" href="#id1">Designed for Open Science</a><a class="headerlink" href="#designed-for-open-science" title="Permalink to this headline">¶</a></h2>
+<p>While commercial software usually provides powerful and easy-to-use graphical user interfaces (GUIs), basic algorithms
+such as baseline correction systems, automatic subtraction, peak detection, curve fitting, etc. are generally not
+disclosed to the user.</p>
+<p>Although they are generally to be trusted (it is in the sole interest of these companies to provide reliable tools),
+the spectroscopist sometimes needs to know the details of how the data provided is processed or analyzed. These details
+are usually neither given in the software manual nor disclosed by the company’s technical staff.</p>
+<p>In addition, the “click, drag and drop” approach of many graphical interfaces often prevents full reproducibility. This
+is the case, for example, with advanced integration or basic editing in many commercial software products. Some of them
+do not always allow to check the history of the data, which is also problematic for the verification of data integrity
+and reproducibility.</p>
+<p>In particular, <strong>SpectroChemPy</strong> :</p>
+<ul class="simple">
+<li><p>is entirely open source and relies on algorithms documented in the code.</p></li>
+<li><p>allows to follow the complete history of data sets and analyses (“history” field)</p></li>
+<li><p>allows to integrate the content of a particular job (data, scripts, notebooks, …) into a dedicated data structure
+(“Project”), guaranteeing a complete follow-up from the import of raw data to the final results..</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>SpectroChemPy does not guarantee “data integrity”, in that the validity of the raw data and the correct use of the
+processing and analysis tools is the responsibility of the user.</p>
+<p>SpectroChemPy is probably not free of bugs in some (hopefully rare) cases. In any case, critical bugs affecting data
+integrity will be reported in the documentation for the version(s) of <strong>SpectroChemPy</strong> concerned, allowing the source
+of these errors to be traced.</p>
+</div>
+</div>
+<div class="section" id="open-souce-software-on-an-open-source-platform">
+<h2><a class="toc-backref" href="#id2">Open souce software on an open source platform</a><a class="headerlink" href="#open-souce-software-on-an-open-source-platform" title="Permalink to this headline">¶</a></h2>
+<p>While powerful and popular tools have been developed by instrument manufacturers, software companies, or academic
+research groups, most are proprietary or require proprietary computing environments (e.g., MATLAB). The cost of
+licensing can be problematic in some cases: “isolated” research groups, developing countries, doctoral or post-doc
+students leaving a group with their data, etc.</p>
+<p>It was important for us to be able to share spectroscopic data / data processing tools / data analysis tools with our
+colleagues, without imposing a financial burden on them… or pushing them to use cracked copies.</p>
+<p><strong>SpectroChemPy</strong> is free of charge and under a free software license
+(<a class="reference external" href="https://cecill.info/index.en.html">Licence [CeCILL-B]</a>). CeCILL-B follows the principle of the popular BSD license
+and its variants (Apache, X11 or W3C among others). In exchange for strong citation obligations (in all software
+incorporating a program covered by CeCILL-B and also through a Web site), the author authorizes the reuse of its
+software without any other constraints.</p>
+</div>
+<div class="section" id="powered-by-python">
+<h2><a class="toc-backref" href="#id3">Powered by Python</a><a class="headerlink" href="#powered-by-python" title="Permalink to this headline">¶</a></h2>
+<p>Python is probably the most popular, open-source language used by Data Scientists. It is extensible and cross-platform,
+allowing <strong>SpectroChemPy</strong> to be used in an entirely open-source software environment. <strong>SpectroChemPy</strong> uses state-of-the-art
+libraries for numerical computation (<a class="reference external" href="https://numpy.org/">numpy</a>, <a class="reference external" href="https://www.scipy.org/">scipy</a>) and
+visualization (<a class="reference external" href="https://matplotlib.org/">matplotlib</a>).</p>
+<p>As the Python community is extremely dynamic, all users should easily find resources to solve specific needs that are
+not (yet) directly or completely satisfied by <strong>SpectroChemPy</strong>.</p>
+<p>We also rely on the motivated members of this community (of which you are a part), to contribute to the improvement of
+<strong>SpectroChemPy</strong> through (<a class="reference internal" href="../devguide/issues.html#contributing-bugs-report"><span class="std std-ref">Reporting Issues</span></a>), or contributions to the code (<a class="reference internal" href="../devguide/contributing.html#develguide"><span class="std std-ref">Developer’s Guide</span></a>).</p>
+</div>
+<div class="section" id="why-not-scpy">
+<h2><a class="toc-backref" href="#id4">Why NOT <strong>SpectroChemPy</strong> ?</a><a class="headerlink" href="#why-not-scpy" title="Permalink to this headline">¶</a></h2>
+<p>You might <strong>NOT</strong> want to use <strong>SpectroChemPy</strong> if:</p>
+<ul class="simple">
+<li><p>you are resistant to command line code (Python) or scripts. Since
+<strong>SpectroChemPy</strong> is essentially an Application Programming Interface (API), it
+requires writing commands and small scripts. its documentation and resources contain fully documented
+examples (see <a class="reference internal" href="gallery/auto_examples/index.html#examples-index"><span class="std std-ref">Example’s gallery</span></a>) and tutorials (see <a class="reference internal" href="../index.html#userguide"><span class="std std-ref">User’s Guide</span></a>),  which should be easy to transpose into
+your own data. In particular, the use of Jupyter notebooks mixing texts, code blocks and figures, so that basic
+procedures (data import, basic processing and analysis, etc…) do not require much programming knowledge.</p></li>
+<li><p>you are working on spectroscopic data that are difficult to process, including <strong>SpectroChemPy</strong> (currently mainly
+focused on optical spectroscopy and NMR) because some components or tools (e.g. importing your raw data, …) are
+missing: please suggest new features that should be added (<a class="reference internal" href="../devguide/issues.html#contributing-bugs-report"><span class="std std-ref">Reporting Issues</span></a>). We will take into
+consideration all suggestions to make <strong>SpectroChemPy</strong> more widely and easily usable.</p></li>
+<li><p>you are working on very sensitive data (health, chemical safety, plant production, …) and cannot take the risk to
+use a software under development and subject to bugs and changes before “maturity”. We do not dispute this!</p></li>
+<li><p>you are fully satisfied with your current tools. “The heart has its reasons, of which the reason knows nothing”.
+We don’t dispute that either, but we are open to your opinion and suggestions (bug reports and requests for
+improvements/functionality)!</p></li>
+<li><p>you are fully satisfied with your current tools. “The heart has its reasons, of which the reason knows nothing”. We
+don’t dispute that either, but we are open to your opinion and suggestions (<a class="reference internal" href="../devguide/issues.html#contributing-bugs-report"><span class="std std-ref">Reporting Issues</span></a>)!</p></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="overview.html" class="btn btn-neutral float-right" title="Overview" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../index.html" class="btn btn-neutral float-left" title="Processing, analysing and modelling spectroscopic data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2014-2021 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">
+        Last updated on Jan 29, 2021.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

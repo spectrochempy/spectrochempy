@@ -1,0 +1,13 @@
+
+spectrochempy.average
+=====================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: average
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.average.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

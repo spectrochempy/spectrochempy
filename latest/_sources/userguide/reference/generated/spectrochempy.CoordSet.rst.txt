@@ -1,0 +1,48 @@
+spectrochempy.CoordSet
+======================
+
+.. currentmodule:: spectrochempy
+
+.. autoclass:: CoordSet
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+
+      ~CoordSet.copy
+      ~CoordSet.implements
+      ~CoordSet.keys
+      ~CoordSet.set
+      ~CoordSet.set_titles
+      ~CoordSet.set_units
+      ~CoordSet.to_dict
+      ~CoordSet.update
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :nosignatures:
+
+
+      ~CoordSet.available_names
+      ~CoordSet.has_defined_name
+      ~CoordSet.id
+      ~CoordSet.is_empty
+      ~CoordSet.is_same_dim
+      ~CoordSet.labels
+      ~CoordSet.names
+      ~CoordSet.size
+      ~CoordSet.sizes
+      ~CoordSet.titles
+      ~CoordSet.units
+
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.CoordSet.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

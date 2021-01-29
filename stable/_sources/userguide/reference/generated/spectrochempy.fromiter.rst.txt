@@ -1,0 +1,13 @@
+
+spectrochempy.fromiter
+======================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: fromiter
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.fromiter.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

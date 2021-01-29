@@ -1,0 +1,1342 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>MCR ALS &mdash; SpectroChemPy v0.2.5 0.2.5 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_override.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery-dataframe.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery-rendered-html.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/scpy.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Databases" href="../databases/databases.html" />
+    <link rel="prev" title="Peak integration" href="peak_integration.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html">
+          
+
+          
+            
+            <img src="../../_static/scpy.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> SpectroChemPy </span>
+        version: stable
+        <span class="fa fa-caret-down"></span>
+      </span>
+        <div class="rst-other-versions">
+            <dl>
+                <dt>Other versions</dt>
+                
+                    
+                        <dd><a href="https://spectrochempy.github.io/spectrochempy/latest/index.html"">LATEST</a></dd>
+                    
+                
+                    
+                
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Downloads</dt>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/stable-spectrochempy.pdf">PDF</a></dd>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/stable-spectrochempy-notebooks.zip">Notebooks</a></dd>
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Sources on GitHub</dt>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
+
+            </dl>
+
+        </div>
+    </div>
+
+    
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Home</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/whyscpy.html">Why <strong>SpectroChemPy</strong>  ?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/gallery/auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/install/index.html">Installation</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../objects.html">Data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../units/units.html">Units &amp; Quantities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../importexport/importexport.html">Import &amp; Export</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plotting/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../processing/processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fitting/fitting.html">Fitting</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="analysis.html">Analysis</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="peak_finding.html">Peak Maxima Finding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="peak_integration.html">Peak integration</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">MCR ALS</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../databases/databases.html">Databases</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference &amp; Help</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/changelog.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/faq.html">Frequently asked questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/examples.html">Adding new tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/examples.html#adding-your-examples-to-the-gallery">Adding your examples to the gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/contributing.html">Developer’s Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/citing.html">Citing  <strong>SpectroChemPy</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/seealso.html">See also</a></li>
+</ul>
+
+            
+          
+
+
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SpectroChemPy v0.2.5</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="analysis.html">Analysis</a> &raquo;</li>
+        
+      <li>MCR ALS</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../_sources/userguide/analysis/mcr_als.ipynb.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    
+    
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt a.copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="MCR-ALS">
+<h1>MCR ALS<a class="headerlink" href="#MCR-ALS" title="Permalink to this headline">¶</a></h1>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">spectrochempy</span> <span class="k">as</span> <span class="nn">scp</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<table><tr><td>
+
+<img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAAlw
+SFlzAAAJOgAACToB8GSSSgAAAetpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6
+bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDUuNC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8x
+OTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAg
+eG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIgogICAgICAgICAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMu
+YWRvYmUuY29tL3RpZmYvMS4wLyI+CiAgICAgICAgIDx4bXA6Q3JlYXRvclRvb2w+bWF0cGxvdGxpYiB2ZXJzaW9uIDIuMS4wLCBo
+dHRwOi8vbWF0cGxvdGxpYi5vcmcvPC94bXA6Q3JlYXRvclRvb2w+CiAgICAgICAgIDx0aWZmOk9yaWVudGF0aW9uPjE8L3RpZmY6
+T3JpZW50YXRpb24+CiAgICAgIDwvcmRmOkRlc2NyaXB0aW9uPgogICA8L3JkZjpSREY+CjwveDp4bXBtZXRhPgqNQaNYAAAGiUlE
+QVRIDY1We4xU1Rn/3XPuYx47u8w+hnU38hTcuoUEt/6D2y4RB0ME1BoEd9taJaKh9CFiN7YGp7appUAMNmktMZFoJTYVLVQ0smsy
+26CN0SU1QgsuFAaW3WVmx33N677O6XfuyoIxTXqSO/fec+75fd93vt/3/UbDV0aKSZmCpkFMLz3T9utuu2N+o98aDSMBKVAo89z5
+y+zEz3ZafcCOfvWdlGCalqKn1Bf71CygTd+mf1esSOnpdMpTb+vWpTZuWVfe3jLPa5tzHYNm0T5N0gpdkkHaDBeGBU6d1/t/fyS8
++/CbqdfUvmsx1PuMgc2bNxv79u1zgd31r+7JH1jbIZKxWRXAcYUQ8IWvBfBXNjEuJWPgMA02NR7C3/pYT9fjdZ3A9tGrWF8YSJHn
+qcDz3y7q2T967PZv+gnYJdd1mEZ+62zGDQV/dQgKhmLzDNOXCEWM3j6eTT5Y3w78dOBKJLR1PQf+4ivPj76UPZnssBN+wbM9Aet/
+AV81Mf1EEULXYfOobvX2WWQk0aoioXwwSmirOlioY0mu8BIouzYl7P8GV3vpqCCEZvlFz769w08oLDWvyKIyL1asSm28d6WfzA97
+ztvvV1kexUMsmhlkULEkuGYmFYC6AvfUrITnwUKl5K79lkjeSSRRTCTbQPd95e1WzMbZSya74XoXAxctCllCnbECMOjZNGRwvzIX
+nD85wbkMmKK+U045Dtdi8Qp+SAxU2GTg2bYlC9224pgvmSb54vkVTBQYyhUt2KjAMyMmPjwRQW5Mh2WKwJhlBh6jVGagFM84wZnQ
+4bpC0Rt4pk1PbSt0NDcxDA5xryosDHWgtbM0DGZDWLSoiDMDYeQnGVrmOThxLozB0RAaahzkJzjKNqcIQBymJFMkOlN8Dqjpg0XY
+Tx5xO/QbmmUrqIjGJznq47TqTaClKYfjp+PInLMwnOdYvtQBZ2XcunQY+VwIo4U4muoFEjVEFE6lQyEUKzHYfgQG9ylCyngU+Cxj
+tOqxCDGHcCsOMCs6iQul5ZiStdATYxjMZXDLTUVwLY8Jey4uOh2IxjwsrP8UXJYxUrkZrghBahzV5iXU6gNkq0Z1EzIsUBUSCV2n
+EOHo0LVxHCpuxabJJdhi5PFnvw5vLXwXIfNZvD/+JNo/X40NegE54sUaazl+UL8XD1x+FB9Ijjt4EQfdGN6J/x131LwIV9ap/AYs
+0x1fz1ZKFbh6A7qKy/By9Dg6G36Ep91vUJJ15Cqr0Z67E8/HzmBrw1OwxWyM+3Mo6BAuSB17oyfx0Oyl2DN0Hqs/70Cx6hBCvESF
+UY1ShWXZZEE7OTAYxZzaPH4TuoiusZvRnunFy2NbiHYuBp2vB66srX4vMEjpRKPxKXmnoQ4+Mn4DPiv8CYcrs3GfNUXJLtM+alSO
+hrMj/KT+wBNW3+E/2liywNO3iSflbaFva/+stGDTxE0E9Sjaox8HBhxpEamzMGSEaFKg+mjEddzDh1MxTDq3YV1kGBsjfwW3S9Cq
+anjmko+ndlb1UR3s6K8JlfphNWq9Ew/7c61T2BB/EbcaNkb8GBaE0tANH7/M34PLdhJDzjIcL9xPbdTG6zyM72Y+wXPHmvB489No
+fm0b5HnbQ9Rgp/7DSSd29AeVvPeNyK6JcYl/yQVi5dBjuGvoV/gaJe47s45QUxrDmcYX0MBsdF7egvXZ7+O0vZA4X8QmOQWjlSK7
+RDz5wIM30gp9UbWcGjXxhzdDu1SiNSpx6kcQB57rPnr/3dlkZarWLnlRq5oPET1dOCIOk4wALib9eeS5iygfhkd09H0DWphB/+gs
++PcOAS+ssrFmmXXgVfR0de9cpbAJfH3Q1jofW9DZk56dDcVsq9YcsoUMEd1qyLoT3BX1YiyHMJuk97hyjqIoE91t+NcTLeN0ZrfM
+oXatZbu6G0h4VG+ibqq0IJVK6cAjo6serG3vSUezCMct0yQeSOFJSUImqb2qbknUpDqlZxE0QZ+ZUpSlZx79h4Nda6zef9dlk121
+JDjbR5XggPRZlRnS6bRQRtLpn4++cuie/Yvn2svmNxuLw9WCcYIl4fEoTEGiSTUqJdfgU+8ROqf1iMkLzS389YtNPXc/PH8l8ONB
+JZkHD+4JtD04HmVEDWWErmBhzV2/2LB1bemJG6krzv2S6NOHUgtEP0Oif5pE/3fHoruP7N8RiP61GArzSwbUhJJQpXJKiKbfr/3b
+IhKq76sKPUdF9NW/LSqfSn6vjv8C45H/6FSgvZQAAAAASUVORK5CYII='
+     style='height:25px; border-radius:12px; display:inline-block; float:left; vertical-align:middle'></img>
+
+</td><td>
+
+&nbsp;&nbsp;<span style='font-size:12px'>SpectroChemPy's API - v.0.2.5<br/>© Copyright 2014-2021 - A.Travert & C.Fernandez @ LCS</span>
+
+</td></tr></table>
+</div></div>
+</div>
+<div class="section" id="Introduction">
+<h2>Introduction<a class="headerlink" href="#Introduction" title="Permalink to this headline">¶</a></h2>
+<p>MCR-ALS (standing for Multivariate Curve Resolution - Alternating Least Squares) is a popular method for resolving a set (or several sets) of spectra <span class="math notranslate nohighlight">\(X\)</span> of an evolving mixture (or a set of mixtures) into the spectra <span class="math notranslate nohighlight">\(S^t\)</span> of ‘pure’ species and their concentration profiles <span class="math notranslate nohighlight">\(C\)</span>. In term of matrix equation:</p>
+<div class="math notranslate nohighlight">
+\[X = C S^t + E\]</div>
+<p>The ALS algorithm allows applying soft or hard constraints (e.g. non negativity, unimodality, equality to a given profile) to the spectra or concentration profiles of pure species. This property makes MCR-ALS an extremely flexible and powerful method. Its current implementation in Scpy is limited to soft constraints but is exected to cover more advanced features in further releases.</p>
+<p>In, this tutorial the application of MCS-ALS as implemented in Scpy to a ‘classical’ dataset form the literature is presented.</p>
+</div>
+<div class="section" id="The-(minimal)-dataset">
+<h2>The (minimal) dataset<a class="headerlink" href="#The-(minimal)-dataset" title="Permalink to this headline">¶</a></h2>
+<p>In this example, we perform the MCR ALS optimization of a dataset corresponding to a HPLC-DAD run, from Jaumot et al. Chemolab, 76 (2005), pp. 101-110 and Jaumot et al. Chemolab, 140 (2015) pp. 1-12. This dataset (and others) can be loaded from the “Multivariate Curve Resolution Homepage” at <a class="reference external" href="https://mcrals.wordpress.com/download/example-data-sets">https://mcrals.wordpress.com/download/example-data-sets</a>. For the user convenience, this dataset is present in the ‘datadir’ of spectrochempy in ‘als2004dataset.MAT’ and can be read as follows in Scpy:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">A</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">read_matlab</span><span class="p">(</span><span class="s2">&quot;matlabdata/als2004dataset.MAT&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>The .mat file contains 6 matrices which are thus returned in A as a list of 6 NDdatasets. We print the names and dimensions of these datasets:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">A</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+m1: (51, 96)
+spure: (4, 96)
+cpure: (204, 4)
+MATRIX: (204, 96)
+csel_matrix: (51, 4)
+isp_matrix: (4, 4)
+</pre></div></div>
+</div>
+<p>In this tutorial, we are first interested in the dataset named (‘m1’) that contains a singleHPLC-DAD run(s). As usual, the rows correspond to the ‘time axis’ of the HPLC run(s), and the columns to the ‘wavelength’ axis of the UV spectra.</p>
+<p>Let’s name it ‘X’ (as in the matrix equation above), display its content and plot it:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">X</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">X</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<table style='background:transparent'>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>         name</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> m1</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>       author</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> travis@travis-job-b5a7aa69-dc6b-4991-a0b4-3d34fc9e310b</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>      created</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 2021-01-29 13:34:30.243616+00:00</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>      history</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div>2021-01-29 13:34:30.244085+00:00:imported from .mat file</div></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><strong>          DATA </strong></td><td style='text-align:left; padding-bottom:0px; padding-top:0px; padding-top:10px; '><hr/></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        title</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <untitled></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>       values</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='blue'>         [[ 0.01525  0.01285 ... 0.0003178 -0.0002631]<br/>          [ 0.01969  0.01617 ... -0.007001 0.000682]<br/>          ...<br/>          [    0.01   0.0144 ... -0.0007125 0.004296]<br/>          [0.008121  0.01139 ... -0.007331 -0.001341]]</font></div></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        shape</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> (y:51, x:96)</td><tr>
+</table></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">_</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_mcr_als_8_0.png" src="../../_images/userguide_analysis_mcr_als_8_0.png" />
+</div>
+</div>
+<p>The original dataset is the ‘m1’ matrix and does not contain information as to the actual elution time, wavelength, and data units. Hence the resulting NDDataset has no coordinates and on the plot, only the matrix line and row indexes are indicated. For the clarity of the tutorial, we add: (i) a proper title to the data, (ii) the default coordinates (index) do the NDDataset and (iii) a proper name for these coordinates:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">X</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;absorbance&#39;</span>
+<span class="n">X</span><span class="o">.</span><span class="n">set_coordset</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<span class="n">X</span><span class="o">.</span><span class="n">set_coordtitles</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="s1">&#39;elution time&#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s1">&#39;wavelength&#39;</span><span class="p">)</span>
+<span class="n">X</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<table style='background:transparent'>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>         name</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> m1</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>       author</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> travis@travis-job-b5a7aa69-dc6b-4991-a0b4-3d34fc9e310b</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>      created</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 2021-01-29 13:34:30.243616+00:00</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>      history</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div>2021-01-29 13:34:30.244085+00:00:imported from .mat file</div></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><strong>          DATA </strong></td><td style='text-align:left; padding-bottom:0px; padding-top:0px; padding-top:10px; '><hr/></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        title</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> absorbance</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>       values</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='blue'>         [[ 0.01525  0.01285 ... 0.0003178 -0.0002631]<br/>          [ 0.01969  0.01617 ... -0.007001 0.000682]<br/>          ...<br/>          [    0.01   0.0144 ... -0.0007125 0.004296]<br/>          [0.008121  0.01139 ... -0.007331 -0.001341]]</font></div></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        shape</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> (y:51, x:96)</td><tr>
+</table></div>
+</div>
+<p>From now on, these names will be taken into account by Scpy in the plottings as well as in the analysis treatments (PCA, EFA, MCR-ALs, …). For instance to plot X as a surface:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">surf</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">plot_surface</span><span class="p">(</span><span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=.</span><span class="mi">2</span><span class="p">,</span> <span class="n">ccount</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_mcr_als_12_0.png" src="../../_images/userguide_analysis_mcr_als_12_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Initial-guess-and-MCR-ALS-optimization">
+<h2>Initial guess and MCR ALS optimization<a class="headerlink" href="#Initial-guess-and-MCR-ALS-optimization" title="Permalink to this headline">¶</a></h2>
+<p>The ALS optimization of the MCR equation above requires the input of a guess for either the concentration matrix <span class="math notranslate nohighlight">\(C_0\)</span> or the spectra matrix <span class="math notranslate nohighlight">\(S^t_0\)</span>. Given the data matrix <span class="math notranslate nohighlight">\(X\)</span>, the lacking initial matrix (<span class="math notranslate nohighlight">\(S^t_0\)</span> or <span class="math notranslate nohighlight">\(C_0\)</span>, respectively) is computed by:</p>
+<div class="math notranslate nohighlight">
+\[S^t_0 = \left( C_0^tC_0 \right)^{-1} C_0^t X\]</div>
+<p>or</p>
+<div class="math notranslate nohighlight">
+\[C_0 = X {S^t_0}^t  \left( S_0^t {S_0^t}^t \right)^{-1}\]</div>
+<div class="section" id="Case-of-initial-spectral-profiles">
+<h3>Case of initial spectral profiles<a class="headerlink" href="#Case-of-initial-spectral-profiles" title="Permalink to this headline">¶</a></h3>
+<p>The matrix spure provided in the initial dataset is a guess for the spectral profiles. Let’s name it ‘St0’, and plot it:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">St0</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">St0</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_mcr_als_14_0.png" src="../../_images/userguide_analysis_mcr_als_14_0.png" />
+</div>
+</div>
+<p>Note that, again, no information has been given as to the ordinate and abscissa data. We could add them as previously but this is not very important. The key point is that the ‘wavelength’ dimension is compatible with the data ‘X’, which is indeed the case (both have a legth of 95). If it was not, an error would be generated in the following.</p>
+<div class="section" id="ALS-Optimization">
+<h4>ALS Optimization<a class="headerlink" href="#ALS-Optimization" title="Permalink to this headline">¶</a></h4>
+<p>With this guess ‘St0’ and the dataset ‘X’ we can create a MCRALS object. At this point of the tutorial, we will use all the default parameters except for the ‘verbose’ option which is swiched on to have a summary of the ALS iterations:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">mcr</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">MCRALS</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">St0</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="s1">&#39;True&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+changed default log_level to INFO
+*** ALS optimisation log***
+#iter     Error/PCA        Error/Exp      %change
+---------------------------------------------------
+1        0.002270        0.002809      -97.745771
+2        0.002269        0.002808       -0.049722
+converged !
+</pre></div></div>
+</div>
+<p>The optimization has converged within few iterations. The figures reported for each iteration are defined as follows:</p>
+<ul class="simple">
+<li><p>‘Error/PCA’ is the standard deviation of the residuals with respect to data reconstructed by a PCA with as many components as pure species (4 in this example),</p></li>
+<li><p>‘Error/exp’: is the standard deviation of the residuals with respect to the experimental data X,</p></li>
+<li><p>‘%change’: is the percent change of ‘Error/exp’ between 2 iterations</p></li>
+</ul>
+<p>The default is to stop when this %change between two iteration is negative (so that the solution is improving), but with an absolute value lower than 0.1% (so that the improvement is considered negligible). This parameter - as well as several other parameters affecting the ALS optimization can be changed by the setting the ‘tol’ value in a python dictionary using the key ‘tol’. For instance:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">mcr</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">MCRALS</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">St0</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;tol&#39;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">},</span> <span class="n">verbose</span><span class="o">=</span><span class="s1">&#39;True&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+*** ALS optimisation log***
+#iter     Error/PCA        Error/Exp      %change
+---------------------------------------------------
+1        0.002270        0.002809      -97.745771
+2        0.002269        0.002808       -0.049722
+converged !
+</pre></div></div>
+</div>
+<p>As could be expected more iterations have been necessary to reach this stricter convergence criterion. The other convergence criterion that can be fixed by the user is ‘maxdiv’, the maximum number of successive diverging iterations. It is set to 5 by default and allows for stopping the ALS algorithm when it is no converging. If for instance the ‘tol’ is set very low, the optimization will be stopped when either the maximum number of iterations is reached (maxit, 50 by default) or when no
+improvement is during 5 successive iterations (maxdiv).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">mcr</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">MCRALS</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">St0</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;tol&#39;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">},</span> <span class="n">verbose</span><span class="o">=</span><span class="s1">&#39;True&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+*** ALS optimisation log***
+#iter     Error/PCA        Error/Exp      %change
+---------------------------------------------------
+1        0.002270        0.002809      -97.745771
+2        0.002269        0.002808       -0.049722
+converged !
+</pre></div></div>
+</div>
+<p>Now if ‘maxit’ is set to 10:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">mcr</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">MCRALS</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">St0</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;tol&#39;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">,</span> <span class="s1">&#39;maxit&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">},</span> <span class="n">verbose</span><span class="o">=</span><span class="s1">&#39;True&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+*** ALS optimisation log***
+#iter     Error/PCA        Error/Exp      %change
+---------------------------------------------------
+1        0.002270        0.002809      -97.745771
+2        0.002269        0.002808       -0.049722
+converged !
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Solutions">
+<h4>Solutions<a class="headerlink" href="#Solutions" title="Permalink to this headline">¶</a></h4>
+<p>The solutions of the MCR ALS optimization are the optimized concentration and pure spectra matrices. They can be obtained by the MCRALS.transform() method. let’s remake an MCRALS object with the default settings, (‘tol’ = 0.1 and verbose = False), and get C and St.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">mcr1</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">MCRALS</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">St0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+*** ALS optimisation log***
+#iter     Error/PCA        Error/Exp      %change
+---------------------------------------------------
+1        0.002270        0.002809      -97.745771
+2        0.002269        0.002808       -0.049722
+converged !
+</pre></div></div>
+</div>
+<p>As the dimensions of C are such that the rows direction (C.y) corresponds to the elution time and the columns direction (C.x) correspond to the four pure species, it is necessary to transpose it before plotting in order to plot the concentration vs. the elution time.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">_</span> <span class="o">=</span> <span class="n">mcr1</span><span class="o">.</span><span class="n">C</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_mcr_als_26_0.png" src="../../_images/userguide_analysis_mcr_als_26_0.png" />
+</div>
+</div>
+<p>On the other hand, the spectra of the pure species can be plot directly:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">_</span> <span class="o">=</span> <span class="n">mcr1</span><span class="o">.</span><span class="n">St</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_mcr_als_28_0.png" src="../../_images/userguide_analysis_mcr_als_28_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="A-basic-illustration-of-the-rotational-ambiguity">
+<h4>A basic illustration of the rotational ambiguity<a class="headerlink" href="#A-basic-illustration-of-the-rotational-ambiguity" title="Permalink to this headline">¶</a></h4>
+<p>We have thus obtained the elution profiles of the four pure species. Note that the ‘concentration’ values are very low. This results from the fact that the absorbance values in X are on the order of 0-1 while the absorbances of the initial pure spectra are of the order of 10^4. As can be seen above, the absorbance of the final spectra is of the same order of magnitude.</p>
+<p>It is possible to normalize the intensity of the spectral profiles by setting the ‘normSpec’ parameter to True. With this option, the specra are normalized such that their euclidian norm is 1. The other normalization option is normspec = ‘max’, whereby the maximum intyensity of tyhe spectra is 1. Let’s look at the effect of both normalizations:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">mcr2</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">MCRALS</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">St0</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;normSpec&#39;</span><span class="p">:</span> <span class="s1">&#39;euclid&#39;</span><span class="p">})</span>
+
+<span class="n">mcr3</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">MCRALS</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">St0</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;normSpec&#39;</span><span class="p">:</span> <span class="s1">&#39;max&#39;</span><span class="p">})</span>
+
+<span class="n">_</span> <span class="o">=</span> <span class="n">mcr1</span><span class="o">.</span><span class="n">St</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">mcr2</span><span class="o">.</span><span class="n">St</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">mcr3</span><span class="o">.</span><span class="n">St</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+*** ALS optimisation log***
+#iter     Error/PCA        Error/Exp      %change
+---------------------------------------------------
+1        0.002270        0.002809      -97.745771
+2        0.002269        0.002808       -0.049722
+converged !
+*** ALS optimisation log***
+#iter     Error/PCA        Error/Exp      %change
+---------------------------------------------------
+1        0.002270        0.002809      -97.745771
+2        0.002269        0.002808       -0.049722
+converged !
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_mcr_als_30_1.png" src="../../_images/userguide_analysis_mcr_als_30_1.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_mcr_als_30_2.png" src="../../_images/userguide_analysis_mcr_als_30_2.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_mcr_als_30_3.png" src="../../_images/userguide_analysis_mcr_als_30_3.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">_</span> <span class="o">=</span> <span class="n">mcr1</span><span class="o">.</span><span class="n">C</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">mcr2</span><span class="o">.</span><span class="n">C</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">mcr3</span><span class="o">.</span><span class="n">C</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_mcr_als_31_0.png" src="../../_images/userguide_analysis_mcr_als_31_0.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_mcr_als_31_1.png" src="../../_images/userguide_analysis_mcr_als_31_1.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_mcr_als_31_2.png" src="../../_images/userguide_analysis_mcr_als_31_2.png" />
+</div>
+</div>
+<p>It is clear that the normalization affects the relative intensity of the spectra and of the concentration. This is a basic example of the well known rotational ambiguity of the MCS ALS solutions.</p>
+</div>
+</div>
+<div class="section" id="Guessing-the-concentration-profile-with-PCA-+-EFA">
+<h3>Guessing the concentration profile with PCA + EFA<a class="headerlink" href="#Guessing-the-concentration-profile-with-PCA-+-EFA" title="Permalink to this headline">¶</a></h3>
+<p>Generally, in MCR ALS, the initial guess cannot be obtained independently of the experimental data ‘x’. In such a case, one has to rely on ‘X’ to obtained (i) the number of pure species and (ii) their initial concentrations or spectral profiles. The number of of pure species can be assessed by carrying out a PCA on the data while the concentrations or spectral profiles can be estimated using procedures such EFA of SIMPLISMA. The following will illustrate the use of PCA followed by EFA</p>
+<div class="section" id="Use-of-PCA-to-assess-the-number-of-pure-species">
+<h4>Use of PCA to assess the number of pure species<a class="headerlink" href="#Use-of-PCA-to-assess-the-number-of-pure-species" title="Permalink to this headline">¶</a></h4>
+<p>Let’s first analyse our dataset using PCA and plot a screeplot:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pca</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">PCA</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="n">pca</span><span class="o">.</span><span class="n">printev</span><span class="p">(</span><span class="n">n_pc</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">pca</span><span class="o">.</span><span class="n">screeplot</span><span class="p">(</span><span class="n">n_pc</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+PC              Eigenvalue              %variance       %cumulative
+                of cov(X)                per PC      variance
+#1      1.082e+00                77.040       77.040
+#2      5.384e-01                19.059       96.100
+#3      2.374e-01                 3.705       99.805
+#4      4.160e-02                 0.114       99.919
+#5      2.210e-02                 0.032       99.951
+#6      6.672e-03                 0.003       99.954
+#7      6.587e-03                 0.003       99.957
+#8      6.372e-03                 0.003       99.959
+#9      6.110e-03                 0.002       99.962
+#10     5.891e-03                 0.002       99.964
+
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_mcr_als_34_1.png" src="../../_images/userguide_analysis_mcr_als_34_1.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_mcr_als_34_2.png" src="../../_images/userguide_analysis_mcr_als_34_2.png" />
+</div>
+</div>
+<p>The number of significant PC’s is clearly larger or equal to 2. It is, however, difficult tto determine whether it should be set to 3 or 4… Let’s look at the score and loading matrices:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">S</span><span class="p">,</span> <span class="n">LT</span> <span class="o">=</span> <span class="n">pca</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">n_pc</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">LT</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_mcr_als_36_0.png" src="../../_images/userguide_analysis_mcr_als_36_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_mcr_als_36_1.png" src="../../_images/userguide_analysis_mcr_als_36_1.png" />
+</div>
+</div>
+<p>Examination of the scores and loadings indicate that the 4th component has structured, non random scores and loadings. Hence we will fix the number of pure species to 4.</p>
+<p>NB: The PCA.transform() can also be used with n_pc=‘auto’ to determine automatically the number of components using the method of Thomas P. Minka (Automatic Choice of Dimensionality for PCA. NIPS 2000: 598-604). This type of methods, however, often lead to too many PC’s for the chemist because they recover all contributions to the data variance: chemical AND non-chemical, thus including non-gaussian noise, baseline changes, background absorption…</p>
+<p>32 in the present case:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">S3</span><span class="p">,</span> <span class="n">LT3</span> <span class="o">=</span> <span class="n">pca</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">n_pc</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">)</span>
+<span class="n">S3</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(51, 29)
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Determination-of-initial-concentrations-using-EFA">
+<h4>Determination of initial concentrations using EFA<a class="headerlink" href="#Determination-of-initial-concentrations-using-EFA" title="Permalink to this headline">¶</a></h4>
+<p>Once the number of components has been determined, the initial concentration matrix is obtained very easily using EFA:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">efa</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">EFA</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="n">C0</span> <span class="o">=</span> <span class="n">efa</span><span class="o">.</span><span class="n">get_conc</span><span class="p">(</span><span class="n">n_pc</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">C0</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_mcr_als_40_0.png" src="../../_images/userguide_analysis_mcr_als_40_0.png" />
+</div>
+</div>
+<p>The MCR ALS can then be launched using this new guess:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">mcr4</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">MCRALS</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">guess</span><span class="o">=</span><span class="n">C0</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;maxit&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="s1">&#39;normSpec&#39;</span><span class="p">:</span> <span class="s1">&#39;euclid&#39;</span><span class="p">},</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+*** ALS optimisation log***
+#iter     Error/PCA        Error/Exp      %change
+---------------------------------------------------
+1        0.002272        0.002820      -97.737601
+2        0.002260        0.002811       -0.297409
+3        0.002255        0.002807       -0.148456
+4        0.002253        0.002804       -0.089421
+converged !
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">_</span> <span class="o">=</span> <span class="n">mcr4</span><span class="o">.</span><span class="n">C</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">mcr4</span><span class="o">.</span><span class="n">St</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_mcr_als_43_0.png" src="../../_images/userguide_analysis_mcr_als_43_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_mcr_als_43_1.png" src="../../_images/userguide_analysis_mcr_als_43_1.png" />
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="Augmented-datasets">
+<h2>Augmented datasets<a class="headerlink" href="#Augmented-datasets" title="Permalink to this headline">¶</a></h2>
+<p>The ‘MATRIX’ dataset is a columnwise augmented dataset consisting into 5 successive runs:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">A</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<table style='background:transparent'>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>         name</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> MATRIX</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>       author</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> travis@travis-job-b5a7aa69-dc6b-4991-a0b4-3d34fc9e310b</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>      created</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 2021-01-29 13:34:30.246309+00:00</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>     modified</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 2021-01-29 13:34:41.046148+00:00</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>      history</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div>2021-01-29 13:34:30.246809+00:00:imported from .mat file</div></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><strong>          DATA </strong></td><td style='text-align:left; padding-bottom:0px; padding-top:0px; padding-top:10px; '><hr/></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        title</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <untitled></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>       values</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='blue'>         [[ 0.01525  0.01285 ... 0.0003178 -0.0002631]<br/>          [ 0.01969  0.01617 ... -0.007001 0.000682]<br/>          ...<br/>          [0.005205 0.003604 ... 0.0001341 0.004421]<br/>          [0.001699 0.007194 ... -2.012e-05 0.003973]]</font></div></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        shape</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> (y:204, x:96)</td><tr>
+</table></div>
+</div>
+<p>Let’s plot it as a map, and as a surface:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">X2</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+<span class="n">X2</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;absorbance&#39;</span>
+<span class="n">X2</span><span class="o">.</span><span class="n">set_coordset</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<span class="n">X2</span><span class="o">.</span><span class="n">set_coordtitles</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="s1">&#39;elution time&#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s1">&#39;wavelength&#39;</span><span class="p">)</span>
+<span class="n">surf</span> <span class="o">=</span> <span class="n">X2</span><span class="o">.</span><span class="n">plot_surface</span><span class="p">(</span><span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=.</span><span class="mi">2</span><span class="p">,</span> <span class="n">ccount</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">X2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;map&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_mcr_als_48_0.png" src="../../_images/userguide_analysis_mcr_als_48_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_mcr_als_48_1.png" src="../../_images/userguide_analysis_mcr_als_48_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">mcr5</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">MCRALS</span><span class="p">(</span><span class="n">X2</span><span class="p">,</span> <span class="n">guess</span><span class="o">=</span><span class="n">St0</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;unimodConc&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span><span class="p">},</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+*** ALS optimisation log***
+#iter     Error/PCA        Error/Exp      %change
+---------------------------------------------------
+1        0.003780        0.002908      -97.392043
+2        0.003780        0.002908       -0.002862
+converged !
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">_</span> <span class="o">=</span> <span class="n">mcr5</span><span class="o">.</span><span class="n">C</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_mcr_als_50_0.png" src="../../_images/userguide_analysis_mcr_als_50_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">_</span> <span class="o">=</span> <span class="n">mcr5</span><span class="o">.</span><span class="n">St</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_mcr_als_51_0.png" src="../../_images/userguide_analysis_mcr_als_51_0.png" />
+</div>
+</div>
+<p>[To be continued…]</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="../databases/databases.html" class="btn btn-neutral float-right" title="Databases" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="peak_integration.html" class="btn btn-neutral float-left" title="Peak integration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2014-2021 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">
+        Last updated on Jan 29, 2021.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

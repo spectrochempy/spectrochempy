@@ -1,0 +1,480 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>spectrochempy.read_opus &mdash; SpectroChemPy v0.2.5 0.2.5 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_override.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery-dataframe.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery-rendered-html.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/scpy.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="spectrochempy.read_labspec" href="spectrochempy.read_labspec.html" />
+    <link rel="prev" title="spectrochempy.read_srs" href="spectrochempy.read_srs.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/scpy.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> SpectroChemPy </span>
+        version: stable
+        <span class="fa fa-caret-down"></span>
+      </span>
+        <div class="rst-other-versions">
+            <dl>
+                <dt>Other versions</dt>
+                
+                    
+                        <dd><a href="https://spectrochempy.github.io/spectrochempy/latest/index.html"">LATEST</a></dd>
+                    
+                
+                    
+                
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Downloads</dt>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/stable-spectrochempy.pdf">PDF</a></dd>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/stable-spectrochempy-notebooks.zip">Notebooks</a></dd>
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Sources on GitHub</dt>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
+
+            </dl>
+
+        </div>
+    </div>
+
+    
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/whyscpy.html">Why <strong>SpectroChemPy</strong>  ?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/gallery/auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/install/index.html">Installation</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../objects.html">Data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../units/units.html">Units &amp; Quantities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../importexport/importexport.html">Import &amp; Export</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plotting/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../processing/processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../fitting/fitting.html">Fitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analysis/analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../databases/databases.html">Databases</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference &amp; Help</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#loading-the-api">Loading the API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#the-nddataset-object">The NDDataset object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#coordinates-related-objects">Coordinates related objects</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#creating-nddataset">Creating NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#export-a-nddataset">Export a NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#select-data-in-a-nddataset">Select data in a NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#plotting-functions">Plotting functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#processing">Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#fitting">Fitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#analysis">Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#project-management">Project management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#scripting">Scripting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#utilities">Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently asked questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/examples.html">Adding new tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/examples.html#adding-your-examples-to-the-gallery">Adding your examples to the gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/contributing.html">Developer’s Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/citing.html">Citing  <strong>SpectroChemPy</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/seealso.html">See also</a></li>
+</ul>
+
+            
+          
+
+
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SpectroChemPy v0.2.5</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">API reference</a> &raquo;</li>
+        
+      <li>spectrochempy.read_opus</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../../_sources/userguide/reference/generated/spectrochempy.read_opus.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    
+    
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="spectrochempy-read-opus">
+<h1>spectrochempy.read_opus<a class="headerlink" href="#spectrochempy-read-opus" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt id="spectrochempy.read_opus">
+<code class="sig-name descname">read_opus</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">paths</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy/core/readers/readopus.py#L27-L162"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spectrochempy.read_opus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open Bruker OPUS file(s).</p>
+<p>Eventually group them in a single dataset. Only Absorbance spectra are
+extracted (“AB” field). Returns an error if dimensions are incompatibles.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul>
+<li><p><strong>*paths</strong> (<em>str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional</em>) – The data source(s) can be specified by the name or a list of name for the file(s) to be loaded:</p>
+<p><em>e.g.,( file1, file2, …,  **kwargs )</em></p>
+<p>If the list of filenames are enclosed into brackets:</p>
+<p><em>e.g.,</em> ( <strong>[</strong> <em>file1, file2, …</em> <strong>]</strong>, <a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs <em>)</em></p>
+<p>The returned datasets are merged to form a single dataset,
+except if <code class="xref py py-obj docutils literal notranslate"><span class="pre">merge</span></code> is set to False. If a source is not provided (i.e. no <code class="xref py py-obj docutils literal notranslate"><span class="pre">filename</span></code>, nor <code class="xref py py-obj docutils literal notranslate"><span class="pre">content</span></code>),
+a dialog box will be opened to select files.</p>
+</li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – See other parameters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>read_opus</em> – The dataset or a list of dataset corresponding to a (set of) OPUS file(s).</p>
+</dd>
+<dt class="field-odd">Other Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>protocol</strong> (<em>{‘scp’, ‘omnic’, ‘opus’, ‘topspin’, ‘matlab’, ‘jcamp’, ‘csv’, ‘excel’}, optional</em>) – Protocol used for reading. If not provided, the correct protocol
+is inferred (whnever it is possible) from the file name extension.</p></li>
+<li><p><strong>directory</strong> (<em>str, optional</em>) – From where to read the specified <code class="xref py py-obj docutils literal notranslate"><span class="pre">filename</span></code>. If not specified, read in the default <code class="docutils literal notranslate"><span class="pre">datadir</span></code> specified in
+SpectroChemPy Preferences.</p></li>
+<li><p><strong>merge</strong> (<em>bool, optional</em>) – Default value is False. If True, and several filenames have been provided as arguments,
+then a single dataset with merged (stacked along the first
+dimension) is returned (default=False).</p></li>
+<li><p><strong>sortbydate</strong> (<em>bool, optional</em>) – Sort multiple spectra by acquisition date (default=True).</p></li>
+<li><p><strong>description</strong> (<em>str, optional</em>) – A Custom description.</p></li>
+<li><p><strong>content</strong> (<em>bytes object, optional</em>) – Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
+The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
+to handle drag and drop of files into a Browser.
+For exemples on how to use this feature, one can look in the <code class="docutils literal notranslate"><span class="pre">tests/tests_readers</span></code> directory.</p></li>
+<li><p><strong>listdir</strong> (<em>bool, optional</em>) – If True and filename is None, all files present in the provided <code class="xref py py-obj docutils literal notranslate"><span class="pre">directory</span></code> are returned (and merged if <code class="xref py py-obj docutils literal notranslate"><span class="pre">merge</span></code>
+is True. It is assumed that all the files correspond to current reading protocol (default=True).</p></li>
+<li><p><strong>recursive</strong> (<em>bool, optional</em>) – Read also in subfolders. (default=False).</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="spectrochempy.read.html#spectrochempy.read" title="spectrochempy.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a></dt><dd><p>Generic read method.</p>
+</dd>
+<dt><a class="reference internal" href="spectrochempy.read_topspin.html#spectrochempy.read_topspin" title="spectrochempy.read_topspin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_topspin</span></code></a></dt><dd><p>Read TopSpin Bruker NMR spectra.</p>
+</dd>
+<dt><a class="reference internal" href="spectrochempy.read_omnic.html#spectrochempy.read_omnic" title="spectrochempy.read_omnic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_omnic</span></code></a></dt><dd><p>Read Omnic spectra.</p>
+</dd>
+<dt><a class="reference internal" href="spectrochempy.read_labspec.html#spectrochempy.read_labspec" title="spectrochempy.read_labspec"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_labspec</span></code></a></dt><dd><p>Read Raman LABSPEC spectra.</p>
+</dd>
+<dt><a class="reference internal" href="spectrochempy.read_spg.html#spectrochempy.read_spg" title="spectrochempy.read_spg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_spg</span></code></a></dt><dd><p>Read Omnic <a href="#id3"><span class="problematic" id="id4">*</span></a>.spg grouped spectra.</p>
+</dd>
+<dt><a class="reference internal" href="spectrochempy.read_spa.html#spectrochempy.read_spa" title="spectrochempy.read_spa"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_spa</span></code></a></dt><dd><p>Read Omnic <a href="#id5"><span class="problematic" id="id6">*</span></a>.Spa single spectra.</p>
+</dd>
+<dt><a class="reference internal" href="spectrochempy.read_srs.html#spectrochempy.read_srs" title="spectrochempy.read_srs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_srs</span></code></a></dt><dd><p>Read Omnic series.</p>
+</dd>
+<dt><a class="reference internal" href="spectrochempy.read_csv.html#spectrochempy.read_csv" title="spectrochempy.read_csv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_csv</span></code></a></dt><dd><p>Read CSV files.</p>
+</dd>
+<dt><a class="reference internal" href="spectrochempy.read_zip.html#spectrochempy.read_zip" title="spectrochempy.read_zip"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_zip</span></code></a></dt><dd><p>Read Zip files.</p>
+</dd>
+<dt><a class="reference internal" href="spectrochempy.read_matlab.html#spectrochempy.read_matlab" title="spectrochempy.read_matlab"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_matlab</span></code></a></dt><dd><p>Read Matlab files.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<p>Reading a single OPUS file  (providing a windows type filename relative to the default <code class="docutils literal notranslate"><span class="pre">Datadir</span></code>)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">scp</span><span class="o">.</span><span class="n">read_opus</span><span class="p">(</span><span class="s1">&#39;irdata</span><span class="se">\\</span><span class="s1">OPUS</span><span class="se">\\</span><span class="s1">test.0000&#39;</span><span class="p">)</span>
+<span class="go">NDDataset: [float32] a.u. (shape: (y:1, x:2567))</span>
+</pre></div>
+</div>
+<p>Reading a single OPUS file  (providing a unix/python type filename relative to the default <code class="docutils literal notranslate"><span class="pre">Datadir</span></code>)
+Note that here read_opus is called as a classmethod of the NDDataset class</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">scp</span><span class="o">.</span><span class="n">NDDataset</span><span class="o">.</span><span class="n">read_opus</span><span class="p">(</span><span class="s1">&#39;irdata/OPUS/test.0000&#39;</span><span class="p">)</span>
+<span class="go">NDDataset: [float32] a.u. (shape: (y:1, x:2567))</span>
+</pre></div>
+</div>
+<p>Single file specified with pathlib.Path object</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;irdata/OPUS&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">folder</span> <span class="o">/</span> <span class="s1">&#39;test.0000&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">scp</span><span class="o">.</span><span class="n">read_opus</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+<span class="go">NDDataset: [float32] a.u. (shape: (y:1, x:2567))</span>
+</pre></div>
+</div>
+<p>Multiple files not merged (return a list of datasets). Note that a directory is specified</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">le</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">read_opus</span><span class="p">(</span><span class="s1">&#39;test.0000&#39;</span><span class="p">,</span> <span class="s1">&#39;test.0001&#39;</span><span class="p">,</span> <span class="s1">&#39;test.0002&#39;</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="s1">&#39;irdata/OPUS&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">le</span><span class="p">)</span>
+<span class="go">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">le</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">NDDataset: [float32] a.u. (shape: (y:1, x:2567))</span>
+</pre></div>
+</div>
+<p>Multiple files merged as the <code class="xref py py-obj docutils literal notranslate"><span class="pre">merge</span></code> keyword is set to true</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">scp</span><span class="o">.</span><span class="n">read_opus</span><span class="p">(</span><span class="s1">&#39;test.0000&#39;</span><span class="p">,</span> <span class="s1">&#39;test.0001&#39;</span><span class="p">,</span> <span class="s1">&#39;test.0002&#39;</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="s1">&#39;irdata/OPUS&#39;</span><span class="p">,</span> <span class="n">merge</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">NDDataset: [float32] a.u. (shape: (y:3, x:2567))</span>
+</pre></div>
+</div>
+<p>Multiple files to merge : they are passed as a list instead of using the keyword <code class="xref py py-obj docutils literal notranslate"><span class="pre">merge</span></code></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">scp</span><span class="o">.</span><span class="n">read_opus</span><span class="p">([</span><span class="s1">&#39;test.0000&#39;</span><span class="p">,</span> <span class="s1">&#39;test.0001&#39;</span><span class="p">,</span> <span class="s1">&#39;test.0002&#39;</span><span class="p">],</span> <span class="n">directory</span><span class="o">=</span><span class="s1">&#39;irdata/OPUS&#39;</span><span class="p">)</span>
+<span class="go">NDDataset: [float32] a.u. (shape: (y:3, x:2567))</span>
+</pre></div>
+</div>
+<p>Multiple files not merged : they are passed as a list but <code class="xref py py-obj docutils literal notranslate"><span class="pre">merge</span></code> is set to false</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">le</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">read_opus</span><span class="p">([</span><span class="s1">&#39;test.0000&#39;</span><span class="p">,</span> <span class="s1">&#39;test.0001&#39;</span><span class="p">,</span> <span class="s1">&#39;test.0002&#39;</span><span class="p">],</span> <span class="n">directory</span><span class="o">=</span><span class="s1">&#39;irdata/OPUS&#39;</span><span class="p">,</span> <span class="n">merge</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">le</span><span class="p">)</span>
+<span class="go">3</span>
+</pre></div>
+</div>
+<p>Read without a filename. This has the effect of opening a dialog for file(s) selection</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">nd</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">read_opus</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Read in a directory (assume that only OPUS files are present in the directory
+(else we must use the generic <a class="reference internal" href="spectrochempy.read.html#spectrochempy.read" title="spectrochempy.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a> function instead)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">le</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">read_opus</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="s1">&#39;irdata/OPUS&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">le</span><span class="p">)</span>
+<span class="go">4</span>
+</pre></div>
+</div>
+<p>Again we can use merge to stack all 4 spectra if thet have compatible dimensions.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">scp</span><span class="o">.</span><span class="n">read_opus</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="s1">&#39;irdata/OPUS&#39;</span><span class="p">,</span> <span class="n">merge</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">NDDataset: [float32] a.u. (shape: (y:4, x:2567))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<div class="section" id="examples-using-spectrochempy-read-opus">
+<h2>Examples using <code class="docutils literal notranslate"><span class="pre">spectrochempy.read_opus</span></code><a class="headerlink" href="#examples-using-spectrochempy-read-opus" title="Permalink to this headline">¶</a></h2>
+<div class="sphx-glr-thumbcontainer" tooltip="Here we load an experimental Bruker OPUS files and plot it."><div class="figure align-default" id="id7">
+<img alt="Loading Bruker OPUS files" src="../../../_images/sphx_glr_plot_read_IR_from_opus_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../../../gettingstarted/gallery/auto_examples/read/plot_read_IR_from_opus.html#sphx-glr-gettingstarted-gallery-auto-examples-read-plot-read-ir-from-opus-py"><span class="std std-ref">Loading Bruker OPUS files</span></a></span><a class="headerlink" href="#id7" title="Permalink to this image">¶</a></p>
+</div>
+</div><div style='clear:both'></div></div>
+</div>
+
+
+           </div>
+           
+          </div>
+
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="spectrochempy.read_labspec.html" class="btn btn-neutral float-right" title="spectrochempy.read_labspec" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="spectrochempy.read_srs.html" class="btn btn-neutral float-left" title="spectrochempy.read_srs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2014-2021 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">
+        Last updated on Jan 29, 2021.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

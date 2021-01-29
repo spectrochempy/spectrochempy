@@ -1,0 +1,13 @@
+
+spectrochempy.mean
+==================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: mean
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.mean.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

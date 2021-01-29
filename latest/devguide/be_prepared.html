@@ -1,0 +1,472 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Be prepared to work on the code &mdash; SpectroChemPy v0.2.5.dev8 0.2.5.dev8 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_override.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/gallery-dataframe.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/gallery-rendered-html.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../_static/scpy.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Acknowledgments" href="../credits/credits.html" />
+    <link rel="prev" title="General Principles" href="general_principles.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/scpy.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.5.dev8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> SpectroChemPy </span>
+        version: latest
+        <span class="fa fa-caret-down"></span>
+      </span>
+        <div class="rst-other-versions">
+            <dl>
+                <dt>Other versions</dt>
+                
+                    
+                
+                    
+                        <dd><a href="https://spectrochempy.github.io/spectrochempy/stable/index.html">STABLE</a></dd>
+                    
+                
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Downloads</dt>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/latest-spectrochempy.pdf">PDF</a></dd>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/latest-spectrochempy-notebooks.zip">Notebooks</a></dd>
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Sources on GitHub</dt>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
+
+            </dl>
+
+        </div>
+    </div>
+
+    
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/whyscpy.html">Why <strong>SpectroChemPy</strong>  ?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/gallery/auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/install/index.html">Installation</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/introduction/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/objects.html">Data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/units/units.html">Units &amp; Quantities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/importexport/importexport.html">Import &amp; Export</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/plotting/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/processing/processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/fitting/fitting.html">Fitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/analysis/analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/databases/databases.html">Databases</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference &amp; Help</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../userguide/reference/changelog.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/reference/index.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/reference/faq.html">Frequently asked questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Adding new tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html#adding-your-examples-to-the-gallery">Adding your examples to the gallery</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="contributing.html">Developer’s Guide</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="general_principles.html">General Principles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="issues.html">Reporting Issues</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Be prepared to work on the code</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../credits/citing.html">Citing  <strong>SpectroChemPy</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../credits/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../credits/seealso.html">See also</a></li>
+</ul>
+
+            
+          
+
+
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SpectroChemPy v0.2.5.dev8</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="contributing.html">Developer’s Guide</a> &raquo;</li>
+        
+          <li><a href="general_principles.html">General Principles</a> &raquo;</li>
+        
+      <li>Be prepared to work on the code</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/devguide/be_prepared.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    
+    
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="be-prepared-to-work-on-the-code">
+<span id="be-prepared"></span><h1>Be prepared to work on the code<a class="headerlink" href="#be-prepared-to-work-on-the-code" title="Permalink to this headline">¶</a></h1>
+<p>To contribute further to the code and documentation, you will need learning how to work with GitHub and the <strong>SpectroChemPy</strong> code base.</p>
+<div class="section" id="version-control-git-and-github">
+<span id="contributing-version-control"></span><h2>Version control, Git, and GitHub<a class="headerlink" href="#version-control-git-and-github" title="Permalink to this headline">¶</a></h2>
+<p>The code of <strong>SpectroChemPy</strong> is hosted on <a class="reference external" href="https://www.github.com/spectrochempy/spectrochempy">GitHub</a>. To contribute, you will need to register for a <a class="reference external" href="https://github.com/signup/free">free GitHub account</a>. Actually, you may have already done this while submitting issues, so you are also almost ready to contribute to the code.</p>
+<p>The reason we use <a class="reference external" href="https://git-scm.com/">Git</a> to version controlling our code is to allow several people to work on this project simultaneously.</p>
+<p>However, working with <a class="reference external" href="https://git-scm.com/">Git</a> is unfortunately not the easiest step for a newcomer when trying to contribute to an open-source software. But learning this versioning system at the same time as developing with Python can be very rewarding for your daily work.</p>
+<p>To learn <a class="reference external" href="https://git-scm.com/">Git</a>, you may want to check out the <a class="reference external" href="https://help.github.com/">GitHub help pages</a> or the
+<a class="reference external" href="https://numpy.org/doc/stable/dev/index.html">NumPy’s documentation</a>. There is no shortage of resources on the web on this subject and many tutorials are available.</p>
+<p>Below we give some essential information to get you started with <strong>Git</strong>, but of course if you encounter difficulties, don’t hesitate to ask for help. This may help to solve your problems faster, but it also allows us to improve this part of our documentation based on your feedback.</p>
+</div>
+<div class="section" id="installing-git">
+<h2>Installing git<a class="headerlink" href="#installing-git" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="https://help.github.com/set-up-git-redirect">GitHub</a> has instructions for installing and configuring git.  All these steps need to be completed before you can work seamlessly between your local repository and GitHub.</p>
+<p>Git is a free and open source distributed control system used in well-known software repositories, such as
+<a class="reference external" href="https://github.com">GitHub</a> or <a class="reference external" href="https://bitbucket.org">Bitbucket</a>. For this project, we use a GitHub
+repository: <a class="reference external" href="https://github.com/spectrochempy/spectrochempy">spectrochempy repository</a>.</p>
+<p>Depending on your operating system, you may refer to these pages for installation instructions:</p>
+<ul>
+<li><p><a class="reference external" href="https://git-scm.com/download/mac">Download Git for macOS</a> (One trivial option is to install <a class="reference external" href="https://developer.apple.com/xcode/">XCode</a> which is shipped with the git system).</p></li>
+<li><p><a class="reference external" href="https://git-scm.com/download/win">Download Git for Windows</a>.</p></li>
+<li><p><a class="reference external" href="https://git-scm.com/download/linux">Download for Linux and Unix</a>. For the common Debian/Ubuntu distribution, it is as simple as typing in the Terminal:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt-get install git
+</pre></div>
+</div>
+</li>
+<li><p>Alternatively, once miniconda or anaconda is installed (see <a class="reference internal" href="#contributing-dev-env"><span class="std std-ref">Creating a Python development environment</span></a>), one can use conda to install
+git:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda install git
+</pre></div>
+</div>
+</li>
+</ul>
+<p>To check whether or not <em>git</em> is correctly installed, use</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git --version
+</pre></div>
+</div>
+</div>
+<div class="section" id="optional-installing-a-gui-git-client">
+<h2>Optional: installing a GUI git client<a class="headerlink" href="#optional-installing-a-gui-git-client" title="Permalink to this headline">¶</a></h2>
+<p>Once your installation of git is complete, it may be useful to install a GUI client for the git version system.</p>
+<p>We have been using <a class="reference external" href="https://www.sourcetreeapp.com">SourceTree client</a> (which can be installed on both Windows and Mac operating systems). To configure and learn how to use the sourcetree GUI application, you can consult this
+<a class="reference external" href="https://confluence.atlassian.com/bitbucket/tutorial-learn-bitbucket-with-sourcetree-760120235.html">tutorial</a></p>
+<p>However, any other GUI can be interesting such as <a class="reference external" href="https://desktop.github.com">Github-desktop</a>, or if you prefer, you can stay using the command line in a terminal.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Many IDE such as <a class="reference external" href="https://www.jetbrains.com/fr-fr/pycharm/">PyCharm</a> have an integrated GUI git client which can be used in place of an external application. This is an option that we use a lot (in combination to the more visual SourceTree application)</p>
+</div>
+</div>
+<div class="section" id="forking-the-spectrochempy-repository">
+<span id="contributing-forking"></span><h2>Forking the spectrochempy repository<a class="headerlink" href="#forking-the-spectrochempy-repository" title="Permalink to this headline">¶</a></h2>
+<p>You will need your own fork to work on the code. Go to the <a class="reference external" href="https://github.com/spectrochempy/spectrochempy">SpectroChemPy project page</a> and hit the <code class="docutils literal notranslate"><span class="pre">Fork</span></code> button to create an exact copy of the project on your account.</p>
+<p>Then you will need to clone your fork to your machine. The fastest way is to type these commands in a terminal on your machine:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/your-user-name/spectrochempy.git localfolder
+<span class="nb">cd</span> localfolder
+git remote add upstream https://github.com/spectrochempy/spectrochempy.git
+</pre></div>
+</div>
+<p>This creates the directory <code class="docutils literal notranslate"><span class="pre">localfolder</span></code> and connects your repository to the upstream (main project) <strong>SpectroChemPy</strong> repository.</p>
+</div>
+<div class="section" id="creating-a-python-development-environment">
+<span id="contributing-dev-env"></span><h2>Creating a Python development environment<a class="headerlink" href="#creating-a-python-development-environment" title="Permalink to this headline">¶</a></h2>
+<p>To test out code and documentation changes, you’ll need to build <strong>SpectroChemPy</strong> from source, which requires a Python environment.</p>
+<ul class="simple">
+<li><p>Install either <a class="reference external" href="https://www.anaconda.com/download/">Anaconda</a>, <a class="reference external" href="https://conda.io/miniconda.html">miniconda</a>, or <a class="reference external" href="https://github.com/conda-forge/miniforge">miniforge</a></p></li>
+<li><p>Make sure your conda is up to date (<code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">update</span> <span class="pre">conda</span></code>)</p></li>
+<li><p>Make sure that you have <a class="reference internal" href="#contributing-forking"><span class="std std-ref">cloned the repository</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cd</span></code> to the <strong>SpectroChemPy</strong> source directory (<em>i.e.,</em> <code class="docutils literal notranslate"><span class="pre">localfolder</span></code> created previously)</p></li>
+</ul>
+<p>We’ll now install <strong>SpectroChemPy</strong> in development mode following 2 steps:</p>
+<ol class="arabic simple">
+<li><p>Create and activate the environment. This will create a new environment and will not touch
+any of your other existing environments, nor any existing Python installation.
+(conda installer is somewhat very slow, this is why we prefer to replace it by
+<a class="reference external" href="https://https://github.com/mamba-org/mamba">mamba</a>.</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda update conda -y
+conda config --add channels conda-forge
+conda config --add channels cantera
+conda config --add channels spectrocat
+conda config --set channel_priority flexible
+conda install mamba
+mamba env create -f .ci/env/scpy3.9.yml
+conda activate scpy3.9
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Install <strong>SpectroChemPy</strong></p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">(</span>scpy3.9<span class="o">)</span> $ python -m pip install -e .
+</pre></div>
+</div>
+<p>At this point you should be able to import spectrochempy from your local
+development version:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">(</span>scpy3.9<span class="o">)</span> $ python
+</pre></div>
+</div>
+<p>This start an interpreter in which you can check your installation</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">spectrochempy</span> <span class="k">as</span> <span class="nn">scp</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">scp</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+<span class="go">SpectroChemPy&#39;s API ...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">exit</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>To view your environments:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda info -e
+</pre></div>
+</div>
+<p>To return to your root environment:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda deactivate
+</pre></div>
+</div>
+<p>See the full conda docs <a class="reference external" href="https://conda.pydata.org/docs">here</a>.</p>
+</div>
+<div class="section" id="creating-a-branch">
+<h2>Creating a branch<a class="headerlink" href="#creating-a-branch" title="Permalink to this headline">¶</a></h2>
+<p>Generally we want the master branch to reflect only production-ready code, so you will have create a
+feature branch for making your changes. For example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git branch my_new_feature
+git checkout my_new_feature
+</pre></div>
+</div>
+<p>The above can be simplified to:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git checkout -b my_new_feature
+</pre></div>
+</div>
+<p>This changes your working directory to the <code class="docutils literal notranslate"><span class="pre">my-new-feature</span></code> branch.  Keep any changes in this branch specific to one bug or feature so it is clear what the branch brings to spectrochempy. You can have many <code class="docutils literal notranslate"><span class="pre">my-other-new-feature</span></code>
+branches and switch in between them using the:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git checkout command.
+</pre></div>
+</div>
+<p>When creating this branch, make sure your master branch is up to date with the latest upstream master version. To update your local master branch, you can do:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git checkout master
+git pull upstream master --ff-only
+</pre></div>
+</div>
+<p>When you want to update the feature branch with changes in master after you created the branch, check the section on
+<span class="xref std std-ref">updating a PR</span>.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="../credits/credits.html" class="btn btn-neutral float-right" title="Acknowledgments" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="general_principles.html" class="btn btn-neutral float-left" title="General Principles" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2014-2021 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">
+        Last updated on Jan 29, 2021.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

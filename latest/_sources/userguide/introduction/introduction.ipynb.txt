@@ -1,0 +1,632 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "stone-harmony",
+   "metadata": {},
+   "source": [
+    "# Introduction\n",
+    "\n",
+    "The **SpectroChemPy** project was developed to provide advanced tools for processing and\n",
+    "analyzing spectroscopic data, initially for internal purposes in the\n",
+    "[LCS (https://www.lcs.ensicaen.fr)](https://www.lcs.ensicaen.fr).\n",
+    "\n",
+    "**SpectroChemPy** is essentially a library written in python language and which proposes objects (`NDDataset`,\n",
+    "*NDPanel(not yet available)* and `Project`) to contain data, equipped with methods to analyze, transform or display\n",
+    "this data in a simple way by the user.\n",
+    "\n",
+    " The processed data are mainly spectroscopic data from techniques such as IR, Raman or NMR, but they are not limited\n",
+    "to this type of application, as any type of numerical data arranged in tabular form can generally serve as the main\n",
+    "input."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "included-criminal",
+   "metadata": {},
+   "source": [
+    "## How to get started\n",
+    "\n",
+    "<div class='alert alert-info'>\n",
+    "<b>Note</b>\n",
+    "\n",
+    "We assume that the SpectroChemPy package has been correctly\n",
+    "installed. if is not the case, please go to [SpectroChemPy installation\n",
+    "procedure](../../gettingstarted/install/index.rst).\n",
+    "</div>"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "formal-press",
+   "metadata": {
+    "nbsphinx-toctree": {
+     "maxdepth": 3
+    }
+   },
+   "source": [
+    "[interface](interface.ipynb)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "mineral-recognition",
+   "metadata": {},
+   "source": [
+    "## Loading the API\n",
+    "\n",
+    "Before using SpectroChemPy, we need to load the **API (Application Programming Interface)**: it exposes many\n",
+    "objects and functions.\n",
+    "\n",
+    "To load the API, you must import it using one of the following syntax.\n",
+    "\n",
+    "In the first syntax we load the library into a namespace called `scp` (you can choose whatever you want - except\n",
+    "something already in use):"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "simplified-circular",
+   "metadata": {
+    "lines_to_next_cell": 2
+   },
+   "outputs": [],
+   "source": [
+    "import spectrochempy as scp  # SYNTAX 1\n",
+    "nd = scp.NDDataset()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "moved-kazakhstan",
+   "metadata": {},
+   "source": [
+    "or in the second syntax, with a wild `*` import."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "compressed-aquatic",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from spectrochempy import *\n",
+    "nd = NDDataset()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "palestinian-arrival",
+   "metadata": {},
+   "source": [
+    "With the second syntax, as often in python, the access to objects/functions can be greatly simplified. For example,\n",
+    "we can use \"NDDataset\" without a prefix instead of `scp.NDDataset` which is the first syntax) but there is always a\n",
+    "risk of overwriting some variables or functions already present in the namespace.\n",
+    "Therefore, the first syntax is generally highly recommended.\n",
+    "\n",
+    "Alternatively, you can also load only the onbjects and function required by your application:\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "identified-cabin",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from spectrochempy import NDDataset\n",
+    "\n",
+    "nd = NDDataset()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "described-assumption",
+   "metadata": {},
+   "source": [
+    "If something goes wrong with during a cell execution,  a ``traceback`` is displayed.\n",
+    "\n",
+    "For instance, the object or method ``toto`` does not exist in the API, so an error (**ImportError**) is generated\n",
+    "when trying to import this from the API.\n",
+    "\n",
+    "Here we catch the error with a conventional `try-except` structure"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "comparative-colony",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "try:\n",
+    "    from spectrochempy import toto\n",
+    "except ImportError as e:\n",
+    "    scp.error_(\"OOPS, THAT'S AN IMPORT ERROR! : %s\" % e)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "recognized-upgrade",
+   "metadata": {},
+   "source": [
+    "The error will stop the execution if not catched.\n",
+    "\n",
+    "This is a basic behavior of python : on way to avoid. stoppping the execution without displaying a message is :"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cosmetic-rating",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "try:\n",
+    "    from spectrochempy import toto  # noqa: F811, F401\n",
+    "except Exception:\n",
+    "    pass"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "adult-wrapping",
+   "metadata": {},
+   "source": [
+    "## API Configuration\n",
+    "\n",
+    "Many options of the API can be set up"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "republican-luxembourg",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "scp.set_loglevel(scp.INFO)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "champion-oasis",
+   "metadata": {},
+   "source": [
+    "In the above cell, we have set the **log** level to display ``info`` messages, such as this one:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "subject-stuart",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "scp.info_('this is an info message!')\n",
+    "scp.debug_('this is a debug message!')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "labeled-parade",
+   "metadata": {},
+   "source": [
+    "Only the info message is displayed, as expected.\n",
+    "\n",
+    "If we change it to ``DEBUG``, we should get the two messages"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "painful-indonesian",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "scp.set_loglevel(scp.DEBUG)\n",
+    "\n",
+    "scp.info_('this is an info message!')\n",
+    "scp.debug_('this is a debug message!')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "pediatric-northeast",
+   "metadata": {},
+   "source": [
+    "Let's now come back to a standard level of message for the rest of the Tutorial."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "still-accuracy",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "scp.set_loglevel(scp.WARNING)\n",
+    "\n",
+    "scp.info_('this is an info message!')\n",
+    "scp.debug_('this is a debug message!')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "plastic-strength",
+   "metadata": {},
+   "source": [
+    "Many other configuration items will be further described when necessary in the other chapters."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "instrumental-observation",
+   "metadata": {},
+   "source": [
+    "## Units"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "final-apollo",
+   "metadata": {},
+   "source": [
+    "The objets **ur**, **Quantity**  allows the manipulation of data with units, thanks to pint. (see [Units and\n",
+    "Quantities](../units/index.ipynb))\n",
+    "\n",
+    "* **ur**: the unit registry\n",
+    "* **Quantity**: a scalar or an array with some units"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "meaning-rover",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from spectrochempy import ur   # to simplify further writting\n",
+    "ur.cm / ur.s"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "human-breed",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "x = scp.Quantity(10., ur.cm / ur.s)\n",
+    "x * 2."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "public-maple",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "xa = scp.Quantity(np.array((1, 2)), 'km')\n",
+    "xa[1] * 2.5"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "broken-british",
+   "metadata": {},
+   "source": [
+    "## NDDataset, the main object"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "outside-balloon",
+   "metadata": {},
+   "source": [
+    "NDDataset is a python object, actually a container, which can represent most of your multidimensional spectroscopic\n",
+    "data.\n",
+    "\n",
+    "For instance, in the following we read data from a series of FTIR experiments, provided  by the OMNIC software:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "golden-adjustment",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import os\n",
+    "\n",
+    "nd = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "metallic-character",
+   "metadata": {},
+   "source": [
+    "Note that for this example, we use data stored in a ``test`` directory. For your own usage, you probably have to\n",
+    "give the full pathname (see ... for the way to overcome this using `preferences` setting)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "third-income",
+   "metadata": {},
+   "source": [
+    "### Display dataset information"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "guilty-prompt",
+   "metadata": {},
+   "source": [
+    "Several ways are available to display the data we have jsut read and that are now stored in the dataset\n",
+    "\n",
+    "* **Printing** them, using the print function of python to get a short text version of the dataset information."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "published-tamil",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(nd)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "continued-raleigh",
+   "metadata": {},
+   "source": [
+    "A much Longer (and colored) information text can be obtained using the spectrochempy provided ``print_`` function."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "frequent-hampton",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "scp.print_(nd)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "joined-cocktail",
+   "metadata": {},
+   "source": [
+    "* **Displaying html**, inside a jupyter notebook, by just typing the name of the dataset (must be the last\n",
+    "instruction of a cell, however!)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "divided-dance",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "nd"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "worse-magnet",
+   "metadata": {},
+   "source": [
+    "### Plotting a dataset\n",
+    "\n",
+    "First, we can set some general plotting preferences for this dataset"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "extra-demographic",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "prefs = nd.preferences\n",
+    "prefs.reset()\n",
+    "prefs.figure.figsize = (6, 3)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "compressed-friendly",
+   "metadata": {},
+   "source": [
+    "Let's plot first a 1D spectrum (for instance one row of nd)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "occupied-grill",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "row = nd[-1]\n",
+    "_ = row.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "related-avatar",
+   "metadata": {},
+   "source": [
+    "or a column ..."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "surface-shoulder",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "col = nd[:, 3500.]  # note the indexing using wavenumber!\n",
+    "_ = col.plot_scatter()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "eleven-quilt",
+   "metadata": {},
+   "source": [
+    "2D plots can be also generated as stacked plot"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "uniform-pulse",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "_ = nd.plot(method='stack')  # or nd.plot_stack()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "possible-sailing",
+   "metadata": {},
+   "source": [
+    "or as an image plot:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "judicial-editing",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "prefs.colormap = 'magma'\n",
+    "_ = nd.plot(method='image')  # or nd.plot_image()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "tender-capacity",
+   "metadata": {},
+   "source": [
+    "Note that as we plot wavenumbers as abcissa, by convention the coordinates direction is reversed.\n",
+    "\n",
+    "This can be changed by using the keyword argument `reversed = False`."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "periodic-pickup",
+   "metadata": {},
+   "source": [
+    "### Processing a dataset"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "julian-syndicate",
+   "metadata": {},
+   "source": [
+    "Some arithmetic can be performed on such dataset. Here is an example where we subtract one reference spectrum to\n",
+    "the whole nddataset that we have read above (`nd`)."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "sensitive-factory",
+   "metadata": {},
+   "source": [
+    "Lets take, e.g., the last row as reference"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "bright-length",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ref = nd[0]\n",
+    "_ = ref.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "blessed-milwaukee",
+   "metadata": {},
+   "source": [
+    "Now suppress this ref spectrum to all other spectra of the whole dataset (additionally we mask the region of\n",
+    "saturation"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "respected-lightweight",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "prefs.colormap = 'jet'\n",
+    "prefs.colorbar = True\n",
+    "nds = nd - ref\n",
+    "nds[:, 1290.:890.] = scp.MASKED\n",
+    "_ = nds.plot_stack()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "flush-buyer",
+   "metadata": {},
+   "source": [
+    "More details on available on available processing and analysis function will be given later in this user guide."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "assured-offering",
+   "metadata": {},
+   "source": [
+    "This was a short overview of the possibilities. To go further you can **Continue with ...**"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "hairy-birmingham",
+   "metadata": {
+    "nbsphinx-toctree": {
+     "maxdepth": 3
+    }
+   },
+   "source": [
+    "[Data structures](../objects.rst)"
+   ]
+  }
+ ],
+ "metadata": {
+  "jupytext": {
+   "cell_metadata_json": true,
+   "formats": "ipynb,py:percent",
+   "notebook_metadata_filter": "all"
+  },
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

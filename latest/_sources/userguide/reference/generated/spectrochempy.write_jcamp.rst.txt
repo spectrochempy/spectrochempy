@@ -1,0 +1,13 @@
+
+spectrochempy.write\_jcamp
+==========================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: write_jcamp
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.write_jcamp.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

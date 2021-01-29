@@ -1,0 +1,334 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "european-tomorrow",
+   "metadata": {},
+   "source": [
+    "# Smoothing\n",
+    "\n",
+    "In this tutorial, we shows how to smooth spectra along one dimension (another tutorial will be devoted to 2-D\n",
+    "smoothing)\n",
+    "and gives informations on the algorithms used in Spectrochempy.\n",
+    "\n",
+    "We first import spectrochempy, the other libraries used in this tutorial, and a sample dataset (\n",
+    "nh4y-activation.spg) from which we extract a noisy part:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "improving-shift",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import spectrochempy as scp\n",
+    "import numpy as np"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "chubby-petroleum",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X = scp.read_omnic('irdata//nh4y-activation.spg')  # import spectra\n",
+    "X = X[0:5, 3600.0:2800.0]  # select a noisy part (the first 5 spectra in the 3700-2800 cm-1 range)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "selected-passage",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "prefs = X.preferences\n",
+    "prefs.figure.figsize = (7, 3)\n",
+    "\n",
+    "ax = X.plot()  # plot"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "lightweight-blues",
+   "metadata": {
+    "title": "Two methods implemented in spectrochempy can be used to smooth spectra along either one dimension ("
+   },
+   "source": [
+    "In this tutorial we will apply smoothing of the\n",
+    "spectra along the wavlength dimension. These methods are based on window functions, which ptototype is the *moving\n",
+    "average*."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "northern-perth",
+   "metadata": {
+    "title": "Two methods implemented in spectrochempy can be used to smooth spectra along either one dimension ("
+   },
+   "source": [
+    "## The `smooth()` method"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "referenced-campus",
+   "metadata": {
+    "title": "Two methods implemented in spectrochempy can be used to smooth spectra along either one dimension ("
+   },
+   "source": [
+    "The `smooth()` method is adapted from the [\"Smoothing of a 1D signal\" code](\n",
+    "https://scipy-cookbook.readthedocs.io/items/SignalSmooth.html) of the [Scipy cookbook](\n",
+    "https://scipy-cookbook.readthedocs.io/). It is a (weighted)-moving average method and consist in the convolution of\n",
+    "a window of a given length with the spectrum.\n",
+    "\n",
+    "In its simplest form - *i.e.* unweighted moving average - each absorbance at a given wavenumber of the smoothed\n",
+    "spectrum is the average of the aborbances at the the absorbance at the considered wavenumber and the N neighboring\n",
+    "wavenumbers (*i.e.* N/2 before and N/2 after), hence the conventional use of an odd number of N+1 points to define\n",
+    "the window length. For the points located at both end of the spectra, the extremities of the spectrum are mirrored\n",
+    "beyond the initial limits so as to minimize boundary effects.\n",
+    "\n",
+    "When passed as is, i.e. `X.smooth()`, the method uses a moving average of 5 points:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "choice-tract",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ax = X.smooth().plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "functioning-modem",
+   "metadata": {},
+   "source": [
+    "### Window length\n",
+    "\n",
+    "The following code compares the influence of the window size on the smoothing of the first spectrum of the\n",
+    "NDDataset `X[0]`."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "based-short",
+   "metadata": {},
+   "source": [
+    "Loop over window lengths. i index will run from 0 to 6."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "invalid-depression",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "lspectra = [X[0], ]\n",
+    "llabels = ['Initial', ]\n",
+    "for i, length in enumerate([5, 11, 27, 51, 101, 201, 501]):\n",
+    "    s = X[0].smooth(window_length=length)  # smooth\n",
+    "    s += 0.1 * (1 + i)  # shift the absorbance by +0.1 a.u. with respect to previous iteration\n",
+    "    lspectra.append(s)\n",
+    "    llabels.append(f'length: {length}')\n",
+    "\n",
+    "ax = scp.plot_multiple(figsize=(7, 6), method='pen', datasets=lspectra, labels=llabels, legend='upper left')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "editorial-rental",
+   "metadata": {
+    "title": "The above spectra clearly show that as that the width of the window increases, the peaks belonging to"
+   },
+   "source": [
+    "the spectrum are flattened out and distorted. When determining the optimum window length, one should thus consier\n",
+    "the balance between noise removal and signal integrity: the larger the window length, the stronger the smoothing,\n",
+    "but also the greater the chance to distort the spectrum.\n",
+    "\n",
+    "### Window function\n",
+    "\n",
+    "Besides the window `length` (default=11 points), the user can also choose the type of\n",
+    "window (`window`) from `flat`, `hanning` (i.e. Hann window), `hamming`, `bartlett` or `blackman`.  The `flat`\n",
+    "window - which is the default shown above - should be fine for the vast majority of cases.\n",
+    "\n",
+    "The code below compares the effect of the type of window:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "permanent-image",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "wspectra = [X[0], ]\n",
+    "wlabels = ['Initial', ]\n",
+    "for i, window in enumerate(['flat', 'bartlett', 'hanning', 'hamming', 'blackman']):\n",
+    "    s = X[0].smooth(window_length=27, window=window) + 0.1 * (1 + i)  # smooth and shift\n",
+    "    wspectra.append(s)\n",
+    "    wlabels.append(f'window: {window}')\n",
+    "\n",
+    "ax = scp.plot_multiple(figsize=(7, 4), method='pen', datasets=wspectra, labels=wlabels, legend='upper left')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "stunning-healing",
+   "metadata": {
+    "title": "Close examination of the spectra shows that the flat window leads to the stronger smoothing. This is"
+   },
+   "source": [
+    "because the other window functions (also known as *apodization functions*) are used as weighting functions for the\n",
+    "N+1 points, with the largest weight on the central point and smaller weights for external points.\n",
+    "\n",
+    "The window functions as used in SpectroChemPy are derived from the numpy library. These builtin functions are such\n",
+    "that the value of the central point is 1. Hence, as shown below,  they are normalised to the sum of weights. The\n",
+    "code below displays the corresponding normalized fucntions for 27 points:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "curious-recycling",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "functions = []\n",
+    "labels = []\n",
+    "for i, f in enumerate([np.bartlett, np.hanning, np.hamming, np.blackman]):\n",
+    "    coord = scp.NDDataset.linspace(-13, 13, 27)\n",
+    "    s = scp.NDDataset(f(27) / np.sum(27) + i * 0.01,\n",
+    "                      coordset=[coord])  # normalized window function, y shifted : +0.1 for each function\n",
+    "    functions.append(s)\n",
+    "    labels.append(f'function: {f.__name__}')\n",
+    "\n",
+    "ax = scp.plot_multiple(figsize=(7, 4), method='pen', datasets=functions, labels=labels, legend='upper left')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "covered-london",
+   "metadata": {
+    "title": "As shown above, the \"bartlett\" function is equivalent to a triangular apodization, while other"
+   },
+   "source": [
+    "fonctions (`hanning`, `hamming`, `blackman`) are bell-shaped. More information on window funcntions can be found [\n",
+    "here](https://en.wikipedia.org/wiki/Window_function).\n",
+    "\n",
+    "Overall, the impact of the window function on the final spectrum is moderate, as can be shown by comparing the\n",
+    "differences (noisy spectrum *minus* smoothed spectra and the standard deviation along dimension x:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cubic-planner",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "diffs = []\n",
+    "stds = []\n",
+    "labels = wlabels[1:]\n",
+    "for s in wspectra[1:]:\n",
+    "    s = s - X[0]\n",
+    "    diffs.append(s)\n",
+    "    stds.append(s.std(dim='x').values.m)\n",
+    "ax = scp.plot_multiple(figsize=(7, 4), method='pen', datasets=diffs, labels=labels, legend='upper left')\n",
+    "ax.set_ylim(0, 0.8)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "dimensional-homeless",
+   "metadata": {},
+   "source": [
+    "and the standard deviations (the largest the value, the stronger the smoothing):"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "temporal-express",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for ll, s in zip(labels, stds):\n",
+    "    print(f'{ll[7:]:10s}: {s:.4f}')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "early-equity",
+   "metadata": {},
+   "source": [
+    "## Savitzky-Golay algorithm:`savgol_filter()`\n",
+    "\n",
+    "The second algorithm implemented in spectrochempy is the Savitzky-Golay filter which uses a polynomial\n",
+    "interpolation in the moving window. A demonstrative illustration of the method can be found on the [Savitzky-Golay\n",
+    "filter](https://en.wikipedia.org/wiki/Savitzky%E2%80%93Golay_filter) entry of Wikipedia.\n",
+    "\n",
+    "The function implemented in spectrochempy is a wrapper of the [savgol_filert() method](\n",
+    "https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.savgol_filter.html) from the [scipy.signal](\n",
+    "https://docs.scipy.org/doc/scipy/reference/signal.html) module to which we refer the interested reader. It not only\n",
+    "used to smooth spectra but also to compute their successive derivatives. The latter are treated in [the\n",
+    "peak-finding tutorial](../analysis/peak_finding.ipynb) and we will focus here on the smoothing which is the default\n",
+    "of the filter (default parameter: `deriv=0`).\n",
+    "\n",
+    "As for the `smooth()` method, it is a moving-window based method. Hence, the window length (`window_length`\n",
+    "parameter) plays an equivalent role, except that it *must* be odd. Moreover, instead of choosing a window function,\n",
+    "the user can choose the order of the polynomial used to fit the window data points (`polyorder`, default value: 0).\n",
+    "The latter must be strictly smaller than the window size (so that the polynomial coefficients can be fully\n",
+    "determined).\n",
+    "\n",
+    "The use of this method is illustrated below, we leave to the reader to assess the impact of the window length and\n",
+    "polynomial order (see Exercises below)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "italic-bangkok",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "_ = X.savgol_filter(window_length=5, polyorder=0).plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "consecutive-banking",
+   "metadata": {},
+   "source": [
+    "<div class='alert alert-info'>\n",
+    "<b>Exercises</b>\n",
+    "\n",
+    "<em>intermediate</em>: - what would be the parameters to use in the `savogol_filter()` method to mimic `smooth()`?\n",
+    "Write a\n",
+    "code to check your answer - examine the impacts of `window_length` and `polyorder` on the extent of smoothing with\n",
+    "a Svitzky-Golay filter.\n",
+    "</div>"
+   ]
+  }
+ ],
+ "metadata": {
+  "jupytext": {
+   "cell_metadata_filter": "title,-all",
+   "encoding": "# -*- coding: utf-8 -*-",
+   "formats": "ipynb,py:percent",
+   "notebook_metadata_filter": "all"
+  },
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

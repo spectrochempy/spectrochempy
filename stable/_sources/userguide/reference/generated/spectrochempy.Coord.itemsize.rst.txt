@@ -1,0 +1,6 @@
+spectrochempy.Coord.itemsize
+============================
+
+.. currentmodule:: spectrochempy
+
+.. autoproperty:: Coord.itemsize

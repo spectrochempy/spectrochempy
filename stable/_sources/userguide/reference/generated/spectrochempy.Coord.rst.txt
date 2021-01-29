@@ -1,0 +1,86 @@
+spectrochempy.Coord
+===================
+
+.. currentmodule:: spectrochempy
+
+.. autoclass:: Coord
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+
+      ~Coord.amax
+      ~Coord.amin
+      ~Coord.arange
+      ~Coord.astype
+      ~Coord.copy
+      ~Coord.fromfunction
+      ~Coord.fromiter
+      ~Coord.geomspace
+      ~Coord.get_labels
+      ~Coord.implements
+      ~Coord.is_units_compatible
+      ~Coord.ito
+      ~Coord.ito_base_units
+      ~Coord.ito_reduced_units
+      ~Coord.linspace
+      ~Coord.logspace
+      ~Coord.max
+      ~Coord.min
+      ~Coord.ptp
+      ~Coord.to
+      ~Coord.to_base_units
+      ~Coord.to_reduced_units
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :nosignatures:
+
+
+      ~Coord.created
+      ~Coord.data
+      ~Coord.date
+      ~Coord.desc
+      ~Coord.description
+      ~Coord.dimensionless
+      ~Coord.dtype
+      ~Coord.has_data
+      ~Coord.has_defined_name
+      ~Coord.has_units
+      ~Coord.history
+      ~Coord.id
+      ~Coord.is_empty
+      ~Coord.is_float
+      ~Coord.is_integer
+      ~Coord.is_labeled
+      ~Coord.itemsize
+      ~Coord.labels
+      ~Coord.limits
+      ~Coord.linear
+      ~Coord.m
+      ~Coord.magnitude
+      ~Coord.meta
+      ~Coord.modified
+      ~Coord.name
+      ~Coord.reversed
+      ~Coord.roi
+      ~Coord.shape
+      ~Coord.size
+      ~Coord.title
+      ~Coord.umasked_data
+      ~Coord.unitless
+      ~Coord.units
+      ~Coord.value
+      ~Coord.values
+
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.Coord.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

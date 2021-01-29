@@ -1,0 +1,13 @@
+
+spectrochempy.eye
+=================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: eye
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.eye.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

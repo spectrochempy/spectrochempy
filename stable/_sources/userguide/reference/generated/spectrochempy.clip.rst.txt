@@ -1,0 +1,13 @@
+
+spectrochempy.clip
+==================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: clip
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.clip.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

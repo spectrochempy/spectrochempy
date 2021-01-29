@@ -1,0 +1,627 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "secure-franklin",
+   "metadata": {},
+   "source": [
+    "# MCR ALS"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "alive-month",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import spectrochempy as scp"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "israeli-clearance",
+   "metadata": {},
+   "source": [
+    "## Introduction\n",
+    "\n",
+    "MCR-ALS (standing for Multivariate Curve Resolution - Alternating Least Squares) is a popular method for resolving a\n",
+    "set (or several sets) of spectra $X$ of an evolving mixture (or a set of mixtures) into the spectra $S^t$ of 'pure'\n",
+    "species and their concentration profiles $C$. In term of matrix equation:\n",
+    "$$ X = C S^t + E $$\n",
+    "The ALS algorithm allows applying soft or hard constraints (e.g. non negativity, unimodality, equality to a given\n",
+    "profile) to the spectra or concentration profiles of pure species. This property makes MCR-ALS an extremely flexible\n",
+    "and powerful method. Its current implementation in Scpy is limited to soft constraints but is exected to cover more\n",
+    "advanced features in further releases.\n",
+    "\n",
+    "In, this tutorial the application of MCS-ALS as implemented in Scpy to a 'classical' dataset form the literature is\n",
+    "presented.\n",
+    "\n",
+    "## The (minimal) dataset\n",
+    "\n",
+    "In this example, we perform the MCR ALS optimization of a dataset corresponding to a HPLC-DAD run, from Jaumot et al.\n",
+    "Chemolab, 76 (2005),\n",
+    "pp. 101-110 and Jaumot et al. Chemolab, 140 (2015) pp. 1-12. This dataset (and others) can be loaded from the\n",
+    "\"Multivariate Curve Resolution Homepage\"\n",
+    "at https://mcrals.wordpress.com/download/example-data-sets. For the user convenience, this dataset is present in the\n",
+    "'datadir' of spectrochempy in 'als2004dataset.MAT' and can be read as follows in Scpy:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "informative-chambers",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "A = scp.read_matlab(\"matlabdata/als2004dataset.MAT\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "exciting-pacific",
+   "metadata": {},
+   "source": [
+    "The .mat file contains 6 matrices which are thus returned in A as a list of 6 NDdatasets. We print the names and\n",
+    "dimensions of these datasets:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "empirical-information",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for a in A:\n",
+    "    print(a.name + ': ' + str(a.shape))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "featured-edmonton",
+   "metadata": {},
+   "source": [
+    "In this tutorial, we are first interested in the dataset named ('m1') that contains a singleHPLC-DAD run(s).\n",
+    "As usual, the rows correspond to the 'time axis' of the HPLC run(s), and the columns to the 'wavelength' axis\n",
+    "of the UV spectra.\n",
+    "\n",
+    "Let's name it 'X' (as in the matrix equation above), display its content and plot it:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "negative-cotton",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X = A[0]\n",
+    "X"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "early-plane",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "_ = X.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "direct-teddy",
+   "metadata": {},
+   "source": [
+    "The original dataset is the 'm1' matrix and does not contain information as to the actual elution time, wavelength,\n",
+    "and data units. Hence the resulting NDDataset has no coordinates and on the plot, only the matrix line and row\n",
+    "indexes are indicated. For the clarity of the tutorial, we add: (i) a proper title to the data, (ii)\n",
+    "the default coordinates (index) do the NDDataset and (iii) a proper name for these coordinates:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "filled-ireland",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X.title = 'absorbance'\n",
+    "X.set_coordset(None, None)\n",
+    "X.set_coordtitles(y='elution time', x='wavelength')\n",
+    "X"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "south-extreme",
+   "metadata": {},
+   "source": [
+    "From now on, these names will be taken into account by Scpy in the plottings as well as in the analysis treatments\n",
+    "(PCA, EFA, MCR-ALs, ...). For instance to plot X as a surface:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "turkish-atlanta",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "surf = X.plot_surface(colorbar=True, linewidth=.2, ccount=100, figsize=(10, 5))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "neutral-format",
+   "metadata": {},
+   "source": [
+    "## Initial guess and MCR ALS optimization\n",
+    "\n",
+    "The ALS optimization of the MCR equation above requires the input of a guess for either the concentration matrix\n",
+    "$C_0$ or the spectra matrix $S^t_0$. Given the data matrix $X$, the lacking initial matrix ($S^t_0$ or $C_0$,\n",
+    "respectively) is computed by:\n",
+    "$$ S^t_0 = \\left( C_0^tC_0 \\right)^{-1} C_0^t X $$\n",
+    "\n",
+    "or\n",
+    "\n",
+    "$$ C_0 = X {S^t_0}^t  \\left( S_0^t {S_0^t}^t \\right)^{-1} $$\n",
+    "\n",
+    "### Case of initial spectral profiles\n",
+    "The matrix spure provided in the initial dataset is a guess for the spectral profiles. Let's name it 'St0',\n",
+    "and plot it:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "copyrighted-characteristic",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "St0 = A[1]\n",
+    "_ = St0.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "unlike-liquid",
+   "metadata": {},
+   "source": [
+    "Note that, again, no information has been given as to the ordinate and abscissa data. We could add them as previously\n",
+    "but this is not very important. The key point is that the 'wavelength' dimension is compatible with the data 'X',\n",
+    "which is indeed the case (both have a legth of 95). If it was not, an error would be generated in the following.\n",
+    "\n",
+    "#### ALS Optimization\n",
+    "With this guess 'St0' and the dataset 'X' we can create a MCRALS object. At this point of the tutorial, we will use\n",
+    "all the default parameters except for the 'verbose' option which is swiched on to have a summary\n",
+    "of the ALS iterations:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "prostate-alignment",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "mcr = scp.MCRALS(X, St0, verbose='True')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "united-portsmouth",
+   "metadata": {},
+   "source": [
+    "The optimization has converged within few iterations. The figures reported for each iteration are defined as follows:\n",
+    "\n",
+    "- 'Error/PCA' is the standard deviation of the residuals with respect to data reconstructed by a PCA with as many\n",
+    "components as pure species (4 in this example),\n",
+    "\n",
+    "- 'Error/exp': is the standard deviation of the residuals with respect to the experimental data X,\n",
+    "\n",
+    "- '%change': is the percent change of 'Error/exp' between 2 iterations\n",
+    "\n",
+    "The default is to stop when this %change between two iteration is negative (so that the solution is improving),\n",
+    "but with an absolute value lower than 0.1% (so that the improvement is considered negligible). This parameter -\n",
+    "as well as several other parameters affecting the ALS optimization can be changed by the setting the 'tol' value\n",
+    "in a python dictionary using the key 'tol'. For instance:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "controlling-grammar",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "mcr = scp.MCRALS(X, St0, param={'tol': 0.01}, verbose='True')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "vertical-beast",
+   "metadata": {},
+   "source": [
+    "As could be expected more iterations have been necessary to reach this stricter convergence criterion.  The other\n",
+    "convergence criterion that can be fixed by the user is 'maxdiv', the maximum number of successive diverging\n",
+    "iterations. It is set to 5 by default and allows for stopping the ALS algorithm when it is no converging.\n",
+    "If for instance the 'tol' is set very low, the optimization will be stopped when either the maximum number\n",
+    "of iterations is reached (maxit, 50 by default) or when no improvement is during 5 successive iterations (maxdiv)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "swedish-exclusion",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "mcr = scp.MCRALS(X, St0, param={'tol': 0.001}, verbose='True')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "spatial-riverside",
+   "metadata": {},
+   "source": [
+    "Now if 'maxit' is set to 10:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "copyrighted-dinner",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "mcr = scp.MCRALS(X, St0, param={'tol': 0.001, 'maxit': 10}, verbose='True')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "twenty-southwest",
+   "metadata": {},
+   "source": [
+    "#### Solutions\n",
+    "\n",
+    "The solutions of the MCR ALS optimization are the optimized concentration and pure spectra matrices. They can be\n",
+    "obtained by the MCRALS.transform() method. let's remake an MCRALS object with the default settings,\n",
+    "('tol' = 0.1 and verbose = False), and get C and St."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "beginning-matter",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "mcr1 = scp.MCRALS(X, St0)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "particular-support",
+   "metadata": {},
+   "source": [
+    "As the dimensions of C are such that the rows direction (C.y) corresponds to the elution time and the columns\n",
+    "direction (C.x) correspond to the four pure species, it is necessary to transpose it before plotting in order\n",
+    "to plot the concentration vs. the elution time."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "proud-disney",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "_ = mcr1.C.T.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "advised-bandwidth",
+   "metadata": {},
+   "source": [
+    "On the other hand, the spectra of the pure species can be plot directly:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "herbal-singing",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "_ = mcr1.St.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "happy-radius",
+   "metadata": {},
+   "source": [
+    "#### A basic illustration of the rotational ambiguity\n",
+    "We have thus obtained the elution profiles of the four pure species. Note that the 'concentration' values are very\n",
+    "low. This results from the fact that the absorbance values in X are on the order of 0-1 while the absorbances of\n",
+    "the initial pure spectra are of the order of 10^4. As can be seen above, the absorbance of the final spectra is of\n",
+    "the same order of magnitude.\n",
+    "\n",
+    "It is possible to normalize the intensity of the spectral profiles by setting the 'normSpec' parameter to True.\n",
+    "With this option, the specra are normalized such that their euclidian norm is 1. The other normalization option is\n",
+    "normspec = 'max', whereby the maximum intyensity of tyhe spectra is 1. Let's look at the effect of\n",
+    "both normalizations:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "agricultural-eligibility",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "mcr2 = scp.MCRALS(X, St0, param={'normSpec': 'euclid'})\n",
+    "\n",
+    "mcr3 = scp.MCRALS(X, St0, param={'normSpec': 'max'})\n",
+    "\n",
+    "_ = mcr1.St.plot()\n",
+    "_ = mcr2.St.plot()\n",
+    "_ = mcr3.St.plot()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "weird-realtor",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "_ = mcr1.C.T.plot()\n",
+    "_ = mcr2.C.T.plot()\n",
+    "_ = mcr3.C.T.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "romance-ticket",
+   "metadata": {},
+   "source": [
+    "It is clear that the normalization affects the relative intensity of the spectra and of the concentration.\n",
+    "This is a basic example of the well known rotational ambiguity of the MCS ALS solutions."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "floral-enclosure",
+   "metadata": {},
+   "source": [
+    "### Guessing the concentration profile with PCA + EFA\n",
+    "\n",
+    "Generally, in MCR ALS, the initial guess cannot be obtained independently of the experimental data 'x'.\n",
+    "In such a case, one has to rely on 'X' to obtained (i) the number of pure species  and (ii) their initial\n",
+    "concentrations or spectral profiles. The number of of pure species can be assessed by carrying out a PCA on the\n",
+    "data while the concentrations or spectral profiles can be estimated using procedures such EFA of SIMPLISMA.\n",
+    "The following will illustrate the use of PCA followed by EFA\n",
+    "\n",
+    "#### Use of PCA to assess the number of pure species\n",
+    "\n",
+    "Let's first analyse our dataset using PCA and plot a screeplot:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "worthy-assault",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "pca = scp.PCA(X)\n",
+    "pca.printev(n_pc=10)\n",
+    "_ = pca.screeplot(n_pc=8)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "wrong-agreement",
+   "metadata": {},
+   "source": [
+    "The number of significant PC's is clearly larger or equal to 2. It is, however, difficult tto determine whether\n",
+    "it should be set to 3 or 4...  Let's look at the score and loading matrices:\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "union-denmark",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "S, LT = pca.reduce(n_pc=8)\n",
+    "_ = S.T.plot()\n",
+    "_ = LT.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "assisted-copying",
+   "metadata": {},
+   "source": [
+    "Examination of the scores and loadings indicate that the 4th component has structured, non random scores and loadings.\n",
+    "Hence we will fix the number of pure species to 4.\n",
+    "\n",
+    "NB: The PCA.transform() can also be used with n_pc='auto' to determine automatically the number of components using\n",
+    "the method of Thomas P. Minka (Automatic Choice of Dimensionality for PCA. NIPS 2000: 598-604). This type of methods,\n",
+    "however, often lead to too many PC's for the chemist because they recover all contributions to the data variance:\n",
+    "chemical AND non-chemical, thus including non-gaussian noise, baseline changes, background absorption...\n",
+    "\n",
+    "32 in the present case:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "direct-november",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "S3, LT3 = pca.reduce(n_pc='auto')\n",
+    "S3.shape"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "confused-wesley",
+   "metadata": {},
+   "source": [
+    "#### Determination of initial concentrations using EFA\n",
+    "\n",
+    "Once the number of components has been determined, the initial concentration matrix is obtained very easily using EFA:\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "early-trademark",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "efa = scp.EFA(X)\n",
+    "C0 = efa.get_conc(n_pc=4)\n",
+    "_ = C0.T.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "exotic-bermuda",
+   "metadata": {},
+   "source": [
+    "The MCR ALS can then be launched using this new guess:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "mysterious-lunch",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "mcr4 = scp.MCRALS(X, guess=C0, param={'maxit': 100, 'normSpec': 'euclid'}, verbose=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "thick-alberta",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "_ = mcr4.C.T.plot()\n",
+    "_ = mcr4.St.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "incoming-conservation",
+   "metadata": {},
+   "source": [
+    "## Augmented datasets"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "literary-bahrain",
+   "metadata": {},
+   "source": [
+    "The 'MATRIX' dataset is a columnwise augmented dataset consisting into 5 successive runs:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "deluxe-plain",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "A[3]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cleared-sharp",
+   "metadata": {},
+   "source": [
+    "Let's plot it as a map, and as a surface:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "western-million",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X2 = A[3]\n",
+    "X2.title = 'absorbance'\n",
+    "X2.set_coordset(None, None)\n",
+    "X2.set_coordtitles(y='elution time', x='wavelength')\n",
+    "surf = X2.plot_surface(colorbar=True, linewidth=.2, ccount=100, figsize=(10, 5))\n",
+    "_ = X2.plot(method='map')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "sweet-gather",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "mcr5 = scp.MCRALS(X2, guess=St0, param={'unimodConc': [0] * 4}, verbose=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "interior-nebraska",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "_ = mcr5.C.T.plot()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "vertical-hello",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "_ = mcr5.St.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "collectible-rings",
+   "metadata": {},
+   "source": [
+    "[To be continued...]"
+   ]
+  }
+ ],
+ "metadata": {
+  "jupytext": {
+   "formats": "ipynb,py:percent",
+   "notebook_metadata_filter": "all"
+  },
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

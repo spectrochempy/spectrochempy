@@ -1,0 +1,13 @@
+
+spectrochempy.set\_quaternion
+=============================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: set_quaternion
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.set_quaternion.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

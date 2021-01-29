@@ -1,0 +1,13 @@
+
+spectrochempy.diag
+==================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: diag
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.diag.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

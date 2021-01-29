@@ -1,0 +1,426 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>spectrochempy.BaselineCorrection &mdash; SpectroChemPy v0.2.5.dev8 0.2.5.dev8 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_override.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery-dataframe.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery-rendered-html.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/scpy.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="spectrochempy.autosub" href="spectrochempy.autosub.html" />
+    <link rel="prev" title="spectrochempy.var" href="spectrochempy.var.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/scpy.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.5.dev8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> SpectroChemPy </span>
+        version: latest
+        <span class="fa fa-caret-down"></span>
+      </span>
+        <div class="rst-other-versions">
+            <dl>
+                <dt>Other versions</dt>
+                
+                    
+                
+                    
+                        <dd><a href="https://spectrochempy.github.io/spectrochempy/stable/index.html">STABLE</a></dd>
+                    
+                
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Downloads</dt>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/latest-spectrochempy.pdf">PDF</a></dd>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/latest-spectrochempy-notebooks.zip">Notebooks</a></dd>
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Sources on GitHub</dt>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
+
+            </dl>
+
+        </div>
+    </div>
+
+    
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/whyscpy.html">Why <strong>SpectroChemPy</strong>  ?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/gallery/auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/install/index.html">Installation</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../objects.html">Data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../units/units.html">Units &amp; Quantities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../importexport/importexport.html">Import &amp; Export</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plotting/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../processing/processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../fitting/fitting.html">Fitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analysis/analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../databases/databases.html">Databases</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference &amp; Help</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#loading-the-api">Loading the API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#the-nddataset-object">The NDDataset object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#coordinates-related-objects">Coordinates related objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#creating-nddataset">Creating NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#export-a-nddataset">Export a NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#select-data-in-a-nddataset">Select data in a NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#plotting-functions">Plotting functions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#processing">Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#fitting">Fitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#analysis">Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#project-management">Project management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#scripting">Scripting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#utilities">Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently asked questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/examples.html">Adding new tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/examples.html#adding-your-examples-to-the-gallery">Adding your examples to the gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/contributing.html">Developer’s Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/citing.html">Citing  <strong>SpectroChemPy</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/seealso.html">See also</a></li>
+</ul>
+
+            
+          
+
+
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SpectroChemPy v0.2.5.dev8</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">API reference</a> &raquo;</li>
+        
+      <li>spectrochempy.BaselineCorrection</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../../_sources/userguide/reference/generated/spectrochempy.BaselineCorrection.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    
+    
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="spectrochempy-baselinecorrection">
+<h1>spectrochempy.BaselineCorrection<a class="headerlink" href="#spectrochempy-baselinecorrection" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="spectrochempy.BaselineCorrection">
+<em class="property">class </em><code class="sig-name descname">BaselineCorrection</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataset</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">ranges</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy/core/processors/baseline.py#L37-L391"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spectrochempy.BaselineCorrection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Baseline Correction processor.</p>
+<p>2 methods are proposed :</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">sequential</span></code> (default) = classical polynom fit or spline
+interpolation with separate fitting of each row (spectrum)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">multivariate</span></code> = SVD modeling of baseline, polynomial fit of PC’s
+and calculation of the modelled baseline spectra.</p></li>
+</ul>
+<p>Interactive mode is proposed using the interactive function : <code class="xref py py-meth docutils literal notranslate"><span class="pre">run</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> (<em>|NDDataset|</em>) – The dataset to be transformed.</p></li>
+<li><p><strong>*ranges</strong> (<em>a variable number of pair-tuples</em>) – The regions taken into account for the manual baseline correction.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – See other parameters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Other Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>dim</strong> (<em>str or int, keyword parameter, optional, default=’x’.</em>) – Specify on which dimension to apply the apodization method. If <code class="xref py py-obj docutils literal notranslate"><span class="pre">dim</span></code> is specified as an integer
+it is equivalent  to the usual <code class="xref py py-obj docutils literal notranslate"><span class="pre">axis</span></code> numpy parameter.</p></li>
+<li><p><strong>method</strong> (<em>str, keyword parameter, optional, default=’multivariate’</em>) – Correction method among [‘multivariate’,’sequential’]</p></li>
+<li><p><strong>interpolation</strong> (<em>string, keyword parameter, optional, default=’polynomial’</em>) – Interpolation method for the computation of the baseline, among [‘polynomial’,’pchip’]</p></li>
+<li><p><strong>order</strong> (<em>int, keyword parameter, optional, default=6</em>) – If the correction method polynomial, this give the polynomial order to use.</p></li>
+<li><p><strong>npc</strong> (<em>int, keyword parameter, optional, default=5</em>) – Number of components to keep for the <code class="docutils literal notranslate"><span class="pre">multivariate</span></code> method</p></li>
+<li><p><strong>zoompreview</strong> (<em>float, keyword parameter, optional, default=1.0</em>) – The zoom factor for the preview in interactive mode</p></li>
+<li><p><strong>figsize</strong> (<em>tuple, keyword parameter, optional, default=(8, 6)</em>) – Size of the figure to display in inch</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="spectrochempy.abc.html#spectrochempy.abc" title="spectrochempy.abc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">abc</span></code></a></dt><dd><p>Automatic baseline correction.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">spectrochempy</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="n">nd</span> <span class="o">=</span> <span class="n">NDDataset</span><span class="o">.</span><span class="n">read_omnic</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;irdata&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;nh4y-activation.spg&#39;</span><span class="p">))</span>
+<span class="n">ndp</span> <span class="o">=</span> <span class="n">nd</span><span class="p">[:,</span> <span class="mf">1291.0</span><span class="p">:</span><span class="mf">5999.0</span><span class="p">]</span>
+<span class="n">bc</span> <span class="o">=</span> <span class="n">BaselineCorrection</span><span class="p">(</span><span class="n">ndp</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;multivariate&#39;</span><span class="p">,</span>
+                            <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;pchip&#39;</span><span class="p">,</span>
+                            <span class="n">npc</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">ranges</span><span class="o">=</span><span class="p">[[</span><span class="mf">5996.</span><span class="p">,</span> <span class="mf">5998.</span><span class="p">],</span> <span class="p">[</span><span class="mf">1290.</span><span class="p">,</span> <span class="mf">1300.</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">2205.</span><span class="p">,</span> <span class="mf">2301.</span><span class="p">],</span> <span class="p">[</span><span class="mf">5380.</span><span class="p">,</span> <span class="mf">5979.</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">3736.</span><span class="p">,</span> <span class="mf">5125.</span><span class="p">]]</span>
+<span class="n">span</span> <span class="o">=</span> <span class="n">bc</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="o">*</span><span class="n">ranges</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">bc</span><span class="o">.</span><span class="n">corrected</span><span class="o">.</span><span class="n">plot_stack</span><span class="p">()</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>(<a class="reference external" href="../../../userguide/reference/generated/spectrochempy-BaselineCorrection-1.py">Source code</a>, <a class="reference external" href="../../../userguide/reference/generated/spectrochempy-BaselineCorrection-1.png">png</a>, <a class="reference external" href="../../../userguide/reference/generated/spectrochempy-BaselineCorrection-1.hires.png">hires.png</a>, <a class="reference external" href="../../../userguide/reference/generated/spectrochempy-BaselineCorrection-1.pdf">pdf</a>)</p>
+<div class="figure align-default">
+<img alt="../../../_images/spectrochempy-BaselineCorrection-1.png" src="../../../_images/spectrochempy-BaselineCorrection-1.png" />
+</div>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute</span></code></p></td>
+<td><p>Base function for dataset baseline correction.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">run</span></code></p></td>
+<td><p>Interactive version of the baseline correction.</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="section" id="examples-using-spectrochempy-baselinecorrection">
+<h2>Examples using <code class="docutils literal notranslate"><span class="pre">spectrochempy.BaselineCorrection</span></code><a class="headerlink" href="#examples-using-spectrochempy-baselinecorrection" title="Permalink to this headline">¶</a></h2>
+<div class="sphx-glr-thumbcontainer" tooltip="In this example, we perform a baseline correction of a 2D NDDataset interactively, using the mu..."><div class="figure align-default" id="id1">
+<img alt="NDDataset baseline correction" src="../../../_images/sphx_glr_plot_baseline_correction_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../../../gettingstarted/gallery/auto_examples/nddataset/plot_baseline_correction.html#sphx-glr-gettingstarted-gallery-auto-examples-nddataset-plot-baseline-correction-py"><span class="std std-ref">NDDataset baseline correction</span></a></span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+</div><div style='clear:both'></div></div>
+</div>
+
+
+           </div>
+           
+          </div>
+
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="spectrochempy.autosub.html" class="btn btn-neutral float-right" title="spectrochempy.autosub" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="spectrochempy.var.html" class="btn btn-neutral float-left" title="spectrochempy.var" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2014-2021 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">
+        Last updated on Jan 29, 2021.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

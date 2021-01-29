@@ -1,0 +1,38 @@
+spectrochempy.MCRALS
+====================
+
+.. currentmodule:: spectrochempy
+
+.. autoclass:: MCRALS
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+
+      ~MCRALS.plotmerit
+      ~MCRALS.reconstruct
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :nosignatures:
+
+
+      ~MCRALS.C
+      ~MCRALS.St
+      ~MCRALS.X
+      ~MCRALS.extC
+      ~MCRALS.extOutput
+      ~MCRALS.logs
+      ~MCRALS.params
+
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.MCRALS.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

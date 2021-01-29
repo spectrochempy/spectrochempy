@@ -1,0 +1,13 @@
+
+spectrochempy.align
+===================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: align
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.align.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

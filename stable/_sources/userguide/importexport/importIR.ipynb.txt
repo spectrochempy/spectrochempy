@@ -1,0 +1,779 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "dense-jackson",
+   "metadata": {},
+   "source": [
+    "# Import IR Data\n",
+    "\n",
+    "This tutorial shows the specifics related to infrared data import in Spectrochempy. As prerequisite, the user is\n",
+    "expected to have read the [Import Tutorial](Import.ipynb).\n",
+    "\n",
+    "Let's first import spectrochempy:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "confidential-coverage",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import spectrochempy as scp"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "equal-biography",
+   "metadata": {},
+   "source": [
+    "## Supported file formats\n",
+    "\n",
+    "At the time of writing of this tutorial (Scpy v.0.1.18), spectrochempy has the following readers which are specific\n",
+    "to IR data:\n",
+    "\n",
+    "- `read_omnic()` to open omnic (spa and spg) files\n",
+    "- `read_opus()` to open Opus (*.0, ...) files\n",
+    "- `read_jcamp()` to open an IR JCAMP-DX datafile\n",
+    "- `read()` which is the generic reader. The type of data is then deduced from the file extension.\n",
+    "\n",
+    "General purpose data exchange formats such as  \\*.csv or \\*.mat will be treated in another tutorial (yet to come...)\n",
+    "can also be read using:\n",
+    "\n",
+    "- `read_csv()` to open csv files\n",
+    "- `read_matlab()` to open .mat files\n",
+    "\n",
+    "## Import of OMNIC files\n",
+    "\n",
+    "[Thermo Scientific OMNIC](https://www.thermofisher.com/search/browse/category/us/fr/602580/FTIR%2C+NIR+%26amp%3B+Raman+Software+%26amp%3B+Libraries) # noqa: E501\n",
+    "software have two proprietary binary file formats:\n",
+    "- .spa files that handle single spectra\n",
+    "- .spg files which contain a group of spectra\n",
+    "\n",
+    "Both have been reverse engineered, hence allowing extracting their key data. The Omnic reader of\n",
+    " Spectrochempy (`read_omnic()`) has been developed based on posts in open forums on the .spa\n",
+    " file format and extended to .spg file formats.\n",
+    "\n",
+    "\n",
+    "### a) import spg file\n",
+    "\n",
+    "Let's import an .spg file from the `datadir` (see [Import Tutorial](Import.ipynb)) and display\n",
+    "its main attributes:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "interstate-syndrome",
+   "metadata": {
+    "pycharm": {
+     "name": "#%%\n"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "X = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG')\n",
+    "X"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "sought-gather",
+   "metadata": {},
+   "source": [
+    "The displayed attibutes are detailed in the following.\n",
+    "\n",
+    "- `name` is the name of the group of spectra as it appears in the .spg file. OMNIC sets this name to the .spg\n",
+    "filename used at the creation of the group. In this example, the name (\"Group sust Mo_Al2O3_base line.SPG\") differs\n",
+    "from the filemane (\"CO@Mo_Al2O3.SPG\") because the latter has been changed from outside OMNIC (directly in the OS).\n",
+    "\n",
+    "- `author` is that of the creator of the NDDataset (not of the .spg file, which, to our knowledge, does not have\n",
+    "this type of attribute). The string is composed of the username and of the machine name as given by the OS:\n",
+    "username@machinename. It can be accessed and changed using `X.author`\n",
+    "\n",
+    "- `created` is the creation date of the NDDataset (again not that of the .spg file). It can be accessed (or even\n",
+    "changed) using `X.created`\n",
+    "\n",
+    "- `description` indicates the complete pathname of the .spg file. As the pathname is also given in the history (below)\n",
+    ", it can be a good practice to give a self explaining description of the group, for instance:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "seasonal-perth",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X.description = 'CO adsorption on CoMo/Al2O3, difference spectra'\n",
+    "X.description"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "unusual-genealogy",
+   "metadata": {},
+   "source": [
+    "or directly at the import:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "american-patient",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X = scp.read_omnic('irdata//CO@Mo_Al2O3.SPG', description='CO@CoMo/Al2O3, diff spectra')\n",
+    "X.description"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "surgical-welding",
+   "metadata": {},
+   "source": [
+    "- `history` records changes made to the dataset. Here, right after its creation, it has been sorted by date\n",
+    "(see below).\n",
+    "\n",
+    "Then come the attributes related to the data themselves:\n",
+    "\n",
+    "- `title` (not to be confused with the `name` of the dataset) describes the nature of data (here **absorbance**)\n",
+    "\n",
+    "- `values` shows the data as quantity (with their units when they exist - here a.u. for absorbance units).\n",
+    "\n",
+    "- The numerical values ar accessed through the`data` attribute and the units throught `units` attribute."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "comparable-mobile",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X.values"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "postal-planning",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X.data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "advised-adelaide",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X.units  # TODO: correct this display"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "short-yesterday",
+   "metadata": {},
+   "source": [
+    "- `shape` is the same as the ndarray `shape` attribute and gives the shape of the data array, here 19 x 3112.\n",
+    "\n",
+    "Then come the attributes related to the dimensions of the dataset.\n",
+    "\n",
+    "- `x`: this dimension has one coordinate (a `Coord` object) made of the 3112 the wavenumbers."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "massive-elite",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(X.x)\n",
+    "X.x"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "assisted-surrey",
+   "metadata": {},
+   "source": [
+    "- `y`: this dimension contains:\n",
+    "\n",
+    "    - one coordinate made of the 19 acquisition timestamps\n",
+    "    - two labels\n",
+    "        - the acquision date (UTC) of each spectrum\n",
+    "        - the name of each spectrum."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "dying-tissue",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(X.y)\n",
+    "X.y"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "boolean-extra",
+   "metadata": {},
+   "source": [
+    "- `dims`: Note that the `x` and `y` dimensions are the second and first dimension respectively. Hence, `X[i,\n",
+    "j]` will return\n",
+    "the absorbance of the ith spectrum at the jth  wavenumber. However, this is subject to change, for instance if you\n",
+    "perform ooperation on you data such as [Transposition](../processing/transformations#Transposition). At any time\n",
+    "the attribute `dims`gives the correct names (which can be modified) and order of the dimensions."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "massive-alliance",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X.dims"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "alive-perspective",
+   "metadata": {},
+   "source": [
+    "#### Acquisition dates and `y` axis\n",
+    "\n",
+    "The acquisition timestamps are the *Unix times* of the acquisition, i.e. the time elapsed in seconds since the\n",
+    "reference date of Jan 1st 1970, 00:00:00 UTC."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "missing-multiple",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X.y.values"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "historic-symbol",
+   "metadata": {},
+   "source": [
+    "In OMNIC, the acquisition time is that of the start of the acquisison.\n",
+    "As such these may be not convenient to use directly (they are currently in the order of 1.5 billion...)\n",
+    "With this respect, it can be convenient to shift the origin of time coordinate to that of the 1st spectrum,\n",
+    "which has the index `0`:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "numerical-optics",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X.y = X.y - X.y[0]\n",
+    "X.y.values"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "flexible-quick",
+   "metadata": {},
+   "source": [
+    "Note that you can also use the inplace subtract operator to perform the same operation."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "korean-metadata",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X.y -= X.y[0]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "beneficial-reform",
+   "metadata": {},
+   "source": [
+    "It is also possible to use the ability of SpectroChemPy to handle unit changes. For this one can use the `to` or\n",
+    "`ito` (\n",
+    "inplace) methods.\n",
+    "```ipython3\n",
+    "val = val.to(some_units)\n",
+    "val.ito(some_units)   # the same inplace\n",
+    "```"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "caroline-peace",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X.y.ito(\"minute\")\n",
+    "X.y.values"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "decent-childhood",
+   "metadata": {},
+   "source": [
+    "As shown above, the values of the `Coord` object are accessed through the `values` attribute. To get the last\n",
+    "values corresponding to the last row of the `X` dataset, you can use:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "married-kinase",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "tf = X.y.values[-1]\n",
+    "tf"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "flying-tracy",
+   "metadata": {},
+   "source": [
+    "Negative index in python indicates the position in a sequence from the end, so -1 indicate the last element."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "resistant-client",
+   "metadata": {},
+   "source": [
+    "Finally, if for instance you want the `x` time axis to be shifted by 2 minutes, it is also very easy to do so:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "negative-chapter",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X.y = X.y + 2\n",
+    "X.y.values"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "private-frontier",
+   "metadata": {
+    "lines_to_next_cell": 2
+   },
+   "source": [
+    "or using the inplace add operator:\n",
+    "```ipython3\n",
+    "X.y += 2\n",
+    "```"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "patient-sheet",
+   "metadata": {},
+   "source": [
+    "#### The order of spectra\n",
+    "\n",
+    "The order of spectra in OMNIC .spg files depends depends on the order in which the spectra were included in the OMNIC\n",
+    "window before the group was saved. By default, sepctrochempy reorders the spectra by acquisistion date but the\n",
+    "original OMNIC order can be kept using the `sortbydate=True` at the function call. For instance:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "qualified-generic",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X2 = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG', sortbydate=False)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "expensive-battle",
+   "metadata": {},
+   "source": [
+    "In the present case this will not change nothing because the spectra in the OMNIC file wre already ordered by\n",
+    "increasing data.\n",
+    "\n",
+    "Finally, it is worth mentioning that a `NDDataset` can generally be manipulated as numpy ndarray. Hence, for\n",
+    "instance, the following will inverse the order of the first dimension:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "square-radio",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X = X[::-1]  # reorders the NDDataset along the first dimension going backward\n",
+    "X.y.values  # displays the `y` dimension"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "signed-picking",
+   "metadata": {},
+   "source": [
+    "<div class='alert alert-info'>\n",
+    "<b>Note</b>\n",
+    "\n",
+    "**Case of groups with different wavenumbers**<br/>\n",
+    "An OMNIC .spg file can contain spectra having different wavenumber axes (e.g. different spacings or wavenumber\n",
+    "ranges). In its current implementation, the spg reader will purposedly return an error because such spectra\n",
+    "*cannot* be included in a single NDdataset which, by definition, contains items that share common axes or dimensions !\n",
+    "Future releases might include an option to deal with such a case and return a list of NDDasets. Let us know if you\n",
+    "are interested in such a feature, see [Bug reports and enhancement requests]\n",
+    "(https://www.spectrochempy.fr/dev/dev/issues.html).\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "simplified-fifteen",
+   "metadata": {},
+   "source": [
+    "### b) Import of .spa files\n",
+    "\n",
+    "The import of a single spectrum follows exactly the same rules as that of the import of a group:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "departmental-microphone",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "Y = scp.read_omnic('irdata/subdir/7_CZ0-100 Pd_101.SPA')\n",
+    "Y"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "interesting-surgery",
+   "metadata": {},
+   "source": [
+    "The omnic reader can also import several spa files together, providing that they share a common axis for the\n",
+    "wavenumbers. This is the case of the following files in the irdata/subdir directory: \"7_CZ0-100 Pd_101.SPA\", ...,\n",
+    "\"7_CZ0-100 Pd_104.spa\". It is possible to import them in a single NDDataset by using the list of filenames\n",
+    "in the function call:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "monetary-offense",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "list_files = [\"7_CZ0-100 Pd_101.SPA\", \"7_CZ0-100 Pd_102.SPA\", \"7_CZ0-100 Pd_103.SPA\", \"7_CZ0-100 Pd_104.SPA\"]\n",
+    "X = scp.read_omnic(list_files, directory='irdata/subdir')\n",
+    "print(X)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "olympic-credit",
+   "metadata": {},
+   "source": [
+    "In such a case ase these .spa files are alone in the directory, a very convenient is to call the read_omnic method\n",
+    "using only the directory path as argument that will gather the .spa files together:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "fiscal-helping",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X = scp.read_omnic('irdata/subdir')\n",
+    "print(X)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ongoing-content",
+   "metadata": {},
+   "source": [
+    "<div class='alert alert-warning'>\n",
+    "<b>Warning</b>\n",
+    "\n",
+    "There is a difference in specifiying the directory to read as an argument as above or as a keyword like here:\n",
+    "```ipython3\n",
+    "X = scp.read_omnic(directory='irdata/subdir')\n",
+    "```\n",
+    "in the latter case, a **dialog** is opened to select files in the given directory, while in the former,\n",
+    "the file are read silently and concatenated (if possible).\n",
+    "</div>"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "weighted-frank",
+   "metadata": {
+    "pycharm": {
+     "name": "#%% md\n"
+    }
+   },
+   "source": [
+    "## Import of Bruker OPUS files\n",
+    "\n",
+    "[Bruker OPUS](https://www.bruker.com/products/infrared-near-infrared-and-raman-spectroscopy/\n",
+    "opus-spectroscopy-software.html) files have also a proprietary file format. The Opus reader (`read_opus()`)\n",
+    "of spectrochempy is essentially a wrapper of the python module\n",
+    "[brukeropusreader](https://github.com/spectrochempy/brukeropusreader) developed by QED. It imports absorbance\n",
+    "spectra (the AB block), acquisition times and name of spectra.\n",
+    "\n",
+    "The use of `read_opus()` is similar to that of  `read_omnic()` for .spa files. Hence, one can open sample\n",
+    "Opus files contained in the `datadir` using:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "rising-sound",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "Z = scp.read_opus(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS')\n",
+    "print(Z)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "designing-third",
+   "metadata": {},
+   "source": [
+    "or:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "specified-cancer",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "Z2 = scp.read_opus('irdata/OPUS')\n",
+    "print(Z2)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "fixed-pierce",
+   "metadata": {},
+   "source": [
+    "Note that supplementary informations can be obtained by the direct use of\n",
+    "`brukeropusreader`. For instance:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "automotive-incentive",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from brukeropusreader import read_file  # noqa: E402\n",
+    "\n",
+    "opusfile = scp.DATADIR / \"irdata\" / \"OPUS\" / \"test.0000\"  # the full pathn of the file\n",
+    "Z3 = read_file(opusfile)  # returns a dictionary of the data and metadata extracted\n",
+    "for key in Z3:\n",
+    "    print(key)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "wireless-pillow",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "Z3['Optik']  # looks what is the Optik block:"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "polyphonic-country",
+   "metadata": {},
+   "source": [
+    "## Import/Export of JCAMP-DX files\n",
+    "\n",
+    "[JCAMP-DX](http://www.jcamp-dx.org/) is an open format initially developped for IR data and extended to\n",
+    "other spectroscopies. At present, the JCAMP-DX reader implemented in Spectrochempy is limited to IR data and\n",
+    "AFFN encoding (see R. S. McDonald and Paul A. Wilks, JCAMP-DX: A Standard Form for Exchange of Infrared Spectra in\n",
+    "Readable Form, Appl. Spec., 1988, 1, 151–162. doi:10.1366/0003702884428734 fo details).\n",
+    "\n",
+    "The JCAMP-DX reader of spectrochempy has been essentially written to read again the jcamp-dx files exported by\n",
+    "spectrochempy `write_jdx()` writer.\n",
+    "\n",
+    "Hence, for instance, the first dataset can be saved in the JCAMP-DX format:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "billion-boundary",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "S0 = X[0]\n",
+    "print(S0)\n",
+    "S0.write_jcamp('CO@Mo_Al2O3_0.jdx', confirm=False);"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "opposite-patent",
+   "metadata": {},
+   "source": [
+    "Then used (and maybe changed) by a 3rd party software, and re-imported in spectrochempy:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "victorian-sodium",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "newS0 = scp.read_jcamp('CO@Mo_Al2O3_0.jdx')\n",
+    "print(newS0)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "surprising-sheet",
+   "metadata": {},
+   "source": [
+    "It is important to note here that the conversion to JCAMP-DX changes the last digits of absorbances and wavenumbers:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "smoking-campus",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def difference(x, y):\n",
+    "    from numpy import max, abs\n",
+    "    nonzero = (y.data != 0)\n",
+    "    error = abs(x.data - y.data)\n",
+    "    max_rel_error = max(error[nonzero] / abs(y.data[nonzero]))\n",
+    "    return max(error), max_rel_error"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "approved-cleaner",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "max_error, max_rel_error = difference(S0, newS0)\n",
+    "print(f'Max absolute difference in absorbance: {max_error:.3g}')\n",
+    "print(f'Max relative difference in absorbance: {max_rel_error:.3g}')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "neither-albany",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "max_error, max_rel_error = difference(S0.x, newS0.x)\n",
+    "print(f'Max absolute difference in wavenumber: {max_error:.3g}')\n",
+    "print(f'Max relative difference in wavenumber: {max_rel_error:.3g}')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "previous-brisbane",
+   "metadata": {},
+   "source": [
+    "This is much beyond the experimental accuracy but can lead to undesirable effects.\n",
+    "\n",
+    "For instance:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "streaming-apollo",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "try:\n",
+    "    S0 - newS0\n",
+    "except Exception as e:\n",
+    "    scp.error_(e)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "congressional-hierarchy",
+   "metadata": {},
+   "source": [
+    "returns an error because of the small shift of coordinates. We will see in another tutorial how to re-align datasets\n",
+    "and deal with these small problems. It is worth noticing that similar distorsions arise in commercial softwares,...\n",
+    "except that the user is not notified."
+   ]
+  }
+ ],
+ "metadata": {
+  "jupytext": {
+   "cell_metadata_json": true,
+   "encoding": "# -*- coding: utf-8 -*-",
+   "formats": "ipynb,py:percent",
+   "notebook_metadata_filter": "all"
+  },
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.7.9"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

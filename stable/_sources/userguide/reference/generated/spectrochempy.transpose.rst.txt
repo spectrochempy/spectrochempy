@@ -1,0 +1,13 @@
+
+spectrochempy.transpose
+=======================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: transpose
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.transpose.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

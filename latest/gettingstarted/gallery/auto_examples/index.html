@@ -1,0 +1,483 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Example’s gallery &mdash; SpectroChemPy v0.2.5.dev8 0.2.5.dev8 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_override.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery-dataframe.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery-rendered-html.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/scpy.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="PCA analysis example" href="analysis/plot_pca_iris.html" />
+    <link rel="prev" title="Overview" href="../../overview.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/scpy.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.5.dev8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> SpectroChemPy </span>
+        version: latest
+        <span class="fa fa-caret-down"></span>
+      </span>
+        <div class="rst-other-versions">
+            <dl>
+                <dt>Other versions</dt>
+                
+                    
+                
+                    
+                        <dd><a href="https://spectrochempy.github.io/spectrochempy/stable/index.html">STABLE</a></dd>
+                    
+                
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Downloads</dt>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/latest-spectrochempy.pdf">PDF</a></dd>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/latest-spectrochempy-notebooks.zip">Notebooks</a></dd>
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Sources on GitHub</dt>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
+
+            </dl>
+
+        </div>
+    </div>
+
+    
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../whyscpy.html">Why <strong>SpectroChemPy</strong>  ?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#example-of-the-analysis-package-usage">Example of the analysis package usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-of-the-fitting-package-usage">Example of the fitting package usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-to-use-nddataset">How to use NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#plotting-dataset-examples">Plotting dataset examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#processing-dataset-examples">Processing dataset examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#project-management">Project Management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#read-write">Read / Write</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../install/index.html">Installation</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/introduction/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/objects.html">Data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/units/units.html">Units &amp; Quantities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/importexport/importexport.html">Import &amp; Export</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/plotting/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/processing/processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/fitting/fitting.html">Fitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/analysis/analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/databases/databases.html">Databases</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference &amp; Help</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/reference/changelog.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/reference/index.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/reference/faq.html">Frequently asked questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/examples.html">Adding new tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/examples.html#adding-your-examples-to-the-gallery">Adding your examples to the gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/contributing.html">Developer’s Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/citing.html">Citing  <strong>SpectroChemPy</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/seealso.html">See also</a></li>
+</ul>
+
+            
+          
+
+
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SpectroChemPy v0.2.5.dev8</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Example’s gallery</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../../_sources/gettingstarted/gallery/auto_examples/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    
+    
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="example-s-gallery">
+<span id="examples-index"></span><span id="sphx-glr-gettingstarted-gallery-auto-examples"></span><h1>Example’s gallery<a class="headerlink" href="#example-s-gallery" title="Permalink to this headline">¶</a></h1>
+<p>Many examples on the use of the API can be found in this gallery. Notebook and standalone python scripts can be
+downloaded using the link at the bottom of each example.</p>
+<div class="contents local topic" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#example-of-the-analysis-package-usage" id="id19">Example of the analysis package usage</a></p></li>
+<li><p><a class="reference internal" href="#example-of-the-fitting-package-usage" id="id20">Example of the fitting package usage</a></p></li>
+<li><p><a class="reference internal" href="#how-to-use-nddataset" id="id21">How to use NDDataset</a></p></li>
+<li><p><a class="reference internal" href="#plotting-dataset-examples" id="id22">Plotting dataset examples</a></p></li>
+<li><p><a class="reference internal" href="#processing-dataset-examples" id="id23">Processing dataset examples</a></p></li>
+<li><p><a class="reference internal" href="#project-management" id="id24">Project Management</a></p></li>
+<li><p><a class="reference internal" href="#read-write" id="id25">Read / Write</a></p></li>
+</ul>
+</div>
+<div class="sphx-glr-clear"></div><div class="section" id="example-of-the-analysis-package-usage">
+<span id="analysis-examples-index"></span><span id="sphx-glr-gettingstarted-gallery-auto-examples-analysis"></span><h2><a class="toc-backref" href="#id19">Example of the analysis package usage</a><a class="headerlink" href="#example-of-the-analysis-package-usage" title="Permalink to this headline">¶</a></h2>
+<div class="sphx-glr-thumbcontainer" tooltip="PCA analysis example"><div class="figure align-default" id="id1">
+<img alt="PCA analysis example" src="../../../_images/sphx_glr_plot_pca_iris_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="analysis/plot_pca_iris.html#sphx-glr-gettingstarted-gallery-auto-examples-analysis-plot-pca-iris-py"><span class="std std-ref">PCA analysis example</span></a></span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="In this example, we perform the MCR ALS optimization of a dataset corresponding to a HPLC-DAD r..."><div class="figure align-default" id="id2">
+<img alt="MCR-ALS optimization example (original example from Jaumot)" src="../../../_images/sphx_glr_plot_mcrals_chrom1_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="analysis/plot_mcrals_chrom1.html#sphx-glr-gettingstarted-gallery-auto-examples-analysis-plot-mcrals-chrom1-py"><span class="std std-ref">MCR-ALS optimization example (original example from Jaumot)</span></a></span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="NDDataset PCA analysis example"><div class="figure align-default" id="id3">
+<img alt="NDDataset PCA analysis example" src="../../../_images/sphx_glr_plot_pca_spec_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="analysis/plot_pca_spec.html#sphx-glr-gettingstarted-gallery-auto-examples-analysis-plot-pca-spec-py"><span class="std std-ref">NDDataset PCA analysis example</span></a></span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="In this example, we perform the Evolving Factor Analysis"><div class="figure align-default" id="id4">
+<img alt="EFA analysis example" src="../../../_images/sphx_glr_plot_efa_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="analysis/plot_efa.html#sphx-glr-gettingstarted-gallery-auto-examples-analysis-plot-efa-py"><span class="std std-ref">EFA analysis example</span></a></span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="In this example, we perform the 2D IRIS analysis of CO adsorption on a sulfide catalyst."><div class="figure align-default" id="id5">
+<img alt="2D-IRIS analysis example" src="../../../_images/sphx_glr_plot_2D_iris_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="analysis/plot_2D_iris.html#sphx-glr-gettingstarted-gallery-auto-examples-analysis-plot-2d-iris-py"><span class="std std-ref">2D-IRIS analysis example</span></a></span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="In this example, we perform the Evolving Factor Analysis of a TEST dataset (ref. Keller and Mas..."><div class="figure align-default" id="id6">
+<img alt="EFA analysis (Keller and Massart original example)" src="../../../_images/sphx_glr_plot_efa_keller_massart_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="analysis/plot_efa_keller_massart.html#sphx-glr-gettingstarted-gallery-auto-examples-analysis-plot-efa-keller-massart-py"><span class="std std-ref">EFA analysis (Keller and Massart original example)</span></a></span><a class="headerlink" href="#id6" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-clear"></div></div>
+<div class="section" id="example-of-the-fitting-package-usage">
+<span id="fitting-examples-index"></span><span id="sphx-glr-gettingstarted-gallery-auto-examples-fitting"></span><h2><a class="toc-backref" href="#id20">Example of the fitting package usage</a><a class="headerlink" href="#example-of-the-fitting-package-usage" title="Permalink to this headline">¶</a></h2>
+<div class="sphx-glr-thumbcontainer" tooltip="Solve a linear equation using LSTSQ"><div class="figure align-default" id="id7">
+<img alt="Solve a linear equation using LSTSQ" src="../../../_images/sphx_glr_plot_lstsq_single_equation_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="fitting/plot_lstsq_single_equation.html#sphx-glr-gettingstarted-gallery-auto-examples-fitting-plot-lstsq-single-equation-py"><span class="std std-ref">Solve a linear equation using LSTSQ</span></a></span><a class="headerlink" href="#id7" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="Fitting 1D dataset"><div class="figure align-default" id="id8">
+<img alt="Fitting 1D dataset" src="../../../_images/sphx_glr_plot_fit_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="fitting/plot_fit.html#sphx-glr-gettingstarted-gallery-auto-examples-fitting-plot-fit-py"><span class="std std-ref">Fitting 1D dataset</span></a></span><a class="headerlink" href="#id8" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-clear"></div></div>
+<div class="section" id="how-to-use-nddataset">
+<span id="nddataset-examples-index"></span><span id="sphx-glr-gettingstarted-gallery-auto-examples-nddataset"></span><h2><a class="toc-backref" href="#id21">How to use NDDataset</a><a class="headerlink" href="#how-to-use-nddataset" title="Permalink to this headline">¶</a></h2>
+<p>Example of how to create and manipulate NDDataset in SpectroChemPy</p>
+<div class="sphx-glr-thumbcontainer" tooltip="In this example, we perform a baseline correction of a 2D NDDataset interactively, using the mu..."><div class="figure align-default" id="id9">
+<img alt="NDDataset baseline correction" src="../../../_images/sphx_glr_plot_baseline_correction_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="nddataset/plot_baseline_correction.html#sphx-glr-gettingstarted-gallery-auto-examples-nddataset-plot-baseline-correction-py"><span class="std std-ref">NDDataset baseline correction</span></a></span><a class="headerlink" href="#id9" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="NDDataset creation and plotting example"><div class="figure align-default" id="id10">
+<img alt="NDDataset creation and plotting example" src="../../../_images/sphx_glr_plot_create_dataset_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="nddataset/plot_create_dataset.html#sphx-glr-gettingstarted-gallery-auto-examples-nddataset-plot-create-dataset-py"><span class="std std-ref">NDDataset creation and plotting example</span></a></span><a class="headerlink" href="#id10" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-clear"></div></div>
+<div class="section" id="plotting-dataset-examples">
+<span id="plotting-examples-index"></span><span id="sphx-glr-gettingstarted-gallery-auto-examples-plotting"></span><h2><a class="toc-backref" href="#id22">Plotting dataset examples</a><a class="headerlink" href="#plotting-dataset-examples" title="Permalink to this headline">¶</a></h2>
+<p>Example of how to plot datasets in SpectroChemPy</p>
+<div class="sphx-glr-thumbcontainer" tooltip="Introduction to the plotting librairie"><div class="figure align-default" id="id11">
+<img alt="Introduction to the plotting librairie" src="../../../_images/sphx_glr_plot_plotting_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="plotting/plot_plotting.html#sphx-glr-gettingstarted-gallery-auto-examples-plotting-plot-plotting-py"><span class="std std-ref">Introduction to the plotting librairie</span></a></span><a class="headerlink" href="#id11" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-clear"></div></div>
+<div class="section" id="processing-dataset-examples">
+<span id="processing-examples-index"></span><span id="sphx-glr-gettingstarted-gallery-auto-examples-processing"></span><h2><a class="toc-backref" href="#id23">Processing dataset examples</a><a class="headerlink" href="#processing-dataset-examples" title="Permalink to this headline">¶</a></h2>
+<p>Example of how to process NDDataset (or more generally NDPanels in SpectroChemPy)</p>
+<div class="sphx-glr-thumbcontainer" tooltip="In this example, we exponential window multiplication to apodize a NMR signal in the time domai..."><div class="figure align-default" id="id12">
+<img alt="Exponential window multiplication" src="../../../_images/sphx_glr_plot_proc_em_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="processing/plot_proc_em.html#sphx-glr-gettingstarted-gallery-auto-examples-processing-plot-proc-em-py"><span class="std std-ref">Exponential window multiplication</span></a></span><a class="headerlink" href="#id12" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="In this example, we use sine bell or squared sine bell window multiplication to apodize a NMR s..."><div class="figure align-default" id="id13">
+<img alt="Sine bell and squared Sine bell window multiplication" src="../../../_images/sphx_glr_plot_proc_sp_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="processing/plot_proc_sp.html#sphx-glr-gettingstarted-gallery-auto-examples-processing-plot-proc-sp-py"><span class="std std-ref">Sine bell and squared Sine bell window multiplication</span></a></span><a class="headerlink" href="#id13" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-clear"></div></div>
+<div class="section" id="project-management">
+<span id="project-examples-index"></span><span id="sphx-glr-gettingstarted-gallery-auto-examples-project"></span><h2><a class="toc-backref" href="#id24">Project Management</a><a class="headerlink" href="#project-management" title="Permalink to this headline">¶</a></h2>
+<p>Example of how to create and manipulate Projects in SpectroChemPy</p>
+<div class="sphx-glr-thumbcontainer" tooltip="In this example, we create a Project from scratch"><div class="figure align-default" id="id14">
+<img alt="Project creation" src="../../../_images/sphx_glr_plot_project_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="project/plot_project.html#sphx-glr-gettingstarted-gallery-auto-examples-project-plot-project-py"><span class="std std-ref">Project creation</span></a></span><a class="headerlink" href="#id14" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-clear"></div></div>
+<div class="section" id="read-write">
+<span id="read-examples-index"></span><span id="sphx-glr-gettingstarted-gallery-auto-examples-read"></span><h2><a class="toc-backref" href="#id25">Read / Write</a><a class="headerlink" href="#read-write" title="Permalink to this headline">¶</a></h2>
+<p>Example of import or export function in SpectroChemPy</p>
+<div class="sphx-glr-thumbcontainer" tooltip="Here we load an experimental Bruker OPUS files and plot it."><div class="figure align-default" id="id15">
+<img alt="Loading Bruker OPUS files" src="../../../_images/sphx_glr_plot_read_IR_from_opus_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="read/plot_read_IR_from_opus.html#sphx-glr-gettingstarted-gallery-auto-examples-read-plot-read-ir-from-opus-py"><span class="std std-ref">Loading Bruker OPUS files</span></a></span><a class="headerlink" href="#id15" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="Here we load an experimental SPG file (OMNIC) and plot it."><div class="figure align-default" id="id16">
+<img alt="Loading an IR (omnic SPG) experimental file" src="../../../_images/sphx_glr_plot_read_IR_from_omnic_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="read/plot_read_IR_from_omnic.html#sphx-glr-gettingstarted-gallery-auto-examples-read-plot-read-ir-from-omnic-py"><span class="std std-ref">Loading an IR (omnic SPG) experimental file</span></a></span><a class="headerlink" href="#id16" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="In this example, we load a NMR dataset (in the Bruker format) and plot it."><div class="figure align-default" id="id17">
+<img alt="Loading of experimental 1D NMR data" src="../../../_images/sphx_glr_plot_read_nmr_from_bruker_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="read/plot_read_nmr_from_bruker.html#sphx-glr-gettingstarted-gallery-auto-examples-read-plot-read-nmr-from-bruker-py"><span class="std std-ref">Loading of experimental 1D NMR data</span></a></span><a class="headerlink" href="#id17" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="Here we load an experimental SPG file (OMNIC) and plot it."><div class="figure align-default" id="id18">
+<img alt="Loading RAMAN experimental file" src="../../../_images/sphx_glr_plot_read_raman_from_labspec_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="read/plot_read_raman_from_labspec.html#sphx-glr-gettingstarted-gallery-auto-examples-read-plot-read-raman-from-labspec-py"><span class="std std-ref">Loading RAMAN experimental file</span></a></span><a class="headerlink" href="#id18" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-clear"></div><p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="analysis/plot_pca_iris.html" class="btn btn-neutral float-right" title="PCA analysis example" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../../overview.html" class="btn btn-neutral float-left" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2014-2021 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">
+        Last updated on Jan 29, 2021.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

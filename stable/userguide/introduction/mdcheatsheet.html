@@ -1,0 +1,728 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Markdown Cheat Sheet &mdash; SpectroChemPy v0.2.5 0.2.5 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_override.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery-dataframe.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery-rendered-html.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/scpy.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html">
+          
+
+          
+            
+            <img src="../../_static/scpy.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> SpectroChemPy </span>
+        version: stable
+        <span class="fa fa-caret-down"></span>
+      </span>
+        <div class="rst-other-versions">
+            <dl>
+                <dt>Other versions</dt>
+                
+                    
+                        <dd><a href="https://spectrochempy.github.io/spectrochempy/latest/index.html"">LATEST</a></dd>
+                    
+                
+                    
+                
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Downloads</dt>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/stable-spectrochempy.pdf">PDF</a></dd>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/stable-spectrochempy-notebooks.zip">Notebooks</a></dd>
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Sources on GitHub</dt>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
+
+            </dl>
+
+        </div>
+    </div>
+
+    
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Home</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/whyscpy.html">Why <strong>SpectroChemPy</strong>  ?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/gallery/auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/install/index.html">Installation</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../objects.html">Data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../units/units.html">Units &amp; Quantities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../importexport/importexport.html">Import &amp; Export</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plotting/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../processing/processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fitting/fitting.html">Fitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analysis/analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../databases/databases.html">Databases</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference &amp; Help</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/changelog.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/faq.html">Frequently asked questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/examples.html">Adding new tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/examples.html#adding-your-examples-to-the-gallery">Adding your examples to the gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/contributing.html">Developer’s Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/citing.html">Citing  <strong>SpectroChemPy</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/seealso.html">See also</a></li>
+</ul>
+
+            
+          
+
+
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SpectroChemPy v0.2.5</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Markdown Cheat Sheet</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../_sources/userguide/introduction/mdcheatsheet.ipynb.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    
+    
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt a.copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="Markdown-Cheat-Sheet">
+<h1>Markdown Cheat Sheet<a class="headerlink" href="#Markdown-Cheat-Sheet" title="Permalink to this headline">¶</a></h1>
+<p>Copied and adapted from <a class="reference external" href="https://www.ibm.com/support/knowledgecenter/en/SSGNPV_2.0.0/dsx/markd-jupyter.html">this guide</a>!</p>
+<p>This Markdown cheat sheet provides a quick overview of all the Markdown syntax elements to format Markdown cells in Jupyter notebooks.</p>
+<div class="section" id="Headings">
+<h2>Headings<a class="headerlink" href="#Headings" title="Permalink to this headline">¶</a></h2>
+<p>Use the number sign (#) followed by a blank space for notebook titles and section headings, e.g.:</p>
+<div class="highlight-md notranslate"><div class="highlight"><pre><span></span><span class="gh"># for titles</span>
+<span class="gu">## for major headings</span>
+<span class="gu">### for subheadings</span>
+<span class="gu">#### for 4th level subheading</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="Emphasis">
+<h2>Emphasis<a class="headerlink" href="#Emphasis" title="Permalink to this headline">¶</a></h2>
+<p>Use the surroundig _ or * to emphasize text, e.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Bold text: `__string___ or **string**`
+Italic text:  `_string_ or *string`
+</pre></div>
+</div>
+</div>
+<div class="section" id="Mathematical-symbols">
+<h2>Mathematical symbols<a class="headerlink" href="#Mathematical-symbols" title="Permalink to this headline">¶</a></h2>
+<p>Surround mathematical symbols with a dollar sign ($), for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ \lambda = \sqrt{2*\pi} $
+</pre></div>
+</div>
+<p>gives $ <span class="math">\lambda `= :nbsphinx-math:</span>sqrt{2*pi}` $</p>
+</div>
+<div class="section" id="Monospace-font">
+<h2>Monospace font<a class="headerlink" href="#Monospace-font" title="Permalink to this headline">¶</a></h2>
+<p>Surround text with a grave accent (`) also called a back single quotation mark, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`string`
+</pre></div>
+</div>
+<p>You can use the monospace font for <code class="docutils literal notranslate"><span class="pre">file</span> <span class="pre">paths</span></code>, <code class="docutils literal notranslate"><span class="pre">file</span> <span class="pre">names</span></code>,<code class="docutils literal notranslate"><span class="pre">message</span> <span class="pre">text</span></code>…</p>
+</div>
+<div class="section" id="Line-breaks">
+<h2>Line breaks<a class="headerlink" href="#Line-breaks" title="Permalink to this headline">¶</a></h2>
+<p>Sometimes markdown doesn’t make line breaks when you want them. To force a linebreak, use the following code: <code class="docutils literal notranslate"><span class="pre">&lt;br&gt;</span></code></p>
+</div>
+<div class="section" id="Indenting">
+<h2>Indenting<a class="headerlink" href="#Indenting" title="Permalink to this headline">¶</a></h2>
+<p>Use the greater than sign (&gt;) followed by a space, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">Text</span> <span class="n">that</span> <span class="n">will</span> <span class="n">be</span> <span class="n">indented</span> <span class="n">when</span> <span class="n">the</span> <span class="n">Markdown</span> <span class="ow">is</span> <span class="n">rendered</span><span class="o">.</span>
+<span class="n">Any</span> <span class="n">subsequent</span> <span class="n">text</span> <span class="ow">is</span> <span class="n">indented</span> <span class="n">until</span> <span class="n">the</span> <span class="nb">next</span> <span class="n">carriage</span> <span class="k">return</span><span class="o">.</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="Bullets">
+<h2>Bullets<a class="headerlink" href="#Bullets" title="Permalink to this headline">¶</a></h2>
+<p>To create a circular bullet point, use one of the following methods. Each bullet point must be on its own line.</p>
+<ul class="simple">
+<li><p>A hyphen (-) followed by one or two spaces, for example:</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">Bulleted</span> <span class="n">item</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>A space, a hyphen (-) and a space, for example:</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">Bulleted</span> <span class="n">item</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>An asterisk (*) followed by one or two spaces, for example:</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">*</span> <span class="n">Bulleted</span> <span class="n">item</span>
+</pre></div>
+</div>
+<p>To create a sub bullet, press Tab before entering the bullet point using one of the methods described above. For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">Main</span> <span class="n">bullet</span> <span class="n">point</span>
+     <span class="o">-</span> <span class="n">Sub</span> <span class="n">bullet</span> <span class="n">point</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="Numbered-lists">
+<h2>Numbered lists<a class="headerlink" href="#Numbered-lists" title="Permalink to this headline">¶</a></h2>
+<p>To create a numbered list, enter 1. followed by a space, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">1.</span> <span class="n">Numbered</span> <span class="n">item</span>
+<span class="mf">1.</span> <span class="n">Numbered</span> <span class="n">item</span>
+</pre></div>
+</div>
+<p>For simplicity, you use 1. before each entry. The list will be numbered correctly when you run the cell.</p>
+<p>To create a substep, press Tab before entering the numbered item, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">1.</span> <span class="n">Numbered</span> <span class="n">item</span>
+     <span class="mf">1.</span> <span class="n">Substep</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="Colored-note-boxes">
+<h2>Colored note boxes<a class="headerlink" href="#Colored-note-boxes" title="Permalink to this headline">¶</a></h2>
+<p>Use one of the following</p>
+<div><p>tags to display text in a colored box.</p>
+<p><strong>Restriction</strong>: Not all Markdown code displays correctly within</p>
+<div><p>tags, so review your colored boxes carefully. For example, to make a word bold, surround it with the HTML code for bold (text instead of the Markdown code.</p>
+<p>The color of the box is determined by the alert type that you specify:</p>
+<ul class="simple">
+<li><p>Blue boxes (alert-info)</p></li>
+<li><p>Yellow boxes (alert-warning)</p></li>
+<li><p>Green boxes (alert-success)</p></li>
+<li><p>Red boxes (alert-danger)</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&lt;div class=&quot;alert alert-block alert-info&quot;&gt;
+&lt;b&gt;Tip:&lt;/b&gt;  For example use blue boxes to highlight a tip.
+If it’s a note, you don’t have to include the word “Note”.
+&lt;/div&gt;
+</pre></div>
+</div>
+<div class="alert alert-block alert-info"><p>Tip: For example use blue boxes to highlight a tip. If it’s a note, you don’t have to include the word “Note”.</p>
+</div></div>
+<div class="section" id="Graphics">
+<h2>Graphics<a class="headerlink" href="#Graphics" title="Permalink to this headline">¶</a></h2>
+<p>You can attach image files directly to a notebook in Markdown cells by dragging and dropping it into the cell. To add images to other types of cells, you must use a graphic that is hosted on the web and use the following code to insert the graphic:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">img</span> <span class="n">src</span><span class="o">=</span><span class="s2">&quot;url.gif&quot;</span> <span class="n">alt</span><span class="o">=</span><span class="s2">&quot;Alt text that describes the graphic&quot;</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Title text&quot;</span> <span class="o">/&gt;</span>
+</pre></div>
+</div>
+<p><img alt="Alt text that describes the graphic" class="no-scaled-link" src="../../_images/scpy.png" style="width: 100px;" /></p>
+<p><strong>Restriction</strong> You cannot add captions to graphics.</p>
+</div>
+<div class="section" id="Geometric-shapes">
+<h2>Geometric shapes<a class="headerlink" href="#Geometric-shapes" title="Permalink to this headline">¶</a></h2>
+<p>Use &amp;# followed by the decimal or hex reference number for the shape, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&amp;</span><span class="c1">#reference_number;</span>
+</pre></div>
+</div>
+<p>e.g., <code class="docutils literal notranslate"><span class="pre">&amp;#9664;</span></code>: ◀</p>
+<p>For a list of reference numbers, see <a class="reference external" href="https://en.wikipedia.org/wiki/Geometric_Shapes">UTF-8 Geometric shapes</a>.</p>
+</div>
+<div class="section" id="Horizontal-lines">
+<h2>Horizontal lines<a class="headerlink" href="#Horizontal-lines" title="Permalink to this headline">¶</a></h2>
+<p>On a new line, enter three asterisks: <code class="docutils literal notranslate"><span class="pre">***</span></code> ***</p>
+</div>
+<div class="section" id="Internal-links">
+<h2>Internal links<a class="headerlink" href="#Internal-links" title="Permalink to this headline">¶</a></h2>
+<p>To link to a section within your notebook, use the following code:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Section</span> <span class="n">title</span><span class="p">](</span><span class="c1">#section-title)</span>
+</pre></div>
+</div>
+<p>For the text inside the parentheses, replace any spaces and special characters with a hyphen. For example, if your section is called <code class="docutils literal notranslate"><span class="pre">processing_functions</span></code>, you’d enter:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">processing_functions</span><span class="p">](</span><span class="c1">#processing_functions)</span>
+</pre></div>
+</div>
+<p><a class="reference external" href="#processing_functions">processing_functions</a></p>
+<p>Alternatively, you can add an ID above the section:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">a</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;section_ID&quot;</span><span class="o">&gt;&lt;/</span><span class="n">a</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p><strong>Important</strong> Each ID in the notebook must be unique.</p>
+<p>To link to a section that has an ID, use the following code: <a class="reference external" href="#section_ID">Section title</a></p>
+</div>
+<div class="section" id="External-links">
+<h2>External links<a class="headerlink" href="#External-links" title="Permalink to this headline">¶</a></h2>
+<p>To link to an external site, use the following code: <a class="reference external" href="http://url">link text</a> Surround the link with two underscores (_) on each side</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2014-2021 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">
+        Last updated on Jan 29, 2021.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

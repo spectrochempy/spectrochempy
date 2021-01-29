@@ -1,0 +1,13 @@
+
+spectrochempy.plot\_scatter
+===========================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: plot_scatter
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.plot_scatter.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

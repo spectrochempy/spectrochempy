@@ -1,0 +1,274 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "fewer-warrior",
+   "metadata": {},
+   "source": [
+    "# Overview"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cardiac-pitch",
+   "metadata": {},
+   "source": [
+    "The purpose of this page is to give you some quick examples of what can be done with SpectroChemPy.\n",
+    "\n",
+    "See the [gallery of examples](generated/auto_examples/index.html) and consult the [user's guide](\n",
+    "../user/index.html) for more information on using SpectroChemPy\n",
+    "\n",
+    "Before using the package, we must load the **API\n",
+    "(Application Programming Interface)**\n",
+    "\n",
+    "The simplest way is to import all objects and methods at once into your\n",
+    "python namespace. The loading step may take several seconds due to the\n",
+    "large number of methods to be imported into the API namespace."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "dependent-clinic",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from spectrochempy import *"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "advisory-albania",
+   "metadata": {},
+   "source": [
+    "## NDDataset, the main object"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "acting-mercy",
+   "metadata": {},
+   "source": [
+    "NDDataset is a python object, actually a container, which can represent most of your multidimensional spectroscopic\n",
+    "data.\n",
+    "\n",
+    "For instance, in the following we read data from a series of FTIR experiments, provided  by the OMNIC software:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "critical-heater",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "datadir = pathclean(preferences.datadir)\n",
+    "ds = NDDataset.read_omnic(datadir / 'irdata' / 'nh4y-activation.spg')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "published-brother",
+   "metadata": {},
+   "source": [
+    "### Display dataset information"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "isolated-puzzle",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ds"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "minus-debut",
+   "metadata": {},
+   "source": [
+    "### Plotting a dataset"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "conventional-bundle",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "_ = ds.plot(method='stack', colormap='jet', colorbar=True)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "greater-stream",
+   "metadata": {},
+   "source": [
+    "### Slicing a dataset"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "random-shepherd",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "region = ds[:, 4000.0:2000.0]\n",
+    "_ = region.plot(method='map', colormap='magma')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "killing-female",
+   "metadata": {},
+   "source": [
+    "### Maths on datasets"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "continuous-imaging",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "region.y -= region.y[0]  # make y coordinate reative to the first point\n",
+    "region.y.title = 'time of dehydratatioin'\n",
+    "region -= region[0]  # suppress the last spectra to all\n",
+    "_ = region.plot(colorbar=True)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "capital-indication",
+   "metadata": {},
+   "source": [
+    "### Processing a dataset"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "chicken-albuquerque",
+   "metadata": {},
+   "source": [
+    "We just give here few examples"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "specific-obligation",
+   "metadata": {},
+   "source": [
+    "#### Smoothing"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "animal-california",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "smoothed = region.smooth(window_length=51, window='hanning')\n",
+    "_ = smoothed.plot(colormap='magma')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "opposed-assessment",
+   "metadata": {},
+   "source": [
+    "#### Baseline correction"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "automated-teach",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "region = ds[:, 4000.0:2000.0]\n",
+    "smoothed = region.smooth(window_length=51, window='hanning')\n",
+    "blc = BaselineCorrection(smoothed, method='multivariate', interpolation='pchip', npc=5)\n",
+    "basc = blc.compute([2000., 2300.], [3800., 3900.])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "operating-martin",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "_ = basc.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "atomic-christianity",
+   "metadata": {},
+   "source": [
+    "### Analyis\n",
+    "\n",
+    "#### IRIS processing"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "driving-lightweight",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ds = NDDataset.read_omnic(datadir / 'irdata' / 'CO@Mo_Al2O3.SPG')[:, 2250.:1950.]\n",
+    "pressure = [0.00300, 0.00400, 0.00900, 0.01400, 0.02100, 0.02600, 0.03600, 0.05100, 0.09300, 0.15000, 0.20300, 0.30000,\n",
+    "            0.40400, 0.50300, 0.60200, 0.70200, 0.80100, 0.90500, 1.00400]\n",
+    "ds.y = Coord(pressure, title='Pressure', units='torr')\n",
+    "_ = ds.plot(colormap='magma')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "passive-canon",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "param = {'epsRange': [-8, -1, 50], 'lambdaRange': [-10, 1, 12], 'kernel': 'langmuir'}\n",
+    "\n",
+    "iris = IRIS(ds, param, verbose=False)\n",
+    "_ = iris.plotdistribution(-7, colormap='magma')"
+   ]
+  }
+ ],
+ "metadata": {
+  "jupytext": {
+   "formats": "ipynb,py:percent",
+   "notebook_metadata_filter": "all"
+  },
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.9.1"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

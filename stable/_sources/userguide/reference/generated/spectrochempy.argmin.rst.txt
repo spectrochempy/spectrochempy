@@ -1,0 +1,13 @@
+
+spectrochempy.argmin
+====================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: argmin
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.argmin.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

@@ -1,0 +1,13 @@
+
+spectrochempy.plot
+==================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: plot
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.plot.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

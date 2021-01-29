@@ -1,0 +1,13 @@
+
+spectrochempy.simps
+===================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: simps
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.simps.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

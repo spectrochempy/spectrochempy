@@ -1,0 +1,13 @@
+
+spectrochempy.random
+====================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: random
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.random.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

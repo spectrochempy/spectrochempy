@@ -1,0 +1,13 @@
+
+spectrochempy.cumsum
+====================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: cumsum
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.cumsum.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

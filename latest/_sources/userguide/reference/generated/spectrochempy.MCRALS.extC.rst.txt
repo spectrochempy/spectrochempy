@@ -1,0 +1,6 @@
+spectrochempy.MCRALS.extC
+=========================
+
+.. currentmodule:: spectrochempy
+
+.. autoproperty:: MCRALS.extC

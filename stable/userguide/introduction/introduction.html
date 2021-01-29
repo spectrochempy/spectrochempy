@@ -1,0 +1,1135 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Introduction &mdash; SpectroChemPy v0.2.5 0.2.5 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_override.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery-dataframe.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery-rendered-html.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/scpy.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Starting Jupyter lab" href="interface.html" />
+    <link rel="prev" title="Install additional libraries" href="../../gettingstarted/install/install_adds.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html">
+          
+
+          
+            
+            <img src="../../_static/scpy.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> SpectroChemPy </span>
+        version: stable
+        <span class="fa fa-caret-down"></span>
+      </span>
+        <div class="rst-other-versions">
+            <dl>
+                <dt>Other versions</dt>
+                
+                    
+                        <dd><a href="https://spectrochempy.github.io/spectrochempy/latest/index.html"">LATEST</a></dd>
+                    
+                
+                    
+                
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Downloads</dt>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/stable-spectrochempy.pdf">PDF</a></dd>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/stable-spectrochempy-notebooks.zip">Notebooks</a></dd>
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Sources on GitHub</dt>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
+
+            </dl>
+
+        </div>
+    </div>
+
+    
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Home</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/whyscpy.html">Why <strong>SpectroChemPy</strong>  ?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/gallery/auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/install/index.html">Installation</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#How-to-get-started">How to get started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Loading-the-API">Loading the API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#API-Configuration">API Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Units">Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#NDDataset,-the-main-object">NDDataset, the main object</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../objects.html">Data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../units/units.html">Units &amp; Quantities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../importexport/importexport.html">Import &amp; Export</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plotting/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../processing/processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fitting/fitting.html">Fitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analysis/analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../databases/databases.html">Databases</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference &amp; Help</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/changelog.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/faq.html">Frequently asked questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/examples.html">Adding new tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/examples.html#adding-your-examples-to-the-gallery">Adding your examples to the gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/contributing.html">Developer’s Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/citing.html">Citing  <strong>SpectroChemPy</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/seealso.html">See also</a></li>
+</ul>
+
+            
+          
+
+
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SpectroChemPy v0.2.5</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Introduction</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../_sources/userguide/introduction/introduction.ipynb.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    
+    
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt a.copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="Introduction">
+<h1>Introduction<a class="headerlink" href="#Introduction" title="Permalink to this headline">¶</a></h1>
+<p>The <strong>SpectroChemPy</strong> project was developed to provide advanced tools for processing and analyzing spectroscopic data, initially for internal purposes in the <a class="reference external" href="https://www.lcs.ensicaen.fr">LCS (https://www.lcs.ensicaen.fr)</a>.</p>
+<p><strong>SpectroChemPy</strong> is essentially a library written in python language and which proposes objects (<code class="docutils literal notranslate"><span class="pre">NDDataset</span></code>, <em>NDPanel(not yet available)</em> and <code class="docutils literal notranslate"><span class="pre">Project</span></code>) to contain data, equipped with methods to analyze, transform or display this data in a simple way by the user.</p>
+<p>The processed data are mainly spectroscopic data from techniques such as IR, Raman or NMR, but they are not limited to this type of application, as any type of numerical data arranged in tabular form can generally serve as the main input.</p>
+<div class="section" id="How-to-get-started">
+<h2>How to get started<a class="headerlink" href="#How-to-get-started" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title fa fa-exclamation-circle">Note</p>
+<p>We assume that the SpectroChemPy package has been correctly installed. if is not the case, please go to <a class="reference internal" href="../../gettingstarted/install/index.html"><span class="doc">SpectroChemPy installation procedure</span></a>.</p>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="interface.html">Starting Jupyter lab</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="interface.html#Create-a-new-Jupyter-notebook">Create a new Jupyter notebook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interface.html#Markdown-cheat-sheet">Markdown cheat sheet</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="interface.html#Using-the-application-in-a-web-browser">Using the application in a web browser</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="Loading-the-API">
+<h2>Loading the API<a class="headerlink" href="#Loading-the-API" title="Permalink to this headline">¶</a></h2>
+<p>Before using SpectroChemPy, we need to load the <strong>API (Application Programming Interface)</strong>: it exposes many objects and functions.</p>
+<p>To load the API, you must import it using one of the following syntax.</p>
+<p>In the first syntax we load the library into a namespace called <code class="docutils literal notranslate"><span class="pre">scp</span></code> (you can choose whatever you want - except something already in use):</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">spectrochempy</span> <span class="k">as</span> <span class="nn">scp</span>  <span class="c1"># SYNTAX 1</span>
+<span class="n">nd</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">NDDataset</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<table><tr><td>
+
+<img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAAlw
+SFlzAAAJOgAACToB8GSSSgAAAetpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6
+bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDUuNC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8x
+OTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAg
+eG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIgogICAgICAgICAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMu
+YWRvYmUuY29tL3RpZmYvMS4wLyI+CiAgICAgICAgIDx4bXA6Q3JlYXRvclRvb2w+bWF0cGxvdGxpYiB2ZXJzaW9uIDIuMS4wLCBo
+dHRwOi8vbWF0cGxvdGxpYi5vcmcvPC94bXA6Q3JlYXRvclRvb2w+CiAgICAgICAgIDx0aWZmOk9yaWVudGF0aW9uPjE8L3RpZmY6
+T3JpZW50YXRpb24+CiAgICAgIDwvcmRmOkRlc2NyaXB0aW9uPgogICA8L3JkZjpSREY+CjwveDp4bXBtZXRhPgqNQaNYAAAGiUlE
+QVRIDY1We4xU1Rn/3XPuYx47u8w+hnU38hTcuoUEt/6D2y4RB0ME1BoEd9taJaKh9CFiN7YGp7appUAMNmktMZFoJTYVLVQ0smsy
+26CN0SU1QgsuFAaW3WVmx33N677O6XfuyoIxTXqSO/fec+75fd93vt/3/UbDV0aKSZmCpkFMLz3T9utuu2N+o98aDSMBKVAo89z5
+y+zEz3ZafcCOfvWdlGCalqKn1Bf71CygTd+mf1esSOnpdMpTb+vWpTZuWVfe3jLPa5tzHYNm0T5N0gpdkkHaDBeGBU6d1/t/fyS8
++/CbqdfUvmsx1PuMgc2bNxv79u1zgd31r+7JH1jbIZKxWRXAcYUQ8IWvBfBXNjEuJWPgMA02NR7C3/pYT9fjdZ3A9tGrWF8YSJHn
+qcDz3y7q2T967PZv+gnYJdd1mEZ+62zGDQV/dQgKhmLzDNOXCEWM3j6eTT5Y3w78dOBKJLR1PQf+4ivPj76UPZnssBN+wbM9Aet/
+AV81Mf1EEULXYfOobvX2WWQk0aoioXwwSmirOlioY0mu8BIouzYl7P8GV3vpqCCEZvlFz769w08oLDWvyKIyL1asSm28d6WfzA97
+ztvvV1kexUMsmhlkULEkuGYmFYC6AvfUrITnwUKl5K79lkjeSSRRTCTbQPd95e1WzMbZSya74XoXAxctCllCnbECMOjZNGRwvzIX
+nD85wbkMmKK+U045Dtdi8Qp+SAxU2GTg2bYlC9224pgvmSb54vkVTBQYyhUt2KjAMyMmPjwRQW5Mh2WKwJhlBh6jVGagFM84wZnQ
+4bpC0Rt4pk1PbSt0NDcxDA5xryosDHWgtbM0DGZDWLSoiDMDYeQnGVrmOThxLozB0RAaahzkJzjKNqcIQBymJFMkOlN8Dqjpg0XY
+Tx5xO/QbmmUrqIjGJznq47TqTaClKYfjp+PInLMwnOdYvtQBZ2XcunQY+VwIo4U4muoFEjVEFE6lQyEUKzHYfgQG9ylCyngU+Cxj
+tOqxCDGHcCsOMCs6iQul5ZiStdATYxjMZXDLTUVwLY8Jey4uOh2IxjwsrP8UXJYxUrkZrghBahzV5iXU6gNkq0Z1EzIsUBUSCV2n
+EOHo0LVxHCpuxabJJdhi5PFnvw5vLXwXIfNZvD/+JNo/X40NegE54sUaazl+UL8XD1x+FB9Ijjt4EQfdGN6J/x131LwIV9ap/AYs
+0x1fz1ZKFbh6A7qKy/By9Dg6G36Ep91vUJJ15Cqr0Z67E8/HzmBrw1OwxWyM+3Mo6BAuSB17oyfx0Oyl2DN0Hqs/70Cx6hBCvESF
+UY1ShWXZZEE7OTAYxZzaPH4TuoiusZvRnunFy2NbiHYuBp2vB66srX4vMEjpRKPxKXmnoQ4+Mn4DPiv8CYcrs3GfNUXJLtM+alSO
+hrMj/KT+wBNW3+E/2liywNO3iSflbaFva/+stGDTxE0E9Sjaox8HBhxpEamzMGSEaFKg+mjEddzDh1MxTDq3YV1kGBsjfwW3S9Cq
+anjmko+ndlb1UR3s6K8JlfphNWq9Ew/7c61T2BB/EbcaNkb8GBaE0tANH7/M34PLdhJDzjIcL9xPbdTG6zyM72Y+wXPHmvB489No
+fm0b5HnbQ9Rgp/7DSSd29AeVvPeNyK6JcYl/yQVi5dBjuGvoV/gaJe47s45QUxrDmcYX0MBsdF7egvXZ7+O0vZA4X8QmOQWjlSK7
+RDz5wIM30gp9UbWcGjXxhzdDu1SiNSpx6kcQB57rPnr/3dlkZarWLnlRq5oPET1dOCIOk4wALib9eeS5iygfhkd09H0DWphB/+gs
++PcOAS+ssrFmmXXgVfR0de9cpbAJfH3Q1jofW9DZk56dDcVsq9YcsoUMEd1qyLoT3BX1YiyHMJuk97hyjqIoE91t+NcTLeN0ZrfM
+oXatZbu6G0h4VG+ibqq0IJVK6cAjo6serG3vSUezCMct0yQeSOFJSUImqb2qbknUpDqlZxE0QZ+ZUpSlZx79h4Nda6zef9dlk121
+JDjbR5XggPRZlRnS6bRQRtLpn4++cuie/Yvn2svmNxuLw9WCcYIl4fEoTEGiSTUqJdfgU+8ROqf1iMkLzS389YtNPXc/PH8l8ONB
+JZkHD+4JtD04HmVEDWWErmBhzV2/2LB1bemJG6krzv2S6NOHUgtEP0Oif5pE/3fHoruP7N8RiP61GArzSwbUhJJQpXJKiKbfr/3b
+IhKq76sKPUdF9NW/LSqfSn6vjv8C45H/6FSgvZQAAAAASUVORK5CYII='
+     style='height:25px; border-radius:12px; display:inline-block; float:left; vertical-align:middle'></img>
+
+</td><td>
+
+&nbsp;&nbsp;<span style='font-size:12px'>SpectroChemPy's API - v.0.2.5<br/>© Copyright 2014-2021 - A.Travert & C.Fernandez @ LCS</span>
+
+</td></tr></table>
+</div></div>
+</div>
+<p>or in the second syntax, with a wild <code class="docutils literal notranslate"><span class="pre">*</span></code> import.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">spectrochempy</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="n">nd</span> <span class="o">=</span> <span class="n">NDDataset</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>With the second syntax, as often in python, the access to objects/functions can be greatly simplified. For example, we can use “NDDataset” without a prefix instead of <code class="docutils literal notranslate"><span class="pre">scp.NDDataset</span></code> which is the first syntax) but there is always a risk of overwriting some variables or functions already present in the namespace. Therefore, the first syntax is generally highly recommended.</p>
+<p>Alternatively, you can also load only the onbjects and function required by your application:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">spectrochempy</span> <span class="kn">import</span> <span class="n">NDDataset</span>
+
+<span class="n">nd</span> <span class="o">=</span> <span class="n">NDDataset</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>If something goes wrong with during a cell execution, a <code class="docutils literal notranslate"><span class="pre">traceback</span></code> is displayed.</p>
+<p>For instance, the object or method <code class="docutils literal notranslate"><span class="pre">toto</span></code> does not exist in the API, so an error (<strong>ImportError</strong>) is generated when trying to import this from the API.</p>
+<p>Here we catch the error with a conventional <code class="docutils literal notranslate"><span class="pre">try-except</span></code> structure</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">spectrochempy</span> <span class="kn">import</span> <span class="n">toto</span>
+<span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="n">scp</span><span class="o">.</span><span class="n">error_</span><span class="p">(</span><span class="s2">&quot;OOPS, THAT&#39;S AN IMPORT ERROR! : </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ ERROR | OOPS, THAT&#39;S AN IMPORT ERROR! : cannot import name &#39;toto&#39; from &#39;spectrochempy&#39; (/home/travis/miniconda/envs/scpy3.7/lib/python3.7/site-packages/spectrochempy/__init__.py)
+</pre></div></div>
+</div>
+<p>The error will stop the execution if not catched.</p>
+<p>This is a basic behavior of python : on way to avoid. stoppping the execution without displaying a message is :</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">spectrochempy</span> <span class="kn">import</span> <span class="n">toto</span>  <span class="c1"># noqa: F811, F401</span>
+<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="API-Configuration">
+<h2>API Configuration<a class="headerlink" href="#API-Configuration" title="Permalink to this headline">¶</a></h2>
+<p>Many options of the API can be set up</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">scp</span><span class="o">.</span><span class="n">set_loglevel</span><span class="p">(</span><span class="n">scp</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+changed default log_level to INFO
+</pre></div></div>
+</div>
+<p>In the above cell, we have set the <strong>log</strong> level to display <code class="docutils literal notranslate"><span class="pre">info</span></code> messages, such as this one:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">scp</span><span class="o">.</span><span class="n">info_</span><span class="p">(</span><span class="s1">&#39;this is an info message!&#39;</span><span class="p">)</span>
+<span class="n">scp</span><span class="o">.</span><span class="n">debug_</span><span class="p">(</span><span class="s1">&#39;this is a debug message!&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+this is an info message!
+</pre></div></div>
+</div>
+<p>Only the info message is displayed, as expected.</p>
+<p>If we change it to <code class="docutils literal notranslate"><span class="pre">DEBUG</span></code>, we should get the two messages</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">scp</span><span class="o">.</span><span class="n">set_loglevel</span><span class="p">(</span><span class="n">scp</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+<span class="n">scp</span><span class="o">.</span><span class="n">info_</span><span class="p">(</span><span class="s1">&#39;this is an info message!&#39;</span><span class="p">)</span>
+<span class="n">scp</span><span class="o">.</span><span class="n">debug_</span><span class="p">(</span><span class="s1">&#39;this is a debug message!&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+[application.py-_log_level_changed INFO] changed default log_level to DEBUG
+[__init__.py-info_ INFO] this is an info message!
+[__init__.py-debug_ DEBUG] this is a debug message!
+</pre></div></div>
+</div>
+<p>Let’s now come back to a standard level of message for the rest of the Tutorial.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">scp</span><span class="o">.</span><span class="n">set_loglevel</span><span class="p">(</span><span class="n">scp</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
+
+<span class="n">scp</span><span class="o">.</span><span class="n">info_</span><span class="p">(</span><span class="s1">&#39;this is an info message!&#39;</span><span class="p">)</span>
+<span class="n">scp</span><span class="o">.</span><span class="n">debug_</span><span class="p">(</span><span class="s1">&#39;this is a debug message!&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Many other configuration items will be further described when necessary in the other chapters.</p>
+</div>
+<div class="section" id="Units">
+<h2>Units<a class="headerlink" href="#Units" title="Permalink to this headline">¶</a></h2>
+<p>The objets <strong>ur</strong>, <strong>Quantity</strong> allows the manipulation of data with units, thanks to pint. (see <a class="reference external" href="../units/index.ipynb">Units and Quantities</a>)</p>
+<ul class="simple">
+<li><p><strong>ur</strong>: the unit registry</p></li>
+<li><p><strong>Quantity</strong>: a scalar or an array with some units</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">spectrochempy</span> <span class="kn">import</span> <span class="n">ur</span>   <span class="c1"># to simplify further writting</span>
+<span class="n">ur</span><span class="o">.</span><span class="n">cm</span> <span class="o">/</span> <span class="n">ur</span><span class="o">.</span><span class="n">s</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+\[centimeter.second<sup>-1</sup>\]</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">x</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">Quantity</span><span class="p">(</span><span class="mf">10.</span><span class="p">,</span> <span class="n">ur</span><span class="o">.</span><span class="n">cm</span> <span class="o">/</span> <span class="n">ur</span><span class="o">.</span><span class="n">s</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">*</span> <span class="mf">2.</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+20.0 cm.s<sup>-1</sup></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="n">xa</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">Quantity</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span> <span class="s1">&#39;km&#39;</span><span class="p">)</span>
+<span class="n">xa</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mf">2.5</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+5.0 km</div>
+</div>
+</div>
+<div class="section" id="NDDataset,-the-main-object">
+<h2>NDDataset, the main object<a class="headerlink" href="#NDDataset,-the-main-object" title="Permalink to this headline">¶</a></h2>
+<p>NDDataset is a python object, actually a container, which can represent most of your multidimensional spectroscopic data.</p>
+<p>For instance, in the following we read data from a series of FTIR experiments, provided by the OMNIC software:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="n">nd</span> <span class="o">=</span> <span class="n">NDDataset</span><span class="o">.</span><span class="n">read_omnic</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;irdata&#39;</span><span class="p">,</span> <span class="s1">&#39;nh4y-activation.spg&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<p>Note that for this example, we use data stored in a <code class="docutils literal notranslate"><span class="pre">test</span></code> directory. For your own usage, you probably have to give the full pathname (see … for the way to overcome this using <code class="docutils literal notranslate"><span class="pre">preferences</span></code> setting)</p>
+<div class="section" id="Display-dataset-information">
+<h3>Display dataset information<a class="headerlink" href="#Display-dataset-information" title="Permalink to this headline">¶</a></h3>
+<p>Several ways are available to display the data we have jsut read and that are now stored in the dataset</p>
+<ul class="simple">
+<li><p><strong>Printing</strong> them, using the print function of python to get a short text version of the dataset information.</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="nb">print</span><span class="p">(</span><span class="n">nd</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+NDDataset: [float32] a.u. (shape: (y:55, x:5549))
+</pre></div></div>
+</div>
+<p>A much Longer (and colored) information text can be obtained using the spectrochempy provided <code class="docutils literal notranslate"><span class="pre">print_</span></code> function.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">scp</span><span class="o">.</span><span class="n">print_</span><span class="p">(</span><span class="n">nd</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-green-fg">         name</span>: nh4y-activation
+<span class="ansi-green-fg">       author</span>: travis@travis-job-b5a7aa69-dc6b-4991-a0b4-3d34fc9e310b
+<span class="ansi-green-fg">      created</span>: 2021-01-29 13:36:10.237786+00:00
+<span class="ansi-green-fg">  description</span>: <span class="ansi-black-fg">Omnic title: NH4Y-activation.SPG
+               Omnic filename: /home/travis/miniconda/envs/scpy3.7/lib/python3.7/site-packages/scp_data/testdata/irdata/nh4y-activation.spg</span>
+<span class="ansi-green-fg">      history</span>: <span class="ansi-black-fg">2021-01-29 13:36:10.237786+00:00:imported from spg file /home/travis/miniconda/envs/scpy3.7/lib/python3.7/site-
+               packages/scp_data/testdata/irdata/nh4y-activation.spg ;
+               2021-01-29 13:36:10.237786+00:00:sorted by date</span>
+<span class="ansi-bold">          DATA </span>
+<span class="ansi-green-fg">        title</span>: Absorbance
+<span class="ansi-green-fg">       values</span>: ...
+<span class="ansi-blue-fg">         [[   2.057    2.061 ...    2.013    2.012]
+          [   2.033    2.037 ...    1.913    1.911]
+          ...
+          [   1.794    1.791 ...    1.198    1.198]
+          [   1.816    1.815 ...     1.24    1.238]] a.u.</span>
+<span class="ansi-green-fg">        shape</span>: (y:55, x:5549)
+<span class="ansi-bold">     DIMENSION `x`</span>
+<span class="ansi-green-fg">         size</span>: 5549
+<span class="ansi-green-fg">        title</span>: Wavenumbers
+<span class="ansi-green-fg">  coordinates</span>: <span class="ansi-blue-fg">[    6000     5999 ...    650.9    649.9] cm^-1</span>
+<span class="ansi-bold">     DIMENSION `y`</span>
+<span class="ansi-green-fg">         size</span>: 55
+<span class="ansi-green-fg">        title</span>: Acquisition timestamp (GMT)
+<span class="ansi-green-fg">  coordinates</span>: <span class="ansi-blue-fg">[1.468e+09 1.468e+09 ... 1.468e+09 1.468e+09] s</span>
+<span class="ansi-green-fg">       labels</span>: ...
+<span class="ansi-cyan-fg">         [[  2016-07-06 19:03:14+00:00   2016-07-06 19:13:14+00:00 ...   2016-07-07 04:03:17+00:00   2016-07-07 04:13:17+00:00]
+          [  vz0466.spa, Wed Jul 06 21:00:38 2016 (GMT+02:00)   vz0467.spa, Wed Jul 06 21:10:38 2016 (GMT+02:00) ...
+             vz0520.spa, Thu Jul 07 06:00:41 2016 (GMT+02:00)   vz0521.spa, Thu Jul 07 06:10:41 2016 (GMT+02:00)]]</span>
+</pre></div></div>
+</div>
+<ul class="simple">
+<li><p><strong>Displaying html</strong>, inside a jupyter notebook, by just typing the name of the dataset (must be the last instruction of a cell, however!)</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">nd</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<table style='background:transparent'>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>         name</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> nh4y-activation</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>       author</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> travis@travis-job-b5a7aa69-dc6b-4991-a0b4-3d34fc9e310b</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>      created</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 2021-01-29 13:36:10.237786+00:00</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>  description</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div>Omnic title: NH4Y-activation.SPG<br/>               Omnic filename: /home/travis/miniconda/envs/scpy3.7/lib/python3.7/site-packages/scp_data/testdata/irdata/nh4y-activation.spg</div></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>      history</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div>2021-01-29 13:36:10.237786+00:00:imported from spg file /home/travis/miniconda/envs/scpy3.7/lib/python3.7/site-<br/>               packages/scp_data/testdata/irdata/nh4y-activation.spg ;<br/>               2021-01-29 13:36:10.237786+00:00:sorted by date</div></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><strong>          DATA </strong></td><td style='text-align:left; padding-bottom:0px; padding-top:0px; padding-top:10px; '><hr/></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        title</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> Absorbance</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>       values</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='blue'>         [[   2.057    2.061 ...    2.013    2.012]<br/>          [   2.033    2.037 ...    1.913    1.911]<br/>          ...<br/>          [   1.794    1.791 ...    1.198    1.198]<br/>          [   1.816    1.815 ...     1.24    1.238]] a.u.</font></div></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        shape</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> (y:55, x:5549)</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><strong>     DIMENSION `x`</strong></td><td style='text-align:left; padding-bottom:0px; padding-top:0px; padding-top:10px; '><hr/></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>         size</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 5549</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        title</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> Wavenumbers</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>  coordinates</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='blue'>[    6000     5999 ...    650.9    649.9] cm^-1</font></div></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><strong>     DIMENSION `y`</strong></td><td style='text-align:left; padding-bottom:0px; padding-top:0px; padding-top:10px; '><hr/></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>         size</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 55</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        title</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> Acquisition timestamp (GMT)</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>  coordinates</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='blue'>[1.468e+09 1.468e+09 ... 1.468e+09 1.468e+09] s</font></div></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>       labels</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='darkcyan'>         [[  2016-07-06 19:03:14+00:00   2016-07-06 19:13:14+00:00 ...   2016-07-07 04:03:17+00:00   2016-07-07 04:13:17+00:00]<br/>          [  vz0466.spa, Wed Jul 06 21:00:38 2016 (GMT+02:00)   vz0467.spa, Wed Jul 06 21:10:38 2016 (GMT+02:00) ...<br/>             vz0520.spa, Thu Jul 07 06:00:41 2016 (GMT+02:00)   vz0521.spa, Thu Jul 07 06:10:41 2016 (GMT+02:00)]]</font></div></td><tr>
+</table></div>
+</div>
+</div>
+<div class="section" id="Plotting-a-dataset">
+<h3>Plotting a dataset<a class="headerlink" href="#Plotting-a-dataset" title="Permalink to this headline">¶</a></h3>
+<p>First, we can set some general plotting preferences for this dataset</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">preferences</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Let’s plot first a 1D spectrum (for instance one row of nd)</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">row</span> <span class="o">=</span> <span class="n">nd</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_introduction_introduction_41_0.png" src="../../_images/userguide_introduction_introduction_41_0.png" />
+</div>
+</div>
+<p>or a column …</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">col</span> <span class="o">=</span> <span class="n">nd</span><span class="p">[:,</span> <span class="mf">3500.</span><span class="p">]</span>  <span class="c1"># note the indexing using wavenumber!</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">plot_scatter</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_introduction_introduction_43_0.png" src="../../_images/userguide_introduction_introduction_43_0.png" />
+</div>
+</div>
+<p>2D plots can be also generated as stacked plot</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">_</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;stack&#39;</span><span class="p">)</span>  <span class="c1"># or nd.plot_stack()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_introduction_introduction_45_0.png" src="../../_images/userguide_introduction_introduction_45_0.png" />
+</div>
+</div>
+<p>or as an image plot:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span><span class="o">.</span><span class="n">colormap</span> <span class="o">=</span> <span class="s1">&#39;magma&#39;</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;image&#39;</span><span class="p">)</span>  <span class="c1"># or nd.plot_image()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_introduction_introduction_47_0.png" src="../../_images/userguide_introduction_introduction_47_0.png" />
+</div>
+</div>
+<p>Note that as we plot wavenumbers as abcissa, by convention the coordinates direction is reversed.</p>
+<p>This can be changed by using the keyword argument <code class="docutils literal notranslate"><span class="pre">reversed</span> <span class="pre">=</span> <span class="pre">False</span></code>.</p>
+</div>
+<div class="section" id="Processing-a-dataset">
+<h3>Processing a dataset<a class="headerlink" href="#Processing-a-dataset" title="Permalink to this headline">¶</a></h3>
+<p>Some arithmetic can be performed on such dataset. Here is an example where we subtract one reference spectrum to the whole nddataset that we have read above (<code class="docutils literal notranslate"><span class="pre">nd</span></code>).</p>
+<p>Lets take, e.g., the last row as reference</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">ref</span> <span class="o">=</span> <span class="n">nd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">ref</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_introduction_introduction_52_0.png" src="../../_images/userguide_introduction_introduction_52_0.png" />
+</div>
+</div>
+<p>Now suppress this ref spectrum to all other spectra of the whole dataset (additionally we mask the region of saturation</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prefs</span><span class="o">.</span><span class="n">colormap</span> <span class="o">=</span> <span class="s1">&#39;jet&#39;</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">colorbar</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">nds</span> <span class="o">=</span> <span class="n">nd</span> <span class="o">-</span> <span class="n">ref</span>
+<span class="n">nds</span><span class="p">[:,</span> <span class="mf">1290.</span><span class="p">:</span><span class="mf">890.</span><span class="p">]</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">MASKED</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">nds</span><span class="o">.</span><span class="n">plot_stack</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_introduction_introduction_54_0.png" src="../../_images/userguide_introduction_introduction_54_0.png" />
+</div>
+</div>
+<p>More details on available on available processing and analysis function will be given later in this user guide.</p>
+<p>This was a short overview of the possibilities. To go further you can <strong>Continue with …</strong></p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../objects.html">Data structures</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../objects.html#nddataset">NDDataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../dataset/dataset.html">The NDDataset object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../dataset/dataset.html#More-insight-on-coordinates">More insight on coordinates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../dataset/dataset.html#Methods-to-create-NDDataset">Methods to create NDDataset</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../objects.html#project">Project</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../project/project.html">Project management</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../objects.html#script">Script</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="interface.html" class="btn btn-neutral float-right" title="Starting Jupyter lab" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../../gettingstarted/install/install_adds.html" class="btn btn-neutral float-left" title="Install additional libraries" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2014-2021 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">
+        Last updated on Jan 29, 2021.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

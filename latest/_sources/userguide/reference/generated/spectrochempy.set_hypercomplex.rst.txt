@@ -1,0 +1,13 @@
+
+spectrochempy.set\_hypercomplex
+===============================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: set_hypercomplex
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.set_hypercomplex.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

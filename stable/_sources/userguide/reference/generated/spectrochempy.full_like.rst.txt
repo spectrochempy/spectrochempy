@@ -1,0 +1,13 @@
+
+spectrochempy.full\_like
+========================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: full_like
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.full_like.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

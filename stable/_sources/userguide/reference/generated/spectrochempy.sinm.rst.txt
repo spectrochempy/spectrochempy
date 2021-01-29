@@ -1,0 +1,13 @@
+
+spectrochempy.sinm
+==================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: sinm
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.sinm.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

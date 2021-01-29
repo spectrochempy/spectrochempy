@@ -1,0 +1,13 @@
+
+spectrochempy.any
+=================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: any
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.any.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

@@ -1,0 +1,13 @@
+
+spectrochempy.take
+==================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: take
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.take.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

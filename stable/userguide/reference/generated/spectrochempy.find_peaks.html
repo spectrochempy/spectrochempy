@@ -1,0 +1,491 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>spectrochempy.find_peaks &mdash; SpectroChemPy v0.2.5 0.2.5 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_override.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery-dataframe.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery-rendered-html.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/scpy.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="spectrochempy.EFA" href="spectrochempy.EFA.html" />
+    <link rel="prev" title="spectrochempy.CurveFit" href="spectrochempy.CurveFit.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/scpy.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> SpectroChemPy </span>
+        version: stable
+        <span class="fa fa-caret-down"></span>
+      </span>
+        <div class="rst-other-versions">
+            <dl>
+                <dt>Other versions</dt>
+                
+                    
+                        <dd><a href="https://spectrochempy.github.io/spectrochempy/latest/index.html"">LATEST</a></dd>
+                    
+                
+                    
+                
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Downloads</dt>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/stable-spectrochempy.pdf">PDF</a></dd>
+                <dd><a href="https://spectrochempy.github.io/spectrochempy/downloads/stable-spectrochempy-notebooks.zip">Notebooks</a></dd>
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Sources on GitHub</dt>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
+
+            </dl>
+
+        </div>
+    </div>
+
+    
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/whyscpy.html">Why <strong>SpectroChemPy</strong>  ?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/gallery/auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/install/index.html">Installation</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User's Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../objects.html">Data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../units/units.html">Units &amp; Quantities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../importexport/importexport.html">Import &amp; Export</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plotting/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../processing/processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../fitting/fitting.html">Fitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analysis/analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../databases/databases.html">Databases</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference &amp; Help</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#loading-the-api">Loading the API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#the-nddataset-object">The NDDataset object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#coordinates-related-objects">Coordinates related objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#creating-nddataset">Creating NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#export-a-nddataset">Export a NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#select-data-in-a-nddataset">Select data in a NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#plotting-functions">Plotting functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#processing">Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#fitting">Fitting</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#analysis">Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#project-management">Project management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#scripting">Scripting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#utilities">Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently asked questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/examples.html">Adding new tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/examples.html#adding-your-examples-to-the-gallery">Adding your examples to the gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/contributing.html">Developer’s Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/citing.html">Citing  <strong>SpectroChemPy</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/seealso.html">See also</a></li>
+</ul>
+
+            
+          
+
+
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SpectroChemPy v0.2.5</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">API reference</a> &raquo;</li>
+        
+      <li>spectrochempy.find_peaks</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../../_sources/userguide/reference/generated/spectrochempy.find_peaks.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    
+    
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="spectrochempy-find-peaks">
+<h1>spectrochempy.find_peaks<a class="headerlink" href="#spectrochempy-find-peaks" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt id="spectrochempy.find_peaks">
+<code class="sig-name descname">find_peaks</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataset</span></em>, <em class="sig-param"><span class="n">height</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">window_length</span><span class="o">=</span><span class="default_value">3</span></em>, <em class="sig-param"><span class="n">threshold</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">distance</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">prominence</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">width</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">wlen</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">rel_height</span><span class="o">=</span><span class="default_value">0.5</span></em>, <em class="sig-param"><span class="n">plateau_size</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">use_coord</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy/core/analysis/peakfinding.py#L25-L253"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spectrochempy.find_peaks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper and extension of scpy.signal.find_peaks(). Find peaks inside a 1D NDDataset based on peak properties.
+This function finds all local maxima by simple comparison of neighbouring values. Optionally, a subset of these
+peaks can be selected by specifying conditions for a peak’s properties.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> (<em>|NDDataset|</em>) – A 1D NDDataset or a 2D NDdataset with <code class="xref py py-obj docutils literal notranslate"><span class="pre">len(X.y)</span> <span class="pre">==</span> <span class="pre">1</span></code></p></li>
+<li><p><strong>height</strong> (<em>number or ndarray or sequence, optional</em>) – Required height of peaks. Either a number, <code class="docutils literal notranslate"><span class="pre">None</span></code>, an array matching
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">x</span></code> or a 2-element sequence of the former. The first element is
+always interpreted as the  minimal and the second, if supplied, as the
+maximal required height.</p></li>
+<li><p><strong>window_length</strong> (<em>int, default: 5</em>) – The length of the filter window used to interpolate the maximum. window_length must be a positive odd integer.
+If set to one, the actual maximum is returned.</p></li>
+<li><p><strong>threshold</strong> (<em>number or ndarray or sequence, optional</em>) – Required threshold of peaks, the vertical distance to its neighbouring
+samples. Either a number, <code class="docutils literal notranslate"><span class="pre">None</span></code>, an array matching <code class="xref py py-obj docutils literal notranslate"><span class="pre">x</span></code> or a
+2-element sequence of the former. The first element is always
+interpreted as the  minimal and the second, if supplied, as the maximal
+required threshold.</p></li>
+<li><p><strong>distance</strong> (<em>number, optional</em>) – Required minimal horizontal distance (&gt;= 1) in samples between
+neighbouring peaks. Smaller peaks are removed first until the condition
+is fulfilled for all remaining peaks.</p></li>
+<li><p><strong>prominence</strong> (<em>number or ndarray or sequence, optional</em>) – Required prominence of peaks. Either a number, <code class="docutils literal notranslate"><span class="pre">None</span></code>, an array
+matching <code class="xref py py-obj docutils literal notranslate"><span class="pre">x</span></code> or a 2-element sequence of the former. The first
+element is always interpreted as the  minimal and the second, if
+supplied, as the maximal required prominence.</p></li>
+<li><p><strong>width</strong> (<em>number or ndarray or sequence, optional</em>) – Required width of peaks in samples. Either a number, <code class="docutils literal notranslate"><span class="pre">None</span></code>, an array
+matching <code class="xref py py-obj docutils literal notranslate"><span class="pre">x</span></code> or a 2-element sequence of the former. The first
+element is always interpreted as the  minimal and the second, if
+supplied, as the maximal required width. Floats are interpreted as width
+measured along the ‘x’ Coord; ints are interpreted as a number of points</p></li>
+<li><p><strong>wlen</strong> (<em>int or float, optional</em>) – Used for calculation of the peaks prominences, thus it is only used if
+one of the arguments <code class="xref py py-obj docutils literal notranslate"><span class="pre">prominence</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">width</span></code> is given. Floats are interpreted
+as measured along the ‘x’ Coord; ints are interpreted as a number of points.
+See argument len` in <code class="xref py py-obj docutils literal notranslate"><span class="pre">peak_prominences</span></code> of the scipy documentation for a full
+description of its effects.</p></li>
+<li><p><strong>rel_height</strong> (<em>float, optional,</em>) – Used for calculation of the peaks width, thus it is only used if <code class="xref py py-obj docutils literal notranslate"><span class="pre">width</span></code>
+is given. See argument  <code class="xref py py-obj docutils literal notranslate"><span class="pre">rel_height</span></code> in <code class="xref py py-obj docutils literal notranslate"><span class="pre">peak_widths</span></code> of the scipy documentation
+for a full description of its effects.</p></li>
+<li><p><strong>plateau_size</strong> (<em>number or ndarray or sequence, optional</em>) – Required size of the flat top of peaks in samples. Either a number,
+<code class="docutils literal notranslate"><span class="pre">None</span></code>, an array matching <code class="xref py py-obj docutils literal notranslate"><span class="pre">x</span></code> or a 2-element sequence of the former.
+The first element is always interpreted as the minimal and the second,
+if supplied as the maximal required plateau size. Floats are interpreted
+as measured along the ‘x’ Coord; ints are interpreted as a number of points.</p></li>
+<li><p><strong>interp</strong> (<em>bool, optional</em>) – locate maximum by quadratic interpolation</p></li>
+<li><p><strong>use_coord</strong> (<em>bool, optional</em>) – Set whether the x Coord (when it exists) should be used instead of indices
+for the positions and width</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul>
+<li><p><strong>peaks</strong> (<em>ndarray</em>) – Indices of peaks in <code class="xref py py-obj docutils literal notranslate"><span class="pre">x</span></code> that satisfy all given conditions.</p></li>
+<li><p><strong>properties</strong> (<em>dict</em>) – A dictionary containing properties of the returned peaks which were
+calculated as intermediate results during evaluation of the specified
+conditions:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>peak_heights</dt><dd><p>If <code class="xref py py-obj docutils literal notranslate"><span class="pre">height</span></code> is given, the height of each peak in <code class="xref py py-obj docutils literal notranslate"><span class="pre">x</span></code>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>left_thresholds, right_thresholds</dt><dd><p>If <code class="xref py py-obj docutils literal notranslate"><span class="pre">threshold</span></code> is given, these keys contain a peaks vertical
+distance to its neighbouring samples.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>prominences, right_bases, left_bases</dt><dd><p>If <code class="xref py py-obj docutils literal notranslate"><span class="pre">prominence</span></code> is given, these keys are accessible. See
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">peak_prominences</span></code> for a description of their content.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>width_heights, left_ips, right_ips</dt><dd><p>If <code class="xref py py-obj docutils literal notranslate"><span class="pre">width</span></code> is given, these keys are accessible. See <code class="xref py py-obj docutils literal notranslate"><span class="pre">peak_widths</span></code>
+for a description of their content.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>plateau_sizes, left_edges’, ‘right_edges’</dt><dd><p>If <code class="xref py py-obj docutils literal notranslate"><span class="pre">plateau_size</span></code> is given, these keys are accessible and contain
+the indices of a peak’s edges (edges are still part of the
+plateau) and the calculated plateau sizes.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>To calculate and return properties without excluding peaks, provide the
+open interval <code class="docutils literal notranslate"><span class="pre">(None,</span> <span class="pre">None)</span></code> as a value to the appropriate argument
+(excluding <code class="xref py py-obj docutils literal notranslate"><span class="pre">distance</span></code>).</p>
+</li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Warns</dt>
+<dd class="field-odd"><p><strong>PeakPropertyWarning</strong> – Raised if a peak’s properties have unexpected values (see
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">peak_prominences</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">peak_widths</span></code>).</p>
+</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This function may return unexpected results for data containing NaNs. To
+avoid this, NaNs should either be removed or replaced.</p>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_peaks_cwt</span></code></dt><dd><p>in scipy.signal: Find peaks using the wavelet transformation.</p>
+</dd>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">peak_prominences</span></code></dt><dd><p>in scipy.signal: Directly calculate the prominence of peaks.</p>
+</dd>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">peak_widths</span></code></dt><dd><p>in scipy.signal: Directly calculate the width of peaks.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>In the context of this function, a peak or local maximum is defined as any
+sample whose two direct neighbours have a smaller amplitude. For flat peaks
+(more than one sample of equal amplitude wide) the index of the middle
+sample is returned (rounded down in case the number of samples is even).
+For noisy signals the peak locations can be off because the noise might
+change the position of local maxima. In those cases consider smoothing the
+signal before searching for peaks or use other peak finding and fitting
+methods (like <code class="xref py py-obj docutils literal notranslate"><span class="pre">find_peaks_cwt</span></code>).
+Some additional comments on specifying conditions:</p>
+<ul class="simple">
+<li><p>Almost all conditions (excluding <code class="xref py py-obj docutils literal notranslate"><span class="pre">distance</span></code>) can be given as half-open or
+closed intervals, e.g <code class="docutils literal notranslate"><span class="pre">1</span></code> or <code class="docutils literal notranslate"><span class="pre">(1,</span> <span class="pre">None)</span></code> defines the half-open
+interval <span class="math notranslate nohighlight">\([1, \infty]\)</span> while <code class="docutils literal notranslate"><span class="pre">(None,</span> <span class="pre">1)</span></code> defines the interval
+<span class="math notranslate nohighlight">\([-\infty, 1]\)</span>. The open interval <code class="docutils literal notranslate"><span class="pre">(None,</span> <span class="pre">None)</span></code> can be specified
+as well, which returns the matching properties without exclusion of peaks.</p></li>
+<li><p>The border is always included in the interval used to select valid peaks.</p></li>
+<li><p>For several conditions the interval borders can be specified with
+arrays matching <code class="xref py py-obj docutils literal notranslate"><span class="pre">x</span></code> in shape which enables dynamic constrains based on
+the sample position.</p></li>
+<li><p>The conditions are evaluated in the following order: <code class="xref py py-obj docutils literal notranslate"><span class="pre">plateau_size</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">height</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">threshold</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">distance</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">prominence</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">width</span></code>. In most cases
+this order is the fastest one because faster operations are applied first
+to reduce the number of peaks that need to be evaluated later.</p></li>
+<li><p>While indices in <code class="xref py py-obj docutils literal notranslate"><span class="pre">peaks</span></code> are guaranteed to be at least <code class="xref py py-obj docutils literal notranslate"><span class="pre">distance</span></code> samples
+apart, edges of flat peaks may be closer than the allowed <code class="xref py py-obj docutils literal notranslate"><span class="pre">distance</span></code>.</p></li>
+<li><p>Use <code class="xref py py-obj docutils literal notranslate"><span class="pre">wlen</span></code> to reduce the time it takes to evaluate the conditions for
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">prominence</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">width</span></code> if <code class="xref py py-obj docutils literal notranslate"><span class="pre">x</span></code> is large or has many local maxima
+(see <code class="xref py py-obj docutils literal notranslate"><span class="pre">peak_prominences</span></code>).</p></li>
+</ul>
+</dd></dl>
+
+<div style='clear:both'></div></div>
+
+
+           </div>
+           
+          </div>
+
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="spectrochempy.EFA.html" class="btn btn-neutral float-right" title="spectrochempy.EFA" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="spectrochempy.CurveFit.html" class="btn btn-neutral float-left" title="spectrochempy.CurveFit" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2014-2021 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">
+        Last updated on Jan 29, 2021.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

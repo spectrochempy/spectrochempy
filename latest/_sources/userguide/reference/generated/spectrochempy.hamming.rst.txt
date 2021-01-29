@@ -1,0 +1,13 @@
+
+spectrochempy.hamming
+=====================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: hamming
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.hamming.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

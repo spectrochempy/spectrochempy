@@ -1,0 +1,483 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "noted-conspiracy",
+   "metadata": {},
+   "source": [
+    "# Baseline corrections\n",
+    "\n",
+    "This tutorial shows how to make baseline corrections with spectrochempy.\n",
+    "As prerequisite, the user is expected to have read the [Import](../import_export/import.ipynb)\n",
+    "and [Import IR](../import_export/importIR.ipynb) tutorials."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "coastal-second",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import spectrochempy as scp"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "promising-orange",
+   "metadata": {},
+   "source": [
+    "Now let's import and plot a typical IR dataset which wase recorded during the removal of ammonia from a NH4-Y zeolite:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "impressive-gardening",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X = scp.read_omnic(\"irdata/nh4y-activation.spg\")\n",
+    "X[:, 1290.:890.] = scp.MASKED"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "nuclear-italian",
+   "metadata": {},
+   "source": [
+    "After setting some plotting preferences and plot it"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "extraordinary-genesis",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "prefs = X.preferences\n",
+    "prefs.figure.figsize = (7, 3)\n",
+    "prefs.colormap = 'magma'\n",
+    "_ = X.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "starting-injury",
+   "metadata": {},
+   "source": [
+    "## Background subtraction\n",
+    "\n",
+    "Often, particularly for surface species, the baseline is first corrected by subtracting a reference spectrum. In this\n",
+    "example, it could be, for instance, the last spectrum (index -1). Hence:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "grand-partner",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "Xdiff = X - X[-1]\n",
+    "_ = Xdiff.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "abroad-robertson",
+   "metadata": {},
+   "source": [
+    "## Detrend\n",
+    "\n",
+    "Other simple baseline corrections - often use in preprocessing prior chemometric analysis - constist in shifting\n",
+    "the spectra or removing a linear trend. This is done using the detrend() method, which is a wrapper of the [\n",
+    "detrend() method](https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.detrend.html) from the [\n",
+    "scipy.signal](https://docs.scipy.org/doc/scipy/reference/signal.html) module to which we refer the interested reader."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "downtown-colorado",
+   "metadata": {},
+   "source": [
+    "### Linear trend\n",
+    "Subtract the linear trend of each spectrum (type='linear', default)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "continued-access",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "_ = X.detrend().plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "authentic-explorer",
+   "metadata": {},
+   "source": [
+    "### Constant trend\n",
+    "Subtract the average absorbance to each spectrum"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "prospective-costs",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "_ = X.detrend(type='constant').plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "applicable-small",
+   "metadata": {},
+   "source": [
+    "## Automatic linear baseline correction `abc`"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "joined-aurora",
+   "metadata": {},
+   "source": [
+    "When the baseline to remove is a simple linear correction, one can use ``abc``.\n",
+    "This perform an automatic baseline correction."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "global-january",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "_ = scp.abc(X).plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "seventh-ethiopia",
+   "metadata": {},
+   "source": [
+    "## Advanced baseline correction\n",
+    "\n",
+    "'Advanced' baseline correction basically consists for the user to choose:\n",
+    "\n",
+    "- spectral ranges which s/he considers as belonging to the base line - the type of polynomial(s) used to model the\n",
+    "baseline in and between these regions (keyword: `interpolation`) - the method used to apply the correction to\n",
+    "spectra: sequentially to each spectrum, or using a multivariate approach (keyword: `method`).\n",
+    "\n",
+    "### Range selection\n",
+    "\n",
+    "Each spectral range is defined by a list of two values indicating the limits of the spectral ranges, e.g. `[4500.,\n",
+    "3500.]` to\n",
+    "select the 4500-3500 cm$^{-1}$ range. Note that the ordering has no importance and using `[3500.0, 4500.]` would\n",
+    "lead to exactly the same result. It is also possible to formally pick a single wavenumber `3750.`.\n",
+    "\n",
+    "The first step is then to select the verious regions that we expect to belong to the baseline"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "gothic-array",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ranges = [5900.0, 5400.0], 4550., [4500., 4000.], [2100., 2000.0], [1550., 1555.]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "primary-transaction",
+   "metadata": {},
+   "source": [
+    "After selection of the baseline ranges, the baseline correction can be made using a sequence of 2 commands:\n",
+    "\n",
+    "1. Initialize an instance of BaselineCorrection"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "floral-durham",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "blc = scp.BaselineCorrection(X)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "sophisticated-sydney",
+   "metadata": {},
+   "source": [
+    "2. compute baseline other the ranges"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "sweet-shade",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "Xcorr = blc.compute(ranges)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "legislative-respondent",
+   "metadata": {},
+   "source": [
+    "* plot the result (blc.corrected.plot() would lead to the same result)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "ambient-damage",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "_ = Xcorr.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "metallic-christian",
+   "metadata": {},
+   "source": [
+    "### Interpolation method\n",
+    "\n",
+    "\n",
+    "The previous correction was made using the default parameters for the interpolation ,i.e. an interpolation using\n",
+    "cubic Hermite spline interpolation: `interpolation='pchip'` (`pchip` stands for **P**iecewise **C**ubic **H**ermite\n",
+    "**I**nterpolating **P**olynomial). This option triggers the use of [scipy.interpolate.PchipInterpolator()](\n",
+    "https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.PchipInterpolator.html) to which we refer\n",
+    "the interested readers. The other interpolation method is the classical polynomial interpolation\n",
+    "(`interpolation='polynomial'`) in which case the order can also be set (e.g. `order=3`, the default value being 6).\n",
+    "In this case, the base methods used for the interpolation are those of the [polynomial module](\n",
+    "https://numpy.org/doc/stable/reference/routines.polynomials.polynomial.html) of spectrochempy, in particular the\n",
+    "[polyfit()](https://numpy.org/doc/stable/reference/generated/numpy.polynomial.polynomial.polyfit.html#numpy\n",
+    ".polynomial.polynomial.polyfit) method.\n",
+    "\n",
+    "For instance:"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "worst-locking",
+   "metadata": {},
+   "source": [
+    "First, we put the ranges in a list"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "prompt-tactics",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ranges = [[5900.0, 5400.0], [4000., 4500.], [2100., 2000.0], [1550., 1555.]]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "documented-bleeding",
+   "metadata": {},
+   "source": [
+    "<div class='alert alert-warning'>\n",
+    "<b>Warning</b>\n",
+    "\n",
+    "if you use a tuple to define the sequences of ranges:\n",
+    "\n",
+    "```ipython3\n",
+    "ranges = [5900.0, 5400.0], [4000., 4500.], [2100., 2000.0], [1550., 1555.]\n",
+    "```\n",
+    "\n",
+    "or\n",
+    "\n",
+    "```ipython3\n",
+    "ranges = ([5900.0, 5400.0], [4000., 4500.], [2100., 2000.0], [1550., 1555.])\n",
+    "```\n",
+    "\n",
+    "then you can call `compute` by directly pass the ranges tuple, or you can unpack it as below.\n",
+    "\n",
+    "```ipython3\n",
+    "blc.compute(ranges, ....)\n",
+    "```\n",
+    "\n",
+    "\n",
+    "if you you use a list instead of tuples:\n",
+    "\n",
+    "```ipython3\n",
+    "ranges = [[5900.0, 5400.0], [4000., 4500.], [2100., 2000.0], [1550., 1555.]]\n",
+    "```\n",
+    "\n",
+    "then you **MUST UNPACK** the element when calling `compute`:\n",
+    "\n",
+    "```ipython3\n",
+    "blc.compute(*ranges, ....)\n",
+    "```\n",
+    "\n",
+    "\n",
+    "</div>"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "fitted-porter",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "blc.compute(*ranges, interpolation='polynomial', order=6)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "disabled-output",
+   "metadata": {},
+   "source": [
+    "The `corrected` attribute contains the corrected NDDataset."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "wireless-words",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "_ = blc.corrected.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "chief-flashing",
+   "metadata": {},
+   "source": [
+    "### Multivariate method\n",
+    "\n",
+    "The `method` option defines whether the selected baseline regions of the spectra should be taken 'as is'\n",
+    "this is the default `method='sequential'`), or modeled using a multivariate approach (`method='multivariate'`).\n",
+    "\n",
+    "The `'multivariate'` option is useful when the signal‐to‐noise ratio is low and/or when the baseline changes in\n",
+    "various regions of the spectrum are correlated. It constist in (i) modeling the baseline regions by a principal\n",
+    "component analysis (PCA), (ii) interpolate the loadings of the first principal components over the whole spectral\n",
+    "and (iii) modeling the spectra baselines from the product of the PCA scores and the interpolated loadings.\n",
+    "(for detail: see [Vilmin et al. Analytica Chimica Acta 891 (2015)](dx.doi.org/10.1016/j.aca.2015.06.006).\n",
+    "\n",
+    "If this option is selected, the user should also choose `npc`, the number of principal components used to model the\n",
+    "baseline. In a sense, this parameter has the same role as the `order` parameter, except tha it will affect how well\n",
+    "the baseline fits the selected regions, but on *both dimensions: wavelength and acquision time*. In particular a\n",
+    "large value of `npc` will lead to an overfit of baseline variation with time and will lead to the same result as the\n",
+    "`sequential` method while a too small `value` would miss important pricipal component underlying the baseline change\n",
+    "over time. Typical optimum values are `npc=2` or `npc=3` (see Exercises below)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "prospective-fiction",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "blc.compute(*ranges, interpolation='pchip', method='multivariate', npc=2)\n",
+    "_ = blc.corrected.plot()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "sexual-lottery",
+   "metadata": {},
+   "source": [
+    "### Code snippet for 'advanced' baseline correction\n",
+    "The following code in which the user can change any of the parameters and look at the changes after re-running\n",
+    "the cell:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "sought-thursday",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# user defined parameters\n",
+    "# -----------------------\n",
+    "ranges = [5900.0, 5400.0], [4000., 4500.], 4550., [2100., 2000.0], [1550., 1555.], [1250.0, 1300.], [800., 850.]\n",
+    "interpolation = 'pchip'  # choose 'polynomial' or 'pchip'\n",
+    "order = 5  # only used for 'polynomial'\n",
+    "method = 'sequential'  # choose 'sequential' or 'multivariate'\n",
+    "npc = 3  # only used for 'multivariate'\n",
+    "\n",
+    "# code: compute baseline, plot original and corrected NDDatasets and ranges\n",
+    "# -------------------------------------------------------------------------\n",
+    "blc = scp.BaselineCorrection(X)\n",
+    "Xcorr = blc.compute(*ranges, interpolation=interpolation, order=order, method=method, npc=npc)\n",
+    "\n",
+    "axes = scp.multiplot([X, Xcorr], labels=['Original', 'Baseline corrected'], sharex=True, nrow=2, ncol=1, figsize=(7, 6),\n",
+    "                     dpi=96)\n",
+    "blc.show_regions(axes['axe21'])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "macro-sensitivity",
+   "metadata": {},
+   "source": [
+    "<div class='alert alert-info'>\n",
+    "    <b>Exercises</b>\n",
+    "\n",
+    "**basic:**\n",
+    "- write commands to subtract (i) the first spectrum from a dataset and (ii) the mean spectrum from a dataset\n",
+    "- write a code to correct the baseline of the last 10 spectra of the above dataset in the 4000-3500 cm$^{-1}$ range\n",
+    "\n",
+    "**intermediate:**\n",
+    "- what would be the parameters to use in 'advanced' baseline correction to mimic 'detrend' ? Write a code to check\n",
+    "your answer.\n",
+    "\n",
+    "**advanced:**\n",
+    "- simulate noisy spectra with baseline drifts and compare the performances of `multivariate` vs `sequential` methods\n",
+    "</div>"
+   ]
+  }
+ ],
+ "metadata": {
+  "jupytext": {
+   "encoding": "# -*- coding: utf-8 -*-",
+   "formats": "ipynb,py:percent",
+   "notebook_metadata_filter": "all"
+  },
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.7.9"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

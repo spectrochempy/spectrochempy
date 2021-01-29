@@ -1,0 +1,13 @@
+
+spectrochempy.detrend
+=====================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: detrend
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.detrend.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

@@ -1,0 +1,13 @@
+
+spectrochempy.to\_reduced\_units
+================================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: to_reduced_units
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.to_reduced_units.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

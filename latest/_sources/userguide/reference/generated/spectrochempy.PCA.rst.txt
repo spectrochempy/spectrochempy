@@ -1,0 +1,40 @@
+spectrochempy.PCA
+=================
+
+.. currentmodule:: spectrochempy
+
+.. autoclass:: PCA
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+
+      ~PCA.printev
+      ~PCA.reconstruct
+      ~PCA.reduce
+      ~PCA.scoreplot
+      ~PCA.screeplot
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :nosignatures:
+
+
+      ~PCA.LT
+      ~PCA.S
+      ~PCA.X
+      ~PCA.ev
+      ~PCA.ev_cum
+      ~PCA.ev_ratio
+
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.PCA.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

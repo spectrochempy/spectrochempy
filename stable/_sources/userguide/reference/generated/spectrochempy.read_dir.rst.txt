@@ -1,0 +1,13 @@
+
+spectrochempy.read\_dir
+=======================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: read_dir
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.read_dir.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

@@ -1,0 +1,13 @@
+
+spectrochempy.zeros\_like
+=========================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: zeros_like
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.zeros_like.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

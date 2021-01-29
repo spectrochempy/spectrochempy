@@ -1,0 +1,13 @@
+
+spectrochempy.max
+=================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: max
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.max.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

@@ -1,0 +1,13 @@
+
+spectrochempy.diagonal
+======================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: diagonal
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.diagonal.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

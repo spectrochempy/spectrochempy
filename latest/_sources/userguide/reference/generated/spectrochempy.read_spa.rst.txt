@@ -1,0 +1,13 @@
+
+spectrochempy.read\_spa
+=======================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: read_spa
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.read_spa.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

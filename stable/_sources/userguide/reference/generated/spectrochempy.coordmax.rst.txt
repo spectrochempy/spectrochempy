@@ -1,0 +1,13 @@
+
+spectrochempy.coordmax
+======================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: coordmax
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.coordmax.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

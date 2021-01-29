@@ -1,0 +1,13 @@
+
+spectrochempy.trapz
+===================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: trapz
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.trapz.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

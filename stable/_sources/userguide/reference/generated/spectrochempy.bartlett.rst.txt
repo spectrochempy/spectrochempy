@@ -1,0 +1,13 @@
+
+spectrochempy.bartlett
+======================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: bartlett
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.bartlett.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

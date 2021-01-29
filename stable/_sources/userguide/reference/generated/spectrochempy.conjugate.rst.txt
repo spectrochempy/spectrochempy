@@ -1,0 +1,13 @@
+
+spectrochempy.conjugate
+=======================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: conjugate
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.conjugate.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

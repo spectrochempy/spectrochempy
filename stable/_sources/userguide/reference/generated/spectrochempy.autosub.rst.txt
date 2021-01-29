@@ -1,0 +1,13 @@
+
+spectrochempy.autosub
+=====================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: autosub
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.autosub.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

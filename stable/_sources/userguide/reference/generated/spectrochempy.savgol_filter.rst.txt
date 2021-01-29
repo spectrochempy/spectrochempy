@@ -1,0 +1,13 @@
+
+spectrochempy.savgol\_filter
+============================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: savgol_filter
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.savgol_filter.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>

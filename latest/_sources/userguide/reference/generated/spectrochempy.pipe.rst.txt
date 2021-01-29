@@ -1,0 +1,13 @@
+
+spectrochempy.pipe
+==================
+
+.. currentmodule:: spectrochempy
+
+.. autofunction:: pipe
+
+.. include:: /gettingstarted/gallery/backreferences/spectrochempy.pipe.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>
