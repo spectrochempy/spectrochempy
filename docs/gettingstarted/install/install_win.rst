@@ -113,20 +113,6 @@ can install Spectrochempy in a dedicated environment (recommended, steps 4. and
 
         (scpy) C:\<yourDefaultPath>> mamba install -c spectrocat/label/dev spectrochempy
 
-Install using pip
------------------
-
-|scpy| can be installed using `pip`. However, although the package is provided
-on Pypi, we are not supporting this method.
-
-.. sourcecode:: bat
-
-   (scpy)  C:\<yourDefaultPath>>  pip install spectrochempy
-
-Install a developper version from sources (advanced usage)
-----------------------------------------------------------
-
-Installation of the developper version is described here:  :ref:`develguide`.
 
 Check the Installation
 ------------------------
@@ -154,5 +140,4 @@ Spectrochempy is likely functional !
     © Copyright 2014-2020 - A.Travert & C.Fernandez @ LCS
 
 
-The recommended next step is to proceed to the :ref:`userguide` or the
-:ref:`tutorials`
+The recommended next step is to proceed to the :ref:`userguide`.

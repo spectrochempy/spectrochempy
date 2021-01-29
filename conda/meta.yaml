@@ -21,7 +21,7 @@ build:
   noarch: python
   script:
     - export SETUPTOOLS_SCM_PRETEND_VERSION={{ version }}
-    - {{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
+    - {{ PYTHON }} setup.py install
 
 requirements:
   host:

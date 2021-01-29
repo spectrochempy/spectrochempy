@@ -64,7 +64,7 @@ Create a conda environment
 
 * ``cd`` to the |scpy| source directory (*i.e.,* ``spectrochempy`` created previously)
 
-* Create and activate an environment using python v.3.x. 
+* Create and activate an environment using python v.3.x.
 
   This will create a new environment and will not touch
   any of your other existing environments, nor any existing Python installation.
@@ -73,7 +73,7 @@ Create a conda environment
   .. sourcecode:: bash
 
      $ conda update conda
-     $ conda install -c conda-forge mamba 
+     $ conda install -c conda-forge mamba
      $ mamba env create -n scpy -f environment.yml
      $ conda activate scpy
 
@@ -85,7 +85,7 @@ Install |scpy| in this environment
 
 .. sourcecode:: bash
 
-   (scpy) $ python -m pip install .
+   (scpy) $ python setup.py install
 
 
 At this point you should be able to ``import spectrochempy``:
@@ -108,13 +108,14 @@ To view your environments:
 
 .. sourcecode:: bash
 
-   conda env list
+   (scpy) $ conda env list
 
 To return to the base environment:
 
 .. sourcecode:: bash
 
-   conda deactivate
+   (scpy) $ conda deactivate
+
 
 Updating |scpy|
 ---------------
@@ -125,13 +126,13 @@ To update your local master branch, you can do:
 
 .. sourcecode:: bash
 
-    git pull upstream master --ff-only
+   (scpy) $ git pull upstream master --ff-only
 
-and if some changes are notified, run pip install again:
+and if some changes are notified, run setup.py again:
 
 .. sourcecode:: bash
 
-    python -m pip install .
+   (scpy) $ python setup.py install
 
 
 To go further and eventually contribute to the code on the upstream, you can consult the :ref:`develguide`.

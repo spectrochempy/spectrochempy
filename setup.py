@@ -9,7 +9,6 @@ import atexit
 import warnings
 import shutil
 from pathlib import Path
-import re
 
 from setuptools import setup, find_packages
 from setuptools.command.develop import develop as _develop
