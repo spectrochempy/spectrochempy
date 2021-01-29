@@ -50,19 +50,20 @@ def _install_mpl():
     for src in styles:
         dest = stylelib / src.name
         shutil.copy(src, dest)
-    print(f'Stylesheets installed in {stylesheets}')
+    print(f'Stylesheets installed in {dest}')
 
     # install fonts in mpl-data
     # https://stackoverflow.com/a/47743010
 
     # Copy files over
-    _dir_data = Path(re.sub('/matplotlibrc$', '', matplotlib_fname()))
+    #_dir_data = Path(matplotlib_fname()).parent
+    _dir_data = Path(mpl.rcParams['datapath'])
 
-    dir_source = Path(__file__).parent.parent.parent / 'scp_data' / 'fonts'
+    dir_source = Path("scp_data") / 'fonts'
     if not dir_source.exists():
         raise IOError(f'directory {dir_source} not found!')
 
-    dir_dest = _dir_data.parent / 'fonts' / 'ttf'
+    dir_dest = _dir_data / 'fonts' / 'ttf'
     if not dir_dest.exists():
         dir_dest.mkdir(parents=True, exist_ok=True)
 
