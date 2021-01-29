@@ -118,7 +118,7 @@ figure.subplot.wspace                    : 0.0
 figure.titlesize                         : 12.0
 figure.titleweight                       : normal
 font.cursive                             : Apple Chancery, Textile, Zapf Chancery, Sand, Script MT, Felipa, cursive
-font.family                              : serif
+font.family                              : monospace
 font.fantasy                             : Comic Sans MS, Chicago, Charcoal, ImpactWestern, Humor Sans, fantasy
 font.monospace                           : DejaVu Sans Mono, Andale Mono, Nimbus Mono L, Courier New, Courier, Fixed, Terminal, monospace
 font.sans-serif                          : DejaVu Sans, Lucida Grande, Verdana, Geneva, Lucid, Arial, Helvetica, Avant Garde, sans-serif
@@ -200,13 +200,13 @@ lines.solid_capstyle                     : round
 lines.solid_joinstyle                    : round
 
 markers.fillstyle                        : full
-mathtext.bf                              : dejavuserif:bold
+mathtext.bf                              : monospace:bold
 mathtext.cal                             : cursive
 mathtext.default                         : regular
 mathtext.fallback                        : cm
-mathtext.fontset                         : dejavuserif
-mathtext.it                              : dejavuserif:italic
-mathtext.rm                              : dejavuserif
+mathtext.fontset                         : custom
+mathtext.it                              : monospace:italic
+mathtext.rm                              : monospace
 mathtext.sf                              : sans\-serif
 mathtext.tt                              : monospace
 mpl_toolkits.legacy_colorbar             : True
