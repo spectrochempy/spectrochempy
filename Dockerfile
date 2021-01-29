@@ -27,7 +27,7 @@ RUN cd /home/$NB_USER/tmp/ && \
     conda install -c conda-forge mamba jinja2 && \
     python env_create.py -v $PY_VERSION $DEV $DASH $CANTERA scpy$PY_VERSION.yml && \
     # mamba env create -p $CONDA_DIR/envs/$CONDA_ENV -f scpy$PY_VERSION.yml && \
-    mamba env update -f scpy$PY_VERSION.yml && \
+    mamba env update --name base -f scpy$PY_VERSION.yml && \
     conda clean --all -f -y && \
     rm -rf /home/$NB_USER/tmp
 
@@ -36,6 +36,5 @@ RUN cd /home/$NB_USER/tmp/ && \
 COPY --chown=${NB_UID}:${NB_GID} . /home/$NB_USER/spectrochempy/
 
 RUN cd spectrochempy && \
-    conda install git && \
     git checkout $BRANCH && \
     python setup.py install
