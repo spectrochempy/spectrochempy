@@ -6,9 +6,20 @@ Version 0.2.5
 
 **TASKS**
 
--  Docker image building
+-  Docker image building.
 
--  cantera installation optional
+-  instructions to use it added in the documentation.
+
+**NEW FEATURES**
+
+-  cantera installation optional.
+
+-  use of pyqt for matplotlib optional.
+
+**BUGS FIXED**
+
+-  added fonts in order to solve missing fonts problems on linux and
+   windows.
 
 Version 0.2.4
 -------------
@@ -21,22 +32,22 @@ Version 0.2.4
 -  NDMath (mathematical and dataset creation routines) module revisited.
    *Still some work to be done*.
 
-**NEW FEATURE**
+**NEW FEATURES**
 
--  Changed CoordRange behavior
+-  Changed CoordRange behavior.
 
 **BUGS FIXED**
 
--  Fix a problem with importing the API
+-  Fix a problem with importing the API.
 
--  Fix dim handling in processing functions
+-  Fix dim handling in processing functions.
 
 Version 0.2.0
 -------------
 
 **NEW FEATURES**
 
--  Copyright update
+-  Copyright update.
 
 -  Requirements and env yml files updated.
 
@@ -48,56 +59,56 @@ Version 0.2.0
 
 -  Bruker TOPSPIN reader.
 
--  Added LabSpec reader for .txt exported files
+-  Added LabSpec reader for .txt exported files.
 
 -  Simplified the format of scp file - now zipped JSON files.
 
--  Rewriting json serialiser
+-  Rewriting json serialiser.
 
--  Add function pathclean to the API
+-  Add function pathclean to the API.
 
--  Add some array creation function to NDMath
+-  Add some array creation function to NDMath.
 
--  Refactoring plotting preferences system
+-  Refactoring plotting preferences system.
 
--  Baseline correction now accept single value for ranges
+-  Baseline correction now accept single value for ranges.
 
--  Add a waterfall plot
+-  Add a waterfall plot.
 
--  Refactoring plot2D and 1D methods
+-  Refactoring plot2D and 1D methods.
 
--  Added Simpson’rule integration
+-  Added Simpson’rule integration.
 
--  Addition of multiple coordinates to a dimension works better
+-  Addition of multiple coordinates to a dimension works better.
 
--  Added Linear coordinates (EXPERIMENTAL)
+-  Added Linear coordinates (EXPERIMENTAL).
 
--  Test for NDDataset dtype change at initialisation
+-  Test for NDDataset dtype change at initialisation.
 
--  Added subdir of txt files in ramandata
+-  Added subdir of txt files in ramandata.
 
--  Comparison of datasets improved in testing.py
+-  Comparison of datasets improved in testing.py.
 
--  Comparison of datasets and projects
+-  Comparison of datasets and projects.
 
 **BUGS FIXED**
 
 -  Dtype parameter was not taken into account during initialisation of
    NDArrays.
 
--  Math function behavior for coords
+-  Math function behavior for coords.
 
--  Color normalisation on the full range for colorscale
+-  Color normalisation on the full range for colorscale.
 
--  Configuration settings in the main application
+-  Configuration settings in the main application.
 
--  Compatibility read_zip with py3.7
+-  Compatibility read_zip with py3.7.
 
--  NDpanel temporary removed from the master
+-  NDpanel temporary removed from the master.
 
--  2D IRIS fixed
+-  2D IRIS fixed.
 
--  Trapz integration to return NDDataset
+-  Trapz integration to return NDDataset.
 
 -  Suppressed a forgotten sleep statement that was slowing down the
    SpectroChemPy initialisation.
@@ -115,9 +126,9 @@ Version 0.2.0
 
 -  Baseline and fitting tutorials.
 
--  Removed dependency of isotopes.py to pandas
+-  Removed dependency of isotopes.py to pandas.
 
 Version 0.1.x
 -------------
 
--  Initial development versions
+-  Initial development versions.
