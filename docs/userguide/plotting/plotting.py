@@ -22,7 +22,12 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.9.1
+#     version: 3.9.0
+#   widgets:
+#     application/vnd.jupyter.widget-state+json:
+#       state: {}
+#       version_major: 2
+#       version_minor: 0
 # ---
 
 # %% [markdown]

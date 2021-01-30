@@ -74,13 +74,13 @@ _ = nd.plot(imag=True, xlim=(0, 5000), color='r')
 _ = ndlb.plot(imag=True, data_only=True, clear=False, color='b')
 
 # %% [markdown]
-# If we want to display the apodization function, we can use the `retfunc=True` parameter.
+# If we want to display the apodization function, we can use the `retapod=True` parameter.
 
 # %%
 nd = dataset.copy()
 _ = nd.plot(xlim=(0., 5000.))
-ndlb, apod = nd.em(lb=300. * ur.Hz, inplace=False,
-                   retfunc=True)  # ndlb contain the processed data and apod the apodization function
+ndlb, apod = nd.em(lb=300. * ur.Hz, inplace=False, retapod=True)  # ndlb contain the processed data and apod the
+# apodization function
 _ = ndlb.plot(data_only=True, clear=False, color='b')
 _ = apod.plot(data_only=True, clear=False, color='m', linestyle='--')
 
@@ -91,7 +91,7 @@ _ = apod.plot(data_only=True, clear=False, color='m', linestyle='--')
 nd = dataset.copy()
 _ = nd.plot(xlim=(0., 5000.))
 ndlb, apod = nd.em(lb=300. * ur.Hz, shifted=1000 * ur.us, inplace=False,
-                   retfunc=True)  # ndlb contain the processed data and apod the apodization function
+                   retapod=True)  # ndlb contain the processed data and apod the apodization function
 _ = ndlb.plot(data_only=True, clear=False, color='b')
 _ = apod.plot(data_only=True, clear=False, color='m', linestyle='--')
 
@@ -105,7 +105,7 @@ _ = apod.plot(data_only=True, clear=False, color='m', linestyle='--')
 nd = dataset.copy()
 lb = 10.
 gb = 200.
-ndlg, apod = nd.gm(lb=lb, gb=gb, inplace=False, retfunc=True)
+ndlg, apod = nd.gm(lb=lb, gb=gb, inplace=False, retapod=True)
 _ = nd.plot(xlim=(0., 5000.))
 _ = ndlg.plot(data_only=True, clear=False, color='b')
 _ = apod.plot(data_only=True, clear=False, color='m', linestyle='--')
@@ -117,7 +117,7 @@ _ = apod.plot(data_only=True, clear=False, color='m', linestyle='--')
 nd = dataset.copy()
 lb = 10.
 gb = 200.
-ndlg, apod = nd.gm(lb=lb, gb=gb, shifted=2000 * ur.us, inplace=False, retfunc=True)
+ndlg, apod = nd.gm(lb=lb, gb=gb, shifted=2000 * ur.us, inplace=False, retapod=True)
 _ = nd.plot(xlim=(0., 5000.))
 _ = ndlg.plot(data_only=True, clear=False, color='b')
 _ = apod.plot(data_only=True, clear=False, color='m', linestyle='--')
@@ -155,7 +155,7 @@ _ = apod.plot(data_only=True, clear=False, color='m', linestyle='--')
 nd = dataset.copy()
 _ = nd.plot()
 
-new, curve = nd.qsin(ssb=3, retfunc=True)
+new, curve = nd.qsin(ssb=3, retapod=True)
 _ = curve.plot(color='r', clear=False)
 _ = new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color='r', clear=False)
 
@@ -163,7 +163,7 @@ _ = new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color='r', clear=Fal
 nd = dataset.copy()
 _ = nd.plot()
 
-new, curve = nd.sinm(ssb=1, retfunc=True)
+new, curve = nd.sinm(ssb=1, retapod=True)
 _ = curve.plot(color='b', clear=False)
 _ = new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color='b', clear=False)
 
@@ -171,7 +171,7 @@ _ = new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color='b', clear=Fal
 nd = dataset.copy()
 _ = nd.plot()
 
-new, curve = nd.sinm(ssb=3, retfunc=True)
+new, curve = nd.sinm(ssb=3, retapod=True)
 _ = curve.plot(color='b', ls='--', clear=False)
 _ = new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color='b', clear=False)
 
@@ -179,7 +179,7 @@ _ = new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color='b', clear=Fal
 nd = dataset.copy()
 _ = nd.plot()
 
-new, curve = nd.qsin(ssb=2, retfunc=True)
+new, curve = nd.qsin(ssb=2, retapod=True)
 _ = curve.plot(color='m', clear=False)
 _ = new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color='m', clear=False)
 
@@ -187,7 +187,7 @@ _ = new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color='m', clear=Fal
 nd = dataset.copy()
 _ = nd.plot()
 
-new, curve = nd.qsin(ssb=1, retfunc=True)
+new, curve = nd.qsin(ssb=1, retapod=True)
 _ = curve.plot(color='g', clear=False)
 _ = new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color='g', clear=False)
 

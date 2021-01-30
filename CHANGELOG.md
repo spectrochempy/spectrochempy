@@ -6,7 +6,7 @@
 
 * Check for new version on anaconda cloud spectrocat channel
 
-* 
+* NMR processing 
 
 ## Version 0.2.5
 

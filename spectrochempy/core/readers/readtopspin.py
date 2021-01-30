@@ -1019,6 +1019,7 @@ def _read_topspin(*args, **kwargs):
     if processed:
         meta.si = [si for si in data.shape]
         meta.isfreq = [True] * (parmode + 1)  # at least we assume this
+        meta.phc0 = [0] * data.ndim
 
     # this transformation is to make data coherent with bruker processsing
     if meta.iscomplex[-1]:
@@ -1043,6 +1044,10 @@ def _read_topspin(*args, **kwargs):
     meta.datatype = datatype
     meta.pathname = str(path)
 
+    # add two parameters needed for phasing
+    meta.pivot = [0] * data.ndim
+    meta.exptc = [0] * data.ndim
+
     # make the corresponding axis
     # debug_('Create coords...')
     coords = []
@@ -1065,7 +1070,6 @@ def _read_topspin(*args, **kwargs):
 
             coord = Coord(np.arange(size) * deltaf + first)
             coord.meta.larmor = meta.sfo1[axis]  # needed for ppm transformation
-            coord._origin = 'nmr'
             coord.ito('ppm')
             if meta.nuc1 is not None:
                 nuc1 = meta.nuc1[axis]
