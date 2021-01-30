@@ -2162,7 +2162,7 @@ class NDArray(HasTraits):
             units = ur.Unit(other)
         if self.has_units:
             try:
-                if new._origin in ['topspin', 'nmr']:
+                if new.meta.larmor: # _origin in ['topspin', 'nmr']:
                     # its nmr data
                     set_nmr_context(new.meta.larmor)
                     with ur.context('nmr'):

@@ -30,11 +30,17 @@ from scipy.interpolate import interp1d
 # ======================================================================================================================
 
 from nmrglue.process.proc_base import largest_power_of_2, zf_size
-from .. import error_
-from ...units import ur
-from ..dataset.ndmath import zeros_like
-from .apodization import hamming
+from spectrochempy.core import error_
+from spectrochempy.units import ur
+from spectrochempy.core.dataset.ndmath import zeros_like
+from spectrochempy.core.processors.apodization import hamming
 from .concatenate import concatenate
+
+
+_fft = lambda data: np.fft.fftshift(np.fft.fft(data), -1)
+_ifft = lambda data : np.fft.ifft(np.fft.ifftshift(data, -1))
+_fft_positive = lambda data : np.fft.fftshift(np.fft.ifft(data).astype(data.dtype)) * data.shape[-1]
+_ifft_positive = lambda data : np.fft.fft(np.fft.ifftshift(data, -1)) * data.shape[-1]
 
 
 def get_zpd(dataset, dim=-1, mode='max'):
@@ -70,7 +76,7 @@ def ifft(dataset, size=None, **kwargs):
     """
     Apply a inverse fast fourier transform.
 
-    For multidimensional NDDataset or NDPanels,
+    For multidimensional NDDataset,
     the apodization is by default performed on the last dimension.
 
     The data in the last dimension MUST be in frequency (or without dimension)
@@ -112,7 +118,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
     """
     Apply a complex fast fourier transform.
 
-    For multidimensional NDDataset or NDPanels,
+    For multidimensional NDDataset,
     the apodization is by default performed on the last dimension.
 
     The data in the last dimension MUST be in time-domain (or without dimension)
@@ -161,19 +167,26 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
     is_nmr = dataset.origin.lower() in ["topspin", ]
     is_ir = dataset.origin.lower() in ["omnic", "opus"]
 
-    # On which axis do we want to apodize? (get axis from arguments)
+    # On which axis do we want to apply transform (get axis from arguments)
     dim = kwargs.pop('dim', kwargs.pop('axis', -1))
     axis, dim = dataset.get_axis(dim, negative_axis=True)
+
+    # output dataset inplace or not
+    inplace = kwargs.pop('inplace', False)
+    if not inplace:  # default
+        new = dataset.copy()  # copy to be sure not to modify this dataset
+    else:
+        new = dataset
 
     # The last dimension is always the dimension on which we apply the fourier transform.
     # If needed, we swap the dimensions to be sure to be in this situation
     swaped = False
     if axis != -1:
-        dataset.swapdims(axis, -1, inplace=True)  # must be done in  place
+        new.swapdims(axis, -1, inplace=True)  # must be done in  place
         swaped = True
 
     # select the last coordinates
-    lastcoord = dataset.coordset[dim]
+    lastcoord = new.coordset[dim]
 
     if not inv and not lastcoord.dimensionless \
             and lastcoord.units.dimensionality != '[time]':
@@ -186,21 +199,14 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
                ' ifft processing was thus cancelled')
         return dataset
 
-    elif dataset.is_masked:
+    elif new.is_masked:
         error_('current fft or ifft processing does not support masked data as input.\n processing was thus cancelled')
 
     # TODO: other tests data spacing and so on.
 
-    # output dataset inplace or not
-    inplace = kwargs.pop('inplace')
-    if not inplace:  # default
-        new = dataset.copy()  # copy to be sure not to modify this dataset
-    else:
-        new = dataset  #
-
     # Can we use some metadata as for NMR spectra
     if is_nmr and not inv:
-        td = dataset.meta.td[-1]
+        td = new.meta.td[-1]
     else:
         td = lastcoord.size
 
@@ -234,14 +240,16 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
     # perform the fft
     if iscomplex and encoding in ['QSIM', 'DQD']:
         data = zf_size(new.data, size)
-        data = np.fft.fft(data)
-        data = np.fft.fftshift(data, -1)
+        data = _fft(data)
+
     elif inv:
         # we assume no special encoding for inverse fft transform
-        data = np.fft.ifftshift(new.data, -1)
-        data = np.fft.ifft(data)
+        data = _ifft(new.data)
 
     elif is_ir and not inv:
+
+        # TODO: revise this
+
         # subtract  DC
         new -= new.mean()
         # determine phase correction (Mertz)
@@ -264,14 +272,15 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         wavenumbers = np.fft.rfftfreq(mirrored.shape[1], 3.165090310992977e-05 * 2)
 
         spectrum = np.fft.rfft(mirrored.data)
-        plt.plot(wavenumbers, spectrum[0])
-        plt.show()
+        #plt.plot(wavenumbers, spectrum[0])
+        #plt.show()
         newx = np.arange(spectrum.shape[1]) * max(initx) / max(np.arange(spectrum.shape[1]))
         phase_angle = interpolate_phase_angle(newx)
         spectrum = spectrum.real * np.cos(phase_angle) + spectrum.imag * np.sin(phase_angle)
 
-        plt.plot(wavenumbers, spectrum[0])
-        plt.show()
+        #plt.plot(wavenumbers, spectrum[0])
+        #plt.show()
+
     else:
         raise NotImplementedError(encoding)
 
@@ -319,7 +328,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
 
     if is_nmr and not inv:
         newcoord.meta.larmor = bf1  # needed for ppm transformation
-        newcoord.origin = 'bruker'
+        ppm = kwargs.get('ppm', True)
         if ppm:
             newcoord.ito('ppm')
             if new.meta.nuc1 is not None:
@@ -341,14 +350,10 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
     if not new.meta.phased:
         new.meta.phased = [False] * new.ndim
 
-    if not new.meta.pivot:
-        new.meta.pivot = [float(abs(new).max().coordset[i].data) * new.coordset[i].units for i in
-                          range(new.ndim)]  # create pivot metadata
+    new.meta.pivot = [abs(new).coordset[i].max() for i in range(new.ndim)]  # create pivot metadata
 
     # applied the stored phases
-    new.pk(inplace=True)
-
-    new.meta.phased[-1] = True
+    new.ps(inplace=True)
 
     new.meta.readonly = True
 

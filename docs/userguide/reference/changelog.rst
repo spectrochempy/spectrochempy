@@ -1,6 +1,15 @@
 What's new
 ==========
 
+Version 0.2.6
+-------------
+
+**NEW FEATURES**
+
+-  Check for new version on anaconda cloud spectrocat channel
+
+-  NMR processing
+
 Version 0.2.5
 -------------
 
