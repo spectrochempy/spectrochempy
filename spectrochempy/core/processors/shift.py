@@ -22,51 +22,16 @@ import numpy as np
 from spectrochempy.units import ur, Quantity
 from spectrochempy.utils import EPSILON
 from spectrochempy.core import error_, warning_
-
+from spectrochempy.core.processors.utils import _units_agnostic_method
 
 pi = np.pi
-
-# ======================================================================================================================
-# Decorators
-# ======================================================================================================================
-
-def _shift_method(method):
-
-    @functools.wraps(method)
-    def wrapper(dataset, **kwargs):
-
-        # On which axis do we want to shift (get axis from arguments)
-        axis, dim = dataset.get_axis(**kwargs, negative_axis=True)
-
-        # output dataset inplace (by default) or not
-        if not kwargs.pop('inplace', False):
-            new = dataset.copy()  # copy to be sure not to modify this dataset
-        else:
-            new = dataset
-
-        swaped = False
-        if axis != -1:
-            new.swapdims(axis, -1, inplace=True)  # must be done in  place
-            swaped = True
-
-        data = method(new.data, **kwargs)
-        new._data = data
-        new.history = f'`{method.__name__}` shift performed on dimension `{dim}` with parameters: {kwargs}'
-
-        # restore original data order if it was swaped
-        if swaped:
-            new.swapdims(axis, -1, inplace=True)  # must be done inplace
-
-        return new
-
-    return wrapper
 
 
 # ======================================================================================================================
 # Public methods
 # ======================================================================================================================
 
-@_shift_method
+@_units_agnostic_method
 def rs(dataset, pts=0.0, **kwargs):
     """
     Right shift and zero fill.
@@ -103,7 +68,7 @@ def rs(dataset, pts=0.0, **kwargs):
     return data
 
 
-@_shift_method
+@_units_agnostic_method
 def ls(dataset, pts=0.0, **kwargs):
     """
     Left shift and zero fill.
@@ -178,7 +143,7 @@ def cs(dataset, pts=0.0, neg=False, **kwargs):
     return roll(dataset, pts, neg, **kwargs)
 
 
-@_shift_method
+@_units_agnostic_method
 def roll(dataset, pts=0.0, neg=False, **kwargs):
     """
     Roll dimensions.
@@ -221,7 +186,7 @@ def roll(dataset, pts=0.0, neg=False, **kwargs):
     return data
 
 
-@_shift_method
+@_units_agnostic_method
 def fsh(dataset, pts, **kwargs):
     """
     Frequency shift by Fourier transform. Negative signed phase correction.
@@ -265,7 +230,7 @@ def fsh(dataset, pts, **kwargs):
     return data
 
 
-@_shift_method
+@_units_agnostic_method
 def fsh2(dataset, pts, **kwargs):
     """
     Frequency Shift by Fourier transform. Positive signed phase correction.
