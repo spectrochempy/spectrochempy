@@ -1,0 +1,6 @@
+   Current data set:
+   NAME =	h3po4	EXPNO =	4	PROCNO = 1
+   USER =	nmrguest	DU    =	D:/u
+
+   Number   Integrated Region     Integral
+     1      1.743     -7.117         1.00000

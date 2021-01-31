@@ -12,7 +12,7 @@ dimension (1) of 2D arrays.
 Some part are adapted from NMRGLUE proc_base (New BSD License)
 """
 
-__all__ = ['ps', 'ps_exp', 'apk', 'autophase']
+__all__ = ['ps', 'ps_exp']
 __dataset_methods__ = __all__
 
 import functools
@@ -209,7 +209,7 @@ def ps_exp(dataset, phc0=0.0, pivot=0.0, exptc=0.0, **kwargs):
 
 # TODO: work on pk (below a copy from MASAI)
 @_phase_method
-def apk(source=None, options='', axis=-1):
+def _apk(source=None, options='', axis=-1):
     """
     Automatic or manual phasing
 
@@ -475,7 +475,7 @@ def _checkin(ph, bp):
     return ph
 
 
-def autophase(data, args, par):
+def _autophase(data, args, par):
     """
     Automatic phasing of 1D or 2D spectra
     """
