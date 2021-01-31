@@ -4,9 +4,9 @@
 
 **NEW FEATURES**
 
-* Check for new version on anaconda cloud spectrocat channel
+* Check for new version on anaconda cloud spectrocat channel.
 
-* NMR processing 
+* 1D NMR processing.
 
 ## Version 0.2.5
 

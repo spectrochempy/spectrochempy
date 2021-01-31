@@ -657,7 +657,10 @@ def _remove_digital_filter(dic, data):
     else:
         if dspfvs >= 14:  # DSPFVS greater than 14 give no phase correction.
             phase = 0.
-        else:  # loop up the phase in the table
+        else:
+            if dspfvs < 11:
+                dspfvs = 11  # default for DQD
+                # loop up the phase in the table
             if dspfvs not in bruker_dsp_table:
                 raise KeyError("dspfvs not in lookup table")
             if decim not in bruker_dsp_table[dspfvs]:
@@ -893,7 +896,7 @@ def _read_topspin(*args, **kwargs):
             data = data[..., :ntd]
 
         # Eliminate the digital filter
-        if kwargs.get('remove_digital_filter', True):
+        if kwargs.get('remove_digital_filter', True) and dic['acqus']['DECIM']>1:
             data = _remove_digital_filter(dic, data)
 
     else:
@@ -929,7 +932,7 @@ def _read_topspin(*args, **kwargs):
     keys = sorted(dic.keys())
 
     # we need the ndim of the data
-    parmode = int(dic['acqus']['PARMODE'])
+    parmode = int(dic['acqus'].get('PARMODE', data.ndim - 1))
     if parmode + 1 != data.ndim:
         raise KeyError(f"The NMR data were not read properly as the PARMODE+1 parameter ({parmode + 1}) doesn't fit"
                        f" the actual number of dimensions ({data.ndim})")
@@ -1027,6 +1030,8 @@ def _read_topspin(*args, **kwargs):
 
     # normalised amplitudes to ns=1 and rg=1
     def _norm(dat):
+        meta.ns = meta.get('ns', [1] * data.ndim)           # sometimes these parameters are not present
+        meta.rg = meta.get('rg', [1.0] * data.ndim)
         fac = float(meta.ns[-1]) * float(meta.rg[-1])
         meta.rgold = [meta.rg[-1]]
         meta.rg[-1] = 1.

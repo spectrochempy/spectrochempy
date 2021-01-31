@@ -119,4 +119,4 @@ print("size = ", spec.size)
 
 # %% [markdown]
 # ### Time domain baseline correction
-# See the dedicated [tutorial](../td_baseline).
+# See the dedicated [tutorial](td_baseline).

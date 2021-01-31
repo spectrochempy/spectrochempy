@@ -9,10 +9,9 @@
 A collection of NMR spectral processing functions which operate on the last
 dimension (1) of 2D arrays.
 
-Some part are adapted from NMRGLUE proc_base (New BSD License)
 """
 
-__all__ = ['ps', 'ps_exp']
+__all__ = ['pk', 'pk_exp']
 __dataset_methods__ = __all__
 
 import functools
@@ -113,7 +112,7 @@ def _phase_method(method):
 # ======================================================================================================================
 
 @_phase_method
-def ps(dataset, phc0=0.0, phc1=0.0, exptc=0.0, pivot=0.0, **kwargs):
+def pk(dataset, phc0=0.0, phc1=0.0, exptc=0.0, pivot=0.0, **kwargs):
     """
     Linear phase correction
 
@@ -167,7 +166,7 @@ def ps(dataset, phc0=0.0, phc1=0.0, exptc=0.0, pivot=0.0, **kwargs):
     return apod
 
 
-def ps_exp(dataset, phc0=0.0, pivot=0.0, exptc=0.0, **kwargs):
+def pk_exp(dataset, phc0=0.0, pivot=0.0, exptc=0.0, **kwargs):
     """
     Exponential Phase Correction
 
@@ -204,7 +203,7 @@ def ps_exp(dataset, phc0=0.0, pivot=0.0, exptc=0.0, **kwargs):
     pk : Automatic or manual phasing
     """
 
-    return ps(dataset, phc0=phc0, phc1=0, pivot=pivot, exptc=exptc)
+    return pk(dataset, phc0=phc0, phc1=0, pivot=pivot, exptc=exptc)
 
 
 # TODO: work on pk (below a copy from MASAI)

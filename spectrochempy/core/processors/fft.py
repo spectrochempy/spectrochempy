@@ -8,7 +8,7 @@
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
 
-__all__ = ["fft", "ifft", "get_zpd"]
+__all__ = ["fft", "ifft"]
 
 __dataset_methods__ = __all__
 
@@ -28,13 +28,12 @@ from scipy.interpolate import interp1d
 # Local imports
 # ======================================================================================================================
 
-from nmrglue.process.proc_base import largest_power_of_2, zf_size
 from spectrochempy.core import error_
 from spectrochempy.units import ur
 from spectrochempy.core.dataset.ndmath import zeros_like
 from spectrochempy.core.processors.apodization import hamming
-from .concatenate import concatenate
-
+from spectrochempy.core.processors.concatenate import concatenate
+from spectrochempy.utils import largest_power_of_2
 
 _fft = lambda data: np.fft.fftshift(np.fft.fft(data), -1)
 _ifft = lambda data : np.fft.ifft(np.fft.ifftshift(data, -1))
@@ -42,7 +41,7 @@ _fft_positive = lambda data : np.fft.fftshift(np.fft.ifft(data).astype(data.dtyp
 _ifft_positive = lambda data : np.fft.fft(np.fft.ifftshift(data, -1)) * data.shape[-1]
 
 
-def get_zpd(dataset, dim=-1, mode='max'):
+def _get_zpd(dataset, dim=-1, mode='max'):
     """
     Find the zero path difference (zpd) positions.
 
@@ -252,7 +251,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         # subtract  DC
         new -= new.mean()
         # determine phase correction (Mertz)
-        zpd = new.get_zpd()
+        zpd = _get_zpd(new)
         if not np.all(zpd[0] == zpd):
             raise ValueError("zpd should be at the same index")
         zpd = zpd[0]
@@ -334,9 +333,12 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
                 nuc1 = new.meta.nuc1[-1]
                 regex = r"([^a-zA-Z]+)([a-zA-Z]+)"
                 m = re.match(regex, nuc1)
-                mass = m[1]
-                name = m[2]
-                nucleus = '^{' + mass + '}' + name
+                if m is not None:
+                    mass = m[1]
+                    name = m[2]
+                    nucleus = '^{' + mass + '}' + name
+                else:
+                    nucleus = ""
             else:
                 nucleus = ""
             newcoord.title = fr"$\delta\ {nucleus}$"
@@ -355,7 +357,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         new.meta.pivot = [abs(new).coordset[i].max() for i in range(new.ndim)]  # create pivot metadata
 
         # applied the stored phases
-        new.ps(inplace=True)
+        new.pk(inplace=True)
 
         new.meta.readonly = True
 
@@ -473,24 +475,6 @@ def zf_size(data, size, mid=False):
     return zf_pad(data, int(size - data.shape[-1]), mid)
 
 
-def largest_power_of_2(value):
-    """
-    Find the nearest power of two equal to or larger than a value.
-
-    Parameters
-    ----------
-    value : int
-        Value to find nearest power of two equal to or larger than.
-
-    Returns
-    -------
-    pw : int
-        Power of 2.
-
-    """
-    return int(pow(2, np.ceil(np.log(value) / np.log(2))))
-
-
 def zf_auto(data, mid=False):
     """
     Zero fill to next largest power of two.
@@ -529,42 +513,12 @@ def mc_pow(data):
     """
     return data.real ** 2 + data.imag ** 2
 
-# Hadamard Transform functions
-def _int2bin(n, digits=8):
-    """
-    Integer to binary string
-    """
-    return "".join([str((n >> y) & 1) for y in range(digits - 1, -1, -1)])
 
-
-def _bin2int(s):
-    """
-    binary string to integer
-    """
-    o = 0
-    k = len(s) - 1
-    for i, v in enumerate(s):
-        o = o + int(v) * 2 ** (k - i)
-    return o
-
-
-def _gray(n):
-    """
-    Calculate n-bit gray code
-    """
-    g = [0, 1]
-    for i in range(1, int(n)):
-        mg = g + g[::-1]   # mirror the current code
-        # first bit 0/2**u for mirror
-        first = [0] * 2 ** (i) + [2 ** (i)] * 2 ** (i)
-        g = [mg[j] + first[j] for j in range(2 ** (i + 1))]
-    return g
-
-
-def ha(data):
+def hadamard(data):
     """
     Hadamard Transform
 
+    Copied for NMRGlue - ha
     Parameters
     ----------
     data : ndarray
@@ -585,6 +539,36 @@ def ha(data):
 
     """
     # implementation is a proof of concept and EXTEMEMLY SLOW
+
+    # Hadamard Transform functions
+    def _int2bin(n, digits=8):
+        """
+        Integer to binary string
+        """
+        return "".join([str((n >> y) & 1) for y in range(digits - 1, -1, -1)])
+
+    def _bin2int(s):
+        """
+        binary string to integer
+        """
+        o = 0
+        k = len(s) - 1
+        for i, v in enumerate(s):
+            o = o + int(v) * 2 ** (k - i)
+        return o
+
+    def _gray(n):
+        """
+        Calculate n-bit gray code
+        """
+        g = [0, 1]
+        for i in range(1, int(n)):
+            mg = g + g[::-1]  # mirror the current code
+            # first bit 0/2**u for mirror
+            first = [0] * 2 ** (i) + [2 ** (i)] * 2 ** (i)
+            g = [mg[j] + first[j] for j in range(2 ** (i + 1))]
+        return g
+
 
     # determind the order and final size of input vectors
     ord = int(np.ceil(np.log2(data.shape[-1])))  # Walsh/Hadamard order
