@@ -72,6 +72,9 @@ def _apodize_method(**units):
 
                     par = kwargs[key]
 
+                    if isinstance(par, str):
+                        par = Quantity(par)
+
                     if not isinstance(par, Quantity):
                         # set to default units
                         par *= Quantity(1., default_units)
