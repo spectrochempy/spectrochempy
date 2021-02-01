@@ -2727,7 +2727,7 @@ class NDMath(object):
         if other is not None:
 
             # First the units may require to be compatible, and if thet are sometimes they may need to be rescales
-            if othertype in ['NDDataset', 'Coord', 'LinearCoord']:
+            if othertype in ['NDDataset', 'Coord', 'LinearCoord', 'Quantity']:
 
                 # rescale according to units
                 if not other.unitless:
@@ -2770,9 +2770,9 @@ class NDMath(object):
 
                 # mask?
                 if ismasked:
-                    arg = other._umasked(other._data, other._mask)
+                    arg = other._umasked(other.data, other.mask)
                 else:
-                    arg = other._data
+                    arg = other.data
 
             else:
                 # Not a NDArray.
@@ -2780,7 +2780,6 @@ class NDMath(object):
                 # if it is a quantity than separate units and magnitude
                 if isinstance(other, Quantity):
                     arg = other.m
-
                 else:
                     # no units
                     arg = other
@@ -2788,6 +2787,7 @@ class NDMath(object):
             args.append(arg)
 
             otherq = reduce_(arg)
+
             if hasattr(other, 'units') and other.units is not None:
                 otherq = Quantity(otherq, other.units)
                 otherq = otherq.values if hasattr(otherq, 'values') else otherq  # case of nddataset, coord,
@@ -3063,7 +3063,11 @@ class NDMath(object):
 
             else:
                 data, units, mask, returntype = self._op(fm, objs)
-                self._data = data
+                if returntype != 'LinearCoord':
+                    self._data = data
+                else:
+                    from spectrochempy.core.dataset.coord import LinearCoord
+                    self = LinearCoord(data)
                 self._units = units
                 self._mask = mask
 
