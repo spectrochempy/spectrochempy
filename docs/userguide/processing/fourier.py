@@ -63,23 +63,21 @@ _ = fid.plot(show_complex=True, xlim=(0,15000))
 print("td = ", fid.size)
 
 # %% [markdown]
-# ## FFT 
-#
 # Now we perform a Fast Fourier Fransform (FFT):
 
 # %%
 spec = scp.fft(fid)
 _ = spec.plot(xlim=(100,-100))
-print("size = ", spec.size)
+print("si = ", spec.size)
 
 # %% [markdown]
-# Alternative notation
+# **Alternative notation**
 
 # %%
 k = 1024
 spec = fid.fft(size=32*k )
 _ = spec.plot(xlim=(100,-100))
-print("size = ", spec.size)
+print("si = ", spec.size)
 
 # %%
 newfid = spec.ifft()
@@ -110,13 +108,49 @@ _ = ax.legend(loc='lower right')
 #
 # ### Line broadening
 # Often before applying a FFT, some exponential multiplication `em`or other broadening filters such as `gm` or `sp` are applied. 
+# See the dedicated [apodization tutorial](apodization.ipynb).
 
 # %%
-fidtrans = fid.em(lb='300. Hz')
-spec = fidtrans.fft(size=32*1024)
-_ = spec.plot(xlim=(100,-100))
-print("size = ", spec.size)
+fid2 = fid.em(lb='50. Hz')
+spec2 = fid2.fft()
+_ = spec2.plot()
+_ = spec.plot(clear=False, xlim=(10,-5), c='r')  # superpose the unbroadened spectrum in red and show expansion.
+
+# %% [markdown]
+# ### Zero-filling
+
+# %%
+print("td = ", fid.size)
+
+# %%
+td = 32*1024  # size: 64 K
+fid3 = fid.zf_size(size=td)      
+print("new td = ", fid3.x.size)
+
+# %%
+spec3 = fid3.fft()
+_ = spec3.plot(xlim=(100,-100))
+print("si = ", spec3.size)
 
 # %% [markdown]
 # ### Time domain baseline correction
-# See the dedicated [tutorial](td_baseline).
+# See the dedicated [Time domain baseline correction tutorial](td_baseline.ipynb).
+
+# %% [markdown]
+# ## Magnitude calculation
+
+# %%
+ms = spec.mc()
+_ = ms.plot(xlim=(10,-10))
+_ = spec.plot(clear=False, xlim=(10,-10), c='r')
+
+# %% [markdown]
+# ## Power spectrum
+
+# %%
+mp = spec.ps()
+_ = (mp/mp.max()).plot()
+_ = (spec/spec.max()).plot(clear=False, xlim=(10,-10), c='r')  
+# Here we have normalized the spectra at their max value.
+
+# %%

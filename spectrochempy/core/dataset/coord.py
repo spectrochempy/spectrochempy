@@ -26,7 +26,7 @@ from traitlets import Bool, observe, All, Unicode
 # ----------------------------------------------------------------------------------------------------------------------
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndmath import NDMath, _set_operators
-from spectrochempy.utils import colored_output, NOMASK, spacing
+from spectrochempy.utils import colored_output, NOMASK
 
 
 # ======================================================================================================================
@@ -216,13 +216,6 @@ class Coord(NDMath, NDArray):
     def mask(self, val):
         # Coordinates cannot be masked. Set mask always to NOMASK
         self._mask = NOMASK
-
-    # ..................................................................................................................
-    @property
-    def spacing(self):
-        # return a scalar for the spacing of the coordinates (if they are uniformly spaced,
-        # else return an array of the differents spacings
-        return spacing(self.data) * self.units
 
     # NDmath methods
 
@@ -552,6 +545,8 @@ class LinearCoord(Coord):
             further restriction is placed on meta.
         copy : bool, optional
             Perform a copy of the passed object. Default is False.
+        fill_missing : bool
+            Create a linear coordinate array where missing data are masked.
 
         See Also
         --------
@@ -567,19 +562,29 @@ class LinearCoord(Coord):
 
         >>> c1 = LinearCoord(offset=2.0, increment=2.0, size=10)
 
-        Alternatively, linear coordinate can be created using the ``linear`` keyword
+        Alternatively, linear coordinates can be created using the ``linear`` keyword
 
         >>> c2 = Coord(linear=True, offset=2.0, increment=2.0, size=10)
         >>> assert (c1 == c2).all()
-        """
 
+        """
         super().__init__(*args, **kwargs)
 
-        if not self.linear:
+        # when data is present, we don't need offset and increment, nor size,
+        # we just do linear=True and these parameters are ignored
+
+        self._fill_missing = True
+
+        if self._data is not None:
+            self.linear = True
+
+        elif not self.linear:
             # in case it was not already a linear array
             self.offset = offset
             self.increment = increment
             self.linear = True
+
+
 
     # ..................................................................................................................
     def geomspace(self):
@@ -589,9 +594,13 @@ class LinearCoord(Coord):
     def logspace(self):
         raise NotImplementedError
 
-    # ======================================================================================================================
+    # ..................................................................................................................
+    def __dir__(self):
+        # remove some methods with respect to the full NDArray
+        # as they are not usefull for Coord.
+        return ['data', 'labels', 'units', 'meta', 'title', 'name', 'offset', 'increment', 'linear', 'size', 'roi']
 
-
+# ======================================================================================================================
 # Set the operators
 # ======================================================================================================================
 _set_operators(Coord, priority=50)

@@ -31,7 +31,7 @@ from traittypes import Array
 from spectrochempy.units import Unit, ur, Quantity, set_nmr_context
 from spectrochempy.core import info_, error_, print_
 from spectrochempy.utils import (TYPE_INTEGER, TYPE_FLOAT, Meta, MaskedConstant, MASKED, NOMASK, INPLACE, is_sequence,
-                                 is_number, numpyprintoptions, insert_masked_print, SpectroChemPyWarning,
+                                 is_number, numpyprintoptions, spacing, insert_masked_print, SpectroChemPyWarning,
                                  make_new_object, convert_to_html, get_user_and_node)
 
 # ======================================================================================================================
@@ -98,10 +98,10 @@ class NDArray(HasTraits):
     # metadata
 
     # Basic NDArray setting
-    _copy = Bool(False)  # by defaults we do not copy the data
-    # which means that if the same numpy array
-    # is used for too different NDArray, they
-    # will share it.
+    _copy = Bool(False)     # by default we do not copy the data
+                            # which means that if the same numpy array
+                            # is used for too different NDArray, they
+                            # will share it.
 
     _labels_allowed = Bool(True)  # Labels are allowed for the data, if the
 
@@ -678,8 +678,8 @@ class NDArray(HasTraits):
         # try to find an increment
         inc = np.diff(data)
         variation = (inc.max() - inc.min()) / data.ptp()
-        if variation < 1.0e-6:
-            self._increment = np.round(np.mean(inc), 6)
+        if variation < 1.0e-5:
+            self._increment = np.round(np.mean(inc), 5)
             self._offset = data[0]
             self._size = data.size
             self._data = None
@@ -1541,10 +1541,12 @@ class NDArray(HasTraits):
     @linear.setter
     def linear(self, val):
 
-        self._linear = val
-        if val and self.data is not None:
-            # linearisation of the data, if possible
-            self._linearize()
+        self._linear = val  # it val is true this provoque the linearization (
+        # see observe)
+
+        # if val and self._data is not None:
+        #     # linearisation of the data, if possible
+        #     self._linearize()
 
     # ..................................................................................................................
     @property
@@ -1955,6 +1957,13 @@ class NDArray(HasTraits):
                 return self._size
         else:
             return self._data.size
+
+    # ..................................................................................................................
+    @property
+    def spacing(self):
+        # return a scalar for the spacing of the coordinates (if they are uniformly spaced,
+        # else return an array of the differents spacings
+        return spacing(self.data) * self.units
 
     # ..................................................................................................................
     def squeeze(self, *dims, inplace=False, return_axis=False, **kwargs):

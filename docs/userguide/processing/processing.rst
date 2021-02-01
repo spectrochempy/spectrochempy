@@ -11,8 +11,8 @@ Processing
    slicing
    smoothing
    apodization
+   td_baseline
    fourier
    baseline
    interactive_baseline
-   td_baseline
    alignment

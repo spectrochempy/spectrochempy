@@ -28,7 +28,7 @@ from traitlets import HasTraits, List, Bool, Unicode, observe, All, validate, de
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
 from spectrochempy.core.dataset.ndarray import NDArray, DEFAULT_DIM_NAME
-from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.utils import is_sequence, colored_output, convert_to_html
 
 
@@ -170,8 +170,8 @@ class CoordSet(HasTraits):
                 if not isinstance(coord, CoordSet):
                     if isinstance(coord, list):
                         coord = CoordSet(*coord, sorted=False)
-                    else:
-                        coord = Coord(coord, copy=True)  # be sure to cast to the correct type
+                    elif not isinstance(coord, (Coord, LinearCoord)):  # else
+                        coord = Coord(coord, copy=True)
                 else:
                     coord = cpy.deepcopy(coord)
 
@@ -183,9 +183,9 @@ class CoordSet(HasTraits):
                         # use the provided list of dims
                         coord.name = dims.pop(-1)
 
-                self._append(
-                    coord)  # append the coord (but instead of append,  # use assignation -in _append - to fire the
-                # validation process )
+                self._append(coord)  # append the coord (but instead of append,
+                                     # use assignation -in _append - to fire the
+                                     # validation process )
 
         # now evaluate keywords argument
         # ------------------------------
@@ -194,7 +194,7 @@ class CoordSet(HasTraits):
             # remove the already used kwargs (Fix: deprecation warning in Traitlets - all args, kwargs must be used)
             del kwargs[key]
 
-            # prepare values to be either Coord or CoordSet
+            # prepare values to be either Coord, LinearCoord or CoordSet
             if isinstance(coord, (list, tuple)):
                 coord = CoordSet(*coord, sorted=False)  # make sure in this case it becomes a CoordSet instance
 
@@ -207,7 +207,12 @@ class CoordSet(HasTraits):
                 continue
 
             # Populate the coords with coord and coord's name.
-            if isinstance(coord, (NDArray, Coord, CoordSet)):
+            if isinstance(coord, NDArray):
+                if coord.implements('NDataset'): # use implements to avoir importing NDDataset
+                    # be sure to transform NDDataset to coord
+                    coord = Coord(coord, copy=True)
+
+            if isinstance(coord, (Coord, LinearCoord, CoordSet)): #NDArray,
                 if key in self.available_names or (
                         len(key) == 2 and key.startswith('_') and key[1] in list("123456789")):
                     # ok we can find it as a canonical name:

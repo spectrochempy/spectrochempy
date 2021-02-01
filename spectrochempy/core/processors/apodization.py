@@ -56,12 +56,8 @@ def _apodize_method(**units):
             x = new.coordset[dim]
 
             # check if the dimensionality is compatible with this kind of functions
-            if not x.unitless and not x.dimensionless and x.units.dimensionality != '[time]':
-                error_('This method apply only to dimensions with [time] or [dimensionless] dimensionality.\n'
-                       'Apodization processing was thus cancelled')
-                apod_arr = 1.
+            if x.unitless or x.dimensionless or x.units.dimensionality == '[time]':
 
-            else:
                 # Set correct units for parameters
                 dunits = dataset.coordset[dim].units
                 apod = {}
@@ -103,9 +99,14 @@ def _apodize_method(**units):
                     new.history = f'`{method.__name__}` apodization performed on dimension `{dim}` with parameters:' \
                                   + str(apod)
 
-            # Apply?
-            if not dryrun:
-                new._data *= apod_arr
+                # Apply?
+                if not dryrun:
+                    new._data *= apod_arr
+
+            else: # not (x.unitless or x.dimensionless or x.units.dimensionality != '[time]')
+                error_('This method apply only to dimensions with [time] or [dimensionless] dimensionality.\n'
+                       'Apodization processing was thus cancelled')
+                apod_arr = 1.
 
             # restore original data order if it was swaped
             if swaped:
