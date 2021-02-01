@@ -18,7 +18,7 @@ from quaternion import as_quat_array
 from nmrglue.fileio.bruker import read as read_fid, read_pdata, read_lowmem
 from spectrochempy.core import debug_
 from spectrochempy.utils.meta import Meta
-from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.units import ur
 from spectrochempy.utils.exceptions import deprecated
 from spectrochempy.core.readers.importer import Importer, importermethod
@@ -1062,9 +1062,11 @@ def _read_topspin(*args, **kwargs):
         if not meta.isfreq[axis]:
             # the axis is in time units
             dw = (1. / meta.sw_h[axis]).to('us')
-            coordpoints = np.arange(meta.td[axis])
-            coord = Coord(coordpoints * dw,
-                          title=f"F{axis + 1} acquisition time")  # TODO: use AQSEQ for >2D data
+            # coordpoints = np.arange(meta.td[axis])
+            # coord = Coord(coordpoints * dw,
+            #             title=f"F{axis + 1} acquisition time")  # TODO: use AQSEQ for >2D data
+            coord = LinearCoord(offset=0.0, increment=dw, units='us',
+                                size=meta.td[axis], title=f"F{axis + 1} acquisition time")
             coord.meta.larmor = meta.sfo1[axis]
             coords.append(coord)
         else:
@@ -1073,7 +1075,8 @@ def _read_topspin(*args, **kwargs):
             deltaf = -meta.sw_h[axis] / sizem
             first = meta.sfo1[axis] - meta.sf[axis] - deltaf * sizem / 2.
 
-            coord = Coord(np.arange(size) * deltaf + first)
+            # coord = Coord(np.arange(size) * deltaf + first)
+            coord = LinearCoord(offset=first, increment=deltaf, size=size)
             coord.meta.larmor = meta.sfo1[axis]  # needed for ppm transformation
             coord.ito('ppm')
             if meta.nuc1 is not None:

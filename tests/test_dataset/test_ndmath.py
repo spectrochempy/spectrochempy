@@ -15,7 +15,7 @@ from pint.errors import (DimensionalityError)
 from quaternion import quaternion
 
 from spectrochempy.core import info_, error_, print_
-from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndmath import _unary_ufuncs, _binary_ufuncs, _comp_ufuncs
@@ -350,6 +350,26 @@ def test_nddataset_add_mismatch_units():
         d1 += d2
     assert str(exc.value).startswith("Cannot convert from '[length]' to '[length] ** 2', "
                                      "Units must be compatible for the `iadd` operator")
+
+
+def test_nddataset_add_units_with_different_scale():
+    d1 = NDDataset(np.ones((5, 5)), units='m')
+    d2 = NDDataset(np.ones((5, 5)), units='cm')
+
+    x = d1 + 1. * ur.cm
+    assert x[0, 0].values == 1.01 * ur.m
+
+    d1 = NDDataset(np.ones((5, 5)), units='m')
+    d2 = NDDataset(np.ones((5, 5)), units='cm')
+    x = d1 + d2
+    assert x.data[0,0] == 1.01
+
+    x = d2 + d1
+    assert x.data[0,0] == 101.
+    d1 += d2
+    assert d1.data[0,0] == 1.01
+    d2 += d1
+    assert d2.data[0,0] == 102.
 
 
 def test_nddataset_add_mismatch_shape():
@@ -940,3 +960,34 @@ def test_nddataset_fancy_indexing():
     info_(a)
     a = nd[np.array([1, 0])]
     info_(a)
+
+
+def test_coord_add_units_with_different_scale():
+    d1 = Coord.arange(3., units='m')
+    d2 = Coord.arange(3., units='cm')
+
+    x = d1 + 1. * ur.cm
+    assert x.data[1] == 1.01
+
+    x = d1 + d2
+    assert x.data[1] == 1.01
+    x = d2 + d1
+    assert x.data[1] == 101.
+    d1 += d2
+    assert d1.data[1] == 1.01
+    d2 += d1
+    assert d2.data[1] == 102.
+
+
+def test_linearcoord_add_units_with_different_scale():
+    d1 = LinearCoord.arange(3., units='m')
+    d2 = LinearCoord.arange(3., units='cm')
+
+    x = d1 + d2
+    assert x.data[1] == 1.01
+    x = d2 + d1
+    assert x.data[1] == 101.
+    d1 += d2
+    assert d1.data[1] == 1.01
+    d2 += d1
+    assert d2.data[1] == 102.

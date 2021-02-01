@@ -51,52 +51,52 @@ def _phase_method(method):
         x = new.coordset[dim]
 
         # check if the dimensionality is compatible with this kind of functions
-        if not x.unitless and not x.dimensionless and x.units.dimensionality == '[time]':
+        if x.unitless or x.dimensionless or x.units.dimensionality != '[time]':
+
+            # extract inital phase from metadata
+            def _check_units(par, default_units, inv=False):
+                if not isinstance(par, Quantity):
+                    par *= Quantity(1., default_units)
+                elif inv:
+                    par = 1. / (1. / par).to(default_units)
+                else:
+                    par = par.to(default_units)
+                return par
+
+            # Set correct units for the parameters
+            dunits = dataset.coordset[dim].units
+
+            kwargs['phc0'] = (_check_units(kwargs.get('phc0', 0), 'degree') - new.meta.phc0[-1]).magnitude
+            kwargs['phc1'] = (_check_units(kwargs.get('phc1', 0), 'degree') - new.meta.phc1[-1]).magnitude
+            kwargs['pivot'] = _check_units(kwargs.get('pivot', new.meta.pivot[-1]), dunits).magnitude
+            kwargs['exptc'] = _check_units(kwargs.get('exptc', new.meta.get('exptc', [0]*new.ndim)[-1]),
+                                        dunits, inv=True).magnitude
+
+            if not new.meta.phased[-1]:
+                # initial phase from topspin have not yet been used
+                kwargs['phc0'] = -kwargs['phc0']
+                kwargs['phc1'] = -kwargs['phc1']
+
+            apod = method(new.data, **kwargs)
+
+            new._data *= apod
+            new.history = f'`{method.__name__}` applied to dimension `{dim}` with parameters: {kwargs}'
+
+            if not new.meta.phased[-1]:
+                new.meta.phased[-1] = True
+                kwargs['phc0'] = 0 * ur.degree
+                kwargs['phc1'] = 0 * ur.degree
+                new.meta.exptc[-1] = 0 * (1 / dunits)
+            else:
+                new.meta.phc0[-1] = kwargs['phc0'] * ur.degree
+                new.meta.phc1[-1] = kwargs['phc1'] * ur.degree
+                new.meta.exptc[-1] = kwargs['exptc'] * (1 / dunits)
+
+            new.meta.pivot[-1] = kwargs['pivot'] * dunits
+
+        else: # not (x.unitless or x.dimensionless or x.units.dimensionality != '[time]')
             error_('This method apply only to dimensions with [frequency] or [dimensionless] dimensionality.\n'
                    'Phase processing was thus cancelled')
-            apod_arr = 1.
-
-        # extract inital phase from metadata
-        def _check_units(par, default_units, inv=False):
-            if not isinstance(par, Quantity):
-                par *= Quantity(1., default_units)
-            elif inv:
-                par = 1. / (1. / par).to(default_units)
-            else:
-                par = par.to(default_units)
-            return par
-
-        # Set correct units for the parameters
-        dunits = dataset.coordset[dim].units
-
-        kwargs['phc0'] = (_check_units(kwargs.get('phc0', 0), 'degree') - new.meta.phc0[-1]).magnitude
-        kwargs['phc1'] = (_check_units(kwargs.get('phc1', 0), 'degree') - new.meta.phc1[-1]).magnitude
-        kwargs['pivot'] = _check_units(kwargs.get('pivot', new.meta.pivot[-1]), dunits).magnitude
-        kwargs['exptc'] = _check_units(kwargs.get('exptc', new.meta.get('exptc', [0]*new.ndim)[-1]),
-                                    dunits, inv=True).magnitude
-
-        if not new.meta.phased[-1]:
-            # initial phase from topspin have not yet been used
-            kwargs['phc0'] = -kwargs['phc0']
-            kwargs['phc1'] = -kwargs['phc1']
-
-        apod = method(new.data, **kwargs)
-
-        new._data *= apod
-        new.history = f'`{method.__name__}` applied to dimension `{dim}` with parameters: {kwargs}'
-
-        if not new.meta.phased[-1]:
-            new.meta.phased[-1] = True
-            kwargs['phc0'] = 0 * ur.degree
-            kwargs['phc1'] = 0 * ur.degree
-            new.meta.exptc[-1] = 0 * (1 / dunits)
-        else:
-            new.meta.phc0[-1] = kwargs['phc0'] * ur.degree
-            new.meta.phc1[-1] = kwargs['phc1'] * ur.degree
-            new.meta.exptc[-1] = kwargs['exptc'] * (1 / dunits)
-
-        new.meta.pivot[-1] = kwargs['pivot'] * dunits
-
 
         # restore original data order if it was swaped
         if swaped:

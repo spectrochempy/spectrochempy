@@ -8,7 +8,7 @@
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
 
-__all__ = ["fft", "ifft"]
+__all__ = ["fft", "ifft", "mc", "ps", "ht"]
 
 __dataset_methods__ = __all__
 
@@ -23,6 +23,7 @@ import matplotlib.pyplot as plt
 # ======================================================================================================================
 import numpy as np
 from scipy.interpolate import interp1d
+from scipy.signal import hilbert
 
 # ======================================================================================================================
 # Local imports
@@ -30,10 +31,14 @@ from scipy.interpolate import interp1d
 
 from spectrochempy.core import error_
 from spectrochempy.units import ur
+from spectrochempy.core.dataset.coord import LinearCoord
 from spectrochempy.core.dataset.ndmath import zeros_like
 from spectrochempy.core.processors.apodization import hamming
 from spectrochempy.core.processors.concatenate import concatenate
 from spectrochempy.utils import largest_power_of_2
+from spectrochempy.core.processors.utils import _units_agnostic_method
+from spectrochempy.core.processors.zero_filling import zf_size
+
 
 _fft = lambda data: np.fft.fftshift(np.fft.fft(data), -1)
 _ifft = lambda data : np.fft.ifft(np.fft.ifftshift(data, -1))
@@ -41,7 +46,7 @@ _fft_positive = lambda data : np.fft.fftshift(np.fft.ifft(data).astype(data.dtyp
 _ifft_positive = lambda data : np.fft.fft(np.fft.ifftshift(data, -1)) * data.shape[-1]
 
 
-def _get_zpd(dataset, dim=-1, mode='max'):
+def _get_zpd(dataset, dim='x', mode='max'):
     """
     Find the zero path difference (zpd) positions.
 
@@ -52,7 +57,7 @@ def _get_zpd(dataset, dim=-1, mode='max'):
     dataset : |NDDataset|
         The dataset on which to search for zpd
     dim: int or str, optional
-        Dimension along which to make the search. Default=-1.
+        Dimension along which to make the search. Default='x'.
     mode : enum('max','abs'), optional
         Mode of selection. Default = 'max'.
 
@@ -183,30 +188,36 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         new.swapdims(axis, -1, inplace=True)  # must be done in  place
         swaped = True
 
-    # select the last coordinates
-    lastcoord = new.coordset[dim]
+    # Select the last coordinates
+    x = new.coordset[dim]
 
-    if not inv and not lastcoord.dimensionless \
-            and lastcoord.units.dimensionality != '[time]':
+    # Performs some dimentionality checking
+    error = False
+    if not inv and not x.dimensionless and x.units.dimensionality != '[time]':
         error_('fft apply only to dimensions with [time] dimensionality or dimensionless coords\n'
                'fft processing was thus cancelled')
-        return dataset
+        error = True
 
-    elif inv and lastcoord.units.dimensionality != '1/[time]' and not lastcoord.dimensionless:
+    elif inv and x.units.dimensionality != '1/[time]' and not x.dimensionless:
         error_('ifft apply only to dimensions with [frequency] dimensionality or with ppm units '
                'or dimensionless coords.\n ifft processing was thus cancelled')
-        return dataset
+        error = True
 
+    # Should not be masked
     elif new.is_masked:
         error_('current fft or ifft processing does not support masked data as input.\n processing was thus cancelled')
+        error = True
 
-    # TODO: other tests data spacing and so on.
+    # Coordinates should be uniformly spaced (linear coordinate)
+    if not x.linear:
+        # try to linearize it
+        x.linear = True
 
     # Can we use some metadata as for NMR spectra
     if is_nmr and not inv:
         td = new.meta.td[-1]
     else:
-        td = lastcoord.size
+        td = x.size
 
     # if no size (or si) parameter then use the size of the data (size not used for inverse transform
     if size is None or inv:
@@ -237,8 +248,8 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
 
     # perform the fft
     if iscomplex and encoding in ['QSIM', 'DQD']:
-        data = zf_size(new.data, size)
-        data = _fft(data)
+        zf_size(new, size=size, inplace=True)
+        data = _fft(new.data)
 
     elif inv:
         # we assume no special encoding for inverse fft transform
@@ -298,7 +309,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         sfo1 = 1.0 * ur.Hz
         bf1 = sfo1
         sf = 0 * ur.Hz
-        dw = lastcoord.spacing
+        dw = x.spacing
         sw = 1. / dw
 
     if not inv:
@@ -307,20 +318,22 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         deltaf = -sw / sizem
         first = sfo1 - sf - deltaf * sizem / 2.
 
-        newcoord = type(lastcoord)(np.arange(size) * deltaf + first)
-        newcoord.name = lastcoord.name
+        # newcoord = type(x)(np.arange(size) * deltaf + first)
+        newcoord = LinearCoord.arange(size)
+        newcoord = newcoord * deltaf + first
+        newcoord.name = x.name
         newcoord.title = 'frequency'
         newcoord.ito("Hz")
 
     else:
         # frequency or ppm to time
-        sw = abs(lastcoord.data[-1] - lastcoord.data[0])
-        if lastcoord.units == 'ppm':
+        sw = abs(x.data[-1] - x.data[0])
+        if x.units == 'ppm':
             sw = bf1.to("Hz") * sw / 1.0e6
         deltat = 1. / sw
 
-        newcoord = type(lastcoord)(np.arange(size) * deltat)
-        newcoord.name = lastcoord.name
+        newcoord = LinearCoord.arange(size) * deltat
+        newcoord.name = x.name
         newcoord.title = 'time'
         newcoord.ito("s")
 
@@ -369,238 +382,39 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
     new.history = f'{s} applied on dimension {dim}'
     return new
 
+
 ft = fft
 ift = ifft
 
-def zf_inter(data, pts=1):
-    """
-    Zero fill between points.
-
-    Parameters
-    ----------
-    data : ndarray
-        Array of NMR data.
-    pts : int
-        Number zeros to add between points.
-
-    Returns
-    -------
-    ndata : ndarray
-        Array of NMR data to which `pts` zero have been added between all
-        points.
-
-    """
-    size = list(data.shape)
-    size[-1] = (pts + 1) * size[-1]
-    z = np.zeros(size, dtype=data.dtype)
-    z[..., ::pts + 1] = data[..., :]
-    return z
-
-
-def zf_pad(data, pad=0, mid=False):
-    """
-    Zero fill by padding with zeros.
-
-    Parameters
-    ----------
-    data : ndarray
-        Array of NMR data.
-    pad : int
-        Number of zeros to pad data with.
-    mid : bool
-        True to zero fill in middle of data.
-
-    Returns
-    -------
-    ndata : ndarray
-        Array of NMR data to which `pad` zeros have been appended to the end or
-        middle of the data.
-
-    """
-    size = list(data.shape)
-    size[-1] = int(pad)
-    z = np.zeros(size, dtype=data.dtype)
-
-    if mid:
-        h = int(data.shape[-1] / 2.0)
-        return np.concatenate((data[..., :h], z, data[..., h:]), axis=-1)
-    else:
-        return np.concatenate((data, z), axis=-1)
-
-
-zf = zf_pad
-
-
-def zf_double(data, n, mid=False):
-    """
-    Zero fill by doubling original data size once or multiple times.
-
-    Parameters
-    ----------
-    data : ndarray
-        Array of NMR data.
-    n : int
-        Number of times to double the size of the data.
-    mid : bool
-        True to zero fill in the middle of data.
-
-    Returns
-    -------
-    ndata : ndarray
-        Zero filled array of NMR data.
-
-    """
-    return zf_pad(data, int((data.shape[-1] * 2 ** n) - data.shape[-1]), mid)
-
-
-def zf_size(data, size, mid=False):
-    """
-    Zero fill to given size.
-
-    Parameters
-    ----------
-    data : ndarray
-        Array of NMR data.
-    size : int
-        Size of data after zero filling.
-    mid : bool
-        True to zero fill in the middle of data.
-
-    Returns
-    -------
-    ndata : ndarray
-        Zero filled array of NMR data.
-
-    """
-    return zf_pad(data, int(size - data.shape[-1]), mid)
-
-
-def zf_auto(data, mid=False):
-    """
-    Zero fill to next largest power of two.
-
-    Parameters
-    ----------
-    data : ndarray
-        Array of NMR data.
-    mid : bool
-        True to zero fill in the middle of data.
-
-    Returns
-    -------
-    ndata : ndarray
-        Zero filled array of NMR data.
-
-    """
-    return zf_size(data, largest_power_of_2(data.shape[-1]), mid)
-
 
 # Modulus Calculation
-def mc(data):
+@_units_agnostic_method
+def mc(dataset):
     """
     Modulus calculation.
 
     Calculates sqrt(real^2 + imag^2)
     """
-    return np.sqrt(data.real ** 2 + data.imag ** 2)
+    return np.sqrt(dataset.real ** 2 + dataset.imag ** 2)
 
 
-def mc_pow(data):
+@_units_agnostic_method
+def ps(dataset):
     """
-    Modulus calculation. Squared version.
+    Power spectrum. Squared version.
 
     Calculated real^2+imag^2
     """
-    return data.real ** 2 + data.imag ** 2
+    return dataset.real ** 2 + dataset.imag ** 2
 
 
-def hadamard(data):
-    """
-    Hadamard Transform
-
-    Copied for NMRGlue - ha
-    Parameters
-    ----------
-    data : ndarray
-        Array of NMR data.
-
-    Returns
-    -------
-    ndata : ndarray
-        Hadamard transform of NMR data.
-
-    Notes
-    -----
-    This function is very slow.  Implement a Fast Walsh-Hadamard Transform
-    with sequency/Walsh ordering (FWHT_w) will result in much faster tranforms.
-
-    http://en.wikipedia.org/wiki/Walsh_matrix
-    http://en.wikipedia.org/wiki/Fast_Hadamard_transform
-
-    """
-    # implementation is a proof of concept and EXTEMEMLY SLOW
-
-    # Hadamard Transform functions
-    def _int2bin(n, digits=8):
-        """
-        Integer to binary string
-        """
-        return "".join([str((n >> y) & 1) for y in range(digits - 1, -1, -1)])
-
-    def _bin2int(s):
-        """
-        binary string to integer
-        """
-        o = 0
-        k = len(s) - 1
-        for i, v in enumerate(s):
-            o = o + int(v) * 2 ** (k - i)
-        return o
-
-    def _gray(n):
-        """
-        Calculate n-bit gray code
-        """
-        g = [0, 1]
-        for i in range(1, int(n)):
-            mg = g + g[::-1]  # mirror the current code
-            # first bit 0/2**u for mirror
-            first = [0] * 2 ** (i) + [2 ** (i)] * 2 ** (i)
-            g = [mg[j] + first[j] for j in range(2 ** (i + 1))]
-        return g
-
-
-    # determind the order and final size of input vectors
-    ord = int(np.ceil(np.log2(data.shape[-1])))  # Walsh/Hadamard order
-    max = 2 ** ord
-
-    # zero fill to power of 2
-    pad = max - data.shape[-1]
-    zdata = zf(data, pad)
-
-    # Multiple each vector by the hadamard matrix
-    nat = np.zeros(zdata.shape, dtype=zdata.dtype)
-    H = scipy.linalg.hadamard(max)
-    nat = np.dot(zdata, H)
-    nat = np.array(nat, dtype=data.dtype)
-
-    # Bit-Reversal Permutation
-    s = [_int2bin(x, digits=ord)[::-1] for x in range(max)]
-    brp = [_bin2int(x) for x in s]
-    brp_data = np.take(nat, brp, axis=-1)
-
-    # Gray code permutation (bit-inverse)
-    gp = _gray(ord)
-    gp_data = np.take(brp_data, gp, axis=-1)
-
-    return gp_data
-
-
-def ht(data, N=None):
+@_units_agnostic_method
+def ht(dataset, N=None):
     """
     Hilbert transform.
 
     Reconstruct imaginary data via hilbert transform.
+    Copied from NMRGlue (BSD3 licence)
 
     Parameters
     ----------
@@ -615,21 +429,19 @@ def ht(data, N=None):
         NMR data which has been Hilvert transformed.
 
     """
-    # XXX come back and fix this when a sane version of scipy.signal.hilbert
-    # is included with scipy 0.8
-
     # create an empty output array
-    fac = N / data.shape[-1]
-    z = np.empty(data.shape, dtype=(data.flat[0] + data.flat[1] * 1.j).dtype)
-    if data.ndim == 1:
-        z[:] = scipy.signal.hilbert(data.real, N)[:data.shape[-1]] * fac
+    fac = N / dataset.shape[-1]
+    z = np.empty(dataset.shape, dtype=(dataset.flat[0] + dataset.flat[1] * 1.j).dtype)
+    if dataset.ndim == 1:
+        z[:] = hilbert(dataset.real, N)[:dataset.shape[-1]] * fac
     else:
-        for i, vec in enumerate(data):
-            z[i] = scipy.signal.hilbert(vec.real, N)[:data.shape[-1]] * fac
+        for i, vec in enumerate(dataset):
+            z[i] = hilbert(vec.real, N)[:dataset.shape[-1]] * fac
 
     # correct the real data as sometimes it changes
-    z.real = data.real
+    z.real = dataset.real
     return z
+
 
 # ======================================================================================================================
 if __name__ == '__main__':  # pragma: no cover

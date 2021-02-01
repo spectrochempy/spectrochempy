@@ -12,7 +12,7 @@ import pytest
 
 from spectrochempy.core import info_, print_
 from spectrochempy.core.dataset.ndarray import NDArray
-from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.units import ur, DimensionalityError
 
@@ -242,7 +242,10 @@ def test_coordset_del(coord0, coord1, coord2):
 
 
 def test_coordset_copy(coord0, coord1):
-    coordsa = CoordSet(coord0, coord1)
+
+    coord2 = LinearCoord.linspace(200., 300., 3, units="K", title='temperature')
+
+    coordsa = CoordSet(coord0, coord1, coord2)
 
     coordsb = coordsa.copy()
     assert coordsa == coordsb
@@ -258,6 +261,7 @@ def test_coordset_copy(coord0, coord1):
     import copy
     coords2 = copy.deepcopy(coords)
     assert coords == coords2
+
 
 
 def test_coordset_implements(coord0, coord1):
