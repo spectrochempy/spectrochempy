@@ -359,8 +359,6 @@ def test_nddataset_add_units_with_different_scale():
     x = d1 + 1. * ur.cm
     assert x[0, 0].values == 1.01 * ur.m
 
-    d1 = NDDataset(np.ones((5, 5)), units='m')
-    d2 = NDDataset(np.ones((5, 5)), units='cm')
     x = d1 + d2
     assert x.data[0,0] == 1.01
 
@@ -982,6 +980,9 @@ def test_coord_add_units_with_different_scale():
 def test_linearcoord_add_units_with_different_scale():
     d1 = LinearCoord.arange(3., units='m')
     d2 = LinearCoord.arange(3., units='cm')
+
+    x = d1 + 1. * ur.cm
+    assert x.data[1] == 1.01
 
     x = d1 + d2
     assert x.data[1] == 1.01
