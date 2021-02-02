@@ -9,6 +9,8 @@
 JSON utilities
 """
 from datetime import datetime
+from backports.datetime_fromisoformat import MonkeyPatch
+
 import pickle
 import base64
 import pathlib
@@ -18,6 +20,7 @@ from spectrochempy.units import Quantity, Unit
 
 __all__ = ['json_serialiser', 'json_decoder']
 
+MonkeyPatch.patch_fromisoformat()  # patch for 3.6
 
 # ======================================================================================================================
 # JSON UTILITIES
