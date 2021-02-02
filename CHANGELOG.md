@@ -10,11 +10,14 @@
 
 * Improved handling of Linear coordinates.
 
+
 **BUGS FIXED**
 
 * Adding quantity to datasets with different scaling (#199).
 
 * Math operates now on linear coordinates.
+
+* Compatibility with python 3.6
 
 ## Version 0.2.5
 
