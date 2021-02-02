@@ -88,6 +88,7 @@ dependencies:
     {%- if DEV or DASH%}
     - pip
     - pip:
+        - backports.datetime_fromisoformat
         {%- if DEV %}
         - autodoc_traits
         {%- endif %}

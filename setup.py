@@ -112,6 +112,7 @@ setup_args = dict(
                      "Intended Audience :: Science/Research",
                      "License :: CeCILL-B Free Software License Agreement (CECILL-B)",
                      "Operating System :: OS Independent",
+                     "Programming Language :: Python :: 3.6",
                      "Programming Language :: Python :: 3.7",
                      "Programming Language :: Python :: 3.8",
                      "Programming Language :: Python :: 3.9", ],
@@ -120,7 +121,7 @@ setup_args = dict(
         zip_safe=False,
         packages=find_packages() + packages,
         include_package_data=True,  # requirements
-        python_requires=">=3.7",
+        python_requires=">=3.6.9",
         setup_requires=['setuptools_scm', 'matplotlib'],
         install_requires=['matplotlib'],
         # install_requires(dev=__DEV__),
