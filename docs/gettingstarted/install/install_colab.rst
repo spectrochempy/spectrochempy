@@ -1,7 +1,7 @@
 .. _install_colab:
 
 ****************************************
-Install in Google Collaboratory (Colab)
+Install in Google Colaboratory (Colab)
 ****************************************
 
 May be you want to try or run SpectroChemPy without installing python and all the necessary packages on your computer.
@@ -20,7 +20,8 @@ automatically the output after execution, you can uncomment the last line.
 .. sourcecode:: ipython3
 
     from IPython.display import clear_output
-    !git clone https://github.com/spectrocat/spectrochempy.git
+    !rm -rf spectrochempy
+    !git clone https://github.com/spectrochempy/spectrochempy.git
     !pip install -r ./spectrochempy/requirements.txt
     !pip install ./spectrochempy
     # clear_output()
