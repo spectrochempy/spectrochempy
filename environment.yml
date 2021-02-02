@@ -43,7 +43,7 @@ dependencies:
     - jupyterlab
     - nodejs
 
-    
+
     # DEV: just for testing
     - pytest
     - pytest-doctestplus
@@ -71,7 +71,7 @@ dependencies:
     # - xarray
     # - datashader
     # - scikit-learn
-    
+
     - pip
     - pip:
         - autodoc_traits

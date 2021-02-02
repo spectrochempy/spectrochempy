@@ -98,8 +98,7 @@ def _apodize_method(**units):
 
                 if not dryrun:
                     new.history = f'`{method.__name__}` apodization performed on dimension `{dim}` with parameters:' \
-                                  + str(
-                            apod)
+                                  + str(apod)
 
                 # Apply?
                 if not dryrun:
@@ -482,9 +481,7 @@ def hamming(dataset, **kwargs):
     Functional form of apodization window :
 
     .. math::
-
-            w(n) = \alpha - \left(1 - \alpha\right) \cos\left(\frac{2\pi{n}}{M-1}\right)
-            qquad 0 \leq n \leq M-1
+       w(n) = \alpha - \left(1 - \alpha\right) \cos\left(\frac{2\pi{n}}{M-1}\right) qquad 0 \leq n \leq M-1
 
     where M is the number of point of the input dataset and :math:`\alpha` = 0.54.
 
@@ -536,8 +533,8 @@ def hann(dataset, **kwargs):
 
     Functional form of apodization window :
 
-    .. math:: w(n) = \alpha - \left(1 - \alpha\right) \cos\left(\frac{2\pi{n}}{M-1}\right)
-              \qquad 0 \leq n \leq M-1
+    .. math::
+       w(n) = \alpha - \left(1 - \alpha\right) \cos\left(\frac{2\pi{n}}{M-1}\right)\qquad 0 \leq n \leq M-1
 
     where M is the number of point of the input dataset and :math:`\alpha` = 0.5
 
@@ -636,9 +633,8 @@ def bartlett(dataset, **kwargs):
 
     The Bartlett window is defined as
 
-    .. math:: w(n) = \frac{2}{M-1} \left(
-              \frac{M-1}{2} - \left|n - \frac{M-1}{2}\right|
-              \right)
+    .. math::
+       w(n) = \frac{2}{M-1} \left(\frac{M-1}{2} - \left|n - \frac{M-1}{2}\right|\right)
 
     where M is the number of point of the input dataset.
 
