@@ -192,7 +192,10 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             _coordset = []
             for c, u, t in zip(coordset, coordunits, coordtitles):
                 if not isinstance(c, CoordSet):
-                    coord = Coord(c)
+                    if isinstance(c, LinearCoord):
+                        coord = LinearCoord(c)
+                    else:
+                        coord = Coord(c)
                     if u is not None:
                         coord.units = u
                     if t is not None:
@@ -413,7 +416,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
                 continue
 
             # For coord to be acceptable, we require at least a NDArray, a NDArray subclass or a CoordSet
-            if not isinstance(coord, (Coord, CoordSet)):
+            if not isinstance(coord, (LinearCoord, Coord, CoordSet)):
                 if isinstance(coord, NDArray):
                     coord = coords[k] = Coord(coord)
                 else:

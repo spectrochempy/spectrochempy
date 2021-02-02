@@ -360,14 +360,14 @@ def test_nddataset_add_units_with_different_scale():
     assert x[0, 0].values == 1.01 * ur.m
 
     x = d1 + d2
-    assert x.data[0,0] == 1.01
+    assert x.data[0, 0] == 1.01
 
     x = d2 + d1
-    assert x.data[0,0] == 101.
+    assert x.data[0, 0] == 101.
     d1 += d2
-    assert d1.data[0,0] == 1.01
+    assert d1.data[0, 0] == 1.01
     d2 += d1
-    assert d2.data[0,0] == 102.
+    assert d2.data[0, 0] == 102.
 
 
 def test_nddataset_add_mismatch_shape():

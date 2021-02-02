@@ -573,8 +573,6 @@ class LinearCoord(Coord):
         # when data is present, we don't need offset and increment, nor size,
         # we just do linear=True and these parameters are ignored
 
-        self._fill_missing = True
-
         if self._data is not None:
             self.linear = True
 
@@ -584,7 +582,20 @@ class LinearCoord(Coord):
             self.increment = increment
             self.linear = True
 
+    # ..................................................................................................................
+    def implements(self, name=None):
+        """
+        Utility to check if the current object implement `LinearCoord`.
 
+        Rather than isinstance(obj, Coord) use object.implements('LinearCoord').
+
+        This is useful to check type without importing the module
+        """
+
+        if name is None:
+            return 'LinearCoord'
+        else:
+            return name == 'LinearCoord'
 
     # ..................................................................................................................
     def geomspace(self):
@@ -599,6 +610,7 @@ class LinearCoord(Coord):
         # remove some methods with respect to the full NDArray
         # as they are not usefull for Coord.
         return ['data', 'labels', 'units', 'meta', 'title', 'name', 'offset', 'increment', 'linear', 'size', 'roi']
+
 
 # ======================================================================================================================
 # Set the operators

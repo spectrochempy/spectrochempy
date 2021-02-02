@@ -5,7 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
 # ======================================================================================================================
 
-import atexit
+# import atexit
 import warnings
 import shutil
 from pathlib import Path
@@ -22,7 +22,6 @@ def _install_mpl():
     """
     try:
         import matplotlib as mpl
-        from matplotlib import matplotlib_fname
         from matplotlib import get_cachedir
     except ImportError:
         warnings.warn('Sorry, but we cannot install mpl plotting styles and fonts '
@@ -55,7 +54,7 @@ def _install_mpl():
     # https://stackoverflow.com/a/47743010
 
     # Copy files over
-    #_dir_data = Path(matplotlib_fname()).parent
+    # _dir_data = Path(matplotlib_fname()).parent
     _dir_data = Path(mpl.rcParams['datapath'])
 
     dir_source = Path("scp_data") / 'fonts'

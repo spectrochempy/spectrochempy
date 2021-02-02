@@ -20,6 +20,7 @@ from spectrochempy.core import error_
 
 pi = np.pi
 
+
 # ======================================================================================================================
 # Decorators
 # ======================================================================================================================
@@ -97,13 +98,14 @@ def _apodize_method(**units):
 
                 if not dryrun:
                     new.history = f'`{method.__name__}` apodization performed on dimension `{dim}` with parameters:' \
-                                  + str(apod)
+                                  + str(
+                            apod)
 
                 # Apply?
                 if not dryrun:
                     new._data *= apod_arr
 
-            else: # not (x.unitless or x.dimensionless or x.units.dimensionality != '[time]')
+            else:  # not (x.unitless or x.dimensionless or x.units.dimensionality != '[time]')
                 error_('This method apply only to dimensions with [time] or [dimensionless] dimensionality.\n'
                        'Apodization processing was thus cancelled')
                 apod_arr = 1.
@@ -479,8 +481,10 @@ def hamming(dataset, **kwargs):
 
     Functional form of apodization window :
 
-    .. math:: w(n) = \alpha - \left(1 - \alpha\right) \cos\left(\frac{2\pi{n}}{M-1}\right)
-              \qquad 0 \leq n \leq M-1
+    .. math::
+
+            w(n) = \alpha - \left(1 - \alpha\right) \cos\left(\frac{2\pi{n}}{M-1}\right)
+            qquad 0 \leq n \leq M-1
 
     where M is the number of point of the input dataset and :math:`\alpha` = 0.54.
 

@@ -12,13 +12,14 @@ __all__ = ['read_topspin', 'read_bruker_nmr']
 __dataset_methods__ = __all__
 
 import re
+
 import numpy as np
 from quaternion import as_quat_array
 
 from nmrglue.fileio.bruker import read as read_fid, read_pdata, read_lowmem
 from spectrochempy.core import debug_
 from spectrochempy.utils.meta import Meta
-from spectrochempy.core.dataset.coord import Coord, LinearCoord
+from spectrochempy.core.dataset.coord import LinearCoord
 from spectrochempy.units import ur
 from spectrochempy.utils.exceptions import deprecated
 from spectrochempy.core.readers.importer import Importer, importermethod
@@ -27,8 +28,7 @@ from spectrochempy.core.readers.importer import Importer, importermethod
 # Constants
 # ======================================================================================================================
 
-FnMODE = ["undefined", "QF", "QSEQ", "TPPI", "STATES", "STATES-TPPI",
-          "ECHO-ANTIECHO"]
+FnMODE = ["undefined", "QF", "QSEQ", "TPPI", "STATES", "STATES-TPPI", "ECHO-ANTIECHO"]
 AQ_mod = ["QF", "QSIM", "QSEQ", "DQD"]
 
 nmr_valid_meta = [
@@ -36,15 +36,9 @@ nmr_valid_meta = [
         # ACQU
 
         # ('amp', ''),
-        ('aq_mod', ''),
-        ('aqseq', ''),
-        # ('aunm', ''),
+        ('aq_mod', ''), ('aqseq', ''),  # ('aunm', ''),
         # ('autopos', ''),
-        ('bf1', 'MHz'),
-        ('bf2', 'MHz'),
-        ('bf3', 'MHz'),
-        ('bf4', 'MHz'),
-        # ('bf5', 'MHz'),
+        ('bf1', 'MHz'), ('bf2', 'MHz'), ('bf3', 'MHz'), ('bf4', 'MHz'),  # ('bf5', 'MHz'),
         # ('bf6', 'MHz'),
         # ('bf7', 'MHz'),
         # ('bf8', 'MHz'),
@@ -52,8 +46,7 @@ nmr_valid_meta = [
         # ('cfdgtyp', ''),
         # ('cfrgtyp', ''),
         # ('chemstr', ''),
-        ('cnst', ''),
-        # ('cpdprg', ''),
+        ('cnst', ''),  # ('cpdprg', ''),
         # ('cpdprg1', ''),
         # ('cpdprg2', ''),
         # ('cpdprg3', ''),
@@ -64,9 +57,7 @@ nmr_valid_meta = [
         # ('cpdprg8', ''),
         # ('cpdprgb', ''),
         # ('cpdprgt', ''),
-        ('d', 's'),
-        ('date', ''),
-        # ('dbl', ''),
+        ('d', 's'), ('date', ''),  # ('dbl', ''),
         # ('dbp', ''),
         # ('dbp07', ''),
         # ('dbpnam0', ''),
@@ -79,13 +70,11 @@ nmr_valid_meta = [
         # ('dbpnam7', ''),
         # ('dbpoal', ''),
         # ('dbpoffs', ''),
-        ('de', 'us'),
-        # ('decbnuc', ''),
+        ('de', 'us'),  # ('decbnuc', ''),
         # ('decim', ''),
         # ('decnuc', ''),
         # ('decstat', ''),
-        ('digmod', ''),
-        # ('digtyp', ''),
+        ('digmod', ''),  # ('digtyp', ''),
         # ('dl', ''),
         # ('dp', ''),
         # ('dp07', ''),
@@ -116,8 +105,7 @@ nmr_valid_meta = [
         # ('fl2', ''),
         # ('fl3', ''),
         # ('fl4', ''),
-        ('fnmode', ''),
-        # ('fov', ''),
+        ('fnmode', ''),  # ('fov', ''),
         # ('fq1list', ''),
         # ('fq2list', ''),
         # ('fq3list', ''),
@@ -191,66 +179,41 @@ nmr_valid_meta = [
         # ('locphas', ''),
         # ('locshft', ''),
         # ('ltime', ''),
-        ('masr', 'Hz'),
-        # ('masrlst', ''),
+        ('masr', 'Hz'),  # ('masrlst', ''),
         # ('nbl', ''),
-        ('nc', ''),
-        ('ns', ''),
-        ('nuc1', ''),
-        ('nuc2', ''),
-        ('nuc3', ''),
-        ('nuc4', ''),
-        # ('nuc5', ''),
+        ('nc', ''), ('ns', ''), ('nuc1', ''), ('nuc2', ''), ('nuc3', ''), ('nuc4', ''),  # ('nuc5', ''),
         # ('nuc6', ''),
         # ('nuc7', ''),
         # ('nuc8', ''),
-        ('nuclei', ''),
-        ('nucleus', ''),
-        ('o1', 'Hz'),
-        ('o2', 'Hz'),
-        ('o3', 'Hz'),
-        ('o4', 'Hz'),
-        # ('o5', 'Hz'),
+        ('nuclei', ''), ('nucleus', ''), ('o1', 'Hz'), ('o2', 'Hz'), ('o3', 'Hz'), ('o4', 'Hz'),  # ('o5', 'Hz'),
         # ('o6', 'Hz'),
         # ('o7', 'Hz'),
         # ('o8', 'Hz'),
         # ('obschan', ''),
         # ('overflw', ''),
-        ('p', 'us'),
-        # ('paps', ''),
-        ('parmode', ''),
-        # ('pcpd', ''),
-        ('ph_ref', ''),
-        ('phcor', ''),
-        # ('php', ''),
-        ('pl', ''),
-        # ('powmod', ''),
+        ('p', 'us'),  # ('paps', ''),
+        ('parmode', ''),  # ('pcpd', ''),
+        ('ph_ref', ''), ('phcor', ''),  # ('php', ''),
+        ('pl', ''),  # ('powmod', ''),
         # ('pr', ''),
         # ('prechan', ''),
         # ('prgain', ''),
         # ('probhd', ''),
         # ('prosol', ''),
-        ('pulprog', ''),
-        ('pw', 'W'),
-        # ('qnp', ''),
+        ('pulprog', ''), ('pw', 'W'),  # ('qnp', ''),
         # ('qs', ''),
         # ('qsb', ''),
         # ('rd', ''),
         # ('recchan', ''),
         # ('recph', ''),
-        ('rg', ''),
-        # ('ro', ''),
+        ('rg', ''),  # ('ro', ''),
         # ('routwd1', ''),
         # ('routwd2', ''),
         # ('rpuused', ''),
         # ('rsel', ''),
         # ('s', ''),
         # ('seout', ''),
-        ('sfo1', 'MHz'),
-        ('sfo2', 'MHz'),
-        ('sfo3', 'MHz'),
-        ('sfo4', 'MHz'),
-        # ('sfo5', 'MHz'),
+        ('sfo1', 'MHz'), ('sfo2', 'MHz'), ('sfo3', 'MHz'), ('sfo4', 'MHz'),  # ('sfo5', 'MHz'),
         # ('sfo6', 'MHz'),
         # ('sfo7', 'MHz'),
         # ('sfo8', 'MHz'),
@@ -302,13 +265,10 @@ nmr_valid_meta = [
         # ('subnam7', ''),
         # ('subnam8', ''),
         # ('subnam9', ''),
-        ('sw', 'ppm'),
-        # ('sw_h', 'Hz'),
+        ('sw', 'ppm'),  # ('sw_h', 'Hz'),
         # ('swibox', ''),
-        ('td', ''),
-        # ('td0', ''),
-        ('te', 'K'),
-        # ('te2', ''),
+        ('td', ''),  # ('td0', ''),
+        ('te', 'K'),  # ('te2', ''),
         # ('te3', ''),
         # ('teg', ''),
         # ('tl', ''),
@@ -333,13 +293,7 @@ nmr_valid_meta = [
         # ('usera4', ''),
         # ('usera5', ''),
         # ('v9', ''),
-        ('valist', ''),
-        ('vclist', ''),
-        ('vd', ''),
-        ('vdlist', ''),
-        ('vplist', ''),
-        ('vtlist', ''),
-        # ('wbst', ''),
+        ('valist', ''), ('vclist', ''), ('vd', ''), ('vdlist', ''), ('vplist', ''), ('vtlist', ''),  # ('wbst', ''),
         # ('wbsw', ''),
         # ('ws', ''),
         # ('xgain', ''),
@@ -363,8 +317,7 @@ nmr_valid_meta = [
         # ('alpha', ''),
         # ('ampcoil', ''),
         # ('anavpt', ''),
-        ('aqorder', ''),
-        # ('assfac', ''),
+        ('aqorder', ''),  # ('assfac', ''),
         # ('assfaci', ''),
         # ('assfacx', ''),
         # ('asswid', ''),
@@ -400,8 +353,7 @@ nmr_valid_meta = [
         # ('gb', 'Hz' ),
         # ('gpnam', ''),
         # ('grpdly', ''),
-        ('inf', 'us'),
-        # ('intbc', ''),
+        ('inf', 'us'),  # ('intbc', ''),
         # ('intscl', ''),
         # ('isen', ''),
         # ('lb', 'Hz' ),
@@ -410,8 +362,7 @@ nmr_valid_meta = [
         # ('locsw', ''),
         # ('lpbin', ''),
         # ('maxi', ''),
-        ('mc2', ''),
-        # ('mdd_csalg', ''),
+        ('mc2', ''),  # ('mdd_csalg', ''),
         # ('mdd_cslambda', ''),
         # ('mdd_csniter', ''),
         # ('mdd_csnorm', ''),
@@ -455,9 +406,7 @@ nmr_valid_meta = [
         # ('pc', ''),
         # ('pexsel', ''),
         # ('ph_mod', ''),
-        ('phc0', 'deg'),
-        ('phc1', 'deg'),
-        # ('phlist', ''),
+        ('phc0', 'deg'), ('phc1', 'deg'),  # ('phlist', ''),
         # ('pknl', ''),
         # ('plstep', ''),
         # ('plstrt', ''),
@@ -477,11 +426,9 @@ nmr_valid_meta = [
         # ('recpre', ''),
         # ('recprfx', ''),
         # ('recsel', ''),
-        ('reverse', ''),
-        # ('s_dev', ''),
+        ('reverse', ''),  # ('s_dev', ''),
         # ('selrec', ''),
-        ('sf', 'MHz'),
-        # ('si', ''),
+        ('sf', 'MHz'),  # ('si', ''),
         # ('sigf1', ''),
         # ('sigf2', ''),
         # ('sino', ''),
@@ -497,8 +444,7 @@ nmr_valid_meta = [
         # ('stsi', ''),
         # ('stsr', ''),
         # ('subnam', ''),
-        ('sw_p', ''),
-        # ('swfinal', ''),
+        ('sw_p', ''),  # ('swfinal', ''),
         # ('symm', ''),
         # ('tdeff', ''),
         # ('tdoff', ''),
@@ -520,7 +466,7 @@ nmr_valid_meta = [
         # ('xdim', ''),
         # ('ymax_p', ''),
         # ('ymin_p', ''),
-        ]
+]
 
 # ======================================================================================================================
 # Digital filter functions
@@ -542,91 +488,22 @@ nmr_valid_meta = [
 # Using this the un-rounded table was created by checking possible unrounded
 # fracions which would round to those in the original table.
 
-bruker_dsp_table = {
-        10: {
-                2: 44.75,
-                3: 33.5,
-                4: 66.625,
-                6: 59.083333333333333,
-                8: 68.5625,
-                12: 60.375,
-                16: 69.53125,
-                24: 61.020833333333333,
-                32: 70.015625,
-                48: 61.34375,
-                64: 70.2578125,
-                96: 61.505208333333333,
-                128: 70.37890625,
-                192: 61.5859375,
-                256: 70.439453125,
-                384: 61.626302083333333,
-                512: 70.4697265625,
-                768: 61.646484375,
-                1024: 70.48486328125,
-                1536: 61.656575520833333,
-                2048: 70.492431640625,
-                },
-        11: {
-                2: 46.,
-                3: 36.5,
-                4: 48.,
-                6: 50.166666666666667,
-                8: 53.25,
-                12: 69.5,
-                16: 72.25,
-                24: 70.166666666666667,
-                32: 72.75,
-                48: 70.5,
-                64: 73.,
-                96: 70.666666666666667,
-                128: 72.5,
-                192: 71.333333333333333,
-                256: 72.25,
-                384: 71.666666666666667,
-                512: 72.125,
-                768: 71.833333333333333,
-                1024: 72.0625,
-                1536: 71.916666666666667,
-                2048: 72.03125
-                },
-        12: {
-                2: 46.,
-                3: 36.5,
-                4: 48.,
-                6: 50.166666666666667,
-                8: 53.25,
-                12: 69.5,
-                16: 71.625,
-                24: 70.166666666666667,
-                32: 72.125,
-                48: 70.5,
-                64: 72.375,
-                96: 70.666666666666667,
-                128: 72.5,
-                192: 71.333333333333333,
-                256: 72.25,
-                384: 71.666666666666667,
-                512: 72.125,
-                768: 71.833333333333333,
-                1024: 72.0625,
-                1536: 71.916666666666667,
-                2048: 72.03125
-                },
-        13: {
-                2: 2.75,
-                3: 2.8333333333333333,
-                4: 2.875,
-                6: 2.9166666666666667,
-                8: 2.9375,
-                12: 2.9583333333333333,
-                16: 2.96875,
-                24: 2.9791666666666667,
-                32: 2.984375,
-                48: 2.9895833333333333,
-                64: 2.9921875,
-                96: 2.9947916666666667
-                }
-        }
+bruker_dsp_table = {10: {2: 44.75, 3: 33.5, 4: 66.625, 6: 59.083333333333333, 8: 68.5625, 12: 60.375, 16: 69.53125,
+                         24: 61.020833333333333, 32: 70.015625, 48: 61.34375, 64: 70.2578125, 96: 61.505208333333333,
+                         128: 70.37890625, 192: 61.5859375, 256: 70.439453125, 384: 61.626302083333333,
+                         512: 70.4697265625, 768: 61.646484375, 1024: 70.48486328125, 1536: 61.656575520833333,
+                         2048: 70.492431640625, },
+                    11: {2: 46., 3: 36.5, 4: 48., 6: 50.166666666666667, 8: 53.25, 12: 69.5, 16: 72.25,
+                         24: 70.166666666666667, 32: 72.75, 48: 70.5, 64: 73., 96: 70.666666666666667, 128: 72.5,
+                         192: 71.333333333333333, 256: 72.25, 384: 71.666666666666667, 512: 72.125,
+                         768: 71.833333333333333, 1024: 72.0625, 1536: 71.916666666666667, 2048: 72.03125},
+                    12: {2: 46., 3: 36.5, 4: 48., 6: 50.166666666666667, 8: 53.25, 12: 69.5, 16: 71.625,
+                         24: 70.166666666666667, 32: 72.125, 48: 70.5, 64: 72.375, 96: 70.666666666666667, 128: 72.5,
+                         192: 71.333333333333333, 256: 72.25, 384: 71.666666666666667, 512: 72.125,
+                         768: 71.833333333333333, 1024: 72.0625, 1536: 71.916666666666667, 2048: 72.03125},
+                    13: {2: 2.75, 3: 2.8333333333333333, 4: 2.875, 6: 2.9166666666666667, 8: 2.9375,
+                         12: 2.9583333333333333, 16: 2.96875, 24: 2.9791666666666667, 32: 2.984375,
+                         48: 2.9895833333333333, 64: 2.9921875, 96: 2.9947916666666667}}
 
 
 def _remove_digital_filter(dic, data):
@@ -659,8 +536,7 @@ def _remove_digital_filter(dic, data):
             phase = 0.
         else:
             if dspfvs < 11:
-                dspfvs = 11  # default for DQD
-                # loop up the phase in the table
+                dspfvs = 11  # default for DQD  # loop up the phase in the table
             if dspfvs not in bruker_dsp_table:
                 raise KeyError("dspfvs not in lookup table")
             if decim not in bruker_dsp_table[dspfvs]:
@@ -668,8 +544,7 @@ def _remove_digital_filter(dic, data):
             phase = bruker_dsp_table[dspfvs][decim]
     # fft
     si = data.shape[-1]
-    pdata = np.fft.fftshift(np.fft.fft(data, si, axis=-1), -1) / float(
-            si / 2)
+    pdata = np.fft.fftshift(np.fft.fft(data, si, axis=-1), -1) / float(si / 2)
     pdata = (pdata.T - pdata.T[0]).T  # TODO: this allow generally to
     # TODO: remove Bruker smiles, not so sure actually
 
@@ -679,8 +554,7 @@ def _remove_digital_filter(dic, data):
     pdata = pdata * np.exp(ph)
 
     # ifft
-    data = np.fft.ifft(np.fft.ifftshift(pdata, -1), si, axis=-1) * float(
-            si / 2)
+    data = np.fft.ifft(np.fft.ifftshift(pdata, -1), si, axis=-1) * float(si / 2)
 
     # remove last points * 2
     rp = 2 * (phase // 2)
@@ -831,7 +705,7 @@ def _read_topspin(*args, **kwargs):
     debug_('Bruker TOPSPIN import')
 
     dataset, path = args
-#    content = kwargs.get('content', None)
+    #    content = kwargs.get('content', None)
 
     # is-it a processed dataset (1r, 2rr ....
     processed = True if path.match('pdata/*/*') else False
@@ -896,20 +770,18 @@ def _read_topspin(*args, **kwargs):
             data = data[..., :ntd]
 
         # Eliminate the digital filter
-        if kwargs.get('remove_digital_filter', True) and dic['acqus']['DECIM']>1:
+        if kwargs.get('remove_digital_filter', True) and dic['acqus']['DECIM'] > 1:
             data = _remove_digital_filter(dic, data)
 
     else:
 
-        dic, datalist = read_pdata(f_procno, acqus_files=acqus_files,
-                                   procs_files=procs_files, all_components=True)
+        dic, datalist = read_pdata(f_procno, acqus_files=acqus_files, procs_files=procs_files, all_components=True)
         if isinstance(datalist, list):
             if datalist[0].ndim == 2:
                 data, dataRI, dataIR, dataII = datalist
                 # make quaternion
                 shape = data.shape
-                data = as_quat_array(
-                        list(zip(data.flatten(), dataRI.flatten(), dataIR.flatten(), dataII.flatten())))
+                data = as_quat_array(list(zip(data.flatten(), dataRI.flatten(), dataIR.flatten(), dataII.flatten())))
                 data = data.reshape(shape)
 
             elif datalist[0].ndim == 1:
@@ -1030,7 +902,7 @@ def _read_topspin(*args, **kwargs):
 
     # normalised amplitudes to ns=1 and rg=1
     def _norm(dat):
-        meta.ns = meta.get('ns', [1] * data.ndim)           # sometimes these parameters are not present
+        meta.ns = meta.get('ns', [1] * data.ndim)  # sometimes these parameters are not present
         meta.rg = meta.get('rg', [1.0] * data.ndim)
         fac = float(meta.ns[-1]) * float(meta.rg[-1])
         meta.rgold = [meta.rg[-1]]
@@ -1065,8 +937,8 @@ def _read_topspin(*args, **kwargs):
             # coordpoints = np.arange(meta.td[axis])
             # coord = Coord(coordpoints * dw,
             #             title=f"F{axis + 1} acquisition time")  # TODO: use AQSEQ for >2D data
-            coord = LinearCoord(offset=0.0, increment=dw, units='us',
-                                size=meta.td[axis], title=f"F{axis + 1} acquisition time")
+            coord = LinearCoord(offset=0.0, increment=dw, units='us', size=meta.td[axis],
+                                title=f"F{axis + 1} acquisition time")
             coord.meta.larmor = meta.sfo1[axis]
             coords.append(coord)
         else:
@@ -1108,36 +980,18 @@ def _read_topspin(*args, **kwargs):
 
     return dataset
 
-    # list_meta.append(meta)
-    # list_coords.append(coords)
-    # list_data.append(data)
+    # list_meta.append(meta)  # list_coords.append(coords)  # list_data.append(data)
 
-    # # store also the varpars of the series
-    # varpars = kargs.get('varpars')
-    # if isinstance(varpars, str):
-    #     varpars = varpars.split()
-    #     if len(varpars) == 1:
-    #         # this should be one of the dic parameters
-    #         lvarpars.append(adic.par[varpars[0]])  # store the variable
-    #     elif len(varpars) == 2:
-    #         lvarpars.append(adic.par[varpars[0]][
-    #                             int(varpars[1])])  # store the variable
-    #     ldates.append(adic.par.DATE)  # and the date
-    # elif isinstance(varpars, list):
-    #     # this should be a list of parameters
-    #     p = []
-    #     for var in varpars:
-    #         p.append(adic.par[var])
-    #     lvarpars.append(p)  # store the variable
-    #     ldates.append(adic.par.DATE)  # and the date
+    # # store also the varpars of the series  # varpars = kargs.get('varpars')  # if isinstance(varpars, str):  #  #
+    # varpars = varpars.split()  #     if len(varpars) == 1:  #         # this should be one of the dic parameters  #
+    # lvarpars.append(adic.par[varpars[0]])  # store the variable  #     elif len(varpars) == 2:  #  #
+    # lvarpars.append(adic.par[varpars[0]][  #                             int(varpars[1])])  # store the variable  #
+    # ldates.append(adic.par.DATE)  # and the date  # elif isinstance(varpars, list):  #     # this should be a list
+    # of parameters  #     p = []  #     for var in varpars:  #         p.append(adic.par[var])  #  #
+    # lvarpars.append(p)  # store the variable  #     ldates.append(adic.par.DATE)  # and the date
 
-    # store temporarily these data
-    # debug_('data read finished : type : %s' % datatype)
-    #
-    #
-    #
-    # if len(list_data) == 1:
-    # # debug_('One experiment read. Make it the current dataset')
+    # store temporarily these data  # debug_('data read finished : type : %s' % datatype)  #  #  #  # if len(  #
+    # list_data) == 1:  # # debug_('One experiment read. Make it the current dataset')
 
 # def _read_topspin_dir(*args, **kwargs):
 #

@@ -170,7 +170,7 @@ class CoordSet(HasTraits):
                 if not isinstance(coord, CoordSet):
                     if isinstance(coord, list):
                         coord = CoordSet(*coord, sorted=False)
-                    elif not isinstance(coord, (Coord, LinearCoord)):  # else
+                    elif not isinstance(coord, LinearCoord):  # else
                         coord = Coord(coord, copy=True)
                 else:
                     coord = cpy.deepcopy(coord)
@@ -207,12 +207,7 @@ class CoordSet(HasTraits):
                 continue
 
             # Populate the coords with coord and coord's name.
-            if isinstance(coord, NDArray):
-                if coord.implements('NDataset'): # use implements to avoir importing NDDataset
-                    # be sure to transform NDDataset to coord
-                    coord = Coord(coord, copy=True)
-
-            if isinstance(coord, (Coord, LinearCoord, CoordSet)): #NDArray,
+            if isinstance(coord, (NDArray, Coord, LinearCoord, CoordSet)):  # NDArray,
                 if key in self.available_names or (
                         len(key) == 2 and key.startswith('_') and key[1] in list("123456789")):
                     # ok we can find it as a canonical name:

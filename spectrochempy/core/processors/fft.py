@@ -16,7 +16,6 @@ __dataset_methods__ = __all__
 # Standard python imports
 # ======================================================================================================================
 import re
-import matplotlib.pyplot as plt
 
 # ======================================================================================================================
 # Third party imports
@@ -24,10 +23,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy.signal import hilbert
-
-# ======================================================================================================================
-# Local imports
-# ======================================================================================================================
 
 from spectrochempy.core import error_
 from spectrochempy.units import ur
@@ -39,11 +34,15 @@ from spectrochempy.utils import largest_power_of_2
 from spectrochempy.core.processors.utils import _units_agnostic_method
 from spectrochempy.core.processors.zero_filling import zf_size
 
+# ======================================================================================================================
+# Local imports
+# ======================================================================================================================
+
 
 _fft = lambda data: np.fft.fftshift(np.fft.fft(data), -1)
-_ifft = lambda data : np.fft.ifft(np.fft.ifftshift(data, -1))
-_fft_positive = lambda data : np.fft.fftshift(np.fft.ifft(data).astype(data.dtype)) * data.shape[-1]
-_ifft_positive = lambda data : np.fft.fft(np.fft.ifftshift(data, -1)) * data.shape[-1]
+_ifft = lambda data: np.fft.ifft(np.fft.ifftshift(data, -1))
+_fft_positive = lambda data: np.fft.fftshift(np.fft.ifft(data).astype(data.dtype)) * data.shape[-1]
+_ifft_positive = lambda data: np.fft.fft(np.fft.ifftshift(data, -1)) * data.shape[-1]
 
 
 def _get_zpd(dataset, dim='x', mode='max'):
@@ -281,14 +280,13 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         wavenumbers = np.fft.rfftfreq(mirrored.shape[1], 3.165090310992977e-05 * 2)
 
         spectrum = np.fft.rfft(mirrored.data)
-        #plt.plot(wavenumbers, spectrum[0])
-        #plt.show()
+        # plt.plot(wavenumbers, spectrum[0])
+        # plt.show()
         newx = np.arange(spectrum.shape[1]) * max(initx) / max(np.arange(spectrum.shape[1]))
         phase_angle = interpolate_phase_angle(newx)
         spectrum = spectrum.real * np.cos(phase_angle) + spectrum.imag * np.sin(phase_angle)
 
-        #plt.plot(wavenumbers, spectrum[0])
-        #plt.show()
+        # plt.plot(wavenumbers, spectrum[0])  # plt.show()
 
     else:
         raise NotImplementedError(encoding)
@@ -319,8 +317,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         first = sfo1 - sf - deltaf * sizem / 2.
 
         # newcoord = type(x)(np.arange(size) * deltaf + first)
-        newcoord = LinearCoord.arange(size)
-        newcoord = newcoord * deltaf + first
+        newcoord = LinearCoord.arange(size) * deltaf + first
         newcoord.name = x.name
         newcoord.title = 'frequency'
         newcoord.ito("Hz")
@@ -330,12 +327,12 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         sw = abs(x.data[-1] - x.data[0])
         if x.units == 'ppm':
             sw = bf1.to("Hz") * sw / 1.0e6
-        deltat = 1. / sw
+        deltat = (1. / sw).to('us')
 
         newcoord = LinearCoord.arange(size) * deltat
         newcoord.name = x.name
         newcoord.title = 'time'
-        newcoord.ito("s")
+        newcoord.ito("us")
 
     if is_nmr and not inv:
         newcoord.meta.larmor = bf1  # needed for ppm transformation
