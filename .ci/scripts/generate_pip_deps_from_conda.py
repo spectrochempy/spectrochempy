@@ -24,7 +24,10 @@ import sys
 import yaml
 
 EXCLUDE = {"python"}
-RENAME = {"pyqt": "pyqt5", "dask-core": "dask", "git": "gitpython"}
+RENAME = {"pyqt": "pyqt5",
+          "dask-core": "dask",
+          "git": "gitpython",
+          "numpy-quaternion" : "quaternion"}
 
 
 def conda_package_to_pip(package):
@@ -136,7 +139,7 @@ if __name__ == "__main__":
     )
     if res:
         msg = (
-            f"`requirements-dev.txt` has to be generated with `{sys.argv[0]}` after "
+            f"`requirements.txt` has to be generated with `{sys.argv[0]}` after "
             "`environment.yml` is modified.\n"
         )
         # if args.azure:
