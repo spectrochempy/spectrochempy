@@ -10,5 +10,3 @@ quadprog
 brukeropusreader
 numpy-quaternion
 nmrglue
-
-ipympl
