@@ -41,7 +41,6 @@ def _zf_method(method):
             swaped = True
 
         # get the lastcoord
-        x = new.coordset[-1]
         if new.coordset[-1].dimensionless or new.coordset[-1].units.dimensionality == '[time]':
 
             if not new.coordset[-1].linear:

@@ -14,10 +14,10 @@ __all__ = ['CoordSet']
 # standard imports
 # ----------------------------------------------------------------------------------------------------------------------
 import copy as cpy
-
 import warnings
 # import textwrap
 import uuid
+
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
 # ----------------------------------------------------------------------------------------------------------------------
@@ -36,7 +36,6 @@ from spectrochempy.utils import is_sequence, colored_output, convert_to_html
 # CoordSet
 # ======================================================================================================================
 class CoordSet(HasTraits):
-
     # Hidden attributes containing the collection of objects
     _id = Unicode()
     _coords = List(allow_none=True)
@@ -183,9 +182,9 @@ class CoordSet(HasTraits):
                         # use the provided list of dims
                         coord.name = dims.pop(-1)
 
-                self._append(coord)  # append the coord (but instead of append,
-                                     # use assignation -in _append - to fire the
-                                     # validation process )
+                self._append(coord)
+                # append the coord (but instead of append,  # use assignation -in _append - to fire the
+                # validation process )
 
         # now evaluate keywords argument
         # ------------------------------
@@ -271,7 +270,8 @@ class CoordSet(HasTraits):
         for id, coord in enumerate(coords):
             if coord and not isinstance(coord, (Coord, CoordSet)):
                 raise TypeError(
-                    'At this point all passed coordinates should be of type Coord or CoordSet!')  # coord = Coord(coord)
+                        'At this point all passed coordinates should be of type Coord or CoordSet!')  # coord =
+                # Coord(coord)
             coords[id] = coord
 
         for coord in coords:

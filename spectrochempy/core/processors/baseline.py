@@ -29,6 +29,7 @@ from .smooth import smooth
 from .. import debug_
 from spectrochempy.core.processors.utils import _units_agnostic_method
 
+
 # ----------------------------------------------------------------------------------------------------------------------
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
@@ -543,7 +544,7 @@ def dc(dataset, **kwargs):
     """
 
     len = int(kwargs.pop('len', .25) * dataset.shape[-1])
-    dc = np.mean(np.atleast_2d(dataset)[...,-len:])
+    dc = np.mean(np.atleast_2d(dataset)[..., -len:])
     dataset -= dc
 
     return dataset

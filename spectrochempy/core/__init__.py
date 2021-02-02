@@ -465,7 +465,6 @@ class _TKFileDialogs:
         self.root = root
         # self.root.mainloop()
 
-
     def _open_existing_directory(self,
                                  caption='Select a folder',
                                  directory=''):
