@@ -26,7 +26,9 @@ import datetime
 import warnings
 import pprint
 import json
+import time
 from pathlib import Path
+import threading
 
 from pkg_resources import parse_version, get_distribution, DistributionNotFound
 import requests
@@ -123,6 +125,7 @@ def display_info_string(**kwargs):
     publish_display_data(data={'text/html': html})
 
 
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Version
 # ----------------------------------------------------------------------------------------------------------------------
@@ -159,6 +162,44 @@ def _get_release_date():
 
 __release_date__ = _get_release_date()
 "Last release date of this package"
+
+
+def _check_for_updates(cls):
+    # Get version
+    conda_url = "https://anaconda.org/spectrocat/spectrochempy/files"
+    try:
+        response = requests.get(conda_url)
+    except requests.exceptions.RequestException:
+        return None
+
+    regex = r"\/\d{1,2}\.\d{1,2}\.\d{1,2}\/download\/noarch" \
+            r"\/spectrochempy-(\d{1,2}\.\d{1,2}\.\d{1,2})\-(dev\d{1,2}|stable).tar.bz2"
+    matches = re.finditer(regex, response.text, re.MULTILINE)
+    vavailables = []
+    for matchNum, match in enumerate(matches):
+        v = match[1]
+        if match[2] == 'stable':
+            vavailables.append(v)
+
+    old = parse_version(__version__)
+
+    new_version = None
+    for key in vavailables:
+        new = parse_version(key)
+        if new > old:
+            new_version = key
+
+    fi = Path.home() / ".scpy_update"
+    if new_version:
+        fi.write_text(f"\n\n\tYou are running SpectrocChemPy-{__version__} but version {new_version} is available."
+                      f"\n\tPlease consider updating for bug fixes and new features! ")
+
+    else:
+        if fi.exists():
+            fi.unlink()
+
+CHECK_UPDATE = threading.Thread(target=_check_for_updates, args=(1,))
+CHECK_UPDATE.start()
 
 # other info
 # ............................................................................
@@ -821,32 +862,6 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
     # Private methods
     # ------------------------------------------------------------------------------------------------------------------
 
-    def _check_for_updates(self):
-        # Gets version
-        conda_url = "https://anaconda.org/spectrocat/spectrochempy/files"
-        try:
-            response = requests.get(conda_url)
-        except requests.exceptions.RequestException:
-            return None
-
-        regex = r"\/\d{1,2}\.\d{1,2}\.\d{1,2}\/download\/noarch" \
-                r"\/spectrochempy-(\d{1,2}\.\d{1,2}\.\d{1,2})\-(dev\d{1,2}|stable).tar.bz2"
-        matches = re.finditer(regex, response.text, re.MULTILINE)
-        vavailables = []
-        for matchNum, match in enumerate(matches):
-            v = match[1]
-            vavailables.append(v)
-
-        old = parse_version(__version__)
-
-        new_version = None
-        for key in vavailables:
-            new = parse_version(key)
-            if new > old:
-                new_version = key
-
-        return new_version
-
     def _start(self):
 
         debug = self.logs.debug
@@ -868,13 +883,6 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
                 if "/bin/scpy" not in sys.argv[0]:  # deactivate for console scripts
                     print(info_string.strip())
 
-            new_version = self._check_for_updates()
-            if new_version:
-
-                self.logs.warning(f"You are running SpectrocChemPy-{__version__} but version {new_version} is "
-                                  f"available. \nPlease consider updating for bug fixes and new features! Use:\n"
-                                  f"                   conda update -c spectrocat spectrochempy")
-
         # force update of rcParams
         for rckey in mpl.rcParams.keys():
             key = rckey.replace('_', '__').replace('.', '_').replace('-', '___')
@@ -891,6 +899,16 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
         self.running = True
 
         debug('MPL backend: {}'.format(mpl.get_backend()))
+
+        # display needs for update
+        time.sleep(1)
+        fi = Path.home() / ".scpy_update"
+        if fi.exists():
+            try:
+                msg = fi.read_text()
+                self.logs.warning(msg)
+            except Exception:
+                pass
 
         return True
 
