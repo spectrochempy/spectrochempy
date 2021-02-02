@@ -85,6 +85,8 @@ class MCRALS(HasTraits):
                 indicates species having non-negative spectra
             * unimodSpec : list or tuple, Default [0, ..., 0]  (no unimodal concentration profiles)
                 indicates species having unimodal spectra
+            * normSpec : str or None, optional, default: None
+                indicates if spectra of poure species must be normalized. Two methods are available: 'max' or 'euclid'
         verbose : bool
             If set to True, prints a summary of residuals and residuals change at each iteration. default = False.
             In any case, the same information is returned in self._log

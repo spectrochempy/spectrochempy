@@ -49,6 +49,7 @@ class BaselineCorrection(HasTraits):
     Interactive mode is proposed using the interactive function : :meth:`run`.
 
     """
+    # todo; change defzault values: sequential, polynomial; order 1; npc 3
     dataset = Instance(NDDataset)
     corrected = Instance(NDDataset)
     method = Unicode('multivariate')

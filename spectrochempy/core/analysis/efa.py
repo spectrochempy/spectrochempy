@@ -110,7 +110,7 @@ class EFA(HasTraits):
                 f[i, k:] = MASKED
             else:
                 f[i] = MASKED
-
+            print(f'Evolving Factor Analysis: {int(i/(2 * M) * 100)}% \r', end="")
         # --------------------------------------------------------------------
         # backward analysis
         # --------------------------------------------------------------------
@@ -132,7 +132,8 @@ class EFA(HasTraits):
                 b[i, k:] = MASKED
             else:
                 b[i] = MASKED
-
+            print(f'Evolving Factor Analysis: {int(100 - i / (2 * M) * 100)} % \r', end="")
+        print()
         self.f = f
         self.b = b
 

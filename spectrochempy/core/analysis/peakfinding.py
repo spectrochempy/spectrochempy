@@ -41,7 +41,7 @@ def find_peaks(X, height=None, window_length=3, threshold=None, distance=None,
         `x` or a 2-element sequence of the former. The first element is
         always interpreted as the  minimal and the second, if supplied, as the
         maximal required height.
-    window_length: int, default: 5
+    window_length: int, default: 3
         The length of the filter window used to interpolate the maximum. window_length must be a positive odd integer.
         If set to one, the actual maximum is returned.
     threshold : number or ndarray or sequence, optional

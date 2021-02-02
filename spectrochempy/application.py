@@ -745,7 +745,10 @@ class ProjectPreferences(MetaConfigurable):
     markersize = Float(5.0, min=.5, help='Default symbol size for scatter '
                                          'plots').tag(config=True)
 
-    colormap = Enum(cmaps, default_value='jet',
+    surface_linewidth = Float(.0, min=0, help='Default linewidth for surface plots').tag(
+        config=True)
+
+    colormap = Enum(cmaps, default_value='viridis',
                     help='Default colormap for contour plots').tag(config=True,
                                                                    type='list')
 
@@ -753,7 +756,7 @@ class ProjectPreferences(MetaConfigurable):
                           help='Default colormap for stack plots').tag(
         config=True, type='list')
 
-    colormap_surface = Enum(cmaps, default_value='jet',
+    colormap_surface = Enum(cmaps, default_value='viridis',
                             help='Default colormap for surface plots').tag(
         config=True, type='list')
 

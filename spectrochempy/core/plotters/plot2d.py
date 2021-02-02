@@ -227,10 +227,6 @@ def plot_2D(dataset, **kwargs):
 
     antialiased = kwargs.get('antialiased', prefs.antialiased)
 
-    rcount = kwargs.get('rcount', prefs.rcount)
-
-    ccount = kwargs.get('ccount', prefs.ccount)
-
     number_x_labels = prefs.number_of_x_labels
     number_y_labels = prefs.number_of_y_labels
     ax.xaxis.set_major_locator(MaxNLocator(nbins=number_x_labels))
@@ -380,8 +376,8 @@ def plot_2D(dataset, **kwargs):
 
     if method in ['map', 'image', 'surface']:
         zmin, zmax = zlim
-        zmin = min(zmin, -zmax)
-        zmax = max(-zmin, zmax)
+        # zmin = min(zmin, -zmax)
+        # zmax = max(-zmin, zmax)
         norm = mpl.colors.Normalize(vmin=zmin, vmax=zmax)
 
     if method in ['surface']:
@@ -389,11 +385,7 @@ def plot_2D(dataset, **kwargs):
         Z = zdata
 
         # Plot the surface.
-        surf = ax.plot_surface(X, Y, Z, cmap=cmap, linewidth=lw,
-                               antialiased=antialiased,
-                               rcount=rcount, ccount=ccount,
-                               norm=norm,
-                               )
+        surf = ax.plot_surface(X, Y, Z, cmap=cmap, linewidth=lw, norm=norm)
 
     elif method in ['image']:
         if discrete_data:
