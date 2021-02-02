@@ -22,7 +22,7 @@ from matplotlib.colors import to_rgba
 from matplotlib import pyplot as plt
 import plotly.graph_objects as go
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from traitlets import Dict, HasTraits, Instance, Union, default, TraitError, Unicode
+from traitlets import Dict, HasTraits, Instance, Union, default, TraitError
 
 # local import
 # ----------------------------------------------------------------------------------------------------------------------
