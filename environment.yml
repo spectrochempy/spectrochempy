@@ -74,5 +74,4 @@ dependencies:
 
     - pip
     - pip:
-        - backports.datetime_fromisoformat
         - autodoc_traits

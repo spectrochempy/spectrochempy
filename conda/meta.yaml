@@ -61,6 +61,7 @@ requirements:
     - ipympl
     - jupyterlab
     - nodejs
+
   test:
     - python                {{ python }}
 

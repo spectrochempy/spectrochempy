@@ -9,7 +9,6 @@
 JSON utilities
 """
 from datetime import datetime
-from backports.datetime_fromisoformat import MonkeyPatch
 
 import pickle
 import base64
@@ -20,7 +19,7 @@ from spectrochempy.units import Quantity, Unit
 
 __all__ = ['json_serialiser', 'json_decoder']
 
-MonkeyPatch.patch_fromisoformat()  # patch for 3.6
+fromisoformat = lambda s: datetime.strptime(s,"%Y-%m-%dT%H:%M:%S.%f%Z")
 
 # ======================================================================================================================
 # JSON UTILITIES
@@ -35,7 +34,7 @@ def json_decoder(dic):
 
         klass = dic['__class__']
         if klass == 'DATETIME':
-            return datetime.fromisoformat(dic["isoformat"])
+            return fromisoformat(dic["isoformat"])
         elif klass == 'NUMPY_ARRAY':
             if 'base64' in dic:
                 return pickle.loads(base64.b64decode(dic['base64']))
@@ -88,7 +87,6 @@ def json_serialiser(byte_obj, encoding=None):
             # Warning with parent-> circular dependencies!
             if name != 'parent':
                 dic[name] = json_serialiser(val, encoding=encoding)
-
         return dic
 
     elif isinstance(byte_obj, (str, int, float, bool)):
@@ -113,24 +111,27 @@ def json_serialiser(byte_obj, encoding=None):
         dic = {}
         for k, v in byte_obj.items():
             dic[k] = json_serialiser(v, encoding=encoding)
-
         return dic
 
     elif isinstance(byte_obj, datetime):
-        return {"isoformat": byte_obj.isoformat(), "__class__": 'DATETIME'}
+        return {"isoformat": byte_obj.strftime("%Y-%m-%dT%H:%M:%S.%f%Z"), "__class__": 'DATETIME'}  #.isoformat()
+
     elif isinstance(byte_obj, np.ndarray):
-        # return {"ndarray":byte_obj.tolist(), "dtype": byte_obj.dtype.name}
         if encoding is None:
             return {"tolist": json_serialiser(byte_obj.tolist(), encoding=encoding), "dtype": str(byte_obj.dtype),
                     "__class__": 'NUMPY_ARRAY'}
         else:
             return {"base64": base64.b64encode(pickle.dumps(byte_obj)).decode(), "__class__": 'NUMPY_ARRAY'}
+
     elif isinstance(byte_obj, pathlib.PosixPath):
         return {"str": str(byte_obj), "__class__": 'PATH'}
+
     elif isinstance(byte_obj, Unit):
         return {"str": str(byte_obj), "__class__": 'UNIT'}
+
     elif isinstance(byte_obj, Quantity):
         return {"tuple": json_serialiser(byte_obj.to_tuple(), encoding=encoding), "__class__": 'QUANTITY'}
+
     elif isinstance(byte_obj, (np.complex128, np.complex64, np.complex)):
         if encoding is None:
             return {"tolist": json_serialiser([byte_obj.real, byte_obj.imag], encoding=encoding),
