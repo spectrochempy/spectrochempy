@@ -463,7 +463,7 @@ class _TKFileDialogs:
         root.lift()
         root.focus_force()
         self.root = root
-        self.root.mainloop()
+        # self.root.mainloop()
 
 
     def _open_existing_directory(self,

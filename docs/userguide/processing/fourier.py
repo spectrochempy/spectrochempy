@@ -35,7 +35,8 @@
 # # Fourier transformation (NMR)
 
 # %% [markdown]
-# In this notebook, we are going to transform time-domain NMR data into 1D or 2D spectra using SpectroChemPy processing tools
+# In this notebook, we are going to transform time-domain NMR data into 1D or 2D spectra using SpectroChemPy
+# processing tools
 
 # %%
 import spectrochempy as scp
@@ -58,8 +59,8 @@ fid.dtype
 
 # %%
 prefs = fid.preferences
-prefs.figure.figsize = (6,3)
-_ = fid.plot(show_complex=True, xlim=(0,15000))
+prefs.figure.figsize = (6, 3)
+_ = fid.plot(show_complex=True, xlim=(0, 15000))
 print("td = ", fid.size)
 
 # %% [markdown]
@@ -67,7 +68,7 @@ print("td = ", fid.size)
 
 # %%
 spec = scp.fft(fid)
-_ = spec.plot(xlim=(100,-100))
+_ = spec.plot(xlim=(100, -100))
 print("si = ", spec.size)
 
 # %% [markdown]
@@ -75,46 +76,47 @@ print("si = ", spec.size)
 
 # %%
 k = 1024
-spec = fid.fft(size=32*k )
-_ = spec.plot(xlim=(100,-100))
+spec = fid.fft(size=32 * k)
+_ = spec.plot(xlim=(100, -100))
 print("si = ", spec.size)
 
 # %%
 newfid = spec.ifft()
 # x coordinateis in second (base units) so lets transform it
-newfid.x.ito('us')
-_ = newfid.plot(show_complex=True, xlim=(0,15000))
+_ = newfid.plot(show_complex=True, xlim=(0, 15000))
 
 # %% [markdown]
-# Let's compare fid and newfid. There differs as a rephasing has been automatically applied after the first FFT (with the parameters found in the original fid metadata: PHC0 and PHC1).
+# Let's compare fid and newfid. There differs as a rephasing has been automatically applied after the first FFT (with
+# the parameters found in the original fid metadata: PHC0 and PHC1).
 #
-# First point in the tme domain of the real part, is at the maximum. 
+# First point in the time domain of the real part is at the maximum.
 
 # %%
-fid.real.plot(xlim=(0,5000), ls='--', label='original real part')
-ax = newfid.real.plot(clear=False, data_only=True, c='r', label='fft + ifft')
+_ = newfid.real.plot(c='r', label='fft + ifft')
+ax = fid.real.plot(clear=False, xlim=(0, 5000), ls='--', label='original real part')
 _ = ax.legend()
 
 # %% [markdown]
-# First point in the time domain of the imaginary part is at the minimum. 
+# First point in the time domain of the imaginary part is at the minimum.
 
 # %%
-fid.imag.plot(xlim=(0,5000), ls='--',  label='original imaginary part')
-ax = newfid.imag.plot(clear=False, data_only=True, c='r', label='fft + ifft')
+_ = fid.imag.plot(ls='--', label='original imaginary part')
+ax = newfid.imag.plot(clear=False, xlim=(0, 5000), c='r', label='fft + ifft')
 _ = ax.legend(loc='lower right')
 
 # %% [markdown]
 # ## Preprocessing
 #
 # ### Line broadening
-# Often before applying a FFT, some exponential multiplication `em`or other broadening filters such as `gm` or `sp` are applied. 
+# Often before applying a FFT, some exponential multiplication `em`or other broadening filters such as `gm` or `sp`
+# are applied.
 # See the dedicated [apodization tutorial](apodization.ipynb).
 
 # %%
 fid2 = fid.em(lb='50. Hz')
 spec2 = fid2.fft()
 _ = spec2.plot()
-_ = spec.plot(clear=False, xlim=(10,-5), c='r')  # superpose the unbroadened spectrum in red and show expansion.
+_ = spec.plot(clear=False, xlim=(10, -5), c='r')  # superpose the unbroadened spectrum in red and show expansion.
 
 # %% [markdown]
 # ### Zero-filling
@@ -123,13 +125,13 @@ _ = spec.plot(clear=False, xlim=(10,-5), c='r')  # superpose the unbroadened spe
 print("td = ", fid.size)
 
 # %%
-td = 32*1024  # size: 64 K
-fid3 = fid.zf_size(size=td)      
+td = 64 * 1024  # size: 64 K
+fid3 = fid.zf_size(size=td)
 print("new td = ", fid3.x.size)
 
 # %%
 spec3 = fid3.fft()
-_ = spec3.plot(xlim=(100,-100))
+_ = spec3.plot(xlim=(100, -100))
 print("si = ", spec3.size)
 
 # %% [markdown]
@@ -141,16 +143,14 @@ print("si = ", spec3.size)
 
 # %%
 ms = spec.mc()
-_ = ms.plot(xlim=(10,-10))
-_ = spec.plot(clear=False, xlim=(10,-10), c='r')
+_ = ms.plot(xlim=(10, -10))
+_ = spec.plot(clear=False, xlim=(10, -10), c='r')
 
 # %% [markdown]
 # ## Power spectrum
 
 # %%
 mp = spec.ps()
-_ = (mp/mp.max()).plot()
-_ = (spec/spec.max()).plot(clear=False, xlim=(10,-10), c='r')  
-# Here we have normalized the spectra at their max value.
-
-# %%
+_ = (mp / mp.max()).plot()
+_ = (spec / spec.max()).plot(clear=False, xlim=(10, -10),
+                             c='r')  # Here we have normalized the spectra at their max value.

@@ -15,13 +15,8 @@ Adapted from NMRGLUE proc_base (New BSD License)
 __all__ = ['rs', 'ls', 'roll', 'cs', 'fsh', 'fsh2']
 __dataset_methods__ = __all__
 
-import functools
-
 import numpy as np
 
-from spectrochempy.units import ur, Quantity
-from spectrochempy.utils import EPSILON
-from spectrochempy.core import error_, warning_
 from spectrochempy.core.processors.utils import _units_agnostic_method
 
 pi = np.pi

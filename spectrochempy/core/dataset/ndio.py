@@ -20,7 +20,7 @@ import numpy as np
 from numpy.lib.npyio import zipfile_factory
 from traitlets import HasTraits, Instance, Union, Unicode
 
-from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core import debug_
 from spectrochempy.utils import SpectroChemPyException
 from spectrochempy.utils import pathclean, check_filenames, ScpFile, check_filename_to_save, json_serialiser
@@ -327,7 +327,13 @@ class NDIO(HasTraits):
                         setattr(obj, key, item_to_attr(getattr(obj, key), val))
 
                     elif key in ['_coordset']:
-                        _coords = [item_to_attr(Coord(), v) for v in val['coords']]
+                        _coords = []
+                        for v in val['coords']:
+                            if 'data' in v:
+                                _coords.append(item_to_attr(Coord(), v))
+                            else:
+                                _coords.append(item_to_attr(LinearCoord(), v))
+
                         if val['is_same_dim']:
                             obj.set_coordset(_coords)
                         else:

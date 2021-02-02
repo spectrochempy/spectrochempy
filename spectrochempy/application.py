@@ -871,8 +871,8 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
             new_version = self._check_for_updates()
             if new_version:
 
-                self.logs.warning(f"You are running SpectrocChemPy-{__version__} but version {new_version} is " \
-                                  f"available. \nPlease consider updating for bug fixes and new features! Use:\n" \
+                self.logs.warning(f"You are running SpectrocChemPy-{__version__} but version {new_version} is "
+                                  f"available. \nPlease consider updating for bug fixes and new features! Use:\n"
                                   f"                   conda update -c spectrocat spectrochempy")
 
         # force update of rcParams

@@ -3093,7 +3093,7 @@ class NDMath(object):
 
         # update the attributes
         new._units = cpy.copy(units)
-        if mask:
+        if mask is not None and np.any(mask != NOMASK):
             new._mask = cpy.copy(mask)
         if history is not None and hasattr(new, 'history'):
             new._history.append(history.strip())

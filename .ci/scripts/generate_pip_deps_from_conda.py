@@ -131,7 +131,7 @@ if __name__ == "__main__":
     )
     res = main(
         os.path.join(repo_path, "environment.yml"),
-        os.path.join(repo_path, "requirements-dev.txt"),
+        os.path.join(repo_path, "requirements.txt"),
         compare=args.compare,
     )
     if res:

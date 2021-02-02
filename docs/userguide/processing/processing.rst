@@ -7,6 +7,7 @@ Processing
    :maxdepth: 3
 
    transformations
+   linearization
    math_operations
    slicing
    smoothing

@@ -19,17 +19,16 @@ import functools
 import numpy as np
 
 from spectrochempy.units import ur, Quantity
-from spectrochempy.utils import EPSILON
-from spectrochempy.core import error_, warning_
+from spectrochempy.core import error_
 
 pi = np.pi
+
 
 # ======================================================================================================================
 # Decorators
 # ======================================================================================================================
 
 def _phase_method(method):
-
     @functools.wraps(method)
     def wrapper(dataset, **kwargs):
 
@@ -69,8 +68,8 @@ def _phase_method(method):
             kwargs['phc0'] = (_check_units(kwargs.get('phc0', 0), 'degree') - new.meta.phc0[-1]).magnitude
             kwargs['phc1'] = (_check_units(kwargs.get('phc1', 0), 'degree') - new.meta.phc1[-1]).magnitude
             kwargs['pivot'] = _check_units(kwargs.get('pivot', new.meta.pivot[-1]), dunits).magnitude
-            kwargs['exptc'] = _check_units(kwargs.get('exptc', new.meta.get('exptc', [0]*new.ndim)[-1]),
-                                        dunits, inv=True).magnitude
+            kwargs['exptc'] = _check_units(kwargs.get('exptc', new.meta.get('exptc', [0] * new.ndim)[-1]), dunits,
+                                           inv=True).magnitude
 
             if not new.meta.phased[-1]:
                 # initial phase from topspin have not yet been used
@@ -94,7 +93,7 @@ def _phase_method(method):
 
             new.meta.pivot[-1] = kwargs['pivot'] * dunits
 
-        else: # not (x.unitless or x.dimensionless or x.units.dimensionality != '[time]')
+        else:  # not (x.unitless or x.dimensionless or x.units.dimensionality != '[time]')
             error_('This method apply only to dimensions with [frequency] or [dimensionless] dimensionality.\n'
                    'Phase processing was thus cancelled')
 
@@ -242,22 +241,19 @@ def _apk(source=None, options='', axis=-1):
     phc1 = None
 
     # positional arguments
-    parser.add_argument('phases', default=(phc0, phc1), nargs='*', type=float,
-                        help='zero and first order phase')
-    parser.add_argument('--pivot', '-pv', default=None, type=float,
-                        help='pivot position in spectral units')
-    parser.add_argument('--interactive', '-i',  default=None, nargs='*',
+    parser.add_argument('phases', default=(phc0, phc1), nargs='*', type=float, help='zero and first order phase')
+    parser.add_argument('--pivot', '-pv', default=None, type=float, help='pivot position in spectral units')
+    parser.add_argument('--interactive', '-i', default=None, nargs='*',
                         help='Interative mode on selected section here to check phase')
     parser.add_argument('--pos', default=(0,), nargs='*', type=float,
                         help='row or column position where to check phase')
-    parser.add_argument('--shifted', default=0.0, type=float,
-                        help="position of the top in units of time")
+    parser.add_argument('--shifted', default=0.0, type=float, help="position of the top in units of time")
     parser.add_argument('--exp', '-ex', action='store_true', help='perform an exponential phase correction')
     parser.add_argument('--auto', '-a', action='store_true', help='set to automatic phase mode')
     parser.add_argument('--fit_phc1', '-u1', action='store_true', help='use phc1 in automatic phasing', )
     parser.add_argument('--ediff', '-ef', default=1, type=int, help='order of the derivative for entropy calculation', )
     parser.add_argument('--gamma', '-ga', default=1.0, type=float, help='weight', )
-    parser.add_argument('--select', '-st', default='standard', choices=['standard', 'max', 'cols','pos'],
+    parser.add_argument('--select', '-st', default='standard', choices=['standard', 'max', 'cols', 'pos'],
                         help='selection mode in automatic phasing', )
     parser.add_argument('--threshold', '-th', default=50.0, type=int, help='default threshold for columns selection', )
     parser.add_argument('--mode', '-m', default='negmin+entropy', help="position of the top in units of time")
@@ -267,7 +263,7 @@ def _apk(source=None, options='', axis=-1):
     parser.add_argument('--bound_phc1', '-bp1', default=10., type=float, help="phc1 boundary")
     parser.add_argument('--byrow', '-br', action='store_true', help='to phase each row separately for series or 2D')
     parser.add_argument('--verbose', action='store_true', help='verbose flag')
-    #parser.add_argument('--absolute', action='store_true', help='absolute flag: take the absolute value of phases')
+    # parser.add_argument('--absolute', action='store_true', help='absolute flag: take the absolute value of phases')
 
     args = parser.parse_args(options.split())
 
@@ -276,7 +272,7 @@ def _apk(source=None, options='', axis=-1):
 
     if source:
 
-        if axis == -1 or axis==1:
+        if axis == -1 or axis == 1:
             par = source.par
         else:
             par = source.par2
@@ -294,7 +290,7 @@ def _apk(source=None, options='', axis=-1):
     # get initial phase and pivot
     # get the initial phase setting
     if DEBUG:
-        print ('Current phases for axis %d : %f,%f'%(axis, par.PHC0, par.PHC1) )
+        print('Current phases for axis %d : %f,%f' % (axis, par.PHC0, par.PHC1))
 
     phc0, phc1 = args.phases
 
@@ -368,14 +364,13 @@ def _apk(source=None, options='', axis=-1):
             pivot_ = position2index(data, pivot)
             apod = np.exp(1.0j * (p0 + (p1 * (np.arange(size) - pivot_) / size)))
             data = apod * data
-            fig = pl.figure(figsize=(4,2))
+            fig = pl.figure(figsize=(4, 2))
             ax = fig.add_subplot(1, 1, 1)
-            ax.set_xlim((data.columns.max(),
-                         data.columns.min()))
+            ax.set_xlim((data.columns.max(), data.columns.min()))
 
             if interact[0] == 'max':
                 i, j = np.unravel_index(np.abs(data.values).argmax(), data.values.shape)
-                #dat = data.values[i]
+                # dat = data.values[i]
                 dat = getsection(data, i, width=1., axis=0)
                 ax.plot(data.columns, dat.values)
             else:
@@ -385,24 +380,21 @@ def _apk(source=None, options='', axis=-1):
                     dat = data.values[i]
                     ax.plot(data.columns, dat)
 
-            ax.axvline(pivot, color='r', lw='.1' )
-            ax.axhline(0, color='g', lw='.1' )
+            ax.axvline(pivot, color='r', lw='.1')
+            ax.axhline(0, color='g', lw='.1')
             pl.show()
 
-            print(
-                    'ph0: {}  ph1: {}  pivot: {} (PHC0: {}'.format(ph0, ph1, pivot, par.PHC0) +
-                    '\nWARNING THESE PHASE VALUES ARE NOT STORED IN THE SOURCE!' +
-                    '\nSo you must use them in another `pk` command)'
-            )
+            print('ph0: {}  ph1: {}  pivot: {} (PHC0: {}'.format(ph0, ph1, pivot,
+                                                                 par.PHC0) + '\nWARNING THESE PHASE VALUES ARE NOT '
+                                                                             'STORED IN THE SOURCE!' + '\nSo you must '
+                                                                                                       'use them in '
+                                                                                                       'another `pk` '
+                                                                                                       'command)')
 
         w = interactive(phasing,
-                        ph0=FloatSlider(min=ps0-45, max=ps0+45, step=0.001,
-                                        value=ps0, continuous_update=False),
-                        ph1=FloatSlider(min=ps1-180, max=ps1+180, step=0.01,
-                                        value=ps1, continuous_update=False),
-                        pivot=FloatSlider(min=data.columns.min(),
-                                          max=data.columns.max(), step=0.001,
-                                          value=ppivot,
+                        ph0=FloatSlider(min=ps0 - 45, max=ps0 + 45, step=0.001, value=ps0, continuous_update=False),
+                        ph1=FloatSlider(min=ps1 - 180, max=ps1 + 180, step=0.01, value=ps1, continuous_update=False),
+                        pivot=FloatSlider(min=data.columns.min(), max=data.columns.max(), step=0.001, value=ppivot,
                                           continuous_update=False))
 
         output = w.children[-1]
@@ -439,7 +431,7 @@ def _apk(source=None, options='', axis=-1):
                 row, phc0, phc1 = autophase(row, args)
                 row = row - basecorr(row)
                 rows.append(row)
-            #merge all rows to recreate data
+            # merge all rows to recreate data
             data = np.vstack(rows)
         else:
             data, phc0, phc1 = autophase(data.values, args, par)  # return an array not a dataframe
@@ -447,9 +439,10 @@ def _apk(source=None, options='', axis=-1):
         atxt = '(not optimized)' if not args.fit_phc1 else ''
 
         sbyrow = 'byrow' if args.byrow else ''
-        source.history.append('Auto-phasing %s:  phc0 = %.3f, phc1%s = %.3f, pivot:%.2f' % (sbyrow, phc0, atxt, phc1, pivot))
+        source.history.append(
+                'Auto-phasing %s:  phc0 = %.3f, phc1%s = %.3f, pivot:%.2f' % (sbyrow, phc0, atxt, phc1, pivot))
         # store the new phases
-        par.PHC0, par.PHC1 = phc0 , phc1
+        par.PHC0, par.PHC1 = phc0, phc1
 
     try:
         data = data - basecorr(data)
@@ -592,7 +585,7 @@ def _autophase(data, args, par):
         if f is not None:  # hopping
             pass
         if f is None:  # simplex
-            #display.clear_output(wait=True)
+            # display.clear_output(wait=True)
 
             msg = ("Iteration: %d (chi2: %.5f)" % (niter, err) + ' Negative area (NA):%.3g Entropy (S) * gamma:%.3g' % (
                     nas, spe * gamma))
@@ -603,9 +596,7 @@ def _autophase(data, args, par):
     # end callback function ---------------------------------------------------
 
     # convergence is not insured depending on the starting values
-    fp, err1 = optimize(_phase_error, fp,
-                        args=[dat, ], method=optmode,
-                        callback=None)
+    fp, err1 = optimize(_phase_error, fp, args=[dat, ], method=optmode, callback=None)
     nas_save = nas
     spe_save = spe
     fp_save = fp.copy()
@@ -613,9 +604,7 @@ def _autophase(data, args, par):
     if optmode.upper() != 'HOPPING':
         fp['phc0'] = (fp['phc0'] - 180.0) % 360.0, -bp0, bp0, False
         ni = 0
-        fp, err2 = optimize(_phase_error, fp,
-                            args=(dat,), method=optmode,
-                            callback=callback)
+        fp, err2 = optimize(_phase_error, fp, args=(dat,), method=optmode, callback=callback)
 
         # select the best
         if err2 > err1:
@@ -643,5 +632,5 @@ def _autophase(data, args, par):
         print('Negative area (NA):%.3g Entropy (S) * gamma:%.3g' % (nas, spe * gamma))
 
     # apply to the original data and return
-    data = ps(data, phc0, phc1 + p_shifted, pivot=pivot, is_exp=is_exp)
+    data = pk(data, phc0, phc1 + p_shifted, pivot=pivot, is_exp=is_exp)
     return data, phc0, phc1

@@ -61,7 +61,6 @@ numpyprintoptions()
 
 # noinspection PyPep8Naming
 class NDArray(HasTraits):
-
     # hidden properties
 
     # array definition
@@ -98,10 +97,10 @@ class NDArray(HasTraits):
     # metadata
 
     # Basic NDArray setting
-    _copy = Bool(False)     # by default we do not copy the data
-                            # which means that if the same numpy array
-                            # is used for too different NDArray, they
-                            # will share it.
+    _copy = Bool(False)  # by default we do not copy the data
+    # which means that if the same numpy array
+    # is used for too different NDArray, they
+    # will share it.
 
     _labels_allowed = Bool(True)  # Labels are allowed for the data, if the
 
@@ -360,9 +359,16 @@ class NDArray(HasTraits):
             new = self.copy()
 
         # slicing by index of all internal array
-        if self._data is not None:
+        if self.data is not None:
             udata = self.masked_data[keys]
-            new._data = np.asarray(udata)
+            if not self.linear:
+                new._data = np.asarray(udata)
+            else:
+                if self.increment > 0:
+                    self.offset = udata.min()
+                else:
+                    self.offset = udata.max()
+                new._size = udata.size
 
         if self.is_labeled:
             # case only of 1D dataset such as Coord
@@ -701,7 +707,7 @@ class NDArray(HasTraits):
 
         else:
 
-            data = self._data
+            data = self.data
 
             if is_number(loc):
                 # get the index of a given values
@@ -1197,7 +1203,10 @@ class NDArray(HasTraits):
             return None
 
         elif self.linear:
-            return np.arange(self.size) * self._increment + self._offset
+            data = np.arange(self.size) * self._increment + self._offset
+            if hasattr(data, 'units'):
+                data = data.m
+            return data
 
         return self._data
 
@@ -1541,12 +1550,9 @@ class NDArray(HasTraits):
     @linear.setter
     def linear(self, val):
 
-        self._linear = val  # it val is true this provoque the linearization (
-        # see observe)
+        self._linear = val  # it val is true this provoque the linearization (  # see observe)
 
-        # if val and self._data is not None:
-        #     # linearisation of the data, if possible
-        #     self._linearize()
+        # if val and self._data is not None:  #     # linearisation of the data, if possible  #     self._linearize()
 
     # ..................................................................................................................
     @property
@@ -2171,7 +2177,7 @@ class NDArray(HasTraits):
             units = ur.Unit(other)
         if self.has_units:
             try:
-                if new.meta.larmor: # _origin in ['topspin', 'nmr']:
+                if new.meta.larmor:  # _origin in ['topspin', 'nmr']:
                     # its nmr data
                     set_nmr_context(new.meta.larmor)
                     with ur.context('nmr'):
@@ -2193,7 +2199,7 @@ class NDArray(HasTraits):
 
                 elif self.units == ur.absorbance:
                     if units in [ur.transmittance, ur.absolute_transmittance]:
-                        new._data = 10.**(-new._data)
+                        new._data = 10. ** (-new._data)
                         if new.title == 'Absorbance':
                             new._title = 'Transmittance'
 

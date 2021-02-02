@@ -70,6 +70,9 @@ def json_serialiser(byte_obj, encoding=None):
     elif hasattr(byte_obj, 'implements'):
 
         objnames = byte_obj.__dir__()
+        # particular case of Linear Coordinates
+        if byte_obj.implements('LinearCoord'):
+            objnames.remove('data')
         dic = {}
         for name in objnames:
 

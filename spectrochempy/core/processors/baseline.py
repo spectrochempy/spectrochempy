@@ -517,6 +517,7 @@ def ab(dataset, dim=-1, **kwargs):
     """
     return abs(dataset, dim, **kwargs)
 
+
 # ......................................................................................................................
 @_units_agnostic_method
 def dc(dataset, **kwargs):

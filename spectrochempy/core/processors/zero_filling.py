@@ -10,17 +10,19 @@ __all__ = ["zf_auto", "zf_double", "zf_size"]
 __dataset_methods__ = __all__
 
 import functools
+
 import numpy as np
+
 from spectrochempy.utils import largest_power_of_2
 from spectrochempy.core import error_
 from spectrochempy.core.dataset.coord import LinearCoord
+
 
 # ======================================================================================================================
 # Decorators
 # ======================================================================================================================
 
 def _zf_method(method):
-
     @functools.wraps(method)
     def wrapper(dataset, **kwargs):
 
@@ -40,8 +42,7 @@ def _zf_method(method):
 
         # get the lastcoord
         x = new.coordset[-1]
-        if new.coordset[-1].dimensionless or \
-                new.coordset[-1].units.dimensionality == '[time]':
+        if new.coordset[-1].dimensionless or new.coordset[-1].units.dimensionality == '[time]':
 
             if not new.coordset[-1].linear:
                 # This method apply only to linear coordinates.
@@ -57,6 +58,8 @@ def _zf_method(method):
             # we needs to increase the x coordinates array
             new.coordset[-1]._size = new._data.shape[-1]
 
+            # update with the new td
+            new.meta.td[-1] = new.coordset[-1].size
             new.history = f'`{method.__name__}` shift performed on dimension `{dim}` with parameters: {kwargs}'
 
         else:
@@ -70,6 +73,7 @@ def _zf_method(method):
         return new
 
     return wrapper
+
 
 # ======================================================================================================================
 # Private methods
@@ -171,4 +175,4 @@ def zf_auto(dataset, mid=False):
         Zero filled array of NMR data.
 
     """
-    return zf_size(dataset, size = largest_power_of_2(dataset.shape[-1]), mid=mid)
+    return zf_size(dataset, size=largest_power_of_2(dataset.shape[-1]), mid=mid)
