@@ -15,9 +15,6 @@ __all__ = ['plot_2D', 'plot_map', 'plot_stack', 'plot_image', 'plot_surface', 'p
 
 __dataset_methods__ = __all__
 
-# ----------------------------------------------------------------------------------------------------------------------
-# standard imports
-# ----------------------------------------------------------------------------------------------------------------------
 from copy import copy as cpy
 
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
@@ -26,19 +23,6 @@ import matplotlib as mpl
 import numpy as np
 
 from spectrochempy.core.plotters.plotutils import make_label
-
-
-# import sys
-# ----------------------------------------------------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------------------------------------------------
-# ----------------------------------------------------------------------------------------------------------------------
-# local imports
-# ----------------------------------------------------------------------------------------------------------------------
-
-
-# from spectrochempy.core import info_, debug_, error_, warning_
-
 
 # ======================================================================================================================
 # nddataset plot2D functions
@@ -369,13 +353,13 @@ def plot_2D(dataset, **kwargs):
     yscale = kwargs.get("yscale", "linear")
     ax.set_yscale(yscale)
 
-    # z intensity (by default we plot real part of the data)
+    # z intensity (by default we plot real component of the data)
     # ------------------------------------------------------------------------------------------------------------------
 
     if not kwargs.get('imag', False):
         zdata = new.real.masked_data
     else:
-        zdata = new.RI.masked_data  # new.imag.masked_data #TODO: quaternion case (3 imag.parts)
+        zdata = new.RI.masked_data  # new.imag.masked_data #TODO: quaternion case (3 imag.components)
 
     zlim = kwargs.get('zlim', (zdata.min(), zdata.max()))
 

@@ -9,10 +9,6 @@ In this module, we define basic functions adapted from numpy but able to handle 
 """
 __all__ = ['dot']
 
-# ----------------------------------------------------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------------------------------------------------
-
 import numpy as np
 
 from spectrochempy.core.dataset.nddataset import NDDataset

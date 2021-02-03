@@ -11,10 +11,6 @@ __all__ = ['Fit']
 
 __dataset_methods__ = []
 
-# ----------------------------------------------------------------------------------------------------------------------
-# standard imports
-# ----------------------------------------------------------------------------------------------------------------------
-
 import sys
 import re
 from warnings import warn
@@ -28,14 +24,6 @@ from spectrochempy.core.fitting.models import getmodel
 from spectrochempy.core.fitting.optimization import optimize
 from spectrochempy.utils import htmldoc
 from spectrochempy.core import preferences, info_, INFO
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------------------------------------------------
-# ----------------------------------------------------------------------------------------------------------------------
-# localimports
-# ----------------------------------------------------------------------------------------------------------------------
 
 
 # ======================================================================================================================
@@ -189,7 +177,7 @@ class Fit(HasTraits):
                 modeldata = self._get_modeldata(dataset, exp_idx)[0]
                 # baseline is already summed with modeldata[-1]
 
-                # important to work with the real part of dataset
+                # important to work with the real component of dataset
                 # not the complex number
                 data = dataset.real.data.squeeze()
 

@@ -510,7 +510,7 @@ class NDMath(object):
 
         else:
             data = np.ma.sqrt(
-                dataset.real ** 2 + dataset.part('IR') ** 2 + dataset.part('RI') ** 2 + dataset.part('II') ** 2,
+                dataset.real ** 2 + dataset.component('IR') ** 2 + dataset.component('RI') ** 2 + dataset.component('II') ** 2,
                 dtype=dtype)
             cls._is_quaternion = False
 
@@ -541,7 +541,7 @@ class NDMath(object):
 
         See Also
         --------
-        conj, real, imag, RR, RI, IR, II, part, set_complex, is_complex
+        conj, real, imag, RR, RI, IR, II, component, set_complex, is_complex
         """
 
         axis, dim = cls.get_axis(dim, allows_none=True)

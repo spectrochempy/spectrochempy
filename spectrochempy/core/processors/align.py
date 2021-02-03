@@ -11,19 +11,10 @@ This module defines functions related to NDDataset or NDPanel alignment.
 __all__ = ['align']
 __dataset_methods__ = __all__
 
-# ----------------------------------------------------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------------------------------------------------
-
 # import scipy.interpolate
 import numpy as np
 
-# ----------------------------------------------------------------------------------------------------------------------
-# localimports
-# ----------------------------------------------------------------------------------------------------------------------
-
 from spectrochempy.utils import MASKED, UnitsCompatibilityError
-# from ...extern.orderedset import OrderedSet
 from spectrochempy.core import warning_, error_
 
 
