@@ -42,11 +42,15 @@
 import spectrochempy as scp
 
 # %% [markdown]
+# ## FFT of 1D spectra
+
+# %% [markdown]
 # First we open read some time domain data. Here is a NMD free induction decay (FID):
 
 # %%
 path = scp.preferences.datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'topspin_1d'
 fid = scp.read_topspin(path)
+fid
 
 # %% [markdown]
 # The type of the data is complex:
@@ -70,6 +74,7 @@ print("td = ", fid.size)
 spec = scp.fft(fid)
 _ = spec.plot(xlim=(100, -100))
 print("si = ", spec.size)
+spec
 
 # %% [markdown]
 # **Alternative notation**
@@ -139,7 +144,7 @@ print("si = ", spec3.size)
 # See the dedicated [Time domain baseline correction tutorial](td_baseline.ipynb).
 
 # %% [markdown]
-# ## Magnitude calculation
+# ### Magnitude calculation
 
 # %%
 ms = spec.mc()
@@ -147,10 +152,17 @@ _ = ms.plot(xlim=(10, -10))
 _ = spec.plot(clear=False, xlim=(10, -10), c='r')
 
 # %% [markdown]
-# ## Power spectrum
+# ### Power spectrum
 
 # %%
 mp = spec.ps()
 _ = (mp / mp.max()).plot()
 _ = (spec / spec.max()).plot(clear=False, xlim=(10, -10),
                              c='r')  # Here we have normalized the spectra at their max value.
+
+# %% [markdown]
+# ## FTIR
+
+# %%
+# ir = scp.read_srs("irdata/OMNIC/dd_19039_538.srs")
+# ir
