@@ -12,10 +12,6 @@ __all__ = ['plot_3D']
 
 __dataset_methods__ = []
 
-
-# ----------------------------------------------------------------------------
-# local imports
-# ----------------------------------------------------------------------------
 # from spectrochempy.core import project_preferences
 
 # import matplotlib.pyplot as plt

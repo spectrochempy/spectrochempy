@@ -10,23 +10,13 @@ This module implements class |CoordSet|.
 
 __all__ = ['CoordSet']
 
-# ----------------------------------------------------------------------------------------------------------------------
-# standard imports
-# ----------------------------------------------------------------------------------------------------------------------
 import copy as cpy
 import warnings
-# import textwrap
 import uuid
 
-# ----------------------------------------------------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------------------------------------------------
 import numpy as np
 from traitlets import HasTraits, List, Bool, Unicode, observe, All, validate, default, Dict
 
-# ----------------------------------------------------------------------------------------------------------------------
-# localimports
-# ----------------------------------------------------------------------------------------------------------------------
 from spectrochempy.core.dataset.ndarray import NDArray, DEFAULT_DIM_NAME
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.utils import is_sequence, colored_output, convert_to_html

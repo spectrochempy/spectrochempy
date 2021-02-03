@@ -10,8 +10,6 @@ This module defines the class |NDPlot| in which generic plot methods for a |NDDa
 
 __all__ = ['NDPlot', 'plot']
 
-# Python and third parties imports
-# ----------------------------------------------------------------------------------------------------------------------
 import re
 import textwrap
 
@@ -24,8 +22,6 @@ import plotly.graph_objects as go
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from traitlets import Dict, HasTraits, Instance, Union, default, TraitError
 
-# local import
-# ----------------------------------------------------------------------------------------------------------------------
 from spectrochempy.utils import get_figure, Meta, pathclean
 
 from spectrochempy.core import preferences, dataset_preferences, project_preferences, matplotlib_preferences

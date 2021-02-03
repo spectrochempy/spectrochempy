@@ -10,10 +10,6 @@ This module implements the base |NDArray| class.
 
 __all__ = ['NDArray']
 
-# ======================================================================================================================
-# standard imports
-# ======================================================================================================================
-
 import copy as cpy
 from datetime import datetime, timezone
 import warnings
@@ -33,13 +29,6 @@ from spectrochempy.core import info_, error_, print_
 from spectrochempy.utils import (TYPE_INTEGER, TYPE_FLOAT, Meta, MaskedConstant, MASKED, NOMASK, INPLACE, is_sequence,
                                  is_number, numpyprintoptions, spacing, insert_masked_print, SpectroChemPyWarning,
                                  make_new_object, convert_to_html, get_user_and_node)
-
-# ======================================================================================================================
-# Third party imports
-# ======================================================================================================================
-# ======================================================================================================================
-# local imports
-# ======================================================================================================================
 
 # ======================================================================================================================
 # constants

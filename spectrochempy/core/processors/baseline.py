@@ -11,10 +11,6 @@ __all__ = ['BaselineCorrection', 'ab', 'abc', 'dc']
 
 __dataset_methods__ = ['ab', 'abc', 'dc']
 
-# ----------------------------------------------------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------------------------------------------------
-
 import numpy as np
 import scipy.interpolate
 from traitlets import Int, Instance, HasTraits, Float, Unicode, Tuple, List
@@ -28,11 +24,6 @@ from ...utils import TYPE_INTEGER, TYPE_FLOAT
 from .smooth import smooth
 from .. import debug_
 from spectrochempy.core.processors.utils import _units_agnostic_method
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-# localimports
-# ----------------------------------------------------------------------------------------------------------------------
 
 
 class BaselineCorrection(HasTraits):

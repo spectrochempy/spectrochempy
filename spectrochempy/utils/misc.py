@@ -122,7 +122,7 @@ def get_component(data, select='REAL'):
     ----------
     data : ndarray
     select : str, optional, default='REAL'
-        if 'REAL', only real part in all dimensions will be selected.
+        if 'REAL', only real component in all dimensions will be selected.
         Else a string must specify which real (R) or imaginary (I) component
         has to be selected along a specific dimension. For instance,
         a string such as 'RRI' for a 2D hypercomplex array indicated
@@ -131,7 +131,7 @@ def get_component(data, select='REAL'):
 
     Returns
     -------
-    part
+    component
         A component of the complex or hypercomplex array.
     """
     if not select:
@@ -171,7 +171,7 @@ def get_component(data, select='REAL'):
         else:
             raise ValueError(f'something wrong: cannot interpret `{select}` for complex data!')
     else:
-        warnings.warn(f'No selection was performed because datasets with complex data have no `{select}` part. ')
+        warnings.warn(f'No selection was performed because datasets with complex data have no `{select}` component. ')
 
     return new
 
