@@ -2634,6 +2634,8 @@ class NDMath(object):
                 returntype = 'NDDataset'
             elif objtype == 'Coord' and returntype not in ['NDPanel', 'NDDataset']:
                 returntype = 'Coord'
+            elif objtype == 'LinearCoord' and returntype not in ['NDPanel', 'NDDataset']:
+                returntype = 'LinearCoord'
             else:
                 # only the three above type have math capabilities in spectrochempy.
                 pass
@@ -2648,7 +2650,7 @@ class NDMath(object):
                 ismasked = True
 
         # it may be necessary to change the object order regarding the types
-        if returntype in ['NDPanel', 'NDDataset', 'Coord'] and objtypes[0] != returntype:
+        if returntype in ['NDPanel', 'NDDataset', 'Coord', 'LinearCoord'] and objtypes[0] != returntype:
 
             inputs.reverse()
             objtypes.reverse()
@@ -2725,7 +2727,7 @@ class NDMath(object):
         if other is not None:
 
             # First the units may require to be compatible, and if thet are sometimes they may need to be rescales
-            if othertype in ['NDDataset', 'Coord']:
+            if othertype in ['NDDataset', 'Coord', 'LinearCoord', 'Quantity']:
 
                 # rescale according to units
                 if not other.unitless:
@@ -2764,13 +2766,13 @@ class NDMath(object):
                         except AssertionError as e:
                             raise CoordinateMismatchError(str(e))
 
-            if othertype in ['NDDataset', 'Coord']:
+            if othertype in ['NDDataset', 'Coord', 'LinearCoord']:
 
                 # mask?
                 if ismasked:
-                    arg = other._umasked(other._data, other._mask)
+                    arg = other._umasked(other.data, other.mask)
                 else:
-                    arg = other._data
+                    arg = other.data
 
             else:
                 # Not a NDArray.
@@ -2778,7 +2780,6 @@ class NDMath(object):
                 # if it is a quantity than separate units and magnitude
                 if isinstance(other, Quantity):
                     arg = other.m
-
                 else:
                     # no units
                     arg = other
@@ -2786,6 +2787,7 @@ class NDMath(object):
             args.append(arg)
 
             otherq = reduce_(arg)
+
             if hasattr(other, 'units') and other.units is not None:
                 otherq = Quantity(otherq, other.units)
                 otherq = otherq.values if hasattr(otherq, 'values') else otherq  # case of nddataset, coord,
@@ -2817,7 +2819,8 @@ class NDMath(object):
         if not remove_units:
 
             if hasattr(q, 'units'):
-                q = q.m * check_require_units(fname, q.units)
+                # q = q.m * check_require_units(fname, q.units)
+                q = q.to(check_require_units(fname, q.units))
 
             for i, otherq in enumerate(otherqs[:]):
                 if hasattr(otherq, 'units'):
@@ -2913,7 +2916,7 @@ class NDMath(object):
             mask = data._mask
             data = data._data
         else:
-            mask = np.zeros_like(data, dtype=bool)
+            mask = NOMASK  # np.zeros_like(data, dtype=bool)
 
         # return calculated data, units and mask
         return data, units, mask, returntype
@@ -2963,12 +2966,14 @@ class NDMath(object):
                 returntype = 'NDDataset'
             elif objtype == 'Coord' and returntype not in ['NDPanel', 'NDDataset']:
                 returntype = 'Coord'
+            elif objtype == 'LinearCoord' and returntype not in ['NDPanel', 'NDDataset']:
+                returntype = 'LinearCoord'
             else:
                 # only the three above type have math capabilities in spectrochempy.
                 pass
 
         # it may be necessary to change the object order regarding the types
-        if returntype in ['NDPanel', 'NDDataset', 'Coord'] and objtypes[0] != returntype:
+        if returntype in ['NDPanel', 'NDDataset', 'Coord', 'LinearCoord'] and objtypes[0] != returntype:
 
             inputs.reverse()
             objtypes.reverse()
@@ -3058,7 +3063,11 @@ class NDMath(object):
 
             else:
                 data, units, mask, returntype = self._op(fm, objs)
-                self._data = data
+                if returntype != 'LinearCoord':
+                    self._data = data
+                else:
+                    from spectrochempy.core.dataset.coord import LinearCoord
+                    self = LinearCoord(data)
                 self._units = units
                 self._mask = mask
 
@@ -3076,11 +3085,16 @@ class NDMath(object):
 
             new = NDDataset(new)
 
-        new._data = cpy.deepcopy(data)
+        if returntype != 'LinearCoord':
+            new._data = cpy.deepcopy(data)
+        else:
+            from spectrochempy.core.dataset.coord import LinearCoord
+            new = LinearCoord(cpy.deepcopy(data))
 
         # update the attributes
         new._units = cpy.copy(units)
-        new._mask = cpy.copy(mask)
+        if mask is not None and np.any(mask != NOMASK):
+            new._mask = cpy.copy(mask)
         if history is not None and hasattr(new, 'history'):
             new._history.append(history.strip())
 

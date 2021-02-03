@@ -6,6 +6,8 @@ channels:
     - defaults
 
 dependencies:
+    - python=3.8
+
     # specific
     - quadprog
     - brukeropusreader
@@ -28,8 +30,6 @@ dependencies:
     - tqdm
     - traitlets
     - traittypes
-
-    # to be suppressed when code change is finished
     - xlrd
 
     # mainly for install and a bit more...
@@ -42,3 +42,36 @@ dependencies:
     - ipympl
     - jupyterlab
     - nodejs
+
+
+    # DEV: just for testing
+    - pytest
+    - pytest-doctestplus
+    - pytest-flake8
+    - scikit-image
+    - coverage
+
+    # DEV: code and docs
+    - jupytext
+    - sphinx
+    - sphinx_rtd_theme
+    - autodocsumm
+    - sphinx-gallery
+    - nbsphinx
+    - jupyter_sphinx
+    - json5
+    - sphinx-copybutton
+
+    # DEV: build
+    - conda-build
+    - boa
+    - anaconda-client
+
+    # optional
+    # - xarray
+    # - datashader
+    # - scikit-learn
+
+    - pip
+    - pip:
+        - autodoc_traits

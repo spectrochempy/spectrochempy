@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-#
 # ======================================================================================================================
 # Copyright (©) 2015-2016 Christian Fernandez
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
@@ -9,7 +8,7 @@
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
 
-__all__ = ["fft", "ifft", "get_zpd"]
+__all__ = ["fft", "ifft", "mc", "ps", "ht"]
 
 __dataset_methods__ = __all__
 
@@ -17,27 +16,36 @@ __dataset_methods__ = __all__
 # Standard python imports
 # ======================================================================================================================
 import re
-import matplotlib.pyplot as plt
 
 # ======================================================================================================================
 # Third party imports
 # ======================================================================================================================
 import numpy as np
 from scipy.interpolate import interp1d
+from scipy.signal import hilbert
+
+from spectrochempy.core import error_
+from spectrochempy.units import ur
+from spectrochempy.core.dataset.coord import LinearCoord
+from spectrochempy.core.dataset.ndmath import zeros_like
+from spectrochempy.core.processors.apodization import hamming
+from spectrochempy.core.processors.concatenate import concatenate
+from spectrochempy.utils import largest_power_of_2
+from spectrochempy.core.processors.utils import _units_agnostic_method
+from spectrochempy.core.processors.zero_filling import zf_size
 
 # ======================================================================================================================
 # Local imports
 # ======================================================================================================================
 
-from nmrglue.process.proc_base import largest_power_of_2, zf_size
-from .. import error_
-from ...units import ur
-from ..dataset.ndmath import zeros_like
-from .apodization import hamming
-from .concatenate import concatenate
+
+_fft = lambda data: np.fft.fftshift(np.fft.fft(data), -1)
+_ifft = lambda data: np.fft.ifft(np.fft.ifftshift(data, -1))
+_fft_positive = lambda data: np.fft.fftshift(np.fft.ifft(data).astype(data.dtype)) * data.shape[-1]
+_ifft_positive = lambda data: np.fft.fft(np.fft.ifftshift(data, -1)) * data.shape[-1]
 
 
-def get_zpd(dataset, dim=-1, mode='max'):
+def _get_zpd(dataset, dim='x', mode='max'):
     """
     Find the zero path difference (zpd) positions.
 
@@ -48,7 +56,7 @@ def get_zpd(dataset, dim=-1, mode='max'):
     dataset : |NDDataset|
         The dataset on which to search for zpd
     dim: int or str, optional
-        Dimension along which to make the search. Default=-1.
+        Dimension along which to make the search. Default='x'.
     mode : enum('max','abs'), optional
         Mode of selection. Default = 'max'.
 
@@ -70,7 +78,7 @@ def ifft(dataset, size=None, **kwargs):
     """
     Apply a inverse fast fourier transform.
 
-    For multidimensional NDDataset or NDPanels,
+    For multidimensional NDDataset,
     the apodization is by default performed on the last dimension.
 
     The data in the last dimension MUST be in frequency (or without dimension)
@@ -112,7 +120,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
     """
     Apply a complex fast fourier transform.
 
-    For multidimensional NDDataset or NDPanels,
+    For multidimensional NDDataset,
     the apodization is by default performed on the last dimension.
 
     The data in the last dimension MUST be in time-domain (or without dimension)
@@ -161,196 +169,209 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
     is_nmr = dataset.origin.lower() in ["topspin", ]
     is_ir = dataset.origin.lower() in ["omnic", "opus"]
 
-    # On which axis do we want to apodize? (get axis from arguments)
+    # On which axis do we want to apply transform (get axis from arguments)
     dim = kwargs.pop('dim', kwargs.pop('axis', -1))
     axis, dim = dataset.get_axis(dim, negative_axis=True)
+
+    # output dataset inplace or not
+    inplace = kwargs.pop('inplace', False)
+    if not inplace:  # default
+        new = dataset.copy()  # copy to be sure not to modify this dataset
+    else:
+        new = dataset
 
     # The last dimension is always the dimension on which we apply the fourier transform.
     # If needed, we swap the dimensions to be sure to be in this situation
     swaped = False
     if axis != -1:
-        dataset.swapdims(axis, -1, inplace=True)  # must be done in  place
+        new.swapdims(axis, -1, inplace=True)  # must be done in  place
         swaped = True
 
-    # select the last coordinates
-    lastcoord = dataset.coordset[dim]
+    # Select the last coordinates
+    x = new.coordset[dim]
 
-    if not inv and not lastcoord.dimensionless \
-            and lastcoord.units.dimensionality != '[time]':
+    # Performs some dimentionality checking
+    error = False
+    if not inv and not x.dimensionless and x.units.dimensionality != '[time]':
         error_('fft apply only to dimensions with [time] dimensionality or dimensionless coords\n'
                'fft processing was thus cancelled')
-        return dataset
+        error = True
 
-    elif inv and lastcoord.units.dimensionality != '1/[time]' and lastcoord.units != 'ppm':
-        error_('ifft apply only to dimensions with [frequency] dimensionality or with ppm units\n'
-               ' ifft processing was thus cancelled')
-        return dataset
+    elif inv and x.units.dimensionality != '1/[time]' and not x.dimensionless:
+        error_('ifft apply only to dimensions with [frequency] dimensionality or with ppm units '
+               'or dimensionless coords.\n ifft processing was thus cancelled')
+        error = True
 
-    elif dataset.is_masked:
+    # Should not be masked
+    elif new.is_masked:
         error_('current fft or ifft processing does not support masked data as input.\n processing was thus cancelled')
+        error = True
 
-    # TODO: other tests data spacing and so on.
+    if not error:
+        # Coordinates should be uniformly spaced (linear coordinate)
+        if not x.linear:
+            # try to linearize it
+            x.linear = True
 
-    # output dataset inplace or not
-    inplace = kwargs.pop('inplace')
-    if not inplace:  # default
-        new = dataset.copy()  # copy to be sure not to modify this dataset
-    else:
-        new = dataset  #
+        # Can we use some metadata as for NMR spectra
+        if is_nmr and not inv:
+            td = new.meta.td[-1]
+        else:
+            td = x.size
 
-    # Can we use some metadata as for NMR spectra
-    if is_nmr and not inv:
-        td = dataset.meta.td[-1]
-    else:
-        td = lastcoord.size
+        # if no size (or si) parameter then use the size of the data (size not used for inverse transform
+        if size is None or inv:
+            size = kwargs.get('si', td)
 
-    # if no size (or si) parameter then use the size of the data (size not used for inverse transform
-    if size is None or inv:
-        size = kwargs.get('si', td)
+        # we default to the closest power of two larger of the data size
+        size = largest_power_of_2(size)
 
-    # we default to the closest power of two larger of the data size
-    size = largest_power_of_2(size)
+        # do we have an effective td to apply
+        tdeff = sizeff
+        if tdeff is None:
+            tdeff = kwargs.get("tdeff", td)
 
-    # do we have an effective td to apply
-    tdeff = sizeff
-    if tdeff is None:
-        tdeff = kwargs.get("tdeff", td)
+        if tdeff is None or tdeff < 5 or tdeff > size:
+            tdeff = size
 
-    if tdeff is None or tdeff < 5 or tdeff > size:
-        tdeff = size
+        # Eventually apply the effective size
+        new[..., tdeff:] = 0.
 
-    # Eventually apply the effective size
-    new[..., tdeff:] = 0.
+        # should we work on complex data
+        iscomplex = new.is_complex
 
-    # should we work on complex data
-    iscomplex = new.is_complex
+        # if we are in NMR we have an additional complication due to the mode
+        # of acquisition (sequential mode when ['QSEQ','TPPI','STATES-TPPI'])
+        encoding = None
+        if is_nmr and not inv:
+            encoding = new.meta.encoding[-1]
 
-    # if we are in NMR we have an additional complication due to the mode
-    # of acquisition (sequential mode when ['QSEQ','TPPI','STATES-TPPI'])
-    encoding = None
-    if is_nmr and not inv:
-        encoding = new.meta.encoding[-1]
+        # perform the fft
+        if iscomplex and encoding in ['QSIM', 'DQD']:
+            zf_size(new, size=size, inplace=True)
+            data = _fft(new.data)
 
-    # perform the fft
-    if iscomplex and encoding in ['QSIM', 'DQD']:
-        data = zf_size(new.data, size)
-        data = np.fft.fft(data)
-        data = np.fft.fftshift(data, -1)
-    elif inv:
-        # we assume no special encoding for inverse fft transform
-        data = np.fft.ifftshift(new.data, -1)
-        data = np.fft.ifft(data)
+        elif inv:
+            # we assume no special encoding for inverse fft transform
+            data = _ifft(new.data)
 
-    elif is_ir and not inv:
-        # subtract  DC
-        new -= new.mean()
-        # determine phase correction (Mertz)
-        zpd = new.get_zpd()
-        if not np.all(zpd[0] == zpd):
-            raise ValueError("zpd should be at the same index")
-        zpd = zpd[0]
-        narrowed = hamming(new[:, 0: 2 * zpd])
-        mirrored = concatenate(narrowed[:, zpd:], narrowed[:, :zpd])
-        spectrum = np.fft.rfft(mirrored.data)
-        phase_angle = np.arctan(spectrum.imag, spectrum.real)
-        initx = np.arange(phase_angle.shape[1])
-        interpolate_phase_angle = interp1d(initx, phase_angle)
+        elif is_ir and not inv:
 
-        zeroed = concatenate(zeros_like(new[:, zpd + 1:]), new)
-        apodized = hamming(zeroed)  # mertz(new, zpd)
-        zpd = len(apodized.x) // 2
-        mirrored = concatenate(apodized[:, zpd:], apodized[:, 0:zpd])
+            # TODO: revise this when SRS file will be provided (will not use plt here!  It should return data)
 
-        wavenumbers = np.fft.rfftfreq(mirrored.shape[1], 3.165090310992977e-05 * 2)
+            # subtract  DC
+            new -= new.mean()
+            # determine phase correction (Mertz)
+            zpd = _get_zpd(new)
+            if not np.all(zpd[0] == zpd):
+                raise ValueError("zpd should be at the same index")
+            zpd = zpd[0]
+            narrowed = hamming(new[:, 0: 2 * zpd])
+            mirrored = concatenate(narrowed[:, zpd:], narrowed[:, :zpd])
+            spectrum = np.fft.rfft(mirrored.data)
+            phase_angle = np.arctan(spectrum.imag, spectrum.real)
+            initx = np.arange(phase_angle.shape[1])
+            interpolate_phase_angle = interp1d(initx, phase_angle)
 
-        spectrum = np.fft.rfft(mirrored.data)
-        plt.plot(wavenumbers, spectrum[0])
-        plt.show()
-        newx = np.arange(spectrum.shape[1]) * max(initx) / max(np.arange(spectrum.shape[1]))
-        phase_angle = interpolate_phase_angle(newx)
-        spectrum = spectrum.real * np.cos(phase_angle) + spectrum.imag * np.sin(phase_angle)
+            zeroed = concatenate(zeros_like(new[:, zpd + 1:]), new)
+            apodized = hamming(zeroed)  # mertz(new, zpd)
+            zpd = len(apodized.x) // 2
+            mirrored = concatenate(apodized[:, zpd:], apodized[:, 0:zpd])
 
-        plt.plot(wavenumbers, spectrum[0])
-        plt.show()
-    else:
-        raise NotImplementedError(encoding)
+            wavenumbers = np.fft.rfftfreq(mirrored.shape[1], 3.165090310992977e-05 * 2)
+            spectrum = np.fft.rfft(mirrored.data)
 
-    # We need here to create a new dataset with new shape and axis
-    new._data = data
-    new.mask = False  # TODO: make a test on mask - should be none before fft!
+            import matplotlib.pyplot as plt
+            plt.plot(wavenumbers, spectrum[0])
+            plt.show()
+            newx = np.arange(spectrum.shape[1]) * max(initx) / max(np.arange(spectrum.shape[1]))
+            phase_angle = interpolate_phase_angle(newx)
+            spectrum = spectrum.real * np.cos(phase_angle) + spectrum.imag * np.sin(phase_angle)
 
-    # create new coordinates for the transformed data
+            plt.plot(wavenumbers, spectrum[0])  # plt.show()
 
-    if is_nmr:
-        sfo1 = new.meta.sfo1[-1]
-        bf1 = new.meta.bf1[-1]
-        sf = new.meta.sf[-1]
-        sw = new.meta.sw_h[-1]
+        else:
+            raise NotImplementedError(encoding)
 
-    else:
-        sfo1 = 1.0 * ur.Hz
-        bf1 = sfo1
-        sf = 0 * ur.Hz
-        dw = lastcoord.spacing
-        sw = 1. / dw
+        # We need here to create a new dataset with new shape and axis
+        new._data = data
+        new.mask = False  # TODO: make a test on mask - should be none before fft!
 
-    if not inv:
-        # time to frequency
-        sizem = max(size - 1, 1)
-        deltaf = -sw / sizem
-        first = sfo1 - sf - deltaf * sizem / 2.
+        # create new coordinates for the transformed data
 
-        newcoord = type(lastcoord)(np.arange(size) * deltaf + first)
-        newcoord.name = lastcoord.name
-        newcoord.title = 'frequency'
-        newcoord.ito("Hz")
+        if is_nmr:
+            sfo1 = new.meta.sfo1[-1]
+            bf1 = new.meta.bf1[-1]
+            sf = new.meta.sf[-1]
+            sw = new.meta.sw_h[-1]
 
-    else:
-        # frequency or ppm to time
-        sw = abs(lastcoord.data[-1] - lastcoord.data[0])
-        if lastcoord.units == 'ppm':
-            sw = bf1.to("Hz") * sw / 1.0e6
-        deltat = 1. / sw
+        else:
+            sfo1 = 1.0 * ur.Hz
+            bf1 = sfo1
+            sf = 0 * ur.Hz
+            dw = x.spacing
+            sw = 1. / dw
 
-        newcoord = type(lastcoord)(np.arange(size) * deltat)
-        newcoord.name = lastcoord.name
-        newcoord.title = 'time'
-        newcoord.ito("s")
+        if not inv:
+            # time to frequency
+            sizem = max(size - 1, 1)
+            deltaf = -sw / sizem
+            first = sfo1 - sf - deltaf * sizem / 2.
 
-    if is_nmr and not inv:
-        newcoord.meta.larmor = bf1  # needed for ppm transformation
-        newcoord.origin = 'bruker'
-        if ppm:
-            newcoord.ito('ppm')
-            if new.meta.nuc1 is not None:
-                nuc1 = new.meta.nuc1[-1]
-                regex = r"([^a-zA-Z]+)([a-zA-Z]+)"
-                m = re.match(regex, nuc1)
-                mass = m[1]
-                name = m[2]
-                nucleus = '^{' + mass + '}' + name
-            else:
-                nucleus = ""
-            newcoord.title = fr"$\delta\ {nucleus}$"
+            # newcoord = type(x)(np.arange(size) * deltaf + first)
+            newcoord = LinearCoord.arange(size) * deltaf + first
+            newcoord.name = x.name
+            newcoord.title = 'frequency'
+            newcoord.ito("Hz")
 
-    new.coordset[-1] = newcoord
+        else:
+            # frequency or ppm to time
+            sw = abs(x.data[-1] - x.data[0])
+            if x.units == 'ppm':
+                sw = bf1.to("Hz") * sw / 1.0e6
+            deltat = (1. / sw).to('us')
 
-    # if some phase related metadata do not exist yet, initialize them
-    new.meta.readonly = False
+            newcoord = LinearCoord.arange(size) * deltat
+            newcoord.name = x.name
+            newcoord.title = 'time'
+            newcoord.ito("us")
 
-    if not new.meta.phased:
-        new.meta.phased = [False] * new.ndim
+        if is_nmr and not inv:
+            newcoord.meta.larmor = bf1  # needed for ppm transformation
+            ppm = kwargs.get('ppm', True)
+            if ppm:
+                newcoord.ito('ppm')
+                if new.meta.nuc1 is not None:
+                    nuc1 = new.meta.nuc1[-1]
+                    regex = r"([^a-zA-Z]+)([a-zA-Z]+)"
+                    m = re.match(regex, nuc1)
+                    if m is not None:
+                        mass = m[1]
+                        name = m[2]
+                        nucleus = '^{' + mass + '}' + name
+                    else:
+                        nucleus = ""
+                else:
+                    nucleus = ""
+                newcoord.title = fr"$\delta\ {nucleus}$"
 
-    if not new.meta.pivot:
-        new.meta.pivot = [float(abs(new).max().coordset[i].data) * new.coordset[i].units for i in
-                          range(new.ndim)]  # create pivot metadata
+        new.coordset[-1] = newcoord
 
-    # applied the stored phases
-    new.pk(inplace=True)
+        if not inv:
+            # phase frequency domain
 
-    new.meta.phased[-1] = True
+            # if some phase related metadata do not exist yet, initialize them
+            new.meta.readonly = False
 
-    new.meta.readonly = True
+            if not new.meta.phased:
+                new.meta.phased = [False] * new.ndim
+
+            new.meta.pivot = [abs(new).coordset[i].max() for i in range(new.ndim)]  # create pivot metadata
+
+            # applied the stored phases
+            new.pk(inplace=True)
+
+            new.meta.readonly = True
 
     # restore original data order if it was swaped
     if swaped:
@@ -359,6 +380,66 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
     s = 'ifft' if inv else 'fft'
     new.history = f'{s} applied on dimension {dim}'
     return new
+
+
+ft = fft
+ift = ifft
+
+
+# Modulus Calculation
+@_units_agnostic_method
+def mc(dataset):
+    """
+    Modulus calculation.
+
+    Calculates sqrt(real^2 + imag^2)
+    """
+    return np.sqrt(dataset.real ** 2 + dataset.imag ** 2)
+
+
+@_units_agnostic_method
+def ps(dataset):
+    """
+    Power spectrum. Squared version.
+
+    Calculated real^2+imag^2
+    """
+    return dataset.real ** 2 + dataset.imag ** 2
+
+
+@_units_agnostic_method
+def ht(dataset, N=None):
+    """
+    Hilbert transform.
+
+    Reconstruct imaginary data via hilbert transform.
+    Copied from NMRGlue (BSD3 licence)
+
+    Parameters
+    ----------
+    data : ndarrat
+        Array of NMR data.
+    N : int or None
+        Number of Fourier components.
+
+    Returns
+    -------
+    ndata : ndarray
+        NMR data which has been Hilvert transformed.
+
+    """
+    # create an empty output array
+    fac = N / dataset.shape[-1]
+    z = np.empty(dataset.shape, dtype=(dataset.flat[0] + dataset.flat[1] * 1.j).dtype)
+    if dataset.ndim == 1:
+        z[:] = hilbert(dataset.real, N)[:dataset.shape[-1]] * fac
+    else:
+        for i, vec in enumerate(dataset):
+            z[i] = hilbert(vec.real, N)[:dataset.shape[-1]] * fac
+
+    # correct the real data as sometimes it changes
+    z.real = dataset.real
+    return z
 
 
 # ======================================================================================================================

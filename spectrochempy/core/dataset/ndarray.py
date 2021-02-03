@@ -31,7 +31,7 @@ from traittypes import Array
 from spectrochempy.units import Unit, ur, Quantity, set_nmr_context
 from spectrochempy.core import info_, error_, print_
 from spectrochempy.utils import (TYPE_INTEGER, TYPE_FLOAT, Meta, MaskedConstant, MASKED, NOMASK, INPLACE, is_sequence,
-                                 is_number, numpyprintoptions, insert_masked_print, SpectroChemPyWarning,
+                                 is_number, numpyprintoptions, spacing, insert_masked_print, SpectroChemPyWarning,
                                  make_new_object, convert_to_html, get_user_and_node)
 
 # ======================================================================================================================
@@ -61,7 +61,6 @@ numpyprintoptions()
 
 # noinspection PyPep8Naming
 class NDArray(HasTraits):
-
     # hidden properties
 
     # array definition
@@ -98,7 +97,7 @@ class NDArray(HasTraits):
     # metadata
 
     # Basic NDArray setting
-    _copy = Bool(False)  # by defaults we do not copy the data
+    _copy = Bool(False)  # by default we do not copy the data
     # which means that if the same numpy array
     # is used for too different NDArray, they
     # will share it.
@@ -360,9 +359,16 @@ class NDArray(HasTraits):
             new = self.copy()
 
         # slicing by index of all internal array
-        if self._data is not None:
+        if self.data is not None:
             udata = self.masked_data[keys]
-            new._data = np.asarray(udata)
+            if not self.linear:
+                new._data = np.asarray(udata)
+            else:
+                if self.increment > 0:
+                    self.offset = udata.min()
+                else:
+                    self.offset = udata.max()
+                new._size = udata.size
 
         if self.is_labeled:
             # case only of 1D dataset such as Coord
@@ -678,8 +684,8 @@ class NDArray(HasTraits):
         # try to find an increment
         inc = np.diff(data)
         variation = (inc.max() - inc.min()) / data.ptp()
-        if variation < 1.0e-6:
-            self._increment = np.round(np.mean(inc), 6)
+        if variation < 1.0e-5:
+            self._increment = np.round(np.mean(inc), 5)
             self._offset = data[0]
             self._size = data.size
             self._data = None
@@ -701,7 +707,7 @@ class NDArray(HasTraits):
 
         else:
 
-            data = self._data
+            data = self.data
 
             if is_number(loc):
                 # get the index of a given values
@@ -1197,7 +1203,10 @@ class NDArray(HasTraits):
             return None
 
         elif self.linear:
-            return np.arange(self.size) * self._increment + self._offset
+            data = np.arange(self.size) * self._increment + self._offset
+            if hasattr(data, 'units'):
+                data = data.m
+            return data
 
         return self._data
 
@@ -1541,10 +1550,9 @@ class NDArray(HasTraits):
     @linear.setter
     def linear(self, val):
 
-        self._linear = val
-        if val and self.data is not None:
-            # linearisation of the data, if possible
-            self._linearize()
+        self._linear = val  # it val is true this provoque the linearization (  # see observe)
+
+        # if val and self._data is not None:  #     # linearisation of the data, if possible  #     self._linearize()
 
     # ..................................................................................................................
     @property
@@ -1957,6 +1965,13 @@ class NDArray(HasTraits):
             return self._data.size
 
     # ..................................................................................................................
+    @property
+    def spacing(self):
+        # return a scalar for the spacing of the coordinates (if they are uniformly spaced,
+        # else return an array of the differents spacings
+        return spacing(self.data) * self.units
+
+    # ..................................................................................................................
     def squeeze(self, *dims, inplace=False, return_axis=False, **kwargs):
         """
         Remove single-dimensional entries from the shape of an array.
@@ -2162,7 +2177,7 @@ class NDArray(HasTraits):
             units = ur.Unit(other)
         if self.has_units:
             try:
-                if new._origin in ['topspin', 'nmr']:
+                if new.meta.larmor:  # _origin in ['topspin', 'nmr']:
                     # its nmr data
                     set_nmr_context(new.meta.larmor)
                     with ur.context('nmr'):
@@ -2184,7 +2199,7 @@ class NDArray(HasTraits):
 
                 elif self.units == ur.absorbance:
                     if units in [ur.transmittance, ur.absolute_transmittance]:
-                        new._data = 10.**(-new._data)
+                        new._data = 10. ** (-new._data)
                         if new.title == 'Absorbance':
                             new._title = 'Transmittance'
 

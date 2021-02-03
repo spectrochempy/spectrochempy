@@ -7,9 +7,9 @@
 """
 This module implements the `BaselineCorrection` class for baseline corrections.
 """
-__all__ = ['BaselineCorrection', 'ab', 'abc']
+__all__ = ['BaselineCorrection', 'ab', 'abc', 'dc']
 
-__dataset_methods__ = ['ab', 'abc']
+__dataset_methods__ = ['ab', 'abc', 'dc']
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
@@ -27,6 +27,7 @@ from ..dataset.nddataset import NDDataset
 from ...utils import TYPE_INTEGER, TYPE_FLOAT
 from .smooth import smooth
 from .. import debug_
+from spectrochempy.core.processors.utils import _units_agnostic_method
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -516,6 +517,37 @@ def ab(dataset, dim=-1, **kwargs):
     Alias of `abc`
     """
     return abs(dataset, dim, **kwargs)
+
+
+# ......................................................................................................................
+@_units_agnostic_method
+def dc(dataset, **kwargs):
+    """
+    Time domain baseline correction
+
+    Parameters
+    ----------
+    dataset : nddataset
+        The time domain daatset to be corrected.
+    kwargs : dict, optional
+        additional parameters.
+
+    Returns
+    -------
+    dc
+        DC corrected array.
+
+    Other Parameters
+    ----------------
+    len : float, optional
+        Proportion in percent of the data at the end of the dataset to take into account. By default, 25%.
+    """
+
+    len = int(kwargs.pop('len', .25) * dataset.shape[-1])
+    dc = np.mean(np.atleast_2d(dataset)[..., -len:])
+    dataset -= dc
+
+    return dataset
 
 
 # =======================================================================================================================

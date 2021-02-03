@@ -21,7 +21,7 @@ import numpy as np
 
 __all__ = ["TYPE_INTEGER", "TYPE_COMPLEX", "TYPE_FLOAT", "TYPE_BOOL", "EPSILON", "INPLACE", 'make_func_from',
            "make_new_object", "getdocfrom", "dict_compare", 'htmldoc', "ignored", "is_iterable", "is_sequence",
-           "is_number", "silence", "makedirs", "multisort", 'makestr', 'srepr', "spacing", ]
+           "is_number", "silence", "makedirs", "multisort", 'makestr', 'srepr', "spacing", 'largest_power_of_2']
 
 #
 # constants
@@ -214,6 +214,27 @@ def multisort(*args, **kargs):
     z = list(zip(*args))
     z = sorted(z, key=itemgetter(kargs.get('index', 0)))
     return list(zip(*z))
+
+
+# ======================================================================================================================
+# rounding
+# ======================================================================================================================
+def largest_power_of_2(value):
+    """
+    Find the nearest power of two equal to or larger than a value.
+
+    Parameters
+    ----------
+    value : int
+        Value to find nearest power of two equal to or larger than.
+
+    Returns
+    -------
+    pw : int
+        Power of 2.
+
+    """
+    return int(pow(2, np.ceil(np.log(value) / np.log(2))))
 
 
 # ======================================================================================================================

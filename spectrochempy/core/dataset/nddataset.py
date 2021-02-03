@@ -24,7 +24,7 @@ from traittypes import Array
 from spectrochempy.core.project.baseproject import AbstractProject
 from spectrochempy.core.dataset.ndarray import NDArray, DEFAULT_DIM_NAME
 from spectrochempy.core.dataset.ndcomplex import NDComplexArray
-from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.ndmath import NDMath, _set_ufuncs, _set_operators
 from spectrochempy.core.dataset.ndio import NDIO
@@ -192,7 +192,10 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             _coordset = []
             for c, u, t in zip(coordset, coordunits, coordtitles):
                 if not isinstance(c, CoordSet):
-                    coord = Coord(c)
+                    if isinstance(c, LinearCoord):
+                        coord = LinearCoord(c)
+                    else:
+                        coord = Coord(c)
                     if u is not None:
                         coord.units = u
                     if t is not None:
@@ -346,6 +349,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
                     _coordset[idx] = list(value.to_dict().values())[0]
                     _coordset[idx].name = key
                     _coordset[idx]._is_same_dim = True
+                elif isinstance(value, (Coord, LinearCoord)):
+                    value.name = key
+                    _coordset[idx] = value
                 else:
                     _coordset[idx] = Coord(value, name=key)
                 _coordset = self._valid_coordset(_coordset)
@@ -410,7 +416,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
                 continue
 
             # For coord to be acceptable, we require at least a NDArray, a NDArray subclass or a CoordSet
-            if not isinstance(coord, (Coord, CoordSet)):
+            if not isinstance(coord, (LinearCoord, Coord, CoordSet)):
                 if isinstance(coord, NDArray):
                     coord = coords[k] = Coord(coord)
                 else:

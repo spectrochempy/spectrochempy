@@ -1,0 +1,12 @@
+# pip install -r requirements.txt
+
+pint
+colorama
+setuptools_scm
+traittypes
+orderedset
+
+quadprog
+brukeropusreader
+numpy-quaternion
+nmrglue

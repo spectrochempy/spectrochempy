@@ -7,7 +7,8 @@
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
-from traitlets import Bool, Unicode, Tuple, List, Integer, Float, Enum, observe, All, default, TraitError, Union, Set
+from traitlets import (Bool, Unicode, Tuple, List, Integer, Float, Enum, observe, All, default, TraitError,
+                       Union, Set)
 from spectrochempy.utils import MetaConfigurable, get_pkg_path, pathclean
 from spectrochempy.core import debug_
 
@@ -19,6 +20,7 @@ def available_styles():
     """
     All matplotlib `styles <https://matplotlib.org/users/style_sheets.html>`_
     which are available in |scpy|
+
     Returns
     -------
     A list of matplotlib styles
@@ -457,9 +459,7 @@ class MatplotlibPreferences(MetaConfigurable):
     # ==================================================================================================================
     # NON MATPLOTLIB OPTIONS
     # ==================================================================================================================
-    style = Union(
-            (List(Enum(available_styles(), default_value=['scpy'])), Enum(available_styles(), default_value='scpy')),
-            help='Basic matplotlib style to use').tag(config=True, default_=['scpy'])
+    style = Union((Unicode(), List(), Tuple()), help='Basic matplotlib style to use').tag(config=True, default_='scpy')
     stylesheets = Unicode(help='Directory where to look for local defined matplotlib styles when they are not in the '
                                ' standard location').tag(config=True, type="folder")
     use_plotly = Bool(False, help='Use Plotly instead of MatPlotLib for plotting (mode Matplotlib more suitable for '
@@ -597,7 +597,11 @@ class MatplotlibPreferences(MetaConfigurable):
         for _style in changes:
             debug_(f'\n\n\nSTYLE:  {_style} \n')
             try:
-                self._apply_style(_style)
+                if isinstance(_style, (list, tuple)):
+                    for s in _style:
+                        self._apply_style(s)
+                else:
+                    self._apply_style(_style)
             except Exception as e:
                 raise e
         # additional setting

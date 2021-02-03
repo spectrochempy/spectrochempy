@@ -30,13 +30,13 @@ dataset1D = dataset1D[0.:15000.]
 ########################################################################################################################
 # Apply exponential window apodization
 
-new1, curve1 = scp.em(dataset1D.copy(), lb=20 * Hz, retfunc=True, inplace=False)
+new1, curve1 = scp.em(dataset1D.copy(), lb=20 * Hz, retapod=True, inplace=False)
 
 ########################################################################################################################
 # Apply a shifted exponential window apodization
 # defualt units are HZ for broadening and microseconds for shifting
 
-new2, curve2 = dataset1D.copy().em(lb=100 * Hz, shifted=10000 * us, retfunc=True, inplace=False)
+new2, curve2 = dataset1D.copy().em(lb=100 * Hz, shifted=10000 * us, retapod=True, inplace=False)
 
 ########################################################################################################################
 # Plotting

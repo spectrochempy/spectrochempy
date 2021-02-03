@@ -12,7 +12,7 @@ import pytest
 
 from spectrochempy.core import info_, print_
 from spectrochempy.core.dataset.ndarray import NDArray
-from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.units import ur, DimensionalityError
 
@@ -47,11 +47,7 @@ def test_coordset_init(coord0, coord1, coord2):
     coordsc = CoordSet(x=coord2, y=coord3, z=coord0)  # third syntax
     assert coordsc.names == ['x', 'y', 'z']
 
-    coordsc1 = CoordSet({
-            'x': coord2,
-            'y': coord3,
-            'z': coord0
-            })
+    coordsc1 = CoordSet({'x': coord2, 'y': coord3, 'z': coord0})
     assert coordsc1.names == ['x', 'y', 'z']
 
     coordsd = CoordSet(coord3, x=coord2, y=coord3, z=coord0)  # conflict (keyw replace args)
@@ -85,7 +81,7 @@ def test_coordset_init(coord0, coord1, coord2):
     info_(repr(coord0))
     assert repr(coord0) == 'Coord: [float64] cm^-1 (size: 10)'
 
-    coords = CoordSet(coord0, coord0.copy())
+    coords = CoordSet(coord0.copy(), coord0)
     info_(str(coords))
 
     assert repr(coords).startswith('CoordSet: [x:wavenumber, y:wavenumber]')
@@ -123,13 +119,11 @@ def test_coordset_init(coord0, coord1, coord2):
 def test_coordset_multicoord_for_a_single_dim():
     # normal coord (single numerical array for a axis)
 
-    coord1 = NDArray(data=np.linspace(1000., 4000., 5),
-                     labels='a b c d e'.split(), mask=None, units='cm^1',
+    coord1 = NDArray(data=np.linspace(1000., 4000., 5), labels='a b c d e'.split(), mask=None, units='cm^1',
                      title='wavelengths')
 
-    coord0 = NDArray(data=np.linspace(20, 500, 5),
-                     labels='very low-low-normal-high-very high'.split('-'),
-                     mask=None, units='K', title='temperature')
+    coord0 = NDArray(data=np.linspace(20, 500, 5), labels='very low-low-normal-high-very high'.split('-'), mask=None,
+                     units='K', title='temperature')
 
     # pass as a list of coord -> this become a subcoordset
     coordsa = CoordSet([coord1, coord0])
@@ -242,7 +236,9 @@ def test_coordset_del(coord0, coord1, coord2):
 
 
 def test_coordset_copy(coord0, coord1):
-    coordsa = CoordSet(coord0, coord1)
+    coord2 = LinearCoord.linspace(200., 300., 3, units="K", title='temperature')
+
+    coordsa = CoordSet(coord0, coord1, coord2)
 
     coordsb = coordsa.copy()
     assert coordsa == coordsb
