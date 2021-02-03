@@ -1,17 +1,4 @@
 # -*- coding: utf-8 -*-
-# ---
-# jupyter:
-#   jupytext:
-#     cell_metadata_filter: -all
-#     formats: ipynb,py:percent
-#     text_representation:
-#       extension: .py
-#       format_name: percent
-#       format_version: '1.3'
-#       jupytext_version: 1.7.1
-# ---
-
-# %%
 
 #  =====================================================================================================================
 #  Copyright (©) 2015-$today.year LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
@@ -21,12 +8,10 @@
 
 """
 Clean, build, and release the HTML and PDF documentation for SpectroChemPy.
-
 ```bash
   python make.py [options]
 ```
 where optional parameters indicates which job(s) is(are) to perform.
-
 """
 from os import environ
 import argparse

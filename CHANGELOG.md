@@ -1,5 +1,16 @@
 # What\'s new
 
+## Version 0.2.7
+
+**NEW FEATURES**
+
+* Test and data for read_carroucell()
+
+
+**BUGS FIXED**
+
+* Fix a small problem with read_carroucell()
+
 ## Version 0.2.6
 
 **NEW FEATURES**
@@ -9,7 +20,6 @@
 * 1D NMR processing with the addition of several new methods.
 
 * Improved handling of Linear coordinates.
-
 
 **BUGS FIXED**
 
