@@ -1,5 +1,19 @@
 # What\'s new
 
+## Version 0.2.7
+
+**TASKS**
+
+
+**NEW FEATURES**
+
+* Test for read_carroucell()
+
+**BUGS FIXED**
+
+* Fix a problem with read_carroucell()
+
+
 ## Version 0.2.5
 
 **TASKS**
