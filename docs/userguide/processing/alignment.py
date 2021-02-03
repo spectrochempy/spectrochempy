@@ -12,6 +12,21 @@
 #     display_name: Python 3
 #     language: python
 #     name: python3
+#   language_info:
+#     codemirror_mode:
+#       name: ipython
+#       version: 3
+#     file_extension: .py
+#     mimetype: text/x-python
+#     name: python
+#     nbconvert_exporter: python
+#     pygments_lexer: ipython3
+#     version: 3.9.0
+#   widgets:
+#     application/vnd.jupyter.widget-state+json:
+#       state: {}
+#       version_major: 2
+#       version_minor: 0
 # ---
 
 # %% [markdown]
@@ -34,7 +49,6 @@ import spectrochempy as scp
 # required aligned coordinates.
 
 # %%
-
 dataset = scp.NDDataset.read_omnic('irdata/nh4y-activation.spg')
 dataset.y = dataset.y - dataset.y[0]  # remove offset in the time
 dataset.y.title = 'Time'

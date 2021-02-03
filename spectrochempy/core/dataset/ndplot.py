@@ -22,7 +22,7 @@ from matplotlib.colors import to_rgba
 from matplotlib import pyplot as plt
 import plotly.graph_objects as go
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from traitlets import Dict, HasTraits, Instance, Union, default, TraitError, Unicode
+from traitlets import Dict, HasTraits, Instance, Union, default, TraitError
 
 # local import
 # ----------------------------------------------------------------------------------------------------------------------
@@ -265,7 +265,8 @@ class Preferences(Meta):
             stylelib = (pathclean(mpl.get_configdir()) / 'stylelib' / filename).with_suffix('.mplstyle')
             stylelib.write_text(txt)
 
-        matplotlib_preferences.traits()['style'].trait_types.append(Unicode(filename))
+        # matplotlib_preferences.traits()['style'].trait_types = matplotlib_preferences.traits()['style'].trait_types +\
+        #                                                       (Unicode(filename),)
         self.style = filename
         return self.style
 

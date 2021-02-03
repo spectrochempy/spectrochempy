@@ -18,6 +18,7 @@ __all__ = []
 # ----------------------------------------------------------------------------------------------------------------------
 
 import os
+import re
 import sys
 import logging
 import subprocess
@@ -25,9 +26,12 @@ import datetime
 import warnings
 import pprint
 import json
+import time
 from pathlib import Path
+import threading
 
-from pkg_resources import get_distribution, DistributionNotFound
+from pkg_resources import parse_version, get_distribution, DistributionNotFound
+import requests
 from setuptools_scm import get_version
 from traitlets.config.configurable import Config
 from traitlets.config.application import Application
@@ -46,7 +50,6 @@ from jinja2 import Template
 
 from spectrochempy.utils import MetaConfigurable, pathclean, get_pkg_path
 from .matplotlib_preferences import MatplotlibPreferences
-
 
 # set the default style
 plt.style.use(['classic'])
@@ -122,6 +125,7 @@ def display_info_string(**kwargs):
     publish_display_data(data={'text/html': html})
 
 
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Version
 # ----------------------------------------------------------------------------------------------------------------------
@@ -158,6 +162,44 @@ def _get_release_date():
 
 __release_date__ = _get_release_date()
 "Last release date of this package"
+
+
+def _check_for_updates(cls):
+    # Get version
+    conda_url = "https://anaconda.org/spectrocat/spectrochempy/files"
+    try:
+        response = requests.get(conda_url)
+    except requests.exceptions.RequestException:
+        return None
+
+    regex = r"\/\d{1,2}\.\d{1,2}\.\d{1,2}\/download\/noarch" \
+            r"\/spectrochempy-(\d{1,2}\.\d{1,2}\.\d{1,2})\-(dev\d{1,2}|stable).tar.bz2"
+    matches = re.finditer(regex, response.text, re.MULTILINE)
+    vavailables = []
+    for matchNum, match in enumerate(matches):
+        v = match[1]
+        if match[2] == 'stable':
+            vavailables.append(v)
+
+    old = parse_version(__version__)
+
+    new_version = None
+    for key in vavailables:
+        new = parse_version(key)
+        if new > old:
+            new_version = key
+
+    fi = Path.home() / ".scpy_update"
+    if new_version:
+        fi.write_text(f"\n\n\tYou are running SpectrocChemPy-{__version__} but version {new_version} is available."
+                      f"\n\tPlease consider updating for bug fixes and new features! ")
+
+    else:
+        if fi.exists():
+            fi.unlink()
+
+CHECK_UPDATE = threading.Thread(target=_check_for_updates, args=(1,))
+CHECK_UPDATE.start()
 
 # other info
 # ............................................................................
@@ -829,6 +871,7 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
             return
 
         self.logs.debug("show info on loading %s" % self.preferences.show_info_on_loading)
+
         if self.preferences.show_info_on_loading:
             info_string = "SpectroChemPy's API - v.{}\n" \
                           "© Copyright {}".format(__version__, __copyright__)
@@ -856,6 +899,16 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
         self.running = True
 
         debug('MPL backend: {}'.format(mpl.get_backend()))
+
+        # display needs for update
+        time.sleep(1)
+        fi = Path.home() / ".scpy_update"
+        if fi.exists():
+            try:
+                msg = fi.read_text()
+                self.logs.warning(msg)
+            except Exception:
+                pass
 
         return True
 

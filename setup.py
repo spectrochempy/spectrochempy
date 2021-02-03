@@ -5,7 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
 # ======================================================================================================================
 
-import atexit
+# import atexit
 import warnings
 import shutil
 from pathlib import Path
@@ -22,7 +22,6 @@ def _install_mpl():
     """
     try:
         import matplotlib as mpl
-        from matplotlib import matplotlib_fname
         from matplotlib import get_cachedir
     except ImportError:
         warnings.warn('Sorry, but we cannot install mpl plotting styles and fonts '
@@ -55,7 +54,7 @@ def _install_mpl():
     # https://stackoverflow.com/a/47743010
 
     # Copy files over
-    #_dir_data = Path(matplotlib_fname()).parent
+    # _dir_data = Path(matplotlib_fname()).parent
     _dir_data = Path(mpl.rcParams['datapath'])
 
     dir_source = Path("scp_data") / 'fonts'
@@ -113,6 +112,7 @@ setup_args = dict(
                      "Intended Audience :: Science/Research",
                      "License :: CeCILL-B Free Software License Agreement (CECILL-B)",
                      "Operating System :: OS Independent",
+                     "Programming Language :: Python :: 3.6",
                      "Programming Language :: Python :: 3.7",
                      "Programming Language :: Python :: 3.8",
                      "Programming Language :: Python :: 3.9", ],
@@ -121,7 +121,7 @@ setup_args = dict(
         zip_safe=False,
         packages=find_packages() + packages,
         include_package_data=True,  # requirements
-        python_requires=">=3.7",
+        python_requires=">=3.6.9",
         setup_requires=['setuptools_scm', 'matplotlib'],
         install_requires=['matplotlib'],
         # install_requires(dev=__DEV__),
@@ -133,8 +133,7 @@ setup_args = dict(
 
         # scripts
         # # scripts = {'scripts/launch_api.py'},
-        entry_points={'console_scripts': [ # 'scpy_gui=spectrochempy.gui.scpy_gui:main',
-                                          'scpy_update=spectrochempy.scripts.scpy_update:main'], },
+        # entry_points={'console_scripts': ['scpy_update=spectrochempy.scripts.scpy_update:main'], },
 )
 
 # ======================================================================================================================

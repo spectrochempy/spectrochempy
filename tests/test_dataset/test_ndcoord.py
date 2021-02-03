@@ -335,4 +335,12 @@ def test_linearcoord():
     coord1 = LinearCoord.linspace(0., 60., 100, labels=None, units="minutes", title='time-on-stream')
     coord2 = LinearCoord.linspace(4000., 1000., 100, labels=None, units="cm^-1", title='wavenumber')
 
-    print(coord0.size, coord1.size, coord2.size)
+    assert coord0.size == 3
+    assert coord1.size == 100
+    assert coord2.size == 100
+
+    coordc = coord0.copy()
+    assert coord0 == coordc
+
+    coordc = coord1.copy()
+    assert coord1 == coordc

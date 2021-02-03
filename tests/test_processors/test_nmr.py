@@ -63,20 +63,20 @@ def test_nmr_1D_apodization(NMR_dataset_1D):
     dataset /= dataset.real.data.max()  # normalize
 
     lb = 0
-    arr, apod = dataset.em(lb=lb, retfunc=True)
+    arr, apod = dataset.em(lb=lb, retapod=True)
 
     # arr and dataset should be equal as no em was applied
     assert_equal(dataset.data, arr.data)
 
     lb = 0.
     gb = 0.
-    arr, apod = dataset.gm(lb=lb, gb=gb, retfunc=True)
+    arr, apod = dataset.gm(lb=lb, gb=gb, retapod=True)
 
     # arr and dataset should be equal as no em was applied
     assert_equal(dataset.data, arr.data)
 
     lb = 100
-    arr, apod = dataset.em(lb=lb, retfunc=True)
+    arr, apod = dataset.em(lb=lb, retapod=True)
 
     # arr and dataset should not be equal as inplace=False
     assert not np.array_equal(dataset.data, arr.data)
@@ -104,7 +104,7 @@ def test_nmr_1D_apodization(NMR_dataset_1D):
 
     dataset.plot(xlim=(0., 6000.))
 
-    dataset, apod = dataset.gm(lb=-100. * ur.Hz, gb=100. * ur.Hz, retfunc=True)
+    dataset, apod = dataset.gm(lb=-100. * ur.Hz, gb=100. * ur.Hz, retapod=True)
     dataset.plot(c='b', data_only=True, clear=False)
     apod.plot(c='r', data_only=True, clear=False)
     show()

@@ -1,18 +1,27 @@
 # What\'s new
 
-## Version 0.2.7
-
-**TASKS**
-
+## Version 0.2.6
 
 **NEW FEATURES**
 
+* Check for new version on anaconda cloud spectrocat channel.
+
+* 1D NMR processing with the addition of several new methods.
+
+* Improved handling of Linear coordinates.
+
 * Test for read_carroucell()
+
 
 **BUGS FIXED**
 
-* Fix a problem with read_carroucell()
+* Adding quantity to datasets with different scaling (#199).
 
+* Math operates now on linear coordinates.
+
+* Compatibility with python 3.6
+
+* Fix a problem with read_carroucell()
 
 ## Version 0.2.5
 

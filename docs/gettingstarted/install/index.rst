@@ -50,6 +50,7 @@ Additionaly it is possible to use a docker container.
 * :doc:`install_win`
 * :doc:`install_docker`
 * :doc:`install_sources`
+* :doc:`install_colab`
 * :doc:`install_adds`
 
 .. toctree::
@@ -60,4 +61,5 @@ Additionaly it is possible to use a docker container.
     install_win
     install_docker
     install_sources
+    install_colab
     install_adds
