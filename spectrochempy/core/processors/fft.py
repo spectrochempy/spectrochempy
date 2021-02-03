@@ -12,34 +12,39 @@ __all__ = ["fft", "ifft", "mc", "ps", "ht"]
 
 __dataset_methods__ = __all__
 
-# ======================================================================================================================
-# Standard python imports
-# ======================================================================================================================
 import re
 
-# ======================================================================================================================
-# Third party imports
-# ======================================================================================================================
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy.signal import hilbert
+from quaternion import as_float_array, as_quat_array
 
-from spectrochempy.core import error_
+from spectrochempy.core import error_, warning_
 from spectrochempy.units import ur
 from spectrochempy.core.dataset.coord import LinearCoord
 from spectrochempy.core.dataset.ndmath import zeros_like
 from spectrochempy.core.processors.apodization import hamming
 from spectrochempy.core.processors.concatenate import concatenate
-from spectrochempy.utils import largest_power_of_2
+from spectrochempy.utils import largest_power_of_2, get_component, typequaternion
 from spectrochempy.core.processors.utils import _units_agnostic_method
 from spectrochempy.core.processors.zero_filling import zf_size
 
-# ======================================================================================================================
-# Local imports
-# ======================================================================================================================
 
+def _fft(data):
+    if data.dtype == typequaternion:
 
-_fft = lambda data: np.fft.fftshift(np.fft.fft(data), -1)
+        r = get_component(data, 'R')
+        newr = np.fft.fftshift(np.fft.fft(r), -1)
+        i = get_component(data, 'I')
+        newi = np.fft.fftshift(np.fft.fft(i), -1)
+
+        # rebuild the quaternion
+        data = as_quat_array(list(zip(r.real.flatten(), r.imag.flatten(), i.real.flatten(), i.imag.flatten())))
+        data = data.reshape(r.shape)
+    else:
+        data = np.fft.fftshift(np.fft.fft(data), -1)
+    return data
+
 _ifft = lambda data: np.fft.ifft(np.fft.ifftshift(data, -1))
 _fft_positive = lambda data: np.fft.fftshift(np.fft.ifft(data).astype(data.dtype)) * data.shape[-1]
 _ifft_positive = lambda data: np.fft.fft(np.fft.ifftshift(data, -1)) * data.shape[-1]
@@ -207,21 +212,25 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         error_('current fft or ifft processing does not support masked data as input.\n processing was thus cancelled')
         error = True
 
-    if not error:
-        # Coordinates should be uniformly spaced (linear coordinate)
+    # Coordinates should be uniformly spaced (linear coordinate)
+    if not x.linear:
+        # try to linearize it
+        x.linear = True
         if not x.linear:
-            # try to linearize it
-            x.linear = True
+            # linearization failed
+            error = True
 
-        # Can we use some metadata as for NMR spectra
-        if is_nmr and not inv:
-            td = new.meta.td[-1]
-        else:
+    if not error:
+        # OK we can proceed
+
+        # time domain size
+        td = None
+        if not inv:
             td = x.size
 
         # if no size (or si) parameter then use the size of the data (size not used for inverse transform
         if size is None or inv:
-            size = kwargs.get('si', td)
+            size = kwargs.get('si', x.size)
 
         # we default to the closest power of two larger of the data size
         size = largest_power_of_2(size)
@@ -237,13 +246,15 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         # Eventually apply the effective size
         new[..., tdeff:] = 0.
 
-        # should we work on complex data
-        iscomplex = new.is_complex
+        # Should we work on complex or hypercomplex data
+        # interleaved is in case of >2D data  ( # TODO: >D not yet implemented in ndcomplex.py
+        iscomplex = new.is_complex or new.is_quaternion or new.is_interleaved
+        isquaternion = new.is_quaternion
 
         # if we are in NMR we have an additional complication due to the mode
         # of acquisition (sequential mode when ['QSEQ','TPPI','STATES-TPPI'])
         encoding = None
-        if is_nmr and not inv:
+        if not inv and 'encoding' in new.meta:
             encoding = new.meta.encoding[-1]
 
         # perform the fft
@@ -251,13 +262,14 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             zf_size(new, size=size, inplace=True)
             data = _fft(new.data)
 
-        elif inv:
-            # we assume no special encoding for inverse fft transform
+        elif iscomplex and inv:
+            # we assume no special encoding for inverse complex fft transform
             data = _ifft(new.data)
 
-        elif is_ir and not inv:
+        elif not iscomplex and not inv:
 
             # TODO: revise this when SRS file will be provided (will not use plt here!  It should return data)
+            # TODO: this module should do only the fourier transform
 
             # subtract  DC
             new -= new.mean()

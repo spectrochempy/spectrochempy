@@ -12,32 +12,18 @@ __all__ = ['NDComplexArray', ]
 
 __dataset_methods__ = []
 
-# ======================================================================================================================
-# Standard python imports
-# ======================================================================================================================
 import itertools
 import textwrap
 import warnings
 
-# ======================================================================================================================
-# third-party imports
-# ======================================================================================================================
 import numpy as np
-from traitlets import validate
+from traitlets import validate, Bool
 from quaternion import as_float_array, as_quat_array
 
-# ======================================================================================================================
-# Local imports
-# ======================================================================================================================
-from .ndarray import NDArray
-from ...utils import SpectroChemPyWarning, NOMASK, TYPE_FLOAT, TYPE_COMPLEX, insert_masked_print
-from ...units.units import Quantity
 
-# ======================================================================================================================
-# quaternion dtype
-# ======================================================================================================================
-
-typequaternion = np.dtype(np.quaternion)
+from spectrochempy.core.dataset.ndarray import NDArray
+from spectrochempy.utils import SpectroChemPyWarning, NOMASK, TYPE_FLOAT, TYPE_COMPLEX, insert_masked_print
+from spectrochempy.units import Quantity
 
 
 # ======================================================================================================================
@@ -45,6 +31,8 @@ typequaternion = np.dtype(np.quaternion)
 # ======================================================================================================================
 
 class NDComplexArray(NDArray):
+
+    _interleaved = Bool(False)
 
     # ..................................................................................................................
     def __init__(self, data=None, **kwargs):
@@ -207,6 +195,16 @@ class NDComplexArray(NDArray):
         if self._data is None:
             return False
         return (self._data.dtype == typequaternion)
+
+    # ..................................................................................................................
+    @property
+    def is_interleaved(self):
+        """
+        bool - True if the `data` array is hypercomplex with interleaved data (Readonly property).
+        """
+        if self._data is None:
+            return False
+        return  self._interleaved     #   (self._data.dtype == typequaternion)
 
     # ..................................................................................................................
     @property

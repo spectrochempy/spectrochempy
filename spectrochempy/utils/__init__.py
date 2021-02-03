@@ -18,7 +18,7 @@ from numpy.ma.core import masked as MASKED, nomask as NOMASK, MaskedArray, Maske
 
 # import util files content
 # ----------------------------------------------------------------------------------------------------------------------
-from .arrays import *
+
 from .exceptions import *
 from .fake import *
 from .file import *

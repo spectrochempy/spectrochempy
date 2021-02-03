@@ -16,12 +16,15 @@ import functools
 from datetime import datetime, timezone
 import uuid
 import types
+import warnings
 
 import numpy as np
+from quaternion import as_float_array
 
-__all__ = ["TYPE_INTEGER", "TYPE_COMPLEX", "TYPE_FLOAT", "TYPE_BOOL", "EPSILON", "INPLACE", 'make_func_from',
-           "make_new_object", "getdocfrom", "dict_compare", 'htmldoc', "ignored", "is_iterable", "is_sequence",
-           "is_number", "silence", "makedirs", "multisort", 'makestr', 'srepr', "spacing", 'largest_power_of_2']
+__all__ = ["TYPE_INTEGER", "TYPE_COMPLEX", "TYPE_FLOAT", "TYPE_BOOL", "EPSILON", "INPLACE", 'typequaternion',
+           'make_func_from', "make_new_object", "getdocfrom", "dict_compare", 'htmldoc', "ignored", "is_iterable",
+           "is_sequence", "is_number", "silence", "multisort", 'makestr', 'srepr', "spacing", 'largest_power_of_2',
+           'get_component', 'interleaved2quaternion', 'interleaved2complex']
 
 #
 # constants
@@ -37,10 +40,8 @@ EPSILON = epsilon = np.finfo(float).eps
 INPLACE = "INPLACE"
 "Flag used to specify inplace slicing"
 
+typequaternion = np.dtype(np.quaternion)
 
-# ======================================================================================================================
-# function signature
-# ======================================================================================================================
 
 def _codechange(code_obj, changes):
     code = types.CodeType
@@ -54,78 +55,7 @@ def _codechange(code_obj, changes):
     return code(*values)
 
 
-def make_func_from(func, first=None):
-    """
-    Create a new func with its arguments from another func and a new signature
-    """
-    code_obj = func.__code__
-    new_varnames = list(code_obj.co_varnames)
-    if first:
-        new_varnames[0] = first
-    new_varnames = tuple(new_varnames)
-    new_code_obj = _codechange(code_obj, changes={'co_varnames': new_varnames, })
-    modified = types.FunctionType(new_code_obj, func.__globals__, func.__name__, func.__defaults__, func.__closure__)
-    modified.__doc__ = func.__doc__
-    return modified
-
-
-def make_new_object(objtype):
-    """
-    Make a new object of type obj
-
-    Parameters
-    ----------
-    objtype : the object type
-
-    Returns
-    -------
-    new : the new object of same type.
-    """
-
-    new = type(objtype)()
-
-    # new id and date
-    new._id = "{}_{}".format(type(objtype).__name__, str(uuid.uuid1()).split('-')[0])
-    new._date = datetime.now(timezone.utc)
-
-    return new
-
-
-# ======================================================================================================================
-# Ignored context
-# ======================================================================================================================
-
-try:
-    from contextlib import ignored
-except ImportError:
-    @contextmanager
-    def ignored(*exceptions):
-        """
-        A context manager for ignoring exceptions.  Equivalent to::
-
-            try :
-                <body>
-            except exceptions :
-                pass
-
-        Examples
-        --------
-
-            >>> import os
-            >>> with ignored(OSError):
-            ...     os.remove('file-that-does-not-exist')
-        """
-
-        try:
-            yield
-        except exceptions:
-            pass
-
-
-# ======================================================================================================================
-# dummy file
-# ======================================================================================================================
-
+# ......................................................................................................................
 class _DummyFile(object):
     """
     A writeable object.
@@ -134,140 +64,6 @@ class _DummyFile(object):
     def write(self, s):
         pass
 
-
-# ======================================================================================================================
-# silence
-# ======================================================================================================================
-
-@contextmanager
-def silence():
-    """
-    A context manager that silences sys.stdout and sys.stderr.
-    """
-
-    old_stdout = sys.stdout
-    old_stderr = sys.stderr
-    sys.stdout = _DummyFile()
-    sys.stderr = _DummyFile()
-    yield
-    sys.stdout = old_stdout
-    sys.stderr = old_stderr
-
-
-# ======================================================================================================================
-# check for a number
-# ======================================================================================================================
-
-def is_number(x):
-    try:
-        if isinstance(x, np.ndarray):
-            return False
-        x + 1
-        return True
-    except TypeError:
-        return False
-
-
-# ======================================================================================================================
-# Epsilon
-# ======================================================================================================================
-
-def gt_eps(arr):
-    """lambda function to check that an array has at least some values
-    greater than epsilon
-
-    Parameters
-    -----------
-    arr : array to check
-
-    Returns
-    --------
-    bool : results ot checking
-        True means that at least some values are greater than epsilon
-    """
-    return np.any(arr > EPSILON)
-
-
-# ======================================================================================================================
-# sequence check
-# ======================================================================================================================
-
-def is_iterable(arg):
-    """
-    Determine if an object is iterable
-    """
-    return hasattr(arg, "__iter__")
-
-
-def is_sequence(arg):
-    """
-    Determine if an object is iterable but is not a string
-    """
-    return (not hasattr(arg, 'strip')) and hasattr(arg, "__iter__")
-
-
-# ======================================================================================================================
-# sorting
-# ======================================================================================================================
-
-def multisort(*args, **kargs):
-    z = list(zip(*args))
-    z = sorted(z, key=itemgetter(kargs.get('index', 0)))
-    return list(zip(*z))
-
-
-# ======================================================================================================================
-# rounding
-# ======================================================================================================================
-def largest_power_of_2(value):
-    """
-    Find the nearest power of two equal to or larger than a value.
-
-    Parameters
-    ----------
-    value : int
-        Value to find nearest power of two equal to or larger than.
-
-    Returns
-    -------
-    pw : int
-        Power of 2.
-
-    """
-    return int(pow(2, np.ceil(np.log(value) / np.log(2))))
-
-
-# ======================================================================================================================
-# makedirs
-# ======================================================================================================================
-
-def makedirs(newdir):
-    """
-    works the way a good mkdir should :)
-        - already exists, silently complete
-        - regular file in the way, raise an exception
-        - parent directory(ies) does not exist, make them as well
-    """
-    # from active recipes http://code.activestate.com/recipes/82465-a-friendly-mkdir/
-
-    newdir = os.path.expanduser(newdir)
-    if os.path.isdir(newdir):
-        pass
-    elif os.path.isfile(newdir):
-        raise OSError("a file with the same name as the desired "
-                      "dir, '%s', already exists." % newdir)
-    else:
-        head, tail = os.path.split(newdir)
-        if head and not os.path.isdir(head):
-            makedirs(head)
-        # print "_mkdir %s" % repr(newdir)
-        if tail:
-            os.mkdir(newdir)
-
-
-# ======================================================================================================================
-# Dictionary comparison
-# ======================================================================================================================
 
 def dict_compare(d1, d2, check_equal_only=True):
     """
@@ -317,9 +113,70 @@ def dict_compare(d1, d2, check_equal_only=True):
         return True
 
 
-# ======================================================================================================================
-# doc utilities
-# ======================================================================================================================
+# ..................................................................................................................
+def get_component(data, select='REAL'):
+    """
+    Take selected components of an hypercomplex array (RRR, RIR, ...)
+
+    Parameters
+    ----------
+    data : ndarray
+    select : str, optional, default='REAL'
+        if 'REAL', only real part in all dimensions will be selected.
+        Else a string must specify which real (R) or imaginary (I) component
+        has to be selected along a specific dimension. For instance,
+        a string such as 'RRI' for a 2D hypercomplex array indicated
+        that we take the real component in each dimension except the last
+        one, for which imaginary component is preferred.
+
+    Returns
+    -------
+    part
+        A component of the complex or hypercomplex array.
+    """
+    if not select:
+        return data
+
+    new = data.copy()
+
+    if select == 'REAL':
+        select = 'R' * new.ndim
+
+    w = x = y = z = None
+
+    if new.dtype == typequaternion:
+        w, x, y, z = as_float_array(new).T
+        w, x, y, z = w.T, x.T, y.T, z.T
+        if select == 'R':
+            new = (w + x * 1j)
+        elif select == 'I':
+            new = y + z * 1j
+        elif select == 'RR':
+            new = w
+        elif select == 'RI':
+            new = x
+        elif select == 'IR':
+            new = y
+        elif select == 'II':
+            new = z
+        else:
+            raise ValueError(f'something wrong: cannot interpret `{select}` for hypercomplex (quaternion) data!')
+
+    elif new.dtype in TYPE_COMPLEX:
+        w, x = new.real, new.imag
+        if (select == 'R') or (select == 'RR'):
+            new = w
+        elif (select == 'I') or (select == 'RI'):
+            new = x
+        else:
+            raise ValueError(f'something wrong: cannot interpret `{select}` for complex data!')
+    else:
+        warnings.warn(f'No selection was performed because datasets with complex data have no `{select}` part. ')
+
+    return new
+
+
+# ......................................................................................................................
 def getdocfrom(origin):
     def decorated(func):
         func.__doc__ = origin.__doc__
@@ -334,6 +191,24 @@ def getdocfrom(origin):
     return decorated
 
 
+# ......................................................................................................................
+def gt_eps(arr):
+    """lambda function to check that an array has at least some values
+    greater than epsilon
+
+    Parameters
+    -----------
+    arr : array to check
+
+    Returns
+    --------
+    bool : results ot checking
+        True means that at least some values are greater than epsilon
+    """
+    return np.any(arr > EPSILON)
+
+
+# ......................................................................................................................
 def htmldoc(text):
     """
     format docstring in html for a nice display in IPython
@@ -372,12 +247,161 @@ def htmldoc(text):
     return html
 
 
-def srepr(arg):
-    if is_sequence(arg):
-        return '<' + ", ".join(srepr(x) for x in arg) + '>'
-    return repr(arg)
+# ......................................................................................................................
+try:
+    from contextlib import ignored
+except ImportError:
+    @contextmanager
+    def ignored(*exceptions):
+        """
+        A context manager for ignoring exceptions.  Equivalent to::
+
+            try :
+                <body>
+            except exceptions :
+                pass
+
+        Examples
+        --------
+
+            >>> import os
+            >>> with ignored(OSError):
+            ...     os.remove('file-that-does-not-exist')
+        """
+
+        try:
+            yield
+        except exceptions:
+            pass
 
 
+# ......................................................................................................................
+def interleaved2complex(data):
+    """
+    Make a complex array from interleaved data
+    """
+    return data[..., ::2] + 1j * data[..., 1::2]
+
+
+# ......................................................................................................................
+def interleaved2quaternion(data):
+    """
+    Make a complex array from interleaved data
+    """
+    return data[..., ::2] + 1j * data[..., 1::2]
+
+
+# ......................................................................................................................
+def is_iterable(arg):
+    """
+    Determine if an object is iterable
+    """
+    return hasattr(arg, "__iter__")
+
+
+# ......................................................................................................................
+def is_number(x):
+    try:
+        if isinstance(x, np.ndarray):
+            return False
+        x + 1
+        return True
+    except TypeError:
+        return False
+
+
+# ......................................................................................................................
+def is_sequence(arg):
+    """
+    Determine if an object is iterable but is not a string
+    """
+    return (not hasattr(arg, 'strip')) and hasattr(arg, "__iter__")
+
+
+# ......................................................................................................................
+def largest_power_of_2(value):
+    """
+    Find the nearest power of two equal to or larger than a value.
+
+    Parameters
+    ----------
+    value : int
+        Value to find nearest power of two equal to or larger than.
+
+    Returns
+    -------
+    pw : int
+        Power of 2.
+
+    """
+    return int(pow(2, np.ceil(np.log(value) / np.log(2))))
+
+
+# ......................................................................................................................
+def make_func_from(func, first=None):
+    """
+    Create a new func with its arguments from another func and a new signature
+    """
+    code_obj = func.__code__
+    new_varnames = list(code_obj.co_varnames)
+    if first:
+        new_varnames[0] = first
+    new_varnames = tuple(new_varnames)
+    new_code_obj = _codechange(code_obj, changes={'co_varnames': new_varnames, })
+    modified = types.FunctionType(new_code_obj, func.__globals__, func.__name__, func.__defaults__, func.__closure__)
+    modified.__doc__ = func.__doc__
+    return modified
+
+
+# ......................................................................................................................
+def make_new_object(objtype):
+    """
+    Make a new object of type obj
+
+    Parameters
+    ----------
+    objtype : the object type
+
+    Returns
+    -------
+    new : the new object of same type.
+    """
+
+    new = type(objtype)()
+
+    # new id and date
+    new._id = "{}_{}".format(type(objtype).__name__, str(uuid.uuid1()).split('-')[0])
+    new._date = datetime.now(timezone.utc)
+
+    return new
+
+
+# ......................................................................................................................
+def makedirs(newdir):
+    """
+    works the way a good mkdir should :)
+        - already exists, silently complete
+        - regular file in the way, raise an exception
+        - parent directory(ies) does not exist, make them as well
+    """
+    # from active recipes http://code.activestate.com/recipes/82465-a-friendly-mkdir/
+
+    newdir = os.path.expanduser(newdir)
+    if os.path.isdir(newdir):
+        pass
+    elif os.path.isfile(newdir):
+        raise OSError("a file with the same name as the desired "
+                      "dir, '%s', already exists." % newdir)
+    else:
+        head, tail = os.path.split(newdir)
+        if head and not os.path.isdir(head):
+            makedirs(head)
+        # print "_mkdir %s" % repr(newdir)
+        if tail:
+            os.mkdir(newdir)
+
+
+# ......................................................................................................................
 def makestr(li):
     """
     make a string from a list of string
@@ -389,6 +413,12 @@ def makestr(li):
     li = li.replace(' ', r'\ ')
     li = r'$%s$' % li
     return li
+
+# ......................................................................................................................
+def multisort(*args, **kargs):
+    z = list(zip(*args))
+    z = sorted(z, key=itemgetter(kargs.get('index', 0)))
+    return list(zip(*z))
 
 
 def primefactors(n):
@@ -403,7 +433,22 @@ def primefactors(n):
         if n == 1:
             return result
 
+# ......................................................................................................................
+@contextmanager
+def silence():
+    """
+    A context manager that silences sys.stdout and sys.stderr.
+    """
 
+    old_stdout = sys.stdout
+    old_stderr = sys.stderr
+    sys.stdout = _DummyFile()
+    sys.stderr = _DummyFile()
+    yield
+    sys.stdout = old_stdout
+    sys.stderr = old_stderr
+
+# ......................................................................................................................
 def spacing(arr):
     """
     Return a scalar for the spacing in the one-dimensional input array (if it is uniformly spaced,
@@ -429,3 +474,9 @@ def spacing(arr):
         return spacings[0]
     else:
         return spacings
+
+# ......................................................................................................................
+def srepr(arg):
+    if is_sequence(arg):
+        return '<' + ", ".join(srepr(x) for x in arg) + '>'
+    return repr(arg)
