@@ -13,6 +13,7 @@ __dataset_methods__ = __all__
 import os
 import warnings
 import datetime
+import re
 
 import scipy.interpolate
 import numpy as np
@@ -240,7 +241,7 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
 
     # debug_("finished read_dir()")
     # several datasets returned, sorted by sample #
-    return sorted(datasets, key=lambda ds: int(ds.name.split('_')[0]))
+    return sorted(datasets, key=lambda ds: int(re.split('-|_', ds.name)[0]))
 
 
 # ======================================================================================================================
