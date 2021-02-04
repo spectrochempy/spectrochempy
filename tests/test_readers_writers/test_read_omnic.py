@@ -115,4 +115,4 @@ def test_read_spa():
 
     lst = scp.read('irdata', merge=True, recursive=True)  # not selective on extension
     assert isinstance(lst, list)
-    assert len(lst) == 5
+    assert len(lst) == 88
