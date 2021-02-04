@@ -19,12 +19,12 @@ import types
 import warnings
 
 import numpy as np
-from quaternion import as_float_array
+from quaternion import as_float_array, as_quat_array
 
 __all__ = ["TYPE_INTEGER", "TYPE_COMPLEX", "TYPE_FLOAT", "TYPE_BOOL", "EPSILON", "INPLACE", 'typequaternion',
            'make_func_from', "make_new_object", "getdocfrom", "dict_compare", 'htmldoc', "ignored", "is_iterable",
            "is_sequence", "is_number", "silence", "multisort", 'makestr', 'srepr', "spacing", 'largest_power_of_2',
-           'get_component', 'interleaved2quaternion', 'interleaved2complex']
+           'get_component', 'interleaved2quaternion', 'interleaved2complex', 'as_quaternion']
 
 #
 # constants
@@ -42,6 +42,9 @@ INPLACE = "INPLACE"
 
 typequaternion = np.dtype(np.quaternion)
 
+# ======================================================================================================================
+# Private methods
+# ======================================================================================================================
 
 def _codechange(code_obj, changes):
     code = types.CodeType
@@ -63,6 +66,37 @@ class _DummyFile(object):
 
     def write(self, s):
         pass
+
+
+# ======================================================================================================================
+# Public methods
+# ======================================================================================================================
+
+def as_quaternion(*args):
+    """
+    Recombine the arguments to produce a numpy array with quaternion dtype.
+
+    Parameters
+    ----------
+    *args : ndarray with dtype:float or complex
+        The quaternion array components: If there is 4 components, then we assume it is the four compoents of the
+        quaternion array: w, x, y, z. If there is only two, they are casted to complex and correspond respectively
+        to w + i.x and y + j.z.
+
+    Returns
+    -------
+
+    """
+    if len(args) == 4:
+        # we assume here that the for components have been provided w, x, y, z
+        w, x, y, z = args
+
+    if len(args) == 2:
+        r, i = args
+        w, x, y, z = r.real, r.imag, i.real, i.imag
+
+    data = as_quat_array(list(zip(w.flatten(), x.flatten(), y.flatten(), z.flatten())))
+    return data.reshape(w.shape)
 
 
 def dict_compare(d1, d2, check_equal_only=True):

@@ -423,9 +423,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
                     raise TypeError('Coordinates must be an instance or a subclass of Coord class or NDArray, or of '
                                     f' CoordSet class, but an instance of {type(coord)} has been passed')
 
-            if self.dims and coord.name not in self.dims:
-                raise AttributeError(f'The name of a coordinate must have name among the current dims: {self.dims}'
-                                     f' but the name is `{coord.name}`')
+            # if self.dims and coord.name not in self.dims:
+            #    raise AttributeError(f'The name of a coordinate must have name among the current dims: {self.dims}'
+            #                         f' but the name is `{coord.name}`')
 
             if self.dims and coord.name in self.dims:
                 # check the validity of the given coordinates in terms of size (if it correspond to one of the dims)

@@ -78,7 +78,9 @@ def _phase_method(method):
 
             apod = method(new.data, **kwargs)
 
-            new._data *= apod
+            r = new.component('R')
+            r1 = r * apod
+            new *= apod
             new.history = f'`{method.__name__}` applied to dimension `{dim}` with parameters: {kwargs}'
 
             if not new.meta.phased[-1]:

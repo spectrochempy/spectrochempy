@@ -128,7 +128,7 @@ def test_ndcomplex_init_complex_with_mask():
     assert d3.dtype == np.complex128
     assert d3.has_complex_dims
     assert d3.mask.shape[-1] == d3.shape[-1]
-    d3RR = d3.part('RR')
+    d3RR = d3.component('RR')
     assert not d3RR.has_complex_dims
     assert d3RR._data.shape == (2, 2)
     assert d3RR._mask.shape == (2, 2)
