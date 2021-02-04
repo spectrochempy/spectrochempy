@@ -2613,16 +2613,14 @@ class NDMath(object):
                 returntype = 'NDDataset'
             elif objtype == 'Coord' and returntype != 'NDDataset':
                 returntype = 'Coord'
-            elif objtype == 'LinearCoord' and returntype != 'NDDataset'é:
+            elif objtype == 'LinearCoord' and returntype != 'NDDataset':
                 returntype = 'LinearCoord'
             else:
                 # only the three above type have math capabilities in spectrochempy.
                 pass
 
             # If one of the input is hypercomplex, this will demand a special treatment
-            # if hasattr(obj, 'is_quaternion'):
-            #    isquaternion = obj.is_quaternion     # TODO: not yet used
-            # elif   #TODO: check if it is a quaternion scalar
+            isquaternion = False if not hasattr(obj, 'is_quaternion') else obj.is_quaternion
 
             # Do we have to deal with mask?
             if hasattr(obj, 'mask') and np.any(obj.mask):

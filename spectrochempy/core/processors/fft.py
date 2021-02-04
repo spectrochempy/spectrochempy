@@ -25,7 +25,7 @@ from spectrochempy.core.dataset.coord import LinearCoord
 from spectrochempy.core.dataset.ndmath import zeros_like
 from spectrochempy.core.processors.apodization import hamming
 from spectrochempy.core.processors.concatenate import concatenate
-from spectrochempy.utils import largest_power_of_2, get_component, typequaternion
+from spectrochempy.utils import largest_power_of_2, get_component, typequaternion, as_quaternion
 from spectrochempy.core.processors.utils import _units_agnostic_method
 from spectrochempy.core.processors.zero_filling import zf_size
 
@@ -34,15 +34,16 @@ def _fft(data):
     if data.dtype == typequaternion:
 
         r = get_component(data, 'R')
-        newr = np.fft.fftshift(np.fft.fft(r), -1)
+        fr = np.fft.fftshift(np.fft.fft(r), -1)
         i = get_component(data, 'I')
-        newi = np.fft.fftshift(np.fft.fft(i), -1)
+        fi = np.fft.fftshift(np.fft.fft(i), -1)
 
         # rebuild the quaternion
-        data = as_quat_array(list(zip(r.real.flatten(), r.imag.flatten(), i.real.flatten(), i.imag.flatten())))
-        data = data.reshape(r.shape)
+        data = as_quaternion(fr, fi)
+
     else:
         data = np.fft.fftshift(np.fft.fft(data), -1)
+
     return data
 
 _ifft = lambda data: np.fft.ifft(np.fft.ifftshift(data, -1))
@@ -251,19 +252,19 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         iscomplex = new.is_complex or new.is_quaternion or new.is_interleaved
         isquaternion = new.is_quaternion
 
-        # if we are in NMR we have an additional complication due to the mode
+        # If we are in NMR we have an additional complication due to the mode
         # of acquisition (sequential mode when ['QSEQ','TPPI','STATES-TPPI'])
         encoding = None
         if not inv and 'encoding' in new.meta:
             encoding = new.meta.encoding[-1]
 
-        # perform the fft
+        # Perform the fft
         if iscomplex and encoding in ['QSIM', 'DQD']:
             zf_size(new, size=size, inplace=True)
             data = _fft(new.data)
 
         elif iscomplex and inv:
-            # we assume no special encoding for inverse complex fft transform
+            # We assume no special encoding for inverse complex fft transform
             data = _ifft(new.data)
 
         elif not iscomplex and not inv:
@@ -307,7 +308,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
 
         # We need here to create a new dataset with new shape and axis
         new._data = data
-        new.mask = False  # TODO: make a test on mask - should be none before fft!
+        new.mask = False
 
         # create new coordinates for the transformed data
 
@@ -316,7 +317,18 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             bf1 = new.meta.bf1[-1]
             sf = new.meta.sf[-1]
             sw = new.meta.sw_h[-1]
-
+            if new.meta.nuc1 is not None:
+                nuc1 = new.meta.nuc1[-1]
+                regex = r"([^a-zA-Z]+)([a-zA-Z]+)"
+                m = re.match(regex, nuc1)
+                if m is not None:
+                    mass = m[1]
+                    name = m[2]
+                    nucleus = '^{' + mass + '}' + name
+                else:
+                    nucleus = ""
+            else:
+                nucleus = ""
         else:
             sfo1 = 1.0 * ur.Hz
             bf1 = sfo1
@@ -333,7 +345,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             # newcoord = type(x)(np.arange(size) * deltaf + first)
             newcoord = LinearCoord.arange(size) * deltaf + first
             newcoord.name = x.name
-            newcoord.title = 'frequency'
+            newcoord.title = f'${nucleus}$ frequency'
             newcoord.ito("Hz")
 
         else:
@@ -353,21 +365,9 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             ppm = kwargs.get('ppm', True)
             if ppm:
                 newcoord.ito('ppm')
-                if new.meta.nuc1 is not None:
-                    nuc1 = new.meta.nuc1[-1]
-                    regex = r"([^a-zA-Z]+)([a-zA-Z]+)"
-                    m = re.match(regex, nuc1)
-                    if m is not None:
-                        mass = m[1]
-                        name = m[2]
-                        nucleus = '^{' + mass + '}' + name
-                    else:
-                        nucleus = ""
-                else:
-                    nucleus = ""
                 newcoord.title = fr"$\delta\ {nucleus}$"
 
-        new.coordset[-1] = newcoord
+        new.coordset[dim] = newcoord
 
         if not inv:
             # phase frequency domain
@@ -378,7 +378,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             if not new.meta.phased:
                 new.meta.phased = [False] * new.ndim
 
-            new.meta.pivot = [abs(new).coordset[i].max() for i in range(new.ndim)]  # create pivot metadata
+            new.meta.pivot[-1] = abs(new).coordset[dim].max()  # create pivot metadata
 
             # applied the stored phases
             new.pk(inplace=True)

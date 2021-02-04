@@ -21,7 +21,7 @@ from traitlets import validate, Bool
 from quaternion import as_float_array, as_quat_array
 
 from spectrochempy.core.dataset.ndarray import NDArray
-from spectrochempy.utils import (NOMASK, TYPE_FLOAT, TYPE_COMPLEX, typequaternion,
+from spectrochempy.utils import (NOMASK, TYPE_FLOAT, TYPE_COMPLEX, typequaternion, as_quaternion,
                                  get_component, insert_masked_print)
 from spectrochempy.units import Quantity
 
@@ -638,10 +638,10 @@ class NDComplexArray(NDArray):
 
         r = data[::2]
         i = data[1::2]
-        _data = as_quat_array(list(zip(r.real.flatten(), r.imag.flatten(), i.real.flatten(), i.imag.flatten())))
-        _data = _data.reshape(r.shape)
+        # _data = as_quat_array(list(zip(r.real.flatten(), r.imag.flatten(), i.real.flatten(), i.imag.flatten())))
+        #_data = _data.reshape(r.shape)
 
-        return _data
+        return as_quaternion(r, i)
 
     # ------------------------------------------------------------------------------------------------------------------
     # special methods
