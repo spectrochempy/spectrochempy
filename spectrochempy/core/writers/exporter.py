@@ -63,15 +63,15 @@ class Exporter(HasTraits):
     # ..................................................................................................................
     def _setup_object(self, *args):
 
-        # check if the first argument is an instance of NDDataset, NDPanel, or Project
+        # check if the first argument is an instance of NDDataset or Project
         args = list(args)
 
-        if args and hasattr(args[0], 'implements') and args[0].implements() in ['NDDataset', 'NDPanel']:
-            # the first arg is an instance of NDDataset or NDPanel
+        if args and hasattr(args[0], 'implements') and args[0].implements() in ['NDDataset']:
+            # the first arg is an instance of NDDataset
             self.object = args.pop(0)
 
         else:
-            raise TypeError('the API write method needs a NDDataset or NDPanel object as the first argument')
+            raise TypeError('the API write method needs a NDDataset object as the first argument')
 
         return args
 

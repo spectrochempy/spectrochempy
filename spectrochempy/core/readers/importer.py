@@ -120,11 +120,11 @@ class Importer(HasTraits):
 
     # ..................................................................................................................
     def _setup_objtype(self, *args, **kwargs):
-        # check if the first argument is an instance of NDDataset, NDPanel, or Project
+        # check if the first argument is an instance of NDDataset or Project
 
         args = list(args)
-        if args and hasattr(args[0], 'implements') and args[0].implements() in ['NDDataset', 'NDPanel']:
-            # the first arg is an instance of NDDataset or NDPanel
+        if args and hasattr(args[0], 'implements') and args[0].implements() in ['NDDataset']:
+            # the first arg is an instance of NDDataset
             object = args.pop(0)
             self.objtype = type(object)
 
@@ -185,7 +185,6 @@ class Importer(HasTraits):
                 merged = kwargs.get('merge', True)  # priority to the keyword setting
         else:
             merged = kwargs.get('merge', False)
-            # TODO: may be create a panel, when possible?
 
         if merged:
             # Try to stack the dataset into a single one
