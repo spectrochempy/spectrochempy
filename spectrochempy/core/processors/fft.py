@@ -29,14 +29,17 @@ from spectrochempy.utils import largest_power_of_2, get_component, typequaternio
 from spectrochempy.core.processors.utils import _units_agnostic_method
 from spectrochempy.core.processors.zero_filling import zf_size
 
+# ======================================================================================================================
+# Private methods
+# ======================================================================================================================
 
 def _fft(data):
     if data.dtype == typequaternion:
 
-        r = get_component(data, 'R')
-        fr = np.fft.fftshift(np.fft.fft(r), -1)
-        i = get_component(data, 'I')
-        fi = np.fft.fftshift(np.fft.fft(i), -1)
+        dr = get_component(data, 'R')
+        fr = np.fft.fftshift(np.fft.fft(dr), -1)
+        di = get_component(data, 'I')
+        fi = np.fft.fftshift(np.fft.fft(di), -1)
 
         # rebuild the quaternion
         data = as_quaternion(fr, fi)
@@ -51,6 +54,7 @@ _fft_positive = lambda data: np.fft.fftshift(np.fft.ifft(data).astype(data.dtype
 _ifft_positive = lambda data: np.fft.fft(np.fft.ifftshift(data, -1)) * data.shape[-1]
 
 
+# ......................................................................................................................
 def _get_zpd(dataset, dim='x', mode='max'):
     """
     Find the zero path difference (zpd) positions.
@@ -79,6 +83,64 @@ def _get_zpd(dataset, dim='x', mode='max'):
     elif mode == 'abs':
         return np.argmax(np.abs(dataset.data), axis=axis)
 
+
+def _states_fft(data, tppi=False):
+    """
+    FFT transform according to STATES encoding
+
+    Parameters
+    ----------
+    data : ndarray
+        Data to process
+    tppi : bool, optional
+        Has the data a TPPI encoding?.
+
+    Returns
+    -------
+    transformed
+        Data transformed according to STATES encoding and optionaly TPPI
+    """
+
+    # warning: at this point, data must have been swaped so the last dimension is the one used for FFT
+    wt, yt, xt, zt = as_float_array(data).T      # x and y are exchanged due to swaping of dims
+    w, y, x, z = wt.T, xt.T, yt.T, zt.T
+
+    # TODO : check this in various situations
+    spath = (w - z) + 1j * (x + y)
+    santi = (w + z) + 1j * (x - y)
+
+    if tppi:
+        spath[...,1::2] = -spath[...,1::2]
+        santi[...,1::2] = -santi[...,1::2]
+
+    fpath = np.fft.fftshift(np.fft.fft(spath), -1)[...,::-1]  # reverse
+    fanti = np.fft.fftshift(np.fft.fft(santi), -1)
+
+    # rebuild the quaternion
+    data = as_quaternion(fpath, fanti)
+
+
+    return data
+
+def _tppi_fft(data):
+    """
+    FFT transform according to TPPI encoding
+
+    Parameters
+    ----------
+    data : ndarray
+        Data to process
+
+    Returns
+    -------
+    transformed
+        Data transformed according to TPPI encoding
+    """
+    # TODO : need examples
+
+# ======================================================================================================================
+# Public methods
+# ======================================================================================================================
 
 def ifft(dataset, size=None, **kwargs):
     """
@@ -258,12 +320,27 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         if not inv and 'encoding' in new.meta:
             encoding = new.meta.encoding[-1]
 
+            qsim = (encoding in ['QSIM', 'DQD'])
+            states = ('STATES' in encoding)
+            tppi = ('TPPI' in encoding)
+
         # Perform the fft
-        if iscomplex and encoding in ['QSIM', 'DQD']:
-            zf_size(new, size=size, inplace=True)
-            data = _fft(new.data)
+        if iscomplex and not inv:
+
+            if qsim:   # F2 fourier transform
+                zf_size(new, size=size, inplace=True)
+                data = _fft(new.data)
+
+            elif states:
+                zf_size(new, size=size, inplace=True)
+                data = _states_fft(new.data, tppi)
+
+            elif tppi:
+                zf_size(new, size=size, inplace=True)
+                data = _tppi_fft(new.data)
 
         elif iscomplex and inv:
+
             # We assume no special encoding for inverse complex fft transform
             data = _ifft(new.data)
 
@@ -369,6 +446,11 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
 
         new.coordset[dim] = newcoord
 
+        # update history
+        s = 'ifft' if inv else 'fft'
+        new.history = f'{s} applied on dimension {dim}'
+
+        # PHASE ?
         if not inv:
             # phase frequency domain
 
@@ -389,8 +471,6 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
     if swaped:
         new.swapdims(axis, -1, inplace=True)  # must be done inplace
 
-    s = 'ifft' if inv else 'fft'
-    new.history = f'{s} applied on dimension {dim}'
     return new
 
 
