@@ -24,7 +24,7 @@ from quaternion import as_float_array
 
 from spectrochempy.units.units import ur, Quantity, DimensionalityError
 from spectrochempy.core.dataset.ndarray import NDArray
-from spectrochempy.utils import NOMASK, TYPE_COMPLEX
+from spectrochempy.utils import NOMASK, TYPE_COMPLEX, quat_as_complex_array, as_quaternion
 from spectrochempy.core import warning_, error_
 from spectrochempy.utils.testing import assert_dataset_equal
 from spectrochempy.utils.exceptions import CoordinateMismatchError
@@ -404,8 +404,9 @@ class NDMath(object):
                       'logaddexp2']
     __remove_units = ['logical_not', 'isfinite', 'isinf', 'isnan', 'isnat', 'isneginf', 'isposinf', 'iscomplex',
                       'signbit', 'sign']
-    __quaternion_aware = ['add', 'subtract', 'multiply', 'divide', 'log', 'exp', 'power', 'negative', 'conjugate',
-                          'copysign', 'equal', 'not_equal', 'less', 'less_equal', 'isnan', 'isinf', 'isfinite',
+    __quaternion_aware = ['add', 'iadd', 'sub', 'isub', 'mul', 'imul', 'div', 'idiv', 'log', 'exp', 'power', 'negative',
+                          'conjugate', 'copysign', 'equal', 'not_equal', 'less', 'less_equal', 'isnan', 'isinf',
+                          'isfinite',
                           'absolute', 'abs']
 
     # the following methods are to give NDArray based class
@@ -2593,11 +2594,12 @@ class NDMath(object):
         objtypes = []
         objunits = OrderedSet()
         returntype = None
-        # isquaternion = False     (  # TODO: not yet used)
+        isquaternion = False
         ismasked = False
         compatible_units = (fname in self.__compatible_units)
         remove_units = (fname in self.__remove_units)
         quaternion_aware = (fname in self.__quaternion_aware)
+
 
         for i, obj in enumerate(inputs):
             # type
@@ -2622,7 +2624,7 @@ class NDMath(object):
                 pass
 
             # If one of the input is hypercomplex, this will demand a special treatment
-            isquaternion = False if not hasattr(obj, 'is_quaternion') else obj.is_quaternion
+            isquaternion = isquaternion or False if not hasattr(obj, 'is_quaternion') else obj.is_quaternion
 
             # Do we have to deal with mask?
             if hasattr(obj, 'mask') and np.any(obj.mask):
@@ -2859,12 +2861,16 @@ class NDMath(object):
         else:
             # make a simple operation
             try:
-                if not isquaternion or quaternion_aware:
+                if not isquaternion:
+                    data = f(d, *args)
+                elif quaternion_aware and all([arg.dtype not in TYPE_COMPLEX for arg in args]):
                     data = f(d, *args)
                 else:
-                    print(fname, d, args)
-            #    raise NotImplementedError('operation {} not yet implemented '
-            #                              'for quaternion'.format(fname))
+                    # in this case we will work on both complex separately
+                    dr, di = quat_as_complex_array(d)
+                    datar = f(dr, *args)
+                    datai = f(di, *args)
+                    data = as_quaternion(datar, datai)
 
             except Exception as e:
                 raise ArithmeticError(e.args[0])

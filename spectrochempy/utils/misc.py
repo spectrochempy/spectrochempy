@@ -24,7 +24,7 @@ from quaternion import as_float_array, as_quat_array
 __all__ = ["TYPE_INTEGER", "TYPE_COMPLEX", "TYPE_FLOAT", "TYPE_BOOL", "EPSILON", "INPLACE", 'typequaternion',
            'make_func_from', "make_new_object", "getdocfrom", "dict_compare", 'htmldoc', "ignored", "is_iterable",
            "is_sequence", "is_number", "silence", "multisort", 'makestr', 'srepr', "spacing", 'largest_power_of_2',
-           'get_component', 'interleaved2quaternion', 'interleaved2complex', 'as_quaternion']
+           'get_component', 'interleaved2quaternion', 'interleaved2complex', 'as_quaternion', 'quat_as_complex_array']
 
 #
 # constants
@@ -97,6 +97,29 @@ def as_quaternion(*args):
 
     data = as_quat_array(list(zip(w.flatten(), x.flatten(), y.flatten(), z.flatten())))
     return data.reshape(w.shape)
+
+
+def quat_as_complex_array(arr):
+    """
+    Recombine the component of a quaternion array into a tuple of two complex array
+
+    Parameters
+    ----------
+    arr : quaternion ndarray
+        The arr will be separated into (w + i.x) and (y + i.z)
+    Returns
+    -------
+    tuple
+        Tuple of two complex array
+    """
+    if not arr.dtype == np.quaternion:
+        # no change
+        return arr
+
+    wt, xt, yt, zt = as_float_array(arr).T
+    w, x, y, z = wt.T, xt.T, yt.T, zt.T
+
+    return (w + 1j * x),  (y + 1j * z)
 
 
 def dict_compare(d1, d2, check_equal_only=True):
