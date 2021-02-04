@@ -481,7 +481,7 @@ def hamming(dataset, **kwargs):
     Functional form of apodization window :
 
     .. math::
-       w(n) = \alpha - \left(1 - \alpha\right) \cos\left(\frac{2\pi{n}}{M-1}\right) qquad 0 \leq n \leq M-1
+        w(n) = \alpha - (1 - \alpha)\cos(\frac{2\pi n}{M-1})\qquad 0\leq n\leq M-1
 
     where M is the number of point of the input dataset and :math:`\alpha` = 0.54.
 
@@ -534,7 +534,7 @@ def hann(dataset, **kwargs):
     Functional form of apodization window :
 
     .. math::
-       w(n) = \alpha - \left(1 - \alpha\right) \cos\left(\frac{2\pi{n}}{M-1}\right)\qquad 0 \leq n \leq M-1
+       w(n) = \alpha - (1 - \alpha) \cos(\frac{2\pi{n}}{M-1}) \qquad 0 \leq n \leq M-1
 
     where M is the number of point of the input dataset and :math:`\alpha` = 0.5
 
@@ -634,7 +634,7 @@ def bartlett(dataset, **kwargs):
     The Bartlett window is defined as
 
     .. math::
-       w(n) = \frac{2}{M-1} \left(\frac{M-1}{2} - \left|n - \frac{M-1}{2}\right|\right)
+       w(n) = \frac{2}{M-1} (\frac{M-1}{2} - |n - \frac{M-1}{2}|)
 
     where M is the number of point of the input dataset.
 

@@ -28,6 +28,7 @@ from spectrochempy.core.plotters.plotutils import make_label
 # nddataset plot2D functions
 # ======================================================================================================================
 
+
 # contour map (default) -------------------------------------------------------
 
 def plot_map(dataset, **kwargs):

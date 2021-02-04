@@ -17,9 +17,9 @@ import re
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy.signal import hilbert
-from quaternion import as_float_array, as_quat_array
+from quaternion import as_float_array
 
-from spectrochempy.core import error_, warning_
+from spectrochempy.core import error_
 from spectrochempy.units import ur
 from spectrochempy.core.dataset.coord import LinearCoord
 from spectrochempy.core.dataset.ndmath import zeros_like
@@ -28,6 +28,7 @@ from spectrochempy.core.processors.concatenate import concatenate
 from spectrochempy.utils import largest_power_of_2, get_component, typequaternion, as_quaternion
 from spectrochempy.core.processors.utils import _units_agnostic_method
 from spectrochempy.core.processors.zero_filling import zf_size
+
 
 # ======================================================================================================================
 # Private methods
@@ -48,6 +49,7 @@ def _fft(data):
         data = np.fft.fftshift(np.fft.fft(data), -1)
 
     return data
+
 
 _ifft = lambda data: np.fft.ifft(np.fft.ifftshift(data, -1))
 _fft_positive = lambda data: np.fft.fftshift(np.fft.ifft(data).astype(data.dtype)) * data.shape[-1]
@@ -102,7 +104,7 @@ def _states_fft(data, tppi=False):
     """
 
     # warning: at this point, data must have been swaped so the last dimension is the one used for FFT
-    wt, yt, xt, zt = as_float_array(data).T      # x and y are exchanged due to swaping of dims
+    wt, yt, xt, zt = as_float_array(data).T  # x and y are exchanged due to swaping of dims
     w, y, x, z = wt.T, xt.T, yt.T, zt.T
 
     # TODO : check this in various situations
@@ -110,17 +112,17 @@ def _states_fft(data, tppi=False):
     santi = (w + z) + 1j * (x - y)
 
     if tppi:
-        spath[...,1::2] = -spath[...,1::2]
-        santi[...,1::2] = -santi[...,1::2]
+        spath[..., 1::2] = -spath[..., 1::2]
+        santi[..., 1::2] = -santi[..., 1::2]
 
-    fpath = np.fft.fftshift(np.fft.fft(spath), -1)[...,::-1]  # reverse
+    fpath = np.fft.fftshift(np.fft.fft(spath), -1)[..., ::-1]  # reverse
     fanti = np.fft.fftshift(np.fft.fft(santi), -1)
 
     # rebuild the quaternion
     data = as_quaternion(fpath, fanti)
 
-
     return data
+
 
 def _tppi_fft(data):
     """
@@ -135,8 +137,8 @@ def _tppi_fft(data):
     -------
     transformed
         Data transformed according to TPPI encoding
-    """
-    # TODO : need examples
+    """  # TODO : need examples
+
 
 # ======================================================================================================================
 # Public methods
@@ -235,7 +237,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
     """
     # datatype
     is_nmr = dataset.origin.lower() in ["topspin", ]
-    is_ir = dataset.origin.lower() in ["omnic", "opus"]
+    # is_ir = dataset.origin.lower() in ["omnic", "opus"]
 
     # On which axis do we want to apply transform (get axis from arguments)
     dim = kwargs.pop('dim', kwargs.pop('axis', -1))
@@ -312,7 +314,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         # Should we work on complex or hypercomplex data
         # interleaved is in case of >2D data  ( # TODO: >D not yet implemented in ndcomplex.py
         iscomplex = new.is_complex or new.is_quaternion or new.is_interleaved
-        isquaternion = new.is_quaternion
+        # isquaternion = new.is_quaternion
 
         # If we are in NMR we have an additional complication due to the mode
         # of acquisition (sequential mode when ['QSEQ','TPPI','STATES-TPPI'])
@@ -327,7 +329,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         # Perform the fft
         if iscomplex and not inv:
 
-            if qsim:   # F2 fourier transform
+            if qsim:  # F2 fourier transform
                 zf_size(new, size=size, inplace=True)
                 data = _fft(new.data)
 

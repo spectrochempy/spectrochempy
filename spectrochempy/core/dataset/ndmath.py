@@ -441,8 +441,6 @@ class NDMath(object):
         # set history string
         history = f'Ufunc {fname} applied.'
 
-        inputtype = type(inputs[0]).__name__
-
         if fname in ['sign', 'logical_not', 'isnan', 'isfinite', 'isinf', 'signbit']:
             return (getattr(np, fname))(inputs[0].masked_data)
 
@@ -2600,7 +2598,6 @@ class NDMath(object):
         remove_units = (fname in self.__remove_units)
         quaternion_aware = (fname in self.__quaternion_aware)
 
-
         for i, obj in enumerate(inputs):
             # type
             objtype = type(obj).__name__
@@ -2897,7 +2894,6 @@ class NDMath(object):
             else:
                 history = None
 
-            inputtype = type(self).__name__
             data, units, mask, returntype = self._op(f, [self])
             return self._op_result(data, units, mask, history, returntype)
 
@@ -2966,8 +2962,6 @@ class NDMath(object):
             else:
                 history = None
 
-            inputtype = objs[0].implements()
-
             data, units, mask, returntype = self._op(fm, objs)
             new = self._op_result(data, units, mask, history, returntype)
             return new
@@ -2987,8 +2981,6 @@ class NDMath(object):
             #    history = None
             objs = [self, other]
             fm, objs = self._check_order(fname, objs)
-
-            inputtype = type(objs[0]).__name__
 
             data, units, mask, returntype = self._op(fm, objs)
             if returntype != 'LinearCoord':

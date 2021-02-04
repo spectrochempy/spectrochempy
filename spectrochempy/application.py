@@ -121,7 +121,6 @@ def display_info_string(**kwargs):
     publish_display_data(data={'text/html': html})
 
 
-
 # ----------------------------------------------------------------------------------------------------------------------
 # Version
 # ----------------------------------------------------------------------------------------------------------------------
@@ -193,6 +192,7 @@ def _check_for_updates(cls):
     else:
         if fi.exists():
             fi.unlink()
+
 
 CHECK_UPDATE = threading.Thread(target=_check_for_updates, args=(1,))
 CHECK_UPDATE.start()

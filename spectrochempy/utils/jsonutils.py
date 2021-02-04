@@ -19,7 +19,7 @@ from spectrochempy.units import Quantity, Unit
 
 __all__ = ['json_serialiser', 'json_decoder']
 
-fromisoformat = lambda s: datetime.strptime(s,"%Y-%m-%dT%H:%M:%S.%f%Z")
+fromisoformat = lambda s: datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f%Z")
 
 # ======================================================================================================================
 # JSON UTILITIES
@@ -114,7 +114,7 @@ def json_serialiser(byte_obj, encoding=None):
         return dic
 
     elif isinstance(byte_obj, datetime):
-        return {"isoformat": byte_obj.strftime("%Y-%m-%dT%H:%M:%S.%f%Z"), "__class__": 'DATETIME'}  #.isoformat()
+        return {"isoformat": byte_obj.strftime("%Y-%m-%dT%H:%M:%S.%f%Z"), "__class__": 'DATETIME'}  # .isoformat()
 
     elif isinstance(byte_obj, np.ndarray):
         if encoding is None:

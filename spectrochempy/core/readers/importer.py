@@ -12,26 +12,24 @@ __dataset_methods__ = __all__
 
 from warnings import warn
 from datetime import datetime, timezone
+
 from traitlets import HasTraits, List, Dict, Type, Unicode
 
 from spectrochempy.utils import pathclean, check_filename_to_open
 from spectrochempy.utils.exceptions import DimensionsCompatibilityError, ProtocolError
 from spectrochempy.core import warning_
 
-FILETYPES = [('scp', 'SpectroChemPy files (*.scp)'),
-             ('omnic', 'Nicolet OMNIC files and series (*.spa *.spg *.srs)'),
-             ('labspec', 'LABSPEC exported files (*.txt)'),
-             ('opus', 'Bruker OPUS files (*.[0-9]*)'),
+FILETYPES = [('scp', 'SpectroChemPy files (*.scp)'), ('omnic', 'Nicolet OMNIC files and series (*.spa *.spg *.srs)'),
+             ('labspec', 'LABSPEC exported files (*.txt)'), ('opus', 'Bruker OPUS files (*.[0-9]*)'),
              ('topspin', 'Bruker TOPSPIN fid or series or processed data files (fid ser 1[r|i] 2[r|i]* 3[r|i]*)'),
-             ('matlab', 'MATLAB files (*.mat)'),
-             ('dso', 'Data Set Object files (*.dso)'),
-             ('jcamp', 'JCAMP-DX files (*.jdx *.dx)'),
-             ('csv', 'CSV files (*.csv)'),
+             ('matlab', 'MATLAB files (*.mat)'), ('dso', 'Data Set Object files (*.dso)'),
+             ('jcamp', 'JCAMP-DX files (*.jdx *.dx)'), ('csv', 'CSV files (*.csv)'),
              ('excel', 'Microsoft Excel files (*.xls)'), ('zip', 'Compressed folder of data files (*.zip)'),
              #  ('all', 'All files (*.*)')
-]
+             ]
 ALIAS = [('spg', 'omnic'), ('spa', 'omnic'), ('srs', 'omnic'), ('mat', 'matlab'), ('txt', 'labspec'), ('jdx', 'jcamp'),
-        ('dx', 'jcamp'), ('xls', 'excel'), ]
+         ('dx', 'jcamp'), ('xls', 'excel'), ]
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 class Importer(HasTraits):
@@ -88,7 +86,7 @@ class Importer(HasTraits):
                 if len(self.datasets) > 1:
                     self.datasets = self._do_merge(self.datasets, **kwargs)
 
-            elif key and key[1:] not in list(zip(*FILETYPES))[0]+list(zip(*ALIAS))[0]:
+            elif key and key[1:] not in list(zip(*FILETYPES))[0] + list(zip(*ALIAS))[0]:
                 continue
 
             else:
@@ -158,7 +156,7 @@ class Importer(HasTraits):
             except IOError as e:
                 warning_(str(e))
 
-            except Exception as e:
+            except Exception:
                 warning_(f'The file `{filename}` has a known extension but it could not be read. It is ignored!')
 
         if len(datasets) > 1:
@@ -192,8 +190,7 @@ class Importer(HasTraits):
                 datasets = [dataset]
 
             except DimensionsCompatibilityError as e:
-                warn(str(e))
-                # return only the list
+                warn(str(e))  # return only the list
 
         return datasets
 
