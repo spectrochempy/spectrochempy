@@ -26,7 +26,7 @@ from spectrochempy.utils import SpectroChemPyException
 from spectrochempy.utils import pathclean, check_filenames, ScpFile, check_filename_to_save, json_serialiser
 from spectrochempy.utils import TYPE_BOOL
 
-SCPY_SUFFIX = {'NDDataset': '.scp', 'NDPanel': '.mscp', 'Project': '.pscp'}
+SCPY_SUFFIX = {'NDDataset': '.scp', 'Project': '.pscp'}
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -107,7 +107,7 @@ class NDIO(HasTraits):
         """
         Save the current object in SpectroChemPy format.
 
-        Default extension is *.scp for |NDDataset|'s, *.nscp for |NDPanel|'s, and *.pscp for |Project|'s.
+        Default extension is *.scp for |NDDataset|'s and *.pscp for |Project|'s.
 
         See Also
         ---------
