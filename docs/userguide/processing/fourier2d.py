@@ -32,13 +32,13 @@
 # ---
 
 # %% [markdown]
-# # N-d Fourier transformation (NMR)
+# # 2D Fourier transformation (NMR)
 
 # %%
 import spectrochempy as scp
 
 # %% [markdown]
-# ## FFT of 2D spectra
+# ## Process step by step 
 
 # %% [markdown]
 # As a first exmple, we will process a 2D HMQC spectrum:
@@ -85,10 +85,7 @@ spec.meta.encoding[0]
 
 # %%
 sp = spec.fft(dim=0)
-sp.plot_map()
+
+# %%
+sp.plot_image()
 sp
-
-# %%
-spec.meta.si
-
-# %%
