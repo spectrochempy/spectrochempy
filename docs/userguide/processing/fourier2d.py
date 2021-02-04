@@ -74,4 +74,21 @@ _ = spec.plot()
 # %%
 _ = spec.plot_map()
 
+# %% [markdown]
+# Now we can perform a FFT in the second dimension. We must take into account the encoding:
+
+# %%
+spec.meta.encoding[0]
+
+# %% [markdown]
+# This type of encoding is however taken into account automatically.
+
+# %%
+sp = spec.fft(dim=0)
+sp.plot_map()
+sp
+
+# %%
+spec.meta.si
+
 # %%

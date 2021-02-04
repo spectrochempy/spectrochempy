@@ -292,7 +292,8 @@ class Meta(object):  # HasTraits):
         newmeta.name = None
 
         for key in self:
-            if is_sequence(self[key]) and len(self[key]) > 1:
+            if isinstance(self[key], list) and len(self[key]) > 1:
+                # print (newmeta[key], len(self[key]))
                 X = newmeta[key]
                 X[dim1], X[dim2] = X[dim2], X[dim1]
             else:
