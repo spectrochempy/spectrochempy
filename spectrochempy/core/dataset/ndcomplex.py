@@ -477,7 +477,7 @@ class NDComplexArray(NDArray):
             # here if it is hypercomplex quaternion
             # we should interchange the imaginary component
             w, x, y, z = as_float_array(new._data).T
-            q = as_quat_array(list(zip(w.T.flatten(), z.T.flatten(), y.T.flatten(), x.T.flatten())))
+            q = as_quat_array(list(zip(w.T.flatten(), y.T.flatten(), x.T.flatten(), z.T.flatten())))
             new._data = q.reshape(new.shape)
 
         return new
@@ -511,7 +511,7 @@ class NDComplexArray(NDArray):
             # here if it is is_quaternion
             # we should interchange the imaginary component
             w, x, y, z = as_float_array(new._data).T
-            q = as_quat_array(list(zip(w.T.flatten(), z.T.flatten(), y.T.flatten(), x.T.flatten())))
+            q = as_quat_array(list(zip(w.T.flatten(), y.T.flatten(), x.T.flatten(), z.T.flatten())))
             new._data = q.reshape(new.shape)
 
         return new
