@@ -41,7 +41,7 @@ import spectrochempy as scp
 # ## FFT of 2D spectra
 
 # %% [markdown]
-# We will process a 2D HMQC spectrum:
+# As a first exmple, we will process a 2D HMQC spectrum:
 
 # %%
 path = scp.preferences.datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'topspin_2d'
@@ -49,7 +49,7 @@ ser = scp.read_topspin(path)
 ser.plot_map()
 ser
 
-# %% [raw]
+# %% [markdown]
 # Extraction and Fourier transformation of the first row :
 
 # %%
@@ -59,8 +59,19 @@ _ = row0.plot()
 
 # %%
 r = row0.fft()
+_ = r.plot()
+
+# %% [markdown]
+# FFT along dimension x for the whole 2D dataset
 
 # %%
-from spectrochempy.utils.misc import dict_compare
+spec = ser.fft()
+spec
+
+# %%
+_ = spec.plot()
+
+# %%
+_ = spec.plot_map()
 
 # %%
