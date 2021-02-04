@@ -117,6 +117,7 @@ def test_read_spa():
     assert isinstance(lst, list)
     assert len(lst) == 88
 
+
 def test_read_srs():
     a = scp.read('irdata/omnic series/rapid_scan.srs')
     assert str(a) == 'NDDataset: [float64] V (shape: (y:643, x:4160))'
