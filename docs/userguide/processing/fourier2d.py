@@ -38,7 +38,7 @@
 import spectrochempy as scp
 
 # %% [markdown]
-# ## Process step by step 
+# ## Process step by step
 
 # %% [markdown]
 # As a first exmple, we will process a 2D HMQC spectrum:
@@ -55,7 +55,6 @@ ser
 # %%
 row0 = ser[0]
 _ = row0.plot()
-
 
 # %%
 r = row0.fft()

@@ -931,7 +931,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         new = self[index]
         return new
 
-
     def to_array(self):
         """
         Return a numpy masked array (i.e., other NDDataset attributes are lost.

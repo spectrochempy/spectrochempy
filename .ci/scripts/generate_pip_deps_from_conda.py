@@ -27,7 +27,7 @@ EXCLUDE = {"python"}
 RENAME = {"pyqt": "pyqt5",
           "dask-core": "dask",
           "git": "gitpython",
-          "numpy-quaternion" : "quaternion"}
+          "numpy-quaternion": "quaternion"}
 
 
 def conda_package_to_pip(package):

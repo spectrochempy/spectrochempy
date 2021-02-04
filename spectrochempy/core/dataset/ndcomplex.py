@@ -14,7 +14,6 @@ __dataset_methods__ = []
 
 import itertools
 import textwrap
-import warnings
 
 import numpy as np
 from traitlets import validate, Bool
@@ -638,8 +637,8 @@ class NDComplexArray(NDArray):
 
         r = data[::2]
         i = data[1::2]
-        # _data = as_quat_array(list(zip(r.real.flatten(), r.imag.flatten(), i.real.flatten(), i.imag.flatten())))
-        #_data = _data.reshape(r.shape)
+        #  _data = as_quat_array(list(zip(r.real.flatten(), r.imag.flatten(), i.real.flatten(), i.imag.flatten())))
+        #  _data = _data.reshape(r.shape)
 
         return as_quaternion(r, i)
 

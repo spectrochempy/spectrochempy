@@ -42,6 +42,7 @@ INPLACE = "INPLACE"
 
 typequaternion = np.dtype(np.quaternion)
 
+
 # ======================================================================================================================
 # Private methods
 # ======================================================================================================================
@@ -119,7 +120,7 @@ def quat_as_complex_array(arr):
     wt, xt, yt, zt = as_float_array(arr).T
     w, x, y, z = wt.T, xt.T, yt.T, zt.T
 
-    return (w + 1j * x),  (y + 1j * z)
+    return (w + 1j * x), (y + 1j * z)
 
 
 def dict_compare(d1, d2, check_equal_only=True):
@@ -471,6 +472,7 @@ def makestr(li):
     li = r'$%s$' % li
     return li
 
+
 # ......................................................................................................................
 def multisort(*args, **kargs):
     z = list(zip(*args))
@@ -490,6 +492,7 @@ def primefactors(n):
         if n == 1:
             return result
 
+
 # ......................................................................................................................
 @contextmanager
 def silence():
@@ -504,6 +507,7 @@ def silence():
     yield
     sys.stdout = old_stdout
     sys.stderr = old_stderr
+
 
 # ......................................................................................................................
 def spacing(arr):
@@ -531,6 +535,7 @@ def spacing(arr):
         return spacings[0]
     else:
         return spacings
+
 
 # ......................................................................................................................
 def srepr(arg):
