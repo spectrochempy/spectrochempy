@@ -56,10 +56,11 @@ ser
 row0 = ser[0]
 _ = row0.plot()
 
-# %%
-row0.fft()
 
 # %%
-row0.is_quaternion
+r = row0.fft()
+
+# %%
+from spectrochempy.utils.misc import dict_compare
 
 # %%
