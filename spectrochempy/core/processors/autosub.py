@@ -107,7 +107,7 @@ def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False
     ranges = tuple(np.array(ranges, dtype=float))
     # must be float to be considered as frequency for instance
 
-    coords = new.coordset[-1]
+    coords = new.coordset[dim]
     xrange = trim_ranges(*ranges, reversed=coords.reversed)
 
     s = []
