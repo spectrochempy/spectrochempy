@@ -327,7 +327,7 @@ class Meta(object):  # HasTraits):
         newmeta.name = None
 
         for key in self:
-            if is_sequence(self[key]) and len(self[key]) > 1:
+            if isinstance(self[key], list) and len(self[key]) > 1:
                 newmeta[key] = type(self[key])()
                 for dim in dims:
                     newmeta[key].append(self[key][dim])
