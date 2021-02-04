@@ -152,15 +152,14 @@ class Importer(HasTraits):
                 else:
                     datasets.extend(res)
 
-            except Exception:
-                warning_(f'file {filename} has a know extension but could not be read. It is ignored!')
+            except FileNotFoundError:
+                warning_(f'No file with name `{filename}` could be found. Sorry! ')
 
             except IOError as e:
-                if 'is not an Absorbance spectrum' in str(e):
-                    # we do not read this filename
-                    warn(str(e))
-                else:
-                    raise e
+                warning_(str(e))
+
+            except Exception as e:
+                warning_(f'The file `{filename}` has a known extension but it could not be read. It is ignored!')
 
         if len(datasets) > 1:
             datasets = self._do_merge(datasets, **kwargs)
