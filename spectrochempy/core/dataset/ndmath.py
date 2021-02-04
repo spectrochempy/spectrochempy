@@ -406,7 +406,8 @@ class NDMath(object):
                       'signbit', 'sign']
     __quaternion_aware = ['add', 'subtract', 'multiply', 'divide', 'log', 'exp', 'power', 'negative', 'conjugate',
                           'copysign', 'equal', 'not_equal', 'less', 'less_equal', 'isnan', 'isinf', 'isfinite',
-                          'absolute']
+                          'absolute', 'abs']
+
     # the following methods are to give NDArray based class
     # a behavior similar to np.ndarray regarding the ufuncs
 
@@ -2596,6 +2597,7 @@ class NDMath(object):
         ismasked = False
         compatible_units = (fname in self.__compatible_units)
         remove_units = (fname in self.__remove_units)
+        quaternion_aware = (fname in self.__quaternion_aware)
 
         for i, obj in enumerate(inputs):
             # type
@@ -2857,11 +2859,10 @@ class NDMath(object):
         else:
             # make a simple operation
             try:
-                # if not isquaternion:
-                data = f(d, *args)
-            # else:
-            # TODO: handle hypercomplex quaternion
-            #    print(fname, d, args)
+                if not isquaternion or quaternion_aware:
+                    data = f(d, *args)
+                else:
+                    print(fname, d, args)
             #    raise NotImplementedError('operation {} not yet implemented '
             #                              'for quaternion'.format(fname))
 
