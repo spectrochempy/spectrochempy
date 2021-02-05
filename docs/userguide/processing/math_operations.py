@@ -56,8 +56,6 @@ sqrt(dx)
 # %% [markdown]
 # ## List of UFuncs working on `NDDataset`:
 #
-# if an Ufunc works on `NDDataset` but not on `NDPanel`, this is specified in the list below.
-#
 # ### Functions affecting magnitudes of the number but keeping units
 # * [negative](#negative)(x, \*\*kwargs): Numerical negative, element-wise.
 # * [absolute](#abs)(x, \*\*kwargs): Calculate the absolute value, element-wise. Alias: [abs](#abs)
