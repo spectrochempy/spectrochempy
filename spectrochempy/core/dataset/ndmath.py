@@ -1018,7 +1018,7 @@ class NDMath(object):
         """Coordinates of maximum of data along axis"""
 
         if not cls.implements('NDDataset') or cls.coordset is None:
-            raise Exception('Method ``oordmin` apply only on NDDataset and if it has defined coordinates')
+            raise Exception('Method `coordmax` apply only on NDDataset and if it has defined coordinates')
 
         axis, dim = cls.get_axis(dim, allows_none=True)
 
@@ -1028,58 +1028,44 @@ class NDMath(object):
         dims = cls.dims
         coordset = cls.coordset
 
-        if dim is None:
-            coord = {}
-            for i, item in enumerate(cmax[::-1]):
-                dim = dims[-(i + 1)]
-                coord[dim] = coordset[dim][item].values
-            return coord
-        else:
-            idx = cmax[axis]
-            coord = coordset[dim][idx]
-            data = coord.data
-            units = coord.units
-            mask = np.all(cls.mask, axis) if cls.mask else NOMASK
-            title = coord.title
-            del coordset[dim]
-            dims.remove(dim)
-            new = type(cls)(data, units=units, dims=dims, coordset=coordset, mask=mask,
-                            title=f'{title} at maximum along {dim}')
-            return new
+        coord = {}
+        for i, item in enumerate(cmax[::-1]):
+            _dim = dims[-(i + 1)]
+            cs = coordset[_dim].values
+            coord[_dim] = cs[item]
+
+        if dim is not None:
+            return coord[dim]
+
+        return coord
 
     # ..................................................................................................................
     @_reduce_method
     @_from_numpy_method
     def coordmin(cls, dataset, dim=None):
-        """Coordinates of minimum of data along axis"""
+        """Coordinates of mainimum of data along axis"""
 
         if not cls.implements('NDDataset') or cls.coordset is None:
-            raise Exception('Method ``oordmin` apply only on NDDataset and if it has defined coordinates')
+            raise Exception('Method `coordmin` apply only on NDDataset and if it has defined coordinates')
 
         axis, dim = cls.get_axis(dim, allows_none=True)
-        idx = np.ma.argmin(dataset, axis, fill_value=1e30)
+
+        idx = np.ma.argmin(dataset, fill_value=-1e30)
+        cmax = list(np.unravel_index(idx, cls.shape))
+
         dims = cls.dims
         coordset = cls.coordset
-        if axis is None:
-            c = np.unravel_index(idx, cls.shape)
-            coord = {}
-            for i, item in enumerate(c[::-1]):
-                dim = dims[-(i + 1)]
-                icoord = coordset.names.index(dim)
-                coord[dim] = coordset.coords[icoord][item].values
-            return coord
-        else:
-            icoord = coordset.names.index(dim)
-            coord = coordset.coords[icoord][idx]
-            data = coord.data
-            units = coord.units
-            mask = np.all(dataset.mask, axis)
-            title = coord.title
-            del coordset.coords[icoord]
-            dims.remove(dim)
-            new = type(cls)(data, units=units, dims=dims, coordset=coordset, mask=mask,
-                            title=f'{title} at minimum along {dim}')
-            return new
+
+        coord = {}
+        for i, item in enumerate(cmax[::-1]):
+            _dim = dims[-(i + 1)]
+            cs = coordset[_dim].values
+            coord[_dim] = cs[item]
+
+        if dim is not None:
+            return coord[dim]
+
+        return coord
 
     # ..................................................................................................................
     @_from_numpy_method
