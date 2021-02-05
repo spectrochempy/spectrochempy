@@ -108,8 +108,8 @@ def _states_fft(data, tppi=False):
     w, y, x, z = wt.T, xt.T, yt.T, zt.T
 
     # TODO : check this in various situations
-    spath = (w - z) + 1j * (x + y)
-    santi = (w + z) + 1j * (x - y)
+    spath = ((w - z) + 1j * (x + y))/2.
+    santi = ((w + z) + 1j * (x - y))/2.
 
     if tppi:
         spath[..., 1::2] = -spath[..., 1::2]
@@ -120,6 +120,37 @@ def _states_fft(data, tppi=False):
 
     # rebuild the quaternion
     data = as_quaternion(fpath, fanti)
+
+    return data
+
+
+def _echoanti_fft(data):
+    """
+    FFT transform according to ECHO-ANTIECHO encoding
+
+    Parameters
+    ----------
+    data : ndarray
+        Data to process
+
+    Returns
+    -------
+    transformed
+        Data transformed
+    """
+
+    # warning: at this point, data must have been swaped so the last dimension is the one used for FFT
+    wt, yt, xt, zt = as_float_array(data).T  # x and y are exchanged due to swaping of dims
+    w, y, x, z = wt.T, xt.T, yt.T, zt.T
+
+    sc = ((w + y) + 1j * (w - y))/2.
+    ss = ((x - z) + 1j * (x - z))/2.
+
+    fc = np.fft.fftshift(np.fft.fft(sc), -1)
+    fs = np.fft.fftshift(np.fft.fft(ss), -1)[..., ::-1]
+
+    # rebuild the quaternion
+    data = as_quaternion( fc.real, fs.real, fc.imag, fs.imag)
 
     return data
 
@@ -137,7 +168,26 @@ def _tppi_fft(data):
     -------
     transformed
         Data transformed according to TPPI encoding
-    """  # TODO : need examples
+    """
+
+    # warning: at this point, data must have been swaped so the last dimension is the one used for FFT
+    wt, yt, xt, zt = as_float_array(data).T  # x and y are exchanged due to swaping of dims
+    w, y, x, z = wt.T, xt.T, yt.T, zt.T
+
+    sx = w + 1j * x
+    sy = y + 1j * z
+
+    sx[..., 1::2] = -sx[..., 1::2]
+    sy[..., 1::2] = -sy[..., 1::2]
+
+    fx = np.fft.fftshift(np.fft.fft(sx), -1)[..., ::-1]  # reverse
+    fy = np.fft.fftshift(np.fft.fft(sy), -1)
+
+    # rebuild the quaternion
+    data = as_quaternion(fx, fy)
+
+    return data
+
 
 
 # ======================================================================================================================
@@ -324,22 +374,29 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
 
             qsim = (encoding in ['QSIM', 'DQD'])
             states = ('STATES' in encoding)
+            echoanti = ('ECHO-ANTIECHO' in encoding)
             tppi = ('TPPI' in encoding)
 
         # Perform the fft
         if iscomplex and not inv:
 
+            zf_size(new, size=size, inplace=True)
+
             if qsim:  # F2 fourier transform
-                zf_size(new, size=size, inplace=True)
                 data = _fft(new.data)
 
             elif states:
-                zf_size(new, size=size, inplace=True)
                 data = _states_fft(new.data, tppi)
 
             elif tppi:
-                zf_size(new, size=size, inplace=True)
                 data = _tppi_fft(new.data)
+
+            elif echoanti:
+                data = _echoanti_fft(new.data)
+
+            else:
+                raise NotImplementedError(f'{encoding} not yet implemented. We recommend you to put an issue on '
+                                          f'Github, so we will not forget to work on this!.')
 
         elif iscomplex and inv:
 
@@ -462,11 +519,10 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             if not new.meta.phased:
                 new.meta.phased = [False] * new.ndim
 
-            new.meta.pivot[-1] = abs(new).coordset[dim].max()  # create pivot metadata
-
             # applied the stored phases
             new.pk(inplace=True)
 
+            new.meta.pivot[-1] = abs(new).coordmax(dim=dim)
             new.meta.readonly = True
 
     # restore original data order if it was swaped
