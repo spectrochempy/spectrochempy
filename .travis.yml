@@ -6,8 +6,8 @@ dist: xenial
 jobs:
   fast_finish: true
   include:
-    - stage: pytest
-      name: py3.9
+    - stage: tests
+    - name: py3.6
       if: type == pull_request or branch NOT IN (master)
       env:
       - TEST=true
@@ -17,13 +17,12 @@ jobs:
       env:
       - TEST=true
       - CONDAPY=3.6
-    - stage: deploy
-      name: conda-deploy
-      if: type != pull_request AND branch IN (master, develop) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/
+    - name: conda-deploy
+      if: type == pull_request AND branch IN (master, develop) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/
       env:
       - DEPLOY=true
       - CONDAPY=3.8
-    - name: build-docs
+    - stage: build-docs
       if: type != pull_request AND (branch IN (master, develop) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/)
       env:
       - BUILDOCS=true
