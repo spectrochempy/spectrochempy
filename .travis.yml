@@ -7,21 +7,16 @@ jobs:
   fast_finish: true
   include:
     - stage: tests
-      name: py3.6
-      if: type == pull_request or branch NOT IN (master)
-      env:
-      - TEST=true
-      - CONDAPY=3.6
-    - name: py3.7
-      if: type == pull_request or branch NOT IN (master)
-      env:
-      - TEST=true
-      - CONDAPY=3.7
-    - name: py3.9
+    - name: py3.6
       if: type == pull_request or branch NOT IN (master)
       env:
       - TEST=true
       - CONDAPY=3.9
+    - name: py3.6
+      if: type == pull_request or branch NOT IN (master)
+      env:
+      - TEST=true
+      - CONDAPY=3.6
     - name: conda-deploy
       if: type == pull_request AND branch IN (master, develop) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/
       env:
