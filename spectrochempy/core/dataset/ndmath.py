@@ -1014,32 +1014,34 @@ class NDMath(object):
     # ..................................................................................................................
     @_reduce_method
     @_from_numpy_method
-    def coordmax(cls, dataset, dim=-1):
+    def coordmax(cls, dataset, dim=None):
         """Coordinates of maximum of data along axis"""
 
         if not cls.implements('NDDataset') or cls.coordset is None:
             raise Exception('Method ``oordmin` apply only on NDDataset and if it has defined coordinates')
 
         axis, dim = cls.get_axis(dim, allows_none=True)
-        idx = np.ma.argmax(dataset, axis, fill_value=-1e30)
+
+        idx = np.ma.argmax(dataset, fill_value=-1e30)
+        cmax = list(np.unravel_index(idx, cls.shape))
+
         dims = cls.dims
         coordset = cls.coordset
-        if axis is None:
-            c = np.unravel_index(idx, cls.shape)
+
+        if dim is None:
             coord = {}
-            for i, item in enumerate(c[::-1]):
+            for i, item in enumerate(cmax[::-1]):
                 dim = dims[-(i + 1)]
-                icoord = coordset.names.index(dim)
-                coord[dim] = coordset.coords[icoord][item].values
+                coord[dim] = coordset[dim][item].values
             return coord
         else:
-            icoord = coordset.names.index(dim)
-            coord = coordset.coords[icoord][idx]
+            idx = cmax[axis]
+            coord = coordset[dim][idx]
             data = coord.data
             units = coord.units
-            mask = np.all(dataset.mask, axis)
+            mask = np.all(cls.mask, axis) if cls.mask else NOMASK
             title = coord.title
-            del coordset.coords[icoord]
+            del coordset[dim]
             dims.remove(dim)
             new = type(cls)(data, units=units, dims=dims, coordset=coordset, mask=mask,
                             title=f'{title} at maximum along {dim}')
