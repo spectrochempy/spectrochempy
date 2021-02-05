@@ -105,18 +105,6 @@ def test_ndmath_unary_ufuncs_simple_data(nd2d, name, comment):
         except DimensionalityError as e:
             error_(f"{name}: ", e)
 
-    # # NDPanel
-    # # -----------------
-    # if name not in ['sign','logical_not', 'isnan', 'isfinite', 'isneginf', 'isinf', 'signbit', 'fix']:
-    #     info_('panel before', pnl)
-    #
-    #     f = getattr(np, name)
-    #     try:
-    #         r = f(pnl)
-    #         info_('panel after ', r)
-    #     except TypeError as e:
-    #         error_(e)
-
     info_('-' * 60)
     info_(' ')
 

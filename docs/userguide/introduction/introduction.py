@@ -37,8 +37,8 @@
 # analyzing spectroscopic data, initially for internal purposes in the
 # [LCS (https://www.lcs.ensicaen.fr)](https://www.lcs.ensicaen.fr).
 #
-# **SpectroChemPy** is essentially a library written in python language and which proposes objects (`NDDataset`,
-# *NDPanel(not yet available)* and `Project`) to contain data, equipped with methods to analyze, transform or display
+# **SpectroChemPy** is essentially a library written in python language and which proposes objects (`NDDataset`, and
+# `Project`) to contain data, equipped with methods to analyze, transform or display
 # this data in a simple way by the user.
 #
 #  The processed data are mainly spectroscopic data from techniques such as IR, Raman or NMR, but they are not limited
