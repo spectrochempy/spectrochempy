@@ -368,7 +368,7 @@ class NDArray(HasTraits):
                    f"Check the indexes and make sure to use floats for location slicing")
             new = None
 
-        elif (self._data is not None) and hasattr(udata, 'mask'):
+        elif (self.data is not None) and hasattr(udata, 'mask'):
             new._mask = udata.mask
         else:
             new._mask = NOMASK
