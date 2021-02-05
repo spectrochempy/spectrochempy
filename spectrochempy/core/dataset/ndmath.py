@@ -1031,8 +1031,7 @@ class NDMath(object):
         coord = {}
         for i, item in enumerate(cmax[::-1]):
             _dim = dims[-(i + 1)]
-            cs = coordset[_dim].values
-            coord[_dim] = cs[item]
+            coord[_dim] = coordset[_dim][item].values
 
         if dim is not None:
             return coord[dim]
@@ -1059,8 +1058,7 @@ class NDMath(object):
         coord = {}
         for i, item in enumerate(cmax[::-1]):
             _dim = dims[-(i + 1)]
-            cs = coordset[_dim].values
-            coord[_dim] = cs[item]
+            coord[_dim] = coordset[_dim][item].values
 
         if dim is not None:
             return coord[dim]

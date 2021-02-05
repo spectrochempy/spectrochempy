@@ -23,7 +23,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.9.1
+#     version: 3.9.0
 #   widgets:
 #     application/vnd.jupyter.widget-state+json:
 #       state: {}
@@ -36,34 +36,62 @@
 
 # %%
 import spectrochempy as scp
+from spectrochempy import ur 
+
 
 # %% [markdown]
-# ## Process step by step
-
-# %%
-# !python --version
+# ## Processing of Hypercomplex dataset
 
 # %% [markdown]
-# As a first example, we will process a 2D HMQC spectrum:
+# As a first example, we will process a 2D HMQC spectrum which has been acquired using a phase sensitive detection method : STATES-TPPI encoding.  The STATES (States, Ruben, Haberkorn) produce an hypercomplex dataset which need to be processed in a specific way, that SpectroChemPy handle automatically. TPPI (for Time Proportinal Phase Increment) is also handled.
 
 # %%
 path = scp.preferences.datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'topspin_2d'
-ser = scp.read_topspin(path)
-ser.plot_map()
-ser
+ser = scp.read_topspin(path, expno=1)
+prefs= ser.preferences 
+prefs.figure.figsize = (7,3)
+_ = ser.plot_map()
 
 # %% [markdown]
-# Extraction and Fourier transformation of the first row (row index:0):
+# ### Processing steps
+#
+# * Optional : Apply some broadening by apodization in the time domain.
+# * Optional : DC correction in the time domain.
+# * Optional : Zero-filling.
+# * Fourier transform in the F2 (x) dimension.
+# * Phase  the first transformed dimension in the frequency domain.
+# * Optional: Apply some apodization in the time domain for the F1 (y) dimension.
+# * Optional: DC Correction in F1.
+# * Optional: Zero-filling.
+# * Fourier transform the second dimension F1.
+# * Phase correct the second transformed dimension in the frequency domain.
+#
+#
+
+# %% [markdown]
+# ### Apodization, DC correction, Zero-filling
+
+# %% [markdown]
+# For this step we can first extract and Fourier transformation of the first row (row index:0).
 
 # %%
 row0 = ser[0]
 _ = row0.plot()
-row0
 
 # %%
-r = row0.fft()
-_ = r.plot()
-r
+row0 = ser[0]  
+row0.dc(inplace=True)
+row0.zf_size(size=2048, inplace=True)
+
+# %%
+shifted = row0.coordmax()
+
+# %%
+row0.em(lb=20*ur.Hz, shifted=shifted)
+f0 = row0.fft()
+_ = f0.plot()
+
+# %%
 
 # %% [markdown]
 # FFT along dimension x for the whole 2D dataset
@@ -95,3 +123,41 @@ sp = spec.fft(dim=0)
 # %%
 sp.plot_image()
 sp
+
+# %% [markdown]
+# ## Other encoding
+
+# %% [markdown]
+# ### Echo-antiecho
+
+# %%
+path = scp.preferences.datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'exam2d_HC'
+ser = scp.read_topspin(path)
+spec = ser.fft()
+sp = spec.fft(dim='y')
+_ = sp.plot_map()
+
+# %% [markdown]
+# ## Processing of Echo-AntiEcho encoded SER
+
+# %% [markdown]
+# In this second example, we will process a HSQC spectrum of Cyclosporin wich has been acquired using a Rance-Kay quadrature scheme, also known as Echo-Antiecho. (The original data is extracted from the examples of the Bruker Topspin software). 
+
+# %%
+path = scp.preferences.datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'exam2d_HC'
+ser = scp.read_topspin(path)
+ser.sp(ssb=2, inplace=True)  # Sine apodization
+s2 = ser.fft(1024)
+s2.pk(phc0=-38, inplace=True)
+s2[0].plot()
+s2.meta.pivot
+
+# %%
+s2.sp(ssb=2, dim='y', inplace=True)  # Sine apodization in the y dimension
+spec = s2.fft(1024, dim='y')
+_ = spec.plot_map()
+spec.meta.pivot
+
+# %%
+s = spec.pk(phc0=45, dim='y')
+_ = s.plot_map() #xlim=(3.5, 2.5), ylim=(20,45))

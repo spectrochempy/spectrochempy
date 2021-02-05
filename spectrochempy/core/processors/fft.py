@@ -144,10 +144,10 @@ def _echoanti_fft(data):
     w, y, x, z = wt.T, xt.T, yt.T, zt.T
 
     sc = ((w + y) + 1j * (w - y))/2.
-    ss = ((x - z) + 1j * (x - z))/2.
+    ss = (-(x + z) + 1j * (x - z))/2.
 
     fc = np.fft.fftshift(np.fft.fft(sc), -1)
-    fs = np.fft.fftshift(np.fft.fft(ss), -1)[..., ::-1]
+    fs = np.fft.fftshift(np.fft.fft(ss), -1)
 
     # rebuild the quaternion
     data = as_quaternion( fc.real, fs.real, fc.imag, fs.imag)
