@@ -57,6 +57,8 @@ def _phase_method(method):
                 if not isinstance(par, Quantity):
                     par *= Quantity(1., default_units)
                 elif inv:
+                    if par == 0:
+                        return par
                     par = 1. / (1. / par).to(default_units)
                 else:
                     par = par.to(default_units)
