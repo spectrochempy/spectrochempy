@@ -7,7 +7,7 @@ jobs:
   fast_finish: true
   include:
     - stage: tests
-    - name: py3.6
+      name: py3.6
       if: type == pull_request or branch NOT IN (master)
       env:
       - TEST=true
