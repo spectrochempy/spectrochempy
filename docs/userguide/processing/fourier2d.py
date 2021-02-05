@@ -23,7 +23,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.9.0
+#     version: 3.9.1
 #   widgets:
 #     application/vnd.jupyter.widget-state+json:
 #       state: {}
@@ -38,10 +38,13 @@
 import spectrochempy as scp
 
 # %% [markdown]
-# ## Process step by step
+# ## Process step by step 
+
+# %%
+# !python --version
 
 # %% [markdown]
-# As a first exmple, we will process a 2D HMQC spectrum:
+# As a first example, we will process a 2D HMQC spectrum:
 
 # %%
 path = scp.preferences.datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'topspin_2d'
@@ -50,28 +53,33 @@ ser.plot_map()
 ser
 
 # %% [markdown]
-# Extraction and Fourier transformation of the first row :
+# Extraction and Fourier transformation of the first row (row index:0):
 
 # %%
 row0 = ser[0]
 _ = row0.plot()
+row0
+
 
 # %%
 r = row0.fft()
 _ = r.plot()
+r
 
 # %% [markdown]
 # FFT along dimension x for the whole 2D dataset
 
 # %%
 spec = ser.fft()
+_ = spec.plot()
 spec
 
-# %%
-_ = spec.plot()
+# %% [markdown]
+# By default, plot() use the `stack`method, which is not the best in this case. Use `map` or `image`instead: 
 
 # %%
 _ = spec.plot_map()
+# TODO: change preferences for contour levels!
 
 # %% [markdown]
 # Now we can perform a FFT in the second dimension. We must take into account the encoding:
@@ -88,3 +96,8 @@ sp = spec.fft(dim=0)
 # %%
 sp.plot_image()
 sp
+
+# %%
+# !conda list quaternion
+
+# %%

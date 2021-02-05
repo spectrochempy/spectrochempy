@@ -430,11 +430,17 @@ class NDArray(HasTraits):
             if not np.any(self._mask):
                 self._mask = np.zeros(self._data.shape).astype(np.bool_)
             self._mask[keys] = value
+            return
 
         elif isinstance(value, Quantity):
             # first convert value to the current units
             value.ito(self.units)
-            self._data[keys] = np.array(value.magnitude, subok=True, copy=self._copy)
+            # self._data[keys] = np.array(value.magnitude, subok=True, copy=self._copy)
+            value = np.array(value.magnitude, subok=True, copy=self._copy)
+
+        if self._data.dtype == np.dtype(np.quaternion) and np.isscalar(value):
+            # sometimes do not work directly : here is a work around
+            self._data[keys] = np.full_like(self._data[keys], value).astype(np.dtype(np.quaternion))
         else:
             self._data[keys] = value
 
