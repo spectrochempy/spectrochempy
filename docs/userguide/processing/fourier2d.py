@@ -38,7 +38,7 @@
 import spectrochempy as scp
 
 # %% [markdown]
-# ## Process step by step 
+# ## Process step by step
 
 # %%
 # !python --version
@@ -60,7 +60,6 @@ row0 = ser[0]
 _ = row0.plot()
 row0
 
-
 # %%
 r = row0.fft()
 _ = r.plot()
@@ -75,7 +74,7 @@ _ = spec.plot()
 spec
 
 # %% [markdown]
-# By default, plot() use the `stack`method, which is not the best in this case. Use `map` or `image`instead: 
+# By default, plot() use the `stack`method, which is not the best in this case. Use `map` or `image`instead:
 
 # %%
 _ = spec.plot_map()
@@ -96,8 +95,3 @@ sp = spec.fft(dim=0)
 # %%
 sp.plot_image()
 sp
-
-# %%
-# !conda list quaternion
-
-# %%

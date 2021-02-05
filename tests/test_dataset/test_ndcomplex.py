@@ -63,7 +63,7 @@ def test_ndcomplex_init_quaternion_witharray():
     d1 = d0.swapdims(1, 0)
     assert d1.shape == (2, 3)
     assert_array_equal(d1.real.data, [[0, 8, 16], [4, 12, 20]])
-    assert d1[0, 0].values == quaternion(0, 3, 2, 1)
+    assert d1[0, 0].values == quaternion(0, 2, 1, 3)
     info_('\n', d1)
 
 
@@ -304,9 +304,10 @@ def test_ndcomplex_swapdims_quaternion():
     assert d4.has_complex_dims
     assert d4.is_quaternion
 
-    wt, xt, yt, zt = as_float_array(d4.data).T
-    assert_array_equal(xt, z.T)
-    assert_array_equal(zt, x.T)
+    wt, yt, xt, zt = as_float_array(d4.data).T
+    assert_array_equal(xt, x.T)
+    assert_array_equal(yt, y.T)
+    assert_array_equal(zt, z.T)
     assert_array_equal(wt, w.T)
 
     info_(d3)
