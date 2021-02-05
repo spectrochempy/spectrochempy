@@ -6,17 +6,17 @@ dist: xenial
 jobs:
   fast_finish: true
   include:
-    - stage: pytest-linux-3.8
+    - name: pytest-linux-3.8
       if: type == pull_request or branch NOT IN (master)
       env:
       - TEST=true
       - CONDAPY=3.8
-    - stage: conda-deploy
+    - name: conda-deploy
       if: type != pull_request AND branch IN (master, develop) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/
       env:
       - DEPLOY=true
       - CONDAPY=3.8
-    - stage: build-docs
+    - name: build-docs
       if: type != pull_request AND (branch IN (master, develop) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/)
       env:
       - BUILDOCS=true
