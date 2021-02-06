@@ -85,8 +85,8 @@ def _phase_method(method):
 
             if not new.meta.phased[-1]:
                 new.meta.phased[-1] = True
-                kwargs['phc0'] = 0 * ur.degree
-                kwargs['phc1'] = 0 * ur.degree
+                new.meta.phc0[-1] = 0 * ur.degree
+                new.meta.phc1[-1]  = 0 * ur.degree
                 new.meta.exptc[-1] = 0 * (1 / dunits)
             else:
                 new.meta.phc0[-1] = kwargs['phc0'] * ur.degree
@@ -157,7 +157,6 @@ def pk(dataset, phc0=0.0, phc1=0.0, exptc=0.0, pivot=0.0, **kwargs):
     size = dataset.shape[-1]
 
     if exptc > 0.0:
-        phc1 = 0
         apod = np.exp(1.0j * (phc0 * np.exp(-exptc * (np.arange(size) - pivot) / size)))
 
     else:

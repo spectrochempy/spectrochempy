@@ -406,7 +406,10 @@ def plot_1D(dataset, **kwargs):
 
     if show_complex and pen:
         # add the imaginaly component for pen only plot
-        zimagdata = new.imag.masked_data
+        if new.is_quaternion:
+            zimagdata = new.RI.masked_data
+        else:
+            zimagdata = new.imag.masked_data
         ax.plot(xdata, zimagdata.T, ls='--')
 
     if kwargs.get('plot_model', False):
