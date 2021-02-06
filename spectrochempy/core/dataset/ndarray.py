@@ -354,9 +354,9 @@ class NDArray(HasTraits):
                 new._data = np.asarray(udata)
             else:
                 if self.increment > 0:
-                    self.offset = udata.min()
+                    new._offset = udata.min()
                 else:
-                    self.offset = udata.max()
+                    new._offset = udata.max()
                 new._size = udata.size
 
         if self.is_labeled:
@@ -1467,6 +1467,9 @@ class NDArray(HasTraits):
 
     @increment.setter
     def increment(self, val):
+        if isinstance(val, Quantity):
+            val.ito(self.units)
+            val = val.m
         self._increment = val
 
     @property
@@ -1869,6 +1872,9 @@ class NDArray(HasTraits):
 
     @offset.setter
     def offset(self, val):
+        if isinstance(val, Quantity):
+            val.ito(self.units)
+            val = val.m
         self._offset = val
 
     @property

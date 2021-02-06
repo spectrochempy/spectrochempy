@@ -280,8 +280,8 @@ class NDComplexArray(NDArray):
         hypercomplex 2D `data` (Readonly property).
         this is equivalent to the `real` property
         """
-        if self.ndim != 2:
-            raise TypeError('Not a two dimensional array')
+        if not self.is_quaternion:
+            raise TypeError('Not an hypercomplex array')
         return self.real
 
     # ..................................................................................................................
@@ -291,8 +291,8 @@ class NDComplexArray(NDArray):
         array - The array with real-imaginary component of
         hypercomplex 2D `data` (Readonly property).
         """
-        if self.ndim != 2:
-            raise TypeError('Not a two dimensional array')
+        if not self.is_quaternion:
+            raise TypeError('Not an hypercomplex array')
         return self.component('RI')
 
     # ..................................................................................................................
@@ -301,10 +301,8 @@ class NDComplexArray(NDArray):
         """
         array - The array with imaginary-real component of hypercomplex 2D `data` (Readonly property).
         """
-        if self.ndim != 2:
-            raise TypeError('Not a two dimensional array')
         if not self.is_quaternion:
-            raise TypeError('Not a quaternion\'s array')
+            raise TypeError('Not an hypercomplex array')
         return self.component('IR')
 
     # ..................................................................................................................
@@ -313,10 +311,8 @@ class NDComplexArray(NDArray):
         """
         array - The array with imaginary-imaginary component of hypercomplex 2D data (Readonly property).
         """
-        if self.ndim != 2:
-            raise TypeError('Not a two dimensional array')
         if not self.is_quaternion:
-            raise TypeError('Not a quaternion\'s array')
+            raise TypeError('Not an hypercomplex array')
         return self.component('II')
 
     # ..................................................................................................................

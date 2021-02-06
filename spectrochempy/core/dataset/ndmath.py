@@ -1023,15 +1023,18 @@ class NDMath(object):
         axis, dim = cls.get_axis(dim, allows_none=True)
 
         idx = np.ma.argmax(dataset, fill_value=-1e30)
-        cmax = list(np.unravel_index(idx, cls.shape))
+        cmax = list(np.unravel_index(idx, dataset.shape))
 
         dims = cls.dims
-        coordset = cls.coordset
+        coordset = cls.coordset.copy()
 
         coord = {}
         for i, item in enumerate(cmax[::-1]):
             _dim = dims[-(i + 1)]
             coord[_dim] = coordset[_dim][item].values
+
+        if cls._squeeze_ndim==1:
+            dim = dims[-1]
 
         if dim is not None:
             return coord[dim]
@@ -1059,6 +1062,9 @@ class NDMath(object):
         for i, item in enumerate(cmax[::-1]):
             _dim = dims[-(i + 1)]
             coord[_dim] = coordset[_dim][item].values
+
+        if cls._squeeze_ndim==1:
+            dim = dims[-1]
 
         if dim is not None:
             return coord[dim]

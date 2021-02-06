@@ -191,6 +191,10 @@ def get_component(data, select='REAL'):
     -------
     component
         A component of the complex or hypercomplex array.
+
+    .. warning::
+        The definition is somewhat different from Bruker, as we order the component in the order of the dimensions in dataset:
+        e.g., for dims = ['y','x'], 'IR' means that the `y` component is imaginary while the `x` is real.
     """
     if not select:
         return data
