@@ -67,8 +67,12 @@ def _phase_method(method):
             # Set correct units for the parameters
             dunits = dataset.coordset[dim].units
 
-            kwargs['phc0'] = (_check_units(kwargs.get('phc0', 0), 'degree') - new.meta.phc0[-1]).magnitude
-            kwargs['phc1'] = (_check_units(kwargs.get('phc1', 0), 'degree') - new.meta.phc1[-1]).magnitude
+            current = [new.meta.phc0[-1], new.meta.phc1[-1]]
+            rel = kwargs.pop('rel', False)
+            if rel:    # relative phase
+                current = [0, 0]
+            kwargs['phc0'] = (_check_units(kwargs.get('phc0', 0), 'degree') - current[0]).magnitude
+            kwargs['phc1'] = (_check_units(kwargs.get('phc1', 0), 'degree') - current[1]).magnitude
             kwargs['pivot'] = _check_units(kwargs.get('pivot', new.meta.pivot[-1]), dunits).magnitude
             kwargs['exptc'] = _check_units(kwargs.get('exptc', new.meta.get('exptc', [0] * new.ndim)[-1]), dunits,
                                            inv=True).magnitude
@@ -89,8 +93,14 @@ def _phase_method(method):
                 new.meta.phc1[-1]  = 0 * ur.degree
                 new.meta.exptc[-1] = 0 * (1 / dunits)
             else:
-                new.meta.phc0[-1] = kwargs['phc0'] * ur.degree
-                new.meta.phc1[-1] = kwargs['phc1'] * ur.degree
+                if rel:
+                    new.meta.phc0[-1] += kwargs['phc0'] * ur.degree
+                    new.meta.phc1[-1] += kwargs['phc1'] * ur.degree
+                else:
+                    new.meta.phc0[-1] = kwargs['phc0'] * ur.degree
+                    new.meta.phc1[-1] = kwargs['phc1'] * ur.degree
+
+                    #TODO: to do for exptc too!
                 new.meta.exptc[-1] = kwargs['exptc'] * (1 / dunits)
 
             new.meta.pivot[-1] = kwargs['pivot'] * dunits
