@@ -23,7 +23,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.9.0
+#     version: 3.9.1
 #   widgets:
 #     application/vnd.jupyter.widget-state+json:
 #       state: {}
@@ -36,11 +36,16 @@
 
 # %%
 import spectrochempy as scp
-from spectrochempy import ur 
 
 
 # %% [markdown]
-# ## Processing of Hypercomplex dataset
+# Additional import to simplify the use of units
+
+# %%
+from spectrochempy import ur
+
+# %% [markdown]
+# ## Processing of NMR dataset with hypercomplex detection (phase-senitive)
 
 # %% [markdown]
 # As a first example, we will process a 2D HMQC spectrum which has been acquired using a phase sensitive detection method : STATES-TPPI encoding.  The STATES (States, Ruben, Haberkorn) produce an hypercomplex dataset which need to be processed in a specific way, that SpectroChemPy handle automatically. TPPI (for Time Proportinal Phase Increment) is also handled.
@@ -48,9 +53,22 @@ from spectrochempy import ur
 # %%
 path = scp.preferences.datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'topspin_2d'
 ser = scp.read_topspin(path, expno=1)
+ser
+
+# %% [markdown]
+# Change of some plotting preferences
+
+# %%
 prefs= ser.preferences 
 prefs.figure.figsize = (7,3)
-_ = ser.plot_map()
+prefs.method_2D = 'map'
+prefs.contour_start = 0.05
+
+# %% [markdown]
+# and now plotting of contours using `plot_map`. Actually we may just use `plot`as we have set above the default plot to `map`.
+
+# %%
+ser.plot();
 
 # %% [markdown]
 # ### Processing steps
@@ -76,69 +94,69 @@ _ = ser.plot_map()
 
 # %%
 row0 = ser[0]
-_ = row0.plot()
+row0.plot();
+
+# %% [markdown]
+# We can zoom to have a better look at the echo (with the imaginary component)
+
+# %%
+row0.plot(show_complex=True, xlim=(0,10000));
+
+# %% [markdown]
+# Now we will perform the processing of the first row and adjust the parameters for apodization, zero-filling, etc...
 
 # %%
 row0 = ser[0]  
-row0.dc(inplace=True)
-row0.zf_size(size=2048, inplace=True)
+
+row0.dc(inplace=True)                  # DC corrrection
+row0.zf_size(size=2048, inplace=True)  # zero-filling (size parameter can be approximate as the FFT will
+                                       # anyway complete the zero-filling to next power of 2.)
+shifted = row0.coordmax()              # find the top of the echo
 
 # %%
-shifted = row0.coordmax()
+newrow, apod = row0.em(lb=20*ur.Hz, shifted=shifted, retapod=True)  
+                                       # retapod: return the apod array along with the apodized dataset
+newrow.plot()
+apod.plot(clear=False, xlim=(0,20000), c='red')        
 
-# %%
-row0.em(lb=20*ur.Hz, shifted=shifted)
-f0 = row0.fft()
-_ = f0.plot()
-
-# %%
+f0 = newrow.fft()                        # fourier transform
+f0.plot(show_complex=True); 
 
 # %% [markdown]
-# FFT along dimension x for the whole 2D dataset
+# Once we have found correct parameters for correcting the first row, we can apply them for the whole 2D dataset in the F2 dimension (the default dimension, so no need to specify this in the following methods)
 
 # %%
-spec = ser.fft()
-_ = spec.plot()
-spec
+sert = ser.dc()                                       # DC correction
+sert.zf_size(size=2048, inplace=True)                  # zero-filling
+sert.em(lb=20*ur.Hz, shifted=shifted, inplace=True)   # shifted was set in the previous step
+sert.plot();
 
 # %% [markdown]
-# By default, plot() use the `stack`method, which is not the best in this case. Use `map` or `image`instead:
+# Transform in F2
 
 # %%
-_ = spec.plot_map()
-# TODO: change preferences for contour levels!
+spec = sert.fft()  
+_ = spec.plot();
 
 # %% [markdown]
-# Now we can perform a FFT in the second dimension. We must take into account the encoding:
+# Now we can process the F1 dimension ('y')
 
 # %%
-spec.meta.encoding[0]
+spect = spec.zf_size(size=512, dim='y')
+spect.em(lb=10*ur.Hz, inplace=True, dim='y')
+s = spect.fft(dim='y')
+prefs.contour_start = 0.12
+_ = s.plot()
 
 # %% [markdown]
-# This type of encoding is however taken into account automatically.
+# Here is an expansion:
 
 # %%
-sp = spec.fft(dim=0)
-
-# %%
-sp.plot_image()
-sp
+spk = s.pk(phc0=0, dim='y')
+_ = spk.plot(xlim=(50,0), ylim=(-40,-15))
 
 # %% [markdown]
-# ## Other encoding
-
-# %% [markdown]
-# ### Echo-antiecho
-
-# %%
-path = scp.preferences.datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'exam2d_HC'
-ser = scp.read_topspin(path)
-spec = ser.fft()
-sp = spec.fft(dim='y')
-_ = sp.plot_map()
-
-# %% [markdown]
-# ## Processing of Echo-AntiEcho encoded SER
+# ## Processing of an Echo-AntiEcho encoded dataset
 
 # %% [markdown]
 # In this second example, we will process a HSQC spectrum of Cyclosporin wich has been acquired using a Rance-Kay quadrature scheme, also known as Echo-Antiecho. (The original data is extracted from the examples of the Bruker Topspin software). 
@@ -146,18 +164,27 @@ _ = sp.plot_map()
 # %%
 path = scp.preferences.datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'exam2d_HC'
 ser = scp.read_topspin(path)
-ser.sp(ssb=2, inplace=True)  # Sine apodization
-s2 = ser.fft(1024)
-s2.pk(phc0=-38, inplace=True)
-s2[0].plot()
-s2.meta.pivot
+prefs = ser.preferences
+prefs.figure.figsize = (7,3)
+ser.shape
 
 # %%
-s2.sp(ssb=2, dim='y', inplace=True)  # Sine apodization in the y dimension
-spec = s2.fft(1024, dim='y')
-_ = spec.plot_map()
-spec.meta.pivot
+sert = ser.dc()
+sert.sp(ssb=2, inplace=True)      # Sine apodization
+s2 = sert.fft(1024)
+s2.pk(phc0=-90, inplace=True)     # phasing
+_ = s2[0].plot()
+ex= (3.5, 2.5)
+_ = s2[0].plot(xlim = ex)
 
 # %%
-s = spec.pk(phc0=45, dim='y')
-_ = s.plot_map() #xlim=(3.5, 2.5), ylim=(20,45))
+s2.sp(ssb=2, dim='y', inplace=True);                # Sine apodization in the y dimension
+
+# %%
+ey = (20,45)
+prefs.contour_start = 0.07
+s = s2.fft(256, dim='y')
+s = s.pk(phc0=-40, dim='y')
+s = s.pk(phc0=-5, rel=True)
+_ = s.plot_map(xlim=ex, ylim=ey)
+_ = s.plot_map()
