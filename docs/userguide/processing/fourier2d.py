@@ -68,7 +68,7 @@ prefs.contour_start = 0.05
 # and now plotting of contours using `plot_map`. Actually we may just use `plot`as we have set above the default plot to `map`.
 
 # %%
-ser.plot();
+_ = ser.plot()
 
 # %% [markdown]
 # ### Processing steps
@@ -94,13 +94,13 @@ ser.plot();
 
 # %%
 row0 = ser[0]
-row0.plot();
+_ = row0.plot()
 
 # %% [markdown]
 # We can zoom to have a better look at the echo (with the imaginary component)
 
 # %%
-row0.plot(show_complex=True, xlim=(0,10000));
+_ = row0.plot(show_complex=True, xlim=(0,10000))
 
 # %% [markdown]
 # Now we will perform the processing of the first row and adjust the parameters for apodization, zero-filling, etc...
@@ -120,7 +120,7 @@ newrow.plot()
 apod.plot(clear=False, xlim=(0,20000), c='red')        
 
 f0 = newrow.fft()                        # fourier transform
-f0.plot(show_complex=True); 
+_ = f0.plot(show_complex=True) 
 
 # %% [markdown]
 # Once we have found correct parameters for correcting the first row, we can apply them for the whole 2D dataset in the F2 dimension (the default dimension, so no need to specify this in the following methods)
@@ -129,7 +129,7 @@ f0.plot(show_complex=True);
 sert = ser.dc()                                       # DC correction
 sert.zf_size(size=2048, inplace=True)                  # zero-filling
 sert.em(lb=20*ur.Hz, shifted=shifted, inplace=True)   # shifted was set in the previous step
-sert.plot();
+_ = sert.plot()
 
 # %% [markdown]
 # Transform in F2
@@ -188,3 +188,35 @@ s = s.pk(phc0=-40, dim='y')
 s = s.pk(phc0=-5, rel=True)
 _ = s.plot_map(xlim=ex, ylim=ey)
 _ = s.plot_map()
+
+# %% [markdown]
+# ## Processing a QF encoded file
+
+# %%
+path = scp.preferences.datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'exam2d_HH'
+ser = scp.read_topspin(path)
+prefs = ser.preferences
+ser.plot()
+ser.dtype
+
+# %%
+sert = ser.dc()
+sert.sp(ssb=2, inplace=True)      # Sine apodization
+s2 = sert.fft(1024)
+s3 = s2.pk(phc0=-140, phc1=95)    
+_ = s3[0].plot()
+
+# %%
+s3.sp(ssb=0, dim='y', inplace=True);                # Sine apodization in the y dimension
+
+# %%
+ey = (20,45)
+s = s3.fft(256, dim='y')
+sa = s.abs()
+
+prefs.contour_start = 0.005
+prefs.show_projections = True
+prefs.figure.figsize = (7,7)
+_ = sa.plot_map()
+
+# %%

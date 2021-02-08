@@ -38,10 +38,8 @@ def _fft(data):
     if data.dtype == typequaternion:
 
         dr = get_component(data, 'R')
-        dr[0] = dr[0] / 2.
         fr = np.fft.fftshift(np.fft.fft(dr), -1)
         di = get_component(data, 'I')
-        di[0] = di[0] / 2.
         fi = np.fft.fftshift(np.fft.fft(di), -1)
 
         # rebuild the quaternion
@@ -102,50 +100,6 @@ def _ifft_positive(data):
         data = np.fft.fft(np.fft.ifftshift(data, -1)) * data.shape[-1]
 
     return data
-
-
-def _nmr_reorder(data):
-    """
-    Reorder spectrum after FT transform to NMR order (swap halves and reverse).
-    """
-    s = data.shape[-1]
-    return np.append(data[..., int(s / 2)::-1], data[..., s:int(s / 2):-1],
-                     axis=-1)
-
-
-def _swap_halves(data):
-    """
-    Swap the halves of a spectrum,
-    """
-    s = data.shape[-1]
-    return np.append(data[..., int(s / 2):], data[..., :int(s / 2)], axis=-1)
-
-
-def _rfft(x):
-
-    s = x.shape[-1]
-    xp = np.zeros(x.shape, dtype="complex64")
-    xp[..., 1:int(s / 2)] = x[..., 1:-1:2] + x[..., 2::2] * 1.j
-    xp[..., 0] = x[..., 0] / 2.
-    xp[..., int(s / 2)] = x[..., -1] / 2.
-    return np.array(_nmr_reorder(np.fft.fft(2 * xp, axis=-1).real),
-                    dtype="float32")
-    return np.array(np.fft.fftshift(np.fft.fft(2 * xp, axis=-1).real), dtype="float32")
-
-def _irfft(xp):
-
-    s = xp.shape[-1]
-    xp = np.fft.ifft(_nmr_reorder(xp))   # re-order, inverse FT
-
-    # output results
-    x = np.zeros(xp.shape, dtype="float32")
-
-    # unpack ifft data
-    x[..., 1:-1:2] = xp[..., 1:int(s / 2)].real
-    x[..., 2::2] = xp[..., 1:int(s / 2)].imag
-    x[..., 0] = xp[..., 0].real
-    x[..., -1] = xp[..., int(s / 2)].real
-    return x
 
 
 # ......................................................................................................................
@@ -209,7 +163,6 @@ def _states_fft(data, tppi=False):
     fr = np.fft.fftshift(np.fft.fft(sr), -1)
     fi = np.fft.fftshift(np.fft.fft(si), -1)
 
-
     # rebuild the quaternion
     data = as_quaternion(fr, fi)
 
@@ -237,8 +190,8 @@ def _echoanti_fft(data):
 
     c = (w + y) + 1j * (w - y)
     s = (x + z) - 1j * (x - z)
-    fc = np.fft.fftshift(np.fft.fft(c), -1)
-    fs = np.fft.fftshift(np.fft.fft(s), -1)
+    fc = np.fft.fftshift(np.fft.fft(c/2.), -1)
+    fs = np.fft.fftshift(np.fft.fft(s/2.), -1)
     data = as_quaternion( fc, fs )
 
     return data
@@ -264,12 +217,12 @@ def _tppi_fft(data):
     w, y, x, z = wt.T, xt.T, yt.T, zt.T
 
     sx = w + 1j * y
-    sy = y + 1j * z
+    sy = x + 1j * z
 
     sx[..., 1::2] = -sx[..., 1::2]
     sy[..., 1::2] = -sy[..., 1::2]
 
-    fx = np.fft.fftshift(np.fft.fft(sx), -1)[..., ::-1]  # reverse
+    fx = np.fft.fftshift(np.fft.fft(sx), -1)  # reverse
     fy = np.fft.fftshift(np.fft.fft(sy), -1)
 
     # rebuild the quaternion
@@ -278,6 +231,24 @@ def _tppi_fft(data):
     return data
 
 
+def _qf_fft(data):
+    """
+    FFT transform according to QF encoding
+
+    Parameters
+    ----------
+    data : ndarray
+        Data to process
+
+    Returns
+    -------
+    transformed
+        Data transformed according to QF encoding
+    """
+
+    data = np.fft.fftshift(np.fft.fft(np.conjugate(data)), -1)
+
+    return data
 
 # ======================================================================================================================
 # Public methods
@@ -452,91 +423,90 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
 
         # Should we work on complex or hypercomplex data
         # interleaved is in case of >2D data  ( # TODO: >D not yet implemented in ndcomplex.py
-        iscomplex = new.is_complex or new.is_quaternion or new.is_interleaved
-        # isquaternion = new.is_quaternion
+        iscomplex = False
+        if axis == -1:
+            iscomplex = new.is_complex
+        if new.is_quaternion or new.is_interleaved:
+            iscomplex = True
 
         # If we are in NMR we have an additional complication due to the mode
         # of acquisition (sequential mode when ['QSEQ','TPPI','STATES-TPPI'])
         encoding = None
-        if not inv and iscomplex and 'encoding' in new.meta:
+        if not inv and 'encoding' in new.meta:
             encoding = new.meta.encoding[-1]
 
             qsim = (encoding in ['QSIM', 'DQD'])
+            qseq = ('QSEQ' in encoding)
             states = ('STATES' in encoding)
             echoanti = ('ECHO-ANTIECHO' in encoding)
             tppi = ('TPPI' in encoding)
+            qf = ('QF'in encoding)
+
+        # Zero_filling
+        zf_size(new, size=size, inplace=True)
 
         # Perform the fft
-        if iscomplex and not inv:
+        if qsim:  # F2 fourier transform
+            data = _fft(new.data)
 
-            zf_size(new, size=size, inplace=True)
+        elif states:
+            data = _states_fft(new.data, tppi)
 
-            if qsim:  # F2 fourier transform
-                data = _fft(new.data)
+        elif tppi:
+            data = _tppi_fft(new.data)
 
-            elif states:
-                data = _states_fft(new.data, tppi)
+        elif echoanti:
+            data = _echoanti_fft(new.data)
 
-            elif tppi:
-                data = _tppi_fft(new.data)
-
-            elif echoanti:
-                data = _echoanti_fft(new.data)
-
-            else:
-                raise NotImplementedError(f'{encoding} not yet implemented. We recommend you to put an issue on '
-                                          f'Github, so we will not forget to work on this!.')
+        elif qf:
+                # we must perform a real fourier transform of a time domain dataset
+            data = _qf_fft(new.data)
 
         elif iscomplex and inv:
-
             # We assume no special encoding for inverse complex fft transform
             data = _ifft(new.data)
 
-        elif not iscomplex:
-
-            if not inv:
-                # we must perform a real fourier transform of a time domain dataset
-                data = _rfft(new.data)
-
-            else:
-                data = _irfft(new.data)
-
-            # TODO: revise this when SRS file will be provided (will not use plt here!  It should return data)
-            # TODO: this module should do only the fourier transform
-
-            # # subtract  DC
-            # new -= new.mean()
-            # # determine phase correction (Mertz)
-            # zpd = _get_zpd(new)
-            # if not np.all(zpd[0] == zpd):
-            #     raise ValueError("zpd should be at the same index")
-            # zpd = zpd[0]
-            # narrowed = hamming(new[:, 0: 2 * zpd])
-            # mirrored = concatenate(narrowed[:, zpd:], narrowed[:, :zpd])
-            # spectrum = np.fft.rfft(mirrored.data)
-            # phase_angle = np.arctan(spectrum.imag, spectrum.real)
-            # initx = np.arange(phase_angle.shape[1])
-            # interpolate_phase_angle = interp1d(initx, phase_angle)
-            #
-            # zeroed = concatenate(zeros_like(new[:, zpd + 1:]), new)
-            # apodized = hamming(zeroed)  # mertz(new, zpd)
-            # zpd = len(apodized.x) // 2
-            # mirrored = concatenate(apodized[:, zpd:], apodized[:, 0:zpd])
-            #
-            # wavenumbers = np.fft.rfftfreq(mirrored.shape[1], 3.165090310992977e-05 * 2)
-            # spectrum = np.fft.rfft(mirrored.data)
-            #
-            # import matplotlib.pyplot as plt
-            # plt.plot(wavenumbers, spectrum[0])
-            # plt.show()
-            # newx = np.arange(spectrum.shape[1]) * max(initx) / max(np.arange(spectrum.shape[1]))
-            # phase_angle = interpolate_phase_angle(newx)
-            # spectrum = spectrum.real * np.cos(phase_angle) + spectrum.imag * np.sin(phase_angle)
-            #
-            # plt.plot(wavenumbers, spectrum[0])  # plt.show()
+        elif not iscomplex and inv:
+            raise NotImplementedError('Inverse FFT for real dimension')
 
         else:
-            raise NotImplementedError(encoding)
+            raise NotImplementedError(f'{encoding} not yet implemented. We recommend you to put an issue on '
+                                      f'Github, so we will not forget to work on this!.')
+
+        # TODO: revise this when SRS file will be provided (will not use plt here!  It should return data)
+        # TODO: this module should do only the fourier transform
+
+        # # subtract  DC
+        # new -= new.mean()
+        # # determine phase correction (Mertz)
+        # zpd = _get_zpd(new)
+        # if not np.all(zpd[0] == zpd):
+        #     raise ValueError("zpd should be at the same index")
+        # zpd = zpd[0]
+        # narrowed = hamming(new[:, 0: 2 * zpd])
+        # mirrored = concatenate(narrowed[:, zpd:], narrowed[:, :zpd])
+        # spectrum = np.fft.rfft(mirrored.data)
+        # phase_angle = np.arctan(spectrum.imag, spectrum.real)
+        # initx = np.arange(phase_angle.shape[1])
+        # interpolate_phase_angle = interp1d(initx, phase_angle)
+        #
+        # zeroed = concatenate(zeros_like(new[:, zpd + 1:]), new)
+        # apodized = hamming(zeroed)  # mertz(new, zpd)
+        # zpd = len(apodized.x) // 2
+        # mirrored = concatenate(apodized[:, zpd:], apodized[:, 0:zpd])
+        #
+        # wavenumbers = np.fft.rfftfreq(mirrored.shape[1], 3.165090310992977e-05 * 2)
+        # spectrum = np.fft.rfft(mirrored.data)
+        #
+        # import matplotlib.pyplot as plt
+        # plt.plot(wavenumbers, spectrum[0])
+        # plt.show()
+        # newx = np.arange(spectrum.shape[1]) * max(initx) / max(np.arange(spectrum.shape[1]))
+        # phase_angle = interpolate_phase_angle(newx)
+        # spectrum = spectrum.real * np.cos(phase_angle) + spectrum.imag * np.sin(phase_angle)
+        #
+        # plt.plot(wavenumbers, spectrum[0])  # plt.show()
+
 
         # We need here to create a new dataset with new shape and axis
         new._data = data
