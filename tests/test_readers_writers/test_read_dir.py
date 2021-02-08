@@ -14,7 +14,7 @@ def test_read_dir():
 
     C = scp.NDDataset.read_dir('matlabdata')
     assert isinstance(C, list)
-    assert len(C) == 6  # six matrices
+    assert len(C) == 7  # six matrices
     assert C[3].shape == (204, 96)
 
     A = scp.read_dir(directory='irdata/subdir')  # open a dialog to eventually select
