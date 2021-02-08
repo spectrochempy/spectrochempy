@@ -16,7 +16,22 @@ from traitlets import HasTraits, List, Dict, Type, Unicode
 
 from spectrochempy.utils import pathclean, check_filename_to_open
 from spectrochempy.utils.exceptions import DimensionsCompatibilityError, ProtocolError
+from spectrochempy.core import warning_
 
+FILETYPES = [('scp', 'SpectroChemPy files (*.scp)'),
+             ('omnic', 'Nicolet OMNIC files and series (*.spa *.spg *.srs)'),
+             ('labspec', 'LABSPEC exported files (*.txt)'),
+             ('opus', 'Bruker OPUS files (*.[0-9]*)'),
+             ('topspin', 'Bruker TOPSPIN fid or series or processed data files (fid ser 1[r|i] 2[r|i]* 3[r|i]*)'),
+             ('matlab', 'MATLAB files (*.mat)'),
+             ('dso', 'Data Set Object files (*.dso)'),
+             ('jcamp', 'JCAMP-DX files (*.jdx *.dx)'),
+             ('csv', 'CSV files (*.csv)'),
+             ('excel', 'Microsoft Excel files (*.xls)'), ('zip', 'Compressed folder of data files (*.zip)'),
+             #  ('all', 'All files (*.*)')
+]
+ALIAS = [('spg', 'omnic'), ('spa', 'omnic'), ('srs', 'omnic'), ('mat', 'matlab'), ('txt', 'labspec'), ('jdx', 'jcamp'),
+        ('dx', 'jcamp'), ('xls', 'excel'), ]
 
 # ----------------------------------------------------------------------------------------------------------------------
 class Importer(HasTraits):
@@ -33,36 +48,12 @@ class Importer(HasTraits):
 
     def __init__(self):
 
-        FILETYPES = [
-                ('scp', 'SpectroChemPy files (*.scp)'),
-                ('omnic', 'Nicolet OMNIC files and series (*.spa *.spg *.srs)'),
-                ('labspec', 'LABSPEC exported files (*.txt)'),
-                ('opus', 'Bruker OPUS files (*.[0-9]*)'),
-                ('topspin', 'Bruker TOPSPIN fid or series or processed data files (fid ser 1[r|i] 2[r|i]* 3[r|i]*)'),
-                ('matlab', 'MATLAB files (*.mat)'),
-                ('dso', 'Data Set Object files (*.dso)'),
-                ('jcamp', 'JCAMP-DX files (*.jdx *.dx)'),
-                ('csv', 'CSV files (*.csv)'),
-                ('excel', 'Microsoft Excel files (*.xls)'),
-                ('zip', 'Compressed folder of data files (*.zip)'),
-                #  ('all', 'All files (*.*)')
-                ]
-
         self.filetypes = dict(FILETYPES)
         temp = list(zip(*FILETYPES))
         temp.reverse()
         self.protocols = dict(zip(*temp))
         #  add alias
-        ALIAS = [
-                ('spg', 'omnic'),
-                ('spa', 'omnic'),
-                ('srs', 'omnic'),
-                ('mat', 'matlab'),
-                ('txt', 'labspec'),
-                ('jdx', 'jcamp'),
-                ('dx', 'jcamp'),
-                ('xls', 'excel'),
-                ]
+
         self.alias = dict(ALIAS)
 
     # ..................................................................................................................
@@ -96,6 +87,9 @@ class Importer(HasTraits):
                     self._switch_protocol(key_, files_, **kwargs)
                 if len(self.datasets) > 1:
                     self.datasets = self._do_merge(self.datasets, **kwargs)
+
+            elif key and key[1:] not in list(zip(*FILETYPES))[0]+list(zip(*ALIAS))[0]:
+                continue
 
             else:
                 # here files are read from the disk using filenames
@@ -147,7 +141,10 @@ class Importer(HasTraits):
                 return
         datasets = []
         for filename in files[key]:
-            read_ = getattr(self, f"_read_{key[1:]}")
+            try:
+                read_ = getattr(self, f"_read_{key[1:]}")
+            except AttributeError:
+                warning_(f'a file with extension {key} was found in this directory but will be ignored')
             try:
                 res = read_(self.objtype(), filename, **kwargs)
                 if not isinstance(res, list):
@@ -155,8 +152,8 @@ class Importer(HasTraits):
                 else:
                     datasets.extend(res)
 
-            except NotImplementedError as e:
-                raise e
+            except Exception:
+                warning_(f'file {filename} has a know extension but could not be read. It is ignored!')
 
             except IOError as e:
                 if 'is not an Absorbance spectrum' in str(e):
