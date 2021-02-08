@@ -25,3 +25,8 @@ def test_read_with_filename():
         info_('  ' + x.name + ': ' + str(x.shape))
     assert len(A) == 6
     assert A[3].shape == (204, 96)
+
+def test_read_DSO():
+    A = NDDataset.read_matlab(os.path.join('matlabdata', 'dso.mat'))
+    assert A.name == "Group sust_base line withoutEQU.SPG"
+    assert A.shape == (20,426)

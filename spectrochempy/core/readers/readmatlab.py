@@ -143,7 +143,7 @@ def _read_mat(*args, **kwargs):
             # for 3D or higher datasets ?
             datasets.append(dataset)
 
-        elif data.dtype == 'object':
+        elif all(name in data.dtype.names for name in ['moddate', 'axisscale', 'imageaxisscale']):
             # this is probably a DSO object
             dataset = _read_dso(dataset, name, data)
             datasets.append(dataset)
@@ -242,7 +242,7 @@ def _read_dso(dataset, name, data):
             coords.append(coord)
 
         dataset.data = dat
-        dataset.coordset = coords
+        dataset.set_coordset(*[coord for coord in coords])
         dataset.author = author
         dataset.name = name
         dataset.date = date
