@@ -9,7 +9,7 @@ import os
 
 from spectrochempy.core import info_
 from spectrochempy.core.dataset.nddataset import NDDataset
-
+import pytest
 
 # comment the next line to test it manually
 @pytest.mark.skip('interactive so cannot be used with full testing')
