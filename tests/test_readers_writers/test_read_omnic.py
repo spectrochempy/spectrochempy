@@ -115,7 +115,7 @@ def test_read_spa():
 
     lst = scp.read('irdata', merge=True, recursive=True)  # not selective on extension
     assert isinstance(lst, list)
-    assert len(lst) == 89
+    assert len(lst) == 88
 
 def test_read_srs():
     a = scp.read('irdata/omnic series/rapid_scan.srs')
