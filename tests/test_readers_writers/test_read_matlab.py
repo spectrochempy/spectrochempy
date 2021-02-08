@@ -12,7 +12,7 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 
 
 # comment the next line to test it manually
-# @pytest.mark.skip('interactive so cannot be used with full testing')
+@pytest.mark.skip('interactive so cannot be used with full testing')
 def test_read_without_filename():
     A = NDDataset.read_matlab()
     info_(A)
