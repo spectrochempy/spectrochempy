@@ -23,7 +23,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.9.0
+#     version: 3.9.1
 #   widgets:
 #     application/vnd.jupyter.widget-state+json:
 #       state: {}
@@ -161,8 +161,76 @@ _ = (spec / spec.max()).plot(clear=False, xlim=(10, -10),
                              c='r')  # Here we have normalized the spectra at their max value.
 
 # %% [markdown]
+# # Real Fourier transform
+
+# %% [markdown]
+# In some case, it might be interesting to perform real Fourier transform . For instance, as a demontration, we will independently transform real and imaginary part of the previous fid, and recombine them to obtain the same result as when performing complex Fourier transform on the complex dataset.
+
+# %%
+lim=(-20,20)
+_ = spec3.plot(xlim=lim)
+_ = spec3.imag.plot(xlim=lim)
+
+
+# %%
+R = fid3.real.astype('complex64')
+fR = R.fft()
+fR.plot(xlim=lim, show_complex=True)
+
+I = fid3.imag.astype('complex64')
+fI = I.fft()
+fI.plot(xlim=lim, show_complex=True)
+
+(fR - fI.imag).plot(xlim=lim)
+(fR.imag + fI).plot(xlim=lim)
+
+
+# %% [markdown]
 # ## FTIR
 
 # %%
 # ir = scp.read_srs("irdata/OMNIC/dd_19039_538.srs")
 # ir
+
+# %%
+fid3.real.plot()
+
+# %%
+import matplotlib.pyplot as plt
+import numpy as np
+
+# %%
+data = fid3.data
+R = data.real
+I = data.imag
+
+# %%
+plt.plot(R)
+
+# %%
+plt.plot(I)
+
+# %%
+Rs = R.astype("complex64")
+lim = (R.size/4-5000, R.size/4+5000)
+Rs[0] = Rs[-1] = Rs[0]/2
+fr = np.fft.fftshift(np.fft.fft(Rs))
+plt.plot(fr)
+plt.plot(fr.imag)
+plt.xlim(lim)
+
+# %%
+Is = np.append(I, I[..., ::-1])
+Is[0] = Is[-1] = Is
+fi = np.fft.fftshift(np.fft.fft(Is))
+plt.plot(fi)
+plt.plot(fi.imag)
+plt.xlim(lim)
+
+# %%
+plt.plot(fr+fi)
+plt.xlim(lim)
+
+# %%
+
+# %%
