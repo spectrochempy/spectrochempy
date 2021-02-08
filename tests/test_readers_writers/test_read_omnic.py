@@ -115,4 +115,17 @@ def test_read_spa():
 
     lst = scp.read('irdata', merge=True, recursive=True)  # not selective on extension
     assert isinstance(lst, list)
-    assert len(lst) == 5
+    assert len(lst) == 86
+
+def test_read_srs():
+    a = scp.read('irdata/omnic series/rapid_scan.srs')
+    assert str(a) == 'NDDataset: [float64] V (shape: (y:643, x:4160))'
+
+    b = scp.read('irdata/omnic series/rapid_scan_reprocessed.srs')
+    assert str(b) == 'NDDataset: [float64] a.u. (shape: (y:643, x:3734))'
+
+    c = scp.read('irdata/omnic series/GC Demo.srs')
+    assert c ==[]
+
+    d = scp.read('irdata/omnic series/TGA demo.srs')
+    assert d == []

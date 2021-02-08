@@ -434,9 +434,8 @@ def read_srs(*paths, **kwargs):
     Examples
     ---------
 
-    >>> scp.read_srs()
-
-    # TODO: gives an example - need a file in irdata
+    >>> scp.read_srs('irdata/omnic series/rapid_scan_reprocessed.srs')
+    NDDataset: [float64] a.u. (shape: (y:643, x:3734))
 
     See ``read_omnic`` for more examples of use
 
@@ -847,7 +846,8 @@ def _read_srs(*args, **kwargs):
                 names.append(_readbtext(fid, pos + 64))
                 pos += 148
 
-        elif np.all(line == [2, 0, 0, 0, 24, 0, 0, 0, 0, 0, 72, 67, 0, 80, 67, 71]):
+        elif np.all(line == [2, 0, 0, 0, 24, 0, 0, 0, 0, 0, 72, 67, 0, 80, 67, 71])\
+                or np.all(line == [30, 0, 0, 0, 2, 0, 0, 0, 24, 0, 0, 0, 0, 0, 72, 67]):
             # hex 02 00 00 00 18 00 00 00 00 00 48 43 00 50 43 47
             # this is likely header of data field of reprocessed series
             # the first one is skipped TODO: check the nature of these data
@@ -923,7 +923,7 @@ def _read_srs(*args, **kwargs):
 
     fid.close()
 
-    return dataset, background
+    return dataset
 
 
 # ......................................................................................................................
@@ -1070,7 +1070,7 @@ def _read_xheader(fid, pos):
     # Todo: merge with _readheader02
 
     fid.seek(pos)
-    key = _fromfile(fid, dtype='uint8', count=1)[0]
+    key = _fromfile(fid, dtype='uint8', count=1)
 
     if key not in (1, 3):
         raise ValueError("xheader key={} not recognized yet.".format(
@@ -1167,7 +1167,7 @@ def _read_xheader(fid, pos):
             out['firstx'], out['lastx'] = out['lastx'], out['firstx']
         out['mode'] = 'rapidscan'
     else:
-        out['mode'] = 'GC-IR of TGA-IR'
+        out['mode'] = 'GC-IR or TGA-IR'
 
     out['name'] = _readbtext(fid, pos + 938)
     fid.seek(pos + 1002)
