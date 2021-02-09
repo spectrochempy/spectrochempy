@@ -8,17 +8,17 @@ jobs:
   include:
     - stage: tests
       name: py3.6
-      if: type == pull_request OR branch != master
+      if: type == pull_request OR branch NOT IN (master)
       env:
       - TEST=true
       - CONDAPY=3.6
     - name: py3.7
-      if: type == pull_request OR branch != master
+      if: type == pull_request OR branch NOT IN (master)
       env:
       - TEST=true
       - CONDAPY=3.7
     - name: py3.9
-      if: type == pull_request OR branch != master
+      if: type == pull_request OR branch NOT IN (master)
       env:
       - TEST=true
       - CONDAPY=3.9
