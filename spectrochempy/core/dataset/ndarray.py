@@ -1877,8 +1877,12 @@ class NDArray(HasTraits):
     @offset.setter
     def offset(self, val):
         if isinstance(val, Quantity):
-            val.ito(self.units)
-            val = val.m
+            if self.has_units:
+                val.ito(self.units)
+                val = val.m
+            else:
+                self.units = val.units
+                val = val.m
         self._offset = val
 
     @property

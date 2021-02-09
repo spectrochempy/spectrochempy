@@ -482,7 +482,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
                 newcoord.title = f'${nucleus}$ frequency'
                 newcoord.ito("Hz")
             elif is_ir:
-                new.units = None
+                new._units = None
                 newcoord.title = 'wavenumbers'
                 newcoord.ito("cm^-1")
             else:

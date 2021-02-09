@@ -1,12 +1,12 @@
-##TITLE= Parameter file, TopSpin 4.1.0
+##TITLE= Parameter file, TopSpin 4.1.1
 ##JCAMPDX= 5.0
 ##DATATYPE= Parameter Values
-##NPOINTS= 5	$$ modification sequence number
+##NPOINTS= 6	$$ modification sequence number
 ##ORIGIN= Bruker BioSpin GmbH
 ##OWNER= Administrator
-$$ 2020-11-30 08:20:46.255 +0100  christian@MacCF.local
+$$ 2021-02-09 18:28:29.905 +0100  christian@MacCF.local
 $$ /Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/nmrdata/bruker/tests/nmr/exam2d_HC/3/pdata/1/proc
-$$ process /opt/topspin4.1.0/prog/mod/apkm
+$$ process /opt/topspin4.1.1/prog/mod/apkm
 ##$ABSF1= 1000
 ##$ABSF2= -1000
 ##$ABSG= 5
@@ -63,8 +63,8 @@ $$ process /opt/topspin4.1.0/prog/mod/apkm
 ##$NZP= 1
 ##$OFFSET= 4.703
 ##$PC= 1.4
-##$PHC0= 60.36187
-##$PHC1= 3.924505
+##$PHC0= 60.31384
+##$PHC1= 3.961514
 ##$PH_mod= 1
 ##$PKNL= yes
 ##$PPARMOD= 1

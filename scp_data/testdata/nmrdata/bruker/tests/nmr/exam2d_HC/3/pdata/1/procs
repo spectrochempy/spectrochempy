@@ -1,12 +1,12 @@
-##TITLE= Parameter file, TopSpin 4.1.0
+##TITLE= Parameter file, TopSpin 4.1.1
 ##JCAMPDX= 5.0
 ##DATATYPE= Parameter Values
-##NPOINTS= 9	$$ modification sequence number
+##NPOINTS= 14	$$ modification sequence number
 ##ORIGIN= Bruker BioSpin GmbH
 ##OWNER= Administrator
-$$ 2020-11-30 08:20:46.366 +0100  christian@MacCF.local
+$$ 2021-02-09 18:28:30.104 +0100  christian@MacCF.local
 $$ /Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/nmrdata/bruker/tests/nmr/exam2d_HC/3/pdata/1/procs
-$$ process /opt/topspin4.1.0/prog/mod/proc2d
+$$ process /opt/topspin4.1.1/prog/mod/proc2d
 ##$ABSF1= 10.71105
 ##$ABSF2= -1.305057
 ##$ABSG= 5
@@ -87,8 +87,8 @@ $$ process /opt/topspin4.1.0/prog/mod/proc2d
 ##$NZP= 0
 ##$OFFSET= 10.71105
 ##$PC= 1.4
-##$PHC0= 60.36187
-##$PHC1= 3.924505
+##$PHC0= 60.31384
+##$PHC1= 3.961514
 ##$PH_mod= 1
 ##$PKNL= yes
 ##$PPARMOD= 1
@@ -119,7 +119,7 @@ $$ process /opt/topspin4.1.0/prog/mod/proc2d
 ##$STSR= 0
 ##$SW_p= 6009.61538461539
 ##$SYMM= 0
-##$S_DEV= 341895
+##$S_DEV= 342244
 ##$TDeff= 1024
 ##$TDoff= 0
 ##$TI= <>
@@ -134,6 +134,6 @@ $$ process /opt/topspin4.1.0/prog/mod/proc2d
 ##$USERP5= <user>
 ##$WDW= 4
 ##$XDIM= 1024
-##$YMAX_p= 408462721
-##$YMIN_p= -133721206
+##$YMAX_p= 408339790
+##$YMIN_p= -133755441
 ##END=

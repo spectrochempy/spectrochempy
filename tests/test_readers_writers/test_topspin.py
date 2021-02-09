@@ -24,7 +24,6 @@ def test_read_topspin():
     assert A.name == 'topspin_2d expno:1 procno:1 (SER)'
 
     # A.plot()
-
     A = scp.read_topspin(nmrdir / 'exam2d_HC/3/pdata/1/2rr')
     A.plot_map()
 
