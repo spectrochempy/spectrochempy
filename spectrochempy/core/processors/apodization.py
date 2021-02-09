@@ -10,7 +10,6 @@ __all__ = ['em', 'gm', "sp", "sine", "sinm", "qsin", "general_hamming", "hamming
 __dataset_methods__ = __all__
 
 import functools
-
 import numpy as np
 from scipy.signal import windows
 
@@ -36,7 +35,7 @@ def _apodize_method(**units):
             # what to return
             retapod = kwargs.pop('retapod', False)
             dryrun = kwargs.pop('dryrun', False)
-            is_nmr = dataset.origin.lower() in ["topspin", ]
+            # is_nmr = dataset.origin.lower() in ["topspin", ]
             is_ir = dataset.origin.lower() in ["omnic", "opus"]
 
             # On which axis do we want to apodize? (get axis from arguments)
@@ -94,7 +93,7 @@ def _apodize_method(**units):
                     # we must apodize at the top of the interferogram.
                     zpd = int(np.argmax(new.data, -1))
                     dist2end = x.size - zpd
-                    apod_arr = method(np.empty(2*dist2end), **kwargs)
+                    apod_arr = method(np.empty(2 * dist2end), **kwargs)
                     apod_arr = apod_arr[-x.size:]
                 else:
                     apod_arr = method(x.data, **kwargs)
@@ -106,8 +105,8 @@ def _apodize_method(**units):
                     apod_arr = 1. / apod_arr  # invert apodization
 
                 if not dryrun:
-                    new.history = f'`{method.__name__}` apodization performed on dimension `{dim}` with parameters:' \
-                                  + str(apod)
+                    new.history = f'`{method.__name__}` apodization performed on dimension `{dim}` ' \
+                                  f'with parameters: {apod}'
 
                 # Apply?
                 if not dryrun:

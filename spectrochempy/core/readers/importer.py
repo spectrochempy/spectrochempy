@@ -12,7 +12,6 @@ __dataset_methods__ = __all__
 
 from warnings import warn
 from datetime import datetime, timezone
-
 from traitlets import HasTraits, List, Dict, Type, Unicode
 
 from spectrochempy.utils import pathclean, check_filename_to_open
@@ -151,13 +150,13 @@ class Importer(HasTraits):
                     datasets.extend(res)
 
             except FileNotFoundError:
-               warning_(f'No file with name `{filename}` could be found. Sorry! ')
+                warning_(f'No file with name `{filename}` could be found. Sorry! ')
 
             except IOError as e:
-               warning_(str(e))
+                warning_(str(e))
 
             except Exception:
-               warning_(f'The file `{filename}` has a known extension but it could not be read. It is ignored!')
+                warning_(f'The file `{filename}` has a known extension but it could not be read. It is ignored!')
 
         if len(datasets) > 1:
             datasets = self._do_merge(datasets, **kwargs)

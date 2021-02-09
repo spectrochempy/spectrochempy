@@ -10,7 +10,6 @@ __all__ = ["zf_auto", "zf_double", "zf_size", "zf"]
 __dataset_methods__ = __all__
 
 import functools
-
 import numpy as np
 
 from spectrochempy.utils import largest_power_of_2
@@ -41,8 +40,8 @@ def _zf_method(method):
             swaped = True
 
         # get the lastcoord
-        if new.coordset[dim].unitless or new.coordset[dim].dimensionless or new.coordset[\
-                dim].units.dimensionality == '[time]':
+        if new.coordset[dim].unitless or new.coordset[dim].dimensionless or \
+                new.coordset[dim].units.dimensionality == '[time]':
 
             if not new.coordset[dim].linear:
                 # This method apply only to linear coordinates.

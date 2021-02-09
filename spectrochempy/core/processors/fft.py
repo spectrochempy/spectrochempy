@@ -13,18 +13,13 @@ __all__ = ["fft", "ifft", "mc", "ps", "ht"]
 __dataset_methods__ = __all__
 
 import re
-
 import numpy as np
-from scipy.interpolate import interp1d
 from scipy.signal import hilbert
 from quaternion import as_float_array
 
 from spectrochempy.core import error_
 from spectrochempy.units import ur
 from spectrochempy.core.dataset.coord import LinearCoord
-from spectrochempy.core.dataset.ndmath import zeros_like
-from spectrochempy.core.processors.apodization import hamming
-from spectrochempy.core.processors.concatenate import concatenate
 from spectrochempy.utils import largest_power_of_2, get_component, typequaternion, as_quaternion
 from spectrochempy.core.processors.utils import _units_agnostic_method
 from spectrochempy.core.processors.zero_filling import zf_size
@@ -89,9 +84,9 @@ def _ifft_positive(data):
     if data.dtype == typequaternion:
 
         fr = get_component(data, 'R')
-        dr = np.fft.fft(np.fft.ifftshift(data, -1)) * data.shape[-1]
+        dr = np.fft.fft(np.fft.ifftshift(fr, -1)) * data.shape[-1]
         fi = get_component(data, 'I')
-        di = np.fft.fft(np.fft.ifftshift(data, -1)) * data.shape[-1]
+        di = np.fft.fft(np.fft.ifftshift(fi, -1)) * data.shape[-1]
 
         # rebuild the quaternion
         data = as_quaternion(dr, di)
@@ -134,9 +129,9 @@ def _echoanti_fft(data):
 
     c = (w + y) + 1j * (w - y)
     s = (x + z) - 1j * (x - z)
-    fc = np.fft.fftshift(np.fft.fft(c/2.), -1)
-    fs = np.fft.fftshift(np.fft.fft(s/2.), -1)
-    data = as_quaternion( fc, fs )
+    fc = np.fft.fftshift(np.fft.fft(c / 2.), -1)
+    fs = np.fft.fftshift(np.fft.fft(s / 2.), -1)
+    data = as_quaternion(fc, fs)
 
     return data
 
@@ -191,21 +186,22 @@ def _interferogram_fft(data):
     dma = np.zeros_like(data)
     dma[..., 0:2 * zpd] = data[..., 0:2 * zpd] * ma[0:2 * zpd]
     dma = np.roll(dma, -zpd)
-    dma[0] = dma[0]/2.
+    dma[0] = dma[0] / 2.
     dma[-1] = dma[-1] / 2.
-    dma = np.fft.rfft(dma)[..., 0:size//2]
-    phase =  np.arctan(dma.imag/dma.real)
+    dma = np.fft.rfft(dma)[..., 0:size // 2]
+    phase = np.arctan(dma.imag / dma.real)
 
     # Make final phase corrected spectrum
-    w = np.arange(0, 2*zpd) / (2*zpd)
+    w = np.arange(0, 2 * zpd) / (2 * zpd)
 
     mapod = np.ones_like(data)
     mapod[..., 0:2 * zpd] = w
-    data = np.roll(data * mapod, int(-zpd) )
-    data = np.fft.rfft(data)[..., 0:size//2] * np.exp(-1j*phase)
+    data = np.roll(data * mapod, int(-zpd))
+    data = np.fft.rfft(data)[..., 0:size // 2] * np.exp(-1j * phase)
 
     # The imaginary part can be now discarder
-    return data.real[..., ::-1]/2.
+    return data.real[..., ::-1] / 2.
+
 
 # ======================================================================================================================
 # Public methods
@@ -303,7 +299,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
     ifft : Inverse Fourier transform.
     """
     # datatype
-    is_nmr = dataset.origin.lower() in ["topspin",]
+    is_nmr = dataset.origin.lower() in ["topspin", ]
     is_ir = dataset.origin.lower() in ["omnic", "opus"]
 
     # On which axis do we want to apply transform (get axis from arguments)
@@ -398,7 +394,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         states = ('STATES' in encoding)
         echoanti = ('ECHO-ANTIECHO' in encoding)
         tppi = ('TPPI' in encoding)
-        qf = ('QF'in encoding)
+        qf = ('QF' in encoding)
 
         zf_size(new, size=size, inplace=True)
 
@@ -419,7 +415,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             data = _echoanti_fft(new.data)
 
         elif qf:
-                # we must perform a real fourier transform of a time domain dataset
+            # we must perform a real fourier transform of a time domain dataset
             data = _qf_fft(new.data)
 
         elif iscomplex and inv:
@@ -466,7 +462,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             dw = x.spacing
             sw = 1 / 4 / dw
             sf = -sw / 2
-            size = size//2
+            size = size // 2
 
         if not inv:
             # time to frequency

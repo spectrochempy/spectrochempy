@@ -12,12 +12,12 @@ __all__ = ['NDMath', ]
 __dataset_methods__ = []
 
 import copy as cpy
+
 import functools
 import inspect
 import sys
 import operator
 from warnings import catch_warnings
-
 import numpy as np
 from orderedset import OrderedSet
 from quaternion import as_float_array
@@ -406,8 +406,7 @@ class NDMath(object):
                       'signbit', 'sign']
     __quaternion_aware = ['add', 'iadd', 'sub', 'isub', 'mul', 'imul', 'div', 'idiv', 'log', 'exp', 'power', 'negative',
                           'conjugate', 'copysign', 'equal', 'not_equal', 'less', 'less_equal', 'isnan', 'isinf',
-                          'isfinite',
-                          'absolute', 'abs']
+                          'isfinite', 'absolute', 'abs']
 
     # the following methods are to give NDArray based class
     # a behavior similar to np.ndarray regarding the ufuncs
@@ -493,8 +492,8 @@ class NDMath(object):
 
         else:
             data = np.ma.sqrt(
-                dataset.real ** 2 + dataset.part('IR') ** 2 + dataset.part('RI') ** 2 + dataset.part('II') ** 2,
-                dtype=dtype)
+                    dataset.real ** 2 + dataset.part('IR') ** 2 + dataset.part('RI') ** 2 + dataset.part('II') ** 2,
+                    dtype=dtype)
             cls._is_quaternion = False
 
         cls._data = data.data
@@ -1033,7 +1032,7 @@ class NDMath(object):
             _dim = dims[-(i + 1)]
             coord[_dim] = coordset[_dim][item].values
 
-        if cls._squeeze_ndim==1:
+        if cls._squeeze_ndim == 1:
             dim = dims[-1]
 
         if dim is not None:
@@ -1063,7 +1062,7 @@ class NDMath(object):
             _dim = dims[-(i + 1)]
             coord[_dim] = coordset[_dim][item].values
 
-        if cls._squeeze_ndim==1:
+        if cls._squeeze_ndim == 1:
             dim = dims[-1]
 
         if dim is not None:

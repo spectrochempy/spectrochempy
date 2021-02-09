@@ -790,7 +790,6 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     cm = nd2.coordmax(dim='x')
     assert cm.size == 1
 
-
     # ABS
     # ----
     nd2a = scp.abs(nd2)

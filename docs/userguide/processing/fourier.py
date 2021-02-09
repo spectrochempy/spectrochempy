@@ -164,22 +164,22 @@ _ = (spec / spec.max()).plot(clear=False, xlim=(10, -10),
 # # Real Fourier transform
 
 # %% [markdown]
-# In some case, it might be interesting to perform real Fourier transform . For instance, as a demontration, we will independently transform real and imaginary part of the previous fid, and recombine them to obtain the same result as when performing complex Fourier transform on the complex dataset.
+# In some case, it might be interesting to perform real Fourier transform . For instance, as a demontration,
+# we will independently transform real and imaginary part of the previous fid, and recombine them to obtain the same
+# result as when performing complex Fourier transform on the complex dataset.
 
 # %%
-lim=(-20,20)
+lim = (-20, 20)
 _ = spec3.plot(xlim=lim)
 _ = spec3.imag.plot(xlim=lim)
 
-
 # %%
-R = fid3.real.astype('complex64')
-fR = R.fft()
+Re = fid3.real.astype('complex64')
+fR = Re.fft()
 _ = fR.plot(xlim=lim, show_complex=True)
-I = fid3.imag.astype('complex64')
-fI = I.fft()
+Im = fid3.imag.astype('complex64')
+fI = Im.fft()
 _ = fI.plot(xlim=lim, show_complex=True)
-
 
 # %% [markdown]
 # Recombinaison:
@@ -187,4 +187,3 @@ _ = fI.plot(xlim=lim, show_complex=True)
 # %%
 _ = (fR - fI.imag).plot(xlim=lim)
 _ = (fR.imag + fI).plot(xlim=lim)
-
