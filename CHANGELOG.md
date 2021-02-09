@@ -1,5 +1,15 @@
 # What\'s new
 
+## Version 0.2.8
+
+**NEW FEATURES**
+
+* Test for trapz(), simps()
+
+**BUGS FIXED**
+
+* Problem with trapz(), simps()
+
 ## Version 0.2.7
 
 **NEW FEATURES**
