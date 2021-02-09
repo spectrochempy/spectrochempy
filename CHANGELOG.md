@@ -1,10 +1,20 @@
 # What\'s new
 
+## Version 0.2.8
+
+**NEW FEATURES**
+
+* Test for trapz(), simps()
+
+**BUGS FIXED**
+
+* Problem with trapz(), simps()
+
 ## Version 0.2.7
 
 **NEW FEATURES**
 
-* Test and/or data for read_carroucell(), read_srs(), read_dso(), trapz(), simps()
+* Test and data for read_carroucell(), read_srs(), read_dso()
 
 * Added NMR processing of 2D spectra.
 
@@ -12,7 +22,7 @@
 
 **BUGS FIXED**
 
-* Problem with read_carroucell(), read_srs(), read_dso(), trapz(), simps()
+* Problem with read_carroucell(), read_srs(), read_dso()
 
 * Colaboratory compatibility
 
