@@ -4,7 +4,7 @@
 
 **NEW FEATURES**
 
-* Test and data for read_carroucell(), read_srs(), read_dso()
+* Test and/or data for read_carroucell(), read_srs(), read_dso(), trapz(), simps()
 
 * Added NMR processing of 2D spectra.
 
@@ -12,7 +12,7 @@
 
 **BUGS FIXED**
 
-* Problem with read_carroucell(), read_srs(), read_dso()
+* Problem with read_carroucell(), read_srs(), read_dso(), trapz(), simps()
 
 * Colaboratory compatibility
 
