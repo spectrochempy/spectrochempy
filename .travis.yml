@@ -28,7 +28,7 @@ jobs:
       - DEPLOY=true
       - CONDAPY=3.8
     - stage: build-docs
-      if: branch IN (master) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/)
+      if: type != pull_request AND (branch == master OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/)
       env:
       - BUILDOCS=true
       - CONDAPY=3.8
