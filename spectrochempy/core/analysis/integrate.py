@@ -32,7 +32,14 @@ def trapz(dataset, *args, **kwargs):
     -------
     trapz : |NDDataset|
         Definite integral as approximated by trapezoidal rule.
-    """
+
+    Example
+    --------
+    >>> dataset = NDDataset.read('irdata/nh4y-activation.spg')
+    >>> dataset[:,1250.:1800.].trapz()
+    [float64] a.u..cm^-1 (size: 55)
+        """
+
 
     # handle the various syntax to pass the axis
     if args:
@@ -95,6 +102,12 @@ def simps(dataset, *args, **kwargs):
     -------
     simps : |NDDataset|
         Definite integral as approximated using the composite Simpson's rule.
+
+        Example
+    --------
+    >>> dataset = NDDataset.read('irdata/nh4y-activation.spg')
+    >>> dataset[:,1250.:1800.].simps()
+    [float64] a.u..cm^-1 (size: 55)
     """
 
     # handle the various syntax to pass the axis
