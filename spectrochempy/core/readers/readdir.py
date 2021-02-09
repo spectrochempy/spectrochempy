@@ -52,7 +52,8 @@ def read_dir(directory=None, **kwargs):
     read_dir
         |NDDataset| or list of |NDDataset|.
 
-    See Also
+    Depending on the python version, the order of the datasets in the list may change.
+    
     ------
     read_topspin : Read TopSpin Bruker NMR spectra.
     read_omnic : Read Omnic spectra.
