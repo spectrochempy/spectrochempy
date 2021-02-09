@@ -1,0 +1,268 @@
+# 1 "C:/Bruker/ts21b10/exp/stan/nmr/lists/pp/cosygpqf"
+;cosygpqf
+;avance-version (07/04/05)
+;2D homonuclear shift correlation
+;using gradient pulses for selection
+;
+;$CLASS=HighRes
+;$DIM=2D
+;$TYPE=
+;$SUBTYPE=
+;$COMMENT=
+
+
+# 1 "C:/Bruker/ts21b10/exp/stan/nmr/lists/pp/Avance.incl" 1
+;Avance2.incl
+;   for 1
+;
+;avance-version (07/01/22)
+;
+;$CLASS=HighRes Incl
+;$COMMENT=
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;$Id: Avance2.incl,v 1.17 2007/01/22 13:31:46 ber Exp $
+# 13 "C:/Bruker/ts21b10/exp/stan/nmr/lists/pp/cosygpqf" 2
+
+# 1 "C:/Bruker/ts21b10/exp/stan/nmr/lists/pp/Grad.incl" 1
+;Grad2.incl  -  include file for Gradient Spectroscopy
+;   for 1
+;
+;avance-version (07/01/17)
+;
+;$CLASS=HighRes Incl
+;$COMMENT=
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+define list<gradient> EA=<EA>
+
+
+
+;$Id: Grad2.incl,v 1.12 2007/01/22 14:22:35 ber Exp $
+# 14 "C:/Bruker/ts21b10/exp/stan/nmr/lists/pp/cosygpqf" 2
+
+
+
+"d13=4u"
+
+
+"in0=inf1"
+
+"d0=3u"
+
+
+# 1 "mc_line 25 file C:/Bruker/ts21b10/exp/stan/nmr/lists/pp/cosygpqf expanding definition part of mc command before ze"
+define delay MCWRK
+define delay MCREST
+"MCWRK = 0.500000*d1"
+"MCREST = d1 - d1"
+    dccorr
+# 25 "C:/Bruker/ts21b10/exp/stan/nmr/lists/pp/cosygpqf"
+1 ze
+# 1 "mc_line 25 file C:/Bruker/ts21b10/exp/stan/nmr/lists/pp/cosygpqf expanding definition of mc command after ze"
+# 26 "C:/Bruker/ts21b10/exp/stan/nmr/lists/pp/cosygpqf"
+# 1 "mc_line 26 file C:/Bruker/ts21b10/exp/stan/nmr/lists/pp/cosygpqf expanding start label for mc command"
+2 MCWRK 
+LBLF1, MCWRK
+  MCREST
+# 27 "C:/Bruker/ts21b10/exp/stan/nmr/lists/pp/cosygpqf"
+3 p1 ph1
+  d0
+  50u setnmr3|0 setnmr0|34|32|33 ctrlgrad 0
+  p16:gp1
+  d16
+  p0 ph2
+  d13
+  p16:gp1
+  d16
+  4u setnmr3^0 setnmr0^34^32^33 ctrlgrad 7
+  go=2 ph31
+# 1 "mc_line 38 file C:/Bruker/ts21b10/exp/stan/nmr/lists/pp/cosygpqf expanding mc command in line"
+  MCWRK  wr #0 if #0 zd id0 
+  lo to LBLF1 times td1
+  MCWRK
+# 39 "C:/Bruker/ts21b10/exp/stan/nmr/lists/pp/cosygpqf"
+exit
+
+
+ph1=0 2
+ph2=0 0 2 2
+ph31=0 2
+
+
+;pl1 : f1 channel - power level for pulse (default)
+;p0 : f1 channel -  20 to 90 degree high power pulse
+;p1 : f1 channel -  90 degree high power pulse
+;p16: homospoil/gradient pulse
+;d0 : incremented delay (2D)                         [3 usec]
+;d1 : relaxation delay; 1-5 * T1
+;d13: short delay                                    [4 usec]
+;d16: delay for homospoil/gradient recovery
+;inf1: 1/SW = 2 * DW
+;in0: 1/(1 * SW) = 2 * DW
+;nd0: 1
+;NS: 1 * n
+;DS: 16
+;td1: number of experiments
+;FnMODE: QF
+
+;use gradient ratio:	gp 1
+;			  10
+
+;for z-only gradients:
+;gpz1: 10%
+
+;use gradient files:   
+;gpnam1: SINE.100
+
+
+
+;$Id: cosygpqf,v 1.5 2007/04/11 13:34:29 ber Exp $

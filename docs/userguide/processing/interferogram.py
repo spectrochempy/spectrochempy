@@ -41,7 +41,7 @@ from spectrochempy.units import ur
 # A situation where we need transform of real data is the case of FTIR interferograms.
 
 # %%
-ir = scp.read_spa("irdata/interferogram/interfero.spa")
+ir = scp.read_spa("irdata/interferogram/interfero.SPA")
 ir.dc(inplace=True)
 _ = ir.plot()
 
