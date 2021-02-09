@@ -14,6 +14,7 @@ Processing
    apodization
    td_baseline
    fourier
+   fourier2D
    baseline
    interactive_baseline
    alignment

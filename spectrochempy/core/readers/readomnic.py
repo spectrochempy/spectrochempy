@@ -17,7 +17,7 @@ import struct
 
 import numpy as np
 
-from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.importer import importermethod, Importer
 
@@ -743,7 +743,8 @@ def _read_spa(*args, **kwargs):
     dataset.filename = str(filename)
 
     # now add coordinates
-    _x = Coord(np.around(np.linspace(firstx, lastx, nx), 3), title=xtitle, units=xunit)
+    spacing = (lastx-firstx)/(nx-1)
+    _x = LinearCoord(offset = firstx, increment=spacing, size=nx, title=xtitle, units=xunit)
     _y = Coord([timestamp], title='Acquisition timestamp (GMT)', units='s', labels=([acquisitiondate], [filename]))
     dataset.set_coordset(y=_y, x=_x)
 
@@ -753,6 +754,10 @@ def _read_spa(*args, **kwargs):
     dataset.history = str(datetime.now(timezone.utc)) + ':imported from spa files'
     dataset.history = history
     dataset._date = datetime.now(timezone.utc)
+
+    if dataset.x.units is None and dataset.x.title == 'Data points':
+        dataset.meta.td = list(dataset.shape)
+        dataset.x.set_laser_frequency(frequency=15798.26)
 
     return dataset
 
@@ -1039,7 +1044,7 @@ def _readheader02(fid, pos):
         out['title'] = 'Kubelka-Munk'
     elif key == 22:
         out['units'] = 'V'
-        out['title'] = 'Volts'
+        out['title'] = 'Detector signal'
     elif key == 26:
         out['units'] = None
         out['title'] = 'Photoacoustic'
@@ -1101,7 +1106,7 @@ def _read_xheader(fid, pos):
         out['xunits'] = 'cm ^ -1'
         out['xtitle'] = 'Wavenumbers'
     elif key == 2:
-        out['xunits'] = 'dimensionless'
+        out['xunits'] = None
         out['xtitle'] = 'Data points'
     elif key == 3:
         out['xunits'] = 'nm'
@@ -1135,7 +1140,7 @@ def _read_xheader(fid, pos):
         out['title'] = 'Kubelka-Munk'
     elif key == 22:
         out['units'] = 'V'
-        out['title'] = 'Volts'
+        out['title'] = 'Detector signal'
     elif key == 26:
         out['units'] = None
         out['title'] = 'Photoacoustic'

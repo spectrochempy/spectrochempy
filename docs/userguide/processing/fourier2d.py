@@ -32,7 +32,7 @@
 # ---
 
 # %% [markdown]
-# # 2D Fourier transformation (NMR)
+# # Two-dimensional (2D) Fourier transformation
 
 # %%
 import spectrochempy as scp
@@ -218,5 +218,3 @@ prefs.contour_start = 0.005
 prefs.show_projections = True
 prefs.figure.figsize = (7,7)
 _ = sa.plot_map()
-
-# %%

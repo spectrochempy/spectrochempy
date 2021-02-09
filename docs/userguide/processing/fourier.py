@@ -32,17 +32,17 @@
 # ---
 
 # %% [markdown]
-# # Fourier transformation (NMR)
+# # One-dimensional (1D) Fourier transformation
 
 # %% [markdown]
-# In this notebook, we are going to transform time-domain NMR data into 1D or 2D spectra using SpectroChemPy
+# In this notebook, we are going to transform time-domain data into 1D or 2D spectra using SpectroChemPy
 # processing tools
 
 # %%
 import spectrochempy as scp
 
 # %% [markdown]
-# ## FFT of 1D spectra
+# ## FFT of 1D NMR spectra
 
 # %% [markdown]
 # First we open read some time domain data. Here is a NMD free induction decay (FID):
@@ -175,62 +175,35 @@ _ = spec3.imag.plot(xlim=lim)
 # %%
 R = fid3.real.astype('complex64')
 fR = R.fft()
-fR.plot(xlim=lim, show_complex=True)
-
+_ = fR.plot(xlim=lim, show_complex=True)
 I = fid3.imag.astype('complex64')
 fI = I.fft()
-fI.plot(xlim=lim, show_complex=True)
-
-(fR - fI.imag).plot(xlim=lim)
-(fR.imag + fI).plot(xlim=lim)
+_ = fI.plot(xlim=lim, show_complex=True)
 
 
 # %% [markdown]
-# ## FTIR
+# Recombinaison:
 
 # %%
-# ir = scp.read_srs("irdata/OMNIC/dd_19039_538.srs")
-# ir
+_ = (fR - fI.imag).plot(xlim=lim)
+_ = (fR.imag + fI).plot(xlim=lim)
+
+
+# %% [markdown]
+# ## FTIR interferogram processing
+#
+# A situation where we need transform of real data is the case of FTIR interferograms.
 
 # %%
-fid3.real.plot()
+ir = scp.read_spa("irdata/interferogram/interfero.spa")
+_ = ir.plot(xlim=(0,250))
+ir
 
 # %%
-import matplotlib.pyplot as plt
-import numpy as np
+irt = ir.fft()
+irt.plot()
 
 # %%
-data = fid3.data
-R = data.real
-I = data.imag
-
-# %%
-plt.plot(R)
-
-# %%
-plt.plot(I)
-
-# %%
-Rs = R.astype("complex64")
-lim = (R.size/4-5000, R.size/4+5000)
-Rs[0] = Rs[-1] = Rs[0]/2
-fr = np.fft.fftshift(np.fft.fft(Rs))
-plt.plot(fr)
-plt.plot(fr.imag)
-plt.xlim(lim)
-
-# %%
-Is = np.append(I, I[..., ::-1])
-Is[0] = Is[-1] = Is
-fi = np.fft.fftshift(np.fft.fft(Is))
-plt.plot(fi)
-plt.plot(fi.imag)
-plt.xlim(lim)
-
-# %%
-plt.plot(fr+fi)
-plt.xlim(lim)
-
-# %%
-
-# %%
+irs = scp.read_spa("irdata/interferogram/spectre.spa")
+_ = irs.plot()
+irs

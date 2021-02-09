@@ -103,18 +103,16 @@ def _ifft_positive(data):
 
 
 # ......................................................................................................................
-def _get_zpd(dataset, dim='x', mode='max'):
+def _get_zpd(data, mode='max'):
     """
     Find the zero path difference (zpd) positions.
 
-    For multidimensional NDDataset the search is by default performed along the last dimension.
+    For multidimensional data the search is by default performed along the last dimension.
 
     Parameters
     ----------
-    dataset : |NDDataset|
-        The dataset on which to search for zpd
-    dim: int or str, optional
-        Dimension along which to make the search. Default='x'.
+    data : ndarray
+        The array on which to search for zpd
     mode : enum('max','abs'), optional
         Mode of selection. Default = 'max'.
 
@@ -123,13 +121,11 @@ def _get_zpd(dataset, dim='x', mode='max'):
     index
         zero path difference index
     """
-    # On which axis do we want to work (get axis from arguments)
-    axis, dim = dataset.get_axis(dim, negative_axis=True)
 
     if mode == 'max':
-        return np.argmax(dataset.data, axis=axis)
+        return np.argmax(data, -1)
     elif mode == 'abs':
-        return np.argmax(np.abs(dataset.data), axis=axis)
+        return np.argmax(np.abs(data), -1)
 
 
 def _states_fft(data, tppi=False):
@@ -238,17 +234,38 @@ def _qf_fft(data):
     Parameters
     ----------
     data : ndarray
-        Data to process
+        Data to process.
 
     Returns
     -------
     transformed
-        Data transformed according to QF encoding
+        Data transformed according to QF encoding.
     """
 
     data = np.fft.fftshift(np.fft.fft(np.conjugate(data)), -1)
 
     return data
+
+
+def _interferogram_fft(data):
+    """
+    FFT transform for rapid-scan interferograms.
+
+    Parameters
+    ----------
+    data : ndarray
+        Data to process.
+
+    Returns
+    -------
+    transformed
+        Data transformed according to QF encoding.
+    """
+    zpd = _get_zpd(data, mode='abs')
+    data = np.roll(data, int(-zpd))
+    size = data.shape[-1]
+    data = np.fft.fft(data)/4
+    return data[..., size//2:]
 
 # ======================================================================================================================
 # Public methods
@@ -346,8 +363,8 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
     ifft : Inverse Fourier transform.
     """
     # datatype
-    is_nmr = dataset.origin.lower() in ["topspin", ]
-    # is_ir = dataset.origin.lower() in ["omnic", "opus"]
+    is_nmr = dataset.origin.lower() in ["topspin",]
+    is_ir = dataset.origin.lower() in ["omnic", "opus"]
 
     # On which axis do we want to apply transform (get axis from arguments)
     dim = kwargs.pop('dim', kwargs.pop('axis', -1))
@@ -372,12 +389,12 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
 
     # Performs some dimentionality checking
     error = False
-    if not inv and not x.dimensionless and x.units.dimensionality != '[time]':
+    if not inv and not x.unitless and not x.dimensionless and x.units.dimensionality != '[time]':
         error_('fft apply only to dimensions with [time] dimensionality or dimensionless coords\n'
                'fft processing was thus cancelled')
         error = True
 
-    elif inv and x.units.dimensionality != '1/[time]' and not x.dimensionless:
+    elif inv and not x.unitless and x.units.dimensionality != '1/[time]' and not x.dimensionless:
         error_('ifft apply only to dimensions with [frequency] dimensionality or with ppm units '
                'or dimensionless coords.\n ifft processing was thus cancelled')
         error = True
@@ -408,7 +425,8 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             size = kwargs.get('si', x.size)
 
         # we default to the closest power of two larger of the data size
-        size = largest_power_of_2(size)
+        if is_nmr:
+            size = largest_power_of_2(size)
 
         # do we have an effective td to apply
         tdeff = sizeff
@@ -431,23 +449,25 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
 
         # If we are in NMR we have an additional complication due to the mode
         # of acquisition (sequential mode when ['QSEQ','TPPI','STATES-TPPI'])
-        encoding = None
+        encoding = 'undefined'
         if not inv and 'encoding' in new.meta:
             encoding = new.meta.encoding[-1]
 
-            qsim = (encoding in ['QSIM', 'DQD'])
-            qseq = ('QSEQ' in encoding)
-            states = ('STATES' in encoding)
-            echoanti = ('ECHO-ANTIECHO' in encoding)
-            tppi = ('TPPI' in encoding)
-            qf = ('QF'in encoding)
+        qsim = (encoding in ['QSIM', 'DQD'])
+        qseq = ('QSEQ' in encoding)
+        states = ('STATES' in encoding)
+        echoanti = ('ECHO-ANTIECHO' in encoding)
+        tppi = ('TPPI' in encoding)
+        qf = ('QF'in encoding)
 
-        # Zero_filling
         zf_size(new, size=size, inplace=True)
 
         # Perform the fft
         if qsim:  # F2 fourier transform
             data = _fft(new.data)
+
+        elif qseq:
+            raise NotImplementedError('QSEQ not yet implemented')
 
         elif states:
             data = _states_fft(new.data, tppi)
@@ -468,6 +488,10 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
 
         elif not iscomplex and inv:
             raise NotImplementedError('Inverse FFT for real dimension')
+
+        elif not iscomplex and not inv and is_ir:
+            # transform interferogram
+            data = _interferogram_fft(new.data)
 
         else:
             raise NotImplementedError(f'{encoding} not yet implemented. We recommend you to put an issue on '
@@ -532,11 +556,12 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             else:
                 nucleus = ""
         else:
-            sfo1 = 1.0 * ur.Hz
+            sfo1 = 0 * ur.Hz
             bf1 = sfo1
-            sf = 0 * ur.Hz
             dw = x.spacing
-            sw = 1. / dw
+            sw = 1 / 4 / dw
+            sf = -sw / 2
+            size = size//2
 
         if not inv:
             # time to frequency
@@ -547,9 +572,16 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             # newcoord = type(x)(np.arange(size) * deltaf + first)
             newcoord = LinearCoord.arange(size) * deltaf + first
             newcoord.name = x.name
-            newcoord.title = f'${nucleus}$ frequency'
-            newcoord.ito("Hz")
-
+            new.title = 'intensity'
+            if is_nmr:
+                newcoord.title = f'${nucleus}$ frequency'
+                newcoord.ito("Hz")
+            elif is_ir:
+                newcoord.title = 'wavenumbers'
+                newcoord.ito("cm^-1")
+            else:
+                newcoord.title = 'frequency'
+                newcoord.ito("Hz")
         else:
             # frequency or ppm to time
             sw = abs(x.data[-1] - x.data[0])
@@ -576,6 +608,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         new.history = f'{s} applied on dimension {dim}'
 
         # PHASE ?
+        iscomplex = (new.is_complex or new.is_quaternion)
         if iscomplex and not inv:
             # phase frequency domain
 
@@ -584,6 +617,18 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
 
             if not new.meta.phased:
                 new.meta.phased = [False] * new.ndim
+
+            if not new.meta.phc0:
+                new.meta.phc0 = [0] * new.ndim
+
+            if not new.meta.phc1:
+                new.meta.phc1 = [0] * new.ndim
+
+            if not new.meta.exptc:
+                new.meta.exptc = [0] * new.ndim
+
+            if not new.meta.pivot:
+                new.meta.pivot = [0] * new.ndim
 
             # applied the stored phases
             new.pk(inplace=True)
