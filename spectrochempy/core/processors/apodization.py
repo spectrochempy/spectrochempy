@@ -36,6 +36,8 @@ def _apodize_method(**units):
             # what to return
             retapod = kwargs.pop('retapod', False)
             dryrun = kwargs.pop('dryrun', False)
+            is_nmr = dataset.origin.lower() in ["topspin", ]
+            is_ir = dataset.origin.lower() in ["omnic", "opus"]
 
             # On which axis do we want to apodize? (get axis from arguments)
             axis, dim = dataset.get_axis(**kwargs, negative_axis=True)
@@ -88,7 +90,14 @@ def _apodize_method(**units):
                 # ----------------------------
 
                 # now call the method with unitless parameters
-                apod_arr = method(x.data, **kwargs)
+                if is_ir:
+                    # we must apodize at the top of the interferogram.
+                    zpd = int(np.argmax(new.data, -1))
+                    dist2end = x.size - zpd
+                    apod_arr = method(np.empty(2*dist2end), **kwargs)
+                    apod_arr = apod_arr[-x.size:]
+                else:
+                    apod_arr = method(x.data, **kwargs)
 
                 if kwargs.pop('rev', False):
                     apod_arr = apod_arr[::-1]  # reverse apodization

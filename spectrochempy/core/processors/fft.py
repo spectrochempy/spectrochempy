@@ -437,38 +437,6 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             raise NotImplementedError(f'{encoding} not yet implemented. We recommend you to put an issue on '
                                       f'Github, so we will not forget to work on this!.')
 
-        # # subtract  DC
-        # new -= new.mean()
-        # # determine phase correction (Mertz)
-        # zpd = _get_zpd(new)
-        # if not np.all(zpd[0] == zpd):
-        #     raise ValueError("zpd should be at the same index")
-        # zpd = zpd[0]
-        # narrowed = hamming(new[:, 0: 2 * zpd])
-        # mirrored = concatenate(narrowed[:, zpd:], narrowed[:, :zpd])
-        # spectrum = np.fft.rfft(mirrored.data)
-        # phase_angle = np.arctan(spectrum.imag, spectrum.real)
-        # initx = np.arange(phase_angle.shape[1])
-        # interpolate_phase_angle = interp1d(initx, phase_angle)
-        #
-        # zeroed = concatenate(zeros_like(new[:, zpd + 1:]), new)
-        # apodized = hamming(zeroed)  # mertz(new, zpd)
-        # zpd = len(apodized.x) // 2
-        # mirrored = concatenate(apodized[:, zpd:], apodized[:, 0:zpd])
-        #
-        # wavenumbers = np.fft.rfftfreq(mirrored.shape[1], 3.165090310992977e-05 * 2)
-        # spectrum = np.fft.rfft(mirrored.data)
-        #
-        # import matplotlib.pyplot as plt
-        # plt.plot(wavenumbers, spectrum[0])
-        # plt.show()
-        # newx = np.arange(spectrum.shape[1]) * max(initx) / max(np.arange(spectrum.shape[1]))
-        # phase_angle = interpolate_phase_angle(newx)
-        # spectrum = spectrum.real * np.cos(phase_angle) + spectrum.imag * np.sin(phase_angle)
-        #
-        # plt.plot(wavenumbers, spectrum[0])  # plt.show()
-
-
         # We need here to create a new dataset with new shape and axis
         new._data = data
         new.mask = False
@@ -514,11 +482,13 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
                 newcoord.title = f'${nucleus}$ frequency'
                 newcoord.ito("Hz")
             elif is_ir:
+                new.units = None
                 newcoord.title = 'wavenumbers'
                 newcoord.ito("cm^-1")
             else:
                 newcoord.title = 'frequency'
                 newcoord.ito("Hz")
+
         else:
             # frequency or ppm to time
             sw = abs(x.data[-1] - x.data[0])
