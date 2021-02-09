@@ -67,8 +67,6 @@ def read_matlab(*paths, **kwargs):
         Default value is False. If True, and several filenames have been provided as arguments,
         then a single dataset with merged (stacked along the first
         dimension) is returned (default=False)
-    sortbydate : bool, optional
-        Sort multiple spectra by acquisition date (default=True)
     description: str, optional
         A Custom description.
     content : bytes object, optional
@@ -82,6 +80,13 @@ def read_matlab(*paths, **kwargs):
     recursive : bool, optional
         Read also in subfolders. (default=False)
 
+    Examples
+    ---------
+
+    >>> scp.read_matlab('matlabdata/dso.mat')
+    NDDataset: [float64] unitless (shape: (y:20, x:426))
+
+    See ``read_omnic`` for more examples of use
     See Also
     --------
     read : Read generic files.
@@ -143,7 +148,7 @@ def _read_mat(*args, **kwargs):
             # for 3D or higher datasets ?
             datasets.append(dataset)
 
-        elif data.dtype == 'object':
+        elif all(name in data.dtype.names for name in ['moddate', 'axisscale', 'imageaxisscale']):
             # this is probably a DSO object
             dataset = _read_dso(dataset, name, data)
             datasets.append(dataset)
@@ -242,7 +247,7 @@ def _read_dso(dataset, name, data):
             coords.append(coord)
 
         dataset.data = dat
-        dataset.coordset = coords
+        dataset.set_coordset(*[coord for coord in coords])
         dataset.author = author
         dataset.name = name
         dataset.date = date

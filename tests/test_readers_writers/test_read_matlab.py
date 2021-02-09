@@ -9,10 +9,10 @@ import os
 
 from spectrochempy.core import info_
 from spectrochempy.core.dataset.nddataset import NDDataset
-
+import pytest
 
 # comment the next line to test it manually
-# @pytest.mark.skip('interactive so cannot be used with full testing')
+@pytest.mark.skip('interactive so cannot be used with full testing')
 def test_read_without_filename():
     A = NDDataset.read_matlab()
     info_(A)
@@ -25,3 +25,8 @@ def test_read_with_filename():
         info_('  ' + x.name + ': ' + str(x.shape))
     assert len(A) == 6
     assert A[3].shape == (204, 96)
+
+def test_read_DSO():
+    A = NDDataset.read_matlab(os.path.join('matlabdata', 'dso.mat'))
+    assert A.name == "Group sust_base line withoutEQU.SPG"
+    assert A.shape == (20,426)

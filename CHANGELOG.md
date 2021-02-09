@@ -4,12 +4,12 @@
 
 **NEW FEATURES**
 
-* Test and data for read_carroucell()
+* Test and data for read_carroucell(), read_srs(), read_dso()
 
 
 **BUGS FIXED**
 
-* Fix a small problem with read_carroucell()
+* Fix a small problem with read_carroucell(), read_srs(), read_dso()
 
 ## Version 0.2.6
 
