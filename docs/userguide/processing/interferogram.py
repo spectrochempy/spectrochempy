@@ -81,7 +81,7 @@ _ = irth.plot(xlim=(3999, 400))
 # are very close
 
 # %%
-irs = scp.read_spa("irdata/interferogram/spectre.spa")
+irs = scp.read_spa("irdata/interferogram/spectre.SPA")
 _ = irs.plot(label='omnic')
 _ = (irt - .2).plot(c='red', clear=False, xlim=(3999, 400), label='no hamming')
 ax = (irth - .4).plot(c='green', clear=False, xlim=(3999, 400), label='hamming')
