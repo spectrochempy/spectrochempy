@@ -5,18 +5,12 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-""" Tests for the SVD class
+""" Tests integration
 
 """
-from numpy.testing import assert_allclose
 
-from spectrochempy.core.analysis.svd import SVD
-from spectrochempy.utils import MASKED
 from spectrochempy.core import info_
 
-
-# test svd
-# -----------
 
 def test_integrate(IR_dataset_2D):
 
