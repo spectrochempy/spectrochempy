@@ -15,7 +15,7 @@ import scipy.integrate
 def trapz(dataset, *args, **kwargs):
     """
 
-    Wrapper of scpy.integrate.simps() : Integrate along the given dimension using the composite trapezoidal rule.
+    Wrapper of scpy.integrate.trapz() : Integrate along the given dimension using the composite trapezoidal rule.
 
     Integrate NDDataset along given dimension.
 
@@ -40,10 +40,10 @@ def trapz(dataset, *args, **kwargs):
         args = []
 
     dim = dataset._get_dims_from_args(*args, **kwargs)
+    if dim is None:
+        dim=-1
     axis = dataset._get_dims_index(dim)
     axis = axis[0] if axis and not dataset.is_1d else None
-    kwargs['axis'] = axis
-    kwargs.pop('dim', None)
 
     data = scipy.integrate.trapz(dataset.data, x=dataset.coord(dim).data, axis=axis)
     if dataset.coord(dim).reversed:
@@ -59,7 +59,7 @@ def trapz(dataset, *args, **kwargs):
 
     new.title = 'Area'
     new._units = dataset.units * dataset.coord(dim).units
-    new._history = ['Dataset resulting from application of `simps` method']
+    new._history = ['Dataset resulting from application of `trapz` method']
 
     return new
 
@@ -81,7 +81,7 @@ def simps(dataset, *args, **kwargs):
         Dimension along which to integrate. Default is the dimension corresponding to the last axis, generally 'x'.
     axis : int, optional
         When dim is not used, this is the axis along which to integrate. Default is the last axis.
-    even : str {'avg', 'first', 'last'}, optional
+    even : str {'avg', 'first', 'last'}, optional. Default is 'avg'.
         'avg' : Average two results: 1) use the first N-2 intervals with
                   a trapezoidal rule on the last interval and 2) use the last
                   N-2 intervals with a trapezoidal rule on the first interval.
@@ -89,6 +89,7 @@ def simps(dataset, *args, **kwargs):
                 a trapezoidal rule on the last interval.
         'last' : Use Simpson's rule for the last N-2 intervals with a
                trapezoidal rule on the first interval.
+
 
     Returns
     -------
@@ -102,10 +103,11 @@ def simps(dataset, *args, **kwargs):
         args = []
 
     dim = dataset._get_dims_from_args(*args, **kwargs)
+    if dim is None:
+        dim=-1
     axis = dataset._get_dims_index(dim)
     axis = axis[0] if axis and not dataset.is_1d else None
-    kwargs['axis'] = axis
-    kwargs.pop('dim', None)
+
 
     data = scipy.integrate.simps(dataset.data, x=dataset.coord(dim).data, axis=axis, even=kwargs.get('even', 'avg'))
     if dataset.coord(dim).reversed:
