@@ -12,16 +12,9 @@ __all__ = ['SVD']
 
 __dataset_methods__ = []
 
-# ----------------------------------------------------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------------------------------------------------
-
 from traitlets import HasTraits, Instance
 import numpy as np
 
-# ----------------------------------------------------------------------------------------------------------------------
-# local imports
-# ----------------------------------------------------------------------------------------------------------------------
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndarray import MASKED

@@ -5,12 +5,11 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
 # ======================================================================================================================
 
-__all__ = ["zf_auto", "zf_double", "zf_size"]
+__all__ = ["zf_auto", "zf_double", "zf_size", "zf"]
 
 __dataset_methods__ = __all__
 
 import functools
-
 import numpy as np
 
 from spectrochempy.utils import largest_power_of_2
@@ -41,24 +40,25 @@ def _zf_method(method):
             swaped = True
 
         # get the lastcoord
-        if new.coordset[-1].dimensionless or new.coordset[-1].units.dimensionality == '[time]':
+        if new.coordset[dim].unitless or new.coordset[dim].dimensionless or \
+                new.coordset[dim].units.dimensionality == '[time]':
 
-            if not new.coordset[-1].linear:
+            if not new.coordset[dim].linear:
                 # This method apply only to linear coordinates.
                 # we try to linearize it
-                new.coordset[-1] = LinearCoord(new.coordset[-1])
+                new.coordset[dim] = LinearCoord(new.coordset[dim])
 
-            if not new.coordset[-1].linear:
+            if not new.coordset[dim].linear:
                 raise TypeError('Coordinate x is not linearisable')
 
             data = method(new.data, **kwargs)
             new._data = data
 
             # we needs to increase the x coordinates array
-            new.coordset[-1]._size = new._data.shape[-1]
+            new.coordset[dim]._size = new._data.shape[-1]
 
             # update with the new td
-            new.meta.td[-1] = new.coordset[-1].size
+            new.meta.td[-1] = new.coordset[dim].size
             new.history = f'`{method.__name__}` shift performed on dimension `{dim}` with parameters: {kwargs}'
 
         else:
@@ -108,6 +108,10 @@ def _zf_pad(data, pad=0, mid=False, **kwargs):
     else:
         return np.concatenate((data, z), axis=-1)
 
+
+# ======================================================================================================================
+# Public methods
+# ======================================================================================================================
 
 @_zf_method
 def zf_double(dataset, n, mid=False, **kwargs):
@@ -175,3 +179,6 @@ def zf_auto(dataset, mid=False):
 
     """
     return zf_size(dataset, size=largest_power_of_2(dataset.shape[-1]), mid=mid)
+
+
+zf = zf_size

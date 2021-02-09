@@ -12,23 +12,14 @@ __all__ = ['PCA']
 
 __dataset_methods__ = []
 
-# ----------------------------------------------------------------------------------------------------------------------
-# standard imports
-# ----------------------------------------------------------------------------------------------------------------------
 import warnings
 
-# ----------------------------------------------------------------------------------------------------------------------
-# third-party imports
-# ----------------------------------------------------------------------------------------------------------------------
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 from scipy.special import gammaln
 from traitlets import HasTraits, Instance
 
-# ----------------------------------------------------------------------------------------------------------------------
-# localimports
-# ----------------------------------------------------------------------------------------------------------------------
 from spectrochempy.core.analysis.svd import SVD
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset

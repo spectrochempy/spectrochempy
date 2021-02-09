@@ -63,7 +63,7 @@ def test_ndcomplex_init_quaternion_witharray():
     d1 = d0.swapdims(1, 0)
     assert d1.shape == (2, 3)
     assert_array_equal(d1.real.data, [[0, 8, 16], [4, 12, 20]])
-    assert d1[0, 0].values == quaternion(0, 3, 2, 1)
+    assert d1[0, 0].values == quaternion(0, 2, 1, 3)
     info_('\n', d1)
 
 
@@ -128,7 +128,7 @@ def test_ndcomplex_init_complex_with_mask():
     assert d3.dtype == np.complex128
     assert d3.has_complex_dims
     assert d3.mask.shape[-1] == d3.shape[-1]
-    d3RR = d3.part('RR')
+    d3RR = d3.component('RR')
     assert not d3RR.has_complex_dims
     assert d3RR._data.shape == (2, 2)
     assert d3RR._mask.shape == (2, 2)
@@ -238,10 +238,10 @@ def test_ndcomplex_len_and_sizes_cplx(ndarraycplx):
     assert ndc.ndim == 2
 
 
-def test_ndcomplex_slicing_byindex_cplx(ndarraycplx):
-    ndc = ndarraycplx.copy()
-    ndc1 = ndc[1, 1]
-    assert_equal(ndc1.values, ndc.RR[1, 1].values + ndc.RI[1, 1].values * 1.j)
+# def test_ndcomplex_slicing_byindex_cplx(ndarraycplx):
+#     ndc = ndarraycplx.copy()
+#     ndc1 = ndc[1, 1]
+#     assert_equal(ndc1.values, ndc.RR[1, 1].values + ndc.RI[1, 1].values * 1.j)
 
 
 def test_ndcomplex_slicing_byindex_quaternion(ndarrayquaternion):
@@ -304,9 +304,10 @@ def test_ndcomplex_swapdims_quaternion():
     assert d4.has_complex_dims
     assert d4.is_quaternion
 
-    wt, xt, yt, zt = as_float_array(d4.data).T
-    assert_array_equal(xt, z.T)
-    assert_array_equal(zt, x.T)
+    wt, yt, xt, zt = as_float_array(d4.data).T
+    assert_array_equal(xt, x.T)
+    assert_array_equal(yt, y.T)
+    assert_array_equal(zt, z.T)
     assert_array_equal(wt, w.T)
 
     info_(d3)
@@ -342,22 +343,23 @@ def test_ndcomplex_squeeze(ndarrayunit):
     assert d1.shape == (8,)
     assert d1 is not d
 
-    d = nd[..., 0].real
-    assert np.all(d == nd[..., 0].RR)
-    assert d.shape == (10, 1)
-    d1 = d.squeeze("x")
-    assert d1.shape == (10,)
-    assert d1 is not d
-
-    # inplace
-    d = nd[..., 0:1]
-    assert d.shape == (10, 1)
-    d1 = d.squeeze(dims=1, inplace=True)
-    assert d1.shape == (10,)
-    assert d1 is d
-
-    d = nd[0:1]
-    assert d.shape == (1, 8)
-    d1 = d.squeeze(dims=0, inplace=True)
-    assert d1.shape == (8,)
-    assert d1 is d
+    # TODO: test a revoir
+    # d = nd[..., 0].real
+    # assert np.all(d == nd[..., 0].RR)
+    # assert d.shape == (10, 1)
+    # d1 = d.squeeze("x")
+    # assert d1.shape == (10,)
+    # assert d1 is not d
+    #
+    # # inplace
+    # d = nd[..., 0:1]
+    # assert d.shape == (10, 1)
+    # d1 = d.squeeze(dims=1, inplace=True)
+    # assert d1.shape == (10,)
+    # assert d1 is d
+    #
+    # d = nd[0:1]
+    # assert d.shape == (1, 8)
+    # d1 = d.squeeze(dims=0, inplace=True)
+    # assert d1.shape == (8,)
+    # assert d1 is d

@@ -57,7 +57,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     _copy = Bool(False)
     _labels_allowed = Bool(False)  # no labels for NDDataset
 
-    # dataset can be members of a project or panels.
+    # dataset can be members of a project.
     # we use the abstract class to avoid circular imports.
     _parent = Instance(AbstractProject, allow_none=True)
 
@@ -423,7 +423,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
                     raise TypeError('Coordinates must be an instance or a subclass of Coord class or NDArray, or of '
                                     f' CoordSet class, but an instance of {type(coord)} has been passed')
 
-            # This error is not one in previson of NDPanel (more coordinates than dims is possible
             # if self.dims and coord.name not in self.dims:
             #    raise AttributeError(f'The name of a coordinate must have name among the current dims: {self.dims}'
             #                         f' but the name is `{coord.name}`')
@@ -461,7 +460,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     # ..................................................................................................................
     def add_coordset(self, *coords, dims=None, **kwargs):
         """
-        Add one or a set of coordinates from a dataset or panel.
+        Add one or a set of coordinates from a dataset.
 
         Parameters
         ----------
@@ -932,24 +931,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         new = self[index]
         return new
 
-    # # ................................................................................................................
-    # def to_panel(self, **kwargs):
-    #     """
-    #     Transform the current |NDDataset| to a new |NDPanel| object
-    #
-    #     Parameters
-    #     ----------
-    #     **kwargs : additional keyword arguments
-    #
-    #     Returns
-    #     -------
-    #     object : A |NDPanel| object
-    #
-    #     """
-    #     import spectrochempy as scp
-    #
-    #     return scp.NDPanel(self, **kwargs)
-
     def to_array(self):
         """
         Return a numpy masked array (i.e., other NDDataset attributes are lost.
@@ -1183,7 +1164,7 @@ api_funcs = ['sort',
              'set_complex',
              'set_quaternion',
              'set_hypercomplex',
-             'part',
+             'component',
              'to',
              'to_base_units',
              'to_reduced_units',

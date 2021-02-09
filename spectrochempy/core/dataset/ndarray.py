@@ -10,10 +10,6 @@ This module implements the base |NDArray| class.
 
 __all__ = ['NDArray']
 
-# ======================================================================================================================
-# standard imports
-# ======================================================================================================================
-
 import copy as cpy
 from datetime import datetime, timezone
 import warnings
@@ -33,13 +29,6 @@ from spectrochempy.core import info_, error_, print_
 from spectrochempy.utils import (TYPE_INTEGER, TYPE_FLOAT, Meta, MaskedConstant, MASKED, NOMASK, INPLACE, is_sequence,
                                  is_number, numpyprintoptions, spacing, insert_masked_print, SpectroChemPyWarning,
                                  make_new_object, convert_to_html, get_user_and_node)
-
-# ======================================================================================================================
-# Third party imports
-# ======================================================================================================================
-# ======================================================================================================================
-# local imports
-# ======================================================================================================================
 
 # ======================================================================================================================
 # constants
@@ -365,9 +354,9 @@ class NDArray(HasTraits):
                 new._data = np.asarray(udata)
             else:
                 if self.increment > 0:
-                    self.offset = udata.min()
+                    new._offset = udata.min()
                 else:
-                    self.offset = udata.max()
+                    new._offset = udata.max()
                 new._size = udata.size
 
         if self.is_labeled:
@@ -379,7 +368,7 @@ class NDArray(HasTraits):
                    f"Check the indexes and make sure to use floats for location slicing")
             new = None
 
-        elif (self._data is not None) and hasattr(udata, 'mask'):
+        elif (self.data is not None) and hasattr(udata, 'mask'):
             new._mask = udata.mask
         else:
             new._mask = NOMASK
@@ -441,11 +430,17 @@ class NDArray(HasTraits):
             if not np.any(self._mask):
                 self._mask = np.zeros(self._data.shape).astype(np.bool_)
             self._mask[keys] = value
+            return
 
         elif isinstance(value, Quantity):
             # first convert value to the current units
             value.ito(self.units)
-            self._data[keys] = np.array(value.magnitude, subok=True, copy=self._copy)
+            # self._data[keys] = np.array(value.magnitude, subok=True, copy=self._copy)
+            value = np.array(value.magnitude, subok=True, copy=self._copy)
+
+        if self._data.dtype == np.dtype(np.quaternion) and np.isscalar(value):
+            # sometimes do not work directly : here is a work around
+            self._data[keys] = np.full_like(self._data[keys], value).astype(np.dtype(np.quaternion))
         else:
             self._data[keys] = value
 
@@ -1472,6 +1467,13 @@ class NDArray(HasTraits):
 
     @increment.setter
     def increment(self, val):
+        if isinstance(val, Quantity):
+            if self.has_units:
+                val.ito(self.units)
+                val = val.m
+            else:
+                self.units = val.units
+                val = val.m
         self._increment = val
 
     @property
@@ -1874,6 +1876,13 @@ class NDArray(HasTraits):
 
     @offset.setter
     def offset(self, val):
+        if isinstance(val, Quantity):
+            if self.has_units:
+                val.ito(self.units)
+                val = val.m
+            else:
+                self.units = val.units
+                val = val.m
         self._offset = val
 
     @property

@@ -10,10 +10,6 @@ Package defining the *core* methods of the |scpy| API.
 Most the API methods such as plotting, processing, analysis, etc...
 """
 
-# ----------------------------------------------------------------------------------------------------------------------
-# standard imports
-# ----------------------------------------------------------------------------------------------------------------------
-
 # warnings.simplefilter('ignore', (DeprecationWarning,
 #                                 FutureWarning, UserWarning))
 

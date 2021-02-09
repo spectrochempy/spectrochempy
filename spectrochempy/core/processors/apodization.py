@@ -6,11 +6,10 @@
 # ======================================================================================================================
 
 __all__ = ['em', 'gm', "sp", "sine", "sinm", "qsin", "general_hamming", "hamming", "hann", "triang", "bartlett",
-           "blackmanharris", "mertz"]
+           "blackmanharris"]
 __dataset_methods__ = __all__
 
 import functools
-
 import numpy as np
 from scipy.signal import windows
 
@@ -36,6 +35,8 @@ def _apodize_method(**units):
             # what to return
             retapod = kwargs.pop('retapod', False)
             dryrun = kwargs.pop('dryrun', False)
+            # is_nmr = dataset.origin.lower() in ["topspin", ]
+            is_ir = dataset.origin.lower() in ["omnic", "opus"]
 
             # On which axis do we want to apodize? (get axis from arguments)
             axis, dim = dataset.get_axis(**kwargs, negative_axis=True)
@@ -88,7 +89,14 @@ def _apodize_method(**units):
                 # ----------------------------
 
                 # now call the method with unitless parameters
-                apod_arr = method(x.data, **kwargs)
+                if is_ir:
+                    # we must apodize at the top of the interferogram.
+                    zpd = int(np.argmax(new.data, -1))
+                    dist2end = x.size - zpd
+                    apod_arr = method(np.empty(2 * dist2end), **kwargs)
+                    apod_arr = apod_arr[-x.size:]
+                else:
+                    apod_arr = method(x.data, **kwargs)
 
                 if kwargs.pop('rev', False):
                     apod_arr = apod_arr[::-1]  # reverse apodization
@@ -97,8 +105,8 @@ def _apodize_method(**units):
                     apod_arr = 1. / apod_arr  # invert apodization
 
                 if not dryrun:
-                    new.history = f'`{method.__name__}` apodization performed on dimension `{dim}` with parameters:' \
-                                  + str(apod)
+                    new.history = f'`{method.__name__}` apodization performed on dimension `{dim}` ' \
+                                  f'with parameters: {apod}'
 
                 # Apply?
                 if not dryrun:
@@ -481,7 +489,7 @@ def hamming(dataset, **kwargs):
     Functional form of apodization window :
 
     .. math::
-       w(n) = \alpha - \left(1 - \alpha\right) \cos\left(\frac{2\pi{n}}{M-1}\right) qquad 0 \leq n \leq M-1
+        w(n) = \alpha - (1 - \alpha)\cos(\frac{2\pi n}{M-1})\qquad 0\leq n\leq M-1
 
     where M is the number of point of the input dataset and :math:`\alpha` = 0.54.
 
@@ -534,7 +542,7 @@ def hann(dataset, **kwargs):
     Functional form of apodization window :
 
     .. math::
-       w(n) = \alpha - \left(1 - \alpha\right) \cos\left(\frac{2\pi{n}}{M-1}\right)\qquad 0 \leq n \leq M-1
+       w(n) = \alpha - (1 - \alpha) \cos(\frac{2\pi{n}}{M-1}) \qquad 0 \leq n \leq M-1
 
     where M is the number of point of the input dataset and :math:`\alpha` = 0.5
 
@@ -634,7 +642,7 @@ def bartlett(dataset, **kwargs):
     The Bartlett window is defined as
 
     .. math::
-       w(n) = \frac{2}{M-1} \left(\frac{M-1}{2} - \left|n - \frac{M-1}{2}\right|\right)
+       w(n) = \frac{2}{M-1} (\frac{M-1}{2} - |n - \frac{M-1}{2}|)
 
     where M is the number of point of the input dataset.
 
@@ -717,51 +725,3 @@ def blackmanharris(dataset, **kwargs):
     x = dataset
 
     return x * windows.blackmanharris(len(x), sym=True)
-
-
-@_apodize_method(zpd=None)
-def mertz(dataset, zpd, **kwargs):
-    r"""
-    Calculate asymetric Mertz apodization
-
-    For multidimensional NDDataset,
-    the apodization is by default performed on the last dimension.
-
-    The data in the last dimension MUST be time-domain or dimensionless,
-    otherwise an error is raised.
-
-
-    Parameters
-    ----------
-    dataset : dataset.
-        Input dataset.
-    zpd :
-
-    Returns
-    -------
-    apodized
-        Dataset.
-    apod_arr
-        The apodization array only if 'retapod' is True.
-
-    Other Parameters
-    ----------------
-    dim : str or int, keyword parameter, optional, default='x'.
-        Specify on which dimension to apply the apodization method. If `dim` is specified as an integer it is equivalent
-        to the usual `axis` numpy parameter.
-    inv : bool, keyword parameter, optional, default=False.
-        True for inverse apodization.
-    rev : bool, keyword parameter, optional, default=False.
-        True to reverse the apodization before applying it to the data.
-    inplace : bool, keyword parameter, optional, default=False.
-        True if we make the transform inplace.  If False, the function return a new dataset
-    retapod : bool, keyword parameter, optional, default=False
-        True to return the apodization array along with the apodized object
-    """
-
-    x = dataset
-
-    w1 = np.arange(1, 2 * zpd + 1) / (2 * zpd)
-    w2 = np.arange(1, len(x) - 2 * zpd + 1)[::-1] / (len(x) - 2 * zpd)
-    w = np.concatenate((w1, w2))
-    return w

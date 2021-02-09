@@ -12,19 +12,19 @@ __all__ = ['NDMath', ]
 __dataset_methods__ = []
 
 import copy as cpy
+
 import functools
 import inspect
 import sys
 import operator
 from warnings import catch_warnings
-
 import numpy as np
 from orderedset import OrderedSet
 from quaternion import as_float_array
 
 from spectrochempy.units.units import ur, Quantity, DimensionalityError
 from spectrochempy.core.dataset.ndarray import NDArray
-from spectrochempy.utils import NOMASK, TYPE_COMPLEX
+from spectrochempy.utils import NOMASK, TYPE_COMPLEX, quat_as_complex_array, as_quaternion
 from spectrochempy.core import warning_, error_
 from spectrochempy.utils.testing import assert_dataset_equal
 from spectrochempy.utils.exceptions import CoordinateMismatchError
@@ -191,7 +191,7 @@ def _get_name(x):
 
 DIMENSIONLESS = ur('dimensionless').units
 UNITLESS = None
-TYPEPRIORITY = {'Coord': 2, 'NDDataset': 3, 'NDPanel': 4}
+TYPEPRIORITY = {'Coord': 2, 'NDDataset': 3}
 
 unary_str = """
 
@@ -207,7 +207,7 @@ trunc(x [, out, where, casting, order, …])    Return the truncated value of th
 around(x [, decimals, out])                Evenly round to the given number of decimals.
 round_(x [, decimals, out])                Round an array to the given number of decimals.
 rint(x [, out, where, casting, order, …])  Round elements of the array to the nearest integer.
-fix(x[, out])                              Round to nearest integer towards zero (Do not work on NDPanel)
+fix(x[, out])                              Round to nearest integer towards zero
 
 exp(x [, out, where, casting, order, …])     Calculate the exponential of all elements in the input array.
 exp2(x [, out, where, casting, order, …])    Calculate 2**p for all p in the input array.
@@ -404,6 +404,9 @@ class NDMath(object):
                       'logaddexp2']
     __remove_units = ['logical_not', 'isfinite', 'isinf', 'isnan', 'isnat', 'isneginf', 'isposinf', 'iscomplex',
                       'signbit', 'sign']
+    __quaternion_aware = ['add', 'iadd', 'sub', 'isub', 'mul', 'imul', 'div', 'idiv', 'log', 'exp', 'power', 'negative',
+                          'conjugate', 'copysign', 'equal', 'not_equal', 'less', 'less_equal', 'isnan', 'isinf',
+                          'isfinite', 'absolute', 'abs']
 
     # the following methods are to give NDArray based class
     # a behavior similar to np.ndarray regarding the ufuncs
@@ -437,43 +440,22 @@ class NDMath(object):
         # set history string
         history = f'Ufunc {fname} applied.'
 
-        inputtype = type(inputs[0]).__name__
+        if fname in ['sign', 'logical_not', 'isnan', 'isfinite', 'isinf', 'signbit']:
+            return (getattr(np, fname))(inputs[0].masked_data)
 
-        if inputtype == 'NDPanel':
+        # case of a dataset
+        data, units, mask, returntype = self._op(ufunc, inputs, isufunc=True)
+        new = self._op_result(data, units, mask, history, returntype)
 
-            # Some ufunc can not be applied to panels
-            if fname in ['sign', 'logical_not', 'isnan', 'isfinite', 'isinf', 'signbit']:
-                raise NotImplementedError(f'`{fname}` ufunc is not implemented for NDPanel objects.')
-
-            # if we have a NDPanel, process the ufuncs on all datasets
-            datasets = self._op(ufunc, inputs, isufunc=True)
-
-            # recreate a panel object
-            obj = type(inputs[0])
-            panel = obj(*datasets, merge=True, align=None)
-            panel.history = history
-
-            # return it
-            return panel
-
-        else:
-            # Some ufunc can not be applied to panels
-            if fname in ['sign', 'logical_not', 'isnan', 'isfinite', 'isinf', 'signbit']:
-                return (getattr(np, fname))(inputs[0].masked_data)
-
-            # case of a dataset
-            data, units, mask, returntype = self._op(ufunc, inputs, isufunc=True)
-            new = self._op_result(data, units, mask, history, returntype)
-
-            # make a new title depending on the operation
-            if fname in self.__remove_title:
-                new.title = f"<{fname}>"
-            elif fname not in self.__keep_title and isinstance(new, NDArray):
-                if hasattr(new, 'title') and new.title is not None:
-                    new.title = f"{fname}({new.title})"
-                else:
-                    new.title = f"{fname}(data)"
-            return new
+        # make a new title depending on the operation
+        if fname in self.__remove_title:
+            new.title = f"<{fname}>"
+        elif fname not in self.__keep_title and isinstance(new, NDArray):
+            if hasattr(new, 'title') and new.title is not None:
+                new.title = f"{fname}({new.title})"
+            else:
+                new.title = f"{fname}(data)"
+        return new
 
     # ------------------------------------------------------------------------------------------------------------------
     # public methods
@@ -510,8 +492,8 @@ class NDMath(object):
 
         else:
             data = np.ma.sqrt(
-                dataset.real ** 2 + dataset.part('IR') ** 2 + dataset.part('RI') ** 2 + dataset.part('II') ** 2,
-                dtype=dtype)
+                    dataset.real ** 2 + dataset.part('IR') ** 2 + dataset.part('RI') ** 2 + dataset.part('II') ** 2,
+                    dtype=dtype)
             cls._is_quaternion = False
 
         cls._data = data.data
@@ -1031,70 +1013,62 @@ class NDMath(object):
     # ..................................................................................................................
     @_reduce_method
     @_from_numpy_method
-    def coordmax(cls, dataset, dim=-1):
+    def coordmax(cls, dataset, dim=None):
         """Coordinates of maximum of data along axis"""
 
         if not cls.implements('NDDataset') or cls.coordset is None:
-            raise Exception('Method ``oordmin` apply only on NDDataset and if it has defined coordinates')
+            raise Exception('Method `coordmax` apply only on NDDataset and if it has defined coordinates')
 
         axis, dim = cls.get_axis(dim, allows_none=True)
-        idx = np.ma.argmax(dataset, axis, fill_value=-1e30)
+
+        idx = np.ma.argmax(dataset, fill_value=-1e30)
+        cmax = list(np.unravel_index(idx, dataset.shape))
+
         dims = cls.dims
-        coordset = cls.coordset
-        if axis is None:
-            c = np.unravel_index(idx, cls.shape)
-            coord = {}
-            for i, item in enumerate(c[::-1]):
-                dim = dims[-(i + 1)]
-                icoord = coordset.names.index(dim)
-                coord[dim] = coordset.coords[icoord][item].values
-            return coord
-        else:
-            icoord = coordset.names.index(dim)
-            coord = coordset.coords[icoord][idx]
-            data = coord.data
-            units = coord.units
-            mask = np.all(dataset.mask, axis)
-            title = coord.title
-            del coordset.coords[icoord]
-            dims.remove(dim)
-            new = type(cls)(data, units=units, dims=dims, coordset=coordset, mask=mask,
-                            title=f'{title} at maximum along {dim}')
-            return new
+        coordset = cls.coordset.copy()
+
+        coord = {}
+        for i, item in enumerate(cmax[::-1]):
+            _dim = dims[-(i + 1)]
+            coord[_dim] = coordset[_dim][item].values
+
+        if cls._squeeze_ndim == 1:
+            dim = dims[-1]
+
+        if dim is not None:
+            return coord[dim]
+
+        return coord
 
     # ..................................................................................................................
     @_reduce_method
     @_from_numpy_method
     def coordmin(cls, dataset, dim=None):
-        """Coordinates of minimum of data along axis"""
+        """Coordinates of mainimum of data along axis"""
 
         if not cls.implements('NDDataset') or cls.coordset is None:
-            raise Exception('Method ``oordmin` apply only on NDDataset and if it has defined coordinates')
+            raise Exception('Method `coordmin` apply only on NDDataset and if it has defined coordinates')
 
         axis, dim = cls.get_axis(dim, allows_none=True)
-        idx = np.ma.argmin(dataset, axis, fill_value=1e30)
+
+        idx = np.ma.argmin(dataset, fill_value=-1e30)
+        cmax = list(np.unravel_index(idx, cls.shape))
+
         dims = cls.dims
         coordset = cls.coordset
-        if axis is None:
-            c = np.unravel_index(idx, cls.shape)
-            coord = {}
-            for i, item in enumerate(c[::-1]):
-                dim = dims[-(i + 1)]
-                icoord = coordset.names.index(dim)
-                coord[dim] = coordset.coords[icoord][item].values
-            return coord
-        else:
-            icoord = coordset.names.index(dim)
-            coord = coordset.coords[icoord][idx]
-            data = coord.data
-            units = coord.units
-            mask = np.all(dataset.mask, axis)
-            title = coord.title
-            del coordset.coords[icoord]
-            dims.remove(dim)
-            new = type(cls)(data, units=units, dims=dims, coordset=coordset, mask=mask,
-                            title=f'{title} at minimum along {dim}')
-            return new
+
+        coord = {}
+        for i, item in enumerate(cmax[::-1]):
+            _dim = dims[-(i + 1)]
+            coord[_dim] = coordset[_dim][item].values
+
+        if cls._squeeze_ndim == 1:
+            dim = dims[-1]
+
+        if dim is not None:
+            return coord[dim]
+
+        return coord
 
     # ..................................................................................................................
     @_from_numpy_method
@@ -2599,8 +2573,6 @@ class NDMath(object):
         # By default the type of the result is set regarding the first obj in inputs
         # (except for some ufuncs that can return numpy arrays or masked numpy arrays
         # but sometimes we have something such as 2 * nd where nd is a NDDataset: In this case we expect a dataset.
-        # Actually, the if there is at least a NDPanel in the calculation, we expect a NDPanel as a results,
-        # if there is a NDDataset, but no NDPanel, then it should be a NDDataset and so on with Coords.
 
         # For binary function, we also determine if the function needs object with compatible units.
         # If the object are not compatible then we raise an error
@@ -2611,46 +2583,43 @@ class NDMath(object):
         objtypes = []
         objunits = OrderedSet()
         returntype = None
-        # isquaternion = False     (  # TODO: not yet used)
+        isquaternion = False
         ismasked = False
         compatible_units = (fname in self.__compatible_units)
         remove_units = (fname in self.__remove_units)
+        quaternion_aware = (fname in self.__quaternion_aware)
 
         for i, obj in enumerate(inputs):
             # type
             objtype = type(obj).__name__
             objtypes.append(objtype)
             # units
-            if objtype != 'NDPanel' and hasattr(obj, 'units'):
+            if hasattr(obj, 'units'):
                 objunits.add(ur.get_dimensionality(obj.units))
                 if len(objunits) > 1 and compatible_units:
                     objunits = list(objunits)
                     raise DimensionalityError(*objunits[::-1],
                                               extra_msg=f", Units must be compatible for the `{fname}` operator")
             # returntype
-            if objtype == 'NDPanel':
-                returntype = 'NDPanel'
-            elif objtype == 'NDDataset' and returntype != 'NDPanel':
+            if objtype == 'NDDataset':
                 returntype = 'NDDataset'
-            elif objtype == 'Coord' and returntype not in ['NDPanel', 'NDDataset']:
+            elif objtype == 'Coord' and returntype != 'NDDataset':
                 returntype = 'Coord'
-            elif objtype == 'LinearCoord' and returntype not in ['NDPanel', 'NDDataset']:
+            elif objtype == 'LinearCoord' and returntype != 'NDDataset':
                 returntype = 'LinearCoord'
             else:
                 # only the three above type have math capabilities in spectrochempy.
                 pass
 
             # If one of the input is hypercomplex, this will demand a special treatment
-            # if objtype != 'NDPanel' and hasattr(obj, 'is_quaternion'):
-            #    isquaternion = obj.is_quaternion     # TODO: not yet used
-            # elif   #TODO: check if it is a quaternion scalar
+            isquaternion = isquaternion or False if not hasattr(obj, 'is_quaternion') else obj.is_quaternion
 
             # Do we have to deal with mask?
             if hasattr(obj, 'mask') and np.any(obj.mask):
                 ismasked = True
 
         # it may be necessary to change the object order regarding the types
-        if returntype in ['NDPanel', 'NDDataset', 'Coord', 'LinearCoord'] and objtypes[0] != returntype:
+        if returntype in ['NDDataset', 'Coord', 'LinearCoord'] and objtypes[0] != returntype:
 
             inputs.reverse()
             objtypes.reverse()
@@ -2673,26 +2642,6 @@ class NDMath(object):
         if inputs:
             other = cpy.copy(inputs.pop(0))
             othertype = objtypes.pop(0)
-
-        # If our first objet is a NDPanel ------------------------------------------------------------------------------
-        if objtype == 'NDPanel':
-
-            # Some ufunc can not be applied to panels
-            if fname in ['sign', 'logical_not', 'isnan', 'isfinite', 'isinf', 'signbit']:
-                raise TypeError(f'`{fname}` ufunc is not implemented for NDPanel objects.')
-
-            # Iterate on all internal dataset of the panel
-            datasets = []
-            for k, v in obj.datasets.items():
-                v._coordset = obj.coordset
-                v.name = k
-                if other is not None:
-                    datasets.append(f(v, other))
-                else:
-                    datasets.append(f(v))
-
-            # Return a list of datasets
-            return datasets
 
         # Our first object is a NDdataset ------------------------------------------------------------------------------
         isdataset = (objtype == 'NDDataset')
@@ -2900,13 +2849,16 @@ class NDMath(object):
         else:
             # make a simple operation
             try:
-                # if not isquaternion:
-                data = f(d, *args)
-            # else:
-            # TODO: handle hypercomplex quaternion
-            #    print(fname, d, args)
-            #    raise NotImplementedError('operation {} not yet implemented '
-            #                              'for quaternion'.format(fname))
+                if not isquaternion:
+                    data = f(d, *args)
+                elif quaternion_aware and all([arg.dtype not in TYPE_COMPLEX for arg in args]):
+                    data = f(d, *args)
+                else:
+                    # in this case we will work on both complex separately
+                    dr, di = quat_as_complex_array(d)
+                    datar = f(dr, *args)
+                    datai = f(di, *args)
+                    data = as_quaternion(datar, datai)
 
             except Exception as e:
                 raise ArithmeticError(e.args[0])
@@ -2924,6 +2876,7 @@ class NDMath(object):
     # ..................................................................................................................
     @staticmethod
     def _unary_op(f):
+
         @functools.wraps(f)
         def func(self):
             fname = f.__name__
@@ -2932,23 +2885,8 @@ class NDMath(object):
             else:
                 history = None
 
-            inputtype = type(self).__name__
-            if inputtype == 'NDPanel':
-                # if we have a NDPanel, process the ufuncs on all datasets
-                datasets = self._op(f, [self])
-
-                # recreate a panel object
-                obj = type(self)
-                panel = obj(*datasets, merge=True, align=None)
-                panel.history = history
-
-                # return it
-                return panel
-
-            else:
-
-                data, units, mask, returntype = self._op(f, [self])
-                return self._op_result(data, units, mask, history, returntype)
+            data, units, mask, returntype = self._op(f, [self])
+            return self._op_result(data, units, mask, history, returntype)
 
         return func
 
@@ -2960,20 +2898,18 @@ class NDMath(object):
             # type
             objtype = type(obj).__name__
             objtypes.append(objtype)
-            if objtype == 'NDPanel':
-                returntype = 'NDPanel'
-            elif objtype == 'NDDataset' and returntype != 'NDPanel':
+            if objtype == 'NDDataset':
                 returntype = 'NDDataset'
-            elif objtype == 'Coord' and returntype not in ['NDPanel', 'NDDataset']:
+            elif objtype == 'Coord' and returntype != 'NDDataset':
                 returntype = 'Coord'
-            elif objtype == 'LinearCoord' and returntype not in ['NDPanel', 'NDDataset']:
+            elif objtype == 'LinearCoord' and returntype != 'NDDataset':
                 returntype = 'LinearCoord'
             else:
                 # only the three above type have math capabilities in spectrochempy.
                 pass
 
         # it may be necessary to change the object order regarding the types
-        if returntype in ['NDPanel', 'NDDataset', 'Coord', 'LinearCoord'] and objtypes[0] != returntype:
+        if returntype in ['NDDataset', 'Coord', 'LinearCoord'] and objtypes[0] != returntype:
 
             inputs.reverse()
             objtypes.reverse()
@@ -3002,6 +2938,7 @@ class NDMath(object):
     # ..................................................................................................................
     @staticmethod
     def _binary_op(f, reflexive=False):
+
         @functools.wraps(f)
         def func(self, other):
             fname = f.__name__
@@ -3016,29 +2953,16 @@ class NDMath(object):
             else:
                 history = None
 
-            inputtype = objs[0].implements()
-            if inputtype == 'NDPanel':
-                # if we have a NDPanel, process the ufuncs on all datasets
-                datasets = self._op(fm, objs)
-
-                # recreate a panel object
-                obj = type(objs[0])
-                panel = obj(*datasets, merge=True, align=None)
-                panel.history = history
-
-                # return it
-                return panel
-
-            else:
-                data, units, mask, returntype = self._op(fm, objs)
-                new = self._op_result(data, units, mask, history, returntype)
-                return new
+            data, units, mask, returntype = self._op(fm, objs)
+            new = self._op_result(data, units, mask, history, returntype)
+            return new
 
         return func
 
     # ..................................................................................................................
     @staticmethod
     def _inplace_binary_op(f):
+
         @functools.wraps(f)
         def func(self, other):
             fname = f.__name__
@@ -3049,27 +2973,14 @@ class NDMath(object):
             objs = [self, other]
             fm, objs = self._check_order(fname, objs)
 
-            inputtype = type(objs[0]).__name__
-            if inputtype == 'NDPanel':
-                # if we have a NDPanel, process the ufuncs on all datasets
-                datasets = self._op(fm, objs)
-
-                # recreate a panel object
-                obj = type(objs[0])
-                panel = obj(*datasets, merge=True, align=None)
-
-                # return it
-                self = panel
-
+            data, units, mask, returntype = self._op(fm, objs)
+            if returntype != 'LinearCoord':
+                self._data = data
             else:
-                data, units, mask, returntype = self._op(fm, objs)
-                if returntype != 'LinearCoord':
-                    self._data = data
-                else:
-                    from spectrochempy.core.dataset.coord import LinearCoord
-                    self = LinearCoord(data)
-                self._units = units
-                self._mask = mask
+                from spectrochempy.core.dataset.coord import LinearCoord
+                self = LinearCoord(data)
+            self._units = units
+            self._mask = mask
 
             return self
 

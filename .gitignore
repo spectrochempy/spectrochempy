@@ -139,3 +139,4 @@ Icon*
 # Html Documentation
 /spectrochempy_docs/
 *.py-donotwork
+/patch.diff

@@ -124,9 +124,9 @@ if globals().get('U_', None) is None:
     U_ = UnitRegistry(on_redefinition='ignore')  # filename)
 
     U_.define('__wrapped__ = 1')  # <- hack to avoid an error with pytest (doctest activated)
-
-    U_.define('transmittance = 1. / 100. ')
-    U_.define('absolute_transmittance = 1. ')
+    U_.define('@alias point = count')
+    U_.define('transmittance = 1. / 100.')
+    U_.define('absolute_transmittance = 1.')
     U_.define('absorbance = 1. = a.u.')
     U_.define('Kubelka_Munk = 1. = K.M.')
 

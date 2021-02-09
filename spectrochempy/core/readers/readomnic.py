@@ -14,10 +14,9 @@ __dataset_methods__ = __all__
 from datetime import datetime, timezone, timedelta
 import io
 import struct
-
 import numpy as np
 
-from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.importer import importermethod, Importer
 
@@ -605,8 +604,8 @@ def _read_spg(*args, **kwargs):
 
         timestamps.append(timestamp)
 
-        # Not used at present  # -------------------  # extract positions of '1B' codes (history text  #  --
-        # sometimes absent, e.g. peakresolve)  # key_is_1B = (keys == 27)  # indices1B = np.nonzero(key_is_1B)  #
+        # Not used at present  # -------------------  # extract positions of '1B' codes (history text  #  --  #
+        # sometimes absent, e.g. peakresolve)  # key_is_1B = (keys == 27)  # indices1B = np.nonzero(key_is_1B)  #  #
         # position1B = 304 * np.ones(len(indices1B[0]), dtype='int') + 16 * indices6B[0]  # if len(position1B) != 0:
         #    # read history texts  #    for j in range(nspec):  #        # determine the position of information  #
         #    f.seek(position1B[j] + 2)  #        history_pos = _fromfile(f, 'uint32', 1)  #        # read history  #
@@ -743,7 +742,8 @@ def _read_spa(*args, **kwargs):
     dataset.filename = str(filename)
 
     # now add coordinates
-    _x = Coord(np.around(np.linspace(firstx, lastx, nx), 3), title=xtitle, units=xunit)
+    spacing = (lastx - firstx) / (nx - 1)
+    _x = LinearCoord(offset=firstx, increment=spacing, size=nx, title=xtitle, units=xunit)
     _y = Coord([timestamp], title='Acquisition timestamp (GMT)', units='s', labels=([acquisitiondate], [filename]))
     dataset.set_coordset(y=_y, x=_x)
 
@@ -753,6 +753,10 @@ def _read_spa(*args, **kwargs):
     dataset.history = str(datetime.now(timezone.utc)) + ':imported from spa files'
     dataset.history = history
     dataset._date = datetime.now(timezone.utc)
+
+    if dataset.x.units is None and dataset.x.title == 'Data points':
+        dataset.meta.td = list(dataset.shape)
+        dataset.x.set_laser_frequency(frequency=15798.26)
 
     return dataset
 
@@ -846,8 +850,8 @@ def _read_srs(*args, **kwargs):
                 names.append(_readbtext(fid, pos + 64))
                 pos += 148
 
-        elif np.all(line == [2, 0, 0, 0, 24, 0, 0, 0, 0, 0, 72, 67, 0, 80, 67, 71])\
-                or np.all(line == [30, 0, 0, 0, 2, 0, 0, 0, 24, 0, 0, 0, 0, 0, 72, 67]):
+        elif np.all(line == [2, 0, 0, 0, 24, 0, 0, 0, 0, 0, 72, 67, 0, 80, 67, 71]) or np.all(
+                line == [30, 0, 0, 0, 2, 0, 0, 0, 24, 0, 0, 0, 0, 0, 72, 67]):
             # hex 02 00 00 00 18 00 00 00 00 00 48 43 00 50 43 47
             # this is likely header of data field of reprocessed series
             # the first one is skipped TODO: check the nature of these data
@@ -929,15 +933,7 @@ def _read_srs(*args, **kwargs):
 # ......................................................................................................................
 def _fromfile(fid, dtype, count):
     # to replace np.fromfile in case of io.BytesIO object instead of byte object
-    t = {
-            'uint8': 'B',
-            'int8': 'b',
-            'uint16': 'H',
-            'int16': 'h',
-            'uint32': 'I',
-            'int32': 'i',
-            'float32': 'f',
-            }
+    t = {'uint8': 'B', 'int8': 'b', 'uint16': 'H', 'int16': 'h', 'uint32': 'I', 'int32': 'i', 'float32': 'f', }
     typ = t[dtype] * count
     if dtype.endswith('16'):
         count = count * 2
@@ -993,9 +989,7 @@ def _readheader02(fid, pos):
     #   nbkgscan_pos = info_pos + 52;
 
     fid.seek(info_pos + 4)
-    out = {
-            'nx': _fromfile(fid, 'uint32', 1)
-            }
+    out = {'nx': _fromfile(fid, 'uint32', 1)}
 
     # read xaxis unit
     fid.seek(info_pos + 8)
@@ -1039,7 +1033,7 @@ def _readheader02(fid, pos):
         out['title'] = 'Kubelka-Munk'
     elif key == 22:
         out['units'] = 'V'
-        out['title'] = 'Volts'
+        out['title'] = 'Detector signal'
     elif key == 26:
         out['units'] = None
         out['title'] = 'Photoacoustic'
@@ -1077,9 +1071,7 @@ def _read_xheader(fid, pos):
                 key) + " Please report this error (and the corresponding srs file) to the developers"
                        "They will do their best to fix the issue")
     else:
-        out = {
-                'xheader': key
-                }
+        out = {'xheader': key}
 
     #   positions
     #   nx_pos = info_pos + 4
@@ -1101,7 +1093,7 @@ def _read_xheader(fid, pos):
         out['xunits'] = 'cm ^ -1'
         out['xtitle'] = 'Wavenumbers'
     elif key == 2:
-        out['xunits'] = 'dimensionless'
+        out['xunits'] = None
         out['xtitle'] = 'Data points'
     elif key == 3:
         out['xunits'] = 'nm'
@@ -1135,7 +1127,7 @@ def _read_xheader(fid, pos):
         out['title'] = 'Kubelka-Munk'
     elif key == 22:
         out['units'] = 'V'
-        out['title'] = 'Volts'
+        out['title'] = 'Detector signal'
     elif key == 26:
         out['units'] = None
         out['title'] = 'Photoacoustic'

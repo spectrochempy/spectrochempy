@@ -12,17 +12,9 @@ __all__ = ['EFA']
 
 __dataset_methods__ = []
 
-# ----------------------------------------------------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------------------------------------------------
-
 import numpy as np
 from datetime import datetime, timezone
 from traitlets import HasTraits, Instance, Float
-
-# ----------------------------------------------------------------------------------------------------------------------
-# localimports
-# ----------------------------------------------------------------------------------------------------------------------
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.coordset import CoordSet

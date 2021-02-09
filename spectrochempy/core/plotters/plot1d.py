@@ -16,20 +16,12 @@ __all__ = ['plot_1D', 'plot_lines', 'plot_pen', 'plot_scatter', 'plot_bar', 'plo
 
 __dataset_methods__ = ['plot_1D', 'plot_lines', 'plot_pen', 'plot_scatter', 'plot_bar', 'plot_scatter_pen']
 
-# ----------------------------------------------------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------------------------------------------------
-
 import numpy as np
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
 from .plotutils import make_label
 from ...utils import is_sequence, deprecated
 
-
-# ----------------------------------------------------------------------------------------------------------------------
-# localimports
-# ----------------------------------------------------------------------------------------------------------------------
 
 # plot scatter ---------------------------------------------------------------
 
@@ -213,10 +205,10 @@ def plot_1D(dataset, **kwargs):
     data_only : bool, optional, default: False
         Only the plot is done. No addition of axes or label specifications.
     imag : bool, optional, default: False
-        Show imaginary part. By default only the real part is displayed.
+        Show imaginary component. By default only the real component is displayed.
     show_complex : bool, optional, default: False
-        Show both real and imaginary part.
-        By default only the real part is displayed.
+        Show both real and imaginary component.
+        By default only the real component is displayed.
     dpi : int, optional
         the number of pixel per inches.
     figsize : tuple, optional, default is (3.4, 1.7)
@@ -224,7 +216,7 @@ def plot_1D(dataset, **kwargs):
     fontsize : int, optional
         font size in pixels, default is 10.
     imag : bool, optional, default False
-        By default real part is shown. Set to True to display the imaginary part
+        By default real component is shown. Set to True to display the imaginary component
     xlim : tuple, optional
         limit on the horizontal axis.
     zlim or ylim : tuple, optional
@@ -310,7 +302,7 @@ def plot_1D(dataset, **kwargs):
     # is that a plot with twin axis
     is_twinx = kwargs.pop('twinx', None) is not None
 
-    # if dataset is complex it is possible to overlap with the imaginary part
+    # if dataset is complex it is possible to overlap with the imaginary component
     show_complex = kwargs.pop('show_complex', False)
 
     # some pen or scatter property
@@ -381,7 +373,7 @@ def plot_1D(dataset, **kwargs):
     if xdata is None:
         xdata = range(xsize)
 
-    # ordinates (by default we plot real part of the data)
+    # ordinates (by default we plot real component of the data)
     if not kwargs.pop('imag', False) or kwargs.get('show_complex', False):
         z = new.real
         zdata = z.masked_data
@@ -413,8 +405,11 @@ def plot_1D(dataset, **kwargs):
                       label=label)  # barwidth = line[0].get_width()
 
     if show_complex and pen:
-        # add the imaginaly part for pen only plot
-        zimagdata = new.imag.masked_data
+        # add the imaginaly component for pen only plot
+        if new.is_quaternion:
+            zimagdata = new.RI.masked_data
+        else:
+            zimagdata = new.imag.masked_data
         ax.plot(xdata, zimagdata.T, ls='--')
 
     if kwargs.get('plot_model', False):

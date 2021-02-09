@@ -10,23 +10,14 @@ This module implements the class |Coord|.
 
 __all__ = ['Coord', 'LinearCoord']
 
-# ----------------------------------------------------------------------------------------------------------------------
-# standard imports
-# ----------------------------------------------------------------------------------------------------------------------
 import textwrap
 
-# ----------------------------------------------------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------------------------------------------------
-# import numpy as np
 from traitlets import Bool, observe, All, Unicode
 
-# ----------------------------------------------------------------------------------------------------------------------
-# localimports
-# ----------------------------------------------------------------------------------------------------------------------
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndmath import NDMath, _set_operators
 from spectrochempy.utils import colored_output, NOMASK
+from spectrochempy.units import Quantity, ur
 
 
 # ======================================================================================================================
@@ -610,6 +601,19 @@ class LinearCoord(Coord):
         # remove some methods with respect to the full NDArray
         # as they are not usefull for Coord.
         return ['data', 'labels', 'units', 'meta', 'title', 'name', 'offset', 'increment', 'linear', 'size', 'roi']
+
+    def set_laser_frequency(self, frequency=15798.26 * ur('cm^-1')):
+
+        if not isinstance(frequency, Quantity):
+            frequency = frequency * ur('cm^-1')
+        frequency.ito('Hz')
+
+        spacing = 1 / (2 * frequency)
+        spacing.ito('picoseconds')
+
+        self.increment = spacing.m
+        self.units = 'picoseconds'
+        self.title = 'time'
 
 
 # ======================================================================================================================

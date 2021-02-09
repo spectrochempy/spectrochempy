@@ -11,17 +11,9 @@ __all__ = ['autosub']
 
 __dataset_methods__ = __all__
 
-# ----------------------------------------------------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------------------------------------------------
-
 import numpy as np
 from scipy.optimize import minimize_scalar
-# from numba import jit
 
-# ----------------------------------------------------------------------------------------------------------------------
-# localimports
-# ----------------------------------------------------------------------------------------------------------------------
 
 from spectrochempy.core.dataset.coordrange import trim_ranges
 
@@ -115,7 +107,7 @@ def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False
     ranges = tuple(np.array(ranges, dtype=float))
     # must be float to be considered as frequency for instance
 
-    coords = new.coordset[-1]
+    coords = new.coordset[dim]
     xrange = trim_ranges(*ranges, reversed=coords.reversed)
 
     s = []

@@ -5,25 +5,16 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 """
-This module defines functions related to NDDataset or NDPanel alignment.
+This module defines functions related to NDDataset alignment.
 """
 
 __all__ = ['align']
 __dataset_methods__ = __all__
 
-# ----------------------------------------------------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------------------------------------------------
-
 # import scipy.interpolate
 import numpy as np
 
-# ----------------------------------------------------------------------------------------------------------------------
-# localimports
-# ----------------------------------------------------------------------------------------------------------------------
-
 from spectrochempy.utils import MASKED, UnitsCompatibilityError
-# from ...extern.orderedset import OrderedSet
 from spectrochempy.core import warning_, error_
 
 
@@ -67,16 +58,14 @@ def can_merge_or_align(coord1, coord2):
 # ............................................................................
 def align(dataset, *others, **kwargs):
     """
-    Align individual |NDDataset| or |NDPanel| along given dimensions using various methods.
+    Align individual |NDDataset| along given dimensions using various methods.
 
     Parameters
     -----------
     dataset : |NDDataset|
         Dataset on which we want to salign other objects.
-    *others : |NDDataset| or |NDPanel|
+    *others : |NDDataset|
         Objects to align.
-        If NDPanel objects are provided, internal datasets will be aligned along the given dimension.
-        Aligning more than one panel is not implemented.
     dim : str. Optional, default='x'
         Along which axis to perform the alignment.
     dims : list of str, optional, default=None
@@ -107,7 +96,7 @@ def align(dataset, *others, **kwargs):
 
     Returns
     --------
-    aligned_datasets : tuple of |NDDataset| or a |NDPanel|
+    aligned_datasets : tuple of |NDDataset|
         Same objects as datasets with dimensions aligned.
 
     Raises
@@ -145,31 +134,16 @@ def align(dataset, *others, **kwargs):
 
     for idx, object in enumerate(objects):
 
-        if not object.implements('NDDataset') and not object.implements('NDPanel'):
-            error_(f'Bad object(s) found: {object}. Note that only NDDataset or NDPanel objects are accepted '
+        if not object.implements('NDDataset'):
+            error_(f'Bad object(s) found: {object}. Note that only NDDataset objects are accepted '
                    f'for alignment')
             return None
 
-        if object.implements('NDPanel'):
-
-            for k, v in object.datasets.items():
-                # set the coordset into the NDDataset object (temporary: this will be unset at the end)
-                v.coordset = object.coordset
-                _objects[_nobj] = {
-                        'obj': v,
-                        'idx': idx,
-                        'is_panel': True,
-                        'key': k
-                        }
-                _nobj += 1
-
-        else:
-            _objects[_nobj] = {
-                    'obj': object,
-                    'idx': idx,
-                    'is_panel': False
-                    }
-            _nobj += 1
+        _objects[_nobj] = {
+                'obj': object,
+                'idx': idx,
+                }
+        _nobj += 1
 
     _last = _nobj - 1
 
@@ -318,20 +292,11 @@ def align(dataset, *others, **kwargs):
     # and mask the missing values (for the moment they are defined to NaN
 
     for index, object in _objects.items():
-        is_panel = object['is_panel']
         obj = object['obj']
         # obj[np.where(np.isnan(obj))] = MASKED  # mask NaN values
         obj[np.where(np.isnan(obj))] = 99999999999999.  # replace NaN values (to simplify comparisons)
         idx = int(object['idx'])
-        if not is_panel:
-            objects[idx] = obj
-        else:
-            key = object['key']
-            coordset = obj.coordset
-            obj.delete_coordset()  # NDDataset in NDPanel are stored without coordset
-            objects[idx].datasets[key] = obj
-            for dim in obj.dims:
-                setattr(objects[idx], dim, getattr(coordset, dim))
+        objects[idx] = obj
 
     return tuple(objects)
 

@@ -15,7 +15,6 @@ __all__ = ['pk', 'pk_exp']
 __dataset_methods__ = __all__
 
 import functools
-
 import numpy as np
 
 from spectrochempy.units import ur, Quantity
@@ -57,6 +56,8 @@ def _phase_method(method):
                 if not isinstance(par, Quantity):
                     par *= Quantity(1., default_units)
                 elif inv:
+                    if par == 0:
+                        return par
                     par = 1. / (1. / par).to(default_units)
                 else:
                     par = par.to(default_units)
@@ -65,8 +66,12 @@ def _phase_method(method):
             # Set correct units for the parameters
             dunits = dataset.coordset[dim].units
 
-            kwargs['phc0'] = (_check_units(kwargs.get('phc0', 0), 'degree') - new.meta.phc0[-1]).magnitude
-            kwargs['phc1'] = (_check_units(kwargs.get('phc1', 0), 'degree') - new.meta.phc1[-1]).magnitude
+            current = [new.meta.phc0[-1], new.meta.phc1[-1]]
+            rel = kwargs.pop('rel', False)
+            if rel:  # relative phase
+                current = [0, 0]
+            kwargs['phc0'] = (_check_units(kwargs.get('phc0', 0), 'degree') - current[0]).magnitude
+            kwargs['phc1'] = (_check_units(kwargs.get('phc1', 0), 'degree') - current[1]).magnitude
             kwargs['pivot'] = _check_units(kwargs.get('pivot', new.meta.pivot[-1]), dunits).magnitude
             kwargs['exptc'] = _check_units(kwargs.get('exptc', new.meta.get('exptc', [0] * new.ndim)[-1]), dunits,
                                            inv=True).magnitude
@@ -77,18 +82,24 @@ def _phase_method(method):
                 kwargs['phc1'] = -kwargs['phc1']
 
             apod = method(new.data, **kwargs)
+            new *= apod
 
-            new._data *= apod
             new.history = f'`{method.__name__}` applied to dimension `{dim}` with parameters: {kwargs}'
 
             if not new.meta.phased[-1]:
                 new.meta.phased[-1] = True
-                kwargs['phc0'] = 0 * ur.degree
-                kwargs['phc1'] = 0 * ur.degree
+                new.meta.phc0[-1] = 0 * ur.degree
+                new.meta.phc1[-1] = 0 * ur.degree
                 new.meta.exptc[-1] = 0 * (1 / dunits)
             else:
-                new.meta.phc0[-1] = kwargs['phc0'] * ur.degree
-                new.meta.phc1[-1] = kwargs['phc1'] * ur.degree
+                if rel:
+                    new.meta.phc0[-1] += kwargs['phc0'] * ur.degree
+                    new.meta.phc1[-1] += kwargs['phc1'] * ur.degree
+                else:
+                    new.meta.phc0[-1] = kwargs['phc0'] * ur.degree
+                    new.meta.phc1[-1] = kwargs['phc1'] * ur.degree
+
+                    # TODO: to do for exptc too!
                 new.meta.exptc[-1] = kwargs['exptc'] * (1 / dunits)
 
             new.meta.pivot[-1] = kwargs['pivot'] * dunits
@@ -155,7 +166,6 @@ def pk(dataset, phc0=0.0, phc1=0.0, exptc=0.0, pivot=0.0, **kwargs):
     size = dataset.shape[-1]
 
     if exptc > 0.0:
-        phc1 = 0
         apod = np.exp(1.0j * (phc0 * np.exp(-exptc * (np.arange(size) - pivot) / size)))
 
     else:
@@ -203,7 +213,6 @@ def pk_exp(dataset, phc0=0.0, pivot=0.0, exptc=0.0, **kwargs):
     """
 
     return pk(dataset, phc0=phc0, phc1=0, pivot=pivot, exptc=exptc)
-
 
 # # TODO: work on pk (below a copy from MASAI)
 # @_phase_method

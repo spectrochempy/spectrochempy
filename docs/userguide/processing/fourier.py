@@ -23,7 +23,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.9.0
+#     version: 3.9.1
 #   widgets:
 #     application/vnd.jupyter.widget-state+json:
 #       state: {}
@@ -32,14 +32,17 @@
 # ---
 
 # %% [markdown]
-# # Fourier transformation (NMR)
+# # One-dimensional (1D) Fourier transformation
 
 # %% [markdown]
-# In this notebook, we are going to transform time-domain NMR data into 1D or 2D spectra using SpectroChemPy
+# In this notebook, we are going to transform time-domain data into 1D or 2D spectra using SpectroChemPy
 # processing tools
 
 # %%
 import spectrochempy as scp
+
+# %% [markdown]
+# ## FFT of 1D NMR spectra
 
 # %% [markdown]
 # First we open read some time domain data. Here is a NMD free induction decay (FID):
@@ -47,6 +50,7 @@ import spectrochempy as scp
 # %%
 path = scp.preferences.datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'topspin_1d'
 fid = scp.read_topspin(path)
+fid
 
 # %% [markdown]
 # The type of the data is complex:
@@ -70,6 +74,7 @@ print("td = ", fid.size)
 spec = scp.fft(fid)
 _ = spec.plot(xlim=(100, -100))
 print("si = ", spec.size)
+spec
 
 # %% [markdown]
 # **Alternative notation**
@@ -139,7 +144,7 @@ print("si = ", spec3.size)
 # See the dedicated [Time domain baseline correction tutorial](td_baseline.ipynb).
 
 # %% [markdown]
-# ## Magnitude calculation
+# ### Magnitude calculation
 
 # %%
 ms = spec.mc()
@@ -147,10 +152,38 @@ _ = ms.plot(xlim=(10, -10))
 _ = spec.plot(clear=False, xlim=(10, -10), c='r')
 
 # %% [markdown]
-# ## Power spectrum
+# ### Power spectrum
 
 # %%
 mp = spec.ps()
 _ = (mp / mp.max()).plot()
 _ = (spec / spec.max()).plot(clear=False, xlim=(10, -10),
                              c='r')  # Here we have normalized the spectra at their max value.
+
+# %% [markdown]
+# # Real Fourier transform
+
+# %% [markdown]
+# In some case, it might be interesting to perform real Fourier transform . For instance, as a demontration,
+# we will independently transform real and imaginary part of the previous fid, and recombine them to obtain the same
+# result as when performing complex Fourier transform on the complex dataset.
+
+# %%
+lim = (-20, 20)
+_ = spec3.plot(xlim=lim)
+_ = spec3.imag.plot(xlim=lim)
+
+# %%
+Re = fid3.real.astype('complex64')
+fR = Re.fft()
+_ = fR.plot(xlim=lim, show_complex=True)
+Im = fid3.imag.astype('complex64')
+fI = Im.fft()
+_ = fI.plot(xlim=lim, show_complex=True)
+
+# %% [markdown]
+# Recombinaison:
+
+# %%
+_ = (fR - fI.imag).plot(xlim=lim)
+_ = (fR.imag + fI).plot(xlim=lim)

@@ -105,18 +105,6 @@ def test_ndmath_unary_ufuncs_simple_data(nd2d, name, comment):
         except DimensionalityError as e:
             error_(f"{name}: ", e)
 
-    # # NDPanel
-    # # -----------------
-    # if name not in ['sign','logical_not', 'isnan', 'isfinite', 'isneginf', 'isinf', 'signbit', 'fix']:
-    #     info_('panel before', pnl)
-    #
-    #     f = getattr(np, name)
-    #     try:
-    #         r = f(pnl)
-    #         info_('panel after ', r)
-    #     except TypeError as e:
-    #         error_(e)
-
     info_('-' * 60)
     info_(' ')
 
@@ -791,27 +779,16 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     # COORDMIN AND COORDMAX
     # ---------------------
     cm = nd2.coordmin()
-    assert cm['x'] == Quantity(2039.386, 'cm^-1')
+    assert cm['x'] == Quantity(1290.165, 'cm^-1')
 
     cm = nd2.coordmin(dim='y')
-    assert cm.size == 5549
-
-    cm = nd2.coordmin(dim='x')
-    assert cm.size == 55
+    assert cm.size == 1
 
     cm = nd2.coordmax(dim='y')
-    assert cm.size == 5549
-    cm.plot()
-    scp.show()
+    assert cm.size == 1
 
     cm = nd2.coordmax(dim='x')
-    assert cm.size == 55
-
-    cm = scp.coordmin(nd2, dim='x')
-    assert cm.size == 55
-
-    cm = scp.coordmax(nd2, dim='x')
-    assert cm.size == 55
+    assert cm.size == 1
 
     # ABS
     # ----
