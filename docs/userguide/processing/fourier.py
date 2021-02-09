@@ -188,22 +188,3 @@ _ = fI.plot(xlim=lim, show_complex=True)
 _ = (fR - fI.imag).plot(xlim=lim)
 _ = (fR.imag + fI).plot(xlim=lim)
 
-
-# %% [markdown]
-# ## FTIR interferogram processing
-#
-# A situation where we need transform of real data is the case of FTIR interferograms.
-
-# %%
-ir = scp.read_spa("irdata/interferogram/interfero.spa")
-_ = ir.plot(xlim=(0,250))
-ir
-
-# %%
-irt = ir.fft()
-irt.plot()
-
-# %%
-irs = scp.read_spa("irdata/interferogram/spectre.spa")
-_ = irs.plot()
-irs

@@ -102,48 +102,8 @@ def _ifft_positive(data):
     return data
 
 
-# ......................................................................................................................
-def _get_zpd(data, mode='max'):
-    """
-    Find the zero path difference (zpd) positions.
-
-    For multidimensional data the search is by default performed along the last dimension.
-
-    Parameters
-    ----------
-    data : ndarray
-        The array on which to search for zpd
-    mode : enum('max','abs'), optional
-        Mode of selection. Default = 'max'.
-
-    Returns
-    -------
-    index
-        zero path difference index
-    """
-
-    if mode == 'max':
-        return np.argmax(data, -1)
-    elif mode == 'abs':
-        return np.argmax(np.abs(data), -1)
-
-
 def _states_fft(data, tppi=False):
-    """
-    FFT transform according to STATES encoding
-
-    Parameters
-    ----------
-    data : ndarray
-        Data to process
-    tppi : bool, optional
-        Has the data a TPPI encoding?.
-
-    Returns
-    -------
-    transformed
-        Data transformed according to STATES encoding and optionaly TPPI
-    """
+    # FFT transform according to STATES encoding
 
     # warning: at this point, data must have been swaped so the last dimension is the one used for FFT
     wt, yt, xt, zt = as_float_array(data).T  # x and y are exchanged due to swaping of dims
@@ -166,19 +126,7 @@ def _states_fft(data, tppi=False):
 
 
 def _echoanti_fft(data):
-    """
-    FFT transform according to ECHO-ANTIECHO encoding
-
-    Parameters
-    ----------
-    data : ndarray
-        Data to process
-
-    Returns
-    -------
-    transformed
-        Data transformed
-    """
+    # FFT transform according to ECHO-ANTIECHO encoding
 
     # warning: at this point, data must have been swaped so the last dimension is the one used for FFT
     wt, yt, xt, zt = as_float_array(data).T  # x and y are exchanged due to swaping of dims
@@ -194,19 +142,7 @@ def _echoanti_fft(data):
 
 
 def _tppi_fft(data):
-    """
-    FFT transform according to TPPI encoding
-
-    Parameters
-    ----------
-    data : ndarray
-        Data to process
-
-    Returns
-    -------
-    transformed
-        Data transformed according to TPPI encoding
-    """
+    # FFT transform according to TPPI encoding
 
     # warning: at this point, data must have been swaped so the last dimension is the one used for FFT
     wt, yt, xt, zt = as_float_array(data).T  # x and y are exchanged due to swaping of dims
@@ -228,19 +164,7 @@ def _tppi_fft(data):
 
 
 def _qf_fft(data):
-    """
-    FFT transform according to QF encoding
-
-    Parameters
-    ----------
-    data : ndarray
-        Data to process.
-
-    Returns
-    -------
-    transformed
-        Data transformed according to QF encoding.
-    """
+    # FFT transform according to QF encoding
 
     data = np.fft.fftshift(np.fft.fft(np.conjugate(data)), -1)
 
@@ -249,23 +173,39 @@ def _qf_fft(data):
 
 def _interferogram_fft(data):
     """
-    FFT transform for rapid-scan interferograms.
-
-    Parameters
-    ----------
-    data : ndarray
-        Data to process.
-
-    Returns
-    -------
-    transformed
-        Data transformed according to QF encoding.
+    FFT transform for rapid-scan interferograms. Phase corrected using the Mertz method.
     """
+
+    def _get_zpd(data, mode='max'):
+        if mode == 'max':
+            return np.argmax(data, -1)
+        elif mode == 'abs':
+            return int(np.argmax(np.abs(data), -1))
+
     zpd = _get_zpd(data, mode='abs')
-    data = np.roll(data, int(-zpd))
     size = data.shape[-1]
-    data = np.fft.fft(data)/4
-    return data[..., size//2:]
+
+    # Compute Mertz phase correction
+    w = np.arange(0, zpd) / zpd
+    ma = np.concatenate((w, w[::-1]))
+    dma = np.zeros_like(data)
+    dma[..., 0:2 * zpd] = data[..., 0:2 * zpd] * ma[0:2 * zpd]
+    dma = np.roll(dma, -zpd)
+    dma[0] = dma[0]/2.
+    dma[-1] = dma[-1] / 2.
+    dma = np.fft.rfft(dma)[..., 0:size//2]
+    phase =  np.arctan(dma.imag/dma.real)
+
+    # Make final phase corrected spectrum
+    w = np.arange(0, 2*zpd) / (2*zpd)
+
+    mapod = np.ones_like(data)
+    mapod[..., 0:2 * zpd] = w
+    data = np.roll(data * mapod, int(-zpd) )
+    data = np.fft.rfft(data)[..., 0:size//2] * np.exp(-1j*phase)
+
+    # The imaginary part can be now discarder
+    return data.real[..., ::-1]/2.
 
 # ======================================================================================================================
 # Public methods
@@ -486,19 +426,16 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             # We assume no special encoding for inverse complex fft transform
             data = _ifft(new.data)
 
-        elif not iscomplex and inv:
-            raise NotImplementedError('Inverse FFT for real dimension')
-
         elif not iscomplex and not inv and is_ir:
             # transform interferogram
             data = _interferogram_fft(new.data)
 
+        elif not iscomplex and inv:
+            raise NotImplementedError('Inverse FFT for real dimension')
+
         else:
             raise NotImplementedError(f'{encoding} not yet implemented. We recommend you to put an issue on '
                                       f'Github, so we will not forget to work on this!.')
-
-        # TODO: revise this when SRS file will be provided (will not use plt here!  It should return data)
-        # TODO: this module should do only the fourier transform
 
         # # subtract  DC
         # new -= new.mean()

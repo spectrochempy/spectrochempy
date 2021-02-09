@@ -59,14 +59,9 @@ ir.x.set_laser_frequency(15798.26 * ur('cm^-1'))
 
 # %%
 ird = ir.dc()
-ird.zf(size=ir.size * 2, inplace=True)
+#ird = ird.hamming()
 irt = ird.fft()
-_ = irt.plot( show_complex=True)
-
-# %% [markdown]
-# ### Mertz processing
-
-# %%
+_ = irt.plot(xlim=(3999, 400))
 
 # %% [markdown]
 # ### Comparison with the OMNIC processing. 
@@ -75,25 +70,5 @@ _ = irt.plot( show_complex=True)
 
 # %%
 irs = scp.read_spa("irdata/interferogram/spectre.spa")
-_ = irs.plot()
-_ = abs(irt).plot(c='red', clear=False, xlim=(3999, 400))
-
-# %%
-ir.size * 2
-
-# %%
-# %%timeit
-ird = ir.dc()
-ird.zf(size=ir.size * 2, inplace=True)
-irt = ird.fft()
-
-# %%
-# %%timeit
-ird = ir.dc()
-ird.zf(size=2048*4, inplace=True)
-irt = ird.fft()
-
-# %%
-_ = irt.plot( show_complex=True)
-
-# %%
+_ = irs.plot(lw=1)
+_ = irt.plot(c='red', clear=False, xlim=(3999, 400))

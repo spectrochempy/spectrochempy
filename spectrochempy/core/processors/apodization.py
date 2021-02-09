@@ -6,7 +6,7 @@
 # ======================================================================================================================
 
 __all__ = ['em', 'gm', "sp", "sine", "sinm", "qsin", "general_hamming", "hamming", "hann", "triang", "bartlett",
-           "blackmanharris", "mertz"]
+           "blackmanharris"]
 __dataset_methods__ = __all__
 
 import functools
@@ -717,51 +717,3 @@ def blackmanharris(dataset, **kwargs):
     x = dataset
 
     return x * windows.blackmanharris(len(x), sym=True)
-
-
-@_apodize_method(zpd=None)
-def mertz(dataset, zpd, **kwargs):
-    r"""
-    Calculate asymetric Mertz apodization
-
-    For multidimensional NDDataset,
-    the apodization is by default performed on the last dimension.
-
-    The data in the last dimension MUST be time-domain or dimensionless,
-    otherwise an error is raised.
-
-
-    Parameters
-    ----------
-    dataset : dataset.
-        Input dataset.
-    zpd :
-
-    Returns
-    -------
-    apodized
-        Dataset.
-    apod_arr
-        The apodization array only if 'retapod' is True.
-
-    Other Parameters
-    ----------------
-    dim : str or int, keyword parameter, optional, default='x'.
-        Specify on which dimension to apply the apodization method. If `dim` is specified as an integer it is equivalent
-        to the usual `axis` numpy parameter.
-    inv : bool, keyword parameter, optional, default=False.
-        True for inverse apodization.
-    rev : bool, keyword parameter, optional, default=False.
-        True to reverse the apodization before applying it to the data.
-    inplace : bool, keyword parameter, optional, default=False.
-        True if we make the transform inplace.  If False, the function return a new dataset
-    retapod : bool, keyword parameter, optional, default=False
-        True to return the apodization array along with the apodized object
-    """
-
-    x = dataset
-
-    w1 = np.arange(1, 2 * zpd + 1) / (2 * zpd)
-    w2 = np.arange(1, len(x) - 2 * zpd + 1)[::-1] / (len(x) - 2 * zpd)
-    w = np.concatenate((w1, w2))
-    return w
