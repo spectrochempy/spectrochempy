@@ -6,10 +6,17 @@
 
 * Test and data for read_carroucell(), read_srs(), read_dso()
 
+* Added NMR processing of 2D spectra.
+
+* Added FTIR interferogram processing.
 
 **BUGS FIXED**
 
-* Fix a small problem with read_carroucell(), read_srs(), read_dso()
+* Problem with read_carroucell(), read_srs(), read_dso()
+
+* Colaboratory compatibility
+
+* Improved check updates 
 
 ## Version 0.2.6
 
