@@ -40,7 +40,6 @@ def trapz(dataset, *args, **kwargs):
     [float64] a.u..cm^-1 (size: 55)
         """
 
-
     # handle the various syntax to pass the axis
     if args:
         kwargs['dim'] = args[0]
@@ -48,7 +47,7 @@ def trapz(dataset, *args, **kwargs):
 
     dim = dataset._get_dims_from_args(*args, **kwargs)
     if dim is None:
-        dim=-1
+        dim = -1
     axis = dataset._get_dims_index(dim)
     axis = axis[0] if axis and not dataset.is_1d else None
 
@@ -117,10 +116,9 @@ def simps(dataset, *args, **kwargs):
 
     dim = dataset._get_dims_from_args(*args, **kwargs)
     if dim is None:
-        dim=-1
+        dim = -1
     axis = dataset._get_dims_index(dim)
     axis = axis[0] if axis and not dataset.is_1d else None
-
 
     data = scipy.integrate.simps(dataset.data, x=dataset.coord(dim).data, axis=axis, even=kwargs.get('even', 'avg'))
     if dataset.coord(dim).reversed:

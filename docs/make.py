@@ -14,13 +14,13 @@ Clean, build, and release the HTML and PDF documentation for SpectroChemPy.
 where optional parameters indicates which job(s) is(are) to perform.
 """
 from os import environ
+
 import argparse
 import shutil
 import sys
 import warnings
 import zipfile
 from pathlib import Path
-
 import numpy as np
 from skimage.io import imread, imsave
 from skimage.transform import resize
@@ -198,9 +198,8 @@ class BuildDocumentation(object):
             sp.build()
 
             print(f"\n{'-' * 130}\nBuild 'latest' finished. The {builder.upper()} pages "
-                f"are in {outdir}.")
+                  f"are in {outdir}.")
             doc_version = 'stable'
-
 
         if builder == 'html':
             self.make_redirection_page()
@@ -359,16 +358,8 @@ class BuildDocumentation(object):
         doc_version = self.doc_version
 
         # Create regular directories.
-        build_dirs = [
-                DOCREPO,
-                DOCTREES,
-                HTML,
-                LATEX,
-                DOCTREES / doc_version,
-                HTML / doc_version,
-                LATEX / doc_version,
-                DOWNLOADS,
-        ]
+        build_dirs = [DOCREPO, DOCTREES, HTML, LATEX, DOCTREES / doc_version, HTML / doc_version, LATEX / doc_version,
+                      DOWNLOADS, ]
         for d in build_dirs:
             if not d.exists():
                 print(f'Make dir {d}')

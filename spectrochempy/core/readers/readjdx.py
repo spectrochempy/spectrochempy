@@ -260,19 +260,19 @@ def _read_jdx(*args, **kwargs):
 
     # Determine xaxis name ****************************************************
     if xunits[0].strip() == '1/CM':
-        axisname = 'Wavenumbers'
+        axisname = 'wavenumbers'
         axisunit = 'cm^-1'
     elif xunits[0].strip() == 'MICROMETERS':
-        axisname = 'Wavelength'
+        axisname = 'wavelength'
         axisunit = 'um'
     elif xunits[0].strip() == 'NANOMETERS':
-        axisname = 'Wavelength'
+        axisname = 'wavelength'
         axisunit = 'nm'
     elif xunits[0].strip() == 'SECONDS':
-        axisname = 'Time'
+        axisname = 'time'
         axisunit = 's'
     elif xunits[0].strip() == 'ARBITRARY UNITS':
-        axisname = 'Arbitrary unit'
+        axisname = 'arbitrary unit'
         axisunit = None
     else:
         axisname = ''
@@ -283,10 +283,10 @@ def _read_jdx(*args, **kwargs):
     dataset.name = jdx_title
     if yunits[0].strip() == 'ABSORBANCE':
         dataset.units = 'absorbance'
-        dataset.title = 'Absorbance'
+        dataset.title = 'absorbance'
     elif yunits[0].strip() == 'TRANSMITTANCE':
         # TODO: This units not in pint. Add this
-        dataset.title = 'Transmittance'
+        dataset.title = 'transmittance'
 
     # now add coordinates
     _x = Coord(xaxis, title=axisname, units=axisunit)

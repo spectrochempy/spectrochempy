@@ -39,26 +39,30 @@ def _zf_method(method):
             new.swapdims(axis, -1, inplace=True)  # must be done in  place
             swaped = True
 
-        # get the lastcoord
-        if new.coordset[dim].unitless or new.coordset[dim].dimensionless or \
-                new.coordset[dim].units.dimensionality == '[time]':
+        x = new.coordset[dim]
+        if hasattr(x, '_use_time_axis'):
+            x._use_time_axis = True  # we need to havze dimentionless or time units
 
-            if not new.coordset[dim].linear:
+        # get the lastcoord
+        if x.unitless or x.dimensionless or \
+                x.units.dimensionality == '[time]':
+
+            if not x.linear:
                 # This method apply only to linear coordinates.
                 # we try to linearize it
-                new.coordset[dim] = LinearCoord(new.coordset[dim])
+                x = LinearCoord(x)
 
-            if not new.coordset[dim].linear:
+            if not x.linear:
                 raise TypeError('Coordinate x is not linearisable')
 
             data = method(new.data, **kwargs)
             new._data = data
 
             # we needs to increase the x coordinates array
-            new.coordset[dim]._size = new._data.shape[-1]
+            x._size = new._data.shape[-1]
 
             # update with the new td
-            new.meta.td[-1] = new.coordset[dim].size
+            new.meta.td[-1] = x.size
             new.history = f'`{method.__name__}` shift performed on dimension `{dim}` with parameters: {kwargs}'
 
         else:

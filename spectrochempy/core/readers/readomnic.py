@@ -604,7 +604,7 @@ def _read_spg(*args, **kwargs):
 
         timestamps.append(timestamp)
 
-        # Not used at present  # -------------------  # extract positions of '1B' codes (history text  #  --  #
+        # Not used at present  # -------------------  # extract positions of '1B' codes (history text  #  --  #  #
         # sometimes absent, e.g. peakresolve)  # key_is_1B = (keys == 27)  # indices1B = np.nonzero(key_is_1B)  #  #
         # position1B = 304 * np.ones(len(indices1B[0]), dtype='int') + 16 * indices6B[0]  # if len(position1B) != 0:
         #    # read history texts  #    for j in range(nspec):  #        # determine the position of information  #
@@ -754,9 +754,12 @@ def _read_spa(*args, **kwargs):
     dataset.history = history
     dataset._date = datetime.now(timezone.utc)
 
-    if dataset.x.units is None and dataset.x.title == 'Data points':
+    if dataset.x.units is None and dataset.x.title == 'data points':
+        # interferogram
         dataset.meta.td = list(dataset.shape)
+        dataset.x._zpd = int(np.argmax(dataset)[-1])  # zero path difference
         dataset.x.set_laser_frequency(frequency=15798.26)
+        dataset.x._use_time_axis = False  # True to have time, else it will be optical path difference
 
     return dataset
 
@@ -835,7 +838,7 @@ def _read_srs(*args, **kwargs):
                 # Create a NDDataset for the background
 
                 background = NDDataset(background)
-                _x = Coord(np.around(np.linspace(0, background_size - 1, background_size), 0), title='Data points',
+                _x = Coord(np.around(np.linspace(0, background_size - 1, background_size), 0), title='data points',
                            units='dimensionless')
                 background.set_coordset(x=_x)
                 background.name = background_name
@@ -884,8 +887,11 @@ def _read_srs(*args, **kwargs):
     dataset.origin = 'omnic'
 
     # now add coordinates
-    _x = Coord(np.around(np.linspace(info['firstx'], info['lastx'], info['nx'], 3)), title=info['xtitle'],
-               units=info['xunits'])
+    # _x = Coord(np.around(np.linspace(info['firstx'], info['lastx'], info['nx'], 3)), title=info['xtitle'],
+    #           units=info['xunits'])
+    spacing = (info['lastx'] - info['firstx']) / (info['nx'] - 1)
+    _x = LinearCoord(offset=info['firstx'], increment=spacing, size=info['nx'], title=info['xtitle'],
+                     units=info['xunits'])
 
     _y = Coord(np.around(np.linspace(info['firsty'], info['lasty'], info['ny']), 3), title='Time', units='minute',
                labels=names)
@@ -897,6 +903,13 @@ def _read_srs(*args, **kwargs):
     dataset.description = kwargs.get('description', 'Dataset from omnic srs file.')
 
     dataset.history = str(datetime.now(timezone.utc)) + ':imported from srs file {} ; '.format(filename)
+
+    if dataset.x.units is None and dataset.x.title == 'data points':
+        # interferogram
+        dataset.meta.td = list(dataset.shape)
+        dataset.x._zpd = int(np.argmax(dataset)[-1])  # zero path difference
+        dataset.x.set_laser_frequency(frequency=15798.26)
+        dataset.x._use_time_axis = False  # True to have time, else it will be optical path difference
 
     # uncomment below to load the last datafield
     # has the same dimension as the time axis
@@ -996,19 +1009,19 @@ def _readheader02(fid, pos):
     key = _fromfile(fid, dtype='uint8', count=1)
     if key == 1:
         out['xunits'] = 'cm ^ -1'
-        out['xtitle'] = 'Wavenumbers'
+        out['xtitle'] = 'wavenumbers'
     elif key == 2:
         out['xunits'] = None
-        out['xtitle'] = 'Data points'
+        out['xtitle'] = 'data points'
     elif key == 3:
         out['xunits'] = 'nm'
-        out['xtitle'] = 'Wavelengths'
+        out['xtitle'] = 'wavelengths'
     elif key == 4:
         out['xunits'] = 'um'
-        out['xtitle'] = 'Wavelengths'
+        out['xtitle'] = 'wavelengths'
     elif key == 32:
         out['xunits'] = 'cm^-1'
-        out['xtitle'] = 'Raman Shift'
+        out['xtitle'] = 'raman shift'
     else:
         out['xunits'] = None
         out['xtitle'] = 'xaxis'  # warning: 'The nature of data is not recognized, xtitle set to \'xaxis\')
@@ -1018,13 +1031,13 @@ def _readheader02(fid, pos):
     key = _fromfile(fid, dtype='uint8', count=1)
     if key == 17:
         out['units'] = 'absorbance'
-        out['title'] = 'Absorbance'
+        out['title'] = 'absorbance'
     elif key == 16:
         out['units'] = 'percent'
-        out['title'] = 'Transmittance'
+        out['title'] = 'transmittance'
     elif key == 11:
         out['units'] = 'percent'
-        out['title'] = 'Reflectance'
+        out['title'] = 'reflectance'
     elif key == 12:
         out['units'] = None
         out['title'] = 'Log(1/R)'
@@ -1033,16 +1046,16 @@ def _readheader02(fid, pos):
         out['title'] = 'Kubelka-Munk'
     elif key == 22:
         out['units'] = 'V'
-        out['title'] = 'Detector signal'
+        out['title'] = 'detector signal'
     elif key == 26:
         out['units'] = None
-        out['title'] = 'Photoacoustic'
+        out['title'] = 'photoacoustic'
     elif key == 31:
         out['units'] = None
-        out['title'] = 'Raman Intensity'
+        out['title'] = 'raman intensity'
     else:
         out['units'] = None
-        out['title'] = 'Intensity'  # warning: 'The nature of data is not recognized, title set to \'Intensity\')
+        out['title'] = 'intensity'  # warning: 'The nature of data is not recognized, title set to \'Intensity\')
 
     fid.seek(info_pos + 16)
     out['firstx'] = _fromfile(fid, 'float32', 1)
@@ -1091,19 +1104,19 @@ def _read_xheader(fid, pos):
     key = _fromfile(fid, dtype='uint8', count=1)
     if key == 1:
         out['xunits'] = 'cm ^ -1'
-        out['xtitle'] = 'Wavenumbers'
+        out['xtitle'] = 'wavenumbers'
     elif key == 2:
         out['xunits'] = None
-        out['xtitle'] = 'Data points'
+        out['xtitle'] = 'data points'
     elif key == 3:
         out['xunits'] = 'nm'
-        out['xtitle'] = 'Wavelengths'
+        out['xtitle'] = 'wavelengths'
     elif key == 4:
         out['xunits'] = 'um'
-        out['xtitle'] = 'Wavelengths'
+        out['xtitle'] = 'wavelengths'
     elif key == 32:
         out['xunits'] = 'cm^-1'
-        out['xtitle'] = 'Raman Shift'
+        out['xtitle'] = 'raman shift'
     else:
         out['xunits'] = None
         out['xtitle'] = 'xaxis'  # warning: 'The nature of data is not recognized, xtitle set to \'xaxis\')
@@ -1112,31 +1125,31 @@ def _read_xheader(fid, pos):
     key = _fromfile(fid, dtype='uint8', count=1)
     if key == 17:
         out['units'] = 'absorbance'
-        out['title'] = 'Absorbance'
+        out['title'] = 'absorbance'
     elif key == 16:
         out['units'] = 'percent'
-        out['title'] = 'Transmittance'
+        out['title'] = 'transmittance'
     elif key == 11:
         out['units'] = 'percent'
-        out['title'] = 'Reflectance'
+        out['title'] = 'reflectance'
     elif key == 12:
         out['units'] = None
-        out['title'] = 'Log(1/R)'
+        out['title'] = 'log(1/R)'
     elif key == 20:
         out['units'] = 'Kubelka_Munk'
         out['title'] = 'Kubelka-Munk'
     elif key == 22:
         out['units'] = 'V'
-        out['title'] = 'Detector signal'
+        out['title'] = 'detector signal'
     elif key == 26:
         out['units'] = None
-        out['title'] = 'Photoacoustic'
+        out['title'] = 'photoacoustic'
     elif key == 31:
         out['units'] = None
-        out['title'] = 'Raman Intensity'
+        out['title'] = 'raman intensity'
     else:
         out['title'] = None
-        out['title'] = 'Intensity'  # warning: 'The nature of data is not recognized, title set to \'Intensity\')
+        out['title'] = 'intensity'  # warning: 'The nature of data is not recognized, title set to \'Intensity\')
 
     fid.seek(pos + 16)
     out['firstx'] = _fromfile(fid, 'float32', 1)

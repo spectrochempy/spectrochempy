@@ -21,6 +21,7 @@ from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
 from .plotutils import make_label
 from ...utils import is_sequence, deprecated
+from spectrochempy.core.dataset.coord import Coord
 
 
 # plot scatter ---------------------------------------------------------------
@@ -357,7 +358,15 @@ def plot_1D(dataset, **kwargs):
     # the actual dimension name is the first in the new.dims list
     dimx = new.dims[-1]
     x = getattr(new, dimx)
+
     xsize = new.size
+    show_x_points = False
+    if x is not None and hasattr(x, 'show_datapoints'):
+        show_x_points = x.show_datapoints
+    if show_x_points:
+        # remove data and units for display
+        x = Coord.arange(xsize)
+
     if x is not None and (not x.is_empty or x.is_labeled):
         xdata = x.data
         # discrete_data = False
@@ -507,6 +516,8 @@ def plot_1D(dataset, **kwargs):
     # x label
 
     xlabel = kwargs.get("xlabel", None)
+    if show_x_points:
+        xlabel = 'data points'
     if not xlabel:
         xlabel = make_label(x, new.dims[-1])
     ax.set_xlabel(xlabel)

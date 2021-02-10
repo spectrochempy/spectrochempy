@@ -9,9 +9,10 @@ Plugin module to extend NDDataset with a JCAMP-DX export method.
 """
 # import os as os
 import csv
-from spectrochempy.core import debug_
+
+from spectrochempy.core import debug_, dataset_preferences as prefs
 from spectrochempy.core.writers.exporter import Exporter, exportermethod
-from spectrochempy.core import dataset_preferences as prefs
+
 __all__ = ['write_csv']
 __dataset_methods__ = __all__
 
@@ -60,7 +61,6 @@ def write_csv(*args, **kwargs):
 
 @exportermethod
 def _write_csv(*args, **kwargs):
-
     debug_("writing csv file")
 
     dataset, filename = args
@@ -80,7 +80,7 @@ def _write_csv(*args, **kwargs):
     with filename.open('w', newline='') as fid:
         writer = csv.writer(fid, delimiter=delimiter)
 
-        if dataset.ndim == 1:         # if statement for future implementation for ndim > 1....
+        if dataset.ndim == 1:  # if statement for future implementation for ndim > 1....
             if dataset.coordset is not None:
                 col_coord = True
                 title_1 = dataset.coordset[-1].title

@@ -31,26 +31,45 @@
 #       version_minor: 0
 # ---
 
-# %%
-import spectrochempy as scp
-from spectrochempy.units import ur
-
 # %% [markdown]
 # # FTIR interferogram processing
 #
 # A situation where we need transform of real data is the case of FTIR interferograms.
 
 # %%
-ir = scp.read_spa("irdata/interferogram/interfero.SPA")
-ir.dc(inplace=True)
-#ir.x = ir.x * conv
-_ = ir.plot()
+import spectrochempy as scp
+from spectrochempy.units import ur
 
 # %%
-_ = ir.plot(xlim=(0, 0.25))
+ir = scp.read_spa("irdata/interferogram/interfero.SPA")
 
 # %% [markdown]
-# Note that the time scale of the interferogram has been calculated using a laser frequency of 15798.26 cm$^{-1}$. If
+# By default, the interferogram is displayed with an axis in points (no units).
+
+# %%
+prefs = ir.preferences
+prefs.figure.figsize = (7, 3)
+_ = ir.plot()
+print('number of points = ', ir.size)
+
+# %% [markdown]
+# Plotting a zoomed region around the maximum of the interferogram (the so-called `ZPD`: `Zero optical Path
+# Difference` ) we can see that it is located around the 64th points. The FFT processing will need this information,
+# but it will be determined automatically.
+
+# %%
+_ = ir.plot(xlim=(0, 128))
+
+# %% [markdown]
+# The `x` scale of the interferogramme can also be displayed as a function of optical path difference. For this we
+# just make `show_datapoints` to False:
+
+# %%
+ir.x.show_datapoints = False
+_ = ir.plot(xlim=(-0.04, 0.04))
+
+# %% [markdown]
+# Note that the `x` scale of the interferogram has been calculated using a laser frequency of 15798.26 cm$^{-1}$. If
 # this is not correct you can change it using the `set_laser_frequency` coordinate method:
 
 # %%
@@ -58,15 +77,18 @@ ir.x.set_laser_frequency(15798.26 * ur('cm^-1'))
 
 # %% [markdown]
 # Now we can perform the Fourier transform. By default no zero-filling level is applied prior the Fourier transform
-# for FTIR.
-# To add one level we use the `zf` method. A `Happ-Genzel` (Hamming window) apodization is also applied prior to the
-# Fourier transformation.
+# for FTIR. To add some level of zero-filling, use the `zf` method.
 
 # %%
 ird = ir.dc()
-ird.zf(inplace=True, size=2 * ird.size)
+ird = ird.zf(size=2 * ird.size)
 irt = ird.fft()
+
 _ = irt.plot(xlim=(3999, 400))
+
+# %% [markdown]
+# A `Happ-Genzel` (Hamming window) apodization can also applied prior to the
+# Fourier transformation in order to decrease the H2O narrow bands.
 
 # %%
 ird = ir.dc()
@@ -83,7 +105,8 @@ _ = irth.plot(xlim=(3999, 400))
 
 # %%
 irs = scp.read_spa("irdata/interferogram/spectre.SPA")
+prefs.figure.figsize = (7, 6)
 _ = irs.plot(label='omnic')
-_ = (irt - .2).plot(c='red', clear=False, xlim=(3999, 400), label='no hamming')
-ax = (irth - .4).plot(c='green', clear=False, xlim=(3999, 400), label='hamming')
+_ = (irt - .4).plot(c='red', clear=False, xlim=(3999, 400), label='no hamming')
+ax = (irth - .2).plot(c='green', clear=False, xlim=(3999, 400), label='hamming')
 _ = ax.legend()

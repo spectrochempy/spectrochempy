@@ -15,11 +15,11 @@ import io
 from warnings import warn
 from datetime import datetime, timezone
 import re
-
 import numpy as np
 
 from spectrochempy.core.dataset.nddataset import NDDataset, Coord
 from spectrochempy.core.readers.importer import Importer, importermethod
+
 
 # ======================================================================================================================
 # Public functions
@@ -109,7 +109,6 @@ def read_quadera(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
-
 # ----------------------------------------------------------------------------------------------------------------------
 # Private methods
 # ----------------------------------------------------------------------------------------------------------------------
@@ -135,7 +134,7 @@ def _read_asc(*args, **kwargs):
         i += 1
 
     i += 2
-    #reads channel names
+    # reads channel names
     channels = re.split(r'\t+', lines[i].rstrip('\t\n'))[1:]
     nchannels = len(channels)
 
@@ -147,7 +146,7 @@ def _read_asc(*args, **kwargs):
 
     if colnames[0] == 'Time' or colnames[1] != 'Time Relative [s]' or colnames[2] != 'Ion Current [A]':
         warn('Columns names are  not those expected: the reading of your .asc file  could yield '
-                      'please notify this to the developers of scpectrochempy')
+             'please notify this to the developers of scpectrochempy')
     if nchannels > 1 and colnames[3] != 'Time Relative [s]':
         warn('The number of columms per channel is not that expected: the reading of your .asc file  could yield '
              'please notify this to the developers of spectrochempy')
@@ -163,12 +162,12 @@ def _read_asc(*args, **kwargs):
     for j in np.arange(i, len(lines)):
         data = re.split(r'[\t+]', lines[j].rstrip('\t'))
         times[j - i][0] = datetime.strptime(data[0].strip(' '), '%m/%d/%Y %H:%M:%S.%f').timestamp()
-        reltimes[j - i][0] = data[2].replace(',','.')
-        ioncurrent[j - i][0] = data[3].replace(',','.')
-        for k in range(nchannels-1):
-            times[j - i][k+1] = datetime.strptime(data[4 + 3*k].strip(' '), '%m/%d/%Y %H:%M:%S.%f').timestamp()
-            reltimes[j - i][k+1] = data[5 + 3*k].replace(',','.')
-            ioncurrent[j - i][k+1] = data[6 + 3*k].replace(',','.')
+        reltimes[j - i][0] = data[2].replace(',', '.')
+        ioncurrent[j - i][0] = data[3].replace(',', '.')
+        for k in range(nchannels - 1):
+            times[j - i][k + 1] = datetime.strptime(data[4 + 3 * k].strip(' '), '%m/%d/%Y %H:%M:%S.%f').timestamp()
+            reltimes[j - i][k + 1] = data[5 + 3 * k].replace(',', '.')
+            ioncurrent[j - i][k + 1] = data[6 + 3 * k].replace(',', '.')
 
     # requirese inter
     dataset = NDDataset(ioncurrent)
@@ -177,9 +176,9 @@ def _read_asc(*args, **kwargs):
     dataset.units = "amp"
 
     if timestamp:
-        _y = Coord(times[:,0], title='Acquisition timestamp (UTC)', units="s")
+        _y = Coord(times[:, 0], title='Acquisition timestamp (UTC)', units="s")
     else:
-        _y = Coord(times[:, 0] - times[0,0], title='Time', units="s")
+        _y = Coord(times[:, 0] - times[0, 0], title='Time', units="s")
 
     _x = Coord(labels=channels)
     dataset.set_coordset(y=_y, x=_x)
@@ -192,9 +191,6 @@ def _read_asc(*args, **kwargs):
     dataset.history = f'{dataset.date}:imported from Quadera asc file {filename}'
 
     return dataset
-
-
-
 
 
 # ----------------------------------------------------------------------------------------------------------------------
