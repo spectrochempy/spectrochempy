@@ -19,7 +19,8 @@ __dataset_methods__ = __all__
 # .......................................................................................................................
 def write_csv(*args, **kwargs):
     """
-    Writes a dataset in CSV format
+    Writes a dataset in CSV format. Currently oinly implemented for 1D datasets
+    or ND datasets with only one dimension of length larger than one
 
     Parameters
     ----------
@@ -43,12 +44,13 @@ def write_csv(*args, **kwargs):
 
     Examples
     --------
+    >>> import spectrochempy as scp
+    >>> ds = scp.NDDataset([1,2,3])
+    >>> f1 = ds.write_csv('myfile')
 
-    The extension will be added automatically
-    # >>> import spectrochempy as scp
-    # >>> ds = scp.NDDataset([1,2,3])
-    # >>> f = ds.write_csv('myfile')
-    # f.name = myfile.csv
+    >>> ds = scp.read('irdata/nh4y-activation.spg')
+    >>> f2 = ds[0].write_csd('single_spectrum.csv')
+
     """
     exporter = Exporter()
     kwargs['filetypes'] = ['CSV files (*.csv)']
