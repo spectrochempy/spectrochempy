@@ -21,7 +21,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.9.0
+#     version: 3.9.1
 #   widgets:
 #     application/vnd.jupyter.widget-state+json:
 #       state: {}
@@ -169,8 +169,3 @@ ndadd = nd1a + nd2a + nd3a + nd4a
 # Comparison of the result array with the original (only the common region is visible, due to the masks)
 _ = scp.multiplot_map(datasets=[dataset, ndadd], colormap='viridis', sharex=0, sharey=True,
                       nrow=1, ncol=2, figsize=(8, 3), dpi=100)
-
-# %%
-
-scp.show()
-# %%

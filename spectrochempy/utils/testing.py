@@ -101,7 +101,7 @@ def compare_datasets(this, other, approx=False, decimal=6):
     thistype = this.implements()
     attrs = this.__dir__()
     for attr in ('filename', 'preferences', 'description', 'history', 'date', 'modified', 'modeldata', 'origin', 'roi',
-                 'offset', 'name'):
+                 'offset', 'name', 'show_datapoints'):
         # these attibutes are not used for comparison (comparison based on data and units!)
         if attr in attrs:
             if attr in attrs:

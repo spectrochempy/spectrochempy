@@ -482,7 +482,7 @@ class Coord(NDMath, NDArray):
 
 
 class LinearCoord(Coord):
-    _laser_frequency = Instance(Quantity, allow_none=True)
+
     _use_time = Bool(False)
     _show_datapoints = Bool(True)
     _zpd = Integer
@@ -604,7 +604,7 @@ class LinearCoord(Coord):
         # remove some methods with respect to the full NDArray
         # as they are not usefull for Coord.
         return ['data', 'labels', 'units', 'meta', 'title', 'name', 'offset', 'increment', 'linear', 'size', 'roi',
-                'laser_frequency', 'show_datapoints']
+                'show_datapoints']
 
     def set_laser_frequency(self, frequency=15798.26 * ur('cm^-1')):
 
@@ -612,7 +612,7 @@ class LinearCoord(Coord):
             frequency = frequency * ur('cm^-1')
 
         frequency.ito('Hz')
-        self._laser_frequency = frequency
+        self.meta.laser_frequency = frequency
 
         if self._use_time:
             spacing = 1. / frequency
@@ -643,8 +643,8 @@ class LinearCoord(Coord):
     def _use_time_axis(self, val):
 
         self._use_time = val
-        if self._laser_frequency is not None:
-            self.set_laser_frequency(self._laser_frequency)
+        if 'laser_frequency' in self.meta:
+            self.set_laser_frequency(self.meta.laser_frequency)
 
     @property
     def show_datapoints(self):
@@ -652,7 +652,7 @@ class LinearCoord(Coord):
         Bool : True if axis must discard values and show only datapoints.
 
         """
-        if self.units.dimensionality not in ['[time]', '[length]']:
+        if not 'laser_frequency' in self.meta  or self.units.dimensionality not in ['[time]', '[length]']:
             return False
 
         return self._show_datapoints
@@ -667,13 +667,11 @@ class LinearCoord(Coord):
         """
         Quantity: Laser frequency (if needed)
         """
-
-        return self._laser_frequency
+        return self.meta.laser_frequency
 
     @laser_frequency.setter
     def laser_frequency(self, val):
-
-        self._laser_frequency = val
+        self.meta.aser_frequency = val
 
 
 # ======================================================================================================================
