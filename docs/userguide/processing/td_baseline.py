@@ -76,5 +76,3 @@ _ = spec2.plot()
 dc_corrected_fid2 = fid2.dc()
 spec2 = scp.fft(dc_corrected_fid2)
 _ = spec2.plot()
-
-# %%
