@@ -76,7 +76,7 @@ def _write_csv(*args, **kwargs):
 
     # Make csv file for 1D dataset: first and 2d column are the unique axis and data, respectively
     with filename.open('w', newline='') as fid:
-        writer = csv.writer(fid, delimiter=";")
+        writer = csv.writer(fid, delimiter=delimiter)
 
         if dataset.ndim == 1:         # if statement for future implementation for ndim > 1....
             if dataset.coordset is not None:
