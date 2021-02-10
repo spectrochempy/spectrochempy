@@ -460,7 +460,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             sfo1 = 0 * ur.Hz
             bf1 = sfo1
             dw = x.spacing
-            sw = 1 / 4 / dw
+            sw = 1 / 2 / dw
             sf = -sw / 2
             size = size // 2
 

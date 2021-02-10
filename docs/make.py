@@ -38,7 +38,7 @@ warnings.filterwarnings(action='ignore', category=RemovedInSphinx40Warning)
 PROJECTNAME = "spectrochempy"
 REPO_URI = f"spectrochempy/{PROJECTNAME}"
 API_GITHUB_URL = "https://api.github.com"
-URL_SCPY = "spectrochempy.github.io/spectrochempy"
+URL_SCPY = "www.spectrochempy.fr"
 
 # GENERAL PATHS
 DOCS = Path(__file__).parent
@@ -186,6 +186,22 @@ class BuildDocumentation(object):
         print(f"\n{'-' * 130}\nBuild finished. The {builder.upper()} pages "
               f"are in {outdir}.")
 
+        if doc_version == 'stable':
+            doc_version = 'latest'
+            # make also the lastest identical
+            print(f'\n{builder.upper()} BUILDING:')
+            srcdir = confdir = DOCS
+            outdir = f"{BUILDDIR}/{doc_version}"
+            doctreesdir = f"{DOCTREES}/{doc_version}"
+            sp = Sphinx(srcdir, confdir, outdir, doctreesdir, builder)
+            sp.verbosity = 1
+            sp.build()
+
+            print(f"\n{'-' * 130}\nBuild 'latest' finished. The {builder.upper()} pages "
+                f"are in {outdir}.")
+            doc_version = 'stable'
+
+
         if builder == 'html':
             self.make_redirection_page()
 
@@ -307,7 +323,7 @@ class BuildDocumentation(object):
         <p>
         We have moved away from the <strong>spectrochempy.github.io</strong> domain.
         If you're not automatically redirected, please visit us at
-        <a href="https://{URL_SCPY}">{URL_SCPY}</a>.
+        <a href="https://{URL_SCPY}">https://{URL_SCPY}</a>.
         </p>
         </body>
         </html>

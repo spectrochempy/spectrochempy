@@ -14,6 +14,8 @@
 
 * Problem with trapz(), simps()
 
+* FIX: interferogram x scaling
+
 ## Version 0.2.7
 
 **NEW FEATURES**

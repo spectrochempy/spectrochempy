@@ -43,6 +43,7 @@ from spectrochempy.units import ur
 # %%
 ir = scp.read_spa("irdata/interferogram/interfero.SPA")
 ir.dc(inplace=True)
+#ir.x = ir.x * conv
 _ = ir.plot()
 
 # %%
@@ -86,5 +87,3 @@ _ = irs.plot(label='omnic')
 _ = (irt - .2).plot(c='red', clear=False, xlim=(3999, 400), label='no hamming')
 ax = (irth - .4).plot(c='green', clear=False, xlim=(3999, 400), label='hamming')
 _ = ax.legend()
-
-# %%

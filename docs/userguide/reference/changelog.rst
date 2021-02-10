@@ -1,6 +1,38 @@
 What's new
 ==========
 
+Version 0.2.8
+-------------
+
+**NEW FEATURES**
+
+-  Added read_quadera() for Pfeiffer Vacuum’s QUADERA® MS files
+
+-  Added test for trapz(), simps(), readquadera()
+
+**BUGS FIXED**
+
+-  Problem with trapz(), simps()
+
+Version 0.2.7
+-------------
+
+**NEW FEATURES**
+
+-  Test and data for read_carroucell(), read_srs(), read_dso()
+
+-  Added NMR processing of 2D spectra.
+
+-  Added FTIR interferogram processing.
+
+**BUGS FIXED**
+
+-  Problem with read_carroucell(), read_srs(), read_dso()
+
+-  Colaboratory compatibility
+
+-  Improved check updates
+
 Version 0.2.6
 -------------
 
@@ -17,6 +49,8 @@ Version 0.2.6
 -  Adding quantity to datasets with different scaling (#199).
 
 -  Math operates now on linear coordinates.
+
+-  Compatibility with python 3.6
 
 Version 0.2.5
 -------------
