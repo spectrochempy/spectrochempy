@@ -1,4 +1,7 @@
 # What\'s new
+## Version 0.2.9
+
+* Hotfix : regarding dispay of NMR x scale
 
 ## Version 0.2.8
 
