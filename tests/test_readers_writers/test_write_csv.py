@@ -6,14 +6,14 @@
 # ======================================================================================================================
 
 
-import spectrochempy as scp
 import pytest
+
+import spectrochempy as scp
 
 
 def test_write_csv(IR_dataset_2D):
-
     # 1D dataset without coords
-    ds = scp.NDDataset([1,2,3])
+    ds = scp.NDDataset([1, 2, 3])
     f = ds.write_csv('myfile.csv', confirm=False)
     assert f.name == 'myfile.csv'
     f.unlink()
@@ -28,4 +28,3 @@ def test_write_csv(IR_dataset_2D):
     ds = IR_dataset_2D
     with pytest.raises(NotImplementedError):
         f = ds.write_csv('myfile.csv', confirm=False)
-

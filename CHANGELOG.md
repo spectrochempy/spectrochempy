@@ -10,6 +10,8 @@
   
 * Added test for trapz(), simps(), readquadera()
 
+* Improved displaying of Interferograms
+
 **BUGS FIXED**
 
 * Problem with trapz(), simps()
