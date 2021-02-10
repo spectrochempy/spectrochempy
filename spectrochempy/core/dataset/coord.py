@@ -12,7 +12,7 @@ __all__ = ['Coord', 'LinearCoord']
 
 import textwrap
 
-from traitlets import Bool, observe, All, Unicode
+from traitlets import Bool, observe, All, Unicode, Instance, Integer
 
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndmath import NDMath, _set_operators
@@ -484,6 +484,11 @@ class Coord(NDMath, NDArray):
 
 class LinearCoord(Coord):
 
+    _flaser = Instance(Quantity, allow_none=True)
+    _use_time_axis = Bool(True)
+    _show_datapoints = Bool(True)
+    _zpd = Integer
+
     def __init__(self, *args, offset=0.0, increment=1.0, **kwargs):
         """
         Linear coordinates.
@@ -600,20 +605,71 @@ class LinearCoord(Coord):
     def __dir__(self):
         # remove some methods with respect to the full NDArray
         # as they are not usefull for Coord.
-        return ['data', 'labels', 'units', 'meta', 'title', 'name', 'offset', 'increment', 'linear', 'size', 'roi']
+        return ['data', 'labels', 'units', 'meta', 'title', 'name', 'offset', 'increment', 'linear', 'size', 'roi',
+                'flaser', 'show_datapoints']
 
     def set_laser_frequency(self, frequency=15798.26 * ur('cm^-1')):
 
         if not isinstance(frequency, Quantity):
             frequency = frequency * ur('cm^-1')
+
         frequency.ito('Hz')
+        self._flaser = frequency
 
-        spacing = 1. / frequency
-        spacing.ito('picoseconds')
+        if self._use_time_axis:
+            spacing = 1. / frequency
+            spacing.ito('picoseconds')
 
-        self.increment = spacing.m
-        self.units = 'picoseconds'
-        self.title = 'time'
+            self.increment = spacing.m
+            self.offset = 0
+            self._units = ur.picoseconds
+            self.title = 'time'
+
+        else:
+            frequency.ito('cm^-1')
+            spacing = 1. / frequency
+            spacing.ito('mm')
+
+            self.increment = spacing.m
+            self.offset = -self.increment * self._zpd
+            self._units = ur.mm
+            self.title = 'optical path difference'
+
+    @property
+    def use_time_axis(self):
+        """
+        Bool : True if time scale must be used for interferogram axis. Else it will be set to optical path difference.
+
+        """
+        return self._use_time_axis
+
+    @use_time_axis.setter
+    def use_time_axis(self, val):
+
+        self._use_time_axis = val
+        self.set_laser_frequency(self._flaser)
+
+    @property
+    def show_datapoints(self):
+        """
+        Bool : True if axis must discard values and show only datapoints.
+
+        """
+        if self.units.dimensionality not in ['[time]', '[length]']:
+            return False
+
+        return self._show_datapoints
+
+    @show_datapoints.setter
+    def show_datapoints(self, val):
+
+        self._show_datapoints = val
+
+
+
+
+
+
 
 
 # ======================================================================================================================

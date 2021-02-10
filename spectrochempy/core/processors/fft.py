@@ -348,6 +348,9 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             # linearization failed
             error = True
 
+    if hasattr(x, 'use_time_axis'):
+        x.use_time_axis = True  # we need to havze dimentionless or time units
+
     if not error:
         # OK we can proceed
 
@@ -472,6 +475,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
 
             # newcoord = type(x)(np.arange(size) * deltaf + first)
             newcoord = LinearCoord.arange(size) * deltaf + first
+            newcoord.show_datapoints = False
             newcoord.name = x.name
             new.title = 'intensity'
             if is_nmr:

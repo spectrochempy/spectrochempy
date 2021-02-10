@@ -23,6 +23,7 @@ import matplotlib as mpl
 import numpy as np
 
 from spectrochempy.core.plotters.plotutils import make_label
+from spectrochempy.core.dataset.coord import Coord
 
 # ======================================================================================================================
 # nddataset plot2D functions
@@ -284,7 +285,13 @@ def plot_2D(dataset, **kwargs):
     # the actual dimension name is the last in the new.dims list
     dimx = new.dims[-1]
     x = getattr(new, dimx)
+
     xsize = new.shape[-1]
+    show_x_points = x.show_datapoints
+    if show_x_points:
+        # remove data and units for display
+        x = Coord.arange(xsize)
+
     discrete_data = False
 
     if x is not None and (not x.is_empty or x.is_labeled):
@@ -327,6 +334,12 @@ def plot_2D(dataset, **kwargs):
     dimy = new.dims[-2]
     y = getattr(new, dimy)
     ysize = new.shape[-2]
+
+    show_y_points = y.show_datapoints
+    if show_y_points:
+        # remove data and units for display
+        y = Coord.arange(ysize)
+
     if y is not None and (not y.is_empty or y.is_labeled):
         ydata = y.data
         if not np.any(ydata):
@@ -543,6 +556,8 @@ def plot_2D(dataset, **kwargs):
     # x label
     # ------------------------------------------------------------------------------------------------------------------
     xlabel = kwargs.get("xlabel", None)
+    if show_x_points:
+        xlabel = 'data points'
     if not xlabel:
         xlabel = make_label(x, new.dims[-1])
     ax.set_xlabel(xlabel)
@@ -556,6 +571,8 @@ def plot_2D(dataset, **kwargs):
     # y label
     # ------------------------------------------------------------------------------------------------------------------
     ylabel = kwargs.get("ylabel", None)
+    if show_y_points:
+        ylabel = 'data points'
     if not ylabel:
         if method in ['stack']:
             ylabel = make_label(new, 'values')
