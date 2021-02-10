@@ -50,26 +50,19 @@ ir = scp.read_spa("irdata/interferogram/interfero.SPA")
 prefs = ir.preferences
 prefs.figure.figsize = (7,3)
 _ = ir.plot()
+print('number of points = ', ir.size)
 
 # %% [markdown]
 # Plotting a zoomed region around the maximum of the interferogram (the so-called `ZPD`: `Zero optical Path Difference` ) we can see that it is located around the 64th points. The FFT processing will need this information, but it will be determined automatically.
 
 # %%
-_ = ir.plot(xlim=(0,128))
+_ = ir.plot(xlim=(0,128)) 
 
 # %% [markdown]
-# Now actually the scale of the interferogramme can also be displayed as a function of the sampling time, according to the reference laser frequency.
-# For this we just make `show_datapoints` to False: 
+# The `x` scale of the interferogramme can also be displayed as a function of optical path difference. For this we just make `show_datapoints` to False: 
 
 # %%
 ir.x.show_datapoints = False
-_ = ir.plot(xlim=(0,0.5))
-
-# %% [markdown]
-# However it migth also be desirable to display the optical path difference. In this case, just set : `use_time_axis` to False 
-
-# %%
-ir.x.use_time_axis = False
 _ = ir.plot(xlim=(-0.04, 0.04))
 
 # %% [markdown]

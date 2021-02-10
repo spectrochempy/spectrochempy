@@ -56,9 +56,9 @@ def _apodize_method(**units):
 
             # Get the coordinates for the last dimension
             x = new.coordset[dim]
-            if hasattr(x, 'use_time_axis'):
-                store = x.use_time_axis
-                x.use_time_axis = True  # we need to have dimentionless or time units
+            if hasattr(x, '_use_time_axis'):
+                store = x._use_time_axis
+                x._use_time_axis = True  # we need to have dimentionless or time units
 
             # check if the dimensionality is compatible with this kind of functions
             if x.unitless or x.dimensionless or x.units.dimensionality == '[time]':
@@ -124,8 +124,8 @@ def _apodize_method(**units):
             if swaped:
                 new.swapdims(axis, -1, inplace=True)  # must be done inplace
 
-            if hasattr(x, 'use_time_axis'):
-                new.x.use_time_axis = store
+            if hasattr(x, '_use_time_axis'):
+                new.x._use_time_axis = store
 
             if retapod:
                 apodcurve = type(new)(apod_arr, coordset=[x])

@@ -759,7 +759,7 @@ def _read_spa(*args, **kwargs):
         dataset.meta.td = list(dataset.shape)
         dataset.x._zpd = int(np.argmax(dataset)[-1] ) # zero path difference
         dataset.x.set_laser_frequency(frequency=15798.26)
-        dataset.x.use_time_axis = True  # True to have time, else it will be optical path difference
+        dataset.x._use_time_axis = False  # True to have time, else it will be optical path difference
 
     return dataset
 
@@ -908,7 +908,7 @@ def _read_srs(*args, **kwargs):
         dataset.meta.td = list(dataset.shape)
         dataset.x._zpd = int(np.argmax(dataset)[-1]) # zero path difference
         dataset.x.set_laser_frequency(frequency=15798.26)
-        dataset.x.use_time_axis = True  # True to have time, else it will be optical path difference
+        dataset.x._use_time_axis = False  # True to have time, else it will be optical path difference
 
     # uncomment below to load the last datafield
     # has the same dimension as the time axis

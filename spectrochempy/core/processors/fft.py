@@ -348,8 +348,8 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             # linearization failed
             error = True
 
-    if hasattr(x, 'use_time_axis'):
-        x.use_time_axis = True  # we need to havze dimentionless or time units
+    if hasattr(x, '_use_time_axis'):
+        x._use_time_axis = True  # we need to havze dimentionless or time units
 
     if not error:
         # OK we can proceed

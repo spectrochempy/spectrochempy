@@ -485,7 +485,7 @@ class Coord(NDMath, NDArray):
 class LinearCoord(Coord):
 
     _laser_frequency = Instance(Quantity, allow_none=True)
-    _use_time_axis = Bool(True)
+    _use_time = Bool(False)
     _show_datapoints = Bool(True)
     _zpd = Integer
 
@@ -616,7 +616,7 @@ class LinearCoord(Coord):
         frequency.ito('Hz')
         self._laser_frequency = frequency
 
-        if self._use_time_axis:
+        if self._use_time:
             spacing = 1. / frequency
             spacing.ito('picoseconds')
 
@@ -636,17 +636,15 @@ class LinearCoord(Coord):
             self.title = 'optical path difference'
 
     @property
-    def use_time_axis(self):
-        """
-        Bool : True if time scale must be used for interferogram axis. Else it will be set to optical path difference.
+    def _use_time_axis(self):
+        # private property
+        # True if time scale must be used for interferogram axis. Else it will be set to optical path difference.
+        return self._use_time
 
-        """
-        return self._use_time_axis
+    @_use_time_axis.setter
+    def _use_time_axis(self, val):
 
-    @use_time_axis.setter
-    def use_time_axis(self, val):
-
-        self._use_time_axis = val
+        self._use_time = val
         if self._laser_frequency is not None:
             self.set_laser_frequency(self._laser_frequency)
 
