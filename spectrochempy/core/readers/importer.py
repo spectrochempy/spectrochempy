@@ -24,10 +24,11 @@ FILETYPES = [('scp', 'SpectroChemPy files (*.scp)'), ('omnic', 'Nicolet OMNIC fi
              ('matlab', 'MATLAB files (*.mat)'), ('dso', 'Data Set Object files (*.dso)'),
              ('jcamp', 'JCAMP-DX files (*.jdx *.dx)'), ('csv', 'CSV files (*.csv)'),
              ('excel', 'Microsoft Excel files (*.xls)'), ('zip', 'Compressed folder of data files (*.zip)'),
+             ('quadera', 'Quadera ascii files (*.asc)')
              #  ('all', 'All files (*.*)')
              ]
 ALIAS = [('spg', 'omnic'), ('spa', 'omnic'), ('srs', 'omnic'), ('mat', 'matlab'), ('txt', 'labspec'), ('jdx', 'jcamp'),
-         ('dx', 'jcamp'), ('xls', 'excel'), ]
+         ('dx', 'jcamp'), ('xls', 'excel'), ('asc', 'quadera')]
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -155,8 +156,8 @@ class Importer(HasTraits):
             except IOError as e:
                 warning_(str(e))
 
-            except Exception:
-                warning_(f'The file `{filename}` has a known extension but it could not be read. It is ignored!')
+#            except Exception:
+#                warning_(f'The file `{filename}` has a known extension but it could not be read. It is ignored!')
 
         if len(datasets) > 1:
             datasets = self._do_merge(datasets, **kwargs)
