@@ -19,7 +19,7 @@ import numpy as np
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.importer import importermethod, Importer
-
+from spectrochempy.units import Quantity
 
 # ======================================================================================================================
 # Public functions
@@ -756,9 +756,11 @@ def _read_spa(*args, **kwargs):
 
     if dataset.x.units is None and dataset.x.title == 'data points':
         # interferogram
+        dataset.meta.interferogram = True
         dataset.meta.td = list(dataset.shape)
         dataset.x._zpd = int(np.argmax(dataset)[-1])  # zero path difference
-        dataset.x.set_laser_frequency(frequency=15798.26)
+        dataset.meta.laser_frequency = Quantity('15798.26 cm^-1')
+        dataset.x.set_laser_frequency()
         dataset.x._use_time_axis = False  # True to have time, else it will be optical path difference
 
     return dataset
@@ -906,9 +908,11 @@ def _read_srs(*args, **kwargs):
 
     if dataset.x.units is None and dataset.x.title == 'data points':
         # interferogram
+        dataset.meta.interferogram = True
         dataset.meta.td = list(dataset.shape)
         dataset.x._zpd = int(np.argmax(dataset)[-1])  # zero path difference
-        dataset.x.set_laser_frequency(frequency=15798.26)
+        dataset.meta.laser_frequency = Quantity('15798.26 cm^-1')
+        dataset.x.set_laser_frequency()
         dataset.x._use_time_axis = False  # True to have time, else it will be optical path difference
 
     # uncomment below to load the last datafield

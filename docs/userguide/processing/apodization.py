@@ -13,6 +13,21 @@
 #     display_name: Python 3
 #     language: python
 #     name: python3
+#   language_info:
+#     codemirror_mode:
+#       name: ipython
+#       version: 3
+#     file_extension: .py
+#     mimetype: text/x-python
+#     name: python
+#     nbconvert_exporter: python
+#     pygments_lexer: ipython3
+#     version: 3.9.1
+#   widgets:
+#     application/vnd.jupyter.widget-state+json:
+#       state: {}
+#       version_major: 2
+#       version_minor: 0
 # ---
 
 # %% [markdown]
@@ -21,7 +36,6 @@
 # %%
 import spectrochempy as scp
 from spectrochempy.units import ur
-import os
 
 # %% [markdown]
 # ## Introduction
@@ -31,7 +45,7 @@ import os
 
 # %%
 # reead an experimental spectra
-path = os.path.join('nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d')
+path = scp.pathclean('nmrdata/bruker/tests/nmr/topspin_1d')  # the method pathclean allow to write pth in linux or window style indifferently
 dataset = scp.NDDataset.read_topspin(path, expno=1, remove_digital_filter=True)
 dataset = dataset / dataset.max()  # normalization
 # store original data
@@ -190,7 +204,3 @@ _ = nd.plot()
 new, curve = nd.qsin(ssb=1, retapod=True)
 _ = curve.plot(color='g', clear=False)
 _ = new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color='g', clear=False)
-
-# %%
-
-# %%
