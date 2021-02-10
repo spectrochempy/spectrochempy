@@ -608,7 +608,7 @@ class LinearCoord(Coord):
             frequency = frequency * ur('cm^-1')
         frequency.ito('Hz')
 
-        spacing = 1 / (2 * frequency)
+        spacing = 1. / frequency
         spacing.ito('picoseconds')
 
         self.increment = spacing.m
