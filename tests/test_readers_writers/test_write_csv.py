@@ -5,18 +5,27 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-from pathlib import Path
 
 import spectrochempy as scp
-from spectrochempy.core import preferences as prefs
-from spectrochempy.core.dataset.nddataset import NDDataset
+import pytest
 
 
-def test_write_csv():
-    datadir = prefs.datadir
+def test_write_csv(IR_dataset_2D):
+
+    # 1D dataset without coords
     ds = scp.NDDataset([1,2,3])
-    f = ds.write_csv('myfile')
-
+    f = ds.write_csv('myfile.csv', confirm=False)
     assert f.name == 'myfile.csv'
-
     f.unlink()
+
+    # 1D dataset with coords
+    ds = IR_dataset_2D[0]
+    f = ds.write_csv('myfile.csv', confirm=False)
+    assert f.name == 'myfile.csv'
+    f.unlink()
+
+    # 2D dataset with coords
+    ds = IR_dataset_2D
+    with pytest.raises(NotImplementedError):
+        f = ds.write_csv('myfile.csv', confirm=False)
+

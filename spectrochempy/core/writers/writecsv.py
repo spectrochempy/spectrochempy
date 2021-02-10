@@ -67,10 +67,14 @@ def _write_csv(*args, **kwargs):
     delimiter = kwargs.get('delimiter', prefs.csv_delimiter)
 
     # check dimensionality of the dataset
-    if dataset.ndim > 1:
+    if dataset.squeeze().ndim > 1:
         raise NotImplementedError('Only implemented for 1D NDDatasets')
 
-    # Make csv file for 1D dataset: frst and 2d column are the unique axis and data, respectively
+    # squeeze if necessary
+    if dataset.ndim > 1:
+        dataset = dataset.squeeze()
+
+    # Make csv file for 1D dataset: first and 2d column are the unique axis and data, respectively
     with filename.open('w', newline='') as fid:
         writer = csv.writer(fid, delimiter=";")
 
@@ -96,7 +100,7 @@ def _write_csv(*args, **kwargs):
         writer.writerow(coltitles)
         if col_coord:
             for i, data in enumerate(dataset.data):
-                writer.writerow([dataset.y.data[i], data])
+                writer.writerow([dataset.coordset[-1].data[i], data])
         else:
             for i, data in enumerate(dataset.data):
                 writer.writerow([data])
