@@ -4,6 +4,8 @@
 
 **NEW FEATURES**
 
+* Added write_csv() dir 1D datasets
+
 * Added read_quadera() for Pfeiffer Vacuum's QUADERA® MS files
   
 * Added test for trapz(), simps(), readquadera()
