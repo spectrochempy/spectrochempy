@@ -484,7 +484,7 @@ class Coord(NDMath, NDArray):
 
 class LinearCoord(Coord):
 
-    _flaser = Instance(Quantity, allow_none=True)
+    _laser_frequency = Instance(Quantity, allow_none=True)
     _use_time_axis = Bool(True)
     _show_datapoints = Bool(True)
     _zpd = Integer
@@ -606,7 +606,7 @@ class LinearCoord(Coord):
         # remove some methods with respect to the full NDArray
         # as they are not usefull for Coord.
         return ['data', 'labels', 'units', 'meta', 'title', 'name', 'offset', 'increment', 'linear', 'size', 'roi',
-                'flaser', 'show_datapoints']
+                'laser_frequency', 'show_datapoints']
 
     def set_laser_frequency(self, frequency=15798.26 * ur('cm^-1')):
 
@@ -614,7 +614,7 @@ class LinearCoord(Coord):
             frequency = frequency * ur('cm^-1')
 
         frequency.ito('Hz')
-        self._flaser = frequency
+        self._laser_frequency = frequency
 
         if self._use_time_axis:
             spacing = 1. / frequency
@@ -647,7 +647,8 @@ class LinearCoord(Coord):
     def use_time_axis(self, val):
 
         self._use_time_axis = val
-        self.set_laser_frequency(self._flaser)
+        if self._laser_frequency is not None:
+            self.set_laser_frequency(self._laser_frequency)
 
     @property
     def show_datapoints(self):
@@ -666,7 +667,18 @@ class LinearCoord(Coord):
         self._show_datapoints = val
 
 
+    @property
+    def laser_frequency(self):
+        """
+        Quantity: Laser frequency (if needed)
+        """
 
+        return self._laser_frequency
+
+    @laser_frequency.setter
+    def laser_frequency(self, val):
+
+        self._laser_frequency = val
 
 
 

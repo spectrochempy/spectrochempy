@@ -287,7 +287,9 @@ def plot_2D(dataset, **kwargs):
     x = getattr(new, dimx)
 
     xsize = new.shape[-1]
-    show_x_points = x.show_datapoints
+    show_x_points = False
+    if x is not None and hasattr(x, 'show_datapoints'):
+        show_x_points = x.show_datapoints
     if show_x_points:
         # remove data and units for display
         x = Coord.arange(xsize)
@@ -335,7 +337,9 @@ def plot_2D(dataset, **kwargs):
     y = getattr(new, dimy)
     ysize = new.shape[-2]
 
-    show_y_points = y.show_datapoints
+    show_y_points = False
+    if y is not None and hasattr(y, 'show_datapoints'):
+        show_y_points = y.show_datapoints
     if show_y_points:
         # remove data and units for display
         y = Coord.arange(ysize)

@@ -887,8 +887,10 @@ def _read_srs(*args, **kwargs):
     dataset.origin = 'omnic'
 
     # now add coordinates
-    _x = Coord(np.around(np.linspace(info['firstx'], info['lastx'], info['nx'], 3)), title=info['xtitle'],
-               units=info['xunits'])
+    #_x = Coord(np.around(np.linspace(info['firstx'], info['lastx'], info['nx'], 3)), title=info['xtitle'],
+    #           units=info['xunits'])
+    spacing = (info['lastx'] - info['firstx']) / (info['nx'] - 1)
+    _x = LinearCoord(offset=info['firstx'], increment=spacing, size=info['nx'], title=info['xtitle'], units=info['xunits'])
 
     _y = Coord(np.around(np.linspace(info['firsty'], info['lasty'], info['ny']), 3), title='Time', units='minute',
                labels=names)

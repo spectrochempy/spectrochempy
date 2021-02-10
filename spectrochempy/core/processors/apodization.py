@@ -58,7 +58,7 @@ def _apodize_method(**units):
             x = new.coordset[dim]
             if hasattr(x, 'use_time_axis'):
                 store = x.use_time_axis
-                x.use_time_axis = True  # we need to havze dimentionless or time units
+                x.use_time_axis = True  # we need to have dimentionless or time units
 
             # check if the dimensionality is compatible with this kind of functions
             if x.unitless or x.dimensionless or x.units.dimensionality == '[time]':

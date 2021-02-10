@@ -362,7 +362,9 @@ def plot_1D(dataset, **kwargs):
     x = getattr(new, dimx)
 
     xsize = new.size
-    show_x_points = x.show_datapoints
+    show_x_points = False
+    if x is not None and hasattr(x, 'show_datapoints'):
+        show_x_points = x.show_datapoints
     if show_x_points:
         # remove data and units for display
         x = Coord.arange(xsize)

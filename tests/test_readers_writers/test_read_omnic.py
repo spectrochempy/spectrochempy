@@ -20,7 +20,7 @@ def test_read_omnic():
 
     # class method
     nd1 = scp.NDDataset.read_omnic('irdata/nh4y-activation.spg')
-    assert nd1.title == 'Absorbance'
+    assert nd1.title == 'absorbance'
     assert str(nd1) == 'NDDataset: [float32] a.u. (shape: (y:55, x:5549))'
 
     # API method
