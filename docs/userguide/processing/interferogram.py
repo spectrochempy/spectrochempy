@@ -66,7 +66,7 @@ ir.x.show_datapoints = False
 _ = ir.plot(xlim=(-0.04, 0.04))
 
 # %% [markdown]
-# Note that the time scale of the interferogram has been calculated using a laser frequency of 15798.26 cm$^{-1}$. If
+# Note that the `x` scale of the interferogram has been calculated using a laser frequency of 15798.26 cm$^{-1}$. If
 # this is not correct you can change it using the `set_laser_frequency` coordinate method:
 
 # %%
@@ -102,6 +102,7 @@ _ = irth.plot(xlim=(3999, 400))
 
 # %%
 irs = scp.read_spa("irdata/interferogram/spectre.SPA")
+prefs.figure.figsize = (7,6)
 _ = irs.plot(label='omnic')
 _ = (irt - .4).plot(c='red', clear=False, xlim=(3999, 400), label='no hamming')
 ax = (irth - .2).plot(c='green', clear=False, xlim=(3999, 400), label='hamming')
