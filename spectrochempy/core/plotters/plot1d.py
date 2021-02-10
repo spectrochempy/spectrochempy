@@ -21,7 +21,6 @@ from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
 from .plotutils import make_label
 from ...utils import is_sequence, deprecated
-
 from spectrochempy.core.dataset.coord import Coord
 
 
@@ -350,7 +349,6 @@ def plot_1D(dataset, **kwargs):
     ax.set_yscale(yscale)
 
     ax.grid(prefs.axes_grid)
-
 
     # ------------------------------------------------------------------------------------------------------------------
     # plot the dataset

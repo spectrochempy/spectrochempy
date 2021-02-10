@@ -11,7 +11,6 @@ This module implements the class |Coord|.
 __all__ = ['Coord', 'LinearCoord']
 
 import textwrap
-
 from traitlets import Bool, observe, All, Unicode, Instance, Integer
 
 from spectrochempy.core.dataset.ndarray import NDArray
@@ -483,7 +482,6 @@ class Coord(NDMath, NDArray):
 
 
 class LinearCoord(Coord):
-
     _laser_frequency = Instance(Quantity, allow_none=True)
     _use_time = Bool(False)
     _show_datapoints = Bool(True)
@@ -664,7 +662,6 @@ class LinearCoord(Coord):
 
         self._show_datapoints = val
 
-
     @property
     def laser_frequency(self):
         """
@@ -677,9 +674,6 @@ class LinearCoord(Coord):
     def laser_frequency(self, val):
 
         self._laser_frequency = val
-
-
-
 
 
 # ======================================================================================================================

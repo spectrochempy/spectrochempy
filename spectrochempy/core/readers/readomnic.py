@@ -604,7 +604,7 @@ def _read_spg(*args, **kwargs):
 
         timestamps.append(timestamp)
 
-        # Not used at present  # -------------------  # extract positions of '1B' codes (history text  #  --  #
+        # Not used at present  # -------------------  # extract positions of '1B' codes (history text  #  --  #  #
         # sometimes absent, e.g. peakresolve)  # key_is_1B = (keys == 27)  # indices1B = np.nonzero(key_is_1B)  #  #
         # position1B = 304 * np.ones(len(indices1B[0]), dtype='int') + 16 * indices6B[0]  # if len(position1B) != 0:
         #    # read history texts  #    for j in range(nspec):  #        # determine the position of information  #
@@ -757,7 +757,7 @@ def _read_spa(*args, **kwargs):
     if dataset.x.units is None and dataset.x.title == 'data points':
         # interferogram
         dataset.meta.td = list(dataset.shape)
-        dataset.x._zpd = int(np.argmax(dataset)[-1] ) # zero path difference
+        dataset.x._zpd = int(np.argmax(dataset)[-1])  # zero path difference
         dataset.x.set_laser_frequency(frequency=15798.26)
         dataset.x._use_time_axis = False  # True to have time, else it will be optical path difference
 
@@ -887,10 +887,11 @@ def _read_srs(*args, **kwargs):
     dataset.origin = 'omnic'
 
     # now add coordinates
-    #_x = Coord(np.around(np.linspace(info['firstx'], info['lastx'], info['nx'], 3)), title=info['xtitle'],
+    # _x = Coord(np.around(np.linspace(info['firstx'], info['lastx'], info['nx'], 3)), title=info['xtitle'],
     #           units=info['xunits'])
     spacing = (info['lastx'] - info['firstx']) / (info['nx'] - 1)
-    _x = LinearCoord(offset=info['firstx'], increment=spacing, size=info['nx'], title=info['xtitle'], units=info['xunits'])
+    _x = LinearCoord(offset=info['firstx'], increment=spacing, size=info['nx'], title=info['xtitle'],
+                     units=info['xunits'])
 
     _y = Coord(np.around(np.linspace(info['firsty'], info['lasty'], info['ny']), 3), title='Time', units='minute',
                labels=names)
@@ -906,7 +907,7 @@ def _read_srs(*args, **kwargs):
     if dataset.x.units is None and dataset.x.title == 'data points':
         # interferogram
         dataset.meta.td = list(dataset.shape)
-        dataset.x._zpd = int(np.argmax(dataset)[-1]) # zero path difference
+        dataset.x._zpd = int(np.argmax(dataset)[-1])  # zero path difference
         dataset.x.set_laser_frequency(frequency=15798.26)
         dataset.x._use_time_axis = False  # True to have time, else it will be optical path difference
 

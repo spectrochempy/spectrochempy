@@ -48,18 +48,21 @@ ir = scp.read_spa("irdata/interferogram/interfero.SPA")
 
 # %%
 prefs = ir.preferences
-prefs.figure.figsize = (7,3)
+prefs.figure.figsize = (7, 3)
 _ = ir.plot()
 print('number of points = ', ir.size)
 
 # %% [markdown]
-# Plotting a zoomed region around the maximum of the interferogram (the so-called `ZPD`: `Zero optical Path Difference` ) we can see that it is located around the 64th points. The FFT processing will need this information, but it will be determined automatically.
+# Plotting a zoomed region around the maximum of the interferogram (the so-called `ZPD`: `Zero optical Path
+# Difference` ) we can see that it is located around the 64th points. The FFT processing will need this information,
+# but it will be determined automatically.
 
 # %%
-_ = ir.plot(xlim=(0,128)) 
+_ = ir.plot(xlim=(0, 128))
 
 # %% [markdown]
-# The `x` scale of the interferogramme can also be displayed as a function of optical path difference. For this we just make `show_datapoints` to False: 
+# The `x` scale of the interferogramme can also be displayed as a function of optical path difference. For this we
+# just make `show_datapoints` to False:
 
 # %%
 ir.x.show_datapoints = False
@@ -85,7 +88,7 @@ _ = irt.plot(xlim=(3999, 400))
 
 # %% [markdown]
 # A `Happ-Genzel` (Hamming window) apodization can also applied prior to the
-# Fourier transformation in order to decrease the H2O narrow bands. 
+# Fourier transformation in order to decrease the H2O narrow bands.
 
 # %%
 ird = ir.dc()
@@ -102,7 +105,7 @@ _ = irth.plot(xlim=(3999, 400))
 
 # %%
 irs = scp.read_spa("irdata/interferogram/spectre.SPA")
-prefs.figure.figsize = (7,6)
+prefs.figure.figsize = (7, 6)
 _ = irs.plot(label='omnic')
 _ = (irt - .4).plot(c='red', clear=False, xlim=(3999, 400), label='no hamming')
 ax = (irth - .2).plot(c='green', clear=False, xlim=(3999, 400), label='hamming')
