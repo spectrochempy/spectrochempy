@@ -4,7 +4,9 @@
 
 **NEW FEATURES**
 
-* Test for trapz(), simps()
+* Added read_quadera() for Pfeiffer Vacuum's QUADERA® MS files
+  
+* Added test for trapz(), simps(), readquadera()
 
 **BUGS FIXED**
 
