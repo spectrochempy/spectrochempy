@@ -8,9 +8,10 @@
 Plugin module to extend NDDataset with a JCAMP-DX export method.
 """
 # import os as os
-
+import csv
+from spectrochempy.core import debug_
 from spectrochempy.core.writers.exporter import Exporter, exportermethod
-
+from spectrochempy.core import dataset_preferences as prefs
 __all__ = ['write_csv']
 __dataset_methods__ = __all__
 
@@ -18,7 +19,8 @@ __dataset_methods__ = __all__
 # .......................................................................................................................
 def write_csv(*args, **kwargs):
     """
-    Writes a dataset in CSV format
+    Writes a dataset in CSV format. Currently oinly implemented for 1D datasets
+    or ND datasets with only one dimension of length larger than one
 
     Parameters
     ----------
@@ -31,9 +33,9 @@ def write_csv(*args, **kwargs):
         Where to write the specified `filename`. If not specified, write in the current directory.
     description: str, optional
         A Custom description.
-    csv_delimiter : str, optional
+    delimiter : str, optional
         Set the column delimiter in CSV file.
-        By default it is the one set in SpectroChemPy `Preferences`.
+        By default it is ',' or the one set in SpectroChemPy `Preferences`.
 
     Returns
     -------
@@ -42,12 +44,13 @@ def write_csv(*args, **kwargs):
 
     Examples
     --------
+    >>> import spectrochempy as scp
+    >>> ds = scp.NDDataset([1,2,3])
+    >>> f1 = ds.write_csv('myfile')
 
-    The extension will be added automatically
-    # >>> import spectrochempy as scp
-    # >>> ds = scp.NDDataset([1,2,3])
-    # >>> f = ds.write_csv('myfile')
-    # f.name = myfile.csv
+    >>> ds = scp.read('irdata/nh4y-activation.spg')
+    >>> f2 = ds[0].write_csd('single_spectrum.csv')
+
     """
     exporter = Exporter()
     kwargs['filetypes'] = ['CSV files (*.csv)']
@@ -57,4 +60,51 @@ def write_csv(*args, **kwargs):
 
 @exportermethod
 def _write_csv(*args, **kwargs):
-    raise NotImplementedError
+
+    debug_("writing csv file")
+
+    dataset, filename = args
+    dataset.filename = filename
+
+    delimiter = kwargs.get('delimiter', prefs.csv_delimiter)
+
+    # check dimensionality of the dataset
+    if dataset.squeeze().ndim > 1:
+        raise NotImplementedError('Only implemented for 1D NDDatasets')
+
+    # squeeze if necessary
+    if dataset.ndim > 1:
+        dataset = dataset.squeeze()
+
+    # Make csv file for 1D dataset: first and 2d column are the unique axis and data, respectively
+    with filename.open('w', newline='') as fid:
+        writer = csv.writer(fid, delimiter=delimiter)
+
+        if dataset.ndim == 1:         # if statement for future implementation for ndim > 1....
+            if dataset.coordset is not None:
+                col_coord = True
+                title_1 = dataset.coordset[-1].title
+                if dataset.coordset[-1].units is not None:
+                    title_1 += ' / ' + str(dataset.coordset[-1].units)
+            else:
+                col_coord = False
+
+            if dataset.units is not None:
+                title_2 = dataset.title + ' / ' + str(dataset.units)
+            else:
+                title_2 = dataset.title
+
+            if col_coord:
+                coltitles = [title_1, title_2]
+            else:
+                coltitles = [title_2]
+
+        writer.writerow(coltitles)
+        if col_coord:
+            for i, data in enumerate(dataset.data):
+                writer.writerow([dataset.coordset[-1].data[i], data])
+        else:
+            for i, data in enumerate(dataset.data):
+                writer.writerow([data])
+
+    return filename
