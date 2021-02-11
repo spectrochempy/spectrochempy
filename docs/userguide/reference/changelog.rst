@@ -1,18 +1,29 @@
 What's new
 ==========
 
+Version 0.2.9
+-------------
+
+-  Hotfix : regarding dispay of NMR x scale
+
 Version 0.2.8
 -------------
 
 **NEW FEATURES**
 
+-  Added write_csv() dir 1D datasets
+
 -  Added read_quadera() for Pfeiffer Vacuum’s QUADERA® MS files
 
 -  Added test for trapz(), simps(), readquadera()
 
+-  Improved displaying of Interferograms
+
 **BUGS FIXED**
 
 -  Problem with trapz(), simps()
+
+-  FIX: interferogram x scaling
 
 Version 0.2.7
 -------------

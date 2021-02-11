@@ -31,7 +31,7 @@ import requests
 from setuptools_scm import get_version
 from traitlets.config.configurable import Config
 from traitlets.config.application import Application
-from traitlets import Bool, Unicode, List, Integer, Union, HasTraits, Instance, default, observe
+from traitlets import Bool, Unicode, List, Integer, Union, HasTraits, Instance, default, observe, import_item
 from traitlets.config.manager import BaseJSONConfigManager
 import matplotlib as mpl
 from matplotlib import pyplot as plt
@@ -383,8 +383,16 @@ class DataDir(HasTraits):
     @default('path')
     def _get_path_default(self):
         # the spectra path in package data
-        return Path(get_pkg_path('testdata', 'scp_data'))
-
+        # OLD: return Path(get_pkg_path('testdata', 'scp_data'))
+        # now installed with spectrochempy_data
+        # we need to fing the share directory
+        conda_env = os.environ['CONDA_DEFAULT_ENV']
+        parents = Path(import_item('numpy').__file__).parents # I use numpy because spectrochempy may be installed in
+        # mode develop and so do not return the correct path.
+        i = 0
+        while parents[i].name != conda_env:
+            i += 1
+        return parents[i] / 'share' / 'spectrochempy_data' / 'testdata'
 
 # ======================================================================================================================
 # General Preferences
@@ -405,8 +413,6 @@ class GeneralPreferences(MetaConfigurable):
     # Gonfiguration entries
     # ------------------------------------------------------------------------------------------------------------------
 
-    cloudURL = Unicode(help='URL where to look for data by default if not found on datadir').tag(config=True,
-                                                                                                 type="folder")
     databases = Union((Instance(Path), Unicode()), help='Directory where to look for database files such as csv').tag(
             config=True, type="folder")
     datadir = Union((Instance(Path), Unicode()), help='Directory where to look for data by default').tag(config=True,
@@ -414,11 +420,6 @@ class GeneralPreferences(MetaConfigurable):
     show_info_on_loading = Bool(True, help='Display info on loading').tag(config=True)
     use_qt = Bool(False, help='Use QT for dialog instead of TK wich is the default. '
                               'If True the PyQt libraries must be installed').tag(config=True)
-
-    # ..................................................................................................................
-    @default('cloudURL')
-    def _get_default_cloudURL(self):
-        return 'https://drive.google.com/drive/folders/1rfc9O7jK6v_SbygzJHoFEXXxYY3wIqmh?usp=sharing'
 
     # ..................................................................................................................
     @default('databases')
