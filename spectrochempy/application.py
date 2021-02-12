@@ -386,14 +386,15 @@ class DataDir(HasTraits):
         # OLD: return Path(get_pkg_path('testdata', 'scp_data'))
         # now installed with spectrochempy_data
         # we need to fing the share directory
-        conda_env = os.environ['CONDA_DEFAULT_ENV']
-        parents = Path(import_item('numpy').__file__).parents # I use numpy because spectrochempy may be installed in
-        # mode develop and so do not return the correct path.
-        i = 0
-        while parents[i].name != conda_env:
-            i += 1
-        return parents[i] / 'share' / 'spectrochempy_data' / 'testdata'
-
+        conda_env = os.environ['CONDA_PREFIX']
+        # well but in conda build this cause a problem as $PREFIX is used
+        if not Path(conda_env).exists():
+            print( 'not FOUND', conda_env)
+            conda_env = os.environ['PREFIX']
+        print('Found CONDA_PREFIX', conda_env)
+        path = Path(conda_env) / 'share' / 'spectrochempy_data' / 'testdata'
+        print('PATH found', path)
+        return path
 # ======================================================================================================================
 # General Preferences
 # ======================================================================================================================
