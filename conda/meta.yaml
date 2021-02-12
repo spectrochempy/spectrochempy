@@ -64,6 +64,7 @@ requirements:
 
   test:
     - python                {{ python }}
+    - spectrochempy_data
 
 test:
   script_env:
