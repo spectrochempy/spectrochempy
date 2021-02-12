@@ -13,8 +13,9 @@ __dataset_methods__ = __all__
 
 import io
 from warnings import warn
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 import re
+
 import numpy as np
 
 from spectrochempy.core.dataset.nddataset import NDDataset, Coord
@@ -167,7 +168,7 @@ def _read_asc(*args, **kwargs):
             times[j][k] = datetime_.timestamp()
             # hours are given in 12h clock format, so we need to add 12h when hour is in the afternoon
             if times[j][k] < prev_timestamp:
-                times[j][k] += 3600*12
+                times[j][k] += 3600 * 12
             reltimes[j][k] = data[1 + 3 * k].replace(',', '.')
             ioncurrent[j][k] = data[2 + 3 * k].replace(',', '.')
         prev_timestamp = times[j][k]

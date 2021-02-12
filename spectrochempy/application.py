@@ -31,7 +31,7 @@ import requests
 from setuptools_scm import get_version
 from traitlets.config.configurable import Config
 from traitlets.config.application import Application
-from traitlets import Bool, Unicode, List, Integer, Union, HasTraits, Instance, default, observe, import_item
+from traitlets import Bool, Unicode, List, Integer, Union, HasTraits, Instance, default, observe
 from traitlets.config.manager import BaseJSONConfigManager
 import matplotlib as mpl
 from matplotlib import pyplot as plt
@@ -387,14 +387,10 @@ class DataDir(HasTraits):
         # now installed with spectrochempy_data
         # we need to fing the share directory
         conda_env = os.environ['CONDA_PREFIX']
-        # well but in conda build this cause a problem as $PREFIX is used
-        if not Path(conda_env).exists():
-            print( 'not FOUND', conda_env)
-            conda_env = os.environ['PREFIX']
-        print('Found CONDA_PREFIX', conda_env)
         path = Path(conda_env) / 'share' / 'spectrochempy_data' / 'testdata'
-        print('PATH found', path)
         return path
+
+
 # ======================================================================================================================
 # General Preferences
 # ======================================================================================================================
