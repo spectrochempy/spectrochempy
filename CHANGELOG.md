@@ -1,4 +1,5 @@
 # What\'s new
+
 ## Version 0.3.0.rc1
 
 **NEW FEATURES**
@@ -10,7 +11,6 @@
 **BUGS FIXED**
 
 * Read_quadera() and example now based on a correct asc file
-
 
 ## Version 0.2.9
 

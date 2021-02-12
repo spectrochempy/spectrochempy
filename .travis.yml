@@ -26,12 +26,12 @@ jobs:
       if: type == pull_request OR branch IN (master, develop) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/
       env:
       - DEPLOY=true
-      - CONDAPY=3.8
+      - CONDAPY=3.9
     - stage: build-docs
       if: type != pull_request AND (branch == master OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/)
       env:
       - BUILDOCS=true
-      - CONDAPY=3.8
+      - CONDAPY=3.9
 
 # limit got clone depth to 50 commits
 # this means that pull requests must be done with less than 50 commit changes
