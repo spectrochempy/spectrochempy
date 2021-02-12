@@ -64,7 +64,6 @@ requirements:
 
   test:
     - python                {{ python }}
-    - spectrochempy_data
 
 test:
   script_env:
@@ -72,6 +71,7 @@ test:
     - DEVSTRING
     - CONDA_BLD_PATH
   imports:
+    - spectrochempy_data
     - spectrochempy
 
 about:
