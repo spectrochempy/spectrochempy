@@ -13,7 +13,7 @@ __dataset_methods__ = __all__
 
 import io
 from warnings import warn
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import re
 import numpy as np
 
@@ -147,7 +147,7 @@ def _read_asc(*args, **kwargs):
     if colnames[0] == 'Time' or colnames[1] != 'Time Relative [s]' or colnames[2] != 'Ion Current [A]':
         warn('Columns names are  not those expected: the reading of your .asc file  could yield '
              'please notify this to the developers of scpectrochempy')
-    if nchannels > 1 and colnames[3] != 'Time Relative [s]':
+    if nchannels > 1 and colnames[3] != 'Time':
         warn('The number of columms per channel is not that expected: the reading of your .asc file  could yield '
              'please notify this to the developers of spectrochempy')
 
@@ -159,17 +159,19 @@ def _read_asc(*args, **kwargs):
     ioncurrent = np.empty((ntimes, nchannels))
     i += 1
 
-    for j in np.arange(i, len(lines)):
-        data = re.split(r'[\t+]', lines[j].rstrip('\t'))
-        times[j - i][0] = datetime.strptime(data[0].strip(' '), '%m/%d/%Y %H:%M:%S.%f').timestamp()
-        reltimes[j - i][0] = data[2].replace(',', '.')
-        ioncurrent[j - i][0] = data[3].replace(',', '.')
-        for k in range(nchannels - 1):
-            times[j - i][k + 1] = datetime.strptime(data[4 + 3 * k].strip(' '), '%m/%d/%Y %H:%M:%S.%f').timestamp()
-            reltimes[j - i][k + 1] = data[5 + 3 * k].replace(',', '.')
-            ioncurrent[j - i][k + 1] = data[6 + 3 * k].replace(',', '.')
+    prev_timestamp = 0
+    for j, line in enumerate(lines[i:]):
+        data = re.split(r'[\t+]', line.rstrip('\t'))
+        for k in range(nchannels):
+            datetime_ = datetime.strptime(data[3 * k].strip(' '), '%m/%d/%Y %H:%M:%S.%f')
+            times[j][k] = datetime_.timestamp()
+            # hours are given in 12h clock format, so we need to add 12h when hour is in the afternoon
+            if times[j][k] < prev_timestamp:
+                times[j][k] += 3600*12
+            reltimes[j][k] = data[1 + 3 * k].replace(',', '.')
+            ioncurrent[j][k] = data[2 + 3 * k].replace(',', '.')
+        prev_timestamp = times[j][k]
 
-    # requirese inter
     dataset = NDDataset(ioncurrent)
     dataset.name = filename.stem
     dataset.title = "Ion Current"
