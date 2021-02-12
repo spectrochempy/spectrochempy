@@ -5,6 +5,21 @@ Install additional libraries
 
 Depending on your project, you may complete |scpy| with additional features.
 
+Examples and test data
+----------------------
+
+When installing the |scpy| package, the data and examples used in documentation and for testing are not provided.
+If you want to try the documentation examples you need to install them separately using:
+
+.. sourcecode:: bash
+
+   $ mamba install -c spectrocat spectrochempy_data
+
+
+Alternatively you can download an archive on `github <https://github.com/spectrochempy/spectrochempy_data/tags>`__
+and unpack it in the directory of your choice. In this case you may need to adapt the path for the reading fonctions.
+
+
 Cantera
 -------
 

@@ -13,15 +13,15 @@
                 <dt>Other versions</dt>
                 {% for slug, url in versions %}
                     {% if slug != current_version %}
-                        <dd><a href="..{{ url }}">{{ slug.upper() }}</a></dd>
+                        <dd><a href="{{ base_url }}{{ url }}">{{ slug.upper() }}</a></dd>
                     {% endif %}
                 {% endfor %}
             </dl>
             <hr/>
             <dl>
                 <dt>Downloads</dt>
-                <dd><a href="../downloads/{{ current_version }}-spectrochempy.pdf">PDF</a></dd>
-                <dd><a href="../downloads/{{ current_version }}-spectrochempy-notebooks.zip">Notebooks</a></dd>
+                <dd><a href="{{ base_url }}/downloads/{{ current_version }}-spectrochempy.pdf">PDF</a></dd>
+                <dd><a href="{{ base_url }}/downloads/{{ current_version }}-spectrochempy-notebooks.zip">Notebooks</a></dd>
             </dl>
             <hr/>
             <dl>

@@ -333,7 +333,7 @@ warnings.filterwarnings("ignore", category=UserWarning,
 html_context = {
         'current_version': 'latest' if ('dev' in version) else 'stable',
         'release': spectrochempy.application.__release__,
-        'base_url': 'https://spectrochempy.github.io/spectrochempy',
+        'base_url': 'https://www.spectrochempy.fr',
         'versions': (
                 ('latest', '/latest/index.html"'),
                 ('stable', '/stable/index.html'),
