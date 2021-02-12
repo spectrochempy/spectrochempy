@@ -1,7 +1,11 @@
 # What\'s new
 ## Version 0.2.9
 
+**BUGS FIXED**
+
 * Hotfix : regarding dispay of NMR x scale
+
+* read_quadera() and example now based on a correct asc file 
 
 ## Version 0.2.8
 
