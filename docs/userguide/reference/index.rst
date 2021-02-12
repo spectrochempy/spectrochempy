@@ -159,6 +159,7 @@ Creation from from external sources
     read_csv
     read_jcamp
     read_matlab
+    read_quadera
     read_dir
     read_carroucell
 

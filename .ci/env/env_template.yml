@@ -38,6 +38,9 @@ dependencies:
     - traittypes
     - xlrd
 
+    # example and test data
+    - spectrochempy_data
+
     # mainly for install and a bit more...
     - setuptools
     - setuptools_scm
@@ -70,6 +73,7 @@ dependencies:
 
     # DEV: build
     - conda-build
+    - conda-verify
     - boa
     - anaconda-client
 

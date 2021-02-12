@@ -383,7 +383,12 @@ class DataDir(HasTraits):
     @default('path')
     def _get_path_default(self):
         # the spectra path in package data
-        return Path(get_pkg_path('testdata', 'scp_data'))
+        # OLD: return Path(get_pkg_path('testdata', 'scp_data'))
+        # now installed with spectrochempy_data
+        # we need to fing the share directory
+        conda_env = os.environ['CONDA_PREFIX']
+        path = Path(conda_env) / 'share' / 'spectrochempy_data' / 'testdata'
+        return path
 
 
 # ======================================================================================================================
@@ -405,8 +410,6 @@ class GeneralPreferences(MetaConfigurable):
     # Gonfiguration entries
     # ------------------------------------------------------------------------------------------------------------------
 
-    cloudURL = Unicode(help='URL where to look for data by default if not found on datadir').tag(config=True,
-                                                                                                 type="folder")
     databases = Union((Instance(Path), Unicode()), help='Directory where to look for database files such as csv').tag(
             config=True, type="folder")
     datadir = Union((Instance(Path), Unicode()), help='Directory where to look for data by default').tag(config=True,
@@ -414,11 +417,6 @@ class GeneralPreferences(MetaConfigurable):
     show_info_on_loading = Bool(True, help='Display info on loading').tag(config=True)
     use_qt = Bool(False, help='Use QT for dialog instead of TK wich is the default. '
                               'If True the PyQt libraries must be installed').tag(config=True)
-
-    # ..................................................................................................................
-    @default('cloudURL')
-    def _get_default_cloudURL(self):
-        return 'https://drive.google.com/drive/folders/1rfc9O7jK6v_SbygzJHoFEXXxYY3wIqmh?usp=sharing'
 
     # ..................................................................................................................
     @default('databases')

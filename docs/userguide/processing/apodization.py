@@ -45,7 +45,8 @@ from spectrochempy.units import ur
 
 # %%
 # reead an experimental spectra
-path = scp.pathclean('nmrdata/bruker/tests/nmr/topspin_1d')  # the method pathclean allow to write pth in linux or window style indifferently
+path = scp.pathclean('nmrdata/bruker/tests/nmr/topspin_1d')
+# the method pathclean allow to write pth in linux or window style indifferently
 dataset = scp.NDDataset.read_topspin(path, expno=1, remove_digital_filter=True)
 dataset = dataset / dataset.max()  # normalization
 # store original data

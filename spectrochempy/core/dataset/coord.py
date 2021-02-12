@@ -11,7 +11,8 @@ This module implements the class |Coord|.
 __all__ = ['Coord', 'LinearCoord']
 
 import textwrap
-from traitlets import Bool, observe, All, Unicode, Instance, Integer
+
+from traitlets import Bool, observe, All, Unicode, Integer
 
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndmath import NDMath, _set_operators
@@ -482,7 +483,6 @@ class Coord(NDMath, NDArray):
 
 
 class LinearCoord(Coord):
-
     _use_time = Bool(False)
     _show_datapoints = Bool(True)
     _zpd = Integer
@@ -652,7 +652,7 @@ class LinearCoord(Coord):
         Bool : True if axis must discard values and show only datapoints.
 
         """
-        if not 'laser_frequency' in self.meta  or self.units.dimensionality not in ['[time]', '[length]']:
+        if 'laser_frequency' not in self.meta or self.units.dimensionality not in ['[time]', '[length]']:
             return False
 
         return self._show_datapoints

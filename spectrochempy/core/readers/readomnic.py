@@ -14,12 +14,14 @@ __dataset_methods__ = __all__
 from datetime import datetime, timezone, timedelta
 import io
 import struct
+
 import numpy as np
 
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.importer import importermethod, Importer
 from spectrochempy.units import Quantity
+
 
 # ======================================================================================================================
 # Public functions
@@ -604,7 +606,7 @@ def _read_spg(*args, **kwargs):
 
         timestamps.append(timestamp)
 
-        # Not used at present  # -------------------  # extract positions of '1B' codes (history text  #  --  #  #
+        # Not used at present  # -------------------  # extract positions of '1B' codes (history text  #  --  #  #  #
         # sometimes absent, e.g. peakresolve)  # key_is_1B = (keys == 27)  # indices1B = np.nonzero(key_is_1B)  #  #
         # position1B = 304 * np.ones(len(indices1B[0]), dtype='int') + 16 * indices6B[0]  # if len(position1B) != 0:
         #    # read history texts  #    for j in range(nspec):  #        # determine the position of information  #

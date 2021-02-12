@@ -1,11 +1,22 @@
 # What\'s new
+
+## Version 0.3.0.rc1
+
+**NEW FEATURES**
+
+* All data for tests and examples are now external. 
+  
+  They are now located in a separate conda package: `spectrochempy_data`.
+  
+**BUGS FIXED**
+
+* Read_quadera() and example now based on a correct asc file
+
 ## Version 0.2.9
 
 **BUGS FIXED**
 
 * Hotfix : regarding dispay of NMR x scale
-
-* read_quadera() and example now based on a correct asc file 
 
 ## Version 0.2.8
 
