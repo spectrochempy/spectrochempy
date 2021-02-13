@@ -22,9 +22,14 @@
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
 #     version: 3.9.1
+#   widgets:
+#     application/vnd.jupyter.widget-state+json:
+#       state: {}
+#       version_major: 2
+#       version_minor: 0
 # ---
 
-# %% [markdown]
+# %% [markdown] slideshow={"slide_type": "slide"}
 # # Overview
 
 # %% [markdown]

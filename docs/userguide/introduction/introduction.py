@@ -30,7 +30,7 @@
 #       version_minor: 0
 # ---
 
-# %% [markdown]
+# %% [markdown] {"slideshow": {"slide_type": "slide"}}
 # # Introduction
 #
 # The **SpectroChemPy** project was developed to provide advanced tools for processing and
@@ -45,7 +45,7 @@
 # to this type of application, as any type of numerical data arranged in tabular form can generally serve as the main
 # input.
 
-# %% [markdown]
+# %% [markdown] {"slideshow": {"slide_type": "slide"}}
 # ## How to get started
 #
 # <div class='alert alert-info'>
@@ -56,10 +56,10 @@
 # procedure](../../gettingstarted/install/index.rst).
 # </div>
 
-# %% [markdown] {"nbsphinx-toctree": {"maxdepth": 3}}
+# %% [markdown] {"nbsphinx-toctree": {"maxdepth": 3}, "slideshow": {"slide_type": "subslide"}}
 # [interface](interface.ipynb)
 
-# %% [markdown]
+# %% [markdown] {"slideshow": {"slide_type": "slide"}}
 # ## Loading the API
 #
 # Before using SpectroChemPy, we need to load the **API (Application Programming Interface)**: it exposes many
