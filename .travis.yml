@@ -17,22 +17,22 @@ jobs:
       env:
       - TEST=true
       - CONDAPY=3.7
-    - name: py3.9
-      if: type == pull_request OR branch NOT IN (master)
-      env:
-        - TEST=true
-        - CONDAPY=3.9
     - name: py3.8
       if: type == pull_request OR branch NOT IN (master)
       env:
+        - TEST=true
+        - CONDAPY=3.8
+    - name: py3.9
+      if: type == pull_request OR branch NOT IN (master)
+      env:
       - TEST=true
-      - CONDAPY=3.8
-    - name: conda-deploy
+      - CONDAPY=3.9
+    - stage: conda-deploy
       if: type == pull_request OR branch IN (master, develop) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/
       env:
       - DEPLOY=true
       - CONDAPY=3.8
-    - stage: build-docs
+    - name: build-docs
       if: type != pull_request AND (branch == master OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/)
       env:
       - BUILDOCS=true
