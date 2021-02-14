@@ -551,7 +551,7 @@ def check_filename_to_save(dataset, filename=None, save_as=True, confirm=True, *
     if not filename or save_as:
 
         # no filename provided
-        if filename is None or (NODIAL and pathclean(filename).resolve().is_dir()):
+        if filename is None or (NODIAL and pathclean(filename).is_dir()):
             filename = dataset.name
             filename = filename + kwargs.get('suffix', '.scp')
 
@@ -563,7 +563,10 @@ def check_filename_to_save(dataset, filename=None, save_as=True, confirm=True, *
                 # this is probably due to a cancel action for an open dialog.
                 return
 
-    return pathclean(filename).resolve()
+    if pathclean(filename).parent.resolve() == Path.cwd():
+        return Path.cwd() / filename
+
+    return pathclean(filename)
 
 
 # ..................................................................................................................

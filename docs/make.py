@@ -20,6 +20,9 @@ import shutil
 import sys
 import warnings
 import zipfile
+import requests
+import re
+from pkg_resources import parse_version
 from pathlib import Path
 import numpy as np
 from skimage.io import imread, imsave
@@ -280,6 +283,85 @@ class BuildDocumentation(object):
     # ..................................................................................................................
     def make_tutorials(self):
         # make tutorials.zip
+
+        # clean notebooks output
+        for nb in DOCS.rglob('**/*.ipynb'):
+            # This will erase all notebook output
+            sh(f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {nb}", silent=True)
+
+        # make zip of all ipynb
+        def zipdir(path, dest, ziph):
+            # ziph is zipfile handle
+            for nb in path.rglob('**/*.ipynb'):
+                if '.ipynb_checkpoints' in nb.parent.suffix:
+                    continue
+                basename = nb.stem
+                sh(f"jupyter nbconvert {nb} --to notebook"
+                   f" --ClearOutputPreprocessor.enabled=True"
+                   f" --stdout > out_{basename}.ipynb")
+                sh(f"rm {nb}", silent=True)
+                sh(f"mv out_{basename}.ipynb {nb}", silent=True)
+                arcnb = str(nb).replace(str(path), str(dest))
+                ziph.write(nb, arcname=arcnb)
+
+        zipf = zipfile.ZipFile('~notebooks.zip', 'w', zipfile.ZIP_STORED)
+        zipdir(SRC, 'notebooks', zipf)
+        zipdir(GALLERY / 'auto_examples', Path('notebooks') / 'examples', zipf)
+        zipf.close()
+
+        sh(f"mv ~notebooks.zip {DOWNLOADS}/{self.doc_version}-{PROJECTNAME}-notebooks.zip")
+
+
+    def make_testdata(self):
+        # make testdata.zip
+
+        # Get version
+        conda_url = "https://anaconda.org/spectrocat/spectrochempy/files"
+        try:
+            response = requests.get(conda_url)
+        except requests.exceptions.RequestException:
+            return None
+
+        regex = r"\/\d{1,2}\.\d{1,2}\.\d{1,2}\/download\/noarch" \
+                r"\/spectrochempy-(\d{1,2}\.\d{1,2}\.\d{1,2})\-(dev\d{1,2}|stable).tar.bz2"
+        matches = re.finditer(regex, response.text, re.MULTILINE)
+        vavailables = []
+        for matchNum, match in enumerate(matches):
+            v = match[1]
+            if match[2] == 'stable':
+                vavailables.append(v)
+
+        old = parse_version(version)
+
+        new_version = None
+        for key in vavailables:
+            new = parse_version(key)
+            if new > old:
+                new_version = key
+
+        fi = Path.home() / ".scpy_update"
+        if new_version:
+            fi.write_text(f"\n\n\tYou are running SpectrocChemPy-{__version__} but version {new_version} is available."
+                          f"\n\tPlease consider updating for bug fixes and new features! ")
+
+        else:
+            if fi.exists():
+                fi.unlink()
+
+
+
+        print('Beginning file download with requests')
+
+        url = 'http://i3.ytimg.com/vi/J---aiyznGQ/mqdefault.jpg'
+        r = requests.get(url)
+
+        with open('/Users/scott/Downloads/cat3.jpg', 'wb') as f:
+            f.write(r.content)
+
+        # Retrieve HTTP meta-data
+        print(r.status_code)
+        print(r.headers['content-type'])
+        print(r.encoding)
 
         # clean notebooks output
         for nb in DOCS.rglob('**/*.ipynb'):

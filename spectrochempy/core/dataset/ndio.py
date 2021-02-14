@@ -54,7 +54,7 @@ class NDIO(HasTraits):
         ReadOnly property - automaticall set when the filename is updated if it contains a parent on its path
         """
         if self._filename:
-            return pathclean(self._filename).parent.resolve()
+            return pathclean(self._filename).parent
         else:
             return None
 
@@ -201,7 +201,7 @@ class NDIO(HasTraits):
             # we have a filename
             # by default it use the saved directory
             filename = pathclean(filename)
-            if self.directory and self.directory != filename.parent.resolve():
+            if self.directory and self.directory != filename.parent:
                 filename = self.directory / filename
         else:
             filename = self.directory

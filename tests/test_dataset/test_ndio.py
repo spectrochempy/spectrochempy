@@ -58,14 +58,16 @@ def test_ndio_generic(NMR_dataset_1D):
     nmr.save_as(irdatadir / 'essai')  # save essai.scp
     assert nmr.directory == irdatadir
     assert nmr.filename == "essai.scp"
+    nmr.filename.unlink()
 
-    # save if the current directory
+    # save in the current directory
     f = nmr.save_as(cwd / 'essai')
-    print(f)
+
     # try to load without extension specification (will first assume it is scp)
     dl = NDDataset.load('essai')
     # assert dl.directory == cwd
     assert_array_equal(dl.data, nmr.data)
+    f.unlink()
 
 
 def test_ndio_2D(IR_dataset_2D):

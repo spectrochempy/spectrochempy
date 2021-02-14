@@ -404,7 +404,7 @@ class DataDir(HasTraits):
         path = _find_or_create_spectrochempy_dir() / 'testdata'
 
         if not path.exists() or (not path.is_symlink() and not list(path.iterdir())):
-            # try to use the condat installed tesdata (spectrochempy_data package)
+            # try to use the conda installed tesdata (spectrochempy_data package)
             try:
                 conda_env = environ['CONDA_PREFIX']
                 testdata = Path(conda_env) / 'share' / 'spectrochempy_data'
