@@ -414,7 +414,7 @@ class DataDir(HasTraits):
                         path.rmdir()
                     path.symlink_to(testdata, target_is_directory=True)
 
-                    warnings.warn('CREATING TESTDATA SYMLINK: ', testdata)
+                    warnings.warn(f'CREATING TESTDATA SYMLINK: {testdata}')
 
             except KeyError:
                 pass
@@ -427,7 +427,7 @@ class DataDir(HasTraits):
         # OK but what if like in colab we found nothing
         if not path.exists():
             # create a directory to avoir an error
-            warnings.warn('NO TEST DATA : Creating a directory', testdata)
+            warnings.warn(f'NO TEST DATA : Creating a directory {testdata}')
 
             path.mkdir()
 
