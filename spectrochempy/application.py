@@ -411,13 +411,13 @@ class DataDir(HasTraits):
                 if testdata.exists():
                     # create a symbolic link to this tesdata directory
                     # However this work locally or on Colab, BUT not on Travis
-                    if environ.get('TRAVIS_BRANCH', None):
+                    if not environ.get('TRAVIS_BRANCH', None):
                         if path.exists():
                             path.rmdir()
                         path.symlink_to(testdata, target_is_directory=True)
                     else:
                         # we need to copy file so it will work
-                        warnings.warn(f'COPYING ALL DATA FILES in {path.parent}')
+                        print(f'COPYING ALL DATA FILES in {path.parent}')
                         import shutil
                         def copytree(src, dst, symlinks=False, ignore=None):
                             for item in src.iterdir():
@@ -432,7 +432,7 @@ class DataDir(HasTraits):
                         copytree(testdata, path.parent)
                         warnings.warn(f'LIST CONTENT of {path}')
                         for item in path.iterdir():
-                            warnings.warn(f'{item}')
+                            print(f'{item}')
 
             except KeyError:
                 pass
