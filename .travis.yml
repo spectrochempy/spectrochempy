@@ -82,7 +82,7 @@ install:
   - git fetch --tags;
   - python setup.py install;
   # check for data
-  - echo "testing data existence"
+  - echo "testing data existence of $CONDA_PREFIX/share/spectrochempy_data/testdata"
   - ls $CONDA_PREFIX/share/spectrochempy_data/testdata
 
 # command to install code-climate dependencies
