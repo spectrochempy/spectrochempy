@@ -81,6 +81,9 @@ install:
   - conda activate scpy$CONDAPY;
   - git fetch --tags;
   - python setup.py install;
+  # check for data
+  - echo "testing data existence in $CONDA_PREFIX/share/spectrochempy_data/testdata"
+  - ls $CONDA_PREFIX/share/spectrochempy_data/testdata/irdata
 
 # command to install code-climate dependencies
 before_script:

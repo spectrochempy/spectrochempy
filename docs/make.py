@@ -43,6 +43,7 @@ URL_SCPY = "www.spectrochempy.fr"
 # GENERAL PATHS
 DOCS = Path(__file__).parent
 TEMPLATES = DOCS / '_templates'
+STATIC = DOCS / '_static'
 PROJECT = DOCS.parent
 DOCREPO = Path().home() / "spectrochempy_docs"
 DOCTREES = DOCREPO / "~doctrees"
@@ -208,6 +209,9 @@ class BuildDocumentation(object):
         # TODO: v.0.2 probably better solution exists?
         if builder == 'latex':
             self.resize_img(GALLERY, size=580.)
+
+        print("move set_colab.sh file in the downloads dir")
+        sh(f"cp {STATIC}/downloads/set_colab.sh {DOWNLOADS}/set_colab.sh")
 
     # ..................................................................................................................
     @staticmethod

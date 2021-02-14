@@ -13,7 +13,6 @@ the default application preferences and IPython magic functions.
 
 __all__ = []
 
-import os
 import re
 import sys
 import logging
@@ -23,6 +22,7 @@ import warnings
 import pprint
 import json
 import time
+from os import environ
 from pathlib import Path
 import threading
 
@@ -213,6 +213,22 @@ __license__ = "CeCILL-B license"
 "Licence of this package"
 
 
+# ..................................................................................................................
+def _find_or_create_spectrochempy_dir():
+
+    directory = Path.home() / '.spectrochempy'
+
+    if not directory.exists():
+        directory.mkdir(exist_ok=True)
+
+    elif directory.is_file():
+        msg = 'Intended SpectroChemPy directory `{0}` is ' \
+              'actually a file.'
+        raise IOError(msg.format(directory))
+
+    return directory
+
+
 # ======================================================================================================================
 # Magic ipython function
 # ======================================================================================================================
@@ -386,8 +402,40 @@ class DataDir(HasTraits):
         # OLD: return Path(get_pkg_path('testdata', 'scp_data'))
         # now installed with spectrochempy_data
         # we need to fing the share directory
-        conda_env = os.environ['CONDA_PREFIX']
-        path = Path(conda_env) / 'share' / 'spectrochempy_data' / 'testdata'
+        path = _find_or_create_spectrochempy_dir() / 'testdata'
+
+        if not path.exists() or (not path.is_symlink() and not list(path.iterdir())):
+            # try to use the conda installed tesdata (spectrochempy_data package)
+            try:
+                conda_env = environ['CONDA_PREFIX']
+                testdata = Path(conda_env) / 'share' / 'spectrochempy_data'
+                if testdata.exists():
+                    # create a symbolic link to this tesdata directory
+                    # However this work locally or on Colab, BUT not on Travis
+                    if not environ.get('TRAVIS_BRANCH', None):
+                        if path.exists():
+                            path.rmdir()
+                        path.symlink_to(testdata, target_is_directory=True)
+                    else:
+                        # we need to copy file so it will work
+                        from spectrochempy.utils import copytree
+                        if path.exists():
+                            path.rmdir()
+                        copytree(testdata, path.parent)
+
+            except KeyError:
+                pass
+
+        if path.exists() and path.is_file():
+            msg = 'Intended Data directory `{0}` is ' \
+                  'actually a file.'
+            raise IOError(msg.format(path))
+
+        # OK but what if like in colab we found nothing
+        if not path.exists():
+            # create a directory to avoir an error
+            path.mkdir()
+
         return path
 
 
@@ -506,20 +554,20 @@ class ProjectPreferences(MetaConfigurable):
         # If neither exists, the former will be created.
 
         # first look for SCP_PROJECTS_HOME
-        scp = os.environ.get('SCP_PROJECTS_HOME')
+        pscp = Path(environ.get('SCP_PROJECTS_HOME'))
 
-        if scp is not None and os.path.exists(scp):
-            return os.path.abspath(scp)
+        if pscp.exits():
+            return pscp
 
-        scp = os.path.join(os.path.expanduser('~'), 'spectrochempy', 'projects')
+        pscp = Path.home() / '.spectrochempy' / 'projects'
 
-        if not os.path.exists(scp):
-            os.makedirs(scp, exist_ok=True)
+        if not pscp.exists():
+            pscp.mkdir(exist_ok=True)
 
-        elif not os.path.isdir(scp):
+        elif pscp.is_file():
             raise IOError('Intended Projects directory is actually a file.')
 
-        return os.path.abspath(scp)
+        return pscp
 
     # ..................................................................................................................
     def __init__(self, **kwargs):
@@ -593,18 +641,18 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
     def _get_config_file_name_default(self):
         return str(self.name).lower() + '_cfg'
 
-    config_dir = Unicode(None, help="Set the configuration directory location").tag(config=True)
+    config_dir = Instance(Path, help="Set the configuration directory location").tag(config=True)
     """Configuration directory"""
 
     @default('config_dir')
     def _get_config_dir_default(self):
-        return self._get_config_dir()
+        return self.get_config_dir()
 
     config_manager = Instance(BaseJSONConfigManager)
 
     @default('config_manager')
     def _get_default_config_manager(self):
-        return BaseJSONConfigManager(config_dir=self.config_dir)
+        return BaseJSONConfigManager(config_dir=str(self.config_dir))
 
     log_format = Unicode("%(highlevel)s %(message)s", help="The Logging format template", ).tag(config=True)
 
@@ -627,9 +675,6 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
     def _last_project_changed(self, change):
         if change.name in self.traits(config=True):
             self.config_manager.update(self.config_file_name, {self.__class__.__name__: {change.name: change.new, }})
-
-    startup_filename = Unicode(os.path.join('irdata', 'nh4y-activation.spg'), help='File name to load at startup').tag(
-            config=True, type='file')
 
     show_config = Bool(help="Dump configuration to stdout at startup").tag(config=True)
 
@@ -769,16 +814,16 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
 
         configfiles = []
         if self.config_file_name:
-            config_file = os.path.join(self.config_dir, self.config_file_name)
+            config_file = self.config_dir / self.config_file_name
             configfiles.append(config_file)
 
-            lis = os.listdir(self.config_dir)
+            lis = self.config_dir.iterdir()
             for f in lis:
-                if f.endswith('.json'):
-                    jsonname = os.path.join(self.config_dir, f)
+                if f.suffix == '.json':
+                    jsonname = self.config_dir / f
                     if self.reset_config or f == 'MatplotlibPreferences.json':
                         # remove the user json file to reset to defaults
-                        os.remove(jsonname)
+                        jsonname.unlink()
                     else:
                         configfiles.append(jsonname)
 
@@ -796,6 +841,38 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
         self.dataset_preferences = DatasetPreferences(config=self.config, parent=self)
         self.project_preferences = ProjectPreferences(config=self.config, parent=self)
         self.matplotlib_preferences = MatplotlibPreferences(config=self.config, parent=self)
+
+    # ..................................................................................................................
+    def get_config_dir(self):
+        """
+        Determines the SpectroChemPy configuration directory name and
+        creates the directory if it doesn't exist.
+
+        This directory is typically ``$HOME/.spectrochempy/config``,
+        but if the
+        SCP_CONFIG_HOME environment variable is set and the
+        ``$SCP_CONFIG_HOME`` directory exists, it will be that
+        directory.
+
+        If neither exists, the former will be created.
+
+        Returns
+        -------
+        config_dir : str
+            The absolute path to the configuration directory.
+        """
+
+        # first look for SCP_CONFIG_HOME
+        scp = environ.get('SCP_CONFIG_HOME')
+
+        if scp is not None and Path(scp).exists():
+            return Path(scp)
+
+        config = _find_or_create_spectrochempy_dir() / 'config'
+        if not config.exists():
+            config.mkdir(exist_ok=True)
+
+        return config
 
     def start_show_config(self, **kwargs):
         """start function used when show_config is True"""
@@ -910,55 +987,14 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
     def _make_default_config_file(self):
         """auto generate default config file."""
 
-        fname = os.path.join(self.config_dir, self.config_file_name + '.py')
+        fname = self.config_dir / self.config_file_name
+        fname = fname.with_suffix('.py')
 
-        if not os.path.exists(fname) or self.reset_config:
+        if not fname.exists() or self.reset_config:
             s = self.generate_config_file()
             self.logs.info("Generating default config file: %r" % fname)
             with open(fname, 'w') as f:
                 f.write(s)
-
-    # ..................................................................................................................
-    @staticmethod
-    def _find_or_create_spectrochempy_dir(directory):
-        directory = os.path.join(os.path.expanduser('~'), '.spectrochempy', directory)
-
-        if not os.path.exists(directory):
-            os.makedirs(directory, exist_ok=True)
-        elif not os.path.isdir(directory):
-            msg = 'Intended SpectroChemPy directory `{0}` is ' \
-                  'actually a file.'
-            raise IOError(msg.format(directory))
-
-        return os.path.abspath(directory)
-
-    # ..................................................................................................................
-    def _get_config_dir(self):
-        """
-        Determines the SpectroChemPy configuration directory name and
-        creates the directory if it doesn't exist.
-
-        This directory is typically ``$HOME/.spectrochempy/config``,
-        but if the
-        SCP_CONFIG_HOME environment variable is set and the
-        ``$SCP_CONFIG_HOME`` directory exists, it will be that
-        directory.
-
-        If neither exists, the former will be created.
-
-        Returns
-        -------
-        config_dir : str
-            The absolute path to the configuration directory.
-        """
-
-        # first look for SCP_CONFIG_HOME
-        scp = os.environ.get('SCP_CONFIG_HOME')
-
-        if scp is not None and os.path.exists(scp):
-            return os.path.abspath(scp)
-
-        return os.path.abspath(self._find_or_create_spectrochempy_dir('config'))
 
     # ------------------------------------------------------------------------------------------------------------------
     # Events from Application

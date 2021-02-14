@@ -8,6 +8,8 @@
   
   They are now located in a separate conda package: `spectrochempy_data`.
   
+* Installation in Colab with Examples and notebooks is now supported.
+
 **BUGS FIXED**
 
 * Read_quadera() and example now based on a correct asc file

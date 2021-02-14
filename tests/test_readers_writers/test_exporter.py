@@ -38,7 +38,7 @@ def test_write():
     assert filename is not None
     assert filename.stem == nd.name
     assert filename.suffix == '.scp'
-    # filename.unlink()
+    filename.unlink()
 
     # # a write protocole can be specified
     # filename = nd.write(protocole='json')

@@ -60,7 +60,8 @@ def test_get_filename():
     f = get_filename("irdata/",
                      filetypes=['OMNIC files (*.spa, *.spg)', 'OMNIC series (*.srs)', 'all files (*.*)'],
                      listdir=True)
-
+    if '.scp' in f.keys():
+        del f['.scp']
     assert len(f.keys()) == 2
 
     # should raise an error
