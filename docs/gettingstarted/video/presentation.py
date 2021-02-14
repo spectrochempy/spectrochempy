@@ -57,7 +57,8 @@ import spectrochempy as scp
 # data.
 
 # %% [markdown] slideshow={"slide_type": "subslide"}
-# For instance, in the following we read data from a series of FTIR experiments, provided  by the OMNIC software, and create a **NDDataset** from these data
+# For instance, in the following we read data from a series of FTIR experiments,
+# provided  by the OMNIC software, and create a **NDDataset** from these data
 
 # %%
 ds = scp.read('irdata/nh4y-activation.spg')
@@ -122,8 +123,8 @@ _ = basc.plot()
 
 # %% slideshow={"slide_type": "subslide"}
 ds = scp.read('irdata/CO@Mo_Al2O3.SPG')[:, 2250.:1950.]
-pressure = [0.00300, 0.00400, 0.00900, 0.01400, 0.02100, 0.02600, 0.03600, 
-            0.05100, 0.09300, 0.15000, 0.20300, 0.30000, 0.40400, 0.50300, 
+pressure = [0.00300, 0.00400, 0.00900, 0.01400, 0.02100, 0.02600, 0.03600,
+            0.05100, 0.09300, 0.15000, 0.20300, 0.30000, 0.40400, 0.50300,
             0.60200, 0.70200, 0.80100, 0.90500, 1.00400]
 ds.y = scp.Coord(pressure, title='Pressure', units='torr')
 _ = ds.plot(colormap='magma')

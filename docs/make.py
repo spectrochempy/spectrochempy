@@ -20,9 +20,6 @@ import shutil
 import sys
 import warnings
 import zipfile
-import requests
-import re
-from pkg_resources import parse_version
 from pathlib import Path
 import numpy as np
 from skimage.io import imread, imsave
@@ -314,7 +311,6 @@ class BuildDocumentation(object):
         zipf.close()
 
         sh(f"mv ~notebooks.zip {DOWNLOADS}/{self.doc_version}-{PROJECTNAME}-notebooks.zip")
-
 
     # ..................................................................................................................
     def make_redirection_page(self, ):

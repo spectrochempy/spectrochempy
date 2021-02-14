@@ -212,6 +212,7 @@ __contributor__ = ""
 __license__ = "CeCILL-B license"
 "Licence of this package"
 
+
 # ..................................................................................................................
 def _find_or_create_spectrochempy_dir():
 
@@ -819,7 +820,7 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
             lis = self.config_dir.iterdir()
             for f in lis:
                 if f.suffix == '.json':
-                    jsonname =self.config_dir / f
+                    jsonname = self.config_dir / f
                     if self.reset_config or f == 'MatplotlibPreferences.json':
                         # remove the user json file to reset to defaults
                         jsonname.unlink()
@@ -986,7 +987,7 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
     def _make_default_config_file(self):
         """auto generate default config file."""
 
-        fname =self.config_dir / self.config_file_name
+        fname = self.config_dir / self.config_file_name
         fname = fname.with_suffix('.py')
 
         if not fname.exists() or self.reset_config:
