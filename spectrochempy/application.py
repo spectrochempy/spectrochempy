@@ -417,6 +417,7 @@ class DataDir(HasTraits):
                         path.symlink_to(testdata, target_is_directory=True)
                     else:
                         # we need to copy file so it will work
+                        warnings.warn(f'COPYING ALL DATA FILES in {path.parent}')
                         import shutil
                         def copytree(src, dst, symlinks=False, ignore=None):
                             for item in src.iterdir():
@@ -429,6 +430,10 @@ class DataDir(HasTraits):
                         if path.exists():
                             path.rmdir()
                         copytree(testdata, path.parent)
+                        warnings.warn(f'LIST CONTENT of {path}')
+                        for item in path.iterdir():
+                            warnings.warn(f'{item}')
+
             except KeyError:
                 pass
 
