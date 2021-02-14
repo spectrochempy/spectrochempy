@@ -83,7 +83,7 @@ install:
   - python setup.py install;
   # check for data
   - echo "testing data existence"
-  - ls $CONDA_PREFIX/share/tesdata
+  - ls $CONDA_PREFIX/share/spectrochempy/testdata
 
 # command to install code-climate dependencies
 before_script:
