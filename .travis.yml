@@ -81,6 +81,9 @@ install:
   - conda activate scpy$CONDAPY;
   - git fetch --tags;
   - python setup.py install;
+  # check for data
+  - echo "testing data existence"
+  - ls $CONDA_PREFIX/share/tesdata
 
 # command to install code-climate dependencies
 before_script:
