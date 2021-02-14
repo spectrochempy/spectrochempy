@@ -58,7 +58,7 @@ def test_ndio_generic(NMR_dataset_1D):
     nmr.save_as(irdatadir / 'essai')  # save essai.scp
     assert nmr.directory == irdatadir
     assert nmr.filename == "essai.scp"
-    nmr.filename.unlink()
+    (irdatadir / nmr.filename).unlink()
 
     # save in the current directory
     f = nmr.save_as(cwd / 'essai')
