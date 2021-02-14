@@ -1,6 +1,6 @@
 # What\'s new
 
-## Version 0.3.0.rc1
+## Version 0.2.10
 
 **NEW FEATURES**
 
@@ -8,7 +8,7 @@
   
   They are now located in a separate conda package: `spectrochempy_data`.
   
-* Installation in Colab with Examples and notebooks is now supported.
+* Installation in Colab with Examples is now supported.
 
 **BUGS FIXED**
 
