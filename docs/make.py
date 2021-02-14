@@ -210,9 +210,6 @@ class BuildDocumentation(object):
         if builder == 'latex':
             self.resize_img(GALLERY, size=580.)
 
-        print("move set_colab.sh file in the downloads dir")
-        sh(f"cp {STATIC}/downloads/set_colab.sh {DOWNLOADS}/set_colab.sh")
-
     # ..................................................................................................................
     @staticmethod
     def resize_img(folder, size):
