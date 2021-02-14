@@ -18,7 +18,7 @@ In the first cell, you must enter the following block of instructions to load Sp
 
 .. sourcecode:: ipython3
 
-    !wget -c "https://www.spectrochempy.fr/downloads/set_colab.sh"
+    !wget -c "https://www.spectrochempy.fr/downloads/set_colab.sh" &> /dev/null
     !bash set_colab.sh
 
 Then as usual you can start using SpectroChemPy.
@@ -30,3 +30,10 @@ Then as usual you can start using SpectroChemPy.
 .. warning::
 
    Colab notebooks are isolated and thus you need to perform the above operation for all notebook you create.
+
+Example of a Colab session
+--------------------------
+.. toctree::
+    :hidden:
+
+    notebook_in_colab
