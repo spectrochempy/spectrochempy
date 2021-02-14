@@ -403,15 +403,16 @@ class DataDir(HasTraits):
         # we need to fing the share directory
         path = _find_or_create_spectrochempy_dir() / 'testdata'
 
-        if not path.exists():
+        if not path.exists() or (not path.is_symlink() and not list(path.iterdir())):
             # try to use the condat installed tesdata (spectrochempy_data package)
             try:
                 conda_env = environ['CONDA_PREFIX']
                 testdata = Path(conda_env) / 'share' / 'spectrochempy_data'
                 if testdata.exists():
                     # create a symbolic link to this tesdata directory
+                    path.rmdir()
                     path.symlink_to(testdata, target_is_directory=True)
-            except Exception:
+            except KeyError:
                 pass
 
         if path.exists() and path.is_file():
