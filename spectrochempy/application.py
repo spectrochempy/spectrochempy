@@ -410,12 +410,25 @@ class DataDir(HasTraits):
                 testdata = Path(conda_env) / 'share' / 'spectrochempy_data'
                 if testdata.exists():
                     # create a symbolic link to this tesdata directory
-                    if path.exists():
-                        path.rmdir()
-                    path.symlink_to(testdata, target_is_directory=True)
-
-                    warnings.warn(f'CREATING TESTDATA SYMLINK: {testdata}')
-
+                    # However this work locally or on Colab, BUT not on Travis
+                    if environ.get('TRAVIS_BRANCH', None):
+                        if path.exists():
+                            path.rmdir()
+                        path.symlink_to(testdata, target_is_directory=True)
+                    else:
+                        # we need to copy file so it will work
+                        import shutil
+                        def copytree(src, dst, symlinks=False, ignore=None):
+                            for item in src.iterdir():
+                                s = src / item.name
+                                d = dst / item.name
+                                if s.is_dir():
+                                    shutil.copytree(s, d, symlinks, ignore)
+                                else:
+                                    shutil.copy2(s, d)
+                        if path.exists():
+                            path.rmdir()
+                        copytree(testdata, path.parent)
             except KeyError:
                 pass
 
@@ -427,8 +440,6 @@ class DataDir(HasTraits):
         # OK but what if like in colab we found nothing
         if not path.exists():
             # create a directory to avoir an error
-            warnings.warn(f'NO TEST DATA : Creating a directory {testdata}')
-
             path.mkdir()
 
         return path
