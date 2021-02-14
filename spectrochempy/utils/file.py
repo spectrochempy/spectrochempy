@@ -8,13 +8,13 @@
 file utilities
 """
 from os import environ
-
+import shutil
 import re
 import warnings
 from pathlib import Path, WindowsPath, PosixPath
 
 __all__ = ['get_filename', 'readdirname', 'pathclean', 'patterns',
-           'check_filenames', 'check_filename_to_open', 'check_filename_to_save']
+           'check_filenames', 'check_filename_to_open', 'check_filename_to_save', 'copytree']
 
 
 # ======================================================================================================================
@@ -601,5 +601,16 @@ def check_filename_to_open(*args, **kwargs):
     else:
         # probably no args (which means that we are coming from a dialog or from a full list of a directory
         return filenames
+
+
+# we need to copy file so it will work
+def copytree(src, dst, symlinks=False, ignore=None):
+    for item in src.iterdir():
+        s = src / item.name
+        d = dst / item.name
+        if s.is_dir():
+            shutil.copytree(s, d, symlinks, ignore)
+        else:
+            shutil.copy2(s, d)
 
 # EOF

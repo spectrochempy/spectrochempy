@@ -417,22 +417,10 @@ class DataDir(HasTraits):
                         path.symlink_to(testdata, target_is_directory=True)
                     else:
                         # we need to copy file so it will work
-                        print(f'COPYING ALL DATA FILES in {path.parent}')
-                        import shutil
-                        def copytree(src, dst, symlinks=False, ignore=None):
-                            for item in src.iterdir():
-                                s = src / item.name
-                                d = dst / item.name
-                                if s.is_dir():
-                                    shutil.copytree(s, d, symlinks, ignore)
-                                else:
-                                    shutil.copy2(s, d)
+                        from spectrochempy.utils import copytree
                         if path.exists():
                             path.rmdir()
                         copytree(testdata, path.parent)
-                        warnings.warn(f'LIST CONTENT of {path}')
-                        for item in path.iterdir():
-                            print(f'{item}')
 
             except KeyError:
                 pass
