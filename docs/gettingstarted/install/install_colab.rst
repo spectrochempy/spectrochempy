@@ -14,18 +14,12 @@ The Colab Notebooks are very similar to Jupyter Notebook (from which they derive
 To start with Colab, go to the `Colab website <https://colab.research.google.com/notebooks/intro.ipynb#recent=true>`_
 and create a new notebook.
 
-In the first cell, you can enter the following block of instructions. This is rather verbose, so if you want to clear
-automatically the output after execution, you can uncomment the last line.
+In the first cell, you must enter the following block of instructions to load SpectroChemPy and the tests/examples files in Colab.
 
 .. sourcecode:: ipython3
 
-    from IPython.display import clear_output
-    !rm -rf spectrochempy
-    !git clone https://github.com/spectrochempy/spectrochempy.git
-    !pip install -r ./spectrochempy/requirements.txt
-    !pip install ./spectrochempy
-    # clear_output()
-
+    !wget -c "https://www.spectrochempy.fr/downloads/set_colab.sh"
+    !bash set_colab.sh
 
 Then as usual you can start using SpectroChemPy.
 
