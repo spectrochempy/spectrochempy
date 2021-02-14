@@ -410,7 +410,8 @@ class DataDir(HasTraits):
                 testdata = Path(conda_env) / 'share' / 'spectrochempy_data'
                 if testdata.exists():
                     # create a symbolic link to this tesdata directory
-                    path.rmdir()
+                    if path.exists():
+                        path.rmdir()
                     path.symlink_to(testdata, target_is_directory=True)
             except KeyError:
                 pass
