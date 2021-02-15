@@ -972,7 +972,7 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
         debug('MPL backend: {}'.format(mpl.get_backend()))
 
         # display needs for update
-        time.sleep(1)
+        # time.sleep(1)
         fi = Path.home() / ".scpy_update"
         if fi.exists():
             try:
