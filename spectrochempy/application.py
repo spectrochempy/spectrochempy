@@ -404,6 +404,7 @@ class DataDir(HasTraits):
         # we need to fing the share directory
         path = _find_or_create_spectrochempy_dir() / 'testdata'
 
+        must_copy = False
         if not path.exists() or (not path.is_symlink() and not list(path.iterdir())):
             # try to use the conda installed tesdata (spectrochempy_data package)
             try:
@@ -417,14 +418,20 @@ class DataDir(HasTraits):
                             path.rmdir()
                         path.symlink_to(testdata, target_is_directory=True)
                     else:
-                        # we need to copy file so it will work
-                        from spectrochempy.utils import copytree
-                        if path.exists():
-                            path.rmdir()
-                        copytree(testdata, path.parent)
-
+                        must_copy=True
             except KeyError:
                 pass
+
+            except OSError:
+                must_copy = True
+
+            if must_copy:
+                # we need to copy file so it will work
+                from spectrochempy.utils import copytree
+                if path.exists():
+                    path.rmdir()
+                copytree(testdata, path.parent)
+
 
         if path.exists() and path.is_file():
             msg = 'Intended Data directory `{0}` is ' \
@@ -433,7 +440,7 @@ class DataDir(HasTraits):
 
         # OK but what if like in colab we found nothing
         if not path.exists():
-            # create a directory to avoir an error
+            # create a directory to avoid an error
             path.mkdir()
 
         return path
@@ -972,7 +979,7 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
         debug('MPL backend: {}'.format(mpl.get_backend()))
 
         # display needs for update
-        time.sleep(1)
+        # time.sleep(1)
         fi = Path.home() / ".scpy_update"
         if fi.exists():
             try:

@@ -33,7 +33,10 @@ Then as usual you can start using SpectroChemPy.
 
 Example of a Colab session
 --------------------------
-.. toctree::
-    :hidden:
 
-    notebook_in_colab
+.. raw:: html
+
+   <video width="696" controls>
+   <source src="../../_static/video/capsule_colab.mp4" type="video/mp4">
+   Your browser does not support the video tag.
+   </video>

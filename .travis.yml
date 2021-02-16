@@ -27,12 +27,13 @@ jobs:
       env:
       - TEST=true
       - CONDAPY=3.9
-    - stage: conda-deploy
+    - stage: builds
+      name: conda
       if: type == pull_request OR branch IN (master, develop) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/
       env:
       - DEPLOY=true
       - CONDAPY=3.8
-    - name: build-docs
+    - name: docs
       if: type != pull_request AND (branch == master OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/)
       env:
       - BUILDOCS=true
