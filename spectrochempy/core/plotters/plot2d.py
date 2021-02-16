@@ -24,6 +24,7 @@ import numpy as np
 
 from spectrochempy.core.plotters.plotutils import make_label
 from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.coordset import CoordSet
 
 # ======================================================================================================================
 # nddataset plot2D functions
@@ -336,7 +337,7 @@ def plot_2D(dataset, **kwargs):
     dimy = new.dims[-2]
     y = getattr(new, dimy)
     # if several coords, take the first one:
-    if y is not None and len(y)>1:
+    if isinstance(y, CoordSet):
         y = y[0]
     ysize = new.shape[-2]
 
