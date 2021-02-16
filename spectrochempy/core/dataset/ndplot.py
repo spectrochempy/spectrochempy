@@ -22,8 +22,8 @@ import plotly.graph_objects as go
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from traitlets import Dict, HasTraits, Instance, Union, default, TraitError
 
-from spectrochempy.utils import get_figure, Meta, pathclean
-
+from spectrochempy.utils import get_figure, pathclean
+from spectrochempy.core.meta import Meta
 from spectrochempy.core import preferences, dataset_preferences, project_preferences, matplotlib_preferences
 from spectrochempy.core import error_
 from spectrochempy.core.plotters.plot1d import plot_1D

@@ -17,7 +17,7 @@ from traitlets import (Dict, Instance, Unicode, This, default)
 
 from spectrochempy.core.dataset.nddataset import NDDataset, NDIO
 from spectrochempy.core.scripts.script import Script
-from spectrochempy.utils import Meta
+from spectrochempy.core.meta import Meta
 from spectrochempy.core.project.baseproject import AbstractProject
 
 

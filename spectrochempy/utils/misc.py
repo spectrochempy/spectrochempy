@@ -29,7 +29,7 @@ __all__ = ["TYPE_INTEGER", "TYPE_COMPLEX", "TYPE_FLOAT", "TYPE_BOOL", "EPSILON",
 #
 # constants
 #
-TYPE_INTEGER = (int, np.int_, np.int32, np.int64)
+TYPE_INTEGER = (int, np.int_, np.int32, np.int64, np.uint32, np.uint64)
 TYPE_FLOAT = (float, np.float_, np.float32, np.float64)
 TYPE_COMPLEX = (complex, np.complex_, np.complex64, np.complex128)
 TYPE_BOOL = (bool, np.bool, np.bool_)

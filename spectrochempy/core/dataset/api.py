@@ -9,7 +9,3 @@ from spectrochempy.utils import generate_api
 
 # generate api
 __all__ = generate_api(__file__)
-
-# ======================================================================================================================
-if __name__ == '__main__':
-    pass

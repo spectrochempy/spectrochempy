@@ -23,11 +23,10 @@ from .exceptions import *
 from .fake import *
 from .file import *
 from .jsonutils import *
-from .meta import *
 from .misc import *
-from .print import *
 from .packages import *
 from .plots import *
 from .system import *
 from .traitlets import *
 from .zip import *
+from .print import *

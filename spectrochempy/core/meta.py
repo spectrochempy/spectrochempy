@@ -139,7 +139,12 @@ class Meta(object):  # HasTraits):
 
     def __eq__(self, other):
         m1 = self._data
-        m2 = other._data
+        if hasattr(other, "_data"):
+            m2 = other._data
+        elif isinstance(other, dict):
+            m2 = other
+        else:
+            return False
         eq = True
         for k, v in m1.items():
             if isinstance(v, list):

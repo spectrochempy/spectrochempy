@@ -101,7 +101,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         Other Parameters
         ----------------
         dtype : str or dtype, optional, default=np.float64
-            If specified, the data will be casted to this dtype, else the type of the data will be used.
+            If specified, the data will be casted to this dtype, else the data will be casted to float64 or complex128.
         dims : list of chars, optional
             If specified the list must have a length equal to the number od data dimensions (ndim) and the chars must be
             taken among among x,y,z,u,v,w or t. If not specified, the dimension names are automatically attributed in

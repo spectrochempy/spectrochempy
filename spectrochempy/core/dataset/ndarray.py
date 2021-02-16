@@ -26,7 +26,8 @@ from traittypes import Array
 
 from spectrochempy.units import Unit, ur, Quantity, set_nmr_context
 from spectrochempy.core import info_, error_, print_
-from spectrochempy.utils import (TYPE_INTEGER, TYPE_FLOAT, Meta, MaskedConstant, MASKED, NOMASK, INPLACE, is_sequence,
+from spectrochempy.core.meta import Meta
+from spectrochempy.utils import (TYPE_INTEGER, TYPE_FLOAT, MaskedConstant, MASKED, NOMASK, INPLACE, is_sequence,
                                  is_number, numpyprintoptions, spacing, insert_masked_print, SpectroChemPyWarning,
                                  make_new_object, convert_to_html, get_user_and_node)
 
@@ -129,7 +130,7 @@ class NDArray(HasTraits):
         Other Parameters
         ----------------
         dtype : str or dtype, optional, default=np.float64
-            If specified, the data will be casted to this dtype, else the type of the data will be used
+            If specified, the data will be casted to this dtype, else the data will be casted to float64.
         dims : list of chars, optional.
             if specified the list must have a length equal to the number od data dimensions (ndim) and the chars must be
             taken among among x,y,z,u,v,w or t. If not specified, the dimension names are automatically attributed in
@@ -178,8 +179,7 @@ class NDArray(HasTraits):
 
         Examples
         --------
-        >>> from spectrochempy import NDArray
-        >>> myarray = NDArray([1., 2., 3.])
+        >>> myarray = scp.NDArray([1., 2., 3.])
         """
 
         # creation date
@@ -198,7 +198,12 @@ class NDArray(HasTraits):
         self._offset = kwargs.pop('offset', 0.0)
         self._size = kwargs.pop('size', 0)
 
-        self.data = data
+        if data is not None:
+            self.data = data
+
+        if data is None or self.data is None:
+            self._data = None
+            self._dtype = None  # default
 
         if self._labels_allowed:
             self.labels = kwargs.pop('labels', None)
@@ -528,8 +533,6 @@ class NDArray(HasTraits):
         # cast to the desired type
         if self._dtype is not None:
             data = data.astype(np.dtype(self._dtype, copy=False))
-            # reset dtype for another use
-            self._dtype = None
 
         # return the validated data
         if self._copy:
@@ -745,7 +748,7 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     def _make_index(self, key):
 
-        if isinstance(key, np.ndarray) and key.dtype == np.bool:
+        if isinstance(key, np.ndarray) and key.dtype == bool:
             # this is a boolean selection
             # we can proceed directly
             return key
@@ -938,10 +941,10 @@ class NDArray(HasTraits):
 
         else:
             # debug_("numpy array detected - initialize data with a numpy array")
-            self._data = np.array(data, subok=True, copy=self._copy)
-
-        if self._dtype is not None:
-            self._data = self._data.astype(self._dtype)
+            data = np.array(data, subok=True, copy=self._copy)
+            if data.dtype == np.object_:  # likely None value
+                data = data.astype(float)
+            self._data = data
 
         if self.linear:
             # we try to replace data by only an offset and an increment
@@ -1138,8 +1141,7 @@ class NDArray(HasTraits):
 
         Examples
         --------
-        >>> from spectrochempy import NDArray
-        >>> nd1 = NDArray([1. + 2.j, 2. + 3.j])
+        >>> nd1 = scp.NDArray([1. + 2.j, 2. + 3.j])
         >>> nd1
         NDArray: [complex128] unitless (size: 2)
         >>> nd2 = nd1
@@ -1316,10 +1318,11 @@ class NDArray(HasTraits):
         """
         numpy dtype - data type
         """
-        if self.data is None:
-            return None
-
-        return self.data.dtype
+        if self.is_empty:
+            self._dtype = None
+        else:
+            self._dtype = self.data.dtype
+        return self._dtype
 
     # ..................................................................................................................
     def get_axis(self, *args, **kwargs):
@@ -1864,7 +1867,7 @@ class NDArray(HasTraits):
         if self.data is None and self.is_labeled:
             return 1
 
-        if self.data is None:
+        if self.size == 0:
             return 0
         else:
             return self.data.ndim
@@ -1949,8 +1952,10 @@ class NDArray(HasTraits):
 
         if self.data is None and self.is_labeled:
             return (self.labels.shape[0],)
+
         elif self.data is None:
             return ()
+
         else:
             return self.data.shape
 
@@ -1970,6 +1975,7 @@ class NDArray(HasTraits):
             if self.linear:
                 # the provided size is returned i or its default
                 return self._size
+            return None
         else:
             return self._data.size
 

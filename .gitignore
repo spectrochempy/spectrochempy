@@ -140,3 +140,6 @@ Icon*
 /spectrochempy_docs/
 *.py-donotwork
 /patch.diff
+
+*.pptx
+.hypothesis/
