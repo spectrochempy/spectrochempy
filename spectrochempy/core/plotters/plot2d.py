@@ -336,7 +336,7 @@ def plot_2D(dataset, **kwargs):
     dimy = new.dims[-2]
     y = getattr(new, dimy)
     # if several coords, take the first one:
-    if len(y)>1:
+    if y is not None and len(y)>1:
         y = y[0]
     ysize = new.shape[-2]
 
