@@ -82,9 +82,6 @@ install:
   - conda activate scpy$CONDAPY;
   - git fetch --tags;
   - python setup.py install;
-  # check for data
-  - echo "testing data existence in $CONDA_PREFIX/share/spectrochempy_data/testdata"
-  - ls $CONDA_PREFIX/share/spectrochempy_data/testdata/irdata
 
 # command to install code-climate dependencies
 before_script:
@@ -98,6 +95,9 @@ before_script:
 script:
   - if [[ $TEST = true ]]; then
       echo "RUNNING TESTS";
+      # check for data
+      echo "testing data existence in $CONDA_PREFIX/share/spectrochempy_data/testdata";
+      ls $CONDA_PREFIX/share/spectrochempy_data/testdata/irdata;
       flake8;
       coverage run -m pytest -v
 
