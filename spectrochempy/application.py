@@ -370,7 +370,9 @@ class DataDir(HasTraits):
         # try to use the conda installed testdata (spectrochempy_data package)
         try:
             conda_env = environ['CONDA_PREFIX']
-            path = Path(conda_env) / 'share' / 'spectrochempy_data'
+            path = Path(conda_env) / 'share' / 'spectrochempy_data' / 'testdata'
+            if not path.exists():
+                path = Path(conda_env) / 'share' / 'spectrochempy_data'   # depending on the version of spectrochempy_data
         except KeyError:
             pass
 
