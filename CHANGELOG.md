@@ -1,5 +1,14 @@
 # What\'s new
 
+## Version 0.2.11
+
+**BUGS FIXED**
+
+* Plot2D now works when more than one coord in 'y' axis (#238)
+
+* Spectrochempy_data location have been corrected (#239)
+
+
 ## Version 0.2.10
 
 **NEW FEATURES**

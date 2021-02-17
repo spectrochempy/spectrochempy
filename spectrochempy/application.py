@@ -21,7 +21,6 @@ import datetime
 import warnings
 import pprint
 import json
-import time
 from os import environ
 from pathlib import Path
 import threading
@@ -359,6 +358,26 @@ class DataDir(HasTraits):
 
     path = Instance(Path)
 
+    @default('path')
+    def _get_path_default(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        # create a directory testdata in .spectrochempy to avoid an error if the following do not work
+        path = _find_or_create_spectrochempy_dir() / 'testdata'
+        path.mkdir(exist_ok=True)
+
+        # try to use the conda installed testdata (spectrochempy_data package)
+        try:
+            conda_env = environ['CONDA_PREFIX']
+            path = Path(conda_env) / 'share' / 'spectrochempy_data' / 'testdata'
+            if not path.exists():
+                path = Path(conda_env) / 'share' / 'spectrochempy_data'   # depending on the version of spectrochempy_data
+        except KeyError:
+            pass
+
+        return path
+
     def listing(self):
         """
         Create a str representing a listing of the testdata folder.
@@ -395,55 +414,6 @@ class DataDir(HasTraits):
     def _repr_html_(self):
         # _repr_html is needed to output in notebooks
         return self.listing().replace('\n', '<br/>').replace(" ", "&nbsp;")
-
-    @default('path')
-    def _get_path_default(self):
-        # the spectra path in package data
-        # OLD: return Path(get_pkg_path('testdata', 'scp_data'))
-        # now installed with spectrochempy_data
-        # we need to fing the share directory
-        path = _find_or_create_spectrochempy_dir() / 'testdata'
-
-        must_copy = False
-        if not path.exists() or (not path.is_symlink() and not list(path.iterdir())):
-            # try to use the conda installed tesdata (spectrochempy_data package)
-            try:
-                conda_env = environ['CONDA_PREFIX']
-                testdata = Path(conda_env) / 'share' / 'spectrochempy_data'
-                if testdata.exists():
-                    # create a symbolic link to this tesdata directory
-                    # However this work locally or on Colab, BUT not on Travis
-                    if not environ.get('TRAVIS_BRANCH', None):
-                        if path.exists():
-                            path.rmdir()
-                        path.symlink_to(testdata, target_is_directory=True)
-                    else:
-                        must_copy=True
-            except KeyError:
-                pass
-
-            except OSError:
-                must_copy = True
-
-            if must_copy:
-                # we need to copy file so it will work
-                from spectrochempy.utils import copytree
-                if path.exists():
-                    path.rmdir()
-                copytree(testdata, path.parent)
-
-
-        if path.exists() and path.is_file():
-            msg = 'Intended Data directory `{0}` is ' \
-                  'actually a file.'
-            raise IOError(msg.format(path))
-
-        # OK but what if like in colab we found nothing
-        if not path.exists():
-            # create a directory to avoid an error
-            path.mkdir()
-
-        return path
 
 
 # ======================================================================================================================
