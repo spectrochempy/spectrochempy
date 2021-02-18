@@ -33,7 +33,7 @@ def test_fix_issue_20():
     # Out[6]: Coord: [float64] cm^-1
 
     X = read_omnic(os.path.join('irdata', 'CO@Mo_Al2O3.SPG'))
-    assert X.__str__() == 'NDDataset: [float32] a.u. (shape: (y:19, x:3112))'
+    assert X.__str__() == 'NDDataset: [float64] a.u. (shape: (y:19, x:3112))'
 
     # slicing a NDDataset with an integer is OK for the coord:
     assert X[:, 100].x.__str__() == 'Coord: [float64] cm^-1 (size: 1)'

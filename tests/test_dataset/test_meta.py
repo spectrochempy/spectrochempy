@@ -9,7 +9,7 @@
 
 """
 
-from spectrochempy.utils import Meta
+from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.utils.testing import raises
 from spectrochempy.units import ur
 

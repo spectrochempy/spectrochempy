@@ -329,7 +329,7 @@ def plot_2D(dataset, **kwargs):
     ax.set_xlim(xlim)
 
     xscale = kwargs.get("xscale", "linear")
-    ax.set_xscale(xscale, nonpositive='mask')
+    ax.set_xscale(xscale) #, nonpositive='mask')
 
     # set the ordinates axis
     # ------------------------------------------------------------------------------------------------------------------
@@ -470,7 +470,7 @@ def plot_2D(dataset, **kwargs):
             kwargs['nlevels'] = 500
             if not hasattr(new, 'clevels') or new.clevels is None:
                 new.clevels = _get_clevels(zdata, prefs, **kwargs)
-            c = ax.contourf(xdata, ydata, zdata, new.clevels, linewidths=lw, alpha=alpha)
+            c = ax.contourf(xdata, ydata, zdata, new.clevels, alpha=alpha)
             c.set_cmap(cmap)
             c.set_norm(norm)
 

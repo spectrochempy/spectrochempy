@@ -102,7 +102,7 @@ def savgol_filter(dataset, window_length=5, polyorder=0, deriv=0, delta=1.0,
     --------
     >>> dataset = scp.read('irdata/nh4y-activation.spg')
     >>> dataset.savgol_filter(window_length=5, polyorder=0)
-    NDDataset: [float32] a.u. (shape: (y:55, x:5549))
+    NDDataset: [float64] a.u. (shape: (y:55, x:5549))
     """
 
     if not kwargs.pop('inplace', False):
@@ -180,7 +180,7 @@ def detrend(dataset, type='linear', bp=0, **kwargs):
     --------
     >>> dataset = scp.read("irdata/nh4y-activation.spg")
     >>> dataset.detrend(type='constant')
-    NDDataset: [float32] a.u. (shape: (y:55, x:5549))
+    NDDataset: [float64] a.u. (shape: (y:55, x:5549))
     """
     if not kwargs.pop('inplace', False):
         # default

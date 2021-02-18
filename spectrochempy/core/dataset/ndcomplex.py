@@ -53,8 +53,6 @@ class NDComplexArray(NDArray):
 
         Other Parameters
         ----------------
-        dtype : str or dtype, optional, default=np.float64
-            If specified, the data will be casted to this dtype, else the type of the data will be used
         dims : list of chars, optional.
             if specified the list must have a length equal to the number od data dimensions (ndim) and the chars must be
             taken among among x,y,z,u,v,w or t. If not specified, the dimension names are automatically attributed in
@@ -149,8 +147,9 @@ class NDComplexArray(NDArray):
             elif self._dtype == typequaternion:
                 data = self._make_quaternion(data)
 
-            # reset dtype for another use
-            self._dtype = None
+
+        elif data.dtype not in [typequaternion] + list(TYPE_COMPLEX):
+            data = data.astype(np.float64, copy=False)    # by default dta are float64 if the dtype is not fixed
 
         # return the validated data
         if self._copy:
@@ -440,7 +439,7 @@ class NDComplexArray(NDArray):
             new = self  # work inplace
 
         if new.dtype != typequaternion:  # not already a quaternion
-            new._data = self._make_quaternion(new.data)
+            new._data = new._make_quaternion(new.data)
 
         return new
 
@@ -613,6 +612,7 @@ class NDComplexArray(NDArray):
         else:
             data = np.ascontiguousarray(data)
 
+        self._dtype = None # reset dtype
         return data
 
     # ..................................................................................................................
@@ -636,6 +636,7 @@ class NDComplexArray(NDArray):
         #  _data = as_quat_array(list(zip(r.real.flatten(), r.imag.flatten(), i.real.flatten(), i.imag.flatten())))
         #  _data = _data.reshape(r.shape)
 
+        self._dtype = None  # reset dtyep
         return as_quaternion(r, i)
 
     # ------------------------------------------------------------------------------------------------------------------

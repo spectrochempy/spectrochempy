@@ -35,10 +35,9 @@ from spectrochempy.utils import (colored_output, SpectroChemPyException, Spectro
 HAS_XARRAY = False
 try:
     import xarray as xr
-    HAS_XARRAY = True
+    HAS_XARRAY = True      # pragma: no cover
 except ImportError:
-    xr = None
-    pass
+    xr = None              # pragma: no cover
 
 
 # ======================================================================================================================
@@ -101,7 +100,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         Other Parameters
         ----------------
         dtype : str or dtype, optional, default=np.float64
-            If specified, the data will be casted to this dtype, else the type of the data will be used.
+            If specified, the data will be casted to this dtype, else the data will be casted to float64 or complex128.
         dims : list of chars, optional
             If specified the list must have a length equal to the number od data dimensions (ndim) and the chars must be
             taken among among x,y,z,u,v,w or t. If not specified, the dimension names are automatically attributed in
@@ -171,14 +170,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         if isinstance(coordset, CoordSet):
             self.set_coordset(**coordset)
 
-            if coordunits is not None:
-                warning_('When a CoordSet object is passed to set the coordinates, coordunits are ignored. '
-                         'To change units, do it in the passed CoordSet')
-
-            if coordtitles is not None:
-                warning_('When a CoordSet object is passed to set the coordinates, coordtitles are ignored. '
-                         'To change titles, do it in the passed CoordSet')
-
         else:
             if coordset is None:
                 coordset = [None] * self.ndim
@@ -201,10 +192,10 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
                     if t is not None:
                         coord.title = t
                 else:
-                    if u:
+                    if u:  # pragma: no cover
                         warning_('units have been set for a CoordSet, but this will be ignored '
                                  '(units are only defined at the coordinate level')
-                    if t:
+                    if t:  # pragma: no cover
                         warning_('title will be ignored as they are only defined at the coordinates level')
                     coord = c
 
@@ -386,11 +377,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         return None
 
     # ..................................................................................................................
-    @default('_copy')
-    def _copy_default(self):
-        return False
-
-    # ..................................................................................................................
     @default('_modeldata')
     def _modeldata_default(self):
         return None
@@ -422,10 +408,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
                 else:
                     raise TypeError('Coordinates must be an instance or a subclass of Coord class or NDArray, or of '
                                     f' CoordSet class, but an instance of {type(coord)} has been passed')
-
-            # if self.dims and coord.name not in self.dims:
-            #    raise AttributeError(f'The name of a coordinate must have name among the current dims: {self.dims}'
-            #                         f' but the name is `{coord.name}`')
 
             if self.dims and coord.name in self.dims:
                 # check the validity of the given coordinates in terms of size (if it correspond to one of the dims)
@@ -547,6 +529,17 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
     # ..................................................................................................................
     @property
+    def coordnames(self):
+        """
+        List of the |Coord| names.
+
+        Read only property.
+        """
+        if self._coordset is not None:
+            return self._coordset.names
+
+    # ..................................................................................................................
+    @property
     def coordtitles(self):
         """
         List of the |Coord| titles.
@@ -634,7 +627,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     def labels(self):
         # not valid for NDDataset
         # There is no label for nd-dataset
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     # ..................................................................................................................
     @property
@@ -701,18 +694,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         Set units of the one or more coordinates.
         """
         self._coordset.set_units(*args, **kwargs)
-
-    # ..................................................................................................................
-    # def set_real(self, axis):
-    #    raise NotImplementedError
-
-    # ..................................................................................................................
-    # def set_complex(self):
-    #    raise NotImplementedError
-
-    # ..................................................................................................................
-    # def set_quaternion(self):
-    #    raise NotImplementedError
 
     # ..................................................................................................................
     def sort(self, **kwargs):
@@ -862,6 +843,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         squeeze : The inverse operation, removing singleton dimensions
         """
         # TODO
+
     # ..................................................................................................................
     def swapdims(self, dim1, dim2, inplace=False):
         """
@@ -1176,7 +1158,7 @@ api_funcs = ['sort',
 
              ]
 
-# todo: chack the fact that some function are defined also in ndmath
+# todo: check the fact that some function are defined also in ndmath
 for funcname in api_funcs:
     setattr(thismodule, funcname, getattr(NDDataset, funcname))
 

@@ -18,7 +18,7 @@ from quaternion import as_quat_array
 
 from nmrglue.fileio.bruker import read as read_fid, read_pdata, read_lowmem
 from spectrochempy.core import debug_
-from spectrochempy.utils.meta import Meta
+from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.core.dataset.coord import LinearCoord
 from spectrochempy.units import ur
 from spectrochempy.utils.exceptions import deprecated

@@ -20,6 +20,7 @@ from matplotlib.ticker import MaxNLocator, ScalarFormatter
 from scipy.special import gammaln
 from traitlets import HasTraits, Instance
 
+from spectrochempy.core import info_
 from spectrochempy.core.analysis.svd import SVD
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
@@ -195,7 +196,7 @@ class PCA(HasTraits):
                 n_pc = self._infer_pc_()
                 return n_pc
             else:
-                warnings.warn('Cannot use `auto` if n_observations < '
+                info_('Cannot use `auto` if n_observations < '
                               'n_features. Try with threshold 0.9999')
                 n_pc = 0.9999
 

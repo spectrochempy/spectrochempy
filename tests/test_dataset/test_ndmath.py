@@ -599,7 +599,7 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     # ----
 
     ds1 = scp.NDDataset.eye(2, dtype=int)
-    assert str(ds1) == 'NDDataset: [int64] unitless (shape: (y:2, x:2))'
+    assert str(ds1) == 'NDDataset: [float64] unitless (shape: (y:2, x:2))'
     ds = scp.eye(3, k=1, units='km')
     assert (ds.data == np.eye(3, k=1)).all()
     assert ds.units == ur.km
@@ -708,7 +708,7 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     nd1 = IR_dataset_1D
     nd1[1290.:890.] = MASKED
     assert nd1.is_masked
-    assert str(nd1) == 'NDDataset: [float32] a.u. (size: 5549)'
+    assert str(nd1) == 'NDDataset: [float64] a.u. (size: 5549)'
 
     idx = nd1.argmax()
     assert idx == 3122
@@ -719,9 +719,9 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     mx = NDDataset.max(nd1)
     assert mx == Quantity(3.8080601692199707, 'absorbance')
 
-    mxk = nd1.max(keepdims=1)
+    mxk = nd1.max(keepdims=True)
     assert isinstance(mxk, NDDataset)
-    assert str(mxk) == 'NDDataset: [float32] a.u. (size: 1)'
+    assert str(mxk) == 'NDDataset: [float64] a.u. (size: 1)'
     assert mxk.values == mx
 
     # test on a 2D NDDataset
@@ -731,7 +731,7 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     mx = nd2.max()  # no axis specified
     assert mx == Quantity(3.8080601692199707, 'absorbance')
     mxk = nd2.max(keepdims=True)
-    assert str(mxk) == 'NDDataset: [float32] a.u. (shape: (y:1, x:1))'
+    assert str(mxk) == 'NDDataset: [float64] a.u. (shape: (y:1, x:1))'
 
     nd2m = nd2.max('y')  # axis selected
     ax = nd2m.plot()
@@ -751,7 +751,7 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     mx = nd2.min()  # no axis specified
     assert mx == Quantity(-0.022955093532800674, 'absorbance')
     mxk = nd2.min(keepdims=True)
-    assert str(mxk) == 'NDDataset: [float32] a.u. (shape: (y:1, x:1))'
+    assert str(mxk) == 'NDDataset: [float64] a.u. (shape: (y:1, x:1))'
 
     nd2m = nd2.min('y')  # axis selected
     ax = nd2m.plot()
@@ -886,10 +886,10 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     # -----
     nd = IR_dataset_2D.copy()
     m = scp.mean(nd)
-    assert m == Quantity(1.1586077386961373, "absorbance")
+    assert m == Quantity(1.1586076837564983, "absorbance")
 
     m = scp.average(nd)
-    assert m == Quantity(1.1586077386961373, "absorbance")
+    assert m == Quantity(1.1586076837564983, "absorbance")
 
     mx = scp.mean(nd, keepdims=True)
     assert mx.shape == (1, 1)

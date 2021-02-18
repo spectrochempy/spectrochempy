@@ -25,7 +25,7 @@ def test_read():
     assert A2 == A1
 
     A3 = scp.read('irdata/nh4y-activation.spg', protocol='omnic')
-    assert str(A3) == 'NDDataset: [float32] a.u. (shape: (y:55, x:5549))'
+    assert str(A3) == 'NDDataset: [float64] a.u. (shape: (y:55, x:5549))'
 
     # single file without protocol
     # inferred from filename
@@ -33,24 +33,24 @@ def test_read():
     assert A4 == A1
 
     A5 = scp.read('irdata/nh4y-activation.spg')
-    assert str(A5) == 'NDDataset: [float32] a.u. (shape: (y:55, x:5549))'
+    assert str(A5) == 'NDDataset: [float64] a.u. (shape: (y:55, x:5549))'
 
     # native format
     f = A5.save_as('nh4y.scp')
     A6 = scp.read('irdata/nh4y.scp')
-    assert str(A6) == 'NDDataset: [float32] a.u. (shape: (y:55, x:5549))'
+    assert str(A6) == 'NDDataset: [float64] a.u. (shape: (y:55, x:5549))'
 
     A7 = scp.read('nh4y', directory='irdata', protocol='scp')
-    assert str(A7) == 'NDDataset: [float32] a.u. (shape: (y:55, x:5549))'
+    assert str(A7) == 'NDDataset: [float64] a.u. (shape: (y:55, x:5549))'
 
     A8 = scp.read('nh4y', directory='irdata')
-    assert str(A8) == 'NDDataset: [float32] a.u. (shape: (y:55, x:5549))'
+    assert str(A8) == 'NDDataset: [float64] a.u. (shape: (y:55, x:5549))'
 
     f.unlink()
 
     # multiple compatible 1D files automatically merged
     B = NDDataset.read('test.0000', 'test.0001', 'test.0002', directory=os.path.join('irdata', 'OPUS'))
-    assert str(B) == 'NDDataset: [float32] a.u. (shape: (y:3, x:2567))'
+    assert str(B) == 'NDDataset: [float64] a.u. (shape: (y:3, x:2567))'
     assert len(B) == 3
 
     # multiple compatible 1D files not merged if the merge keyword is set to False
@@ -96,17 +96,17 @@ def test_read():
 
     # The most direct way to pass the byte content information
     nd = NDDataset.read(filename, content=content)
-    assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:2, x:5549))'
+    assert str(nd) == 'NDDataset: [float64] a.u. (shape: (y:2, x:5549))'
 
     # It can also be passed using a dictionary structure {filename:content, ....}
     nd = NDDataset.read({
             filename: content
             })
-    assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:2, x:5549))'
+    assert str(nd) == 'NDDataset: [float64] a.u. (shape: (y:2, x:5549))'
 
     # Case where the filename is not provided
     nd = NDDataset.read(content)
-    assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:2, x:5549))'
+    assert str(nd) == 'NDDataset: [float64] a.u. (shape: (y:2, x:5549))'
 
     # Try with an .spa file
     filename = datadir / 'irdata/subdir/7_CZ0-100 Pd_101.SPA'
@@ -120,21 +120,21 @@ def test_read():
     nd = NDDataset.read({
             filename: content
             })
-    assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:1, x:5549))'
+    assert str(nd) == 'NDDataset: [float64] a.u. (shape: (y:1, x:5549))'
 
     # Try with only a .spa content
     nd = NDDataset.read(content)
-    assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:1, x:5549))'
+    assert str(nd) == 'NDDataset: [float64] a.u. (shape: (y:1, x:5549))'
 
     # Try with several .spa content (should be stacked into a single nddataset)
     nd = NDDataset.read({
             filename: content,
             filename2: content2
             })
-    assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:2, x:5549))'
+    assert str(nd) == 'NDDataset: [float64] a.u. (shape: (y:2, x:5549))'
 
     nd = NDDataset.read(content, content2)
-    assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:2, x:5549))'
+    assert str(nd) == 'NDDataset: [float64] a.u. (shape: (y:2, x:5549))'
 
 
 def test_generic_read():

@@ -86,3 +86,20 @@ def test_concatenate(IR_dataset_2D):
     assert s1.shape == (5549,)
     ss = concatenate(s0, s1, force_stack=True)
     assert ss.shape == (2, 5549)
+
+def test_bug_243():
+    import spectrochempy as scp
+
+    D = scp.zeros((10, 100))
+
+    x = scp.LinearCoord(offset=0.0, increment=1.0, size=100)
+    y = scp.LinearCoord(offset=0.0, increment=1.0, size=10)
+
+    D.set_coordset(x=x, y=y)
+    D1 = D[:, 0.:10.]
+    D2 = D[:, 20.:40.]
+
+    D12 = scp.concatenate(D1, D2, axis=1)
+
+    # D2.x.data[-1] is 40., as expected, but not D12.x.data[-1]:
+    assert D12.x.data[-1] == D2.x.data[-1]

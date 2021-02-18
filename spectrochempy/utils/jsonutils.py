@@ -95,10 +95,10 @@ def json_serialiser(byte_obj, encoding=None):
     elif isinstance(byte_obj, np.bool_):
         return bool(byte_obj)
 
-    elif isinstance(byte_obj, (np.float64, np.float32, np.float)):
+    elif isinstance(byte_obj, (np.float64, np.float32, float)):
         return float(byte_obj)
 
-    elif isinstance(byte_obj, (np.int64, np.int32, np.int)):
+    elif isinstance(byte_obj, (np.int64, np.int32, int)):
         return int(byte_obj)
 
     elif isinstance(byte_obj, tuple):

@@ -21,7 +21,7 @@ def test_read_omnic():
     # class method
     nd1 = scp.NDDataset.read_omnic('irdata/nh4y-activation.spg')
     assert nd1.title == 'absorbance'
-    assert str(nd1) == 'NDDataset: [float32] a.u. (shape: (y:55, x:5549))'
+    assert str(nd1) == 'NDDataset: [float64] a.u. (shape: (y:55, x:5549))'
 
     # API method
     nd2 = scp.read_omnic('irdata/nh4y-activation.spg')
@@ -30,8 +30,8 @@ def test_read_omnic():
     # opening list of dataset
     l1 = scp.read_omnic('wodger.spg', 'irdata/nh4y-activation.spg')
     assert len(l1) == 2
-    assert str(l1[0]) == 'NDDataset: [float32] a.u. (shape: (y:2, x:5549))'
-    assert str(l1[1]) == 'NDDataset: [float32] a.u. (shape: (y:55, x:5549))'
+    assert str(l1[0]) == 'NDDataset: [float64] a.u. (shape: (y:2, x:5549))'
+    assert str(l1[1]) == 'NDDataset: [float64] a.u. (shape: (y:55, x:5549))'
 
     # It is also possible to use more specific reader function such as
     # `read_spg`, `read_spa` or `read_srs` - they are alias of the read_omnic function.
@@ -45,11 +45,11 @@ def test_read_omnic():
 
     # merging
     nd = scp.read_omnic(['wodger.spg', 'irdata/nh4y-activation.spg'])
-    assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:57, x:5549))'
+    assert str(nd) == 'NDDataset: [float64] a.u. (shape: (y:57, x:5549))'
 
     # merging
     nd = scp.read_omnic('wodger.spg', 'irdata/nh4y-activation.spg', merge=True)
-    assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:57, x:5549))'
+    assert str(nd) == 'NDDataset: [float64] a.u. (shape: (y:57, x:5549))'
 
 
 def test_read_omnic_dir():
@@ -105,13 +105,13 @@ def test_read_omnic_contents():
 
 def test_read_spa():
     nd = scp.read_spa('irdata/subdir/20-50/7_CZ0-100 Pd_21.SPA')
-    assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:1, x:5549))'
+    assert str(nd) == 'NDDataset: [float64] a.u. (shape: (y:1, x:5549))'
 
     nd = scp.read_spa('irdata/subdir', merge=True)
-    assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:4, x:5549))'
+    assert str(nd) == 'NDDataset: [float64] a.u. (shape: (y:4, x:5549))'
 
     nd = scp.read_spa('irdata/subdir', merge=True, recursive=True)
-    assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:8, x:5549))'
+    assert str(nd) == 'NDDataset: [float64] a.u. (shape: (y:8, x:5549))'
 
     lst = scp.read('irdata', merge=True, recursive=True)  # not selective on extension
     assert isinstance(lst, list)

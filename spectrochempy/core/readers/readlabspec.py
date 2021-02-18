@@ -20,7 +20,7 @@ import numpy as np
 
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import importermethod, Importer
-from spectrochempy.utils import Meta
+from spectrochempy.core.dataset.meta import Meta
 
 
 # ======================================================================================================================
