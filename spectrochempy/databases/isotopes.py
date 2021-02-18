@@ -22,7 +22,7 @@ import numpy as np
 
 from spectrochempy.units import ur
 from spectrochempy.core import preferences as prefs
-from spectrochempy.core.meta import Meta
+from spectrochempy.core.dataset.meta import Meta
 
 
 # ======================================================================================================================

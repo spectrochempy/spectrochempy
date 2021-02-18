@@ -284,13 +284,13 @@ def read(*paths, **kwargs):
     Reading a single OPUS file  (providing a windows type filename relative to the default ``Datadir``)
 
     >>> scp.read('irdata\\\\OPUS\\\\test.0000')
-    NDDataset: [float32] a.u. (shape: (y:1, x:2567))
+    NDDataset: [float64] a.u. (shape: (y:1, x:2567))
 
     Reading a single OPUS file  (providing a unix/python type filename relative to the default ``Datadir``)
     Note that here read_opus is called as a classmethod of the NDDataset class
 
     >>> scp.NDDataset.read('irdata/OPUS/test.0000')
-    NDDataset: [float32] a.u. (shape: (y:1, x:2567))
+    NDDataset: [float64] a.u. (shape: (y:1, x:2567))
 
     Single file specified with pathlib.Path object
 
@@ -298,7 +298,7 @@ def read(*paths, **kwargs):
     >>> folder = Path('irdata/OPUS')
     >>> p = folder / 'test.0000'
     >>> scp.read(p)
-    NDDataset: [float32] a.u. (shape: (y:1, x:2567))
+    NDDataset: [float64] a.u. (shape: (y:1, x:2567))
 
     Multiple files not merged (return a list of datasets). Note that a directory is specified
 
@@ -306,17 +306,17 @@ def read(*paths, **kwargs):
     >>> len(le)
     3
     >>> le[0]
-    NDDataset: [float32] a.u. (shape: (y:1, x:2567))
+    NDDataset: [float64] a.u. (shape: (y:1, x:2567))
 
     Multiple files merged as the `merge` keyword is set to true
 
     >>> scp.read('test.0000', 'test.0001', 'test.0002', directory='irdata/OPUS', merge=True)
-    NDDataset: [float32] a.u. (shape: (y:3, x:2567))
+    NDDataset: [float64] a.u. (shape: (y:3, x:2567))
 
     Multiple files to merge : they are passed as a list instead of using the keyword `merge`
 
     >>> scp.read(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS')
-    NDDataset: [float32] a.u. (shape: (y:3, x:2567))
+    NDDataset: [float64] a.u. (shape: (y:3, x:2567))
 
     Multiple files not merged : they are passed as a list but `merge` is set to false
 
@@ -338,7 +338,7 @@ def read(*paths, **kwargs):
     Again we can use merge to stack all 4 spectra if thet have compatible dimensions.
 
     >>> scp.read(directory='irdata/OPUS', merge=True)
-    [NDDataset: [float32] a.u. (shape: (y:1, x:5549)), NDDataset: [float32] a.u. (shape: (y:4, x:2567))]
+    [NDDataset: [float64] a.u. (shape: (y:1, x:5549)), NDDataset: [float64] a.u. (shape: (y:4, x:2567))]
     """
 
     importer = Importer()

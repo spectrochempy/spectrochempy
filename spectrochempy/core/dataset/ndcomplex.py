@@ -439,7 +439,7 @@ class NDComplexArray(NDArray):
             new = self  # work inplace
 
         if new.dtype != typequaternion:  # not already a quaternion
-            new._data = self._make_quaternion(new.data)
+            new._data = new._make_quaternion(new.data)
 
         return new
 
@@ -612,6 +612,7 @@ class NDComplexArray(NDArray):
         else:
             data = np.ascontiguousarray(data)
 
+        self._dtype = None # reset dtype
         return data
 
     # ..................................................................................................................
@@ -635,6 +636,7 @@ class NDComplexArray(NDArray):
         #  _data = as_quat_array(list(zip(r.real.flatten(), r.imag.flatten(), i.real.flatten(), i.imag.flatten())))
         #  _data = _data.reshape(r.shape)
 
+        self._dtype = None  # reset dtyep
         return as_quaternion(r, i)
 
     # ------------------------------------------------------------------------------------------------------------------

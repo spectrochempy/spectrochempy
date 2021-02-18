@@ -150,7 +150,8 @@ class _from_numpy_method(object):
 
             # Be sure that the dataset passed to the numpy function are a numpy (masked) array
             if isinstance(argpos[0], (NDDataset, Coord)):
-                argpos[0] = argpos[0].real.masked_data
+                #argpos[0] = argpos[0].real.masked_data
+                argpos[0] = argpos[0].masked_data
 
             # case of creation like method
             # ............................
@@ -376,13 +377,13 @@ class NDMath(object):
     >>> from spectrochempy import *
     >>> nd1 = NDDataset.read('wodger.spg')
     >>> nd1
-    NDDataset: [float32] a.u. (shape: (y:2, x:5549))
+    NDDataset: [float64] a.u. (shape: (y:2, x:5549))
     >>> nd1.data
     array([[   2.005,    2.003, ...,    1.826,    1.831],
            [   1.983,    1.984, ...,    1.698,    1.704]], dtype=float32)
     >>> nd2 = np.negative(nd1)
     >>> nd2
-    NDDataset: [float32] a.u. (shape: (y:2, x:5549))
+    NDDataset: [float64] a.u. (shape: (y:2, x:5549))
     >>> nd2.data
     array([[  -2.005,   -2.003, ...,   -1.826,   -1.831],
            [  -1.983,   -1.984, ...,   -1.698,   -1.704]], dtype=float32)
@@ -614,6 +615,11 @@ class NDMath(object):
             Maximum of the data. If `dim` is None, the result is a scalar value.
             If `dim` is given, the result is an array of dimension ``ndim - 1``.
 
+        Note
+        ----
+        For dataset with complex or hypercomplex type type, the default is the
+        value with the maximum real part.
+
         See Also
         --------
         amin : The minimum value of a dataset along a given dimension, propagating any NaNs.
@@ -626,17 +632,36 @@ class NDMath(object):
         """
 
         axis, dim = cls.get_axis(dim, allows_none=True)
+        quaternion = False
+        if dataset.dtype in [np.quaternion]:
+            from quaternion import as_float_array
+            quaternion = True
+            data = dataset
+            dataset = as_float_array(dataset)[...,0]  # real part
         m = np.ma.max(dataset, axis=axis, keepdims=keepdims)
+        if quaternion:
+            if dim is None:
+                # we return the corresponding quaternion value
+                idx = np.ma.argmax(dataset)
+                c = list(np.unravel_index(idx, dataset.shape))
+                m = data[..., c[-2], c[-1]][()]
+            else:
+                m = np.ma.diag(data[np.ma.argmax(dataset, axis=axis)])
 
-        if np.isscalar(m):
+        if np.isscalar(m) or (m.size==1 and not keepdims):
+            if not np.isscalar(m): # case of quaternion
+                m = m[()]
             if cls.units is not None:
                 return Quantity(m, cls.units)
             else:
                 return m
 
         dims = cls.dims
-        cls._data = m.data
-        cls._mask = m.mask
+        if hasattr(m, 'mask'):
+            cls._data = m.data
+            cls._mask = m.mask
+        else:
+            cls._data = m
 
         # Here we must eventually reduce the corresponding coordinates
         if hasattr(cls, 'coordset'):
@@ -914,12 +939,12 @@ class NDMath(object):
         --------
         >>> nd = scp.read('irdata/nh4y-activation.spg')
         >>> nd
-        NDDataset: [float32] a.u. (shape: (y:55, x:5549))
+        NDDataset: [float64] a.u. (shape: (y:55, x:5549))
         >>> scp.average(nd)
         <Quantity(1.2508586645126343, 'absorbance')>
         >>> m = scp.average(nd, dim='y')
         >>> m
-        NDDataset: [float32] a.u. (size: 5549)
+        NDDataset: [float64] a.u. (size: 5549)
         >>> m.x
         Coord: [float64] cm^-1 (size: 5549)
         >>> m = scp.average(nd, dim='y', weights=np.arange(55))
@@ -1102,14 +1127,14 @@ class NDMath(object):
         --------
         >>> nd = scp.read('irdata/nh4y-activation.spg')
         >>> nd
-        NDDataset: [float32] a.u. (shape: (y:55, x:5549))
+        NDDataset: [float64] a.u. (shape: (y:55, x:5549))
         >>> scp.sum(nd)
         <Quantity(381755.8125, 'absorbance')>
         >>> scp.sum(nd, keepdims=True)
-        NDDataset: [float32] a.u. (shape: (y:1, x:1))
+        NDDataset: [float64] a.u. (shape: (y:1, x:1))
         >>> m = scp.sum(nd, dim='y')
         >>> m
-        NDDataset: [float32] a.u. (size: 5549)
+        NDDataset: [float64] a.u. (size: 5549)
         >>> m.data
         array([   100.7,    100.7, ...,       74,    73.98], dtype=float32)
         """
@@ -1862,14 +1887,14 @@ class NDMath(object):
         --------
         >>> nd = scp.read('irdata/nh4y-activation.spg')
         >>> nd
-        NDDataset: [float32] a.u. (shape: (y:55, x:5549))
+        NDDataset: [float64] a.u. (shape: (y:55, x:5549))
         >>> scp.mean(nd)
         <Quantity(1.2508586645126343, 'absorbance')>
         >>> scp.mean(nd, keepdims=True)
-        NDDataset: [float32] a.u. (shape: (y:1, x:1))
+        NDDataset: [float64] a.u. (shape: (y:1, x:1))
         >>> m = scp.mean(nd, dim='y')
         >>> m
-        NDDataset: [float32] a.u. (size: 5549)
+        NDDataset: [float64] a.u. (size: 5549)
         >>> m.x
         Coord: [float64] cm^-1 (size: 5549)
         """
@@ -2211,14 +2236,14 @@ class NDMath(object):
         --------
         >>> nd = scp.read('irdata/nh4y-activation.spg')
         >>> nd
-        NDDataset: [float32] a.u. (shape: (y:55, x:5549))
+        NDDataset: [float64] a.u. (shape: (y:55, x:5549))
         >>> scp.std(nd)
         <Quantity(0.8079720139503479, 'absorbance')>
         >>> scp.std(nd, keepdims=True)
-        NDDataset: [float32] a.u. (shape: (y:1, x:1))
+        NDDataset: [float64] a.u. (shape: (y:1, x:1))
         >>> m = scp.std(nd, dim='y')
         >>> m
-        NDDataset: [float32] a.u. (size: 5549)
+        NDDataset: [float64] a.u. (size: 5549)
         >>> m.data
         array([ 0.08521,  0.08543, ...,    0.251,   0.2537], dtype=float32)
         """
@@ -2291,14 +2316,14 @@ class NDMath(object):
         --------
         >>> nd = scp.read('irdata/nh4y-activation.spg')
         >>> nd
-        NDDataset: [float32] a.u. (shape: (y:55, x:5549))
+        NDDataset: [float64] a.u. (shape: (y:55, x:5549))
         >>> scp.sum(nd)
         <Quantity(381755.8125, 'absorbance')>
         >>> scp.sum(nd, keepdims=True)
-        NDDataset: [float32] a.u. (shape: (y:1, x:1))
+        NDDataset: [float64] a.u. (shape: (y:1, x:1))
         >>> m = scp.sum(nd, dim='y')
         >>> m
-        NDDataset: [float32] a.u. (size: 5549)
+        NDDataset: [float64] a.u. (size: 5549)
         >>> m.data
         array([   100.7,    100.7, ...,       74,    73.98], dtype=float32)
         """
@@ -2400,14 +2425,14 @@ class NDMath(object):
         --------
         >>> nd = scp.read('irdata/nh4y-activation.spg')
         >>> nd
-        NDDataset: [float32] a.u. (shape: (y:55, x:5549))
+        NDDataset: [float64] a.u. (shape: (y:55, x:5549))
         >>> scp.var(nd)
         <Quantity(0.6528187990188599, 'absorbance')>
         >>> scp.var(nd, keepdims=True)
-        NDDataset: [float32] a.u. (shape: (y:1, x:1))
+        NDDataset: [float64] a.u. (shape: (y:1, x:1))
         >>> m = scp.var(nd, dim='y')
         >>> m
-        NDDataset: [float32] a.u. (size: 5549)
+        NDDataset: [float64] a.u. (size: 5549)
         >>> m.data
         array([0.007262, 0.007299, ...,  0.06298,  0.06438], dtype=float32)
         """

@@ -108,13 +108,13 @@ def read_omnic(*paths, **kwargs):
     Reading a single OMNIC file  (providing a windows type filename relative to the default ``datadir``)
 
     >>> scp.read_omnic('irdata\\\\nh4y-activation.spg')
-    NDDataset: [float32] a.u. (shape: (y:55, x:5549))
+    NDDataset: [float64] a.u. (shape: (y:55, x:5549))
 
     Reading a single OMNIC file  (providing a unix/python type filename relative to the default ``datadir``)
     Note that here read_omnic is called as a classmethod of the NDDataset class
 
     >>> scp.NDDataset.read_omnic('irdata/nh4y-activation.spg')
-    NDDataset: [float32] a.u. (shape: (y:55, x:5549))
+    NDDataset: [float64] a.u. (shape: (y:55, x:5549))
 
     Single file specified with pathlib.Path object
 
@@ -122,12 +122,12 @@ def read_omnic(*paths, **kwargs):
     >>> folder = Path('irdata')
     >>> p = folder / 'nh4y-activation.spg'
     >>> scp.read_omnic(p)
-    NDDataset: [float32] a.u. (shape: (y:55, x:5549))
+    NDDataset: [float64] a.u. (shape: (y:55, x:5549))
 
     The diretory can also be specified independantly, either as a string or a pathlib object
 
     >>> scp.read_omnic('nh4y-activation.spg', directory=folder)
-    NDDataset: [float32] a.u. (shape: (y:55, x:5549))
+    NDDataset: [float64] a.u. (shape: (y:55, x:5549))
 
     Multiple files not merged (return a list of datasets)
 
@@ -135,17 +135,17 @@ def read_omnic(*paths, **kwargs):
     >>> len(le)
     2
     >>> le[1]
-    NDDataset: [float32] a.u. (shape: (y:2, x:5549))
+    NDDataset: [float64] a.u. (shape: (y:2, x:5549))
 
     Multiple files merged as the `merge` keyword is set to true
 
     >>> scp.read_omnic('irdata/nh4y-activation.spg', 'wodger.spg', merge=True)
-    NDDataset: [float32] a.u. (shape: (y:57, x:5549))
+    NDDataset: [float64] a.u. (shape: (y:57, x:5549))
 
     Multiple files to merge : they are passed as a list (note the brakets) instead of using the keyword `merge`
 
     >>> scp.read_omnic(['irdata/nh4y-activation.spg', 'wodger.spg'])
-    NDDataset: [float32] a.u. (shape: (y:57, x:5549))
+    NDDataset: [float64] a.u. (shape: (y:57, x:5549))
 
     Multiple files not merged : they are passed as a list but `merge` is set to false
 
@@ -167,7 +167,7 @@ def read_omnic(*paths, **kwargs):
     Again we can use merge to stack all 4 spectra if thet have compatible dimensions.
 
     >>> scp.read_omnic(directory='irdata/subdir', merge=True)
-    NDDataset: [float32] a.u. (shape: (y:4, x:5549))
+    NDDataset: [float64] a.u. (shape: (y:4, x:5549))
 
     An example, where bytes contents are passed directly to the read_omnic method.
 
@@ -180,7 +180,7 @@ def read_omnic(*paths, **kwargs):
     >>> len(listnd)
     2
     >>> scp.read_omnic({filename1.name: content1, filename2.name: content2}, merge=True)
-    NDDataset: [float32] a.u. (shape: (y:3, x:5549))
+    NDDataset: [float64] a.u. (shape: (y:3, x:5549))
     """
 
     kwargs['filetypes'] = ['OMNIC files (*.spa *.spg)', 'OMNIC series (*.srs)']
@@ -261,7 +261,7 @@ def read_spg(*paths, **kwargs):
     ---------
 
     >>> scp.read_spg('irdata/nh4y-activation.spg')
-    NDDataset: [float32] a.u. (shape: (y:55, x:5549))
+    NDDataset: [float64] a.u. (shape: (y:55, x:5549))
 
     See ``read_omnic`` for more examples of use
     """
@@ -347,10 +347,10 @@ def read_spa(*paths, **kwargs):
     ---------
 
     >>> scp.read_spa('irdata/subdir/20-50/7_CZ0-100 Pd_21.SPA')
-    NDDataset: [float32] a.u. (shape: (y:1, x:5549))
+    NDDataset: [float64] a.u. (shape: (y:1, x:5549))
 
     >>> scp.read_spa(directory='irdata/subdir', merge=True)
-    NDDataset: [float32] a.u. (shape: (y:4, x:5549))
+    NDDataset: [float64] a.u. (shape: (y:4, x:5549))
 
     See ``read_omnic`` for more examples of use
     """

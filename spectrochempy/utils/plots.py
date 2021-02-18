@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 import plotly.graph_objects as go
 import numpy as np
 
-from spectrochempy.core.meta import Meta
+from spectrochempy.core.dataset.meta import Meta
 
 __all__ = ['cmyk2rgb', 'NBlack', 'NRed', 'NBlue', 'NGreen', 'figure', 'show', 'get_figure',  # Plotly specific
            'get_plotly_figure', 'colorscale']
