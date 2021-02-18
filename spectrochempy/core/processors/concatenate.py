@@ -245,6 +245,8 @@ def concatenate(*datasets, **kwargs):
         coords = coordss[0].copy()
 
         try:
+            coords[dim] = Coord(coords[dim], linear=False)  # de-linearize the
+            # coordinates
             coords[dim]._data = np.concatenate(tuple((c[dim].data for c in coordss)))
         except ValueError:
             pass
@@ -328,7 +330,7 @@ def stack(*datasets):
     >>> B = NDDataset.read('irdata/nh4y-activation.scp')
     >>> C = NDDataset.stack(A, B)
     >>> print(C)
-    NDDataset: [float32]  a.u. (shape: (z:2, y:55, x:5549))
+    NDDataset: [float64]  a.u. (shape: (z:2, y:55, x:5549))
     """
 
     return concatenate(*datasets, force_stack=True)

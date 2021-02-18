@@ -26,7 +26,7 @@ from traittypes import Array
 
 from spectrochempy.units import Unit, ur, Quantity, set_nmr_context
 from spectrochempy.core import info_, error_, print_
-from spectrochempy.core.meta import Meta
+from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.utils import (TYPE_INTEGER, TYPE_FLOAT, MaskedConstant, MASKED, NOMASK, INPLACE, is_sequence,
                                  is_number, numpyprintoptions, spacing, insert_masked_print, SpectroChemPyWarning,
                                  make_new_object, convert_to_html, get_user_and_node)
@@ -900,6 +900,27 @@ class NDArray(HasTraits):
 
         if data is None:
             return
+
+        elif isinstance(data, NDArray) and data.linear:
+            # Case of Linearcoord
+            for attr in self.__dir__():
+                try:
+                    if attr in ['linear', 'offset', 'increment']:
+                        continue
+                    if attr == 'data':
+                        val = data.data
+                    else:
+                        val = getattr(data, f"_{attr}")
+                    if self._copy:
+                        val = cpy.deepcopy(val)
+                    setattr(self, f"_{attr}", val)
+                except AttributeError:
+                    # some attribute of NDDataset are missing in NDArray
+                    pass
+            try:
+                self.history = f'Copied from object:{data.name}'
+            except AttributeError:
+                pass
 
         elif isinstance(data, NDArray):
             # init data with data from another NDArray or NDArray's subclass
@@ -1867,7 +1888,7 @@ class NDArray(HasTraits):
         if self.data is None and self.is_labeled:
             return 1
 
-        if self.size == 0:
+        if not self.size:
             return 0
         else:
             return self.data.ndim
