@@ -779,7 +779,7 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     # COORDMIN AND COORDMAX
     # ---------------------
     cm = nd2.coordmin()
-    assert cm['x'] == Quantity(1290.165, 'cm^-1')
+    assert cm['x'] == Quantity(1289.8, 'cm^-1')
 
     cm = nd2.coordmin(dim='y')
     assert cm.size == 1
@@ -886,17 +886,17 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     # -----
     nd = IR_dataset_2D.copy()
     m = scp.mean(nd)
-    assert m == Quantity(1.1586076837564983, "absorbance")
+    assert m == Quantity(1.1572712436356645, "absorbance")
 
     m = scp.average(nd)
-    assert m == Quantity(1.1586076837564983, "absorbance")
+    assert m == Quantity(1.1572712436356645, "absorbance")
 
     mx = scp.mean(nd, keepdims=True)
     assert mx.shape == (1, 1)
 
     mxd = scp.mean(nd, dim='y')
     assert str(mxd) == 'NDDataset: [float64] a.u. (size: 5549)'
-    assert str(mxd.x) == 'Coord: [float64] cm^-1 (size: 5549)'
+    assert str(mxd.x) == 'LinearCoord: [float64] cm^-1 (size: 5549)'
 
 
 def test_nddataset_fancy_indexing():
@@ -913,7 +913,7 @@ def test_nddataset_fancy_indexing():
     info_(x[3:7])
     assert_array_equal(dx[3:7].data, x[3:7])
 
-    # boolean indexing
+    # boolean indexingassert
     info_(x[x > 52])
     assert_array_equal(dx[x > 52].data, x[x > 52])
 

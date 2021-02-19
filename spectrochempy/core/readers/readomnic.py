@@ -624,11 +624,10 @@ def _read_spg(*args, **kwargs):
 
     # now add coordinates
     #_x = Coord(np.around(np.linspace(firstx[0], lastx[0], nx[0]), 3),
-    # title=xtitles[0], units=xunits[0])
+    #           title=xtitles[0], units=xunits[0])
     spacing = (lastx[0] - firstx[0]) / (nx[0] - 1)
     _x = LinearCoord(offset=firstx[0], increment=spacing, size=int(nx[0]),
-                     title=xtitles[0],
-                     units=xunits[0])
+                     title=xtitles[0], units=xunits[0])
 
     _y = Coord(timestamps, title='Acquisition timestamp (GMT)', units='s', labels=(acquisitiondates, spectitles))
 
@@ -749,8 +748,11 @@ def _read_spa(*args, **kwargs):
     dataset.filename = str(filename)
 
     # now add coordinates
+    # _x = Coord(np.around(np.linspace(firstx, lastx, nx, 3)), title=xtitle,
+    # units=xunit)
     spacing = (lastx - firstx) / (nx - 1)
     _x = LinearCoord(offset=firstx, increment=spacing, size=nx, title=xtitle, units=xunit)
+
     _y = Coord([timestamp], title='Acquisition timestamp (GMT)', units='s', labels=([acquisitiondate], [filename]))
     dataset.set_coordset(y=_y, x=_x)
 
@@ -896,11 +898,9 @@ def _read_srs(*args, **kwargs):
     dataset.origin = 'omnic'
 
     # now add coordinates
-    # _x = Coord(np.around(np.linspace(info['firstx'], info['lastx'], info['nx'], 3)), title=info['xtitle'],
-    #           units=info['xunits'])
     spacing = (info['lastx'] - info['firstx']) / (info['nx'] - 1)
     _x = LinearCoord(offset=info['firstx'], increment=spacing, size=info['nx'], title=info['xtitle'],
-                     units=info['xunits'])
+                      units=info['xunits'])
 
     _y = Coord(np.around(np.linspace(info['firsty'], info['lasty'], info['ny']), 3), title='Time', units='minute',
                labels=names)

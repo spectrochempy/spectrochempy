@@ -7,7 +7,8 @@
 
 from spectrochempy.core.processors.concatenate import concatenate, stack
 from spectrochempy.units import ur
-
+from spectrochempy.core.dataset.coord import Coord, LinearCoord
+from spectrochempy.utils.testing import assert_dataset_equal, assert_dataset_almost_equal
 
 def test_concatenate(IR_dataset_2D):
     dataset = IR_dataset_2D
@@ -24,7 +25,7 @@ def test_concatenate(IR_dataset_2D):
     assert s.x.size == (s1.x.size + s2.x.size)
     assert s.x != dataset.x
     s = s.sort(dims=dim, descend=True)  #
-    assert s.x == dataset.x
+    assert_dataset_almost_equal(s.x, Coord(dataset.x, linear=False))
 
     # default concatenation in the last dimensions
     s = concatenate(s1, s2)
@@ -33,7 +34,7 @@ def test_concatenate(IR_dataset_2D):
     assert s.x.size == (s1.x.size + s2.x.size)
     assert s.x != dataset.x
     s = s.sort(descend=True)  #
-    assert s.x == dataset.x
+    assert_dataset_almost_equal(s.x, Coord(dataset.x, linear=False))
 
     s1 = dataset[:10]
     s2 = dataset[20:]

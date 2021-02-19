@@ -8,7 +8,10 @@ import hypothesis.extra.numpy as hen
 import spectrochempy as scp
 from spectrochempy.units import ur
 from spectrochempy.utils import get_user_and_node, SpectroChemPyException
-from spectrochempy.utils.testing import (assert_dataset_equal, assert_equal,
+from spectrochempy.utils.testing import (assert_dataset_equal,
+                                         assert_dataset_almost_equal,
+                                         assert_equal,
+                                         assert_array_almost_equal,
                                          assert_array_equal, raises,
                                          RandomSeedContext)
 
@@ -335,14 +338,19 @@ def test_nddataset_coords_indexer():
     assert da.shape == (10, 100, 10)
     coords = da.coordset
     assert len(coords) == 3
-    assert_array_equal(da.coordset[2].data, coord0, "get axis by index failed")
-    assert_array_equal(da.coordset['wavelength'].data, coord0,
-                       "get axis by title failed")
-    assert_array_equal(da.coordset['time-on-stream'].data, coord1,
-                       "get axis by title failed")
-    assert_array_equal(da.coordset['temperature'].data, coord2)
+    assert_array_almost_equal(da.coordset[2].data, coord0,
+                              decimal=2, err_msg="get axis by index "
+                                                     "failed")
+    # we use almost as SpectroChemPy round the coordinate numbers
+    assert_array_almost_equal(da.coordset['wavelength'].data, coord0,
+                              decimal=2, err_msg="get axis by title failed")
+    assert_array_almost_equal(da.coordset['time-on-stream'].data, coord1,
+                       decimal=4, err_msg="get axis by title failed")
+    assert_array_almost_equal(da.coordset['temperature'].data, coord2,
+                              decimal=3)
     da.coordset['temperature'] += 273.15 * ur.K
-    assert_array_equal(da.coordset['temperature'].data, coord2 + 273.15)
+    assert_array_almost_equal(da.coordset['temperature'].data, coord2 +
+                              273.15, decimal=3)
 
 
 # ======================================================================================================================
@@ -482,7 +490,7 @@ def test_nddataset_slicing_by_index(ref_ds, ds1):
     assert plane0.shape == (1, 100, 3)
     assert plane0.size == 300
     assert plane0.dims == ['z', 'y', 'x']
-    assert_array_equal(plane0.z, da.z[0])
+    assert_dataset_equal(plane0.z, da.z[0])
     da1 = plane0.squeeze()
     assert da1.shape == (100, 3)
     assert da1.dims == ['y', 'x']
@@ -494,8 +502,10 @@ def test_nddataset_slicing_by_index(ref_ds, ds1):
     assert plane1.dims == ['z', 'y', 'x']
     da2 = plane1.squeeze()
     assert da2.dims == ['z', 'x']
-    assert da2.z == coords[-1]  # remember coordinates are ordered by name!
-    assert da2.x == coords[0]
+    assert_dataset_almost_equal(da2.z, coords[-1], decimal=2)  # remember
+    # coordinates
+    # are ordered by name!
+    assert_dataset_almost_equal(da2.x, coords[0])
     # another selection
     row0 = plane0[:, 0]
     assert type(row0) == type(da)

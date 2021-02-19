@@ -99,9 +99,17 @@ def compare_datasets(this, other, approx=False, decimal=6):
         return eq
 
     thistype = this.implements()
+
     attrs = this.__dir__()
-    for attr in ('filename', 'preferences', 'description', 'history', 'date', 'modified', 'modeldata', 'origin', 'roi',
-                 'offset', 'name', 'show_datapoints'):
+    exclude = ('filename', 'preferences', 'description', 'history', 'date',
+                   'modified', 'modeldata', 'origin', 'roi', 'linear',
+                   'offset', 'increment', 'size', 'name', 'show_datapoints')
+    # else:
+    #     exclude = ('filename', 'preferences', 'description', 'history', 'date',
+    #                'modified', 'modeldata', 'origin', 'roi', 'data', 'name',
+    #                'show_datapoints')
+
+    for attr in exclude:
         # these attibutes are not used for comparison (comparison based on data and units!)
         if attr in attrs:
             if attr in attrs:
@@ -113,8 +121,13 @@ def compare_datasets(this, other, approx=False, decimal=6):
     for attr in attrs:
         if attr != 'units':
             sattr = getattr(this, f'_{attr}')
+            if this.linear and attr=='data':  # allow comparison of LinearCoord
+                # and Coord
+                sattr = this.data
             if hasattr(other, f'_{attr}'):
                 oattr = getattr(other, f'_{attr}')
+                if other.linear and attr == 'data':
+                    oattr = other.data
                 # to avoid deprecation warning issue for unequal array
                 if sattr is None and oattr is not None:
                     raise AssertionError(f'`{attr}` of {this} is None.')

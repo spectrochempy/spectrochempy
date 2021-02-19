@@ -361,8 +361,8 @@ class NDMath(object):
     this. Most of the time it returns a new NDDataset, while in some cases
     noted below, one get a |ndarray|.
 
-    >>> from spectrochempy import *
-    >>> ds = NDDataset([1.,2.,3.])
+    >>> import spectrochempy as scp
+    >>> ds = scp.NDDataset([1.,2.,3.])
     >>> np.sin(ds)
     NDDataset: [float64] unitless (size: 3)
 
@@ -374,8 +374,7 @@ class NDMath(object):
     Examples
     --------
 
-    >>> from spectrochempy import *
-    >>> nd1 = NDDataset.read('wodger.spg')
+    >>> nd1 = scp.read('wodger.spg')
     >>> nd1
     NDDataset: [float64] a.u. (shape: (y:2, x:5549))
     >>> nd1.data

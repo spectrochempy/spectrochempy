@@ -919,6 +919,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         Examples
         ========
+        >>> import spectrochempy as scp
         >>> a = scp.to_array(dataset)
 
         equivalent to:

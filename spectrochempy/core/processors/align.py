@@ -16,7 +16,7 @@ import numpy as np
 
 from spectrochempy.utils import MASKED, UnitsCompatibilityError
 from spectrochempy.core import warning_, error_
-
+from spectrochempy.core.dataset.coord import Coord
 
 # ..................................................................................................................
 def can_merge_or_align(coord1, coord2):
@@ -104,6 +104,11 @@ def align(dataset, *others, **kwargs):
     ValueError
         issued when the dimensions given in `dim` or `dims` argument are not compatibles (units, titles, etc...).
     """
+    # DEVELOPPER NOTE
+    # There is probably better methods, but to simplify dealing with
+    # LinearCoord, we transform them in Coord before treatment (going back
+    # to linear if possible at the end of the process)
+
     # TODO: Perform an alignment along numeric labels
     # TODO: add example in docs
 
@@ -115,6 +120,8 @@ def align(dataset, *others, **kwargs):
 
     # should we align on given external coordinates
     extern_coord = kwargs.pop('coord', None)
+    if extern_coord and extern_coord.implements('LinearCoord'):
+        extern_coord = Coord(extern_coord, linear=False, copy=True)
 
     # what's the method to use (by default='outer')
     method = kwargs.pop('method', 'outer')
@@ -180,6 +187,8 @@ def align(dataset, *others, **kwargs):
 
         # prepare a new Coord object to store the final new dimenson
         new_coord = ref_coord.copy()
+        if new_coord.implements('LinearCoord'):
+            new_coord = Coord(new_coord, linear=False, copy=True)
 
         # loop on all object
         for index, object in _objects.items():
@@ -195,8 +204,11 @@ def align(dataset, *others, **kwargs):
 
             # get the current objet coordinates and check compatibility
             coord = obj.coordset[dim]
+            if coord.implements('LinearCoord'):
+                coord = Coord(coord, linear=False, copy=True)
+
             if not coord.is_units_compatible(ref_coord):
-                # not compatible, stop everything
+            # not compatible, stop everything
                 raise UnitsCompatibilityError('NDataset to align must have compatible units!')
 
             # do units transform if necesssary so coords can be compared
@@ -290,6 +302,7 @@ def align(dataset, *others, **kwargs):
 
     # now return the new transformed object in the same order as the passed objects
     # and mask the missing values (for the moment they are defined to NaN
+    # we also transform into linear coord if possible
 
     for index, object in _objects.items():
         obj = object['obj']

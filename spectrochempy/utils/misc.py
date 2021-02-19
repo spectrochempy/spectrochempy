@@ -24,7 +24,9 @@ from quaternion import as_float_array, as_quat_array
 __all__ = ["TYPE_INTEGER", "TYPE_COMPLEX", "TYPE_FLOAT", "TYPE_BOOL", "EPSILON", "INPLACE", 'typequaternion',
            'make_func_from', "make_new_object", "getdocfrom", "dict_compare", 'htmldoc', "ignored", "is_iterable",
            "is_sequence", "is_number", "silence", "multisort", 'makestr', 'srepr', "spacing", 'largest_power_of_2',
-           'get_component', 'interleaved2quaternion', 'interleaved2complex', 'as_quaternion', 'quat_as_complex_array']
+           'get_component', 'interleaved2quaternion', 'interleaved2complex',
+           'as_quaternion', 'quat_as_complex_array',
+           'get_n_decimals']
 
 #
 # constants
@@ -42,6 +44,17 @@ INPLACE = "INPLACE"
 
 typequaternion = np.dtype(np.quaternion)
 
+
+def get_n_decimals(val, accuracy):
+    if abs(val) > 0.0:
+        nd = int(np.log10(abs(val) * accuracy))
+    else:
+        return 3
+    if nd >= 0:
+        nd = 1
+    else:
+        nd = -nd + 1
+    return nd
 
 # ======================================================================================================================
 # Private methods
@@ -531,10 +544,13 @@ def spacing(arr):
     spacings = np.diff(arr)
     # we need to take into account only the significative digits ( but round to some decimals doesn't work
     # for very small number
-    mantissa, twoexp = np.frexp(spacings)
-    mantissa = mantissa.round(6)
-    spacings = np.ldexp(mantissa, twoexp)
-    spacings = list(set(abs(spacings)))
+#    mantissa, twoexp = np.frexp(spacings)
+#    mantissa = mantissa.round(6)
+#    spacings = np.ldexp(mantissa, twoexp)
+#    spacings = list(set(abs(spacings)))
+    nd = get_n_decimals(spacings.max(), 1.0e-3)
+    spacings = list(set(np.around(spacings, nd)))
+
     if len(spacings) == 1:
         # uniform spacing
         return spacings[0]

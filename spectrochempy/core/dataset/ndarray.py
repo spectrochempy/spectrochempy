@@ -19,7 +19,7 @@ import uuid
 import itertools
 
 from traitlets import (List, Unicode, Instance, Bool, Union, CFloat, Integer, CInt, HasTraits, default, validate,
-                       observe, All)
+                       observe, All, Float)
 from pint.errors import DimensionalityError
 import numpy as np
 from traittypes import Array
@@ -29,7 +29,8 @@ from spectrochempy.core import info_, error_, print_
 from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.utils import (TYPE_INTEGER, TYPE_FLOAT, MaskedConstant, MASKED, NOMASK, INPLACE, is_sequence,
                                  is_number, numpyprintoptions, spacing, insert_masked_print, SpectroChemPyWarning,
-                                 make_new_object, convert_to_html, get_user_and_node)
+                                 make_new_object, convert_to_html,
+                                 get_user_and_node, get_n_decimals)
 
 # ======================================================================================================================
 # constants
@@ -83,6 +84,8 @@ class NDArray(HasTraits):
     _increment = Union((CFloat(), CInt(), Instance(Quantity)), )
     _size = Integer(0)
     _linear = Bool(False)
+
+    _accuracy = Float(allow_none=True)
 
     # metadata
 
@@ -179,6 +182,7 @@ class NDArray(HasTraits):
 
         Examples
         --------
+        >>> import spectrochempy as scp
         >>> myarray = scp.NDArray([1., 2., 3.])
         """
 
@@ -197,6 +201,8 @@ class NDArray(HasTraits):
         self._increment = kwargs.pop('increment', 1.0)
         self._offset = kwargs.pop('offset', 0.0)
         self._size = kwargs.pop('size', 0)
+
+        self._accuracy = kwargs.pop('accuracy', None)
 
         if data is not None:
             self.data = data
@@ -343,7 +349,7 @@ class NDArray(HasTraits):
             items = items[:-1]
             inplace = True
 
-        # get a better representation of the indexes
+        # Eventually get a better representation of the indexes
         keys = self._make_index(items)
 
         # init returned object
@@ -353,16 +359,31 @@ class NDArray(HasTraits):
             new = self.copy()
 
         # slicing by index of all internal array
-        if self.data is not None:
-            udata = self.masked_data[keys]
-            if not self.linear:
-                new._data = np.asarray(udata)
-            else:
-                if self.increment > 0:
-                    new._offset = udata.min()
-                else:
-                    new._offset = udata.max()
+        if new.data is not None:
+            udata = new.masked_data[keys]
+
+            if new.linear:
+                # if self.increment > 0:
+                #     new._offset = udata.min()
+                # else:
+                #     new._offset = udata.max()
                 new._size = udata.size
+                if new._size > 1:
+                    inc = np.diff(udata)
+                    variation = (inc.max() - inc.min()) / udata.ptp()
+                    if variation < 1.0e-5:
+                        new._increment = np.mean(inc) #np.round(np.mean(
+                        # inc), 5)
+                        new._offset = udata[0]
+                        new._data = None
+                        new._linear = True
+                    else:
+                        new._linear = False
+                else:
+                    new._linear = False
+
+            if not new.linear:
+                new._data = np.asarray(udata)
 
         if self.is_labeled:
             # case only of 1D dataset such as Coord
@@ -680,14 +701,17 @@ class NDArray(HasTraits):
         data = self._data.squeeze()
 
         # try to find an increment
-        inc = np.diff(data)
-        variation = (inc.max() - inc.min()) / data.ptp()
-        if variation < 1.0e-5:
-            self._increment = np.round(np.mean(inc), 5)
-            self._offset = data[0]
-            self._size = data.size
-            self._data = None
-            self.linear = True
+        if data.size > 1:
+            inc = np.diff(data)
+            variation = (inc.max() - inc.min()) / data.ptp()
+            if variation < 1.0e-5:
+                self._increment = np.mean(inc)  # np.round(np.mean(inc), 5)
+                self._offset = data[0]
+                self._size = data.size
+                self._data = None
+                self.linear = True
+            else:
+                self._linear = False
         else:
             self._linear = False
 
@@ -875,7 +899,7 @@ class NDArray(HasTraits):
 
                 dtype = self.dtype
                 data = ''
-                if self.implements('Coord'):
+                if self.implements('Coord') or self.implements('LinearCoord'):
                     size = f" (size: {self.data.size})"
                 units = ' {:~K}'.format(self.units) if self.has_units else ' unitless'
 
@@ -1162,6 +1186,7 @@ class NDArray(HasTraits):
 
         Examples
         --------
+        >>> import spectrochempy as scp
         >>> nd1 = scp.NDArray([1. + 2.j, 2. + 3.j])
         >>> nd1
         NDArray: [complex128] unitless (size: 2)
@@ -1224,9 +1249,19 @@ class NDArray(HasTraits):
             data = np.arange(self.size) * self._increment + self._offset
             if hasattr(data, 'units'):
                 data = data.m
-            return data
+        else:
+            data = self._data
 
-        return self._data
+        if self._accuracy is not None:
+            nd = get_n_decimals(abs(data).max(), self._accuracy)
+            data = np.around(data, nd)
+            if self._linear:
+                inc = np.diff(data)
+                self._increment = np.around(np.mean(inc), nd)  # np.round(
+                                            # np.mean(inc), 5)
+                self._offset = np.around(data[0], nd)
+
+        return data
 
     # ..................................................................................................................
     @data.setter
@@ -1621,7 +1656,6 @@ class NDArray(HasTraits):
         >>> nd1.is_units_compatible(nd2)
         False
         >>> nd1.ito('minutes', force=True)
-        NDDataset: [complex128] min (size: 2)
         >>> nd1.is_units_compatible(nd2)
         True
         >>> nd2[0].values * 60. == nd1[0].values
@@ -2005,6 +2039,8 @@ class NDArray(HasTraits):
     def spacing(self):
         # return a scalar for the spacing of the coordinates (if they are uniformly spaced,
         # else return an array of the differents spacings
+        if self.linear:
+            return self.increment * self.units
         return spacing(self.data) * self.units
 
     # ..................................................................................................................

@@ -64,11 +64,9 @@ def concatenate(*datasets, **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy import *
-    ...
-    >>> A = NDDataset.read('irdata/nh4y-activation.spg', protocol='omnic')
-    >>> B = NDDataset.read('irdata/nh4y-activation.scp')
-    >>> C = NDDataset.concatenate(A[10:], B[3:5], A[:10], axis=0)
+    >>> A = scp.read('irdata/nh4y-activation.spg', protocol='omnic')
+    >>> B = scp.read('irdata/nh4y-activation.scp')
+    >>> C = scp.concatenate(A[10:], B[3:5], A[:10], axis=0)
     >>> A[10:].shape, B[3:5].shape, A[:10].shape, C.shape
     ((45, 5549), (2, 5549), (10, 5549), (57, 5549))
 
@@ -324,11 +322,9 @@ def stack(*datasets):
 
     Examples
     --------
-    >>> from spectrochempy import *
-    ...
-    >>> A = NDDataset.read('irdata/nh4y-activation.spg', protocol='omnic')
-    >>> B = NDDataset.read('irdata/nh4y-activation.scp')
-    >>> C = NDDataset.stack(A, B)
+    >>> A = scp.read('irdata/nh4y-activation.spg', protocol='omnic')
+    >>> B = scp.read('irdata/nh4y-activation.scp')
+    >>> C = scp.stack(A, B)
     >>> print(C)
     NDDataset: [float64]  a.u. (shape: (z:2, y:55, x:5549))
     """

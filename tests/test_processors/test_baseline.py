@@ -16,25 +16,48 @@ from spectrochempy import (
     NDDataset,
     ur,
     )
+from spectrochempy.utils.testing import assert_dataset_equal, assert_dataset_almost_equal
 
 path = os.path.dirname(os.path.abspath(__file__))
 
 
 def test_basecor_sequential(IR_dataset_2D):
-    dataset = IR_dataset_2D[5]
 
+    dataset = IR_dataset_2D[5]
+    from spectrochempy import Coord
+    dataset.x = Coord(dataset.x, linear=False)
     basc = BaselineCorrection(dataset)
-    s = basc([6000., 3500.], [2200., 1500.], method='sequential', interpolation='pchip')
+
+    s = basc([6000., 3500.], [2200., 1500.], method='sequential',
+             interpolation='pchip')
     s.plot()
-    s = basc([6000., 3500.], [2200., 1500.], method='sequential', interpolation='polynomial')
-    s.plot(clear=False, color='red')
+
+    s1 = basc([6000., 3500.], [2200., 1500.], method='sequential',
+              interpolation='polynomial')
+    s1.plot(clear=False, color='red')
+
+    dataset = IR_dataset_2D[5]   # with LinearCoord
+    basc = BaselineCorrection(dataset)
+
+    s2 = basc([6000., 3500.], [2200., 1500.], method='sequential',
+              interpolation='pchip')
+    assert_dataset_almost_equal(s, s2, )
+    s2.plot(clear=False, color='green')
+
+    s3 = basc([6000., 3500.], [2200., 1500.], method='sequential',
+              interpolation='polynomial')
+    assert_dataset_almost_equal(s1, s3)
+    s3.plot(clear=False, color='cyan')
+
+    show()
 
     dataset = IR_dataset_2D[:15]
-
     basc = BaselineCorrection(dataset)
-    s = basc([6000., 3500.], [2200., 1500.], method='sequential', interpolation='pchip')
+    s = basc([6000., 3500.], [2200., 1500.], method='sequential',
+             interpolation='pchip')
     s.plot()
-    s = basc([6000., 3500.], [2200., 1500.], method='sequential', interpolation='polynomial')
+    s = basc([6000., 3500.], [2200., 1500.], method='sequential',
+             interpolation='polynomial')
     s.plot(cmap='copper')
 
     show()

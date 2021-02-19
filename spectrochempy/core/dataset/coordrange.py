@@ -96,7 +96,8 @@ def trim_ranges(*ranges, reversed=False):
 
     Examples
     --------
-    >>> spc.trim_ranges([1, 4], [7, 5], [6, 10])
+    >>> import spectrochempy as scp
+    >>> scp.trim_ranges([1, 4], [7, 5], [6, 10])
     [[1, 4], [5, 10]]
     """
     return _CoordRange(*ranges, reversed=reversed).ranges

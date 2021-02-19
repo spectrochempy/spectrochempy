@@ -238,12 +238,12 @@ class NDIO(HasTraits):
 
         Examples
         --------
-        >>> from spectrochempy import *
-        >>> nd1 = NDDataset.read('irdata/nh4y-activation.spg')
+        >>> import spectrochempy as scp
+        >>> nd1 = scp.read('irdata/nh4y-activation.spg')
         >>> f = nd1.save()
         >>> f.name
         'nh4y-activation.scp'
-        >>> nd2 = NDDataset.load(f)
+        >>> nd2 = scp.load(f)
 
 
         Notes

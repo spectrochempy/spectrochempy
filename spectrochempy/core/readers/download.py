@@ -82,7 +82,8 @@ def download_IRIS():
         try:
             from sklearn import datasets
         except ImportError:
-            raise IOError('Failed in uploading the IRIS dataset!')
+            error_('Failed in uploading the IRIS dataset!')
+            return
 
         # import some data to play with
         data = datasets.load_iris()
