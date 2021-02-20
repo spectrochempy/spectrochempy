@@ -13,7 +13,7 @@ from spectrochempy.core import info_
 
 def test_upload():
     ds = download_IRIS()
-    info_(ds)
+
     assert ds.shape == (150, 4)
     assert repr(ds[0]) == "NDDataset: [float64] cm (shape: (y:1, x:4))"
     ds.plot_stack()

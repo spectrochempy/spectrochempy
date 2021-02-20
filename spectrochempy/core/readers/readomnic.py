@@ -1,12 +1,15 @@
 #  -*- coding: utf-8 -*-
 #
 #  =====================================================================================================================
-#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie,
+#  Caen, France.
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in
+#  the root directory
 #  =====================================================================================================================
 #
 """
-This module extend NDDataset with the import method for OMNIC generated data files.
+This module extend NDDataset with the import method for OMNIC generated data
+files.
 """
 __all__ = ['read_omnic', 'read_spg', 'read_spa', 'read_srs']
 __dataset_methods__ = __all__
@@ -30,24 +33,31 @@ def read_omnic(*paths, **kwargs):
     """
     Open a Thermo Nicolet OMNIC file.
 
-    Open Omnic file or a list of files with extension ``.spg`` , ``.spa`` or ``.srs``
+    Open Omnic file or a list of files with extension ``.spg`` , ``.spa`` or
+    ``.srs``
     and set data/metadata in the current dataset.
 
     The collected metatdata are:
     - names of spectra
     - acquisition dates (UTC)
-    - units of spectra (absorbance, transmittance, reflectance, Log(1/R), Kubelka-Munk, Raman intensity,
+    - units of spectra (absorbance, transmittance, reflectance, Log(1/R),
+    Kubelka-Munk, Raman intensity,
     photoacoustics, volts)
-    - units of xaxis (wavenumbers in cm^-1, wavelengths in nm or micrometer, Raman shift in cm^-1)
-    - spectra history (but only incorporated in the NDDataset if a single spa is read)
+    - units of xaxis (wavenumbers in cm^-1, wavelengths in nm or micrometer,
+    Raman shift in cm^-1)
+    - spectra history (but only incorporated in the NDDataset if a single
+    spa is read)
 
-    An error is generated if attempt is made to inconsistent datasets: units of spectra and
+    An error is generated if attempt is made to inconsistent datasets: units
+    of spectra and
     xaxis, limits and number of points of the xaxis.
 
     Parameters
     -----------
-    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
-        The data source(s) can be specified by the name or a list of name for the file(s) to be loaded:
+    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path
+    objects, optional
+        The data source(s) can be specified by the name or a list of name
+        for the file(s) to be loaded:
 
         *e.g.,( file1, file2, ...,  **kwargs )*
 
@@ -56,7 +66,8 @@ def read_omnic(*paths, **kwargs):
         *e.g.,* ( **[** *file1, file2, ...* **]**, **kwargs *)*
 
         The returned datasets are merged to form a single dataset,
-        except if `merge` is set to False. If a source is not provided (i.e. no `filename`, nor `content`),
+        except if `merge` is set to False. If a source is not provided (i.e.
+        no `filename`, nor `content`),
         a dialog box will be opened to select files.
     **kwargs : dict
         See other parameters.
@@ -64,15 +75,18 @@ def read_omnic(*paths, **kwargs):
     Returns
     --------
     out
-        The dataset or a list of dataset corresponding to a (set of) .spg, .spa or .srs file(s).
+        The dataset or a list of dataset corresponding to a (set of) .spg,
+        .spa or .srs file(s).
 
     Other Parameters
     -----------------
     directory : str, optional
-        From where to read the specified `filename`. If not specified, read in the default ``datadir`` specified in
+        From where to read the specified `filename`. If not specified,
+        read in the default ``datadir`` specified in
         SpectroChemPy Preferences.
     merge : bool, optional
-        Default value is False. If True, and several filenames have been provided as arguments,
+        Default value is False. If True, and several filenames have been
+        provided as arguments,
         then a single dataset with merged (stacked along the first
         dimension) is returned (default=False).
     sortbydate : bool, optional
@@ -80,13 +94,18 @@ def read_omnic(*paths, **kwargs):
     description : str, optional
         A Custom description.
     content : bytes object, optional
-        Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
-        The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
+        Instead of passing a filename for further reading, a bytes content
+        can be directly provided as bytes objects.
+        The most convenient way is to use a dictionary. This feature is
+        particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
-        For exemples on how to use this feature, one can look in the ``tests/tests_readers`` directory.
+        For exemples on how to use this feature, one can look in the
+        ``tests/tests_readers`` directory.
     listdir : bool, optional
-        If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
-        is True. It is assumed that all the files correspond to current reading protocol (default=True).
+        If True and filename is None, all files present in the provided
+        `directory` are returned (and merged if `merge`
+        is True. It is assumed that all the files correspond to current
+        reading protocol (default=True).
     recursive : bool, optional
         Read also in subfolders. (default=False).
 
@@ -105,12 +124,15 @@ def read_omnic(*paths, **kwargs):
 
     Examples
     ---------
-    Reading a single OMNIC file  (providing a windows type filename relative to the default ``datadir``)
+    Reading a single OMNIC file  (providing a windows type filename relative
+    to the default ``datadir``)
 
+    >>> import spectrochempy as scp
     >>> scp.read_omnic('irdata\\\\nh4y-activation.spg')
     NDDataset: [float64] a.u. (shape: (y:55, x:5549))
 
-    Reading a single OMNIC file  (providing a unix/python type filename relative to the default ``datadir``)
+    Reading a single OMNIC file  (providing a unix/python type filename
+    relative to the default ``datadir``)
     Note that here read_omnic is called as a classmethod of the NDDataset class
 
     >>> scp.NDDataset.read_omnic('irdata/nh4y-activation.spg')
@@ -124,7 +146,8 @@ def read_omnic(*paths, **kwargs):
     >>> scp.read_omnic(p)
     NDDataset: [float64] a.u. (shape: (y:55, x:5549))
 
-    The diretory can also be specified independantly, either as a string or a pathlib object
+    The diretory can also be specified independantly, either as a string or
+    a pathlib object
 
     >>> scp.read_omnic('nh4y-activation.spg', directory=folder)
     NDDataset: [float64] a.u. (shape: (y:55, x:5549))
@@ -142,34 +165,40 @@ def read_omnic(*paths, **kwargs):
     >>> scp.read_omnic('irdata/nh4y-activation.spg', 'wodger.spg', merge=True)
     NDDataset: [float64] a.u. (shape: (y:57, x:5549))
 
-    Multiple files to merge : they are passed as a list (note the brakets) instead of using the keyword `merge`
+    Multiple files to merge : they are passed as a list (note the brakets)
+    instead of using the keyword `merge`
 
     >>> scp.read_omnic(['irdata/nh4y-activation.spg', 'wodger.spg'])
     NDDataset: [float64] a.u. (shape: (y:57, x:5549))
 
-    Multiple files not merged : they are passed as a list but `merge` is set to false
+    Multiple files not merged : they are passed as a list but `merge` is set
+    to false
 
     >>> l2 = scp.read_omnic(['irdata/nh4y-activation.spg', 'wodger.spg'], merge=False)
     >>> len(l2)
     2
 
-    Read without a filename. This has the effect of opening a dialog for file(s) selection
+    Read without a filename. This has the effect of opening a dialog for
+    file(s) selection
 
     >>> nd = scp.read_omnic()
 
-    Read in a directory (assume that only OPUS files are present in the directory
+    Read in a directory (assume that only OPUS files are present in the
+    directory
     (else we must use the generic `read` function instead)
 
     >>> l3 = scp.read_omnic(directory='irdata/subdir/1-20')
     >>> len(l3)
     3
 
-    Again we can use merge to stack all 4 spectra if thet have compatible dimensions.
+    Again we can use merge to stack all 4 spectra if thet have compatible
+    dimensions.
 
     >>> scp.read_omnic(directory='irdata/subdir', merge=True)
     NDDataset: [float64] a.u. (shape: (y:4, x:5549))
 
-    An example, where bytes contents are passed directly to the read_omnic method.
+    An example, where bytes contents are passed directly to the read_omnic
+    method.
 
     >>> datadir = scp.preferences.datadir
     >>> filename1 = datadir / 'irdata' / 'subdir' / '7_CZ0-100 Pd_101.SPA'
@@ -196,8 +225,10 @@ def read_spg(*paths, **kwargs):
 
     Parameters
     -----------
-    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
-        The data source(s) can be specified by the name or a list of name for the file(s) to be loaded:
+    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path
+    objects, optional
+        The data source(s) can be specified by the name or a list of name
+        for the file(s) to be loaded:
 
         *e.g.,( file1, file2, ...,  **kwargs )*
 
@@ -206,7 +237,8 @@ def read_spg(*paths, **kwargs):
         *e.g.,* ( **[** *file1, file2, ...* **]**, **kwargs *)*
 
         The returned datasets are merged to form a single dataset,
-        except if `merge` is set to False. If a source is not provided (i.e. no `filename`, nor `content`),
+        except if `merge` is set to False. If a source is not provided (i.e.
+        no `filename`, nor `content`),
         a dialog box will be opened to select files.
     **kwargs : dict
         See other parameters.
@@ -214,15 +246,18 @@ def read_spg(*paths, **kwargs):
     Returns
     --------
     read_spg
-        The dataset or a list of dataset corresponding to a (set of) .spg file(s).
+        The dataset or a list of dataset corresponding to a (set of) .spg
+        file(s).
 
     Other Parameters
     -----------------
     directory : str, optional
-        From where to read the specified `filename`. If not specified, read in the default ``datadir`` specified in
+        From where to read the specified `filename`. If not specified,
+        read in the default ``datadir`` specified in
         SpectroChemPy Preferences.
     merge : bool, optional
-        Default value is False. If True, and several filenames have been provided as arguments,
+        Default value is False. If True, and several filenames have been
+        provided as arguments,
         then a single dataset with merged (stacked along the first
         dimension) is returned (default=False).
     sortbydate : bool, optional
@@ -230,13 +265,18 @@ def read_spg(*paths, **kwargs):
     description : str, optional
         A Custom description.
     content : bytes object, optional
-        Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
-        The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
+        Instead of passing a filename for further reading, a bytes content
+        can be directly provided as bytes objects.
+        The most convenient way is to use a dictionary. This feature is
+        particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
-        For exemples on how to use this feature, one can look in the ``tests/tests_readers`` directory.
+        For exemples on how to use this feature, one can look in the
+        ``tests/tests_readers`` directory.
     listdir : bool, optional
-        If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
-        is True. It is assumed that all the files correspond to current reading protocol (default=True).
+        If True and filename is None, all files present in the provided
+        `directory` are returned (and merged if `merge`
+        is True. It is assumed that all the files correspond to current
+        reading protocol (default=True).
     recursive : bool, optional
         Read also in subfolders. (default=False).
 
@@ -255,11 +295,12 @@ def read_spg(*paths, **kwargs):
 
     Notes
     -----
-    This method is an alias of ``read_omnic``, except that the type of file is contrain to *.spg.
+    This method is an alias of ``read_omnic``, except that the type of file
+    is contrain to *.spg.
 
     Examples
     ---------
-
+    >>> import spectrochempy as scp
     >>> scp.read_spg('irdata/nh4y-activation.spg')
     NDDataset: [float64] a.u. (shape: (y:55, x:5549))
 
@@ -279,8 +320,10 @@ def read_spa(*paths, **kwargs):
 
     Parameters
     -----------
-    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
-        The data source(s) can be specified by the name or a list of name for the file(s) to be loaded:
+    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path
+    objects, optional
+        The data source(s) can be specified by the name or a list of name
+        for the file(s) to be loaded:
 
         *e.g.,( file1, file2, ...,  **kwargs )*
 
@@ -289,7 +332,8 @@ def read_spa(*paths, **kwargs):
         *e.g.,* ( **[** *file1, file2, ...* **]**, **kwargs *)*
 
         The returned datasets are merged to form a single dataset,
-        except if `merge` is set to False. If a source is not provided (i.e. no `filename`, nor `content`),
+        except if `merge` is set to False. If a source is not provided (i.e.
+        no `filename`, nor `content`),
         a dialog box will be opened to select files.
     **kwargs : dict
         See other parameters.
@@ -297,18 +341,22 @@ def read_spa(*paths, **kwargs):
     Returns
     --------
     read_spa
-        The dataset or a list of dataset corresponding to a (set of) .spg file(s).
+        The dataset or a list of dataset corresponding to a (set of) .spg
+        file(s).
 
     Other Parameters
     -----------------
-    protocol : {'scp', 'omnic', 'opus', 'topspin', 'matlab', 'jcamp', 'csv', 'excel'}, optional
+    protocol : {'scp', 'omnic', 'opus', 'topspin', 'matlab', 'jcamp', 'csv',
+    'excel'}, optional
         Protocol used for reading. If not provided, the correct protocol
         is inferred (whnever it is possible) from the file name extension.
     directory : str, optional
-        From where to read the specified `filename`. If not specified, read in the default ``datadir`` specified in
+        From where to read the specified `filename`. If not specified,
+        read in the default ``datadir`` specified in
         SpectroChemPy Preferences.
     merge : bool, optional
-        Default value is False. If True, and several filenames have been provided as arguments,
+        Default value is False. If True, and several filenames have been
+        provided as arguments,
         then a single dataset with merged (stacked along the first
         dimension) is returned (default=False).
     sortbydate : bool, optional
@@ -316,13 +364,18 @@ def read_spa(*paths, **kwargs):
     description: str, optional
         A Custom description.
     content : bytes object, optional
-        Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
-        The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
+        Instead of passing a filename for further reading, a bytes content
+        can be directly provided as bytes objects.
+        The most convenient way is to use a dictionary. This feature is
+        particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
-        For exemples on how to use this feature, one can look in the ``tests/tests_readers`` directory.
+        For exemples on how to use this feature, one can look in the
+        ``tests/tests_readers`` directory.
     listdir : bool, optional
-        If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
-        is True. It is assumed that all the files correspond to current reading protocol (default=True).
+        If True and filename is None, all files present in the provided
+        `directory` are returned (and merged if `merge`
+        is True. It is assumed that all the files correspond to current
+        reading protocol (default=True).
     recursive : bool, optional
         Read also in subfolders. (default=False).
 
@@ -341,11 +394,13 @@ def read_spa(*paths, **kwargs):
 
     Notes
     -----
-    This method is an alias of ``read_omnic``, except that the type of file is contrain to *.spa.
+    This method is an alias of ``read_omnic``, except that the type of file
+    is contrain to *.spa.
 
     Examples
     ---------
 
+    >>> import spectrochempy as scp
     >>> scp.read_spa('irdata/subdir/20-50/7_CZ0-100 Pd_21.SPA')
     NDDataset: [float64] a.u. (shape: (y:1, x:5549))
 
@@ -368,8 +423,10 @@ def read_srs(*paths, **kwargs):
 
     Parameters
     -----------
-    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
-        The data source(s) can be specified by the name or a list of name for the file(s) to be loaded:
+    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path
+    objects, optional
+        The data source(s) can be specified by the name or a list of name
+        for the file(s) to be loaded:
 
         *e.g.,( file1, file2, ...,  **kwargs )*
 
@@ -378,7 +435,8 @@ def read_srs(*paths, **kwargs):
         *e.g.,* ( **[** *file1, file2, ...* **]**, **kwargs *)*
 
         The returned datasets are merged to form a single dataset,
-        except if `merge` is set to False. If a source is not provided (i.e. no `filename`, nor `content`),
+        except if `merge` is set to False. If a source is not provided (i.e.
+        no `filename`, nor `content`),
         a dialog box will be opened to select files.
     **kwargs : dict
         See other parameters.
@@ -386,18 +444,22 @@ def read_srs(*paths, **kwargs):
     Returns
     --------
     read_srs
-        The dataset or a list of dataset corresponding to a (set of) .spg file(s).
+        The dataset or a list of dataset corresponding to a (set of) .spg
+        file(s).
 
     Other Parameters
     -----------------
-    protocol : {'scp', 'omnic', 'opus', 'topspin', 'matlab', 'jcamp', 'csv', 'excel'}, optional
+    protocol : {'scp', 'omnic', 'opus', 'topspin', 'matlab', 'jcamp', 'csv',
+    'excel'}, optional
         Protocol used for reading. If not provided, the correct protocol
         is inferred (whnever it is possible) from the file name extension.
     directory : str, optional
-        From where to read the specified `filename`. If not specified, read in the default ``datadir`` specified in
+        From where to read the specified `filename`. If not specified,
+        read in the default ``datadir`` specified in
         SpectroChemPy Preferences.
     merge : bool, optional
-        Default value is False. If True, and several filenames have been provided as arguments,
+        Default value is False. If True, and several filenames have been
+        provided as arguments,
         then a single dataset with merged (stacked along the first
         dimension) is returned (default=False).
     sortbydate : bool, optional
@@ -405,13 +467,18 @@ def read_srs(*paths, **kwargs):
     description: str, optional
         A Custom description.
     content : bytes object, optional
-        Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
-        The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
+        Instead of passing a filename for further reading, a bytes content
+        can be directly provided as bytes objects.
+        The most convenient way is to use a dictionary. This feature is
+        particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
-        For exemples on how to use this feature, one can look in the ``tests/tests_readers`` directory.
+        For exemples on how to use this feature, one can look in the
+        ``tests/tests_readers`` directory.
     listdir : bool, optional
-        If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
-        is True. It is assumed that all the files correspond to current reading protocol (default=True)
+        If True and filename is None, all files present in the provided
+        `directory` are returned (and merged if `merge`
+        is True. It is assumed that all the files correspond to current
+        reading protocol (default=True)
     recursive : bool, optional
         Read also in subfolders. (default=False).
 
@@ -430,11 +497,12 @@ def read_srs(*paths, **kwargs):
 
     Notes
     -----
-    This method is an alias of ``read_omnic``, except that the type of file is contrain to *.srs.
+    This method is an alias of ``read_omnic``, except that the type of file
+    is contrain to *.srs.
 
     Examples
     ---------
-
+    >>> import spectrochempy as scp
     >>> scp.read_srs('irdata/omnic series/rapid_scan_reprocessed.srs')
     NDDataset: [float64] a.u. (shape: (y:643, x:3734))
 
@@ -471,13 +539,16 @@ def _read_spg(*args, **kwargs):
         fid = open(filename, 'rb')
 
     # Read title:
-    # The file title starts at position hex 1e = decimal 30. Its max length is 256 bytes.
-    #  It is the original filename under which the group has been saved: it won't match with
+    # The file title starts at position hex 1e = decimal 30. Its max length
+    # is 256 bytes.
+    #  It is the original filename under which the group has been saved: it
+    #  won't match with
     #  the actual filename if a subsequent renaming has been done in the OS.
 
     spg_title = _readbtext(fid, 30)
 
-    # Check if it is really a spg file (in this case title his the filename with extension spg)
+    # Check if it is really a spg file (in this case title his the filename
+    # with extension spg)
     if spg_title[-4:].lower() != '.spg':
         # probably not a spg content
         # try .spa
@@ -490,18 +561,22 @@ def _read_spg(*args, **kwargs):
     # for instance hex[02 6a 6b 69 1b 03 82] -> dec[02 106  107 105 27 03 130]
     # Each of theses lines provides positions of data and metadata in the file:
     #
-    #     key: hex 02, dec  02: position of spectral header (=> nx, firstx, lastx, nscans, nbkgscans)
+    #     key: hex 02, dec  02: position of spectral header (=> nx, firstx,
+    #     lastx, nscans, nbkgscans)
     #     key: hex 03, dec  03: intensity position
     #     key: hex 04, dec  04: user text position
     #     key: hex 1B, dec  27: position of History text
     #     key: hex 69, dec 105: ?
     #     key: hex 6a, dec 106: ?
-    #     key: hex 6b, dec 107: position of spectrum title, the acquisition date follows at +256(dec)
+    #     key: hex 6b, dec 107: position of spectrum title, the acquisition
+    #     date follows at +256(dec)
     #     key: hex 80, dec 128: ?
     #     key: hex 82, dec 130: ?
     #
-    # the number of line per block may change from one omnic version to another,
-    # but the total number of lines is given at hex 294, hence allowing counting
+    # the number of line per block may change from one omnic version to
+    # another,
+    # but the total number of lines is given at hex 294, hence allowing
+    # counting
     # number of spectra:
 
     # read total number of lines
@@ -548,7 +623,8 @@ def _read_spg(*args, **kwargs):
     # check the consistency of xaxis and data units
     if np.ptp(nx) != 0:
         raise ValueError('Error : Inconsistent data set -'
-                         ' number of wavenumber per spectrum should be identical')
+                         ' number of wavenumber per spectrum should be '
+                         'identical')
     elif np.ptp(firstx) != 0:
         raise ValueError('Error : Inconsistent data set - '
                          'the x axis should start at same value')
@@ -606,12 +682,13 @@ def _read_spg(*args, **kwargs):
 
         timestamps.append(timestamp)
 
-        # Not used at present  # -------------------  # extract positions of '1B' codes (history text  #  --  #  #  #
-        # sometimes absent, e.g. peakresolve)  # key_is_1B = (keys == 27)  # indices1B = np.nonzero(key_is_1B)  #  #
-        # position1B = 304 * np.ones(len(indices1B[0]), dtype='int') + 16 * indices6B[0]  # if len(position1B) != 0:
-        #    # read history texts  #    for j in range(nspec):  #        # determine the position of information  #
-        #    f.seek(position1B[j] + 2)  #        history_pos = _fromfile(f, 'uint32', 1)  #        # read history  #
-        #    history = _readbtext(f, history_pos[0])  #        allhistories.append(history)
+        # Not used at present  # -------------------  # extract positions of  # '1B' codes (history text  #  --  #  #
+        #  # sometimes absent,  # e.g. peakresolve)  # key_is_1B = (keys == 27)  # indices1B =  # np.nonzero(
+        #  key_is_1B)  #  #  # position1B = 304 * np.ones(len(  # indices1B[0]), dtype='int') + 16 * indices6B[0]  #
+        #  if len(  # position1B) != 0:  #    # read history texts  #    for j in range(  # nspec):  #        #
+        #  determine the position of information  #  #  # f.seek(position1B[j] + 2)  #        history_pos =
+        #  _fromfile(f,  # 'uint32', 1)  #        # read history  #  #    history =  # _readbtext(f, history_pos[0])
+        #        allhistories.append(history)
 
     fid.close()
 
@@ -623,11 +700,10 @@ def _read_spg(*args, **kwargs):
     dataset.filename = filename
 
     # now add coordinates
-    #_x = Coord(np.around(np.linspace(firstx[0], lastx[0], nx[0]), 3),
+    # _x = Coord(np.around(np.linspace(firstx[0], lastx[0], nx[0]), 3),
     #           title=xtitles[0], units=xunits[0])
     spacing = (lastx[0] - firstx[0]) / (nx[0] - 1)
-    _x = LinearCoord(offset=firstx[0], increment=spacing, size=int(nx[0]),
-                     title=xtitles[0], units=xunits[0])
+    _x = LinearCoord(offset=firstx[0], increment=spacing, size=int(nx[0]), title=xtitles[0], units=xunits[0])
 
     _y = Coord(timestamps, title='Acquisition timestamp (GMT)', units='s', labels=(acquisitiondates, spectitles))
 
@@ -635,7 +711,8 @@ def _read_spg(*args, **kwargs):
 
     # Set origin and description
     dataset.origin = "omnic"
-    dataset.description = kwargs.get('description', f'Omnic title: {spg_title}\nOmnic filename: {filename}')
+    dataset.description = kwargs.get('description', f'Omnic title: {spg_title}\nOmnic '
+                                                    f'filename: {filename}')
 
     # Set the NDDataset date
     dataset._date = datetime.now(timezone.utc)
@@ -669,8 +746,10 @@ def _read_spa(*args, **kwargs):
         fid = open(filename, 'rb')
 
     # Read title:
-    # The file title  starts at position hex 1e = decimal 30. Its max length is 256 bytes. It is the original
-    # filename under which the group has  been saved: it won't match with the actual filename if a subsequent
+    # The file title  starts at position hex 1e = decimal 30. Its max length
+    # is 256 bytes. It is the original
+    # filename under which the group has  been saved: it won't match with
+    # the actual filename if a subsequent
     # renaming has been done in the OS.
 
     spa_title = _readbtext(fid, 30)
@@ -758,7 +837,8 @@ def _read_spa(*args, **kwargs):
 
     # Set origin, description, history, date
     dataset.origin = "omnic"
-    dataset.description = kwargs.get('description', f'Omnic title: {spa_title}\nOmnic filename: {filename.name}')
+    dataset.description = kwargs.get('description', f'Omnic title: {spa_title}\nOmnic '
+                                                    f'filename: {filename.name}')
     dataset.history = str(datetime.now(timezone.utc)) + ':imported from spa files'
     dataset.history = history
     dataset._date = datetime.now(timezone.utc)
@@ -770,7 +850,7 @@ def _read_spa(*args, **kwargs):
         dataset.x._zpd = int(np.argmax(dataset)[-1])  # zero path difference
         dataset.meta.laser_frequency = Quantity('15798.26 cm^-1')
         dataset.x.set_laser_frequency()
-        dataset.x._use_time_axis = False  # True to have time, else it will be optical path difference
+        dataset.x._use_time_axis = False  # True to have time, else it will  # be optical path difference
 
     return dataset
 
@@ -803,7 +883,8 @@ def _read_srs(*args, **kwargs):
     names = []
     data = np.zeros((info['ny'], info['nx']))
 
-    # find the position of the background and of the first interferogram based on
+    # find the position of the background and of the first interferogram
+    # based on
     # empirical "fingerprints".
 
     while not found:
@@ -812,7 +893,8 @@ def _read_srs(*args, **kwargs):
         line = _fromfile(fid, dtype='uint8', count=16)
         if np.all(line == [15, 0, 0, 0, 2, 0, 0, 0, 24, 0, 0, 0, 0, 0, 72, 67]):
             # hex 0F 00 00 00 02 00 00 00 18 00 00 00 00 00 48 43
-            # this is a fingerprint of header of data fields for non-processed series
+            # this is a fingerprint of header of data fields for
+            # non-processed series
             # the first one is the background
             if background is None:
                 pos += 52
@@ -820,7 +902,8 @@ def _read_srs(*args, **kwargs):
                 key = _fromfile(fid, dtype='uint16', count=1)
 
                 if key > 0:
-                    # a background file was selected; it is present as a single sided interferogram
+                    # a background file was selected; it is present as a
+                    # single sided interferogram
                     #  key could be the zpd of the double sided interferogram
                     background_size = key - 2
                     pos += 8
@@ -833,7 +916,8 @@ def _read_srs(*args, **kwargs):
                     pos = _nextline(pos)
 
                 elif key == 0:
-                    # no background file was selected; the background is the one that was recorded with the series
+                    # no background file was selected; the background is the
+                    # one that was recorded with the series
                     background_size = info['nx']
                     pos += 8
                     fid.seek(pos)
@@ -850,7 +934,7 @@ def _read_srs(*args, **kwargs):
 
                 background = NDDataset(background)
                 _x = Coord(np.around(np.linspace(0, background_size - 1, background_size), 0), title='data points',
-                           units='dimensionless')
+                        units='dimensionless')
                 background.set_coordset(x=_x)
                 background.name = background_name
                 background.units = 'V'
@@ -900,10 +984,10 @@ def _read_srs(*args, **kwargs):
     # now add coordinates
     spacing = (info['lastx'] - info['firstx']) / (info['nx'] - 1)
     _x = LinearCoord(offset=info['firstx'], increment=spacing, size=info['nx'], title=info['xtitle'],
-                      units=info['xunits'])
+                     units=info['xunits'])
 
     _y = Coord(np.around(np.linspace(info['firsty'], info['lasty'], info['ny']), 3), title='Time', units='minute',
-               labels=names)
+            labels=names)
 
     dataset.set_coordset(y=_y, x=_x)
 
@@ -920,7 +1004,7 @@ def _read_srs(*args, **kwargs):
         dataset.x._zpd = int(np.argmax(dataset)[-1])  # zero path difference
         dataset.meta.laser_frequency = Quantity('15798.26 cm^-1')
         dataset.x.set_laser_frequency()
-        dataset.x._use_time_axis = False  # True to have time, else it will be optical path difference
+        dataset.x._use_time_axis = False  # True to have time, else it will  # be optical path difference
 
     # uncomment below to load the last datafield
     # has the same dimension as the time axis
@@ -956,7 +1040,8 @@ def _read_srs(*args, **kwargs):
 
 # ......................................................................................................................
 def _fromfile(fid, dtype, count):
-    # to replace np.fromfile in case of io.BytesIO object instead of byte object
+    # to replace np.fromfile in case of io.BytesIO object instead of byte
+    # object
     t = {'uint8': 'B', 'int8': 'b', 'uint16': 'H', 'int16': 'h', 'uint32': 'I', 'int32': 'i', 'float32': 'f', }
     typ = t[dtype] * count
     if dtype.endswith('16'):
@@ -976,7 +1061,8 @@ def _readbtext(fid, pos):
     # Returns utf-8 string
     fid.seek(pos)  # read first byte, ensure entering the while loop
     btext = fid.read(1)
-    while not (btext[len(btext) - 1] == 0):  # while the last byte of btext differs from zero
+    while not (btext[len(btext) - 1] == 0):  # while the last byte of btext differs from
+        # zero
         btext = btext + fid.read(1)  # append 1 byte
 
     btext = btext[0:len(btext) - 1]  # cuts the last byte
@@ -1035,7 +1121,7 @@ def _readheader02(fid, pos):
         out['xtitle'] = 'raman shift'
     else:
         out['xunits'] = None
-        out['xtitle'] = 'xaxis'  # warning: 'The nature of data is not recognized, xtitle set to \'xaxis\')
+        out['xtitle'] = 'xaxis'  # warning: 'The nature of data is not  # recognized, xtitle set to \'xaxis\')
 
     # read data unit
     fid.seek(info_pos + 12)
@@ -1066,7 +1152,7 @@ def _readheader02(fid, pos):
         out['title'] = 'raman intensity'
     else:
         out['units'] = None
-        out['title'] = 'intensity'  # warning: 'The nature of data is not recognized, title set to \'Intensity\')
+        out['title'] = 'intensity'  # warning: 'The nature of data is not  # recognized, title set to \'Intensity\')
 
     fid.seek(info_pos + 16)
     out['firstx'] = _fromfile(fid, 'float32', 1)
@@ -1091,9 +1177,10 @@ def _read_xheader(fid, pos):
     key = _fromfile(fid, dtype='uint8', count=1)
 
     if key not in (1, 3):
-        raise ValueError("xheader key={} not recognized yet.".format(
-                key) + " Please report this error (and the corresponding srs file) to the developers"
-                       "They will do their best to fix the issue")
+        raise ValueError(
+            "xheader key={} not recognized yet.".format(key) + " Please report this error (and the corresponding srs "
+                                                               "file) to the developers"
+                                                               "They will do their best to fix the issue")
     else:
         out = {'xheader': key}
 
@@ -1130,7 +1217,7 @@ def _read_xheader(fid, pos):
         out['xtitle'] = 'raman shift'
     else:
         out['xunits'] = None
-        out['xtitle'] = 'xaxis'  # warning: 'The nature of data is not recognized, xtitle set to \'xaxis\')
+        out['xtitle'] = 'xaxis'  # warning: 'The nature of data is not  # recognized, xtitle set to \'xaxis\')
     # read data unit
     fid.seek(pos + 12)
     key = _fromfile(fid, dtype='uint8', count=1)
@@ -1160,7 +1247,7 @@ def _read_xheader(fid, pos):
         out['title'] = 'raman intensity'
     else:
         out['title'] = None
-        out['title'] = 'intensity'  # warning: 'The nature of data is not recognized, title set to \'Intensity\')
+        out['title'] = 'intensity'  # warning: 'The nature of data is not  # recognized, title set to \'Intensity\')
 
     fid.seek(pos + 16)
     out['firstx'] = _fromfile(fid, 'float32', 1)

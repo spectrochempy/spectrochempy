@@ -215,7 +215,7 @@ class IRIS:
                 # The following line is to avoid ValueError: 'matrix G is not
                 # positive definite'
                 # SEE: https://github.com/facebookresearch/GradientEpisodicMemory/issues/2#issuecomment-431826393
-                G += G * 0.0001
+                G += G * 0.00001
 
                 for j, freq in enumerate(X.x.data):
                     fi[:, j] = quadprog.solve_qp(G, a[j].squeeze(), C, b)[0]

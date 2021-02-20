@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie,
+#  Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in
+#  the root directory                         =
 # ======================================================================================================================
 """
-In this module, we define basic functions adapted from numpy but able to handle our NDDataset objects
+In this module, we define basic functions adapted from numpy but able to
+handle our NDDataset objects
 """
 __all__ = ['dot']
 
@@ -20,7 +23,8 @@ def dot(a, b, strict=True, out=None):
     """
     Return the dot product of two NDDatasets.
 
-    This function is the equivalent of `numpy.dot` that takes NDDataset as input
+    This function is the equivalent of `numpy.dot` that takes NDDataset as
+    input
 
     .. note::
       Works only with 2-D arrays at the moment.
@@ -63,7 +67,8 @@ def dot(a, b, strict=True, out=None):
     #      different kind of objects, as far they are numpy-like arrays
 
     if not isinstance(a, NDDataset) and not isinstance(a, NDDataset):
-        # must be between numpy object or something non valid. Let numpy deal with this
+        # must be between numpy object or something non valid. Let numpy
+        # deal with this
         return np.dot(a, b)
 
     if not isinstance(a, NDDataset):

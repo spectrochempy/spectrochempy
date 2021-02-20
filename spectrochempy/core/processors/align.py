@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie,
+#  Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in
+#  the root directory                         =
 # ======================================================================================================================
 """
 This module defines functions related to NDDataset alignment.
@@ -17,6 +19,7 @@ import numpy as np
 from spectrochempy.utils import MASKED, UnitsCompatibilityError
 from spectrochempy.core import warning_, error_
 from spectrochempy.core.dataset.coord import Coord
+
 
 # ..................................................................................................................
 def can_merge_or_align(coord1, coord2):
@@ -41,7 +44,8 @@ def can_merge_or_align(coord1, coord2):
     else:
         # no the same coordinates
         can_merge = False  # we need to do alignment to merge
-        # can align only if data exists, units compatibles, and title are the same
+        # can align only if data exists, units compatibles, and title are
+        # the same
         can_align = True
         can_align &= not coord1.is_empty
         can_align &= not coord2.is_empty
@@ -69,29 +73,37 @@ def align(dataset, *others, **kwargs):
     dim : str. Optional, default='x'
         Along which axis to perform the alignment.
     dims : list of str, optional, default=None
-        Align along all dims defined in dims (if dim or axis is also defined, then dims have higher priority).
-    method : enum ['outer', 'inner', 'first', 'last', 'interpolate'], optional, default='outer'
+        Align along all dims defined in dims (if dim or axis is also
+        defined, then dims have higher priority).
+    method : enum ['outer', 'inner', 'first', 'last', 'interpolate'],
+    optional, default='outer'
         Which method to use for the alignment.
 
         If align is defined :
 
-        * 'outer' means that a union of the different coordinates is achieved (missing values are masked)
+        * 'outer' means that a union of the different coordinates is
+        achieved (missing values are masked)
         * 'inner' means that the intersection of the coordinates is used
         * 'first' means that the first dataset is used as reference
         * 'last' means that the last dataset is used as reference
-        * 'interpolate' means that interpolation is performed relative to the first dataset.
+        * 'interpolate' means that interpolation is performed relative to
+        the first dataset.
     interpolate_method : enum ['linear','pchip']. Optional, default='linear'
         Method of interpolation to performs for the alignment.
     interpolate_sampling : 'auto', int or float. Optional, default='auto'
 
         * 'auto' : sampling is determined automatically from the existing data.
         * int :  if an integer values is specified, then the
-          sampling interval for the interpolated data will be splitted in this number of points.
-        * float : If a float value is provided, it determines the interval between the interpolated data.
+          sampling interval for the interpolated data will be splitted in
+          this number of points.
+        * float : If a float value is provided, it determines the interval
+        between the interpolated data.
     coord : |Coord|, optional, default=None
-        coordinates to use for alignment. Ignore those corresponding to the dimensions to align.
+        coordinates to use for alignment. Ignore those corresponding to the
+        dimensions to align.
     copy : bool, optional, default=True
-        If False then the returned objects will share memory with the original objects, whenever it is possible :
+        If False then the returned objects will share memory with the
+        original objects, whenever it is possible :
         in principle only if reindexing is not necessary.
 
     Returns
@@ -102,7 +114,8 @@ def align(dataset, *others, **kwargs):
     Raises
     ------
     ValueError
-        issued when the dimensions given in `dim` or `dims` argument are not compatibles (units, titles, etc...).
+        issued when the dimensions given in `dim` or `dims` argument are not
+        compatibles (units, titles, etc...).
     """
     # DEVELOPPER NOTE
     # There is probably better methods, but to simplify dealing with
@@ -131,7 +144,8 @@ def align(dataset, *others, **kwargs):
         warning_('No object provided for alignment!')
         return None
 
-    if len(objects) == 1 and objects[0].implements('NDDataset') and extern_coord is None:
+    if len(objects) == 1 and objects[0].implements(
+            'NDDataset') and extern_coord is None:
         # no necessary alignment
         return objects
 
@@ -142,19 +156,19 @@ def align(dataset, *others, **kwargs):
     for idx, object in enumerate(objects):
 
         if not object.implements('NDDataset'):
-            error_(f'Bad object(s) found: {object}. Note that only NDDataset objects are accepted '
-                   f'for alignment')
+            error_(
+                f'Bad object(s) found: {object}. Note that only NDDataset '
+                f'objects are accepted '
+                f'for alignment')
             return None
 
-        _objects[_nobj] = {
-                'obj': object,
-                'idx': idx,
-                }
+        _objects[_nobj] = {'obj': object, 'idx': idx, }
         _nobj += 1
 
     _last = _nobj - 1
 
-    # get the reference object (by default the first, except if method if set to 'last'
+    # get the reference object (by default the first, except if method if
+    # set to 'last'
     ref_obj_index = 0
     if method == 'last':
         ref_obj_index = _last
@@ -169,7 +183,8 @@ def align(dataset, *others, **kwargs):
     # check compatibility of the dims and prepare the dimension for alignment
     for dim in dims:
 
-        # as we will sort their coordinates at some point, we need to know if the coordinates need to be reversed at
+        # as we will sort their coordinates at some point, we need to know
+        # if the coordinates need to be reversed at
         # the end of the alignment process
         reversed = ref_obj.coordset[dim].reversed
         if reversed:
@@ -181,7 +196,8 @@ def align(dataset, *others, **kwargs):
         # get the coordinate for the reference dimension
         ref_coord = ref_obj_coordset[dim]
 
-        # as we will sort their coordinates at some point, we need to know if the coordinates need to be reversed at
+        # as we will sort their coordinates at some point, we need to know
+        # if the coordinates need to be reversed at
         # the end of the alignment process
         reversed = ref_coord.reversed
 
@@ -208,8 +224,9 @@ def align(dataset, *others, **kwargs):
                 coord = Coord(coord, linear=False, copy=True)
 
             if not coord.is_units_compatible(ref_coord):
-            # not compatible, stop everything
-                raise UnitsCompatibilityError('NDataset to align must have compatible units!')
+                # not compatible, stop everything
+                raise UnitsCompatibilityError(
+                    'NDataset to align must have compatible units!')
 
             # do units transform if necesssary so coords can be compared
             if coord.units != ref_coord.units:
@@ -220,8 +237,10 @@ def align(dataset, *others, **kwargs):
             coord_data = set(coord.data)
 
             if method in ['outer', 'interpolate']:
-                # in this case we do a union of the coords (masking the missing values)
-                # For method=`interpolate`, the interpolation will be performed in a second step
+                # in this case we do a union of the coords (masking the
+                # missing values)
+                # For method=`interpolate`, the interpolation will be
+                # performed in a second step
                 new_coord._data = sorted(coord_data | new_coord_data)
 
             elif method == 'inner':
@@ -230,7 +249,8 @@ def align(dataset, *others, **kwargs):
                 new_coord._data = sorted(coord_data & new_coord_data)
 
             elif method in ['first', 'last']:
-                # we take the reference coordinates already determined as basis (masking the missing values)
+                # we take the reference coordinates already determined as
+                # basis (masking the missing values)
                 continue
 
             else:
@@ -244,7 +264,8 @@ def align(dataset, *others, **kwargs):
             # get the dim index for the given object
             dim_index = obj.dims.index(dim)
 
-            # prepare slicing keys ; set slice(None) for the untouched dimensions preceeding the dimension of interest
+            # prepare slicing keys ; set slice(None) for the untouched
+            # dimensions preceeding the dimension of interest
             prepend_keys = [slice(None)] * dim_index
 
             # New objects for obj must be created with the new coordinates
@@ -269,7 +290,8 @@ def align(dataset, *others, **kwargs):
 
             new_obj._data = new_obj_data
 
-            # mask all the data -we will unmask later the relevant data in the next step
+            # mask all the data -we will unmask later the relevant data in
+            # the next step
             new_obj.mask = MASKED
 
             # remove the mask for the selected part of the array
@@ -283,7 +305,8 @@ def align(dataset, *others, **kwargs):
             if coord.is_labeled:
                 label_shape = list(coord.labels.shape)
                 label_shape[0] = new_coord.size
-                new_coord._labels = np.zeros(tuple(label_shape)).astype(coord.labels.dtype)
+                new_coord._labels = np.zeros(tuple(label_shape)).astype(
+                    coord.labels.dtype)
                 new_coord._labels[:] = '--'
                 new_coord._labels[dim_loc] = coord.labels
             setattr(new_coordset, dim, new_coord)
@@ -298,101 +321,72 @@ def align(dataset, *others, **kwargs):
             _objects[index]['obj'] = new_obj
 
             if method == 'interpolate':
-                warning_('Interpolation not yet implemented - for now equivalent to `outer`')
+                warning_(
+                    'Interpolation not yet implemented - for now equivalent '
+                    'to `outer`')
 
-    # now return the new transformed object in the same order as the passed objects
+    # now return the new transformed object in the same order as the passed
+    # objects
     # and mask the missing values (for the moment they are defined to NaN
     # we also transform into linear coord if possible
 
     for index, object in _objects.items():
         obj = object['obj']
         # obj[np.where(np.isnan(obj))] = MASKED  # mask NaN values
-        obj[np.where(np.isnan(obj))] = 99999999999999.  # replace NaN values (to simplify comparisons)
+        obj[np.where(np.isnan(
+            obj))] = 99999999999999.  # replace NaN values (to simplify
+        # comparisons)
         idx = int(object['idx'])
         objects[idx] = obj
 
     return tuple(objects)
 
-    # if method == 'interpolate':
-    #
-    #     # reorders dataset and reference in ascending order
-    #     is_sorted = False
-    #     if dataset.coordset(axis).reversed:
-    #         datasetordered = dataset.sort(axis, descend=False)
-    #         refordered = ref.sort(refaxis, descend=False)
-    #         is_sorted = True
-    #     else:
-    #         datasetordered = dataset.copy()
-    #         refordered = ref.copy()
-    #
-    #     try:
-    #         datasetordered.coordset(axis).to(refordered.coordset(refaxis).units)
-    #     except:
-    #         raise ValueError(
-    #             'units of the dataset and reference axes on which interpolate are not compatible')
-    #
-    #     oldaxisdata = datasetordered.coordset(axis).data
-    #     refaxisdata = refordered.coordset(refaxis).data  # TODO: at the end restore the original order
-    #
-    #     method = kwargs.pop('method', 'linear')
-    #     fill_value = kwargs.pop('fill_value', np.NaN)
-    #
-    #     if method == 'linear':
-    #         interpolator = lambda data, ax=0: scipy.interpolate.interp1d(
-    #             oldaxisdata, data, axis=ax, kind=method, bounds_error=False,
-    #             fill_value=fill_value, assume_sorted=True)
-    #
-    #     elif method == 'pchip':
-    #         interpolator = lambda data, ax=0: scipy.interpolate.PchipInterpolator(
-    #             oldaxisdata, data, axis=ax, extrapolate=False)
-    #     else:
-    #         raise AttributeError(f'{method} is not a recognised option method for `align`')
-    #
-    #     interpolate_data = interpolator(datasetordered.data, axis)
-    #     newdata = interpolate_data(refaxisdata)
-    #
-    #     if datasetordered.is_masked:
-    #         interpolate_mask = interpolator(datasetordered.mask, axis)
-    #         newmask = interpolate_mask(refaxisdata)
-    #     else:
-    #         newmask = NOMASK
-    #
-    #     # interpolate_axis = interpolator(datasetordered.coordset(axis).data)
-    #     # newaxisdata = interpolate_axis(refaxisdata)
-    #     newaxisdata = refaxisdata.copy()
-    #
-    #     if method == 'pchip' and not np.isnan(fill_value):
-    #         index = np.any(np.isnan(newdata))
-    #         newdata[index] = fill_value
-    #
-    #         index = np.any(np.isnan(newaxisdata))
-    #         newaxisdata[index] = fill_value
-    #
-    #     # create the new axis
-    #     newaxes = dataset.coords.copy()
-    #     newaxes[axis]._data = newaxisdata
-    #     newaxes[axis]._labels = np.array([''] * newaxisdata.size)
-    #
-    #     # transform the dataset
-    #     inplace = kwargs.pop('inplace', False)
-    #
-    #     if inplace:
-    #         out = dataset
-    #     else:
-    #         out = dataset.copy()
-    #
-    #     out._data = newdata
-    #     out._coords = newaxes
-    #     out._mask = newmask
-    #
-    #     out.name = dataset.name
-    #     out.title = dataset.title
-    #
-    #     out.history = '{}: Aligned along dim {} with respect to dataset {} using coords {} \n'.format(
-    #         str(dataset.modified), axis, ref.name, ref.coords[refaxis].title)
-    #
-    #     if is_sorted and out.coordset(axis).reversed:
-    #         out.sort(axis, descend=True, inplace=True)
-    #         ref.sort(refaxis, descend=True, inplace=True)
-    #
-    # return out
+    # if method == 'interpolate':  #  #     # reorders dataset and reference
+    # in ascending order  #     is_sorted = False  #     if
+    # dataset.coordset(axis).reversed:  #         datasetordered =
+    # dataset.sort(axis, descend=False)  #         refordered = ref.sort(
+    # refaxis, descend=False)  #         is_sorted = True  #     else:  #
+    # datasetordered = dataset.copy()  #         refordered = ref.copy()  #
+    #     try:  #         datasetordered.coordset(axis).to(
+    #     refordered.coordset(refaxis).units)  #     except:  #
+    #     raise ValueError(  #             'units of the dataset and
+    #     reference axes on which interpolate are not compatible')  #  #
+    #     oldaxisdata = datasetordered.coordset(axis).data  #
+    #     refaxisdata = refordered.coordset(refaxis).data  # TODO: at the
+    #      end restore the original order  #  #     method = kwargs.pop(
+    #      'method', 'linear')  #     fill_value = kwargs.pop('fill_value',
+    #      np.NaN)  #  #     if method == 'linear':  #         interpolator
+    #      = lambda data, ax=0: scipy.interpolate.interp1d(  #
+    #      oldaxisdata, data, axis=ax, kind=method, bounds_error=False,
+    #             fill_value=fill_value, assume_sorted=True)  #  #     elif
+    #             method == 'pchip':  #         interpolator = lambda data,
+    #             ax=0: scipy.interpolate.PchipInterpolator(  #
+    #             oldaxisdata, data, axis=ax, extrapolate=False)  #
+    #             else:  #         raise AttributeError(f'{method} is not a
+    #             recognised option method for `align`')  #  #
+    #             interpolate_data = interpolator(datasetordered.data,
+    #             axis)  #     newdata = interpolate_data(refaxisdata)  #  #
+    #             if datasetordered.is_masked:  #         interpolate_mask =
+    #             interpolator(datasetordered.mask, axis)  #         newmask
+    #             = interpolate_mask(refaxisdata)  #     else:  #
+    #             newmask = NOMASK  #  #     # interpolate_axis =
+    #             interpolator(datasetordered.coordset(axis).data)  #     #
+    #             newaxisdata = interpolate_axis(refaxisdata)  #
+    #             newaxisdata = refaxisdata.copy()  #  #     if method ==
+    #             'pchip' and not np.isnan(fill_value):  #         index =
+    #             np.any(np.isnan(newdata))  #         newdata[index] =
+    #             fill_value  #  #         index = np.any(np.isnan(
+    #             newaxisdata))  #         newaxisdata[index] = fill_value
+    #  #     # create the new axis  #     newaxes = dataset.coords.copy()  #
+    #  newaxes[axis]._data = newaxisdata  #     newaxes[axis]._labels =
+    #  np.array([''] * newaxisdata.size)  #  #     # transform the dataset
+    #     inplace = kwargs.pop('inplace', False)  #  #     if inplace:  #
+    #     out = dataset  #     else:  #         out = dataset.copy()  #  #
+    #     out._data = newdata  #     out._coords = newaxes  #     out._mask
+    #     = newmask  #  #     out.name = dataset.name  #     out.title =
+    #     dataset.title  #  #     out.history = '{}: Aligned along dim {}
+    #     with respect to dataset {} using coords {} \n'.format(  #
+    #     str(dataset.modified), axis, ref.name, ref.coords[refaxis].title)
+    #  #     if is_sorted and out.coordset(axis).reversed:  #
+    #  out.sort(axis, descend=True, inplace=True)  #         ref.sort(
+    #  refaxis, descend=True, inplace=True)  #  # return out

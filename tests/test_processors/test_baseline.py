@@ -41,12 +41,12 @@ def test_basecor_sequential(IR_dataset_2D):
 
     s2 = basc([6000., 3500.], [2200., 1500.], method='sequential',
               interpolation='pchip')
-    assert_dataset_almost_equal(s, s2, )
+    assert_dataset_almost_equal(s, s2, decimal=5)
     s2.plot(clear=False, color='green')
 
     s3 = basc([6000., 3500.], [2200., 1500.], method='sequential',
               interpolation='polynomial')
-    assert_dataset_almost_equal(s1, s3)
+    assert_dataset_almost_equal(s1, s3, decimal=5)
     s3.plot(clear=False, color='cyan')
 
     show()

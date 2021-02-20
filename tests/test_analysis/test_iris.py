@@ -15,7 +15,6 @@ from spectrochempy.utils import show
 
 
 def test_IRIS():
-    info_('start test IRIS')
 
     X = NDDataset.read_omnic(os.path.join('irdata', 'CO@Mo_Al2O3.SPG'))
 

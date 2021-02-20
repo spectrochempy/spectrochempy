@@ -10,7 +10,6 @@ from copy import copy
 import numpy as np
 import pytest
 
-from spectrochempy.core import info_, print_
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.coordset import CoordSet
@@ -22,17 +21,12 @@ from spectrochempy.units import ur, DimensionalityError
 # ======================================================================================================================
 
 def test_coordset_init(coord0, coord1, coord2):
-    info_()
-    info_(coord0)
-    info_(coord1)
-    info_(coord2)
-
     coord3 = coord2.copy()
     coord3.title = 'titi'
-    info_(coord3)
+
 
     coordsa = CoordSet(coord0, coord3, coord2)  # First syntax
-    info_(coordsa)
+
     assert coordsa.names == ['x', 'y', 'z']  # coordinates are sorted in the coordset
 
     coordsb = CoordSet((coord0, coord3, coord2))  # second syntax with a tuple of coordinates
@@ -77,12 +71,10 @@ def test_coordset_init(coord0, coord1, coord2):
     for i, coord in enumerate(coordsa):
         assert isinstance(coord, Coord)
 
-    info_(str(coord0))
-    info_(repr(coord0))
     assert repr(coord0) == 'Coord: [float64] cm^-1 (size: 10)'
 
     coords = CoordSet(coord0.copy(), coord0)
-    info_(str(coords))
+
 
     assert repr(coords).startswith('CoordSet: [x:wavenumber, y:wavenumber]')
 
@@ -112,7 +104,6 @@ def test_coordset_init(coord0, coord1, coord2):
     # not recommended
     coords2 = CoordSet(*coordse)  # loose the names so the ordering may be different
     assert coords2.names == ['x', 'y', 'z']
-    print_(coords2)
     assert coords.x == coords2.z
 
 
@@ -166,13 +157,10 @@ def test_coordset_multicoord_for_a_single_dim():
     assert co[0].name == 'y'  # should keep the original name (solved)
     assert co[0]["_1"] == coord1
 
-    print_(coordsa.units)
-    print_(coordsa.labels)
-
 
 def test_coordset_call(coord0, coord1):
     coordsa = CoordSet(coord0, coord1)
-    info_(coordsa)
+
     assert str(coordsa) == 'CoordSet: [x:time-on-stream, y:wavenumber]'
     a = coordsa(1, 0)
     assert a == coordsa
@@ -190,7 +178,6 @@ def test_coordset_call(coord0, coord1):
         e = coordsa('x_a')  # do not exit
 
     e = coordsa('y_a')
-    print_(e)
 
 
 def test_coordset_get(coord0, coord1, coord2):
@@ -289,9 +276,6 @@ def test_coordset_str_repr(coord0, coord1, coord2):
     assert str(coords) == repr(
             coords) == 'CoordSet: [x:time-on-stream, y:[_1:wavenumber, _2:wavenumber], z:temperature]'
     assert repr(coords) == str(coords)
-    print_(coords)
-
-    print_(coords._repr_html_())
 
 
 def test_coordset_set(coord0, coord1, coord2):
@@ -354,9 +338,5 @@ def test_coordset_set(coord0, coord1, coord2):
     coords.zaza = coord0
     assert str(coords) == 'CoordSet: [x:wavenumber, y:wavenumber, z:wavenumber]'
 
-    print_(coords.zaza)
-
     coords.wavenumber = coord2
     assert str(coords) == 'CoordSet: [x:zaza, y:wavenumber, z:wavenumber]'
-
-    print_(coords.zaza)

@@ -29,8 +29,7 @@ from spectrochempy.core import info_, error_, print_
 from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.utils import (TYPE_INTEGER, TYPE_FLOAT, MaskedConstant, MASKED, NOMASK, INPLACE, is_sequence,
                                  is_number, numpyprintoptions, spacing, insert_masked_print, SpectroChemPyWarning,
-                                 make_new_object, convert_to_html,
-                                 get_user_and_node, get_n_decimals)
+                                 make_new_object, convert_to_html, get_user_and_node, get_n_decimals)
 
 # ======================================================================================================================
 # constants
@@ -372,7 +371,7 @@ class NDArray(HasTraits):
                     inc = np.diff(udata)
                     variation = (inc.max() - inc.min()) / udata.ptp()
                     if variation < 1.0e-5:
-                        new._increment = np.mean(inc) #np.round(np.mean(
+                        new._increment = np.mean(inc)  # np.round(np.mean(
                         # inc), 5)
                         new._offset = udata[0]
                         new._data = None
@@ -1255,12 +1254,6 @@ class NDArray(HasTraits):
         if self._accuracy is not None:
             nd = get_n_decimals(abs(data).max(), self._accuracy)
             data = np.around(data, nd)
-            if self._linear:
-                inc = np.diff(data)
-                self._increment = np.around(np.mean(inc), nd)  # np.round(
-                                            # np.mean(inc), 5)
-                self._offset = np.around(data[0], nd)
-
         return data
 
     # ..................................................................................................................

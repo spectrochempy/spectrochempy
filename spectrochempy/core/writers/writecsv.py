@@ -50,7 +50,7 @@ def write_csv(*args, **kwargs):
     >>> f1 = ds.write_csv('myfile')
 
     >>> ds = scp.read('irdata/nh4y-activation.spg')
-    >>> f2 = ds[0].write_csd('single_spectrum.csv')
+    >>> f2 = ds[0].write_csv('single_spectrum.csv')
 
     """
     exporter = Exporter()

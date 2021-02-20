@@ -10,7 +10,7 @@ from spectrochempy import Script, info_
 
 def test_script():
     x = Script('name', 'print(2)')
-    info_(x.name)
+
 
     try:
         Script('0name', 'print(3)')

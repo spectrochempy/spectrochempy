@@ -52,6 +52,8 @@ class Exporter(HasTraits):
                     protocol = self.protocols[pathclean(args[0]).suffix]
                     kwargs['filetypes'] = [self.filetypes[protocol]]
             filename = check_filename_to_save(self.object, *args, **kwargs)
+            if kwargs.get('suffix', ''):
+                filename = filename.with_suffix(kwargs.get('suffix', ''))
             protocol = self.protocols[filename.suffix]
             write_ = getattr(self, f"_write_{protocol}")
             write_(self.object, filename, **kwargs)
@@ -125,6 +127,7 @@ def write(dataset, filename=None, **kwargs):
     ---------
     write a dataset (providing a windows type filename relative to the default ``Datadir``)
 
+    >>> import spectrochempy as scp
     >>> nd = scp.read_opus('irdata/OPUS')
     >>> f = nd.write('opus.scp')
     >>> f.name

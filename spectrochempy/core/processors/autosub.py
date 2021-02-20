@@ -64,6 +64,7 @@ def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False
 
     Examples
     ---------
+    >>> import spectrochempy as scp
     >>> path_A = 'irdata/nh4y-activation.spg'
     >>> A = scp.read(path_A, protocol='omnic')
     >>> ref = A[0, :]  # let's subtrack the first row

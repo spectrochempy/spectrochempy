@@ -68,9 +68,10 @@ def read_dir(directory=None, **kwargs):
 
     Examples
     --------
+    >>> import spectrochempy as scp
     >>> A = scp.read_dir('irdata')
     >>> len(A)
-    3
+    4
 
     >>> B = scp.NDDataset.read_dir()
     """

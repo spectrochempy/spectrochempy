@@ -46,10 +46,7 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert not d0.dims
     assert not d0.meta
     assert hash(d0) is not None
-
-    info_('\n', repr(d0))
     assert (repr(d0) == 'NDArray: empty (size: 0)')
-    info_('\n', d0)
 
     # assignement to basic write allowed properties
 
@@ -67,11 +64,9 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     d0.meta = []
     d0.meta.something = "a_value"
     assert d0.meta.something == "a_value"
-    info_('\n', d0[1])
     assert d0[1].value == 2  # only a single element so we get a squeezed array
     d0.units = 'absorbance'
     assert d0.units == ur.absorbance
-    info_('\n', d0[2])
     assert d0[2] == 3 * ur.absorbance
     assert d0.dims == ['x']
 
@@ -108,7 +103,6 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert d3.ndim == 2
     assert d3.dims == ['y', 'x']
     assert d3.units == 'tesla'
-    info_('\n', d3)
 
     # initialisation with a sequence
 
@@ -152,8 +146,7 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert d0mask.shape == (4,)
     assert d0mask.is_masked
     assert d0mask.mask.shape == d0mask.shape
-    info_('\n', d0mask)
-    info_('\n', repr(d0mask))
+
 
     # initialisation with a sequence and a mask
 
@@ -161,7 +154,7 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert d1mask.shape == (4,)
     assert d1mask.is_masked
     assert d1mask.mask.shape == d1mask.shape
-    info_('\n', d1mask)
+
 
     # dtype specified
 
@@ -174,20 +167,20 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert d8.desc == d8.description
     assert len(ndarraymask.history) == 1  # one line already in
     assert len(d8.history) == 2  # copy added
-    info_('\n', d8)
+
 
     # intialisation with only labels
 
     d9 = NDArray(labels='a b c d e f g h i j'.split(), title='labeled')
     assert d9.is_labeled
-    info_('\n', d9)
+
 
     # changing dims name
     d11 = NDArray(labels='a b c d e f g h i j'.split(), title='labeled', dims=['q'], author='Blake',
                   history='Created from scratch')
     assert d11.dims == ['q']
     assert d11.author == 'Blake'
-    info_('\n', d11)
+
 
     assert '[  a   b ...   i   j]' in d11._repr_html_()  # comparison
 
@@ -377,8 +370,6 @@ def test_ndarray_methods(refarray, ndarray, ndarrayunit):
 
     nd = ndarrayunit.copy()
     nd[1] = MASKED
-    for item in nd:
-        info_('\n', item)
 
     # force units to change
 
@@ -484,19 +475,14 @@ def test_ndarray_slicing(refarray, ndarray):
     # boolean indexing
     nd = ndarray.copy()
     ndb = nd[nd.data > 0]
-    info_(nd)
-    info_(ndb)
 
     # fancy indexing
     df = nd.data[[-1, 1]]
-    info_(df)
 
     ndf = nd[[-1, 1]]
-    info_(ndf)
     assert_array_equal(ndf.data, df)
 
     ndf = nd[[-1, 1], INPLACE]  # TODO: check utility of this (I remember it should be related to setitem)
-    info_(ndf)
     assert_array_equal(ndf.data, df)
 
     # use with selection from other numpy functions
@@ -514,10 +500,8 @@ def test_dim_names_specified(ndarray):
     # set dim names
     nd.dims = ['t', 'y']
 
-    info_(nd)
     assert nd.dims == ['t', 'y']
 
-    info_(nd[1])
     assert nd.dims == ['t', 'y']
 
 
@@ -526,8 +510,7 @@ def test_ndarray_slice_labels():
 
     d0 = NDArray(labels='a b c d e f g h i j'.split(), title='labelled')
     assert d0.is_labeled
-    info_('\n', repr(d0))
-    info_("\n", d0)
+
 
     assert d0.ndim == 1
     assert d0.shape == (10,)
@@ -576,15 +559,14 @@ def test_ndarray_issue_23():
 
 def test_ndarray_bug_13(ndarrayunit):
     nd = ndarrayunit[0]
-    info_('\n', nd)
-    info_('\n', nd.units)
+
 
     assert isinstance(nd[0], NDArray)
-    info_('\n', nd[0])
+
 
     # reproduce our bug (now solved)
     nd[0] = Quantity('10 cm.s^-1')
-    info_('\n', nd)
+
 
     with pytest.raises(DimensionalityError):
         nd[0] = Quantity('10 cm')

@@ -24,8 +24,7 @@ from traitlets import Dict, HasTraits, Instance, Union, default, TraitError
 
 from spectrochempy.utils import get_figure, pathclean
 from spectrochempy.core.dataset.meta import Meta
-from spectrochempy.core import preferences, dataset_preferences, project_preferences, matplotlib_preferences
-from spectrochempy.core import error_
+from spectrochempy.core import preferences, dataset_preferences, project_preferences, matplotlib_preferences, error_
 from spectrochempy.core.plotters.plot1d import plot_1D
 from spectrochempy.core.plotters.plot3d import plot_3D
 from spectrochempy.core.plotters.plot2d import plot_2D
@@ -109,7 +108,7 @@ class Preferences(Meta):
 
         # # ........................ TO WORK ON  ## from spectrochempy.core import preferences,  # config_manager  #
         # read json files in the pscp file (obj[f])  # # then write it in the main config  #   #  # directory  # f =
-        # 'ProjectPreferences.json'  # if f in obj.files:  # TODO: work on this  #     prefjsonfile  #  =  #
+        # 'ProjectPreferences.json'  # if f in obj.files:  # TODO: work on this  #     prefjsonfile  #  =  #  #
         #  os.path.join(config_dir, f)  #     with open(prefjsonfile, 'w') as fd:  #         json.dump(obj[f], fd,
         #  indent=4)  #     # we must also reinit preferences  #     app.init_all_preferences()  #  #    #  #  #  #
         #  app.load_config_file(prefjsonfile)  #     app.project_preferences = ProjectPreferences(config=app.config,
@@ -224,9 +223,9 @@ class Preferences(Meta):
             if key in ['animation.avconv_args', 'animation.avconv_path', 'animation.html_args', 'keymap.all_axes',
                        'mathtext.fallback_to_cm', 'validate_bool_maybe_none', 'savefig.jpeg_quality',
                        'text.latex.preview', 'backend', 'backend_fallback', 'date.epoch', 'docstring.hardcopy',
-                       'figure.max_open_warning', 'figure.raise_window', 'interactive', 'savefig.directory',
-                       'timezone', 'tk.window_focus', 'toolbar', 'webagg.address', 'webagg.open_in_browser',
-                       'webagg.port', 'webagg.port_retries']:
+                       'figure.max_open_warning', 'figure.raise_window', 'interactive', 'savefig.directory', 'timezone',
+                       'tk.window_focus', 'toolbar', 'webagg.address', 'webagg.open_in_browser', 'webagg.port',
+                       'webagg.port_retries']:
                 continue
             val = str(mpl.rcParams[key])
             sav = ''

@@ -1,8 +1,10 @@
 #  -*- coding: utf-8 -*-
 
 #  =====================================================================================================================
-#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie,
+#  Caen, France.
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in
+#  the root directory
 #  =====================================================================================================================
 
 
@@ -88,7 +90,8 @@ def compare_datasets(this, other, approx=False, decimal=6):
             otherdata = other
             otherunits = False
         else:
-            raise AssertionError(f'{this} and {other} objects are too different to be compared.')
+            raise AssertionError(f'{this} and {other} objects are too different to be '
+                                 f'compared.')
 
         if not this.has_units and not otherunits:
             eq = np.all(this._data == otherdata)
@@ -101,16 +104,18 @@ def compare_datasets(this, other, approx=False, decimal=6):
     thistype = this.implements()
 
     attrs = this.__dir__()
-    exclude = ('filename', 'preferences', 'description', 'history', 'date',
-                   'modified', 'modeldata', 'origin', 'roi', 'linear',
-                   'offset', 'increment', 'size', 'name', 'show_datapoints')
+    exclude = (
+        'filename', 'preferences', 'description', 'history', 'date', 'modified', 'modeldata', 'origin', 'roi', 'linear',
+        'offset', 'increment', 'size', 'name', 'show_datapoints')
     # else:
-    #     exclude = ('filename', 'preferences', 'description', 'history', 'date',
+    #     exclude = ('filename', 'preferences', 'description', 'history',
+    #     'date',
     #                'modified', 'modeldata', 'origin', 'roi', 'data', 'name',
     #                'show_datapoints')
 
     for attr in exclude:
-        # these attibutes are not used for comparison (comparison based on data and units!)
+        # these attibutes are not used for comparison (comparison based on
+        # data and units!)
         if attr in attrs:
             if attr in attrs:
                 attrs.remove(attr)
@@ -121,7 +126,8 @@ def compare_datasets(this, other, approx=False, decimal=6):
     for attr in attrs:
         if attr != 'units':
             sattr = getattr(this, f'_{attr}')
-            if this.linear and attr=='data':  # allow comparison of LinearCoord
+            if this.linear and attr == 'data':  # allow comparison of
+                # LinearCoord
                 # and Coord
                 sattr = this.data
             if hasattr(other, f'_{attr}'):
@@ -142,12 +148,14 @@ def compare_datasets(this, other, approx=False, decimal=6):
                             raise AssertionError(f'{this} and {other} masks are different.')
                 if attr in ['data', 'mask']:
                     if approx:
-                        assert_array_compare(compare, sattr, oattr, header=(
-                                f'{thistype}.{attr} attributes are not almost equal to %d decimals' % decimal),
+                        assert_array_compare(compare, sattr, oattr, header=(f'{thistype}.{attr} attributes ar'
+                                                                            f'e not almost equal to %d decimals' %
+                                                                            decimal),
                                              precision=decimal)
                     else:
-                        assert_array_compare(operator.__eq__, sattr, oattr,
-                                             header=f'{thistype}.{attr} attributes are not equal')
+                        assert_array_compare(operator.__eq__, sattr, oattr, header=f'{thistype}.{attr} '
+                                                                                   f'attributes are not '
+                                                                                   f'equal')
 
                 elif attr in ['coordset']:
                     if (sattr is None and oattr is not None) or (oattr is None and sattr is not None):
@@ -162,7 +170,8 @@ def compare_datasets(this, other, approx=False, decimal=6):
                 else:
                     eq &= np.all(sattr == oattr)
                 if not eq:
-                    raise AssertionError(f'The {attr} attributes of {this} and {other} are different.')
+                    raise AssertionError(f'The {attr} attributes of {this} and {other} are '
+                                         f'different.')
             else:
                 return False
         else:
@@ -177,7 +186,8 @@ def compare_datasets(this, other, approx=False, decimal=6):
 
                 eq &= np.all(sattr == oattr)
                 if not eq:
-                    raise AssertionError(f"attributes `{attr}` are not equals or one is missing: \n{sattr} != {oattr}")
+                    raise AssertionError(f"attributes `{attr}` are not equals or one is "
+                                         f"missing: \n{sattr} != {oattr}")
             else:
                 raise AssertionError(f'{other} has no units')
 
@@ -371,16 +381,19 @@ class catch_warnings(warnings.catch_warnings):
 # #
 # ----------------------------------------------------------------------------------------------------------------------
 #
-# figures_dir = os.path.join(os.path.expanduser("~"), ".spectrochempy", "figures")
+# figures_dir = os.path.join(os.path.expanduser("~"), ".spectrochempy",
+# "figures")
 # os.makedirs(figures_dir, exist_ok=True)
 #
 #
-# # .............................................................................
+# #
+# .............................................................................
 # def _compute_rms(x, y):
 #     return calculate_rms(x, y)
 #
 #
-# # .............................................................................
+# #
+# .............................................................................
 # def _image_compare(imgpath1, imgpath2, REDO_ON_TYPEERROR):
 #     # compare two images saved in files imgpath1 and imgpath2
 #
@@ -410,7 +423,8 @@ class catch_warnings(warnings.catch_warnings):
 #         # this happen sometimes and erratically during testing using
 #         # pytest-xdist (parallele testing). This is work-around the problem
 #         if e.args[0] == "unsupported operand type(s) " \
-#                         "for - : 'PngImageFile' and 'int'" and not REDO_ON_TYPEERROR:
+#                         "for - : 'PngImageFile' and 'int'" and not
+#                         REDO_ON_TYPEERROR:
 #             REDO_ON_TYPEERROR = True
 #             rms = sim = -1
 #         else:
@@ -419,7 +433,8 @@ class catch_warnings(warnings.catch_warnings):
 #     return (sim, rms, REDO_ON_TYPEERROR)
 #
 #
-# # .............................................................................
+# #
+# .............................................................................
 # def compare_images(imgpath1, imgpath2,
 #                    max_rms=None,
 #                    min_similarity=None, ):
@@ -445,13 +460,15 @@ class catch_warnings(warnings.catch_warnings):
 #     return message
 #
 #
-# # .............................................................................
+# #
+# .............................................................................
 # def same_images(imgpath1, imgpath2):
 #     if compare_images(imgpath1, imgpath2).startswith('identical'):
 #         return True
 #
 #
-# # .............................................................................
+# #
+# .............................................................................
 # def image_comparison(reference=None,
 #                      extension=None,
 #                      max_rms=None,
@@ -485,12 +502,15 @@ class catch_warnings(warnings.catch_warnings):
 #
 #     force_creation : `bool`, optional, default=`False`.
 #
-#         if this flag is True, the figures created in the decorated function are
-#         saved in the reference figures directory (``.spectrocchempy/figures``)
+#         if this flag is True, the figures created in the decorated
+#         function are
+#         saved in the reference figures directory (
+#         ``.spectrocchempy/figures``)
 #
 #     min_similarity : float (percent).
 #
-#         If set, then it will be used to decide if an image is the same (similar)
+#         If set, then it will be used to decide if an image is the same (
+#         similar)
 #         or not. In this case max_rms is not used.
 #
 #     max_rms : float
@@ -547,10 +567,12 @@ class catch_warnings(warnings.catch_warnings):
 #
 #             if not curfignums:
 #                 # no figure where generated
-#                 raise RuntimeError(f'No figure was generated by the "{func.__name__}" function. Stopped')
+#                 raise RuntimeError(f'No figure was generated by the "{
+#                 func.__name__}" function. Stopped')
 #
 #             if len(reference) != len(curfignums):
-#                 raise ValueError("number of reference figures provided doesn't match the number of generated
+#                 raise ValueError("number of reference figures provided
+#                 doesn't match the number of generated
 #                 figures.")
 #
 #             # Comparison
@@ -586,7 +608,8 @@ class catch_warnings(warnings.catch_warnings):
 #                     if not force_creation:
 #                         # we do not need to loose time
 #                         # if we have just created the figure
-#                         sim, rms, REDO_ON_TYPEERROR = _image_compare(referfile,
+#                         sim, rms, REDO_ON_TYPEERROR = _image_compare(
+#                         referfile,
 #                                                                      tmpfile,
 #                                                                      REDO_ON_TYPEERROR)
 #                     EPSILON = np.finfo(float).eps
@@ -602,7 +625,8 @@ class catch_warnings(warnings.catch_warnings):
 #                     elif CHECKRMS and rms <= RMS:
 #                         message = "identical images {}".format(MESSRMS)
 #                     elif (CHECKSIM or not CHECKRMS) and sim >= SIM:
-#                         message = "identical/similar images {}".format(MESSSIM)
+#                         message = "identical/similar images {}".format(
+#                         MESSSIM)
 #                     else:
 #                         message = "different images {}".format(MESSSIM)
 #
@@ -617,7 +641,8 @@ class catch_warnings(warnings.catch_warnings):
 #                         print(message)
 #
 #                 if errors and not REDO_ON_TYPEERROR:
-#                     # raise an error if one of the image is different from the
+#                     # raise an error if one of the image is different from
+#                     the
 #                     # reference image
 #                     raise ImageAssertionError("\n" + errors)
 #

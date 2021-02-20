@@ -35,9 +35,10 @@ from spectrochempy.utils import (colored_output, SpectroChemPyException, Spectro
 HAS_XARRAY = False
 try:
     import xarray as xr
-    HAS_XARRAY = True      # pragma: no cover
+
+    HAS_XARRAY = True  # pragma: no cover
 except ImportError:
-    xr = None              # pragma: no cover
+    xr = None  # pragma: no cover
 
 
 # ======================================================================================================================
@@ -45,7 +46,6 @@ except ImportError:
 # ======================================================================================================================
 
 class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
-
     # coordinates
     _coordset = Instance(CoordSet, allow_none=True)
 
@@ -841,8 +841,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         See Also
         --------
         squeeze : The inverse operation, removing singleton dimensions
-        """
-        # TODO
+        """  # TODO
 
     # ..................................................................................................................
     def swapdims(self, dim1, dim2, inplace=False):
@@ -920,12 +919,15 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         Examples
         ========
         >>> import spectrochempy as scp
+        >>> dataset = scp.read('wodger.spg')
         >>> a = scp.to_array(dataset)
 
         equivalent to:
 
         >>> a = np.ma.array(dataset)
+
         or
+
         >>> a= dataset.masked_data
         """
         return np.ma.array(self)
@@ -1136,26 +1138,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 # make some NDDataset operation accessible from the spectrochempy API
 thismodule = sys.modules[__name__]
 
-api_funcs = ['sort',
-             'copy',
-             'squeeze',
-             'swapdims',
-             'transpose',
-             'to_array',
-             'to_xarray',
-             'take',
-             'set_complex',
-             'set_quaternion',
-             'set_hypercomplex',
-             'component',
-             'to',
-             'to_base_units',
-             'to_reduced_units',
-             'ito',
-             'ito_base_units',
-             'ito_reduced_units',
-             'is_units_compatible',
-             'remove_masks',
+api_funcs = ['sort', 'copy', 'squeeze', 'swapdims', 'transpose', 'to_array', 'to_xarray', 'take', 'set_complex',
+             'set_quaternion', 'set_hypercomplex', 'component', 'to', 'to_base_units', 'to_reduced_units', 'ito',
+             'ito_base_units', 'ito_reduced_units', 'is_units_compatible', 'remove_masks',
 
              ]
 
@@ -1164,6 +1149,10 @@ for funcname in api_funcs:
     setattr(thismodule, funcname, getattr(NDDataset, funcname))
 
     thismodule.__all__.append(funcname)
+
+# load one method from NDIO
+load = NDDataset.load
+__all__ += ['load']
 
 # ======================================================================================================================
 # Set the operators

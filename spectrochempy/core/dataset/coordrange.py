@@ -11,6 +11,7 @@ This module implements the class |CoordRange|.
 __all__ = __slots__ = ['trim_ranges']
 
 from traitlets import HasTraits, List, Bool
+
 from spectrochempy.utils.traitlets import Range
 
 
@@ -18,7 +19,6 @@ from spectrochempy.utils.traitlets import Range
 # _CoordRange
 # ======================================================================================================================
 class _CoordRange(HasTraits):
-
     # TODO: May use also units ???
     ranges = List(Range())
     reversed = Bool()
@@ -30,8 +30,7 @@ class _CoordRange(HasTraits):
         if len(ranges) == 0:
             # first case: no argument passed, returns an empty range
             self.ranges = []
-        elif len(ranges) == 2 and all(
-                isinstance(elt, (int, float)) for elt in ranges):
+        elif len(ranges) == 2 and all(isinstance(elt, (int, float)) for elt in ranges):
             # second case: a pair of scalars has been passed
             # using the Interval class, we have autochecking of the interval
             # validity

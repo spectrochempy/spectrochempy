@@ -36,7 +36,7 @@ def test_pca():
     dataset[:, 1240.0:920.0] = MASKED  # do not forget to use float in slicing
 
     pca = PCA(dataset)
-    info_(pca)
+
 
     pca.printev(n_pc=5)
 
@@ -60,10 +60,6 @@ def test_compare_scikit_learn():
     pcas = sklPCA(n_components=2)
     pcas.fit(X)
 
-    info_('')
-    for i in range(2):
-        info_(pcas.singular_values_[i], pcas.explained_variance_ratio_[i] * 100.)
-
     pca = PCA(NDDataset(X))
     pca.printev(n_pc=2)
 
@@ -76,16 +72,8 @@ def test_compare_scikit_learn():
     pcas = sklPCA(n_components=5)
     pcas.fit(X)
 
-    info_('')
-    for i in range(5):
-        info_(pcas.singular_values_[i], pcas.explained_variance_ratio_[i] * 100.)
-
     dataset = X.copy()
     pca = PCA(NDDataset(dataset))
-
-    info_('')
-    for i in range(5):
-        info_(pca.sv.data[i], pca.ev_ratio.data[i])
 
     pca.printev(n_pc=5)
 

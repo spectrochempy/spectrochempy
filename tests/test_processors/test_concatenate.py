@@ -25,7 +25,7 @@ def test_concatenate(IR_dataset_2D):
     assert s.x.size == (s1.x.size + s2.x.size)
     assert s.x != dataset.x
     s = s.sort(dims=dim, descend=True)  #
-    assert_dataset_almost_equal(s.x, Coord(dataset.x, linear=False))
+    assert_dataset_almost_equal(s.x, Coord(dataset.x, linear=False), decimal=3)
 
     # default concatenation in the last dimensions
     s = concatenate(s1, s2)
@@ -34,7 +34,7 @@ def test_concatenate(IR_dataset_2D):
     assert s.x.size == (s1.x.size + s2.x.size)
     assert s.x != dataset.x
     s = s.sort(descend=True)  #
-    assert_dataset_almost_equal(s.x, Coord(dataset.x, linear=False))
+    assert_dataset_almost_equal(s.x, Coord(dataset.x, linear=False), decimal=3)
 
     s1 = dataset[:10]
     s2 = dataset[20:]

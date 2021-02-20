@@ -51,6 +51,7 @@ def smooth(dataset, window_length=5, window='flat', **kwargs):
 
     Examples
     --------
+    >>> import spectrochempy as scp
     >>> ds = scp.read("irdata/nh4y-activation.spg")
     >>> ds.smooth(window_length=11)
     NDDataset: [float64] a.u. (shape: (y:55, x:5549))
