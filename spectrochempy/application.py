@@ -214,7 +214,6 @@ __license__ = "CeCILL-B license"
 
 # ..................................................................................................................
 def _find_or_create_spectrochempy_dir():
-
     directory = Path.home() / '.spectrochempy'
 
     if not directory.exists():
@@ -343,9 +342,9 @@ class SpectroChemPyMagics(Magics):
 
         return "Script {} created.".format(name)
 
-        # @line_magic  # def runscript(self, pars=''):  #     """  #  #  # """  #     opts,
-        # args = self.parse_options(pars, '')  #  #     if  # not args:  #         raise UsageError('Missing script
-        # name')  #  #  # return args
+        # @line_magic  # def runscript(self, pars=''):  #     """  #  #  # """
+        #     opts,  # args = self.parse_options(pars, '')  #  #     if  # not args:
+        #         raise UsageError('Missing script  # name')  #  #  # return args
 
 
 # ======================================================================================================================
@@ -372,7 +371,8 @@ class DataDir(HasTraits):
             conda_env = environ['CONDA_PREFIX']
             path = Path(conda_env) / 'share' / 'spectrochempy_data' / 'testdata'
             if not path.exists():
-                path = Path(conda_env) / 'share' / 'spectrochempy_data'   # depending on the version of spectrochempy_data
+                path = Path(
+                        conda_env) / 'share' / 'spectrochempy_data'  # depending on the version of spectrochempy_data
         except KeyError:
             pass
 
@@ -684,10 +684,10 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
                  quiet=({'SpectroChemPy': {'log_level': ERROR}}, "Set log_level to ERROR - no verbosity at all"),
                  nodisplay=({'SpectroChemPy': {'nodisplay': True}}, "Set NO DISPLAY mode to true - no graphics at all"),
                  reset_config=({'SpectroChemPy': {'reset_config': True}}, "Reset config to default"), show_config=(
-                {'SpectroChemPy': {'show_config': True, }}, "Show the application's configuration (human-readable "
-                                                            "format)"), show_config_json=(
-                {'SpectroChemPy': {'show_config_json': True, }}, "Show the application's configuration (json "
-                                                                 "format)"), )
+            {'SpectroChemPy': {'show_config': True, }}, "Show the application's configuration (human-readable "
+                                                        "format)"), show_config_json=(
+            {'SpectroChemPy': {'show_config_json': True, }}, "Show the application's configuration (json "
+                                                             "format)"), )
 
     classes = List([GeneralPreferences, DatasetPreferences, ProjectPreferences, MatplotlibPreferences, DataDir, ])
 

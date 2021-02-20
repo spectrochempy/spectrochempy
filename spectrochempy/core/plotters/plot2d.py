@@ -26,6 +26,7 @@ from spectrochempy.core.plotters.plotutils import make_label
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 
+
 # ======================================================================================================================
 # nddataset plot2D functions
 # ======================================================================================================================
@@ -329,7 +330,7 @@ def plot_2D(dataset, **kwargs):
     ax.set_xlim(xlim)
 
     xscale = kwargs.get("xscale", "linear")
-    ax.set_xscale(xscale) #, nonpositive='mask')
+    ax.set_xscale(xscale)  # , nonpositive='mask')
 
     # set the ordinates axis
     # ------------------------------------------------------------------------------------------------------------------
@@ -453,8 +454,7 @@ def plot_2D(dataset, **kwargs):
         rcount = kwargs.get('rcount', prefs.rcount)
         ccount = kwargs.get('ccount', prefs.ccount)
         ax.set_facecolor('w')
-        ax.plot_surface(X, Y, Z, cmap=cmap, linewidth=lw, antialiased=antialiased,
-                        rcount=rcount, ccount=ccount,
+        ax.plot_surface(X, Y, Z, cmap=cmap, linewidth=lw, antialiased=antialiased, rcount=rcount, ccount=ccount,
                         edgecolor='k', norm=norm, )
 
     if method in ['waterfall']:
@@ -669,8 +669,7 @@ def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwa
         line = mpl.lines.Line2D(x, z, color='k')
         line.set_label(f"{ydata[i]}")
         line.set_zorder(row.size + 1 - i)
-        poly = plt.fill_between(x, z, z2, alpha=1, facecolors="w",
-                                edgecolors="0.85" if 0 < i < ydata.size - 1 else 'k')
+        poly = plt.fill_between(x, z, z2, alpha=1, facecolors="w", edgecolors="0.85" if 0 < i < ydata.size - 1 else 'k')
         poly.set_zorder(row.size + 1 - i)
         try:
             ax.add_collection(poly)

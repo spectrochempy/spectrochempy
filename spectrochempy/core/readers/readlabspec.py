@@ -18,7 +18,7 @@ import io
 import datetime
 import numpy as np
 
-from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.readers.importer import importermethod, Importer
 from spectrochempy.core.dataset.meta import Meta
 
@@ -96,7 +96,7 @@ def read_labspec(*paths, **kwargs):
 
     Examples
     --------
-
+    >>> import spectrochempy as scp
     >>> A = scp.read_labspec('ramandata/Activation.txt')
     """
 
@@ -161,6 +161,8 @@ def _read_txt(*args, **kwargs):
         _x = Coord(rawdata[0, 1:], title='Raman shift', units='1/cm')
         _y = Coord(rawdata[1:, 0], title='Time', units='s')
         date_acq, _y = _transf_meta(_y, meta)
+
+    _x = LinearCoord(_x)
 
     # set dataset metadata
     dataset.data = data

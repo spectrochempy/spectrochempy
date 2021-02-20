@@ -20,8 +20,8 @@ from traitlets import validate, Bool
 from quaternion import as_float_array, as_quat_array
 
 from spectrochempy.core.dataset.ndarray import NDArray
-from spectrochempy.utils import (NOMASK, TYPE_FLOAT, TYPE_COMPLEX, typequaternion, as_quaternion,
-                                 get_component, insert_masked_print)
+from spectrochempy.utils import (NOMASK, TYPE_FLOAT, TYPE_COMPLEX, typequaternion, as_quaternion, get_component,
+                                 insert_masked_print)
 from spectrochempy.units import Quantity
 
 
@@ -147,9 +147,8 @@ class NDComplexArray(NDArray):
             elif self._dtype == typequaternion:
                 data = self._make_quaternion(data)
 
-
         elif data.dtype not in [typequaternion] + list(TYPE_COMPLEX):
-            data = data.astype(np.float64, copy=False)    # by default dta are float64 if the dtype is not fixed
+            data = data.astype(np.float64, copy=False)  # by default dta are float64 if the dtype is not fixed
 
         # return the validated data
         if self._copy:
@@ -612,7 +611,7 @@ class NDComplexArray(NDArray):
         else:
             data = np.ascontiguousarray(data)
 
-        self._dtype = None # reset dtype
+        self._dtype = None  # reset dtype
         return data
 
     # ..................................................................................................................

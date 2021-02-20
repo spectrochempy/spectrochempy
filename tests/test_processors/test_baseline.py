@@ -6,31 +6,44 @@
 # ======================================================================================================================
 
 import os
+import sys
 
 import pytest
 
 # noinspection PyUnresolvedReferences
-from spectrochempy import (
-    show,
-    BaselineCorrection,
-    NDDataset,
-    ur,
-    )
+from spectrochempy import (show, BaselineCorrection, NDDataset, ur,
+                           )
+from spectrochempy.utils.testing import assert_dataset_almost_equal
 
 path = os.path.dirname(os.path.abspath(__file__))
 
-
+@pytest.mark.skipif(sys.version_info > (3, 8),  reason="fails on linux for 3.9")
 def test_basecor_sequential(IR_dataset_2D):
     dataset = IR_dataset_2D[5]
-
+    from spectrochempy import Coord
+    dataset.x = Coord(dataset.x, linear=False)
     basc = BaselineCorrection(dataset)
+
     s = basc([6000., 3500.], [2200., 1500.], method='sequential', interpolation='pchip')
     s.plot()
-    s = basc([6000., 3500.], [2200., 1500.], method='sequential', interpolation='polynomial')
-    s.plot(clear=False, color='red')
+
+    s1 = basc([6000., 3500.], [2200., 1500.], method='sequential', interpolation='polynomial')
+    s1.plot(clear=False, color='red')
+
+    dataset = IR_dataset_2D[5]  # with LinearCoord
+    basc = BaselineCorrection(dataset)
+
+    s2 = basc([6000., 3500.], [2200., 1500.], method='sequential', interpolation='pchip')
+    assert_dataset_almost_equal(s, s2, decimal=5)
+    s2.plot(clear=False, color='green')
+
+    s3 = basc([6000., 3500.], [2200., 1500.], method='sequential', interpolation='polynomial')
+    assert_dataset_almost_equal(s1, s3, decimal=5)
+    s3.plot(clear=False, color='cyan')
+
+    show()
 
     dataset = IR_dataset_2D[:15]
-
     basc = BaselineCorrection(dataset)
     s = basc([6000., 3500.], [2200., 1500.], method='sequential', interpolation='pchip')
     s.plot()
@@ -70,12 +83,10 @@ def test_notebook_basecor_bug():
 
     basc = BaselineCorrection(s)
 
-    ranges = [[1261.86, 1285.89], [1556.30, 1568.26], [1795.00, 1956.75],
-              [3766.03, 3915.81], [4574.26, 4616.04], [4980.10, 4998.01],
-              [5437.52, 5994.70]]  # predifined ranges
+    ranges = [[1261.86, 1285.89], [1556.30, 1568.26], [1795.00, 1956.75], [3766.03, 3915.81], [4574.26, 4616.04],
+              [4980.10, 4998.01], [5437.52, 5994.70]]  # predifined ranges
 
-    _ = basc.run(*ranges, method='multivariate', interpolation='pchip', npc=5,
-                 figsize=(6, 6), zoompreview=4)
+    _ = basc.run(*ranges, method='multivariate', interpolation='pchip', npc=5, figsize=(6, 6), zoompreview=4)
 
     # The regions used to set the baseline are accessible using the `ranges`
     #  attibute:

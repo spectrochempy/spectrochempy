@@ -100,6 +100,7 @@ def savgol_filter(dataset, window_length=5, polyorder=0, deriv=0, delta=1.0,
 
     Examples
     --------
+    >>> import spectrochempy as scp
     >>> dataset = scp.read('irdata/nh4y-activation.spg')
     >>> dataset.savgol_filter(window_length=5, polyorder=0)
     NDDataset: [float64] a.u. (shape: (y:55, x:5549))
@@ -178,6 +179,7 @@ def detrend(dataset, type='linear', bp=0, **kwargs):
 
     Examples
     --------
+    >>> import spectrochempy as scp
     >>> dataset = scp.read("irdata/nh4y-activation.spg")
     >>> dataset.detrend(type='constant')
     NDDataset: [float64] a.u. (shape: (y:55, x:5549))

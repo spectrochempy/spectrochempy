@@ -83,8 +83,10 @@ def read_quadera(*paths, **kwargs):
     Examples
     ---------
 
-    >>> scp.read_asc('msdata/ion_currents.asc')
-    NDDataset: [float64] A (shape: (y:4208, x:4))
+    >>> import spectrochempy as scp
+    >>> scp.read_quadera('msdata/ion_currents.asc')
+    NDDataset: [float64] A (shape: (y:16975, x:10))
+
     Notes:
     ------
     Currently the acquisition time is that of the first channel as the timeshift of other channels are typically

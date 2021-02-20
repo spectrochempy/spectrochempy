@@ -64,9 +64,9 @@ def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False
 
     Examples
     ---------
-    >>> from spectrochempy import NDDataset
+    >>> import spectrochempy as scp
     >>> path_A = 'irdata/nh4y-activation.spg'
-    >>> A = NDDataset.read(path_A, protocol='omnic')
+    >>> A = scp.read(path_A, protocol='omnic')
     >>> ref = A[0, :]  # let's subtrack the first row
     >>> B = A.autosub(ref, [3900., 3700.], [1600., 1500.], inplace=False)
     >>> B

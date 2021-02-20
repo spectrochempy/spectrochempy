@@ -283,6 +283,7 @@ def read(*paths, **kwargs):
     ---------
     Reading a single OPUS file  (providing a windows type filename relative to the default ``Datadir``)
 
+    >>> import spectrochempy as scp
     >>> scp.read('irdata\\\\OPUS\\\\test.0000')
     NDDataset: [float64] a.u. (shape: (y:1, x:2567))
 
@@ -338,7 +339,7 @@ def read(*paths, **kwargs):
     Again we can use merge to stack all 4 spectra if thet have compatible dimensions.
 
     >>> scp.read(directory='irdata/OPUS', merge=True)
-    [NDDataset: [float64] a.u. (shape: (y:1, x:5549)), NDDataset: [float64] a.u. (shape: (y:4, x:2567))]
+    [NDDataset: [float64] a.u. (shape: (y:4, x:2567)), NDDataset: [float64] a.u. (shape: (y:1, x:5549))]
     """
 
     importer = Importer()

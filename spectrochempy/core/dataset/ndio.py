@@ -22,9 +22,9 @@ from traitlets import HasTraits, Instance, Union, Unicode
 
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core import debug_
-from spectrochempy.utils import SpectroChemPyException
-from spectrochempy.utils import pathclean, check_filenames, ScpFile, check_filename_to_save, json_serialiser
-from spectrochempy.utils import TYPE_BOOL
+from spectrochempy.utils import (SpectroChemPyException, pathclean, check_filenames, ScpFile, check_filename_to_save,
+                                 json_serialiser, TYPE_BOOL,
+                                 )
 
 SCPY_SUFFIX = {'NDDataset': '.scp', 'Project': '.pscp'}
 
@@ -51,7 +51,8 @@ class NDIO(HasTraits):
         """
         `Pathlib` object - current directory for this dataset
 
-        ReadOnly property - automaticall set when the filename is updated if it contains a parent on its path
+        ReadOnly property - automaticall set when the filename is updated if
+        it contains a parent on its path
         """
         if self._filename:
             return pathclean(self._filename).parent
@@ -82,7 +83,8 @@ class NDIO(HasTraits):
         """
         filename suffix
 
-        Read Only property - automatically set when the filename is updated if it has a suffix, else give
+        Read Only property - automatically set when the filename is updated
+        if it has a suffix, else give
         the default suffix for the given type of object.
         """
         if self._filename and self._filename.suffix:
@@ -107,7 +109,8 @@ class NDIO(HasTraits):
         """
         Save the current object in SpectroChemPy format.
 
-        Default extension is *.scp for |NDDataset|'s and *.pscp for |Project|'s.
+        Default extension is *.scp for |NDDataset|'s and *.pscp for
+        |Project|'s.
 
         See Also
         ---------
@@ -134,7 +137,8 @@ class NDIO(HasTraits):
         >>> filename.unlink()
         """
 
-        # by default we save the file in the self.directory and with the name + suffix depending
+        # by default we save the file in the self.directory and with the
+        # name + suffix depending
         # on the current object type
         if self.directory is None:
             filename = pathclean('.') / self.name
@@ -206,7 +210,8 @@ class NDIO(HasTraits):
         else:
             filename = self.directory
 
-        # suffix must be specified which correspond to the type of the object to save
+        # suffix must be specified which correspond to the type of the
+        # object to save
         default_suffix = SCPY_SUFFIX[self.implements()]
         filename = filename.with_suffix(default_suffix)
         kwargs['filetypes'] = self.filetype
@@ -231,19 +236,20 @@ class NDIO(HasTraits):
         filename :  `str`, `pathlib` or `file` objects
             The name of the file to read (or a file objects.
         content : str, optional
-             The optional content of the file(s) to be loaded as a binary string
+             The optional content of the file(s) to be loaded as a binary
+             string
         kwargs : optional keyword parameters.
             Any additional keyword(s) to pass to the actual reader.
 
 
         Examples
         --------
-        >>> from spectrochempy import *
-        >>> nd1 = NDDataset.read('irdata/nh4y-activation.spg')
+        >>> import spectrochempy as scp
+        >>> nd1 = scp.read('irdata/nh4y-activation.spg')
         >>> f = nd1.save()
         >>> f.name
         'nh4y-activation.scp'
-        >>> nd2 = NDDataset.load(f)
+        >>> nd2 = scp.load(f)
 
 
         Notes
@@ -260,7 +266,8 @@ class NDIO(HasTraits):
         if content:
             fid = io.BytesIO(content)
         else:
-            # be sure to convert filename to a pathlib object with the default suffix
+            # be sure to convert filename to a pathlib object with the
+            # default suffix
             filename = pathclean(filename)
             suffix = cls().suffix
             filename = filename.with_suffix(suffix)
@@ -343,7 +350,8 @@ class NDIO(HasTraits):
                         obj._references = val['references']
 
                     elif key in ['_datasets']:
-                        # datasets = [item_to_attr(NDDataset(name=k), v) for k, v in val.items()]
+                        # datasets = [item_to_attr(NDDataset(name=k),
+                        # v) for k, v in val.items()]
                         datasets = [item_to_attr(NDDataset(), js) for js in val]
                         obj.datasets = datasets
 

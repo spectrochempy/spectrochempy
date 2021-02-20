@@ -12,7 +12,6 @@ import numpy as np
 import pytest
 
 from spectrochempy.core.dataset.ndcomplex import NDComplexArray
-from spectrochempy.core import info_, print_
 from spectrochempy.units import ur, Quantity
 from spectrochempy.utils.testing import (assert_equal, assert_array_equal, assert_approx_equal, )
 
@@ -49,10 +48,10 @@ def test_ndarray_comparison(ndarray, ndarrayunit, ndarraycplx, ndarrayquaternion
 
 def test_ndcomplex_init_quaternion_witharray():
     d = np.arange(24).reshape(3, 2, 4)
-    info_('\n', d)
+
     d = as_quat_array(d)
     d0 = NDComplexArray(d)
-    info_('\n', d0)
+
     assert d0.shape == (3, 2)
     assert_array_equal(d0.real.data, [[0, 4], [8, 12], [16, 20]])
 
@@ -64,7 +63,6 @@ def test_ndcomplex_init_quaternion_witharray():
     assert d1.shape == (2, 3)
     assert_array_equal(d1.real.data, [[0, 8, 16], [4, 12, 20]])
     assert d1[0, 0].values == quaternion(0, 2, 1, 3)
-    info_('\n', d1)
 
 
 def test_ndcomplex_init_quaternion():
@@ -75,10 +73,7 @@ def test_ndcomplex_init_quaternion():
     d0 = NDComplexArray(d, units=ur.Hz, mask=[[False, True, False], [True, False, False]],
                         dtype=typequaternion)  # with units & mask
     assert d0.shape == (2, 3)
-    info_(d0.__repr__())
     assert 'NDComplexArray: [quaternion] Hz' in repr(d0)
-    info_(d0)
-    print_(d0)
 
 
 def test_ndcomplex_init_quaternion_error1():
@@ -113,7 +108,7 @@ def test_ndcomplex_init_complex_with_mask():
 
     np.random.seed(12345)
     d = np.random.random((2, 2)) * np.exp(.1j)
-    info_(d)
+
     d3 = NDComplexArray(d, units=ur.Hz, mask=[[False, True], [False, False]])  # with units & mask
 
     # internal representation (interleaved)
@@ -132,7 +127,7 @@ def test_ndcomplex_init_complex_with_mask():
     assert not d3RR.has_complex_dims
     assert d3RR._data.shape == (2, 2)
     assert d3RR._mask.shape == (2, 2)
-    info_(d3)
+
     assert isinstance(d3[1, 1].values, Quantity)
     assert d3[1, 1].values.magnitude == d[1, 1]
 
@@ -175,16 +170,13 @@ def test_ndcomplex_init_complex_with_a_ndarray():
     assert d0.has_complex_dims
     assert d0.shape == (2, 2)
     assert d0.size == 4
-    info_('\n-------------')
-    info_(d0.__repr__())
+
     assert 'NDComplexArray: [complex128]' in repr(d0)
-    info_('\n-------------')
-    info_(d0)
 
 
 def test_ndcomplex_quaternion_fixture(ndarrayquaternion):
     nd = ndarrayquaternion.copy()
-    info_(str(nd))
+
     # some checking
     assert nd.size == 20
     assert nd.data.size == 20
@@ -262,14 +254,12 @@ def test_ndcomplex_complex(ndarraycplx):
 def test_ndcomplex_str_representation_for_complex():
     nd1 = NDComplexArray([1. + 2.j, 2. + 3.j])
     assert "NDComplexArray: [complex128] unitless" in repr(nd1)
-    info_(nd1)
 
 
 def test_ndcomplex_quaternion_str_representation():
     np.random.seed(12345)
     d = np.random.random((4, 2)) * np.exp(.1j)
-    d3 = NDComplexArray(d, dtype=typequaternion)
-    info_(d3)
+    NDComplexArray(d, dtype=typequaternion)
 
 
 def test_ndcomplex_real_imag_quaternion():
@@ -310,9 +300,6 @@ def test_ndcomplex_swapdims_quaternion():
     assert_array_equal(zt, z.T)
     assert_array_equal(wt, w.T)
 
-    info_(d3)
-    info_(d4)
-
 
 def test_ndcomplex_squeeze(ndarrayunit):
     nd = NDComplexArray(ndarrayunit)
@@ -328,10 +315,7 @@ def test_ndcomplex_squeeze(ndarrayunit):
 
     nd1 = nd.set_complex()
     assert nd1.shape == (10, 4)
-    info_(nd1)
-    print(nd1)
-    print_(nd1)
-    print(nd1._repr_html_())
+    nd1._repr_html_()
 
     d = nd[..., 0]
     d = d.squeeze()
@@ -343,23 +327,9 @@ def test_ndcomplex_squeeze(ndarrayunit):
     assert d1.shape == (8,)
     assert d1 is not d
 
-    # TODO: test a revoir
-    # d = nd[..., 0].real
-    # assert np.all(d == nd[..., 0].RR)
-    # assert d.shape == (10, 1)
-    # d1 = d.squeeze("x")
-    # assert d1.shape == (10,)
-    # assert d1 is not d
-    #
-    # # inplace
-    # d = nd[..., 0:1]
-    # assert d.shape == (10, 1)
-    # d1 = d.squeeze(dims=1, inplace=True)
-    # assert d1.shape == (10,)
-    # assert d1 is d
-    #
-    # d = nd[0:1]
-    # assert d.shape == (1, 8)
-    # d1 = d.squeeze(dims=0, inplace=True)
-    # assert d1.shape == (8,)
-    # assert d1 is d
+    # TODO: test a revoir  # d = nd[..., 0].real  # assert np.all(d == nd[..., 0].RR)
+    # assert d.shape == (10, 1)  # d1 = d.squeeze("x")  # assert d1.shape == (10,)
+    # assert d1 is not d  #  # # inplace  # d = nd[..., 0:1]  # assert d.shape == (10, 1)
+    # d1 = d.squeeze(dims=1, inplace=True)  # assert d1.shape == (10,)  # assert d1 is d  #
+    # d = nd[0:1]  # assert d.shape == (1, 8)  # d1 = d.squeeze(dims=0, inplace=True)
+    # assert d1.shape == (8,)  # assert d1 is d

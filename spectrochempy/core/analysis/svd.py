@@ -61,7 +61,8 @@ class SVD(HasTraits):
 
         Examples
         --------
-        >>> dataset = NDDataset.read('irdata/nh4y-activation.spg')
+        >>> import spectrochempy as scp
+        >>> dataset = scp.read('irdata/nh4y-activation.spg')
         >>> svd = SVD(dataset)
         >>> print(svd.ev.data)
         [1.185e+04      634 ... 0.001089 0.000975]

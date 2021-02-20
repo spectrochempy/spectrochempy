@@ -14,11 +14,16 @@ In this example, we perform the PCA dimensionality reduction of the classical
 """
 
 import spectrochempy as scp
+import sys
 
 ############################################################
 # Upload a dataset form a distant server
 
-dataset = scp.download_IRIS()
+try:
+    dataset = scp.download_IRIS()
+except (IOError, OSError):
+    print('Could not load The IRIS dataset. Finishing here.')
+    sys.exit(0)
 
 ##############################################################
 # Create a PCA object

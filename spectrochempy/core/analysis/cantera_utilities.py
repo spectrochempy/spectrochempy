@@ -21,7 +21,7 @@ if HAS_CANTERA:
     import cantera as ct
 
 from spectrochempy.core.dataset.nddataset import NDDataset, Coord
-from spectrochempy.utils.exception import SpectroChemPyException
+from spectrochempy.utils.exceptions import SpectroChemPyException
 
 
 def coverages_vs_time(surface, t, returnNDDataset=False):

@@ -30,15 +30,16 @@ def trapz(dataset, *args, **kwargs):
 
     Returns
     -------
-    trapz : |NDDataset|
+    trapz
         Definite integral as approximated by trapezoidal rule.
 
     Example
     --------
-    >>> dataset = NDDataset.read('irdata/nh4y-activation.spg')
+    >>> import spectrochempy as scp
+    >>> dataset = scp.read('irdata/nh4y-activation.spg')
     >>> dataset[:,1250.:1800.].trapz()
-    [float64] a.u..cm^-1 (size: 55)
-        """
+    NDDataset: [float64] a.u..cm^-1 (size: 55)
+    """
 
     # handle the various syntax to pass the axis
     if args:
@@ -96,17 +97,17 @@ def simps(dataset, *args, **kwargs):
         'last' : Use Simpson's rule for the last N-2 intervals with a
                trapezoidal rule on the first interval.
 
-
     Returns
     -------
-    simps : |NDDataset|
+    simps
         Definite integral as approximated using the composite Simpson's rule.
 
-        Example
+    Example
     --------
-    >>> dataset = NDDataset.read('irdata/nh4y-activation.spg')
+    >>> import spectrochempy as scp
+    >>> dataset = scp.read('irdata/nh4y-activation.spg')
     >>> dataset[:,1250.:1800.].simps()
-    [float64] a.u..cm^-1 (size: 55)
+    NDDataset: [float64] a.u..cm^-1 (size: 55)
     """
 
     # handle the various syntax to pass the axis

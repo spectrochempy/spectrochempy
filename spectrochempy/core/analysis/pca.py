@@ -12,8 +12,6 @@ __all__ = ['PCA']
 
 __dataset_methods__ = []
 
-import warnings
-
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
@@ -197,7 +195,7 @@ class PCA(HasTraits):
                 return n_pc
             else:
                 info_('Cannot use `auto` if n_observations < '
-                              'n_features. Try with threshold 0.9999')
+                      'n_features. Try with threshold 0.9999')
                 n_pc = 0.9999
 
         if 0 < n_pc < 1.0:

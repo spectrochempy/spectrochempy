@@ -69,8 +69,8 @@ ds = read('irdata/nh4y-activation.spg')
 # %%
 ds
 
-# %%
-Detailled information:
+# %% [markdown]
+# Detailled information:
 
 # %%
 ds
@@ -93,7 +93,7 @@ _ = region.plot()
 
 # %% jupyter={"source_hidden": true}
 region.y -= region.y[0]  # make y coordinate reative to the first point
-region.y.title = 'time of dehydratatioin'
+region.y.title = 'time of dehydratation'
 region -= region[-1]  # suppress the last spectra to all
 _ = region.plot(colorbar=True)
 
@@ -128,7 +128,7 @@ _ = basc.plot()
 # #### IRIS processing
 
 # %% jupyter={"source_hidden": true}
-ds = NDDataset.read_omnic(datadir / 'irdata' / 'CO@Mo_Al2O3.SPG')[:, 2250.:1950.]
+ds = NDDataset.read_omnic('irdata/CO@Mo_Al2O3.SPG')[:, 2250.:1950.]
 pressure = [0.00300, 0.00400, 0.00900, 0.01400, 0.02100, 0.02600, 0.03600, 0.05100, 0.09300, 0.15000, 0.20300, 0.30000,
             0.40400, 0.50300, 0.60200, 0.70200, 0.80100, 0.90500, 1.00400]
 ds.y = Coord(pressure, title='Pressure', units='torr')

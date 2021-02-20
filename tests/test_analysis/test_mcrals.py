@@ -13,7 +13,6 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.analysis.efa import EFA
 from spectrochempy.core.analysis.mcrals import MCRALS
 from spectrochempy.utils import show
-from spectrochempy.core import info_
 
 
 def test_MCRALS_no_coords():
@@ -38,9 +37,8 @@ def test_MCRALS_no_coords():
     guess = EFA(X).get_conc(4)
 
     param = {
-            'normSpec': 'euclid',
-            'maxit': 100
-            }
+        'normSpec': 'euclid', 'maxit': 100
+    }
     mcr2 = MCRALS(X, guess, param=param, verbose=False)
     mcr2.plotmerit()
 
@@ -49,18 +47,11 @@ def test_MCRALS_no_coords():
 
 def test_MCRALS():
     data = NDDataset.read_matlab(os.path.join('matlabdata', 'als2004dataset.MAT'), transposed=True)
-    info_('\nDataset (Jaumot et al., Chemometr. Intell. Lab. 76 (2005) 101-110)):\n')
-
-    for mat in data:
-        info_('    ', mat.name, mat.shape)
-
-    info_('\n test on single experiment (m1) with estimate of pure species (spure)...\n')
 
     X = data[0]  # m1
     X.set_coordset(y=np.arange(51), x=np.arange(96))
     X.title = 'concentration'
     X.coordset.set_titles(y='spec coord.', x='elution time')
-    info_(X)
     X.plot(title='M1')
 
     guess = data[1]  # spure
@@ -77,14 +68,12 @@ def test_MCRALS():
 
     mcr.plotmerit()
 
-    info_('\n test on single experiment (m1) with EFA estimate of pure species (verbose off)...\n')
     guess = EFA(X).get_conc(4)
     guess.plot(title='EFA guess')
 
     param = {
-            'normSpec': 'euclid',
-            'maxit': 100
-            }
+        'normSpec': 'euclid', 'maxit': 100
+    }
     mcr2 = MCRALS(X, guess, param=param, verbose=False)
     mcr.plotmerit()
 

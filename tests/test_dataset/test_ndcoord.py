@@ -14,7 +14,7 @@ from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.readers.importer import read
 from spectrochempy.units import ur, Quantity
 from spectrochempy.utils.testing import assert_array_equal, assert_equal_units
-from spectrochempy.core import info_, print_, debug_
+from spectrochempy.core import debug_
 
 
 # ======================================================================================================================
@@ -74,8 +74,6 @@ def test_coord():
     # even an array
     a._labels[3] = range(10)
     assert a._labels[3][2] == 2
-    info_('\n' + str(a))
-    info_('\n' + repr(a))
 
     # coords with datetime
 
@@ -87,8 +85,7 @@ def test_coord():
     assert a.title == 'time'
     assert isinstance(a.data, np.ndarray)
     assert isinstance(a.labels, np.ndarray)
-    b = a._sort(by='label', descend=True)
-    info_('\n' + str(b))
+    a._sort(by='label', descend=True)
 
     # but coordinates must be 1D
 
@@ -103,8 +100,6 @@ def test_coord():
     assert coord0.units is None
     assert coord0.data[0] == 4000.
     assert repr(coord0) == 'Coord: [float64] unitless (size: 10)'
-
-    info_('\n' + str(coord0))
 
     # dimensionless coordinates
 
@@ -129,7 +124,6 @@ def test_coord():
     assert coord0.units.dimensionless
     assert coord0.data[0] == 4000.  # <- displayed data to be multiplied by the scale factor
     assert repr(coord0) == 'Coord: [float64] scaled-dimensionless (0.001) (size: 10)'
-    info_('\n' + str(coord0))
 
     coord0 = Coord(data=np.linspace(4000, 1000, 10), labels=list('abcdefghij'), mask=None, units="m^2/s",
                    title='wavelength')
@@ -252,7 +246,7 @@ def test_coord_unit_conversion_operators_a(operation, result_units):
     operator_km = in_km.__getattribute__(operation)
 
     combined = operator_km(scalar_in_m)
-    info_(f'{operation}, {combined}')
+
     assert_equal_units(combined.units, result_units)
 
 
@@ -309,27 +303,20 @@ def test_linearcoord():
 
     assert coord5 is not None
     coord5.linear = True
-    print_('Linear coordinate', coord5)
 
     coord6 = Coord(linear=True, offset=2.0, increment=2.0, size=10)
     assert np.all(coord6.data == (coord4.data + 1.0) * 2.)
 
     # %%
-    coord7 = LinearCoord(offset=2.0, increment=2.0, size=10)
-    print_(coord7)
+    LinearCoord(offset=2.0, increment=2.0, size=10)
 
     # %%
     X = read('irdata/CO@Mo_Al2O3.SPG')
-    print_(X.x)
     XX = X.x.copy()
     X.x.linear = True
-    print_((X.x.data - XX.data).ptp(), X.x.increment,
-           (X.x.data - XX.data).ptp() * 100 / X.x.increment)  # TODO : why such a difference!!!!
-    print(X.x._data)
-
-    print(X.x.offset)
+    ((X.x.data - XX.data).ptp(), X.x.increment,
+     (X.x.data - XX.data).ptp() * 100 / X.x.increment)  # TODO : why such a difference!!!!
     X.x.ito('m^-1')
-    print(X.x.offset_value)
 
     coord0 = LinearCoord.linspace(200., 300., 3, labels=['cold', 'normal', 'hot'], units="K", title='temperature')
     coord1 = LinearCoord.linspace(0., 60., 100, labels=None, units="minutes", title='time-on-stream')

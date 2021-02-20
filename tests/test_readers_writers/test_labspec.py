@@ -12,8 +12,9 @@ import spectrochempy as scp
 
 def test_read_labspec():
 
-    # datadir = scp.preferences.datadir
+    datadir = scp.preferences.datadir
     ramandir = Path('ramandata')
+    scp.info_(ramandir)
 
     A = scp.read_labspec('Activation.txt', directory=ramandir)
     A.plot()

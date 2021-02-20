@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie,
+#  Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in
+#  the root directory                         =
 # ======================================================================================================================
 """
 This module mainly contains the definition of a Meta class object
@@ -103,7 +105,7 @@ class Meta(object):  # HasTraits):
                        '_cross_validation_lock', '__wrapped__']:
             self[key] = value
         else:
-            self.__dict__[key] = value  # to avoid a recursive call  # we can not use self._readonly = value!
+            self.__dict__[key] = value  # to avoid a recursive call  # we can not use  # self._readonly = value!
 
     def __getattr__(self, key):
         if key.startswith('_ipython') or key.startswith('_repr'):

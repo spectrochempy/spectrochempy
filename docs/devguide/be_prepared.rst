@@ -107,38 +107,58 @@ We'll now install |scpy| in development mode following 2 steps:
    (conda installer is somewhat very slow, this is why we prefer to replace it by
    `mamba <https://https://github.com/mamba-org/mamba>`__.
 
-.. sourcecode:: bash
+   .. sourcecode:: bash
 
-   conda update conda -y
-   conda config --add channels conda-forge
-   conda config --add channels cantera
-   conda config --add channels spectrocat
-   conda config --set channel_priority flexible
-   conda install mamba
-   mamba env create -f .ci/env/scpy3.9.yml
-   conda activate scpy3.9
+      conda update conda -y
+      conda config --add channels conda-forge
+      conda config --add channels cantera
+      conda config --add channels spectrocat
+      conda config --set channel_priority flexible
+      conda install mamba jinja2
+
+   Here we will create un environment using python in its version 3.9
+   but it is up to you to install any version from 3.6.9 to 3.9.
+   Just change the relevant information in the code below (the first line use a
+   script to create the necessary yaml
+   file containing all information about the packages to install):
+
+   .. sourcecode:: bash
+
+      python .ci/env/env_create.py -v 3.9 --dev scpy3.9.yml
+      mamba env create -f .ci/env/scpy3.9.yml
+      conda activate scpy3.9
 
 2. Install |scpy|
 
-.. sourcecode:: bash
+   Once your environment is created and activated, we must install SpectroChemPy
+   in development mode.
 
-   (scpy3.9) $ python -m pip install -e .
+   .. sourcecode:: bash
 
-At this point you should be able to import spectrochempy from your local
-development version:
+      (scpy3.9) $ cd <spectrochempy folder>
+      (scpy3.9) $ python setup.py develop
 
-.. sourcecode:: bash
+   At this point you should be able to import spectrochempy from your local
+   development version:
 
-   (scpy3.9) $ python
+   .. sourcecode:: bash
 
-This start an interpreter in which you can check your installation
+      (scpy3.9) $ python
 
-.. sourcecode:: python
+   This start an interpreter in which you can check your installation
 
-   >>> import spectrochempy as scp
-   >>> print(scp.version)
-   SpectroChemPy's API ...
-   >>> exit()
+   .. sourcecode:: python
+
+     >>> import spectrochempy as scp
+     >>> print(scp.version)
+     SpectroChemPy's API ...
+     >>> exit()
+
+Controling the environments
+---------------------------
+
+You can create as many environment you want, using the method above
+(for example with different versions of python)
 
 To view your environments:
 

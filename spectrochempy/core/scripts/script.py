@@ -51,6 +51,7 @@ class Script(HasTraits):
         --------
         Make a script
 
+        >>> import spectrochempy as scp
         >>> s = "set_loglevel(INFO)"
         >>> s = "info_('Hello')"
         >>> myscript = scp.Script("print_hello_info", s)

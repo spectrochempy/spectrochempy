@@ -172,8 +172,8 @@ class CoordSet(HasTraits):
                         # use the provided list of dims
                         coord.name = dims.pop(-1)
 
-                self._append(coord)
-                # append the coord (but instead of append,  # use assignation -in _append - to fire the
+                self._append(
+                    coord)  # append the coord (but instead of append,  # use assignation -in _append - to fire the
                 # validation process )
 
         # now evaluate keywords argument
@@ -258,9 +258,9 @@ class CoordSet(HasTraits):
             return None
 
         for id, coord in enumerate(coords):
-            if coord and not isinstance(coord, (Coord, CoordSet)):
+            if coord and not isinstance(coord, (Coord, LinearCoord, CoordSet)):
                 raise TypeError(
-                        'At this point all passed coordinates should be of type Coord or CoordSet!')  # coord =
+                        'At this point all passed coordinates should be of type Coord or CoordSet!')  # coord =  #
                 # Coord(coord)
             coords[id] = coord
 

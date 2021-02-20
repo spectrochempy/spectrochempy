@@ -12,12 +12,12 @@ __all__ = ['NDMath', ]
 __dataset_methods__ = []
 
 import copy as cpy
-
 import functools
 import inspect
 import sys
 import operator
 from warnings import catch_warnings
+
 import numpy as np
 from orderedset import OrderedSet
 from quaternion import as_float_array
@@ -26,7 +26,7 @@ from spectrochempy.units.units import ur, Quantity, DimensionalityError
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.utils import NOMASK, TYPE_COMPLEX, quat_as_complex_array, as_quaternion
 from spectrochempy.core import warning_, error_
-from spectrochempy.utils.testing import assert_dataset_equal
+from spectrochempy.utils.testing import assert_dataset_almost_equal
 from spectrochempy.utils.exceptions import CoordinateMismatchError
 
 
@@ -150,7 +150,7 @@ class _from_numpy_method(object):
 
             # Be sure that the dataset passed to the numpy function are a numpy (masked) array
             if isinstance(argpos[0], (NDDataset, Coord)):
-                #argpos[0] = argpos[0].real.masked_data
+                # argpos[0] = argpos[0].real.masked_data
                 argpos[0] = argpos[0].masked_data
 
             # case of creation like method
@@ -361,8 +361,8 @@ class NDMath(object):
     this. Most of the time it returns a new NDDataset, while in some cases
     noted below, one get a |ndarray|.
 
-    >>> from spectrochempy import *
-    >>> ds = NDDataset([1.,2.,3.])
+    >>> import spectrochempy as scp
+    >>> ds = scp.NDDataset([1.,2.,3.])
     >>> np.sin(ds)
     NDDataset: [float64] unitless (size: 3)
 
@@ -373,31 +373,30 @@ class NDMath(object):
 
     Examples
     --------
-
-    >>> from spectrochempy import *
-    >>> nd1 = NDDataset.read('wodger.spg')
+    >>> nd1 = scp.read('wodger.spg')
     >>> nd1
     NDDataset: [float64] a.u. (shape: (y:2, x:5549))
     >>> nd1.data
     array([[   2.005,    2.003, ...,    1.826,    1.831],
-           [   1.983,    1.984, ...,    1.698,    1.704]], dtype=float32)
+           [   1.983,    1.984, ...,    1.698,    1.704]])
     >>> nd2 = np.negative(nd1)
     >>> nd2
     NDDataset: [float64] a.u. (shape: (y:2, x:5549))
     >>> nd2.data
     array([[  -2.005,   -2.003, ...,   -1.826,   -1.831],
-           [  -1.983,   -1.984, ...,   -1.698,   -1.704]], dtype=float32)
+           [  -1.983,   -1.984, ...,   -1.698,   -1.704]])
     """
 
     __radian = 'radian'
     __degree = 'degree'
-    __require_units = {'cumprod': DIMENSIONLESS, 'arccos': DIMENSIONLESS, 'arcsin': DIMENSIONLESS,
-                       'arctan': DIMENSIONLESS, 'arccosh': DIMENSIONLESS, 'arcsinh': DIMENSIONLESS,
-                       'arctanh': DIMENSIONLESS, 'exp': DIMENSIONLESS, 'expm1': DIMENSIONLESS, 'exp2': DIMENSIONLESS,
-                       'log': DIMENSIONLESS, 'log10': DIMENSIONLESS, 'log1p': DIMENSIONLESS, 'log2': DIMENSIONLESS,
-                       'sin': __radian, 'cos': __radian, 'tan': __radian, 'sinh': __radian, 'cosh': __radian,
-                       'tanh': __radian, 'radians': __degree, 'degrees': __radian, 'deg2rad': __degree,
-                       'rad2deg': __radian, 'logaddexp': DIMENSIONLESS, 'logaddexp2': DIMENSIONLESS}
+    __require_units = {
+        'cumprod': DIMENSIONLESS, 'arccos': DIMENSIONLESS, 'arcsin': DIMENSIONLESS, 'arctan': DIMENSIONLESS,
+        'arccosh': DIMENSIONLESS, 'arcsinh': DIMENSIONLESS, 'arctanh': DIMENSIONLESS, 'exp': DIMENSIONLESS,
+        'expm1': DIMENSIONLESS, 'exp2': DIMENSIONLESS, 'log': DIMENSIONLESS, 'log10': DIMENSIONLESS,
+        'log1p': DIMENSIONLESS, 'log2': DIMENSIONLESS, 'sin': __radian, 'cos': __radian, 'tan': __radian,
+        'sinh': __radian, 'cosh': __radian, 'tanh': __radian, 'radians': __degree, 'degrees': __radian,
+        'deg2rad': __degree, 'rad2deg': __radian, 'logaddexp': DIMENSIONLESS, 'logaddexp2': DIMENSIONLESS
+    }
     __compatible_units = ['add', 'sub', 'iadd', 'isub', 'maximum', 'minimum', 'fmin', 'fmax', 'lt', 'le', 'ge', 'gt']
     __complex_funcs = ['real', 'imag', 'absolute', 'abs']
     __keep_title = ['negative', 'absolute', 'abs', 'fabs', 'rint', 'floor', 'ceil', 'trunc', 'add', 'subtract']
@@ -637,7 +636,7 @@ class NDMath(object):
             from quaternion import as_float_array
             quaternion = True
             data = dataset
-            dataset = as_float_array(dataset)[...,0]  # real part
+            dataset = as_float_array(dataset)[..., 0]  # real part
         m = np.ma.max(dataset, axis=axis, keepdims=keepdims)
         if quaternion:
             if dim is None:
@@ -648,8 +647,8 @@ class NDMath(object):
             else:
                 m = np.ma.diag(data[np.ma.argmax(dataset, axis=axis)])
 
-        if np.isscalar(m) or (m.size==1 and not keepdims):
-            if not np.isscalar(m): # case of quaternion
+        if np.isscalar(m) or (m.size == 1 and not keepdims):
+            if not np.isscalar(m):  # case of quaternion
                 m = m[()]
             if cls.units is not None:
                 return Quantity(m, cls.units)
@@ -848,7 +847,9 @@ class NDMath(object):
 
         Examples
         --------
-        >>> Coord.arange(1, 20.0001, 1, units='s', name='mycoord')
+        >>> import spectrochempy as scp
+        >>> scp.arange(1, 20.0001, 1, units='s', name='mycoord')
+        NDDataset: [float64] s (size: 20)
         """
 
         return cls(np.arange(start, stop, step, dtype), **kwargs)
@@ -937,16 +938,17 @@ class NDMath(object):
 
         Examples
         --------
+        >>> import spectrochempy as scp
         >>> nd = scp.read('irdata/nh4y-activation.spg')
         >>> nd
         NDDataset: [float64] a.u. (shape: (y:55, x:5549))
         >>> scp.average(nd)
-        <Quantity(1.2508586645126343, 'absorbance')>
+        <Quantity(1.25085858, 'absorbance')>
         >>> m = scp.average(nd, dim='y')
         >>> m
         NDDataset: [float64] a.u. (size: 5549)
         >>> m.x
-        Coord: [float64] cm^-1 (size: 5549)
+        LinearCoord: [float64] cm^-1 (size: 5549)
         >>> m = scp.average(nd, dim='y', weights=np.arange(55))
         >>> m.data
         array([   1.789,    1.789, ...,    1.222,     1.22])
@@ -1125,18 +1127,19 @@ class NDMath(object):
 
         Examples
         --------
+        >>> import spectrochempy as scp
         >>> nd = scp.read('irdata/nh4y-activation.spg')
         >>> nd
         NDDataset: [float64] a.u. (shape: (y:55, x:5549))
         >>> scp.sum(nd)
-        <Quantity(381755.8125, 'absorbance')>
+        <Quantity(381755.783, 'absorbance')>
         >>> scp.sum(nd, keepdims=True)
         NDDataset: [float64] a.u. (shape: (y:1, x:1))
         >>> m = scp.sum(nd, dim='y')
         >>> m
         NDDataset: [float64] a.u. (size: 5549)
         >>> m.data
-        array([   100.7,    100.7, ...,       74,    73.98], dtype=float32)
+        array([   100.7,    100.7, ...,       74,    73.98])
         """
 
         axis, dim = cls.get_axis(dim, allows_none=True)
@@ -1243,10 +1246,12 @@ class NDMath(object):
 
         Examples
         --------
+        >>> import spectrochempy as scp
         >>> nd = scp.full((2, 2), 0.5, units='s', title='initial')
         >>> nd
         NDDataset: [float64] s (shape: (y:2, x:2))
         >>> nd.diagonal(title='diag')
+        NDDataset: [float64] s (size: 2)
         """
 
         axis, dim = cls.get_axis(dim)
@@ -1315,13 +1320,12 @@ class NDMath(object):
 
         Examples
         --------
-        >>> from spectrochempy import *
-
-        >>> NDDataset.empty([2, 2], dtype=int, units='s')
+        >>> import spectrochempy as scp
+        >>> scp.empty([2, 2], dtype=int, units='s')
         NDDataset: [int64] s (shape: (y:2, x:2))
         """
 
-        return cls(np.empty(shape, dtype), **kwargs)
+        return cls(np.empty(shape, dtype), dtype=dtype, **kwargs)
 
     @_from_numpy_method
     def empty_like(cls, dataset, dtype=None, **kwargs):
@@ -1370,6 +1374,8 @@ class NDMath(object):
         """
 
         cls._data = np.empty_like(dataset, dtype)
+        cls._dtype = np.dtype(dtype)
+
         return cls
 
     @_from_numpy_method
@@ -1406,8 +1412,9 @@ class NDMath(object):
 
         Examples
         --------
-        >>> scp.NDDataset.eye(2, dtype=int)
-        NDDataset: [int64] unitless (shape: (y:2, x:2))
+        >>> import spectrochempy as scp
+        >>> scp.eye(2, dtype=int)
+        NDDataset: [float64] unitless (shape: (y:2, x:2))
         >>> scp.eye(3, k=1, units='km').values
         <Quantity([[       0        1        0]
          [       0        0        1]
@@ -1460,18 +1467,17 @@ class NDMath(object):
         --------
         Create a 1D NDDataset from a function
 
+        >>> import spectrochempy as scp
         >>> def func1(t, v):
         ...     d = v * t
         ...     return d
         ...
-        ...
-        ...
-        >>> time = scp.Coord.linspace(0, 60, 10, units='min')
-        >>> d = scp.NDDataset.fromfunction(func1, v=scp.Quantity(134, 'km/hour'), coordset=scp.CoordSet(t=time))
+        >>> time = scp.LinearCoord.arange(0, 60, 10, units='min')
+        >>> d = scp.fromfunction(func1, v=scp.Quantity(134, 'km/hour'), coordset=scp.CoordSet(t=time))
         >>> d.dims
         ['t']
         >>> d
-        NDDataset: [float64] km (size: 10)
+        NDDataset: [float64] km (size: 6)
         """
 
         from spectrochempy.core.dataset.coordset import CoordSet
@@ -1531,6 +1537,7 @@ class NDMath(object):
 
         Examples
         --------
+        >>> import spectrochempy as scp
         >>> iterable = (x * x for x in range(5))
         >>> d = scp.fromiter(iterable, float, units='km')
         >>> d
@@ -1581,14 +1588,14 @@ class NDMath(object):
 
         Examples
         --------
-        >>> from spectrochempy import *
-        >>> Coord.full((2, ), np.inf)
-        Coord: [float64] unitless (size: 2)
-        >>> NDDataset.full((2, 2), 10, dtype=np.int)
+        >>> import spectrochempy as scp
+        >>> scp.full((2, ), np.inf)
+        NDDataset: [float64] unitless (size: 2)
+        >>> scp.NDDataset.full((2, 2), 10, dtype=np.int)
         NDDataset: [int64] unitless (shape: (y:2, x:2))
         """
 
-        return cls(np.full(shape, fill_value, dtype), **kwargs)
+        return cls(np.full(shape, fill_value, dtype), dtype=dtype, **kwargs)
 
     @_from_numpy_method
     def full_like(cls, dataset, fill_value=0.0, dtype=None, **kwargs):
@@ -1637,38 +1644,26 @@ class NDMath(object):
 
         1) from the API
 
+        >>> import spectrochempy as scp
         >>> x = np.arange(6, dtype=int)
         >>> scp.full_like(x, 1)
-        NDDataset: [int64] unitless (size: 6)
+        NDDataset: [float64] unitless (size: 6)
 
         2) as a classmethod
 
         >>> x = np.arange(6, dtype=int)
-        >>> scp.Coord.full_like(x, 1)
-        Coord: [int64] unitless (size: 6)
+        >>> scp.NDDataset.full_like(x, 1)
+        NDDataset: [float64] unitless (size: 6)
 
         3) as an instance method
 
         >>> scp.NDDataset(x).full_like(1, units='km')
-        NDDataset: [int64] km (size: 6)
-
-        Warning with data types:
-
-        >>> x = scp.NDDataset(x, units='m')
-        >>> x.dtype
-        dtype('int64')
-        >>> nd = scp.NDDataset.full_like(x, 0.1)
-        >>> nd
-        NDDataset: [int64] m (size: 6)
-        >>> nd.values
-        <Quantity([       0        0        0        0        0        0], 'meter')>
-        >>> scp.full_like(x, 0.1, dtype=np.double).values
-        <Quantity([     0.1      0.1      0.1      0.1      0.1      0.1], 'meter')>
-        >>> scp.full_like(x, np.nan, dtype=np.double).values
-        <Quantity([     nan     nan      nan      nan      nan      nan], 'meter')>
+        NDDataset: [float64] km (size: 6)
         """
 
         cls._data = np.full_like(dataset, fill_value, dtype)
+        cls._dtype = np.dtype(dtype)
+
         return cls
 
     @_from_numpy_method
@@ -1745,6 +1740,7 @@ class NDMath(object):
 
         Examples
         --------
+        >>> import spectrochempy as scp
         >>> scp.identity(3).data
         array([[       1,        0,        0],
                [       0,        1,        0],
@@ -1885,18 +1881,19 @@ class NDMath(object):
 
         Examples
         --------
+        >>> import spectrochempy as scp
         >>> nd = scp.read('irdata/nh4y-activation.spg')
         >>> nd
         NDDataset: [float64] a.u. (shape: (y:55, x:5549))
         >>> scp.mean(nd)
-        <Quantity(1.2508586645126343, 'absorbance')>
+        <Quantity(1.25085858, 'absorbance')>
         >>> scp.mean(nd, keepdims=True)
         NDDataset: [float64] a.u. (shape: (y:1, x:1))
         >>> m = scp.mean(nd, dim='y')
         >>> m
         NDDataset: [float64] a.u. (size: 5549)
         >>> m.x
-        Coord: [float64] cm^-1 (size: 5549)
+        LinearCoord: [float64] cm^-1 (size: 5549)
         """
 
         axis, dim = cls.get_axis(dim, allows_none=True)
@@ -1970,6 +1967,7 @@ class NDMath(object):
 
         Examples
         --------
+        >>> import spectrochempy as scp
         >>> nd = scp.ones(5, units='km')
         >>> nd
         NDDataset: [float64] km (size: 5)
@@ -1992,7 +1990,7 @@ class NDMath(object):
                [       1,        1]])
         """
 
-        return cls(np.ones(shape, dtype), **kwargs)
+        return cls(np.ones(shape), dtype=dtype, **kwargs)
 
     @_from_numpy_method
     def ones_like(cls, dataset, dtype=None, **kwargs):
@@ -2035,16 +2033,19 @@ class NDMath(object):
 
         Examples
         --------
+        >>> import spectrochempy as scp
         >>> x = np.arange(6)
         >>> x = x.reshape((2, 3))
         >>> x = scp.NDDataset(x, units='s')
         >>> x
-        NDDataset: [int64] s (shape: (y:2, x:3))
+        NDDataset: [float64] s (shape: (y:2, x:3))
         >>> scp.ones_like(x, dtype=float, units='J')
         NDDataset: [float64] J (shape: (y:2, x:3))
         """
 
         cls._data = np.ones_like(dataset, dtype)
+        cls._dtype = np.dtype(dtype)
+
         return cls
 
     def pipe(self, func, *args, **kwargs):
@@ -2234,18 +2235,19 @@ class NDMath(object):
 
         Examples
         --------
+        >>> import spectrochempy as scp
         >>> nd = scp.read('irdata/nh4y-activation.spg')
         >>> nd
         NDDataset: [float64] a.u. (shape: (y:55, x:5549))
         >>> scp.std(nd)
-        <Quantity(0.8079720139503479, 'absorbance')>
+        <Quantity(0.807972021, 'absorbance')>
         >>> scp.std(nd, keepdims=True)
         NDDataset: [float64] a.u. (shape: (y:1, x:1))
         >>> m = scp.std(nd, dim='y')
         >>> m
         NDDataset: [float64] a.u. (size: 5549)
         >>> m.data
-        array([ 0.08521,  0.08543, ...,    0.251,   0.2537], dtype=float32)
+        array([ 0.08521,  0.08543, ...,    0.251,   0.2537])
         """
 
         axis, dim = cls.get_axis(dim, allows_none=True)
@@ -2314,18 +2316,19 @@ class NDMath(object):
 
         Examples
         --------
+        >>> import spectrochempy as scp
         >>> nd = scp.read('irdata/nh4y-activation.spg')
         >>> nd
         NDDataset: [float64] a.u. (shape: (y:55, x:5549))
         >>> scp.sum(nd)
-        <Quantity(381755.8125, 'absorbance')>
+        <Quantity(381755.783, 'absorbance')>
         >>> scp.sum(nd, keepdims=True)
         NDDataset: [float64] a.u. (shape: (y:1, x:1))
         >>> m = scp.sum(nd, dim='y')
         >>> m
         NDDataset: [float64] a.u. (size: 5549)
         >>> m.data
-        array([   100.7,    100.7, ...,       74,    73.98], dtype=float32)
+        array([   100.7,    100.7, ...,       74,    73.98])
         """
 
         axis, dim = cls.get_axis(dim, allows_none=True)
@@ -2423,18 +2426,19 @@ class NDMath(object):
 
         Examples
         --------
+        >>> import spectrochempy as scp
         >>> nd = scp.read('irdata/nh4y-activation.spg')
         >>> nd
         NDDataset: [float64] a.u. (shape: (y:55, x:5549))
         >>> scp.var(nd)
-        <Quantity(0.6528187990188599, 'absorbance')>
+        <Quantity(0.652818786, 'absorbance')>
         >>> scp.var(nd, keepdims=True)
         NDDataset: [float64] a.u. (shape: (y:1, x:1))
         >>> m = scp.var(nd, dim='y')
         >>> m
         NDDataset: [float64] a.u. (size: 5549)
         >>> m.data
-        array([0.007262, 0.007299, ...,  0.06298,  0.06438], dtype=float32)
+        array([0.007262, 0.007299, ...,  0.06298,  0.06438])
         """
 
         axis, dim = cls.get_axis(dim, allows_none=True)
@@ -2508,6 +2512,7 @@ class NDMath(object):
 
         Examples
         --------
+        >>> import spectrochempy as scp
         >>> nd = scp.NDDataset.zeros(6)
         >>> nd
         NDDataset: [float64] unitless (size: 6)
@@ -2521,7 +2526,7 @@ class NDMath(object):
         NDDataset: [int64] a.u. (shape: (y:5, x:10))
         """
 
-        return cls(np.zeros(shape, dtype), **kwargs)
+        return cls(np.zeros(shape), dtype=dtype, **kwargs)
 
     @_from_numpy_method
     def zeros_like(cls, dataset, dtype=None, **kwargs):
@@ -2564,23 +2569,26 @@ class NDMath(object):
 
         Examples
         --------
+        >>> import spectrochempy as scp
         >>> x = np.arange(6)
         >>> x = x.reshape((2, 3))
         >>> nd = scp.NDDataset(x, units='s')
         >>> nd
-        NDDataset: [int64] s (shape: (y:2, x:3))
+        NDDataset: [float64] s (shape: (y:2, x:3))
         >>> nd.values
          <Quantity([[       0        1        2]
          [       3        4        5]], 'second')>
         >>> nd = scp.zeros_like(nd)
         >>> nd
-        NDDataset: [int64] s (shape: (y:2, x:3))
+        NDDataset: [float64] s (shape: (y:2, x:3))
         >>> nd.values
             <Quantity([[       0        0        0]
          [       0        0        0]], 'second')>
         """
 
         cls._data = np.zeros_like(dataset, dtype)
+        cls._dtype = np.dtype(dtype)
+
         return cls
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -2727,7 +2735,7 @@ class NDMath(object):
                 # coordinates in the x dimension
                 elif other._squeeze_ndim >= 1:
                     try:
-                        assert_dataset_equal(obc[obj.dims[-1]], otc[other.dims[-1]])
+                        assert_dataset_almost_equal(obc[obj.dims[-1]], otc[other.dims[-1]], decimal=3)
                     except AssertionError as e:
                         raise CoordinateMismatchError(str(e))
 
@@ -2736,7 +2744,7 @@ class NDMath(object):
                 if other._squeeze_ndim > 1:
                     for idx in range(obj.ndim - 2):
                         try:
-                            assert_dataset_equal(obc[obj.dims[idx]], otc[other.dims[idx]])
+                            assert_dataset_almost_equal(obc[obj.dims[idx]], otc[other.dims[idx]], decimal=3)
                         except AssertionError as e:
                             raise CoordinateMismatchError(str(e))
 
@@ -3102,7 +3110,7 @@ class _ufunc:
 
             Examples
             --------
-
+            >>> import spectrochempy as scp
             >>> ds = scp.read('wodger.spg')
             >>> ds_transformed = scp.{self.name}(ds)
 
@@ -3149,10 +3157,10 @@ def _set_operators(cls, priority=50):
 
 # make some API functions
 api_funcs = [  # creation functions
-        'empty_like', 'zeros_like', 'ones_like', 'full_like', 'empty', 'zeros', 'ones', 'full', 'eye', 'identity',
-        'random', 'linspace', 'arange', 'logspace', 'geomspace', 'fromfunction', 'fromiter',  #
-        'diagonal', 'diag', 'sum', 'average', 'mean', 'std', 'var', 'amax', 'amin', 'min', 'max', 'argmin', 'argmax',
-        'cumsum', 'coordmin', 'coordmax', 'clip', 'ptp', 'pipe', 'abs', 'conjugate', 'absolute', 'conj', 'all', 'any', ]
+    'empty_like', 'zeros_like', 'ones_like', 'full_like', 'empty', 'zeros', 'ones', 'full', 'eye', 'identity', 'random',
+    'linspace', 'arange', 'logspace', 'geomspace', 'fromfunction', 'fromiter',  #
+    'diagonal', 'diag', 'sum', 'average', 'mean', 'std', 'var', 'amax', 'amin', 'min', 'max', 'argmin', 'argmax',
+    'cumsum', 'coordmin', 'coordmax', 'clip', 'ptp', 'pipe', 'abs', 'conjugate', 'absolute', 'conj', 'all', 'any', ]
 
 for funcname in api_funcs:
     setattr(thismodule, funcname, getattr(NDMath, funcname))
