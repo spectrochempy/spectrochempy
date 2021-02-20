@@ -8,7 +8,6 @@
 from spectrochempy.core.readers.download import download_IRIS
 from spectrochempy.core.analysis.pca import PCA
 from spectrochempy.core import show
-from spectrochempy.core import info_
 
 
 def test_upload():

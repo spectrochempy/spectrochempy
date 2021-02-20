@@ -9,8 +9,7 @@ from spectrochempy import Script, info_
 
 
 def test_script():
-    x = Script('name', 'print(2)')
-
+    Script('name', 'print(2)')
 
     try:
         Script('0name', 'print(3)')

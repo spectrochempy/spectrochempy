@@ -9,7 +9,8 @@ import spectrochempy as scp
 from spectrochempy.units import ur
 from spectrochempy.utils import get_user_and_node, SpectroChemPyException
 from spectrochempy.utils.testing import (assert_dataset_equal, assert_dataset_almost_equal, assert_equal,
-                                         assert_array_almost_equal, assert_array_equal, raises, RandomSeedContext)
+                                         assert_array_almost_equal, assert_array_equal, raises, RandomSeedContext,
+                                         )
 
 typequaternion = np.dtype(np.quaternion)
 
@@ -494,12 +495,12 @@ def test_nddataset_slicing_by_index(ref_ds, ds1):
     element = row1[..., 0]
     assert element.x == coords[0][0]
     # now a slicing in multi direction
-    matrix = da[1:4, 10:40:2, :2]
+    da[1:4, 10:40:2, :2]
     # now again a slicing in multi direction (full selection)
-    matrix = da[:, :, -2]
+    da[:, :, -2]
     # now again a slicing in multi direction (ellipsis)
-    matrix = da[..., -1]
-    matrix = da[-1, ...]
+    da[..., -1]
+    da[-1, ...]
 
 
 def test_nddataset_slicing_by_label(ds1):
@@ -518,7 +519,7 @@ def test_nddataset_slicing_by_label(ds1):
     bc = da['b':'f', :, "hot"]
     assert bc.shape == (5, 100, 1)
     assert bc.z.labels[0] == 'b'
-    hot = da[..., "hot"]  # TODO: find a way to use such syntax  # hot2 = da[  #  # "x.hot"]  # assert hot == hot2
+    da[..., "hot"]  # TODO: find a way to use such syntax  # hot2 = da[  #  # "x.hot"]  # assert hot == hot2
 
 
 def test_nddataset_slicing_by_values(ds1):
@@ -674,8 +675,9 @@ def test_nddataset_with_mask_acts_like_masked_array():
         assert result.is_masked
         # Result mask should match input mask because other has no mask
         assert np.all(
-                result.mask == input_mask)  # TODO:IndexError: in the   #  # future, 0-d boolean arrays will be
-        # interpreted  # as a  # valid  # boolean index  # assert np.all(result[~result.mask].data == -   #  #
+                result.mask == input_mask)  # TODO:IndexError: in the   #
+        # future, 0-d boolean arrays will be  # interpreted  # as a  # valid
+        # boolean index  # assert np.all(result[~result.mask].data == -   #  #
         # input_data[~input_mask])
 
 
@@ -717,7 +719,7 @@ def test_nddataset_repr_html():
     coord2 = scp.Coord(data=np.linspace(200., 300., 3), labels=['cold', 'normal', 'hot'], mask=None, units="K",
                        title='temperature')
     da = scp.NDDataset(dx, coordset=[coord0, coord1, coord2], title='absorbance', units='absorbance')
-    a = da._repr_html_()
+    da._repr_html_()
 
 
 # ### Metadata ################################################################
@@ -950,9 +952,9 @@ def test_nddataset_max_with_2D_quaternion(NMR_dataset_2D):
     nd2 = NMR_dataset_2D
     assert nd2.is_quaternion
     nd = nd2.RR
-    ndrm = nd.max()
-    ndmt = nd2.max()  # no axis specified
-    nd2m = nd2.max(dim=0)  # axis selected
+    nd.max()
+    nd2.max()  # no axis specified
+    nd2.max(dim=0)  # axis selected
 
 
 def test_nddataset_max_min_with_1D(NMR_dataset_1D):
@@ -1139,7 +1141,7 @@ def test_nddataset_issue_29_mulitlabels():
     assert_array_equal(DS1.x, [1, 3, 2, 4])
     DS1 = DS.sort(dim='x', by='label', pos=2, descend=False)
     assert_array_equal(DS1.x, [1, 2, 4, 3])
-    DS2 = DS.sort(dim='y')
+    DS.sort(dim='y')
     DS.y.labels = ['alpha', 'omega', 'gamma']
     DS2 = DS.sort(dim='y')
     assert_array_equal(DS2.y.labels, ['alpha', 'gamma', 'omega'])
@@ -1147,10 +1149,10 @@ def test_nddataset_issue_29_mulitlabels():
 
 def test_nddataset_apply_funcs(dsm):
     # convert to masked array
-    out = np.ma.array(dsm)
+    np.ma.array(dsm)
     dsm[1] = scp.MASKED
-    out = np.ma.array(dsm)
-    out = np.array(dsm)
+    np.ma.array(dsm)
+    np.array(dsm)
 
 
 def test_take(dsm):

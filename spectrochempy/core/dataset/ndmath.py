@@ -12,12 +12,12 @@ __all__ = ['NDMath', ]
 __dataset_methods__ = []
 
 import copy as cpy
-
 import functools
 import inspect
 import sys
 import operator
 from warnings import catch_warnings
+
 import numpy as np
 from orderedset import OrderedSet
 from quaternion import as_float_array
@@ -26,7 +26,7 @@ from spectrochempy.units.units import ur, Quantity, DimensionalityError
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.utils import NOMASK, TYPE_COMPLEX, quat_as_complex_array, as_quaternion
 from spectrochempy.core import warning_, error_
-from spectrochempy.utils.testing import assert_dataset_equal, assert_dataset_almost_equal
+from spectrochempy.utils.testing import assert_dataset_almost_equal
 from spectrochempy.utils.exceptions import CoordinateMismatchError
 
 
@@ -150,7 +150,7 @@ class _from_numpy_method(object):
 
             # Be sure that the dataset passed to the numpy function are a numpy (masked) array
             if isinstance(argpos[0], (NDDataset, Coord)):
-                #argpos[0] = argpos[0].real.masked_data
+                # argpos[0] = argpos[0].real.masked_data
                 argpos[0] = argpos[0].masked_data
 
             # case of creation like method
@@ -389,13 +389,14 @@ class NDMath(object):
 
     __radian = 'radian'
     __degree = 'degree'
-    __require_units = {'cumprod': DIMENSIONLESS, 'arccos': DIMENSIONLESS, 'arcsin': DIMENSIONLESS,
-                       'arctan': DIMENSIONLESS, 'arccosh': DIMENSIONLESS, 'arcsinh': DIMENSIONLESS,
-                       'arctanh': DIMENSIONLESS, 'exp': DIMENSIONLESS, 'expm1': DIMENSIONLESS, 'exp2': DIMENSIONLESS,
-                       'log': DIMENSIONLESS, 'log10': DIMENSIONLESS, 'log1p': DIMENSIONLESS, 'log2': DIMENSIONLESS,
-                       'sin': __radian, 'cos': __radian, 'tan': __radian, 'sinh': __radian, 'cosh': __radian,
-                       'tanh': __radian, 'radians': __degree, 'degrees': __radian, 'deg2rad': __degree,
-                       'rad2deg': __radian, 'logaddexp': DIMENSIONLESS, 'logaddexp2': DIMENSIONLESS}
+    __require_units = {
+        'cumprod': DIMENSIONLESS, 'arccos': DIMENSIONLESS, 'arcsin': DIMENSIONLESS, 'arctan': DIMENSIONLESS,
+        'arccosh': DIMENSIONLESS, 'arcsinh': DIMENSIONLESS, 'arctanh': DIMENSIONLESS, 'exp': DIMENSIONLESS,
+        'expm1': DIMENSIONLESS, 'exp2': DIMENSIONLESS, 'log': DIMENSIONLESS, 'log10': DIMENSIONLESS,
+        'log1p': DIMENSIONLESS, 'log2': DIMENSIONLESS, 'sin': __radian, 'cos': __radian, 'tan': __radian,
+        'sinh': __radian, 'cosh': __radian, 'tanh': __radian, 'radians': __degree, 'degrees': __radian,
+        'deg2rad': __degree, 'rad2deg': __radian, 'logaddexp': DIMENSIONLESS, 'logaddexp2': DIMENSIONLESS
+    }
     __compatible_units = ['add', 'sub', 'iadd', 'isub', 'maximum', 'minimum', 'fmin', 'fmax', 'lt', 'le', 'ge', 'gt']
     __complex_funcs = ['real', 'imag', 'absolute', 'abs']
     __keep_title = ['negative', 'absolute', 'abs', 'fabs', 'rint', 'floor', 'ceil', 'trunc', 'add', 'subtract']
@@ -635,7 +636,7 @@ class NDMath(object):
             from quaternion import as_float_array
             quaternion = True
             data = dataset
-            dataset = as_float_array(dataset)[...,0]  # real part
+            dataset = as_float_array(dataset)[..., 0]  # real part
         m = np.ma.max(dataset, axis=axis, keepdims=keepdims)
         if quaternion:
             if dim is None:
@@ -646,8 +647,8 @@ class NDMath(object):
             else:
                 m = np.ma.diag(data[np.ma.argmax(dataset, axis=axis)])
 
-        if np.isscalar(m) or (m.size==1 and not keepdims):
-            if not np.isscalar(m): # case of quaternion
+        if np.isscalar(m) or (m.size == 1 and not keepdims):
+            if not np.isscalar(m):  # case of quaternion
                 m = m[()]
             if cls.units is not None:
                 return Quantity(m, cls.units)
@@ -1324,7 +1325,7 @@ class NDMath(object):
         NDDataset: [int64] s (shape: (y:2, x:2))
         """
 
-        return cls(np.empty(shape, dtype), dtype= dtype, **kwargs)
+        return cls(np.empty(shape, dtype), dtype=dtype, **kwargs)
 
     @_from_numpy_method
     def empty_like(cls, dataset, dtype=None, **kwargs):
@@ -1989,7 +1990,7 @@ class NDMath(object):
                [       1,        1]])
         """
 
-        return cls(np.ones(shape), dtype= dtype, **kwargs)
+        return cls(np.ones(shape), dtype=dtype, **kwargs)
 
     @_from_numpy_method
     def ones_like(cls, dataset, dtype=None, **kwargs):
@@ -2525,7 +2526,7 @@ class NDMath(object):
         NDDataset: [int64] a.u. (shape: (y:5, x:10))
         """
 
-        return cls(np.zeros(shape), dtype= dtype, **kwargs)
+        return cls(np.zeros(shape), dtype=dtype, **kwargs)
 
     @_from_numpy_method
     def zeros_like(cls, dataset, dtype=None, **kwargs):
@@ -3156,10 +3157,10 @@ def _set_operators(cls, priority=50):
 
 # make some API functions
 api_funcs = [  # creation functions
-        'empty_like', 'zeros_like', 'ones_like', 'full_like', 'empty', 'zeros', 'ones', 'full', 'eye', 'identity',
-        'random', 'linspace', 'arange', 'logspace', 'geomspace', 'fromfunction', 'fromiter',  #
-        'diagonal', 'diag', 'sum', 'average', 'mean', 'std', 'var', 'amax', 'amin', 'min', 'max', 'argmin', 'argmax',
-        'cumsum', 'coordmin', 'coordmax', 'clip', 'ptp', 'pipe', 'abs', 'conjugate', 'absolute', 'conj', 'all', 'any', ]
+    'empty_like', 'zeros_like', 'ones_like', 'full_like', 'empty', 'zeros', 'ones', 'full', 'eye', 'identity', 'random',
+    'linspace', 'arange', 'logspace', 'geomspace', 'fromfunction', 'fromiter',  #
+    'diagonal', 'diag', 'sum', 'average', 'mean', 'std', 'var', 'amax', 'amin', 'min', 'max', 'argmin', 'argmax',
+    'cumsum', 'coordmin', 'coordmax', 'clip', 'ptp', 'pipe', 'abs', 'conjugate', 'absolute', 'conj', 'all', 'any', ]
 
 for funcname in api_funcs:
     setattr(thismodule, funcname, getattr(NDMath, funcname))

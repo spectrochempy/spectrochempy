@@ -13,7 +13,6 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.analysis.efa import EFA
 from spectrochempy.core.analysis.mcrals import MCRALS
 from spectrochempy.utils import show
-from spectrochempy.core import info_
 
 
 def test_MCRALS_no_coords():
@@ -38,9 +37,8 @@ def test_MCRALS_no_coords():
     guess = EFA(X).get_conc(4)
 
     param = {
-            'normSpec': 'euclid',
-            'maxit': 100
-            }
+        'normSpec': 'euclid', 'maxit': 100
+    }
     mcr2 = MCRALS(X, guess, param=param, verbose=False)
     mcr2.plotmerit()
 
@@ -74,9 +72,8 @@ def test_MCRALS():
     guess.plot(title='EFA guess')
 
     param = {
-            'normSpec': 'euclid',
-            'maxit': 100
-            }
+        'normSpec': 'euclid', 'maxit': 100
+    }
     mcr2 = MCRALS(X, guess, param=param, verbose=False)
     mcr.plotmerit()
 

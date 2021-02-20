@@ -80,7 +80,6 @@ def test_fit_multiple_dataset(IR_dataset_2D, script):
     f.run(maxiter=10, every=1)
     assert_approx_equal(datasets[0].model_A, 116.3807504474709, significant=4)
     assert_approx_equal(datasets[1].model_A, 116.3807504474709 * 2.23456, significant=4)
-    assert_approx_equal(f.fp['width_line_2'],  195.7273, significant=4)
+    assert_approx_equal(f.fp['width_line_2'], 195.7273, significant=4)
 
-    # TODO: plotting of multiple datasets
-    # plotr(*datasets, showmodel=True, test=True)
+    # TODO: plotting of multiple datasets  # plotr(*datasets, showmodel=True, test=True)

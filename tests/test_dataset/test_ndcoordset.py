@@ -24,7 +24,6 @@ def test_coordset_init(coord0, coord1, coord2):
     coord3 = coord2.copy()
     coord3.title = 'titi'
 
-
     coordsa = CoordSet(coord0, coord3, coord2)  # First syntax
 
     assert coordsa.names == ['x', 'y', 'z']  # coordinates are sorted in the coordset
@@ -74,7 +73,6 @@ def test_coordset_init(coord0, coord1, coord2):
     assert repr(coord0) == 'Coord: [float64] cm^-1 (size: 10)'
 
     coords = CoordSet(coord0.copy(), coord0)
-
 
     assert repr(coords).startswith('CoordSet: [x:wavenumber, y:wavenumber]')
 
@@ -175,9 +173,9 @@ def test_coordset_call(coord0, coord1):
     assert d == coord1
 
     with pytest.raises(KeyError):
-        e = coordsa('x_a')  # do not exit
+        coordsa('x_a')  # do not exit
 
-    e = coordsa('y_a')
+    coordsa('y_a')
 
 
 def test_coordset_get(coord0, coord1, coord2):

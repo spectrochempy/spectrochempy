@@ -194,7 +194,7 @@ def _read_opus(*args, **kwargs):
     lxv = opus_data['AB Data Parameter']['LXV']
     xdata = linspace(fxv, lxv, npt)
     xaxis = LinearCoord(xdata, title='Wavenumbers', units='cm^-1')
-    #xaxis2 = Coord(xdata, title='Wavenumbers', units='cm^-1')
+
     # yaxis
     name = opus_data["Sample"]['SNM']
     acqdate = opus_data["AB Data Parameter"]["DAT"]

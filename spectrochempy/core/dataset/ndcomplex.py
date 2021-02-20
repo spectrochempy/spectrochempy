@@ -147,7 +147,6 @@ class NDComplexArray(NDArray):
             elif self._dtype == typequaternion:
                 data = self._make_quaternion(data)
 
-
         elif data.dtype not in [typequaternion] + list(TYPE_COMPLEX):
             data = data.astype(np.float64, copy=False)  # by default dta are float64 if the dtype is not fixed
 

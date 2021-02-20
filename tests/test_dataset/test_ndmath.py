@@ -39,7 +39,7 @@ def test_ndmath_unary_ufuncs_simple_data(nd2d, name, comment):
     assert nd1.unitless
 
     f = getattr(np, name)
-    r = f(nd1)
+    f(nd1)
     # assert isinstance(r, NDDataset)
 
     # NDDataset with units
@@ -70,9 +70,8 @@ def test_ndmath_unary_ufuncs_simple_data(nd2d, name, comment):
 
     if not skip:
         try:
-            r = f(nd1)
+            f(nd1)
             # assert isinstance(r, NDDataset)
-
 
             nd1 = nd2d.copy()  # reset nd
 
@@ -80,8 +79,7 @@ def test_ndmath_unary_ufuncs_simple_data(nd2d, name, comment):
             nd1.units = ur.absorbance
             nd1[1, 1] = MASKED
 
-            r = f(nd1)
-
+            f(nd1)
 
         except DimensionalityError as e:
             error_(f"{name}: ", e)
@@ -106,7 +104,6 @@ def test_bug_lost_dimensionless_units():
 def test_ndmath_binary_ufuncs_two_datasets(nd2d, name, comment):
     nd1 = nd2d.copy()
     nd2 = nd1.copy() * np.ones_like(nd1) * .01
-
 
     # simple NDDataset
     # -----------------
@@ -133,7 +130,6 @@ def test_ndmath_comp_ufuncs_two_datasets(nd2d, name, comment):
     nd1 = nd2d.copy()
     nd2 = nd1.copy() + np.ones_like(nd1) * .001
 
-
     # simple NDDataset
     # -----------------
 
@@ -156,7 +152,6 @@ def test_ndmath_comp_ufuncs_two_datasets(nd2d, name, comment):
 def test_ndmath_binary_ufuncs_scalar(nd2d, name, comment):
     nd1 = nd2d.copy()
     nd2 = 2.
-
 
     # simple NDDataset
     # -----------------
@@ -779,10 +774,8 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     ndd = NDDataset([1., 2. + 1j, 3.])
     val = np.abs(ndd)
 
-
     val = ndd[1] * 1.2 - 10.
     val = np.abs(val)
-
 
     # FROMFUNCTION
     # ------------
@@ -908,7 +901,6 @@ def test_nddataset_fancy_indexing():
     a = nd[np.array([1, 0])]
 
 
-
 def test_coord_add_units_with_different_scale():
     d1 = Coord.arange(3., units='m')
     d2 = Coord.arange(3., units='cm')
@@ -942,11 +934,13 @@ def test_linearcoord_add_units_with_different_scale():
     d2 += d1
     assert d2.data[1] == 102.
 
+
 def test_creation():
     nd = scp.ones(5, units='km')
     assert str(nd) == 'NDDataset: [float64] km (size: 5)'
     nd = scp.ones((5,), dtype=np.int, mask=[True, False, False, False, True])
     assert nd.dtype == np.dtype("int64")
+
 
 def test_from_function_docstring():
     def func1(t, v):
@@ -954,17 +948,4 @@ def test_from_function_docstring():
         return d
 
     time = scp.LinearCoord.arange(0, 60, 10, units='min')
-    d = scp.fromfunction(func1, v=scp.Quantity(134, 'km/hour'), coordset=scp.CoordSet(t=time))
-
-    """
-    295         >>> import spectrochempy as scp
-296         >>> def func1(t, v):
-297         ...     d = v * t
-298         ...     return d
-299         ...
-300         ...
-301         ...
-302         >>> time = scp.linspace(0, 60, 10, units='min')
-303         >>> d = scp.fromfunction(func1, v=scp.Quantity(134, 'km/hour'), coordset=scp.CoordSet(t=time))
-    :return: 
-    """
+    scp.fromfunction(func1, v=scp.Quantity(134, 'km/hour'), coordset=scp.CoordSet(t=time))

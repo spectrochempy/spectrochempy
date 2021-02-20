@@ -7,12 +7,9 @@
 
 import pytest
 
-from spectrochempy.core import info_
-
 
 def test_findpeaks(IR_dataset_1D):
     dataset = IR_dataset_1D
-
 
     peaks, properties = dataset[1800.0:1300.0].find_peaks(height=1.5, distance=50.0, width=0.0)
     assert len(peaks.x) == 2

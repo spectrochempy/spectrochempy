@@ -7,8 +7,9 @@
 
 from spectrochempy.core.processors.concatenate import concatenate, stack
 from spectrochempy.units import ur
-from spectrochempy.core.dataset.coord import Coord, LinearCoord
-from spectrochempy.utils.testing import assert_dataset_equal, assert_dataset_almost_equal
+from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.utils.testing import assert_dataset_almost_equal
+
 
 def test_concatenate(IR_dataset_2D):
     dataset = IR_dataset_2D
@@ -68,8 +69,7 @@ def test_concatenate(IR_dataset_2D):
 
     # Stacking of datasets:
     # for nDimensional datasets (with the same shape), a new dimension is added
-    ss = concatenate(s.copy(), s.copy(),
-                     force_stack=True)  # make a copy of s
+    ss = concatenate(s.copy(), s.copy(), force_stack=True)  # make a copy of s
     # (dataset cannot be concatenated to itself!)
     assert ss.shape == (2, 45, 5549)
 
@@ -87,6 +87,7 @@ def test_concatenate(IR_dataset_2D):
     assert s1.shape == (5549,)
     ss = concatenate(s0, s1, force_stack=True)
     assert ss.shape == (2, 5549)
+
 
 def test_bug_243():
     import spectrochempy as scp

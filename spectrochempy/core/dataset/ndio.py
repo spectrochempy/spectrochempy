@@ -23,7 +23,8 @@ from traitlets import HasTraits, Instance, Union, Unicode
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core import debug_
 from spectrochempy.utils import (SpectroChemPyException, pathclean, check_filenames, ScpFile, check_filename_to_save,
-                                 json_serialiser, TYPE_BOOL)
+                                 json_serialiser, TYPE_BOOL,
+                                 )
 
 SCPY_SUFFIX = {'NDDataset': '.scp', 'Project': '.pscp'}
 
@@ -413,8 +414,6 @@ class NDIO(HasTraits):
         self.name = filename.stem
 
         return filename
-
-
 
 
 # ======================================================================================================================

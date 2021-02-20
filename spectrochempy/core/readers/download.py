@@ -85,7 +85,6 @@ def download_IRIS():
         except ImportError:
             raise IOError('Failed in uploading the IRIS dataset!')
 
-
         # import some data to play with
         data = datasets.load_iris()
 

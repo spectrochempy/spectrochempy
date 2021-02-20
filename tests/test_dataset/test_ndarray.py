@@ -13,7 +13,6 @@ import pytest
 from pint.errors import DimensionalityError
 
 from spectrochempy.core.dataset.ndarray import NDArray
-from spectrochempy.core import info_
 from spectrochempy.units import ur, Quantity
 from spectrochempy.utils import SpectroChemPyWarning, INPLACE, MASKED, TYPE_INTEGER, TYPE_FLOAT
 from spectrochempy.utils.testing import assert_equal, assert_array_equal, raises, catch_warnings
@@ -147,14 +146,12 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert d0mask.is_masked
     assert d0mask.mask.shape == d0mask.shape
 
-
     # initialisation with a sequence and a mask
 
     d1mask = NDArray([2., 3., 4., 5.1], mask=[1, 0, 0, 0])
     assert d1mask.shape == (4,)
     assert d1mask.is_masked
     assert d1mask.mask.shape == d1mask.shape
-
 
     # dtype specified
 
@@ -168,19 +165,16 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert len(ndarraymask.history) == 1  # one line already in
     assert len(d8.history) == 2  # copy added
 
-
     # intialisation with only labels
 
     d9 = NDArray(labels='a b c d e f g h i j'.split(), title='labeled')
     assert d9.is_labeled
-
 
     # changing dims name
     d11 = NDArray(labels='a b c d e f g h i j'.split(), title='labeled', dims=['q'], author='Blake',
                   history='Created from scratch')
     assert d11.dims == ['q']
     assert d11.author == 'Blake'
-
 
     assert '[  a   b ...   i   j]' in d11._repr_html_()  # comparison
 
@@ -474,7 +468,7 @@ def test_ndarray_slicing(refarray, ndarray):
 
     # boolean indexing
     nd = ndarray.copy()
-    ndb = nd[nd.data > 0]
+    nd[nd.data > 0]
 
     # fancy indexing
     df = nd.data[[-1, 1]]
@@ -510,7 +504,6 @@ def test_ndarray_slice_labels():
 
     d0 = NDArray(labels='a b c d e f g h i j'.split(), title='labelled')
     assert d0.is_labeled
-
 
     assert d0.ndim == 1
     assert d0.shape == (10,)
@@ -560,13 +553,10 @@ def test_ndarray_issue_23():
 def test_ndarray_bug_13(ndarrayunit):
     nd = ndarrayunit[0]
 
-
     assert isinstance(nd[0], NDArray)
-
 
     # reproduce our bug (now solved)
     nd[0] = Quantity('10 cm.s^-1')
-
 
     with pytest.raises(DimensionalityError):
         nd[0] = Quantity('10 cm')

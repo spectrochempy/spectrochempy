@@ -14,7 +14,6 @@ import numpy as np
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.analysis.pca import PCA
 from spectrochempy.utils import MASKED, show
-from spectrochempy.core import info_
 from spectrochempy.utils.testing import assert_array_almost_equal
 
 HAS_SCIKITLEARN = False
@@ -36,7 +35,6 @@ def test_pca():
     dataset[:, 1240.0:920.0] = MASKED  # do not forget to use float in slicing
 
     pca = PCA(dataset)
-
 
     pca.printev(n_pc=5)
 

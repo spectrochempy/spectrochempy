@@ -9,12 +9,9 @@
 
 """
 
-from spectrochempy.core import info_
-
 
 def test_integrate(IR_dataset_2D):
     dataset = IR_dataset_2D[:, 1250.:1800.]
-
 
     # default dim='x', compare trapz and simps
     area_trap = dataset.trapz()

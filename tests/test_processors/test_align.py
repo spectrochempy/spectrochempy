@@ -8,7 +8,6 @@
 """ Tests for the interpolate module
 
 """
-from spectrochempy.core import info_
 from spectrochempy.core.processors.align import align
 
 
@@ -16,7 +15,6 @@ from spectrochempy.core.processors.align import align
 # -------
 
 def test_align(ds1, ds2):
-
     ds1c = ds1.copy()
     dss = ds1c.align(ds2, dim='x')  # first syntax
     # TODO: flag copy=False raise an error

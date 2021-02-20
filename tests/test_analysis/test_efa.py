@@ -5,14 +5,12 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-from spectrochempy.core import info_
 from spectrochempy.core.analysis.efa import EFA
 from spectrochempy.utils import MASKED, show
 
 
 def test_EFA(IR_dataset_2D):
     ds = IR_dataset_2D.copy()
-
 
     # columns masking
     ds[:, 1230.0:920.0] = MASKED  # do not forget to use float in slicing
