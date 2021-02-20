@@ -2274,7 +2274,7 @@ class NDArray(HasTraits):
                     new._increment = new._increment * scale
                 new._offset = new._offset * scale
                 if new._roi is not None:
-                    new._roi = new._roi * scale
+                    new._roi = list(np.array(new._roi) * scale)
 
             except DimensionalityError as exc:
                 if force:
