@@ -938,7 +938,7 @@ def test_linearcoord_add_units_with_different_scale():
 def test_creation():
     nd = scp.ones(5, units='km')
     assert str(nd) == 'NDDataset: [float64] km (size: 5)'
-    nd = scp.ones((5,), dtype=np.int, mask=[True, False, False, False, True])
+    nd = scp.ones((5,), dtype=np.dtype('int64'), mask=[True, False, False, False, True])
     assert nd.dtype == np.dtype("int64")
 
 

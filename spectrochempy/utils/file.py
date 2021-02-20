@@ -182,7 +182,7 @@ def check_filenames(*args, **kwargs):
         for filename in filenames:
             # in which directory ?
             directory = filename.parent
-            if directory.resolve() == Path.cwd():
+            if directory.resolve() == Path.cwd() or directory == Path('.'):
                 directory = ''
             kw_directory = pathclean(kwargs.get("directory", None))
             if directory and kw_directory and directory != kw_directory:
