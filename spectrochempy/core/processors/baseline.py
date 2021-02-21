@@ -53,7 +53,7 @@ class BaselineCorrection(HasTraits):
     dim : str or int, keyword parameter, optional, default='x'.
         Specify on which dimension to apply the apodization method. If `dim` is specified as an integer
         it is equivalent  to the usual `axis` numpy parameter.
-    method : str, keyword parameter, optional, default='multivariate'
+    method : str, keyword parameter, optional, default='sequential'
         Correction method among ['multivariate','sequential']
     interpolation : string, keyword parameter, optional, default='polynomial'
         Interpolation method for the computation of the baseline, among ['polynomial','pchip']
@@ -91,7 +91,7 @@ class BaselineCorrection(HasTraits):
     """
     dataset = Instance(NDDataset)
     corrected = Instance(NDDataset)
-    method = Unicode('multivariate')
+    method = Unicode('sequential')
     interpolation = Unicode('pchip')
     axis = Int(-1)
     dim = Unicode('')
@@ -178,7 +178,7 @@ class BaselineCorrection(HasTraits):
         dim : str or int, keyword parameter, optional, default='x'.
             Specify on which dimension to apply the apodization method. If `dim` is specified as an integer
             it is equivalent  to the usual `axis` numpy parameter.
-        method : str, keyword parameter, optional, default='multivariate'
+        method : str, keyword parameter, optional, default='sequential'
             Correction method among ['multivariate','sequential']
         interpolation : string, keyword parameter, optional, default='polynomial'
             Interpolation method for the computation of the baseline, among ['polynomial','pchip']
@@ -264,7 +264,7 @@ class BaselineCorrection(HasTraits):
             if self.interpolation == 'pchip':
                 for i in range(npc):
                     y = scipy.interpolate.PchipInterpolator(xbase.data, Pt[i])
-                    baseline_loadings[i] = y(coords)
+                    baseline_loadings[i] = y(coords.data)
 
             elif self.interpolation == 'polynomial':
                 polycoef = np.polynomial.polynomial.polyfit(xbase.data, Pt.T, deg=self.order, rcond=None, full=False)
