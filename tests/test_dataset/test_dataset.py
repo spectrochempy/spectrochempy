@@ -2,155 +2,18 @@ import numpy as np
 import pytest
 from pint.errors import (UndefinedUnitError)
 from quaternion import quaternion
-from hypothesis import given, strategies as st
+from hypothesis import given, settings, strategies as st
 import hypothesis.extra.numpy as hen
-
+from datetime import timedelta
 import spectrochempy as scp
 from spectrochempy.units import ur
 from spectrochempy.utils import get_user_and_node, SpectroChemPyException
-from spectrochempy.utils.testing import (assert_dataset_equal, assert_dataset_almost_equal, assert_equal,
-                                         assert_array_almost_equal, assert_array_equal, raises, RandomSeedContext,
+from spectrochempy.utils.testing import (assert_dataset_equal, assert_dataset_almost_equal,
+                                         assert_equal, assert_array_almost_equal,
+                                         assert_array_equal, raises, RandomSeedContext,
                                          )
 
 typequaternion = np.dtype(np.quaternion)
-
-with RandomSeedContext(12345):
-    ref_data = 10. * np.random.random((10, 8)) - 5.
-    ref3d_data = 10. * np.random.random((10, 100, 3)) - 5.
-    ref3d_2_data = np.random.random((9, 50, 4))
-
-ref_mask = ref_data < -4
-ref3d_mask = ref3d_data < -3
-ref3d_2_mask = ref3d_2_data < -2
-
-coord0_ = scp.Coord(data=np.linspace(4000., 1000., 10), labels=list('abcdefghij'), units="cm^-1", title='wavenumber')
-
-
-@pytest.fixture(scope="function")
-def coord0():
-    return coord0_.copy()
-
-
-coord1_ = scp.Coord(data=np.linspace(0., 60., 100), units="s", title='time-on-stream')
-
-
-@pytest.fixture(scope="function")
-def coord1():
-    return coord1_.copy()
-
-
-coord2_ = scp.Coord(data=np.linspace(200., 300., 3), labels=['cold', 'normal', 'hot'], units="K", title='temperature')
-
-
-@pytest.fixture(scope="function")
-def coord2():
-    return coord2_.copy()
-
-
-coord2b_ = scp.Coord(data=np.linspace(1., 20., 3), labels=['low', 'medium', 'high'], units="tesla",
-                     title='magnetic field')
-
-
-@pytest.fixture(scope="function")
-def coord2b():
-    return coord2b_.copy()
-
-
-coord0_2_ = scp.Coord(data=np.linspace(4000., 1000., 9), labels=list('abcdefghi'), units="cm^-1", title='wavenumber')
-
-
-@pytest.fixture(scope="function")
-def coord0_2():
-    return coord0_2_.copy()
-
-
-coord1_2_ = scp.Coord(data=np.linspace(0., 60., 50), units="s", title='time-on-stream')
-
-
-@pytest.fixture(scope="function")
-def coord1_2():
-    return coord1_2_.copy()
-
-
-coord2_2_ = scp.Coord(data=np.linspace(200., 1000., 4), labels=['cold', 'normal', 'hot', 'veryhot'], units="K",
-                      title='temperature')
-
-
-@pytest.fixture(scope="function")
-def coord2_2():
-    return coord2_2_.copy()
-
-
-@pytest.fixture(scope="function")
-def nd1d():
-    # a simple ddataset
-    return scp.NDDataset(ref_data[:, 1].squeeze()).copy()
-
-
-@pytest.fixture(scope="function")
-def nd2d():
-    # a simple 2D ndarrays
-    return scp.NDDataset(ref_data).copy()
-
-
-@pytest.fixture(scope="function")
-def ref_ds():
-    # a dataset with coordinates
-    return ref3d_data.copy()
-
-
-@pytest.fixture(scope="function")
-def ds1():
-    # a dataset with coordinates
-    return scp.NDDataset(ref3d_data, coordset=[coord0_, coord1_, coord2_], title='Absorbance',
-                         units='absorbance').copy()
-
-
-@pytest.fixture(scope="function")
-def ds2():
-    # another dataset
-    return scp.NDDataset(ref3d_2_data, coordset=[coord0_2_, coord1_2_, coord2_2_], title='Absorbance',
-                         units='absorbance').copy()
-
-
-@pytest.fixture(scope="function")
-def dsm():
-    # dataset with coords containing several axis and a mask
-
-    coordmultiple = scp.CoordSet(coord2_, coord2b_)
-    return scp.NDDataset(ref3d_data, coordset=[coord0_, coord1_, coordmultiple], mask=ref3d_mask, title='Absorbance',
-                         units='absorbance').copy()
-
-
-dataset = scp.NDDataset.read_omnic('irdata/nh4y-activation.spg')
-
-
-@pytest.fixture(scope="function")
-def IR_dataset_2D():
-    nd = dataset.copy()
-    nd.name = 'IR_2D'
-    return nd
-
-
-@pytest.fixture(scope="function")
-def IR_dataset_1D():
-    nd = dataset[0].squeeze().copy()
-    nd.name = 'IR_1D'
-    return nd
-
-
-@pytest.fixture(scope="function")
-def NMR_dataset_1D():
-    path = 'nmrdata/bruker/tests/nmr/topspin_1d/1/fid'
-    dataset = scp.NDDataset.read_topspin(path, remove_digital_filter=True, name='NMR_1D')
-    return dataset.copy()
-
-
-@pytest.fixture(scope="function")
-def NMR_dataset_2D():
-    path = 'nmrdata/bruker/tests/nmr/topspin_2d/1/ser'
-    dataset = scp.NDDataset.read_topspin(path, expno=1, remove_digital_filter=True, name="NMR_2D")
-    return dataset.copy()
 
 
 # test minimal constructeur and dtypes
@@ -181,7 +44,7 @@ def test_1D_NDDataset(a, b, c, d):
         assert ds.description == ""
         assert ds.history == []
 
-
+@settings(deadline=timedelta(milliseconds=2000))
 @given(hen.arrays(float, st.tuples(st.integers(1, 3), st.integers(1, 3))))
 def test_2D_NDDataset(arr):
     # 2D
