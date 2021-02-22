@@ -13,7 +13,6 @@ __dataset_methods__ = __all__
 import io
 import numpy as np
 from datetime import datetime, timezone, timedelta
-from numpy import linspace
 
 from brukeropusreader.opus_parser import parse_data, parse_meta
 from spectrochempy.core.dataset.coord import LinearCoord, Coord

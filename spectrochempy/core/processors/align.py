@@ -173,7 +173,7 @@ def align(dataset, *others, **kwargs):
     ref_obj = _objects[ref_obj_index]['obj']
 
     # evaluate on which axis we align
-    axis, dims = ref_obj.get_axis( only_first=False, **kwargs)
+    axis, dims = ref_obj.get_axis(only_first=False, **kwargs)
 
     if len(dims) > 1:
         # mutidimensional alignment
@@ -181,13 +181,6 @@ def align(dataset, *others, **kwargs):
 
     # check compatibility of the dims and prepare the dimension for alignment
     for axis, dim in zip(axis, dims):
-
-        # The last dimension is always the dimension on which we apply the apodization window.
-        # If needed, we swap the dimensions to be sure to be in this situation
-        #swaped = False
-        #if axis != -1:
-        #    new.swapdims(axis, -1, inplace=True)  # must be done in  place
-        #    swaped = True
 
         # as we will sort their coordinates at some point, we need to know
         # if the coordinates need to be reversed at

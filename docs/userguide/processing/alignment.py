@@ -52,16 +52,16 @@ dataset.y = dataset.y - dataset.y[0]  # remove offset in the time
 dataset.y.title = 'Time'
 prefs = dataset.preferences
 prefs.reset()
-prefs.figure.figsize = (7,3)
+prefs.figure.figsize = (7, 3)
 prefs.figure.dpi = 100
 _ = dataset.plot_map(colormap='viridis', colorbar=True)
 print('shape:', dataset.shape)
 
 # %%
 nd1 = dataset[0:30, 0:4000]
-nd2 = dataset[0:30, 2000:5549]*2
-nd3 = dataset[10:55, 0:4000]*1.5
-nd4 = dataset[10:55, 2000:5549]*3
+nd2 = dataset[0:30, 2000:5549] * 2
+nd3 = dataset[10:55, 0:4000] * 1.5
+nd4 = dataset[10:55, 2000:5549] * 3
 _ = scp.multiplot_map(datasets=[nd1, nd2, nd3, nd4], colormap='viridis',
                       nrow=2, ncol=2, sharex=True, sharey=True, dpi=100)
 
@@ -73,7 +73,7 @@ _ = scp.multiplot_map(datasets=[nd1, nd2, nd3, nd4], colormap='viridis',
 try:
     nd2 + nd4
 except Exception as e:
-    scp.error_('Cannot add unaligned datasets')
+    scp.error_(str(e) + ' Cannot add unaligned datasets.')
 
 # %% [markdown]
 # Let try to align them, in the `y` dimension (*i.e.* the first) as this the one which differ in size.
@@ -102,8 +102,8 @@ ndadd.shape
 # array, as the mathematical operation are aware of the masks.
 
 # %%
-_ = scp.multiplot_map(datasets=[nd2a, nd4a, ndadd], colormap='viridis', sharey=True,
-                      nrow=1, ncol=3, figsize=(8, 3), dpi=100)
+_ = scp.multiplot_map(datasets=[nd2a, nd4a, ndadd], colormap='viridis', sharey=True, nrow=1, ncol=3, figsize=(8, 3),
+                      dpi=100)
 
 # %% [markdown]
 # Now, assume we want to align in the other dimension, or both
@@ -112,13 +112,13 @@ _ = scp.multiplot_map(datasets=[nd2a, nd4a, ndadd], colormap='viridis', sharey=T
 try:
     nd1 + nd2
 except Exception as e:
-    scp.error_('Cannot add unaligned datasets')
+    scp.error_(str(e) + ' Cannot add unaligned datasets.')
 
 # %%
 nd1a, nd2a = scp.align(nd1, nd2, dim='x', method='outer')
 ndadd = nd1a + nd2a
-_ = scp.multiplot_map(datasets=[nd1a, nd2a, ndadd], colormap='viridis', sharey=True,
-                      nrow=1, ncol=3, figsize=(8, 3), dpi=100)
+_ = scp.multiplot_map(datasets=[nd1a, nd2a, ndadd], colormap='viridis', sharey=True, nrow=1, ncol=3, figsize=(8, 3),
+                      dpi=100)
 ndadd.shape
 
 # %% [markdown]
@@ -143,8 +143,8 @@ ndadd = nd2a + nd4a
 ndadd.shape  # note the difference with the outer method above (the shape correspond to the intersection)
 
 # %%
-_ = scp.multiplot_map(datasets=[nd2a, nd4a, ndadd], colormap='viridis', sharey=True,
-                      nrow=1, ncol=3, figsize=(8, 3), dpi=100)
+_ = scp.multiplot_map(datasets=[nd2a, nd4a, ndadd], colormap='viridis', sharey=True, nrow=1, ncol=3, figsize=(8, 3),
+                      dpi=100)
 
 # %% [markdown]
 # ### `first` method
@@ -156,8 +156,8 @@ ndadd = nd2a + nd4a
 ndadd.shape  # note the difference with the outer method above
 
 # %%
-_ = scp.multiplot_map(datasets=[nd2a, nd4a, ndadd], colormap='viridis', sharey=True,
-                      nrow=1, ncol=3, figsize=(8, 3), dpi=100)
+_ = scp.multiplot_map(datasets=[nd2a, nd4a, ndadd], colormap='viridis', sharey=True, nrow=1, ncol=3, figsize=(8, 3),
+                      dpi=100)
 
 # %% [markdown]
 # ### `last` method
@@ -169,8 +169,8 @@ ndadd = nd2a + nd4a
 ndadd.shape  # note the difference with the outer method above
 
 # %%
-_ = scp.multiplot_map(datasets=[nd2a, nd4a, ndadd], colormap='viridis', sharey=True,
-                      nrow=1, ncol=3, figsize=(8, 3), dpi=100)
+_ = scp.multiplot_map(datasets=[nd2a, nd4a, ndadd], colormap='viridis', sharey=True, nrow=1, ncol=3, figsize=(8, 3),
+                      dpi=100)
 
 # %% [markdown]
 # /## Alignment along several dimensions (DO NOT WORK FOR NOW)

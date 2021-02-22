@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
+#  =
 # ======================================================================================================================
 """
 This module implements the base |NDArray| class.
@@ -19,7 +21,7 @@ import uuid
 import itertools
 
 from traitlets import (List, Unicode, Instance, Bool, Union, CFloat, Integer, CInt, HasTraits, default, validate,
-                       observe, All, Float)
+                       observe, All)
 from pint.errors import DimensionalityError
 import numpy as np
 from traittypes import Array
@@ -29,7 +31,7 @@ from spectrochempy.core import info_, error_, print_
 from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.utils import (TYPE_INTEGER, TYPE_FLOAT, MaskedConstant, MASKED, NOMASK, INPLACE, is_sequence,
                                  is_number, numpyprintoptions, spacing, insert_masked_print, SpectroChemPyWarning,
-                                 make_new_object, convert_to_html, get_user_and_node, get_n_decimals)
+                                 make_new_object, convert_to_html, get_user_and_node)
 
 # ======================================================================================================================
 # constants
@@ -122,7 +124,8 @@ class NDArray(HasTraits):
             a |NDArray| or any subclass of |NDArray|. Any size or shape of data is accepted. If not given, an empty
             |NDArray| will be inited.
             At the initialisation the provided data will be eventually casted to a numpy-ndarray.
-            If a subclass of |NDArray| is passed which already contains some mask, labels, or units, these elements will
+            If a subclass of |NDArray| is passed which already contains some mask, labels, or units, these elements
+            will
             be used to accordingly set those of the created object. If possible, the provided data will not be copied
             for `data` input, but will be passed by reference, so you should make a copy of the `data` before passing
             them if that's the desired behavior or set the `copy` argument to True.
@@ -132,7 +135,8 @@ class NDArray(HasTraits):
         dtype : str or dtype, optional, default=np.float64
             If specified, the data will be casted to this dtype, else the data will be casted to float64.
         dims : list of chars, optional.
-            if specified the list must have a length equal to the number od data dimensions (ndim) and the chars must be
+            if specified the list must have a length equal to the number od data dimensions (ndim) and the chars
+            must be
             taken among among x,y,z,u,v,w or t. If not specified, the dimension names are automatically attributed in
             this order.
         name : str, optional
@@ -584,7 +588,7 @@ class NDArray(HasTraits):
             dims = kdims
 
         if dims is not None and not isinstance(dims, list):
-            if  isinstance(dims, tuple):
+            if isinstance(dims, tuple):
                 dims = list(dims)
             else:
                 dims = [dims]
@@ -717,7 +721,8 @@ class NDArray(HasTraits):
             inc = np.diff(data)
             variation = (inc.max() - inc.min()) / data.ptp()
             if variation < 1.0e-5:
-                self._increment = data.ptp()/(data.size-1) * np.sign(inc[0]) # np.mean(inc)  # np.round(np.mean(inc), 5)
+                self._increment = data.ptp() / (data.size - 1) * np.sign(
+                        inc[0])  # np.mean(inc)  # np.round(np.mean(inc), 5)
                 self._offset = data[0]
                 self._size = data.size
                 self._data = None
@@ -1426,7 +1431,7 @@ class NDArray(HasTraits):
         for i, a in enumerate(axis[:]):
             # axis = axis[0] if axis else self.ndim - 1  # None
             if a is None:
-                a = self.ndim-1
+                a = self.ndim - 1
             if kwargs.get('negative_axis', False):
                 if a >= 0:
                     a = a - self.ndim
@@ -1435,7 +1440,7 @@ class NDArray(HasTraits):
 
         only_first = kwargs.pop('only_first', True)
 
-        if len(dims)==1 and only_first:
+        if len(dims) == 1 and only_first:
             dims = dims[0]
             axis = axis[0]
 

@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
+#  =
 # ======================================================================================================================
 
 """
@@ -205,8 +207,8 @@ def test_ndmath_classmethod_implementation(nd2d, name):
 
 
 def test_ndmath_absolute_of_quaternion():
-    na0 = np.array(
-            [[1., 2., 2., 0., 0., 0.], [1.3, 2., 2., 0.5, 1., 1.], [1, 4.2, 2., 3., 2., 2.], [5., 4.2, 2., 3., 3., 3.]])
+    na0 = np.array([[1., 2., 2., 0., 0., 0.], [1.3, 2., 2., 0.5, 1., 1.], [1, 4.2, 2., 3., 2., 2.],
+                    [5., 4.2, 2., 3., 3., 3.]])
     nd = NDDataset(na0, dtype=quaternion)
 
     coords = CoordSet(np.linspace(-1, 1, 2), np.linspace(-10., 10., 3))
@@ -746,7 +748,7 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     # COORDMIN AND COORDMAX
     # ---------------------
     cm = nd2.coordmin()
-    assert np.around(cm['x'],3) == Quantity(1290.165, 'cm^-1')
+    assert np.around(cm['x'], 3) == Quantity(1290.165, 'cm^-1')
 
     cm = nd2.coordmin(dim='y')
     assert cm.size == 1
@@ -923,14 +925,14 @@ def test_linearcoord_add_units_with_different_scale():
     d2 = LinearCoord.arange(3., units='cm')
 
     x = d1 + 1. * ur.cm
-    assert np.around(x.data[1],2) == 1.01
+    assert np.around(x.data[1], 2) == 1.01
 
     x = d1 + d2
-    assert np.around(x.data[1],2) == 1.01
+    assert np.around(x.data[1], 2) == 1.01
     x = d2 + d1
-    assert np.around(x.data[1],2) == 101.
+    assert np.around(x.data[1], 2) == 101.
     d1 += d2
-    assert np.around(d1.data[1],2) == 1.01
+    assert np.around(d1.data[1], 2) == 1.01
     d2 += d1
     assert d2.data[1] == 102.
 

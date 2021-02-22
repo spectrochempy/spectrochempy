@@ -14,7 +14,7 @@ __all__ = ['Coord', 'LinearCoord']
 
 import textwrap
 
-from traitlets import Bool, observe, All, Unicode, Integer, Float
+from traitlets import Bool, observe, All, Unicode, Integer
 
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndmath import NDMath, _set_operators

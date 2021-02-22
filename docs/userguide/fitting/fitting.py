@@ -33,10 +33,11 @@
 # %% [markdown]
 # # Fitting
 
+import numpy as np
+
 # %%
 import spectrochempy as scp
 from spectrochempy import ur
-import numpy as np
 
 
 # %% [markdown]
@@ -55,8 +56,8 @@ def func(t, v, var):
 
 time = scp.LinearCoord.linspace(0, 10, 20, title='time', units='hour')
 d = scp.NDDataset.fromfunction(func, v=100. * ur('km/hr'), var=60. * ur('km'),
-                           # extra arguments passed to the function v, var
-                           coordset=scp.CoordSet(t=time), name='mydataset', title='distance travelled')
+                               # extra arguments passed to the function v, var
+                               coordset=scp.CoordSet(t=time), name='mydataset', title='distance travelled')
 
 # %% [markdown]
 # Here is a plot of these data-points:
@@ -122,8 +123,8 @@ def func(t, a, var):
 
 time = scp.Coord.linspace(0, 10, 20, title='time', units='hour')
 d2 = scp.NDDataset.fromfunction(func, a=100. * ur('km/hr^2'), var=60. * ur('km'),
-                            # extra arguments passed to the function v, var
-                            coordset=scp.CoordSet(t=time), name='mydataset', title='distance travelled')
+                                # extra arguments passed to the function v, var
+                                coordset=scp.CoordSet(t=time), name='mydataset', title='distance travelled')
 
 d2.plot_scatter(markersize=7, mfc='red');
 
