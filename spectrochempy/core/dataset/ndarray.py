@@ -84,8 +84,6 @@ class NDArray(HasTraits):
     _size = Integer(0)
     _linear = Bool(False)
 
-    _accuracy = Float(allow_none=True)
-
     # metadata
 
     # Basic NDArray setting
@@ -585,6 +583,21 @@ class NDArray(HasTraits):
                               SpectroChemPyWarning)
             dims = kdims
 
+        if dims is not None and not isinstance(dims, list):
+            if  isinstance(dims, tuple):
+                dims = list(dims)
+            else:
+                dims = [dims]
+
+        if dims is not None:
+            for i, item in enumerate(dims[:]):
+                if item is not None and not isinstance(item, str):
+                    item = self.dims[item]
+                dims[i] = item
+
+        if dims is not None and len(dims) == 1:
+            dims = dims[0]
+
         return dims
 
     # ..................................................................................................................
@@ -641,7 +654,7 @@ class NDArray(HasTraits):
             else:
                 if key < 0:  # reverse indexing
                     axis, dim = self.get_axis(dim)
-                    start = self._data.shape[axis] + key
+                    start = self.shape[axis] + key
             stop = start + 1  # in order to keep an non squeezed slice
             return slice(start, stop, 1)
         else:
@@ -704,7 +717,7 @@ class NDArray(HasTraits):
             inc = np.diff(data)
             variation = (inc.max() - inc.min()) / data.ptp()
             if variation < 1.0e-5:
-                self._increment = np.mean(inc)  # np.round(np.mean(inc), 5)
+                self._increment = data.ptp()/(data.size-1) * np.sign(inc[0]) # np.mean(inc)  # np.round(np.mean(inc), 5)
                 self._offset = data[0]
                 self._size = data.size
                 self._data = None
@@ -1251,9 +1264,6 @@ class NDArray(HasTraits):
         else:
             data = self._data
 
-        if self._accuracy is not None:
-            nd = get_n_decimals(abs(data).max(), self._accuracy)
-            data = np.around(data, nd)
         return data
 
     # ..................................................................................................................
@@ -1382,11 +1392,14 @@ class NDArray(HasTraits):
         ----------
         dim, axis, dims : str, int, or list of str or index.
             The axis indexes or dimensions names - they can be specified as argument or using keyword 'axis', 'dim'
-            or 'dims'
+            or 'dims'.
         negative_axis : bool, optional, default=False.
-            If True a negative index is returned for the axis value (-1 for the last dimension, etc...)
+            If True a negative index is returned for the axis value (-1 for the last dimension, etc...).
         allows_none : bool, optional, default=False
             If True, if input is none then None is returned.
+        only_first : bool, optional, default: True
+            By default return only information on the first axis if dim is a list
+            Else, return an list for axis and dims information
 
         Returns
         -------
@@ -1399,14 +1412,34 @@ class NDArray(HasTraits):
         dims = self._get_dims_from_args(*args, **kwargs)
         axis = self._get_dims_index(dims)
         allows_none = kwargs.get('allows_none', False)
+
         if axis is None and allows_none:
             return None, None
-        axis = axis[0] if axis else self.ndim - 1  # None
-        dim = self.dims[axis]
-        if axis is not None and kwargs.get('negative_axis', False):
-            if axis >= 0:
-                axis = axis - self.ndim
-        return axis, dim
+
+        if isinstance(axis, tuple):
+            axis = list(axis)
+
+        if not isinstance(axis, list):
+            axis = [axis]
+
+        dims = axis[:]
+        for i, a in enumerate(axis[:]):
+            # axis = axis[0] if axis else self.ndim - 1  # None
+            if a is None:
+                a = self.ndim-1
+            if kwargs.get('negative_axis', False):
+                if a >= 0:
+                    a = a - self.ndim
+            axis[i] = a
+            dims[i] = self.dims[a]
+
+        only_first = kwargs.pop('only_first', True)
+
+        if len(dims)==1 and only_first:
+            dims = dims[0]
+            axis = axis[0]
+
+        return axis, dims
 
     # ..................................................................................................................
     def get_labels(self, level=0):

@@ -156,14 +156,11 @@ def concatenate(*datasets, **kwargs):
             dataset.add_coordset(newcoord)
             dataset.dims = [newcoord.name] + dataset.dims
             # TODO: make a function to simplify this process of adding new dimensions with coords
-        axis, dim = datasets[0].get_axis(0)
+        axis, dim = datasets[0].get_axis(dim=0)
 
     else:
-        # get axis from arguments
-        if kwargs:
-            axis, dim = datasets[0].get_axis(**kwargs)
-        else:
-            axis, dim = datasets[0].get_axis(-1)
+        # get axis from arguments (or set it to the default)
+        axis, dim = datasets[0].get_axis(**kwargs)
 
     # check if data shapes are compatible (all dimension must have the same size
     # except the one to be concatenated)

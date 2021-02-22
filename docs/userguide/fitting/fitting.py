@@ -8,18 +8,35 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.9.1
+#       jupytext_version: 1.10.2
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
 #     name: python3
+#   language_info:
+#     codemirror_mode:
+#       name: ipython
+#       version: 3
+#     file_extension: .py
+#     mimetype: text/x-python
+#     name: python
+#     nbconvert_exporter: python
+#     pygments_lexer: ipython3
+#     version: 3.9.1
+#   widgets:
+#     application/vnd.jupyter.widget-state+json:
+#       state: {}
+#       version_major: 2
+#       version_minor: 0
 # ---
 
 # %% [markdown]
 # # Fitting
 
 # %%
-from spectrochempy import *
+import spectrochempy as scp
+from spectrochempy import ur
+import numpy as np
 
 
 # %% [markdown]
@@ -36,10 +53,10 @@ def func(t, v, var):
     return d
 
 
-time = Coord.linspace(0, 10, 20, title='time', units='hour')
-d = NDDataset.fromfunction(func, v=100. * ur('km/hr'), var=60. * ur('km'),
+time = scp.LinearCoord.linspace(0, 10, 20, title='time', units='hour')
+d = scp.NDDataset.fromfunction(func, v=100. * ur('km/hr'), var=60. * ur('km'),
                            # extra arguments passed to the function v, var
-                           coordset=CoordSet(t=time), name='mydataset', title='distance travelled')
+                           coordset=scp.CoordSet(t=time), name='mydataset', title='distance travelled')
 
 # %% [markdown]
 # Here is a plot of these data-points:
@@ -60,7 +77,7 @@ d.plot_scatter(markersize=7, mfc='red');
 # Using LSTSQ, the solution is found very easily:
 
 # %%
-lst = LSTSQ(time, d)
+lst = scp.LSTSQ(time, d)
 
 v, d0 = lst.transform()
 print('speed : {:.3fK},  distance at time 0 : {:.3fK}'.format(v, d0))
@@ -75,7 +92,7 @@ print('speed : {:.3fK},  distance at time 0 : {:.3fK}'.format(v, d0))
 # </div>
 
 # %%
-lst = LSTSQ(d)
+lst = scp.LSTSQ(d)
 
 v, d0 = lst.transform()
 print('speed : {:.3fK},  distance at time 0 : {:.3fK}'.format(v, d0))
@@ -103,10 +120,10 @@ def func(t, a, var):
     return d
 
 
-time = Coord.linspace(0, 10, 20, title='time', units='hour')
-d2 = NDDataset.fromfunction(func, a=100. * ur('km/hr^2'), var=60. * ur('km'),
+time = scp.Coord.linspace(0, 10, 20, title='time', units='hour')
+d2 = scp.NDDataset.fromfunction(func, a=100. * ur('km/hr^2'), var=60. * ur('km'),
                             # extra arguments passed to the function v, var
-                            coordset=CoordSet(t=time), name='mydataset', title='distance travelled')
+                            coordset=scp.CoordSet(t=time), name='mydataset', title='distance travelled')
 
 d2.plot_scatter(markersize=7, mfc='red');
 
@@ -115,7 +132,7 @@ d2.plot_scatter(markersize=7, mfc='red');
 
 # %%
 X = (time ** 2)
-lst = LSTSQ(X, d2)
+lst = scp.LSTSQ(X, d2)
 
 v, d0 = lst.transform()
 print('acceleration : {:.3fK},  distance at time 0 : {:.3fK}'.format(v, d0))
@@ -138,7 +155,7 @@ dfit.plot_pen(clear=False, color='g', lw=2, label=' Fitted line', legend="best")
 
 # %%
 X = (time ** 2)
-lst = NNLS(X, d2)
+lst = scp.NNLS(X, d2)
 
 v, d0 = lst.transform()
 print('acceleration : {:.3fK},  distance at time 0 : {:.3fK}'.format(v, d0))
@@ -157,7 +174,7 @@ dfit.plot_pen(clear=False, color='g', lw=2, label=' Fitted line', legend="best")
 # First we will load an IR dataset
 
 # %%
-nd = read('irdata/nh4y-activation.spg"')
+nd = scp.read('irdata/nh4y-activation.spg"')
 
 # %% [markdown]
 # As we want to start with a single 1D spectra, we select the last one (index -1)
@@ -183,7 +200,7 @@ ndOH.plot();
 # automatic baseline correction)
 
 # %%
-ndOHcorr = abc(ndOH)
+ndOHcorr = scp.abc(ndOH)
 ndOHcorr.plot();
 
 # %% [markdown]
@@ -204,7 +221,7 @@ pks.plot_scatter(ax=ax, marker='v', color='black', clear=False,  # we need to ke
                  ylim=(-0.05, 1.3));
 
 # %% [markdown]
-# The maximum of the two major peaks are thus exactly at 3624.86 and 3541.33 cm$^{-1}$
+# The maximum of the two major peaks are thus exactly at 3624.61 and 3541.68 cm$^{-1}$
 
 # %% [markdown]
 # ### Fitting script
@@ -232,7 +249,7 @@ $ gassym: 0.1, 0, 1
 MODEL: LINE_1
 shape: assymvoigtmodel
     * ampl:  1.0, 0.0, none
-    $ pos:   3624.33, 3520.0, 3570.0
+    $ pos:   3624.61, 3520.0, 3570.0
     > ratio: gratio
     > assym: gassym
     $ width: 200, 0, 1000
@@ -240,7 +257,7 @@ shape: assymvoigtmodel
 MODEL: LINE_2
 shape: assymvoigtmodel
     $ ampl:  0.2, 0.0, none
-    $ pos:   3541.86, 3400.0, 3700.0
+    $ pos:   3541.68, 3400.0, 3700.0
     > ratio: gratio
     > assym: gassym
     $ width: 200, 0, 1000
@@ -366,8 +383,8 @@ shape: assymvoigtmodel
 #   ```
 
 # %%
-f1 = Fit(ndOHcorr, script, silent=False)
-f1.run(maxiter=5000, every=100)
+f1 = scp.Fit(ndOHcorr, script, silent=False)
+f1.run(maxiter=10000, every=100)
 ndOHcorr.plot(plot_model=True, lw=2);
 
 # %% [markdown]

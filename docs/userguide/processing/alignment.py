@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.9.1
+#       jupytext_version: 1.10.2
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -31,8 +31,6 @@
 
 # %% [markdown]
 # # Alignment of datasets
-#
-# import os
 
 # %%
 import spectrochempy as scp
@@ -50,19 +48,22 @@ import spectrochempy as scp
 
 # %%
 dataset = scp.NDDataset.read_omnic('irdata/nh4y-activation.spg')
-dataset.y = dataset.y - dataset.y[0]  # remove offset in the time
+dataset.y -= dataset.y[0]  # remove offset in the time
 dataset.y.title = 'Time'
+prefs = dataset.preferences
+prefs.reset()
+prefs.figure.figsize = (7,3)
+prefs.figure.dpi = 100
 _ = dataset.plot_map(colormap='viridis', colorbar=True)
 print('shape:', dataset.shape)
 
 # %%
 nd1 = dataset[0:30, 0:4000]
-nd2 = dataset[0:30, 2000:5549]
-nd3 = dataset[10:55, 0:4000]
-nd4 = dataset[10:55, 2000:5549]
+nd2 = dataset[0:30, 2000:5549]*2
+nd3 = dataset[10:55, 0:4000]*1.5
+nd4 = dataset[10:55, 2000:5549]*3
 _ = scp.multiplot_map(datasets=[nd1, nd2, nd3, nd4], colormap='viridis',
-                      nrow=2, ncol=2, sharex=True, sharey=True,
-                      figsize=(6, 6), dpi=100)
+                      nrow=2, ncol=2, sharex=True, sharey=True, dpi=100)
 
 # %% [markdown]
 # The four datasets `nd1` to `nd4` have some overlapping in both dimensions. But it we want for example to add `nd2`
@@ -71,7 +72,7 @@ _ = scp.multiplot_map(datasets=[nd1, nd2, nd3, nd4], colormap='viridis',
 # %%
 try:
     nd2 + nd4
-except ArithmeticError:
+except Exception as e:
     scp.error_('Cannot add unaligned datasets')
 
 # %% [markdown]
@@ -103,6 +104,29 @@ ndadd.shape
 # %%
 _ = scp.multiplot_map(datasets=[nd2a, nd4a, ndadd], colormap='viridis', sharey=True,
                       nrow=1, ncol=3, figsize=(8, 3), dpi=100)
+
+# %% [markdown]
+# Now, assume we want to align in the other dimension, or both
+
+# %%
+try:
+    nd1 + nd2
+except Exception as e:
+    scp.error_('Cannot add unaligned datasets')
+
+# %%
+nd1a, nd2a = scp.align(nd1, nd2, dim='x', method='outer')
+ndadd = nd1a + nd2a
+_ = scp.multiplot_map(datasets=[nd1a, nd2a, ndadd], colormap='viridis', sharey=True,
+                      nrow=1, ncol=3, figsize=(8, 3), dpi=100)
+ndadd.shape
+
+# %%
+nd1a, nd4a = scp.align(nd1, nd4, dim=['y','x'], method='outer')
+ndadd = nd1a + nd4a
+_ = scp.multiplot_map(datasets=[nd1a, nd4a, ndadd], colormap='viridis', sharey=True,
+                      nrow=1, ncol=3, figsize=(8, 3), dpi=100)
+ndadd.shape
 
 # %% [markdown]
 # ## Methods for alignments
@@ -159,13 +183,16 @@ _ = scp.multiplot_map(datasets=[nd2a, nd4a, ndadd], colormap='viridis', sharey=T
 # ## Alignment along several dimensions
 
 # %%
-nd1a, nd2a, nd3a, nd4a = scp.align(nd1, nd2, nd3, nd4, dims=['x', 'y'])  # by default the outer method is used
-nd1a.shape
+nd1a, nd2a, nd3a, nd4a = scp.align(nd1, nd2, nd3, nd4, dims=['y', 'x'])  # by default the outer method is used
+nd1.shape, nd2.shape, nd3.shape, nd4.shape, nd1a.shape
 
 # %%
 ndadd = nd1a + nd2a + nd3a + nd4a
+nd1a
 
 # %%
 # Comparison of the result array with the original (only the common region is visible, due to the masks)
 _ = scp.multiplot_map(datasets=[dataset, ndadd], colormap='viridis', sharex=0, sharey=True,
                       nrow=1, ncol=2, figsize=(8, 3), dpi=100)
+
+# %%

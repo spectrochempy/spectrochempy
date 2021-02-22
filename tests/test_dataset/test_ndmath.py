@@ -746,7 +746,7 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     # COORDMIN AND COORDMAX
     # ---------------------
     cm = nd2.coordmin()
-    assert cm['x'] == Quantity(1290.1647, 'cm^-1')
+    assert np.around(cm['x'],3) == Quantity(1290.165, 'cm^-1')
 
     cm = nd2.coordmin(dim='y')
     assert cm.size == 1
@@ -923,14 +923,14 @@ def test_linearcoord_add_units_with_different_scale():
     d2 = LinearCoord.arange(3., units='cm')
 
     x = d1 + 1. * ur.cm
-    assert x.data[1] == 1.01
+    assert np.around(x.data[1],2) == 1.01
 
     x = d1 + d2
-    assert x.data[1] == 1.01
+    assert np.around(x.data[1],2) == 1.01
     x = d2 + d1
-    assert x.data[1] == 101.
+    assert np.around(x.data[1],2) == 101.
     d1 += d2
-    assert d1.data[1] == 1.01
+    assert np.around(d1.data[1],2) == 1.01
     d2 += d1
     assert d2.data[1] == 102.
 

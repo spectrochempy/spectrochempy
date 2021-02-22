@@ -73,10 +73,9 @@ def align(dataset, *others, **kwargs):
     dim : str. Optional, default='x'
         Along which axis to perform the alignment.
     dims : list of str, optional, default=None
-        Align along all dims defined in dims (if dim or axis is also
+        Align along all dims defined in dims (if dim is also
         defined, then dims have higher priority).
-    method : enum ['outer', 'inner', 'first', 'last', 'interpolate'],
-    optional, default='outer'
+    method : enum ['outer', 'inner', 'first', 'last', 'interpolate'], optional, default='outer'
         Which method to use for the alignment.
 
         If align is defined :
@@ -144,8 +143,7 @@ def align(dataset, *others, **kwargs):
         warning_('No object provided for alignment!')
         return None
 
-    if len(objects) == 1 and objects[0].implements(
-            'NDDataset') and extern_coord is None:
+    if len(objects) == 1 and objects[0].implements('NDDataset') and extern_coord is None:
         # no necessary alignment
         return objects
 
@@ -175,13 +173,23 @@ def align(dataset, *others, **kwargs):
     ref_obj = _objects[ref_obj_index]['obj']
 
     # get the relevant dimension names
-    ref_dims = ref_obj.dims
-    axis = kwargs.pop('axis', -1)
-    dim = kwargs.pop('dim', ref_dims[axis])
-    dims = kwargs.pop('dims', [dim])
+    #ref_dims = ref_obj.dims
+    #axis = kwargs.pop('axis', -1)
+    #dim = kwargs.pop('dim', ref_dims[axis])
+    #dims = kwargs.pop('dims', [dim])
+
+    # evaluate on which axis we align
+    axis, dims = ref_obj.get_axis( only_first=False, **kwargs)
 
     # check compatibility of the dims and prepare the dimension for alignment
-    for dim in dims:
+    for axis, dim in zip(axis, dims):
+
+        # The last dimension is always the dimension on which we apply the apodization window.
+        # If needed, we swap the dimensions to be sure to be in this situation
+        #swaped = False
+        #if axis != -1:
+        #    new.swapdims(axis, -1, inplace=True)  # must be done in  place
+        #    swaped = True
 
         # as we will sort their coordinates at some point, we need to know
         # if the coordinates need to be reversed at
@@ -201,7 +209,7 @@ def align(dataset, *others, **kwargs):
         # the end of the alignment process
         reversed = ref_coord.reversed
 
-        # prepare a new Coord object to store the final new dimenson
+        # prepare a new Coord object to store the final new dimension
         new_coord = ref_coord.copy()
         if new_coord.implements('LinearCoord'):
             new_coord = Coord(new_coord, linear=False, copy=True)
@@ -220,7 +228,7 @@ def align(dataset, *others, **kwargs):
 
             # get the current objet coordinates and check compatibility
             coord = obj.coordset[dim]
-            if coord.implements('LinearCoord'):
+            if coord.implements('LinearCoord') or coord.linear:
                 coord = Coord(coord, linear=False, copy=True)
 
             if not coord.is_units_compatible(ref_coord):
