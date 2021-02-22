@@ -44,6 +44,7 @@ def test_1D_NDDataset(a, b, c, d):
         assert ds.description == ""
         assert ds.history == []
 
+
 @settings(deadline=timedelta(milliseconds=2000))
 @given(hen.arrays(float, st.tuples(st.integers(1, 3), st.integers(1, 3))))
 def test_2D_NDDataset(arr):

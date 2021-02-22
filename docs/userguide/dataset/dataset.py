@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.9.1
+#       jupytext_version: 1.10.2
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -21,7 +21,12 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.7.9
+#     version: 3.9.1
+#   widgets:
+#     application/vnd.jupyter.widget-state+json:
+#       state: {}
+#       version_major: 2
+#       version_minor: 0
 # ---
 
 # %% [markdown]
@@ -633,7 +638,8 @@ if datadir.exists():
 
 # %%
 nd = NDDataset.read_omnic(datadir / 'irdata/nh4y-activation.spg')
-_ = nd.plot_waterfall(y_reverse=True)
+nd.preferences.reset()
+_ = nd.plot()
 
 # %% [markdown]
 # Even if we do not specify the **datadir**, the application first look in tht directory by default.

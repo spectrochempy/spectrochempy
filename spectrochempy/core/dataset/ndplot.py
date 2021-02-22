@@ -605,7 +605,10 @@ class NDPlot(HasTraits):
     # ..................................................................................................................
     @default('_preferences')
     def _preferences_default(self):
-        return Preferences()
+        # Reset all preferences
+        prefs = Preferences()
+        prefs.reset()
+        return prefs
 
     # ..................................................................................................................
     @property

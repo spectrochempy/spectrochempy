@@ -1,6 +1,31 @@
 What's new
 ==========
 
+Version 0.2.12
+--------------
+
+**BUGS FIXED**
+
+-  LinearCoord operations now working.
+
+-  Baseline default now “sequential” as expected. **WARNING**: It was
+   wrongly set to “mutivariate” in previous releases, so you should
+   expect some difference with processings you may have done before.
+
+-  Comparison of coordinates now correct for mathematical operations.
+
+-  Alignment methods now working (except for multidimensional
+   alignement).
+
+Version 0.2.11
+--------------
+
+**BUGS FIXED**
+
+-  Plot2D now works when more than one coord in ‘y’ axis (#238).
+
+-  Spectrochempy_data location have been corrected (#239).
+
 Version 0.2.10
 --------------
 
@@ -22,7 +47,7 @@ Version 0.2.9
 
 **BUGS FIXED**
 
--  Hotfix : regarding dispay of NMR x scale
+-  Hotfix regarding dispay of NMR x scale
 
 Version 0.2.8
 -------------
