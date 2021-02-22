@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
+#  =
 # ======================================================================================================================
 """
 This module implements the base |NDArray| class.
@@ -19,7 +21,7 @@ import uuid
 import itertools
 
 from traitlets import (List, Unicode, Instance, Bool, Union, CFloat, Integer, CInt, HasTraits, default, validate,
-                       observe, All, Float)
+                       observe, All)
 from pint.errors import DimensionalityError
 import numpy as np
 from traittypes import Array
@@ -29,7 +31,7 @@ from spectrochempy.core import info_, error_, print_
 from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.utils import (TYPE_INTEGER, TYPE_FLOAT, MaskedConstant, MASKED, NOMASK, INPLACE, is_sequence,
                                  is_number, numpyprintoptions, spacing, insert_masked_print, SpectroChemPyWarning,
-                                 make_new_object, convert_to_html, get_user_and_node, get_n_decimals)
+                                 make_new_object, convert_to_html, get_user_and_node)
 
 # ======================================================================================================================
 # constants
@@ -84,8 +86,6 @@ class NDArray(HasTraits):
     _size = Integer(0)
     _linear = Bool(False)
 
-    _accuracy = Float(allow_none=True)
-
     # metadata
 
     # Basic NDArray setting
@@ -124,7 +124,8 @@ class NDArray(HasTraits):
             a |NDArray| or any subclass of |NDArray|. Any size or shape of data is accepted. If not given, an empty
             |NDArray| will be inited.
             At the initialisation the provided data will be eventually casted to a numpy-ndarray.
-            If a subclass of |NDArray| is passed which already contains some mask, labels, or units, these elements will
+            If a subclass of |NDArray| is passed which already contains some mask, labels, or units, these elements
+            will
             be used to accordingly set those of the created object. If possible, the provided data will not be copied
             for `data` input, but will be passed by reference, so you should make a copy of the `data` before passing
             them if that's the desired behavior or set the `copy` argument to True.
@@ -134,7 +135,8 @@ class NDArray(HasTraits):
         dtype : str or dtype, optional, default=np.float64
             If specified, the data will be casted to this dtype, else the data will be casted to float64.
         dims : list of chars, optional.
-            if specified the list must have a length equal to the number od data dimensions (ndim) and the chars must be
+            if specified the list must have a length equal to the number od data dimensions (ndim) and the chars
+            must be
             taken among among x,y,z,u,v,w or t. If not specified, the dimension names are automatically attributed in
             this order.
         name : str, optional
@@ -585,6 +587,21 @@ class NDArray(HasTraits):
                               SpectroChemPyWarning)
             dims = kdims
 
+        if dims is not None and not isinstance(dims, list):
+            if isinstance(dims, tuple):
+                dims = list(dims)
+            else:
+                dims = [dims]
+
+        if dims is not None:
+            for i, item in enumerate(dims[:]):
+                if item is not None and not isinstance(item, str):
+                    item = self.dims[item]
+                dims[i] = item
+
+        if dims is not None and len(dims) == 1:
+            dims = dims[0]
+
         return dims
 
     # ..................................................................................................................
@@ -641,7 +658,7 @@ class NDArray(HasTraits):
             else:
                 if key < 0:  # reverse indexing
                     axis, dim = self.get_axis(dim)
-                    start = self._data.shape[axis] + key
+                    start = self.shape[axis] + key
             stop = start + 1  # in order to keep an non squeezed slice
             return slice(start, stop, 1)
         else:
@@ -704,7 +721,8 @@ class NDArray(HasTraits):
             inc = np.diff(data)
             variation = (inc.max() - inc.min()) / data.ptp()
             if variation < 1.0e-5:
-                self._increment = np.mean(inc)  # np.round(np.mean(inc), 5)
+                self._increment = data.ptp() / (data.size - 1) * np.sign(
+                        inc[0])  # np.mean(inc)  # np.round(np.mean(inc), 5)
                 self._offset = data[0]
                 self._size = data.size
                 self._data = None
@@ -1251,9 +1269,6 @@ class NDArray(HasTraits):
         else:
             data = self._data
 
-        if self._accuracy is not None:
-            nd = get_n_decimals(abs(data).max(), self._accuracy)
-            data = np.around(data, nd)
         return data
 
     # ..................................................................................................................
@@ -1382,11 +1397,14 @@ class NDArray(HasTraits):
         ----------
         dim, axis, dims : str, int, or list of str or index.
             The axis indexes or dimensions names - they can be specified as argument or using keyword 'axis', 'dim'
-            or 'dims'
+            or 'dims'.
         negative_axis : bool, optional, default=False.
-            If True a negative index is returned for the axis value (-1 for the last dimension, etc...)
+            If True a negative index is returned for the axis value (-1 for the last dimension, etc...).
         allows_none : bool, optional, default=False
             If True, if input is none then None is returned.
+        only_first : bool, optional, default: True
+            By default return only information on the first axis if dim is a list
+            Else, return an list for axis and dims information
 
         Returns
         -------
@@ -1399,14 +1417,34 @@ class NDArray(HasTraits):
         dims = self._get_dims_from_args(*args, **kwargs)
         axis = self._get_dims_index(dims)
         allows_none = kwargs.get('allows_none', False)
+
         if axis is None and allows_none:
             return None, None
-        axis = axis[0] if axis else self.ndim - 1  # None
-        dim = self.dims[axis]
-        if axis is not None and kwargs.get('negative_axis', False):
-            if axis >= 0:
-                axis = axis - self.ndim
-        return axis, dim
+
+        if isinstance(axis, tuple):
+            axis = list(axis)
+
+        if not isinstance(axis, list):
+            axis = [axis]
+
+        dims = axis[:]
+        for i, a in enumerate(axis[:]):
+            # axis = axis[0] if axis else self.ndim - 1  # None
+            if a is None:
+                a = self.ndim - 1
+            if kwargs.get('negative_axis', False):
+                if a >= 0:
+                    a = a - self.ndim
+            axis[i] = a
+            dims[i] = self.dims[a]
+
+        only_first = kwargs.pop('only_first', True)
+
+        if len(dims) == 1 and only_first:
+            dims = dims[0]
+            axis = axis[0]
+
+        return axis, dims
 
     # ..................................................................................................................
     def get_labels(self, level=0):

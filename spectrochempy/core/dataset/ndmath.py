@@ -2731,20 +2731,22 @@ class NDMath(object):
                 if other._squeeze_ndim == 0 or ((obc is None or obc.is_empty) and (otc is None or otc.is_empty)):
                     pass
 
-                # Another acceptable situation is that we suppress the other NDDataset is 1D, with compatible
+                # Another acceptable situation is that the other NDDataset is 1D, with compatible
                 # coordinates in the x dimension
                 elif other._squeeze_ndim >= 1:
                     try:
-                        assert_dataset_almost_equal(obc[obj.dims[-1]], otc[other.dims[-1]], decimal=3)
+                        assert_dataset_almost_equal(obc[obj.dims[-1]], otc[other.dims[-1]], decimal=3,
+                                                    data_only=True)  # we compare only data for this operation
                     except AssertionError as e:
                         raise CoordinateMismatchError(str(e))
 
-                # if other is multidimentional and as we are talking about element wise operation, we assume
-                # tha all coordinates must match
-                if other._squeeze_ndim > 1:
-                    for idx in range(obj.ndim - 2):
+                # if other is multidimensional and as we are talking about element wise operation, we assume
+                # that all coordinates must match
+                elif other._squeeze_ndim > 1:
+                    for idx in range(obj.ndim):
                         try:
-                            assert_dataset_almost_equal(obc[obj.dims[idx]], otc[other.dims[idx]], decimal=3)
+                            assert_dataset_almost_equal(obc[obj.dims[idx]], otc[other.dims[idx]], decimal=3,
+                                                        data_only=True)     # we compare only data for this operation
                         except AssertionError as e:
                             raise CoordinateMismatchError(str(e))
 

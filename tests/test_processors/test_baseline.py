@@ -1,23 +1,24 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
+#  =
 # ======================================================================================================================
 
 import os
-import sys
 
 import pytest
 
 # noinspection PyUnresolvedReferences
-from spectrochempy import (show, BaselineCorrection, NDDataset, ur,
-                           )
+from spectrochempy import (show, BaselineCorrection, NDDataset, ur, )
 from spectrochempy.utils.testing import assert_dataset_almost_equal
 
 path = os.path.dirname(os.path.abspath(__file__))
 
-@pytest.mark.skipif(sys.version_info > (3, 8),  reason="fails on linux for 3.9")
+
+# @pytest.mark.skipif(sys.version_info > (3, 8),  reason="fails on linux for 3.9")
 def test_basecor_sequential(IR_dataset_2D):
     dataset = IR_dataset_2D[5]
     from spectrochempy import Coord

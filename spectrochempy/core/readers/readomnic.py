@@ -705,7 +705,7 @@ def _read_spg(*args, **kwargs):
     # now add coordinates
     # _x = Coord(np.around(np.linspace(firstx[0], lastx[0], nx[0]), 3),
     #           title=xtitles[0], units=xunits[0])
-    spacing = (lastx[0] - firstx[0]) / (nx[0] - 1)
+    spacing = (lastx[0] - firstx[0]) / int(nx[0] - 1)
     _x = LinearCoord(offset=firstx[0], increment=spacing, size=int(nx[0]), title=xtitles[0], units=xunits[0])
 
     _y = Coord(timestamps, title='Acquisition timestamp (GMT)', units='s', labels=(acquisitiondates, spectitles))

@@ -768,6 +768,10 @@ class CoordSet(HasTraits):
 
             raise KeyError(f"Could not find `{index}` in coordinates names or titles")
 
+        try:
+            self._coords.__getitem__(index)
+        except TypeError:
+            print()
         res = self._coords.__getitem__(index)
         if isinstance(index, slice):
             if isinstance(res, CoordSet):

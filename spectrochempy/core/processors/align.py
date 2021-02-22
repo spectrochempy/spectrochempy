@@ -16,7 +16,7 @@ __dataset_methods__ = __all__
 # import scipy.interpolate
 import numpy as np
 
-from spectrochempy.utils import MASKED, UnitsCompatibilityError
+from spectrochempy.utils import MASKED, UnitsCompatibilityError, get_n_decimals
 from spectrochempy.core import warning_, error_
 from spectrochempy.core.dataset.coord import Coord
 
@@ -73,10 +73,9 @@ def align(dataset, *others, **kwargs):
     dim : str. Optional, default='x'
         Along which axis to perform the alignment.
     dims : list of str, optional, default=None
-        Align along all dims defined in dims (if dim or axis is also
+        Align along all dims defined in dims (if dim is also
         defined, then dims have higher priority).
-    method : enum ['outer', 'inner', 'first', 'last', 'interpolate'],
-    optional, default='outer'
+    method : enum ['outer', 'inner', 'first', 'last', 'interpolate'], optional, default='outer'
         Which method to use for the alignment.
 
         If align is defined :
@@ -144,8 +143,7 @@ def align(dataset, *others, **kwargs):
         warning_('No object provided for alignment!')
         return None
 
-    if len(objects) == 1 and objects[0].implements(
-            'NDDataset') and extern_coord is None:
+    if len(objects) == 1 and objects[0].implements('NDDataset') and extern_coord is None:
         # no necessary alignment
         return objects
 
@@ -162,7 +160,7 @@ def align(dataset, *others, **kwargs):
                 f'for alignment')
             return None
 
-        _objects[_nobj] = {'obj': object, 'idx': idx, }
+        _objects[_nobj] = {'obj': object.copy(), 'idx': idx, }
         _nobj += 1
 
     _last = _nobj - 1
@@ -174,14 +172,15 @@ def align(dataset, *others, **kwargs):
         ref_obj_index = _last
     ref_obj = _objects[ref_obj_index]['obj']
 
-    # get the relevant dimension names
-    ref_dims = ref_obj.dims
-    axis = kwargs.pop('axis', -1)
-    dim = kwargs.pop('dim', ref_dims[axis])
-    dims = kwargs.pop('dims', [dim])
+    # evaluate on which axis we align
+    axis, dims = ref_obj.get_axis(only_first=False, **kwargs)
+
+    if len(dims) > 1:
+        # mutidimensional alignment
+        print()
 
     # check compatibility of the dims and prepare the dimension for alignment
-    for dim in dims:
+    for axis, dim in zip(axis, dims):
 
         # as we will sort their coordinates at some point, we need to know
         # if the coordinates need to be reversed at
@@ -201,8 +200,11 @@ def align(dataset, *others, **kwargs):
         # the end of the alignment process
         reversed = ref_coord.reversed
 
-        # prepare a new Coord object to store the final new dimenson
+        # prepare a new Coord object to store the final new dimension
         new_coord = ref_coord.copy()
+
+        ndec = get_n_decimals(new_coord.data.max(), 1.e-5)
+
         if new_coord.implements('LinearCoord'):
             new_coord = Coord(new_coord, linear=False, copy=True)
 
@@ -220,7 +222,7 @@ def align(dataset, *others, **kwargs):
 
             # get the current objet coordinates and check compatibility
             coord = obj.coordset[dim]
-            if coord.implements('LinearCoord'):
+            if coord.implements('LinearCoord') or coord.linear:
                 coord = Coord(coord, linear=False, copy=True)
 
             if not coord.is_units_compatible(ref_coord):
@@ -233,8 +235,9 @@ def align(dataset, *others, **kwargs):
                 coord.ito(ref_coord)
 
             # adjust the new_cord depending on the method of alignement
-            new_coord_data = set(new_coord.data)
-            coord_data = set(coord.data)
+
+            new_coord_data = set(np.around(new_coord.data, ndec))
+            coord_data = set(np.around(coord.data, ndec))
 
             if method in ['outer', 'interpolate']:
                 # in this case we do a union of the coords (masking the

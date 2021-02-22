@@ -14,7 +14,7 @@ __all__ = ['Coord', 'LinearCoord']
 
 import textwrap
 
-from traitlets import Bool, observe, All, Unicode, Integer, Float
+from traitlets import Bool, observe, All, Unicode, Integer
 
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndmath import NDMath, _set_operators
@@ -30,8 +30,6 @@ class Coord(NDMath, NDArray):
 
     _html_output = False
     _parent_dim = Unicode(allow_none=True)
-
-    _accuracy = Float(1.e-7, allow_none=True)
 
     # ------------------------------------------------------------------------------------------------------------------
     # initialization
@@ -137,10 +135,6 @@ class Coord(NDMath, NDArray):
         >>> c1
         Coord: [labels] [  a   b   c   d   e   f] (size: 6)
         """
-
-        kwargs['accuracy'] = kwargs.pop('accuracy', self._accuracy)
-        # we wants coordinates with not a two high precision to allow easier
-        # alignements and indexation
 
         super().__init__(data=data, **kwargs)
 

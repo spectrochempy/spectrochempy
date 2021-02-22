@@ -45,7 +45,7 @@ def gisinf(x):
     return st
 
 
-def compare_datasets(this, other, approx=False, decimal=6):
+def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
     from spectrochempy.core.dataset.ndarray import NDArray
     from spectrochempy.units import ur, Quantity
 
@@ -103,25 +103,23 @@ def compare_datasets(this, other, approx=False, decimal=6):
 
     thistype = this.implements()
 
-    attrs = this.__dir__()
-    exclude = (
-        'filename', 'preferences', 'description', 'history', 'date', 'modified', 'modeldata', 'origin', 'roi', 'linear',
-        'offset', 'increment', 'size', 'name', 'show_datapoints')
-    # else:
-    #     exclude = ('filename', 'preferences', 'description', 'history',
-    #     'date',
-    #                'modified', 'modeldata', 'origin', 'roi', 'data', 'name',
-    #                'show_datapoints')
+    if data_only:
+        attrs = ['data']
+    else:
+        attrs = this.__dir__()
+        exclude = (
+                'filename', 'preferences', 'description', 'history', 'date', 'modified', 'modeldata', 'origin', 'roi',
+                'linear', 'offset', 'increment', 'size', 'name', 'show_datapoints')
 
-    for attr in exclude:
-        # these attibutes are not used for comparison (comparison based on
-        # data and units!)
-        if attr in attrs:
+        for attr in exclude:
+            # these attibutes are not used for comparison (comparison based on
+            # data and units!)
             if attr in attrs:
-                attrs.remove(attr)
+                if attr in attrs:
+                    attrs.remove(attr)
 
-    # if 'title' in attrs:
-    #    attrs.remove('title')  #TODO: should we use title for comparison?
+        # if 'title' in attrs:
+        #    attrs.remove('title')  #TODO: should we use title for comparison?
 
     for attr in attrs:
         if attr != 'units':
@@ -150,8 +148,7 @@ def compare_datasets(this, other, approx=False, decimal=6):
                     if approx:
                         assert_array_compare(compare, sattr, oattr, header=(f'{thistype}.{attr} attributes ar'
                                                                             f'e not almost equal to %d decimals' %
-                                                                            decimal),
-                                             precision=decimal)
+                                                                            decimal), precision=decimal)
                     else:
                         assert_array_compare(operator.__eq__, sattr, oattr, header=f'{thistype}.{attr} '
                                                                                    f'attributes are not '
@@ -195,8 +192,9 @@ def compare_datasets(this, other, approx=False, decimal=6):
 
 
 # ......................................................................................................................
-def assert_dataset_equal(nd1, nd2):
-    assert_dataset_almost_equal(nd1, nd2, approx=False)
+def assert_dataset_equal(nd1, nd2, **kwargs):
+    kwargs['approx'] = False
+    assert_dataset_almost_equal(nd1, nd2, **kwargs)
     return True
 
 
@@ -204,7 +202,8 @@ def assert_dataset_equal(nd1, nd2):
 def assert_dataset_almost_equal(nd1, nd2, **kwargs):
     decimal = kwargs.get('decimal', 6)
     approx = kwargs.get('approx', True)
-    compare_datasets(nd1, nd2, approx=approx, decimal=decimal)
+    data_only = kwargs.get('data_only', False)  # if True, compare only based on data (not labels and so on)
+    compare_datasets(nd1, nd2, approx=approx, decimal=decimal, data_only=data_only)
     return True
 
 

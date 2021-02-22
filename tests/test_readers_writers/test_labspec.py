@@ -12,7 +12,6 @@ import spectrochempy as scp
 
 def test_read_labspec():
 
-    datadir = scp.preferences.datadir
     ramandir = Path('ramandata')
     scp.info_(ramandir)
 
