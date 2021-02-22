@@ -48,7 +48,7 @@ import spectrochempy as scp
 
 # %%
 dataset = scp.NDDataset.read_omnic('irdata/nh4y-activation.spg')
-dataset.y -= dataset.y[0]  # remove offset in the time
+dataset.y = dataset.y - dataset.y[0]  # remove offset in the time
 dataset.y.title = 'Time'
 prefs = dataset.preferences
 prefs.reset()
@@ -121,13 +121,6 @@ _ = scp.multiplot_map(datasets=[nd1a, nd2a, ndadd], colormap='viridis', sharey=T
                       nrow=1, ncol=3, figsize=(8, 3), dpi=100)
 ndadd.shape
 
-# %%
-nd1a, nd4a = scp.align(nd1, nd4, dim=['y','x'], method='outer')
-ndadd = nd1a + nd4a
-_ = scp.multiplot_map(datasets=[nd1a, nd4a, ndadd], colormap='viridis', sharey=True,
-                      nrow=1, ncol=3, figsize=(8, 3), dpi=100)
-ndadd.shape
-
 # %% [markdown]
 # ## Methods for alignments
 # Method for alignments are:
@@ -180,19 +173,17 @@ _ = scp.multiplot_map(datasets=[nd2a, nd4a, ndadd], colormap='viridis', sharey=T
                       nrow=1, ncol=3, figsize=(8, 3), dpi=100)
 
 # %% [markdown]
-# ## Alignment along several dimensions
+# /## Alignment along several dimensions (DO NOT WORK FOR NOW)
 
 # %%
-nd1a, nd2a, nd3a, nd4a = scp.align(nd1, nd2, nd3, nd4, dims=['y', 'x'])  # by default the outer method is used
-nd1.shape, nd2.shape, nd3.shape, nd4.shape, nd1a.shape
+# nd1a, nd2a, nd3a, nd4a = scp.align(nd1, nd2, nd3, nd4, dims=['y', 'x'])  # by default the outer method is used
+# nd1.shape, nd2.shape, nd3.shape, nd4.shape, nd1a.shape
 
 # %%
-ndadd = nd1a + nd2a + nd3a + nd4a
-nd1a
+# ndadd = nd1a + nd2a + nd3a + nd4a
+# nd1a
 
 # %%
-# Comparison of the result array with the original (only the common region is visible, due to the masks)
-_ = scp.multiplot_map(datasets=[dataset, ndadd], colormap='viridis', sharex=0, sharey=True,
-                      nrow=1, ncol=2, figsize=(8, 3), dpi=100)
-
-# %%
+# # Comparison of the result array with the original (only the common region is visible, due to the masks)
+# _ = scp.multiplot_map(datasets=[dataset, ndadd], colormap='viridis', sharex=0, sharey=True,
+#                      nrow=1, ncol=2, figsize=(8, 3), dpi=100)
