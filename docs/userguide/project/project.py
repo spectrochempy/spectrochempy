@@ -8,7 +8,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.9.1
+#       jupytext_version: 1.10.2
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -142,7 +142,7 @@ proj2
 _ = proj2.NMR_1D.plot()
 
 # %%
-proj2.NMR_2D  # TODO: something wrong there!
+proj2.NMR_2D  #  TODO: something wrong there!
 
 # %%
 proj.NMR_2D.plot()

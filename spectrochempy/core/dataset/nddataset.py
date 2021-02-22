@@ -69,8 +69,10 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         The main N-dimensional dataset class used by |scpy|.
 
         The NDDataset is the main object use by SpectroChemPy. Like numpy ndarrays, NDDataset have the capability to be
-        sliced, sorted and subject to mathematical operations. But, in addition, NDDataset may have units, can be masked
-        and each dimensions can have coordinates also with units. This make NDDataset aware of unit compatibility, e.g.,
+        sliced, sorted and subject to mathematical operations. But, in addition, NDDataset may have units,
+        can be masked
+        and each dimensions can have coordinates also with units. This make NDDataset aware of unit compatibility,
+        e.g.,
         for binary operation such as additions or subtraction or during the application of mathematical operations.
         In addition or in replacement of numerical data for coordinates, NDDataset can also have labeled coordinates
         where labels can be different kind of objects (strings, datetime, numpy nd.ndarray or othe NDDatasets, etc…).
@@ -82,7 +84,8 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             a |NDArray| or any subclass of |NDArray|. Any size or shape of data is accepted. If not given, an empty
             |NDArray| will be inited.
             At the initialisation the provided data will be eventually casted to a numpy-ndarray.
-            If a subclass of |NDArray| is passed which already contains some mask, labels, or units, these elements will
+            If a subclass of |NDArray| is passed which already contains some mask, labels, or units, these elements
+            will
             be used to accordingly set those of the created object. If possible, the provided data will not be copied
             for `data` input, but will be passed by reference, so you should make a copy of the `data` before passing
             them if that's the desired behavior or set the `copy` argument to True.
@@ -102,7 +105,8 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         dtype : str or dtype, optional, default=np.float64
             If specified, the data will be casted to this dtype, else the data will be casted to float64 or complex128.
         dims : list of chars, optional
-            If specified the list must have a length equal to the number od data dimensions (ndim) and the chars must be
+            If specified the list must have a length equal to the number od data dimensions (ndim) and the chars
+            must be
             taken among among x,y,z,u,v,w or t. If not specified, the dimension names are automatically attributed in
             this order.
         name : str, optional
@@ -212,7 +216,8 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     def __dir__(self):
         # WARNING: be carefull to keep the present order of the three first elements! Needed for save/load operations
         return ['dims', 'coordset', 'data', 'name', 'title', 'mask', 'units', 'meta', 'preferences', 'author',
-                'description', 'history', 'date', 'modified', 'modeldata', 'origin', 'roi', 'offset'] + NDIO().__dir__()
+                'description', 'history', 'date', 'modified', 'modeldata', 'origin', 'roi',
+                'offset'] + NDIO().__dir__()
 
     # ..................................................................................................................
     def __getitem__(self, items):
@@ -1046,7 +1051,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         out += '         name: {}\n'.format(self.name)
         out += '       author: {}\n'.format(self.author)
         out += '      created: {}\n'.format(self._date)
-        out += '     modified: {}\n'.format(self._modified) if (self.modified - self.date).seconds > 1 else ''
+        # out += '     modified: {}\n'.format(self._modified) if (self.modified - self.date).seconds > 1 else ''
 
         wrapper1 = textwrap.TextWrapper(initial_indent='', subsequent_indent=' ' * 15, replace_whitespace=True,
                                         width=self._text_width)

@@ -8,28 +8,28 @@ jobs:
   include:
     - stage: tests
       name: py3.6
-      if: type == pull_request OR branch NOT IN (master)
+      if: type == pull_request OR (branch != master AND !(tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/))
       env:
       - TEST=true
       - CONDAPY=3.6
     - name: py3.7
-      if: type == pull_request OR branch NOT IN (master)
+      if: type == pull_request OR (branch != master AND !(tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/))
       env:
       - TEST=true
       - CONDAPY=3.7
     - name: py3.8
-      if: type == pull_request OR branch NOT IN (master)
+      if: type == pull_request OR (branch != master AND !(tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/))
       env:
         - TEST=true
         - CONDAPY=3.8
     - name: py3.9
-      if: type == pull_request OR branch NOT IN (master)
+      if: type == pull_request OR (branch != master AND !(tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/))
       env:
       - TEST=true
       - CONDAPY=3.9
     - stage: builds
       name: conda
-      if: type == pull_request OR branch IN (master, develop) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/
+      if: type == pull_request OR branch == master OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/
       env:
       - DEPLOY=true
       - CONDAPY=3.8

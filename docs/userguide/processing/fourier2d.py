@@ -9,7 +9,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.9.1
+#       jupytext_version: 1.10.2
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -63,15 +63,13 @@ ser
 # %%
 prefs = ser.preferences
 prefs.figure.figsize = (7, 3)
-prefs.method_2D = 'map'
 prefs.contour_start = 0.05
 
 # %% [markdown]
-# and now plotting of contours using `plot_map`. Actually we may just use `plot`as we have set above the default plot
-# to `map`.
+# and now plotting of contours using `plot_map`.
 
 # %%
-_ = ser.plot()
+_ = ser.plot_map()
 
 # %% [markdown]
 # ### Processing steps
@@ -133,14 +131,14 @@ _ = f0.plot(show_complex=True)
 sert = ser.dc()  # DC correction
 sert.zf_size(size=2048, inplace=True)  # zero-filling
 sert.em(lb=20 * ur.Hz, shifted=shifted, inplace=True)  # shifted was set in the previous step
-_ = sert.plot()
+_ = sert.plot_map()
 
 # %% [markdown]
 # Transform in F2
 
 # %%
 spec = sert.fft()
-_ = spec.plot();
+_ = spec.plot_map();
 
 # %% [markdown]
 # Now we can process the F1 dimension ('y')
@@ -150,14 +148,14 @@ spect = spec.zf_size(size=512, dim='y')
 spect.em(lb=10 * ur.Hz, inplace=True, dim='y')
 s = spect.fft(dim='y')
 prefs.contour_start = 0.12
-_ = s.plot()
+_ = s.plot_map()
 
 # %% [markdown]
 # Here is an expansion:
 
 # %%
 spk = s.pk(phc0=0, dim='y')
-_ = spk.plot(xlim=(50, 0), ylim=(-40, -15))
+_ = spk.plot_map(xlim=(50, 0), ylim=(-40, -15))
 
 # %% [markdown]
 # ## Processing of an Echo-AntiEcho encoded dataset
@@ -202,7 +200,7 @@ _ = s.plot_map()
 path = scp.preferences.datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'exam2d_HH'
 ser = scp.read_topspin(path)
 prefs = ser.preferences
-ser.plot()
+ser.plot_map()
 ser.dtype
 
 # %%
@@ -224,7 +222,3 @@ prefs.contour_start = 0.005
 prefs.show_projections = True
 prefs.figure.figsize = (7, 7)
 _ = sa.plot_map()
-
-# %%
-
-# %%
