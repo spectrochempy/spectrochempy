@@ -17,6 +17,7 @@ typequaternion = np.dtype(np.quaternion)
 
 
 # test minimal constructeur and dtypes
+@settings(deadline=timedelta(milliseconds=1000))  # don'y know why, but sometimes necessary for TRAVIS CI.
 @given(st.lists(st.none()), st.lists(st.integers()), st.lists(st.floats()), st.lists(st.complex_numbers()))
 def test_1D_NDDataset(a, b, c, d):
     # 1D
@@ -45,7 +46,7 @@ def test_1D_NDDataset(a, b, c, d):
         assert ds.history == []
 
 
-@settings(deadline=timedelta(milliseconds=2000))
+@settings(deadline=timedelta(milliseconds=1000))
 @given(hen.arrays(float, st.tuples(st.integers(1, 3), st.integers(1, 3))))
 def test_2D_NDDataset(arr):
     # 2D

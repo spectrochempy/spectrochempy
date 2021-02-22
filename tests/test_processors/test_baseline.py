@@ -19,11 +19,12 @@ path = os.path.dirname(os.path.abspath(__file__))
 
 
 # @pytest.mark.skipif(sys.version_info > (3, 8),  reason="fails on linux for 3.9")
-@pytest.mark.skip("erratic failing!")
+# @pytest.mark.skip("erratic failing!")
 def test_basecor_sequential(IR_dataset_2D):
-    dataset = IR_dataset_2D[5]
     from spectrochempy import Coord
-    dataset.x = Coord(dataset.x, linear=False)
+
+    dataset = IR_dataset_2D[5]
+    # dataset.x = Coord(dataset.x, linear=False, copy=True)
     basc = BaselineCorrection(dataset)
 
     s = basc([6000., 3500.], [2200., 1500.], method='sequential', interpolation='pchip')
