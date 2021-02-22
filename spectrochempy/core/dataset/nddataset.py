@@ -1051,7 +1051,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         out += '         name: {}\n'.format(self.name)
         out += '       author: {}\n'.format(self.author)
         out += '      created: {}\n'.format(self._date)
-        out += '     modified: {}\n'.format(self._modified) if (self.modified - self.date).seconds > 1 else ''
+        # out += '     modified: {}\n'.format(self._modified) if (self.modified - self.date).seconds > 1 else ''
 
         wrapper1 = textwrap.TextWrapper(initial_indent='', subsequent_indent=' ' * 15, replace_whitespace=True,
                                         width=self._text_width)
