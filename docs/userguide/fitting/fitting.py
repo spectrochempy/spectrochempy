@@ -33,9 +33,9 @@
 # %% [markdown]
 # # Fitting
 #
-import numpy as np
 
 # %%
+import numpy as np
 import spectrochempy as scp
 from spectrochempy import ur
 
