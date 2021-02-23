@@ -203,5 +203,3 @@ ndadd = nd1a + nd4a
 # Comparison of the result array with the original (only the common region is visible, due to the masks)
 _ = scp.multiplot_map(datasets=[nd1a, nd4a, ndadd], colormap='viridis', sharex=0, sharey=True,
                      nrow=1, ncol=3, figsize=(8, 3), dpi=100)
-
-# %%

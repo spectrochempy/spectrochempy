@@ -2,7 +2,9 @@
 
 ## Version 0.2.14
 
-* 
+**BUGS FIXED**
+
+* alignment along several dimensions (issue #248)
 
 ## Version 0.2.13
 
