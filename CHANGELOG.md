@@ -1,5 +1,15 @@
 # What\'s new
 
+## Version 0.2.14
+
+* 
+
+## Version 0.2.13
+
+**BUGS FIXED**
+
+* Solved the problem that reading of experimental datasets was too slow in v.0.2.12.
+
 ## Version 0.2.12
 
 **BUGS FIXED**
