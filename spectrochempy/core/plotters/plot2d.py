@@ -385,7 +385,7 @@ def plot_2D(dataset, **kwargs):
     else:
         zdata = new.RI.masked_data  # new.imag.masked_data #TODO: quaternion case (3 imag.components)
 
-    zlim = kwargs.get('zlim', (zdata.min(), zdata.max()))
+    zlim = kwargs.get('zlim', (np.ma.min(zdata), np.ma.max(zdata)))
 
     if method in ['stack', 'waterfall']:
 

@@ -4,7 +4,7 @@ from pint.errors import (UndefinedUnitError)
 from quaternion import quaternion
 from hypothesis import given, settings, strategies as st
 import hypothesis.extra.numpy as hen
-from datetime import timedelta
+# from datetime import timedelta
 import spectrochempy as scp
 from spectrochempy.units import ur
 from spectrochempy.utils import get_user_and_node, SpectroChemPyException
@@ -17,7 +17,7 @@ typequaternion = np.dtype(np.quaternion)
 
 
 # test minimal constructeur and dtypes
-@settings(deadline=timedelta(milliseconds=1000))  # don'y know why, but sometimes necessary for TRAVIS CI.
+@settings(deadline=None)  # don'y know why, but sometimes necessary for TRAVIS CI.
 @given(st.lists(st.none()), st.lists(st.integers()), st.lists(st.floats()), st.lists(st.complex_numbers()))
 def test_1D_NDDataset(a, b, c, d):
     # 1D
@@ -46,7 +46,7 @@ def test_1D_NDDataset(a, b, c, d):
         assert ds.history == []
 
 
-@settings(deadline=timedelta(milliseconds=1000))
+@settings(deadline=None)
 @given(hen.arrays(float, st.tuples(st.integers(1, 3), st.integers(1, 3))))
 def test_2D_NDDataset(arr):
     # 2D

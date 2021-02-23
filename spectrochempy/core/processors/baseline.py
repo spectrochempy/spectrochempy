@@ -245,7 +245,7 @@ class BaselineCorrection(HasTraits):
             elif self.interpolation == 'pchip':
                 for i in range(new.shape[0]):
                     y = scipy.interpolate.PchipInterpolator(xbase.data, sbase.data[i])
-                    baseline[i] = y(coords)
+                    baseline[i] = y(coords.data)
 
         elif self.method == 'multivariate':
 
