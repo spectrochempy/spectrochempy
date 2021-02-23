@@ -607,7 +607,6 @@ class NDPlot(HasTraits):
     def _preferences_default(self):
         # Reset all preferences
         prefs = Preferences()
-        prefs.reset()
         return prefs
 
     # ..................................................................................................................

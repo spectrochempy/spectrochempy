@@ -93,6 +93,10 @@ class Importer(HasTraits):
                 # here files are read from the disk using filenames
                 self._switch_protocol(key, self.files, **kwargs)
 
+        # now we will reset preference for this newly loaded datasets
+        prefs = self.datasets[0].preferences
+        prefs.reset()
+
         if len(self.datasets) == 1:
             nd = self.datasets[0]  # a single dataset is returned
             name = kwargs.pop('name', None)
