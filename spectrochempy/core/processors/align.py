@@ -147,40 +147,37 @@ def align(dataset, *others, **kwargs):
         # no necessary alignment
         return objects
 
-    # get all objets to align
-    _objects = {}
-    _nobj = 0
-
-    for idx, object in enumerate(objects):
-
-        if not object.implements('NDDataset'):
-            error_(
-                f'Bad object(s) found: {object}. Note that only NDDataset '
-                f'objects are accepted '
-                f'for alignment')
-            return None
-
-        _objects[_nobj] = {'obj': object.copy(), 'idx': idx, }
-        _nobj += 1
-
-    _last = _nobj - 1
-
-    # get the reference object (by default the first, except if method if
-    # set to 'last'
-    ref_obj_index = 0
-    if method == 'last':
-        ref_obj_index = _last
-    ref_obj = _objects[ref_obj_index]['obj']
-
     # evaluate on which axis we align
-    axis, dims = ref_obj.get_axis(only_first=False, **kwargs)
-
-    if len(dims) > 1:
-        # mutidimensional alignment
-        print()
+    axis, dims = dataset.get_axis(only_first=False, **kwargs)
 
     # check compatibility of the dims and prepare the dimension for alignment
     for axis, dim in zip(axis, dims):
+
+        # get all objets to align
+        _objects = {}
+        _nobj = 0
+
+        for idx, object in enumerate(objects):
+
+            if not object.implements('NDDataset'):
+                error_(
+                    f'Bad object(s) found: {object}. Note that only NDDataset '
+                    f'objects are accepted '
+                    f'for alignment')
+                return None
+
+            _objects[_nobj] = {'obj': object.copy(), 'idx': idx, }
+            _nobj += 1
+
+        _last = _nobj - 1
+
+        # get the reference object (by default the first, except if method if
+        # set to 'last'
+        ref_obj_index = 0
+        if method == 'last':
+            ref_obj_index = _last
+
+        ref_obj = _objects[ref_obj_index]['obj']
 
         # as we will sort their coordinates at some point, we need to know
         # if the coordinates need to be reversed at
@@ -286,19 +283,23 @@ def align(dataset, *others, **kwargs):
 
             # update the data and mask
             coord = obj.coordset[dim]
-            coord_data = set(coord.data)
+            coord_data = set(np.around(coord.data, ndec))
 
             dim_loc = new_coord._loc2index(sorted(coord_data))
             loc = tuple(prepend_keys + [dim_loc])
 
             new_obj._data = new_obj_data
 
-            # mask all the data -we will unmask later the relevant data in
+            # mask all the data then unmask later the relevant data in
             # the next step
-            new_obj.mask = MASKED
 
-            # remove the mask for the selected part of the array
-            new_obj.mask[loc] = False
+            if not new_obj.is_masked:
+                new_obj.mask = MASKED
+                new_obj.mask[loc] = False
+            else:
+                mask =  new_obj.mask.copy()
+                new_obj.mask = MASKED
+                new_obj.mask[loc] = mask
 
             # set the data for the loc
             new_obj._data[loc] = obj.data
@@ -328,19 +329,23 @@ def align(dataset, *others, **kwargs):
                     'Interpolation not yet implemented - for now equivalent '
                     'to `outer`')
 
-    # now return the new transformed object in the same order as the passed
-    # objects
-    # and mask the missing values (for the moment they are defined to NaN
-    # we also transform into linear coord if possible
+        # the new transformed object must be in the same order as the passed
+        # objects
+        # and the missing values must be masked (for the moment they are defined to NaN
 
-    for index, object in _objects.items():
-        obj = object['obj']
-        # obj[np.where(np.isnan(obj))] = MASKED  # mask NaN values
-        obj[np.where(np.isnan(
-            obj))] = 99999999999999.  # replace NaN values (to simplify
-        # comparisons)
-        idx = int(object['idx'])
-        objects[idx] = obj
+        for index, object in _objects.items():
+            obj = object['obj']
+            # obj[np.where(np.isnan(obj))] = MASKED  # mask NaN values
+            obj[np.where(np.isnan(
+                obj))] = 99999999999999.  # replace NaN values (to simplify
+            # comparisons)
+            idx = int(object['idx'])
+            objects[idx] = obj
+
+            # we also transform into linear coord if possible ?
+            pass  # TODO:
+
+    # Now return
 
     return tuple(objects)
 
