@@ -323,6 +323,9 @@ class CoordSet(HasTraits):
     # ..................................................................................................................
     @property
     def coords(self):
+        """
+        list -Coordinates in the coordset
+        """
         return self._coords
 
     # ..................................................................................................................
@@ -344,8 +347,8 @@ class CoordSet(HasTraits):
     # ..................................................................................................................
     @property
     def is_empty(self):
-        """bool - True if there is no coords defined (readonly
-        property).
+        """
+        bool - True if there is no coords defined.
         """
         if self._coords:
             return len(self._coords) == 0
@@ -355,8 +358,8 @@ class CoordSet(HasTraits):
     # ..................................................................................................................
     @property
     def is_same_dim(self):
-        """bool - True if the coords define a single dimension (readonly
-        property).
+        """
+        bool - True if the coords define a single dimension
         """
         return self._is_same_dim
 
