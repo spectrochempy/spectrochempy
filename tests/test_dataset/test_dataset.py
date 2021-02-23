@@ -2,9 +2,7 @@ import numpy as np
 import pytest
 from pint.errors import (UndefinedUnitError)
 from quaternion import quaternion
-from hypothesis import given, settings, strategies as st
-import hypothesis.extra.numpy as hen
-# from datetime import timedelta
+
 import spectrochempy as scp
 from spectrochempy.units import ur
 from spectrochempy.utils import get_user_and_node, SpectroChemPyException
@@ -17,11 +15,19 @@ typequaternion = np.dtype(np.quaternion)
 
 
 # test minimal constructeur and dtypes
-@settings(deadline=None)  # don'y know why, but sometimes necessary for TRAVIS CI.
-@given(st.lists(st.none()), st.lists(st.integers()), st.lists(st.floats()), st.lists(st.complex_numbers()))
-def test_1D_NDDataset(a, b, c, d):
+adata = (
+    [],
+    [None, 1.],
+    [np.nan, np.inf],
+    [0, 1, 2],
+    [0., 1., 3.],
+    [0. + 1j, 10. + 3.j],
+    [0. + 1j, np.nan + 3.j],
+)
+@pytest.mark.parametrize("a", adata)
+def test_1D_NDDataset(a):
     # 1D
-    for arr in [a, b, c, d, np.array(a), np.array(b), np.array(c), np.array(d)]:
+    for arr in [a, np.array(a)]:
         ds = scp.NDDataset(arr)
         assert ds.size == len(arr)
         assert ds.shape == (ds.size,)
@@ -45,9 +51,12 @@ def test_1D_NDDataset(a, b, c, d):
         assert ds.description == ""
         assert ds.history == []
 
-
-@settings(deadline=None)
-@given(hen.arrays(float, st.tuples(st.integers(1, 3), st.integers(1, 3))))
+arrdata = (
+    np.array([[1,1.], [0, np.nan]]),
+    np.random.rand(2,3).astype('int64'),
+    np.random.rand(2, 4),
+)
+@pytest.mark.parametrize("arr", arrdata)
 def test_2D_NDDataset(arr):
     # 2D
     ds = scp.NDDataset(arr)
