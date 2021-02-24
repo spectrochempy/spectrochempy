@@ -286,7 +286,7 @@ def plot_2D(dataset, **kwargs):
     # the actual dimension name is the last in the new.dims list
     dimx = new.dims[-1]
     x = getattr(new, dimx)
-    if x.implements('CoordSet'):
+    if x is not None and x.implements('CoordSet'):
         # if several coords, take the default ones:
         x = x.default
     xsize = new.shape[-1]
@@ -338,7 +338,7 @@ def plot_2D(dataset, **kwargs):
     # the actual dimension name is the second in the new.dims list
     dimy = new.dims[-2]
     y = getattr(new, dimy)
-    if y.implements('CoordSet'):
+    if y is not None and y.implements('CoordSet'):
         # if several coords, take the default ones:
         y = y.default
     ysize = new.shape[-2]
