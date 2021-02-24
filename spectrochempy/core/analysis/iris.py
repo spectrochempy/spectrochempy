@@ -54,6 +54,13 @@ class IRIS:
             In a
             ny case, the same information is returned in self._log
         """
+        # eventually deal with multiple coordinates
+        # Limited to 2D dataset
+
+        # if multiple coords for a given dimension, take the default ones:
+        coord_x = X.x.default
+        coord_y = X.y.default
+
         # check options
         # defines the kernel
 
@@ -122,8 +129,8 @@ class IRIS:
                 p = Coord(p, title='External variable')
                 pval = p.data  # values
         else:
-            p = X.y
-            pval = X.y.data  # values
+            p = coord_y
+            pval = p.data  # values
 
         # if 'guess' in param:
         #     guess = param['guess']       <-- # TODO: never used.
@@ -134,17 +141,17 @@ class IRIS:
 
         # define containers for outputs
         if not regularization:
-            f = np.zeros((1, len(eps), len(X.x.data)))
+            f = np.zeros((1, len(eps), len(coord_x.data)))
             RSS = np.zeros((1))
             SM = np.zeros((1))
 
         if regularization and not searchLambda:
-            f = np.zeros((len(lamb), len(eps), len(X.x.data)))
+            f = np.zeros((len(lamb), len(eps), len(coord_x.data)))
             RSS = np.zeros((len(lamb)))
             SM = np.zeros((len(lamb)))
 
         if regularization and searchLambda:
-            f = np.zeros((4, len(eps), len(X.x.data)))
+            f = np.zeros((4, len(eps), len(coord_x.data)))
             RSS = np.zeros((4))
             SM = np.zeros((4))
 
@@ -171,7 +178,7 @@ class IRIS:
                 print('Solving for {} wavenumbers and {} spectra, no regularization\n'
                       .format(X.shape[1], X.shape[0]))
             # une scipy.nnls() to solve the linear problem: X = K f
-            for j, freq in enumerate(X.x.data):
+            for j, freq in enumerate(coord_x.data):
                 f[0, :, j] = optimize.nnls(K.data, X[:, j].data.squeeze())[0]
             res = X.data - np.dot(K.data, f[0].data)
             RSS[0] = np.sum(res ** 2)
@@ -207,7 +214,7 @@ class IRIS:
                 --------
                 f, RSS and SM for a given regularization parameter
                 """
-                fi = np.zeros((len(eps), len(X.x.data)))
+                fi = np.zeros((len(eps), len(coord_x.data)))
                 if verbose:
                     print('... Solving for lambda = {} ...'.format(lamda))
                 G = nearestPD(G0 + 2 * lamda * S)
@@ -217,7 +224,7 @@ class IRIS:
                 # SEE: https://github.com/facebookresearch/GradientEpisodicMemory/issues/2#issuecomment-431826393
                 G += G * 0.00001
 
-                for j, freq in enumerate(X.x.data):
+                for j, freq in enumerate(coord_x.data):
                     fi[:, j] = quadprog.solve_qp(G, a[j].squeeze(), C, b)[0]
 
                 resi = X.data - np.dot(K.data, fi)
@@ -358,11 +365,12 @@ class IRIS:
         X_hat : |NDDataset|
             The reconstructed dataset.
         """
-        X_hat = NDDataset(np.zeros((self.f.z.size, self.X.y.size, self.X.x.size)),
+        X_hat = NDDataset(np.zeros((self.f.z.size, *self.X.shape)),
                           title=self.X.title, units=self.X.units)
 
         X_hat.name = '2D-IRIS Reconstructed datasets'
-        X_hat.set_coordset(z=self.f.z, y=self.X.y, x=self.X.x)
+        X_hat.set_coordset(z=self.f.z, y=self.X.y, x=self.X.x)   # TODO: take into account the fact that coordinates
+        # may have other names
         for i in range(X_hat.z.size):
             X_hat[i] = np.dot(self.K.data, self.f[i].data.squeeze())
         return X_hat

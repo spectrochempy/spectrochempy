@@ -418,7 +418,16 @@ class CoordSet(HasTraits):
 
     @property
     def default(self):
+        """
+        Coord - default coordinates
+        """
         return self[self._default]
+
+    @property
+    def data(self):
+        # in case data is called on a coordset for dimension with multiple coordinates
+        # return the first coordinates
+        return self.default.data
 
     # ..................................................................................................................
     @property

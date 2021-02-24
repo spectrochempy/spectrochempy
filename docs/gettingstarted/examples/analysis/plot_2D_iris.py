@@ -94,7 +94,7 @@ iris = scp.IRIS(X_, param, verbose=False)
 ########################################################################################################################
 # Plots the results
 iris.plotdistribution()
-iris.plotmerit()
+_ = iris.plotmerit()
 
 ###############################################################################
 # ## With regularization and a manual seach
@@ -110,7 +110,7 @@ param = {
 iris = scp.IRIS(X_, param, verbose=False)
 iris.plotlcurve()
 iris.plotdistribution(-7)
-iris.plotmerit(-7)
+_ = iris.plotmerit(-7)
 
 ###############################################################################
 # ## Automatic search
@@ -127,7 +127,7 @@ param = {
 iris = scp.IRIS(X_, param, verbose=False)
 iris.plotlcurve()
 iris.plotdistribution(-1)
-iris.plotmerit(-1)
+_ = iris.plotmerit(-1)
 
 ""
 # scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

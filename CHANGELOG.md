@@ -2,6 +2,10 @@
 
 ## Version 0.2.14
 
+**NEW FEATURES**
+
+* a default coordiate can now be selected for for multiple coordinates dimensions.
+
 **BUGS FIXED**
 
 * alignment along several dimensions (issue #248)
