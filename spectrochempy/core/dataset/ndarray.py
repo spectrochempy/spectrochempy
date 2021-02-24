@@ -2306,7 +2306,16 @@ class NDArray(HasTraits):
                         if new.title == 'Absorbance':
                             new._title = 'Transmittance'
 
-                if not self.linear:
+                # Now we need to transform the data accordingly
+                # In the case of LinearCoordinate, it would be simple if the new units led to linear
+                # scale, but sometimes it is not the case
+                # for instance when we transform from wavenumber to wavelength.
+                # So we work on the data whatever the case (linear or non linera and we transform later to
+                # linear case if needed.
+
+                linear = self.linear
+
+                if not linear:
                     new._data = new._data * scale  # new * scale #
                 else:
                     new._increment = new._increment * scale

@@ -6,17 +6,17 @@
 # ======================================================================================================================
 
 """
-2D-IRIS analysis example
-=========================
+NDDataset coordinates example
+=============================
 
-In this example, we perform the 2D IRIS analysis of CO adsorption on a sulfide catalyst.
+In this example, we show how coordinates can be used in SpectroChemPy
 
 """
 
 import spectrochempy as scp
 
 ########################################################################################################################
-# ## Uploading dataset
+# ## Uploading a dataset
 
 X = scp.read('irdata/CO@Mo_Al2O3.SPG')
 
@@ -27,9 +27,17 @@ X = scp.read('irdata/CO@Mo_Al2O3.SPG')
 print(X.coordset)
 
 ########################################################################################################################
+# To display them individually use the ``x`` and ``y`` attributes of the dataset ``X``:
+
+X.x
+
+""
+X.y
+
+########################################################################################################################
 # ## Setting new coordinates
 #
-# Each experiments corresponding to a timestamp correspond to a given pressure of CO in the intrared cell. 
+# In this example, each experiments have a timestamp corresponds to the time when a given pressure of CO in the intrared cell was set. 
 #
 # Hence it would be interesting to replace the "useless" timestamps (``y``) by a pressure coordinates:
 
@@ -37,13 +45,24 @@ pressures = [0.00300, 0.00400, 0.00900, 0.01400, 0.02100, 0.02600, 0.03600,
              0.05100, 0.09300, 0.15000, 0.20300, 0.30000, 0.40400, 0.50300,
              0.60200, 0.70200, 0.80100, 0.90500, 1.00400]
 
-""
-c_pressures = scp.Coord(pressures, title='pressure', units='torr')
+###############################################################################
+# 1. A first way to do this is to replace the time coordinates by the pressure coordinate
 
 ###############################################################################
-# Now we can set multiple coordinates:
+# *(we first make a copy of the time coordinates for later use the original will be destroyed by the following operation)*
 
-c_times = X.y.copy()  # the original coordinate
+c_times = X.y.copy()
+
+###############################################################################
+# Now we perform the replacement with this new coordinate:
+
+c_pressures = scp.Coord(pressures, title='pressure', units='torr')
+X.y = c_pressures
+print(X.y)
+
+###############################################################################
+# 2. A second way is to affect several different coordinates to the corresponding dimension. To do this, the simplest is to affect a list of coordinates instead of a single one:
+
 X.y = [c_times, c_pressures]
 print(X.y)
 
@@ -69,53 +88,23 @@ _ = X_.plot()
 _ = X_.plot_map()
 
 ###############################################################################
-# ## IRIS analysis without regularization
+# The same can be done for the x coordinates.
+#
+# Let's take for instance row with index 10 of the previous dataset
 
-########################################################################################################################
-# Perform IRIS without regularization (the verbose flag can be set to True to have information on the running process)
-param = {
-        'epsRange': [-8, -1, 50],
-        'kernel': 'langmuir'
-        }
-iris = scp.IRIS(X_, param, verbose=False)
-
-########################################################################################################################
-# Plots the results
-iris.plotdistribution()
-_ = iris.plotmerit()
+row10 = X_[10].squeeze()
+row10.plot()
+print(row10.coordset)
 
 ###############################################################################
-# ## With regularization and a manual seach
+# Now we wants to add a coordinate with the wavelength instead of wavenumber. 
 
-########################################################################################################################
-# Perform  IRIS with regularization, manual search
-param = {
-        'epsRange': [-8, -1, 50],
-        'lambdaRange': [-10, 1, 12],
-        'kernel': 'langmuir'
-        }
-
-iris = scp.IRIS(X_, param, verbose=False)
-iris.plotlcurve()
-iris.plotdistribution(-7)
-_ = iris.plotmerit(-7)
-
-###############################################################################
-# ## Automatic search
-
-########################################################################################################################
-# Now try an automatic search of the regularization parameter:
-
-param = {
-        'epsRange': [-8, -1, 50],
-        'lambdaRange': [-10, 1],
-        'kernel': 'langmuir'
-        }
-
-iris = scp.IRIS(X_, param, verbose=False)
-iris.plotlcurve()
-iris.plotdistribution(-1)
-_ = iris.plotmerit(-1)
+c_wavenumber = row10.x.copy()
+c_wavelength = row10.x.to('nanometer')
+print(c_wavenumber, c_wavelength)
 
 ""
 # scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
+
+""
+
