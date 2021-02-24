@@ -358,7 +358,9 @@ def plot_1D(dataset, **kwargs):
     # the actual dimension name is the first in the new.dims list
     dimx = new.dims[-1]
     x = getattr(new, dimx)
-
+    if x.implements('CoordSet'):
+        # if several coords, take the default ones:
+        x = x.default
     xsize = new.size
     show_x_points = False
     if x is not None and hasattr(x, 'show_datapoints'):

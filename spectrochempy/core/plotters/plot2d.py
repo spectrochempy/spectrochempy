@@ -23,8 +23,7 @@ import matplotlib as mpl
 import numpy as np
 
 from spectrochempy.core.plotters.plotutils import make_label
-from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core.dataset.coordset import CoordSet
+from spectrochempy.core.dataset.coord import LinearCoord
 
 
 # ======================================================================================================================
@@ -287,14 +286,16 @@ def plot_2D(dataset, **kwargs):
     # the actual dimension name is the last in the new.dims list
     dimx = new.dims[-1]
     x = getattr(new, dimx)
-
+    if x.implements('CoordSet'):
+        # if several coords, take the default ones:
+        x = x.default
     xsize = new.shape[-1]
     show_x_points = False
     if x is not None and hasattr(x, 'show_datapoints'):
         show_x_points = x.show_datapoints
     if show_x_points:
         # remove data and units for display
-        x = Coord.arange(xsize)
+        x = LinearCoord.arange(xsize)
 
     discrete_data = False
 
@@ -337,7 +338,7 @@ def plot_2D(dataset, **kwargs):
     # the actual dimension name is the second in the new.dims list
     dimy = new.dims[-2]
     y = getattr(new, dimy)
-    if isinstance(y, CoordSet):
+    if y.implements('CoordSet'):
         # if several coords, take the default ones:
         y = y.default
     ysize = new.shape[-2]
@@ -347,7 +348,7 @@ def plot_2D(dataset, **kwargs):
         show_y_points = y.show_datapoints
     if show_y_points:
         # remove data and units for display
-        y = Coord.arange(ysize)
+        y = LinearCoord.arange(ysize)
 
     if y is not None and (not y.is_empty or y.is_labeled):
         ydata = y.data
