@@ -171,6 +171,11 @@ class Coord(NDMath, NDArray):
 
         # Return a correct result only if the data are sorted  # return  # bool(self.data[0] > self.data[-1])
 
+    @property
+    def default(self):
+        # this is in case default is called on a coord, while it is a coordset property
+        return self
+
     # ------------------------------------------------------------------------------------------------------------------
     # hidden properties (for the documentation, only - we remove the docstring)
     # some of the property of NDArray has to be hidden because they

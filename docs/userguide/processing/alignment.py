@@ -59,9 +59,9 @@ print('shape:', dataset.shape)
 
 # %%
 nd1 = dataset[0:30, 0:4000]
-nd2 = dataset[0:30, 2000:5549] * 2
-nd3 = dataset[10:55, 0:4000] * 1.5
-nd4 = dataset[10:55, 2000:5549] * 3
+nd2 = dataset[0:30, 2000:5549]
+nd3 = dataset[10:55, 0:4000] 
+nd4 = dataset[10:55, 2000:5549] 
 _ = scp.multiplot_map(datasets=[nd1, nd2, nd3, nd4], colormap='viridis',
                       nrow=2, ncol=2, sharex=True, sharey=True, dpi=100)
 
@@ -173,17 +173,33 @@ _ = scp.multiplot_map(datasets=[nd2a, nd4a, ndadd], colormap='viridis', sharey=T
                       dpi=100)
 
 # %% [markdown]
-# /## Alignment along several dimensions (DO NOT WORK FOR NOW)
+# ## Alignment along several dimensions
 
 # %%
-# nd1a, nd2a, nd3a, nd4a = scp.align(nd1, nd2, nd3, nd4, dims=['y', 'x'])  # by default the outer method is used
-# nd1.shape, nd2.shape, nd3.shape, nd4.shape, nd1a.shape
+nd1a, nd4a = scp.align(nd1, nd4, dims=['y', 'x'])  # by default the outer method is used
+ndadd = nd1a + nd4a
+# Comparison of the result array with the original (only the common region is visible, due to the masks)
+_ = scp.multiplot_map(datasets=[nd1a, nd4a, ndadd], colormap='viridis', sharex=0, sharey=True,
+                     nrow=1, ncol=3, figsize=(8, 3), dpi=100)
+nd1a.shape,  nd4a.shape, ndadd.shape
 
 # %%
-# ndadd = nd1a + nd2a + nd3a + nd4a
-# nd1a
+nd1a, nd4a = scp.align(nd1, nd4, dims=['y', 'x'], method='inner')  # by default the outer method is used
+ndadd = nd1a + nd4a
+# Comparison of the result array with the original (only the common region is visible, due to the masks)
+_ = scp.multiplot_map(datasets=[nd1a, nd4a, ndadd], colormap='viridis', sharex=0, sharey=True,
+                     nrow=1, ncol=3, figsize=(8, 3), dpi=100)
 
 # %%
-# # Comparison of the result array with the original (only the common region is visible, due to the masks)
-# _ = scp.multiplot_map(datasets=[dataset, ndadd], colormap='viridis', sharex=0, sharey=True,
-#                      nrow=1, ncol=2, figsize=(8, 3), dpi=100)
+nd1a, nd4a = scp.align(nd1, nd4, dims=['y', 'x'], method='first')  # by default the outer method is used
+ndadd = nd1a + nd4a
+# Comparison of the result array with the original (only the common region is visible, due to the masks)
+_ = scp.multiplot_map(datasets=[nd1a, nd4a, ndadd], colormap='viridis', sharex=0, sharey=True,
+                     nrow=1, ncol=3, figsize=(8, 3), dpi=100)
+
+# %%
+nd1a, nd4a = scp.align(nd1, nd4, dims=['y', 'x'], method='last')  # by default the outer method is used
+ndadd = nd1a + nd4a
+# Comparison of the result array with the original (only the common region is visible, due to the masks)
+_ = scp.multiplot_map(datasets=[nd1a, nd4a, ndadd], colormap='viridis', sharex=0, sharey=True,
+                     nrow=1, ncol=3, figsize=(8, 3), dpi=100)

@@ -256,7 +256,10 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
                         newc = []
                         for c in self._coordset[idx]:
                             newc.append(c[item])
-                        new_coords[idx] = CoordSet(*newc, name=name)
+                        new_coords[idx] = CoordSet(*newc[::-1], name=name) # we reverse to be sure
+                        # the order will be # kept for internal coordinates
+                        new_coords[idx]._default = self._coordset[idx]._default # set the same default coord
+                        new_coords[idx]._is_same_dim = self._coordset[idx]._is_same_dim
 
                 elif isinstance(item, (np.ndarray, list)):
                     new_coords[idx] = self._coordset[idx][item]
