@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-# flake8: noqa
-# ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
-
 """
 2D-IRIS analysis example
 =========================
@@ -13,36 +6,82 @@ In this example, we perform the 2D IRIS analysis of CO adsorption on a sulfide c
 
 """
 
-import os
-
 import spectrochempy as scp
 
 ########################################################################################################################
-# Upload dataset
+# ## Uploading dataset
 
-X = scp.NDDataset.read_omnic(os.path.join('irdata', 'CO@Mo_Al2O3.SPG'))
+X = scp.read('irdata/CO@Mo_Al2O3.SPG')
 
 ########################################################################################################################
-# X has two coordinates: `wavenumbers` named "x" and `timestamps` (i.e. the time of recording)
-# named "y".
+# ``X`` has two coordinates: 
+# * `wavenumbers` named "x" 
+# * and `timestamps` (*i.e.,* the time of recording) named "y".
 print(X.coordset)
 
 ########################################################################################################################
-# We want to replace the timestamps ("y") by pressure coordinates.
-#
-# **Note**: To replace a coordinate always use its name not the index (i.e. "y" in the present case) or `update`
-# method. See the API reference or our User Guide for more information on this.
+# To display them individually use the ``x`` and ``y`` attributes of the dataset ``X``:
 
-p = [0.00300, 0.00400, 0.00900, 0.01400, 0.02100, 0.02600, 0.03600,
-     0.05100, 0.09300, 0.15000, 0.20300, 0.30000, 0.40400, 0.50300,
-     0.60200, 0.70200, 0.80100, 0.90500, 1.00400]
+X.x
 
-X.coordset["y"] = scp.Coord(p, title='pressure', units='torr')
+""
+X.y
 
 ########################################################################################################################
-# Select and plot the spectral range of interest
+# ## Setting new coordinates
+#
+# Each experiments corresponding to a timestamp correspond to a given pressure of CO in the intrared cell. 
+#
+# Hence it would be interesting to replace the "useless" timestamps (``y``) by a pressure coordinates:
+
+pressures = [0.00300, 0.00400, 0.00900, 0.01400, 0.02100, 0.02600, 0.03600,
+             0.05100, 0.09300, 0.15000, 0.20300, 0.30000, 0.40400, 0.50300,
+             0.60200, 0.70200, 0.80100, 0.90500, 1.00400]
+
+###############################################################################
+# 1. A first way to do this is to replace the time coordinates by the pressure coordinate
+
+###############################################################################
+# *(we first make a copy of the time coordinates for later use the original will be destroyed by the following operation)*
+
+c_times = X.y.copy()
+
+###############################################################################
+# Now we perform the replacement with this new coordinate:
+
+c_pressures = scp.Coord(pressures, title='pressure', units='torr')
+X.y = c_pressures
+print(X.y)
+
+###############################################################################
+# 2. A second way is to affect several different coordinates to the corresponding dimension. To do this, the simplest is to affect a list of coordinates instead of a single one:
+
+X.y = [c_times, c_pressures]
+print(X.y)
+
+###############################################################################
+# By default, the current coordinate is the first one (here `c_times`). For example, it will be used for plotting:
+
+prefs = X.preferences
+prefs.figure.figsize = (7,3)
+_ = X.plot(colorbar=True)
+_ = X.plot_map(colorbar=True)
+
+###############################################################################
+# To seamlessly work with the second coordinates (pressures), we can change the default coordinate:
+
+X.y.select(2)    # to select coordinate ``_2``
+X.y.default
+
+########################################################################################################################
+# Let's now plot the spectral range of interest. The default coordinate is now used:
 X_ = X[:, 2250.:1950.]
-X_.plot()
+print(X_.y.default)
+_ = X_.plot()
+_ = X_.plot_map()
+
+###############################################################################
+# ## IRIS analysis without regularization
 
 ########################################################################################################################
 # Perform IRIS without regularization (the verbose flag can be set to True to have information on the running process)
@@ -50,13 +89,15 @@ param = {
         'epsRange': [-8, -1, 50],
         'kernel': 'langmuir'
         }
-
 iris = scp.IRIS(X_, param, verbose=False)
 
 ########################################################################################################################
 # Plots the results
 iris.plotdistribution()
 iris.plotmerit()
+
+###############################################################################
+# ## With regularization and a manual seach
 
 ########################################################################################################################
 # Perform  IRIS with regularization, manual search
@@ -70,6 +111,9 @@ iris = scp.IRIS(X_, param, verbose=False)
 iris.plotlcurve()
 iris.plotdistribution(-7)
 iris.plotmerit(-7)
+
+###############################################################################
+# ## Automatic search
 
 ########################################################################################################################
 # Now try an automatic search of the regularization parameter:
@@ -85,4 +129,5 @@ iris.plotlcurve()
 iris.plotdistribution(-1)
 iris.plotmerit(-1)
 
+""
 # scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

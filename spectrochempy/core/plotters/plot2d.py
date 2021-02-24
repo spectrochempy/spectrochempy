@@ -337,9 +337,9 @@ def plot_2D(dataset, **kwargs):
     # the actual dimension name is the second in the new.dims list
     dimy = new.dims[-2]
     y = getattr(new, dimy)
-    # if several coords, take the first one:
     if isinstance(y, CoordSet):
-        y = y[0]
+        # if several coords, take the default ones:
+        y = y.default
     ysize = new.shape[-2]
 
     show_y_points = False

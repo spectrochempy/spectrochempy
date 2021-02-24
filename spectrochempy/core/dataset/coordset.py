@@ -15,7 +15,8 @@ import warnings
 import uuid
 
 import numpy as np
-from traitlets import HasTraits, List, Bool, Unicode, observe, All, validate, default, Dict
+from traitlets import HasTraits, List, Bool, Unicode, observe, All, validate, \
+    default, Dict, Int
 
 from spectrochempy.core.dataset.ndarray import NDArray, DEFAULT_DIM_NAME
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
@@ -43,6 +44,9 @@ class CoordSet(HasTraits):
     _copy = Bool(False)
     _sorted = Bool(True)
     _html_output = Bool(False)
+
+    # default coord index
+    _default = Int(0)
 
     # ------------------------------------------------------------------------------------------------------------------
     # initialization
@@ -172,9 +176,8 @@ class CoordSet(HasTraits):
                         # use the provided list of dims
                         coord.name = dims.pop(-1)
 
-                self._append(
-                    coord)  # append the coord (but instead of append,  # use assignation -in _append - to fire the
-                # validation process )
+                self._append(coord)  # append the coord (but instead of append,
+                # use assignation -in _append - to fire the validation process )
 
         # now evaluate keywords argument
         # ------------------------------
@@ -413,6 +416,10 @@ class CoordSet(HasTraits):
     # Mutable Properties
     # ------------------------------------------------------------------------------------------------------------------
 
+    @property
+    def default(self):
+        return self[self._default]
+
     # ..................................................................................................................
     @property
     def name(self):
@@ -489,6 +496,13 @@ class CoordSet(HasTraits):
         return keys
 
     # ..................................................................................................................
+    def select(self, val):
+        """
+        Select the default coord index
+        """
+        self._default = min(max(0, int(val) - 1), len(self.names))
+
+    #..................................................................................................................
     def set(self, *args, **kwargs):
         """
         Set one or more coordinates in the current CoordSet
@@ -973,6 +987,8 @@ class CoordSet(HasTraits):
     def __deepcopy__(self, memo):
         coords = self.__class__(tuple(cpy.deepcopy(ax, memo=memo) for ax in self), keepnames=True)
         coords.name = self.name
+        coords._is_same_dim = self._is_same_dim
+        coords._default = self._default
         return coords
 
     # ..................................................................................................................
@@ -980,9 +996,9 @@ class CoordSet(HasTraits):
         coords = self.__class__(tuple(cpy.copy(ax) for ax in self), keepnames=True)
         # name must be changed
         coords.name = self.name
-        # ans is_same_dim too for coordset
-        if self.implements('CoordSet'):
-            coords._is_same_dim = self.is_same_dim
+        # and is_same_dim and default for coordset
+        coords._is_same_dim = self._is_same_dim
+        coords._default = self._default
         return coords
 
         # ..................................................................................................................
