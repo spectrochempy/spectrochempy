@@ -300,16 +300,16 @@ def test_coordset_set(coord0, coord1, coord2):
         coords.set_units(('km/s', ('s', 'm')), z='radian')
 
     coords.set_units(('km/s', ('s', 'm')), z='radian', force=True)  # force change
-    assert str(coords) == 'CoordSet: [x:t, y:[_1:l, _2:g], z:z]'
+    assert str(coords) == 'CoordSet: [x:t, y:[_1:l, _2:wavelength], z:z]'
     assert coords.y_1.units == ur('s')
 
     # set item
 
     coords['z'] = coord2
-    assert str(coords) == 'CoordSet: [x:t, y:[_1:l, _2:g], z:temperature]'
+    assert str(coords) == 'CoordSet: [x:t, y:[_1:l, _2:wavelength], z:temperature]'
 
     coords['temperature'] = coord1
-    assert str(coords) == 'CoordSet: [x:t, y:[_1:l, _2:g], z:time-on-stream]'
+    assert str(coords) == 'CoordSet: [x:t, y:[_1:l, _2:wavelength], z:time-on-stream]'
 
     coords['y_2'] = coord2
     assert str(coords) == 'CoordSet: [x:t, y:[_1:l, _2:temperature], z:time-on-stream]'
