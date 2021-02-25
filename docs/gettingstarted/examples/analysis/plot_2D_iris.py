@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+# flake8: noqa
+# ======================================================================================================================
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+# ======================================================================================================================
+
 """
 2D-IRIS analysis example
 =========================
@@ -20,14 +27,6 @@ X = scp.read('irdata/CO@Mo_Al2O3.SPG')
 print(X.coordset)
 
 ########################################################################################################################
-# To display them individually use the ``x`` and ``y`` attributes of the dataset ``X``:
-
-X.x
-
-""
-X.y
-
-########################################################################################################################
 # ## Setting new coordinates
 #
 # Each experiments corresponding to a timestamp correspond to a given pressure of CO in the intrared cell. 
@@ -38,24 +37,13 @@ pressures = [0.00300, 0.00400, 0.00900, 0.01400, 0.02100, 0.02600, 0.03600,
              0.05100, 0.09300, 0.15000, 0.20300, 0.30000, 0.40400, 0.50300,
              0.60200, 0.70200, 0.80100, 0.90500, 1.00400]
 
-###############################################################################
-# 1. A first way to do this is to replace the time coordinates by the pressure coordinate
-
-###############################################################################
-# *(we first make a copy of the time coordinates for later use the original will be destroyed by the following operation)*
-
-c_times = X.y.copy()
-
-###############################################################################
-# Now we perform the replacement with this new coordinate:
-
+""
 c_pressures = scp.Coord(pressures, title='pressure', units='torr')
-X.y = c_pressures
-print(X.y)
 
 ###############################################################################
-# 2. A second way is to affect several different coordinates to the corresponding dimension. To do this, the simplest is to affect a list of coordinates instead of a single one:
+# Now we can set multiple coordinates:
 
+c_times = X.y.copy()  # the original coordinate
 X.y = [c_times, c_pressures]
 print(X.y)
 

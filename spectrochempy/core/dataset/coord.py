@@ -604,13 +604,13 @@ class LinearCoord(Coord):
         # we just do linear=True and these parameters are ignored
 
         if self._data is not None:
-            self.linear = True
+            self._linear = True
 
         elif not self.linear:
             # in case it was not already a linear array
             self.offset = offset
             self.increment = increment
-            self.linear = True
+            self._linear = True
 
     # ..................................................................................................................
     def implements(self, name=None):
@@ -627,6 +627,11 @@ class LinearCoord(Coord):
             return 'LinearCoord'
         else:
             return name == 'LinearCoord'
+
+    # ..................................................................................................................
+    @property  # read only
+    def linear(self):
+        return self._linear
 
     # ..................................................................................................................
     def geomspace(self):

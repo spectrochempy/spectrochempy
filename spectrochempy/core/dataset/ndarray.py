@@ -708,7 +708,7 @@ class NDArray(HasTraits):
         if not self.linear or self._data is None:
             return
 
-        self.linear = False  # to avoid action of the observer
+        self._linear = False  # to avoid action of the observer
 
         if self._squeeze_ndim > 1:
             error_("Linearization is only implemented for 1D data")
@@ -726,7 +726,7 @@ class NDArray(HasTraits):
                 self._offset = data[0]
                 self._size = data.size
                 self._data = None
-                self.linear = True
+                self._linear = True
             else:
                 self._linear = False
         else:
@@ -2261,58 +2261,94 @@ class NDArray(HasTraits):
         >>> print(ndd)
         NDArray: [float64] m (shape: (y:3, x:3))
         """
-        if inplace:
-            new = self
-        else:
-            new = self.copy()
+
+        new = self.copy()
+
         if other is None:
             units = None
             if self.units is None:
                 return new
             elif force:
                 new._units = None
+                if inplace:
+                    self._units = None
                 return new
+
         elif isinstance(other, str):
             units = ur.Unit(other)
+
         elif hasattr(other, 'units'):
             units = other.units
+
         else:
             units = ur.Unit(other)
+
         if self.has_units:
+
+            oldunits = self._units
+
+            def _transform(new):
+                # not a linear transform
+                udata = (new.data * new.units).to(units)
+                new._data = udata.m
+                new._units = udata.units
+
+                if new._roi is not None:
+                    roi = (np.array(new._roi) * self.units).to(units)
+                    new._roi = list(udata.m)
+                if new._linear:
+                    # try to make it linear as well
+                    new._linearize()
+                    if not new._linear and new.implements('LinearCoord'):
+                        # can't be linearized -> Coord
+                        if inplace:
+                            raise Exception(
+                                    'A LinearCoord object cannot be transformed to a non linear coordinate `inplace`. '
+                                    'Use to() instead of ito() and leave the `inplace` attribute to False')
+                        else:
+                            from spectrochempy import Coord
+                            new = Coord(new)
+                return new
+
             try:
-                if new.meta.larmor:  # _origin in ['topspin', 'nmr']:
-                    # its nmr data
+                if new.meta.larmor:  # _origin in ['topspin', 'nmr']
                     set_nmr_context(new.meta.larmor)
                     with ur.context('nmr'):
-                        q = Quantity(1., self._units).to(units)
-                else:
-                    q = Quantity(1., self._units).to(units)
-
-                scale = q.magnitude
-                new._units = q.units
+                        new = _transform(new)
 
                 # particular case of dimensionless units: absorbance and transmittance
-
-                if self.units in [ur.transmittance, ur.absolute_transmittance]:
+                if oldunits in [ur.transmittance, ur.absolute_transmittance]:
                     if units == ur.absorbance:
-                        new._data = -np.log10(new._data * scale)
-                        scale = 1.
-                        if new.title == 'Transmittance':
-                            new._title = 'Absorbance'
+                        udata = (new.data * new.units).to(units)
+                        new._data = -np.log10(udata.m)
+                        new._units = units
+                        if new.title.lower() == 'transmittance':
+                            new._title = 'absorbance'
 
-                elif self.units == ur.absorbance:
+                elif oldunits == ur.absorbance:
                     if units in [ur.transmittance, ur.absolute_transmittance]:
-                        new._data = 10. ** (-new._data)
-                        if new.title == 'Absorbance':
-                            new._title = 'Transmittance'
-
-                if not self.linear:
-                    new._data = new._data * scale  # new * scale #
+                        scale = Quantity(1., self._units).to(units).magnitude
+                        new._data = 10. ** -new.data * scale
+                        new._units = units
+                        if new.title.lower() == 'absorbance':
+                            new._title = 'transmittance'
                 else:
-                    new._increment = new._increment * scale
-                new._offset = new._offset * scale
-                if new._roi is not None:
-                    new._roi = list(np.array(new._roi) * scale)
+                    # change the title for spectrocopic units change
+                    new = _transform(new)
+                    if (oldunits.dimensionality in ['1/[length]', '[length]', '[length] ** 2 * [mass] / [time] ** 2']
+                            and
+                        new._units.dimensionality == '1/[time]'):
+                        new._title = 'frequency'
+                    elif (oldunits.dimensionality in ['1/[time]', '[length] ** 2 * [mass] / [time] ** 2'] and
+                          new._units.dimensionality == '1/[length]'):
+                        new._title = 'wavenumber'
+                    elif (oldunits.dimensionality in ['1/[time]', '1/[length]',
+                                                      '[length] ** 2 * [mass] / [time] ** 2'] and
+                          new._units.dimensionality == '[length]'):
+                        new._title = 'wavelength'
+                    elif (oldunits.dimensionality in ['1/[time]', '1/[length]', '[length]'] and
+                          new._units.dimensionality == '[length] ** 2 * [mass] / [time] ** 2'):
+                        new._title = 'energy'
 
             except DimensionalityError as exc:
                 if force:
@@ -2326,7 +2362,16 @@ class NDArray(HasTraits):
             else:
                 warnings.warn("There is no units for this NDArray!", SpectroChemPyWarning)
 
-        if not inplace:
+        if inplace:
+            self._data = new._data
+            self._units = new._units
+            self._offset = new._offset
+            self._increment = new._increment
+            self._title = new._title
+            self._roi = new._roi
+            self._linear = new._linear
+
+        else:
             return new
 
     def to_base_units(self, inplace=False):

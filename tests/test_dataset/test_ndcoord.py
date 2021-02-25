@@ -307,16 +307,7 @@ def test_linearcoord():
     coord6 = Coord(linear=True, offset=2.0, increment=2.0, size=10)
     assert np.all(coord6.data == (coord4.data + 1.0) * 2.)
 
-    # %%
     LinearCoord(offset=2.0, increment=2.0, size=10)
-
-    # %%
-    X = read('irdata/CO@Mo_Al2O3.SPG')
-    XX = X.x.copy()
-    X.x.linear = True
-    ((X.x.data - XX.data).ptp(), X.x.increment,
-     (X.x.data - XX.data).ptp() * 100 / X.x.increment)  # TODO : why such a difference!!!!
-    X.x.ito('m^-1')
 
     coord0 = LinearCoord.linspace(200., 300., 3, labels=['cold', 'normal', 'hot'], units="K", title='temperature')
     coord1 = LinearCoord.linspace(0., 60., 100, labels=None, units="minutes", title='time-on-stream')
