@@ -184,7 +184,7 @@ class BaselineCorrection(HasTraits):
         x = lastcoord.data
         self.ranges = [[x[0], x[2]], [x[-3], x[-1]]]
         self._extendranges(*ranges, **kwargs)
-        self.ranges = trim_ranges(*self.ranges)
+        self.ranges = ranges = trim_ranges(*self.ranges)
 
         baseline = np.zeros_like(new)
 

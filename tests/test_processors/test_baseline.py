@@ -14,7 +14,7 @@ import pytest
 # noinspection PyUnresolvedReferences
 import spectrochempy as scp
 from spectrochempy import show, BaselineCorrection, NDDataset, ur
-from spectrochempy.utils.testing import assert_dataset_almost_equal
+from spectrochempy.utils.testing import assert_dataset_almost_equal, assert_dataset_equal
 
 path = os.path.dirname(os.path.abspath(__file__))
 
@@ -99,6 +99,19 @@ def test_notebook_basecor_bug():
 def test_issue_227():
     # IR spectrum, we want to make a baseline correction on the absorbance vs. time axis:
     ir = scp.read('irdata/nh4y-activation.spg')
+
+    # baseline correction along x
+    blc = scp.BaselineCorrection(ir)
+    s1 = blc([5999., 3500.], [1800., 1500.], method='multivariate', interpolation='pchip')
+
+    # baseline correction the transposed data along x (now on axis 0) -> should produce the same results
+    # baseline correction along axis -1 previuosly
+    blc = scp.BaselineCorrection(ir.T)
+    s2 = blc([5999., 3500.], [1800., 1500.], dim='x', method='multivariate', interpolation='pchip')
+
+    # compare
+    assert_dataset_equal(s1, s2.T)
+
     ir.y = ir.y - ir[0].y
     irs = ir[:, 2000.0:2020.0]
     blc = scp.BaselineCorrection(irs)
