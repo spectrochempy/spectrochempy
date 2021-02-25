@@ -11,7 +11,6 @@ import numpy as np
 import pytest
 
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
-from spectrochempy.core.readers.importer import read
 from spectrochempy.units import ur, Quantity
 from spectrochempy.utils.testing import assert_array_equal, assert_equal_units
 from spectrochempy.core import debug_

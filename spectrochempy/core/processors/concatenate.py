@@ -241,34 +241,61 @@ def concatenate(*datasets, **kwargs):
         coords = coordss[0].copy()
 
         try:
-            coords[dim] = Coord(coords[dim], linear=False)  # de-linearize the
-            # coordinates
+            coords[dim] = Coord(coords[dim], linear=False)  # de-linearize the coordinates
             coords[dim]._data = np.concatenate(tuple((c[dim].data for c in coordss)))
         except ValueError:
             pass
 
-        # concatenation of the labels (fist check the presence of at least one labeled coordinates)
+        # concatenation of the labels (first check the presence of at least one labeled coordinates)
         is_labeled = False
         for i, c in enumerate(coordss):
-            if c[dim].is_labeled:
-                # at least one of the coord is labeled
-                is_labeled = True
-                break
+            if c[dim].implements() in ['Coord', 'LinearCoord']:
+                # this is a coord
+                if c[dim].is_labeled:
+                    # at least one of the coord is labeled
+                    is_labeled = True
+                    break
+            if c[dim].implements('CoordSet'):
+                # this is a coordset
+                for coord in c[dim]:
+                    if coord.is_labeled:
+                        # at least one of the coord is labeled
+                        is_labeled = True
+                        break
 
         if is_labeled:
             labels = []
             # be sure that now all the coordinates have a label, or create one
             for i, c in enumerate(coordss):
-                if c[dim].is_labeled:
-                    labels.append(c[dim].labels)
-                else:
-                    labels.append(str(i))
+                if c[dim].implements() in ['Coord', 'LinearCoord']:
+                    # this is a coord
+                    if c[dim].is_labeled:
+                        labels.append(c[dim].labels)
+                    else:
+                        labels.append(str(i))
+                if c[dim].implements('CoordSet'):
+                    # this is a coordset
+                    for coord in c[dim]:
+                        if coord.is_labeled:
+                            labels.append(c[dim].labels)
+                        else:
+                            labels.append(str(i))
+
+            if isinstance(coords[dim], Coord):
+                coords[dim]._labels = np.concatenate(labels)
+            if coords[dim].implements('CoordSet'):
+                for i, coord in enumerate(coords[dim]):
+                    coord._labels = np.concatenate(labels[i::len(coords[dim])])
 
             coords[dim]._labels = np.concatenate(labels)
 
-    out = NDDataset(data, coordset=coords, mask=mask, units=units)
-    # for ss in sss:
-    #     ss = ss.squeeze()
+    # out = NDDataset(data, coordset=coords, mask=mask, units=units)    # This doesn't keep the order of the
+    # coordinates
+    out = dataset.copy()
+    out._data = data
+    out._coordset[dim] = coords[dim]
+    out._mask = mask
+    out._units = units
 
     thist = 'Stack' if axis == 0 else 'Concatenation'
 

@@ -132,6 +132,7 @@ blc = scp.BaselineCorrection(X)
 
 # %%
 Xcorr = blc.compute(ranges)
+Xcorr
 
 # %% [markdown]
 # * plot the result (blc.corrected.plot() would lead to the same result)
@@ -201,6 +202,7 @@ ranges = [[5900.0, 5400.0], [4000., 4500.], [2100., 2000.0], [1550., 1555.]]
 # </div>
 
 # %%
+blc = scp.BaselineCorrection(X)
 blc.compute(*ranges, interpolation='polynomial', order=6)
 
 # %% [markdown]
@@ -229,6 +231,7 @@ _ = blc.corrected.plot()
 # over time. Typical optimum values are `npc=2` or `npc=3` (see Exercises below).
 
 # %%
+blc = scp.BaselineCorrection(X)
 blc.compute(*ranges, interpolation='pchip', method='multivariate', npc=2)
 _ = blc.corrected.plot()
 
@@ -251,8 +254,8 @@ npc = 3  # only used for 'multivariate'
 blc = scp.BaselineCorrection(X)
 Xcorr = blc.compute(*ranges, interpolation=interpolation, order=order, method=method, npc=npc)
 
-axes = scp.multiplot([X, Xcorr], labels=['Original', 'Baseline corrected'], sharex=True, nrow=2, ncol=1, figsize=(7, 6),
-                     dpi=96)
+axes = scp.multiplot([X, Xcorr], labels=['Original', 'Baseline corrected'], 
+                     sharex=True, nrow=2, ncol=1, figsize=(7, 6), dpi=96)
 blc.show_regions(axes['axe21'])
 
 # %% [markdown]

@@ -6,24 +6,15 @@ from quaternion import quaternion
 import spectrochempy as scp
 from spectrochempy.units import ur
 from spectrochempy.utils import get_user_and_node, SpectroChemPyException
-from spectrochempy.utils.testing import (assert_dataset_equal, assert_dataset_almost_equal,
-                                         assert_equal, assert_array_almost_equal,
-                                         assert_array_equal, raises, RandomSeedContext,
-                                         )
+from spectrochempy.utils.testing import (assert_dataset_equal, assert_dataset_almost_equal, assert_equal,
+                                         assert_array_almost_equal, assert_array_equal, raises, RandomSeedContext, )
 
 typequaternion = np.dtype(np.quaternion)
 
-
 # test minimal constructeur and dtypes
-adata = (
-    [],
-    [None, 1.],
-    [np.nan, np.inf],
-    [0, 1, 2],
-    [0., 1., 3.],
-    [0. + 1j, 10. + 3.j],
-    [0. + 1j, np.nan + 3.j],
-)
+adata = ([], [None, 1.], [np.nan, np.inf], [0, 1, 2], [0., 1., 3.], [0. + 1j, 10. + 3.j], [0. + 1j, np.nan + 3.j],)
+
+
 @pytest.mark.parametrize("a", adata)
 def test_1D_NDDataset(a):
     # 1D
@@ -51,11 +42,10 @@ def test_1D_NDDataset(a):
         assert ds.description == ""
         assert ds.history == []
 
-arrdata = (
-    np.array([[1,1.], [0, np.nan]]),
-    np.random.rand(2,3).astype('int64'),
-    np.random.rand(2, 4),
-)
+
+arrdata = (np.array([[1, 1.], [0, np.nan]]), np.random.rand(2, 3).astype('int64'), np.random.rand(2, 4),)
+
+
 @pytest.mark.parametrize("arr", arrdata)
 def test_2D_NDDataset(arr):
     # 2D
@@ -196,7 +186,8 @@ def test_nddataset_coords_indexer():
                                                                               "failed")
     # we use almost as SpectroChemPy round the coordinate numbers
     assert_array_almost_equal(da.coordset['wavelength'].data, coord0, decimal=2, err_msg="get axis by title failed")
-    assert_array_almost_equal(da.coordset['time-on-stream'].data, coord1, decimal=4, err_msg="get axis by title failed")
+    assert_array_almost_equal(da.coordset['time-on-stream'].data, coord1, decimal=4,
+                              err_msg="get axis by title failed")
     assert_array_almost_equal(da.coordset['temperature'].data, coord2, decimal=3)
     da.coordset['temperature'] += 273.15 * ur.K
     assert_array_almost_equal(da.coordset['temperature'].data, coord2 + 273.15, decimal=3)
@@ -549,9 +540,8 @@ def test_nddataset_with_mask_acts_like_masked_array():
         assert result.is_masked
         # Result mask should match input mask because other has no mask
         assert np.all(
-                result.mask == input_mask)  # TODO:IndexError: in the   #
-        # future, 0-d boolean arrays will be  # interpreted  # as a  # valid
-        # boolean index  # assert np.all(result[~result.mask].data == -   #  #
+                result.mask == input_mask)  # TODO:IndexError: in the   #  # future, 0-d boolean arrays will be  #
+        # interpreted  # as a  # valid  # boolean index  # assert np.all(result[~result.mask].data == -   #  #  #
         # input_data[~input_mask])
 
 
@@ -804,8 +794,8 @@ def test_nddataset_real_imag_quaternion():
 
 
 def test_nddataset_quaternion():
-    na0 = np.array(
-            [[1., 2., 2., 0., 0., 0.], [1.3, 2., 2., 0.5, 1., 1.], [1, 4.2, 2., 3., 2., 2.], [5., 4.2, 2., 3., 3., 3.]])
+    na0 = np.array([[1., 2., 2., 0., 0., 0.], [1.3, 2., 2., 0.5, 1., 1.], [1, 4.2, 2., 3., 2., 2.],
+                    [5., 4.2, 2., 3., 3., 3.]])
     nd = scp.NDDataset(na0)
     assert nd.shape == (4, 6)
     nd.dims = ['v', 'u']

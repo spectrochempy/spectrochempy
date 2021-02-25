@@ -12,16 +12,15 @@ import os
 import pytest
 
 # noinspection PyUnresolvedReferences
-from spectrochempy import (show, BaselineCorrection, NDDataset, ur, )
-from spectrochempy.utils.testing import assert_dataset_almost_equal
+import spectrochempy as scp
+from spectrochempy import show, BaselineCorrection, NDDataset, ur
+from spectrochempy.utils.testing import assert_dataset_almost_equal, assert_dataset_equal
 
 path = os.path.dirname(os.path.abspath(__file__))
 
 
 # @pytest.mark.skip("erratic failing!")
 def test_basecor_sequential(IR_dataset_2D):
-    from spectrochempy import Coord
-
     dataset = IR_dataset_2D[5]
     basc = BaselineCorrection(dataset)
 
@@ -95,6 +94,37 @@ def test_notebook_basecor_bug():
     print(ranges)
 
     basc.corrected.plot_stack()
+
+
+def test_issue_227():
+    # IR spectrum, we want to make a baseline correction on the absorbance vs. time axis:
+    ir = scp.read('irdata/nh4y-activation.spg')
+
+    # baseline correction along x
+    blc = scp.BaselineCorrection(ir)
+    s1 = blc([5999., 3500.], [1800., 1500.], method='multivariate', interpolation='pchip')
+
+    # baseline correction the transposed data along x (now on axis 0) -> should produce the same results
+    # baseline correction along axis -1 previuosly
+    blc = scp.BaselineCorrection(ir.T)
+    s2 = blc([5999., 3500.], [1800., 1500.], dim='x', method='multivariate', interpolation='pchip')
+
+    # compare
+    assert_dataset_equal(s1, s2.T)
+
+    ir.y = ir.y - ir[0].y
+    irs = ir[:, 2000.0:2020.0]
+    blc = scp.BaselineCorrection(irs)
+    blc.compute(*[[0., 2.e3], [3.0e4, 3.3e4]], dim='y', interpolation='polynomial', order=1, method='sequential')
+    blc.corrected.plot()
+    scp.show()
+
+    # MS profiles, we want to make a baseline correction on the ion current vs. time axis:
+    ms = scp.read('msdata/ion_currents.asc', timestamp=False)
+    blc = scp.BaselineCorrection(ms[10.:20., :])
+    blc.compute(*[[10., 11.], [19., 20.]], dim='y', interpolation='polynomial', order=1, method='sequential')
+    blc.corrected.T.plot()
+    scp.show()
 
 
 @pytest.mark.skip()

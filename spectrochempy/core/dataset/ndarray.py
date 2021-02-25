@@ -2295,7 +2295,7 @@ class NDArray(HasTraits):
 
                 if new._roi is not None:
                     roi = (np.array(new._roi) * self.units).to(units)
-                    new._roi = list(udata.m)
+                    new._roi = list(roi)
                 if new._linear:
                     # try to make it linear as well
                     new._linearize()
@@ -2335,19 +2335,22 @@ class NDArray(HasTraits):
                 else:
                     # change the title for spectrocopic units change
                     new = _transform(new)
-                    if (oldunits.dimensionality in ['1/[length]', '[length]', '[length] ** 2 * [mass] / [time] ** 2']
-                            and
-                        new._units.dimensionality == '1/[time]'):
+                    if (oldunits.dimensionality in ['1/[length]', '[length]',
+                                                    '[length] ** 2 * [mass] / [time] ** 2'] and
+                            new._units.dimensionality == '1/[time]'):
                         new._title = 'frequency'
-                    elif (oldunits.dimensionality in ['1/[time]', '[length] ** 2 * [mass] / [time] ** 2'] and
+                    elif (oldunits.dimensionality in ['1/[time]',
+                                                      '[length] ** 2 * [mass] / [time] ** 2'] and
                           new._units.dimensionality == '1/[length]'):
                         new._title = 'wavenumber'
                     elif (oldunits.dimensionality in ['1/[time]', '1/[length]',
                                                       '[length] ** 2 * [mass] / [time] ** 2'] and
                           new._units.dimensionality == '[length]'):
                         new._title = 'wavelength'
-                    elif (oldunits.dimensionality in ['1/[time]', '1/[length]', '[length]'] and
-                          new._units.dimensionality == '[length] ** 2 * [mass] / [time] ** 2'):
+                    elif (oldunits.dimensionality in ['1/[time]', '1/[length]',
+                                                      '[length]'] and new._units.dimensionality == '[length] ** 2 * '
+                                                                                                   '[mass] / [time] '
+                                                                                                   '** 2'):
                         new._title = 'energy'
 
             except DimensionalityError as exc:
