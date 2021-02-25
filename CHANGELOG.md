@@ -4,11 +4,11 @@
 
 **NEW FEATURES**
 
-* a default coordinate can now be selected for multiple coordinates dimensions.
+* A default coordinate can now be selected for multiple coordinates dimensions.
 
 **BUGS FIXED**
 
-* alignment along several dimensions (issue #248)
+* Alignment along several dimensions (issue #248)
 
 * to() and ito() methods have been fixed to work correctly (issue #255) 
 
@@ -27,6 +27,7 @@
 * LinearCoord operations now working.
 
 * Baseline default now "sequential" as expected. 
+  
   **WARNING**: It was wrongly set to "mutivariate" in previous releases, so you should 
   expect some difference with processings you may have done before.
 

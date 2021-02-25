@@ -165,7 +165,7 @@ class BaselineCorrection(HasTraits):
 
         # we assume that the last dimension if always the dimension to which we want to subtract the baseline.
         # Swap the axes to be sure to be in this situation
-        axis, dim = self.dataset.get_axis(**kwargs, negative_axis=True)
+        axis, dim = new.get_axis(**kwargs, negative_axis=True)
 
         swaped = False
         if axis != -1:
@@ -196,7 +196,11 @@ class BaselineCorrection(HasTraits):
             # determine the slices
 
             sl = slice(*pair)
-            s.append(new[..., sl])
+            sect = new[..., sl]
+            if sect is None:
+                continue
+
+            s.append(sect)
 
         sbase = NDDataset.concatenate(s, axis=-1)
         # TODO: probably we could use masked data instead of concatenating - could be faster
@@ -256,12 +260,10 @@ class BaselineCorrection(HasTraits):
         else:
             new.history = 'Sequential.'
 
-        new.history = 'Interpolation: '
-
         if self.interpolation == 'polynomial':
-            new.history = 'Polynomial, order=' + str(self.order) + '.\n'
+            new.history = 'Interpolation: Polynomial, order=' + str(self.order) + '.\n'
         else:
-            new.history = 'Pchip. \n'
+            new.history = 'Interpolation: Pchip. \n'
 
         if swaped:
             new = new.swapdims(axis, -1)
@@ -296,7 +298,37 @@ class BaselineCorrection(HasTraits):
         self._setup(**kwargs)
         self.sps = []
 
-        datasets = [self.dataset, self.dataset]
+        # output dataset
+        new = self.corrected
+        origin = self.dataset.copy()
+
+        # we assume that the last dimension if always the dimension to which we want to subtract the baseline.
+        # Swap the axes to be sure to be in this situation
+        axis, dim = new.get_axis(**kwargs, negative_axis=True)
+
+        swaped = False
+        if axis != -1:
+            new.swapdims(axis, -1, inplace=True)
+            origin.swapdims(axis, -1, inplace=True)
+            swaped = True
+
+        lastcoord = new.coordset[dim]
+
+        # most of the time we need sorted axis, so let's do it now
+
+        if lastcoord.reversed:
+            new.sort(dim=dim, inplace=True, descend=False)
+            lastcoord = new.coordset[dim]
+
+        x = lastcoord.data
+        self.ranges = [[x[0], x[2]], [x[-3], x[-1]]]
+        self._extendranges(*ranges, **kwargs)
+        self.ranges = ranges = trim_ranges(*self.ranges)
+
+        new = self.compute(*ranges, **kwargs)
+
+        # display
+        datasets = [origin, new]
         labels = ['Click on left button & Span to set regions. Click on right button on a region to remove it.',
                   'Baseline corrected dataset preview']
         axes = multiplot(datasets, labels, method='stack', sharex=True, nrow=2, ncol=1, figsize=self.figsize,
@@ -308,13 +340,11 @@ class BaselineCorrection(HasTraits):
         ax1 = axes['axe11']
         ax2 = axes['axe21']
 
-        self._extendranges(*ranges, **kwargs)
-        self.ranges = list(trim_ranges(*self.ranges))
         self.show_regions(ax1)
 
         def show_basecor(ax2):
 
-            corrected = self.compute()
+            corrected = self.compute(*ranges, **kwargs)
 
             ax2.clear()
             ax2.set_title('Baseline corrected dataset preview', fontweight='bold', fontsize=8)
