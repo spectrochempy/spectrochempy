@@ -39,14 +39,14 @@ ndp = (nd - nd[-1])[:, 1291.0:5999.0]
 ###############################################################################
 # Define the BaselineCorrection object.
 
-ibc = scp.BaselineCorrection(ndp, method='multivariate',
-                             interpolation='pchip', npc=5, zoompreview=3)
+ibc = scp.BaselineCorrection(ndp)
 
 ###############################################################################
 # Launch the interactive view, using the `BaselineCorrection.run` method:
 
 ranges = []  # not predefined range
-span = ibc.run(*ranges)
+span = ibc.run(*ranges, method='multivariate',
+               interpolation='pchip', npc=5, zoompreview=3)
 
 ###############################################################################
 # print the corrected dataset

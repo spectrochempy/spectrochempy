@@ -116,8 +116,8 @@ _ = smoothed.plot(colormap='magma')
 # %% jupyter={"source_hidden": true}
 region = ds[:, 4000.0:2000.0]
 smoothed = region.smooth(window_length=51, window='hanning')
-blc = BaselineCorrection(smoothed, method='multivariate', interpolation='pchip', npc=5)
-basc = blc.compute([2000., 2300.], [3800., 3900.])
+blc = BaselineCorrection(smoothed)
+basc = blc.compute([2000., 2300.], [3800., 3900.], method='multivariate', interpolation='pchip', npc=5)
 
 # %% jupyter={"source_hidden": true}
 _ = basc.plot()

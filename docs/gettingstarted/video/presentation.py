@@ -114,8 +114,8 @@ _ = smoothed.plot(colormap='magma')
 # %% slideshow={"slide_type": "fragment"}
 region = ds[:, 4000.0:2000.0]
 smoothed = region.smooth(window_length=51, window='hanning')
-blc = scp.BaselineCorrection(smoothed, method='multivariate', interpolation='pchip', npc=5)
-basc = blc.compute([2000., 2300.], [3800., 3900.])
+blc = scp.BaselineCorrection(smoothed)
+basc = blc.compute([2000., 2300.], [3800., 3900.], method='multivariate', interpolation='pchip', npc=5)
 _ = basc.plot()
 
 # %% [markdown] slideshow={"slide_type": "subslide"}

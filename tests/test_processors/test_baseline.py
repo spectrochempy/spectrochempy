@@ -13,7 +13,7 @@ import pytest
 
 # noinspection PyUnresolvedReferences
 import spectrochempy as scp
-from spectrochempy import (show, BaselineCorrection, NDDataset, ur, )
+from spectrochempy import show, BaselineCorrection, NDDataset, ur
 from spectrochempy.utils.testing import assert_dataset_almost_equal
 
 path = os.path.dirname(os.path.abspath(__file__))
@@ -101,15 +101,15 @@ def test_issue_227():
     ir = scp.read('irdata/nh4y-activation.spg')
     ir.y = ir.y - ir[0].y
     irs = ir[:, 2000.0:2020.0]
-    blc = scp.BaselineCorrection(irs, dim='y')
-    blc.compute(*[[0., 2.e3], [3.0e4, 3.3e4]], interpolation='polynomial', order=1, method='sequential')
+    blc = scp.BaselineCorrection(irs)
+    blc.compute(*[[0., 2.e3], [3.0e4, 3.3e4]], dim='y', interpolation='polynomial', order=1, method='sequential')
     blc.corrected.plot()
     scp.show()
 
     # MS profiles, we want to make a baseline correction on the ion current vs. time axis:
     ms = scp.read('msdata/ion_currents.asc', timestamp=False)
-    blc = scp.BaselineCorrection(ms[10.:20., :], dim=0)
-    blc.compute(*[[10., 11.], [19., 20.]], interpolation='polynomial', order=1, method='sequential')
+    blc = scp.BaselineCorrection(ms[10.:20., :])
+    blc.compute(*[[10., 11.], [19., 20.]], dim='y', interpolation='polynomial', order=1, method='sequential')
     blc.corrected.T.plot()
     scp.show()
 

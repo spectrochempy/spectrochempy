@@ -22,7 +22,7 @@ from ..plotters.multiplot import multiplot
 from ..dataset.nddataset import NDDataset
 from ...utils import TYPE_INTEGER, TYPE_FLOAT
 from .smooth import smooth
-from .. import debug_
+from .. import debug_, warning_
 from spectrochempy.core.processors.utils import _units_agnostic_method
 
 
@@ -43,28 +43,6 @@ class BaselineCorrection(HasTraits):
     ----------
     dataset : |NDDataset|
         The dataset to be transformed.
-    *ranges : a variable number of pair-tuples
-        The regions taken into account for the manual baseline correction.
-    **kwargs : dict
-        See other parameters.
-
-    Other Parameters
-    ----------------
-    dim : str or int, keyword parameter, optional, default='x'.
-        Specify on which dimension to apply the apodization method. If `dim` is specified as an integer
-        it is equivalent  to the usual `axis` numpy parameter.
-    method : str, keyword parameter, optional, default='sequential'
-        Correction method among ['multivariate','sequential']
-    interpolation : string, keyword parameter, optional, default='polynomial'
-        Interpolation method for the computation of the baseline, among ['polynomial','pchip']
-    order : int, keyword parameter, optional, default=6
-        If the correction method polynomial, this give the polynomial order to use.
-    npc : int, keyword parameter, optional, default=5
-        Number of components to keep for the ``multivariate`` method
-    zoompreview : float, keyword parameter, optional, default=1.0
-        The zoom factor for the preview in interactive mode
-    figsize : tuple, keyword parameter, optional, default=(8, 6)
-        Size of the figure to display in inch
 
     See Also
     --------
@@ -79,13 +57,12 @@ class BaselineCorrection(HasTraits):
         nd = NDDataset.read_omnic(os.path.join('irdata',
                                     'nh4y-activation.spg'))
         ndp = nd[:, 1291.0:5999.0]
-        bc = BaselineCorrection(ndp,method='multivariate',
-                                    interpolation='pchip',
-                                    npc=8)
+        bc = BaselineCorrection(ndp)
         ranges=[[5996., 5998.], [1290., 1300.],
                 [2205., 2301.], [5380., 5979.],
                 [3736., 5125.]]
-        span = bc.compute(*ranges)
+        span = bc.compute(*ranges,method='multivariate',
+                          interpolation='pchip', npc=8)
         _ = bc.corrected.plot_stack()
         show()
     """
@@ -102,18 +79,13 @@ class BaselineCorrection(HasTraits):
     sps = List()
 
     # ..................................................................................................................
-    def __init__(self, dataset, *ranges, **kwargs):
+    def __init__(self, dataset, *args, **kwargs):
         self.dataset = dataset
         self.corrected = self.dataset.copy()
-
-        self._setup(**kwargs)
-
-        x = getattr(dataset, self.dim).data
-
-        self.ranges = [[x[0], x[2]], [x[-3], x[-1]]]
-        self._extendranges(*ranges, **kwargs)
-        self.ranges = trim_ranges(*self.ranges)
-        self.spc = []
+        if args or kwargs:
+            warning_("DEPRECATION WARNING: Pass all arguments such range, and method definition in the "
+                     "``compute`` method, not during the initialisation of the BaselineCorrection instance.\n"
+                     "Here they are ignored.")
 
     # ..................................................................................................................
     def _extendranges(self, *ranges, **kwargs):
@@ -140,12 +112,6 @@ class BaselineCorrection(HasTraits):
 
     # ..................................................................................................................
     def _setup(self, **kwargs):
-
-        if 'axis' in kwargs.keys() or 'dim' in kwargs.keys():
-            self.axis, self.dim = self.dataset.get_axis(**kwargs)  # using dim, dims or axis keyword arguments
-
-        if not self.dim:
-            self.dim = self.dataset.dims[self.axis]
 
         self.method = kwargs.get('method', self.method)
         self.interpolation = kwargs.get('interpolation', self.interpolation)
@@ -195,27 +161,32 @@ class BaselineCorrection(HasTraits):
         self._setup(**kwargs)
 
         # output dataset
-        new = self.dataset.copy()
+        new = self.corrected
 
-        # we assume that the first dimension if always the dimension to which we want to subtract the baseline.
+        # we assume that the last dimension if always the dimension to which we want to subtract the baseline.
         # Swap the axes to be sure to be in this situation
+        axis, dim = self.dataset.get_axis(**kwargs, negative_axis=True)
 
         swaped = False
-        if self.axis != -1:
-            new.swapdims(self.axis, -1, inplace=True)
+        if axis != -1:
+            new.swapdims(axis, -1, inplace=True)
             swaped = True
+
+        lastcoord = new.coordset[dim]
 
         # most of the time we need sorted axis, so let's do it now
         is_sorted = False
-        if new.coordset[self.dim].reversed:
-            new.sort(dim=self.dim, inplace=True, descend=False)
+        if lastcoord.reversed:
+            new.sort(dim=dim, inplace=True, descend=False)
             is_sorted = True
+            lastcoord = new.coordset[dim]
 
-        coords = new.coordset[self.dim]
-        baseline = np.zeros_like(new)
-
+        x = lastcoord.data
+        self.ranges = [[x[0], x[2]], [x[-3], x[-1]]]
         self._extendranges(*ranges, **kwargs)
-        self.ranges = ranges = trim_ranges(*self.ranges)
+        self.ranges = trim_ranges(*self.ranges)
+
+        baseline = np.zeros_like(new)
 
         # Extract: Sbase: the matrix of data corresponding to ranges
         #          xbase: the xaxis values corresponding to ranges
@@ -229,7 +200,7 @@ class BaselineCorrection(HasTraits):
 
         sbase = NDDataset.concatenate(s, axis=-1)
         # TODO: probably we could use masked data instead of concatenating - could be faster
-        xbase = sbase.coordset(self.dim)
+        xbase = sbase.coordset(dim)
 
         if self.method == 'sequential':
 
@@ -240,12 +211,12 @@ class BaselineCorrection(HasTraits):
 
                 polycoef = np.polynomial.polynomial.polyfit(xbase.data, sbase.data.T, deg=self.order, rcond=None,
                                                             full=False)
-                baseline = np.polynomial.polynomial.polyval(coords.data, polycoef)
+                baseline = np.polynomial.polynomial.polyval(x, polycoef)
 
             elif self.interpolation == 'pchip':
                 for i in range(new.shape[0]):
-                    y = scipy.interpolate.PchipInterpolator(xbase.data, sbase.data[i])
-                    baseline[i] = y(coords.data)
+                    interp = scipy.interpolate.PchipInterpolator(xbase.data, sbase.data[i])
+                    baseline[i] = interp(x)
 
         elif self.method == 'multivariate':
 
@@ -263,13 +234,13 @@ class BaselineCorrection(HasTraits):
 
             if self.interpolation == 'pchip':
                 for i in range(npc):
-                    y = scipy.interpolate.PchipInterpolator(xbase.data, Pt[i])
-                    baseline_loadings[i] = y(coords.data)
+                    interp = scipy.interpolate.PchipInterpolator(xbase.data, Pt[i])
+                    baseline_loadings[i] = interp(x)
 
             elif self.interpolation == 'polynomial':
                 polycoef = np.polynomial.polynomial.polyfit(xbase.data, Pt.T, deg=self.order, rcond=None, full=False)
 
-                baseline_loadings = np.polynomial.polynomial.polyval(coords.data, polycoef)
+                baseline_loadings = np.polynomial.polynomial.polyval(x, polycoef)
 
             baseline = np.dot(T, baseline_loadings)
 
@@ -293,7 +264,7 @@ class BaselineCorrection(HasTraits):
             new.history = 'Pchip. \n'
 
         if swaped:
-            new = new.swapdims(self.axis, -1)
+            new = new.swapdims(axis, -1)
 
         self.corrected = new
         return new
