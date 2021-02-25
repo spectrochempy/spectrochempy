@@ -95,7 +95,7 @@ except Exception as e:
 ""
 ds.x = ds.x.to('nanometer')
 _ = ds.plot()
-print(ds.x)
+print(ds.x)  # The LinearCoord object is transformed into a Coord object
 
 ###############################################################################
 # ``absorbance`` units (the units of the data) can also be transformed into ``transmittance``
