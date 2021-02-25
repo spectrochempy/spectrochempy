@@ -110,6 +110,9 @@ print(row10.coordset)
 c_wavenumber = row10.x.copy()
 c_wavelength = row10.x.to('nanometer')
 print(c_wavenumber, c_wavelength)
+row10.x = [c_wavenumber, c_wavelength]
+row10.x.select(2)
+_ = row10.plot()
 
 ""
 # scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

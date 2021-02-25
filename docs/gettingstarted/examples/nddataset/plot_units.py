@@ -87,8 +87,15 @@ ds.x.ito('eV')
 _ = ds.plot()
 
 ""
-ds.x.ito('nanometer')
+try:
+    ds.x.ito('nanometer')
+except Exception as e:
+    scp.error_(e) 
+
+""
+ds.x = ds.x.to('nanometer')
 _ = ds.plot()
+print(ds.x)
 
 ###############################################################################
 # ``absorbance`` units (the units of the data) can also be transformed into ``transmittance``

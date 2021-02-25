@@ -708,7 +708,7 @@ class NDArray(HasTraits):
         if not self.linear or self._data is None:
             return
 
-        self.linear = False  # to avoid action of the observer
+        self._linear = False  # to avoid action of the observer
 
         if self._squeeze_ndim > 1:
             error_("Linearization is only implemented for 1D data")
@@ -726,7 +726,7 @@ class NDArray(HasTraits):
                 self._offset = data[0]
                 self._size = data.size
                 self._data = None
-                self.linear = True
+                self._linear = True
             else:
                 self._linear = False
         else:
@@ -2261,10 +2261,8 @@ class NDArray(HasTraits):
         >>> print(ndd)
         NDArray: [float64] m (shape: (y:3, x:3))
         """
-        if inplace:
-            new = self
-        else:
-            new = self.copy()
+
+        new = self.copy()
 
         if other is None:
             units = None
@@ -2272,6 +2270,8 @@ class NDArray(HasTraits):
                 return new
             elif force:
                 new._units = None
+                if inplace:
+                    self._units = None
                 return new
 
         elif isinstance(other, str):
@@ -2296,9 +2296,18 @@ class NDArray(HasTraits):
                 if new._roi is not None:
                     roi = (np.array(new._roi) * self.units).to(units)
                     new._roi = list(udata.m)
-                if self.linear:
+                if new._linear:
                     # try to make it linear as well
                     new._linearize()
+                    if not new._linear and new.implements('LinearCoord'):
+                        # can't be linearized -> Coord
+                        if inplace:
+                            raise Exception(
+                                    'A LinearCoord object cannot be transformed to a non linear coordinate `inplace`. '
+                                    'Use to() instead of ito() and leave the `inplace` attribute to False')
+                        else:
+                            from spectrochempy import Coord
+                            new = Coord(new)
                 return new
 
             try:
@@ -2326,15 +2335,20 @@ class NDArray(HasTraits):
                 else:
                     # change the title for spectrocopic units change
                     new = _transform(new)
-                    if (oldunits.dimensionality in ['1/[length]', '[length] ** 2 * [mass] / [time] ** 2'] and
+                    if (oldunits.dimensionality in ['1/[length]', '[length]', '[length] ** 2 * [mass] / [time] ** 2']
+                            and
                         new._units.dimensionality == '1/[time]'):
                         new._title = 'frequency'
                     elif (oldunits.dimensionality in ['1/[time]', '[length] ** 2 * [mass] / [time] ** 2'] and
                           new._units.dimensionality == '1/[length]'):
-                        new._title = 'wavenumbers'
-                    elif (oldunits.dimensionality in ['1/[time]', '1/[length]'] and
-                          new._units.dimensionality == '[length] ** 2 * [mass] / [time] ** 2'):
+                        new._title = 'wavenumber'
+                    elif (oldunits.dimensionality in ['1/[time]', '1/[length]',
+                                                      '[length] ** 2 * [mass] / [time] ** 2'] and
+                          new._units.dimensionality == '[length]'):
                         new._title = 'wavelength'
+                    elif (oldunits.dimensionality in ['1/[time]', '1/[length]', '[length]'] and
+                          new._units.dimensionality == '[length] ** 2 * [mass] / [time] ** 2'):
+                        new._title = 'energy'
 
             except DimensionalityError as exc:
                 if force:
@@ -2348,7 +2362,16 @@ class NDArray(HasTraits):
             else:
                 warnings.warn("There is no units for this NDArray!", SpectroChemPyWarning)
 
-        if not inplace:
+        if inplace:
+            self._data = new._data
+            self._units = new._units
+            self._offset = new._offset
+            self._increment = new._increment
+            self._title = new._title
+            self._roi = new._roi
+            self._linear = new._linear
+
+        else:
             return new
 
     def to_base_units(self, inplace=False):
