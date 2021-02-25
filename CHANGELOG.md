@@ -4,13 +4,15 @@
 
 **NEW FEATURES**
 
-* a default coordiate can now be selected for multiple coordinates dimensions.
+* a default coordinate can now be selected for multiple coordinates dimensions.
 
 **BUGS FIXED**
 
 * alignment along several dimensions (issue #248)
 
 * to() and ito() methods have been fixed to work correctly (issue #255) 
+
+* Baseline correction works on all dimensions 
 
 ## Version 0.2.13
 
