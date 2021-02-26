@@ -7,9 +7,9 @@
 """
 This module implements the `BaselineCorrection` class for baseline corrections.
 """
-__all__ = ['BaselineCorrection', 'ab', 'abc', 'dc']
+__all__ = ['BaselineCorrection', 'ab', 'abc', 'dc', 'basc']
 
-__dataset_methods__ = ['ab', 'abc', 'dc']
+__dataset_methods__ = ['ab', 'abc', 'dc', 'basc']
 
 import numpy as np
 import scipy.interpolate
@@ -383,6 +383,70 @@ class BaselineCorrection(HasTraits):
 
         return
 
+# ......................................................................................................................
+def basc(dataset, *ranges, **kwargs):
+    """
+    Compute a baseline correction using the BaselineCorrection processor.
+
+    2 methods are proposed :
+
+    * ``sequential`` (default) = classical polynom fit or spline
+      interpolation with separate fitting of each row (spectrum)
+    * ``multivariate`` = SVD modeling of baseline, polynomial fit of PC's
+      and calculation of the modelled baseline spectra.
+
+    Parameters
+    ----------
+    dataset : a [NDDataset| instance
+        The dataset where to calculate the baseline.
+    *ranges : a variable number of pair-tuples
+        The regions taken into account for the manual baseline correction.
+    **kwargs : dict
+        See other parameters.
+
+    Other Parameters
+    ----------------
+    dim : str or int, keyword parameter, optional, default='x'.
+        Specify on which dimension to apply the apodization method. If `dim` is specified as an integer
+        it is equivalent  to the usual `axis` numpy parameter.
+    method : str, keyword parameter, optional, default='sequential'
+        Correction method among ['multivariate','sequential']
+    interpolation : string, keyword parameter, optional, default='polynomial'
+        Interpolation method for the computation of the baseline, among ['polynomial','pchip']
+    order : int, keyword parameter, optional, default=6
+        If the correction method polynomial, this give the polynomial order to use.
+    npc : int, keyword parameter, optional, default=5
+        Number of components to keep for the ``multivariate`` method
+
+    See Also
+    --------
+    BaselineCorrection : Manual baseline corrections.
+    abc : Automatic baseline correction.
+
+    Notes
+    -----
+    For more flexibility and functionality, it is advised to use the BaselineCorrection processor instead.
+
+    Examples
+    --------
+    .. plot::
+        :include-source:
+
+        import spectrochempy as scp
+        nd = scp.read('irdata/nh4y-activation.spg')
+        ndp = nd[:, 1291.0:5999.0]
+
+        ranges=[[5996., 5998.], [1290., 1300.],
+                [2205., 2301.], [5380., 5979.],
+                [3736., 5125.]]
+
+        ndcorr = spc.basc(ndp, *ranges,method='multivariate', interpolation='pchip', npc=8)
+        ndcorr.plot()
+        spc.show()
+    """
+    blc = BaselineCorrection(dataset)
+    return blc.compute(*ranges, **kwargs)
+
 
 # ======================================================================================================================
 # abc # TODO: some work to perform on this
@@ -439,6 +503,7 @@ def abc(dataset, dim=-1, **kwargs):
     See Also
     --------
     BaselineCorrection : Manual baseline corrections.
+    basc : Manual baseline correction.
 
     Notes
     -----
