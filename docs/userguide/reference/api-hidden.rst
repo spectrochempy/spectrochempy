@@ -22,6 +22,7 @@
     NDDataset.astype
     NDDataset.autosub
     NDDataset.average
+    NDDataset.basc
     NDDataset.bartlett
     NDDataset.blackmanharris
     NDDataset.clip

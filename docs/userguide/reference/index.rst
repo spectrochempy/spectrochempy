@@ -450,6 +450,7 @@ Baseline correction
     autosub
     ab
     abc
+    basc
     detrend
 
 Fourier transform
