@@ -1,5 +1,11 @@
 # What\'s new
 
+## Version 0.2.15
+
+**NEW FEATURES**
+
+* Added a baseline correction method: `basc`. 
+
 ## Version 0.2.14
 
 **NEW FEATURES**
