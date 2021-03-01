@@ -17,6 +17,7 @@ import os
 from os import environ
 import sys
 import warnings
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -161,14 +162,12 @@ from spectrochempy.application import (  # noqa: E402
     )
 
 preferences = app.preferences
-project_preferences = app.project_preferences
-dataset_preferences = app.dataset_preferences
-matplotlib_preferences = app.matplotlib_preferences
+plot_preferences = app.plot_preferences
 description = app.description
 long_description = app.long_description
 config_manager = app.config_manager
 config_dir = app.config_dir
-
+reset_preferences = app.reset_preferences
 
 # datadir = app.datadir
 
@@ -187,12 +186,11 @@ __all__ += [
         'ERROR',
         'CRITICAL',
         'INFO',
-        'project_preferences',
-        'dataset_preferences',
         'preferences',
-        'matplotlib_preferences',
+        'plot_preferences',
         'config_manager',
         'config_dir',
+        'reset_preferences',
         'set_loglevel',
         'get_loglevel',
 
@@ -351,14 +349,19 @@ warnings.filterwarnings(action='ignore', module='matplotlib', category=UserWarni
 # can not be in utils due to circular imports
 __all__ += ['open_dialog', 'save_dialog']
 
-USE_QT = preferences.use_qt
+# set flags
+USE_QT = preferences.use_qt or environ.get('SCPY_GUI', None) == 'RUNNING'
 
 if USE_QT:
 
     try:
-        from PyQt5 import QtWidgets
+        from PyQt5 import QtGui, QtWidgets
 
-        GUI = QtWidgets.QApplication(sys.argv)
+        if not QtWidgets.QApplication.startingUp():
+            # we use this only if we are not in spectrochempy_gui
+            # because in the latter case, the file dialogs are defined there
+            QtWidgets.QApplication(sys.argv)
+
         FileDialog = QtWidgets.QFileDialog
 
     except ImportError:
@@ -379,9 +382,13 @@ class _QTFileDialogs:
     def _open_existing_directory(cls,
                                  parent=None,
                                  caption='Select a folder',
-                                 directory=''):
+                                 directory=None):
+
+        if directory is None:
+            directory = str(preferences.datadir)
+
         options = FileDialog.DontResolveSymlinks | FileDialog.ShowDirsOnly | FileDialog.DontUseNativeDialog
-        directory = FileDialog.getExistingDirectory(parent,
+        directory = FileDialog.getExistingDirectory(parent=parent,
                                                     caption=caption,
                                                     directory=directory,
                                                     options=options)
@@ -392,11 +399,15 @@ class _QTFileDialogs:
     @classmethod
     def _open_filename(cls,
                        parent=None,
-                       directory='',
+                       directory=None,
                        caption='Select file',
                        filters=None):
+
+        if directory is None:
+            directory = str(preferences.datadir)
+
         options = FileDialog.DontUseNativeDialog
-        filename, _ = FileDialog.getOpenFileName(parent,
+        filename, _ = FileDialog.getOpenFileName(parent=parent,
                                                  caption=caption,
                                                  directory=directory,
                                                  filter=';;'.join(filters),
@@ -409,14 +420,18 @@ class _QTFileDialogs:
     def _open_multiple_filenames(
             cls,
             parent=None,
-            directory='',
+            directory=None,
             caption='Select file(s)',
             filters=None):
         """
         Return one or several files to open
         """
+
+        if directory is None:
+            directory = str(preferences.datadir)
+
         options = FileDialog.DontUseNativeDialog
-        files, _ = FileDialog.getOpenFileNames(parent,
+        files, _ = FileDialog.getOpenFileNames(parent=parent,
                                                caption=caption,
                                                directory=directory,
                                                filter=';;'.join(filters),
@@ -426,19 +441,22 @@ class _QTFileDialogs:
 
     @classmethod
     def _save_filename(cls,
-                       filename='',
+                       parent=None,
+                       filename=None,
                        caption='Save as...',
                        selected_filter='',
                        filters=None):
+
+        directory = str(filename)
 
         options = FileDialog.DontUseNativeDialog
         options |= FileDialog.DontConfirmOverwrite  # bug : this seems to work only with DontUseNativeDialog on OSX.
         # TODO: Check on windows and Linux
         # second problems: if we confirm overwrite here a new dialog is opened,
         # and thus the main one do not close on exit!
-        filename, _ = FileDialog.getSaveFileName(parent=None,
+        filename, _ = FileDialog.getSaveFileName(parent=parent,
                                                  caption=caption,
-                                                 directory=str(filename),
+                                                 directory=directory,
                                                  initialFilter=selected_filter,
                                                  filter=';;'.join(filters),
                                                  options=options)
@@ -496,7 +514,8 @@ class _TKFileDialogs:
         filename = filedialog.askopenfilename(
                 parent=self.root,
                 filetypes=self.filetypes(filters),
-                title='Select file to open')
+                title='Select file to open',
+                )
 
         self.root.destroy()
         if filename:
@@ -557,38 +576,44 @@ class _TKFileDialogs:
 # ------------------------------------------------------------------------------------------------------------------
 
 # noinspection PyRedundantParentheses
-def save_dialog(filename='',
+def save_dialog(parent=None,
+                filename=None,
                 caption='Save as...',
                 selected_filter='',
-                filters=("All Files (*)")):
+                filters=("All Files (*)"),
+                **kwargs):
     """
     Return a file where to save
     """
     if USE_QT:
-        f = _QTFileDialogs._save_filename(filename,
-                                          caption,
-                                          selected_filter,
-                                          filters)
+        parent = kwargs.pop('Qt_parent', None)  # in case this is launched from spectrochempy_gui
+        f = _QTFileDialogs._save_filename(parent=parent,
+                                          filename=filename,
+                                          caption=caption,
+                                          selected_filter=selected_filter,
+                                          filters=filters)
     else:
         f = _TKFileDialogs()._save_filename(filename,
                                             caption,
                                             selected_filter,
                                             filters)
 
-    from spectrochempy.utils.file import pathclean
-
+    from spectrochempy.utils import pathclean
     return pathclean(f)
 
 
 # noinspection PyRedundantParentheses
-def open_dialog(single=True,
-                directory='',
-                filters=("All Files (*)")
+def open_dialog(parent=None,
+                single=True,
+                directory=None,
+                filters=("All Files (*)"),
+                **kwargs
                 ):
     """
     Return one or several files to open
     """
     if USE_QT:
+        parent = kwargs.pop('Qt_parent', None)  # in case this is launched from spectrochempy_gui
         klass = _QTFileDialogs
     else:
         klass = _TKFileDialogs()
@@ -597,14 +622,17 @@ def open_dialog(single=True,
         directory = ''
     if filters == 'directory':
         caption = 'Select a folder'
-        f = klass._open_existing_directory(caption=caption, directory=str(directory))
+        f = klass._open_existing_directory(parent=parent,
+                                           caption=caption,
+                                           directory=str(directory))
     elif single:
-        f = klass._open_filename(filters=filters)
+        f = klass._open_filename(parent=parent,
+                                 filters=filters,)
     else:
-        f = klass._open_multiple_filenames(filters=filters)
+        f = klass._open_multiple_filenames(parent=parent,
+                                           filters=filters)
 
-    from spectrochempy.utils.file import pathclean
-
+    from spectrochempy.utils import pathclean
     return pathclean(f)
 
 

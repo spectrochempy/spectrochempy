@@ -142,9 +142,8 @@ class NDIO(HasTraits):
         # on the current object type
         if self.directory is None:
             filename = pathclean('.') / self.name
-            self.filename = filename  # <- this will set self.directory too.
-
-        filename = self.directory / self.name
+        else:
+            filename = pathclean(self.directory) / self.name
 
         default_suffix = SCPY_SUFFIX[self.implements()]
         filename = filename.with_suffix(default_suffix)
@@ -213,10 +212,13 @@ class NDIO(HasTraits):
         # suffix must be specified which correspond to the type of the
         # object to save
         default_suffix = SCPY_SUFFIX[self.implements()]
-        filename = filename.with_suffix(default_suffix)
+        if filename is not None and not filename.is_dir():
+            filename = filename.with_suffix(default_suffix)
+
         kwargs['filetypes'] = self.filetype
         kwargs['caption'] = f'Save the current {self.implements()} as ... '
-        filename = check_filename_to_save(self, filename, save_as=True, **kwargs)
+        filename = check_filename_to_save(self, filename, save_as=True,
+                                          suffix=default_suffix, **kwargs)
 
         if filename:
             self.filename = filename
@@ -284,7 +286,7 @@ class NDIO(HasTraits):
             raise SpectroChemPyException(f"File {filename} doesn't exist!")
         except Exception as e:
             if str(e) == 'File is not a zip file':
-                raise SpectroChemPyException("File not in 'scp' format!")
+                raise SpectroChemPyException("File not in 'scp' or 'pscp' format!")
             raise SpectroChemPyException("Undefined error!")
 
         js = obj[obj.files[0]]

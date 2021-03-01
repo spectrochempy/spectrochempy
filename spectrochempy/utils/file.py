@@ -342,8 +342,9 @@ def get_filename(*filenames, **kwargs):
 
     # directory
     # ---------
+    kw_dir = pathclean(kwargs.pop("directory", None))
     if directory is None:
-        directory = pathclean(kwargs.get("directory", None))
+        directory = kw_dir
 
     if directory is not None:
         if filenames:
@@ -400,7 +401,9 @@ def get_filename(*filenames, **kwargs):
 
                 filenames = open_dialog(single=False,
                                         directory=directory,
-                                        filters=filetypes)
+                                        filters=filetypes,
+                                        **kwargs
+                                        )
                 if not filenames:
                     # cancel
                     return None
@@ -414,7 +417,8 @@ def get_filename(*filenames, **kwargs):
             if not (NO_DISPLAY or NODIAL):
                 directory = open_dialog(
                         directory=directory,
-                        filters='directory')
+                        filters='directory',
+                        **kwargs)
                 if not directory:
                     # cancel
                     return None
@@ -488,7 +492,7 @@ def get_filename(*filenames, **kwargs):
         return filenames
 
 
-def readdirname(directory):
+def readdirname(directory, **kwargs):
     """
     returns a valid directory name
 
@@ -535,7 +539,8 @@ def readdirname(directory):
         if not NO_DISPLAY and not NO_DIALOG:  # this is for allowing test to continue in the background
             directory = open_dialog(single=False,
                                     directory=working_dir,
-                                    filters='directory')
+                                    filters='directory',
+                                    **kwargs)
 
         return pathclean(directory)
 
@@ -556,9 +561,10 @@ def check_filename_to_save(dataset, filename=None, save_as=True, confirm=True, *
             filename = filename + kwargs.get('suffix', '.scp')
 
         if not NODIAL and confirm:
-            filename = save_dialog(caption=kwargs.get('caption', 'Save as ...'),
+            filename = save_dialog(caption=kwargs.pop('caption', 'Save as ...'),
                                    filename=filename,
-                                   filters=kwargs.get('filetypes', ['All file types (*.*)']))
+                                   filters=kwargs.pop('filetypes', ['All file types (*.*)']),
+                                   **kwargs)
             if filename is None:
                 # this is probably due to a cancel action for an open dialog.
                 return

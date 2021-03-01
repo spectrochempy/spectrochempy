@@ -13,7 +13,7 @@ import uuid
 import pathlib
 import dill
 from functools import wraps
-from traitlets import (Dict, Instance, Unicode, This, default)
+from traitlets import  Dict, Instance, Unicode, This, default
 
 from spectrochempy.core.dataset.nddataset import NDDataset, NDIO
 from spectrochempy.core.scripts.script import Script
@@ -43,6 +43,7 @@ class Project(AbstractProject, NDIO):
     _meta = Instance(Meta)
 
     _filename = Instance(pathlib.Path, allow_none=True)
+    _directory = Instance(pathlib.Path, allow_none=True)
 
     # ..................................................................................................................
     def __init__(self, *args, argnames=None, name=None, **meta):
@@ -328,6 +329,10 @@ class Project(AbstractProject, NDIO):
         lst = sorted(lst)
         return lst
 
+    @property
+    def directory(self):
+        return self._directory
+
     # ..................................................................................................................
     @property
     def datasets(self):
@@ -344,6 +349,7 @@ class Project(AbstractProject, NDIO):
     def datasets(self, datasets):
 
         self.add_datasets(*datasets)
+
 
     # ..................................................................................................................
     @property

@@ -61,7 +61,7 @@ formatting._KNOWN_TYPES = frozenset(list(formatting._FORMATS.keys()) + ['~'])
 def _repr_html_(cls):
     p = cls.__format__('~H')
     # attempt to solve a display problem in notebook (recent version of pint
-    # have a strange way to handle HTML. For me it doen't work
+    # have a strange way to handle HTML. For me it doesn't work
     p = p.replace(r'\[', '').replace(r'\]', '').replace(r'\ ', ' ')
     return p
 

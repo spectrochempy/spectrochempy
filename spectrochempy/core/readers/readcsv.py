@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 import numpy as np
 
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core import dataset_preferences as prefs
+from spectrochempy.core import preferences as prefs
 from spectrochempy.core.readers.importer import Importer, importermethod
 
 try:

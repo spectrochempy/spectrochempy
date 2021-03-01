@@ -30,7 +30,7 @@ import requests
 from setuptools_scm import get_version
 from traitlets.config.configurable import Config
 from traitlets.config.application import Application
-from traitlets import Bool, Unicode, List, Integer, Union, HasTraits, Instance, default, observe
+from traitlets import Bool, Unicode, List, Integer, Enum, Union, HasTraits, Instance, default, observe
 from traitlets.config.manager import BaseJSONConfigManager
 import matplotlib as mpl
 from matplotlib import pyplot as plt
@@ -44,7 +44,7 @@ from IPython.display import publish_display_data, clear_output
 from jinja2 import Template
 
 from spectrochempy.utils import MetaConfigurable, pathclean, get_pkg_path
-from .matplotlib_preferences import MatplotlibPreferences
+from .plot_preferences import PlotPreferences
 
 # set the default style
 plt.style.use(['classic'])
@@ -435,17 +435,78 @@ class GeneralPreferences(MetaConfigurable):
     # Gonfiguration entries
     # ------------------------------------------------------------------------------------------------------------------
 
-    databases = Union((Instance(Path), Unicode()), help='Directory where to look for database files such as csv').tag(
-            config=True, type="folder")
-    datadir = Union((Instance(Path), Unicode()), help='Directory where to look for data by default').tag(config=True,
-                                                                                                         type="folder")
+    # NON GUI
+
     show_info_on_loading = Bool(True, help='Display info on loading').tag(config=True)
-    use_qt = Bool(False, help='Use QT for dialog instead of TK wich is the default. '
+    use_qt = Bool(False, help='Use QT for dialog instead of TK which is the default. '
                               'If True the PyQt libraries must be installed').tag(config=True)
 
+    # GUI
+    databases_directory = Union((Instance(Path), Unicode()),
+                      help='Directory where to look for database files such as csv').tag(
+                      config=True, gui=True, kind="folder")
+
+    datadir = Union((Instance(Path), Unicode()),
+                    help='Directory where to look for data by default').tag(
+                      config=True, gui=True, kind="folder")
+
+    workspace = Union((Instance(Path), Unicode()),
+                    help='Workspace directory by default').tag(
+            config=True, gui=True, kind="folder")
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Configuration entries
+    # ------------------------------------------------------------------------------------------------------------------
+
+    autoload_project = Bool(True,
+                            help='Automatic loading of the last project at startup').tag(config=True, gui=True)
+
+    autosave_project = Bool(True, help='Automatic saving of the current project').tag(config=True, gui=True)
+
+    project_directory = Union((Instance(Path), Unicode()),
+                              help='Directory where projects are stored by default').tag(config=True, kind='folder')
+
+    last_project = Union((Instance(Path, allow_none=True), Unicode()),
+                              help='Last used project').tag(config=True, gui=True, kind='file')
+
+    show_close_dialog = Bool(True,
+                             help='Display the close project dialog project changing or on application exit').tag(
+                             config=True, gui=True)
+
+    csv_delimiter = Enum([',', ';', r'\t', ' '], help='CSV data delimiter').tag(config=True, gui=True)
+
+
+    @default('project_directory')
+    def _get_default_project_directory(self):
+        # Determines the SpectroChemPy project directory name and creates the directory if it doesn't exist.
+        # This directory is typically ``$HOME/spectrochempy/projects``, but if the SCP_PROJECTS_HOME environment
+        # variable is set and the `$SCP_PROJECTS_HOME` directory exists, it will be that directory.
+        # If neither exists, the former will be created.
+
+        # first look for SCP_PROJECTS_HOME
+        pscp = environ.get('SCP_PROJECTS_HOME')
+        if pscp is not None and Path(pscp).exits():
+            return Path(pscp)
+
+        pscp = Path.home() / '.spectrochempy' / 'projects'
+
+        if not pscp.exists():
+            pscp.mkdir(exist_ok=True)
+
+        elif pscp.is_file():
+            raise IOError('Intended Projects directory is actually a file.')
+
+        return pscp
+
     # ..................................................................................................................
-    @default('databases')
-    def _get_databases_default(self):
+    @default('workspace')
+    def _get_workspace_default(self):
+        # the spectra path in package data
+        return Path.home()
+
+    # ..................................................................................................................
+    @default('databases_directory')
+    def _get_databases_directory_default(self):
         # the spectra path in package data
         return Path(get_pkg_path('databases', 'scp_data'))
 
@@ -484,75 +545,6 @@ class GeneralPreferences(MetaConfigurable):
 
 
 # ======================================================================================================================
-class DatasetPreferences(MetaConfigurable):
-    """
-    Per nddataset preferences
-    """
-    name = Unicode('DatasetPreferences')
-    description = Unicode('Options for datasets')
-    updated = Bool(False)
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # Configuration entries
-    # ------------------------------------------------------------------------------------------------------------------
-
-    csv_delimiter = Unicode(',', help='CSV data delimiter').tag(config=True)
-
-    # ..................................................................................................................
-    def __init__(self, **kwargs):
-        super(DatasetPreferences, self).__init__(jsonfile='DatasetPreferences', **kwargs)
-
-
-# ======================================================================================================================
-class ProjectPreferences(MetaConfigurable):
-    """
-    Project preferences
-    """
-
-    name = Unicode('ProjectPreferences')
-    description = Unicode('Options for projects')
-    updated = Bool(False)
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # Configuration entries
-    # ------------------------------------------------------------------------------------------------------------------
-
-    autoload_project = Bool(False, help='Automatic loading of the last project at startup').tag(config=True)
-    autosave_projects = Bool(False, help='Automatic saving of the current project').tag(config=True)
-    project_directory = Unicode(help='Directory where projects are stored by default').tag(config=True, type='folder')
-    show_close_dialog = Bool(True, help='Display the close project dialog project changing or on application exit').tag(
-            config=True)
-
-    @default('project_directory')
-    def _get_default_project_directory(self):
-        # Determines the SpectroChemPy project directory name and creates the directory if it doesn't exist.
-        # This directory is typically ``$HOME/spectrochempy/projects``, but if the SCP_PROJECTS_HOME environment
-        # variable is set and the `$SCP_PROJECTS_HOME` directory exists, it will be that directory.
-        # If neither exists, the former will be created.
-
-        # first look for SCP_PROJECTS_HOME
-        pscp = Path(environ.get('SCP_PROJECTS_HOME'))
-
-        if pscp.exits():
-            return pscp
-
-        pscp = Path.home() / '.spectrochempy' / 'projects'
-
-        if not pscp.exists():
-            pscp.mkdir(exist_ok=True)
-
-        elif pscp.is_file():
-            raise IOError('Intended Projects directory is actually a file.')
-
-        return pscp
-
-    # ..................................................................................................................
-    def __init__(self, **kwargs):
-
-        super().__init__(jsonfile='ProjectPreferences', **kwargs)
-
-
-# ======================================================================================================================
 # Application
 # ======================================================================================================================
 
@@ -585,7 +577,7 @@ Welcome to <strong>SpectroChemPy</strong> Application<br><br>
 <p><strong>SpectroChemPy</strong> is a framework for processing, analysing and modelling
  <strong>Spectro</>scopic data for <strong>Chem</strong>istry with <strong>Py</strong>thon.
  It is a cross platform software, running on Linux, Windows or OS X.</p><br><br>
-<strong>version:</strong> {version}<br>
+<strong>Version:</strong> {version}<br>
 <strong>Authors:</strong> {authors}<br>
 <strong>License:</strong> {license}<br>
 <div class='warning'> SpectroChemPy is still experimental and under active development. Its current design and
@@ -645,13 +637,13 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
     nodisplay = Bool(False, help='Set NO DISPLAY mode, i.e., no graphics outputs').tag(config=True)
     """Flag to set in NO DISPLAY mode """
 
-    last_project = Unicode('', help='Last used project').tag(config=True, type='project')
-    """Last used project"""
-
-    @observe('last_project')
-    def _last_project_changed(self, change):
-        if change.name in self.traits(config=True):
-            self.config_manager.update(self.config_file_name, {self.__class__.__name__: {change.name: change.new, }})
+    # last_project = Unicode('', help='Last used project').tag(config=True, type='project')
+    # """Last used project"""
+    #
+    # @observe('last_project')
+    # def _last_project_changed(self, change):
+    #     if change.name in self.traits(config=True):
+    #         self.config_manager.update(self.config_file_name, {self.__class__.__name__: {change.name: change.new, }})
 
     show_config = Bool(help="Dump configuration to stdout at startup").tag(config=True)
 
@@ -689,7 +681,7 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
             {'SpectroChemPy': {'show_config_json': True, }}, "Show the application's configuration (json "
                                                              "format)"), )
 
-    classes = List([GeneralPreferences, DatasetPreferences, ProjectPreferences, MatplotlibPreferences, DataDir, ])
+    classes = List([GeneralPreferences, PlotPreferences, DataDir, ])
 
     # ------------------------------------------------------------------------------------------------------------------
     # Initialisation of the application
@@ -798,7 +790,7 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
             for f in lis:
                 if f.suffix == '.json':
                     jsonname = self.config_dir / f
-                    if self.reset_config or f == 'MatplotlibPreferences.json':
+                    if self.reset_config or f == 'PlotPreferences.json':
                         # remove the user json file to reset to defaults
                         jsonname.unlink()
                     else:
@@ -815,9 +807,7 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
 
         self.datadir = DataDir(config=self.config)
         self.preferences = GeneralPreferences(config=self.config, parent=self)
-        self.dataset_preferences = DatasetPreferences(config=self.config, parent=self)
-        self.project_preferences = ProjectPreferences(config=self.config, parent=self)
-        self.matplotlib_preferences = MatplotlibPreferences(config=self.config, parent=self)
+        self.plot_preferences = PlotPreferences(config=self.config, parent=self)
 
     # ..................................................................................................................
     def get_config_dir(self):
@@ -891,6 +881,15 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
         # now run the actual start function
         return self._start()
 
+    def reset_preferences(self):
+        """
+        Reset all preferences to default
+
+        """
+        self.reset_config = True
+        self._init_all_preferences()
+        self.reset_config = False
+
     # ------------------------------------------------------------------------------------------------------------------
     # start the application
     # ------------------------------------------------------------------------------------------------------------------
@@ -935,14 +934,14 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
         for rckey in mpl.rcParams.keys():
             key = rckey.replace('_', '__').replace('.', '_').replace('-', '___')
             try:
-                mpl.rcParams[rckey] = getattr(self.matplotlib_preferences, key)
+                mpl.rcParams[rckey] = getattr(self.plot_preferences, key)
             except ValueError:
-                mpl.rcParams[rckey] = getattr(self.matplotlib_preferences, key).replace('\'', '')
+                mpl.rcParams[rckey] = getattr(self.plot_preferences, key).replace('\'', '')
             except AttributeError:
-                # print(f'{e} -> you may want to add it to MatplotlibPreferences.py')
+                # print(f'{e} -> you may want to add it to PlotPreferences.py')
                 pass
 
-        self.matplotlib_preferences.set_latex_font(self.matplotlib_preferences.font_family)
+        self.plot_preferences.set_latex_font(self.plot_preferences.font_family)
 
         self.running = True
 

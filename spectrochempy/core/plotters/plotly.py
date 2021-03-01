@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 import numpy as np
 
 from spectrochempy.utils import colorscale
-from spectrochempy.core import dataset_preferences
+from spectrochempy.core import preferences
 
 # from matplotlib.ticker import MaxNLocator
 
@@ -89,6 +89,8 @@ def plotly(dataset, **kwargs):
     figure
         A plotly figure
     """
+
+    # TODO: not finished    (replace preferences)
     # get all plot preferences
     # ------------------------------------------------------------------------------------------------------------------
 

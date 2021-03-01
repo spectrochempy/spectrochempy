@@ -37,11 +37,11 @@ def available_styles():
     return styles
 
 
-class MatplotlibPreferences(MetaConfigurable):
+class PlotPreferences(MetaConfigurable):
     """
     This is a port of matplotlib.rcParams to our configuration system (traitlets)
     """
-    name = Unicode("MatplotlibPreferences")
+    name = Unicode("PlotPreferences")
     description = Unicode("Options for Matplotlib")
     updated = Bool(False)
     _groups = Set(Unicode)
@@ -55,9 +55,9 @@ class MatplotlibPreferences(MetaConfigurable):
     # See http://matplotlib.org/api/artist_api.html#module-matplotlib.lines for more
     # information on line properties.
     #
-    lines_linewidth = Float(0.75, help=r'''line width in points''').tag(config=True, kind='')
-    lines_linestyle = Enum(list(Line2D.lineStyles.keys()), default_value='-', help=r'''solid line''').tag(config=True,
-                                                                                                          kind='')
+    lines_linewidth = Float(0.75, help=r'''line width in points''').tag(config=True, gui=True, kind='')
+    lines_linestyle = Enum(list(Line2D.lineStyles.keys()), default_value='-',
+                           help=r'''solid line''').tag(config=True, kind='')
     lines_color = Unicode('b', help=r'''has no affect on plot(); see axes.prop_cycle''').tag(config=True, kind='color')
     lines_marker = Enum(list(Line2D.markers.keys()), default_value='None', help=r'''the default marker''').tag(
             config=True, kind='')
@@ -496,7 +496,7 @@ class MatplotlibPreferences(MetaConfigurable):
 
     # ..................................................................................................................
     def __init__(self, **kwargs):
-        super().__init__(jsonfile='MatplotlibPreferences', **kwargs)
+        super().__init__(jsonfile='PlotPreferences', **kwargs)
         for key in plt.rcParams:
             lis = key.split('.')
             if len(lis) > 1:
