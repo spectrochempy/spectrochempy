@@ -19,7 +19,8 @@ def test_simplisma():
     for mat in data:
         print('    ' + mat.name, str(mat.shape))
 
-    ds = data[0]
+    ds = data[-1]
+    assert ds.name == 'm1'
     print('\n test simplisma on {}\n'.format(ds.name))
     pure = SIMPLISMA(ds, n_pc=20, tol=0.2, noise=3, verbose=True)
 

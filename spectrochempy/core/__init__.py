@@ -477,13 +477,16 @@ class _TKFileDialogs:
         root.lift()
         root.focus_force()
         self.root = root
-        # self.root.mainloop()
 
     def _open_existing_directory(self,
+                                 parent=None,
                                  caption='Select a folder',
                                  directory=''):
 
-        directory = filedialog.askdirectory(parent=self.root, initialdir=directory, title=caption)
+        directory = filedialog.askdirectory(
+                parent=parent,
+                initialdir=directory,
+                title=caption)
 
         if directory:
             return directory
@@ -509,36 +512,44 @@ class _TKFileDialogs:
         return filetypes
 
     # noinspection PyRedundantParentheses
-    def _open_filename(self, filters=None):
+    def _open_filename(self,
+                       parent=None,
+                       filters=None):
 
         filename = filedialog.askopenfilename(
-                parent=self.root,
+                parent=parent,
                 filetypes=self.filetypes(filters),
                 title='Select file to open',
                 )
 
-        self.root.destroy()
+        if parent is not None:
+            parent.destroy()
+
         if filename:
             return filename
 
     # noinspection PyRedundantParentheses
     def _open_multiple_filenames(
             self,
+            parent=None,
             filters=None):
         """
         Return one or several files to open
         """
 
         filename = filedialog.askopenfilenames(
-                parent=self.root,
+                parent=parent,
                 filetypes=self.filetypes(filters) + [("all files", ('*'))],
                 title='Select file(s) to open')
 
-        self.root.destroy()
+        if parent is not None:
+            parent.destroy()
+
         if filename:
             return filename
 
     def _save_filename(self,
+                       parent=None,
                        filename='',
                        caption='Save as...',
                        selected_filter='',
@@ -561,12 +572,15 @@ class _TKFileDialogs:
 
         # -defaultextension, -filetypes, -initialdir, -initialfile, -message, -parent, -title, -typevariable,
         # -command, or -confirmoverwrite
-        filename = filedialog.asksaveasfilename(parent=self.root,
+        filename = filedialog.asksaveasfilename(parent=parent,
                                                 title=caption,
                                                 initialdir=str(directory),
                                                 initialfile=filename.name,
                                                 defaultextension=dftext,
                                                 filetypes=self.filetypes(filters))
+        if parent is not None:
+            parent.destroy
+
         if filename:
             return pathclean(filename)
 
@@ -617,6 +631,7 @@ def open_dialog(parent=None,
         klass = _QTFileDialogs
     else:
         klass = _TKFileDialogs()
+        parent = klass.root
 
     if directory is None:
         directory = ''

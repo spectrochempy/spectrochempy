@@ -158,7 +158,7 @@ def read_omnic(*paths, **kwargs):
     >>> len(le)
     2
     >>> le[1]
-    NDDataset: [float64] a.u. (shape: (y:2, x:5549))
+    NDDataset: [float64] a.u. (shape: (y:55, x:5549))
 
     Multiple files merged as the `merge` keyword is set to true
 

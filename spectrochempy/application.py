@@ -473,7 +473,8 @@ class GeneralPreferences(MetaConfigurable):
                              help='Display the close project dialog project changing or on application exit').tag(
                              config=True, gui=True)
 
-    csv_delimiter = Enum([',', ';', r'\t', ' '], help='CSV data delimiter').tag(config=True, gui=True)
+    csv_delimiter = Enum([',', ';', r'\t', ' '], default_value=',',
+                         help='CSV data delimiter').tag(config=True, gui=True)
 
 
     @default('project_directory')

@@ -113,7 +113,7 @@ class Importer(HasTraits):
                     nd.name = name
             elif names and len(names) != len(nds):
                 warn('length of the `names` list and of the list of datsets mismatch - names not applied')
-            return nds
+            return sorted(nds, key=str)  # return a sorted list (sorted according to their string representation)
 
     # ..................................................................................................................
     def _setup_objtype(self, *args, **kwargs):
@@ -344,7 +344,7 @@ def read(*paths, **kwargs):
     Again we can use merge to stack all 4 spectra if thet have compatible dimensions.
 
     >>> scp.read(directory='irdata/OPUS', merge=True)
-    [NDDataset: [float64] a.u. (shape: (y:4, x:2567)), NDDataset: [float64] a.u. (shape: (y:1, x:5549))]
+    [NDDataset: [float64] a.u. (shape: (y:1, x:5549)), NDDataset: [float64] a.u. (shape: (y:4, x:2567))]
     """
 
     importer = Importer()
