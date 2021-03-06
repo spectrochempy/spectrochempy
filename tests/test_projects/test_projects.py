@@ -5,6 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
+from pathlib import Path
 
 from spectrochempy.core.project.project import Project
 from spectrochempy.core.scripts.script import Script, run_script
@@ -135,4 +136,17 @@ def test_save_and_load_project(ds1, ds2):
 
     myp.add_datasets(ds1, ds2)
 
-    myp.save()
+    fn = myp.save()
+
+    proj = Project.load(fn)
+
+    assert str(proj['toto']) == 'NDDataset: [float64] a.u. (shape: (z:10, y:100, x:3))'
+
+
+def test_opening_project_created_by_gui():
+
+    path = Path.home() / '.spectrochempy' / 'projects' / 'essai.pscp'
+
+    proj = Project.load(path)
+
+    print(proj)

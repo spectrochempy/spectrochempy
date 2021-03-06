@@ -19,6 +19,7 @@ import re
 import textwrap
 import uuid
 import itertools
+import pathlib
 
 from traitlets import (List, Unicode, Instance, Bool, Union, CFloat, Integer, CInt, HasTraits, default, validate,
                        observe, All)
@@ -31,7 +32,7 @@ from spectrochempy.core import info_, error_, print_
 from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.utils import (TYPE_INTEGER, TYPE_FLOAT, MaskedConstant, MASKED, NOMASK, INPLACE, is_sequence,
                                  is_number, numpyprintoptions, spacing, insert_masked_print, SpectroChemPyWarning,
-                                 make_new_object, convert_to_html, get_user_and_node)
+                                 make_new_object, convert_to_html, get_user_and_node, pathclean)
 
 # ======================================================================================================================
 # constants
@@ -102,6 +103,9 @@ class NDArray(HasTraits):
     # other settings
     _text_width = Integer(120)
     _html_output = Bool(False)
+
+    # Put this here as it is sometimes not found when only in NDIO
+    _filename = Union((Instance(pathlib.Path), Unicode()), allow_none=True)
 
     # ..................................................................................................................
     def __init__(self, data=None, **kwargs):
@@ -1375,6 +1379,20 @@ class NDArray(HasTraits):
                                  f"{DEFAULT_DIM_NAME[::-1]}.")
 
         self._dims = tuple(values)
+
+    @property
+    def filename(self):
+        """
+        `Pathlib` object - current filename for this dataset.
+        """
+        if self._filename:
+            return self._filename.stem + self.suffix
+        else:
+            return None
+
+    @filename.setter
+    def filename(self, val):
+        self._filename = pathclean(val)
 
     # ..................................................................................................................
     @property

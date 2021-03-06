@@ -57,7 +57,7 @@ class PlotPreferences(MetaConfigurable):
     #
     lines_linewidth = Float(0.75, help=r'''line width in points''').tag(config=True, gui=True, kind='')
     lines_linestyle = Enum(list(Line2D.lineStyles.keys()), default_value='-',
-                           help=r'''solid line''').tag(config=True, kind='')
+                           help=r'''solid line''').tag(config=True, gui=True, kind='')
     lines_color = Unicode('b', help=r'''has no affect on plot(); see axes.prop_cycle''').tag(config=True, kind='color')
     lines_marker = Enum(list(Line2D.markers.keys()), default_value='None', help=r'''the default marker''').tag(
             config=True, kind='')
@@ -652,7 +652,7 @@ class PlotPreferences(MetaConfigurable):
                     value = self._get_fontsize(value)
                 elif name.endswith('color') and 'force_' not in name:
                     value = self._get_color(value)
-                debug_(f'{name_} = {value}')
+            # debug_(f'{name_} = {value}')
                 if value == 'true':
                     value = 'True'
                 elif value == 'false':
@@ -718,7 +718,7 @@ class PlotPreferences(MetaConfigurable):
                 except ValueError:
                     mpl.rcParams[key] = change.new.replace('\'', '')
             else:
-                debug_(f'no such parameter in rcParams: {key} - skipped')
+                pass # debug_(f'no such parameter in rcParams: {key} - skipped')
             if key == 'font.size':
                 mpl.rcParams['legend.fontsize'] = int(change.new * .8)
                 mpl.rcParams['xtick.labelsize'] = int(change.new)

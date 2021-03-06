@@ -152,7 +152,7 @@ class Project(AbstractProject, NDIO):
         elif key in self.scripts_names:
             return self._scripts[key]
         else:
-            raise KeyError("This object name does not exist in this project.")
+            raise KeyError(f"{key}: This object name does not exist in this project.")
 
     # ..................................................................................................................
     def __setitem__(self, key, value):
@@ -249,7 +249,8 @@ class Project(AbstractProject, NDIO):
     # ..................................................................................................................
     @default('_id')
     def _id_default(self):
-        return str(uuid.uuid1())  # a unique id
+        # a unique id
+        return f"{type(self).__name__}_{str(uuid.uuid1()).split('-')[0]}"
 
     # ..................................................................................................................
     @property
@@ -491,8 +492,14 @@ class Project(AbstractProject, NDIO):
         dataset.parent = self
         if name is None:
             name = dataset.name
-        else:
-            dataset.name = name
+
+        n = 1
+        while name in self.allnames:
+            # this name already exists
+            name = f'{dataset.name}-{n}'
+            n += 1
+
+        dataset.name = name
         self._datasets[name] = dataset
 
     # ..................................................................................................................

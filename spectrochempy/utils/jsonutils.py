@@ -19,8 +19,12 @@ from spectrochempy.units import Quantity, Unit
 
 __all__ = ['json_serialiser', 'json_decoder']
 
-fromisoformat = lambda s: datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f%Z")
-
+def fromisoformat(s):
+    try:
+        date = datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f%Z")
+    except:
+        date = datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f")
+    return date
 # ======================================================================================================================
 # JSON UTILITIES
 # ======================================================================================================================
@@ -64,7 +68,7 @@ def json_serialiser(byte_obj, encoding=None):
     from spectrochempy.core import debug_
     from spectrochempy.core.dataset.ndplot import Preferences
 
-    debug_(str(byte_obj))
+    # debug_(str(byte_obj))
 
     if byte_obj is None:
         return None
