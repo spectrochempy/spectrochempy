@@ -53,7 +53,7 @@ ds = scp.read('irdata/CO@Mo_Al2O3.SPG')
 
 # %%
 ds.y -= ds.y.data[0]  # start time a 0 for the  first spectrum
-ds.y.title = 'Time'
+ds.y.title = 'time'
 ds.y = ds.y.to('minutes')
 
 # %% [markdown]
@@ -164,8 +164,8 @@ for peaks in peakslist:
 positions = [s.find_peaks()[0].x.values.m for s in reg[:, 2220.:2180.]]
 
 # Make a NDDataset
-evol = scp.NDDataset(positions, title="Wavenumber at the maximum", units="1 /cm")
-evol.x = scp.Coord(reg.y, title='Acquisition time')  # the x coordinate is st to the acquisition time for each specra
+evol = scp.NDDataset(positions, title="wavenumber at the maximum", units="1 /cm")
+evol.x = scp.Coord(reg.y, title='acquisition time')  # the x coordinate is st to the acquisition time for each specra
 evol.preferences.method_1D = 'scatter+pen'
 
 # plot it

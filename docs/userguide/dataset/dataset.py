@@ -194,7 +194,7 @@ a
 
 # %%
 d3D = NDDataset(a)
-d3D.title = 'Energy'
+d3D.title = 'energy'
 d3D.author = 'Someone'
 d3D.name = '3D dataset creation'
 d3D.history = 'created from scratch'
@@ -566,7 +566,7 @@ def func(x, y, extra):
 
 # %%
 ds = NDDataset.fromfunction(func, extra=100 * ur.cm ** -1,  # extra arguments passed to the function
-                            coordset=cs, name='mydataset', title='Absorbance',
+                            coordset=cs, name='mydataset', title='absorbance',
                             units=None)  # when None, units will be determined from the function results
 
 ds.description = """Dataset example created for this tutorial.

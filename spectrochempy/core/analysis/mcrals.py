@@ -185,7 +185,7 @@ class MCRALS(HasTraits):
             Ct = np.linalg.lstsq(St.data.T, X.data.T, rcond=None)[0]
             C = NDDataset(Ct.T)
             C.name = 'Pure conc. profile, mcs-als of ' + X.name
-            C.title = 'Concentration'
+            C.title = 'concentration'
             cx = St.y.copy() if St.y else None
             cy = X.y.copy() if X.y else None
             C.set_coordset(y=cy, x=cx)

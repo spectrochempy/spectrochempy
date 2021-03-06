@@ -708,7 +708,7 @@ def _read_spg(*args, **kwargs):
     spacing = (lastx[0] - firstx[0]) / int(nx[0] - 1)
     _x = LinearCoord(offset=firstx[0], increment=spacing, size=int(nx[0]), title=xtitles[0], units=xunits[0])
 
-    _y = Coord(timestamps, title='Acquisition timestamp (GMT)', units='s', labels=(acquisitiondates, spectitles))
+    _y = Coord(timestamps, title='acquisition timestamp (GMT)', units='s', labels=(acquisitiondates, spectitles))
 
     dataset.set_coordset(y=_y, x=_x)
 
@@ -835,7 +835,7 @@ def _read_spa(*args, **kwargs):
     spacing = (lastx - firstx) / (nx - 1)
     _x = LinearCoord(offset=firstx, increment=spacing, size=nx, title=xtitle, units=xunit)
 
-    _y = Coord([timestamp], title='Acquisition timestamp (GMT)', units='s', labels=([acquisitiondate], [filename]))
+    _y = Coord([timestamp], title='acquisition timestamp (GMT)', units='s', labels=([acquisitiondate], [filename]))
     dataset.set_coordset(y=_y, x=_x)
 
     # Set origin, description, history, date

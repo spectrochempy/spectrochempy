@@ -222,13 +222,13 @@ def ref_ds():
 @pytest.fixture(scope="function")
 def ds1():
     # a dataset with coordinates
-    return NDDataset(ref3d_data, coordset=[coord0_, coord1_, coord2_], title='Absorbance', units='absorbance').copy()
+    return NDDataset(ref3d_data, coordset=[coord0_, coord1_, coord2_], title='absorbance', units='absorbance').copy()
 
 
 @pytest.fixture(scope="function")
 def ds2():
     # another dataset
-    return NDDataset(ref3d_2_data, coordset=[coord0_2_, coord1_2_, coord2_2_], title='Absorbance',
+    return NDDataset(ref3d_2_data, coordset=[coord0_2_, coord1_2_, coord2_2_], title='absorbance',
                      units='absorbance').copy()
 
 
@@ -237,7 +237,7 @@ def dsm():
     # dataset with coords containing several axis and a mask
 
     coordmultiple = CoordSet(coord2_, coord2b_)
-    return NDDataset(ref3d_data, coordset=[coord0_, coord1_, coordmultiple], mask=ref3d_mask, title='Absorbance',
+    return NDDataset(ref3d_data, coordset=[coord0_, coord1_, coordmultiple], mask=ref3d_mask, title='absorbance',
                      units='absorbance').copy()
 
 

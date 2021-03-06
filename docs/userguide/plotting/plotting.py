@@ -68,7 +68,7 @@ dataset = dataset[:, 4000.:650.]
 # %%
 dataset.y -= dataset.y[0]
 dataset.y.ito("minutes")
-dataset.y.title = 'Time on stream'
+dataset.y.title = 'time on stream'
 
 # %% [markdown]
 # We will also mask a region that we do not want to display

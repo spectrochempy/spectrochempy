@@ -64,7 +64,7 @@ def trapz(dataset, *args, **kwargs):
         idx = new._coordset.names.index(dim)
         del new._coordset.coords[idx]
 
-    new.title = 'Area'
+    new.title = 'area'
     new._units = dataset.units * dataset.coord(dim).units
     new._history = ['Dataset resulting from application of `trapz` method']
 
@@ -133,7 +133,7 @@ def simps(dataset, *args, **kwargs):
         idx = new._coordset.names.index(dim)
         del new._coordset.coords[idx]
 
-    new.title = 'Area'
+    new.title = 'area'
     new._units = dataset.units * dataset.coord(dim).units
     new._history = ['Dataset resulting from application of `simps` method']
 
