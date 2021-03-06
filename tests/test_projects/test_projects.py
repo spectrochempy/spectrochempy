@@ -141,12 +141,3 @@ def test_save_and_load_project(ds1, ds2):
     proj = Project.load(fn)
 
     assert str(proj['toto']) == 'NDDataset: [float64] a.u. (shape: (z:10, y:100, x:3))'
-
-
-def test_opening_project_created_by_gui():
-
-    path = Path.home() / '.spectrochempy' / 'projects' / 'essai.pscp'
-
-    proj = Project.load(path)
-
-    print(proj)
