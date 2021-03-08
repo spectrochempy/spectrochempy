@@ -565,6 +565,7 @@ def abc(dataset, dim=-1, **kwargs):
     if swaped:
         new.swapdims(axis, -1, inplace=True)  # must be done inplace
 
+    new.history = '`abc` Baseline correction applied.'
     return new
 
 
