@@ -297,7 +297,7 @@ def simple_project():
 
     )
 
-    assert proj.projects_names == ['A350', 'B350', 'P350']
+    assert proj.projects_names == ['P350', 'A350', 'B350']
 
     ir = NDDataset([1.1, 2.2, 3.3], coordset=[[1, 2, 3]])
     tg = NDDataset([1, 3, 4], coordset=[[1, 2, 3]])

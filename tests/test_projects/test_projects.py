@@ -32,7 +32,7 @@ def test_project(ds1, ds2, dsm):
     myp.add_datasets(ds1, ds2, dsm)
 
     print(myp.datasets_names)
-    assert myp.datasets_names[-1] == 'toto'
+    assert myp.datasets_names[-1] == 'titi'
     assert ds1.parent == myp
 
     # iteration
@@ -40,7 +40,7 @@ def test_project(ds1, ds2, dsm):
     for item in myp:
         d.append(item)
 
-    assert d[1][0] == 'titi'
+    assert d[1][0] == 'tata'
 
     ##
     # add sub project
@@ -80,7 +80,7 @@ def test_project_with_script():
             Project(name='B350', label=r'$\mathrm{M_B}\,(623\,K)$'),
             name='HIZECOKE_TEST')
 
-    assert proj.projects_names == ['A350', 'B350', 'P350']
+    assert proj.projects_names == ['P350', 'A350', 'B350']
 
     # add a dataset to a subproject
     ir = NDDataset([1, 2, 3])

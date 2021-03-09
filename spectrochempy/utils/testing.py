@@ -214,12 +214,16 @@ def assert_project_equal(proj1, proj2, **kwargs):
 
 # ......................................................................................................................
 def assert_project_almost_equal(proj1, proj2, **kwargs):
+
+    assert len(proj1.datasets) == len(proj2.datasets)
     for nd1, nd2 in zip(proj1.datasets, proj2.datasets):
         compare_datasets(nd1, nd2, **kwargs)
 
+    assert len(proj1.projects) == len(proj2.projects)
     for pr1, pr2 in zip(proj1.projects, proj2.projects):
         assert_project_almost_equal(pr1, pr2, **kwargs)
 
+    assert len(proj1.scripts)==len(proj2.scripts)
     for sc1, sc2 in zip(proj1.scripts, proj2.scripts):
         assert_script_equal(sc1, sc2, **kwargs)
 

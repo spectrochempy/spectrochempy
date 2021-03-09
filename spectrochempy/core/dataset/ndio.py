@@ -251,6 +251,7 @@ class NDIO(HasTraits):
 
         Alternatively, this method can be called as a class method of NDDataset or Project object:
 
+        >>> from spectrochempy import *
         >>> nd2 = NDDataset.load(f)
 
         Notes
