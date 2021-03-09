@@ -197,7 +197,7 @@ class Project(AbstractProject, NDIO):
 
     # ..................................................................................................................
     def __iter__(self):
-        for items in sorted(self.allitems):
+        for items in self.allitems:
             yield items
 
     # ..................................................................................................................
@@ -211,14 +211,14 @@ class Project(AbstractProject, NDIO):
             ns += 1
             sep = "   " * ns
 
-            for k, v in sorted(project._projects.items()):
+            for k, v in project._projects.items():
                 s += "{} ⤷ {} (sub-project)\n".format(sep, k)
                 s = _listproj(s, v, ns)  # recursive call
 
-            for k, v in sorted(project._datasets.items()):
+            for k, v in project._datasets.items():
                 s += "{} ⤷ {} (dataset)\n".format(sep, k)
 
-            for k, v in sorted(project._scripts.items()):
+            for k, v in project._scripts.items():
                 s += "{} ⤷ {} (script)\n".format(sep, k)
 
             if len(s) == lens:
@@ -326,8 +326,7 @@ class Project(AbstractProject, NDIO):
         list - names of all dataset included in this project.
         (does not return those located in sub-folders).
         """
-        lst = self._datasets.keys()
-        lst = sorted(lst)
+        lst = list(self._datasets.keys())
         return lst
 
     @property
@@ -358,8 +357,7 @@ class Project(AbstractProject, NDIO):
         """
         list - names of all subprojects included in this project.
         """
-        lst = self._projects.keys()
-        lst = sorted(lst)
+        lst = list(self._projects.keys())
         return lst
 
     # ..................................................................................................................
@@ -384,8 +382,7 @@ class Project(AbstractProject, NDIO):
         """
         list - names of all scripts included in this project.
         """
-        lst = self._scripts.keys()
-        lst = sorted(lst)
+        lst = list(self._scripts.keys())
         return lst
 
     # ..................................................................................................................
