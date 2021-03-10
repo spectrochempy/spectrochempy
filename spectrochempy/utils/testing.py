@@ -142,8 +142,7 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
                     if attr != 'mask':
                         raise AssertionError(f'{thistype}.{attr} sizes are different.')
                     else:
-                        if other.mask != this.mask:
-                            raise AssertionError(f'{this} and {other} masks are different.')
+                        assert_array_equal(other.mask, this.mask, f'{this} and {other} masks are different.')
                 if attr in ['data', 'mask']:
                     if approx:
                         assert_array_compare(compare, sattr, oattr, header=(f'{thistype}.{attr} attributes ar'
