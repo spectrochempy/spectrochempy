@@ -10,7 +10,7 @@
 
 **BUGS FIXED**
 
-* comparison of dataset in testing functions.
+* comparison of dataset when containing metadata in testing functions.
 
 * Some fixes relative to Project.
 
