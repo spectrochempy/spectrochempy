@@ -23,8 +23,7 @@ from traitlets import HasTraits, Instance, Union, Unicode
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core import debug_
 from spectrochempy.utils import (SpectroChemPyException, pathclean, check_filenames, ScpFile, check_filename_to_save,
-                                 json_serialiser, TYPE_BOOL,
-                                 )
+                                 json_serialiser, TYPE_BOOL, )
 
 SCPY_SUFFIX = {'NDDataset': '.scp', 'Project': '.pscp'}
 
@@ -217,8 +216,7 @@ class NDIO(HasTraits):
 
         kwargs['filetypes'] = self.filetype
         kwargs['caption'] = f'Save the current {self.implements()} as ... '
-        filename = check_filename_to_save(self, filename, save_as=True,
-                                          suffix=default_suffix, **kwargs)
+        filename = check_filename_to_save(self, filename, save_as=True, suffix=default_suffix, **kwargs)
 
         if filename:
             self.filename = filename
@@ -374,8 +372,8 @@ class NDIO(HasTraits):
                     else:
                         if isinstance(val, TYPE_BOOL) and key == '_mask':
                             val = np.bool_(val)
-                        if isinstance(obj, NDDataset) and key=='_filename':
-                            obj.filename = val   # This is a hack because for some reason finelame attribute is not
+                        if isinstance(obj, NDDataset) and key == '_filename':
+                            obj.filename = val  # This is a hack because for some reason finelame attribute is not
                             # found ????
                         else:
                             setattr(obj, key, val)

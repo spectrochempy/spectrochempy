@@ -1,19 +1,21 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
+#  =
 # ======================================================================================================================
 
 __all__ = ['Project']
 
 from copy import copy as cpy
-
 import uuid
 import pathlib
-import dill
 from functools import wraps
-from traitlets import  Dict, Instance, Unicode, This, default
+
+import dill
+from traitlets import Dict, Instance, Unicode, This, default
 
 from spectrochempy.core.dataset.nddataset import NDDataset, NDIO
 from spectrochempy.core.scripts.script import Script
@@ -31,7 +33,6 @@ from spectrochempy.core.project.baseproject import AbstractProject
 # Project class
 # ======================================================================================================================
 class Project(AbstractProject, NDIO):
-
     _id = Unicode()
     _name = Unicode(allow_none=True)
 
@@ -349,7 +350,6 @@ class Project(AbstractProject, NDIO):
     def datasets(self, datasets):
 
         self.add_datasets(*datasets)
-
 
     # ..................................................................................................................
     @property

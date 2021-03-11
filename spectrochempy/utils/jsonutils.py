@@ -1,30 +1,35 @@
 # -*- coding: utf-8 -*-
 #
 #  =====================================================================================================================
-#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
+#  =
 #  =====================================================================================================================
 #
 """
 JSON utilities
 """
 from datetime import datetime
-
 import pickle
 import base64
 import pathlib
+
 import numpy as np
 
 from spectrochempy.units import Quantity, Unit
 
 __all__ = ['json_serialiser', 'json_decoder']
 
+
 def fromisoformat(s):
     try:
         date = datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f%Z")
-    except:
+    except Exception:
         date = datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f")
     return date
+
+
 # ======================================================================================================================
 # JSON UTILITIES
 # ======================================================================================================================
@@ -65,7 +70,6 @@ def json_serialiser(byte_obj, encoding=None):
     """
     Return a serialised json object
     """
-    from spectrochempy.core import debug_
     from spectrochempy.core.dataset.ndplot import Preferences
 
     # debug_(str(byte_obj))
@@ -82,8 +86,8 @@ def json_serialiser(byte_obj, encoding=None):
         dic = {}
         for name in objnames:
 
-            if name in ['readonly'] or (name == 'dims' and 'datasets' in objnames) or [
-                    name in ['parent', 'name'] and isinstance(byte_obj, Preferences)]:
+            if name in ['readonly'] or (name == 'dims' and 'datasets' in objnames) \
+                    or [name in ['parent', 'name'] and isinstance(byte_obj, Preferences)]:
                 val = getattr(byte_obj, name)
             else:
                 val = getattr(byte_obj, f'_{name}')

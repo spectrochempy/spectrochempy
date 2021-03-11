@@ -7,8 +7,8 @@
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
-from traitlets import (Bool, Unicode, Tuple, List, Integer, Float, Enum, observe, All, default, TraitError,
-                       Union, Set)
+from traitlets import (Bool, Unicode, Tuple, List, Integer, Float, Enum, observe, All, default, TraitError, Union, Set)
+
 from spectrochempy.utils import MetaConfigurable, get_pkg_path, pathclean
 from spectrochempy.core import debug_
 
@@ -56,8 +56,9 @@ class PlotPreferences(MetaConfigurable):
     # information on line properties.
     #
     lines_linewidth = Float(0.75, help=r'''line width in points''').tag(config=True, gui=True, kind='')
-    lines_linestyle = Enum(list(Line2D.lineStyles.keys()), default_value='-',
-                           help=r'''solid line''').tag(config=True, gui=True, kind='')
+    lines_linestyle = Enum(list(Line2D.lineStyles.keys()), default_value='-', help=r'''solid line''').tag(config=True,
+                                                                                                          gui=True,
+                                                                                                          kind='')
     lines_color = Unicode('b', help=r'''has no affect on plot(); see axes.prop_cycle''').tag(config=True, kind='color')
     lines_marker = Enum(list(Line2D.markers.keys()), default_value='None', help=r'''the default marker''').tag(
             config=True, kind='')
@@ -69,8 +70,8 @@ class PlotPreferences(MetaConfigurable):
             config=True, kind='')
     lines_dash_capstyle = Enum(['butt', 'round', 'projecting'], default_value='butt',
                                help=r'''butt|round|projecting''').tag(config=True, kind='')
-    lines_solid_joinstyle = Enum(['miter', 'round', 'bevel'], default_value='round', help=r'''miter|round|bevel''').tag(
-            config=True, kind='')
+    lines_solid_joinstyle = Enum(['miter', 'round', 'bevel'], default_value='round',
+                                 help=r'''miter|round|bevel''').tag(config=True, kind='')
     lines_solid_capstyle = Enum(['butt', 'round', 'projecting'], default_value='round',
                                 help=r'''butt|round|projecting''').tag(config=True, kind='')
     lines_antialiased = Bool(True, help=r'''render lines in antialiased (no jaggies)''').tag(config=True, kind='')
@@ -249,9 +250,10 @@ class PlotPreferences(MetaConfigurable):
     axes_formatter_useoffset = Bool(True, help=r'''If True, the tick label formatter will default to labeling ticks
                                     relative to an offset when the data range is small compared to the minimum
                                     absolute value of the data.''').tag(config=True, kind='')
-    axes_formatter_offset_threshold = Integer(4, help=r'''When useoffset is True, the offset
-     will be used when it can remove at least this number of significant digits from tick labels.''').tag(
-            config=True, kind='')
+    axes_formatter_offset_threshold = Integer(4,
+                                              help=r'''When useoffset is True, the offset will be used when it can
+                                              remove at least this number of significant digits from tick labels.'''
+                                              ).tag(config=True, kind='')
     axes_unicode_minus = Bool(True, help=r'''use unicode for the minus symbol rather than hyphen. See
                                 http://en.wikipedia.org/wiki/Plus_and_minus_signs#Character_codes''').tag(config=True,
                                                                                                           kind='')
@@ -353,7 +355,8 @@ class PlotPreferences(MetaConfigurable):
     legend_handleheight = Float(0.7, help=r'''the height of the legend handle''').tag(config=True, kind='')
     legend_handletextpad = Float(0.1, help=r'''the space between the legend line and legend text''').tag(config=True,
                                                                                                          kind='')
-    legend_borderaxespad = Float(0.5, help=r'''the border between the axes and legend edge''').tag(config=True, kind='')
+    legend_borderaxespad = Float(0.5, help=r'''the border between the axes and legend edge''').tag(config=True,
+                                                                                                   kind='')
     legend_columnspacing = Float(0.5, help=r'''column separation''').tag(config=True, kind='')
     figure_titlesize = Float(12.0, help=r'''size of the figure title (Figure.suptitle())''').tag(config=True, kind='')
     figure_titleweight = Unicode('normal', help=r'''weight of the figure title''').tag(config=True, kind='')
@@ -370,7 +373,8 @@ class PlotPreferences(MetaConfigurable):
     #
     figure_max_open_warning = Integer(30, help=r'''The maximum number of figures to open through the pyplot
     interface before emitting a warning. If less than one this feature is disabled.''').tag(config=True, kind='')
-    figure_subplot_left = Float(0.15, help=r'''the left side of the subplots of the figure''').tag(config=True, kind='')
+    figure_subplot_left = Float(0.15, help=r'''the left side of the subplots of the figure''').tag(config=True,
+                                                                                                   kind='')
     figure_subplot_right = Float(0.95, help=r'''the right side of the subplots of the figure''').tag(config=True,
                                                                                                      kind='')
     figure_subplot_bottom = Float(0.12, help=r'''the bottom of the subplots of the figure''').tag(config=True, kind='')
@@ -468,7 +472,8 @@ class PlotPreferences(MetaConfigurable):
                      help='Default plot methods for 1D datasets').tag(config=True)
     method_2D = Enum(['map', 'image', 'stack', 'surface', '3D'], default_value='stack',
                      help='Default plot methods for 2D datasets').tag(config=True)
-    method_3D = Enum(['surface'], default_value='surface', help='Default plot methods for 3D datasets').tag(config=True)
+    method_3D = Enum(['surface'], default_value='surface', help='Default plot methods for 3D datasets').tag(
+        config=True)
 
     # - 2d
     # ------
@@ -652,7 +657,7 @@ class PlotPreferences(MetaConfigurable):
                     value = self._get_fontsize(value)
                 elif name.endswith('color') and 'force_' not in name:
                     value = self._get_color(value)
-            # debug_(f'{name_} = {value}')
+                # debug_(f'{name_} = {value}')
                 if value == 'true':
                     value = 'True'
                 elif value == 'false':
@@ -718,7 +723,7 @@ class PlotPreferences(MetaConfigurable):
                 except ValueError:
                     mpl.rcParams[key] = change.new.replace('\'', '')
             else:
-                pass # debug_(f'no such parameter in rcParams: {key} - skipped')
+                pass  # debug_(f'no such parameter in rcParams: {key} - skipped')
             if key == 'font.size':
                 mpl.rcParams['legend.fontsize'] = int(change.new * .8)
                 mpl.rcParams['xtick.labelsize'] = int(change.new)
@@ -726,8 +731,6 @@ class PlotPreferences(MetaConfigurable):
                 mpl.rcParams['axes.labelsize'] = int(change.new)
             if key == 'font.family':
                 self.set_latex_font(
-                        change.new)  # @observe('use_latex')  # def _use_latex_changed(self, change):  #     mpl.rc(
-                # 'text', usetex=change.new)  #  # @observe('latex_preamble')  # def _set_latex_preamble(self,
-                # change):  #     mpl.rcParams[  #    #  #  #  'text.latex.preamble'] = change.new.split('\n')
+                        change.new)  # @observe('use_latex')  # def _use_latex_changed(self, change):  #     mpl.rc(  # 'text', usetex=change.new)  #  # @observe('latex_preamble')  # def _set_latex_preamble(self,  # change):  #     mpl.rcParams[  #    #  #  #  'text.latex.preamble'] = change.new.split('\n')
         super()._anytrait_changed(change)
         return  # EOF

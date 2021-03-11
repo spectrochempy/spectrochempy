@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
+#  =
 # ======================================================================================================================
-
-from pathlib import Path
 
 from spectrochempy.core.project.project import Project
 from spectrochempy.core.scripts.script import Script, run_script
@@ -74,11 +74,9 @@ def test_empty_project():
 
 def test_project_with_script():
     # Example from tutorial agir notebook
-    proj = Project(
-            Project(name='P350', label=r'$\mathrm{M_P}\,(623\,K)$'),
-            Project(name='A350', label=r'$\mathrm{M_A}\,(623\,K)$'),
-            Project(name='B350', label=r'$\mathrm{M_B}\,(623\,K)$'),
-            name='HIZECOKE_TEST')
+    proj = Project(Project(name='P350', label=r'$\mathrm{M_P}\,(623\,K)$'),
+                   Project(name='A350', label=r'$\mathrm{M_A}\,(623\,K)$'),
+                   Project(name='B350', label=r'$\mathrm{M_B}\,(623\,K)$'), name='HIZECOKE_TEST')
 
     assert proj.projects_names == ['P350', 'A350', 'B350']
 

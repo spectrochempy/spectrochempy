@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
+#  =
 # ======================================================================================================================
 
 import os
@@ -38,9 +40,7 @@ def test_MCRALS_no_coords():
     print('\n test on single experiment (m1) with EFA estimate of pure species (verbose off)...\n')
     guess = EFA(X).get_conc(4)
 
-    param = {
-        'normSpec': 'euclid', 'maxit': 100
-    }
+    param = {'normSpec': 'euclid', 'maxit': 100}
     mcr2 = MCRALS(X, guess, param=param, verbose=False)
     mcr2.plotmerit()
 
@@ -58,7 +58,7 @@ def test_MCRALS():
     X.plot(title='M1')
 
     guess = data[3]
-    assert guess.name == 'spure' # spure
+    assert guess.name == 'spure'  # spure
     guess.set_coordset(y=np.arange(4), x=np.arange(96))
     guess.title = 'concentration'
     guess.coordset.set_titles(y='#components', x='elution time')
@@ -75,9 +75,7 @@ def test_MCRALS():
     guess = EFA(X).get_conc(4)
     guess.plot(title='EFA guess')
 
-    param = {
-        'normSpec': 'euclid', 'maxit': 100
-    }
+    param = {'normSpec': 'euclid', 'maxit': 100}
     mcr2 = MCRALS(X, guess, param=param, verbose=False)
     mcr.plotmerit()
 

@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
+#  =
 # ======================================================================================================================
 """
 This module define the `application` on which the API rely.
@@ -342,9 +344,9 @@ class SpectroChemPyMagics(Magics):
 
         return "Script {} created.".format(name)
 
-        # @line_magic  # def runscript(self, pars=''):  #     """  #  #  # """
-        #     opts,  # args = self.parse_options(pars, '')  #  #     if  # not args:
-        #         raise UsageError('Missing script  # name')  #  #  # return args
+        # @line_magic  # def runscript(self, pars=''):  #     """  #  #  # """  #     opts,
+        # args = self.parse_options(pars, '')  #  #     if  # not args:  #         raise UsageError('Missing script
+        # name')  #  #  # return args
 
 
 # ======================================================================================================================
@@ -443,39 +445,36 @@ class GeneralPreferences(MetaConfigurable):
 
     # GUI
     databases_directory = Union((Instance(Path), Unicode()),
-                      help='Directory where to look for database files such as csv').tag(
-                      config=True, gui=True, kind="folder")
+                                help='Directory where to look for database files such as csv'
+                                ).tag(config=True, gui=True, kind="folder")
 
     datadir = Union((Instance(Path), Unicode()),
-                    help='Directory where to look for data by default').tag(
-                      config=True, gui=True, kind="folder")
+                    help='Directory where to look for data by default').tag(config=True, gui=True, kind="folder")
 
     workspace = Union((Instance(Path), Unicode()),
-                    help='Workspace directory by default').tag(
-            config=True, gui=True, kind="folder")
+                      help='Workspace directory by default').tag(config=True, gui=True, kind="folder")
 
     # ------------------------------------------------------------------------------------------------------------------
     # Configuration entries
     # ------------------------------------------------------------------------------------------------------------------
 
-    autoload_project = Bool(True,
-                            help='Automatic loading of the last project at startup').tag(config=True, gui=True)
+    autoload_project = Bool(True, help='Automatic loading of the last project at startup').tag(config=True, gui=True)
 
     autosave_project = Bool(True, help='Automatic saving of the current project').tag(config=True, gui=True)
 
-    project_directory = Union((Instance(Path), Unicode()),
-                              help='Directory where projects are stored by default').tag(config=True, kind='folder')
+    project_directory = Union((Instance(Path), Unicode()), help='Directory where projects are stored by default').tag(
+        config=True, kind='folder')
 
-    last_project = Union((Instance(Path, allow_none=True), Unicode()),
-                              help='Last used project').tag(config=True, gui=True, kind='file')
+    last_project = Union((Instance(Path, allow_none=True), Unicode()), help='Last used project').tag(config=True,
+                                                                                                     gui=True,
+                                                                                                     kind='file')
 
     show_close_dialog = Bool(True,
                              help='Display the close project dialog project changing or on application exit').tag(
-                             config=True, gui=True)
+            config=True, gui=True)
 
-    csv_delimiter = Enum([',', ';', r'\t', ' '], default_value=',',
-                         help='CSV data delimiter').tag(config=True, gui=True)
-
+    csv_delimiter = Enum([',', ';', r'\t', ' '], default_value=',', help='CSV data delimiter').tag(config=True,
+                                                                                                   gui=True)
 
     @default('project_directory')
     def _get_default_project_directory(self):
@@ -564,8 +563,9 @@ class SpectroChemPy(Application):
     name = Unicode('SpectroChemPy')
     "Running name of the application"
 
-    description = Unicode('SpectroChemPy is a framework for processing, analysing and modelling Spectroscopic data for '
-                          'Chemistry with Python.')
+    description = Unicode(
+        'SpectroChemPy is a framework for processing, analysing and modelling Spectroscopic data for '
+        'Chemistry with Python.')
     "Short description of the |scpy| application"
 
     long_description = Unicode()
@@ -675,7 +675,8 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
     flags = dict(debug=({'SpectroChemPy': {'log_level': DEBUG}}, "Set log_level to DEBUG - most verbose mode"),
                  info=({'SpectroChemPy': {'log_level': INFO}}, "Set log_level to INFO - verbose mode"),
                  quiet=({'SpectroChemPy': {'log_level': ERROR}}, "Set log_level to ERROR - no verbosity at all"),
-                 nodisplay=({'SpectroChemPy': {'nodisplay': True}}, "Set NO DISPLAY mode to true - no graphics at all"),
+                 nodisplay=(
+                 {'SpectroChemPy': {'nodisplay': True}}, "Set NO DISPLAY mode to true - no graphics at all"),
                  reset_config=({'SpectroChemPy': {'reset_config': True}}, "Reset config to default"), show_config=(
             {'SpectroChemPy': {'show_config': True, }}, "Show the application's configuration (human-readable "
                                                         "format)"), show_config_json=(
