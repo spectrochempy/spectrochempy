@@ -2335,16 +2335,16 @@ class NDArray(HasTraits):
                         new = _transform(new)
 
                 # particular case of dimensionless units: absorbance and transmittance
-                if oldunits in [ur.transmittance, ur.absolute_transmittance]:
-                    if units == ur.absorbance:
+                if str(oldunits) in ['transmittance', 'absolute_transmittance']:
+                    if str(units) == 'absorbance':
                         udata = (new.data * new.units).to(units)
                         new._data = -np.log10(udata.m)
                         new._units = units
                         if new.title.lower() == 'transmittance':
                             new._title = 'absorbance'
 
-                elif oldunits == ur.absorbance:
-                    if units in [ur.transmittance, ur.absolute_transmittance]:
+                elif str(oldunits) == 'absorbance':
+                    if str(units) in ['transmittance', 'absolute_transmittance']:
                         scale = Quantity(1., self._units).to(units).magnitude
                         new._data = 10. ** -new.data * scale
                         new._units = units
