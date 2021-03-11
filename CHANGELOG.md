@@ -14,6 +14,8 @@
 
 * Some fixes relative to Project.
 
+* Bug in the `to` function.
+
 ## Version 0.2.14
 
 **NEW FEATURES**
