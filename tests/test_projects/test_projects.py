@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
+#  =
 # ======================================================================================================================
-
 
 from spectrochempy.core.project.project import Project
 from spectrochempy.core.scripts.script import Script, run_script
@@ -31,7 +32,7 @@ def test_project(ds1, ds2, dsm):
     myp.add_datasets(ds1, ds2, dsm)
 
     print(myp.datasets_names)
-    assert myp.datasets_names[-1] == 'toto'
+    assert myp.datasets_names[-1] == 'titi'
     assert ds1.parent == myp
 
     # iteration
@@ -39,7 +40,7 @@ def test_project(ds1, ds2, dsm):
     for item in myp:
         d.append(item)
 
-    assert d[1][0] == 'titi'
+    assert d[1][0] == 'tata'
 
     ##
     # add sub project
@@ -73,13 +74,11 @@ def test_empty_project():
 
 def test_project_with_script():
     # Example from tutorial agir notebook
-    proj = Project(
-            Project(name='P350', label=r'$\mathrm{M_P}\,(623\,K)$'),
-            Project(name='A350', label=r'$\mathrm{M_A}\,(623\,K)$'),
-            Project(name='B350', label=r'$\mathrm{M_B}\,(623\,K)$'),
-            name='HIZECOKE_TEST')
+    proj = Project(Project(name='P350', label=r'$\mathrm{M_P}\,(623\,K)$'),
+                   Project(name='A350', label=r'$\mathrm{M_A}\,(623\,K)$'),
+                   Project(name='B350', label=r'$\mathrm{M_B}\,(623\,K)$'), name='HIZECOKE_TEST')
 
-    assert proj.projects_names == ['A350', 'B350', 'P350']
+    assert proj.projects_names == ['P350', 'A350', 'B350']
 
     # add a dataset to a subproject
     ir = NDDataset([1, 2, 3])
@@ -135,4 +134,8 @@ def test_save_and_load_project(ds1, ds2):
 
     myp.add_datasets(ds1, ds2)
 
-    myp.save()
+    fn = myp.save()
+
+    proj = Project.load(fn)
+
+    assert str(proj['toto']) == 'NDDataset: [float64] a.u. (shape: (z:10, y:100, x:3))'

@@ -41,7 +41,8 @@
 import spectrochempy as scp
 
 # %% [markdown]
-# Now let's import and plot a typical IR dataset which wase recorded during the removal of ammonia from a NH4-Y zeolite:
+# Now let's import and plot a typical IR dataset which wase recorded during the removal of ammonia from a NH4-Y
+# zeolite:
 
 # %%
 X = scp.read_omnic("irdata/nh4y-activation.spg")
@@ -254,8 +255,8 @@ npc = 3  # only used for 'multivariate'
 blc = scp.BaselineCorrection(X)
 Xcorr = blc.compute(*ranges, interpolation=interpolation, order=order, method=method, npc=npc)
 
-axes = scp.multiplot([X, Xcorr], labels=['Original', 'Baseline corrected'], 
-                     sharex=True, nrow=2, ncol=1, figsize=(7, 6), dpi=96)
+axes = scp.multiplot([X, Xcorr], labels=['Original', 'Baseline corrected'], sharex=True, nrow=2, ncol=1,
+                     figsize=(7, 6), dpi=96)
 blc.show_regions(axes['axe21'])
 
 # %% [markdown]

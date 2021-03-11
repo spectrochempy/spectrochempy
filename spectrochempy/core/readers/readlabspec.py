@@ -167,7 +167,7 @@ def _read_txt(*args, **kwargs):
     # set dataset metadata
     dataset.data = data
     dataset.set_coordset(y=_y, x=_x)
-    dataset.title = 'Raman Intensity'
+    dataset.title = 'raman Intensity'
     dataset.units = 'absorbance'
     dataset.name = filename.stem
     dataset.meta = meta
@@ -280,7 +280,7 @@ def _transf_meta(y, meta):
 #     labels = out.y.labels
 #     out.y = lstime
 #     out.y.labels = labels, lsfile
-#     out.y.title = 'Time'
+#     out.y.title = 'time'
 #     out.y.units = 's'
 #     out.name = 'Series concatenated'
 #

@@ -124,7 +124,7 @@ class PCA(HasTraits):
         # loadings
 
         LT = VT
-        LT.title = 'Loadings (L^T) of ' + X.name
+        LT.title = 'loadings (L^T) of ' + X.name
         LT.history = 'Created by PCA'
 
         # scores

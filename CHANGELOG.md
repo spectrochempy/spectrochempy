@@ -6,6 +6,14 @@
 
 * Added a baseline correction method: `basc`. 
 
+* Baseline ranges can be stored in meta.regions['baseline'] - basc will recognize them.
+
+**BUGS FIXED**
+
+* comparison of dataset when containing metadata in testing functions.
+
+* Some fixes relative to Project.
+
 ## Version 0.2.14
 
 **NEW FEATURES**

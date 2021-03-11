@@ -1,19 +1,21 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
+#  =
 # ======================================================================================================================
 
 __all__ = ['Project']
 
 from copy import copy as cpy
-
 import uuid
 import pathlib
-import dill
 from functools import wraps
-from traitlets import (Dict, Instance, Unicode, This, default)
+
+import dill
+from traitlets import Dict, Instance, Unicode, This, default
 
 from spectrochempy.core.dataset.nddataset import NDDataset, NDIO
 from spectrochempy.core.scripts.script import Script
@@ -31,7 +33,6 @@ from spectrochempy.core.project.baseproject import AbstractProject
 # Project class
 # ======================================================================================================================
 class Project(AbstractProject, NDIO):
-
     _id = Unicode()
     _name = Unicode(allow_none=True)
 
@@ -43,6 +44,7 @@ class Project(AbstractProject, NDIO):
     _meta = Instance(Meta)
 
     _filename = Instance(pathlib.Path, allow_none=True)
+    _directory = Instance(pathlib.Path, allow_none=True)
 
     # ..................................................................................................................
     def __init__(self, *args, argnames=None, name=None, **meta):
@@ -151,7 +153,7 @@ class Project(AbstractProject, NDIO):
         elif key in self.scripts_names:
             return self._scripts[key]
         else:
-            raise KeyError("This object name does not exist in this project.")
+            raise KeyError(f"{key}: This object name does not exist in this project.")
 
     # ..................................................................................................................
     def __setitem__(self, key, value):
@@ -196,7 +198,7 @@ class Project(AbstractProject, NDIO):
 
     # ..................................................................................................................
     def __iter__(self):
-        for items in sorted(self.allitems):
+        for items in self.allitems:
             yield items
 
     # ..................................................................................................................
@@ -210,14 +212,14 @@ class Project(AbstractProject, NDIO):
             ns += 1
             sep = "   " * ns
 
-            for k, v in sorted(project._projects.items()):
+            for k, v in project._projects.items():
                 s += "{} ⤷ {} (sub-project)\n".format(sep, k)
                 s = _listproj(s, v, ns)  # recursive call
 
-            for k, v in sorted(project._datasets.items()):
+            for k, v in project._datasets.items():
                 s += "{} ⤷ {} (dataset)\n".format(sep, k)
 
-            for k, v in sorted(project._scripts.items()):
+            for k, v in project._scripts.items():
                 s += "{} ⤷ {} (script)\n".format(sep, k)
 
             if len(s) == lens:
@@ -248,7 +250,8 @@ class Project(AbstractProject, NDIO):
     # ..................................................................................................................
     @default('_id')
     def _id_default(self):
-        return str(uuid.uuid1())  # a unique id
+        # a unique id
+        return f"{type(self).__name__}_{str(uuid.uuid1()).split('-')[0]}"
 
     # ..................................................................................................................
     @property
@@ -324,9 +327,12 @@ class Project(AbstractProject, NDIO):
         list - names of all dataset included in this project.
         (does not return those located in sub-folders).
         """
-        lst = self._datasets.keys()
-        lst = sorted(lst)
+        lst = list(self._datasets.keys())
         return lst
+
+    @property
+    def directory(self):
+        return self._directory
 
     # ..................................................................................................................
     @property
@@ -351,8 +357,7 @@ class Project(AbstractProject, NDIO):
         """
         list - names of all subprojects included in this project.
         """
-        lst = self._projects.keys()
-        lst = sorted(lst)
+        lst = list(self._projects.keys())
         return lst
 
     # ..................................................................................................................
@@ -377,8 +382,7 @@ class Project(AbstractProject, NDIO):
         """
         list - names of all scripts included in this project.
         """
-        lst = self._scripts.keys()
-        lst = sorted(lst)
+        lst = list(self._scripts.keys())
         return lst
 
     # ..................................................................................................................
@@ -485,8 +489,14 @@ class Project(AbstractProject, NDIO):
         dataset.parent = self
         if name is None:
             name = dataset.name
-        else:
-            dataset.name = name
+
+        n = 1
+        while name in self.allnames:
+            # this name already exists
+            name = f'{dataset.name}-{n}'
+            n += 1
+
+        dataset.name = name
         self._datasets[name] = dataset
 
     # ..................................................................................................................

@@ -195,7 +195,7 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
     # ------------------------------------------------------------------------------------------------------------------
     def __init__(self, nucleus='1H'):
         # filename = resource_filename(PKG, 'isotopes.csv')
-        DATABASES = pathlib.Path(prefs.databases)
+        DATABASES = pathlib.Path(prefs.databases_directory)
         filename = DATABASES / 'isotopes.csv'
         txt = filename.read_text()
         arr = txt.replace(" ", "").split('\n')

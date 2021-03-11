@@ -14,11 +14,12 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 
 def test_read_csv():
     datadir = prefs.datadir
+    prefs.csv_delimiter = ','
 
     A = NDDataset.read_csv('agirdata/P350/TGA/tg.csv', directory=datadir, origin='tga')
     assert A.shape == (1, 3247)
 
-    B = NDDataset.read_csv('irdata/IR.CSV', origin='omnic', csv_delimiter=',')
+    B = NDDataset.read_csv('irdata/IR.CSV', origin='omnic')
     assert B.shape == (1, 3736)
 
     # without directory

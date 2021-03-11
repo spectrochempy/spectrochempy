@@ -24,7 +24,7 @@ from traitlets import Dict, HasTraits, Instance, Union, default, TraitError
 
 from spectrochempy.utils import get_figure, pathclean
 from spectrochempy.core.dataset.meta import Meta
-from spectrochempy.core import preferences, dataset_preferences, project_preferences, matplotlib_preferences, error_
+from spectrochempy.core import preferences, plot_preferences, error_
 from spectrochempy.core.plotters.plot1d import plot_1D
 from spectrochempy.core.plotters.plot3d import plot_3D
 from spectrochempy.core.plotters.plot2d import plot_2D
@@ -49,12 +49,8 @@ class Preferences(Meta):
         # search on the preferences
         if self.parent is not None:
             res = getattr(self.parent, f'{self.name}_{key}')
-        elif hasattr(matplotlib_preferences, key):
-            res = getattr(matplotlib_preferences, key)
-        elif hasattr(dataset_preferences, key):
-            res = getattr(dataset_preferences, key)
-        elif hasattr(project_preferences, key):
-            res = getattr(project_preferences, key)
+        elif hasattr(plot_preferences, key):
+            res = getattr(plot_preferences, key)
         elif hasattr(preferences, key):
             res = getattr(preferences, key)
         else:
@@ -76,21 +72,17 @@ class Preferences(Meta):
     def __setitem__(self, key, value):
 
         # also change the corresponding preferences
-        if hasattr(matplotlib_preferences, key):
+        if hasattr(plot_preferences, key):
             try:
-                setattr(matplotlib_preferences, key, value)
+                setattr(plot_preferences, key, value)
             except TraitError:
-                value = type(matplotlib_preferences.traits()[key].default_value)(value)
-                setattr(matplotlib_preferences, key, value)
-        elif hasattr(dataset_preferences, key):
-            setattr(dataset_preferences, key, value)
-        elif hasattr(project_preferences, key):
-            setattr(project_preferences, key, value)
+                value = type(plot_preferences.traits()[key].default_value)(value)
+                setattr(plot_preferences, key, value)
         elif hasattr(preferences, key):
             setattr(preferences, key, value)
         elif key in self.keys():
             newkey = f'{self.name}_{key}'
-            setattr(matplotlib_preferences, newkey, value)
+            setattr(plot_preferences, newkey, value)
             self.parent[newkey] = value
             return
         else:
@@ -98,21 +90,13 @@ class Preferences(Meta):
             alias = self._get_alias(key)
             if alias:
                 newkey = f'{alias}_{key}'
-                setattr(matplotlib_preferences, newkey, value)
+                setattr(plot_preferences, newkey, value)
                 self.parent[newkey] = value
             else:
                 error_(f'not found {key}')
             return
 
         super().__setitem__(key, value)
-
-        # # ........................ TO WORK ON  ## from spectrochempy.core import preferences,  # config_manager  #
-        # read json files in the pscp file (obj[f])  # # then write it in the main config  #   #  # directory  # f =
-        # 'ProjectPreferences.json'  # if f in obj.files:  # TODO: work on this  #     prefjsonfile  #  =  #  #
-        #  os.path.join(config_dir, f)  #     with open(prefjsonfile, 'w') as fd:  #         json.dump(obj[f], fd,
-        #  indent=4)  #     # we must also reinit preferences  #     app.init_all_preferences()  #  #    #  #  #  #
-        #  app.load_config_file(prefjsonfile)  #     app.project_preferences = ProjectPreferences(config=app.config,
-        #  parent=app)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Private methods
@@ -124,7 +108,7 @@ class Preferences(Meta):
         lkeyp = (len(key) + 1)
 
         regex = r"[a-zA-Z0-9_]*(?:\b|_)" + key + "(?:\b|_)[a-zA-Z0-9_]*"
-        for item in matplotlib_preferences.trait_names():
+        for item in plot_preferences.trait_names():
             matches = re.match(regex, item)
             if matches is not None:
                 alias.append(item)
@@ -160,11 +144,11 @@ class Preferences(Meta):
 
         # remove the matplotlib_user json file to reset to defaults
         config_dir = pathclean(preferences.cfg.config_dir)
-        f = config_dir / 'MatplotlibPreferences.json'
+        f = config_dir / 'PlotPreferences.json'
         if f.exists():
             f.unlink()
 
-        matplotlib_preferences._apply_style('scpy')
+        plot_preferences._apply_style('scpy')
         self.style = 'scpy'
 
         # reset also non-matplolib preferences
@@ -173,7 +157,7 @@ class Preferences(Meta):
                       'number_of_y_labels', 'number_of_z_labels', 'number_of_contours', 'contour_alpha',
                       'contour_start', 'antialiased', 'rcount', 'ccount']
         for par in nonmplpars:
-            setattr(self, par, matplotlib_preferences.traits()[par].default_value)
+            setattr(self, par, plot_preferences.traits()[par].default_value)
 
         self._data = {}
 
@@ -181,7 +165,7 @@ class Preferences(Meta):
         """
         List all parameters with their current and default value
         """
-        for key in matplotlib_preferences.trait_names(config=True):
+        for key in plot_preferences.trait_names(config=True):
             self.help(key)
 
     def help(self, key):
@@ -195,7 +179,7 @@ class Preferences(Meta):
         """
         from spectrochempy.utils import colored, TBold
         value = self[key]
-        trait = matplotlib_preferences.traits()[key]
+        trait = plot_preferences.traits()[key]
         default = trait.default_value
         thelp = trait.help.replace('\n', ' ').replace('\t', ' ')
         sav = ''
@@ -260,7 +244,7 @@ class Preferences(Meta):
             stylelib = (pathclean(mpl.get_configdir()) / 'stylelib' / filename).with_suffix('.mplstyle')
             stylelib.write_text(txt)
 
-        # matplotlib_preferences.traits()['style'].trait_types = matplotlib_preferences.traits()['style'].trait_types +\
+        # plot_preferences.traits()['style'].trait_types = plot_preferences.traits()['style'].trait_types +\
         #                                                       (Unicode(filename),)
         self.style = filename
         return self.style

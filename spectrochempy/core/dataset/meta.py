@@ -153,7 +153,7 @@ class Meta(object):  # HasTraits):
                 for i, ve in enumerate(v):
                     eq &= np.all(ve == m2[k][i])
             else:
-                eq &= np.all(v == m2[k])
+                eq &= np.all(v == m2.get(k, None))
         return eq
 
     def __ne__(self, other):

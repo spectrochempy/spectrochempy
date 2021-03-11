@@ -30,7 +30,7 @@ proj = scp.Project(
 
 )
 
-assert proj.projects_names == ['A350', 'B350', 'P350']
+assert proj.projects_names == ['P350', 'A350', 'B350']
 
 ##############################################################################
 # Add for example two datasets to the ``A350`` subproject.

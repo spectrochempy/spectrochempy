@@ -177,11 +177,11 @@ def _read_asc(*args, **kwargs):
 
     dataset = NDDataset(ioncurrent)
     dataset.name = filename.stem
-    dataset.title = "Ion Current"
+    dataset.title = "ion current"
     dataset.units = "amp"
 
     if timestamp:
-        _y = Coord(times[:, 0], title='Acquisition timestamp (UTC)', units="s")
+        _y = Coord(times[:, 0], title='acquisition timestamp (UTC)', units="s")
     else:
         _y = Coord(times[:, 0] - times[0, 0], title='Time', units="s")
 

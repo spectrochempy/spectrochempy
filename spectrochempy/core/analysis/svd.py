@@ -131,7 +131,7 @@ class SVD(HasTraits):
         # -------------------------------------------------------
 
         s = NDDataset(s)
-        s.title = 'Singular values of ' + X.name
+        s.title = 'singular values of ' + X.name
         s.name = 'sigma'
         s.history = 'Created by SVD \n'
         s.description = (
@@ -179,7 +179,7 @@ class SVD(HasTraits):
 
             VT = NDDataset(VT)
             VT.name = 'V.T'
-            VT.title = 'Loadings (V.t) of ' + X.name
+            VT.title = 'loadings (V.t) of ' + X.name
             VT.set_coordset(x=X.x, y=Coord(labels=['#%d' % (i + 1) for i in range(KV)], title='Components'))
             VT.description = (
                     'Loadings obtained by singular value decomposition of ' + X.name)
@@ -214,7 +214,7 @@ class SVD(HasTraits):
         size = self.s.size
         sv = self.s.copy()
         sv.name = 'sv'
-        sv.title = 'Singular values'
+        sv.title = 'singular values'
         sv.set_coordset(Coord(None, labels=['#%d' % (i + 1) for i in range(size)], title='Components'))
         return sv
 
@@ -224,7 +224,7 @@ class SVD(HasTraits):
         size = self.s.size
         ev = self.s ** 2 / (size - 1)
         ev.name = 'ev'
-        ev.title = 'Explained variance'
+        ev.title = 'explained variance'
         ev.set_coordset(Coord(None, labels=['#%d' % (i + 1) for i in range(size)], title='Components'))
         return ev
 
@@ -233,7 +233,7 @@ class SVD(HasTraits):
         """|NDDataset|, Cumulative Explained Variance"""
         ev_cum = np.cumsum(self.ev_ratio)
         ev_cum.name = 'ev_cum'
-        ev_cum.title = 'Cumulative explained variance'
+        ev_cum.title = 'cumulative explained variance'
         ev_cum.units = 'percent'
         return ev_cum
 
@@ -242,7 +242,7 @@ class SVD(HasTraits):
         """|NDDataset|,  Explained Variance per singular values"""
         ratio = self.ev * 100. / np.sum(self.ev)
         ratio.name = 'ev_ratio'
-        ratio.title = 'Explained variance'
+        ratio.title = 'explained variance'
         ratio.units = 'percent'
         return ratio
 

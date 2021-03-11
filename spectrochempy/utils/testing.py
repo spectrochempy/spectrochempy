@@ -108,8 +108,8 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
     else:
         attrs = this.__dir__()
         exclude = (
-                'filename', 'preferences', 'description', 'history', 'date', 'modified', 'modeldata', 'origin', 'roi',
-                'linear', 'offset', 'increment', 'size', 'name', 'show_datapoints')
+            'filename', 'preferences', 'description', 'history', 'date', 'modified', 'modeldata', 'origin', 'roi',
+            'linear', 'offset', 'increment', 'size', 'name', 'show_datapoints')
 
         for attr in exclude:
             # these attibutes are not used for comparison (comparison based on
@@ -118,8 +118,7 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
                 if attr in attrs:
                     attrs.remove(attr)
 
-        # if 'title' in attrs:
-        #    attrs.remove('title')  #TODO: should we use title for comparison?
+        # if 'title' in attrs:  #    attrs.remove('title')  #TODO: should we use title for comparison?
 
     for attr in attrs:
         if attr != 'units':
@@ -142,13 +141,13 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
                     if attr != 'mask':
                         raise AssertionError(f'{thistype}.{attr} sizes are different.')
                     else:
-                        if other.mask != this.mask:
-                            raise AssertionError(f'{this} and {other} masks are different.')
+                        assert_array_equal(other.mask, this.mask, f'{this} and {other} masks are different.')
                 if attr in ['data', 'mask']:
                     if approx:
                         assert_array_compare(compare, sattr, oattr, header=(f'{thistype}.{attr} attributes ar'
                                                                             f'e not almost equal to %d decimals' %
-                                                                            decimal), precision=decimal)
+                                                                            decimal),
+                                             precision=decimal)
                     else:
                         assert_array_compare(operator.__eq__, sattr, oattr, header=f'{thistype}.{attr} '
                                                                                    f'attributes are not '
@@ -214,12 +213,15 @@ def assert_project_equal(proj1, proj2, **kwargs):
 
 # ......................................................................................................................
 def assert_project_almost_equal(proj1, proj2, **kwargs):
+    assert len(proj1.datasets) == len(proj2.datasets)
     for nd1, nd2 in zip(proj1.datasets, proj2.datasets):
         compare_datasets(nd1, nd2, **kwargs)
 
+    assert len(proj1.projects) == len(proj2.projects)
     for pr1, pr2 in zip(proj1.projects, proj2.projects):
         assert_project_almost_equal(pr1, pr2, **kwargs)
 
+    assert len(proj1.scripts) == len(proj2.scripts)
     for sc1, sc2 in zip(proj1.scripts, proj2.scripts):
         assert_script_equal(sc1, sc2, **kwargs)
 

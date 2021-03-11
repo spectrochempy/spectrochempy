@@ -18,7 +18,7 @@ import warnings
 import sys
 
 import numpy as np
-from traitlets import HasTraits, Instance, Bool, Float, validate, default
+from traitlets import HasTraits, Instance, Bool, Float, validate, default, Dict
 from traittypes import Array
 
 from spectrochempy.core.project.baseproject import AbstractProject
@@ -59,6 +59,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     # dataset can be members of a project.
     # we use the abstract class to avoid circular imports.
     _parent = Instance(AbstractProject, allow_none=True)
+
+    # For the GUI interface
+    _state = Dict()
 
     # ------------------------------------------------------------------------------------------------------------------
     # initialisation
@@ -215,7 +218,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     # ..................................................................................................................
     def __dir__(self):
         # WARNING: be carefull to keep the present order of the three first elements! Needed for save/load operations
-        return ['dims', 'coordset', 'data', 'name', 'title', 'mask', 'units', 'meta', 'preferences', 'author',
+        return ['dims', 'coordset', 'data', 'name', 'title', 'mask', 'units', 'meta', 'preferences', 'state', 'author',
                 'description', 'history', 'date', 'modified', 'modeldata', 'origin', 'roi',
                 'offset'] + NDIO().__dir__()
 
@@ -1137,6 +1140,20 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         _ = self.dims  # fire an update  # debug_('dims have been updated')
 
     # ..................................................................................................................
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # GUI options
+    # ------------------------------------------------------------------------------------------------------------------
+    # TODO: refactor the spectrochempy preference system to have a common basis
+
+    @property
+    def state(self):
+        # state of the controller window for this dataset
+        return self._state
+
+    @state.setter
+    def state(self, val):
+        self._state = val
 
 
 # ======================================================================================================================

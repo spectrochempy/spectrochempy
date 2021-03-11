@@ -22,6 +22,7 @@
     NDDataset.astype
     NDDataset.autosub
     NDDataset.average
+    NDDataset.basc
     NDDataset.bartlett
     NDDataset.blackmanharris
     NDDataset.clip
@@ -408,3 +409,7 @@
     MCRALS.extOutput
     MCRALS.logs
     MCRALS.params
+
+    BaselineCorrection.compute
+    BaselineCorrection.run
+    BaselineCorrection.show_regions

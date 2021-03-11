@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 import numpy as np
 
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core import dataset_preferences as prefs
+from spectrochempy.core import preferences as prefs
 from spectrochempy.core.readers.importer import Importer, importermethod
 
 try:
@@ -233,7 +233,7 @@ def _add_omnic_info(dataset, **kwargs):
 
     # modify the dataset metadata
     dataset.units = 'absorbance'
-    dataset.title = 'Absorbance'
+    dataset.title = 'absorbance'
     dataset.name = name
     dataset.description = ('Dataset from .csv file: {}\n'.format(desc))
     dataset.history = str(datetime.now(timezone.utc)) + ':read from omnic exported csv file \n'
@@ -269,7 +269,7 @@ def _add_omnic_info(dataset, **kwargs):
         timestamp = acqdate.timestamp()
 
         dataset.y = Coord(np.array([timestamp]), name='y')
-        dataset.set_coordtitles(y='Acquisition timestamp (GMT)', x='Wavenumbers')
+        dataset.set_coordtitles(y='acquisition timestamp (GMT)', x='wavenumbers')
         dataset.y.labels = np.array([[acqdate], [name]])
         dataset.y.units = 's'
 
@@ -281,8 +281,8 @@ def _add_tga_info(dataset, **kwargs):
     # we add them here
     dataset.x.units = 'hour'
     dataset.units = 'weight_percent'
-    dataset.x.title = 'Time-on-stream'
-    dataset.title = 'Mass change'
+    dataset.x.title = 'time-on-stream'
+    dataset.title = 'mass change'
     dataset.origin = 'tga'
 
     return dataset

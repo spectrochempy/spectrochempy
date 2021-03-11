@@ -192,7 +192,7 @@ def _read_opus(*args, **kwargs):
     fxv = opus_data['AB Data Parameter']['FXV']
     lxv = opus_data['AB Data Parameter']['LXV']
     # xdata = linspace(fxv, lxv, npt)
-    xaxis = LinearCoord.linspace(fxv, lxv, npt, title='Wavenumbers', units='cm^-1')
+    xaxis = LinearCoord.linspace(fxv, lxv, npt, title='wavenumbers', units='cm^-1')
 
     # yaxis
     name = opus_data["Sample"]['SNM']
@@ -204,14 +204,14 @@ def _read_opus(*args, **kwargs):
     utc_dt = utc_dt.replace(tzinfo=timezone.utc)
     timestamp = utc_dt.timestamp()
     yaxis = Coord([timestamp],
-                  title='Acquisition timestamp (GMT)',
+                  title='acquisition timestamp (GMT)',
                   units='s',
                   labels=([utc_dt], [name]))
 
     # set dataset's Coordset
     dataset.set_coordset(y=yaxis, x=xaxis)
     dataset.units = 'absorbance'
-    dataset.title = 'Absorbance'
+    dataset.title = 'absorbance'
 
     # Set name, origin, description and history
     dataset.name = filename.name

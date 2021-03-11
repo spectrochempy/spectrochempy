@@ -21,7 +21,7 @@ def test_read_without_filename():
 def test_read_with_filename():
     A = NDDataset.read_matlab(os.path.join('matlabdata', 'als2004dataset.MAT'))
     assert len(A) == 6
-    assert A[3].shape == (204, 96)
+    assert A[3].shape == (4, 96)
 
 
 def test_read_DSO():

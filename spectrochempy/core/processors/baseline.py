@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
+#  =
 # ======================================================================================================================
 """
 This module implements the `BaselineCorrection` class for baseline corrections.
@@ -209,9 +211,9 @@ class BaselineCorrection(HasTraits):
         if self.method == 'sequential':
 
             if self.interpolation == 'polynomial':
-                # bad fit when NaN values => are replaced by 0
-                if np.any(np.isnan(sbase)):
-                    sbase[np.isnan(sbase)] = 0
+                # # bad fit when NaN values => are replaced by 0      # NO reason we have Nan -> suppressed
+                # if np.any(np.isnan(sbase)):
+                #     sbase[np.isnan(sbase)] = 0
 
                 polycoef = np.polynomial.polynomial.polyfit(xbase.data, sbase.data.T, deg=self.order, rcond=None,
                                                             full=False)
@@ -383,6 +385,7 @@ class BaselineCorrection(HasTraits):
 
         return
 
+
 # ......................................................................................................................
 def basc(dataset, *ranges, **kwargs):
     """
@@ -445,6 +448,9 @@ def basc(dataset, *ranges, **kwargs):
         spc.show()
     """
     blc = BaselineCorrection(dataset)
+    if not ranges and dataset.meta.regions is not None:
+        # use the range stored in metadata
+        ranges = dataset.meta.regions['baseline']
     return blc.compute(*ranges, **kwargs)
 
 
@@ -565,6 +571,7 @@ def abc(dataset, dim=-1, **kwargs):
     if swaped:
         new.swapdims(axis, -1, inplace=True)  # must be done inplace
 
+    new.history = '`abc` Baseline correction applied.'
     return new
 
 
@@ -774,8 +781,8 @@ def _polybase(data, **kwargs):
             mi1, mi2, mi3 = s1.min(), s2.min(), s3.min()
             ma1, ma2, ma3 = s1.max(), s2.max(), s3.max()
 
-            if abs(ma1 - mi1) < float(nstd) * sigma and abs(ma2 - mi2) < float(nstd) * sigma and abs(ma3 - mi3) < float(
-                    nstd) * sigma:
+            if abs(ma1 - mi1) < float(nstd) * sigma and abs(ma2 - mi2) < float(nstd) * sigma and abs(
+                    ma3 - mi3) < float(nstd) * sigma:
                 found = True
                 nb += 1
                 baseline[:1, i].mask = False  # baseline points

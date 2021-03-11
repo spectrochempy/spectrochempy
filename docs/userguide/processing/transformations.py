@@ -24,7 +24,7 @@ from spectrochempy import *
 # %%
 dataset = NDDataset.read_omnic('irdata/nh4y-activation.spg')
 dataset.y -= dataset.y[0]
-dataset.y.title = 'Time'
+dataset.y.title = 'time'
 dataset
 
 # %%

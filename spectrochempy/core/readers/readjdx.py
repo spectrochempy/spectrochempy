@@ -291,7 +291,7 @@ def _read_jdx(*args, **kwargs):
     # now add coordinates
     _x = Coord(xaxis, title=axisname, units=axisunit)
     if jdx_data_type == 'LINK':
-        _y = Coord(alltimestamps, title='Acquisition timestamp (GMT)', units='s', labels=(alldates, alltitles))
+        _y = Coord(alltimestamps, title='acquisition timestamp (GMT)', units='s', labels=(alldates, alltitles))
         dataset.set_coordset(y=_y, x=_x)
     else:
         _y = Coord()

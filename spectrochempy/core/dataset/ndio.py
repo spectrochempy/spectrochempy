@@ -23,8 +23,7 @@ from traitlets import HasTraits, Instance, Union, Unicode
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core import debug_
 from spectrochempy.utils import (SpectroChemPyException, pathclean, check_filenames, ScpFile, check_filename_to_save,
-                                 json_serialiser, TYPE_BOOL,
-                                 )
+                                 json_serialiser, TYPE_BOOL, )
 
 SCPY_SUFFIX = {'NDDataset': '.scp', 'Project': '.pscp'}
 
@@ -142,9 +141,8 @@ class NDIO(HasTraits):
         # on the current object type
         if self.directory is None:
             filename = pathclean('.') / self.name
-            self.filename = filename  # <- this will set self.directory too.
-
-        filename = self.directory / self.name
+        else:
+            filename = pathclean(self.directory) / self.name
 
         default_suffix = SCPY_SUFFIX[self.implements()]
         filename = filename.with_suffix(default_suffix)
@@ -213,10 +211,12 @@ class NDIO(HasTraits):
         # suffix must be specified which correspond to the type of the
         # object to save
         default_suffix = SCPY_SUFFIX[self.implements()]
-        filename = filename.with_suffix(default_suffix)
+        if filename is not None and not filename.is_dir():
+            filename = filename.with_suffix(default_suffix)
+
         kwargs['filetypes'] = self.filetype
         kwargs['caption'] = f'Save the current {self.implements()} as ... '
-        filename = check_filename_to_save(self, filename, save_as=True, **kwargs)
+        filename = check_filename_to_save(self, filename, save_as=True, suffix=default_suffix, **kwargs)
 
         if filename:
             self.filename = filename
@@ -226,10 +226,7 @@ class NDIO(HasTraits):
     @classmethod
     def load(cls, filename, **kwargs):
         """
-        open a data from a '*.scp' file.
-
-        It's a class method, that can be used directly on the class,
-        without prior opening of a class instance.
+        Open data from a '*.scp' (NDDataset) or '.pscp' (Project) file.
 
         Parameters
         ----------
@@ -241,7 +238,6 @@ class NDIO(HasTraits):
         kwargs : optional keyword parameters.
             Any additional keyword(s) to pass to the actual reader.
 
-
         Examples
         --------
         >>> import spectrochempy as scp
@@ -251,10 +247,14 @@ class NDIO(HasTraits):
         'nh4y-activation.scp'
         >>> nd2 = scp.load(f)
 
+        Alternatively, this method can be called as a class method of NDDataset or Project object:
+
+        >>> from spectrochempy import *
+        >>> nd2 = NDDataset.load(f)
 
         Notes
         -----
-        adapted from `numpy.load`
+        Adapted from `numpy.load`.
 
         See Also
         --------
@@ -284,7 +284,7 @@ class NDIO(HasTraits):
             raise SpectroChemPyException(f"File {filename} doesn't exist!")
         except Exception as e:
             if str(e) == 'File is not a zip file':
-                raise SpectroChemPyException("File not in 'scp' format!")
+                raise SpectroChemPyException("File not in 'scp' or 'pscp' format!")
             raise SpectroChemPyException("Undefined error!")
 
         js = obj[obj.files[0]]
@@ -299,11 +299,12 @@ class NDIO(HasTraits):
             filename = pathclean(filename)
             new._filename = filename
             new.name = filename.stem
+
         return new
 
     def dumps(self, encoding=None):
 
-        debug_('Dumps')
+        debug_('JSON Dumps')
         js = json_serialiser(self, encoding=encoding)
         return json.dumps(js, indent=2)
 
@@ -316,6 +317,7 @@ class NDIO(HasTraits):
 
         # .........................
         def item_to_attr(obj, dic):
+
             for key, val in dic.items():
 
                 try:
@@ -370,14 +372,20 @@ class NDIO(HasTraits):
                     else:
                         if isinstance(val, TYPE_BOOL) and key == '_mask':
                             val = np.bool_(val)
-                        setattr(obj, key, val)
+                        if isinstance(obj, NDDataset) and key == '_filename':
+                            obj.filename = val  # This is a hack because for some reason finelame attribute is not
+                            # found ????
+                        else:
+                            setattr(obj, key, val)
 
                 except Exception as e:
                     raise TypeError(f'for {key} {e}')
 
             return obj
 
+        # Create the class object and load it with the JSON content
         new = item_to_attr(cls(), js)
+
         return new
 
     # ..................................................................................................................
@@ -395,19 +403,21 @@ class NDIO(HasTraits):
         import zipfile
         import tempfile
 
-        zipf = zipfile_factory(filename, mode="w", compression=zipfile.ZIP_DEFLATED)
+        # prepare the json data
+        try:
+            js = self.dumps(encoding='base64')
+        except Exception as e:
+            print(e)
+
+        # write in a temp file
         _, tmpfile = tempfile.mkstemp(suffix='-spectrochempy')
-
         tmpfile = pathclean(tmpfile)
-
-        js = self.dumps(encoding='base64')
-
         tmpfile.write_bytes(js.encode('utf-8'))
 
+        # compress and write zip file
+        zipf = zipfile_factory(filename, mode="w", compression=zipfile.ZIP_DEFLATED)
         zipf.write(tmpfile, arcname=f'{self.name}.json')
-
         tmpfile.unlink()
-
         zipf.close()
 
         self.filename = filename
