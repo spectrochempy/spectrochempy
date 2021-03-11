@@ -409,3 +409,7 @@
     MCRALS.extOutput
     MCRALS.logs
     MCRALS.params
+
+    BaselineCorrection.compute
+    BaselineCorrection.run
+    BaselineCorrection.show_regions

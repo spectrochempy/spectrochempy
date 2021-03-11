@@ -209,9 +209,9 @@ class BaselineCorrection(HasTraits):
         if self.method == 'sequential':
 
             if self.interpolation == 'polynomial':
-                # bad fit when NaN values => are replaced by 0
-                if np.any(np.isnan(sbase)):
-                    sbase[np.isnan(sbase)] = 0
+                # # bad fit when NaN values => are replaced by 0      # NO reason we have Nan -> suppressed
+                # if np.any(np.isnan(sbase)):
+                #     sbase[np.isnan(sbase)] = 0
 
                 polycoef = np.polynomial.polynomial.polyfit(xbase.data, sbase.data.T, deg=self.order, rcond=None,
                                                             full=False)
