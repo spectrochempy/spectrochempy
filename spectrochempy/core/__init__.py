@@ -147,7 +147,20 @@ app = SpectroChemPy()
 __all__ += ['app']
 
 from spectrochempy.application import (  # noqa: E402
-    WARNING, )
+    __version__ as version,
+    __release__ as release,
+    __copyright__ as copyright,
+    __license__ as license,
+    __release_date__ as release_date,
+    __author__ as authors,
+    __contributor__ as contributors,
+    __url__ as url,
+    DEBUG,
+    WARNING,
+    ERROR,
+    CRITICAL,
+    INFO,
+    )
 
 preferences = app.preferences
 plot_preferences = app.plot_preferences
@@ -168,13 +181,34 @@ def get_loglevel():
     return preferences.log_level
 
 
-__all__ += [  # Helpers
-    'DEBUG', 'WARNING', 'ERROR', 'CRITICAL', 'INFO', 'preferences', 'plot_preferences', 'config_manager', 'config_dir',
-    'reset_preferences', 'set_loglevel', 'get_loglevel',
+__all__ += [
 
-    # Info
-    'copyright', 'version', 'release', 'license', 'url', 'release_date', 'authors', 'contributors', 'description',
-    'long_description']
+        # Helpers
+        'DEBUG',
+        'WARNING',
+        'ERROR',
+        'CRITICAL',
+        'INFO',
+        'preferences',
+        'plot_preferences',
+        'config_manager',
+        'config_dir',
+        'reset_preferences',
+        'set_loglevel',
+        'get_loglevel',
+
+        # Info
+        'copyright',
+        'version',
+        'release',
+        'license',
+        'url',
+        'release_date',
+        'authors',
+        'contributors',
+        'description',
+        'long_description'
+        ]
 
 # IPython methods
 # ----------------------------------------------------------------------------------------------------------------------
@@ -184,6 +218,7 @@ _pbar_update()
 
 # constants
 # ----------------------------------------------------------------------------------------------------------------------
+from spectrochempy.utils import show, MASKED, NOMASK, EPSILON, INPLACE  # noqa: E402
 
 __all__ += ['show', 'MASKED', 'NOMASK', 'EPSILON', 'INPLACE']
 
