@@ -445,6 +445,9 @@ def basc(dataset, *ranges, **kwargs):
         spc.show()
     """
     blc = BaselineCorrection(dataset)
+    if not ranges and dataset.meta.regions is not None:
+        # use the range stored in metadata
+        ranges = dataset.meta.regions['baseline']
     return blc.compute(*ranges, **kwargs)
 
 
