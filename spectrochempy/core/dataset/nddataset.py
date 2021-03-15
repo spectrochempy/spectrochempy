@@ -383,7 +383,11 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
                 'show_datapoints', 'roi', 'offset', 'modeldata', 'processeddata', 'baselinedata', 'referencedata',
                 'state'):
             # these attibutes are not used for comparison (comparison based on data and units!)
-            attrs.remove(attr)
+            try:
+                attrs.remove(attr)
+            except ValueError:
+                pass
+
         return super().__eq__(other, attrs)
 
     # ..................................................................................................................
@@ -414,6 +418,49 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     @default('_baselinedata')
     def _baselinedata_default(self):
         return None
+
+    # ..................................................................................................................
+    @default('_referencedata')
+    def _referencedata_default(self):
+        return None
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # GUI options
+    # ------------------------------------------------------------------------------------------------------------------
+    # TODO: refactor the spectrochempy preference system to have a common basis
+
+    @property
+    def state(self):
+        # state of the controller window for this dataset
+        return self._state
+
+    @state.setter
+    def state(self, val):
+        self._state = val
+
+    @property
+    def processeddata(self):
+        return self._processeddata
+
+    @processeddata.setter
+    def processeddata(self, val):
+        self._processeddata = val
+
+    @property
+    def baselinedata(self):
+        return self._baselinedata
+
+    @baselinedata.setter
+    def baselinedata(self, val):
+        self._baselinedata = val
+
+    @property
+    def referencedata(self):
+        return self._referencedata
+
+    @referencedata.setter
+    def referencedata(self, val):
+        self._referencedata = val
 
     # ------------------------------------------------------------------------------------------------------------------
     # Validators
@@ -1164,43 +1211,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
     # ..................................................................................................................
 
-    # ------------------------------------------------------------------------------------------------------------------
-    # GUI options
-    # ------------------------------------------------------------------------------------------------------------------
-    # TODO: refactor the spectrochempy preference system to have a common basis
-
-    @property
-    def state(self):
-        # state of the controller window for this dataset
-        return self._state
-
-    @state.setter
-    def state(self, val):
-        self._state = val
-
-    @property
-    def processeddata(self):
-        return self._processeddata
-
-    @processeddata.setter
-    def processeddata(self, val):
-        self._processeddata = val
-
-    @property
-    def baselinedata(self):
-        return self._baselinedata
-
-    @baselinedata.setter
-    def baselinedata(self, val):
-        self._baselinedata = val
-
-    @property
-    def referencedata(self):
-        return self._referencedata
-
-    @referencedata.setter
-    def referencedata(self, val):
-        self._referencedata = val
 
 # ======================================================================================================================
 # module function
