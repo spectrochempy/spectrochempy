@@ -71,6 +71,10 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     # baseline data (for GUI)
     _baselinedata = Array(Float(), allow_none=True)
 
+    # reference data (for GUI)
+    _referencedata = Array(Float(), allow_none=True)
+
+
     # ------------------------------------------------------------------------------------------------------------------
     # initialisation
     # ------------------------------------------------------------------------------------------------------------------
@@ -228,7 +232,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         # WARNING: be carefull to keep the present order of the three first elements! Needed for save/load operations
         return ['dims', 'coordset', 'data', 'name', 'title', 'mask', 'units', 'meta', 'preferences',
                 'author', 'description', 'history', 'date', 'modified', 'origin', 'roi', 'offset',
-                'modeldata', 'processeddata', 'baselinedata', 'state'] + NDIO().__dir__()
+                'modeldata', 'processeddata', 'baselinedata', 'referencedata', 'state'] + NDIO().__dir__()
 
     # ..................................................................................................................
     def __getitem__(self, items):
@@ -1175,7 +1179,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
     @property
     def processeddata(self):
-        #
         return self._processeddata
 
     @processeddata.setter
@@ -1184,12 +1187,19 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
     @property
     def baselinedata(self):
-        #
         return self._baselinedata
 
     @baselinedata.setter
     def baselinedata(self, val):
         self._baselinedata = val
+
+    @property
+    def referencedata(self):
+        return self._referencedata
+
+    @referencedata.setter
+    def referencedata(self, val):
+        self._referencedata = val
 
 # ======================================================================================================================
 # module function
