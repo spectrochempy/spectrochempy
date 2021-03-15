@@ -380,7 +380,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         attrs = self.__dir__()
         for attr in (
                 'filename', 'preferences', 'name', 'description', 'history', 'date', 'modified', 'origin',
-                'show_datapoints', 'roi', 'offset', , 'modeldata', 'processeddata', 'baselinedata', 'referencedata',
+                'show_datapoints', 'roi', 'offset', 'modeldata', 'processeddata', 'baselinedata', 'referencedata',
                 'state'):
             # these attibutes are not used for comparison (comparison based on data and units!)
             attrs.remove(attr)
