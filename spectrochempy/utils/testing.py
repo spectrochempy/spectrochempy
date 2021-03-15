@@ -108,9 +108,9 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
     else:
         attrs = this.__dir__()
         exclude = (
-            'filename', 'preferences', 'description', 'history', 'date', 'modified', 'modeldata', 'origin', 'roi',
-            'linear', 'offset', 'increment', 'size', 'name', 'show_datapoints')
-
+            'filename', 'preferences', 'description', 'history', 'date', 'modified', 'origin', 'roi',
+            'linear', 'offset', 'increment', 'size', 'name', 'show_datapoints', 'modeldata', 'processeddata',
+            'baselinedata', 'referencedata', 'state')
         for attr in exclude:
             # these attibutes are not used for comparison (comparison based on
             # data and units!)

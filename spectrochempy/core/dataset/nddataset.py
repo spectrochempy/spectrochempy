@@ -379,8 +379,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     def __eq__(self, other, attrs=None):
         attrs = self.__dir__()
         for attr in (
-                'filename', 'preferences', 'name', 'description', 'history', 'date', 'modified', 'modeldata', 'origin',
-                'roi', 'offset'):
+                'filename', 'preferences', 'name', 'description', 'history', 'date', 'modified', 'origin',
+                'show_datapoints', 'roi', 'offset', , 'modeldata', 'processeddata', 'baselinedata', 'referencedata',
+                'state'):
             # these attibutes are not used for comparison (comparison based on data and units!)
             attrs.remove(attr)
         return super().__eq__(other, attrs)
