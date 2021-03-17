@@ -541,7 +541,6 @@ def plot_2D(dataset, **kwargs):
 
         # but display only a subset of them in order to accelerate the drawing
         maxlines = kwargs.get('maxlines', prefs.max_lines_in_stack)
-        # debug_('max number of lines %d' % maxlines)
         setpy = max(len(new._ax_lines) // maxlines, 1)
         ax.lines = new._ax_lines[::setpy]  # displayed ax lines
 

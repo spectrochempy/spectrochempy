@@ -10,7 +10,7 @@ Plugin module to extend NDDataset with a JCAMP-DX export method.
 # import os as os
 import csv
 
-from spectrochempy.core import debug_, preferences as prefs
+from spectrochempy.core import preferences as prefs
 from spectrochempy.core.writers.exporter import Exporter, exportermethod
 
 __all__ = ['write_csv']
@@ -61,7 +61,6 @@ def write_csv(*args, **kwargs):
 
 @exportermethod
 def _write_csv(*args, **kwargs):
-    debug_("writing csv file")
 
     dataset, filename = args
     dataset.filename = filename

@@ -1207,7 +1207,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
     def _dims_update(self, change=None):
         # when notified that a coords names have been updated
-        _ = self.dims  # fire an update  # debug_('dims have been updated')
+        _ = self.dims  # fire an update
 
     # ..................................................................................................................
 

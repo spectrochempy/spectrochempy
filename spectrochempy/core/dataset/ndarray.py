@@ -334,7 +334,6 @@ class NDArray(HasTraits):
 
                     eq &= np.all(sattr == oattr)
                     if not eq:
-                        # debug_(f"attributes `{attr}` are not equals or one is missing: \n{sattr} != {oattr}")
                         return False
                 else:
                     return False
@@ -972,7 +971,6 @@ class NDArray(HasTraits):
             # No need to check the validity of the data
             # because the data must have been already
             # successfully initialized for the passed NDArray.data
-            # debug_("init data with data from another NDArray object")
             for attr in self.__dir__():
                 try:
                     val = getattr(data, f"_{attr}")
@@ -988,25 +986,21 @@ class NDArray(HasTraits):
                 pass
 
         elif isinstance(data, Quantity):
-            # debug_("init data with data from a Quantity object")
             self._data = np.array(data.magnitude, subok=True, copy=self._copy)
             self._units = data.units
 
         elif hasattr(data, 'mask'):
             # an object with data and mask attributes
-            # debug_("mask detected - initialize a mask from the passed data")
             self._data = np.array(data.data, subok=True, copy=self._copy)
             if isinstance(data.mask, np.ndarray) and data.mask.shape == data.data.shape:
                 self.mask = np.array(data.mask, dtype=np.bool_, copy=False)
 
         elif (not hasattr(data, 'shape') or not hasattr(data, '__getitem__') or not hasattr(data, '__array_struct__')):
-            # debug_("Attempt to initialize data with a numpy-like array object")
             # Data doesn't look like a numpy array, try converting it to
             # one. Non-numerical input are converted to an array of objects.
             self._data = np.array(data, subok=True, copy=False)
 
         else:
-            # debug_("numpy array detected - initialize data with a numpy array")
             data = np.array(data, subok=True, copy=self._copy)
             if data.dtype == np.object_:  # likely None value
                 data = data.astype(float)
@@ -1955,7 +1949,6 @@ class NDArray(HasTraits):
 
         if name:
             if self._name:
-                # debug_("Overwriting current name")
                 pass
             self._name = name
 

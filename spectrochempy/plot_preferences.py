@@ -600,7 +600,6 @@ class PlotPreferences(MetaConfigurable):
         if not isinstance(changes, list):
             changes = [changes]
         for _style in changes:
-            debug_(f'\n\n\nSTYLE:  {_style} \n')
             try:
                 if isinstance(_style, (list, tuple)):
                     for s in _style:

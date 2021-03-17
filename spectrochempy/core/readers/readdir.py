@@ -136,7 +136,6 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
     --------
     """
 
-    # debug_("starting reading in a folder")
     # check if the first parameter is a dataset
     # because we allow not to pass it
     if not isinstance(dataset, NDDataset):
@@ -220,10 +219,8 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
                         t.append(time)
                         T.append(sheet.cell(i, 4).value)
                 except ValueError:
-                    # debug_('incorrect date or temperature format in row {}'.format(i))
                     pass
                 except TypeError:
-                    # debug_('incorrect date or temperature format in row {}'.format(i))
                     pass
 
             # interpolate T = f(timestamp)
@@ -240,10 +237,8 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
                 ds.y = Coord(title=ds.y.title, data=ds.y.data, labels=newlabels)
 
     if len(datasets) == 1:
-        # debug_("finished read_dir()")
         return datasets[0]  # a single dataset is returned
 
-    # debug_("finished read_dir()")
     # several datasets returned, sorted by sample #
     return sorted(datasets, key=lambda ds: int(re.split('-|_', ds.name)[0]))
 

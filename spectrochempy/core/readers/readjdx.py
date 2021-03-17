@@ -119,7 +119,6 @@ def read_dx(*args, **kwargs):
 
 @importermethod
 def _read_jdx(*args, **kwargs):
-    debug_("reading a jcamp-dx file")
 
     # read jdx file
     dataset, filename = args

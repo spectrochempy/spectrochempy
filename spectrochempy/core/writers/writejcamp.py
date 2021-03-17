@@ -7,11 +7,9 @@
 """
 Plugin module to extend NDDataset with a JCAMP-DX export method.
 """
-# import os as os
 import numpy as np
 from datetime import datetime, timezone
 
-from spectrochempy.core import debug_
 from spectrochempy.core.writers.exporter import Exporter, exportermethod
 
 __all__ = ['write_jcamp', 'write_jdx']
@@ -61,8 +59,6 @@ write_jdx.__doc__ = 'This method is an alias of `write_jcamp` '
 @exportermethod
 def _write_jcamp(*args, **kwargs):
     # Writes a dataset in JCAMP-DX format
-
-    debug_("writing jcamp_dx file")
 
     dataset, filename = args
     dataset.filename = filename

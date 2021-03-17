@@ -21,7 +21,6 @@ from numpy.lib.npyio import zipfile_factory
 from traitlets import HasTraits, Instance, Union, Unicode
 
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
-from spectrochempy.core import debug_
 from spectrochempy.utils import (SpectroChemPyException, pathclean, check_filenames, ScpFile, check_filename_to_save,
                                  json_serialiser, TYPE_BOOL, )
 
@@ -304,7 +303,6 @@ class NDIO(HasTraits):
 
     def dumps(self, encoding=None):
 
-        debug_('JSON Dumps')
         js = json_serialiser(self, encoding=encoding)
         return json.dumps(js, indent=2)
 

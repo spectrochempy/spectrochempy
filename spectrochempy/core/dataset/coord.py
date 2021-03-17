@@ -498,7 +498,6 @@ class Coord(NDMath, NDArray):
         #   'type': 'change', # The event type of the notification, usually
         #   'change'
         # }
-        # debug_(f'changes in Coord: {change.name}')
 
         if change.name in ['_linear', '_increment', '_offset', '_size']:
             super()._anytrait_changed(change)
