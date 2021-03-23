@@ -387,7 +387,7 @@ class _QTFileDialogs:
         if directory is None:
             directory = str(preferences.datadir)
 
-        options = FileDialog.DontResolveSymlinks | FileDialog.ShowDirsOnly | FileDialog.DontUseNativeDialog
+        options = FileDialog.DontResolveSymlinks | FileDialog.ShowDirsOnly #| FileDialog.DontUseNativeDialog
         directory = FileDialog.getExistingDirectory(parent=parent, caption=caption, directory=directory,
                                                     options=options)
         if directory:
@@ -400,9 +400,9 @@ class _QTFileDialogs:
         if directory is None:
             directory = str(preferences.datadir)
 
-        options = FileDialog.DontUseNativeDialog
+        #options = FileDialog.DontUseNativeDialog
         filename, _ = FileDialog.getOpenFileName(parent=parent, caption=caption, directory=directory,
-                                                 filter=';;'.join(filters), options=options)
+                                                 filter=';;'.join(filters))#, options=options)
         if filename:
             return filename
 
@@ -418,7 +418,7 @@ class _QTFileDialogs:
 
         options = FileDialog.DontUseNativeDialog
         files, _ = FileDialog.getOpenFileNames(parent=parent, caption=caption, directory=directory,
-                                               filter=';;'.join(filters), options=options)
+                                               filter=';;'.join(filters)) #, options=options)
         if files:
             return files
 
@@ -427,8 +427,8 @@ class _QTFileDialogs:
 
         directory = str(filename)
 
-        options = FileDialog.DontUseNativeDialog
-        options |= FileDialog.DontConfirmOverwrite  # bug : this seems to work only with DontUseNativeDialog on OSX.
+        #options = FileDialog.DontUseNativeDialog
+        options = FileDialog.DontConfirmOverwrite  # bug : this seems to work only with DontUseNativeDialog on OSX.
         # TODO: Check on windows and Linux
         # second problems: if we confirm overwrite here a new dialog is opened,
         # and thus the main one do not close on exit!
