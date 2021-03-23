@@ -18,7 +18,7 @@ import warnings
 import sys
 
 import numpy as np
-from traitlets import HasTraits, Instance, Bool, Float, validate, default, Dict
+from traitlets import HasTraits, Instance, Bool, Float, validate, default, Dict, Union
 from traittypes import Array
 
 from spectrochempy.core.project.baseproject import AbstractProject
@@ -30,7 +30,7 @@ from spectrochempy.core.dataset.ndmath import NDMath, _set_ufuncs, _set_operator
 from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.core.dataset.ndplot import NDPlot
 from spectrochempy.core import error_, warning_
-from spectrochempy.utils import (colored_output, SpectroChemPyException, SpectroChemPyWarning, )
+from spectrochempy.utils import (colored_output, SpectroChemPyException, SpectroChemPyWarning, MaskedConstant)
 
 HAS_XARRAY = False
 try:
@@ -67,6 +67,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
     # processed data (for GUI)
     _processeddata = Array(Float(), allow_none=True)
+
+    # processed mask (for GUI)
+    _processedmask = Union((Bool(), Array(Bool()), Instance(MaskedConstant)))
 
     # baseline data (for GUI)
     _baselinedata = Array(Float(), allow_none=True)
@@ -445,6 +448,14 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     @processeddata.setter
     def processeddata(self, val):
         self._processeddata = val
+
+    @property
+    def processedmask(self):
+        return self._processedmask
+
+    @processedmask.setter
+    def processedmask(self, val):
+        self._processedmask = val
 
     @property
     def baselinedata(self):
