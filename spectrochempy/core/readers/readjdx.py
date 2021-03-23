@@ -16,7 +16,6 @@ import re
 from datetime import datetime, timezone
 import numpy as np
 
-from spectrochempy.core import debug_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer, importermethod
 from spectrochempy.utils.exceptions import deprecated
@@ -119,7 +118,6 @@ def read_dx(*args, **kwargs):
 
 @importermethod
 def _read_jdx(*args, **kwargs):
-    debug_("reading a jcamp-dx file")
 
     # read jdx file
     dataset, filename = args

@@ -365,17 +365,17 @@
     PCA.ev_cum
     PCA.ev_ratio
 
-    LSTSQ.inverse_transforms
+    LSTSQ.inverse_transform
     LSTSQ.trans
     LSTSQ.itrans
     LSTSQ.transform
 
-    CurveFit.inverse_transforms
+    CurveFit.inverse_transform
     CurveFit.trans
     CurveFit.itrans
     CurveFit.transform
 
-    NNLS.inverse_transforms
+    NNLS.inverse_transform
     NNLS.trans
     NNLS.itrans
     NNLS.transform
@@ -413,3 +413,43 @@
     BaselineCorrection.compute
     BaselineCorrection.run
     BaselineCorrection.show_regions
+
+    Project.add_dataset
+    Project.add_datasets
+    Project.add_project
+    Project.add_projects
+    Project.add_script
+    Project.add_scripts
+    Project.copy
+    Project.dump
+    Project.implements
+    Project.load
+    Project.remove_all_dataset
+    Project.remove_all_project
+    Project.remove_dataset
+    Project.remove_project
+    Project.save
+    Project.save_as
+
+    Project.allitems
+    Project.allnames
+    Project.datasets
+    Project.datasets_names
+    Project.directory
+    Project.filename
+    Project.id
+    Project.meta
+    Project.name
+    Project.parent
+    Project.projects
+    Project.projects_names
+    Project.scripts
+    Project.scripts_names
+    Project.suffix
+
+    Script.implements
+
+    NNMF.nmf
+
+    Fit.run
+    Fit.script_default

@@ -588,7 +588,7 @@ to the <a url='https://redmine.spectrochempy.fr/projects/spectrochempy/issues'>I
 When using <strong>SpectroChemPy</strong> for your own work, you are kindly requested to cite it this way:
 <pre>Arnaud Travert & Christian Fernandez, SpectroChemPy, a framework for processing, analysing and modelling of
 Spectroscopic data for Chemistry with Python https://www.spectrochempy.fr, (version {version})
-Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 2019
+Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 2021
 </pre></p>""".format(version=__release__, authors=__author__, license=__license__)
 
         return desc
@@ -714,13 +714,9 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
         # deactivate potential command line arguments
         # (such that those from jupyter which cause problems here)
 
-        self.logs.debug('initialization of SpectroChemPy')
-
         IN_IPYTHON = False
         if InteractiveShell.initialized():
             IN_IPYTHON = True
-
-        self.logs.debug("scpy command line arguments are: %s" % " ".join(sys.argv))
 
         if not IN_IPYTHON:
             # remove argument not known by spectrochempy
@@ -913,13 +909,9 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
 
     def _start(self):
 
-        debug = self.logs.debug
-
         if self.running:
-            debug('API already started. Nothing done!')
+            # API already started. Nothing done!
             return
-
-        self.logs.debug("show info on loading %s" % self.preferences.show_info_on_loading)
 
         if self.preferences.show_info_on_loading:
             info_string = "SpectroChemPy's API - v.{}\n" \
@@ -946,8 +938,6 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
         self.plot_preferences.set_latex_font(self.plot_preferences.font_family)
 
         self.running = True
-
-        debug('MPL backend: {}'.format(mpl.get_backend()))
 
         # display needs for update
         # time.sleep(1)

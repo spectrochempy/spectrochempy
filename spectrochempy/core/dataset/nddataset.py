@@ -18,7 +18,7 @@ import warnings
 import sys
 
 import numpy as np
-from traitlets import HasTraits, Instance, Bool, Float, validate, default, Dict
+from traitlets import HasTraits, Instance, Bool, Float, validate, default, Dict, Union
 from traittypes import Array
 
 from spectrochempy.core.project.baseproject import AbstractProject
@@ -30,7 +30,7 @@ from spectrochempy.core.dataset.ndmath import NDMath, _set_ufuncs, _set_operator
 from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.core.dataset.ndplot import NDPlot
 from spectrochempy.core import error_, warning_
-from spectrochempy.utils import (colored_output, SpectroChemPyException, SpectroChemPyWarning, )
+from spectrochempy.utils import (colored_output, SpectroChemPyException, SpectroChemPyWarning, MaskedConstant)
 
 HAS_XARRAY = False
 try:
@@ -61,7 +61,21 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     _parent = Instance(AbstractProject, allow_none=True)
 
     # For the GUI interface
+
+    # parameters state
     _state = Dict()
+
+    # processed data (for GUI)
+    _processeddata = Array(Float(), allow_none=True)
+
+    # processed mask (for GUI)
+    _processedmask = Union((Bool(), Array(Bool()), Instance(MaskedConstant)))
+
+    # baseline data (for GUI)
+    _baselinedata = Array(Float(), allow_none=True)
+
+    # reference data (for GUI)
+    _referencedata = Array(Float(), allow_none=True)
 
     # ------------------------------------------------------------------------------------------------------------------
     # initialisation
@@ -218,9 +232,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     # ..................................................................................................................
     def __dir__(self):
         # WARNING: be carefull to keep the present order of the three first elements! Needed for save/load operations
-        return ['dims', 'coordset', 'data', 'name', 'title', 'mask', 'units', 'meta', 'preferences', 'state', 'author',
-                'description', 'history', 'date', 'modified', 'modeldata', 'origin', 'roi',
-                'offset'] + NDIO().__dir__()
+        return ['dims', 'coordset', 'data', 'name', 'title', 'mask', 'units', 'meta', 'preferences',
+                'author', 'description', 'history', 'date', 'modified', 'origin', 'roi', 'offset',
+                'modeldata', 'processeddata', 'baselinedata', 'referencedata', 'state'] + NDIO().__dir__()
 
     # ..................................................................................................................
     def __getitem__(self, items):
@@ -367,10 +381,15 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     def __eq__(self, other, attrs=None):
         attrs = self.__dir__()
         for attr in (
-                'filename', 'preferences', 'name', 'description', 'history', 'date', 'modified', 'modeldata', 'origin',
-                'roi', 'offset'):
+                'filename', 'preferences', 'name', 'description', 'history', 'date', 'modified', 'origin',
+                'show_datapoints', 'roi', 'offset', 'modeldata', 'processeddata', 'baselinedata', 'referencedata',
+                'state'):
             # these attibutes are not used for comparison (comparison based on data and units!)
-            attrs.remove(attr)
+            try:
+                attrs.remove(attr)
+            except ValueError:
+                pass
+
         return super().__eq__(other, attrs)
 
     # ..................................................................................................................
@@ -391,6 +410,67 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     @default('_modeldata')
     def _modeldata_default(self):
         return None
+
+    # ..................................................................................................................
+    @default('_processeddata')
+    def _processeddata_default(self):
+        return None
+
+    # ..................................................................................................................
+    @default('_baselinedata')
+    def _baselinedata_default(self):
+        return None
+
+    # ..................................................................................................................
+    @default('_referencedata')
+    def _referencedata_default(self):
+        return None
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # GUI options
+    # ------------------------------------------------------------------------------------------------------------------
+    # TODO: refactor the spectrochempy preference system to have a common basis
+
+    @property
+    def state(self):
+        # state of the controller window for this dataset
+        return self._state
+
+    @state.setter
+    def state(self, val):
+        self._state = val
+
+    @property
+    def processeddata(self):
+        return self._processeddata
+
+    @processeddata.setter
+    def processeddata(self, val):
+        self._processeddata = val
+
+    @property
+    def processedmask(self):
+        return self._processedmask
+
+    @processedmask.setter
+    def processedmask(self, val):
+        self._processedmask = val
+
+    @property
+    def baselinedata(self):
+        return self._baselinedata
+
+    @baselinedata.setter
+    def baselinedata(self, val):
+        self._baselinedata = val
+
+    @property
+    def referencedata(self):
+        return self._referencedata
+
+    @referencedata.setter
+    def referencedata(self, val):
+        self._referencedata = val
 
     # ------------------------------------------------------------------------------------------------------------------
     # Validators
@@ -1137,23 +1217,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
     def _dims_update(self, change=None):
         # when notified that a coords names have been updated
-        _ = self.dims  # fire an update  # debug_('dims have been updated')
+        _ = self.dims  # fire an update
 
     # ..................................................................................................................
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # GUI options
-    # ------------------------------------------------------------------------------------------------------------------
-    # TODO: refactor the spectrochempy preference system to have a common basis
-
-    @property
-    def state(self):
-        # state of the controller window for this dataset
-        return self._state
-
-    @state.setter
-    def state(self, val):
-        self._state = val
 
 
 # ======================================================================================================================
@@ -1165,9 +1231,7 @@ thismodule = sys.modules[__name__]
 
 api_funcs = ['sort', 'copy', 'squeeze', 'swapdims', 'transpose', 'to_array', 'to_xarray', 'take', 'set_complex',
              'set_quaternion', 'set_hypercomplex', 'component', 'to', 'to_base_units', 'to_reduced_units', 'ito',
-             'ito_base_units', 'ito_reduced_units', 'is_units_compatible', 'remove_masks',
-
-             ]
+             'ito_base_units', 'ito_reduced_units', 'is_units_compatible', 'remove_masks']
 
 # todo: check the fact that some function are defined also in ndmath
 for funcname in api_funcs:

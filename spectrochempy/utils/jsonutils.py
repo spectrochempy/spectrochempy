@@ -72,8 +72,6 @@ def json_serialiser(byte_obj, encoding=None):
     """
     from spectrochempy.core.dataset.ndplot import Preferences
 
-    # debug_(str(byte_obj))
-
     if byte_obj is None:
         return None
 

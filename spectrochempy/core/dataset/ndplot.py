@@ -515,8 +515,6 @@ class NDPlot(HasTraits):
     # ..................................................................................................................
     def _plot_resume(self, origin, **kwargs):
 
-        # debug_('resume plot')
-
         # put back the axes in the original dataset
         # (we have worked on a copy in plot)
         if not kwargs.get('data_transposed', False):
@@ -566,7 +564,6 @@ class NDPlot(HasTraits):
         if savename is not None:
             # we save the figure with options found in kwargs
             # starting with `save`
-            # debug_('save plot to {}'.format(savename))
             kw = {}
             for key, value in kwargs.items():
                 if key.startswith('save'):
@@ -639,7 +636,6 @@ class NDPlot(HasTraits):
         if isinstance(axes, list):
             # a list a axes have been passed
             for ax in axes:
-                # debug_('add axe: {}'.format(ax.name))
                 self._ndaxes[ax.name] = ax
         elif isinstance(axes, dict):
             self._ndaxes.update(axes)

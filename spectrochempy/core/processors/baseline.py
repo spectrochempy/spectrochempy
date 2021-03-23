@@ -308,11 +308,11 @@ class BaselineCorrection(HasTraits):
         # Swap the axes to be sure to be in this situation
         axis, dim = new.get_axis(**kwargs, negative_axis=True)
 
-        swaped = False
+        # swaped = False
         if axis != -1:
             new.swapdims(axis, -1, inplace=True)
             origin.swapdims(axis, -1, inplace=True)
-            swaped = True
+            # swaped = True
 
         lastcoord = new.coordset[dim]
 
@@ -543,8 +543,6 @@ def abc(dataset, dim=-1, **kwargs):
     #
     # source.history.append('baseline correction mode:%s' % args.mode)
 
-    debug_('Automatic baseline correction')
-
     inplace = kwargs.pop('inplace', False)
     dryrun = kwargs.pop('dryrun', False)
 
@@ -646,8 +644,6 @@ def _linearbase(data, **kwargs):
         # percent
         window = int(data.shape[-1] * window)
 
-    debug_(f"Linear base correction window : {window}")
-
     if len(data.shape) == 1:
         npts = float(data.shape[-1])
         a = (data[-window:].mean() - data[:window].mean()) / (npts - 1.)
@@ -727,8 +723,6 @@ def _svdbase(data, args=None, retw=False):
     XYZ = np.array((x, y, z))
     p, n = _planeFit(XYZ)
     d = np.dot(p, n)
-    debug_(" origin baseline plane: ", p)
-    debug_(" normal vector component:", n)
 
     col = data.columns
     row = data.index
