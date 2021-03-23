@@ -308,11 +308,11 @@ class BaselineCorrection(HasTraits):
         # Swap the axes to be sure to be in this situation
         axis, dim = new.get_axis(**kwargs, negative_axis=True)
 
-        swaped = False
+        # swaped = False
         if axis != -1:
             new.swapdims(axis, -1, inplace=True)
             origin.swapdims(axis, -1, inplace=True)
-            swaped = True
+            # swaped = True
 
         lastcoord = new.coordset[dim]
 

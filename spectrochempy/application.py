@@ -588,7 +588,7 @@ to the <a url='https://redmine.spectrochempy.fr/projects/spectrochempy/issues'>I
 When using <strong>SpectroChemPy</strong> for your own work, you are kindly requested to cite it this way:
 <pre>Arnaud Travert & Christian Fernandez, SpectroChemPy, a framework for processing, analysing and modelling of
 Spectroscopic data for Chemistry with Python https://www.spectrochempy.fr, (version {version})
-Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 2019
+Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 2021
 </pre></p>""".format(version=__release__, authors=__author__, license=__license__)
 
         return desc
@@ -908,8 +908,6 @@ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 201
     # ------------------------------------------------------------------------------------------------------------------
 
     def _start(self):
-
-        debug = self.logs.debug
 
         if self.running:
             # API already started. Nothing done!

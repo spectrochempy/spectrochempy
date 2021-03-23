@@ -10,7 +10,6 @@ from matplotlib.lines import Line2D
 from traitlets import (Bool, Unicode, Tuple, List, Integer, Float, Enum, observe, All, default, TraitError, Union, Set)
 
 from spectrochempy.utils import MetaConfigurable, get_pkg_path, pathclean
-from spectrochempy.core import debug_
 
 
 # ----------------------------------------------------------------------------------------------------------------------
