@@ -9,7 +9,7 @@
 
 __all__ = ['Project']
 
-from copy import copy as cpy
+from copy import deepcopy as cpy
 import uuid
 import pathlib
 from functools import wraps
@@ -242,12 +242,18 @@ class Project(AbstractProject, NDIO):
 
     def __copy__(self):
         new = Project()
-        new.name = self.name + '*'
+        # new.name = self.name + '*'
         for item in self.__dir__():
-            if item == 'name':
-                continue
+            # if item == 'name':
+            #     continue
             item = "_" + item
-            setattr(new, item, cpy(getattr(self, item)))
+            data = getattr(self, item)
+            # if isinstance(data, (Project,NDDataset, Script)):
+            #     setattr(new, item, data.copy())
+            # elif item in ['_datasets', '_projects', '_scripts']:
+            #
+            # else:
+            setattr(new, item, cpy(data))
         return new
 
     # ------------------------------------------------------------------------------------------------------------------

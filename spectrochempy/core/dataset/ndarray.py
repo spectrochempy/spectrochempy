@@ -80,6 +80,7 @@ class NDArray(HasTraits):
     _origin = Unicode()
     _history = List(Unicode(), allow_none=True)
     _meta = Instance(Meta, allow_none=True)
+    _transposed = Bool(False)
 
     # for linear data generation
     _offset = Union((CFloat(), CInt(), Instance(Quantity)), )
@@ -267,7 +268,7 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     def __dir__(self):
         return ['data', 'dims', 'mask', 'labels', 'units', 'meta', 'title', 'name', 'origin', 'roi', 'author',
-                'description', 'history', 'linear', 'offset', 'increment']
+                'description', 'history', 'linear', 'offset', 'increment', 'transposed']
 
     # ..................................................................................................................
     def __eq__(self, other, attrs=None):
@@ -2490,7 +2491,12 @@ class NDArray(HasTraits):
 
         new._dims = list(np.take(self._dims, axis))
 
+        new._transposed = not new._transposed   # change the transposed flag
         return new
+
+    @property
+    def transposed(self):
+        return self._transposed
 
     # ..................................................................................................................
     @property
