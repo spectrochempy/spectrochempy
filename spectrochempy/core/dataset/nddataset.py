@@ -1124,6 +1124,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         """
         new = super().transpose(*dims, inplace=inplace)
         new.history = f'Data transposed between dims: {dims}' if dims else ''
+
         return new
 
     # ------------------------------------------------------------------------------------------------------------------
