@@ -597,6 +597,10 @@ class LinearCoord(Coord):
         >>> c2 = Coord(linear=True, offset=2.0, increment=2.0, size=10)
 
         """
+        if isinstance(args[0], 'Coord') and not args[0].linear:
+            raise ValueError('Only linear Coord (with attribute linear set to True, can be transformed into '
+                             'LinearCoord class')
+
         super().__init__(*args, **kwargs)
 
         # when data is present, we don't need offset and increment, nor size,
