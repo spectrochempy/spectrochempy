@@ -356,7 +356,8 @@ def read(*paths, **kwargs):
         kwargs['filetypes'] = list(importer.filetypes.values())
         kwargs['protocol'] = 'ALL'
         default_filter = kwargs.get('default_filter', None)
-        kwargs['default_filter'] = importer.filetypes[default_filter]
+        if default_filter is not None:
+            kwargs['default_filter'] = importer.filetypes[default_filter]
     else:
         try:
             kwargs['filetypes'] = [importer.filetypes[protocol]]
