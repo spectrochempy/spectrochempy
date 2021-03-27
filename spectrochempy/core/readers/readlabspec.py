@@ -162,7 +162,12 @@ def _read_txt(*args, **kwargs):
         _y = Coord(rawdata[1:, 0], title='Time', units='s')
         date_acq, _y = _transf_meta(_y, meta)
 
-    _x = LinearCoord(_x)
+    # try to transform to linear coord
+    _x.linear = True
+
+    # if success linear should still be True
+    if _x.linear:
+        _x = LinearCoord(_x)
 
     # set dataset metadata
     dataset.data = data

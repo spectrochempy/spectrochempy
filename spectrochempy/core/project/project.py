@@ -145,6 +145,10 @@ class Project(AbstractProject, NDIO):
 
         if not isinstance(key, str):
             raise KeyError('The key must be a string.')
+
+        if key == 'No project':
+            return
+
         if '/' in key:
             # Case of composed name (we assume not more than one level subproject
             parent = key.split('/')[0]
