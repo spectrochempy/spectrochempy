@@ -569,7 +569,7 @@ def open_dialog(parent=None, single=True, directory=None, filters=("All Files (*
         klass = _TKFileDialogs()
         parent = klass.root
 
-    default_filter = kwargs.get('default_filter', None )
+    default_filter = kwargs.get('default_filter', None)
     if directory is None:
         directory = ''
     if filters == 'directory':
