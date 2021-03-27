@@ -395,19 +395,20 @@ class _QTFileDialogs:
 
     # noinspection PyRedundantParentheses
     @classmethod
-    def _open_filename(cls, parent=None, directory=None, caption='Select file', filters=None):
+    def _open_filename(cls, parent=None, directory=None, caption='Select file', filters=None, default_filter=None):
 
         if directory is None:
             directory = str(preferences.datadir)
 
         filename, _ = FileDialog.getOpenFileName(parent=parent, caption=caption, directory=directory,
-                                                 filter=';;'.join(filters))
+                                                 filter=';;'.join(filters), initialFilter=default_filter)
         if filename:
             return filename
 
     # noinspection PyRedundantParentheses
     @classmethod
-    def _open_multiple_filenames(cls, parent=None, directory=None, caption='Select file(s)', filters=None):
+    def _open_multiple_filenames(cls, parent=None, directory=None, caption='Select file(s)',
+                                 filters=None, default_filter=None):
         """
         Return one or several files to open
         """
@@ -416,7 +417,7 @@ class _QTFileDialogs:
             directory = str(preferences.datadir)
 
         files, _ = FileDialog.getOpenFileNames(parent=parent, caption=caption, directory=directory,
-                                               filter=';;'.join(filters))
+                                               filter=';;'.join(filters), initialFilter=default_filter)
         if files:
             return files
 
@@ -478,7 +479,7 @@ class _TKFileDialogs:
         return filetypes
 
     # noinspection PyRedundantParentheses
-    def _open_filename(self, parent=None, filters=None):
+    def _open_filename(self, parent=None, filters=None, default_filter=None):
 
         filename = filedialog.askopenfilename(parent=parent,
                                               filetypes=self.filetypes(filters),
@@ -491,7 +492,7 @@ class _TKFileDialogs:
             return filename
 
     # noinspection PyRedundantParentheses
-    def _open_multiple_filenames(self, parent=None, filters=None):
+    def _open_multiple_filenames(self, parent=None, filters=None, default_filter=None):
         """
         Return one or several files to open
         """
@@ -568,15 +569,16 @@ def open_dialog(parent=None, single=True, directory=None, filters=("All Files (*
         klass = _TKFileDialogs()
         parent = klass.root
 
+    default_filter = kwargs.get('default_filter', None )
     if directory is None:
         directory = ''
     if filters == 'directory':
         caption = 'Select a folder'
         f = klass._open_existing_directory(parent=parent, caption=caption, directory=str(directory))
     elif single:
-        f = klass._open_filename(parent=parent, filters=filters, )
+        f = klass._open_filename(parent=parent, filters=filters, default_filter=default_filter)
     else:
-        f = klass._open_multiple_filenames(parent=parent, filters=filters)
+        f = klass._open_multiple_filenames(parent=parent, filters=filters, default_filter=default_filter)
 
     from spectrochempy.utils import pathclean
     return pathclean(f)
