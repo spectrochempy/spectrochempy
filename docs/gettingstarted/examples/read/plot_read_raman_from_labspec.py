@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# %%
 # flake8: noqa
 # ======================================================================================================================
 #  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
@@ -9,7 +10,7 @@
 Loading RAMAN experimental file
 ============================================
 
-Here we load an experimental SPG file (OMNIC) and plot it.
+Here we load experimental LABSPEC spectra and plot them.
 
 """
 
