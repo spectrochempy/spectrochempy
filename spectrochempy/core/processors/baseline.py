@@ -177,10 +177,10 @@ class BaselineCorrection(HasTraits):
         lastcoord = new.coordset[dim]
 
         # most of the time we need sorted axis, so let's do it now
-        is_sorted = False
-        if lastcoord.reversed:
+        is_descendant = False
+        if lastcoord.descendant:
             new.sort(dim=dim, inplace=True, descend=False)
-            is_sorted = True
+            is_descendant = True
             lastcoord = new.coordset[dim]
 
         x = lastcoord.data
@@ -253,7 +253,7 @@ class BaselineCorrection(HasTraits):
         new.data = new.data - baseline
 
         # eventually sort back to the original order
-        if is_sorted:
+        if is_descendant:
             new.sort(axis=-1, inplace=True, descend=True)
 
         new.history = str(new.modified) + ': ' + 'Baseline correction.' + ' Method: '
