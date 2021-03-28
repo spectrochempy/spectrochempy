@@ -388,6 +388,10 @@ class Coord(NDMath, NDArray):
     def author(self):
         return None
 
+    @property
+    def descendant(self):
+        return (self.data[-1]-self.data[0]) < 0
+
     # ..................................................................................................................
     @property
     def dims(self):
@@ -565,7 +569,7 @@ class LinearCoord(Coord):
             The title of the dimension. It will later be used for instance
             for labelling plots of the data.
             It is optional but recommended to give a title to each ndarray.
-        dlabel :  str, optional.
+        dlabel : str, optional.
             Alias of `title`.
         meta : dict-like object, optional.
             Additional metadata for this object. Must be dict-like but no
