@@ -233,7 +233,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     def __dir__(self):
         # WARNING: be carefull to keep the present order of the three first elements! Needed for save/load operations
         return ['dims', 'coordset', 'data', 'name', 'title', 'mask', 'units', 'meta', 'preferences',
-                'author', 'description', 'history', 'date', 'modified', 'origin', 'roi', 'offset',
+                'author', 'description', 'history', 'date', 'modified', 'origin', 'roi', 'offset', 'transposed',
                 'modeldata', 'processeddata', 'baselinedata', 'referencedata', 'state'] + NDIO().__dir__()
 
     # ..................................................................................................................
