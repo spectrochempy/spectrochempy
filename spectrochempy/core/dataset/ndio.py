@@ -330,7 +330,7 @@ class NDIO(HasTraits):
                     if val is None:
                         pass
 
-                    elif key in ['_meta', '_preferences']:
+                    elif key in ['_meta', '_ranges', '_preferences']:
                         setattr(obj, key, item_to_attr(getattr(obj, key), val))
 
                     elif key in ['_coordset']:

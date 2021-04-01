@@ -208,7 +208,7 @@ class NDArray(HasTraits):
         self._offset = kwargs.pop('offset', 0.0)
         self._size = kwargs.pop('size', 0)
 
-        self._accuracy = kwargs.pop('accuracy', None)
+        # self._accuracy = kwargs.pop('accuracy', None)
 
         if data is not None:
             self.data = data

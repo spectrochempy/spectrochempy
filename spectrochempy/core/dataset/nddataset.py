@@ -29,6 +29,7 @@ from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.ndmath import NDMath, _set_ufuncs, _set_operators
 from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.core.dataset.ndplot import NDPlot
+from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.core import error_, warning_
 from spectrochempy.utils import (colored_output, SpectroChemPyException, SpectroChemPyWarning, MaskedConstant)
 
@@ -46,6 +47,7 @@ except ImportError:
 # ======================================================================================================================
 
 class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
+
     # coordinates
     _coordset = Instance(CoordSet, allow_none=True)
 
@@ -76,6 +78,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
     # reference data (for GUI)
     _referencedata = Array(Float(), allow_none=True)
+
+    # region ranges
+    _ranges = Instance(Meta)
 
     # ------------------------------------------------------------------------------------------------------------------
     # initialisation
@@ -231,10 +236,11 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
     # ..................................................................................................................
     def __dir__(self):
+        # Only these attributes are used for saving dataset
         # WARNING: be carefull to keep the present order of the three first elements! Needed for save/load operations
         return ['dims', 'coordset', 'data', 'name', 'title', 'mask', 'units', 'meta', 'preferences',
                 'author', 'description', 'history', 'date', 'modified', 'origin', 'roi', 'offset', 'transposed',
-                'modeldata', 'processeddata', 'baselinedata', 'referencedata', 'state'] + NDIO().__dir__()
+                'modeldata', 'referencedata', 'state', 'ranges'] + NDIO().__dir__()
 
     # ..................................................................................................................
     def __getitem__(self, items):
@@ -426,11 +432,29 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     def _referencedata_default(self):
         return None
 
+    @default('_ranges')
+    def _ranges_default(self):
+        ranges = Meta()
+        for dim in self.dims:
+            ranges[dim] = dict(masks={}, baselines={}, integrals={}, others={})
+        return ranges
+
+    # ..................................................................................................................
+    @property
+    def ranges(self):
+        return self._ranges
+
+    # ..................................................................................................................
+    @ranges.setter
+    def ranges(self, value):
+        self._ranges = value
+
     # ------------------------------------------------------------------------------------------------------------------
     # GUI options
     # ------------------------------------------------------------------------------------------------------------------
     # TODO: refactor the spectrochempy preference system to have a common basis
 
+    # .................................................................................................................
     @property
     def state(self):
         # state of the controller window for this dataset

@@ -14,8 +14,9 @@ __all__ = ['Coord', 'LinearCoord']
 
 import textwrap
 
-from traitlets import Bool, observe, All, Unicode, Integer
+from traitlets import Instance, default, Bool, observe, All, Unicode, Integer
 
+from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndmath import NDMath, _set_operators
 from spectrochempy.utils import colored_output, NOMASK
@@ -159,6 +160,7 @@ class Coord(NDMath, NDArray):
     # ------------------------------------------------------------------------------------------------------------------
     # readonly property
     # ------------------------------------------------------------------------------------------------------------------
+
     # ..................................................................................................................
     @property
     def reversed(self):
