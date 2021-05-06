@@ -55,8 +55,9 @@ def _install_mpl():
 
     # Copy files over
     # _dir_data = Path(matplotlib_fname()).parent
-    _dir_data = Path(mpl.rcParams['datapath'])
-
+    #_dir_data = Path(mpl.rcParams['datapath'])
+    _dir_data = mpl.get_data_path()
+    
     dir_source = Path("scp_data") / 'fonts'
     if not dir_source.exists():
         raise IOError(f'directory {dir_source} not found!')
