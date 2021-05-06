@@ -65,16 +65,16 @@ class MCRALS(HasTraits):
             index of species having unimodal concentrationsprofiles.
         closureConc : list or tuple, Default=None  (no closure)
             Index of species subjected to a closure constraint.
-        extConc: list or tuple, Default None (no external concentration).
+        externalConc: list or tuple, Default None (no external concentration).
             Index of species for which a concentration profile is provided by an external function.
-        getExtlConc : callable
+        getExternalConc : callable
             An external function that will provide `n_ext` concentration profiles:
 
-            getExtConc(C, extConc, ext_to_C_idx, *args) -> extC
+            getExternalConc(C, extConc, ext_to_C_idx, *args) -> extC
 
             or
 
-            getExtConc(C, extConc, ext_to_C_idx, *args) -> (extC, out2, out3, ...)
+            etExternalConc(C, extConc, ext_to_C_idx, *args) -> (extC, out2, out3, ...)
 
             where C is the current concentration matrix, *args are the parameters needed to completely
             specify the function, extC is a  nadarray or NDDataset of shape (C.y, n_ext), and out1, out2, ... are
