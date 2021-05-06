@@ -12,6 +12,7 @@ import datetime
 import numpy as np
 from scipy.optimize import minimize
 
+
 __all__ = ['coverages_vs_time', 'concentrations_vs_time', 'modify_rate', 'modify_surface_kinetics',
            'fit_to_concentrations', 'PFR']
 
@@ -213,21 +214,25 @@ def fit_to_concentrations(C, externalConc, external_to_C_idx, reactive_phase, pa
     options = kwargs.get("options", {
             'disp': True
             })
+
+    guess_param = np.zeros((len(param_to_optimize)))
+    for i, param in enumerate(param_to_optimize):
+        guess_param[i] = param_to_optimize[param]
+
     if options['disp']:
         print('Optimization of the parameters.')
-        print('         Initial parameters: {}'.format(guess_param))
-        print('         Initial function value: {}'.format(objective(guess_param, param_to_optimize, C, externalConc,
-                                                                     external_to_C_idx, reactive_phase)))
+        print(f'         Initial parameters: {guess_param}')
+        print(f'         Initial function value: {objective(guess_param, param_to_optimize, C, externalConc, external_to_C_idx, reactive_phase)}')
     tic = datetime.datetime.now(datetime.timezone.utc)
     res = minimize(objective, guess_param, args=(param_to_optimize, C, externalConc, external_to_C_idx, reactive_phase),
                    method=method, bounds=bounds, tol=tol, options=options)
     toc = datetime.datetime.now(datetime.timezone.utc)
-    guess_param = res.x
+    final_param = res.x
     if options['disp']:
-        print('         Optimization time: {}'.format((toc - tic)))
-        print('         Final parameters: {}'.format(guess_param))
+        print(f'         Optimization time: {toc - tic}')
+        print(f'         Final parameters: {final_param}')
     Ckin = concentrations_vs_time(reactive_phase, C.y, returnNDDataset=True)
-    newargs = (reactive_phase, param_to_optimize, guess_param)
+    newargs = (reactive_phase, param_to_optimize, final_param)
     return {
             'concentrations': Ckin,
             'results': res,
@@ -417,142 +422,155 @@ class PFR():
         return {'X': X,
                 'coverages': coverages}
 
-def fit_to_gas_concentrations(pfr, exp_conc, exp_idx, fit_to_exp_idx,
+    def fit_to_gas_concentrations(self, exp_conc, exp_idx, fit_to_exp_idx,
                                   param_to_optimize, other_param=None, **kwargs):
-    r"""
-    Function fitting rate parameters and concentrations to a given concentration profile at the outlet of a PFR.
+        r"""
+        Function fitting rate parameters and concentrations to a given concentration profile at the outlet of the pfr.
 
-    Parameters
-   ------------
-    pfr: a PFR instance
+        Parameters
+       ------------
 
-    exp_conc: NDDataset
-        experimental concentration profiles on which to fit the model. Can contain more concentration
-        profiles than those to fit. the y Coord should be time
+        exp_conc: NDDataset
+            experimental concentration profiles on which to fit the model. Can contain more concentration
+            profiles than those to fit. the y Coord should be time
 
-    exp_idx:
-        indexes of experimental concentration profiles on which the model will be fitted
+        exp_idx:
+            indexes of experimental concentration profiles on which the model will be fitted
 
-    fit_to_exp_idx:
-        correspondence between optimized concentration profile and experimental
-        concentration profile
+        fit_to_exp_idx:
+            correspondence between optimized concentration profile and experimental
+            concentration profile
 
-    param_to_optimize: dict
-        reactive phase parameters to optimize
+        param_to_optimize: dict
+            reactive phase parameters to optimize
 
-    param_to_set: dict
-        names of kinetic parameters differing from the cti file but fixed during optimization
+        param_to_set: dict
+            names of kinetic parameters differing from the cti file but fixed during optimization
 
-    **kwargs:
-        parameters for the optimization (see scipy.optimize.minimize)
+        **kwargs:
+            parameters for the optimization (see scipy.optimize.minimize)
 
-    Returns
-    ----------
-    a dictionary
-    """
-    if not HAS_CANTERA:
-        raise SpectroChemPyException('Cantera is not available : please install it before continuing:  \n'
-                                     'conda install -c cantera cantera')
-
-    global it
-
-    def objective(guess, param_to_optimize,
-                  exp_conc, exp_idx, fit_to_exp_idx,
-                  pfr, optimizer,
-                  **kwargs):
+        Returns
+        ----------
+        a dictionary
+        """
+        if not HAS_CANTERA:
+            raise SpectroChemPyException('Cantera is not available : please install it before continuing:  \n'
+                                         'conda install -c cantera cantera')
 
         global it
-        it = it + 1
+
+        def objective(guess, param_to_optimize,
+                      exp_conc, exp_idx, fit_to_exp_idx,
+                      optimizer,
+                      **kwargs):
+
+            global it
+            it = it + 1
+
+            for i, param in enumerate(param_to_optimize):
+                param_to_optimize[param] = guess[i]
+
+            # create reactor
+            if self._kin_param_to_set is not None:
+                all_param = {**self._kin_param_to_set, **param_to_optimize}
+            else:
+                all_param = param_to_optimize
+
+            newpfr = PFR(self._cti, self._init_X, self._inlet_X, self._inlet_F, self._volume,
+                         P=self.P, T=self.T, area=self._area, kin_param_to_set=all_param)
+
+            fitted_concentrations = newpfr.composition_vs_time(exp_conc.z, returnNDDataset=False)['X'][:, -1,
+                                    :].squeeze()
+
+            se = np.square(exp_conc.data[:, exp_idx] - fitted_concentrations[:, fit_to_exp_idx]).flatten()
+            sse = np.sum(se)
+
+            if options['disp']:
+                print(f'         Evaluation # {it} | Current function value: {sse} \r', end="")
+
+            if optimizer == 'minimize':
+                return sse
+
+            elif optimizer == 'least_squares':
+                return se
+
+        method = kwargs.get("method", "Nelder-Mead")
+        bounds = kwargs.get("bounds", None)
+        tol = kwargs.get("tol", None)
+        options = kwargs.get("options", {'disp': True})
+
+        if method in ["Nelder-Mead", "Powell", "CG", "BFGS", "Newton-CG", "L-BFGS-B", "TNC", "COBYLA", "SLSQP",
+                      "trust-constr", "dogleg", "trust-ncg", "trust-krylov", "trust-exact"]:
+            optimizer = 'minimize'
+
+        elif method in ['trf', 'dogbox', 'lm']:
+            optimizer = 'least_squares'
+            if bounds is None:
+                bounds = (-np.inf, np.inf)
+
+        elif method == 'differential_evolution':
+            optimizer = 'differential_evolution'
+            # then param_to_optimize are expected to be bounds for each varaible
+
+        initial_guess = np.zeros((len(param_to_optimize)))
 
         for i, param in enumerate(param_to_optimize):
-            param_to_optimize[param] = guess[i]
+            initial_guess[i] = param_to_optimize[param]
 
-        # create reactor
-        if pfr._kin_param_to_set is not None:
-            all_param = {**pfr._kin_param_to_set, **param_to_optimize}
+        it = -1
+
+
+
+        init_function_value = objective(initial_guess, param_to_optimize,
+                                        exp_conc, exp_idx, fit_to_exp_idx,
+                                        optimizer)
+
+        if optimizer in ['minimize', 'least_squares']:
+            init_function_value = np.sum(init_function_value)
+
+        if options['disp']:
+            print('Optimization of the parameters.')
+            print(f'         Initial parameters: {initial_guess}')
+            if optimizer in ['minimize', 'least_squares']:
+                print(f'         Initial function value: {init_function_value}')
+
+        tic = datetime.datetime.now()
+
+        if optimizer == 'minimize':
+            res = minimize(objective, initial_guess,
+                           args=(param_to_optimize, exp_conc, exp_idx, fit_to_exp_idx, optimizer),
+                           method=method, bounds=bounds, tol=tol, options=options)
+
+        elif optimizer == 'least_squares':
+            res = least_squares(objective, initial_guess,
+                                args=(param_to_optimize, exp_conc, exp_idx, fit_to_exp_idx, optimizer),
+                                method=method, bounds=bounds)
+
+        elif optimizer == 'differential_evolution':
+            res = differential_evolution(objective, bounds, args=(exp_conc, exp_idx, fit_to_exp_idx))
+
+
+        optim_param = res.x
+
+        toc = datetime.datetime.now()
+
+        if options['disp']:
+            print('         Optimization time: {}'.format((toc - tic)))
+            print('         Final parameters: {}'.format(optim_param))
+
+        if other_param is not None:
+            all_param = {**other_param, **param_to_optimize}
         else:
             all_param = param_to_optimize
 
-        newpfr = PFR(pfr._cti, pfr._init_X, pfr._inlet_X, pfr._inlet_F, pfr._volume,
-                   P=pfr.P, T=pfr.T, area=pfr._area, kin_param_to_set=all_param)
+        newpfr = PFR(self._cti, self._init_X, self._inlet_X, self._inlet_F, self._volume,
+                     P=self.P, T=self.T, area=self._area, kin_param_to_set=all_param)
 
-        fitted_concentrations = newpfr.composition_vs_time(exp_conc.z, returnNDDataset=False)['X'][:, -1, :].squeeze()
+        fitted_concentrations = newpfr.composition_vs_time(exp_conc.z)['X'][:, -1, :].squeeze()
+        newargs = (self, all_param)
 
-        se = np.square(exp_conc.data[:, exp_idx] - fitted_concentrations[:, fit_to_exp_idx]).flatten()
-        sse = np.sum(se)
+        return {'fitted_concentrations': fitted_concentrations,
+                'results': res,
+                'newargs': newargs}
 
-        if options['disp']:
-            print(f'         Evaluation # {it} | Current function value: {sse} \r', end="")
-
-        if optimizer == 'minimize':
-            return sse
-
-        elif optimizer == 'least_squares':
-            return se
-
-    method = kwargs.get("method", "Nelder-Mead")
-    bounds = kwargs.get("bounds", None)
-    tol = kwargs.get("tol", None)
-    options = kwargs.get("options", {'disp': True})
-
-    if method in ["Nelder-Mead", "Powell", "CG", "BFGS", "Newton-CG", "L-BFGS-B", "TNC", "COBYLA", "SLSQP",
-                  "trust-constr", "dogleg", "trust-ncg", "trust-krylov", "trust-exact"]:
-        optimizer = 'minimize'
-
-    elif method in ['trf', 'dogbox', 'lm']:
-        optimizer = 'least_squares'
-
-        if bounds is None:
-            bounds = (-np.inf, np.inf)
-
-    initial_guess = np.zeros((len(param_to_optimize)))
-
-    for i, param in enumerate(param_to_optimize):
-        initial_guess[i] = param_to_optimize[param]
-
-    it = -1
-
-    init_function_value = objective(initial_guess, param_to_optimize,
-                                    exp_conc, exp_idx, fit_to_exp_idx,
-                                    pfr, optimizer)
-
-    if optimizer == 'least-squares':
-        init_function_value = np.sum(init_function_value)
-
-    if options['disp']:
-        print('Optimization of the parameters.')
-        print(f'         Initial parameters: {initial_guess}')
-        print(f'         Initial function value: {init_function_value}')
-
-    tic = datetime.datetime.now()
-
-    if optimizer == 'minimize':
-        res = minimize(objective, initial_guess,
-                       args=(param_to_optimize, exp_conc, exp_idx, fit_to_exp_idx, pfr, optimizer),
-                       method=method, bounds=bounds, tol=tol, options=options)
-
-    elif optimizer == 'least_squares':
-        res = least_squares(objective, initial_guess,
-                            args=(param_to_optimize, exp_conc, exp_idx, fit_to_exp_idx, pfr, optimizer),
-                            method=method, bounds=bounds)
-
-    toc = datetime.datetime.now()
-    optim_param = res.x
-    if options['disp']:
-        print('         Optimization time: {}'.format((toc - tic)))
-        print('         Final parameters: {}'.format(optim_param))
-
-    if other_param is not None:
-        all_param = {**other_param, **param_to_optimize}
-    else:
-        all_param = param_to_optimize
-
-    newpfr = PFR(pfr._cti, pfr._init_X, pfr._inlet_X, pfr._inlet_F, pfr._volume,
-                 P=pfr.P, T=pfr.T, area=pfr._area, kin_param_to_set=all_param)
-
-    fitted_concentrations = newpfr.composition_vs_time(exp_conc.z)['X'][:, -1, :].squeeze()
-    newargs = (pfr, all_param)
-
-    return {'fitted_concentrations': fitted_concentrations,
-            'results': res,
-            'newargs': newargs}
