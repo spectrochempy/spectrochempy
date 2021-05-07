@@ -10,7 +10,8 @@
 import importlib
 import datetime
 import numpy as np
-from scipy.optimize import minimize
+import warnings
+from scipy.optimize import minimize, differential_evolution
 
 
 __all__ = ['coverages_vs_time', 'concentrations_vs_time', 'modify_rate', 'modify_surface_kinetics',
@@ -240,6 +241,7 @@ def fit_to_concentrations(C, externalConc, external_to_C_idx, reactive_phase, pa
             }
 
 
+
 class PFR():
 
     '''PFR reactor as a CSTR in series'''
@@ -422,6 +424,8 @@ class PFR():
         return {'X': X,
                 'coverages': coverages}
 
+
+
     def fit_to_gas_concentrations(self, exp_conc, exp_idx, fit_to_exp_idx,
                                   param_to_optimize, other_param=None, **kwargs):
         r"""
@@ -462,8 +466,7 @@ class PFR():
 
         def objective(guess, param_to_optimize,
                       exp_conc, exp_idx, fit_to_exp_idx,
-                      optimizer,
-                      **kwargs):
+                      optimizer, **kwargs):
 
             global it
             it = it + 1
@@ -489,7 +492,7 @@ class PFR():
             if options['disp']:
                 print(f'         Evaluation # {it} | Current function value: {sse} \r', end="")
 
-            if optimizer == 'minimize':
+            if optimizer in ['minimize', 'differential_evolution']:
                 return sse
 
             elif optimizer == 'least_squares':
@@ -513,24 +516,28 @@ class PFR():
             optimizer = 'differential_evolution'
             # then param_to_optimize are expected to be bounds for each varaible
 
-        initial_guess = np.zeros((len(param_to_optimize)))
+        if optimizer in ['minimize', 'least_squares']:
+            initial_guess = np.zeros((len(param_to_optimize)))
+            for i, param in enumerate(param_to_optimize):
+                initial_guess[i] = param_to_optimize[param]
 
-        for i, param in enumerate(param_to_optimize):
-            initial_guess[i] = param_to_optimize[param]
+        else: # optimizer is 'differential_evolution'
+            initial_guess = []
+            for param in param_to_optimize:
+                initial_guess.append(param_to_optimize[param])
+                bounds = initial_guess
 
         it = -1
 
-
-
-        init_function_value = objective(initial_guess, param_to_optimize,
+        if optimizer in ['minimize', 'least_squares']:
+            init_function_value = objective(initial_guess, param_to_optimize,
                                         exp_conc, exp_idx, fit_to_exp_idx,
                                         optimizer)
 
-        if optimizer in ['minimize', 'least_squares']:
-            init_function_value = np.sum(init_function_value)
 
         if options['disp']:
             print('Optimization of the parameters.')
+            print(f'         Method: {method}')
             print(f'         Initial parameters: {initial_guess}')
             if optimizer in ['minimize', 'least_squares']:
                 print(f'         Initial function value: {init_function_value}')
@@ -548,7 +555,80 @@ class PFR():
                                 method=method, bounds=bounds)
 
         elif optimizer == 'differential_evolution':
-            res = differential_evolution(objective, bounds, args=(exp_conc, exp_idx, fit_to_exp_idx))
+            # set optional parameters / default set to scipy defauls
+            if 'strategy' in options:
+                strategy = options['strategy']
+            else:
+                strategy = 'best1bin'
+            if 'maxiter' in options:
+                maxiter = options['maxiter']
+            else:
+                maxiter = 1000
+            if 'popsize' in options:
+                popsize = options['popsize']
+            else:
+                popsize = 15
+            if 'tol' in options:
+                tol = options['tol']
+            else:
+                tol = 0.01
+            if 'mutation' in options:
+                mutation = options['mutation']
+            else:
+                mutation = 0.5, 1
+            if 'recombination' in options:
+                recombination = options['recombination']
+            else:
+                recombination = 0.7
+            if 'seed' in options:
+                seed = options['seed']
+            else:
+                seed = None
+            if 'callback' in options:
+                callback = options['callback']
+            else:
+                callback = None
+            if 'polish' in options:
+                polish = options['polish']
+            else:
+                polish = True
+            if 'init' in options:
+                init = options['init']
+            else:
+                init = 'latinhypercube'
+            if 'atol' in options:
+                atol = options['atol']
+            else:
+                atol = 0
+            if 'updating' in options:
+                updating = options['updating']
+            else:
+                updating = 'immediate'
+            if 'workers' in options:
+                workers = options['workers']
+                if workers != 1:
+                    warnings.warn(
+                        "parallelizatrion not implemented yet, workers reset to 1",
+                        UserWarning
+                    )
+                    workers = 1
+            else:
+                workers = 1
+            if 'constraints' in options:
+                constraints = options['constraints']
+            else:
+                constraints = ()
+
+            res = differential_evolution(objective, bounds, args=(param_to_optimize, exp_conc, exp_idx, fit_to_exp_idx, optimizer),
+                                         strategy=strategy, maxiter=maxiter, popsize=popsize, tol=tol, mutation=mutation,
+                                         recombination=recombination, seed=seed, callback=callback, polish=polish,
+                                         init=init, atol=atol, updating=updating, workers=workers, constraints=constraints)
+
+            # note: to make it parallel (WIP):
+            #  - move objective outside/at thye same level as the class PFR, replace self by pfr : def _objective(guess, pfr, param_to_optimize, exp_conc, exp_idx, fit_to_exp_idx):
+            #  - pass self in args of _objectives: differential_evolution(_objective, bounds, args=(self, param_to_optimize, exp_conc, exp_idx, fit_to_exp_idx),
+            #  for the moment can't be parallelized because pfr uses lambda functions (for the pulse..) that can't be
+            # pickled.
 
 
         optim_param = res.x
