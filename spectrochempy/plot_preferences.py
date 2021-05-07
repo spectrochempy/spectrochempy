@@ -69,9 +69,9 @@ class PlotPreferences(MetaConfigurable):
             config=True, kind='')
     lines_dash_capstyle = Enum(['CapStyle.butt', 'butt', 'CapStyle.round', 'round', 'CapStyle.projecting', 'projecting'], default_value='butt',
                                help=r'''butt|round|projecting''').tag(config=True, kind='')
-    lines_solid_joinstyle = Enum(['miter', 'round', 'bevel'], default_value='round',
+    lines_solid_joinstyle = Enum(['miter', 'JoinStyle.miter', 'round', 'JoinStyle.round', 'bevel', 'JoinStyle.bevel'], default_value='round',
                                  help=r'''miter|round|bevel''').tag(config=True, kind='')
-    lines_solid_capstyle = Enum(['butt', 'round', 'projecting'], default_value='round',
+    lines_solid_capstyle = Enum(['CapStyle.butt', 'butt', 'CapStyle.round', 'round', 'CapStyle.projecting', 'projecting'], default_value='round',
                                 help=r'''butt|round|projecting''').tag(config=True, kind='')
     lines_antialiased = Bool(True, help=r'''render lines in antialiased (no jaggies)''').tag(config=True, kind='')
     lines_dashed_pattern = Tuple((6.0, 6.0), help=r'''''').tag(config=True, kind='')
