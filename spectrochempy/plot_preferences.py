@@ -67,7 +67,7 @@ class PlotPreferences(MetaConfigurable):
     lines_markersize = Float(7.0, help=r'''markersize, in points''').tag(config=True, kind='')
     lines_dash_joinstyle = Enum(['miter', 'round', 'bevel'], default_value='round', help=r'''miter|round|bevel''').tag(
             config=True, kind='')
-    lines_dash_capstyle = Enum(['butt', 'round', 'projecting'], default_value='butt',
+    lines_dash_capstyle = Enum(['CapStyle.butt', 'CapStyle.round', 'CapStyle.projecting'], default_value='butt',
                                help=r'''butt|round|projecting''').tag(config=True, kind='')
     lines_solid_joinstyle = Enum(['miter', 'round', 'bevel'], default_value='round',
                                  help=r'''miter|round|bevel''').tag(config=True, kind='')
