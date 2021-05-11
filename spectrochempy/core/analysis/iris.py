@@ -222,7 +222,7 @@ class IRIS:
                 # The following line is to avoid ValueError: 'matrix G is not
                 # positive definite'
                 # SEE: https://github.com/facebookresearch/GradientEpisodicMemory/issues/2#issuecomment-431826393
-                G += G * 0.0001
+                G += + np.eye(G.shape[0]).__mul__(1e-3)
 
                 for j, freq in enumerate(coord_x.data):
                     fi[:, j] = quadprog.solve_qp(G, a[j].squeeze(), C, b)[0]
@@ -542,7 +542,7 @@ def nearestPD(A):
     return A3
 
 
-def isPD(B, tol=1e-8):
+def isPD(B):
     """Returns true when input is positive-definite,
      copyright: see https://gist.github.com/fasiha/fdb5cec2054e6f1c6ae35476045a0bbd"""
 
