@@ -542,12 +542,18 @@ def nearestPD(A):
     return A3
 
 
-def isPD(B):
-    """Returns true when input is positive-definite, via Cholesky
+def isPD(B, tol=1e-8):
+    """Returns true when input is positive-definite,"""
 
-    copyright: see https://gist.github.com/fasiha/fdb5cec2054e6f1c6ae35476045a0bbd"""
-    try:
-        _ = np.linalg.cholesky(B)
-        return True
-    except np.linalg.LinAlgError:
-        return False
+    E = np.linalg.eigvalsh(A)
+    return np.all(E > -tol)
+
+    # Former code below: used Cholesky decomposition
+    # but lead to inconsistent results and errors depending on the platform
+    # copyright: see https://gist.github.com/fasiha/fdb5cec2054e6f1c6ae35476045a0bbd"""
+    #
+    # try:
+    #     _ = np.linalg.cholesky(B)
+    #     return True
+    # except np.linalg.LinAlgError:
+    #     return False
