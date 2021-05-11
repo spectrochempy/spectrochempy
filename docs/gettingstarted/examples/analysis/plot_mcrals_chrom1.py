@@ -31,7 +31,7 @@ datasets = scp.read_matlab("matlabdata/als2004dataset.MAT")
 print('\n NDDataset names: ' + str([ds.name for ds in datasets]))
 
 ########################################################################################################################
-# We are interested in the first dataset ('m1') that contains a single HPLS-DAD run (51x96)  dataset.
+# We are interested in the last dataset ('m1') that contains a single HPLS-DAD run (51x96)  dataset.
 # As usual, the 51 rows correspond to the 'time axis' of the HPLC run, and the 96 columns to the 'wavelength' axis
 # of the UV spectra. The original dataset does not contain information as to the actual time and wavelength coordinates.
 #
@@ -39,7 +39,7 @@ print('\n NDDataset names: ' + str([ds.name for ds in datasets]))
 # The second dataset 'spure' is a (4x96) guess of spectral profiles.
 #
 # Load the experimental data as X and the guess:
-X = datasets[0]
+X = datasets[-1]
 guess = datasets[1]
 
 ########################################################################################################################
