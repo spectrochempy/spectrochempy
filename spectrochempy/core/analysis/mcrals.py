@@ -288,9 +288,11 @@ class MCRALS(HasTraits):
 
             # compute St
             St.data = np.linalg.lstsq(C.data, X.data, rcond=None)[0]
-            # recompute C for consistency(soft modeling)
+
             # stores St in Stsoft
             Stsoft = St.copy()
+
+            # recompute C for consistency(soft modeling)
             C.data = np.linalg.lstsq(St.data.T, X.data.T, rcond=None)[0].T
 
             # Force non-negative spectra
@@ -313,13 +315,14 @@ class MCRALS(HasTraits):
             X_hat = dot(C, St)
             stdev2 = (X_hat - X.data).std()
             change = 100 * (stdev2 - stdev) / stdev
+            stdev = stdev2
 
             stdev_PCA = (X_hat - Xpca.data).std()  # TODO: Check PCA : values are different from the Arnaud version ?
 
             logentry = '{:3d}      {:10f}      {:10f}      {:10f}'.format(niter, stdev_PCA, stdev2, change)
             logs += logentry + '\n'
             info_(logentry)
-            stdev = stdev2
+
 
             if change > 0:
                 ndiv += 1
@@ -355,6 +358,7 @@ class MCRALS(HasTraits):
         else:
             self._extC = None
             self._extOutput = None
+
         self._St = St
         self._logs = logs
 
@@ -396,6 +400,19 @@ class MCRALS(HasTraits):
         """
         return self._St
 
+    @property
+    def Stsoft(self):
+        """
+        The soft spectra profiles
+        """
+        return self._Stsoft
+
+    @property
+    def Chard(self):
+        """
+        The hard concentyration profiles
+        """
+        return self._Stsoft
     @property
     def params(self):
         """
