@@ -222,7 +222,7 @@ class IRIS:
                 # The following line is to avoid ValueError: 'matrix G is not
                 # positive definite'
                 # SEE: https://github.com/facebookresearch/GradientEpisodicMemory/issues/2#issuecomment-431826393
-                G += G * 0.00001
+                G +=  np.eye(G.shape[0]).__mul__(1e-3)
 
                 for j, freq in enumerate(coord_x.data):
                     fi[:, j] = quadprog.solve_qp(G, a[j].squeeze(), C, b)[0]
@@ -543,9 +543,9 @@ def nearestPD(A):
 
 
 def isPD(B):
-    """Returns true when input is positive-definite, via Cholesky
+    """Returns true when input is positive-definite,
+     copyright: see https://gist.github.com/fasiha/fdb5cec2054e6f1c6ae35476045a0bbd"""
 
-    copyright: see https://gist.github.com/fasiha/fdb5cec2054e6f1c6ae35476045a0bbd"""
     try:
         _ = np.linalg.cholesky(B)
         return True

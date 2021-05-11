@@ -65,13 +65,13 @@ class PlotPreferences(MetaConfigurable):
     lines_markeredgecolor = Unicode('auto', help=r'''the default markeredgecolor''').tag(config=True, kind='color')
     lines_markeredgewidth = Float(0.0, help=r'''the line width around the marker symbol''').tag(config=True, kind='')
     lines_markersize = Float(7.0, help=r'''markersize, in points''').tag(config=True, kind='')
-    lines_dash_joinstyle = Enum(['miter', 'round', 'bevel'], default_value='round', help=r'''miter|round|bevel''').tag(
+    lines_dash_joinstyle = Enum(['miter', 'JoinStyle.miter','round', 'JoinStyle.round', 'bevel', 'JoinStyle.bevel'], default_value='round', help=r'''miter|round|bevel''').tag(
             config=True, kind='')
-    lines_dash_capstyle = Enum(['butt', 'round', 'projecting'], default_value='butt',
+    lines_dash_capstyle = Enum(['CapStyle.butt', 'butt', 'CapStyle.round', 'round', 'CapStyle.projecting', 'projecting'], default_value='butt',
                                help=r'''butt|round|projecting''').tag(config=True, kind='')
-    lines_solid_joinstyle = Enum(['miter', 'round', 'bevel'], default_value='round',
+    lines_solid_joinstyle = Enum(['miter', 'JoinStyle.miter', 'round', 'JoinStyle.round', 'bevel', 'JoinStyle.bevel'], default_value='round',
                                  help=r'''miter|round|bevel''').tag(config=True, kind='')
-    lines_solid_capstyle = Enum(['butt', 'round', 'projecting'], default_value='round',
+    lines_solid_capstyle = Enum(['CapStyle.butt', 'butt', 'CapStyle.round', 'round', 'CapStyle.projecting', 'projecting'], default_value='round',
                                 help=r'''butt|round|projecting''').tag(config=True, kind='')
     lines_antialiased = Bool(True, help=r'''render lines in antialiased (no jaggies)''').tag(config=True, kind='')
     lines_dashed_pattern = Tuple((6.0, 6.0), help=r'''''').tag(config=True, kind='')
