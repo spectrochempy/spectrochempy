@@ -36,11 +36,11 @@ print('\n NDDataset names: ' + str([ds.name for ds in datasets]))
 # of the UV spectra. The original dataset does not contain information as to the actual time and wavelength coordinates.
 #
 # MCR-ALS needs also an initial guess for either concentration profiles or pure spectra concentration profiles.
-# The second dataset 'spure' is a (4x96) guess of spectral profiles.
+# The 4th dataset 'spure' is a (4x96) guess of spectral profiles.
 #
 # Load the experimental data as X and the guess:
 X = datasets[-1]
-guess = datasets[1]
+guess = datasets[3]
 
 ########################################################################################################################
 # Create a MCR-ALS object with the default settings
