@@ -341,7 +341,7 @@ class PFR():
                     raise ValueError("variable flow rate(s) must be associated within the first"
                                      "five MFC(s)")
 
-        # create other cstrs and link them with the previous one throupd a pressure controller
+        # create other cstrs and link them with the previous one through a pressure controller
 
         for i in range(1,len(volume)):
             initial_gas = ct.Solution(self._cti, 'gas')
@@ -462,14 +462,15 @@ class PFR():
             raise SpectroChemPyException('Cantera is not available : please install it before continuing:  \n'
                                          'conda install -c cantera cantera')
 
-        global it
+        global it, trials, func_values
 
         def objective(guess, param_to_optimize,
                       exp_conc, exp_idx, fit_to_exp_idx,
                       optimizer, **kwargs):
 
-            global it
+            global it, trials
             it = it + 1
+            trials.append(guess)
 
             for i, param in enumerate(param_to_optimize):
                 param_to_optimize[param] = guess[i]
@@ -483,19 +484,31 @@ class PFR():
             newpfr = PFR(self._cti, self._init_X, self._inlet_X, self._inlet_F, self._volume,
                          P=self.P, T=self.T, area=self._area, kin_param_to_set=all_param)
 
-            fitted_concentrations = newpfr.composition_vs_time(exp_conc.z, returnNDDataset=False)['X'][:, -1,
+            try:
+                fitted_concentrations = newpfr.composition_vs_time(exp_conc.z, returnNDDataset=False)['X'][:, -1,
                                     :].squeeze()
+            except:
+                if optimizer == 'differential_evolution':
+                    integrationError = True
+                    warnings.warn("model could not be integrated with these parameters. Objective function set to Inf", UserWarning)
+                else:
+                    raise
 
-            se = np.square(exp_conc.data[:, exp_idx] - fitted_concentrations[:, fit_to_exp_idx]).flatten()
-            sse = np.sum(se)
+            if 'integrationError' not in locals():
+                se = np.square(exp_conc.data[:, exp_idx] - fitted_concentrations[:, fit_to_exp_idx]).flatten()
+                sse = np.sum(se)
+            else:
+                sse = np.Inf
 
             if options['disp']:
                 print(f'         Evaluation # {it} | Current function value: {sse} \r', end="")
 
             if optimizer in ['minimize', 'differential_evolution']:
+                func_values.append(sse)
                 return sse
 
             elif optimizer == 'least_squares':
+                func_values.append(se)
                 return se
 
         method = kwargs.get("method", "Nelder-Mead")
@@ -542,6 +555,8 @@ class PFR():
             if optimizer in ['minimize', 'least_squares']:
                 print(f'         Initial function value: {init_function_value}')
 
+        trials = []
+        func_values = []
         tic = datetime.datetime.now()
 
         if optimizer == 'minimize':
@@ -650,7 +665,13 @@ class PFR():
         fitted_concentrations = newpfr.composition_vs_time(exp_conc.z)['X'][:, -1, :].squeeze()
         newargs = (self, all_param)
 
+        trials = NDDataset(trials)
+        trials.title = 'Trial solutions'
+        # trials.set_coordset(Coord(data=None, labels=param_to_optimize.keys(), title='kinetic parameters'),
+        #                    Coord(data=func_values, title='objective function values'))
+
         return {'fitted_concentrations': fitted_concentrations,
                 'results': res,
+                'trials': trials,
                 'newargs': newargs}
 
