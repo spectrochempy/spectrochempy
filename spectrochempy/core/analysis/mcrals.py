@@ -65,16 +65,16 @@ class MCRALS(HasTraits):
             index of species having unimodal concentrationsprofiles.
         closureConc : list or tuple, Default=None  (no closure)
             Index of species subjected to a closure constraint.
-        extConc: list or tuple, Default None (no external concentration).
+        externalConc: list or tuple, Default None (no external concentration).
             Index of species for which a concentration profile is provided by an external function.
-        getExtlConc : callable
+        getExternalConc : callable
             An external function that will provide `n_ext` concentration profiles:
 
-            getExtConc(C, extConc, ext_to_C_idx, *args) -> extC
+            getExternalConc(C, extConc, ext_to_C_idx, *args) -> extC
 
             or
 
-            getExtConc(C, extConc, ext_to_C_idx, *args) -> (extC, out2, out3, ...)
+            etExternalConc(C, extConc, ext_to_C_idx, *args) -> (extC, out2, out3, ...)
 
             where C is the current concentration matrix, *args are the parameters needed to completely
             specify the function, extC is a  nadarray or NDDataset of shape (C.y, n_ext), and out1, out2, ... are
@@ -283,18 +283,23 @@ class MCRALS(HasTraits):
                     extC = extC.data
                 C.data[:, externalConc] = extC[:, external_to_C_idx]
 
-            # stores C in C_hard and recompute C for consistency (soft modeling)
-            # Chard = C.copy()       # TODO: not used?
-            C.data = np.linalg.lstsq(St.data.T, X.data.T, rcond=None)[0].T
+            # stores C in C_hard
+            Chard = C.copy()
 
+            # compute St
             St.data = np.linalg.lstsq(C.data, X.data, rcond=None)[0]
+
             # stores St in Stsoft
-            # Stsoft = St.copy()     # TODO: not used?
+            Stsoft = St.copy()
 
             # Force non-negative spectra
             # --------------------------
             if nonnegSpec is not None:
                 St.data[nonnegSpec, :] = St.data[nonnegSpec, :].clip(min=0)
+
+            # recompute C for consistency(soft modeling)
+            C.data = np.linalg.lstsq(St.data.T, X.data.T, rcond=None)[0].T
+
 
             # rescale spectra & concentrations
             if normSpec == 'max':
@@ -311,13 +316,14 @@ class MCRALS(HasTraits):
             X_hat = dot(C, St)
             stdev2 = (X_hat - X.data).std()
             change = 100 * (stdev2 - stdev) / stdev
+            stdev = stdev2
 
             stdev_PCA = (X_hat - Xpca.data).std()  # TODO: Check PCA : values are different from the Arnaud version ?
 
             logentry = '{:3d}      {:10f}      {:10f}      {:10f}'.format(niter, stdev_PCA, stdev2, change)
             logs += logentry + '\n'
             info_(logentry)
-            stdev = stdev2
+
 
             if change > 0:
                 ndiv += 1
@@ -353,11 +359,12 @@ class MCRALS(HasTraits):
         else:
             self._extC = None
             self._extOutput = None
+
         self._St = St
         self._logs = logs
 
-        # self._Stsoft = Stsoft
-        # self._Chard = Chard
+        self._Stsoft = Stsoft
+        self._Chard = Chard
 
     @property
     def X(self):
@@ -394,6 +401,19 @@ class MCRALS(HasTraits):
         """
         return self._St
 
+    @property
+    def Stsoft(self):
+        """
+        The soft spectra profiles
+        """
+        return self._Stsoft
+
+    @property
+    def Chard(self):
+        """
+        The hard concentyration profiles
+        """
+        return self._Chard
     @property
     def params(self):
         """
