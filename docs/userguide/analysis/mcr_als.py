@@ -63,7 +63,7 @@ for a in A:
 # Let's name it 'X' (as in the matrix equation above), display its content and plot it:
 
 # %%
-X = A[0]
+X = A[-1]
 X
 
 # %%
@@ -105,7 +105,7 @@ surf = X.plot_surface(colorbar=True, linewidth=.2, ccount=100, figsize=(10, 5))
 # and plot it:
 
 # %%
-St0 = A[1]
+St0 = A[3]
 _ = St0.plot()
 
 # %% [markdown]
@@ -280,13 +280,13 @@ _ = mcr4.St.plot()
 # The 'MATRIX' dataset is a columnwise augmented dataset consisting into 5 successive runs:
 
 # %%
-A[3]
+A[1]
 
 # %% [markdown]
 # Let's plot it as a map, and as a surface:
 
 # %%
-X2 = A[3]
+X2 = A[1]
 X2.title = 'absorbance'
 X2.set_coordset(None, None)
 X2.set_coordtitles(y='elution time', x='wavelength')
