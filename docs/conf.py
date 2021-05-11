@@ -629,4 +629,4 @@ def shorter_signature(app, what, name, obj, options, signature, return_annotatio
 def setup(app):
     app.connect('autodoc-skip-member', autodoc_skip_member)
     app.connect('autodoc-process-signature', shorter_signature)
-    app.add_stylesheet("theme_override.css")  # also can be a full URL
+    app.add_css_file("theme_override.css")  # also can be a full URL
