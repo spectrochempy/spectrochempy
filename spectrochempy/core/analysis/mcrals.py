@@ -283,13 +283,15 @@ class MCRALS(HasTraits):
                     extC = extC.data
                 C.data[:, externalConc] = extC[:, external_to_C_idx]
 
-            # stores C in C_hard and recompute C for consistency (soft modeling)
-            # Chard = C.copy()       # TODO: not used?
-            C.data = np.linalg.lstsq(St.data.T, X.data.T, rcond=None)[0].T
+            # stores C in C_hard
+            Chard = C.copy()
 
+            # compute St
             St.data = np.linalg.lstsq(C.data, X.data, rcond=None)[0]
+            # recompute C for consistency(soft modeling)
             # stores St in Stsoft
-            # Stsoft = St.copy()     # TODO: not used?
+            Stsoft = St.copy()
+            C.data = np.linalg.lstsq(St.data.T, X.data.T, rcond=None)[0].T
 
             # Force non-negative spectra
             # --------------------------
@@ -356,8 +358,8 @@ class MCRALS(HasTraits):
         self._St = St
         self._logs = logs
 
-        # self._Stsoft = Stsoft
-        # self._Chard = Chard
+        self._Stsoft = Stsoft
+        self._Chard = Chard
 
     @property
     def X(self):
