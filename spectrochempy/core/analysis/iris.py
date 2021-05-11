@@ -545,7 +545,7 @@ def nearestPD(A):
 def isPD(B, tol=1e-8):
     """Returns true when input is positive-definite,"""
 
-    E = np.linalg.eigvalsh(A)
+    E = np.linalg.eigvalsh(B)
     return np.all(E > -tol)
 
     # Former code below: used Cholesky decomposition
