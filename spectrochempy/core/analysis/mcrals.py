@@ -292,13 +292,14 @@ class MCRALS(HasTraits):
             # stores St in Stsoft
             Stsoft = St.copy()
 
-            # recompute C for consistency(soft modeling)
-            C.data = np.linalg.lstsq(St.data.T, X.data.T, rcond=None)[0].T
-
             # Force non-negative spectra
             # --------------------------
             if nonnegSpec is not None:
                 St.data[nonnegSpec, :] = St.data[nonnegSpec, :].clip(min=0)
+
+            # recompute C for consistency(soft modeling)
+            C.data = np.linalg.lstsq(St.data.T, X.data.T, rcond=None)[0].T
+
 
             # rescale spectra & concentrations
             if normSpec == 'max':
@@ -412,7 +413,7 @@ class MCRALS(HasTraits):
         """
         The hard concentyration profiles
         """
-        return self._Stsoft
+        return self._Chard
     @property
     def params(self):
         """
