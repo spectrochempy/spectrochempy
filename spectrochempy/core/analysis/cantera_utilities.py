@@ -484,7 +484,6 @@ class PFR():
             newpfr = PFR(self._cti, self._init_X, self._inlet_X, self._inlet_F, self._volume,
                          P=self.P, T=self.T, area=self._area, kin_param_to_set=all_param)
 
-#            fitted_concentrations = newpfr.composition_vs_time(exp_conc.z, returnNDDataset=False)['X'][:, -1,:].squeeze()
 
             try:
                 fitted_concentrations = newpfr.composition_vs_time(exp_conc.z, returnNDDataset=False)['X'][:, -1,
