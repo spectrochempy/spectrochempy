@@ -484,10 +484,12 @@ class PFR():
             newpfr = PFR(self._cti, self._init_X, self._inlet_X, self._inlet_F, self._volume,
                          P=self.P, T=self.T, area=self._area, kin_param_to_set=all_param)
 
+#            fitted_concentrations = newpfr.composition_vs_time(exp_conc.z, returnNDDataset=False)['X'][:, -1,:].squeeze()
+
             try:
                 fitted_concentrations = newpfr.composition_vs_time(exp_conc.z, returnNDDataset=False)['X'][:, -1,
                                     :].squeeze()
-            except:
+            except ct.CanteraError:
                 if optimizer == 'differential_evolution':
                     integrationError = True
                     warnings.warn("model could not be integrated with these parameters. Objective function set to Inf", UserWarning)
@@ -667,8 +669,21 @@ class PFR():
 
         trials = NDDataset(trials)
         trials.title = 'Trial solutions'
-        # trials.set_coordset(Coord(data=None, labels=param_to_optimize.keys(), title='kinetic parameters'),
-        #                    Coord(data=func_values, title='objective function values'))
+
+        if optimizer == 'differential_evolution':
+            # label trials per generation
+            gen_labels = []
+            for gen in range(len(func_values) // (popsize * len(param_to_optimize))):
+                gen_labels.append(['G_' + str(gen)] * (popsize * len(param_to_optimize)))
+            gen_labels.append(['G_polish'] * (len(func_values) % (popsize * len(param_to_optimize))))
+            gen_labels = [item for sublist in gen_labels for item in sublist]
+        else:
+            gen_labels = None
+
+        trials.set_coordset(Coord(data=func_values, labels=gen_labels, title='objective function values'),
+                            Coord(data=None, labels=[key for key in param_to_optimize.keys()],
+                                  title='kinetic parameters'),
+                            )
 
         return {'fitted_concentrations': fitted_concentrations,
                 'results': res,
