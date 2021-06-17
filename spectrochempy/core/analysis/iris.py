@@ -222,7 +222,7 @@ class IRIS:
                 # The following line is to avoid ValueError: 'matrix G is not
                 # positive definite'
                 # SEE: https://github.com/facebookresearch/GradientEpisodicMemory/issues/2#issuecomment-431826393
-                G +=  np.eye(G.shape[0]).__mul__(1e-3)
+                G += G * 0.0001
 
                 for j, freq in enumerate(coord_x.data):
                     fi[:, j] = quadprog.solve_qp(G, a[j].squeeze(), C, b)[0]
@@ -365,14 +365,24 @@ class IRIS:
         X_hat : |NDDataset|
             The reconstructed dataset.
         """
-        X_hat = NDDataset(np.zeros((self.f.z.size, *self.X.shape)),
-                          title=self.X.title, units=self.X.units)
+        #TODO: adapt for non-regularized / 1D IRIS
+
+
+
+        if len(self.lamda)==1 and self.lamda == [0]:
+            X_hat = NDDataset(np.zeros((self.f.z.size, *self.X.shape)).squeeze(axis=0),
+                              title=self.X.title, units=self.X.units)
+            X_hat.set_coordset(y=self.X.y, x=self.X.x)
+            X_hat.data = np.dot(self.K.data, self.f.data.squeeze())
+        else:
+            X_hat = NDDataset(np.zeros((self.f.z.size, *self.X.shape)),
+                              title=self.X.title, units=self.X.units)
+            X_hat.set_coordset(z=self.f.z, y=self.X.y, x=self.X.x)   # TODO: take into account the fact that coordinates
+        # may have other names
+            for i in range(X_hat.z.size):
+                X_hat[i].data = np.dot(self.K.data, self.f[i].data.squeeze())
 
         X_hat.name = '2D-IRIS Reconstructed datasets'
-        X_hat.set_coordset(z=self.f.z, y=self.X.y, x=self.X.x)   # TODO: take into account the fact that coordinates
-        # may have other names
-        for i in range(X_hat.z.size):
-            X_hat[i] = np.dot(self.K.data, self.f[i].data.squeeze())
         return X_hat
 
     def plotlcurve(self, **kwargs):
