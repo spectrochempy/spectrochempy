@@ -8,6 +8,7 @@ statistics = True
 exclude =
     # exclude test, and some other folder for now (may be done later)
     .idea
+    .eggs
     gui
     docs/sphinxext
     # docs/userguide
