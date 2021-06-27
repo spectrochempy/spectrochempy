@@ -10,37 +10,37 @@ jobs:
       name: py3.6
       if: type == pull_request OR (branch != master AND !(tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/))
       env:
-      - TEST=true
-      - CONDAPY=3.6
+       - TEST=true
+       - CONDAPY=3.6
     - name: py3.7
       if: type == pull_request OR (branch != master AND !(tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/))
       env:
-      - TEST=true
-      - CONDAPY=3.7
+       - TEST=true
+       - CONDAPY=3.7
     - name: py3.8
       if: type == pull_request OR (branch != master AND !(tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/))
       env:
-        - TEST=true
-        - CONDAPY=3.8
+       - TEST=true
+       - CONDAPY=3.8
     - name: py3.9
       if: type == pull_request OR (branch != master AND !(tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/))
       env:
-      - TEST=true
-      - CONDAPY=3.9
+       - TEST=true
+       - CONDAPY=3.9
     - stage: builds
       name: conda
       if: type != pull_request AND (branch == master OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/)
       env:
-      - DEPLOY=true
-      - CONDAPY=3.8
+       - DEPLOY=true
+       - CONDAPY=3.8
     - name: docs
       if: type != pull_request AND (branch == master OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}(.rc\d+)?$/)
       env:
-      - BUILDOCS=true
-      - CONDAPY=3.8
+       - BUILDOCS=true
+       - CONDAPY=3.8
 
 # limit got clone depth to 50 commits
-# this means that pull requests must be done with less than 50 commit changes
+# this means that pull requests must be done with less than 100 commit changes
 git:
   depth: 50
 
