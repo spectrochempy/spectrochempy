@@ -78,6 +78,7 @@ jobs:
         flake8 .
     - name: Test with pytest
       run: |
+        conda info
         mamba install pytest
         pytest
 >>>>>>> 79d0accfe (Update python-package-conda.yml)
