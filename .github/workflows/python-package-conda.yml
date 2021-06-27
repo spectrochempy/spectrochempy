@@ -70,7 +70,8 @@ jobs:
         conda config --set channel_priority flexible;
         conda install mamba jinja2
         python .ci/env/env_create.py -v 3.8 --dev scpy3.8.yml
-        mamba env create -f .ci/env/scpy3.8.yml;
+        mamba env create -f .ci/env/scpy3.8.yml
+        conda activate scpy3.8
         python setup.py install
     - name: Lint with flake8
       run: |
