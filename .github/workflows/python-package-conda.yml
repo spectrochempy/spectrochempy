@@ -13,6 +13,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    
     - name: Set up Python 3.8
       uses: actions/setup-python@v2
       with:
@@ -29,8 +30,8 @@ jobs:
         conda config --add channels spectrocat;
         conda config --set channel_priority flexible;
         conda install mamba jinja2
-        python .ci/env/env_create.py -v $CONDAPY --dev scpy$CONDAPY.yml
-        mamba env create -f .ci/env/scpy$CONDAPY.yml;
+        python .ci/env/env_create.py -v 3.8 --dev scpy3.8.yml
+        mamba env create -f .ci/env/scpy3.8.yml;
         python setup.py install
     - name: Lint with flake8
       run: |
