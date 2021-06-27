@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
+#  =
 # ======================================================================================================================
 """
 This module implements the IRIS class.
@@ -90,9 +92,7 @@ class IRIS:
             raise NameError('A kernel must be given !')
 
         # define eps values
-        eps = np.linspace(param['epsRange'][0],
-                          param['epsRange'][1],
-                          param['epsRange'][2])
+        eps = np.linspace(param['epsRange'][0], param['epsRange'][1], param['epsRange'][2])
 
         # defines regularization parameter values
         if 'lambdaRange' not in param:
@@ -109,9 +109,7 @@ class IRIS:
         elif len(param['lambdaRange']) == 3:
             regularization = True
             searchLambda = False
-            lamb = np.logspace(param['lambdaRange'][0],
-                               param['lambdaRange'][1],
-                               param['lambdaRange'][2])
+            lamb = np.logspace(param['lambdaRange'][0], param['lambdaRange'][1], param['lambdaRange'][2])
         else:
             raise ValueError('lambdaRange should either None or a set of 2 or 3 integers')
 
@@ -121,8 +119,8 @@ class IRIS:
             if isinstance(p, Coord):
                 if p.shape[1] != X.shape[0]:
                     raise ValueError('\'p\' should be consistent with the y coordinate of the dataset')
-                pval = p.data  # values
-                # (values contains unit! to use it we must either have eps with units or noramlise p
+                pval = p.data  # values  # (values contains unit! to use it we must either have eps with units or
+                # noramlise p
             else:
                 if len(p) != X.shape[0]:
                     raise ValueError('\'p\' should be consistent with the y coordinate of the dataset')
@@ -175,8 +173,7 @@ class IRIS:
         # solve untregularized problem
         if not regularization:
             if verbose:
-                print('Solving for {} wavenumbers and {} spectra, no regularization\n'
-                      .format(X.shape[1], X.shape[0]))
+                print('Solving for {} wavenumbers and {} spectra, no regularization\n'.format(X.shape[1], X.shape[0]))
             # une scipy.nnls() to solve the linear problem: X = K f
             for j, freq in enumerate(coord_x.data):
                 f[0, :, j] = optimize.nnls(K.data, X[:, j].data.squeeze())[0]
@@ -240,8 +237,7 @@ class IRIS:
                 points. x, y = sets of 3 cartesian coordinates
                 """
 
-                numerator = 2 * (x[0] * y[1] + x[1] * y[2] + x[2] * y[0]
-                                 - x[0] * y[2] - x[1] * y[0] - x[2] * y[1])
+                numerator = 2 * (x[0] * y[1] + x[1] * y[2] + x[2] * y[0] - x[0] * y[2] - x[1] * y[0] - x[2] * y[1])
                 # euclidian distances
                 r01 = (x[1] - x[0]) ** 2 + (y[1] - y[0]) ** 2
                 r12 = (x[2] - x[1]) ** 2 + (y[2] - y[1]) ** 2
@@ -252,8 +248,10 @@ class IRIS:
 
             if not searchLambda:
                 if verbose:
-                    print('Solving for {} wavenumbers, {} spectra and {} regularization parameters \n'
-                          .format(X.shape[1], X.shape[0], len(lamb)))
+                    print(
+                        'Solving for {} wavenumbers, {} spectra and {} regularization parameters \n'.format(X.shape[1],
+                                                                                                            X.shape[0],
+                                                                                                            len(lamb)))
 
                 for i, lamda in enumerate(lamb):
                     f[i], RSS[i], SM[i] = solve_lambda(X, K, G0, lamda, S, verbose)
@@ -261,8 +259,8 @@ class IRIS:
             else:
                 if verbose:
                     print('Solving for {} wavenumbers and {} spectra, search regularization parameter '
-                          'in [10**{}, 10**{}]\n'
-                          .format(X.shape[1], X.shape[0], str(min(lambdaRange)), str(max(lambdaRange))))
+                          'in [10**{}, 10**{}]\n'.format(X.shape[1], X.shape[0], str(min(lambdaRange)),
+                                                         str(max(lambdaRange))))
 
                 x = np.ndarray((4))
                 epsilon = 0.1
@@ -365,20 +363,17 @@ class IRIS:
         X_hat : |NDDataset|
             The reconstructed dataset.
         """
-        #TODO: adapt for non-regularized / 1D IRIS
+        # TODO: adapt for non-regularized / 1D IRIS
 
-
-
-        if len(self.lamda)==1 and self.lamda == [0]:
-            X_hat = NDDataset(np.zeros((self.f.z.size, *self.X.shape)).squeeze(axis=0),
-                              title=self.X.title, units=self.X.units)
+        if len(self.lamda) == 1 and self.lamda == [0]:
+            X_hat = NDDataset(np.zeros((self.f.z.size, *self.X.shape)).squeeze(axis=0), title=self.X.title,
+                              units=self.X.units)
             X_hat.set_coordset(y=self.X.y, x=self.X.x)
             X_hat.data = np.dot(self.K.data, self.f.data.squeeze())
         else:
-            X_hat = NDDataset(np.zeros((self.f.z.size, *self.X.shape)),
-                              title=self.X.title, units=self.X.units)
-            X_hat.set_coordset(z=self.f.z, y=self.X.y, x=self.X.x)   # TODO: take into account the fact that coordinates
-        # may have other names
+            X_hat = NDDataset(np.zeros((self.f.z.size, *self.X.shape)), title=self.X.title, units=self.X.units)
+            X_hat.set_coordset(z=self.f.z, y=self.X.y, x=self.X.x)  # TODO: take into account the fact that coordinates
+            # may have other names
             for i in range(X_hat.z.size):
                 X_hat[i].data = np.dot(self.K.data, self.f[i].data.squeeze())
 

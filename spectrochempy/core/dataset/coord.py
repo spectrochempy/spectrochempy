@@ -14,9 +14,8 @@ __all__ = ['Coord', 'LinearCoord']
 
 import textwrap
 
-from traitlets import Instance, default, Bool, observe, All, Unicode, Integer
+from traitlets import Bool, observe, All, Unicode, Integer
 
-from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndmath import NDMath, _set_operators
 from spectrochempy.utils import colored_output, NOMASK
@@ -392,7 +391,7 @@ class Coord(NDMath, NDArray):
 
     @property
     def descendant(self):
-        return (self.data[-1]-self.data[0]) < 0
+        return (self.data[-1] - self.data[0]) < 0
 
     # ..................................................................................................................
     @property
