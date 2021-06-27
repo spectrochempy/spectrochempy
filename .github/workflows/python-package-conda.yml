@@ -39,5 +39,6 @@ jobs:
         flake8 .
     - name: Test with pytest
       run: |
+        conda info
         mamba install pytest
         pytest
