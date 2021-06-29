@@ -13,10 +13,6 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 6006cf316 (Update python-package-conda.yml)
       - uses: actions/checkout@v2
       - name: Set up Python 3.8
         uses: actions/setup-python@v2
@@ -37,7 +33,6 @@ jobs:
           python-version: 3.8
           condarc-file: .ci/env/condarc.yml
           auto-activate-base: false
-<<<<<<< HEAD
       - name: install spectrochempy
         run: |
           python setup.py install
@@ -54,41 +49,3 @@ jobs:
           mamba install pytest
           pytest
 
-=======
-    - uses: actions/checkout@v2
-    
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
-    - name: Add conda to system path
-      run: |
-        # $CONDA is an environment variable pointing to the root of the miniconda directory
-        echo $CONDA/bin >> $GITHUB_PATH
-    - name: Install dependencies
-      run: |
-        conda config --set always_yes yes;
-        conda update -q conda;
-        conda config --add channels conda-forge;
-        conda config --add channels spectrocat;
-        conda config --set channel_priority flexible;
-        conda install mamba jinja2
-        python .ci/env/env_create.py -v 3.8 --dev scpy3.8.yml
-        mamba env create -f .ci/env/scpy3.8.yml
-        conda activate scpy3.8
-        python setup.py install
-    - name: Lint with flake8
-      run: |
-        mamba install flake8
-        flake8 .
-    - name: Test with pytest
-      run: |
-        conda info
-        mamba install pytest
-        pytest
->>>>>>> 79d0accfe (Update python-package-conda.yml)
-=======
-      - run: |
-          conda info
-          conda list
->>>>>>> 6006cf316 (Update python-package-conda.yml)
