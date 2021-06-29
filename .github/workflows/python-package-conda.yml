@@ -14,6 +14,9 @@ jobs:
         shell: bash -l {0}
     steps:
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 6006cf316 (Update python-package-conda.yml)
       - uses: actions/checkout@v2
       - name: Set up Python 3.8
         uses: actions/setup-python@v2
@@ -34,6 +37,7 @@ jobs:
           python-version: 3.8
           condarc-file: .ci/env/condarc.yml
           auto-activate-base: false
+<<<<<<< HEAD
       - name: install spectrochempy
         run: |
           python setup.py install
@@ -83,3 +87,8 @@ jobs:
         mamba install pytest
         pytest
 >>>>>>> 79d0accfe (Update python-package-conda.yml)
+=======
+      - run: |
+          conda info
+          conda list
+>>>>>>> 6006cf316 (Update python-package-conda.yml)
