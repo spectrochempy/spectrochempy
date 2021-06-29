@@ -34,10 +34,10 @@ jobs:
           condarc-file: .ci/env/condarc.yml
           auto-activate-base: false
       - name: install spectrochempy
-      - run: |
+        run: |
           python setup.py install
       - name: display info
-      - run: |
+        run: |
           conda info
           conda list
       - name: Lint with flake8
@@ -46,7 +46,6 @@ jobs:
           flake8 .
       - name: Test with pytest
         run: |
-          conda info
           mamba install pytest
           pytest
 
