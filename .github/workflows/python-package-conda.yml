@@ -33,6 +33,20 @@ jobs:
           python-version: 3.8
           condarc-file: .ci/env/condarc.yml
           auto-activate-base: false
+      - name: install spectrochempy
+      - run: |
+          python setup.py install
+      - name: display info
       - run: |
           conda info
           conda list
+      - name: Lint with flake8
+        run: |
+          mamba install flake8
+          flake8 .
+      - name: Test with pytest
+        run: |
+          conda info
+          mamba install pytest
+          pytest
+
