@@ -117,7 +117,7 @@ class IRIS:
             if isinstance(p, Coord):
                 if p.shape[1] != X.shape[0]:
                     raise ValueError('\'p\' should be consistent with the y coordinate of the dataset')
-                pval = p.data  # values  # (values contains unit! to use it we must either have eps with units or
+                pval = p.data  # values  # (values contains unit! to use it we must either have eps with units or  #
                 # noramlise p
             else:
                 if len(p) != X.shape[0]:
@@ -247,10 +247,8 @@ class IRIS:
 
             if not searchLambda:
                 if verbose:
-                    print(
-                        'Solving for {} wavenumbers, {} spectra and {} regularization parameters \n'.format(X.shape[1],
-                                                                                                            X.shape[0],
-                                                                                                            len(lamb)))
+                    print('Solving for {} wavenumbers, {} spectra and {} regularization parameters \n'.format(
+                            X.shape[1], X.shape[0], len(lamb)))
 
                 for i, lamda in enumerate(lamb):
                     f[i], RSS[i], SM[i] = solve_lambda(X, K, G0, lamda, S, verbose)
@@ -363,10 +361,10 @@ class IRIS:
             The reconstructed dataset.
         """
 
-        if len(self.lamda)==1 : # no regularization or signle lambda
+        if len(self.lamda) == 1:  # no regularization or signle lambda
 
-            X_hat = NDDataset(np.zeros((self.f.z.size, *self.X.shape)).squeeze(axis=0),
-                              title=self.X.title, units=self.X.units)
+            X_hat = NDDataset(np.zeros((self.f.z.size, *self.X.shape)).squeeze(axis=0), title=self.X.title,
+                              units=self.X.units)
             X_hat.set_coordset(y=self.X.y, x=self.X.x)
             X_hat.data = np.dot(self.K.data, self.f.data.squeeze())
         else:
@@ -431,7 +429,7 @@ class IRIS:
         if type(index) is int:
             index = [index]
         for i in index:
-            if X_hat.ndim == 3: #if several lambda
+            if X_hat.ndim == 3:  # if several lambda
                 X_hat_ = X_hat[i].squeeze()
             else:
                 X_hat_ = X_hat  # if single lambda or no regularization
