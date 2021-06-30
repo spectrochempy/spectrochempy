@@ -368,6 +368,7 @@ class IRIS:
         """
 
         if len(self.lamda)==1 : # no regularization or signle lambda
+
             X_hat = NDDataset(np.zeros((self.f.z.size, *self.X.shape)).squeeze(axis=0),
                               title=self.X.title, units=self.X.units)
             X_hat.set_coordset(y=self.X.y, x=self.X.x)
