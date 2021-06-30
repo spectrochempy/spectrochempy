@@ -222,7 +222,8 @@ class IRIS:
                 # The following line is to avoid ValueError: 'matrix G is not
                 # positive definite'
                 # SEE: https://github.com/facebookresearch/GradientEpisodicMemory/issues/2#issuecomment-431826393
-                # G += G * 0.001
+
+                G += G * 0.001
 
                 for j, freq in enumerate(coord_x.data):
                     fi[:, j] = quadprog.solve_qp(G, a[j].squeeze(), C, b)[0]
@@ -374,10 +375,9 @@ class IRIS:
         else:
             X_hat = NDDataset(np.zeros((self.f.z.size, *self.X.shape)),
                               title=self.X.title, units=self.X.units)
-            X_hat.set_coordset(z=self.f.z, y=self.X.y, x=self.X.x)   # TODO: take into account the fact that coordinates
-        # may have other names
+            X_hat.set_coordset(z=self.f.z, y=self.X.y, x=self.X.x)
             for i in range(X_hat.z.size):
-                X_hat[i].data = np.dot(self.K.data, self.f[i].data.squeeze())
+                X_hat.data[i] = np.expand_dims(np.dot(self.K.data, self.f[i].data.squeeze()), 0)
 
         X_hat.name = '2D-IRIS Reconstructed datasets'
         return X_hat
