@@ -2,9 +2,7 @@
 
 # ======================================================================================================================
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
-#  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
-#  =
 # ======================================================================================================================
 """
 This module implements the IRIS class.
@@ -219,6 +217,7 @@ class IRIS:
                 # The following line is to avoid ValueError: 'matrix G is not
                 # positive definite'
                 # SEE: https://github.com/facebookresearch/GradientEpisodicMemory/issues/2#issuecomment-431826393
+
                 G += G * 0.001
 
                 for j, freq in enumerate(coord_x.data):
@@ -363,11 +362,11 @@ class IRIS:
         X_hat : |NDDataset|
             The reconstructed dataset.
         """
-        # TODO: adapt for non-regularized / 1D IRIS
 
-        if len(self.lamda) == 1 and self.lamda == [0]:
-            X_hat = NDDataset(np.zeros((self.f.z.size, *self.X.shape)).squeeze(axis=0), title=self.X.title,
-                              units=self.X.units)
+        if len(self.lamda)==1 : # no regularization or signle lambda
+
+            X_hat = NDDataset(np.zeros((self.f.z.size, *self.X.shape)).squeeze(axis=0),
+                              title=self.X.title, units=self.X.units)
             X_hat.set_coordset(y=self.X.y, x=self.X.x)
             X_hat.data = np.dot(self.K.data, self.f.data.squeeze())
         else:
@@ -412,7 +411,6 @@ class IRIS:
     def plotmerit(self, index=None, **kwargs):
         """
         Plots the input dataset, reconstructed dataset and residuals.
-
         Parameters
         ----------
         index : optional, int, list or tuple of int.
@@ -426,16 +424,20 @@ class IRIS:
 
         colX, colXhat, colRes = kwargs.get('colors', ['blue', 'green', 'red'])
 
-        X_hats = self.reconstruct()
+        X_hat = self.reconstruct()
         axeslist = []
         if index is None:
             index = range(len(self.lamda))
         if type(index) is int:
             index = [index]
         for i in index:
-            res = self.X - X_hats[i].squeeze()
+            if X_hat.ndim == 3: #if several lambda
+                X_hat_ = X_hat[i].squeeze()
+            else:
+                X_hat_ = X_hat  # if single lambda or no regularization
+            res = self.X - X_hat_
             ax = self.X.plot()
-            ax.plot(self.X.x.data, X_hats[i].squeeze().T.data, color=colXhat)
+            ax.plot(self.X.x.data, X_hat_.squeeze().T.data, color=colXhat)
             ax.plot(self.X.x.data, res.T.data, color=colRes)
             ax.set_title(r'2D IRIS merit plot, $\lambda$ = ' + str(self.lamda[i]))
             axeslist.append(ax)
