@@ -367,8 +367,7 @@ class IRIS:
             The reconstructed dataset.
         """
 
-        if len(self.lamda)==1 : # no regularization or signle lambda
-
+        if len(self.lamda) == 1:  # no regularization or signle lambda
             X_hat = NDDataset(np.zeros((self.f.z.size, *self.X.shape)).squeeze(axis=0),
                               title=self.X.title, units=self.X.units)
             X_hat.set_coordset(y=self.X.y, x=self.X.x)
@@ -376,10 +375,9 @@ class IRIS:
         else:
             X_hat = NDDataset(np.zeros((self.f.z.size, *self.X.shape)),
                               title=self.X.title, units=self.X.units)
-            X_hat.set_coordset(z=self.f.z, y=self.X.y, x=self.X.x)   # TODO: take into account the fact that coordinates
-        # may have other names
+            X_hat.set_coordset(z=self.f.z, y=self.X.y, x=self.X.x)
             for i in range(X_hat.z.size):
-                X_hat[i].data = np.dot(self.K.data, self.f[i].data.squeeze())
+                X_hat.data[i] = np.expand_dims(np.dot(self.K.data, self.f[i].data.squeeze()), 0)
 
         X_hat.name = '2D-IRIS Reconstructed datasets'
         return X_hat
@@ -435,8 +433,9 @@ class IRIS:
             index = range(len(self.lamda))
         if type(index) is int:
             index = [index]
+
         for i in index:
-            if X_hat.ndim == 3: #if several lambda
+            if X_hat.ndim == 3:  # if several lambda
                 X_hat_ = X_hat[i].squeeze()
             else:
                 X_hat_ = X_hat  # if single lambda or no regularization
