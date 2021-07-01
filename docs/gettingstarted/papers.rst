@@ -1,7 +1,7 @@
 .. _papers:
 
 ****************************************
-Research papers using |scpy|
+Papers citing |scpy|
 ****************************************
 
 **Table of contents**
