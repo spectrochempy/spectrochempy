@@ -11,8 +11,7 @@ import importlib
 import datetime
 import numpy as np
 import warnings
-from scipy.optimize import minimize, differential_evolution
-
+from scipy.optimize import minimize, differential_evolution, least_squares
 
 __all__ = ['coverages_vs_time', 'concentrations_vs_time', 'modify_rate', 'modify_surface_kinetics',
            'fit_to_concentrations', 'PFR']
@@ -25,6 +24,7 @@ if HAS_CANTERA:
 from spectrochempy.core.dataset.nddataset import NDDataset, Coord
 from spectrochempy.utils.exceptions import SpectroChemPyException
 from collections.abc import Iterable
+
 
 def coverages_vs_time(surface, t, returnNDDataset=False):
     ''' Returns the surface coverages at time(s) t
@@ -213,8 +213,8 @@ def fit_to_concentrations(C, externalConc, external_to_C_idx, reactive_phase, pa
     bounds = kwargs.get("bounds", None)
     tol = kwargs.get("tol", None)
     options = kwargs.get("options", {
-            'disp': True
-            })
+        'disp': True
+    })
 
     guess_param = np.zeros((len(param_to_optimize)))
     for i, param in enumerate(param_to_optimize):
@@ -223,7 +223,8 @@ def fit_to_concentrations(C, externalConc, external_to_C_idx, reactive_phase, pa
     if options['disp']:
         print('Optimization of the parameters.')
         print(f'         Initial parameters: {guess_param}')
-        print(f'         Initial function value: {objective(guess_param, param_to_optimize, C, externalConc, external_to_C_idx, reactive_phase)}')
+        print(
+            f'         Initial function value: {objective(guess_param, param_to_optimize, C, externalConc, external_to_C_idx, reactive_phase)}')
     tic = datetime.datetime.now(datetime.timezone.utc)
     res = minimize(objective, guess_param, args=(param_to_optimize, C, externalConc, external_to_C_idx, reactive_phase),
                    method=method, bounds=bounds, tol=tol, options=options)
@@ -235,15 +236,13 @@ def fit_to_concentrations(C, externalConc, external_to_C_idx, reactive_phase, pa
     Ckin = concentrations_vs_time(reactive_phase, C.y, returnNDDataset=True)
     newargs = (reactive_phase, param_to_optimize, final_param)
     return {
-            'concentrations': Ckin,
-            'results': res,
-            'new_args': newargs
-            }
-
+        'concentrations': Ckin,
+        'results': res,
+        'new_args': newargs
+    }
 
 
 class PFR():
-
     '''PFR reactor as a CSTR in series'''
 
     def __init__(self, cti_file, init_X, inlet_X, inlet_F, volume, n_cstr=0, P=ct.one_atm, T=298,
@@ -278,18 +277,18 @@ class PFR():
         self._K = K
         self._kin_param_to_set = kin_param_to_set
 
-        self.cstr = []      #  list of cstrs
-        self.surface = []   # reactor surfaces of cstr's
-        self._mfc = [] # mass flow
+        self.cstr = []  # list of cstrs
+        self.surface = []  # reactor surfaces of cstr's
+        self._mfc = []  # mass flow
         self.inlet = []  # reservoirs
         self.event = None
-        self._pc = [] # pressure controllers
+        self._pc = []  # pressure controllers
 
         if isinstance(self._volume, (float, int)):
-            self._volume = self._volume * np.ones((n_cstr))/n_cstr
+            self._volume = self._volume * np.ones((n_cstr)) / n_cstr
 
         if add_surface and isinstance(area, (float, int)):
-            self._area = self.area * np.ones((n_cstr))/n_cstr
+            self._area = self.area * np.ones((n_cstr)) / n_cstr
         self.n_cstr = len(volume)
 
         # first cstr
@@ -343,7 +342,7 @@ class PFR():
 
         # create other cstrs and link them with the previous one through a pressure controller
 
-        for i in range(1,len(volume)):
+        for i in range(1, len(volume)):
             initial_gas = ct.Solution(self._cti, 'gas')
             initial_gas.TPX = self.T, self.P, init_X
             self.cstr.append(ct.IdealGasReactor(initial_gas, name="R_0", energy='off'))
@@ -356,14 +355,14 @@ class PFR():
                     modify_surface_kinetics(surface, kin_param_to_set)
                 self.surface.append(ct.ReactorSurface(kin=surface, r=self.cstr[i], A=area[i]))
 
-            self._pc.append(ct.PressureController(self.cstr[i-1], self.cstr[i],
+            self._pc.append(ct.PressureController(self.cstr[i - 1], self.cstr[i],
                                                   master=self._mfc[-1], K=K))
 
         # create the event
 
         event_gas = ct.Solution(self._cti, 'gas')
         event_gas.TPX = self.T, self.P, init_X
-        self.event = ct.Reservoir(contents=event_gas, name=f'event')
+        self.event = ct.Reservoir(contents=event_gas, name='event')
         self._pc.append(ct.PressureController(self.cstr[-1], self.event,
                                               master=self._mfc[-1], K=K))
 
@@ -371,14 +370,13 @@ class PFR():
         self.coverages = np.ones((self.n_cstr, self.n_surface_species))
 
         for i, (r, s) in enumerate(zip(self.cstr, self.surface)):
-            self.X[i,:] = r.thermo.X
+            self.X[i, :] = r.thermo.X
             self.coverages[i, :] = s.coverages
 
         self.net = ct.ReactorNet(self.cstr)
-            # properties
+        # properties
 
     @property
-
     def time(self):
         return self.net.time
 
@@ -396,8 +394,8 @@ class PFR():
         if isinstance(time, Coord):
             time = time.data
 
-        X = np.zeros((len(time), self.n_cstr,  self.n_gas_species))
-        coverages = np.zeros((len(time), self.n_cstr,  self.n_surface_species))
+        X = np.zeros((len(time), self.n_cstr, self.n_gas_species))
+        coverages = np.zeros((len(time), self.n_cstr, self.n_surface_species))
 
         for i, t in enumerate(time):
             self.advance(t)
@@ -423,8 +421,6 @@ class PFR():
 
         return {'X': X,
                 'coverages': coverages}
-
-
 
     def fit_to_gas_concentrations(self, exp_conc, exp_idx, fit_to_exp_idx,
                                   param_to_optimize, other_param=None, **kwargs):
@@ -484,14 +480,14 @@ class PFR():
             newpfr = PFR(self._cti, self._init_X, self._inlet_X, self._inlet_F, self._volume,
                          P=self.P, T=self.T, area=self._area, kin_param_to_set=all_param)
 
-
             try:
-                fitted_concentrations = newpfr.composition_vs_time(exp_conc.z, returnNDDataset=False)['X'][:, -1,
-                                    :].squeeze()
+                fitted_concentrations = newpfr.composition_vs_time(exp_conc.z,
+                                                                   returnNDDataset=False)['X'][:, -1, :].squeeze()
             except ct.CanteraError:
                 if optimizer == 'differential_evolution':
                     integrationError = True
-                    warnings.warn("model could not be integrated with these parameters. Objective function set to Inf", UserWarning)
+                    warnings.warn("model could not be integrated with these parameters. Objective function set to Inf",
+                                  UserWarning)
                 else:
                     raise
 
@@ -535,7 +531,7 @@ class PFR():
             for i, param in enumerate(param_to_optimize):
                 initial_guess[i] = param_to_optimize[param]
 
-        else: # optimizer is 'differential_evolution'
+        else:  # optimizer is 'differential_evolution'
             initial_guess = []
             for param in param_to_optimize:
                 initial_guess.append(param_to_optimize[param])
@@ -545,9 +541,8 @@ class PFR():
 
         if optimizer in ['minimize', 'least_squares']:
             init_function_value = objective(initial_guess, param_to_optimize,
-                                        exp_conc, exp_idx, fit_to_exp_idx,
-                                        optimizer)
-
+                                            exp_conc, exp_idx, fit_to_exp_idx,
+                                            optimizer)
 
         if options['disp']:
             print('Optimization of the parameters.')
@@ -635,17 +630,19 @@ class PFR():
             else:
                 constraints = ()
 
-            res = differential_evolution(objective, bounds, args=(param_to_optimize, exp_conc, exp_idx, fit_to_exp_idx, optimizer),
-                                         strategy=strategy, maxiter=maxiter, popsize=popsize, tol=tol, mutation=mutation,
+            res = differential_evolution(objective, bounds,
+                                         args=(param_to_optimize, exp_conc, exp_idx, fit_to_exp_idx, optimizer),
+                                         strategy=strategy, maxiter=maxiter, popsize=popsize, tol=tol,
+                                         mutation=mutation,
                                          recombination=recombination, seed=seed, callback=callback, polish=polish,
-                                         init=init, atol=atol, updating=updating, workers=workers, constraints=constraints)
+                                         init=init, atol=atol, updating=updating, workers=workers,
+                                         constraints=constraints)
 
             # note: to make it parallel (WIP):
             #  - move objective outside/at thye same level as the class PFR, replace self by pfr : def _objective(guess, pfr, param_to_optimize, exp_conc, exp_idx, fit_to_exp_idx):
             #  - pass self in args of _objectives: differential_evolution(_objective, bounds, args=(self, param_to_optimize, exp_conc, exp_idx, fit_to_exp_idx),
             #  for the moment can't be parallelized because pfr uses lambda functions (for the pulse..) that can't be
             # pickled.
-
 
         optim_param = res.x
 
@@ -688,4 +685,3 @@ class PFR():
                 'results': res,
                 'trials': trials,
                 'newargs': newargs}
-
