@@ -1,5 +1,25 @@
 # What\'s new
 
+## Version 0.2.16
+
+**NEW FEATURES**
+
+* Added list of papers citing spectrochempy
+
+* Added IRIS for 1D datasets
+
+* Added differential evolution algorithm in cantera utilities
+  
+* Added PFR object in cantera utilities
+
+**BUGS FIXED**
+
+* IRIS example after modification of readers 
+
+* MCR-ALS returns the 'soft' concentration matrix
+
+* document building configuration after update of an external package
+
 ## Version 0.2.15
 
 **NEW FEATURES**
