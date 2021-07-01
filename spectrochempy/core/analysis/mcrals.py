@@ -300,7 +300,6 @@ class MCRALS(HasTraits):
             # recompute C for consistency(soft modeling)
             C.data = np.linalg.lstsq(St.data.T, X.data.T, rcond=None)[0].T
 
-
             # rescale spectra & concentrations
             if normSpec == 'max':
                 alpha = np.max(St.data, axis=1).reshape(nspecies, 1)
@@ -323,7 +322,6 @@ class MCRALS(HasTraits):
             logentry = '{:3d}      {:10f}      {:10f}      {:10f}'.format(niter, stdev_PCA, stdev2, change)
             logs += logentry + '\n'
             info_(logentry)
-
 
             if change > 0:
                 ndiv += 1
@@ -414,6 +412,7 @@ class MCRALS(HasTraits):
         The hard concentyration profiles
         """
         return self._Chard
+
     @property
     def params(self):
         """
