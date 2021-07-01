@@ -64,13 +64,13 @@ ds = read('irdata/nh4y-activation.spg')
 # ### Display dataset information
 
 # %% [markdown]
-# Short information
+# Short information:
 
 # %%
-ds
+print(ds)
 
 # %% [markdown]
-# Detailled information:
+# Detailed information on the main metatdata:
 
 # %%
 ds
