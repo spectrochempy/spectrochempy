@@ -14,7 +14,21 @@ The Colab Notebooks are very similar to Jupyter Notebook (from which they derive
 To start with Colab, go to the `Colab website <https://colab.research.google.com/notebooks/intro.ipynb#recent=true>`_
 and create a new notebook.
 
-In the first cell, you must enter the following block of instructions to load SpectroChemPy and the tests/examples files in Colab.
+.. warning::
+
+        Currently, the version of `numpy` implemented in Colab leads to a bug with spectrochempy. To use spectrochempy
+        you must first update numpy in Colab by executing the following in the first cell:
+
+        .. sourcecode:: shell
+
+            !pip install -U numpy
+
+        Do not pay attention to the messages about the incompatibility of some other packages with numpy and click
+        `restart runtime`
+
+        You can then and continue in the next cell....
+
+In the cell, you enter and execute the following block of instructions to load SpectroChemPy and the tests/examples files in Colab.
 
 .. sourcecode:: ipython3
 
