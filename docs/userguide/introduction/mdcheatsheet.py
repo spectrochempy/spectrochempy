@@ -230,5 +230,5 @@
 #  __[link text](https://github.com/spectrochempy/spectrochempy)__
 # ```
 # Surround the link with two underscores (_) on each side
-#__[link text](https://github.com/spectrochempy/spectrochempy)__
+# __[link text](https://github.com/spectrochempy/spectrochempy)__
 # %%
