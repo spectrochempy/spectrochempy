@@ -133,11 +133,11 @@ mcr = scp.MCRALS(X, St0, verbose='True')
 #
 # The default is to stop when this %change between two iteration is negative (so that the solution is improving),
 # but with an absolute value lower than 0.1% (so that the improvement is considered negligible). This parameter -
-# as well as several other parameters affecting the ALS optimization can be changed by the setting the 'tol' value
-# in a python dictionary using the key 'tol'. For instance:
+# as well as several other parameters affecting the ALS optimization can be changed by the setting the 'tol' value.
+# For instance:
 
 # %%
-mcr = scp.MCRALS(X, St0, param={'tol': 0.01}, verbose='True')
+mcr = scp.MCRALS(X, St0, tol=0.01, verbose='True')
 
 # %% [markdown]
 # As could be expected more iterations have been necessary to reach this stricter convergence criterion.  The other
@@ -147,13 +147,13 @@ mcr = scp.MCRALS(X, St0, param={'tol': 0.01}, verbose='True')
 # of iterations is reached (maxit, 50 by default) or when no improvement is during 5 successive iterations (maxdiv).
 
 # %%
-mcr = scp.MCRALS(X, St0, param={'tol': 0.001}, verbose='True')
+mcr = scp.MCRALS(X, St0, tol=0.001, verbose='True')
 
 # %% [markdown]
 # Now if 'maxit' is set to 10:
 
 # %%
-mcr = scp.MCRALS(X, St0, param={'tol': 0.001, 'maxit': 10}, verbose='True')
+mcr = scp.MCRALS(X, St0, tol=0.001, maxit=10, verbose='True')
 
 # %% [markdown]
 # #### Solutions
@@ -192,9 +192,9 @@ _ = mcr1.St.plot()
 # both normalizations:
 
 # %%
-mcr2 = scp.MCRALS(X, St0, param={'normSpec': 'euclid'})
+mcr2 = scp.MCRALS(X, St0, normSpec='euclid')
 
-mcr3 = scp.MCRALS(X, St0, param={'normSpec': 'max'})
+mcr3 = scp.MCRALS(X, St0, normSpec='max')
 
 _ = mcr1.St.plot()
 _ = mcr2.St.plot()
@@ -246,10 +246,10 @@ _ = LT.plot()
 # however, often lead to too many PC's for the chemist because they recover all contributions to the data variance:
 # chemical AND non-chemical, thus including non-gaussian noise, baseline changes, background absorption...
 #
-# 32 in the present case:
+# 29 in the present case:
 
 # %%
-S3, LT3 = pca.reduce(n_pc='auto')
+S3, LT3 = scp.PCA(X).reduce(n_pc='auto')
 S3.shape
 
 # %% [markdown]
@@ -267,7 +267,7 @@ _ = C0.T.plot()
 # The MCR ALS can then be launched using this new guess:
 
 # %%
-mcr4 = scp.MCRALS(X, guess=C0, param={'maxit': 100, 'normSpec': 'euclid'}, verbose=True)
+mcr4 = scp.MCRALS(X, guess=C0, maxit=100, normSpec='euclid', verbose=True)
 
 # %%
 _ = mcr4.C.T.plot()
@@ -294,7 +294,7 @@ surf = X2.plot_surface(colorbar=True, linewidth=.2, ccount=100, figsize=(10, 5))
 _ = X2.plot(method='map')
 
 # %%
-mcr5 = scp.MCRALS(X2, guess=St0, param={'unimodConc': [0] * 4}, verbose=True)
+mcr5 = scp.MCRALS(X2, guess=St0, unimodConc=None, verbose=True)
 
 # %%
 _ = mcr5.C.T.plot()

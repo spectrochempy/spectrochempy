@@ -88,17 +88,13 @@ You might **NOT** want to use |scpy| if:
   your own data. In particular, the use of Jupyter notebooks mixing texts, code blocks and figures, so that basic
   procedures (data import, basic processing and analysis, etc...) do not require much programming knowledge.
 
-- you are working on spectroscopic data that are difficult to process, including |scpy| (currently mainly
+- you are working on spectroscopic data that are difficult to process with |scpy| (currently mainly
   focused on optical spectroscopy and NMR) because some components or tools (e.g. importing your raw data, ...) are
   missing: please suggest new features that should be added (:ref:`contributing.bugs_report`). We will take into
   consideration all suggestions to make |scpy| more widely and easily usable.
 
 - you are working on very sensitive data (health, chemical safety, plant production, ...) and cannot take the risk to
   use a software under development and subject to bugs and changes before "maturity". We do not dispute this!
-
-- you are fully satisfied with your current tools. "The heart has its reasons, of which the reason knows nothing".
-  We don't dispute that either, but we are open to your opinion and suggestions (bug reports and requests for
-  improvements/functionality)!
 
 - you are fully satisfied with your current tools. "The heart has its reasons, of which the reason knows nothing". We
   don't dispute that either, but we are open to your opinion and suggestions (:ref:`contributing.bugs_report`)!
