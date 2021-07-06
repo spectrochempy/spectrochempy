@@ -150,17 +150,11 @@ mcr = scp.MCRALS(X, St0, tol=0.01, verbose='True')
 mcr = scp.MCRALS(X, St0, tol=0.001, verbose='True')
 
 # %% [markdown]
-# Now if 'maxit' is set to 10:
-
-# %%
-mcr = scp.MCRALS(X, St0, tol=0.001, maxit=10, verbose='True')
-
-# %% [markdown]
 # #### Solutions
 #
 # The solutions of the MCR ALS optimization are the optimized concentration and pure spectra matrices. They can be
-# obtained by the MCRALS.transform() method. let's remake an MCRALS object with the default settings,
-# ('tol' = 0.1 and verbose = False), and get C and St.
+# obtained by the MCRALS.transform() method. let's reset a MCRALS object with the default settings,
+# ('tol' = 0.1 and verbose = False), and get the solution datasets C and St.
 
 # %%
 mcr1 = scp.MCRALS(X, St0)
@@ -187,7 +181,7 @@ _ = mcr1.St.plot()
 # the same order of magnitude.
 #
 # It is possible to normalize the intensity of the spectral profiles by setting the 'normSpec' parameter to True.
-# With this option, the specra are normalized such that their euclidian norm is 1. The other normalization option is
+# With this option, the spectra are normalized such that their euclidian norm is 1. The other normalization option is
 # normspec = 'max', whereby the maximum intyensity of tyhe spectra is 1. Let's look at the effect of
 # both normalizations:
 
@@ -249,6 +243,7 @@ _ = LT.plot()
 # 29 in the present case:
 
 # %%
+pca = scp.PCA(X)
 S3, LT3 = scp.PCA(X).reduce(n_pc='auto')
 S3.shape
 
