@@ -20,6 +20,27 @@
 # %% [markdown]
 # Spectrochempy can do calculations with units - it uses [pint](https://pint.readthedocs.io) to define and perform
 # operation on data with units.
+#
+# The objets **ur** and **Quantity**  allows the manipulation of data with units, thanks to pint. (see [Units and
+# Quantities](../units/index.ipynb))
+#
+# * **ur**: the unit registry
+# * **Quantity**: a scalar or an array with some units
+
+# %% [markdown]
+# ## Units
+# %%
+from spectrochempy import ur   # to simplify further writting
+ur.cm / ur.s
+
+# %%
+x = scp.Quantity(10., ur.cm / ur.s)
+x * 2.
+
+# %%
+import numpy as np
+xa = scp.Quantity(np.array((1, 2)), 'km')
+xa[1] * 2.5
 
 # %%
 from spectrochempy import *  # noqa: F403
