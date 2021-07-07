@@ -16,7 +16,7 @@
 
 
 import spectrochempy as scp
-from spectrochempy import ur, Quantity   # to simplify further writting
+from spectrochempy import ur, Quantity # to simplify further writting
 import numpy as np
 
 # %% [markdown]
@@ -40,12 +40,12 @@ import numpy as np
 ur.cm / ur.s
 
 # %%
-x = scp.Quantity(10., ur.cm / ur.s)
+x = Quantity(10., ur.cm / ur.s)
 x * 2.
 
 # %%
 
-xa = scp.Quantity(np.array((1, 2)), 'km')
+xa = Quantity(np.array((1, 2)), 'km')
 xa[1] * 2.5
 
 
@@ -122,14 +122,14 @@ np.sqrt(x)
 x = 10 * ur.meters
 try:
     np.cos(x)
-except DimensionalityError as e:
-    error_(e)
+except scp.DimensionalityError as e:
+    scp.error_(e)
 
 # %% [markdown]
 # Units can be set for NDDataset data and/or Coordinates
 
 # %%
-ds = NDDataset([1., 2., 3.], units='g/cm^3', title='concentration')
+ds = scp.NDDataset([1., 2., 3.], units='g/cm^3', title='concentration')
 ds
 
 # %%
