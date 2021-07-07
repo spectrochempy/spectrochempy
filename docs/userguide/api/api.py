@@ -31,6 +31,10 @@
 # ---
 
 # %% [markdown]
+# ## API Loading
+import spectrochempy as scp
+
+# %% [markdown]
 # ## API Configuration
 #
 # Many options of the API can be set up
@@ -67,7 +71,7 @@ scp.debug_('this is a debug message!')
 
 
 # %% [markdown]
-# Many other configuration items will be further described when necessary in the other chapters.
+# Other configuration items will be further described when necessary in the other chapters.
 
 # %% [markdown]
 # ## Errors
