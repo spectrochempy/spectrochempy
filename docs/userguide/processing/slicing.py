@@ -24,7 +24,7 @@ import numpy as np
 import spectrochempy as scp
 
 # %% [markdown]
-# # 1.1 What is the slicing ?
+# ## What is the slicing ?
 #
 # The slicing of a list or an array means taking elements from a given index (or set of indexes) to another index (or set of indexes). Slicing is specified using the colon operator `:` with a `from` and `to` index before and after the first column, and a `step` after the second column. Hence a slice of the object `X` will be set as:
 #
@@ -52,7 +52,7 @@ print(X[2:5,:].shape)      # slices along the 1st dimension, X[2:5,] is equivale
 print(X[2:5, ::2].shape)   # same slice along 1st dimension and takes one 1 column out of two along the second
 
 # %% [markdown]
-# ## 1.2. Slicing of NDDataset
+# ## Slicing of NDDatasets
 #
 # Let's import a group of IR spectra, look at its content and plot it:
 
@@ -62,12 +62,10 @@ X.y = (X.y - X[0].y).to("minute")
 X
 
 # %%
-# the "magic" below enables to get a plot in the Notebook. Use qt instead of inline to have an interactive plot
-# %matplotlib inline
 subplot = X.plot()        #  assignment avoids the display of the object address (<matplotlib.axes._subplots.AxesSubplot at 0x294076b93c8> or similar)
 
 # %% [markdown]
-# ## 1.2.1 Slicing with indexes
+# ### Slicing with indexes
 #
 # The classical slicing, using integers, can be used. For instance, along the 1st dimension:
 
@@ -91,7 +89,7 @@ print(X[0:3,200:1000:2])    # 3 first spectra, one wavenumbers out of 2, from in
 X[:,200:1000:2].x   # as the Coord can be sliced, the same is obtained with: X.x[200:1000:2]
 
 # %% [markdown]
-# ## 1.2.2 Slicing with coordinates
+# ### Slicing with coordinates
 #
 # Now the spectroscopist is generally interested in a particular region of the spectrum, for instance, 2300-1900 cm$^{-1}$. Can you easily guess the indexes that one should use to spectrum this region ? probably not without a calculator...
 #

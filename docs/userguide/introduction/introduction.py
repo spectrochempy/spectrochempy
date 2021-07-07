@@ -67,8 +67,8 @@
 #
 # To load the API, you must import it using one of the following syntax.
 #
-# In the first syntax we load the library into a namespace called `scp` (you can choose whatever you want - except
-# something already in use):
+# In the first syntax we load the library into a namespace called `scp` (we recommend this name, but you can choose whatever
+# you want - except something already in use):
 
 # %%
 import spectrochempy as scp  # SYNTAX 1
@@ -79,108 +79,23 @@ nd = scp.NDDataset()
 # or in the second syntax, with a wild `*` import.
 
 # %%
-from spectrochempy import *
+from spectrochempy import *  # SYNTAX 2
 nd = NDDataset()
 
 # %% [markdown]
 # With the second syntax, as often in python, the access to objects/functions can be greatly simplified. For example,
-# we can use "NDDataset" without a prefix instead of `scp.NDDataset` which is the first syntax) but there is always a
+# we can use directly `NDDataset` without a prefix instead of `scp.NDDataset` which is the first syntax) but there is always a
 # risk of overwriting some variables or functions already present in the namespace.
 # Therefore, the first syntax is generally highly recommended.
 #
-# Alternatively, you can also load only the onbjects and function required by your application:
+# Alternatively, you can also load only the objects and function required by your application:
 #
 
 # %%
-from spectrochempy import NDDataset
+from spectrochempy import NDDataset   # SYNTAX 3
 
 nd = NDDataset()
 
-# %% [markdown]
-# If something goes wrong with during a cell execution,  a ``traceback`` is displayed.
-#
-# For instance, the object or method ``toto`` does not exist in the API, so an error (**ImportError**) is generated
-# when trying to import this from the API.
-#
-# Here we catch the error with a conventional `try-except` structure
-
-# %%
-try:
-    from spectrochempy import toto
-except ImportError as e:
-    scp.error_("OOPS, THAT'S AN IMPORT ERROR! : %s" % e)
-
-# %% [markdown]
-# The error will stop the execution if not catched.
-#
-# This is a basic behavior of python : on way to avoid. stoppping the execution without displaying a message is :
-
-# %%
-try:
-    from spectrochempy import toto  # noqa: F811, F401
-except Exception:
-    pass
-
-# %% [markdown]
-# ## API Configuration
-#
-# Many options of the API can be set up
-
-# %%
-scp.set_loglevel(scp.INFO)
-
-# %% [markdown]
-# In the above cell, we have set the **log** level to display ``info`` messages, such as this one:
-
-# %%
-scp.info_('this is an info message!')
-scp.debug_('this is a debug message!')
-
-# %% [markdown]
-# Only the info message is displayed, as expected.
-#
-# If we change it to ``DEBUG``, we should get the two messages
-
-# %%
-scp.set_loglevel(scp.DEBUG)
-
-scp.info_('this is an info message!')
-scp.debug_('this is a debug message!')
-
-# %% [markdown]
-# Let's now come back to a standard level of message for the rest of the Tutorial.
-
-# %%
-scp.set_loglevel(scp.WARNING)
-
-scp.info_('this is an info message!')
-scp.debug_('this is a debug message!')
-
-# %% [markdown]
-# Many other configuration items will be further described when necessary in the other chapters.
-
-# %% [markdown]
-# ## Units
-
-# %% [markdown]
-# The objets **ur**, **Quantity**  allows the manipulation of data with units, thanks to pint. (see [Units and
-# Quantities](../units/index.ipynb))
-#
-# * **ur**: the unit registry
-# * **Quantity**: a scalar or an array with some units
-
-# %%
-from spectrochempy import ur   # to simplify further writting
-ur.cm / ur.s
-
-# %%
-x = scp.Quantity(10., ur.cm / ur.s)
-x * 2.
-
-# %%
-import numpy as np
-xa = scp.Quantity(np.array((1, 2)), 'km')
-xa[1] * 2.5
 
 # %% [markdown]
 # ## NDDataset, the main object
