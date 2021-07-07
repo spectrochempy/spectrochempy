@@ -14,6 +14,11 @@
 #     name: python3
 # ---
 
+
+import spectrochempy as scp
+from spectrochempy import ur, Quantity   # to simplify further writting
+import numpy as np
+
 # %% [markdown]
 # # Units & Quantities
 
@@ -29,8 +34,9 @@
 
 # %% [markdown]
 # ## Units
+# The unit registry allows
 # %%
-from spectrochempy import ur   # to simplify further writting
+
 ur.cm / ur.s
 
 # %%
@@ -38,12 +44,10 @@ x = scp.Quantity(10., ur.cm / ur.s)
 x * 2.
 
 # %%
-import numpy as np
+
 xa = scp.Quantity(np.array((1, 2)), 'km')
 xa[1] * 2.5
 
-# %%
-from spectrochempy import *  # noqa: F403
 
 # %% [markdown]
 # ## Create quantities
