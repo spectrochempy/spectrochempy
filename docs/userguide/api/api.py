@@ -95,6 +95,8 @@ print(f'New loglevel: {scp.get_loglevel()}')
 # has been set, and no such a message is displayed when the `WARNING`level
 #
 # It is also possible to define these messages in scripts:
+# In the above cell, we have set the **log** level to display ``info`` messages, such as this one:
+
 # %%
 scp.info_('this is an info message!')
 scp.debug_('this is a debug message!')
@@ -102,7 +104,9 @@ scp.debug_('this is a debug message!')
 # %% [markdown]
 # Only the info message is displayed, as expected.
 #
-# If we change the loglevl to ``DEBUG``, we should get the two messages
+
+# If we change the loglevel to ``DEBUG``, we should get the two messages
+
 
 # %%
 scp.set_loglevel(scp.DEBUG)
@@ -124,7 +128,10 @@ scp.debug_('this is a debug message!')
 # Other configuration items will be further described when necessary in the other chapters.
 
 # %% [markdown]
+#
 # ### Error handling
+
+
 
 # If something goes wrong with during a cell execution,  a ``traceback`` is displayed.
 #
