@@ -9,7 +9,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.10.2
+#       jupytext_version: 1.6.0
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -219,7 +219,7 @@
 # ```
 # [Section title](#section_ID)
 # ```
-#[Section title](#section_ID)
+# [Section title](#section_ID)
 
 # %% [markdown]
 # ## External links
