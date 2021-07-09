@@ -26,11 +26,10 @@ import numpy as np
 # SpectroChemPy can do calculations with units - it uses [pint](https://pint.readthedocs.io) to define and perform
 # operation on data with units.
 #
-# The objets **ur** and **Quantity** allow the manipulation of data with units, thanks to pint. (see [Units and
-# Quantities](../units/index.ipynb))
+# The objets `ur` and `Quantity` allow the manipulation of data with units, thanks to pint.
 #
-# * **ur**: stands for **unit registry**, is used to handle many type of units and conversion between them
-# * **Quantity**: is a scalar or an array with some units
+# * `ur`: stands for **unit registry**, is used to handle many type of units and conversion between them
+# * `Quantity`: is a scalar or an array with some units
 
 # %% [markdown]
 # ## Units
@@ -67,9 +66,6 @@ Quantity(10.0, ur.cm / ur.km)
 
 # %%
 10.0 * ur.meter / ur.gram / ur.volt
-
-# %% [markdown]
-
 
 # %% [markdown]
 # ## Do arithmetics with units

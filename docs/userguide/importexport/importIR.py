@@ -45,7 +45,7 @@ import spectrochempy as scp
 # %% [markdown]
 # ## Supported file formats
 #
-# At the time of writing of this tutorial (Scpy v.0.1.18), spectrochempy has the following readers which are specific
+# At the time of writing of this tutorial (Scpy v.0.2), spectrochempy has the following readers which are specific
 # to IR data:
 #
 # - `read_omnic()` to open omnic (spa and spg) files
@@ -61,8 +61,8 @@ import spectrochempy as scp
 #
 # ## Import of OMNIC files
 #
-# [Thermo Scientific OMNIC](https://www.thermofisher.com/search/browse/category/us/fr/602580/FTIR%2C+NIR+%26amp%3B+Raman+Software+%26amp%3B+Libraries) # noqa: E501
-# software have two proprietary binary file formats:
+# Thermo Scientific [OMNIC](https://www.thermofisher.com/search/results?query=OMNIC) software have two proprietary binary file formats:
+#
 # - .spa files that handle single spectra
 # - .spg files which contain a group of spectra
 #
@@ -302,8 +302,8 @@ print(X)
 # %% [markdown] {"pycharm": {"name": "#%% md\n"}}
 # ## Import of Bruker OPUS files
 #
-# [Bruker OPUS](https://www.bruker.com/products/infrared-near-infrared-and-raman-spectroscopy/
-# opus-spectroscopy-software.html) files have also a proprietary file format. The Opus reader (`read_opus()`)
+# Bruker OPUS](https://www.bruker.com/en/products-and-solutions/infrared-and-raman/opus-spectroscopy-software.html)
+# files have also a proprietary file format. The Opus reader (`read_opus()`)
 # of spectrochempy is essentially a wrapper of the python module
 # [brukeropusreader](https://github.com/spectrochempy/brukeropusreader) developed by QED. It imports absorbance
 # spectra (the AB block), acquisition times and name of spectra.
