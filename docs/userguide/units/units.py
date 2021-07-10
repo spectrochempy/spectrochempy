@@ -27,25 +27,18 @@ import numpy as np
 # SpectroChemPy can do calculations with units - it uses [pint](https://pint.readthedocs.io) to define and perform
 # operation on data with units.
 #
-# The objets `ur` and `Quantity` allow the manipulation of data with units, thanks to pint.
+# Two objects, `ur` and `Quantity`, allow the manipulation of data with units:
 #
-# * `ur`: stands for **unit registry**, is used to handle many type of units and conversion between them
-# * `Quantity`: is a scalar or an array with some units
+# * `ur`: stands for **unit registry**, is used to define and handle many type of units as well as making conversion
+#  between them.
+# * `Quantity`: is a scalar or an array of scalars with some units.
 
 # %% [markdown]
 # ## Units
-# The unit registry allows defining and handling units. For instance, a unit of speed can be defined as:
+# For instance, a unit of speed can be defined as:
 # %%
 
 ur.cm / ur.s
-
-# %%
-x = Quantity(10., ur.cm / ur.s)
-x * 2.
-
-# %%
-xa = Quantity(np.array((1, 2)), 'km')
-xa[1] * 2.5
 
 
 # %% [markdown]
@@ -66,7 +59,7 @@ Quantity(10.0, ur.cm / ur.km)
 # or may be (?) simpler,
 
 # %%
-10.0 * ur.meter / ur.gram / ur.volt
+10.0 * ur.cm / ur.km
 
 # %% [markdown]
 # ## Do arithmetics with units
@@ -80,45 +73,64 @@ a / b
 # Such calculations can also be done using the following syntax, using a string expression
 
 # %%
-Quantity("900 km / (8 hours)")
+Quantity("900 km / (4.5 hours)")
 
 # %% [markdown]
-# ## Convert between units
+# ## Conversion between units
 
 # %%
 c = a / b
-c.to('cm/s')
+d = c.to('cm/s')
+
 
 # %% [markdown]
-# We can make the conversion *inplace* using *ito* instead of *to*
+# As shown below `to()` has generated a new variable and does not affect the initial one:
+
+# %%
+print(f"initial quantity: c = {c}")
+print(f"converted quantity: d = {d}")
+
+# %% [markdown]
+# We can make the conversion *inplace* using `ito()` instead of `to()`:
 
 # %%
 c.ito('m/s')
-c
+print(f"converted quantity: c = {c}")
 
 # %% [markdown]
 # ## Do math operations with consistent units
+# The units are transformed consistently in maths operations:
+
+# %%
+x = 10 * ur.meters
+np.sqrt(x)
 
 # %%
 x = 10 * ur.radians
 np.sin(x)
 
 # %% [markdown]
-# Consistency of the units are checked!
-
-# %%
-x = 10 * ur.meters
-np.sqrt(x)
-
-# %% [markdown]
-# but this is wrong...
+# Consistency of the units are checked and errors are generated if quantities have not appropriate units
+# with the math operation...
 
 # %%
 x = 10 * ur.meters
 try:
     np.cos(x)
-except scp.DimensionalityError as e:
-    scp.error_(e)
+except scp.DimensionalityError as e:   # catch the error
+    scp.error_(e)                      # generate the error message (see API configuration)
+
+# Consistency of the units are checked and errors are generated if quantities have not appropriate units
+# with the math operation...
+
+# %% [markdown]
+## Stripping the units
+#
+# If for any reason - including quick and dirty checks -  unitless numbers are needed, the `magnitude` field can be used:
+
+# %%
+x = 10 * ur.meters
+np.cos(x.magnitude)
 
 # %% [markdown]
 # Units can be set for NDDataset data and/or Coordinates

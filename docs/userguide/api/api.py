@@ -62,15 +62,15 @@ print(f' description : {scp.description}')
 #
 # | Loglevel / criticality | use |
 # | --- | --- |
-# | `DEBUG` / `10` | help diagnose problems on the running process or help developers |
+# | `DEBUG` / `10` | diagnose problems on the running process or help developers |
 # | `INFO`  / `20` | general information on the running process |
-# | `WARNING` / `30` (default) | a condition might cause a problem with respect to the expected behaviour |
-# | `ERROR`   / `40` | wrong argument/commands are used or bug |
-# | `CRITICAL` / `50` | the process could lead to a system crash |
+# | `WARNING` / `30` (default) | a condition might cause a problem WRT expected behaviour |
+# | `ERROR`   / `40` | wrong argument/commands or bug |
+# | `CRITICAL` / `50` | could lead to a system crash |
 #
 #  Not all these informations are always necessary and the level of information displayed by SpectroChemPy can be
 #  tuned using the command `scp.set_loglevel()` with the rule that only informations having a
-#  criticity larger than that passed to the `set_loglevel()` function will be shown.
+#  criticality larger than that passed to the `set_loglevel()` function will be shown.
 #
 #  For instance, the `DEBUG` level can be triggered by using one of the three equivalent instructions
 # ```python
@@ -85,7 +85,7 @@ print(f' description : {scp.description}')
 print(f'Default: {scp.get_loglevel()}')       # print the current loglevel
 
 # %% [markdown]
-# As expected, it yields `30` the numerical value corresponding to the `WARNING` level. Now, the next instruction
+# It yields `30` the numerical value corresponding to the `WARNING` level. Now, the next instruction
 # lowers the loglevel to `ÌNFO`:
 # %%
 scp.set_loglevel(scp.INFO)                    # set loglevel to 'INFO'
@@ -93,14 +93,9 @@ scp.set_loglevel(scp.INFO)                    # set loglevel to 'INFO'
 
 # %% [markdown]
 # We see that the API then delivers the INFO message: `changed default log_level to INFO`.
-#
-# The next instruction prints the current level. As expected, it yields `20` the numerical value corresponding to
-# the `INFO` level:.
-# %%
-print(f'New loglevel: {scp.get_loglevel()}')
 
 # %% [markdown]
-# And  finally, the next instructions reset the loglevel to `WARNING`, and print it.  and return to the default level.
+# And  finally, the next instructions reset the loglevel to `WARNING` level (default), and print it.
 # As seen below, no message `changed default log_level to ...` is delivered
 
 # %%
@@ -127,7 +122,7 @@ scp.info_('this is an info message!')
 scp.debug_('this is a debug message!')
 
 # %% [markdown]
-# Let's now come back to the standard level of message for the rest of the Tutorial -- in yhis case neither `DEBUG`
+# Finally, we come back to the standard level of message for the rest of the Tutorial -- in this case neither `DEBUG`
 # nor `INFO` messages will be printed.
 
 # %%
