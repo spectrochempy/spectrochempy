@@ -159,8 +159,7 @@ def _get_release_date():
 __release_date__ = _get_release_date()
 "Last release date of this package"
 
-__year__ = __release_date__.replace("'","-").split("-")[1]
-"Year of the last release of this package"
+
 
 def _check_for_updates(cls):
     # Get version
@@ -215,7 +214,7 @@ __contributor__ = "A. Ait Blal, W. Guérin"
 __license__ = "CeCILL-B license"
 "Licence of this package"
 
-__cite__ = f"Arnaud Travert & Christian Fernandez ({__year__}) SpectroChemPy (version {'.'.join(__version__.split('.')[0:2])}). " \
+__cite__ = f"Arnaud Travert & Christian Fernandez (2021) SpectroChemPy (version {'.'.join(__version__.split('.')[0:2])}). " \
            f"Zenodo. http://doi.org/10.5281/zenodo.3823841"
 "How to cite this package"
 
