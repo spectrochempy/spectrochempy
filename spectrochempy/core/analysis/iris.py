@@ -223,7 +223,6 @@ class IRIS:
                 # positive definite'
                 # SEE: https://github.com/facebookresearch/GradientEpisodicMemory/issues/2#issuecomment-431826393
 
-                G += G * 0.001
 
                 for j, freq in enumerate(coord_x.data):
                     fi[:, j] = quadprog.solve_qp(G, a[j].squeeze(), C, b)[0]
@@ -513,6 +512,7 @@ def nearestPD(A):
 
     A Python/Numpy port of John D'Errico's `nearestSPD` MATLAB code [1], which
     credits [2].
+    +
 
     [1] https://www.mathworks.com/matlabcentral/fileexchange/42885-nearestspd
 
@@ -522,14 +522,14 @@ def nearestPD(A):
     copyright: see https://gist.github.com/fasiha/fdb5cec2054e6f1c6ae35476045a0bbd
     """
 
-    B = (A + A.T) / 2
+    B = 0.5 * (A + A.T)
     _, s, V = np.linalg.svd(B)
 
     H = np.dot(V.T, np.dot(np.diag(s), V))
 
-    A2 = (B + H) / 2
+    A2 = 0.5 * (B + H)
 
-    A3 = (A2 + A2.T) / 2
+    A3 = 0.5 * (A2 + A2.T)  + np.eye(A2.shape[0]).__mul__(1e-3)
     if isPD(A3):
         return A3
 
