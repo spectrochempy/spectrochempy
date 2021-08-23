@@ -32,16 +32,17 @@
 # ---
 
 # %% [markdown]
-# ## API Configuration
-#
+# # API Configuration
+
+# %% [markdown]
 # Many options of the API can be set up.
-# Let's first import it in the u the usual way:
+# Let's first import it in the the usual way:
 
 # %%
 import spectrochempy as scp
 
 # %% [markdown]
-# ### General information
+# ## General information
 # General informations on the API can be obtained the following variables:
 
 # %%
@@ -56,7 +57,7 @@ print(f'contributors : {scp.contributors}')
 print(f' description : {scp.description}')
 
 # %% [markdown]
-# ### Loglevel
+# ## Loglevel
 # During the execution, the API can display, besides the expected output, various messages categorized according
 # to their criticality:
 #
