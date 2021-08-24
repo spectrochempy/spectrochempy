@@ -8,7 +8,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.10.2
+#       jupytext_version: 1.6.0
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -87,8 +87,8 @@ print(X)
 # </div>
 
 # %%
-scp.read_omnic('irdata/subdir')
-
+X = scp.read_omnic('irdata/subdir')
+print(X)
 # %% [markdown]
 # See below for more information
 #
@@ -111,7 +111,7 @@ scp.read_omnic('irdata/subdir')
 #
 # If successful, the output of the above cell should read something like
 #
-#     Out[2] NDDataset: [float64] a.u. (shape: (y:2, x:5549))
+#     Out[2] NDDataset: [float64] a.u. (shape: (y:4, x:5549))
 
 # %% [markdown]
 # ## Import with explicit directory or file pathnames

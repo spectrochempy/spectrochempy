@@ -8,7 +8,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.10.2
+#       jupytext_version: 1.6.0
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -32,11 +32,21 @@
 
 # %% [markdown]
 # # Plotting
-
+#
+# This section shows the main the plotting capabilities of SpectroChemPy. Most of them are based on [Matplotlib](
+# https://matplotlib.org), one of the most used plotting library for Python, and its
+# [pyplot](https://matplotlib.org/stable/tutorials/introductory/pyplot.html) interface. While not mandatory to follow
+# this tutorial, some familiarity with this library can help and we recommand a brief look at some
+# [matplotlib tutorials](https://matplotlib.org/stable/tutorials/index.html) as well.
+#
+# Note that in the near future, SpectroChemPy should also offer the possibillity to use [Plotly](https://plotly.com/)
+# for a better interactivity inside a notebook.
+#
+# Finally, some of the the commands and objects used here are described in-depth in the sections related to
+# [import](../importexport/import.html) ans [slicing](../processing/slicing.html) of NDDatasets and the *
+# [NDDatasets](../dataset/dataset.html) themselves.
 # %% [markdown]
 # ## Load the API
-
-# %% [markdown]
 # First, before anything else, we import the spectrochempy API:
 
 # %%
@@ -44,11 +54,8 @@ from spectrochempy import *
 
 # %% [markdown]
 # ## Loading the data
-
-# %% [markdown]
-# For sake of demonstration of the plotting capabilities of SpectroChemPy (based on [Matplotlib](
-# https://matplotlib.org)), let's first import a NDDataset from a file and make some (optional) preparation of the
-# data to display.
+# For sake of demonstration we import a NDDataset consisting in infrared spectra from an omnic .spg file
+# and make some (optional) preparation of the data to display (see also [Import IR Data](../importexport/importIR.html)).
 
 # %%
 dataset = NDDataset.read('irdata/nh4y-activation.spg')
@@ -57,21 +64,22 @@ dataset = NDDataset.read('irdata/nh4y-activation.spg')
 # ## Preparing the data
 
 # %% [markdown]
-# We keep only the region that we want to display
+#
+
 
 # %%
-dataset = dataset[:, 4000.:650.]
+dataset = dataset[:, 4000.:650.]   # We keep only the region that we want to display
 
 # %% [markdown]
-# We change the y coordinated so that times start at 0 and put it in minutes
+# We change the y coordinated so that times start at 0, put it in minutes and change its title/
 
 # %%
 dataset.y -= dataset.y[0]
 dataset.y.ito("minutes")
-dataset.y.title = 'time on stream'
+dataset.y.title = 'relative time on stream'
 
 # %% [markdown]
-# We will also mask a region that we do not want to display
+# We also mask a region that we do not want to display
 
 # %%
 dataset[:, 1290.:920.] = MASKED
@@ -109,42 +117,33 @@ dataset[:, 1290.:920.] = MASKED
 # %matplotlib inline
 
 # %% [markdown]
-# ## Using Plotly (experimental)
-
-# %% [markdown]
-# For a better experience of interactivity inside a notebook, SpectroChemPy also offer the possibillity to use Plotly.
-#
-# See the dedicated tutorial: [here](...)
-
-# %% [markdown]
 # ## Default plotting
 
 # %% [markdown]
 # To plot the previously loaded dataset, it is very simple: we use the `plot` command (generic plot).
 #
-# The current NDDataset is 2D, a **stack plot** is displayed by default, with a **viridis** colormap.
+# As the current NDDataset is 2D, a **stack plot** is displayed by default, with a **viridis** colormap.
 
 # %%
-prefs = dataset.preferences
-prefs.reset()        # Reset to default plot preferences
 _ = dataset.plot()
 
 # %% [markdown]
-# <div class="alert alert-block alert-info">
-# <b>Tip: </b>
-#
-# Note, in the line above, that we used ` _ = ... `  syntax.
+# Note, in the cell above, that we used ` _ = ... `  syntax.
 # This is to avoid any ouput but the plot from this statement.
-# </div>
-
+#
+# Note also that the `plot()` method uses some of NDDataset metadata: the `NDDataset.x` coordinate `data` (here the
+# wavenumber values), `name` (here 'wavenumbers'), `units` (here 'cm-1') as well as the `NDDataset.title`
+# (here 'absorbance') and `NDDataset.units (here 'absorbance').
 # %% [markdown]
 # ## Changing the aspect of the plot
 
 # %% [markdown]
-# We can change the default plot configuration for this dataset (see below for an overview of the available
-# configuration parameters.
+# ### Change the `NDDataset.preferences`
+# We can change the default plot configuration for this dataset by changing its `preferences' attributes
+# (see at the ned ot this tutorial  for an overview of all the available parameters).
 
 # %%
+prefs = dataset.preferences  # we will use prefs instead of dataset.preference
 prefs.figure.figsize = (6, 3)  # The default figsize is (6.8,4.4)
 prefs.colorbar = True  # This add a color bar on a side
 prefs.colormap = 'magma'  # The default colormap is viridis
@@ -154,31 +153,52 @@ prefs.axes.grid = True
 _ = dataset.plot()
 
 # %% [markdown]
-# Note that, by default, <b>sans-serif</b> font are used for all text in the figure.
-# But if you prefer, <b>serif</b>, or <b>monospace</b> font can be used instead:
-
-# %%
-prefs.font.family = 'serif'
-_ = dataset.plot()
-
+# Note that, by default, **sans-serif** font are used for all text in the figure.
+# But if you prefer, **serif**, or *monospace* font can be used instead. For instance:
 
 # %%
 prefs.font.family = 'monospace'
 _ = dataset.plot()
 
 # %% [markdown]
-# ## Plotting 1D datasets
+# Once changed, the `NDDataset.preferences` attributes will be used for the subsequent plots, but can be reset to the
+# initial defaults anytime using the `NDDataset.preferences.reset()` method. For instance:
 
 # %%
+print(f'font before reset: {prefs.font.family}')
 prefs.reset()
-d1D = dataset[-1]  # select the last row of the previous 2D dataset
-_ = d1D.plot(color='r')
+print(f'font after reset: {prefs.font.family}')
+
+# %% [markdown]
+# It is also possible to change a parameter for a single plot without changing the `preferences` attribute by passing
+# it as an argument of the `plot()`method. For instance, as in matplotlib, the default colormap is `viridis':
+
+# %%
+prefs.colormap
+
+# %% [markdown]
+# but 'magma' can be passed to the `plot()` method:
+
+# %%
+_ = dataset.plot(colormap='magma')
+
+# %% [markdown]
+# while the `preferences.colormap` is still set to `viridis':
+
+# %%
+prefs.colormap
+
+# %% [markdown]
+# and will be used by default for the next plots:
+
+# %%
+_ = dataset.plot()
 
 # %% [markdown]
 # ## Adding titles and annotations
 
 # %% [markdown]
-# The plot function return a reference to the subplot `ax` on which the data have been plotted.
+# The plot function return a reference to the subplot `ax` object on which the data have been plotted.
 # We can then use this reference to modify some element of the plot.
 #
 # For example, here we add a title and some annotations:
@@ -190,7 +210,7 @@ prefs.colormap = 'terrain'
 prefs.font.family = 'monospace'
 
 ax = dataset.plot()
-ax.grid(False)  # This temporary suppress the grid after the plot is done - not saved in prefs
+ax.grid(False)  # This temporarily suppress the grid after the plot is done but is not saved in prefs
 
 # set title
 title = ax.set_title('NH$_4$Y IR spectra during activation')
@@ -207,14 +227,14 @@ _ = ax.annotate('OH groups', xy=(3600., 1.25), xytext=(-10, -50), textcoords='of
 
 # %% [markdown]
 # More information about annotation can be found in the [matplotlib documentation:  annotations](
-# https://matplotlib.org/tutorials/text/annotations.html)
+# https://matplotlib.org/stable/tutorials/text/annotations.html)
 
 # %% [markdown]
 # ## Changing the plot style using matpotlib style sheets
 
 # %% [markdown]
-#  The easiest way to to change the plot style may be to use presetted style such as those used in [matplotlib
-#  styles](https://matplotlib.org/3.3.3/tutorials/introductory/customizing.html). This is directly included in the
+#  The easiest way to to change the plot style may be to use pre-defined styles such as those used in [matplotlib
+#  styles](https://matplotlib.org/stable/tutorials/introductory/customizing.html). This is directly included in the
 #  preferences of SpectroChemPy
 
 # %%
@@ -232,7 +252,8 @@ _ = dataset.plot()
 # * talk
 
 # %% [markdown]
-# the styles can be combined:
+# the styles can be combined so you can have a style sheet that customizes
+# colors and a separate style sheet that alters element sizes for presentations:
 
 # %%
 prefs.reset()
@@ -240,7 +261,8 @@ prefs.style = 'grayscale', 'paper'
 _ = dataset.plot(colorbar=True)
 
 # %% [markdown]
-# Style specification can also be done directly in the plot method:
+# As previously, style specification can also be done directly in the plot method without
+# affectting the `preferences' attribute.
 
 # %%
 prefs.colormap = 'magma'
@@ -253,7 +275,7 @@ _ = dataset.plot(style=['scpy', 'paper'])
 prefs.available_styles
 
 # %% [markdown]
-# Now to restore the default setting, you can use the reset function
+# Again, to restore the default setting, you can use the reset function
 
 # %%
 prefs.reset()
@@ -261,11 +283,9 @@ _ = dataset.plot()
 
 # %% [markdown]
 # ## Create your own style
-
-# %% [markdown]
+#
 # If you want to create your own style for later use, you can use the command  `makestyle` (**warning**: you can not
-# use `scpy`
-# which is the READONLY default style).
+# use `scpy` which is the READONLY default style:
 
 # %%
 prefs.makestyle('scpy')
@@ -306,9 +326,11 @@ _ = dataset.plot()  # plot with our own style
 # ## Changing the type of plot
 
 # %% [markdown]
-# By default, plots are done in stack mode.
+# By default, plots of 2D datasets are done in 'stack' mode. Other available modes are 'map', 'image', 'surface' and
+# 'waterfall'.
 #
-# If you like to have contour plot, you can use:
+# The default can be changed permanently by setting the variable `pref.method_2D` to one of these alternative modes,
+# for instance if you like to have contour plot, you can use:
 
 # %%
 prefs.reset()
@@ -319,16 +341,32 @@ prefs.figure_figsize = (5, 3)
 _ = dataset.plot()
 
 # %% [markdown]
-# You can also, for an individual plot use specialised plot commands, such as plot_stack, plot_map, plot_waterfall,
-# or plot_image:
-
+# You can also, for an individual plot use specialised plot commands, such as `plot_stack()`, `plot_map()`,
+# `plot_waterfall()`, `plot_surface()` or `plot_image()' , or equivalently the generic 'plot' function with
+# the `method' parameter (i.e. `plot(method='stack')`, `plot(method='map')`, etc...
+#
+# These modes are illustrated below:
 # %%
 prefs.axes_facecolor = 'white'
 _ = dataset.plot_image(colorbar=True)  # will use image_cmap preference!
 
 # %%
+# here we use the generic `plot()` with the `method' argument and change the image_cmap:
+_ = dataset.plot(method='image', image_cmap='jet', colorbar=True)
+# %%
 prefs.reset()
 _ = dataset.plot_waterfall(figsize=(7, 4), y_reverse=True)
+
+# %%
+prefs.reset()
+_ = dataset.plot_surface(linewidth=0.00,  antialiased=True, y_reverse=True)
+# %% [markdown]
+# ## Plotting 1D datasets
+
+# %%
+prefs.reset()
+d1D = dataset[-1]  # select the last row of the previous 2D dataset
+_ = d1D.plot(color='r')
 
 # %%
 prefs.style = 'seaborn-paper'
@@ -349,7 +387,7 @@ ax1 = ds1.plot_stack()
 _ = ds2.plot_stack(ax=ax1, clear=False, zlim=(-2.5, 4))
 
 # %% [markdown]
-# For 1D datasets only, you can also use the `plot_multiple`mathod:
+# For 1D datasets only, you can also use the `plot_multiple`method:
 
 # %%
 datasets = [dataset[0], dataset[10], dataset[20], dataset[50], dataset[53]]
@@ -370,19 +408,13 @@ _ = plot_multiple(method='scatter', me=10, datasets=datasets, labels=labels, leg
 prefs
 
 # %% [markdown]
-# <div class="alert alert-block alert-warning">
-#     <b>Warning</b> :
-# Note that in the `dataset.preferences` dictionary (`prefs`), the parameters have a slightly different name, e.g.,
-#     <b>figure_figsize</b> instead of <b>figure.fisize</b> which is the matplotlib syntax (In spectrochempy,
-#     dot (`.`) cannot be used in paremeter name, and thus it is replaced by an underscore (`_`))
+# **Warning**: Note that with respect to matplotlib,the parameters in the `dataset.preferences` dictionary
+# have a slightly different name, e.g. `figure_figsize` (SpectroChemPy) instead of `figure.figsize` (matplotlib syntax)
+# (this is because in SpectroChempy, dot (`.`) cannot be used in paremeter name, and thus it is replaced by an underscore (`_`))
 #
-# Actually, in the jupyter notebook, or in scripts, both syntax can be used to read or write most of the preferences
-# entries
-#
-#  </div>
 
 # %% [markdown]
-# To display the current values of **all parameters** correspondint to one group, e.g. `lines`, type:
+# To display the current values of **all parameters** corresponding to one group, e.g. `lines`, type:
 
 # %%
 prefs.lines
