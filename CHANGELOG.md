@@ -8,6 +8,8 @@
 
 * Added IRIS for 1D datasets
 
+* Added IRIS kernel function for diffusion 
+
 * Added differential evolution algorithm in cantera utilities
   
 * Added PFR object in cantera utilities
@@ -15,6 +17,8 @@
 **BUGS FIXED**
 
 * IRIS example after modification of readers 
+
+* IRIS: automatic search of the L-curve corner  
 
 * MCR-ALS returns the 'soft' concentration matrix
 
