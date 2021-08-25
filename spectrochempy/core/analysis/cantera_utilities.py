@@ -538,6 +538,8 @@ class PFR():
                 bounds = initial_guess
 
         it = -1
+        trials = []
+        func_values = []
 
         if optimizer in ['minimize', 'least_squares']:
             init_function_value = objective(initial_guess, param_to_optimize,
@@ -551,8 +553,7 @@ class PFR():
             if optimizer in ['minimize', 'least_squares']:
                 print(f'         Initial function value: {init_function_value}')
 
-        trials = []
-        func_values = []
+
         tic = datetime.datetime.now()
 
         if optimizer == 'minimize':
