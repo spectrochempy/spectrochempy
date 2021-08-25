@@ -1,6 +1,69 @@
 What's new
 ==========
 
+Version 0.2.16
+--------------
+
+**NEW FEATURES**
+
+-  Added list of papers citing spectrochempy
+
+-  Added IRIS for 1D datasets
+
+-  Added differential evolution algorithm in cantera utilities
+
+-  Added PFR object in cantera utilities
+
+**BUGS FIXED**
+
+-  IRIS example after modification of readers
+
+-  MCR-ALS returns the ‘soft’ concentration matrix
+
+-  document building configuration after update of an external package
+
+Version 0.2.15
+--------------
+
+**NEW FEATURES**
+
+-  Added a baseline correction method: ``basc``.
+
+-  Baseline ranges can be stored in meta.regions[‘baseline’] - basc will
+   recognize them.
+
+**BUGS FIXED**
+
+-  comparison of dataset when containing metadata in testing functions.
+
+-  Some fixes relative to Project.
+
+-  Bug in the ``to`` function.
+
+Version 0.2.14
+--------------
+
+**NEW FEATURES**
+
+-  A default coordinate can now be selected for multiple coordinates
+   dimensions.
+
+**BUGS FIXED**
+
+-  Alignment along several dimensions (issue #248)
+
+-  to() and ito() methods have been fixed to work correctly (issue #255)
+
+-  Baseline correction works on all dimensions
+
+Version 0.2.13
+--------------
+
+**BUGS FIXED**
+
+-  Solved the problem that reading of experimental datasets was too slow
+   in v.0.2.12.
+
 Version 0.2.12
 --------------
 
@@ -8,9 +71,11 @@ Version 0.2.12
 
 -  LinearCoord operations now working.
 
--  Baseline default now “sequential” as expected. **WARNING**: It was
-   wrongly set to “mutivariate” in previous releases, so you should
-   expect some difference with processings you may have done before.
+-  Baseline default now “sequential” as expected.
+
+   **WARNING**: It was wrongly set to “mutivariate” in previous
+   releases, so you should expect some difference with processings you
+   may have done before.
 
 -  Comparison of coordinates now correct for mathematical operations.
 

@@ -68,7 +68,7 @@ Create a conda environment
 
   This will create a new environment and will not touch
   any of your other existing environments, nor any existing Python installation.
-  (conda installer is somewhat very slow, this is why we prefer to replace it by `mamba <https://https://github.com/mamba-org/mamba>`__
+  (conda installer is somewhat very slow, this is why we prefer to replace it by `mamba <https://github.com/mamba-org/mamba>`__
 
   .. sourcecode:: bash
 

@@ -153,11 +153,12 @@ __copyright__ = _get_copyright()
 
 # .............................................................................
 def _get_release_date():
-    return subprocess.getoutput("git log -1 --tags --date='short' --format='%ad'")
+    return subprocess.getoutput("git log -1 --tags --date=short --format='%ad'")
 
 
 __release_date__ = _get_release_date()
 "Last release date of this package"
+
 
 
 def _check_for_updates(cls):
@@ -204,15 +205,18 @@ CHECK_UPDATE.start()
 __url__ = "http://www.spectrochempy.fr"
 "URL for the documentation of this package"
 
-__author__ = "C. Fernandez & A. Travert @LCS"
+__author__ = "C. Fernandez & A. Travert"
 "First authors(s) of this package"
 
-__contributor__ = ""
+__contributor__ = "A. Ait Blal, W. Guérin"
 "contributor(s) to this package"
 
 __license__ = "CeCILL-B license"
 "Licence of this package"
 
+__cite__ = f"Arnaud Travert & Christian Fernandez (2021) SpectroChemPy (version {'.'.join(__version__.split('.')[0:2])}). " \
+           f"Zenodo. http://doi.org/10.5281/zenodo.3823841"
+"How to cite this package"
 
 # ..................................................................................................................
 def _find_or_create_spectrochempy_dir():
@@ -574,7 +578,6 @@ class SpectroChemPy(Application):
     @default('long_description')
     def _get_long_description(self):
         desc = """
-Welcome to <strong>SpectroChemPy</strong> Application<br><br>
 <p><strong>SpectroChemPy</strong> is a framework for processing, analysing and modelling
  <strong>Spectro</>scopic data for <strong>Chem</strong>istry with <strong>Py</strong>thon.
  It is a cross platform software, running on Linux, Windows or OS X.</p><br><br>
@@ -583,13 +586,11 @@ Welcome to <strong>SpectroChemPy</strong> Application<br><br>
 <strong>License:</strong> {license}<br>
 <div class='warning'> SpectroChemPy is still experimental and under active development. Its current design and
  functionalities are subject to major changes, reorganizations, bugs and crashes!!!. Please report any issues
-to the <a url='https://redmine.spectrochempy.fr/projects/spectrochempy/issues'>Issue Tracker<a>
+to the <a url='https://github.com/spectrochempy/spectrochempy/issues'>Issue Tracker<a>
 </div><br><br>
 When using <strong>SpectroChemPy</strong> for your own work, you are kindly requested to cite it this way:
-<pre>Arnaud Travert & Christian Fernandez, SpectroChemPy, a framework for processing, analysing and modelling of
-Spectroscopic data for Chemistry with Python https://www.spectrochempy.fr, (version {version})
-Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 2021
-</pre></p>""".format(version=__release__, authors=__author__, license=__license__)
+<pre>{cite}
+</pre></p>""".format(version=__release__, authors=__author__, license=__license__, cite=__cite__)
 
         return desc
 
