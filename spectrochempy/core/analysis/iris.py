@@ -20,7 +20,7 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core import info_, warning_
 
 class IRIS:
-    """ IntegRal Inversion for Spectroscopic data
+    """ Integral Inversion solver for spectroscopic data
 
     """
 
@@ -32,6 +32,7 @@ class IRIS:
             The 1D or 2D dataset on which to perform the IRIS analysis
         param : dict
             Dictionary of parameters with the following keys :
+
             *   'kernel': str or callable
                 Kernel function of the integral equation. Pre-defined functions can be chosen among
                 {'langmuir', 'ca', 'reactant-first-order', 'product-first-order', diffusion} (see Notes below).
@@ -64,18 +65,23 @@ class IRIS:
 
         Notes
         -----
-        IRIS solves integral equation of the first kind of 1 or 2 dimensions:
+        IRIS solves integral equation of the first kind of 1 or 2 dimensions, i.e. finds a
+        distribution function :math:`f` of contributions to spectra :math:`a(\nu,p)` or univariate measurement
+        :math:`a(p)` evolving with an external experimental variable :math:`p` (time, pressure,
+        temperature, concentration, ...) according to the integral transform:
 
-        .. math:: a(p) = \int_{min}^{max} k(\eps, \p) f(\eps) dp
+        .. math:: a(\nu, p) = \int_{min}^{max} k(\epsilon, \p) f(\nu, \epsilon) dp
 
-        .. math:: a(\nu, p) = \int_{min}^{max} k(\eps, \p) f(^\nu, \eps) dp
+        .. math:: a(p) = \int_{min}^{max} k(\epsilon, p) f(\epsilon) dp
 
-        where :math:`a` is a 1D or 2D dataset.
+        where the kernel :math:`k(\epsilon, p)` expresses the functional dependence of a single contribution
+        with respect to the experimental variable math:`p` and and 'internal' physico-chemical variable math:`\epsilopn`
+
+
 
         Regularization is triggered when 'lambdaRange' is set to an array of two or three values.
 
-        If 'lambdaRange'
-        has two values [min, max], the optimum regularization parameter is searched between :math:`10^{min}` and
+        If 'lambdaRange' has two values [min, max], the optimum regularization parameter is searched between :math:`10^{min}` and
         :math:`10^{max}`. Automatic search of the regularization is made using the Cultrera_Callegaro algorithm (arXiv:1608.04571v2)
         which involves the Menger curvature of a circumcircle and the golden section search method.
 
@@ -274,16 +280,16 @@ class IRIS:
                     try:
                         G = G0 + 2 * lamda * S
                         fi[:, j] = quadprog.solve_qp(G, a[j].squeeze(), C, b)[0]
-                    except:
+                    except ValueError:
                         msg = f"Warning:G is not positive definite for log10(lambda)={np.log10(lamda):.2f} at {freq:.2f} {coord_x.units}, find nearest PD matrix"
                         warning_(msg)
                         _log += msg
                         try:
                             G = nearestPD(G0 + 2 * lamda * S, 0)
                             fi[:, j] = quadprog.solve_qp(G, a[j].squeeze(), C, b)[0]
-                        except:
+                        except ValueError:
                             msg = f"... G matrix is still ill-conditioned, try with a small shift of diagonal elements..."
-                            info_(msg)
+                            warning_(msg)
                             _log += msg
                             G = nearestPD(G0 + 2 * lamda * S, 1e-3)
                             fi[:, j] = quadprog.solve_qp(G, a[j].squeeze(), C, b)[0]

@@ -124,7 +124,7 @@ except scp.DimensionalityError as e:   # catch the error
 # with the math operation...
 
 # %% [markdown]
-## Stripping the units
+# ## Stripping the units
 #
 # If for any reason - including quick and dirty checks -  unitless numbers are needed, the `magnitude` field can be used:
 
