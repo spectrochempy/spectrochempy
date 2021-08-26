@@ -464,12 +464,14 @@ class PFR():
 
 
         # global variables to keep track of iterations and optimization history
-        global it, trials, func_values, popsize
+        global it, trials, func_values, popsize, pop_sse, prev_min_sse
 
         it = -1           # current total number of function evaluation
         trials = []       # values of the parameters ti optimize
         func_values = []  # values of the objective functions
-        popsize = None    # popsize
+        popsize = None    # popsize for differential evolution
+
+
         start_time = datetime.datetime.now()
 
         if logfile:
@@ -479,7 +481,7 @@ class PFR():
                       exp_conc, exp_idx, fit_to_exp_idx,
                       optimizer, **kwargs):
 
-            global it, trials, popsize, tic0, tic
+            global it, trials, tic, pop_sse, prev_min_sse
             it = it + 1
             trials.append(guess)
 
@@ -515,18 +517,35 @@ class PFR():
 
             if logfile:
                 if popsize:
+                    pop_sse.append(sse)
                     if not it % (popsize * len(param_to_optimize)):
                         toc = datetime.datetime.now()
                         gen = it // (popsize * len(param_to_optimize))
                         if gen > 0:
-                            logging.info(f'Calculation time for current population (#{gen}): {toc - tic}')
-                            logging.info(f'Total execution time: {toc - start_time}')
-                        logging.info(f'*** Population #{gen} ***')
+                            logging.info('--------' + 10 * len(param_to_optimize) * '-' + '--------------')
+                            min_sse = min(pop_sse)
+                            if gen == 1:
+                                logging.info(f'Minimum objective function : {min_sse:.3e} ')
+                            else:
+                                logging.info(
+                                    f'       Minimum objective function: {min_sse:.3e} ({100 * (min_sse - prev_min_sse) / prev_min_sse:+.2f}%)')
+                            logging.info(f'Execution time for the population: {toc - tic}')
+                            logging.info(f'             Total execution time: {toc - start_time}')
+                            logging.info(' ')
+                            prev_min_sse = min_sse
+
                         tic = datetime.datetime.now()
+                        logging.info(f'{tic}: Start calculation of population #{gen}')
+                        logging.info('--------' + 10 * len(param_to_optimize) * '-' + '--------------')
+                        logging.info('Eval # | Parameters' + (10 * len(param_to_optimize) - 11)* ' ' + '  | Objective ')
+                        logging.info('-------|' + 10 * len(param_to_optimize) * '-' + '--|-----------')
+                        pos_sse = []
+
+
                 guess_string = ''
                 for val in guess:
                     guess_string += f'{val:.3e} '
-                logging.info(f'Eval # {it} | parameters: {guess_string} | Objective function: {sse:.3e}')
+                logging.info(f'{it:6} | {guess_string} | {sse:.3e} ')
 
 
             if options['disp']:
@@ -580,6 +599,7 @@ class PFR():
             logging.info(f'{datetime.datetime.now()}: Starting optimization of the parameters')
             logging.info(f'   Parameters to optimize: {param_to_optimize}')
             logging.info(f'   Optimization Method: {method}')
+            logging.info(' ')
 
 
         if options['disp']:
@@ -656,7 +676,7 @@ class PFR():
                 workers = options['workers']
                 if workers != 1:
                     warnings.warn(
-                        "parallelizatrion not implemented yet, workers reset to 1",
+                        "parallelization not implemented yet, workers reset to 1",
                         UserWarning
                     )
                     workers = 1
@@ -667,6 +687,7 @@ class PFR():
             else:
                 constraints = ()
 
+            pop_sse = []
 
             res = differential_evolution(objective, bounds,
                                          args=(param_to_optimize, exp_conc, exp_idx, fit_to_exp_idx, optimizer),
@@ -682,13 +703,35 @@ class PFR():
             #  for the moment can't be parallelized because pfr uses lambda functions (for the pulse..) that can't be
             # pickled.
 
-        optim_param = res.x
 
+        logging.info(f'\nEnd of optimization: {res.message}')
         toc = datetime.datetime.now()
 
+
+
+        if res.success:
+            best_string = ''
+            for val in res.x:
+                best_string += f'{val:.3e} '
+            logging.info(f'Optimized parameters: {best_string}')
+        else:
+            if popsize:
+                logging.info('Optimization did not end successfully. You might want to restart an optimization with the')
+                logging.info('following array specifying the last population:\n')
+                init_array = 'init_pop = np.array([\n'
+                extra_trials = it % (popsize * len(param_to_optimize))
+                for trial in trials[it - popsize * len(param_to_optimize) - extra_trials:-1 - extra_trials]:
+                    init_array += '['
+                    for par in trial:
+                        init_array += str(par) + ', '
+                    init_array += '],\n'
+                init_array += '])'
+                logging.info(init_array)
+
+
         if options['disp']:
-            print('         Optimization time: {}'.format((toc - tic)))
-            print('         Final parameters: {}'.format(optim_param))
+            print(f'         Optimization time: {(toc - start_time)}')
+            print(f'         Final parameters: {res.x}')
 
         if param_to_set is not None:
             all_param = {**param_to_set, **param_to_optimize}
@@ -718,6 +761,9 @@ class PFR():
                             Coord(data=None, labels=[key for key in param_to_optimize.keys()],
                                   title='kinetic parameters'),
                             )
+
+        logging.info('**** Optimization exited normally ***')
+        logging.info(f'Total execution time: {toc - start_time}')
 
         return {'fitted_concentrations': fitted_concentrations,
                 'results': res,
