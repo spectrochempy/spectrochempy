@@ -11,6 +11,7 @@ import importlib
 import datetime
 import numpy as np
 import warnings
+import logging
 from scipy.optimize import minimize, differential_evolution, least_squares
 
 __all__ = ['coverages_vs_time', 'concentrations_vs_time', 'modify_rate', 'modify_surface_kinetics',
@@ -423,7 +424,7 @@ class PFR():
                 'coverages': coverages}
 
     def fit_to_gas_concentrations(self, exp_conc, exp_idx, fit_to_exp_idx,
-                                  param_to_optimize, other_param=None, **kwargs):
+                                  param_to_optimize, param_to_set=None, logfile=None, **kwargs):
         r"""
         Function fitting rate parameters and concentrations to a given concentration profile at the outlet of the pfr.
 
@@ -447,6 +448,9 @@ class PFR():
         param_to_set: dict
             names of kinetic parameters differing from the cti file but fixed during optimization
 
+        logfile: None (default) or str
+            name of the logfile
+
         **kwargs:
             parameters for the optimization (see scipy.optimize.minimize)
 
@@ -458,18 +462,30 @@ class PFR():
             raise SpectroChemPyException('Cantera is not available : please install it before continuing:  \n'
                                          'conda install -c cantera cantera')
 
-        global it, trials, func_values
+
+        # global variables to keep track of iterations and optimization history
+        global it, trials, func_values, popsize
+
+        it = -1           # current total number of function evaluation
+        trials = []       # values of the parameters ti optimize
+        func_values = []  # values of the objective functions
+        popsize = None    # popsize
+        start_time = datetime.datetime.now()
+
+        if logfile:
+            logging.basicConfig(filename=logfile, filemode='w', format='%(message)s', level=logging.INFO)
 
         def objective(guess, param_to_optimize,
                       exp_conc, exp_idx, fit_to_exp_idx,
                       optimizer, **kwargs):
 
-            global it, trials
+            global it, trials, popsize, tic0, tic
             it = it + 1
             trials.append(guess)
 
             for i, param in enumerate(param_to_optimize):
                 param_to_optimize[param] = guess[i]
+
 
             # create reactor
             if self._kin_param_to_set is not None:
@@ -496,6 +512,22 @@ class PFR():
                 sse = np.sum(se)
             else:
                 sse = np.Inf
+
+            if logfile:
+                if popsize:
+                    if not it % (popsize * len(param_to_optimize)):
+                        toc = datetime.datetime.now()
+                        gen = it // (popsize * len(param_to_optimize))
+                        if gen > 0:
+                            logging.info(f'Calculation time for current population (#{gen}): {toc - tic}')
+                            logging.info(f'Total execution time: {toc - start_time}')
+                        logging.info(f'*** Population #{gen} ***')
+                        tic = datetime.datetime.now()
+                guess_string = ''
+                for val in guess:
+                    guess_string += f'{val:.3e} '
+                logging.info(f'Eval # {it} | parameters: {guess_string} | Objective function: {sse:.3e}')
+
 
             if options['disp']:
                 print(f'         Evaluation # {it} | Current function value: {sse} \r', end="")
@@ -537,14 +569,18 @@ class PFR():
                 initial_guess.append(param_to_optimize[param])
                 bounds = initial_guess
 
-        it = -1
-        trials = []
-        func_values = []
 
         if optimizer in ['minimize', 'least_squares']:
             init_function_value = objective(initial_guess, param_to_optimize,
                                             exp_conc, exp_idx, fit_to_exp_idx,
                                             optimizer)
+
+        if logfile:
+            logging.info('*** Cantera/Spectrochempy kinetic model optimization log ***')
+            logging.info(f'{datetime.datetime.now()}: Starting optimization of the parameters')
+            logging.info(f'   Parameters to optimize: {param_to_optimize}')
+            logging.info(f'   Optimization Method: {method}')
+
 
         if options['disp']:
             print('Optimization of the parameters.')
@@ -631,6 +667,7 @@ class PFR():
             else:
                 constraints = ()
 
+
             res = differential_evolution(objective, bounds,
                                          args=(param_to_optimize, exp_conc, exp_idx, fit_to_exp_idx, optimizer),
                                          strategy=strategy, maxiter=maxiter, popsize=popsize, tol=tol,
@@ -653,8 +690,8 @@ class PFR():
             print('         Optimization time: {}'.format((toc - tic)))
             print('         Final parameters: {}'.format(optim_param))
 
-        if other_param is not None:
-            all_param = {**other_param, **param_to_optimize}
+        if param_to_set is not None:
+            all_param = {**param_to_set, **param_to_optimize}
         else:
             all_param = param_to_optimize
 
