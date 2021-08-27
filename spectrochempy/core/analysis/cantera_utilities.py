@@ -521,22 +521,24 @@ class PFR():
                         if gen > 0:
                             logging.info('--------' + 10 * len(param_to_optimize) * '-' + '--------------')
                             min_sse = min(pop_sse)
+                            it_min_sse = it - popsize * len(param_to_optimize) + np.argmin(pop_sse) + 1
                             if gen == 1:
-                                logging.info(f'                      Minimum SSE: {min_sse:.3e} ')
+                                logging.info(f'                      Minimum SSE: {min_sse:.3e} (Eval # {it_min_sse})')
                             else:
                                 logging.info(
-                                    f'                      Minimum SSE: {min_sse:.3e} ({(min_sse - prev_min_sse) / prev_min_sse:+.3%})')
+                                    f'                      Minimum SSE: {min_sse:.3e} ({(min_sse - prev_min_sse) / prev_min_sse:+.3%}, Eval # {it_min_sse})')
                             logging.info(f'Execution time for the population: {toc - tic}')
                             logging.info(f'             Total execution time: {toc - start_time}')
                             logging.info(' ')
                             prev_min_sse = min_sse
+                            pop_sse = []
 
                         tic = datetime.datetime.now()
                         logging.info(f'{tic}: Start calculation of population #{gen}')
                         logging.info('--------' + 12 * len(param_to_optimize) * '-' + '--------------')
                         logging.info('Eval # | Parameters' + (12 * len(param_to_optimize) - 11) * ' ' + '  | SSE ')
                         logging.info('-------|' + 12 * len(param_to_optimize) * '-' + '--|-----------')
-                        pos_sse = []
+                        pop_sse = []
 
                 guess_string = ''
                 for val in guess:
@@ -703,8 +705,9 @@ class PFR():
         if res.success:
             best_string = ''
             for val in res.x:
-                best_string += f'{val:.3e} '
+                best_string += f'{val:.5e} '
             logging.info(f'Optimized parameters: {best_string}')
+            logging.info(f'             Min SSE: {res.fun:.5e}')
         else:
             if popsize:
                 logging.info(
