@@ -100,7 +100,7 @@ scp.set_loglevel(scp.INFO)                    # set loglevel to 'INFO'
 # As seen below, no message `changed default log_level to ...` is delivered
 
 # %%
-scp.set_loglevel('WARNING')                   #reset to default
+scp.set_loglevel('WARNING')  # reset to default
 print(f'New loglevel: {scp.get_loglevel()}')
 
 # %% [markdown]

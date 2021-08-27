@@ -160,7 +160,6 @@ __release_date__ = _get_release_date()
 "Last release date of this package"
 
 
-
 def _check_for_updates(cls):
     # Get version
     conda_url = "https://anaconda.org/spectrocat/spectrochempy/files"
@@ -217,6 +216,7 @@ __license__ = "CeCILL-B license"
 __cite__ = f"Arnaud Travert & Christian Fernandez (2021) SpectroChemPy (version {'.'.join(__version__.split('.')[0:2])}). " \
            f"Zenodo. http://doi.org/10.5281/zenodo.3823841"
 "How to cite this package"
+
 
 # ..................................................................................................................
 def _find_or_create_spectrochempy_dir():
@@ -378,7 +378,7 @@ class DataDir(HasTraits):
             path = Path(conda_env) / 'share' / 'spectrochempy_data' / 'testdata'
             if not path.exists():
                 path = Path(
-                        conda_env) / 'share' / 'spectrochempy_data'  # depending on the version of spectrochempy_data
+                    conda_env) / 'share' / 'spectrochempy_data'  # depending on the version of spectrochempy_data
         except KeyError:
             pass
 
@@ -475,7 +475,7 @@ class GeneralPreferences(MetaConfigurable):
 
     show_close_dialog = Bool(True,
                              help='Display the close project dialog project changing or on application exit').tag(
-            config=True, gui=True)
+        config=True, gui=True)
 
     csv_delimiter = Enum([',', ';', r'\t', ' '], default_value=',', help='CSV data delimiter').tag(config=True,
                                                                                                    gui=True)
@@ -677,7 +677,7 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
                  info=({'SpectroChemPy': {'log_level': INFO}}, "Set log_level to INFO - verbose mode"),
                  quiet=({'SpectroChemPy': {'log_level': ERROR}}, "Set log_level to ERROR - no verbosity at all"),
                  nodisplay=(
-                 {'SpectroChemPy': {'nodisplay': True}}, "Set NO DISPLAY mode to true - no graphics at all"),
+                     {'SpectroChemPy': {'nodisplay': True}}, "Set NO DISPLAY mode to true - no graphics at all"),
                  reset_config=({'SpectroChemPy': {'reset_config': True}}, "Reset config to default"), show_config=(
             {'SpectroChemPy': {'show_config': True, }}, "Show the application's configuration (human-readable "
                                                         "format)"), show_config_json=(

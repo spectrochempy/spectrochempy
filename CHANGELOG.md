@@ -24,7 +24,7 @@
 
 * MCR-ALS returns the 'soft' concentration matrix
 
-* document building configuration after update of an external package
+* document building configuration after update of external packages
 
 * DOC: fix several broken links
 

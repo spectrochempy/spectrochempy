@@ -14,7 +14,6 @@
 __all__ = ['read_labspec']
 __dataset_methods__ = __all__
 
-import io
 import datetime
 import numpy as np
 
@@ -122,7 +121,8 @@ def _read_txt(*args, **kwargs):
     content = kwargs.get('content', False)
 
     if content:
-        fid = io.StringIO(content)
+        pass
+        # fid = io.StringIO(content)
         # TODO: get the l list of string
 
     else:

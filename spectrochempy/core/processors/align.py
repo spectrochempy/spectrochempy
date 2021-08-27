@@ -338,7 +338,7 @@ def align(dataset, *others, **kwargs):
             objects[idx] = obj
 
             # we also transform into linear coord if possible ?
-            pass  # TODO:
+            # TODO:
 
     # Now return
 
