@@ -14,7 +14,6 @@
 __all__ = ['read_labspec']
 __dataset_methods__ = __all__
 
-import io
 import datetime
 import numpy as np
 

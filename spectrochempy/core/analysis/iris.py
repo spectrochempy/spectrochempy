@@ -19,6 +19,7 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core import info_, warning_
 
+
 class IRIS:
     """ Integral Inversion solver for spectroscopic data
 
@@ -100,7 +101,6 @@ class IRIS:
 
         # check options
         # defines the kernel
-
 
         if 'kernel' in param:
             if isinstance(param['kernel'], str):
@@ -226,7 +226,6 @@ class IRIS:
         info_(msg)
         _log += msg
 
-
         # solve untregularized problem
         if not regularization:
             msg = 'Solving for {} wavenumbers and {} spectra, no regularization\n'.format(X.shape[1], X.shape[0])
@@ -244,7 +243,7 @@ class IRIS:
             _log += msg
             info_(msg)
 
-        else: # regularization
+        else:  # regularization
             # some matrices used for QP optimization do not depend on lambdaR
             # and are computed here. The standard form used by quadprog() is
             # minimize (1/2) xT G x - aT x ; subject to: C.T x >= b
@@ -288,7 +287,7 @@ class IRIS:
                             G = nearestPD(G0 + 2 * lamda * S, 0)
                             fi[:, j] = quadprog.solve_qp(G, a[j].squeeze(), C, b)[0]
                         except ValueError:
-                            msg = f"... G matrix is still ill-conditioned, try with a small shift of diagonal elements..."
+                            msg = "... G matrix is still ill-conditioned, try with a small shift of diagonal elements..."
                             warning_(msg)
                             _log += msg
                             G = nearestPD(G0 + 2 * lamda * S, 1e-3)

@@ -390,7 +390,7 @@ class Coord(NDMath, NDArray):
 
     @property
     def descendant(self):
-        return (self.data[-1]-self.data[0]) < 0
+        return (self.data[-1] - self.data[0]) < 0
 
     # ..................................................................................................................
     @property
