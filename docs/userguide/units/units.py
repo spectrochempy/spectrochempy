@@ -17,7 +17,7 @@
 # %%
 
 import spectrochempy as scp
-from spectrochempy import ur, Quantity # to simplify further writting
+from spectrochempy import ur, Quantity  # to simplify further writting
 import numpy as np
 
 # %% [markdown]
