@@ -525,10 +525,10 @@ class PFR():
                             logging.info('--------' + 10 * len(param_to_optimize) * '-' + '--------------')
                             min_sse = min(pop_sse)
                             if gen == 1:
-                                logging.info(f'Minimum objective function : {min_sse:.3e} ')
+                                logging.info(f'                      Minimum SSE: {min_sse:.3e} ')
                             else:
                                 logging.info(
-                                    f'       Minimum objective function: {min_sse:.3e} ({100 * (min_sse - prev_min_sse) / prev_min_sse:+.2f}%)')
+                                         f'                      Minimum SSE: {min_sse:.3e} ({(min_sse - prev_min_sse) / prev_min_sse:+.3%})')
                             logging.info(f'Execution time for the population: {toc - tic}')
                             logging.info(f'             Total execution time: {toc - start_time}')
                             logging.info(' ')
@@ -536,15 +536,15 @@ class PFR():
 
                         tic = datetime.datetime.now()
                         logging.info(f'{tic}: Start calculation of population #{gen}')
-                        logging.info('--------' + 10 * len(param_to_optimize) * '-' + '--------------')
-                        logging.info('Eval # | Parameters' + (10 * len(param_to_optimize) - 11)* ' ' + '  | Objective ')
-                        logging.info('-------|' + 10 * len(param_to_optimize) * '-' + '--|-----------')
+                        logging.info('--------' + 12 * len(param_to_optimize) * '-' + '--------------')
+                        logging.info('Eval # | Parameters' + (12 * len(param_to_optimize) - 11)* ' ' + '  | SSE ')
+                        logging.info('-------|' + 12 * len(param_to_optimize) * '-' + '--|-----------')
                         pos_sse = []
 
 
                 guess_string = ''
                 for val in guess:
-                    guess_string += f'{val:.3e} '
+                    guess_string += f'{val:.5e} '
                 logging.info(f'{it:6} | {guess_string} | {sse:.3e} ')
 
 
@@ -707,8 +707,6 @@ class PFR():
         logging.info(f'\nEnd of optimization: {res.message}')
         toc = datetime.datetime.now()
 
-
-
         if res.success:
             best_string = ''
             for val in res.x:
@@ -718,16 +716,22 @@ class PFR():
             if popsize:
                 logging.info('Optimization did not end successfully. You might want to restart an optimization with the')
                 logging.info('following array specifying the last population:\n')
+                print(f'it: {it}')
                 init_array = 'init_pop = np.array([\n'
-                extra_trials = it % (popsize * len(param_to_optimize))
-                for trial in trials[it - popsize * len(param_to_optimize) - extra_trials:-1 - extra_trials]:
+                extra_trials = (it + 1)  % (popsize * len(param_to_optimize))
+                if not extra_trials:
+                   last_pop = trials[it - popsize * len(param_to_optimize) + 1 :]
+                else:
+                    last_pop = trials[it - popsize * len(param_to_optimize) - extra_trials + 1: - extra_trials]
+                for trial in last_pop:
                     init_array += '['
                     for par in trial:
-                        init_array += str(par) + ', '
+                        init_array += f'{par:.5e}, '
                     init_array += '],\n'
                 init_array += '])'
                 logging.info(init_array)
-
+            else:
+                logging.info('Optimization did not end successfully.')
 
         if options['disp']:
             print(f'         Optimization time: {(toc - start_time)}')
@@ -762,7 +766,7 @@ class PFR():
                                   title='kinetic parameters'),
                             )
 
-        logging.info('**** Optimization exited normally ***')
+        logging.info('**** Optimization exited gracefully ***')
         logging.info(f'Total execution time: {toc - start_time}')
 
         return {'fitted_concentrations': fitted_concentrations,
