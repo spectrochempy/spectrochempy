@@ -1,5 +1,33 @@
 # What\'s new
 
+## Version 0.2.16
+
+**NEW FEATURES**
+
+* IRIS: Added 1D datasets
+
+* IRIS: Added kernel function for diffusion 
+
+* EFA: Added indication of progress
+
+* Cantera: Added differential evolution algorithm in cantera utilities
+  
+* Cantera: Added PFR object in cantera utilities
+
+* DOC: Added list of papers citing spectrochempy, 
+
+**BUGS FIXED**
+
+* IRIS example after modification of readers 
+
+* IRIS: automatic search of the L-curve corner  
+
+* MCR-ALS returns the 'soft' concentration matrix
+
+* document building configuration after update of external packages
+
+* DOC: fix several broken links
+
 ## Version 0.2.15
 
 **NEW FEATURES**

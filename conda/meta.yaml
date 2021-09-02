@@ -30,7 +30,7 @@ requirements:
     - setuptools
     - setuptools_scm
     - nodejs
-    - jupyterlab
+    - jupyterlab >=2.2.10
     - matplotlib-base
 
   run:
@@ -59,7 +59,7 @@ requirements:
     - git
     - ipywidgets
     - ipympl
-    - jupyterlab
+    - jupyterlab >=2.2.10
     - nodejs
 
   test:

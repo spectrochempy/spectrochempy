@@ -6,9 +6,9 @@ Processing
 .. toctree::
    :maxdepth: 3
 
+   slicing
    transformations
    math_operations
-   slicing
    smoothing
    apodization
    td_baseline

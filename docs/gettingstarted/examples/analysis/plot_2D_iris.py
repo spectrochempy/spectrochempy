@@ -29,15 +29,15 @@ print(X.coordset)
 ########################################################################################################################
 # ## Setting new coordinates
 #
-# Each experiments corresponding to a timestamp correspond to a given pressure of CO in the intrared cell. 
+# The ``y`` coordinates of the dataset is the acquisition timestamp. However, each spectra has been recorded
+# with a given pressure of CO in the intrared cell.
 #
-# Hence it would be interesting to replace the "useless" timestamps (``y``) by a pressure coordinates:
+# Hence it would be interesting to add pressure coordinates to the ``y`` dimension:
 
 pressures = [0.00300, 0.00400, 0.00900, 0.01400, 0.02100, 0.02600, 0.03600,
              0.05100, 0.09300, 0.15000, 0.20300, 0.30000, 0.40400, 0.50300,
              0.60200, 0.70200, 0.80100, 0.90500, 1.00400]
 
-""
 c_pressures = scp.Coord(pressures, title='pressure', units='torr')
 
 ###############################################################################
@@ -48,7 +48,8 @@ X.y = [c_times, c_pressures]
 print(X.y)
 
 ###############################################################################
-# By default, the current coordinate is the first one (here `c_times`). For example, it will be used for plotting:
+# By default, the current coordinate is the first one (here `c_times`). For example, it will be used by default for
+# plotting:
 
 prefs = X.preferences
 prefs.figure.figsize = (7,3)
@@ -72,12 +73,13 @@ _ = X_.plot_map()
 # ## IRIS analysis without regularization
 
 ########################################################################################################################
-# Perform IRIS without regularization (the verbose flag can be set to True to have information on the running process)
+# Perform IRIS without regularization (the loglevel can be set to `INFO` to have information on the running process)
+scp.set_loglevel(scp.INFO)
 param = {
         'epsRange': [-8, -1, 50],
         'kernel': 'langmuir'
         }
-iris = scp.IRIS(X_, param, verbose=False)
+iris = scp.IRIS(X_, param)
 
 ########################################################################################################################
 # Plots the results
@@ -95,8 +97,9 @@ param = {
         'kernel': 'langmuir'
         }
 
-iris = scp.IRIS(X_, param, verbose=False)
-iris.plotlcurve()
+
+iris = scp.IRIS(X_, param)
+iris.plotlcurve(title='L curve, manual search')
 iris.plotdistribution(-7)
 _ = iris.plotmerit(-7)
 
@@ -112,10 +115,16 @@ param = {
         'kernel': 'langmuir'
         }
 
-iris = scp.IRIS(X_, param, verbose=False)
-iris.plotlcurve()
-iris.plotdistribution(-1)
-_ = iris.plotmerit(-1)
+iris = scp.IRIS(X_, param)
+iris.plotlcurve(title='L curve, automated search')
+
+
+###############################################################################
+# The data corresponding to the largest curvature of the L-curve
+# are at the second last position of output data:
+
+iris.plotdistribution(-2)
+_ = iris.plotmerit(-2)
 
 ""
 # scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

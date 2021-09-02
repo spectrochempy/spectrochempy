@@ -65,6 +65,7 @@ Getting Started
 * :doc:`gettingstarted/overview`
 * :doc:`gettingstarted/gallery/auto_examples/index`
 * :doc:`gettingstarted/install/index`
+* :doc:`gettingstarted/papers`
 
 .. toctree::
     :maxdepth: 1
@@ -75,6 +76,7 @@ Getting Started
     gettingstarted/overview
     Examples <gettingstarted/gallery/auto_examples/index>
     Installation <gettingstarted/install/index>
+    gettingstarted/papers
 
 .. _userguide:
 
@@ -84,14 +86,14 @@ User's Guide
 
 * :doc:`userguide/introduction/introduction`
 * :doc:`userguide/objects`
-* :doc:`userguide/units/units`
 * :doc:`userguide/importexport/importexport`
 * :doc:`userguide/plotting/plotting`
 * :doc:`userguide/processing/processing`
-* :doc:`userguide/fitting/fitting`
 * :doc:`userguide/analysis/analysis`
+* :doc:`userguide/fitting/fitting`
+* :doc:`userguide/units/units`
 * :doc:`userguide/databases/databases`
-
+* :doc:`userguide/api/api`
 .. toctree::
     :maxdepth: 1
     :hidden:
@@ -99,13 +101,14 @@ User's Guide
 
     userguide/introduction/introduction
     userguide/objects
-    userguide/units/units
     userguide/importexport/importexport
     userguide/plotting/plotting
     userguide/processing/processing
-    userguide/fitting/fitting
     userguide/analysis/analysis
+    userguide/fitting/fitting
+    userguide/units/units
     userguide/databases/databases
+    userguide/api/api
 
 ***********************
 Reference & Help

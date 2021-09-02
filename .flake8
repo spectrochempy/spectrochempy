@@ -9,6 +9,7 @@ exclude =
     # exclude test, and some other folder for now (may be done later)
     .idea
     .eggs
+    build
     gui
     docs/sphinxext
     # docs/userguide

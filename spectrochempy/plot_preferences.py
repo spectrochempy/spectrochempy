@@ -60,20 +60,24 @@ class PlotPreferences(MetaConfigurable):
                                                                                                           kind='')
     lines_color = Unicode('b', help=r'''has no affect on plot(); see axes.prop_cycle''').tag(config=True, kind='color')
     lines_marker = Enum(list(Line2D.markers.keys()), default_value='None', help=r'''the default marker''').tag(
-            config=True, kind='')
+        config=True, kind='')
     lines_markerfacecolor = Unicode('auto', help=r'''the default markerfacecolor''').tag(config=True, kind='color')
     lines_markeredgecolor = Unicode('auto', help=r'''the default markeredgecolor''').tag(config=True, kind='color')
     lines_markeredgewidth = Float(0.0, help=r'''the line width around the marker symbol''').tag(config=True, kind='')
     lines_markersize = Float(7.0, help=r'''markersize, in points''').tag(config=True, kind='')
-    lines_dash_joinstyle = Enum(['miter', 'JoinStyle.miter', 'round', 'JoinStyle.round', 'bevel',
-                                 'JoinStyle.bevel'], default_value='round', help=r'''miter|round|bevel''').tag(
-            config=True, kind='')
-    lines_dash_capstyle = Enum(['CapStyle.butt', 'butt', 'CapStyle.round', 'round', 'CapStyle.projecting', 'projecting'], default_value='butt',
-                               help=r'''butt|round|projecting''').tag(config=True, kind='')
-    lines_solid_joinstyle = Enum(['miter', 'JoinStyle.miter', 'round', 'JoinStyle.round', 'bevel', 'JoinStyle.bevel'], default_value='round',
+    lines_dash_joinstyle = Enum(['miter', 'JoinStyle.miter', 'round', 'JoinStyle.round', 'bevel', 'JoinStyle.bevel'],
+                                default_value='round', help=r'''miter|round|bevel''').tag(
+        config=True, kind='')
+    lines_dash_capstyle = Enum(
+        ['CapStyle.butt', 'butt', 'CapStyle.round', 'round', 'CapStyle.projecting', 'projecting'], default_value='butt',
+        help=r'''butt|round|projecting''').tag(config=True, kind='')
+    lines_solid_joinstyle = Enum(['miter', 'JoinStyle.miter', 'round', 'JoinStyle.round', 'bevel', 'JoinStyle.bevel'],
+                                 default_value='round',
                                  help=r'''miter|round|bevel''').tag(config=True, kind='')
-    lines_solid_capstyle = Enum(['CapStyle.butt', 'butt', 'CapStyle.round', 'round', 'CapStyle.projecting', 'projecting'], default_value='round',
-                                help=r'''butt|round|projecting''').tag(config=True, kind='')
+    lines_solid_capstyle = Enum(
+        ['CapStyle.butt', 'butt', 'CapStyle.round', 'round', 'CapStyle.projecting', 'projecting'],
+        default_value='round',
+        help=r'''butt|round|projecting''').tag(config=True, kind='')
     lines_antialiased = Bool(True, help=r'''render lines in antialiased (no jaggies)''').tag(config=True, kind='')
     lines_dashed_pattern = Tuple((6.0, 6.0), help=r'''''').tag(config=True, kind='')
     lines_dashdot_pattern = Tuple((3.0, 5.0, 1.0, 5.0), help=r'''''').tag(config=True, kind='')
@@ -143,7 +147,7 @@ class PlotPreferences(MetaConfigurable):
     font_weight = Enum([100, 200, 300, 'normal', 400, 500, 600, 'bold', 700, 800, 900, 'bolder', 'lighter'],
                        default_value='normal',
                        help=r'''100|200|300|normal or 400|500|600|bold or 700|800|900|bolder|lighter''').tag(
-            config=True, kind='')
+        config=True, kind='')
     font_stretch = Unicode('normal', help=r'''''')  # not implemented
     # note that font.size controls default text sizes.  To configure
     # special text sizes tick labels, axes, labels, title, etc, see the
@@ -211,7 +215,7 @@ class PlotPreferences(MetaConfigurable):
     mathtext_sf = Unicode('sans\-serif', help=r'''''').tag(config=True, kind='')  # noqa: W605
     mathtext_fontset = Unicode('dejavusans', help=r'''Should be "dejavusans" (default),
                                "dejavuserif", "cm" (Computer Modern), "stix", "stixsans" or "custom"''').tag(
-            config=True, kind='')
+        config=True, kind='')
     mathtext_fallback_to_cm = Bool(False, help=r'''When True, use symbols from the Computer Modern fonts when a
     symbol
                                        can not be found in one of the custom math fonts.''').tag(config=True, kind='')
@@ -244,9 +248,9 @@ class PlotPreferences(MetaConfigurable):
                                        r'first or larger than the second').tag(config=True, kind='')
     axes_formatter_use_locale = Bool(False, help=r'''When True, format tick labels according to the user"s locale.
                                        For example, use "," as a decimal separator in the fr_FR locale.''').tag(
-            config=True, kind='')
+        config=True, kind='')
     axes_formatter_use_mathtext = Bool(False, help=r'''When True, use mathtext for scientific notation.''').tag(
-            config=True, kind='')
+        config=True, kind='')
     axes_formatter_useoffset = Bool(True, help=r'''If True, the tick label formatter will default to labeling ticks
                                     relative to an offset when the data range is small compared to the minimum
                                     absolute value of the data.''').tag(config=True, kind='')
@@ -263,7 +267,7 @@ class PlotPreferences(MetaConfigurable):
     axes_autolimit_mode = Unicode('data', help=r'''How to scale axes limits to the data. Use "data" to use data
     limits,
                                     plus some margin. Use "round_number" move to the nearest "round" number''').tag(
-            config=True, kind='')
+        config=True, kind='')
     axes_xmargin = Float(0.05, help=r'''x margin. See `axes.Axes.margins`''').tag(config=True, kind='')
     axes_ymargin = Float(0.05, help=r'''y margin See `axes.Axes.margins`''').tag(config=True, kind='')
     axes_spines_bottom = Bool(True).tag(config=True, kind='')
@@ -341,7 +345,7 @@ class PlotPreferences(MetaConfigurable):
     legend_edgecolor = Unicode('0.8', help=r'''background patch boundary color''').tag(config=True, kind='color')
     legend_fancybox = Bool(True,
                            help=r'''if True, use a rounded box for the legend background, else a rectangle''').tag(
-            config=True, kind='')
+        config=True, kind='')
     legend_shadow = Bool(False, help=r'''if True, give background a shadow effect''').tag(config=True, kind='')
     legend_numpoints = Integer(1, help=r'''the number of marker points in the legend line''').tag(config=True, kind='')
     legend_scatterpoints = Integer(1, help=r'''number of scatter points''').tag(config=True, kind='')
@@ -390,7 +394,7 @@ class PlotPreferences(MetaConfigurable):
     image_aspect = Unicode('equal', help=r'''equal | auto | a number''').tag(config=True, kind='')
     image_interpolation = Unicode('antialiased', help=r'''see help(imshow) for options''').tag(config=True, kind='')
     image_cmap = Enum(plt.colormaps(), default_value='viridis', help=r'''A colormap name, gray etc...''').tag(
-            config=True, kind='')
+        config=True, kind='')
     image_lut = Integer(256, help=r'''the size of the colormap lookup table''').tag(config=True, kind='')
     image_origin = Unicode('upper', help=r'''lower | upper''').tag(config=True, kind='')
     image_resample = Bool(True, help=r'''''').tag(config=True, kind='')
@@ -402,9 +406,9 @@ class PlotPreferences(MetaConfigurable):
     # CONTOUR PLOTS
     #
     contour_negative_linestyle = Enum(['dashed', 'solid'], default_value='dashed', help=r'''dashed | solid''').tag(
-            config=True, kind='')
+        config=True, kind='')
     contour_corner_mask = Enum([True, False, 'legacy'], default_value=True, help=r'''True | False | legacy''').tag(
-            config=True, kind='')
+        config=True, kind='')
     #
     # ERRORBAR
     #
@@ -427,14 +431,14 @@ class PlotPreferences(MetaConfigurable):
     savefig_facecolor = Unicode('white', help=r'''figure facecolor when saving''').tag(config=True, kind='color')
     savefig_edgecolor = Unicode('white', help=r'''figure edgecolor when saving''').tag(config=True, kind='color')
     savefig_format = Enum(['png', 'ps', 'pdf', 'svg'], default_value='png', help=r'''png, ps, pdf, svg''').tag(
-            config=True, kind='')
+        config=True, kind='')
     savefig_bbox = Enum(["tight", "standard"], default_value='standard', help=r'''"tight" or "standard". "tight" is
     incompatible with pipe-based animation backends but will workd with temporary file based ones:
     e.g. setting animation.writer to ffmpeg will not work, use ffmpeg_file instead''').tag(config=True, kind='')
     savefig_pad_inches = Float(0.1, help=r'''Padding to be used when bbox is set to "tight"''').tag(config=True,
                                                                                                     kind='')
     savefig_jpeg_quality = Integer(95, help=r'''when a jpeg is saved, the default quality parameter.''').tag(
-            config=True, kind='')
+        config=True, kind='')
     savefig_directory = Unicode("", help=r'''default directory in savefig dialog box, leave empty to always use current
                                 working directory''').tag(config=True, kind='')
     savefig_transparent = Bool(False, help=r'''setting that controls whether figures are saved with a transparent
@@ -730,6 +734,6 @@ class PlotPreferences(MetaConfigurable):
                 mpl.rcParams['axes.labelsize'] = int(change.new)
             if key == 'font.family':
                 self.set_latex_font(
-                        change.new)  # @observe('use_latex')  # def _use_latex_changed(self, change):  #     mpl.rc(  # 'text', usetex=change.new)  #  # @observe('latex_preamble')  # def _set_latex_preamble(self,  # change):  #     mpl.rcParams[  #    #  #  #  'text.latex.preamble'] = change.new.split('\n')
+                    change.new)  # @observe('use_latex')  # def _use_latex_changed(self, change):  #     mpl.rc(  # 'text', usetex=change.new)  #  # @observe('latex_preamble')  # def _set_latex_preamble(self,  # change):  #     mpl.rcParams[  #    #  #  #  'text.latex.preamble'] = change.new.split('\n')
         super()._anytrait_changed(change)
         return  # EOF

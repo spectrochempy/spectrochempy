@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.10.2
+#       jupytext_version: 1.6.0
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -35,8 +35,8 @@
 # %% [markdown]
 # The purpose of this page is to give you some quick examples of what can be done with SpectroChemPy.
 #
-# See the [gallery of examples](generated/auto_examples/index.html) and consult the [user's guide](
-# ../user/index.html) for more information on using SpectroChemPy
+# See the [gallery of examples](auto_examples/index.html) and consult the [user's guide](
+# ../userguide/introduction/introduction.html) for more information on using SpectroChemPy
 #
 # Before using the package, we must load the **API
 # (Application Programming Interface)**
@@ -64,13 +64,13 @@ ds = read('irdata/nh4y-activation.spg')
 # ### Display dataset information
 
 # %% [markdown]
-# Short information
+# Short information:
 
 # %%
-ds
+print(ds)
 
 # %% [markdown]
-# Detailled information:
+# Detailed information on the main metatdata:
 
 # %%
 ds

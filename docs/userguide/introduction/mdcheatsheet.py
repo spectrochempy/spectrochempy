@@ -9,7 +9,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.10.2
+#       jupytext_version: 1.6.0
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -216,15 +216,19 @@
 # Each ID in the notebook must be unique.
 #
 # To link to a section that has an ID, use the following code:
+# ```
 # [Section title](#section_ID)
-#
+# ```
+# [Section title](#section_ID)
 
 # %% [markdown]
 # ## External links
 
 # %% [markdown]
 # To link to an external site, use the following code:
-# __[link text](http://url)__
+# ```
+#  __[link text](https://github.com/spectrochempy/spectrochempy)__
+# ```
 # Surround the link with two underscores (_) on each side
-
+# __[link text](https://github.com/spectrochempy/spectrochempy)__
 # %%

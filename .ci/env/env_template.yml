@@ -49,7 +49,7 @@ dependencies:
     # need this, because the API is mainly designed to run in Jupyter notebook
     - ipywidgets
     - ipympl
-    - jupyterlab
+    - jupyterlab>=2.2.10
     - nodejs
 
     {% if DEV %}
