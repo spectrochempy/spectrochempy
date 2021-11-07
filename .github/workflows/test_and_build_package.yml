@@ -113,8 +113,8 @@ jobs:
       - name: Lint with flake8
         run: flake8 .
 
-      - name: Test with pytest
-        run: pytest tests
+   #   - name: Test with pytest
+   #     run: pytest tests
 
   # Job 3
   build-package:
@@ -188,13 +188,6 @@ jobs:
           conda install conda-build conda-verify
           conda-build .conda --output-folder out-${{ matrix.os }}-${{ matrix.pythonVersion }}
 
-      - name: Build docs
-        run: |
-          mkdir ../../../spectrochempy_docs
-          echo "cloning spectrochempy.github.io repository"
-          git clone --branch=gh-pages --single-branch https://github.com/spectrochempy/spectrochempy.git ../../../spectrochempy_docs/html
-          python docs/make.py --clean --html
-
       - name: Publish package for release
         if: contains(env.DEVSTRING, 'stable')
         env:
@@ -212,3 +205,10 @@ jobs:
           conda install anaconda-client
           anaconda upload -l dev --force out-${{ matrix.os }}-${{ matrix.pythonVersion }}/*/*.tar.bz2
           rm out-${{ matrix.os }}-${{ matrix.pythonVersion }}/*/*.tar.bz2
+
+      - name: Build docs
+        run: |
+          mkdir ../../../spectrochempy_docs
+          echo "cloning spectrochempy.github.io repository"
+          git clone --branch=gh-pages --single-branch https://github.com/spectrochempy/spectrochempy.git ../../../spectrochempy_docs/html
+          python docs/make.py --clean --html
