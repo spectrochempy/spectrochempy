@@ -69,7 +69,8 @@ jobs:
   # Job 2  (only for non release)
   test-package:
 
-    if: "!(startsWith(github.ref, ‘refs/release’))"
+    if: ${{ github_ref != ‘refs/release’ }}
+
     name: Test using ${{ matrix.os }} and python ${{ matrix.pythonVersion }}
 
     needs: create-env-files
