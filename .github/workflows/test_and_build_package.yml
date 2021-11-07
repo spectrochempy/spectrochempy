@@ -130,10 +130,9 @@ jobs:
         shell: bash -l {0}
 
     strategy:
-      max-parallel: 3
       matrix:
         os: [ubuntu-latest]
-        pythonVersion: [3.7, 3.8, 3.9]
+        pythonVersion: [3.9]
 
     steps:
       - name: Checkout code
@@ -188,6 +187,13 @@ jobs:
         run: |
           conda install conda-build conda-verify
           conda-build .conda --output-folder out-${{ matrix.os }}-${{ matrix.pythonVersion }}
+
+      - name: Build docs
+        run: |
+          mkdir ../../../spectrochempy_docs
+          echo "cloning spectrochempy.github.io repository"
+          git clone --branch=gh-pages --single-branch https://github.com/spectrochempy/spectrochempy.git ../../../spectrochempy_docs/html
+          python docs/make.py --clean --html
 
       - name: Publish package for release
         if: contains(env.DEVSTRING, 'stable')
