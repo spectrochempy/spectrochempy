@@ -160,7 +160,7 @@ __release_date__ = _get_release_date()
 "Last release date of this package"
 
 
-def _check_for_updates():
+def _check_for_updates(*args, **kwargs):
     # Get version
     conda_url = "https://anaconda.org/spectrocat/spectrochempy/files"
     try:
