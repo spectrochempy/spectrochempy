@@ -460,7 +460,7 @@ class IRIS:
         X_hat.name = '2D-IRIS Reconstructed datasets'
         return X_hat
 
-    def plotlcurve(self, scale='ll'):  # , **kwargs):
+    def plotlcurve(self, scale='ll', title='L curve'):  # , **kwargs):
         """
         Plots the L Curve
 
@@ -469,7 +469,8 @@ class IRIS:
         scale : str, optional, default='ll'
             2 letters among 'l' (log) or 'n' (non-log) indicating whether the y and x
             axes should be log scales.
-
+        title : str, optional, default='L curve'
+            Plot title
 
         Returns
         -------
@@ -478,7 +479,7 @@ class IRIS:
 
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        ax.set_title('L curve')
+        ax.set_title(title)
         scale = scale.lower()
         plt.plot(self.RSS, self.SM, 'o')
         ax.set_xlabel('Residuals')
