@@ -545,27 +545,6 @@ out = np.floor_divide(dataset, dataset2)
 _ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
-# ##### mod
-# or
-# ##### remainder
-# Return element-wise remainder of division.
-
-# %%
-out = np.mod(dataset, dataset2)
-_ = out.plot(figsize=(6, 2.5))
-
-# %% [markdown]
-# ##### fmod
-# Return element-wise remainder of division.
-#
-# **Note**: For `fmod`, the sign of result is the sign of the dividend, while for remainder the sign of the result is
-# the sign of the divisor.
-
-# %%
-out = np.fmod(dataset, dataset2)
-_ = out.plot(figsize=(6, 2.5))
-
-# %% [markdown]
 # ## Complex or hypercomplex NDDatasets
 #
 #

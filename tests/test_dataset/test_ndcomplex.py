@@ -166,7 +166,7 @@ def test_ndcomplex_init_complex_with_a_ndarray():
 
     d = np.array([[1, 2], [3, 4]]) * np.exp(.1j)
     d0 = NDComplexArray(d)
-    assert d0.dtype == np.complex
+    assert d0.dtype == np.complex128
     assert d0.has_complex_dims
     assert d0.shape == (2, 2)
     assert d0.size == 4

@@ -53,6 +53,7 @@ if '--nodisplay' in sys.argv:
     mpl.use('agg', force=True)
 
 # Are we running pytest?
+
 if 'pytest' in sys.argv[0] or 'py.test' in sys.argv[0]:
     # if we are testing we also like a silent work with no figure popup!
     NO_DISPLAY = True
@@ -91,7 +92,7 @@ from spectrochempy.core import *  # noqa: F403, F401, E402
 
 ALL += core.__all__
 
-
+debug_('ARGV', sys.argv)
 if not IN_IPYTHON:
     # needed in windows terminal - but must not be inited in Jupyter notebook
     from colorama import init as initcolor

@@ -69,13 +69,13 @@ class PlotPreferences(MetaConfigurable):
                                 default_value='round', help=r'''miter|round|bevel''').tag(
         config=True, kind='')
     lines_dash_capstyle = Enum(
-        ['CapStyle.butt', 'butt', 'CapStyle.round', 'round', 'CapStyle.projecting', 'projecting'], default_value='butt',
+        ['butt', 'round', 'projecting'], default_value='butt',
         help=r'''butt|round|projecting''').tag(config=True, kind='')
-    lines_solid_joinstyle = Enum(['miter', 'JoinStyle.miter', 'round', 'JoinStyle.round', 'bevel', 'JoinStyle.bevel'],
+    lines_solid_joinstyle = Enum(['miter', 'round', 'bevel'],
                                  default_value='round',
                                  help=r'''miter|round|bevel''').tag(config=True, kind='')
     lines_solid_capstyle = Enum(
-        ['CapStyle.butt', 'butt', 'CapStyle.round', 'round', 'CapStyle.projecting', 'projecting'],
+        ['butt', 'round', 'projecting'],
         default_value='round',
         help=r'''butt|round|projecting''').tag(config=True, kind='')
     lines_antialiased = Bool(True, help=r'''render lines in antialiased (no jaggies)''').tag(config=True, kind='')

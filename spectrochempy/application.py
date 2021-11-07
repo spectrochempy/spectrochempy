@@ -142,9 +142,9 @@ except LookupError:  # pragma: no cover
 # ............................................................................
 def _get_copyright():
     current_year = datetime.date.today().year
-    copyright = '2014-{}'.format(current_year)
-    copyright += ' - A.Travert & C.Fernandez @ LCS'
-    return copyright
+    right = '2014-{}'.format(current_year)
+    right += ' - A.Travert & C.Fernandez @ LCS'
+    return right
 
 
 __copyright__ = _get_copyright()
@@ -160,7 +160,7 @@ __release_date__ = _get_release_date()
 "Last release date of this package"
 
 
-def _check_for_updates(cls):
+def _check_for_updates():
     # Get version
     conda_url = "https://anaconda.org/spectrocat/spectrochempy/files"
     try:
@@ -201,7 +201,7 @@ CHECK_UPDATE.start()
 # other info
 # ............................................................................
 
-__url__ = "http://www.spectrochempy.fr"
+__url__ = "https://www.spectrochempy.fr"
 "URL for the documentation of this package"
 
 __author__ = "C. Fernandez & A. Travert"
@@ -213,8 +213,9 @@ __contributor__ = "A. Ait Blal, W. Guérin"
 __license__ = "CeCILL-B license"
 "Licence of this package"
 
-__cite__ = f"Arnaud Travert & Christian Fernandez (2021) SpectroChemPy (version {'.'.join(__version__.split('.')[0:2])}). " \
-           f"Zenodo. http://doi.org/10.5281/zenodo.3823841"
+__cite__ = f"Arnaud Travert & Christian Fernandez (2021) SpectroChemPy (version" \
+           f" {'.'.join(__version__.split('.')[0:2])}). " \
+           f"Zenodo. https://doi.org/10.5281/zenodo.3823841"
 "How to cite this package"
 
 
@@ -438,7 +439,7 @@ class GeneralPreferences(MetaConfigurable):
     updated = Bool(False)
 
     # ------------------------------------------------------------------------------------------------------------------
-    # Gonfiguration entries
+    # Configuration entries
     # ------------------------------------------------------------------------------------------------------------------
 
     # NON GUI
@@ -489,7 +490,7 @@ class GeneralPreferences(MetaConfigurable):
 
         # first look for SCP_PROJECTS_HOME
         pscp = environ.get('SCP_PROJECTS_HOME')
-        if pscp is not None and Path(pscp).exits():
+        if pscp is not None and Path(pscp).exists():
             return Path(pscp)
 
         pscp = Path.home() / '.spectrochempy' / 'projects'
@@ -690,11 +691,11 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
     # Initialisation of the application
     # ------------------------------------------------------------------------------------------------------------------
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
 
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
 
-        self.logs = self.log  # we change the noame in order to avoid latter conflict with numpy.log
+        self.logs = self.log  # we change the no name in order to avoid latter conflict with numpy.log
 
         self.initialize()
 
@@ -740,7 +741,7 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
 
         self._init_all_preferences()
 
-        # we catch warnings and error for a ligther display to the end-user.
+        # we catch warnings and error for a lighter display to the end-user.
         # except if we are in debugging mode
 
         # warning handler
@@ -804,12 +805,13 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
         # --------------------------------------
         self._make_default_config_file()
 
-        self.datadir = DataDir(config=self.config)
+        self.datadir = DataDir()  # config=self.config)  -- passing args deprecated in traitlets 4.2
         self.preferences = GeneralPreferences(config=self.config, parent=self)
         self.plot_preferences = PlotPreferences(config=self.config, parent=self)
 
     # ..................................................................................................................
-    def get_config_dir(self):
+    @staticmethod
+    def get_config_dir():
         """
         Determines the SpectroChemPy configuration directory name and
         creates the directory if it doesn't exist.

@@ -44,6 +44,7 @@ axes.titley                              : 1.0
 axes.unicode_minus                       : True
 axes.xmargin                             : 0.0
 axes.ymargin                             : 0.0
+axes.zmargin                             : 0.05
 axes3d.grid                              : True
 
 boxplot.bootstrap                        : None
@@ -95,6 +96,8 @@ date.autoformatter.minute                : %H:%M:%S.%f
 date.autoformatter.month                 : %b %Y
 date.autoformatter.second                : %H:%M:%S.%f
 date.autoformatter.year                  : %Y
+date.converter                           : auto
+date.interval_multiples                  : True
 
 errorbar.capsize                         : 3.0
 
@@ -221,6 +224,7 @@ path.simplify_threshold                  : 0.111111111111
 path.sketch                              : None
 path.snap                                : True
 pcolor.shading                           : flat
+pcolormesh.snap                          : True
 pdf.compression                          : 6
 pdf.fonttype                             : 3
 pdf.inheritcolor                         : False
@@ -263,6 +267,7 @@ xtick.bottom                             : True
 xtick.color                              : .15
 xtick.direction                          : out
 xtick.labelbottom                        : True
+xtick.labelcolor                         : inherit
 xtick.labelsize                          : 14.0
 xtick.labeltop                           : False
 xtick.major.bottom                       : True
@@ -282,6 +287,7 @@ yaxis.labellocation                      : center
 ytick.alignment                          : center
 ytick.color                              : .15
 ytick.direction                          : out
+ytick.labelcolor                         : inherit
 ytick.labelleft                          : True
 ytick.labelright                         : False
 ytick.labelsize                          : 14.0

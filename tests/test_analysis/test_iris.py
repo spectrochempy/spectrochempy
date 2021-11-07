@@ -13,6 +13,8 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import show
 
 
+# import pytest
+# @pytest.mark.skip('do not work with workflow - need to solve this!')
 def test_IRIS():
     X = NDDataset.read_omnic(os.path.join('irdata', 'CO@Mo_Al2O3.SPG'))
 
@@ -27,11 +29,13 @@ def test_IRIS():
     # and plot the results
 
     param = {
-        'epsRange': [-8, -1, 20], 'lambdaRange': [-7, -5, 3], 'kernel': 'langmuir'
-    }
+        'epsRange': [-8, -1, 20],
+        'lambdaRange': [-7, -5, 3],
+        'kernel': 'langmuir'
+        }
 
     X_ = X[:, 2250.:1950.]
-    X_.plot()
+    # X_.plot()
 
     iris = IRIS(X_, param, verbose=True)
 

@@ -788,8 +788,8 @@ def _polybase(data, **kwargs):
     wm = np.array(list(zip(*np.argwhere(~baseline[:1].mask)))[1])
     bm = baseline[:, wm]
     if data.ndim > 1:
-        bm = smooth(bm.T, length=max(int(dat.shape[0] / 10), 3)).T
-    bm = smooth(bm, length=max(int(dat.shape[-1] / 10), 3))
+        bm = smooth(bm.T, max(int(dat.shape[0] / 10), 3)).T
+    bm = smooth(bm, max(int(dat.shape[-1] / 10), 3))
 
     # if not polynom:
     #    sr = pchip(wm, bm.real)
