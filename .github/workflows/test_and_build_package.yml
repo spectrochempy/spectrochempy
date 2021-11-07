@@ -4,9 +4,14 @@ on:
   push:
     branches:
       - develop
+      - feature/workflow
+    tags:
   pull_request:
     branches:
       - master
+  release:
+    types:
+      - created
 
 jobs:
 
@@ -62,9 +67,10 @@ jobs:
           name: env-artifact
           path: artifact
 
-  # Job 2
+  # Job 2  (only for non release)
   test-package:
 
+    if: "!(startsWith(github_ref, ‘refs/release’)) && !(startsWith(github_ref, ‘refs/tags’))"
     name: Test using ${{ matrix.os }} and python ${{ matrix.pythonVersion }}
 
     needs: create-env-files
