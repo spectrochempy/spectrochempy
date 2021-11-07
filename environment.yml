@@ -6,10 +6,10 @@ channels:
     - defaults
 
 dependencies:
-    - python=3.8
+    - python>=3.6
 
     # specific
-    - quadprog
+    - quadprog=0.1.9
     - brukeropusreader
     - quaternion
     - nmrglue
@@ -23,7 +23,7 @@ dependencies:
     - matplotlib-base
     - numpy
     - orderedset
-    - pint
+    - pint=0.16.1
     - plotly
     - requests
     - scipy
