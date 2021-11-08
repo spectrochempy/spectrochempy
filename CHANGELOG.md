@@ -4,29 +4,31 @@
 
 **NEW FEATURES**
 
-* IRIS: Added 1D datasets
+* IRIS: Added 1D datasets.
 
-* IRIS: Added kernel function for diffusion 
+* IRIS: Added kernel function for diffusion .
 
-* EFA: Added indication of progress
+* EFA: Added indication of progress.
 
-* Cantera: Added differential evolution algorithm in cantera utilities
+* Cantera: Added differential evolution algorithm in cantera utilities.
   
-* Cantera: Added PFR object in cantera utilities
+* Cantera: Added PFR object in cantera utilities.
 
-* DOC: Added list of papers citing spectrochempy, 
+* DOC: Added list of papers citing spectrochempy.
+
+* Github action workflow to test, build and publish conda package and docs in replacement of Travis CI.
 
 **BUGS FIXED**
 
-* IRIS example after modification of readers 
+* IRIS example after modification of readers. 
 
-* IRIS: automatic search of the L-curve corner  
+* IRIS: automatic search of the L-curve corner.  
 
-* MCR-ALS returns the 'soft' concentration matrix
+* MCR-ALS returns the 'soft' concentration matrix.
 
-* document building configuration after update of external packages
+* Document building configuration after update of external packages.
 
-* DOC: fix several broken links
+* DOC: fix several broken links.
 
 ## Version 0.2.15
 

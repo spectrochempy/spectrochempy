@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - develop
-      - feature/workflow
   pull_request:
     branches:
       - master
@@ -84,8 +83,8 @@ jobs:
     strategy:
       max-parallel: 3
       matrix:
-        os: [ubuntu-latest] #, windows-latest, macOS-latest]
-        pythonVersion: [3.7] # , 3.8, 3.9]
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        pythonVersion: [3.7, 3.8, 3.9]
 
     steps:
       - name: Checkout code
@@ -113,8 +112,8 @@ jobs:
       - name: Lint with flake8
         run: flake8 .
 
-   #   - name: Test with pytest
-   #     run: pytest tests
+      - name: Test with pytest
+        run: pytest tests
 
   # Job 3
   build-and-publish-package-and-docs:
