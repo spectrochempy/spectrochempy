@@ -20,8 +20,6 @@ from spectrochempy.core import info_, warning_
 
 from quadprog import solve_qp
 
-global _log
-
 
 class IRIS:
     """ Integral inversion solver for spectroscopic data
