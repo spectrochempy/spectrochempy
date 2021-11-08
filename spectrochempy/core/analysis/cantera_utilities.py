@@ -606,7 +606,7 @@ class PFR():
             if optimizer in ['minimize', 'least_squares']:
                 print(f'         Initial function value: {init_function_value}')
 
-        tic = datetime.datetime.now()
+        # tic = datetime.datetime.now()
 
         if optimizer == 'minimize':
             res = minimize(objective, initial_guess,

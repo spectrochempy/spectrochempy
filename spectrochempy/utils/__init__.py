@@ -27,6 +27,6 @@ from .misc import *
 from .packages import *
 from .plots import *
 from .system import *
-from .traitlets import *
+from .traits import *
 from .zip import *
 from .print import *
