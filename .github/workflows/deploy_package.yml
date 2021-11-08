@@ -1,4 +1,4 @@
-name: Test, Build and Publish package
+name: Build and Deploy package
 
 on:
   push:
@@ -45,7 +45,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@v2
         with:
           activate-environment: scpy3.9
-          environment-file: scpy3.9.yml
+          environment-file: .ci/env/scpy3.9.yml
           condarc-file: .ci/env/condarc.yml
           auto-activate-base: false
 
