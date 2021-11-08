@@ -204,7 +204,6 @@ mathtext.it                              : dejavusans:italic
 mathtext.rm                              : dejavusans
 mathtext.sf                              : sans\-serif
 mathtext.tt                              : monospace
-mpl_toolkits.legacy_colorbar             : True
 
 patch.antialiased                        : True
 patch.edgecolor                          : k

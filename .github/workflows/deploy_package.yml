@@ -1,0 +1,121 @@
+name: Test, Build and Publish package
+
+on:
+  push:
+    branches:
+      - master
+  release:
+    types:
+      - created
+
+jobs:
+
+  build_and_publish:
+
+    name: deploy package and documentation (noarch)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Install miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: ""
+          auto-activate-base: true
+          auto-update-conda: true
+
+      - name: Install dependency
+        run: |
+          conda install jinja2
+
+      - name: Create environment scpy3.9
+        run: |
+          python .ci/env/env_create.py -v 3.9 --dev scpy3.9.yml
+
+      - name: Install miniconda (scpy3.9)
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: scpy3.9
+          environment-file: scpy3.9.yml
+          condarc-file: .ci/env/condarc.yml
+          auto-activate-base: false
+
+      - name: Install spectrochempy
+        run: |
+          python setup.py install
+
+      - name: Set up version environment variable
+        run: |
+          ## get version string from setuptools_scm
+          PVS="$(python setup.py --version)"
+          echo "Current version string = $PVS"
+
+          ## Extract components
+          IFS=$"+"
+          read -ra arr <<< "$PVS"
+
+          ## latest version string
+          LATEST="${arr[0]}"
+          IFS=$"."
+          read -ra tag <<< "$LATEST";
+          DEVSTRING="${tag[3]}"
+          VERSION="${tag[0]}.${tag[1]}.${tag[2]}"
+          if [[ -z $DEVSTRING ]]; then
+            DEVSTRING="stable"
+          fi
+
+          ## Export variable in the github environment
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "DEVSTRING=$DEVSTRING" >> $GITHUB_ENV
+
+          echo "$VERSION"
+          echo "$DEVSTRING"
+
+      - name: Build package
+        run: |
+          conda install conda-build conda-verify
+          conda-build .conda --output-folder out-${{ matrix.os }}-${{ matrix.pythonVersion }}
+
+      - name: Publish package for release
+        if: contains(env.DEVSTRING, 'stable')
+        env:
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
+        run: |
+          conda install anaconda-client
+          anaconda upload --force out-${{ matrix.os }}-${{ matrix.pythonVersion }}/*/*.tar.bz2
+          rm out-${{ matrix.os }}-${{ matrix.pythonVersion }}/*/*.tar.bz2
+
+      - name: Publish development package
+        if: "!(contains(env.DEVSTRING, 'stable'))"
+        env:
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
+        run: |
+          conda install anaconda-client
+          anaconda upload -l dev --force out-${{ matrix.os }}-${{ matrix.pythonVersion }}/*/*.tar.bz2
+          rm out-${{ matrix.os }}-${{ matrix.pythonVersion }}/*/*.tar.bz2
+
+      - name: Build docs
+        run: |
+          mkdir ../../../spectrochempy_docs
+
+          echo "cloning spectrochempy.github.io repository"
+          git clone --branch=gh-pages --single-branch https://github.com/spectrochempy/spectrochempy.git ../../../spectrochempy_docs/html
+
+          echo "Recreating docs"
+          python docs/make.py --clean --html
+
+      - name: Deploy Github Pages
+        uses: JamesIves/github-pages-deploy-action@4.1.5
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: ../../../spectrochempy_docs/html/

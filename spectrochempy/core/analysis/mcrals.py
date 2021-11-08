@@ -409,7 +409,7 @@ class MCRALS(HasTraits):
     @property
     def Chard(self):
         """
-        The hard concentyration profiles
+        The hard concentration profiles
         """
         return self._Chard
 

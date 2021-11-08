@@ -12,7 +12,7 @@ __all__ = __slots__ = ['trim_ranges']
 
 from traitlets import HasTraits, List, Bool
 
-from spectrochempy.utils.traitlets import Range
+from spectrochempy.utils.traits import Range
 
 
 # ======================================================================================================================

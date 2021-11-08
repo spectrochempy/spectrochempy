@@ -330,7 +330,7 @@ class NDIO(HasTraits):
                     if val is None:
                         pass
 
-                    elif key in ['_meta', '_preferences']:
+                    elif key in ['_meta', '_ranges', '_preferences']:
                         setattr(obj, key, item_to_attr(getattr(obj, key), val))
 
                     elif key in ['_coordset']:
@@ -415,7 +415,7 @@ class NDIO(HasTraits):
         # compress and write zip file
         zipf = zipfile_factory(filename, mode="w", compression=zipfile.ZIP_DEFLATED)
         zipf.write(tmpfile, arcname=f'{self.name}.json')
-        tmpfile.unlink()
+        # tmpfile.unlink()
         zipf.close()
 
         self.filename = filename

@@ -10,7 +10,7 @@
 This module implements the base |NDArray| class.
 """
 
-__all__ = ['NDArray']
+__all__ = ['NDArray', 'DEFAULT_DIM_NAME']
 
 import copy as cpy
 from datetime import datetime, timezone
@@ -109,7 +109,7 @@ class NDArray(HasTraits):
     _filename = Union((Instance(pathlib.Path), Unicode()), allow_none=True)
 
     # ..................................................................................................................
-    def __init__(self, data=None, **kwargs):
+    def __init__(self, data=None, *args, **kwargs):
         """
         The basic |NDArray| object.
 
@@ -191,6 +191,7 @@ class NDArray(HasTraits):
         >>> import spectrochempy as scp
         >>> myarray = scp.NDArray([1., 2., 3.])
         """
+        super().__init__()
 
         # creation date
 
@@ -208,7 +209,7 @@ class NDArray(HasTraits):
         self._offset = kwargs.pop('offset', 0.0)
         self._size = kwargs.pop('size', 0)
 
-        self._accuracy = kwargs.pop('accuracy', None)
+        # self._accuracy = kwargs.pop('accuracy', None)
 
         if data is not None:
             self.data = data

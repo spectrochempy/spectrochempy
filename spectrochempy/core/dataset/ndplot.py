@@ -411,7 +411,10 @@ class NDPlot(HasTraits):
             self.ndaxes = self._fig.get_axes()
         else:
             # or create a new subplot
-            ax = self._fig.gca(projection=ax3d)
+            # ax = self._fig.gca(projection=ax3d) :: passing parameters DEPRECATED in matplotlib 3.4
+            # ---
+            ax = self._fig.add_subplot(projection=ax3d)
+
             ax.name = 'main'
             self.ndaxes['main'] = ax
 

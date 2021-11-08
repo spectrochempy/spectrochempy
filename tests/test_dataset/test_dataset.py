@@ -72,14 +72,14 @@ def test_2D_NDDataset(arr):
     else:
         assert ds.dtype == np.float32
     if ds.shape[-1] % 2 == 0:  # must be even
-        ds = scp.NDDataset(arr, dtype=np.complex)
+        ds = scp.NDDataset(arr, dtype=np.complex128)
         if ds.size == 0:
             assert ds.dtype is None
         else:
             assert ds.dtype == np.complex128
     else:
         with pytest.raises(ValueError):
-            ds = scp.NDDataset(arr, dtype=np.complex)
+            ds = scp.NDDataset(arr, dtype=np.complex128)
     if (arr.shape[-1] % 2) == 0 and (arr.shape[-2] % 2) == 0 and arr.ndim == 2:
         ds = scp.NDDataset(arr, dtype=np.quaternion)
         if ds.size == 0:
@@ -899,7 +899,7 @@ def test_nddataset_init_complex_1D_with_mask():
     assert d1.shape == (5,)
     assert d1._data.shape == (5,)
     assert d1.size == 5
-    assert d1.dtype == np.complex
+    assert d1.dtype == np.complex128
     assert d1.has_complex_dims
     assert d1.mask.shape[-1] == 5
     assert d1[2].data == d[2]

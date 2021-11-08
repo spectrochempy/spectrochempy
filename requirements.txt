@@ -1,12 +1,12 @@
 # pip install -r requirements.txt
 
-pint
+pint==0.16.1
 colorama
 setuptools_scm
 traittypes
 orderedset
 
-quadprog
+quadprog==0.1.9
 brukeropusreader
 numpy-quaternion
 nmrglue

@@ -28,9 +28,8 @@ from spectrochempy.utils import is_sequence, colored_output, convert_to_html
 # ======================================================================================================================
 class CoordSet(HasTraits):
     # Hidden attributes containing the collection of objects
-    _id = Unicode()
     _coords = List(allow_none=True)
-    _references = Dict({})
+    _references = Dict()
     _updated = Bool(False)
 
     # Hidden id and name of the object
@@ -690,8 +689,8 @@ class CoordSet(HasTraits):
     # ------------------------------------------------------------------------------------------------------------------
 
     # ..................................................................................................................
-    @staticmethod
-    def __dir__():
+    # @staticmethod
+    def __dir__(self):
         return ['coords', 'references', 'is_same_dim', 'name']
 
     # ..................................................................................................................
