@@ -128,7 +128,7 @@ jobs:
 # command to install code-climate dependencies
 
       - name: CodeClimate reporter (before build)
-        if: ${{ github.event_name != 'push' && matrix.pythonVersion == '3.9'}}
+        # if: ${{ github.event_name != 'push' && matrix.pythonVersion == '3.9'}}
         run: |
           # downloading cc-test-reporter
           curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter;
@@ -140,7 +140,7 @@ jobs:
           coverage run -m pytest -v tests
 
       - name: CodeClimate reporter (after build)
-        if: ${{ github.event_name != 'push' && matrix.pythonVersion == '3.9'}}
+        # if: ${{ github.event_name != 'push' && matrix.pythonVersion == '3.9'}}
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_REPORTER_ID }}
         run: |
