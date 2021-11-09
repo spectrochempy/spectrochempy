@@ -82,7 +82,7 @@ jobs:
       max-parallel: 3
       matrix:
         os: [ubuntu-latest, windows-latest] # , macOS-latest]
-        pythonVersion: [3.7, 3.8, 3.9]
+        pythonVersion: [3.9, 3.8, 3.7]
 
     steps:
       - name: Checkout code
@@ -110,5 +110,13 @@ jobs:
       - name: Lint with flake8
         run: flake8 .
 
-      - name: Test with pytest
-        run: pytest tests
+      - name: Test with coverage
+        run: coverage run -m pytest -v tests
+
+      - name: Notify to code-climate
+        uses: paambaati/codeclimate-action@v3.0.0
+        if: ${{ github.ref == 'master' && matrix..pythonVersion == '3.9'}}
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_REPORTER_ID }}
+        with:
+          coverageCommand: coverage xml
