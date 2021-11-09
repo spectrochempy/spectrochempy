@@ -60,6 +60,7 @@ dependencies:
     - scikit-image
     - coverage
     - black
+    - pre-commit
 
     # DEV: code and docs
     - jupytext
