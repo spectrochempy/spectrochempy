@@ -1,6 +1,4 @@
 name: Tests
-env:
-  CC_TEST_REPORTER_ID: ${{ secrets.CC_REPORTER_ID }}
 
 on:
   push:
@@ -143,6 +141,9 @@ jobs:
 
       - name: CodeClimate reporter (after build)
         # if: ${{ github.event_name != 'push' && matrix.pythonVersion == '3.9'}}
+        env:
+          env:
+            CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         run: |
           coverage xml
           ./cc-test-reporter after-build
