@@ -107,6 +107,11 @@ jobs:
         run: |
           python setup.py install
 
+      - name: Code formatting
+        run: |
+          conda install black
+          black .
+
       - name: Lint with flake8
         run: flake8 .
 
@@ -115,7 +120,7 @@ jobs:
 
       - name: Notify to code-climate
         uses: paambaati/codeclimate-action@v3.0.0
-        if: ${{ github.ref == 'master' && matrix..pythonVersion == '3.9'}}
+        if: ${{ github.ref == 'master' && matrix.pythonVersion == '3.9'}}
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_REPORTER_ID }}
         with:
