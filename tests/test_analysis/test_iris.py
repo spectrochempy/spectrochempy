@@ -2,12 +2,14 @@
 # flake8: noqa
 
 import os
+import pytest
 
 from spectrochempy.analysis.iris import IRIS
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import show
 
+ #pytestmark = pytest.mark.skip("WIP: iris dev on going")
 
 # import pytest
 # @pytest.mark.skip('do not work with workflow - need to solve this!')
