@@ -49,6 +49,7 @@ class Exporter(HasTraits):
             if "filetypes" not in kwargs:
                 kwargs["filetypes"] = list(self.filetypes.values())
                 if args and args[0] is not None:  # filename
+                    args.append(False)  # save_as = False
                     protocol = self.protocols[pathclean(args[0]).suffix]
                     kwargs["filetypes"] = [self.filetypes[protocol]]
             filename = check_filename_to_save(self.object, *args, **kwargs)
