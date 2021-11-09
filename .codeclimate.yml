@@ -24,6 +24,10 @@ checks:
   similar-code:
     config:
       threshold: 50
+  nested-control-flow:
+    config:
+      threshold: 4
+
 exclude_patterns:
   - ".ci/"
   - ".git/"
