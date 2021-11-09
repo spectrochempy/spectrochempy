@@ -13,7 +13,7 @@ This module essentially define a class :class:`Isotopes` which handle all
 necessary features of NMR nuclei, such as their spin, larmor frequency and
 so on.
 """
-__all__ = ['Isotopes']
+__all__ = ["Isotopes"]
 
 import pathlib
 import re
@@ -78,7 +78,7 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
     'aluminium'
     """
 
-    _nucleus = ''
+    _nucleus = ""
 
     # ------------------------------------------------------------------------------------------------------------------
     # isotope / alias of nucleus
@@ -95,7 +95,7 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
     @property
     def spin(self):
         """Spin quantum number of the current nucleus"""
-        return Fraction(self[self.nucleus]['spin'])
+        return Fraction(self[self.nucleus]["spin"])
 
     # ===========================================================================
     # Z
@@ -103,7 +103,7 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
     @property
     def Z(self):
         """Atomic number  of the current nucleus"""
-        return self[self.nucleus]['Z']
+        return self[self.nucleus]["Z"]
 
     # ===========================================================================
     # A
@@ -111,7 +111,7 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
     @property
     def A(self):
         """Atomic mass  of the current nucleus"""
-        return self[self.nucleus]['A']
+        return self[self.nucleus]["A"]
 
     # ===========================================================================
     # full name
@@ -119,7 +119,7 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
     @property
     def name(self):
         """the name of the nucleus"""
-        return self[self.nucleus]['name'].strip()
+        return self[self.nucleus]["name"].strip()
 
     # ===========================================================================
     # gamma
@@ -127,8 +127,8 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
     @property
     def gamma(self):
         """gyromagnetic ratio of the current nucleus"""
-        muN = ur.elementary_charge / ur.proton_mass / 2. / (2. * np.pi)
-        return (self[self.nucleus]['gamma'] * muN).to('MHz/T')
+        muN = ur.elementary_charge / ur.proton_mass / 2.0 / (2.0 * np.pi)
+        return (self[self.nucleus]["gamma"] * muN).to("MHz/T")
 
     # ===========================================================================
     # _get_abundance
@@ -136,7 +136,7 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
     @property
     def abundance(self):
         """natural abundance in percent of the current nucleus"""
-        return self[self.nucleus]['abundance']
+        return self[self.nucleus]["abundance"]
 
     # ===========================================================================
     # _get_Q
@@ -149,9 +149,9 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
                       'of the current nucleus
         """
         try:
-            return float(self[self.nucleus]['Q']) * 1000. * ur.mbarn
+            return float(self[self.nucleus]["Q"]) * 1000.0 * ur.mbarn
         except Exception:
-            return 0. * ur.barn
+            return 0.0 * ur.barn
 
     # ------------------------------------------------------------------------------------------------------------------
     # symbol
@@ -159,7 +159,7 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
     @property
     def symbol(self):
         """Symbol of the current nucleus"""
-        return self[self.nucleus]['symbol'].strip()
+        return self[self.nucleus]["symbol"].strip()
 
     # ------------------------------------------------------------------------------------------------------------------
     # Stability
@@ -169,7 +169,7 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
         """
         The stability of the current nucleus
         """
-        return self[self.nucleus]['stability'].strip()
+        return self[self.nucleus]["stability"].strip()
 
     @property
     def nucleus(self):
@@ -180,7 +180,7 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
         if nuc in list(self.keys()):
             return nuc
 
-        p = re.compile(r'^([A-Z,a-z]+)[_-]*([0-9]+$)')
+        p = re.compile(r"^([A-Z,a-z]+)[_-]*([0-9]+$)")
         m = re.match(p, nuc).groups()
 
         nuc = m[1] + m[0]  # transform "e.g., Al27->27Al, ou AL-27 to 27Al"
@@ -188,21 +188,21 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
             return nuc
 
         else:
-            raise KeyError(f'Unknown isotope symbol : {nuc}')
+            raise KeyError(f"Unknown isotope symbol : {nuc}")
 
     # ------------------------------------------------------------------------------------------------------------------
     # initializer
     # ------------------------------------------------------------------------------------------------------------------
-    def __init__(self, nucleus='1H'):
+    def __init__(self, nucleus="1H"):
         # filename = resource_filename(PKG, 'isotopes.csv')
         DATABASES = pathlib.Path(prefs.databases_directory)
-        filename = DATABASES / 'isotopes.csv'
+        filename = DATABASES / "isotopes.csv"
         txt = filename.read_text()
-        arr = txt.replace(" ", "").split('\n')
-        keys = arr[0].split(',')
+        arr = txt.replace(" ", "").split("\n")
+        keys = arr[0].split(",")
         dic = {}
         for line in arr[1:]:
-            vals = line.split(',')
+            vals = line.split(",")
             dic[vals[0]] = dict(zip(keys[1:], vals[1:]))
         self._data = self._isotopes_validate(dic)
         self.nucleus = nucleus
@@ -227,13 +227,22 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
             return self[key]
 
     def __setattr__(self, key, value):
-        if key not in ['nucleus', 'readonly', '_data', '_trait_notifiers', '_trait_values', '_trait_validators',
-                       '_cross_validation_lock']:
+        if key not in [
+            "nucleus",
+            "readonly",
+            "_data",
+            "_trait_notifiers",
+            "_trait_values",
+            "_trait_validators",
+            "_cross_validation_lock",
+        ]:
             self[key] = value
-        elif key == 'nucleus':
-            self.__dict__['_nucleus'] = value
+        elif key == "nucleus":
+            self.__dict__["_nucleus"] = value
         else:
-            self.__dict__[key] = value  # to avoid a recursive call  # we can not use  # self._readonly = value!
+            self.__dict__[
+                key
+            ] = value  # to avoid a recursive call  # we can not use  # self._readonly = value!
 
     def _isotopes_validate(self, pv):
 
@@ -241,15 +250,17 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
             if not key or not item:
                 continue
 
-            pv[key] = {'name': item['name'],
-                       'symbol': item['symbol'],
-                       'A': int(item['A']),
-                       'Q': float(item['quadrupole']),
-                       'Z': int(item['Z']),
-                       'gamma': float(item['gn']),
-                       'spin': float(item['spin']),
-                       'abundance': float(item['abundance']),
-                       'stablity': item['stability'], }
+            pv[key] = {
+                "name": item["name"],
+                "symbol": item["symbol"],
+                "A": int(item["A"]),
+                "Q": float(item["quadrupole"]),
+                "Z": int(item["Z"]),
+                "gamma": float(item["gn"]),
+                "spin": float(item["spin"]),
+                "abundance": float(item["abundance"]),
+                "stablity": item["stability"],
+            }
 
         return pv
 
@@ -258,5 +269,5 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
 
 
 #   ======================================================================================================================
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

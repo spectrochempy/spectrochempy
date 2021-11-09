@@ -7,8 +7,15 @@
 
 import warnings
 
-__all__ = ['SpectroChemPyWarning', 'SpectroChemPyException', 'UnitsCompatibilityError', 'DimensionsCompatibilityError',
-           'CoordinateMismatchError', 'ProtocolError', 'deprecated', ]
+__all__ = [
+    "SpectroChemPyWarning",
+    "SpectroChemPyException",
+    "UnitsCompatibilityError",
+    "DimensionsCompatibilityError",
+    "CoordinateMismatchError",
+    "ProtocolError",
+    "deprecated",
+]
 
 
 # ======================================================================================================================
@@ -51,10 +58,11 @@ class CoordinateMismatchError(SpectroChemPyException):
 
 
 class ProtocolError(SpectroChemPyException):
-
     def __init__(self, protocol, available_protocols):
-        print(f'The `{protocol}` protocol is unknown or not yet implemented:\n'
-              f'it is expected to be one of {tuple(available_protocols)}')
+        print(
+            f"The `{protocol}` protocol is unknown or not yet implemented:\n"
+            f"it is expected to be one of {tuple(available_protocols)}"
+        )
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -70,12 +78,16 @@ def deprecated(message):
 
     def deprecation_decorator(func):
         def wrapper(*args, **kwargs):
-            warnings.warn("The function `{} is deprecated : {}".format(func.__name__, message), DeprecationWarning)
+            warnings.warn(
+                "The function `{} is deprecated : {}".format(func.__name__, message),
+                DeprecationWarning,
+            )
             return func(*args, **kwargs)
 
         return wrapper
 
     return deprecation_decorator
+
 
 # ======================================================================================================================
 # EOF

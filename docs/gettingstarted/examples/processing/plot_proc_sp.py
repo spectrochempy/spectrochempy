@@ -17,14 +17,16 @@ import spectrochempy as scp
 import os
 
 
-path = os.path.join(scp.preferences.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d')
+path = os.path.join(
+    scp.preferences.datadir, "nmrdata", "bruker", "tests", "nmr", "topspin_1d"
+)
 dataset1D = scp.read_topspin(path, expno=1, remove_digital_filter=True)
 
 ########################################################################################################################
 # Normalize the dataset values and reduce the time domain
 
 dataset1D /= dataset1D.real.data.max()  # normalize
-dataset1D = dataset1D[0.:15000.]
+dataset1D = dataset1D[0.0:15000.0]
 
 ########################################################################################################################
 # Apply Sine bell window apodization with parameter ssb=2, which correspond to a cosine function
@@ -57,21 +59,32 @@ new5, curve5 = dataset1D.sinm(ssb=8, retapod=True, inplace=False)
 ########################################################################################################################
 # Plotting
 
-p = dataset1D.plot(zlim=(-2, 2), color='k')
+p = dataset1D.plot(zlim=(-2, 2), color="k")
 
-curve1.plot(color='r', clear=False)
-new1.plot(data_only=True, color='r', clear=False, label=' sinm with ssb= 2 (cosine window)')
+curve1.plot(color="r", clear=False)
+new1.plot(
+    data_only=True, color="r", clear=False, label=" sinm with ssb= 2 (cosine window)"
+)
 
-curve2.plot(color='b', clear=False)
-new2.plot(data_only=True, color='b', clear=False, label=' sinm with ssb= 1 (sine window)')
+curve2.plot(color="b", clear=False)
+new2.plot(
+    data_only=True, color="b", clear=False, label=" sinm with ssb= 1 (sine window)"
+)
 
-curve3.plot(color='m', clear=False)
-new3.plot(data_only=True, color='m', clear=False, label=' qsin with ssb= 2')
+curve3.plot(color="m", clear=False)
+new3.plot(data_only=True, color="m", clear=False, label=" qsin with ssb= 2")
 
-curve4.plot(color='g', clear=False)
-new4.plot(data_only=True, color='g', clear=False, label=' qsin with ssb= 1')
+curve4.plot(color="g", clear=False)
+new4.plot(data_only=True, color="g", clear=False, label=" qsin with ssb= 1")
 
-curve5.plot(color='c', ls='--', clear=False)
-new5.plot(data_only=True, color='c', ls='--', clear=False, label=' sinm with ssb= 8', legend='best')
+curve5.plot(color="c", ls="--", clear=False)
+new5.plot(
+    data_only=True,
+    color="c",
+    ls="--",
+    clear=False,
+    label=" sinm with ssb= 8",
+    legend="best",
+)
 
 # scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

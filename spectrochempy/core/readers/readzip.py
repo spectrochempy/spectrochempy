@@ -5,7 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-__all__ = ['read_zip']
+__all__ = ["read_zip"]
 __dataset_methods__ = __all__
 
 import io
@@ -95,9 +95,9 @@ def read_zip(*paths, **kwargs):
     >>> print(A)
     NDDataset: [float64]  a.u. (shape: (y:50, x:2843))
     """
-    kwargs['filetypes'] = ['Compressed files (*.zip)']
+    kwargs["filetypes"] = ["Compressed files (*.zip)"]
     # TODO: allows other type of compressed files
-    kwargs['protocol'] = ['zip']
+    kwargs["protocol"] = ["zip"]
     importer = Importer()
     return importer(*paths, **kwargs)
 
@@ -105,6 +105,7 @@ def read_zip(*paths, **kwargs):
 # ======================================================================================================================
 # Private functions
 # ======================================================================================================================
+
 
 @importermethod
 def _read_zip(*args, **kwargs):
@@ -114,17 +115,17 @@ def _read_zip(*args, **kwargs):
 
     # read zip file
     _, filename = args
-    content = kwargs.pop('content', None)
+    content = kwargs.pop("content", None)
 
     if content:
         fid = io.BytesIO(content)
     else:
-        fid = open(filename, 'rb')
+        fid = open(filename, "rb")
 
     with zipfile.ZipFile(fid) as zf:
 
         filelist = zf.filelist
-        only = kwargs.pop('only', len(filelist))
+        only = kwargs.pop("only", len(filelist))
 
         datasets = []
 
@@ -163,17 +164,24 @@ def _read_zip(*args, **kwargs):
 
         # seek the parent directory containing the files to read
         for file in filelist:
-            if not file.filename.startswith('__') and file.is_dir():
+            if not file.filename.startswith("__") and file.is_dir():
                 parent = file.filename
                 break
 
         count = 0
         for file in filelist:
-            if not file.is_dir() and file.filename.startswith(parent) and 'DS_Store' not in file.filename:
+            if (
+                not file.is_dir()
+                and file.filename.startswith(parent)
+                and "DS_Store" not in file.filename
+            ):
                 # read it
-                datasets.append(NDDataset.read({
-                        file.filename: zf.read(file.filename)
-                        }, origin=kwargs.get('origin', None)))
+                datasets.append(
+                    NDDataset.read(
+                        {file.filename: zf.read(file.filename)},
+                        origin=kwargs.get("origin", None),
+                    )
+                )
                 count += 1
                 if count == only:
                     break
@@ -181,5 +189,5 @@ def _read_zip(*args, **kwargs):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

@@ -5,9 +5,9 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-__all__ = ['simps', 'trapz']
+__all__ = ["simps", "trapz"]
 
-__dataset_methods__ = ['simps', 'trapz']
+__dataset_methods__ = ["simps", "trapz"]
 
 import scipy.integrate
 
@@ -43,7 +43,7 @@ def trapz(dataset, *args, **kwargs):
 
     # handle the various syntax to pass the axis
     if args:
-        kwargs['dim'] = args[0]
+        kwargs["dim"] = args[0]
         args = []
 
     dim = dataset._get_dims_from_args(*args, **kwargs)
@@ -60,13 +60,13 @@ def trapz(dataset, *args, **kwargs):
     new._data = data
 
     del new._dims[axis]
-    if new.implements('NDDataset') and new._coordset and (dim in new._coordset.names):
+    if new.implements("NDDataset") and new._coordset and (dim in new._coordset.names):
         idx = new._coordset.names.index(dim)
         del new._coordset.coords[idx]
 
-    new.title = 'area'
+    new.title = "area"
     new._units = dataset.units * dataset.coord(dim).units
-    new._history = ['Dataset resulting from application of `trapz` method']
+    new._history = ["Dataset resulting from application of `trapz` method"]
 
     return new
 
@@ -112,7 +112,7 @@ def simps(dataset, *args, **kwargs):
 
     # handle the various syntax to pass the axis
     if args:
-        kwargs['dim'] = args[0]
+        kwargs["dim"] = args[0]
         args = []
 
     dim = dataset._get_dims_from_args(*args, **kwargs)
@@ -121,7 +121,12 @@ def simps(dataset, *args, **kwargs):
     axis = dataset._get_dims_index(dim)
     axis = axis[0] if axis and not dataset.is_1d else None
 
-    data = scipy.integrate.simps(dataset.data, x=dataset.coord(dim).data, axis=axis, even=kwargs.get('even', 'avg'))
+    data = scipy.integrate.simps(
+        dataset.data,
+        x=dataset.coord(dim).data,
+        axis=axis,
+        even=kwargs.get("even", "avg"),
+    )
     if dataset.coord(dim).reversed:
         data *= -1
 
@@ -129,12 +134,12 @@ def simps(dataset, *args, **kwargs):
     new._data = data
 
     del new._dims[axis]
-    if new.implements('NDDataset') and new._coordset and (dim in new._coordset.names):
+    if new.implements("NDDataset") and new._coordset and (dim in new._coordset.names):
         idx = new._coordset.names.index(dim)
         del new._coordset.coords[idx]
 
-    new.title = 'area'
+    new.title = "area"
     new._units = dataset.units * dataset.coord(dim).units
-    new._history = ['Dataset resulting from application of `simps` method']
+    new._history = ["Dataset resulting from application of `simps` method"]
 
     return new

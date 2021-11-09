@@ -14,7 +14,9 @@ prefs = preferences
 
 # @pytest.mark.skip
 def test_1D():
-    dataset = NDDataset.read_omnic(os.path.join(prefs.datadir, 'irdata', 'nh4y-activation.spg'))
+    dataset = NDDataset.read_omnic(
+        os.path.join(prefs.datadir, "irdata", "nh4y-activation.spg")
+    )
 
     # get first spectrum
     nd0 = dataset[0]
@@ -83,12 +85,12 @@ def test_1D():
     # os.remove('multiple_IR_dataset_1D_scatter.png')
 
     # plot 1D column
-    col = dataset[:, 3500.]  # note the indexing using wavenumber!
+    col = dataset[:, 3500.0]  # note the indexing using wavenumber!
     _ = col.plot_scatter()
 
     show()
 
 
 # ======================================================================================================================
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

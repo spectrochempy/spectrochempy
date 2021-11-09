@@ -7,15 +7,16 @@
 """
 Module to perform fitting of 1D or n-D spectral data.
 """
-__all__ = ['Fit']
+__all__ = ["Fit"]
 
 __dataset_methods__ = []
 
 import sys
 import re
 from warnings import warn
-from traitlets import (HasTraits, Bool, Any, List, Instance)
+from traitlets import HasTraits, Bool, Any, List, Instance
 import numpy as np
+
 # IPython
 from IPython import display
 
@@ -29,6 +30,7 @@ from spectrochempy.core import preferences, info_, INFO
 # ======================================================================================================================
 #  Fit: main object to handle a fit
 # ======================================================================================================================
+
 
 class Fit(HasTraits):
     """
@@ -58,7 +60,7 @@ class Fit(HasTraits):
 
     _ = Any()
 
-    datasets = List(Instance('spectrochempy.core.dataset.nddataset.NDDataset'))
+    datasets = List(Instance("spectrochempy.core.dataset.nddataset.NDDataset"))
 
     parameterscript = Instance(ParameterScript)
 
@@ -71,7 +73,9 @@ class Fit(HasTraits):
         if args:
             # look in args
             if not isinstance(args[0], list):
-                self.datasets = [args[0], ]
+                self.datasets = [
+                    args[0],
+                ]
             else:
                 self.datasets = args[0]
                 # we create a list of dataset in all case
@@ -81,22 +85,28 @@ class Fit(HasTraits):
             return
 
         # get parameters form script
-        self.parameterscript = ParameterScript(datasets=self.datasets,
-                                               script=script)
+        self.parameterscript = ParameterScript(datasets=self.datasets, script=script)
         if self.fp is None:
             # for unknown reason for now, this sometimes happens during tests
-            warn('error with fp')
+            warn("error with fp")
 
         # sequence = kargs.get('sequence', 'ideal_pulse')
         # self.sequence = PulseSequence(type=sequence)
 
-        self.mode = kwargs.pop('mode', None)
-        self.method = kwargs.pop('method', None)
-        self.silent = kwargs.pop('silent', False)
+        self.mode = kwargs.pop("mode", None)
+        self.method = kwargs.pop("method", None)
+        self.silent = kwargs.pop("silent", False)
 
         for exp_idx, dataset in enumerate(self.datasets):
-            dataset.modeldata, dataset.modelnames, dataset.model_A, dataset.model_a, dataset.model_b = \
-                self._get_modeldata(dataset, exp_idx)  # lgtm [py/mismatched-multiple-assignment]
+            (
+                dataset.modeldata,
+                dataset.modelnames,
+                dataset.model_A,
+                dataset.model_a,
+                dataset.model_b,
+            ) = self._get_modeldata(
+                dataset, exp_idx
+            )  # lgtm [py/mismatched-multiple-assignment]
 
     # *******************************************************************************
     # public methodss
@@ -104,8 +114,7 @@ class Fit(HasTraits):
 
     @staticmethod
     def script_default():
-        """ Return a default script
-        """
+        """Return a default script"""
         return """
         #-----------------------------------------------------------
         # syntax for parameters definition:
@@ -136,8 +145,8 @@ class Fit(HasTraits):
     def dry_run(self):
         return self.run(dry=True)
 
-    def run(self, maxiter=100, maxfun=None, every=10, method='simplex', **kwargs):
-        """ Main fitting procedure
+    def run(self, maxiter=100, maxfun=None, every=10, method="simplex", **kwargs):
+        """Main fitting procedure
 
         Parameters
         ----------
@@ -152,9 +161,9 @@ class Fit(HasTraits):
             level = preferences.log_level
             if level > INFO:
                 preferences.log_level = INFO
-            info_('*' * 50)
-            info_('  Entering fitting procedure')
-            info_('*' * 50)
+            info_("*" * 50)
+            info_("  Entering fitting procedure")
+            info_("*" * 50)
 
         global niter, chi2, everyiter, ncalls
         ncalls = 0
@@ -187,7 +196,7 @@ class Fit(HasTraits):
                 # else:
                 #    mdata = modeldata.values
 
-                merror = 1.
+                merror = 1.0
                 # if dataset.is_2d:
                 #     if constraints:
                 #
@@ -232,8 +241,9 @@ class Fit(HasTraits):
 
             if not self.silent:
                 display.clear_output(wait=True)
-                info_(("Iterations: %d, Calls: %d (chi2: %.5f)" % (
-                        niter, ncalls, chi2)))
+                info_(
+                    ("Iterations: %d, Calls: %d (chi2: %.5f)" % (niter, ncalls, chi2))
+                )
                 sys.stdout.flush()
 
         # end callback function ---------------------------------------------------
@@ -243,13 +253,16 @@ class Fit(HasTraits):
         dry = kwargs.get("dry", False)
 
         if not dry:
-            fp, fopt = optimize(funchi2, fp,
-                                args=(self.datasets,),
-                                maxfun=maxfun,
-                                maxiter=maxiter,
-                                method=method,
-                                constraints=kwargs.get('constraints', None),
-                                callback=callback)
+            fp, fopt = optimize(
+                funchi2,
+                fp,
+                args=(self.datasets,),
+                maxfun=maxfun,
+                maxiter=maxiter,
+                method=method,
+                constraints=kwargs.get("constraints", None),
+                callback=callback,
+            )
 
         # replace the previous script with new fp parameters
         self.parameterscript.script = str(fp)
@@ -257,18 +270,23 @@ class Fit(HasTraits):
         if not self.silent:
             # log.info the results
             info_("\n")
-            info_('*' * 50)
+            info_("*" * 50)
             if not dry:
                 info_("  Result:")
             else:
                 info_("  Starting parameters:")
-            info_('*' * 50)
+            info_("*" * 50)
             info_(self.parameterscript.script)
 
         # store the models
         for exp_idx, dataset in enumerate(self.datasets):
-            dataset.modeldata, dataset.modelnames, dataset.model_A, dataset.model_a, dataset.model_b = \
-                self._get_modeldata(dataset, exp_idx)
+            (
+                dataset.modeldata,
+                dataset.modelnames,
+                dataset.model_A,
+                dataset.model_a,
+                dataset.model_b,
+            ) = self._get_modeldata(dataset, exp_idx)
 
         # Reset Log_level
         if not self.silent:
@@ -323,7 +341,7 @@ class Fit(HasTraits):
         modeldata = np.zeros((nbmodels + 2, x.size), dtype=np.float64)
 
         if nbmodels < 1:
-            names = ['baseline', 'modelsum']
+            names = ["baseline", "modelsum"]
             return modeldata, names
 
         # Calculates model data
@@ -331,11 +349,13 @@ class Fit(HasTraits):
         # The first row (i=0) of the modeldata array is the baseline,
         # so we fill the array starting at row 1
         row = 0
-        names = ['baseline', ]
+        names = [
+            "baseline",
+        ]
 
         for model in models:
             calc = getmodel(x, modelname=model, par=parameters)  # , dataset=dataset)
-            if not model.startswith('baseline'):
+            if not model.startswith("baseline"):
                 row += 1
                 modeldata[row] = calc
                 names.append(model)
@@ -344,10 +364,10 @@ class Fit(HasTraits):
 
         # make the sum
         modeldata[row + 1] = modeldata.sum(axis=0)
-        names.append('modelsum')
+        names.append("modelsum")
 
         # remove unused column
-        modeldata = modeldata[:row + 2]
+        modeldata = modeldata[: row + 2]
 
         xi = np.arange(float(x.size))
         A, a, b = self._ampbas(xi, expedata, modeldata[-1])
@@ -399,8 +419,9 @@ class Fit(HasTraits):
                 try:
                     new_param[key] = eval(str(refpar))
                 except Exception:
-                    raise ValueError('Cannot evaluate the expression %s: %s'
-                                     % (key, param[refpar]))
+                    raise ValueError(
+                        "Cannot evaluate the expression %s: %s" % (key, param[refpar])
+                    )
 
                 new_param.fixed[key] = True
                 new_param.reference[key] = True  # restore it for the next call
@@ -429,20 +450,41 @@ class Fit(HasTraits):
         sEI = sum(xi * expe)
         sId = sum(xi ** 2)
 
-        a = (-sE * (sF * sFI - sFd * sI) + sEF * (n * sFI - sF * sI) - sEI * (
-                n * sFd - sF ** 2)
-             ) / (
-                    n * sFI ** 2 - n * sFd * sId + sF ** 2 * sId - 2 * sF * sFI * sI + sFd * sI ** 2)
+        a = (
+            -sE * (sF * sFI - sFd * sI)
+            + sEF * (n * sFI - sF * sI)
+            - sEI * (n * sFd - sF ** 2)
+        ) / (
+            n * sFI ** 2
+            - n * sFd * sId
+            + sF ** 2 * sId
+            - 2 * sF * sFI * sI
+            + sFd * sI ** 2
+        )
 
-        A = (sE * (sF * sId - sFI * sI) - sEF * (n * sId - sI ** 2) + sEI * (
-                n * sFI - sF * sI)
-             ) / (
-                    n * sFI ** 2 - n * sFd * sId + sF ** 2 * sId - 2 * sF * sFI * sI + sFd * sI ** 2)
+        A = (
+            sE * (sF * sId - sFI * sI)
+            - sEF * (n * sId - sI ** 2)
+            + sEI * (n * sFI - sF * sI)
+        ) / (
+            n * sFI ** 2
+            - n * sFd * sId
+            + sF ** 2 * sId
+            - 2 * sF * sFI * sI
+            + sFd * sI ** 2
+        )
 
-        b = (sE * (sFI ** 2 - sFd * sId) + sEF * (sF * sId - sFI * sI) - sEI * (
-                sF * sFI - sFd * sI)
-             ) / (
-                    n * sFI ** 2 - n * sFd * sId + sF ** 2 * sId - 2 * sF * sFI * sI + sFd * sI ** 2)
+        b = (
+            sE * (sFI ** 2 - sFd * sId)
+            + sEF * (sF * sId - sFI * sI)
+            - sEI * (sF * sFI - sFd * sI)
+        ) / (
+            n * sFI ** 2
+            - n * sFd * sId
+            + sF ** 2 * sId
+            - 2 * sF * sFI * sI
+            + sFd * sI ** 2
+        )
 
         # in case the modeldata is zero, to avoid further errors
         if np.isnan(A):
@@ -471,74 +513,237 @@ class Fit(HasTraits):
         sId = sum(xi ** 2)
         sJd = sum(yj ** 2)
 
-        c = (sE * (
-                -m * n * sFd * sId * sJd + m * sFJ ** 2 * sId + n * sFI ** 2 * sJd - 2 * sFI * sFJ * sIJ
-                + sFd * sIJ ** 2) + sEF * (
-                     m * n * sF * sId * sJd
-                     - m * n * sFI * sI * sJd - m * n * sFJ * sId * sJ + m * sFJ * sI * sIJ + n * sFI * sIJ * sJ
-                     - sF * sIJ ** 2) + sEI * (
-                     m * n * sFd * sI * sJd
-                     - m * sFJ ** 2 * sI - n * sF * sFI * sJd + n * sFI * sFJ * sJ - n * sFd * sIJ * sJ
-                     + sF * sFJ * sIJ) + sEJ * (
-                     m * n * sFd * sId * sJ - m * sF * sFJ * sId
-                     + m * sFI * sFJ * sI - m * sFd * sI * sIJ - n * sFI ** 2 * sJ + sF * sFI * sIJ)) / (
-                    -m ** 2 * n ** 2 * sFd * sId * sJd + m ** 2 * n * sFJ ** 2 * sId
-                    + m ** 2 * n * sFd * sI ** 2 * sJd - m ** 2 * sFJ ** 2 * sI ** 2 + m * n ** 2 * sFI ** 2 * sJd
-                    + m * n ** 2 * sFd * sId * sJ ** 2 + m * n * sF ** 2 * sId * sJd
-                    - 2 * m * n * sF * sFI * sI * sJd - 2 * m * n * sF * sFJ * sId * sJ
-                    + 2 * m * n * sFI * sFJ * sI * sJ - 2 * m * n * sFI * sFJ * sIJ - 2 * m * n * sFd * sI * sIJ * sJ
-                    + m * n * sFd * sIJ ** 2 + 2 * m * sF * sFJ * sI * sIJ - n ** 2 * sFI ** 2 * sJ ** 2
-                    + 2 * n * sF * sFI * sIJ * sJ - sF ** 2 * sIJ ** 2)
+        c = (
+            sE
+            * (
+                -m * n * sFd * sId * sJd
+                + m * sFJ ** 2 * sId
+                + n * sFI ** 2 * sJd
+                - 2 * sFI * sFJ * sIJ
+                + sFd * sIJ ** 2
+            )
+            + sEF
+            * (
+                m * n * sF * sId * sJd
+                - m * n * sFI * sI * sJd
+                - m * n * sFJ * sId * sJ
+                + m * sFJ * sI * sIJ
+                + n * sFI * sIJ * sJ
+                - sF * sIJ ** 2
+            )
+            + sEI
+            * (
+                m * n * sFd * sI * sJd
+                - m * sFJ ** 2 * sI
+                - n * sF * sFI * sJd
+                + n * sFI * sFJ * sJ
+                - n * sFd * sIJ * sJ
+                + sF * sFJ * sIJ
+            )
+            + sEJ
+            * (
+                m * n * sFd * sId * sJ
+                - m * sF * sFJ * sId
+                + m * sFI * sFJ * sI
+                - m * sFd * sI * sIJ
+                - n * sFI ** 2 * sJ
+                + sF * sFI * sIJ
+            )
+        ) / (
+            -(m ** 2) * n ** 2 * sFd * sId * sJd
+            + m ** 2 * n * sFJ ** 2 * sId
+            + m ** 2 * n * sFd * sI ** 2 * sJd
+            - m ** 2 * sFJ ** 2 * sI ** 2
+            + m * n ** 2 * sFI ** 2 * sJd
+            + m * n ** 2 * sFd * sId * sJ ** 2
+            + m * n * sF ** 2 * sId * sJd
+            - 2 * m * n * sF * sFI * sI * sJd
+            - 2 * m * n * sF * sFJ * sId * sJ
+            + 2 * m * n * sFI * sFJ * sI * sJ
+            - 2 * m * n * sFI * sFJ * sIJ
+            - 2 * m * n * sFd * sI * sIJ * sJ
+            + m * n * sFd * sIJ ** 2
+            + 2 * m * sF * sFJ * sI * sIJ
+            - n ** 2 * sFI ** 2 * sJ ** 2
+            + 2 * n * sF * sFI * sIJ * sJ
+            - sF ** 2 * sIJ ** 2
+        )
 
-        a = (n * sEF * (
-                m * n * sFI * sJd - m * sF * sI * sJd + m * sFJ * sI * sJ - m * sFJ * sIJ
-                - n * sFI * sJ ** 2 + sF * sIJ * sJ) + n * sEI * (
-                     -m * n * sFd * sJd
-                     + m * sFJ ** 2 + n * sFd * sJ ** 2 + sF ** 2 * sJd - 2 * sF * sFJ * sJ) + sE * (
-                     m * n * sFd * sI * sJd - m * sFJ ** 2 * sI - n * sF * sFI * sJd
-                     + n * sFI * sFJ * sJ - n * sFd * sIJ * sJ + sF * sFJ * sIJ) - sEJ * (
-                     m * n * sFI * sFJ + m * n * sFd * sI * sJ - m * n * sFd * sIJ - m * sF * sFJ * sI
-                     - n * sF * sFI * sJ + sF ** 2 * sIJ)) / (
-                    -m ** 2 * n ** 2 * sFd * sId * sJd + m ** 2 * n * sFJ ** 2 * sId + m ** 2 * n * sFd * sI ** 2 * sJd
-                    - m ** 2 * sFJ ** 2 * sI ** 2 + m * n ** 2 * sFI ** 2 * sJd + m * n ** 2 * sFd * sId * sJ ** 2 +
-                    m * n * sF ** 2 * sId * sJd - 2 * m * n * sF * sFI * sI * sJd
-                    - 2 * m * n * sF * sFJ * sId * sJ + 2 * m * n * sFI * sFJ * sI * sJ - 2 * m * n * sFI * sFJ * sIJ
-                    - 2 * m * n * sFd * sI * sIJ * sJ + m * n * sFd * sIJ ** 2
-                    + 2 * m * sF * sFJ * sI * sIJ - n ** 2 * sFI ** 2 * sJ ** 2 + 2 * n * sF * sFI * sIJ * sJ
-                    - sF ** 2 * sIJ ** 2)
+        a = (
+            n
+            * sEF
+            * (
+                m * n * sFI * sJd
+                - m * sF * sI * sJd
+                + m * sFJ * sI * sJ
+                - m * sFJ * sIJ
+                - n * sFI * sJ ** 2
+                + sF * sIJ * sJ
+            )
+            + n
+            * sEI
+            * (
+                -m * n * sFd * sJd
+                + m * sFJ ** 2
+                + n * sFd * sJ ** 2
+                + sF ** 2 * sJd
+                - 2 * sF * sFJ * sJ
+            )
+            + sE
+            * (
+                m * n * sFd * sI * sJd
+                - m * sFJ ** 2 * sI
+                - n * sF * sFI * sJd
+                + n * sFI * sFJ * sJ
+                - n * sFd * sIJ * sJ
+                + sF * sFJ * sIJ
+            )
+            - sEJ
+            * (
+                m * n * sFI * sFJ
+                + m * n * sFd * sI * sJ
+                - m * n * sFd * sIJ
+                - m * sF * sFJ * sI
+                - n * sF * sFI * sJ
+                + sF ** 2 * sIJ
+            )
+        ) / (
+            -(m ** 2) * n ** 2 * sFd * sId * sJd
+            + m ** 2 * n * sFJ ** 2 * sId
+            + m ** 2 * n * sFd * sI ** 2 * sJd
+            - m ** 2 * sFJ ** 2 * sI ** 2
+            + m * n ** 2 * sFI ** 2 * sJd
+            + m * n ** 2 * sFd * sId * sJ ** 2
+            + m * n * sF ** 2 * sId * sJd
+            - 2 * m * n * sF * sFI * sI * sJd
+            - 2 * m * n * sF * sFJ * sId * sJ
+            + 2 * m * n * sFI * sFJ * sI * sJ
+            - 2 * m * n * sFI * sFJ * sIJ
+            - 2 * m * n * sFd * sI * sIJ * sJ
+            + m * n * sFd * sIJ ** 2
+            + 2 * m * sF * sFJ * sI * sIJ
+            - n ** 2 * sFI ** 2 * sJ ** 2
+            + 2 * n * sF * sFI * sIJ * sJ
+            - sF ** 2 * sIJ ** 2
+        )
 
-        A = (m * n * sEF * (
-                -m * n * sId * sJd + m * sI ** 2 * sJd + n * sId * sJ ** 2 - 2 * sI * sIJ * sJ + sIJ ** 2) + m * sEJ * (
-                     m * n * sFJ * sId - m * sFJ * sI ** 2
-                     - n * sF * sId * sJ + n * sFI * sI * sJ - n * sFI * sIJ + sF * sI * sIJ) + n * sEI * (
-                     m * n * sFI * sJd - m * sF * sI * sJd + m * sFJ * sI * sJ
-                     - m * sFJ * sIJ - n * sFI * sJ ** 2 + sF * sIJ * sJ) + sE * (
-                     m * n * sF * sId * sJd - m * n * sFI * sI * sJd - m * n * sFJ * sId * sJ + m * sFJ * sI * sIJ
-                     + n * sFI * sIJ * sJ - sF * sIJ ** 2)) / (
-                    -m ** 2 * n ** 2 * sFd * sId * sJd + m ** 2 * n * sFJ ** 2 * sId + m ** 2 * n * sFd * sI ** 2 * sJd
-                    - m ** 2 * sFJ ** 2 * sI ** 2 + m * n ** 2 * sFI ** 2 * sJd + m * n ** 2 * sFd * sId * sJ ** 2
-                    + m * n * sF ** 2 * sId * sJd - 2 * m * n * sF * sFI * sI * sJd
-                    - 2 * m * n * sF * sFJ * sId * sJ + 2 * m * n * sFI * sFJ * sI * sJ - 2 * m * n * sFI * sFJ * sIJ
-                    - 2 * m * n * sFd * sI * sIJ * sJ + m * n * sFd * sIJ ** 2
-                    + 2 * m * sF * sFJ * sI * sIJ - n ** 2 * sFI ** 2 * sJ ** 2 + 2 * n * sF * sFI * sIJ * sJ
-                    - sF ** 2 * sIJ ** 2)
+        A = (
+            m
+            * n
+            * sEF
+            * (
+                -m * n * sId * sJd
+                + m * sI ** 2 * sJd
+                + n * sId * sJ ** 2
+                - 2 * sI * sIJ * sJ
+                + sIJ ** 2
+            )
+            + m
+            * sEJ
+            * (
+                m * n * sFJ * sId
+                - m * sFJ * sI ** 2
+                - n * sF * sId * sJ
+                + n * sFI * sI * sJ
+                - n * sFI * sIJ
+                + sF * sI * sIJ
+            )
+            + n
+            * sEI
+            * (
+                m * n * sFI * sJd
+                - m * sF * sI * sJd
+                + m * sFJ * sI * sJ
+                - m * sFJ * sIJ
+                - n * sFI * sJ ** 2
+                + sF * sIJ * sJ
+            )
+            + sE
+            * (
+                m * n * sF * sId * sJd
+                - m * n * sFI * sI * sJd
+                - m * n * sFJ * sId * sJ
+                + m * sFJ * sI * sIJ
+                + n * sFI * sIJ * sJ
+                - sF * sIJ ** 2
+            )
+        ) / (
+            -(m ** 2) * n ** 2 * sFd * sId * sJd
+            + m ** 2 * n * sFJ ** 2 * sId
+            + m ** 2 * n * sFd * sI ** 2 * sJd
+            - m ** 2 * sFJ ** 2 * sI ** 2
+            + m * n ** 2 * sFI ** 2 * sJd
+            + m * n ** 2 * sFd * sId * sJ ** 2
+            + m * n * sF ** 2 * sId * sJd
+            - 2 * m * n * sF * sFI * sI * sJd
+            - 2 * m * n * sF * sFJ * sId * sJ
+            + 2 * m * n * sFI * sFJ * sI * sJ
+            - 2 * m * n * sFI * sFJ * sIJ
+            - 2 * m * n * sFd * sI * sIJ * sJ
+            + m * n * sFd * sIJ ** 2
+            + 2 * m * sF * sFJ * sI * sIJ
+            - n ** 2 * sFI ** 2 * sJ ** 2
+            + 2 * n * sF * sFI * sIJ * sJ
+            - sF ** 2 * sIJ ** 2
+        )
 
-        b = (m * sEF * (
-                m * n * sFJ * sId - m * sFJ * sI ** 2 - n * sF * sId * sJ + n * sFI * sI * sJ - n * sFI * sIJ
-                + sF * sI * sIJ) + m * sEJ * (
-                     -m * n * sFd * sId
-                     + m * sFd * sI ** 2 + n * sFI ** 2 + sF ** 2 * sId - 2 * sF * sFI * sI) + sE * (
-                     m * n * sFd * sId * sJ - m * sF * sFJ * sId + m * sFI * sFJ * sI
-                     - m * sFd * sI * sIJ - n * sFI ** 2 * sJ + sF * sFI * sIJ) - sEI * (
-                     m * n * sFI * sFJ + m * n * sFd * sI * sJ - m * n * sFd * sIJ - m * sF * sFJ * sI
-                     - n * sF * sFI * sJ + sF ** 2 * sIJ)) / (
-                    -m ** 2 * n ** 2 * sFd * sId * sJd + m ** 2 * n * sFJ ** 2 * sId + m ** 2 * n * sFd * sI ** 2 * sJd
-                    - m ** 2 * sFJ ** 2 * sI ** 2 + m * n ** 2 * sFI ** 2 * sJd + m * n ** 2 * sFd * sId * sJ ** 2
-                    + m * n * sF ** 2 * sId * sJd - 2 * m * n * sF * sFI * sI * sJd
-                    - 2 * m * n * sF * sFJ * sId * sJ + 2 * m * n * sFI * sFJ * sI * sJ - 2 * m * n * sFI * sFJ * sIJ
-                    - 2 * m * n * sFd * sI * sIJ * sJ + m * n * sFd * sIJ ** 2
-                    + 2 * m * sF * sFJ * sI * sIJ - n ** 2 * sFI ** 2 * sJ ** 2 + 2 * n * sF * sFI * sIJ * sJ
-                    - sF ** 2 * sIJ ** 2)
+        b = (
+            m
+            * sEF
+            * (
+                m * n * sFJ * sId
+                - m * sFJ * sI ** 2
+                - n * sF * sId * sJ
+                + n * sFI * sI * sJ
+                - n * sFI * sIJ
+                + sF * sI * sIJ
+            )
+            + m
+            * sEJ
+            * (
+                -m * n * sFd * sId
+                + m * sFd * sI ** 2
+                + n * sFI ** 2
+                + sF ** 2 * sId
+                - 2 * sF * sFI * sI
+            )
+            + sE
+            * (
+                m * n * sFd * sId * sJ
+                - m * sF * sFJ * sId
+                + m * sFI * sFJ * sI
+                - m * sFd * sI * sIJ
+                - n * sFI ** 2 * sJ
+                + sF * sFI * sIJ
+            )
+            - sEI
+            * (
+                m * n * sFI * sFJ
+                + m * n * sFd * sI * sJ
+                - m * n * sFd * sIJ
+                - m * sF * sFJ * sI
+                - n * sF * sFI * sJ
+                + sF ** 2 * sIJ
+            )
+        ) / (
+            -(m ** 2) * n ** 2 * sFd * sId * sJd
+            + m ** 2 * n * sFJ ** 2 * sId
+            + m ** 2 * n * sFd * sI ** 2 * sJd
+            - m ** 2 * sFJ ** 2 * sI ** 2
+            + m * n ** 2 * sFI ** 2 * sJd
+            + m * n ** 2 * sFd * sId * sJ ** 2
+            + m * n * sF ** 2 * sId * sJd
+            - 2 * m * n * sF * sFI * sI * sJd
+            - 2 * m * n * sF * sFJ * sId * sJ
+            + 2 * m * n * sFI * sFJ * sI * sJ
+            - 2 * m * n * sFI * sFJ * sIJ
+            - 2 * m * n * sFd * sI * sIJ * sJ
+            + m * n * sFd * sIJ ** 2
+            + 2 * m * sF * sFJ * sI * sIJ
+            - n ** 2 * sFI ** 2 * sJ ** 2
+            + 2 * n * sF * sFI * sIJ * sJ
+            - sF ** 2 * sIJ ** 2
+        )
 
         # in case the modeldata is zero, to avoid further errors
         if np.isnan(A):
@@ -552,5 +757,5 @@ class Fit(HasTraits):
         return A, a, b, c
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

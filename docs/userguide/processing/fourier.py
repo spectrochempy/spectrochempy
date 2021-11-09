@@ -48,7 +48,7 @@ import spectrochempy as scp
 # First we open read some time domain data. Here is a NMD free induction decay (FID):
 
 # %%
-path = scp.preferences.datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'topspin_1d'
+path = scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_1d"
 fid = scp.read_topspin(path)
 fid
 
@@ -97,17 +97,17 @@ _ = newfid.plot(show_complex=True, xlim=(0, 15000))
 # First point in the time domain of the real part is at the maximum.
 
 # %%
-_ = newfid.real.plot(c='r', label='fft + ifft')
-ax = fid.real.plot(clear=False, xlim=(0, 5000), ls='--', label='original real part')
+_ = newfid.real.plot(c="r", label="fft + ifft")
+ax = fid.real.plot(clear=False, xlim=(0, 5000), ls="--", label="original real part")
 _ = ax.legend()
 
 # %% [markdown]
 # First point in the time domain of the imaginary part is at the minimum.
 
 # %%
-_ = fid.imag.plot(ls='--', label='original imaginary part')
-ax = newfid.imag.plot(clear=False, xlim=(0, 5000), c='r', label='fft + ifft')
-_ = ax.legend(loc='lower right')
+_ = fid.imag.plot(ls="--", label="original imaginary part")
+ax = newfid.imag.plot(clear=False, xlim=(0, 5000), c="r", label="fft + ifft")
+_ = ax.legend(loc="lower right")
 
 # %% [markdown]
 # ## Preprocessing
@@ -118,10 +118,12 @@ _ = ax.legend(loc='lower right')
 # See the dedicated [apodization tutorial](apodization.ipynb).
 
 # %%
-fid2 = fid.em(lb='50. Hz')
+fid2 = fid.em(lb="50. Hz")
 spec2 = fid2.fft()
 _ = spec2.plot()
-_ = spec.plot(clear=False, xlim=(10, -5), c='r')  # superpose the unbroadened spectrum in red and show expansion.
+_ = spec.plot(
+    clear=False, xlim=(10, -5), c="r"
+)  # superpose the unbroadened spectrum in red and show expansion.
 
 # %% [markdown]
 # ### Zero-filling
@@ -149,7 +151,7 @@ print("si = ", spec3.size)
 # %%
 ms = spec.mc()
 _ = ms.plot(xlim=(10, -10))
-_ = spec.plot(clear=False, xlim=(10, -10), c='r')
+_ = spec.plot(clear=False, xlim=(10, -10), c="r")
 
 # %% [markdown]
 # ### Power spectrum
@@ -157,8 +159,9 @@ _ = spec.plot(clear=False, xlim=(10, -10), c='r')
 # %%
 mp = spec.ps()
 _ = (mp / mp.max()).plot()
-_ = (spec / spec.max()).plot(clear=False, xlim=(10, -10),
-                             c='r')  # Here we have normalized the spectra at their max value.
+_ = (spec / spec.max()).plot(
+    clear=False, xlim=(10, -10), c="r"
+)  # Here we have normalized the spectra at their max value.
 
 # %% [markdown]
 # # Real Fourier transform
@@ -174,10 +177,10 @@ _ = spec3.plot(xlim=lim)
 _ = spec3.imag.plot(xlim=lim)
 
 # %%
-Re = fid3.real.astype('complex64')
+Re = fid3.real.astype("complex64")
 fR = Re.fft()
 _ = fR.plot(xlim=lim, show_complex=True)
-Im = fid3.imag.astype('complex64')
+Im = fid3.imag.astype("complex64")
 fI = Im.fft()
 _ = fI.plot(xlim=lim, show_complex=True)
 

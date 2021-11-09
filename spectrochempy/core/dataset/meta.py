@@ -26,12 +26,13 @@ import numpy as np
 # constants
 # ----------------------------------------------------------------------------------------------------------------------
 
-__all__ = ['Meta']
+__all__ = ["Meta"]
 
 
 # ======================================================================================================================
 # Class Meta
 # ======================================================================================================================
+
 
 class Meta(object):  # HasTraits):
     """A dictionary to store metadata.
@@ -93,34 +94,45 @@ class Meta(object):  # HasTraits):
         **data : keywords
             The dictionary can be already inited with some keywords.
         """
-        self.parent = data.pop('parent', None)
-        self.name = data.pop('name', None)
+        self.parent = data.pop("parent", None)
+        self.name = data.pop("name", None)
         self._data = data
 
     def __dir__(self):
-        return ['data', 'readonly', 'parent', 'name']
+        return ["data", "readonly", "parent", "name"]
 
     def __setattr__(self, key, value):
-        if key not in ['readonly', 'parent', 'name', '_data', '_trait_values', '_trait_notifiers', '_trait_validators',
-                       '_cross_validation_lock', '__wrapped__']:
+        if key not in [
+            "readonly",
+            "parent",
+            "name",
+            "_data",
+            "_trait_values",
+            "_trait_notifiers",
+            "_trait_validators",
+            "_cross_validation_lock",
+            "__wrapped__",
+        ]:
             self[key] = value
         else:
-            self.__dict__[key] = value  # to avoid a recursive call  # we can not use  # self._readonly = value!
+            self.__dict__[
+                key
+            ] = value  # to avoid a recursive call  # we can not use  # self._readonly = value!
 
     def __getattr__(self, key):
-        if key.startswith('_ipython') or key.startswith('_repr'):
+        if key.startswith("_ipython") or key.startswith("_repr"):
             raise AttributeError
-        if key in ['__wrapped__']:
+        if key in ["__wrapped__"]:
             return False
         return self[key]
 
     def __setitem__(self, key, value):
-        if key in self.__dir__() or key.startswith('_'):
-            raise KeyError('`{}` can not be used as a metadata key'.format(key))
+        if key in self.__dir__() or key.startswith("_"):
+            raise KeyError("`{}` can not be used as a metadata key".format(key))
         elif not self.readonly:
             self._data.update({key: value})
         else:
-            raise ValueError('the metadata `{}` is read only'.format(key))
+            raise ValueError("the metadata `{}` is read only".format(key))
 
     def __getitem__(self, key):
         return self._data.get(key, None)
@@ -168,7 +180,7 @@ class Meta(object):  # HasTraits):
 
     def _repr_html_(self):
         s = json.dumps(self._data, sort_keys=True, indent=4)
-        return s.replace('\n', '<br/>').replace(' ', '&nbsp;')
+        return s.replace("\n", "<br/>").replace(" ", "&nbsp;")
 
     # ------------------------------------------------------------------------------------------------------------------
     # public methods
@@ -176,9 +188,9 @@ class Meta(object):  # HasTraits):
 
     def implements(self, name=None):
         if name is None:
-            return 'Meta'
+            return "Meta"
         else:
-            return name == 'Meta'
+            return name == "Meta"
 
     def to_dict(self):
         """Transform a metadata dictionary to a regular one.
@@ -212,13 +224,13 @@ class Meta(object):  # HasTraits):
             another `Meta` object.
         """
 
-        if isinstance(d, Meta) or hasattr(d, '_data'):
+        if isinstance(d, Meta) or hasattr(d, "_data"):
             d = d.to_dict()
         if d:
             self._data.update(d)
 
     def copy(self):
-        """ Return a disconnected copy of self.
+        """Return a disconnected copy of self.
 
         Returns
         -------

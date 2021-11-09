@@ -12,6 +12,7 @@ import functools
 # Decorators
 # ======================================================================================================================
 
+
 def _units_agnostic_method(method):
     @functools.wraps(method)
     def wrapper(dataset, **kwargs):
@@ -20,7 +21,7 @@ def _units_agnostic_method(method):
         axis, dim = dataset.get_axis(**kwargs, negative_axis=True)
 
         # output dataset inplace (by default) or not
-        if not kwargs.pop('inplace', False):
+        if not kwargs.pop("inplace", False):
             new = dataset.copy()  # copy to be sure not to modify this dataset
         else:
             new = dataset
@@ -33,7 +34,7 @@ def _units_agnostic_method(method):
         data = method(new.data, **kwargs)
         new._data = data
 
-        new.history = f'`{method.__name__}` shift performed on dimension `{dim}` with parameters: {kwargs}'
+        new.history = f"`{method.__name__}` shift performed on dimension `{dim}` with parameters: {kwargs}"
 
         # restore original data order if it was swaped
         if swaped:

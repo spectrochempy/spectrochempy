@@ -77,7 +77,7 @@ import spectrochempy as scp
 # its main attributes:
 
 # %% {"pycharm": {"name": "#%%\n"}}
-X = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG')
+X = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG")
 X
 
 # %% [markdown]
@@ -98,14 +98,14 @@ X
 # , it can be a good practice to give a self explaining description of the group, for instance:
 
 # %%
-X.description = 'CO adsorption on CoMo/Al2O3, difference spectra'
+X.description = "CO adsorption on CoMo/Al2O3, difference spectra"
 X.description
 
 # %% [markdown]
 # or directly at the import:
 
 # %%
-X = scp.read_omnic('irdata//CO@Mo_Al2O3.SPG', description='CO@CoMo/Al2O3, diff spectra')
+X = scp.read_omnic("irdata//CO@Mo_Al2O3.SPG", description="CO@CoMo/Al2O3, diff spectra")
 X.description
 
 # %% [markdown]
@@ -233,7 +233,7 @@ X.y.values
 # original OMNIC order can be kept using the `sortbydate=True` at the function call. For instance:
 
 # %%
-X2 = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG', sortbydate=False)
+X2 = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG", sortbydate=False)
 
 # %% [markdown]
 # In the present case this will not change nothing because the spectra in the OMNIC file wre already ordered by
@@ -265,7 +265,7 @@ X.y.values  # displays the `y` dimension
 # The import of a single spectrum follows exactly the same rules as that of the import of a group:
 
 # %%
-Y = scp.read_omnic('irdata/subdir/7_CZ0-100 Pd_101.SPA')
+Y = scp.read_omnic("irdata/subdir/7_CZ0-100 Pd_101.SPA")
 Y
 
 # %% [markdown]
@@ -275,8 +275,13 @@ Y
 # in the function call:
 
 # %%
-list_files = ["7_CZ0-100 Pd_101.SPA", "7_CZ0-100 Pd_102.SPA", "7_CZ0-100 Pd_103.SPA", "7_CZ0-100 Pd_104.SPA"]
-X = scp.read_omnic(list_files, directory='irdata/subdir')
+list_files = [
+    "7_CZ0-100 Pd_101.SPA",
+    "7_CZ0-100 Pd_102.SPA",
+    "7_CZ0-100 Pd_103.SPA",
+    "7_CZ0-100 Pd_104.SPA",
+]
+X = scp.read_omnic(list_files, directory="irdata/subdir")
 print(X)
 
 # %% [markdown]
@@ -284,7 +289,7 @@ print(X)
 # using only the directory path as argument that will gather the .spa files together:
 
 # %%
-X = scp.read_omnic('irdata/subdir')
+X = scp.read_omnic("irdata/subdir")
 print(X)
 
 # %% [markdown]
@@ -312,14 +317,14 @@ print(X)
 # Opus files contained in the `datadir` using:
 
 # %%
-Z = scp.read_opus(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS')
+Z = scp.read_opus(["test.0000", "test.0001", "test.0002"], directory="irdata/OPUS")
 print(Z)
 
 # %% [markdown]
 # or:
 
 # %%
-Z2 = scp.read_opus('irdata/OPUS')
+Z2 = scp.read_opus("irdata/OPUS")
 print(Z2)
 
 # %% [markdown]
@@ -335,7 +340,7 @@ for key in Z3:
     print(key)
 
 # %%
-Z3['Optik']  # looks what is the Optik block:
+Z3["Optik"]  # looks what is the Optik block:
 
 # %% [markdown]
 # ## Import/Export of JCAMP-DX files
@@ -353,13 +358,13 @@ Z3['Optik']  # looks what is the Optik block:
 # %%
 S0 = X[0]
 print(S0)
-S0.write_jcamp('CO@Mo_Al2O3_0.jdx', confirm=False);
+S0.write_jcamp("CO@Mo_Al2O3_0.jdx", confirm=False)
 
 # %% [markdown]
 # Then used (and maybe changed) by a 3rd party software, and re-imported in spectrochempy:
 
 # %%
-newS0 = scp.read_jcamp('CO@Mo_Al2O3_0.jdx')
+newS0 = scp.read_jcamp("CO@Mo_Al2O3_0.jdx")
 print(newS0)
 
 
@@ -369,7 +374,8 @@ print(newS0)
 # %%
 def difference(x, y):
     from numpy import max, abs
-    nonzero = (y.data != 0)
+
+    nonzero = y.data != 0
     error = abs(x.data - y.data)
     max_rel_error = max(error[nonzero] / abs(y.data[nonzero]))
     return max(error), max_rel_error
@@ -377,13 +383,13 @@ def difference(x, y):
 
 # %%
 max_error, max_rel_error = difference(S0, newS0)
-print(f'Max absolute difference in absorbance: {max_error:.3g}')
-print(f'Max relative difference in absorbance: {max_rel_error:.3g}')
+print(f"Max absolute difference in absorbance: {max_error:.3g}")
+print(f"Max relative difference in absorbance: {max_rel_error:.3g}")
 
 # %%
 max_error, max_rel_error = difference(S0.x, newS0.x)
-print(f'Max absolute difference in wavenumber: {max_error:.3g}')
-print(f'Max relative difference in wavenumber: {max_rel_error:.3g}')
+print(f"Max absolute difference in wavenumber: {max_error:.3g}")
+print(f"Max relative difference in wavenumber: {max_rel_error:.3g}")
 
 # %% [markdown]
 # This is much beyond the experimental accuracy but can lead to undesirable effects.

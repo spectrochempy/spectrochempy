@@ -8,7 +8,7 @@
 This module should be able to handle a large set of plot types.
 """
 
-__all__ = ['plot_3D']
+__all__ = ["plot_3D"]
 
 __dataset_methods__ = []
 
@@ -25,7 +25,7 @@ __dataset_methods__ = []
 
 
 def plot_3D(dataset, **kwargs):
-    raise NotImplementedError('Not implemented')
+    raise NotImplementedError("Not implemented")
 
     # """
     # 3D Plots of NDDatasets

@@ -1,4 +1,4 @@
-name: Test package
+name: Tests
 
 on:
   push:
@@ -82,7 +82,7 @@ jobs:
       max-parallel: 3
       matrix:
         os: [ubuntu-latest, windows-latest] # , macOS-latest]
-        pythonVersion: [3.7, 3.8, 3.9]
+        pythonVersion: [3.9, 3.8, 3.7]
 
     steps:
       - name: Checkout code
@@ -107,8 +107,42 @@ jobs:
         run: |
           python setup.py install
 
+      - name: Code formatting
+        run: black .
+
       - name: Lint with flake8
         run: flake8 .
 
-      - name: Test with pytest
-        run: pytest tests
+#      - name: Test with coverage
+#        run: coverage run -m pytest -v tests
+#
+#      - name: Notify to code-climate
+#        if: ${{ github.event_name != 'push' }}
+#        uses: paambaati/codeclimate-action@v3.0.0
+#        env:
+#          CC_TEST_REPORTER_ID: ${{ secrets.CC_REPORTER_ID }}
+#        with:
+#          coverageCommand: coverage xml
+#          coverageLocations: coverage.xml:coverage.py
+
+# command to install code-climate dependencies
+
+      - name: CodeClimate reporter (before build)
+        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.9' && matrix.os == 'ubuntu-latest' }}
+        run: |
+          # downloading cc-test-reporter
+          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter;
+          chmod +x ./cc-test-reporter
+          ./cc-test-reporter before-build
+
+      - name: Test, generate coverage information and report to CodeClimate
+        run: |
+          coverage run -m pytest -v tests
+
+      - name: CodeClimate reporter (after build)
+        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.9' && matrix.os == 'ubuntu-latest' }}
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        run: |
+          coverage xml
+          ./cc-test-reporter after-build

@@ -13,7 +13,7 @@ import csv
 from spectrochempy.core import preferences as prefs
 from spectrochempy.core.writers.exporter import Exporter, exportermethod
 
-__all__ = ['write_csv']
+__all__ = ["write_csv"]
 __dataset_methods__ = __all__
 
 
@@ -54,8 +54,8 @@ def write_csv(*args, **kwargs):
 
     """
     exporter = Exporter()
-    kwargs['filetypes'] = ['CSV files (*.csv)']
-    kwargs['suffix'] = '.csv'
+    kwargs["filetypes"] = ["CSV files (*.csv)"]
+    kwargs["suffix"] = ".csv"
     return exporter(*args, **kwargs)
 
 
@@ -65,18 +65,18 @@ def _write_csv(*args, **kwargs):
     dataset, filename = args
     dataset.filename = filename
 
-    delimiter = kwargs.get('delimiter', prefs.csv_delimiter)
+    delimiter = kwargs.get("delimiter", prefs.csv_delimiter)
 
     # check dimensionality of the dataset
     if dataset.squeeze().ndim > 1:
-        raise NotImplementedError('Only implemented for 1D NDDatasets')
+        raise NotImplementedError("Only implemented for 1D NDDatasets")
 
     # squeeze if necessary
     if dataset.ndim > 1:
         dataset = dataset.squeeze()
 
     # Make csv file for 1D dataset: first and 2d column are the unique axis and data, respectively
-    with filename.open('w', newline='') as fid:
+    with filename.open("w", newline="") as fid:
         writer = csv.writer(fid, delimiter=delimiter)
 
         if dataset.ndim == 1:  # if statement for future implementation for ndim > 1....
@@ -84,12 +84,12 @@ def _write_csv(*args, **kwargs):
                 col_coord = True
                 title_1 = dataset.coordset[-1].title
                 if dataset.coordset[-1].units is not None:
-                    title_1 += ' / ' + str(dataset.coordset[-1].units)
+                    title_1 += " / " + str(dataset.coordset[-1].units)
             else:
                 col_coord = False
 
             if dataset.units is not None:
-                title_2 = dataset.title + ' / ' + str(dataset.units)
+                title_2 = dataset.title + " / " + str(dataset.units)
             else:
                 title_2 = dataset.title
 

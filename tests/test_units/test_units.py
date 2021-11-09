@@ -16,34 +16,35 @@ def test_ppm():
 def test_nmr_context():
     set_nmr_context(larmor=104.3 * ur.MHz)
     fhz = 10000 * ur.Hz
-    with ur.context('nmr'):
-        fppm = fhz.to('ppm')
-    assert "{:~.3f}".format(fppm) == '95.877 ppm'
+    with ur.context("nmr"):
+        fppm = fhz.to("ppm")
+    assert "{:~.3f}".format(fppm) == "95.877 ppm"
     print("{:.1f}".format(fppm))
 
-    with ur.context('nmr'):
-        fhz = fppm.to('Hz')
-    assert "{:~.3f}".format(fhz) == '10000.000 Hz'
+    with ur.context("nmr"):
+        fhz = fppm.to("Hz")
+    assert "{:~.3f}".format(fhz) == "10000.000 Hz"
     print("{:.1f}".format(fhz))
 
 
 def test_units():
     assert 10 * ur.km == 10000 * ur.m
-    assert ur.km / ur.m == 1000.
-    x = (ur.km / ur.m)
+    assert ur.km / ur.m == 1000.0
+    x = ur.km / ur.m
     assert x.dimensionless
 
 
 def test_repr_html():
-    a = Quantity(10, 's/km')
+    a = Quantity(10, "s/km")
     assert "{}".format(a) == "10 second / kilometer"
     assert a._repr_html_() == "10 s.km<sup>-1</sup>"
 
 
 def test_unit_dimensionality():
-    a = Quantity(1., 'cm')
-    b = a / Quantity(1., 'km')
-    assert b._repr_html_() == '1.0 scaled-dimensionless (1e-05)'
+    a = Quantity(1.0, "cm")
+    b = a / Quantity(1.0, "km")
+    assert b._repr_html_() == "1.0 scaled-dimensionless (1e-05)"
+
 
 # def test_matplotlib():
 #

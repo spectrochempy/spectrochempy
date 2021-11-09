@@ -7,7 +7,7 @@
 """
 This module provides methods for reading data in a directory
 """
-__all__ = ['read_dir', 'read_carroucell']
+__all__ = ["read_dir", "read_carroucell"]
 __dataset_methods__ = __all__
 
 import os
@@ -76,7 +76,7 @@ def read_dir(directory=None, **kwargs):
 
     >>> B = scp.NDDataset.read_dir()
     """
-    kwargs['listdir'] = True
+    kwargs["listdir"] = True
     importer = Importer()
     return importer(directory, **kwargs)
 
@@ -141,7 +141,7 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
     if not isinstance(dataset, NDDataset):
         # probably did not specify a dataset
         # so the first parameter must be the directory
-        if isinstance(dataset, str) and dataset != '':
+        if isinstance(dataset, str) and dataset != "":
             directory = dataset
 
     directory = readdirname(directory)
@@ -151,29 +151,52 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
         info_("No directory was selected.")
         return
 
-    spectra = kwargs.get('spectra', None)
-    discardbg = kwargs.get('discardbg', True)
+    spectra = kwargs.get("spectra", None)
+    discardbg = kwargs.get("discardbg", True)
 
-    delta_clocks = datetime.timedelta(seconds=kwargs.get('delta_clocks', 0))
+    delta_clocks = datetime.timedelta(seconds=kwargs.get("delta_clocks", 0))
 
     datasets = []
 
     # get the sorted list of spa files in the directory
-    spafiles = sorted([f for f in os.listdir(directory)
-                       if (os.path.isfile(os.path.join(directory, f)) and f[-4:].lower() == '.spa')])
+    spafiles = sorted(
+        [
+            f
+            for f in os.listdir(directory)
+            if (os.path.isfile(os.path.join(directory, f)) and f[-4:].lower() == ".spa")
+        ]
+    )
 
     # discard BKG files
     if discardbg:
-        spafiles = sorted([f for f in spafiles if 'BCKG' not in f])
+        spafiles = sorted([f for f in spafiles if "BCKG" not in f])
 
     # select files
     if spectra is not None:
         [min, max] = spectra
         if discardbg:
-            spafiles = sorted([f for f in spafiles if min <= int(f.split('_')[2][:-4]) <= max and 'BCKG' not in f])
+            spafiles = sorted(
+                [
+                    f
+                    for f in spafiles
+                    if min <= int(f.split("_")[2][:-4]) <= max and "BCKG" not in f
+                ]
+            )
         if not discardbg:
-            spafilespec = sorted([f for f in spafiles if min <= int(f.split('_')[2][:-4]) <= max and 'BCKG' not in f])
-            spafileback = sorted([f for f in spafiles if min <= int(f.split('_')[2][:-6]) <= max and 'BCKG' in f])
+            spafilespec = sorted(
+                [
+                    f
+                    for f in spafiles
+                    if min <= int(f.split("_")[2][:-4]) <= max and "BCKG" not in f
+                ]
+            )
+            spafileback = sorted(
+                [
+                    f
+                    for f in spafiles
+                    if min <= int(f.split("_")[2][:-6]) <= max and "BCKG" in f
+                ]
+            )
             spafiles = spafilespec + spafileback
 
     curfilelist = [spafiles[0]]
@@ -181,26 +204,29 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
 
     for f in spafiles[1:]:
         if f[::-1].split("_", 1)[1][::-1] != curprefix:
-            datasets.append(NDDataset.read_omnic(curfilelist, sortbydate=True, directory=directory))
+            datasets.append(
+                NDDataset.read_omnic(curfilelist, sortbydate=True, directory=directory)
+            )
             datasets[-1].name = os.path.basename(curprefix)
             curfilelist = [f]
             curprefix = f[::-1].split("_", 1)[1][::-1]
         else:
             curfilelist.append(f)
 
-    datasets.append(NDDataset.read_omnic(curfilelist, sortbydate=True, directory=directory))
+    datasets.append(
+        NDDataset.read_omnic(curfilelist, sortbydate=True, directory=directory)
+    )
     datasets[-1].name = os.path.basename(curprefix)
 
     # Now manage temperature
-    Tfile = sorted([f for f in os.listdir(directory)
-                    if f[-4:].lower() == '.xls'])
+    Tfile = sorted([f for f in os.listdir(directory) if f[-4:].lower() == ".xls"])
     if len(Tfile) == 0:
         print_("no temperature file")
     elif len(Tfile) > 1:
         warnings.warn("several .xls/.csv files. The temperature will not be read")
     else:
         Tfile = Tfile[0]
-        if Tfile[-4:].lower() == '.xls':
+        if Tfile[-4:].lower() == ".xls":
             book = xlrd.open_workbook(os.path.join(directory, Tfile))
 
             # determine experiment start and end time (thermocouple clock)
@@ -213,8 +239,9 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
             sheet = book.sheet_by_index(0)
             for i in range(9, sheet.nrows):
                 try:
-                    time = datetime.datetime.strptime(sheet.cell(i, 0).value, '%d/%m/%y %H:%M:%S').replace(
-                            tzinfo=datetime.timezone.utc)
+                    time = datetime.datetime.strptime(
+                        sheet.cell(i, 0).value, "%d/%m/%y %H:%M:%S"
+                    ).replace(tzinfo=datetime.timezone.utc)
                     if ti <= time <= tf:
                         t.append(time)
                         T.append(sheet.cell(i, 4).value)
@@ -226,12 +253,16 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
             # interpolate T = f(timestamp)
             tstamp = [time.timestamp() for time in t]
             # interpolate, except for the first and last points that are extrapolated
-            interpolator = scipy.interpolate.interp1d(tstamp, T, fill_value='extrapolate', assume_sorted=True)
+            interpolator = scipy.interpolate.interp1d(
+                tstamp, T, fill_value="extrapolate", assume_sorted=True
+            )
 
             for ds in datasets:
                 # timestamp of spectra for the thermocouple clock
 
-                tstamp_ds = [(label[0] + delta_clocks).timestamp() for label in ds.y.labels]
+                tstamp_ds = [
+                    (label[0] + delta_clocks).timestamp() for label in ds.y.labels
+                ]
                 T_ds = interpolator(tstamp_ds)
                 newlabels = np.hstack((ds.y.labels, T_ds.reshape((50, 1))))
                 ds.y = Coord(title=ds.y.title, data=ds.y.data, labels=newlabels)
@@ -240,12 +271,13 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
         return datasets[0]  # a single dataset is returned
 
     # several datasets returned, sorted by sample #
-    return sorted(datasets, key=lambda ds: int(re.split('-|_', ds.name)[0]))
+    return sorted(datasets, key=lambda ds: int(re.split("-|_", ds.name)[0]))
 
 
 # ======================================================================================================================
 # Private functions
 # ======================================================================================================================
+
 
 @importermethod
 def _read_dir(*args, **kwargs):
@@ -263,5 +295,5 @@ def _read_dir(*args, **kwargs):
     return datasets
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

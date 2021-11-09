@@ -8,15 +8,25 @@
 This module implements class |CoordSet|.
 """
 
-__all__ = ['CoordSet']
+__all__ = ["CoordSet"]
 
 import copy as cpy
 import warnings
 import uuid
 
 import numpy as np
-from traitlets import HasTraits, List, Bool, Unicode, observe, All, validate, \
-    default, Dict, Int
+from traitlets import (
+    HasTraits,
+    List,
+    Bool,
+    Unicode,
+    observe,
+    All,
+    validate,
+    default,
+    Dict,
+    Int,
+)
 
 from spectrochempy.core.dataset.ndarray import NDArray, DEFAULT_DIM_NAME
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
@@ -114,14 +124,14 @@ class CoordSet(HasTraits):
         Coord: [float64] K (size: 4)
         """
 
-        self._copy = kwargs.pop('copy', True)
-        self._sorted = kwargs.pop('sorted', True)
+        self._copy = kwargs.pop("copy", True)
+        self._sorted = kwargs.pop("sorted", True)
 
-        keepnames = kwargs.pop('keepnames', False)
+        keepnames = kwargs.pop("keepnames", False)
         # if keepnames is false and the names of the dimensions are not passed in kwargs, then use dims if not none
-        dims = kwargs.pop('dims', None)
+        dims = kwargs.pop("dims", None)
 
-        self.name = kwargs.pop('name', None)
+        self.name = kwargs.pop("name", None)
 
         # initialise the coordinate list
         self._coords = []
@@ -132,8 +142,15 @@ class CoordSet(HasTraits):
         # some cleaning
         if coords:
 
-            if all([(isinstance(coords[i], (np.ndarray, NDArray, list, CoordSet)) or coords[i] is None) for i in
-                    range(len(coords))]):
+            if all(
+                [
+                    (
+                        isinstance(coords[i], (np.ndarray, NDArray, list, CoordSet))
+                        or coords[i] is None
+                    )
+                    for i in range(len(coords))
+                ]
+            ):
                 # Any instance of a NDArray can be accepted as coordinates for a dimension.
                 # If an instance of CoordSet is found, this means that all
                 # coordinates in this set describe the same axis
@@ -151,7 +168,7 @@ class CoordSet(HasTraits):
                     coords = None
 
             else:
-                raise ValueError('Did not understand the inputs')
+                raise ValueError("Did not understand the inputs")
 
         # now store the args coordinates in self._coords (validation is fired when this attribute is set)
         if coords:
@@ -187,10 +204,14 @@ class CoordSet(HasTraits):
 
             # prepare values to be either Coord, LinearCoord or CoordSet
             if isinstance(coord, (list, tuple)):
-                coord = CoordSet(*coord, sorted=False)  # make sure in this case it becomes a CoordSet instance
+                coord = CoordSet(
+                    *coord, sorted=False
+                )  # make sure in this case it becomes a CoordSet instance
 
             elif isinstance(coord, np.ndarray) or coord is None:
-                coord = Coord(coord, copy=True)  # make sure it's a Coord  # (even if it is None -> Coord(None)
+                coord = Coord(
+                    coord, copy=True
+                )  # make sure it's a Coord  # (even if it is None -> Coord(None)
 
             elif isinstance(coord, str) and coord in DEFAULT_DIM_NAME:
                 # may be a reference to another coordinates (e.g. same coordinates for various dimensions)
@@ -200,7 +221,10 @@ class CoordSet(HasTraits):
             # Populate the coords with coord and coord's name.
             if isinstance(coord, (NDArray, Coord, LinearCoord, CoordSet)):  # NDArray,
                 if key in self.available_names or (
-                        len(key) == 2 and key.startswith('_') and key[1] in list("123456789")):
+                    len(key) == 2
+                    and key.startswith("_")
+                    and key[1] in list("123456789")
+                ):
                     # ok we can find it as a canonical name:
                     # this will overwrite any already defined coord value
                     # which means also that kwargs have priority over args
@@ -215,11 +239,15 @@ class CoordSet(HasTraits):
                     self._coords[idx] = coord
 
                 else:
-                    raise KeyError(f'Probably an invalid key (`{key}`) for coordinates has been passed. '
-                                   f'Valid keys are among:{DEFAULT_DIM_NAME}')
+                    raise KeyError(
+                        f"Probably an invalid key (`{key}`) for coordinates has been passed. "
+                        f"Valid keys are among:{DEFAULT_DIM_NAME}"
+                    )
 
             else:
-                raise ValueError(f'Probably an invalid type of coordinates has been passed: {key}:{coord} ')
+                raise ValueError(
+                    f"Probably an invalid type of coordinates has been passed: {key}:{coord} "
+                )
 
         # store the item (validation will be performed)
         # self._coords = _coords
@@ -230,7 +258,7 @@ class CoordSet(HasTraits):
         # set a notifier on the name traits name of each coordinates
         for coord in self._coords:
             if coord is not None:
-                HasTraits.observe(coord, self._coords_update, '_name')
+                HasTraits.observe(coord, self._coords_update, "_name")
 
         # initialize the base class with the eventual remaining arguments
         super().__init__(**kwargs)
@@ -245,24 +273,25 @@ class CoordSet(HasTraits):
         This is useful to check type without importing the module
         """
         if name is None:
-            return 'CoordSet'
+            return "CoordSet"
         else:
-            return name == 'CoordSet'
+            return name == "CoordSet"
 
     # ------------------------------------------------------------------------------------------------------------------
     # Validation methods
     # ------------------------------------------------------------------------------------------------------------------
     # ..................................................................................................................
-    @validate('_coords')
+    @validate("_coords")
     def _coords_validate(self, proposal):
-        coords = proposal['value']
+        coords = proposal["value"]
         if not coords:
             return None
 
         for id, coord in enumerate(coords):
             if coord and not isinstance(coord, (Coord, LinearCoord, CoordSet)):
                 raise TypeError(
-                        'At this point all passed coordinates should be of type Coord or CoordSet!')  # coord =  #
+                    "At this point all passed coordinates should be of type Coord or CoordSet!"
+                )  # coord =  #
                 # Coord(coord)
             coords[id] = coord
 
@@ -280,7 +309,9 @@ class CoordSet(HasTraits):
 
                 # change the internal names
                 n = len(coord)
-                coord._set_names([f"_{i + 1}" for i in range(n)])  # we must have  _1 for the first coordinates,
+                coord._set_names(
+                    [f"_{i + 1}" for i in range(n)]
+                )  # we must have  _1 for the first coordinates,
                 # _2 the second, etc...
                 coord._set_parent_dim(coord.name)
 
@@ -290,18 +321,22 @@ class CoordSet(HasTraits):
             if coord.has_defined_name:
                 names.append(coord.name)
             else:
-                raise ValueError('At this point all passed coordinates should have a valid name!')
+                raise ValueError(
+                    "At this point all passed coordinates should have a valid name!"
+                )
 
         if coords:
             if self._sorted:
-                _sortedtuples = sorted((coord.name, coord) for coord in coords)  # Final sort
+                _sortedtuples = sorted(
+                    (coord.name, coord) for coord in coords
+                )  # Final sort
                 coords = list(zip(*_sortedtuples))[1]
             return list(coords)  # be sure its a list not a tuple
         else:
             return None
 
     # ..................................................................................................................
-    @default('_id')
+    @default("_id")
     def _id_default(self):
         # a unique id
         return f"{type(self).__name__}_{str(uuid.uuid1()).split('-')[0]}"
@@ -384,7 +419,9 @@ class CoordSet(HasTraits):
         if self.is_same_dim:
             _sizes = list(set(_sizes))
             if len(_sizes) > 1:
-                raise ValueError('Coordinates must be of the same size for a dimension with multiple coordinates')
+                raise ValueError(
+                    "Coordinates must be of the same size for a dimension with multiple coordinates"
+                )
             return _sizes[0]
         return _sizes
 
@@ -402,8 +439,7 @@ class CoordSet(HasTraits):
     # ..................................................................................................................
     @property
     def names(self):
-        """list - Names of the coords in the current coords (read only property)
-        """
+        """list - Names of the coords in the current coords (read only property)"""
         _names = []
         if self._coords:
             for item in self._coords:
@@ -444,23 +480,23 @@ class CoordSet(HasTraits):
     # ..................................................................................................................
     @property
     def titles(self):
-        """list - Titles of the coords in the current coords
-        """
+        """list - Titles of the coords in the current coords"""
         _titles = []
         for item in self._coords:
             if isinstance(item, NDArray):
                 _titles.append(item.title if item.title else item.name)  # TODO:name
             elif isinstance(item, CoordSet):
-                _titles.append([el.title if el.title else el.name for el in item])  # TODO:name
+                _titles.append(
+                    [el.title if el.title else el.name for el in item]
+                )  # TODO:name
             else:
-                raise ValueError('Something wrong with the titles!')
+                raise ValueError("Something wrong with the titles!")
         return _titles
 
     # ..................................................................................................................
     @property
     def labels(self):
-        """list - Labels of the coordinates in the current coordset
-        """
+        """list - Labels of the coordinates in the current coordset"""
         return [item.labels for item in self]
 
     # ..................................................................................................................
@@ -600,7 +636,7 @@ class CoordSet(HasTraits):
         force : bool, optional, default=False
             whether or not the new units must be compatible with the current units. See the `Coord`.`to` method.
         """
-        force = kwargs.pop('force', False)
+        force = kwargs.pop("force", False)
 
         if len(args) == 1 and is_sequence(args[0]):
             args = args[0]
@@ -655,7 +691,9 @@ class CoordSet(HasTraits):
             coord = (coord,)
         if self._coords:
             # some coordinates already present, prepend the new one
-            self._coords = (*coord,) + tuple(self._coords)  # instead of append, fire the validation process
+            self._coords = (*coord,) + tuple(
+                self._coords
+            )  # instead of append, fire the validation process
         else:
             # no coordinates yet, start a new tuple of coordinate
             self._coords = (*coord,)
@@ -691,13 +729,13 @@ class CoordSet(HasTraits):
     # ..................................................................................................................
     # @staticmethod
     def __dir__(self):
-        return ['coords', 'references', 'is_same_dim', 'name']
+        return ["coords", "references", "is_same_dim", "name"]
 
     # ..................................................................................................................
     def __call__(self, *args, **kwargs):
         # allow the following syntax: coords(), coords(0,2) or
         coords = []
-        axis = kwargs.get('axis', None)
+        axis = kwargs.get("axis", None)
         if args:
             for idx in args:
                 coords.append(self[idx])
@@ -723,7 +761,7 @@ class CoordSet(HasTraits):
         return len(self._coords)
 
     def __delattr__(self, item):
-        if 'notify_change' in item:
+        if "notify_change" in item:
             pass
 
         else:
@@ -735,7 +773,7 @@ class CoordSet(HasTraits):
     # ..................................................................................................................
     def __getattr__(self, item):
         # when the attribute was not found
-        if '_validate' in item or '_changed' in item:
+        if "_validate" in item or "_changed" in item:
             raise AttributeError
 
         try:
@@ -762,8 +800,10 @@ class CoordSet(HasTraits):
             if index in self.titles:
                 # selection by coord titles
                 if self.titles.count(index) > 1:
-                    warnings.warn(f"Getting a coordinate from its title. However `{index}` occurs several time. Only"
-                                  f" the first occurence is returned!")
+                    warnings.warn(
+                        f"Getting a coordinate from its title. However `{index}` occurs several time. Only"
+                        f" the first occurence is returned!"
+                    )
                 return self._coords.__getitem__(self.titles.index(index))
 
             # may be it is a title or a name in a sub-coords
@@ -782,7 +822,7 @@ class CoordSet(HasTraits):
                 if index[0] in self.names:
                     # ok we can find it a a canonical name:
                     c = self._coords.__getitem__(self.names.index(index[0]))
-                    if len(index) > 1 and index[1] == '_':
+                    if len(index) > 1 and index[1] == "_":
                         if isinstance(c, CoordSet):
                             c = c.__getitem__(index[1:])
                         else:
@@ -807,9 +847,23 @@ class CoordSet(HasTraits):
 
     # ..................................................................................................................
     def __setattr__(self, key, value):
-        keyb = key[1:] if key.startswith('_') else key
-        if keyb in ['parent', 'copy', 'sorted', 'coords', 'updated', 'name', 'html_output', 'is_same_dim', 'parent_dim',
-                    'trait_values', 'trait_notifiers', 'trait_validators', 'cross_validation_lock', 'notify_change']:
+        keyb = key[1:] if key.startswith("_") else key
+        if keyb in [
+            "parent",
+            "copy",
+            "sorted",
+            "coords",
+            "updated",
+            "name",
+            "html_output",
+            "is_same_dim",
+            "parent_dim",
+            "trait_values",
+            "trait_notifiers",
+            "trait_validators",
+            "cross_validation_lock",
+            "notify_change",
+        ]:
             super().__setattr__(key, value)
             return
 
@@ -841,8 +895,10 @@ class CoordSet(HasTraits):
             if index in self.titles:
                 # selection by coord titles
                 if self.titles.count(index) > 1:
-                    warnings.warn(f"Getting a coordinate from its title. However `{index}` occurs several time. Only"
-                                  f" the first occurence is returned!")
+                    warnings.warn(
+                        f"Getting a coordinate from its title. However `{index}` occurs several time. Only"
+                        f" the first occurence is returned!"
+                    )
                 index = self.titles.index(index)
                 coord.name = self.names[index]
                 self._coords.__setitem__(index, coord)
@@ -869,7 +925,7 @@ class CoordSet(HasTraits):
                 if index[0] in self.names:
                     # ok we can find it a a canonical name:
                     c = self._coords.__getitem__(self.names.index(index[0]))
-                    if len(index) > 1 and index[1] == '_':
+                    if len(index) > 1 and index[1] == "_":
                         c.__setitem__(index[1:], coord)
                     return
 
@@ -878,13 +934,18 @@ class CoordSet(HasTraits):
 
             # add the new coordinates
             if index in self.available_names or (
-                    len(index) == 2 and index.startswith('_') and index[1] in list("123456789")):
+                len(index) == 2
+                and index.startswith("_")
+                and index[1] in list("123456789")
+            ):
                 coord.name = index
                 self._coords.append(coord)
                 return
 
             else:
-                raise KeyError(f"Could not find `{index}` in coordinates names or titles")
+                raise KeyError(
+                    f"Could not find `{index}` in coordinates names or titles"
+                )
 
         self._coords[index] = coord
 
@@ -916,7 +977,7 @@ class CoordSet(HasTraits):
             if index[0] in self.names:
                 # ok we can find it a a canonical name:
                 c = self._coords.__getitem__(self.names.index(index[0]))
-                if len(index) > 1 and index[1] == '_':
+                if len(index) > 1 and index[1] == "_":
                     if isinstance(c, CoordSet):
                         return c.__delitem__(index[1:])
 
@@ -929,11 +990,11 @@ class CoordSet(HasTraits):
 
     # ..................................................................................................................
     def __repr__(self):
-        out = "CoordSet: [" + ', '.join(['{}'] * len(self._coords)) + "]"
+        out = "CoordSet: [" + ", ".join(["{}"] * len(self._coords)) + "]"
         s = []
         for item in self._coords:
             if isinstance(item, CoordSet):
-                s.append(f"{item.name}:" + repr(item).replace('CoordSet: ', ''))
+                s.append(f"{item.name}:" + repr(item).replace("CoordSet: ", ""))
             else:
                 s.append(f"{item.name}:{item.title}")
         out = out.format(*s)
@@ -944,41 +1005,44 @@ class CoordSet(HasTraits):
         return repr(self)
 
     # ..................................................................................................................
-    def _cstr(self, header='  coordinates: ... \n', print_size=True):
+    def _cstr(self, header="  coordinates: ... \n", print_size=True):
 
-        txt = ''
+        txt = ""
         for idx, dim in enumerate(self.names):
             coord = getattr(self, dim)
 
             if coord:
 
-                dimension = f'     DIMENSION `{dim}`'
+                dimension = f"     DIMENSION `{dim}`"
                 for k, v in self.references.items():
                     if dim == v:
                         # reference to this dimension
-                        dimension += f'=`{k}`'
-                txt += dimension + '\n'
+                        dimension += f"=`{k}`"
+                txt += dimension + "\n"
 
                 if isinstance(coord, CoordSet):
                     # txt += '        index: {}\n'.format(idx)
                     if not coord.is_empty:
                         if print_size:
-                            txt += f'{coord[0]._str_shape().rstrip()}\n'
+                            txt += f"{coord[0]._str_shape().rstrip()}\n"
 
                         coord._html_output = self._html_output
                         for idx_s, dim_s in enumerate(coord.names):
                             c = getattr(coord, dim_s)
-                            txt += f'          ({dim_s}) ...\n'
+                            txt += f"          ({dim_s}) ...\n"
                             c._html_output = self._html_output
-                            sub = c._cstr(header='  coordinates: ... \n',
-                                          print_size=False)  # , indent=4, first_indent=-6)
+                            sub = c._cstr(
+                                header="  coordinates: ... \n", print_size=False
+                            )  # , indent=4, first_indent=-6)
                             txt += f"{sub}\n"
 
                 elif not coord.is_empty:
                     # coordinates if available
                     # txt += '        index: {}\n'.format(idx)
                     coord._html_output = self._html_output
-                    txt += '{}\n'.format(coord._cstr(header=header, print_size=print_size))
+                    txt += "{}\n".format(
+                        coord._cstr(header=header, print_size=print_size)
+                    )
 
         txt = txt.rstrip()  # remove the trailing '\n'
 
@@ -993,7 +1057,9 @@ class CoordSet(HasTraits):
 
     # ..................................................................................................................
     def __deepcopy__(self, memo):
-        coords = self.__class__(tuple(cpy.deepcopy(ax, memo=memo) for ax in self), keepnames=True)
+        coords = self.__class__(
+            tuple(cpy.deepcopy(ax, memo=memo) for ax in self), keepnames=True
+        )
         coords.name = self.name
         coords._is_same_dim = self._is_same_dim
         coords._default = self._default
@@ -1042,10 +1108,10 @@ class CoordSet(HasTraits):
         #   'type': 'change', # The event type of the notification, usually 'change'
         # }
 
-        if change.name == '_updated' and change.new:
+        if change.name == "_updated" and change.new:
             self._updated = False  # reset
 
 
 # ======================================================================================================================
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

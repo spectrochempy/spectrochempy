@@ -16,7 +16,7 @@
 
 * DOC: Added list of papers citing spectrochempy.
 
-* Github action workflow to test, build and publish conda package and docs in replacement of Travis CI.
+* Github action workflows to test, build and publish conda package and docs in replacement of Travis CI.
 
 **BUGS FIXED**
 

@@ -11,7 +11,7 @@ dimension (1) of 2D arrays.
 
 """
 
-__all__ = ['pk', 'pk_exp']
+__all__ = ["pk", "pk_exp"]
 __dataset_methods__ = __all__
 
 import functools
@@ -27,6 +27,7 @@ pi = np.pi
 # Decorators
 # ======================================================================================================================
 
+
 def _phase_method(method):
     @functools.wraps(method)
     def wrapper(dataset, **kwargs):
@@ -35,7 +36,7 @@ def _phase_method(method):
         axis, dim = dataset.get_axis(**kwargs, negative_axis=True)
 
         # output dataset inplace (by default) or not
-        if not kwargs.pop('inplace', False):
+        if not kwargs.pop("inplace", False):
             new = dataset.copy()  # copy to be sure not to modify this dataset
         else:
             new = dataset
@@ -49,16 +50,16 @@ def _phase_method(method):
         x = new.coordset[dim]
 
         # check if the dimensionality is compatible with this kind of functions
-        if x.unitless or x.dimensionless or x.units.dimensionality != '[time]':
+        if x.unitless or x.dimensionless or x.units.dimensionality != "[time]":
 
             # extract inital phase from metadata
             def _check_units(par, default_units, inv=False):
                 if not isinstance(par, Quantity):
-                    par *= Quantity(1., default_units)
+                    par *= Quantity(1.0, default_units)
                 elif inv:
                     if par == 0:
                         return par
-                    par = 1. / (1. / par).to(default_units)
+                    par = 1.0 / (1.0 / par).to(default_units)
                 else:
                     par = par.to(default_units)
                 return par
@@ -67,24 +68,33 @@ def _phase_method(method):
             dunits = dataset.coordset[dim].units
 
             current = [new.meta.phc0[-1], new.meta.phc1[-1]]
-            rel = kwargs.pop('rel', False)
+            rel = kwargs.pop("rel", False)
             if rel:  # relative phase
                 current = [0, 0]
-            kwargs['phc0'] = (_check_units(kwargs.get('phc0', 0), 'degree') - current[0]).magnitude
-            kwargs['phc1'] = (_check_units(kwargs.get('phc1', 0), 'degree') - current[1]).magnitude
-            kwargs['pivot'] = _check_units(kwargs.get('pivot', new.meta.pivot[-1]), dunits).magnitude
-            kwargs['exptc'] = _check_units(kwargs.get('exptc', new.meta.get('exptc', [0] * new.ndim)[-1]), dunits,
-                                           inv=True).magnitude
+            kwargs["phc0"] = (
+                _check_units(kwargs.get("phc0", 0), "degree") - current[0]
+            ).magnitude
+            kwargs["phc1"] = (
+                _check_units(kwargs.get("phc1", 0), "degree") - current[1]
+            ).magnitude
+            kwargs["pivot"] = _check_units(
+                kwargs.get("pivot", new.meta.pivot[-1]), dunits
+            ).magnitude
+            kwargs["exptc"] = _check_units(
+                kwargs.get("exptc", new.meta.get("exptc", [0] * new.ndim)[-1]),
+                dunits,
+                inv=True,
+            ).magnitude
 
             if not new.meta.phased[-1]:
                 # initial phase from topspin have not yet been used
-                kwargs['phc0'] = -kwargs['phc0']
-                kwargs['phc1'] = -kwargs['phc1']
+                kwargs["phc0"] = -kwargs["phc0"]
+                kwargs["phc1"] = -kwargs["phc1"]
 
             apod = method(new.data, **kwargs)
             new *= apod
 
-            new.history = f'`{method.__name__}` applied to dimension `{dim}` with parameters: {kwargs}'
+            new.history = f"`{method.__name__}` applied to dimension `{dim}` with parameters: {kwargs}"
 
             if not new.meta.phased[-1]:
                 new.meta.phased[-1] = True
@@ -93,20 +103,22 @@ def _phase_method(method):
                 new.meta.exptc[-1] = 0 * (1 / dunits)
             else:
                 if rel:
-                    new.meta.phc0[-1] += kwargs['phc0'] * ur.degree
-                    new.meta.phc1[-1] += kwargs['phc1'] * ur.degree
+                    new.meta.phc0[-1] += kwargs["phc0"] * ur.degree
+                    new.meta.phc1[-1] += kwargs["phc1"] * ur.degree
                 else:
-                    new.meta.phc0[-1] = kwargs['phc0'] * ur.degree
-                    new.meta.phc1[-1] = kwargs['phc1'] * ur.degree
+                    new.meta.phc0[-1] = kwargs["phc0"] * ur.degree
+                    new.meta.phc1[-1] = kwargs["phc1"] * ur.degree
 
                     # TODO: to do for exptc too!
-                new.meta.exptc[-1] = kwargs['exptc'] * (1 / dunits)
+                new.meta.exptc[-1] = kwargs["exptc"] * (1 / dunits)
 
-            new.meta.pivot[-1] = kwargs['pivot'] * dunits
+            new.meta.pivot[-1] = kwargs["pivot"] * dunits
 
         else:  # not (x.unitless or x.dimensionless or x.units.dimensionality != '[time]')
-            error_('This method apply only to dimensions with [frequency] or [dimensionless] dimensionality.\n'
-                   'Phase processing was thus cancelled')
+            error_(
+                "This method apply only to dimensions with [frequency] or [dimensionless] dimensionality.\n"
+                "Phase processing was thus cancelled"
+            )
 
         # restore original data order if it was swaped
         if swaped:
@@ -120,6 +132,7 @@ def _phase_method(method):
 # ======================================================================================================================
 # Public methods
 # ======================================================================================================================
+
 
 @_phase_method
 def pk(dataset, phc0=0.0, phc1=0.0, exptc=0.0, pivot=0.0, **kwargs):
@@ -162,14 +175,14 @@ def pk(dataset, phc0=0.0, phc1=0.0, exptc=0.0, pivot=0.0, **kwargs):
     ps_exp : Exponential Phase Correction
     pk : Automatic or manual phasing
     """
-    phc0 = pi * phc0 / 180.
+    phc0 = pi * phc0 / 180.0
     size = dataset.shape[-1]
 
     if exptc > 0.0:
         apod = np.exp(1.0j * (phc0 * np.exp(-exptc * (np.arange(size) - pivot) / size)))
 
     else:
-        phc1 = pi * phc1 / 180.
+        phc1 = pi * phc1 / 180.0
         apod = np.exp(1.0j * (phc0 + (phc1 * (np.arange(size) - pivot) / size)))
 
     return apod
@@ -213,6 +226,7 @@ def pk_exp(dataset, phc0=0.0, pivot=0.0, exptc=0.0, **kwargs):
     """
 
     return pk(dataset, phc0=phc0, phc1=0, pivot=pivot, exptc=exptc)
+
 
 # # TODO: work on pk (below a copy from MASAI)
 # @_phase_method

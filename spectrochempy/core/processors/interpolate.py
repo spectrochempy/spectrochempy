@@ -8,7 +8,7 @@
 This module defines functions related to interpolations
 """
 
-__all__ = ['interpolate']
+__all__ = ["interpolate"]
 
 __dataset_methods__ = __all__
 
@@ -25,4 +25,4 @@ __dataset_methods__ = __all__
 def interpolate(dataset, axis=0, size=None):
     # TODO: a simple interpolator of the data (either to reduce
     #      or increase number of points in every dimension)
-    raise NotImplementedError('Not yet implemented')
+    raise NotImplementedError("Not yet implemented")

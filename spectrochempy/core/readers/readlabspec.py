@@ -11,7 +11,7 @@
 """This module extend NDDataset with the import method for Labspec *.txt generated data files.
 """
 
-__all__ = ['read_labspec']
+__all__ = ["read_labspec"]
 __dataset_methods__ = __all__
 
 import datetime
@@ -99,8 +99,8 @@ def read_labspec(*paths, **kwargs):
     >>> A = scp.read_labspec('ramandata/Activation.txt')
     """
 
-    kwargs['filetypes'] = ['LABSPEC exported files (*.txt)']
-    kwargs['protocol'] = ['labspec', 'txt']
+    kwargs["filetypes"] = ["LABSPEC exported files (*.txt)"]
+    kwargs["protocol"] = ["labspec", "txt"]
     importer = Importer()
     return importer(*paths, **kwargs)
 
@@ -118,7 +118,7 @@ def _read_txt(*args, **kwargs):
     # read Labspec *txt files or series
 
     dataset, filename = args
-    content = kwargs.get('content', False)
+    content = kwargs.get("content", False)
 
     if content:
         pass
@@ -126,11 +126,11 @@ def _read_txt(*args, **kwargs):
         # TODO: get the l list of string
 
     else:
-        fid = open(filename, 'r', encoding='utf-8')
+        fid = open(filename, "r", encoding="utf-8")
         try:
             lines = fid.readlines()
         except UnicodeDecodeError:
-            fid = open(filename, 'r', encoding='latin-1')
+            fid = open(filename, "r", encoding="latin-1")
             lines = fid.readlines()
             fid.close()
 
@@ -138,28 +138,28 @@ def _read_txt(*args, **kwargs):
     meta = Meta()
 
     i = 0
-    while lines[i].startswith('#'):
-        key, val = lines[i].split('=')
+    while lines[i].startswith("#"):
+        key, val = lines[i].split("=")
         key = key[1:]
         if key in meta.keys():
-            key = f'{key} {i}'
+            key = f"{key} {i}"
         meta[key] = val.strip()
         i += 1
 
     # read spec
-    rawdata = np.genfromtxt(lines[i:], delimiter='\t')
+    rawdata = np.genfromtxt(lines[i:], delimiter="\t")
 
     # populate the dataset
     if rawdata.shape[1] == 2:
         data = rawdata[:, 1][np.newaxis]
-        _x = Coord(rawdata[:, 0], title='Raman shift', units='1/cm')
-        _y = Coord(None, title='Time', units='s')
+        _x = Coord(rawdata[:, 0], title="Raman shift", units="1/cm")
+        _y = Coord(None, title="Time", units="s")
         date_acq, _y = _transf_meta(_y, meta)
 
     else:
         data = rawdata[1:, 1:]
-        _x = Coord(rawdata[0, 1:], title='Raman shift', units='1/cm')
-        _y = Coord(rawdata[1:, 0], title='Time', units='s')
+        _x = Coord(rawdata[0, 1:], title="Raman shift", units="1/cm")
+        _y = Coord(rawdata[1:, 0], title="Time", units="s")
         date_acq, _y = _transf_meta(_y, meta)
 
     # try to transform to linear coord
@@ -172,20 +172,20 @@ def _read_txt(*args, **kwargs):
     # set dataset metadata
     dataset.data = data
     dataset.set_coordset(y=_y, x=_x)
-    dataset.title = 'raman Intensity'
-    dataset.units = 'absorbance'
+    dataset.title = "raman Intensity"
+    dataset.units = "absorbance"
     dataset.name = filename.stem
     dataset.meta = meta
 
     # date_acq is Acquisition date at start (first moment of acquisition)
-    dataset.description = 'Spectrum acquisition : ' + str(date_acq)
+    dataset.description = "Spectrum acquisition : " + str(date_acq)
 
     # Set the NDDataset date
     dataset._date = datetime.datetime.now(datetime.timezone.utc)
     dataset._modified = dataset.date
 
     # Set origin, description and history
-    dataset.history = f'{dataset.date}:imported from LabSpec6 text file {filename}'
+    dataset.history = f"{dataset.date}:imported from LabSpec6 text file {filename}"
 
     return dataset
 
@@ -212,13 +212,13 @@ def _transf_meta(y, meta):
 
     if meta:
         try:
-            dateacq = datetime.datetime.strptime(meta['Acquired'], '%d.%m.%Y %H:%M:%S')
+            dateacq = datetime.datetime.strptime(meta["Acquired"], "%d.%m.%Y %H:%M:%S")
         except TypeError:
-            dateacq = datetime.datetime.strptime(meta['Date'], '%d/%m/%y %H:%M:%S')
+            dateacq = datetime.datetime.strptime(meta["Date"], "%d/%m/%y %H:%M:%S")
 
-        acq = int(meta.get('Acq. time (s)', meta['Exposition']))
-        accu = int(meta.get('Accumulations', meta.get('Accumulation')))
-        delay = int(meta.get('Delay time (s)', 0))
+        acq = int(meta.get("Acq. time (s)", meta["Exposition"]))
+        accu = int(meta.get("Accumulations", meta.get("Accumulation")))
+        delay = int(meta.get("Delay time (s)", 0))
         # total = val_from_key_wo_time_units('Full time')
 
     else:

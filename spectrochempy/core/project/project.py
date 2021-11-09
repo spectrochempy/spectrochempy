@@ -7,7 +7,7 @@
 #  =
 # ======================================================================================================================
 
-__all__ = ['Project']
+__all__ = ["Project"]
 
 from copy import deepcopy as cpy
 import uuid
@@ -116,12 +116,14 @@ class Project(AbstractProject, NDIO):
         elif isinstance(obj, Script):
             self.add_script(obj, name)
 
-        elif hasattr(obj, 'name'):
+        elif hasattr(obj, "name"):
             self._others[obj.name] = obj
 
         else:
-            raise ValueError('objects of type {} has no name and so '
-                             'cannot be appended to the project '.format(type(obj).__name__))
+            raise ValueError(
+                "objects of type {} has no name and so "
+                "cannot be appended to the project ".format(type(obj).__name__)
+            )
 
     # ..................................................................................................................
     def _get_from_type(self, name):
@@ -131,8 +133,8 @@ class Project(AbstractProject, NDIO):
     def _repr_html_(self):
 
         h = self.__str__()
-        h = h.replace('\n', '<br/>\n')
-        h = h.replace(' ', '&nbsp;')
+        h = h.replace("\n", "<br/>\n")
+        h = h.replace(" ", "&nbsp;")
 
         return h
 
@@ -144,14 +146,14 @@ class Project(AbstractProject, NDIO):
     def __getitem__(self, key):
 
         if not isinstance(key, str):
-            raise KeyError('The key must be a string.')
+            raise KeyError("The key must be a string.")
 
-        if key == 'No project':
+        if key == "No project":
             return
 
-        if '/' in key:
+        if "/" in key:
             # Case of composed name (we assume not more than one level subproject
-            parent = key.split('/')[0]
+            parent = key.split("/")[0]
             if parent in self.projects_names:
                 if key in self._projects[parent].datasets_names:
                     return self._projects[parent]._datasets[key]
@@ -170,11 +172,13 @@ class Project(AbstractProject, NDIO):
     def __setitem__(self, key, value):
 
         if not isinstance(key, str):
-            raise KeyError('The key must be a string.')
+            raise KeyError("The key must be a string.")
 
         if key in self.allnames and not isinstance(value, type(self[key])):
-            raise ValueError('the key exists but for a different type '
-                             'of object: {}'.format(type(self[key]).__name__))
+            raise ValueError(
+                "the key exists but for a different type "
+                "of object: {}".format(type(self[key]).__name__)
+            )
 
         if key in self.datasets_names:
             value.parent = self
@@ -205,7 +209,9 @@ class Project(AbstractProject, NDIO):
             return self.meta[item]
 
         else:
-            raise AttributeError("`%s` has no attribute `%s`" % (type(self).__name__, item))
+            raise AttributeError(
+                "`%s` has no attribute `%s`" % (type(self).__name__, item)
+            )
 
     # ..................................................................................................................
     def __iter__(self):
@@ -237,12 +243,19 @@ class Project(AbstractProject, NDIO):
                 # nothing has been found in the project
                 s += "{} (empty project)\n".format(sep)
 
-            return s.strip('\n')
+            return s.strip("\n")
 
         return _listproj(s, self, 0)
 
     def __dir__(self):
-        return ['name', 'meta', 'parent', 'datasets', 'projects', 'scripts', ]
+        return [
+            "name",
+            "meta",
+            "parent",
+            "datasets",
+            "projects",
+            "scripts",
+        ]
 
     def __copy__(self):
         new = Project()
@@ -265,7 +278,7 @@ class Project(AbstractProject, NDIO):
     # ------------------------------------------------------------------------------------------------------------------
 
     # ..................................................................................................................
-    @default('_id')
+    @default("_id")
     def _id_default(self):
         # a unique id
         return f"{type(self).__name__}_{str(uuid.uuid1()).split('-')[0]}"
@@ -294,7 +307,7 @@ class Project(AbstractProject, NDIO):
         if name is not None:
             self._name = name
         else:
-            self.name = "Project-" + self.id.split('-')[0]
+            self.name = "Project-" + self.id.split("-")[0]
 
     # ..................................................................................................................
     @property
@@ -317,12 +330,12 @@ class Project(AbstractProject, NDIO):
         self._parent = value
 
     # ..................................................................................................................
-    @default('_parent')
+    @default("_parent")
     def _get_parent(self):
         return None
 
     # ..................................................................................................................
-    @default('_meta')
+    @default("_meta")
     def _meta_default(self):
         return Meta()
 
@@ -430,7 +443,11 @@ class Project(AbstractProject, NDIO):
         """
         list - all items contained in this project
         """
-        return list(self._datasets.items()) + list(self._projects.items()) + list(self._scripts.items())
+        return (
+            list(self._datasets.items())
+            + list(self._projects.items())
+            + list(self._scripts.items())
+        )
 
     # ------------------------------------------------------------------------------------------------------------------
     # Public methods
@@ -445,9 +462,9 @@ class Project(AbstractProject, NDIO):
         This is useful to check type without importing the module.
         """
         if name is None:
-            return 'Project'
+            return "Project"
         else:
-            return name == 'Project'
+            return name == "Project"
 
     def copy(self):
         """
@@ -510,7 +527,7 @@ class Project(AbstractProject, NDIO):
         n = 1
         while name in self.allnames:
             # this name already exists
-            name = f'{dataset.name}-{n}'
+            name = f"{dataset.name}-{n}"
             n += 1
 
         dataset.name = name
@@ -601,12 +618,12 @@ class Project(AbstractProject, NDIO):
     # ..................................................................................................................
     def add_scripts(self, *scripts):
         """
-         Add one or a series of scripts to the current project.
+        Add one or a series of scripts to the current project.
 
-         Parameters
-         ----------
-         scripts : |Script| instances
-         """
+        Parameters
+        ----------
+        scripts : |Script| instances
+        """
         for sc in scripts:
             self.add_script(sc)
 
@@ -655,5 +672,5 @@ def makescript(priority=50):
 
 
 # ======================================================================================================================
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

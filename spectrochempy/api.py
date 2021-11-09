@@ -39,22 +39,22 @@ NO_DISPLAY = False
 NO_DIALOG = False
 
 # Are we buidings the docs ?
-if 'make.py' in sys.argv[0]:
+if "make.py" in sys.argv[0]:
     # if we are building the documentation, in principle it should be done
     # using the make.py located at the root of the spectrchempy package.
     NO_DISPLAY = True
     NO_DIALOG = True
-    mpl.use('agg', force=True)
+    mpl.use("agg", force=True)
 
 # is there a --nodisplay flag
-if '--nodisplay' in sys.argv:
+if "--nodisplay" in sys.argv:
     NO_DISPLAY = True
     NO_DIALOG = True
-    mpl.use('agg', force=True)
+    mpl.use("agg", force=True)
 
 # Are we running pytest?
 
-if 'pytest' in sys.argv[0] or 'py.test' in sys.argv[0]:
+if "pytest" in sys.argv[0] or "py.test" in sys.argv[0]:
     # if we are testing we also like a silent work with no figure popup!
     NO_DISPLAY = True
     NO_DIALOG = True
@@ -62,26 +62,29 @@ if 'pytest' in sys.argv[0] or 'py.test' in sys.argv[0]:
     # OK, but if we are doing individual function testing in PyCharm
     # it is interesting to see the plots and the file dialogs (except if we set explicitely --nodisplay argument!
     # if len(sys.argv) > 1 and not any([arg.endswith(".py") for arg in sys.argv[1:]]) and '--nodisplay' not in sys.argv:
-    if len(sys.argv) > 1 and any(
-            [arg.split('::')[0].endswith(".py") for arg in sys.argv[1:]]) and '--nodisplay' not in sys.argv:
+    if (
+        len(sys.argv) > 1
+        and any([arg.split("::")[0].endswith(".py") for arg in sys.argv[1:]])
+        and "--nodisplay" not in sys.argv
+    ):
         # individual module testing
         NO_DISPLAY = False
         NO_DIALOG = False
 
     if NO_DISPLAY:
-        mpl.use('agg', force=True)
+        mpl.use("agg", force=True)
 
 # Are we running in PyCharm scientific mode?
-if mpl.get_backend() == 'module://backend_interagg':
+if mpl.get_backend() == "module://backend_interagg":
     IN_PYCHARM_SCIMODE = True
 else:
     IN_PYCHARM_SCIMODE = False
 
 if not (IN_IPYTHON and kernel) and not IN_PYCHARM_SCIMODE and not NO_DISPLAY:
-    backend = mpl.rcParams['backend']  # 'Qt5Agg'
+    backend = mpl.rcParams["backend"]  # 'Qt5Agg'
     mpl.use(backend, force=True)
 
-ALL = ['NO_DISPLAY', 'NO_DIALOG']
+ALL = ["NO_DISPLAY", "NO_DIALOG"]
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Now we can start loading the API
@@ -92,7 +95,7 @@ from spectrochempy.core import *  # noqa: F403, F401, E402
 
 ALL += core.__all__
 
-debug_('ARGV', sys.argv)
+debug_("ARGV", sys.argv)
 if not IN_IPYTHON:
     # needed in windows terminal - but must not be inited in Jupyter notebook
     from colorama import init as initcolor
@@ -106,17 +109,19 @@ if not IN_IPYTHON:
 
 if IN_IPYTHON and kernel and not NO_DISPLAY:
     try:
-        if 'ipykernel_launcher' in sys.argv[0] and \
-                "--InlineBackend.rc={'figure.dpi': 96}" in sys.argv:
+        if (
+            "ipykernel_launcher" in sys.argv[0]
+            and "--InlineBackend.rc={'figure.dpi': 96}" in sys.argv
+        ):
             # We are running from NBSphinx - the plot must be inline to show up.
-            ip.magic('matplotlib inline')
+            ip.magic("matplotlib inline")
         else:
             # Do not set the widget backend.... do not work most of the time after upbgrade of the various
             # library and
             # jupyter!!! ...
-            ip.magic('matplotlib inline')  # widget
+            ip.magic("matplotlib inline")  # widget
     except Exception:
-        ip.magic('matplotlib qt')
+        ip.magic("matplotlib qt")
 
 
 # set_backend()
@@ -126,13 +131,13 @@ from spectrochempy.utils import pathclean
 
 DATADIR = pathclean(preferences.datadir)
 
-__all__ = ['pathclean', 'DATADIR'] + ALL
+__all__ = ["pathclean", "DATADIR"] + ALL
 
 import warnings
 
-warnings.filterwarnings(action='ignore', module='matplotlib')  # , category=UserWarning)
+warnings.filterwarnings(action="ignore", module="matplotlib")  # , category=UserWarning)
 # warnings.filterwarnings(action="error", category=DeprecationWarning)
 
 # ==============================================================================
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

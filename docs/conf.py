@@ -64,41 +64,40 @@ sys._called_from_sphinx = True
 source = os.path.dirname(os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(source, "docs", "sphinxext"))
 # print (sys.path)
-extensions = \
-    [
-            'nbsphinx',
-            'sphinx_copybutton',
-            'sphinx.ext.mathjax',
-            'sphinx.ext.autodoc',
-            'sphinx.ext.doctest',
-            'sphinx.ext.intersphinx',
-            'sphinx.ext.linkcode',
-            'sphinx.ext.todo',
-            'sphinx_gallery.gen_gallery',
-            'matplotlib.sphinxext.plot_directive',
-            'IPython.sphinxext.ipython_console_highlighting',
-            'IPython.sphinxext.ipython_directive',
-            'sphinx.ext.napoleon',
-            'autodoc_traitlets',
-            'sphinx.ext.autosummary',
-            'sphinx.ext.githubpages',
-            ]
+extensions = [
+    "nbsphinx",
+    "sphinx_copybutton",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.doctest",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.linkcode",
+    "sphinx.ext.todo",
+    "sphinx_gallery.gen_gallery",
+    "matplotlib.sphinxext.plot_directive",
+    "IPython.sphinxext.ipython_console_highlighting",
+    "IPython.sphinxext.ipython_directive",
+    "sphinx.ext.napoleon",
+    "autodoc_traitlets",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.githubpages",
+]
 
 # %%
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # %%
 # The suffix of source filenames.
-source_suffix = '.rst'
+source_suffix = ".rst"
 
 # %%
 # The encoding of source files.
-source_encoding = 'utf-8'
+source_encoding = "utf-8"
 
 # %%
 # The master toctree document.
-master_doc = 'index'
+master_doc = "index"
 
 # %% [markdown]
 # General information about the project.
@@ -110,7 +109,7 @@ master_doc = 'index'
 
 # %%
 version = spectrochempy.application.__version__  # .split('+')[0]
-release = version.split('+')[0]
+release = version.split("+")[0]
 project = f"SpectroChemPy v{version}"
 copyright = spectrochempy.application.__copyright__
 
@@ -119,22 +118,22 @@ copyright = spectrochempy.application.__copyright__
 # non-false value, then it is used:
 # today = ''
 # Else, today_fmt is used as the format for a strftime call.
-today_fmt = '%B %d, %Y'
+today_fmt = "%B %d, %Y"
 
 # %%
 exclude_patterns = []
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns.append('_templates')
-exclude_patterns.append('_static')
-exclude_patterns.append('**.ipynb_checkpoints')
-exclude_patterns.append('gallery')
-exclude_patterns.append('~temp')
+exclude_patterns.append("_templates")
+exclude_patterns.append("_static")
+exclude_patterns.append("**.ipynb_checkpoints")
+exclude_patterns.append("gallery")
+exclude_patterns.append("~temp")
 
 # %%
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
-default_role = 'obj'
+default_role = "obj"
 
 # %%
 # If true, '()' will be appended to :func: etc. cross-reference text.
@@ -152,7 +151,7 @@ add_module_names = False
 
 # %%
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 # %% [markdown]
 # A list of ignored prefixes for module index sorting.
@@ -217,18 +216,18 @@ rst_epilog = """
 # a list of builtin themes.
 
 # %%
-html_theme = 'sphinx_rtd_theme'
+html_theme = "sphinx_rtd_theme"
 
 # %%
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
-        'logo_only': True,
-        'display_version': True,
-        'collapse_navigation': True,
-        'navigation_depth': 2,
-        }
+    "logo_only": True,
+    "display_version": True,
+    "collapse_navigation": True,
+    "navigation_depth": 2,
+}
 
 # %% [markdown]
 # Add any paths that contain custom themes here, relative to this directory.
@@ -245,7 +244,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # of the sidebar.
 
 # %%
-html_logo = '_static/scpy.png'
+html_logo = "_static/scpy.png"
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
@@ -257,12 +256,12 @@ html_favicon = "_static/scpy.ico"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
 # %%
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
-html_last_updated_fmt = '%b %d, %Y'
+html_last_updated_fmt = "%b %d, %Y"
 
 # %%
 # If true, SmartyPants will be used to convert quotes and dashes to
@@ -314,7 +313,7 @@ html_show_copyright = True
 
 # %%
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'spectrochempydoc'
+htmlhelp_basename = "spectrochempydoc"
 
 # %% [markdown]
 # SINCE the new sphinx version HTML5 is generated by default,
@@ -326,20 +325,23 @@ trim_doctests_flags = True
 
 # %%
 # Remove matplotlib agg warnings from generated doc when using plt.show
-warnings.filterwarnings("ignore", category=UserWarning,
-                        message='Matplotlib is currently using agg, which is a'
-                                ' non-GUI backend, so cannot show the figure.')
+warnings.filterwarnings(
+    "ignore",
+    category=UserWarning,
+    message="Matplotlib is currently using agg, which is a"
+    " non-GUI backend, so cannot show the figure.",
+)
 
 # %%
 html_context = {
-        'current_version': 'latest' if ('dev' in version) else 'stable',
-        'release': spectrochempy.application.__release__,
-        'base_url': 'https://www.spectrochempy.fr',
-        'versions': (
-                ('latest', '/latest/index.html"'),
-                ('stable', '/stable/index.html'),
-                )
-        }
+    "current_version": "latest" if ("dev" in version) else "stable",
+    "release": spectrochempy.application.__release__,
+    "base_url": "https://www.spectrochempy.fr",
+    "versions": (
+        ("latest", '/latest/index.html"'),
+        ("stable", "/stable/index.html"),
+    ),
+}
 
 # %% [markdown]
 # -- Options for LaTeX output --------------------------------------------------
@@ -348,10 +350,16 @@ html_context = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass  [
 # howto/manual]).
-latex_documents = [(
-        'index', 'spectrochempy.tex', u'SpectroChemPy Documentation',
-        u'A. Travert & C. Fernandez', 'manual', False),
-        ]
+latex_documents = [
+    (
+        "index",
+        "spectrochempy.tex",
+        "SpectroChemPy Documentation",
+        "A. Travert & C. Fernandez",
+        "manual",
+        False,
+    ),
+]
 
 # %%
 # The name of an image file (relative to this directory) to place at the top of
@@ -365,22 +373,19 @@ latex_use_parts = False
 
 # %%
 latex_elements = {
-        # The paper size ('letterpaper' or 'a4paper').
-        'papersize': 'a4paper',  # ''letterpaper',
-
-        # The font size ('10pt', '11pt' or '12pt').
-        'pointsize': '10pt',
-
-        # remove blank pages (between the title page and the TOC, etc.)
-        'classoptions': ',openany,oneside',
-        'babel': '\\usepackage[english]{babel}',
-
-        # Additional stuff for the LaTeX preamble.
-        'preamble': r'''
+    # The paper size ('letterpaper' or 'a4paper').
+    "papersize": "a4paper",  # ''letterpaper',
+    # The font size ('10pt', '11pt' or '12pt').
+    "pointsize": "10pt",
+    # remove blank pages (between the title page and the TOC, etc.)
+    "classoptions": ",openany,oneside",
+    "babel": "\\usepackage[english]{babel}",
+    # Additional stuff for the LaTeX preamble.
+    "preamble": r"""
 \usepackage{hyperref}
 \setcounter{tocdepth}{3}
-'''
-        }
+""",
+}
 
 # %%
 # If false, no module index is generated.
@@ -410,12 +415,17 @@ latex_use_modindex = True
 # Grouping the document tree into PDF files. List of tuples
 # (source start file, target name, title, author).
 pdf_documents = [
-        ('index', u'SpectroChempy', u'Spectrochempy Documentation', u'A. Travert & C. Fernandez'),
-        ]
+    (
+        "index",
+        "SpectroChempy",
+        "Spectrochempy Documentation",
+        "A. Travert & C. Fernandez",
+    ),
+]
 
 # %%
 # A comma-separated list of custom stylesheets. Example:
-pdf_stylesheets = ['sphinx', 'kerning', 'a4']
+pdf_stylesheets = ["sphinx", "kerning", "a4"]
 
 # %% [markdown]
 # Create a compressed PDF
@@ -452,22 +462,22 @@ pdf_language = "en_EN"
 
 # %%
 sphinx_gallery_conf = {
-        'plot_gallery': 'True',
-        'backreferences_dir': 'gettingstarted/gallery/backreferences',
-        'doc_module': ('spectrochempy',),
-        'reference_url': {
-                'spectrochempy': None,
-                },
-        # path to the examples scripts
-        'examples_dirs': 'gettingstarted/examples',
-        # path where to save gallery generated examples=======
-        'gallery_dirs': 'gettingstarted/gallery/auto_examples',
-        'abort_on_example_error': False,
-        'expected_failing_examples': [],
-        'download_all_examples': False,
-        }
+    "plot_gallery": "True",
+    "backreferences_dir": "gettingstarted/gallery/backreferences",
+    "doc_module": ("spectrochempy",),
+    "reference_url": {
+        "spectrochempy": None,
+    },
+    # path to the examples scripts
+    "examples_dirs": "gettingstarted/examples",
+    # path where to save gallery generated examples=======
+    "gallery_dirs": "gettingstarted/gallery/auto_examples",
+    "abort_on_example_error": False,
+    "expected_failing_examples": [],
+    "download_all_examples": False,
+}
 suppress_warnings = [
-        'sphinx_gallery',
+    "sphinx_gallery",
 ]
 # MYST_NB
 # execution_excludepatterns = ['gettingstarted/gallery/auto_examples', 'sphinxext']
@@ -480,13 +490,13 @@ suppress_warnings = [
 # %%
 # List of arguments to be passed to the kernel that executes the notebooks:
 nbsphinx_execute_arguments = [
-        "--InlineBackend.figure_formats={'jpg', 'png'}",
-        "--InlineBackend.rc={'figure.dpi': 96}",
-        ]
+    "--InlineBackend.figure_formats={'jpg', 'png'}",
+    "--InlineBackend.rc={'figure.dpi': 96}",
+]
 
 # %%
 # Execute notebooks before conversion: 'always', 'never', 'auto' (default)
-nbsphinx_execute = 'always'
+nbsphinx_execute = "always"
 nbsphinx_allow_errors = True
 nbsphinx_timeout = 180
 nbsphinx_prolog = """
@@ -498,29 +508,29 @@ copybutton_prompt_is_regexp = True
 
 # %%
 # Use this kernel instead of the one stored in the notebook metadata:
-nbsphinx_kernel_name = 'python3'
+nbsphinx_kernel_name = "python3"
 
 # %%
 # set a filename and default folder by default for notebook which have file dialogs
-os.environ['TUTORIAL_FILENAME'] = 'wodger.spg'
-os.environ['TUTORIAL_FOLDER'] = 'irdata/subdir'
+os.environ["TUTORIAL_FILENAME"] = "wodger.spg"
+os.environ["TUTORIAL_FOLDER"] = "irdata/subdir"
 
 # %%
 # set a flag to deactivate TQDM
-os.environ['USE_TQDM'] = 'No'
+os.environ["USE_TQDM"] = "No"
 
 # %% [markdown]
 # configuration for intersphinx ------------------------------------------------
 
 # %%
 intersphinx_mapping = {
-        'python': ('https://docs.python.org/3', None),
-        'ipython': ('https://ipython.readthedocs.io/en/stable/', None),
-        'numpy': ('https://numpy.org/doc/stable/', None),
-        'SciPy': ('https://docs.scipy.org/doc/scipy/reference', None),
-        'matplotlib': ('https://matplotlib.org/', None),
-        'sklearn': ('https://scikit-learn.org/stable/', None),
-        }
+    "python": ("https://docs.python.org/3", None),
+    "ipython": ("https://ipython.readthedocs.io/en/stable/", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "SciPy": ("https://docs.scipy.org/doc/scipy/reference", None),
+    "matplotlib": ("https://matplotlib.org/", None),
+    "sklearn": ("https://scikit-learn.org/stable/", None),
+}
 
 
 # %% [markdown]
@@ -532,8 +542,8 @@ def linkcode_resolve(domain, info):
     def find_source():
         # try to find the file and line number, based on code from numpy:
         # https://github.com/numpy/numpy/blob/master/doc/source/conf.py#L286
-        obj = sys.modules[info['module']]
-        for part in info['fullname'].split('.'):
+        obj = sys.modules[info["module"]]
+        for part in info["fullname"].split("."):
             obj = getattr(obj, part)
 
         fn = inspect.getsourcefile(obj)
@@ -541,13 +551,13 @@ def linkcode_resolve(domain, info):
         source, lineno = inspect.getsourcelines(obj)
         return fn, lineno, lineno + len(source) - 1
 
-    if domain != 'py' or not info['module']:
+    if domain != "py" or not info["module"]:
         return None
     try:
-        filename = 'spectrochempy/%s#L%d-L%d' % find_source()
+        filename = "spectrochempy/%s#L%d-L%d" % find_source()
     except Exception:
-        filename = info['module'].replace('.', '/') + '.py'
-    tag = 'master'
+        filename = info["module"].replace(".", "/") + ".py"
+    tag = "master"
     return f"https://github.com/spectrochempy/spectrochempy/blob/{tag}/{filename}"
 
 
@@ -570,33 +580,74 @@ numpydoc_show_class_members = False
 numpydoc_use_plots = True
 
 # %%
-autoclass_content = 'both'  # Both the class’ and the __init__ method’s docstring are concatenated and inserted.
+autoclass_content = "both"  # Both the class’ and the __init__ method’s docstring are concatenated and inserted.
 
 # %%
-autodoc_default_flags = ['autosummary']
+autodoc_default_flags = ["autosummary"]
 
 # %%
 exclusions = (
-        'with_traceback', 'with_traceback', 'observe', 'unobserve', 'observe',
-        'cross_validation_lock', 'unobserve_all', 'class_config_rst_doc',
-        'class_config_section', 'class_get_help', 'class_print_help',
-        'section_names', 'update_config', 'clear_instance', "notify_change",
-        'document_config_options', 'flatten_flags', 'generate_config_file',
-        'initialize_subcommand', 'initialized', 'instance',
-        'json_config_loader_class', 'launch_instance', 'setup_instance',
-        'load_config_file',
-        'parse_command_line', 'print_alias_help', 'print_description',
-        'print_examples', 'print_flag_help', 'print_help', 'print_subcommands',
-        'print_version', 'python_config_loader_class', 'raises', '_*',
-        'unobserve', 'unobserve_all', 'trait_events', 'trait_metadata', 'trait_names', 'trait', 'setup_instance',
-        'set_trait', 'on_trait_change', 'observe', 'notify_change', 'hold_trait_notifications', 'has_trait',
-        'class_traits', 'class_trait_names', 'class_own_traits', 'class_own_trait_events', 'add_traits')
+    "with_traceback",
+    "with_traceback",
+    "observe",
+    "unobserve",
+    "observe",
+    "cross_validation_lock",
+    "unobserve_all",
+    "class_config_rst_doc",
+    "class_config_section",
+    "class_get_help",
+    "class_print_help",
+    "section_names",
+    "update_config",
+    "clear_instance",
+    "notify_change",
+    "document_config_options",
+    "flatten_flags",
+    "generate_config_file",
+    "initialize_subcommand",
+    "initialized",
+    "instance",
+    "json_config_loader_class",
+    "launch_instance",
+    "setup_instance",
+    "load_config_file",
+    "parse_command_line",
+    "print_alias_help",
+    "print_description",
+    "print_examples",
+    "print_flag_help",
+    "print_help",
+    "print_subcommands",
+    "print_version",
+    "python_config_loader_class",
+    "raises",
+    "_*",
+    "unobserve",
+    "unobserve_all",
+    "trait_events",
+    "trait_metadata",
+    "trait_names",
+    "trait",
+    "setup_instance",
+    "set_trait",
+    "on_trait_change",
+    "observe",
+    "notify_change",
+    "hold_trait_notifications",
+    "has_trait",
+    "class_traits",
+    "class_trait_names",
+    "class_own_traits",
+    "class_own_trait_events",
+    "add_traits",
+)
 
 
 # %%
 def autodoc_skip_member(app, what, name, obj, skip, options):
     doc = True if obj.__doc__ is not None else False
-    exclude = name in exclusions or 'trait' in name or name.startswith('_') or not doc
+    exclude = name in exclusions or "trait" in name or name.startswith("_") or not doc
     return skip or exclude
 
 
@@ -604,30 +655,36 @@ def shorter_signature(app, what, name, obj, options, signature, return_annotatio
     """
     Prevent displaying self in signature.
     """
-    if what == 'data':
-        signature = '(dataset)'
-        what = 'function'
+    if what == "data":
+        signature = "(dataset)"
+        what = "function"
 
-    if what not in ('function', 'method', 'class', 'data') or signature is None:
+    if what not in ("function", "method", "class", "data") or signature is None:
         return
 
     import re
+
     new_sig = signature
 
     if inspect.isfunction(obj) or inspect.isclass(obj) or inspect.ismethod(obj):
         sig_obj = obj if not inspect.isclass(obj) else obj.__init__
-        sig_re = r'\((self|cls)?,?\s*(.*?)\)\:'
+        sig_re = r"\((self|cls)?,?\s*(.*?)\)\:"
         try:
-            new_sig = ' '.join(re.search(sig_re, inspect.getsource(sig_obj), re.S).group(2).replace('\n', '').split())
+            new_sig = " ".join(
+                re.search(sig_re, inspect.getsource(sig_obj), re.S)
+                .group(2)
+                .replace("\n", "")
+                .split()
+            )
         except Exception as e:
             print(sig_obj)
             raise e
-        new_sig = '(' + new_sig + ')'
+        new_sig = "(" + new_sig + ")"
     return new_sig, return_annotation
 
 
 # %%
 def setup(app):
-    app.connect('autodoc-skip-member', autodoc_skip_member)
-    app.connect('autodoc-process-signature', shorter_signature)
+    app.connect("autodoc-skip-member", autodoc_skip_member)
+    app.connect("autodoc-process-signature", shorter_signature)
     app.add_css_file("theme_override.css")  # also can be a full URL

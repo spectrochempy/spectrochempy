@@ -48,7 +48,7 @@ proj.name
 # Let's change this name
 
 # %%
-proj.name = 'myNMRdata'
+proj.name = "myNMRdata"
 proj
 
 # %% [markdown]
@@ -58,9 +58,13 @@ proj
 
 # %%
 datadir = pathclean(prefs.datadir)
-path = datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr'
-nd1 = NDDataset.read_topspin(path / 'topspin_1d', expno=1, remove_digital_filter=True, name="NMR_1D")
-nd2 = NDDataset.read_topspin(path / 'topspin_2d', expno=1, remove_digital_filter=True, name='NMR_2D')
+path = datadir / "nmrdata" / "bruker" / "tests" / "nmr"
+nd1 = NDDataset.read_topspin(
+    path / "topspin_1d", expno=1, remove_digital_filter=True, name="NMR_1D"
+)
+nd2 = NDDataset.read_topspin(
+    path / "topspin_2d", expno=1, remove_digital_filter=True, name="NMR_2D"
+)
 
 # %% [markdown]
 # To add it to the project, we use the `add_dataset` function for a single dataset:
@@ -87,7 +91,7 @@ proj
 # ## Remove an element from a project
 
 # %%
-proj.remove_dataset('NMR_1D')
+proj.remove_dataset("NMR_1D")
 proj
 
 # %% [markdown]
@@ -112,7 +116,7 @@ _ = proj.NMR_1D.plot()
 # project behave as a dictionary). For example:
 
 # %%
-proj['NMR_1D'].data
+proj["NMR_1D"].data
 
 # %%
 proj.NMR_2D
@@ -127,13 +131,13 @@ proj
 # #### Saving
 
 # %%
-proj.save_as('NMR')
+proj.save_as("NMR")
 
 # %% [markdown]
 # #### Loading
 
 # %%
-proj2 = Project.load('NMR')
+proj2 = Project.load("NMR")
 
 # %%
 proj2

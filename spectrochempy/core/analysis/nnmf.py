@@ -9,7 +9,7 @@ This module implement the NNMF (Non Negative Matrix Factorization) class
 """
 # TODO: create  tests
 
-__all__ = ['NNMF']
+__all__ = ["NNMF"]
 
 __dataset_methods__ = []
 
@@ -56,23 +56,23 @@ class NNMF(HasTraits):
         """
         super().__init__()
 
-        tol = kwargs.get('tol', 0.1)
+        tol = kwargs.get("tol", 0.1)
 
-        maxtime = kwargs.get('maxtime', 60)
+        maxtime = kwargs.get("maxtime", 60)
 
-        maxit = kwargs.get('maxit', 100)
+        maxit = kwargs.get("maxit", 100)
 
         self.C = Ci.copy()
-        self.C.name = 'Conc profile optimized by nnmf'
-        self.C.history = ''
+        self.C.name = "Conc profile optimized by nnmf"
+        self.C.history = ""
 
         self.St = Sti.copy()
-        self.St.name = 'Spectral profile optimized by nnmf'
-        self.St.history = ''
+        self.St.name = "Spectral profile optimized by nnmf"
+        self.St.history = ""
 
-        self.C.data, self.St.data = self.nmf(X.data, Ci.data, Sti.data, tol,
-                                             maxtime,
-                                             maxit)
+        self.C.data, self.St.data = self.nmf(
+            X.data, Ci.data, Sti.data, tol, maxtime, maxit
+        )
 
     @staticmethod
     def nmf(V, Winit, Hinit, tol, timelimit, maxiter):
@@ -136,7 +136,7 @@ class NNMF(HasTraits):
                         Hp = Hn
 
             if n_iter == maxiter:
-                info_('Max iter in nlssubprob')
+                info_("Max iter in nlssubprob")
 
             return H, grad, n_iter
 
@@ -149,14 +149,18 @@ class NNMF(HasTraits):
         gradW = np.dot(W, np.dot(H, H.T)) - np.dot(V, H.T)
         gradH = np.dot(np.dot(W.T, W), H) - np.dot(W.T, V)
         initgrad = norm(np.r_[gradW, gradH.T])
-        info_('Init gradient norm {:.3f}'.format(initgrad))
+        info_("Init gradient norm {:.3f}".format(initgrad))
         tolW = max(0.001, tol) * initgrad
         tolH = tolW
 
         for myiter in range(1, maxiter):
             # stopping condition
-            projnorm = norm(np.r_[gradW[np.logical_or(gradW < 0, W > 0)],
-                                  gradH[np.logical_or(gradH < 0, H > 0)]])
+            projnorm = norm(
+                np.r_[
+                    gradW[np.logical_or(gradW < 0, W > 0)],
+                    gradH[np.logical_or(gradH < 0, H > 0)],
+                ]
+            )
 
             if projnorm < tol * initgrad or time() - initt > timelimit:
                 break
@@ -174,9 +178,7 @@ class NNMF(HasTraits):
                 tolH = 0.1 * tolH
 
             if myiter % 10 == 0:
-                stdout.write('.')
+                stdout.write(".")
 
-        info_(
-                '\nIter = {} Final proj-grad norm {:.3f}'.format(myiter,
-                                                                 projnorm))
+        info_("\nIter = {} Final proj-grad norm {:.3f}".format(myiter, projnorm))
         return W, H

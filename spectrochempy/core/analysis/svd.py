@@ -8,7 +8,7 @@
 This module implements the Singular Value Decomposition (SVD) class.
 """
 
-__all__ = ['SVD']
+__all__ = ["SVD"]
 
 __dataset_methods__ = []
 
@@ -90,8 +90,10 @@ class SVD(HasTraits):
             units = X.units
 
         else:
-            raise TypeError(f'A dataset of type NDDataset is expected as a dataset of data, but an object of type'
-                            f' {type(X).__name__} has been provided')
+            raise TypeError(
+                f"A dataset of type NDDataset is expected as a dataset of data, but an object of type"
+                f" {type(X).__name__} has been provided"
+            )
 
         # Retains only valid rows and columns
         # -----------------------------------
@@ -111,15 +113,16 @@ class SVD(HasTraits):
             masked_columns = np.zeros(X._data.shape[-1], dtype=bool)
             masked_rows = np.zeros(X._data.shape[-2], dtype=bool)
 
-        data = data[:, ~ masked_columns]
-        data = data[~ masked_rows]
+        data = data[:, ~masked_columns]
+        data = data[~masked_rows]
 
         # Performs the SVD
         # ----------------
 
         if data.size == 0 and np.product(data.shape[-2:]) == 0:
-            raise np.linalg.LinAlgError("Arrays cannot be empty. You may "
-                                        "want to check the masked data. ")
+            raise np.linalg.LinAlgError(
+                "Arrays cannot be empty. You may " "want to check the masked data. "
+            )
 
         res = np.linalg.svd(data, full_matrices, compute_uv)
         if compute_uv:
@@ -131,12 +134,12 @@ class SVD(HasTraits):
         # -------------------------------------------------------
 
         s = NDDataset(s)
-        s.title = 'singular values of ' + X.name
-        s.name = 'sigma'
-        s.history = 'Created by SVD \n'
+        s.title = "singular values of " + X.name
+        s.name = "sigma"
+        s.history = "Created by SVD \n"
         s.description = (
-                'Vector of singular values obtained  by SVD '
-                'decomposition of ' + X.name)
+            "Vector of singular values obtained  by SVD " "decomposition of " + X.name
+        )
         self.s = s
 
         if compute_uv:
@@ -147,7 +150,7 @@ class SVD(HasTraits):
             KV = VT.shape[0]
             if np.any(masked_columns):
                 Vtemp = np.ma.zeros((KV, N))  # note np.ma, not np.
-                Vtemp[:, ~ masked_columns] = VT
+                Vtemp[:, ~masked_columns] = VT
                 Vtemp[:, masked_columns] = MASKED
                 VT = Vtemp
 
@@ -156,7 +159,7 @@ class SVD(HasTraits):
             KU = U.shape[1]
             if np.any(masked_rows):
                 Utemp = np.ma.zeros((M, KU))
-                Utemp[~ masked_rows] = U
+                Utemp[~masked_rows] = U
                 Utemp[masked_rows] = MASKED
                 U = Utemp
 
@@ -168,22 +171,33 @@ class SVD(HasTraits):
             # Returns U as a NDDataset object
             # --------------------------------
             U = NDDataset(U)
-            U.name = 'U'
-            U.title = 'left singular vectors of ' + X.name
-            U.set_coordset(x=Coord(labels=['#%d' % (i + 1) for i in range(KU)], title='Components'), y=X.y)
-            U.description = 'left singular vectors of ' + X.name
-            U.history = 'Created by SVD \n'
+            U.name = "U"
+            U.title = "left singular vectors of " + X.name
+            U.set_coordset(
+                x=Coord(
+                    labels=["#%d" % (i + 1) for i in range(KU)], title="Components"
+                ),
+                y=X.y,
+            )
+            U.description = "left singular vectors of " + X.name
+            U.history = "Created by SVD \n"
 
             # Returns the loadings (VT) as a NDDataset object
             # ------------------------------------------------
 
             VT = NDDataset(VT)
-            VT.name = 'V.T'
-            VT.title = 'loadings (V.t) of ' + X.name
-            VT.set_coordset(x=X.x, y=Coord(labels=['#%d' % (i + 1) for i in range(KV)], title='Components'))
+            VT.name = "V.T"
+            VT.title = "loadings (V.t) of " + X.name
+            VT.set_coordset(
+                x=X.x,
+                y=Coord(
+                    labels=["#%d" % (i + 1) for i in range(KV)], title="Components"
+                ),
+            )
             VT.description = (
-                    'Loadings obtained by singular value decomposition of ' + X.name)
-            VT.history = (str(VT.modified) + ': Created by SVD \n')
+                "Loadings obtained by singular value decomposition of " + X.name
+            )
+            VT.history = str(VT.modified) + ": Created by SVD \n"
             # loadings keep the units of the original data
             VT.units = units
 
@@ -199,10 +213,13 @@ class SVD(HasTraits):
 
     def __repr__(self):
         if self._compute_uv:
-            return '<svd: U%s, s(%s), VT%s>' % (
-                    self.U.shape, self.s.size, self.VT.shape)
+            return "<svd: U%s, s(%s), VT%s>" % (
+                self.U.shape,
+                self.s.size,
+                self.VT.shape,
+            )
         else:
-            return '<svd: s(%s), U, VT:not computed>' % (self.s.size,)
+            return "<svd: s(%s), U, VT:not computed>" % (self.s.size,)
 
     # ------------------------------------------------------------------------------------------------------------------
     #  Properties
@@ -213,9 +230,13 @@ class SVD(HasTraits):
         """|NDDataset|, Singular values"""
         size = self.s.size
         sv = self.s.copy()
-        sv.name = 'sv'
-        sv.title = 'singular values'
-        sv.set_coordset(Coord(None, labels=['#%d' % (i + 1) for i in range(size)], title='Components'))
+        sv.name = "sv"
+        sv.title = "singular values"
+        sv.set_coordset(
+            Coord(
+                None, labels=["#%d" % (i + 1) for i in range(size)], title="Components"
+            )
+        )
         return sv
 
     @property
@@ -223,27 +244,31 @@ class SVD(HasTraits):
         """|NDDataset|, Explained variance"""
         size = self.s.size
         ev = self.s ** 2 / (size - 1)
-        ev.name = 'ev'
-        ev.title = 'explained variance'
-        ev.set_coordset(Coord(None, labels=['#%d' % (i + 1) for i in range(size)], title='Components'))
+        ev.name = "ev"
+        ev.title = "explained variance"
+        ev.set_coordset(
+            Coord(
+                None, labels=["#%d" % (i + 1) for i in range(size)], title="Components"
+            )
+        )
         return ev
 
     @property
     def ev_cum(self):
         """|NDDataset|, Cumulative Explained Variance"""
         ev_cum = np.cumsum(self.ev_ratio)
-        ev_cum.name = 'ev_cum'
-        ev_cum.title = 'cumulative explained variance'
-        ev_cum.units = 'percent'
+        ev_cum.name = "ev_cum"
+        ev_cum.title = "cumulative explained variance"
+        ev_cum.units = "percent"
         return ev_cum
 
     @property
     def ev_ratio(self):
         """|NDDataset|,  Explained Variance per singular values"""
-        ratio = self.ev * 100. / np.sum(self.ev)
-        ratio.name = 'ev_ratio'
-        ratio.title = 'explained variance'
-        ratio.units = 'percent'
+        ratio = self.ev * 100.0 / np.sum(self.ev)
+        ratio.name = "ev_ratio"
+        ratio.title = "explained variance"
+        ratio.units = "percent"
         return ratio
 
     def _svd_flip(self, U, VT, u_based_decision=True):
@@ -280,5 +305,5 @@ class SVD(HasTraits):
 
 
 # ======================================================================================================================
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

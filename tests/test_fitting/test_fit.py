@@ -49,7 +49,7 @@ def script():
 
 
 def test_fit_single_dataset(IR_dataset_2D, script):
-    dataset = IR_dataset_2D[54, 3700.:3400.]
+    dataset = IR_dataset_2D[54, 3700.0:3400.0]
 
     f1 = Fit(dataset, script, silent=True)
     f1.run(maxiter=10, every=1)
@@ -64,7 +64,7 @@ def test_fit_single_dataset(IR_dataset_2D, script):
     dataset2.plot(plot_model=True)
 
     assert_approx_equal(dataset2.model_A, 272.3309560470805, significant=4)
-    assert_approx_equal(f2.fp['width_line_2'], 195.7273, significant=4)
+    assert_approx_equal(f2.fp["width_line_2"], 195.7273, significant=4)
 
     f2 = Fit(dataset2, script, silent=False)
     f2.run(maxiter=1000, every=1)
@@ -74,12 +74,12 @@ def test_fit_single_dataset(IR_dataset_2D, script):
 
 
 def test_fit_multiple_dataset(IR_dataset_2D, script):
-    dataset = IR_dataset_2D[54, 3700.:3400.]
+    dataset = IR_dataset_2D[54, 3700.0:3400.0]
     datasets = [dataset.copy(), dataset.copy() * 2.23456]
     f = Fit(datasets, script, silent=True)
     f.run(maxiter=10, every=1)
     assert_approx_equal(datasets[0].model_A, 116.3807504474709, significant=4)
     assert_approx_equal(datasets[1].model_A, 116.3807504474709 * 2.23456, significant=4)
-    assert_approx_equal(f.fp['width_line_2'], 195.7273, significant=4)
+    assert_approx_equal(f.fp["width_line_2"], 195.7273, significant=4)
 
     # TODO: plotting of multiple datasets  # plotr(*datasets, showmodel=True, test=True)
