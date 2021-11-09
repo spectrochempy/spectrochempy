@@ -1,7 +1,7 @@
 version: "2"
 plugins:
   pep8:
-    enabled: true
+    enabled: false
 checks:
   file-lines:
     config:
@@ -17,16 +17,16 @@ checks:
       threshold: 300
   method-count:
     config:
-      threshold: 50
+      threshold: 100
   method-complexity:
     config:
-      threshold: 50
+      threshold: 100
   similar-code:
     config:
       threshold: 50
   nested-control-flow:
     config:
-      threshold: 4
+      threshold: 5
 
 exclude_patterns:
   - ".ci/"
