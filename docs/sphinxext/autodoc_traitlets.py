@@ -32,9 +32,9 @@ class ConfigurableDocumenter(ModuleDocumenter):
     def get_object_members(self, want_all):
         """Add traits with .tag(config=True) to members list"""
         get_traits = (
-                self.object.class_own_traits
-                if self.options.inherited_members
-                else self.object.class_traits
+            self.object.class_own_traits
+            if self.options.inherited_members
+            else self.object.class_traits
         )
         trait_members = []
         for name, trait in sorted(get_traits(config=True).items()):

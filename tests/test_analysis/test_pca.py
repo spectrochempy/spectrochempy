@@ -28,8 +28,9 @@ except ImportError:
 # test pca
 # ---------
 
+
 def test_pca():
-    dataset = NDDataset.read('irdata/nh4y-activation.spg')
+    dataset = NDDataset.read("irdata/nh4y-activation.spg")
 
     # with masks
     dataset[:, 1240.0:920.0] = MASKED  # do not forget to use float in slicing
@@ -38,11 +39,11 @@ def test_pca():
 
     pca.printev(n_pc=5)
 
-    assert str(pca)[:3] == '\nPC'
+    assert str(pca)[:3] == "\nPC"
 
     pca.screeplot(n_pc=0.999)
 
-    pca.screeplot(n_pc='auto')
+    pca.screeplot(n_pc="auto")
 
     pca.scoreplot((1, 2))
 
@@ -62,9 +63,9 @@ def test_compare_scikit_learn():
     pca.printev(n_pc=2)
 
     assert_array_almost_equal(pca.sv.data, pcas.singular_values_)
-    assert_array_almost_equal(pca.ev_ratio.data, pcas.explained_variance_ratio_ * 100.)
+    assert_array_almost_equal(pca.ev_ratio.data, pcas.explained_variance_ratio_ * 100.0)
 
-    dataset = NDDataset.read('irdata/nh4y-activation.spg')
+    dataset = NDDataset.read("irdata/nh4y-activation.spg")
     X = dataset.data
 
     pcas = sklPCA(n_components=5)
@@ -76,4 +77,6 @@ def test_compare_scikit_learn():
     pca.printev(n_pc=5)
 
     assert_array_almost_equal(pca.sv.data[:5], pcas.singular_values_[:5], 4)
-    assert_array_almost_equal(pca.ev_ratio.data[:5], pcas.explained_variance_ratio_[:5] * 100., 4)
+    assert_array_almost_equal(
+        pca.ev_ratio.data[:5], pcas.explained_variance_ratio_[:5] * 100.0, 4
+    )

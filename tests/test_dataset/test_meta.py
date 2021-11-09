@@ -19,9 +19,9 @@ def test_init():
     meta.td = [200, 400]
     assert meta.td[0] == 200
     assert meta.si is None
-    meta['si'] = 'a string'
+    meta["si"] = "a string"
     assert isinstance(meta.si, str)
-    assert meta.si.startswith('a')
+    assert meta.si.startswith("a")
 
 
 def test_instance():
@@ -38,7 +38,7 @@ def test_equal():
 def test_readonly():
     meta = Meta()
     meta.chaine = "a string"
-    assert meta.chaine == 'a string'
+    assert meta.chaine == "a string"
     meta.readonly = True
     with raises(ValueError):
         meta.chaine = "a modified string"
@@ -49,9 +49,9 @@ def test_invalid_key():
     meta = Meta()
     meta.readonly = False  # this is accepted`
     with raises(KeyError):
-        meta['readonly'] = True  # this not because readonly is reserved
+        meta["readonly"] = True  # this not because readonly is reserved
     with raises(KeyError):
-        meta['_data'] = True  # this not because _xxx type attributes are private
+        meta["_data"] = True  # this not because _xxx type attributes are private
 
 
 def test_get_inexistent():
@@ -63,8 +63,8 @@ def test_get_keys_items():
     meta = Meta()
     meta.td = [200, 400]
     meta.si = 1024
-    assert list(meta.keys()) == ['si', 'td']
-    assert list(meta.items()) == [('si', 1024), ('td', [200, 400])]
+    assert list(meta.keys()) == ["si", "td"]
+    assert list(meta.items()) == [("si", 1024), ("td", [200, 400])]
 
 
 def test_iterator():
@@ -73,7 +73,7 @@ def test_iterator():
     meta.si = 2048
     meta.ls = 3
     meta.ns = 1024
-    assert sorted([val for val in meta]) == ['ls', 'ns', 'si', 'td']
+    assert sorted([val for val in meta]) == ["ls", "ns", "si", "td"]
 
 
 def test_copy():
@@ -88,7 +88,7 @@ def test_copy():
 
     meta2 = meta.copy()
     assert meta2 is not meta
-    assert sorted([val for val in meta2]) == ['ls', 'ns', 'si', 'td']
+    assert sorted([val for val in meta2]) == ["ls", "ns", "si", "td"]
 
     # bug with quantity
 
@@ -96,7 +96,7 @@ def test_copy():
     meta.si = si
 
     meta3 = meta.copy()
-    meta3.si = si / 2.
+    meta3.si = si / 2.0
 
     assert meta3 is not meta
 

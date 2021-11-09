@@ -21,6 +21,7 @@ from spectrochempy.core.dataset.coord import LinearCoord
 # Decorators
 # ======================================================================================================================
 
+
 def _zf_method(method):
     @functools.wraps(method)
     def wrapper(dataset, **kwargs):
@@ -29,7 +30,7 @@ def _zf_method(method):
         axis, dim = dataset.get_axis(**kwargs, negative_axis=True)
 
         # output dataset inplace (by default) or not
-        if not kwargs.pop('inplace', False):
+        if not kwargs.pop("inplace", False):
             new = dataset.copy()  # copy to be sure not to modify this dataset
         else:
             new = dataset
@@ -40,12 +41,11 @@ def _zf_method(method):
             swaped = True
 
         x = new.coordset[dim]
-        if hasattr(x, '_use_time_axis'):
+        if hasattr(x, "_use_time_axis"):
             x._use_time_axis = True  # we need to havze dimentionless or time units
 
         # get the lastcoord
-        if x.unitless or x.dimensionless or \
-                x.units.dimensionality == '[time]':
+        if x.unitless or x.dimensionless or x.units.dimensionality == "[time]":
 
             if not x.linear:
                 # This method apply only to linear coordinates.
@@ -53,7 +53,7 @@ def _zf_method(method):
                 x = LinearCoord(x)
 
             if not x.linear:
-                raise TypeError('Coordinate x is not linearisable')
+                raise TypeError("Coordinate x is not linearisable")
 
             data = method(new.data, **kwargs)
             new._data = data
@@ -63,11 +63,13 @@ def _zf_method(method):
 
             # update with the new td
             new.meta.td[-1] = x.size
-            new.history = f'`{method.__name__}` shift performed on dimension `{dim}` with parameters: {kwargs}'
+            new.history = f"`{method.__name__}` shift performed on dimension `{dim}` with parameters: {kwargs}"
 
         else:
-            error_('zero-filling apply only to dimensions with [time] dimensionality or dimensionless coords\n'
-                   'The processing was thus cancelled')
+            error_(
+                "zero-filling apply only to dimensions with [time] dimensionality or dimensionless coords\n"
+                "The processing was thus cancelled"
+            )
 
         # restore original data order if it was swaped
         if swaped:
@@ -81,6 +83,7 @@ def _zf_method(method):
 # ======================================================================================================================
 # Private methods
 # ======================================================================================================================
+
 
 def _zf_pad(data, pad=0, mid=False, **kwargs):
     """
@@ -116,6 +119,7 @@ def _zf_pad(data, pad=0, mid=False, **kwargs):
 # ======================================================================================================================
 # Public methods
 # ======================================================================================================================
+
 
 @_zf_method
 def zf_double(dataset, n, mid=False, **kwargs):

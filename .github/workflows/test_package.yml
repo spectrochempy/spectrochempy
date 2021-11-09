@@ -108,9 +108,7 @@ jobs:
           python setup.py install
 
       - name: Code formatting
-        run: |
-          conda install black
-          black .
+        run: black .
 
       - name: Lint with flake8
         run: flake8 .

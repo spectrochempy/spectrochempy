@@ -12,7 +12,7 @@ import numpy as np
 from spectrochempy.core import error_
 
 
-def smooth(dataset, window_length=5, window='flat', **kwargs):
+def smooth(dataset, window_length=5, window="flat", **kwargs):
     """
     Smooth the data using a window with requested size.
 
@@ -57,15 +57,15 @@ def smooth(dataset, window_length=5, window='flat', **kwargs):
     NDDataset: [float64] a.u. (shape: (y:55, x:5549))
     """
 
-    if not kwargs.pop('inplace', False):
+    if not kwargs.pop("inplace", False):
         # default
         new = dataset.copy()
     else:
         new = dataset
 
     is_ndarray = False
-    axis = kwargs.pop('dim', kwargs.pop('axis', -1))
-    if hasattr(new, 'get_axis'):
+    axis = kwargs.pop("dim", kwargs.pop("axis", -1))
+    if hasattr(new, "get_axis"):
         axis, dim = new.get_axis(axis, negative_axis=True)
     else:
         is_ndarray = True
@@ -86,29 +86,38 @@ def smooth(dataset, window_length=5, window='flat', **kwargs):
         return new
 
     wind = {
-            'flat': np.ones,
-            'hanning': np.hanning,
-            'hamming': np.hamming,
-            'bartlett': np.bartlett,
-            'blackman': np.blackman,
-            }
+        "flat": np.ones,
+        "hanning": np.hanning,
+        "hamming": np.hamming,
+        "bartlett": np.bartlett,
+        "blackman": np.blackman,
+    }
 
     if not callable(window):
         if window not in wind.keys():
-            error_("Window must be a callable or a string among 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'")
+            error_(
+                "Window must be a callable or a string among 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
+            )
             return new
         window = wind[window]
 
     # extend on both side to limit side effects
-    dat = np.r_['-1', new.data[..., window_length - 1:0:-1], new.data, new.data[..., -1:-window_length:-1]]
+    dat = np.r_[
+        "-1",
+        new.data[..., window_length - 1 : 0 : -1],
+        new.data,
+        new.data[..., -1:-window_length:-1],
+    ]
 
     w = window(window_length)
-    data = np.apply_along_axis(np.convolve, -1, dat, w / w.sum(), mode='valid')
-    data = data[..., int(window_length / 2):-int(window_length / 2)]
+    data = np.apply_along_axis(np.convolve, -1, dat, w / w.sum(), mode="valid")
+    data = data[..., int(window_length / 2) : -int(window_length / 2)]
 
     if not is_ndarray:
         new.data = data
-        new.history = f'smoothing with a window:{window.__name__} of length {window_length}'
+        new.history = (
+            f"smoothing with a window:{window.__name__} of length {window_length}"
+        )
 
         # restore original data order if it was swaped
         if swaped:
@@ -119,5 +128,5 @@ def smooth(dataset, window_length=5, window='flat', **kwargs):
     return new
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

@@ -10,7 +10,7 @@
 In this module, we define basic functions adapted from numpy but able to
 handle our NDDataset objects
 """
-__all__ = ['dot']
+__all__ = ["dot"]
 
 import numpy as np
 
@@ -92,7 +92,7 @@ def dot(a, b, strict=True, out=None):
     else:
         coordx = None
 
-    history = 'Dot product between %s and %s' % (a.name, b.name)
+    history = "Dot product between %s and %s" % (a.name, b.name)
 
     # make the output
     # ------------------------------------------------------------------------------------------------------------------
@@ -112,5 +112,5 @@ def dot(a, b, strict=True, out=None):
 
 
 # ======================================================================================================================
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

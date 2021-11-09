@@ -22,10 +22,10 @@ import spectrochempy as scp
 # ## Create quantities
 # To create quantity, use for instance, one of the following expression:
 
-scp.Quantity('10.0 cm^-1')
+scp.Quantity("10.0 cm^-1")
 
 ""
-scp.Quantity(1.0, 'cm^-1/hour')
+scp.Quantity(1.0, "cm^-1/hour")
 
 ###############################################################################
 # or may be simpler using `ur`:
@@ -41,7 +41,7 @@ ur = scp.ur
 #
 # When loading experimental dataset using the `read` method, units are generally affected to coordinates and data
 
-ds = scp.read('wodger.spg')[0]
+ds = scp.read("wodger.spg")[0]
 prefs = ds.preferences
 prefs.figure.figsize = (7, 3)
 _ = ds.plot()
@@ -55,20 +55,20 @@ _ = ds.plot()
 #
 # Here are some examples
 
-x = 36 * ur('km/hr')
-x.to('cm/s')
+x = 36 * ur("km/hr")
+x.to("cm/s")
 
 ###############################################################################
 # We can make the conversion *inplace* using *ito* instead of *to*
 
-x.ito('m/s')
+x.ito("m/s")
 x
 
 ###############################################################################
 # Obviously you cannot convert between incompatible units
 
 try:
-    x.to('hour')
+    x.to("hour")
 except scp.DimensionalityError as e:
     scp.error_(e)
 
@@ -76,36 +76,36 @@ except scp.DimensionalityError as e:
 # This, of course, also applies to NDDataset.
 # Lets try for the `x` coordinate. It is `wavenumber` in $cm^{-1}$ that can be transformed in $Hz$ for instance:
 
-ds.x.ito('terahertz')
+ds.x.ito("terahertz")
 _ = ds.plot()
 
 ###############################################################################
 # We can also change the wavenumbers (or frequency units), to energy units or wavelength as
 # Spectrochempy (thanks to [pint](https://pint.readthedocs.io)) knows how to make the transformation.
 
-ds.x.ito('eV')
+ds.x.ito("eV")
 _ = ds.plot()
 
 ""
 try:
-    ds.x.ito('nanometer')
+    ds.x.ito("nanometer")
 except Exception as e:
-    scp.error_(e) 
+    scp.error_(e)
 
 ""
-ds.x = ds.x.to('nanometer')
+ds.x = ds.x.to("nanometer")
 _ = ds.plot()
 print(ds.x)  # The LinearCoord object is transformed into a Coord object
 
 ###############################################################################
 # ``absorbance`` units (the units of the data) can also be transformed into ``transmittance``
 
-ds.ito('transmittance')
+ds.ito("transmittance")
 _ = ds.plot()
 
 ""
-ds.ito('absorbance')
-ds.x.ito('cm^-1')
+ds.ito("absorbance")
+ds.x.ito("cm^-1")
 _ = ds.plot()
 
 ""

@@ -8,7 +8,7 @@
 """ Bruker file (single dimension FID or multidimensional SER) importers
 """
 
-__all__ = ['read_topspin', 'read_bruker_nmr']
+__all__ = ["read_topspin", "read_bruker_nmr"]
 __dataset_methods__ = __all__
 
 import re
@@ -32,440 +32,462 @@ FnMODE = ["undefined", "QF", "QSEQ", "TPPI", "STATES", "STATES-TPPI", "ECHO-ANTI
 AQ_mod = ["QF", "QSIM", "QSEQ", "DQD"]
 
 nmr_valid_meta = [
-
-        # ACQU
-
-        # ('amp', ''),
-        ('aq_mod', ''), ('aqseq', ''),  # ('aunm', ''),
-        # ('autopos', ''),
-        ('bf1', 'MHz'), ('bf2', 'MHz'), ('bf3', 'MHz'), ('bf4', 'MHz'),  # ('bf5', 'MHz'),
-        # ('bf6', 'MHz'),
-        # ('bf7', 'MHz'),
-        # ('bf8', 'MHz'),
-        # ('bytorda', ''),
-        # ('cfdgtyp', ''),
-        # ('cfrgtyp', ''),
-        # ('chemstr', ''),
-        ('cnst', ''),  # ('cpdprg', ''),
-        # ('cpdprg1', ''),
-        # ('cpdprg2', ''),
-        # ('cpdprg3', ''),
-        # ('cpdprg4', ''),
-        # ('cpdprg5', ''),
-        # ('cpdprg6', ''),
-        # ('cpdprg7', ''),
-        # ('cpdprg8', ''),
-        # ('cpdprgb', ''),
-        # ('cpdprgt', ''),
-        ('d', 's'), ('date', ''),  # ('dbl', ''),
-        # ('dbp', ''),
-        # ('dbp07', ''),
-        # ('dbpnam0', ''),
-        # ('dbpnam1', ''),
-        # ('dbpnam2', ''),
-        # ('dbpnam3', ''),
-        # ('dbpnam4', ''),
-        # ('dbpnam5', ''),
-        # ('dbpnam6', ''),
-        # ('dbpnam7', ''),
-        # ('dbpoal', ''),
-        # ('dbpoffs', ''),
-        ('de', 'us'),  # ('decbnuc', ''),
-        # ('decim', ''),
-        # ('decnuc', ''),
-        # ('decstat', ''),
-        ('digmod', ''),  # ('digtyp', ''),
-        # ('dl', ''),
-        # ('dp', ''),
-        # ('dp07', ''),
-        # ('dpname0', ''),
-        # ('dpname1', ''),
-        # ('dpname2', ''),
-        # ('dpname3', ''),
-        # ('dpname4', ''),
-        # ('dpname5', ''),
-        # ('dpname6', ''),
-        # ('dpname7', ''),
-        # ('dpoal', ''),
-        # ('dpoffs', ''),
-        # ('dqdmode', ''),
-        # ('dr', ''),
-        # ('ds', ''),
-        # ('dslist', ''),
-        # ('dspfirm', ''),
-        # ('dspfvs', ''),
-        # ('dtypa', ''),
-        # ('exp', ''),
-        # ('f1list', ''),
-        # ('f2list', ''),
-        # ('f3list', ''),
-        # ('fcuchan', ''),
-        # ('file_size', ''),
-        # ('fl1', ''),
-        # ('fl2', ''),
-        # ('fl3', ''),
-        # ('fl4', ''),
-        ('fnmode', ''),  # ('fov', ''),
-        # ('fq1list', ''),
-        # ('fq2list', ''),
-        # ('fq3list', ''),
-        # ('fq4list', ''),
-        # ('fq5list', ''),
-        # ('fq6list', ''),
-        # ('fq7list', ''),
-        # ('fq8list', ''),
-        # ('fs', ''),
-        # ('ftlpgn', ''),
-        # ('fw', ''),
-        # ('gp031', ''),
-        # ('gpnam0', ''),
-        # ('gpnam1', ''),
-        # ('gpnam10', ''),
-        # ('gpnam11', ''),
-        # ('gpnam12', ''),
-        # ('gpnam13', ''),
-        # ('gpnam14', ''),
-        # ('gpnam15', ''),
-        # ('gpnam16', ''),
-        # ('gpnam17', ''),
-        # ('gpnam18', ''),
-        # ('gpnam19', ''),
-        # ('gpnam2', ''),
-        # ('gpnam20', ''),
-        # ('gpnam21', ''),
-        # ('gpnam22', ''),
-        # ('gpnam23', ''),
-        # ('gpnam24', ''),
-        # ('gpnam25', ''),
-        # ('gpnam26', ''),
-        # ('gpnam27', ''),
-        # ('gpnam28', ''),
-        # ('gpnam29', ''),
-        # ('gpnam3', ''),
-        # ('gpnam30', ''),
-        # ('gpnam31', ''),
-        # ('gpnam4', ''),
-        # ('gpnam5', ''),
-        # ('gpnam6', ''),
-        # ('gpnam7', ''),
-        # ('gpnam8', ''),
-        # ('gpnam9', ''),
-        # ('gpx', ''),
-        # ('gpy', ''),
-        # ('gpz', ''),
-        # ('grdprog', ''),
-        # ('hdduty', ''),
-        # ('hdrate', ''),
-        # ('hgain', ''),
-        # ('hl1', ''),
-        # ('hl2', ''),
-        # ('hl3', ''),
-        # ('hl4', ''),
-        # ('holder', ''),
-        # ('hpmod', ''),
-        # ('hpprgn', ''),
-        # ('in', 's'),
-        # ('inp', 's'),
-        # ('instrum', ''),
-        # ('l', ''),
-        # ('lfilter', ''),
-        # ('lgain', ''),
-        # ('locked', ''),
-        # ('lockfld', ''),
-        # ('lockgn', ''),
-        # ('lockpow', ''),
-        # ('lockppm', ''),
-        # ('locnuc', ''),
-        # ('locphas', ''),
-        # ('locshft', ''),
-        # ('ltime', ''),
-        ('masr', 'Hz'),  # ('masrlst', ''),
-        # ('nbl', ''),
-        ('nc', ''), ('ns', ''), ('nuc1', ''), ('nuc2', ''), ('nuc3', ''), ('nuc4', ''),  # ('nuc5', ''),
-        # ('nuc6', ''),
-        # ('nuc7', ''),
-        # ('nuc8', ''),
-        ('nuclei', ''), ('nucleus', ''), ('o1', 'Hz'), ('o2', 'Hz'), ('o3', 'Hz'), ('o4', 'Hz'),  # ('o5', 'Hz'),
-        # ('o6', 'Hz'),
-        # ('o7', 'Hz'),
-        # ('o8', 'Hz'),
-        # ('obschan', ''),
-        # ('overflw', ''),
-        ('p', 'us'),  # ('paps', ''),
-        ('parmode', ''),  # ('pcpd', ''),
-        ('ph_ref', ''), ('phcor', ''),  # ('php', ''),
-        ('pl', ''),  # ('powmod', ''),
-        # ('pr', ''),
-        # ('prechan', ''),
-        # ('prgain', ''),
-        # ('probhd', ''),
-        # ('prosol', ''),
-        ('pulprog', ''), ('pw', 'W'),  # ('qnp', ''),
-        # ('qs', ''),
-        # ('qsb', ''),
-        # ('rd', ''),
-        # ('recchan', ''),
-        # ('recph', ''),
-        ('rg', ''),  # ('ro', ''),
-        # ('routwd1', ''),
-        # ('routwd2', ''),
-        # ('rpuused', ''),
-        # ('rsel', ''),
-        # ('s', ''),
-        # ('seout', ''),
-        ('sfo1', 'MHz'), ('sfo2', 'MHz'), ('sfo3', 'MHz'), ('sfo4', 'MHz'),  # ('sfo5', 'MHz'),
-        # ('sfo6', 'MHz'),
-        # ('sfo7', 'MHz'),
-        # ('sfo8', 'MHz'),
-        # ('solvent', ''),
-        # ('sp', ''),
-        # ('sp07', ''),
-        # ('spectr', ''),
-        # ('spnam0', ''),
-        # ('spnam1', ''),
-        # ('spnam10', ''),
-        # ('spnam11', ''),
-        # ('spnam12', ''),
-        # ('spnam13', ''),
-        # ('spnam14', ''),
-        # ('spnam15', ''),
-        # ('spnam16', ''),
-        # ('spnam17', ''),
-        # ('spnam18', ''),
-        # ('spnam19', ''),
-        # ('spnam2', ''),
-        # ('spnam20', ''),
-        # ('spnam21', ''),
-        # ('spnam22', ''),
-        # ('spnam23', ''),
-        # ('spnam24', ''),
-        # ('spnam25', ''),
-        # ('spnam26', ''),
-        # ('spnam27', ''),
-        # ('spnam28', ''),
-        # ('spnam29', ''),
-        # ('spnam3', ''),
-        # ('spnam30', ''),
-        # ('spnam31', ''),
-        # ('spnam4', ''),
-        # ('spnam5', ''),
-        # ('spnam6', ''),
-        # ('spnam7', ''),
-        # ('spnam8', ''),
-        # ('spnam9', ''),
-        # ('spoal', ''),
-        # ('spoffs', ''),
-        # ('subnam0', ''),
-        # ('subnam1', ''),
-        # ('subnam2', ''),
-        # ('subnam3', ''),
-        # ('subnam4', ''),
-        # ('subnam5', ''),
-        # ('subnam6', ''),
-        # ('subnam7', ''),
-        # ('subnam8', ''),
-        # ('subnam9', ''),
-        ('sw', 'ppm'),  # ('sw_h', 'Hz'),
-        # ('swibox', ''),
-        ('td', ''),  # ('td0', ''),
-        ('te', 'K'),  # ('te2', ''),
-        # ('te3', ''),
-        # ('teg', ''),
-        # ('tl', ''),
-        # ('tp', ''),
-        # ('tp07', ''),
-        # ('tpname0', ''),
-        # ('tpname1', ''),
-        # ('tpname2', ''),
-        # ('tpname3', ''),
-        # ('tpname4', ''),
-        # ('tpname5', ''),
-        # ('tpname6', ''),
-        # ('tpname7', ''),
-        # ('tpoal', ''),
-        # ('tpoffs', ''),
-        # ('tunhin', ''),
-        # ('tunhout', ''),
-        # ('tunxout', ''),
-        # ('usera1', ''),
-        # ('usera2', ''),
-        # ('usera3', ''),
-        # ('usera4', ''),
-        # ('usera5', ''),
-        # ('v9', ''),
-        ('valist', ''), ('vclist', ''), ('vd', ''), ('vdlist', ''), ('vplist', ''), ('vtlist', ''),  # ('wbst', ''),
-        # ('wbsw', ''),
-        # ('ws', ''),
-        # ('xgain', ''),
-        # ('xl', ''),
-        # ('yl', ''),
-        # ('ymax_a', ''),
-        # ('ymin_a', ''),
-        # ('zgoptns', ''),
-        # ('zl1', ''),
-        # ('zl2', ''),
-        # ('zl3', ''),
-        # ('zl4', ''),
-
-        # PROCS
-
-        # ('absf1', ''),
-        # ('absf2', ''),
-        # ('absg', ''),
-        # ('absl', ''),
-        # ('acqt0', ''),
-        # ('alpha', ''),
-        # ('ampcoil', ''),
-        # ('anavpt', ''),
-        ('aqorder', ''),  # ('assfac', ''),
-        # ('assfaci', ''),
-        # ('assfacx', ''),
-        # ('asswid', ''),
-        # ('aunmp', ''),
-        # ('axleft', ''),
-        # ('axname', ''),
-        # ('axnuc', ''),
-        # ('axright', ''),
-        # ('axtype', ''),
-        # ('axunit', ''),
-        # ('azfe', ''),
-        # ('azfw', ''),
-        # ('bc_mod', ''),
-        # ('bcfw', ''),
-        # ('bytordp', ''),
-        # ('cagpars', ''),
-        # ('coroffs', ''),
-        # ('cy', ''),
-        # ('datmod', ''),
-        # ('dc', ''),
-        # ('dfilt', ''),
-        # ('dtypp', ''),
-        # ('eretic', ''),
-        # ('f1p', ''),
-        # ('f2p', ''),
-        # ('fcor', ''),
-        # ('fntype', ''),
-        # ('frqlo3', ''),
-        # ('frqlo3n', ''),
-        # ('ft_mod', ''),
-        # ('ftsize', ''),
-        # ('gamma', ''),
-        # ('gb', 'Hz' ),
-        # ('gpnam', ''),
-        # ('grpdly', ''),
-        ('inf', 'us'),  # ('intbc', ''),
-        # ('intscl', ''),
-        # ('isen', ''),
-        # ('lb', 'Hz' ),
-        # ('lev0', ''),
-        # ('linpstp', ''),
-        # ('locsw', ''),
-        # ('lpbin', ''),
-        # ('maxi', ''),
-        ('mc2', ''),  # ('mdd_csalg', ''),
-        # ('mdd_cslambda', ''),
-        # ('mdd_csniter', ''),
-        # ('mdd_csnorm', ''),
-        # ('mdd_cszf', ''),
-        # ('mdd_mod', ''),
-        # ('mddcexp', ''),
-        # ('mddct_sp', ''),
-        # ('mddf180', ''),
-        # ('mddlambda', ''),
-        # ('mddmemory', ''),
-        # ('mddmerge', ''),
-        # ('mddncomp', ''),
-        # ('mddniter', ''),
-        # ('mddnoise', ''),
-        # ('mddphase', ''),
-        # ('mddseed', ''),
-        # ('mddsrsize', ''),
-        # ('me_mod', ''),
-        # ('mean', ''),
-        # ('mi', ''),
-        # ('mulexpno', ''),
-        # ('nc_proc', ''),
-        # ('ncoef', ''),
-        # ('nlev', ''),
-        # ('nlogch', ''),
-        # ('noisf1', ''),
-        # ('noisf2', ''),
-        # ('novflw', ''),
-        # ('nsp', ''),
-        # ('nth_pi', ''),
-        # ('nusamount', ''),
-        # ('nusfpnz', ''),
-        # ('nusjsp', ''),
-        # ('nuslist', ''),
-        # ('nusseed', ''),
-        # ('nust2', ''),
-        # ('nustd', ''),
-        # ('nzp', ''),
-        # ('offset', ''),
-        # ('pacoil', ''),
-        # ('pc', ''),
-        # ('pexsel', ''),
-        # ('ph_mod', ''),
-        ('phc0', 'deg'), ('phc1', 'deg'),  # ('phlist', ''),
-        # ('pknl', ''),
-        # ('plstep', ''),
-        # ('plstrt', ''),
-        # ('plw', ''),
-        # ('plwmax', ''),
-        # ('pparmod', ''),
-        # ('ppdiag', ''),
-        # ('ppiptyp', ''),
-        # ('ppmpnum', ''),
-        # ('ppresol', ''),
-        # ('pqphase', ''),
-        # ('pqscale', ''),
-        # ('pscal', ''),
-        # ('psign', ''),
-        # ('pynm', ''),
-        # ('pynmp', ''),
-        # ('recpre', ''),
-        # ('recprfx', ''),
-        # ('recsel', ''),
-        ('reverse', ''),  # ('s_dev', ''),
-        # ('selrec', ''),
-        ('sf', 'MHz'),  # ('si', ''),
-        # ('sigf1', ''),
-        # ('sigf2', ''),
-        # ('sino', ''),
-        # ('siold', ''),
-        # ('solvold', ''),
-        # ('spectyp', ''),
-        # ('spincnt', ''),
-        # ('spnam', ''),
-        # ('sppex', ''),
-        # ('spw', ''),
-        # ('sreglst', ''),
-        # ('ssb', ''),
-        # ('stsi', ''),
-        # ('stsr', ''),
-        # ('subnam', ''),
-        ('sw_p', ''),  # ('swfinal', ''),
-        # ('symm', ''),
-        # ('tdeff', ''),
-        # ('tdoff', ''),
-        # ('te1', ''),
-        # ('te4', ''),
-        # ('te_pidx', ''),
-        # ('te_stab', ''),
-        # ('ti', ''),
-        # ('tilt', ''),
-        # ('tm1', ''),
-        # ('tm2', ''),
-        # ('toplev', ''),
-        # ('userp1', ''),
-        # ('userp2', ''),
-        # ('userp3', ''),
-        # ('userp4', ''),
-        # ('userp5', ''),
-        # ('wdw', ''),
-        # ('xdim', ''),
-        # ('ymax_p', ''),
-        # ('ymin_p', ''),
+    # ACQU
+    # ('amp', ''),
+    ("aq_mod", ""),
+    ("aqseq", ""),  # ('aunm', ''),
+    # ('autopos', ''),
+    ("bf1", "MHz"),
+    ("bf2", "MHz"),
+    ("bf3", "MHz"),
+    ("bf4", "MHz"),  # ('bf5', 'MHz'),
+    # ('bf6', 'MHz'),
+    # ('bf7', 'MHz'),
+    # ('bf8', 'MHz'),
+    # ('bytorda', ''),
+    # ('cfdgtyp', ''),
+    # ('cfrgtyp', ''),
+    # ('chemstr', ''),
+    ("cnst", ""),  # ('cpdprg', ''),
+    # ('cpdprg1', ''),
+    # ('cpdprg2', ''),
+    # ('cpdprg3', ''),
+    # ('cpdprg4', ''),
+    # ('cpdprg5', ''),
+    # ('cpdprg6', ''),
+    # ('cpdprg7', ''),
+    # ('cpdprg8', ''),
+    # ('cpdprgb', ''),
+    # ('cpdprgt', ''),
+    ("d", "s"),
+    ("date", ""),  # ('dbl', ''),
+    # ('dbp', ''),
+    # ('dbp07', ''),
+    # ('dbpnam0', ''),
+    # ('dbpnam1', ''),
+    # ('dbpnam2', ''),
+    # ('dbpnam3', ''),
+    # ('dbpnam4', ''),
+    # ('dbpnam5', ''),
+    # ('dbpnam6', ''),
+    # ('dbpnam7', ''),
+    # ('dbpoal', ''),
+    # ('dbpoffs', ''),
+    ("de", "us"),  # ('decbnuc', ''),
+    # ('decim', ''),
+    # ('decnuc', ''),
+    # ('decstat', ''),
+    ("digmod", ""),  # ('digtyp', ''),
+    # ('dl', ''),
+    # ('dp', ''),
+    # ('dp07', ''),
+    # ('dpname0', ''),
+    # ('dpname1', ''),
+    # ('dpname2', ''),
+    # ('dpname3', ''),
+    # ('dpname4', ''),
+    # ('dpname5', ''),
+    # ('dpname6', ''),
+    # ('dpname7', ''),
+    # ('dpoal', ''),
+    # ('dpoffs', ''),
+    # ('dqdmode', ''),
+    # ('dr', ''),
+    # ('ds', ''),
+    # ('dslist', ''),
+    # ('dspfirm', ''),
+    # ('dspfvs', ''),
+    # ('dtypa', ''),
+    # ('exp', ''),
+    # ('f1list', ''),
+    # ('f2list', ''),
+    # ('f3list', ''),
+    # ('fcuchan', ''),
+    # ('file_size', ''),
+    # ('fl1', ''),
+    # ('fl2', ''),
+    # ('fl3', ''),
+    # ('fl4', ''),
+    ("fnmode", ""),  # ('fov', ''),
+    # ('fq1list', ''),
+    # ('fq2list', ''),
+    # ('fq3list', ''),
+    # ('fq4list', ''),
+    # ('fq5list', ''),
+    # ('fq6list', ''),
+    # ('fq7list', ''),
+    # ('fq8list', ''),
+    # ('fs', ''),
+    # ('ftlpgn', ''),
+    # ('fw', ''),
+    # ('gp031', ''),
+    # ('gpnam0', ''),
+    # ('gpnam1', ''),
+    # ('gpnam10', ''),
+    # ('gpnam11', ''),
+    # ('gpnam12', ''),
+    # ('gpnam13', ''),
+    # ('gpnam14', ''),
+    # ('gpnam15', ''),
+    # ('gpnam16', ''),
+    # ('gpnam17', ''),
+    # ('gpnam18', ''),
+    # ('gpnam19', ''),
+    # ('gpnam2', ''),
+    # ('gpnam20', ''),
+    # ('gpnam21', ''),
+    # ('gpnam22', ''),
+    # ('gpnam23', ''),
+    # ('gpnam24', ''),
+    # ('gpnam25', ''),
+    # ('gpnam26', ''),
+    # ('gpnam27', ''),
+    # ('gpnam28', ''),
+    # ('gpnam29', ''),
+    # ('gpnam3', ''),
+    # ('gpnam30', ''),
+    # ('gpnam31', ''),
+    # ('gpnam4', ''),
+    # ('gpnam5', ''),
+    # ('gpnam6', ''),
+    # ('gpnam7', ''),
+    # ('gpnam8', ''),
+    # ('gpnam9', ''),
+    # ('gpx', ''),
+    # ('gpy', ''),
+    # ('gpz', ''),
+    # ('grdprog', ''),
+    # ('hdduty', ''),
+    # ('hdrate', ''),
+    # ('hgain', ''),
+    # ('hl1', ''),
+    # ('hl2', ''),
+    # ('hl3', ''),
+    # ('hl4', ''),
+    # ('holder', ''),
+    # ('hpmod', ''),
+    # ('hpprgn', ''),
+    # ('in', 's'),
+    # ('inp', 's'),
+    # ('instrum', ''),
+    # ('l', ''),
+    # ('lfilter', ''),
+    # ('lgain', ''),
+    # ('locked', ''),
+    # ('lockfld', ''),
+    # ('lockgn', ''),
+    # ('lockpow', ''),
+    # ('lockppm', ''),
+    # ('locnuc', ''),
+    # ('locphas', ''),
+    # ('locshft', ''),
+    # ('ltime', ''),
+    ("masr", "Hz"),  # ('masrlst', ''),
+    # ('nbl', ''),
+    ("nc", ""),
+    ("ns", ""),
+    ("nuc1", ""),
+    ("nuc2", ""),
+    ("nuc3", ""),
+    ("nuc4", ""),  # ('nuc5', ''),
+    # ('nuc6', ''),
+    # ('nuc7', ''),
+    # ('nuc8', ''),
+    ("nuclei", ""),
+    ("nucleus", ""),
+    ("o1", "Hz"),
+    ("o2", "Hz"),
+    ("o3", "Hz"),
+    ("o4", "Hz"),  # ('o5', 'Hz'),
+    # ('o6', 'Hz'),
+    # ('o7', 'Hz'),
+    # ('o8', 'Hz'),
+    # ('obschan', ''),
+    # ('overflw', ''),
+    ("p", "us"),  # ('paps', ''),
+    ("parmode", ""),  # ('pcpd', ''),
+    ("ph_ref", ""),
+    ("phcor", ""),  # ('php', ''),
+    ("pl", ""),  # ('powmod', ''),
+    # ('pr', ''),
+    # ('prechan', ''),
+    # ('prgain', ''),
+    # ('probhd', ''),
+    # ('prosol', ''),
+    ("pulprog", ""),
+    ("pw", "W"),  # ('qnp', ''),
+    # ('qs', ''),
+    # ('qsb', ''),
+    # ('rd', ''),
+    # ('recchan', ''),
+    # ('recph', ''),
+    ("rg", ""),  # ('ro', ''),
+    # ('routwd1', ''),
+    # ('routwd2', ''),
+    # ('rpuused', ''),
+    # ('rsel', ''),
+    # ('s', ''),
+    # ('seout', ''),
+    ("sfo1", "MHz"),
+    ("sfo2", "MHz"),
+    ("sfo3", "MHz"),
+    ("sfo4", "MHz"),  # ('sfo5', 'MHz'),
+    # ('sfo6', 'MHz'),
+    # ('sfo7', 'MHz'),
+    # ('sfo8', 'MHz'),
+    # ('solvent', ''),
+    # ('sp', ''),
+    # ('sp07', ''),
+    # ('spectr', ''),
+    # ('spnam0', ''),
+    # ('spnam1', ''),
+    # ('spnam10', ''),
+    # ('spnam11', ''),
+    # ('spnam12', ''),
+    # ('spnam13', ''),
+    # ('spnam14', ''),
+    # ('spnam15', ''),
+    # ('spnam16', ''),
+    # ('spnam17', ''),
+    # ('spnam18', ''),
+    # ('spnam19', ''),
+    # ('spnam2', ''),
+    # ('spnam20', ''),
+    # ('spnam21', ''),
+    # ('spnam22', ''),
+    # ('spnam23', ''),
+    # ('spnam24', ''),
+    # ('spnam25', ''),
+    # ('spnam26', ''),
+    # ('spnam27', ''),
+    # ('spnam28', ''),
+    # ('spnam29', ''),
+    # ('spnam3', ''),
+    # ('spnam30', ''),
+    # ('spnam31', ''),
+    # ('spnam4', ''),
+    # ('spnam5', ''),
+    # ('spnam6', ''),
+    # ('spnam7', ''),
+    # ('spnam8', ''),
+    # ('spnam9', ''),
+    # ('spoal', ''),
+    # ('spoffs', ''),
+    # ('subnam0', ''),
+    # ('subnam1', ''),
+    # ('subnam2', ''),
+    # ('subnam3', ''),
+    # ('subnam4', ''),
+    # ('subnam5', ''),
+    # ('subnam6', ''),
+    # ('subnam7', ''),
+    # ('subnam8', ''),
+    # ('subnam9', ''),
+    ("sw", "ppm"),  # ('sw_h', 'Hz'),
+    # ('swibox', ''),
+    ("td", ""),  # ('td0', ''),
+    ("te", "K"),  # ('te2', ''),
+    # ('te3', ''),
+    # ('teg', ''),
+    # ('tl', ''),
+    # ('tp', ''),
+    # ('tp07', ''),
+    # ('tpname0', ''),
+    # ('tpname1', ''),
+    # ('tpname2', ''),
+    # ('tpname3', ''),
+    # ('tpname4', ''),
+    # ('tpname5', ''),
+    # ('tpname6', ''),
+    # ('tpname7', ''),
+    # ('tpoal', ''),
+    # ('tpoffs', ''),
+    # ('tunhin', ''),
+    # ('tunhout', ''),
+    # ('tunxout', ''),
+    # ('usera1', ''),
+    # ('usera2', ''),
+    # ('usera3', ''),
+    # ('usera4', ''),
+    # ('usera5', ''),
+    # ('v9', ''),
+    ("valist", ""),
+    ("vclist", ""),
+    ("vd", ""),
+    ("vdlist", ""),
+    ("vplist", ""),
+    ("vtlist", ""),  # ('wbst', ''),
+    # ('wbsw', ''),
+    # ('ws', ''),
+    # ('xgain', ''),
+    # ('xl', ''),
+    # ('yl', ''),
+    # ('ymax_a', ''),
+    # ('ymin_a', ''),
+    # ('zgoptns', ''),
+    # ('zl1', ''),
+    # ('zl2', ''),
+    # ('zl3', ''),
+    # ('zl4', ''),
+    # PROCS
+    # ('absf1', ''),
+    # ('absf2', ''),
+    # ('absg', ''),
+    # ('absl', ''),
+    # ('acqt0', ''),
+    # ('alpha', ''),
+    # ('ampcoil', ''),
+    # ('anavpt', ''),
+    ("aqorder", ""),  # ('assfac', ''),
+    # ('assfaci', ''),
+    # ('assfacx', ''),
+    # ('asswid', ''),
+    # ('aunmp', ''),
+    # ('axleft', ''),
+    # ('axname', ''),
+    # ('axnuc', ''),
+    # ('axright', ''),
+    # ('axtype', ''),
+    # ('axunit', ''),
+    # ('azfe', ''),
+    # ('azfw', ''),
+    # ('bc_mod', ''),
+    # ('bcfw', ''),
+    # ('bytordp', ''),
+    # ('cagpars', ''),
+    # ('coroffs', ''),
+    # ('cy', ''),
+    # ('datmod', ''),
+    # ('dc', ''),
+    # ('dfilt', ''),
+    # ('dtypp', ''),
+    # ('eretic', ''),
+    # ('f1p', ''),
+    # ('f2p', ''),
+    # ('fcor', ''),
+    # ('fntype', ''),
+    # ('frqlo3', ''),
+    # ('frqlo3n', ''),
+    # ('ft_mod', ''),
+    # ('ftsize', ''),
+    # ('gamma', ''),
+    # ('gb', 'Hz' ),
+    # ('gpnam', ''),
+    # ('grpdly', ''),
+    ("inf", "us"),  # ('intbc', ''),
+    # ('intscl', ''),
+    # ('isen', ''),
+    # ('lb', 'Hz' ),
+    # ('lev0', ''),
+    # ('linpstp', ''),
+    # ('locsw', ''),
+    # ('lpbin', ''),
+    # ('maxi', ''),
+    ("mc2", ""),  # ('mdd_csalg', ''),
+    # ('mdd_cslambda', ''),
+    # ('mdd_csniter', ''),
+    # ('mdd_csnorm', ''),
+    # ('mdd_cszf', ''),
+    # ('mdd_mod', ''),
+    # ('mddcexp', ''),
+    # ('mddct_sp', ''),
+    # ('mddf180', ''),
+    # ('mddlambda', ''),
+    # ('mddmemory', ''),
+    # ('mddmerge', ''),
+    # ('mddncomp', ''),
+    # ('mddniter', ''),
+    # ('mddnoise', ''),
+    # ('mddphase', ''),
+    # ('mddseed', ''),
+    # ('mddsrsize', ''),
+    # ('me_mod', ''),
+    # ('mean', ''),
+    # ('mi', ''),
+    # ('mulexpno', ''),
+    # ('nc_proc', ''),
+    # ('ncoef', ''),
+    # ('nlev', ''),
+    # ('nlogch', ''),
+    # ('noisf1', ''),
+    # ('noisf2', ''),
+    # ('novflw', ''),
+    # ('nsp', ''),
+    # ('nth_pi', ''),
+    # ('nusamount', ''),
+    # ('nusfpnz', ''),
+    # ('nusjsp', ''),
+    # ('nuslist', ''),
+    # ('nusseed', ''),
+    # ('nust2', ''),
+    # ('nustd', ''),
+    # ('nzp', ''),
+    # ('offset', ''),
+    # ('pacoil', ''),
+    # ('pc', ''),
+    # ('pexsel', ''),
+    # ('ph_mod', ''),
+    ("phc0", "deg"),
+    ("phc1", "deg"),  # ('phlist', ''),
+    # ('pknl', ''),
+    # ('plstep', ''),
+    # ('plstrt', ''),
+    # ('plw', ''),
+    # ('plwmax', ''),
+    # ('pparmod', ''),
+    # ('ppdiag', ''),
+    # ('ppiptyp', ''),
+    # ('ppmpnum', ''),
+    # ('ppresol', ''),
+    # ('pqphase', ''),
+    # ('pqscale', ''),
+    # ('pscal', ''),
+    # ('psign', ''),
+    # ('pynm', ''),
+    # ('pynmp', ''),
+    # ('recpre', ''),
+    # ('recprfx', ''),
+    # ('recsel', ''),
+    ("reverse", ""),  # ('s_dev', ''),
+    # ('selrec', ''),
+    ("sf", "MHz"),  # ('si', ''),
+    # ('sigf1', ''),
+    # ('sigf2', ''),
+    # ('sino', ''),
+    # ('siold', ''),
+    # ('solvold', ''),
+    # ('spectyp', ''),
+    # ('spincnt', ''),
+    # ('spnam', ''),
+    # ('sppex', ''),
+    # ('spw', ''),
+    # ('sreglst', ''),
+    # ('ssb', ''),
+    # ('stsi', ''),
+    # ('stsr', ''),
+    # ('subnam', ''),
+    ("sw_p", ""),  # ('swfinal', ''),
+    # ('symm', ''),
+    # ('tdeff', ''),
+    # ('tdoff', ''),
+    # ('te1', ''),
+    # ('te4', ''),
+    # ('te_pidx', ''),
+    # ('te_stab', ''),
+    # ('ti', ''),
+    # ('tilt', ''),
+    # ('tm1', ''),
+    # ('tm2', ''),
+    # ('toplev', ''),
+    # ('userp1', ''),
+    # ('userp2', ''),
+    # ('userp3', ''),
+    # ('userp4', ''),
+    # ('userp5', ''),
+    # ('wdw', ''),
+    # ('xdim', ''),
+    # ('ymax_p', ''),
+    # ('ymin_p', ''),
 ]
 
 # ======================================================================================================================
@@ -488,22 +510,91 @@ nmr_valid_meta = [
 # Using this the un-rounded table was created by checking possible unrounded
 # fracions which would round to those in the original table.
 
-bruker_dsp_table = {10: {2: 44.75, 3: 33.5, 4: 66.625, 6: 59.083333333333333, 8: 68.5625, 12: 60.375, 16: 69.53125,
-                         24: 61.020833333333333, 32: 70.015625, 48: 61.34375, 64: 70.2578125, 96: 61.505208333333333,
-                         128: 70.37890625, 192: 61.5859375, 256: 70.439453125, 384: 61.626302083333333,
-                         512: 70.4697265625, 768: 61.646484375, 1024: 70.48486328125, 1536: 61.656575520833333,
-                         2048: 70.492431640625, },
-                    11: {2: 46., 3: 36.5, 4: 48., 6: 50.166666666666667, 8: 53.25, 12: 69.5, 16: 72.25,
-                         24: 70.166666666666667, 32: 72.75, 48: 70.5, 64: 73., 96: 70.666666666666667, 128: 72.5,
-                         192: 71.333333333333333, 256: 72.25, 384: 71.666666666666667, 512: 72.125,
-                         768: 71.833333333333333, 1024: 72.0625, 1536: 71.916666666666667, 2048: 72.03125},
-                    12: {2: 46., 3: 36.5, 4: 48., 6: 50.166666666666667, 8: 53.25, 12: 69.5, 16: 71.625,
-                         24: 70.166666666666667, 32: 72.125, 48: 70.5, 64: 72.375, 96: 70.666666666666667, 128: 72.5,
-                         192: 71.333333333333333, 256: 72.25, 384: 71.666666666666667, 512: 72.125,
-                         768: 71.833333333333333, 1024: 72.0625, 1536: 71.916666666666667, 2048: 72.03125},
-                    13: {2: 2.75, 3: 2.8333333333333333, 4: 2.875, 6: 2.9166666666666667, 8: 2.9375,
-                         12: 2.9583333333333333, 16: 2.96875, 24: 2.9791666666666667, 32: 2.984375,
-                         48: 2.9895833333333333, 64: 2.9921875, 96: 2.9947916666666667}}
+bruker_dsp_table = {
+    10: {
+        2: 44.75,
+        3: 33.5,
+        4: 66.625,
+        6: 59.083333333333333,
+        8: 68.5625,
+        12: 60.375,
+        16: 69.53125,
+        24: 61.020833333333333,
+        32: 70.015625,
+        48: 61.34375,
+        64: 70.2578125,
+        96: 61.505208333333333,
+        128: 70.37890625,
+        192: 61.5859375,
+        256: 70.439453125,
+        384: 61.626302083333333,
+        512: 70.4697265625,
+        768: 61.646484375,
+        1024: 70.48486328125,
+        1536: 61.656575520833333,
+        2048: 70.492431640625,
+    },
+    11: {
+        2: 46.0,
+        3: 36.5,
+        4: 48.0,
+        6: 50.166666666666667,
+        8: 53.25,
+        12: 69.5,
+        16: 72.25,
+        24: 70.166666666666667,
+        32: 72.75,
+        48: 70.5,
+        64: 73.0,
+        96: 70.666666666666667,
+        128: 72.5,
+        192: 71.333333333333333,
+        256: 72.25,
+        384: 71.666666666666667,
+        512: 72.125,
+        768: 71.833333333333333,
+        1024: 72.0625,
+        1536: 71.916666666666667,
+        2048: 72.03125,
+    },
+    12: {
+        2: 46.0,
+        3: 36.5,
+        4: 48.0,
+        6: 50.166666666666667,
+        8: 53.25,
+        12: 69.5,
+        16: 71.625,
+        24: 70.166666666666667,
+        32: 72.125,
+        48: 70.5,
+        64: 72.375,
+        96: 70.666666666666667,
+        128: 72.5,
+        192: 71.333333333333333,
+        256: 72.25,
+        384: 71.666666666666667,
+        512: 72.125,
+        768: 71.833333333333333,
+        1024: 72.0625,
+        1536: 71.916666666666667,
+        2048: 72.03125,
+    },
+    13: {
+        2: 2.75,
+        3: 2.8333333333333333,
+        4: 2.875,
+        6: 2.9166666666666667,
+        8: 2.9375,
+        12: 2.9583333333333333,
+        16: 2.96875,
+        24: 2.9791666666666667,
+        32: 2.984375,
+        48: 2.9895833333333333,
+        64: 2.9921875,
+        96: 2.9947916666666667,
+    },
+}
 
 
 def _remove_digital_filter(dic, data):
@@ -511,21 +602,21 @@ def _remove_digital_filter(dic, data):
     Remove the digital filter from Bruker data.
     nmrglue modified Digital Filter Processing
     """
-    if 'acqus' not in dic:
+    if "acqus" not in dic:
         raise KeyError("dictionary does not contain acqus parameters")
 
-    if 'DECIM' not in dic['acqus']:
+    if "DECIM" not in dic["acqus"]:
         raise KeyError("dictionary does not contain DECIM parameter")
-    decim = dic['acqus']['DECIM']
+    decim = dic["acqus"]["DECIM"]
 
-    if 'DSPFVS' not in dic['acqus']:
+    if "DSPFVS" not in dic["acqus"]:
         raise KeyError("dictionary does not contain DSPFVS parameter")
-    dspfvs = dic['acqus']['DSPFVS']
+    dspfvs = dic["acqus"]["DSPFVS"]
 
-    if 'GRPDLY' not in dic['acqus']:
+    if "GRPDLY" not in dic["acqus"]:
         grpdly = 0
     else:
-        grpdly = dic['acqus']['GRPDLY']
+        grpdly = dic["acqus"]["GRPDLY"]
 
     if grpdly > 0:  # use group delay value if provided (not 0 or -1)
         phase = grpdly
@@ -533,7 +624,7 @@ def _remove_digital_filter(dic, data):
     # Determine the phase correction
     else:
         if dspfvs >= 14:  # DSPFVS greater than 14 give no phase correction.
-            phase = 0.
+            phase = 0.0
         else:
             if dspfvs < 11:
                 dspfvs = 11  # default for DQD  # loop up the phase in the table
@@ -558,9 +649,9 @@ def _remove_digital_filter(dic, data):
 
     # remove last points * 2
     rp = 2 * (phase // 2)
-    td = dic['acqus']['TD'] // 2
+    td = dic["acqus"]["TD"] // 2
     td = int(td) - int(rp)
-    dic['acqus']['TD'] = td * 2
+    dic["acqus"]["TD"] = td * 2
     data = data[..., :td]
 
     # debug_('Bruker digital filter : removed %s points' % rp)
@@ -673,28 +764,32 @@ def read_topspin(*paths, **kwargs):
     read_zip : Read Zip files.
     read_matlab : Read Matlab files.
     """
-    kwargs['filetypes'] = ['Bruker TOPSPIN fid\'s or processed data files (fid ser 1[r|i] 2[r|i]* 3[r|i]*)',
-                           'Compressed TOPSPIN data directories (*.zip)']
-    kwargs['protocol'] = ['topspin']
+    kwargs["filetypes"] = [
+        "Bruker TOPSPIN fid's or processed data files (fid ser 1[r|i] 2[r|i]* 3[r|i]*)",
+        "Compressed TOPSPIN data directories (*.zip)",
+    ]
+    kwargs["protocol"] = ["topspin"]
 
     importer = Importer()
     return importer(*paths, **kwargs)
 
 
-@deprecated("read_bruker_nmr reading method is deprecated and may be removed in next versions "
-            "- use read_topspin instead")
+@deprecated(
+    "read_bruker_nmr reading method is deprecated and may be removed in next versions "
+    "- use read_topspin instead"
+)
 def read_bruker_nmr(*args, **kwargs):
     return read_topspin(*args, **kwargs)
 
 
 # ......................................................................................................................
-def _get_files(path, typ='acqu'):
+def _get_files(path, typ="acqu"):
     files = []
-    for i in ['', 2, 3]:
-        f = path / f'{typ}{i}'
+    for i in ["", 2, 3]:
+        f = path / f"{typ}{i}"
         if f.exists():
             files.append(f)
-        f = path / f'{typ}{i}s'
+        f = path / f"{typ}{i}s"
         if f.exists():
             files.append(f)
     return files
@@ -702,16 +797,16 @@ def _get_files(path, typ='acqu'):
 
 @importermethod
 def _read_topspin(*args, **kwargs):
-    debug_('Bruker TOPSPIN import')
+    debug_("Bruker TOPSPIN import")
 
     dataset, path = args
     #    content = kwargs.get('content', None)
 
     # is-it a processed dataset (1r, 2rr ....
-    processed = True if path.match('pdata/*/*') else False
+    processed = True if path.match("pdata/*/*") else False
 
     # low memory handling (lowmem) ?
-    lowmem = kwargs.get('lowmem', False)  # load all in numero by default
+    lowmem = kwargs.get("lowmem", False)  # load all in numero by default
 
     # ------------------------------------------------------------------------------------------------------------------
     # start reading ....
@@ -725,8 +820,8 @@ def _read_topspin(*args, **kwargs):
         # a fid or a ser has been selected
         f_expno = parents[0]
         expno = f_expno.name
-        procno = kwargs.get('procno', '1')
-        f_procno = f_expno / 'pdata' / procno
+        procno = kwargs.get("procno", "1")
+        f_procno = f_expno / "pdata" / procno
         f_name = parents[1]
 
     else:
@@ -737,57 +832,75 @@ def _read_topspin(*args, **kwargs):
         expno = f_expno.name
         f_name = parents[3]
 
-    acqus_files = _get_files(f_expno, 'acqu')
-    procs_files = _get_files(f_procno, 'proc')
+    acqus_files = _get_files(f_expno, "acqu")
+    procs_files = _get_files(f_procno, "proc")
 
     if not processed:
 
         if not lowmem:
-            dic, data = read_fid(f_expno, acqus_files=acqus_files, procs_files=procs_files)
+            dic, data = read_fid(
+                f_expno, acqus_files=acqus_files, procs_files=procs_files
+            )
         else:
-            dic, data = read_lowmem(f_expno, acqus_files=acqus_files, procs_files=procs_files)
+            dic, data = read_lowmem(
+                f_expno, acqus_files=acqus_files, procs_files=procs_files
+            )
 
         # apply a -90 phase shift to be compatible with topspin
-        data = data * np.exp(- 1j * np.pi / 2.)
+        data = data * np.exp(-1j * np.pi / 2.0)
 
         # Look the case when the reshaping was not correct
         # for example, this happen when the number
         # of accumulated row was incomplete
-        if path.name in ['ser'] and data.ndim == 1:
+        if path.name in ["ser"] and data.ndim == 1:
             # we must reshape using the acqu parameters
-            td1 = dic['acqu2']['TD']
+            td1 = dic["acqu2"]["TD"]
             try:
                 data = data.reshape(td1, -1)
             except ValueError:
                 try:
-                    td = dic['acqu']['TD'] // 2
+                    td = dic["acqu"]["TD"] // 2
                     data = data.reshape(-1, td)
                 except ValueError:
                     raise KeyError("Inconsistency between TD's and data size")
 
             # reduce to td
-            ntd = dic['acqus']['TD'] // 2
+            ntd = dic["acqus"]["TD"] // 2
             data = data[..., :ntd]
 
         # Eliminate the digital filter
-        if kwargs.get('remove_digital_filter', True) and dic['acqus']['DECIM'] > 1:
+        if kwargs.get("remove_digital_filter", True) and dic["acqus"]["DECIM"] > 1:
             data = _remove_digital_filter(dic, data)
 
     else:
 
-        dic, datalist = read_pdata(f_procno, acqus_files=acqus_files, procs_files=procs_files, all_components=True)
+        dic, datalist = read_pdata(
+            f_procno,
+            acqus_files=acqus_files,
+            procs_files=procs_files,
+            all_components=True,
+        )
         if isinstance(datalist, list):
             if datalist[0].ndim == 2:
                 data, dataRI, dataIR, dataII = datalist
                 # make quaternion
                 shape = data.shape
-                data = as_quat_array(list(zip(data.flatten(), dataRI.flatten(), dataIR.flatten(), dataII.flatten())))
+                data = as_quat_array(
+                    list(
+                        zip(
+                            data.flatten(),
+                            dataRI.flatten(),
+                            dataIR.flatten(),
+                            dataII.flatten(),
+                        )
+                    )
+                )
                 data = data.reshape(shape)
 
             elif datalist[0].ndim == 1:
                 # make complex
                 data, dataI = datalist
-                data = data + dataI * 1.j
+                data = data + dataI * 1.0j
 
             else:
                 return None
@@ -799,15 +912,17 @@ def _read_topspin(*args, **kwargs):
     # we assume that all experiments have similar (important) parameters so that the experiments are compatibles
 
     meta = Meta()  # This is the parameter dictionary
-    datatype = path.name.upper() if not processed else f'{data.ndim}D'
+    datatype = path.name.upper() if not processed else f"{data.ndim}D"
 
     keys = sorted(dic.keys())
 
     # we need the ndim of the data
-    parmode = int(dic['acqus'].get('PARMODE', data.ndim - 1))
+    parmode = int(dic["acqus"].get("PARMODE", data.ndim - 1))
     if parmode + 1 != data.ndim:
-        raise KeyError(f"The NMR data were not read properly as the PARMODE+1 parameter ({parmode + 1}) doesn't fit"
-                       f" the actual number of dimensions ({data.ndim})")
+        raise KeyError(
+            f"The NMR data were not read properly as the PARMODE+1 parameter ({parmode + 1}) doesn't fit"
+            f" the actual number of dimensions ({data.ndim})"
+        )
 
     # read the acqu and proc
     valid_keys = list(zip(*nmr_valid_meta))[0]
@@ -815,14 +930,14 @@ def _read_topspin(*args, **kwargs):
 
     for item in keys:
 
-        if item[:4] in ['acqu', 'proc']:
+        if item[:4] in ["acqu", "proc"]:
             dim = parmode
-            if len(item) > 4 and item[4] in ['2', '3']:
+            if len(item) > 4 and item[4] in ["2", "3"]:
                 dim = parmode + 1 - int(item[4])
 
             for key in sorted(dic[item]):
 
-                if key.startswith('_') or key.lower() not in valid_keys:
+                if key.startswith("_") or key.lower() not in valid_keys:
                     continue
 
                 value = dic[item][key]
@@ -858,7 +973,7 @@ def _read_topspin(*args, **kwargs):
         meta.encoding[-1] = AQ_mod[meta.aq_mod[-1]]
         meta.iscomplex[-1] = meta.aq_mod[-1] > 0
 
-    if datatype in ['SER']:
+    if datatype in ["SER"]:
         meta.isfreq.insert(0, False)
 
         if meta.fnmode[-2] == 0:
@@ -889,7 +1004,10 @@ def _read_topspin(*args, **kwargs):
                 meta.td[axis] = meta.td[axis] // 2
             meta.tdeff[axis] = meta.tdeff[axis] // 2
 
-    meta.sw_h = [(meta.sw[axis].m * meta.sfo1[axis] * 1e-6).to('Hz') for axis in range(parmode + 1)]
+    meta.sw_h = [
+        (meta.sw[axis].m * meta.sfo1[axis] * 1e-6).to("Hz")
+        for axis in range(parmode + 1)
+    ]
 
     if processed:
         meta.si = [si for si in data.shape]
@@ -898,15 +1016,17 @@ def _read_topspin(*args, **kwargs):
 
     # this transformation is to make data coherent with bruker processsing
     if meta.iscomplex[-1]:
-        data = np.conj(data * np.exp(np.pi * 1j / 2.))
+        data = np.conj(data * np.exp(np.pi * 1j / 2.0))
 
     # normalised amplitudes to ns=1 and rg=1
     def _norm(dat):
-        meta.ns = meta.get('ns', [1] * data.ndim)  # sometimes these parameters are not present
-        meta.rg = meta.get('rg', [1.0] * data.ndim)
+        meta.ns = meta.get(
+            "ns", [1] * data.ndim
+        )  # sometimes these parameters are not present
+        meta.rg = meta.get("rg", [1.0] * data.ndim)
         fac = float(meta.ns[-1]) * float(meta.rg[-1])
         meta.rgold = [meta.rg[-1]]
-        meta.rg[-1] = 1.
+        meta.rg[-1] = 1.0
         meta.nsold = [meta.ns[-1]]  # store the old value of NS
         meta.ns[-1] = 1
         dat /= fac
@@ -933,31 +1053,36 @@ def _read_topspin(*args, **kwargs):
     for axis in axe_range:
         if not meta.isfreq[axis]:
             # the axis is in time units
-            dw = (1. / meta.sw_h[axis]).to('us')
+            dw = (1.0 / meta.sw_h[axis]).to("us")
             # coordpoints = np.arange(meta.td[axis])
             # coord = Coord(coordpoints * dw,
             #             title=f"F{axis + 1} acquisition time")  # TODO: use AQSEQ for >2D data
-            coord = LinearCoord(offset=0.0, increment=dw, units='us', size=meta.td[axis],
-                                title=f"F{axis + 1} acquisition time")
+            coord = LinearCoord(
+                offset=0.0,
+                increment=dw,
+                units="us",
+                size=meta.td[axis],
+                title=f"F{axis + 1} acquisition time",
+            )
             coord.meta.larmor = meta.sfo1[axis]
             coords.append(coord)
         else:
             size = meta.si[axis]
             sizem = max(size - 1, 1)
             deltaf = -meta.sw_h[axis] / sizem
-            first = meta.sfo1[axis] - meta.sf[axis] - deltaf * sizem / 2.
+            first = meta.sfo1[axis] - meta.sf[axis] - deltaf * sizem / 2.0
 
             # coord = Coord(np.arange(size) * deltaf + first)
             coord = LinearCoord(offset=first, increment=deltaf, size=size)
             coord.meta.larmor = meta.sfo1[axis]  # needed for ppm transformation
-            coord.ito('ppm')
+            coord.ito("ppm")
             if meta.nuc1 is not None:
                 nuc1 = meta.nuc1[axis]
                 regex = r"([^a-zA-Z]+)([a-zA-Z]+)"
                 m = re.match(regex, nuc1)
                 mass = m[1]
                 name = m[2]
-                nucleus = '^{' + mass + '}' + name
+                nucleus = "^{" + mass + "}" + name
             else:
                 nucleus = ""
             coord.title = fr"$\delta\ {nucleus}$"
@@ -973,9 +1098,9 @@ def _read_topspin(*args, **kwargs):
     dataset.meta.readonly = True
     dataset.set_coordset(*tuple(coords))
 
-    dataset.title = 'intensity'
-    dataset.origin = 'topspin'
-    dataset.name = f'{f_name.name} expno:{expno} procno:{procno} ({datatype})'
+    dataset.title = "intensity"
+    dataset.origin = "topspin"
+    dataset.name = f"{f_name.name} expno:{expno} procno:{procno} ({datatype})"
     dataset.filename = f_name
 
     return dataset
@@ -992,6 +1117,7 @@ def _read_topspin(*args, **kwargs):
 
     # store temporarily these data  # debug_('data read finished : type : %s' % datatype)  #  #  #  # if len(  #
     # list_data) == 1:  # # debug_('One experiment read. Make it the current dataset')
+
 
 # def _read_topspin_dir(*args, **kwargs):
 #

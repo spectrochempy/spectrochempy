@@ -31,8 +31,9 @@ class polynomialbaseline(object):
     .. math::
         f(x) = ampl * \\sum_{i=2}^{max} c_i*x^i
     """
-    args = ['ampl']
-    args.extend(['c_%d' % i for i in range(2, 11)])
+
+    args = ["ampl"]
+    args.extend(["c_%d" % i for i in range(2, 11)])
 
     script = """MODEL: baseline%(id)d\nshape: polynomialbaseline
     # This polynom starts at the order 2
@@ -88,7 +89,8 @@ class gaussianmodel(object):
 
     where :math:`\\sigma = \\frac{width}{2.3548}`
     """
-    args = ['ampl', 'width', 'pos']
+
+    args = ["ampl", "width", "pos"]
     script = """MODEL: line%(id)d\nshape: gaussianmodel
     $ ampl: %(ampl).3f, 0.0, None
     $ width: %(width).3f, 0.0, None
@@ -115,7 +117,8 @@ class lorentzianmodel(object):
 
     where :math:`\\lambda = \\frac{width}{2}`
     """
-    args = ['ampl', 'width', 'pos']
+
+    args = ["ampl", "width", "pos"]
     script = """MODEL: line%(id)d\nshape: lorentzianmodel
     $ ampl: %(ampl).3f, 0.0, None
     $ width: %(width).3f, 0.0, None
@@ -123,7 +126,7 @@ class lorentzianmodel(object):
     """
 
     def f(self, x, ampl, width, pos, **kargs):
-        lb = width / 2.
+        lb = width / 2.0
         w = lb / np.pi / (x * x - 2 * x * pos + pos * pos + lb * lb)
         w = w * abs(x[1] - x[0])
         return ampl * w
@@ -137,7 +140,8 @@ class voigtmodel(object):
     A Voigt model constructed as the convolution of a :class:`GaussianModel` and
     a :class:`LorentzianModel` -- commonly used for spectral line fitting.
     """
-    args = ['ampl', 'width', 'ratio', 'pos']
+
+    args = ["ampl", "width", "ratio", "pos"]
     script = """MODEL: line%(id)d\nshape: voigtmodel
     $ ampl: %(ampl).3f, 0.0, None
     $ width: %(width).3f, 0.0, None
@@ -147,13 +151,14 @@ class voigtmodel(object):
 
     def f(self, x, ampl, width, ratio, pos, **kargs):
         from scipy.special import wofz
+
         gb = ratio * width / 2.3548
-        lb = (1. - ratio) * width / 2.
-        if gb < 1.e-16:
-            return lorentzianmodel().f(x, ampl, lb * 2., pos, **kargs)
+        lb = (1.0 - ratio) * width / 2.0
+        if gb < 1.0e-16:
+            return lorentzianmodel().f(x, ampl, lb * 2.0, pos, **kargs)
         else:
             w = wofz(((x - pos) + 1.0j * lb) * 2 ** -0.5 / gb)
-            w = w.real * (2. * np.pi) ** -0.5 / gb
+            w = w.real * (2.0 * np.pi) ** -0.5 / gb
             w = w * abs(x[1] - x[0])
             return ampl * w
 
@@ -166,7 +171,8 @@ class assymvoigtmodel(object):
     An assymetric Voigt model
     A. L. Stancik and E. B. Brauns, Vibrational Spectroscopy, 2008, 47, 66-69
     """
-    args = ['ampl', 'width', 'ratio', 'assym', 'pos']
+
+    args = ["ampl", "width", "ratio", "assym", "pos"]
     script = """MODEL: line%(id)d\nshape: voigtmodel
         $ ampl: %(ampl).3f, 0.0, None
         $ width: %(width).3f, 0.0, None
@@ -176,12 +182,12 @@ class assymvoigtmodel(object):
         """
 
     def lorentz(self, x, g_, pos):
-        w = (2. / (np.pi * g_)) / (1. + 4. * ((x - pos) / g_) ** 2)
+        w = (2.0 / (np.pi * g_)) / (1.0 + 4.0 * ((x - pos) / g_) ** 2)
         return w
 
     def gaussian(self, x, g_, pos):
-        a = np.sqrt(4. * np.log(2.) / np.pi) / g_
-        b = -4. * np.log(2.) * ((x - pos) / g_) ** 2
+        a = np.sqrt(4.0 * np.log(2.0) / np.pi) / g_
+        b = -4.0 * np.log(2.0) * ((x - pos) / g_) ** 2
         w = a * np.exp(b)
         return w
 
@@ -189,10 +195,9 @@ class assymvoigtmodel(object):
         return
 
     def f(self, x, ampl, width, ratio, assym, pos, **kargs):
-        g = 2. * width / (1. + np.exp(assym * (x - pos)))
+        g = 2.0 * width / (1.0 + np.exp(assym * (x - pos)))
         # sigmoid variation of width
-        w = ratio * self.lorentz(x, g, pos) \
-            + (1. - ratio) * self.gaussian(x, g, pos)
+        w = ratio * self.lorentz(x, g, pos) + (1.0 - ratio) * self.gaussian(x, g, pos)
         w = w * abs(x[1] - x[0])
         return ampl * w
 
@@ -238,9 +243,9 @@ def getmodel(x, y=None, modelname=None, par=None, **kargs):
     args = []
     for p in a.args:
         try:
-            args.append(par['%s_%s' % (p, modelname)])
+            args.append(par["%s_%s" % (p, modelname)])
         except KeyError as e:
-            if p.startswith('c_'):
+            if p.startswith("c_"):
                 # probably the end of the list
                 # due to a limited polynomial degree
                 pass
@@ -257,5 +262,5 @@ def getmodel(x, y=None, modelname=None, par=None, **kargs):
         return a.f(x, y, *args, **kargs)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

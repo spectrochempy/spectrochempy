@@ -13,7 +13,11 @@ import pytest
 
 from spectrochempy.core.dataset.ndcomplex import NDComplexArray
 from spectrochempy.units import ur, Quantity
-from spectrochempy.utils.testing import (assert_equal, assert_array_equal, assert_approx_equal, )
+from spectrochempy.utils.testing import (
+    assert_equal,
+    assert_array_equal,
+    assert_approx_equal,
+)
 
 # TODO: a lot of repetition - must be simplified with some logics
 
@@ -40,7 +44,7 @@ def test_ndarray_comparison(ndarray, ndarrayunit, ndarraycplx, ndarrayquaternion
     nd4 = ndarrayquaternion.copy()
     assert nd4 == ndarrayquaternion
 
-    assert nd1 != 'xxxx'
+    assert nd1 != "xxxx"
 
     nd2n = nd2.to(None, force=True)
     assert nd2n != nd2
@@ -69,16 +73,20 @@ def test_ndcomplex_init_quaternion():
     # test with complex data in all dimension
 
     np.random.seed(12345)
-    d = np.random.random((4, 3)) * np.exp(.1j)
-    d0 = NDComplexArray(d, units=ur.Hz, mask=[[False, True, False], [True, False, False]],
-                        dtype=typequaternion)  # with units & mask
+    d = np.random.random((4, 3)) * np.exp(0.1j)
+    d0 = NDComplexArray(
+        d,
+        units=ur.Hz,
+        mask=[[False, True, False], [True, False, False]],
+        dtype=typequaternion,
+    )  # with units & mask
     assert d0.shape == (2, 3)
-    assert 'NDComplexArray: [quaternion] Hz' in repr(d0)
+    assert "NDComplexArray: [quaternion] Hz" in repr(d0)
 
 
 def test_ndcomplex_init_quaternion_error1():
     # test with complex data in all dimension but odd number of comlumn (should raise an error
-    d = np.random.random((3, 3)) * np.exp(.1j)
+    d = np.random.random((3, 3)) * np.exp(0.1j)
     with pytest.raises(ValueError):
         NDComplexArray(d, dtype=typequaternion)  # with units & mask
 
@@ -93,7 +101,7 @@ def test_ndcomplex_init_quaternion_error2():
 def test_ndcomplex_init_complex_with_copy_of_ndarray():
     # test with complex from copy of another ndArray
 
-    d = np.ones((2, 2)) * np.exp(.1j)
+    d = np.ones((2, 2)) * np.exp(0.1j)
     d1 = NDComplexArray(d)
     d2 = NDComplexArray(d1)
     assert d1._data is d2._data
@@ -107,9 +115,11 @@ def test_ndcomplex_init_complex_with_mask():
     # test with complex with mask and units
 
     np.random.seed(12345)
-    d = np.random.random((2, 2)) * np.exp(.1j)
+    d = np.random.random((2, 2)) * np.exp(0.1j)
 
-    d3 = NDComplexArray(d, units=ur.Hz, mask=[[False, True], [False, False]])  # with units & mask
+    d3 = NDComplexArray(
+        d, units=ur.Hz, mask=[[False, True], [False, False]]
+    )  # with units & mask
 
     # internal representation (interleaved)
     assert d3.shape == (2, 2)
@@ -123,7 +133,7 @@ def test_ndcomplex_init_complex_with_mask():
     assert d3.dtype == np.complex128
     assert d3.has_complex_dims
     assert d3.mask.shape[-1] == d3.shape[-1]
-    d3RR = d3.component('RR')
+    d3RR = d3.component("RR")
     assert not d3RR.has_complex_dims
     assert d3RR._data.shape == (2, 2)
     assert d3RR._mask.shape == (2, 2)
@@ -134,16 +144,24 @@ def test_ndcomplex_init_complex_with_mask():
 
 def test_ndcomplex_swapdims():
     np.random.seed(12345)
-    d = np.random.random((4, 3)) * np.exp(.1j)
-    d3 = NDComplexArray(d, units=ur.Hz, mask=[[False, True, False], [False, True, False], [False, True, False],
-                                              [True, False, False]])  # with units & mask
+    d = np.random.random((4, 3)) * np.exp(0.1j)
+    d3 = NDComplexArray(
+        d,
+        units=ur.Hz,
+        mask=[
+            [False, True, False],
+            [False, True, False],
+            [False, True, False],
+            [True, False, False],
+        ],
+    )  # with units & mask
     assert d3.shape == (4, 3)
     assert d3._data.shape == (4, 3)
     assert d3.has_complex_dims
     assert not d3.is_quaternion
-    assert d3.dims == ['y', 'x']
+    assert d3.dims == ["y", "x"]
     d4 = d3.swapdims(0, 1)
-    assert d4.dims == ['x', 'y']
+    assert d4.dims == ["x", "y"]
     assert d4.shape == (3, 4)
     assert d4._data.shape == (3, 4)
     assert d4.has_complex_dims
@@ -164,14 +182,14 @@ def test_ndcomplex_ndarraycplx_fixture2(ndarraycplx):
 def test_ndcomplex_init_complex_with_a_ndarray():
     # test with complex data in the last dimension
 
-    d = np.array([[1, 2], [3, 4]]) * np.exp(.1j)
+    d = np.array([[1, 2], [3, 4]]) * np.exp(0.1j)
     d0 = NDComplexArray(d)
     assert d0.dtype == np.complex128
     assert d0.has_complex_dims
     assert d0.shape == (2, 2)
     assert d0.size == 4
 
-    assert 'NDComplexArray: [complex128]' in repr(d0)
+    assert "NDComplexArray: [complex128]" in repr(d0)
 
 
 def test_ndcomplex_quaternion_fixture(ndarrayquaternion):
@@ -190,7 +208,7 @@ def test_ndcomplex_quaternion_fixture(ndarrayquaternion):
 
 def test_ndcomplex_real_imag():
     np.random.seed(12345)
-    d = np.random.random((2, 2)) * np.exp(.1j)
+    d = np.random.random((2, 2)) * np.exp(0.1j)
     d3 = NDComplexArray(d)
     new = d3.copy()
     new.data = d3.real.data + 1j * d3.imag.data
@@ -199,7 +217,7 @@ def test_ndcomplex_real_imag():
 
 def test_ndcomplex_set_with_complex(ndarraycplx):
     nd = ndarraycplx.copy()
-    nd.units = 'meter/hour'
+    nd.units = "meter/hour"
     assert nd.units == ur.meter / ur.hour
 
 
@@ -252,19 +270,19 @@ def test_ndcomplex_complex(ndarraycplx):
 
 
 def test_ndcomplex_str_representation_for_complex():
-    nd1 = NDComplexArray([1. + 2.j, 2. + 3.j])
+    nd1 = NDComplexArray([1.0 + 2.0j, 2.0 + 3.0j])
     assert "NDComplexArray: [complex128] unitless" in repr(nd1)
 
 
 def test_ndcomplex_quaternion_str_representation():
     np.random.seed(12345)
-    d = np.random.random((4, 2)) * np.exp(.1j)
+    d = np.random.random((4, 2)) * np.exp(0.1j)
     NDComplexArray(d, dtype=typequaternion)
 
 
 def test_ndcomplex_real_imag_quaternion():
     np.random.seed(12345)
-    d = np.random.random((2, 2)) * np.exp(.1j)
+    d = np.random.random((2, 2)) * np.exp(0.1j)
     d3 = NDComplexArray(d, dtype=typequaternion)
     d3r = d3.real
     assert d3r.dtype == np.float64
@@ -275,10 +293,14 @@ def test_ndcomplex_real_imag_quaternion():
 
 def test_ndcomplex_swapdims_quaternion():
     np.random.seed(12345)
-    d = np.random.random((4, 3)) * np.exp(.1j)
+    d = np.random.random((4, 3)) * np.exp(0.1j)
 
-    d3 = NDComplexArray(d, units=ur.Hz, mask=[[False, True, False], [True, False, False]],
-                        dtype=typequaternion)  # quaternion with units & mask
+    d3 = NDComplexArray(
+        d,
+        units=ur.Hz,
+        mask=[[False, True, False], [True, False, False]],
+        dtype=typequaternion,
+    )  # quaternion with units & mask
 
     assert d3.shape == (2, 3)
     assert d3._data.shape == (2, 3)

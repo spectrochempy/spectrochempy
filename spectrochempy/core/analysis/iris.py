@@ -7,7 +7,7 @@
 """
 This module implements the IRIS class.
 """
-__all__ = ['IRIS']
+__all__ = ["IRIS"]
 __dataset_methods__ = []
 
 import numpy as np
@@ -22,9 +22,7 @@ from quadprog import solve_qp
 
 
 class IRIS:
-    """ Integral inversion solver for spectroscopic data
-
-    """
+    """Integral inversion solver for spectroscopic data"""
 
     def __init__(self, X, param, **kwargs):
         """
@@ -101,51 +99,55 @@ class IRIS:
         """
 
         global _log
-        _log = ''
+        _log = ""
 
         # If multiple coords for a given dimension, take the default ones:
         coord_x = X.x.default
         coord_y = X.y.default
 
         # Defines the kernel
-        kernel = param.get('kernel', None)
+        kernel = param.get("kernel", None)
         if kernel is not None:
             if isinstance(kernel, str):
-                if kernel.lower() == 'langmuir':
+                if kernel.lower() == "langmuir":
                     ker = lambda p_, eps_: np.exp(-eps_) * p_ / (1 + np.exp(-eps_) * p_)
-                elif kernel.lower() == 'ca':
+                elif kernel.lower() == "ca":
                     ker = lambda p_, eps_: 0 if p_ < np.exp(eps_) else 1
-                elif kernel.lower() == 'reactant-first-order':
+                elif kernel.lower() == "reactant-first-order":
                     ker = lambda t_, lnk_: np.exp(-1 * np.exp(lnk_) * t_)
-                elif kernel.lower() == 'product-first-order':
+                elif kernel.lower() == "product-first-order":
                     ker = lambda t_, lnk_: 1 - np.exp(-1 * np.exp(lnk_) * t_)
-                elif kernel.lower() == 'diffusion':
+                elif kernel.lower() == "diffusion":
+
                     def ker(t_, tau_inv_):
                         ker_ = np.zeros_like(t_)
                         for n in np.arange(1, 100):
-                            ker_ += (1 / n ** 2) * np.exp(- (1 / 9) * n ** 2 * np.pi ** 2 * t_ * tau_inv_)
+                            ker_ += (1 / n ** 2) * np.exp(
+                                -(1 / 9) * n ** 2 * np.pi ** 2 * t_ * tau_inv_
+                            )
                             return 1 - (6 / np.pi ** 2) * ker_
+
                 else:
                     raise NameError(f"This kernel: <{kernel}> is not implemented")
             elif callable(kernel):
                 ker = kernel
             else:
-                raise ValueError('The kernel must be a str or a callable !')
+                raise ValueError("The kernel must be a str or a callable !")
         else:
-            raise NameError('A kernel must be given !')
+            raise NameError("A kernel must be given !")
 
         # Define eps values
-        epsRange = param.get('epsRange', None)
+        epsRange = param.get("epsRange", None)
         try:
-            eps = np.linspace(epsRange[0],
-                              epsRange[1],
-                              epsRange[2])
+            eps = np.linspace(epsRange[0], epsRange[1], epsRange[2])
         except Exception:
-            raise Exception('Parameter epsRange in param must be a list of 3 values: [start, stop, num]')
+            raise Exception(
+                "Parameter epsRange in param must be a list of 3 values: [start, stop, num]"
+            )
 
         # Defines regularization parameter values
         lamb = [0]
-        lambdaRange = param.get('lambdaRange', None)
+        lambdaRange = param.get("lambdaRange", None)
 
         if lambdaRange is None:
             regularization = False
@@ -156,24 +158,28 @@ class IRIS:
         elif len(lambdaRange) == 3:
             regularization = True
             searchLambda = False
-            lamb = np.logspace(lambdaRange[0],
-                               lambdaRange[1],
-                               lambdaRange[2])
+            lamb = np.logspace(lambdaRange[0], lambdaRange[1], lambdaRange[2])
         else:
-            raise ValueError('lambdaRange should either None, or a set of 2 or 3 integers')
+            raise ValueError(
+                "lambdaRange should either None, or a set of 2 or 3 integers"
+            )
 
-        p = param.get('p', None)
+        p = param.get("p", None)
         if p is not None:
             # Check p
             if isinstance(p, Coord):
                 if p.shape[1] != X.shape[0]:
-                    raise ValueError('`p` should be consistent with the y coordinate of the dataset')
+                    raise ValueError(
+                        "`p` should be consistent with the y coordinate of the dataset"
+                    )
                 pval = p.data  # values
                 # (values contains unit! to use it we must either have eps with units or normalise p
             else:
                 if len(p) != X.shape[0]:
-                    raise ValueError('`p` should be consistent with the y coordinate of the dataset')
-                p = Coord(p, title='External variable')
+                    raise ValueError(
+                        "`p` should be consistent with the y coordinate of the dataset"
+                    )
+                p = Coord(p, title="External variable")
                 pval = p.data  # values
         else:
             p = coord_y
@@ -200,7 +206,7 @@ class IRIS:
                 SM = np.zeros(4)
 
         # Define K matrix (kernel)
-        msg = 'Build kernel matrix...\n'
+        msg = "Build kernel matrix...\n"
         info_(msg)
         _log += msg
         # first some weighting coefficients for the numerical quadrature of the Fredholm integral
@@ -211,7 +217,7 @@ class IRIS:
         w[-1] = w[0]
         # then compute K  (TODO: allow using weighting matrix W)
         K = NDDataset(np.zeros((p.size, len(eps))))
-        K.set_coordset(y=p, x=Coord(eps, title='epsilon'))
+        K.set_coordset(y=p, x=Coord(eps, title="epsilon"))
         for i, p_i in enumerate(pval):
             for j, eps_j in enumerate(eps):
                 K.data[i, j] = w[j] * ker(p_i, eps_j)
@@ -219,13 +225,17 @@ class IRIS:
         # Define S matrix (sharpness), see function Smat() below
         S = Smat(eps)
 
-        msg = '... done\n'
+        msg = "... done\n"
         info_(msg)
         _log += msg
 
         # Solve unregularized problem
         if not regularization:
-            msg = 'Solving for {} wavenumbers and {} spectra, no regularization\n'.format(X.shape[1], X.shape[0])
+            msg = (
+                "Solving for {} wavenumbers and {} spectra, no regularization\n".format(
+                    X.shape[1], X.shape[0]
+                )
+            )
             _log += msg
             info_(msg)
 
@@ -236,7 +246,7 @@ class IRIS:
             RSS[0] = np.sum(res ** 2)
             SM[0] = np.linalg.norm(np.dot(np.dot(np.transpose(f[0]), S), f[0]))
 
-            msg = '-->  residuals = {:.2e}    curvature = {:.2e}'.format(RSS[0], SM[0])
+            msg = "-->  residuals = {:.2e}    curvature = {:.2e}".format(RSS[0], SM[0])
             _log += msg
             info_(msg)
 
@@ -277,16 +287,20 @@ class IRIS:
                         G = G0 + 2 * lamda * S
                         fi[:, j] = solve_qp(G, a[j].squeeze(), C, b)[0]
                     except ValueError:
-                        msg = f"Warning:G is not positive definite for log10(lambda)={np.log10(lamda):.2f} " \
-                              f"at {freq:.2f} {coord_x.units}, find nearest PD matrix"
+                        msg = (
+                            f"Warning:G is not positive definite for log10(lambda)={np.log10(lamda):.2f} "
+                            f"at {freq:.2f} {coord_x.units}, find nearest PD matrix"
+                        )
                         warning_(msg)
                         _log += msg
                         try:
                             G = nearestPD(G0 + 2 * lamda * S, 0)
                             fi[:, j] = solve_qp(G, a[j].squeeze(), C, b)[0]
                         except ValueError:
-                            msg = "... G matrix is still ill-conditioned, " \
-                                  "try with a small shift of diagonal elements..."
+                            msg = (
+                                "... G matrix is still ill-conditioned, "
+                                "try with a small shift of diagonal elements..."
+                            )
                             warning_(msg)
                             _log += msg
                             G = nearestPD(G0 + 2 * lamda * S, 1e-3)
@@ -296,16 +310,20 @@ class IRIS:
                 RSSi = np.sum(resi ** 2)
                 SMi = np.linalg.norm(np.dot(np.dot(np.transpose(fi), S), fi))
 
-                msg = f'log10(lambda)={np.log10(lamda):.3f} -->  residuals = {RSSi:.3e}    ' \
-                      f'regularization constraint  = {SMi:.3e}\n'
+                msg = (
+                    f"log10(lambda)={np.log10(lamda):.3f} -->  residuals = {RSSi:.3e}    "
+                    f"regularization constraint  = {SMi:.3e}\n"
+                )
                 info_(msg)
                 _log += msg
 
                 return fi, RSSi, SMi
 
             if not searchLambda:
-                msg = f'Solving for {X.shape[1]} wavenumbers, {X.shape[0]} spectra and ' \
-                      f'{len(lamb)} regularization parameters \n'
+                msg = (
+                    f"Solving for {X.shape[1]} wavenumbers, {X.shape[0]} spectra and "
+                    f"{len(lamb)} regularization parameters \n"
+                )
                 info_(msg)
                 _log += msg
 
@@ -313,8 +331,10 @@ class IRIS:
                     f[i], RSS[i], SM[i] = solve_lambda(X, K, G0, lamda, S)
 
             else:
-                msg = f'Solving for {X.shape[1]} wavenumbers and {X.shape[0]} spectra, search ' \
-                      f'regularization parameter in the range: [10**{min(lambdaRange)}, 10**{max(lambdaRange)}]\n'
+                msg = (
+                    f"Solving for {X.shape[1]} wavenumbers and {X.shape[0]} spectra, search "
+                    f"regularization parameter in the range: [10**{min(lambdaRange)}, 10**{max(lambdaRange)}]\n"
+                )
                 info_(msg)
                 _log += msg
 
@@ -327,7 +347,7 @@ class IRIS:
                 x[1] = (x[3] + phi * x[0]) / (1 + phi)
                 x[2] = x[0] + x[3] - x[1]
                 lamb = 10 ** x
-                msg = 'Initial Log(lambda) values = ' + str(x)
+                msg = "Initial Log(lambda) values = " + str(x)
                 info_(msg)
                 _log += msg
 
@@ -339,7 +359,7 @@ class IRIS:
                 while "convergence not reached":
                     C1 = menger(np.log10(Rx[0:3]), np.log10(Sy[0:3]))
                     C2 = menger(np.log10(Rx[1:4]), np.log10(Sy[1:4]))
-                    msg = f'Curvatures of the inner points: C1 = {C1:.3f} ; C2 = {C2:.3f} \n'
+                    msg = f"Curvatures of the inner points: C1 = {C1:.3f} ; C2 = {C2:.3f} \n"
                     info_(msg)
                     _log += msg
 
@@ -351,7 +371,7 @@ class IRIS:
                         Rx[2] = Rx[1]
                         Sy[2] = Sy[1]
                         x[1] = (x[3] + phi * x[0]) / (1 + phi)
-                        msg = 'New range of Log(lambda) values: ' + str(x)
+                        msg = "New range of Log(lambda) values: " + str(x)
                         info_(msg)
                         _log += msg
 
@@ -361,7 +381,7 @@ class IRIS:
                         RSS = np.concatenate((RSS, np.array(Rx[1:2])))
                         SM = np.concatenate((SM, np.array(Sy[1:2])))
                         C2 = menger(np.log10(Rx[1:4]), np.log10(Sy[1:4]))
-                        msg = f'new curvature: C2 = {C2:.3f}'
+                        msg = f"new curvature: C2 = {C2:.3f}"
                         info_(msg)
                         _log += msg
 
@@ -378,7 +398,7 @@ class IRIS:
                         Rx[2] = Rx[1]
                         Sy[2] = Sy[1]
                         x[1] = (x[3] + phi * x[0]) / (1 + phi)
-                        msg = 'New range (Log lambda): ' + str(x)
+                        msg = "New range (Log lambda): " + str(x)
                         info_(msg)
                         _log += msg
                         f_, Rx[1], Sy[1] = solve_lambda(X, K, G0, 10 ** x[1], S)
@@ -396,7 +416,7 @@ class IRIS:
                         Rx[1] = Rx[2]
                         Sy[1] = Sy[2]
                         x[2] = x[0] - (x[1] - x[3])
-                        msg = 'Log lambda= ' + str(x)
+                        msg = "Log lambda= " + str(x)
                         info_(msg)
                         _log += msg
                         f_, Rx[2], Sy[2] = solve_lambda(X, K, G0, 10 ** x[2], S)
@@ -406,21 +426,23 @@ class IRIS:
                         SM = np.concatenate((SM, np.array(Sy[1:2])))
                     if (10 ** x[3] - 10 ** x[0]) / 10 ** x[3] < epsilon:
                         break
-                msg = f'\n optimum found: log10(lambda) = {x_:.3f} ; curvature = {C_:.3f}'
+                msg = (
+                    f"\n optimum found: log10(lambda) = {x_:.3f} ; curvature = {C_:.3f}"
+                )
                 info_(msg)
                 _log += msg
 
-        msg = '\n Done.'
+        msg = "\n Done."
         info_(msg)
         _log += msg
 
         f = NDDataset(f)
-        f.name = '2D distribution functions'
-        f.title = 'pseudo-concentration'
-        f.history = '2D IRIS analysis of {} dataset'.format(X.name)
-        xcoord = X.coordset['x']
-        ycoord = Coord(data=eps, title='epsilon')
-        zcoord = Coord(data=lamb, title='lambda')
+        f.name = "2D distribution functions"
+        f.title = "pseudo-concentration"
+        f.history = "2D IRIS analysis of {} dataset".format(X.name)
+        xcoord = X.coordset["x"]
+        ycoord = Coord(data=eps, title="epsilon")
+        zcoord = Coord(data=lamb, title="lambda")
         f.set_coordset(z=zcoord, y=ycoord, x=xcoord)
         self.f = f
         self.K = K
@@ -444,21 +466,29 @@ class IRIS:
         """
 
         if len(self.lamda) == 1:  # no regularization or single lambda
-            X_hat = NDDataset(np.zeros((self.f.z.size, *self.X.shape)).squeeze(axis=0),
-                              title=self.X.title, units=self.X.units)
+            X_hat = NDDataset(
+                np.zeros((self.f.z.size, *self.X.shape)).squeeze(axis=0),
+                title=self.X.title,
+                units=self.X.units,
+            )
             X_hat.set_coordset(y=self.X.y, x=self.X.x)
             X_hat.data = np.dot(self.K.data, self.f.data.squeeze())
         else:
-            X_hat = NDDataset(np.zeros((self.f.z.size, *self.X.shape)),
-                              title=self.X.title, units=self.X.units)
+            X_hat = NDDataset(
+                np.zeros((self.f.z.size, *self.X.shape)),
+                title=self.X.title,
+                units=self.X.units,
+            )
             X_hat.set_coordset(z=self.f.z, y=self.X.y, x=self.X.x)
             for i in range(X_hat.z.size):
-                X_hat.data[i] = np.expand_dims(np.dot(self.K.data, self.f[i].data.squeeze()), 0)
+                X_hat.data[i] = np.expand_dims(
+                    np.dot(self.K.data, self.f[i].data.squeeze()), 0
+                )
 
-        X_hat.name = '2D-IRIS Reconstructed datasets'
+        X_hat.name = "2D-IRIS Reconstructed datasets"
         return X_hat
 
-    def plotlcurve(self, scale='ll', title='L curve'):  # , **kwargs):
+    def plotlcurve(self, scale="ll", title="L curve"):  # , **kwargs):
         """
         Plots the L Curve
 
@@ -479,13 +509,13 @@ class IRIS:
         ax = fig.add_subplot(111)
         ax.set_title(title)
         scale = scale.lower()
-        plt.plot(self.RSS, self.SM, 'o')
-        ax.set_xlabel('Residuals')
-        ax.set_ylabel('Curvature')
-        if scale[1] == 'l':
-            ax.set_xscale('log')
-        if scale[0] == 'l':
-            ax.set_yscale('log')
+        plt.plot(self.RSS, self.SM, "o")
+        ax.set_xlabel("Residuals")
+        ax.set_ylabel("Curvature")
+        if scale[1] == "l":
+            ax.set_xscale("log")
+        if scale[0] == "l":
+            ax.set_yscale("log")
         return ax
 
     def plotmerit(self, index=None, **kwargs):
@@ -502,7 +532,7 @@ class IRIS:
         list of axes
         """
 
-        colX, colXhat, colRes = kwargs.get('colors', ['blue', 'green', 'red'])
+        colX, colXhat, colRes = kwargs.get("colors", ["blue", "green", "red"])
 
         X_hat = self.reconstruct()
         axeslist = []
@@ -520,7 +550,7 @@ class IRIS:
             ax = self.X.plot()
             ax.plot(self.X.x.data, X_hat_.squeeze().T.data, color=colXhat)
             ax.plot(self.X.x.data, res.T.data, color=colRes)
-            ax.set_title(f'2D IRIS merit plot, $\\lambda$ = {self.lamda[i]:.2e}')
+            ax.set_title(f"2D IRIS merit plot, $\\lambda$ = {self.lamda[i]:.2e}")
             axeslist.append(ax)
         return axeslist
 
@@ -547,15 +577,16 @@ class IRIS:
         if type(index) is int:
             index = [index]
         for i in index:
-            self.f[i].plot(method='map', **kwargs)
+            self.f[i].plot(method="map", **kwargs)
         return axeslist
 
 
 # --------------------------------------------
 # Utility functions
 
+
 def Smat(eps):
-    """ returns the matrix used to compute the norm of f second derivative  """
+    """returns the matrix used to compute the norm of f second derivative"""
     m = len(eps)
     S = np.zeros((m, m))
     S[0, 0] = 6
@@ -628,13 +659,13 @@ def nearestPD(A, shift):
         mineig = np.min(np.real(np.linalg.eigvals(A3)))
         A3 += Ie * (-mineig * k ** 2 + spacing)
         k += 1
-        print('makes PD matrix')
+        print("makes PD matrix")
     return A3
 
 
 def isPD(B):
     """Returns true when input is positive-definite,
-     copyright: see https://gist.github.com/fasiha/fdb5cec2054e6f1c6ae35476045a0bbd"""
+    copyright: see https://gist.github.com/fasiha/fdb5cec2054e6f1c6ae35476045a0bbd"""
 
     try:
         _ = np.linalg.cholesky(B)
@@ -649,7 +680,14 @@ def menger(x, y):
     points. x, y = sets of 3 cartesian coordinates
     """
 
-    numerator = 2 * (x[0] * y[1] + x[1] * y[2] + x[2] * y[0] - x[0] * y[2] - x[1] * y[0] - x[2] * y[1])
+    numerator = 2 * (
+        x[0] * y[1]
+        + x[1] * y[2]
+        + x[2] * y[0]
+        - x[0] * y[2]
+        - x[1] * y[0]
+        - x[2] * y[1]
+    )
     # Euclidian distances
     r01 = (x[1] - x[0]) ** 2 + (y[1] - y[0]) ** 2
     r12 = (x[2] - x[1]) ** 2 + (y[2] - y[1]) ** 2

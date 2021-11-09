@@ -34,12 +34,12 @@ def test_npy(ds1):
     assert df.size == d.x.size ** 2
 
     df = diag(ds.data)
-    assert df.implements('NDDataset')
+    assert df.implements("NDDataset")
 
     # DOT
     a = ds  # 2D dataset
     b = ds1[3].squeeze()  # second 2D dataset
-    b.ito('km', force=True)  # put some units to b
+    b.ito("km", force=True)  # put some units to b
     x = dot(a.T, b)
     assert x.units == a.units * b.units
     assert x.shape == (a.x.size, b.x.size)
@@ -54,7 +54,7 @@ def test_npy(ds1):
 
 
 # ============================================================================
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass
 
 # end of module

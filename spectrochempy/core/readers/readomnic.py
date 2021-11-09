@@ -11,7 +11,7 @@
 This module extend NDDataset with the import method for OMNIC generated data
 files.
 """
-__all__ = ['read_omnic', 'read_spg', 'read_spa', 'read_srs']
+__all__ = ["read_omnic", "read_spg", "read_spa", "read_srs"]
 __dataset_methods__ = __all__
 
 from datetime import datetime, timezone, timedelta
@@ -212,8 +212,8 @@ def read_omnic(*paths, **kwargs):
     NDDataset: [float64] a.u. (shape: (y:3, x:5549))
     """
 
-    kwargs['filetypes'] = ['OMNIC files (*.spa *.spg)', 'OMNIC series (*.srs)']
-    kwargs['protocol'] = ['omnic', 'spa', 'spg', 'srs']
+    kwargs["filetypes"] = ["OMNIC files (*.spa *.spg)", "OMNIC series (*.srs)"]
+    kwargs["protocol"] = ["omnic", "spa", "spg", "srs"]
     importer = Importer()
     return importer(*paths, **kwargs)
 
@@ -307,8 +307,8 @@ def read_spg(*paths, **kwargs):
     See ``read_omnic`` for more examples of use
     """
 
-    kwargs['filetypes'] = ['OMNIC files (*.spg)']
-    kwargs['protocol'] = ['spg']
+    kwargs["filetypes"] = ["OMNIC files (*.spg)"]
+    kwargs["protocol"] = ["spg"]
     importer = Importer()
     return importer(*paths, **kwargs)
 
@@ -410,8 +410,8 @@ def read_spa(*paths, **kwargs):
     See ``read_omnic`` for more examples of use
     """
 
-    kwargs['filetypes'] = ['OMNIC files (*.spa)']
-    kwargs['protocol'] = ['spa']
+    kwargs["filetypes"] = ["OMNIC files (*.spa)"]
+    kwargs["protocol"] = ["spa"]
     importer = Importer()
     return importer(*paths, **kwargs)
 
@@ -514,8 +514,8 @@ def read_srs(*paths, **kwargs):
     read_omnic, read_spg, read_spa, read_opus
     """
 
-    kwargs['filetypes'] = ['OMNIC series (*.srs)']
-    kwargs['protocol'] = ['srs']
+    kwargs["filetypes"] = ["OMNIC series (*.srs)"]
+    kwargs["protocol"] = ["srs"]
     importer = Importer()
     return importer(*paths, **kwargs)
 
@@ -531,12 +531,12 @@ def _read_spg(*args, **kwargs):
 
     dataset, filename = args
     sortbydate = kwargs.pop("sortbydate", True)
-    content = kwargs.get('content', False)
+    content = kwargs.get("content", False)
 
     if content:
         fid = io.BytesIO(content)
     else:
-        fid = open(filename, 'rb')
+        fid = open(filename, "rb")
 
     # Read title:
     # The file title starts at position hex 1e = decimal 30. Its max length
@@ -549,7 +549,7 @@ def _read_spg(*args, **kwargs):
 
     # Check if it is really a spg file (in this case title his the filename
     # with extension spg)
-    if spg_title[-4:].lower() != '.spg':
+    if spg_title[-4:].lower() != ".spg":
         # probably not a spg content
         # try .spa
         fid.close()
@@ -581,70 +581,83 @@ def _read_spg(*args, **kwargs):
 
     # read total number of lines
     fid.seek(294)
-    nlines = _fromfile(fid, 'uint16', count=1)
+    nlines = _fromfile(fid, "uint16", count=1)
 
     # read "key values"
     pos = 304
     keys = np.zeros(nlines)
     for i in range(nlines):
         fid.seek(pos)
-        keys[i] = _fromfile(fid, dtype='uint8', count=1)
+        keys[i] = _fromfile(fid, dtype="uint8", count=1)
         pos = pos + 16
 
     # the number of occurences of the key '02' is number of spectra
     nspec = np.count_nonzero((keys == 2))
 
     if nspec == 0:
-        raise IOError('Error : File format not recognized'
-                      ' - information markers not found')
+        raise IOError(
+            "Error : File format not recognized" " - information markers not found"
+        )
 
     # container to hold values
-    nx, firstx, lastx = np.zeros(nspec, 'int'), np.zeros(nspec, 'float'), np.zeros(nspec, 'float')
+    nx, firstx, lastx = (
+        np.zeros(nspec, "int"),
+        np.zeros(nspec, "float"),
+        np.zeros(nspec, "float"),
+    )
     xunits = []
     xtitles = []
     units = []
     titles = []
 
     # Extracts positions of '02' keys
-    key_is_02 = (keys == 2)  # ex: [T F F F F T F (...) F T ....]'
+    key_is_02 = keys == 2  # ex: [T F F F F T F (...) F T ....]'
     indices02 = np.nonzero(key_is_02)  # ex: [1 9 ...]
-    position02 = 304 * np.ones(len(indices02[0]), dtype='int') + 16 * indices02[0]  # ex: [304 432 ...]
+    position02 = (
+        304 * np.ones(len(indices02[0]), dtype="int") + 16 * indices02[0]
+    )  # ex: [304 432 ...]
 
     for i in range(nspec):
         info02 = _readheader02(fid, position02[i])
-        nx[i] = info02['nx']
-        firstx[i] = info02['firstx']
-        lastx[i] = info02['lastx']
-        xunits.append(info02['xunits'])
-        xtitles.append(info02['xtitle'])
-        units.append(info02['units'])
-        titles.append(info02['title'])
+        nx[i] = info02["nx"]
+        firstx[i] = info02["firstx"]
+        lastx[i] = info02["lastx"]
+        xunits.append(info02["xunits"])
+        xtitles.append(info02["xtitle"])
+        units.append(info02["units"])
+        titles.append(info02["title"])
 
     # check the consistency of xaxis and data units
     if np.ptp(nx) != 0:
-        raise ValueError('Error : Inconsistent data set -'
-                         ' number of wavenumber per spectrum should be '
-                         'identical')
+        raise ValueError(
+            "Error : Inconsistent data set -"
+            " number of wavenumber per spectrum should be "
+            "identical"
+        )
     elif np.ptp(firstx) != 0:
-        raise ValueError('Error : Inconsistent data set - '
-                         'the x axis should start at same value')
+        raise ValueError(
+            "Error : Inconsistent data set - " "the x axis should start at same value"
+        )
     elif np.ptp(lastx) != 0:
-        raise ValueError('Error : Inconsistent data set -'
-                         ' the x axis should end at same value')
+        raise ValueError(
+            "Error : Inconsistent data set -" " the x axis should end at same value"
+        )
     elif len(set(xunits)) != 1:
-        raise ValueError('Error : Inconsistent data set - '
-                         'data units should be identical')
+        raise ValueError(
+            "Error : Inconsistent data set - " "data units should be identical"
+        )
     elif len(set(units)) != 1:
-        raise ValueError('Error : Inconsistent data set - '
-                         'x axis units should be identical')
-    data = np.ndarray((nspec, nx[0]), dtype='float32')
+        raise ValueError(
+            "Error : Inconsistent data set - " "x axis units should be identical"
+        )
+    data = np.ndarray((nspec, nx[0]), dtype="float32")
 
     # Now the intensity data
 
     # Extracts positions of '03' keys
-    key_is_03 = (keys == 3)
+    key_is_03 = keys == 3
     indices03 = np.nonzero(key_is_03)
-    position03 = 304 * np.ones(len(indices03[0]), dtype='int') + 16 * indices03[0]
+    position03 = 304 * np.ones(len(indices03[0]), dtype="int") + 16 * indices03[0]
 
     # Read number of spectral intensities
     for i in range(nspec):
@@ -655,15 +668,15 @@ def _read_spg(*args, **kwargs):
     spectitles, acquisitiondates, timestamps = [], [], []
 
     # Extract positions of '6B' keys (spectra titles & acquisition dates)
-    key_is_6B = (keys == 107)
+    key_is_6B = keys == 107
     indices6B = np.nonzero(key_is_6B)
-    position6B = 304 * np.ones(len(indices6B[0]), dtype='int') + 16 * indices6B[0]
+    position6B = 304 * np.ones(len(indices6B[0]), dtype="int") + 16 * indices6B[0]
 
     # Read spectra titles and acquisition date
     for i in range(nspec):
         # determines the position of informatioon
         fid.seek(position6B[i] + 2)  # go to line and skip 2 bytes
-        spa_title_pos = _fromfile(fid, 'uint32', 1)
+        spa_title_pos = _fromfile(fid, "uint32", 1)
 
         # read filename
         spa_title = _readbtext(fid, spa_title_pos)  # [0])
@@ -671,9 +684,11 @@ def _read_spg(*args, **kwargs):
 
         # and the acquisition date
         fid.seek(spa_title_pos + 256)
-        timestamp = _fromfile(fid, dtype='uint32', count=1)  #
+        timestamp = _fromfile(fid, dtype="uint32", count=1)  #
         # since 31/12/1899, 00:00
-        acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=timezone.utc) + timedelta(seconds=int(timestamp))
+        acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=timezone.utc) + timedelta(
+            seconds=int(timestamp)
+        )
         acquisitiondates.append(acqdate)
         timestamp = acqdate.timestamp()
         # Transform back to timestamp for storage in the Coord object
@@ -706,25 +721,39 @@ def _read_spg(*args, **kwargs):
     # _x = Coord(np.around(np.linspace(firstx[0], lastx[0], nx[0]), 3),
     #           title=xtitles[0], units=xunits[0])
     spacing = (lastx[0] - firstx[0]) / int(nx[0] - 1)
-    _x = LinearCoord(offset=firstx[0], increment=spacing, size=int(nx[0]), title=xtitles[0], units=xunits[0])
+    _x = LinearCoord(
+        offset=firstx[0],
+        increment=spacing,
+        size=int(nx[0]),
+        title=xtitles[0],
+        units=xunits[0],
+    )
 
-    _y = Coord(timestamps, title='acquisition timestamp (GMT)', units='s', labels=(acquisitiondates, spectitles))
+    _y = Coord(
+        timestamps,
+        title="acquisition timestamp (GMT)",
+        units="s",
+        labels=(acquisitiondates, spectitles),
+    )
 
     dataset.set_coordset(y=_y, x=_x)
 
     # Set origin and description
     dataset.origin = "omnic"
-    dataset.description = kwargs.get('description', f'Omnic title: {spg_title}\nOmnic '
-                                                    f'filename: {filename}')
+    dataset.description = kwargs.get(
+        "description", f"Omnic title: {spg_title}\nOmnic " f"filename: {filename}"
+    )
 
     # Set the NDDataset date
     dataset._date = datetime.now(timezone.utc)
 
     # Set origin, description and history
-    dataset.history = str(dataset.date) + ':imported from spg file {} ; '.format(filename)
+    dataset.history = str(dataset.date) + ":imported from spg file {} ; ".format(
+        filename
+    )
     if sortbydate:
-        dataset.sort(dim='y', inplace=True)
-        dataset.history = str(dataset.date) + ':sorted by date'
+        dataset.sort(dim="y", inplace=True)
+        dataset.history = str(dataset.date) + ":sorted by date"
 
     # debug_("end of reading")
 
@@ -741,12 +770,12 @@ def _read_omnic(*args, **kwargs):
 @importermethod
 def _read_spa(*args, **kwargs):
     dataset, filename = args
-    content = kwargs.get('content', False)
+    content = kwargs.get("content", False)
 
     if content:
         fid = io.BytesIO(content)
     else:
-        fid = open(filename, 'rb')
+        fid = open(filename, "rb")
 
     # Read title:
     # The file title  starts at position hex 1e = decimal 30. Its max length
@@ -764,7 +793,9 @@ def _read_spa(*args, **kwargs):
 
     # days since 31/12/1899, 00:00
     timestamp = _fromfile(fid, dtype="uint32", count=1)
-    acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=timezone.utc) + timedelta(seconds=int(timestamp))
+    acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=timezone.utc) + timedelta(
+        seconds=int(timestamp)
+    )
     acquisitiondate = acqdate
 
     # Transform back to timestamp for storage in the Coord object
@@ -792,16 +823,16 @@ def _read_spa(*args, **kwargs):
     pos = 304
     while not (all(gotinfos)):
         fid.seek(pos)
-        key = _fromfile(fid, dtype='uint8', count=1)
+        key = _fromfile(fid, dtype="uint8", count=1)
         if key == 2:
             info02 = _readheader02(fid, pos)
-            nx = info02['nx']
-            firstx = info02['firstx']
-            lastx = info02['lastx']
-            xunit = info02['xunits']
-            xtitle = info02['xtitle']
-            units = info02['units']
-            title = info02['title']
+            nx = info02["nx"]
+            firstx = info02["firstx"]
+            lastx = info02["lastx"]
+            xunit = info02["xunits"]
+            xtitle = info02["xtitle"]
+            units = info02["units"]
+            title = info02["title"]
             gotinfos[0] = True
 
         elif key == 3:
@@ -810,7 +841,7 @@ def _read_spa(*args, **kwargs):
 
         elif key == 27:
             fid.seek(pos + 2)
-            history_pos = _fromfile(fid, 'uint32', 1)
+            history_pos = _fromfile(fid, "uint32", 1)
             # read history
             history = _readbtext(fid, history_pos)
             gotinfos[2] = True
@@ -823,7 +854,7 @@ def _read_spa(*args, **kwargs):
     fid.close()
 
     # load spectral content into the  NDDataset
-    dataset.data = np.array(intensities[np.newaxis], dtype='float32')
+    dataset.data = np.array(intensities[np.newaxis], dtype="float32")
     dataset.units = units
     dataset.title = title
     dataset.name = filename.stem
@@ -833,27 +864,37 @@ def _read_spa(*args, **kwargs):
     # _x = Coord(np.around(np.linspace(firstx, lastx, nx, 3)), title=xtitle,
     # units=xunit)
     spacing = (lastx - firstx) / (nx - 1)
-    _x = LinearCoord(offset=firstx, increment=spacing, size=nx, title=xtitle, units=xunit)
+    _x = LinearCoord(
+        offset=firstx, increment=spacing, size=nx, title=xtitle, units=xunit
+    )
 
-    _y = Coord([timestamp], title='acquisition timestamp (GMT)', units='s', labels=([acquisitiondate], [filename]))
+    _y = Coord(
+        [timestamp],
+        title="acquisition timestamp (GMT)",
+        units="s",
+        labels=([acquisitiondate], [filename]),
+    )
     dataset.set_coordset(y=_y, x=_x)
 
     # Set origin, description, history, date
     dataset.origin = "omnic"
-    dataset.description = kwargs.get('description', f'Omnic title: {spa_title}\nOmnic '
-                                                    f'filename: {filename.name}')
-    dataset.history = str(datetime.now(timezone.utc)) + ':imported from spa files'
+    dataset.description = kwargs.get(
+        "description", f"Omnic title: {spa_title}\nOmnic " f"filename: {filename.name}"
+    )
+    dataset.history = str(datetime.now(timezone.utc)) + ":imported from spa files"
     dataset.history = history
     dataset._date = datetime.now(timezone.utc)
 
-    if dataset.x.units is None and dataset.x.title == 'data points':
+    if dataset.x.units is None and dataset.x.title == "data points":
         # interferogram
         dataset.meta.interferogram = True
         dataset.meta.td = list(dataset.shape)
         dataset.x._zpd = int(np.argmax(dataset)[-1])  # zero path difference
-        dataset.meta.laser_frequency = Quantity('15798.26 cm^-1')
+        dataset.meta.laser_frequency = Quantity("15798.26 cm^-1")
         dataset.x.set_laser_frequency()
-        dataset.x._use_time_axis = False  # True to have time, else it will  # be optical path difference
+        dataset.x._use_time_axis = (
+            False  # True to have time, else it will  # be optical path difference
+        )
 
     return dataset
 
@@ -862,29 +903,29 @@ def _read_spa(*args, **kwargs):
 @importermethod
 def _read_srs(*args, **kwargs):
     dataset, filename = args
-    frombytes = kwargs.get('frombytes', False)
+    frombytes = kwargs.get("frombytes", False)
 
     if frombytes:
         # in this case, filename is actualy a byte content
         fid = io.BytesIO(filename)
     else:
-        fid = open(filename, 'rb')
+        fid = open(filename, "rb")
     # at pos=306 (hex:132) is the position of the xheader
     fid.seek(306)
-    pos_xheader = _fromfile(fid, dtype='int32', count=1)
+    pos_xheader = _fromfile(fid, dtype="int32", count=1)
     info, pos = _read_xheader(fid, pos_xheader)
 
     # reset current position at the start of next line
     pos = _nextline(pos)
 
-    if info['mode'] != 'rapidscan':
+    if info["mode"] != "rapidscan":
         raise NotImplementedError("Only implemented for rapidscan")
 
     # read the data part of series files
     found = False
     background = None
     names = []
-    data = np.zeros((info['ny'], info['nx']))
+    data = np.zeros((info["ny"], info["nx"]))
 
     # find the position of the background and of the first interferogram
     # based on
@@ -893,7 +934,7 @@ def _read_srs(*args, **kwargs):
     while not found:
         pos += 16
         fid.seek(pos)
-        line = _fromfile(fid, dtype='uint8', count=16)
+        line = _fromfile(fid, dtype="uint8", count=16)
         if np.all(line == [15, 0, 0, 0, 2, 0, 0, 0, 24, 0, 0, 0, 0, 0, 72, 67]):
             # hex 0F 00 00 00 02 00 00 00 18 00 00 00 00 00 48 43
             # this is a fingerprint of header of data fields for
@@ -902,7 +943,7 @@ def _read_srs(*args, **kwargs):
             if background is None:
                 pos += 52
                 fid.seek(pos)
-                key = _fromfile(fid, dtype='uint16', count=1)
+                key = _fromfile(fid, dtype="uint16", count=1)
 
                 if key > 0:
                     # a background file was selected; it is present as a
@@ -914,17 +955,17 @@ def _read_srs(*args, **kwargs):
                     pos += 256  # max length of text
                     pos += 8  # unknown info ?
                     fid.seek(pos)
-                    background = _fromfile(fid, dtype='float32', count=background_size)
+                    background = _fromfile(fid, dtype="float32", count=background_size)
                     pos += background_size * 4
                     pos = _nextline(pos)
 
                 elif key == 0:
                     # no background file was selected; the background is the
                     # one that was recorded with the series
-                    background_size = info['nx']
+                    background_size = info["nx"]
                     pos += 8
                     fid.seek(pos)
-                    background = _fromfile(fid, dtype='float32', count=background_size)
+                    background = _fromfile(fid, dtype="float32", count=background_size)
                     pos += background_size * 4
                     background_name = _readbtext(fid, pos)
                     # uncomment below to read unused data (noise measurement ?)
@@ -936,23 +977,29 @@ def _read_srs(*args, **kwargs):
                 # Create a NDDataset for the background
 
                 background = NDDataset(background)
-                _x = Coord(np.around(np.linspace(0, background_size - 1, background_size), 0), title='data points',
-                           units='dimensionless')
+                _x = Coord(
+                    np.around(np.linspace(0, background_size - 1, background_size), 0),
+                    title="data points",
+                    units="dimensionless",
+                )
                 background.set_coordset(x=_x)
                 background.name = background_name
-                background.units = 'V'
-                background.title = 'volts'
-                background.origin = 'omnic'
-                background.description = 'background from omnic srs file.'
-                background.history = str(datetime.now(timezone.utc)) + ':imported from srs file'
+                background.units = "V"
+                background.title = "volts"
+                background.origin = "omnic"
+                background.description = "background from omnic srs file."
+                background.history = (
+                    str(datetime.now(timezone.utc)) + ":imported from srs file"
+                )
 
             else:  # this is likely the first interferogram of the series
                 found = True
                 names.append(_readbtext(fid, pos + 64))
                 pos += 148
 
-        elif np.all(line == [2, 0, 0, 0, 24, 0, 0, 0, 0, 0, 72, 67, 0, 80, 67, 71]) or np.all(
-                line == [30, 0, 0, 0, 2, 0, 0, 0, 24, 0, 0, 0, 0, 0, 72, 67]):
+        elif np.all(
+            line == [2, 0, 0, 0, 24, 0, 0, 0, 0, 0, 72, 67, 0, 80, 67, 71]
+        ) or np.all(line == [30, 0, 0, 0, 2, 0, 0, 0, 24, 0, 0, 0, 0, 0, 72, 67]):
             # hex 02 00 00 00 18 00 00 00 00 00 48 43 00 50 43 47
             # this is likely header of data field of reprocessed series
             # the first one is skipped TODO: check the nature of these data
@@ -966,48 +1013,61 @@ def _read_srs(*args, **kwargs):
 
     # read first data
     fid.seek(pos)
-    data[0, :] = _fromfile(fid, dtype='float32', count=info['nx'])[:]
-    pos += info['nx'] * 4
+    data[0, :] = _fromfile(fid, dtype="float32", count=info["nx"])[:]
+    pos += info["nx"] * 4
     # and the remaining part:
-    for i in np.arange(info['ny'])[1:]:
+    for i in np.arange(info["ny"])[1:]:
         pos += 16
         names.append(_readbtext(fid, pos))
         pos += 84
         fid.seek(pos)
-        data[i, :] = _fromfile(fid, dtype='float32', count=info['nx'])[:]
-        pos += info['nx'] * 4
+        data[i, :] = _fromfile(fid, dtype="float32", count=info["nx"])[:]
+        pos += info["nx"] * 4
 
     # Create NDDataset Object for the series
     dataset = NDDataset(data)
-    dataset.name = info['name']
-    dataset.units = info['units']
-    dataset.title = info['title']
-    dataset.origin = 'omnic'
+    dataset.name = info["name"]
+    dataset.units = info["units"]
+    dataset.title = info["title"]
+    dataset.origin = "omnic"
 
     # now add coordinates
-    spacing = (info['lastx'] - info['firstx']) / (info['nx'] - 1)
-    _x = LinearCoord(offset=info['firstx'], increment=spacing, size=info['nx'], title=info['xtitle'],
-                     units=info['xunits'])
+    spacing = (info["lastx"] - info["firstx"]) / (info["nx"] - 1)
+    _x = LinearCoord(
+        offset=info["firstx"],
+        increment=spacing,
+        size=info["nx"],
+        title=info["xtitle"],
+        units=info["xunits"],
+    )
 
-    _y = Coord(np.around(np.linspace(info['firsty'], info['lasty'], info['ny']), 3), title='Time', units='minute',
-               labels=names)
+    _y = Coord(
+        np.around(np.linspace(info["firsty"], info["lasty"], info["ny"]), 3),
+        title="Time",
+        units="minute",
+        labels=names,
+    )
 
     dataset.set_coordset(y=_y, x=_x)
 
     # Set origin, description and history
     dataset.origin = "omnic"
-    dataset.description = kwargs.get('description', 'Dataset from omnic srs file.')
+    dataset.description = kwargs.get("description", "Dataset from omnic srs file.")
 
-    dataset.history = str(datetime.now(timezone.utc)) + ':imported from srs file {} ; '.format(filename)
+    dataset.history = str(
+        datetime.now(timezone.utc)
+    ) + ":imported from srs file {} ; ".format(filename)
 
-    if dataset.x.units is None and dataset.x.title == 'data points':
+    if dataset.x.units is None and dataset.x.title == "data points":
         # interferogram
         dataset.meta.interferogram = True
         dataset.meta.td = list(dataset.shape)
         dataset.x._zpd = int(np.argmax(dataset)[-1])  # zero path difference
-        dataset.meta.laser_frequency = Quantity('15798.26 cm^-1')
+        dataset.meta.laser_frequency = Quantity("15798.26 cm^-1")
         dataset.x.set_laser_frequency()
-        dataset.x._use_time_axis = False  # True to have time, else it will  # be optical path difference
+        dataset.x._use_time_axis = (
+            False  # True to have time, else it will  # be optical path difference
+        )
 
     # uncomment below to load the last datafield
     # has the same dimension as the time axis
@@ -1045,11 +1105,19 @@ def _read_srs(*args, **kwargs):
 def _fromfile(fid, dtype, count):
     # to replace np.fromfile in case of io.BytesIO object instead of byte
     # object
-    t = {'uint8': 'B', 'int8': 'b', 'uint16': 'H', 'int16': 'h', 'uint32': 'I', 'int32': 'i', 'float32': 'f', }
+    t = {
+        "uint8": "B",
+        "int8": "b",
+        "uint16": "H",
+        "int16": "h",
+        "uint32": "I",
+        "int32": "i",
+        "float32": "f",
+    }
     typ = t[dtype] * count
-    if dtype.endswith('16'):
+    if dtype.endswith("16"):
         count = count * 2
-    elif dtype.endswith('32'):
+    elif dtype.endswith("32"):
         count = count * 4
 
     out = struct.unpack(typ, fid.read(count))
@@ -1068,14 +1136,14 @@ def _readbtext(fid, pos):
         # zero
         btext = btext + fid.read(1)  # append 1 byte
 
-    btext = btext[0:len(btext) - 1]  # cuts the last byte
+    btext = btext[0 : len(btext) - 1]  # cuts the last byte
     try:
-        text = btext.decode(encoding='utf-8')  # decode btext to string
+        text = btext.decode(encoding="utf-8")  # decode btext to string
     except UnicodeDecodeError:
         try:
-            text = btext.decode(encoding='latin_1')
+            text = btext.decode(encoding="latin_1")
         except UnicodeDecodeError:
-            text = btext.decode(encoding='utf-8', errors='ignore')
+            text = btext.decode(encoding="utf-8", errors="ignore")
     return text
 
 
@@ -1090,7 +1158,7 @@ def _readheader02(fid, pos):
     # read spectrum header, pos is the position of the 02 key
     # returns a dict
     fid.seek(pos + 2)  # go to line and skip 2 bytes
-    info_pos = _fromfile(fid, dtype='uint32', count=1)
+    info_pos = _fromfile(fid, dtype="uint32", count=1)
 
     # other positions:
     #   nx_pos = info_pos + 4
@@ -1102,69 +1170,73 @@ def _readheader02(fid, pos):
     #   nbkgscan_pos = info_pos + 52;
 
     fid.seek(info_pos + 4)
-    out = {'nx': _fromfile(fid, 'uint32', 1)}
+    out = {"nx": _fromfile(fid, "uint32", 1)}
 
     # read xaxis unit
     fid.seek(info_pos + 8)
-    key = _fromfile(fid, dtype='uint8', count=1)
+    key = _fromfile(fid, dtype="uint8", count=1)
     if key == 1:
-        out['xunits'] = 'cm ^ -1'
-        out['xtitle'] = 'wavenumbers'
+        out["xunits"] = "cm ^ -1"
+        out["xtitle"] = "wavenumbers"
     elif key == 2:
-        out['xunits'] = None
-        out['xtitle'] = 'data points'
+        out["xunits"] = None
+        out["xtitle"] = "data points"
     elif key == 3:
-        out['xunits'] = 'nm'
-        out['xtitle'] = 'wavelengths'
+        out["xunits"] = "nm"
+        out["xtitle"] = "wavelengths"
     elif key == 4:
-        out['xunits'] = 'um'
-        out['xtitle'] = 'wavelengths'
+        out["xunits"] = "um"
+        out["xtitle"] = "wavelengths"
     elif key == 32:
-        out['xunits'] = 'cm^-1'
-        out['xtitle'] = 'raman shift'
+        out["xunits"] = "cm^-1"
+        out["xtitle"] = "raman shift"
     else:
-        out['xunits'] = None
-        out['xtitle'] = 'xaxis'  # warning: 'The nature of data is not  # recognized, xtitle set to \'xaxis\')
+        out["xunits"] = None
+        out[
+            "xtitle"
+        ] = "xaxis"  # warning: 'The nature of data is not  # recognized, xtitle set to \'xaxis\')
 
     # read data unit
     fid.seek(info_pos + 12)
-    key = _fromfile(fid, dtype='uint8', count=1)
+    key = _fromfile(fid, dtype="uint8", count=1)
     if key == 17:
-        out['units'] = 'absorbance'
-        out['title'] = 'absorbance'
+        out["units"] = "absorbance"
+        out["title"] = "absorbance"
     elif key == 16:
-        out['units'] = 'percent'
-        out['title'] = 'transmittance'
+        out["units"] = "percent"
+        out["title"] = "transmittance"
     elif key == 11:
-        out['units'] = 'percent'
-        out['title'] = 'reflectance'
+        out["units"] = "percent"
+        out["title"] = "reflectance"
     elif key == 12:
-        out['units'] = None
-        out['title'] = 'Log(1/R)'
+        out["units"] = None
+        out["title"] = "Log(1/R)"
     elif key == 20:
-        out['units'] = 'Kubelka_Munk'
-        out['title'] = 'Kubelka-Munk'
+        out["units"] = "Kubelka_Munk"
+        out["title"] = "Kubelka-Munk"
     elif key == 22:
-        out['units'] = 'V'
-        out['title'] = 'detector signal'
+        out["units"] = "V"
+        out["title"] = "detector signal"
     elif key == 26:
-        out['units'] = None
-        out['title'] = 'photoacoustic'
+        out["units"] = None
+        out["title"] = "photoacoustic"
     elif key == 31:
-        out['units'] = None
-        out['title'] = 'raman intensity'
+        out["units"] = None
+        out["title"] = "raman intensity"
     else:
-        out['units'] = None
-        out['title'] = 'intensity'  # warning: 'The nature of data is not  # recognized, title set to \'Intensity\')
+        out["units"] = None
+        out[
+            "title"
+        ] = "intensity"  # warning: 'The nature of data is not  # recognized, title set to \'Intensity\')
 
     fid.seek(info_pos + 16)
-    out['firstx'] = _fromfile(fid, 'float32', 1)
+    out["firstx"] = _fromfile(fid, "float32", 1)
     fid.seek(info_pos + 20)
-    out['lastx'] = _fromfile(fid, 'float32', 1)
+    out["lastx"] = _fromfile(fid, "float32", 1)
     fid.seek(info_pos + 36)
-    out['nscan'] = _fromfile(fid, 'uint32', 1)
+    out["nscan"] = _fromfile(fid, "uint32", 1)
     fid.seek(info_pos + 52)
-    out['nbkgscan'] = _fromfile(fid, 'uint32', 1)
+    out["nbkgscan"] = _fromfile(fid, "uint32", 1)
 
     return out
 
@@ -1177,15 +1249,17 @@ def _read_xheader(fid, pos):
     # Todo: merge with _readheader02
 
     fid.seek(pos)
-    key = _fromfile(fid, dtype='uint8', count=1)
+    key = _fromfile(fid, dtype="uint8", count=1)
 
     if key not in (1, 3):
         raise ValueError(
-            "xheader key={} not recognized yet.".format(key) + " Please report this error (and the corresponding srs "
-                                                               "file) to the developers"
-                                                               "They will do their best to fix the issue")
+            "xheader key={} not recognized yet.".format(key)
+            + " Please report this error (and the corresponding srs "
+            "file) to the developers"
+            "They will do their best to fix the issue"
+        )
     else:
-        out = {'xheader': key}
+        out = {"xheader": key}
 
     #   positions
     #   nx_pos = info_pos + 4
@@ -1198,92 +1272,96 @@ def _read_xheader(fid, pos):
     #   nbkgscan_pos = info_pos + 52;
 
     fid.seek(pos + 4)
-    out['nx'] = _fromfile(fid, 'uint32', count=1)
+    out["nx"] = _fromfile(fid, "uint32", count=1)
 
     # read xaxis unit
     fid.seek(pos + 8)
-    key = _fromfile(fid, dtype='uint8', count=1)
+    key = _fromfile(fid, dtype="uint8", count=1)
     if key == 1:
-        out['xunits'] = 'cm ^ -1'
-        out['xtitle'] = 'wavenumbers'
+        out["xunits"] = "cm ^ -1"
+        out["xtitle"] = "wavenumbers"
     elif key == 2:
-        out['xunits'] = None
-        out['xtitle'] = 'data points'
+        out["xunits"] = None
+        out["xtitle"] = "data points"
     elif key == 3:
-        out['xunits'] = 'nm'
-        out['xtitle'] = 'wavelengths'
+        out["xunits"] = "nm"
+        out["xtitle"] = "wavelengths"
     elif key == 4:
-        out['xunits'] = 'um'
-        out['xtitle'] = 'wavelengths'
+        out["xunits"] = "um"
+        out["xtitle"] = "wavelengths"
     elif key == 32:
-        out['xunits'] = 'cm^-1'
-        out['xtitle'] = 'raman shift'
+        out["xunits"] = "cm^-1"
+        out["xtitle"] = "raman shift"
     else:
-        out['xunits'] = None
-        out['xtitle'] = 'xaxis'  # warning: 'The nature of data is not  # recognized, xtitle set to \'xaxis\')
+        out["xunits"] = None
+        out[
+            "xtitle"
+        ] = "xaxis"  # warning: 'The nature of data is not  # recognized, xtitle set to \'xaxis\')
     # read data unit
     fid.seek(pos + 12)
-    key = _fromfile(fid, dtype='uint8', count=1)
+    key = _fromfile(fid, dtype="uint8", count=1)
     if key == 17:
-        out['units'] = 'absorbance'
-        out['title'] = 'absorbance'
+        out["units"] = "absorbance"
+        out["title"] = "absorbance"
     elif key == 16:
-        out['units'] = 'percent'
-        out['title'] = 'transmittance'
+        out["units"] = "percent"
+        out["title"] = "transmittance"
     elif key == 11:
-        out['units'] = 'percent'
-        out['title'] = 'reflectance'
+        out["units"] = "percent"
+        out["title"] = "reflectance"
     elif key == 12:
-        out['units'] = None
-        out['title'] = 'log(1/R)'
+        out["units"] = None
+        out["title"] = "log(1/R)"
     elif key == 20:
-        out['units'] = 'Kubelka_Munk'
-        out['title'] = 'Kubelka-Munk'
+        out["units"] = "Kubelka_Munk"
+        out["title"] = "Kubelka-Munk"
     elif key == 22:
-        out['units'] = 'V'
-        out['title'] = 'detector signal'
+        out["units"] = "V"
+        out["title"] = "detector signal"
     elif key == 26:
-        out['units'] = None
-        out['title'] = 'photoacoustic'
+        out["units"] = None
+        out["title"] = "photoacoustic"
     elif key == 31:
-        out['units'] = None
-        out['title'] = 'raman intensity'
+        out["units"] = None
+        out["title"] = "raman intensity"
     else:
-        out['title'] = None
-        out['title'] = 'intensity'  # warning: 'The nature of data is not  # recognized, title set to \'Intensity\')
+        out["title"] = None
+        out[
+            "title"
+        ] = "intensity"  # warning: 'The nature of data is not  # recognized, title set to \'Intensity\')
 
     fid.seek(pos + 16)
-    out['firstx'] = _fromfile(fid, 'float32', 1)
+    out["firstx"] = _fromfile(fid, "float32", 1)
     fid.seek(pos + 20)
-    out['lastx'] = _fromfile(fid, 'float32', 1)
+    out["lastx"] = _fromfile(fid, "float32", 1)
     fid.seek(pos + 28)
-    out['scan_pts'] = _fromfile(fid, 'uint32', 1)
+    out["scan_pts"] = _fromfile(fid, "uint32", 1)
     fid.seek(pos + 32)
-    out['zpd'] = _fromfile(fid, 'uint32', 1)
+    out["zpd"] = _fromfile(fid, "uint32", 1)
     fid.seek(pos + 36)
-    out['nscan'] = _fromfile(fid, 'uint32', 1)
+    out["nscan"] = _fromfile(fid, "uint32", 1)
     fid.seek(pos + 52)
-    out['nbkgscan'] = _fromfile(fid, 'uint32', 1)
-    if out['nbkgscan'] == 0:  # then probably interferogram in rapid scan mode
+    out["nbkgscan"] = _fromfile(fid, "uint32", 1)
+    if out["nbkgscan"] == 0:  # then probably interferogram in rapid scan mode
         #     out['units'] = 'V'
         #     out['title'] = 'Volts'
         #     out['xunits'] = 'dimensionless'
         #     out['xtitle'] = 'Data points'
-        if out['firstx'] > out['lastx']:
-            out['firstx'], out['lastx'] = out['lastx'], out['firstx']
-        out['mode'] = 'rapidscan'
+        if out["firstx"] > out["lastx"]:
+            out["firstx"], out["lastx"] = out["lastx"], out["firstx"]
+        out["mode"] = "rapidscan"
     else:
-        out['mode'] = 'GC-IR or TGA-IR'
+        out["mode"] = "GC-IR or TGA-IR"
 
-    out['name'] = _readbtext(fid, pos + 938)
+    out["name"] = _readbtext(fid, pos + 938)
     fid.seek(pos + 1002)
-    out['coll_length'] = _fromfile(fid, 'float32', 1) * 60
+    out["coll_length"] = _fromfile(fid, "float32", 1) * 60
     fid.seek(pos + 1006)
-    out['lasty'] = _fromfile(fid, 'float32', 1)
+    out["lasty"] = _fromfile(fid, "float32", 1)
     fid.seek(pos + 1010)
-    out['firsty'] = _fromfile(fid, 'float32', 1)
+    out["firsty"] = _fromfile(fid, "float32", 1)
     fid.seek(pos + 1026)
-    out['ny'] = _fromfile(fid, 'uint32', 1)
+    out["ny"] = _fromfile(fid, "uint32", 1)
     #  y unit could be at pos+1030 with 01 = minutes ?
     return out, pos + 1026
 
@@ -1294,16 +1372,16 @@ def _getintensities(fid, pos):
     # returns a ndarray
 
     fid.seek(pos + 2)  # skip 2 bytes
-    intensity_pos = _fromfile(fid, 'uint32', 1)
+    intensity_pos = _fromfile(fid, "uint32", 1)
     fid.seek(pos + 6)
-    intensity_size = _fromfile(fid, 'uint32', 1)
+    intensity_size = _fromfile(fid, "uint32", 1)
     nintensities = int(intensity_size / 4)
 
     # Read and return spectral intensities
     fid.seek(intensity_pos)
-    return _fromfile(fid, 'float32', int(nintensities))
+    return _fromfile(fid, "float32", int(nintensities))
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

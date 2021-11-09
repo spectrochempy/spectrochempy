@@ -5,13 +5,14 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-__all__ = ['get_user_and_node',
-           'get_user',
-           'get_node',
-           'is_kernel',
-           'sh',
-           'is_windows',
-           ]
+__all__ = [
+    "get_user_and_node",
+    "get_user",
+    "get_node",
+    "is_kernel",
+    "sh",
+    "is_windows",
+]
 
 import getpass
 import platform
@@ -20,7 +21,7 @@ from subprocess import run, PIPE, STDOUT
 
 
 def is_windows():
-    win = 'Windows' in platform.platform()
+    win = "Windows" in platform.platform()
     return win
 
 
@@ -37,20 +38,19 @@ def get_user_and_node():
 
 
 def is_kernel():
-    """ Check if we are running from IPython
-    """
+    """Check if we are running from IPython"""
     # from http://stackoverflow.com
     # /questions/34091701/determine-if-were-in-an-ipython-notebook-session
-    if 'IPython' not in sys.modules:
+    if "IPython" not in sys.modules:
         # IPython hasn't been imported
         return False
     from IPython import get_ipython  # pragma: no cover
+
     # check for `kernel` attribute on the IPython instance
-    return getattr(get_ipython(), 'kernel', None) is not None  # pragma: no cover
+    return getattr(get_ipython(), "kernel", None) is not None  # pragma: no cover
 
 
 class _ExecCommand:
-
     def __init__(self, command):
         """
 
@@ -65,7 +65,9 @@ class _ExecCommand:
         self.commands.extend(args)
 
         silent = kwargs.pop("silent", False)
-        proc = run(self.commands, text=True, stdout=PIPE, stderr=STDOUT)  # capture_output=True)
+        proc = run(
+            self.commands, text=True, stdout=PIPE, stderr=STDOUT
+        )  # capture_output=True)
 
         # TODO: handle error codes
         if not silent and proc.stdout:

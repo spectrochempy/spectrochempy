@@ -8,7 +8,7 @@
 """
 This module define a generic class to import files and contents.
 """
-__all__ = ['write']
+__all__ = ["write"]
 __dataset_methods__ = __all__
 
 from traitlets import HasTraits, Any
@@ -25,14 +25,14 @@ class Exporter(HasTraits):
     def __init__(self):
 
         FILETYPES = [
-                ('scp', 'SpectroChemPy files (*.scp)'),
-                ('labspec', 'LABSPEC exported files (*.txt)'),
-                ('matlab', 'MATLAB files (*.mat)'),
-                ('dso', 'Data Set Object files (*.dso)'),
-                ('jcamp', 'JCAMP-DX files (*.jdx *dx)'),
-                ('csv', 'CSV files (*.csv)'),
-                ('excel', 'Microsoft Excel files (*.xls)'),
-                ]
+            ("scp", "SpectroChemPy files (*.scp)"),
+            ("labspec", "LABSPEC exported files (*.txt)"),
+            ("matlab", "MATLAB files (*.mat)"),
+            ("dso", "Data Set Object files (*.dso)"),
+            ("jcamp", "JCAMP-DX files (*.jdx *dx)"),
+            ("csv", "CSV files (*.csv)"),
+            ("excel", "Microsoft Excel files (*.xls)"),
+        ]
 
         self.filetypes = dict(FILETYPES)
         self.protocols = {}
@@ -46,14 +46,14 @@ class Exporter(HasTraits):
         args = self._setup_object(*args)
 
         try:
-            if 'filetypes' not in kwargs:
-                kwargs['filetypes'] = list(self.filetypes.values())
+            if "filetypes" not in kwargs:
+                kwargs["filetypes"] = list(self.filetypes.values())
                 if args and args[0] is not None:  # filename
                     protocol = self.protocols[pathclean(args[0]).suffix]
-                    kwargs['filetypes'] = [self.filetypes[protocol]]
+                    kwargs["filetypes"] = [self.filetypes[protocol]]
             filename = check_filename_to_save(self.object, *args, **kwargs)
-            if kwargs.get('suffix', ''):
-                filename = filename.with_suffix(kwargs.get('suffix', ''))
+            if kwargs.get("suffix", ""):
+                filename = filename.with_suffix(kwargs.get("suffix", ""))
             protocol = self.protocols[filename.suffix]
             write_ = getattr(self, f"_write_{protocol}")
             write_(self.object, filename, **kwargs)
@@ -68,12 +68,18 @@ class Exporter(HasTraits):
         # check if the first argument is an instance of NDDataset or Project
         args = list(args)
 
-        if args and hasattr(args[0], 'implements') and args[0].implements() in ['NDDataset']:
+        if (
+            args
+            and hasattr(args[0], "implements")
+            and args[0].implements() in ["NDDataset"]
+        ):
             # the first arg is an instance of NDDataset
             self.object = args.pop(0)
 
         else:
-            raise TypeError('the API write method needs a NDDataset object as the first argument')
+            raise TypeError(
+                "the API write method needs a NDDataset object as the first argument"
+            )
 
         return args
 
@@ -146,5 +152,5 @@ def _write_scp(*args, **kwargs):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

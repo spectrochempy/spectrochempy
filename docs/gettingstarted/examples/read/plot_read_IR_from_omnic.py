@@ -20,17 +20,17 @@ import spectrochempy as scp
 
 datadir = scp.preferences.datadir
 
-dataset = scp.NDDataset.read_omnic(datadir / 'irdata' / 'nh4y-activation.spg')
+dataset = scp.NDDataset.read_omnic(datadir / "irdata" / "nh4y-activation.spg")
 
-dataset.plot_stack(style='paper');
+dataset.plot_stack(style="paper")
 
 ################################################################################
 # change the unit of y axis, the y origin as well as the title of the axis
 
-dataset.y.to('hour')
+dataset.y.to("hour")
 dataset.y -= dataset.y[0]
-dataset.y.title = 'acquisition time'
+dataset.y.title = "acquisition time"
 
-dataset.plot_stack();
+dataset.plot_stack()
 
 # scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

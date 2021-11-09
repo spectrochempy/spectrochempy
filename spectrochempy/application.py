@@ -32,13 +32,24 @@ import requests
 from setuptools_scm import get_version
 from traitlets.config.configurable import Config
 from traitlets.config.application import Application
-from traitlets import Bool, Unicode, List, Integer, Enum, Union, HasTraits, Instance, default, observe
+from traitlets import (
+    Bool,
+    Unicode,
+    List,
+    Integer,
+    Enum,
+    Union,
+    HasTraits,
+    Instance,
+    default,
+    observe,
+)
 from traitlets.config.manager import BaseJSONConfigManager
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 from IPython import get_ipython
 from IPython.core.interactiveshell import InteractiveShell
-from IPython.core.magic import (Magics, magics_class, line_cell_magic)
+from IPython.core.magic import Magics, magics_class, line_cell_magic
 from IPython.core.magics.code import extract_symbols
 from IPython.core.error import UsageError
 from IPython.utils.text import get_text_list
@@ -49,7 +60,7 @@ from spectrochempy.utils import MetaConfigurable, pathclean, get_pkg_path
 from .plot_preferences import PlotPreferences
 
 # set the default style
-plt.style.use(['classic'])
+plt.style.use(["classic"])
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Log levels
@@ -65,6 +76,7 @@ CRITICAL = logging.CRITICAL
 # ----------------------------------------------------------------------------------------------------------------------
 # logo / copyright display
 # ----------------------------------------------------------------------------------------------------------------------
+
 
 def display_info_string(**kwargs):
     _template = """
@@ -114,26 +126,28 @@ def display_info_string(**kwargs):
 
     clear_output()
 
-    logo = kwargs.get('logo', True)
-    message = kwargs.get('message', 'info ')
+    logo = kwargs.get("logo", True)
+    message = kwargs.get("message", "info ")
 
     template = Template(_template)
-    html = template.render({'logo': logo, 'message': message.strip().replace('\n', '<br/>')})
-    publish_display_data(data={'text/html': html})
+    html = template.render(
+        {"logo": logo, "message": message.strip().replace("\n", "<br/>")}
+    )
+    publish_display_data(data={"text/html": html})
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Version
 # ----------------------------------------------------------------------------------------------------------------------
 try:
-    __release__ = get_distribution('spectrochempy').version.split('+')[0]
+    __release__ = get_distribution("spectrochempy").version.split("+")[0]
     "Release version string of this package"
 except DistributionNotFound:  # pragma: no cover
     # package is not installed
-    __release__ = '--not set--'
+    __release__ = "--not set--"
 
 try:
-    __version__ = get_version(root='..', relative_to=__file__)
+    __version__ = get_version(root="..", relative_to=__file__)
     "Version string of this package"
 except LookupError:  # pragma: no cover
     __version__ = __release__
@@ -142,8 +156,8 @@ except LookupError:  # pragma: no cover
 # ............................................................................
 def _get_copyright():
     current_year = datetime.date.today().year
-    right = '2014-{}'.format(current_year)
-    right += ' - A.Travert & C.Fernandez @ LCS'
+    right = "2014-{}".format(current_year)
+    right += " - A.Travert & C.Fernandez @ LCS"
     return right
 
 
@@ -168,13 +182,15 @@ def _check_for_updates(*args, **kwargs):
     except requests.exceptions.RequestException:
         return None
 
-    regex = r"\/\d{1,2}\.\d{1,2}\.\d{1,2}\/download\/noarch" \
-            r"\/spectrochempy-(\d{1,2}\.\d{1,2}\.\d{1,2})\-(dev\d{1,2}|stable).tar.bz2"
+    regex = (
+        r"\/\d{1,2}\.\d{1,2}\.\d{1,2}\/download\/noarch"
+        r"\/spectrochempy-(\d{1,2}\.\d{1,2}\.\d{1,2})\-(dev\d{1,2}|stable).tar.bz2"
+    )
     matches = re.finditer(regex, response.text, re.MULTILINE)
     vavailables = []
     for matchNum, match in enumerate(matches):
         v = match[1]
-        if match[2] == 'stable':
+        if match[2] == "stable":
             vavailables.append(v)
 
     old = parse_version(__version__)
@@ -187,8 +203,10 @@ def _check_for_updates(*args, **kwargs):
 
     fi = Path.home() / ".scpy_update"
     if new_version:
-        fi.write_text(f"\n\n\tYou are running SpectrocChemPy-{__version__} but version {new_version} is available."
-                      f"\n\tPlease consider updating for bug fixes and new features! ")
+        fi.write_text(
+            f"\n\n\tYou are running SpectrocChemPy-{__version__} but version {new_version} is available."
+            f"\n\tPlease consider updating for bug fixes and new features! "
+        )
 
     else:
         if fi.exists():
@@ -213,22 +231,23 @@ __contributor__ = "A. Ait Blal, W. Guérin"
 __license__ = "CeCILL-B license"
 "Licence of this package"
 
-__cite__ = f"Arnaud Travert & Christian Fernandez (2021) SpectroChemPy (version" \
-           f" {'.'.join(__version__.split('.')[0:2])}). " \
-           f"Zenodo. https://doi.org/10.5281/zenodo.3823841"
+__cite__ = (
+    f"Arnaud Travert & Christian Fernandez (2021) SpectroChemPy (version"
+    f" {'.'.join(__version__.split('.')[0:2])}). "
+    f"Zenodo. https://doi.org/10.5281/zenodo.3823841"
+)
 "How to cite this package"
 
 
 # ..................................................................................................................
 def _find_or_create_spectrochempy_dir():
-    directory = Path.home() / '.spectrochempy'
+    directory = Path.home() / ".spectrochempy"
 
     if not directory.exists():
         directory.mkdir(exist_ok=True)
 
     elif directory.is_file():
-        msg = 'Intended SpectroChemPy directory `{0}` is ' \
-              'actually a file.'
+        msg = "Intended SpectroChemPy directory `{0}` is " "actually a file."
         raise IOError(msg.format(directory))
 
     return directory
@@ -244,7 +263,7 @@ class SpectroChemPyMagics(Magics):
     """
 
     @line_cell_magic
-    def addscript(self, pars='', cell=None):
+    def addscript(self, pars="", cell=None):
         """
         This works both as **%addscript** and as **%%addscript**
 
@@ -290,53 +309,64 @@ class SpectroChemPyMagics(Magics):
 
            In[5]: %addscript mymodule.myfunction
         """
-        opts, args = self.parse_options(pars, 'p:o:s:n:a')
+        opts, args = self.parse_options(pars, "p:o:s:n:a")
 
         # append = 'a' in opts
         # mode = 'a' if append else 'w'
-        search_ns = 'n' in opts
+        search_ns = "n" in opts
 
         if not args and not cell and not search_ns:  # pragma: no cover
-            raise UsageError('Missing filename, input history range, '
-                             'or element in the user namespace.\n '
-                             'If no argument are given then the cell content '
-                             'should '
-                             'not be empty')
-        name = 'script'
-        if 'o' in opts:
-            name = opts['o']
+            raise UsageError(
+                "Missing filename, input history range, "
+                "or element in the user namespace.\n "
+                "If no argument are given then the cell content "
+                "should "
+                "not be empty"
+            )
+        name = "script"
+        if "o" in opts:
+            name = opts["o"]
 
-        proj = 'proj'
-        if 'p' in opts:
-            proj = opts['p']
+        proj = "proj"
+        if "p" in opts:
+            proj = opts["p"]
         if proj not in self.shell.user_ns:  # pragma: no cover
-            raise ValueError('Cannot find any project with name `{}` in the '
-                             'namespace.'.format(proj))
+            raise ValueError(
+                "Cannot find any project with name `{}` in the "
+                "namespace.".format(proj)
+            )
         # get the proj object
         projobj = self.shell.user_ns[proj]
 
         contents = ""
         if search_ns:
-            contents += "\n" + self.shell.find_user_code(opts['n'], search_ns=search_ns) + "\n"
+            contents += (
+                "\n" + self.shell.find_user_code(opts["n"], search_ns=search_ns) + "\n"
+            )
 
         args = " ".join(args)
         if args.strip():
-            contents += "\n" + self.shell.find_user_code(args, search_ns=search_ns) + "\n"
+            contents += (
+                "\n" + self.shell.find_user_code(args, search_ns=search_ns) + "\n"
+            )
 
-        if 's' in opts:  # pragma: no cover
+        if "s" in opts:  # pragma: no cover
             try:
-                blocks, not_found = extract_symbols(contents, opts['s'])
+                blocks, not_found = extract_symbols(contents, opts["s"])
             except SyntaxError:
                 # non python code
                 logging.error("Unable to parse the input as valid Python code")
                 return
 
             if len(not_found) == 1:
-                warnings.warn('The symbol `%s` was not found' % not_found[0])
+                warnings.warn("The symbol `%s` was not found" % not_found[0])
             elif len(not_found) > 1:
-                warnings.warn('The symbols %s were not found' % get_text_list(not_found, wrap_item_with='`'))
+                warnings.warn(
+                    "The symbols %s were not found"
+                    % get_text_list(not_found, wrap_item_with="`")
+                )
 
-            contents = '\n'.join(blocks)
+            contents = "\n".join(blocks)
 
         if cell:
             contents += "\n" + cell
@@ -358,28 +388,29 @@ class SpectroChemPyMagics(Magics):
 # DataDir class
 # ======================================================================================================================
 
+
 class DataDir(HasTraits):
-    """ A class used to determine the path to the testdata directory.
-    """
+    """A class used to determine the path to the testdata directory."""
 
     path = Instance(Path)
 
-    @default('path')
+    @default("path")
     def _get_path_default(self, **kwargs):
 
         super().__init__(**kwargs)
 
         # create a directory testdata in .spectrochempy to avoid an error if the following do not work
-        path = _find_or_create_spectrochempy_dir() / 'testdata'
+        path = _find_or_create_spectrochempy_dir() / "testdata"
         path.mkdir(exist_ok=True)
 
         # try to use the conda installed testdata (spectrochempy_data package)
         try:
-            conda_env = environ['CONDA_PREFIX']
-            path = Path(conda_env) / 'share' / 'spectrochempy_data' / 'testdata'
+            conda_env = environ["CONDA_PREFIX"]
+            path = Path(conda_env) / "share" / "spectrochempy_data" / "testdata"
             if not path.exists():
-                path = Path(
-                    conda_env) / 'share' / 'spectrochempy_data'  # depending on the version of spectrochempy_data
+                path = (
+                    Path(conda_env) / "share" / "spectrochempy_data"
+                )  # depending on the version of spectrochempy_data
         except KeyError:
             pass
 
@@ -394,15 +425,21 @@ class DataDir(HasTraits):
         listing : str
             Display of the datadir content
         """
-        strg = f'{self.path.name}\n'  # os.path.basename(self.path) + "\n"
+        strg = f"{self.path.name}\n"  # os.path.basename(self.path) + "\n"
 
         def _listdir(s, initial, ns):
             ns += 1
-            for f in pathclean(initial).glob('*'):  # glob.glob(os.path.join(initial, '*')):
+            for f in pathclean(initial).glob(
+                "*"
+            ):  # glob.glob(os.path.join(initial, '*')):
                 fb = f.name  # os.path.basename(f)
-                if fb.startswith('.'):
+                if fb.startswith("."):
                     continue
-                if not fb.startswith('acqu') and not fb.startswith('pulse') and fb not in ['ser', 'fid']:
+                if (
+                    not fb.startswith("acqu")
+                    and not fb.startswith("pulse")
+                    and fb not in ["ser", "fid"]
+                ):
                     s += "   " * ns + "|__" + "%s\n" % fb
                 if f.is_dir():
                     s = _listdir(s, f, ns)
@@ -420,12 +457,13 @@ class DataDir(HasTraits):
 
     def _repr_html_(self):
         # _repr_html is needed to output in notebooks
-        return self.listing().replace('\n', '<br/>').replace(" ", "&nbsp;")
+        return self.listing().replace("\n", "<br/>").replace(" ", "&nbsp;")
 
 
 # ======================================================================================================================
 # General Preferences
 # ======================================================================================================================
+
 
 class GeneralPreferences(MetaConfigurable):
     """
@@ -434,8 +472,8 @@ class GeneralPreferences(MetaConfigurable):
     They should be accessible from the main API
     """
 
-    name = Unicode('GeneralPreferences')
-    description = Unicode('General options for the SpectroChemPy application')
+    name = Unicode("GeneralPreferences")
+    description = Unicode("General options for the SpectroChemPy application")
     updated = Bool(False)
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -444,44 +482,58 @@ class GeneralPreferences(MetaConfigurable):
 
     # NON GUI
 
-    show_info_on_loading = Bool(True, help='Display info on loading').tag(config=True)
-    use_qt = Bool(False, help='Use QT for dialog instead of TK which is the default. '
-                              'If True the PyQt libraries must be installed').tag(config=True)
+    show_info_on_loading = Bool(True, help="Display info on loading").tag(config=True)
+    use_qt = Bool(
+        False,
+        help="Use QT for dialog instead of TK which is the default. "
+        "If True the PyQt libraries must be installed",
+    ).tag(config=True)
 
     # GUI
-    databases_directory = Union((Instance(Path), Unicode()),
-                                help='Directory where to look for database files such as csv'
-                                ).tag(config=True, gui=True, kind="folder")
+    databases_directory = Union(
+        (Instance(Path), Unicode()),
+        help="Directory where to look for database files such as csv",
+    ).tag(config=True, gui=True, kind="folder")
 
-    datadir = Union((Instance(Path), Unicode()),
-                    help='Directory where to look for data by default').tag(config=True, gui=True, kind="folder")
+    datadir = Union(
+        (Instance(Path), Unicode()), help="Directory where to look for data by default"
+    ).tag(config=True, gui=True, kind="folder")
 
-    workspace = Union((Instance(Path), Unicode()),
-                      help='Workspace directory by default').tag(config=True, gui=True, kind="folder")
+    workspace = Union(
+        (Instance(Path), Unicode()), help="Workspace directory by default"
+    ).tag(config=True, gui=True, kind="folder")
 
     # ------------------------------------------------------------------------------------------------------------------
     # Configuration entries
     # ------------------------------------------------------------------------------------------------------------------
 
-    autoload_project = Bool(True, help='Automatic loading of the last project at startup').tag(config=True, gui=True)
+    autoload_project = Bool(
+        True, help="Automatic loading of the last project at startup"
+    ).tag(config=True, gui=True)
 
-    autosave_project = Bool(True, help='Automatic saving of the current project').tag(config=True, gui=True)
+    autosave_project = Bool(True, help="Automatic saving of the current project").tag(
+        config=True, gui=True
+    )
 
-    project_directory = Union((Instance(Path), Unicode()), help='Directory where projects are stored by default').tag(
-        config=True, kind='folder')
+    project_directory = Union(
+        (Instance(Path), Unicode()),
+        help="Directory where projects are stored by default",
+    ).tag(config=True, kind="folder")
 
-    last_project = Union((Instance(Path, allow_none=True), Unicode()), help='Last used project').tag(config=True,
-                                                                                                     gui=True,
-                                                                                                     kind='file')
+    last_project = Union(
+        (Instance(Path, allow_none=True), Unicode()), help="Last used project"
+    ).tag(config=True, gui=True, kind="file")
 
-    show_close_dialog = Bool(True,
-                             help='Display the close project dialog project changing or on application exit').tag(
-        config=True, gui=True)
+    show_close_dialog = Bool(
+        True,
+        help="Display the close project dialog project changing or on application exit",
+    ).tag(config=True, gui=True)
 
-    csv_delimiter = Enum([',', ';', r'\t', ' '], default_value=',', help='CSV data delimiter').tag(config=True,
-                                                                                                   gui=True)
+    csv_delimiter = Enum(
+        [",", ";", r"\t", " "], default_value=",", help="CSV data delimiter"
+    ).tag(config=True, gui=True)
 
-    @default('project_directory')
+    @default("project_directory")
     def _get_default_project_directory(self):
         # Determines the SpectroChemPy project directory name and creates the directory if it doesn't exist.
         # This directory is typically ``$HOME/spectrochempy/projects``, but if the SCP_PROJECTS_HOME environment
@@ -489,41 +541,41 @@ class GeneralPreferences(MetaConfigurable):
         # If neither exists, the former will be created.
 
         # first look for SCP_PROJECTS_HOME
-        pscp = environ.get('SCP_PROJECTS_HOME')
+        pscp = environ.get("SCP_PROJECTS_HOME")
         if pscp is not None and Path(pscp).exists():
             return Path(pscp)
 
-        pscp = Path.home() / '.spectrochempy' / 'projects'
+        pscp = Path.home() / ".spectrochempy" / "projects"
 
         if not pscp.exists():
             pscp.mkdir(exist_ok=True)
 
         elif pscp.is_file():
-            raise IOError('Intended Projects directory is actually a file.')
+            raise IOError("Intended Projects directory is actually a file.")
 
         return pscp
 
     # ..................................................................................................................
-    @default('workspace')
+    @default("workspace")
     def _get_workspace_default(self):
         # the spectra path in package data
         return Path.home()
 
     # ..................................................................................................................
-    @default('databases_directory')
+    @default("databases_directory")
     def _get_databases_directory_default(self):
         # the spectra path in package data
-        return Path(get_pkg_path('databases', 'scp_data'))
+        return Path(get_pkg_path("databases", "scp_data"))
 
     # ..................................................................................................................
-    @default('datadir')
+    @default("datadir")
     def _get_default_datadir(self):
         return self.parent.datadir.path
 
     # ..................................................................................................................
-    @observe('datadir')
+    @observe("datadir")
     def _datadir_changed(self, change):
-        self.parent.datadir.path = pathclean(change['new'])
+        self.parent.datadir.path = pathclean(change["new"])
 
     # ..................................................................................................................
     @property
@@ -539,19 +591,22 @@ class GeneralPreferences(MetaConfigurable):
         if isinstance(value, str):
             value = getattr(logging, value, None)
             if value is None:
-                warnings.warn('Log level not changed: invalid value given\n'
-                              'string values must be DEBUG, INFO, WARNING, '
-                              'or ERROR')
+                warnings.warn(
+                    "Log level not changed: invalid value given\n"
+                    "string values must be DEBUG, INFO, WARNING, "
+                    "or ERROR"
+                )
         self.parent.log_level = value
 
     # ..................................................................................................................
     def __init__(self, **kwargs):
-        super().__init__(jsonfile='GeneralPreferences', **kwargs)
+        super().__init__(jsonfile="GeneralPreferences", **kwargs)
 
 
 # ======================================================================================================================
 # Application
 # ======================================================================================================================
+
 
 class SpectroChemPy(Application):
     """
@@ -559,24 +614,25 @@ class SpectroChemPy(Application):
     configuration and more.
     """
 
-    icon = Unicode('scpy.png')
+    icon = Unicode("scpy.png")
     "Icon for the application"
 
     running = Bool(False)
     "Running status of the |scpy| application"
 
-    name = Unicode('SpectroChemPy')
+    name = Unicode("SpectroChemPy")
     "Running name of the application"
 
     description = Unicode(
-        'SpectroChemPy is a framework for processing, analysing and modelling Spectroscopic data for '
-        'Chemistry with Python.')
+        "SpectroChemPy is a framework for processing, analysing and modelling Spectroscopic data for "
+        "Chemistry with Python."
+    )
     "Short description of the |scpy| application"
 
     long_description = Unicode()
     "Long description of the |scpy| application"
 
-    @default('long_description')
+    @default("long_description")
     def _get_long_description(self):
         desc = """
 <p><strong>SpectroChemPy</strong> is a framework for processing, analysing and modelling
@@ -591,7 +647,9 @@ to the <a url='https://github.com/spectrochempy/spectrochempy/issues'>Issue Trac
 </div><br><br>
 When using <strong>SpectroChemPy</strong> for your own work, you are kindly requested to cite it this way:
 <pre>{cite}
-</pre></p>""".format(version=__release__, authors=__author__, license=__license__, cite=__cite__)
+</pre></p>""".format(
+            version=__release__, authors=__author__, license=__license__, cite=__cite__
+        )
 
         return desc
 
@@ -603,41 +661,50 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
     # ------------------------------------------------------------------------------------------------------------------
     _loaded_config_files = List()
 
-    reset_config = Bool(False, help='Should we restore a default configuration ?').tag(config=True)
+    reset_config = Bool(False, help="Should we restore a default configuration ?").tag(
+        config=True
+    )
     """Flag: True if one wants to reset settings to the original config defaults"""
 
     config_file_name = Unicode(None, help="Configuration file name").tag(config=True)
     """Configuration file name"""
 
-    @default('config_file_name')
+    @default("config_file_name")
     def _get_config_file_name_default(self):
-        return str(self.name).lower() + '_cfg'
+        return str(self.name).lower() + "_cfg"
 
-    config_dir = Instance(Path, help="Set the configuration directory location").tag(config=True)
+    config_dir = Instance(Path, help="Set the configuration directory location").tag(
+        config=True
+    )
     """Configuration directory"""
 
-    @default('config_dir')
+    @default("config_dir")
     def _get_config_dir_default(self):
         return self.get_config_dir()
 
     config_manager = Instance(BaseJSONConfigManager)
 
-    @default('config_manager')
+    @default("config_manager")
     def _get_default_config_manager(self):
         return BaseJSONConfigManager(config_dir=str(self.config_dir))
 
-    log_format = Unicode("%(highlevel)s %(message)s", help="The Logging format template", ).tag(config=True)
+    log_format = Unicode(
+        "%(highlevel)s %(message)s",
+        help="The Logging format template",
+    ).tag(config=True)
 
-    debug = Bool(True, help='Set DEBUG mode, with full outputs').tag(config=True)
+    debug = Bool(True, help="Set DEBUG mode, with full outputs").tag(config=True)
     """Flag to set debugging mode"""
 
-    info = Bool(False, help='Set INFO mode, with msg outputs').tag(config=True)
+    info = Bool(False, help="Set INFO mode, with msg outputs").tag(config=True)
     """Flag to set info mode"""
 
-    quiet = Bool(False, help='Set Quiet mode, with minimal outputs').tag(config=True)
+    quiet = Bool(False, help="Set Quiet mode, with minimal outputs").tag(config=True)
     """Flag to set in fully quite mode (even no warnings)"""
 
-    nodisplay = Bool(False, help='Set NO DISPLAY mode, i.e., no graphics outputs').tag(config=True)
+    nodisplay = Bool(False, help="Set NO DISPLAY mode, i.e., no graphics outputs").tag(
+        config=True
+    )
     """Flag to set in NO DISPLAY mode """
 
     # last_project = Unicode('', help='Last used project').tag(config=True, type='project')
@@ -650,42 +717,82 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
 
     show_config = Bool(help="Dump configuration to stdout at startup").tag(config=True)
 
-    @observe('show_config')
+    @observe("show_config")
     def _show_config_changed(self, change):
         if change.new:
             self._save_start = self.start
             self.start = self.start_show_config
 
-    show_config_json = Bool(help="Dump configuration to stdout (as JSON)").tag(config=True)
+    show_config_json = Bool(help="Dump configuration to stdout (as JSON)").tag(
+        config=True
+    )
 
-    @observe('show_config_json')
+    @observe("show_config_json")
     def _show_config_json_changed(self, change):
         self.show_config = change.new
 
-    test = Bool(False, help='test flag').tag(config=True)
+    test = Bool(False, help="test flag").tag(config=True)
     """Flag to set the application in testing mode"""
 
-    port = Integer(7000, help='Dash server port').tag(config=True)
+    port = Integer(7000, help="Dash server port").tag(config=True)
     """Dash server port"""
 
     # Command line interface
     # ------------------------------------------------------------------------------------------------------------------
 
-    aliases = dict(test='SpectroChemPy.test', project='SpectroChemPy.last_project', f='SpectroChemPy.startup_filename',
-                   port='SpectroChemPy.port', )
+    aliases = dict(
+        test="SpectroChemPy.test",
+        project="SpectroChemPy.last_project",
+        f="SpectroChemPy.startup_filename",
+        port="SpectroChemPy.port",
+    )
 
-    flags = dict(debug=({'SpectroChemPy': {'log_level': DEBUG}}, "Set log_level to DEBUG - most verbose mode"),
-                 info=({'SpectroChemPy': {'log_level': INFO}}, "Set log_level to INFO - verbose mode"),
-                 quiet=({'SpectroChemPy': {'log_level': ERROR}}, "Set log_level to ERROR - no verbosity at all"),
-                 nodisplay=(
-                     {'SpectroChemPy': {'nodisplay': True}}, "Set NO DISPLAY mode to true - no graphics at all"),
-                 reset_config=({'SpectroChemPy': {'reset_config': True}}, "Reset config to default"), show_config=(
-            {'SpectroChemPy': {'show_config': True, }}, "Show the application's configuration (human-readable "
-                                                        "format)"), show_config_json=(
-            {'SpectroChemPy': {'show_config_json': True, }}, "Show the application's configuration (json "
-                                                             "format)"), )
+    flags = dict(
+        debug=(
+            {"SpectroChemPy": {"log_level": DEBUG}},
+            "Set log_level to DEBUG - most verbose mode",
+        ),
+        info=(
+            {"SpectroChemPy": {"log_level": INFO}},
+            "Set log_level to INFO - verbose mode",
+        ),
+        quiet=(
+            {"SpectroChemPy": {"log_level": ERROR}},
+            "Set log_level to ERROR - no verbosity at all",
+        ),
+        nodisplay=(
+            {"SpectroChemPy": {"nodisplay": True}},
+            "Set NO DISPLAY mode to true - no graphics at all",
+        ),
+        reset_config=(
+            {"SpectroChemPy": {"reset_config": True}},
+            "Reset config to default",
+        ),
+        show_config=(
+            {
+                "SpectroChemPy": {
+                    "show_config": True,
+                }
+            },
+            "Show the application's configuration (human-readable " "format)",
+        ),
+        show_config_json=(
+            {
+                "SpectroChemPy": {
+                    "show_config_json": True,
+                }
+            },
+            "Show the application's configuration (json " "format)",
+        ),
+    )
 
-    classes = List([GeneralPreferences, PlotPreferences, DataDir, ])
+    classes = List(
+        [
+            GeneralPreferences,
+            PlotPreferences,
+            DataDir,
+        ]
+    )
 
     # ------------------------------------------------------------------------------------------------------------------
     # Initialisation of the application
@@ -695,7 +802,9 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
 
         super().__init__(**kwargs)
 
-        self.logs = self.log  # we change the no name in order to avoid latter conflict with numpy.log
+        self.logs = (
+            self.log
+        )  # we change the no name in order to avoid latter conflict with numpy.log
 
         self.initialize()
 
@@ -722,15 +831,17 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
 
         if not IN_IPYTHON:
             # remove argument not known by spectrochempy
-            if 'make.py' in sys.argv[0] or 'pytest' in sys.argv[0]:  # building docs
+            if "make.py" in sys.argv[0] or "pytest" in sys.argv[0]:  # building docs
                 options = []
                 for item in sys.argv[:]:
                     for k in list(self.flags.keys()):
-                        if item.startswith("--" + k) or k in ['--help', '--help-all']:
+                        if item.startswith("--" + k) or k in ["--help", "--help-all"]:
                             options.append(item)
                         continue
                     for k in list(self.aliases.keys()):
-                        if item.startswith("-" + k) or k in ['h', ]:
+                        if item.startswith("-" + k) or k in [
+                            "h",
+                        ]:
                             options.append(item)
                 self.parse_command_line(options)
             else:
@@ -747,7 +858,7 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
         # warning handler
         # --------------------------------------------------------------------
         def send_warnings_to_log(message, category):
-            self.logs.warning(f'{category.__name__} - {message}')
+            self.logs.warning(f"{category.__name__} - {message}")
             return
 
         warnings.showwarning = send_warnings_to_log
@@ -788,9 +899,9 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
 
             lis = self.config_dir.iterdir()
             for f in lis:
-                if f.suffix == '.json':
+                if f.suffix == ".json":
                     jsonname = self.config_dir / f
-                    if self.reset_config or f == 'PlotPreferences.json':
+                    if self.reset_config or f == "PlotPreferences.json":
                         # remove the user json file to reset to defaults
                         jsonname.unlink()
                     else:
@@ -805,7 +916,9 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
         # --------------------------------------
         self._make_default_config_file()
 
-        self.datadir = DataDir()  # config=self.config)  -- passing args deprecated in traitlets 4.2
+        self.datadir = (
+            DataDir()
+        )  # config=self.config)  -- passing args deprecated in traitlets 4.2
         self.preferences = GeneralPreferences(config=self.config, parent=self)
         self.plot_preferences = PlotPreferences(config=self.config, parent=self)
 
@@ -831,12 +944,12 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
         """
 
         # first look for SCP_CONFIG_HOME
-        scp = environ.get('SCP_CONFIG_HOME')
+        scp = environ.get("SCP_CONFIG_HOME")
 
         if scp is not None and Path(scp).exists():
             return Path(scp)
 
-        config = _find_or_create_spectrochempy_dir() / 'config'
+        config = _find_or_create_spectrochempy_dir() / "config"
         if not config.exists():
             config.mkdir(exist_ok=True)
 
@@ -849,20 +962,20 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
         for cls in self.__class__.mro():
             if cls.__name__ in config:
                 cls_config = config[cls.__name__]
-                cls_config.pop('show_config', None)
-                cls_config.pop('show_config_json', None)
+                cls_config.pop("show_config", None)
+                cls_config.pop("show_config_json", None)
 
         if self.show_config_json:
             json.dump(config, sys.stdout, indent=1, sort_keys=True, default=repr)
             # add trailing newlines
-            sys.stdout.write('\n')
+            sys.stdout.write("\n")
             print()
             return self._start()
 
         if self._loaded_config_files:
             print("Loaded config files:")
             for f in self._loaded_config_files:
-                print('  ' + f)
+                print("  " + f)
             print()
 
         for classname in sorted(config):
@@ -873,10 +986,15 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
             pformat_kwargs = dict(indent=4)
             if sys.version_info >= (3, 4):
                 # use compact pretty-print on Pythons that support it
-                pformat_kwargs['compact'] = True
+                pformat_kwargs["compact"] = True
             for traitname in sorted(class_config):
                 value = class_config[traitname]
-                print('  .{} = {}'.format(traitname, pprint.pformat(value, **pformat_kwargs), ))
+                print(
+                    "  .{} = {}".format(
+                        traitname,
+                        pprint.pformat(value, **pformat_kwargs),
+                    )
+                )
         print()
 
         # now run the actual start function
@@ -917,8 +1035,9 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
             return
 
         if self.preferences.show_info_on_loading:
-            info_string = "SpectroChemPy's API - v.{}\n" \
-                          "© Copyright {}".format(__version__, __copyright__)
+            info_string = "SpectroChemPy's API - v.{}\n" "© Copyright {}".format(
+                __version__, __copyright__
+            )
             ip = get_ipython()
             if ip is not None and "TerminalInteractiveShell" not in str(ip):
                 display_info_string(message=info_string.strip())
@@ -929,11 +1048,13 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
 
         # force update of rcParams
         for rckey in mpl.rcParams.keys():
-            key = rckey.replace('_', '__').replace('.', '_').replace('-', '___')
+            key = rckey.replace("_", "__").replace(".", "_").replace("-", "___")
             try:
                 mpl.rcParams[rckey] = getattr(self.plot_preferences, key)
             except ValueError:
-                mpl.rcParams[rckey] = getattr(self.plot_preferences, key).replace('\'', '')
+                mpl.rcParams[rckey] = getattr(self.plot_preferences, key).replace(
+                    "'", ""
+                )
             except AttributeError:
                 # print(f'{e} -> you may want to add it to PlotPreferences.py')
                 pass
@@ -959,30 +1080,31 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
         """auto generate default config file."""
 
         fname = self.config_dir / self.config_file_name
-        fname = fname.with_suffix('.py')
+        fname = fname.with_suffix(".py")
 
         if not fname.exists() or self.reset_config:
             s = self.generate_config_file()
             self.logs.info("Generating default config file: %r" % fname)
-            with open(fname, 'w') as f:
+            with open(fname, "w") as f:
                 f.write(s)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Events from Application
     # ------------------------------------------------------------------------------------------------------------------
 
-    @observe('log_level')
+    @observe("log_level")
     def _log_level_changed(self, change):
 
-        self.log_format = '%(message)s'
+        self.log_format = "%(message)s"
         if change.new == DEBUG:
-            self.log_format = '[%(filename)s-%(funcName)s %(levelname)s] %(' \
-                              'message)s'
+            self.log_format = "[%(filename)s-%(funcName)s %(levelname)s] %(" "message)s"
         self.logs._cache = {}
         self.logs.level = self.log_level
         for handler in self.logs.handlers:
             handler.level = self.log_level
-        self.logs.info("changed default log_level to {}".format(logging.getLevelName(change.new)))
+        self.logs.info(
+            "changed default log_level to {}".format(logging.getLevelName(change.new))
+        )
 
 
 # ======================================================================================================================

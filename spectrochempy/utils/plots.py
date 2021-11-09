@@ -12,8 +12,18 @@ import numpy as np
 
 from spectrochempy.core.dataset.meta import Meta
 
-__all__ = ['cmyk2rgb', 'NBlack', 'NRed', 'NBlue', 'NGreen', 'figure', 'show', 'get_figure',  # Plotly specific
-           'get_plotly_figure', 'colorscale']
+__all__ = [
+    "cmyk2rgb",
+    "NBlack",
+    "NRed",
+    "NBlue",
+    "NGreen",
+    "figure",
+    "show",
+    "get_figure",  # Plotly specific
+    "get_plotly_figure",
+    "colorscale",
+]
 
 
 # ............................................................................
@@ -23,16 +33,16 @@ def cmyk2rgb(C, M, Y, K):
     C,M,Y,K are given in percent.
     The R,G,B values are returned in the range of 0..1.
     """
-    C, Y, M, K = C / 100., Y / 100., M / 100., K / 100.
+    C, Y, M, K = C / 100.0, Y / 100.0, M / 100.0, K / 100.0
 
     # The red (R) color is calculated from the cyan (C) and black (K) colors:
     R = (1.0 - C) * (1.0 - K)
 
     # The green color (G) is calculated from the magenta (M) and black (K) colors:
-    G = (1. - M) * (1. - K)
+    G = (1.0 - M) * (1.0 - K)
 
     # The blue color (B) is calculated from the yellow (Y) and black (K) colors:
-    B = (1. - Y) * (1. - K)
+    B = (1.0 - Y) * (1.0 - K)
 
     return (R, G, B)
 
@@ -116,18 +126,18 @@ def get_figure(**kwargs):
 
     n = plt.get_fignums()
 
-    clear = kwargs.get('clear', True)
+    clear = kwargs.get("clear", True)
 
     if not n or clear:
         # create a figure
-        prefs = kwargs.pop('preferences', None)
+        prefs = kwargs.pop("preferences", None)
 
-        figsize = kwargs.get('figsize', prefs.figure_figsize)
-        dpi = kwargs.get('dpi', prefs.figure_dpi)
-        facecolor = kwargs.get('facecolor', prefs.figure_facecolor)
-        edgecolor = kwargs.get('edgecolor', prefs.figure_edgecolor)
-        frameon = kwargs.get('frameon', prefs.figure_frameon)
-        tight_layout = kwargs.get('autolayout', prefs.figure_autolayout)
+        figsize = kwargs.get("figsize", prefs.figure_figsize)
+        dpi = kwargs.get("dpi", prefs.figure_dpi)
+        facecolor = kwargs.get("facecolor", prefs.figure_facecolor)
+        edgecolor = kwargs.get("edgecolor", prefs.figure_edgecolor)
+        frameon = kwargs.get("frameon", prefs.figure_frameon)
+        tight_layout = kwargs.get("autolayout", prefs.figure_autolayout)
 
         # get the current figure (or the last used)
         fig = plt.figure(figsize=figsize)
@@ -144,7 +154,7 @@ def get_figure(**kwargs):
             try:
                 fig.set_facecolor(eval(facecolor))
             except ValueError:
-                fig.set_facecolor('#' + eval(facecolor))
+                fig.set_facecolor("#" + eval(facecolor))
         fig.set_dpi(dpi)
         fig.set_tight_layout(tight_layout)
 
@@ -183,12 +193,10 @@ def get_plotly_figure(clear=True, fig=None, **kwargs):
 
 
 class colorscale:
-
-    def normalize(self, vmin, vmax, cmap='viridis', rev=False, offset=0):
-        """
-        """
+    def normalize(self, vmin, vmax, cmap="viridis", rev=False, offset=0):
+        """ """
         if rev:
-            cmap = cmap + '_r'
+            cmap = cmap + "_r"
         _colormap = plt.get_cmap(cmap)
 
         _norm = mpl.colors.Normalize(vmin=vmin - offset, vmax=vmax - offset)
@@ -197,8 +205,8 @@ class colorscale:
     def rgba(self, z, offset=0):
         c = np.array(self.scalarMap.to_rgba(z.squeeze() - offset))
         c[0:3] *= 255
-        c[0:3] = np.round(c[0:3].astype('uint16'), 0)
-        return f'rgba{tuple(c)}'
+        c[0:3] = np.round(c[0:3].astype("uint16"), 0)
+        return f"rgba{tuple(c)}"
 
 
 colorscale = colorscale()

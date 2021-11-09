@@ -11,7 +11,7 @@ from pkgutil import walk_packages
 
 from traitlets import import_item
 
-__all__ = ['list_packages', 'generate_api', 'get_pkg_path']
+__all__ = ["list_packages", "generate_api", "get_pkg_path"]
 
 
 # ======================================================================================================================
@@ -29,7 +29,9 @@ def list_packages(package):
     # http://stackoverflow.com/questions/1707709
 
     names = [package.__name__]
-    for __, name, __ in walk_packages(package.__path__, prefix=package.__name__ + '.', onerror=lambda x: None):
+    for __, name, __ in walk_packages(
+        package.__path__, prefix=package.__name__ + ".", onerror=lambda x: None
+    ):
         names.append(name)
 
     return names
@@ -41,30 +43,30 @@ def generate_api(api_path):
 
     dirname, name = os.path.split(os.path.split(api_path)[0])
 
-    if not dirname.endswith('spectrochempy'):
+    if not dirname.endswith("spectrochempy"):
         dirname, _name = os.path.split(dirname)
-        name = _name + '.' + name
-    pkgs = sys.modules['spectrochempy.%s' % name]
-    api = sys.modules['spectrochempy.%s.api' % name]
+        name = _name + "." + name
+    pkgs = sys.modules["spectrochempy.%s" % name]
+    api = sys.modules["spectrochempy.%s.api" % name]
 
     pkgs = list_packages(pkgs)
 
     __all__ = []
 
     for pkg in pkgs:
-        if pkg.endswith('api') or "test" in pkg:
+        if pkg.endswith("api") or "test" in pkg:
             continue
         try:
             pkg = import_item(pkg)
         except Exception:
-            if not hasattr(pkg, '__all__'):
+            if not hasattr(pkg, "__all__"):
                 continue
             raise ImportError(pkg)
-        if not hasattr(pkg, '__all__'):
+        if not hasattr(pkg, "__all__"):
             continue
 
-        a = getattr(pkg, '__all__', [])
-        dmethods = getattr(pkg, '__dataset_methods__', [])
+        a = getattr(pkg, "__all__", [])
+        dmethods = getattr(pkg, "__dataset_methods__", [])
 
         __all__ += a
         for item in a:
@@ -76,6 +78,7 @@ def generate_api(api_path):
             # some  methods are class method of NDDatasets
             if item in dmethods:
                 from spectrochempy.core.dataset.nddataset import NDDataset
+
                 setattr(NDDataset, item, getattr(pkg, item))
 
     return __all__
@@ -95,5 +98,5 @@ def get_pkg_path(data_name, package=None):
 
 # ======================================================================================================================
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

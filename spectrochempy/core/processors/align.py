@@ -10,7 +10,7 @@
 This module defines functions related to NDDataset alignment.
 """
 
-__all__ = ['align']
+__all__ = ["align"]
 __dataset_methods__ = __all__
 
 # import scipy.interpolate
@@ -36,7 +36,7 @@ def can_merge_or_align(coord1, coord2):
     can_merge, can_align : tuple of bools
         Two flags about merge and alignment possibility
     """
-    if (coord1 == coord2):
+    if coord1 == coord2:
         # same coordinates
         can_merge = True  # merge is obvious
         can_align = True  # of course as it is the same coordinate
@@ -125,25 +125,29 @@ def align(dataset, *others, **kwargs):
     # TODO: add example in docs
 
     # copy objects?
-    copy = kwargs.pop('copy', True)
+    copy = kwargs.pop("copy", True)
 
     # make a single list with dataset and the remaining object
     objects = [dataset] + list(others)
 
     # should we align on given external coordinates
-    extern_coord = kwargs.pop('coord', None)
-    if extern_coord and extern_coord.implements('LinearCoord'):
+    extern_coord = kwargs.pop("coord", None)
+    if extern_coord and extern_coord.implements("LinearCoord"):
         extern_coord = Coord(extern_coord, linear=False, copy=True)
 
     # what's the method to use (by default='outer')
-    method = kwargs.pop('method', 'outer')
+    method = kwargs.pop("method", "outer")
 
     # trivial cases where alignment is not possible or unecessary
     if not objects:
-        warning_('No object provided for alignment!')
+        warning_("No object provided for alignment!")
         return None
 
-    if len(objects) == 1 and objects[0].implements('NDDataset') and extern_coord is None:
+    if (
+        len(objects) == 1
+        and objects[0].implements("NDDataset")
+        and extern_coord is None
+    ):
         # no necessary alignment
         return objects
 
@@ -159,13 +163,18 @@ def align(dataset, *others, **kwargs):
 
         for idx, object in enumerate(objects):
 
-            if not object.implements('NDDataset'):
-                error_(f'Bad object(s) found: {object}. Note that only NDDataset '
-                       f'objects are accepted '
-                       f'for alignment')
+            if not object.implements("NDDataset"):
+                error_(
+                    f"Bad object(s) found: {object}. Note that only NDDataset "
+                    f"objects are accepted "
+                    f"for alignment"
+                )
                 return None
 
-            _objects[_nobj] = {'obj': object.copy(), 'idx': idx, }
+            _objects[_nobj] = {
+                "obj": object.copy(),
+                "idx": idx,
+            }
             _nobj += 1
 
         _last = _nobj - 1
@@ -173,10 +182,10 @@ def align(dataset, *others, **kwargs):
         # get the reference object (by default the first, except if method if
         # set to 'last'
         ref_obj_index = 0
-        if method == 'last':
+        if method == "last":
             ref_obj_index = _last
 
-        ref_obj = _objects[ref_obj_index]['obj']
+        ref_obj = _objects[ref_obj_index]["obj"]
 
         # as we will sort their coordinates at some point, we need to know
         # if the coordinates need to be reversed at
@@ -199,15 +208,15 @@ def align(dataset, *others, **kwargs):
         # prepare a new Coord object to store the final new dimension
         new_coord = ref_coord.copy()
 
-        ndec = get_n_decimals(new_coord.data.max(), 1.e-5)
+        ndec = get_n_decimals(new_coord.data.max(), 1.0e-5)
 
-        if new_coord.implements('LinearCoord'):
+        if new_coord.implements("LinearCoord"):
             new_coord = Coord(new_coord, linear=False, copy=True)
 
         # loop on all object
         for index, object in _objects.items():
 
-            obj = object['obj']
+            obj = object["obj"]
 
             if obj is ref_obj:
                 # not necessary to compare with itself!
@@ -218,12 +227,14 @@ def align(dataset, *others, **kwargs):
 
             # get the current objet coordinates and check compatibility
             coord = obj.coordset[dim]
-            if coord.implements('LinearCoord') or coord.linear:
+            if coord.implements("LinearCoord") or coord.linear:
                 coord = Coord(coord, linear=False, copy=True)
 
             if not coord.is_units_compatible(ref_coord):
                 # not compatible, stop everything
-                raise UnitsCompatibilityError('NDataset to align must have compatible units!')
+                raise UnitsCompatibilityError(
+                    "NDataset to align must have compatible units!"
+                )
 
             # do units transform if necesssary so coords can be compared
             if coord.units != ref_coord.units:
@@ -234,30 +245,30 @@ def align(dataset, *others, **kwargs):
             new_coord_data = set(np.around(new_coord.data, ndec))
             coord_data = set(np.around(coord.data, ndec))
 
-            if method in ['outer', 'interpolate']:
+            if method in ["outer", "interpolate"]:
                 # in this case we do a union of the coords (masking the
                 # missing values)
                 # For method=`interpolate`, the interpolation will be
                 # performed in a second step
                 new_coord._data = sorted(coord_data | new_coord_data)
 
-            elif method == 'inner':
+            elif method == "inner":
                 # take only intersection of the coordinates
                 # and generate a warning if it result something null or
                 new_coord._data = sorted(coord_data & new_coord_data)
 
-            elif method in ['first', 'last']:
+            elif method in ["first", "last"]:
                 # we take the reference coordinates already determined as
                 # basis (masking the missing values)
                 continue
 
             else:
-                raise NotImplementedError(f'The method {method} is unknown!')
+                raise NotImplementedError(f"The method {method} is unknown!")
 
         # Now perform alignment of all objects on the new coordinates
         for index, object in _objects.items():
 
-            obj = object['obj']
+            obj = object["obj"]
 
             # get the dim index for the given object
             dim_index = obj.dims.index(dim)
@@ -307,8 +318,10 @@ def align(dataset, *others, **kwargs):
             if coord.is_labeled:
                 label_shape = list(coord.labels.shape)
                 label_shape[0] = new_coord.size
-                new_coord._labels = np.zeros(tuple(label_shape)).astype(coord.labels.dtype)
-                new_coord._labels[:] = '--'
+                new_coord._labels = np.zeros(tuple(label_shape)).astype(
+                    coord.labels.dtype
+                )
+                new_coord._labels[:] = "--"
                 new_coord._labels[dim_loc] = coord.labels
             setattr(new_coordset, dim, new_coord)
             new_obj._coordset = new_coordset
@@ -319,22 +332,26 @@ def align(dataset, *others, **kwargs):
                 new_obj.sort(descend=reversed, dim=dim, inplace=True)
 
             # update the _objects
-            _objects[index]['obj'] = new_obj
+            _objects[index]["obj"] = new_obj
 
-            if method == 'interpolate':
-                warning_('Interpolation not yet implemented - for now equivalent '
-                         'to `outer`')
+            if method == "interpolate":
+                warning_(
+                    "Interpolation not yet implemented - for now equivalent "
+                    "to `outer`"
+                )
 
         # the new transformed object must be in the same order as the passed
         # objects
         # and the missing values must be masked (for the moment they are defined to NaN
 
         for index, object in _objects.items():
-            obj = object['obj']
+            obj = object["obj"]
             # obj[np.where(np.isnan(obj))] = MASKED  # mask NaN values
-            obj[np.where(np.isnan(obj))] = 99999999999999.  # replace NaN values (to simplify
+            obj[
+                np.where(np.isnan(obj))
+            ] = 99999999999999.0  # replace NaN values (to simplify
             # comparisons)
-            idx = int(object['idx'])
+            idx = int(object["idx"])
             objects[idx] = obj
 
             # we also transform into linear coord if possible ?

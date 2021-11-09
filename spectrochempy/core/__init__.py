@@ -33,15 +33,16 @@ warnings.filterwarnings("ignore")
 # ======================================================================================================================
 
 __all__ = [
-
     # Useful librairies alias for the end user avoiding to load them when wild card import is used
     # --------------------------------------------------------------------------------------------
-
-    'np', 'plt', 'scipy', 'os', 'sys', 'mpl',
-
+    "np",
+    "plt",
+    "scipy",
+    "os",
+    "sys",
+    "mpl",
     # methods and objects from other packages will be added
     # later on this module (see below)
-
 ]
 
 # ======================================================================================================================
@@ -57,8 +58,8 @@ def print_(*args, **kwargs):
     """
     s = ""
     for a in args:
-        s += pstr(a, **kwargs) + ' '
-    s = s.replace('\0', '').strip()
+        s += pstr(a, **kwargs) + " "
+    s = s.replace("\0", "").strip()
     print(s)
 
 
@@ -66,8 +67,8 @@ def print_(*args, **kwargs):
 def info_(*args, **kwargs):
     s = ""
     for a in args:
-        s += pstr(a, **kwargs) + ' '
-    s = s.replace('\0', '').strip()
+        s += pstr(a, **kwargs) + " "
+    s = s.replace("\0", "").strip()
     app.logs.info(s)
 
 
@@ -75,8 +76,8 @@ def info_(*args, **kwargs):
 def debug_(*args, **kwargs):
     s = ""
     for a in args:
-        s += pstr(a, **kwargs) + ' '
-        s = s.replace('\0', '').strip()
+        s += pstr(a, **kwargs) + " "
+        s = s.replace("\0", "").strip()
     try:
         app.logs.debug(s)
     except NameError:
@@ -86,12 +87,12 @@ def debug_(*args, **kwargs):
 
 # ----------------------------------------------------------------------------------------------------------------------
 def error_(*args, **kwargs):
-    s = ''
+    s = ""
     if not isinstance(args[0], str):
         s += type(args[0]).__name__ + ": "
     for a in args:
-        s += pstr(a, **kwargs) + ' '
-        s = s.replace('\0', '').strip()
+        s += pstr(a, **kwargs) + " "
+        s = s.replace("\0", "").strip()
     app.logs.error(s)
 
 
@@ -99,23 +100,27 @@ def error_(*args, **kwargs):
 def warning_(*args, **kwargs):
     s = ""
     for a in args:
-        s += pstr(a, **kwargs) + ' '
-        s = s.replace('\0', '').strip()
+        s += pstr(a, **kwargs) + " "
+        s = s.replace("\0", "").strip()
     app.logs.warning(s)
 
 
-__all__ += ['info_', 'debug_', 'error_', 'warning_', 'print_']
+__all__ += ["info_", "debug_", "error_", "warning_", "print_"]
 
 # ======================================================================================================================
 # Progress bar
 # ======================================================================================================================
 pbar_count = 0
 
-USE_TQDM = environ.get('USE_TQDM', 'Yes') == 'Yes' and 'DOC_BUILDING' not in environ and "/bin/scpy" not in sys.argv[0]
+USE_TQDM = (
+    environ.get("USE_TQDM", "Yes") == "Yes"
+    and "DOC_BUILDING" not in environ
+    and "/bin/scpy" not in sys.argv[0]
+)
 
 if USE_TQDM:
     pbar = tqdm(total=1211)
-    pbar.set_description('Loading SpectroChemPy API')
+    pbar.set_description("Loading SpectroChemPy API")
     val_tqdm = [1, 39, 52, 83, 83, 89, 92, 93, 94, 95, 96, 97, 98, 99, 100]
 
 
@@ -144,7 +149,7 @@ _pbar_update()
 from spectrochempy.application import SpectroChemPy  # noqa: E402
 
 app = SpectroChemPy()
-__all__ += ['app']
+__all__ += ["app"]
 
 from spectrochempy.application import (  # noqa: E402
     __version__ as version,
@@ -160,7 +165,7 @@ from spectrochempy.application import (  # noqa: E402
     ERROR,
     CRITICAL,
     INFO,
-    )
+)
 
 preferences = app.preferences
 plot_preferences = app.plot_preferences
@@ -173,6 +178,7 @@ reset_preferences = app.reset_preferences
 
 # datadir = app.datadir
 
+
 def set_loglevel(level=WARNING):
     preferences.log_level = level
 
@@ -182,33 +188,31 @@ def get_loglevel():
 
 
 __all__ += [
-
-        # Helpers
-        'DEBUG',
-        'WARNING',
-        'ERROR',
-        'CRITICAL',
-        'INFO',
-        'preferences',
-        'plot_preferences',
-        'config_manager',
-        'config_dir',
-        'reset_preferences',
-        'set_loglevel',
-        'get_loglevel',
-
-        # Info
-        'copyright',
-        'version',
-        'release',
-        'license',
-        'url',
-        'release_date',
-        'authors',
-        'contributors',
-        'description',
-        'long_description'
-        ]
+    # Helpers
+    "DEBUG",
+    "WARNING",
+    "ERROR",
+    "CRITICAL",
+    "INFO",
+    "preferences",
+    "plot_preferences",
+    "config_manager",
+    "config_dir",
+    "reset_preferences",
+    "set_loglevel",
+    "get_loglevel",
+    # Info
+    "copyright",
+    "version",
+    "release",
+    "license",
+    "url",
+    "release_date",
+    "authors",
+    "contributors",
+    "description",
+    "long_description",
+]
 
 # IPython methods
 # ----------------------------------------------------------------------------------------------------------------------
@@ -220,7 +224,7 @@ _pbar_update()
 # ----------------------------------------------------------------------------------------------------------------------
 from spectrochempy.utils import show, MASKED, NOMASK, EPSILON, INPLACE  # noqa: E402
 
-__all__ += ['show', 'MASKED', 'NOMASK', 'EPSILON', 'INPLACE']
+__all__ += ["show", "MASKED", "NOMASK", "EPSILON", "INPLACE"]
 
 # dataset
 # ----------------------------------------------------------------------------------------------------------------------
@@ -322,6 +326,7 @@ __all__ += api.__all__
 # Helpers
 # ----------------------------------------------------------------------------------------------------------------------
 
+
 def APIref():
     """
     Helper to display public objects and methods from the API
@@ -333,7 +338,7 @@ def APIref():
 
 APIref = APIref()
 
-__all__.append('APIref')
+__all__.append("APIref")
 
 # START THE app
 
@@ -343,17 +348,17 @@ _pbar_update(close=True)
 
 _started = app.start()
 
-warnings.filterwarnings(action='ignore', module='matplotlib', category=UserWarning)
+warnings.filterwarnings(action="ignore", module="matplotlib", category=UserWarning)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # File Dialogs
 # ----------------------------------------------------------------------------------------------------------------------
 
 # can not be in utils due to circular imports
-__all__ += ['open_dialog', 'save_dialog']
+__all__ += ["open_dialog", "save_dialog"]
 
 # set flags
-USE_QT = preferences.use_qt or environ.get('SCPY_GUI', None) == 'RUNNING'
+USE_QT = preferences.use_qt or environ.get("SCPY_GUI", None) == "RUNNING"
 
 if USE_QT:
 
@@ -379,36 +384,57 @@ if not USE_QT:
 # Private functions
 # ------------------------------------------------------------------------------------------------------------------
 
-class _QTFileDialogs:
 
+class _QTFileDialogs:
     @classmethod
-    def _open_existing_directory(cls, parent=None, caption='Select a folder', directory=None):
+    def _open_existing_directory(
+        cls, parent=None, caption="Select a folder", directory=None
+    ):
 
         if directory is None:
             directory = str(preferences.datadir)
 
         options = FileDialog.DontResolveSymlinks | FileDialog.ShowDirsOnly
-        directory = FileDialog.getExistingDirectory(parent=parent, caption=caption, directory=directory,
-                                                    options=options)
+        directory = FileDialog.getExistingDirectory(
+            parent=parent, caption=caption, directory=directory, options=options
+        )
         if directory:
             return directory
 
     # noinspection PyRedundantParentheses
     @classmethod
-    def _open_filename(cls, parent=None, directory=None, caption='Select file', filters=None, default_filter=None):
+    def _open_filename(
+        cls,
+        parent=None,
+        directory=None,
+        caption="Select file",
+        filters=None,
+        default_filter=None,
+    ):
 
         if directory is None:
             directory = str(preferences.datadir)
 
-        filename, _ = FileDialog.getOpenFileName(parent=parent, caption=caption, directory=directory,
-                                                 filter=';;'.join(filters), initialFilter=default_filter)
+        filename, _ = FileDialog.getOpenFileName(
+            parent=parent,
+            caption=caption,
+            directory=directory,
+            filter=";;".join(filters),
+            initialFilter=default_filter,
+        )
         if filename:
             return filename
 
     # noinspection PyRedundantParentheses
     @classmethod
-    def _open_multiple_filenames(cls, parent=None, directory=None, caption='Select file(s)',
-                                 filters=None, default_filter=None):
+    def _open_multiple_filenames(
+        cls,
+        parent=None,
+        directory=None,
+        caption="Select file(s)",
+        filters=None,
+        default_filter=None,
+    ):
         """
         Return one or several files to open
         """
@@ -416,44 +442,66 @@ class _QTFileDialogs:
         if directory is None:
             directory = str(preferences.datadir)
 
-        files, _ = FileDialog.getOpenFileNames(parent=parent, caption=caption, directory=directory,
-                                               filter=';;'.join(filters), initialFilter=default_filter)
+        files, _ = FileDialog.getOpenFileNames(
+            parent=parent,
+            caption=caption,
+            directory=directory,
+            filter=";;".join(filters),
+            initialFilter=default_filter,
+        )
         if files:
             return files
 
     @classmethod
-    def _save_filename(cls, parent=None, filename=None, caption='Save as...', selected_filter='', filters=None):
+    def _save_filename(
+        cls,
+        parent=None,
+        filename=None,
+        caption="Save as...",
+        selected_filter="",
+        filters=None,
+    ):
 
         directory = str(filename)
 
-        options = FileDialog.DontConfirmOverwrite  # bug : this seems to work only with DontUseNativeDialog on OSX.
+        options = (
+            FileDialog.DontConfirmOverwrite
+        )  # bug : this seems to work only with DontUseNativeDialog on OSX.
         # TODO: Check on windows and Linux
         # second problems: if we confirm overwrite here a new dialog is opened,
         # and thus the main one do not close on exit!
-        filename, _ = FileDialog.getSaveFileName(parent=parent, caption=caption, directory=directory,
-                                                 initialFilter=selected_filter, filter=';;'.join(filters),
-                                                 options=options)
+        filename, _ = FileDialog.getSaveFileName(
+            parent=parent,
+            caption=caption,
+            directory=directory,
+            initialFilter=selected_filter,
+            filter=";;".join(filters),
+            options=options,
+        )
         if filename:
             return filename
 
 
 class _TKFileDialogs:
-
     def __init__(self):
         import tkinter as tk
 
         root = tk.Tk()
         root.withdraw()
         root.overrideredirect(True)
-        root.geometry('0x0+0+0')
+        root.geometry("0x0+0+0")
         root.deiconify()
         root.lift()
         root.focus_force()
         self.root = root
 
-    def _open_existing_directory(self, parent=None, caption='Select a folder', directory=''):
+    def _open_existing_directory(
+        self, parent=None, caption="Select a folder", directory=""
+    ):
 
-        directory = filedialog.askdirectory(parent=parent, initialdir=directory, title=caption)
+        directory = filedialog.askdirectory(
+            parent=parent, initialdir=directory, title=caption
+        )
 
         if directory:
             return directory
@@ -469,21 +517,23 @@ class _TKFileDialogs:
             matches = re.finditer(regex, filter)
             match = list(matches)[0]
             g = list(match.groups())
-            g[1] = g[1].replace('[0-9]', '')
-            g[1] = g[1].replace('1[r|i]', '*.*')
-            g[1] = g[1].replace('2[r|i]*', '*.*')
-            g[1] = g[1].replace('3[r|i]*', '*.*')
-            g[1] = g[1].replace(' ', ',')
-            g[1] = tuple(set(g[1].split(',')))
+            g[1] = g[1].replace("[0-9]", "")
+            g[1] = g[1].replace("1[r|i]", "*.*")
+            g[1] = g[1].replace("2[r|i]*", "*.*")
+            g[1] = g[1].replace("3[r|i]*", "*.*")
+            g[1] = g[1].replace(" ", ",")
+            g[1] = tuple(set(g[1].split(",")))
             filetypes.append((g[0], (g[1])))
         return filetypes
 
     # noinspection PyRedundantParentheses
     def _open_filename(self, parent=None, filters=None, default_filter=None):
 
-        filename = filedialog.askopenfilename(parent=parent,
-                                              filetypes=self.filetypes(filters),
-                                              title='Select file to open', )
+        filename = filedialog.askopenfilename(
+            parent=parent,
+            filetypes=self.filetypes(filters),
+            title="Select file to open",
+        )
 
         if parent is not None:
             parent.destroy()
@@ -497,9 +547,11 @@ class _TKFileDialogs:
         Return one or several files to open
         """
 
-        filename = filedialog.askopenfilenames(parent=parent,
-                                               filetypes=self.filetypes(filters) + [("all files", ('*'))],
-                                               title='Select file(s) to open')
+        filename = filedialog.askopenfilenames(
+            parent=parent,
+            filetypes=self.filetypes(filters) + [("all files", ("*"))],
+            title="Select file(s) to open",
+        )
 
         if parent is not None:
             parent.destroy()
@@ -507,12 +559,19 @@ class _TKFileDialogs:
         if filename:
             return filename
 
-    def _save_filename(self, parent=None, filename='', caption='Save as...', selected_filter='', filters=None):
+    def _save_filename(
+        self,
+        parent=None,
+        filename="",
+        caption="Save as...",
+        selected_filter="",
+        filters=None,
+    ):
 
         from spectrochempy.utils import pathclean
 
-        dftext = ''
-        directory = '.'
+        dftext = ""
+        directory = "."
         if filename:
             filename = pathclean(filename)
             directory = filename.parent
@@ -522,13 +581,18 @@ class _TKFileDialogs:
             raise Exception("Save error")
 
         if not dftext:
-            dftext = '.scp'
+            dftext = ".scp"
 
         # -defaultextension, -filetypes, -initialdir, -initialfile, -message, -parent, -title, -typevariable,
         # -command, or -confirmoverwrite
-        filename = filedialog.asksaveasfilename(parent=parent, title=caption, initialdir=str(directory),
-                                                initialfile=filename.name, defaultextension=dftext,
-                                                filetypes=self.filetypes(filters))
+        filename = filedialog.asksaveasfilename(
+            parent=parent,
+            title=caption,
+            initialdir=str(directory),
+            initialfile=filename.name,
+            defaultextension=dftext,
+            filetypes=self.filetypes(filters),
+        )
         if parent is not None:
             parent.destroy
 
@@ -541,49 +605,74 @@ class _TKFileDialogs:
 # ------------------------------------------------------------------------------------------------------------------
 
 # noinspection PyRedundantParentheses
-def save_dialog(parent=None, filename=None, caption='Save as...', selected_filter='', filters=("All Files (*)"),
-                **kwargs):
+def save_dialog(
+    parent=None,
+    filename=None,
+    caption="Save as...",
+    selected_filter="",
+    filters=("All Files (*)"),
+    **kwargs
+):
     """
     Return a file where to save
     """
     if USE_QT:
-        parent = kwargs.pop('Qt_parent', None)  # in case this is launched from spectrochempy_gui
-        f = _QTFileDialogs._save_filename(parent=parent, filename=filename, caption=caption,
-                                          selected_filter=selected_filter, filters=filters)
+        parent = kwargs.pop(
+            "Qt_parent", None
+        )  # in case this is launched from spectrochempy_gui
+        f = _QTFileDialogs._save_filename(
+            parent=parent,
+            filename=filename,
+            caption=caption,
+            selected_filter=selected_filter,
+            filters=filters,
+        )
     else:
         f = _TKFileDialogs()._save_filename(filename, caption, selected_filter, filters)
 
     from spectrochempy.utils import pathclean
+
     return pathclean(f)
 
 
 # noinspection PyRedundantParentheses
-def open_dialog(parent=None, single=True, directory=None, filters=("All Files (*)"), **kwargs):
+def open_dialog(
+    parent=None, single=True, directory=None, filters=("All Files (*)"), **kwargs
+):
     """
     Return one or several files to open
     """
     if USE_QT:
-        parent = kwargs.pop('Qt_parent', None)  # in case this is launched from spectrochempy_gui
+        parent = kwargs.pop(
+            "Qt_parent", None
+        )  # in case this is launched from spectrochempy_gui
         klass = _QTFileDialogs
     else:
         klass = _TKFileDialogs()
         parent = klass.root
 
-    default_filter = kwargs.get('default_filter', None)
+    default_filter = kwargs.get("default_filter", None)
     if directory is None:
-        directory = ''
-    if filters == 'directory':
-        caption = 'Select a folder'
-        f = klass._open_existing_directory(parent=parent, caption=caption, directory=str(directory))
+        directory = ""
+    if filters == "directory":
+        caption = "Select a folder"
+        f = klass._open_existing_directory(
+            parent=parent, caption=caption, directory=str(directory)
+        )
     elif single:
-        f = klass._open_filename(parent=parent, filters=filters, default_filter=default_filter)
+        f = klass._open_filename(
+            parent=parent, filters=filters, default_filter=default_filter
+        )
     else:
-        f = klass._open_multiple_filenames(parent=parent, filters=filters, default_filter=default_filter)
+        f = klass._open_multiple_filenames(
+            parent=parent, filters=filters, default_filter=default_filter
+        )
 
     from spectrochempy.utils import pathclean
+
     return pathclean(f)
 
 
 # ======================================================================================================================
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

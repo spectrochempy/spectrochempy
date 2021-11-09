@@ -94,7 +94,12 @@ from spectrochempy import ur
 # In the following example, a minimal 1D dataset is created from a simple list, to which we can add some metadata:
 
 # %%
-d1D = NDDataset([10., 20., 30.], name="Dataset N1", author='Blake and Mortimer', description='A dataset from scratch')
+d1D = NDDataset(
+    [10.0, 20.0, 30.0],
+    name="Dataset N1",
+    author="Blake and Mortimer",
+    description="A dataset from scratch",
+)
 d1D
 
 # %% [markdown]
@@ -128,7 +133,7 @@ _ = d1D.plot(figsize=(3, 2))
 np.sqrt(d1D)
 
 # %%
-d1D + d1D / 2.
+d1D + d1D / 2.0
 
 # %% [markdown]
 # As seen above, there are some metadata that are automatically added to the dataset:
@@ -152,10 +157,10 @@ d1D + d1D / 2.
 # For instance:
 
 # %%
-d1D.title = 'intensity'
-d1D.name = 'mydataset'
-d1D.history = 'created from scratch'
-d1D.description = 'Some experimental measurements'
+d1D.title = "intensity"
+d1D.name = "mydataset"
+d1D.history = "created from scratch"
+d1D.description = "Some experimental measurements"
 d1D
 
 # %% [markdown]
@@ -177,7 +182,7 @@ d1D.dims  # the name of the dimension (it has been automatically attributed)
 # name must be a single letter.
 
 # %%
-d1D.dims = ['q']  # change the list of dim names.
+d1D.dims = ["q"]  # change the list of dim names.
 
 # %%
 d1D.dims
@@ -194,20 +199,27 @@ a
 
 # %%
 d3D = NDDataset(a)
-d3D.title = 'energy'
-d3D.author = 'Someone'
-d3D.name = '3D dataset creation'
-d3D.history = 'created from scratch'
-d3D.description = 'Some example'
-d3D.dims = ['u', 'v', 't']
+d3D.title = "energy"
+d3D.author = "Someone"
+d3D.name = "3D dataset creation"
+d3D.history = "created from scratch"
+d3D.description = "Some example"
+d3D.dims = ["u", "v", "t"]
 d3D
 
 # %% [markdown]
 # We can also add all information in a single statement
 
 # %%
-d3D = NDDataset(a, dims=['u', 'v', 't'], title='Energy', author='Someone', name='3D_dataset',
-                history='created from scratch', description='a single statement creation example')
+d3D = NDDataset(
+    a,
+    dims=["u", "v", "t"],
+    title="Energy",
+    author="Someone",
+    name="3D_dataset",
+    history="created from scratch",
+    description="a single statement creation example",
+)
 d3D
 
 # %% [markdown]
@@ -245,17 +257,17 @@ d1D ** 2  # note the results in eV^2
 np.sqrt(d1D)  # note the result in e^0.5
 
 # %%
-time = 5. * ur.second
+time = 5.0 * ur.second
 d1D / time  # here we get results in eV/s
 
 # %% [markdown]
 # Conversion can be done between different units transparently
 
 # %%
-d1D.to('J')
+d1D.to("J")
 
 # %%
-d1D.to('K')
+d1D.to("K")
 
 # %% [markdown]
 # ## Coordinates
@@ -278,8 +290,10 @@ d3D.t  # the same for coordinate  t, v, u which are not yet set
 # To add coordinates, on way is to set them one by one:
 
 # %%
-d3D.t = Coord.arange(6) * .1  # we need a sequence of 6 values for `t` dimension (see shape above)
-d3D.t.title = 'time'
+d3D.t = (
+    Coord.arange(6) * 0.1
+)  # we need a sequence of 6 values for `t` dimension (see shape above)
+d3D.t.title = "time"
 d3D.t.units = ur.seconds
 d3D.coordset  # now return a list of coordinates
 
@@ -287,10 +301,10 @@ d3D.coordset  # now return a list of coordinates
 d3D.t
 
 # %%
-d3D.coordset('t')  # Alternative way to get a given coordinates
+d3D.coordset("t")  # Alternative way to get a given coordinates
 
 # %%
-d3D['t']  # another alternative way to get a given coordinates
+d3D["t"]  # another alternative way to get a given coordinates
 
 # %% [markdown]
 # The two other coordinates u and v are still undefined
@@ -325,7 +339,7 @@ except KeyError as e:
 # returned - this can be ambiguous)
 
 # %%
-d3D['time']
+d3D["time"]
 
 # %%
 d3D.time
@@ -341,8 +355,8 @@ d3D.time
 # The labels can be simple strings, *e.g.,*
 
 # %%
-tags = list('ab')
-d3D.u.title = 'some tags'
+tags = list("ab")
+d3D.u.title = "some tags"
 d3D.u.labels = tags  # TODO: avoid repetition
 d3D
 
@@ -358,7 +372,7 @@ start = timedelta(0)
 times = [start + timedelta(seconds=x * 60) for x in range(6)]
 d3D.t = None
 d3D.t.labels = times
-d3D.t.title = 'time'
+d3D.t.title = "time"
 d3D
 
 # %% [markdown]
@@ -388,7 +402,7 @@ nd
 
 # %%
 coordx = Coord.arange(3)
-nd.set_coordset(x=coordx, y='x')
+nd.set_coordset(x=coordx, y="x")
 nd
 
 # %% [markdown]
@@ -398,11 +412,11 @@ nd
 # Lets create 3 `Coord` objects to be use a s coordinates for the 3 dimensions of the previous d3D dataset.
 
 # %%
-d3D.dims = ['t', 'v', 'u']
+d3D.dims = ["t", "v", "u"]
 s0, s1, s2 = d3D.shape
-coord0 = Coord.linspace(10., 100., s0, units='m', title='distance')
-coord1 = Coord.linspace(20., 25., s1, units='K', title='temperature')
-coord2 = Coord.linspace(0., 1000., s2, units='hour', title='elapsed time')
+coord0 = Coord.linspace(10.0, 100.0, s0, units="m", title="distance")
+coord1 = Coord.linspace(20.0, 25.0, s1, units="K", title="temperature")
+coord2 = Coord.linspace(0.0, 1000.0, s2, units="hour", title="elapsed time")
 
 # %% [markdown]
 # ### Syntax 1
@@ -415,7 +429,7 @@ d3D
 # ### Syntax 2
 
 # %%
-d3D.set_coordset({'u': coord2, 'v': coord1, 't': coord0})
+d3D.set_coordset({"u": coord2, "v": coord1, "t": coord0})
 d3D
 
 # %% [markdown]
@@ -423,7 +437,7 @@ d3D
 # We can add several coordinates to the same dimension
 
 # %%
-coord1b = Coord([1, 2, 3, 4], units='millitesla', title='magnetic field')
+coord1b = Coord([1, 2, 3, 4], units="millitesla", title="magnetic field")
 
 # %%
 d3D.set_coordset(u=coord2, v=[coord1, coord1b], t=coord0)
@@ -467,7 +481,7 @@ d3D
 # **C.** Third syntax (from a dictionary)
 
 # %%
-d3D.set_coordset({'t': coord0, 'u': coord2, 'v': [coord1, coord1b]})
+d3D.set_coordset({"t": coord0, "u": coord2, "v": [coord1, coord1b]})
 d3D
 
 # %% [markdown]
@@ -478,7 +492,7 @@ d3D.coordset = coord0, [coord1, coord1b], coord2
 d3D
 
 # %%
-d3D.coordset = {'t': coord0, 'u': coord2, 'v': [coord1, coord1b]}
+d3D.coordset = {"t": coord0, "u": coord2, "v": [coord1, coord1b]}
 d3D
 
 # %%
@@ -499,13 +513,19 @@ d3D
 try:
     d3D.coordset = [coord0, coord1, coord2]
 except ValueError:
-    scp.error_('Coordinates must be of the same size for a dimension with multiple coordinates')
+    scp.error_(
+        "Coordinates must be of the same size for a dimension with multiple coordinates"
+    )
 
 # %% [markdown]
 # This works : it use a tuple `()`, not a list `[]`
 
 # %%
-d3D.coordset = (coord0, coord1, coord2)  # equivalent to d3D.coordset = coord0, coord1, coord2
+d3D.coordset = (
+    coord0,
+    coord1,
+    coord2,
+)  # equivalent to d3D.coordset = coord0, coord1, coord2
 d3D
 
 # %% [markdown]
@@ -539,10 +559,14 @@ d3D
 # `linspace`to generate the data.
 
 # %%
-c0 = Coord.linspace(start=4000., stop=1000., num=5, labels=None, units="cm^-1", title='wavenumber')
+c0 = Coord.linspace(
+    start=4000.0, stop=1000.0, num=5, labels=None, units="cm^-1", title="wavenumber"
+)
 
 # %%
-c1 = Coord.linspace(10., 40., 3, labels=['Cold', 'RT', 'Hot'], units="K", title='temperature')
+c1 = Coord.linspace(
+    10.0, 40.0, 3, labels=["Cold", "RT", "Hot"], units="K", title="temperature"
+)
 
 # %% [markdown]
 # The full coordset will be the following
@@ -565,34 +589,45 @@ def func(x, y, extra):
 
 
 # %%
-ds = NDDataset.fromfunction(func, extra=100 * ur.cm ** -1,  # extra arguments passed to the function
-                            coordset=cs, name='mydataset', title='absorbance',
-                            units=None)  # when None, units will be determined from the function results
+ds = NDDataset.fromfunction(
+    func,
+    extra=100 * ur.cm ** -1,  # extra arguments passed to the function
+    coordset=cs,
+    name="mydataset",
+    title="absorbance",
+    units=None,
+)  # when None, units will be determined from the function results
 
 ds.description = """Dataset example created for this tutorial.
 It's a 2-D dataset"""
 
-ds.author = 'Blake & Mortimer'
+ds.author = "Blake & Mortimer"
 ds
 
 # %% [markdown]
 # ## Using numpy-like constructors of NDDatasets
 
 # %%
-dz = NDDataset.zeros((5, 3), coordset=cs, units='meters', title='Datasets with only zeros')
+dz = NDDataset.zeros(
+    (5, 3), coordset=cs, units="meters", title="Datasets with only zeros"
+)
 
 # %%
-do = NDDataset.ones((5, 3), coordset=cs, units='kilograms', title='Datasets with only ones')
+do = NDDataset.ones(
+    (5, 3), coordset=cs, units="kilograms", title="Datasets with only ones"
+)
 
 # %%
-df = NDDataset.full((5, 3), fill_value=1.25, coordset=cs, units='radians', title='with only float=1.25')
+df = NDDataset.full(
+    (5, 3), fill_value=1.25, coordset=cs, units="radians", title="with only float=1.25"
+)
 df
 
 # %% [markdown]
 # As with numpy, it is also possible to take another dataset as a template:
 
 # %%
-df = NDDataset.full_like(d3D, dtype='int', fill_value=2)
+df = NDDataset.full_like(d3D, dtype="int", fill_value=2)
 df
 
 # %%
@@ -617,7 +652,7 @@ d3D_copy = d3D[:]
 # Finally, it is also possible to initialize a dataset using an existing one:
 
 # %%
-d3Dduplicate = NDDataset(d3D, name='duplicate of %s' % d3D.name, units='absorbance')
+d3Dduplicate = NDDataset(d3D, name="duplicate of %s" % d3D.name, units="absorbance")
 d3Dduplicate
 
 # %% [markdown]
@@ -637,7 +672,7 @@ if datadir.exists():
 # Let's load grouped IR spectra acquired using OMNIC:
 
 # %%
-nd = NDDataset.read_omnic(datadir / 'irdata/nh4y-activation.spg')
+nd = NDDataset.read_omnic(datadir / "irdata/nh4y-activation.spg")
 nd.preferences.reset()
 _ = nd.plot()
 
@@ -648,13 +683,13 @@ _ = nd.plot()
 # Now, lets load a NMR dataset (in the Bruker format).
 
 # %%
-path = datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'topspin_2d'
+path = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_2d"
 
 # load the data directly (no need to create the dataset first)
 nd2 = NDDataset.read_topspin(path, expno=1, remove_digital_filter=True)
 
 # view it...
-nd2.x.to('s')
-nd2.y.to('ms')
+nd2.x.to("s")
+nd2.y.to("ms")
 
-ax = nd2.plot(method='map')
+ax = nd2.plot(method="map")

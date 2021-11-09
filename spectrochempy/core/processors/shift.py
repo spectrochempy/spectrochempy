@@ -12,7 +12,7 @@ dimension (1) of 2D arrays.
 Adapted from NMRGLUE proc_base (New BSD License)
 """
 
-__all__ = ['rs', 'ls', 'roll', 'cs', 'fsh', 'fsh2']
+__all__ = ["rs", "ls", "roll", "cs", "fsh", "fsh2"]
 __dataset_methods__ = __all__
 
 import numpy as np
@@ -25,6 +25,7 @@ pi = np.pi
 # ======================================================================================================================
 # Public methods
 # ======================================================================================================================
+
 
 @_units_agnostic_method
 def rs(dataset, pts=0.0, **kwargs):
@@ -59,7 +60,7 @@ def rs(dataset, pts=0.0, **kwargs):
     roll : shift without zero filling.
     """
     data = np.roll(dataset, int(pts))
-    data[..., :int(pts)] = 0
+    data[..., : int(pts)] = 0
     return data
 
 
@@ -96,7 +97,7 @@ def ls(dataset, pts=0.0, **kwargs):
     roll : shift without zero filling.
     """
     data = np.roll(dataset, -int(pts))
-    data[..., -int(pts):] = 0
+    data[..., -int(pts) :] = 0
     return data
 
 
@@ -175,9 +176,9 @@ def roll(dataset, pts=0.0, neg=False, **kwargs):
     data = np.roll(dataset, int(pts))
     if neg:
         if pts > 0:
-            data[..., :int(pts)] = -data[..., :int(pts)]
+            data[..., : int(pts)] = -data[..., : int(pts)]
         else:
-            data[..., int(pts):] = -data[..., int(pts):]
+            data[..., int(pts) :] = -data[..., int(pts) :]
     return data
 
 
@@ -219,7 +220,7 @@ def fsh(dataset, pts, **kwargs):
     s = float(dataset.shape[-1])
 
     data = _ifft(dataset)
-    data = np.exp(-2.j * pi * pts * np.arange(s) / s) * data
+    data = np.exp(-2.0j * pi * pts * np.arange(s) / s) * data
     data = _fft(data)
 
     return data
@@ -264,7 +265,7 @@ def fsh2(dataset, pts, **kwargs):
     s = float(dataset.shape[-1])
 
     data = _ifft_positive(dataset)
-    data = np.exp(2.j * pi * pts * np.arange(s) / s) * data
+    data = np.exp(2.0j * pi * pts * np.arange(s) / s) * data
     data = _fft_positive(data)
 
     return data

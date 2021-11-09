@@ -59,6 +59,7 @@ dependencies:
     - pytest-flake8
     - scikit-image
     - coverage
+    - black
 
     # DEV: code and docs
     - jupytext

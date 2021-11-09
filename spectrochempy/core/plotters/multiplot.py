@@ -8,18 +8,26 @@
 Module containing multiplot function(s)
 """
 
-__all__ = ['multiplot', 'multiplot_map', 'multiplot_stack',
-           'multiplot_image', 'multiplot_lines', 'multiplot_scatter',
-           'multiplot_with_transposed', 'plot_with_transposed']
+__all__ = [
+    "multiplot",
+    "multiplot_map",
+    "multiplot_stack",
+    "multiplot_image",
+    "multiplot_lines",
+    "multiplot_scatter",
+    "multiplot_with_transposed",
+    "plot_with_transposed",
+]
 
 __dataset_methods__ = []
 
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.tight_layout import (
-    get_renderer, get_tight_layout_figure,
+    get_renderer,
+    get_tight_layout_figure,
     get_subplotspec_list,
-    )
+)
 import matplotlib as mpl
 
 from spectrochempy.utils import is_sequence
@@ -35,7 +43,7 @@ def multiplot_scatter(datasets, **kwargs):
 
     Alias of multiplot (with `method` argument set to ``scatter``.
     """
-    kwargs['method'] = 'scatter'
+    kwargs["method"] = "scatter"
     return multiplot(datasets, **kwargs)
 
 
@@ -46,7 +54,7 @@ def multiplot_lines(datasets, **kwargs):
 
     Alias of multiplot (with `method` argument set to ``lines``.
     """
-    kwargs['method'] = 'lines'
+    kwargs["method"] = "lines"
     return multiplot(datasets, **kwargs)
 
 
@@ -57,7 +65,7 @@ def multiplot_stack(datasets, **kwargs):
 
     Alias of multiplot (with `method` argument set to ``stack``.
     """
-    kwargs['method'] = 'stack'
+    kwargs["method"] = "stack"
     return multiplot(datasets, **kwargs)
 
 
@@ -68,7 +76,7 @@ def multiplot_map(datasets, **kwargs):
 
     Alias of multiplot (with `method` argument set to ``map``.
     """
-    kwargs['method'] = 'map'
+    kwargs["method"] = "map"
     return multiplot(datasets, **kwargs)
 
 
@@ -79,11 +87,12 @@ def multiplot_image(datasets, **kwargs):
 
     Alias of multiplot (with `method` argument set to ``image``.
     """
-    kwargs['method'] = 'image'
+    kwargs["method"] = "image"
     return multiplot(datasets, **kwargs)
 
 
 # with transpose plot  -----------------------------------------------------------------
+
 
 def plot_with_transposed(dataset, **kwargs):
     """
@@ -92,7 +101,7 @@ def plot_with_transposed(dataset, **kwargs):
 
     Alias of plot_2D (with `method` argument set to ``with_transposed``).
     """
-    kwargs['method'] = 'with_transposed'
+    kwargs["method"] = "with_transposed"
     axes = multiplot(dataset, **kwargs)
     return axes
 
@@ -101,12 +110,20 @@ multiplot_with_transposed = plot_with_transposed
 
 
 # .............................................................................
-def multiplot(datasets=[], labels=[], nrow=1, ncol=1,
-              method='stack',
-              sharex=False, sharey=False, sharez=False,
-              colorbar=False,
-              suptitle=None, suptitle_color='k',
-              **kwargs):
+def multiplot(
+    datasets=[],
+    labels=[],
+    nrow=1,
+    ncol=1,
+    method="stack",
+    sharex=False,
+    sharey=False,
+    sharez=False,
+    colorbar=False,
+    suptitle=None,
+    suptitle_color="k",
+    **kwargs
+):
     """
     Generate a figure with multiple axes arranged in array (n rows, n columns)
 
@@ -210,9 +227,9 @@ def multiplot(datasets=[], labels=[], nrow=1, ncol=1,
     # ------------------------------------------------------------------------------------------------------------------
 
     show_transposed = False
-    if method in 'with_transposed':
+    if method in "with_transposed":
         show_transposed = True
-        method = 'stack'
+        method = "stack"
         nrow = 2
         ncol = 1
         datasets = [datasets, datasets]  # we need to datasets
@@ -225,7 +242,7 @@ def multiplot(datasets=[], labels=[], nrow=1, ncol=1,
 
     if len(datasets) < nrow * ncol and not show_transposed:
         # not enough datasets given in this list.
-        raise ValueError('Not enough datasets given in this list')
+        raise ValueError("Not enough datasets given in this list")
 
     # if labels and len(labels) != len(datasets):
     #     # not enough labels given in this list.
@@ -241,17 +258,17 @@ def multiplot(datasets=[], labels=[], nrow=1, ncol=1,
 
     ndims = set([dataset.ndim for dataset in datasets])
     if len(ndims) > 1:
-        raise NotImplementedError('mixed dataset shape.')
+        raise NotImplementedError("mixed dataset shape.")
     ndim = list(ndims)[0]
 
     # create the subplots and plot the ndarrays
     # ------------------------------------------------------------------------------------------------------------------
-    mpl.rcParams['figure.autolayout'] = False
+    mpl.rcParams["figure.autolayout"] = False
 
-    figsize = kwargs.pop('figsize', None)
-    dpi = kwargs.pop('dpi', 150)
+    figsize = kwargs.pop("figsize", None)
+    dpi = kwargs.pop("dpi", 150)
 
-    fig = kwargs.pop('fig', plt.figure(figsize=figsize, dpi=dpi))
+    fig = kwargs.pop("fig", plt.figure(figsize=figsize, dpi=dpi))
 
     fig.rcParams = plt.rcParams.copy()  # save params used for this figure
 
@@ -267,19 +284,21 @@ def multiplot(datasets=[], labels=[], nrow=1, ncol=1,
     ylims = []
     zlims = []
 
-    if sharex not in [None, True, False, 'all', 'col']:
-        raise ValueError("invalid option for sharex. Should be"
-                         " among (None, False, True, 'all' or 'col')")
+    if sharex not in [None, True, False, "all", "col"]:
+        raise ValueError(
+            "invalid option for sharex. Should be"
+            " among (None, False, True, 'all' or 'col')"
+        )
 
     if sharex:
-        sharex = 'all'
+        sharex = "all"
 
     if ndim == 1:
         sharez = False
 
     textsharey = "sharey"
     textsharez = "sharez"
-    if method in ['stack']:
+    if method in ["stack"]:
         sharez, sharey = sharey, sharez  # we echange them
         zlims, ylims = ylims, zlims
         # for our internal needs as only sharex and sharey are recognized by
@@ -287,19 +306,23 @@ def multiplot(datasets=[], labels=[], nrow=1, ncol=1,
         textsharey = "sharez"
         textsharez = "sharey"
 
-    if sharey not in [None, False, True, 'all', 'col']:
-        raise ValueError("invalid option for {}. Should be"
-                         " among (None, False, True, 'all' or 'row')".format(textsharey))
+    if sharey not in [None, False, True, "all", "col"]:
+        raise ValueError(
+            "invalid option for {}. Should be"
+            " among (None, False, True, 'all' or 'row')".format(textsharey)
+        )
 
-    if sharez not in [None, False, True, 'all', 'col', 'row']:
-        raise ValueError("invalid option for {}. Should be"
-                         " among (None, False, True, "
-                         "'all', 'row' or 'col')".format(textsharez))
+    if sharez not in [None, False, True, "all", "col", "row"]:
+        raise ValueError(
+            "invalid option for {}. Should be"
+            " among (None, False, True, "
+            "'all', 'row' or 'col')".format(textsharez)
+        )
 
     if sharey:
-        sharey = 'all'
+        sharey = "all"
     if sharez:
-        sharez = 'all'
+        sharez = "all"
 
     for irow in range(nrow):
         for icol in range(ncol):
@@ -309,54 +332,60 @@ def multiplot(datasets=[], labels=[], nrow=1, ncol=1,
             try:
                 label = labels[idx]
             except Exception:
-                label = ''
+                label = ""
 
             _sharex = None
             _sharey = None
             _sharez = None
             # on the type of the plot and
-            if ((irow == icol and irow == 0) or (sharex == 'col' and irow == 0) or (sharey == 'row' and icol == 0)):
+            if (
+                (irow == icol and irow == 0)
+                or (sharex == "col" and irow == 0)
+                or (sharey == "row" and icol == 0)
+            ):
                 ax = fig.add_subplot(nrow, ncol, irow * ncol + icol + 1)
 
             else:
-                if sharex == 'all':
-                    _sharex = axes['axe11']
-                elif sharex == 'col':
-                    _sharex = axes['axe1{}'.format(icol + 1)]
+                if sharex == "all":
+                    _sharex = axes["axe11"]
+                elif sharex == "col":
+                    _sharex = axes["axe1{}".format(icol + 1)]
 
-                if sharey == 'all':
-                    _sharey = axes['axe11']
-                elif sharey == 'row':
-                    _sharey = axes['axe{}1'.format(irow + 1)]
+                if sharey == "all":
+                    _sharey = axes["axe11"]
+                elif sharey == "row":
+                    _sharey = axes["axe{}1".format(irow + 1)]
 
                 # in the last dimension
-                if sharez == 'all':
-                    _sharez = axes['axe11']
-                elif sharez == 'row':
-                    _sharez = axes['axe{}1'.format(irow + 1)]
-                elif sharez == 'col':
-                    _sharez = axes['axe1{}'.format(icol + 1)]
+                if sharez == "all":
+                    _sharez = axes["axe11"]
+                elif sharez == "row":
+                    _sharez = axes["axe{}1".format(irow + 1)]
+                elif sharez == "col":
+                    _sharez = axes["axe1{}".format(icol + 1)]
 
-                ax = fig.add_subplot(nrow, ncol, idx + 1,
-                                     sharex=_sharex, sharey=_sharey)
+                ax = fig.add_subplot(
+                    nrow, ncol, idx + 1, sharex=_sharex, sharey=_sharey
+                )
 
             ax._sharez = _sharez  # we add a new share info to the ax.
             # wich will be useful for the interactive masks
 
-            ax.name = 'axe{}{}'.format(irow + 1, icol + 1)
+            ax.name = "axe{}{}".format(irow + 1, icol + 1)
             axes[ax.name] = ax
             if icol > 0 and sharey:
                 # hide the redondant ticklabels on left side of interior figures
                 plt.setp(axes[ax.name].get_yticklabels(), visible=False)
-                axes[ax.name].yaxis.set_tick_params(which='both',
-                                                    labelleft=False, labelright=False)
+                axes[ax.name].yaxis.set_tick_params(
+                    which="both", labelleft=False, labelright=False
+                )
                 axes[ax.name].yaxis.offsetText.set_visible(False)
             if irow < nrow - 1 and sharex:
                 # hide the bottom ticklabels of interior rows
                 plt.setp(axes[ax.name].get_xticklabels(), visible=False)
-                axes[ax.name].xaxis.set_tick_params(which='both',
-                                                    labelbottom=False,
-                                                    labeltop=False)
+                axes[ax.name].xaxis.set_tick_params(
+                    which="both", labelbottom=False, labeltop=False
+                )
                 axes[ax.name].xaxis.offsetText.set_visible(False)
 
             if show_transposed and irow == 1:
@@ -364,11 +393,15 @@ def multiplot(datasets=[], labels=[], nrow=1, ncol=1,
             else:
                 transposed = False
 
-            dataset.plot(method=method,
-                         ax=ax, clear=False, autolayout=False,
-                         colorbar=colorbar,
-                         data_transposed=transposed,
-                         **kwargs)
+            dataset.plot(
+                method=method,
+                ax=ax,
+                clear=False,
+                autolayout=False,
+                colorbar=colorbar,
+                data_transposed=transposed,
+                **kwargs
+            )
 
             ax.set_title(label, fontsize=8)
             if sharex and irow < nrow - 1:
@@ -404,21 +437,30 @@ def multiplot(datasets=[], labels=[], nrow=1, ncol=1,
         renderer = get_renderer(fig)
         axeslist = list(axes.values())
         subplots_list = list(get_subplotspec_list(axeslist))
-        kw = get_tight_layout_figure(fig, axeslist, subplots_list, renderer,
-                                     pad=1.08, h_pad=0, w_pad=0, rect=None)
+        kw = get_tight_layout_figure(
+            fig,
+            axeslist,
+            subplots_list,
+            renderer,
+            pad=1.08,
+            h_pad=0,
+            w_pad=0,
+            rect=None,
+        )
 
-        left = kwargs.get('left', kw['left'])
-        bottom = kwargs.get('bottom', kw['bottom'])
-        right = kwargs.get('right', kw['right'])
-        top = kw['top']
+        left = kwargs.get("left", kw["left"])
+        bottom = kwargs.get("bottom", kw["bottom"])
+        right = kwargs.get("right", kw["right"])
+        top = kw["top"]
         if suptitle:
-            top = top * .95
-        top = kwargs.get('top', top)
-        ws = kwargs.get('wspace', kw.get('wspace', 0) * 1.1)
-        hs = kwargs.get('hspace', kw.get('hspace', 0) * 1.1)
+            top = top * 0.95
+        top = kwargs.get("top", top)
+        ws = kwargs.get("wspace", kw.get("wspace", 0) * 1.1)
+        hs = kwargs.get("hspace", kw.get("hspace", 0) * 1.1)
 
-        plt.subplots_adjust(left=left, bottom=bottom, right=right, top=top,
-                            wspace=ws, hspace=hs)
+        plt.subplots_adjust(
+            left=left, bottom=bottom, right=right, top=top, wspace=ws, hspace=hs
+        )
 
     do_tight_layout(fig, axes, suptitle, **kwargs)
 
@@ -428,13 +470,13 @@ def multiplot(datasets=[], labels=[], nrow=1, ncol=1,
         do_tight_layout(fig, axes, suptitle, **kwargs)
         fig.canvas.draw()
 
-    fig.canvas.mpl_connect('axes_enter_event', _onenter)
-    fig.canvas.mpl_connect('axes_leave_event', _onenter)
-    fig.canvas.mpl_connect('figure_enter_event', _onenter)
-    fig.canvas.mpl_connect('figure_leave_event', _onenter)
+    fig.canvas.mpl_connect("axes_enter_event", _onenter)
+    fig.canvas.mpl_connect("axes_leave_event", _onenter)
+    fig.canvas.mpl_connect("figure_enter_event", _onenter)
+    fig.canvas.mpl_connect("figure_leave_event", _onenter)
 
     return axes
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

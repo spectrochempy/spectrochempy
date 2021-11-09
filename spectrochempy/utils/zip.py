@@ -13,7 +13,7 @@ from numpy.lib.format import read_array
 
 from spectrochempy.utils import json_decoder
 
-__all__ = ['make_zipfile', 'ScpFile']
+__all__ = ["make_zipfile", "ScpFile"]
 
 
 # ======================================================================================================================
@@ -34,11 +34,11 @@ def make_zipfile(file, **kwargs):
     """
     import zipfile
 
-    kwargs['allowZip64'] = True
+    kwargs["allowZip64"] = True
     return zipfile.ZipFile(file, **kwargs)
 
 
-class ScpFile(Mapping):   # lgtm [py/missing-equals]
+class ScpFile(Mapping):  # lgtm [py/missing-equals]
     """
     ScpFile(fid)
 
@@ -74,7 +74,7 @@ class ScpFile(Mapping):   # lgtm [py/missing-equals]
         self.files = _zip.namelist()
         self.zip = _zip
 
-        if hasattr(fid, 'close'):
+        if hasattr(fid, "close"):
             self.fid = fid
         else:
             self.fid = None
@@ -124,14 +124,14 @@ class ScpFile(Mapping):   # lgtm [py/missing-equals]
             f = self.zip.open(key)
             return read_array(f, allow_pickle=True)
 
-        elif member and ext in ['.scp']:
+        elif member and ext in [".scp"]:
             from spectrochempy.core.dataset.nddataset import NDDataset
 
             # f = io.BytesIO(self.zip.read(key))
             content = self.zip.read(key)
             return NDDataset.load(key, content=content)
 
-        elif member and ext in ['.json']:
+        elif member and ext in [".json"]:
             content = self.zip.read(key)
             return json.loads(content, object_hook=json_decoder)
 
@@ -139,15 +139,14 @@ class ScpFile(Mapping):   # lgtm [py/missing-equals]
             return self.zip.read(key)
 
         else:
-            raise KeyError("%s is not a file in the archive or is not "
-                           "allowed" % key)
+            raise KeyError("%s is not a file in the archive or is not " "allowed" % key)
 
     def __contains__(self, key):
         return self.files.__contains__(key)
 
 
 # ======================================================================================================================
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass
 
 # EOF

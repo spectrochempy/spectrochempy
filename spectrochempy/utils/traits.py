@@ -14,7 +14,6 @@ __all__ = ["MetaConfigurable", "Range"]
 
 
 class MetaConfigurable(Configurable):
-
     def __init__(self, jsonfile=None, **kwargs):  # lgtm [py/missing-call-to-init]
 
         super().__init__(**kwargs)
@@ -40,7 +39,7 @@ class MetaConfigurable(Configurable):
     @observe(All)
     def _anytrait_changed(self, change):
         # update configuration
-        if not hasattr(self, 'cfg'):
+        if not hasattr(self, "cfg"):
             # not yet initialized
             return
 
@@ -50,7 +49,14 @@ class MetaConfigurable(Configurable):
             if isinstance(value, (type(cycler), Path)):
                 value = str(value)
 
-            self.cfg.update(self.jsonfile, {self.__class__.__name__: {change.name: value, }})
+            self.cfg.update(
+                self.jsonfile,
+                {
+                    self.__class__.__name__: {
+                        change.name: value,
+                    }
+                },
+            )
 
             self.updated = True
 
@@ -59,17 +65,19 @@ class MetaConfigurable(Configurable):
 # Range trait type
 # ======================================================================================================================
 
+
 class Range(List):
     """
     The trait-type Range.
 
     Create a trait with two values defining an ordered range of values
     """
+
     klass = list
     _cast_types = (tuple,)
 
     # Describe the trait type
-    info_text = 'an ordered interval trait'
+    info_text = "an ordered interval trait"
     allow_none = True
 
     def __init__(self, trait=None, default_value=None, **kwargs):
@@ -84,13 +92,13 @@ class Range(List):
             The default value for the Trait.  Must be list/tuple/set, and
             will be cast to the container type.
         """
-        super(Range, self).__init__(trait=None, default_value=default_value,
-                                    **kwargs)
+        super(Range, self).__init__(trait=None, default_value=default_value, **kwargs)
 
     def length_error(self, obj, value):
-        e = "The '%s' trait of '%s' instance must be of length 2 exactly," \
-            " but a value of %s was specified." \
-            % (self.name, type(obj), value)
+        e = (
+            "The '%s' trait of '%s' instance must be of length 2 exactly,"
+            " but a value of %s was specified." % (self.name, type(obj), value)
+        )
         raise TraitError(e)
 
     def validate_elements(self, obj, value):
@@ -112,5 +120,5 @@ class Range(List):
 
 
 # ======================================================================================================================
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

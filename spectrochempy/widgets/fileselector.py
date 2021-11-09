@@ -37,7 +37,7 @@ import IPython
 
 from ..utils import pathclean
 
-__all__ = ['FileSelector', 'URLSelector']
+__all__ = ["FileSelector", "URLSelector"]
 
 import ipywidgets as widgets
 
@@ -62,9 +62,11 @@ class Base(object):
             self.done_callback(None)
 
     def __repr__(self):
-        return ("To get widget to display, you must "
-                "install ipy/jupyter-widgets, run in a notebook and, in "
-                "the case of jupyter-lab, install the jlab extension.")
+        return (
+            "To get widget to display, you must "
+            "install ipy/jupyter-widgets, run in a notebook and, in "
+            "the case of jupyter-lab, install the jlab extension."
+        )
 
     def _ipython_display_(self, **kwargs):
 
@@ -72,9 +74,14 @@ class Base(object):
         if InteractiveShell.initialized():
             if self.widget._view_name is not None:
                 plaintext = repr(self)
-                data = {'text/plain': plaintext,
-                        'application/vnd.jupyter.widget-view+json': {'version_major': 2, 'version_minor': 0,
-                                                                     'model_id': self.widget._model_id}}
+                data = {
+                    "text/plain": plaintext,
+                    "application/vnd.jupyter.widget-view+json": {
+                        "version_major": 2,
+                        "version_minor": 0,
+                        "model_id": self.widget._model_id,
+                    },
+                }
                 IPython.display.display(data, raw=True)
                 self.widget._handle_displayed(**kwargs)
 
@@ -82,13 +89,22 @@ class Base(object):
 class URLSelector(Base):
     def __init__(self, done_callback=None):
         self.done_callback = done_callback
-        self.lurl = widgets.Label(value='URL:')
-        self.url = widgets.Text(placeholder="Full URL with protocol",
-                                layout=widgets.Layout(flex='10 1 auto', width='auto'))
-        self.x = widgets.Button(icon='close', tooltip='Close Selector',
-                                layout=widgets.Layout(flex='1 1 auto', width='auto'))
+        self.lurl = widgets.Label(value="URL:")
+        self.url = widgets.Text(
+            placeholder="Full URL with protocol",
+            layout=widgets.Layout(flex="10 1 auto", width="auto"),
+        )
+        self.x = widgets.Button(
+            icon="close",
+            tooltip="Close Selector",
+            layout=widgets.Layout(flex="1 1 auto", width="auto"),
+        )
         self.x.on_click(lambda ev: self.stop())
-        self.ok = widgets.Button(icon='check', tooltip='OK', layout=widgets.Layout(flex='1 1 auto', width='auto'))
+        self.ok = widgets.Button(
+            icon="check",
+            tooltip="OK",
+            layout=widgets.Layout(flex="1 1 auto", width="auto"),
+        )
         self.ok.on_click(lambda ev: self.stop(ok=self.url.value))
         self.widget = widgets.HBox(children=[self.lurl, self.url, self.ok, self.x])
 
@@ -123,26 +139,35 @@ class FileSelector(Base):
                 filters = [filters]
             self.filters = list(filters)
         else:
-            self.filters = ['']
+            self.filters = [""]
         if not path or not path.exists():
             self.path = path.cwd()
         else:
             self.path = path
         self.main = widgets.Select(rows=7)
 
-        self.button = widgets.Button(icon='chevron-left', tooltip='Parent',
-                                     layout=widgets.Layout(flex='1 1 auto', width='auto'))
+        self.button = widgets.Button(
+            icon="chevron-left",
+            tooltip="Parent",
+            layout=widgets.Layout(flex="1 1 auto", width="auto"),
+        )
         self.button.on_click(self.up)
 
-        self.label = widgets.Label(layout=widgets.Layout(flex='100 1 auto', width='auto'))
-        self.x = widgets.Button(icon='close', tooltip='Close Selector', layout=widgets.Layout(width='auto'))
+        self.label = widgets.Label(
+            layout=widgets.Layout(flex="100 1 auto", width="auto")
+        )
+        self.x = widgets.Button(
+            icon="close", tooltip="Close Selector", layout=widgets.Layout(width="auto")
+        )
         self.x.on_click(lambda ev: self.stop())
 
-        self.ok = widgets.Button(icon='check', tooltip='OK', layout=widgets.Layout(width='auto'))
+        self.ok = widgets.Button(
+            icon="check", tooltip="OK", layout=widgets.Layout(width="auto")
+        )
         self.ok.on_click(lambda ev: self._ok())
 
         self.make_options()
-        self.main.observe(self.changed, 'value')
+        self.main.observe(self.changed, "value")
         self.upper = widgets.Box(children=[self.button, self.label])
         self.right = widgets.VBox(children=[self.x, self.ok])
         self.lower = widgets.HBox(children=[self.main, self.right])
@@ -158,11 +183,17 @@ class FileSelector(Base):
 
     def make_options(self):
         self.ignore = True
-        self.label.value = str(self.path).replace(str(self.startpath.parent), '..') if str(self.startpath) in str(
-                self.path) else str(self.path)
+        self.label.value = (
+            str(self.path).replace(str(self.startpath.parent), "..")
+            if str(self.startpath) in str(self.path)
+            else str(self.path)
+        )
         out = []
-        for f in sorted(self.path.glob('[a-zA-Z0-9]*')):  # os.listdir()):
-            if f.is_dir() or any(ext in f.suffix for ext in self.filters + list(map(str.upper, self.filters))):
+        for f in sorted(self.path.glob("[a-zA-Z0-9]*")):  # os.listdir()):
+            if f.is_dir() or any(
+                ext in f.suffix
+                for ext in self.filters + list(map(str.upper, self.filters))
+            ):
                 out.append(f.name)
         self.main.value = self.value = None
         self.fullpath = self.path
@@ -170,7 +201,9 @@ class FileSelector(Base):
         self.ignore = False
 
     def up(self, *args):
-        self.path = self.path.parent  # os.path.dirname(self.path.rstrip('/')).rstrip('/') + '/'
+        self.path = (
+            self.path.parent
+        )  # os.path.dirname(self.path.rstrip('/')).rstrip('/') + '/'
         self.make_options()
 
     def changed(self, ev):
@@ -179,7 +212,7 @@ class FileSelector(Base):
             self.fullpath = None
             return
         with ignore(self):
-            fn = self.path / ev['new']
+            fn = self.path / ev["new"]
             if fn.is_dir():
                 self.path = fn
                 self.make_options()

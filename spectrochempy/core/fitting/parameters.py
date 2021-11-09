@@ -8,7 +8,7 @@
 Model parameters handling
 """
 
-__all__ = ['FitParameters', 'ParameterScript']
+__all__ = ["FitParameters", "ParameterScript"]
 
 # ==============
 # python import
@@ -19,7 +19,7 @@ from collections import UserDict  # This is to be able to create a special dicti
 from spectrochempy.core import info_
 from spectrochempy.core.dataset.nddataset import NDDataset
 import numpy as np
-from traitlets import (HasTraits, Unicode, Instance, List, observe)
+from traitlets import HasTraits, Unicode, Instance, List, observe
 
 
 # =============
@@ -64,7 +64,7 @@ class FitParameters(UserDict):
         self.common = {}  # indicates if a parameters belong to a common block
         self.model = {}  # model to use
         self.models = []  # list of models
-        self.sequence = ''  # sequence used in the experiment
+        self.sequence = ""  # sequence used in the experiment
         self.expvars = []  # list of parameters which are experiment dependent
         self.expnumber = 1  # number of experiments
 
@@ -113,9 +113,12 @@ class FitParameters(UserDict):
         key = str(key)
         if self.lob[key] is None and self.upb[key] is None:
             return False
-        elif (self.lob[key] is not None and self.data[key] < self.lob[key]) or (self.upb[key] is not None
-                                                                                and self.data[key] > self.upb[key]):
-            raise ValueError('%s value %s is out of bounds' % (key, str(self.data[key])))
+        elif (self.lob[key] is not None and self.data[key] < self.lob[key]) or (
+            self.upb[key] is not None and self.data[key] > self.upb[key]
+        ):
+            raise ValueError(
+                "%s value %s is out of bounds" % (key, str(self.data[key]))
+            )
 
     # ------------------------------------------------------------------------------------------------------------------
     def __str__(self):
@@ -123,7 +126,7 @@ class FitParameters(UserDict):
         # .............................................................
         def makestr(key):
 
-            keystring = key.split('_')[0]
+            keystring = key.split("_")[0]
             if self.reference[key]:
                 return "\t> %s:%s \n" % (keystring, self.data[key])
             else:
@@ -139,8 +142,7 @@ class FitParameters(UserDict):
                     upb = "none"
                 val = str(self.data[key])
 
-                return "%s: %10.4f, %s, %s \n" % (
-                        keystring, float(val), lob, upb)
+                return "%s: %10.4f, %s, %s \n" % (keystring, float(val), lob, upb)
 
         # ..............................................................
 
@@ -156,7 +158,7 @@ class FitParameters(UserDict):
 
         # look for common parameters
         for key in list(self.keys()):
-            keysp = key.split('_')[0]
+            keysp = key.split("_")[0]
             if self.common[keysp]:
                 message += makestr(key)
 
@@ -166,8 +168,8 @@ class FitParameters(UserDict):
             message += "\nMODEL: %s\n" % model
             message += "shape: %s\n" % self.model[model]
             for key in sorted(self.keys()):
-                keyspl = key.split('_')
-                if model not in '_'.join(keyspl[1:]):
+                keyspl = key.split("_")
+                if model not in "_".join(keyspl[1:]):
                     continue
                 message += makestr(key)
         return message
@@ -193,13 +195,14 @@ class FitParameters(UserDict):
 
         if isinstance(strg, str):
             # strg=string.upper(strg)
-            p = re.compile(r'\s+')
+            p = re.compile(r"\s+")
             m = p.split(strg.strip())
             try:
                 res = eval(m[0])
             except NameError:
-                message = "Cannot evaluate '" + strg + "' >> " + m[
-                    0] + " is not defined"
+                message = (
+                    "Cannot evaluate '" + strg + "' >> " + m[0] + " is not defined"
+                )
                 raise NameError(message)
             except SyntaxError:
                 message = "Syntax error in '" + strg + "'"
@@ -209,8 +212,9 @@ class FitParameters(UserDict):
                 try:
                     res = res * eval(m[1])
                 except NameError:
-                    message = "Cannot evaluate '" + strg + "' >> " + m[
-                        1] + " is not defined"
+                    message = (
+                        "Cannot evaluate '" + strg + "' >> " + m[1] + " is not defined"
+                    )
                     raise NameError(message)
                 except SyntaxError:
                     message = "Syntax error in '" + strg + "'"
@@ -237,22 +241,26 @@ class FitParameters(UserDict):
         lob = self.lob[key]
         upb = self.upb[key]
 
-        is_lob = lob is not None and lob > -0.1 / sys.float_info.epsilon  # lob is not None
-        is_upb = lob is not None and upb < +0.1 / sys.float_info.epsilon  # upb is not None
+        is_lob = (
+            lob is not None and lob > -0.1 / sys.float_info.epsilon
+        )  # lob is not None
+        is_upb = (
+            lob is not None and upb < +0.1 / sys.float_info.epsilon
+        )  # upb is not None
 
         if is_lob and is_upb:
             lob = min(pe, lob)
             upb = max(pe, upb)
             # With min and max bounds defined
-            pi = np.arcsin((2 * (pe - lob) / (upb - lob)) - 1.)
+            pi = np.arcsin((2 * (pe - lob) / (upb - lob)) - 1.0)
         elif is_upb:
             upb = max(pe, upb)
             # With only max defined
-            pi = np.sqrt((upb - pe + 1.) ** 2 - 1.)
+            pi = np.sqrt((upb - pe + 1.0) ** 2 - 1.0)
         elif is_lob:
             lob = min(pe, lob)
             # With only min defined
-            pi = np.sqrt((pe - lob + 1.) ** 2 - 1.)
+            pi = np.sqrt((pe - lob + 1.0) ** 2 - 1.0)
         else:
             pi = pe
         return pi
@@ -267,23 +275,29 @@ class FitParameters(UserDict):
         lob = self.lob[key]
         upb = self.upb[key]
 
-        is_lob = lob is not None and lob > -0.1 / sys.float_info.epsilon  # lob is not None
-        is_upb = lob is not None and upb < +0.1 / sys.float_info.epsilon  # upb is not None
+        is_lob = (
+            lob is not None and lob > -0.1 / sys.float_info.epsilon
+        )  # lob is not None
+        is_upb = (
+            lob is not None and upb < +0.1 / sys.float_info.epsilon
+        )  # upb is not None
 
         if not isinstance(pi, list):
-            pi = [pi, ]  # make a list
+            pi = [
+                pi,
+            ]  # make a list
 
         pe = []
         for item in pi:
             if is_lob and is_upb:
                 #  With min and max bounds defined
-                pei = lob + ((upb - lob) / 2.) * (np.sin(item) + 1.)
+                pei = lob + ((upb - lob) / 2.0) * (np.sin(item) + 1.0)
             elif is_upb:
                 # With only max defined
-                pei = upb + 1. - np.sqrt(item ** 2 + 1.)
+                pei = upb + 1.0 - np.sqrt(item ** 2 + 1.0)
             elif is_lob:
                 # With only min defined
-                pei = lob - 1. + np.sqrt(item ** 2 + 1.)
+                pei = lob - 1.0 + np.sqrt(item ** 2 + 1.0)
             else:
                 pei = pi
             pe.append(pei)
@@ -326,7 +340,7 @@ class ParameterScript(HasTraits):
 
     fp = Instance(FitParameters)
 
-    script = Unicode('')
+    script = Unicode("")
 
     datasets = List(Instance(NDDataset))
 
@@ -334,7 +348,7 @@ class ParameterScript(HasTraits):
     # properties
     # ===========================================================================
     # ------------------------------------------------------------------------------------------------------------------
-    @observe('script')
+    @observe("script")
     def _check_parameters(self, change):
         """
         Check the validity of the parameters
@@ -360,93 +374,103 @@ class ParameterScript(HasTraits):
         info_("The number of experiment(s) is set to %d" % fp.expnumber)
 
         # start interpreting ------------------------------------------------------
-        lines = script.split('\n')
+        lines = script.split("\n")
         lc = 0
 
         for item in lines:
             lc += 1  # -------------- count the lines
             line = item.strip()
-            if line == '' or line.startswith("#"):
+            if line == "" or line.startswith("#"):
                 # this is a blank or comment line, go to next line
                 continue
             # split around the semi-column
-            s = line.split(':')
+            s = line.split(":")
             if len(s) != 2:
                 raise ValueError(
-                        'Cannot interpret line %d: A semi-column is missing?' % lc)
+                    "Cannot interpret line %d: A semi-column is missing?" % lc
+                )
 
             key, values = s
             key = key.strip().lower()
-            if key.startswith('model'):
+            if key.startswith("model"):
                 modlabel = values.lower().strip()
                 if modlabel not in fp.models:
                     fp.models.append(modlabel)
                 common = False
                 continue
-            elif key.startswith('common') or key.startswith('vars'):
+            elif key.startswith("common") or key.startswith("vars"):
                 common = True
-                modlabel = 'common'
+                modlabel = "common"
                 continue
-            elif key.startswith('shape'):
+            elif key.startswith("shape"):
                 shape = values.lower().strip()
-                if shape is None:  # or (shape not in self._list_of_models and shape not in self._list_of_baselines):
+                if (
+                    shape is None
+                ):  # or (shape not in self._list_of_models and shape not in self._list_of_baselines):
                     raise ValueError(
-                            'Shape of this model "%s" was not specified or is not implemented' % shape)
+                        'Shape of this model "%s" was not specified or is not implemented'
+                        % shape
+                    )
                 fp.model[modlabel] = shape
                 common = False
                 continue
             elif key.startswith("experiment"):  # must be in common
                 if not common:
                     raise ValueError(
-                            "'experiment_...' specification was found outside the common block.")
+                        "'experiment_...' specification was found outside the common block."
+                    )
                 if "variables" in key:
                     expvars = values.lower().strip()
-                    expvars = expvars.replace(',', ' ').replace(';', ' ')
+                    expvars = expvars.replace(",", " ").replace(";", " ")
                     expvars = expvars.split()
                     fp.expvars.extend(expvars)
                 continue
             else:
                 if modlabel is None and not common:
                     raise ValueError(
-                            "The first definition should be a label for a model or a block of variables or constants.")
+                        "The first definition should be a label for a model or a block of variables or constants."
+                    )
                 # get the parameters
-                if key.startswith('*'):
+                if key.startswith("*"):
                     fixed = True
                     reference = False
                     key = key[1:].strip()
-                elif key.startswith('$'):
+                elif key.startswith("$"):
                     fixed = False
                     reference = False
                     key = key[1:].strip()
-                elif key.startswith('>'):
+                elif key.startswith(">"):
                     fixed = True
                     reference = True
                     key = key[1:].strip()
                 else:
                     raise ValueError(
-                            'Cannot interpret line %d: A parameter definition must start with *,$ or >' % lc)
+                        "Cannot interpret line %d: A parameter definition must start with *,$ or >"
+                        % lc
+                    )
 
                 # store this parameter
-                s = values.split(',')
+                s = values.split(",")
                 s = [ss.strip() for ss in s]
-                if len(s) > 1 and ('[' in s[0]) and (']' in s[1]):  # list
+                if len(s) > 1 and ("[" in s[0]) and ("]" in s[1]):  # list
                     s[0] = "%s, %s" % (s[0], s[1])
                     if len(s) > 2:
                         s[1:] = s[2:]
                 if len(s) > 3:
                     raise ValueError(
-                            'line %d: value, min, max should be defined in this order' % lc)
+                        "line %d: value, min, max should be defined in this order" % lc
+                    )
                 elif len(s) == 2:
-                    raise ValueError('only two items in line %d' % lc)
+                    raise ValueError("only two items in line %d" % lc)
                     # s.append('none')
                 elif len(s) == 1:
-                    s.extend(['none', 'none'])
+                    s.extend(["none", "none"])
                 value, mini, maxi = s
-                if mini.strip().lower() in ['none', '']:
-                    mini = str(-1. / sys.float_info.epsilon)
-                if maxi.strip().lower() in ['none', '']:
-                    maxi = str(+1. / sys.float_info.epsilon)
-                if modlabel != 'common':
+                if mini.strip().lower() in ["none", ""]:
+                    mini = str(-1.0 / sys.float_info.epsilon)
+                if maxi.strip().lower() in ["none", ""]:
+                    maxi = str(+1.0 / sys.float_info.epsilon)
+                if modlabel != "common":
                     ks = "%s_%s" % (key, modlabel)
                     # print(ks)
                     # if "ratio_line_1" in ks:
@@ -466,11 +490,13 @@ class ParameterScript(HasTraits):
                         # if the parameter is already a list, that's ok if the number of parameters is ok
                         if len(val) != fp.expnumber:
                             raise ValueError(
-                                    'the number of parameters for %s is not the number of experiments.' % len(
-                                            val))
+                                "the number of parameters for %s is not the number of experiments."
+                                % len(val)
+                            )
                         if key not in fp.expvars:
                             raise ValueError(
-                                    'parameter %s is not declared as variable' % key)
+                                "parameter %s is not declared as variable" % key
+                            )
                     else:
                         if key in fp.expvars:
                             # we create a list of parameters corresponding

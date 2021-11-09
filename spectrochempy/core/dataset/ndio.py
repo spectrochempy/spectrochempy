@@ -10,7 +10,7 @@ This module define the class |NDIO| in which input/output standard
 methods for a |NDDataset| are defined.
 """
 
-__all__ = ['NDIO', 'SCPY_SUFFIX']
+__all__ = ["NDIO", "SCPY_SUFFIX"]
 
 import io
 import json
@@ -21,10 +21,17 @@ from numpy.lib.npyio import zipfile_factory
 from traitlets import HasTraits, Instance, Union, Unicode
 
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
-from spectrochempy.utils import (SpectroChemPyException, pathclean, check_filenames, ScpFile, check_filename_to_save,
-                                 json_serialiser, TYPE_BOOL, )
+from spectrochempy.utils import (
+    SpectroChemPyException,
+    pathclean,
+    check_filenames,
+    ScpFile,
+    check_filename_to_save,
+    json_serialiser,
+    TYPE_BOOL,
+)
 
-SCPY_SUFFIX = {'NDDataset': '.scp', 'Project': '.pscp'}
+SCPY_SUFFIX = {"NDDataset": ".scp", "Project": ".pscp"}
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -34,6 +41,7 @@ SCPY_SUFFIX = {'NDDataset': '.scp', 'Project': '.pscp'}
 # ======================================================================================================================
 # Class NDIO to handle I/O of datasets
 # ======================================================================================================================
+
 
 class NDIO(HasTraits):
     """
@@ -74,7 +82,7 @@ class NDIO(HasTraits):
     @property
     def filetype(self):
         klass = self.implements()
-        return [f'SpectroChemPy {klass} file (*{SCPY_SUFFIX[klass]})']
+        return [f"SpectroChemPy {klass} file (*{SCPY_SUFFIX[klass]})"]
 
     @property
     def suffix(self):
@@ -96,7 +104,9 @@ class NDIO(HasTraits):
     # ------------------------------------------------------------------------------------------------------------------
 
     def __dir__(self):
-        return ['filename', ]
+        return [
+            "filename",
+        ]
 
     # ------------------------------------------------------------------------------------------------------------------
     # Public methods
@@ -139,16 +149,16 @@ class NDIO(HasTraits):
         # name + suffix depending
         # on the current object type
         if self.directory is None:
-            filename = pathclean('.') / self.name
+            filename = pathclean(".") / self.name
         else:
             filename = pathclean(self.directory) / self.name
 
         default_suffix = SCPY_SUFFIX[self.implements()]
         filename = filename.with_suffix(default_suffix)
 
-        if not filename.exists() and kwargs.get('confirm', True):
+        if not filename.exists() and kwargs.get("confirm", True):
             # never saved
-            kwargs['caption'] = f'Save the current {self.implements()} as ... '
+            kwargs["caption"] = f"Save the current {self.implements()} as ... "
             return self.save_as(filename, **kwargs)
 
         # was already saved previously with this name,
@@ -158,7 +168,7 @@ class NDIO(HasTraits):
         return self.dump(filename, **kwargs)
 
     # ..................................................................................................................
-    def save_as(self, filename='', **kwargs):
+    def save_as(self, filename="", **kwargs):
         """
         Save the current |NDDataset| in SpectroChemPy format (*.scp)
 
@@ -213,9 +223,11 @@ class NDIO(HasTraits):
         if filename is not None and not filename.is_dir():
             filename = filename.with_suffix(default_suffix)
 
-        kwargs['filetypes'] = self.filetype
-        kwargs['caption'] = f'Save the current {self.implements()} as ... '
-        filename = check_filename_to_save(self, filename, save_as=True, suffix=default_suffix, **kwargs)
+        kwargs["filetypes"] = self.filetype
+        kwargs["caption"] = f"Save the current {self.implements()} as ... "
+        filename = check_filename_to_save(
+            self, filename, save_as=True, suffix=default_suffix, **kwargs
+        )
 
         if filename:
             self.filename = filename
@@ -260,7 +272,7 @@ class NDIO(HasTraits):
         read : import dataset from various orgines
         save : save the current dataset
         """
-        content = kwargs.get('content', None)
+        content = kwargs.get("content", None)
 
         if content:
             fid = io.BytesIO(content)
@@ -270,11 +282,11 @@ class NDIO(HasTraits):
             filename = pathclean(filename)
             suffix = cls().suffix
             filename = filename.with_suffix(suffix)
-            if kwargs.get('directory', None) is not None:
-                filename = pathclean(kwargs.get('directory')) / filename
+            if kwargs.get("directory", None) is not None:
+                filename = pathclean(kwargs.get("directory")) / filename
             if not filename.exists():
                 filename = check_filenames(filename, **kwargs)[0]
-            fid = open(filename, 'rb')
+            fid = open(filename, "rb")
 
         # get zip file
         try:
@@ -282,12 +294,12 @@ class NDIO(HasTraits):
         except FileNotFoundError:
             raise SpectroChemPyException(f"File {filename} doesn't exist!")
         except Exception as e:
-            if str(e) == 'File is not a zip file':
+            if str(e) == "File is not a zip file":
                 raise SpectroChemPyException("File not in 'scp' or 'pscp' format!")
             raise SpectroChemPyException("Undefined error!")
 
         js = obj[obj.files[0]]
-        if kwargs.get('json', False):
+        if kwargs.get("json", False):
             return js
 
         new = cls.loads(js)
@@ -319,65 +331,65 @@ class NDIO(HasTraits):
             for key, val in dic.items():
 
                 try:
-                    if 'readonly' in dic.keys() and key in ['readonly', 'name']:
+                    if "readonly" in dic.keys() and key in ["readonly", "name"]:
                         # case of the meta and preferences
                         pass
 
-                    elif hasattr(obj, f'_{key}'):
+                    elif hasattr(obj, f"_{key}"):
                         # use the hidden attribute if it exists
-                        key = f'_{key}'
+                        key = f"_{key}"
 
                     if val is None:
                         pass
 
-                    elif key in ['_meta', '_ranges', '_preferences']:
+                    elif key in ["_meta", "_ranges", "_preferences"]:
                         setattr(obj, key, item_to_attr(getattr(obj, key), val))
 
-                    elif key in ['_coordset']:
+                    elif key in ["_coordset"]:
                         _coords = []
-                        for v in val['coords']:
-                            if 'data' in v:
+                        for v in val["coords"]:
+                            if "data" in v:
                                 _coords.append(item_to_attr(Coord(), v))
                             else:
                                 _coords.append(item_to_attr(LinearCoord(), v))
 
-                        if val['is_same_dim']:
+                        if val["is_same_dim"]:
                             obj.set_coordset(_coords)
                         else:
                             coords = dict((c.name, c) for c in _coords)
                             obj.set_coordset(coords)
-                        obj._name = val['name']
-                        obj._references = val['references']
+                        obj._name = val["name"]
+                        obj._references = val["references"]
 
-                    elif key in ['_datasets']:
+                    elif key in ["_datasets"]:
                         # datasets = [item_to_attr(NDDataset(name=k),
                         # v) for k, v in val.items()]
                         datasets = [item_to_attr(NDDataset(), js) for js in val]
                         obj.datasets = datasets
 
-                    elif key in ['_projects']:
+                    elif key in ["_projects"]:
                         projects = [item_to_attr(Project(), js) for js in val]
                         obj.projects = projects
 
-                    elif key in ['_scripts']:
+                    elif key in ["_scripts"]:
                         scripts = [item_to_attr(Script(), js) for js in val]
                         obj.scripts = scripts
 
-                    elif key in ['_parent']:
+                    elif key in ["_parent"]:
                         # automatically set
                         pass
 
                     else:
-                        if isinstance(val, TYPE_BOOL) and key == '_mask':
+                        if isinstance(val, TYPE_BOOL) and key == "_mask":
                             val = np.bool_(val)
-                        if isinstance(obj, NDDataset) and key == '_filename':
+                        if isinstance(obj, NDDataset) and key == "_filename":
                             obj.filename = val  # This is a hack because for some reason finelame attribute is not
                             # found ????
                         else:
                             setattr(obj, key, val)
 
                 except Exception as e:
-                    raise TypeError(f'for {key} {e}')
+                    raise TypeError(f"for {key} {e}")
 
             return obj
 
@@ -403,18 +415,18 @@ class NDIO(HasTraits):
 
         # prepare the json data
         try:
-            js = self.dumps(encoding='base64')
+            js = self.dumps(encoding="base64")
         except Exception as e:
             print(e)
 
         # write in a temp file
-        _, tmpfile = tempfile.mkstemp(suffix='-spectrochempy')
+        _, tmpfile = tempfile.mkstemp(suffix="-spectrochempy")
         tmpfile = pathclean(tmpfile)
-        tmpfile.write_bytes(js.encode('utf-8'))
+        tmpfile.write_bytes(js.encode("utf-8"))
 
         # compress and write zip file
         zipf = zipfile_factory(filename, mode="w", compression=zipfile.ZIP_DEFLATED)
-        zipf.write(tmpfile, arcname=f'{self.name}.json')
+        zipf.write(tmpfile, arcname=f"{self.name}.json")
         # tmpfile.unlink()
         zipf.close()
 
@@ -425,7 +437,7 @@ class NDIO(HasTraits):
 
 
 # ======================================================================================================================
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass
 
 # EOF

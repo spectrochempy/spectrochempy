@@ -25,10 +25,14 @@ def main():
     debug = scp.get_loglevel() == scp.DEBUG
 
     # create the standalone application
-    layout = Layout(calling_script_name=__file__, fix_navbar=debug, data_storage='session')
+    layout = Layout(
+        calling_script_name=__file__, fix_navbar=debug, data_storage="session"
+    )
 
     theme = dbc.themes.BOOTSTRAP
-    app = dash.Dash(__name__, title='SpectroChemPy by Dash', external_stylesheets=[theme])
+    app = dash.Dash(
+        __name__, title="SpectroChemPy by Dash", external_stylesheets=[theme]
+    )
     app.css.config.serve_locally = True
     app.scripts.config.serve_locally = True
     app.index_string = """
@@ -70,8 +74,9 @@ def main():
     port = scp.app.port
     for i in range(10):
         try:
-            _open_browser = \
-                lambda: webbrowser.open_new(f'http://127.0.0.1:{port + i}/')  # lgtm [py/loop-variable-capture]
+            _open_browser = lambda: webbrowser.open_new(
+                f"http://127.0.0.1:{port + i}/"
+            )  # lgtm [py/loop-variable-capture]
             Timer(1, _open_browser).start()
             app.run_server(debug=debug, port=port + i)
             break
@@ -81,5 +86,5 @@ def main():
                 continue
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

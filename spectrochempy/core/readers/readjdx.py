@@ -8,7 +8,7 @@
 This module to extend NDDataset with the import methods.
 """
 
-__all__ = ['read_jcamp', 'read_jdx', 'read_dx']
+__all__ = ["read_jcamp", "read_jdx", "read_dx"]
 __dataset_methods__ = __all__
 
 import io
@@ -94,20 +94,24 @@ def read_jcamp(*paths, **kwargs):
     read_zip : Read Zip files.
     read_matlab : Read Matlab files.
     """
-    kwargs['filetypes'] = ['JCAMP-DX files (*.jdx *.dx)']
-    kwargs['protocol'] = ['jcamp']
+    kwargs["filetypes"] = ["JCAMP-DX files (*.jdx *.dx)"]
+    kwargs["protocol"] = ["jcamp"]
     importer = Importer()
     return importer(*paths, **kwargs)
 
 
-@deprecated("read_jdx reading method is deprecated and may be removed in next versions "
-            "- use read_jcamp instead")
+@deprecated(
+    "read_jdx reading method is deprecated and may be removed in next versions "
+    "- use read_jcamp instead"
+)
 def read_jdx(*args, **kwargs):
     return read_jcamp(*args, **kwargs)
 
 
-@deprecated("read_dx reading method is deprecated and may be removed in next versions "
-            "- use read_jcamp instead")
+@deprecated(
+    "read_dx reading method is deprecated and may be removed in next versions "
+    "- use read_jcamp instead"
+)
 def read_dx(*args, **kwargs):
     return read_jcamp(*args, **kwargs)
 
@@ -116,101 +120,110 @@ def read_dx(*args, **kwargs):
 # private functions
 # ======================================================================================================================
 
+
 @importermethod
 def _read_jdx(*args, **kwargs):
 
     # read jdx file
     dataset, filename = args
-    content = kwargs.get('content', None)
+    content = kwargs.get("content", None)
     sortbydate = kwargs.pop("sortbydate", True)
 
     if content is not None:
         fid = io.StringIO(content.decode("utf-8"))
     else:
-        fid = open(filename, 'r')
+        fid = open(filename, "r")
 
     # Read header of outer Block
     # ..................................................................................................................
-    keyword = ''
+    keyword = ""
 
-    while keyword != '##TITLE':
+    while keyword != "##TITLE":
         keyword, text = _readl(fid)
-    if keyword != 'EOF':
+    if keyword != "EOF":
         jdx_title = text
     else:
-        raise ValueError('No ##TITLE LR in outer block header')
+        raise ValueError("No ##TITLE LR in outer block header")
 
-    while (keyword != '##DATA TYPE') and (keyword != '##DATATYPE'):
+    while (keyword != "##DATA TYPE") and (keyword != "##DATATYPE"):
         keyword, text = _readl(fid)
-    if keyword != 'EOF':
+    if keyword != "EOF":
         jdx_data_type = text
     else:
-        raise ValueError('No ##DATA TYPE LR in outer block header')
+        raise ValueError("No ##DATA TYPE LR in outer block header")
 
-    if jdx_data_type == 'LINK':
-        while keyword != '##BLOCKS':
+    if jdx_data_type == "LINK":
+        while keyword != "##BLOCKS":
             keyword, text = _readl(fid)
         nspec = int(text)
-    elif jdx_data_type.replace(' ', '') == 'INFRAREDSPECTRUM':
+    elif jdx_data_type.replace(" ", "") == "INFRAREDSPECTRUM":
         nspec = 1
     else:
-        raise ValueError('DATA TYPE must be LINK or INFRARED SPECTRUM')
+        raise ValueError("DATA TYPE must be LINK or INFRARED SPECTRUM")
 
     # Create variables
     # ..................................................................................................................
     xaxis = np.array([])
     data = np.array([])
     alltitles, alltimestamps, alldates, xunits, yunits = [], [], [], [], []
-    nx, firstx, lastx = np.zeros(nspec, 'int'), np.zeros(nspec, 'float'), np.zeros(nspec, 'float')
+    nx, firstx, lastx = (
+        np.zeros(nspec, "int"),
+        np.zeros(nspec, "float"),
+        np.zeros(nspec, "float"),
+    )
 
     # Read the spectra
     # ..................................................................................................................
     for i in range(nspec):
 
         # Reset variables
-        keyword = ''
+        keyword = ""
 
         # (year, month,...) must be reset at each spectrum because labels "time"
         # and "longdate" are not required in JDX file
-        [year, month, day, hour, minute, second] = '', '', '', '', '', ''
+        [year, month, day, hour, minute, second] = "", "", "", "", "", ""
 
         # Read JDX file for spectrum n° i
-        while keyword != '##END':
+        while keyword != "##END":
             keyword, text = _readl(fid)
-            if keyword in ['##ORIGIN', '##OWNER', '##JCAMP-DX']:
+            if keyword in ["##ORIGIN", "##OWNER", "##JCAMP-DX"]:
                 continue
-            elif keyword == '##TITLE':
+            elif keyword == "##TITLE":
                 # Add the title of the spectrum in the list alltitles
                 alltitles.append(text)
-            elif keyword == '##LONGDATE':
-                [year, month, day] = text.split('/')
-            elif keyword == '##TIME':
-                [hour, minute, second] = re.split(r'[:.]', text)
-            elif keyword == '##XUNITS':
+            elif keyword == "##LONGDATE":
+                [year, month, day] = text.split("/")
+            elif keyword == "##TIME":
+                [hour, minute, second] = re.split(r"[:.]", text)
+            elif keyword == "##XUNITS":
                 xunits.append(text)
-            elif keyword == '##YUNITS':
+            elif keyword == "##YUNITS":
                 yunits.append(text)
-            elif keyword == '##FIRSTX':
+            elif keyword == "##FIRSTX":
                 firstx[i] = float(text)
-            elif keyword == '##LASTX':
+            elif keyword == "##LASTX":
                 lastx[i] = float(text)
-            elif keyword == '##XFACTOR':
+            elif keyword == "##XFACTOR":
                 xfactor = float(text)
-            elif keyword == '##YFACTOR':
+            elif keyword == "##YFACTOR":
                 yfactor = float(text)
-            elif keyword == '##NPOINTS':
+            elif keyword == "##NPOINTS":
                 nx[i] = float(text)
-            elif keyword == '##XYDATA':
+            elif keyword == "##XYDATA":
                 # Read the intensities
                 allintensities = []
-                while keyword != '##END':
+                while keyword != "##END":
                     keyword, text = _readl(fid)
                     # for each line, get all the values exept the first one (first value = wavenumber)
-                    intensities = list(filter(None, text.split(' ')[1:]))
+                    intensities = list(filter(None, text.split(" ")[1:]))
                     if len(intensities) > 0:
                         allintensities += intensities
-                spectra = np.array([allintensities])  # convert allintensities into an array
-                spectra[spectra == '?'] = 'nan'  # deals with missing or out of range intensity values
+                spectra = np.array(
+                    [allintensities]
+                )  # convert allintensities into an array
+                spectra[
+                    spectra == "?"
+                ] = "nan"  # deals with missing or out of range intensity values
                 spectra = spectra.astype(np.float32)
                 spectra *= yfactor
                 # add spectra in "data" matrix
@@ -228,17 +241,40 @@ def _read_jdx(*args, **kwargs):
             else:
                 # Check the consistency of xaxis
                 if nx[i] - nx[i - 1] != 0:
-                    raise ValueError('Inconsistent data set: number of wavenumber per spectrum should be identical')
+                    raise ValueError(
+                        "Inconsistent data set: number of wavenumber per spectrum should be identical"
+                    )
                 elif firstx[i] - firstx[i - 1] != 0:
-                    raise ValueError('Inconsistent data set: the x axis should start at same value')
+                    raise ValueError(
+                        "Inconsistent data set: the x axis should start at same value"
+                    )
                 elif lastx[i] - lastx[i - 1] != 0:
-                    raise ValueError('Inconsistent data set: the x axis should end at same value')
+                    raise ValueError(
+                        "Inconsistent data set: the x axis should end at same value"
+                    )
         else:
-            raise ValueError('##FIRST, ##LASTX or ##NPOINTS are unusuable in the spectrum n°', i + 1)
+            raise ValueError(
+                "##FIRST, ##LASTX or ##NPOINTS are unusuable in the spectrum n°", i + 1
+            )
 
         # Creation of the acquisition date
-        if (year != '' and month != '' and day != '' and hour != '' and minute != '' and second != ''):
-            date = datetime(int(year), int(month), int(day), int(hour), int(minute), int(second), tzinfo=timezone.utc)
+        if (
+            year != ""
+            and month != ""
+            and day != ""
+            and hour != ""
+            and minute != ""
+            and second != ""
+        ):
+            date = datetime(
+                int(year),
+                int(month),
+                int(day),
+                int(hour),
+                int(minute),
+                int(second),
+                tzinfo=timezone.utc,
+            )
             timestamp = date.timestamp()
             # Transform back to timestamp for storage in the Coord object
             # use datetime.fromtimestamp(d, timezone.utc))
@@ -252,44 +288,53 @@ def _read_jdx(*args, **kwargs):
         # Check the consistency of xunits and yunits
         if i > 0:
             if yunits[i] != yunits[i - 1]:
-                raise ValueError(f'##YUNITS should be the same for all spectra (check spectrum n°{i + 1}')
+                raise ValueError(
+                    f"##YUNITS should be the same for all spectra (check spectrum n°{i + 1}"
+                )
             elif xunits[i] != xunits[i - 1]:
-                raise ValueError(f'##XUNITS should be the same for all spectra (check spectrum n°{i + 1}')
+                raise ValueError(
+                    f"##XUNITS should be the same for all spectra (check spectrum n°{i + 1}"
+                )
 
     # Determine xaxis name ****************************************************
-    if xunits[0].strip() == '1/CM':
-        axisname = 'wavenumbers'
-        axisunit = 'cm^-1'
-    elif xunits[0].strip() == 'MICROMETERS':
-        axisname = 'wavelength'
-        axisunit = 'um'
-    elif xunits[0].strip() == 'NANOMETERS':
-        axisname = 'wavelength'
-        axisunit = 'nm'
-    elif xunits[0].strip() == 'SECONDS':
-        axisname = 'time'
-        axisunit = 's'
-    elif xunits[0].strip() == 'ARBITRARY UNITS':
-        axisname = 'arbitrary unit'
+    if xunits[0].strip() == "1/CM":
+        axisname = "wavenumbers"
+        axisunit = "cm^-1"
+    elif xunits[0].strip() == "MICROMETERS":
+        axisname = "wavelength"
+        axisunit = "um"
+    elif xunits[0].strip() == "NANOMETERS":
+        axisname = "wavelength"
+        axisunit = "nm"
+    elif xunits[0].strip() == "SECONDS":
+        axisname = "time"
+        axisunit = "s"
+    elif xunits[0].strip() == "ARBITRARY UNITS":
+        axisname = "arbitrary unit"
         axisunit = None
     else:
-        axisname = ''
-        axisunit = ''
+        axisname = ""
+        axisunit = ""
     fid.close()
 
     dataset.data = data
     dataset.name = jdx_title
-    if yunits[0].strip() == 'ABSORBANCE':
-        dataset.units = 'absorbance'
-        dataset.title = 'absorbance'
-    elif yunits[0].strip() == 'TRANSMITTANCE':
+    if yunits[0].strip() == "ABSORBANCE":
+        dataset.units = "absorbance"
+        dataset.title = "absorbance"
+    elif yunits[0].strip() == "TRANSMITTANCE":
         # TODO: This units not in pint. Add this
-        dataset.title = 'transmittance'
+        dataset.title = "transmittance"
 
     # now add coordinates
     _x = Coord(xaxis, title=axisname, units=axisunit)
-    if jdx_data_type == 'LINK':
-        _y = Coord(alltimestamps, title='acquisition timestamp (GMT)', units='s', labels=(alldates, alltitles))
+    if jdx_data_type == "LINK":
+        _y = Coord(
+            alltimestamps,
+            title="acquisition timestamp (GMT)",
+            units="s",
+            labels=(alldates, alltitles),
+        )
         dataset.set_coordset(y=_y, x=_x)
     else:
         _y = Coord()
@@ -299,11 +344,11 @@ def _read_jdx(*args, **kwargs):
     dataset.origin = "omnic"
     dataset.description = "Dataset from jdx: '{0}'".format(jdx_title)
 
-    dataset.history = str(datetime.now(timezone.utc)) + ':imported from jdx file \n'
+    dataset.history = str(datetime.now(timezone.utc)) + ":imported from jdx file \n"
 
     if sortbydate:
-        dataset.sort(dim='x', inplace=True)
-        dataset.history = str(datetime.now(timezone.utc)) + ':sorted by date\n'
+        dataset.sort(dim="x", inplace=True)
+        dataset.history = str(datetime.now(timezone.utc)) + ":sorted by date\n"
     # Todo: make sure that the lowest index correspond to the largest wavenumber
     #  for compatibility with dataset created by read_omnic:
 
@@ -324,20 +369,20 @@ def _read_dx(*args, **kwargs):
 def _readl(fid):
     line = fid.readline()
     if not line:
-        return 'EOF', ''
-    line = line.strip(' \n')  # remove newline character
-    if line[0:2] == '##':  # if line starts with "##"
-        if line[0:5] == '##END':  # END KEYWORD, no text
-            keyword = '##END'
-            text = ''
+        return "EOF", ""
+    line = line.strip(" \n")  # remove newline character
+    if line[0:2] == "##":  # if line starts with "##"
+        if line[0:5] == "##END":  # END KEYWORD, no text
+            keyword = "##END"
+            text = ""
         else:  # keyword + text
-            keyword, text = line.split('=')
+            keyword, text = line.split("=")
     else:
-        keyword = ''
+        keyword = ""
         text = line.strip()
     return keyword, text
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass
