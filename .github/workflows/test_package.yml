@@ -113,14 +113,34 @@ jobs:
       - name: Lint with flake8
         run: flake8 .
 
-      - name: Test with coverage
-        run: coverage run -m pytest -v tests
+#      - name: Test with coverage
+#        run: coverage run -m pytest -v tests
+#
+#      - name: Notify to code-climate
+#        if: ${{ github.event_name != 'push' }}
+#        uses: paambaati/codeclimate-action@v3.0.0
+#        env:
+#          CC_TEST_REPORTER_ID: ${{ secrets.CC_REPORTER_ID }}
+#        with:
+#          coverageCommand: coverage xml
+#          coverageLocations: coverage.xml:coverage.py
 
-      - name: Notify to code-climate
+# command to install code-climate dependencies
+
+      - name: CodeClimate reporter (before build)
         if: ${{ github.event_name != 'push' }}
-        uses: paambaati/codeclimate-action@v3.0.0
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_REPORTER_ID }}
-        with:
-          coverageCommand: coverage xml
-          coverageLocations: coverage.xml:coverage.py
+        run: |
+          # downloading cc-test-reporter
+          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter;
+          chmod +x ./cc-test-reporter
+          ./cc-test-reporter before-build
+
+      - name: Test, generate coverage information and report to CodeClimate
+        run: |
+          coverage run -m pytest -v tests
+
+      - name: CodeClimate reporter (after build)
+        if: ${{ github.event_name != 'push' && matrix.pythonVersion == '3.9'}}
+        run: |
+          coverage xml
+          ./cc-test-reporter after-build
