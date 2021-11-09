@@ -113,13 +113,10 @@ jobs:
       - name: Lint with flake8
         run: flake8 .
 
-      - name: Test with coverage
-        run: coverage run -m pytest -v tests
-
       - name: Notify to code-climate
-        if: ${{ github.event_name == 'push' }}
+        if: ${{ github.event_name != 'push' }}
         uses: paambaati/codeclimate-action@v3.0.0
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_REPORTER_ID }}
         with:
-          coverageCommand: coverage xml
+          coverageCommand: coverage run -m pytest -v tests
