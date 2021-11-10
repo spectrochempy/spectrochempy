@@ -23,3 +23,4 @@ rm -f set_colab.sh &>> output.log
 rm -rf sample_data &>> output.log
 
 echo "SpectroChemPy is now installed."
+echo "(But in case of problems, you may have a look to the logs; type: cat output.log)"
