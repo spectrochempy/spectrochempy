@@ -131,7 +131,7 @@ jobs:
         if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.9' && matrix.os == 'ubuntu-latest' }}
         run: |
           # downloading cc-test-reporter
-          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter;
+          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
           chmod +x ./cc-test-reporter
           ./cc-test-reporter before-build
 
@@ -145,4 +145,4 @@ jobs:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         run: |
           coverage xml
-          ./cc-test-reporter after-build
+          ./cc-test-reporter after-build --prefix $(readlink -f .)
