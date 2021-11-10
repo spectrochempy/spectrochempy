@@ -145,6 +145,4 @@ jobs:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         run: |
           coverage xml
-          echo "$(readlink -f .)"
-          ./cc-test-reporter after-build -h
-          ./cc-test-reporter after-build --prefix $(readlink -f .)
+          ./cc-test-reporter after-build --prefix $(readlink -f .)/../../*
