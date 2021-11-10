@@ -137,7 +137,7 @@ jobs:
 
       - name: Test, generate coverage information and report to CodeClimate
         run: |
-          coverage run -m pytest -v tests
+          coverage run -m pytest -v tests/test_utils
 
       - name: CodeClimate reporter (after build)
         if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.9' && matrix.os == 'ubuntu-latest' }}
@@ -146,4 +146,5 @@ jobs:
         run: |
           coverage xml
           echo "$(readlink -f .)"
-          ./cc-test-reporter after-build --prefix $(readlink -f ./spectrochempy)
+          ./cc-test-reporter after-build -h
+          ./cc-test-reporter after-build --prefix $(readlink -f .)
