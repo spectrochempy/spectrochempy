@@ -137,7 +137,7 @@ jobs:
 
       - name: Test, generate coverage information and report to CodeClimate
         run: |
-          coverage run -m pytest -v tests/test_dataset
+          coverage run -m pytest -v tests
 
       - name: CodeClimate reporter (after build)
         if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.9' && matrix.os == 'ubuntu-latest' }}
