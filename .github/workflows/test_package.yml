@@ -81,7 +81,7 @@ jobs:
     strategy:
       max-parallel: 3
       matrix:
-        os: [ubuntu-latest, windows-latest] # , macOS-latest]
+        os: [ubuntu-latest, windows-latest] #, macOS-latest]
         pythonVersion: [3.9, 3.8, 3.7]
 
     steps:
@@ -137,12 +137,12 @@ jobs:
 
       - name: Test, generate coverage information and report to CodeClimate
         run: |
-          coverage run -m pytest -v tests
+          coverage run -m pytest -v tests/test_dataset
 
       - name: CodeClimate reporter (after build)
         if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.9' && matrix.os == 'ubuntu-latest' }}
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         run: |
-          coverage xml
-          ./cc-test-reporter after-build --prefix $(readlink -f .)
+          coverage xml --omit=$(readlink -f .)/../../../.spectrochempy/config/spectrochempy_cfg.py
+          ./cc-test-reporter after-build
