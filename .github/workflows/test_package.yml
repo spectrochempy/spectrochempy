@@ -81,8 +81,8 @@ jobs:
     strategy:
       max-parallel: 3
       matrix:
-        os: [ubuntu-latest] #, windows-latest] # , macOS-latest]
-        pythonVersion: [3.9] #, 3.8, 3.7]
+        os: [ubuntu-latest, windows-latest] #, macOS-latest]
+        pythonVersion: [3.9, 3.8, 3.7]
 
     steps:
       - name: Checkout code
@@ -144,6 +144,5 @@ jobs:
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         run: |
-          echo "$(readlink -f .)/../../../.spectrochempy/config/spectrochempy_cfg.py"
           coverage xml --omit=$(readlink -f .)/../../../.spectrochempy/config/spectrochempy_cfg.py
           ./cc-test-reporter after-build
