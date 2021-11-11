@@ -117,5 +117,6 @@ jobs:
       - name: Deploy Github Pages
         uses: JamesIves/github-pages-deploy-action@4.1.5
         with:
-          BRANCH: gh-pages
-          FOLDER: ../../../spectrochempy_docs/html/
+          branch: gh-pages
+          folder: ../../../spectrochempy_docs/html/
+          single-commit: yes
