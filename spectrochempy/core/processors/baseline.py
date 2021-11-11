@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# ======================================================================================================================
+# =============================================================================
 #  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
-#  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
-#  =
-# ======================================================================================================================
+# =============================================================================
 """
 This module implements the `BaselineCorrection` class for baseline corrections.
 """
@@ -72,10 +70,10 @@ class BaselineCorrection(HasTraits):
     dataset = Instance(NDDataset)
     corrected = Instance(NDDataset)
     method = Unicode("sequential")
-    interpolation = Unicode("pchip")
+    interpolation = Unicode("polynomial")
     axis = Int(-1)
     dim = Unicode("")
-    order = Int(6, min=1, allow_none=True)
+    order = Int(1, min=1, allow_none=True)
     npc = Int(5, min=1, allow_none=True)
     zoompreview = Float(1.0)
     figsize = Tuple((7, 5))
@@ -149,14 +147,17 @@ class BaselineCorrection(HasTraits):
         Other Parameters
         ----------------
         dim : str or int, keyword parameter, optional, default='x'.
-            Specify on which dimension to apply the apodization method. If `dim` is specified as an integer
+            Specify on which dimension to apply the apodization method.
+            If `dim` is specified as an integer
             it is equivalent  to the usual `axis` numpy parameter.
         method : str, keyword parameter, optional, default='sequential'
             Correction method among ['multivariate','sequential']
         interpolation : string, keyword parameter, optional, default='polynomial'
-            Interpolation method for the computation of the baseline, among ['polynomial','pchip']
-        order : int, keyword parameter, optional, default=6
-            If the correction method polynomial, this give the polynomial order to use.
+            Interpolation method for the computation of the baseline,
+            among ['polynomial','pchip']
+        order : int, keyword parameter, optional, default=1
+            If the correction method polynomial,
+            this give the polynomial order to use.
         npc : int, keyword parameter, optional, default=5
             Number of components to keep for the ``multivariate`` method
         zoompreview : float, keyword parameter, optional, default=1.0
@@ -170,7 +171,8 @@ class BaselineCorrection(HasTraits):
         # output dataset
         new = self.corrected
 
-        # we assume that the last dimension if always the dimension to which we want to subtract the baseline.
+        # we assume that the last dimension
+        # if always the dimension to which we want to subtract the baseline.
         # Swap the axes to be sure to be in this situation
         axis, dim = new.get_axis(**kwargs, negative_axis=True)
 

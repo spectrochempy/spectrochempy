@@ -25,8 +25,9 @@ tests/examples files in Colab.
 
 .. note::
 
-  Do not pay attention to the message about RUNTIME killed. It is restarted automatically. You can safely close the
-popup.
+  Do not pay attention to the message about killed kernel.
+  It is restarted automatically!
+  You can safely close the popup messages.
 
 Then as usual you can start using SpectroChemPy.
 

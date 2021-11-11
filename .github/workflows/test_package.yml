@@ -127,7 +127,7 @@ jobs:
 
 # command to install code-climate dependencies
 
-      - name: CodeClimate reporter (before build)
+      - name: Download CodeClimate reporter
         if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.9' && matrix.os == 'ubuntu-latest' }}
         run: |
           # downloading cc-test-reporter
@@ -135,14 +135,14 @@ jobs:
           chmod +x ./cc-test-reporter
           ./cc-test-reporter before-build
 
-      - name: Test, generate coverage information and report to CodeClimate
+      - name: Test, generate coverage information
         run: |
-          coverage run -m pytest -v tests/test_dataset
+          coverage run --rcfile=tests/.coveragerc -m pytest -v tests
 
-      - name: CodeClimate reporter (after build)
+      - name: Report Coverage info to CodeClimate
         if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.9' && matrix.os == 'ubuntu-latest' }}
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         run: |
-          coverage xml --omit=$(readlink -f .)/../../../.spectrochempy/config/spectrochempy_cfg.py
+          coverage xml
           ./cc-test-reporter after-build

@@ -450,41 +450,31 @@ class Fit(HasTraits):
         sEI = sum(xi * expe)
         sId = sum(xi ** 2)
 
-        a = (
-            -sE * (sF * sFI - sFd * sI)
-            + sEF * (n * sFI - sF * sI)
-            - sEI * (n * sFd - sF ** 2)
-        ) / (
+        den = (
             n * sFI ** 2
             - n * sFd * sId
             + sF ** 2 * sId
             - 2 * sF * sFI * sI
             + sFd * sI ** 2
         )
+
+        a = (
+            -sE * (sF * sFI - sFd * sI)
+            + sEF * (n * sFI - sF * sI)
+            - sEI * (n * sFd - sF ** 2)
+        ) / den
 
         A = (
             sE * (sF * sId - sFI * sI)
             - sEF * (n * sId - sI ** 2)
             + sEI * (n * sFI - sF * sI)
-        ) / (
-            n * sFI ** 2
-            - n * sFd * sId
-            + sF ** 2 * sId
-            - 2 * sF * sFI * sI
-            + sFd * sI ** 2
-        )
+        ) / den
 
         b = (
             sE * (sFI ** 2 - sFd * sId)
             + sEF * (sF * sId - sFI * sI)
             - sEI * (sF * sFI - sFd * sI)
-        ) / (
-            n * sFI ** 2
-            - n * sFd * sId
-            + sF ** 2 * sId
-            - 2 * sF * sFI * sI
-            + sFd * sI ** 2
-        )
+        ) / den
 
         # in case the modeldata is zero, to avoid further errors
         if np.isnan(A):
@@ -512,6 +502,26 @@ class Fit(HasTraits):
         sEJ = (yj * expe.T).sum()
         sId = sum(xi ** 2)
         sJd = sum(yj ** 2)
+
+        den = (
+            -(m ** 2) * n ** 2 * sFd * sId * sJd
+            + m ** 2 * n * sFJ ** 2 * sId
+            + m ** 2 * n * sFd * sI ** 2 * sJd
+            - m ** 2 * sFJ ** 2 * sI ** 2
+            + m * n ** 2 * sFI ** 2 * sJd
+            + m * n ** 2 * sFd * sId * sJ ** 2
+            + m * n * sF ** 2 * sId * sJd
+            - 2 * m * n * sF * sFI * sI * sJd
+            - 2 * m * n * sF * sFJ * sId * sJ
+            + 2 * m * n * sFI * sFJ * sI * sJ
+            - 2 * m * n * sFI * sFJ * sIJ
+            - 2 * m * n * sFd * sI * sIJ * sJ
+            + m * n * sFd * sIJ ** 2
+            + 2 * m * sF * sFJ * sI * sIJ
+            - n ** 2 * sFI ** 2 * sJ ** 2
+            + 2 * n * sF * sFI * sIJ * sJ
+            - sF ** 2 * sIJ ** 2
+        )
 
         c = (
             sE
@@ -549,25 +559,7 @@ class Fit(HasTraits):
                 - n * sFI ** 2 * sJ
                 + sF * sFI * sIJ
             )
-        ) / (
-            -(m ** 2) * n ** 2 * sFd * sId * sJd
-            + m ** 2 * n * sFJ ** 2 * sId
-            + m ** 2 * n * sFd * sI ** 2 * sJd
-            - m ** 2 * sFJ ** 2 * sI ** 2
-            + m * n ** 2 * sFI ** 2 * sJd
-            + m * n ** 2 * sFd * sId * sJ ** 2
-            + m * n * sF ** 2 * sId * sJd
-            - 2 * m * n * sF * sFI * sI * sJd
-            - 2 * m * n * sF * sFJ * sId * sJ
-            + 2 * m * n * sFI * sFJ * sI * sJ
-            - 2 * m * n * sFI * sFJ * sIJ
-            - 2 * m * n * sFd * sI * sIJ * sJ
-            + m * n * sFd * sIJ ** 2
-            + 2 * m * sF * sFJ * sI * sIJ
-            - n ** 2 * sFI ** 2 * sJ ** 2
-            + 2 * n * sF * sFI * sIJ * sJ
-            - sF ** 2 * sIJ ** 2
-        )
+        ) / den
 
         a = (
             n
@@ -607,25 +599,7 @@ class Fit(HasTraits):
                 - n * sF * sFI * sJ
                 + sF ** 2 * sIJ
             )
-        ) / (
-            -(m ** 2) * n ** 2 * sFd * sId * sJd
-            + m ** 2 * n * sFJ ** 2 * sId
-            + m ** 2 * n * sFd * sI ** 2 * sJd
-            - m ** 2 * sFJ ** 2 * sI ** 2
-            + m * n ** 2 * sFI ** 2 * sJd
-            + m * n ** 2 * sFd * sId * sJ ** 2
-            + m * n * sF ** 2 * sId * sJd
-            - 2 * m * n * sF * sFI * sI * sJd
-            - 2 * m * n * sF * sFJ * sId * sJ
-            + 2 * m * n * sFI * sFJ * sI * sJ
-            - 2 * m * n * sFI * sFJ * sIJ
-            - 2 * m * n * sFd * sI * sIJ * sJ
-            + m * n * sFd * sIJ ** 2
-            + 2 * m * sF * sFJ * sI * sIJ
-            - n ** 2 * sFI ** 2 * sJ ** 2
-            + 2 * n * sF * sFI * sIJ * sJ
-            - sF ** 2 * sIJ ** 2
-        )
+        ) / den
 
         A = (
             m
@@ -667,25 +641,7 @@ class Fit(HasTraits):
                 + n * sFI * sIJ * sJ
                 - sF * sIJ ** 2
             )
-        ) / (
-            -(m ** 2) * n ** 2 * sFd * sId * sJd
-            + m ** 2 * n * sFJ ** 2 * sId
-            + m ** 2 * n * sFd * sI ** 2 * sJd
-            - m ** 2 * sFJ ** 2 * sI ** 2
-            + m * n ** 2 * sFI ** 2 * sJd
-            + m * n ** 2 * sFd * sId * sJ ** 2
-            + m * n * sF ** 2 * sId * sJd
-            - 2 * m * n * sF * sFI * sI * sJd
-            - 2 * m * n * sF * sFJ * sId * sJ
-            + 2 * m * n * sFI * sFJ * sI * sJ
-            - 2 * m * n * sFI * sFJ * sIJ
-            - 2 * m * n * sFd * sI * sIJ * sJ
-            + m * n * sFd * sIJ ** 2
-            + 2 * m * sF * sFJ * sI * sIJ
-            - n ** 2 * sFI ** 2 * sJ ** 2
-            + 2 * n * sF * sFI * sIJ * sJ
-            - sF ** 2 * sIJ ** 2
-        )
+        ) / den
 
         b = (
             m
@@ -725,25 +681,7 @@ class Fit(HasTraits):
                 - n * sF * sFI * sJ
                 + sF ** 2 * sIJ
             )
-        ) / (
-            -(m ** 2) * n ** 2 * sFd * sId * sJd
-            + m ** 2 * n * sFJ ** 2 * sId
-            + m ** 2 * n * sFd * sI ** 2 * sJd
-            - m ** 2 * sFJ ** 2 * sI ** 2
-            + m * n ** 2 * sFI ** 2 * sJd
-            + m * n ** 2 * sFd * sId * sJ ** 2
-            + m * n * sF ** 2 * sId * sJd
-            - 2 * m * n * sF * sFI * sI * sJd
-            - 2 * m * n * sF * sFJ * sId * sJ
-            + 2 * m * n * sFI * sFJ * sI * sJ
-            - 2 * m * n * sFI * sFJ * sIJ
-            - 2 * m * n * sFd * sI * sIJ * sJ
-            + m * n * sFd * sIJ ** 2
-            + 2 * m * sF * sFJ * sI * sIJ
-            - n ** 2 * sFI ** 2 * sJ ** 2
-            + 2 * n * sF * sFI * sIJ * sJ
-            - sF ** 2 * sIJ ** 2
-        )
+        ) / den
 
         # in case the modeldata is zero, to avoid further errors
         if np.isnan(A):

@@ -4,10 +4,10 @@ _internal.classic_mode                   : True
 agg.path.chunksize                       : 20000
 animation.bitrate                        : -1
 animation.codec                          : mpeg4
-animation.convert_args                   :
+animation.convert_args                   : 
 animation.convert_path                   : convert
 animation.embed_limit                    : 20.0
-animation.ffmpeg_args                    :
+animation.ffmpeg_args                    : 
 animation.ffmpeg_path                    : ffmpeg
 animation.frame_format                   : png
 animation.html                           : none
@@ -22,12 +22,12 @@ axes.formatter.offset_threshold          : 4
 axes.formatter.use_locale                : False
 axes.formatter.use_mathtext              : False
 axes.formatter.useoffset                 : True
-axes.grid                                : True
-axes.grid.axis                           : x
+axes.grid                                : False
+axes.grid.axis                           : both
 axes.grid.which                          : major
-axes.labelcolor                          : blue
+axes.labelcolor                          : k
 axes.labelpad                            : 5.0
-axes.labelsize                           : 14.0
+axes.labelsize                           : 10.0
 axes.labelweight                         : normal
 axes.linewidth                           : 1.0
 axes.prop_cycle                          : cycler('color', ['0072B2', '009E73', 'D55E00', 'CC79A7', 'F0E442', '56B4E9'])
@@ -96,12 +96,12 @@ date.autoformatter.minute                : %H:%M:%S.%f
 date.autoformatter.month                 : %b %Y
 date.autoformatter.second                : %H:%M:%S.%f
 date.autoformatter.year                  : %Y
-date.converter                           : auto
-date.interval_multiples                  : True
+date.converter                           : None
+date.interval_multiples                  : None
 
 errorbar.capsize                         : 3.0
 
-figure.autolayout                        : True
+figure.autolayout                        : False
 figure.constrained_layout.h_pad          : 0.04167
 figure.constrained_layout.hspace         : 0.02
 figure.constrained_layout.use            : False
@@ -121,12 +121,12 @@ figure.subplot.wspace                    : 0.0
 figure.titlesize                         : 12.0
 figure.titleweight                       : normal
 font.cursive                             : Apple Chancery, Textile, Zapf Chancery, Sand, Script MT, Felipa, cursive
-font.family                              : monospace
+font.family                              : sans-serif
 font.fantasy                             : Comic Sans MS, Chicago, Charcoal, ImpactWestern, Humor Sans, fantasy
 font.monospace                           : DejaVu Sans Mono, Andale Mono, Nimbus Mono L, Courier New, Courier, Fixed, Terminal, monospace
 font.sans-serif                          : DejaVu Sans, Lucida Grande, Verdana, Geneva, Lucid, Arial, Helvetica, Avant Garde, sans-serif
 font.serif                               : DejaVu Serif, New Century Schoolbook, Century Schoolbook L, Utopia, ITC Bookman, Bookman, Nimbus Roman No9 L, Times New Roman, Times, Palatino, Charter, serif
-font.size                                : 14.0
+font.size                                : 10.0
 font.stretch                             : normal
 font.style                               : normal
 font.variant                             : normal
@@ -159,7 +159,7 @@ keymap.help                              : f1
 keymap.home                              : h, r, home
 keymap.pan                               : p
 keymap.quit                              : ctrl+w, cmd+w
-keymap.quit_all                          :
+keymap.quit_all                          : 
 keymap.save                              : s, ctrl+s
 keymap.xscale                            : k, L
 keymap.yscale                            : l
@@ -171,7 +171,7 @@ legend.columnspacing                     : 0.5
 legend.edgecolor                         : inherit
 legend.facecolor                         : inherit
 legend.fancybox                          : False
-legend.fontsize                          : 11.0
+legend.fontsize                          : 9.0
 legend.framealpha                        : None
 legend.frameon                           : False
 legend.handleheight                      : 0.7
@@ -186,8 +186,8 @@ legend.shadow                            : False
 legend.title_fontsize                    : None
 lines.antialiased                        : True
 lines.color                              : b
-lines.dash_capstyle                      : butt
-lines.dash_joinstyle                     : round
+lines.dash_capstyle                      : CapStyle.butt
+lines.dash_joinstyle                     : JoinStyle.round
 lines.dashdot_pattern                    : 3.0, 5.0, 1.0, 5.0
 lines.dashed_pattern                     : 6.0, 6.0
 lines.dotted_pattern                     : 1.0, 3.0
@@ -199,17 +199,17 @@ lines.markeredgewidth                    : 0.0
 lines.markerfacecolor                    : auto
 lines.markersize                         : 7.0
 lines.scale_dashes                       : False
-lines.solid_capstyle                     : round
-lines.solid_joinstyle                    : round
+lines.solid_capstyle                     : CapStyle.round
+lines.solid_joinstyle                    : JoinStyle.round
 
 markers.fillstyle                        : full
-mathtext.bf                              : monospace:bold
+mathtext.bf                              : dejavusans:bold
 mathtext.cal                             : cursive
 mathtext.default                         : regular
 mathtext.fallback                        : cm
-mathtext.fontset                         : custom
-mathtext.it                              : monospace:italic
-mathtext.rm                              : monospace
+mathtext.fontset                         : dejavusans
+mathtext.it                              : dejavusans:italic
+mathtext.rm                              : dejavusans
 mathtext.sf                              : sans\-serif
 mathtext.tt                              : monospace
 
@@ -218,7 +218,7 @@ patch.edgecolor                          : k
 patch.facecolor                          : 4C72B0
 patch.force_edgecolor                    : False
 patch.linewidth                          : 0.3
-path.effects                             :
+path.effects                             : 
 path.simplify                            : True
 path.simplify_threshold                  : 0.111111111111
 path.sketch                              : None
@@ -229,7 +229,7 @@ pdf.compression                          : 6
 pdf.fonttype                             : 3
 pdf.inheritcolor                         : False
 pdf.use14corefonts                       : False
-pgf.preamble                             :
+pgf.preamble                             : 
 pgf.rcfonts                              : True
 pgf.texsystem                            : xelatex
 polaraxes.grid                           : True
@@ -258,7 +258,7 @@ text.color                               : .15
 text.hinting                             : auto
 text.hinting_factor                      : 8
 text.kerning_factor                      : 0
-text.latex.preamble                      :
+text.latex.preamble                      : 
 text.usetex                              : False
 
 xaxis.labellocation                      : center
@@ -268,7 +268,7 @@ xtick.color                              : .15
 xtick.direction                          : out
 xtick.labelbottom                        : True
 xtick.labelcolor                         : inherit
-xtick.labelsize                          : 14.0
+xtick.labelsize                          : 10.0
 xtick.labeltop                           : False
 xtick.major.bottom                       : True
 xtick.major.pad                          : 4.0
@@ -290,7 +290,7 @@ ytick.direction                          : out
 ytick.labelcolor                         : inherit
 ytick.labelleft                          : True
 ytick.labelright                         : False
-ytick.labelsize                          : 14.0
+ytick.labelsize                          : 10.0
 ytick.left                               : True
 ytick.major.left                         : True
 ytick.major.pad                          : 4.0
@@ -312,11 +312,11 @@ ytick.right                              : True
 ##@method_1D                             : pen
 ##@method_2D                             : stack
 ##@method_3D                             : surface
-##@colorbar                              : True
+##@colorbar                              : False
 ##@show_projections                      : False
 ##@show_projection_x                     : False
 ##@show_projection_y                     : False
-##@colormap                              : jet
+##@colormap                              : viridis
 ##@max_lines_in_stack                    : 1000
 ##@simplify                              : False
 ##@number_of_x_labels                    : 5

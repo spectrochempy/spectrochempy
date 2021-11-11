@@ -1,20 +1,19 @@
 # -*- coding: utf-8 -*-
 
 #
-# ======================================================================================================================
+# =============================================================================
 # Copyright (©) 2015-2021 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 #
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# ======================================================================================================================
+# =============================================================================
 """
 Module containing 1D plotting function(s)
 """
 
 __all__ = [
     "plot_1D",
-    "plot_lines",
     "plot_pen",
     "plot_scatter",
     "plot_bar",
@@ -35,7 +34,7 @@ import numpy as np
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
 from .plotutils import make_label
-from ...utils import is_sequence, deprecated
+from ...utils import is_sequence  # , deprecated
 from spectrochempy.core.dataset.coord import Coord
 
 
@@ -50,24 +49,7 @@ def plot_scatter(dataset, **kwargs):
     """
     kwargs["method"] = "scatter"
     if kwargs.get("use_plotly", False):
-        return dataset.plotly(**kwargs)
-    else:
-        return plot_1D(dataset, **kwargs)
-
-
-# plot lines -----------------------------------------------------------------
-
-
-@deprecated("Use method=pen or plot_pen() instead.")
-def plot_lines(dataset, **kwargs):
-    """
-    Plot a 1D dataset with solid lines by default.
-
-    Alias of plot (with `method` argument set to ``lines``.
-    """
-    kwargs["method"] = "pen"
-    if kwargs.get("use_plotly", False):
-        return dataset.plotly(**kwargs)
+        return dataset.plotly(**kwargs)  # pragma: no cover
     else:
         return plot_1D(dataset, **kwargs)
 
@@ -83,7 +65,7 @@ def plot_pen(dataset, **kwargs):
     """
     kwargs["method"] = "pen"
     if kwargs.get("use_plotly", False):
-        return dataset.plotly(**kwargs)
+        return dataset.plotly(**kwargs)  # pragma: no cover
     else:
         return plot_1D(dataset, **kwargs)
 
@@ -99,7 +81,7 @@ def plot_scatter_pen(dataset, **kwargs):
     """
     kwargs["method"] = "scatter+pen"
     if kwargs.get("use_plotly", False):
-        return dataset.plotly(**kwargs)
+        return dataset.plotly(**kwargs)  # pragma: no cover
     else:
         return plot_1D(dataset, **kwargs)
 
@@ -115,7 +97,7 @@ def plot_bar(dataset, **kwargs):
     """
     kwargs["method"] = "bar"
     if kwargs.get("use_plotly", False):
-        return dataset.plotly(**kwargs)
+        return dataset.plotly(**kwargs)  # pragma: no cover
     else:
         return plot_1D(dataset, **kwargs)
 
@@ -184,7 +166,8 @@ def plot_multiple(datasets, method="scatter", pen=True, labels=None, **kwargs):
             clear=clear,
             **kwargs
         )
-        clear = False  # clear=False is necessary for the next plot to say  # that we will plot on the same figure
+        clear = False  # clear=False is necessary for the next plot to say
+        # that we will plot on the same figure
 
     # scale all plots
     if legend is not None:
@@ -223,7 +206,7 @@ def plot_1D(dataset, **kwargs):
     Other Parameters
     ----------------
     widget : Matplotlib or PyQtGraph widget (for GUI only)
-        The widget where to plot in the GUI application. This is not used if the
+        The widget where to plot in the GUI application. This is not used if
         plots are made in jupyter notebook.
     method : str, optional, default: pen
         The method can be one among ``pen``, ``bar``,  or ``scatter``
@@ -239,7 +222,8 @@ def plot_1D(dataset, **kwargs):
         Matplotlib stylesheet (use `available_style` to get a list of available
         styles for plotting.
     reverse : bool or None [optional, default=None/False
-        In principle, coordinates run from left to right, except for wavenumbers
+        In principle, coordinates run from left to right,
+        except for wavenumbers
         (*e.g.*, FTIR spectra) or ppm (*e.g.*, NMR), that spectrochempy
         will try to guess. But if reverse is set, then this is the
         setting which will be taken into account.
@@ -248,7 +232,8 @@ def plot_1D(dataset, **kwargs):
     data_only : bool, optional, default: False
         Only the plot is done. No addition of axes or label specifications.
     imag : bool, optional, default: False
-        Show imaginary component. By default only the real component is displayed.
+        Show imaginary component. By default only the real component is
+        displayed.
     show_complex : bool, optional, default: False
         Show both real and imaginary component.
         By default only the real component is displayed.
@@ -259,7 +244,8 @@ def plot_1D(dataset, **kwargs):
     fontsize : int, optional
         font size in pixels, default is 10.
     imag : bool, optional, default False
-        By default real component is shown. Set to True to display the imaginary component
+        By default real component is shown.
+        Set to True to display the imaginary component
     xlim : tuple, optional
         limit on the horizontal axis.
     zlim or ylim : tuple, optional
@@ -331,8 +317,9 @@ def plot_1D(dataset, **kwargs):
     scatterpen = ((method == "scatter" or scatter) and pen) or (method == "scatter+pen")
     bar = method == "bar"
 
-    # often we do need to plot only data when plotting on top of a previous plot
-    data_only = kwargs.get("data_only", False)
+    # often we do need to plot only data
+    # when plotting on top of a previous plot
+    # data_only = kwargs.get("data_only", False)
 
     # Get the data to plot
     # -------------------------------------------------------------------------------------------------------------------
@@ -345,7 +332,8 @@ def plot_1D(dataset, **kwargs):
     # is that a plot with twin axis
     is_twinx = kwargs.pop("twinx", None) is not None
 
-    # if dataset is complex it is possible to overlap with the imaginary component
+    # if dataset is complex it is possible to overlap
+    # with the imaginary component
     show_complex = kwargs.pop("show_complex", False)
 
     # some pen or scatter property
@@ -417,7 +405,8 @@ def plot_1D(dataset, **kwargs):
         if not np.any(xdata):
             if x.is_labeled:
                 # discrete_data = True
-                # take into account the fact that sometimes axis have just labels
+                # take into account the fact that sometimes axis
+                # have just labels
                 xdata = range(1, len(x.labels) + 1)
     else:
         xdata = range(xsize)
@@ -476,6 +465,8 @@ def plot_1D(dataset, **kwargs):
             align="center",
             label=label,
         )  # barwidth = line[0].get_width()
+    else:
+        raise ValueError("label not valid")
 
     if show_complex and pen:
         # add the imaginaly component for pen only plot
@@ -520,7 +511,7 @@ def plot_1D(dataset, **kwargs):
         xl.sort()
 
         if bar or len(xdata) < number_x_labels + 1:
-            # extend the axis so that the labels are not too close to the limits
+            # extend the axis so that the labels are not too close to limits
             inc = (xdata[1] - xdata[0]) * 0.5
             xl = [xl[0] - inc, xl[1] + inc]
 

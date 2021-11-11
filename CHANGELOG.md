@@ -18,6 +18,8 @@
 
 * Github action workflows to test, build and publish conda package and docs in replacement of Travis CI.
 
+* Use CodeClimate to show Coverage info
+
 **BUGS FIXED**
 
 * IRIS example after modification of readers. 
@@ -30,6 +32,10 @@
 
 * DOC: fix several broken links.
 
+* Baseline correction default changed.
+
+* Compatibility with newest change in Colab
+
 ## Version 0.2.15
 
 **NEW FEATURES**
@@ -40,7 +46,7 @@
 
 **BUGS FIXED**
 
-* comparison of dataset when containing metadata in testing functions.
+* Comparison of dataset when containing metadata in testing functions.
 
 * Some fixes relative to Project.
 
@@ -171,17 +177,17 @@
 
 * Docker image building.
 
-* instructions to use it added in the documentation.
+* Instructions to use it added in the documentation.
 
 **NEW FEATURES**
 
-* cantera installation optional.
+* Cantera installation optional.
 
-* use of pyqt for matplotlib optional.
+* Use of pyqt for matplotlib optional.
 
 **BUGS FIXED**
 
-* added fonts in order to solve missing fonts problems on linux and windows.
+* Added fonts in order to solve missing fonts problems on linux and windows.
 
 ## Version 0.2.4
 
