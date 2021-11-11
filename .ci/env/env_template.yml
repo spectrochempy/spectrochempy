@@ -64,7 +64,7 @@ dependencies:
 
     # DEV: code and docs
     - jupytext
-    - sphinx
+    - sphinx=4.2.0
     - sphinx_rtd_theme
     - autodocsumm
     - sphinx-gallery
