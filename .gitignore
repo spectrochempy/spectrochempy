@@ -143,3 +143,6 @@ Icon*
 *.pptx
 .hypothesis/
 /htmlcov/
+cov.coverage
+cov.syspath.txt
+coverage.xml
