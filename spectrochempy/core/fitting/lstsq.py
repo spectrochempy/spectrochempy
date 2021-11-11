@@ -248,6 +248,9 @@ class CurveFit(HasTraits):
     This is a wrapper to the `scipy.optimize.curve_fit`` function
     """
 
+    # TODO: Something wrong here! This is exactly the same code as NNLS.
+    # Probably a mistake to correct...
+
     X = Instance(NDArray)
     Y = Instance(NDDataset)
 

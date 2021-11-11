@@ -197,23 +197,14 @@ class FitParameters(UserDict):
             # strg=string.upper(strg)
             p = re.compile(r"\s+")
             m = p.split(strg.strip())
-            try:
-                res = eval(m[0])
-            except NameError:
-                message = (
-                    "Cannot evaluate '" + strg + "' >> " + m[0] + " is not defined"
-                )
-                raise NameError(message)
-            except SyntaxError:
-                message = "Syntax error in '" + strg + "'"
-                raise SyntaxError(message)
-            # read mulitplier
-            if len(m) > 1:
+
+            for i in range(len(m)):
                 try:
-                    res = res * eval(m[1])
+                    res = eval(m[i])
                 except NameError:
                     message = (
-                        "Cannot evaluate '" + strg + "' >> " + m[1] + " is not defined"
+                        "Cannot evaluate '" + strg + "' >> " + m[i] + " is "
+                        "not defined"
                     )
                     raise NameError(message)
                 except SyntaxError:
