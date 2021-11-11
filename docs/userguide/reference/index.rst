@@ -233,7 +233,6 @@ Changing number of dimensions
     :toctree: generated/
 
     squeeze
-    expand_dims
 
 Changing type
 ==============
@@ -245,7 +244,6 @@ Changing type
     set_complex
     set_hypercomplex
     set_quaternion
-    asfortranarray
 
 Joining or splitting datasets
 =============================
@@ -256,7 +254,6 @@ Joining or splitting datasets
 
     concatenate
     stack
-    split
 
 Indexing
 ========
@@ -344,7 +341,6 @@ Sums, integal, difference
     cumsum
     trapz
     simps
-    diff
 
 Complex
 =======
@@ -359,7 +355,6 @@ Complex
     NDDataset.RI
     NDDataset.IR
     NDDataset.II
-    part
     conj
     conjugate
     abs
@@ -475,7 +470,6 @@ Smoothing, apodization
     bartlett
     blackmanharris
     hamming
-    mertz
     triang
     em
     gm

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - docs
   release:
     types:
       - created
@@ -37,15 +38,16 @@ jobs:
         run: |
           conda install jinja2
 
-      - name: Create environment scpy3.9
+      # Use python 3.8 as an error arise with 3.9 (# TODO why?)
+      - name: Create environment scpy3.8
         run: |
-          python .ci/env/env_create.py -v 3.9 --dev scpy3.9.yml
+          python .ci/env/env_create.py -v 3.8 --dev scpy3.8.yml
 
-      - name: Install miniconda (scpy3.9)
+      - name: Install miniconda (scpy3.8)
         uses: conda-incubator/setup-miniconda@v2
         with:
-          activate-environment: scpy3.9
-          environment-file: .ci/env/scpy3.9.yml
+          activate-environment: scpy3.8
+          environment-file: .ci/env/scpy3.8.yml
           condarc-file: .ci/env/condarc.yml
           auto-activate-base: false
 
