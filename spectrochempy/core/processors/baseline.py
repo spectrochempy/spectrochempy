@@ -474,9 +474,9 @@ def basc(dataset, *ranges, **kwargs):
                 [2205., 2301.], [5380., 5979.],
                 [3736., 5125.]]
 
-        ndcorr = spc.basc(ndp, *ranges,method='multivariate', interpolation='pchip', npc=8)
+        ndcorr = scp.basc(ndp, *ranges,method='multivariate', interpolation='pchip', npc=8)
         ndcorr.plot()
-        spc.show()
+        scp.show()
     """
     blc = BaselineCorrection(dataset)
     if not ranges and dataset.meta.regions is not None:
