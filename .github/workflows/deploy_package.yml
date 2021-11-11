@@ -89,8 +89,7 @@ jobs:
           conda-build .conda --output-folder out
 
       - name: Publish package for release
-        if: ${{ github.ref == 'refs/heads/master' && contains(env.DEVSTRING,
-        'stable') }}
+        if: ${{ github.ref == 'refs/heads/master' && contains(env.DEVSTRING,'stable') }}
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
         run: |
@@ -98,7 +97,7 @@ jobs:
           anaconda upload --force out/*/*.tar.bz2
 
       - name: Publish development package
-        if: ${{ github.ref == 'refs/heads/master' && !(contains(env.DEVSTRING, 'stable')) }}
+        if: ${{ github.ref == 'refs/heads/master' && !(contains(env.DEVSTRING,'stable')) }}
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
         run: |
