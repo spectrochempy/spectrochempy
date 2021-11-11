@@ -106,7 +106,7 @@ class _from_numpy_method(object):
                     except TypeError:
                         if issubclass(cls, NDMath):
                             # Probably a call from the API !
-                            # spc.method(dataset, ...)
+                            # scp.method(dataset, ...)
                             new = dataset
                             if not isinstance(new, NDArray):
                                 # we have only an array-like dataset
@@ -2981,15 +2981,19 @@ class NDMath(object):
                     # here we want to change the behavior a pint regarding the addition of scalar to quantity
                     #         # in principle it is only possible with dimensionless quantity, else a dimensionerror is
                     #         raised.
-                    if fname in [
-                        "add",
-                        "sub",
-                        "iadd",
-                        "isub",
-                        "and",
-                        "xor",
-                        "or",
-                    ] and hasattr(q, "units"):
+                    if (
+                        fname
+                        in [
+                            "add",
+                            "sub",
+                            "iadd",
+                            "isub",
+                            "and",
+                            "xor",
+                            "or",
+                        ]
+                        and hasattr(q, "units")
+                    ):
                         otherqs[i] = otherq * q.units  # take the unit of the first obj
 
             # some functions are not handled by pint regardings units, try to solve this here

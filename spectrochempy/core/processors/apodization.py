@@ -215,7 +215,7 @@ def em(dataset, lb=1, shifted=0, **kwargs):
 
     See Also
     --------
-    gm, sp, sine, sinm, qsin, hamming, triang, bartlett, blackmanharris, mertz
+    gm, sp, sine, sinm, qsin, hamming, triang, bartlett, blackmanharris
     """
 
     # units are set by a decorator
@@ -297,7 +297,7 @@ def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
 
     See Also
     --------
-    em, sp, sine, sinm, qsin, hamming, triang, bartlett, blackmanharris, mertz
+    em, sp, sine, sinm, qsin, hamming, triang, bartlett, blackmanharris
     """
 
     x = dataset
@@ -381,7 +381,7 @@ def sp(dataset, ssb=1, pow=1, **kwargs):
 
     See Also
     --------
-    em, gm, sine, sinm, qsin, hamming, triang, bartlett, blackmanharris, mertz
+    em, gm, sine, sinm, qsin, hamming, triang, bartlett, blackmanharris
     """
 
     x = dataset
@@ -409,7 +409,7 @@ def sine(dataset, *args, **kwargs):
 
     See Also
     --------
-    em, gm, sp, sinm, qsin, hamming, triang, bartlett, blackmanharris, mertz
+    em, gm, sp, sinm, qsin, hamming, triang, bartlett, blackmanharris
     """
     return sp(dataset, *args, **kwargs)
 
@@ -421,7 +421,7 @@ def sinm(dataset, ssb=1, **kwargs):
 
     See Also
     --------
-    em, gm, sp, sine, qsin, hamming, triang, bartlett, blackmanharris, mertz
+    em, gm, sp, sine, qsin, hamming, triang, bartlett, blackmanharris
     """
     return sp(dataset, ssb=ssb, pow=1, **kwargs)
 
@@ -433,7 +433,7 @@ def qsin(dataset, ssb=1, **kwargs):
 
     See Also
     --------
-    em, gm, sp, sine, sinm, hamming, triang, bartlett, blackmanharris, mertz
+    em, gm, sp, sine, sinm, hamming, triang, bartlett, blackmanharris
     """
     return sp(dataset, ssb=ssb, pow=2, **kwargs)
 
@@ -491,7 +491,7 @@ def general_hamming(dataset, alpha, **kwargs):
 
     See Also
     --------
-    gm, sp, sine, sinm, qsin, hamming, triang, bartlett, blackmanharris, mertz
+    gm, sp, sine, sinm, qsin, hamming, triang, bartlett, blackmanharris
     """
 
     x = dataset
@@ -643,7 +643,7 @@ def triang(dataset, **kwargs):
 
     See Also
     --------
-    gm, sp, sine, sinm, qsin, hamming, bartlett, blackmanharris, mertz
+    gm, sp, sine, sinm, qsin, hamming, bartlett, blackmanharris
     """
 
     x = dataset

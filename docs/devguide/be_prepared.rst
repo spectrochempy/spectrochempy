@@ -205,5 +205,6 @@ When creating this branch, make sure your master branch is up to date with the l
     git checkout master
     git pull upstream master --ff-only
 
-When you want to update the feature branch with changes in master after you created the branch, check the section on
-:ref:`updating a PR <contributing.update-pr>`.
+.. When you want to update the feature branch with changes in master after you
+.. created the branch, check the section on :ref:`updating a PR
+<contributing.update-pr>`.

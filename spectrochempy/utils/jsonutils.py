@@ -69,7 +69,7 @@ def json_serialiser(byte_obj, encoding=None):
     """
     Return a serialised json object
     """
-    from spectrochempy.core.dataset.ndplot import Preferences
+    from spectrochempy.core.dataset.ndplot import PreferencesSet
 
     if byte_obj is None:
         return None
@@ -86,7 +86,7 @@ def json_serialiser(byte_obj, encoding=None):
             if (
                 name in ["readonly"]
                 or (name == "dims" and "datasets" in objnames)
-                or [name in ["parent", "name"] and isinstance(byte_obj, Preferences)]
+                or [name in ["parent", "name"] and isinstance(byte_obj, PreferencesSet)]
             ):
                 val = getattr(byte_obj, name)
             else:

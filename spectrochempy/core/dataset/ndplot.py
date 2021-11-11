@@ -38,9 +38,9 @@ from spectrochempy.core.plotters.plot2d import plot_2D
 # ======================================================================================================================
 
 
-class Preferences(Meta):
+class PreferencesSet(Meta):
     """
-    Preferences management
+    Preferences setting
     """
 
     def __init__(self, **data):
@@ -59,7 +59,7 @@ class Preferences(Meta):
             alias = self._get_alias(key)
             if alias:
                 if isinstance(alias, list):
-                    res = Preferences(
+                    res = PreferencesSet(
                         parent=self,
                         name=key,
                         **dict([(n, getattr(self, f"{key}_{n}")) for n in alias]),
@@ -346,7 +346,7 @@ class NDPlot(HasTraits):
     _ndaxes = Dict(Instance(plt.Axes))
 
     # add metadata to store plot parameters
-    _preferences = Instance(Preferences, allow_none=True)
+    _preferences = Instance(PreferencesSet, allow_none=True)
 
     # ------------------------------------------------------------------------------------------------------------------
     # generic plotter and plot related methods or properties
@@ -675,7 +675,7 @@ class NDPlot(HasTraits):
     @default("_preferences")
     def _preferences_default(self):
         # Reset all preferences
-        prefs = Preferences()
+        prefs = PreferencesSet()
         return prefs
 
     # ..................................................................................................................

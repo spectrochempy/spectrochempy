@@ -6,7 +6,8 @@
 # ======================================================================================================================
 
 """
-# Units manipulation examples
+Units manipulation examples
+===========================
 
 In this example, we show how units can be used in SpectroChemPy
 
