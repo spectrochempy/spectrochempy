@@ -98,11 +98,11 @@ class PlotPreferences(MetaConfigurable):
     lines_dash_joinstyle = Enum(
         [
             "miter",
-            "JoinStyle.miter",
+            "miter",
             "round",
-            "JoinStyle.round",
+            "round",
             "bevel",
-            "JoinStyle.bevel",
+            "bevel",
         ],
         default_value="round",
         help=r"""miter|round|bevel""",
