@@ -78,7 +78,7 @@ CRITICAL = logging.CRITICAL
 # ----------------------------------------------------------------------------------------------------------------------
 
 
-def display_info_string(**kwargs):
+def display_info_string(**kwargs):  # pragma: no cover
     _template = """
     {{widgetcss}}
     <table><tr><td>
@@ -179,7 +179,7 @@ def _check_for_updates(*args, **kwargs):
     conda_url = "https://anaconda.org/spectrocat/spectrochempy/files"
     try:
         response = requests.get(conda_url)
-    except requests.exceptions.RequestException:
+    except requests.exceptions.RequestException:  # pragma: no cover
         return None
 
     regex = (
@@ -198,17 +198,17 @@ def _check_for_updates(*args, **kwargs):
     new_version = None
     for key in vavailables:
         new = parse_version(key)
-        if new > old:
+        if new > old:  # pragma: no cover
             new_version = key
 
     fi = Path.home() / ".scpy_update"
-    if new_version:
+    if new_version:  # pragma: no cover
         fi.write_text(
             f"\n\n\tYou are running SpectrocChemPy-{__version__} but version {new_version} is available."
             f"\n\tPlease consider updating for bug fixes and new features! "
         )
 
-    else:
+    else:  # pragma: no cover
         if fi.exists():
             fi.unlink()
 
@@ -243,10 +243,9 @@ __cite__ = (
 def _find_or_create_spectrochempy_dir():
     directory = Path.home() / ".spectrochempy"
 
-    if not directory.exists():
-        directory.mkdir(exist_ok=True)
+    directory.mkdir(exist_ok=True)  # Create directory only if it do not exist
 
-    elif directory.is_file():
+    if directory.is_file():  # pragma: no cover
         msg = "Intended SpectroChemPy directory `{0}` is " "actually a file."
         raise IOError(msg.format(directory))
 
@@ -395,7 +394,7 @@ class DataDir(HasTraits):
     path = Instance(Path)
 
     @default("path")
-    def _get_path_default(self, **kwargs):
+    def _get_path_default(self, **kwargs):  # pragma: no cover
 
         super().__init__(**kwargs)
 
@@ -433,7 +432,7 @@ class DataDir(HasTraits):
                 "*"
             ):  # glob.glob(os.path.join(initial, '*')):
                 fb = f.name  # os.path.basename(f)
-                if fb.startswith("."):
+                if fb.startswith("."):  # pragma: no cover
                     continue
                 if (
                     not fb.startswith("acqu")
@@ -455,7 +454,7 @@ class DataDir(HasTraits):
     def __str__(self):
         return self.listing()
 
-    def _repr_html_(self):
+    def _repr_html_(self):  # pragma: no cover
         # _repr_html is needed to output in notebooks
         return self.listing().replace("\n", "<br/>").replace(" ", "&nbsp;")
 
@@ -481,7 +480,6 @@ class GeneralPreferences(MetaConfigurable):
     # ------------------------------------------------------------------------------------------------------------------
 
     # NON GUI
-
     show_info_on_loading = Bool(True, help="Display info on loading").tag(config=True)
     use_qt = Bool(
         False,
@@ -547,10 +545,9 @@ class GeneralPreferences(MetaConfigurable):
 
         pscp = Path.home() / ".spectrochempy" / "projects"
 
-        if not pscp.exists():
-            pscp.mkdir(exist_ok=True)
+        pscp.mkdir(exist_ok=True)
 
-        elif pscp.is_file():
+        if pscp.is_file():
             raise IOError("Intended Projects directory is actually a file.")
 
         return pscp
@@ -590,7 +587,7 @@ class GeneralPreferences(MetaConfigurable):
     def log_level(self, value):
         if isinstance(value, str):
             value = getattr(logging, value, None)
-            if value is None:
+            if value is None:  # pragma: no cover
                 warnings.warn(
                     "Log level not changed: invalid value given\n"
                     "string values must be DEBUG, INFO, WARNING, "
@@ -844,7 +841,7 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
                         ]:
                             options.append(item)
                 self.parse_command_line(options)
-            else:
+            else:  # pragma: no cover
                 self.parse_command_line(sys.argv)
 
         # Get preferences from the config file and init everything
@@ -866,7 +863,7 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
         # exception handler
         # --------------------------------------------------------------------
 
-        if IN_IPYTHON:
+        if IN_IPYTHON:  # pragma: no cover
 
             ip = get_ipython()
 
