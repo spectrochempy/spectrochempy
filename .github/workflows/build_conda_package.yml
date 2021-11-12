@@ -1,10 +1,9 @@
-name: Build and Deploy package
+name: build and deploy conda package
 
 on:
   push:
     branches:
       - master
-      - docs
       - develop
   release:
     types: [published]
@@ -13,7 +12,7 @@ jobs:
 
   build_and_publish:
 
-    name: deploy package and documentation (noarch)
+    name: deploy package (noarch)
     runs-on: ubuntu-latest
 
     defaults:
@@ -27,27 +26,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install miniconda
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          activate-environment: ""
-          auto-activate-base: true
-          auto-update-conda: true
-
-      - name: Install dependency
-        run: |
-          conda install jinja2
-
-      - name: Create environment scpy3.9
-        run: |
-          python .ci/env/env_create.py -v 3.9 --dev scpy3.9.yml
-
       - name: Install miniconda (scpy3.9)
         uses: conda-incubator/setup-miniconda@v2
         with:
           activate-environment: scpy3.9
-          environment-file: .ci/env/scpy3.9.yml
-          condarc-file: .ci/env/condarc.yml
+          environment-file: environment.yml
+          condarc-file: .ci/scripts/condarc.yml
           auto-activate-base: false
 
       - name: Install spectrochempy
@@ -101,20 +85,3 @@ jobs:
         run: |
           conda install anaconda-client
           anaconda upload -l dev --force out/*/*.tar.bz2
-
-      - name: Build docs
-        run: |
-          mkdir ../../../spectrochempy_docs
-
-          echo "cloning spectrochempy.github.io repository"
-          git clone --branch=gh-pages --single-branch https://github.com/spectrochempy/spectrochempy.git ../../../spectrochempy_docs/html
-
-          echo "Recreating docs"
-          python docs/make.py --clean --html
-
-      - name: Deploy Github Pages
-        uses: JamesIves/github-pages-deploy-action@4.1.5
-        with:
-          branch: gh-pages
-          folder: ../../../spectrochempy_docs/html/
-          single-commit: true

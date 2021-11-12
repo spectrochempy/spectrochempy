@@ -1,4 +1,4 @@
-name: scpy
+name: scpy3.9
 
 channels:
     - conda-forge
@@ -6,7 +6,7 @@ channels:
     - defaults
 
 dependencies:
-    - python>=3.6
+    - python=3.9
 
     # specific
     - quadprog=0.1.9
@@ -21,7 +21,7 @@ dependencies:
     - jinja2
     - mamba
     - matplotlib-base
-    - numpy
+    - numpy>=1.21.0
     - orderedset
     - pint=0.16.1
     - plotly
@@ -42,7 +42,6 @@ dependencies:
     - ipympl
     - jupyterlab>=2.2.10
     - nodejs
-
 
     # DEV: just for testing
     - pytest

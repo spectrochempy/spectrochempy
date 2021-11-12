@@ -20,7 +20,7 @@ ARG BRANCH=''
 # We will first create a YAML file and then use it to update the environment
 # to be suitable for spectrochempy
 
-COPY --chown=${NB_UID}:${NB_GID} .ci/env/env* /home/$NB_USER/tmp/
+COPY --chown=${NB_UID}:${NB_GID} .ci/scripts/env* /home/$NB_USER/tmp/
 
 RUN cd /home/$NB_USER/tmp/ && \
     conda update conda && \
