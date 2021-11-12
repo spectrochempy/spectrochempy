@@ -55,7 +55,6 @@ jobs:
           python setup.py install
 
       - name: Set up version environment variable
-        if: (github.event_name == 'release' && github.event.action == 'published')
         run: |
           ## get version string from setuptools_scm
           PVS="$(python setup.py --version)"
@@ -83,7 +82,6 @@ jobs:
           echo "$DEVSTRING"
 
       - name: Build package
-        if: (github.event_name == 'release' && github.event.action == 'published')
         run: |
           conda install conda-build conda-verify
           conda-build .conda --output-folder out
