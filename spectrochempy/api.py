@@ -30,7 +30,7 @@ from IPython import get_ipython
 IN_IPYTHON = False
 kernel = None
 ip = None
-if InteractiveShell.initialized():
+if InteractiveShell.initialized():  # pragma: no cover
     IN_IPYTHON = True
     ip = get_ipython()
     kernel = getattr(ip, "kernel", None)
@@ -39,7 +39,7 @@ NO_DISPLAY = False
 NO_DIALOG = False
 
 # Are we buidings the docs ?
-if "make.py" in sys.argv[0]:
+if "make.py" in sys.argv[0]:  # pragma: no cover
     # if we are building the documentation, in principle it should be done
     # using the make.py located at the root of the spectrchempy package.
     NO_DISPLAY = True
@@ -47,7 +47,7 @@ if "make.py" in sys.argv[0]:
     mpl.use("agg", force=True)
 
 # is there a --nodisplay flag
-if "--nodisplay" in sys.argv:
+if "--nodisplay" in sys.argv:  # pragma: no cover
     NO_DISPLAY = True
     NO_DIALOG = True
     mpl.use("agg", force=True)
@@ -66,7 +66,7 @@ if "pytest" in sys.argv[0] or "py.test" in sys.argv[0]:
         len(sys.argv) > 1
         and any([arg.split("::")[0].endswith(".py") for arg in sys.argv[1:]])
         and "--nodisplay" not in sys.argv
-    ):
+    ):  # pragma: no cover
         # individual module testing
         NO_DISPLAY = False
         NO_DIALOG = False
@@ -75,12 +75,14 @@ if "pytest" in sys.argv[0] or "py.test" in sys.argv[0]:
         mpl.use("agg", force=True)
 
 # Are we running in PyCharm scientific mode?
-if mpl.get_backend() == "module://backend_interagg":
+if mpl.get_backend() == "module://backend_interagg":  # pragma: no cover
     IN_PYCHARM_SCIMODE = True
 else:
     IN_PYCHARM_SCIMODE = False
 
-if not (IN_IPYTHON and kernel) and not IN_PYCHARM_SCIMODE and not NO_DISPLAY:
+if (
+    not (IN_IPYTHON and kernel) and not IN_PYCHARM_SCIMODE and not NO_DISPLAY
+):  # pragma: no cover
     backend = mpl.rcParams["backend"]  # 'Qt5Agg'
     mpl.use(backend, force=True)
 
@@ -107,7 +109,7 @@ if not IN_IPYTHON:
 # workaround this problem https://github.com/jupyter/notebook/issues/3385
 # ip.magic('matplotlib notebook')
 
-if IN_IPYTHON and kernel and not NO_DISPLAY:
+if IN_IPYTHON and kernel and not NO_DISPLAY:  # pragma: no cover
     try:
         if (
             "ipykernel_launcher" in sys.argv[0]
