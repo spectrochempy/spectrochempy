@@ -180,6 +180,7 @@ def em(dataset, lb=1, shifted=0, **kwargs):
     .. math::
         e = \pi * lb
 
+
     Parameters
     ----------
     dataset : Dataset
