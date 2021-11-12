@@ -55,8 +55,7 @@ jobs:
           python setup.py install
 
       - name: Set up version environment variable
-        if: ${{ github.ref == 'refs/heads/master' ||
-                github.event.release.action == 'released' }}
+        if: (github.event_name == 'release' && github.event.action == 'published')
         run: |
           ## get version string from setuptools_scm
           PVS="$(python setup.py --version)"
@@ -84,14 +83,13 @@ jobs:
           echo "$DEVSTRING"
 
       - name: Build package
-        if: ${{ github.ref == 'refs/heads/master' ||
-                github.event.release.action == 'released' }}
+        if: (github.event_name == 'release' && github.event.action == 'published')
         run: |
           conda install conda-build conda-verify
           conda-build .conda --output-folder out
 
       - name: Publish package for release
-        if: ${{ github.event.release.action == 'released' }}
+        if: (github.event_name == 'release' && github.event.action == 'published')
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
         run: |
@@ -99,7 +97,7 @@ jobs:
           anaconda upload --force out/*/*.tar.bz2
 
       - name: Publish development package
-        if: ${{ github.ref == 'refs/heads/master' && !(contains(env.DEVSTRING,'stable')) }}
+        if: (github.event_name == 'push')
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
         run: |
