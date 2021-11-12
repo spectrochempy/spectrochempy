@@ -119,4 +119,4 @@ jobs:
         with:
           branch: gh-pages
           folder: ../../../spectrochempy_docs/html/
-          single-commit: yes
+          single-commit: true
