@@ -23,19 +23,16 @@ import spectrochempy as scp
 # We have some noisy data that represent the distance `d` traveled by some
 # objects versus time `t`:
 
-t = scp.NDDataset(data=[0, 1, 2, 3],
-                  title='time',
-                  units='hour')
+t = scp.NDDataset(data=[0, 1, 2, 3], title="time", units="hour")
 
-d = scp.NDDataset(data=[-1, 0.2, 0.9, 2.1],
-                  coordset=[t],
-                  title='distance',
-                  units='kilometer')
+d = scp.NDDataset(
+    data=[-1, 0.2, 0.9, 2.1], coordset=[t], title="distance", units="kilometer"
+)
 
 ##############################################################################
 # Here is a plot of these data-points:
 
-d.plot_scatter(markersize=7, mfc='red')
+d.plot_scatter(markersize=7, mfc="red")
 
 ##############################################################################
 # We want to fit a line through these data-points of equation
@@ -52,18 +49,21 @@ d.plot_scatter(markersize=7, mfc='red')
 lst = scp.LSTSQ(t, d)
 
 v, d0 = lst.transform()
-print('speed : {:.3fK},  d0 : {:.3fK}'.format(v, d0))
+print("speed : {:.3fK},  d0 : {:.3fK}".format(v, d0))
 
 ##############################################################################
 # Final plot
 
-d.plot_scatter(markersize=10,
-               mfc='red', mec='black',
-               label='Original data', suptitle='Least-square fitting '
-                                               'example')
+d.plot_scatter(
+    markersize=10,
+    mfc="red",
+    mec="black",
+    label="Original data",
+    suptitle="Least-square fitting " "example",
+)
 dfit = lst.inverse_transform()
 
-dfit.plot_pen(clear=False, color='g', label='Fitted line', legend=True)
+dfit.plot_pen(clear=False, color="g", label="Fitted line", legend=True)
 
 ##############################################################################
 # Note: The same result can be obtained directly using `d` as a single
@@ -72,6 +72,6 @@ dfit.plot_pen(clear=False, color='g', label='Fitted line', legend=True)
 lst = scp.LSTSQ(d)
 
 v, d0 = lst.transform()
-print('speed : {:.3fK},  d0 : {:.3fK}'.format(v, d0))
+print("speed : {:.3fK},  d0 : {:.3fK}".format(v, d0))
 
 # scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

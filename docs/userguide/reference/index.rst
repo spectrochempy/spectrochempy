@@ -9,6 +9,7 @@ API reference
 
 .. contents:: Table of Contents
 
+
 ****************
 Loading the API
 ****************
@@ -56,6 +57,7 @@ This offers a lot of flexibility in using NDDatasets that, we hope, will be usef
 
     NDDataset
 
+
 ***************************
 Coordinates related objects
 ***************************
@@ -97,6 +99,7 @@ The above code in |scpy| can be simplified using the ``random`` creation method:
 
 Many SpectroChemPy methods mimics numpy equivalent, but output a NDDataset object.
 
+
 Basic creation methods
 =======================
 
@@ -117,6 +120,7 @@ Basic creation methods
     random
     diag
 
+
 Creation from existing data
 ============================
 
@@ -127,6 +131,7 @@ Creation from existing data
     copy
     fromfunction
     fromiter
+
 
 Creation from numerical ranges
 ==============================
@@ -139,6 +144,7 @@ Creation from numerical ranges
     linspace
     logspace
     geomspace
+
 
 Creation from from external sources
 ====================================
@@ -163,6 +169,7 @@ Creation from from external sources
     read_dir
     read_carroucell
 
+
 ******************
 Export a NDDataset
 ******************
@@ -178,6 +185,7 @@ Export a NDDataset
     write_jcamp
     to_array
     to_xarray
+
 
 **************************
 Select data in a NDDataset
@@ -210,6 +218,7 @@ Plotting functions
     plot_surface
     plot_waterfall
 
+
 ************
 Processing
 ************
@@ -225,6 +234,7 @@ Transpose-like oprations
     NDDataset.T
     swapdims
 
+
 Changing number of dimensions
 =============================
 
@@ -233,7 +243,7 @@ Changing number of dimensions
     :toctree: generated/
 
     squeeze
-    expand_dims
+
 
 Changing type
 ==============
@@ -245,7 +255,7 @@ Changing type
     set_complex
     set_hypercomplex
     set_quaternion
-    asfortranarray
+
 
 Joining or splitting datasets
 =============================
@@ -256,7 +266,7 @@ Joining or splitting datasets
 
     concatenate
     stack
-    split
+
 
 Indexing
 ========
@@ -269,6 +279,7 @@ Indexing
     diagonal
     take
 
+
 Sorting
 =======
 
@@ -277,6 +288,7 @@ Sorting
     :toctree: generated/
 
     sort
+
 
 Minimum and maximum
 ===================
@@ -292,6 +304,7 @@ Minimum and maximum
     min
     max
     ptp
+
 
 Clipping and rounding
 =====================
@@ -322,6 +335,7 @@ Algebra
     LSTSQ
     NNLS
 
+
 Logic functions
 ================
 
@@ -332,6 +346,7 @@ Logic functions
     all
     any
     sign
+
 
 Sums, integal, difference
 ==========================
@@ -344,7 +359,7 @@ Sums, integal, difference
     cumsum
     trapz
     simps
-    diff
+
 
 Complex
 =======
@@ -359,11 +374,11 @@ Complex
     NDDataset.RI
     NDDataset.IR
     NDDataset.II
-    part
     conj
     conjugate
     abs
     absolute
+
 
 Masks
 =====
@@ -373,6 +388,7 @@ Masks
     :toctree: generated/
 
     remove_masks
+
 
 Units manipulation
 ===================
@@ -425,6 +441,7 @@ Unary mathematical operations
     arccosh
     arctanh
 
+
 Statistical operations
 =======================
 
@@ -453,6 +470,7 @@ Baseline correction
     basc
     detrend
 
+
 Fourier transform
 ==================
 
@@ -462,6 +480,7 @@ Fourier transform
 
     fft
     ifft
+
 
 Smoothing, apodization
 =======================
@@ -475,7 +494,6 @@ Smoothing, apodization
     bartlett
     blackmanharris
     hamming
-    mertz
     triang
     em
     gm
@@ -483,6 +501,7 @@ Smoothing, apodization
     sine
     qsin
     sinm
+
 
 Alignment, interpolation
 ========================
@@ -494,6 +513,7 @@ Alignment, interpolation
     align
     interpolate
 
+
 Miscellaneous
 =============
 
@@ -502,6 +522,7 @@ Miscellaneous
     :toctree: generated/
 
     pipe
+
 
 ********************
 Fitting
@@ -515,6 +536,7 @@ Fitting
     CurveFit
     LSTSQ
     NNLS
+
 
 *******************
 Analysis
@@ -531,6 +553,7 @@ Analysis
     SIMPLISMA
     MCRALS
     IRIS
+
 
 ********************
 Project management
@@ -556,6 +579,7 @@ This is rather experimental
 
     Script
 
+
 **********
 Utilities
 **********
@@ -563,6 +587,5 @@ Utilities
 .. autosummary::
     :nosignatures:
     :toctree: generated/
-
 
     download_IRIS

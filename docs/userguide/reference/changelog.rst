@@ -6,21 +6,38 @@ Version 0.2.16
 
 **NEW FEATURES**
 
--  Added list of papers citing spectrochempy
+-  IRIS: Added 1D datasets.
 
--  Added IRIS for 1D datasets
+-  IRIS: Added kernel function for diffusion .
 
--  Added differential evolution algorithm in cantera utilities
+-  EFA: Added indication of progress.
 
--  Added PFR object in cantera utilities
+-  Cantera: Added differential evolution algorithm in cantera utilities.
+
+-  Cantera: Added PFR object in cantera utilities.
+
+-  DOC: Added list of papers citing spectrochempy.
+
+-  Github action workflows to test, build and publish conda package and
+   docs in replacement of Travis CI.
+
+-  Use CodeClimate to show Coverage info
 
 **BUGS FIXED**
 
--  IRIS example after modification of readers
+-  IRIS example after modification of readers.
 
--  MCR-ALS returns the ‘soft’ concentration matrix
+-  IRIS: automatic search of the L-curve corner.
 
--  document building configuration after update of an external package
+-  MCR-ALS returns the ‘soft’ concentration matrix.
+
+-  Document building configuration after update of external packages.
+
+-  DOC: fix several broken links.
+
+-  Baseline correction default changed.
+
+-  Compatibility with newest change in Colab
 
 Version 0.2.15
 --------------
@@ -34,7 +51,7 @@ Version 0.2.15
 
 **BUGS FIXED**
 
--  comparison of dataset when containing metadata in testing functions.
+-  Comparison of dataset when containing metadata in testing functions.
 
 -  Some fixes relative to Project.
 
@@ -178,17 +195,17 @@ Version 0.2.5
 
 -  Docker image building.
 
--  instructions to use it added in the documentation.
+-  Instructions to use it added in the documentation.
 
 **NEW FEATURES**
 
--  cantera installation optional.
+-  Cantera installation optional.
 
--  use of pyqt for matplotlib optional.
+-  Use of pyqt for matplotlib optional.
 
 **BUGS FIXED**
 
--  added fonts in order to solve missing fonts problems on linux and
+-  Added fonts in order to solve missing fonts problems on linux and
    windows.
 
 Version 0.2.4

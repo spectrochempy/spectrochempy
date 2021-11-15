@@ -8,7 +8,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.13.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -46,7 +46,7 @@ import spectrochempy as scp
 
 # %%
 X = scp.read_omnic("irdata/nh4y-activation.spg")
-X[:, 1290.:890.] = scp.MASKED
+X[:, 1290.0:890.0] = scp.MASKED
 
 # %% [markdown]
 # After setting some plotting preferences and plot it
@@ -54,7 +54,7 @@ X[:, 1290.:890.] = scp.MASKED
 # %%
 prefs = X.preferences
 prefs.figure.figsize = (7, 3)
-prefs.colormap = 'magma'
+prefs.colormap = "magma"
 _ = X.plot()
 
 # %% [markdown]
@@ -87,7 +87,7 @@ _ = X.detrend().plot()
 # Subtract the average absorbance to each spectrum
 
 # %%
-_ = X.detrend(type='constant').plot()
+_ = X.detrend(type="constant").plot()
 
 # %% [markdown]
 # ## Automatic linear baseline correction `abc`
@@ -118,7 +118,7 @@ _ = scp.abc(X).plot()
 # The first step is then to select the verious regions that we expect to belong to the baseline
 
 # %%
-ranges = [5900.0, 5400.0], 4550., [4500., 4000.], [2100., 2000.0], [1550., 1555.]
+ranges = [5900.0, 5400.0], 4550.0, [4500.0, 4000.0], [2100.0, 2000.0], [1550.0, 1555.0]
 
 # %% [markdown]
 # After selection of the baseline ranges, the baseline correction can be made using a sequence of 2 commands:
@@ -162,7 +162,7 @@ _ = Xcorr.plot()
 # First, we put the ranges in a list
 
 # %%
-ranges = [[5900.0, 5400.0], [4000., 4500.], [2100., 2000.0], [1550., 1555.]]
+ranges = [[5900.0, 5400.0], [4000.0, 4500.0], [2100.0, 2000.0], [1550.0, 1555.0]]
 
 # %% [markdown]
 # <div class='alert alert-warning'>
@@ -204,7 +204,7 @@ ranges = [[5900.0, 5400.0], [4000., 4500.], [2100., 2000.0], [1550., 1555.]]
 
 # %%
 blc = scp.BaselineCorrection(X)
-blc.compute(*ranges, interpolation='polynomial', order=6)
+blc.compute(*ranges, interpolation="polynomial", order=6)
 
 # %% [markdown]
 # The `corrected` attribute contains the corrected NDDataset.
@@ -233,7 +233,7 @@ _ = blc.corrected.plot()
 
 # %%
 blc = scp.BaselineCorrection(X)
-blc.compute(*ranges, interpolation='pchip', method='multivariate', npc=2)
+blc.compute(*ranges, interpolation="pchip", method="multivariate", npc=2)
 _ = blc.corrected.plot()
 
 # %% [markdown]
@@ -244,20 +244,37 @@ _ = blc.corrected.plot()
 # %%
 # user defined parameters
 # -----------------------
-ranges = [5900.0, 5400.0], [4000., 4500.], 4550., [2100., 2000.0], [1550., 1555.], [1250.0, 1300.], [800., 850.]
-interpolation = 'pchip'  # choose 'polynomial' or 'pchip'
+ranges = (
+    [5900.0, 5400.0],
+    [4000.0, 4500.0],
+    4550.0,
+    [2100.0, 2000.0],
+    [1550.0, 1555.0],
+    [1250.0, 1300.0],
+    [800.0, 850.0],
+)
+interpolation = "pchip"  # choose 'polynomial' or 'pchip'
 order = 5  # only used for 'polynomial'
-method = 'sequential'  # choose 'sequential' or 'multivariate'
+method = "sequential"  # choose 'sequential' or 'multivariate'
 npc = 3  # only used for 'multivariate'
 
 # code: compute baseline, plot original and corrected NDDatasets and ranges
 # -------------------------------------------------------------------------
 blc = scp.BaselineCorrection(X)
-Xcorr = blc.compute(*ranges, interpolation=interpolation, order=order, method=method, npc=npc)
+Xcorr = blc.compute(
+    *ranges, interpolation=interpolation, order=order, method=method, npc=npc
+)
 
-axes = scp.multiplot([X, Xcorr], labels=['Original', 'Baseline corrected'], sharex=True, nrow=2, ncol=1,
-                     figsize=(7, 6), dpi=96)
-blc.show_regions(axes['axe21'])
+axes = scp.multiplot(
+    [X, Xcorr],
+    labels=["Original", "Baseline corrected"],
+    sharex=True,
+    nrow=2,
+    ncol=1,
+    figsize=(7, 6),
+    dpi=96,
+)
+blc.show_regions(axes["axe21"])
 
 # %% [markdown]
 # <div class='alert alert-info'>

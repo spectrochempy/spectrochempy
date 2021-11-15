@@ -8,19 +8,37 @@
 #  =====================================================================================================================
 
 
-__all__ = ["assert_equal", "assert_array_equal", "assert_array_almost_equal", 'assert_dataset_equal',
-           'assert_dataset_almost_equal', 'assert_project_equal', 'assert_project_almost_equal', "assert_approx_equal",
-           "assert_raises", "raises", "catch_warnings", "RandomSeedContext", ]
+__all__ = [
+    "assert_equal",
+    "assert_array_equal",
+    "assert_array_almost_equal",
+    "assert_dataset_equal",
+    "assert_dataset_almost_equal",
+    "assert_project_equal",
+    "assert_project_almost_equal",
+    "assert_approx_equal",
+    "assert_raises",
+    "raises",
+    "catch_warnings",
+    "RandomSeedContext",
+]
 
 import operator
 import functools
 import warnings
 
 import numpy as np
+
 # import matplotlib.pyplot as plt
 # from matplotlib.testing.compare import calculate_rms, ImageAssertionError
-from numpy.testing import (assert_equal, assert_array_equal, assert_array_almost_equal, assert_approx_equal,
-                           assert_raises, assert_array_compare)
+from numpy.testing import (
+    assert_equal,
+    assert_array_equal,
+    assert_array_almost_equal,
+    assert_approx_equal,
+    assert_raises,
+    assert_array_compare,
+)
 
 
 # ======================================================================================================================
@@ -38,7 +56,8 @@ def gisinf(x):
 
     This should be removed once this problem is solved at the Ufunc level."""
     from numpy.core import isinf, errstate
-    with errstate(invalid='ignore'):
+
+    with errstate(invalid="ignore"):
         st = isinf(x)
         if isinstance(st, type(NotImplemented)):
             raise TypeError("isinf not supported for this type")
@@ -70,7 +89,7 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
 
         # make sure y is an inexact type to avoid abs(MIN_INT); will cause
         # casting of x later.
-        dtype = result_type(y, 1.)
+        dtype = result_type(y, 1.0)
         y = array(y, dtype=dtype, copy=False, subok=True)
         z = abs(x - y)
 
@@ -90,27 +109,45 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
             otherdata = other
             otherunits = False
         else:
-            raise AssertionError(f'{this} and {other} objects are too different to be '
-                                 f'compared.')
+            raise AssertionError(
+                f"{this} and {other} objects are too different to be " f"compared."
+            )
 
         if not this.has_units and not otherunits:
             eq = np.all(this._data == otherdata)
         elif this.has_units and otherunits:
             eq = np.all(this._data * this._units == otherdata * otherunits)
         else:
-            raise AssertionError(f'units of {this} and {other} objects does not match')
+            raise AssertionError(f"units of {this} and {other} objects does not match")
         return eq
 
     thistype = this.implements()
 
     if data_only:
-        attrs = ['data']
+        attrs = ["data"]
     else:
         attrs = this.__dir__()
         exclude = (
-            'filename', 'preferences', 'description', 'history', 'date', 'modified', 'origin', 'roi',
-            'linear', 'offset', 'increment', 'size', 'name', 'show_datapoints', 'modeldata', 'processeddata',
-            'baselinedata', 'referencedata', 'state')
+            "filename",
+            "preferences",
+            "description",
+            "history",
+            "date",
+            "modified",
+            "origin",
+            "roi",
+            "linear",
+            "offset",
+            "increment",
+            "size",
+            "name",
+            "show_datapoints",
+            "modeldata",
+            "processeddata",
+            "baselinedata",
+            "referencedata",
+            "state",
+        )
         for attr in exclude:
             # these attibutes are not used for comparison (comparison based on
             # data and units!)
@@ -121,53 +158,78 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
         # if 'title' in attrs:  #    attrs.remove('title')  #TODO: should we use title for comparison?
 
     for attr in attrs:
-        if attr != 'units':
-            sattr = getattr(this, f'_{attr}')
-            if this.linear and attr == 'data':  # allow comparison of
+        if attr != "units":
+            sattr = getattr(this, f"_{attr}")
+            if this.linear and attr == "data":  # allow comparison of
                 # LinearCoord
                 # and Coord
                 sattr = this.data
-            if hasattr(other, f'_{attr}'):
-                oattr = getattr(other, f'_{attr}')
-                if other.linear and attr == 'data':
+            if hasattr(other, f"_{attr}"):
+                oattr = getattr(other, f"_{attr}")
+                if other.linear and attr == "data":
                     oattr = other.data
                 # to avoid deprecation warning issue for unequal array
                 if sattr is None and oattr is not None:
-                    raise AssertionError(f'`{attr}` of {this} is None.')
+                    raise AssertionError(f"`{attr}` of {this} is None.")
                 if oattr is None and sattr is not None:
-                    raise AssertionError(f'{attr} of {other} is None.')
-                if hasattr(oattr, 'size') and hasattr(sattr, 'size') and oattr.size != sattr.size:
+                    raise AssertionError(f"{attr} of {other} is None.")
+                if (
+                    hasattr(oattr, "size")
+                    and hasattr(sattr, "size")
+                    and oattr.size != sattr.size
+                ):
                     # particular case of mask
-                    if attr != 'mask':
-                        raise AssertionError(f'{thistype}.{attr} sizes are different.')
+                    if attr != "mask":
+                        raise AssertionError(f"{thistype}.{attr} sizes are different.")
                     else:
-                        assert_array_equal(other.mask, this.mask, f'{this} and {other} masks are different.')
-                if attr in ['data', 'mask']:
+                        assert_array_equal(
+                            other.mask,
+                            this.mask,
+                            f"{this} and {other} masks are different.",
+                        )
+                if attr in ["data", "mask"]:
                     if approx:
-                        assert_array_compare(compare, sattr, oattr, header=(f'{thistype}.{attr} attributes ar'
-                                                                            f'e not almost equal to %d decimals' %
-                                                                            decimal),
-                                             precision=decimal)
+                        assert_array_compare(
+                            compare,
+                            sattr,
+                            oattr,
+                            header=(
+                                f"{thistype}.{attr} attributes ar"
+                                f"e not almost equal to %d decimals" % decimal
+                            ),
+                            precision=decimal,
+                        )
                     else:
-                        assert_array_compare(operator.__eq__, sattr, oattr, header=f'{thistype}.{attr} '
-                                                                                   f'attributes are not '
-                                                                                   f'equal')
+                        assert_array_compare(
+                            operator.__eq__,
+                            sattr,
+                            oattr,
+                            header=f"{thistype}.{attr} "
+                            f"attributes are not "
+                            f"equal",
+                        )
 
-                elif attr in ['coordset']:
-                    if (sattr is None and oattr is not None) or (oattr is None and sattr is not None):
-                        raise AssertionError('One of the coordset is None')
+                elif attr in ["coordset"]:
+                    if (sattr is None and oattr is not None) or (
+                        oattr is None and sattr is not None
+                    ):
+                        raise AssertionError("One of the coordset is None")
                     elif sattr is None and oattr is None:
                         res = True
                     else:
                         for item in zip(sattr, oattr):
-                            res = compare_datasets(*item, approx=approx, decimal=decimal)
+                            res = compare_datasets(
+                                *item, approx=approx, decimal=decimal
+                            )
                             if not res:
-                                raise AssertionError(f'coords differs:\n{res}')
+                                raise AssertionError(f"coords differs:\n{res}")
                 else:
                     eq &= np.all(sattr == oattr)
                 if not eq:
-                    raise AssertionError(f'The {attr} attributes of {this} and {other} are '
-                                         f'different.')
+                    raise AssertionError(
+                        f"The {attr} attributes of {this} and {other} are "
+                        f"different."
+                    )
             else:
                 return False
         else:
@@ -175,33 +237,37 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
             sattr = this._units
             if sattr is None:
                 sattr = ur.dimensionless
-            if hasattr(other, '_units'):
+            if hasattr(other, "_units"):
                 oattr = other._units
                 if oattr is None:
                     oattr = ur.dimensionless
 
                 eq &= np.all(sattr == oattr)
                 if not eq:
-                    raise AssertionError(f"attributes `{attr}` are not equals or one is "
-                                         f"missing: \n{sattr} != {oattr}")
+                    raise AssertionError(
+                        f"attributes `{attr}` are not equals or one is "
+                        f"missing: \n{sattr} != {oattr}"
+                    )
             else:
-                raise AssertionError(f'{other} has no units')
+                raise AssertionError(f"{other} has no units")
 
     return True
 
 
 # ......................................................................................................................
 def assert_dataset_equal(nd1, nd2, **kwargs):
-    kwargs['approx'] = False
+    kwargs["approx"] = False
     assert_dataset_almost_equal(nd1, nd2, **kwargs)
     return True
 
 
 # ......................................................................................................................
 def assert_dataset_almost_equal(nd1, nd2, **kwargs):
-    decimal = kwargs.get('decimal', 6)
-    approx = kwargs.get('approx', True)
-    data_only = kwargs.get('data_only', False)  # if True, compare only based on data (not labels and so on)
+    decimal = kwargs.get("decimal", 6)
+    approx = kwargs.get("approx", True)
+    data_only = kwargs.get(
+        "data_only", False
+    )  # if True, compare only based on data (not labels and so on)
     compare_datasets(nd1, nd2, approx=approx, decimal=decimal, data_only=data_only)
     return True
 
@@ -231,7 +297,7 @@ def assert_project_almost_equal(proj1, proj2, **kwargs):
 # ......................................................................................................................
 def assert_script_equal(sc1, sc2, **kwargs):
     if sc1 != sc2:
-        raise AssertionError(f'Scripts are differents: {sc1.content} != {sc2.content}')
+        raise AssertionError(f"Scripts are differents: {sc1.content} != {sc2.content}")
 
 
 # ======================================================================================================================
@@ -287,7 +353,7 @@ def assert_equal_units(unit1, unit2):
     from pint import DimensionalityError
 
     try:
-        x = (1. * unit1) / (1. * unit2)
+        x = (1.0 * unit1) / (1.0 * unit2)
     except DimensionalityError:
         return False
     if x.dimensionless:
@@ -322,12 +388,14 @@ class raises(object):
         @functools.wraps(func)
         def run_raises_test(*args, **kwargs):
             import pytest
+
             pytest.raises(self._exc, func, *args, **kwargs)
 
         return run_raises_test
 
     def __enter__(self):
         import pytest
+
         self._ctx = pytest.raises(self._exc)
         return self._ctx.__enter__()
 
@@ -364,11 +432,11 @@ class catch_warnings(warnings.catch_warnings):
     def __enter__(self):
         warning_list = super(catch_warnings, self).__enter__()
         if len(self.classes) == 0:
-            warnings.simplefilter('always')
+            warnings.simplefilter("always")
         else:
-            warnings.simplefilter('ignore')
+            warnings.simplefilter("ignore")
             for cls in self.classes:
-                warnings.simplefilter('always', cls)
+                warnings.simplefilter("always", cls)
         return warning_list
 
     def __exit__(self, type, value, traceback):
@@ -660,5 +728,5 @@ class catch_warnings(warnings.catch_warnings):
 # ----------------------------------------------------------------------------------------------------------------------
 # main
 # ----------------------------------------------------------------------------------------------------------------------
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

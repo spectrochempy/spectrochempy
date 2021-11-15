@@ -8,7 +8,7 @@
 This module implement the PCA (Principal Component Analysis) class.
 """
 
-__all__ = ['PCA']
+__all__ = ["PCA"]
 
 __dataset_methods__ = []
 
@@ -30,6 +30,7 @@ from spectrochempy.utils import NRed, NBlue
 # class PCA
 # ======================================================================================================================
 
+
 class PCA(HasTraits):
     """
     Principal Component Analysis
@@ -47,6 +48,7 @@ class PCA(HasTraits):
     If the dataset `X` contains masked values, these values are silently
     ignored in the calculation.
     """
+
     _LT = Instance(NDDataset)
     _S = Instance(NDDataset)
     _X = Instance(NDDataset)
@@ -124,18 +126,24 @@ class PCA(HasTraits):
         # loadings
 
         LT = VT
-        LT.title = 'loadings (L^T) of ' + X.name
-        LT.history = 'Created by PCA'
+        LT.title = "loadings (L^T) of " + X.name
+        LT.history = "Created by PCA"
 
         # scores
 
         S = dot(U, sigma)
-        S.title = 'scores (S) of ' + X.name
-        S.set_coordset(y=X.y,
-                       x=Coord(None, labels=['#%d' % (i + 1) for i in range(svd.s.size)], title='principal component'))
+        S.title = "scores (S) of " + X.name
+        S.set_coordset(
+            y=X.y,
+            x=Coord(
+                None,
+                labels=["#%d" % (i + 1) for i in range(svd.s.size)],
+                title="principal component",
+            ),
+        )
 
-        S.description = 'scores (S) of ' + X.name
-        S.history = 'Created by PCA'
+        S.description = "scores (S) of " + X.name
+        S.history = "Created by PCA"
 
         self._LT = LT
         self._S = S
@@ -144,16 +152,16 @@ class PCA(HasTraits):
         # ----------------
 
         self._sv = svd.sv
-        self._sv.x.title = 'PC #'
+        self._sv.x.title = "PC #"
 
         self._ev = svd.ev
-        self._ev.x.title = 'PC #'
+        self._ev.x.title = "PC #"
 
         self._ev_ratio = svd.ev_ratio
-        self._ev_ratio.x.title = 'PC #'
+        self._ev_ratio.x.title = "PC #"
 
         self._ev_cum = svd.ev_cum
-        self._ev_cum.x.title = 'PC #'
+        self._ev_cum.x.title = "PC #"
 
         return
 
@@ -163,15 +171,18 @@ class PCA(HasTraits):
 
     def __str__(self, n_pc=5):
 
-        s = '\nPC\t\tEigenvalue\t\t%variance\t' \
-            '%cumulative\n'
-        s += '   \t\tof cov(X)\t\t per PC\t' \
-             '     variance\n'
+        s = "\nPC\t\tEigenvalue\t\t%variance\t" "%cumulative\n"
+        s += "   \t\tof cov(X)\t\t per PC\t" "     variance\n"
 
         n_pc = min(n_pc, len(self.ev.data))
         for i in range(n_pc):
-            tup = (i + 1, np.sqrt(self.ev.data[i]), self.ev_ratio.data[i], self.ev_cum.data[i])
-            s += '#{}  \t{:8.3e}\t\t {:6.3f}\t      {:6.3f}\n'.format(*tup)
+            tup = (
+                i + 1,
+                np.sqrt(self.ev.data[i]),
+                self.ev_ratio.data[i],
+                self.ev_cum.data[i],
+            )
+            s += "#{}  \t{:8.3e}\t\t {:6.3f}\t      {:6.3f}\n".format(*tup)
 
         return s
 
@@ -188,23 +199,25 @@ class PCA(HasTraits):
         elif isinstance(n_pc, int):
             n_pc = min(n_pc, max_n_pc)
             return n_pc
-        elif n_pc == 'auto':
+        elif n_pc == "auto":
             M, N = self.X.shape
             if M >= N:
                 n_pc = self._infer_pc_()
                 return n_pc
             else:
-                info_('Cannot use `auto` if n_observations < '
-                      'n_features. Try with threshold 0.9999')
+                info_(
+                    "Cannot use `auto` if n_observations < "
+                    "n_features. Try with threshold 0.9999"
+                )
                 n_pc = 0.9999
 
         if 0 < n_pc < 1.0:
             # number of PC for which the cumulated explained variance is
             # less than a given ratio
-            n_pc = np.searchsorted(self.ev_cum.data / 100., n_pc) + 1
+            n_pc = np.searchsorted(self.ev_cum.data / 100.0, n_pc) + 1
             return n_pc
         else:
-            raise ValueError('could not get a valid number of components')
+            raise ValueError("could not get a valid number of components")
 
     def _assess_dimension_(self, rank):
         """Compute the likelihood of a rank ``rank`` dataset
@@ -231,34 +244,36 @@ class PCA(HasTraits):
         M, N = self._X.shape
 
         if rank > len(spectrum):
-            raise ValueError("The tested rank cannot exceed the rank of the"
-                             " dataset")
+            raise ValueError("The tested rank cannot exceed the rank of the" " dataset")
 
-        pu = -rank * np.log(2.)
+        pu = -rank * np.log(2.0)
         for i in range(rank):
-            pu += (gammaln((N - i) / 2.) - np.log(np.pi) * (N - i) / 2.)
+            pu += gammaln((N - i) / 2.0) - np.log(np.pi) * (N - i) / 2.0
 
         pl = np.sum(np.log(spectrum[:rank]))
-        pl = -pl * M / 2.
+        pl = -pl * M / 2.0
 
         if rank == N:
             pv = 0
             v = 1
         else:
             v = np.sum(spectrum[rank:]) / (N - rank)
-            pv = -np.log(v) * M * (N - rank) / 2.
+            pv = -np.log(v) * M * (N - rank) / 2.0
 
-        m = N * rank - rank * (rank + 1.) / 2.
-        pp = np.log(2. * np.pi) * (m + rank + 1.) / 2.
+        m = N * rank - rank * (rank + 1.0) / 2.0
+        pp = np.log(2.0 * np.pi) * (m + rank + 1.0) / 2.0
 
-        pa = 0.
+        pa = 0.0
         spectrum_ = spectrum.copy()
         spectrum_[rank:N] = v
         for i in range(rank):
             for j in range(i + 1, len(spectrum)):
-                pa += np.log((spectrum[i] - spectrum[j]) * (1. / spectrum_[j] - 1. / spectrum_[i])) + np.log(M)
+                pa += np.log(
+                    (spectrum[i] - spectrum[j])
+                    * (1.0 / spectrum_[j] - 1.0 / spectrum_[i])
+                ) + np.log(M)
 
-        ll = pu + pl + pv + pp - pa / 2. - rank * np.log(M) / 2.
+        ll = pu + pl + pv + pp - pa / 2.0 - rank * np.log(M) / 2.0
 
         return ll
 
@@ -349,7 +364,7 @@ class PCA(HasTraits):
         if self._centered:
             X += self._center
 
-        X.history = f'PCA reconstructed Dataset with {n_pc} principal components'
+        X.history = f"PCA reconstructed Dataset with {n_pc} principal components"
         X.title = self._X.title
         return X
 
@@ -379,21 +394,25 @@ class PCA(HasTraits):
         # get n_pc (automatic or determined by the n_pc arguments) - min = 3
         n_pc = max(self._get_n_pc(n_pc), 3)
 
-        color1, color2 = kwargs.get('colors', [NBlue, NRed])
+        color1, color2 = kwargs.get("colors", [NBlue, NRed])
         # pen = kwargs.get('pen', True)
-        ylim1, ylim2 = kwargs.get('ylims', [(0, 100), 'auto'])
+        ylim1, ylim2 = kwargs.get("ylims", [(0, 100), "auto"])
 
-        if ylim2 == 'auto':
-            y1 = np.around(self._ev_ratio.data[0] * .95, -1)
-            y2 = 101.
+        if ylim2 == "auto":
+            y1 = np.around(self._ev_ratio.data[0] * 0.95, -1)
+            y2 = 101.0
             ylim2 = (y1, y2)
 
-        ax1 = self._ev_ratio[:n_pc].plot_bar(ylim=ylim1, color=color1, title='Scree plot')
-        ax2 = self._ev_cum[:n_pc].plot_scatter(ylim=ylim2, color=color2, pen=True, markersize=7., twinx=ax1)
-        ax1.set_title('Scree plot')
+        ax1 = self._ev_ratio[:n_pc].plot_bar(
+            ylim=ylim1, color=color1, title="Scree plot"
+        )
+        ax2 = self._ev_cum[:n_pc].plot_scatter(
+            ylim=ylim2, color=color2, pen=True, markersize=7.0, twinx=ax1
+        )
+        ax1.set_title("Scree plot")
         return ax1, ax2
 
-    def scoreplot(self, *pcs, colormap='viridis', color_mapping='index', **kwargs):
+    def scoreplot(self, *pcs, colormap="viridis", color_mapping="index", **kwargs):
         """
         2D or 3D scoreplot of samples.
 
@@ -416,14 +435,14 @@ class PCA(HasTraits):
         pcs = np.array(pcs) - 1
 
         # colors
-        if color_mapping == 'index':
+        if color_mapping == "index":
 
             if np.any(self._S.y.data):
                 colors = self._S.y.data
             else:
                 colors = np.array(range(self._S.shape[0]))
 
-        elif color_mapping == 'labels':
+        elif color_mapping == "labels":
 
             labels = list(set(self._S.y.labels))
             colors = [labels.index(lab) for lab in self._S.y.labels]
@@ -433,12 +452,21 @@ class PCA(HasTraits):
 
             fig = plt.figure(**kwargs)
             ax = fig.add_subplot(111)
-            ax.set_title('Score plot')
+            ax.set_title("Score plot")
 
-            ax.set_xlabel('PC# {} ({:.3f}%)'.format(pcs[0] + 1, self._ev_ratio.data[pcs[0]]))
-            ax.set_ylabel('PC# {} ({:.3f}%)'.format(pcs[1] + 1, self._ev_ratio.data[pcs[1]]))
-            axsc = ax.scatter(self._S.masked_data[:, pcs[0]], self._S.masked_data[:, pcs[1]], s=30, c=colors,
-                              cmap=colormap)
+            ax.set_xlabel(
+                "PC# {} ({:.3f}%)".format(pcs[0] + 1, self._ev_ratio.data[pcs[0]])
+            )
+            ax.set_ylabel(
+                "PC# {} ({:.3f}%)".format(pcs[1] + 1, self._ev_ratio.data[pcs[1]])
+            )
+            axsc = ax.scatter(
+                self._S.masked_data[:, pcs[0]],
+                self._S.masked_data[:, pcs[1]],
+                s=30,
+                c=colors,
+                cmap=colormap,
+            )
 
             number_x_labels = self.prefs.number_of_x_labels  # get from config
             number_y_labels = self.prefs.number_of_y_labels
@@ -447,21 +475,35 @@ class PCA(HasTraits):
             ax.yaxis.set_major_formatter(y_formatter)
             ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
             ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
-            ax.xaxis.set_ticks_position('bottom')
-            ax.yaxis.set_ticks_position('left')
+            ax.xaxis.set_ticks_position("bottom")
+            ax.yaxis.set_ticks_position("left")
 
         if len(pcs) == 3:
             # tridimensional score plot
             plt.figure(**kwargs)
-            ax = plt.axes(projection='3d')
-            ax.set_title('Score plot')
-            ax.set_xlabel('PC# {} ({:.3f}%)'.format(pcs[0] + 1, self._ev_ratio.data[pcs[0]]))
-            ax.set_ylabel('PC# {} ({:.3f}%)'.format(pcs[1] + 1, self._ev_ratio.data[pcs[1]]))
-            ax.set_zlabel('PC# {} ({:.3f}%)'.format(pcs[2] + 1, self._ev_ratio.data[pcs[2]]))
-            axsc = ax.scatter(self._S.masked_data[:, pcs[0]], self._S.masked_data[:, pcs[1]],
-                              self._S.masked_data[:, pcs[2]], zdir='z', s=30, c=colors, cmap=colormap, depthshade=True)
+            ax = plt.axes(projection="3d")
+            ax.set_title("Score plot")
+            ax.set_xlabel(
+                "PC# {} ({:.3f}%)".format(pcs[0] + 1, self._ev_ratio.data[pcs[0]])
+            )
+            ax.set_ylabel(
+                "PC# {} ({:.3f}%)".format(pcs[1] + 1, self._ev_ratio.data[pcs[1]])
+            )
+            ax.set_zlabel(
+                "PC# {} ({:.3f}%)".format(pcs[2] + 1, self._ev_ratio.data[pcs[2]])
+            )
+            axsc = ax.scatter(
+                self._S.masked_data[:, pcs[0]],
+                self._S.masked_data[:, pcs[1]],
+                self._S.masked_data[:, pcs[2]],
+                zdir="z",
+                s=30,
+                c=colors,
+                cmap=colormap,
+                depthshade=True,
+            )
 
-        if color_mapping == 'labels':
+        if color_mapping == "labels":
             import matplotlib.patches as mpatches
 
             leg = []
@@ -470,7 +512,7 @@ class PCA(HasTraits):
                 c = axsc.get_cmap().colors[int(255 / (len(labels) - 1) * i)]
                 leg.append(mpatches.Patch(color=c, label=lab))
 
-            ax.legend(handles=leg, loc='best')
+            ax.legend(handles=leg, loc="best")
 
         return ax
 
@@ -520,5 +562,5 @@ class PCA(HasTraits):
 
 
 # ============================================================================
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

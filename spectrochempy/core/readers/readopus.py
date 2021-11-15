@@ -7,7 +7,7 @@
 """
 This module extend NDDataset with the import method for OPUS generated data files.
 """
-__all__ = ['read_opus']
+__all__ = ["read_opus"]
 __dataset_methods__ = __all__
 
 import io
@@ -155,8 +155,8 @@ def read_opus(*paths, **kwargs):
     NDDataset: [float64] a.u. (shape: (y:4, x:2567))
     """
 
-    kwargs['filetypes'] = ['Bruker OPUS files (*.[0-9]*)']
-    kwargs['protocol'] = ['opus']
+    kwargs["filetypes"] = ["Bruker OPUS files (*.[0-9]*)"]
+    kwargs["protocol"] = ["opus"]
     importer = Importer()
     return importer(*paths, **kwargs)
 
@@ -168,42 +168,46 @@ def read_opus(*paths, **kwargs):
 # ......................................................................................................................
 @importermethod
 def _read_opus(*args, **kwargs):
-    debug_('Bruker OPUS import')
+    debug_("Bruker OPUS import")
 
     dataset, filename = args
-    content = kwargs.get('content', None)
+    content = kwargs.get("content", None)
 
     if content:
         fid = io.BytesIO(content)
     else:
-        fid = open(filename, 'rb')
+        fid = open(filename, "rb")
 
     opus_data = _read_data(fid)
 
     # data
     try:
-        npt = opus_data['AB Data Parameter']['NPT']
+        npt = opus_data["AB Data Parameter"]["NPT"]
         data = opus_data["AB"][:npt]
-        dataset.data = np.array(data[np.newaxis], dtype='float32')
+        dataset.data = np.array(data[np.newaxis], dtype="float32")
     except KeyError:
         raise IOError(f"{filename} is not an Absorbance spectrum. It cannot be read with the `read_opus` import method")
     #todo: read background
 
+
     # xaxis
-    fxv = opus_data['AB Data Parameter']['FXV']
-    lxv = opus_data['AB Data Parameter']['LXV']
+    fxv = opus_data["AB Data Parameter"]["FXV"]
+    lxv = opus_data["AB Data Parameter"]["LXV"]
     # xdata = linspace(fxv, lxv, npt)
-    xaxis = LinearCoord.linspace(fxv, lxv, npt, title='wavenumbers', units='cm^-1')
+    xaxis = LinearCoord.linspace(fxv, lxv, npt, title="wavenumbers", units="cm^-1")
 
     # yaxis
-    name = opus_data["Sample"]['SNM']
+    name = opus_data["Sample"]["SNM"]
     acqdate = opus_data["AB Data Parameter"]["DAT"]
     acqtime = opus_data["AB Data Parameter"]["TIM"]
-    gmt_offset_hour = float(acqtime.split('GMT')[1].split(')')[0])
-    date_time = datetime.strptime(acqdate + '_' + acqtime.split()[0], '%d/%m/%Y_%H:%M:%S.%f')
+    gmt_offset_hour = float(acqtime.split("GMT")[1].split(")")[0])
+    date_time = datetime.strptime(
+        acqdate + "_" + acqtime.split()[0], "%d/%m/%Y_%H:%M:%S.%f"
+    )
     utc_dt = date_time - timedelta(hours=gmt_offset_hour)
     utc_dt = utc_dt.replace(tzinfo=timezone.utc)
     timestamp = utc_dt.timestamp()
+
     yaxis = Coord([timestamp],
                   title='acquisition timestamp (GMT)',
                   units='s',
@@ -211,14 +215,14 @@ def _read_opus(*args, **kwargs):
 
     # set dataset's Coordset
     dataset.set_coordset(y=yaxis, x=xaxis)
-    dataset.units = 'absorbance'
-    dataset.title = 'absorbance'
+    dataset.units = "absorbance"
+    dataset.title = "absorbance"
 
     # Set name, origin, description and history
     dataset.name = filename.name
     dataset.origin = "opus"
-    dataset.description = 'Dataset from opus files. \n'
-    dataset.history = str(datetime.now(timezone.utc)) + ': import from opus files \n'
+    dataset.description = "Dataset from opus files. \n"
+    dataset.history = str(datetime.now(timezone.utc)) + ": import from opus files \n"
     dataset._date = datetime.now(timezone.utc)
     dataset._modified = dataset.date
 
@@ -234,5 +238,5 @@ def _read_data(fid):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

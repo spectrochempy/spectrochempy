@@ -52,7 +52,7 @@ It is a cross platform software, running on Linux, Windows or OS X.
 # from time import time
 # from pathlib import Path
 
-__all__ = ['api']
+__all__ = ["api"]
 
 # import the main api
 from spectrochempy import api
@@ -62,5 +62,5 @@ __all__ += api.__all__
 
 
 # ==============================================================================
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

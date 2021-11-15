@@ -8,12 +8,13 @@
 This module implements the MCRALS class.
 """
 
-__all__ = ['MCRALS']
+__all__ = ["MCRALS"]
 
 __dataset_methods__ = []
 
 import numpy as np
 from traitlets import HasTraits, Instance, Dict, Unicode
+
 # from collections.abc import Iterable
 
 from spectrochempy.core.dataset.nddataset import NDDataset
@@ -35,7 +36,7 @@ class MCRALS(HasTraits):
     _logs = Unicode
     _params = Dict()
 
-    def __init__(self, dataset, guess, **kwargs):   # lgtm [py/missing-call-to-init]
+    def __init__(self, dataset, guess, **kwargs):  # lgtm [py/missing-call-to-init]
         """
         Parameters
         ----------
@@ -91,7 +92,7 @@ class MCRALS(HasTraits):
             Indicates species having unimodal spectra
         """
 
-        verbose = kwargs.pop('verbose', False)
+        verbose = kwargs.pop("verbose", False)
         if verbose:
             set_loglevel(INFO)
 
@@ -108,18 +109,20 @@ class MCRALS(HasTraits):
         if X.shape[0] == guess.shape[0]:
             initConc = True
             C = guess.copy()
-            C.name = 'Pure conc. profile, mcs-als of ' + X.name
+            C.name = "Pure conc. profile, mcs-als of " + X.name
             nspecies = C.shape[1]
 
         elif X.shape[1] == guess.shape[1]:
             initSpec = True
             St = guess.copy()
-            St.name = 'Pure spectra profile, mcs-als of ' + X.name
+            St.name = "Pure spectra profile, mcs-als of " + X.name
             nspecies = St.shape[0]
 
         else:
-            raise ValueError('the dimensions of initial concentration '
-                             'or spectra dataset do not match the data')
+            raise ValueError(
+                "the dimensions of initial concentration "
+                "or spectra dataset do not match the data"
+            )
 
         ny, nx = X.shape
 
@@ -132,37 +135,39 @@ class MCRALS(HasTraits):
         # TODO: make a preference  file to set this kwargs
         # optimization
 
-        tol = kwargs.get('tol', 0.1)
-        maxit = kwargs.get('maxit', 50)
-        maxdiv = kwargs.get('maxdiv', 5)
+        tol = kwargs.get("tol", 0.1)
+        maxit = kwargs.get("maxit", 50)
+        maxdiv = kwargs.get("maxdiv", 5)
 
         # constraints on concentrations
-        nonnegConc = kwargs.get('nonnegConc', np.arange(nspecies))
-        unimodConc = kwargs.get('unimodConc', np.arange(nspecies))
-        unimodTol = kwargs.get('unimodTol', 1.1)
-        unimodMod = kwargs.get('unimodMod', 'strict')
-        closureConc = kwargs.get('closureConc', None)
+        nonnegConc = kwargs.get("nonnegConc", np.arange(nspecies))
+        unimodConc = kwargs.get("unimodConc", np.arange(nspecies))
+        unimodTol = kwargs.get("unimodTol", 1.1)
+        unimodMod = kwargs.get("unimodMod", "strict")
+        closureConc = kwargs.get("closureConc", None)
         if closureConc is not None:
-            closureTarget = kwargs.get('closureTarget', np.ones(ny))
-            closureMethod = kwargs.get('closureMethod', 'scaling')
-        monoDecConc = kwargs.get('monoDecConc', None)
-        monoDecTol = kwargs.get('monoDecTol', 1.1)
-        monoIncConc = kwargs.get('monoIncConc', None)
-        monoIncTol = kwargs.get('monoIncTol', 1.1)
-        externalConc = kwargs.get('externalConc', None)
+            closureTarget = kwargs.get("closureTarget", np.ones(ny))
+            closureMethod = kwargs.get("closureMethod", "scaling")
+        monoDecConc = kwargs.get("monoDecConc", None)
+        monoDecTol = kwargs.get("monoDecTol", 1.1)
+        monoIncConc = kwargs.get("monoIncConc", None)
+        monoIncTol = kwargs.get("monoIncTol", 1.1)
+        externalConc = kwargs.get("externalConc", None)
         if externalConc is not None:
-            external_to_C_idx = kwargs.get('external_to_C_idx', np.arange(nspecies))
+            external_to_C_idx = kwargs.get("external_to_C_idx", np.arange(nspecies))
         if externalConc is not None:
             try:
-                getExternalConc = kwargs.get('getExternalConc')
+                getExternalConc = kwargs.get("getExternalConc")
             except Exception:
-                raise ValueError('A function must be given to get the external concentration profile(s)')
-            external_to_C_idx = kwargs.get('external_to_C_idx', externalConc)
-            args = kwargs.get('args', ())
+                raise ValueError(
+                    "A function must be given to get the external concentration profile(s)"
+                )
+            external_to_C_idx = kwargs.get("external_to_C_idx", externalConc)
+            args = kwargs.get("args", ())
 
         # constraints on spectra
-        nonnegSpec = kwargs.get('nonnegSpec', np.arange(nspecies))
-        normSpec = kwargs.get('normSpec', None)
+        nonnegSpec = kwargs.get("nonnegSpec", np.arange(nspecies))
+        normSpec = kwargs.get("normSpec", None)
 
         # TODO: add unimodal constraint on spectra
 
@@ -173,7 +178,7 @@ class MCRALS(HasTraits):
             if C.coordset is None:
                 C.set_coordset(y=X.y, x=C.x)
             St = NDDataset(np.linalg.lstsq(C.data, X.data, rcond=None)[0])
-            St.name = 'Pure spectra profile, mcs-als of ' + X.name
+            St.name = "Pure spectra profile, mcs-als of " + X.name
             St.title = X.title
             cy = C.x.copy() if C.x else None
             cx = X.x.copy() if X.x else None
@@ -184,8 +189,8 @@ class MCRALS(HasTraits):
                 St.set_coordset(y=St.y, x=X.x)
             Ct = np.linalg.lstsq(St.data.T, X.data.T, rcond=None)[0]
             C = NDDataset(Ct.T)
-            C.name = 'Pure conc. profile, mcs-als of ' + X.name
-            C.title = 'concentration'
+            C.name = "Pure conc. profile, mcs-als of " + X.name
+            C.title = "concentration"
             cx = St.y.copy() if St.y else None
             cy = X.y.copy() if X.y else None
             C.set_coordset(y=cy, x=cx)
@@ -195,9 +200,9 @@ class MCRALS(HasTraits):
         niter = 0
         ndiv = 0
 
-        logs = '*** ALS optimisation log***\n'
-        logs += '#iter     Error/PCA        Error/Exp      %change\n'
-        logs += '---------------------------------------------------'
+        logs = "*** ALS optimisation log***\n"
+        logs += "#iter     Error/PCA        Error/Exp      %change\n"
+        logs += "---------------------------------------------------"
         info_(logs)
 
         while change >= tol and niter < maxit and ndiv < maxdiv:
@@ -222,11 +227,12 @@ class MCRALS(HasTraits):
                     while curid > 0:
                         curid -= 1
                         if C.data[curid, s] > curmax * unimodTol:
-                            if unimodMod == 'strict':
+                            if unimodMod == "strict":
                                 C.data[curid, s] = C.data[curid + 1, s]
-                            if unimodMod == 'smooth':
-                                C.data[curid, s] = (C.data[curid, s] + C.data[
-                                    curid + 1, s]) / 2
+                            if unimodMod == "smooth":
+                                C.data[curid, s] = (
+                                    C.data[curid, s] + C.data[curid + 1, s]
+                                ) / 2
                                 C.data[curid + 1, s] = C.data[curid, s]
                                 curid = curid + 2
                         curmax = C.data[curid, s]
@@ -235,11 +241,12 @@ class MCRALS(HasTraits):
                     while curid < ny - 1:
                         curid += 1
                         if C.data[curid, s] > curmax * unimodTol:
-                            if unimodMod == 'strict':
+                            if unimodMod == "strict":
                                 C.data[curid, s] = C.data[curid - 1, s]
-                            if unimodMod == 'smooth':
-                                C.data[curid, s] = (C.data[curid, s] + C.data[
-                                    curid - 1, s]) / 2
+                            if unimodMod == "smooth":
+                                C.data[curid, s] = (
+                                    C.data[curid, s] + C.data[curid - 1, s]
+                                ) / 2
                                 C.data[curid - 1, s] = C.data[curid, s]
                                 curid = curid - 2
                         curmax = C.data[curid, s]
@@ -263,20 +270,35 @@ class MCRALS(HasTraits):
             # Closure
             # ------------------------------------------
             if closureConc is not None:
-                if closureMethod == 'scaling':
-                    Q = np.linalg.lstsq(C.data[:, closureConc], closureTarget.T, rcond=None)[0]
+                if closureMethod == "scaling":
+                    Q = np.linalg.lstsq(
+                        C.data[:, closureConc], closureTarget.T, rcond=None
+                    )[0]
                     C.data[:, closureConc] = np.dot(C.data[:, closureConc], np.diag(Q))
-                elif closureMethod == 'constantSum':
+                elif closureMethod == "constantSum":
                     totalConc = np.sum(C.data[:, closureConc], axis=1)
-                    C.data[:, closureConc] = C.data[:, closureConc] * closureTarget[:, None] / totalConc[:, None]
+                    C.data[:, closureConc] = (
+                        C.data[:, closureConc]
+                        * closureTarget[:, None]
+                        / totalConc[:, None]
+                    )
 
             # external concentration profiles
             # ------------------------------------------
             if externalConc is not None:
-                extOutput = getExternalConc(*((C, externalConc, external_to_C_idx,) + args))
+                extOutput = getExternalConc(
+                    *(
+                        (
+                            C,
+                            externalConc,
+                            external_to_C_idx,
+                        )
+                        + args
+                    )
+                )
                 if isinstance(extOutput, dict):
-                    extC = extOutput['concentrations']
-                    args = extOutput['new_args']
+                    extC = extOutput["concentrations"]
+                    args = extOutput["new_args"]
                 else:
                     extC = extOutput
                 if type(extC) is NDDataset:
@@ -301,11 +323,11 @@ class MCRALS(HasTraits):
             C.data = np.linalg.lstsq(St.data.T, X.data.T, rcond=None)[0].T
 
             # rescale spectra & concentrations
-            if normSpec == 'max':
+            if normSpec == "max":
                 alpha = np.max(St.data, axis=1).reshape(nspecies, 1)
                 St.data = St.data / alpha
                 C.data = C.data * alpha.T
-            elif normSpec == 'euclid':
+            elif normSpec == "euclid":
                 alpha = np.linalg.norm(St.data, axis=1).reshape(nspecies, 1)
                 St.data = St.data / alpha
                 C.data = C.data * alpha.T
@@ -317,10 +339,14 @@ class MCRALS(HasTraits):
             change = 100 * (stdev2 - stdev) / stdev
             stdev = stdev2
 
-            stdev_PCA = (X_hat - Xpca.data).std()  # TODO: Check PCA : values are different from the Arnaud version ?
+            stdev_PCA = (
+                X_hat - Xpca.data
+            ).std()  # TODO: Check PCA : values are different from the Arnaud version ?
 
-            logentry = '{:3d}      {:10f}      {:10f}      {:10f}'.format(niter, stdev_PCA, stdev2, change)
-            logs += logentry + '\n'
+            logentry = "{:3d}      {:10f}      {:10f}      {:10f}".format(
+                niter, stdev_PCA, stdev2, change
+            )
+            logs += logentry + "\n"
             info_(logentry)
 
             if change > 0:
@@ -330,21 +356,25 @@ class MCRALS(HasTraits):
                 change = -change
 
             if change < tol:
-                logentry = 'converged !'
-                logs += logentry + '\n'
+                logentry = "converged !"
+                logs += logentry + "\n"
                 info_(logentry)
 
             if ndiv == maxdiv:
-                logline = f"Optimization not improved since {maxdiv} iterations... unconverged " \
-                          f"or 'tol' set too small ?\n"
-                logline += 'Stop ALS optimization'
-                logs += logline + '\n'
+                logline = (
+                    f"Optimization not improved since {maxdiv} iterations... unconverged "
+                    f"or 'tol' set too small ?\n"
+                )
+                logline += "Stop ALS optimization"
+                logs += logline + "\n"
                 info_(logline)
 
             if niter == maxit:
-                logline = 'Convergence criterion (\'tol\') not reached after {:d} iterations.'.format(maxit)
-                logline += 'Stop ALS optimization'
-                logs += logline + '\n'
+                logline = "Convergence criterion ('tol') not reached after {:d} iterations.".format(
+                    maxit
+                )
+                logline += "Stop ALS optimization"
+                logs += logline + "\n"
                 info_(logline)
 
         self._X = X
@@ -445,8 +475,8 @@ class MCRALS(HasTraits):
 
         X_hat = dot(C, St)
 
-        X_hat.history = 'Dataset reconstructed by MCS ALS optimization'
-        X_hat.title = 'X_hat: ' + self.X.title
+        X_hat.history = "Dataset reconstructed by MCS ALS optimization"
+        X_hat.title = "X_hat: " + self.X.title
         return X_hat
 
     def plotmerit(self, **kwargs):
@@ -458,7 +488,7 @@ class MCRALS(HasTraits):
         ax
             subplot
         """
-        colX, colXhat, colRes = kwargs.get('colors', ['blue', 'green', 'red'])
+        colX, colXhat, colRes = kwargs.get("colors", ["blue", "green", "red"])
 
         X_hat = self.reconstruct()
         res = self.X - X_hat
@@ -470,5 +500,5 @@ class MCRALS(HasTraits):
             ax.plot(X_hat.T.data, color=colXhat)
             ax.plot(res.T.data, color=colRes)
         ax.autoscale(enable=True)
-        ax.set_title('MCR ALS merit plot')
+        ax.set_title("MCR ALS merit plot")
         return ax

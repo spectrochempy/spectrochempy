@@ -8,7 +8,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.13.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -33,7 +33,7 @@ import numpy as np
 # like this using the `np.sqrt` functions :
 
 # %%
-x = np.array([1., 2., 3., 4., 6.])
+x = np.array([1.0, 2.0, 3.0, 4.0, 6.0])
 np.sqrt(x)
 
 # %% [markdown]
@@ -128,9 +128,9 @@ sqrt(dx)
 # dataset.
 
 # %%
-d2D = NDDataset.read_omnic('irdata/nh4y-activation.spg')
+d2D = NDDataset.read_omnic("irdata/nh4y-activation.spg")
 prefs = d2D.preferences
-prefs.colormap = 'magma'
+prefs.colormap = "magma"
 prefs.colorbar = False
 prefs.figure.figsize = (6, 3)
 _ = d2D.plot()
@@ -148,8 +148,8 @@ _ = dataset.plot()
 # present negative values and we will also mask some data
 
 # %%
-dataset = dataset - 2.  # add an offset to make that some of the values become negative
-dataset[1290.:890.] = MASKED  # additionally we mask some data
+dataset = dataset - 2.0  # add an offset to make that some of the values become negative
+dataset[1290.0:890.0] = MASKED  # additionally we mask some data
 _ = dataset.plot()
 
 # %% [markdown]
@@ -214,7 +214,9 @@ _ = out.plot(figsize=(6, 2.5))
 # Return the non-negative square-root of an array, element-wise.
 
 # %%
-out = np.sqrt(dataset)  # as they are some negative elements, return dataset has complex dtype.
+out = np.sqrt(
+    dataset
+)  # as they are some negative elements, return dataset has complex dtype.
 _ = out.plot_1D(show_complex=True, figsize=(6, 2.5))
 
 # %% [markdown]
@@ -238,7 +240,7 @@ _ = out.plot_1D(figsize=(6, 2.5))
 # Return the reciprocal of the argument, element-wise.
 
 # %%
-out = np.reciprocal(dataset + 3.)
+out = np.reciprocal(dataset + 3.0)
 _ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
@@ -256,7 +258,7 @@ _ = out.plot(figsize=(6, 2.5))
 # Obviously numpy exponential functions applies only to dimensionless array. Else an error is generated.
 
 # %%
-x = NDDataset(np.arange(5), units='m')
+x = NDDataset(np.arange(5), units="m")
 try:
     np.exp(x)  # A dimensionality error will be generated
 except DimensionalityError as e:
@@ -426,7 +428,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.rad2deg(dataset)
-out.title = 'data'  # just to avoid a too long title
+out.title = "data"  # just to avoid a too long title
 _ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
@@ -436,7 +438,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.deg2rad(out)
-out.title = 'data'
+out.title = "data"
 _ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
@@ -495,7 +497,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 dataset2 = np.reciprocal(dataset + 3)  # create a second dataset
-dataset2[5000.:4000.] = MASKED
+dataset2[5000.0:4000.0] = MASKED
 _ = dataset.plot(figsize=(6, 2.5))
 _ = dataset2.plot(figsize=(6, 2.5))
 
@@ -556,7 +558,14 @@ _ = out.plot(figsize=(6, 2.5))
 # .g.,* allows 2D-hypercomplex array that can be transposed (useful for NMR data).
 
 # %%
-da = NDDataset([[1. + 2.j, 2. + 0j], [1.3 + 2.j, 2. + 0.5j], [1. + 4.2j, 2. + 3j], [5. + 4.2j, 2. + 3j]])
+da = NDDataset(
+    [
+        [1.0 + 2.0j, 2.0 + 0j],
+        [1.3 + 2.0j, 2.0 + 0.5j],
+        [1.0 + 4.2j, 2.0 + 3j],
+        [5.0 + 4.2j, 2.0 + 3j],
+    ]
+)
 da
 
 # %% [markdown]

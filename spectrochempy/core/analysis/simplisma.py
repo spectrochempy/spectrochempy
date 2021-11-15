@@ -11,7 +11,7 @@
 This module implement the SIMPLISMA class.
 """
 
-__all__ = ['SIMPLISMA']
+__all__ = ["SIMPLISMA"]
 
 __dataset_methods__ = []
 
@@ -31,6 +31,7 @@ from spectrochempy.core import info_, set_loglevel, INFO
 # ============================================================================
 # class SIMPLISMA
 # ============================================================================
+
 
 class SIMPLISMA(HasTraits):
     """
@@ -76,8 +77,10 @@ class SIMPLISMA(HasTraits):
         def figures_of_merit(X, maxPIndex, C, St, j):
             # return %explained variance and stdev of residuals when the jth compound is added
             C[:, j] = X[:, maxPIndex[j]]
-            St[0:j + 1, :] = np.linalg.lstsq(C.data[:, 0:j + 1], X.data, rcond=None)[0]
-            Xhat = dot(C[:, 0:j + 1], St[0:j + 1, :])
+            St[0 : j + 1, :] = np.linalg.lstsq(
+                C.data[:, 0 : j + 1], X.data, rcond=None
+            )[0]
+            Xhat = dot(C[:, 0 : j + 1], St[0 : j + 1, :])
             res = Xhat - X
             stdev_res = np.std(res)
             rsquare = 1 - np.linalg.norm(res) ** 2 / np.linalg.norm(X) ** 2
@@ -86,7 +89,9 @@ class SIMPLISMA(HasTraits):
         def str_iter_summary(j, index, coord, rsquare, stdev_res, diff):
             # return formatted list of figure of merits at a given iteration
 
-            string = '{:4}  {:5}  {:8.1f} {:10.4f} {:10.4f} '.format(j + 1, index, coord, stdev_res, rsquare)
+            string = "{:4}  {:5}  {:8.1f} {:10.4f} {:10.4f} ".format(
+                j + 1, index, coord, stdev_res, rsquare
+            )
             return string
 
         def get_x_data(X):
@@ -102,23 +107,25 @@ class SIMPLISMA(HasTraits):
         X = dataset
 
         if len(X.shape) != 2:
-            raise ValueError('For now, SIMPLISMA only handles 2D Datasets')
+            raise ValueError("For now, SIMPLISMA only handles 2D Datasets")
 
         if np.min(X.data) < 0:
-            warnings.warn('SIMPLISMA does not handle easily negative values.')
+            warnings.warn("SIMPLISMA does not handle easily negative values.")
             # TODO: check whether negative values should be set to zero or not.
 
-        verbose = kwargs.get('verbose', True)
+        verbose = kwargs.get("verbose", True)
         if verbose:
             set_loglevel(INFO)
 
-        interactive = kwargs.get('interactive', False)
-        tol = kwargs.get('tol', 0.1)
-        noise = kwargs.get('noise', 3)
-        n_pc = kwargs.get('n_pc', 2)
+        interactive = kwargs.get("interactive", False)
+        tol = kwargs.get("tol", 0.1)
+        noise = kwargs.get("noise", 3)
+        n_pc = kwargs.get("n_pc", 2)
         if n_pc < 2 or not isinstance(n_pc, int):
-            raise ValueError('Oh you did not just... \'MA\' in simplisMA stands for Mixture Analysis. '
-                             'The number of pure compounds should be an integer larger than 2')
+            raise ValueError(
+                "Oh you did not just... 'MA' in simplisMA stands for Mixture Analysis. "
+                "The number of pure compounds should be an integer larger than 2"
+            )
         if interactive:
             n_pc = 100
 
@@ -127,28 +134,28 @@ class SIMPLISMA(HasTraits):
         # ------------------------------------------------------------------------
 
         if not interactive:
-            logs = '*** Automatic SIMPL(I)SMA analysis *** \n'
+            logs = "*** Automatic SIMPL(I)SMA analysis *** \n"
         else:
-            logs = '*** Interative SIMPLISMA analysis *** \n'
-        logs += 'dataset: {}\n'.format(X.name)
-        logs += '  noise: {:2} %\n'.format(noise)
+            logs = "*** Interative SIMPLISMA analysis *** \n"
+        logs += "dataset: {}\n".format(X.name)
+        logs += "  noise: {:2} %\n".format(noise)
         if not interactive:
-            logs += '    tol: {:2} %\n'.format(tol)
-            logs += '   n_pc: {:2}\n'.format(n_pc)
-        logs += '\n'
-        logs += '#iter index_pc  coord_pc   Std(res)   R^2   \n'
-        logs += '---------------------------------------------'
+            logs += "    tol: {:2} %\n".format(tol)
+            logs += "   n_pc: {:2}\n".format(n_pc)
+        logs += "\n"
+        logs += "#iter index_pc  coord_pc   Std(res)   R^2   \n"
+        logs += "---------------------------------------------"
         info_(logs)
-        logs += '\n'
+        logs += "\n"
 
         # Containers for returned objects and intermediate data
         # ---------------------------------------------------
         # purity 'spectra' (generally spectra if X is passed,
         # but could also be concentrations if X.T is passed)
         Pt = NDDataset.zeros((n_pc, X.shape[-1]))
-        Pt.name = 'Purity spectra'
+        Pt.name = "Purity spectra"
         Pt.set_coordset(y=Pt.y, x=X.x)
-        Pt.y.title = '# pure compound'
+        Pt.y.title = "# pure compound"
 
         # weight matrix
         w = NDDataset.zeros((n_pc, X.shape[-1]))
@@ -156,7 +163,7 @@ class SIMPLISMA(HasTraits):
 
         # Stdev spectrum
         s = NDDataset.zeros((n_pc, X.shape[-1]))
-        s.name = 'Standard deviation spectra'
+        s.name = "Standard deviation spectra"
         s.set_coordset(y=Pt.y, x=X.x)
 
         # maximum purity indexes and coordinates
@@ -165,13 +172,13 @@ class SIMPLISMA(HasTraits):
 
         # Concentration matrix
         C = NDDataset.zeros((X.shape[-2], n_pc))
-        C.name = 'Relative Concentrations'
+        C.name = "Relative Concentrations"
         C.set_coordset(y=X.y, x=C.x)
-        C.x.title = '# pure compound'
+        C.x.title = "# pure compound"
 
         # Pure component spectral profiles
         St = NDDataset.zeros((n_pc, X.shape[-1]))
-        St.name = 'Pure compound spectra'
+        St.name = "Pure compound spectra"
         St.set_coordset(y=Pt.y, x=X.x)
 
         # Compute Statistics
@@ -206,9 +213,10 @@ class SIMPLISMA(HasTraits):
                 rsquare0, stdev_res0 = figures_of_merit(X, maxPIndex, C, St, j)
 
                 # add summary to log
-                llog = str_iter_summary(j, maxPIndex[j], maxPCoordinate[j],
-                                        rsquare0, stdev_res0, '')
-                logs += llog + '\n'
+                llog = str_iter_summary(
+                    j, maxPIndex[j], maxPCoordinate[j], rsquare0, stdev_res0, ""
+                )
+                logs += llog + "\n"
 
                 if verbose or interactive:
                     print(llog)
@@ -225,12 +233,14 @@ class SIMPLISMA(HasTraits):
                     # ax2.axvline(maxPCoordinate[j], color='r')
                     # plt.show()
 
-                    ans = ''
-                    while ans.lower() not in ['a', 'c']:
-                        ans = input('   |--> (a) Accept, (c) Change: ')
+                    ans = ""
+                    while ans.lower() not in ["a", "c"]:
+                        ans = input("   |--> (a) Accept, (c) Change: ")
 
-                    while ans.lower() != 'a':
-                        new = input('   |--> enter the new index (int) or variable value (float): ')
+                    while ans.lower() != "a":
+                        new = input(
+                            "   |--> enter the new index (int) or variable value (float): "
+                        )
                         try:
                             new = int(new)
                             maxPIndex[j] = new
@@ -241,16 +251,20 @@ class SIMPLISMA(HasTraits):
                                 maxPIndex[j] = np.argmin(abs(get_x_data(X) - new))
                                 maxPCoordinate[j] = get_x_data(X)[maxPIndex[j]]
                             except ValueError:
-                                print('Incorrect answer. Please enter a valid index or value')
+                                print(
+                                    "Incorrect answer. Please enter a valid index or value"
+                                )
 
                         rsquare0, stdev_res0 = figures_of_merit(X, maxPIndex, C, St, j)
 
-                        llog = str_iter_summary(j, maxPIndex[j], maxPCoordinate[j], rsquare0, stdev_res0, '')
-                        logs += '   |--> changed pure variable #1'
-                        logs += llog + '\n'
+                        llog = str_iter_summary(
+                            j, maxPIndex[j], maxPCoordinate[j], rsquare0, stdev_res0, ""
+                        )
+                        logs += "   |--> changed pure variable #1"
+                        logs += llog + "\n"
                         info_(llog)
 
-                        ans = input('   |--> (a) Accept, (c) Change: ')
+                        ans = input("   |--> (a) Accept, (c) Change: ")
                     # ans was [a]ccept
                     j += 1
                 if not interactive:
@@ -280,13 +294,17 @@ class SIMPLISMA(HasTraits):
                 prev_stdev_res = stdev_resj
 
                 # add summary to log
-                llog = str_iter_summary(j, maxPIndex[j], maxPCoordinate[j], rsquarej, stdev_resj, diff)
-                logs += llog + '\n'
+                llog = str_iter_summary(
+                    j, maxPIndex[j], maxPCoordinate[j], rsquarej, stdev_resj, diff
+                )
+                logs += llog + "\n"
 
                 if verbose or interactive:
                     info_(llog)
 
-                if interactive:  # TODO: I suggest to use jupyter widgets for the interactivity!
+                if (
+                    interactive
+                ):  # TODO: I suggest to use jupyter widgets for the interactivity!
                     # should plot purity and stdev, does not work for the moment
                     # TODO: fix the code below
                     # ax1.clear()
@@ -303,12 +321,16 @@ class SIMPLISMA(HasTraits):
                     # ax2.axvline(maxPCoordinate[j], color='r')
                     # plt.show()
 
-                    ans = ''
-                    while ans.lower() not in ['a', 'c', 'r', 'f']:
-                        ans = input('   |--> (a) Accept and continue, (c) Change, (r) Reject, (f) Accept and finish: ')
+                    ans = ""
+                    while ans.lower() not in ["a", "c", "r", "f"]:
+                        ans = input(
+                            "   |--> (a) Accept and continue, (c) Change, (r) Reject, (f) Accept and finish: "
+                        )
 
-                    while ans.lower() == 'c':
-                        new = input('   |--> enter the new index (int) or variable value (float): ')
+                    while ans.lower() == "c":
+                        new = input(
+                            "   |--> enter the new index (int) or variable value (float): "
+                        )
                         try:
                             new = int(new)
                             maxPIndex[j] = new
@@ -319,34 +341,47 @@ class SIMPLISMA(HasTraits):
                                 maxPIndex[j] = np.argmin(abs(get_x_data(X) - new))
                                 maxPCoordinate[j] = get_x_data(X)[maxPIndex[j]]
                             except ValueError:
-                                print('   |--> Incorrect answer. Please enter a valid index or value')
+                                print(
+                                    "   |--> Incorrect answer. Please enter a valid index or value"
+                                )
 
                         rsquarej, stdev_resj = figures_of_merit(X, maxPIndex, C, St, j)
                         diff = 100 * (stdev_resj - prev_stdev_res) / prev_stdev_res
                         prev_stdev_res + stdev_resj
 
-                        logs += f'   |--> changed pure variable #{j + 1}\n'
-                        llog = str_iter_summary(j, maxPIndex[j], maxPCoordinate[j], rsquarej, stdev_resj, 'diff')
-                        logs += llog + '\n'
+                        logs += f"   |--> changed pure variable #{j + 1}\n"
+                        llog = str_iter_summary(
+                            j,
+                            maxPIndex[j],
+                            maxPCoordinate[j],
+                            rsquarej,
+                            stdev_resj,
+                            "diff",
+                        )
+                        logs += llog + "\n"
                         info_(llog)
 
-                        info_(f'purest variable #{j + 1} set at index = {maxPIndex[j]} ; x = {maxPCoordinate[j]}')
-                        ans = input('   |--> (a) Accept and continue, (c) Change, (r) Reject, (f) Accept and stop: ')
+                        info_(
+                            f"purest variable #{j + 1} set at index = {maxPIndex[j]} ; x = {maxPCoordinate[j]}"
+                        )
+                        ans = input(
+                            "   |--> (a) Accept and continue, (c) Change, (r) Reject, (f) Accept and stop: "
+                        )
 
-                    if ans.lower() == 'r':
+                    if ans.lower() == "r":
                         maxPCoordinate[j] = 0
                         maxPIndex[j] = 0
-                        logs += f'   |--> rejected pure variable #{j + 1}\n'
+                        logs += f"   |--> rejected pure variable #{j + 1}\n"
                         j = j - 1
 
-                    elif ans.lower() == 'a':
+                    elif ans.lower() == "a":
                         j = j + 1
 
-                    elif ans.lower() == 'f':
+                    elif ans.lower() == "f":
                         finished = True
                         j = j + 1
-                        llog = (f'\n**** Interrupted by user at compound # {j} \n**** End of SIMPL(I)SMA analysis.')
-                        logs += llog + '\n'
+                        llog = f"\n**** Interrupted by user at compound # {j} \n**** End of SIMPL(I)SMA analysis."
+                        logs += llog + "\n"
                         Pt = Pt[0:j, :]
                         St = St[0:j, :]
                         s = s[0:j, :]
@@ -355,9 +390,11 @@ class SIMPLISMA(HasTraits):
                 else:
                     j = j + 1
                     if (1 - rsquarej) < tol / 100:
-                        llog = (f"\n**** Unexplained variance lower than 'tol' ({tol}%) \n"
-                                "**** End of SIMPL(I)SMA analysis.")
-                        logs += llog + '\n'
+                        llog = (
+                            f"\n**** Unexplained variance lower than 'tol' ({tol}%) \n"
+                            "**** End of SIMPL(I)SMA analysis."
+                        )
+                        logs += llog + "\n"
                         Pt = Pt[0:j, :]
                         St = St[0:j, :]
                         s = s[0:j, :]
@@ -367,16 +404,18 @@ class SIMPLISMA(HasTraits):
                         finished = True
             if j == n_pc:
                 if not interactive:
-                    llog = (f"\n**** Reached maximum number of pure compounds 'n_pc' ({n_pc}) \n"
-                            "**** End of SIMPL(I)SMA analysis.")
-                    logs += llog + '\n'
+                    llog = (
+                        f"\n**** Reached maximum number of pure compounds 'n_pc' ({n_pc}) \n"
+                        "**** End of SIMPL(I)SMA analysis."
+                    )
+                    logs += llog + "\n"
                     info_(llog)
                     finished = True
 
-        Pt.description = 'Purity spectra from SIMPLISMA:\n' + logs
-        C.description = 'Concentration/contribution matrix from SIMPLISMA:\n' + logs
-        St.description = 'Pure compound spectra matrix from SIMPLISMA:\n' + logs
-        s.description = 'Standard deviation spectra matrix from SIMPLISMA:\n' + logs
+        Pt.description = "Purity spectra from SIMPLISMA:\n" + logs
+        C.description = "Concentration/contribution matrix from SIMPLISMA:\n" + logs
+        St.description = "Pure compound spectra matrix from SIMPLISMA:\n" + logs
+        s.description = "Standard deviation spectra matrix from SIMPLISMA:\n" + logs
 
         self._logs = logs
         self._X = X
@@ -402,7 +441,7 @@ class SIMPLISMA(HasTraits):
     @property
     def C(self):
         """
-         Intensities ('concentrations') of pure compounds in spectra.
+        Intensities ('concentrations') of pure compounds in spectra.
         """
         return self._C
 
@@ -442,8 +481,8 @@ class SIMPLISMA(HasTraits):
         # reconstruct from concentration and spectra profiles
 
         X_hat = dot(self.C, self.St)
-        X_hat.description = 'Dataset reconstructed by SIMPLISMA\n' + self.logs
-        X_hat.title = 'X_hat: ' + self.X.title
+        X_hat.description = "Dataset reconstructed by SIMPLISMA\n" + self.logs
+        X_hat.title = "X_hat: " + self.X.title
         return X_hat
 
     def plotmerit(self, **kwargs):
@@ -461,20 +500,20 @@ class SIMPLISMA(HasTraits):
             subplot
         """
 
-        colX, colXhat, colRes = kwargs.get('colors', ['blue', 'green', 'red'])
+        colX, colXhat, colRes = kwargs.get("colors", ["blue", "green", "red"])
 
         X_hat = self.reconstruct()
 
         res = self.X - X_hat
 
-        ax = self.X.plot(label='$X$')
-        ax.plot(X_hat.data.T, color=colXhat, label=r'$\hat{X}')
-        ax.plot(res.data.T, color=colRes, label='Residual')
-        ax.set_title('SIMPLISMA plot: ' + self.X.name)
+        ax = self.X.plot(label="$X$")
+        ax.plot(X_hat.data.T, color=colXhat, label=r"$\hat{X}")
+        ax.plot(res.data.T, color=colRes, label="Residual")
+        ax.set_title("SIMPLISMA plot: " + self.X.name)
 
         return ax
 
 
 # ============================================================================
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

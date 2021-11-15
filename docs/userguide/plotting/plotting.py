@@ -8,7 +8,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.13.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -58,7 +58,7 @@ from spectrochempy import *
 # and make some (optional) preparation of the data to display (see also [Import IR Data](../importexport/importIR.html)).
 
 # %%
-dataset = NDDataset.read('irdata/nh4y-activation.spg')
+dataset = NDDataset.read("irdata/nh4y-activation.spg")
 
 # %% [markdown]
 # ## Preparing the data
@@ -68,7 +68,7 @@ dataset = NDDataset.read('irdata/nh4y-activation.spg')
 
 
 # %%
-dataset = dataset[:, 4000.:650.]   # We keep only the region that we want to display
+dataset = dataset[:, 4000.0:650.0]  # We keep only the region that we want to display
 
 # %% [markdown]
 # We change the y coordinated so that times start at 0, put it in minutes and change its title/
@@ -76,13 +76,13 @@ dataset = dataset[:, 4000.:650.]   # We keep only the region that we want to dis
 # %%
 dataset.y -= dataset.y[0]
 dataset.y.ito("minutes")
-dataset.y.title = 'relative time on stream'
+dataset.y.title = "relative time on stream"
 
 # %% [markdown]
 # We also mask a region that we do not want to display
 
 # %%
-dataset[:, 1290.:920.] = MASKED
+dataset[:, 1290.0:920.0] = MASKED
 
 # %% [markdown]
 # ## Selecting the output window
@@ -146,8 +146,8 @@ _ = dataset.plot()
 prefs = dataset.preferences  # we will use prefs instead of dataset.preference
 prefs.figure.figsize = (6, 3)  # The default figsize is (6.8,4.4)
 prefs.colorbar = True  # This add a color bar on a side
-prefs.colormap = 'magma'  # The default colormap is viridis
-prefs.axes.facecolor = '.95'  # Make the graph background colored in a ligth gray
+prefs.colormap = "magma"  # The default colormap is viridis
+prefs.axes.facecolor = ".95"  # Make the graph background colored in a ligth gray
 prefs.axes.grid = True
 
 _ = dataset.plot()
@@ -157,7 +157,7 @@ _ = dataset.plot()
 # But if you prefer, **serif**, or *monospace* font can be used instead. For instance:
 
 # %%
-prefs.font.family = 'monospace'
+prefs.font.family = "monospace"
 _ = dataset.plot()
 
 # %% [markdown]
@@ -165,9 +165,9 @@ _ = dataset.plot()
 # initial defaults anytime using the `NDDataset.preferences.reset()` method. For instance:
 
 # %%
-print(f'font before reset: {prefs.font.family}')
+print(f"font before reset: {prefs.font.family}")
 prefs.reset()
-print(f'font after reset: {prefs.font.family}')
+print(f"font after reset: {prefs.font.family}")
 
 # %% [markdown]
 # It is also possible to change a parameter for a single plot without changing the `preferences` attribute by passing
@@ -180,7 +180,7 @@ prefs.colormap
 # but 'magma' can be passed to the `plot()` method:
 
 # %%
-_ = dataset.plot(colormap='magma')
+_ = dataset.plot(colormap="magma")
 
 # %% [markdown]
 # while the `preferences.colormap` is still set to `viridis':
@@ -206,24 +206,36 @@ _ = dataset.plot()
 # %%
 prefs.reset()
 prefs.colorbar = False
-prefs.colormap = 'terrain'
-prefs.font.family = 'monospace'
+prefs.colormap = "terrain"
+prefs.font.family = "monospace"
 
 ax = dataset.plot()
-ax.grid(False)  # This temporarily suppress the grid after the plot is done but is not saved in prefs
+ax.grid(
+    False
+)  # This temporarily suppress the grid after the plot is done but is not saved in prefs
 
 # set title
-title = ax.set_title('NH$_4$Y IR spectra during activation')
-title.set_color('red')
-title.set_fontstyle('italic')
+title = ax.set_title("NH$_4$Y IR spectra during activation")
+title.set_color("red")
+title.set_fontstyle("italic")
 title.set_fontsize(14)
 
 # put some text
-ax.text(1200., 1, 'Masked region\n (saturation)', rotation=90)
+ax.text(1200.0, 1, "Masked region\n (saturation)", rotation=90)
 
 # put some fancy annotations (see matplotlib documentation to learn how to design this)
-_ = ax.annotate('OH groups', xy=(3600., 1.25), xytext=(-10, -50), textcoords='offset points',
-                arrowprops=dict(arrowstyle="fancy", color="0.5", shrinkB=5, connectionstyle="arc3,rad=-0.3", ), )
+_ = ax.annotate(
+    "OH groups",
+    xy=(3600.0, 1.25),
+    xytext=(-10, -50),
+    textcoords="offset points",
+    arrowprops=dict(
+        arrowstyle="fancy",
+        color="0.5",
+        shrinkB=5,
+        connectionstyle="arc3,rad=-0.3",
+    ),
+)
 
 # %% [markdown]
 # More information about annotation can be found in the [matplotlib documentation:  annotations](
@@ -238,11 +250,11 @@ _ = ax.annotate('OH groups', xy=(3600., 1.25), xytext=(-10, -50), textcoords='of
 #  preferences of SpectroChemPy
 
 # %%
-prefs.style = 'grayscale'
+prefs.style = "grayscale"
 _ = dataset.plot()
 
 # %%
-prefs.style = 'ggplot'
+prefs.style = "ggplot"
 _ = dataset.plot()
 
 # %% [markdown]
@@ -257,7 +269,7 @@ _ = dataset.plot()
 
 # %%
 prefs.reset()
-prefs.style = 'grayscale', 'paper'
+prefs.style = "grayscale", "paper"
 _ = dataset.plot(colorbar=True)
 
 # %% [markdown]
@@ -265,8 +277,8 @@ _ = dataset.plot(colorbar=True)
 # affectting the `preferences' attribute.
 
 # %%
-prefs.colormap = 'magma'
-_ = dataset.plot(style=['scpy', 'paper'])
+prefs.colormap = "magma"
+_ = dataset.plot(style=["scpy", "paper"])
 
 # %% [markdown]
 # To get a list of all available styles :
@@ -288,7 +300,7 @@ _ = dataset.plot()
 # use `scpy` which is the READONLY default style:
 
 # %%
-prefs.makestyle('scpy')
+prefs.makestyle("scpy")
 
 # %% [markdown]
 # If no name is provided a default name is used :`mydefault`
@@ -303,14 +315,14 @@ prefs.makestyle()
 # %%
 prefs.reset()
 prefs.colorbar = True
-prefs.colormap = 'jet'
-prefs.font.family = 'monospace'
+prefs.colormap = "jet"
+prefs.font.family = "monospace"
 prefs.font.size = 14
-prefs.axes.labelcolor = 'blue'
+prefs.axes.labelcolor = "blue"
 prefs.axes.grid = True
-prefs.axes.grid_axis = 'x'
+prefs.axes.grid_axis = "x"
 
-_ = dataset.plot();
+_ = dataset.plot()
 
 prefs.makestyle()
 
@@ -319,7 +331,7 @@ prefs.reset()
 _ = dataset.plot()  # plot with the default scpy style
 
 # %%
-prefs.style = 'mydefault'
+prefs.style = "mydefault"
 _ = dataset.plot()  # plot with our own style
 
 # %% [markdown]
@@ -335,8 +347,8 @@ _ = dataset.plot()  # plot with our own style
 # %%
 prefs.reset()
 
-prefs.method_2D = 'map'  # this will change permanently the type of 2D plot
-prefs.colormap = 'magma'
+prefs.method_2D = "map"  # this will change permanently the type of 2D plot
+prefs.colormap = "magma"
 prefs.figure_figsize = (5, 3)
 _ = dataset.plot()
 
@@ -347,12 +359,12 @@ _ = dataset.plot()
 #
 # These modes are illustrated below:
 # %%
-prefs.axes_facecolor = 'white'
+prefs.axes_facecolor = "white"
 _ = dataset.plot_image(colorbar=True)  # will use image_cmap preference!
 
 # %%
 # here we use the generic `plot()` with the `method' argument and change the image_cmap:
-_ = dataset.plot(method='image', image_cmap='jet', colorbar=True)
+_ = dataset.plot(method="image", image_cmap="jet", colorbar=True)
 # %%
 prefs.reset()
 _ = dataset.plot_waterfall(figsize=(7, 4), y_reverse=True)
@@ -366,10 +378,10 @@ _ = dataset.plot_surface(linewidth=0.00, antialiased=True, y_reverse=True)
 # %%
 prefs.reset()
 d1D = dataset[-1]  # select the last row of the previous 2D dataset
-_ = d1D.plot(color='r')
+_ = d1D.plot(color="r")
 
 # %%
-prefs.style = 'seaborn-paper'
+prefs.style = "seaborn-paper"
 _ = dataset[3].plot(scatter=True, pen=False, me=30, ms=5)
 
 # %% [markdown]
@@ -381,7 +393,7 @@ _ = dataset[3].plot(scatter=True, pen=False, me=30, ms=5)
 # %%
 nspec = int(len(dataset) / 4)
 ds1 = dataset[:nspec]  # split the dataset into too parts
-ds2 = dataset[nspec:] - 2.  # add an ofset to the second part
+ds2 = dataset[nspec:] - 2.0  # add an ofset to the second part
 
 ax1 = ds1.plot_stack()
 _ = ds2.plot_stack(ax=ax1, clear=False, zlim=(-2.5, 4))
@@ -391,11 +403,13 @@ _ = ds2.plot_stack(ax=ax1, clear=False, zlim=(-2.5, 4))
 
 # %%
 datasets = [dataset[0], dataset[10], dataset[20], dataset[50], dataset[53]]
-labels = ['sample {}'.format(label) for label in ["S1", "S10", "S20", "S50", "S53"]]
+labels = ["sample {}".format(label) for label in ["S1", "S10", "S20", "S50", "S53"]]
 prefs.reset()
-prefs.axes.facecolor = '.99'
+prefs.axes.facecolor = ".99"
 prefs.axes.grid = True
-_ = plot_multiple(method='scatter', me=10, datasets=datasets, labels=labels, legend='best')
+_ = plot_multiple(
+    method="scatter", me=10, datasets=datasets, labels=labels, legend="best"
+)
 
 # %% [markdown]
 # ## Overview of the main configuration parameters
@@ -423,7 +437,7 @@ prefs.lines
 # To display **help** on a single parameter, type:
 
 # %%
-prefs.help('lines_linewidth')
+prefs.help("lines_linewidth")
 
 # %% [markdown]
 # To view **all parameters**:
@@ -435,10 +449,11 @@ prefs.all()
 # ## A last graph for the road and fun...
 
 # %%
-prefs.font.family = 'fantasy'
+prefs.font.family = "fantasy"
 import matplotlib.pyplot as plt
+
 with plt.xkcd():
     # print(mpl.rcParams)
     prefs.lines.linewidth = 2
     ax = dataset[-1].plot(figsize=(7.5, 4))
-    ax.text(2800., 1.5, "A XKCD plot!...")
+    ax.text(2800.0, 1.5, "A XKCD plot!...")

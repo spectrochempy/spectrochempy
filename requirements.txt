@@ -10,3 +10,5 @@ quadprog==0.1.9
 brukeropusreader
 numpy-quaternion
 nmrglue
+
+numpy>=1.21.0

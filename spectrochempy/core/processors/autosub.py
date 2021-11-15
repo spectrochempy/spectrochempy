@@ -7,7 +7,7 @@
 """
 Plugin module to perform automatic subtraction of ref on a dataset.
 """
-__all__ = ['autosub']
+__all__ = ["autosub"]
 
 __dataset_methods__ = __all__
 
@@ -18,7 +18,9 @@ from scipy.optimize import minimize_scalar
 from spectrochempy.core.dataset.coordrange import trim_ranges
 
 
-def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False, inplace=False):
+def autosub(
+    dataset, ref, *ranges, dim="x", method="vardiff", return_coefs=False, inplace=False
+):
     """
     Automatic subtraction of a reference to the dataset.
 
@@ -92,7 +94,7 @@ def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False
     try:
         ref.to(dataset.units)
     except Exception:
-        raise ValueError('Units of the dataset and reference are not compatible')
+        raise ValueError("Units of the dataset and reference are not compatible")
 
     swaped = False
     if axis != -1:
@@ -129,12 +131,12 @@ def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False
     # two methods
     # @jit
     def _f(alpha, p):
-        if method == 'ssdiff':
+        if method == "ssdiff":
             return np.sum((p - alpha * ref_r) ** 2)
-        elif method == 'vardiff':
+        elif method == "vardiff":
             return np.var(np.diff(p - alpha * ref_r))
         else:
-            raise ValueError('Not implemented for method={}'.format(method))
+            raise ValueError("Not implemented for method={}".format(method))
 
     # @jit(cache=True)
     def _minim():
@@ -146,7 +148,7 @@ def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False
             # slices.append(slice(None))
             # args = (X_r[slices],)
             args = X_r[tup]
-            res = minimize_scalar(_f, args=(args,), method='brent')
+            res = minimize_scalar(_f, args=(args,), method="brent")
             x.append(res.x)
 
         x = np.asarray(x)
@@ -159,8 +161,9 @@ def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False
     if swaped:
         new = new.swapdims(axis, -1)
 
-    new.history = str(
-            new.modified) + ': ' + 'Automatic subtraction of:' + ref.name + '\n'
+    new.history = (
+        str(new.modified) + ": " + "Automatic subtraction of:" + ref.name + "\n"
+    )
 
     if return_coefs:
         return new, x

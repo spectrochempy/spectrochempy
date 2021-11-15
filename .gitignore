@@ -114,7 +114,6 @@ clevels
 # ----------------------------------------------------------------------------------------------------------------------
 .Python
 develop-eggs/
-downloads/
 eggs/
 lib/
 lib64/
@@ -143,3 +142,7 @@ Icon*
 
 *.pptx
 .hypothesis/
+/htmlcov/
+cov.coverage
+cov.syspath.txt
+coverage.xml

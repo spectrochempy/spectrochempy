@@ -8,7 +8,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.13.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -72,6 +72,7 @@
 
 # %%
 import spectrochempy as scp  # SYNTAX 1
+
 nd = scp.NDDataset()
 
 
@@ -80,6 +81,7 @@ nd = scp.NDDataset()
 
 # %%
 from spectrochempy import *  # SYNTAX 2
+
 nd = NDDataset()
 
 # %% [markdown]
@@ -92,7 +94,7 @@ nd = NDDataset()
 #
 
 # %%
-from spectrochempy import NDDataset   # SYNTAX 3
+from spectrochempy import NDDataset  # SYNTAX 3
 
 nd = NDDataset()
 
@@ -109,7 +111,7 @@ nd = NDDataset()
 # %%
 import os
 
-nd = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
+nd = NDDataset.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
 
 # %% [markdown]
 # Note that for this example, we use data stored in a ``test`` directory. For your own usage, you probably have to
@@ -160,21 +162,21 @@ _ = row.plot()
 # or a column ...
 
 # %%
-col = nd[:, 3500.]  # note the indexing using wavenumber!
+col = nd[:, 3500.0]  # note the indexing using wavenumber!
 _ = col.plot_scatter()
 
 # %% [markdown]
 # 2D plots can be also generated as stacked plot
 
 # %%
-_ = nd.plot(method='stack')  # or nd.plot_stack()
+_ = nd.plot(method="stack")  # or nd.plot_stack()
 
 # %% [markdown]
 # or as an image plot:
 
 # %%
-prefs.colormap = 'magma'
-_ = nd.plot(method='image')  # or nd.plot_image()
+prefs.colormap = "magma"
+_ = nd.plot(method="image")  # or nd.plot_image()
 
 # %% [markdown]
 # Note that as we plot wavenumbers as abcissa, by convention the coordinates direction is reversed.
@@ -200,10 +202,10 @@ _ = ref.plot()
 # saturation
 
 # %%
-prefs.colormap = 'jet'
+prefs.colormap = "jet"
 prefs.colorbar = True
 nds = nd - ref
-nds[:, 1290.:890.] = scp.MASKED
+nds[:, 1290.0:890.0] = scp.MASKED
 _ = nds.plot_stack()
 
 # %% [markdown]

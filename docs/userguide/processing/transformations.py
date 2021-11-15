@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.13.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -22,15 +22,15 @@
 from spectrochempy import *
 
 # %%
-dataset = NDDataset.read_omnic('irdata/nh4y-activation.spg')
+dataset = NDDataset.read_omnic("irdata/nh4y-activation.spg")
 dataset.y -= dataset.y[0]
-dataset.y.title = 'time'
+dataset.y.title = "time"
 dataset
 
 # %%
 prefs = dataset.preferences
 prefs.figure.figsize = (6, 3)
-prefs.colormap = 'Dark2'
+prefs.colormap = "Dark2"
 prefs.colorbar = True
 ax = dataset.plot()
 
@@ -51,7 +51,7 @@ dataset.max()
 # Masking values in this case is straigthforward. Just set a value `masked` or True for those data you want to mask.
 
 # %%
-dataset[:, 1290.:890.] = MASKED
+dataset[:, 1290.0:890.0] = MASKED
 # note that we specify floating values in order to sect wavenumbers, not index.
 
 # %% [markdown]
@@ -80,7 +80,7 @@ _ = dataset.plot()
 # Dataset can be transposed
 
 # %%
-dataset[:, 1290.:890.] = MASKED  # we mask the unwanted colomns
+dataset[:, 1290.0:890.0] = MASKED  # we mask the unwanted colomns
 datasetT = dataset.T
 datasetT
 
@@ -104,7 +104,7 @@ _ = datasetT.plot()
 # even if in this case it maks very little sense.
 
 # %%
-dataset.units = 'radian'
+dataset.units = "radian"
 
 # %%
 _ = dataset.plot()
@@ -114,7 +114,7 @@ _ = dataset.plot()
 
 # %%
 try:
-    dataset.to('meter')
+    dataset.to("meter")
 except DimensionalityError as e:
     error_(e)
 
@@ -122,7 +122,7 @@ except DimensionalityError as e:
 # If this is for some reasons something you want to do, you must for the change:
 
 # %%
-d = dataset.to('meter', force=True)
+d = dataset.to("meter", force=True)
 print(d.units)
 
 # %% [markdown]
@@ -130,7 +130,7 @@ print(d.units)
 # Time) to hours. Her we use the inplace transformation `ito`.
 
 # %%
-dataset.y.ito('hours')
+dataset.y.ito("hours")
 _ = dataset.plot()
 
 # %% [markdown]

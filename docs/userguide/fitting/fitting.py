@@ -8,7 +8,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.13.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -50,14 +50,20 @@ from spectrochempy import ur
 # %%
 def func(t, v, var):
     d = v * t + (np.random.rand(len(t)) - 0.5) * var
-    d[0].data = 0.
+    d[0].data = 0.0
     return d
 
 
-time = scp.LinearCoord.linspace(0, 10, 20, title='time', units='hour')
-d = scp.NDDataset.fromfunction(func, v=100. * ur('km/hr'), var=60. * ur('km'),
-                               # extra arguments passed to the function v, var
-                               coordset=scp.CoordSet(t=time), name='mydataset', title='distance travelled')
+time = scp.LinearCoord.linspace(0, 10, 20, title="time", units="hour")
+d = scp.NDDataset.fromfunction(
+    func,
+    v=100.0 * ur("km/hr"),
+    var=60.0 * ur("km"),
+    # extra arguments passed to the function v, var
+    coordset=scp.CoordSet(t=time),
+    name="mydataset",
+    title="distance travelled",
+)
 
 # %% [markdown]
 # Here is a plot of these data-points:
@@ -65,7 +71,7 @@ d = scp.NDDataset.fromfunction(func, v=100. * ur('km/hr'), var=60. * ur('km'),
 # %%
 prefs = d.preferences
 prefs.figure.figsize = (7, 3)
-d.plot_scatter(markersize=7, mfc='red');
+d.plot_scatter(markersize=7, mfc="red")
 
 # %% [markdown]
 # We want to fit a line through these data-points of equation
@@ -81,7 +87,7 @@ d.plot_scatter(markersize=7, mfc='red');
 lst = scp.LSTSQ(time, d)
 
 v, d0 = lst.transform()
-print('speed : {:.3fK},  distance at time 0 : {:.3fK}'.format(v, d0))
+print("speed : {:.3fK},  distance at time 0 : {:.3fK}".format(v, d0))
 
 # %% [markdown]
 # <div class="alert alert-info">
@@ -96,17 +102,22 @@ print('speed : {:.3fK},  distance at time 0 : {:.3fK}'.format(v, d0))
 lst = scp.LSTSQ(d)
 
 v, d0 = lst.transform()
-print('speed : {:.3fK},  distance at time 0 : {:.3fK}'.format(v, d0))
+print("speed : {:.3fK},  distance at time 0 : {:.3fK}".format(v, d0))
 
 # %% [markdown]
 # and the final plot
 
 # %%
-d.plot_scatter(markersize=7, mfc='red', mec='black', label='Original data', title='Least-square fitting '
-                                                                                  'example')
+d.plot_scatter(
+    markersize=7,
+    mfc="red",
+    mec="black",
+    label="Original data",
+    title="Least-square fitting " "example",
+)
 dfit = lst.inverse_transform()
 
-dfit.plot_pen(clear=False, color='g', lw=2, label=' Fitted line', legend="best");
+dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
 
 
 # %% [markdown]
@@ -114,36 +125,47 @@ dfit.plot_pen(clear=False, color='g', lw=2, label=' Fitted line', legend="best")
 
 # %%
 def func(t, a, var):
-    d = a * (t / 3.) ** 2 + (np.random.rand(len(t)) - 0.8) * var
+    d = a * (t / 3.0) ** 2 + (np.random.rand(len(t)) - 0.8) * var
     for i in range(t.size):
         if d[i].magnitude < 0:
-            d[i] = 0. * d.units
+            d[i] = 0.0 * d.units
     return d
 
 
-time = scp.Coord.linspace(0, 10, 20, title='time', units='hour')
-d2 = scp.NDDataset.fromfunction(func, a=100. * ur('km/hr^2'), var=60. * ur('km'),
-                                # extra arguments passed to the function v, var
-                                coordset=scp.CoordSet(t=time), name='mydataset', title='distance travelled')
+time = scp.Coord.linspace(0, 10, 20, title="time", units="hour")
+d2 = scp.NDDataset.fromfunction(
+    func,
+    a=100.0 * ur("km/hr^2"),
+    var=60.0 * ur("km"),
+    # extra arguments passed to the function v, var
+    coordset=scp.CoordSet(t=time),
+    name="mydataset",
+    title="distance travelled",
+)
 
-d2.plot_scatter(markersize=7, mfc='red');
+d2.plot_scatter(markersize=7, mfc="red")
 
 # %% [markdown]
 # Now we must use the first syntax LSTQ(X, Y) as the variation is not proportional to time, but to its square.
 
 # %%
-X = (time ** 2)
+X = time ** 2
 lst = scp.LSTSQ(X, d2)
 
 v, d0 = lst.transform()
-print('acceleration : {:.3fK},  distance at time 0 : {:.3fK}'.format(v, d0))
+print("acceleration : {:.3fK},  distance at time 0 : {:.3fK}".format(v, d0))
 
 # %%
-d2.plot_scatter(markersize=7, mfc='red', mec='black', label='Original data', title='Least-square fitting '
-                                                                                   'example on quadratic data')
+d2.plot_scatter(
+    markersize=7,
+    mfc="red",
+    mec="black",
+    label="Original data",
+    title="Least-square fitting " "example on quadratic data",
+)
 dfit = lst.inverse_transform()
 
-dfit.plot_pen(clear=False, color='g', lw=2, label=' Fitted line', legend="best");
+dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
 
 # %% [markdown]
 # ## Least square with non-negativity constrainst (NNLS)
@@ -155,18 +177,23 @@ dfit.plot_pen(clear=False, color='g', lw=2, label=' Fitted line', legend="best")
 # In this case, we can use the NNLS method of fitting. It operates as ``LSTSQ`` but keep the Y values always positive.
 
 # %%
-X = (time ** 2)
+X = time ** 2
 lst = scp.NNLS(X, d2)
 
 v, d0 = lst.transform()
-print('acceleration : {:.3fK},  distance at time 0 : {:.3fK}'.format(v, d0))
+print("acceleration : {:.3fK},  distance at time 0 : {:.3fK}".format(v, d0))
 
 # %%
-d2.plot_scatter(markersize=7, mfc='red', mec='black', label='Original data', title='Non-negative Least-square fitting '
-                                                                                   'example')
+d2.plot_scatter(
+    markersize=7,
+    mfc="red",
+    mec="black",
+    label="Original data",
+    title="Non-negative Least-square fitting " "example",
+)
 dfit = lst.inverse_transform()
 
-dfit.plot_pen(clear=False, color='g', lw=2, label=' Fitted line', legend="best");
+dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
 
 # %% [markdown]
 # ## NDDataset modelling using the Fit method
@@ -189,8 +216,8 @@ nd = nd[-1].squeeze()
 # Now we slice it to keep only the OH vibration region:
 
 # %%
-ndOH = nd[3700.:3300.]
-ndOH.plot();
+ndOH = nd[3700.0:3300.0]
+ndOH.plot()
 
 # %% [markdown]
 # ### Baseline correction
@@ -202,7 +229,7 @@ ndOH.plot();
 
 # %%
 ndOHcorr = scp.abc(ndOH)
-ndOHcorr.plot();
+ndOHcorr.plot()
 
 # %% [markdown]
 # ### Peak finding
@@ -217,9 +244,14 @@ peaks.x.values
 # %%
 ax = ndOHcorr.plot_pen()  # output the spectrum on ax. ax will receive next plot too
 pks = peaks + 0.01  # add a small offset on the y positiion of the markers
-pks.plot_scatter(ax=ax, marker='v', color='black', clear=False,  # we need to keep the previous outpout on ax
-                 data_only=True,  # we dont need to redraw all things like labels, etc...
-                 ylim=(-0.05, 1.3));
+pks.plot_scatter(
+    ax=ax,
+    marker="v",
+    color="black",
+    clear=False,  # we need to keep the previous outpout on ax
+    data_only=True,  # we dont need to redraw all things like labels, etc...
+    ylim=(-0.05, 1.3),
+)
 
 # %% [markdown]
 # The maximum of the two major peaks are thus exactly at 3624.61 and 3541.68 cm$^{-1}$
@@ -386,7 +418,7 @@ shape: assymvoigtmodel
 # %%
 f1 = scp.Fit(ndOHcorr, script, silent=False)
 f1.run(maxiter=10000, every=100)
-ndOHcorr.plot(plot_model=True, lw=2);
+ndOHcorr.plot(plot_model=True, lw=2)
 
 # %% [markdown]
 # <div class='alert alert-warning'>

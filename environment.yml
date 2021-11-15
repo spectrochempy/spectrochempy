@@ -50,13 +50,14 @@ dependencies:
     - pytest-flake8
     - scikit-image
     - coverage
+    - black
 
     # DEV: code and docs
     - jupytext
-    - sphinx
+    - sphinx=4.2.0
     - sphinx_rtd_theme
     - autodocsumm
-    - sphinx-gallery
+    - sphinx-gallery<=0.7.0
     - nbsphinx
     - jupyter_sphinx
     - json5

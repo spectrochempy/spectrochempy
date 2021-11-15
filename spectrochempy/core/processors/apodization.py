@@ -5,8 +5,20 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-__all__ = ['em', 'gm', "sp", "sine", "sinm", "qsin", "general_hamming", "hamming", "hann", "triang", "bartlett",
-           "blackmanharris"]
+__all__ = [
+    "em",
+    "gm",
+    "sp",
+    "sine",
+    "sinm",
+    "qsin",
+    "general_hamming",
+    "hamming",
+    "hann",
+    "triang",
+    "bartlett",
+    "blackmanharris",
+]
 __dataset_methods__ = __all__
 
 import functools
@@ -24,17 +36,17 @@ pi = np.pi
 # Decorators
 # ======================================================================================================================
 
+
 def _apodize_method(**units):
     # Decorator to set units of parameters according to dataset units
 
     def decorator_apodize_method(method):
-
         @functools.wraps(method)
         def wrapper(dataset, **kwargs):
 
             # what to return
-            retapod = kwargs.pop('retapod', False)
-            dryrun = kwargs.pop('dryrun', False)
+            retapod = kwargs.pop("retapod", False)
+            dryrun = kwargs.pop("dryrun", False)
             # is_nmr = dataset.origin.lower() in ["topspin", ]
             is_ir = dataset.origin.lower() in ["omnic", "opus"]
 
@@ -42,7 +54,7 @@ def _apodize_method(**units):
             axis, dim = dataset.get_axis(**kwargs, negative_axis=True)
 
             # output dataset inplace (by default) or not
-            if not kwargs.pop('inplace', False) and not dryrun:
+            if not kwargs.pop("inplace", False) and not dryrun:
                 new = dataset.copy()  # copy to be sure not to modify this dataset
             else:
                 new = dataset
@@ -56,12 +68,12 @@ def _apodize_method(**units):
 
             # Get the coordinates for the last dimension
             x = new.coordset[dim]
-            if hasattr(x, '_use_time_axis'):
+            if hasattr(x, "_use_time_axis"):
                 store = x._use_time_axis
                 x._use_time_axis = True  # we need to have dimentionless or time units
 
             # check if the dimensionality is compatible with this kind of functions
-            if x.unitless or x.dimensionless or x.units.dimensionality == '[time]':
+            if x.unitless or x.dimensionless or x.units.dimensionality == "[time]":
 
                 # Set correct units for parameters
                 dunits = dataset.coordset[dim].units
@@ -78,11 +90,11 @@ def _apodize_method(**units):
 
                     if not isinstance(par, Quantity):
                         # set to default units
-                        par *= Quantity(1., default_units)
+                        par *= Quantity(1.0, default_units)
 
                     apod[key] = par
                     if par.dimensionality == 1 / dunits.dimensionality:
-                        kwargs[key] = 1. / (1. / par).to(dunits)
+                        kwargs[key] = 1.0 / (1.0 / par).to(dunits)
                     else:
                         kwargs[key] = par.to(dunits)
 
@@ -97,34 +109,38 @@ def _apodize_method(**units):
                     zpd = int(np.argmax(new.data, -1))
                     dist2end = x.size - zpd
                     apod_arr = method(np.empty(2 * dist2end), **kwargs)
-                    apod_arr = apod_arr[-x.size:]
+                    apod_arr = apod_arr[-x.size :]
                 else:
                     apod_arr = method(x.data, **kwargs)
 
-                if kwargs.pop('rev', False):
+                if kwargs.pop("rev", False):
                     apod_arr = apod_arr[::-1]  # reverse apodization
 
-                if kwargs.pop('inv', False):
-                    apod_arr = 1. / apod_arr  # invert apodization
+                if kwargs.pop("inv", False):
+                    apod_arr = 1.0 / apod_arr  # invert apodization
 
                 if not dryrun:
-                    new.history = f'`{method.__name__}` apodization performed on dimension `{dim}` ' \
-                                  f'with parameters: {apod}'
+                    new.history = (
+                        f"`{method.__name__}` apodization performed on dimension `{dim}` "
+                        f"with parameters: {apod}"
+                    )
 
                 # Apply?
                 if not dryrun:
                     new._data *= apod_arr
 
             else:  # not (x.unitless or x.dimensionless or x.units.dimensionality != '[time]')
-                error_('This method apply only to dimensions with [time] or [dimensionless] dimensionality.\n'
-                       'Apodization processing was thus cancelled')
-                apod_arr = 1.
+                error_(
+                    "This method apply only to dimensions with [time] or [dimensionless] dimensionality.\n"
+                    "Apodization processing was thus cancelled"
+                )
+                apod_arr = 1.0
 
             # restore original data order if it was swaped
             if swaped:
                 new.swapdims(axis, -1, inplace=True)  # must be done inplace
 
-            if hasattr(x, '_use_time_axis'):
+            if hasattr(x, "_use_time_axis"):
                 new.x._use_time_axis = store
 
             if retapod:
@@ -142,7 +158,8 @@ def _apodize_method(**units):
 # Public module methods
 # ======================================================================================================================
 
-@_apodize_method(lb='Hz', shifted='us')
+
+@_apodize_method(lb="Hz", shifted="us")
 def em(dataset, lb=1, shifted=0, **kwargs):
     r"""
     Calculate exponential apodization.
@@ -198,7 +215,7 @@ def em(dataset, lb=1, shifted=0, **kwargs):
 
     See Also
     --------
-    gm, sp, sine, sinm, qsin, hamming, triang, bartlett, blackmanharris, mertz
+    gm, sp, sine, sinm, qsin, hamming, triang, bartlett, blackmanharris
     """
 
     # units are set by a decorator
@@ -210,9 +227,9 @@ def em(dataset, lb=1, shifted=0, **kwargs):
     if abs(lb) <= EPSILON:
         return e
     if shifted < EPSILON:
-        shifted = 0.
+        shifted = 0.0
 
-    tc = 1. / lb
+    tc = 1.0 / lb
     xs = pi * np.abs(x - shifted)
     e = xs / tc
 
@@ -220,7 +237,7 @@ def em(dataset, lb=1, shifted=0, **kwargs):
 
 
 # ......................................................................................................................
-@_apodize_method(gb='Hz', lb='Hz', shifted='us')
+@_apodize_method(gb="Hz", lb="Hz", shifted="us")
 def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
     r"""
     Calculate lorentz-to-gauss apodization.
@@ -280,7 +297,7 @@ def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
 
     See Also
     --------
-    em, sp, sine, sinm, qsin, hamming, triang, bartlett, blackmanharris, mertz
+    em, sp, sine, sinm, qsin, hamming, triang, bartlett, blackmanharris
     """
 
     x = dataset
@@ -290,17 +307,17 @@ def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
     if abs(lb) <= EPSILON and abs(gb) <= EPSILON:
         return g
     if shifted < EPSILON:
-        shifted = 0.
+        shifted = 0.0
 
     xs = pi * np.abs(x - shifted)
 
     if abs(lb) > EPSILON:
-        tc1 = 1. / lb
+        tc1 = 1.0 / lb
         e = x / tc1
     else:
         e = np.zeros_like(x)
     if abs(gb) > EPSILON:
-        tc2 = 1. / gb
+        tc2 = 1.0 / gb
         g = 0.6 * xs / tc2
     else:
         g = np.zeros_like(x)
@@ -364,22 +381,22 @@ def sp(dataset, ssb=1, pow=1, **kwargs):
 
     See Also
     --------
-    em, gm, sine, sinm, qsin, hamming, triang, bartlett, blackmanharris, mertz
+    em, gm, sine, sinm, qsin, hamming, triang, bartlett, blackmanharris
     """
 
     x = dataset
 
     # ssb
-    if ssb < 1.:
-        ssb = 1.
+    if ssb < 1.0:
+        ssb = 1.0
 
     # pow
     pow = 2 if int(pow) % 2 == 0 else 1
 
-    aq = (x[-1] - x[0])
+    aq = x[-1] - x[0]
     t = x / aq
     if ssb < 2:
-        phi = 0.
+        phi = 0.0
     else:
         phi = np.pi / ssb
     return np.sin((np.pi - phi) * t + phi) ** pow
@@ -392,7 +409,7 @@ def sine(dataset, *args, **kwargs):
 
     See Also
     --------
-    em, gm, sp, sinm, qsin, hamming, triang, bartlett, blackmanharris, mertz
+    em, gm, sp, sinm, qsin, hamming, triang, bartlett, blackmanharris
     """
     return sp(dataset, *args, **kwargs)
 
@@ -404,7 +421,7 @@ def sinm(dataset, ssb=1, **kwargs):
 
     See Also
     --------
-    em, gm, sp, sine, qsin, hamming, triang, bartlett, blackmanharris, mertz
+    em, gm, sp, sine, qsin, hamming, triang, bartlett, blackmanharris
     """
     return sp(dataset, ssb=ssb, pow=1, **kwargs)
 
@@ -416,7 +433,7 @@ def qsin(dataset, ssb=1, **kwargs):
 
     See Also
     --------
-    em, gm, sp, sine, sinm, hamming, triang, bartlett, blackmanharris, mertz
+    em, gm, sp, sine, sinm, hamming, triang, bartlett, blackmanharris
     """
     return sp(dataset, ssb=ssb, pow=2, **kwargs)
 
@@ -474,7 +491,7 @@ def general_hamming(dataset, alpha, **kwargs):
 
     See Also
     --------
-    gm, sp, sine, sinm, qsin, hamming, triang, bartlett, blackmanharris, mertz
+    gm, sp, sine, sinm, qsin, hamming, triang, bartlett, blackmanharris
     """
 
     x = dataset
@@ -626,7 +643,7 @@ def triang(dataset, **kwargs):
 
     See Also
     --------
-    gm, sp, sine, sinm, qsin, hamming, bartlett, blackmanharris, mertz
+    gm, sp, sine, sinm, qsin, hamming, bartlett, blackmanharris
     """
 
     x = dataset

@@ -5,7 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-__all__ = ['concatenate', 'stack']
+__all__ = ["concatenate", "stack"]
 
 __dataset_methods__ = __all__
 
@@ -113,8 +113,10 @@ def concatenate(*datasets, **kwargs):
             try:
                 datasets[i] = NDDataset(item)
             except Exception:
-                raise TypeError(f"Only instance of NDDataset can be concatenated, not {type(item).__name__}, "
-                                f"but casting to this type failed. ")
+                raise TypeError(
+                    f"Only instance of NDDataset can be concatenated, not {type(item).__name__}, "
+                    f"but casting to this type failed. "
+                )
 
     # get the shapes and ndims for comparison
     rshapes = []
@@ -126,12 +128,14 @@ def concatenate(*datasets, **kwargs):
 
     # The number of dimensions is expected to be the same for all datasets
     if len(list(set(rndims))) > 1:
-        raise DimensionsCompatibilityError("Only NDDataset with the same number of dimensions can be concatenated.")
+        raise DimensionsCompatibilityError(
+            "Only NDDataset with the same number of dimensions can be concatenated."
+        )
 
     rcompat = list(map(list, list(map(set, list(zip(*rshapes))))))
 
     # a flag to force stacking of dataset instead of the default concatenation
-    force_stack = kwargs.get('force_stack', False)
+    force_stack = kwargs.get("force_stack", False)
     if force_stack:
         # when stacking, we add a new first dimension except if one dimension is of size one: in this case we use this
         # dimension for stacking
@@ -143,8 +147,11 @@ def concatenate(*datasets, **kwargs):
             # else we will try to stack them on the first dimension
 
         if not prepend:
-            warn('These datasets have not the same shape, so they cannot be stacked. By default they will be '
-                 'concatenated along the first dimension.', category=SpectroChemPyWarning)
+            warn(
+                "These datasets have not the same shape, so they cannot be stacked. By default they will be "
+                "concatenated along the first dimension.",
+                category=SpectroChemPyWarning,
+            )
 
         for i, dataset in enumerate(datasets):
             if not prepend or dataset.shape[0] == 1:
@@ -167,8 +174,9 @@ def concatenate(*datasets, **kwargs):
     for i, item in enumerate(zip(*rshapes)):
         if i != axis and len(set(item)) > 1:
             raise DimensionsCompatibilityError(
-                    "Datasets must have the same shape for all dimensions except the one along which the"
-                    " concatenation is performed")
+                "Datasets must have the same shape for all dimensions except the one along which the"
+                " concatenation is performed"
+            )
 
     # Check unit compatibility
     # ------------------------------------------------------------------------------------------------------------------
@@ -176,8 +184,7 @@ def concatenate(*datasets, **kwargs):
     units = datasets[0].units
     for dataset in datasets:
         if not dataset.is_units_compatible(datasets[0]):
-            raise ValueError(
-                    'units of the datasets to concatenate are not compatible')
+            raise ValueError("units of the datasets to concatenate are not compatible")
         # if needed transform to the same unit
         dataset.ito(units)
     # TODO: make concatenation of heterogeneous data possible by using labels
@@ -241,7 +248,9 @@ def concatenate(*datasets, **kwargs):
         coords = coordss[0].copy()
 
         try:
-            coords[dim] = Coord(coords[dim], linear=False)  # de-linearize the coordinates
+            coords[dim] = Coord(
+                coords[dim], linear=False
+            )  # de-linearize the coordinates
             coords[dim]._data = np.concatenate(tuple((c[dim].data for c in coordss)))
         except ValueError:
             pass
@@ -249,13 +258,13 @@ def concatenate(*datasets, **kwargs):
         # concatenation of the labels (first check the presence of at least one labeled coordinates)
         is_labeled = False
         for i, c in enumerate(coordss):
-            if c[dim].implements() in ['Coord', 'LinearCoord']:
+            if c[dim].implements() in ["Coord", "LinearCoord"]:
                 # this is a coord
                 if c[dim].is_labeled:
                     # at least one of the coord is labeled
                     is_labeled = True
                     break
-            if c[dim].implements('CoordSet'):
+            if c[dim].implements("CoordSet"):
                 # this is a coordset
                 for coord in c[dim]:
                     if coord.is_labeled:
@@ -267,13 +276,13 @@ def concatenate(*datasets, **kwargs):
             labels = []
             # be sure that now all the coordinates have a label, or create one
             for i, c in enumerate(coordss):
-                if c[dim].implements() in ['Coord', 'LinearCoord']:
+                if c[dim].implements() in ["Coord", "LinearCoord"]:
                     # this is a coord
                     if c[dim].is_labeled:
                         labels.append(c[dim].labels)
                     else:
                         labels.append(str(i))
-                if c[dim].implements('CoordSet'):
+                if c[dim].implements("CoordSet"):
                     # this is a coordset
                     for coord in c[dim]:
                         if coord.is_labeled:
@@ -283,9 +292,9 @@ def concatenate(*datasets, **kwargs):
 
             if isinstance(coords[dim], Coord):
                 coords[dim]._labels = np.concatenate(labels)
-            if coords[dim].implements('CoordSet'):
+            if coords[dim].implements("CoordSet"):
                 for i, coord in enumerate(coords[dim]):
-                    coord._labels = np.concatenate(labels[i::len(coords[dim])])
+                    coord._labels = np.concatenate(labels[i :: len(coords[dim])])
 
             coords[dim]._labels = np.concatenate(labels)
 
@@ -297,27 +306,27 @@ def concatenate(*datasets, **kwargs):
     out._mask = mask
     out._units = units
 
-    thist = 'Stack' if axis == 0 else 'Concatenation'
+    thist = "Stack" if axis == 0 else "Concatenation"
 
-    out.description = '{} of {}  datasets:\n'.format(thist, len(datasets))
-    out.description += '( {}'.format(datasets[0].name)
+    out.description = "{} of {}  datasets:\n".format(thist, len(datasets))
+    out.description += "( {}".format(datasets[0].name)
     out.title = datasets[0].title
     authortuple = (datasets[0].author,)
 
     for dataset in datasets[1:]:
 
         if out.title != dataset.title:
-            warn('Different data title => the title is that of the 1st dataset')
+            warn("Different data title => the title is that of the 1st dataset")
 
         if not (dataset.author in authortuple):
             authortuple = authortuple + (dataset.author,)
-            out.author = out.author + ' & ' + dataset.author
+            out.author = out.author + " & " + dataset.author
 
-        out.description += ', {}'.format(dataset.name)
+        out.description += ", {}".format(dataset.name)
 
-    out.description += ' )'
+    out.description += " )"
     out._date = out._modified = datetime.datetime.now(datetime.timezone.utc)
-    out._history = [str(out.date) + ': Created by %s' % thist]
+    out._history = [str(out.date) + ": Created by %s" % thist]
 
     return out
 
@@ -358,5 +367,5 @@ def stack(*datasets):
     return concatenate(*datasets, force_stack=True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

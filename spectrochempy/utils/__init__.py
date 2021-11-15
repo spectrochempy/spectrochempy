@@ -14,7 +14,12 @@ Package containing various utilities classes and functions.
 
 # masked arrays
 # ----------------------------------------------------------------------------------------------------------------------
-from numpy.ma.core import masked as MASKED, nomask as NOMASK, MaskedArray, MaskedConstant  # noqa: F401
+from numpy.ma.core import (
+    masked as MASKED,
+    nomask as NOMASK,
+    MaskedArray,
+    MaskedConstant,
+)  # noqa: F401
 
 # import util files content
 # ----------------------------------------------------------------------------------------------------------------------

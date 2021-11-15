@@ -8,7 +8,7 @@
 """Plugin module to extend NDDataset with the import methods method.
 """
 
-__all__ = ['read_quadera']
+__all__ = ["read_quadera"]
 __dataset_methods__ = __all__
 
 import io
@@ -106,8 +106,8 @@ def read_quadera(*paths, **kwargs):
     read_csv : Read CSV files.
     read_zip : Read Zip files.
     """
-    kwargs['filetypes'] = ['Quadera files (*.asc)']
-    kwargs['protocol'] = ['asc']
+    kwargs["filetypes"] = ["Quadera files (*.asc)"]
+    kwargs["protocol"] = ["asc"]
     importer = Importer()
     return importer(*paths, **kwargs)
 
@@ -116,20 +116,21 @@ def read_quadera(*paths, **kwargs):
 # Private methods
 # ----------------------------------------------------------------------------------------------------------------------
 
+
 @importermethod
 def _read_asc(*args, **kwargs):
     _, filename = args
-    content = kwargs.get('content', False)
+    content = kwargs.get("content", False)
 
     if content:
         fid = io.BytesIO(content)
     else:
-        fid = open(filename, 'r')
+        fid = open(filename, "r")
 
     lines = fid.readlines()
     fid.close()
 
-    timestamp = kwargs.get('timestamp', True)
+    timestamp = kwargs.get("timestamp", True)
 
     # the list of channels is 2 lines after the line starting with "End Time"
     i = 0
@@ -138,21 +139,29 @@ def _read_asc(*args, **kwargs):
 
     i += 2
     # reads channel names
-    channels = re.split(r'\t+', lines[i].rstrip('\t\n'))[1:]
+    channels = re.split(r"\t+", lines[i].rstrip("\t\n"))[1:]
     nchannels = len(channels)
 
     # the next line contains the columns titles, repeated for each channels
     # this routine assumes that for each channel are  Time / Time relative [s] / Ion Current [A]
     # check it:
     i += 1
-    colnames = re.split(r'\t+', lines[i].rstrip('\t'))
+    colnames = re.split(r"\t+", lines[i].rstrip("\t"))
 
-    if colnames[0] == 'Time' or colnames[1] != 'Time Relative [s]' or colnames[2] != 'Ion Current [A]':
-        warn('Columns names are  not those expected: the reading of your .asc file  could yield '
-             'please notify this to the developers of scpectrochempy')
-    if nchannels > 1 and colnames[3] != 'Time':
-        warn('The number of columms per channel is not that expected: the reading of your .asc file  could yield '
-             'please notify this to the developers of spectrochempy')
+    if (
+        colnames[0] == "Time"
+        or colnames[1] != "Time Relative [s]"
+        or colnames[2] != "Ion Current [A]"
+    ):
+        warn(
+            "Columns names are  not those expected: the reading of your .asc file  could yield "
+            "please notify this to the developers of scpectrochempy"
+        )
+    if nchannels > 1 and colnames[3] != "Time":
+        warn(
+            "The number of columms per channel is not that expected: the reading of your .asc file  could yield "
+            "please notify this to the developers of spectrochempy"
+        )
 
     # the remaining lines contain data and time coords
     ntimes = len(lines) - i - 1
@@ -164,15 +173,17 @@ def _read_asc(*args, **kwargs):
 
     prev_timestamp = 0
     for j, line in enumerate(lines[i:]):
-        data = re.split(r'[\t+]', line.rstrip('\t'))
+        data = re.split(r"[\t+]", line.rstrip("\t"))
         for k in range(nchannels):
-            datetime_ = datetime.strptime(data[3 * k].strip(' '), '%m/%d/%Y %H:%M:%S.%f')
+            datetime_ = datetime.strptime(
+                data[3 * k].strip(" "), "%m/%d/%Y %H:%M:%S.%f"
+            )
             times[j][k] = datetime_.timestamp()
             # hours are given in 12h clock format, so we need to add 12h when hour is in the afternoon
             if times[j][k] < prev_timestamp:
                 times[j][k] += 3600 * 12
-            reltimes[j][k] = data[1 + 3 * k].replace(',', '.')
-            ioncurrent[j][k] = data[2 + 3 * k].replace(',', '.')
+            reltimes[j][k] = data[1 + 3 * k].replace(",", ".")
+            ioncurrent[j][k] = data[2 + 3 * k].replace(",", ".")
         prev_timestamp = times[j][k]
 
     dataset = NDDataset(ioncurrent)
@@ -181,9 +192,9 @@ def _read_asc(*args, **kwargs):
     dataset.units = "amp"
 
     if timestamp:
-        _y = Coord(times[:, 0], title='acquisition timestamp (UTC)', units="s")
+        _y = Coord(times[:, 0], title="acquisition timestamp (UTC)", units="s")
     else:
-        _y = Coord(times[:, 0] - times[0, 0], title='Time', units="s")
+        _y = Coord(times[:, 0] - times[0, 0], title="Time", units="s")
 
     _x = Coord(labels=channels)
     dataset.set_coordset(y=_y, x=_x)
@@ -193,11 +204,11 @@ def _read_asc(*args, **kwargs):
     dataset._modified = dataset.date
 
     # Set origin, description and history
-    dataset.history = f'{dataset.date}:imported from Quadera asc file {filename}'
+    dataset.history = f"{dataset.date}:imported from Quadera asc file {filename}"
 
     return dataset
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

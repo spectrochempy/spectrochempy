@@ -9,7 +9,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.13.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -46,15 +46,15 @@ import spectrochempy as scp
 # General informations on the API can be obtained the following variables:
 
 # %%
-print(f'   copyright : {scp.copyright}')
-print(f'     version : {scp.version}')
-print(f'     release : {scp.release}')
-print(f'     license : {scp.license}')
-print(f'         url : {scp.url}')
-print(f'release_date : {scp.release_date}')
-print(f'     authors : {scp.authors}')
-print(f'contributors : {scp.contributors}')
-print(f' description : {scp.description}')
+print(f"   copyright : {scp.copyright}")
+print(f"     version : {scp.version}")
+print(f"     release : {scp.release}")
+print(f"     license : {scp.license}")
+print(f"         url : {scp.url}")
+print(f"release_date : {scp.release_date}")
+print(f"     authors : {scp.authors}")
+print(f"contributors : {scp.contributors}")
+print(f" description : {scp.description}")
 
 # %% [markdown]
 # ## Loglevel
@@ -83,13 +83,13 @@ print(f' description : {scp.description}')
 #
 # The following instruction prints the current loglevel
 # %%
-print(f'Default: {scp.get_loglevel()}')       # print the current loglevel
+print(f"Default: {scp.get_loglevel()}")  # print the current loglevel
 
 # %% [markdown]
 # It yields `30` the numerical value corresponding to the `WARNING` level. Now, the next instruction
 # lowers the loglevel to `ÌNFO`:
 # %%
-scp.set_loglevel(scp.INFO)                    # set loglevel to 'INFO'
+scp.set_loglevel(scp.INFO)  # set loglevel to 'INFO'
 
 
 # %% [markdown]
@@ -100,17 +100,17 @@ scp.set_loglevel(scp.INFO)                    # set loglevel to 'INFO'
 # As seen below, no message `changed default log_level to ...` is delivered
 
 # %%
-scp.set_loglevel('WARNING')  # reset to default
-print(f'New loglevel: {scp.get_loglevel()}')
+scp.set_loglevel("WARNING")  # reset to default
+print(f"New loglevel: {scp.get_loglevel()}")
 
 # %% [markdown]
 # It is also possible to issue such messages in scripts. In the cell below, we set the loglevel to `INFO` and try to
 # print two types of messages:
 
 # %%
-scp.set_loglevel('INFO')
-scp.info_('this is an info message!')
-scp.debug_('this is a debug message!')
+scp.set_loglevel("INFO")
+scp.info_("this is an info message!")
+scp.debug_("this is a debug message!")
 
 # %% [markdown]
 # A expected, only the info message was displayed.
@@ -119,8 +119,8 @@ scp.debug_('this is a debug message!')
 
 # %%
 scp.set_loglevel(scp.DEBUG)
-scp.info_('this is an info message!')
-scp.debug_('this is a debug message!')
+scp.info_("this is an info message!")
+scp.debug_("this is a debug message!")
 
 # %% [markdown]
 # Finally, we come back to the standard level of message for the rest of the Tutorial -- in this case neither `DEBUG`
@@ -129,8 +129,8 @@ scp.debug_('this is a debug message!')
 # %%
 scp.set_loglevel(scp.WARNING)
 
-scp.info_('this is an info message!')
-scp.debug_('this is a debug message!')
+scp.info_("this is an info message!")
+scp.debug_("this is a debug message!")
 
 # %% [markdown]
 #

@@ -4,9 +4,10 @@ on:
   push:
     branches:
       - master
+      - docs
+      - develop
   release:
-    types:
-      - created
+    types: [published]
 
 jobs:
 
@@ -86,7 +87,7 @@ jobs:
           conda-build .conda --output-folder out
 
       - name: Publish package for release
-        if: contains(env.DEVSTRING, 'stable')
+        if: (github.event_name == 'release' && github.event.action == 'published')
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
         run: |
@@ -94,7 +95,7 @@ jobs:
           anaconda upload --force out/*/*.tar.bz2
 
       - name: Publish development package
-        if: "!(contains(env.DEVSTRING, 'stable'))"
+        if: (github.event_name == 'push')
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
         run: |
@@ -114,5 +115,6 @@ jobs:
       - name: Deploy Github Pages
         uses: JamesIves/github-pages-deploy-action@4.1.5
         with:
-          BRANCH: gh-pages
-          FOLDER: ../../../spectrochempy_docs/html/
+          branch: gh-pages
+          folder: ../../../spectrochempy_docs/html/
+          single-commit: true

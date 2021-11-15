@@ -9,16 +9,16 @@ from spectrochempy import Isotopes, ur
 
 
 def test_isotopes():
-    isotope = Isotopes('129Xe')
+    isotope = Isotopes("129Xe")
 
-    assert (isotope.name == 'xenon')
-    assert (isotope.spin == 1 / 2)
-    assert (isotope.symbol == 'Xe')
+    assert isotope.name == "xenon"
+    assert isotope.spin == 1 / 2
+    assert isotope.symbol == "Xe"
 
-    isotope.nucleus = '27Al'  # we change the isotope`inplace`
-    assert (isotope.name == 'aluminium')
-    assert (isotope.spin == 5 / 2)
-    assert (isotope.symbol == 'Al')
+    isotope.nucleus = "27Al"  # we change the isotope`inplace`
+    assert isotope.name == "aluminium"
+    assert isotope.spin == 5 / 2
+    assert isotope.symbol == "Al"
 
     assert isinstance(isotope.H_2, Isotopes)
     assert round(isotope.H_2.Q, 2) == 2.86 * ur.millibarn

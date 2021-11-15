@@ -7,7 +7,7 @@
 
 # TODO: create tests
 
-__all__ = ['CurveFit', 'LSTSQ', 'NNLS']
+__all__ = ["CurveFit", "LSTSQ", "NNLS"]
 
 import numpy as np
 import scipy.optimize as sopt
@@ -47,7 +47,7 @@ class LSTSQ(HasTraits):
         super().__init__()
 
         if len(datasets) > 2 or len(datasets) < 1:
-            raise ValueError('one or two dataset at max are expected')
+            raise ValueError("one or two dataset at max are expected")
 
         if len(datasets) == 2:
             X, Y = datasets
@@ -91,15 +91,19 @@ class LSTSQ(HasTraits):
             B = P[1] * Y.units
 
         else:
-            A = NDDataset(data=P[0],
-                          units=Y.units / X.units,
-                          title="%s/%s" % (Y.title, X.title), )
-            B = NDDataset(data=P[1] * np.ones(X.size),
-                          units=Y.units,
-                          title="%s at origin" % Y.title)
+            A = NDDataset(
+                data=P[0],
+                units=Y.units / X.units,
+                title="%s/%s" % (Y.title, X.title),
+            )
+            B = NDDataset(
+                data=P[1] * np.ones(X.size),
+                units=Y.units,
+                title="%s at origin" % Y.title,
+            )
 
-            A.history = 'Computed by spectrochempy.lstsq \n'
-            B.history = 'Computed by spectrochempy.lstsq \n'
+            A.history = "Computed by spectrochempy.lstsq \n"
+            B.history = "Computed by spectrochempy.lstsq \n"
 
         return A, B
 
@@ -120,7 +124,7 @@ class LSTSQ(HasTraits):
             Yp = self.Y.copy()
             Yp.data = (self.X * A + B).data
         else:
-            Yp = (A * self.X + B)
+            Yp = A * self.X + B
         return Yp
 
     itrans = inverse_transform
@@ -154,7 +158,7 @@ class NNLS(HasTraits):
         super().__init__()
 
         if len(datasets) > 2 or len(datasets) < 1:
-            raise ValueError('one or two dataset at max are expected')
+            raise ValueError("one or two dataset at max are expected")
 
         if len(datasets) == 2:
             X, Y = datasets
@@ -196,15 +200,19 @@ class NNLS(HasTraits):
             B = P[1] * Y.units
 
         else:
-            A = NDDataset(data=P[0],
-                          units=Y.units / X.units,
-                          title="%s/%s" % (Y.title, X.title), )
-            B = NDDataset(data=P[1] * np.ones(X.size),
-                          units=Y.units,
-                          title="%s at origin" % Y.title)
+            A = NDDataset(
+                data=P[0],
+                units=Y.units / X.units,
+                title="%s/%s" % (Y.title, X.title),
+            )
+            B = NDDataset(
+                data=P[1] * np.ones(X.size),
+                units=Y.units,
+                title="%s at origin" % Y.title,
+            )
 
-            A.history = 'Computed by spectrochempy.lstsq \n'
-            B.history = 'Computed by spectrochempy.lstsq \n'
+            A.history = "Computed by spectrochempy.lstsq \n"
+            B.history = "Computed by spectrochempy.lstsq \n"
 
         return A, B
 
@@ -225,7 +233,7 @@ class NNLS(HasTraits):
             Yp = self.Y.copy()
             Yp.data = (self.X * A + B).data
         else:
-            Yp = (A * self.X + B)
+            Yp = A * self.X + B
         return Yp
 
     itrans = inverse_transform
@@ -239,6 +247,9 @@ class CurveFit(HasTraits):
 
     This is a wrapper to the `scipy.optimize.curve_fit`` function
     """
+
+    # TODO: Something wrong here! This is exactly the same code as NNLS.
+    # Probably a mistake to correct...
 
     X = Instance(NDArray)
     Y = Instance(NDDataset)
@@ -261,7 +272,7 @@ class CurveFit(HasTraits):
         super().__init__()
 
         if len(datasets) > 2 or len(datasets) < 1:
-            raise ValueError('one or two dataset at max are expected')
+            raise ValueError("one or two dataset at max are expected")
 
         if len(datasets) == 2:
             X, Y = datasets
@@ -303,15 +314,19 @@ class CurveFit(HasTraits):
             B = P[1] * Y.units
 
         else:
-            A = NDDataset(data=P[0],
-                          units=Y.units / X.units,
-                          title="%s/%s" % (Y.title, X.title), )
-            B = NDDataset(data=P[1] * np.ones(X.size),
-                          units=Y.units,
-                          title="%s at origin" % Y.title)
+            A = NDDataset(
+                data=P[0],
+                units=Y.units / X.units,
+                title="%s/%s" % (Y.title, X.title),
+            )
+            B = NDDataset(
+                data=P[1] * np.ones(X.size),
+                units=Y.units,
+                title="%s at origin" % Y.title,
+            )
 
-            A.history = 'Computed by spectrochempy.lstsq \n'
-            B.history = 'Computed by spectrochempy.lstsq \n'
+            A.history = "Computed by spectrochempy.lstsq \n"
+            B.history = "Computed by spectrochempy.lstsq \n"
 
         return A, B
 
@@ -332,7 +347,7 @@ class CurveFit(HasTraits):
             Yp = self.Y.copy()
             Yp.data = (self.X * A + B).data
         else:
-            Yp = (A * self.X + B)
+            Yp = A * self.X + B
         return Yp
 
     itrans = inverse_transform

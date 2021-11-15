@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.13.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -47,10 +47,10 @@ ur.cm / ur.s
 # to create quantity, use for instance, one of the following expression:
 
 # %%
-Quantity('10.0 cm^-1')
+Quantity("10.0 cm^-1")
 
 # %%
-Quantity(1.0, 'cm^-1/hour')
+Quantity(1.0, "cm^-1/hour")
 
 # %%
 Quantity(10.0, ur.cm / ur.km)
@@ -80,7 +80,7 @@ Quantity("900 km / (4.5 hours)")
 
 # %%
 c = a / b
-d = c.to('cm/s')
+d = c.to("cm/s")
 
 
 # %% [markdown]
@@ -94,7 +94,7 @@ print(f"converted quantity: d = {d}")
 # We can make the conversion *inplace* using `ito()` instead of `to()`:
 
 # %%
-c.ito('m/s')
+c.ito("m/s")
 print(f"converted quantity: c = {c}")
 
 # %% [markdown]
@@ -117,8 +117,8 @@ np.sin(x)
 x = 10 * ur.meters
 try:
     np.cos(x)
-except scp.DimensionalityError as e:   # catch the error
-    scp.error_(e)                      # generate the error message (see API configuration)
+except scp.DimensionalityError as e:  # catch the error
+    scp.error_(e)  # generate the error message (see API configuration)
 
 # Consistency of the units are checked and errors are generated if quantities have not appropriate units
 # with the math operation...
@@ -136,11 +136,11 @@ np.cos(x.magnitude)
 # Units can be set for NDDataset data and/or Coordinates
 
 # %%
-ds = scp.NDDataset([1., 2., 3.], units='g/cm^3', title='concentration')
+ds = scp.NDDataset([1.0, 2.0, 3.0], units="g/cm^3", title="concentration")
 ds
 
 # %%
-ds.to('kg/m^3')
+ds.to("kg/m^3")
 
 # %% [markdown]
 # One can do transparent calculation using the units

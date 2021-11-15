@@ -24,31 +24,35 @@ def _install_mpl():
         import matplotlib as mpl
         from matplotlib import get_cachedir
     except ImportError:
-        warnings.warn('Sorry, but we cannot install mpl plotting styles and fonts '
-                      'if MatPlotLib is not installed.\n'
-                      'Please install MatPlotLib using:\n'
-                      '  pip install matplotlib\n'
-                      'or\n'
-                      '  conda install matplotlib\n'
-                      'and then install again.')
+        warnings.warn(
+            "Sorry, but we cannot install mpl plotting styles and fonts "
+            "if MatPlotLib is not installed.\n"
+            "Please install MatPlotLib using:\n"
+            "  pip install matplotlib\n"
+            "or\n"
+            "  conda install matplotlib\n"
+            "and then install again."
+        )
         return
 
     # install all plotting styles in the matplotlib stylelib library
     stylesheets = Path("scp_data") / "stylesheets"
     if not stylesheets.exists():
-        raise IOError(f"Can't find the stylesheets from SpectroChemPy {str(stylesheets)}.\n"
-                      f"Installation incomplete!")
+        raise IOError(
+            f"Can't find the stylesheets from SpectroChemPy {str(stylesheets)}.\n"
+            f"Installation incomplete!"
+        )
 
     cfgdir = Path(mpl.get_configdir())
-    stylelib = cfgdir / 'stylelib'
+    stylelib = cfgdir / "stylelib"
     if not stylelib.exists():
         stylelib.mkdir()
 
-    styles = stylesheets.glob('*.mplstyle')
+    styles = stylesheets.glob("*.mplstyle")
     for src in styles:
         dest = stylelib / src.name
         shutil.copy(src, dest)
-    print(f'Stylesheets installed in {dest}')
+    print(f"Stylesheets installed in {dest}")
 
     # install fonts in mpl-data
     # https://stackoverflow.com/a/47743010
@@ -58,27 +62,27 @@ def _install_mpl():
     # _dir_data = Path(mpl.rcParams['datapath'])
     _dir_data = Path(mpl.get_data_path())
 
-    dir_source = Path("scp_data") / 'fonts'
+    dir_source = Path("scp_data") / "fonts"
     if not dir_source.exists():
-        raise IOError(f'directory {dir_source} not found!')
+        raise IOError(f"directory {dir_source} not found!")
 
-    dir_dest = _dir_data / 'fonts' / 'ttf'
+    dir_dest = _dir_data / "fonts" / "ttf"
     if not dir_dest.exists():
         dir_dest.mkdir(parents=True, exist_ok=True)
 
-    for file in dir_source.glob('*.[ot]tf'):
+    for file in dir_source.glob("*.[ot]tf"):
         if not (dir_dest / file.name).exists():
             print(f'Adding font "{file.name}".')
             shutil.copy(file, dir_dest)
             if (dir_dest / file.name).exists():
-                print('success')
+                print("success")
 
     # Delete cache
     dir_cache = Path(get_cachedir())
-    for file in list(dir_cache.glob('*.cache')) + list(dir_cache.glob('font*')):
+    for file in list(dir_cache.glob("*.cache")) + list(dir_cache.glob("font*")):
         if not file.is_dir():  # don't dump the tex.cache folder... because dunno why
             file.unlink()
-            print(f'Deleted font cache {file}.')
+            print(f"Deleted font cache {file}.")
 
 
 class PostInstallCommand(_install):
@@ -100,44 +104,53 @@ class PostDevelopCommand(_develop):
 # Data for setuptools
 packages = []
 setup_args = dict(
-        # packages informations
-        name="spectrochempy", use_scm_version=True, license="CeCILL-B Free Software",
-        author="Arnaud Travert & Christian Fernandez", author_email="contact (at) spectrochempy.fr",
-        maintainer="C. Fernandez", maintainer_email="christian.fernandez (at) ensicaen.fr",
-        url='http:/www.spectrochempy.fr', description='Processing, analysis and modelling Spectroscopic data for '
-                                                      'Chemistry with Python',
-        long_description=Path('README.md').read_text(), long_description_content_type="text/markdown",
-        classifiers=["Development Status :: 3 - Alpha",
-                     "Topic :: Utilities", "Topic :: Scientific/Engineering",
-                     "Topic :: Software Development :: Libraries",
-                     "Intended Audience :: Science/Research",
-                     "License :: CeCILL-B Free Software License Agreement (CECILL-B)",
-                     "Operating System :: OS Independent",
-                     "Programming Language :: Python :: 3.6",
-                     "Programming Language :: Python :: 3.7",
-                     "Programming Language :: Python :: 3.8",
-                     "Programming Language :: Python :: 3.9", ],
-        platforms=['Windows', 'Mac OS X', 'Linux'],
-        # packages discovery
-        zip_safe=False,
-        packages=find_packages() + packages,
-        include_package_data=True,  # requirements
-        python_requires=">=3.6.9",
-        setup_requires=['setuptools_scm', 'matplotlib'],
-        install_requires=['matplotlib'],
-        # install_requires(dev=__DEV__),
-        # tests_require=extras_require['tests'],
-
-        # post-commands
-        cmdclass={'develop': PostDevelopCommand,
-                  'install': PostInstallCommand, },
-
-        # scripts
-        # # scripts = {'scripts/launch_api.py'},
-        # entry_points={'console_scripts': ['scpy_update=spectrochempy.scripts.scpy_update:main'], },
+    # packages informations
+    name="spectrochempy",
+    use_scm_version=True,
+    license="CeCILL-B Free Software",
+    author="Arnaud Travert & Christian Fernandez",
+    author_email="contact (at) spectrochempy.fr",
+    maintainer="C. Fernandez",
+    maintainer_email="christian.fernandez (at) ensicaen.fr",
+    url="http:/www.spectrochempy.fr",
+    description="Processing, analysis and modelling Spectroscopic data for "
+    "Chemistry with Python",
+    long_description=Path("README.md").read_text(),
+    long_description_content_type="text/markdown",
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Topic :: Utilities",
+        "Topic :: Scientific/Engineering",
+        "Topic :: Software Development :: Libraries",
+        "Intended Audience :: Science/Research",
+        "License :: CeCILL-B Free Software License Agreement (CECILL-B)",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+    ],
+    platforms=["Windows", "Mac OS X", "Linux"],
+    # packages discovery
+    zip_safe=False,
+    packages=find_packages() + packages,
+    include_package_data=True,  # requirements
+    python_requires=">=3.7",
+    setup_requires=["setuptools_scm", "matplotlib"],
+    install_requires=["matplotlib"],
+    # install_requires(dev=__DEV__),
+    # tests_require=extras_require['tests'],
+    # post-commands
+    cmdclass={
+        "develop": PostDevelopCommand,
+        "install": PostInstallCommand,
+    },
+    # scripts
+    # # scripts = {'scripts/launch_api.py'},
+    # entry_points={'console_scripts': ['scpy_update=spectrochempy.scripts.scpy_update:main'], },
 )
 
 # ======================================================================================================================
-if __name__ == '__main__':
+if __name__ == "__main__":
     # execute setup
     setup(**setup_args)

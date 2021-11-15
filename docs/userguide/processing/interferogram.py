@@ -9,7 +9,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.13.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -50,7 +50,7 @@ ir = scp.read_spa("irdata/interferogram/interfero.SPA")
 prefs = ir.preferences
 prefs.figure.figsize = (7, 3)
 _ = ir.plot()
-print('number of points = ', ir.size)
+print("number of points = ", ir.size)
 
 # %% [markdown]
 # Plotting a zoomed region around the maximum of the interferogram (the so-called `ZPD`: `Zero optical Path
@@ -73,7 +73,7 @@ _ = ir.plot(xlim=(-0.04, 0.04))
 # this is not correct you can change it using the `set_laser_frequency` coordinate method:
 
 # %%
-ir.x.set_laser_frequency(15798.26 * ur('cm^-1'))
+ir.x.set_laser_frequency(15798.26 * ur("cm^-1"))
 
 # %% [markdown]
 # Now we can perform the Fourier transform. By default no zero-filling level is applied prior the Fourier transform
@@ -106,7 +106,7 @@ _ = irth.plot(xlim=(3999, 400))
 # %%
 irs = scp.read_spa("irdata/interferogram/spectre.SPA")
 prefs.figure.figsize = (7, 6)
-_ = irs.plot(label='omnic')
-_ = (irt - .4).plot(c='red', clear=False, xlim=(3999, 400), label='no hamming')
-ax = (irth - .2).plot(c='green', clear=False, xlim=(3999, 400), label='hamming')
+_ = irs.plot(label="omnic")
+_ = (irt - 0.4).plot(c="red", clear=False, xlim=(3999, 400), label="no hamming")
+ax = (irth - 0.2).plot(c="green", clear=False, xlim=(3999, 400), label="hamming")
 _ = ax.legend()

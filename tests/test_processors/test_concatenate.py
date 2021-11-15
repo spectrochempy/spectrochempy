@@ -19,7 +19,7 @@ def test_concatenate(IR_dataset_2D):
     s2 = dataset[:, :-10]
 
     # specify axis
-    dim = 'x'
+    dim = "x"
     s = concatenate(s1, s2, dims=dim)
     assert s.units == s1.units
     assert s.shape[-1] == (s1.shape[-1] + s2.shape[-1])
@@ -46,7 +46,7 @@ def test_concatenate(IR_dataset_2D):
     assert s.units == s1.units
     assert s.shape[0] == (s1.shape[0] + s2.shape[0])
     assert s.y.size == (s1.y.size + s2.y.size)
-    s = s.sort(dim='y')
+    s = s.sort(dim="y")
     s.plot()
 
     # second syntax
@@ -98,8 +98,8 @@ def test_bug_243():
     y = scp.LinearCoord(offset=0.0, increment=1.0, size=10)
 
     D.set_coordset(x=x, y=y)
-    D1 = D[:, 0.:10.]
-    D2 = D[:, 20.:40.]
+    D1 = D[:, 0.0:10.0]
+    D2 = D[:, 20.0:40.0]
 
     D12 = scp.concatenate(D1, D2, axis=1)
 

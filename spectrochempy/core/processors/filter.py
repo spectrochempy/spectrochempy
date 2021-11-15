@@ -5,7 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-__all__ = ['savgol_filter', 'detrend']
+__all__ = ["savgol_filter", "detrend"]
 
 __dataset_methods__ = __all__
 
@@ -20,8 +20,17 @@ import scipy.signal
 # argrelmax(data[, axis, order, mode]) 	Calculate the relative maxima of data.
 # argrelextrema(data, comparator[, axis, ...]) 	Calculate the relative extrema of data.
 
-def savgol_filter(dataset, window_length=5, polyorder=0, deriv=0, delta=1.0,
-                  mode='interp', cval=0.0, **kwargs):
+
+def savgol_filter(
+    dataset,
+    window_length=5,
+    polyorder=0,
+    deriv=0,
+    delta=1.0,
+    mode="interp",
+    cval=0.0,
+    **kwargs,
+):
     """
     Apply a Savitzky-Golay filter to a NDDataset.
 
@@ -106,23 +115,24 @@ def savgol_filter(dataset, window_length=5, polyorder=0, deriv=0, delta=1.0,
     NDDataset: [float64] a.u. (shape: (y:55, x:5549))
     """
 
-    if not kwargs.pop('inplace', False):
+    if not kwargs.pop("inplace", False):
         # default
         new = dataset.copy()
     else:
         new = dataset
 
     is_ndarray = False
-    axis = kwargs.pop('dim', kwargs.pop('axis', -1))
-    if hasattr(new, 'get_axis'):
+    axis = kwargs.pop("dim", kwargs.pop("axis", -1))
+    if hasattr(new, "get_axis"):
         axis, dim = new.get_axis(axis, negative_axis=True)
         data = new.data
     else:
         is_ndarray = True
         data = new
 
-    data = scipy.signal.savgol_filter(data, window_length, polyorder,
-                                      deriv, delta, axis, mode, cval)
+    data = scipy.signal.savgol_filter(
+        data, window_length, polyorder, deriv, delta, axis, mode, cval
+    )
 
     if not is_ndarray:
         if deriv != 0 and dataset.coord(dim).reversed:
@@ -132,12 +142,14 @@ def savgol_filter(dataset, window_length=5, polyorder=0, deriv=0, delta=1.0,
         new = data
 
     if not is_ndarray:
-        new.history = f'savgol_filter applied (window_length={window_length}, polyorder={polyorder}, ' \
-                      f'deriv={deriv}, delta={delta}, mode={mode}, cval={cval}'
+        new.history = (
+            f"savgol_filter applied (window_length={window_length}, polyorder={polyorder}, "
+            f"deriv={deriv}, delta={delta}, mode={mode}, cval={cval}"
+        )
     return new
 
 
-def detrend(dataset, type='linear', bp=0, **kwargs):
+def detrend(dataset, type="linear", bp=0, **kwargs):
     """
     Remove linear trend along dim from dataset.
 
@@ -184,15 +196,15 @@ def detrend(dataset, type='linear', bp=0, **kwargs):
     >>> dataset.detrend(type='constant')
     NDDataset: [float64] a.u. (shape: (y:55, x:5549))
     """
-    if not kwargs.pop('inplace', False):
+    if not kwargs.pop("inplace", False):
         # default
         new = dataset.copy()
     else:
         new = dataset
 
     is_ndarray = False
-    axis = kwargs.pop('dim', kwargs.pop('axis', -1))
-    if hasattr(new, 'get_axis'):
+    axis = kwargs.pop("dim", kwargs.pop("axis", -1))
+    if hasattr(new, "get_axis"):
         axis, dim = new.get_axis(axis, negative_axis=True)
         data = new.data
     else:

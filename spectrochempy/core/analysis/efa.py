@@ -8,7 +8,7 @@
 This module implement the EFA (Evolving Factor Analysis) class.
 """
 
-__all__ = ['EFA']
+__all__ = ["EFA"]
 
 __dataset_methods__ = []
 
@@ -60,8 +60,10 @@ class EFA(HasTraits):
             self._X = X
             M, N = X.shape
         else:
-            raise TypeError(f'An object of type NDDataset is expected as input, but an object of type'
-                            f' {type(X).__name__} has been provided')
+            raise TypeError(
+                f"An object of type NDDataset is expected as input, but an object of type"
+                f" {type(X).__name__} has been provided"
+            )
 
         # max number of components
         K = min(M, N)
@@ -72,17 +74,19 @@ class EFA(HasTraits):
         else:
             masked_rows = np.array([False] * M)
 
-        K = min(K, len(np.where(~ masked_rows)[0]))
+        K = min(K, len(np.where(~masked_rows)[0]))
 
         # --------------------------------------------------------------------
         # forward analysis
         # --------------------------------------------------------------------
 
-        f = NDDataset(np.zeros((M, K)),
-                      coordset=[X.y, Coord(range(K))],
-                      title='EigenValues',
-                      description='Forward EFA of ' + X.name,
-                      history=str(datetime.now(timezone.utc)) + ': created by spectrochempy ')
+        f = NDDataset(
+            np.zeros((M, K)),
+            coordset=[X.y, Coord(range(K))],
+            title="EigenValues",
+            description="Forward EFA of " + X.name,
+            history=str(datetime.now(timezone.utc)) + ": created by spectrochempy ",
+        )
 
         # in case some row are masked, take this into account, by masking
         # the corresponding rows of f
@@ -92,23 +96,25 @@ class EFA(HasTraits):
         for i in range(M):
             # if some rows are masked, we must skip them
             if not masked_rows[i]:
-                fsvd = SVD(X[:i + 1], compute_uv=False)
+                fsvd = SVD(X[: i + 1], compute_uv=False)
                 k = fsvd.s.size
                 # print(i, k)
                 f[i, :k] = fsvd.s.data ** 2
                 f[i, k:] = MASKED
             else:
                 f[i] = MASKED
-            print(f'Evolving Factor Analysis: {int(i / (2 * M) * 100)}% \r', end="")
+            print(f"Evolving Factor Analysis: {int(i / (2 * M) * 100)}% \r", end="")
         # --------------------------------------------------------------------
         # backward analysis
         # --------------------------------------------------------------------
 
-        b = NDDataset(np.zeros((M, K)),
-                      coordset=[X.y, Coord(range(K))],
-                      title='EigenValues',
-                      name='Backward EFA of ' + X.name,
-                      history=str(datetime.now(timezone.utc)) + ': created by spectrochempy ')
+        b = NDDataset(
+            np.zeros((M, K)),
+            coordset=[X.y, Coord(range(K))],
+            title="EigenValues",
+            name="Backward EFA of " + X.name,
+            history=str(datetime.now(timezone.utc)) + ": created by spectrochempy ",
+        )
 
         b[masked_rows] = MASKED
 
@@ -121,7 +127,9 @@ class EFA(HasTraits):
                 b[i, k:] = MASKED
             else:
                 b[i] = MASKED
-            print(f'Evolving Factor Analysis: {int(100 - i / (2 * M) * 100)} % \r', end="")
+            print(
+                f"Evolving Factor Analysis: {int(100 - i / (2 * M) * 100)} % \r", end=""
+            )
 
         self._f_ev = f
         self._b_ev = b
@@ -180,13 +188,15 @@ class EFA(HasTraits):
         f = self.f_ev
         b = self.b_ev
 
-        xcoord = Coord(range(n_pc), title='PS#')
-        c = NDDataset(np.zeros((M, n_pc)),
-                      coordset=CoordSet(y=self._X.y, x=xcoord),
-                      name='C_EFA[{}]'.format(self._X.name),
-                      title='relative concentration',
-                      description='Concentration profile from EFA',
-                      history=str(datetime.now(timezone.utc)) + ': created by spectrochempy')
+        xcoord = Coord(range(n_pc), title="PS#")
+        c = NDDataset(
+            np.zeros((M, n_pc)),
+            coordset=CoordSet(y=self._X.y, x=xcoord),
+            name="C_EFA[{}]".format(self._X.name),
+            title="relative concentration",
+            description="Concentration profile from EFA",
+            history=str(datetime.now(timezone.utc)) + ": created by spectrochempy",
+        )
         if self._X.is_masked:
             masked_rows = np.all(self._X.mask, axis=-1)
         else:
@@ -201,5 +211,5 @@ class EFA(HasTraits):
 
 
 # ======================================================================================================================
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

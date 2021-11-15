@@ -18,7 +18,7 @@ import spectrochempy as scp
 ###############################################################################
 # ## Uploading a dataset
 
-X = scp.read('irdata/CO@Mo_Al2O3.SPG')
+X = scp.read("irdata/CO@Mo_Al2O3.SPG")
 
 ###############################################################################
 # ``X`` has two coordinates:
@@ -44,9 +44,27 @@ X.y
 # Hence it would be interesting to replace the "useless" timestamps (``y``)
 # by a pressure coordinates:
 
-pressures = [0.00300, 0.00400, 0.00900, 0.01400, 0.02100, 0.02600, 0.03600,
-             0.05100, 0.09300, 0.15000, 0.20300, 0.30000, 0.40400, 0.50300,
-             0.60200, 0.70200, 0.80100, 0.90500, 1.00400]
+pressures = [
+    0.00300,
+    0.00400,
+    0.00900,
+    0.01400,
+    0.02100,
+    0.02600,
+    0.03600,
+    0.05100,
+    0.09300,
+    0.15000,
+    0.20300,
+    0.30000,
+    0.40400,
+    0.50300,
+    0.60200,
+    0.70200,
+    0.80100,
+    0.90500,
+    1.00400,
+]
 
 ###############################################################################
 # 1. A first way to do this is to replace the time coordinates by the pressure
@@ -61,7 +79,7 @@ c_times = X.y.copy()
 ###############################################################################
 # Now we perform the replacement with this new coordinate:
 
-c_pressures = scp.Coord(pressures, title='pressure', units='torr')
+c_pressures = scp.Coord(pressures, title="pressure", units="torr")
 X.y = c_pressures
 print(X.y)
 
@@ -77,7 +95,7 @@ print(X.y)
 # For example, it will be used for plotting:
 
 prefs = X.preferences
-prefs.figure.figsize = (7,3)
+prefs.figure.figsize = (7, 3)
 _ = X.plot(colorbar=True)
 _ = X.plot_map(colorbar=True)
 
@@ -85,12 +103,12 @@ _ = X.plot_map(colorbar=True)
 # To seamlessly work with the second coordinates (pressures),
 # we can change the default coordinate:
 
-X.y.select(2)    # to select coordinate ``_2``
+X.y.select(2)  # to select coordinate ``_2``
 X.y.default
 
 ###############################################################################
 # Let's now plot the spectral range of interest. The default coordinate is now used:
-X_ = X[:, 2250.:1950.]
+X_ = X[:, 2250.0:1950.0]
 print(X_.y.default)
 _ = X_.plot()
 _ = X_.plot_map()
@@ -108,7 +126,7 @@ print(row10.coordset)
 # Now we wants to add a coordinate with the wavelength instead of wavenumber.
 
 c_wavenumber = row10.x.copy()
-c_wavelength = row10.x.to('nanometer')
+c_wavelength = row10.x.to("nanometer")
 print(c_wavenumber, c_wavelength)
 row10.x = [c_wavenumber, c_wavelength]
 row10.x.select(2)

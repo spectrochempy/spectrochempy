@@ -18,7 +18,6 @@
     NDDataset.arange
     NDDataset.argmax
     NDDataset.argmin
-    NDDataset.asfortranarray
     NDDataset.astype
     NDDataset.autosub
     NDDataset.average
@@ -54,7 +53,6 @@
     NDDataset.geomspace
     NDDataset.get_axis
     NDDataset.get_labels
-    NDDataset.get_zpd
     NDDataset.gm
     NDDataset.hamming
     NDDataset.identity
@@ -69,11 +67,9 @@
     NDDataset.logspace
     NDDataset.max
     NDDataset.mean
-    NDDataset.mertz
     NDDataset.min
     NDDataset.ones
     NDDataset.ones_like
-    NDDataset.part
     NDDataset.pipe
     NDDataset.plot
     NDDataset.plot_1D
@@ -88,8 +84,6 @@
     NDDataset.plot_stack
     NDDataset.plot_surface
     NDDataset.plot_waterfall
-    NDDataset.plotly
-    NDDataset.plotly_stack
     NDDataset.ptp
     NDDataset.qsin
     NDDataset.random
@@ -453,3 +447,7 @@
 
     Fit.run
     Fit.script_default
+
+..    NDDataset.plotly
+..    NDDataset.plotly_stack
+..    NDDataset.asfortranarray

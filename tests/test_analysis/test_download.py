@@ -21,5 +21,5 @@ def test_upload():
     L, S = pca.reduce()
     L.plot_stack()
     pca.screeplot()
-    pca.scoreplot(1, 2, color_mapping='labels')
+    pca.scoreplot(1, 2, color_mapping="labels")
     show()

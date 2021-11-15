@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.13.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -41,15 +41,15 @@ ds
 # use floating numbers for slicing)
 
 # %%
-X = ds[:20, 1250.0:1800.]
+X = ds[:20, 1250.0:1800.0]
 
 # %% [markdown]
 # We can also eventually remove offset on the acquisition time dimension (y)
 
 # %%
 X.y -= X.y[0]
-X.y.ito('min')
-X.y.title = 'acquisition time'
+X.y.ito("min")
+X.y.title = "acquisition time"
 
 # %% [markdown]
 # We set some plotting preferences and then plot the raw data
@@ -57,9 +57,9 @@ X.y.title = 'acquisition time'
 # %%
 prefs = X.preferences
 prefs.figure.figsize = (6, 3)
-prefs.colormap = 'Dark2'
+prefs.colormap = "Dark2"
 prefs.colorbar = True
-X.plot();
+X.plot()
 
 # %% [markdown]
 # Now we can perform some baseline correction
@@ -67,31 +67,39 @@ X.plot();
 # %%
 blc = scp.BaselineCorrection(X)
 regions = (
-        [1740., 1800.0], [1550., 1570.], [1250., 1300.])  # define 3 regions where we want the baseline to reach zero.
+    [1740.0, 1800.0],
+    [1550.0, 1570.0],
+    [1250.0, 1300.0],
+)  # define 3 regions where we want the baseline to reach zero.
 Xcorr = blc.compute(*regions)  # compute the corrected NDDataset
 
-Xcorr.plot();
+Xcorr.plot()
 
 # %% [markdown]
 # To integrate each row on the full range, we can use the sum or trapz method of a NDDataset.
 
 # %%
-inttrapz = Xcorr.trapz(dim='x')
-intsimps = Xcorr.simps(dim='x')
+inttrapz = Xcorr.trapz(dim="x")
+intsimps = Xcorr.simps(dim="x")
 
 # %% [markdown]
 # As you can see both method give almost the same results in this case
 
 # %%
-scp.plot_multiple(method='scatter', ms=5, datasets=[inttrapz, intsimps], labels=['trapzoidal rule', 'simpson\' rule'],
-                  legend='best');
+scp.plot_multiple(
+    method="scatter",
+    ms=5,
+    datasets=[inttrapz, intsimps],
+    labels=["trapzoidal rule", "simpson' rule"],
+    legend="best",
+)
 
 # %% [markdown]
 # The difference between the trapezoidal and simpson integration methods is visualized below. In this case they are
 # extremly close.
 
 # %%
-diff = ((inttrapz - intsimps) * 100. / intsimps)
-diff.title = 'difference'
-diff.units = 'percent'
-diff.plot(scatter=True, ms=5);
+diff = (inttrapz - intsimps) * 100.0 / intsimps
+diff.title = "difference"
+diff.units = "percent"
+diff.plot(scatter=True, ms=5)

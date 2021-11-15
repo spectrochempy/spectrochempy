@@ -8,7 +8,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.13.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -42,7 +42,9 @@ print(X)
 print(X[2:5])  # selects all elements from 2 to 4
 print(X[::2])  # selects one out of two elements
 print(X[:-3])  # a negative index will be counted from the end of the array
-print(X[::-2])  # a negative step will slice backward, starting from 'to', ending at 'from'
+print(
+    X[::-2]
+)  # a negative step will slice backward, starting from 'to', ending at 'from'
 
 # %% [markdown]
 # The same applies to multidimensional arrays by indicating slices separated by commas:
@@ -51,7 +53,9 @@ print(X[::-2])  # a negative step will slice backward, starting from 'to', endin
 X = np.random.rand(10, 10)  # genarates a 10x10 array filled with random values
 print(X.shape)
 print(X[2:5, :].shape)  # slices along the 1st dimension, X[2:5,] is equivalent
-print(X[2:5, ::2].shape)  # same slice along 1st dimension and takes one 1 column out of two along the second
+print(
+    X[2:5, ::2].shape
+)  # same slice along 1st dimension and takes one 1 column out of two along the second
 
 # %% [markdown]
 # ## Slicing of NDDatasets
@@ -59,12 +63,14 @@ print(X[2:5, ::2].shape)  # same slice along 1st dimension and takes one 1 colum
 # Let's import a group of IR spectra, look at its content and plot it:
 
 # %%
-X = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG', description='CO adsorption, diff spectra')
+X = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG", description="CO adsorption, diff spectra")
 X.y = (X.y - X[0].y).to("minute")
 X
 
 # %%
-subplot = X.plot()  # assignment avoids the display of the object address (<matplotlib.axes._subplots.AxesSubplot at 0x294076b93c8> or similar)
+subplot = (
+    X.plot()
+)  # assignment avoids the display of the object address (<matplotlib.axes._subplots.AxesSubplot at 0x294076b93c8> or similar)
 
 # %% [markdown]
 # ### Slicing with indexes
@@ -80,15 +86,21 @@ print(X[::2])  # selects one spectrum out of 2
 # The same can be made along the second dimension, simultanesly or not with the first one. For instance
 
 # %%
-print(X[:, ::2])  # all spectra, one wavenumber out of 2   (note the bug: X[,::2] generates an error)
-print(X[0:3, 200:1000:2])  # 3 first spectra, one wavenumbers out of 2, from index 200 to 1000
+print(
+    X[:, ::2]
+)  # all spectra, one wavenumber out of 2   (note the bug: X[,::2] generates an error)
+print(
+    X[0:3, 200:1000:2]
+)  # 3 first spectra, one wavenumbers out of 2, from index 200 to 1000
 
 # %% [markdown]
 # Would you easily guess which wavenumber range have been actually selected ?.... probably not because the relationship between the index and the wavenumber is not straightforward as it depends on the the value of the first wavenumber, the wavenumber spacing, and whether the wavenumbers are arranged in ascending or descending order...
 # Here is the answer:
 
 # %%
-X[:, 200:1000:2].x  # as the Coord can be sliced, the same is obtained with: X.x[200:1000:2]
+X[
+    :, 200:1000:2
+].x  # as the Coord can be sliced, the same is obtained with: X.x[200:1000:2]
 
 # %% [markdown]
 # ### Slicing with coordinates
@@ -104,14 +116,16 @@ subplot = X[:, 2300.0:1900.0:].plot()
 # The same mechanism can be used along the first dimension (`y`). For instance, to select and plot the same region and the spectra recorded between 80 and 180 minutes:
 
 # %%
-subplot = X[80.:180., 2300.:1900.].plot()  # Note that a decimal point is enough to get a float
+subplot = X[
+    80.0:180.0, 2300.0:1900.0
+].plot()  # Note that a decimal point is enough to get a float
 # a warning is raised if one or several values are beyond the limits
 
 # %% [markdown]
 # Similarly, the spectrum recorded at the time the closest to 60 mins can be selected using a float:
 
 # %%
-X[60.].y  # X[60.] slices the spectrum,  .y returns the corresponding `y` axis.
+X[60.0].y  # X[60.] slices the spectrum,  .y returns the corresponding `y` axis.
 
 # %% [markdown]
 # --- End of Tutorial ---

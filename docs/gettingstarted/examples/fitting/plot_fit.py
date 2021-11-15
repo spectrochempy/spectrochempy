@@ -21,12 +21,12 @@ import os
 ########################################################################
 #  Let's take an IR spectrum
 
-nd = scp.NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
+nd = scp.NDDataset.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
 
 ########################################################################
 # where we select only region (OH region)
 
-ndOH = nd[54, 3700.:3400.]
+ndOH = nd[54, 3700.0:3400.0]
 
 ndOH.plot()
 

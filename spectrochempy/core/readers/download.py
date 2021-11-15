@@ -8,7 +8,7 @@
 In this module, methods are provided to download external datasets
 from public database.
 """
-__all__ = ['download_IRIS']
+__all__ = ["download_IRIS"]
 __dataset_methods__ = __all__
 
 from io import StringIO
@@ -55,25 +55,34 @@ def download_IRIS():
         connection = False
 
     if connection:  # Download data
-        txtdata = ''
+        txtdata = ""
         for rd in response.iter_content():
-            txtdata += rd.decode('utf8')
+            txtdata += rd.decode("utf8")
 
         fil = StringIO(txtdata)
         try:
-            data = np.loadtxt(fil, delimiter=',', usecols=range(4))
+            data = np.loadtxt(fil, delimiter=",", usecols=range(4))
             fil.seek(0)
-            labels = np.loadtxt(fil, delimiter=',', usecols=(4,), dtype='|S')
+            labels = np.loadtxt(fil, delimiter=",", usecols=(4,), dtype="|S")
             labels = list((lab.decode("utf8") for lab in labels))
         except Exception:
-            raise IOError('{} is not a .csv file or its structure cannot be recognized')
+            raise IOError("{} is not a .csv file or its structure cannot be recognized")
 
-        coordx = Coord(labels=['sepal_length', 'sepal width', 'petal_length', 'petal_width'], title='features')
-        coordy = Coord(labels=labels, title='samples')
+        coordx = Coord(
+            labels=["sepal_length", "sepal width", "petal_length", "petal_width"],
+            title="features",
+        )
+        coordy = Coord(labels=labels, title="samples")
 
-        new = NDDataset(data, coordset=[coordy, coordx], title='size', name='IRIS Dataset', units='cm')
+        new = NDDataset(
+            data,
+            coordset=[coordy, coordx],
+            title="size",
+            name="IRIS Dataset",
+            units="cm",
+        )
 
-        new.history = 'Loaded from UC Irvine machine learning repository'
+        new.history = "Loaded from UC Irvine machine learning repository"
 
         return new
 
@@ -83,22 +92,31 @@ def download_IRIS():
         try:
             from sklearn import datasets
         except ImportError:
-            raise IOError('Failed in uploading the IRIS dataset!')
+            raise IOError("Failed in uploading the IRIS dataset!")
 
         # import some data to play with
         data = datasets.load_iris()
 
-        coordx = Coord(labels=['sepal_length', 'sepal width', 'petal_length', 'petal_width'], title='features')
+        coordx = Coord(
+            labels=["sepal_length", "sepal width", "petal_length", "petal_width"],
+            title="features",
+        )
         labels = [data.target_names[i] for i in data.target]
-        coordy = Coord(labels=labels, title='samples')
+        coordy = Coord(labels=labels, title="samples")
 
-        new = NDDataset(data.data, coordset=[coordy, coordx], title='size', name='IRIS Dataset', units='cm')
+        new = NDDataset(
+            data.data,
+            coordset=[coordy, coordx],
+            title="size",
+            name="IRIS Dataset",
+            units="cm",
+        )
 
-        new.history = 'Loaded from scikit-learn datasets'
+        new.history = "Loaded from scikit-learn datasets"
 
         return new
 
 
 # ======================================================================================================================
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

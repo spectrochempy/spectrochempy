@@ -22,7 +22,7 @@ import sys
 try:
     dataset = scp.download_IRIS()
 except (IOError, OSError):
-    print('Could not load The IRIS dataset. Finishing here.')
+    print("Could not load The IRIS dataset. Finishing here.")
     sys.exit(0)
 
 ##############################################################
@@ -33,7 +33,7 @@ pca = scp.PCA(dataset, centered=True)
 # Reduce the dataset to a lower dimensionality (number of
 # components is automatically determined)
 
-S, LT = pca.reduce(n_pc='auto')
+S, LT = pca.reduce(n_pc="auto")
 
 print(LT)
 
@@ -45,11 +45,11 @@ _ = pca.screeplot()
 
 ########################################################################################################################
 # ScorePlot of 2 PC's
-_ = pca.scoreplot(1, 2, color_mapping='labels')
+_ = pca.scoreplot(1, 2, color_mapping="labels")
 
 ########################################################################################################################
 # or in 3D for 3 PC's
-_ = pca.scoreplot(1, 2, 3, color_mapping='labels')
+_ = pca.scoreplot(1, 2, 3, color_mapping="labels")
 
 
 # scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

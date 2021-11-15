@@ -21,11 +21,36 @@ import warnings
 import numpy as np
 from quaternion import as_float_array, as_quat_array
 
-__all__ = ["TYPE_INTEGER", "TYPE_COMPLEX", "TYPE_FLOAT", "TYPE_BOOL", "EPSILON", "INPLACE", 'typequaternion',
-           'make_func_from', "make_new_object", "getdocfrom", "dict_compare", 'htmldoc', "ignored", "is_iterable",
-           "is_sequence", "is_number", "silence", "multisort", 'makestr', 'srepr', "spacing", 'largest_power_of_2',
-           'get_component', 'interleaved2quaternion', 'interleaved2complex', 'as_quaternion', 'quat_as_complex_array',
-           'get_n_decimals']
+__all__ = [
+    "TYPE_INTEGER",
+    "TYPE_COMPLEX",
+    "TYPE_FLOAT",
+    "TYPE_BOOL",
+    "EPSILON",
+    "INPLACE",
+    "typequaternion",
+    "make_func_from",
+    "make_new_object",
+    "getdocfrom",
+    "dict_compare",
+    "htmldoc",
+    "ignored",
+    "is_iterable",
+    "is_sequence",
+    "is_number",
+    "silence",
+    "multisort",
+    "makestr",
+    "srepr",
+    "spacing",
+    "largest_power_of_2",
+    "get_component",
+    "interleaved2quaternion",
+    "interleaved2complex",
+    "as_quaternion",
+    "quat_as_complex_array",
+    "get_n_decimals",
+]
 
 #
 # constants
@@ -60,14 +85,29 @@ def get_n_decimals(val, accuracy):
 # Private methods
 # ======================================================================================================================
 
+
 def _codechange(code_obj, changes):
     code = types.CodeType
-    names = ['co_argcount', 'co_nlocals', 'co_stacksize', 'co_flags', 'co_code', 'co_consts', 'co_names', 'co_varnames',
-             'co_filename', 'co_name', 'co_firstlineno', 'co_lnotab', 'co_freevars', 'co_cellvars']
-    if hasattr(code, 'co_kwonlyargcount'):
-        names.insert(1, 'co_kwonlyargcount')
-    if hasattr(code, 'co_posonlyargcount'):
-        names.insert(1, 'co_posonlyargcount')
+    names = [
+        "co_argcount",
+        "co_nlocals",
+        "co_stacksize",
+        "co_flags",
+        "co_code",
+        "co_consts",
+        "co_names",
+        "co_varnames",
+        "co_filename",
+        "co_name",
+        "co_firstlineno",
+        "co_lnotab",
+        "co_freevars",
+        "co_cellvars",
+    ]
+    if hasattr(code, "co_kwonlyargcount"):
+        names.insert(1, "co_kwonlyargcount")
+    if hasattr(code, "co_posonlyargcount"):
+        names.insert(1, "co_posonlyargcount")
     values = [changes.get(name, getattr(code_obj, name)) for name in names]
     return code(*values)
 
@@ -85,6 +125,7 @@ class _DummyFile(object):
 # ======================================================================================================================
 # Public methods
 # ======================================================================================================================
+
 
 def as_quaternion(*args):
     """
@@ -185,7 +226,7 @@ def dict_compare(d1, d2, check_equal_only=True):
 
 
 # ..................................................................................................................
-def get_component(data, select='REAL'):
+def get_component(data, select="REAL"):
     """
     Take selected components of an hypercomplex array (RRR, RIR, ...)
 
@@ -215,39 +256,45 @@ def get_component(data, select='REAL'):
 
     new = data.copy()
 
-    if select == 'REAL':
-        select = 'R' * new.ndim
+    if select == "REAL":
+        select = "R" * new.ndim
 
     w = x = y = z = None
 
     if new.dtype == typequaternion:
         w, x, y, z = as_float_array(new).T
         w, x, y, z = w.T, x.T, y.T, z.T
-        if select == 'R':
-            new = (w + x * 1j)
-        elif select == 'I':
+        if select == "R":
+            new = w + x * 1j
+        elif select == "I":
             new = y + z * 1j
-        elif select == 'RR':
+        elif select == "RR":
             new = w
-        elif select == 'RI':
+        elif select == "RI":
             new = x
-        elif select == 'IR':
+        elif select == "IR":
             new = y
-        elif select == 'II':
+        elif select == "II":
             new = z
         else:
-            raise ValueError(f'something wrong: cannot interpret `{select}` for hypercomplex (quaternion) data!')
+            raise ValueError(
+                f"something wrong: cannot interpret `{select}` for hypercomplex (quaternion) data!"
+            )
 
     elif new.dtype in TYPE_COMPLEX:
         w, x = new.real, new.imag
-        if (select == 'R') or (select == 'RR'):
+        if (select == "R") or (select == "RR"):
             new = w
-        elif (select == 'I') or (select == 'RI'):
+        elif (select == "I") or (select == "RI"):
             new = x
         else:
-            raise ValueError(f'something wrong: cannot interpret `{select}` for complex data!')
+            raise ValueError(
+                f"something wrong: cannot interpret `{select}` for complex data!"
+            )
     else:
-        warnings.warn(f'No selection was performed because datasets with complex data have no `{select}` component. ')
+        warnings.warn(
+            f"No selection was performed because datasets with complex data have no `{select}` component. "
+        )
 
     return new
 
@@ -300,23 +347,23 @@ def htmldoc(text):
         the html string
     """
     p = re.compile("^(?P<name>.*:)(.*)", re.MULTILINE)  # To get the keywords
-    html = p.sub(r'<b>\1</b>\2', text)
-    html = html.replace('-', '')
-    html = html.split('\n')
-    while html[0].strip() == '':
+    html = p.sub(r"<b>\1</b>\2", text)
+    html = html.replace("-", "")
+    html = html.split("\n")
+    while html[0].strip() == "":
         html = html[1:]  # suppress initial blank lines
 
     for i in range(len(html)):
         html[i] = html[i].strip()
         if i == 0:
             html[i] = "<h3>%s</h3>" % html[i]
-        html[i] = html[i].replace('Parameters', '<h4>Parameters</h4>')
-        html[i] = html[i].replace('Properties', '<h4>Properties</h4>')
-        html[i] = html[i].replace('Methods', '<h4>Methods</h4>')
-        if html[i] != '':
+        html[i] = html[i].replace("Parameters", "<h4>Parameters</h4>")
+        html[i] = html[i].replace("Properties", "<h4>Properties</h4>")
+        html[i] = html[i].replace("Methods", "<h4>Methods</h4>")
+        if html[i] != "":
             if "</h" not in html[i]:
-                html[i] = html[i] + '<br/>'
-            if not html[i].strip().startswith('<'):
+                html[i] = html[i] + "<br/>"
+            if not html[i].strip().startswith("<"):
                 html[i] = "&nbsp;&nbsp;&nbsp;&nbsp;" + html[i]
     html = "".join(html)
 
@@ -327,6 +374,7 @@ def htmldoc(text):
 try:
     from contextlib import ignored
 except ImportError:
+
     @contextmanager
     def ignored(*exceptions):
         """
@@ -391,7 +439,7 @@ def is_sequence(arg):
     """
     Determine if an object is iterable but is not a string
     """
-    return (not hasattr(arg, 'strip')) and hasattr(arg, "__iter__")
+    return (not hasattr(arg, "strip")) and hasattr(arg, "__iter__")
 
 
 # ......................................................................................................................
@@ -423,8 +471,19 @@ def make_func_from(func, first=None):
     if first:
         new_varnames[0] = first
     new_varnames = tuple(new_varnames)
-    new_code_obj = _codechange(code_obj, changes={'co_varnames': new_varnames, })
-    modified = types.FunctionType(new_code_obj, func.__globals__, func.__name__, func.__defaults__, func.__closure__)
+    new_code_obj = _codechange(
+        code_obj,
+        changes={
+            "co_varnames": new_varnames,
+        },
+    )
+    modified = types.FunctionType(
+        new_code_obj,
+        func.__globals__,
+        func.__name__,
+        func.__defaults__,
+        func.__closure__,
+    )
     modified.__doc__ = func.__doc__
     return modified
 
@@ -446,7 +505,7 @@ def make_new_object(objtype):
     new = type(objtype)()
 
     # new id and date
-    new._id = "{}_{}".format(type(objtype).__name__, str(uuid.uuid1()).split('-')[0])
+    new._id = "{}_{}".format(type(objtype).__name__, str(uuid.uuid1()).split("-")[0])
     new._date = datetime.now(timezone.utc)
 
     return new
@@ -466,8 +525,10 @@ def makedirs(newdir):
     if os.path.isdir(newdir):
         pass
     elif os.path.isfile(newdir):
-        raise OSError("a file with the same name as the desired "
-                      "dir, '%s', already exists." % newdir)
+        raise OSError(
+            "a file with the same name as the desired "
+            "dir, '%s', already exists." % newdir
+        )
     else:
         head, tail = os.path.split(newdir)
         if head and not os.path.isdir(head):
@@ -485,21 +546,22 @@ def makestr(li):
 
     if is_sequence(li):
         li = " ".join(map(str, li))
-    li = li.replace('$', '')
-    li = li.replace(' ', r'\ ')
-    li = r'$%s$' % li
+    li = li.replace("$", "")
+    li = li.replace(" ", r"\ ")
+    li = r"$%s$" % li
     return li
 
 
 # ......................................................................................................................
 def multisort(*args, **kargs):
     z = list(zip(*args))
-    z = sorted(z, key=itemgetter(kargs.get('index', 0)))
+    z = sorted(z, key=itemgetter(kargs.get("index", 0)))
     return list(zip(*z))
 
 
 def primefactors(n):
     from itertools import chain
+
     result = []
     for i in chain([2], range(3, n + 1, 2)):
         s = 0
@@ -561,5 +623,5 @@ def spacing(arr):
 # ......................................................................................................................
 def srepr(arg):
     if is_sequence(arg):
-        return '<' + ", ".join(srepr(x) for x in arg) + '>'
+        return "<" + ", ".join(srepr(x) for x in arg) + ">"
     return repr(arg)

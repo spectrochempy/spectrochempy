@@ -8,7 +8,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.13.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -87,7 +87,7 @@ print(X)
 # </div>
 
 # %%
-X = scp.read_omnic('irdata/subdir')
+X = scp.read_omnic("irdata/subdir")
 print(X)
 # %% [markdown]
 # See below for more information
@@ -246,7 +246,7 @@ DATADIR
 # DATADIR is already a pathlib object and so can be used easily
 
 # %%
-X = scp.read_omnic(DATADIR / 'wodger.spg')
+X = scp.read_omnic(DATADIR / "wodger.spg")
 
 # %% [markdown]
 # It can be set to another pathname *permanently* (i.e., even after computer restart) by a new assignment:
@@ -276,7 +276,7 @@ X = scp.read_omnic(DATADIR / 'wodger.spg')
 
 # %%
 datadir = scp.preferences.datadir
-fs = scp.FileSelector(path=datadir, filters=['spg', 'spa'])
+fs = scp.FileSelector(path=datadir, filters=["spg", "spa"])
 fs
 
 # %% [markdown]

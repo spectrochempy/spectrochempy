@@ -9,7 +9,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.13.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -31,8 +31,10 @@ import spectrochempy as scp
 import numpy as np
 
 # %%
-X = scp.read_omnic('irdata//nh4y-activation.spg')  # import spectra
-X = X[0:5, 3600.0:2800.0]  # select a noisy part (the first 5 spectra in the 3700-2800 cm-1 range)
+X = scp.read_omnic("irdata//nh4y-activation.spg")  # import spectra
+X = X[
+    0:5, 3600.0:2800.0
+]  # select a noisy part (the first 5 spectra in the 3700-2800 cm-1 range)
 
 # %%
 prefs = X.preferences
@@ -75,15 +77,23 @@ ax = X.smooth().plot()
 # Loop over window lengths. i index will run from 0 to 6.
 
 # %%
-lspectra = [X[0], ]
-llabels = ['Initial', ]
+lspectra = [
+    X[0],
+]
+llabels = [
+    "Initial",
+]
 for i, length in enumerate([5, 11, 27, 51, 101, 201, 501]):
     s = X[0].smooth(window_length=length)  # smooth
-    s += 0.1 * (1 + i)  # shift the absorbance by +0.1 a.u. with respect to previous iteration
+    s += 0.1 * (
+        1 + i
+    )  # shift the absorbance by +0.1 a.u. with respect to previous iteration
     lspectra.append(s)
-    llabels.append(f'length: {length}')
+    llabels.append(f"length: {length}")
 
-ax = scp.plot_multiple(figsize=(7, 6), method='pen', datasets=lspectra, labels=llabels, legend='upper left')
+ax = scp.plot_multiple(
+    figsize=(7, 6), method="pen", datasets=lspectra, labels=llabels, legend="upper left"
+)
 
 # %% The above spectra clearly show that as that the width of the window increases, the peaks belonging to [markdown]
 # the spectrum are flattened out and distorted. When determining the optimum window length, one should thus consier
@@ -99,14 +109,20 @@ ax = scp.plot_multiple(figsize=(7, 6), method='pen', datasets=lspectra, labels=l
 # The code below compares the effect of the type of window:
 
 # %%
-wspectra = [X[0], ]
-wlabels = ['Initial', ]
-for i, window in enumerate(['flat', 'bartlett', 'hanning', 'hamming', 'blackman']):
+wspectra = [
+    X[0],
+]
+wlabels = [
+    "Initial",
+]
+for i, window in enumerate(["flat", "bartlett", "hanning", "hamming", "blackman"]):
     s = X[0].smooth(window_length=27, window=window) + 0.1 * (1 + i)  # smooth and shift
     wspectra.append(s)
-    wlabels.append(f'window: {window}')
+    wlabels.append(f"window: {window}")
 
-ax = scp.plot_multiple(figsize=(7, 4), method='pen', datasets=wspectra, labels=wlabels, legend='upper left')
+ax = scp.plot_multiple(
+    figsize=(7, 4), method="pen", datasets=wspectra, labels=wlabels, legend="upper left"
+)
 
 # %% Close examination of the spectra shows that the flat window leads to the stronger smoothing. This is [markdown]
 # because the other window functions (also known as *apodization functions*) are used as weighting functions for the
@@ -121,12 +137,15 @@ functions = []
 labels = []
 for i, f in enumerate([np.bartlett, np.hanning, np.hamming, np.blackman]):
     coord = scp.NDDataset.linspace(-13, 13, 27)
-    s = scp.NDDataset(f(27) / np.sum(27) + i * 0.01,
-                      coordset=[coord])  # normalized window function, y shifted : +0.1 for each function
+    s = scp.NDDataset(
+        f(27) / np.sum(27) + i * 0.01, coordset=[coord]
+    )  # normalized window function, y shifted : +0.1 for each function
     functions.append(s)
-    labels.append(f'function: {f.__name__}')
+    labels.append(f"function: {f.__name__}")
 
-ax = scp.plot_multiple(figsize=(7, 4), method='pen', datasets=functions, labels=labels, legend='upper left')
+ax = scp.plot_multiple(
+    figsize=(7, 4), method="pen", datasets=functions, labels=labels, legend="upper left"
+)
 
 # %% As shown above, the "bartlett" function is equivalent to a triangular apodization, while other [markdown]
 # fonctions (`hanning`, `hamming`, `blackman`) are bell-shaped. More information on window funcntions can be found [
@@ -142,8 +161,10 @@ labels = wlabels[1:]
 for s in wspectra[1:]:
     s = s - X[0]
     diffs.append(s)
-    stds.append(s.std(dim='x').values.m)
-ax = scp.plot_multiple(figsize=(7, 4), method='pen', datasets=diffs, labels=labels, legend='upper left')
+    stds.append(s.std(dim="x").values.m)
+ax = scp.plot_multiple(
+    figsize=(7, 4), method="pen", datasets=diffs, labels=labels, legend="upper left"
+)
 ax.set_ylim(0, 0.8)
 
 # %% [markdown]
@@ -151,7 +172,7 @@ ax.set_ylim(0, 0.8)
 
 # %%
 for ll, s in zip(labels, stds):
-    print(f'{ll[7:]:10s}: {s:.4f}')
+    print(f"{ll[7:]:10s}: {s:.4f}")
 
 # %% [markdown]
 # ## Savitzky-Golay algorithm:`savgol_filter()`

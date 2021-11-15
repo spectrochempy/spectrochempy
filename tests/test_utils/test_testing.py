@@ -18,7 +18,7 @@ def test_compare(IR_dataset_1D, simple_project):
     testing.assert_dataset_equal(nd1, nd2)
 
     nd3 = nd1.copy()
-    nd3.title = 'ddd'
+    nd3.title = "ddd"
 
     with testing.raises(AssertionError):
         testing.assert_dataset_equal(nd1, nd3)
@@ -37,14 +37,14 @@ def test_compare(IR_dataset_1D, simple_project):
     # project comparison
 
     proj1 = simple_project.copy()
-    proj1.name = 'PROJ1'
+    proj1.name = "PROJ1"
     proj2 = proj1.copy()
-    proj2.name = 'PROJ2'
+    proj2.name = "PROJ2"
 
     testing.assert_project_equal(proj1, proj2)
 
     proj3 = proj2.copy()
-    proj3.add_script(Script(content='print()', name='just_a_try'))
+    proj3.add_script(Script(content="print()", name="just_a_try"))
 
     with testing.raises(AssertionError):
         testing.assert_project_equal(proj1, proj3)

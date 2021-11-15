@@ -43,7 +43,7 @@ def test_ndio_generic(NMR_dataset_1D):
 
     # as it has been already saved, we should not get dialogs
     f = nd.save()
-    assert nd.filename == 'NMR_1D.scp'
+    assert nd.filename == "NMR_1D.scp"
     # return
 
     # now it opens a dialog and the name can be changed
@@ -55,16 +55,16 @@ def test_ndio_generic(NMR_dataset_1D):
     f1.unlink()
 
     # save in a specified directory
-    nmr.save_as(irdatadir / 'essai')  # save essai.scp
+    nmr.save_as(irdatadir / "essai")  # save essai.scp
     assert nmr.directory == irdatadir
     assert nmr.filename == "essai.scp"
     (irdatadir / nmr.filename).unlink()
 
     # save in the current directory
-    f = nmr.save_as(cwd / 'essai')
+    f = nmr.save_as(cwd / "essai")
 
     # try to load without extension specification (will first assume it is scp)
-    dl = NDDataset.load('essai')
+    dl = NDDataset.load("essai")
     # assert dl.directory == cwd
     assert_array_equal(dl.data, nmr.data)
     f.unlink()
@@ -74,12 +74,13 @@ def test_ndio_2D(IR_dataset_2D):
     # test with a 2D
 
     ir2 = IR_dataset_2D.copy()
-    f = ir2.save_as('essai2D')
+    f = ir2.save_as("essai2D")
     assert ir2.directory == irdatadir
     with pytest.raises(FileNotFoundError):
         nd = NDDataset.load("essai2D")
     nd = NDDataset.load("irdata/essai2D")
     assert nd.directory == irdatadir
     f.unlink()
+
 
 # EOF

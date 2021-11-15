@@ -10,7 +10,7 @@
 This module implements the class |Coord|.
 """
 
-__all__ = ['Coord', 'LinearCoord']
+__all__ = ["Coord", "LinearCoord"]
 
 import textwrap
 
@@ -139,7 +139,7 @@ class Coord(NDMath, NDArray):
         super().__init__(data=data, **kwargs)
 
         if len(self.shape) > 1:
-            raise ValueError('Only one 1D arrays can be used to define coordinates')
+            raise ValueError("Only one 1D arrays can be used to define coordinates")
 
     # ..................................................................................................................
     def implements(self, name=None):
@@ -152,9 +152,9 @@ class Coord(NDMath, NDArray):
         """
 
         if name is None:
-            return 'Coord'
+            return "Coord"
         else:
-            return name == 'Coord'
+            return name == "Coord"
 
     # ------------------------------------------------------------------------------------------------------------------
     # readonly property
@@ -166,7 +166,7 @@ class Coord(NDMath, NDArray):
         """bool - Whether the axis is reversed (readonly
         property).
         """
-        if self.units in ['1 / centimeter', 'ppm']:
+        if self.units in ["1 / centimeter", "ppm"]:
             return True
         return False
 
@@ -396,7 +396,7 @@ class Coord(NDMath, NDArray):
     # ..................................................................................................................
     @property
     def dims(self):
-        return ['x']
+        return ["x"]
 
     # ..................................................................................................................
     @property
@@ -432,7 +432,18 @@ class Coord(NDMath, NDArray):
     def __dir__(self):
         # remove some methods with respect to the full NDArray
         # as they are not usefull for Coord.
-        return ['data', 'labels', 'units', 'meta', 'title', 'name', 'offset', 'increment', 'linear', 'roi']
+        return [
+            "data",
+            "labels",
+            "units",
+            "meta",
+            "title",
+            "name",
+            "offset",
+            "increment",
+            "linear",
+            "roi",
+        ]
 
     # ..................................................................................................................
     def __getitem__(self, items, return_index=False):
@@ -447,37 +458,37 @@ class Coord(NDMath, NDArray):
         return repr(self)
 
     # ..................................................................................................................
-    def _cstr(self, header='  coordinates: ... \n', print_size=True, **kwargs):
+    def _cstr(self, header="  coordinates: ... \n", print_size=True, **kwargs):
 
-        indent = kwargs.get('indent', 0)
+        indent = kwargs.get("indent", 0)
 
-        out = ''
+        out = ""
         if not self.is_empty and print_size:
-            out += f'{self._str_shape().rstrip()}\n'
-        out += f'        title: {self.title}\n' if self.title else ''
+            out += f"{self._str_shape().rstrip()}\n"
+        out += f"        title: {self.title}\n" if self.title else ""
         if self.has_data:
-            out += '{}\n'.format(self._str_value(header=header))
+            out += "{}\n".format(self._str_value(header=header))
         elif self.is_empty and not self.is_labeled:
-            out += header.replace('...', '\0Undefined\0')
+            out += header.replace("...", "\0Undefined\0")
 
         if self.is_labeled:
-            header = '       labels: ... \n'
+            header = "       labels: ... \n"
             text = str(self.labels.T).strip()
-            if '\n' not in text:  # single line!
-                out += header.replace('...', '\0\0{}\0\0'.format(text))
+            if "\n" not in text:  # single line!
+                out += header.replace("...", "\0\0{}\0\0".format(text))
             else:
                 out += header
-                out += '\0\0{}\0\0'.format(textwrap.indent(text.strip(), ' ' * 9))
+                out += "\0\0{}\0\0".format(textwrap.indent(text.strip(), " " * 9))
 
-        if out[-1] == '\n':
+        if out[-1] == "\n":
             out = out[:-1]
 
         if indent:
-            out = "{}".format(textwrap.indent(out, ' ' * indent))
+            out = "{}".format(textwrap.indent(out, " " * indent))
 
         first_indent = kwargs.get("first_indent", 0)
         if first_indent < indent:
-            out = out[indent - first_indent:]
+            out = out[indent - first_indent :]
 
         if not self._html_output:
             return colored_output(out)
@@ -504,7 +515,7 @@ class Coord(NDMath, NDArray):
         #   'change'
         # }
 
-        if change.name in ['_linear', '_increment', '_offset', '_size']:
+        if change.name in ["_linear", "_increment", "_offset", "_size"]:
             super()._anytrait_changed(change)
 
 
@@ -603,8 +614,10 @@ class LinearCoord(Coord):
 
         """
         if args and isinstance(args[0], Coord) and not args[0].linear:
-            raise ValueError('Only linear Coord (with attribute linear set to True, can be transformed into '
-                             'LinearCoord class')
+            raise ValueError(
+                "Only linear Coord (with attribute linear set to True, can be transformed into "
+                "LinearCoord class"
+            )
 
         super().__init__(*args, **kwargs)
 
@@ -632,9 +645,9 @@ class LinearCoord(Coord):
         """
 
         if name is None:
-            return 'LinearCoord'
+            return "LinearCoord"
         else:
-            return name == 'LinearCoord'
+            return name == "LinearCoord"
 
     # ..................................................................................................................
     @property  # read only
@@ -653,35 +666,47 @@ class LinearCoord(Coord):
     def __dir__(self):
         # remove some methods with respect to the full NDArray
         # as they are not usefull for Coord.
-        return ['data', 'labels', 'units', 'meta', 'title', 'name', 'offset', 'increment', 'linear', 'size', 'roi',
-                'show_datapoints']
+        return [
+            "data",
+            "labels",
+            "units",
+            "meta",
+            "title",
+            "name",
+            "offset",
+            "increment",
+            "linear",
+            "size",
+            "roi",
+            "show_datapoints",
+        ]
 
-    def set_laser_frequency(self, frequency=15798.26 * ur('cm^-1')):
+    def set_laser_frequency(self, frequency=15798.26 * ur("cm^-1")):
 
         if not isinstance(frequency, Quantity):
-            frequency = frequency * ur('cm^-1')
+            frequency = frequency * ur("cm^-1")
 
-        frequency.ito('Hz')
+        frequency.ito("Hz")
         self.meta.laser_frequency = frequency
 
         if self._use_time:
-            spacing = 1. / frequency
-            spacing.ito('picoseconds')
+            spacing = 1.0 / frequency
+            spacing.ito("picoseconds")
 
             self.increment = spacing.m
             self.offset = 0
             self._units = ur.picoseconds
-            self.title = 'time'
+            self.title = "time"
 
         else:
-            frequency.ito('cm^-1')
-            spacing = 1. / frequency
-            spacing.ito('mm')
+            frequency.ito("cm^-1")
+            spacing = 1.0 / frequency
+            spacing.ito("mm")
 
             self.increment = spacing.m
             self.offset = -self.increment * self._zpd
             self._units = ur.mm
-            self.title = 'optical path difference'
+            self.title = "optical path difference"
 
     @property
     def _use_time_axis(self):
@@ -694,7 +719,7 @@ class LinearCoord(Coord):
     def _use_time_axis(self, val):
 
         self._use_time = val
-        if 'laser_frequency' in self.meta:
+        if "laser_frequency" in self.meta:
             self.set_laser_frequency(self.meta.laser_frequency)
 
     @property
@@ -703,7 +728,10 @@ class LinearCoord(Coord):
         Bool : True if axis must discard values and show only datapoints.
 
         """
-        if 'laser_frequency' not in self.meta or self.units.dimensionality not in ['[time]', '[length]']:
+        if "laser_frequency" not in self.meta or self.units.dimensionality not in [
+            "[time]",
+            "[length]",
+        ]:
             return False
 
         return self._show_datapoints
@@ -731,5 +759,5 @@ class LinearCoord(Coord):
 _set_operators(Coord, priority=50)
 
 # ======================================================================================================================
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

@@ -9,7 +9,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.13.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -53,7 +53,7 @@ from spectrochempy import ur
 # Increment) is also handled.
 
 # %%
-path = scp.preferences.datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'topspin_2d'
+path = scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_2d"
 ser = scp.read_topspin(path, expno=1)
 ser
 
@@ -110,7 +110,9 @@ _ = row0.plot(show_complex=True, xlim=(0, 10000))
 row0 = ser[0]
 
 row0.dc(inplace=True)  # DC corrrection
-row0.zf_size(size=2048, inplace=True)  # zero-filling (size parameter can be approximate as the FFT will
+row0.zf_size(
+    size=2048, inplace=True
+)  # zero-filling (size parameter can be approximate as the FFT will
 # anyway complete the zero-filling to next power of 2.)
 shifted = row0.coordmax()  # find the top of the echo
 
@@ -118,7 +120,7 @@ shifted = row0.coordmax()  # find the top of the echo
 newrow, apod = row0.em(lb=20 * ur.Hz, shifted=shifted, retapod=True)
 # retapod: return the apod array along with the apodized dataset
 newrow.plot()
-apod.plot(clear=False, xlim=(0, 20000), c='red')
+apod.plot(clear=False, xlim=(0, 20000), c="red")
 
 f0 = newrow.fft()  # fourier transform
 _ = f0.plot(show_complex=True)
@@ -130,7 +132,9 @@ _ = f0.plot(show_complex=True)
 # %%
 sert = ser.dc()  # DC correction
 sert.zf_size(size=2048, inplace=True)  # zero-filling
-sert.em(lb=20 * ur.Hz, shifted=shifted, inplace=True)  # shifted was set in the previous step
+sert.em(
+    lb=20 * ur.Hz, shifted=shifted, inplace=True
+)  # shifted was set in the previous step
 _ = sert.plot_map()
 
 # %% [markdown]
@@ -138,15 +142,15 @@ _ = sert.plot_map()
 
 # %%
 spec = sert.fft()
-_ = spec.plot_map();
+_ = spec.plot_map()
 
 # %% [markdown]
 # Now we can process the F1 dimension ('y')
 
 # %%
-spect = spec.zf_size(size=512, dim='y')
-spect.em(lb=10 * ur.Hz, inplace=True, dim='y')
-s = spect.fft(dim='y')
+spect = spec.zf_size(size=512, dim="y")
+spect.em(lb=10 * ur.Hz, inplace=True, dim="y")
+s = spect.fft(dim="y")
 prefs.contour_start = 0.12
 _ = s.plot_map()
 
@@ -154,7 +158,7 @@ _ = s.plot_map()
 # Here is an expansion:
 
 # %%
-spk = s.pk(phc0=0, dim='y')
+spk = s.pk(phc0=0, dim="y")
 _ = spk.plot_map(xlim=(50, 0), ylim=(-40, -15))
 
 # %% [markdown]
@@ -166,7 +170,7 @@ _ = spk.plot_map(xlim=(50, 0), ylim=(-40, -15))
 # Topspin software).
 
 # %%
-path = scp.preferences.datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'exam2d_HC'
+path = scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "exam2d_HC"
 ser = scp.read_topspin(path)
 prefs = ser.preferences
 prefs.figure.figsize = (7, 3)
@@ -182,13 +186,14 @@ ex = (3.5, 2.5)
 _ = s2[0].plot(xlim=ex)
 
 # %%
-s2.sp(ssb=2, dim='y', inplace=True);  # Sine apodization in the y dimension
+s2.sp(ssb=2, dim="y", inplace=True)
+# Sine apodization in the y dimension
 
 # %%
 ey = (20, 45)
 prefs.contour_start = 0.07
-s = s2.fft(256, dim='y')
-s = s.pk(phc0=-40, dim='y')
+s = s2.fft(256, dim="y")
+s = s.pk(phc0=-40, dim="y")
 s = s.pk(phc0=-5, rel=True)
 _ = s.plot_map(xlim=ex, ylim=ey)
 _ = s.plot_map()
@@ -197,7 +202,7 @@ _ = s.plot_map()
 # ## Processing a QF encoded file
 
 # %%
-path = scp.preferences.datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'exam2d_HH'
+path = scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "exam2d_HH"
 ser = scp.read_topspin(path)
 prefs = ser.preferences
 ser.plot_map()
@@ -211,11 +216,12 @@ s3 = s2.pk(phc0=-140, phc1=95)
 _ = s3[0].plot()
 
 # %%
-s3.sp(ssb=0, dim='y', inplace=True);  # Sine apodization in the y dimension
+s3.sp(ssb=0, dim="y", inplace=True)
+# Sine apodization in the y dimension
 
 # %%
 ey = (20, 45)
-s = s3.fft(256, dim='y')
+s = s3.fft(256, dim="y")
 sa = s.abs()
 
 prefs.contour_start = 0.005

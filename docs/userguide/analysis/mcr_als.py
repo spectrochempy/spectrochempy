@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.13.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -53,7 +53,7 @@ A = scp.read_matlab("matlabdata/als2004dataset.MAT")
 
 # %%
 for a in A:
-    print(a.name + ': ' + str(a.shape))
+    print(a.name + ": " + str(a.shape))
 
 # %% [markdown]
 # In this tutorial, we are first interested in the dataset named ('m1') that contains a singleHPLC-DAD run(s).
@@ -76,9 +76,9 @@ _ = X.plot()
 # the default coordinates (index) do the NDDataset and (iii) a proper name for these coordinates:
 
 # %%
-X.title = 'absorbance'
+X.title = "absorbance"
 X.set_coordset(None, None)
-X.set_coordtitles(y='elution time', x='wavelength')
+X.set_coordtitles(y="elution time", x="wavelength")
 X
 
 # %% [markdown]
@@ -86,7 +86,7 @@ X
 # (PCA, EFA, MCR-ALs, ...). For instance to plot X as a surface:
 
 # %%
-surf = X.plot_surface(colorbar=True, linewidth=.2, ccount=100, figsize=(10, 5))
+surf = X.plot_surface(colorbar=True, linewidth=0.2, ccount=100, figsize=(10, 5))
 
 # %% [markdown]
 # ## Initial guess and MCR ALS optimization
@@ -119,7 +119,7 @@ _ = St0.plot()
 # of the ALS iterations:
 
 # %%
-mcr = scp.MCRALS(X, St0, verbose='True')
+mcr = scp.MCRALS(X, St0, verbose="True")
 
 # %% [markdown]
 # The optimization has converged within few iterations. The figures reported for each iteration are defined as follows:
@@ -137,7 +137,7 @@ mcr = scp.MCRALS(X, St0, verbose='True')
 # For instance:
 
 # %%
-mcr = scp.MCRALS(X, St0, tol=0.01, verbose='True')
+mcr = scp.MCRALS(X, St0, tol=0.01, verbose="True")
 
 # %% [markdown]
 # As could be expected more iterations have been necessary to reach this stricter convergence criterion.  The other
@@ -147,7 +147,7 @@ mcr = scp.MCRALS(X, St0, tol=0.01, verbose='True')
 # of iterations is reached (maxit, 50 by default) or when no improvement is during 5 successive iterations (maxdiv).
 
 # %%
-mcr = scp.MCRALS(X, St0, tol=0.001, verbose='True')
+mcr = scp.MCRALS(X, St0, tol=0.001, verbose="True")
 
 # %% [markdown]
 # #### Solutions
@@ -186,9 +186,9 @@ _ = mcr1.St.plot()
 # both normalizations:
 
 # %%
-mcr2 = scp.MCRALS(X, St0, normSpec='euclid')
+mcr2 = scp.MCRALS(X, St0, normSpec="euclid")
 
-mcr3 = scp.MCRALS(X, St0, normSpec='max')
+mcr3 = scp.MCRALS(X, St0, normSpec="max")
 
 _ = mcr1.St.plot()
 _ = mcr2.St.plot()
@@ -244,7 +244,7 @@ _ = LT.plot()
 
 # %%
 pca = scp.PCA(X)
-S3, LT3 = scp.PCA(X).reduce(n_pc='auto')
+S3, LT3 = scp.PCA(X).reduce(n_pc="auto")
 S3.shape
 
 # %% [markdown]
@@ -262,7 +262,7 @@ _ = C0.T.plot()
 # The MCR ALS can then be launched using this new guess:
 
 # %%
-mcr4 = scp.MCRALS(X, guess=C0, maxit=100, normSpec='euclid', verbose=True)
+mcr4 = scp.MCRALS(X, guess=C0, maxit=100, normSpec="euclid", verbose=True)
 
 # %%
 _ = mcr4.C.T.plot()
@@ -282,11 +282,11 @@ A[1]
 
 # %%
 X2 = A[1]
-X2.title = 'absorbance'
+X2.title = "absorbance"
 X2.set_coordset(None, None)
-X2.set_coordtitles(y='elution time', x='wavelength')
-surf = X2.plot_surface(colorbar=True, linewidth=.2, ccount=100, figsize=(10, 5))
-_ = X2.plot(method='map')
+X2.set_coordtitles(y="elution time", x="wavelength")
+surf = X2.plot_surface(colorbar=True, linewidth=0.2, ccount=100, figsize=(10, 5))
+_ = X2.plot(method="map")
 
 # %%
 mcr5 = scp.MCRALS(X2, guess=St0, unimodConc=None, verbose=True)

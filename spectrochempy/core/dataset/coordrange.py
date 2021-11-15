@@ -8,7 +8,7 @@
 This module implements the class |CoordRange|.
 """
 
-__all__ = __slots__ = ['trim_ranges']
+__all__ = __slots__ = ["trim_ranges"]
 
 from traitlets import HasTraits, List, Bool
 
@@ -103,5 +103,5 @@ def trim_ranges(*ranges, reversed=False):
 
 
 # ======================================================================================================================
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

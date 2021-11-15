@@ -9,7 +9,7 @@ from spectrochempy.utils import show
 
 
 def test_plot_generic_1D(IR_dataset_1D):
-    for method in ['scatter', 'lines']:
+    for method in ["scatter", "pen", "scatter+pen"]:
         dataset = IR_dataset_1D.copy()
         dataset.plot(method=method)
 
@@ -17,7 +17,7 @@ def test_plot_generic_1D(IR_dataset_1D):
 
 
 def test_plot_generic_2D(IR_dataset_2D):
-    for method in ['stack', 'map', 'image']:
+    for method in ["stack", "map", "image"]:
         dataset = IR_dataset_2D.copy()
         dataset.plot(method=method)
 
