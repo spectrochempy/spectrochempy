@@ -187,6 +187,7 @@ def _read_opus(*args, **kwargs):
         dataset.data = np.array(data[np.newaxis], dtype='float32')
     except KeyError:
         raise IOError(f"{filename} is not an Absorbance spectrum. It cannot be read with the `read_opus` import method")
+    #todo: read background
 
     # xaxis
     fxv = opus_data['AB Data Parameter']['FXV']
@@ -206,7 +207,7 @@ def _read_opus(*args, **kwargs):
     yaxis = Coord([timestamp],
                   title='acquisition timestamp (GMT)',
                   units='s',
-                  labels=([utc_dt], [name]))
+                  labels=([utc_dt], [name], [filename]))
 
     # set dataset's Coordset
     dataset.set_coordset(y=yaxis, x=xaxis)
