@@ -186,9 +186,9 @@ def _read_opus(*args, **kwargs):
         data = opus_data["AB"][:npt]
         dataset.data = np.array(data[np.newaxis], dtype="float32")
     except KeyError:
-        raise IOError(
-            f"{filename} is not an Absorbance spectrum. It cannot be read with the `read_opus` import method"
-        )
+        raise IOError(f"{filename} is not an Absorbance spectrum. It cannot be read with the `read_opus` import method")
+    #todo: read background
+
 
     # xaxis
     fxv = opus_data["AB Data Parameter"]["FXV"]
@@ -207,12 +207,11 @@ def _read_opus(*args, **kwargs):
     utc_dt = date_time - timedelta(hours=gmt_offset_hour)
     utc_dt = utc_dt.replace(tzinfo=timezone.utc)
     timestamp = utc_dt.timestamp()
-    yaxis = Coord(
-        [timestamp],
-        title="acquisition timestamp (GMT)",
-        units="s",
-        labels=([utc_dt], [name]),
-    )
+
+    yaxis = Coord([timestamp],
+                  title='acquisition timestamp (GMT)',
+                  units='s',
+                  labels=([utc_dt], [name], [filename]))
 
     # set dataset's Coordset
     dataset.set_coordset(y=yaxis, x=xaxis)

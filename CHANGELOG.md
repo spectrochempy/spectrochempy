@@ -11,6 +11,12 @@
 **BUGS FIXED**
 
 
+## Version 0.2.17
+
+**NEW FEATURES**
+
+* Read opus: add filenames as labels
+
 ## Version 0.2.16
 
 **NEW FEATURES**
