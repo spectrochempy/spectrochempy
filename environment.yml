@@ -1,4 +1,4 @@
-name: environment
+name: scpy
 
 channels:
     - conda-forge

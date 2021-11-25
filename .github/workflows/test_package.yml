@@ -6,8 +6,6 @@ on:
       - develop
       - master
   pull_request:
-    branches:
-      - master
 
 jobs:
 
@@ -34,6 +32,9 @@ jobs:
       - name: Install miniconda
         uses: conda-incubator/setup-miniconda@v2
         with:
+          python-version: 3.9
+          mamba-version: "*"
+          channels: conda-forge,defaults
           activate-environment: ""
           auto-activate-base: true
           auto-update-conda: true
@@ -98,6 +99,7 @@ jobs:
       - name: Install miniconda (scpy${{ matrix.pythonVersion }})
         uses: conda-incubator/setup-miniconda@v2
         with:
+          mamba-version: "*"
           activate-environment: scpy${{ matrix.pythonVersion }}
           environment-file: scpy${{ matrix.pythonVersion }}.yml
           condarc-file: .ci/scripts/condarc.yml

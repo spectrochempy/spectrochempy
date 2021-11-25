@@ -118,8 +118,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "name",
         nargs="?",
-        default="environment.yml",
-        help="name of the output yml file (ext must be .yml!) ",
+        default="scpy",
+        help="name of the environment (default scpy) ",
     )
 
     parser.add_argument("-v", "--version", help="Python version")

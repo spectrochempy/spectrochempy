@@ -26,10 +26,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install miniconda (scpy3.9)
+      - name: Install miniconda (scpy)
         uses: conda-incubator/setup-miniconda@v2
         with:
-          activate-environment: scpy3.9
+          activate-environment: scpy
           environment-file: environment.yml
           condarc-file: .ci/scripts/condarc.yml
           auto-activate-base: false
