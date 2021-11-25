@@ -12,12 +12,11 @@ Usage:
     generated with this script:
     $ python .ci/scripts/generate_pip_deps_from_conda.py --compare
 
-Copied and modified from https://github.com/pandas-dev/pandas/scripts/generate_pip_deps_from_conda.py (BSD 3-Clause
-License)
+Adapted from https://github.com/pandas-dev/pandas/scripts
+/generate_pip_deps_from_conda.py (BSD 3-Clause License)
 
 """
 import argparse
-import os
 import re
 import sys
 
@@ -32,6 +31,7 @@ RENAME = {
     "dask-core": "dask",
     "git": "gitpython",
     "numpy-quaternion": "quaternion",
+    "matplotlib-base": "matplotlib",
 }
 
 
@@ -69,10 +69,9 @@ def conda_package_to_pip(package):
     return package
 
 
-def main(conda_fname, pip_fname, compare=False):
+def main(conda_fname, pip_fname):
     """
-    Generate the pip dependencies file from the conda file, or compare that
-    they are synchronized (``compare=True``).
+    Generate the pip dependencies file from the conda file.
 
     Parameters
     ----------
@@ -80,17 +79,13 @@ def main(conda_fname, pip_fname, compare=False):
         Path to the conda file with dependencies (e.g. `environment.yml`).
     pip_fname : str
         Path to the pip file with dependencies (e.g. `requirements-dev.txt`).
-    compare : bool, default False
-        Whether to generate the pip file (``False``) or to compare if the
-        pip file has been generated with this script and the last version
-        of the conda file (``True``).
 
     Returns
     -------
     bool
-        True if the comparison fails, False otherwise
+        True if the comparison fails, False otherwise.
     """
-    with open(conda_fname) as conda_fd:
+    with conda_fname.open() as conda_fd:
         deps = yaml.safe_load(conda_fd)["dependencies"]
 
     pip_deps = []
@@ -104,26 +99,27 @@ def main(conda_fname, pip_fname, compare=False):
         else:
             raise ValueError(f"Unexpected dependency {dep}")
 
-    fname = os.path.split(conda_fname)[1]
+    fname = conda_fname.name
     header = (
         f"# This file is auto-generated from {fname}, do not modify.\n"
         "# See that file for comments about the need/usage of each dependency.\n\n"
     )
     pip_content = header + "\n".join(pip_deps) + "\n"
 
-    if compare:
-        with open(pip_fname) as pip_fd:
-            return pip_content != pip_fd.read()
-    else:
-        with open(pip_fname, "w") as pip_fd:
-            pip_fd.write(pip_content)
-        return False
+    pip_fname.write_text(pip_content)
 
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
         description="convert (or compare) conda file to pip"
+    )
+
+    parser.add_argument(
+        "name",
+        nargs="?",
+        default="environment.yml",
+        help="name of the output yml file (ext must be .yml!) ",
     )
 
     parser.add_argument(
@@ -135,21 +131,15 @@ if __name__ == "__main__":
     parser.add_argument("--dash", help="use dash", action="store_true")
     parser.add_argument("--cantera", help="use cantera", action="store_true")
 
-    # parser.add_argument("--compare", action="store_true",
-    #        help="compare whether the two files are equivalent", )
-
     args = parser.parse_args()
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
 
-    repo_path = os.path.dirname(
-        os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
-    )
+    repo_path = Path(__file__).parent.parent.parent
 
     # generate environment yaml file
-    env = Path(__file__).parent
-    tempfile = env / "env_template.yml"
+    tempfile = repo_path / ".ci" / "scripts" / "env_template.yml"
     template = Template(tempfile.read_text("utf-8"))
 
     name = args.name.split(".yml")[0]
@@ -161,19 +151,11 @@ if __name__ == "__main__":
         CANTERA=args.cantera,
     )
 
-    filename = (env / args.name).with_suffix(".yml")
+    filename = repo_path / "environment.yml"
     filename.write_text(out)
 
     # generate requirements
-    res = main(
-        os.path.join(repo_path, "environment.yml"),
-        os.path.join(repo_path, "requirements.txt"),
-        compare=args.compare,
+    main(
+        filename,
+        repo_path / "requirements.txt",
     )
-    if res:
-        msg = (
-            f"`requirements.txt` has to be generated with `{sys.argv[0]}` after "
-            "`environment.yml` is modified.\n"
-        )
-
-    sys.exit(res)
