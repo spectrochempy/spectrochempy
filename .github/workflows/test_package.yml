@@ -48,7 +48,7 @@ jobs:
       - name: Create environment scpy3.10
         run: |
           python .ci/scripts/env_create.py -v 3.10 --dev scpy3.10.yml
-          mv .ci/scripts/scpy3.9.yml artifact/scpy3.10.yml
+          mv .ci/scripts/scpy3.10.yml artifact/scpy3.10.yml
 
       - name: Store artifact
         uses: actions/upload-artifact@v2
