@@ -45,15 +45,10 @@ jobs:
           python .ci/scripts/env_create.py -v 3.7 --dev scpy3.7.yml
           mv .ci/scripts/scpy3.7.yml artifact/scpy3.7.yml
 
-      - name: Create environment scpy3.8
+      - name: Create environment scpy3.10
         run: |
-          python .ci/scripts/env_create.py -v 3.8 --dev scpy3.8.yml
-          mv .ci/scripts/scpy3.8.yml artifact/scpy3.8.yml
-
-      - name: Create environment scpy3.9
-        run: |
-          python .ci/scripts/env_create.py -v 3.9 --dev scpy3.9.yml
-          mv .ci/scripts/scpy3.9.yml artifact/scpy3.9.yml
+          python .ci/scripts/env_create.py -v 3.10 --dev scpy3.10.yml
+          mv .ci/scripts/scpy3.9.yml artifact/scpy3.10.yml
 
       - name: Store artifact
         uses: actions/upload-artifact@v2
@@ -77,10 +72,10 @@ jobs:
         shell: bash -l {0}
 
     strategy:
-      max-parallel: 3
+      max-parallel: 4
       matrix:
         os: [ubuntu-latest, windows-latest] #, macOS-latest]
-        pythonVersion: [3.9, 3.8, 3.7]
+        pythonVersion: [3.10, 3.7]
 
     steps:
       - name: Checkout code
@@ -111,22 +106,9 @@ jobs:
       - name: Lint with flake8
         run: flake8 .
 
-#      - name: Test with coverage
-#        run: coverage run -m pytest -v tests
-#
-#      - name: Notify to code-climate
-#        if: ${{ github.event_name != 'push' }}
-#        uses: paambaati/codeclimate-action@v3.0.0
-#        env:
-#          CC_TEST_REPORTER_ID: ${{ secrets.CC_REPORTER_ID }}
-#        with:
-#          coverageCommand: coverage xml
-#          coverageLocations: coverage.xml:coverage.py
-
-# command to install code-climate dependencies
-
       - name: Download CodeClimate reporter
-        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.9' && matrix.os == 'ubuntu-latest' }}
+        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.10'
+          && matrix.os == 'ubuntu-latest' }}
         run: |
           # downloading cc-test-reporter
           curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
@@ -138,7 +120,8 @@ jobs:
           coverage run --rcfile=tests/.coveragerc -m pytest -v tests
 
       - name: Report Coverage info to CodeClimate
-        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.9' && matrix.os == 'ubuntu-latest' }}
+        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.10'
+          && matrix.os == 'ubuntu-latest' }}
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         run: |
