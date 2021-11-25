@@ -6,7 +6,6 @@ channels:
     - defaults
 
 dependencies:
-    - python>=3.6
 
     # specific
     - quadprog=0.1.9
@@ -21,7 +20,7 @@ dependencies:
     - jinja2
     - mamba
     - matplotlib-base
-    - numpy
+    - numpy>=1.21.0
     - orderedset
     - pint=0.16.1
     - plotly
@@ -31,6 +30,9 @@ dependencies:
     - traitlets
     - traittypes
     - xlrd
+
+    # example and test data
+    - spectrochempy_data
 
     # mainly for install and a bit more...
     - setuptools
@@ -43,7 +45,7 @@ dependencies:
     - jupyterlab>=2.2.10
     - nodejs
 
-
+    
     # DEV: just for testing
     - pytest
     - pytest-doctestplus
@@ -51,6 +53,7 @@ dependencies:
     - scikit-image
     - coverage
     - black
+    - pre-commit
 
     # DEV: code and docs
     - jupytext
@@ -65,14 +68,14 @@ dependencies:
 
     # DEV: build
     - conda-build
-    - boa
+    - conda-verify
     - anaconda-client
 
     # optional
     # - xarray
     # - datashader
     # - scikit-learn
-
+    
     - pip
     - pip:
         - autodoc_traits

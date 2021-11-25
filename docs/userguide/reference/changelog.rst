@@ -1,5 +1,14 @@
-What's new
+What’s new
 ==========
+
+Version 0.2.17
+--------------
+
+**TASKS**
+
+**NEW FEATURES**
+
+**BUGS FIXED**
 
 Version 0.2.16
 --------------

@@ -9,7 +9,9 @@ channels:
     {%- endif %}
 
 dependencies:
+    {%- if VERSION %}
     - python={{ VERSION }}
+    {%- endif %}
 
     # specific
     - quadprog=0.1.9
@@ -27,7 +29,7 @@ dependencies:
     - jinja2
     - mamba
     - matplotlib-base
-    - numpy
+    - numpy>=1.21.0
     - orderedset
     - pint=0.16.1
     - plotly
@@ -76,7 +78,6 @@ dependencies:
     # DEV: build
     - conda-build
     - conda-verify
-    - boa
     - anaconda-client
 
     # optional
