@@ -35,7 +35,7 @@ jobs:
           python-version: 3.9
           mamba-version: "*"
           channels: conda-forge,defaults
-          activate-environment: ""
+          activate-environment: true
           auto-activate-base: true
           auto-update-conda: true
 
