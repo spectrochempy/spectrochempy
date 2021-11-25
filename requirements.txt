@@ -5,7 +5,6 @@ quadprog==0.1.9
 brukeropusreader
 quaternion
 nmrglue
-cantera
 colorama
 dill
 ipython
@@ -48,7 +47,6 @@ json5
 sphinx-copybutton
 conda-build
 conda-verify
-boa
 anaconda-client
 pip
 autodoc_traits

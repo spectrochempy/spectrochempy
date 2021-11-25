@@ -122,9 +122,7 @@ if __name__ == "__main__":
         help="name of the output yml file (ext must be .yml!) ",
     )
 
-    parser.add_argument(
-        "-v", "--version", default="3.9", help="Python version (default=3.9)"
-    )
+    parser.add_argument("-v", "--version", help="Python version")
     parser.add_argument(
         "--dev", help="make a development environment", action="store_true"
     )

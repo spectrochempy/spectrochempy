@@ -9,7 +9,9 @@ channels:
     {%- endif %}
 
 dependencies:
+    {%- if VERSION %}
     - python={{ VERSION }}
+    {%- endif %}
 
     # specific
     - quadprog=0.1.9
