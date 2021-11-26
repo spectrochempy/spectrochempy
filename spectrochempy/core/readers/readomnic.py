@@ -813,10 +813,12 @@ def _read_spa(*args, **kwargs):
     #     key: hex 03, dec  03: intensity position
     #     key: hex 04, dec  04: user text position
     #     key: hex 1B, dec  27: position of History text
+    #     key: hex 66  dec 102: sample inferogram
+    #     key: hex 67  dec 103: background inferogram
     #     key: hex 69, dec 105: ?
     #     key: hex 6a, dec 106: ?
     #     key: hex 80, dec 128: ?
-    #     key: hex 82, dec 130: ?
+    #     key: hex 82, dec 130: rotation angle
 
     gotinfos = [False, False, False]  # spectral header, intensity, history
     # scan "key values"
