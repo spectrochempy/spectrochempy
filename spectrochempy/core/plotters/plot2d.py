@@ -554,7 +554,7 @@ def plot_2D(dataset, **kwargs):
         if not clear and not transposed:
             lines.extend(ax.lines)  # keep the old lines
 
-        (line0,) = ax.plot(xdata, zdata[0], lw=lw, picker=True)
+        line0 = mpl.lines.Line2D(xdata, zdata[0], lw=lw, picker=True)
 
         for i in range(zdata.shape[0]):
             li = cpy(line0)
@@ -571,10 +571,9 @@ def plot_2D(dataset, **kwargs):
         # but display only a subset of them in order to accelerate the drawing
         maxlines = kwargs.get("maxlines", prefs.max_lines_in_stack)
         setpy = max(len(new._ax_lines) // maxlines, 1)
-        ax.cla()
+
         for line in new._ax_lines[::setpy]:
             ax.add_line(line)
-        # ax.lines = new._ax_lines[::setpy]  # displayed ax lines
 
     if data_only or method in ["waterfall"]:
         # if data only (we will not set axes and labels
