@@ -4,7 +4,7 @@
 Developer's Guide
 *****************************************************
 
-.. .. contents:: Table of Contents:
+.. contents:: Table of Contents:
 ..    :local:
 
 

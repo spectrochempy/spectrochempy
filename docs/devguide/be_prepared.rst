@@ -10,11 +10,11 @@ To contribute further to the code and documentation, you will need learning how 
 Version control, Git, and GitHub
 ---------------------------------
 
-The code of |scpy| is hosted on `GitHub <https://www.github.com/spectrochempy/spectrochempy>`__. To contribute, you will need to register for a `free GitHub account <https://github.com/signup/free>`__. Actually, you may have already done this while submitting issues, so you are also almost ready to contribute to the code.
+The code of |scpy| is hosted on `GitHub <https://www.github.com/spectrochempy/spectrochempy>`__. To contribute, you will need to register for a `free GitHub account <https://github.com/signup/free>`__. Actually, you may have already done so by submitting issues, so you are also almost ready to contribute to the code.
 
-The reason we use `Git <https://git-scm.com/>`__ to version controlling our code is to allow several people to work on this project simultaneously.
+The reason we use `Git <https://git-scm.com/>`__ for version control of our code is to allow multiple people to work on this project simultaneously.
 
-However, working with `Git <https://git-scm.com/>`__ is unfortunately not the easiest step for a newcomer when trying to contribute to an open-source software. But learning this versioning system at the same time as developing with Python can be very rewarding for your daily work.
+However, working with `Git <https://git-scm.com/>`__ is unfortunately not the easiest step for a newcomer when trying to contribute to open-source software. But learning this versioning system along with developing with Python can be very rewarding for your daily work.
 
 To learn `Git <https://git-scm.com/>`__, you may want to check out the `GitHub help pages <https://help.github.com/>`_ or the
 `NumPy's documentation <https://numpy.org/doc/stable/dev/index.html>`__. There is no shortage of resources on the web on this subject and many tutorials are available.
@@ -204,7 +204,3 @@ When creating this branch, make sure your master branch is up to date with the l
 
     git checkout master
     git pull upstream master --ff-only
-
-.. When you want to update the feature branch with changes in master after you
-.. created the branch, check the section on :ref:`updating a PR
-<contributing.update-pr>`.
