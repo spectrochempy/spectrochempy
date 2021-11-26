@@ -1088,7 +1088,7 @@ class PlotPreferences(MetaConfigurable):
                     print()
                 try:
                     mpl.rcParams[key] = change.new
-                except ValueError:
+                except ValueError:  # pragma: no cover
                     mpl.rcParams[key] = change.new.replace("'", "")
             else:
                 pass  # debug_(f'no such parameter in rcParams: {key} - skipped')

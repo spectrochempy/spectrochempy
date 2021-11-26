@@ -2,20 +2,13 @@
 
 ## Version 0.2.17
 
-**TASKS**
-
-
 **NEW FEATURES**
 
+* Read opus: add filenames as labels.
 
 **BUGS FIXED**
 
-
-## Version 0.2.17
-
-**NEW FEATURES**
-
-* Read opus: add filenames as labels
+* Compatibility with matplotlib 3.5
 
 ## Version 0.2.16
 

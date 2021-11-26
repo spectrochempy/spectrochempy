@@ -136,8 +136,8 @@ Spectrochempy is likely functional !
 
 .. sourcecode:: ipython
 
-    SpectroChemPy's API - v.0.1.17
-    © Copyright 2014-2020 - A.Travert & C.Fernandez @ LCS
+    SpectroChemPy's API - v.0.2.16
+    © Copyright 2014-2021 - A.Travert & C.Fernandez @ LCS
 
 
 The recommended next step is to proceed to the :ref:`userguide`.

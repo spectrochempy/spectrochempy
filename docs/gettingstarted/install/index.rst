@@ -8,7 +8,7 @@ Prerequisites
 *************
 
 |scpy| requires a working `Python <http://www.python.org/>`_ installation
-(version 3.6.9 or higher).
+(version 3.7 to 3.9).
 
 We highly recommend to install
 `Anaconda <https://www.anaconda.com/distribution/>`_ or
@@ -32,8 +32,7 @@ whether you choose Miniconda or Anaconda…
   or `Miniconda download page <https://docs.conda.io/en/latest/miniconda.html>`_
   to get one of these distribution.
 * Choose your platform and download one of the available installer,
-  *e.g.*, the 3.7 or + version (up to now it has been tested upon 3.9,
-  but it is likely to work with upper version numbers).
+  *e.g.*, the 3.7 or + version (up to now it has been tested upon 3.9).
 * Install the version which you just downloaded, following the instructions
   on the download page.
 
