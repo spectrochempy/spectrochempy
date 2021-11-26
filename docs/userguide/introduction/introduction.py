@@ -8,7 +8,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.13.1
+#       jupytext_version: 1.11.0
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -101,8 +101,7 @@ nd = NDDataset()
 
 # %% [markdown]
 # ## NDDataset, the main object
-
-# %% [markdown]
+#
 # NDDataset is a python object, actually a container, which can represent most of your multidimensional spectroscopic
 # data.
 #

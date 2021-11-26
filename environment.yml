@@ -45,7 +45,7 @@ dependencies:
     - jupyterlab>=2.2.10
     - nodejs
 
-    
+
     # DEV: just for testing
     - pytest
     - pytest-doctestplus
@@ -57,11 +57,11 @@ dependencies:
 
     # DEV: code and docs
     - jupytext
-    - sphinx=4.2.0
+    - sphinx<4.0
     - sphinx_rtd_theme
     - autodocsumm
     - sphinx-gallery<=0.7.0
-    - nbsphinx
+    - nbsphinx=0.8.1
     - jupyter_sphinx
     - json5
     - sphinx-copybutton
@@ -75,7 +75,7 @@ dependencies:
     # - xarray
     # - datashader
     # - scikit-learn
-    
+
     - pip
     - pip:
         - autodoc_traits

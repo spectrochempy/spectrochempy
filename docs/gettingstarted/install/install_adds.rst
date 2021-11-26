@@ -44,7 +44,7 @@ for the development version.
 QT
 --
 
-IF you like to have the matplotlib qt backend for your plots, you need to install the pyqt library.
+If you like to have the matplotlib qt backend for your plots, you need to install the pyqt library.
 
 .. sourcecode:: bash
 

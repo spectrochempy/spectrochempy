@@ -4,11 +4,13 @@
 
 **NEW FEATURES**
 
-* Read opus: add filenames as labels.
+* opus file reader: add filenames as labels.
+
+* Omnic file reader: Documented more .spa header keys.
 
 **BUGS FIXED**
 
-* Compatibility with matplotlib 3.5
+* Compatibility with matplotlib 3.5.
 
 ## Version 0.2.16
 
