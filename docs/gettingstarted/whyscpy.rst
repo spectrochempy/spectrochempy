@@ -74,7 +74,7 @@ You might **NOT** want to use |scpy| if:
   |scpy| is essentially an Application Programming Interface (API), it
   requires writing commands and small scripts. its documentation and resources contain fully documented
   examples (see :ref:`examples-index`) and tutorials (see :ref:`userguide`),
-which should be easy to translate into
+  which should be easy to translate into
   your own data. In particular, the use of Jupyter notebooks mixing texts, code blocks and figures, so that basic
   procedures (data import, basic processing and analysis, etc...) do not require much programming knowledge.
 
@@ -85,7 +85,7 @@ which should be easy to translate into
 
 - you are working on very sensitive data (health, chemical safety, plant production, ...) and cannot take the risk to
   use a software under development and subject to bugs and changes before
-"maturity". We do not dispute that!
+  "maturity". We do not dispute that!
 
 - you are fully satisfied with your current tools. "The heart has its reasons, of which the reason knows nothing". We
   don't dispute that either, but we are open to your opinion and suggestions (:ref:`contributing.bugs_report`)!
