@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2021 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 """
@@ -186,9 +186,10 @@ def _read_opus(*args, **kwargs):
         data = opus_data["AB"][:npt]
         dataset.data = np.array(data[np.newaxis], dtype="float32")
     except KeyError:
-        raise IOError(f"{filename} is not an Absorbance spectrum. It cannot be read with the `read_opus` import method")
-    #todo: read background
-
+        raise IOError(
+            f"{filename} is not an Absorbance spectrum. It cannot be read with the `read_opus` import method"
+        )
+    # todo: read background
 
     # xaxis
     fxv = opus_data["AB Data Parameter"]["FXV"]
@@ -208,10 +209,12 @@ def _read_opus(*args, **kwargs):
     utc_dt = utc_dt.replace(tzinfo=timezone.utc)
     timestamp = utc_dt.timestamp()
 
-    yaxis = Coord([timestamp],
-                  title='acquisition timestamp (GMT)',
-                  units='s',
-                  labels=([utc_dt], [name], [filename]))
+    yaxis = Coord(
+        [timestamp],
+        title="acquisition timestamp (GMT)",
+        units="s",
+        labels=([utc_dt], [name], [filename]),
+    )
 
     # set dataset's Coordset
     dataset.set_coordset(y=yaxis, x=xaxis)
