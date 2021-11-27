@@ -119,7 +119,7 @@ Reference & Help
 * :doc:`userguide/reference/faq`
 * :doc:`devguide/issues`
 * :doc:`devguide/examples`
-* :doc:`devguide/contributing`
+* :doc:`devguide/index`
 
 .. toctree::
     :maxdepth: 1
@@ -131,7 +131,7 @@ Reference & Help
     userguide/reference/faq
     Bug reports & feature request <devguide/issues>
     Sharing examples & tutorials <devguide/examples>
-    devguide/contributing
+    devguide/index
 
 
 ********

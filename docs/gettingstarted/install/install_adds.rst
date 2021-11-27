@@ -1,9 +1,14 @@
 .. _install_adds:
 
-Install additional libraries
+Install optional dependencies
 =============================
 
-Depending on your project, you may complete |scpy| with additional features.
+Depending on your project, you may complete |scpy| with additional but optional dependencies that are only used
+for specific methods.
+For example, :mod:`cantera_utilities.py` requires the ``cantera`` package.
+
+If the optional dependency is not installed, SpectroChempy will raise an ``ImportError`` when
+the method requiring that dependency is called.
 
 Examples and test data
 ----------------------

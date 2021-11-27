@@ -10,7 +10,7 @@
 
 **BUGS FIXED**
 
-* Compatibility with matplotlib 3.5.
+* Compatibility with matplotlib 3.5 (issue #316).
 
 * Datasets were not properly centered in PCA analysis.
 

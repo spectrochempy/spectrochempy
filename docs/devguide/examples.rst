@@ -1,9 +1,5 @@
 .. _contributing.examples:
 
-Adding new tutorials
----------------------
-
-
 Adding your examples to the gallery
 ------------------------------------
 

@@ -1,4 +1,23 @@
-.. _be_prepared:
+.. _contributing:
+
+
+******************************
+Contributing to SpectroChemPy
+******************************
+
+.. contents:: Table of contents:
+   :local:
+
+General Principles
+===================
+
+The instructions below are a general guide. We do our best to follow this guide, and if you wish to contribute we encourage you to follow it as well. But you don't have to follow everything to the letter: Any kind of contribution is welcome!
+
+In this guide, we will talk about some basic but very useful contributions such as bug reports our feature requests, and of some more advanced topics concerning contributions to documentation and to the code base.
+
+Note that the content/structure of this guide has been adapted from the `spectrochempy developer guide <https://spectrochempy.pydata.org/docs/development/contributing.html>`__).
+
+.. include:: issues.rst
 
 Be prepared to work on the code
 ================================
@@ -86,7 +105,7 @@ Then you will need to clone your fork to your machine. The fastest way is to typ
 
 This creates the directory ``localfolder`` and connects your repository to the upstream (main project) |scpy| repository.
 
-.. _contributing.dev_env:
+.. _contributing_environment:
 
 Creating a Python development environment
 ------------------------------------------
@@ -124,8 +143,8 @@ We'll now install |scpy| in development mode following 2 steps:
 
    .. sourcecode:: bash
 
-      python .ci/env/env_create.py -v 3.9 --dev scpy3.9.yml
-      mamba env create -f .ci/env/scpy3.9.yml
+      python .ci/scripts/env_create.py -v 3.9 --dev scpy3.9.yml
+      mamba env create -f .ci/scripts/scpy3.9.yml
       conda activate scpy3.9
 
 2. Install |scpy|
@@ -204,3 +223,231 @@ When creating this branch, make sure your master branch is up to date with the l
 
     git checkout master
     git pull upstream master --ff-only
+
+
+When you want to update the feature branch with changes in master after you have created the
+you have created the branch, see the section on
+:ref:`updating a PR <contributing.update-pr>`.
+
+Contributing your changes to SpectroChemPy
+==========================================
+
+.. _contributing.commit-code:
+
+Commit your code
+--------------------
+
+.. note::
+
+    If you are not easy with the command lines,
+    Remember that all the following `git` operations can be done using an GUI application such as ``sourcetree``
+    or whatever you prefer.
+
+Keep style corrections in a separate commit to make your pull request more readable.
+
+Once you've made changes, you can see them by typing:
+
+.. sourcecode:: bash
+
+    git status
+
+If you created a new file, it is not tracked by git. Add it by typing:
+
+.. sourcecode:: bash
+
+    git add path/to/file-to-be-added
+
+By typing `git status` again, you should get something like:
+
+.. sourcecode:: bash
+
+    # On the my-new-feature branch
+    #
+    # modified: /path/to/file-to-be-added
+    #
+
+Finally, commit your changes to your local repository with an explanatory message.
+
+It is recommended to use a convention for prefixes and the presentation of commit messages.
+Here are some common prefixes:
+
+* ENH: Enhancement, new feature
+* FIX: Bug fixes
+* DOC: Documentation additions/updates
+* TEST: Test additions/updates
+* BUILD: Build process/script updates
+* PERF: Performance improvements
+* MAINT: Code cleanup
+
+The following defines how a commit message should be structured:
+
+* a subject line with ``< 80`` chars (optionally starting with one of the above prefixes).
+* One blank line.
+* Optionally, a commit message body.
+
+Please reference the
+relevant GitHub issues in your commit message using GH1234 or #1234.
+
+
+Now you can commit your changes to your local repository:
+
+.. sourcecode:: bash
+
+    git commit -m <message>
+
+.. _contributing.push-code :
+
+Push your changes
+--------------------
+
+When you want your changes to appear publicly on your GitHub page, push the commits of your forked feature branch:
+
+.. sourcecode:: bash
+
+    git push origin my-new-feature
+
+Here, `origin` is the default name given to your remote repository on GitHub.
+You can see the remote repositories:
+
+.. sourcecode:: bash
+
+    git remote -v
+
+If you added the upstream repository as described above, you'll see something
+like:
+
+.. sourcecode:: bash
+
+    origin git@github.com:yourname/spectrochemp.git (fetch)
+    origin git@github.com:yourname/spectrochempy.git (push)
+    upstream git://github.com/spectrochempy/spectrochempy.git (fetch)
+    upstream git://github.com/spectrochempy/spectrochempy.git (push)
+
+Now your code is on GitHub, but it is not yet part of the SpectroChemPy project. For this to happen, a pull request must be submitted on GitHub.
+
+Review your code
+----------------
+
+When you are ready to request a code review, file a review request. Before doing so, make sure
+again that you have followed all the guidelines described in this document
+regarding code style, testing, performance testing and documentation. You should also
+check the changes in your branch against the branch on which it was based:
+
+#. Navigate to your repository on GitHub -- https://github.com/your-user-name/spectrochempy
+#. Click on ``Branches``.
+#. Click on the ``Compare`` button for your feature branch.
+#. Select the ``base`` and ``compare`` branches, if necessary. This will be ``master`` and
+   and ``my-new-feature``, respectively.
+
+Make the pull request (PR)
+------------------------------
+
+If everything looks good, you are ready to make a pull request.  A pull request is the way
+code from a local repository is made available to the GitHub community, can be
+reviewed and eventually merged into the master version.  This request and its associated changes
+will eventually be integrated into the master branch and available in the next release.  To submit a change request:
+
+#. Navigate to your repository on GitHub.
+#. Click the ``Pull Request`` button.
+#. You can then click on ``Commits`` and ``Files Changed`` to make sure that everything is fine one last time
+#. Write a description of your changes in the ``Preview Discussion`` tab.
+#. Click on ``Send Pull Request``.
+
+This request will then be sent to the repository maintainers, and they will review
+the code.
+
+.. _contributing.update-pr:
+
+Update your pull request
+--------------------------
+
+Depending on the evaluation of your pull request, you will probably need to make
+some changes to the code. In this case, you can make them in your branch,
+add a new commit to that branch, push it to GitHub. This will automatically update your pull request with the latest
+code and restart the
+:any:`Continuous Integration <contributing.ci>` tests.
+
+Another reason you might need to update your pull request is to resolve conflicts
+with changes that have been merged into the master branch since you opened your
+pull request.
+
+To do this, you need to ``merge upstream master`` in your branch:
+
+.. sourcecode:: bash
+
+    git checkout my-new-feature
+    git fetch upstream
+    git merge upstream/master
+
+If there are no conflicts (or if they were able to be fixed automatically),
+a file with a default commit message will be opened, and you can simply save and exit this file.
+
+If there are merge conflicts, you must resolve the conflicts. See for example
+example at https://help.github.com/articles/resolving-a-merge-conflict-using-the-command-line/
+for an explanation of how to do this.
+
+Once the conflicts are merged and the files where the conflicts were resolved are added, you can run
+``git commit`` to save these corrections.
+
+If you have uncommitted changes at the time you want to update the branch with
+master, you'll need to ``stash`` them before you update (see the
+`stash docs <https://git-scm.com/book/en/v2/Git-Tools-Stashing-and-Cleaning>`__).
+This will effectively store your changes and they can be reapplied after the update.
+
+After the feature branch has been updated locally, you can now update your pull
+request by pushing again to the branch on GitHub.
+
+Automatically fix formatting errors
+-----------------------------------
+
+We use several style checks (i.e., ``black'', ``flake8'') that are run after
+you make a download request. If there is a scenario where one of these checks fails then you
+can comment:
+
+.. sourcecode:: bash
+
+    @github-actions pre-commit
+
+on that pull request. This will trigger a workflow that will automatically correct the formatting errors.
+
+To automatically correct formatting errors on every commit you make, you can
+configure the pre-commit yourself. First, create a Python environment :ref:`environment
+<contributing_environment>`, then configure :ref:`pre-commit <contributing.pre-commit>`.
+
+Delete your merged branch (optional)
+------------------------------------
+
+Once your feature branch is accepted upstream, you will probably want to get rid of
+the branch. First, merge upstream master into your branch so that git knows it's safe to
+delete your branch:
+
+.. sourcecode:: bash
+
+    git fetch upstream
+    git checkout master
+    git merge upstream/master
+
+Then you can do:
+
+.. sourcecode:: bash
+
+    git branch -d my-new-feature
+
+Make sure you use a lowercase ``d``, otherwise git won't tell you if your feature branch
+branch hasn't been merged.
+
+The branch will still exist on GitHub, so to delete it, do:
+
+    git push origin --delete my-new-feature
+
+
+Tips for a successful pull request
+==================================
+
+To improve the chances that your pull request will be reviewed, you should:
+
+- **Reference an open issue** for non-trivial changes to clarify the purpose of the PR.
+- **Make sure you have appropriate tests**.
+- **Keep your PR requests as simple as possible**. Large PRs take longer to review.
+- **Make sure the CI is in a green state**. Reviewers may not look otherwise
+- **Keep** `Update your pull request`_, either per request or every few days.
