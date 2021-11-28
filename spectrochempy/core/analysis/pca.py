@@ -89,7 +89,7 @@ class PCA(HasTraits):
         # -----------------------
         self._centered = centered
         if centered:
-            self._center = center = np.mean(X, axis=0)
+            self._center = center = X.mean(dim=0)
             Xsc = X - center
             Xsc.title = "centered %s" % X.title
 
@@ -97,7 +97,7 @@ class PCA(HasTraits):
         # ---------------
         self._standardized = standardized
         if standardized:
-            self._std = np.std(Xsc, axis=0)
+            self._std = Xsc.std(dim=0)
             Xsc /= self._std
             Xsc.title = "standardized %s" % Xsc.title
 
@@ -105,8 +105,8 @@ class PCA(HasTraits):
         # -------
         self._scaled = scaled
         if scaled:
-            self._min = np.min(Xsc, axis=0)
-            self._ampl = np.ptp(Xsc, axis=0)
+            self._min = Xsc.min(dim=0)
+            self._ampl = Xsc.ptp(dim=0)
             Xsc -= self._min
             Xsc /= self._ampl
             Xsc.title = "scaled %s" % Xsc.title

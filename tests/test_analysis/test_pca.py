@@ -54,6 +54,7 @@ def test_pca():
 
 @pytest.mark.skipif(not HAS_SCIKITLEARN, reason="scikit-learn library not loaded")
 def test_compare_scikit_learn():
+
     X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
 
     pcas = sklPCA(n_components=2)
@@ -62,21 +63,21 @@ def test_compare_scikit_learn():
     pca = PCA(NDDataset(X))
     pca.printev(n_pc=2)
 
-    assert_array_almost_equal(pca.sv.data, pcas.singular_values_)
+    assert_array_almost_equal(pca._sv.data, pcas.singular_values_)
     assert_array_almost_equal(pca.ev_ratio.data, pcas.explained_variance_ratio_ * 100.0)
 
     dataset = NDDataset.read("irdata/nh4y-activation.spg")
-    X = dataset.data
+    X1 = dataset.copy().data
 
-    pcas = sklPCA(n_components=5)
-    pcas.fit(X)
+    pcas = sklPCA(n_components=5, svd_solver="full")
+    pcas.fit(X1)
 
-    dataset = X.copy()
-    pca = PCA(NDDataset(dataset))
+    X2 = NDDataset(dataset.copy())
+    pca = PCA(X2)
 
     pca.printev(n_pc=5)
 
-    assert_array_almost_equal(pca.sv.data[:5], pcas.singular_values_[:5], 4)
+    assert_array_almost_equal(pca._sv.data[:5], pcas.singular_values_[:5], 4)
     assert_array_almost_equal(
         pca.ev_ratio.data[:5], pcas.explained_variance_ratio_[:5] * 100.0, 4
     )
