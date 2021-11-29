@@ -124,7 +124,10 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
     thistype = this.implements()
 
     if data_only:
-        attrs = ["data"]
+        if other.data is None and this.data is None:
+            attrs = ["labels"]
+        else:
+            attrs = ["data"]
     else:
         attrs = this.__dir__()
         exclude = (
@@ -268,6 +271,7 @@ def assert_dataset_almost_equal(nd1, nd2, **kwargs):
     data_only = kwargs.get(
         "data_only", False
     )  # if True, compare only based on data (not labels and so on)
+    # except if dataset is label only!.
     compare_datasets(nd1, nd2, approx=approx, decimal=decimal, data_only=data_only)
     return True
 
