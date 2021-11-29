@@ -533,6 +533,7 @@ def test_simple_arithmetic_on_full_dataset():
 
 
 def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
+
     # CREATION _LIKE METHODS
     # ----------------------
 
@@ -941,11 +942,16 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
 
     # MEAN, AVERAGE
     # -----
+
     nd = IR_dataset_2D.copy()
+
     m = scp.mean(nd)
+
+    assert m.shape == ()
     assert m == Quantity(np.mean(nd.data), "absorbance")
 
     m = scp.average(nd)
+    assert m.shape == ()
     assert m == Quantity(np.average(nd.data), "absorbance")
 
     mx = scp.mean(nd, keepdims=True)
@@ -954,6 +960,34 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     mxd = scp.mean(nd, dim="y")
     assert str(mxd) == "NDDataset: [float64] a.u. (size: 5549)"
     assert str(mxd.x) == "LinearCoord: [float64] cm^-1 (size: 5549)"
+
+    # ----
+    nd2 = NDDataset([[0, 1, 2], [3, 4, 5]])  # no coord (check issues
+
+    m = scp.mean(nd2)
+
+    assert m.shape == ()
+    assert m == np.mean(nd2.data)
+    assert m == 2.5
+
+    m = scp.mean(nd2, keepdims=True)
+    assert m.shape == (1, 1)
+    assert m.data == [[2.5]]
+
+    m = scp.mean(nd2, dim="y")
+    assert m.shape == (3,)
+    assert_array_equal(m.data, [1.5, 2.5, 3.5])
+    assert str(m) == "NDDataset: [float64] unitless (size: 3)"
+
+    m = scp.mean(nd2, dim=0, keepdims=True)
+    assert m.shape == (1, 3)
+    assert_array_equal(m.data, [[1.5, 2.5, 3.5]])
+    assert str(m) == "NDDataset: [float64] unitless (shape: (y:1, x:3))"
+
+    m = nd2.mean(dim="y")
+    assert m.shape == (3,)
+    assert_array_equal(m.data, [1.5, 2.5, 3.5])
+    assert str(m) == "NDDataset: [float64] unitless (size: 3)"
 
 
 def test_nddataset_fancy_indexing():
