@@ -14,6 +14,13 @@ Version 0.2.17
 
 -  Compatibility with matplotlib 3.5.
 
+-  Datasets were not properly centered in PCA analysis.
+
+-  Comparing dataset with only labels coordinates was failing.
+
+-  Issue #322 fixed : mean and other API reduce methods were sometimes
+   failing.
+
 Version 0.2.16
 --------------
 

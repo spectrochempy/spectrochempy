@@ -4,10 +4,10 @@ _internal.classic_mode                   : True
 agg.path.chunksize                       : 20000
 animation.bitrate                        : -1
 animation.codec                          : mpeg4
-animation.convert_args                   :
+animation.convert_args                   : 
 animation.convert_path                   : convert
 animation.embed_limit                    : 20.0
-animation.ffmpeg_args                    :
+animation.ffmpeg_args                    : 
 animation.ffmpeg_path                    : ffmpeg
 animation.frame_format                   : png
 animation.html                           : none
@@ -159,7 +159,7 @@ keymap.help                              : f1
 keymap.home                              : h, r, home
 keymap.pan                               : p
 keymap.quit                              : ctrl+w, cmd+w
-keymap.quit_all                          :
+keymap.quit_all                          : 
 keymap.save                              : s, ctrl+s
 keymap.xscale                            : k, L
 keymap.yscale                            : l
@@ -177,6 +177,7 @@ legend.frameon                           : False
 legend.handleheight                      : 0.7
 legend.handlelength                      : 2.0
 legend.handletextpad                     : 0.1
+legend.labelcolor                        : None
 legend.labelspacing                      : 0.2
 legend.loc                               : upper right
 legend.markerscale                       : 1.0
@@ -186,8 +187,8 @@ legend.shadow                            : False
 legend.title_fontsize                    : None
 lines.antialiased                        : True
 lines.color                              : b
-lines.dash_capstyle                      : butt
-lines.dash_joinstyle                     : round
+lines.dash_capstyle                      : CapStyle.butt
+lines.dash_joinstyle                     : JoinStyle.round
 lines.dashdot_pattern                    : 3.0, 5.0, 1.0, 5.0
 lines.dashed_pattern                     : 6.0, 6.0
 lines.dotted_pattern                     : 1.0, 3.0
@@ -199,8 +200,8 @@ lines.markeredgewidth                    : 0.0
 lines.markerfacecolor                    : auto
 lines.markersize                         : 7.0
 lines.scale_dashes                       : False
-lines.solid_capstyle                     : projecting
-lines.solid_joinstyle                    : round
+lines.solid_capstyle                     : CapStyle.projecting
+lines.solid_joinstyle                    : JoinStyle.round
 
 markers.fillstyle                        : full
 mathtext.bf                              : monospace:bold
@@ -218,18 +219,18 @@ patch.edgecolor                          : k
 patch.facecolor                          : 4C72B0
 patch.force_edgecolor                    : True
 patch.linewidth                          : 0.3
-path.effects                             :
+path.effects                             : 
 path.simplify                            : True
 path.simplify_threshold                  : 0.1111111111111111
 path.sketch                              : None
 path.snap                                : True
-pcolor.shading                           : flat
+pcolor.shading                           : auto
 pcolormesh.snap                          : True
 pdf.compression                          : 6
 pdf.fonttype                             : 3
 pdf.inheritcolor                         : False
 pdf.use14corefonts                       : False
-pgf.preamble                             :
+pgf.preamble                             : 
 pgf.rcfonts                              : True
 pgf.texsystem                            : xelatex
 polaraxes.grid                           : True
@@ -258,7 +259,7 @@ text.color                               : .15
 text.hinting                             : auto
 text.hinting_factor                      : 8
 text.kerning_factor                      : 0
-text.latex.preamble                      :
+text.latex.preamble                      : 
 text.usetex                              : False
 
 xaxis.labellocation                      : center

@@ -12,11 +12,11 @@
 
 * Compatibility with matplotlib 3.5.
 
-* nddatasets were not properly centered in PCA analysis.
+* Datasets were not properly centered in PCA analysis.
 
 * Comparing dataset with only labels coordinates was failing.
 
-* issue #322 fixed : mean and other API reduce methods were sometimes failing.
+* Issue #322 fixed : mean and other API reduce methods were sometimes failing.
 
 ## Version 0.2.16
 
