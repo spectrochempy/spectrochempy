@@ -199,6 +199,31 @@ class _from_numpy_method(object):
         return func
 
 
+def _reduce_dims(cls, dim, keepdims=False):
+
+    dims = cls.dims
+    if hasattr(cls, "coordset"):
+        coordset = cls.coordset
+        if dim is not None:
+            if coordset is not None:
+                idx = coordset.names.index(dim)
+                if not keepdims:
+                    del coordset.coords[idx]
+                    dims.remove(dim)
+                else:
+                    coordset.coords[idx].data = [
+                        0,
+                    ]
+            else:
+                if not keepdims:
+                    dims.remove(dim)
+        else:
+            # dim being None we eventually remove the coordset
+            cls.set_coordset(None)
+
+    return dims
+
+
 def _get_name(x):
     return str(x.name if hasattr(x, "name") else x)
 
@@ -1072,23 +1097,11 @@ class NDMath(object):
             else:
                 return m
 
-        dims = cls.dims
+        dims = _reduce_dims(cls, dim)
         cls._data = m.data
         cls._mask = m.mask
-
-        # Here we must eventually reduce the corresponding coordinates
-        if hasattr(cls, "coordset"):
-            coordset = cls.coordset
-            if coordset is not None:
-                if dim is not None:
-                    idx = coordset.names.index(dim)
-                    del coordset.coords[idx]
-                    dims.remove(dim)
-                else:
-                    # dim being None we remove the coordset
-                    cls.set_coordset(None)
-
         cls.dims = dims
+
         if returned:
             return cls, retval
         else:
@@ -2024,27 +2037,9 @@ class NDMath(object):
             else:
                 return m
 
-        dims = cls.dims
+        dims = _reduce_dims(cls, dim, keepdims)
         cls._data = m.data
         cls._mask = m.mask
-
-        # Here we must eventually reduce the corresponding coordinates
-        if hasattr(cls, "coordset"):
-            coordset = cls.coordset
-            if coordset is not None:
-                if dim is not None:
-                    idx = coordset.names.index(dim)
-                    if not keepdims:
-                        del coordset.coords[idx]
-                        dims.remove(dim)
-                    else:
-                        coordset.coords[idx].data = [
-                            0,
-                        ]
-                else:
-                    # dim being None we remove the coordset
-                    cls.set_coordset(None)
-
         cls.dims = dims
 
         return cls
@@ -2239,27 +2234,9 @@ class NDMath(object):
             else:
                 return m
 
-        dims = cls.dims
+        dims = _reduce_dims(cls, dim, keepdims)
         cls._data = m.data
         cls._mask = m.mask
-
-        # Here we must eventually reduce the corresponding coordinates
-        if hasattr(cls, "coordset"):
-            coordset = cls.coordset
-            if coordset is not None:
-                if dim is not None:
-                    idx = coordset.names.index(dim)
-                    if not keepdims:
-                        del coordset.coords[idx]
-                        dims.remove(dim)
-                    else:
-                        coordset.coords[idx].data = [
-                            0,
-                        ]
-                else:
-                    # dim being None we remove the coordset
-                    cls.set_coordset(None)
-
         cls.dims = dims
 
         return cls
@@ -2385,27 +2362,9 @@ class NDMath(object):
             else:
                 return m
 
-        dims = cls.dims
+        dims = _reduce_dims(cls, dim, keepdims)
         cls._data = m.data
         cls._mask = m.mask
-
-        # Here we must eventually reduce the corresponding coordinates
-        if hasattr(cls, "coordset"):
-            coordset = cls.coordset
-            if coordset is not None:
-                if dim is not None:
-                    idx = coordset.names.index(dim)
-                    if not keepdims:
-                        del coordset.coords[idx]
-                        dims.remove(dim)
-                    else:
-                        coordset.coords[idx].data = [
-                            0,
-                        ]
-                else:
-                    # dim being None we remove the coordset
-                    cls.set_coordset(None)
-
         cls.dims = dims
 
         return cls
@@ -2468,27 +2427,9 @@ class NDMath(object):
             else:
                 return m
 
-        dims = cls.dims
+        dims = _reduce_dims(cls, dim, keepdims)
         cls._data = m.data
         cls._mask = m.mask
-
-        # Here we must eventually reduce the corresponding coordinates
-        if hasattr(cls, "coordset"):
-            coordset = cls.coordset
-            if coordset is not None:
-                if dim is not None:
-                    idx = coordset.names.index(dim)
-                    if not keepdims:
-                        del coordset.coords[idx]
-                        dims.remove(dim)
-                    else:
-                        coordset.coords[idx].data = [
-                            0,
-                        ]
-                else:
-                    # dim being None we remove the coordset
-                    cls.set_coordset(None)
-
         cls.dims = dims
 
         return cls
@@ -2580,27 +2521,9 @@ class NDMath(object):
             else:
                 return m
 
-        dims = cls.dims
+        dims = _reduce_dims(cls, dim, keepdims)
         cls._data = m.data
         cls._mask = m.mask
-
-        # Here we must eventually reduce the corresponding coordinates
-        if hasattr(cls, "coordset"):
-            coordset = cls.coordset
-            if coordset is not None:
-                if dim is not None:
-                    idx = coordset.names.index(dim)
-                    if not keepdims:
-                        del coordset.coords[idx]
-                        dims.remove(dim)
-                    else:
-                        coordset.coords[idx].data = [
-                            0,
-                        ]
-                else:
-                    # dim being None we remove the coordset
-                    cls.set_coordset(None)
-
         cls.dims = dims
 
         return cls
