@@ -11,11 +11,10 @@ Contributing to SpectroChemPy
 General Principles
 ===================
 
-The instructions below are a general guide. We do our best to follow this guide, and if you wish to contribute we encourage you to follow it as well. But you don't have to follow everything to the letter: Any kind of contribution is welcome!
+The instructions below are a general guide. We are (or rather will be) doing our best to follow this guide, so if you want to contribute, we encourage you to follow it as well. But you don't have to follow everything to the letter: any kind of contribution is welcome!
 
 In this guide, we will talk about some basic but very useful contributions such as bug reports our feature requests, and of some more advanced topics concerning contributions to documentation and to the code base.
 
-Note that the content/structure of this guide has been adapted from the `spectrochempy developer guide <https://spectrochempy.pydata.org/docs/development/contributing.html>`__).
 
 .. include:: issues.rst
 
@@ -61,7 +60,7 @@ Depending on your operating system, you may refer to these pages for installatio
 
        sudo apt-get install git
 
--  Alternatively, once miniconda or anaconda is installed (see :ref:`contributing.dev_env`), one can use conda to install
+-  Alternatively, once miniconda or anaconda is installed (see :ref:`contributing_environment`), one can use conda to install
    git:
 
    .. sourcecode:: bash

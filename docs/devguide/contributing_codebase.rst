@@ -78,7 +78,7 @@ All methods using an optional dependency should include a test asserting that an
 should be skipped if the library is present.
 
 All optional dependencies should be documented in
-:ref:`install.optional_dependencies` and the minimum required version should be
+:ref:`install_adds` and the minimum required version should be
 set in the ``spectrochempy._optional.VERSIONS`` dict.
 
 
@@ -157,9 +157,7 @@ directive to the deprecated functions or methods.
 You'll also need to
 
 1. Write a new test that asserts a warning is issued when calling with the deprecated argument
-2. Update all of spectrochempy existing tests and code to use the new argument
-
-See :ref:`contributing.warnings` for more.
+2. Update all of spectrochempy existing tests and code to use the new argument.
 
 .. _contributing.ci:
 

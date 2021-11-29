@@ -1,8 +1,8 @@
 .. _docstring:
 
-======================
-pandas docstring guide
-======================
+=============================
+spectrochempy docstring guide
+=============================
 
 About docstrings and standards
 ------------------------------
@@ -61,7 +61,7 @@ The first conventions every Python docstring should follow are defined in
 `PEP-257 <https://www.python.org/dev/peps/pep-0257/>`_.
 
 As PEP-257 is quite broad, other more specific standards also exist. In the
-case of pandas, the NumPy docstring convention is followed. These conventions are
+case of spectrochempy, the NumPy docstring convention is followed. These conventions are
 explained in this document:
 
 * `numpydoc docstring guide <https://numpydoc.readthedocs.io/en/latest/format.html>`_
@@ -78,11 +78,8 @@ about reStructuredText can be found in:
 * `Quick reStructuredText reference <https://docutils.sourceforge.io/docs/user/rst/quickref.html>`_
 * `Full reStructuredText specification <https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html>`_
 
-pandas has some helpers for sharing docstrings between related classes, see
-:ref:`docstring.sharing`.
-
 The rest of this document will summarize all the above guidelines, and will
-provide additional conventions specific to the pandas project.
+provide additional conventions specific to the spectrochempy project.
 
 .. _docstring.tutorial:
 
@@ -106,14 +103,14 @@ backticks. The following are considered inline code:
 * The name of a parameter
 * Python code, a module, function, built-in, type, literal... (e.g. ``os``,
   ``list``, ``numpy.abs``, ``datetime.date``, ``True``)
-* A pandas class (in the form ``:class:`pandas.Series```)
-* A pandas method (in the form ``:meth:`pandas.Series.sum```)
-* A pandas function (in the form ``:func:`pandas.to_datetime```)
+* A spectrochempy class (in the form ``:class:`spectrochempy.NDDataset```)
+* A spectrochempy method (in the form ``:meth:`spectrochempy.NDDataset.sum```)
+* A spectrochempy function (in the form ``:func:`spectrochempy.sum```)
 
 .. note::
     To display only the last component of the linked class, method or
-    function, prefix it with ``~``. For example, ``:class:`~pandas.Series```
-    will link to ``pandas.Series`` but only display the last part, ``Series``
+    function, prefix it with ``~``. For example, ``:class:`~spectrochempy.Series```
+    will link to ``spectrochempy.NDDataset`` but only display the last part, ``NDDataset``
     as the link text. See `Sphinx cross-referencing syntax
     <https://www.sphinx-doc.org/en/stable/domains.html#cross-referencing-syntax>`_
     for details.
@@ -126,7 +123,7 @@ backticks. The following are considered inline code:
         """
         Add the values in ``arr``.
 
-        This is equivalent to Python ``sum`` of :meth:`pandas.Series.sum`.
+        This is equivalent to Python ``sum`` of :meth:`spectrochempy.Series.sum`.
 
         Some sections are omitted here for simplicity.
         """
@@ -390,14 +387,12 @@ If the type is in a package, the module must be also specified:
 * numpy.ndarray
 * scipy.sparse.coo_matrix
 
-If the type is a pandas type, also specify pandas except for Series and
-DataFrame:
+If the type is a spectrochempy type, also specify spectrochempy except for NDDataset, Coord and CoordSet:
 
-* Series
-* DataFrame
-* pandas.Index
-* pandas.Categorical
-* pandas.arrays.SparseArray
+* NDDataset
+* Coord
+* CoordSet
+* spectrochempy.NDArray
 
 If the exact type is not relevant, but must be compatible with a NumPy
 array, array-like can be specified. If Any type that can be iterated is
@@ -506,7 +501,7 @@ If the method yields its value:
 Section 5: see also
 ~~~~~~~~~~~~~~~~~~~
 
-This section is used to let users know about pandas functionality
+This section is used to let users know about spectrochempy functionality
 related to the one being documented. In rare cases, if no related methods
 or functions can be found at all, this section can be skipped.
 
@@ -526,9 +521,9 @@ examples:
 * ``fillna`` and ``dropna``, as both methods are used to handle missing values
 * ``read_csv`` and ``to_csv``, as they are complementary
 * ``merge`` and ``join``, as one is a generalization of the other
-* ``astype`` and ``pandas.to_datetime``, as users may be reading the
+* ``astype`` and ``spectrochempy.to_datetime``, as users may be reading the
   documentation of ``astype`` to know how to cast as a date, and the way to do
-  it is with ``pandas.to_datetime``
+  it is with ``spectrochempy.to_datetime``
 * ``where`` is related to ``numpy.where``, as its functionality is based on it
 
 When deciding what is related, you should mainly use your common sense and
@@ -558,26 +553,22 @@ For example:
 
 .. code-block:: python
 
-    class Series:
-        def head(self):
-            """
-            Return the first 5 elements of the Series.
+    def download_IRIS():
+        """
+        Upload the classical IRIS dataset.
 
-            This function is mainly useful to preview the values of the
-            Series without displaying the whole of it.
+        Returns
+        -------
+        downloaded
+           The IRIS dataset.
 
-            Returns
-            -------
-            Series
-                Subset of the original series with the 5 first values.
+        See Also
+        --------
+        read : Read data from experimental data.
+        """
 
-            See Also
-            --------
-            Series.tail : Return the last 5 elements of the Series.
-            Series.iloc : Return a slice of the elements in the Series,
-                which can also be used to return the first or last n.
-            """
-            return self.iloc[:5]
+        ....
+
 
 .. _docstring.notes:
 
@@ -614,7 +605,7 @@ be added with blank lines before and after them.
 
 The way to present examples is as follows:
 
-1. Import required libraries (except ``numpy`` and ``pandas``)
+1. Import required libraries (except ``spectrochempy``)
 
 2. Create the data required for the example
 
@@ -627,50 +618,28 @@ A simple example could be:
 
 .. code-block:: python
 
-    class Series:
+    def download_IRIS():
+        """
+        Upload the classical IRIS dataset.
 
-        def head(self, n=5):
-            """
-            Return the first elements of the Series.
+        Returns
+        -------
+        downloaded
+           The IRIS dataset.
 
-            This function is mainly useful to preview the values of the
-            Series without displaying all of it.
+        See Also
+        --------
+        read : Read data from experimental data.
 
-            Parameters
-            ----------
-            n : int
-                Number of values to return.
+        Examples
+        --------
+        Upload a dataset from a distant server
 
-            Return
-            ------
-            pandas.Series
-                Subset of the original series with the n first values.
+        >>> import spectrochempy as scp
+        >>> dataset = scp.download_IRIS()
+        """
 
-            See Also
-            --------
-            tail : Return the last n elements of the Series.
-
-            Examples
-            --------
-            >>> s = pd.Series(['Ant', 'Bear', 'Cow', 'Dog', 'Falcon',
-            ...                'Lion', 'Monkey', 'Rabbit', 'Zebra'])
-            >>> s.head()
-            0   Ant
-            1   Bear
-            2   Cow
-            3   Dog
-            4   Falcon
-            dtype: object
-
-            With the ``n`` parameter, we can change the number of returned rows:
-
-            >>> s.head(n=3)
-            0   Ant
-            1   Bear
-            2   Cow
-            dtype: object
-            """
-            return self.iloc[:n]
+        ....
 
 The examples should be as concise as possible. In cases where the complexity of
 the function requires long examples, is recommended to use blocks with headers
@@ -681,13 +650,12 @@ in bold. Use double star ``**`` to make a text bold, like in ``**this example**`
 Conventions for the examples
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Code in examples is assumed to always start with these two lines which are not
+Code in examples is assumed to always start with these two lines which is not
 shown:
 
 .. code-block:: python
 
-    import numpy as np
-    import pandas as pd
+    import spectrochempy as scp
 
 Any other module used in the examples must be explicitly imported, one per line (as
 recommended in :pep:`8#imports`)
@@ -695,153 +663,8 @@ and avoiding aliases. Avoid excessive imports, but if needed, imports from
 the standard library go first, followed by third-party libraries (like
 matplotlib).
 
-When illustrating examples with a single ``Series`` use the name ``s``, and if
-illustrating with a single ``DataFrame`` use the name ``df``. For indices,
-``idx`` is the preferred name. If a set of homogeneous ``Series`` or
-``DataFrame`` is used, name them ``s1``, ``s2``, ``s3``...  or ``df1``,
-``df2``, ``df3``... If the data is not homogeneous, and more than one structure
-is needed, name them with something meaningful, for example ``df_main`` and
-``df_to_join``.
-
-Data used in the example should be as compact as possible. The number of rows
-is recommended to be around 4, but make it a number that makes sense for the
-specific example. For example in the ``head`` method, it requires to be higher
-than 5, to show the example with the default values. If doing the ``mean``, we
-could use something like ``[1, 2, 3]``, so it is easy to see that the value
-returned is the mean.
-
-For more complex examples (grouping for example), avoid using data without
-interpretation, like a matrix of random numbers with columns A, B, C, D...
-And instead use a meaningful example, which makes it easier to understand the
-concept. Unless required by the example, use names of animals, to keep examples
-consistent. And numerical properties of them.
-
 When calling the method, keywords arguments ``head(n=3)`` are preferred to
 positional arguments ``head(3)``.
-
-**Good:**
-
-.. code-block:: python
-
-    class Series:
-
-        def mean(self):
-            """
-            Compute the mean of the input.
-
-            Examples
-            --------
-            >>> s = pd.Series([1, 2, 3])
-            >>> s.mean()
-            2
-            """
-            pass
-
-
-        def fillna(self, value):
-            """
-            Replace missing values by ``value``.
-
-            Examples
-            --------
-            >>> s = pd.Series([1, np.nan, 3])
-            >>> s.fillna(0)
-            [1, 0, 3]
-            """
-            pass
-
-        def groupby_mean(self):
-            """
-            Group by index and return mean.
-
-            Examples
-            --------
-            >>> s = pd.Series([380., 370., 24., 26],
-            ...               name='max_speed',
-            ...               index=['falcon', 'falcon', 'parrot', 'parrot'])
-            >>> s.groupby_mean()
-            index
-            falcon    375.0
-            parrot     25.0
-            Name: max_speed, dtype: float64
-            """
-            pass
-
-        def contains(self, pattern, case_sensitive=True, na=numpy.nan):
-            """
-            Return whether each value contains ``pattern``.
-
-            In this case, we are illustrating how to use sections, even
-            if the example is simple enough and does not require them.
-
-            Examples
-            --------
-            >>> s = pd.Series('Antelope', 'Lion', 'Zebra', np.nan)
-            >>> s.contains(pattern='a')
-            0    False
-            1    False
-            2     True
-            3      NaN
-            dtype: bool
-
-            **Case sensitivity**
-
-            With ``case_sensitive`` set to ``False`` we can match ``a`` with both
-            ``a`` and ``A``:
-
-            >>> s.contains(pattern='a', case_sensitive=False)
-            0     True
-            1    False
-            2     True
-            3      NaN
-            dtype: bool
-
-            **Missing values**
-
-            We can fill missing values in the output using the ``na`` parameter:
-
-            >>> s.contains(pattern='a', na=False)
-            0    False
-            1    False
-            2     True
-            3    False
-            dtype: bool
-            """
-            pass
-
-**Bad:**
-
-.. code-block:: python
-
-    def method(foo=None, bar=None):
-        """
-        A sample DataFrame method.
-
-        Do not import NumPy and pandas.
-
-        Try to use meaningful data, when it makes the example easier
-        to understand.
-
-        Try to avoid positional arguments like in ``df.method(1)``. They
-        can be all right if previously defined with a meaningful name,
-        like in ``present_value(interest_rate)``, but avoid them otherwise.
-
-        When presenting the behavior with different parameters, do not place
-        all the calls one next to the other. Instead, add a short sentence
-        explaining what the example shows.
-
-        Examples
-        --------
-        >>> import numpy as np
-        >>> import pandas as pd
-        >>> df = pd.DataFrame(np.random.randn(3, 3),
-        ...                   columns=('a', 'b', 'c'))
-        >>> df.method(1)
-        21
-        >>> df.method(bar=14)
-        123
-        """
-        pass
 
 
 .. _docstring.doctest_tips:
@@ -852,8 +675,7 @@ Tips for getting your examples pass the doctests
 Getting the examples pass the doctests in the validation script can sometimes
 be tricky. Here are some attention points:
 
-* Import all needed libraries (except for pandas and NumPy, those are already
-  imported as ``import pandas as pd`` and ``import numpy as np``) and define
+* Import all needed libraries (except for spectrochempy) and define
   all variables you use in the example.
 
 * Try to avoid using random data. However random data might be OK in some
@@ -861,25 +683,13 @@ be tricky. Here are some attention points:
   distributions, or if the amount of data needed to make the function result
   meaningful is too much, such that creating it manually is very cumbersome.
   In those cases, always use a fixed random seed to make the generated examples
-  predictable. Example::
-
-    >>> np.random.seed(42)
-    >>> df = pd.DataFrame({'normal': np.random.normal(100, 5, 20)})
+  predictable.
 
 * If you have a code snippet that wraps multiple lines, you need to use '...'
   on the continued lines: ::
 
-    >>> df = pd.DataFrame([[1, 2, 3], [4, 5, 6]], index=['a', 'b', 'c'],
-    ...                   columns=['A', 'B'])
-
-* If you want to show a case where an exception is raised, you can do::
-
-    >>> pd.to_datetime(["712-01-01"])
-    Traceback (most recent call last):
-    OutOfBoundsDatetime: Out of bounds nanosecond timestamp: 712-01-01 00:00:00
-
-  It is essential to include the "Traceback (most recent call last):", but for
-  the actual error only the error name is sufficient.
+    >>> coord = Coord.linspace(20., 25., 4, units='K',
+    ...                         title='temperature')
 
 * If there is a small part of the result that can vary (e.g. a hash in an object
   representation), you can use ``...`` to represent this part.
@@ -901,7 +711,7 @@ be tricky. Here are some attention points:
 Plots in examples
 ^^^^^^^^^^^^^^^^^
 
-There are some methods in pandas returning plots. To render the plots generated
+There are some methods in spectrochempy returning plots. To render the plots generated
 by the examples in the documentation, the ``.. plot::`` directive exists.
 
 To use it, place the next code after the "Examples" header as shown below. The
@@ -909,91 +719,17 @@ plot will be generated automatically when building the documentation.
 
 .. code-block:: python
 
-    class Series:
-        def plot(self):
-            """
-            Generate a plot with the ``Series`` data.
+    def plot(self):
+         """
+         Generate a plot with the ``NDDataset`` data.
 
-            Examples
-            --------
+         Examples
+         --------
 
-            .. plot::
-                :context: close-figs
+         .. plot::
+             :context: close-figs
 
-                >>> s = pd.Series([1, 2, 3])
-                >>> s.plot()
-            """
-            pass
-
-.. _docstring.sharing:
-
-Sharing docstrings
-------------------
-
-pandas has a system for sharing docstrings, with slight variations, between
-classes. This helps us keep docstrings consistent, while keeping things clear
-for the user reading. It comes at the cost of some complexity when writing.
-
-Each shared docstring will have a base template with variables, like
-``{klass}``. The variables filled in later on using the ``doc`` decorator.
-Finally, docstrings can also be appended to with the ``doc`` decorator.
-
-In this example, we'll create a parent docstring normally (this is like
-``pandas.core.generic.NDFrame``. Then we'll have two children (like
-``pandas.core.series.Series`` and ``pandas.core.frame.DataFrame``). We'll
-substitute the class names in this docstring.
-
-.. code-block:: python
-
-   class Parent:
-       @doc(klass="Parent")
-       def my_function(self):
-           """Apply my function to {klass}."""
-           ...
-
-
-   class ChildA(Parent):
-       @doc(Parent.my_function, klass="ChildA")
-       def my_function(self):
-           ...
-
-
-   class ChildB(Parent):
-       @doc(Parent.my_function, klass="ChildB")
-       def my_function(self):
-           ...
-
-The resulting docstrings are
-
-.. code-block:: python
-
-   >>> print(Parent.my_function.__doc__)
-   Apply my function to Parent.
-   >>> print(ChildA.my_function.__doc__)
-   Apply my function to ChildA.
-   >>> print(ChildB.my_function.__doc__)
-   Apply my function to ChildB.
-
-Notice:
-
-1. We "append" the parent docstring to the children docstrings, which are
-   initially empty.
-
-Our files will often contain a module-level ``_shared_doc_kwargs`` with some
-common substitution values (things like ``klass``, ``axes``, etc).
-
-You can substitute and append in one shot with something like
-
-.. code-block:: python
-
-   @doc(template, **_shared_doc_kwargs)
-   def my_function(self):
-       ...
-
-where ``template`` may come from a module-level ``_shared_docs`` dictionary
-mapping function names to docstrings. Wherever possible, we prefer using
-``doc``, since the docstring-writing processes is slightly closer to normal.
-
-See ``pandas.core.generic.NDFrame.fillna`` for an example template, and
-``pandas.core.series.Series.fillna`` and ``pandas.core.generic.frame.fillna``
-for the filled versions.
+             >>> s = scp.NDDataset([1, 2, 3])
+             >>> s.plot()
+         """
+         ...

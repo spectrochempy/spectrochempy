@@ -1,26 +1,19 @@
 .. _code_style:
 
-{{ header }}
-
-=======================
-pandas code style guide
-=======================
+==============================
+SpectroChemPy code style guide
+==============================
 
 .. contents:: Table of contents:
    :local:
 
-pandas follows the `PEP8 <https://www.python.org/dev/peps/pep-0008/>`_
+SpectroChemPy follows the `PEP8 <https://www.python.org/dev/peps/pep-0008/>`_
 standard and uses `Black <https://black.readthedocs.io/en/stable/>`_
 and `Flake8 <https://flake8.pycqa.org/en/latest/>`_ to ensure a
 consistent code format throughout the project. We encourage you to use
 :ref:`pre-commit <contributing.pre-commit>` to automatically run ``black``,
-``flake8``, ``isort``, and related code checks when you make a git commit.
+``flake8`` whenever you make a git commit.
 
-Patterns
-========
-
-We use a ``flake8`` plugin, `pandas-dev-flaker <https://github.com/pandas-dev/pandas-dev-flaker>`_, to
-check our codebase for unwanted patterns. See its ``README`` for the up-to-date list of rules we enforce.
 
 Testing
 =======
@@ -63,18 +56,3 @@ xfail during the testing phase. To do so, use the ``request`` fixture:
 xfail is not to be used for tests involving failure due to invalid user arguments.
 For these tests, we need to verify the correct exception type and error message
 is being raised, using ``pytest.raises`` instead.
-
-Miscellaneous
-=============
-
-Reading from a url
-------------------
-
-**Good:**
-
-.. code-block:: python
-
-    from pandas.io.common import urlopen
-
-    with urlopen("http://www.google.com") as url:
-        raw_text = url.read()
