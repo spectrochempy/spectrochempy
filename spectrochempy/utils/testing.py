@@ -123,11 +123,10 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
 
     thistype = this.implements()
 
-    if data_only:
-        if other.data is None and this.data is None:
-            attrs = ["labels"]
-        else:
-            attrs = ["data"]
+    if other.data is None and this.data is None and data_only:
+        attrs = ["labels"]
+    elif data_only:
+        attrs = ["data"]
     else:
         attrs = this.__dir__()
         exclude = (
