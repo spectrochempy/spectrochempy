@@ -11,6 +11,7 @@ ipython
 jinja2
 mamba
 matplotlib
+numba
 numpy>=1.21.0
 orderedset
 pint==0.16.1
