@@ -427,6 +427,13 @@ def test_issue_310():
     assert str(D.coordset) == "CoordSet: [x:<untitled>, y:<untitled>]"
     assert D.dims == ["y", "x"]
 
+    E = scp.NDDataset(np.ndarray((10, 5)))
+    E.dims = ["t", "s"]
+    E.set_coordset(s=c5, t=c10)
+    assert c5.name == "s"
+    assert str(E.coordset) == "CoordSet: [s:<untitled>, t:<untitled>]"
+    assert E.dims == ["t", "s"]
+
     E = scp.NDDataset(np.ndarray((5, 10)))
     E.dims = ["s", "t"]
     E.set_coordset(s=c5, t=c10)
