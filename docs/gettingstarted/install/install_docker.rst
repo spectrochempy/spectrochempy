@@ -28,7 +28,7 @@ Additional steps on windows
 
   - run
 
-  .. sourcecode:: powershell
+  .. sourcecode:: shell
 
      dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
 

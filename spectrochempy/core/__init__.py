@@ -24,7 +24,8 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 import scipy
-from tqdm import tqdm
+
+from spectrochempy._optional import import_optional_dependency
 
 warnings.filterwarnings("ignore")
 
@@ -119,6 +120,8 @@ USE_TQDM = (
 )
 
 if USE_TQDM:
+    from tqdm import tqdm
+
     pbar = tqdm(total=1211)
     pbar.set_description("Loading SpectroChemPy API")
     val_tqdm = [1, 39, 52, 83, 83, 89, 92, 93, 94, 95, 96, 97, 98, 99, 100]
@@ -354,29 +357,25 @@ warnings.filterwarnings(action="ignore", module="matplotlib", category=UserWarni
 # File Dialogs
 # ----------------------------------------------------------------------------------------------------------------------
 
-# can not be in utils due to circular imports
 __all__ += ["open_dialog", "save_dialog"]
 
-# set flags
+# Set flags
 USE_QT = preferences.use_qt or environ.get("SCPY_GUI", None) == "RUNNING"
 
 if USE_QT:
 
-    try:
-        from PyQt5 import QtWidgets
+    import_optional_dependency("PyQt5")
+    from PyQt5 import QtWidgets
 
-        if not QtWidgets.QApplication.startingUp():
-            # we use this only if we are not in spectrochempy_gui
-            # because in the latter case, the file dialogs are defined there
-            QtWidgets.QApplication(sys.argv)
+    if not QtWidgets.QApplication.startingUp():
+        # we use this only if we are not in spectrochempy_gui
+        # because in the latter case, the file dialogs are defined there
+        QtWidgets.QApplication(sys.argv)
 
-        FileDialog = QtWidgets.QFileDialog
+    FileDialog = QtWidgets.QFileDialog
 
-    except ImportError:
-        # Qt not found - use Tkinter
-        USE_QT = False
+else:
 
-if not USE_QT:
     from tkinter import filedialog
 
 

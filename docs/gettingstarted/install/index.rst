@@ -39,10 +39,9 @@ whether you choose Miniconda or Anaconda…
 Installation of |scpy|
 *****************************************************
 
-|scpy| installation is very similar on the various platform, except the syntax
-of some command. We propose here the installation step whether you are on
-mac/linux systems, or on Windows. Additionaly it is possible to use a docker
-container or the Google Colaboratory cloud platform.
+|scpy| installation is very similar on the various platform, except the syntax of some command. We propose here the installation step whether you are on mac/linux systems, or on Windows.
+
+Additionaly it is possible to use a docker container or the Google Colaboratory cloud platform.
 
 * :doc:`install_mac`
 * :doc:`install_win`

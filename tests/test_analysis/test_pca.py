@@ -5,10 +5,10 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-""" Tests for the PCA module
+"""
+Tests for the PCA module
 
 """
-import pytest
 import numpy as np
 
 from spectrochempy.core.dataset.nddataset import NDDataset
@@ -16,14 +16,7 @@ from spectrochempy.core.analysis.pca import PCA
 from spectrochempy.utils import MASKED, show
 from spectrochempy.utils.testing import assert_array_almost_equal
 
-HAS_SCIKITLEARN = False
-try:
-    from sklearn.decomposition import PCA as sklPCA
-
-    HAS_SCIKITLEARN = True
-except ImportError:
-    pass
-
+from spectrochempy._optional import import_optional_dependency
 
 # test pca
 # ---------
@@ -52,8 +45,14 @@ def test_pca():
     show()
 
 
-@pytest.mark.skipif(not HAS_SCIKITLEARN, reason="scikit-learn library not loaded")
 def test_compare_scikit_learn():
+
+    try:
+        import_optional_dependency("scikit-learn")
+    except ImportError:
+        return
+
+    from sklearn.decomposition import PCA as sklPCA
 
     X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
 

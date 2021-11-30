@@ -14,7 +14,6 @@ This module implements the |NDDataset| class.
 __all__ = ["NDDataset"]
 
 import textwrap
-import warnings
 import sys
 
 import numpy as np
@@ -34,17 +33,9 @@ from spectrochempy.core import error_, warning_
 from spectrochempy.utils import (
     colored_output,
     SpectroChemPyException,
-    SpectroChemPyWarning,
     MaskedConstant,
 )
-
-HAS_XARRAY = False
-try:
-    import xarray as xr
-
-    HAS_XARRAY = True  # pragma: no cover
-except ImportError:
-    xr = None  # pragma: no cover
+from spectrochempy._optional import import_optional_dependency
 
 
 # ======================================================================================================================
@@ -1188,25 +1179,21 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         #     'units' and 'calendar' (the later two only for datetime arrays).
         #     Unrecognized keys are ignored.
 
-        if not HAS_XARRAY:
-            warnings.warn(
-                "Xarray is not available! This function can not be used",
-                SpectroChemPyWarning,
-            )
-            return None
+        import_optional_dependency("xarray")
+        from xarray import DataArray
 
         x, y = self.x, self.y
         tx = x.title
         if y:
             ty = y.title
-            da = xr.DataArray(
+            da = DataArray(
                 np.array(self.data, dtype=np.float64),
                 coords=[(ty, y.data), (tx, x.data)],
             )
 
             da.attrs["units"] = self.units
         else:
-            da = xr.DataArray(
+            da = DataArray(
                 np.array(self.data, dtype=np.float64),
                 coords=[(tx, x.data)],
             )

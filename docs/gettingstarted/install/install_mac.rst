@@ -6,6 +6,7 @@ Installation Guide for Mac OSX
 Installation
 -------------
 
+
 .. _conda_mac:
 
 The following steps have been checked only with OSX-Catalina but should work

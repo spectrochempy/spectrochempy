@@ -90,6 +90,8 @@ class CoordSet(HasTraits):
             Same as `x` for the others dimensions.
         dims : list of string, optional
             Names of the dims to use corresponding to the coordinates. If not given, standard names are used: x, y, ...
+        copy : bool, optional
+            Perform a copy of the passed object. Default is True.
 
         See Also
         --------
@@ -293,7 +295,10 @@ class CoordSet(HasTraits):
                     "At this point all passed coordinates should be of type Coord or CoordSet!"
                 )  # coord =  #
                 # Coord(coord)
-            coords[id] = coord
+            if self._copy:
+                coords[id] = coord.copy()
+            else:
+                coords[id] = coord
 
         for coord in coords:
             if isinstance(coord, CoordSet):
@@ -431,7 +436,8 @@ class CoordSet(HasTraits):
     # ..................................................................................................................
     # @property
     # def coords(self):  #TODO: replace with itertiems, items etc ... to simulate a dict
-    #     """list - list of the Coord objects in the current coords (readonly
+    #     """
+    #     list - list of the Coord objects in the current coords (readonly
     #     property).
     #     """
     #     return self._coords
@@ -439,7 +445,8 @@ class CoordSet(HasTraits):
     # ..................................................................................................................
     @property
     def names(self):
-        """list - Names of the coords in the current coords (read only property)"""
+        """
+        list - Names of the coords in the current coords (read only property)"""
         _names = []
         if self._coords:
             for item in self._coords:
