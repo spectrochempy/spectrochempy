@@ -15,5 +15,4 @@ Developer's Guide
 
     contributing
     contributing_codebase
-    code_style
     contributing_documentation

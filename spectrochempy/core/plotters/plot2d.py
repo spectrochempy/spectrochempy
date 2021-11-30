@@ -29,9 +29,51 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 
-from spectrochempy.core.plotters.plotutils import make_label
-from spectrochempy.core.dataset.coord import LinearCoord
+from .plotutils import make_label
+from ..dataset.coord import LinearCoord
+from ...utils import add_docstring
 
+_PLOT2D_DOC = """\
+ax : |Axes| instance. Optional
+    The axe where to plot. The default is the current axe or to create a new one if is None.
+clear : bool, optional, default=`True`
+    Should we plot on the ax previously used or create a new figure?.
+figsize : tuple, optional
+    The figure size expressed as a tuple (w,h) in inch.
+fontsize : int, optional
+    The font size in pixels, default is 10 (or read from preferences).
+style : str
+autolayout : `bool`, optional, default=True
+    if True, layout will be set automatically.
+output : str
+    A string containing a path to a filename. The output format is deduced
+    from the extension of the filename. If the filename has no extension,
+    the value of the rc parameter savefig.format is used.
+dpi : [ None | scalar > 0]
+    The resolution in dots per inch. If None it will default to the
+    value savefig.dpi in the matplotlibrc file.
+colorbar :
+transposed :
+clear :
+ax :
+twinx :
+use_plotly : bool, optional
+    Should we use plotly instead of mpl for plotting. Default to `preferences.use_plotly`  (default=False)
+data_only : `bool` [optional, default=`False`]
+    Only the plot is done. No addition of axes or label specifications
+    (current if any or automatic settings are kept.
+method : str [optional among ``map``, ``stack``, ``image`` or ``3D``]
+    The type of plot,
+projections : `bool` [optional, default=False]
+style : str, optional, default='notebook'
+    Matplotlib stylesheet (use `available_style` to get a list of available
+    styles for plotting
+reverse : `bool` or None [optional, default=None
+    In principle, coordinates run from left to right, except for wavenumbers
+    (e.g., FTIR spectra) or ppm (e.g., NMR), that spectrochempy
+    will try to guess. But if reverse is set, then this is the
+    setting which will be taken into account.
+x_reverse : `bool` or None [optional, default=None"""
 
 # ======================================================================================================================
 # nddataset plot2D functions
@@ -41,11 +83,32 @@ from spectrochempy.core.dataset.coord import LinearCoord
 # contour map (default) -------------------------------------------------------
 
 
+@add_docstring(_PLOT2D_DOC)
 def plot_map(dataset, **kwargs):
     """
     Plot a 2D dataset as a contoured map.
 
     Alias of plot_2D (with `method` argument set to ``map``.
+
+    Parameters
+    ----------
+    dataset : |NDDataset|
+        The dataset to plot.
+    **kwargs : dic, optional
+        Additional keywords parameters.
+        See Other Parameters.
+
+    Other Parameters
+    ----------------
+    {0}
+
+    See Also
+    --------
+    plot_2D
+    plot_stack
+    plot_image
+    plot_surface
+    plot_waterfall
     """
     if dataset.ndim < 2:
         from spectrochempy.core.plotters.plot1d import plot_1D
@@ -62,11 +125,32 @@ def plot_map(dataset, **kwargs):
 # stack plot  -----------------------------------------------------------------
 
 
+@add_docstring(_PLOT2D_DOC)
 def plot_stack(dataset, **kwargs):
     """
     Plot a 2D dataset as a stacked plot.
 
     Alias of plot_2D (with `method` argument set to ``stack``).
+
+    Parameters
+    ----------
+    dataset : |NDDataset|
+        The dataset to plot.
+    **kwargs : dic, optional
+        Additional keywords parameters.
+        See Other Parameters.
+
+    Other Parameters
+    ----------------
+    {0}
+
+    See Also
+    --------
+    plot_map
+    plot_2D
+    plot_image
+    plot_surface
+    plot_waterfall
     """
     if dataset.ndim < 2:
         from spectrochempy.core.plotters.plot1d import plot_1D
@@ -83,11 +167,32 @@ def plot_stack(dataset, **kwargs):
 # image plot --------------------------------------------------------
 
 
+@add_docstring(_PLOT2D_DOC)
 def plot_image(dataset, **kwargs):
     """
     Plot a 2D dataset as an image plot.
 
     Alias of plot_2D (with `method` argument set to ``image``).
+
+    Parameters
+    ----------
+    dataset : |NDDataset|
+        The dataset to plot.
+    **kwargs : dic, optional
+        Additional keywords parameters.
+        See Other Parameters.
+
+    Other Parameters
+    ----------------
+    {0}
+
+    See Also
+    --------
+    plot_map
+    plot_stack
+    plot_2D
+    plot_surface
+    plot_waterfall
     """
     if dataset.ndim < 2:
         from spectrochempy.core.plotters.plot1d import plot_1D
@@ -104,11 +209,32 @@ def plot_image(dataset, **kwargs):
 # surface plot -----------------------------------------------------------------
 
 
+@add_docstring(_PLOT2D_DOC)
 def plot_surface(dataset, **kwargs):
     """
     Plot a 2D dataset as a a 3D-surface.
 
     Alias of plot_2D (with `method` argument set to ``surface``.
+
+    Parameters
+    ----------
+    dataset : |NDDataset|
+        The dataset to plot.
+    **kwargs : dic, optional
+        Additional keywords parameters.
+        See Other Parameters.
+
+    Other Parameters
+    ----------------
+    {0}
+
+    See Also
+    --------
+    plot_map
+    plot_stack
+    plot_image
+    plot_2D
+    plot_waterfall
     """
     if dataset.ndim < 2:
         from spectrochempy.core.plotters.plot1d import plot_1D
@@ -125,11 +251,32 @@ def plot_surface(dataset, **kwargs):
 # waterfall plot -----------------------------------------------------------------
 
 
+@add_docstring(_PLOT2D_DOC)
 def plot_waterfall(dataset, **kwargs):
     """
     Plot a 2D dataset as a a 3D-waterfall plot.
 
     Alias of plot_2D (with `method` argument set to ``waterfall``.
+
+    Parameters
+    ----------
+    dataset : |NDDataset|
+        The dataset to plot.
+    **kwargs : dic, optional
+        Additional keywords parameters.
+        See Other Parameters.
+
+    Other Parameters
+    ----------------
+    {0}
+
+    See Also
+    --------
+    plot_map
+    plot_stack
+    plot_image
+    plot_surface
+    plot_2D
     """
     if dataset.ndim < 2:
         from spectrochempy.core.plotters.plot1d import plot_1D
@@ -146,60 +293,32 @@ def plot_waterfall(dataset, **kwargs):
 # generic plot (default stack plot) -------------------------------------------
 
 
-def plot_2D(dataset, **kwargs):
+@add_docstring(_PLOT2D_DOC)
+def plot_2D(dataset, method="stack", **kwargs):
     """
-    PLot of 2D array.
+    Plot of 2D array.
 
     Parameters
     ----------
-    dataset : :class:`~spectrochempy.ddataset.nddataset.NDDataset`
+    dataset : |NDDataset|
         The dataset to plot.
-    ax : |Axes| instance. Optional
-        The axe where to plot. The default is the current axe or to create a new one if is None.
-    clear : `bool`, optional, default=`True`
-        Should we plot on the ax previously used or create a new figure?.
-    figsize : tuple, optional
-        The figure size expressed as a tuple (w,h) in inch.
+    method : ['stack', 'map', 'image', 'surface', 'waterfall'] , optional
+        The method of plot of the dataset, which will determine the plotter to use. Default is stack.
+    **kwargs : dic, optional
+        Additional keywords parameters.
+        See Other Parameters.
 
     Other Parameters
-    -----------------
-    method : ['stack', 'map', 'image', 'surface', 'waterfall'] , optional
-        The method of plot of the dataset, which will determine the plotter to use. Default is stack
-    fontsize : int, optional
-        The font size in pixels, default is 10 (or read from preferences).
-    style : str
-    autolayout : `bool`, optional, default=True
-        if True, layout will be set automatically.
-    output : str
-        A string containing a path to a filename. The output format is deduced
-        from the extension of the filename. If the filename has no extension,
-        the value of the rc parameter savefig.format is used.
-    dpi : [ None | scalar > 0]
-        The resolution in dots per inch. If None it will default to the
-        value savefig.dpi in the matplotlibrc file.
-    colorbar :
-    transposed :
-    clear :
-    ax :
-    twinx :
-    use_plotly : bool, optional
-        Should we use plotly instead of mpl for plotting. Default to `preferences.use_plotly`  (default=False)
-    data_only : `bool` [optional, default=`False`]
-        Only the plot is done. No addition of axes or label specifications
-        (current if any or automatic settings are kept.
-    method : str [optional among ``map``, ``stack``, ``image`` or ``3D``]
-        The type of plot,
-    projections : `bool` [optional, default=False]
-    style : str, optional, default='notebook'
-        Matplotlib stylesheet (use `available_style` to get a list of available
-        styles for plotting
-    reverse : `bool` or None [optional, default=None
-        In principle, coordinates run from left to right, except for wavenumbers
-        (e.g., FTIR spectra) or ppm (e.g., NMR), that spectrochempy
-        will try to guess. But if reverse is set, then this is the
-        setting which will be taken into account.
-    x_reverse : `bool` or None [optional, default=None
-    kwargs : additional keywords
+    ----------------
+    {0}
+
+    See Also
+    --------
+    plot_map
+    plot_stack
+    plot_image
+    plot_surface
+    plot_waterfall
     """
 
     # Get preferences
@@ -226,10 +345,6 @@ def plot_2D(dataset, **kwargs):
     if kwargs.get("use_plotly", prefs.use_plotly):
         return dataset.plotly(**kwargs)
 
-    # Method of plot
-    # ------------------------------------------------------------------------------------------------------------------
-
-    method = kwargs.get("method", prefs.method_2D)
     # do not display colorbar if it's not a surface plot
     # except if we have asked to d so
 

@@ -220,7 +220,7 @@ class NDArray(HasTraits):
 
         Examples
         --------
-        >>> import spectrochempy as scp
+
         >>> myarray = scp.NDArray([1., 2., 3.])
         """
         super().__init__()
@@ -1294,7 +1294,7 @@ class NDArray(HasTraits):
 
         Examples
         --------
-        >>> import spectrochempy as scp
+
         >>> nd1 = scp.NDArray([1. + 2.j, 2. + 3.j])
         >>> nd1
         NDArray: [complex128] unitless (size: 2)
@@ -1799,15 +1799,13 @@ class NDArray(HasTraits):
 
         Examples
         --------
-        >>> from spectrochempy import *
-
-        >>> nd1 = NDDataset([1.+2.j,2.+ 3.j], units='meters')
+        >>> nd1 = scp.NDDataset([1.+2.j, 2.+ 3.j], units = 'meters')
         >>> nd1
         NDDataset: [complex128] m (size: 2)
-        >>> nd2 = NDDataset([1.+2.j,2.+ 3.j], units='seconds')
+        >>> nd2 = scp.NDDataset([1.+2.j, 2.+ 3.j], units = 'seconds')
         >>> nd1.is_units_compatible(nd2)
         False
-        >>> nd1.ito('minutes', force=True)
+        >>> nd1.ito('minutes', force = True)
         >>> nd1.is_units_compatible(nd2)
         True
         >>> nd2[0].values * 60. == nd1[0].values
@@ -2348,9 +2346,9 @@ class NDArray(HasTraits):
             Destination units.
         inplace : bool, optional, default=`False`
             Flag to say that the method return a new object (default)
-            or not (inplace=True)
+            or not (inplace=True).
         force : bool, optional, default=False
-            If True the change of units is forced, even for incompatible units
+            If True the change of units is forced, even for incompatible units.
 
         Returns
         -------
@@ -2367,7 +2365,7 @@ class NDArray(HasTraits):
         Examples
         --------
         >>> np.random.seed(12345)
-        >>> ndd = NDArray( data = np.random.random((3, 3)),
+        >>> ndd = scp.NDArray(data = np.random.random((3, 3)),
         ...                mask = [[True, False, False],
         ...                        [False, True, False],
         ...                        [False, False, True]],
@@ -2545,7 +2543,6 @@ class NDArray(HasTraits):
         -------
         rescaled
             A rescaled array
-
         """
         q = Quantity(1.0, self.units)
         q.ito_base_units()
@@ -2577,7 +2574,6 @@ class NDArray(HasTraits):
         -------
         rescaled
             A rescaled array
-
         """
         q = Quantity(1.0, self.units)
         q.ito_reduced_units()

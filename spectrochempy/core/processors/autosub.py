@@ -66,7 +66,7 @@ def autosub(
 
     Examples
     ---------
-    >>> import spectrochempy as scp
+
     >>> path_A = 'irdata/nh4y-activation.spg'
     >>> A = scp.read(path_A, protocol='omnic')
     >>> ref = A[0, :]  # let's subtrack the first row

@@ -396,7 +396,6 @@ class NDComplexArray(NDArray):
         """
         Set the object data as complex.
 
-
         When nD-dimensional array are set to complex, we assume that it is along the first dimension.
         Two succesives rows are merged to form a complex rows. This means that the number of row must be even
         If the complexity is to be applied in other dimension, either transpose/swapdims your data before applying this

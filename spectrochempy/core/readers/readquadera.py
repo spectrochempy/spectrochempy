@@ -27,8 +27,7 @@ from spectrochempy.core.readers.importer import Importer, importermethod
 # ======================================================================================================================
 def read_quadera(*paths, **kwargs):
     """
-    Read a Pfeiffer Vacuum's QUADERA® mass spectrometer software file with extension ``.asc`` and return its
-    content as dataset.
+    Read a Pfeiffer Vacuum's QUADERA® mass spectrometer software file with extension ``.asc``.
 
     Parameters
     -----------
@@ -80,14 +79,7 @@ def read_quadera(*paths, **kwargs):
     recursive : bool, optional
         Read also in subfolders. (default=False)
 
-    Examples
-    ---------
-
-    >>> import spectrochempy as scp
-    >>> scp.read_quadera('msdata/ion_currents.asc')
-    NDDataset: [float64] A (shape: (y:16975, x:10))
-
-    Notes:
+    Notes
     ------
     Currently the acquisition time is that of the first channel as the timeshift of other channels are typically
     within few seconds, and the data of other channels are NOT interpolated
@@ -105,6 +97,12 @@ def read_quadera(*paths, **kwargs):
     read_srs : Read Omnic series.
     read_csv : Read CSV files.
     read_zip : Read Zip files.
+
+    Examples
+    ---------
+
+    >>> scp.read_quadera('msdata/ion_currents.asc')
+    NDDataset: [float64] A (shape: (y:16975, x:10))
     """
     kwargs["filetypes"] = ["Quadera files (*.asc)"]
     kwargs["protocol"] = ["asc"]

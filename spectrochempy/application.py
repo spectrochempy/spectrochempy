@@ -174,7 +174,7 @@ __release_date__ = _get_release_date()
 "Last release date of this package"
 
 
-def _check_for_updates():
+def _check_for_updates(*args):
     # Get version
     conda_url = "https://anaconda.org/spectrocat/spectrochempy/files"
     try:
@@ -1021,7 +1021,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>
 
         if self.preferences.show_info_on_loading:
             info_string = (
-                "SpectroChemPy's API - v.{__version__}\n© Copyright {__copyright__}"
+                f"SpectroChemPy's API - v.{__version__}\n© Copyright {__copyright__}"
             )
             ipy = get_ipython()
             if ipy is not None and "TerminalInteractiveShell" not in str(ipy):

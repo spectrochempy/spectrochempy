@@ -68,7 +68,7 @@ def read_dir(directory=None, **kwargs):
 
     Examples
     --------
-    >>> import spectrochempy as scp
+
     >>> scp.preferences.csv_delimiter = ','
     >>> A = scp.read_dir('irdata')
     >>> len(A)

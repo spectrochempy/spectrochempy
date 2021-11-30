@@ -351,31 +351,47 @@ class NDPlot(HasTraits):
     # ------------------------------------------------------------------------------------------------------------------
     # generic plotter and plot related methods or properties
     # ------------------------------------------------------------------------------------------------------------------
-    def plot(self, **kwargs):
+    def plot(self, ax=None, method=None, **kwargs):
         """
         Generic plot function.
 
-        This apply to a |NDDataset| but actually delegate the work to a plotter defined by the parameter ``method``.
+        This apply to a |NDDataset| but actually delegate the work to a plotter defined by the keyword parameter
+        ``method``.
+
+        Parameters
+        ----------
+        ax : :class:`matplotlib.axe`
+            The viewplot where to plot.
+        method : str, optional, default: "generic"
+            Specify with plot method to use.
+        **kwargs : dict, optional
+            Any optional parameters to pass to the plot method.
+
+        Examples
+        --------
+
+        >>> nd = scp.NDDataset([1, 2, 3])
+        >>> _ = nd.plot()
+
+        or
+        >>> _ = nd.plot(method='scatter')
         """
 
         # --------------------------------------------------------------------
         # select plotter depending on the dimension of the data
         # --------------------------------------------------------------------
-
-        method = "generic"
-
         method = kwargs.pop("method", method)
-
-        # Find or guess the adequate plotter
-        # -----------------------------------
-
-        _plotter = getattr(self, f"plot_{method.replace('+', '_')}", None)
-        if _plotter is None:
-            # no plotter found
-            error_(
-                "The specified plotter for method " "`{}` was not found!".format(method)
-            )
-            raise IOError
+        if method:
+            _plotter = getattr(self, f"plot_{method.replace('+', '_')}", None)
+            if _plotter is None:
+                # no plotter found
+                error_(
+                    "The specified plotter for method "
+                    "`{}` was not found!".format(method)
+                )
+                raise IOError
+        else:
+            _plotter = self._plot_generic
 
         # Execute the plotter
         # --------------------
@@ -387,24 +403,7 @@ class NDPlot(HasTraits):
     # ------------------------------------------------------------------------------------------------------------------
 
     # ..................................................................................................................
-    def plot_generic(self, **kwargs):
-        """
-        The generic plotter.
-
-        It try to guess an adequate basic plot for the data. Other method of plotters are defined explicitely in the
-        ``plotters`` package.
-
-        Parameters
-        ----------
-        ax : :class:`matplotlib.axe`
-            the viewplot where to plot.
-        kwargs : optional additional arguments
-
-        Returns
-        -------
-        ax
-            Return the handler to ax where the main plot was done
-        """
+    def _plot_generic(self, **kwargs):
 
         if self._squeeze_ndim == 1:
 

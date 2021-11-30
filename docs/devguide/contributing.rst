@@ -167,7 +167,7 @@ We'll now install |scpy| in development mode following 2 steps:
 
    .. sourcecode:: python
 
-     >>> import spectrochempy as scp
+
      >>> print(scp.version)
      SpectroChemPy's API ...
      >>> exit()

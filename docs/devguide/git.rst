@@ -80,7 +80,7 @@ Create a conda environment
   .. sourcecode:: bash
 
      $ conda update conda
-     $ conda install -c conda-forge mamba 
+     $ conda install -c conda-forge mamba
      $ mamba env create -n scpy_dev -f scpy_dev.yml
      $ conda activate scpy_dev
 
@@ -105,7 +105,7 @@ This start an interpreter in which you can check your installation.
 
 .. sourcecode:: python
 
-   >>> import spectrochempy as scp
+
    >>> print(scp.version)
    SpectroChemPy's API ...
    >>> exit()

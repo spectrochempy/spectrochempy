@@ -635,7 +635,7 @@ A simple example could be:
         --------
         Upload a dataset from a distant server
 
-        >>> import spectrochempy as scp
+
         >>> dataset = scp.download_IRIS()
         """
 

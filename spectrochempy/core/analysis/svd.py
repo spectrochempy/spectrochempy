@@ -94,7 +94,7 @@ class SVD(HasTraits):
 
         Examples
         --------
-        >>> import spectrochempy as scp
+
         >>> dataset = scp.read('irdata/nh4y-activation.spg')
         >>> svd = SVD(dataset)
         >>> print(svd.ev.data)

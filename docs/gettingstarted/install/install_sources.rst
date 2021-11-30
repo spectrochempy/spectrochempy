@@ -99,7 +99,7 @@ This start an interpreter in which you can check your installation.
 
 .. sourcecode:: python
 
-   >>> import spectrochempy as scp
+
    >>> print(scp.version)
    SpectroChemPy's API ...
    >>> exit()

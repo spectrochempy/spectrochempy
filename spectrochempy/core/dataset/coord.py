@@ -411,6 +411,26 @@ class Coord(NDMath, NDArray):
     # public methods
     # ------------------------------------------------------------------------------------------------------------------
     def loc2index(self, loc):
+        """
+        Return the index corresponding to a given location.
+
+        Parameters
+        ----------
+        loc: float.
+            Value corresponding to a given location on the coordinates axis.
+
+        Returns
+        -------
+        index: int.
+            The corresponding index.
+
+        Examples
+        --------
+
+        >>> dataset = scp.NDDataset.read("irdata/nh4y-activation.spg")
+        >>> dataset.x.loc2index(1644.0)
+        4517
+        """
         return self._loc2index(loc)
 
     # ------------------------------------------------------------------------------------------------------------------

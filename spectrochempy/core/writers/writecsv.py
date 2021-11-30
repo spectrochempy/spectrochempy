@@ -45,7 +45,7 @@ def write_csv(*args, **kwargs):
 
     Examples
     --------
-    >>> import spectrochempy as scp
+
     >>> ds = scp.NDDataset([1,2,3])
     >>> f1 = ds.write_csv('myfile')
 

@@ -399,7 +399,7 @@ class NDMath(object):
     this. Most of the time it returns a new NDDataset, while in some cases
     noted below, one get a |ndarray|.
 
-    >>> import spectrochempy as scp
+
     >>> ds = scp.NDDataset([1.,2.,3.])
     >>> np.sin(ds)
     NDDataset: [float64] unitless (size: 3)
@@ -743,11 +743,6 @@ class NDMath(object):
             Maximum of the data. If `dim` is None, the result is a scalar value.
             If `dim` is given, the result is an array of dimension ``ndim - 1``.
 
-        Note
-        ----
-        For dataset with complex or hypercomplex type type, the default is the
-        value with the maximum real part.
-
         See Also
         --------
         amin : The minimum value of a dataset along a given dimension, propagating any NaNs.
@@ -757,6 +752,12 @@ class NDMath(object):
         fmin : Element-wise minimum of two datasets, ignoring any NaNs.
         argmax : Return the indices or coordinates of the maximum values.
         argmin : Return the indices or coordinates of the minimum values.
+
+        Notes
+        -----
+        For dataset with complex or hypercomplex type type, the default is the
+        value with the maximum real part.
+
         """
 
         axis, dim = cls.get_axis(dim, allows_none=True)
@@ -975,13 +976,13 @@ class NDMath(object):
         arange
             Array of evenly spaced values.
 
-        See also
+        See Also
         --------
         linspace : Evenly spaced numbers with careful handling of endpoints.
 
         Examples
         --------
-        >>> import spectrochempy as scp
+
         >>> scp.arange(1, 20.0001, 1, units='s', name='mycoord')
         NDDataset: [float64] s (size: 20)
         """
@@ -1004,7 +1005,9 @@ class NDMath(object):
     @_reduce_method
     @_from_numpy_method
     def argmin(cls, dataset, dim=None):
-        """indexes of minimum of data along axis"""
+        """
+        Indexes of minimum of data along axis.
+        """
 
         axis, dim = cls.get_axis(dim, allows_none=True)
         idx = np.ma.argmin(dataset, axis)
@@ -1072,7 +1075,7 @@ class NDMath(object):
 
         Examples
         --------
-        >>> import spectrochempy as scp
+
         >>> nd = scp.read('irdata/nh4y-activation.spg')
         >>> nd
         NDDataset: [float64] a.u. (shape: (y:55, x:5549))
@@ -1253,7 +1256,7 @@ class NDMath(object):
 
         Examples
         --------
-        >>> import spectrochempy as scp
+
         >>> nd = scp.read('irdata/nh4y-activation.spg')
         >>> nd
         NDDataset: [float64] a.u. (shape: (y:55, x:5549))
@@ -1372,7 +1375,7 @@ class NDMath(object):
 
         Examples
         --------
-        >>> import spectrochempy as scp
+
         >>> nd = scp.full((2, 2), 0.5, units='s', title='initial')
         >>> nd
         NDDataset: [float64] s (shape: (y:2, x:2))
@@ -1446,7 +1449,7 @@ class NDMath(object):
 
         Examples
         --------
-        >>> import spectrochempy as scp
+
         >>> scp.empty([2, 2], dtype=int, units='s')
         NDDataset: [int64] s (shape: (y:2, x:2))
         """
@@ -1538,7 +1541,7 @@ class NDMath(object):
 
         Examples
         --------
-        >>> import spectrochempy as scp
+
         >>> scp.eye(2, dtype=int)
         NDDataset: [float64] unitless (shape: (y:2, x:2))
         >>> scp.eye(3, k=1, units='km').values
@@ -1549,7 +1552,6 @@ class NDMath(object):
 
         return cls(np.eye(N, M, k, dtype), **kwargs)
 
-    # ..................................................................................................................
     @_from_numpy_method
     def fromfunction(
         cls, function, shape=None, dtype=float, units=None, coordset=None, **kwargs
@@ -1595,10 +1597,11 @@ class NDMath(object):
         --------
         Create a 1D NDDataset from a function
 
-        >>> import spectrochempy as scp
         >>> def func1(t, v):
         ...     d = v * t
         ...     return d
+        ...
+        ...
         ...
         >>> time = scp.LinearCoord.arange(0, 60, 10, units='min')
         >>> d = scp.fromfunction(func1, v=scp.Quantity(134, 'km/hour'), coordset=scp.CoordSet(t=time))
@@ -1665,7 +1668,7 @@ class NDMath(object):
 
         Examples
         --------
-        >>> import spectrochempy as scp
+
         >>> iterable = (x * x for x in range(5))
         >>> d = scp.fromiter(iterable, float, units='km')
         >>> d
@@ -1716,7 +1719,7 @@ class NDMath(object):
 
         Examples
         --------
-        >>> import spectrochempy as scp
+
         >>> scp.full((2, ), np.inf)
         NDDataset: [float64] unitless (size: 2)
         >>> scp.NDDataset.full((2, 2), 10, dtype=np.int)
@@ -1772,7 +1775,6 @@ class NDMath(object):
 
         1) from the API
 
-        >>> import spectrochempy as scp
         >>> x = np.arange(6, dtype=int)
         >>> scp.full_like(x, 1)
         NDDataset: [float64] unitless (size: 6)
@@ -1811,9 +1813,9 @@ class NDMath(object):
             In that case, ``num + 1`` values are spaced over the
             interval in log-space, of which all but the last (a sequence of
             length `num`) are returned.
-        num : integer, optional
+        num : int, optional
             Number of samples to generate.  Default is 50.
-        endpoint : boolean, optional
+        endpoint : bool, optional
             If true, `stop` is the last sample. Otherwise, it is not included.
             Default is True.
         dtype : dtype
@@ -1826,6 +1828,7 @@ class NDMath(object):
         -------
         geomspace
             `num` samples, equally spaced on a log scale.
+
         See Also
         --------
         logspace : Similar to geomspace, but with endpoints specified using log
@@ -1868,7 +1871,7 @@ class NDMath(object):
 
         Examples
         --------
-        >>> import spectrochempy as scp
+
         >>> scp.identity(3).data
         array([[       1,        0,        0],
                [       0,        1,        0],
@@ -1938,9 +1941,9 @@ class NDMath(object):
             is False.  In that case, ``num + 1`` values are spaced over the
             interval in log-space, of which all but the last (a sequence of
             length `num`) are returned.
-        num : integer, optional
+        num : int, optional
             Number of samples to generate.  Default is 50.
-        endpoint : boolean, optional
+        endpoint : bool, optional
             If true, `stop` is the last sample. Otherwise, it is not included.
             Default is True.
         base : float, optional
@@ -2013,7 +2016,7 @@ class NDMath(object):
 
         Examples
         --------
-        >>> import spectrochempy as scp
+
         >>> nd = scp.read('irdata/nh4y-activation.spg')
         >>> nd
         NDDataset: [float64] a.u. (shape: (y:55, x:5549))
@@ -2083,7 +2086,7 @@ class NDMath(object):
 
         Examples
         --------
-        >>> import spectrochempy as scp
+
         >>> nd = scp.ones(5, units='km')
         >>> nd
         NDDataset: [float64] km (size: 5)
@@ -2149,7 +2152,7 @@ class NDMath(object):
 
         Examples
         --------
-        >>> import spectrochempy as scp
+
         >>> x = np.arange(6)
         >>> x = x.reshape((2, 3))
         >>> x = scp.NDDataset(x, units='s')
@@ -2338,7 +2341,7 @@ class NDMath(object):
 
         Examples
         --------
-        >>> import spectrochempy as scp
+
         >>> nd = scp.read('irdata/nh4y-activation.spg')
         >>> nd
         NDDataset: [float64] a.u. (shape: (y:55, x:5549))
@@ -2403,7 +2406,7 @@ class NDMath(object):
 
         Examples
         --------
-        >>> import spectrochempy as scp
+
         >>> nd = scp.read('irdata/nh4y-activation.spg')
         >>> nd
         NDDataset: [float64] a.u. (shape: (y:55, x:5549))
@@ -2497,7 +2500,7 @@ class NDMath(object):
 
         Examples
         --------
-        >>> import spectrochempy as scp
+
         >>> nd = scp.read('irdata/nh4y-activation.spg')
         >>> nd
         NDDataset: [float64] a.u. (shape: (y:55, x:5549))
@@ -2567,7 +2570,7 @@ class NDMath(object):
 
         Examples
         --------
-        >>> import spectrochempy as scp
+
         >>> nd = scp.NDDataset.zeros(6)
         >>> nd
         NDDataset: [float64] unitless (size: 6)
@@ -2624,7 +2627,7 @@ class NDMath(object):
 
         Examples
         --------
-        >>> import spectrochempy as scp
+
         >>> x = np.arange(6)
         >>> x = x.reshape((2, 3))
         >>> nd = scp.NDDataset(x, units='s')
@@ -3194,12 +3197,16 @@ class _ufunc:
             Parameters
             ----------
             dataset : array-like
-                object to pass to the numpy function.
+                Object to pass to the numpy function.
 
             Returns
             -------
             out
                 |NDDataset|
+
+            See Also
+            --------
+            numpy.{self.name} : Corresponding numpy Ufunc.
 
             Notes
             -----
@@ -3207,14 +3214,9 @@ class _ufunc:
             of SpectrochemPy objects.
             Most of these Ufuncs, however, instead of returning a numpy array, will return the same type of object.
 
-            See Also
-            --------
-            `numpy <https://numpy.org/doc/stable/reference/generated/numpy.{self.name}.html>`_ :
-                Corresponding numpy Ufunc.
-
             Examples
             --------
-            >>> import spectrochempy as scp
+
             >>> ds = scp.read('wodger.spg')
             >>> ds_transformed = scp.{self.name}(ds)
 

@@ -82,7 +82,7 @@ def read_matlab(*paths, **kwargs):
 
     Examples
     ---------
-    >>> import spectrochempy as scp
+
     >>> scp.read_matlab('matlabdata/dso.mat')
     NDDataset: [float64] unitless (shape: (y:20, x:426))
 

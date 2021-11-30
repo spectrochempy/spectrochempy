@@ -106,7 +106,7 @@ def simps(dataset, *args, **kwargs):
 
     Example
     --------
-    >>> import spectrochempy as scp
+
     >>> dataset = scp.read('irdata/nh4y-activation.spg')
     >>> dataset[:,1250.:1800.].simps()
     NDDataset: [float64] a.u..cm^-1 (size: 55)

@@ -34,18 +34,105 @@ import numpy as np
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
 from .plotutils import make_label
-from ...utils import is_sequence  # , deprecated
-from spectrochempy.core.dataset.coord import Coord
+from ...utils import is_sequence, add_docstring  # , deprecated
+from ..dataset.coord import Coord
+
+
+_PLOT1D_DOC = """\
+widget : Matplotlib or PyQtGraph widget (for GUI only)
+    The widget where to plot in the GUI application. This is not used if
+    plots are made in jupyter notebook.
+twinx : :class:`~matplotlib.Axes` instance, optional, default: None
+    If this is not None, then a twin axes will be created with a
+    common x dimension.
+title : str
+    Title of the plot (or subplot) axe.
+style : str, optional, default='notebook'
+    Matplotlib stylesheet (use `available_style` to get a list of available
+    styles for plotting.
+reverse : bool or None [optional, default=None/False
+    In principle, coordinates run from left to right,
+    except for wavenumbers
+    (*e.g.*, FTIR spectra) or ppm (*e.g.*, NMR), that spectrochempy
+    will try to guess. But if reverse is set, then this is the
+    setting which will be taken into account.
+clear : bool, optional, default: True
+    If false, hold the current figure and ax until a new plot is performed.
+data_only : bool, optional, default: False
+    Only the plot is done. No addition of axes or label specifications.
+imag : bool, optional, default: False
+    Show imaginary component. By default only the real component is
+    displayed.
+show_complex : bool, optional, default: False
+    Show both real and imaginary component.
+    By default only the real component is displayed.
+dpi : int, optional
+    the number of pixel per inches.
+figsize : tuple, optional, default is (3.4, 1.7)
+    figure size.
+fontsize : int, optional
+    font size in pixels, default is 10.
+imag : bool, optional, default False
+    By default real component is shown.
+    Set to True to display the imaginary component
+xlim : tuple, optional
+    limit on the horizontal axis.
+zlim or ylim : tuple, optional
+    limit on the vertical axis.
+color or c : matplotlib valid color, optional
+    color of the line.  # TODO : a list if several line
+linewidth or lw : float, optional
+    line width.
+linestyle or ls : str, optional
+    line style definition.
+xlabel : str, optional
+    label on the horizontal axis.
+zlabel or ylabel : str, optional
+    label on the vertical axis.
+showz : bool, optional, default=True
+    should we show the vertical axis.
+plot_model : Bool,
+    plot model data if available.
+modellinestyle or modls : str
+    line style of the model.
+offset : float
+    offset of the model individual lines.
+commands : str,
+    matplotlib commands to be executed.
+show_zero : boolean, optional
+    show the zero basis.
+output : str,
+    name of the file to save the figure.
+vshift : float, optional
+    vertically shift the line from its baseline."""
 
 
 # plot scatter ---------------------------------------------------------------
-
-
+@add_docstring(_PLOT1D_DOC)
 def plot_scatter(dataset, **kwargs):
     """
     Plot a 1D dataset as a scatter plot (points can be added on lines).
 
     Alias of plot (with `method` argument set to ``scatter``.
+
+    Parameters
+    ----------
+    dataset : :class:`~spectrochempy.ddataset.nddataset.NDDataset`
+        Source of data to plot.
+    **kwargs : dict
+        See other parameters.
+
+    Other Parameters
+    ----------------
+    {0}
+
+    See Also
+    --------
+    plot_1D
+    plot_pen
+    plot_bar
+    plot_scatter_pen
+    plot_multiple
     """
     kwargs["method"] = "scatter"
     if kwargs.get("use_plotly", False):
@@ -57,11 +144,31 @@ def plot_scatter(dataset, **kwargs):
 # plot pen (default) ---------------------------------------------------------
 
 
+@add_docstring(_PLOT1D_DOC)
 def plot_pen(dataset, **kwargs):
     """
     Plot a 1D dataset with solid pen by default.
 
     Alias of plot (with `method` argument set to ``pen``.
+
+    Parameters
+    ----------
+    dataset : :class:`~spectrochempy.ddataset.nddataset.NDDataset`
+        Source of data to plot.
+    **kwargs : dict
+        See other parameters.
+
+    Other Parameters
+    ----------------
+    {0}
+
+    See Also
+    --------
+    plot_1D
+    plot_scatter
+    plot_bar
+    plot_scatter_pen
+    plot_multiple
     """
     kwargs["method"] = "pen"
     if kwargs.get("use_plotly", False):
@@ -73,11 +180,31 @@ def plot_pen(dataset, **kwargs):
 # plot pen (default) ---------------------------------------------------------
 
 
+@add_docstring(_PLOT1D_DOC)
 def plot_scatter_pen(dataset, **kwargs):
     """
     Plot a 1D dataset with solid pen by default.
 
-    Alias of plot (with `method` argument set to ``pen``.
+    Alias of plot (with `method` argument set to ``scatter_pen``.
+
+    Parameters
+    ----------
+    dataset : :class:`~spectrochempy.ddataset.nddataset.NDDataset`
+        Source of data to plot.
+    **kwargs : dict
+        See other parameters.
+
+    Other Parameters
+    ----------------
+    {0}
+
+    See Also
+    --------
+    plot_1D
+    plot_pen
+    plot_scatter
+    plot_bar
+    plot_multiple
     """
     kwargs["method"] = "scatter+pen"
     if kwargs.get("use_plotly", False):
@@ -89,11 +216,31 @@ def plot_scatter_pen(dataset, **kwargs):
 # plot bars ------------------------------------------------------------------
 
 
+@add_docstring(_PLOT1D_DOC)
 def plot_bar(dataset, **kwargs):
     """
     Plot a 1D dataset with bars.
 
     Alias of plot (with `method` argument set to ``bar``.
+
+    Parameters
+    ----------
+    dataset : :class:`~spectrochempy.ddataset.nddataset.NDDataset`
+        Source of data to plot.
+    **kwargs : dict
+        See other parameters.
+
+    Other Parameters
+    ----------------
+    {0}
+
+    See Also
+    --------
+    plot_1D
+    plot_pen
+    plot_scatter
+    plot_scatter_pen
+    plot_multiple
     """
     kwargs["method"] = "bar"
     if kwargs.get("use_plotly", False):
@@ -105,6 +252,7 @@ def plot_bar(dataset, **kwargs):
 # plot multiple --------------------------------------------------------------
 
 
+@add_docstring(_PLOT1D_DOC)
 def plot_multiple(datasets, method="scatter", pen=True, labels=None, **kwargs):
     """
     Plot a series of 1D datasets as a scatter plot
@@ -119,7 +267,20 @@ def plot_multiple(datasets, method="scatter", pen=True, labels=None, **kwargs):
         between the marks.
     labels : a list of str, optional
         labels used for the legend.
-    **kwargs : other parameters that will be passed to the plot1D function
+    **kwargs : dic
+        Other parameters that will be passed to the plot1D function
+
+    Other Parameters
+    ----------------
+    {0}
+
+    See Also
+    --------
+    plot_1D
+    plot_pen
+    plot_scatter
+    plot_bar
+    plot_scatter_pen
     """
     if not is_sequence(datasets):
         # we need a sequence. Else it is a single plot.
@@ -192,7 +353,8 @@ def plot_multiple(datasets, method="scatter", pen=True, labels=None, **kwargs):
 # ----------------------------------------------------------------------------------------------------------------------
 
 
-def plot_1D(dataset, **kwargs):
+@add_docstring(_PLOT1D_DOC)
+def plot_1D(dataset, method="pen", **kwargs):
     """
     Plot of one-dimensional data.
 
@@ -200,82 +362,25 @@ def plot_1D(dataset, **kwargs):
     ----------
     dataset : :class:`~spectrochempy.ddataset.nddataset.NDDataset`
         Source of data to plot.
-    **kwargs : dict
-        See other parameters.
-
-    Other Parameters
-    ----------------
-    widget : Matplotlib or PyQtGraph widget (for GUI only)
-        The widget where to plot in the GUI application. This is not used if
-        plots are made in jupyter notebook.
     method : str, optional, default: pen
         The method can be one among ``pen``, ``bar``,  or ``scatter``
         Default values is ``pen``, i.e., solid lines are drawn.
         To draw a Bar graph, use method : ``bar``.
         For a Scatter plot, use method : ``scatter``.
-    twinx : :class:`~matplotlib.Axes` instance, optional, default: None
-        If this is not None, then a twin axes will be created with a
-        common x dimension.
-    title : str
-        Title of the plot (or subplot) axe.
-    style : str, optional, default='notebook'
-        Matplotlib stylesheet (use `available_style` to get a list of available
-        styles for plotting.
-    reverse : bool or None [optional, default=None/False
-        In principle, coordinates run from left to right,
-        except for wavenumbers
-        (*e.g.*, FTIR spectra) or ppm (*e.g.*, NMR), that spectrochempy
-        will try to guess. But if reverse is set, then this is the
-        setting which will be taken into account.
-    clear : bool, optional, default: True
-        If false, hold the current figure and ax until a new plot is performed.
-    data_only : bool, optional, default: False
-        Only the plot is done. No addition of axes or label specifications.
-    imag : bool, optional, default: False
-        Show imaginary component. By default only the real component is
-        displayed.
-    show_complex : bool, optional, default: False
-        Show both real and imaginary component.
-        By default only the real component is displayed.
-    dpi : int, optional
-        the number of pixel per inches.
-    figsize : tuple, optional, default is (3.4, 1.7)
-        figure size.
-    fontsize : int, optional
-        font size in pixels, default is 10.
-    imag : bool, optional, default False
-        By default real component is shown.
-        Set to True to display the imaginary component
-    xlim : tuple, optional
-        limit on the horizontal axis.
-    zlim or ylim : tuple, optional
-        limit on the vertical axis.
-    color or c : matplotlib valid color, optional
-        color of the line.  # TODO : a list if several line
-    linewidth or lw : float, optional
-        line width.
-    linestyle or ls : str, optional
-        line style definition.
-    xlabel : str, optional
-        label on the horizontal axis.
-    zlabel or ylabel : str, optional
-        label on the vertical axis.
-    showz : bool, optional, default=True
-        should we show the vertical axis.
-    plot_model : Bool,
-        plot model data if available.
-    modellinestyle or modls : str
-        line style of the model.
-    offset : float
-        offset of the model individual lines.
-    commands : str,
-        matplotlib commands to be executed.
-    show_zero : boolean, optional
-        show the zero basis.
-    output : str,
-        name of the file to save the figure.
-    vshift : float, optional
-        vertically shift the line from its baseline.
+    **kwargs : dict
+        See other parameters.
+
+    Other Parameters
+    ----------------
+    {0}
+
+    See Also
+    --------
+    plot_pen
+    plot_scatter
+    plot_bar
+    plot_scatter_pen
+    plot_multiple
     """
 
     # Get preferences
@@ -304,8 +409,6 @@ def plot_1D(dataset, **kwargs):
 
     # Method of plot
     # ------------------------------------------------------------------------------------------------------------------
-
-    method = kwargs.get("method", prefs.method_1D)
 
     # some addtional options may exists in kwargs
     pen = kwargs.pop("pen", False)  # lines and pen synonyms
