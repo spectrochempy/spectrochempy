@@ -135,7 +135,7 @@ def test_coordset_multicoord_for_a_single_dim():
     )
 
     # pass as a list of coord -> this become a subcoordset
-    coordsa = CoordSet([coord1, coord0])
+    coordsa = CoordSet([coord0, coord1])
     assert (
         repr(coordsa) == "CoordSet: [x:[_1:temperature, _2:wavelengths]]"
     )  # note the internal coordinates are not sorted
