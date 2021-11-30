@@ -67,8 +67,8 @@ def test_coordset_init(coord0, coord1, coord2):
     coordse = CoordSet(
         x=(coord1[:3], coord2[:3]), y=coord3, z=coord0
     )  # coordset as coordinates
-    assert coordse["x"].titles == CoordSet(coord1, coord2, sorted=False).titles
-    assert coordse["x_2"] == coord2
+    assert coordse["x"].titles == CoordSet(coord1, coord2).titles
+    assert coordse["x_1"] == coord2
     assert coordse["titi"] == coord3
 
     # iteration
@@ -137,7 +137,7 @@ def test_coordset_multicoord_for_a_single_dim():
     # pass as a list of coord -> this become a subcoordset
     coordsa = CoordSet([coord1, coord0])
     assert (
-        repr(coordsa) == "CoordSet: [x:[_1:wavelengths, _2:temperature]]"
+        repr(coordsa) == "CoordSet: [x:[_1:temperature, _2:wavelengths]]"
     )  # note the internal coordinates are not sorted
     assert not coordsa.is_same_dim
     assert coordsa.x.is_same_dim
@@ -153,7 +153,7 @@ def test_coordset_multicoord_for_a_single_dim():
     coordsd = CoordSet(coordsa.x, coordsc)
     assert (
         repr(coordsd)
-        == "CoordSet: [x:[_1:temperature, _2:wavelengths], y:[_1:wavelengths, _2:temperature]]"
+        == "CoordSet: [x:[_1:temperature, _2:wavelengths], y:[_1:temperature, _2:wavelengths]]"
     )
 
     assert not coordsd.is_same_dim
@@ -161,7 +161,7 @@ def test_coordset_multicoord_for_a_single_dim():
 
     coordse = CoordSet(coordsb, coord1)
     assert (
-        repr(coordse) == "CoordSet: [x:wavelengths, y:[_1:wavelengths, _2:temperature]]"
+        repr(coordse) == "CoordSet: [x:wavelengths, y:[_1:temperature, _2:wavelengths]]"
     )
 
     assert not coordse.is_same_dim
@@ -174,12 +174,12 @@ def test_coordset_multicoord_for_a_single_dim():
     assert isinstance(co, CoordSet)
     assert co.name == "y"
     assert co.names == ["_1", "_2"]
-    assert co._1 == coord1  # no reordering for the sub-coordset
+    assert co._1 == coord0
 
     co = coordse[-1:]
     assert isinstance(co, CoordSet)
     assert co[0].name == "y"  # should keep the original name (solved)
-    assert co[0]["_1"] == coord1
+    assert co[0]["_1"] == coord0
 
 
 def test_coordset_call(coord0, coord1):
@@ -412,7 +412,7 @@ def test_coordset_set(coord0, coord1, coord2):
     assert str(coords) == "CoordSet: [x:zaza, y:wavenumber, z:wavenumber]"
 
 
-def test_issue_issue_310():
+def test_issue_310():
 
     import spectrochempy as scp
     import numpy as np
@@ -421,23 +421,20 @@ def test_issue_issue_310():
     c5 = scp.Coord.linspace(start=0.0, stop=1000.0, num=5, name="xcoord")
     c10 = scp.Coord.linspace(start=0.0, stop=1000.0, num=10, name="ycoord")
 
-    print(c5.name)  # as expected: "xcoord"
+    assert c5.name == "xcoord"
     D.set_coordset(x=c5, y=c10)
-    print(c5.name)  # now it is "x"
-    print(D.coordset)  # as expected: "CoordSet: [x:<untitled>, y:<untitled>]"
-    print(D.dims)  # as expected: ['y', 'x']
+    assert c5.name == "x"
+    assert str(D.coordset) == "CoordSet: [x:<untitled>, y:<untitled>]"
+    assert D.dims == ["y", "x"]
 
     E = scp.NDDataset(np.ndarray((5, 10)))
-    E.set_coordset(s=c5, t=c10, dims=["s", "t"])
-
-    print(
-        D.coordset
-    )  # now the Coord names of D have been changed: "CoordSet: [s:<untitled>, t:<untitled>]"
-    print(D.dims)  # but not the dim names: ['y', 'x'], and this can lead to
-    # bugs:
-
-    print(
-        D[:, 1]
-    )  # ERROR | ValueError: the size of a coordinates array must be None or be equal to that of the respective `y` data dimension but coordinate size=5 != data shape[0]=10
-
+    E.dims = ["s", "t"]
     E.set_coordset(s=c5, t=c10)
+    assert c5.name == "s"
+    assert str(E.coordset) == "CoordSet: [s:<untitled>, t:<untitled>]"
+    assert E.dims == ["s", "t"]
+
+    assert str(D.coordset) == "CoordSet: [x:<untitled>, y:<untitled>]"
+    assert D.dims == ["y", "x"]
+
+    assert str(D[:, 1]) == "NDDataset: [float64] unitless (shape: (y:10, x:1))"
