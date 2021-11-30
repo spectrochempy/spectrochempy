@@ -431,7 +431,8 @@ class CoordSet(HasTraits):
     # ..................................................................................................................
     # @property
     # def coords(self):  #TODO: replace with itertiems, items etc ... to simulate a dict
-    #     """list - list of the Coord objects in the current coords (readonly
+    #     """
+    #     list - list of the Coord objects in the current coords (readonly
     #     property).
     #     """
     #     return self._coords
@@ -439,7 +440,8 @@ class CoordSet(HasTraits):
     # ..................................................................................................................
     @property
     def names(self):
-        """list - Names of the coords in the current coords (read only property)"""
+        """
+        list - Names of the coords in the current coords (read only property)"""
         _names = []
         if self._coords:
             for item in self._coords:

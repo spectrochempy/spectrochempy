@@ -410,3 +410,34 @@ def test_coordset_set(coord0, coord1, coord2):
 
     coords.wavenumber = coord2
     assert str(coords) == "CoordSet: [x:zaza, y:wavenumber, z:wavenumber]"
+
+
+def test_issue_issue_310():
+
+    import spectrochempy as scp
+    import numpy as np
+
+    D = scp.NDDataset(np.zeros((10, 5)))
+    c5 = scp.Coord.linspace(start=0.0, stop=1000.0, num=5, name="xcoord")
+    c10 = scp.Coord.linspace(start=0.0, stop=1000.0, num=10, name="ycoord")
+
+    print(c5.name)  # as expected: "xcoord"
+    D.set_coordset(x=c5, y=c10)
+    print(c5.name)  # now it is "x"
+    print(D.coordset)  # as expected: "CoordSet: [x:<untitled>, y:<untitled>]"
+    print(D.dims)  # as expected: ['y', 'x']
+
+    E = scp.NDDataset(np.ndarray((5, 10)))
+    E.set_coordset(s=c5, t=c10, dims=["s", "t"])
+
+    print(
+        D.coordset
+    )  # now the Coord names of D have been changed: "CoordSet: [s:<untitled>, t:<untitled>]"
+    print(D.dims)  # but not the dim names: ['y', 'x'], and this can lead to
+    # bugs:
+
+    print(
+        D[:, 1]
+    )  # ERROR | ValueError: the size of a coordinates array must be None or be equal to that of the respective `y` data dimension but coordinate size=5 != data shape[0]=10
+
+    E.set_coordset(s=c5, t=c10)

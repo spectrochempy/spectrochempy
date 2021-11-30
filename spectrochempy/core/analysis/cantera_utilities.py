@@ -1,18 +1,26 @@
 # -*- coding: utf-8 -*-
 
-# ----------------------------------------------------------------------------
-# Description
-# Utility functions to deal with Cantera input/output
 #
-# ---------------------------------------------------------------------------------
+# ======================================================================================================================
+# Copyright (©) 2015-2019 LCS
+# Laboratoire Catalyse et Spectrochimie, Caen, France.
+# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
+# See full LICENSE agreement in the root directory
+# ======================================================================================================================
+"""
+Utility functions to deal with Cantera input/output
+"""
 
+# TODO: Testing !
 
-import importlib
 import datetime
 import numpy as np
 import warnings
 import logging
+
 from scipy.optimize import minimize, differential_evolution, least_squares
+
+from spectrochempy._optional import import_optional_dependency
 
 __all__ = [
     "coverages_vs_time",
@@ -23,13 +31,10 @@ __all__ = [
     "PFR",
 ]
 
-HAS_CANTERA = importlib.util.find_spec("cantera")
-
-if HAS_CANTERA:
-    import cantera as ct
+import_optional_dependency("cantera")
+import cantera as ct
 
 from spectrochempy.core.dataset.nddataset import NDDataset, Coord
-from spectrochempy.utils.exceptions import SpectroChemPyException
 from collections.abc import Iterable
 
 
@@ -42,12 +47,6 @@ def coverages_vs_time(surface, t, returnNDDataset=False):
     return_NDDataset: boolean, if True returns the concentration matrix as a NDDataset, else as a np.ndarray
     default: False
     """
-    if not HAS_CANTERA:
-        raise SpectroChemPyException(
-            "Cantera is not available : please install it before continuing:  \n"
-            "conda install -c cantera cantera"
-        )
-
     init_coverages = surface.coverages
     coverages = np.zeros((len(t), surface.coverages.shape[0]))
 
@@ -76,11 +75,6 @@ def concentrations_vs_time(reactive_phase, t, reactorNet=None, returnNDDataset=F
     return_NDDataset: boolean, if True returns the concentration matrix as a NDDataset, else as a np.ndarray
     default: False
     """
-    if not HAS_CANTERA:
-        raise SpectroChemPyException(
-            "Cantera is not available : please install it before continuing:  \n"
-            "conda install -c cantera cantera"
-        )
 
     if type(reactive_phase) is ct.composite.Interface:
         concentrations = (
@@ -126,12 +120,6 @@ def modify_rate(reactive_phase, i_reaction, rate):
     -------
     reactive_phase
     """
-    if not HAS_CANTERA:
-        raise SpectroChemPyException(
-            "Cantera is not available : please install it before continuing:  \n"
-            "conda install -c cantera cantera"
-        )
-
     rxn = reactive_phase.reaction(i_reaction)
     rxn.rate = rate
     reactive_phase.modify_reaction(i_reaction, rxn)
@@ -144,12 +132,6 @@ def modify_surface_kinetics(surface, param_to_set):
     pre-exponential factor, temperature_exponent, activation_energy
 
     """
-    if not HAS_CANTERA:
-        raise SpectroChemPyException(
-            "Cantera is not available : please install it before continuing:  \n"
-            "conda install -c cantera cantera"
-        )
-
     # check some parameters
 
     if type(surface) is not ct.composite.Interface:
@@ -231,12 +213,6 @@ def fit_to_concentrations(
     a dictionary
     """
 
-    if not HAS_CANTERA:
-        raise SpectroChemPyException(
-            "Cantera is not available : please install it before continuing:  \n"
-            "conda install -c cantera cantera"
-        )
-
     def objective(
         param_value, param_to_optimize, C, externalConc, external_to_C_idx, surface
     ):
@@ -305,11 +281,6 @@ class PFR:
         init_X: dict, array or list of them
             initial composition of the reactors
         """
-        if not HAS_CANTERA:
-            raise SpectroChemPyException(
-                "Cantera is not available : please install it before continuing:  \n"
-                "conda install -c cantera cantera"
-            )
 
         if area is None:
             add_surface = False
@@ -539,12 +510,6 @@ class PFR:
          ----------
          a dictionary
         """
-        if not HAS_CANTERA:
-            raise SpectroChemPyException(
-                "Cantera is not available : please install it before continuing:  \n"
-                "conda install -c cantera cantera"
-            )
-
         # global variables to keep track of iterations and optimization history
         global it, trials, func_values, popsize, pop_sse, prev_min_sse
 

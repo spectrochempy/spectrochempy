@@ -1,3 +1,7 @@
+# This file is adapted from pandas (pandas.compat._optional)
+# see https://github.com/pandas-dev/pandas/blob/master/pandas/compat/_optional.py
+# BSD 3-Clause License
+
 from __future__ import annotations
 
 import importlib
@@ -5,47 +9,21 @@ import sys
 import types
 import warnings
 
-from pandas.util.version import Version
+from spectrochempy.utils.version import Version
 
-# Update install.rst when updating versions!
+# Update install_adds.rst when updating versions!
 
 VERSIONS = {
-    "bs4": "4.8.2",
-    "bottleneck": "1.3.1",
-    "fsspec": "0.7.4",
-    "fastparquet": "0.4.0",
-    "gcsfs": "0.6.0",
-    "lxml.etree": "4.5.0",
-    "matplotlib": "3.3.2",
-    "numexpr": "2.7.1",
-    "odfpy": "1.4.1",
-    "openpyxl": "3.0.2",
-    "pandas_gbq": "0.14.0",
-    "pyarrow": "1.0.1",
-    "pytest": "6.0",
-    "pyxlsb": "1.0.6",
-    "s3fs": "0.4.0",
-    "scipy": "1.4.1",
-    "sqlalchemy": "1.3.11",
-    "tables": "3.6.1",
-    "tabulate": "0.8.7",
-    "xarray": "0.15.1",
-    "xlrd": "2.0.1",
-    "xlwt": "1.3.0",
-    "xlsxwriter": "1.2.2",
-    "numba": "0.50.1",
+    "scikit-learn": "*",
+    "xarray": "*",
+    "cantera": "2.5.1",
+    "pyqt": "*",
 }
 
 # A mapping from import name to package name (on PyPI) for packages where
 # these two names are different.
 
 INSTALL_MAPPING = {
-    "bs4": "beautifulsoup4",
-    "bottleneck": "Bottleneck",
-    "lxml.etree": "lxml",
-    "odf": "odfpy",
-    "pandas_gbq": "pandas-gbq",
-    "sqlalchemy": "SQLAlchemy",
     "jinja2": "Jinja2",
 }
 
@@ -109,7 +87,7 @@ def import_optional_dependency(
 
     msg = (
         f"Missing optional dependency '{install_name}'. {extra} "
-        f"Use pip or conda to install {install_name}."
+        f"Use conda to install {install_name}."
     )
     try:
         module = importlib.import_module(name)
@@ -127,7 +105,7 @@ def import_optional_dependency(
     else:
         module_to_get = module
     minimum_version = min_version if min_version is not None else VERSIONS.get(parent)
-    if minimum_version:
+    if minimum_version != "*":
         version = get_version(module_to_get)
         if Version(version) < Version(minimum_version):
             msg = (
