@@ -180,7 +180,7 @@ class CoordSet(HasTraits):
                 # coords follow the order of dims.
                 if not isinstance(coord, CoordSet):
                     if isinstance(coord, list):
-                        coord = CoordSet(*coord, sorted=False)
+                        coord = CoordSet(*coord[::-1], sorted=False)
                     elif not isinstance(coord, LinearCoord):  # else
                         coord = Coord(coord, copy=True)
                 else:
