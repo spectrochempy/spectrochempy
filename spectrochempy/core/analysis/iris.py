@@ -140,10 +140,10 @@ class IRIS:
         epsRange = param.get("epsRange", None)
         try:
             eps = np.linspace(epsRange[0], epsRange[1], epsRange[2])
-        except Exception:
+        except Exception as exc:
             raise Exception(
                 "Parameter epsRange in param must be a list of 3 values: [start, stop, num]"
-            )
+            ) from exc
 
         # Defines regularization parameter values
         lamb = [0]

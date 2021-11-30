@@ -25,7 +25,7 @@ import matplotlib as mpl
 import numpy as np
 import scipy
 
-from spectrochempy._optional import import_optional_dependency
+from .._optional import import_optional_dependency
 
 warnings.filterwarnings("ignore")
 
@@ -50,37 +50,41 @@ __all__ = [
 # logging functions
 # ======================================================================================================================
 
-from spectrochempy.utils import pstr  # noqa: E402
+from ..utils import pstr  # noqa: E402
+
+
+def _format_args(*args, **kwargs):
+    stg = ""
+    for arg in args:
+        stg += pstr(arg, **kwargs) + " "
+    return stg.replace("\0", "").strip()
 
 
 def print_(*args, **kwargs):
     """
     Formatted printing
     """
-    s = ""
-    for a in args:
-        s += pstr(a, **kwargs) + " "
-    s = s.replace("\0", "").strip()
-    print(s)
+    stg = _format_args(*args, **kwargs)
+    print(stg)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 def info_(*args, **kwargs):
-    s = ""
-    for a in args:
-        s += pstr(a, **kwargs) + " "
-    s = s.replace("\0", "").strip()
-    app.logs.info(s)
+    """
+    Formatted info message
+    """
+    stg = _format_args(*args, **kwargs)
+    app.logs.info(stg)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 def debug_(*args, **kwargs):
-    s = ""
-    for a in args:
-        s += pstr(a, **kwargs) + " "
-        s = s.replace("\0", "").strip()
+    """
+    Formatted debug message
+    """
+    stg = _format_args(*args, **kwargs)
     try:
-        app.logs.debug(s)
+        app.logs.debug(stg)
     except NameError:
         # works only if app if already loaded
         pass
@@ -88,22 +92,23 @@ def debug_(*args, **kwargs):
 
 # ----------------------------------------------------------------------------------------------------------------------
 def error_(*args, **kwargs):
-    s = ""
+    """
+    Formatted error message
+    """
+    stg = ""
     if not isinstance(args[0], str):
-        s += type(args[0]).__name__ + ": "
-    for a in args:
-        s += pstr(a, **kwargs) + " "
-        s = s.replace("\0", "").strip()
-    app.logs.error(s)
+        stg += type(args[0]).__name__ + ": "
+    stg += _format_args(*args, **kwargs)
+    app.logs.error(stg)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 def warning_(*args, **kwargs):
-    s = ""
-    for a in args:
-        s += pstr(a, **kwargs) + " "
-        s = s.replace("\0", "").strip()
-    app.logs.warning(s)
+    """
+    Formatted warning message
+    """
+    stg = _format_args(*args, **kwargs)
+    app.logs.warning(stg)
 
 
 __all__ += ["info_", "debug_", "error_", "warning_", "print_"]
@@ -111,7 +116,7 @@ __all__ += ["info_", "debug_", "error_", "warning_", "print_"]
 # ======================================================================================================================
 # Progress bar
 # ======================================================================================================================
-pbar_count = 0
+PBAR_COUNT = 0
 
 USE_TQDM = (
     environ.get("USE_TQDM", "Yes") == "Yes"
@@ -128,17 +133,17 @@ if USE_TQDM:
 
 
 def _pbar_update(close=None):
-    global pbar_count
+    global PBAR_COUNT
 
     if USE_TQDM:
 
         if close:
             pbar.clear()
             pbar.close()
-            pbar_count = 0
+            PBAR_COUNT = 0
         else:
-            pbar.update(val_tqdm[pbar_count])
-            pbar_count += 1
+            pbar.update(val_tqdm[PBAR_COUNT])
+            PBAR_COUNT += 1
     else:
         pass
 
@@ -149,12 +154,12 @@ def _pbar_update(close=None):
 # ======================================================================================================================
 
 _pbar_update()
-from spectrochempy.application import SpectroChemPy  # noqa: E402
+from ..application import SpectroChemPy  # noqa: E402
 
 app = SpectroChemPy()
 __all__ += ["app"]
 
-from spectrochempy.application import (  # noqa: E402
+from ..application import (  # noqa: E402
     __version__ as version,
     __release__ as release,
     __copyright__ as copyright,
@@ -225,103 +230,103 @@ _pbar_update()
 
 # constants
 # ----------------------------------------------------------------------------------------------------------------------
-from spectrochempy.utils import show, MASKED, NOMASK, EPSILON, INPLACE  # noqa: E402
+from ..utils import show, MASKED, NOMASK, EPSILON, INPLACE  # noqa: E402
 
 __all__ += ["show", "MASKED", "NOMASK", "EPSILON", "INPLACE"]
 
 # dataset
 # ----------------------------------------------------------------------------------------------------------------------
 _pbar_update()
-from spectrochempy.core.dataset.api import *  # noqa: E402,F403,F401
-from spectrochempy.core.dataset import api  # noqa: E402
+from .dataset import api  # noqa: E402
+from .dataset.api import *  # noqa: E402,F403,F401
 
 __all__ += api.__all__
 
 # plotters
 # ----------------------------------------------------------------------------------------------------------------------
 _pbar_update()
-from spectrochempy.core.plotters.api import *  # noqa: E402,F403,F401
-from spectrochempy.core.plotters import api  # noqa: E402
+from .plotters import api  # noqa: E402
+from .plotters.api import *  # noqa: E402,F403,F401
 
 __all__ += api.__all__
 
 # processors
 # ----------------------------------------------------------------------------------------------------------------------
 _pbar_update()
-from spectrochempy.core.processors.api import *  # noqa: E402,F403,F401
-from spectrochempy.core.processors import api  # noqa: E402
+from .processors import api  # noqa: E402
+from .processors.api import *  # noqa: E402,F403,F401
 
 __all__ += api.__all__
 
 # readers
 # ----------------------------------------------------------------------------------------------------------------------
 _pbar_update()
-from spectrochempy.core.readers.api import *  # noqa: E402,F403,F401
-from spectrochempy.core.readers import api  # noqa: E402
+from .readers import api  # noqa: E402
+from .readers.api import *  # noqa: E402,F403,F401
 
 __all__ += api.__all__
 
 # writers
 # ----------------------------------------------------------------------------------------------------------------------
 _pbar_update()
-from spectrochempy.core.writers.api import *  # noqa: E402,F403,F401
-from spectrochempy.core.writers import api  # noqa: E402
+from .writers import api  # noqa: E402
+from .writers.api import *  # noqa: E402,F403,F401
 
 __all__ += api.__all__
 
 # units
 # ----------------------------------------------------------------------------------------------------------------------
 _pbar_update()
-from spectrochempy.units.units import *  # noqa: E402,F403,F401
-from spectrochempy.units import units  # noqa: E402
+from ..units import units  # noqa: E402
+from ..units.units import *  # noqa: E402,F403,F401
 
 __all__ += units.__all__
 
 # databases
 # ----------------------------------------------------------------------------------------------------------------------
 _pbar_update()
-from spectrochempy.databases.api import *  # noqa: E402,F403,F401
-from spectrochempy.databases import api  # noqa: E402
+from ..databases import api  # noqa: E402
+from ..databases.api import *  # noqa: E402,F403,F401
 
 __all__ += api.__all__
 
 # analysis
 # ----------------------------------------------------------------------------------------------------------------------
 _pbar_update()
-from spectrochempy.core.analysis.api import *  # noqa: E402,F403,F401
-from spectrochempy.core.analysis import api  # noqa: E402
+from .analysis import api  # noqa: E402
+from .analysis.api import *  # noqa: E402,F403,F401
 
 __all__ += api.__all__
 
 # fitting
 # ----------------------------------------------------------------------------------------------------------------------
 _pbar_update()
-from spectrochempy.core.fitting.api import *  # noqa: E402,F403,F401
-from spectrochempy.core.fitting import api  # noqa: E402
+from .fitting import api  # noqa: E402
+from .fitting.api import *  # noqa: E402,F403,F401
 
 __all__ += api.__all__
 
 # project
 # ----------------------------------------------------------------------------------------------------------------------
 _pbar_update()
-from spectrochempy.core.project.api import *  # noqa: E402,F403,F401
-from spectrochempy.core.project import api  # noqa: E402
+from .project import api  # noqa: E402
+from .project.api import *  # noqa: E402,F403,F401
 
 __all__ += api.__all__
 
 # script
 # ----------------------------------------------------------------------------------------------------------------------
 _pbar_update()
-from spectrochempy.core.scripts.api import *  # noqa: E402,F403,F401
-from spectrochempy.core.scripts import api  # noqa: E402
+from .scripts import api  # noqa: E402
+from .scripts.api import *  # noqa: E402,F403,F401
 
 __all__ += api.__all__
 
 # widgets
 # ----------------------------------------------------------------------------------------------------------------------
 _pbar_update()
-from spectrochempy.widgets.api import *  # noqa: E402,F403,F401
-from spectrochempy.widgets import api  # noqa: E402
+from ..widgets import api  # noqa: E402
+from ..widgets.api import *  # noqa: E402,F403,F401
 
 __all__ += api.__all__
 
@@ -400,6 +405,8 @@ class _QTFileDialogs:
         if directory:
             return directory
 
+        return None
+
     # noinspection PyRedundantParentheses
     @classmethod
     def _open_filename(
@@ -423,6 +430,8 @@ class _QTFileDialogs:
         )
         if filename:
             return filename
+
+        return None
 
     # noinspection PyRedundantParentheses
     @classmethod
@@ -450,6 +459,8 @@ class _QTFileDialogs:
         )
         if files:
             return files
+
+        return None
 
     @classmethod
     def _save_filename(
@@ -480,6 +491,8 @@ class _QTFileDialogs:
         if filename:
             return filename
 
+        return None
+
 
 class _TKFileDialogs:
     def __init__(self):
@@ -494,9 +507,8 @@ class _TKFileDialogs:
         root.focus_force()
         self.root = root
 
-    def _open_existing_directory(
-        self, parent=None, caption="Select a folder", directory=""
-    ):
+    @staticmethod
+    def _open_existing_directory(parent=None, caption="Select a folder", directory=""):
 
         directory = filedialog.askdirectory(
             parent=parent, initialdir=directory, title=caption
@@ -505,6 +517,8 @@ class _TKFileDialogs:
         if directory:
             return directory
 
+        return None
+
     @staticmethod
     def filetypes(filters):
         # convert QT filters to TK
@@ -512,8 +526,8 @@ class _TKFileDialogs:
 
         regex = r"(.*)\((.*)\)"
         filetypes = []
-        for filter in filters:
-            matches = re.finditer(regex, filter)
+        for _filter in filters:
+            matches = re.finditer(regex, _filter)
             match = list(matches)[0]
             g = list(match.groups())
             g[1] = g[1].replace("[0-9]", "")
@@ -526,7 +540,7 @@ class _TKFileDialogs:
         return filetypes
 
     # noinspection PyRedundantParentheses
-    def _open_filename(self, parent=None, filters=None, default_filter=None):
+    def _open_filename(self, parent=None, filters=None):
 
         filename = filedialog.askopenfilename(
             parent=parent,
@@ -540,8 +554,10 @@ class _TKFileDialogs:
         if filename:
             return filename
 
+        return None
+
     # noinspection PyRedundantParentheses
-    def _open_multiple_filenames(self, parent=None, filters=None, default_filter=None):
+    def _open_multiple_filenames(self, parent=None, filters=None):
         """
         Return one or several files to open
         """
@@ -558,6 +574,8 @@ class _TKFileDialogs:
         if filename:
             return filename
 
+        return None
+
     def _save_filename(
         self,
         parent=None,
@@ -567,7 +585,7 @@ class _TKFileDialogs:
         filters=None,
     ):
 
-        from spectrochempy.utils import pathclean
+        from ..utils import pathclean
 
         dftext = ""
         directory = "."
@@ -598,6 +616,8 @@ class _TKFileDialogs:
         if filename:
             return pathclean(filename)
 
+        return None
+
 
 # ------------------------------------------------------------------------------------------------------------------
 # Public functions
@@ -605,7 +625,6 @@ class _TKFileDialogs:
 
 # noinspection PyRedundantParentheses
 def save_dialog(
-    parent=None,
     filename=None,
     caption="Save as...",
     selected_filter="",
@@ -629,15 +648,13 @@ def save_dialog(
     else:
         f = _TKFileDialogs()._save_filename(filename, caption, selected_filter, filters)
 
-    from spectrochempy.utils import pathclean
+    from ..utils import pathclean
 
     return pathclean(f)
 
 
 # noinspection PyRedundantParentheses
-def open_dialog(
-    parent=None, single=True, directory=None, filters=("All Files (*)"), **kwargs
-):
+def open_dialog(single=True, directory=None, filters=("All Files (*)"), **kwargs):
     """
     Return one or several files to open
     """
@@ -667,7 +684,7 @@ def open_dialog(
             parent=parent, filters=filters, default_filter=default_filter
         )
 
-    from spectrochempy.utils import pathclean
+    from ..utils import pathclean
 
     return pathclean(f)
 

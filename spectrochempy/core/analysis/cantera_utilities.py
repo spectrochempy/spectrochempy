@@ -17,10 +17,15 @@ import datetime
 import numpy as np
 import warnings
 import logging
+from collections.abc import Iterable
 
 from scipy.optimize import minimize, differential_evolution, least_squares
 
 from spectrochempy._optional import import_optional_dependency
+from spectrochempy.core.dataset.nddataset import NDDataset, Coord
+
+import_optional_dependency("cantera")
+import cantera as ct
 
 __all__ = [
     "coverages_vs_time",
@@ -31,31 +36,28 @@ __all__ = [
     "PFR",
 ]
 
-import_optional_dependency("cantera")
-import cantera as ct
-
-from spectrochempy.core.dataset.nddataset import NDDataset, Coord
-from collections.abc import Iterable
-
 
 def coverages_vs_time(surface, t, returnNDDataset=False):
-    """Returns the surface coverages at time(s) t
-    params:
-    ------
-    surface: instance of cantera.composite.Interface
-    t: iterable or spectrochempy.Coord, times at which the coverages must be computed
-    return_NDDataset: boolean, if True returns the concentration matrix as a NDDataset, else as a np.ndarray
-    default: False
+    """
+    Returns the surface coverages at time(s) t.
+
+    Parameters
+    ----------
+    surface: instance of cantera.composite.Interface.
+    tim: iterable or spectrochempy.Coord.
+        Times at which the coverages must be computed.
+    returnNDDataset: boolean, default: False.
+        If True returns the concentration matrix as a NDDataset, else as a np.ndarray.
     """
     init_coverages = surface.coverages
     coverages = np.zeros((len(t), surface.coverages.shape[0]))
 
-    if type(t) is Coord:
+    if isinstance(t, Coord):
         t = t.data
 
-    for i, ti in enumerate(t):
+    for i, tim in enumerate(t):
         surface.coverages = init_coverages
-        surface.advance_coverages(ti)
+        surface.advance_coverages(tim)
         coverages[i, :] = surface.coverages
         surface.coverages = init_coverages
     if returnNDDataset:
@@ -67,16 +69,19 @@ def coverages_vs_time(surface, t, returnNDDataset=False):
 
 
 def concentrations_vs_time(reactive_phase, t, reactorNet=None, returnNDDataset=False):
-    """Returns the  concentrations at time(s) t
-    params:
-    ------
-    surface: instance of cantera.composite.Interface or
-    t: iterable or spectrochempy.Coord, times at which the concentrations must be computed
-    return_NDDataset: boolean, if True returns the concentration matrix as a NDDataset, else as a np.ndarray
-    default: False
+    """
+    Returns the  concentrations at time(s) t.
+
+    Parameters
+    ----------
+    surface: instance of cantera.composite.Interface.
+    tim: iterable or Coord.
+        Times at which the concentrations must be computed.
+    return_NDDataset: boolean, default: False.
+        If True returns the concentration matrix as a NDDataset, else as a np.ndarray
     """
 
-    if type(reactive_phase) is ct.composite.Interface:
+    if isinstance(reactive_phase, ct.composite.Interface):
         concentrations = (
             coverages_vs_time(reactive_phase, t, returnNDDataset)
             * reactive_phase.site_density
@@ -85,25 +90,24 @@ def concentrations_vs_time(reactive_phase, t, reactorNet=None, returnNDDataset=F
             concentrations.x.title = "concentration"
         return concentrations
 
-    else:
-        raise NotImplementedError(
-            "not implemented for reactive_phase={}".format(str(type(reactive_phase)))
-        )
-        # # code for reactorNet
-        # if type(t) is Coord:
-        #     t = t.data
-        #
-        # for i, ti in enumerate(t):
-        #     reactorNet.advance(ti)
-        #     concentrations[i, :] = reactive_phase.concentrations
-        #     reactive_phase.concentrations = init_concentrations
-        #
-        #
-        # if returnNDDataset:
-        #     concentrations = NDDataset(concentrations)
-        #     concentrations.y = Coord(t, title='time')
-        #     concentrations.x.title = 'concentrations'
-        #     concentrations.x.labels = reactive_phase.species_names
+    raise NotImplementedError(
+        f"not implemented for reactive_phase={str(type(reactive_phase))}"
+    )
+    # # code for reactorNet
+    # if type(t) is Coord:
+    #     t = t.data
+    #
+    # for i, ti in enumerate(t):
+    #     reactorNet.advance(ti)
+    #     concentrations[i, :] = reactive_phase.concentrations
+    #     reactive_phase.concentrations = init_concentrations
+    #
+    #
+    # if returnNDDataset:
+    #     concentrations = NDDataset(concentrations)
+    #     concentrations.y = Coord(t, title='time')
+    #     concentrations.x.title = 'concentrations'
+    #     concentrations.x.labels = reactive_phase.species_names
 
 
 def modify_rate(reactive_phase, i_reaction, rate):
@@ -127,14 +131,15 @@ def modify_rate(reactive_phase, i_reaction, rate):
 
 
 def modify_surface_kinetics(surface, param_to_set):
-    """changes a set of numerical parameters of a an Interface among following:
+    """
+    Changes a set of numerical parameters of a an Interface among following:
     site_density, coverages, concentrations,
     pre-exponential factor, temperature_exponent, activation_energy
 
     """
     # check some parameters
 
-    if type(surface) is not ct.composite.Interface:
+    if not isinstance(surface, ct.composite.Interface):
         raise ValueError("only implemented of ct.composite.Interface")
 
     for param in param_to_set:
@@ -142,7 +147,7 @@ def modify_surface_kinetics(surface, param_to_set):
         try:
             eval("surface." + param)
         except ValueError:
-            print("class {} has no '{}' attribute".format(type(surface), param))
+            print(f"class {type(surface)} has no '{param}' attribute")
             raise
         # if exists => sets its new value
         # if the attribute is writable:
@@ -180,7 +185,6 @@ def modify_surface_kinetics(surface, param_to_set):
             )
             rxn = int(param.split(".")[0].split("[")[-1].split("]")[0])
             modify_rate(surface, rxn, ct.Arrhenius(A, b, param_to_set[param]))
-    return
 
 
 def fit_to_concentrations(
@@ -233,7 +237,8 @@ def fit_to_concentrations(
         print("Optimization of the parameters.")
         print(f"         Initial parameters: {guess_param}")
         print(
-            f"         Initial function value: {objective(guess_param, param_to_optimize, C, externalConc, external_to_C_idx, reactive_phase)}"
+            f"         Initial function value: "
+            f"{objective(guess_param, param_to_optimize, C, externalConc, external_to_C_idx, reactive_phase)}"
         )
     tic = datetime.datetime.now(datetime.timezone.utc)
     res = minimize(
@@ -310,7 +315,7 @@ class PFR:
             self._volume = self._volume * np.ones((n_cstr)) / n_cstr
 
         if add_surface and isinstance(area, (float, int)):
-            self._area = self.area * np.ones((n_cstr)) / n_cstr
+            self._area = self._area * np.ones((n_cstr)) / n_cstr
         self.n_cstr = len(volume)
 
         # first cstr
@@ -607,7 +612,8 @@ class PFR:
                                 )
                             else:
                                 logging.info(
-                                    f"                      Minimum SSE: {min_sse:.3e} ({(min_sse - prev_min_sse) / prev_min_sse:+.3%}, Eval # {it_min_sse})"
+                                    f"                      Minimum SSE: {min_sse:.3e} "
+                                    f"({(min_sse - prev_min_sse) / prev_min_sse:+.3%}, Eval # {it_min_sse})"
                                 )
                             logging.info(
                                 f"Execution time for the population: {toc - tic}"
@@ -653,7 +659,7 @@ class PFR:
                 func_values.append(sse)
                 return sse
 
-            elif optimizer == "least_squares":
+            if optimizer == "least_squares":
                 func_values.append(se)
                 return se
 
@@ -838,10 +844,12 @@ class PFR:
             )
 
             # note: to make it parallel (WIP):
-            #  - move objective outside/at thye same level as the class PFR, replace self by pfr : def _objective(guess, pfr, param_to_optimize, exp_conc, exp_idx, fit_to_exp_idx):
-            #  - pass self in args of _objectives: differential_evolution(_objective, bounds, args=(self, param_to_optimize, exp_conc, exp_idx, fit_to_exp_idx),
-            #  for the moment can't be parallelized because pfr uses lambda functions (for the pulse..) that can't be
-            # pickled.
+            #  - move objective outside/at the same level as the class PFR, replace self by pfr :
+            #    def _objective(guess, pfr, param_to_optimize, exp_conc, exp_idx, fit_to_exp_idx):
+            #  - pass self in args of _objectives: differential_evolution(_objective, bounds, args=(self,
+            #    param_to_optimize, exp_conc, exp_idx, fit_to_exp_idx),
+            #  for the moment can't be parallelized because pfr uses lambda functions (for the pulse..)
+            #    that can't be pickled.
 
         logging.info(f"\nEnd of optimization: {res.message}")
         toc = datetime.datetime.now()
@@ -929,7 +937,7 @@ class PFR:
             ),
             Coord(
                 data=None,
-                labels=[key for key in param_to_optimize.keys()],
+                labels=list(param_to_optimize.keys()),
                 title="kinetic parameters",
             ),
         )

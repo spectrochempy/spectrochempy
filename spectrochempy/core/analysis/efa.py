@@ -7,20 +7,20 @@
 """
 This module implement the EFA (Evolving Factor Analysis) class.
 """
+from datetime import datetime, timezone
+
+import numpy as np
+from traitlets import HasTraits, Instance, Float
+
+from ..dataset.nddataset import NDDataset
+from ..dataset.coordset import CoordSet
+from ..dataset.coord import Coord
+from ...utils import MASKED
+from .svd import SVD
 
 __all__ = ["EFA"]
 
 __dataset_methods__ = []
-
-import numpy as np
-from datetime import datetime, timezone
-from traitlets import HasTraits, Instance, Float
-
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.coordset import CoordSet
-from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.utils import MASKED
-from spectrochempy.core.analysis.svd import SVD
 
 
 # from spectrochempy.core.plotters.plot1d import plot_multiple
@@ -49,6 +49,8 @@ class EFA(HasTraits):
             in each IR spectrum).
 
         """
+        super().__init__()
+
         # check if we have the correct input
         # ----------------------------------
 
@@ -192,10 +194,10 @@ class EFA(HasTraits):
         c = NDDataset(
             np.zeros((M, n_pc)),
             coordset=CoordSet(y=self._X.y, x=xcoord),
-            name="C_EFA[{}]".format(self._X.name),
+            name=f"C_EFA[{self._X.name}]",
             title="relative concentration",
             description="Concentration profile from EFA",
-            history=str(datetime.now(timezone.utc)) + ": created by spectrochempy",
+            history=f"{datetime.now(timezone.utc)}: created by spectrochempy",
         )
         if self._X.is_masked:
             masked_rows = np.all(self._X.mask, axis=-1)

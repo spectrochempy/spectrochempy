@@ -5,14 +5,13 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-# """
-# Main package
-#
+"""
+Application Programming Interface
+"""
+
 # During the initialization of this package, a `matplotlib` backend is set
 # and some `IPython` configurations are made.
-#
-#
-# """
+
 
 import sys
 
@@ -28,12 +27,12 @@ from IPython import get_ipython
 
 # Do we run in IPython ?
 IN_IPYTHON = False
-kernel = None
-ip = None
+KERNEL = None
+IP = None
 if InteractiveShell.initialized():  # pragma: no cover
     IN_IPYTHON = True
-    ip = get_ipython()
-    kernel = getattr(ip, "kernel", None)
+    IP = get_ipython()
+    KERNEL = getattr(IP, "kernel", None)
 
 NO_DISPLAY = False
 NO_DIALOG = False
@@ -64,7 +63,7 @@ if "pytest" in sys.argv[0] or "py.test" in sys.argv[0]:
     # if len(sys.argv) > 1 and not any([arg.endswith(".py") for arg in sys.argv[1:]]) and '--nodisplay' not in sys.argv:
     if (
         len(sys.argv) > 1
-        and any([arg.split("::")[0].endswith(".py") for arg in sys.argv[1:]])
+        and any((arg.split("::")[0].endswith(".py") for arg in sys.argv[1:]))
         and "--nodisplay" not in sys.argv
     ):  # pragma: no cover
         # individual module testing
@@ -75,13 +74,10 @@ if "pytest" in sys.argv[0] or "py.test" in sys.argv[0]:
         mpl.use("agg", force=True)
 
 # Are we running in PyCharm scientific mode?
-if mpl.get_backend() == "module://backend_interagg":  # pragma: no cover
-    IN_PYCHARM_SCIMODE = True
-else:
-    IN_PYCHARM_SCIMODE = False
+IN_PYCHARM_SCIMODE = mpl.get_backend() == "module://backend_interagg"
 
 if (
-    not (IN_IPYTHON and kernel) and not IN_PYCHARM_SCIMODE and not NO_DISPLAY
+    not (IN_IPYTHON and KERNEL) and not IN_PYCHARM_SCIMODE and not NO_DISPLAY
 ):  # pragma: no cover
     backend = mpl.rcParams["backend"]  # 'Qt5Agg'
     mpl.use(backend, force=True)
@@ -92,12 +88,11 @@ ALL = ["NO_DISPLAY", "NO_DIALOG"]
 # Now we can start loading the API
 # ----------------------------------------------------------------------------------------------------------------------
 # import the core api
-from spectrochempy import core
-from spectrochempy.core import *  # noqa: F403, F401, E402
+from . import core
+from .core import *  # noqa: F403, F401, E402
 
 ALL += core.__all__
 
-debug_("ARGV", sys.argv)
 if not IN_IPYTHON:
     # needed in windows terminal - but must not be inited in Jupyter notebook
     from colorama import init as initcolor
@@ -109,27 +104,27 @@ if not IN_IPYTHON:
 # workaround this problem https://github.com/jupyter/notebook/issues/3385
 # ip.magic('matplotlib notebook')
 
-if IN_IPYTHON and kernel and not NO_DISPLAY:  # pragma: no cover
+if IN_IPYTHON and KERNEL and not NO_DISPLAY:  # pragma: no cover
     try:
         if (
             "ipykernel_launcher" in sys.argv[0]
             and "--InlineBackend.rc={'figure.dpi': 96}" in sys.argv
         ):
             # We are running from NBSphinx - the plot must be inline to show up.
-            ip.magic("matplotlib inline")
+            IP.magic("matplotlib inline")
         else:
             # Do not set the widget backend.... do not work most of the time after upbgrade of the various
             # library and
             # jupyter!!! ...
-            ip.magic("matplotlib inline")  # widget
+            IP.magic("matplotlib inline")  # widget
     except Exception:
-        ip.magic("matplotlib qt")
+        IP.magic("matplotlib qt")
 
 
 # set_backend()
 
 # a usefull utilities for dealing with path
-from spectrochempy.utils import pathclean
+from .utils import pathclean
 
 DATADIR = pathclean(preferences.datadir)
 

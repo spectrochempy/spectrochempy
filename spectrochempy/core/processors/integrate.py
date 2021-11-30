@@ -4,6 +4,9 @@
 #  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
+"""
+Integration methods
+"""
 
 __all__ = ["simps", "trapz"]
 
@@ -35,7 +38,6 @@ def trapz(dataset, *args, **kwargs):
 
     Example
     --------
-    >>> import spectrochempy as scp
     >>> dataset = scp.read('irdata/nh4y-activation.spg')
     >>> dataset[:,1250.:1800.].trapz()
     NDDataset: [float64] a.u..cm^-1 (size: 55)

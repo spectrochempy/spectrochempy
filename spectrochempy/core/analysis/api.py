@@ -9,7 +9,7 @@ API for the core.analysis package
 
 Automatically generated from file present in the analysis directory.
 """
-from spectrochempy.utils import generate_api
+from ...utils import generate_api
 
 # generate api
 __all__ = generate_api(__file__)

@@ -4,7 +4,9 @@
 #  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
+"""
+Test ndcoordset
+"""
 from copy import copy
 
 import numpy as np
@@ -19,8 +21,6 @@ from spectrochempy.units import ur, DimensionalityError
 # ======================================================================================================================
 # CoordSet
 # ======================================================================================================================
-
-
 def test_coordset_init(coord0, coord1, coord2):
     coord3 = coord2.copy()
     coord3.title = "titi"

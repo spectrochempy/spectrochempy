@@ -15,7 +15,7 @@ __dataset_methods__ = []
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
-from scipy.special import gammaln
+from scipy import special
 from traitlets import HasTraits, Instance
 
 from spectrochempy.core import info_
@@ -79,6 +79,8 @@ class PCA(HasTraits):
         scaled : bool, optional, default:False
             If True the data are scaled in the interval [0-1]: :math:`X' = (X - min(X)) / (max(X)-min(X))`
         """
+        super().__init__()
+
         self.prefs = dataset.preferences
 
         self._X = X = dataset
@@ -91,7 +93,7 @@ class PCA(HasTraits):
         if centered:
             self._center = center = X.mean(dim=0)
             Xsc = X - center
-            Xsc.title = "centered %s" % X.title
+            Xsc.title = f"centered {X.title}"
 
         # Standardization
         # ---------------
@@ -99,7 +101,7 @@ class PCA(HasTraits):
         if standardized:
             self._std = Xsc.std(dim=0)
             Xsc /= self._std
-            Xsc.title = "standardized %s" % Xsc.title
+            Xsc.title = f"standardized {Xsc.title}"
 
         # Scaling
         # -------
@@ -248,7 +250,7 @@ class PCA(HasTraits):
 
         pu = -rank * np.log(2.0)
         for i in range(rank):
-            pu += gammaln((N - i) / 2.0) - np.log(np.pi) * (N - i) / 2.0
+            pu += special.gammaln((N - i) / 2.0) - np.log(np.pi) * (N - i) / 2.0
 
         pl = np.sum(np.log(spectrum[:rank]))
         pl = -pl * M / 2.0
