@@ -351,7 +351,7 @@ class NDPlot(HasTraits):
     # ------------------------------------------------------------------------------------------------------------------
     # generic plotter and plot related methods or properties
     # ------------------------------------------------------------------------------------------------------------------
-    def plot(self, ax=None, method=None, **kwargs):
+    def plot(self, method=None, **kwargs):
         """
         Generic plot function.
 
@@ -360,8 +360,6 @@ class NDPlot(HasTraits):
 
         Parameters
         ----------
-        ax : :class:`matplotlib.axe`
-            The viewplot where to plot.
         method : str, optional, default: "generic"
             Specify with plot method to use.
         **kwargs : dict, optional
@@ -380,7 +378,6 @@ class NDPlot(HasTraits):
         # --------------------------------------------------------------------
         # select plotter depending on the dimension of the data
         # --------------------------------------------------------------------
-        method = kwargs.pop("method", method)
         if method:
             _plotter = getattr(self, f"plot_{method.replace('+', '_')}", None)
             if _plotter is None:
@@ -424,7 +421,9 @@ class NDPlot(HasTraits):
         return ax
 
     def close_figure(self):
-        """Close a Matplotlib figure associated to this dataset"""
+        """
+        Close a Matplotlib figure associated to this dataset.
+        """
         if self._fig is not None:
             plt.close(self._fig)
 

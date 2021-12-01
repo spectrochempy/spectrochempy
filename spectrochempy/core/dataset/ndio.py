@@ -136,6 +136,7 @@ class NDIO(HasTraits):
 
         Examples
         ---------
+
         Read some data from an OMNIC file
         >>> nd = scp.read_omnic('wodger.spg')
         >>> assert nd.name == 'wodger'
@@ -192,32 +193,32 @@ class NDIO(HasTraits):
             If specified, the given `directory` and the `filename` will be
             appended.
 
-        Examples
+        See Also
         ---------
-        read some data from an OMNIC file
+        save : Save current dataset.
+        write : Export current dataset to different format.
 
+        Notes
+        -----
+        Adapted from :class:`numpy.savez`.
+
+        Examples
+        --------
+
+        Read some data from an OMNIC file
         >>> nd = scp.read_omnic('wodger.spg')
         >>> assert nd.name == 'wodger'
 
-        write it in SpectroChemPy format (.scp)
+        Write it in SpectroChemPy format (.scp)
         (return a `pathlib` object)
         >>> filename = nd.save_as('new_wodger')
 
-        check the existence of the scp fie
+        Check the existence of the scp fie
         >>> assert filename.is_file()
         >>> assert filename.name == 'new_wodger.scp'
 
         Remove this file
         >>> filename.unlink()
-
-        Notes
-        -----
-        adapted from :class:`numpy.savez`
-
-        See Also
-        ---------
-        save : save current dataset
-        write : export current dataset to different format
         """
         if filename:
             # we have a filename
@@ -415,12 +416,12 @@ class NDIO(HasTraits):
     # ..................................................................................................................
     def dump(self, filename, **kwargs):
         """
-        Save the current object into compressed native spectrochempy format
+        Save the current object into compressed native spectrochempy format.
 
         Parameters
         ----------
         filename: str of  `pathlib` object
-            File name where to save the current object. Extension
+            File name where to save the current object.
         """
 
         # Stage data in a temporary file on disk, before writing to zip.

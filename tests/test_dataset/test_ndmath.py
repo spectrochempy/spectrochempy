@@ -1077,3 +1077,29 @@ def test_from_function_docstring():
     scp.fromfunction(
         func1, v=scp.Quantity(134, "km/hour"), coordset=scp.CoordSet(t=time)
     )
+
+
+def test_round_docstring_example():
+    ds = scp.read("wodger.spg")
+    ds_transformed1 = np.round(ds, 3)
+    ds_transformed2 = np.around(ds, 3)
+    ds_transformed3 = scp.around(ds, 3)
+    ds_transformed4 = scp.round(ds, 3)
+    ds_transformed5 = ds.round(3)
+    ds_transformed6 = NDDataset.round(ds, 3)
+
+    assert_dataset_equal(ds_transformed1, ds_transformed2)
+    assert_dataset_equal(ds_transformed1, ds_transformed3)
+    assert_dataset_equal(ds_transformed1, ds_transformed4)
+    assert_dataset_equal(ds_transformed1, ds_transformed5)
+    assert_dataset_equal(ds_transformed1, ds_transformed6)
+
+    ds[:, 3000.0:3500.0] = scp.MASKED
+    dsm_transformed1 = np.ma.round(ds)
+    dsm_transformed2 = np.around(ds)
+    dsm_transformed3 = scp.around(ds)
+    dsm_transformed4 = ds.round(ds)
+
+    assert_dataset_equal(dsm_transformed1, dsm_transformed2)
+    assert_dataset_equal(dsm_transformed1, dsm_transformed3)
+    assert_dataset_equal(dsm_transformed1, dsm_transformed4)

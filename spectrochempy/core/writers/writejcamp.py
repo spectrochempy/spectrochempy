@@ -19,7 +19,7 @@ __dataset_methods__ = __all__
 # .......................................................................................................................
 def write_jcamp(*args, **kwargs):
     """
-    Writes a dataset in JCAMP-DX format.
+    Write a dataset in JCAMP-DX format.
 
     (see Published JCAMP-DX Protocols http://www.jcamp-dx.org/protocols.html#ir4.24)
     Up to now, only IR output is available.
@@ -53,7 +53,7 @@ def write_jcamp(*args, **kwargs):
 
 
 write_jdx = write_jcamp
-write_jdx.__doc__ = "This method is an alias of `write_jcamp` "
+write_jdx.__doc__ = "This method is an alias of `write_jcamp`."
 
 
 @exportermethod

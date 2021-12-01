@@ -607,7 +607,7 @@ def abc(dataset, dim=-1, **kwargs):
 # ......................................................................................................................
 def ab(dataset, dim=-1, **kwargs):
     """
-    Alias of `abc`
+    Alias of `abc`.
     """
     return abs(dataset, dim, **kwargs)
 

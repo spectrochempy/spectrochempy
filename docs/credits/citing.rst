@@ -21,4 +21,3 @@ Bibtex field::
   version      = {0.2.16},
   doi          = {10.5281/zenodo.3823841},
   url          = {https://doi.org/10.5281/zenodo.3823841}
-}

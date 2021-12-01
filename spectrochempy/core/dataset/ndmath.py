@@ -7,6 +7,7 @@
 """
 This module implements the |NDMath| class.
 """
+# TODO: test binary ufunc and put them in docs
 
 __all__ = [
     "NDMath",
@@ -17,6 +18,7 @@ import copy as cpy
 import functools
 import inspect
 import sys
+import re
 import operator
 from warnings import catch_warnings
 
@@ -55,7 +57,7 @@ def _reduce_method(method):
     return method
 
 
-class _from_numpy_method(object):
+class _from_numpy_method:
     # Decorator
     # ---------
     # This decorator assumes that the signature starts always by : (cls, ...)
@@ -71,6 +73,7 @@ class _from_numpy_method(object):
         @functools.wraps(self.method)
         def func(*args, **kwargs):
 
+            # Delayed import to avoid circular reference
             from spectrochempy.core.dataset.nddataset import NDDataset
             from spectrochempy.core.dataset.coord import Coord
 
@@ -176,25 +179,23 @@ class _from_numpy_method(object):
                     new.history = f"Created using method : {method}"  # (args:{argpos}, kwargs:{kw})'
                 return new
 
-            else:
+            # reduce methods
+            # ...............
 
-                # reduce methods
-                # ...............
+            # apply the numpy operator on the masked data
+            new = self.method(new, *argpos)
 
-                # apply the numpy operator on the masked data
-                new = self.method(new, *argpos)
-
-                if not isinstance(new, (NDDataset, Coord)):
-                    # if a numpy array or a scalar is returned after reduction
-                    return new
-
-                # # particular case of functions that returns Dataset with no coordinates
-                # if dim is None and method in ['sum', 'trapz', 'prod', 'mean', 'var', 'std']:
-                #     # delete all coordinates
-                #     new._coordset = None
-
-                new.history = f"Dataset resulting from application of `{method}` method"
+            if not isinstance(new, (NDDataset, Coord)):
+                # if a numpy array or a scalar is returned after reduction
                 return new
+
+            # # particular case of functions that returns Dataset with no coordinates
+            # if dim is None and method in ['sum', 'trapz', 'prod', 'mean', 'var', 'std']:
+            #     # delete all coordinates
+            #     new._coordset = None
+
+            new.history = f"Dataset resulting from application of `{method}` method"
+            return new
 
         return func
 
@@ -228,13 +229,27 @@ def _get_name(x):
     return str(x.name if hasattr(x, "name") else x)
 
 
+def _extract_ufuncs(strg):
+
+    ufuncs = {}
+    regex = r"^([a-z,0-9,_]*)\((x.*)\[.*]\)\W*(.*\.)$"
+    matches = re.finditer(regex, strg, re.MULTILINE)
+
+    for match in matches:
+        func = match.group(1)
+        args = match.group(2)
+        desc = match.group(3)
+
+        ufuncs[func] = f"({args.strip()}) -> {desc.strip()}"
+
+    return ufuncs
+
+
 DIMENSIONLESS = ur("dimensionless").units
 UNITLESS = None
 TYPEPRIORITY = {"Coord": 2, "NDDataset": 3}
 
-unary_str = """
-
-negative(x [, out, where, casting, order, …])    Numerical negative, element-wise.
+UNARY_STR = """
 abs(x [, out, where, casting, order, …])         Calculate the absolute value element-wise (alias of absolute).
 absolute(x [, out, where, casting, order, …])    Calculate the absolute value element-wise.
 fabs(x [, out, where, casting, order, …])        Compute the absolute values element-wise.
@@ -242,18 +257,19 @@ rint(x [, out, where, casting, order, …])        Round elements of the array t
 floor(x [, out, where, casting, order, …])    Return the floor of the input, element-wise.
 ceil(x [, out, where, casting, order, …])    Return the ceiling of the input, element-wise.
 trunc(x [, out, where, casting, order, …])    Return the truncated value of the input, element-wise.
+negative(x [, out, where, casting, order, …])    Numerical negative, element-wise.
 
 around(x [, decimals, out])                Evenly round to the given number of decimals.
-round_(x [, decimals, out])                Round an array to the given number of decimals.
+round(x [, decimals, out])                Round an array to the given number of decimals.
 rint(x [, out, where, casting, order, …])  Round elements of the array to the nearest integer.
-fix(x[, out])                              Round to nearest integer towards zero
+fix(x[, out])                              Round to nearest integer towards zero.
 
 exp(x [, out, where, casting, order, …])     Calculate the exponential of all elements in the input array.
 exp2(x [, out, where, casting, order, …])    Calculate 2**p for all p in the input array.
 log(x [, out, where, casting, order, …])     Natural logarithm, element-wise.
 log2(x [, out, where, casting, order, …])    Base-2 logarithm of x.
 log10(x [, out, where, casting, order, …])    Return the base 10 logarithm of the input array, element-wise.
-expm1(x [, out, where, casting, order, …])    Calculate exp(x) - 1 for all elements in the array.
+expm1(x [, out, where, casting, order, …])    Calculate exp(x - 1) for all elements in the array.
 log1p(x [, out, where, casting, order, …])    Return the natural logarithm of one plus the input array, element-wise.
 
 sqrt(x [, out, where, casting, order, …])      Return the non-negative square-root of an array, element-wise.
@@ -293,18 +309,11 @@ signbit(x, [, out, where, casting, order, …])   Returns element-wise True wher
 
 
 def _unary_ufuncs():
-    liste = unary_str.split("\n")
-    ufuncs = {}
-    for item in liste:
-        item = item.strip()
-        if item and not item.startswith("#"):
-            item = item.split("(")
-            string = item[1].split(")")
-            ufuncs[item[0]] = f"({string[0]}) -> {string[1].strip()}"
-    return ufuncs
+
+    return _extract_ufuncs(UNARY_STR)
 
 
-binary_str = """
+BINARY_STR = """
 
 multiply(x1, x2 [, out, where, casting, …])    Multiply arguments element-wise.
 divide(x1, x2 [, out, where, casting, …])    Returns a true division of the inputs, element-wise.
@@ -322,20 +331,11 @@ copysign(x1, x2 [, out, where, casting, …])    Change the sign of x1 to that o
 
 
 def _binary_ufuncs():
-    liste = binary_str.split("\n")
-    ufuncs = {}
-    for item in liste:
-        item = item.strip()
-        if not item:
-            continue
-        if item.startswith("#"):
-            continue
-        item = item.split("(")
-        ufuncs[item[0]] = item[1]
-    return ufuncs
+
+    return _extract_ufuncs(BINARY_STR)
 
 
-comp_str = """
+COMP_STR = """
 # Comparison functions
 
 greater(x1, x2 [, out, where, casting, …])         Return the truth value of (x1 > x2) element-wise.
@@ -348,20 +348,11 @@ equal(x1, x2 [, out, where, casting, …])           Return (x1 == x2) element-w
 
 
 def _comp_ufuncs():
-    liste = comp_str.split("\n")
-    ufuncs = {}
-    for item in liste:
-        item = item.strip()
-        if not item:
-            continue
-        if item.startswith("#"):
-            continue
-        item = item.split("(")
-        ufuncs[item[0]] = item[1]
-    return ufuncs
+
+    return _extract_ufuncs(COMP_STR)
 
 
-logical_binary_str = """
+LOGICAL_BINARY_STR = """
 
 logical_and(x1, x2 [, out, where, …])          Compute the truth value of x1 AND x2 element-wise.
 logical_or(x1, x2 [, out, where, casting, …])  Compute the truth value of x1 OR x2 element-wise.
@@ -370,25 +361,16 @@ logical_xor(x1, x2 [, out, where, …])          Compute the truth value of x1 X
 
 
 def _logical_binary_ufuncs():
-    liste = logical_binary_str.split("\n")
-    ufuncs = {}
-    for item in liste:
-        item = item.strip()
-        if not item:
-            continue
-        if item.startswith("#"):
-            continue
-        item = item.split("(")
-        ufuncs[item[0]] = item[1]
-    return ufuncs
+
+    return _extract_ufuncs(LOGICAL_BINARY_STR)
 
 
-class NDMath(object):
+class NDMath:
     """
     This class provides the math and some other array manipulation functionalities to |NDArray| or |Coord|.
 
     Below is a list of mathematical functions (numpy) implemented (or
-    planned for implementation)
+    planned for implementation).
 
     **Ufuncs**
 
@@ -589,7 +571,7 @@ class NDMath(object):
     @_from_numpy_method
     def absolute(cls, dataset, dtype=None):
         """
-        Calculate the absolute value element-wise.
+        Calculate the absolute value of the given NDDataset element-wise.
 
         `abs` is a shorthand for this function. For complex input, a + ib, the absolute value is
         :math:`\\sqrt{ a^2 + b^2}`.
@@ -631,6 +613,9 @@ class NDMath(object):
         return cls
 
     abs = absolute
+    abs.__doc__ = (
+        "Calculate the absolute value element-wise.\n\nEquivalent to absolute."
+    )
 
     # ..................................................................................................................
     @_from_numpy_method
@@ -671,6 +656,52 @@ class NDMath(object):
         return cls
 
     conj = conjugate
+    conj.__doc__ = "Conjugate of the NDDataset in the specified dimension.\n\nEquivalent to conjugate."
+
+    # ..................................................................................................................
+    @_from_numpy_method
+    def around(cls, dataset, decimals=0):
+        """
+        Evenly round to the given number of decimals.
+
+        Parameters
+        ----------
+        dataset : |NDDataset|
+            Input dataset.
+        decimals : int, optional
+            Number of decimal places to round to (default: 0).  If
+            decimals is negative, it specifies the number of positions to
+            the left of the decimal point.
+
+        Returns
+        -------
+        rounded_array
+            NDDataset containing the rounded values.
+            The real and imaginary parts of complex numbers are rounded
+            separately.
+            The result of rounding a float is a float.
+            If the dataset contains masked data, the mask remain unchanged.
+
+        See Also
+        --------
+        numpy.round, around, spectrochempy.round, spectrochempy.around: Equivalent methods.
+        ceil, fix, floor, rint, trunc
+        """
+
+        cls._data = np.ma.round(dataset, decimals)
+        if hasattr(dataset, "mask"):
+            cls._mask = dataset.mask
+
+        return cls
+
+    round = around
+    round.__doc__ = (
+        "Evenly round to the given number of decimals.\n\nEquivalent to around."
+    )
+    round_ = around
+    round.__doc__ = (
+        "Evenly round to the given number of decimals.\n\nEquivalent to around."
+    )
 
     # ..................................................................................................................
     @_reduce_method
@@ -757,7 +788,6 @@ class NDMath(object):
         -----
         For dataset with complex or hypercomplex type type, the default is the
         value with the maximum real part.
-
         """
 
         axis, dim = cls.get_axis(dim, allows_none=True)
@@ -783,8 +813,7 @@ class NDMath(object):
                 m = m[()]
             if cls.units is not None:
                 return Quantity(m, cls.units)
-            else:
-                return m
+            return m
 
         dims = cls.dims
         if hasattr(m, "mask"):
@@ -864,10 +893,7 @@ class NDMath(object):
         m = np.ma.min(dataset, axis=axis, keepdims=keepdims)
 
         if np.isscalar(m):
-            if cls.units is not None:
-                return Quantity(m, cls.units)
-            else:
-                return m
+            return m if cls.units is not None else Quantity(m, cls.units)
 
         dims = cls.dims
         cls._data = m.data
@@ -993,7 +1019,9 @@ class NDMath(object):
     @_reduce_method
     @_from_numpy_method
     def argmax(cls, dataset, dim=None):
-        """indexes of maximum of data along axis"""
+        """
+        Indexes of maximum of data along axis.
+        """
 
         axis, dim = cls.get_axis(dim, allows_none=True)
         idx = np.ma.argmax(dataset, axis)
@@ -1017,7 +1045,7 @@ class NDMath(object):
 
     @_reduce_method
     @_from_numpy_method
-    def average(cls, dataset, dim=None, weights=None, returned=False):
+    def average(cls, dataset, dim=None, weights=None, keepdims=False):
         """
         Compute the weighted average along the specified axis.
 
@@ -1040,25 +1068,11 @@ class NDMath(object):
                 avg = sum(a * weights) / sum(weights)
 
             The only constraint on `weights` is that `sum(weights)` must not be 0.
-        returned : bool, optional
-            Default is `False`. If `True`, the tuple (`average`, `sum_of_weights`)
-            is returned, otherwise only the average is returned.
-            If `weights=None`, `sum_of_weights` is equivalent to the number of
-            elements over which the average is taken.
 
         Returns
         -------
-        average, [sum_of_weights]
-            Return the average along the specified axis. When `returned` is `True`,
-            return a tuple with the average as the first element and the sum
-            of the weights as the second element. `sum_of_weights` is of the
-            same type as `retval`. The result dtype follows a genereal pattern.
-            If `weights` is None, the result dtype will be that of `a` , or ``float64``
-            if `a` is integral. Otherwise, if `weights` is not None and `a` is non-
-            integral, the result type will be the type of lowest precision capable of
-            representing values of both `a` and `weights`. If `a` happens to be
-            integral, the previous rules still applies but the result dtype will
-            at least be ``float64``.
+        average,
+            Return the average along the specified axis.
 
         Raises
         ------
@@ -1092,23 +1106,17 @@ class NDMath(object):
         """
 
         axis, dim = cls.get_axis(dim, allows_none=True)
-        m, retval = np.ma.average(dataset, axis=axis, weights=weights, returned=True)
+        m, sumweight = np.ma.average(dataset, axis=axis, weights=weights, returned=True)
 
         if np.isscalar(m):
-            if cls.units is not None:
-                return Quantity(m, cls.units)
-            else:
-                return m
+            return Quantity(m, cls.units) if cls.units is not None else m
 
-        dims = _reduce_dims(cls, dim)
+        dims = _reduce_dims(cls, dim, keepdims)
         cls._data = m.data
         cls._mask = m.mask
         cls.dims = dims
 
-        if returned:
-            return cls, retval
-        else:
-            return cls
+        return cls
 
     # ..................................................................................................................
     @_from_numpy_method
@@ -1166,7 +1174,9 @@ class NDMath(object):
     @_reduce_method
     @_from_numpy_method
     def coordmax(cls, dataset, dim=None):
-        """Coordinates of maximum of data along axis"""
+        """
+        Find coordinates of the maximum of data along axis.
+        """
 
         if not cls.implements("NDDataset") or cls.coordset is None:
             raise Exception(
@@ -1198,7 +1208,9 @@ class NDMath(object):
     @_reduce_method
     @_from_numpy_method
     def coordmin(cls, dataset, dim=None):
-        """Coordinates of mainimum of data along axis"""
+        """
+        Find oordinates of the mainimum of data along axis.
+        """
 
         if not cls.implements("NDDataset") or cls.coordset is None:
             raise Exception(
@@ -1331,14 +1343,13 @@ class NDMath(object):
                 new.set_coordset(coordset)
             return new
 
-        elif new.ndim == 2:
+        if new.ndim == 2:
 
             # extract a diagonal
             # ------------------
             return new.diagonal(offset=offset, **kwargs)
 
-        else:
-            raise ValueError("Input must be 1- or 2-d.")
+        raise ValueError("Input must be 1- or 2-d.")
 
     # ..................................................................................................................
     @_reduce_method
@@ -1597,12 +1608,7 @@ class NDMath(object):
         --------
         Create a 1D NDDataset from a function
 
-        >>> def func1(t, v):
-        ...     d = v * t
-        ...     return d
-        ...
-        ...
-        ...
+        >>> func1 = lambda t, v: v * t
         >>> time = scp.LinearCoord.arange(0, 60, 10, units='min')
         >>> d = scp.fromfunction(func1, v=scp.Quantity(134, 'km/hour'), coordset=scp.CoordSet(t=time))
         >>> d.dims
@@ -2035,10 +2041,7 @@ class NDMath(object):
         m = np.ma.mean(dataset, axis=axis, dtype=dtype, keepdims=keepdims)
 
         if np.isscalar(m):
-            if cls.units is not None:
-                return Quantity(m, cls.units)
-            else:
-                return m
+            return Quantity(m, cls.units) if cls.units is not None else m
 
         dims = _reduce_dims(cls, dim, keepdims)
         cls._data = m.data
@@ -2168,7 +2171,8 @@ class NDMath(object):
         return cls
 
     def pipe(self, func, *args, **kwargs):
-        """Apply func(self, *args, **kwargs)
+        """
+        Apply func(self, *args, **kwargs).
 
         Parameters
         ----------
@@ -2232,10 +2236,7 @@ class NDMath(object):
         m = np.ma.ptp(dataset, axis=axis, keepdims=keepdims)
 
         if np.isscalar(m):
-            if cls.units is not None:
-                return Quantity(m, cls.units)
-            else:
-                return m
+            return Quantity(m, cls.units) if cls.units is not None else m
 
         dims = _reduce_dims(cls, dim, keepdims)
         cls._data = m.data
@@ -2360,10 +2361,7 @@ class NDMath(object):
         m = np.ma.std(dataset, axis=axis, dtype=dtype, ddof=ddof, keepdims=keepdims)
 
         if np.isscalar(m):
-            if cls.units is not None:
-                return Quantity(m, cls.units)
-            else:
-                return m
+            return Quantity(m, cls.units) if cls.units is not None else m
 
         dims = _reduce_dims(cls, dim, keepdims)
         cls._data = m.data
@@ -2425,10 +2423,7 @@ class NDMath(object):
         m = np.ma.sum(dataset, axis=axis, dtype=dtype, keepdims=keepdims)
 
         if np.isscalar(m):
-            if cls.units is not None:
-                return Quantity(m, cls.units)
-            else:
-                return m
+            return Quantity(m, cls.units) if cls.units is not None else m
 
         dims = _reduce_dims(cls, dim, keepdims)
         cls._data = m.data
@@ -2519,10 +2514,7 @@ class NDMath(object):
         m = np.ma.var(dataset, axis=axis, dtype=dtype, ddof=ddof, keepdims=keepdims)
 
         if np.isscalar(m):
-            if cls.units is not None:
-                return Quantity(m, cls.units)
-            else:
-                return m
+            return Quantity(m, cls.units) if cls.units is not None else m
 
         dims = _reduce_dims(cls, dim, keepdims)
         cls._data = m.data
@@ -2868,10 +2860,9 @@ class NDMath(object):
             if fname in self.__require_units:
                 requnits = self.__require_units[fname]
                 if (
-                    requnits == DIMENSIONLESS
-                    or requnits == "radian"
-                    or requnits == "degree"
-                ) and _units.dimensionless:
+                    requnits in (DIMENSIONLESS, "radian", "degree")
+                    and _units.dimensionless
+                ):
                     # this is compatible:
                     _units = DIMENSIONLESS
                 else:
@@ -2989,7 +2980,7 @@ class NDMath(object):
                 if not isquaternion:
                     data = f(d, *args)
                 elif quaternion_aware and all(
-                    [arg.dtype not in TYPE_COMPLEX for arg in args]
+                    (arg.dtype not in TYPE_COMPLEX for arg in args)
                 ):
                     data = f(d, *args)
                 else:
@@ -3029,7 +3020,8 @@ class NDMath(object):
         return func
 
     # ..................................................................................................................
-    def _check_order(self, fname, inputs):
+    @staticmethod
+    def _check_order(fname, inputs):
         objtypes = []
         returntype = None
         for i, obj in enumerate(inputs):

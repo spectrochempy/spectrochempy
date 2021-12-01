@@ -778,7 +778,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         Check if the current object implements `NDDataset`.
 
         Rather than isinstance(obj, NDDataset) use object.implements('NDDataset').
-        This is useful to check type without importing the module
+        This is useful to check type without importing the module.
 
         Parameters
         ----------
@@ -1028,8 +1028,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         See Also
         --------
-        squeeze : The inverse operation, removing singleton dimensions
-        """  # TODO
+        squeeze : The inverse operation, removing singleton dimensions.
+        """
+        # TODO
 
     # ..................................................................................................................
     def swapdims(self, dim1, dim2, inplace=False):
@@ -1125,7 +1126,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     # ..................................................................................................................
     def to_xarray(self):
         """
-        Convert a NDDataset instance to an `~xarray.DataArray` object
+        Convert a NDDataset instance to an `~xarray.DataArray` object.
 
         Warning: the xarray library must be available.
 

@@ -1504,27 +1504,27 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     def get_axis(self, *args, **kwargs):
         """
-        Helper function to determine an axis index whatever the syntax used (axis index or dimension names)
+        Helper function to determine an axis index whatever the syntax used (axis index or dimension names).
 
         Parameters
         ----------
-        dim, axis, dims : str, int, or list of str or index.
+        dim, axis, dims : str, int, or list of str or index
             The axis indexes or dimensions names - they can be specified as argument or using keyword 'axis', 'dim'
             or 'dims'.
-        negative_axis : bool, optional, default=False.
+        negative_axis : bool, optional, default=False
             If True a negative index is returned for the axis value (-1 for the last dimension, etc...).
         allows_none : bool, optional, default=False
             If True, if input is none then None is returned.
         only_first : bool, optional, default: True
-            By default return only information on the first axis if dim is a list
-            Else, return an list for axis and dims information
+            By default return only information on the first axis if dim is a list.
+            Else, return an list for axis and dims information.
 
         Returns
         -------
         axis : int
-            The axis indexes
+            The axis indexes.
         dim : str
-            The axis name
+            The axis name.
         """
         # handle the various syntax to pass the axis
         dims = self._get_dims_from_args(*args, **kwargs)
@@ -1561,10 +1561,10 @@ class NDArray(HasTraits):
 
     # ..................................................................................................................
     def get_labels(self, level=0):
-        """Get the labels at a given level
+        """Get the labels at a given level.
 
         Used to replace `data` when only labels are provided, and/or for
-        labeling axis in plots
+        labeling axis in plots.
 
         Parameters
         ----------
@@ -1573,7 +1573,7 @@ class NDArray(HasTraits):
         Returns
         -------
         |ndarray|
-            The labels at the desired level or None
+            The labels at the desired level or None.
         """
         if not self.is_labeled:
             return None
@@ -1785,27 +1785,27 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     def is_units_compatible(self, other):
         """
-        Check the compatibility of units with another object
+        Check the compatibility of units with another object.
 
         Parameters
         ----------
         other : |ndarray|
-            The ndarray object for which we want to compare units compatibility
+            The ndarray object for which we want to compare units compatibility.
 
         Returns
         -------
         result
-            True if units are compatible
+            True if units are compatible.
 
         Examples
         --------
-        >>> nd1 = scp.NDDataset([1.+2.j, 2.+ 3.j], units = 'meters')
+        >>> nd1 = scp.NDDataset([1. + 2.j, 2. + 3.j], units='meters')
         >>> nd1
         NDDataset: [complex128] m (size: 2)
-        >>> nd2 = scp.NDDataset([1.+2.j, 2.+ 3.j], units = 'seconds')
+        >>> nd2 = scp.NDDataset([1. + 2.j, 2. + 3.j], units='seconds')
         >>> nd1.is_units_compatible(nd2)
         False
-        >>> nd1.ito('minutes', force = True)
+        >>> nd1.ito('minutes', force=True)
         >>> nd1.is_units_compatible(nd2)
         True
         >>> nd2[0].values * 60. == nd1[0].values
@@ -1848,9 +1848,9 @@ class NDArray(HasTraits):
 
         See Also
         --------
-        to : Rescaling of the current object data to different units
-        to_base_units : Rescaling of the current object data to different units
-        ito_base_units : Inplace rescaling of the current object data to different units
+        to : Rescaling of the current object data to different units.
+        to_base_units : Rescaling of the current object data to different units.
+        ito_base_units : Inplace rescaling of the current object data to different units.
         to_reduced_units : Rescaling to reduced units.
         ito_reduced_units : Rescaling to reduced units.
         """
@@ -1863,9 +1863,9 @@ class NDArray(HasTraits):
 
         See Also
         --------
-        to : Rescaling of the current object data to different units
-        ito : Inplace rescaling of the current object data to different units
-        to_base_units : Rescaling of the current object data to different units
+        to : Rescaling of the current object data to different units.
+        ito : Inplace rescaling of the current object data to different units.
+        to_base_units : Rescaling of the current object data to different units.
         to_reduced_units : Rescaling to redunced units.
         ito_reduced_units : Inplace rescaling to reduced units.
         """
@@ -1878,14 +1878,14 @@ class NDArray(HasTraits):
 
         Scaling to reduced units means, one unit per
         dimension. This will not reduce compound units (e.g., 'J/kg' will not
-        be reduced to m**2/s**2)
+        be reduced to m**2/s**2).
 
         See Also
         --------
-        to : Rescaling of the current object data to different units
-        ito : Inplace rescaling of the current object data to different units
-        to_base_units : Rescaling of the current object data to different units
-        ito_base_units : Inplace rescaling of the current object data to different units
+        to : Rescaling of the current object data to different units.
+        ito : Inplace rescaling of the current object data to different units.
+        to_base_units : Rescaling of the current object data to different units.
+        ito_base_units : Inplace rescaling of the current object data to different units.
         to_reduced_units : Rescaling to reduced units.
         """
         self.to_reduced_units(inplace=True)
@@ -2134,7 +2134,7 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     def remove_masks(self):
         """
-        Remove all masks previously set on this array
+        Remove all masks previously set on this array.
         """
         self._mask = NOMASK
 
@@ -2267,12 +2267,12 @@ class NDArray(HasTraits):
         Parameters
         ----------
         dim1 : int or str
-            First dimension index
+            First dimension index.
         dim2 : int
-            Second dimension index
+            Second dimension index.
         inplace : bool, optional, default=`False`
             Flag to say that the method return a new object (default)
-            or not (inplace=True)
+            or not (inplace=True).
 
         Returns
         -------
@@ -2303,7 +2303,7 @@ class NDArray(HasTraits):
         return new
 
     swapaxes = swapdims
-    swapaxes.__doc__ = "Alias of `swapdims`"
+    swapaxes.__doc__ = "Alias of `swapdims`."
 
     # ..................................................................................................................
     @property
@@ -2342,7 +2342,7 @@ class NDArray(HasTraits):
 
         Parameters
         ----------
-        other : |Quantity| or str.
+        other : |Quantity| or str
             Destination units.
         inplace : bool, optional, default=`False`
             Flag to say that the method return a new object (default)
@@ -2356,20 +2356,20 @@ class NDArray(HasTraits):
 
         See Also
         --------
-        ito : Inplace rescaling of the current object data to different units
-        to_base_units : Rescaling of the current object data to different units
-        ito_base_units : Inplace rescaling of the current object data to different units
+        ito : Inplace rescaling of the current object data to different units.
+        to_base_units : Rescaling of the current object data to different units.
+        ito_base_units : Inplace rescaling of the current object data to different units.
         to_reduced_units : Rescaling to reduced_units.
         ito_reduced_units : Inplace rescaling to reduced units.
 
         Examples
         --------
         >>> np.random.seed(12345)
-        >>> ndd = scp.NDArray(data = np.random.random((3, 3)),
-        ...                mask = [[True, False, False],
-        ...                        [False, True, False],
-        ...                        [False, False, True]],
-        ...                units = 'meters')
+        >>> ndd = scp.NDArray(data=np.random.random((3, 3)),
+        ...                   mask=[[True, False, False],
+        ...                         [False, True, False],
+        ...                         [False, False, True]],
+        ...                   units='meters')
         >>> print(ndd)
         NDArray: [float64] m (shape: (y:3, x:3))
 
@@ -2537,7 +2537,7 @@ class NDArray(HasTraits):
         Parameters
         ----------
         inplace : bool
-            If True the rescaling is done in place
+            If True the rescaling is done in place.
 
         Returns
         -------
@@ -2559,21 +2559,21 @@ class NDArray(HasTraits):
 
     def to_reduced_units(self, inplace=False):
         """
-        Return an array scaled in place to reduced units
+        Return an array scaled in place to reduced units.
 
         Reduced units means one unit per
         dimension. This will not reduce compound units (e.g., 'J/kg' will not
-        be reduced to m**2/s**2),
+        be reduced to m**2/s**2).
 
         Parameters
         ----------
         inplace : bool
-            If True the rescaling is done in place
+            If True the rescaling is done in place.
 
         Returns
         -------
         rescaled
-            A rescaled array
+            A rescaled array.
         """
         q = Quantity(1.0, self.units)
         q.ito_reduced_units()

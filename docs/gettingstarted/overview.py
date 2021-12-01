@@ -35,7 +35,7 @@
 # %% [markdown]
 # The purpose of this page is to give you some quick examples of what can be done with SpectroChemPy.
 #
-# See the [gallery of examples](auto_examples/index.html) and consult the [user's guide](
+# See the [gallery of examples](gallery/auto_examples/index.html) and consult the [user's guide](
 # ../userguide/introduction/introduction.html) for more information on using SpectroChemPy
 #
 # Before using the package, we must load the **API

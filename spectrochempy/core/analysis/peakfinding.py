@@ -191,13 +191,11 @@ def find_peaks(
     >>> len(peaks.x)
     2
     >>> peaks.x.values
-    array([    1644,     1455]) <Unit('1 / centimeter')>
+    <Quantity([    1644     1455], '1 / centimeter')>
     >>> properties["peak_heights"][0]
     2.266634464263916
     >>> properties["widths"][0]
     38.73096143103294
-
-
     """
 
     X = dataset.squeeze()

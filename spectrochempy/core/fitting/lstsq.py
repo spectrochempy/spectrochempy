@@ -132,9 +132,9 @@ class LSTSQ(HasTraits):
 
 class NNLS(HasTraits):
     """
-    Least-squares solution to a linear matrix equation with non-negativity constraints
+    Least-squares solution to a linear matrix equation with non-negativity constraints.
 
-    This is a wrapper to the `scipy.optimize.nnls`` function
+    This is a wrapper to the `scipy.optimize.nnls`` function.
     """
 
     X = Instance(NDArray)

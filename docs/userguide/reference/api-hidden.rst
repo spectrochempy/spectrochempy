@@ -142,6 +142,8 @@
     NDDataset.write_matlab
     NDDataset.zeros
     NDDataset.zeros_like
+    NDDataset.round
+    NDDataset.around
 
     NDDataset.II
     NDDataset.IR

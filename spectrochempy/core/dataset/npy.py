@@ -49,7 +49,7 @@ def dot(a, b, strict=True, out=None):
     See Also
     --------
     numpy.dot : Equivalent function for ndarrays.
-    numpy.ma.dot : Equivalent function for masked ndarrays
+    numpy.ma.dot : Equivalent function for masked ndarrays.
     """
     # if not a.implements('NDDataset'):
     #     raise TypeError('A dataset of type NDDataset is  '

@@ -13,13 +13,15 @@ General Principles
 
 The instructions below are a general guide. We are (or rather will be) doing our best to follow this guide, so if you want to contribute, we encourage you to follow it as well. But you don't have to follow everything to the letter: any kind of contribution is welcome!
 
-In this guide, we will talk about some basic but very useful contributions such as bug reports our feature requests, and of some more advanced topics concerning contributions to documentation and to the code base.
+In this guide, we will talk about some basic but very useful contributions such as issues reporting and of some more advanced topics concerning contributions to documentation and to the code base.
 
+.. toctree::
 
-.. include:: issues.rst
+    issues
+
 
 Be prepared to work on the code
-================================
+===============================
 
 To contribute further to the code and documentation, you will need learning how to work with GitHub and the |scpy| code base.
 
@@ -399,7 +401,7 @@ request by pushing again to the branch on GitHub.
 Automatically fix formatting errors
 -----------------------------------
 
-We use several style checks (i.e., ``black'', ``flake8'') that are run after
+We use several style checks (i.e., ``black``, ``flake8``) that are run after
 you make a download request. If there is a scenario where one of these checks fails then you
 can comment:
 

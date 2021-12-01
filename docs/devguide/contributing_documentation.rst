@@ -49,13 +49,13 @@ Some other important things to know about the docs:
 Todo : add some explanation the API reference generation
 
 Updating a spectrochempy docstring
------------------------------
+----------------------------------
 
 When improving a single function or method's docstring, it is not necessarily
 needed to build the full documentation (see next section).
-However, there is a script that checks a docstring (for example for the ``DataFrame.mean`` method)::
+Indeed, one can use a script that checks a docstring (for example for the ``spectrocopy.round`` method)::
 
-    python scripts/validate_docstrings.py spectrochempy.DataFrame.mean
+    python scripts/validate_docstrings.py spectrochempy.round
 
 This script will indicate some formatting errors if present, and will also
 run and test the examples included in the docstring.
@@ -74,7 +74,7 @@ output of the validation script in a comment on github.
 
 
 How to build the spectrochempy documentation
----------------------------------------
+--------------------------------------------
 
 Requirements
 ~~~~~~~~~~~~

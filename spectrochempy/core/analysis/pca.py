@@ -33,7 +33,7 @@ from spectrochempy.utils import NRed, NBlue
 
 class PCA(HasTraits):
     """
-    Principal Component Analysis
+    Principal Component Analysis.
 
     This class performs a Principal Component Analysis of a |NDDataset|,
     *i.e.*, a linear dimensionality reduction using Singular Value

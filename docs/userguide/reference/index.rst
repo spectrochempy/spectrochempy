@@ -187,6 +187,7 @@ Export a NDDataset
     to_xarray
 
 
+
 **************************
 Select data in a NDDataset
 **************************
@@ -320,7 +321,7 @@ Clipping and rounding
     fix
     trunc
     around
-    round_
+    round
 
 
 Algebra

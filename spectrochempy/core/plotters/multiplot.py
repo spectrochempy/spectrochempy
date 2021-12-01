@@ -125,29 +125,22 @@ def multiplot(
     **kwargs
 ):
     """
-    Generate a figure with multiple axes arranged in array (n rows, n columns)
+    Generate a figure with multiple axes arranged in array (n rows, n columns).
 
     Parameters
     ----------
 
     datasets : nddataset or list of nddataset
-
-    labels : list of str.
-
+        Datasets to plot.
+    labels : list of str
         The labels that will be used as title of each axes.
-
     method : str, default to `map` for 2D and `lines` for 1D data
-
         Type of plot to draw in all axes (`lines` , `scatter` , `stack` , `map`
         ,`image` or `with_transposed`).
-
     nrows, ncols : int, default=1
-
         Number of rows/cols of the subplot grid. ncol*nrow must be equal
-        to the number of datasets to plot
-
+        to the number of datasets to plot.
     sharex, sharey : bool or {'none', 'all', 'row', 'col'}, default=False
-
         Controls sharing of properties among x (`sharex`) or y (`sharey`)
         axes::
 
@@ -160,67 +153,40 @@ def multiplot(
         labels of the bottom subplot are visible.  Similarly, when
         subplots have a shared y-axis along a row, only the y tick labels
         of the first column subplot are visible.
-
     sharez : bool or {'none', 'all', 'row', 'col'}, default=False
-        equivalent to sharey for 1D plot.
+        Equivalent to sharey for 1D plot.
         for 2D plot, z is the intensity axis (i.e., contour levels for maps or
         the vertical axis for stack plot), y is the third axis.
-
     figsize : 2-tuple of floats
-
-        ``(width, height)`` tuple in inches
-
+        ``(width, height)`` tuple in inches.
     dpi : float
-
         Dots per inch
-
     facecolor : color
-
-        The figure patch facecolor; defaults to rc ``figure.facecolor``
-
+        The figure patch facecolor; defaults to rc ``figure.facecolor``.
     edgecolor : color
-
-        The figure patch edge color; defaults to rc ``figure.edgecolor``
-
+        The figure patch edge color; defaults to rc ``figure.edgecolor``.
     linewidth : float
-
-        The figure patch edge linewidth; the default linewidth of the frame
-
+        The figure patch edge linewidth; the default linewidth of the frame.
     frameon : bool
-
-        If `False` , suppress drawing the figure frame
-
+        If `False` , suppress drawing the figure frame.
     left : float in the [0-1] interval
-
-        The left side of the subplots of the figure
-
+        The left side of the subplots of the figure.
     right : float in the [0-1] interval
-
-        The right side of the subplots of the figure
-
+        The right side of the subplots of the figure.
     bottom : float in the [0-1] interval
-
-        The bottom of the subplots of the figure
-
+        The bottom of the subplots of the figure.
     top : float in the [0-1] interval
-
-        The top of the subplots of the figure
-
+        The top of the subplots of the figure.
     wspace : float in the [0-1] interval
-
         The amount of width reserved for blank space between subplots,
-        expressed as a fraction of the average axis width
-
+        expressed as a fraction of the average axis width.
     hspace : float in the [0-1] interval
-
         The amount of height reserved for white space between subplots,
-        expressed as a fraction of the average axis height
-
+        expressed as a fraction of the average axis height.
     suptitle : str
-
-        title of the figure to display on top
-
+        Title of the figure to display on top.
     suptitle_color : color
+        Color of the subtitles
     """
 
     # some basic checking
@@ -369,7 +335,7 @@ def multiplot(
                 )
 
             ax._sharez = _sharez  # we add a new share info to the ax.
-            # wich will be useful for the interactive masks
+            # which will be useful for the interactive masks
 
             ax.name = "axe{}{}".format(irow + 1, icol + 1)
             axes[ax.name] = ax
