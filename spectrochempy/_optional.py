@@ -109,7 +109,7 @@ def import_optional_dependency(
         version = get_version(module_to_get)
         if Version(version) < Version(minimum_version):
             msg = (
-                f"Pandas requires version '{minimum_version}' or newer of '{parent}' "
+                f"SpectroChemPy requires version '{minimum_version}' or newer of '{parent}' "
                 f"(version '{version}' currently installed)."
             )
             if errors == "warn":

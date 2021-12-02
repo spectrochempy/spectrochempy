@@ -101,6 +101,7 @@ def get_api_items(api_doc_fd):
     current_module = "spectrochempy"
     previous_line = current_section = current_subsection = ""
     position = None
+
     for line in api_doc_fd:
         line = line.strip()
         if len(line) == len(previous_line):
@@ -113,6 +114,16 @@ def get_api_items(api_doc_fd):
 
         if line.startswith(".. currentmodule::"):
             current_module = line.replace(".. currentmodule::", "").strip()
+            continue
+
+        ####
+        elif line.startswith(".. automodule::"):
+            current_module = line.replace(".. automodule::", "").strip()
+            continue
+        #####
+
+        if line == ".. automodule::":
+            position = "automodule"
             continue
 
         if line == ".. autosummary::":
@@ -130,9 +141,13 @@ def get_api_items(api_doc_fd):
                 continue
             item = line.strip()
             func = importlib.import_module(current_module)
-            for part in item.split("."):
-                func = getattr(func, part)
-
+            item = item.split(current_module + ".")[-1]
+            parts = item.split(".")
+            for part in parts:
+                try:
+                    func = getattr(func, part)
+                except Exception:
+                    continue
             yield (
                 ".".join([current_module, item]),
                 func,
@@ -284,7 +299,7 @@ def validate_all(prefix, ignore_deprecated=False):
     result = {}
     seen = {}
 
-    api_doc_fnames = os.path.join(BASE_PATH, "docs", "userguide", "reference", "*.rst")
+    api_doc_fnames = os.path.join(BASE_PATH, "docs", "devguide", "generated", "*.rst")
     api_items = []
     for api_doc_fname in glob.glob(api_doc_fnames):
         with open(api_doc_fname) as f:
