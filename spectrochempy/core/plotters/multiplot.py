@@ -5,7 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 """
-Module containing multiplot function(s)
+Module containing multiplot function(s).
 """
 
 __all__ = [
@@ -129,7 +129,6 @@ def multiplot(
 
     Parameters
     ----------
-
     datasets : nddataset or list of nddataset
         Datasets to plot.
     labels : list of str

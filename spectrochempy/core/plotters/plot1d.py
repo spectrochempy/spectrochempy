@@ -9,7 +9,7 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 """
-Module containing 1D plotting function(s)
+Module containing 1D plotting function(s).
 """
 
 __all__ = [

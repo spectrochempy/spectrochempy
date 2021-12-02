@@ -822,7 +822,11 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>
 
         if not in_python:
             # remove argument not known by spectrochempy
-            if "make.py" in sys.argv[0] or "pytest" in sys.argv[0]:  # building docs
+            if (
+                "make.py" in sys.argv[0]
+                or "pytest" in sys.argv[0]
+                or "validate_docstrings" in sys.argv[0]
+            ):  # building docs
                 options = []
                 for item in sys.argv[:]:
                     for k in list(self.flags.keys()):

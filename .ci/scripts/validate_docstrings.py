@@ -29,7 +29,6 @@ import flake8.main.application
 
 from io import StringIO
 
-
 # Template backend makes matplotlib to not plot anything. This is useful
 # to avoid that plot windows are open from the doctests while running the
 # script. Setting here before matplotlib is loaded.

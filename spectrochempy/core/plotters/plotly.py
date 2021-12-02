@@ -5,7 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-"""define plots"""
+"""Define plots."""
 
 # import plotly.graph_objects as go
 # import numpy as np

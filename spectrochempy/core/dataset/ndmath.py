@@ -381,7 +381,6 @@ class NDMath:
     this. Most of the time it returns a new NDDataset, while in some cases
     noted below, one get a |ndarray|.
 
-
     >>> ds = scp.NDDataset([1.,2.,3.])
     >>> np.sin(ds)
     NDDataset: [float64] unitless (size: 3)
@@ -389,7 +388,6 @@ class NDMath:
     In this particular case (*i.e.*, `np.sin` ufuncs) , the `ds` units must be
     `unitless`, `dimensionless` or angle-units : `radians` or `degrees`,
     or an exception will be raised.
-
 
     Examples
     --------
@@ -760,7 +758,7 @@ class NDMath:
         dataset : array_like
             Input array or object that can be converted to an array.
         dim : None or int or dimension name or tuple of int or dimensions, optional
-            dimension or dimensions along which to operate.  By default, flattened input is used.
+            Dimension or dimensions along which to operate.  By default, flattened input is used.
             If this is a tuple, the maximum is selected over multiple dimensions,
             instead of a single dimension or all the dimensions as before.
         keepdims : bool, optional
@@ -864,7 +862,7 @@ class NDMath:
         dataset : array_like
             Input array or object that can be converted to an array.
         dim : None or int or dimension name or tuple of int or dimensions, optional
-            dimension or dimensions along which to operate.  By default, flattened input is used.
+            Dimension or dimensions along which to operate.  By default, flattened input is used.
             If this is a tuple, the minimum is selected over multiple dimensions,
             instead of a single dimension or all the dimensions as before.
         keepdims : bool, optional
@@ -2177,13 +2175,15 @@ class NDMath:
         Parameters
         ----------
         func : function
-            function to apply to the |NDDataset|.
+            Function to apply to the |NDDataset|.
             `*args`, and `**kwargs` are passed into `func`.
             Alternatively a `(callable, data_keyword)` tuple where
             `data_keyword` is a string indicating the keyword of
             `callable` that expects the array object.
-        *args : positional arguments passed into `func`.
-        **kwargs : keyword arguments passed into `func`.
+        *args
+            positional arguments passed into `func`.
+        **kwargs
+            keyword arguments passed into `func`.
 
         Returns
         -------

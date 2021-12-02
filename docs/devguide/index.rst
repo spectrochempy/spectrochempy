@@ -16,3 +16,4 @@ Developer's Guide
     contributing
     contributing_codebase
     contributing_documentation
+    devapi
