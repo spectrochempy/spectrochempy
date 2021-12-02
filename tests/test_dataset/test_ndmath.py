@@ -1098,7 +1098,7 @@ def test_round_docstring_example():
     dsm_transformed1 = np.ma.round(ds)
     dsm_transformed2 = np.around(ds)
     dsm_transformed3 = scp.around(ds)
-    dsm_transformed4 = ds.round(ds)
+    dsm_transformed4 = ds.round()
 
     assert_dataset_equal(dsm_transformed1, dsm_transformed2)
     assert_dataset_equal(dsm_transformed1, dsm_transformed3)

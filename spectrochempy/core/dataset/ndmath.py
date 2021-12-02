@@ -365,7 +365,7 @@ def _logical_binary_ufuncs():
     return _extract_ufuncs(LOGICAL_BINARY_STR)
 
 
-class NDMath:
+class NDMath(object):
     """
     This class provides the math and some other array manipulation functionalities to |NDArray| or |Coord|.
 
@@ -686,9 +686,12 @@ class NDMath:
         ceil, fix, floor, rint, trunc
         """
 
-        cls._data = np.ma.round(dataset, decimals)
-        if hasattr(dataset, "mask"):
-            cls._mask = dataset.mask
+        m = np.ma.round(dataset, decimals)
+        if hasattr(m, "mask"):
+            cls._data = m.data
+            cls._mask = m.mask
+        else:
+            cls._data = m
 
         return cls
 
@@ -888,14 +891,36 @@ class NDMath:
         """
 
         axis, dim = cls.get_axis(dim, allows_none=True)
-        m = np.ma.min(dataset, axis=axis, keepdims=keepdims)
+        quaternion = False
+        if dataset.dtype in [np.quaternion]:
+            from quaternion import as_float_array
 
-        if np.isscalar(m):
-            return m if cls.units is not None else Quantity(m, cls.units)
+            quaternion = True
+            data = dataset
+            dataset = as_float_array(dataset)[..., 0]  # real part
+        m = np.ma.min(dataset, axis=axis, keepdims=keepdims)
+        if quaternion:
+            if dim is None:
+                # we return the corresponding quaternion value
+                idx = np.ma.argmin(dataset)
+                c = list(np.unravel_index(idx, dataset.shape))
+                m = data[..., c[-2], c[-1]][()]
+            else:
+                m = np.ma.diag(data[np.ma.argmin(dataset, axis=axis)])
+
+        if np.isscalar(m) or (m.size == 1 and not keepdims):
+            if not np.isscalar(m):  # case of quaternion
+                m = m[()]
+            if cls.units is not None:
+                return Quantity(m, cls.units)
+            return m
 
         dims = cls.dims
-        cls._data = m.data
-        cls._mask = m.mask
+        if hasattr(m, "mask"):
+            cls._data = m.data
+            cls._mask = m.mask
+        else:
+            cls._data = m
 
         # Here we must eventually reduce the corresponding coordinates
         if hasattr(cls, "coordset"):
@@ -923,7 +948,6 @@ class NDMath:
                     cls.set_coordset(coord)
 
         cls.dims = dims
-
         return cls
 
     min = amin
@@ -1110,8 +1134,11 @@ class NDMath:
             return Quantity(m, cls.units) if cls.units is not None else m
 
         dims = _reduce_dims(cls, dim, keepdims)
-        cls._data = m.data
-        cls._mask = m.mask
+        if hasattr(m, "mask"):
+            cls._data = m.data
+            cls._mask = m.mask
+        else:
+            cls._data = m
         cls.dims = dims
 
         return cls
@@ -1164,8 +1191,12 @@ class NDMath:
         # res.history = f'Clipped with limits between {amin} and {amax}'
         # return res
 
-        data = np.ma.clip(dataset, a_min, a_max)
-        cls._data = data
+        m = np.ma.clip(dataset, a_min, a_max)
+        if hasattr(m, "mask"):
+            cls._data = m.data
+            cls._mask = m.mask
+        else:
+            cls._data = m
         return cls
 
     # ..................................................................................................................

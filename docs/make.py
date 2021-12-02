@@ -27,7 +27,7 @@ from skimage.transform import resize
 from sphinx.application import Sphinx
 from sphinx.deprecation import RemovedInSphinx50Warning, RemovedInSphinx60Warning
 
-from spectrochempy import version
+from spectrochempy.api import version
 from spectrochempy.utils import sh
 
 warnings.filterwarnings(action="ignore", module="matplotlib", category=UserWarning)
@@ -114,6 +114,10 @@ class BuildDocumentation(object):
         )
         parser.add_argument("--delnb", help="delete all ipynb", action="store_true")
         parser.add_argument(
+            "--syncnb", help="sync all py/ipynb pairs", action="store_true"
+        )
+
+        parser.add_argument(
             "-m",
             "--message",
             default="DOCS: updated",
@@ -147,6 +151,9 @@ class BuildDocumentation(object):
         if args.delnb:
             self.delnb()
 
+        if args.syncnb:
+            self.sync_notebooks()
+
         if args.html:
             self.make_docs("html")
             self.make_tutorials()
@@ -156,7 +163,7 @@ class BuildDocumentation(object):
             self.make_pdf()
 
         if args.all:
-            self.delnb()
+            # self.delnb()
             self.make_docs("html", clean=True)
             self.make_docs("latex", clean=True)
             self.make_pdf()
@@ -299,21 +306,23 @@ class BuildDocumentation(object):
             difftime = 1
             print(f"sync: {item.name}")
             if item.with_suffix(".ipynb").exists():
-                difftime = (
-                    item.stat().st_mtime - item.with_suffix(".ipynb").stat().st_mtime
-                )
-            if difftime > 0.5:
+                py = item
+                ipynb = item.with_suffix(".ipynb")
+                difftime = py.stat().st_mtime - ipynb.stat().st_mtime
+            if abs(difftime) > 0.5:
                 # may be modified
                 count += 1
+                fil = ipynb if difftime < 0 else py
                 sh.jupytext(
                     "--update-metadata",
                     '{"jupytext": {"notebook_metadata_filter":"all"}}',
                     "--set-formats",
                     "ipynb,py:percent",
                     "--sync",
-                    item,
+                    fil,
                     silent=False,
                 )
+                # make sure the mtime is now the same
             else:
                 print("\tNo sync needed.")
         if count == 0:
@@ -323,6 +332,7 @@ class BuildDocumentation(object):
     # ..................................................................................................................
     def delnb(self):
         # Remove all ipynb before git commit
+        return
 
         for nb in SRC.rglob("**/*.ipynb"):
             sh.rm(nb)

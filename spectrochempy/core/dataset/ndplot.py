@@ -432,12 +432,13 @@ class NDPlot(HasTraits):
     # ------------------------------------------------------------------------------------------------------------------
 
     # ..................................................................................................................
-    def _figure_setup(self, ndim=1, **kwargs):
+    def _figure_setup(self, ndim=1, method=None, **kwargs):
 
         prefs = self.preferences
 
-        method = prefs.method_2D if ndim == 2 else prefs.method_1D
-        method = kwargs.get("method", method)
+        if not method:
+            method = prefs.method_2D if ndim == 2 else prefs.method_1D
+
         ax3d = "3d" if method in ["surface"] else None
 
         # Get current figure information

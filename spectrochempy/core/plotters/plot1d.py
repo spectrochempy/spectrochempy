@@ -134,11 +134,10 @@ def plot_scatter(dataset, **kwargs):
     plot_scatter_pen
     plot_multiple
     """
-    kwargs["method"] = "scatter"
     if kwargs.get("use_plotly", False):
         return dataset.plotly(**kwargs)  # pragma: no cover
     else:
-        return plot_1D(dataset, **kwargs)
+        return plot_1D(dataset, method="scatter", **kwargs)
 
 
 # plot pen (default) ---------------------------------------------------------
@@ -170,11 +169,10 @@ def plot_pen(dataset, **kwargs):
     plot_scatter_pen
     plot_multiple
     """
-    kwargs["method"] = "pen"
     if kwargs.get("use_plotly", False):
         return dataset.plotly(**kwargs)  # pragma: no cover
     else:
-        return plot_1D(dataset, **kwargs)
+        return plot_1D(dataset, method="pen", **kwargs)
 
 
 # plot pen (default) ---------------------------------------------------------
@@ -206,11 +204,10 @@ def plot_scatter_pen(dataset, **kwargs):
     plot_bar
     plot_multiple
     """
-    kwargs["method"] = "scatter+pen"
     if kwargs.get("use_plotly", False):
         return dataset.plotly(**kwargs)  # pragma: no cover
     else:
-        return plot_1D(dataset, **kwargs)
+        return plot_1D(dataset, method="scatter+pen", **kwargs)
 
 
 # plot bars ------------------------------------------------------------------
@@ -242,11 +239,10 @@ def plot_bar(dataset, **kwargs):
     plot_scatter_pen
     plot_multiple
     """
-    kwargs["method"] = "bar"
     if kwargs.get("use_plotly", False):
         return dataset.plotly(**kwargs)  # pragma: no cover
     else:
-        return plot_1D(dataset, **kwargs)
+        return plot_1D(dataset, method="bar", **kwargs)
 
 
 # plot multiple --------------------------------------------------------------

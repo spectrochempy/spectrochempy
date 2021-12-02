@@ -115,11 +115,10 @@ def plot_map(dataset, **kwargs):
 
         return plot_1D(dataset, **kwargs)
 
-    kwargs["method"] = "map"
     if kwargs.get("use_plotly", False):
         return dataset.plotly(**kwargs)
     else:
-        return plot_2D(dataset, **kwargs)
+        return plot_2D(dataset, method="map", **kwargs)
 
 
 # stack plot  -----------------------------------------------------------------
@@ -157,11 +156,10 @@ def plot_stack(dataset, **kwargs):
 
         return plot_1D(dataset, **kwargs)
 
-    kwargs["method"] = "stack"
     if kwargs.get("use_plotly", False):
         return dataset.plotly(**kwargs)
     else:
-        return plot_2D(dataset, **kwargs)
+        return plot_2D(dataset, method="stack", **kwargs)
 
 
 # image plot --------------------------------------------------------
@@ -199,11 +197,10 @@ def plot_image(dataset, **kwargs):
 
         return plot_1D(dataset, **kwargs)
 
-    kwargs["method"] = "image"
     if kwargs.get("use_plotly", False):
         return dataset.plotly(**kwargs)
     else:
-        return plot_2D(dataset, **kwargs)
+        return plot_2D(dataset, method="image", **kwargs)
 
 
 # surface plot -----------------------------------------------------------------
@@ -241,11 +238,10 @@ def plot_surface(dataset, **kwargs):
 
         return plot_1D(dataset, **kwargs)
 
-    kwargs["method"] = "surface"
     if kwargs.get("use_plotly", False):
         return dataset.plotly(**kwargs)
     else:
-        return plot_2D(dataset, **kwargs)
+        return plot_2D(dataset, method="surface", **kwargs)
 
 
 # waterfall plot -----------------------------------------------------------------
@@ -283,11 +279,10 @@ def plot_waterfall(dataset, **kwargs):
 
         return plot_1D(dataset, **kwargs)
 
-    kwargs["method"] = "waterfall"
     if kwargs.get("use_plotly", False):
         return dataset.plotly(**kwargs)
     else:
-        return plot_2D(dataset, **kwargs)
+        return plot_2D(dataset, method="waterfall", **kwargs)
 
 
 # generic plot (default stack plot) -------------------------------------------
@@ -369,7 +364,7 @@ def plot_2D(dataset, method="stack", **kwargs):
 
     # Figure setup
     # ------------------------------------------------------------------------------------------------------------------
-    new._figure_setup(ndim=2, **kwargs)
+    new._figure_setup(ndim=2, method=method, **kwargs)
 
     ax = new.ndaxes["main"]
     ax.name = ax.name + nameadd
