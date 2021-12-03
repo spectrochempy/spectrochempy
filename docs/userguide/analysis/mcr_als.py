@@ -26,7 +26,9 @@ import spectrochempy as scp
 # MCR-ALS (standing for Multivariate Curve Resolution - Alternating Least Squares) is a popular method for resolving a
 # set (or several sets) of spectra $X$ of an evolving mixture (or a set of mixtures) into the spectra $S^t$ of 'pure'
 # species and their concentration profiles $C$. In term of matrix equation:
+#
 # $$ X = C S^t + E $$
+#
 # The ALS algorithm allows applying soft or hard constraints (e.g. non negativity, unimodality, equality to a given
 # profile) to the spectra or concentration profiles of pure species. This property makes MCR-ALS an extremely flexible
 # and powerful method. Its current implementation in Scpy is limited to soft constraints but is exected to cover more

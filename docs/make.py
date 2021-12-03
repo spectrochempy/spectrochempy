@@ -63,19 +63,6 @@ REFERENCE = SRC / "userguide" / "reference"
 API = REFERENCE / "generated"
 GALLERY = GETTINGSTARTED / "gallery"
 
-PY = list(SRC.glob(("**/*.py")))
-for f in PY[:]:
-    if (
-        "generated" in f.parts
-        or ".ipynb_checkpoints" in f.parts
-        or "gallery" in f.parts
-        or "examples" in f.parts
-        or "sphinxext" in f.parts
-    ):
-        PY.remove(f)
-    if f.name in ["conf.py", "make.py"]:
-        PY.remove(f)
-
 __all__ = []
 
 
@@ -298,33 +285,66 @@ class BuildDocumentation(object):
         )
 
     # ..................................................................................................................
-    def sync_notebooks(self, pyfiles=PY):
+    def sync_notebooks(self):
         # Use  jupytext to sync py and ipynb files in userguide and tutorials
+
+        pyfiles = set()
         print(f'\n{"-" * 80}\nSync *.py and *.ipynb using jupytex\n{"-" * 80}')
+
+        py = list(SRC.glob(("**/*.py")))
+        py.extend(list(SRC.glob(("**/*.ipynb"))))
+
+        for f in py[:]:
+            # do not consider some files
+            if (
+                "generated" in f.parts
+                or ".ipynb_checkpoints" in f.parts
+                or "gallery" in f.parts
+                or "examples" in f.parts
+                or "sphinxext" in f.parts
+            ) or f.name in ["conf.py", "make.py"]:
+                continue
+            # add only the full path without suffix
+            pyfiles.add(f.with_suffix(""))
+
         count = 0
         for item in pyfiles:
-            difftime = 1
-            print(f"sync: {item.name}")
-            if item.with_suffix(".ipynb").exists():
-                py = item
-                ipynb = item.with_suffix(".ipynb")
+
+            py = item.with_suffix(".py")
+            ipynb = item.with_suffix(".ipynb")
+
+            # case of an existing pair py,ipynb
+            if py.exists() and ipynb.exists():
                 difftime = py.stat().st_mtime - ipynb.stat().st_mtime
-            if abs(difftime) > 0.5:
-                # may be modified
-                count += 1
-                fil = ipynb if difftime < 0 else py
-                sh.jupytext(
+                # negative if ipynb is more recent else positive
+
+            args = None
+            if not py.exists() or difftime < -0.5:
+                args = [
                     "--update-metadata",
                     '{"jupytext": {"notebook_metadata_filter":"all"}}',
                     "--set-formats",
                     "ipynb,py:percent",
                     "--sync",
-                    fil,
-                    silent=False,
-                )
-                # make sure the mtime is now the same
-            else:
-                print("\tNo sync needed.")
+                    ipynb,
+                ]
+
+            elif not ipynb.exists() or difftime > 0.5:
+                args = [
+                    "--update-metadata",
+                    '{"jupytext": {"notebook_metadata_filter":"all"}}',
+                    "--set-formats",
+                    "ipynb,py:percent",
+                    "--sync",
+                    py,
+                ]
+
+            if args is not None:
+                print(f"sync: {item}   diff time: {difftime}")
+                count += 1
+
+                sh.jupytext(*args, silent=False)
+
         if count == 0:
             print("\nAll notebooks are up-to-date and synchronised with py files")
         print("\n")
