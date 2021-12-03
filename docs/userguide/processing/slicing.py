@@ -28,11 +28,18 @@ import spectrochempy as scp
 # %% [markdown]
 # ## What is the slicing ?
 #
-# The slicing of a list or an array means taking elements from a given index (or set of indexes) to another index (or set of indexes). Slicing is specified using the colon operator `:` with a `from` and `to` index before and after the first column, and a `step` after the second column. Hence a slice of the object `X` will be set as:
+# The slicing of a list or an array means taking elements from a given index
+# (or set of indexes) to another index (or set of indexes).
+# Slicing is specified using the colon operator `:` with a `from` and `to` index
+# before and after the first column, and a `step` after the second column.
+# Hence, a slice of the object `X` will be set as:
 #
 # `X[from:to:step]`
 #
-# and will extend from the ‘from’ index, ends one item before the ‘to’ index and with an increment of `step`between each index. When not given the default values are respectively 0 (i.e. starts at the 1st index), length in the dimension (stops at the last index), and 1.
+# and will extend from the ‘from’ index, ends one item before the ‘to’ index
+# and with an increment of `step`between each index. When not given the default
+# values are respectively 0 (i.e. starts at the 1st index),
+# length in the dimension (stops at the last index), and 1.
 #
 # Let's first illustrate the concept on a 1D example:
 
@@ -50,7 +57,7 @@ print(
 # The same applies to multidimensional arrays by indicating slices separated by commas:
 
 # %%
-X = np.random.rand(10, 10)  # genarates a 10x10 array filled with random values
+X = np.random.rand(10, 10)  # generates a 10x10 array filled with random values
 print(X.shape)
 print(X[2:5, :].shape)  # slices along the 1st dimension, X[2:5,] is equivalent
 print(
@@ -70,7 +77,7 @@ X
 # %%
 subplot = (
     X.plot()
-)  # assignment avoids the display of the object address (<matplotlib.axes._subplots.AxesSubplot at 0x294076b93c8> or similar)
+)  # assignment avoids the display of the object address (<matplotlib.axes._subplots.AxesSubplot ...)
 
 # %% [markdown]
 # ### Slicing with indexes
@@ -83,7 +90,7 @@ print(X[-3:])  # selects the last three spectra
 print(X[::2])  # selects one spectrum out of 2
 
 # %% [markdown]
-# The same can be made along the second dimension, simultanesly or not with the first one. For instance
+# The same can be made along the second dimension, simultaneously or not with the first one. For instance
 
 # %%
 print(
@@ -94,7 +101,11 @@ print(
 )  # 3 first spectra, one wavenumbers out of 2, from index 200 to 1000
 
 # %% [markdown]
-# Would you easily guess which wavenumber range have been actually selected ?.... probably not because the relationship between the index and the wavenumber is not straightforward as it depends on the the value of the first wavenumber, the wavenumber spacing, and whether the wavenumbers are arranged in ascending or descending order...
+# Would you easily guess which wavenumber range have been actually selected ?...
+# probably not because the relationship between the index and the wavenumber
+# is not straightforward as it depends on the value of the first wavenumber,
+# the wavenumber spacing, and whether the wavenumbers are arranged in ascending
+# or descending order...
 # Here is the answer:
 
 # %%
@@ -105,15 +116,20 @@ X[
 # %% [markdown]
 # ### Slicing with coordinates
 #
-# Now the spectroscopist is generally interested in a particular region of the spectrum, for instance, 2300-1900 cm$^{-1}$. Can you easily guess the indexes that one should use to spectrum this region ? probably not without a calculator...
+# Now the spectroscopist is generally interested in a particular region of the
+# spectrum, for instance, 2300-1900 cm$^{-1}$. Can you easily guess the indexes
+# that one should use to spectrum this region ? probably not without a calculator...
 #
-# Fortunately, a simple mechanism has been implemented in spectrochempy for this purpose: the use of floats instead of integers will slice the NDDataset at the corresponding coordinates. For instance to select the 2300-1900 cm$^{-1}$ region:
+# Fortunately, a simple mechanism has been implemented in spectrochempy
+# for this purpose: the use of floats instead of integers will slice the
+# NDDataset at the corresponding coordinates. For instance to select the 2300-1900 cm$^{-1}$ region:
 
 # %%
 subplot = X[:, 2300.0:1900.0:].plot()
 
 # %% [markdown]
-# The same mechanism can be used along the first dimension (`y`). For instance, to select and plot the same region and the spectra recorded between 80 and 180 minutes:
+# The same mechanism can be used along the first dimension (`y`).
+# For instance, to select and plot the same region and the spectra recorded between 80 and 180 minutes:
 
 # %%
 subplot = X[
@@ -122,11 +138,11 @@ subplot = X[
 # a warning is raised if one or several values are beyond the limits
 
 # %% [markdown]
-# Similarly, the spectrum recorded at the time the closest to 60 mins can be selected using a float:
+# Similarly, the spectrum recorded at the time the closest to 60 minutes can be selected using a float:
 
 # %%
 X[60.0].y  # X[60.] slices the spectrum,  .y returns the corresponding `y` axis.
 
 # %% [markdown]
 # --- End of Tutorial ---
-#    (todo: add advanced slicing by array of indexes, array of bool,  )
+#    (todo: add advanced slicing by array of indexes, array of bool,  ...)

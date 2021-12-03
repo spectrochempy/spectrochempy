@@ -42,7 +42,7 @@
 # ## Emphasis
 
 # %% [markdown]
-# Use the surroundig _ or * to emphasize text, e.g.:
+# Use the surrounding _ or * to emphasize text, e.g.:
 # ```
 # Bold text: `__string___ or **string**`
 # Italic text:  `_string_ or *string`
@@ -72,7 +72,7 @@
 # ## Line breaks
 
 # %% [markdown]
-# Sometimes markdown doesn’t make line breaks when you want them. To force a linebreak, use the following code: `<br>`
+# Sometimes markdown does not make line breaks when you want them. To force a linebreak, use the following code: `<br>`
 
 # %% [markdown]
 # ## Indenting
@@ -141,7 +141,8 @@
 #
 # **Restriction**:
 # Not all Markdown code displays correctly within <div> tags, so review your colored boxes carefully.
-# For example, to make a word bold, surround it with the HTML code for bold (<b>text</b> instead of the Markdown code.
+# For example, to make a word bold, surround it with the HTML code for bold
+# (`<b>text</b>` -> <b>text</b>) instead of the Markdown code.
 #
 # The color of the box is determined by the alert type that you specify:
 #

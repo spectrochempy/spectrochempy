@@ -35,13 +35,13 @@
 # %% [markdown]
 # The NDDataset is the main object use by **SpectroChemPy**.
 #
-# Like numpy ndarrays, NDDataset have the capability to be sliced, sorted and subject to matematical operations.
+# Like numpy ndarrays, NDDataset have the capability to be sliced, sorted and subject to mathematical operations.
 #
 # But, in addition, NDDataset may have units, can be masked and each dimensions can have coordinates also with units.
-# This make NDDataset aware of unit compatibility, *e.g.*, for binary operation such as addtions or subtraction or
+# This make NDDataset aware of unit compatibility, *e.g.*, for binary operation such as additions or subtraction or
 # during the application of mathematical operations. In addition or in replacement of numerical data for coordinates,
-# NDDatset can also have labeled coordinates where labels can be different kind of objects (strings, datetime,
-# numpy nd.ndarray or othe NDDatasets, etc...).
+# NDDataset can also have labeled coordinates where labels can be different kind of objects (strings, datetime,
+# numpy nd.ndarray or other NDDatasets, etc...).
 #
 # This offers a lot of flexibility in using NDDatasets that,  we hope, will be useful for applications.
 # See the **Tutorials** for more information about such possible applications.
@@ -75,7 +75,7 @@ from spectrochempy import ur
 # Multidimensional array are defined in Spectrochempy using the `NDDataset` object.
 #
 # `NDDataset` objects mostly behave as numpy's `numpy.ndarray`
-# (see for instance __[numpy quikstart tutorial](https://numpy.org/doc/stable/user/quickstart.html)__).
+# (see for instance __[numpy quickstart tutorial](https://numpy.org/doc/stable/user/quickstart.html)__).
 
 # %% [markdown]
 # However, unlike raw numpy's ndarray, the presence of optional properties make them (hopefully) more appropriate for
@@ -83,7 +83,7 @@ from spectrochempy import ur
 #
 # *  `mask`: Data can be partially masked at will
 # *  `units`: Data can have units, allowing units-aware operations
-# *  `coordset`: Data can have a set of coordinates, one or sevral by dimensions
+# *  `coordset`: Data can have a set of coordinates, one or several by dimensions
 #
 # Additional metadata can also be added to the instances of this class through the `meta` properties.
 
@@ -124,8 +124,8 @@ scp.print_(d1D)
 _ = d1D.plot(figsize=(3, 2))
 
 # %% [markdown]
-# Except few addtional metadata such `author`, `created` ..., there is not much
-# differences with respect to a conventional `numpy.ndarray`. For example, one
+# Except few additional metadata such `author`, `created` ..., there is not much
+# difference with respect to a conventional `numpy.ndarray`. For example, one
 # can apply numpy ufunc's directly to a NDDataset or make basic arithmetic
 # operation with these objects:
 
@@ -143,12 +143,12 @@ d1D + d1D / 2.0
 # * `created` : date/time of creation
 # * `modified`: date/time of modification
 #
-# additionaly, dataset can have a **`name`** (equal to the `id` if it is not provided)
+# additional, dataset can have a **`name`** (equal to the `id` if it is not provided)
 #
 # Some other metadata are defined:
 #
 # * `history`: history of operation achieved on the object since the object creation
-# * `description`: A user friendly description of the objects purpose or contents.
+# * `description`: A user-friendly description of the objects purpose or contents.
 # * `title`: A title that will be used in plots or in some other operation on the objects.
 #
 #
@@ -275,7 +275,7 @@ d1D.to("K")
 # %% [markdown]
 # The above created `d3D` dataset has 3 dimensions, but no coordinate for these dimensions. Here arises a big difference
 # with simple `numpy`-arrays:
-# * We can add coordinates to each dimensions of a NDDataset.
+# * We can add coordinates to each dimension of a NDDataset.
 
 # %% [markdown]
 # To get the list of all defined coordinates, we can use the `coords` attribute:
@@ -319,7 +319,7 @@ d3D.u, d3D.v
 d3D
 
 # %% [markdown]
-# Programatically, we can use the attribute `is_empty` or `has_data` to check this
+# Programmatically, we can use the attribute `is_empty` or `has_data` to check this
 
 # %%
 d3D.v.has_data, d3D.v.is_empty
@@ -334,7 +334,7 @@ except KeyError as e:
     scp.error_(e)
 
 # %% [markdown]
-# In some case it can also be usefull to get a coordinate from its title instead of its name (the limitation is that if
+# In some case it can also be useful to get a coordinate from its title instead of its name (the limitation is that if
 # several coordinates have the same title, then only the first ones that is found in the coordinate list, will be
 # returned - this can be ambiguous)
 
@@ -388,7 +388,7 @@ d3D.time
 # ## Sharing coordinates between dimensions
 
 # %% [markdown]
-# Sometimes it is not necessary to have different coordinates for the each axes. Some can be shared between axes.
+# Sometimes it is not necessary to have different coordinates for each axe. Some can be shared between axes.
 #
 # For example, if we have a square matrix with the same coordinate in the two dimensions, the second dimension can
 # refer to the first. Here we create a square 2D dataset, using the `diag` method:
@@ -409,7 +409,7 @@ nd
 # ## Setting coordinates using `set_coordset`
 
 # %% [markdown]
-# Lets create 3 `Coord` objects to be use a s coordinates for the 3 dimensions of the previous d3D dataset.
+# Let's create 3 `Coord` objects to be used as coordinates for the 3 dimensions of the previous d3D dataset.
 
 # %%
 d3D.dims = ["t", "v", "u"]
@@ -444,7 +444,7 @@ d3D.set_coordset(u=coord2, v=[coord1, coord1b], t=coord0)
 d3D
 
 # %% [markdown]
-# We can retrieve the various coordinates for a single dimention easily:
+# We can retrieve the various coordinates for a single dimension easily:
 
 # %%
 d3D.v_1
@@ -518,7 +518,7 @@ except ValueError:
     )
 
 # %% [markdown]
-# This works : it use a tuple `()`, not a list `[]`
+# This works : it uses a tuple `()`, not a list `[]`
 
 # %%
 d3D.coordset = (
@@ -544,7 +544,7 @@ d3D
 d3D.v = [coord1, coord1b]
 d3D
 # %% [markdown]
-# or using a CoorSet object.
+# or using a CoordSet object.
 
 # %%
 d3D.v = CoordSet(coord1, coord1b)

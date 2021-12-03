@@ -3,7 +3,7 @@
 .. _home:
 
 #####################################################################
-Processing, analysing and modelling spectroscopic data
+Processing, analyzing and modeling spectroscopic data
 #####################################################################
 
 .. toctree::
@@ -15,12 +15,11 @@ Processing, analysing and modelling spectroscopic data
     :caption: Summary
 
 |scpy| is a framework for processing, analyzing and modeling **Spectro**\ scopic
-data for **Chem**\ istry with **Py**\ thon. It is a cross platform software,
-running on Linux, Windows or OS X.
+data for **Chem**\ istry with **Py**\ thon. It is a cross-platform software, running on Linux, Windows or OS X.
 
 Among its major features:
 
-#.  Import data from experiments or modeling programs with their *metatdata*
+#.  Import data from experiments or modeling programs with their *metadata*
     (title, units, coordinates, ...)
 #.  Preprocess these data: baseline correction, (automatic) subtraction,
     smoothing, apodization...
@@ -28,11 +27,10 @@ Among its major features:
     along given dimensions, ...
 #.  Explore data with exploratory analyses methods such as ``SVD``, ``PCA``, ``EFA``
     and visualization capabilities ...
-#.  Modelling single or multiple datasets with curve fitting / curve modelling
+#.  Modeling single or multiple datasets with curve fitting / curve modeling
     (``MCR-ALS``) methods...
 #.  Export data and analyses to various formats: ``csv``, ``xls``, ``JCAMP-DX``,  ...
-#.  Embed the complete workflow from raw data import to final analyses in a
-    Project Manager
+#.  Embed the complete workflow from raw data import to final analyses in a     Project Manager
 
 .. only:: html
 

@@ -9,7 +9,6 @@ Frequently asked questions (FAQ)
 
 General
 -------
-
 Where are the preference's files saved?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -21,9 +20,9 @@ But if the `SCP_CONFIG_HOME` environment variable is set and the `$SCP_CONFIG_HO
 it will be that directory.
 
 In principle you should not need to access files in this directory,
-but if you wants to do it, you can use one of these solutions :
+but if you want to do it, you can use one of these solutions :
 
-On Mac OSX system you access to this file by typing in the terminal:
+On Mac OSX system, you access to this file by typing in the terminal:
 
 .. sourcecode:: bash
 
@@ -31,7 +30,7 @@ On Mac OSX system you access to this file by typing in the terminal:
    $ open spectrochempy_cfg.py
 
 
-On Linux system, the second command can be replaced by:
+On Linux systems, the second command can be replaced by:
 
 .. sourcecode:: bash
 
@@ -80,7 +79,7 @@ The exact value of the coordinate can the be obtained by:
 How to specify a plot with abscissa in ascending or descending order?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-By default NDDataset with wavenumbers (infrared) or ppm units (NMR) are plotted with coords in descending order. This can be prevented by passing `reverse=False`:
+By default NDDataset with wavenumbers (infrared) or ppm units (NMR) are plotted with coordinates in descending order. This can be prevented by passing `reverse=False`:
 
 .. sourcecode:: python
 

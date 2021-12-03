@@ -13,7 +13,7 @@ Clean, build, and release the HTML and PDF documentation for SpectroChemPy.
 ```
 where optional parameters indicates which job(s) is(are) to perform.
 """
-from os import environ
+from os import environ, utime
 
 import argparse
 import shutil
@@ -67,11 +67,121 @@ __all__ = []
 
 
 # %%
+def sync_notebooks():
+    # Use  jupytext to sync py and ipynb files in userguide and tutorials
+
+    pyfiles = set()
+    print(f'\n{"-" * 80}\nSync *.py and *.ipynb using jupytex\n{"-" * 80}')
+
+    py = list(SRC.glob("**/*.py"))
+    py.extend(list(SRC.glob("**/*.ipynb")))
+
+    for f in py[:]:
+        # do not consider some files
+        if (
+            "generated" in f.parts
+            or ".ipynb_checkpoints" in f.parts
+            or "gallery" in f.parts
+            or "examples" in f.parts
+            or "sphinxext" in f.parts
+        ) or f.name in ["conf.py", "make.py"]:
+            continue
+        # add only the full path without suffix
+        pyfiles.add(f.with_suffix(""))
+
+    count = 0
+    for item in pyfiles:
+
+        py = item.with_suffix(".py")
+        ipynb = item.with_suffix(".ipynb")
+
+        # case of an existing pair py,ipynb
+        difftime = 0
+        if py.exists() and ipynb.exists():
+            difftime = py.stat().st_mtime - ipynb.stat().st_mtime
+            # negative if ipynb is more recent else positive
+
+        args = None
+        if not py.exists() or difftime < -0.5:
+            args = [
+                "--update-metadata",
+                '{"jupytext": {"notebook_metadata_filter":"all"}}',
+                "--to",
+                "py:percent",
+                ipynb,
+            ]
+
+        elif not ipynb.exists() or difftime > 0.5:
+            args = [
+                "--update-metadata",
+                '{"jupytext": {"notebook_metadata_filter":"all"}}',
+                "--to",
+                "ipynb",
+                py,
+            ]
+
+        if args is not None:
+            print(f"sync: {item}   diff time: {difftime}")
+            count += 1
+
+            sh.jupytext(*args, silent=False)
+
+            # modify the py file timestamp to ensure a difftime == 0
+            atime = ipynb.stat().st_mtime
+            mtime = ipynb.stat().st_mtime
+            utime(py, (atime, mtime))
+
+    if count == 0:
+        print("\nAll notebooks are up-to-date and synchronised with py files")
+    print("\n")
+
+
+def delnb():
+    # Remove all ipynb before git commit
+    for nb in SRC.rglob("**/*.ipynb"):
+        sh.rm(nb)
+    for nbch in SRC.glob("**/.ipynb_checkpoints"):
+        sh(f"rm -r {nbch}")
+
+
+def make_redirection_page():
+    # create an index page a the site root to redirect to latest version
+
+    html = f"""
+    <html>
+    <head>
+    <title>Redirect to the dev version of the documentation</title>
+    <meta http-equiv="refresh" content="0; URL=https://{URL_SCPY}/latest">
+    </head>
+    <body>
+    <p>
+    We have moved away from the <strong>spectrochempy.github.io</strong> domain.
+    If you're not automatically redirected, please visit us at
+    <a href="https://{URL_SCPY}">https://{URL_SCPY}</a>.
+    </p>
+    </body>
+    </html>
+    """
+    with open(HTML / "index.html", "w") as f:
+        f.write(html)
+
+
+def make_changelog():
+
+    print(f'\n{"-" * 80}\nMake `changelogs`\n{"-" * 80}')
+
+    outfile = REFERENCE / "changelog.rst"
+
+    sh.pandoc(PROJECT / "CHANGELOG.md", "-f", "markdown", "-t", "rst", "-o", outfile)
+
+    print(f"`Complete what's new` log written to:\n{outfile}\n")
+
+
 class BuildDocumentation(object):
 
     # ..................................................................................................................
     def __init__(self):
-        # determine if we are in the developement branch (latest) or master (stable)
+        # determine if we are in the development branch (latest) or master (stable)
 
         if "dev" in version:
             self._doc_version = "latest"
@@ -136,10 +246,10 @@ class BuildDocumentation(object):
             self.clean("latex")
 
         if args.delnb:
-            self.delnb()
+            delnb()
 
         if args.syncnb:
-            self.sync_notebooks()
+            sync_notebooks()
 
         if args.html:
             self.make_docs("html")
@@ -172,7 +282,7 @@ class BuildDocumentation(object):
 
         doc_version = self.doc_version
 
-        self.make_changelog()
+        make_changelog()
 
         if builder not in ["html", "latex"]:
             raise ValueError('Not a supported builder: Must be "html" or "latex"')
@@ -191,7 +301,7 @@ class BuildDocumentation(object):
         self.make_dirs()
 
         # update modified notebooks
-        self.sync_notebooks()
+        sync_notebooks()
 
         shutil.rmtree(API, ignore_errors=True)
         print(f"remove {API}")
@@ -212,7 +322,7 @@ class BuildDocumentation(object):
 
         if doc_version == "stable":
             doc_version = "latest"
-            # make also the lastest identical
+            # make also the latest identical
             print(f"\n{builder.upper()} BUILDING:")
             srcdir = confdir = DOCS
             outdir = f"{BUILDDIR}/{doc_version}"
@@ -228,7 +338,7 @@ class BuildDocumentation(object):
             doc_version = "stable"
 
         if builder == "html":
-            self.make_redirection_page()
+            make_redirection_page()
 
         # a workaround to reduce the size of the image in the pdf document
         # TODO: v.0.2 probably better solution exists?
@@ -285,79 +395,8 @@ class BuildDocumentation(object):
         )
 
     # ..................................................................................................................
-    def sync_notebooks(self):
-        # Use  jupytext to sync py and ipynb files in userguide and tutorials
-
-        pyfiles = set()
-        print(f'\n{"-" * 80}\nSync *.py and *.ipynb using jupytex\n{"-" * 80}')
-
-        py = list(SRC.glob(("**/*.py")))
-        py.extend(list(SRC.glob(("**/*.ipynb"))))
-
-        for f in py[:]:
-            # do not consider some files
-            if (
-                "generated" in f.parts
-                or ".ipynb_checkpoints" in f.parts
-                or "gallery" in f.parts
-                or "examples" in f.parts
-                or "sphinxext" in f.parts
-            ) or f.name in ["conf.py", "make.py"]:
-                continue
-            # add only the full path without suffix
-            pyfiles.add(f.with_suffix(""))
-
-        count = 0
-        for item in pyfiles:
-
-            py = item.with_suffix(".py")
-            ipynb = item.with_suffix(".ipynb")
-
-            # case of an existing pair py,ipynb
-            if py.exists() and ipynb.exists():
-                difftime = py.stat().st_mtime - ipynb.stat().st_mtime
-                # negative if ipynb is more recent else positive
-
-            args = None
-            if not py.exists() or difftime < -0.5:
-                args = [
-                    "--update-metadata",
-                    '{"jupytext": {"notebook_metadata_filter":"all"}}',
-                    "--set-formats",
-                    "ipynb,py:percent",
-                    "--sync",
-                    ipynb,
-                ]
-
-            elif not ipynb.exists() or difftime > 0.5:
-                args = [
-                    "--update-metadata",
-                    '{"jupytext": {"notebook_metadata_filter":"all"}}',
-                    "--set-formats",
-                    "ipynb,py:percent",
-                    "--sync",
-                    py,
-                ]
-
-            if args is not None:
-                print(f"sync: {item}   diff time: {difftime}")
-                count += 1
-
-                sh.jupytext(*args, silent=False)
-
-        if count == 0:
-            print("\nAll notebooks are up-to-date and synchronised with py files")
-        print("\n")
 
     # ..................................................................................................................
-    def delnb(self):
-        # Remove all ipynb before git commit
-        return
-
-        for nb in SRC.rglob("**/*.ipynb"):
-            sh.rm(nb)
-        for nbch in SRC.glob("**/.ipynb_checkpoints"):
-            sh(f"rm -r {nbch}")
 
     # ..................................................................................................................
     def make_tutorials(self):
@@ -374,19 +413,19 @@ class BuildDocumentation(object):
         # make zip of all ipynb
         def zipdir(path, dest, ziph):
             # ziph is zipfile handle
-            for nb in path.rglob("**/*.ipynb"):
-                if ".ipynb_checkpoints" in nb.parent.suffix:
+            for inb in path.rglob("**/*.ipynb"):
+                if ".ipynb_checkpoints" in inb.parent.suffix:
                     continue
-                basename = nb.stem
+                basename = inb.stem
                 sh(
-                    f"jupyter nbconvert {nb} --to notebook"
+                    f"jupyter nbconvert {inb} --to notebook"
                     f" --ClearOutputPreprocessor.enabled=True"
                     f" --stdout > out_{basename}.ipynb"
                 )
-                sh(f"rm {nb}", silent=True)
-                sh(f"mv out_{basename}.ipynb {nb}", silent=True)
-                arcnb = str(nb).replace(str(path), str(dest))
-                ziph.write(nb, arcname=arcnb)
+                sh(f"rm {inb}", silent=True)
+                sh(f"mv out_{basename}.ipynb {inb}", silent=True)
+                arcnb = str(inb).replace(str(path), str(dest))
+                ziph.write(inb, arcname=arcnb)
 
         zipf = zipfile.ZipFile("~notebooks.zip", "w", zipfile.ZIP_STORED)
         zipdir(SRC, "notebooks", zipf)
@@ -396,30 +435,6 @@ class BuildDocumentation(object):
         sh(
             f"mv ~notebooks.zip {DOWNLOADS}/{self.doc_version}-{PROJECTNAME}-notebooks.zip"
         )
-
-    # ..................................................................................................................
-    def make_redirection_page(
-        self,
-    ):
-        # create an index page a the site root to redirect to latest version
-
-        html = f"""
-        <html>
-        <head>
-        <title>Redirect to the dev version of the documentation</title>
-        <meta http-equiv="refresh" content="0; URL=https://{URL_SCPY}/latest">
-        </head>
-        <body>
-        <p>
-        We have moved away from the <strong>spectrochempy.github.io</strong> domain.
-        If you're not automatically redirected, please visit us at
-        <a href="https://{URL_SCPY}">https://{URL_SCPY}</a>.
-        </p>
-        </body>
-        </html>
-        """
-        with open(HTML / "index.html", "w") as f:
-            f.write(html)
 
     # ..................................................................................................................
     def clean(self, builder):
@@ -463,19 +478,6 @@ class BuildDocumentation(object):
             if not d.exists():
                 print(f"Make dir {d}")
                 Path.mkdir(d, exist_ok=False)
-
-    # ..................................................................................................................
-    def make_changelog(self):
-
-        print(f'\n{"-" * 80}\nMake `changelogs`\n{"-" * 80}')
-
-        outfile = REFERENCE / "changelog.rst"
-
-        sh.pandoc(
-            PROJECT / "CHANGELOG.md", "-f", "markdown", "-t", "rst", "-o", outfile
-        )
-
-        print(f"`Complete what's new` log written to:\n{outfile}\n")
 
 
 # %%

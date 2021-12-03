@@ -23,7 +23,7 @@ In this guide, we will talk about some basic but very useful contributions such 
 Be prepared to work on the code
 ===============================
 
-To contribute further to the code and documentation, you will need learning how to work with GitHub and the |scpy| code base.
+To contribute further to the code and documentation, you will need learning how to work with GitHub and the |scpy| Code base.
 
 .. _contributing.version_control:
 
@@ -39,7 +39,7 @@ However, working with `Git <https://git-scm.com/>`__ is unfortunately not the ea
 To learn `Git <https://git-scm.com/>`__, you may want to check out the `GitHub help pages <https://help.github.com/>`_ or the
 `NumPy's documentation <https://numpy.org/doc/stable/dev/index.html>`__. There is no shortage of resources on the web on this subject and many tutorials are available.
 
-Below we give some essential information to get you started with **Git**, but of course if you encounter difficulties, don't hesitate to ask for help. This may help to solve your problems faster, but it also allows us to improve this part of our documentation based on your feedback.
+Below we give some essential information to get you started with **Git**, but, of course, if you encounter difficulties, don't hesitate to ask for help. This may help to solve your problems faster, but it also allows us to improve this part of our documentation based on your feedback.
 
 Installing git
 ---------------
@@ -138,7 +138,7 @@ We'll now install |scpy| in development mode following 2 steps:
 
    Here we will create un environment using python in its version 3.9
    but it is up to you to install any version from 3.6.9 to 3.9.
-   Just change the relevant information in the code below (the first line use a
+   Just change the relevant information in the code below (the first line uses a
    script to create the necessary yaml
    file containing all information about the packages to install):
 
@@ -165,7 +165,7 @@ We'll now install |scpy| in development mode following 2 steps:
 
       (scpy3.9) $ python
 
-   This start an interpreter in which you can check your installation
+   This start an interpreter in which you can check your installation.
 
    .. sourcecode:: python
 
@@ -174,11 +174,11 @@ We'll now install |scpy| in development mode following 2 steps:
      SpectroChemPy's API ...
      >>> exit()
 
-Controling the environments
+Controlling the environments
 ---------------------------
 
-You can create as many environment you want, using the method above
-(for example with different versions of python)
+You can create as many environments you want, using the method above
+(for example with different versions of Python)
 
 To view your environments:
 
@@ -197,8 +197,8 @@ See the full conda docs `here <https://conda.pydata.org/docs>`__.
 Creating a branch
 -----------------
 
-Generally we want the master branch to reflect only production-ready code, so you will have create a
-feature branch for making your changes. For example:
+Generally we want the master branch to reflect only production-ready code, so you will have to create a
+feature branch for making your changes. For example
 
 .. sourcecode:: bash
 
@@ -218,7 +218,7 @@ branches and switch in between them using the:
 
     git checkout command.
 
-When creating this branch, make sure your master branch is up to date with the latest upstream master version. To update your local master branch, you can do:
+When creating this branch, make sure your master branch is up to date with the latest upstream master version. To update your local master branch, you can do
 
 .. sourcecode:: bash
 
@@ -226,7 +226,7 @@ When creating this branch, make sure your master branch is up to date with the l
     git pull upstream master --ff-only
 
 
-When you want to update the feature branch with changes in master after you have created the
+When you want to update the feature branch with changes in the master after you have created the
 you have created the branch, see the section on
 :ref:`updating a PR <contributing.update-pr>`.
 
@@ -241,7 +241,7 @@ Commit your code
 .. note::
 
     If you are not easy with the command lines,
-    Remember that all the following `git` operations can be done using an GUI application such as ``sourcetree``
+    Remember that all the following `git` operations can be done using a GUI application such as ``sourcetree``
     or whatever you prefer.
 
 Keep style corrections in a separate commit to make your pull request more readable.
@@ -258,7 +258,7 @@ If you created a new file, it is not tracked by git. Add it by typing:
 
     git add path/to/file-to-be-added
 
-By typing `git status` again, you should get something like:
+By typing `git status` again, you should get something like
 
 .. sourcecode:: bash
 
@@ -315,7 +315,7 @@ You can see the remote repositories:
     git remote -v
 
 If you added the upstream repository as described above, you'll see something
-like:
+like
 
 .. sourcecode:: bash
 
@@ -326,7 +326,7 @@ like:
 
 Now your code is on GitHub, but it is not yet part of the SpectroChemPy project. For this to happen, a pull request must be submitted on GitHub.
 
-Review your code
+Review Your Code
 ----------------
 
 When you are ready to request a code review, file a review request. Before doing so, make sure
@@ -344,7 +344,7 @@ Make the pull request (PR)
 ------------------------------
 
 If everything looks good, you are ready to make a pull request.  A pull request is the way
-code from a local repository is made available to the GitHub community, can be
+code from a local repository is made available to the GitHub community can be
 reviewed and eventually merged into the master version.  This request and its associated changes
 will eventually be integrated into the master branch and available in the next release.  To submit a change request:
 
@@ -381,7 +381,7 @@ To do this, you need to ``merge upstream master`` in your branch:
     git merge upstream/master
 
 If there are no conflicts (or if they were able to be fixed automatically),
-a file with a default commit message will be opened, and you can simply save and exit this file.
+a file with a default commit message will open, and you can simply save and exit this file.
 
 If there are merge conflicts, you must resolve the conflicts. See for example
 example at https://help.github.com/articles/resolving-a-merge-conflict-using-the-command-line/
@@ -391,7 +391,7 @@ Once the conflicts are merged and the files where the conflicts were resolved ar
 ``git commit`` to save these corrections.
 
 If you have uncommitted changes at the time you want to update the branch with
-master, you'll need to ``stash`` them before you update (see the
+the master, you'll need to ``stash`` them before you update (see the
 `stash docs <https://git-scm.com/book/en/v2/Git-Tools-Stashing-and-Cleaning>`__).
 This will effectively store your changes and they can be reapplied after the update.
 
@@ -409,7 +409,7 @@ can comment:
 
     @github-actions pre-commit
 
-on that pull request. This will trigger a workflow that will automatically correct the formatting errors.
+On that pull request. This will trigger a workflow that will automatically correct the formatting errors.
 
 To automatically correct formatting errors on every commit you make, you can
 configure the pre-commit yourself. First, create a Python environment :ref:`environment
@@ -428,7 +428,7 @@ delete your branch:
     git checkout master
     git merge upstream/master
 
-Then you can do:
+Then you can do
 
 .. sourcecode:: bash
 
@@ -437,7 +437,7 @@ Then you can do:
 Make sure you use a lowercase ``d``, otherwise git won't tell you if your feature branch
 branch hasn't been merged.
 
-The branch will still exist on GitHub, so to delete it, do:
+The branch will still exist on GitHub, so to delete it, do
 
     git push origin --delete my-new-feature
 
@@ -445,7 +445,7 @@ The branch will still exist on GitHub, so to delete it, do:
 Tips for a successful pull request
 ==================================
 
-To improve the chances that your pull request will be reviewed, you should:
+To improve the chances that your pull request will be reviewed, you should
 
 - **Reference an open issue** for non-trivial changes to clarify the purpose of the PR.
 - **Make sure you have appropriate tests**.

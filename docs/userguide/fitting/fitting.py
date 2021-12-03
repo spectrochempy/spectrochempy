@@ -41,7 +41,7 @@ from spectrochempy import ur
 
 
 # %% [markdown]
-# ## Solving a linear equation using least square method (LSTSQ)
+# ## Solving a linear equation using the least square method (LSTSQ)
 # In the first example, we find the least square solution of a simple linear equation.
 #
 # Let's first create a NDDataset with some data. We have for instance some noisy data that represent the distance `d`
@@ -168,7 +168,7 @@ dfit = lst.inverse_transform()
 dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
 
 # %% [markdown]
-# ## Least square with non-negativity constrainst (NNLS)
+# ## Least square with non-negativity constraint (NNLS)
 
 # %% [markdown]
 # When fitting data with LSTSQ, it happens that we get some negative values were it should not, for instance having a
@@ -235,7 +235,7 @@ ndOHcorr.plot()
 # ### Peak finding
 #
 # Below we will need to start with some guess of the peak position and width. For this we can use the `find_peaks()`
-# method (see [Peak findind tutorial](../analysis/peak_finding.ipynb))
+# method (see [Peak finding tutorial](../analysis/peak_finding.ipynb))
 
 # %%
 peaks, _ = ndOHcorr.find_peaks()
@@ -243,12 +243,12 @@ peaks.x.values
 
 # %%
 ax = ndOHcorr.plot_pen()  # output the spectrum on ax. ax will receive next plot too
-pks = peaks + 0.01  # add a small offset on the y positiion of the markers
+pks = peaks + 0.01  # add a small offset on the y position of the markers
 pks.plot_scatter(
     ax=ax,
     marker="v",
     color="black",
-    clear=False,  # we need to keep the previous outpout on ax
+    clear=False,  # we need to keep the previous output on ax
     data_only=True,  # we dont need to redraw all things like labels, etc...
     ylim=(-0.05, 1.3),
 )
@@ -300,8 +300,8 @@ shape: assymvoigtmodel
 # %% [markdown]
 # #### Syntax for parameters definition
 #
-# In such script, the char `#` at the begining of a line denote that the whole line is a comment. Comments are
-# obviously optional but may be usefull to explain
+# In such script, the char `#` at the beginning of a line denote that the whole line is a comment. Comments are
+# obviously optional but may be useful to explain
 #
 # Each individual model component is identified by the keyword `MODEL`
 #
@@ -321,21 +321,21 @@ shape: assymvoigtmodel
 #
 # * `$` is the default and denote a variable parameters
 # * `*` denotes fixed parameters
-# * `>` say that the given parameters is actualy defined in a COMMON block
+# * `>` say that the given parameters is actually defined in a COMMON block
 #
-# `COMMON`is the common block containing parameters to which a parmeter in the MODEL blocks can make reference using
+# `COMMON`is the common block containing parameters to which a parameter in the MODEL blocks can make reference using
 # the  `>` markers.  (`>` obviously is forbidden in the COMMON block)
 # common block parameters should not have a `_`(underscore) in their names
 #
 # With this parameter script definition, you can thus make rather complex search for modelling, as you can make
-# pareters dependents or fixed.
+# parameters dependents or fixed.
 #
 # The line shape can be (up to now) in the following list of shape (for 1D models - see below for 2D):
 #
 # * PolynomialBaseline -> `polynomialbaseline`:
 #
 #   Arbitrary-degree polynomial (degree limited to 10, however). As a linear baseline is automatically calculated
-#   during fittin, this polynom is always of
+#   during fitting, this polynom is always of
 #   greater or equal to order 2 (parabolic function at the minimum).
 #
 #   $f(x) = ampl * \sum_{i=2}^{max} c_i*x^i$
@@ -343,7 +343,7 @@ shape: assymvoigtmodel
 #   ```
 #   MODEL: baseline
 #   shape: polynomialbaseline
-#   # This polynom starts at the order 2
+#   # This polynomial starts at the order 2
 #   $ ampl: val, 0.0, None
 #   $ c_2: 1.0, None, None
 #   * c_3: 0.0, None, None

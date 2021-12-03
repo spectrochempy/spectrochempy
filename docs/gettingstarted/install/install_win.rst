@@ -8,16 +8,11 @@ Installation
 
 .. _conda_win:
 
-The following steps have been checked only with windows 10 but should work with
-previous versions as well.
+The following steps have been checked only with windows 10 but should work with previous versions as well.
 
-We highly recommend that all new users install |scpy| interface via Conda. You
-can install Spectrochempy in a dedicated environment (recommended, steps 4. and
-5. below). You can also use your base environment or an existing environment
-(then skip steps 4. and 5.)
+We highly recommend that all new users install |scpy| interface via Conda. You can install Spectrochempy in a dedicated environment (recommended, steps 4 and 5. below). You can also use your base environment or an existing environment (then skip steps 4 and 5.)
 
-#.  Open a command prompt (Select the Start button and type cmd), or preferably
-    open the Anaconda Prompt in the Anaconda start Menu.
+#.  Open a command prompt (Select the Start button and type cmd), or preferably     open the Anaconda Prompt in the Anaconda start Menu.
 
     .. image:: images/prompt.png
        :width: 200
@@ -41,8 +36,7 @@ can install Spectrochempy in a dedicated environment (recommended, steps 4. and
         (base) C:\<yourDefaultPath>> conda config --add channels spectrocat
         (base) C:\<yourDefaultPath>> conda config --add channels cantera
 
-#.  **Recommended**: you can create a dedicated environment. We will name it
-    `scpy` in this example but of course you can use whatever name you want.
+#.  **Recommended**: you can create a dedicated environment. We will name it     `scpy` in this example but, of course, you can use whatever name you want.
 
     .. sourcecode:: bat
 
@@ -117,9 +111,7 @@ can install Spectrochempy in a dedicated environment (recommended, steps 4. and
 Check the Installation
 ------------------------
 
-Check the installation by running a
-`IPython <https://ipython.readthedocs.io/en/stable/>`_ session by issuing in
-the terminal the following command:
+Check the installation by running a `IPython <https://ipython.readthedocs.io/en/stable/>`_ session by issuing in the terminal the following command:
 
 .. sourcecode:: bat
 

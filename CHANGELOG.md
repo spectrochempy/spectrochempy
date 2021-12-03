@@ -4,9 +4,9 @@
 
 **NEW FEATURES**
 
-* opus file reader: add filenames as labels.
+* OPUS file reader: add filenames as labels.
 
-* Omnic file reader: Documented more .spa header keys.
+* OMNIC file reader: Documented more .spa header keys.
 
 **BUGS FIXED**
 
@@ -29,7 +29,7 @@
 * EFA: Added indication of progress.
 
 * Cantera: Added differential evolution algorithm in cantera utilities.
-  
+
 * Cantera: Added PFR object in cantera utilities.
 
 * DOC: Added list of papers citing spectrochempy.
@@ -40,9 +40,9 @@
 
 **BUGS FIXED**
 
-* IRIS example after modification of readers. 
+* IRIS example after modification of readers.
 
-* IRIS: automatic search of the L-curve corner.  
+* IRIS: automatic search of the L-curve corner.
 
 * MCR-ALS returns the 'soft' concentration matrix.
 
@@ -58,7 +58,7 @@
 
 **NEW FEATURES**
 
-* Added a baseline correction method: `basc`. 
+* Added a baseline correction method: `basc`.
 
 * Baseline ranges can be stored in meta.regions['baseline'] - basc will recognize them.
 
@@ -80,9 +80,9 @@
 
 * Alignment along several dimensions (issue #248)
 
-* to() and ito() methods have been fixed to work correctly (issue #255) 
+* to() and ito() methods have been fixed to work correctly (issue #255)
 
-* Baseline correction works on all dimensions 
+* Baseline correction works on all dimensions
 
 ## Version 0.2.13
 
@@ -96,15 +96,13 @@
 
 * LinearCoord operations now working.
 
-* Baseline default now "sequential" as expected. 
-  
-  **WARNING**: It was wrongly set to "mutivariate" in previous releases, so you should 
-  expect some difference with processings you may have done before.
+* Baseline default now "sequential" as expected.
+
+**WARNING**: It was wrongly set to "mutivariate" in previous releases, so you should  expect some difference with processing you may have done before.
 
 * Comparison of coordinates now correct for mathematical operations.
 
-* Alignment methods now working (except for multidimensional alignement).
-
+* Alignment methods now working (except for multidimensional alignment).
 
 ## Version 0.2.11
 
@@ -112,28 +110,27 @@
 
 * Plot2D now works when more than one coord in 'y' axis (#238).
 
-* Spectrochempy_data location have been corrected (#239).
-
+* Spectrochempy_data location has been corrected (#239).
 
 ## Version 0.2.10
 
 **NEW FEATURES**
 
-* All data for tests and examples are now external. 
-  
-  They are now located in a separate conda package: `spectrochempy_data`.
-  
+* All data for tests and examples are now external.
+
+They are now located in a separate conda package: `spectrochempy_data`.
+
 * Installation in Colab with Examples is now supported.
 
 **BUGS FIXED**
 
-* Read_quadera() and example now based on a correct asc file
+* Read_quadera() and examples now based on a correct asc file
 
 ## Version 0.2.9
 
 **BUGS FIXED**
 
-* Hotfix regarding dispay of NMR x scale
+* Hotfix regarding display of NMR x scale
 
 ## Version 0.2.8
 
@@ -142,7 +139,7 @@
 * Added write_csv() dir 1D datasets
 
 * Added read_quadera() for Pfeiffer Vacuum's QUADERA® MS files
-  
+
 * Added test for trapz(), simps(), readquadera()
 
 * Improved displaying of Interferograms
@@ -169,7 +166,7 @@
 
 * Colaboratory compatibility
 
-* Improved check updates 
+* Improved check updates
 
 ## Version 0.2.6
 
@@ -185,7 +182,7 @@
 
 * Adding quantity to datasets with different scaling (#199).
 
-* Math operates now on linear coordinates.
+* Math now operates on linear coordinates.
 
 * Compatibility with python 3.6
 
@@ -205,14 +202,14 @@
 
 **BUGS FIXED**
 
-* Added fonts in order to solve missing fonts problems on linux and windows.
+* Added fonts in order to solve missing fonts problems on Linux and windows.
 
 ## Version 0.2.4
 
 **TASKS**
 
 * Documentation largely revisited and hopefully improved. *Still some work to be done*.
-  
+
 * NDMath (mathematical and dataset creation routines) module revisited. *Still some work to be done*.
 
 **NEW FEATURES**
@@ -230,17 +227,17 @@
 **NEW FEATURES**
 
 * Copyright update.
-  
+
 * Requirements and env yml files updated.
 
 * Use of the coordinates in math operation improved.
-  
+
 * Added ROI and Offset properties to NDArrays.
-  
+
 * Readers / Writers revisited.
 
 * Bruker TOPSPIN reader.
-  
+
 * Added LabSpec reader for .txt exported files.
 
 * Simplified the format of scp file - now zipped JSON files.
@@ -251,9 +248,9 @@
 
 * Add some array creation function to NDMath.
 
-* Refactoring plotting preferences system.
+* Refactoring plotting preference system.
 
-* Baseline correction now accept single value for ranges.
+* Baseline correction now accepts single value for ranges.
 
 * Add a waterfall plot.
 
@@ -265,7 +262,7 @@
 
 * Added Linear coordinates (EXPERIMENTAL).
 
-* Test for NDDataset dtype change at initialisation.
+* Test for NDDataset dtype change at initialization.
 
 * Added subdir of txt files in ramandata.
 
@@ -275,36 +272,36 @@
 
 **BUGS FIXED**
 
-* Dtype parameter was not taken into account during initialisation of NDArrays.
-  
+* Dtype parameter was not taken into account during initialization of NDArrays.
+
 * Math function behavior for coords.
-  
-* Color normalisation on the full range for colorscale.
-  
+
+* Color normalization on the full range for colorscale.
+
 * Configuration settings in the main application.
-  
+
 * Compatibility read_zip with py3.7.
-  
+
 * NDpanel temporary removed from the master.
-  
+
 * 2D IRIS fixed.
-  
+
 * Trapz integration to return NDDataset.
-  
-* Suppressed a forgotten sleep statement that was slowing down the SpectroChemPy initialisation.
-  
+
+* Suppressed a forgotten sleep statement that was slowing down the SpectroChemPy initialization.
+
 * Error in SIMPLISMA (changed affectations such as C.data[...] = something by C[...] = something.
-  
+
 * Cleaning mplstyle about non-style parameters and fix makestyle.
-  
+
 * Argument of set_xscale.
-  
+
 * Use read_topspin instead of the deprecated function read_bruker_nmr.
-  
+
 * Some issues with interactive baseline.
-  
+
 * Baseline and fitting tutorials.
-  
+
 * Removed dependency of isotopes.py to pandas.
 
 ## Version 0.1.x

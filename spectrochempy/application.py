@@ -7,9 +7,9 @@
 #  =
 # ======================================================================================================================
 """
-This module define the `application` on which the API rely.
+This module defines the `application` on which the API rely.
 
-It also define
+It also defines
 the default application preferences and IPython magic functions.
 """
 
@@ -228,7 +228,7 @@ __contributor__ = "A. Ait Blal, W. Guérin"
 "contributor(s) to this package"
 
 __license__ = "CeCILL-B license"
-"Licence of this package"
+"License of this package"
 
 __cite__ = (
     f"Arnaud Travert & Christian Fernandez (2021) SpectroChemPy (version"
@@ -242,7 +242,7 @@ __cite__ = (
 def _find_or_create_spectrochempy_dir():
     directory = Path.home() / ".spectrochempy"
 
-    directory.mkdir(exist_ok=True)  # Create directory only if it do not exist
+    directory.mkdir(exist_ok=True)  # Create directory only if it does not exist
 
     if directory.is_file():  # pragma: no cover
         msg = "Intended SpectroChemPy directory `{0}` is actually a file."

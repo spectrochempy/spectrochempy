@@ -398,7 +398,7 @@ class NDIO(HasTraits):
                         if isinstance(val, TYPE_BOOL) and key == "_mask":
                             val = np.bool_(val)
                         if isinstance(obj, NDDataset) and key == "_filename":
-                            obj.filename = val  # This is a hack because for some reason finelame attribute is not
+                            obj.filename = val  # This is a hack because for some reason fileame attribute is not
                             # found ????
                         else:
                             setattr(obj, key, val)

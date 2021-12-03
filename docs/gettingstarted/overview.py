@@ -40,13 +40,9 @@
 #
 # Before using the package, we must load the **API
 # (Application Programming Interface)**
-#
-# The simplest way is to import all objects and methods at once into your
-# python namespace. The loading step may take several seconds due to the
-# large number of methods to be imported into the API namespace.
 
 # %%
-from spectrochempy import *
+import spectrochempy as scp
 
 # %% [markdown]
 # ## NDDataset, the main object
@@ -58,7 +54,7 @@ from spectrochempy import *
 # For instance, in the following we read data from a series of FTIR experiments, provided  by the OMNIC software:
 
 # %%
-ds = read("irdata/nh4y-activation.spg")
+ds = scp.read("irdata/nh4y-activation.spg")
 
 # %% [markdown]
 # ### Display dataset information
@@ -70,7 +66,7 @@ ds = read("irdata/nh4y-activation.spg")
 print(ds)
 
 # %% [markdown]
-# Detailed information on the main metatdata:
+# Detailed information on the main metadata:
 
 # %%
 ds
@@ -92,7 +88,7 @@ _ = region.plot()
 # ### Maths on datasets
 
 # %% jupyter={"source_hidden": true}
-region.y -= region.y[0]  # make y coordinate reative to the first point
+region.y -= region.y[0]  # make y coordinate relative to the first point
 region.y.title = "time of dehydratation"
 region -= region[-1]  # suppress the last spectra to all
 _ = region.plot(colorbar=True)
@@ -116,7 +112,7 @@ _ = smoothed.plot(colormap="magma")
 # %% jupyter={"source_hidden": true}
 region = ds[:, 4000.0:2000.0]
 smoothed = region.smooth(window_length=51, window="hanning")
-blc = BaselineCorrection(smoothed)
+blc = scp.BaselineCorrection(smoothed)
 basc = blc.compute(
     [2000.0, 2300.0],
     [3800.0, 3900.0],
@@ -129,12 +125,12 @@ basc = blc.compute(
 _ = basc.plot()
 
 # %% [markdown]
-# ### Analyis
+# ### Analysis
 #
 # #### IRIS processing
 
 # %% jupyter={"source_hidden": true}
-ds = NDDataset.read_omnic("irdata/CO@Mo_Al2O3.SPG")[:, 2250.0:1950.0]
+ds = scp.NDDataset.read_omnic("irdata/CO@Mo_Al2O3.SPG")[:, 2250.0:1950.0]
 pressure = [
     0.00300,
     0.00400,
@@ -156,13 +152,13 @@ pressure = [
     0.90500,
     1.00400,
 ]
-ds.y = Coord(pressure, title="Pressure", units="torr")
+ds.y = scp.Coord(pressure, title="Pressure", units="torr")
 _ = ds.plot(colormap="magma")
 
 # %% jupyter={"source_hidden": true}
 param = {"epsRange": [-8, -1, 50], "lambdaRange": [-10, 1, 12], "kernel": "langmuir"}
 
-iris = IRIS(ds, param, verbose=False)
+iris = scp.IRIS(ds, param, verbose=False)
 _ = iris.plotdistribution(-7, colormap="magma")
 
 # %%

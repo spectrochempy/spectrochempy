@@ -11,4 +11,4 @@ multidimensional NMR data, J. Biomol. NMR 2013, 55, 355-367.
 
 Reading of Opus file use the `BrukerOpusReader <https://github.com/qedsoftware/brukeropusreader>`_ open source software.
 
-IRIS use `Quadprog <https://github.com/spectrochempy/quadprog>`_ open source Quadratic Programming Solver
+IRIS use `Quadprog <https://github.com/spectrochempy/quadprog>`_ open source Quadratic Programming Solver.

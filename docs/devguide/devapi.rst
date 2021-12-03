@@ -2,7 +2,7 @@
 
 
 #########################
-Developper API reference
+Developer API reference
 #########################
 
 Here is a summary of all publics methods and attributes used in |scpy| modules.

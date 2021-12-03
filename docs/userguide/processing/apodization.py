@@ -41,14 +41,16 @@ from spectrochempy.units import ur
 # ## Introduction
 #
 # As an example, apodization is a transformation particularly useful for preprocessing NMR time domain data before
-# Fourier transformation. It generally help for signal to noise improvement.
+# Fourier transformation. It generally helps for signal-to-noise improvement.
 
 # %%
-# reead an experimental spectra
+# read an experimental spectra
 path = scp.pathclean("nmrdata/bruker/tests/nmr/topspin_1d")
+
 # the method pathclean allow to write pth in linux or window style indifferently
 dataset = scp.NDDataset.read_topspin(path, expno=1, remove_digital_filter=True)
 dataset = dataset / dataset.max()  # normalization
+
 # store original data
 nd = dataset.copy()
 
@@ -117,7 +119,7 @@ _ = apod.plot(data_only=True, clear=False, color="m", linestyle="--")
 # ### Other apodization functions
 
 # %% [markdown]
-# #### Gaussian-Lorentzian appodization
+# #### Gaussian-Lorentzian apodization
 
 # %%
 nd = dataset.copy()
@@ -163,7 +165,7 @@ _ = apod.plot(data_only=True, clear=False, color="m", linestyle="--")
 # have the same effect as $\text{ssb}=1$, namely a pure sine function.
 #
 # **Shortcuts**:
-# * `sine` is strictly a alias of `sp`
+# * `sine` is strictly an alias of `sp`
 # * `sinm` is equivalent to `sp` with $\text{pow}=1$
 # * `qsin` is equivalent to `sp` with $\text{pow}=2$
 #

@@ -40,7 +40,7 @@ proj.A350["IR"] = ir
 proj.A350["TG"] = tg
 
 ##############################################################################
-# Members of the project or attributes are easily accesssed:
+# Members of the project or attributes are easily accessed:
 
 print(proj.A350)
 print(proj)
@@ -95,7 +95,7 @@ scp.run_script(newproj.print_info)
 newproj.print_info()
 
 ###############################################################################
-# Finally lets use a more usefull script
+# Finally lets use a more useful script
 script_source_2 = """
 proj.A350.TG.plot_scatter(title='my scatter plot')
 #show()

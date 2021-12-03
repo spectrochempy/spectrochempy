@@ -16,13 +16,15 @@
 
 # %% [markdown]
 # # Basic transformations
+#
 # Let's show some SpectroChemPy features on a group of IR spectra
 
 # %%
-from spectrochempy import *
+import spectrochempy as scp
+from spectrochempy import DimensionalityError, error_, MASKED
 
 # %%
-dataset = NDDataset.read_omnic("irdata/nh4y-activation.spg")
+dataset = scp.NDDataset.read_omnic("irdata/nh4y-activation.spg")
 dataset.y -= dataset.y[0]
 dataset.y.title = "time"
 dataset
@@ -48,7 +50,7 @@ dataset.max()
 # One way is to apply the max function to only a part of the spectrum (using [slicing](slicing)). Another way is to
 # mask the undesired data.
 #
-# Masking values in this case is straigthforward. Just set a value `masked` or True for those data you want to mask.
+# Masking values in this case is straightforward. Just set a value `masked` or True for those data you want to mask.
 
 # %%
 dataset[:, 1290.0:890.0] = MASKED
@@ -80,17 +82,17 @@ _ = dataset.plot()
 # Dataset can be transposed
 
 # %%
-dataset[:, 1290.0:890.0] = MASKED  # we mask the unwanted colomns
+dataset[:, 1290.0:890.0] = MASKED  # we mask the unwanted columns
 datasetT = dataset.T
 datasetT
 
 # %% [markdown]
-# As it can be observed the dimension `x`and `y`have been exchanged, *e.g.* the originalshape was **(x: 5549, y: 55)**,
+# As it can be observed the dimension `x`and `y`have been exchanged, *e.g.* the original shape was **(x: 5549, y: 55)**,
 # and after transposition it is **(y:55, x:5549)**.
 # (the dimension names stay the same, but the index of the corresponding axis are exchanged).
 
 # %% [markdown]
-# Let's vizualize the result:
+# Let's visualize the result:
 
 # %%
 _ = datasetT.plot()

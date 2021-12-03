@@ -61,7 +61,8 @@ import spectrochempy as scp
 #
 # ## Import of OMNIC files
 #
-# Thermo Scientific [OMNIC](https://www.thermofisher.com/search/results?query=OMNIC) software have two proprietary binary file formats:
+# Thermo Scientific [OMNIC](https://www.thermofisher.com/search/results?query=OMNIC) software
+# have two proprietary binary file formats:
 #
 # - .spa files that handle single spectra
 # - .spg files which contain a group of spectra
@@ -81,11 +82,11 @@ X = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG")
 X
 
 # %% [markdown]
-# The displayed attibutes are detailed in the following.
+# The displayed attributes are detailed in the following.
 #
 # - `name` is the name of the group of spectra as it appears in the .spg file. OMNIC sets this name to the .spg
 # filename used at the creation of the group. In this example, the name ("Group sust Mo_Al2O3_base line.SPG") differs
-# from the filemane ("CO@Mo_Al2O3.SPG") because the latter has been changed from outside OMNIC (directly in the OS).
+# from the filename ("CO@Mo_Al2O3.SPG") because the latter has been changed from outside OMNIC (directly in the OS).
 #
 # - `author` is that of the creator of the NDDataset (not of the .spg file, which, to our knowledge, does not have
 # this type of attribute). The string is composed of the username and of the machine name as given by the OS:
@@ -118,7 +119,7 @@ X.description
 #
 # - `values` shows the data as quantity (with their units when they exist - here a.u. for absorbance units).
 #
-# - The numerical values ar accessed through the`data` attribute and the units throught `units` attribute.
+# - The numerical values ar accessed through the`data` attribute and the units throughout `units` attribute.
 
 # %%
 X.values
@@ -145,7 +146,7 @@ X.x
 #
 #     - one coordinate made of the 19 acquisition timestamps
 #     - two labels
-#         - the acquision date (UTC) of each spectrum
+#         - the acquisition date (UTC) of each spectrum
 #         - the name of each spectrum.
 
 # %%
@@ -156,7 +157,7 @@ X.y
 # - `dims`: Note that the `x` and `y` dimensions are the second and first dimension respectively. Hence, `X[i,
 # j]` will return
 # the absorbance of the ith spectrum at the jth  wavenumber. However, this is subject to change, for instance if you
-# perform ooperation on you data such as [Transposition](../processing/transformations#Transposition). At any time
+# perform operation on your data such as [Transposition](../processing/transformations#Transposition). At any time
 # the attribute `dims`gives the correct names (which can be modified) and order of the dimensions.
 
 # %%
@@ -172,7 +173,7 @@ X.dims
 X.y.values
 
 # %% [markdown]
-# In OMNIC, the acquisition time is that of the start of the acquisison.
+# In OMNIC, the acquisition time is that of the start of the acquisition.
 # As such these may be not convenient to use directly (they are currently in the order of 1.5 billion...)
 # With this respect, it can be convenient to shift the origin of time coordinate to that of the 1st spectrum,
 # which has the index `0`:
@@ -228,15 +229,15 @@ X.y.values
 # %% [markdown]
 # #### The order of spectra
 #
-# The order of spectra in OMNIC .spg files depends depends on the order in which the spectra were included in the OMNIC
-# window before the group was saved. By default, sepctrochempy reorders the spectra by acquisistion date but the
+# The order of spectra in OMNIC .spg files depends on the order in which the spectra were included in the OMNIC
+# window before the group was saved. By default, spectrochempy reorders the spectra by acquisition date but the
 # original OMNIC order can be kept using the `sortbydate=True` at the function call. For instance:
 
 # %%
 X2 = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG", sortbydate=False)
 
 # %% [markdown]
-# In the present case this will not change nothing because the spectra in the OMNIC file wre already ordered by
+# In the present case, this will change nothing because the spectra in the OMNIC file were already ordered by
 # increasing data.
 #
 # Finally, it is worth mentioning that a `NDDataset` can generally be manipulated as numpy ndarray. Hence, for
@@ -252,9 +253,9 @@ X.y.values  # displays the `y` dimension
 #
 # **Case of groups with different wavenumbers**<br/>
 # An OMNIC .spg file can contain spectra having different wavenumber axes (e.g. different spacings or wavenumber
-# ranges). In its current implementation, the spg reader will purposedly return an error because such spectra
-# *cannot* be included in a single NDdataset which, by definition, contains items that share common axes or dimensions !
-# Future releases might include an option to deal with such a case and return a list of NDDasets. Let us know if you
+# ranges). In its current implementation, the spg reader will purposely return an error because such spectra
+# *cannot* be included in a single NDDataset which, by definition, contains items that share common axes or dimensions !
+# Future releases might include an option to deal with such a case and return a list of NDDatasets. Let us know if you
 # are interested in such a feature, see [Bug reports and enhancement requests]
 # (https://www.spectrochempy.fr/dev/dev/issues.html).
 #
@@ -296,7 +297,7 @@ print(X)
 # <div class='alert alert-warning'>
 # <b>Warning</b>
 #
-# There is a difference in specifiying the directory to read as an argument as above or as a keyword like here:
+# There is a difference in specifying the directory to read as an argument as above or as a keyword like here:
 # ```ipython3
 # X = scp.read_omnic(directory='irdata/subdir')
 # ```
@@ -307,7 +308,7 @@ print(X)
 # %% [markdown] {"pycharm": {"name": "#%% md\n"}}
 # ## Import of Bruker OPUS files
 #
-# Bruker OPUS](https://www.bruker.com/en/products-and-solutions/infrared-and-raman/opus-spectroscopy-software.html)
+# [Bruker OPUS](https://www.bruker.com/en/products-and-solutions/infrared-and-raman/opus-spectroscopy-software.html)
 # files have also a proprietary file format. The Opus reader (`read_opus()`)
 # of spectrochempy is essentially a wrapper of the python module
 # [brukeropusreader](https://github.com/spectrochempy/brukeropusreader) developed by QED. It imports absorbance
@@ -328,24 +329,25 @@ Z2 = scp.read_opus("irdata/OPUS")
 print(Z2)
 
 # %% [markdown]
-# Note that supplementary informations can be obtained by the direct use of
-# `brukeropusreader`. For instance:
+# Note that supplementary information can be obtained by the direct use of
+# `brukeropusreader`.
+#
+# For instance:
 
 # %%
 from brukeropusreader import read_file  # noqa: E402
 
-opusfile = scp.DATADIR / "irdata" / "OPUS" / "test.0000"  # the full pathn of the file
+opusfile = scp.DATADIR / "irdata" / "OPUS" / "test.0000"  # the full path of the file
 Z3 = read_file(opusfile)  # returns a dictionary of the data and metadata extracted
 for key in Z3:
     print(key)
 
-# %%
 Z3["Optik"]  # looks what is the Optik block:
 
 # %% [markdown]
 # ## Import/Export of JCAMP-DX files
 #
-# [JCAMP-DX](http://www.jcamp-dx.org/) is an open format initially developped for IR data and extended to
+# [JCAMP-DX](http://www.jcamp-dx.org/) is an open format initially developed for IR data and extended to
 # other spectroscopies. At present, the JCAMP-DX reader implemented in Spectrochempy is limited to IR data and
 # AFFN encoding (see R. S. McDonald and Paul A. Wilks, JCAMP-DX: A Standard Form for Exchange of Infrared Spectra in
 # Readable Form, Appl. Spec., 1988, 1, 151–162. doi:10.1366/0003702884428734 fo details).
@@ -369,7 +371,7 @@ print(newS0)
 
 
 # %% [markdown]
-# It is important to note here that the conversion to JCAMP-DX changes the last digits of absorbances and wavenumbers:
+# It is important to note here that the conversion to JCAMP-DX changes the last digits of absorbance and wavenumbers:
 
 # %%
 def difference(x, y):
@@ -377,8 +379,8 @@ def difference(x, y):
 
     nonzero = y.data != 0
     error = abs(x.data - y.data)
-    max_rel_error = max(error[nonzero] / abs(y.data[nonzero]))
-    return max(error), max_rel_error
+    max_relative_error = max(error[nonzero] / abs(y.data[nonzero]))
+    return max(error), max_relative_error
 
 
 # %%
@@ -404,5 +406,5 @@ except Exception as e:
 
 # %% [markdown]
 # returns an error because of the small shift of coordinates. We will see in another tutorial how to re-align datasets
-# and deal with these small problems. It is worth noticing that similar distorsions arise in commercial softwares,...
+# and deal with these small problems. It is worth noticing that similar distortions arise in commercial software,...
 # except that the user is not notified.

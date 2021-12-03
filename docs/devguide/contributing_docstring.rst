@@ -1,7 +1,7 @@
 .. _docstring:
 
 =============================
-spectrochempy docstring guide
+SpectroChemPy Docstring Guide
 =============================
 
 About docstrings and standards
@@ -15,7 +15,7 @@ Also, it is a common practice to generate online (html) documentation
 automatically from docstrings. `Sphinx <https://www.sphinx-doc.org>`_ serves
 this purpose.
 
-The next example gives an idea of what a docstring looks like:
+The next example gives an idea of what a docstring looks like
 
 .. code-block:: python
 
@@ -91,7 +91,7 @@ Writing a docstring
 General rules
 ~~~~~~~~~~~~~
 
-Docstrings must be defined with three double-quotes. No blank lines should be
+Docstrings must be defined with three double quotes. No blank lines should be
 left before or after the docstring. The text starts in the next line after the
 opening quotes. The closing quotes have their own line
 (meaning that they are not at the end of the last sentence).
@@ -186,7 +186,7 @@ infinitive verb.
         """
         Casts Series type.
 
-        Verb in third-person of the present simple, should be infinitive.
+        Verb in third person of the present simple should be infinitive.
         """
         pass
 
@@ -614,7 +614,7 @@ The way to present examples is as follows:
 4. Add examples with explanations that illustrate how the parameters can be
    used for extended functionality
 
-A simple example could be:
+A simple example could be
 
 .. code-block:: python
 
@@ -642,8 +642,8 @@ A simple example could be:
         ....
 
 The examples should be as concise as possible. In cases where the complexity of
-the function requires long examples, is recommended to use blocks with headers
-in bold. Use double star ``**`` to make a text bold, like in ``**this example**``.
+the function requires long examples, it is recommended to use blocks with headers
+in bold. Use double stars ``**`` to make a text bold, like in ``**this example**``.
 
 .. _docstring.example_conventions:
 
@@ -691,7 +691,7 @@ be tricky. Here are some attention points:
     >>> coord = Coord.linspace(20., 25., 4, units='K',
     ...                         title='temperature')
 
-* If there is a small part of the result that can vary (e.g. a hash in an object
+* If there is a small part of the result that can vary (e.g., a hash in an object
   representation), you can use ``...`` to represent this part.
 
   If you want to show that ``s.plot()`` returns a matplotlib AxesSubplot object,

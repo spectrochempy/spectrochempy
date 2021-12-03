@@ -42,8 +42,8 @@ import spectrochempy as scp
 # To allow some mathematical operations or dataset processing, it is often necessary that the datasets are aligned,
 # *i.e.,* that they have compatible coordinate for the dimensions.
 #
-# For sake of demonstration, let's take an experimental dataset that we will arbitrary split into four unaligned
-# datasets. Then will realign them and appy some binary mathematical operation such as addition or subtration that
+# For sake of demonstration, let's take an experimental dataset that will be arbitrary split into four unaligned
+# datasets. Then will realign them and apply some binary mathematical operation such as addition or subtraction that
 # required aligned coordinates.
 
 # %%
@@ -73,7 +73,7 @@ _ = scp.multiplot_map(
 )
 
 # %% [markdown]
-# The four datasets `nd1` to `nd4` have some overlapping in both dimensions. But it we want for example to add `nd2`
+# The four datasets `nd1` to `nd4` have some overlapping in both dimensions. But if we want for example to add `nd2`
 # with `nd4`. This will fail because the dimension are not aligned.
 
 # %%
@@ -84,7 +84,7 @@ except Exception as e:
 
 # %% [markdown]
 # Let try to align them, in the `y` dimension (*i.e.* the first) as this the one which differ in size.
-# (NOTE: to find the actual names of the dimensions, just get the `dims` attribute of the datasets.
+# (NOTE: to find the actual names of the dimensions, just get the `dims` attribute of the datasets).
 
 # %%
 nd2.dims, nd4.dims

@@ -10,7 +10,7 @@ Prerequisites
 |scpy| requires a working `Python <http://www.python.org/>`_ installation
 (version 3.7 to 3.9).
 
-We highly recommend to install
+We highly recommend installing
 `Anaconda <https://www.anaconda.com/distribution/>`_ or
 `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_
 distributions which are available for most
@@ -30,8 +30,8 @@ whether you choose Miniconda or Anaconda…
 
 * Go to `Anaconda download page <https://www.anaconda.com/distribution/>`_
   or `Miniconda download page <https://docs.conda.io/en/latest/miniconda.html>`_
-  to get one of these distribution.
-* Choose your platform and download one of the available installer,
+  to get one of these distributions.
+* Choose your platform and download one of the available installers,
   *e.g.*, the 3.7 or + version (up to now it has been tested upon 3.9).
 * Install the version which you just downloaded, following the instructions
   on the download page.
@@ -39,9 +39,9 @@ whether you choose Miniconda or Anaconda…
 Installation of |scpy|
 *****************************************************
 
-|scpy| installation is very similar on the various platform, except the syntax of some command. We propose here the installation step whether you are on mac/linux systems, or on Windows.
+|scpy| installation is very similar on the various platforms, except the syntax of some command. We propose here the installation step whether you are on mac/Linux systems, or on Windows.
 
-Additionaly it is possible to use a docker container or the Google Colaboratory cloud platform.
+Additionally it is possible to use a docker container or the Google Colaboratory cloud platform.
 
 * :doc:`install_mac`
 * :doc:`install_win`
