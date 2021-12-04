@@ -4,7 +4,7 @@ channels:
     - conda-forge
     - spectrocat
     - defaults
-    - cantera/dev
+    - cantera
 
 dependencies:
 
