@@ -5,7 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 """
-This module implements the class |CoordRange|.
+This module implements the class _CoordRange.
 """
 
 __all__ = __slots__ = ["trim_ranges"]
