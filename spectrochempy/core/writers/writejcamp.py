@@ -19,15 +19,15 @@ __dataset_methods__ = __all__
 # .......................................................................................................................
 def write_jcamp(*args, **kwargs):
     """
-    Writes a dataset in JCAMP-DX format
+    Write a dataset in JCAMP-DX format.
 
     (see Published JCAMP-DX Protocols http://www.jcamp-dx.org/protocols.html#ir4.24)
-    Up to now, only IR output is available
+    Up to now, only IR output is available.
 
     Parameters
     ----------
     filename: str or pathlib objet, optional
-        If not provided, a dialog is opened to select a file for writing
+        If not provided, a dialog is opened to select a file for writing.
     protocol : {'scp', 'matlab', 'jcamp', 'csv', 'excel'}, optional
         Protocol used for writing. If not provided, the correct protocol
         is inferred (whnever it is possible) from the file name extension.
@@ -39,7 +39,7 @@ def write_jcamp(*args, **kwargs):
     Returns
     -------
     out : `pathlib` object
-        path of the saved file
+        path of the saved file.
 
     Examples
     --------
@@ -53,7 +53,7 @@ def write_jcamp(*args, **kwargs):
 
 
 write_jdx = write_jcamp
-write_jdx.__doc__ = "This method is an alias of `write_jcamp` "
+write_jdx.__doc__ = "This method is an alias of `write_jcamp`."
 
 
 @exportermethod

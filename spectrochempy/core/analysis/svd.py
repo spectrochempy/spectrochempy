@@ -20,6 +20,39 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndarray import MASKED
 
 
+def _svd_flip(U, VT, u_based_decision=True):
+    """
+    Sign correction to ensure deterministic output from SVD.
+    Adjusts the columns of u and the rows of v such that the loadings in the
+    columns in u that are largest in absolute value are always positive.
+
+    Parameters
+    ----------
+    u_based_decision : boolean, (default=True)
+        If True, use the columns of u as the basis for sign flipping.
+        Otherwise, use the rows of v.
+
+    Notes
+    -----
+    Copied and modified from scikit-learn.utils.extmath (BSD 3 Licence)
+    """
+
+    if u_based_decision:
+        # columns of U, rows of VT
+        max_abs_cols = np.argmax(np.abs(U), axis=0)
+        signs = np.sign(U[max_abs_cols, range(U.shape[1])])
+        U *= signs
+        VT *= signs[:, np.newaxis]
+    else:
+        # rows of V, columns of U
+        max_abs_rows = np.argmax(np.abs(VT), axis=1)
+        signs = np.sign(VT[range(VT.shape[0]), max_abs_rows])
+        U *= signs
+        VT *= signs[:, np.newaxis]
+
+    return U, VT
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 class SVD(HasTraits):
     """
@@ -61,7 +94,7 @@ class SVD(HasTraits):
 
         Examples
         --------
-        >>> import spectrochempy as scp
+
         >>> dataset = scp.read('irdata/nh4y-activation.spg')
         >>> svd = SVD(dataset)
         >>> print(svd.ev.data)
@@ -71,6 +104,7 @@ class SVD(HasTraits):
         >>> print(svd.ev_ratio.data)
         [   94.54    5.059 ... 8.687e-06 7.779e-06]
         """
+        super().__init__()
 
         self._compute_uv = compute_uv
 
@@ -166,7 +200,7 @@ class SVD(HasTraits):
             # Sign correction to ensure deterministic output from SVD.
             # This doesn't work will full_matrices=True.
             if not full_matrices:
-                U, VT = self._svd_flip(U, VT)
+                U, VT = _svd_flip(U, VT)
 
             # Returns U as a NDDataset object
             # --------------------------------
@@ -174,9 +208,7 @@ class SVD(HasTraits):
             U.name = "U"
             U.title = "left singular vectors of " + X.name
             U.set_coordset(
-                x=Coord(
-                    labels=["#%d" % (i + 1) for i in range(KU)], title="Components"
-                ),
+                x=Coord(labels=[f"#{i + 1}" for i in range(KU)], title="Components"),
                 y=X.y,
             )
             U.description = "left singular vectors of " + X.name
@@ -190,9 +222,7 @@ class SVD(HasTraits):
             VT.title = "loadings (V.t) of " + X.name
             VT.set_coordset(
                 x=X.x,
-                y=Coord(
-                    labels=["#%d" % (i + 1) for i in range(KV)], title="Components"
-                ),
+                y=Coord(labels=[f"#{i + 1}" for i in range(KV)], title="Components"),
             )
             VT.description = (
                 "Loadings obtained by singular value decomposition of " + X.name
@@ -213,13 +243,8 @@ class SVD(HasTraits):
 
     def __repr__(self):
         if self._compute_uv:
-            return "<svd: U%s, s(%s), VT%s>" % (
-                self.U.shape,
-                self.s.size,
-                self.VT.shape,
-            )
-        else:
-            return "<svd: s(%s), U, VT:not computed>" % (self.s.size,)
+            return f"<svd: U{self.U.shape}, s({self.s.size}), VT{self.VT.shape}>"
+        return f"<svd: s({self.s.size}), U, VT:not computed>"
 
     # ------------------------------------------------------------------------------------------------------------------
     #  Properties
@@ -233,9 +258,7 @@ class SVD(HasTraits):
         sv.name = "sv"
         sv.title = "singular values"
         sv.set_coordset(
-            Coord(
-                None, labels=["#%d" % (i + 1) for i in range(size)], title="Components"
-            )
+            Coord(None, labels=[f"#{(i + 1)}" for i in range(size)], title="Components")
         )
         return sv
 
@@ -247,9 +270,7 @@ class SVD(HasTraits):
         ev.name = "ev"
         ev.title = "explained variance"
         ev.set_coordset(
-            Coord(
-                None, labels=["#%d" % (i + 1) for i in range(size)], title="Components"
-            )
+            Coord(None, labels=[f"#{(i + 1)}" for i in range(size)], title="Components")
         )
         return ev
 
@@ -270,38 +291,6 @@ class SVD(HasTraits):
         ratio.title = "explained variance"
         ratio.units = "percent"
         return ratio
-
-    def _svd_flip(self, U, VT, u_based_decision=True):
-        """
-        Sign correction to ensure deterministic output from SVD.
-        Adjusts the columns of u and the rows of v such that the loadings in the
-        columns in u that are largest in absolute value are always positive.
-
-        Parameters
-        ----------
-        u_based_decision : boolean, (default=True)
-            If True, use the columns of u as the basis for sign flipping.
-            Otherwise, use the rows of v.
-
-        Notes
-        -----
-        Copied and modified from scikit-learn.utils.extmath (BSD 3 Licence)
-        """
-
-        if u_based_decision:
-            # columns of U, rows of VT
-            max_abs_cols = np.argmax(np.abs(U), axis=0)
-            signs = np.sign(U[max_abs_cols, range(U.shape[1])])
-            U *= signs
-            VT *= signs[:, np.newaxis]
-        else:
-            # rows of V, columns of U
-            max_abs_rows = np.argmax(np.abs(VT), axis=1)
-            signs = np.sign(VT[range(VT.shape[0]), max_abs_rows])
-            U *= signs
-            VT *= signs[:, np.newaxis]
-
-        return U, VT
 
 
 # ======================================================================================================================

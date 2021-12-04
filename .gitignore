@@ -146,3 +146,5 @@ Icon*
 cov.coverage
 cov.syspath.txt
 coverage.xml
+myfile.csv
+single_spectrum.csv

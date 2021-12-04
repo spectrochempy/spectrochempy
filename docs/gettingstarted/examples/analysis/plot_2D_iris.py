@@ -29,10 +29,10 @@ print(X.coordset)
 ########################################################################################################################
 # ## Setting new coordinates
 #
-# The ``y`` coordinates of the dataset is the acquisition timestamp. However, each spectra has been recorded
-# with a given pressure of CO in the intrared cell.
+# The ``y`` coordinates of the dataset is the acquisition timestamp. However, each spectrum has been recorded
+# with a given pressure of CO in the infrared cell.
 #
-# Hence it would be interesting to add pressure coordinates to the ``y`` dimension:
+# Hence, it would be interesting to add pressure coordinates to the ``y`` dimension:
 
 pressures = [
     0.00300,
@@ -102,7 +102,7 @@ iris.plotdistribution()
 _ = iris.plotmerit()
 
 ###############################################################################
-# ## With regularization and a manual seach
+# ## With regularization and a manual search
 
 ########################################################################################################################
 # Perform  IRIS with regularization, manual search

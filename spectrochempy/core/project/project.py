@@ -77,7 +77,7 @@ class Project(AbstractProject, NDIO):
 
         Examples
         --------
-        >>> import spectrochempy as scp
+
         >>> myproj = scp.Project(name='project_1')
         >>> ds = scp.NDDataset([1., 2., 3.], name='dataset_1')
         >>> myproj.add_dataset(ds)

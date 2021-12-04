@@ -54,8 +54,7 @@ def read_omnic(*paths, **kwargs):
 
     Parameters
     -----------
-    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path
-    objects, optional
+    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
         The data source(s) can be specified by the name or a list of name
         for the file(s) to be loaded:
 
@@ -127,7 +126,6 @@ def read_omnic(*paths, **kwargs):
     Reading a single OMNIC file  (providing a windows type filename relative
     to the default ``datadir``)
 
-    >>> import spectrochempy as scp
     >>> scp.read_omnic('irdata\\\\nh4y-activation.spg')
     NDDataset: [float64] a.u. (shape: (y:55, x:5549))
 
@@ -225,8 +223,7 @@ def read_spg(*paths, **kwargs):
 
     Parameters
     -----------
-    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path
-    objects, optional
+    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
         The data source(s) can be specified by the name or a list of name
         for the file(s) to be loaded:
 
@@ -300,11 +297,9 @@ def read_spg(*paths, **kwargs):
 
     Examples
     ---------
-    >>> import spectrochempy as scp
+
     >>> scp.read_spg('irdata/nh4y-activation.spg')
     NDDataset: [float64] a.u. (shape: (y:55, x:5549))
-
-    See ``read_omnic`` for more examples of use
     """
 
     kwargs["filetypes"] = ["OMNIC files (*.spg)"]
@@ -320,8 +315,7 @@ def read_spa(*paths, **kwargs):
 
     Parameters
     -----------
-    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path
-    objects, optional
+    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
         The data source(s) can be specified by the name or a list of name
         for the file(s) to be loaded:
 
@@ -400,14 +394,10 @@ def read_spa(*paths, **kwargs):
     Examples
     ---------
 
-    >>> import spectrochempy as scp
     >>> scp.read_spa('irdata/subdir/20-50/7_CZ0-100 Pd_21.SPA')
     NDDataset: [float64] a.u. (shape: (y:1, x:5549))
-
     >>> scp.read_spa(directory='irdata/subdir', merge=True)
     NDDataset: [float64] a.u. (shape: (y:4, x:5549))
-
-    See ``read_omnic`` for more examples of use
     """
 
     kwargs["filetypes"] = ["OMNIC files (*.spa)"]
@@ -423,8 +413,7 @@ def read_srs(*paths, **kwargs):
 
     Parameters
     -----------
-    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path
-    objects, optional
+    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
         The data source(s) can be specified by the name or a list of name
         for the file(s) to be loaded:
 
@@ -502,16 +491,8 @@ def read_srs(*paths, **kwargs):
 
     Examples
     ---------
-    >>> import spectrochempy as scp
     >>> scp.read_srs('irdata/omnic series/rapid_scan_reprocessed.srs')
     NDDataset: [float64] a.u. (shape: (y:643, x:3734))
-
-    See ``read_omnic`` for more examples of use
-
-    See Also
-    --------
-    read : Generic read method
-    read_omnic, read_spg, read_spa, read_opus
     """
 
     kwargs["filetypes"] = ["OMNIC series (*.srs)"]

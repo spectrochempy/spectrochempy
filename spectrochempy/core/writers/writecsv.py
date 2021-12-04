@@ -20,13 +20,15 @@ __dataset_methods__ = __all__
 # .......................................................................................................................
 def write_csv(*args, **kwargs):
     """
-    Writes a dataset in CSV format. Currently oinly implemented for 1D datasets
-    or ND datasets with only one dimension of length larger than one
+    Write a dataset in CSV format.
+
+    Currently only implemented for 1D datasets
+    or ND datasets with only one dimension of length larger than one.
 
     Parameters
     ----------
     filename: str or pathlib objet, optional
-        If not provided, a dialog is opened to select a file for writing
+        If not provided, a dialog is opened to select a file for writing.
     protocol : {'scp', 'matlab', 'jcamp', 'csv', 'excel'}, optional
         Protocol used for writing. If not provided, the correct protocol
         is inferred (whnever it is possible) from the file name extension.
@@ -41,17 +43,16 @@ def write_csv(*args, **kwargs):
     Returns
     -------
     out : `pathlib` object
-        path of the saved file
+        Path of the saved file.
 
     Examples
     --------
-    >>> import spectrochempy as scp
-    >>> ds = scp.NDDataset([1,2,3])
+
+    >>> ds = scp.NDDataset([1, 2, 3])
     >>> f1 = ds.write_csv('myfile')
 
     >>> ds = scp.read('irdata/nh4y-activation.spg')
     >>> f2 = ds[0].write_csv('single_spectrum.csv')
-
     """
     exporter = Exporter()
     kwargs["filetypes"] = ["CSV files (*.csv)"]

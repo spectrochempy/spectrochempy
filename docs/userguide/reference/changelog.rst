@@ -6,9 +6,9 @@ Version 0.2.17
 
 **NEW FEATURES**
 
--  opus file reader: add filenames as labels.
+-  OPUS file reader: add filenames as labels.
 
--  Omnic file reader: Documented more .spa header keys.
+-  OMNIC file reader: Documented more .spa header keys.
 
 **BUGS FIXED**
 
@@ -110,14 +110,14 @@ Version 0.2.12
 
 -  Baseline default now “sequential” as expected.
 
-   **WARNING**: It was wrongly set to “mutivariate” in previous
-   releases, so you should expect some difference with processings you
-   may have done before.
+**WARNING**: It was wrongly set to “mutivariate” in previous releases,
+so you should expect some difference with processing you may have done
+before.
 
 -  Comparison of coordinates now correct for mathematical operations.
 
 -  Alignment methods now working (except for multidimensional
-   alignement).
+   alignment).
 
 Version 0.2.11
 --------------
@@ -126,7 +126,7 @@ Version 0.2.11
 
 -  Plot2D now works when more than one coord in ‘y’ axis (#238).
 
--  Spectrochempy_data location have been corrected (#239).
+-  Spectrochempy_data location has been corrected (#239).
 
 Version 0.2.10
 --------------
@@ -135,21 +135,21 @@ Version 0.2.10
 
 -  All data for tests and examples are now external.
 
-   They are now located in a separate conda package:
-   ``spectrochempy_data``.
+They are now located in a separate conda package:
+``spectrochempy_data``.
 
 -  Installation in Colab with Examples is now supported.
 
 **BUGS FIXED**
 
--  Read_quadera() and example now based on a correct asc file
+-  Read_quadera() and examples now based on a correct asc file
 
 Version 0.2.9
 -------------
 
 **BUGS FIXED**
 
--  Hotfix regarding dispay of NMR x scale
+-  Hotfix regarding display of NMR x scale
 
 Version 0.2.8
 -------------
@@ -204,7 +204,7 @@ Version 0.2.6
 
 -  Adding quantity to datasets with different scaling (#199).
 
--  Math operates now on linear coordinates.
+-  Math now operates on linear coordinates.
 
 -  Compatibility with python 3.6
 
@@ -225,7 +225,7 @@ Version 0.2.5
 
 **BUGS FIXED**
 
--  Added fonts in order to solve missing fonts problems on linux and
+-  Added fonts in order to solve missing fonts problems on Linux and
    windows.
 
 Version 0.2.4
@@ -276,9 +276,9 @@ Version 0.2.0
 
 -  Add some array creation function to NDMath.
 
--  Refactoring plotting preferences system.
+-  Refactoring plotting preference system.
 
--  Baseline correction now accept single value for ranges.
+-  Baseline correction now accepts single value for ranges.
 
 -  Add a waterfall plot.
 
@@ -290,7 +290,7 @@ Version 0.2.0
 
 -  Added Linear coordinates (EXPERIMENTAL).
 
--  Test for NDDataset dtype change at initialisation.
+-  Test for NDDataset dtype change at initialization.
 
 -  Added subdir of txt files in ramandata.
 
@@ -300,12 +300,12 @@ Version 0.2.0
 
 **BUGS FIXED**
 
--  Dtype parameter was not taken into account during initialisation of
+-  Dtype parameter was not taken into account during initialization of
    NDArrays.
 
 -  Math function behavior for coords.
 
--  Color normalisation on the full range for colorscale.
+-  Color normalization on the full range for colorscale.
 
 -  Configuration settings in the main application.
 
@@ -318,7 +318,7 @@ Version 0.2.0
 -  Trapz integration to return NDDataset.
 
 -  Suppressed a forgotten sleep statement that was slowing down the
-   SpectroChemPy initialisation.
+   SpectroChemPy initialization.
 
 -  Error in SIMPLISMA (changed affectations such as C.data[…] =
    something by C[…] = something.

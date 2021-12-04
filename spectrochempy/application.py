@@ -7,9 +7,9 @@
 #  =
 # ======================================================================================================================
 """
-This module define the `application` on which the API rely.
+This module defines the `application` on which the API rely.
 
-It also define
+It also defines
 the default application preferences and IPython magic functions.
 """
 
@@ -156,7 +156,7 @@ except LookupError:  # pragma: no cover
 # ............................................................................
 def _get_copyright():
     current_year = datetime.date.today().year
-    right = "2014-{}".format(current_year)
+    right = f"2014-{current_year}"
     right += " - A.Travert & C.Fernandez @ LCS"
     return right
 
@@ -174,13 +174,13 @@ __release_date__ = _get_release_date()
 "Last release date of this package"
 
 
-def _check_for_updates(*args, **kwargs):
+def _check_for_updates(*args):
     # Get version
     conda_url = "https://anaconda.org/spectrocat/spectrochempy/files"
     try:
         response = requests.get(conda_url)
     except requests.exceptions.RequestException:  # pragma: no cover
-        return None
+        return
 
     regex = (
         r"\/\d{1,2}\.\d{1,2}\.\d{1,2}\/download\/noarch"
@@ -188,10 +188,9 @@ def _check_for_updates(*args, **kwargs):
     )
     matches = re.finditer(regex, response.text, re.MULTILINE)
     vavailables = []
-    for matchNum, match in enumerate(matches):
-        v = match[1]
+    for match in matches:
         if match[2] == "stable":
-            vavailables.append(v)
+            vavailables.append(match[1])
 
     old = parse_version(__version__)
 
@@ -201,16 +200,16 @@ def _check_for_updates(*args, **kwargs):
         if new > old:  # pragma: no cover
             new_version = key
 
-    fi = Path.home() / ".scpy_update"
+    fil = Path.home() / ".scpy_update"
     if new_version:  # pragma: no cover
-        fi.write_text(
+        fil.write_text(
             f"\n\n\tYou are running SpectrocChemPy-{__version__} but version {new_version} is available."
             f"\n\tPlease consider updating for bug fixes and new features! "
         )
 
     else:  # pragma: no cover
-        if fi.exists():
-            fi.unlink()
+        if fil.exists():
+            fil.unlink()
 
 
 CHECK_UPDATE = threading.Thread(target=_check_for_updates, args=(1,))
@@ -229,7 +228,7 @@ __contributor__ = "A. Ait Blal, W. Guérin"
 "contributor(s) to this package"
 
 __license__ = "CeCILL-B license"
-"Licence of this package"
+"License of this package"
 
 __cite__ = (
     f"Arnaud Travert & Christian Fernandez (2021) SpectroChemPy (version"
@@ -243,10 +242,10 @@ __cite__ = (
 def _find_or_create_spectrochempy_dir():
     directory = Path.home() / ".spectrochempy"
 
-    directory.mkdir(exist_ok=True)  # Create directory only if it do not exist
+    directory.mkdir(exist_ok=True)  # Create directory only if it does not exist
 
     if directory.is_file():  # pragma: no cover
-        msg = "Intended SpectroChemPy directory `{0}` is " "actually a file."
+        msg = "Intended SpectroChemPy directory `{0}` is actually a file."
         raise IOError(msg.format(directory))
 
     return directory
@@ -331,8 +330,7 @@ class SpectroChemPyMagics(Magics):
             proj = opts["p"]
         if proj not in self.shell.user_ns:  # pragma: no cover
             raise ValueError(
-                "Cannot find any project with name `{}` in the "
-                "namespace.".format(proj)
+                f"Cannot find any project with name `{proj}` in the namespace."
             )
         # get the proj object
         projobj = self.shell.user_ns[proj]
@@ -355,15 +353,13 @@ class SpectroChemPyMagics(Magics):
             except SyntaxError:
                 # non python code
                 logging.error("Unable to parse the input as valid Python code")
-                return
+                return None
 
             if len(not_found) == 1:
-                warnings.warn("The symbol `%s` was not found" % not_found[0])
+                warnings.warn(f"The symbol `{not_found[0]}` was not found")
             elif len(not_found) > 1:
-                warnings.warn(
-                    "The symbols %s were not found"
-                    % get_text_list(not_found, wrap_item_with="`")
-                )
+                sym = get_text_list(not_found, wrap_item_with="`")
+                warnings.warn(f"The symbols {sym} were not found")
 
             contents = "\n".join(blocks)
 
@@ -376,7 +372,7 @@ class SpectroChemPyMagics(Magics):
         script = Script(name, content=contents)
         projobj[name] = script
 
-        return "Script {} created.".format(name)
+        return f"Script {name} created."
 
         # @line_magic  # def runscript(self, pars=''):  #     """  #  #  # """  #     opts,
         # args = self.parse_options(pars, '')  #  #     if  # not args:  #         raise UsageError('Missing script
@@ -426,23 +422,23 @@ class DataDir(HasTraits):
         """
         strg = f"{self.path.name}\n"  # os.path.basename(self.path) + "\n"
 
-        def _listdir(s, initial, ns):
-            ns += 1
-            for f in pathclean(initial).glob(
+        def _listdir(strg, initial, nst):
+            nst += 1
+            for fil in pathclean(initial).glob(
                 "*"
             ):  # glob.glob(os.path.join(initial, '*')):
-                fb = f.name  # os.path.basename(f)
-                if fb.startswith("."):  # pragma: no cover
+                filename = fil.name  # os.path.basename(f)
+                if filename.startswith("."):  # pragma: no cover
                     continue
                 if (
-                    not fb.startswith("acqu")
-                    and not fb.startswith("pulse")
-                    and fb not in ["ser", "fid"]
+                    not filename.startswith("acqu")
+                    and not filename.startswith("pulse")
+                    and filename not in ["ser", "fid"]
                 ):
-                    s += "   " * ns + "|__" + "%s\n" % fb
-                if f.is_dir():
-                    s = _listdir(s, f, ns)
-            return s
+                    strg += "   " * nst + f"|__{filename}\n"
+                if fil.is_dir():
+                    strg = _listdir(strg, fil, nst)
+            return strg
 
         return _listdir(strg, self.path, -1)
 
@@ -631,22 +627,20 @@ class SpectroChemPy(Application):
 
     @default("long_description")
     def _get_long_description(self):
-        desc = """
+        desc = f"""
 <p><strong>SpectroChemPy</strong> is a framework for processing, analysing and modelling
  <strong>Spectro</>scopic data for <strong>Chem</strong>istry with <strong>Py</strong>thon.
  It is a cross platform software, running on Linux, Windows or OS X.</p><br><br>
-<strong>Version:</strong> {version}<br>
-<strong>Authors:</strong> {authors}<br>
-<strong>License:</strong> {license}<br>
+<strong>Version:</strong> {__release__}<br>
+<strong>Authors:</strong> {__author__}<br>
+<strong>License:</strong> {__license__}<br>
 <div class='warning'> SpectroChemPy is still experimental and under active development. Its current design and
  functionalities are subject to major changes, reorganizations, bugs and crashes!!!. Please report any issues
 to the <a url='https://github.com/spectrochempy/spectrochempy/issues'>Issue Tracker<a>
 </div><br><br>
-When using <strong>SpectroChemPy</strong> for your own work, you are kindly requested to cite it this way:
-<pre>{cite}
-</pre></p>""".format(
-            version=__release__, authors=__author__, license=__license__, cite=__cite__
-        )
+When using <strong>SpectroChemPy</strong> for your own work,
+you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>
+"""
 
         return desc
 
@@ -771,7 +765,7 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
                     "show_config": True,
                 }
             },
-            "Show the application's configuration (human-readable " "format)",
+            "Show the application's configuration (human-readable format)",
         ),
         show_config_json=(
             {
@@ -779,7 +773,7 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
                     "show_config_json": True,
                 }
             },
-            "Show the application's configuration (json " "format)",
+            "Show the application's configuration (json format)",
         ),
     )
 
@@ -822,13 +816,17 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
         # deactivate potential command line arguments
         # (such that those from jupyter which cause problems here)
 
-        IN_IPYTHON = False
+        in_python = False
         if InteractiveShell.initialized():
-            IN_IPYTHON = True
+            in_python = True
 
-        if not IN_IPYTHON:
+        if not in_python:
             # remove argument not known by spectrochempy
-            if "make.py" in sys.argv[0] or "pytest" in sys.argv[0]:  # building docs
+            if (
+                "make.py" in sys.argv[0]
+                or "pytest" in sys.argv[0]
+                or "validate_docstrings" in sys.argv[0]
+            ):  # building docs
                 options = []
                 for item in sys.argv[:]:
                     for k in list(self.flags.keys()):
@@ -856,30 +854,29 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
         # --------------------------------------------------------------------
         def send_warnings_to_log(message, category):
             self.logs.warning(f"{category.__name__} - {message}")
-            return
 
         warnings.showwarning = send_warnings_to_log
 
         # exception handler
         # --------------------------------------------------------------------
 
-        if IN_IPYTHON:  # pragma: no cover
+        if in_python:  # pragma: no cover
 
-            ip = get_ipython()
+            ipy = get_ipython()
 
-            def _custom_exc(shell, etype, evalue, tb, tb_offset=None):
+            def _custom_exc(shell, etype, evalue, trb, trb_offset=None):
 
                 if self.log_level == logging.DEBUG:
-                    shell.showtraceback((etype, evalue, tb), tb_offset=tb_offset)
+                    shell.showtraceback((etype, evalue, trb), tb_offset=trb_offset)
                 else:
                     self.logs.error(f"{etype.__name__}: {evalue}")
 
-            ip.set_custom_exc((Exception,), _custom_exc)
+            ipy.set_custom_exc((Exception,), _custom_exc)
 
             # load our custom magic extensions
             # --------------------------------------------------------------------
-            if ip is not None:
-                ip.register_magics(SpectroChemPyMagics)
+            if ipy is not None:
+                ipy.register_magics(SpectroChemPyMagics)
 
     def _init_all_preferences(self):
 
@@ -895,10 +892,10 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
             configfiles.append(config_file)
 
             lis = self.config_dir.iterdir()
-            for f in lis:
-                if f.suffix == ".json":
-                    jsonname = self.config_dir / f
-                    if self.reset_config or f == "PlotPreferences.json":
+            for fil in lis:
+                if fil.suffix == ".json":
+                    jsonname = self.config_dir / fil
+                    if self.reset_config or fil == "PlotPreferences.json":
                         # remove the user json file to reset to defaults
                         jsonname.unlink()
                     else:
@@ -952,7 +949,7 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
 
         return config
 
-    def start_show_config(self, **kwargs):
+    def start_show_config(self):
         """start function used when show_config is True"""
         config = self.config.copy()
         # exclude show_config flags from displayed config
@@ -971,8 +968,8 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
 
         if self._loaded_config_files:
             print("Loaded config files:")
-            for f in self._loaded_config_files:
-                print("  " + f)
+            for fil in self._loaded_config_files:
+                print(f"  {fil}")
             print()
 
         for classname in sorted(config):
@@ -986,12 +983,7 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
                 pformat_kwargs["compact"] = True
             for traitname in sorted(class_config):
                 value = class_config[traitname]
-                print(
-                    "  .{} = {}".format(
-                        traitname,
-                        pprint.pformat(value, **pformat_kwargs),
-                    )
-                )
+                print(f"  {traitname} = {pprint.pformat(value, **pformat_kwargs)}")
         print()
 
         # now run the actual start function
@@ -1029,14 +1021,14 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
 
         if self.running:
             # API already started. Nothing done!
-            return
+            return True
 
         if self.preferences.show_info_on_loading:
-            info_string = "SpectroChemPy's API - v.{}\n" "© Copyright {}".format(
-                __version__, __copyright__
+            info_string = (
+                f"SpectroChemPy's API - v.{__version__}\n© Copyright {__copyright__}"
             )
-            ip = get_ipython()
-            if ip is not None and "TerminalInteractiveShell" not in str(ip):
+            ipy = get_ipython()
+            if ipy is not None and "TerminalInteractiveShell" not in str(ipy):
                 display_info_string(message=info_string.strip())
 
             else:
@@ -1062,10 +1054,10 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
 
         # display needs for update
         # time.sleep(1)
-        fi = Path.home() / ".scpy_update"
-        if fi.exists():
+        fil = Path.home() / ".scpy_update"
+        if fil.exists():
             try:
-                msg = fi.read_text()
+                msg = fil.read_text()
                 self.logs.warning(msg)
             except Exception:
                 pass
@@ -1080,10 +1072,10 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
         fname = fname.with_suffix(".py")
 
         if not fname.exists() or self.reset_config:
-            s = self.generate_config_file()
-            self.logs.info("Generating default config file: %r" % fname)
-            with open(fname, "w") as f:
-                f.write(s)
+            sfil = self.generate_config_file()
+            self.logs.info(f"Generating default config file: {fname}")
+            with open(fname, "w") as fil:
+                fil.write(sfil)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Events from Application
@@ -1094,13 +1086,13 @@ When using <strong>SpectroChemPy</strong> for your own work, you are kindly requ
 
         self.log_format = "%(message)s"
         if change.new == DEBUG:
-            self.log_format = "[%(filename)s-%(funcName)s %(levelname)s] %(" "message)s"
+            self.log_format = "[%(filename)s-%(funcName)s %(levelname)s] %(message)s"
         self.logs._cache = {}
         self.logs.level = self.log_level
         for handler in self.logs.handlers:
             handler.level = self.log_level
         self.logs.info(
-            "changed default log_level to {}".format(logging.getLevelName(change.new))
+            f"changed default log_level to {logging.getLevelName(change.new)}"
         )
 
 

@@ -55,8 +55,9 @@ It is a cross platform software, running on Linux, Windows or OS X.
 __all__ = ["api"]
 
 # import the main api
-from spectrochempy import api
-from spectrochempy.api import *  # noqa: F401
+
+from . import api
+from .api import *  # noqa: F401
 
 __all__ += api.__all__
 

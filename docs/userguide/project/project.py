@@ -111,7 +111,7 @@ proj.NMR_1D
 _ = proj.NMR_1D.plot()
 
 # %% [markdown]
-# However this work only if the name contains no space, dot, comma, colon, etc. The only special character allowed is
+# However, this work only if the name contains no space, dot, comma, colon, etc. The only special character allowed is
 # the underscore `_`.  If the name is not respecting this, then it is possible to use the following syntax (as a
 # project behave as a dictionary). For example:
 

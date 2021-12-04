@@ -289,8 +289,9 @@ class NDComplexArray(NDArray):
     def RR(self):
         """
         array - The array with real component in both dimension of
-        hypercomplex 2D `data` (Readonly property).
-        this is equivalent to the `real` property
+        hypercomplex 2D `data`.
+
+        This readonly property is equivalent to the `real` property.
         """
         if not self.is_quaternion:
             raise TypeError("Not an hypercomplex array")
@@ -300,8 +301,7 @@ class NDComplexArray(NDArray):
     @property
     def RI(self):
         """
-        array - The array with real-imaginary component of
-        hypercomplex 2D `data` (Readonly property).
+        array - The array with real-imaginary component of hypercomplex 2D `data` (Readonly property).
         """
         if not self.is_quaternion:
             raise TypeError("Not an hypercomplex array")
@@ -396,7 +396,6 @@ class NDComplexArray(NDArray):
         """
         Set the object data as complex.
 
-
         When nD-dimensional array are set to complex, we assume that it is along the first dimension.
         Two succesives rows are merged to form a complex rows. This means that the number of row must be even
         If the complexity is to be applied in other dimension, either transpose/swapdims your data before applying this
@@ -457,7 +456,7 @@ class NDComplexArray(NDArray):
         return new
 
     set_hypercomplex = set_quaternion
-    set_hypercomplex.__doc__ = "Alias of set_quaternion"
+    set_hypercomplex.__doc__ = "Alias of set_quaternion."
 
     # ..................................................................................................................
     def transpose(self, *dims, inplace=False):

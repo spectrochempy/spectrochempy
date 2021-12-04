@@ -75,7 +75,6 @@
     NDDataset.plot_1D
     NDDataset.plot_2D
     NDDataset.plot_bar
-    NDDataset.plot_generic
     NDDataset.plot_image
     NDDataset.plot_map
     NDDataset.plot_pen
@@ -143,6 +142,8 @@
     NDDataset.write_matlab
     NDDataset.zeros
     NDDataset.zeros_like
+    NDDataset.round
+    NDDataset.around
 
     NDDataset.II
     NDDataset.IR
@@ -255,6 +256,7 @@
     Coord.labels
     Coord.limits
     Coord.linear
+    Coord.loc2index
     Coord.m
     Coord.magnitude
     Coord.meta
@@ -307,6 +309,7 @@
     LinearCoord.labels
     LinearCoord.limits
     LinearCoord.linear
+    LinearCoord.loc2index
     LinearCoord.m
     LinearCoord.magnitude
     LinearCoord.meta

@@ -25,11 +25,13 @@ import spectrochempy as scp
 #
 # MCR-ALS (standing for Multivariate Curve Resolution - Alternating Least Squares) is a popular method for resolving a
 # set (or several sets) of spectra $X$ of an evolving mixture (or a set of mixtures) into the spectra $S^t$ of 'pure'
-# species and their concentration profiles $C$. In term of matrix equation:
+# species and their concentration profiles $C$. In terms of matrix equation:
+#
 # $$ X = C S^t + E $$
+#
 # The ALS algorithm allows applying soft or hard constraints (e.g. non negativity, unimodality, equality to a given
 # profile) to the spectra or concentration profiles of pure species. This property makes MCR-ALS an extremely flexible
-# and powerful method. Its current implementation in Scpy is limited to soft constraints but is exected to cover more
+# and powerful method. Its current implementation in Scpy is limited to soft constraints but is expected to cover more
 # advanced features in further releases.
 #
 # In, this tutorial the application of MCS-ALS as implemented in Scpy to a 'classical' dataset form the literature is
@@ -48,7 +50,7 @@ import spectrochempy as scp
 A = scp.read_matlab("matlabdata/als2004dataset.MAT")
 
 # %% [markdown]
-# The .mat file contains 6 matrices which are thus returned in A as a list of 6 NDdatasets. We print the names and
+# The .mat file contains 6 matrices which are thus returned in A as a list of 6 NDDatasets. We print the names and
 # dimensions of these datasets:
 
 # %%
@@ -71,7 +73,7 @@ _ = X.plot()
 
 # %% [markdown]
 # The original dataset is the 'm1' matrix and does not contain information as to the actual elution time, wavelength,
-# and data units. Hence the resulting NDDataset has no coordinates and on the plot, only the matrix line and row
+# and data units. Hence, the resulting NDDataset has no coordinates and on the plot, only the matrix line and row
 # indexes are indicated. For the clarity of the tutorial, we add: (i) a proper title to the data, (ii)
 # the default coordinates (index) do the NDDataset and (iii) a proper name for these coordinates:
 
@@ -82,7 +84,7 @@ X.set_coordtitles(y="elution time", x="wavelength")
 X
 
 # %% [markdown]
-# From now on, these names will be taken into account by Scpy in the plottings as well as in the analysis treatments
+# From now on, these names will be taken into account by Scpy in the plots as well as in the analysis treatments
 # (PCA, EFA, MCR-ALs, ...). For instance to plot X as a surface:
 
 # %%
@@ -111,11 +113,11 @@ _ = St0.plot()
 # %% [markdown]
 # Note that, again, no information has been given as to the ordinate and abscissa data. We could add them as previously
 # but this is not very important. The key point is that the 'wavelength' dimension is compatible with the data 'X',
-# which is indeed the case (both have a legth of 95). If it was not, an error would be generated in the following.
+# which is indeed the case (both have a length of 95). If it was not, an error would be generated in the following.
 #
 # #### ALS Optimization
 # With this guess 'St0' and the dataset 'X' we can create a MCRALS object. At this point of the tutorial, we will use
-# all the default parameters except for the 'verbose' option which is swiched on to have a summary
+# all the default parameters except for the 'verbose' option which is switched on to have a summary
 # of the ALS iterations:
 
 # %%
@@ -160,7 +162,7 @@ mcr = scp.MCRALS(X, St0, tol=0.001, verbose="True")
 mcr1 = scp.MCRALS(X, St0)
 
 # %% [markdown]
-# As the dimensions of C are such that the rows direction (C.y) corresponds to the elution time and the columns
+# As the dimensions of C are such that the rows' direction (C.y) corresponds to the elution time and the columns'
 # direction (C.x) correspond to the four pure species, it is necessary to transpose it before plotting in order
 # to plot the concentration vs. the elution time.
 
@@ -168,7 +170,7 @@ mcr1 = scp.MCRALS(X, St0)
 _ = mcr1.C.T.plot()
 
 # %% [markdown]
-# On the other hand, the spectra of the pure species can be plot directly:
+# On the other hand, the spectra of the pure species can be plotted directly:
 
 # %%
 _ = mcr1.St.plot()
@@ -176,13 +178,13 @@ _ = mcr1.St.plot()
 # %% [markdown]
 # #### A basic illustration of the rotational ambiguity
 # We have thus obtained the elution profiles of the four pure species. Note that the 'concentration' values are very
-# low. This results from the fact that the absorbance values in X are on the order of 0-1 while the absorbances of
+# low. This results from the fact that the absorbance values in X are on the order of 0-1 while the absorbance of
 # the initial pure spectra are of the order of 10^4. As can be seen above, the absorbance of the final spectra is of
 # the same order of magnitude.
 #
 # It is possible to normalize the intensity of the spectral profiles by setting the 'normSpec' parameter to True.
 # With this option, the spectra are normalized such that their euclidian norm is 1. The other normalization option is
-# normspec = 'max', whereby the maximum intyensity of tyhe spectra is 1. Let's look at the effect of
+# normspec = 'max', whereby the maximum intensity of the spectra is 1. Let's look at the effect of
 # both normalizations:
 
 # %%
@@ -208,7 +210,7 @@ _ = mcr3.C.T.plot()
 #
 # Generally, in MCR ALS, the initial guess cannot be obtained independently of the experimental data 'x'.
 # In such a case, one has to rely on 'X' to obtained (i) the number of pure species  and (ii) their initial
-# concentrations or spectral profiles. The number of of pure species can be assessed by carrying out a PCA on the
+# concentrations or spectral profiles. The number of pure species can be assessed by carrying out a PCA on the
 # data while the concentrations or spectral profiles can be estimated using procedures such EFA of SIMPLISMA.
 # The following will illustrate the use of PCA followed by EFA
 #
@@ -232,8 +234,8 @@ _ = S.T.plot()
 _ = LT.plot()
 
 # %% [markdown]
-# Examination of the scores and loadings indicate that the 4th component has structured, non random scores and loadings.
-# Hence we will fix the number of pure species to 4.
+# Examination of the scores and loadings indicate that the 4th component has structured, nonrandom scores and loadings.
+# Hence, we will fix the number of pure species to 4.
 #
 # NB: The PCA.transform() can also be used with n_pc='auto' to determine automatically the number of components using
 # the method of Thomas P. Minka (Automatic Choice of Dimensionality for PCA. NIPS 2000: 598-604). This type of methods,

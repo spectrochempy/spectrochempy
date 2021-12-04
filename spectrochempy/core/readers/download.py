@@ -42,7 +42,6 @@ def download_IRIS():
     --------
     Upload a dataset form a distant server
 
-    >>> import spectrochempy as scp
     >>> dataset = scp.download_IRIS()
     """
     url = "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data"

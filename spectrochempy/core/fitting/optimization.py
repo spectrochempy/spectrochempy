@@ -43,7 +43,6 @@ def optimize(
     callback=None,
 ):
     """
-
     Parameters
     ----------
     func
@@ -56,9 +55,6 @@ def optimize(
     ftol
     xtol
     callback
-
-    Returns
-    -------
     """
 
     global keys

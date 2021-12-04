@@ -17,7 +17,7 @@
 # %%
 
 import spectrochempy as scp
-from spectrochempy import ur, Quantity  # to simplify further writting
+from spectrochempy import ur, Quantity  # to simplify further writing
 import numpy as np
 
 # %% [markdown]
@@ -126,7 +126,8 @@ except scp.DimensionalityError as e:  # catch the error
 # %% [markdown]
 # ## Stripping the units
 #
-# If for any reason - including quick and dirty checks -  unitless numbers are needed, the `magnitude` field can be used:
+# If for any reason - including quick and dirty checks -
+# unitless numbers are needed, the `magnitude` field can be used:
 
 # %%
 x = 10 * ur.meters

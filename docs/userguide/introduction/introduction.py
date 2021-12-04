@@ -67,7 +67,8 @@
 #
 # To load the API, you must import it using one of the following syntax.
 #
-# In the first syntax we load the library into a namespace called `scp` (we recommend this name, but you can choose whatever
+# In the first syntax we load the library into a namespace called `scp`
+# (we recommend this name, but you can choose whatever
 # you want - except something already in use):
 
 # %%
@@ -86,7 +87,8 @@ nd = NDDataset()
 
 # %% [markdown]
 # With the second syntax, as often in python, the access to objects/functions can be greatly simplified. For example,
-# we can use directly `NDDataset` without a prefix instead of `scp.NDDataset` which is the first syntax) but there is always a
+# we can use directly `NDDataset` without a prefix instead of `scp.NDDataset`
+# which is the first syntax but there is always a
 # risk of overwriting some variables or functions already present in the namespace.
 # Therefore, the first syntax is generally highly recommended.
 #
@@ -120,7 +122,7 @@ nd = NDDataset.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
 # ### Display dataset information
 
 # %% [markdown]
-# Several ways are available to display the data we have jsut read and that are now stored in the dataset
+# Several ways are available to display the data we have just read and that are now stored in the dataset
 #
 # * **Printing** them, using the print function of python to get a short text version of the dataset information.
 
@@ -178,7 +180,7 @@ prefs.colormap = "magma"
 _ = nd.plot(method="image")  # or nd.plot_image()
 
 # %% [markdown]
-# Note that as we plot wavenumbers as abcissa, by convention the coordinates direction is reversed.
+# Note that as we plot wavenumbers as abscissa, by convention the coordinates' direction is reversed.
 #
 # This can be changed by using the keyword argument `reversed = False`.
 
@@ -190,7 +192,7 @@ _ = nd.plot(method="image")  # or nd.plot_image()
 # the whole nddataset that we have read above (`nd`).
 
 # %% [markdown]
-# Lets take, e.g., the last row as reference
+# Let's take, e.g., the last row as reference
 
 # %%
 ref = nd[0]
@@ -208,7 +210,7 @@ nds[:, 1290.0:890.0] = scp.MASKED
 _ = nds.plot_stack()
 
 # %% [markdown]
-# More details on available on available processing and analysis function will be given later in this user guide.
+# More details on available processing and analysis function will be given later in this user guide.
 
 # %% [markdown]
 # This was a short overview of the possibilities. To go further you can **Continue with ...**

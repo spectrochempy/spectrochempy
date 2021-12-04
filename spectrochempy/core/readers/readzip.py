@@ -90,7 +90,7 @@ def read_zip(*paths, **kwargs):
 
     Examples
     --------
-    >>> import spectrochempy as scp
+
     >>> A = scp.read_zip('agirdata/P350/FTIR/FTIR.zip', only=50, origin='omnic')
     >>> print(A)
     NDDataset: [float64]  a.u. (shape: (y:50, x:2843))

@@ -96,7 +96,7 @@ region -= region[-1]  # suppress the last spectra to all
 _ = region.plot(colorbar=True)
 
 # %% [markdown] slideshow={"slide_type": "subslide"}
-# ## Processing a dataset
+# ### Processing a dataset
 
 # %% [markdown] slideshow={"slide_type": "subslide"}
 # We just give here few examples

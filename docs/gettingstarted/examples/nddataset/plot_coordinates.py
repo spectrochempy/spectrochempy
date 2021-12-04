@@ -16,7 +16,8 @@ In this example, we show how coordinates can be used in SpectroChemPy
 import spectrochempy as scp
 
 ###############################################################################
-# ## Uploading a dataset
+# Uploading a dataset
+# -------------------
 
 X = scp.read("irdata/CO@Mo_Al2O3.SPG")
 
@@ -32,16 +33,19 @@ print(X.coordset)
 
 X.x
 
-""
+######################################################
+#
+
 X.y
 
 ###############################################################################
-# ## Setting new coordinates
+# Setting new coordinates
+# -----------------------
 #
-# In this example, each experiments have a timestamp corresponds to the time
-# when a given pressure of CO in the intrared cell was set.
+# In this example, each experiment have a timestamp corresponds to the time
+# when a given pressure of CO in the infrared cell was set.
 #
-# Hence it would be interesting to replace the "useless" timestamps (``y``)
+# Hence, it would be interesting to replace the "useless" timestamps (``y``)
 # by a pressure coordinates:
 
 pressures = [
@@ -84,7 +88,7 @@ X.y = c_pressures
 print(X.y)
 
 ###############################################################################
-# 2. A second way is to affect several different coordinates to the corresponding dimension.
+# 2. A second way is to affect several coordinates to the corresponding dimension.
 #    To do this, the simplest is to affect a list of coordinates instead of a single one:
 
 X.y = [c_times, c_pressures]

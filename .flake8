@@ -10,7 +10,7 @@ exclude =
     .idea
     .eggs
     build
-    gui
+    ~*
     docs/sphinxext
     # docs/userguide
     *.ipynb_checkpoints

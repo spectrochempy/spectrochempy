@@ -14,7 +14,7 @@ Examples and test data
 ----------------------
 
 When installing the |scpy| package, the data and examples used in documentation and for testing are not provided.
-If you want to try the documentation examples you need to install them separately using:
+If you want to try the documentation examples, you need to install them separately using:
 
 .. sourcecode:: bash
 
@@ -22,7 +22,7 @@ If you want to try the documentation examples you need to install them separatel
 
 
 Alternatively you can download an archive on `github <https://github.com/spectrochempy/spectrochempy_data/tags>`__
-and unpack it in the directory of your choice. In this case you may need to adapt the path for the reading fonctions.
+and unpack it in the directory of your choice. In this case you may need to adapt the path for the reading functions.
 
 
 Cantera

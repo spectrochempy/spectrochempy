@@ -4,6 +4,9 @@
 #  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
+"""
+Integration methods
+"""
 
 __all__ = ["simps", "trapz"]
 
@@ -14,7 +17,6 @@ import scipy.integrate
 
 def trapz(dataset, *args, **kwargs):
     """
-
     Wrapper of scpy.integrate.trapz() : Integrate along the given dimension using the composite trapezoidal rule.
 
     Integrate NDDataset along given dimension.
@@ -22,7 +24,7 @@ def trapz(dataset, *args, **kwargs):
     Parameters
     ----------
     dataset : |NDDataset|
-        dataset to be integrated.
+        Dataset to be integrated.
     dim : str, optional
         Dimension along which to integrate. Default is the dimension corresponding to the last axis, generally 'x'.
     axis : int, optional
@@ -35,7 +37,6 @@ def trapz(dataset, *args, **kwargs):
 
     Example
     --------
-    >>> import spectrochempy as scp
     >>> dataset = scp.read('irdata/nh4y-activation.spg')
     >>> dataset[:,1250.:1800.].trapz()
     NDDataset: [float64] a.u..cm^-1 (size: 55)
@@ -73,7 +74,9 @@ def trapz(dataset, *args, **kwargs):
 
 def simps(dataset, *args, **kwargs):
     """
-    Wrapper of scpy.integrate.simps() : Integrate y(x) using samples along the given axis and the composite
+    Wrapper of scpy.integrate.simps().
+
+    Integrate y(x) using samples along the given axis and the composite
     Simpson's rule. If x is None, spacing of dx is assumed.
 
     If there are an even number of samples, N, then there are an odd
@@ -88,7 +91,7 @@ def simps(dataset, *args, **kwargs):
         Dimension along which to integrate. Default is the dimension corresponding to the last axis, generally 'x'.
     axis : int, optional
         When dim is not used, this is the axis along which to integrate. Default is the last axis.
-    even : str {'avg', 'first', 'last'}, optional. Default is 'avg'.
+    even : str {'avg', 'first', 'last'}, optional, default is 'avg'
         'avg' : Average two results: 1) use the first N-2 intervals with
                   a trapezoidal rule on the last interval and 2) use the last
                   N-2 intervals with a trapezoidal rule on the first interval.
@@ -104,7 +107,7 @@ def simps(dataset, *args, **kwargs):
 
     Example
     --------
-    >>> import spectrochempy as scp
+
     >>> dataset = scp.read('irdata/nh4y-activation.spg')
     >>> dataset[:,1250.:1800.].simps()
     NDDataset: [float64] a.u..cm^-1 (size: 55)

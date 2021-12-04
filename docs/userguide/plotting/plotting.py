@@ -33,32 +33,33 @@
 # %% [markdown]
 # # Plotting
 #
-# This section shows the main the plotting capabilities of SpectroChemPy. Most of them are based on [Matplotlib](
+# This section shows the main plotting capabilities of SpectroChemPy. Most of them are based on [Matplotlib](
 # https://matplotlib.org), one of the most used plotting library for Python, and its
-# [pyplot](https://matplotlib.org/stable/tutorials/introductory/pyplot.html) interface. While not mandatory to follow
-# this tutorial, some familiarity with this library can help and we recommand a brief look at some
+# [pyplot](https://matplotlib.org/stable/tutorials/introductory/pyplot.html) interface. While not mandatory, to follow
+# this tutorial, some familiarity with this library can help, and we recommend a brief look at some
 # [matplotlib tutorials](https://matplotlib.org/stable/tutorials/index.html) as well.
 #
-# Note that in the near future, SpectroChemPy should also offer the possibillity to use [Plotly](https://plotly.com/)
+# Note that in the near future, SpectroChemPy should also offer the possibility to use [Plotly](https://plotly.com/)
 # for a better interactivity inside a notebook.
 #
-# Finally, some of the the commands and objects used here are described in-depth in the sections related to
-# [import](../importexport/import.html) ans [slicing](../processing/slicing.html) of NDDatasets and the *
+# Finally, some commands and objects used here are described in-depth in the sections related to
+# [import](../Importexport/import.html) and [slicing](../processing/slicing.html) of NDDatasets and the *
 # [NDDatasets](../dataset/dataset.html) themselves.
 # %% [markdown]
 # ## Load the API
 # First, before anything else, we import the spectrochempy API:
 
 # %%
-from spectrochempy import *
+import spectrochempy as scp
 
 # %% [markdown]
 # ## Loading the data
 # For sake of demonstration we import a NDDataset consisting in infrared spectra from an omnic .spg file
-# and make some (optional) preparation of the data to display (see also [Import IR Data](../importexport/importIR.html)).
+# and make some (optional) preparation of the data to display
+# (see also [Import IR Data](../importexport/importIR.html)).
 
 # %%
-dataset = NDDataset.read("irdata/nh4y-activation.spg")
+dataset = scp.NDDataset.read("irdata/nh4y-activation.spg")
 
 # %% [markdown]
 # ## Preparing the data
@@ -82,30 +83,30 @@ dataset.y.title = "relative time on stream"
 # We also mask a region that we do not want to display
 
 # %%
-dataset[:, 1290.0:920.0] = MASKED
+dataset[:, 1290.0:920.0] = scp.MASKED
 
 # %% [markdown]
 # ## Selecting the output window
 
 # %% [markdown]
-# For the examples below, we use inline matplotlib figures (non interactive): this can be forced using the magic
+# For the examples below, we use inline matplotlib figures (non-interactive): this can be forced using the magic
 # function before loading spectrochempy.:
 # ```ipython3
 # %matplotlib inline
 # ```
 # but it is also the default in `Jupyter lab` (so we don't really need to specify this). Note that when such magic
-# function has been used, it is not possible to change the setting, except by resseting the notebook kernel.
+# function has been used, it is not possible to change the setting, except by resetting the notebook kernel.
 #
 # If one wants interactive displays (with selection, zooming, etc...) one can use:
 # ```ipython3
 #     %matplotlib widget
 # ```
-# However, this suffer (at least for us) some incompatibilities in `jupyter lab`... it is worth to try!
+# However, this suffers (at least for us) some incompatibilities in `jupyter lab`... it is worth to try!
 # If you can not get it working in `jupyter lab` and you need interactivity, you can use the following:
 # ```ipython3
 #     %matplotlib
 # ```
-# which has the effect of displaying the figures in independant windows using default matplotlib backend (e.g.,
+# which has the effect of displaying the figures in independent windows using default matplotlib backend (e.g.,
 # `Tk`), with all the interactivity of matplotlib.
 #
 # But you can explicitly request a different GUI backend:
@@ -129,7 +130,7 @@ _ = dataset.plot()
 
 # %% [markdown]
 # Note, in the cell above, that we used ` _ = ... `  syntax.
-# This is to avoid any ouput but the plot from this statement.
+# This is to avoid any output but the plot from this statement.
 #
 # Note also that the `plot()` method uses some of NDDataset metadata: the `NDDataset.x` coordinate `data` (here the
 # wavenumber values), `name` (here 'wavenumbers'), `units` (here 'cm-1') as well as the `NDDataset.title`
@@ -147,7 +148,7 @@ prefs = dataset.preferences  # we will use prefs instead of dataset.preference
 prefs.figure.figsize = (6, 3)  # The default figsize is (6.8,4.4)
 prefs.colorbar = True  # This add a color bar on a side
 prefs.colormap = "magma"  # The default colormap is viridis
-prefs.axes.facecolor = ".95"  # Make the graph background colored in a ligth gray
+prefs.axes.facecolor = ".95"  # Make the graph background colored in a light gray
 prefs.axes.grid = True
 
 _ = dataset.plot()
@@ -242,10 +243,10 @@ _ = ax.annotate(
 # https://matplotlib.org/stable/tutorials/text/annotations.html)
 
 # %% [markdown]
-# ## Changing the plot style using matpotlib style sheets
+# ## Changing the plot style using matplotlib style sheets
 
 # %% [markdown]
-#  The easiest way to to change the plot style may be to use pre-defined styles such as those used in [matplotlib
+#  The easiest way to change the plot style may be to use pre-defined styles such as those used in [matplotlib
 #  styles](https://matplotlib.org/stable/tutorials/introductory/customizing.html). This is directly included in the
 #  preferences of SpectroChemPy
 
@@ -264,7 +265,7 @@ _ = dataset.plot()
 # * talk
 
 # %% [markdown]
-# the styles can be combined so you can have a style sheet that customizes
+# the styles can be combined, so you can have a style sheet that customizes
 # colors and a separate style sheet that alters element sizes for presentations:
 
 # %%
@@ -274,7 +275,7 @@ _ = dataset.plot(colorbar=True)
 
 # %% [markdown]
 # As previously, style specification can also be done directly in the plot method without
-# affectting the `preferences' attribute.
+# affecting the `preferences' attribute.
 
 # %%
 prefs.colormap = "magma"
@@ -354,8 +355,8 @@ _ = dataset.plot()
 
 # %% [markdown]
 # You can also, for an individual plot use specialised plot commands, such as `plot_stack()`, `plot_map()`,
-# `plot_waterfall()`, `plot_surface()` or `plot_image()' , or equivalently the generic 'plot' function with
-# the `method' parameter (i.e. `plot(method='stack')`, `plot(method='map')`, etc...
+# `plot_waterfall()`, `plot_surface()` or `plot_image()` , or equivalently the generic `plot` function with
+# the `method` parameter, i.e., `plot(method='stack')`, `plot(method='map')`, etc...
 #
 # These modes are illustrated below:
 # %%
@@ -393,7 +394,7 @@ _ = dataset[3].plot(scatter=True, pen=False, me=30, ms=5)
 # %%
 nspec = int(len(dataset) / 4)
 ds1 = dataset[:nspec]  # split the dataset into too parts
-ds2 = dataset[nspec:] - 2.0  # add an ofset to the second part
+ds2 = dataset[nspec:] - 2.0  # add an offset to the second part
 
 ax1 = ds1.plot_stack()
 _ = ds2.plot_stack(ax=ax1, clear=False, zlim=(-2.5, 4))
@@ -407,7 +408,7 @@ labels = ["sample {}".format(label) for label in ["S1", "S10", "S20", "S50", "S5
 prefs.reset()
 prefs.axes.facecolor = ".99"
 prefs.axes.grid = True
-_ = plot_multiple(
+_ = scp.plot_multiple(
     method="scatter", me=10, datasets=datasets, labels=labels, legend="best"
 )
 
@@ -424,7 +425,8 @@ prefs
 # %% [markdown]
 # **Warning**: Note that with respect to matplotlib,the parameters in the `dataset.preferences` dictionary
 # have a slightly different name, e.g. `figure_figsize` (SpectroChemPy) instead of `figure.figsize` (matplotlib syntax)
-# (this is because in SpectroChempy, dot (`.`) cannot be used in paremeter name, and thus it is replaced by an underscore (`_`))
+# (this is because in SpectroChemPy, dot (`.`) cannot be used in parameter name,
+# and thus it is replaced by an underscore (`_`))
 #
 
 # %% [markdown]

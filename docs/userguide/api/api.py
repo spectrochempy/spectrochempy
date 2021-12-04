@@ -36,14 +36,14 @@
 
 # %% [markdown]
 # Many options of the API can be set up.
-# Let's first import it in the the usual way:
+# Let's first import it in the usual way:
 
 # %%
 import spectrochempy as scp
 
 # %% [markdown]
 # ## General information
-# General informations on the API can be obtained the following variables:
+# General information on the API can be obtained the following variables:
 
 # %%
 print(f"   copyright : {scp.copyright}")
@@ -69,8 +69,8 @@ print(f" description : {scp.description}")
 # | `ERROR`   / `40` | wrong argument/commands or bug |
 # | `CRITICAL` / `50` | could lead to a system crash |
 #
-#  Not all these informations are always necessary and the level of information displayed by SpectroChemPy can be
-#  tuned using the command `scp.set_loglevel()` with the rule that only informations having a
+#  Not all this information is always necessary and the level of information displayed by SpectroChemPy can be
+#  tuned using the command `scp.set_loglevel()` with the rule that only information having a
 #  criticality larger than that passed to the `set_loglevel()` function will be shown.
 #
 #  For instance, the `DEBUG` level can be triggered by using one of the three equivalent instructions
@@ -113,7 +113,7 @@ scp.info_("this is an info message!")
 scp.debug_("this is a debug message!")
 
 # %% [markdown]
-# A expected, only the info message was displayed.
+# As expected, only the info message was displayed.
 #
 # If we change the loglevel to ``DEBUG``, then the two messages will be printed:
 

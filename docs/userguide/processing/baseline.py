@@ -94,7 +94,7 @@ _ = X.detrend(type="constant").plot()
 
 # %% [markdown]
 # When the baseline to remove is a simple linear correction, one can use ``abc``.
-# This perform an automatic baseline correction.
+# This performs an automatic baseline correction.
 
 # %%
 _ = scp.abc(X).plot()
@@ -104,7 +104,7 @@ _ = scp.abc(X).plot()
 #
 # 'Advanced' baseline correction basically consists for the user to choose:
 #
-# - spectral ranges which s/he considers as belonging to the base line - the type of polynomial(s) used to model the
+# - spectral ranges which s/he considers as belonging to the baseline - the type of polynomial(s) used to model the
 # baseline in and between these regions (keyword: `interpolation`) - the method used to apply the correction to
 # spectra: sequentially to each spectrum, or using a multivariate approach (keyword: `method`).
 #
@@ -187,7 +187,7 @@ ranges = [[5900.0, 5400.0], [4000.0, 4500.0], [2100.0, 2000.0], [1550.0, 1555.0]
 # ```
 #
 #
-# if you you use a list instead of tuples:
+# if you use a list instead of tuples:
 #
 # ```ipython3
 # ranges = [[5900.0, 5400.0], [4000., 4500.], [2100., 2000.0], [1550., 1555.]]
@@ -219,16 +219,16 @@ _ = blc.corrected.plot()
 # this is the default `method='sequential'`), or modeled using a multivariate approach (`method='multivariate'`).
 #
 # The `'multivariate'` option is useful when the signal‐to‐noise ratio is low and/or when the baseline changes in
-# various regions of the spectrum are correlated. It constist in (i) modeling the baseline regions by a principal
+# various regions of the spectrum are correlated. It consist in (i) modeling the baseline regions by a principal
 # component analysis (PCA), (ii) interpolate the loadings of the first principal components over the whole spectral
 # and (iii) modeling the spectra baselines from the product of the PCA scores and the interpolated loadings.
-# (for detail: see [Vilmin et al. Analytica Chimica Acta 891 (2015)](dx.doi.org/10.1016/j.aca.2015.06.006).
+# (for detail: see [Vilmin et al. Analytica Chimica Acta 891 (2015)](dx.doi.org/10.1016/j.aca.2015.06.006)).
 #
 # If this option is selected, the user should also choose `npc`, the number of principal components used to model the
 # baseline. In a sense, this parameter has the same role as the `order` parameter, except tha it will affect how well
-# the baseline fits the selected regions, but on *both dimensions: wavelength and acquision time*. In particular a
-# large value of `npc` will lead to an overfit of baseline variation with time and will lead to the same result as the
-# `sequential` method while a too small `value` would miss important pricipal component underlying the baseline change
+# the baseline fits the selected regions, but on *both dimensions: wavelength and acquisition time*. In particular a
+# large value of `npc` will lead to overfit of baseline variation with time and will lead to the same result as the
+# `sequential` method while a too small `value` would miss important principal component underlying the baseline change
 # over time. Typical optimum values are `npc=2` or `npc=3` (see Exercises below).
 
 # %%

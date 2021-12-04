@@ -95,7 +95,6 @@ def read_labspec(*paths, **kwargs):
 
     Examples
     --------
-    >>> import spectrochempy as scp
     >>> A = scp.read_labspec('ramandata/Activation.txt')
     """
 

@@ -65,7 +65,7 @@ X = scp.read()
 # <div class='alert alert-warning'>
 # <b>Tip</b>
 #
-# the dialog box does not necessarily pops up in the foreground: check your task bar !
+# the dialog box does not necessarily pop up in the foreground: check your task bar !
 # </div>
 #
 # Printing the returned NDDataset object X should read like this, with indication of the dataset `shape`, *i.e.,
@@ -76,13 +76,13 @@ print(X)
 
 # %% [markdown]
 # The size of the `y` and `x` dimension will depend, of course, of the file that you have selected ! If you did not
-# select any file (*e.g.,* by pressing 'cancel' in th Dialog Box, the result will be `None`, as nothing has been loaded
+# select any file (*e.g.,* by pressing 'cancel' in th Dialog Box), the result will be `None`, as nothing has been loaded
 # in `X`.
 #
 # <div class='alert alert-info'>
 # <b>Note</b>
 #
-# By default the Dialog Box opens in the last directory you have used. However if a directory path is specified,
+# By default, the Dialog Box opens in the last directory you have used. However, if a directory path is specified,
 # the dialog should open from this diectory.
 # </div>
 
@@ -96,7 +96,7 @@ print(X)
 #     - `read` to open any kind of recognised data files based on the file suffix (e.g., *.spg, etc...)
 #     - `read_omnic` to open omnic (spa and spg) files
 #     - `read_opus` to open Bruker Opus (*.0, ...) files
-#     - `read_labspec` to open LABSPEC6 files - this assume they have been exported as *.txt files
+#     - `read_labspec` to open LABSPEC6 files - this assumes they have been exported as *.txt files
 #     - `read_topspin` to open Bruker Topspin NMR files
 #     - `read_csv` to open csv files
 #     - `read_jcamp` to open an IR JCAMP-DX datafile
@@ -142,8 +142,8 @@ print(X)
 #
 # and will open the dialog box at the root directory of the `C:` drive.
 #
-# You can avoid using the form `\\` or the use of raw strings by using conventional slash `/`. In python
-# they play the path separator role, as well in Windows than in other unix-based system (Linux, OSX, ...)
+# You can avoid using the form `\\` or the use of raw strings by using conventional slash `/`. In python,
+# they play the path separator role, as well in Windows than in other UNIX-based system (Linux, OSX, ...)
 #
 # ```ipython3
 # X = scp.read_omnic(directory='C:/users/Brian')
@@ -197,7 +197,7 @@ print(X)
 # ```
 # In this respect, a good practice consists in using relative pathnames in scripts and notebooks.
 # Fortunately, SpectroChemPy readers use relative paths. If the given path is not absolute, then SpectroChemPy will
-# search in the current directory. Hence the opening of the `spg` file from scripts in `welease.ipynb` can be made
+# search in the current directory. Hence, the opening of the `spg` file from scripts in `welease.ipynb` can be made
 # by the command:
 # ```ipython3
 # X = scp.read_omnic('Life/wodger.spg')

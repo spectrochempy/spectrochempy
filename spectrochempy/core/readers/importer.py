@@ -320,7 +320,6 @@ def read(*paths, **kwargs):
     ---------
     Reading a single OPUS file  (providing a windows type filename relative to the default ``Datadir``)
 
-    >>> import spectrochempy as scp
     >>> scp.read('irdata\\\\OPUS\\\\test.0000')
     NDDataset: [float64] a.u. (shape: (y:1, x:2567))
 

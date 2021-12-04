@@ -22,7 +22,9 @@ from quadprog import solve_qp
 
 
 class IRIS:
-    """Integral inversion solver for spectroscopic data"""
+    """
+    Integral inversion solver for spectroscopic data.
+    """
 
     def __init__(self, X, param, **kwargs):
         """
@@ -30,7 +32,7 @@ class IRIS:
         Parameters
         -----------
         X : |NDDataset|
-            The 1D or 2D dataset on which to perform the IRIS analysis
+            The 1D or 2D dataset on which to perform the IRIS analysis.
         param : dict
             Dictionary of parameters with the following keys :
 
@@ -44,27 +46,27 @@ class IRIS:
                 Defines the interval of eps values.
                 start, stop: the starting and end values of eps, num: number of values.
             *   'lambdaRange': None or array_like of two values [min, max] or three values [start, stop, num]
-                (see Notes below)
-            *   'p': array or coordinate of the external variable. If none is given, p = X.y.values
+                (see Notes below).
+            *   'p': array or coordinate of the external variable. If none is given, p = X.y.values.
         verbose : bool
-            if true, print running information
+            if true, print running information.
 
         Attributes
         ----------
         f : |NDDataset|
-            A 3D/2D dataset containing the solutions (one per regularization parameter)
+            A 3D/2D dataset containing the solutions (one per regularization parameter).
         RSS: array of float
-            Residual sums of squares (one per regularization parameter)
+            Residual sums of squares (one per regularization parameter).
         SM : array of float
-            Values of the penalty function (one per regularization parameter)
+            Values of the penalty function (one per regularization parameter).
         lamda : array of float
-            Values of the regularization parameters
+            Values of the regularization parameters.
         log : str
-            Log of the optimization
+            Log of the optimization.
         K : |NDDataset|
-            Kernel matrix
+            Kernel matrix.
         X : |NDDataset|
-            Copy of the original dataset
+            Copy of the original dataset.
 
         Notes
         -----
@@ -140,10 +142,10 @@ class IRIS:
         epsRange = param.get("epsRange", None)
         try:
             eps = np.linspace(epsRange[0], epsRange[1], epsRange[2])
-        except Exception:
+        except Exception as exc:
             raise Exception(
                 "Parameter epsRange in param must be a list of 3 values: [start, stop, num]"
-            )
+            ) from exc
 
         # Defines regularization parameter values
         lamb = [0]
@@ -521,6 +523,7 @@ class IRIS:
     def plotmerit(self, index=None, **kwargs):
         """
         Plots the input dataset, reconstructed dataset and residuals.
+
         Parameters
         ----------
         index : optional, int, list or tuple of int.

@@ -369,7 +369,7 @@ def numpyprintoptions(
     **kargs
 ):
     """
-    Method to control array printing
+    Method to control array printing.
 
     Parameters
     ----------

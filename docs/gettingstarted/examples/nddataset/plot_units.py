@@ -40,7 +40,7 @@ ur = scp.ur
 ###############################################################################
 # ## Units for dataset
 #
-# When loading experimental dataset using the `read` method, units are generally affected to coordinates and data
+# When loading experimental dataset using the `read` method, units are generally attributed to coordinates and data
 
 ds = scp.read("wodger.spg")[0]
 prefs = ds.preferences
@@ -75,7 +75,7 @@ except scp.DimensionalityError as e:
 
 ###############################################################################
 # This, of course, also applies to NDDataset.
-# Lets try for the `x` coordinate. It is `wavenumber` in $cm^{-1}$ that can be transformed in $Hz$ for instance:
+# Let's try for the `x` coordinate. It is `wavenumber` in $cm^{-1}$ that can be transformed in $Hz$ for instance:
 
 ds.x.ito("terahertz")
 _ = ds.plot()

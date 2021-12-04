@@ -32,7 +32,7 @@
 # %% [markdown]
 # # Time domain baseline correction (NMR)
 #
-# Here we chow how to baseline correct dataset in the time domain before applying FFT.
+# Here we show how to baseline correct dataset in the time domain before applying FFT.
 #
 # The example spectra were downloaded from [this page](
 # http://anorganik.uni-tuebingen.de/klaus/nmr/processing/index.php?p=dcoffset/dcoffset) where you can find some

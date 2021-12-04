@@ -9,7 +9,7 @@
 Exponential window multiplication
 =====================================================
 
-In this example, we exponential window multiplication to apodize a NMR signal in the time domain.
+In this example, we perform exponential window multiplication to apodize a NMR signal in the time domain.
 
 """
 
@@ -34,7 +34,7 @@ new1, curve1 = scp.em(dataset1D.copy(), lb=20 * Hz, retapod=True, inplace=False)
 
 ########################################################################################################################
 # Apply a shifted exponential window apodization
-# defualt units are HZ for broadening and microseconds for shifting
+# default units are HZ for broadening and microseconds for shifting
 
 new2, curve2 = dataset1D.copy().em(
     lb=100 * Hz, shifted=10000 * us, retapod=True, inplace=False

@@ -19,8 +19,9 @@
 # # Mathematical operations
 
 # %%
-from spectrochempy import *
 import numpy as np
+import spectrochempy as scp
+from spectrochempy import error_, DimensionalityError, MASKED
 
 # %% [markdown]
 # ## Ufuncs (Universal Numpy's functions)
@@ -42,7 +43,7 @@ np.sqrt(x)
 # The interesting thing, it that `ufunc`'s can also work with `NDDataset`.
 
 # %%
-dx = NDDataset(x)
+dx = scp.NDDataset(x)
 np.sqrt(dx)
 
 # %% [markdown]
@@ -51,7 +52,7 @@ np.sqrt(dx)
 # For instance, the square root can be calculated using the following syntax:
 
 # %%
-sqrt(dx)
+scp.sqrt(dx)
 
 # %% [markdown]
 # ## List of UFuncs working on `NDDataset`:
@@ -112,7 +113,7 @@ sqrt(dx)
 #
 # ### Binary Ufuncs
 #
-# * [add](#add)(x1, x2, \*\*kwargs): Add arguments élement-wise.
+# * [add](#add)(x1, x2, \*\*kwargs): Add arguments element-wise.
 # * [subtract](#subtract)(x1, x2, \*\*kwargs): Subtract arguments, element-wise.
 # * [multiply](#multiply)(x1, x2, \*\*kwargs): Multiply arguments element-wise.
 # * [divide](#divide) or [true_divide](#true_divide)(x1, x2, \*\*kwargs): Returns a true division of the inputs,
@@ -128,7 +129,7 @@ sqrt(dx)
 # dataset.
 
 # %%
-d2D = NDDataset.read_omnic("irdata/nh4y-activation.spg")
+d2D = scp.NDDataset.read_omnic("irdata/nh4y-activation.spg")
 prefs = d2D.preferences
 prefs.colormap = "magma"
 prefs.colorbar = False
@@ -137,7 +138,7 @@ _ = d2D.plot()
 
 # %% [markdown]
 # Let's select only the first row of the 2D dataset ( the `squeeze` method is used to remove
-# the residual size 1 dimension). In addition we mask the saturated region.
+# the residual size 1 dimension). In addition, we mask the saturated region.
 
 # %%
 dataset = d2D[0].squeeze()
@@ -145,11 +146,11 @@ _ = dataset.plot()
 
 # %% [markdown]
 # This dataset will be artificially modified already using some mathematical operation (subtraction with a scalar) to
-# present negative values and we will also mask some data
+# present negative values, and we will also mask some data
 
 # %%
 dataset = dataset - 2.0  # add an offset to make that some of the values become negative
-dataset[1290.0:890.0] = MASKED  # additionally we mask some data
+dataset[1290.0:890.0] = scp.MASKED  # additionally we mask some data
 _ = dataset.plot()
 
 # %% [markdown]
@@ -233,7 +234,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.cbrt(dataset)
-_ = out.plot_1D(figsize=(6, 2.5))
+_ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### reciprocal
@@ -258,7 +259,7 @@ _ = out.plot(figsize=(6, 2.5))
 # Obviously numpy exponential functions applies only to dimensionless array. Else an error is generated.
 
 # %%
-x = NDDataset(np.arange(5), units="m")
+x = scp.NDDataset(np.arange(5), units="m")
 try:
     np.exp(x)  # A dimensionality error will be generated
 except DimensionalityError as e:
@@ -422,7 +423,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 
 # %% [markdown]
-# for instance, if we take the z axis (the data magintude) in the figure above, it's expressed in radians. We can
+# for instance, if we take the z axis (the data magnitude) in the figure above, it's expressed in radians. We can
 # change to degrees easily.
 
 
@@ -558,7 +559,7 @@ _ = out.plot(figsize=(6, 2.5))
 # .g.,* allows 2D-hypercomplex array that can be transposed (useful for NMR data).
 
 # %%
-da = NDDataset(
+da = scp.NDDataset(
     [
         [1.0 + 2.0j, 2.0 + 0j],
         [1.3 + 2.0j, 2.0 + 0.5j],
@@ -569,11 +570,11 @@ da = NDDataset(
 da
 
 # %% [markdown]
-# A dataset of type float can be transformed into a complex dataset (using two cionsecutive rows to create a complex
+# A dataset of type float can be transformed into a complex dataset (using two consecutive rows to create a complex
 # row)
 
 # %%
-da = NDDataset(np.arange(40).reshape(10, 4))
+da = scp.NDDataset(np.arange(40).reshape(10, 4))
 da
 
 # %%

@@ -4,7 +4,7 @@ echo "Installing SpectroChemPy ... "
 rm -rf spectrochempy &> output.log
 git clone https://github.com/spectrochempy/spectrochempy.git &>> output.log
 pip install -U -r ./spectrochempy/requirements.txt &>> output.log
-cd ./spectrochempy
+cd ./spectrochempy || exit
 python setup.py install &>> output.log
 cd ..
 

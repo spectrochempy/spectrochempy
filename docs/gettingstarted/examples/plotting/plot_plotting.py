@@ -45,7 +45,7 @@ labels = ["sample {}".format(label) for label in ["S1", "S10", "S20", "S50", "S5
 scp.plot_multiple(method="scatter", datasets=datasets, labels=labels, legend="best")
 
 ########################################################################################################################
-# plot mupltiple with style
+# plot multiple with style
 scp.plot_multiple(
     method="scatter", style="sans", datasets=datasets, labels=labels, legend="best"
 )

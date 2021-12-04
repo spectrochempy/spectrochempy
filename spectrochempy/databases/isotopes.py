@@ -30,13 +30,12 @@ from spectrochempy.core.dataset.meta import Meta
 # ======================================================================================================================
 class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
     """
-    This class defines useful properties of nuclei. [#]_
+    This class defines useful properties of nuclei [#]_.
 
     Parameters
     ----------
     nucleus : String, optional, default='1H'
-        In the AX form where A is the atomic mass and X the atom symbol
-
+        In the AX form where A is the atomic mass and X the atom symbol.
 
     References
     ----------
@@ -52,13 +51,7 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
 
     How to use it?
 
-    after the |scpy| has been loaded :
-
-    >>> from spectrochempy import *
-
-
-    one can use :
-
+    >>> from spectrochempy import Isotopes
     >>> isotope = Isotopes('129Xe')
     >>> isotope.name
     'xenon'
@@ -66,7 +59,7 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
     Fraction(1, 2)
     >>> isotope.symbol
     'Xe'
-    >>> isotope.nucleus = '27Al' # we change the isotope`inplace`
+    >>> isotope.nucleus = '27Al'  # we change the isotope `inplace`.
     >>> isotope.name
     'aluminium'
     >>> isotope.spin
@@ -86,7 +79,7 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
 
     @property
     def isotope(self):
-        """The current isotope (alias for nucleus)"""
+        """The current isotope (alias for nucleus)."""
         return self.nucleus.strip()
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -94,7 +87,7 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def spin(self):
-        """Spin quantum number of the current nucleus"""
+        """Spin quantum number of the current nucleus."""
         return Fraction(self[self.nucleus]["spin"])
 
     # ===========================================================================
@@ -102,7 +95,7 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
     # ===========================================================================
     @property
     def Z(self):
-        """Atomic number  of the current nucleus"""
+        """Atomic number  of the current nucleus."""
         return self[self.nucleus]["Z"]
 
     # ===========================================================================
@@ -110,7 +103,7 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
     # ===========================================================================
     @property
     def A(self):
-        """Atomic mass  of the current nucleus"""
+        """Atomic mass  of the current nucleus."""
         return self[self.nucleus]["A"]
 
     # ===========================================================================
@@ -126,7 +119,7 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
     # ===========================================================================
     @property
     def gamma(self):
-        """gyromagnetic ratio of the current nucleus"""
+        """gyromagnetic ratio of the current nucleus."""
         muN = ur.elementary_charge / ur.proton_mass / 2.0 / (2.0 * np.pi)
         return (self[self.nucleus]["gamma"] * muN).to("MHz/T")
 
@@ -145,8 +138,7 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
     @property
     def Q(self):
         """
-        Electric quadrupole moment in barn '
-                      'of the current nucleus
+        Electric quadrupole moment in barn of the current nucleus.
         """
         try:
             return float(self[self.nucleus]["Q"]) * 1000.0 * ur.mbarn
@@ -158,7 +150,7 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def symbol(self):
-        """Symbol of the current nucleus"""
+        """Symbol of the current nucleus."""
         return self[self.nucleus]["symbol"].strip()
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -167,7 +159,7 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
     @property
     def stability(self):
         """
-        The stability of the current nucleus
+        The stability of the current nucleus.
         """
         return self[self.nucleus]["stability"].strip()
 

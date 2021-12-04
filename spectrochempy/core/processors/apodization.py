@@ -260,7 +260,7 @@ def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
 
     Parameters
     ----------
-    dataset : ndarray.
+    dataset : ndarray
         Dataset we want to apodize using an Lorentz Multiplication.
     lb : float or `quantity`, optional, default=0 Hz
         Inverse exponential width.
@@ -519,7 +519,7 @@ def hamming(dataset, **kwargs):
 
     Parameters
     ----------
-    dataset : array.
+    dataset : array
         Input dataset.
     alpha : float
         The window coefficient, :math:`\alpha`.
@@ -608,7 +608,7 @@ def hann(dataset, **kwargs):
 @_apodize_method()
 def triang(dataset, **kwargs):
     r"""
-    Calculate triangular apodization with non-null extremities and maximum value normalized to 1
+    Calculate triangular apodization with non-null extremities and maximum value normalized to 1.
 
     For multidimensional NDDataset,
     the apodization is by default performed on the last dimension.
@@ -618,13 +618,13 @@ def triang(dataset, **kwargs):
 
     Parameters
     ----------
-    dataset : array.
+    dataset : array
         Input dataset.
 
     Returns
     -------
     apodized
-        Dataset.
+        Dataset
     apod_arr
         The apodization array only if 'retapod' is True.
 

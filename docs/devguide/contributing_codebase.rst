@@ -13,7 +13,7 @@ Code standards
 During :ref:`Continuous Integration <contributing.ci>` testing, several
 tools will be run to check your code for stylistic errors.
 Generating any warnings will cause the test to fail.
-Thus, good style is a requirement for submitting code to spectrochempy.
+Thus, good style is a requirement for submitting code to SpectroChemPy.
 
 In addition, it is important that we
 do not make sudden changes to the code that could have the potential to break
@@ -48,7 +48,7 @@ and then running::
 from the root of the spectrochempy repository. Now all of the styling checks will be
 run each time you commit changes without your needing to run each one manually.
 In addition, using ``pre-commit`` will also allow you to more easily
-remain up-to-date with our code checks as they change.
+remain up to date with our code checks as they change.
 
 Note that if needed, you can skip these checks with ``git commit --no-verify``.
 
@@ -69,7 +69,7 @@ without needing to have done ``pre-commit install`` beforehand.
 Optional dependencies
 ---------------------
 
-Optional dependencies (e.g. cantera, nmrglue, ...) should be imported with the private helper
+Optional dependencies (e.g., cantera, nmrglue, ...) should be imported with the private helper
 ``spectrochempy._optional.import_optional_dependency``. This ensures a
 consistent error message when the dependency is not met.
 
@@ -104,7 +104,7 @@ apply ``black`` as you edit files.
 
 One caveat about ``git diff upstream/master -u -- "*.py" | flake8 --diff``: this
 command will catch any stylistic errors in your changes specifically, but
-be beware it may not catch all of them. For example, if you delete the only
+beware it may not catch all of them. For example, if you delete the only
 usage of an imported function, it is stylistically incorrect to import an
 unused function. However, style-checking the diff will not catch this because
 the actual import is not part of the diff. Thus, for completeness, you should
@@ -119,7 +119,7 @@ run this slightly modified command::
 
 Windows does not support the ``xargs`` command (unless installed for example
 via the `MinGW <http://www.mingw.org/>`__ toolchain), but one can imitate the
-behaviour as follows::
+behavior as follows::
 
     for /f %i in ('git diff upstream/master --name-only -- "*.py"') do flake8 %i
 
@@ -140,7 +140,7 @@ directive to the deprecated functions or methods.
 
     from spectrochempy.utils.exceptions import deprecated
 
-    @deprecated("this function is deprecated and may be removed in future version")
+    @deprecated("This function is deprecated and may be removed in future version")
     def old_func():
         """Summary of the function.
 
@@ -176,7 +176,7 @@ then you will get a red 'X', where you can click through to see the individual f
 Test-driven development/code writing
 ------------------------------------
 
-spectrochempy strongly encourages contributors to embrace
+SpectroChemPy strongly encourages contributors to embrace
 `test-driven development (TDD) <https://en.wikipedia.org/wiki/Test-driven_development>`_.
 This development process "relies on the repetition of a very short development cycle:
 first the developer writes an (initially failing) automated test case that defines a desired
@@ -313,7 +313,7 @@ The tests can then be run directly inside your Git clone by typing::
 
     pytest .
 
-The tests suite is exhaustive and takes around 20 minutes to run.  Often it is
+The test suite is exhaustive and takes several minutes to run.  Often it is
 worth running only a subset of tests first around your changes before running the
 entire suite.
 
@@ -350,6 +350,6 @@ Documenting change log
 
 Changes should be reflected in the release notes located in ``CHANGELOG.md`` in the root directory of the spectrochempy package.
 This file contains an ongoing change log for each release.  Add an entry to this file to
-document your fix, enhancement or (unavoidable) breaking change.  include the
+document your fix, enhancement or (unavoidable) breaking change.  Include the
 GitHub issue number when adding your entry (using ``(issue #1234)``` where ``1234`` is the
 issue/pull request number).

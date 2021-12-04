@@ -778,7 +778,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         Check if the current object implements `NDDataset`.
 
         Rather than isinstance(obj, NDDataset) use object.implements('NDDataset').
-        This is useful to check type without importing the module
+        This is useful to check type without importing the module.
 
         Parameters
         ----------
@@ -886,7 +886,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     # ..................................................................................................................
     def sort(self, **kwargs):
         """
-        Returns the dataset sorted along a given dimension.
+        Return the dataset sorted along a given dimension.
 
         (by default, the last dimension [axis=-1]) using the numeric or label values.
 
@@ -1028,8 +1028,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         See Also
         --------
-        squeeze : The inverse operation, removing singleton dimensions
-        """  # TODO
+        squeeze : The inverse operation, removing singleton dimensions.
+        """
+        # TODO
 
     # ..................................................................................................................
     def swapdims(self, dim1, dim2, inplace=False):
@@ -1072,7 +1073,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     # ..................................................................................................................
     def take(self, indices, **kwargs):
         """
-        Take elements from an array
+        Take elements from an array.
 
         Parameters
         ----------
@@ -1108,7 +1109,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         Examples
         ========
-        >>> import spectrochempy as scp
+
         >>> dataset = scp.read('wodger.spg')
         >>> a = scp.to_array(dataset)
 
@@ -1118,21 +1119,21 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         or
 
-        >>> a= dataset.masked_data
+        >>> a = dataset.masked_data
         """
         return np.ma.array(self)
 
     # ..................................................................................................................
-    def to_xarray(self, **kwargs):
+    def to_xarray(self):
         """
-        Convert a NDDataset instance to an `~xarray.DataArray` object
-        ( the xarray library must be available )
+        Convert a NDDataset instance to an `~xarray.DataArray` object.
 
-        Parameters
+        Warning: the xarray library must be available.
 
         Returns
         -------
-        object : a xarray.DataArray object
+        object
+            A array.DataArray object.
         """
         # Information about DataArray from the DataArray docstring
         #

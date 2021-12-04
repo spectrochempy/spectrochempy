@@ -18,7 +18,7 @@ __dataset_methods__ = __all__
 # .......................................................................................................................
 def write_excel(*args, **kwargs):
     """
-    Writes a dataset in XLS format
+    Write a dataset in XLS format.
 
     Parameters
     ----------
@@ -35,7 +35,7 @@ def write_excel(*args, **kwargs):
     Returns
     -------
     out : `pathlib` object
-        path of the saved file
+        path of the saved file.
 
     Examples
     --------
@@ -50,7 +50,7 @@ def write_excel(*args, **kwargs):
 
 
 write_xls = write_excel
-write_xls.__doc__ = "This method is an alias of `write_excel` "
+write_xls.__doc__ = "This method is an alias of `write_excel`."
 
 
 @exportermethod

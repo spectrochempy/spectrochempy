@@ -69,7 +69,7 @@ efa.b_ev.T.plot(yscale="log")
 
 ########################################################################################################################
 # Looking at these EFA curves, it is quite obvious that only two components
-# are really significant, and this correspond to the data that we have in
+# are really significant, and this corresponds to the data that we have in
 # input.
 # We can consider that the third EFA components is mainly due to the noise,
 # and so we can use it to set a cut of values

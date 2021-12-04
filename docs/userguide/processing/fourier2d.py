@@ -44,12 +44,13 @@ import spectrochempy as scp
 from spectrochempy import ur
 
 # %% [markdown]
-# ## Processing of NMR dataset with hypercomplex detection (phase-senitive)
+# ## Processing of NMR dataset with hypercomplex detection (phase-sensitive)
 
 # %% [markdown]
 # As a first example, we will process a 2D HMQC spectrum which has been acquired using a phase sensitive detection
-# method : STATES-TPPI encoding.  The STATES (States, Ruben, Haberkorn) produce an hypercomplex dataset which need to
-# be processed in a specific way, that SpectroChemPy handle automatically. TPPI (for Time Proportinal Phase
+# method : STATES-TPPI encoding.
+# The STATES (States, Ruben, Haberkorn) encoding produces an hypercomplex dataset which need to
+# be processed in a specific way, that SpectroChemPy handle automatically. TPPI (for Time Proportional Phase
 # Increment) is also handled.
 
 # %%
@@ -74,16 +75,16 @@ _ = ser.plot_map()
 # %% [markdown]
 # ### Processing steps
 #
-# * Optional : Apply some broadening by apodization in the time domain.
+# * Optional : Apodization in the time domain.
 # * Optional : DC correction in the time domain.
 # * Optional : Zero-filling.
 # * Fourier transform in the F2 (x) dimension.
-# * Phase  the first transformed dimension in the frequency domain.
-# * Optional: Apply some apodization in the time domain for the F1 (y) dimension.
+# * Phasing the first transformed dimension in the frequency domain.
+# * Optional: Apodization in the time domain for the F1 (y) dimension.
 # * Optional: DC Correction in F1.
 # * Optional: Zero-filling.
-# * Fourier transform the second dimension F1.
-# * Phase correct the second transformed dimension in the frequency domain.
+# * Fourier transform in the second dimension F1.
+# * Phase correct of the second transformed dimension in the frequency domain.
 #
 #
 
@@ -91,7 +92,7 @@ _ = ser.plot_map()
 # ### Apodization, DC correction, Zero-filling
 
 # %% [markdown]
-# For this step we can first extract and Fourier transformation of the first row (row index:0).
+# For this step, we can extract and fourier transform the first row (row index:0).
 
 # %%
 row0 = ser[0]
@@ -109,7 +110,7 @@ _ = row0.plot(show_complex=True, xlim=(0, 10000))
 # %%
 row0 = ser[0]
 
-row0.dc(inplace=True)  # DC corrrection
+row0.dc(inplace=True)  # DC correction
 row0.zf_size(
     size=2048, inplace=True
 )  # zero-filling (size parameter can be approximate as the FFT will
@@ -165,8 +166,8 @@ _ = spk.plot_map(xlim=(50, 0), ylim=(-40, -15))
 # ## Processing of an Echo-AntiEcho encoded dataset
 
 # %% [markdown]
-# In this second example, we will process a HSQC spectrum of Cyclosporin wich has been acquired using a Rance-Kay
-# quadrature scheme, also known as Echo-Antiecho. (The original data is extracted from the examples of the Bruker
+# In this second example, we will process a HSQC spectrum of Cyclosporin which has been acquired using a Rance-Kay
+# quadrature scheme, also known as Echo-AntiEcho. (The original data is extracted from the examples of the Bruker
 # Topspin software).
 
 # %%

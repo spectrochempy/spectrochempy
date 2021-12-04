@@ -17,6 +17,7 @@ from datetime import datetime, timezone
 import uuid
 import types
 import warnings
+import textwrap
 
 import numpy as np
 from quaternion import as_float_array, as_quat_array
@@ -50,6 +51,7 @@ __all__ = [
     "as_quaternion",
     "quat_as_complex_array",
     "get_n_decimals",
+    "add_docstring",
 ]
 
 #
@@ -61,10 +63,10 @@ TYPE_COMPLEX = (complex, np.complex_, np.complex64, np.complex128)
 TYPE_BOOL = (bool, np.bool, np.bool_)
 
 EPSILON = epsilon = np.finfo(float).eps
-"Minimum value before considering it as zero value"
+"Minimum value before considering it as zero value."
 
 INPLACE = "INPLACE"
-"Flag used to specify inplace slicing"
+"Flag used to specify inplace slicing."
 
 typequaternion = np.dtype(np.quaternion)
 
@@ -127,6 +129,21 @@ class _DummyFile(object):
 # ======================================================================================================================
 
 
+def add_docstring(*args):
+    """
+    Decorator which add a docstring to the actual func doctring"""
+
+    def new_doc(func):
+
+        for item in args:
+            item.strip()
+
+        func.__doc__ = textwrap.dedent(func.__doc__).format(*args)
+        return func
+
+    return new_doc
+
+
 def as_quaternion(*args):
     """
     Recombine the arguments to produce a numpy array with quaternion dtype.
@@ -179,11 +196,27 @@ def quat_as_complex_array(arr):
 
 def dict_compare(d1, d2, check_equal_only=True):
     """
-    Compare two dictionaries
+    Compare two dictionaries.
+
+    Parameters
+    ----------
+    d1, d2 : dict
+        Dictionaries to compare.
+    check_equal_only : bool, optional default: True
+        If check equal is True, then is the dictionaries are not equal, False is False
+        returned. If check is False, for set of values are returned which contains
+        added, removed, modified, or same values, respectively.
+
+    Returns
+    -------
+    results
+        Either  bool or a tupl e of for sets if check_equals_only is False.
 
     Examples
     --------
 
+        >>> from spectrochempy.utils import dict_compare
+        >>>
         >>> x = dict(a=1, b=2)
         >>> y = dict(a=2, b=2)
         >>> added, removed, modified, same = dict_compare(x, y, check_equal_only=False)
@@ -378,17 +411,26 @@ except ImportError:
     @contextmanager
     def ignored(*exceptions):
         """
-        A context manager for ignoring exceptions.  Equivalent to::
+        A context manager for ignoring exceptions.
+
+        This is equivalent to::
 
             try :
                 <body>
             except exceptions :
                 pass
 
+        parameters
+        ----------
+        *exceptions : Exception
+            One or several exceptions to ignore.
+
         Examples
         --------
 
             >>> import os
+            >>> from spectrochempy.utils import ignored
+            >>>
             >>> with ignored(OSError):
             ...     os.remove('file-that-does-not-exist')
         """

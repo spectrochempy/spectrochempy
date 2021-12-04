@@ -120,24 +120,32 @@ class NDIO(HasTraits):
         Default extension is *.scp for |NDDataset|'s and *.pscp for
         |Project|'s.
 
+        Parameters
+        ----------
+        **kwargs : dict
+          See other parameters.
+
+        Other Parameters
+        ----------------
+        confirm : bool
+
         See Also
         ---------
-        save_as : save current object with a different name and/or directory
-        write : export current object to different format
+        save_as : Save current object with a different name and/or directory.
+        write : Export current object to different format.
 
         Examples
         ---------
 
-        read some data from an OMNIC file
-        >>> import spectrochempy as scp
+        Read some data from an OMNIC file
         >>> nd = scp.read_omnic('wodger.spg')
         >>> assert nd.name == 'wodger'
 
-        write it in SpectroChemPy format (.scp)
+        Write it in SpectroChemPy format (.scp)
         (return a `pathlib` object)
         >>> filename = nd.save()
 
-        check the existence of the scp fie
+        Check the existence of the scp fie
         >>> assert filename.is_file()
         >>> assert filename.name == 'wodger.scp'
 
@@ -145,7 +153,7 @@ class NDIO(HasTraits):
         >>> filename.unlink()
         """
 
-        # by default we save the file in the self.directory and with the
+        # By default we save the file in the self.directory and with the
         # name + suffix depending
         # on the current object type
         if self.directory is None:
@@ -170,43 +178,47 @@ class NDIO(HasTraits):
     # ..................................................................................................................
     def save_as(self, filename="", **kwargs):
         """
-        Save the current |NDDataset| in SpectroChemPy format (*.scp)
+        Save the current |NDDataset| in SpectroChemPy format (*.scp).
 
         Parameters
         ----------
         filename : str
-            The filename of the file where to save the current dataset
+            The filename of the file where to save the current dataset.
+        **kwargs : dict
+            See Other Parameters.
+
+        Other Parameters
+        -----------------
         directory : str, optional
             If specified, the given `directory` and the `filename` will be
             appended.
 
-        Examples
+        See Also
         ---------
+        save : Save current dataset.
+        write : Export current dataset to different format.
 
-        read some data from an OMNIC file
-        >>> import spectrochempy as scp
+        Notes
+        -----
+        Adapted from :class:`numpy.savez`.
+
+        Examples
+        --------
+
+        Read some data from an OMNIC file
         >>> nd = scp.read_omnic('wodger.spg')
         >>> assert nd.name == 'wodger'
 
-        write it in SpectroChemPy format (.scp)
+        Write it in SpectroChemPy format (.scp)
         (return a `pathlib` object)
         >>> filename = nd.save_as('new_wodger')
 
-        check the existence of the scp fie
+        Check the existence of the scp fie
         >>> assert filename.is_file()
         >>> assert filename.name == 'new_wodger.scp'
 
         Remove this file
         >>> filename.unlink()
-
-        Notes
-        -----
-        adapted from :class:`numpy.savez`
-
-        See Also
-        ---------
-        save : save current dataset
-        write : export current dataset to different format
         """
         if filename:
             # we have a filename
@@ -243,15 +255,27 @@ class NDIO(HasTraits):
         ----------
         filename :  `str`, `pathlib` or `file` objects
             The name of the file to read (or a file objects.
-        content : str, optional
-             The optional content of the file(s) to be loaded as a binary
-             string
-        kwargs : optional keyword parameters.
+        **kwargs : dict, optional
             Any additional keyword(s) to pass to the actual reader.
+            See Other Parameters.
+
+        Other Parameters
+        ----------------
+        content : str, optional
+             The optional content of the file(s) to be loaded as a binary string.
+
+        See Also
+        --------
+        read : Import dataset from various orgines.
+        save : Save the current dataset.
+
+        Notes
+        -----
+        Adapted from `numpy.load`.
 
         Examples
         --------
-        >>> import spectrochempy as scp
+
         >>> nd1 = scp.read('irdata/nh4y-activation.spg')
         >>> f = nd1.save()
         >>> f.name
@@ -262,15 +286,6 @@ class NDIO(HasTraits):
 
         >>> from spectrochempy import *
         >>> nd2 = NDDataset.load(f)
-
-        Notes
-        -----
-        Adapted from `numpy.load`.
-
-        See Also
-        --------
-        read : import dataset from various orgines
-        save : save the current dataset
         """
         content = kwargs.get("content", None)
 
@@ -383,7 +398,7 @@ class NDIO(HasTraits):
                         if isinstance(val, TYPE_BOOL) and key == "_mask":
                             val = np.bool_(val)
                         if isinstance(obj, NDDataset) and key == "_filename":
-                            obj.filename = val  # This is a hack because for some reason finelame attribute is not
+                            obj.filename = val  # This is a hack because for some reason fileame attribute is not
                             # found ????
                         else:
                             setattr(obj, key, val)
@@ -401,12 +416,12 @@ class NDIO(HasTraits):
     # ..................................................................................................................
     def dump(self, filename, **kwargs):
         """
-        Save the current object into compressed native spectrochempy format
+        Save the current object into compressed native spectrochempy format.
 
         Parameters
         ----------
         filename: str of  `pathlib` object
-            File name where to save the current object. Extension
+            File name where to save the current object.
         """
 
         # Stage data in a temporary file on disk, before writing to zip.

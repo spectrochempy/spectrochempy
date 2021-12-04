@@ -19,9 +19,9 @@
 # %% [markdown]
 # # Smoothing
 #
-# In this tutorial, we shows how to smooth spectra along one dimension (another tutorial will be devoted to 2-D
+# In this tutorial, we show how to smooth spectra along one dimension (another tutorial will be devoted to 2-D
 # smoothing)
-# and gives informations on the algorithms used in Spectrochempy.
+# and gives information on the algorithms used in Spectrochempy.
 #
 # We first import spectrochempy, the other libraries used in this tutorial, and a sample dataset (
 # nh4y-activation.spg) from which we extract a noisy part:
@@ -44,7 +44,7 @@ ax = X.plot()  # plot
 
 # %% Two methods implemented in spectrochempy can be used to smooth spectra along either one dimension ( [markdown]
 # In this tutorial we will apply smoothing of the
-# spectra along the wavlength dimension. These methods are based on window functions, which ptototype is the *moving
+# spectra along the wavelength dimension. These methods are based on window functions, which prototype is the *moving
 # average*.
 
 # %% Two methods implemented in spectrochempy can be used to smooth spectra along either one dimension ( [markdown]
@@ -57,10 +57,10 @@ ax = X.plot()  # plot
 # a window of a given length with the spectrum.
 #
 # In its simplest form - *i.e.* unweighted moving average - each absorbance at a given wavenumber of the smoothed
-# spectrum is the average of the aborbances at the the absorbance at the considered wavenumber and the N neighboring
+# spectrum is the average of the absorbance at the absorbance at the considered wavenumber and the N neighboring
 # wavenumbers (*i.e.* N/2 before and N/2 after), hence the conventional use of an odd number of N+1 points to define
 # the window length. For the points located at both end of the spectra, the extremities of the spectrum are mirrored
-# beyond the initial limits so as to minimize boundary effects.
+# beyond the initial limits to minimize boundary effects.
 #
 # When passed as is, i.e. `X.smooth()`, the method uses a moving average of 5 points:
 
@@ -74,7 +74,8 @@ ax = X.smooth().plot()
 # NDDataset `X[0]`.
 
 # %% [markdown]
-# Loop over window lengths. i index will run from 0 to 6.
+# Loop over window lengths.
+# `i` index will run from 0 to 6.
 
 # %%
 lspectra = [
@@ -96,7 +97,7 @@ ax = scp.plot_multiple(
 )
 
 # %% The above spectra clearly show that as that the width of the window increases, the peaks belonging to [markdown]
-# the spectrum are flattened out and distorted. When determining the optimum window length, one should thus consier
+# The spectrum is flattened out and distorted. When determining the optimum window length, one should thus consider
 # the balance between noise removal and signal integrity: the larger the window length, the stronger the smoothing,
 # but also the greater the chance to distort the spectrum.
 #
@@ -129,8 +130,8 @@ ax = scp.plot_multiple(
 # N+1 points, with the largest weight on the central point and smaller weights for external points.
 #
 # The window functions as used in SpectroChemPy are derived from the numpy library. These builtin functions are such
-# that the value of the central point is 1. Hence, as shown below,  they are normalised to the sum of weights. The
-# code below displays the corresponding normalized fucntions for 27 points:
+# that the value of the central point is 1. Hence, as shown below,  they are normalized to the sum of weights. The
+# code below displays the corresponding normalized functions for 27 points:
 
 # %%
 functions = []
@@ -148,7 +149,7 @@ ax = scp.plot_multiple(
 )
 
 # %% As shown above, the "bartlett" function is equivalent to a triangular apodization, while other [markdown]
-# fonctions (`hanning`, `hamming`, `blackman`) are bell-shaped. More information on window funcntions can be found [
+# functions (`hanning`, `hamming`, `blackman`) are bell-shaped. More information on window functions can be found [
 # here](https://en.wikipedia.org/wiki/Window_function).
 #
 # Overall, the impact of the window function on the final spectrum is moderate, as can be shown by comparing the

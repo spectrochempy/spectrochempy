@@ -554,7 +554,10 @@ def linkcode_resolve(domain, info):
     if domain != "py" or not info["module"]:
         return None
     try:
-        filename = "spectrochempy/%s#L%d-L%d" % find_source()
+        fs = find_source()
+        filename = "spectrochempy/%s#L%d-L%d" % fs
+    except TypeError:
+        return None
     except Exception:
         filename = info["module"].replace(".", "/") + ".py"
     tag = "master"
@@ -659,8 +662,8 @@ def shorter_signature(app, what, name, obj, options, signature, return_annotatio
         signature = "(dataset)"
         what = "function"
 
-    if what not in ("function", "method", "class", "data") or signature is None:
-        return
+    if what not in ("function", "method", "data") or signature is None:
+        return  # removed"class",
 
     import re
 
@@ -676,10 +679,11 @@ def shorter_signature(app, what, name, obj, options, signature, return_annotatio
                 .replace("\n", "")
                 .split()
             )
-        except Exception as e:
+            new_sig = "(" + new_sig + ")"
+
+        except Exception:
             print(sig_obj)
-            raise e
-        new_sig = "(" + new_sig + ")"
+
     return new_sig, return_annotation
 
 

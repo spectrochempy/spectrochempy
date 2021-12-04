@@ -34,16 +34,16 @@ from spectrochempy.core import preferences, info_, INFO
 
 class Fit(HasTraits):
     """
-    Fit a 1D or 2D dataset, or a list of datasets
+    Fit a 1D or 2D dataset, or a list of datasets.
 
 
     Parameters
     ----------
     dataset : Dataset or list of Dataset instance
-        The data to fit
+        The data to fit.
 
     mode : Unicode, optional
-        Reserved - not used for now
+        Reserved - not used for now.
 
     Attributes
     ----------

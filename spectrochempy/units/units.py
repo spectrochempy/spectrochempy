@@ -5,7 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 """
-The core interface to the Pint library
+The core interface to the Pint library.
 """
 
 __all__ = ["Unit", "Quantity", "ur", "set_nmr_context", "DimensionalityError"]
@@ -36,7 +36,9 @@ _PRETTY_EXPONENTS = "⁰¹²³⁴⁵⁶⁷⁸⁹"
 
 # ----------------------------------------------------------------------------------------------------------------------
 def _pretty_fmt_exponent(num):
-    """Format an number into a pretty printed exponent using unicode."""
+    """
+    Format an number into a pretty printed exponent using unicode.
+    """
     # work badly for decimals as superscript dot do not exist in unicode
     # (as far as we know)
     ret = "{0:n}".format(num).replace("-", "⁻").replace(".", "\u22C5")
@@ -193,47 +195,49 @@ U_.enable_contexts("spectroscopy", "boltzmann", "chemistry")
 # ----------------------------------------------------------------------------------------------------------------------
 def set_nmr_context(larmor):
     """
-    Set a NMR context relative to the given Larmor frequency
+    Set a NMR context relative to the given Larmor frequency.
 
     Parameters
     ----------
-    larmor : Quantity or float
+    larmor : |Quantity| or float
         The Larmor frequency of the current nucleus.
-        If it is not a quantity it is assumed to be given in MHz
+        If it is not a quantity it is assumed to be given in MHz.
 
     Examples
     --------
 
     First we set the NMR context,
 
-    >>> set_nmr_context(104.3 * U_.MHz)
+    >>> from spectrochempy.units import ur, set_nmr_context
+    >>>
+    >>> set_nmr_context(104.3 * ur.MHz)
 
-    then, we can use the context as follow :
+    then, we can use the context as follow
 
-    >>> fhz = 10000 * U_.Hz
-    >>> with U_.context('nmr'):
-    ...    fppm = fhz.to('ppm')
+    >>> fhz = 10000 * ur.Hz
+    >>> with ur.context('nmr'):
+    ...     fppm = fhz.to('ppm')
     >>> print("{:~.3f}".format(fppm))
     95.877 ppm
 
     or in the opposite direction
 
-    >>> with U_.context('nmr'):
-    ...    fhz = fppm.to('kHz')
+    >>> with ur.context('nmr'):
+    ...     fhz = fppm.to('kHz')
     >>> print("{:~.3f}".format(fhz))
     10.000 kHz
 
     Now we update the context :
 
-    >>> with U_.context('nmr', larmor=100. * U_.MHz):
-    ...    fppm = fhz.to('ppm')
+    >>> with ur.context('nmr', larmor=100. * ur.MHz):
+    ...     fppm = fhz.to('ppm')
     >>> print("{:~.3f}".format(fppm))
     100.000 ppm
 
-    >>> set_nmr_context(75 * U_.MHz)
-    >>> fhz = 10000 * U_.Hz
-    >>> with U_.context('nmr'):
-    ...    fppm = fhz.to('ppm')
+    >>> set_nmr_context(75 * ur.MHz)
+    >>> fhz = 10000 * ur.Hz
+    >>> with ur.context('nmr'):
+    ...     fppm = fhz.to('ppm')
     >>> print("{:~.3f}".format(fppm))
     133.333 ppm
     """

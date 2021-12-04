@@ -41,8 +41,7 @@ class Coord(NDMath, NDArray):
         The coordinates of a |NDDataset| can be created using the |Coord|
         object.
         This is a single dimension array with either numerical (float)
-        values or
-        labels (str, `Datetime` objects, or any other kind of objects) to
+        values or labels (str, `Datetime` objects, or any other kind of objects) to
         represent the coordinates. Only a one numerical axis can be defined,
         but labels can be multiple.
 
@@ -60,13 +59,13 @@ class Coord(NDMath, NDArray):
             `data` before passing it in the object constructor if that's the
             desired behavior or set the `copy` argument to True.
         **kwargs
-            See other parameters
+            See other parameters.
 
         Other Parameters
         ----------------
         dtype : str or dtype, optional, default=np.float64
             If specified, the data will be casted to this dtype, else the
-            type of the data will be used
+            type of the data will be used.
         dims : list of chars, optional.
             if specified the list must have a length equal to the number od
             data dimensions (ndim) and the chars must be
@@ -76,7 +75,7 @@ class Coord(NDMath, NDArray):
         name : str, optional
             A user friendly name for this object. If not given,
             the automatic `id` given at the object creation will be
-            used as a name.
+            used as a name..
         labels : array of objects, optional
             Labels for the `data`. labels can be used only for 1D-datasets.
             The labels array may have an additional dimension, meaning
@@ -94,9 +93,9 @@ class Coord(NDMath, NDArray):
             The title of the dimension. It will later be used for instance
             for labelling plots of the data.
             It is optional but recommended to give a title to each ndarray.
-        dlabel :  str, optional.
+        dlabel :  str, optional
             Alias of `title`.
-        meta : dict-like object, optional.
+        meta : dict-like object, optional
             Additional metadata for this object. Must be dict-like but no
             further restriction is placed on meta.
         copy : bool, optional
@@ -107,26 +106,23 @@ class Coord(NDMath, NDArray):
 
         See Also
         --------
-        NDDataset : Main SpectroChemPy object: an array with masks,
-        units and coordinates.
+        NDDataset : Main SpectroChemPy object: an array with masks, units and coordinates.
         LinearCoord : Implicit linear coordinates.
 
         Examples
         --------
-        We first import the object from the api :
 
+        We first import the object from the api :
         >>> from spectrochempy import Coord
 
         We then create a numpy |ndarray| and use it as the numerical `data`
         axis of our new |Coord| object.
-
         >>> c0 = Coord.arange(1., 12., 2., title='frequency', units='Hz')
         >>> c0
         Coord: [float64] Hz (size: 6)
 
         We can take a series of str to create a non numerical but labelled
         axis :
-
         >>> tarr = list('abcdef')
         >>> tarr
         ['a', 'b', 'c', 'd', 'e', 'f']
@@ -411,6 +407,26 @@ class Coord(NDMath, NDArray):
     # public methods
     # ------------------------------------------------------------------------------------------------------------------
     def loc2index(self, loc):
+        """
+        Return the index corresponding to a given location.
+
+        Parameters
+        ----------
+        loc: float.
+            Value corresponding to a given location on the coordinates axis.
+
+        Returns
+        -------
+        index: int.
+            The corresponding index.
+
+        Examples
+        --------
+
+        >>> dataset = scp.NDDataset.read("irdata/nh4y-activation.spg")
+        >>> dataset.x.loc2index(1644.0)
+        4517
+        """
         return self._loc2index(loc)
 
     # ------------------------------------------------------------------------------------------------------------------

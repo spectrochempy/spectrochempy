@@ -64,7 +64,6 @@ def concatenate(*datasets, **kwargs):
 
     Examples
     --------
-    >>> import spectrochempy as scp
     >>> A = scp.read('irdata/nh4y-activation.spg', protocol='omnic')
     >>> B = scp.read('irdata/nh4y-activation.scp')
     >>> C = scp.concatenate(A[10:], B[3:5], A[:10], axis=0)
@@ -356,7 +355,7 @@ def stack(*datasets):
 
     Examples
     --------
-    >>> import spectrochempy as scp
+
     >>> A = scp.read('irdata/nh4y-activation.spg', protocol='omnic')
     >>> B = scp.read('irdata/nh4y-activation.scp')
     >>> C = scp.stack(A, B)

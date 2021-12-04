@@ -68,7 +68,7 @@ _ = fid.plot(show_complex=True, xlim=(0, 15000))
 print("td = ", fid.size)
 
 # %% [markdown]
-# Now we perform a Fast Fourier Fransform (FFT):
+# Now we perform a Fast Fourier Transform (FFT):
 
 # %%
 spec = scp.fft(fid)
@@ -87,7 +87,7 @@ print("si = ", spec.size)
 
 # %%
 newfid = spec.ifft()
-# x coordinateis in second (base units) so lets transform it
+# x coordinate is in second (base units) so lets transform it
 _ = newfid.plot(show_complex=True, xlim=(0, 15000))
 
 # %% [markdown]
@@ -113,7 +113,7 @@ _ = ax.legend(loc="lower right")
 # ## Preprocessing
 #
 # ### Line broadening
-# Often before applying a FFT, some exponential multiplication `em`or other broadening filters such as `gm` or `sp`
+# Often before applying FFT, some exponential multiplication `em`or other broadening filters such as `gm` or `sp`
 # are applied.
 # See the dedicated [apodization tutorial](apodization.ipynb).
 
@@ -123,7 +123,7 @@ spec2 = fid2.fft()
 _ = spec2.plot()
 _ = spec.plot(
     clear=False, xlim=(10, -5), c="r"
-)  # superpose the unbroadened spectrum in red and show expansion.
+)  # superpose the non broadened spectrum in red and show expansion.
 
 # %% [markdown]
 # ### Zero-filling
@@ -167,9 +167,9 @@ _ = (spec / spec.max()).plot(
 # # Real Fourier transform
 
 # %% [markdown]
-# In some case, it might be interesting to perform real Fourier transform . For instance, as a demontration,
+# In some case, it might be interesting to perform real Fourier transform . For instance, as a demonstration,
 # we will independently transform real and imaginary part of the previous fid, and recombine them to obtain the same
-# result as when performing complex Fourier transform on the complex dataset.
+# result as when performing complex fourier transform on the complex dataset.
 
 # %%
 lim = (-20, 20)
@@ -185,7 +185,7 @@ fI = Im.fft()
 _ = fI.plot(xlim=lim, show_complex=True)
 
 # %% [markdown]
-# Recombinaison:
+# Recombination:
 
 # %%
 _ = (fR - fI.imag).plot(xlim=lim)

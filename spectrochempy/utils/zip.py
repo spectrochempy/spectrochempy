@@ -40,9 +40,9 @@ def make_zipfile(file, **kwargs):
 
 class ScpFile(Mapping):  # lgtm [py/missing-equals]
     """
-    ScpFile(fid)
+    ScpFile(fid).
 
-    (largely inspired by ``NpzFile`` object in numpy)
+    (largely inspired by ``NpzFile`` object in numpy).
 
     `ScpFile` is used to load files stored in ``.scp`` or ``.pscp``
     format.

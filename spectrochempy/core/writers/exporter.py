@@ -133,7 +133,6 @@ def write(dataset, filename=None, **kwargs):
     ---------
     write a dataset (providing a windows type filename relative to the default ``Datadir``)
 
-    >>> import spectrochempy as scp
     >>> nd = scp.read_opus('irdata/OPUS')
     >>> f = nd.write('opus.scp')
     >>> f.name

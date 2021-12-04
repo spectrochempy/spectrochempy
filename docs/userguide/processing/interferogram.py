@@ -34,7 +34,7 @@
 # %% [markdown]
 # # FTIR interferogram processing
 #
-# A situation where we need transform of real data is the case of FTIR interferograms.
+# A situation where we need transform of real data is the case of FTIR interferogram.
 
 # %%
 import spectrochempy as scp
@@ -61,7 +61,7 @@ print("number of points = ", ir.size)
 _ = ir.plot(xlim=(0, 128))
 
 # %% [markdown]
-# The `x` scale of the interferogramme can also be displayed as a function of optical path difference. For this we
+# The `x` scale of the interferogram can also be displayed as a function of optical path difference. For this we
 # just make `show_datapoints` to False:
 
 # %%
@@ -76,7 +76,7 @@ _ = ir.plot(xlim=(-0.04, 0.04))
 ir.x.set_laser_frequency(15798.26 * ur("cm^-1"))
 
 # %% [markdown]
-# Now we can perform the Fourier transform. By default no zero-filling level is applied prior the Fourier transform
+# Now we can perform the Fourier transform. By default, no zero-filling level is applied prior the Fourier transform
 # for FTIR. To add some level of zero-filling, use the `zf` method.
 
 # %%
@@ -87,7 +87,7 @@ irt = ird.fft()
 _ = irt.plot(xlim=(3999, 400))
 
 # %% [markdown]
-# A `Happ-Genzel` (Hamming window) apodization can also applied prior to the
+# A `Happ-Genzel` (Hamming window) apodization can also be applied prior to the
 # Fourier transformation in order to decrease the H2O narrow bands.
 
 # %%

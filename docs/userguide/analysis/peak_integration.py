@@ -18,8 +18,9 @@
 # # Peak integration
 #
 # This tutorial shows how to find peak maxima and determine peak areas with spectrochempy. As prerequisite,
-# the user is expected to have read the [Import](../IO/import.ipynb), [Import IR](../IO/importIR.ipynb),
-# [slicing](../processing/slicing.ipynb) and [baseline correction](../processing/baseline_correct.ipynb) tutorials.
+# the user is expected to have read the [Import](../importexport/import.ipynb),
+# [Import IR](../importexport/importIR.ipynb),
+# [slicing](../processing/slicing.ipynb) and [baseline correction](../processing/baseline.ipynb) tutorials.
 
 # %% [markdown]
 # First lets import the SpectroChemPy API
@@ -96,7 +97,7 @@ scp.plot_multiple(
 
 # %% [markdown]
 # The difference between the trapezoidal and simpson integration methods is visualized below. In this case they are
-# extremly close.
+# extremely close.
 
 # %%
 diff = (inttrapz - intsimps) * 100.0 / intsimps

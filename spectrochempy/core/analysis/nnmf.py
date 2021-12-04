@@ -125,15 +125,13 @@ class NNMF(HasTraits):
                     if suff_decr:
                         H = Hn
                         break
-                    else:
-                        alpha = alpha * beta
+                    alpha = alpha * beta
                 else:
                     if not suff_decr or (Hp == Hn).all():
                         H = Hp
                         break
-                    else:
-                        alpha = alpha / beta
-                        Hp = Hn
+                    alpha = alpha / beta
+                    Hp = Hn
 
             if n_iter == maxiter:
                 info_("Max iter in nlssubprob")
@@ -149,7 +147,7 @@ class NNMF(HasTraits):
         gradW = np.dot(W, np.dot(H, H.T)) - np.dot(V, H.T)
         gradH = np.dot(np.dot(W.T, W), H) - np.dot(W.T, V)
         initgrad = norm(np.r_[gradW, gradH.T])
-        info_("Init gradient norm {:.3f}".format(initgrad))
+        info_(f"Init gradient norm {initgrad:.3f}")
         tolW = max(0.001, tol) * initgrad
         tolH = tolW
 
@@ -180,5 +178,5 @@ class NNMF(HasTraits):
             if myiter % 10 == 0:
                 stdout.write(".")
 
-        info_("\nIter = {} Final proj-grad norm {:.3f}".format(myiter, projnorm))
+        info_(f"\nIter = {myiter} Final proj-grad norm {projnorm:.3f}")
         return W, H

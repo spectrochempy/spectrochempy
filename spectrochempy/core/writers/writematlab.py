@@ -17,17 +17,17 @@ __dataset_methods__ = __all__
 # .......................................................................................................................
 def write_matlab(*args, **kwargs):
     """
-    Writes a dataset in CSV format
-
+    Write a dataset in CSV format.
 
     Parameters
     ----------
-
+    *args
+    **kwargs
 
     Returns
     -------
     out : `pathlib` object
-        path of the saved file
+        Path of the saved file.
 
     Examples
     --------
@@ -42,7 +42,7 @@ def write_matlab(*args, **kwargs):
 
 
 write_mat = write_matlab
-write_mat.__doc__ = "This method is an alias of `write_matlab` "
+write_mat.__doc__ = "This method is an alias of `write_matlab`."
 
 
 @exportermethod

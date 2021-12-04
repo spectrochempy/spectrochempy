@@ -124,7 +124,7 @@ class MCRALS(HasTraits):
                 "or spectra dataset do not match the data"
             )
 
-        ny, nx = X.shape
+        ny, _ = X.shape
 
         # makes a PCA with same number of species
         Xpca = PCA(X).reconstruct(n_pc=nspecies)
@@ -158,10 +158,10 @@ class MCRALS(HasTraits):
         if externalConc is not None:
             try:
                 getExternalConc = kwargs.get("getExternalConc")
-            except Exception:
+            except Exception as exc:
                 raise ValueError(
                     "A function must be given to get the external concentration profile(s)"
-                )
+                ) from exc
             external_to_C_idx = kwargs.get("external_to_C_idx", externalConc)
             args = kwargs.get("args", ())
 
