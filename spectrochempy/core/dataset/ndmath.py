@@ -5,7 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 """
-This module implements the |NDMath| class.
+This module implements the NDMath class.
 """
 # TODO: test binary ufunc and put them in docs
 
@@ -367,7 +367,7 @@ def _logical_binary_ufuncs():
 
 class NDMath(object):
     """
-    This class provides the math and some other array manipulation functionalities to |NDArray| or |Coord|.
+    This class provides the math and some other array manipulation functionalities to |NDArray| or |Coord| .
 
     Below is a list of mathematical functions (numpy) implemented (or
     planned for implementation).
@@ -377,16 +377,16 @@ class NDMath(object):
     These functions should work like for numpy-ndarray, except that they
     may be units-aware.
 
-    For instance, `ds`  being a |NDDataset|, just call the np functions like
+    For instance, `ds`  being a |NDDataset| , just call the np functions like
     this. Most of the time it returns a new NDDataset, while in some cases
-    noted below, one get a |ndarray|.
+    noted below, one get a |ndarray| .
 
     >>> ds = scp.NDDataset([1.,2.,3.])
     >>> np.sin(ds)
     NDDataset: [float64] unitless (size: 3)
 
     In this particular case (*i.e.*, `np.sin` ufuncs) , the `ds` units must be
-    `unitless`, `dimensionless` or angle-units : `radians` or `degrees`,
+    `unitless` , `dimensionless` or angle-units : `radians` or `degrees` ,
     or an exception will be raised.
 
     Examples
@@ -1292,7 +1292,7 @@ class NDMath(object):
         See Also
         --------
         sum : Sum array elements.
-        trapz : Integration of array values using the composite trapezoidal rule.
+        trapezoid : Integration of array values using the composite trapezoidal rule.
         diff :  Calculate the n-th discrete difference along given axis.
 
         Examples
