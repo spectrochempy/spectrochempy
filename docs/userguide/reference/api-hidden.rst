@@ -113,6 +113,7 @@
     NDDataset.set_quaternion
     NDDataset.simpson
     NDDataset.simps
+    NDDataset.simpson
     NDDataset.sine
     NDDataset.sinm
     NDDataset.smooth

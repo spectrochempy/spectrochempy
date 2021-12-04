@@ -4,6 +4,7 @@ channels:
     - conda-forge
     - spectrocat
     - defaults
+    - cantera/dev
 
 dependencies:
 
@@ -12,7 +13,8 @@ dependencies:
     - brukeropusreader
     - quaternion
     - nmrglue
-
+    - cantera
+    -
     # for the core package
     - colorama
     - dill

@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.11.0
+#       jupytext_version: 1.13.0
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -33,13 +33,13 @@
 # # Overview
 
 # %% [markdown]
-# In this presentation, we will shortly present some of the **SpectroChemPy** features.
+# In this presentation, we will shortly present some **SpectroChemPy** features.
 
 # %% [markdown] slideshow={"slide_type": "notes"}
 # ## Using the Jupyter Lab environment
 
 # %% [markdown]
-# PRobably the most easiet way to start experiencing SpectroChemPy
+# Probably the most easiet way to start experiencing SpectroChemPy
 #
 # <img src='images/enter_md.png' />
 
@@ -90,7 +90,7 @@ _ = region.plot()
 # ### Maths on datasets
 
 # %% slideshow={"slide_type": "fragment"}
-region.y -= region.y[0]  # make y coordinate reative to the first point
+region.y -= region.y[0]  # make y coordinate relative to the first point
 region.y.title = "time of dehydratatioin"
 region -= region[-1]  # suppress the last spectra to all
 _ = region.plot(colorbar=True)
