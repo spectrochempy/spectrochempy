@@ -358,8 +358,8 @@ Sums, integal, difference
 
     sum
     cumsum
-    trapz
-    simps
+    trapezoidal
+    simpson
 
 
 Complex

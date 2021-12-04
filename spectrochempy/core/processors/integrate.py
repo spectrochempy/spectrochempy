@@ -8,9 +8,9 @@
 Integration methods
 """
 
-__all__ = ["simps", "trapz"]
+__all__ = ["simps", "trapz", "simpson", "trapezoid"]
 
-__dataset_methods__ = ["simps", "trapz"]
+__dataset_methods__ = ["simps", "trapz", "simpson", "trapezoid"]
 
 import functools
 import scipy.integrate
@@ -69,17 +69,20 @@ def trapezoid(dataset, **kwargs):
 
     Wrapper of scpy.integrate.trapezoid.
 
-    Returns the integration along the last or given dimension.
+    Performs the integration along the last or given dimension.
 
     Parameters
     ----------
     dataset : |NDDataset|
         Dataset to be integrated.
-    dim : int or str, optional, default: "x"
-        Dimension along which to integrate.       If an integer is provided, it is equivalent to the `axis` parameter for numpy arrays.
     **kwargs
         Additional keywords parameters.
         See Other Parameters.
+
+    Other Parameters
+    ----------------
+    dim : int or str, optional, default: "x"
+        Dimension along which to integrate.       If an integer is provided, it is equivalent to the `axis` parameter for numpy arrays.
 
     Returns
     -------
@@ -89,7 +92,8 @@ def trapezoid(dataset, **kwargs):
     See Also
     --------
     trapz : An alias of trapezoid.
-    simps : Integrate using the composite trapezoidal rule.
+
+    simps : Integrate using the composite simpson rule.
 
     Example
     --------
@@ -102,18 +106,18 @@ def trapezoid(dataset, **kwargs):
 
 
 trapz = trapezoid
-trapz.__doc__ = """
-An alias of `trapezoid` kept for backwards compatibily.
+trapz.__doc__ = f"""
+    An alias of `trapezoid` kept for backwards compatibily.
 {trapezoid.__doc__}"""
 
 
 def simpson(dataset, *args, **kwargs):
     """
-    Integrate using the composite trapezoidal rule.
+    Integrate using the composite Simpson's rule.
 
     Wrapper of scpy.integrate.trapezoid.
 
-    Returns the integration along the last or given dimension.
+    Performs the integration along the last or given dimension.
 
     If there are an even number of samples, N, then there are an odd
     number of intervals (N-1), but Simpson's rule requires an even number
@@ -123,6 +127,12 @@ def simpson(dataset, *args, **kwargs):
     ----------
     dataset : |NDDataset|
         dataset to be integrated.
+    **kwargs
+        Additional keywords parameters.
+        See Other Parameters.
+
+    Other Parameters
+    ----------------
     dim : int or str, optional, default: "x"
         Dimension along which to integrate.
         If an integer is provided, it is equivalent to the `axis` parameter for numpy arrays.
@@ -140,6 +150,12 @@ def simpson(dataset, *args, **kwargs):
     integral
         Definite integral as approximated using the composite Simpson's rule.
 
+    See Also
+    --------
+    simps : An alias of simpson.
+
+    trapezoid : Integrate using the composite simpson rule.
+
     Example
     --------
 
@@ -152,6 +168,6 @@ def simpson(dataset, *args, **kwargs):
 
 
 simps = simpson
-simps.__doc__ = """
-An alias of `trapezoid` kept for backwards compatibily.
+simps.__doc__ = f"""
+    An alias of `trapezoid` kept for backwards compatibily.
 {simpson.__doc__}"""

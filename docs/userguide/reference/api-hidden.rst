@@ -111,6 +111,7 @@
     NDDataset.set_coordunits
     NDDataset.set_hypercomplex
     NDDataset.set_quaternion
+    NDDataset.simpson
     NDDataset.simps
     NDDataset.sine
     NDDataset.sinm
@@ -131,6 +132,7 @@
     NDDataset.to_xarray
     NDDataset.transpose
     NDDataset.trapz
+    NDDataset.trapezoid
     NDDataset.triang
     NDDataset.var
     NDDataset.write
