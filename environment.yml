@@ -14,7 +14,7 @@ dependencies:
     - quaternion
     - nmrglue
     - cantera
-    -
+
     # for the core package
     - colorama
     - dill
