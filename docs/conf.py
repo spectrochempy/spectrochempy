@@ -692,3 +692,5 @@ def setup(app):
     app.connect("autodoc-skip-member", autodoc_skip_member)
     app.connect("autodoc-process-signature", shorter_signature)
     app.add_css_file("theme_override.css")  # also can be a full URL
+    # Ignore .ipynb files
+    app.registry.source_suffix.pop(".ipynb", None)
