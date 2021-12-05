@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.13.0
+#       jupytext_version: 1.11.0
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -35,8 +35,8 @@
 # %% [markdown]
 # The purpose of this page is to give you some quick examples of what can be done with SpectroChemPy.
 #
-# See the [gallery of examples](gallery/auto_examples/index.rst) and consult the [user's guide](
-# ../userguide/introduction/introduction.ipynb) for more information on using SpectroChemPy
+# See the [gallery of examples](gallery/auto_examples/index.html) and consult the [user's guide](
+# ../userguide/introduction/introduction.html) for more information on using SpectroChemPy
 #
 # Before using the package, we must load the **API
 # (Application Programming Interface)**
