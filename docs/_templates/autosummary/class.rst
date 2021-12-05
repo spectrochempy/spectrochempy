@@ -3,27 +3,37 @@
 .. currentmodule:: {{ module }}
 
 .. autoclass:: {{ objname }}
+    {% block methods %}
 
-{% block methods %}{% if methods %}
+   {% if methods %}
    .. rubric:: {{ _('Methods') }}
 
    .. autosummary::
-      :nosignatures:
-
-{% for item in methods %}
+   {% for item in methods %}
+   {%- if item != "__init__" %}
       ~{{ name }}.{{ item }}
-{%- endfor %}
-{% endif %}{% endblock %}
-{% block attributes %}{% if attributes %}
+    {%- endif%}
+   {%- endfor %}
+
+   {% for item in methods %}
+   {%- if item != "__init__" %}
+   .. automethod:: {{ item }}
+   {%- endif%}
+   {%- endfor %}
+
+   {% endif %}
+   {% endblock %}
+
+   {% block attributes %}
+   {% if attributes %}
    .. rubric:: {{ _('Attributes') }}
 
    .. autosummary::
-      :nosignatures:
-
-{% for item in attributes %}
+   {% for item in attributes %}
       ~{{ name }}.{{ item }}
-{%- endfor %}
-{% endif %}{% endblock %}
+   {%- endfor %}
+   {% endif %}
+   {% endblock %}
 
 .. include:: /gettingstarted/gallery/backreferences/{{fullname}}.examples
 

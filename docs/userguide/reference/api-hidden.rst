@@ -111,7 +111,9 @@
     NDDataset.set_coordunits
     NDDataset.set_hypercomplex
     NDDataset.set_quaternion
+    NDDataset.simpson
     NDDataset.simps
+    NDDataset.simpson
     NDDataset.sine
     NDDataset.sinm
     NDDataset.smooth
@@ -131,6 +133,7 @@
     NDDataset.to_xarray
     NDDataset.transpose
     NDDataset.trapz
+    NDDataset.trapezoid
     NDDataset.triang
     NDDataset.var
     NDDataset.write
@@ -144,7 +147,6 @@
     NDDataset.zeros_like
     NDDataset.round
     NDDataset.around
-
     NDDataset.II
     NDDataset.IR
     NDDataset.RI
@@ -215,7 +217,6 @@
     NDDataset.units
     NDDataset.value
     NDDataset.values
-
     Coord.arange
     Coord.astype
     Coord.copy
@@ -236,7 +237,6 @@
     Coord.to
     Coord.to_base_units
     Coord.to_reduced_units
-
     Coord.created
     Coord.data
     Coord.date
@@ -270,7 +270,6 @@
     Coord.units
     Coord.value
     Coord.values
-
     LinearCoord.arange
     LinearCoord.astype
     LinearCoord.copy
@@ -289,7 +288,6 @@
     LinearCoord.to
     LinearCoord.to_base_units
     LinearCoord.to_reduced_units
-
     LinearCoord.created
     LinearCoord.data
     LinearCoord.date
@@ -323,7 +321,6 @@
     LinearCoord.units
     LinearCoord.value
     LinearCoord.values
-
     CoordSet.copy
     CoordSet.implements
     CoordSet.keys
@@ -332,7 +329,6 @@
     CoordSet.set_units
     CoordSet.to_dict
     CoordSet.update
-
     CoordSet.available_names
     CoordSet.has_defined_name
     CoordSet.id
@@ -344,12 +340,10 @@
     CoordSet.sizes
     CoordSet.titles
     CoordSet.units
-
     SVD.ev
     SVD.ev_cum
     SVD.ev_ratio
     SVD.sv
-
     PCA.printev
     PCA.reconstruct
     PCA.reduce
@@ -361,7 +355,6 @@
     PCA.ev
     PCA.ev_cum
     PCA.ev_ratio
-
     LSTSQ.inverse_transform
     LSTSQ.trans
     LSTSQ.itrans

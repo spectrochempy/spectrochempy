@@ -175,7 +175,7 @@ We'll now install |scpy| in development mode following 2 steps:
      >>> exit()
 
 Controlling the environments
----------------------------
+----------------------------
 
 You can create as many environments you want, using the method above
 (for example with different versions of Python)
