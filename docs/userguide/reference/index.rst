@@ -3,18 +3,19 @@
 .. currentmodule:: spectrochempy
 
 
-##############
-API reference
-##############
+####################
+Public API reference
+####################
+
+The |scpy| API publicly exposes many objects and functions.
+They are listed below exhaustively.
+What is not listed here is reserved for developers and should not normally be necessary for normal use of |scpy|.
 
 .. contents:: Table of Contents
-
 
 ****************
 Loading the API
 ****************
-
-The |scpy| API exposes many objects and functions.
 
 To use the API, you must import it using one of the following syntax:
 

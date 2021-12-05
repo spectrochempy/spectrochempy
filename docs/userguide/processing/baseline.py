@@ -34,8 +34,8 @@
 # # Baseline corrections
 #
 # This tutorial shows how to make baseline corrections with spectrochempy.
-# As prerequisite, the user is expected to have read the [Import](../import_export/import.ipynb)
-# and [Import IR](../import_export/importIR.ipynb) tutorials.
+# As prerequisite, the user is expected to have read the [Import](../importexport/import.ipynb)
+# and [Import IR](../importexport/importIR.ipynb) tutorials.
 
 # %%
 import spectrochempy as scp
@@ -222,7 +222,7 @@ _ = blc.corrected.plot()
 # various regions of the spectrum are correlated. It consist in (i) modeling the baseline regions by a principal
 # component analysis (PCA), (ii) interpolate the loadings of the first principal components over the whole spectral
 # and (iii) modeling the spectra baselines from the product of the PCA scores and the interpolated loadings.
-# (for detail: see [Vilmin et al. Analytica Chimica Acta 891 (2015)](dx.doi.org/10.1016/j.aca.2015.06.006)).
+# (for detail: see [Vilmin et al. Analytica Chimica Acta 891 (2015)](http://dx.doi.org/10.1016/j.aca.2015.06.006)).
 #
 # If this option is selected, the user should also choose `npc`, the number of principal components used to model the
 # baseline. In a sense, this parameter has the same role as the `order` parameter, except tha it will affect how well

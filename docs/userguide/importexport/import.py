@@ -36,7 +36,7 @@
 # This tutorial shows how to import data in **SpectroChemPy (SCPy)**.
 #
 # First, let's ``import spectrochempy as scp`` in the current
-# namespace, so that all spectrochempy commands will be called as ```scp.method(<method parameters>)```.
+# namespace, so that all spectrochempy commands will be called as ``scp.method(<method parameters>)``.
 
 # %%
 import spectrochempy as scp

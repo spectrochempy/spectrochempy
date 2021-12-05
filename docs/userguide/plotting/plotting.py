@@ -43,8 +43,8 @@
 # for a better interactivity inside a notebook.
 #
 # Finally, some commands and objects used here are described in-depth in the sections related to
-# [import](../Importexport/import.html) and [slicing](../processing/slicing.html) of NDDatasets and the *
-# [NDDatasets](../dataset/dataset.html) themselves.
+# [import](../Importexport/import.ipynb) and [slicing](../processing/slicing.ipynb) of NDDatasets and the *
+# [NDDatasets](../dataset/dataset.ipynb) themselves.
 # %% [markdown]
 # ## Load the API
 # First, before anything else, we import the spectrochempy API:

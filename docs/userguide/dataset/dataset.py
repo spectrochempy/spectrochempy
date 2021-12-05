@@ -1,7 +1,7 @@
 # ---
 # jupyter:
 #   jupytext:
-#     formats: ipynb,py:percent
+#     formats: ipynb,py:percent,md:myst
 #     notebook_metadata_filter: all
 #     text_representation:
 #       extension: .py
@@ -21,7 +21,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.9.1
+#     version: 3.8.8
 #   widgets:
 #     application/vnd.jupyter.widget-state+json:
 #       state: {}

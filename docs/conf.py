@@ -129,6 +129,8 @@ exclude_patterns.append("_static")
 exclude_patterns.append("**.ipynb_checkpoints")
 exclude_patterns.append("gallery")
 exclude_patterns.append("~temp")
+exclude_patterns.append("**.py")
+exclude_patterns.append("**.md5")
 
 # %%
 # The reST default role (used for this markup: `text`) to use for all
@@ -692,5 +694,3 @@ def setup(app):
     app.connect("autodoc-skip-member", autodoc_skip_member)
     app.connect("autodoc-process-signature", shorter_signature)
     app.add_css_file("theme_override.css")  # also can be a full URL
-    # Ignore .ipynb files
-    app.registry.source_suffix.pop(".ipynb", None)

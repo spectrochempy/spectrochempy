@@ -1,7 +1,7 @@
 # ---
 # jupyter:
 #   jupytext:
-#     formats: ipynb,py:percent
+#     formats: ipynb,py:percent,md:myst
 #     notebook_metadata_filter: all
 #     text_representation:
 #       extension: .py
@@ -21,7 +21,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.8.0
+#     version: 3.8.8
 #   widgets:
 #     application/vnd.jupyter.widget-state+json:
 #       state: {}
@@ -29,17 +29,16 @@
 #       version_minor: 0
 # ---
 
-# %% [markdown] slideshow={"slide_type": "slide"}
+# %% [markdown]
 # # Overview
 
 # %% [markdown]
 # The purpose of this page is to give you some quick examples of what can be done with SpectroChemPy.
 #
-# See the [gallery of examples](gallery/auto_examples/index.html) and consult the [user's guide](
-# ../userguide/introduction/introduction.html) for more information on using SpectroChemPy
+# See the [gallery of examples](gallery/auto_examples/index.rst) and consult the [user's guide](
+# ../userguide/introduction/introduction.ipynb) for more information on using SpectroChemPy
 #
-# Before using the package, we must load the **API
-# (Application Programming Interface)**
+# Before using the package, we must load the **API (Application Programming Interface)**
 
 # %%
 import spectrochempy as scp
@@ -155,10 +154,8 @@ pressure = [
 ds.y = scp.Coord(pressure, title="Pressure", units="torr")
 _ = ds.plot(colormap="magma")
 
-# %% jupyter={"source_hidden": true}
+# %% jupyter={"source_hidden": true} pycharm={"name": "#%%\n"}
 param = {"epsRange": [-8, -1, 50], "lambdaRange": [-10, 1, 12], "kernel": "langmuir"}
 
 iris = scp.IRIS(ds, param, verbose=False)
 _ = iris.plotdistribution(-7, colormap="magma")
-
-# %%
