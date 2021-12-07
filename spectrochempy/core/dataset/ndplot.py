@@ -149,7 +149,7 @@ class PreferencesSet(Meta):
     # ------------------------------------------------------------------------------------------------------------------
 
     def reset(self):
-
+        """:parameter"""
         # remove the matplotlib_user json file to reset to defaults
         config_dir = pathclean(preferences.cfg.config_dir)
         f = config_dir / "PlotPreferences.json"

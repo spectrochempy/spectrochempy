@@ -74,7 +74,7 @@ class LSTSQ(HasTraits):
 
     def transform(self):
         """
-        Return the least square coefficients A and B
+        Return the least square coefficients A and B.
 
         Returns
         -------
@@ -112,7 +112,7 @@ class LSTSQ(HasTraits):
     def inverse_transform(self):
         """
         Return the reconstructed data from the A and B least-square
-        coefficients
+        coefficients.
 
         Returns
         -------

@@ -1561,7 +1561,8 @@ class NDArray(HasTraits):
 
     # ..................................................................................................................
     def get_labels(self, level=0):
-        """Get the labels at a given level.
+        """
+        Get the labels at a given level.
 
         Used to replace `data` when only labels are provided, and/or for
         labeling axis in plots.
@@ -1593,7 +1594,7 @@ class NDArray(HasTraits):
     @property
     def has_data(self):
         """
-        bool - True if the `data` array is not empty and size > 0.
+        Bool - True if the `data` array is not empty and size > 0.
         (Readonly property).
         """
         if (self.data is None) or (self.data.size == 0):
@@ -1844,7 +1845,7 @@ class NDArray(HasTraits):
         other : |Unit|, |Quantity| or str
             Destination units.
         force : bool, optional, default=`False`
-            If True the change of units is forced, even for incompatible units
+            If True the change of units is forced, even for incompatible units.
 
         See Also
         --------

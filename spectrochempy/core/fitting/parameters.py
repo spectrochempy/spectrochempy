@@ -219,7 +219,7 @@ class FitParameters(UserDict):
     # ------------------------------------------------------------------------------------------------------------------
     def to_internal(self, key, expi=None):
         """
-        if expi is not none, several parameters to create
+        if expi is not none, several parameters to create.
         """
         key = str(key)
         if key not in self.data:

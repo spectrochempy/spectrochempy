@@ -24,17 +24,17 @@ from spectrochempy.core.dataset.coord import Coord
 # ..................................................................................................................
 def can_merge_or_align(coord1, coord2):
     """
-    Check if two coordinates can be merged or aligned
+    Check if two coordinates can be merged or aligned.
 
     Parameters
     ----------
     coord1, coord2 : |Coord|
-        coordinates to merge or align
+        coordinates to merge or align.
 
     Returns
     -------
     can_merge, can_align : tuple of bools
-        Two flags about merge and alignment possibility
+        Two flags about merge and alignment possibility.
     """
     if coord1 == coord2:
         # same coordinates
@@ -81,10 +81,10 @@ def align(dataset, *others, **kwargs):
         If align is defined :
 
         * 'outer' means that a union of the different coordinates is
-        achieved (missing values are masked)
-        * 'inner' means that the intersection of the coordinates is used
-        * 'first' means that the first dataset is used as reference
-        * 'last' means that the last dataset is used as reference
+        achieved (missing values are masked).
+        * 'inner' means that the intersection of the coordinates is used.
+        * 'first' means that the first dataset is used as reference.
+        * 'last' means that the last dataset is used as reference.
         * 'interpolate' means that interpolation is performed relative to
         the first dataset.
     interpolate_method : enum ['linear','pchip']. Optional, default='linear'
@@ -114,7 +114,7 @@ def align(dataset, *others, **kwargs):
     ------
     ValueError
         issued when the dimensions given in `dim` or `dims` argument are not
-        compatibles (units, titles, etc...).
+        compatibles (units, titles, etc.).
     """
     # DEVELOPPER NOTE
     # There is probably better methods, but to simplify dealing with

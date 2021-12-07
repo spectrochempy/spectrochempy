@@ -212,7 +212,8 @@ class Meta(object):  # HasTraits):
         return self._data.get(key, default)
 
     def update(self, d):
-        """Feed a metadata dictionary with the content of an another
+        """
+        Feed a metadata dictionary with the content of an another
         dictionary
 
         Parameters
@@ -228,7 +229,8 @@ class Meta(object):  # HasTraits):
             self._data.update(d)
 
     def copy(self):
-        """Return a disconnected copy of self.
+        """
+        Return a disconnected copy of self.
 
         Returns
         -------
@@ -238,7 +240,8 @@ class Meta(object):  # HasTraits):
         return self.__copy__()
 
     def keys(self):
-        """A list of metadata contained in the object.
+        """
+        A list of metadata contained in the object.
 
         Returns
         -------
@@ -247,7 +250,7 @@ class Meta(object):  # HasTraits):
 
         Examples
         --------
-        >>> m = Meta()
+        >>> m = scp.Meta()
         >>> m.td = 10
         >>> m.si = 20
         >>> print(m.keys())
@@ -257,7 +260,7 @@ class Meta(object):  # HasTraits):
         -----
         Alternatively, it is possible to iter directly on the Meta object
 
-        >>> m = Meta()
+        >>> m = scp.Meta()
         >>> m.td = 10
         >>> m.si = 20
         >>> for key in m :
@@ -268,7 +271,8 @@ class Meta(object):  # HasTraits):
         return [key for key in self]
 
     def items(self):
-        """A list of metadata items contained in the object.
+        """
+        A list of metadata items contained in the object.
 
         Returns
         -------
@@ -277,7 +281,7 @@ class Meta(object):  # HasTraits):
 
         Examples
         --------
-        >>> m = Meta()
+        >>> m = scp.Meta()
         >>> m.td = 10
         >>> m.si = 20
         >>> print(m.items())
@@ -325,7 +329,6 @@ class Meta(object):  # HasTraits):
 
     def permute(self, *dims, inplace=True):
         """
-
         Parameters
         ----------
         dims

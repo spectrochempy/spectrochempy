@@ -287,7 +287,7 @@ def check_filenames(*args, **kwargs):
 
 def get_filename(*filenames, **kwargs):
     """
-    returns a list or dictionary of the filenames of existing files, filtered by extensions
+    Return a list or dictionary of the filenames of existing files, filtered by extensions
 
     Parameters
     ----------
@@ -296,15 +296,15 @@ def get_filename(*filenames, **kwargs):
         If not provided, a dialog box is opened to select files in the current directory if no `directory` is specified)
     directory : `str` or pathlib object, optional.
         The directory where to look at. If not specified, read in
-        current directory, or in the datadir if unsuccessful
+        current directory, or in the datadir if unsuccessful.
     filetypes : `list`, optional, default=['all files, '.*)'].
-        file type filter
+        file type filter.
     dictionary : `bool`, optional, default=True
         Whether a dictionary or a list should be returned.
     listdir : bool, default=False
         read all file (possibly limited by `filetypes` in a given `directory`.
     recursive : bool, optional,  default=False.
-        Read also subfolders
+        Read also subfolders.
 
     Warnings
     --------
@@ -322,6 +322,7 @@ def get_filename(*filenames, **kwargs):
     from spectrochempy import NO_DISPLAY, NO_DIALOG
     from spectrochempy.core import open_dialog
 
+    print(environ.get("DOC_BUILDING"))
     NODIAL = (
         NO_DIALOG or "DOC_BUILDING" in environ
     )  # suppress dialog when doc is built or during full testing
@@ -506,7 +507,7 @@ def get_filename(*filenames, **kwargs):
 
 def readdirname(directory, **kwargs):
     """
-    returns a valid directory name
+    Return a valid directory name.
 
     Parameters
     ----------
@@ -516,7 +517,7 @@ def readdirname(directory, **kwargs):
     Returns
     --------
     out: `pathlib.Path` object
-        valid directory name
+        valid directory name.
     """
 
     from spectrochempy.core import preferences as prefs

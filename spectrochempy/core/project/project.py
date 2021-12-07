@@ -479,21 +479,27 @@ class Project(AbstractProject, NDIO):
     # ..................................................................................................................
     def add_datasets(self, *datasets):
         """
-        Add datasets to the current project.
+        Add several datasets to the current project.
 
         Parameters
         ----------
-        datasets : series of |NDDataset|
+        *datasets : series of |NDDataset|
             Datasets to add to the current project.
             The name of the entries in the project will be identical to the
             names of the datasets.
 
+        See Also
+        --------
+        add_dataset : Add a single dataset to the current project.
+
         Examples
         --------
-        Assuming that ds1, ds2 and ds3 are already defined datasets :
 
-        >>> proj = Project()
-        >>> proj.add_datasets(ds1, ds2, ds3) # doctest: +SKIP
+        >>> ds1 = scp.NDDataset([1, 2, 3])
+        >>> ds2 = scp.NDDataset([4, 5, 6])
+        >>> ds3 = scp.NDDataset([7, 8, 9])
+        >>> proj = scp.Project()
+        >>> proj.add_datasets(ds1, ds2, ds3)
         """
         for ds in datasets:
             self.add_dataset(ds)
@@ -501,7 +507,7 @@ class Project(AbstractProject, NDIO):
     # ..................................................................................................................
     def add_dataset(self, dataset, name=None):
         """
-        Add datasets to the current project.
+        Add a single dataset to the current project.
 
         Parameters
         ----------
@@ -512,12 +518,16 @@ class Project(AbstractProject, NDIO):
         name : str, optional
             If provided the name will be used to name the entry in the project.
 
+        See Also
+        --------
+        add_datasets : Add several datasets to the current project.
+
         Examples
         --------
-        Assuming that ds1 is an already defined dataset :
 
-        >>> proj = Project()
-        >>> proj.add_dataset(ds1, name='Toto') # doctest: +SKIP
+        >>> ds1 = scp.NDDataset([1, 2, 3])
+        >>> proj = scp.Project()
+        >>> proj.add_dataset(ds1, name='Toto')
         """
 
         dataset.parent = self
