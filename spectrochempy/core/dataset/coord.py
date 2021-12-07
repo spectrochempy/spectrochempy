@@ -536,18 +536,18 @@ class Coord(NDMath, NDArray):
 
 
 class LinearCoord(Coord):
+
     _use_time = Bool(False)
     _show_datapoints = Bool(True)
     _zpd = Integer
 
-    def __init__(self, *args, offset=0.0, increment=1.0, **kwargs):
+    def __init__(self, data=None, offset=0.0, increment=1.0, **kwargs):
+
         """
         Linear coordinates.
 
         Such coordinates correspond to a ascending or descending linear
-        sequence of values, fully determined
-        by two
-        parameters, i.e., an offset (off) and an increment (inc) :
+        sequence of values, fully determined by two parameters, i.e., an offset (off) and an increment (inc) :
 
         .. math::
 
@@ -556,14 +556,16 @@ class LinearCoord(Coord):
         Parameters
         ----------
         data : a 1D array-like object, optional
-            wWen provided, the `size` parameters is adjusted to the size of
+            WWen provided, the `size` parameters is adjusted to the size of
             the array, and a linearization of the
             array is performed (only if it is possible: regular spacing in
-            the 1.e5 relative accuracy)
+            the 1.e5 relative accuracy).
         offset : float, optional
             If omitted a value of 0.0 is taken for tje coordinate offset.
         increment : float, optional
             If omitted a value of 1.0 is taken for the coordinate increment.
+        **kwargs
+            Additional keywords parameters. See Other Parameters.
 
         Other Parameters
         ----------------
@@ -609,8 +611,7 @@ class LinearCoord(Coord):
 
         See Also
         --------
-        NDDataset : Main SpectroChemPy object: an array with masks,
-        units and coordinates.
+        NDDataset : Main SpectroChemPy object: an array with masks, units and coordinates.
         Coord : Explicit coordinates.
 
         Examples
@@ -627,15 +628,15 @@ class LinearCoord(Coord):
         ``linear`` keyword
 
         >>> c2 = Coord(linear=True, offset=2.0, increment=2.0, size=10)
-
         """
-        if args and isinstance(args[0], Coord) and not args[0].linear:
+
+        if data is not None and isinstance(data, Coord) and not data.linear:
             raise ValueError(
                 "Only linear Coord (with attribute linear set to True, can be transformed into "
                 "LinearCoord class"
             )
 
-        super().__init__(*args, **kwargs)
+        super().__init__(data, **kwargs)
 
         # when data is present, we don't need offset and increment, nor size,
         # we just do linear=True and these parameters are ignored

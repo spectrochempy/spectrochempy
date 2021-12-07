@@ -7,7 +7,7 @@
 #  the root directory                         =
 # ======================================================================================================================
 """
-Database isotopes for NMR
+Database isotopes for NMR.
 
 This module essentially define a class :class:`Isotopes` which handle all
 necessary features of NMR nuclei, such as their spin, larmor frequency and

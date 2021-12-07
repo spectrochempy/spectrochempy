@@ -183,11 +183,12 @@ class NNLS(HasTraits):
 
     def transform(self):
         """
-        Return the least square coefficients A and B
+        Return the least square coefficients A and B.
 
         Returns
         -------
-        Quantity or NDDataset, depending on the dimension of the linear system.
+        Coefficient
+            Quantity or NDDataset, depending on the dimension of the linear system.
         """
         P = self._P
         X = self.X
@@ -221,11 +222,12 @@ class NNLS(HasTraits):
     def inverse_transform(self):
         """
         Return the reconstructed data from the A and B least-square
-        coefficients
+        coefficients.
 
         Returns
         -------
-        |NDDataset|
+        dataset
+            |NDDataset|.
         """
         A, B = self.transform()
 

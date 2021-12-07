@@ -521,28 +521,28 @@ class PCA(HasTraits):
     @property
     def LT(self):
         """
-        LT
+        LT.
         """
         return self._LT
 
     @property
     def S(self):
         """
-        S
+        S.
         """
         return self._S
 
     @property
     def X(self):
         """
-        X
+        X.
         """
         return self._X
 
     @property
     def ev(self):
         """
-        |NDDataset| - Explained variances
+        Explained variances (|NDDataset|).
 
         (The eigenvalues of the covariance matrix).
         """
@@ -551,14 +551,14 @@ class PCA(HasTraits):
     @property
     def ev_ratio(self):
         """
-        |NDDataset| - Explained variance per singular values.
+        Explained variance per singular values (|NDDataset|).
         """
         return self._ev_ratio
 
     @property
     def ev_cum(self):
         """
-        |NDDataset| - Cumulative Explained Variances.
+        Cumulative Explained Variances (|NDDataset|).
         """
         return self._ev_cum
 

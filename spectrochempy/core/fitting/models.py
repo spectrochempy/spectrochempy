@@ -25,6 +25,7 @@ import numpy as np
 class polynomialbaseline(object):
     """
     Arbitrary-degree polynomial (degree limited to 10, however).
+
     As a linear baseline is automatically calculated, this polynom is always of
     greater or equal to order 2 (parabolic function).
 
@@ -82,12 +83,12 @@ class polynomialbaseline(object):
 # ======================================================================================================================
 class gaussianmodel(object):
     """
-    Normalized 1D gaussian function :
+    Normalized 1D gaussian function.
 
     .. math::
         f(x) = \\frac{ampl}{\\sqrt{2 \\pi \\sigma^2} } \\exp({\\frac{-(x-pos)^2}{2 \\sigma^2}})
 
-    where :math:`\\sigma = \\frac{width}{2.3548}`
+    where :math:`\\sigma = \\frac{width}{2.3548}`.
     """
 
     args = ["ampl", "width", "pos"]
@@ -110,12 +111,12 @@ class gaussianmodel(object):
 # ======================================================================================================================
 class lorentzianmodel(object):
     """
-    A standard Lorentzian function (also known as the Cauchy distribution):
+    A standard Lorentzian function (also known as the Cauchy distribution).
 
     .. math::
         f(x) = \\frac{ampl * \\lambda}{\\pi [(x-pos)^2+ \\lambda^2]}
 
-    where :math:`\\lambda = \\frac{width}{2}`
+    where :math:`\\lambda = \\frac{width}{2}`.
     """
 
     args = ["ampl", "width", "pos"]
@@ -138,7 +139,9 @@ class lorentzianmodel(object):
 class voigtmodel(object):
     """
     A Voigt model constructed as the convolution of a :class:`GaussianModel` and
-    a :class:`LorentzianModel` -- commonly used for spectral line fitting.
+    a :class:`LorentzianModel`.
+
+    Commonly used for spectral line fitting.
     """
 
     args = ["ampl", "width", "ratio", "pos"]
@@ -168,8 +171,9 @@ class voigtmodel(object):
 # ======================================================================================================================
 class assymvoigtmodel(object):
     """
-    An assymetric Voigt model
-    A. L. Stancik and E. B. Brauns, Vibrational Spectroscopy, 2008, 47, 66-69
+    An assymetric Voigt model.
+
+    A. L. Stancik and E. B. Brauns, Vibrational Spectroscopy, 2008, 47, 66-69.
     """
 
     args = ["ampl", "width", "ratio", "assym", "pos"]

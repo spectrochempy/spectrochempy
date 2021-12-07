@@ -60,7 +60,7 @@ __all__ = [
 TYPE_INTEGER = (int, np.int_, np.int32, np.int64, np.uint32, np.uint64)
 TYPE_FLOAT = (float, np.float_, np.float32, np.float64)
 TYPE_COMPLEX = (complex, np.complex_, np.complex64, np.complex128)
-TYPE_BOOL = (bool, np.bool, np.bool_)
+TYPE_BOOL = (bool, np.bool_)
 
 EPSILON = epsilon = np.finfo(float).eps
 "Minimum value before considering it as zero value."

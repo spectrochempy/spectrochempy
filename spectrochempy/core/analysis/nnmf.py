@@ -77,11 +77,23 @@ class NNMF(HasTraits):
     @staticmethod
     def nmf(V, Winit, Hinit, tol, timelimit, maxiter):
         """
-        (W,H) = nmf(V,Winit,Hinit,tol,timelimit,maxiter)
-        W,H : output solution
-        Winit,Hinit : initial solution
-        tol : tolerance for a relative stopping condition
-        timelimit, maxiter : limit of time and iterations
+        (W,H) = nmf(V,Winit,Hinit,tol,timelimit,maxiter).
+
+        Parameters
+        ==========
+        Winit,Hinit
+            initial solution
+        tol
+            tolerance for a relative stopping condition
+        timelimit
+            limit of time.
+        maxiter
+            Limit of iterations
+
+        Returns
+        =======
+        W,H
+            output solution.
         """
 
         def nlssubprob(V, W, Hinit, tol, maxiter):

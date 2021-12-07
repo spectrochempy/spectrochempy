@@ -139,7 +139,7 @@ class EFA(HasTraits):
     @property
     def cutoff(self):
         """
-        float - cutoff value
+        Cutoff value (float)
         """
         return self._cutoff
 
@@ -150,7 +150,7 @@ class EFA(HasTraits):
     @property
     def f_ev(self):
         """
-        |NDDataset| - Eigenvalues for the forward analysis
+        Eigenvalues for the forward analysis (|NDDataset|).
         """
         f = self._f_ev
         if self._cutoff is not None:
@@ -160,7 +160,7 @@ class EFA(HasTraits):
     @property
     def b_ev(self):
         """
-        |NDDataset| - Eigenvalues for the backward analysis
+        Eigenvalues for the backward analysis (|NDDataset|).
         """
         b = self._b_ev
         if self.cutoff is not None:
@@ -169,7 +169,7 @@ class EFA(HasTraits):
 
     def get_conc(self, n_pc=None):
         """
-        Computes abstract concentration profile (first in - first out)
+        Computes abstract concentration profile (first in - first out).
 
         Parameters
         ----------
