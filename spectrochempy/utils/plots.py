@@ -65,14 +65,14 @@ NGreen = cmyk2rgb(85, 0, 60, 10)
 # .............................................................................
 def figure(preferences=Meta(), **kwargs):
     """
-    Method to open a new figure
+    Method to open a new figure.
 
     Parameters
     ----------
     kwargs : any
         keywords arguments to be passed to the matplotlib figure constructor.
     preferences : Meta dictionary
-        per object saved plot configuration
+        per object saved plot configuration.
     """
     return get_figure(preferences=preferences, **kwargs)
 

@@ -82,13 +82,13 @@ class NNMF(HasTraits):
         Parameters
         ==========
         Winit,Hinit
-            initial solution
+            initial solution.
         tol
-            tolerance for a relative stopping condition
+            tolerance for a relative stopping condition.
         timelimit
             limit of time.
         maxiter
-            Limit of iterations
+            Limit of iterations.
 
         Returns
         =======

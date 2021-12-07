@@ -131,7 +131,8 @@ class _DummyFile(object):
 
 def add_docstring(*args):
     """
-    Decorator which add a docstring to the actual func doctring"""
+    Decorator which add a docstring to the actual func doctring.
+    """
 
     def new_doc(func):
 
@@ -261,7 +262,7 @@ def dict_compare(d1, d2, check_equal_only=True):
 # ..................................................................................................................
 def get_component(data, select="REAL"):
     """
-    Take selected components of an hypercomplex array (RRR, RIR, ...)
+    Take selected components of an hypercomplex array (RRR, RIR, ...).
 
     Parameters
     ----------
@@ -367,17 +368,17 @@ def gt_eps(arr):
 # ......................................................................................................................
 def htmldoc(text):
     """
-    format docstring in html for a nice display in IPython
+    format docstring in html for a nice display in IPython.
 
     Parameters
     ----------
     text : str
-        The string to convert to html
+        The string to convert to html.
 
     Returns
     -------
     out : str
-        the html string
+        the html string.
     """
     p = re.compile("^(?P<name>.*:)(.*)", re.MULTILINE)  # To get the keywords
     html = p.sub(r"<b>\1</b>\2", text)
@@ -444,7 +445,7 @@ except ImportError:
 # ......................................................................................................................
 def interleaved2complex(data):
     """
-    Make a complex array from interleaved data
+    Make a complex array from interleaved data.
     """
     return data[..., ::2] + 1j * data[..., 1::2]
 
@@ -452,7 +453,7 @@ def interleaved2complex(data):
 # ......................................................................................................................
 def interleaved2quaternion(data):
     """
-    Make a complex array from interleaved data
+    Make a complex array from interleaved data.
     """
     return data[..., ::2] + 1j * data[..., 1::2]
 
@@ -460,7 +461,7 @@ def interleaved2quaternion(data):
 # ......................................................................................................................
 def is_iterable(arg):
     """
-    Determine if an object is iterable
+    Determine if an object is iterable.
     """
     return hasattr(arg, "__iter__")
 
@@ -479,7 +480,7 @@ def is_number(x):
 # ......................................................................................................................
 def is_sequence(arg):
     """
-    Determine if an object is iterable but is not a string
+    Determine if an object is iterable but is not a string.
     """
     return (not hasattr(arg, "strip")) and hasattr(arg, "__iter__")
 
@@ -506,7 +507,7 @@ def largest_power_of_2(value):
 # ......................................................................................................................
 def make_func_from(func, first=None):
     """
-    Create a new func with its arguments from another func and a new signature
+    Create a new func with its arguments from another func and a new signature.
     """
     code_obj = func.__code__
     new_varnames = list(code_obj.co_varnames)
@@ -533,7 +534,7 @@ def make_func_from(func, first=None):
 # ......................................................................................................................
 def make_new_object(objtype):
     """
-    Make a new object of type obj
+    Make a new object of type obj.
 
     Parameters
     ----------
@@ -541,7 +542,7 @@ def make_new_object(objtype):
 
     Returns
     -------
-    new : the new object of same type.
+    new : the new object of same type
     """
 
     new = type(objtype)()
@@ -635,7 +636,7 @@ def silence():
 def spacing(arr):
     """
     Return a scalar for the spacing in the one-dimensional input array (if it is uniformly spaced,
-    else return an array of the different spacings
+    else return an array of the different spacings.
 
     Parameters
     ----------

@@ -45,7 +45,7 @@ SCPY_SUFFIX = {"NDDataset": ".scp", "Project": ".pscp"}
 
 class NDIO(HasTraits):
     """
-    Import/export interface from |NDDataset|
+    Import/export interface from |NDDataset|.
 
     This class is used as basic import/export interface of the |NDDataset|.
     """

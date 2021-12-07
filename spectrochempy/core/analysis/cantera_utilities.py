@@ -8,7 +8,7 @@
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
 """
-Utility functions to deal with Cantera input/output
+Utility functions to deal with Cantera input/output.
 """
 
 # TODO: Testing !
@@ -112,7 +112,7 @@ def concentrations_vs_time(reactive_phase, t, reactorNet=None, returnNDDataset=F
 
 def modify_rate(reactive_phase, i_reaction, rate):
     """
-    Modify the reaction rate with index i_reaction to have the same rate parameters as rate
+    Modify the reaction rate with index i_reaction to have the same rate parameters as rate.
 
     Parameters
     ----------

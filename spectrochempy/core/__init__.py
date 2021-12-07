@@ -80,7 +80,7 @@ def info_(*args, **kwargs):
 # ----------------------------------------------------------------------------------------------------------------------
 def debug_(*args, **kwargs):
     """
-    Formatted debug message
+    Formatted debug message.
     """
     stg = _format_args(*args, **kwargs)
     try:
@@ -93,7 +93,7 @@ def debug_(*args, **kwargs):
 # ----------------------------------------------------------------------------------------------------------------------
 def error_(*args, **kwargs):
     """
-    Formatted error message
+    Formatted error message.
     """
     stg = ""
     if not isinstance(args[0], str):
@@ -105,7 +105,7 @@ def error_(*args, **kwargs):
 # ----------------------------------------------------------------------------------------------------------------------
 def warning_(*args, **kwargs):
     """
-    Formatted warning message
+    Formatted warning message.
     """
     stg = _format_args(*args, **kwargs)
     app.logs.warning(stg)

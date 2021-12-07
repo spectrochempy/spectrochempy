@@ -24,12 +24,12 @@ class MetaConfigurable(Configurable):
             self.jsonfile = jsonfile
 
     def to_dict(self):
-        """Return config value in a dict form
+        """Return config value in a dict form.
 
         Returns
         -------
         dict
-            A regular dictionary
+            A regular dictionary.
         """
         d = {}
         for k, v in self.traits(config=True).items():

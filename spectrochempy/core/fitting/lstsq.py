@@ -337,7 +337,7 @@ class CurveFit(HasTraits):
     def inverse_transform(self):
         """
         Return the reconstructed data from the A and B least-square
-        coefficients
+        coefficients.
 
         Returns
         -------

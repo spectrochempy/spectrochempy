@@ -456,10 +456,10 @@ class IRIS:
 
     def reconstruct(self):
         """
-        Transform data back to the original space
+        Transform data back to the original space.
 
-        The following matrix operation is performed : :math:`\\hat{X} = K.f[i]`
-        for each value of the regularization parameter.
+        The following matrix operation is performed : :math:`\\hat{X} = K.f[i]` for each value of the regularization
+        parameter.
 
         Returns
         -------
@@ -492,15 +492,14 @@ class IRIS:
 
     def plotlcurve(self, scale="ll", title="L curve"):  # , **kwargs):
         """
-        Plots the L Curve
+        Plots the L Curve.
 
         Parameters
         ----------
         scale : str, optional, default='ll'
-            2 letters among 'l' (log) or 'n' (non-log) indicating whether the y and x
-            axes should be log scales.
+            2 letters among 'l' (log) or 'n' (non-log) indicating whether the y and x axes should be log scales.
         title : str, optional, default='L curve'
-            Plot title
+            Plot title.
 
         Returns
         -------
@@ -526,9 +525,9 @@ class IRIS:
 
         Parameters
         ----------
-        index : optional, int, list or tuple of int.
+        index : int, list or tuple of int, optional, default: None
             Index(es) of the inversions (i.e. of the lambda values) to consider.
-            If 'None': plots for all indices. default: None
+            If 'None': plots for all indices.
 
         Returns
         -------

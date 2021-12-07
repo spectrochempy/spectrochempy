@@ -5,10 +5,10 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 """
-Fake data for testing
+Fake data for testing.
 
 This module implements routines to generate fake data that can be used for
-testing our various |scpy| analysis methods
+testing our various |scpy| analysis methods.
 """
 __all__ = ["generate_fake"]
 

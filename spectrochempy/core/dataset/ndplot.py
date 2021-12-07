@@ -188,19 +188,19 @@ class PreferencesSet(Meta):
 
     def all(self):
         """
-        List all parameters with their current and default value
+        List all parameters with their current and default value.
         """
         for key in plot_preferences.trait_names(config=True):
             self.help(key)
 
     def help(self, key):
         """
-        Display information on a given parameter
+        Display information on a given parameter.
 
         Parameters
         ----------
         key: str
-            name of the parameter for which we want information
+            Name of the parameter for which we want information.
         """
         from spectrochempy.utils import colored, TBold
 
@@ -330,12 +330,12 @@ class PreferencesSet(Meta):
 
 class NDPlot(HasTraits):
     """
-    Plotting interface for |NDDataset|
+    Plotting interface for |NDDataset|.
 
     This class is used as basic plotting interface of the |NDDataset|.
     """
 
-    # variable containing the matplotlib axis defined for a NDArray object
+    # variable containing the matplotlib axis defined for a NDArray object.
     _ax = Instance(plt.Axes, allow_none=True)
 
     # The figure on which this NDArray can be plotted

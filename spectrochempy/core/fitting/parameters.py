@@ -326,7 +326,7 @@ class FitParameters(UserDict):
 # ================
 class ParameterScript(HasTraits):
     """
-    This class allow some manipulation of the parameter list for modelling
+    This class allow some manipulation of the parameter list for modelling.
     """
 
     fp = Instance(FitParameters)

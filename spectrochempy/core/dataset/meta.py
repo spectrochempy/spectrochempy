@@ -214,7 +214,7 @@ class Meta(object):  # HasTraits):
     def update(self, d):
         """
         Feed a metadata dictionary with the content of an another
-        dictionary
+        dictionary.
 
         Parameters
         ----------
@@ -292,7 +292,7 @@ class Meta(object):  # HasTraits):
     def swap(self, dim1, dim2, inplace=True):
         """
         Permute meta corresponding to distinct axis to reflect swapping on the
-        corresponding data array
+        corresponding data array.
 
         Parameters
         ----------
