@@ -5,7 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 """
-Model parameters handling
+Model parameters handling.
 """
 
 __all__ = ["FitParameters", "ParameterScript"]
@@ -342,14 +342,14 @@ class ParameterScript(HasTraits):
     @observe("script")
     def _check_parameters(self, change):
         """
-        Check the validity of the parameters
+        Check the validity of the parameters.
         """
         self.fp = self._interpret(self.script)
 
     # ------------------------------------------------------------------------------------------------------------------
     def _interpret(self, script):
         """
-        Interpreter of the script content
+        Interpreter of the script content.
         """
         # init some flags
         modlabel = None

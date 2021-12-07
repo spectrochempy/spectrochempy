@@ -111,7 +111,7 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
     # ===========================================================================
     @property
     def name(self):
-        """the name of the nucleus"""
+        """the name of the nucleus."""
         return self[self.nucleus]["name"].strip()
 
     # ===========================================================================
@@ -128,7 +128,7 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
     # ===========================================================================
     @property
     def abundance(self):
-        """natural abundance in percent of the current nucleus"""
+        """natural abundance in percent of the current nucleus."""
         return self[self.nucleus]["abundance"]
 
     # ===========================================================================

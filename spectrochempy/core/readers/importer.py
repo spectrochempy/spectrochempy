@@ -5,7 +5,8 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 #  =====================================================================================================================
 #
-"""This module define a generic class to import files and contents.
+"""
+This module define a generic class to import files and contents.
 """
 __all__ = ["read"]
 __dataset_methods__ = __all__

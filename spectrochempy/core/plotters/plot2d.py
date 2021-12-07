@@ -73,7 +73,8 @@ reverse : `bool` or None [optional, default=None
     (e.g., FTIR spectra) or ppm (e.g., NMR), that spectrochempy
     will try to guess. But if reverse is set, then this is the
     setting which will be taken into account.
-x_reverse : `bool` or None [optional, default=None"""
+x_reverse : `bool` or None [optional, default=None
+"""
 
 # ======================================================================================================================
 # nddataset plot2D functions

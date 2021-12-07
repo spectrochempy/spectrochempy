@@ -5,7 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 """
-This module holds the definitions all the various models
+This module holds the definitions all the various models.
 """
 
 __all__ = []
@@ -36,7 +36,8 @@ class polynomialbaseline(object):
     args = ["ampl"]
     args.extend(["c_%d" % i for i in range(2, 11)])
 
-    script = """MODEL: baseline%(id)d\nshape: polynomialbaseline
+    script = """
+    MODEL: baseline%(id)d\nshape: polynomialbaseline
     # This polynom starts at the order 2
     # as a linear baseline is additionnaly fitted automatically
     # parameters must be in the form c_i where i is an integer as shown below
@@ -92,7 +93,8 @@ class gaussianmodel(object):
     """
 
     args = ["ampl", "width", "pos"]
-    script = """MODEL: line%(id)d\nshape: gaussianmodel
+    script = """
+    MODEL: line%(id)d\nshape: gaussianmodel
     $ ampl: %(ampl).3f, 0.0, None
     $ width: %(width).3f, 0.0, None
     $ pos: %(pos).3f, %(poslb).3f, %(poshb).3f
@@ -120,7 +122,8 @@ class lorentzianmodel(object):
     """
 
     args = ["ampl", "width", "pos"]
-    script = """MODEL: line%(id)d\nshape: lorentzianmodel
+    script = """
+    MODEL: line%(id)d\nshape: lorentzianmodel
     $ ampl: %(ampl).3f, 0.0, None
     $ width: %(width).3f, 0.0, None
     $ pos: %(pos).3f, %(poslb).3f, %(poshb).3f
@@ -145,7 +148,8 @@ class voigtmodel(object):
     """
 
     args = ["ampl", "width", "ratio", "pos"]
-    script = """MODEL: line%(id)d\nshape: voigtmodel
+    script = """
+    MODEL: line%(id)d\nshape: voigtmodel
     $ ampl: %(ampl).3f, 0.0, None
     $ width: %(width).3f, 0.0, None
     $ pos: %(pos).3f, %(poslb).3f, %(poshb).3f
@@ -177,7 +181,9 @@ class assymvoigtmodel(object):
     """
 
     args = ["ampl", "width", "ratio", "assym", "pos"]
-    script = """MODEL: line%(id)d\nshape: voigtmodel
+
+    script = """
+        MODEL: line%(id)d\nshape: voigtmodel
         $ ampl: %(ampl).3f, 0.0, None
         $ width: %(width).3f, 0.0, None
         $ pos: %(pos).3f, %(poslb).3f, %(poshb).3f
@@ -216,7 +222,8 @@ class assymvoigtmodel(object):
 # getmodel
 # ======================================================================================================================
 def getmodel(x, y=None, modelname=None, par=None, **kargs):
-    """Get the model for a given x vector.
+    """
+    Get the model for a given x vector.
 
     Parameters
     -----------
@@ -224,18 +231,18 @@ def getmodel(x, y=None, modelname=None, par=None, **kargs):
         Array of frequency where to evaluate the model values returned by the
         f function.
     y : ndarray or None
-        None for 1D, or index for the second dimension
+        None for 1D, or index for the second dimension.
     modelname : str
-        name of the model class to use.
+        Name of the model class to use.
     par : :class:`Parameters` instance
-        parameter to pass to the f function
+        Parameter to pass to the f function.
     kargs : any
-        Keywords arguments to pass the the f function
+        Keywords arguments to pass the the f function.
 
     Returns
     -------
     ndarray : float
-        an array containing the calculated model.
+        An array containing the calculated model.
     """
     model = par.model[modelname]
     modelcls = globals()[model]

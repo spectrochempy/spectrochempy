@@ -39,7 +39,7 @@ def get_user_and_node():
 
 def is_kernel():
     """
-    Check if we are running from IPython
+    Check if we are running from IPython.
     """
     # from http://stackoverflow.com
     # /questions/34091701/determine-if-were-in-an-ipython-notebook-session
@@ -55,7 +55,6 @@ def is_kernel():
 class _ExecCommand:
     def __init__(self, command):
         """
-
         Parameters
         ----------
         command: shell command to execute
@@ -80,7 +79,7 @@ class _ExecCommand:
 # noinspection PyPep8Naming
 class sh(object):
     """
-    Utility to run subprocess run command as if they were functions
+    Utility to run subprocess run command as if they were functions.
     """
 
     def __getattr__(self, command):

@@ -20,7 +20,8 @@ import spectrochempy as scp
 # operation on data with units.
 
 ###############################################################################
-# ## Create quantities
+# Create quantities
+# -----------------
 # To create quantity, use for instance, one of the following expression:
 
 scp.Quantity("10.0 cm^-1")
@@ -38,7 +39,8 @@ ur = scp.ur
 # `ur` stands for **unit registry**, which handle many type of units (and conversion between them)
 
 ###############################################################################
-# ## Units for dataset
+# Units for dataset
+# -----------------
 #
 # When loading experimental dataset using the `read` method, units are generally attributed to coordinates and data
 
@@ -52,7 +54,8 @@ _ = ds.plot()
 # * and `data` are in absorbance ($a.u.$) units.
 
 ###############################################################################
-# ## Convert between units
+# Convert between units
+# ----------------------
 #
 # Here are some examples
 

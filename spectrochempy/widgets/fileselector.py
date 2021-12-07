@@ -28,7 +28,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # ----------------------------------------------------------------------------------------------------------------------
 """
-Widgets for the Jupyter notebook and Jupyter lab
+Widgets for the Jupyter notebook and Jupyter lab.
 """
 from contextlib import contextmanager
 
@@ -112,7 +112,6 @@ class URLSelector(Base):
 class FileSelector(Base):
     """
     IPyWidgets interface for picking files.
-
     """
 
     def __init__(self, done_callback=None, path=None, filters=None):

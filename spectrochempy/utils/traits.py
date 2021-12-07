@@ -24,7 +24,8 @@ class MetaConfigurable(Configurable):
             self.jsonfile = jsonfile
 
     def to_dict(self):
-        """Return config value in a dict form.
+        """
+        Return config value in a dict form.
 
         Returns
         -------
@@ -70,14 +71,14 @@ class Range(List):
     """
     The trait-type Range.
 
-    Create a trait with two values defining an ordered range of values
+    Create a trait with two values defining an ordered range of values.
     """
 
     klass = list
     _cast_types = (tuple,)
 
     # Describe the trait type
-    info_text = "an ordered interval trait"
+    info_text = "An ordered interval trait."
     allow_none = True
 
     def __init__(self, trait=None, default_value=None, **kwargs):
@@ -87,7 +88,6 @@ class Range(List):
         trait : TraitType [ optional ]
             The type for restricting the contents of the Container.
             If unspecified, types are not checked.
-
         default_value : SequenceType [ optional ]
             The default value for the Trait.  Must be list/tuple/set, and
             will be cast to the container type.

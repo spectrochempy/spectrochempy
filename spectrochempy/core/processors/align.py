@@ -29,7 +29,7 @@ def can_merge_or_align(coord1, coord2):
     Parameters
     ----------
     coord1, coord2 : |Coord|
-        coordinates to merge or align.
+        Coordinates to merge or align.
 
     Returns
     -------
@@ -98,7 +98,7 @@ def align(dataset, *others, **kwargs):
         * float : If a float value is provided, it determines the interval
         between the interpolated data.
     coord : |Coord|, optional, default=None
-        coordinates to use for alignment. Ignore those corresponding to the
+        Coordinates to use for alignment. Ignore those corresponding to the
         dimensions to align.
     copy : bool, optional, default=True
         If False then the returned objects will share memory with the
@@ -113,7 +113,7 @@ def align(dataset, *others, **kwargs):
     Raises
     ------
     ValueError
-        issued when the dimensions given in `dim` or `dims` argument are not
+        Issued when the dimensions given in `dim` or `dims` argument are not
         compatibles (units, titles, etc.).
     """
     # DEVELOPPER NOTE

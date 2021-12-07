@@ -551,7 +551,7 @@ class LinearCoord(Coord):
 
         .. math::
 
-            \\mathrm{data} = i*\\mathrm{inc} + \\mathrm{off}
+            \\mathrm{data} = i*\\mathrm{inc} + \\mathrm{off}.
 
         Parameters
         ----------
@@ -761,7 +761,7 @@ class LinearCoord(Coord):
     @property
     def laser_frequency(self):
         """
-        Quantity: Laser frequency (if needed)
+        Laser frequency if needed (Quantity).
         """
         return self.meta.laser_frequency
 

@@ -201,7 +201,6 @@ class _MaskedPrintOption(object):
     # """
     # Handle the string used to represent missing data in a masked array.
     # copied from numpy.ma.core
-    #
     # """
 
     def __init__(self, display):

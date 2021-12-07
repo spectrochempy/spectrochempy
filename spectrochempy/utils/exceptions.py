@@ -73,7 +73,7 @@ def deprecated(message):
     Parameters
     ----------
     message : str,
-        the deprecation message
+        The deprecation message.
     """
 
     def deprecation_decorator(func):

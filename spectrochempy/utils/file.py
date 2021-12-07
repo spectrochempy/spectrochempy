@@ -5,7 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 """
-file utilities
+File utilities.
 """
 from os import environ
 import shutil
@@ -293,7 +293,7 @@ def get_filename(*filenames, **kwargs):
     ----------
     filenames : `str` or pathlib object, `tuple` or `list` of strings of pathlib object, optional.
         A filename or a list of filenames.
-        If not provided, a dialog box is opened to select files in the current directory if no `directory` is specified)
+        If not provided, a dialog box is opened to select files in the current directory if no `directory` is specified).
     directory : `str` or pathlib object, optional.
         The directory where to look at. If not specified, read in
         current directory, or in the datadir if unsuccessful.

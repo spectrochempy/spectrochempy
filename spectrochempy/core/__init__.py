@@ -62,7 +62,7 @@ def _format_args(*args, **kwargs):
 
 def print_(*args, **kwargs):
     """
-    Formatted printing
+    Formatted printing.
     """
     stg = _format_args(*args, **kwargs)
     print(stg)
@@ -71,7 +71,7 @@ def print_(*args, **kwargs):
 # ----------------------------------------------------------------------------------------------------------------------
 def info_(*args, **kwargs):
     """
-    Formatted info message
+    Formatted info message.
     """
     stg = _format_args(*args, **kwargs)
     app.logs.info(stg)
@@ -632,7 +632,7 @@ def save_dialog(
     **kwargs
 ):
     """
-    Return a file where to save
+    Return a file where to save.
     """
     if USE_QT:
         parent = kwargs.pop(
@@ -656,7 +656,7 @@ def save_dialog(
 # noinspection PyRedundantParentheses
 def open_dialog(single=True, directory=None, filters=("All Files (*)"), **kwargs):
     """
-    Return one or several files to open
+    Return one or several files to open.
     """
     if USE_QT:
         parent = kwargs.pop(

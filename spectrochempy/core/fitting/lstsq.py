@@ -299,7 +299,7 @@ class CurveFit(HasTraits):
 
     def transform(self):
         """
-        Return the least square coefficients A and B
+        Return the least square coefficients A and B.
 
         Returns
         -------

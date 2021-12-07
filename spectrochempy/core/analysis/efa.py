@@ -139,7 +139,7 @@ class EFA(HasTraits):
     @property
     def cutoff(self):
         """
-        Cutoff value (float)
+        Cutoff value (float).
         """
         return self._cutoff
 

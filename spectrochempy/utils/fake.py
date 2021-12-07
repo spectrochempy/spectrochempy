@@ -51,7 +51,7 @@ def _make_concentrations_matrix(*profiles):
 
 def _generate_2D_spectra(concentrations, spectra):
     """
-    Generate a fake 2D experimental spectra
+    Generate a fake 2D experimental spectra.
 
     Parameters
     ----------

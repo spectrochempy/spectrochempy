@@ -562,15 +562,15 @@ class IRIS:
 
         Parameters
         ----------
-        index : optional, int, list or tuple of int.
+        index : optional, int, list or tuple of int. default: None.
             Index(es) of the inversions (i.e. of the lambda values) to consider.
-            If 'None': plots for all indices. default: None
+            If 'None': plots for all indices.
         kwargs:
-            other optional arguments are passed in the plots
+            Other optional arguments are passed in the plots.
 
         Returns
         -------
-        list of axes
+        List of axes
         """
 
         axeslist = []
@@ -588,7 +588,9 @@ class IRIS:
 
 
 def Smat(eps):
-    """returns the matrix used to compute the norm of f second derivative"""
+    """
+    Return the matrix used to compute the norm of f second derivative.
+    """
     m = len(eps)
     S = np.zeros((m, m))
     S[0, 0] = 6
@@ -619,19 +621,20 @@ def Smat(eps):
 
 
 def nearestPD(A, shift):
-    """Find the nearest positive-definite matrix to input
+    """
+    Find the nearest positive-definite matrix to input.
 
     A Python/Numpy port of John D'Errico's `nearestSPD` MATLAB code [1], which
     credits [2].
     With addition of a small increment in the diagonal as in:
-    https://github.com/stephane-caron/qpsolvers/pull/12/commits/945554d857e0c1e4623ddda8d8f801cb6f61d6af
+    https://github.com/stephane-caron/qpsolvers/pull/12/commits/945554d857e0c1e4623ddda8d8f801cb6f61d6af.
 
-    [1] https://www.mathworks.com/matlabcentral/fileexchange/42885-nearestspd
+    [1] https://www.mathworks.com/matlabcentral/fileexchange/42885-nearestspd.
 
     [2] N.J. Higham, "Computing a nearest symmetric positive semidefinite
-    matrix" (1988): https://doi.org/10.1016/0024-3795(88)90223-6
+    matrix" (1988): https://doi.org/10.1016/0024-3795(88)90223-6.
 
-    copyright: see https://gist.github.com/fasiha/fdb5cec2054e6f1c6ae35476045a0bbd
+    copyright: see https://gist.github.com/fasiha/fdb5cec2054e6f1c6ae35476045a0bbd.
     """
 
     B = 0.5 * (A + A.T)
@@ -666,8 +669,11 @@ def nearestPD(A, shift):
 
 
 def isPD(B):
-    """Returns true when input is positive-definite,
-    copyright: see https://gist.github.com/fasiha/fdb5cec2054e6f1c6ae35476045a0bbd"""
+    """
+    Return True when input is positive-definite.
+
+    copyright: see https://gist.github.com/fasiha/fdb5cec2054e6f1c6ae35476045a0bbd.
+    """
 
     try:
         _ = np.linalg.cholesky(B)
@@ -678,8 +684,12 @@ def isPD(B):
 
 def menger(x, y):
     """
-    returns the Menger curvature of a triplet of
-    points. x, y = sets of 3 cartesian coordinates
+    Return the Menger curvature of a triplet of points.
+
+    Parameters
+    ==========
+    x, y
+        Sets of 3 cartesian coordinates.
     """
 
     numerator = 2 * (

@@ -623,7 +623,7 @@ def dc(dataset, **kwargs):
     dataset : nddataset
         The time domain daatset to be corrected.
     kwargs : dict, optional
-        additional parameters.
+        Additional parameters.
 
     Returns
     -------

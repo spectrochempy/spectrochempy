@@ -6,7 +6,7 @@
 # ======================================================================================================================
 
 """
-Application Programming Interface
+Application Programming Interface.
 """
 
 # During the initialization of this package, a `matplotlib` backend is set

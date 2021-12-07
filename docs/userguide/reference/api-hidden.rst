@@ -318,7 +318,7 @@
    core.dataset.ndplot
    core.dataset.npy
    core.readers.importer.read
-   idgets.fileselector.FileSelector
+   widgets.fileselector.FileSelector
    core.processors.baseline.ab
    core.processors.baseline.abc
    core.processors.baseline.basc

@@ -16,7 +16,8 @@ In this example, we perform the 2D IRIS analysis of CO adsorption on a sulfide c
 import spectrochempy as scp
 
 ########################################################################################################################
-# ## Uploading dataset
+# Uploading dataset
+# -----------------
 
 X = scp.read("irdata/CO@Mo_Al2O3.SPG")
 
@@ -27,7 +28,8 @@ X = scp.read("irdata/CO@Mo_Al2O3.SPG")
 print(X.coordset)
 
 ########################################################################################################################
-# ## Setting new coordinates
+# Setting new coordinates
+# -----------------------
 #
 # The ``y`` coordinates of the dataset is the acquisition timestamp. However, each spectrum has been recorded
 # with a given pressure of CO in the infrared cell.
@@ -88,7 +90,8 @@ _ = X_.plot()
 _ = X_.plot_map()
 
 ###############################################################################
-# ## IRIS analysis without regularization
+# IRIS analysis without regularization
+# ------------------------------------
 
 ########################################################################################################################
 # Perform IRIS without regularization (the loglevel can be set to `INFO` to have information on the running process)
@@ -102,7 +105,8 @@ iris.plotdistribution()
 _ = iris.plotmerit()
 
 ###############################################################################
-# ## With regularization and a manual search
+# With regularization and a manual search
+# ---------------------------------------
 
 ########################################################################################################################
 # Perform  IRIS with regularization, manual search

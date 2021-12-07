@@ -38,14 +38,14 @@ def rs(dataset, pts=0.0, **kwargs):
     Parameters
     ----------
     dataset : nddataset
-        nddataset to be right-shifted
+        NDDataset to be right-shifted.
     pts : int
         Number of points to right shift.
 
     Returns
     -------
     dataset
-        dataset right shifted and zero filled.
+        Dataset right shifted and zero filled.
 
     Other Parameters
     ----------------
@@ -75,7 +75,7 @@ def ls(dataset, pts=0.0, **kwargs):
     Parameters
     ----------
     dataset : nddataset
-        nddataset to be left-shifted
+        NDDataset to be left-shifted.
     pts : int
         Number of points to right shift.
 
@@ -112,7 +112,7 @@ def cs(dataset, pts=0.0, neg=False, **kwargs):
     Parameters
     ----------
     dataset : nddataset
-        nddataset to be shifted
+        NDDataset to be shifted.
     pts : int
         Number of points toshift.
     neg : bool
@@ -121,7 +121,7 @@ def cs(dataset, pts=0.0, neg=False, **kwargs):
     Returns
     -------
     dataset
-        dataset shifted
+        Dataset shifted.
 
     Other Parameters
     ----------------
@@ -150,7 +150,7 @@ def roll(dataset, pts=0.0, neg=False, **kwargs):
     Parameters
     ----------
     dataset : nddataset
-        nddataset to be shifted
+        Dataset to be shifted.
     pts : int
         Number of points toshift.
     neg : bool
@@ -159,7 +159,7 @@ def roll(dataset, pts=0.0, neg=False, **kwargs):
     Returns
     -------
     dataset
-        dataset shifted
+        Dataset shifted.
 
     Other Parameters
     ----------------

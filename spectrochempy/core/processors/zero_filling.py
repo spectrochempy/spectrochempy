@@ -139,7 +139,6 @@ def zf_double(dataset, n, mid=False, **kwargs):
     -------
     ndata : ndarray
         Zero filled array of NMR data.
-
     """
     return _zf_pad(dataset, int((dataset.shape[-1] * 2 ** n) - dataset.shape[-1]), mid)
 
@@ -162,7 +161,6 @@ def zf_size(dataset, size=None, mid=False, **kwargs):
     -------
     ndata : ndarray
         Zero filled array of NMR data.
-
     """
     if size is None:
         size = dataset.shape[-1]
@@ -184,7 +182,6 @@ def zf_auto(dataset, mid=False):
     -------
     ndata : ndarray
         Zero filled array of NMR data.
-
     """
     return zf_size(dataset, size=largest_power_of_2(dataset.shape[-1]), mid=mid)
 

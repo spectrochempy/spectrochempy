@@ -888,12 +888,12 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         """
         Return the dataset sorted along a given dimension.
 
-        (by default, the last dimension [axis=-1]) using the numeric or label values.
+        By default, it is the last dimension [axis=-1]) using the numeric or label values.
 
         Parameters
         ----------
         dim : str or int, optional, default=-1
-            dimension index or name along which to sort.
+            Dimension index or name along which to sort.
         pos : int , optional
             If labels are multidimensional  - allow to sort on a define
             row of labels : labels[pos]. Experimental : Not yet checked.

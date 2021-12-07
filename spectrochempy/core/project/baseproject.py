@@ -15,5 +15,5 @@ class AbstractProject(HasTraits):
     """
     Project class will subclass it.
 
-    This is mainly for type comparison purpose
+    This is mainly for type comparison purpose.
     """

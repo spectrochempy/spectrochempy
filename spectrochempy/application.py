@@ -263,11 +263,11 @@ class SpectroChemPyMagics(Magics):
     @line_cell_magic
     def addscript(self, pars="", cell=None):
         """
-        This works both as **%addscript** and as **%%addscript**
+        This works both as **%addscript** and as **%%addscript**.
 
         This magic command can either take a local filename, element in the
         namespace or history range (see %history),
-        or the current cell content
+        or the current cell content.
 
 
         Usage:
@@ -285,12 +285,12 @@ class SpectroChemPyMagics(Magics):
             -p <string>         Name of the project where the script will be stored.
                                 If not provided, a project with a standard
                                 name : `proj` is searched.
-            -o <string>         script name
+            -o <string>         script name.
             -s <symbols>        Specify function or classes to load from python
                                 source.
             -a                  append to the current script instead of
                                 overwriting it.
-            -n                  search symbol in the current namespace
+            -n                  Search symbol in the current namespace.
 
 
         Examples
@@ -385,7 +385,9 @@ class SpectroChemPyMagics(Magics):
 
 
 class DataDir(HasTraits):
-    """A class used to determine the path to the testdata directory."""
+    """
+    A class used to determine the path to the testdata directory.
+    """
 
     path = Instance(Path)
 
@@ -462,9 +464,9 @@ class DataDir(HasTraits):
 
 class GeneralPreferences(MetaConfigurable):
     """
-    Preferences that apply to the |scpy| application in general
+    Preferences that apply to the |scpy| application in general.
 
-    They should be accessible from the main API
+    They should be accessible from the main API.
     """
 
     name = Unicode("GeneralPreferences")
@@ -574,7 +576,7 @@ class GeneralPreferences(MetaConfigurable):
     @property
     def log_level(self):
         """
-        int - logging level
+        Logging level (int).
         """
         return self.parent.log_level
 
@@ -639,7 +641,7 @@ class SpectroChemPy(Application):
 to the <a url='https://github.com/spectrochempy/spectrochempy/issues'>Issue Tracker<a>
 </div><br><br>
 When using <strong>SpectroChemPy</strong> for your own work,
-you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>
+you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
 """
 
         return desc
@@ -655,10 +657,10 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>
     reset_config = Bool(False, help="Should we restore a default configuration ?").tag(
         config=True
     )
-    """Flag: True if one wants to reset settings to the original config defaults"""
+    """Flag: True if one wants to reset settings to the original config defaults."""
 
     config_file_name = Unicode(None, help="Configuration file name").tag(config=True)
-    """Configuration file name"""
+    """Configuration file name."""
 
     @default("config_file_name")
     def _get_config_file_name_default(self):
@@ -667,7 +669,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>
     config_dir = Instance(Path, help="Set the configuration directory location").tag(
         config=True
     )
-    """Configuration directory"""
+    """Configuration directory."""
 
     @default("config_dir")
     def _get_config_dir_default(self):
@@ -685,18 +687,18 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>
     ).tag(config=True)
 
     debug = Bool(True, help="Set DEBUG mode, with full outputs").tag(config=True)
-    """Flag to set debugging mode"""
+    """Flag to set debugging mode."""
 
     info = Bool(False, help="Set INFO mode, with msg outputs").tag(config=True)
-    """Flag to set info mode"""
+    """Flag to set info mode."""
 
     quiet = Bool(False, help="Set Quiet mode, with minimal outputs").tag(config=True)
-    """Flag to set in fully quite mode (even no warnings)"""
+    """Flag to set in fully quite mode (even no warnings)."""
 
     nodisplay = Bool(False, help="Set NO DISPLAY mode, i.e., no graphics outputs").tag(
         config=True
     )
-    """Flag to set in NO DISPLAY mode """
+    """Flag to set in NO DISPLAY mode."""
 
     # last_project = Unicode('', help='Last used project').tag(config=True, type='project')
     # """Last used project"""
@@ -723,10 +725,10 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>
         self.show_config = change.new
 
     test = Bool(False, help="test flag").tag(config=True)
-    """Flag to set the application in testing mode"""
+    """Flag to set the application in testing mode."""
 
     port = Integer(7000, help="Dash server port").tag(config=True)
-    """Dash server port"""
+    """Dash server port."""
 
     # Command line interface
     # ------------------------------------------------------------------------------------------------------------------
@@ -741,15 +743,15 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>
     flags = dict(
         debug=(
             {"SpectroChemPy": {"log_level": DEBUG}},
-            "Set log_level to DEBUG - most verbose mode",
+            "Set log_level to DEBUG - most verbose mode.",
         ),
         info=(
             {"SpectroChemPy": {"log_level": INFO}},
-            "Set log_level to INFO - verbose mode",
+            "Set log_level to INFO - verbose mode.",
         ),
         quiet=(
             {"SpectroChemPy": {"log_level": ERROR}},
-            "Set log_level to ERROR - no verbosity at all",
+            "Set log_level to ERROR - no verbosity at all.",
         ),
         nodisplay=(
             {"SpectroChemPy": {"nodisplay": True}},
@@ -765,7 +767,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>
                     "show_config": True,
                 }
             },
-            "Show the application's configuration (human-readable format)",
+            "Show the application's configuration (human-readable format).",
         ),
         show_config_json=(
             {
@@ -773,7 +775,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>
                     "show_config_json": True,
                 }
             },
-            "Show the application's configuration (json format)",
+            "Show the application's configuration (json format).",
         ),
     )
 
@@ -801,7 +803,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>
 
     def initialize(self, argv=None):
         """
-        Initialisation function for the API applications
+        Initialisation function for the API applications.
 
         Parameters
         ----------
@@ -950,7 +952,9 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>
         return config
 
     def start_show_config(self):
-        """start function used when show_config is True"""
+        """
+        Start function used when show_config is True.
+        """
         config = self.config.copy()
         # exclude show_config flags from displayed config
         for cls in self.__class__.mro():
@@ -991,8 +995,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>
 
     def reset_preferences(self):
         """
-        Reset all preferences to default
-
+        Reset all preferences to default.
         """
         self.reset_config = True
         self._init_all_preferences()
@@ -1004,9 +1007,9 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>
 
     def start(self):
         """
-        Start the |scpy| API
+        Start the |scpy| API.
 
-        All configuration must have been done before calling this function
+        All configuration must have been done before calling this function.
         """
 
         # print(f'{sys.argv}')

@@ -191,19 +191,19 @@ class Meta(object):  # HasTraits):
             return name == "Meta"
 
     def to_dict(self):
-        """Transform a metadata dictionary to a regular one.
+        """
+        Transform a metadata dictionary to a regular one.
 
         Returns
         -------
         dict
-            A regular dictionary
+            A regular dictionary.
         """
 
         return self._data
 
     def get(self, key, default=None):
         """
-
         Parameters
         ----------
         :param key:

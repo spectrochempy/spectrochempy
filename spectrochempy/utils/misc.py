@@ -5,7 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 """
-Various methods and classes used in other part of the program
+Various methods and classes used in other part of the program.
 """
 import re
 import os
@@ -155,10 +155,6 @@ def as_quaternion(*args):
         The quaternion array components: If there is 4 components, then we assume it is the four compoents of the
         quaternion array: w, x, y, z. If there is only two, they are casted to complex and correspond respectively
         to w + i.x and y + j.z.
-
-    Returns
-    -------
-
     """
     if len(args) == 4:
         # we assume here that the for components have been provided w, x, y, z
@@ -174,16 +170,16 @@ def as_quaternion(*args):
 
 def quat_as_complex_array(arr):
     """
-    Recombine the component of a quaternion array into a tuple of two complex array
+    Recombine the component of a quaternion array into a tuple of two complex array.
 
     Parameters
     ----------
     arr : quaternion ndarray
-        The arr will be separated into (w + i.x) and (y + i.z)
+        The arr will be separated into (w + i.x) and (y + i.z).
     Returns
     -------
     tuple
-        Tuple of two complex array
+        Tuple of two complex array.
     """
     if not arr.dtype == np.quaternion:
         # no change
@@ -268,7 +264,7 @@ def get_component(data, select="REAL"):
     ----------
     data : ndarray
     select : str, optional, default='REAL'
-        if 'REAL', only real component in all dimensions will be selected.
+        If 'REAL', only real component in all dimensions will be selected.
         Else a string must specify which real (R) or imaginary (I) component
         has to be selected along a specific dimension. For instance,
         a string such as 'RRI' for a 2D hypercomplex array indicated
@@ -350,8 +346,8 @@ def getdocfrom(origin):
 
 # ......................................................................................................................
 def gt_eps(arr):
-    """lambda function to check that an array has at least some values
-    greater than epsilon
+    """
+    Lambda function to check that an array has at least some values greater than epsilon.
 
     Parameters
     -----------
@@ -360,7 +356,7 @@ def gt_eps(arr):
     Returns
     --------
     bool : results ot checking
-        True means that at least some values are greater than epsilon
+        True means that at least some values are greater than epsilon.
     """
     return np.any(arr > EPSILON)
 
@@ -368,7 +364,7 @@ def gt_eps(arr):
 # ......................................................................................................................
 def htmldoc(text):
     """
-    format docstring in html for a nice display in IPython.
+    Format docstring in html for a nice display in IPython.
 
     Parameters
     ----------
@@ -378,7 +374,7 @@ def htmldoc(text):
     Returns
     -------
     out : str
-        the html string.
+        The html string.
     """
     p = re.compile("^(?P<name>.*:)(.*)", re.MULTILINE)  # To get the keywords
     html = p.sub(r"<b>\1</b>\2", text)
@@ -499,7 +495,6 @@ def largest_power_of_2(value):
     -------
     pw : int
         Power of 2.
-
     """
     return int(pow(2, np.ceil(np.log(value) / np.log(2))))
 
@@ -557,10 +552,10 @@ def make_new_object(objtype):
 # ......................................................................................................................
 def makedirs(newdir):
     """
-    works the way a good mkdir should :)
-        - already exists, silently complete
-        - regular file in the way, raise an exception
-        - parent directory(ies) does not exist, make them as well
+    Works the way a good mkdir should :
+        - already exists, silently complete.
+        - regular file in the way, raise an exception.
+        - parent directory(ies) does not exist, make them as well.
     """
     # from active recipes http://code.activestate.com/recipes/82465-a-friendly-mkdir/
 
@@ -584,7 +579,7 @@ def makedirs(newdir):
 # ......................................................................................................................
 def makestr(li):
     """
-    make a string from a list of string
+    Make a string from a list of string.
     """
 
     if is_sequence(li):

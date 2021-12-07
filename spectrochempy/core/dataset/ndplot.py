@@ -40,7 +40,7 @@ from spectrochempy.core.plotters.plot2d import plot_2D
 
 class PreferencesSet(Meta):
     """
-    Preferences setting
+    Preferences setting.
     """
 
     def __init__(self, **data):
@@ -149,8 +149,9 @@ class PreferencesSet(Meta):
     # ------------------------------------------------------------------------------------------------------------------
 
     def reset(self):
-        """:parameter"""
-        # remove the matplotlib_user json file to reset to defaults
+        """
+        Remove the matplotlib_user json file to reset to defaults.
+        """
         config_dir = pathclean(preferences.cfg.config_dir)
         f = config_dir / "PlotPreferences.json"
         if f.exists():
@@ -696,7 +697,7 @@ class NDPlot(HasTraits):
     @property
     def fig(self):
         """
-        Matplotlib figure associated to this dataset
+        Matplotlib figure associated to this dataset.
         """
         return self._fig
 
@@ -704,7 +705,7 @@ class NDPlot(HasTraits):
     @property
     def fignum(self):
         """
-        Matplotlib figure associated to this dataset
+        Matplotlib figure associated to this dataset.
         """
         return self._fignum
 
@@ -712,7 +713,7 @@ class NDPlot(HasTraits):
     @property
     def ndaxes(self):
         """
-        A dictionary containing all the axes of the current figures
+        A dictionary containing all the axes of the current figures.
         """
         return self._ndaxes
 
@@ -734,7 +735,7 @@ class NDPlot(HasTraits):
     @property
     def ax(self):
         """
-        the main matplotlib axe associated to this dataset
+        the main matplotlib axe associated to this dataset.
         """
         return self._ndaxes["main"]
 
@@ -742,7 +743,7 @@ class NDPlot(HasTraits):
     @property
     def axT(self):
         """
-        the matplotlib axe associated to the transposed dataset
+        the matplotlib axe associated to the transposed dataset.
         """
         return self._ndaxes["mainT"]
 
@@ -750,7 +751,7 @@ class NDPlot(HasTraits):
     @property
     def axec(self):
         """
-        Matplotlib colorbar axe associated to this dataset
+        Matplotlib colorbar axe associated to this dataset.
         """
         return self._ndaxes["colorbar"]
 
@@ -758,7 +759,7 @@ class NDPlot(HasTraits):
     @property
     def axecT(self):
         """
-        Matplotlib colorbar axe associated to the transposed dataset
+        Matplotlib colorbar axe associated to the transposed dataset.
         """
         return self._ndaxes["colorbarT"]
 
@@ -766,7 +767,7 @@ class NDPlot(HasTraits):
     @property
     def axex(self):
         """
-        Matplotlib projection x axe associated to this dataset
+        Matplotlib projection x axe associated to this dataset.
         """
         return self._ndaxes["xproj"]
 
@@ -774,7 +775,7 @@ class NDPlot(HasTraits):
     @property
     def axey(self):
         """
-        Matplotlib projection y axe associated to this dataset
+        Matplotlib projection y axe associated to this dataset.
         """
         return self._ndaxes["yproj"]
 
@@ -782,7 +783,7 @@ class NDPlot(HasTraits):
     @property
     def divider(self):
         """
-        Matplotlib plot divider
+        Matplotlib plot divider.
         """
         return self._divider
 

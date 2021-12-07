@@ -45,16 +45,18 @@ from numpy.testing import (
 # NDDataset comparison
 # ======================================================================================================================
 def gisinf(x):
-    """like isinf, but always raise an error if type not supported instead of
+    """
+    Like isinf, but always raise an error if type not supported instead of
     returning a TypeError object.
 
     Notes
     -----
-    isinf and other ufunc sometimes return a NotImplementedType object instead
+    `isinf` and other ufunc sometimes return a NotImplementedType object instead
     of raising any exception. This function is a wrapper to make sure an
     exception is always raised.
 
-    This should be removed once this problem is solved at the Ufunc level."""
+    This should be removed once this problem is solved at the Ufunc level.
+    """
     from numpy.core import isinf, errstate
 
     with errstate(invalid="ignore"):
@@ -314,7 +316,7 @@ class RandomSeedContext(object):
     numpy random number generator (RNG) to a specific value, and then restore
     the RNG state back to whatever it was before.
 
-    (Copied from Astropy, licence BSD-3)
+    (Copied from Astropy, licence BSD-3).
 
     Parameters
     ----------

@@ -252,7 +252,9 @@ class SVD(HasTraits):
 
     @property
     def sv(self):
-        """|NDDataset|, Singular values"""
+        """
+        Singular values (|NDDataset|).
+        """
         size = self.s.size
         sv = self.s.copy()
         sv.name = "sv"
@@ -264,7 +266,9 @@ class SVD(HasTraits):
 
     @property
     def ev(self):
-        """|NDDataset|, Explained variance"""
+        """
+        Explained variance (|NDDataset|).
+        """
         size = self.s.size
         ev = self.s ** 2 / (size - 1)
         ev.name = "ev"
@@ -276,7 +280,9 @@ class SVD(HasTraits):
 
     @property
     def ev_cum(self):
-        """|NDDataset|, Cumulative Explained Variance"""
+        """
+        Cumulative Explained Variance (|NDDataset|).
+        """
         ev_cum = np.cumsum(self.ev_ratio)
         ev_cum.name = "ev_cum"
         ev_cum.title = "cumulative explained variance"
@@ -285,7 +291,9 @@ class SVD(HasTraits):
 
     @property
     def ev_ratio(self):
-        """|NDDataset|,  Explained Variance per singular values"""
+        """
+        Explained Variance per singular values |NDDataset|).
+        """
         ratio = self.ev * 100.0 / np.sum(self.ev)
         ratio.name = "ev_ratio"
         ratio.title = "explained variance"

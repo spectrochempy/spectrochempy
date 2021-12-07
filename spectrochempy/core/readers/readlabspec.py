@@ -8,7 +8,8 @@
 # author: Guillaume Clet (LCS)
 #
 
-"""This module extend NDDataset with the import method for Labspec *.txt generated data files.
+"""
+This module extend NDDataset with the import method for Labspec *.txt generated data files.
 """
 
 __all__ = ["read_labspec"]

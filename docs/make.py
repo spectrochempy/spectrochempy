@@ -224,12 +224,7 @@ class BuildDocumentation(object):
         parser.add_argument(
             "--api", help="execute a full regeneration of the api", action="store_true"
         )
-        parser.add_argument(
-            "-R",
-            "--release",
-            help="release the current version documentation on website",
-            action="store_true",
-        )
+
         parser.add_argument("--all", help="Build all docs", action="store_true")
 
         args = parser.parse_args()
@@ -249,8 +244,7 @@ class BuildDocumentation(object):
         if args.delnb:
             delnb()
 
-        if args.syncnb:
-            sync_notebooks()
+        self.sync_notebook = args.syncnb
 
         if args.html:
             self.make_docs("html")
@@ -261,7 +255,6 @@ class BuildDocumentation(object):
             self.make_pdf()
 
         if args.all:
-            # self.delnb()
             self.make_docs("html", clean=True)
             self.make_docs("latex", clean=True)
             self.make_pdf()
@@ -299,13 +292,17 @@ class BuildDocumentation(object):
         if clean:
             print("CLEAN:")
             self.clean(builder)
+            self.sync_notebook = True
+            self.regenerate_api = True
         self.make_dirs()
 
         # update modified notebooks
-        sync_notebooks()
+        if self.sync_notebook:
+            sync_notebooks()
 
-        shutil.rmtree(API, ignore_errors=True)
-        print(f"remove {API}")
+        if self.regenerate_api:
+            shutil.rmtree(API, ignore_errors=True)
+            print(f"remove {API}")
 
         # run sphinx
         print(f"\n{builder.upper()} BUILDING:")

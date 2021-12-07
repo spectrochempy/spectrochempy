@@ -104,7 +104,8 @@ show_zero : boolean, optional
 output : str,
     name of the file to save the figure.
 vshift : float, optional
-    vertically shift the line from its baseline."""
+    vertically shift the line from its baseline.
+"""
 
 
 # plot scatter ---------------------------------------------------------------
@@ -251,20 +252,19 @@ def plot_bar(dataset, **kwargs):
 @add_docstring(_PLOT1D_DOC)
 def plot_multiple(datasets, method="scatter", pen=True, labels=None, **kwargs):
     """
-    Plot a series of 1D datasets as a scatter plot
-    with optional lines between markers.
+    Plot a series of 1D datasets as a scatter plot with optional lines between markers.
 
     Parameters
     ----------
     datasets : a list of ndatasets
     method : str among [scatter, pen]
     pen : bool, optional, default: True
-        if method is scatter, this flag tells to draw also the lines
+        If method is scatter, this flag tells to draw also the lines
         between the marks.
     labels : a list of str, optional
-        labels used for the legend.
+        Labels used for the legend.
     **kwargs : dic
-        Other parameters that will be passed to the plot1D function
+        Other parameters that will be passed to the plot1D function.
 
     Other Parameters
     ----------------

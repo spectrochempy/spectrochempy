@@ -37,7 +37,7 @@ def fromisoformat(s):
 
 def json_decoder(dic):
     """
-    Decode a serialised ison object.
+    Decode a serialised json object.
     """
 
     if "__class__" in dic:

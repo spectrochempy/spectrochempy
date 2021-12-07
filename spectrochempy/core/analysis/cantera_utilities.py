@@ -78,7 +78,7 @@ def concentrations_vs_time(reactive_phase, t, reactorNet=None, returnNDDataset=F
     tim: iterable or Coord.
         Times at which the concentrations must be computed.
     return_NDDataset: boolean, default: False.
-        If True returns the concentration matrix as a NDDataset, else as a np.ndarray
+        If True returns the concentration matrix as a NDDataset, else as a np.ndarray.
     """
 
     if isinstance(reactive_phase, ct.composite.Interface):
@@ -134,8 +134,7 @@ def modify_surface_kinetics(surface, param_to_set):
     """
     Changes a set of numerical parameters of a an Interface among following:
     site_density, coverages, concentrations,
-    pre-exponential factor, temperature_exponent, activation_energy
-
+    pre-exponential factor, temperature_exponent, activation_energy.
     """
     # check some parameters
 
@@ -197,24 +196,25 @@ def fit_to_concentrations(
     ------------
 
     C: NDDataset
-        experimental concentration profiles on which to fit the model. C can contain more concentration
+        Experimental concentration profiles on which to fit the model. C can contain more concentration
         profiles than those to fit.
     externalConc:
-        indexes of experimental concentration profiles on which the model will be fitted
+        Indexes of experimental concentration profiles on which the model will be fitted
     external_to_C_idx:
-        correspondence between optimized (external) concentration profile and experimental
-        concentration profile
+        Correspondence between optimized (external) concentration profile and experimental
+        concentration profile.
     reactivePhase:
-        cantera active phase. Currently implemented for surface only
+        Cantera active phase. Currently implemented for surface only.
     param_to_optimize: dict
-               reactive phase parameters to optimize
+        Reactive phase parameters to optimize.
 
     **kwargs:
-        parameters for the optimization (see scipy.optimize.minimize)
+        Parameters for the optimization (see scipy.optimize.minimize).
 
     Returns
     ----------
-    a dictionary
+    result
+        A result dictionary.
     """
 
     def objective(
@@ -261,7 +261,9 @@ def fit_to_concentrations(
 
 
 class PFR:
-    """PFR reactor as a CSTR in series"""
+    """
+    PFR reactor as a CSTR in series.
+    """
 
     def __init__(
         self,
@@ -279,12 +281,13 @@ class PFR:
     ):
         """
 
-        parameters:
+        Parameters
+        ==========
         cti_file: str,
-        the cti file must contain a gas phase named 'gas' and optionally a reactive surface named 'surface'
+            The cti file must contain a gas phase named 'gas' and optionally a reactive surface named 'surface'.
 
         init_X: dict, array or list of them
-            initial composition of the reactors
+            Initial composition of the reactors.
         """
 
         if area is None:
