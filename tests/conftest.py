@@ -278,6 +278,7 @@ def dsm():
     ).copy()
 
 
+datadir = pathclean(prefs.datadir)
 dataset = NDDataset.read_omnic(datadir / "irdata" / "nh4y-activation.spg")
 
 

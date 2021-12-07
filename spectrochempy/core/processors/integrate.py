@@ -133,7 +133,7 @@ def simpson(dataset, *args, **kwargs):
     Parameters
     ----------
     dataset : |NDDataset|
-        dataset to be integrated.
+        Dataset to be integrated.
     **kwargs
         Additional keywords parameters.
         See Other Parameters.

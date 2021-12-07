@@ -2212,14 +2212,14 @@ class NDMath(object):
             `data_keyword` is a string indicating the keyword of
             `callable` that expects the array object.
         *args
-            positional arguments passed into `func`.
+            Positional arguments passed into `func`.
         **kwargs
-            keyword arguments passed into `func`.
+            Keyword arguments passed into `func`.
 
         Returns
         -------
         pipe
-           the return type of `func`.
+           The return type of `func`.
 
         Notes
         -----

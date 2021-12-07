@@ -287,7 +287,7 @@ def check_filenames(*args, **kwargs):
 
 def get_filename(*filenames, **kwargs):
     """
-    Return a list or dictionary of the filenames of existing files, filtered by extensions
+    Return a list or dictionary of the filenames of existing files, filtered by extensions.
 
     Parameters
     ----------
@@ -298,11 +298,11 @@ def get_filename(*filenames, **kwargs):
         The directory where to look at. If not specified, read in
         current directory, or in the datadir if unsuccessful.
     filetypes : `list`, optional, default=['all files, '.*)'].
-        file type filter.
+        File type filter.
     dictionary : `bool`, optional, default=True
         Whether a dictionary or a list should be returned.
     listdir : bool, default=False
-        read all file (possibly limited by `filetypes` in a given `directory`.
+        Read all file (possibly limited by `filetypes` in a given `directory`.
     recursive : bool, optional,  default=False.
         Read also subfolders.
 
@@ -312,7 +312,8 @@ def get_filename(*filenames, **kwargs):
 
     Returns
     --------
-    out : list of filenames
+    out
+        List of filenames.
 
     Examples
     --------

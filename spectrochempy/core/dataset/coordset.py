@@ -645,12 +645,12 @@ class CoordSet(HasTraits):
         ----------
         *args : str(s)
             The list of units to apply to the set of coordinates (they must be given according to the coordinate's name
-            alphabetical order
+            alphabetical order.
         **kwargs : str
-            keyword attribution of the units. The keys must be valid names among the coordinate's name list. This
+            Keyword attribution of the units. The keys must be valid names among the coordinate's name list. This
             is the recommended way to set units as this will be less prone to errors.
         force : bool, optional, default=False
-            whether or not the new units must be compatible with the current units. See the `Coord`.`to` method.
+            Whether or not the new units must be compatible with the current units. See the `Coord`.`to` method.
         """
         force = kwargs.pop("force", False)
 

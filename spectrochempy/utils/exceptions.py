@@ -32,28 +32,28 @@ class SpectroChemPyWarning(Warning):
 # ----------------------------------------------------------------------------------------------------------------------
 class SpectroChemPyException(Exception):
     """
-    The base exception class for SpectroChemPy
+    The base exception class for SpectroChemPy.
     """
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 class UnitsCompatibilityError(SpectroChemPyException):
     """
-    Exception raised when units are not compatible, preventing some mathematical operations
+    Exception raised when units are not compatible, preventing some mathematical operations.
     """
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 class DimensionsCompatibilityError(SpectroChemPyException):
     """
-    Exception raised when dimensions are not compatible for concatenation for instance
+    Exception raised when dimensions are not compatible for concatenation for instance.
     """
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 class CoordinateMismatchError(SpectroChemPyException):
     """
-    Exception raised when object coordinates differ
+    Exception raised when object coordinates differ.
     """
 
 
@@ -68,7 +68,7 @@ class ProtocolError(SpectroChemPyException):
 # ----------------------------------------------------------------------------------------------------------------------
 def deprecated(message):
     """
-    Deprecation decorator
+    Deprecation decorator.
 
     Parameters
     ----------

@@ -111,7 +111,7 @@ class URLSelector(Base):
 
 class FileSelector(Base):
     """
-    ipywidgets interface for picking files
+    IPyWidgets interface for picking files.
 
     The current path is stored in ``.path`` and the current selection is stored
     in ``.value``.

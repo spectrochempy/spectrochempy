@@ -1251,7 +1251,7 @@ class NDArray(HasTraits):
         Parameters
         ----------
         dtype : str or dtype
-            typecode or data-type to which the array is cast.
+            Typecode or data-type to which the array is cast.
         """
         if not self.linear:
             self._data = self._data.astype(dtype, **kwargs)
