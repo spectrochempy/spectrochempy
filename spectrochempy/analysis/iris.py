@@ -208,8 +208,15 @@ class IRIS:
         global _log
         _log = ""
 
-        # if multiple coords for a given dimension, take the default ones:
-        channels = X.x.default
+
+        # check if x dimension exists
+        if 'x' in X.dims:
+            # if multiple coords for a given dimension, take the default ones:
+            channels = X.x.default
+        else:
+            # else, set a single channel:
+            channels = Coord([0])
+
 
         if p is not None:  # supersedes the default
             if isinstance(p, Coord):
@@ -531,7 +538,7 @@ class IRIS:
                               title=self.X.title, units=self.X.units)
             X_hat.set_coordset(z=self.f.z, y=self.X.y, x=self.X.x)
             for i in range(X_hat.z.size):
-                X_hat.data[i] = np.expand_dims(np.dot(self.K.data, self.f[i].data.squeeze()), 0)
+                X_hat.data[i] = np.expand_dims(np.dot(self.K.data, self.f[i].data.squeeze()), 1)
 
         X_hat.name = "2D-IRIS Reconstructed datasets"
         return X_hat
