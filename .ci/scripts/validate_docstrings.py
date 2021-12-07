@@ -231,6 +231,11 @@ def spectrochempy_validate(func_name: str):
     print(func_name)
     result = validate(func_name)
 
+    # suppress errors from non spectrochempy files
+    file = result.get("file", {})
+    if file and "spectrochempy" not in file:
+        result["errors"] = []
+
     mentioned_errs = doc.mentioned_private_classes
     if mentioned_errs:
         result["errors"].append(
