@@ -25,7 +25,8 @@ from numpy.ma.core import (
 # ----------------------------------------------------------------------------------------------------------------------
 
 from .exceptions import *
-from .fake import *
+
+# from .fake import *
 from .file import *
 from .jsonutils import *
 from .misc import *
