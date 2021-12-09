@@ -247,7 +247,7 @@ def read(*paths, **kwargs):
     """
     Generic read method.
 
-    This method is generally abble to load experimental files based on extensions.
+    This method is generally able to load experimental files based on extensions.
 
     Parameters
     ----------

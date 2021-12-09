@@ -154,6 +154,7 @@ def test_generic_read():
     assert isinstance(path, Path)
     assert path.stem == ds.name
     assert path.parent == ds.directory
+    assert path.suffix == ".scp"
 
     # read should be équivalent to load (but read is a more general function,
     dataset = NDDataset.load("wodger.scp")
