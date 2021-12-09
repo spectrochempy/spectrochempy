@@ -5,7 +5,8 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-""" Bruker file (single dimension FID or multidimensional SER) importers
+"""
+Bruker file (single dimension FID or multidimensional SER) importers.
 """
 
 __all__ = ["read_topspin", "read_bruker_nmr"]

@@ -45,7 +45,7 @@ SCPY_SUFFIX = {"NDDataset": ".scp", "Project": ".pscp"}
 
 class NDIO(HasTraits):
     """
-    Import/export interface from |NDDataset|
+    Import/export interface from |NDDataset|.
 
     This class is used as basic import/export interface of the |NDDataset|.
     """
@@ -55,10 +55,10 @@ class NDIO(HasTraits):
     @property
     def directory(self):
         """
-        `Pathlib` object - current directory for this dataset
+        `Pathlib` object - current directory for this dataset.
 
         ReadOnly property - automaticall set when the filename is updated if
-        it contains a parent on its path
+        it contains a parent on its path.
         """
         if self._filename:
             return pathclean(self._filename).parent
@@ -87,7 +87,7 @@ class NDIO(HasTraits):
     @property
     def suffix(self):
         """
-        filename suffix
+        filename suffix.
 
         Read Only property - automatically set when the filename is updated
         if it has a suffix, else give

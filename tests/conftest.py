@@ -73,18 +73,6 @@ def pytest_sessionfinish(session, exitstatus):  # pragma: no cover
         f.unlink()
 
 
-# set test file and folder in environment
-# set a test file in environment
-
-datadir = pathclean(prefs.datadir)
-
-environ["TEST_FILE"] = str(datadir / "irdata" / "nh4y-activation.spg")
-environ["TEST_FOLDER"] = str(datadir / "irdata" / "subdir")
-environ["TEST_NMR_FOLDER"] = str(
-    datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_2d"
-)
-
-
 # ----------------------------------------------------------------------------------------------------------------------
 # create reference arrays
 # ----------------------------------------------------------------------------------------------------------------------
@@ -290,6 +278,7 @@ def dsm():
     ).copy()
 
 
+datadir = pathclean(prefs.datadir)
 dataset = NDDataset.read_omnic(datadir / "irdata" / "nh4y-activation.spg")
 
 

@@ -5,7 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 """
-Integration methods
+Integration methods.
 """
 
 __all__ = ["simps", "trapz", "simpson", "trapezoid"]
@@ -118,6 +118,7 @@ An alias of `trapezoid` kept for backwards compatibily.
 {trapezoid.__doc__}"""
 
 
+@_integrate_method
 def simpson(dataset, *args, **kwargs):
     """
     Integrate using the composite Simpson's rule.
@@ -133,7 +134,7 @@ def simpson(dataset, *args, **kwargs):
     Parameters
     ----------
     dataset : |NDDataset|
-        dataset to be integrated.
+        Dataset to be integrated.
     **kwargs
         Additional keywords parameters.
         See Other Parameters.

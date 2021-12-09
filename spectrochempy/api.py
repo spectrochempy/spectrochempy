@@ -6,7 +6,7 @@
 # ======================================================================================================================
 
 """
-Application Programming Interface
+Application Programming Interface.
 """
 
 # During the initialization of this package, a `matplotlib` backend is set
@@ -14,12 +14,14 @@ Application Programming Interface
 
 
 import sys
+from os import environ
 
 import matplotlib as mpl
 
 from IPython.core.interactiveshell import InteractiveShell
 from IPython import get_ipython
 
+from pathlib import Path
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Check the environment for plotting
@@ -38,9 +40,9 @@ NO_DISPLAY = False
 NO_DIALOG = False
 
 # Are we buidings the docs ?
-if "make.py" in sys.argv[0]:  # pragma: no cover
+if Path(sys.argv[0]).name in ["make.py", "validate_docstrings.py"]:  # pragma: no cover
     # if we are building the documentation, in principle it should be done
-    # using the make.py located at the root of the spectrchempy package.
+    # using the make.py located at the root of the spectrochempy package.
     NO_DISPLAY = True
     NO_DIALOG = True
     mpl.use("agg", force=True)
@@ -49,7 +51,6 @@ if "make.py" in sys.argv[0]:  # pragma: no cover
 if "--nodisplay" in sys.argv:  # pragma: no cover
     NO_DISPLAY = True
     NO_DIALOG = True
-    mpl.use("agg", force=True)
 
 # Are we running pytest?
 
@@ -69,9 +70,6 @@ if "pytest" in sys.argv[0] or "py.test" in sys.argv[0]:
         # individual module testing
         NO_DISPLAY = False
         NO_DIALOG = False
-
-    if NO_DISPLAY:
-        mpl.use("agg", force=True)
 
 # Are we running in PyCharm scientific mode?
 IN_PYCHARM_SCIMODE = mpl.get_backend() == "module://backend_interagg"
@@ -134,6 +132,18 @@ import warnings
 
 warnings.filterwarnings(action="ignore", module="matplotlib")  # , category=UserWarning)
 # warnings.filterwarnings(action="error", category=DeprecationWarning)
+
+if NO_DISPLAY:
+    mpl.use("agg", force=True)
+
+    # set test file and folder in environment
+    # set a test file in environment
+
+    environ["TEST_FILE"] = str(DATADIR / "irdata" / "nh4y-activation.spg")
+    environ["TEST_FOLDER"] = str(DATADIR / "irdata" / "subdir")
+    environ["TEST_NMR_FOLDER"] = str(
+        DATADIR / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_2d"
+    )
 
 # ==============================================================================
 if __name__ == "__main__":

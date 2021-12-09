@@ -5,7 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 """
-This module implement the NNMF (Non Negative Matrix Factorization) class
+This module implement the NNMF (Non Negative Matrix Factorization) class.
 """
 # TODO: create  tests
 
@@ -77,21 +77,33 @@ class NNMF(HasTraits):
     @staticmethod
     def nmf(V, Winit, Hinit, tol, timelimit, maxiter):
         """
-        (W,H) = nmf(V,Winit,Hinit,tol,timelimit,maxiter)
-        W,H : output solution
-        Winit,Hinit : initial solution
-        tol : tolerance for a relative stopping condition
-        timelimit, maxiter : limit of time and iterations
+        (W,H) = nmf(V,Winit,Hinit,tol,timelimit,maxiter).
+
+        Parameters
+        ==========
+        Winit,Hinit
+            Initial solution.
+        tol
+            Tolerance for a relative stopping condition.
+        timelimit
+            Limit of time.
+        maxiter
+            Limit of iterations.
+
+        Returns
+        =======
+        W,H
+            Output solution.
         """
 
         def nlssubprob(V, W, Hinit, tol, maxiter):
             """
-            H, grad : output solution and gradient
-            iter : #iterations used
-            V, W : constant matrices
-            Hinit : initial solution
-            tol : stopping tolerance
-            maxiter : limit of iterations
+            H, grad : output solution and gradient.
+            iter : #iterations used.
+            V, W : constant matrices.
+            Hinit : initial solution.
+            tol : stopping tolerance.
+            maxiter : limit of iterations.
             """
 
             H = Hinit

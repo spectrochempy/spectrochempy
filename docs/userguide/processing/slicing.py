@@ -19,7 +19,7 @@
 # # Slicing NDDatasets
 #
 # This tutorial shows how to handle NDDatasets using python slicing. As prerequisite, the user is
-# expected to have read the [Import Tutorials](../importexport/import.html).
+# expected to have read the [Import Tutorials](../importexport/import.ipynb).
 
 # %%
 import numpy as np

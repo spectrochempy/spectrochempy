@@ -5,7 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 """
-This module provides methods for reading data in a directory
+This module provides methods for reading data in a directory.
 """
 __all__ = ["read_dir", "read_carroucell"]
 __dataset_methods__ = __all__

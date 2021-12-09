@@ -432,21 +432,21 @@ class MCRALS(HasTraits):
     @property
     def Stsoft(self):
         """
-        The soft spectra profiles
+        The soft spectra profiles.
         """
         return self._Stsoft
 
     @property
     def Chard(self):
         """
-        The hard concentration profiles
+        The hard concentration profiles.
         """
         return self._Chard
 
     @property
     def params(self):
         """
-        the parameters used to perform the MCR als.
+        The parameters used to perform the MCR als.
         """
         return self._params
 
@@ -461,7 +461,7 @@ class MCRALS(HasTraits):
         """
         Transform data back to the original space.
 
-        The following matrice operation is performed : :math:`X'_{hat} = C'.S'^t`
+        The following matrice operation is performed : :math:`X'_{hat} = C'.S'^t`.
 
         Returns
         -------
@@ -481,12 +481,12 @@ class MCRALS(HasTraits):
 
     def plotmerit(self, **kwargs):
         """
-        Plots the input dataset, reconstructed dataset and residuals
+        Plots the input dataset, reconstructed dataset and residuals.
 
         Returns
         -------
         ax
-            subplot
+            subplot.
         """
         colX, colXhat, colRes = kwargs.get("colors", ["blue", "green", "red"])
 

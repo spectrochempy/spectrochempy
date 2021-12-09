@@ -5,7 +5,8 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-"""Plugin module to extend NDDataset with the import methods method.
+"""
+Plugin module to extend NDDataset with the import methods method.
 """
 
 __all__ = ["read_matlab", "read_mat"]

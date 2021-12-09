@@ -45,7 +45,6 @@ Additionally it is possible to use a docker container or the Google Colaboratory
 
 * :doc:`install_mac`
 * :doc:`install_win`
-* :doc:`install_docker`
 * :doc:`install_sources`
 * :doc:`install_colab`
 * :doc:`install_adds`
@@ -56,7 +55,6 @@ Additionally it is possible to use a docker container or the Google Colaboratory
 
     install_mac
     install_win
-    install_docker
     install_sources
     install_colab
     install_adds

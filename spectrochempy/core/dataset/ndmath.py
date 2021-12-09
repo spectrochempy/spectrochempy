@@ -381,7 +381,7 @@ class NDMath(object):
     this. Most of the time it returns a new NDDataset, while in some cases
     noted below, one get a |ndarray| .
 
-    >>> ds = scp.NDDataset([1.,2.,3.])
+    >>> ds = scp.NDDataset([1., 2., 3.])
     >>> np.sin(ds)
     NDDataset: [float64] unitless (size: 3)
 
@@ -1599,13 +1599,13 @@ class NDMath(object):
         """
         Construct a nddataset by executing a function over each coordinate.
 
-        The resulting array therefore has a value ``fn(x, y, z)`` at coordinate ``(x, y, z)``.
+        The resulting array therefore has a value ``fn(x, y, z)`` at coordinate ``(x, y, z)`` .
 
         Parameters
         ----------
         function : callable
             The function is called with N parameters, where N is the rank of
-            `shape` or from the provided ``coordset`.
+            `shape` or from the provided `coordset`.
         shape : (N,) tuple of ints, optional
             Shape of the output array, which also determines the shape of
             the coordinate arrays passed to `function`. It is optional only if
@@ -2212,14 +2212,14 @@ class NDMath(object):
             `data_keyword` is a string indicating the keyword of
             `callable` that expects the array object.
         *args
-            positional arguments passed into `func`.
+            Positional arguments passed into `func`.
         **kwargs
-            keyword arguments passed into `func`.
+            Keyword arguments passed into `func`.
 
         Returns
         -------
         pipe
-           the return type of `func`.
+           The return type of `func`.
 
         Notes
         -----

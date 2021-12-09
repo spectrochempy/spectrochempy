@@ -5,7 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 """
-This module holds the definitions all the various models
+This module holds the definitions all the various models.
 """
 
 __all__ = []
@@ -25,6 +25,7 @@ import numpy as np
 class polynomialbaseline(object):
     """
     Arbitrary-degree polynomial (degree limited to 10, however).
+
     As a linear baseline is automatically calculated, this polynom is always of
     greater or equal to order 2 (parabolic function).
 
@@ -35,7 +36,8 @@ class polynomialbaseline(object):
     args = ["ampl"]
     args.extend(["c_%d" % i for i in range(2, 11)])
 
-    script = """MODEL: baseline%(id)d\nshape: polynomialbaseline
+    script = """
+    MODEL: baseline%(id)d\nshape: polynomialbaseline
     # This polynom starts at the order 2
     # as a linear baseline is additionnaly fitted automatically
     # parameters must be in the form c_i where i is an integer as shown below
@@ -82,16 +84,17 @@ class polynomialbaseline(object):
 # ======================================================================================================================
 class gaussianmodel(object):
     """
-    Normalized 1D gaussian function :
+    Normalized 1D gaussian function.
 
     .. math::
         f(x) = \\frac{ampl}{\\sqrt{2 \\pi \\sigma^2} } \\exp({\\frac{-(x-pos)^2}{2 \\sigma^2}})
 
-    where :math:`\\sigma = \\frac{width}{2.3548}`
+    where :math:`\\sigma = \\frac{width}{2.3548}`.
     """
 
     args = ["ampl", "width", "pos"]
-    script = """MODEL: line%(id)d\nshape: gaussianmodel
+    script = """
+    MODEL: line%(id)d\nshape: gaussianmodel
     $ ampl: %(ampl).3f, 0.0, None
     $ width: %(width).3f, 0.0, None
     $ pos: %(pos).3f, %(poslb).3f, %(poshb).3f
@@ -110,16 +113,17 @@ class gaussianmodel(object):
 # ======================================================================================================================
 class lorentzianmodel(object):
     """
-    A standard Lorentzian function (also known as the Cauchy distribution):
+    A standard Lorentzian function (also known as the Cauchy distribution).
 
     .. math::
         f(x) = \\frac{ampl * \\lambda}{\\pi [(x-pos)^2+ \\lambda^2]}
 
-    where :math:`\\lambda = \\frac{width}{2}`
+    where :math:`\\lambda = \\frac{width}{2}`.
     """
 
     args = ["ampl", "width", "pos"]
-    script = """MODEL: line%(id)d\nshape: lorentzianmodel
+    script = """
+    MODEL: line%(id)d\nshape: lorentzianmodel
     $ ampl: %(ampl).3f, 0.0, None
     $ width: %(width).3f, 0.0, None
     $ pos: %(pos).3f, %(poslb).3f, %(poshb).3f
@@ -138,11 +142,14 @@ class lorentzianmodel(object):
 class voigtmodel(object):
     """
     A Voigt model constructed as the convolution of a :class:`GaussianModel` and
-    a :class:`LorentzianModel` -- commonly used for spectral line fitting.
+    a :class:`LorentzianModel`.
+
+    Commonly used for spectral line fitting.
     """
 
     args = ["ampl", "width", "ratio", "pos"]
-    script = """MODEL: line%(id)d\nshape: voigtmodel
+    script = """
+    MODEL: line%(id)d\nshape: voigtmodel
     $ ampl: %(ampl).3f, 0.0, None
     $ width: %(width).3f, 0.0, None
     $ pos: %(pos).3f, %(poslb).3f, %(poshb).3f
@@ -168,12 +175,15 @@ class voigtmodel(object):
 # ======================================================================================================================
 class assymvoigtmodel(object):
     """
-    An assymetric Voigt model
-    A. L. Stancik and E. B. Brauns, Vibrational Spectroscopy, 2008, 47, 66-69
+    An assymetric Voigt model.
+
+    A. L. Stancik and E. B. Brauns, Vibrational Spectroscopy, 2008, 47, 66-69.
     """
 
     args = ["ampl", "width", "ratio", "assym", "pos"]
-    script = """MODEL: line%(id)d\nshape: voigtmodel
+
+    script = """
+        MODEL: line%(id)d\nshape: voigtmodel
         $ ampl: %(ampl).3f, 0.0, None
         $ width: %(width).3f, 0.0, None
         $ pos: %(pos).3f, %(poslb).3f, %(poshb).3f
@@ -212,7 +222,8 @@ class assymvoigtmodel(object):
 # getmodel
 # ======================================================================================================================
 def getmodel(x, y=None, modelname=None, par=None, **kargs):
-    """Get the model for a given x vector.
+    """
+    Get the model for a given x vector.
 
     Parameters
     -----------
@@ -220,18 +231,18 @@ def getmodel(x, y=None, modelname=None, par=None, **kargs):
         Array of frequency where to evaluate the model values returned by the
         f function.
     y : ndarray or None
-        None for 1D, or index for the second dimension
+        None for 1D, or index for the second dimension.
     modelname : str
-        name of the model class to use.
+        Name of the model class to use.
     par : :class:`Parameters` instance
-        parameter to pass to the f function
+        Parameter to pass to the f function.
     kargs : any
-        Keywords arguments to pass the the f function
+        Keywords arguments to pass the the f function.
 
     Returns
     -------
     ndarray : float
-        an array containing the calculated model.
+        An array containing the calculated model.
     """
     model = par.model[modelname]
     modelcls = globals()[model]

@@ -114,7 +114,9 @@ class Fit(HasTraits):
 
     @staticmethod
     def script_default():
-        """Return a default script"""
+        """
+        Return a default script.
+        """
         return """
         #-----------------------------------------------------------
         # syntax for parameters definition:
@@ -146,7 +148,8 @@ class Fit(HasTraits):
         return self.run(dry=True)
 
     def run(self, maxiter=100, maxfun=None, every=10, method="simplex", **kwargs):
-        """Main fitting procedure
+        """
+        Main fitting procedure.
 
         Parameters
         ----------

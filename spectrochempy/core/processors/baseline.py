@@ -616,14 +616,14 @@ def ab(dataset, dim=-1, **kwargs):
 @_units_agnostic_method
 def dc(dataset, **kwargs):
     """
-    Time domain baseline correction
+    Time domain baseline correction.
 
     Parameters
     ----------
     dataset : nddataset
         The time domain daatset to be corrected.
     kwargs : dict, optional
-        additional parameters.
+        Additional parameters.
 
     Returns
     -------

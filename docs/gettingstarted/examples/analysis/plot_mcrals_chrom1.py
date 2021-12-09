@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 # flake8: noqa
 # ======================================================================================================================
 #  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
@@ -11,13 +12,15 @@ MCR-ALS optimization example (original example from Jaumot)
 
 In this example, we perform the MCR ALS optimization of a dataset
 corresponding to a HPLC-DAD run, from
-`Jaumot et al. Chemolab, 76 (2005) 101-110, <https://doi.org/10.1016/j.chemolab.2004.12.007>`_ and `Jaumot et al.
-Chemolab, 140 (2015) pp. 1-12. <https://doi.org/10.1016/j.chemolab.2014.10.003>`_
+Jaumot et al. Chemolab, 76 (2005) 101-110,
+`DOI: 10.1016/j.chemolab.2004.12.007  <https://doi.org/10.1016/j.chemolab.2004.12.007>`_
+and Jaumot et al. Chemolab, 140 (2015) pp. 1-12,
+`DOI: 10.1016/j.chemolab.2014.10.003 <https://doi.org/10.1016/j.chemolab.2014.10.003>`_ .
 
-This dataset (and others) can be loaded from the `"Multivariate Curve Resolution Homepage".
-<https://mcrals.wordpress.com/download/example-data-sets>`_
+This dataset (and others) can be loaded from the
+`Multivariate Curve Resolution Homepage <https://mcrals.wordpress.com/download/example-data-sets>`_ .
 
-For the user convenience, this dataset is present in the `datadir`of SpectroChemPy as 'als2004dataset.MAT'
+For the user convenience, this dataset is present in the `datadir` of SpectroChemPy as 'als2004dataset.MAT' .
 
 """
 import spectrochempy as scp

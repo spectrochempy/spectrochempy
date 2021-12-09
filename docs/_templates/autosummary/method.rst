@@ -1,9 +1,12 @@
 
+:orphan:
+
 {{ fullname | escape | underline}}
+
 
 .. currentmodule:: {{ module }}
 
-.. automethod:: {{ objname }}
+.. auto{{ objtype }}:: {{ objname }}
 
 .. include:: /gettingstarted/gallery/backreferences/{{fullname}}.examples
 

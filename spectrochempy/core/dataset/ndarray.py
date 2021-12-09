@@ -1251,7 +1251,7 @@ class NDArray(HasTraits):
         Parameters
         ----------
         dtype : str or dtype
-            typecode or data-type to which the array is cast.
+            Typecode or data-type to which the array is cast.
         """
         if not self.linear:
             self._data = self._data.astype(dtype, **kwargs)
@@ -1264,7 +1264,7 @@ class NDArray(HasTraits):
     @property
     def author(self):
         """
-        str - creator of the array
+        Creator of the array (str).
         """
         return self._author
 
@@ -1336,7 +1336,7 @@ class NDArray(HasTraits):
     @property
     def created(self):
         """
-        `Datetime` - creation date object
+        Creation date object (Datetime).
         """
         return self._date
 
@@ -1350,7 +1350,7 @@ class NDArray(HasTraits):
     @property
     def data(self):
         """
-        |ndarray| - The `data` array.
+        The `data` array (|ndarray|).
 
         If there is no data but labels, then the labels are returned instead of data.
         """
@@ -1385,7 +1385,7 @@ class NDArray(HasTraits):
     @property
     def date(self):
         """
-        `Datetime` - creation date object - equivalent to the attribute `created`
+        Creation date object - equivalent to the attribute `created` (Datetime).
         """
         return self._date
 
@@ -1406,12 +1406,12 @@ class NDArray(HasTraits):
     @property
     def description(self):
         """
-        str - Provides a description of the underlying data
+        Provides a description of the underlying data (str).
         """
         return self._description
 
     desc = description
-    desc.__doc__ = """Alias to the description attribute"""
+    desc.__doc__ = """Alias to the description attribute."""
 
     # ..................................................................................................................
     @description.setter
@@ -1422,7 +1422,7 @@ class NDArray(HasTraits):
     @property
     def dimensionless(self):
         """
-        bool - True if the `data` array is dimensionless (Readonly property).
+        True if the `data` array is dimensionless - Readonly property (bool).
 
         Notes
         -----
@@ -1440,7 +1440,7 @@ class NDArray(HasTraits):
     @property
     def dims(self):
         """
-        list -  Names of the dimensions
+        Names of the dimensions (list).
 
         The name of the dimensions are 'x', 'y', 'z'.... depending on the number of dimension.
         """
@@ -1478,7 +1478,7 @@ class NDArray(HasTraits):
     @property
     def filename(self):
         """
-        `Pathlib` object - current filename for this dataset.
+        Current filename for this dataset (`Pathlib` object).
         """
         if self._filename:
             return self._filename.stem + self.suffix
@@ -1493,7 +1493,7 @@ class NDArray(HasTraits):
     @property
     def dtype(self):
         """
-        numpy dtype - data type
+        Data type (np.dtype).
         """
         if self.is_empty:
             self._dtype = None
@@ -1561,7 +1561,8 @@ class NDArray(HasTraits):
 
     # ..................................................................................................................
     def get_labels(self, level=0):
-        """Get the labels at a given level.
+        """
+        Get the labels at a given level.
 
         Used to replace `data` when only labels are provided, and/or for
         labeling axis in plots.
@@ -1593,7 +1594,7 @@ class NDArray(HasTraits):
     @property
     def has_data(self):
         """
-        bool - True if the `data` array is not empty and size > 0.
+        True if the `data` array is not empty and size > 0 (Bool).
         (Readonly property).
         """
         if (self.data is None) or (self.data.size == 0):
@@ -1605,7 +1606,7 @@ class NDArray(HasTraits):
     @property
     def has_defined_name(self):
         """
-        bool - True is the name has been defined
+        True is the name has been defined (bool).
         """
         return not (self.name == self.id)
 
@@ -1613,7 +1614,7 @@ class NDArray(HasTraits):
     @property
     def has_units(self):
         """
-        bool - True if the `data` array have units (Readonly property).
+        True if the `data` array have units - Readonly property (bool).
 
         See Also
         --------
@@ -1629,7 +1630,7 @@ class NDArray(HasTraits):
     @property
     def history(self):
         """
-        List of strings - Describes the history of actions made on this array
+        Describes the history of actions made on this array (List of strings).
         """
         return self._history
 
@@ -1642,7 +1643,7 @@ class NDArray(HasTraits):
     @property
     def id(self):
         """
-        str - Object identifier (Readonly property).
+        Object identifier - Readonly property (str).
         """
         return self._id
 
@@ -1658,7 +1659,7 @@ class NDArray(HasTraits):
 
         Rather than isinstance(obj, NDArrray) use object.implements('NDArray').
 
-        This is useful to check type without importing the module
+        This is useful to check type without importing the module.
         """
         if name is None:
             return "NDArray"
@@ -1693,7 +1694,7 @@ class NDArray(HasTraits):
     @property
     def is_float(self):
         """
-        bool - True if the `data` are real values (Readonly property).
+        True if the `data` are real values - Readonly property (bool).
         """
         if self.data is None:
             return False
@@ -1704,7 +1705,7 @@ class NDArray(HasTraits):
     @property
     def is_integer(self):
         """
-        bool - True if the `data` are integer values (Readonly property).
+        True if the `data` are integer values - Readonly property (bool).
         """
         if self.data is None:
             return False
@@ -1715,7 +1716,7 @@ class NDArray(HasTraits):
     @property
     def is_1d(self):
         """
-        bool - True if the `data` array has only one dimension
+        True if the `data` array has only one dimension (bool).
         """
         return self.ndim == 1
 
@@ -1723,8 +1724,8 @@ class NDArray(HasTraits):
     @property
     def is_empty(self):
         """
-        bool - True if the `data` array is empty or size=0, and if no label are present
-        (Readonly property).
+        True if the `data` array is empty or size=0, and if no label are present
+        - Readonly property (bool).
         """
         if (
             not self.linear
@@ -1739,7 +1740,7 @@ class NDArray(HasTraits):
     @property
     def is_labeled(self):
         """
-        bool - True if the `data` array have labels (Readonly property).
+        True if the `data` array have labels - Readonly property (bool).
         """
         # label cannot exists (for now for nD dataset - only 1D dataset, such
         # as Coord can be labelled.
@@ -1754,7 +1755,7 @@ class NDArray(HasTraits):
     @property
     def linear(self):
         """
-        bool - flag to specify if the data can be constructed using a linear variation
+        Flag to specify if the data can be constructed using a linear variation (bool).
         """
         return self._linear
 
@@ -1771,7 +1772,7 @@ class NDArray(HasTraits):
     @property
     def is_masked(self):
         """
-        bool - True if the `data` array has masked values (Readonly property).
+        True if the `data` array has masked values - Readonly property (bool).
         """
         if isinstance(self._mask, np.ndarray):
             return np.any(self._mask)
@@ -1821,7 +1822,7 @@ class NDArray(HasTraits):
     @property
     def itemsize(self):
         """
-        numpy itemsize - data type size
+        Data type size (int).
         """
         if self.data is None:
             return None
@@ -1844,7 +1845,7 @@ class NDArray(HasTraits):
         other : |Unit|, |Quantity| or str
             Destination units.
         force : bool, optional, default=`False`
-            If True the change of units is forced, even for incompatible units
+            If True the change of units is forced, even for incompatible units.
 
         See Also
         --------
@@ -1894,7 +1895,7 @@ class NDArray(HasTraits):
     @property
     def labels(self):
         """
-        |ndarray| (str) - An array of labels for `data`.
+        An array of labels for `data` (|ndarray| of str).
 
         An array of objects of any type (but most generally string), with the last dimension size equal to that of the
         dimension of data. Note that's labelling is possible only for 1D data. One classical application is
@@ -1957,7 +1958,9 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     @property
     def limits(self):
-        """list - range of the data"""
+        """
+        Range of the data (list).
+        """
         if self.data is None:
             return None
 
@@ -1967,7 +1970,7 @@ class NDArray(HasTraits):
     @property
     def mask(self):
         """
-        |ndarray| (bool) - Mask for the data
+        Mask for the data (|ndarray| of bool).
         """
         if not self.is_masked:
             return NOMASK
@@ -2021,7 +2024,7 @@ class NDArray(HasTraits):
     @property
     def masked_data(self):
         """
-        |ma.ndarray| - The actual masked `data` array (Readonly property).
+        The actual masked `data` array - Readonly property (|ma.ndarray|).
         """
         if self.is_masked and not self.is_empty:
             return self._umasked(self.data, self.mask)
@@ -2032,7 +2035,7 @@ class NDArray(HasTraits):
     @property
     def meta(self):
         """
-        |Meta| - Additional metadata.
+        Additional metadata (|Meta|).
         """
         return self._meta
 
@@ -2047,7 +2050,7 @@ class NDArray(HasTraits):
     @property
     def modified(self):
         """
-        `Datetime` object - Date of modification (readonly property).
+        Date of modification (readonly property).
         """
         return self._modified
 
@@ -2055,9 +2058,9 @@ class NDArray(HasTraits):
     @property
     def name(self):
         """
-        str - An user friendly name.
+        An user friendly name (str).
 
-        When the name is not provided, the `id` of the object is retruned instead
+        When the name is not provided, the `id` of the object is retruned instead.
         """
         if self._name:
             return self._name
@@ -2077,7 +2080,7 @@ class NDArray(HasTraits):
     @property
     def ndim(self):
         """
-        int - The number of dimensions of the `data` array (Readonly property).
+        The number of dimensions of the `data` array (Readonly property).
         """
         if self.linear:
             return 1
@@ -2118,7 +2121,7 @@ class NDArray(HasTraits):
     @property
     def origin(self):
         """
-        str - origin of the data
+        Origin of the data (str).
         """
         return self._origin
 
@@ -2141,7 +2144,9 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     @property
     def roi(self):
-        """list - region of interest (ROI) limits"""
+        """
+        Region of interest (ROI) limits (list).
+        """
         if self._roi is None:
             self._roi = self.limits
         return self._roi
@@ -2161,7 +2166,7 @@ class NDArray(HasTraits):
     @property
     def shape(self):
         """
-        tuple on int - A tuple with the size of each dimensions (Readonly property).
+        A tuple with the size of each dimensions - Readonly property.
         The number of `data` element on each dimensions (possibly complex).
         For only labelled array, there is no data, so it is the 1D and the size is the size of the array of labels.
         """
@@ -2181,7 +2186,7 @@ class NDArray(HasTraits):
     @property
     def size(self):
         """
-        int - Size of the underlying `data` array (Readonly property).
+        Size of the underlying `data` array - Readonly property (int).
         The total number of data element (possibly complex or hypercomplex
         in the array).
         """
@@ -2200,8 +2205,12 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     @property
     def spacing(self):
-        # return a scalar for the spacing of the coordinates (if they are uniformly spaced,
-        # else return an array of the differents spacings
+        """
+        Return coordinates spacing.
+
+        It will be a scalar if the coordinates are uniformly spaced,
+        else ran array of the differents spacings
+        """
         if self.linear:
             return self.increment * self.units
         return spacing(self.data) * self.units
@@ -2309,7 +2318,7 @@ class NDArray(HasTraits):
     @property
     def T(self):
         """
-        |NDArray| - Transposed array.
+        Transposed array (|NDArray|).
 
         The same object is returned if `ndim` is less than 2.
         """
@@ -2319,7 +2328,7 @@ class NDArray(HasTraits):
     @property
     def title(self):
         """
-        str - An user friendly title.
+        An user friendly title (str).
 
         When the title is provided, it can be used for labeling the object,
         e.g., axe title in a matplotlib plot.
@@ -2641,7 +2650,7 @@ class NDArray(HasTraits):
     @property
     def umasked_data(self):
         """
-        |Quantity| - The actual array with mask and unit
+        The actual array with mask and unit (|Quantity|).
 
         (Readonly property).
         """

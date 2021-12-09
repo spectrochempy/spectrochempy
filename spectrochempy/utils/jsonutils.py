@@ -8,7 +8,7 @@
 #  =====================================================================================================================
 #
 """
-JSON utilities
+JSON utilities.
 """
 from datetime import datetime
 import pickle
@@ -36,7 +36,9 @@ def fromisoformat(s):
 
 
 def json_decoder(dic):
-    """Decode a serialised ison object"""
+    """
+    Decode a serialised json object.
+    """
 
     if "__class__" in dic:
 
@@ -67,7 +69,7 @@ def json_decoder(dic):
 
 def json_serialiser(byte_obj, encoding=None):
     """
-    Return a serialised json object
+    Return a serialised json object.
     """
     from spectrochempy.core.dataset.ndplot import PreferencesSet
 

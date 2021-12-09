@@ -287,7 +287,7 @@ class Project(AbstractProject, NDIO):
     @property
     def id(self):
         """
-        str - Readonly object identifier.
+        Readonly object identifier (str).
         """
         return self._id
 
@@ -295,8 +295,9 @@ class Project(AbstractProject, NDIO):
     @property
     def name(self):
         """
-        str - An user friendly name for the project. The default is
-        automatically generated.
+        An user friendly name for the project.
+
+        The default is automatically generated (str).
         """
         return self._name
 
@@ -313,8 +314,8 @@ class Project(AbstractProject, NDIO):
     @property
     def parent(self):
         """
-        project - instance of the Project which is the parent (if any) of the
-        current project.
+        Instance of the Project which is the parent (if any) of the
+        current project (project).
         """
         return self._parent
 
@@ -343,7 +344,7 @@ class Project(AbstractProject, NDIO):
     @property
     def meta(self):
         """
-        meta - metadata for the project
+        Metadata for the project (meta).
 
         meta contains all attribute except the name,
         id and parent of the current project.
@@ -354,8 +355,8 @@ class Project(AbstractProject, NDIO):
     @property
     def datasets_names(self):
         """
-        list - names of all dataset included in this project.
-        (does not return those located in sub-folders).
+        Names of all dataset included in this project.
+        (does not return those located in sub-folders) (list).
         """
         lst = list(self._datasets.keys())
         return lst
@@ -368,8 +369,8 @@ class Project(AbstractProject, NDIO):
     @property
     def datasets(self):
         """
-        list - datasets included in this project excluding those
-        located in subprojects.
+        Datasets included in this project excluding those
+        located in subprojects (list).
         """
         d = []
         for name in self.datasets_names:
@@ -385,7 +386,7 @@ class Project(AbstractProject, NDIO):
     @property
     def projects_names(self):
         """
-        list - names of all subprojects included in this project.
+        Names of all subprojects included in this project (list).
         """
         lst = list(self._projects.keys())
         return lst
@@ -394,7 +395,7 @@ class Project(AbstractProject, NDIO):
     @property
     def projects(self):
         """
-        list - subprojects included in this project.
+        Subprojects included in this project (list).
         """
         p = []
         for name in self.projects_names:
@@ -410,7 +411,7 @@ class Project(AbstractProject, NDIO):
     @property
     def scripts_names(self):
         """
-        list - names of all scripts included in this project.
+        Names of all scripts included in this project (list).
         """
         lst = list(self._scripts.keys())
         return lst
@@ -419,7 +420,7 @@ class Project(AbstractProject, NDIO):
     @property
     def scripts(self):
         """
-        list - scripts included in this project.
+        Scripts included in this project (list).
         """
         s = []
         for name in self.scripts_names:
@@ -434,14 +435,14 @@ class Project(AbstractProject, NDIO):
     @property
     def allnames(self):
         """
-        list - names of all objects contained in this project
+        Names of all objects contained in this project (list).
         """
         return self.datasets_names + self.projects_names + self.scripts_names
 
     @property
     def allitems(self):
         """
-        list - all items contained in this project
+        All items contained in this project (list).
         """
         return (
             list(self._datasets.items())
@@ -479,21 +480,27 @@ class Project(AbstractProject, NDIO):
     # ..................................................................................................................
     def add_datasets(self, *datasets):
         """
-        Add datasets to the current project.
+        Add several datasets to the current project.
 
         Parameters
         ----------
-        datasets : series of |NDDataset|
+        *datasets : series of |NDDataset|
             Datasets to add to the current project.
             The name of the entries in the project will be identical to the
             names of the datasets.
 
+        See Also
+        --------
+        add_dataset : Add a single dataset to the current project.
+
         Examples
         --------
-        Assuming that ds1, ds2 and ds3 are already defined datasets :
 
-        >>> proj = Project()
-        >>> proj.add_datasets(ds1, ds2, ds3) # doctest: +SKIP
+        >>> ds1 = scp.NDDataset([1, 2, 3])
+        >>> ds2 = scp.NDDataset([4, 5, 6])
+        >>> ds3 = scp.NDDataset([7, 8, 9])
+        >>> proj = scp.Project()
+        >>> proj.add_datasets(ds1, ds2, ds3)
         """
         for ds in datasets:
             self.add_dataset(ds)
@@ -501,7 +508,7 @@ class Project(AbstractProject, NDIO):
     # ..................................................................................................................
     def add_dataset(self, dataset, name=None):
         """
-        Add datasets to the current project.
+        Add a single dataset to the current project.
 
         Parameters
         ----------
@@ -512,12 +519,16 @@ class Project(AbstractProject, NDIO):
         name : str, optional
             If provided the name will be used to name the entry in the project.
 
+        See Also
+        --------
+        add_datasets : Add several datasets to the current project.
+
         Examples
         --------
-        Assuming that ds1 is an already defined dataset :
 
-        >>> proj = Project()
-        >>> proj.add_dataset(ds1, name='Toto') # doctest: +SKIP
+        >>> ds1 = scp.NDDataset([1, 2, 3])
+        >>> proj = scp.Project()
+        >>> proj.add_dataset(ds1, name='Toto')
         """
 
         dataset.parent = self
@@ -580,7 +591,7 @@ class Project(AbstractProject, NDIO):
         Parameters
         ----------
         proj : a project instance
-            A project to add to the current one
+            A project to add to the current one.
         """
         proj.parent = self
         if name is None:
@@ -592,12 +603,12 @@ class Project(AbstractProject, NDIO):
     # ..................................................................................................................
     def remove_project(self, name):
         """
-        remove one project from the current project.
+        Remove one project from the current project.
 
         Parameters
         ----------
         name : str
-            Name of the project to remove
+            Name of the project to remove.
         """
         self._projects[name]._parent = None
         del self._projects[name]
@@ -605,7 +616,7 @@ class Project(AbstractProject, NDIO):
     # ..................................................................................................................
     def remove_all_project(self):
         """
-        remove all projects from the current project.
+        Remove all projects from the current project.
         """
         for v in self._projects.values():
             v._parent = None

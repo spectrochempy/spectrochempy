@@ -5,7 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 """
-Various methods and classes used in other part of the program
+Various methods and classes used in other part of the program.
 """
 import re
 import os
@@ -60,7 +60,7 @@ __all__ = [
 TYPE_INTEGER = (int, np.int_, np.int32, np.int64, np.uint32, np.uint64)
 TYPE_FLOAT = (float, np.float_, np.float32, np.float64)
 TYPE_COMPLEX = (complex, np.complex_, np.complex64, np.complex128)
-TYPE_BOOL = (bool, np.bool, np.bool_)
+TYPE_BOOL = (bool, np.bool_)
 
 EPSILON = epsilon = np.finfo(float).eps
 "Minimum value before considering it as zero value."
@@ -131,7 +131,8 @@ class _DummyFile(object):
 
 def add_docstring(*args):
     """
-    Decorator which add a docstring to the actual func doctring"""
+    Decorator which add a docstring to the actual func doctring.
+    """
 
     def new_doc(func):
 
@@ -154,10 +155,6 @@ def as_quaternion(*args):
         The quaternion array components: If there is 4 components, then we assume it is the four compoents of the
         quaternion array: w, x, y, z. If there is only two, they are casted to complex and correspond respectively
         to w + i.x and y + j.z.
-
-    Returns
-    -------
-
     """
     if len(args) == 4:
         # we assume here that the for components have been provided w, x, y, z
@@ -173,16 +170,16 @@ def as_quaternion(*args):
 
 def quat_as_complex_array(arr):
     """
-    Recombine the component of a quaternion array into a tuple of two complex array
+    Recombine the component of a quaternion array into a tuple of two complex array.
 
     Parameters
     ----------
     arr : quaternion ndarray
-        The arr will be separated into (w + i.x) and (y + i.z)
+        The arr will be separated into (w + i.x) and (y + i.z).
     Returns
     -------
     tuple
-        Tuple of two complex array
+        Tuple of two complex array.
     """
     if not arr.dtype == np.quaternion:
         # no change
@@ -261,13 +258,13 @@ def dict_compare(d1, d2, check_equal_only=True):
 # ..................................................................................................................
 def get_component(data, select="REAL"):
     """
-    Take selected components of an hypercomplex array (RRR, RIR, ...)
+    Take selected components of an hypercomplex array (RRR, RIR, ...).
 
     Parameters
     ----------
     data : ndarray
     select : str, optional, default='REAL'
-        if 'REAL', only real component in all dimensions will be selected.
+        If 'REAL', only real component in all dimensions will be selected.
         Else a string must specify which real (R) or imaginary (I) component
         has to be selected along a specific dimension. For instance,
         a string such as 'RRI' for a 2D hypercomplex array indicated
@@ -349,8 +346,8 @@ def getdocfrom(origin):
 
 # ......................................................................................................................
 def gt_eps(arr):
-    """lambda function to check that an array has at least some values
-    greater than epsilon
+    """
+    Lambda function to check that an array has at least some values greater than epsilon.
 
     Parameters
     -----------
@@ -359,7 +356,7 @@ def gt_eps(arr):
     Returns
     --------
     bool : results ot checking
-        True means that at least some values are greater than epsilon
+        True means that at least some values are greater than epsilon.
     """
     return np.any(arr > EPSILON)
 
@@ -367,17 +364,17 @@ def gt_eps(arr):
 # ......................................................................................................................
 def htmldoc(text):
     """
-    format docstring in html for a nice display in IPython
+    Format docstring in html for a nice display in IPython.
 
     Parameters
     ----------
     text : str
-        The string to convert to html
+        The string to convert to html.
 
     Returns
     -------
     out : str
-        the html string
+        The html string.
     """
     p = re.compile("^(?P<name>.*:)(.*)", re.MULTILINE)  # To get the keywords
     html = p.sub(r"<b>\1</b>\2", text)
@@ -444,7 +441,7 @@ except ImportError:
 # ......................................................................................................................
 def interleaved2complex(data):
     """
-    Make a complex array from interleaved data
+    Make a complex array from interleaved data.
     """
     return data[..., ::2] + 1j * data[..., 1::2]
 
@@ -452,7 +449,7 @@ def interleaved2complex(data):
 # ......................................................................................................................
 def interleaved2quaternion(data):
     """
-    Make a complex array from interleaved data
+    Make a complex array from interleaved data.
     """
     return data[..., ::2] + 1j * data[..., 1::2]
 
@@ -460,7 +457,7 @@ def interleaved2quaternion(data):
 # ......................................................................................................................
 def is_iterable(arg):
     """
-    Determine if an object is iterable
+    Determine if an object is iterable.
     """
     return hasattr(arg, "__iter__")
 
@@ -479,7 +476,7 @@ def is_number(x):
 # ......................................................................................................................
 def is_sequence(arg):
     """
-    Determine if an object is iterable but is not a string
+    Determine if an object is iterable but is not a string.
     """
     return (not hasattr(arg, "strip")) and hasattr(arg, "__iter__")
 
@@ -498,7 +495,6 @@ def largest_power_of_2(value):
     -------
     pw : int
         Power of 2.
-
     """
     return int(pow(2, np.ceil(np.log(value) / np.log(2))))
 
@@ -506,7 +502,7 @@ def largest_power_of_2(value):
 # ......................................................................................................................
 def make_func_from(func, first=None):
     """
-    Create a new func with its arguments from another func and a new signature
+    Create a new func with its arguments from another func and a new signature.
     """
     code_obj = func.__code__
     new_varnames = list(code_obj.co_varnames)
@@ -533,7 +529,7 @@ def make_func_from(func, first=None):
 # ......................................................................................................................
 def make_new_object(objtype):
     """
-    Make a new object of type obj
+    Make a new object of type obj.
 
     Parameters
     ----------
@@ -541,7 +537,7 @@ def make_new_object(objtype):
 
     Returns
     -------
-    new : the new object of same type.
+    new : the new object of same type
     """
 
     new = type(objtype)()
@@ -556,10 +552,10 @@ def make_new_object(objtype):
 # ......................................................................................................................
 def makedirs(newdir):
     """
-    works the way a good mkdir should :)
-        - already exists, silently complete
-        - regular file in the way, raise an exception
-        - parent directory(ies) does not exist, make them as well
+    Works the way a good mkdir should :
+        - already exists, silently complete.
+        - regular file in the way, raise an exception.
+        - parent directory(ies) does not exist, make them as well.
     """
     # from active recipes http://code.activestate.com/recipes/82465-a-friendly-mkdir/
 
@@ -583,7 +579,7 @@ def makedirs(newdir):
 # ......................................................................................................................
 def makestr(li):
     """
-    make a string from a list of string
+    Make a string from a list of string.
     """
 
     if is_sequence(li):
@@ -635,7 +631,7 @@ def silence():
 def spacing(arr):
     """
     Return a scalar for the spacing in the one-dimensional input array (if it is uniformly spaced,
-    else return an array of the different spacings
+    else return an array of the different spacings.
 
     Parameters
     ----------

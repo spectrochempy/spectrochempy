@@ -16,5 +16,4 @@ Processing
    interferogram
    fourier2d
    baseline
-   interactive_baseline
    alignment

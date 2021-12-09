@@ -29,7 +29,9 @@ __all__ = [
 # ............................................................................
 # color conversion function
 def cmyk2rgb(C, M, Y, K):
-    """CMYK to RGB conversion
+    """
+    CMYK to RGB conversion.
+
     C,M,Y,K are given in percent.
     The R,G,B values are returned in the range of 0..1.
     """
@@ -65,14 +67,14 @@ NGreen = cmyk2rgb(85, 0, 60, 10)
 # .............................................................................
 def figure(preferences=Meta(), **kwargs):
     """
-    Method to open a new figure
+    Method to open a new figure.
 
     Parameters
     ----------
-    kwargs : any
-        keywords arguments to be passed to the matplotlib figure constructor.
-    preferences : Meta dictionary
-        per object saved plot configuration
+    Kwargs : any
+        Keywords arguments to be passed to the matplotlib figure constructor.
+    Preferences : Meta dictionary
+        Per object saved plot configuration.
     """
     return get_figure(preferences=preferences, **kwargs)
 
@@ -80,7 +82,7 @@ def figure(preferences=Meta(), **kwargs):
 # .............................................................................
 def show():
     """
-    Method to force the `matplotlib` figure display
+    Method to force the `matplotlib` figure display.
     """
     from spectrochempy import NO_DISPLAY
 
@@ -98,7 +100,7 @@ def get_figure(**kwargs):
     Parameters
     ----------
     clear : bool
-        if False the last used figure is returned
+        If False the last used figure is returned.
     figsize : 2-tuple of floats, default: rcParams["figure.figsize"] (default: [6.4, 4.8])
         Figure dimension (width, height) in inches.
     dpi : float, default: rcParams["figure.dpi"] (default: 100.0)
@@ -117,7 +119,7 @@ def get_figure(**kwargs):
         If True use constrained layout to adjust positioning of plot elements.
         Like tight_layout, but designed to be more flexible. See Constrained Layout Guide for examples.
     preferences : Meta object,
-        per object plot configuration
+        Per object plot configuration.
 
     Returns
     -------
@@ -173,11 +175,11 @@ def get_plotly_figure(clear=True, fig=None, **kwargs):
     Parameters
     ----------
     clear : bool
-        if False the figure provided in the `fig` parameters is used.
+        If False the figure provided in the `fig` parameters is used.
     fig : plotly figure
-        if provided, and clear is not True, it will be used for plotting
+        If provided, and clear is not True, it will be used for plotting
     kwargs : any
-        keywords arguments to be passed to the plotly figure constructor.
+        Keywords arguments to be passed to the plotly figure constructor.
 
     Returns
     -------

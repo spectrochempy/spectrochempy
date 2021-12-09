@@ -8,7 +8,6 @@
 """
 A collection of NMR spectral processing functions which operate on the last
 dimension (1) of 2D arrays.
-
 """
 
 __all__ = ["pk", "pk_exp"]
@@ -137,7 +136,7 @@ def _phase_method(method):
 @_phase_method
 def pk(dataset, phc0=0.0, phc1=0.0, exptc=0.0, pivot=0.0, **kwargs):
     """
-    Linear phase correction
+    Linear phase correction.
 
     For multidimensional NDDataset,
     the phase is by default applied on the last dimension.
@@ -153,7 +152,7 @@ def pk(dataset, phc0=0.0, phc1=0.0, exptc=0.0, pivot=0.0, **kwargs):
     exptc : float or |Quantity|, optional, default=0 us
         Exponential decay constant. If not 0, phc1 is ignored.
     pivot: float or |Quantity|, optional, default=0 in units of the x coordinate
-        Units if any must be compatible with last dimension units
+        Units if any must be compatible with last dimension units.
 
     Returns
     -------
@@ -172,8 +171,8 @@ def pk(dataset, phc0=0.0, phc1=0.0, exptc=0.0, pivot=0.0, **kwargs):
 
     See Also
     --------
-    ps_exp : Exponential Phase Correction
-    pk : Automatic or manual phasing
+    ps_exp : Exponential Phase Correction.
+    pk : Automatic or manual phasing.
     """
     phc0 = pi * phc0 / 180.0
     size = dataset.shape[-1]
@@ -190,7 +189,7 @@ def pk(dataset, phc0=0.0, phc1=0.0, exptc=0.0, pivot=0.0, **kwargs):
 
 def pk_exp(dataset, phc0=0.0, pivot=0.0, exptc=0.0, **kwargs):
     """
-    Exponential Phase Correction
+    Exponential Phase Correction.
 
     For multidimensional NDDataset,
     the phase is by default applied on the last dimension.
@@ -221,8 +220,8 @@ def pk_exp(dataset, phc0=0.0, pivot=0.0, exptc=0.0, **kwargs):
 
     See Also
     --------
-    ps : Linear Phase Correction
-    pk : Automatic or manual phasing
+    ps : Linear Phase Correction.
+    pk : Automatic or manual phasing.
     """
 
     return pk(dataset, phc0=phc0, phc1=0, pivot=pivot, exptc=exptc)

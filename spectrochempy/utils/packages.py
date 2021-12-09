@@ -20,13 +20,14 @@ __all__ = ["list_packages", "generate_api", "get_pkg_path"]
 
 # ......................................................................................................................
 def list_packages(package):
-    """Return a list of the names of a package and its subpackages.
+    """
+    Return a list of the names of a package and its subpackages.
 
     This only works if the package has a :attr:`__path__` attribute, which is
     not the case for some (all?) of the built-in packages.
     """
     # Based on response at
-    # http://stackoverflow.com/questions/1707709
+    # http://stackoverflow.com/questions/1707709.
 
     names = [package.__name__]
     for __, name, __ in walk_packages(

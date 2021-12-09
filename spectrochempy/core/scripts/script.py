@@ -203,14 +203,15 @@ def run_script(script, localvars=None):
     Parameters
     ----------
     script : script instance
-        The script to execute
+        The script to execute.
     localvars : dict, optional
         If provided it will be used for evaluating the script. In general,
         it can be `localvrs`=``locals()``.
 
     Returns
     -------
-    output of the script if any
+    out
+        Output of the script if any
     """
 
     return script.execute(localvars)

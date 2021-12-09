@@ -12,7 +12,10 @@ from spectrochempy.utils import NRed, NBlue, NBlack
 
 # ............................................................................
 def make_label(ss, lab="<no_axe_label>", use_mpl=True):
-    """make a label from title and units"""
+    """
+    Make a label from title and units.
+    """
+
     if ss is None:
         return lab
 

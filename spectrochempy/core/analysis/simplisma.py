@@ -487,17 +487,17 @@ class SIMPLISMA(HasTraits):
 
     def plotmerit(self, **kwargs):
         """
-        Plots the input dataset, reconstructed dataset and residuals
+        Plots the input dataset, reconstructed dataset and residuals.
 
         Parameters
         ----------
         **kwargs : dict
-            Plotting parameters
+            Plotting parameters.
 
         Returns
         -------
         ax
-            subplot
+            subplot.
         """
 
         colX, colXhat, colRes = kwargs.get("colors", ["blue", "green", "red"])

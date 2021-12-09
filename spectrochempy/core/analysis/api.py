@@ -5,7 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 """
-API for the core.analysis package
+API for the core.analysis package.
 
 Automatically generated from file present in the analysis directory.
 """

@@ -351,12 +351,12 @@ class NDComplexArray(NDArray):
     # ..................................................................................................................
     def component(self, select="REAL"):
         """
-        Take selected components of an hypercomplex array (RRR, RIR, ...)
+        Take selected components of an hypercomplex array (RRR, RIR, ...).
 
         Parameters
         ----------
         select : str, optional, default='REAL'
-            if 'REAL', only real component in all dimensions will be selected.
+            If 'REAL', only real component in all dimensions will be selected.
             ELse a string must specify which real (R) or imaginary (I) component
             has to be selected along a specific dimension. For instance,
             a string such as 'RRI' for a 2D hypercomplex array indicated
@@ -366,7 +366,7 @@ class NDComplexArray(NDArray):
         Returns
         -------
         component
-            component of the complex or hypercomplex array
+            Component of the complex or hypercomplex array.
         """
         if not select:
             # no selection - returns inchanged

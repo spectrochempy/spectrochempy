@@ -5,5 +5,5 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 """
-Package defining exporters for the n-dimensional datasets and projects
+Package defining exporters for the n-dimensional datasets and projects.
 """

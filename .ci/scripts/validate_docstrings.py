@@ -231,6 +231,11 @@ def spectrochempy_validate(func_name: str):
     print(func_name)
     result = validate(func_name)
 
+    # suppress errors from non spectrochempy files
+    file = result.get("file", {})
+    if file and "spectrochempy" not in file:
+        result["errors"] = []
+
     mentioned_errs = doc.mentioned_private_classes
     if mentioned_errs:
         result["errors"].append(
@@ -298,7 +303,9 @@ def validate_all(prefix, ignore_deprecated=False):
     result = {}
     seen = {}
 
-    api_doc_fnames = os.path.join(BASE_PATH, "docs", "devguide", "generated", "*.rst")
+    api_doc_fnames = os.path.join(
+        BASE_PATH, "docs", "userguide", "reference", "generated", "*.rst"
+    )
     api_items = []
     for api_doc_fname in glob.glob(api_doc_fnames):
         with open(api_doc_fname) as f:
@@ -403,8 +410,6 @@ def main(func_name, prefix, errors, output_format, ignore_deprecated):
 
 if __name__ == "__main__":
 
-    os.environ["DOC_BUILDING"] = "yes"
-
     format_opts = "default", "json", "actions"
     func_help = (
         "function or method to validate (e.g. spectrochempy.NDDataset.read) "
@@ -458,5 +463,4 @@ if __name__ == "__main__":
         args.ignore_deprecated,
     )
 
-    del os.environ["DOC_BUILDING"]
     sys.exit(res)

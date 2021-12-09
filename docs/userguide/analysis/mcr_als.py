@@ -29,7 +29,7 @@ import spectrochempy as scp
 #
 # $$ X = C S^t + E $$
 #
-# The ALS algorithm allows applying soft or hard constraints (e.g. non negativity, unimodality, equality to a given
+# The ALS algorithm allows applying soft or hard constraints (e.g., non negativity, unimodality, equality to a given
 # profile) to the spectra or concentration profiles of pure species. This property makes MCR-ALS an extremely flexible
 # and powerful method. Its current implementation in Scpy is limited to soft constraints but is expected to cover more
 # advanced features in further releases.

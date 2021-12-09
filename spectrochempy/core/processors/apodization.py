@@ -717,7 +717,6 @@ def blackmanharris(dataset, **kwargs):
     The data in the last dimension MUST be time-domain or dimensionless,
     otherwise an error is raised.
 
-
     Parameters
     ----------
     dataset : dataset
@@ -729,6 +728,8 @@ def blackmanharris(dataset, **kwargs):
         dataset.
     apod_arr
         The apodization array only if 'retapod' is True.
+    **kwargs
+        Additional keyword parameters (see Other Parameters)
 
     Other Parameters
     ----------------
@@ -743,7 +744,6 @@ def blackmanharris(dataset, **kwargs):
         True if we make the transform inplace.  If False, the function return a new datase
     retapod : bool, keyword parameter, optional, default=False
         True to return the apodization array along with the apodized object.
-
     """
 
     x = dataset

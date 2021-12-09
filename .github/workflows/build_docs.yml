@@ -68,10 +68,10 @@ jobs:
 
       - name: Build docs
         run: |
-          mkdir ../../../spectrochempy_docs
+          mkdir docs/build
 
           echo "cloning spectrochempy.github.io repository"
-          git clone --branch=gh-pages --single-branch https://github.com/spectrochempy/spectrochempy.git ../../../spectrochempy_docs/html
+          git clone --branch=gh-pages --single-branch https://github.com/spectrochempy/spectrochempy.git docs/build/html
 
           echo "Recreating docs"
           python docs/make.py --clean --html
@@ -80,5 +80,5 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@4.1.5
         with:
           branch: gh-pages
-          folder: ../../../spectrochempy_docs/html/
+          folder: docs/build/html/
           single-commit: true

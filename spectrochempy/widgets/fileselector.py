@@ -28,7 +28,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # ----------------------------------------------------------------------------------------------------------------------
 """
-Widgets for the Jupyter notebook and Jupyter lab
+Widgets for the Jupyter notebook and Jupyter lab.
 """
 from contextlib import contextmanager
 
@@ -111,23 +111,20 @@ class URLSelector(Base):
 
 class FileSelector(Base):
     """
-    ipywidgets interface for picking files
-
-    The current path is stored in ``.path`` and the current selection is stored
-    in ``.value``.
+    IPyWidgets interface for picking files.
     """
 
     def __init__(self, done_callback=None, path=None, filters=None):
         """
+        The current path is stored in ``.path`` and the current selection is stored in ``.value``.
+
         Parameters
         ----------
         done_callback : function
-            Called when the tick or cross buttons are clicked. Expects
-            signature func(path, ok=True|False).
+            Called when the tick or cross buttons are clicked. Expects signature func(path, ok=True|False).
         filters : list of str or None
-            Only show files ending in one of these strings. Normally used for
-            picking file extensions. None is an alias for [''], passes all
-            files.
+            Only show files ending in one of these strings. Normally used for picking file extensions. None is an
+            alias for [''], passes all files.
         """
         path = pathclean(path)
         self.startpath = path

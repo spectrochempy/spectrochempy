@@ -616,7 +616,7 @@ def ht(dataset, N=None):
     Hilbert transform.
 
     Reconstruct imaginary data via hilbert transform.
-    Copied from NMRGlue (BSD3 licence)
+    Copied from NMRGlue (BSD3 licence).
 
     Parameters
     ----------
@@ -629,7 +629,6 @@ def ht(dataset, N=None):
     -------
     ndata : ndarray
         NMR data which has been Hilvert transformed.
-
     """
     # create an empty output array
     fac = N / dataset.shape[-1]
