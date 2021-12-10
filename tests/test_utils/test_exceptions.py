@@ -4,11 +4,12 @@
 #  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
 # ============================================================================================
+import pathlib
 
 import pytest
 
 import spectrochempy as scp
-from spectrochempy.utils import deprecated, ProtocolError
+from spectrochempy.utils import deprecated, ProtocolError, ignored
 
 
 def test_protocolerror():
@@ -25,3 +26,9 @@ def test_deprecated():
 
     with pytest.warns(DeprecationWarning):
         deprecated_function()
+
+
+def test_ignored():
+
+    with ignored(FileNotFoundError):
+        pathlib.Path("file-that-does-not-exist").unlink()

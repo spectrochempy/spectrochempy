@@ -13,16 +13,38 @@
 
 from pathlib import Path
 from os import environ
-from os.path import join
 
 import pytest
 
 from spectrochempy.core import preferences as prefs
 from spectrochempy import NO_DISPLAY
-from spectrochempy.utils import get_filename
+from spectrochempy.utils import get_filename, check_filenames, pathclean
+
+
+def test_pathclean():
+
+    # Using unix/mac way to write paths
+    filename = pathclean("irdata/nh4y-activation.spg")
+    assert filename.suffix == ".spg"
+    assert filename.parent.name == "irdata"
+
+    # or Windows
+    filename = pathclean("irdata\\\\nh4y-activation.spg")
+    assert filename.parent.name == "irdata"
+
+    # Due to the escape character \\ in Unix, path string should be escaped \\\\
+    # or the raw-string prefix `r` must be used as shown below
+    filename = pathclean(r"irdata\\nh4y-activation.spg")
+    assert filename.suffix == ".spg"
+    assert filename.parent.name == "irdata"
+
+    # of course should work if input is alreadya Path
+    filename = pathclean(prefs.datadir / "irdata/nh4y-activation.spg")
+    assert filename.suffix == ".spg"
 
 
 def test_get_filename():
+
     # should read in the default prefs.datadir (and for testing we fix the name to environ['TEST_FILE']
     f = get_filename(
         filetypes=["OMNIC files (*.spg *.spa *.srs)", "SpectroChemPy files (*.scp)"]
@@ -35,8 +57,9 @@ def test_get_filename():
     )
     assert isinstance(f, list)
     assert isinstance(f[0], Path)
+
     if NO_DISPLAY:
-        assert str(f[0]) == join(prefs.datadir, environ["TEST_FILE"])
+        assert f[0] == prefs.datadir / environ["TEST_FILE"]
 
     # directory specified by a keyword as well as the filename
     f = get_filename("nh4y-activation.spg", directory="irdata")
@@ -80,4 +103,24 @@ def test_get_filename():
         )
 
 
-# EOF
+def test_check_filename():
+
+    filename = "irdata/nh4y-activation.spg"
+
+    # return a dictionary (after opening a dialog)
+    filenames = check_filenames()
+    assert isinstance(filenames, dict)
+    assert filenames == {".spg": [prefs.datadir / filename]}
+
+    filenames = check_filenames(filename)
+    assert isinstance(filenames, list)
+    assert filenames[0] == prefs.datadir / filename
+
+    filenames = check_filenames([filename])
+    assert isinstance(filenames, list)
+    assert filenames[0] == prefs.datadir / filename
+
+    # return the dictionary itself
+    filenames = check_filenames({"xxx": [filename]})
+    assert isinstance(filenames, dict)
+    assert filenames == {"xxx": [filename]}

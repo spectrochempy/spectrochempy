@@ -53,7 +53,7 @@ from spectrochempy.utils import (
     is_sequence,
     is_number,
     numpyprintoptions,
-    spacing,
+    spacing_,
     insert_masked_print,
     SpectroChemPyWarning,
     make_new_object,
@@ -2213,7 +2213,7 @@ class NDArray(HasTraits):
         """
         if self.linear:
             return self.increment * self.units
-        return spacing(self.data) * self.units
+        return spacing_(self.data) * self.units
 
     # ..................................................................................................................
     def squeeze(self, *dims, inplace=False, return_axis=False, **kwargs):

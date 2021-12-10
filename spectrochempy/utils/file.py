@@ -8,7 +8,6 @@
 File utilities.
 """
 from os import environ
-import shutil
 import re
 import warnings
 from pathlib import Path, WindowsPath, PosixPath
@@ -21,7 +20,6 @@ __all__ = [
     "check_filenames",
     "check_filename_to_open",
     "check_filename_to_save",
-    "copytree",
 ]
 
 
@@ -88,10 +86,6 @@ def pathclean(paths):
     '.spg'
     >>> filename.parent.name
     'irdata'
-
-    >>> from spectrochempy import preferences as prefs
-    >>> datadir = prefs.datadir
-    >>> fullpath = datadir / filename
     """
     from spectrochempy.utils import is_windows
 
@@ -99,9 +93,8 @@ def pathclean(paths):
         if isinstance(path, Path):
             path = path.name
         if is_windows():
-            path = WindowsPath(path)
-        else:
-            # some replacement so we can handle window style path on unix
+            path = WindowsPath(path)  # pragma: no cover
+        else:  # some replacement so we can handle window style path on unix
             path = path.strip()
             path = path.replace("\\", "/")
             path = path.replace("\n", "/n")
@@ -112,8 +105,9 @@ def pathclean(paths):
         return Path(path)
 
     if paths is not None:
-        if isinstance(paths, str):
-            return _clean(paths).expanduser()
+        if isinstance(paths, (str, Path)):
+            path = str(paths)
+            return _clean(path).expanduser()
         elif isinstance(paths, (list, tuple)):
             return [_clean(p).expanduser() if isinstance(p, str) else p for p in paths]
 
@@ -140,7 +134,36 @@ def _get_file_for_protocol(f, **kwargs):
 
 
 def check_filenames(*args, **kwargs):
+    """
+    Return a list or a dictionary of filenames.
 
+    Parameters
+    ==========
+    *args
+        If passed it is a str, a list of str or a dictionary containing filenames or a byte's contents.
+    **kwargs
+        Optional keywords parameters. See Othe parameters
+
+    Other Parameters
+    ================
+    filename :
+    filetypes :
+    content :
+    protocol :
+    processed :
+    expno :
+    procno :
+    listdir :
+    glob :
+
+    See Also
+    ========
+    check_filename_to_open
+    check_filename_to_save
+
+    Examples
+    ========
+    """
     from spectrochempy.core import preferences as prefs
 
     datadir = pathclean(prefs.datadir)
@@ -193,7 +216,7 @@ def check_filenames(*args, **kwargs):
                 directory = ""
             kw_directory = pathclean(kwargs.get("directory", None))
             if directory and kw_directory and directory != kw_directory:
-                # conflit we do not take into account the kw.
+                # conflict we do not take into account the kw.
                 warnings.warn(
                     "Two differents directory where specified (from args and keywords arg). "
                     "Keyword `directory` will be ignored!"
@@ -229,7 +252,7 @@ def check_filenames(*args, **kwargs):
             if filename.is_dir() and "topspin" in kwargs.get("protocol", []):
                 if kwargs.get("listdir", False) or kwargs.get("glob", None) is not None:
                     # when we list topspin dataset we have to read directories, not directly files
-                    # we can retreive them using glob patterns
+                    # we can retrieve them using glob patterns
                     glob = kwargs.get("glob", None)
                     if glob:
                         files_ = list(filename.glob(glob))
@@ -265,7 +288,7 @@ def check_filenames(*args, **kwargs):
                         else:
                             files_ = [f / "1r"]
 
-                # depending of the glob patterns too many files may have been selected : restriction to the valid subset
+                # depending on the glob patterns too many files may have been selected : restriction to the valid subset
                 filename = []
                 for item in files_:
                     if item.name in ["fid", "ser", "1r", "2rr", "3rrr"]:
@@ -293,7 +316,13 @@ def get_filename(*filenames, **kwargs):
     ----------
     filenames : `str` or pathlib object, `tuple` or `list` of strings of pathlib object, optional.
         A filename or a list of filenames.
-        If not provided, a dialog box is opened to select files in the current directory if no `directory` is specified).
+        If not provided, a dialog box is opened to select files in the current
+        directory if no `directory` is specified).
+    **kwargs
+        Other optional keyword parameters. See Other Parameters.
+
+    Other Parameters
+    ----------------
     directory : `str` or pathlib object, optional.
         The directory where to look at. If not specified, read in
         current directory, or in the datadir if unsuccessful.
@@ -323,10 +352,9 @@ def get_filename(*filenames, **kwargs):
     from spectrochempy import NO_DISPLAY, NO_DIALOG
     from spectrochempy.core import open_dialog
 
-    print(environ.get("DOC_BUILDING"))
     NODIAL = (
         NO_DIALOG or "DOC_BUILDING" in environ
-    )  # suppress dialog when doc is built or during full testing
+    )  # flag to suppress dialog when doc is built or during full testing
 
     # allowed filetypes
     # -----------------
@@ -405,7 +433,6 @@ def get_filename(*filenames, **kwargs):
         # no filenames:
         # open a file dialog
         # except if a directory is specified or listdir is True.
-        # currently Scpy use QT (needed for next GUI features)
 
         getdir = kwargs.get(
             "listdir",
@@ -622,17 +649,6 @@ def check_filename_to_open(*args, **kwargs):
     else:
         # probably no args (which means that we are coming from a dialog or from a full list of a directory
         return filenames
-
-
-# we need to copy file so it will work
-def copytree(src, dst, symlinks=False, ignore=None):
-    for item in src.iterdir():
-        s = src / item.name
-        d = dst / item.name
-        if s.is_dir():
-            shutil.copytree(s, d, symlinks, ignore)
-        else:
-            shutil.copy2(s, d)
 
 
 # EOF

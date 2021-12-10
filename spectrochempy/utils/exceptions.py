@@ -6,6 +6,7 @@
 # ============================================================================================
 
 import warnings
+from contextlib import contextmanager
 
 __all__ = [
     "SpectroChemPyWarning",
@@ -15,6 +16,7 @@ __all__ = [
     "CoordinateMismatchError",
     "ProtocolError",
     "deprecated",
+    "ignored",
 ]
 
 
@@ -101,6 +103,44 @@ def deprecated(message):
         return wrapper
 
     return deprecation_decorator
+
+
+# ......................................................................................................................
+try:
+    from contextlib import ignored
+except ImportError:
+
+    @contextmanager
+    def ignored(*exceptions):
+        """
+        A context manager for ignoring exceptions.
+
+        This is equivalent to::
+
+            try :
+                <body>
+            except exceptions :
+                pass
+
+        parameters
+        ----------
+        *exceptions : Exception
+            One or several exceptions to ignore.
+
+        Examples
+        --------
+
+            >>> import os
+            >>> from spectrochempy.utils import ignored
+            >>>
+            >>> with ignored(OSError):
+            ...     os.remove('file-that-does-not-exist')
+        """
+
+        try:
+            yield
+        except exceptions:
+            pass
 
 
 # ==============================================================================

@@ -410,12 +410,7 @@ class _QTFileDialogs:
     # noinspection PyRedundantParentheses
     @classmethod
     def _open_filename(
-        cls,
-        parent=None,
-        directory=None,
-        caption="Select file",
-        filters=None,
-        default_filter=None,
+        cls, parent=None, directory=None, caption="Select file", filters=None
     ):
 
         if directory is None:
@@ -426,7 +421,6 @@ class _QTFileDialogs:
             caption=caption,
             directory=directory,
             filter=";;".join(filters),
-            initialFilter=default_filter,
         )
         if filename:
             return filename
@@ -436,12 +430,7 @@ class _QTFileDialogs:
     # noinspection PyRedundantParentheses
     @classmethod
     def _open_multiple_filenames(
-        cls,
-        parent=None,
-        directory=None,
-        caption="Select file(s)",
-        filters=None,
-        default_filter=None,
+        cls, parent=None, directory=None, caption="Select file(s)", filters=None
     ):
         """
         Return one or several files to open
@@ -455,7 +444,6 @@ class _QTFileDialogs:
             caption=caption,
             directory=directory,
             filter=";;".join(filters),
-            initialFilter=default_filter,
         )
         if files:
             return files
@@ -468,7 +456,6 @@ class _QTFileDialogs:
         parent=None,
         filename=None,
         caption="Save as...",
-        selected_filter="",
         filters=None,
     ):
 
@@ -484,7 +471,6 @@ class _QTFileDialogs:
             parent=parent,
             caption=caption,
             directory=directory,
-            initialFilter=selected_filter,
             filter=";;".join(filters),
             options=options,
         )
@@ -540,7 +526,11 @@ class _TKFileDialogs:
         return filetypes
 
     # noinspection PyRedundantParentheses
-    def _open_filename(self, parent=None, filters=None):
+    def _open_filename(
+        self,
+        parent=None,
+        filters=None,
+    ):
 
         filename = filedialog.askopenfilename(
             parent=parent,
@@ -561,7 +551,6 @@ class _TKFileDialogs:
         """
         Return one or several files to open
         """
-
         filename = filedialog.askopenfilenames(
             parent=parent,
             filetypes=self.filetypes(filters) + [("all files", ("*"))],
@@ -577,12 +566,7 @@ class _TKFileDialogs:
         return None
 
     def _save_filename(
-        self,
-        parent=None,
-        filename="",
-        caption="Save as...",
-        selected_filter="",
-        filters=None,
+        self, parent=None, filename="", caption="Save as...", filters=None
     ):
 
         from ..utils import pathclean
@@ -593,9 +577,6 @@ class _TKFileDialogs:
             filename = pathclean(filename)
             directory = filename.parent
             dftext = filename.suffix
-
-        if not dftext and selected_filter:
-            raise Exception("Save error")
 
         if not dftext:
             dftext = ".scp"
@@ -625,11 +606,7 @@ class _TKFileDialogs:
 
 # noinspection PyRedundantParentheses
 def save_dialog(
-    filename=None,
-    caption="Save as...",
-    selected_filter="",
-    filters=("All Files (*)"),
-    **kwargs
+    filename=None, caption="Save as...", filters=("All Files (*)"), **kwargs
 ):
     """
     Return a file where to save.
@@ -642,11 +619,10 @@ def save_dialog(
             parent=parent,
             filename=filename,
             caption=caption,
-            selected_filter=selected_filter,
             filters=filters,
         )
     else:
-        f = _TKFileDialogs()._save_filename(filename, caption, selected_filter, filters)
+        f = _TKFileDialogs()._save_filename(filename, caption, filters)
 
     from ..utils import pathclean
 
@@ -667,7 +643,6 @@ def open_dialog(single=True, directory=None, filters=("All Files (*)"), **kwargs
         klass = _TKFileDialogs()
         parent = klass.root
 
-    default_filter = kwargs.get("default_filter", None)
     if directory is None:
         directory = ""
     if filters == "directory":
@@ -676,13 +651,9 @@ def open_dialog(single=True, directory=None, filters=("All Files (*)"), **kwargs
             parent=parent, caption=caption, directory=str(directory)
         )
     elif single:
-        f = klass._open_filename(
-            parent=parent, filters=filters, default_filter=default_filter
-        )
+        f = klass._open_filename(parent=parent, filters=filters)
     else:
-        f = klass._open_multiple_filenames(
-            parent=parent, filters=filters, default_filter=default_filter
-        )
+        f = klass._open_multiple_filenames(parent=parent, filters=filters)
 
     from ..utils import pathclean
 

@@ -55,6 +55,7 @@ def generate_api(api_path):
     __all__ = []
 
     for pkg in pkgs:
+        # print(pkg)
         if pkg.endswith("api") or "test" in pkg:
             continue
         try:
