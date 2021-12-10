@@ -32,7 +32,7 @@ jobs:
           python-version: "3.8"
           activate-environment: scpy
           environment-file: environment.yml
-          condarc-file: .ci/scripts/condarc.yml
+          condarc-file: .ci/condarc.yml
           auto-activate-base: false
 
       - name: Install spectrochempy

@@ -31,7 +31,7 @@ jobs:
         with:
           activate-environment: scpy3.9
           environment-file: environment.yml
-          condarc-file: .ci/scripts/condarc.yml
+          condarc-file: .ci/condarc.yml
           auto-activate-base: false
 
       - name: Install spectrochempy

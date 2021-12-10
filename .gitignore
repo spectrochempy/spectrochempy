@@ -146,7 +146,7 @@ Icon*
 cov.coverage
 cov.syspath.txt
 coverage.xml
-.ci/scripts/myfile.csv
-.ci/scripts/single_spectrum.csv
+scripts/myfile.csv
+scripts/single_spectrum.csv
 myfile.csv
 single_spectrum.csv

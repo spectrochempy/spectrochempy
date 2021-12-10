@@ -42,13 +42,13 @@ jobs:
 
       - name: Create environment scpy3.7
         run: |
-          python .ci/scripts/env_create.py -v 3.7 --dev scpy3.7.yml
-          mv .ci/scripts/scpy3.7.yml artifact/scpy3.7.yml
+          python .ci/env_create.py -v 3.7 --dev scpy3.7.yml
+          mv .ci/scpy3.7.yml artifact/scpy3.7.yml
 
       - name: Create environment scpy3.9
         run: |
-          python .ci/scripts/env_create.py -v 3.9 --dev scpy3.9.yml
-          mv .ci/scripts/scpy3.9.yml artifact/scpy3.9.yml
+          python .ci/env_create.py -v 3.9 --dev scpy3.9.yml
+          mv .ci/scpy3.9.yml artifact/scpy3.9.yml
 
       - name: Store artifact
         uses: actions/upload-artifact@v2
@@ -93,7 +93,7 @@ jobs:
         with:
           activate-environment: scpy${{ matrix.pythonVersion }}
           environment-file: scpy${{ matrix.pythonVersion }}.yml
-          condarc-file: .ci/scripts/condarc.yml
+          condarc-file: .ci/condarc.yml
           auto-activate-base: false
 
       - name: Install spectrochempy
