@@ -251,13 +251,10 @@ class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
                 "gamma": float(item["gn"]),
                 "spin": float(item["spin"]),
                 "abundance": float(item["abundance"]),
-                "stablity": item["stability"],
+                "stability": item["stability"],
             }
 
         return pv
-
-    def __eq__(self, other):
-        raise NotImplementedError
 
 
 #   ======================================================================================================================
