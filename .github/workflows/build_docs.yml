@@ -34,6 +34,7 @@ jobs:
           environment-file: environment.yml
           condarc-file: .ci/condarc.yml
           auto-activate-base: false
+          auto-update-conda: true
 
       - name: Install spectrochempy
         run: |

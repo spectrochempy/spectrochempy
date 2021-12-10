@@ -95,6 +95,7 @@ jobs:
           environment-file: scpy${{ matrix.pythonVersion }}.yml
           condarc-file: .ci/condarc.yml
           auto-activate-base: false
+          auto-update-conda: true
 
       - name: Install spectrochempy
         run: |
