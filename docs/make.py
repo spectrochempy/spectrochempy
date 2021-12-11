@@ -152,7 +152,7 @@ def make_redirection_page():
     <html>
     <head>
     <title>Redirect to the dev version of the documentation</title>
-    <meta http-equiv="refresh" content="0; URL=https://{URL_SCPY}/latest">
+    <meta http-equiv="refresh" content="0; URL=latest">
     </head>
     <body>
     <p>
@@ -247,6 +247,7 @@ class BuildDocumentation(object):
         self.sync_notebook = args.syncnb
 
         if args.html:
+            self.sync_notebook = True
             self.make_docs("html")
             self.make_tutorials()
 

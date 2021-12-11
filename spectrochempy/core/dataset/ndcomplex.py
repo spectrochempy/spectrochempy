@@ -117,19 +117,6 @@ class NDComplexArray(NDArray):
 
         super().__init__(data=data, **kwargs)
 
-    # ..................................................................................................................
-    def implements(self, name=None):
-        """
-        Utility to check if the current object implement `NDComplexArray`.
-
-        Rather than isinstance(obj, NDComplexArrray) use object.implements('NDComplexArray').
-        This is useful to check type without importing the module
-        """
-        if name is None:
-            return "NDComplexArray"
-        else:
-            return name == "NDComplexArray"
-
     # ------------------------------------------------------------------------------------------------------------------
     # validators
     # ------------------------------------------------------------------------------------------------------------------

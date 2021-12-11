@@ -37,7 +37,7 @@ import IPython
 
 from ..utils import pathclean
 
-__all__ = ["FileSelector", "URLSelector"]
+__all__ = ["FileSelector"]
 
 import ipywidgets as widgets
 
@@ -84,29 +84,6 @@ class Base(object):
                 }
                 IPython.display.display(data, raw=True)
                 self.widget._handle_displayed(**kwargs)
-
-
-class URLSelector(Base):
-    def __init__(self, done_callback=None):
-        self.done_callback = done_callback
-        self.lurl = widgets.Label(value="URL:")
-        self.url = widgets.Text(
-            placeholder="Full URL with protocol",
-            layout=widgets.Layout(flex="10 1 auto", width="auto"),
-        )
-        self.x = widgets.Button(
-            icon="close",
-            tooltip="Close Selector",
-            layout=widgets.Layout(flex="1 1 auto", width="auto"),
-        )
-        self.x.on_click(lambda ev: self.stop())
-        self.ok = widgets.Button(
-            icon="check",
-            tooltip="OK",
-            layout=widgets.Layout(flex="1 1 auto", width="auto"),
-        )
-        self.ok.on_click(lambda ev: self.stop(ok=self.url.value))
-        self.widget = widgets.HBox(children=[self.lurl, self.url, self.ok, self.x])
 
 
 class FileSelector(Base):

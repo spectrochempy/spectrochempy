@@ -37,7 +37,7 @@ _PRETTY_EXPONENTS = "⁰¹²³⁴⁵⁶⁷⁸⁹"
 # ----------------------------------------------------------------------------------------------------------------------
 def _pretty_fmt_exponent(num):
     """
-    Format an number into a pretty printed exponent using unicode.
+    Format a number into a pretty printed exponent using unicode.
     """
     # work badly for decimals as superscript dot do not exist in unicode
     # (as far as we know)

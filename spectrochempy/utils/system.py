@@ -45,7 +45,7 @@ def is_kernel():
     # /questions/34091701/determine-if-were-in-an-ipython-notebook-session
     if "IPython" not in sys.modules:
         # IPython hasn't been imported
-        return False
+        return False  # pragma: no cover
     from IPython import get_ipython  # pragma: no cover
 
     # check for `kernel` attribute on the IPython instance

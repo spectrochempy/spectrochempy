@@ -14,7 +14,6 @@ Application Programming Interface.
 
 
 import sys
-from os import environ
 
 import matplotlib as mpl
 
@@ -22,6 +21,7 @@ from IPython.core.interactiveshell import InteractiveShell
 from IPython import get_ipython
 
 from pathlib import Path
+from os import environ
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Check the environment for plotting

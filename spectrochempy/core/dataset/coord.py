@@ -26,6 +26,17 @@ from spectrochempy.units import Quantity, ur
 # Coord
 # ======================================================================================================================
 class Coord(NDMath, NDArray):
+    """
+    Explicit coordinates for a dataset along a given axis.
+
+    The coordinates of a |NDDataset| can be created using the |Coord|
+    object.
+    This is a single dimension array with either numerical (float)
+    values or labels (str, `Datetime` objects, or any other kind of objects) to
+    represent the coordinates. Only a one numerical axis can be defined,
+    but labels can be multiple.
+    """
+
     _copy = Bool()
 
     _html_output = False
@@ -36,15 +47,6 @@ class Coord(NDMath, NDArray):
     # ------------------------------------------------------------------------------------------------------------------
     def __init__(self, data=None, **kwargs):
         """
-        Explicit coordinates for a dataset along a given axis.
-
-        The coordinates of a |NDDataset| can be created using the |Coord|
-        object.
-        This is a single dimension array with either numerical (float)
-        values or labels (str, `Datetime` objects, or any other kind of objects) to
-        represent the coordinates. Only a one numerical axis can be defined,
-        but labels can be multiple.
-
         Parameters
         -----------
         data : ndarray, tuple or list
@@ -59,7 +61,7 @@ class Coord(NDMath, NDArray):
             `data` before passing it in the object constructor if that's the
             desired behavior or set the `copy` argument to True.
         **kwargs
-            See other parameters.
+            Optional keywords parameters. See other parameters.
 
         Other Parameters
         ----------------
@@ -103,11 +105,17 @@ class Coord(NDMath, NDArray):
         linear : bool, optional
             If set to True, the coordinate is considered as a
             ``LinearCoord`` object.
+        offset : float, optional
+            Only used is linear is True.
+            If omitted a value of 0.0 is taken for tje coordinate offset.
+        increment : float, optional
+            Only used if linear is true.
+            If omitted a value of 1.0 is taken for the coordinate increment.
 
         See Also
         --------
         NDDataset : Main SpectroChemPy object: an array with masks, units and coordinates.
-        LinearCoord : Implicit linear coordinates.
+        LinearCoord : linear coordinates.
 
         Examples
         --------
@@ -137,20 +145,11 @@ class Coord(NDMath, NDArray):
         if len(self.shape) > 1:
             raise ValueError("Only one 1D arrays can be used to define coordinates")
 
-    # ..................................................................................................................
-    def implements(self, name=None):
-        """
-        Utility to check if the current object implement `Coord`.
-
-        Rather than isinstance(obj, Coord) use object.implements('Coord').
-
-        This is useful to check type without importing the module
-        """
-
-        if name is None:
-            return "Coord"
-        else:
-            return name == "Coord"
+        self._linear = kwargs.pop("linear", False)
+        self._increment = kwargs.pop("increment", 1.0)
+        self._offset = kwargs.pop("offset", 0.0)
+        self._size = kwargs.pop("size", 0)
+        # self._accuracy = kwargs.pop('accuracy', None)
 
     # ------------------------------------------------------------------------------------------------------------------
     # readonly property
@@ -447,7 +446,7 @@ class Coord(NDMath, NDArray):
     # ..................................................................................................................
     def __dir__(self):
         # remove some methods with respect to the full NDArray
-        # as they are not usefull for Coord.
+        # as they are not useful for Coord.
         return [
             "data",
             "labels",
@@ -536,6 +535,16 @@ class Coord(NDMath, NDArray):
 
 
 class LinearCoord(Coord):
+    """
+    Linear coordinates.
+
+    Such coordinates correspond to a ascending or descending linear
+    sequence of values, fully determined by two parameters, i.e., an offset (off) and an increment (inc) :
+
+    .. math::
+
+        \\mathrm{data} = i*\\mathrm{inc} + \\mathrm{off}.
+    """
 
     _use_time = Bool(False)
     _show_datapoints = Bool(True)
@@ -544,15 +553,6 @@ class LinearCoord(Coord):
     def __init__(self, data=None, offset=0.0, increment=1.0, **kwargs):
 
         """
-        Linear coordinates.
-
-        Such coordinates correspond to a ascending or descending linear
-        sequence of values, fully determined by two parameters, i.e., an offset (off) and an increment (inc) :
-
-        .. math::
-
-            \\mathrm{data} = i*\\mathrm{inc} + \\mathrm{off}.
-
         Parameters
         ----------
         data : a 1D array-like object, optional
@@ -565,7 +565,7 @@ class LinearCoord(Coord):
         increment : float, optional
             If omitted a value of 1.0 is taken for the coordinate increment.
         **kwargs
-            Additional keywords parameters. See Other Parameters.
+            Optional keywords parameters. See other parameters.
 
         Other Parameters
         ----------------
@@ -649,22 +649,6 @@ class LinearCoord(Coord):
             self.offset = offset
             self.increment = increment
             self._linear = True
-
-    # ..................................................................................................................
-    def implements(self, name=None):
-        """
-        Utility to check if the current object implement `LinearCoord`.
-
-        Rather than isinstance(obj, Coord) use object.implements(
-        'LinearCoord').
-
-        This is useful to check type without importing the module
-        """
-
-        if name is None:
-            return "LinearCoord"
-        else:
-            return name == "LinearCoord"
 
     # ..................................................................................................................
     @property  # read only
