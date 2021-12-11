@@ -63,7 +63,7 @@ from spectrochempy.utils import (
 )
 
 # ======================================================================================================================
-# constants
+# Constants
 # ======================================================================================================================
 
 DEFAULT_DIM_NAME = list("xyzuvwpqrstijklmnoabcdefgh")[::-1]
@@ -80,11 +80,23 @@ numpyprintoptions()
 # ======================================================================================================================
 
 
-# noinspection PyPep8Naming
 class NDArray(HasTraits):
-    # hidden properties
+    """
+    The basic |NDArray| object.
 
-    # array definition
+    The |NDArray| class is an array (numpy |ndarray|-like) container, usually not intended to be used directly,
+    as its basic functionalities may be quite limited, but to be subclassed.
+
+    Indeed, both the classes |NDDataset| and |Coord| which respectively implement a full dataset (with
+    coordinates) and the coordinates in a given dimension, are derived from |NDArray| in |scpy|.
+
+    The key distinction from raw numpy |ndarray| is the presence of optional properties such as dimension names,
+    labels, masks, units and/or extensible metadata dictionary.
+    """
+
+    # Hidden properties
+
+    # Main array properties
     _id = Unicode()
     _name = Unicode()
     _title = Unicode(allow_none=True)
@@ -95,14 +107,14 @@ class NDArray(HasTraits):
     _labels = Array(allow_none=True)
     _units = Instance(Unit, allow_none=True)
 
-    # region of interest
+    # Region of interest
     _roi = List(allow_none=True)
 
-    # dates
+    # Dates
     _date = Instance(datetime)
     _modified = Instance(datetime)
 
-    # metadata
+    # Metadata
     _author = Unicode()
     _description = Unicode()
     _origin = Unicode()
@@ -110,50 +122,28 @@ class NDArray(HasTraits):
     _meta = Instance(Meta, allow_none=True)
     _transposed = Bool(False)
 
-    # for linear data generation
-    _offset = Union(
-        (CFloat(), CInt(), Instance(Quantity)),
-    )
-    _increment = Union(
-        (CFloat(), CInt(), Instance(Quantity)),
-    )
+    # For linear data generation
+    _offset = Union((CFloat(), CInt(), Instance(Quantity)))
+    _increment = Union((CFloat(), CInt(), Instance(Quantity)))
     _size = Integer(0)
     _linear = Bool(False)
 
-    # metadata
-
     # Basic NDArray setting
     _copy = Bool(False)  # by default we do not copy the data
-    # which means that if the same numpy array
-    # is used for too different NDArray, they
-    # will share it.
+    # which means that if the same numpy array is used for too different NDArray,
+    # they will share it.
 
     _labels_allowed = Bool(True)  # Labels are allowed for the data, if the
+    # data are 1D only (they will essentially serve as coordinates labelling.
 
-    # data are 1D only (they will essentially
-    # serve as coordinates labelling.
-
-    # other settings
+    # Other settings
     _text_width = Integer(120)
     _html_output = Bool(False)
-
-    # Put this here as it is sometimes not found when only in NDIO
     _filename = Union((Instance(pathlib.Path), Unicode()), allow_none=True)
 
     # ..................................................................................................................
-    def __init__(self, data=None, *args, **kwargs):
+    def __init__(self, data=None, **kwargs):
         """
-        The basic |NDArray| object.
-
-        The |NDArray| class is an array (numpy |ndarray|-like) container, usually not intended to be used directly,
-        as its basic functionalities may be quite limited, but to be subclassed.
-
-        Indeed, both the classes |NDDataset| and |Coord| which respectively implement a full dataset (with
-        coordinates)  and the coordinates in a given dimension, are derived from |NDArray| in |scpy|.
-
-        The key distinction from raw numpy |ndarray| is the presence of optional properties such as dimension names,
-        labels, masks, units and/or extensible metadata dictionary.
-
         Parameters
         ----------
         data : array of floats
@@ -166,6 +156,8 @@ class NDArray(HasTraits):
             be used to accordingly set those of the created object. If possible, the provided data will not be copied
             for `data` input, but will be passed by reference, so you should make a copy of the `data` before passing
             them if that's the desired behavior or set the `copy` argument to True.
+        **kwargs
+            Optional keywords parameters. See Other Parameters.
 
         Other Parameters
         ----------------
@@ -215,33 +207,26 @@ class NDArray(HasTraits):
         See Also
         --------
         NDDataset : Object which subclass |NDArray| with the addition of coordinates.
-        Coord : Explicit coordinates object.
-        LinearCoord : Implicit coordinates objet.
+        Coord : Object which subclass |NDArray| (coordinates object).
+        LinearCoord : Object which subclass |NDArray| (Linear coordinates object).
 
         Examples
         --------
 
-        >>> myarray = scp.NDArray([1., 2., 3.])
+        >>> myarray = scp.NDArray([1., 2., 3.], name='myarray')
+        >>> assert myarray.name == 'myarray'
         """
         super().__init__()
 
-        # creation date
-
+        # Creation date.
         self._date = datetime.now(timezone.utc)
 
-        # by default, we try to keep a reference to the data, not copy them
+        # By default, we try to keep a reference to the data, so we do not copy them.
         self._copy = kwargs.pop("copy", False)  #
 
         dtype = kwargs.pop("dtype", None)
         if dtype is not None:
             self._dtype = np.dtype(dtype)
-
-        self._linear = kwargs.pop("linear", False)
-        self._increment = kwargs.pop("increment", 1.0)
-        self._offset = kwargs.pop("offset", 0.0)
-        self._size = kwargs.pop("size", 0)
-
-        # self._accuracy = kwargs.pop('accuracy', None)
 
         if data is not None:
             self.data = data
@@ -314,9 +299,6 @@ class NDArray(HasTraits):
             "author",
             "description",
             "history",
-            "linear",
-            "offset",
-            "increment",
             "transposed",
         ]
 
@@ -1655,16 +1637,31 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     def implements(self, name=None):
         """
-        Utility to check if the current object implement `NDArray`.
+        Utility to check if the current object implements a given class.
 
-        Rather than isinstance(obj, NDArrray) use object.implements('NDArray').
-
+        Rather than isinstance(obj, <class>) use object.implements('<classname>').
         This is useful to check type without importing the module.
+
+        Parameters
+        ----------
+        name : str, optional
+            Name of the class implemented.
+
+        Examples
+        --------
+        >>> from spectrochempy import NDArray
+        >>> ar = NDArray([1., 2., 3.])
+        >>> ar.implements('NDDataset')
+        False
+        >>> ar.implements('NDArray')
+        True
+        >>> ar.implements()
+        'NDArray'
         """
         if name is None:
-            return "NDArray"
+            return self.__class__.__name__
         else:
-            return name == "NDArray"
+            return name == self.__class__.__name__
 
     # ..................................................................................................................
     @property

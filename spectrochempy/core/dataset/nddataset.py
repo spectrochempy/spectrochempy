@@ -773,44 +773,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         self._coordset = None
 
     # ..................................................................................................................
-    def implements(self, name=None):
-        """
-        Check if the current object implements `NDDataset`.
-
-        Rather than isinstance(obj, NDDataset) use object.implements('NDDataset').
-        This is useful to check type without importing the module.
-
-        Parameters
-        ----------
-        name : str
-            Name of the object class. If None, the function returns the class name.
-            If name is given, it checks if it correspond to the current class name.
-
-        Returns
-        -------
-        str or bool
-            If name is given, a bool is returned
-            If name is None, the classname is returned
-
-        Examples
-        --------
-        >>> from spectrochempy import NDDataset, Coord
-        >>> co = Coord([1., 2., 3.])
-        >>> co.implements('NDDataset')
-        False
-        >>> co.implements('Coord')
-        True
-        >>> ds = NDDataset([1., 2., 3.])
-        >>> ds.implements()
-        'NDDataset'
-        """
-
-        if name is None:
-            return "NDDataset"
-        else:
-            return name == "NDDataset"
-
-    # ..................................................................................................................
     @property
     def labels(self):
         # not valid for NDDataset
