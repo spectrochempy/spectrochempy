@@ -247,6 +247,7 @@ class BuildDocumentation(object):
         self.sync_notebook = args.syncnb
 
         if args.html:
+            self.sync_notebook = True
             self.make_docs("html")
             self.make_tutorials()
 
