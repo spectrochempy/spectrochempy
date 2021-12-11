@@ -12,10 +12,10 @@ from datetime import datetime, timezone
 import numpy as np
 from traitlets import HasTraits, Instance, Float
 
-from ..dataset.nddataset import NDDataset
-from ..dataset.coordset import CoordSet
-from ..dataset.coord import Coord
-from ...utils import MASKED
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.coordset import CoordSet
+from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.utils import MASKED
 from .svd import SVD
 
 __all__ = ["EFA"]

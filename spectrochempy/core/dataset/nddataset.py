@@ -35,7 +35,7 @@ from spectrochempy.utils import (
     SpectroChemPyException,
     MaskedConstant,
 )
-from spectrochempy._optional import import_optional_dependency
+from spectrochempy.optional import import_optional_dependency
 
 
 # ======================================================================================================================

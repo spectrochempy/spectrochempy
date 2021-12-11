@@ -29,9 +29,8 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 
-from .plotutils import make_label
-from ..dataset.coord import LinearCoord
-from ...utils import add_docstring
+from spectrochempy.utils import make_label, add_docstring
+from spectrochempy.core.dataset.coord import LinearCoord
 
 _PLOT2D_DOC = """\
 ax : |Axes| instance. Optional

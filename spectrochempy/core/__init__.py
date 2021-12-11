@@ -25,7 +25,7 @@ import matplotlib as mpl
 import numpy as np
 import scipy
 
-from .._optional import import_optional_dependency
+from ..optional import import_optional_dependency
 
 warnings.filterwarnings("ignore")
 

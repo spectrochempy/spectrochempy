@@ -57,7 +57,7 @@ from IPython.display import publish_display_data, clear_output
 from jinja2 import Template
 
 from spectrochempy.utils import MetaConfigurable, pathclean, get_pkg_path
-from .plot_preferences import PlotPreferences
+from spectrochempy.plot_preferences import PlotPreferences
 
 # set the default style
 plt.style.use(["classic"])

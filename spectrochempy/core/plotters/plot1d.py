@@ -33,9 +33,8 @@ __dataset_methods__ = [
 import numpy as np
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
-from .plotutils import make_label
-from ...utils import is_sequence, add_docstring  # , deprecated
-from ..dataset.coord import Coord
+from spectrochempy.utils import make_label, is_sequence, add_docstring  # , deprecated
+from spectrochempy.core.dataset.coord import Coord
 
 
 _PLOT1D_DOC = """\

@@ -17,13 +17,13 @@ from traitlets import Int, Instance, HasTraits, Float, Unicode, Tuple, List
 from matplotlib.widgets import SpanSelector
 import matplotlib.pyplot as plt
 
-from ..dataset.coordrange import trim_ranges
-from ..plotters.multiplot import multiplot
-from ..dataset.nddataset import NDDataset
-from ...utils import TYPE_INTEGER, TYPE_FLOAT
-from .smooth import smooth
-from .. import debug_, warning_
+from spectrochempy.core.dataset.coordrange import trim_ranges
+from spectrochempy.core.plotters.multiplot import multiplot
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.utils import TYPE_INTEGER, TYPE_FLOAT
+from spectrochempy.core import debug_, warning_
 from spectrochempy.core.processors.utils import _units_agnostic_method
+from .smooth import smooth
 
 
 class BaselineCorrection(HasTraits):

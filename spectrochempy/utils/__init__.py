@@ -24,6 +24,7 @@ from numpy.ma.core import (
 # import util files content
 # ----------------------------------------------------------------------------------------------------------------------
 
+from .print import *
 from .file import *
 from .jsonutils import *
 from .misc import *
@@ -32,5 +33,5 @@ from .plots import *
 from .system import *
 from .traits import *
 from .zip import *
-from .print import *
 from .exceptions import *
+from .version import *
