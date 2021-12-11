@@ -179,11 +179,10 @@ def check_filenames(*args, **kwargs):
             # as filename where not given we passed the 'unnamed' string
             # return a dictionary
             return {pathclean(f"no_name_{i}"): arg for i, arg in enumerate(args)}
-        elif isinstance(args[0], list):
-            if isinstance(args[0][0], (str, Path)):
-                filenames = pathclean(args[0])
-            elif isinstance(args[0][0], bytes):
-                return {pathclean(f"no_name_{i}"): arg for i, arg in enumerate(args[0])}
+        elif isinstance(args[0], list) and isinstance(args[0][0], (str, Path)):
+            filenames = pathclean(args[0])
+        elif isinstance(args[0], list) and isinstance(args[0][0], bytes):
+            return {pathclean(f"no_name_{i}"): arg for i, arg in enumerate(args[0])}
         elif isinstance(args[0], dict):
             # return directly the dictionary
             return args[0]
@@ -207,7 +206,7 @@ def check_filenames(*args, **kwargs):
         filenames = get_filename(
             directory=directory, dictionary=True, filetypes=filetypes, **kwargs
         )
-    if filenames and not isinstance(filenames, dict):
+    elif filenames and not isinstance(filenames, dict):
         filenames_ = []
         for filename in filenames:
             # in which directory ?
@@ -231,54 +230,46 @@ def check_filenames(*args, **kwargs):
 
             f = directory / filename
 
-            fexist = None
-            if f.exists():
-                fexist = f
-            else:
-                fexist = _get_file_for_protocol(f, **kwargs)
+            fexist = f if f.exists() else _get_file_for_protocol(f, **kwargs)
 
             if fexist is None:
                 f = datadir / filename
-                if f.exists():
-                    fexist = f
-                else:
-                    fexist = _get_file_for_protocol(f, **kwargs)
+                fexist = f if f.exists() else _get_file_for_protocol(f, **kwargs)
 
             if fexist:
                 filename = fexist
 
-            # particular case for topspin where filename can be provided as a directory only
+            # Particular case for topspin where filename can be provided as a directory only
             # use of expno and procno
             if filename.is_dir() and "topspin" in kwargs.get("protocol", []):
+
                 if kwargs.get("listdir", False) or kwargs.get("glob", None) is not None:
                     # when we list topspin dataset we have to read directories, not directly files
                     # we can retrieve them using glob patterns
                     glob = kwargs.get("glob", None)
                     if glob:
                         files_ = list(filename.glob(glob))
+                    elif not kwargs.get("processed", False):
+                        files_ = list(filename.glob("**/ser"))
+                        files_.extend(list(filename.glob("**/fid")))
                     else:
-                        if not kwargs.get("processed", False):
-                            files_ = list(filename.glob("**/ser"))
-                            files_.extend(list(filename.glob("**/fid")))
-                        else:
-                            files_ = list(filename.glob("**/1r"))
-                            files_.extend(list(filename.glob("**/2rr")))
-                            files_.extend(list(filename.glob("**/3rrr")))
+                        files_ = list(filename.glob("**/1r"))
+                        files_.extend(list(filename.glob("**/2rr")))
+                        files_.extend(list(filename.glob("**/3rrr")))
                 else:
                     expno = kwargs.pop("expno", None)
                     procno = kwargs.pop("procno", None)
+
                     if expno is None:
                         expnos = sorted(filename.glob("[0-9]*"))
                         if expnos:
                             expno = expnos[0]
-                    if procno is None:
-                        # read a fid or a ser
-                        f = filename / str(expno)
-                        if (f / "ser").exists():
-                            files_ = [f / "ser"]
-                        else:
-                            files_ = [f / "fid"]
-                    else:
+
+                    # read a fid or a ser
+                    f = filename / str(expno)
+                    files_ = [f / "ser"] if (f / "ser").exists() else [f / "fid"]
+
+                    if procno is not None:
                         # get the adsorption spectrum
                         f = filename / str(expno) / "pdata" / str(procno)
                         if (f / "3rrr").exists():
