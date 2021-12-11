@@ -206,7 +206,7 @@ def check_filenames(*args, **kwargs):
         filenames = get_filename(
             directory=directory, dictionary=True, filetypes=filetypes, **kwargs
         )
-    elif filenames and not isinstance(filenames, dict):
+    if filenames and not isinstance(filenames, dict):
         filenames_ = []
         for filename in filenames:
             # in which directory ?
@@ -242,48 +242,7 @@ def check_filenames(*args, **kwargs):
             # Particular case for topspin where filename can be provided as a directory only
             # use of expno and procno
             if filename.is_dir() and "topspin" in kwargs.get("protocol", []):
-
-                if kwargs.get("listdir", False) or kwargs.get("glob", None) is not None:
-                    # when we list topspin dataset we have to read directories, not directly files
-                    # we can retrieve them using glob patterns
-                    glob = kwargs.get("glob", None)
-                    if glob:
-                        files_ = list(filename.glob(glob))
-                    elif not kwargs.get("processed", False):
-                        files_ = list(filename.glob("**/ser"))
-                        files_.extend(list(filename.glob("**/fid")))
-                    else:
-                        files_ = list(filename.glob("**/1r"))
-                        files_.extend(list(filename.glob("**/2rr")))
-                        files_.extend(list(filename.glob("**/3rrr")))
-                else:
-                    expno = kwargs.pop("expno", None)
-                    procno = kwargs.pop("procno", None)
-
-                    if expno is None:
-                        expnos = sorted(filename.glob("[0-9]*"))
-                        if expnos:
-                            expno = expnos[0]
-
-                    # read a fid or a ser
-                    f = filename / str(expno)
-                    files_ = [f / "ser"] if (f / "ser").exists() else [f / "fid"]
-
-                    if procno is not None:
-                        # get the adsorption spectrum
-                        f = filename / str(expno) / "pdata" / str(procno)
-                        if (f / "3rrr").exists():
-                            files_ = [f / "3rrr"]
-                        elif (f / "2rr").exists():
-                            files_ = [f / "2rr"]
-                        else:
-                            files_ = [f / "1r"]
-
-                # depending on the glob patterns too many files may have been selected : restriction to the valid subset
-                filename = []
-                for item in files_:
-                    if item.name in ["fid", "ser", "1r", "2rr", "3rrr"]:
-                        filename.append(item)
+                filename = _topspin_check_filename(filename, **kwargs)
 
             if not isinstance(filename, list):
                 filename = [filename]
@@ -297,6 +256,53 @@ def check_filenames(*args, **kwargs):
         filenames = filenames_
 
     return filenames
+
+
+def _topspin_check_filename(filename, **kwargs):
+
+    if kwargs.get("listdir", False) or kwargs.get("glob", None) is not None:
+        # when we list topspin dataset we have to read directories, not directly files
+        # we can retrieve them using glob patterns
+        glob = kwargs.get("glob", None)
+        if glob:
+            files_ = list(filename.glob(glob))
+        elif not kwargs.get("processed", False):
+            files_ = list(filename.glob("**/ser"))
+            files_.extend(list(filename.glob("**/fid")))
+        else:
+            files_ = list(filename.glob("**/1r"))
+            files_.extend(list(filename.glob("**/2rr")))
+            files_.extend(list(filename.glob("**/3rrr")))
+    else:
+        expno = kwargs.pop("expno", None)
+        procno = kwargs.pop("procno", None)
+
+        if expno is None:
+            expnos = sorted(filename.glob("[0-9]*"))
+            expno = expnos[0] if expnos else expno
+
+        # read a fid or a ser
+        if procno is None:
+            f = filename / str(expno)
+            files_ = [f / "ser"] if (f / "ser").exists() else [f / "fid"]
+
+        else:
+            # get the adsorption spectrum
+            f = filename / str(expno) / "pdata" / str(procno)
+            if (f / "3rrr").exists():
+                files_ = [f / "3rrr"]
+            elif (f / "2rr").exists():
+                files_ = [f / "2rr"]
+            else:
+                files_ = [f / "1r"]
+
+    # depending on the glob patterns too many files may have been selected : restriction to the valid subset
+    filename = []
+    for item in files_:
+        if item.name in ["fid", "ser", "1r", "2rr", "3rrr"]:
+            filename.append(item)
+
+    return filename
 
 
 def get_filename(*filenames, **kwargs):
