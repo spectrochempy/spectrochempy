@@ -5,7 +5,16 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
 #  =====================================================================================================================
 #
-from spectrochempy.utils import get_user, get_user_and_node, get_node, is_kernel, sh
+import pytest
+
+from spectrochempy.utils import (
+    get_user,
+    get_user_and_node,
+    get_node,
+    is_kernel,
+    sh,
+    is_windows,
+)
 
 
 def test_get_user():
@@ -29,6 +38,9 @@ def test_is_kernel():
 
 
 # @pytest.mark.skip("problem with one of the commit - look at this later")
+@pytest.mark.skipif(
+    is_windows(), reason="Fail under on Windows OS due to one of the commits"
+)
 def test_sh():
     res = sh.git("show", "HEAD")
     assert res is not None
