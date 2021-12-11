@@ -152,7 +152,7 @@ def make_redirection_page():
     <html>
     <head>
     <title>Redirect to the dev version of the documentation</title>
-    <meta http-equiv="refresh" content="0; URL=https://{URL_SCPY}/latest">
+    <meta http-equiv="refresh" content="0; URL=latest">
     </head>
     <body>
     <p>
