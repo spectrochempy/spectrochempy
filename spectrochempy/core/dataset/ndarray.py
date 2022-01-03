@@ -1092,9 +1092,9 @@ class NDArray(HasTraits):
         new._data = udata.m
         new._units = udata.units
 
-        if new.roi is not None:
+        if new._roi is not None:
             roi = (np.array(new.roi) * oldunits).to(units)
-            new.roi = list(roi)
+            new._roi = list(roi)
 
         return new
 

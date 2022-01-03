@@ -476,7 +476,7 @@ def test_ndarray_slicing(refarray, ndarray):
     assert isinstance(nd1.data, np.ndarray)
     assert isinstance(nd1.values, TYPE_FLOAT)
 
-    nd1b, id = nd.__getitem__(
+    nd1b = nd.__getitem__(
         (0, 0),
     )
     assert nd1b == nd1
