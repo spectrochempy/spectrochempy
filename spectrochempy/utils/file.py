@@ -211,6 +211,7 @@ def check_filenames(*args, **kwargs):
         for filename in filenames:
             # in which directory ?
             directory = filename.parent
+
             if directory.resolve() == Path.cwd() or directory == Path("."):
                 directory = ""
             kw_directory = pathclean(kwargs.get("directory", None))
@@ -584,7 +585,7 @@ def readdirname(directory, **kwargs):
         return pathclean(directory)
 
 
-# ......................................................................................................................
+# ..............................................................................
 def check_filename_to_save(
     dataset, filename=None, save_as=True, confirm=True, **kwargs
 ):
@@ -618,7 +619,7 @@ def check_filename_to_save(
     return pathclean(filename)
 
 
-# ..................................................................................................................
+# ..........................................................................
 def check_filename_to_open(*args, **kwargs):
     # Check the args and keywords arg to determine the correct filename
 

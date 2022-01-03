@@ -21,7 +21,7 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core import error_
 
 
-# ......................................................................................................................
+# ..............................................................................
 def download_IRIS():
     """
     Upload the classical IRIS dataset.

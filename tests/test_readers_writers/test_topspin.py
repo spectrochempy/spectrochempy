@@ -19,9 +19,6 @@ def test_deprecated():
 
 
 def test_read_topspin():
-    # Open a dialog for selecting a Topspin directory
-    A = scp.read_topspin(directory=nmrdir)
-    assert A.name == "topspin_2d expno:1 procno:1 (SER)"
 
     # A.plot()
     A = scp.read_topspin(nmrdir / "exam2d_HC/3/pdata/1/2rr")
@@ -48,6 +45,10 @@ def test_read_topspin():
 
     D = scp.read_topspin(nmrdir / "topspin_2d", expno=1, procno=1)
     assert D == C
+
+    # Open a dialog for selecting a Topspin directory
+    A = scp.read_topspin(directory=nmrdir)
+    assert A.name == "topspin_2d expno:1 procno:1 (SER)"
 
     scp.show()
 

@@ -94,9 +94,9 @@ def concatenate(*datasets, **kwargs):
     ((1, 5549), (1, 5549), (2, 5549))
     """
 
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # checks dataset validity
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     # We must have a list of datasets
     if isinstance(datasets, tuple):
@@ -178,7 +178,7 @@ def concatenate(*datasets, **kwargs):
             )
 
     # Check unit compatibility
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     units = datasets[0].units
     for dataset in datasets:
@@ -189,7 +189,7 @@ def concatenate(*datasets, **kwargs):
     # TODO: make concatenation of heterogeneous data possible by using labels
 
     # Check coordinates compatibility
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     # coordinates units of NDDatasets must be compatible in all dimensions
     # get the coordss
@@ -225,7 +225,7 @@ def concatenate(*datasets, **kwargs):
     #                     )
 
     # concatenate or stack the data array + mask
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     sss = []
     for i, dataset in enumerate(datasets):
@@ -237,7 +237,7 @@ def concatenate(*datasets, **kwargs):
     mask = sconcat.mask
 
     # concatenate coords if they exists
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     if len(coordss) == 1 and coordss.pop() is None:
         # no coords

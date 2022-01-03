@@ -82,7 +82,7 @@ def read_dir(directory=None, **kwargs):
 
 
 # TODO: make an importer function, when a test directory will be provided.
-# ......................................................................................................................
+# ..............................................................................
 def read_carroucell(dataset=None, directory=None, **kwargs):
     """
     Open .spa files in a directory after a carroucell experiment.

@@ -9,4 +9,5 @@ Package to handle units (interface with `pint`.
 """
 
 from .units import *  # noqa: F403, F401, E402
-from .units import __all__  # noqa: F401
+
+# from .units import __all__  # noqa: F401

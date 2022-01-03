@@ -1084,6 +1084,19 @@ class NDArray(HasTraits):
     def _title_default(self):
         return None
 
+    @staticmethod
+    def _unittransform(new, units):
+        oldunits = new.units
+        udata = (new.data * oldunits).to(units)
+        new._data = udata.m
+        new._units = udata.units
+
+        if new._roi is not None:
+            roi = (np.array(new._roi) * oldunits).to(units)
+            new._roi = list(roi)
+
+        return new
+
     # ..........................................................................
     @staticmethod
     def _uarray(data, units=None):
@@ -2217,81 +2230,75 @@ class NDArray(HasTraits):
         else:
             units = ur.Unit(other)
 
-        if self.has_units and not force:
+        if self.has_units:
 
             oldunits = self._units
-
-            def _transform(new):
-                udata = (new.data * new.units).to(units)
-                new._data = udata.m
-                new._units = udata.units
-
-                if new._roi is not None:
-                    roi = (np.array(new._roi) * self.units).to(units)
-                    new._roi = list(roi)
-
-                return new
 
             try:
                 if new.meta.larmor:  # _origin in ['topspin', 'nmr']
                     set_nmr_context(new.meta.larmor)
                     with ur.context("nmr"):
-                        new = _transform(new)
+                        new = self._unittransform(new, units)
 
                 # particular case of dimensionless units: absorbance and transmittance
-                if str(oldunits) in ["transmittance", "absolute_transmittance"]:
-                    if str(units) == "absorbance":
-                        udata = (new.data * new.units).to(units)
-                        new._data = -np.log10(udata.m)
-                        new._units = units
-                        if new.title.lower() == "transmittance":
-                            new._title = "absorbance"
-
-                elif str(oldunits) == "absorbance":
-                    if str(units) in ["transmittance", "absolute_transmittance"]:
-                        scale = Quantity(1.0, self._units).to(units).magnitude
-                        new._data = 10.0 ** -new.data * scale
-                        new._units = units
-                        if new.title.lower() == "absorbance":
-                            new._title = "transmittance"
-
                 else:
-                    # change the title for spectrocopic units change
-                    new = _transform(new)
-                    if (
-                        oldunits.dimensionality
-                        in [
-                            "1/[length]",
-                            "[length]",
-                            "[length] ** 2 * [mass] / [time] ** 2",
-                        ]
-                        and new._units.dimensionality == "1/[time]"
-                    ):
-                        new._title = "frequency"
-                    elif (
-                        oldunits.dimensionality
-                        in ["1/[time]", "[length] ** 2 * [mass] / [time] ** 2"]
-                        and new._units.dimensionality == "1/[length]"
-                    ):
-                        new._title = "wavenumber"
-                    elif (
-                        oldunits.dimensionality
-                        in [
-                            "1/[time]",
-                            "1/[length]",
-                            "[length] ** 2 * [mass] / [time] ** 2",
-                        ]
-                        and new._units.dimensionality == "[length]"
-                    ):
-                        new._title = "wavelength"
-                    elif (
-                        oldunits.dimensionality
-                        in ["1/[time]", "1/[length]", "[length]"]
-                        and new._units.dimensionality == "[length] ** 2 * "
-                        "[mass] / [time] "
-                        "** 2"
-                    ):
-                        new._title = "energy"
+
+                    if str(oldunits) in ["transmittance", "absolute_transmittance"]:
+                        if str(units) == "absorbance":
+                            udata = (new.data * new.units).to(units)
+                            new._data = -np.log10(udata.m)
+                            new._units = units
+                            if new.title.lower() == "transmittance":
+                                new._title = "absorbance"
+
+                    elif str(oldunits) == "absorbance":
+                        if str(units) in ["transmittance", "absolute_transmittance"]:
+                            scale = Quantity(1.0, self._units).to(units).magnitude
+                            new._data = 10.0 ** -new.data * scale
+                            new._units = units
+                            if new.title.lower() == "absorbance":
+                                new._title = "transmittance"
+
+                    else:
+                        new = self._unittransform(new, units)
+                        # change the title for spectrocopic units change
+                        if (
+                            oldunits.dimensionality
+                            in [
+                                "1/[length]",
+                                "[length]",
+                                "[length] ** 2 * [mass] / [time] ** 2",
+                            ]
+                            and new._units.dimensionality == "1/[time]"
+                        ):
+                            new._title = "frequency"
+                        elif (
+                            oldunits.dimensionality
+                            in ["1/[time]", "[length] ** 2 * [mass] / [time] ** 2"]
+                            and new._units.dimensionality == "1/[length]"
+                        ):
+                            new._title = "wavenumber"
+                        elif (
+                            oldunits.dimensionality
+                            in [
+                                "1/[time]",
+                                "1/[length]",
+                                "[length] ** 2 * [mass] / [time] ** 2",
+                            ]
+                            and new._units.dimensionality == "[length]"
+                        ):
+                            new._title = "wavelength"
+                        elif (
+                            oldunits.dimensionality
+                            in ["1/[time]", "1/[length]", "[length]"]
+                            and new._units.dimensionality == "[length] ** 2 * "
+                            "[mass] / [time] "
+                            "** 2"
+                        ):
+                            new._title = "energy"
+
+                if force:
+                    new._units = units
 
             except DimensionalityError as exc:
                 if force:

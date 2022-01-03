@@ -12,13 +12,32 @@ This module implements the class |Coord|.
 
 __all__ = ["Coord", "LinearCoord"]
 
+import copy as cpy
 import textwrap
 
-from traitlets import Bool, observe, All, Unicode, Integer
+import numpy as np
+from traitlets import (
+    Bool,
+    observe,
+    All,
+    Unicode,
+    Integer,
+    Union,
+    CFloat,
+    CInt,
+    Instance,
+)
+from traitlets import default as traitdefault
 
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndmath import NDMath, _set_operators
-from spectrochempy.utils import colored_output, NOMASK
+from spectrochempy.utils import (
+    colored_output,
+    NOMASK,
+    INPLACE,
+    spacing_,
+    error_,
+)
 from spectrochempy.units import Quantity, ur
 
 
@@ -42,9 +61,15 @@ class Coord(NDMath, NDArray):
     _html_output = False
     _parent_dim = Unicode(allow_none=True)
 
-    # ------------------------------------------------------------------------------------------------------------------
+    # For linear data generation
+    _offset = Union((CFloat(), CInt(), Instance(Quantity)))
+    _increment = Union((CFloat(), CInt(), Instance(Quantity)))
+    _size = Integer(0)
+    _linear = Bool(False)
+
+    # ------------------------------------------------------------------------
     # initialization
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     def __init__(self, data=None, **kwargs):
         """
         Parameters
@@ -151,11 +176,11 @@ class Coord(NDMath, NDArray):
         self._size = kwargs.pop("size", 0)
         # self._accuracy = kwargs.pop('accuracy', None)
 
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # readonly property
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
-    # ..................................................................................................................
+    # ..........................................................................
     @property
     def reversed(self):
         """bool - Whether the axis is reversed (readonly
@@ -168,57 +193,159 @@ class Coord(NDMath, NDArray):
         # Return a correct result only if the data are sorted  # return  # bool(self.data[0] > self.data[-1])
 
     @property
+    def data(self):
+        """
+        The `data` array (|ndarray|).
+
+        If there is no data but labels, then the labels are returned instead of data.
+        """
+        if self.linear:
+            data = np.arange(self.size) * self._increment + self._offset
+            if hasattr(data, "units"):
+                data = data.m
+        else:
+            data = self._data
+
+        return data
+
+    @data.setter
+    def data(self, data):
+
+        self._set_data(data)
+
+    @property
     def default(self):
         # this is in case default is called on a coord, while it is a coordset property
         return self
 
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # hidden properties (for the documentation, only - we remove the docstring)
     # some of the property of NDArray has to be hidden because they
     # are not useful for this Coord class
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     # NDarray methods
 
-    # ..................................................................................................................
+    # ..........................................................................
     @property
     def is_complex(self):
         return False  # always real
 
-    # ..................................................................................................................
+    # ..........................................................................
+    @property
+    def is_empty(self):
+        """
+        True if the `data` array is empty or size=0, and if no label are present
+        - Readonly property (bool).
+        """
+        if not self.linear:
+            return super().is_empty
+
+        return False
+
+    # ..........................................................................
     @property
     def ndim(self):
+        if self.linear:
+            return 1
         ndim = super().ndim
         if ndim > 1:
             raise ValueError("Coordinate's array should be 1-dimensional!")
         return ndim
 
-    # ..................................................................................................................
+    # ..........................................................................
     @property
     def T(self):  # no transpose
         return self
 
-    # ..................................................................................................................
+    # ..........................................................................
     # @property
     # def values(self):
     #    return super().values
 
-    # ..................................................................................................................
+    # ..........................................................................
+    def to(self, other, inplace=False, force=False):
+
+        new = super().to(other, force=force)
+
+        if inplace:
+            self._units = new._units
+            self._title = new._title
+            self._roi = new._roi
+            if not self.linear:
+                self._data = new._data
+            else:
+                self._offset = new._offset
+                self._increment = new._increment
+                self._linear = new._linear
+
+        else:
+            return new
+
+    to.__doc__ = NDArray.to.__doc__
+
+    # ..........................................................................
     @property
     def masked_data(self):
         return super().masked_data
 
-    # ..................................................................................................................
+    # ..........................................................................
     @property
     def is_masked(self):
         return False
 
-    # ..................................................................................................................
+    # ..........................................................................
+    @property
+    def linear(self):
+        """
+        Flag to specify if the data can be constructed using a linear variation (bool).
+        """
+        return self._linear
+
+    @linear.setter
+    def linear(self, val):
+
+        self._linear = (
+            val  # it val is true this provoque the linearization (  # see observe)
+        )
+
+        # if val and self._data is not None:  #     # linearisation of the data, if possible  #     self._linearize()
+
+    # ..........................................................................
+    @property
+    def offset(self):
+        """
+        Starting value for linear array
+        """
+        return self._offset
+
+    # ..........................................................................
+    @offset.setter
+    def offset(self, val):
+        if isinstance(val, Quantity):
+            if self.has_units:
+                val.ito(self.units)
+                val = val.m
+            else:
+                self.units = val.units
+                val = val.m
+        self._offset = val
+
+    # ..........................................................................
+    @property
+    def offset_value(self):
+        offset = self.offset
+        if self.units:
+            return Quantity(offset, self._units)
+        else:
+            return offset
+
+    # ..........................................................................
     @property
     def mask(self):
-        return super().mask
+        return NOMASK
 
-    # ..................................................................................................................
+    # ..........................................................................
     @mask.setter
     def mask(self, val):
         # Coordinates cannot be masked. Set mask always to NOMASK
@@ -226,160 +353,210 @@ class Coord(NDMath, NDArray):
 
     # NDmath methods
 
-    # ..................................................................................................................
+    # ..........................................................................
     def cumsum(self, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def mean(self, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def pipe(self, func=None, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def remove_masks(self, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
+    @property
+    def size(self):
+        """
+        Size of the underlying `data` array - Readonly property (int).
+        """
+
+        if self.linear:
+            # the provided size is returned i or its default
+            return self._size
+        else:
+            return super().size
+
+    # ..........................................................................
+    @property
+    def shape(self):
+        if self.linear:
+            return (self._size,)
+        return super().shape
+
+    # ..........................................................................
     def std(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def sum(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def swapdims(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def swapaxes(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
+    @property
+    def spacing(self):
+        """
+        Return coordinates spacing.
+
+        It will be a scalar if the coordinates are uniformly spaced,
+        else ran array of the differents spacings
+        """
+        if self.linear:
+            return self.increment * self.units
+        return spacing_(self.data) * self.units
+
+    # ..........................................................................
     def squeeze(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def random(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def empty(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def empty_like(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def var(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def ones(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def ones_like(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def full(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def diag(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def diagonal(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def full_like(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def identity(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def eye(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def zeros(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def zeros_like(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def coordmin(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def coordmax(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def conjugate(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def conj(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def abs(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def absolute(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def all(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def any(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def argmax(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def argmin(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def asfortranarray(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
+    def astype(self, dtype=None, **kwargs):
+        """
+        Cast the data to a specified type.
+
+        Parameters
+        ----------
+        dtype : str or dtype
+            Typecode or data-type to which the array is cast.
+        """
+        if not self.linear:
+            self._data = self._data.astype(dtype, **kwargs)
+        else:
+            self._increment = np.array(self._increment).astype(dtype, **kwargs)[()]
+            self._offset = np.array(self._offset).astype(dtype, **kwargs)[()]
+        return self
+
+    # ..........................................................................
     def average(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def clip(self, *args, **kwargs):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def get_axis(self, *args, **kwargs):
         return super().get_axis(*args, **kwargs)
 
-    # ..................................................................................................................
+    # ..........................................................................
     @property
     def origin(self, *args, **kwargs):
         return None
 
-    # ..................................................................................................................
+    # ..........................................................................
     @property
     def author(self):
         return None
@@ -388,23 +565,23 @@ class Coord(NDMath, NDArray):
     def descendant(self):
         return (self.data[-1] - self.data[0]) < 0
 
-    # ..................................................................................................................
+    # ..........................................................................
     @property
     def dims(self):
         return ["x"]
 
-    # ..................................................................................................................
+    # ..........................................................................
     @property
     def is_1d(self):
         return True
 
-    # ..................................................................................................................
+    # ..........................................................................
     def transpose(self):
         return self
 
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # public methods
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     def loc2index(self, loc):
         """
         Return the index corresponding to a given location.
@@ -428,22 +605,22 @@ class Coord(NDMath, NDArray):
         """
         return self._loc2index(loc)
 
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # special methods
-    # ------------------------------------------------------------------------------------------------------------------
-    # ..................................................................................................................
+    # ------------------------------------------------------------------------
+    # ..........................................................................
     def __copy__(self):
         res = self.copy(deep=False)  # we keep name of the coordinate by default
         res.name = self.name
         return res
 
-    # ..................................................................................................................
+    # ..........................................................................
     def __deepcopy__(self, memo=None):
         res = self.copy(deep=True, memo=memo)
         res.name = self.name
         return res
 
-    # ..................................................................................................................
+    # ..........................................................................
     def __dir__(self):
         # remove some methods with respect to the full NDArray
         # as they are not useful for Coord.
@@ -460,19 +637,87 @@ class Coord(NDMath, NDArray):
             "roi",
         ]
 
-    # ..................................................................................................................
-    def __getitem__(self, items, return_index=False):
+    # ..........................................................................
+    def __getitem__(self, items):
+
+        if isinstance(items, list):
+            # Special case of fancy indexing
+            items = (items,)
+
+        # choose, if we keep the same or create new object
+        inplace = False
+        if isinstance(items, tuple) and items[-1] == INPLACE:
+            items = items[:-1]
+            inplace = True
+
+        # Eventually get a better representation of the indexes
+        keys = self._make_index(items)
+
+        # init returned object
+        if inplace:
+            new = self
+        else:
+            new = self.copy()
+
+        # slicing by index of all internal array
+        if new.data is not None:
+            udata = new.data[keys]
+
+            if new.linear:
+                # if self.increment > 0:
+                #     new._offset = udata.min()
+                # else:
+                #     new._offset = udata.max()
+                new._size = udata.size
+                if new._size > 1:
+                    inc = np.diff(udata)
+                    variation = (inc.max() - inc.min()) / udata.ptp()
+                    if variation < 1.0e-5:
+                        new._increment = np.mean(inc)  # np.round(np.mean(
+                        # inc), 5)
+                        new._offset = udata[0]
+                        new._data = None
+                        new._linear = True
+                    else:
+                        new._linear = False
+                else:
+                    new._linear = False
+
+            if not new.linear:
+                new._data = np.asarray(udata)
+
+        if self.is_labeled:
+            # case only of 1D dataset such as Coord
+            new._labels = np.array(self._labels[keys])
+
+        if new.is_empty:
+            error_(
+                f"Empty array of shape {new._data.shape} resulted from slicing.\n"
+                f"Check the indexes and make sure to use floats for location slicing"
+            )
+            new = None
+
+        new._mask = NOMASK
+
         # we need to keep the names when copying coordinates to avoid later
         # problems
-        res = super().__getitem__(items, return_index=return_index)
-        res.name = self.name
-        return res
+        new.name = self.name
+        return new
 
-    # ..................................................................................................................
+    # ..........................................................................
+    def __setitem__(self, items, value):
+
+        if self.linear:
+            error_("Linearly defined array are readonly")
+            return
+
+        super().__setitem__(items, value)
+
+    # ..........................................................................
     def __str__(self):
         return repr(self)
 
-    # ..................................................................................................................
+    # ..........................................................................
     def _cstr(self, header="  coordinates: ... \n", print_size=True, **kwargs):
 
         indent = kwargs.get("indent", 0)
@@ -510,15 +755,170 @@ class Coord(NDMath, NDArray):
         else:
             return out
 
-    # ..................................................................................................................
+    # ..........................................................................
     def __repr__(self):
         out = self._repr_value().rstrip()
         return out
 
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
+    # Private properties and methods
+    # ------------------------------------------------------------------------
+
+    # ..........................................................................
+    @traitdefault("_increment")
+    def _increment_default(self):
+        return 1.0
+
+    # ..........................................................................
+    def _linearize(self):
+
+        if not self.linear or self._data is None:
+            return
+
+        self._linear = False  # to avoid action of the observer
+
+        if self._squeeze_ndim > 1:
+            error_("Linearization is only implemented for 1D data")
+            return
+
+        data = self._data.squeeze()
+
+        # try to find an increment
+        if data.size > 1:
+            inc = np.diff(data)
+            variation = (inc.max() - inc.min()) / data.ptp()
+            if variation < 1.0e-5:
+                self._increment = (
+                    data.ptp() / (data.size - 1) * np.sign(inc[0])
+                )  # np.mean(inc)  # np.round(np.mean(inc), 5)
+                self._offset = data[0]
+                self._size = data.size
+                self._data = None
+                self._linear = True
+            else:
+                self._linear = False
+        else:
+            self._linear = False
+
+    # ..........................................................................
+    @traitdefault("_offset")
+    def _offset_default(self):
+        return 0
+
+    # ..........................................................................
+    def _set_data(self, data):
+
+        if data is None:
+            return
+
+        elif isinstance(data, Coord) and data.linear:
+            # Case of LinearCoord
+            for attr in self.__dir__():
+                try:
+                    if attr in ["linear", "offset", "increment"]:
+                        continue
+                    if attr == "data":
+                        val = data.data
+                    else:
+                        val = getattr(data, f"_{attr}")
+                    if self._copy:
+                        val = cpy.deepcopy(val)
+                    setattr(self, f"_{attr}", val)
+                except AttributeError:
+                    # some attribute of NDDataset are missing in NDArray
+                    pass
+            try:
+                self.history = f"Copied from object:{data.name}"
+            except AttributeError:
+                pass
+
+        elif isinstance(data, NDArray):
+            # init data with data from another NDArray or NDArray's subclass
+            # No need to check the validity of the data
+            # because the data must have been already
+            # successfully initialized for the passed NDArray.data
+            for attr in self.__dir__():
+                try:
+                    val = getattr(data, f"_{attr}")
+                    if self._copy:
+                        val = cpy.deepcopy(val)
+                    setattr(self, f"_{attr}", val)
+                except AttributeError:
+                    # some attribute of NDDataset are missing in NDArray
+                    pass
+            try:
+                self.history = f"Copied from object:{data.name}"
+            except AttributeError:
+                pass
+
+        elif isinstance(data, Quantity):
+            self._data = np.array(data.magnitude, subok=True, copy=self._copy)
+            self._units = data.units
+
+        elif hasattr(data, "mask"):
+            # an object with data and mask attributes
+            self._data = np.array(data.data, subok=True, copy=self._copy)
+            if isinstance(data.mask, np.ndarray) and data.mask.shape == data.data.shape:
+                self.mask = np.array(data.mask, dtype=np.bool_, copy=False)
+
+        elif (
+            not hasattr(data, "shape")
+            or not hasattr(data, "__getitem__")
+            or not hasattr(data, "__array_struct__")
+        ):
+            # Data doesn't look like a numpy array, try converting it to
+            # one. Non-numerical input are converted to an array of objects.
+            self._data = np.array(data, subok=True, copy=False)
+
+        else:
+            data = np.array(data, subok=True, copy=self._copy)
+            if data.dtype == np.object_:  # likely None value
+                data = data.astype(float)
+            self._data = data
+
+        if self.linear:
+            # we try to replace data by only an offset and an increment
+            self._linearize()
+
+    @staticmethod
+    def _unittransform(new, units):
+        oldunits = new.units
+        if not new.linear:
+            udata = (new.data * oldunits).to(units)
+            new._data = udata.m
+            new._units = udata.units
+        else:
+            offset = (new.offset * oldunits).to(units)
+            increment = (new.increment * oldunits).to(units)
+            new._offset = offset.m
+            new._increment = increment.m
+            new._units = increment.units
+
+        if new._roi is not None:
+            roi = (np.array(new._roi) * oldunits).to(units)
+            new._roi = list(roi)
+
+        # if new._linear:
+        #     # try to make it linear as well
+        #     new._linearize()
+        #     if not new._linear and new.implements("LinearCoord"):
+        #         # can't be linearized -> Coord
+        #         if inplace:
+        #             raise Exception(
+        #                     "A LinearCoord object cannot be transformed to a non linear coordinate "
+        #                     "`inplace`. "
+        #                     "Use to() instead of ito() and leave the `inplace` attribute to False"
+        #             )
+        #         else:
+        #             from spectrochempy import Coord
+        #
+        #             new = Coord(new)
+        return new
+
+    # ------------------------------------------------------------------------
     # Events
-    # ------------------------------------------------------------------------------------------------------------------
-    # ..................................................................................................................
+    # ------------------------------------------------------------------------
+    # ..........................................................................
     @observe(All)
     def _anytrait_changed(self, change):
         # ex: change {
@@ -531,7 +931,33 @@ class Coord(NDMath, NDArray):
         # }
 
         if change.name in ["_linear", "_increment", "_offset", "_size"]:
-            super()._anytrait_changed(change)
+            if self._linear:
+                self._linearize()
+            return
+
+    # ..........................................................................
+    @property
+    def increment(self):
+        return self._increment
+
+    @increment.setter
+    def increment(self, val):
+        if isinstance(val, Quantity):
+            if self.has_units:
+                val.ito(self.units)
+                val = val.m
+            else:
+                self.units = val.units
+                val = val.m
+        self._increment = val
+
+    @property
+    def increment_value(self):
+        increment = self.increment
+        if self.units:
+            return Quantity(increment, self._units)
+        else:
+            return increment
 
 
 class LinearCoord(Coord):
@@ -650,23 +1076,24 @@ class LinearCoord(Coord):
             self.increment = increment
             self._linear = True
 
-    # ..................................................................................................................
+    # ..........................................................................
     @property  # read only
     def linear(self):
         return self._linear
 
-    # ..................................................................................................................
+    # ..........................................................................
     def geomspace(self):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def logspace(self):
         raise NotImplementedError
 
-    # ..................................................................................................................
+    # ..........................................................................
     def __dir__(self):
         # remove some methods with respect to the full NDArray
         # as they are not usefull for Coord.
+
         return [
             "data",
             "labels",

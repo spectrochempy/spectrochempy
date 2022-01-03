@@ -26,9 +26,9 @@ from traitlets import (
 from spectrochempy.utils import MetaConfigurable, get_pkg_path, pathclean
 
 
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 # available matplotlib styles (equivalent of plt.style.available)
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 def available_styles():
     """
     All matplotlib `styles <https://matplotlib.org/users/style_sheets.html>`_
@@ -61,9 +61,9 @@ class PlotPreferences(MetaConfigurable):
     _groups = Set(Unicode)
     _subgroups = Set(Unicode)
     _members = Set(Unicode)
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # Configuration entries based on the classic matplotlib style
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     #
     # LINES
     # See http://matplotlib.org/api/artist_api.html#module-matplotlib.lines for more
@@ -862,7 +862,7 @@ class PlotPreferences(MetaConfigurable):
         config=True
     )
 
-    # ..................................................................................................................
+    # ..........................................................................
     def __init__(self, **kwargs):
         super().__init__(jsonfile="PlotPreferences", **kwargs)
         for key in plt.rcParams:

@@ -12,7 +12,6 @@ from copy import copy
 import numpy as np
 import pytest
 
-from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.units import ur, DimensionalityError
@@ -118,7 +117,7 @@ def test_coordset_init(coord0, coord1, coord2):
 def test_coordset_multicoord_for_a_single_dim():
     # normal coord (single numerical array for a axis)
 
-    coord1 = NDArray(
+    coord1 = Coord(
         data=np.linspace(1000.0, 4000.0, 5),
         labels="a b c d e".split(),
         mask=None,
@@ -126,7 +125,7 @@ def test_coordset_multicoord_for_a_single_dim():
         title="wavelengths",
     )
 
-    coord0 = NDArray(
+    coord0 = Coord(
         data=np.linspace(20, 500, 5),
         labels="very low-low-normal-high-very high".split("-"),
         mask=None,
@@ -335,20 +334,20 @@ def test_coordset_set(coord0, coord1, coord2):
         == "CoordSet: [x:time-on-stream, y:[_1:wavenumber, _2:wavenumber], z:temperature]"
     )
 
-    coords.set_titles("time", "dddd", "celcius")
+    coords.set_titles("time", "dddd", "celsius")
     assert (
-        str(coords) == "CoordSet: [x:time, y:[_1:wavenumber, _2:wavenumber], z:celcius]"
+        str(coords) == "CoordSet: [x:time, y:[_1:wavenumber, _2:wavenumber], z:celsius]"
     )
 
-    coords.set_titles(x="time", z="celcius", y_1="length")
+    coords.set_titles(x="time", z="celsius", y_1="length")
     assert (
         str(coords)
         == repr(coords)
-        == "CoordSet: [x:time, y:[_1:length, _2:wavenumber], z:celcius]"
+        == "CoordSet: [x:time, y:[_1:length, _2:wavenumber], z:celsius]"
     )
 
     coords.set_titles("t", ("l", "g"), x="x")
-    assert str(coords) == "CoordSet: [x:x, y:[_1:l, _2:g], z:celcius]"
+    assert str(coords) == "CoordSet: [x:x, y:[_1:l, _2:g], z:celsius]"
 
     coords.set_titles(("t", ("l", "g")), z="z")
     assert str(coords) == "CoordSet: [x:t, y:[_1:l, _2:g], z:z]"

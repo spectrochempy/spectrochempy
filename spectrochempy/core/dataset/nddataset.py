@@ -79,10 +79,10 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     # region ranges
     _ranges = Instance(Meta)
 
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # initialisation
-    # ------------------------------------------------------------------------------------------------------------------
-    # ..................................................................................................................
+    # ------------------------------------------------------------------------
+    # ..........................................................................
     def __init__(
         self, data=None, coordset=None, coordunits=None, coordtitles=None, **kwargs
     ):
@@ -235,11 +235,11 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             }:  # if they are no coordinates do nothing
                 self.set_coordset(*_coordset)
 
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # special methods
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
-    # ..................................................................................................................
+    # ..........................................................................
     def __dir__(self):
         # Only these attributes are used for saving dataset
         # WARNING: be carefull to keep the present order of the three first elements! Needed for save/load operations
@@ -260,7 +260,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             "modified",
             "origin",
             "roi",
-            "offset",
             "transposed",
             "modeldata",
             "referencedata",
@@ -268,7 +267,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             "ranges",
         ] + NDIO().__dir__()
 
-    # ..................................................................................................................
+    # ..........................................................................
     def __getitem__(self, items):
 
         saveditems = items
@@ -305,10 +304,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
                         newc = []
                         for c in self._coordset[idx]:
                             newc.append(c[item])
-                        new_coords[idx] = CoordSet(
-                            *newc[::-1], name=name
-                        )  # we reverse to be sure
-                        # the order will be # kept for internal coordinates
+                        new_coords[idx] = CoordSet(*newc[::-1], name=name)
+                        # we reverse to be sure
+                        # the order will be  kept for internal coordinates
                         new_coords[idx]._default = self._coordset[
                             idx
                         ]._default  # set the same default coord
@@ -322,7 +320,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         new.history = f"Slice extracted: ({saveditems})"
         return new
 
-    # ..................................................................................................................
+    # ..........................................................................
     def __getattr__(self, item):
         # when the attribute was not found
         if (
@@ -366,7 +364,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
                 try:
                     c = self._coordset[item]
                     if isinstance(c, str) and c in self.dims:
-                        # probaly a reference to another coordinate name
+                        # probably a reference to another coordinate name
                         c = self._coordset[c]
 
                     if c.name in self.dims or c._parent_dim in self.dims:
@@ -434,7 +432,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         else:
             super().__setattr__(key, value)
 
-    # ..................................................................................................................
+    # ..........................................................................
     def __eq__(self, other, attrs=None):
         attrs = self.__dir__()
         for attr in (
@@ -448,7 +446,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             "origin",
             "show_datapoints",
             "roi",
-            "offset",
             "modeldata",
             "processeddata",
             "baselinedata",
@@ -463,36 +460,36 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         return super().__eq__(other, attrs)
 
-    # ..................................................................................................................
+    # ..........................................................................
     def __hash__(self):
         # all instance of this class has same hash, so they can be compared
         return super().__hash__ + hash(self._coordset)
 
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # Default values
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
-    # ..................................................................................................................
+    # ..........................................................................
     @default("_coordset")
     def _coordset_default(self):
         return None
 
-    # ..................................................................................................................
+    # ..........................................................................
     @default("_modeldata")
     def _modeldata_default(self):
         return None
 
-    # ..................................................................................................................
+    # ..........................................................................
     @default("_processeddata")
     def _processeddata_default(self):
         return None
 
-    # ..................................................................................................................
+    # ..........................................................................
     @default("_baselinedata")
     def _baselinedata_default(self):
         return None
 
-    # ..................................................................................................................
+    # ..........................................................................
     @default("_referencedata")
     def _referencedata_default(self):
         return None
@@ -504,22 +501,22 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             ranges[dim] = dict(masks={}, baselines={}, integrals={}, others={})
         return ranges
 
-    # ..................................................................................................................
+    # ..........................................................................
     @property
     def ranges(self):
         return self._ranges
 
-    # ..................................................................................................................
+    # ..........................................................................
     @ranges.setter
     def ranges(self, value):
         self._ranges = value
 
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # GUI options
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # TODO: refactor the spectrochempy preference system to have a common basis
 
-    # .................................................................................................................
+    # ...........................................................................................................
     @property
     def state(self):
         # state of the controller window for this dataset
@@ -561,11 +558,11 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     def referencedata(self, val):
         self._referencedata = val
 
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # Validators
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
-    # ..................................................................................................................
+    # ..........................................................................
     @validate("_coordset")
     def _coordset_validate(self, proposal):
         coords = proposal["value"]
@@ -614,7 +611,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         coords._parent = self
         return coords
 
-    # ..................................................................................................................
+    # ..........................................................................
     @property
     def _dict_dims(self):
         _dict = {}
@@ -623,11 +620,11 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
                 _dict[dim] = {"size": self.shape[index], "coord": getattr(self, dim)}
         return _dict
 
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # public methods
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
-    # ..................................................................................................................
+    # ..........................................................................
     def add_coordset(self, *coords, dims=None, **kwargs):
         """
         Add one or a set of coordinates from a dataset.
@@ -659,7 +656,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             # force it one time after this initialization
             self._coordset._updated = True
 
-    # ..................................................................................................................
+    # ..........................................................................
     def coord(self, dim="x"):
         """
         Return the coordinates along the given dimension.
@@ -693,7 +690,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             error_(f"could not find this dimenson name: `{name}`")
             return None
 
-    # ..................................................................................................................
+    # ..........................................................................
     @property
     def coordset(self):
         """
@@ -707,7 +704,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             return None
         return self._coordset
 
-    # ..................................................................................................................
+    # ..........................................................................
     @coordset.setter
     def coordset(self, coords):
         if isinstance(coords, CoordSet):
@@ -715,7 +712,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         else:
             self.set_coordset(coords)
 
-    # ..................................................................................................................
+    # ..........................................................................
     @property
     def coordnames(self):
         """
@@ -726,7 +723,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         if self._coordset is not None:
             return self._coordset.names
 
-    # ..................................................................................................................
+    # ..........................................................................
     @property
     def coordtitles(self):
         """
@@ -737,7 +734,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         if self._coordset is not None:
             return self._coordset.titles
 
-    # ..................................................................................................................
+    # ..........................................................................
     @property
     def coordunits(self):
         """
@@ -748,7 +745,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         if self._coordset is not None:
             return self._coordset.units
 
-    # ..................................................................................................................
+    # ..........................................................................
     @property
     def data(self):
         """
@@ -758,28 +755,28 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         """
         return super().data
 
-    # ..................................................................................................................
+    # ..........................................................................
     @data.setter
     def data(self, data):
         # as we can't write super().data = data, we call _set_data
         # see comment in the data.setter of NDArray
         super()._set_data(data)
 
-    # ..................................................................................................................
+    # ..........................................................................
     def delete_coordset(self):
         """
         Delete all coordinate settings.
         """
         self._coordset = None
 
-    # ..................................................................................................................
+    # ..........................................................................
     @property
     def labels(self):
         # not valid for NDDataset
         # There is no label for nd-dataset
         raise NotImplementedError  # pragma: no cover
 
-    # ..................................................................................................................
+    # ..........................................................................
     @property
     def modeldata(self):
         """
@@ -789,12 +786,12 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         """
         return self._modeldata
 
-    # ..................................................................................................................
+    # ..........................................................................
     @modeldata.setter
     def modeldata(self, data):
         self._modeldata = data
 
-    # ..................................................................................................................
+    # ..........................................................................
     @property
     def parent(self):
         """
@@ -804,7 +801,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         """
         return self._parent
 
-    # ..................................................................................................................
+    # ..........................................................................
     @parent.setter
     def parent(self, value):
         if self._parent is not None:
@@ -815,7 +812,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             self._parent.remove_dataset(self.name)
         self._parent = value
 
-    # ..................................................................................................................
+    # ..........................................................................
     def set_coordset(self, *args, **kwargs):
         """
         Set one or more coordinates at once.
@@ -831,21 +828,21 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         self._coordset = None
         self.add_coordset(*args, dims=self.dims, **kwargs)
 
-    # ..................................................................................................................
+    # ..........................................................................
     def set_coordtitles(self, *args, **kwargs):
         """
         Set titles of the one or more coordinates.
         """
         self._coordset.set_titles(*args, **kwargs)
 
-    # ..................................................................................................................
+    # ..........................................................................
     def set_coordunits(self, *args, **kwargs):
         """
         Set units of the one or more coordinates.
         """
         self._coordset.set_units(*args, **kwargs)
 
-    # ..................................................................................................................
+    # ..........................................................................
     def sort(self, **kwargs):
         """
         Return the dataset sorted along a given dimension.
@@ -929,7 +926,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         return new
 
-    # ..................................................................................................................
+    # ..........................................................................
     def squeeze(self, *dims, inplace=False):
         """
         Remove single-dimensional entries from the shape of a NDDataset.
@@ -994,7 +991,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         """
         # TODO
 
-    # ..................................................................................................................
+    # ..........................................................................
     def swapdims(self, dim1, dim2, inplace=False):
         """
         Interchange two dimensions of a NDDataset.
@@ -1022,7 +1019,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         new.history = f"Data swapped between dims {dim1} and {dim2}"
         return new
 
-    # ..................................................................................................................
+    # ..........................................................................
     @property
     def T(self):
         """
@@ -1032,7 +1029,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         """
         return self.transpose()
 
-    # ..................................................................................................................
+    # ..........................................................................
     def take(self, indices, **kwargs):
         """
         Take elements from an array.
@@ -1085,7 +1082,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         """
         return np.ma.array(self)
 
-    # ..................................................................................................................
+    # ..........................................................................
     def to_xarray(self):
         """
         Convert a NDDataset instance to an `~xarray.DataArray` object.
@@ -1167,7 +1164,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         return da
 
-    # ..................................................................................................................
+    # ..........................................................................
     def transpose(self, *dims, inplace=False):
         """
         Permute the dimensions of a NDDataset.
@@ -1194,11 +1191,11 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         return new
 
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # private methods
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
-    # ..................................................................................................................
+    # ..........................................................................
     def _cstr(self):
         # Display the metadata of the object and partially the data
         out = ""
@@ -1253,7 +1250,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         else:
             return out.rstrip()
 
-    # ..................................................................................................................
+    # ..........................................................................
     def _loc2index(self, loc, dim=-1):
         # Return the index of a location (label or coordinates) along the dim
         # This can work only if `coords` exists.
@@ -1268,7 +1265,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         return coord._loc2index(loc)
 
-    # ..................................................................................................................
+    # ..........................................................................
     def _str_dims(self):
         if self.is_empty:
             return ""
@@ -1287,15 +1284,15 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
     _repr_dims = _str_dims
 
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # events
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     def _dims_update(self, change=None):
         # when notified that a coords names have been updated
         _ = self.dims  # fire an update
 
-    # ..................................................................................................................
+    # ..........................................................................
 
 
 # ======================================================================================================================
