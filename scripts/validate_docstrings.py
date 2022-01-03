@@ -304,7 +304,13 @@ def validate_all(prefix, ignore_deprecated=False):
     seen = {}
 
     api_doc_fnames = os.path.join(
-        BASE_PATH, "docs", "userguide", "reference", "generated", "*.rst"
+        BASE_PATH,
+        "spectrochempy",
+        "docs",
+        "userguide",
+        "reference",
+        "generated",
+        "*.rst",
     )
     api_items = []
     for api_doc_fname in glob.glob(api_doc_fnames):

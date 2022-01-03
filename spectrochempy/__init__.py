@@ -56,8 +56,8 @@ __all__ = ["api"]
 
 # import the main api
 
-from . import api
-from .api import *  # noqa: F401
+from spectrochempy import api
+from spectrochempy.api import *  # noqa: F401
 
 __all__ += api.__all__
 

@@ -29,9 +29,9 @@ from spectrochempy.utils.testing import (
 )
 
 
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 #  NDARRAY INITIALIZATION
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 
 
 def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
@@ -45,6 +45,7 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert isinstance(d0, NDArray)
 
     assert d0.is_empty
+    assert len(d0) == 0
     assert d0.shape == ()
     assert d0.id.startswith("NDArray")
     assert d0.name == d0.id
@@ -209,6 +210,7 @@ def test_ndarray_copy():
     d1 = d0.copy()
     assert d1 is not d0
     assert d1 == d0
+    assert not (d1 != d0)
     assert d1.units == d0.units
     assert_array_equal(d1.labels, d0.labels)
     assert_array_equal(d1.mask, d0.mask)
@@ -286,6 +288,12 @@ def test_ndarray_sort():
     # other way
     d2 = d1._sort(by="label", pos=1, descend=True)
     assert np.all(d2.labels[0] == d1.labels[0])
+
+    d3 = d1.copy()
+    d3._labels = None
+    d3._sort(
+        by="label", pos=1, descend=True
+    )  # no label! generate a warning but no error
 
 
 def test_ndarray_methods(refarray, ndarray, ndarrayunit):
@@ -468,7 +476,9 @@ def test_ndarray_slicing(refarray, ndarray):
     assert isinstance(nd1.data, np.ndarray)
     assert isinstance(nd1.values, TYPE_FLOAT)
 
-    nd1b, id = nd.__getitem__((0, 0), return_index=True)
+    nd1b = nd.__getitem__(
+        (0, 0),
+    )
     assert nd1b == nd1
 
     nd1a = nd[0, 0:2]

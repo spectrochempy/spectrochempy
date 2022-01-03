@@ -95,7 +95,7 @@ def dot(a, b, strict=True, out=None):
     history = "Dot product between %s and %s" % (a.name, b.name)
 
     # make the output
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     new = make_new_object(a)
     new._data = data
     new._mask = mask

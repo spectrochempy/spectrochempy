@@ -39,7 +39,7 @@ def test_is_kernel():
 
 # @pytest.mark.skip("problem with one of the commit - look at this later")
 @pytest.mark.skipif(
-    is_windows(), reason="Fail under on Windows OS due to one of the commits"
+    is_windows(), reason="Fail under Windows OS due to one of the commits"
 )
 def test_sh():
     res = sh.git("show", "HEAD")

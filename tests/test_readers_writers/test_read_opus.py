@@ -15,7 +15,7 @@ from spectrochempy import NDDataset
 from spectrochempy import preferences as prefs
 
 
-# ......................................................................................................................
+# ..............................................................................
 def test_read_opus():
     # single file
     A = NDDataset.read_opus(os.path.join("irdata", "OPUS", "test.0000"))

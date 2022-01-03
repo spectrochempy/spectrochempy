@@ -5,11 +5,86 @@
 #    CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
 #  =====================================================================================================================
 
+from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.scripts.script import Script
 from spectrochempy.utils import testing
 
 
-def test_compare(IR_dataset_1D, simple_project):
+def test_compare_ndarrays(IR_dataset_1D):
+
+    nda1 = NDArray(IR_dataset_1D)
+    nda2 = nda1.copy()
+
+    assert not nda1.implements("NDDataset")
+    testing.assert_ndarray_equal(nda1, nda2)
+
+    # equality does not depend on title
+    nda3 = nda1.copy()
+    nda3.title = "xxx"
+    testing.assert_ndarray_equal(nda1, nda3)
+
+    # should have same units
+    nda3.ito("km", force=True)
+    with testing.raises(AssertionError):
+        testing.assert_ndarray_equal(nda1, nda3)
+
+    # almost equal ndarrays
+    nda4 = nda1.copy()
+    nda4.data += 1.0e-6
+    with testing.raises(AssertionError):
+        testing.assert_ndarray_equal(nda1, nda4)
+    testing.assert_ndarray_almost_equal(nda1, nda4)
+    with testing.raises(AssertionError):
+        testing.assert_ndarray_equal(nda1, nda4, decimal=7)
+
+    # data only
+    nda5 = nda1.copy()
+    nda5.ito("km", force=True)
+    with testing.raises(AssertionError):
+        testing.assert_ndarray_equal(nda1, nda5)
+    testing.assert_ndarray_equal(nda1, nda5, data_only=True)
+
+
+def test_compare_coords(IR_dataset_2D):
+
+    x1 = IR_dataset_2D.x
+    x2 = x1.copy()
+
+    assert x1.implements("LinearCoord")
+    testing.assert_coord_equal(x1, x2)
+
+    y1 = IR_dataset_2D.y
+    y2 = y1.copy()
+
+    assert y2.implements("Coord")
+    testing.assert_coord_equal(y1, y2)
+
+    # equality do depend on title for coordinates
+    y3 = y1.copy()
+    y3.title = "xxx"
+    with testing.raises(AssertionError):
+        testing.assert_coord_equal(y1, y3)
+
+    # should have same units
+    y2.ito("km", force=True)
+    with testing.raises(AssertionError):
+        testing.assert_coord_equal(y1, y2)
+
+    x2.ito("km", force=True)
+    with testing.raises(AssertionError):
+        testing.assert_coord_equal(x1, x2)
+
+    # almost equal coords
+    x4 = x1.copy()
+    x4.data += 1.0e-6
+    with testing.raises(AssertionError):
+        testing.assert_coord_equal(x1, x4)
+    testing.assert_coord_almost_equal(x1, x4)
+    with testing.raises(AssertionError):
+        testing.assert_coord_equal(x1, x4, decimal=7)
+
+
+def test_compare_dataset(IR_dataset_1D):
     # dataset comparison
 
     nd1 = IR_dataset_1D.copy()
@@ -34,6 +109,8 @@ def test_compare(IR_dataset_1D, simple_project):
     with testing.raises(AssertionError):
         testing.assert_dataset_almost_equal(nd1, nd4, decimal=4)
 
+
+def test_compare_project(simple_project):
     # project comparison
 
     proj1 = simple_project.copy()

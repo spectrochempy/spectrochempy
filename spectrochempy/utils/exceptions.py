@@ -105,7 +105,7 @@ def deprecated(message):
     return deprecation_decorator
 
 
-# ......................................................................................................................
+# ..............................................................................
 try:
     from contextlib import ignored
 except ImportError:
@@ -130,11 +130,11 @@ except ImportError:
         Examples
         --------
 
-            >>> import os
-            >>> from spectrochempy.utils import ignored
-            >>>
-            >>> with ignored(OSError):
-            ...     os.remove('file-that-does-not-exist')
+        >>> import os
+        >>> from spectrochempy.utils import ignored
+        >>>
+        >>> with ignored(OSError):
+        ...     os.remove('file-that-does-not-exist')
         """
 
         try:

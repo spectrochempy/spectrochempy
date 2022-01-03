@@ -21,7 +21,7 @@ from spectrochempy.core import warning_, error_
 from spectrochempy.core.dataset.coord import Coord
 
 
-# ..................................................................................................................
+# ..........................................................................
 def can_merge_or_align(coord1, coord2):
     """
     Check if two coordinates can be merged or aligned.

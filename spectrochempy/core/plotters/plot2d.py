@@ -29,9 +29,8 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 
-from .plotutils import make_label
-from ..dataset.coord import LinearCoord
-from ...utils import add_docstring
+from spectrochempy.utils import make_label, add_docstring
+from spectrochempy.core.dataset.coord import LinearCoord
 
 _PLOT2D_DOC = """\
 ax : |Axes| instance. Optional
@@ -318,7 +317,7 @@ def plot_2D(dataset, method="stack", **kwargs):
     """
 
     # Get preferences
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     prefs = dataset.preferences
 
@@ -331,7 +330,7 @@ def plot_2D(dataset, method="stack", **kwargs):
     prefs.set_latex_font(prefs.font.family)  # reset latex settings
 
     # Redirections ?
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     # should we redirect the plotting to another method
     if dataset._squeeze_ndim < 2:
@@ -348,7 +347,7 @@ def plot_2D(dataset, method="stack", **kwargs):
     data_only = kwargs.get("data_only", False)
 
     # Get the data to plot
-    # -------------------------------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------
 
     # if we want to plot the transposed dataset
     transposed = kwargs.get("transposed", False)
@@ -364,14 +363,14 @@ def plot_2D(dataset, method="stack", **kwargs):
         new = new[::-1]
 
     # Figure setup
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     new._figure_setup(ndim=2, method=method, **kwargs)
 
     ax = new.ndaxes["main"]
     ax.name = ax.name + nameadd
 
     # Other properties that can be passed as arguments
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     lw = kwargs.get("linewidth", kwargs.get("lw", prefs.lines_linewidth))
     alpha = kwargs.get("calpha", prefs.contour_alpha)
@@ -401,12 +400,12 @@ def plot_2D(dataset, method="stack", **kwargs):
     ax.xaxis.set_major_formatter(formatter)
     ax.yaxis.set_major_formatter(formatter)
 
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # Set axis
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     # set the abscissa axis
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # the actual dimension name is the last in the new.dims list
     dimx = new.dims[-1]
     x = getattr(new, dimx)
@@ -458,7 +457,7 @@ def plot_2D(dataset, method="stack", **kwargs):
     ax.set_xscale(xscale)  # , nonpositive='mask')
 
     # set the ordinates axis
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # the actual dimension name is the second in the new.dims list
     dimy = new.dims[-2]
     y = getattr(new, dimy)
@@ -503,7 +502,7 @@ def plot_2D(dataset, method="stack", **kwargs):
     ax.set_yscale(yscale)
 
     # z intensity (by default we plot real component of the data)
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     if not kwargs.get("imag", False):
         zdata = new.real.masked_data
@@ -556,9 +555,9 @@ def plot_2D(dataset, method="stack", **kwargs):
         # ----------------
         ax.set_ylim(ylim)
 
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # plot the dataset
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     ax.grid(prefs.axes_grid)
 
     normalize = kwargs.get("normalize", None)
@@ -693,19 +692,19 @@ def plot_2D(dataset, method="stack", **kwargs):
         return ax
 
     # display a title
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     title = kwargs.get("title", None)
     if title:
         ax.set_title(title)
     elif kwargs.get("plottitle", False):
         ax.set_title(new.name)
 
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # labels
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     # x label
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     xlabel = kwargs.get("xlabel", None)
     if show_x_points:
         xlabel = "data points"
@@ -725,7 +724,7 @@ def plot_2D(dataset, method="stack", **kwargs):
         ax.set_xticklabels(x.labels)
 
     # y label
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     ylabel = kwargs.get("ylabel", None)
     if show_y_points:
         ylabel = "data points"
@@ -748,7 +747,7 @@ def plot_2D(dataset, method="stack", **kwargs):
                 ax.set_yticklabels(y.labels)
 
     # z label
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     zlabel = kwargs.get("zlabel", None)
     if not zlabel:
         if method in ["stack"]:
@@ -921,24 +920,24 @@ def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwa
         lab = ax.text(xmax + ctx(8), pos, f"{y:.0f}", va="center")
 
     # display a title
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     title = kwargs.get("title", None)
     if title:
         ax.set_title(title)
 
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # labels
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     # x label
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     xlabel = kwargs.get("xlabel", None)
     if not xlabel:
         xlabel = make_label(new.x, "x")
     ax.set_xlabel(xlabel, x=(ax.bbox._bbox.x0 + ax.bbox._bbox.x1) / 2 - xe)
 
     # y label
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     ylabel = kwargs.get("ylabel", None)
     if not ylabel:
         ylabel = make_label(new.y, "y")
@@ -961,7 +960,7 @@ def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwa
     )
 
     # z label
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     zlabel = kwargs.get("zlabel", None)
     if not zlabel:
         zlabel = make_label(new, "value")

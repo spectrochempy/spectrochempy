@@ -33,9 +33,8 @@ __dataset_methods__ = [
 import numpy as np
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
-from .plotutils import make_label
-from ...utils import is_sequence, add_docstring  # , deprecated
-from ..dataset.coord import Coord
+from spectrochempy.utils import make_label, is_sequence, add_docstring  # , deprecated
+from spectrochempy.core.dataset.coord import Coord
 
 
 _PLOT1D_DOC = """\
@@ -344,9 +343,9 @@ def plot_multiple(datasets, method="scatter", pen=True, labels=None, **kwargs):
     return ax
 
 
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 # plot_1D
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 
 
 @add_docstring(_PLOT1D_DOC)
@@ -380,7 +379,7 @@ def plot_1D(dataset, method="pen", **kwargs):
     """
 
     # Get preferences
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     prefs = dataset.preferences
 
@@ -393,7 +392,7 @@ def plot_1D(dataset, method="pen", **kwargs):
     prefs.set_latex_font(prefs.font.family)  # reset latex settings
 
     # Redirections ?
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     # should we redirect the plotting to another method
     if dataset._squeeze_ndim > 1:
@@ -404,7 +403,7 @@ def plot_1D(dataset, method="pen", **kwargs):
         return dataset.plotly(**kwargs)
 
     # Method of plot
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     # some addtional options may exists in kwargs
     pen = kwargs.pop("pen", False)  # lines and pen synonyms
@@ -421,7 +420,7 @@ def plot_1D(dataset, method="pen", **kwargs):
     # data_only = kwargs.get("data_only", False)
 
     # Get the data to plot
-    # -------------------------------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------
 
     new = dataset  # .copy()
     if new.size > 1:
@@ -446,7 +445,7 @@ def plot_1D(dataset, method="pen", **kwargs):
     markeredgecolor = kwargs.get("markeredgecolor", kwargs.get("mec", "k"))
 
     # Figure setup  #
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     new._figure_setup(ndim=1, scatter=scatter, scatterpen=scatterpen, **kwargs)
 
     ax = new.ndaxes["main"]
@@ -455,7 +454,7 @@ def plot_1D(dataset, method="pen", **kwargs):
     # we first look in the meta parameters of the dataset for the defaults
 
     # Other ax properties that can be passed as arguments
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     number_x_labels = prefs.number_of_x_labels
     number_y_labels = prefs.number_of_y_labels
@@ -479,9 +478,9 @@ def plot_1D(dataset, method="pen", **kwargs):
 
     ax.grid(prefs.axes_grid)
 
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # plot the dataset
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     # abscissa axis
     # the actual dimension name is the first in the new.dims list
@@ -523,7 +522,7 @@ def plot_1D(dataset, method="pen", **kwargs):
         zdata = z.masked_data
 
     # plot_lines
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     label = kwargs.get("label", None)
     if scatterpen:
         # pen + scatter
@@ -598,9 +597,9 @@ def plot_1D(dataset, method="pen", **kwargs):
         # set the line style if defined in the preferences or options
         line.set_marker(marker)
 
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # axis
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     data_only = kwargs.get("data_only", False)
 
@@ -665,9 +664,9 @@ def plot_1D(dataset, method="pen", **kwargs):
         new._plot_resume(dataset, **kwargs)
         return ax
 
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # labels
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     # x label
 
@@ -712,7 +711,7 @@ def plot_1D(dataset, method="pen", **kwargs):
         ax.haxlines(label="zero_line")
 
     # display a title
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     title = kwargs.get("title", None)
     if title:
         ax.set_title(title)

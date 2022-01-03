@@ -2,9 +2,7 @@
 
 # ======================================================================================================================
 #  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
-#  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
-#  =
 # ======================================================================================================================
 """
 Package defining the *core* methods of the |scpy| API.
@@ -25,7 +23,7 @@ import matplotlib as mpl
 import numpy as np
 import scipy
 
-from .._optional import import_optional_dependency
+from ..optional import import_optional_dependency
 
 warnings.filterwarnings("ignore")
 
@@ -68,7 +66,7 @@ def print_(*args, **kwargs):
     print(stg)
 
 
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 def info_(*args, **kwargs):
     """
     Formatted info message.
@@ -77,7 +75,7 @@ def info_(*args, **kwargs):
     app.logs.info(stg)
 
 
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 def debug_(*args, **kwargs):
     """
     Formatted debug message.
@@ -85,12 +83,12 @@ def debug_(*args, **kwargs):
     stg = _format_args(*args, **kwargs)
     try:
         app.logs.debug(stg)
-    except NameError:
+    except NameError:  # pragma: no cover
         # works only if app if already loaded
         pass
 
 
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 def error_(*args, **kwargs):
     """
     Formatted error message.
@@ -102,7 +100,7 @@ def error_(*args, **kwargs):
     app.logs.error(stg)
 
 
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 def warning_(*args, **kwargs):
     """
     Formatted warning message.
@@ -223,19 +221,19 @@ __all__ += [
 ]
 
 # IPython methods
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 # we put them before so that we can eventually overwrite them
 
 _pbar_update()
 
 # constants
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 from ..utils import show, MASKED, NOMASK, EPSILON, INPLACE  # noqa: E402
 
 __all__ += ["show", "MASKED", "NOMASK", "EPSILON", "INPLACE"]
 
 # dataset
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 _pbar_update()
 from .dataset import api  # noqa: E402
 from .dataset.api import *  # noqa: E402,F403,F401
@@ -243,7 +241,7 @@ from .dataset.api import *  # noqa: E402,F403,F401
 __all__ += api.__all__
 
 # plotters
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 _pbar_update()
 from .plotters import api  # noqa: E402
 from .plotters.api import *  # noqa: E402,F403,F401
@@ -251,7 +249,7 @@ from .plotters.api import *  # noqa: E402,F403,F401
 __all__ += api.__all__
 
 # processors
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 _pbar_update()
 from .processors import api  # noqa: E402
 from .processors.api import *  # noqa: E402,F403,F401
@@ -259,7 +257,7 @@ from .processors.api import *  # noqa: E402,F403,F401
 __all__ += api.__all__
 
 # readers
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 _pbar_update()
 from .readers import api  # noqa: E402
 from .readers.api import *  # noqa: E402,F403,F401
@@ -267,7 +265,7 @@ from .readers.api import *  # noqa: E402,F403,F401
 __all__ += api.__all__
 
 # writers
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 _pbar_update()
 from .writers import api  # noqa: E402
 from .writers.api import *  # noqa: E402,F403,F401
@@ -275,7 +273,7 @@ from .writers.api import *  # noqa: E402,F403,F401
 __all__ += api.__all__
 
 # units
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 _pbar_update()
 from ..units import units  # noqa: E402
 from ..units.units import *  # noqa: E402,F403,F401
@@ -283,7 +281,7 @@ from ..units.units import *  # noqa: E402,F403,F401
 __all__ += units.__all__
 
 # databases
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 _pbar_update()
 from ..databases import api  # noqa: E402
 from ..databases.api import *  # noqa: E402,F403,F401
@@ -291,7 +289,7 @@ from ..databases.api import *  # noqa: E402,F403,F401
 __all__ += api.__all__
 
 # analysis
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 _pbar_update()
 from .analysis import api  # noqa: E402
 from .analysis.api import *  # noqa: E402,F403,F401
@@ -299,7 +297,7 @@ from .analysis.api import *  # noqa: E402,F403,F401
 __all__ += api.__all__
 
 # fitting
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 _pbar_update()
 from .fitting import api  # noqa: E402
 from .fitting.api import *  # noqa: E402,F403,F401
@@ -307,7 +305,7 @@ from .fitting.api import *  # noqa: E402,F403,F401
 __all__ += api.__all__
 
 # project
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 _pbar_update()
 from .project import api  # noqa: E402
 from .project.api import *  # noqa: E402,F403,F401
@@ -315,7 +313,7 @@ from .project.api import *  # noqa: E402,F403,F401
 __all__ += api.__all__
 
 # script
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 _pbar_update()
 from .scripts import api  # noqa: E402
 from .scripts.api import *  # noqa: E402,F403,F401
@@ -323,7 +321,7 @@ from .scripts.api import *  # noqa: E402,F403,F401
 __all__ += api.__all__
 
 # widgets
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 _pbar_update()
 from ..widgets import api  # noqa: E402
 from ..widgets.api import *  # noqa: E402,F403,F401
@@ -332,7 +330,7 @@ __all__ += api.__all__
 
 
 # Helpers
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 
 
 def APIref():
@@ -358,16 +356,16 @@ _started = app.start()
 
 warnings.filterwarnings(action="ignore", module="matplotlib", category=UserWarning)
 
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 # File Dialogs
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 
 __all__ += ["open_dialog", "save_dialog"]
 
 # Set flags
 USE_QT = preferences.use_qt or environ.get("SCPY_GUI", None) == "RUNNING"
 
-if USE_QT:
+if USE_QT:  # pragma: no cover
 
     import_optional_dependency("PyQt5")
     from PyQt5 import QtWidgets
@@ -384,12 +382,12 @@ else:
     from tkinter import filedialog
 
 
-# ------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------
 # Private functions
-# ------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------
 
 
-class _QTFileDialogs:
+class _QTFileDialogs:  # pragma: no cover
     @classmethod
     def _open_existing_directory(
         cls, parent=None, caption="Select a folder", directory=None
@@ -480,7 +478,7 @@ class _QTFileDialogs:
         return None
 
 
-class _TKFileDialogs:
+class _TKFileDialogs:  # pragma: no cover
     def __init__(self):
         import tkinter as tk
 
@@ -600,14 +598,14 @@ class _TKFileDialogs:
         return None
 
 
-# ------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------
 # Public functions
-# ------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------
 
 # noinspection PyRedundantParentheses
 def save_dialog(
     filename=None, caption="Save as...", filters=("All Files (*)"), **kwargs
-):
+):  # pragma: no cover
     """
     Return a file where to save.
     """
@@ -622,7 +620,9 @@ def save_dialog(
             filters=filters,
         )
     else:
-        f = _TKFileDialogs()._save_filename(filename, caption, filters)
+        f = _TKFileDialogs()._save_filename(
+            filename=filename, caption=caption, filters=filters
+        )
 
     from ..utils import pathclean
 
@@ -630,7 +630,9 @@ def save_dialog(
 
 
 # noinspection PyRedundantParentheses
-def open_dialog(single=True, directory=None, filters=("All Files (*)"), **kwargs):
+def open_dialog(
+    single=True, directory=None, filters=("All Files (*)"), **kwargs
+):  # pragma: no cover
     """
     Return one or several files to open.
     """

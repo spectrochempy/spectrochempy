@@ -13,7 +13,7 @@ from spectrochempy import NDDataset
 from spectrochempy import preferences as prefs
 
 
-# ......................................................................................................................
+# ..............................................................................
 def test_read():
     f = Path("irdata/OPUS/test.0000")
 

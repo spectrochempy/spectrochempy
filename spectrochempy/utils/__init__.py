@@ -9,11 +9,11 @@
 Package containing various utilities classes and functions.
 """
 # some useful constants
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 # import numpy as np
 
 # masked arrays
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 from numpy.ma.core import (
     masked as MASKED,
     nomask as NOMASK,
@@ -22,8 +22,9 @@ from numpy.ma.core import (
 )  # noqa: F401
 
 # import util files content
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------
 
+from .print import *
 from .file import *
 from .jsonutils import *
 from .misc import *
@@ -32,5 +33,5 @@ from .plots import *
 from .system import *
 from .traits import *
 from .zip import *
-from .print import *
 from .exceptions import *
+from .version import *

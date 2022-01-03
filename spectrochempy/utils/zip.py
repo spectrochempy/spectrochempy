@@ -16,21 +16,28 @@ from spectrochempy.utils import json_decoder
 __all__ = ["make_zipfile", "ScpFile"]
 
 
-# ======================================================================================================================
+# ==============================================================================
 # ZIP UTILITIES
-# ======================================================================================================================
+# ==============================================================================
 
 # ............................................................................
 def make_zipfile(file, **kwargs):
     """
     Create a ZipFile.
 
-    Allows for Zip64 (useful if files are larger than 4 GiB, and the `file`
-    argument can accept file or str.
-    `kwargs` are passed to the zipfile.ZipFile
-    constructor.
-
+    Allows for Zip64 (useful if files are larger than 4 GiB)
     (adapted from numpy)
+
+    Parameters
+    ----------
+    file:  file or str
+        The file to be zipped.
+    **kwargs: Optional keyword arguments
+        They are passed to the zipfile.ZipFile constructor.
+
+    Returns
+    -------
+    zipfile
     """
     import zipfile
 
@@ -52,13 +59,6 @@ class ScpFile(Mapping):  # lgtm [py/missing-equals]
     in the case of project's ``.pscp`` file format and finally ``pars.json``
     files which contains other information on the structure and  attibutes of
     the saved objects. Other files are ignored.
-
-    Attributes
-    ----------
-    files : list of str
-        List of all files in the archive with a ``.npy`` extension.
-    zip : ZipFile instance
-        The ZipFile object initialized with the zipped archive.
     """
 
     def __init__(self, fid):
@@ -68,6 +68,13 @@ class ScpFile(Mapping):  # lgtm [py/missing-equals]
         fid : file or str
             The zipped archive to open. This is either a file-like object
             or a string containing the path to the archive.
+
+        Attributes
+        ----------
+        files : list of str
+            List of all files in the archive with a ``.npy`` extension.
+        zip : ZipFile instance
+            The ZipFile object initialized with the zipped archive.
         """
         _zip = make_zipfile(fid)
 

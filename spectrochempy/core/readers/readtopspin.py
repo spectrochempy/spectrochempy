@@ -783,7 +783,7 @@ def read_bruker_nmr(*args, **kwargs):
     return read_topspin(*args, **kwargs)
 
 
-# ......................................................................................................................
+# ..............................................................................
 def _get_files(path, typ="acqu"):
     files = []
     for i in ["", 2, 3]:
@@ -809,9 +809,9 @@ def _read_topspin(*args, **kwargs):
     # low memory handling (lowmem) ?
     lowmem = kwargs.get("lowmem", False)  # load all in numero by default
 
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # start reading ....
-    # ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     parents = path.parents
 
@@ -908,7 +908,7 @@ def _read_topspin(*args, **kwargs):
         else:
             data = datalist
 
-    # ..............................................................................................................
+    # ........................................................................................................
     # we now make some rearrangement of the dic to have something more user friendly
     # we assume that all experiments have similar (important) parameters so that the experiments are compatibles
 

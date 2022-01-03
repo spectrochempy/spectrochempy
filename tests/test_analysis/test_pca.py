@@ -16,7 +16,7 @@ from spectrochempy.core.analysis.pca import PCA
 from spectrochempy.utils import MASKED, show
 from spectrochempy.utils.testing import assert_array_almost_equal
 
-from spectrochempy._optional import import_optional_dependency
+from spectrochempy.optional import import_optional_dependency
 
 # test pca
 # ---------

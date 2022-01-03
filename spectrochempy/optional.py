@@ -9,8 +9,6 @@ import sys
 import types
 import warnings
 
-from spectrochempy.utils.version import Version
-
 # Update install_adds.rst when updating versions!
 
 VERSIONS = {
@@ -28,7 +26,7 @@ INSTALL_MAPPING = {
 }
 
 
-def get_version(module: types.ModuleType) -> str:
+def get_module_version(module: types.ModuleType) -> str:
     version = getattr(module, "__version__", None)
     if version is None:
         # xlrd uses a capitalized attribute name
@@ -79,6 +77,7 @@ def import_optional_dependency(
         is False, or when the package's version is too old and `errors`
         is ``'warn'``.
     """
+    from spectrochempy.utils import Version
 
     assert errors in {"warn", "raise", "ignore"}
 
@@ -87,7 +86,7 @@ def import_optional_dependency(
 
     msg = (
         f"Missing optional dependency '{install_name}'. {extra} "
-        f"Use conda to install {install_name}."
+        f"Use conda or pip to install {install_name}."
     )
     try:
         module = importlib.import_module(name)
@@ -106,7 +105,7 @@ def import_optional_dependency(
         module_to_get = module
     minimum_version = min_version if min_version is not None else VERSIONS.get(parent)
     if minimum_version != "*":
-        version = get_version(module_to_get)
+        version = get_module_version(module_to_get)
         if Version(version) < Version(minimum_version):
             msg = (
                 f"SpectroChemPy requires version '{minimum_version}' or newer of '{parent}' "

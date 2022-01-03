@@ -9,7 +9,7 @@
 from spectrochempy import NDDataset
 
 
-# ......................................................................................................................
+# ..............................................................................
 def test_read_quadera():
     # single file
     A = NDDataset.read_quadera("msdata/ion_currents.asc")
