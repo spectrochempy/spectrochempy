@@ -1,9 +1,6 @@
-# This file is auto-generated from environment.yml, do not modify.
-# See that file for comments about the need/usage of each dependency.
-
 quadprog==0.1.9
 brukeropusreader
-quaternion
+numpy-quaternion
 nmrglue
 colorama
 dill
@@ -22,7 +19,6 @@ tqdm
 traitlets
 traittypes
 xlrd
-spectrochempy_data
 setuptools
 setuptools_scm
 gitpython
@@ -46,8 +42,6 @@ nbsphinx
 jupyter_sphinx
 json5
 sphinx-copybutton
-conda-build
-conda-verify
-anaconda-client
-pip
 autodoc_traits
+
+# spectrochempy_data  <- this is conda package only.
