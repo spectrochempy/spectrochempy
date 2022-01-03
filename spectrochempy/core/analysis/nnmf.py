@@ -33,7 +33,7 @@ class NNMF(HasTraits):
     If you find this tool useful, please cite the above work.
     Author : Chih-Jen Lin, National Taiwan University
     Copyright (c) 2005-2008 Chih-Jen Lin
-    All rights reserved.
+    See LICENCES in the root directory.
     Python/numpy translation : Anthony Di Franco ;
     """
 
