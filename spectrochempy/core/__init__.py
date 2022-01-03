@@ -83,7 +83,7 @@ def debug_(*args, **kwargs):
     stg = _format_args(*args, **kwargs)
     try:
         app.logs.debug(stg)
-    except NameError:
+    except NameError:  # pragma: no cover
         # works only if app if already loaded
         pass
 
@@ -365,7 +365,7 @@ __all__ += ["open_dialog", "save_dialog"]
 # Set flags
 USE_QT = preferences.use_qt or environ.get("SCPY_GUI", None) == "RUNNING"
 
-if USE_QT:
+if USE_QT:  # pragma: no cover
 
     import_optional_dependency("PyQt5")
     from PyQt5 import QtWidgets
@@ -387,7 +387,7 @@ else:
 # ------------------------------------------------------------------------
 
 
-class _QTFileDialogs:
+class _QTFileDialogs:  # pragma: no cover
     @classmethod
     def _open_existing_directory(
         cls, parent=None, caption="Select a folder", directory=None
@@ -478,7 +478,7 @@ class _QTFileDialogs:
         return None
 
 
-class _TKFileDialogs:
+class _TKFileDialogs:  # pragma: no cover
     def __init__(self):
         import tkinter as tk
 
@@ -605,7 +605,7 @@ class _TKFileDialogs:
 # noinspection PyRedundantParentheses
 def save_dialog(
     filename=None, caption="Save as...", filters=("All Files (*)"), **kwargs
-):
+):  # pragma: no cover
     """
     Return a file where to save.
     """
@@ -630,7 +630,9 @@ def save_dialog(
 
 
 # noinspection PyRedundantParentheses
-def open_dialog(single=True, directory=None, filters=("All Files (*)"), **kwargs):
+def open_dialog(
+    single=True, directory=None, filters=("All Files (*)"), **kwargs
+):  # pragma: no cover
     """
     Return one or several files to open.
     """

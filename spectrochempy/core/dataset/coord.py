@@ -576,7 +576,7 @@ class Coord(NDMath, NDArray):
         return True
 
     # ..........................................................................
-    def transpose(self):
+    def transpose(self, **kwargs):
         return self
 
     # ------------------------------------------------------------------------
@@ -638,7 +638,7 @@ class Coord(NDMath, NDArray):
         ]
 
     # ..........................................................................
-    def __getitem__(self, items):
+    def __getitem__(self, items, **kwargs):
 
         if isinstance(items, list):
             # Special case of fancy indexing

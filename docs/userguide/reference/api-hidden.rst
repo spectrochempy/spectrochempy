@@ -259,8 +259,6 @@
    core.plotters.plot2d.plot_waterfall
    core.plotters.plot3d
    core.plotters.plotly
-   core.plotters.plotutils
-   core.plotters.plotutils.make_label
    core.print_
    core.processors
    core.processors.align
@@ -561,7 +559,6 @@
    NDDataset.ito_base_units
    NDDataset.ito_reduced_units
    NDDataset.limits
-   NDDataset.linear
    NDDataset.linspace
    NDDataset.load
    NDDataset.logspace

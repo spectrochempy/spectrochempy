@@ -5,7 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
 # ======================================================================================================================
 """
-This module implements the base |NDArray| class.
+This module implements the |NDArray| base class.
 """
 
 __all__ = ["NDArray", "DEFAULT_DIM_NAME"]
@@ -87,6 +87,77 @@ class NDArray(HasTraits):
 
     The key distinction from raw numpy |ndarray| is the presence of optional properties such as dimension names,
     labels, masks, units and/or extensible metadata dictionary.
+
+    Parameters
+    ----------
+    data : array of floats
+        Data array contained in the object. The data can be a list, a tuple, a |ndarray|, a ndarray-like,
+        a |NDArray| or any subclass of |NDArray|. Any size or shape of data is accepted. If not given, an empty
+        |NDArray| will be inited.
+        At the initialisation the provided data will be eventually cast to a numpy-ndarray.
+        If a subclass of |NDArray| is passed which already contains some mask, labels, or units, these elements
+        will
+        be used to accordingly set those of the created object. If possible, the provided data will not be copied
+        for `data` input, but will be passed by reference, so you should make a copy of the `data` before passing
+        them if that's the desired behavior or set the `copy` argument to True.
+    **kwargs
+        Optional keywords parameters. See Other Parameters.
+
+    Other Parameters
+    ----------------
+    dtype : str or dtype, optional, default=np.float64
+        If specified, the data will be cast to this dtype, else the data will be cast to float64.
+    dims : list of chars, optional.
+        If specified the list must have a length equal to the number of data dimensions (ndim).
+        If not specified, dimension names are automatically attributed in the order given by
+        `DEFAULT_DIM_NAME`.
+    name : str, optional
+        A user-friendly name for this object. If not given, the automatic `id` given at the object creation will be
+        used as a name.
+    labels : array of objects, optional
+        Labels for the `data`. Note that the labels can be used only for 1D-datasets.
+        The labels array may have an additional dimension, meaning several series of labels for the same data.
+        The given array can be a list, a tuple, a |ndarray|, a ndarray-like, a |NDArray| or any subclass of
+        |NDArray|.
+    mask : array of bool or `NOMASK`, optional
+        Mask for the data. The mask array must have the same shape as the data. The given array can be a list,
+        a tuple, or a |ndarray|. Each values in the array must be `False` where the data are *valid* and True when
+        they are not (like in numpy masked arrays). If `data` is already a :class:`~numpy.ma.MaskedArray`, or any
+        array object (such as a |NDArray| or subclass of it), providing a `mask` here will cause the mask from the
+        masked array to be ignored.
+    units : |Unit| instance or str, optional
+        Units of the data. If data is a |Quantity| then `units` is set to the unit of the `data`; if a unit is also
+        explicitly provided an error is raised. Handling of units use the `pint <https://pint.readthedocs.org/>`_
+        package.
+    title : str, optional
+        The title of the dimension. It will later be used for instance for labelling plots of the data.
+        It is optional but recommended giving a title to each ndarray.
+    dlabel :  str, optional.
+        Alias of `title`.
+    meta : dict-like object, optional.
+        Additional metadata for this object. Must be dict-like but no
+        further restriction is placed on meta.
+    author : str, optional.
+        name(s) of the author(s) of this dataset. BNy default, name of the computer note where this dataset is
+        created.
+    description : str, optional.
+        An optional description of the nd-dataset. A shorter alias is `desc`.
+    history : str, optional.
+        A string to add to the object history.
+    copy : bool, optional, Default:False.
+        If True, a deep copy of the passed object is performed.
+
+    See Also
+    --------
+    NDDataset : Object which subclass |NDArray| with the addition of coordinates.
+    Coord : Object which subclass |NDArray| (coordinates object).
+    LinearCoord : Object which subclass |NDArray| (Linear coordinates object).
+
+    Examples
+    --------
+
+    >>> myarray = scp.NDArray([1., 2., 3.], name='myarray')
+    >>> assert myarray.name == 'myarray'
     """
 
     # Hidden properties
@@ -134,78 +205,7 @@ class NDArray(HasTraits):
 
     # ..........................................................................
     def __init__(self, data=None, **kwargs):
-        """
-        Parameters
-        ----------
-        data : array of floats
-            Data array contained in the object. The data can be a list, a tuple, a |ndarray|, a ndarray-like,
-            a |NDArray| or any subclass of |NDArray|. Any size or shape of data is accepted. If not given, an empty
-            |NDArray| will be inited.
-            At the initialisation the provided data will be eventually cast to a numpy-ndarray.
-            If a subclass of |NDArray| is passed which already contains some mask, labels, or units, these elements
-            will
-            be used to accordingly set those of the created object. If possible, the provided data will not be copied
-            for `data` input, but will be passed by reference, so you should make a copy of the `data` before passing
-            them if that's the desired behavior or set the `copy` argument to True.
-        **kwargs
-            Optional keywords parameters. See Other Parameters.
 
-        Other Parameters
-        ----------------
-        dtype : str or dtype, optional, default=np.float64
-            If specified, the data will be cast to this dtype, else the data will be cast to float64.
-        dims : list of chars, optional.
-            If specified the list must have a length equal to the number of data dimensions (ndim).
-            If not specified, dimension names are automatically attributed in the order given by
-            `DEFAULT_DIM_NAME`.
-        name : str, optional
-            A user-friendly name for this object. If not given, the automatic `id` given at the object creation will be
-            used as a name.
-        labels : array of objects, optional
-            Labels for the `data`. Note that the labels can be used only for 1D-datasets.
-            The labels array may have an additional dimension, meaning several series of labels for the same data.
-            The given array can be a list, a tuple, a |ndarray|, a ndarray-like, a |NDArray| or any subclass of
-            |NDArray|.
-        mask : array of bool or `NOMASK`, optional
-            Mask for the data. The mask array must have the same shape as the data. The given array can be a list,
-            a tuple, or a |ndarray|. Each values in the array must be `False` where the data are *valid* and True when
-            they are not (like in numpy masked arrays). If `data` is already a :class:`~numpy.ma.MaskedArray`, or any
-            array object (such as a |NDArray| or subclass of it), providing a `mask` here will cause the mask from the
-            masked array to be ignored.
-        units : |Unit| instance or str, optional
-            Units of the data. If data is a |Quantity| then `units` is set to the unit of the `data`; if a unit is also
-            explicitly provided an error is raised. Handling of units use the `pint <https://pint.readthedocs.org/>`_
-            package.
-        title : str, optional
-            The title of the dimension. It will later be used for instance for labelling plots of the data.
-            It is optional but recommended giving a title to each ndarray.
-        dlabel :  str, optional.
-            Alias of `title`.
-        meta : dict-like object, optional.
-            Additional metadata for this object. Must be dict-like but no
-            further restriction is placed on meta.
-        author : str, optional.
-            name(s) of the author(s) of this dataset. BNy default, name of the computer note where this dataset is
-            created.
-        description : str, optional.
-            An optional description of the nd-dataset. A shorter alias is `desc`.
-        history : str, optional.
-            A string to add to the object history.
-        copy : bool, optional, Default:False.
-            If True, a deep copy of the passed object is performed.
-
-        See Also
-        --------
-        NDDataset : Object which subclass |NDArray| with the addition of coordinates.
-        Coord : Object which subclass |NDArray| (coordinates object).
-        LinearCoord : Object which subclass |NDArray| (Linear coordinates object).
-
-        Examples
-        --------
-
-        >>> myarray = scp.NDArray([1., 2., 3.], name='myarray')
-        >>> assert myarray.name == 'myarray'
-        """
         super().__init__()
 
         # Creation date.
@@ -250,14 +250,12 @@ class NDArray(HasTraits):
             try:
                 self.author = author
             except AttributeError:
+                # This happens for coord for which we cannot set the author (no need)
                 pass
 
         history = kwargs.pop("history", None)
         if history is not None:
-            try:
-                self.history = history
-            except AttributeError:
-                pass
+            self.history = history
 
         self._modified = self._date
 
@@ -329,10 +327,11 @@ class NDArray(HasTraits):
                 if hasattr(other, f"_{attr}"):
                     oattr = getattr(other, f"_{attr}")
                     # to avoid deprecation warning issue for unequal array
-                    if sattr is None and oattr is not None:
+                    if sattr is None and oattr is not None:  # pragma: no cover
                         return False
-                    if oattr is None and sattr is not None:
+                    if oattr is None and sattr is not None:  # pragma: no cover
                         return False
+                    # noinspection PyUnresolvedReferences
                     if (
                         hasattr(oattr, "size")
                         and hasattr(sattr, "size")
@@ -507,8 +506,16 @@ class NDArray(HasTraits):
         return
 
     # ..........................................................................
-    def _argsort(self, by="value", pos=None, descend=False):
+    def _argsort(self, by=None, pos=None, descend=False):
         # found the indices sorted by values or labels
+
+        if by is None:
+            warnings.warn(
+                "parameter `by` should be set to `value` or `label`, use `value` by default",
+                SpectroChemPyWarning,
+            )
+            by = "value"
+
         if by == "value":
             args = np.argsort(self.data)
         elif "label" in by and not self.is_labeled:
@@ -531,13 +538,7 @@ class NDArray(HasTraits):
                         pos = int(p[1])
                 labels = self._labels[..., pos]
             args = np.argsort(labels)
-        else:
-            # by = 'value'
-            warnings.warn(
-                "parameter `by` should be set to `value` or `label`, use `value` by default",
-                SpectroChemPyWarning,
-            )
-            args = np.argsort(self.data)
+
         if descend:
             args = args[::-1]
         return args
@@ -637,8 +638,8 @@ class NDArray(HasTraits):
                         f"Error: Dimension `{dim}` is not recognized "
                         f"(not in the dimension's list: {self.dims})."
                     )
-                id = self.dims.index(dim)
-                axis.append(id)
+                idx = self.dims.index(dim)
+                axis.append(idx)
 
             else:
                 raise TypeError(
@@ -791,12 +792,12 @@ class NDArray(HasTraits):
                 key,
             ]
 
-        def ellipsisinkeys(keys):
+        def ellipsisinkeys(_keys):
             try:
                 # Ellipsis
-                if isinstance(keys[0], np.ndarray):
+                if isinstance(_keys[0], np.ndarray):
                     return False
-                test = Ellipsis in keys
+                test = Ellipsis in _keys
             except ValueError as e:
                 if e.args[0].startswith("The truth "):
                     # probably an array of index (Fancy indexing)  # should not happen anymore with the test above
@@ -979,7 +980,7 @@ class NDArray(HasTraits):
             self._data = data
 
     # ..........................................................................
-    def _sort(self, by="value", pos=None, descend=False, inplace=False):
+    def _sort(self, by=None, pos=None, descend=False, inplace=False):
         # sort an ndarray using data or label values
 
         args = self._argsort(by, pos, descend)
@@ -1038,18 +1039,18 @@ class NDArray(HasTraits):
         print_unit = True
         units = ""
 
-        def mkbody(d, pref, units):
+        def mkbody(d, pref, _units):
             # work around printing masked values with formatting
             ds = d.copy()
             if self.is_masked:
                 dtype = self.data.dtype
                 mask_string = f"--{dtype}"
                 ds = insert_masked_print(ds, mask_string=mask_string)
-            body = np.array2string(ds, separator=" ", prefix=pref)
-            body = body.replace("\n", sep)
-            text = "".join([pref, body, units])
-            text += sep
-            return text
+            _body = np.array2string(ds, separator=" ", prefix=pref)
+            _body = _body.replace("\n", sep)
+            _text = "".join([pref, _body, _units])
+            _text += sep
+            return _text
 
         text = ""
         if not self.is_empty:
@@ -1091,9 +1092,9 @@ class NDArray(HasTraits):
         new._data = udata.m
         new._units = udata.units
 
-        if new._roi is not None:
-            roi = (np.array(new._roi) * oldunits).to(units)
-            new._roi = list(roi)
+        if new.roi is not None:
+            roi = (np.array(new.roi) * oldunits).to(units)
+            new.roi = list(roi)
 
         return new
 
@@ -1160,7 +1161,7 @@ class NDArray(HasTraits):
         self._author = value
 
     # ..........................................................................
-    def copy(self, deep=True, memo=None, keepname=False):
+    def copy(self, deep=True, keepname=False, **kwargs):
         """
         Make a disconnected copy of the current object.
 
@@ -1168,8 +1169,6 @@ class NDArray(HasTraits):
         ----------
         deep : bool, optional
             If True a deepcopy is performed which is the default behavior.
-        memo : Not used
-            This parameter ensures compatibility with deepcopy() from the copy package.
         keepname : bool
             If True keep the same name for the copied object.
 
@@ -2235,7 +2234,9 @@ class NDArray(HasTraits):
             oldunits = self._units
 
             try:
+                # noinspection PyUnresolvedReferences
                 if new.meta.larmor:  # _origin in ['topspin', 'nmr']
+                    # noinspection PyUnresolvedReferences
                     set_nmr_context(new.meta.larmor)
                     with ur.context("nmr"):
                         new = self._unittransform(new, units)

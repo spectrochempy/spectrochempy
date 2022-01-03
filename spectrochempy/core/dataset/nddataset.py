@@ -268,7 +268,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         ] + NDIO().__dir__()
 
     # ..........................................................................
-    def __getitem__(self, items):
+    def __getitem__(self, items, **kwargs):
 
         saveditems = items
 

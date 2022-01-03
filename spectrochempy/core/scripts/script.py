@@ -155,6 +155,16 @@ class Script(HasTraits):
 
         Rather than isinstance(obj, Project) use object.implements('Project').
         This is useful to check type without importing the module
+
+        Parameters
+        ----------
+        name: Object type name, optional
+            If not None, the function return True is the object type correspond to name.
+            If None the function return the object type name.
+
+        Returns
+        -------
+        Bool or str
         """
         if name is None:
             return "Script"
