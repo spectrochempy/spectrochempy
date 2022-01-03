@@ -12,7 +12,11 @@ import pytest
 
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.units import ur, Quantity
-from spectrochempy.utils.testing import assert_array_equal, assert_equal_units
+from spectrochempy.utils.testing import (
+    assert_array_equal,
+    assert_equal_units,
+    assert_approx_equal,
+)
 from spectrochempy.core import debug_
 
 
@@ -263,6 +267,11 @@ def test_coord():
     )
     assert coord0.reversed
 
+    assert not coord0.is_complex
+    assert not coord0.is_empty
+    assert coord0.T == coord0
+    assert_array_equal(coord0.masked_data, coord0.data)
+
 
 def test_coord_slicing():
     # slicing by index
@@ -374,7 +383,45 @@ def test_coord_unit_conversion_operators(operation, result_units):
     assert_equal_units(combined.units, result_units)
 
 
-NOTIMPL = ["mean", "pipe", "remove_masks", "std", "sum", "swapdims"]
+NOTIMPL = [
+    "average",
+    "clip",
+    "mean",
+    "pipe",
+    "remove_masks",
+    "std",
+    "cumsum",
+    "sum",
+    "swapdims",
+    "swapaxes",
+    "squeeze",
+    "random",
+    "empty",
+    "empty_like",
+    "var",
+    "ones",
+    "ones_like",
+    "full",
+    "diag",
+    "diagonal",
+    "full_like",
+    "identity",
+    "eye",
+    "zeros",
+    "zeros_like",
+    "coordmin",
+    "coordmax",
+    "conjugate",
+    "conj",
+    "abs",
+    "absolute",
+    "all",
+    "any",
+    "argmax",
+    "argmin",
+    "asfortranarray",
+    "origin",
+]
 
 
 @pytest.mark.parametrize("name", NOTIMPL)
@@ -433,3 +480,15 @@ def test_linearcoord():
 
     coordc = coord1.copy()
     assert coord1 == coordc
+
+    assert_approx_equal(coord1.spacing.m, 0.606060606)
+
+    assert coord1.author is None
+    assert not coord1.history
+
+    assert not coord1.descendant
+    assert coord2.descendant
+
+    assert coord1.is_1d
+
+    assert coord0.transpose() == coord0

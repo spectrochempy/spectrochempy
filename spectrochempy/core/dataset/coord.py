@@ -201,8 +201,8 @@ class Coord(NDMath, NDArray):
         """
         if self.linear:
             data = np.arange(self.size) * self._increment + self._offset
-            if hasattr(data, "units"):
-                data = data.m
+            # if hasattr(data, "units"):
+            #    data = data.m
         else:
             data = self._data
 
@@ -412,7 +412,7 @@ class Coord(NDMath, NDArray):
         Return coordinates spacing.
 
         It will be a scalar if the coordinates are uniformly spaced,
-        else ran array of the differents spacings
+        else an array of the differents spacings
         """
         if self.linear:
             return self.increment * self.units
@@ -554,7 +554,7 @@ class Coord(NDMath, NDArray):
     # ..........................................................................
     @property
     def origin(self, *args, **kwargs):
-        return None
+        raise NotImplementedError
 
     # ..........................................................................
     @property
@@ -1082,14 +1082,6 @@ class LinearCoord(Coord):
         return self._linear
 
     # ..........................................................................
-    def geomspace(self):
-        raise NotImplementedError
-
-    # ..........................................................................
-    def logspace(self):
-        raise NotImplementedError
-
-    # ..........................................................................
     def __dir__(self):
         # remove some methods with respect to the full NDArray
         # as they are not usefull for Coord.
@@ -1185,6 +1177,7 @@ class LinearCoord(Coord):
 # Set the operators
 # ======================================================================================================================
 _set_operators(Coord, priority=50)
+_set_operators(LinearCoord, priority=50)
 
 # ======================================================================================================================
 if __name__ == "__main__":
