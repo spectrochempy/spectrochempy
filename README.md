@@ -9,10 +9,7 @@ running on Linux, Windows or OS X.
 |---:|:---|
 |**Tests**| [![Tests Actions Status](https://github.com/spectrochempy/spectrochempy/actions/workflows/test_package.yml/badge.svg)](https://github.com/spectrochempy/spectrochempy/actions) [![Total alerts](https://img.shields.io/lgtm/alerts/g/spectrochempy/spectrochempy.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/spectrochempy/spectrochempy/alerts/) [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/spectrochempy/spectrochempy.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/spectrochempy/spectrochempy/context:python) [![Maintainability](https://api.codeclimate.com/v1/badges/78681bc1aabbb8ca915f/maintainability)](https://codeclimate.com/github/spectrochempy/spectrochempy/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/78681bc1aabbb8ca915f/test_coverage)](https://codeclimate.com/github/spectrochempy/spectrochempy/test_coverage)|
 |**Packages**| ![Conda](https://img.shields.io/conda/v/spectrocat/spectrochempy) [![PyPI version](https://badge.fury.io/py/spectrochempy.svg)](https://badge.fury.io/py/spectrochempy)||
-|**Docs**|[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3823841.svg)](https://doi.org/10.5281/zenodo.3823841) ![Conda](https://img.shields.io/conda/l/spectrocat/spectrochempy)|  
-
-
-
+|**Docs**|[![Docs](https://readthedocs.org/projects/docs/badge/?version=latest)](https://www.spectrochempy.fr/latest) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3823841.svg)](https://doi.org/10.5281/zenodo.3823841) ![Conda](https://img.shields.io/conda/l/spectrocat/spectrochempy)|
 
 ## Features
 
