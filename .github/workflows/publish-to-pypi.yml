@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - release/pypi_version
   release:
     types: [published]
 
