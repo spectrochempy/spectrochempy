@@ -36,6 +36,8 @@ whether you choose Miniconda or Anaconda…
 * Install the version which you just downloaded, following the instructions
   on the download page.
 
+For other python distributions, please check their respective documentation.
+
 Installation of |scpy|
 *****************************************************
 

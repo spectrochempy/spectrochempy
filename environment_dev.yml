@@ -1,4 +1,4 @@
-name: scpy
+name: scpy_dev
 
 channels:
     - conda-forge
@@ -47,3 +47,38 @@ dependencies:
     - nodejs
 
     
+    # DEV: just for testing
+    - pytest
+    - pytest-doctestplus
+    - pytest-flake8
+    - scikit-image
+    - coverage
+    - black
+    - pre-commit
+
+    # DEV: code and docs
+    - mamba
+    - jupytext
+    - sphinx=4.2.0
+    - sphinx_rtd_theme
+    - autodocsumm
+    - sphinx-gallery<=0.7.0
+    - nbsphinx
+    - jupyter_sphinx
+    - json5
+    - sphinx-copybutton
+    - numpydoc
+
+    # DEV: build
+    - conda-build
+    - conda-verify
+    - anaconda-client
+
+    # optional
+    # - xarray
+    # - datashader
+    # - scikit-learn
+    
+    - pip
+    - pip:
+        - autodoc_traits

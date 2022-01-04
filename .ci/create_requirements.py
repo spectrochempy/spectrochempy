@@ -18,20 +18,28 @@ Adapted from https://github.com/pandas-dev/pandas/scripts
 """
 import argparse
 import re
-import sys
 
 import yaml
 
 from jinja2 import Template
 from pathlib import Path
 
-EXCLUDE = {"python"}
+EXCLUDE = {
+    "python",
+    "pip",
+    "spectrochempy_data",
+    "cantera",
+    "conda-build",
+    "conda-verify",
+    "anaconda-client",
+}
 RENAME = {
     "pyqt": "pyqt5",
     "dask-core": "dask",
     "git": "gitpython",
-    "numpy-quaternion": "quaternion",
+    "quaternion": "numpy-quaternion",
     "matplotlib-base": "matplotlib",
+    "nmrglue": "git+https://github.com/jjhelmus/nmrglue.git",
 }
 
 
@@ -122,7 +130,7 @@ if __name__ == "__main__":
         help="name of the environment (default scpy) ",
     )
 
-    parser.add_argument("-v", "--version", help="Python version")
+    parser.add_argument("-v", "--version", help="Python version", default="3.8")
     parser.add_argument(
         "--dev", help="make a development environment", action="store_true"
     )
@@ -131,29 +139,28 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    if len(sys.argv) == 1:
-        parser.print_help(sys.stderr)
-
-    repo_path = Path(__file__).parent.parent.parent
+    repo_path = Path(__file__).parent.parent
 
     # generate environment yaml file
-    tempfile = repo_path / ".ci" / "scripts" / "env_template.yml"
+    tempfile = repo_path / ".ci" / "env_template.yml"
     template = Template(tempfile.read_text("utf-8"))
 
     name = args.name.split(".yml")[0]
+    dev = "_dev" if args.dev else ""
+    print(dev)
     out = template.render(
-        NAME=name,
+        NAME=f"{name}{dev}",
         VERSION=args.version,
         DEV=args.dev,
         DASH=args.dash,
         CANTERA=args.cantera,
     )
 
-    filename = repo_path / "environment.yml"
+    filename = repo_path / f"environment{dev}.yml"
     filename.write_text(out)
 
     # generate requirements
     main(
         filename,
-        repo_path / "requirements.txt",
+        repo_path / f"requirements{dev}.txt",
     )

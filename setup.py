@@ -13,6 +13,11 @@ from pathlib import Path
 from setuptools import setup, find_packages
 from setuptools.command.develop import develop as _develop
 from setuptools.command.install import install as _install
+from setuptools_scm import get_version
+
+
+def version():
+    return get_version(root=".", relative_to=__file__).split("+")[0]
 
 
 def _install_mpl():
@@ -106,13 +111,14 @@ packages = []
 setup_args = dict(
     # packages informations
     name="spectrochempy",
-    use_scm_version=True,
+    # use_scm_version=True,
+    version=version(),
     license="CeCILL-B Free Software",
     author="Arnaud Travert & Christian Fernandez",
-    author_email="contact (at) spectrochempy.fr",
+    author_email="contact@spectrochempy.fr",
     maintainer="C. Fernandez",
-    maintainer_email="christian.fernandez (at) ensicaen.fr",
-    url="http:/www.spectrochempy.fr",
+    maintainer_email="christian.fernandez@ensicaen.fr",
+    url="https://www.spectrochempy.fr",
     description="Processing, analysis and modelling Spectroscopic data for "
     "Chemistry with Python",
     long_description=Path("README.md").read_text(),
@@ -125,7 +131,6 @@ setup_args = dict(
         "Intended Audience :: Science/Research",
         "License :: CeCILL-B Free Software License Agreement (CECILL-B)",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
@@ -136,10 +141,10 @@ setup_args = dict(
     packages=find_packages() + packages,
     include_package_data=True,  # requirements
     python_requires=">=3.7",
-    setup_requires=["setuptools_scm", "matplotlib"],
-    install_requires=["matplotlib"],
-    # install_requires(dev=__DEV__),
-    # tests_require=extras_require['tests'],
+    setup_requires=["setuptools_scm>=6.3.2", "matplotlib>=3.5.1"],
+    install_requires=[
+        "matplotlib>=3.5.1",
+    ],
     # post-commands
     cmdclass={
         "develop": PostDevelopCommand,

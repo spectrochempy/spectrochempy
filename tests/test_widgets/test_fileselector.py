@@ -8,7 +8,7 @@ def test_fileselector():
     # no selection possible if we are not in a notebook
     assert fs.value is None
     assert fs.path.name == "testdata"
-    assert fs.fullpath.parent.name == "spectrochempy_data"
+    assert fs.fullpath.parent.name == datadir.parent.name
 
     fs.up()
-    assert fs.path.name == "spectrochempy_data"
+    assert fs.path.name == datadir.parent.name
