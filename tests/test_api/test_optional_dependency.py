@@ -10,7 +10,7 @@ from spectrochempy.optional import (
     import_optional_dependency,
 )
 
-import pandas._testing as tm
+import spectrochempy.utils._warnings as tm
 
 
 def test_import_optional():
