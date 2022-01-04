@@ -1,6 +1,6 @@
 # What's new
 
-## Version 0.2.18
+## Version 0.2.18rc2
 
 **NEW FEATURES**
 
