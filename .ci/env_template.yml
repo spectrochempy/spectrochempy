@@ -27,7 +27,6 @@ dependencies:
     - dill
     - ipython
     - jinja2
-    - mamba
     - matplotlib-base
     - numba
     - numpy>=1.21.0
@@ -66,6 +65,7 @@ dependencies:
     - pre-commit
 
     # DEV: code and docs
+    - mamba
     - jupytext
     - sphinx=4.2.0
     - sphinx_rtd_theme
