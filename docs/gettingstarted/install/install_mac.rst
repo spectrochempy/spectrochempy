@@ -3,9 +3,8 @@
 Installation Guide for Mac OSX
 ===============================
 
-Installation
--------------
-
+Installation using Conda
+------------------------
 
 .. _conda_mac:
 
@@ -124,6 +123,46 @@ environment or an existing environment
    .. sourcecode:: bash
 
         (scpy)  ~ $ mamba install -c spectrocat/label/dev spectrochempy
+
+Installation using pip
+----------------------
+
+If you prefer to use pip, here are the installation steps. We assume that you have a working installation of python > 3.6.
+
+#. Open a terminal and update pip:
+
+   ..sourcecode:: bash
+
+     $ python -m pip install --user --upgrade pip
+
+#. Creating a virtual environment
+
+   ..sourcecode:: bash
+
+     $ python -m venv env
+     $ source env/bin/activate
+
+   Check that you in the correct environment
+
+   ..sourcecode:: bash
+
+     (env) $ which python
+
+     .../env/bin/python
+
+#. Install all required packages
+
+   The easiest way to achieve this is to use the requirements.txt present on our github repository or in the present documentation (<link>)
+
+   ..sourcecode:: bash
+
+     (env) $ python -m pip install -r https://raw.githubusercontent.com/spectrochempy/spectrochempy/master/requirements.txt
+
+#. Install spectrochempy from pypi
+
+   ..sourcecode:: bash
+
+     (env) $ python -m pip install spectrochempy
 
 
 Check the Installation

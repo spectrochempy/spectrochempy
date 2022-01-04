@@ -150,3 +150,6 @@ scripts/myfile.csv
 scripts/single_spectrum.csv
 myfile.csv
 single_spectrum.csv
+
+# pip virtual environment
+/env/
