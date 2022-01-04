@@ -13,6 +13,11 @@ from pathlib import Path
 from setuptools import setup, find_packages
 from setuptools.command.develop import develop as _develop
 from setuptools.command.install import install as _install
+from setuptools_scm import get_version
+
+
+def version():
+    return get_version(root=".", relative_to=__file__).split("+")[0]
 
 
 def _install_mpl():
@@ -106,7 +111,8 @@ packages = []
 setup_args = dict(
     # packages informations
     name="spectrochempy",
-    use_scm_version=True,
+    # use_scm_version=True,
+    version=version(),
     license="CeCILL-B Free Software",
     author="Arnaud Travert & Christian Fernandez",
     author_email="contact@spectrochempy.fr",
