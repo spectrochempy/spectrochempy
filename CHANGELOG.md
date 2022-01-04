@@ -1,5 +1,15 @@
 # What's new
 
+## Version 0.2.18rc0
+
+**NEW FEATURES**
+
+* pip installation now possible
+
+**BUGS FIXED**
+
+* Various bug fixed
+
 ## Version 0.2.17
 
 **NEW FEATURES**
