@@ -1,4 +1,4 @@
-name: build and deploy conda package
+name: build and publish conda package
 
 on:
   push:
