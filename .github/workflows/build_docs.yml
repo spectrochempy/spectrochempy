@@ -69,10 +69,10 @@ jobs:
 
       - name: Build docs
         run: |
-          mkdir docs/build
+          mkdir ../../../spectrochempy_docs
 
           echo "cloning spectrochempy.github.io repository"
-          git clone --branch=gh-pages --single-branch https://github.com/spectrochempy/spectrochempy.git docs/build/html
+          git clone --branch=gh-pages --single-branch https://github.com/spectrochempy/spectrochempy.git ../../../spectrochempy_docs
 
           echo "Recreating docs"
           python docs/make.py --clean --html
