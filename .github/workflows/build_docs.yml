@@ -81,7 +81,7 @@ jobs:
           python docs/make.py --clean --html
 
       - name: Deploy Github Pages
-        if: ((github.event_name == 'release' && github.event.action == 'published') || (github.event_name == 'pull_request'))
+        if: (github.event_name != 'pull_request'))
         uses: JamesIves/github-pages-deploy-action@4.1.5
         with:
           branch: gh-pages
