@@ -45,7 +45,7 @@ DOCS = Path(__file__).parent
 TEMPLATES = DOCS / "_templates"
 STATIC = DOCS / "_static"
 PROJECT = DOCS.parent
-DOCREPO = DOCS / "build"  # Path().home() / "spectrochempy_docs"
+DOCREPO = Path().home() / "spectrochempy_docs"
 DOCTREES = DOCREPO / "~doctrees"
 HTML = DOCREPO / "html"
 LATEX = DOCREPO / "latex"
@@ -231,7 +231,10 @@ class BuildDocumentation(object):
 
         if len(sys.argv) == 1:
             parser.print_help(sys.stderr)
-            return
+
+            # ny default we run with option -H
+            print("by default, option is set to --html")
+            args.html = True
 
         self.regenerate_api = args.api
 

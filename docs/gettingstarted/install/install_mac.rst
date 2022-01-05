@@ -97,7 +97,7 @@ environment or an existing environment
 
    .. sourcecode:: bash
 
-        scpy)  ~ $ conda install mamba
+        (scpy)  ~ $ conda install mamba
 
    To install a stable version of spectrochempy, then you just have to do :
 
@@ -131,38 +131,38 @@ If you prefer to use pip, here are the installation steps. We assume that you ha
 
 #. Open a terminal and update pip:
 
-   ..sourcecode:: bash
+   .. sourcecode:: bash
 
-     $ python -m pip install --user --upgrade pip
+        $ python -m pip install --user --upgrade pip
 
 #. Creating a virtual environment
 
-   ..sourcecode:: bash
+   .. sourcecode:: bash
 
-     $ python -m venv env
-     $ source env/bin/activate
+        $ python -m venv env
+        $ source env/bin/activate
 
    Check that you in the correct environment
 
-   ..sourcecode:: bash
+   .. sourcecode:: bash
 
-     (env) $ which python
+       (env) $ which python
 
-     .../env/bin/python
+       .../env/bin/python
 
 #. Install all required packages
 
    The easiest way to achieve this is to use the requirements.txt present on our github repository or in the present documentation (<link>)
 
-   ..sourcecode:: bash
+   .. sourcecode:: bash
 
      (env) $ python -m pip install -r https://raw.githubusercontent.com/spectrochempy/spectrochempy/master/requirements.txt
 
 #. Install spectrochempy from pypi
 
-   ..sourcecode:: bash
+   .. sourcecode:: bash
 
-     (env) $ python -m pip install spectrochempy
+       (env) $ python -m pip install spectrochempy
 
 
 Check the Installation

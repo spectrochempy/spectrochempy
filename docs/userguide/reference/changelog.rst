@@ -1,6 +1,34 @@
 What’s new
 ==========
 
+Version 0.2.18rc2
+-----------------
+
+**NEW FEATURES**
+
+**NEW TASKS**
+
+-  pip installation now possible
+
+-  Some code revision
+
+-  NNMF revision
+
+-  Documentation improvement
+
+**BUGS FIXED**
+
+-  FIX issue #310
+
+-  FIX: the order of multicoordinates for a single dimension
+
+-  FIX: integrate methods to avoid code-climate warnings (duplicate
+   code)
+
+-  FIX: Documentation for the integrate methods
+
+-  FIX: skipping test_sh under windows
+
 Version 0.2.17
 --------------
 
