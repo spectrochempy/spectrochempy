@@ -173,7 +173,7 @@ def make_changelog():
 
     outfile = REFERENCE / "changelog.rst"
 
-    sh.pandoc(PROJECT / "CHANGELOG.md", "-f", "markdown", "-t", "rst", "-o", outfile)
+    sh(f'pandoc {PROJECT / "CHANGELOG.md"} -f  markdown -t rst -o {outfile}')
 
     print(f"`Complete what's new` log written to:\n{outfile}\n")
 
