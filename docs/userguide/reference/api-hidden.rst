@@ -683,7 +683,6 @@
    NDDataset.zf_size
    units.units
    units.units.set_nmr_context
-   utils.exception.ignored
    utils.exceptions
    utils.exceptions.CoordinateMismatchError
    utils.exceptions.deprecated

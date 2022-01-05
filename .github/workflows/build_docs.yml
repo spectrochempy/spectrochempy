@@ -26,18 +26,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install miniconda (scpy)
-        uses: conda-incubator/setup-miniconda@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
         with:
-          python-version: "3.8"
-          activate-environment: scpy
-          environment-file: environment_dev.yml
-          condarc-file: .ci/condarc.yml
-          auto-activate-base: false
-          auto-update-conda: true
+          python-version: '3.9'
 
       - name: Install spectrochempy
         run: |
+          python -m pip install -r requirements_dev.txt
           python setup.py install
 
       - name: Set up version environment variable
