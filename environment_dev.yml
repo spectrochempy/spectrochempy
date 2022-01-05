@@ -46,7 +46,7 @@ dependencies:
     - jupyterlab>=2.2.10
     - nodejs
 
-    
+
     # DEV: just for testing
     - pytest
     - pytest-doctestplus
@@ -68,6 +68,7 @@ dependencies:
     - json5
     - sphinx-copybutton
     - numpydoc
+    - pandoc
 
     # DEV: build
     - conda-build
@@ -78,7 +79,7 @@ dependencies:
     # - xarray
     # - datashader
     # - scikit-learn
-    
+
     - pip
     - pip:
         - autodoc_traits

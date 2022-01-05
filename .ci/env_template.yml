@@ -76,6 +76,7 @@ dependencies:
     - json5
     - sphinx-copybutton
     - numpydoc
+    - pandoc
 
     # DEV: build
     - conda-build
