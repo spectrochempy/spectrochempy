@@ -6,7 +6,7 @@ on:
       - master
       - docs
 
-  pull request:
+  pull_request:
 
   release:
     types: [published]
