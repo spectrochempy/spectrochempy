@@ -286,9 +286,11 @@ class BuildDocumentation(object):
             raise ValueError('Not a supported builder: Must be "html" or "latex"')
 
         BUILDDIR = DOCREPO / builder
+
         print(
             f'{"-" * 80}\n'
             f"building {builder.upper()} documentation ({doc_version.capitalize()} version : {version})"
+            f"\n in {BUILDDIR}"
             f'\n{"-" * 80}'
         )
 
@@ -325,8 +327,8 @@ class BuildDocumentation(object):
         if doc_version == "stable":
             doc_version = "latest"
             # make also the latest identical
-            sh("rm -rf latest")
-            sh("cp -r  stable latest")
+            sh(f"rm -rf {BUILDDIR}/latest")
+            sh(f"cp -r  {BUILDDIR}/stable {BUILDDIR}latest")
 
         if builder == "html":
             make_redirection_page()
