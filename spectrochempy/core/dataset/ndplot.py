@@ -261,6 +261,7 @@ class PreferencesSet(Meta):
                 "webagg.port_retries",
             ]:
                 continue
+
             val = str(mpl.rcParams[key])
             sav = ""
             while val != sav:
