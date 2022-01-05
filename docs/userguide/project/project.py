@@ -10,9 +10,24 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.13.5
 #   kernelspec:
-#     display_name: Python 3
+#     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
+#   language_info:
+#     codemirror_mode:
+#       name: ipython
+#       version: 3
+#     file_extension: .py
+#     mimetype: text/x-python
+#     name: python
+#     nbconvert_exporter: python
+#     pygments_lexer: ipython3
+#     version: 3.9.9
+#   widgets:
+#     application/vnd.jupyter.widget-state+json:
+#       state: {}
+#       version_major: 2
+#       version_minor: 0
 # ---
 
 # %% [markdown]
@@ -41,7 +56,7 @@ proj.name
 # To get the signature of the object, one can use the usual '?'. Uncomment the following line to check
 
 # %%
-# Project?
+# # Project?
 
 # %% [markdown]
 # ----

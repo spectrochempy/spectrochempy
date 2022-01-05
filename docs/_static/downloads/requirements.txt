@@ -1,0 +1,30 @@
+# This file is auto-generated from environment.yml, do not modify.
+# See that file for comments about the need/usage of each dependency.
+
+quadprog==0.1.9
+brukeropusreader
+numpy-quaternion
+git+https://github.com/jjhelmus/nmrglue.git
+colorama
+dill
+ipython
+jinja2
+matplotlib
+numba
+numpy>=1.21.0
+orderedset
+pint==0.16.1
+plotly
+requests
+scipy
+tqdm
+traitlets
+traittypes
+xlrd
+setuptools
+setuptools_scm
+gitpython
+ipywidgets
+ipympl
+jupyterlab>=2.2.10
+nodejs

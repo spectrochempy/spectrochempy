@@ -9,7 +9,7 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.13.5
 #   kernelspec:
-#     display_name: Python 3
+#     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
 #   language_info:
@@ -21,7 +21,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.8.8
+#     version: 3.9.9
 #   widgets:
 #     application/vnd.jupyter.widget-state+json:
 #       state: {}
@@ -86,7 +86,7 @@ _ = region.plot()
 # %% [markdown]
 # ### Maths on datasets
 
-# %% jupyter={"source_hidden": true}
+# %% tags=[]
 region.y -= region.y[0]  # make y coordinate relative to the first point
 region.y.title = "time of dehydratation"
 region -= region[-1]  # suppress the last spectra to all
@@ -101,14 +101,14 @@ _ = region.plot(colorbar=True)
 # %% [markdown]
 # #### Smoothing
 
-# %% jupyter={"source_hidden": true}
+# %% tags=[]
 smoothed = region.smooth(window_length=51, window="hanning")
 _ = smoothed.plot(colormap="magma")
 
 # %% [markdown]
 # #### Baseline correction
 
-# %% jupyter={"source_hidden": true}
+# %% tags=[]
 region = ds[:, 4000.0:2000.0]
 smoothed = region.smooth(window_length=51, window="hanning")
 blc = scp.BaselineCorrection(smoothed)
@@ -120,7 +120,7 @@ basc = blc.compute(
     npc=5,
 )
 
-# %% jupyter={"source_hidden": true}
+# %% tags=[]
 _ = basc.plot()
 
 # %% [markdown]
@@ -128,7 +128,7 @@ _ = basc.plot()
 #
 # #### IRIS processing
 
-# %% jupyter={"source_hidden": true}
+# %% tags=[]
 ds = scp.NDDataset.read_omnic("irdata/CO@Mo_Al2O3.SPG")[:, 2250.0:1950.0]
 pressure = [
     0.00300,
