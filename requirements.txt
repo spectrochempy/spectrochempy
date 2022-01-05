@@ -9,7 +9,7 @@ colorama
 dill
 ipython
 jinja2
-matplotlib
+matplotlib>=3.5
 numba
 numpy>=1.21.0
 orderedset
