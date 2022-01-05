@@ -1,5 +1,33 @@
-What’s new
+What's new
 ==========
+
+Version 0.2.18rc2
+-----------------
+
+**NEW FEATURES**
+
+**NEW TASKS**
+
+-  pip installation now possible
+
+-  Some code revision
+
+-  NNMF revision
+
+-  Documentation improvement
+
+**BUGS FIXED**
+
+-  FIX issue #310
+
+-  FIX: the order of multicoordinates for a single dimension
+
+-  FIX: integrate methods to avoid code-climate warnings (duplicate
+   code)
+
+-  FIX: Documentation for the integrate methods
+
+-  FIX: skipping test\_sh under windows
 
 Version 0.2.17
 --------------
@@ -49,7 +77,7 @@ Version 0.2.16
 
 -  IRIS: automatic search of the L-curve corner.
 
--  MCR-ALS returns the ‘soft’ concentration matrix.
+-  MCR-ALS returns the 'soft' concentration matrix.
 
 -  Document building configuration after update of external packages.
 
@@ -66,7 +94,7 @@ Version 0.2.15
 
 -  Added a baseline correction method: ``basc``.
 
--  Baseline ranges can be stored in meta.regions[‘baseline’] - basc will
+-  Baseline ranges can be stored in meta.regions['baseline'] - basc will
    recognize them.
 
 **BUGS FIXED**
@@ -108,9 +136,9 @@ Version 0.2.12
 
 -  LinearCoord operations now working.
 
--  Baseline default now “sequential” as expected.
+-  Baseline default now "sequential" as expected.
 
-**WARNING**: It was wrongly set to “mutivariate” in previous releases,
+**WARNING**: It was wrongly set to "mutivariate" in previous releases,
 so you should expect some difference with processing you may have done
 before.
 
@@ -124,9 +152,9 @@ Version 0.2.11
 
 **BUGS FIXED**
 
--  Plot2D now works when more than one coord in ‘y’ axis (#238).
+-  Plot2D now works when more than one coord in 'y' axis (#238).
 
--  Spectrochempy_data location has been corrected (#239).
+-  Spectrochempy\_data location has been corrected (#239).
 
 Version 0.2.10
 --------------
@@ -142,7 +170,7 @@ They are now located in a separate conda package:
 
 **BUGS FIXED**
 
--  Read_quadera() and examples now based on a correct asc file
+-  Read\_quadera() and examples now based on a correct asc file
 
 Version 0.2.9
 -------------
@@ -156,9 +184,9 @@ Version 0.2.8
 
 **NEW FEATURES**
 
--  Added write_csv() dir 1D datasets
+-  Added write\_csv() dir 1D datasets
 
--  Added read_quadera() for Pfeiffer Vacuum’s QUADERA® MS files
+-  Added read\_quadera() for Pfeiffer Vacuum's QUADERA® MS files
 
 -  Added test for trapz(), simps(), readquadera()
 
@@ -175,7 +203,7 @@ Version 0.2.7
 
 **NEW FEATURES**
 
--  Test and data for read_carroucell(), read_srs(), read_dso()
+-  Test and data for read\_carroucell(), read\_srs(), read\_dso()
 
 -  Added NMR processing of 2D spectra.
 
@@ -183,7 +211,7 @@ Version 0.2.7
 
 **BUGS FIXED**
 
--  Problem with read_carroucell(), read_srs(), read_dso()
+-  Problem with read\_carroucell(), read\_srs(), read\_dso()
 
 -  Colaboratory compatibility
 
@@ -284,7 +312,7 @@ Version 0.2.0
 
 -  Refactoring plot2D and 1D methods.
 
--  Added Simpson’rule integration.
+-  Added Simpson'rule integration.
 
 -  Addition of multiple coordinates to a dimension works better.
 
@@ -309,7 +337,7 @@ Version 0.2.0
 
 -  Configuration settings in the main application.
 
--  Compatibility read_zip with py3.7.
+-  Compatibility read\_zip with py3.7.
 
 -  NDpanel temporary removed from the master.
 
@@ -320,14 +348,15 @@ Version 0.2.0
 -  Suppressed a forgotten sleep statement that was slowing down the
    SpectroChemPy initialization.
 
--  Error in SIMPLISMA (changed affectations such as C.data[…] =
-   something by C[…] = something.
+-  Error in SIMPLISMA (changed affectations such as C.data[...] =
+   something by C[...] = something.
 
 -  Cleaning mplstyle about non-style parameters and fix makestyle.
 
--  Argument of set_xscale.
+-  Argument of set\_xscale.
 
--  Use read_topspin instead of the deprecated function read_bruker_nmr.
+-  Use read\_topspin instead of the deprecated function
+   read\_bruker\_nmr.
 
 -  Some issues with interactive baseline.
 

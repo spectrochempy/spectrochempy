@@ -45,7 +45,7 @@ DOCS = Path(__file__).parent
 TEMPLATES = DOCS / "_templates"
 STATIC = DOCS / "_static"
 PROJECT = DOCS.parent
-DOCREPO = DOCS / "build"  # Path().home() / "spectrochempy_docs"
+DOCREPO = Path().home() / "spectrochempy_docs"
 DOCTREES = DOCREPO / "~doctrees"
 HTML = DOCREPO / "html"
 LATEX = DOCREPO / "latex"
@@ -173,7 +173,7 @@ def make_changelog():
 
     outfile = REFERENCE / "changelog.rst"
 
-    sh.pandoc(PROJECT / "CHANGELOG.md", "-f", "markdown", "-t", "rst", "-o", outfile)
+    sh(f'pandoc {PROJECT / "CHANGELOG.md"} -f  markdown -t rst -o {outfile}')
 
     print(f"`Complete what's new` log written to:\n{outfile}\n")
 
@@ -231,7 +231,10 @@ class BuildDocumentation(object):
 
         if len(sys.argv) == 1:
             parser.print_help(sys.stderr)
-            return
+
+            # ny default we run with option -H
+            print("by default, option is set to --html")
+            args.html = True
 
         self.regenerate_api = args.api
 
@@ -283,9 +286,11 @@ class BuildDocumentation(object):
             raise ValueError('Not a supported builder: Must be "html" or "latex"')
 
         BUILDDIR = DOCREPO / builder
+
         print(
             f'{"-" * 80}\n'
             f"building {builder.upper()} documentation ({doc_version.capitalize()} version : {version})"
+            f"\n in {BUILDDIR}"
             f'\n{"-" * 80}'
         )
 
@@ -322,19 +327,8 @@ class BuildDocumentation(object):
         if doc_version == "stable":
             doc_version = "latest"
             # make also the latest identical
-            print(f"\n{builder.upper()} BUILDING:")
-            srcdir = confdir = DOCS
-            outdir = f"{BUILDDIR}/{doc_version}"
-            doctreesdir = f"{DOCTREES}/{doc_version}"
-            sp = Sphinx(srcdir, confdir, outdir, doctreesdir, builder)
-            sp.verbosity = 1
-            sp.build()
-
-            print(
-                f"\n{'-' * 130}\nBuild 'latest' finished. The {builder.upper()} pages "
-                f"are in {outdir}."
-            )
-            doc_version = "stable"
+            sh(f"rm -rf {BUILDDIR}/latest")
+            sh(f"cp -r  {BUILDDIR}/stable {BUILDDIR}latest")
 
         if builder == "html":
             make_redirection_page()

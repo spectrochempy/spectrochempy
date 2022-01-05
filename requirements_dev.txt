@@ -46,4 +46,5 @@ jupyter_sphinx
 json5
 sphinx-copybutton
 numpydoc
+pandoc
 autodoc_traits
