@@ -5,6 +5,9 @@ on:
     branches:
       - master
       - docs
+
+  pull request:
+
   release:
     types: [published]
 

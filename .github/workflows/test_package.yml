@@ -6,6 +6,8 @@ on:
       - develop
       - master
   pull_request:
+    branches-ignore:
+      - docs
 
 jobs:
 
