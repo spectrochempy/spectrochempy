@@ -26,14 +26,22 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Python
+      - name: Set up Python 3.9
         uses: actions/setup-python@v2
         with:
-          python-version: '3.9'
+          python-version: 3.9
+
+      - name: Add conda to system path
+        run: |
+          # $CONDA is an environment variable pointing to the root of the miniconda directory
+          echo $CONDA/bin >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: |
+          conda env update --file environment_dev.yml --name base
 
       - name: Install spectrochempy
         run: |
-          python -m pip install -r requirements_dev.txt
           python setup.py install
 
       - name: Set up version environment variable
