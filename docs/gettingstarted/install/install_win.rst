@@ -123,16 +123,16 @@ If you prefer to use pip, here are the installation steps. We assume that you ha
 
    .. sourcecode:: bat
 
-      C:\<yourDefaultPath>> py -m venv env
-      C:\<yourDefaultPath>> .\env\Scripts\activate
+        C:\<yourDefaultPath>> py -m venv env
+        C:\<yourDefaultPath>> .\env\Scripts\activate
 
    Check that you in the correct environment
 
    .. sourcecode:: bat
 
-      C:\<yourDefaultPath>> where python
+        C:\<yourDefaultPath>> where python
 
-      ...\env\Scripts\python.exe
+        ...\env\Scripts\python.exe
 
 #. Install all required packages
 
@@ -140,13 +140,13 @@ If you prefer to use pip, here are the installation steps. We assume that you ha
 
    .. sourcecode:: bat
 
-      C:\<yourDefaultPath>> py -m pip install -r https://raw.githubusercontent.com/spectrochempy/spectrochempy/master/requirements.txt
+        C:\<yourDefaultPath>> py -m pip install -r https://raw.githubusercontent.com/spectrochempy/spectrochempy/master/requirements.txt
 
 #. Install spectrochempy from pypi
 
    .. sourcecode:: bat
 
-      C:\<yourDefaultPath>> python -m pip install spectrochempy
+        C:\<yourDefaultPath>> python -m pip install spectrochempy
 
 
 Check the Installation
@@ -156,7 +156,7 @@ Check the installation by running a `IPython <https://ipython.readthedocs.io/en/
 
 .. sourcecode:: bat
 
-    C:\<yourDefaultPath>> ipython
+     C:\<yourDefaultPath>> ipython
 
 Then execute the following command:
 

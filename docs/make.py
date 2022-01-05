@@ -328,7 +328,7 @@ class BuildDocumentation(object):
             doc_version = "latest"
             # make also the latest identical
             sh(f"rm -rf {BUILDDIR}/latest")
-            sh(f"cp -r  {BUILDDIR}/stable {BUILDDIR}latest")
+            sh(f"cp -r  {BUILDDIR}/stable {BUILDDIR}/latest")
 
         if builder == "html":
             make_redirection_page()
