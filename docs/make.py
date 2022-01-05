@@ -325,19 +325,8 @@ class BuildDocumentation(object):
         if doc_version == "stable":
             doc_version = "latest"
             # make also the latest identical
-            print(f"\n{builder.upper()} BUILDING:")
-            srcdir = confdir = DOCS
-            outdir = f"{BUILDDIR}/{doc_version}"
-            doctreesdir = f"{DOCTREES}/{doc_version}"
-            sp = Sphinx(srcdir, confdir, outdir, doctreesdir, builder)
-            sp.verbosity = 1
-            sp.build()
-
-            print(
-                f"\n{'-' * 130}\nBuild 'latest' finished. The {builder.upper()} pages "
-                f"are in {outdir}."
-            )
-            doc_version = "stable"
+            sh("rm -rf latest")
+            sh("cp -r  stable latest")
 
         if builder == "html":
             make_redirection_page()
