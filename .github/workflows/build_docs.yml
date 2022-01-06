@@ -78,7 +78,7 @@ jobs:
           git clone --branch=gh-pages --single-branch https://github.com/spectrochempy/spectrochempy.git ../../../spectrochempy_docs
 
           echo "Recreating docs"
-          python docs/make.py --clean --html
+          python docs/make.py --html
 
       - name: Deploy Github Pages
         if: (github.event_name != 'pull_request')
@@ -86,4 +86,4 @@ jobs:
         with:
           branch: gh-pages
           folder: ../../../spectrochempy_docs/html/
-          single-commit: true
+          # single-commit: true
