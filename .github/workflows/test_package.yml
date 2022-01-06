@@ -1,13 +1,13 @@
-name: 🔬 tests
+name: 🔬 Tests packages
 
 on:
   push:
+
     branches:
       - develop
       - master
+
   pull_request:
-    branches-ignore:
-      - docs
 
 jobs:
 

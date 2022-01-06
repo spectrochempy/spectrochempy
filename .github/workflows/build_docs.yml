@@ -1,10 +1,10 @@
-name: 📕 build and publish documentation
+name: 📕 Build and publish documentation
 
 on:
   push:
     branches:
       - master
-      - docs
+      - develop
 
   pull_request:
 
@@ -13,9 +13,10 @@ on:
 
 jobs:
 
-  build_and_publish_documentation:
+  # Job 1
+  build_documentation:
 
-    name: build documentation
+    name: Build documentation
     runs-on: ubuntu-latest
 
     defaults:
@@ -80,8 +81,34 @@ jobs:
           echo "Recreating docs"
           python docs/make.py --html
 
-      - name: Deploy Github Pages
-        if: (github.event_name != 'pull_request')
+      - name: Store artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: docs-artifact
+          path: build/html/
+
+
+  publish_github_pages:
+
+    name: Publish GitHub pages
+
+    runs-on: ubuntu-latest
+    needs: build_documentation
+
+    if: (github.event_name != 'pull_request')
+
+    steps:
+
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: docs-artifact
+
+      - name: List directory
+        run: ls
+
+      - name: Deployment
+
         uses: JamesIves/github-pages-deploy-action@4.1.5
         with:
           branch: gh-pages
