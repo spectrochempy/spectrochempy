@@ -73,7 +73,7 @@ jobs:
           conda-build .conda --output-folder out
 
       - name: Publish package for release
-        if: (github.event_name == 'release' && github.event.action == 'published' && github.repository == ‘spectrochempy/spectrochempy’)
+        if: (github.event_name == 'release' && github.event.action == 'published' && github.repository == 'spectrochempy/spectrochempy')
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
         run: |
@@ -81,7 +81,7 @@ jobs:
           anaconda upload --force out/*/*.tar.bz2
 
       - name: Publish development package
-        if: (github.event_name == 'push' && github.repository == ‘spectrochempy/spectrochempy’)
+        if: (github.event_name == 'push' && github.repository == 'spectrochempy/spectrochempy')
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
         run: |
