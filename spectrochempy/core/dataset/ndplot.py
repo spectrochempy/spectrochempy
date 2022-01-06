@@ -263,6 +263,9 @@ class PreferencesSet(Meta):
                 continue
 
             val = str(mpl.rcParams[key])
+            if val.startswith("CapStyle") or val.startswith("JoinStyle"):
+                val = val.split(".")[-1]
+
             sav = ""
             while val != sav:
                 sav = val

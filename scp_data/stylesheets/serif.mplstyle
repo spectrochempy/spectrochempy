@@ -37,7 +37,7 @@ legend.columnspacing: .5
 lines.linewidth: 0.75
 lines.markeredgewidth: 0
 lines.markersize: 7
-lines.solid_capstyle: CapStyle.round
+lines.solid_capstyle: round
 
 patch.facecolor: 4C72B0
 patch.linewidth: .3

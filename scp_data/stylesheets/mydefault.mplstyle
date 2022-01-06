@@ -187,8 +187,8 @@ legend.shadow                            : False
 legend.title_fontsize                    : None
 lines.antialiased                        : True
 lines.color                              : b
-lines.dash_capstyle                      : CapStyle.butt
-lines.dash_joinstyle                     : JoinStyle.round
+lines.dash_capstyle                      : butt
+lines.dash_joinstyle                     : round
 lines.dashdot_pattern                    : 3.0, 5.0, 1.0, 5.0
 lines.dashed_pattern                     : 6.0, 6.0
 lines.dotted_pattern                     : 1.0, 3.0
@@ -200,8 +200,8 @@ lines.markeredgewidth                    : 0.0
 lines.markerfacecolor                    : auto
 lines.markersize                         : 7.0
 lines.scale_dashes                       : False
-lines.solid_capstyle                     : CapStyle.projecting
-lines.solid_joinstyle                    : JoinStyle.round
+lines.solid_capstyle                     : round
+lines.solid_joinstyle                    : round
 
 markers.fillstyle                        : full
 mathtext.bf                              : monospace:bold
@@ -224,7 +224,7 @@ path.simplify                            : True
 path.simplify_threshold                  : 0.111111111111
 path.sketch                              : None
 path.snap                                : True
-pcolor.shading                           : auto
+pcolor.shading                           : flat
 pcolormesh.snap                          : True
 pdf.compression                          : 6
 pdf.fonttype                             : 3

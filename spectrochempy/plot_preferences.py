@@ -97,51 +97,45 @@ class PlotPreferences(MetaConfigurable):
     )
     lines_dash_joinstyle = Enum(
         [
-            "JoinStyle.miter",
-            "JoinStyle.round",
-            "JoinStyle.bevel",
+            "miter",
+            "round",
+            "bevel",
             "miter",
             "round",
             "bevel",
         ],
-        default_value="JoinStyle.round",
-        help=r"""JoinStyle.miter|JoinStyle.round|JoinStyle.bevel""",
+        default_value="round",
+        help=r"""miter|round|bevel""",
     ).tag(config=True, kind="")
     lines_dash_capstyle = Enum(
         [
-            "CapStyle.butt",
-            "CapStyle.round",
-            "CapStyle.projecting",
+            "butt",
+            "round",
+            "projecting",
             "butt",
             "round",
             "projecting",
         ],
-        default_value="CapStyle.butt",
-        help=r"""CapStyle.butt|CapStyle.round|CapStyle.projecting""",
+        default_value="butt",
+        help=r"""butt|round|projecting""",
     ).tag(config=True, kind="")
     lines_solid_joinstyle = Enum(
         [
-            "JoinStyle.miter",
-            "JoinStyle.round",
-            "JoinStyle.bevel",
             "miter",
             "round",
             "bevel",
         ],
-        default_value="JoinStyle.round",
-        help=r"""JoinStyle.miter|JoinStyle.round|JoinStyle.bevel""",
+        default_value="round",
+        help=r"""miter|round|bevel""",
     ).tag(config=True, kind="")
     lines_solid_capstyle = Enum(
         [
-            "CapStyle.butt",
-            "CapStyle.round",
-            "CapStyle.projecting",
             "butt",
             "round",
             "projecting",
         ],
-        default_value="CapStyle.round",
-        help=r"""CapStyle.butt|CapStyle.round|CapStyle.projecting""",
+        default_value="round",
+        help=r"""butt|round|projecting""",
     ).tag(config=True, kind="")
     lines_antialiased = Bool(
         True, help=r"""render lines in antialiased (no jaggies)"""
@@ -1071,6 +1065,7 @@ class PlotPreferences(MetaConfigurable):
                     setattr(self, name_, value)
                 except Exception as e:
                     raise e
+
             if line.strip() and line.strip().startswith("##@"):
                 # SPECTROCHEMPY Parameters
                 name, value = line[3:].split(":", maxsplit=1)
