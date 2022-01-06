@@ -213,7 +213,7 @@ def _check_for_updates(*args):
                 new_release = new_version
 
     fil = Path.home() / ".scpy_update"
-    if new_release:  # pragma: no cover
+    if new_release and environ.get("DOC_BUILDING") is not None:  # pragma: no cover
         fil.write_text(
             f"You are running SpectrocChemPy-{__version__} but version {new_release} is available."
             f"Please consider updating for bug fixes and new features! "

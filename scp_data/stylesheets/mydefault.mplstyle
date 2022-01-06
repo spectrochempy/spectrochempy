@@ -200,7 +200,7 @@ lines.markeredgewidth                    : 0.0
 lines.markerfacecolor                    : auto
 lines.markersize                         : 7.0
 lines.scale_dashes                       : False
-lines.solid_capstyle                     : CapStyle.projecting
+lines.solid_capstyle                     : CapStyle.round
 lines.solid_joinstyle                    : JoinStyle.round
 
 markers.fillstyle                        : full
