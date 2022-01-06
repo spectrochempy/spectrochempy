@@ -2727,7 +2727,7 @@ class NDMath(object):
                 pass
 
             # Do we have to deal with mask?
-            if hasattr(obj, "mask") and obj.is_masked:
+            if hasattr(obj, "mask") and np.any(obj.mask):
                 is_masked = True
 
             # If one of the input is hypercomplex, this will demand a special treatment
