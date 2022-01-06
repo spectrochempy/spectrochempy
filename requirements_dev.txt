@@ -9,7 +9,7 @@ colorama
 dill
 ipython
 jinja2
-matplotlib
+matplotlib>=3.5
 numba
 numpy>=1.21.0
 orderedset
@@ -37,11 +37,11 @@ black
 pre-commit
 mamba
 jupytext
-sphinx==4.2.0
+sphinx<4
 sphinx_rtd_theme
 autodocsumm
 sphinx-gallery<=0.7.0
-nbsphinx
+nbsphinx==0.8.1
 jupyter_sphinx
 json5
 sphinx-copybutton

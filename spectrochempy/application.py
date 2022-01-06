@@ -25,9 +25,10 @@ from os import environ
 from pathlib import Path
 import threading
 
-from pkg_resources import parse_version, get_distribution, DistributionNotFound
+from pkg_resources import get_distribution, DistributionNotFound
 import requests
 from setuptools_scm import get_version
+
 from traitlets.config.configurable import Config
 from traitlets.config.application import Application
 from traitlets import (
@@ -54,7 +55,7 @@ from IPython.utils.text import get_text_list
 from IPython.display import publish_display_data, clear_output
 from jinja2 import Template
 
-from spectrochempy.utils import MetaConfigurable, pathclean, get_pkg_path
+from spectrochempy.utils import MetaConfigurable, pathclean, get_pkg_path, Version
 from spectrochempy.plot_preferences import PlotPreferences
 
 # set the default style
@@ -172,7 +173,10 @@ __release_date__ = _get_release_date()
 "Last release date of this package"
 
 
-def _check_for_updates(*args):
+def _get_conda_package_version():
+    """
+    Get last conda package version
+    """
     # Get version
     conda_url = "https://anaconda.org/spectrocat/spectrochempy/files"
     try:
@@ -182,27 +186,37 @@ def _check_for_updates(*args):
 
     regex = (
         r"\/\d{1,2}\.\d{1,2}\.\d{1,2}\/download\/noarch"
-        r"\/spectrochempy-(\d{1,2}\.\d{1,2}\.\d{1,2})\-(dev\d{1,2}|stable).tar.bz2"
+        r"\/spectrochempy-(\d{1,2}\.\d{1,2}\.\d{1,2})\-(dev\d{1,"
+        r"2}|stable).tar.bz2"
     )
     matches = re.finditer(regex, response.text, re.MULTILINE)
     vavailables = []
     for match in matches:
-        if match[2] == "stable":
-            vavailables.append(match[1])
+        vers = match[1] if match[2] == "stable" else f"{match[1]}.{match[2]}"
+        vavailables.append(vers)
 
-    old = parse_version(__version__)
+    return sorted(map(Version, vavailables))
 
+
+def _check_for_updates(*args):
+
+    old = Version(__version__)
+    conda_versions = _get_conda_package_version()
+
+    new_release = None
     new_version = None
-    for key in vavailables:
-        new = parse_version(key)
+
+    for new in conda_versions:
         if new > old:  # pragma: no cover
-            new_version = key
+            new_version = new.public
+            if not new.is_devrelease:
+                new_release = new_version
 
     fil = Path.home() / ".scpy_update"
-    if new_version:  # pragma: no cover
+    if new_release:  # pragma: no cover
         fil.write_text(
-            f"\n\n\tYou are running SpectrocChemPy-{__version__} but version {new_version} is available."
-            f"\n\tPlease consider updating for bug fixes and new features! "
+            f"You are running SpectrocChemPy-{__version__} but version {new_release} is available."
+            f"Please consider updating for bug fixes and new features! "
         )
 
     else:  # pragma: no cover
@@ -222,7 +236,7 @@ __url__ = "https://www.spectrochempy.fr"
 __author__ = "C. Fernandez & A. Travert"
 "First authors(s) of this package"
 
-__contributor__ = "A. Ait Blal, W. Guérin"
+__contributor__ = "A. Ait Blal, W. Guérin, M. Mailänder"
 "contributor(s) to this package"
 
 __license__ = "CeCILL-B license"

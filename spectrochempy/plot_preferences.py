@@ -97,30 +97,51 @@ class PlotPreferences(MetaConfigurable):
     )
     lines_dash_joinstyle = Enum(
         [
-            "miter",
+            "JoinStyle.miter",
+            "JoinStyle.round",
+            "JoinStyle.bevel",
             "miter",
             "round",
-            "round",
-            "bevel",
             "bevel",
         ],
-        default_value="round",
-        help=r"""miter|round|bevel""",
+        default_value="JoinStyle.round",
+        help=r"""JoinStyle.miter|JoinStyle.round|JoinStyle.bevel""",
     ).tag(config=True, kind="")
     lines_dash_capstyle = Enum(
-        ["butt", "round", "projecting"],
-        default_value="butt",
-        help=r"""butt|round|projecting""",
+        [
+            "CapStyle.butt",
+            "CapStyle.round",
+            "CapStyle.projecting",
+            "butt",
+            "round",
+            "projecting",
+        ],
+        default_value="CapStyle.butt",
+        help=r"""CapStyle.butt|CapStyle.round|CapStyle.projecting""",
     ).tag(config=True, kind="")
     lines_solid_joinstyle = Enum(
-        ["miter", "round", "bevel"],
-        default_value="round",
-        help=r"""miter|round|bevel""",
+        [
+            "JoinStyle.miter",
+            "JoinStyle.round",
+            "JoinStyle.bevel",
+            "miter",
+            "round",
+            "bevel",
+        ],
+        default_value="JoinStyle.round",
+        help=r"""JoinStyle.miter|JoinStyle.round|JoinStyle.bevel""",
     ).tag(config=True, kind="")
     lines_solid_capstyle = Enum(
-        ["butt", "round", "projecting"],
-        default_value="round",
-        help=r"""butt|round|projecting""",
+        [
+            "CapStyle.butt",
+            "CapStyle.round",
+            "CapStyle.projecting",
+            "butt",
+            "round",
+            "projecting",
+        ],
+        default_value="CapStyle.round",
+        help=r"""CapStyle.butt|CapStyle.round|CapStyle.projecting""",
     ).tag(config=True, kind="")
     lines_antialiased = Bool(
         True, help=r"""render lines in antialiased (no jaggies)"""

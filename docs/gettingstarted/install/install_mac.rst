@@ -156,7 +156,7 @@ If you prefer to use pip, here are the installation steps. We assume that you ha
 
    .. sourcecode:: bash
 
-     (env) $ python -m pip install -r https://raw.githubusercontent.com/spectrochempy/spectrochempy/master/requirements.txt
+     (env) $ python -m pip install -r https://www.spectrochempy.fr/downloads/requirements.txt
 
 #. Install spectrochempy from pypi
 

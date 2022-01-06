@@ -2676,11 +2676,8 @@ class NDMath(object):
     # private methods
     # ------------------------------------------------------------------------
 
-    # ..........................................................................
-    def _op(self, f, inputs, isufunc=False):
-        # Achieve an operation f on the objs
+    def _preprocess_op_inputs(self, fname, inputs):
 
-        fname = f.__name__
         inputs = list(inputs)  # work with a list of objs not tuples
         # print(fname)
 
@@ -2694,19 +2691,20 @@ class NDMath(object):
         # Take the objects out of the input list and get their types and units. Additionally determine if we need to
         # use operation on masked arrays and/or on quaternion
 
+        is_masked = False
         objtypes = []
         objunits = OrderedSet()
         returntype = None
-        isquaternion = False
-        ismasked = False
+
+        is_quaternion = False
         compatible_units = fname in self.__compatible_units
-        remove_units = fname in self.__remove_units
-        quaternion_aware = fname in self.__quaternion_aware
 
         for i, obj in enumerate(inputs):
+
             # type
             objtype = type(obj).__name__
             objtypes.append(objtype)
+
             # units
             if hasattr(obj, "units"):
                 objunits.add(ur.get_dimensionality(obj.units))
@@ -2716,6 +2714,7 @@ class NDMath(object):
                         *objunits[::-1],
                         extra_msg=f", Units must be compatible for the `{fname}` operator",
                     )
+
             # returntype
             if objtype == "NDDataset":
                 returntype = "NDDataset"
@@ -2727,16 +2726,16 @@ class NDMath(object):
                 # only the three above type have math capabilities in spectrochempy.
                 pass
 
+            # Do we have to deal with mask?
+            if hasattr(obj, "mask") and np.any(obj.mask):
+                is_masked = True
+
             # If one of the input is hypercomplex, this will demand a special treatment
-            isquaternion = (
-                isquaternion or False
+            is_quaternion = (
+                is_quaternion or False
                 if not hasattr(obj, "is_quaternion")
                 else obj.is_quaternion
             )
-
-            # Do we have to deal with mask?
-            if hasattr(obj, "mask") and np.any(obj.mask):
-                ismasked = True
 
         # it may be necessary to change the object order regarding the types
         if (
@@ -2758,9 +2757,32 @@ class NDMath(object):
             else:
                 raise NotImplementedError()
 
+        return fname, inputs, objtypes, returntype, is_masked, is_quaternion
+
+    # ..........................................................................
+    def _op(self, f, inputs, isufunc=False):
+        # Achieve an operation f on the objs
+
+        fname = f.__name__
+
+        compatible_units = fname in self.__compatible_units
+        remove_units = fname in self.__remove_units
+        quaternion_aware = fname in self.__quaternion_aware
+
+        (
+            fname,
+            inputs,
+            objtypes,
+            returntype,
+            is_masked,
+            is_quaternion,
+        ) = self._preprocess_op_inputs(fname, inputs)
+
         # Now we can proceed
+
         obj = cpy.copy(inputs.pop(0))
         objtype = objtypes.pop(0)
+
         other = None
         if inputs:
             other = cpy.copy(inputs.pop(0))
@@ -2768,10 +2790,10 @@ class NDMath(object):
 
         # Is our first object a NDdataset
         # ------------------------------------------------------------------------------
-        isdataset = objtype == "NDDataset"
+        is_dataset = objtype == "NDDataset"
 
         # Get the underlying data: If one of the input is masked, we will work with masked array
-        if ismasked and isdataset:
+        if is_masked and is_dataset:
             d = obj._umasked(obj.data, obj.mask)
         else:
             d = obj.data
@@ -2792,11 +2814,13 @@ class NDMath(object):
             q = Quantity(q, obj.units)
             q = q.values if hasattr(q, "values") else q  # case of nddataset, coord,
 
-        # Now we analyse the other operands ---------------------------------------------------------------------------
+        # Now we analyse the other operands
+        # ---------------------------------------------------------------------------
         args = []
         otherqs = []
 
         # If other is None, then it is a unary operation we can pass the following
+
         if other is not None:
 
             # First the units may require to be compatible, and if thet are sometimes they may need to be rescales
@@ -2812,7 +2836,7 @@ class NDMath(object):
 
             # If all inputs are datasets BUT coordset mismatch.
             if (
-                isdataset
+                is_dataset
                 and (othertype == "NDDataset")
                 and (other._coordset != obj._coordset)
             ):
@@ -2858,7 +2882,7 @@ class NDMath(object):
             if othertype in ["NDDataset", "Coord", "LinearCoord"]:
 
                 # mask?
-                if ismasked:
+                if is_masked:
                     arg = other._umasked(other.data, other.mask)
                 else:
                     arg = other.data
@@ -3009,7 +3033,7 @@ class NDMath(object):
         else:
             # make a simple operation
             try:
-                if not isquaternion:
+                if not is_quaternion:
                     data = f(d, *args)
                 elif quaternion_aware and all(
                     (arg.dtype not in TYPE_COMPLEX for arg in args)
