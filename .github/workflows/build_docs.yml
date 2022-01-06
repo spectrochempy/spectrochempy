@@ -75,7 +75,7 @@ jobs:
           mkdir -p build
 
           echo "cloning gh-pages repository"
-          git clone --branch=gh-pages --single-branch https://github.com/spectrochempy/spectrochempy.git build/docs
+          git clone --branch=gh-pages --single-branch https://github.com/spectrochempy/spectrochempy.git build/html
 
           echo "Recreating docs"
           python docs/make.py --html
@@ -85,5 +85,5 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@4.1.5
         with:
           branch: gh-pages
-          folder: build/docs/html/
+          folder: build/html/
           single-commit: true
