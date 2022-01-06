@@ -72,7 +72,7 @@ jobs:
 
       - name: Build docs
         run: |
-          mkdir build
+          mkdir -p build
 
           echo "cloning gh-pages repository"
           git clone --branch=gh-pages --single-branch https://github.com/spectrochempy/spectrochempy.git build
