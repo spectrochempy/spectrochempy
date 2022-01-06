@@ -45,7 +45,7 @@ DOCS = Path(__file__).parent
 TEMPLATES = DOCS / "_templates"
 STATIC = DOCS / "_static"
 PROJECT = DOCS.parent
-DOCREPO = PROJECT / "build"
+DOCREPO = PROJECT / "build/docs"
 DOCTREES = DOCREPO / "~doctrees"
 HTML = DOCREPO / "html"
 LATEX = DOCREPO / "latex"
@@ -470,9 +470,7 @@ class BuildDocumentation(object):
             DOWNLOADS,
         ]
         for d in build_dirs:
-            if not d.exists():
-                print(f"Make dir {d}")
-                Path.mkdir(d, exist_ok=False)
+            Path.mkdir(d, parents=True, exist_ok=True)
 
 
 # %%
