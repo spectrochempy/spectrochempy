@@ -1,4 +1,4 @@
-name: build and publish conda package 📦 to Anaconda repository
+name: 📦 build and publish conda package to Anaconda repository
 
 on:
   push:

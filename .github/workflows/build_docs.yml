@@ -1,4 +1,4 @@
-name: build and publish documentation 📕
+name: 📕 build and publish documentation
 
 on:
   push:
