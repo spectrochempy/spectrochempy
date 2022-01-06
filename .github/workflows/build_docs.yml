@@ -13,10 +13,9 @@ on:
 
 jobs:
 
-  # Job 1
-  build_documentation:
+  build_and_publish_documentation:
 
-    name: Build documentation
+    name: Build and publish documentation
     runs-on: ubuntu-latest
 
     defaults:
@@ -81,34 +80,8 @@ jobs:
           echo "Recreating docs"
           python docs/make.py --html
 
-      - name: Store artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: docs-artifact
-          path: build/html/
-
-
-  publish_github_pages:
-
-    name: Publish GitHub pages
-
-    runs-on: ubuntu-latest
-    needs: build_documentation
-
-    if: (github.event_name != 'pull_request')
-
-    steps:
-
-      - name: Download artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: docs-artifact
-
-      - name: List directory
-        run: ls
-
       - name: Deployment
-
+        if: (github.event_name != 'pull_request')
         uses: JamesIves/github-pages-deploy-action@4.1.5
         with:
           branch: gh-pages
