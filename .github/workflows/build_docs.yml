@@ -75,8 +75,7 @@ jobs:
           mkdir -p build
 
           echo "cloning gh-pages repository"
-          git clone --branch=gh-pages --single-branch https://github
-          .com/spectrochempy/spectrochempy.git build/docs
+          git clone --branch=gh-pages --single-branch https://github.com/spectrochempy/spectrochempy.git build/docs
 
           echo "Recreating docs"
           python docs/make.py --html
