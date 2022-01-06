@@ -100,6 +100,9 @@ class PlotPreferences(MetaConfigurable):
             "JoinStyle.miter",
             "JoinStyle.round",
             "JoinStyle.bevel",
+            "miter",
+            "round",
+            "bevel",
         ],
         default_value="JoinStyle.round",
         help=r"""JoinStyle.miter|JoinStyle.round|JoinStyle.bevel""",
@@ -109,6 +112,9 @@ class PlotPreferences(MetaConfigurable):
             "CapStyle.butt",
             "CapStyle.round",
             "CapStyle.projecting",
+            "butt",
+            "round",
+            "projecting",
         ],
         default_value="CapStyle.butt",
         help=r"""CapStyle.butt|CapStyle.round|CapStyle.projecting""",
@@ -127,6 +133,9 @@ class PlotPreferences(MetaConfigurable):
             "CapStyle.butt",
             "CapStyle.round",
             "CapStyle.projecting",
+            "butt",
+            "round",
+            "projecting",
         ],
         default_value="CapStyle.round",
         help=r"""CapStyle.butt|CapStyle.round|CapStyle.projecting""",
@@ -1053,8 +1062,6 @@ class PlotPreferences(MetaConfigurable):
                             value = tuple(map(str.strip, value))
                     else:
                         value = type(self.traits()[name_].default_value)(eval(value))
-                except NameError:
-                    print("O")
                 except Exception as e:
                     raise e
                 try:
