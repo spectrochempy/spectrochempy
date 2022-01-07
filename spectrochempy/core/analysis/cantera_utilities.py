@@ -22,10 +22,8 @@ from collections.abc import Iterable
 from scipy.optimize import minimize, differential_evolution, least_squares
 
 from spectrochempy.optional import import_optional_dependency
+from spectrochempy.core import error_
 from spectrochempy.core.dataset.nddataset import NDDataset, Coord
-
-import_optional_dependency("cantera")
-import cantera as ct
 
 __all__ = [
     "coverages_vs_time",
@@ -35,6 +33,16 @@ __all__ = [
     "fit_to_concentrations",
     "PFR",
 ]
+
+ct = import_optional_dependency("cantera", errors="ignore")
+
+
+def _cantera_is_not_available():
+    if ct is None:
+        error_(
+            "Missing optional dependency 'cantera'.  Use conda or pip to install cantera."
+        )
+    return ct is None
 
 
 def coverages_vs_time(surface, t, returnNDDataset=False):
@@ -49,6 +57,7 @@ def coverages_vs_time(surface, t, returnNDDataset=False):
     returnNDDataset: boolean, default: False.
         If True returns the concentration matrix as a NDDataset, else as a np.ndarray.
     """
+
     init_coverages = surface.coverages
     coverages = np.zeros((len(t), surface.coverages.shape[0]))
 
@@ -80,6 +89,9 @@ def concentrations_vs_time(reactive_phase, t, reactorNet=None, returnNDDataset=F
     return_NDDataset: boolean, default: False.
         If True returns the concentration matrix as a NDDataset, else as a np.ndarray.
     """
+
+    if _cantera_is_not_available():
+        return
 
     if isinstance(reactive_phase, ct.composite.Interface):
         concentrations = (
@@ -124,6 +136,7 @@ def modify_rate(reactive_phase, i_reaction, rate):
     -------
     reactive_phase
     """
+
     rxn = reactive_phase.reaction(i_reaction)
     rxn.rate = rate
     reactive_phase.modify_reaction(i_reaction, rxn)
@@ -136,6 +149,10 @@ def modify_surface_kinetics(surface, param_to_set):
     site_density, coverages, concentrations,
     pre-exponential factor, temperature_exponent, activation_energy.
     """
+
+    if _cantera_is_not_available():
+        return
+
     # check some parameters
 
     if not isinstance(surface, ct.composite.Interface):
@@ -273,7 +290,7 @@ class PFR:
         inlet_F,
         volume,
         n_cstr=0,
-        P=ct.one_atm,
+        P=None,  # ct.one_atm,
         T=298,
         area=None,
         K=1e-5,
@@ -289,6 +306,8 @@ class PFR:
         init_X: dict, array or list of them
             Initial composition of the reactors.
         """
+        if _cantera_is_not_available():
+            raise ImportError
 
         if area is None:
             add_surface = False
@@ -302,7 +321,7 @@ class PFR:
         self._inlet_F = inlet_F
         self._volume = volume
         self.T = T
-        self.P = P
+        self.P = P if P is not None else ct.one_atm
         self._area = area
         self._K = K
         self._kin_param_to_set = kin_param_to_set

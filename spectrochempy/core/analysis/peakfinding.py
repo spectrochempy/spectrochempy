@@ -72,7 +72,7 @@ def find_peaks(
         interpreted as the  minimal and the second, if supplied, as the maximal
         required threshold.
     distance : number, optional
-        Required minimal horizontal distance (>= 1) in samples between
+        Required minimal horizontal distance in samples between
         neighbouring peaks. Smaller peaks are removed first until the condition
         is fulfilled for all remaining peaks.
     prominence : number or ndarray or sequence, optional
@@ -104,7 +104,8 @@ def find_peaks(
         as measured along the 'x' Coord; ints are interpreted as a number of points.
     use_coord : bool, optional
         Set whether the x Coord (when it exists) should be used instead of indices
-        for the positions and width.
+        for the positions and width. If True, the units of the other parameters
+        are interpreted according to the coordinates.
 
     Returns
     -------
@@ -207,20 +208,25 @@ def find_peaks(
 
     window_length = window_length if window_length % 2 == 0 else window_length - 1
 
-    # if the following parameters are entered as floats, the coordinates are used. Else, they will
-    # be treated as indices as in scipy.signal.find_peak()
+    # if the following parameters are entered as floats, the coordinates are used.
+    # Else, they will be treated as indices as in scipy.signal.find_peak()
 
     use_coord = use_coord and X.coordset is not None
 
-    # transform coord (if exists) to index
+    # units
+    xunits = X.x.units if use_coord else 1
+    dunits = X.units if use_coord else 1
+
     # assume linear x coordinates when use_coord is True!
     step = np.abs(X.x.increment) if use_coord else 1
 
+    # transform coord (if exists) to index
     distance = int(round(distance / step)) if distance is not None else None
     width = int(round(width / step)) if width is not None else None
     wlen = int(round(wlen / step)) if wlen is not None else None
     plateau_size = int(round(plateau_size / step)) if plateau_size is not None else None
 
+    # now the distance, width ... parameters are given in data points
     peaks, properties = signal.find_peaks(
         X.data,
         height=height,
@@ -266,12 +272,16 @@ def find_peaks(
     # transform back index to coord
     if use_coord:
 
+        for key in ["peak_heights", "width_heights", "prominences"]:
+            if key in properties:
+                properties[key] = [height * dunits for height in properties[key]]
+
         for key in (
             "left_bases",
             "right_bases",
             "left_edges",
             "right_edges",
-        ):  # values are int type
+        ):  # values are initially of int type
 
             if key in properties:
                 properties[key] = [
@@ -279,34 +289,30 @@ def find_peaks(
                     for index in properties[key].astype("float64")
                 ]
 
+        def _prop(ips):
+            # interpolate coord
+            floor = int(np.floor(ips))
+            return X.x.values[floor] + (ips - floor) * (
+                X.x.values[floor + 1] - X.x.values[floor]
+            )
+
         for key in ("left_ips", "right_ips"):  # values are float type
-
-            def _prop(ips):
-                # interpolate coord
-                floor = int(np.floor(ips))
-                return X.x.data[floor] + (ips - floor) * (
-                    X.x.data[floor + 1] - X.x.data[floor]
-                )
-
             if key in properties:
                 properties[key] = [_prop(ips) for ips in properties[key]]
 
         if "widths" in properties:
-            for i in range(len(properties["widths"])):
-                properties["widths"][i] = np.abs(
-                    properties["left_ips"][i] - properties["right_ips"][i]
-                )
+            properties["widths"] = [
+                np.abs(width * step) * xunits for width in properties["widths"]
+            ]
 
         if "plateau_sizes" in properties:
-            properties["plateau_sizes"] = properties["plateau_sizes"].astype("float64")
-            for i in range(len(properties["plateau_sizes"])):
-                properties["plateau_sizes"][i] = np.abs(
-                    properties["left_edges"][i] - properties["right_edges"][i]
-                )
+            properties["plateau_sizes"] = [
+                np.abs(sizes * step) * xunits for sizes in properties["plateau_sizes"]
+            ]
 
     out.name = "peaks of " + X.name
-    out.history[-1] = (
-        str(datetime.now(timezone.utc)) + f": find_peaks(): {len(peaks)} peak(s) found"
+    out.history = (
+        f"{str(datetime.now(timezone.utc))}: find_peaks(): {len(peaks)} peak(s) found"
     )
 
     return out, properties

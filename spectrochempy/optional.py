@@ -15,7 +15,7 @@ VERSIONS = {
     "scikit-learn": "*",
     "xarray": "*",
     "cantera": "2.5.1",
-    "pyqt": "*",
+    "PyQt5": "*",
 }
 
 # A mapping from import name to package name (on PyPI) for packages where
