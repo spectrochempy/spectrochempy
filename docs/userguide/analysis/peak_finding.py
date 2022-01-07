@@ -351,9 +351,10 @@ _ = peaks.plot_scatter(
 wl, wr = properties["left_bases"][0], properties["right_bases"][0]
 # wavenumbers of of left and right bases
 for w in (wl, wr):
-    ax.axvline(w, linestyle="--")  # add vertical line at the bases
+    wm = w.magnitude
+    ax.axvline(wm, linestyle="--")  # add vertical line at the bases
     ax.plot(
-        w, s[w].data, "v", color="red"
+        wm, s[wm].data, "v", color="red"
     )  # and a red mark  #TODO: add function to plot this easily
 ax = ax.set_xlim(2310.0, 1900.0)  # change x limits to better see the 'left_base'
 
@@ -362,8 +363,8 @@ ax = ax.set_xlim(2310.0, 1900.0)  # change x limits to better see the 'left_base
 # and the highest base, here the 'right_base':
 
 # %%
-prominence = peaks[0].values.m - s[wr].values.m
-print(f"calc. prominence = {prominence:0.4f}")
+prominence = peaks[0].values - s[wr.m].values
+print(f"calc. prominence = {prominence:0.4fK}")
 
 # %% Finally, we illustrate how the use of the `wlen` parameter - which limits the search of the "base [markdown]
 # Finally, the figure below shows how the prominence can be affected by `wlen`, the size of the window used to
@@ -376,12 +377,12 @@ print(f"calc. prominence = {prominence:0.4f}")
 
 # %%
 peak, properties = s.find_peaks(height=0.2, prominence=0)
-print(f"prominence with full spectrum: {properties['prominences'][0]:0.4f}")
+print(f"prominence with full spectrum: {properties['prominences'][0]:0.4fK}")
 
 peak, properties = s.find_peaks(
     height=0.2, prominence=0, wlen=50.0
 )  # a float should be explicitly passed, else will be considered as points
-print(f"prominence with reduced window: {properties['prominences'][0]:0.4f}")
+print(f"prominence with reduced window: {properties['prominences'][0]:0.4fK}")
 
 # %% [markdown]
 # #### Width
@@ -422,8 +423,8 @@ _ = peaks.plot_scatter(
 )
 _ = ax.axhline(height, linestyle="--", color="blue")
 _ = ax.axhline(width_height, linestyle="--", color="red")
-_ = ax.axvline(wl, linestyle="--", color="green")
-_ = ax.axvline(wr, linestyle="--", color="green")
+_ = ax.axvline(wl.m, linestyle="--", color="green")
+_ = ax.axvline(wr.m, linestyle="--", color="green")
 
 # %% As stressed above, we see here that the peak width is very approximate and probably exaggerated in [markdown]
 # It is obvious here that the peak width is overestimated in the present case due to the presence of the second peak on
@@ -462,13 +463,14 @@ peaks, properties = s.find_peaks(
     rel_height=rel_height,
 )
 
-table_pos = " ".join([f"{peaks[i].x.values.m:<10.3f}" for i in range(len(peaks))])
-print(f'{"peak_position":>16}: {table_pos}')
+table_pos = "  ".join([f"{peaks[i].x.value.m:>10.3f}" for i in range(len(peaks))])
+print(f'{"peak_position (cm^-1)":>26}: {table_pos}')
 for key in properties:
-    table_property = " ".join(
-        [f"{properties[key][i]:<10.3f}" for i in range(len(peaks))]
+    table_property = "  ".join(
+        [f"{properties[key][i].m:>10.3f}" for i in range(len(peaks))]
     )
-    print(f"{key[:-1]:>16}: {table_property}")
+    title = f"{key:>.16} ({properties[key][0].u:>.6K})"
+    print(f"{title:>26}: {table_property}")
 
 ax = s.plot()
 peaks.plot_scatter(
@@ -477,9 +479,9 @@ peaks.plot_scatter(
 
 for i in range(len(peaks)):
     for w in (properties["left_bases"][i], properties["right_bases"][i]):
-        ax.plot(w, s[0, w].data.T, "v", color="red")
+        ax.plot(w.m, s[0, w.m].data.T, "v", color="red")
     for w in (properties["left_ips"][i], properties["right_ips"][i]):
-        ax.axvline(w, linestyle="--", color="green")
+        ax.axvline(w.m, linestyle="--", color="green")
 
 # %% [markdown]
 # -- this is the end of this tutorial --
