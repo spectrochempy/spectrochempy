@@ -367,15 +367,14 @@ USE_QT = preferences.use_qt or environ.get("SCPY_GUI", None) == "RUNNING"
 
 if USE_QT:  # pragma: no cover
 
-    import_optional_dependency("PyQt5")
-    from PyQt5 import QtWidgets
+    try:
+        pyqt = import_optional_dependency("PyQt5.QtWidgets")
+        FileDialog = pyqt.QFileDialog
 
-    if not QtWidgets.QApplication.startingUp():
-        # we use this only if we are not in spectrochempy_gui
-        # because in the latter case, the file dialogs are defined there
-        QtWidgets.QApplication(sys.argv)
-
-    FileDialog = QtWidgets.QFileDialog
+    except ImportError as e:
+        error_(e)
+        USE_QT = False
+        from tkinter import filedialog
 
 else:
 
@@ -400,6 +399,7 @@ class _QTFileDialogs:  # pragma: no cover
         directory = FileDialog.getExistingDirectory(
             parent=parent, caption=caption, directory=directory, options=options
         )
+
         if directory:
             return directory
 
@@ -640,6 +640,7 @@ def open_dialog(
         parent = kwargs.pop(
             "Qt_parent", None
         )  # in case this is launched from spectrochempy_gui
+        _ = pyqt.QApplication([])
         klass = _QTFileDialogs
     else:
         klass = _TKFileDialogs()
