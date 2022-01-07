@@ -1092,7 +1092,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         Returns
         -------
         object
-            A array.DataArray object.
+            A axrray.DataArray object.
         """
         # Information about DataArray from the DataArray docstring
         #
@@ -1139,21 +1139,22 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         #     'units' and 'calendar' (the later two only for datetime arrays).
         #     Unrecognized keys are ignored.
 
-        import_optional_dependency("xarray")
-        from xarray import DataArray
+        xr = import_optional_dependency("xarray")
+        if xr is None:
+            return
 
         x, y = self.x, self.y
         tx = x.title
         if y:
             ty = y.title
-            da = DataArray(
+            da = xr.DataArray(
                 np.array(self.data, dtype=np.float64),
                 coords=[(ty, y.data), (tx, x.data)],
             )
 
             da.attrs["units"] = self.units
         else:
-            da = DataArray(
+            da = xr.DataArray(
                 np.array(self.data, dtype=np.float64),
                 coords=[(tx, x.data)],
             )
