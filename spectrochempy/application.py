@@ -881,10 +881,10 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
 
             ipy = get_ipython()
 
-            def _custom_exc(shell, etype, evalue, trb, trb_offset=None):
+            def _custom_exc(shell, etype, evalue, tb, tb_offset=None):
 
                 if self.log_level == logging.DEBUG:
-                    shell.showtraceback((etype, evalue, trb), tb_offset=trb_offset)
+                    shell.showtraceback((etype, evalue, tb), tb_offset=tb_offset)
                 else:
                     self.logs.error(f"{etype.__name__}: {evalue}")
 
