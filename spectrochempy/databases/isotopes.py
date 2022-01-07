@@ -28,7 +28,7 @@ from spectrochempy.core.dataset.meta import Meta
 # ======================================================================================================================
 # Isotopes class
 # ======================================================================================================================
-class Isotopes(Meta):  # lgtm [py/missing-call-to-init]
+class Isotopes(Meta):  # lgtm[py/missing-call-to-init]
     """
     This class defines useful properties of nuclei [#]_.
 

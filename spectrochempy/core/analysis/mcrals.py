@@ -36,7 +36,7 @@ class MCRALS(HasTraits):
     _logs = Unicode
     _params = Dict()
 
-    def __init__(self, dataset, guess, **kwargs):  # lgtm [py/missing-call-to-init]
+    def __init__(self, dataset, guess, **kwargs):  # lgtm[py/missing-call-to-init]
         """
         Parameters
         ----------

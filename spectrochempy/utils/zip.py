@@ -45,7 +45,7 @@ def make_zipfile(file, **kwargs):
     return zipfile.ZipFile(file, **kwargs)
 
 
-class ScpFile(Mapping):  # lgtm [py/missing-equals]
+class ScpFile(Mapping):  # lgtm[py/missing-equals]
     """
     ScpFile(fid).
 
