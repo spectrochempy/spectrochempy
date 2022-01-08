@@ -970,8 +970,14 @@ class NDArray(HasTraits):
             or not hasattr(data, "__array_struct__")
         ):
             # Data doesn't look like a numpy array, try converting it to
-            # one. Non-numerical input are converted to an array of objects.
-            self._data = np.array(data, subok=True, copy=False)
+            # one.
+            try:
+                self._data = np.array(data, subok=True, copy=False)
+            except ValueError:
+                # happens if data is a list of quantities
+                if isinstance(data[0], Quantity):
+                    self._data = np.array([d.m for d in data], subok=True, copy=False)
+                self._units = data[0].units
 
         else:
             data = np.array(data, subok=True, copy=self._copy)
