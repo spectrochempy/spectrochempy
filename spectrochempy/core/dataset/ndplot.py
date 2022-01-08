@@ -23,7 +23,8 @@ import plotly.graph_objects as go
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from traitlets import Dict, HasTraits, Instance, Union, default, TraitError
 
-from spectrochempy.utils import get_figure, pathclean, Axes, Axes3D
+from spectrochempy.utils.plots import get_figure, _Axes, _Axes3D
+from spectrochempy.utils import pathclean
 from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.core import preferences, plot_preferences, error_
 from spectrochempy.core.plotters.plot1d import plot_1D
@@ -350,14 +351,14 @@ class NDPlot(HasTraits):
     """
 
     # variable containing the matplotlib axis defined for a NDArray object.
-    _ax = Instance(Axes, allow_none=True)
+    _ax = Instance(_Axes, allow_none=True)
 
     # The figure on which this NDArray can be plotted
     _fig = Union((Instance(plt.Figure), Instance(go.Figure)), allow_none=True)
 
     # The axes on which this dataset and other elements such as projections
     # and colorbar can be plotted
-    _ndaxes = Dict(Instance(Axes))
+    _ndaxes = Dict(Instance(_Axes))
 
     # add metadata to store plot parameters
     _preferences = Instance(PreferencesSet, allow_none=True)
@@ -468,7 +469,7 @@ class NDPlot(HasTraits):
         # they will be ignored
         tax = kwargs.get("twinx", None)
         if tax is not None:
-            if isinstance(tax, Axes):
+            if isinstance(tax, _Axes):
                 clear = False
                 ax = tax.twinx()
                 ax.name = "main"
@@ -487,7 +488,7 @@ class NDPlot(HasTraits):
         if ax is not None:
             # ax given in the plot parameters,
             # in this case we will plot on this ax
-            if isinstance(ax, (Axes)):
+            if isinstance(ax, (_Axes)):
                 ax.name = "main"
                 self.ndaxes["main"] = ax
             else:
@@ -502,10 +503,10 @@ class NDPlot(HasTraits):
             # ax = self._fig.gca(projection=ax3d) :: passing parameters DEPRECATED in matplotlib 3.4
             # ---
             if not ax3d:
-                ax = Axes(self._fig, 1, 1, 1)
+                ax = _Axes(self._fig, 1, 1, 1)
                 ax = self._fig.add_subplot(ax)
             else:
-                ax = Axes3D(self._fig)
+                ax = _Axes3D(self._fig)
                 ax = self._fig.add_axes(ax, projection="3d")
 
             ax.name = "main"
@@ -745,7 +746,7 @@ class NDPlot(HasTraits):
                 self._ndaxes[ax.name] = ax
         elif isinstance(axes, dict):
             self._ndaxes.update(axes)
-        elif isinstance(axes, Axes):
+        elif isinstance(axes, _Axes):
             # it's an axe! add it to our list
             self._ndaxes[axes.name] = axes
 

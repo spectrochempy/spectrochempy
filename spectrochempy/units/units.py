@@ -299,9 +299,7 @@ def remove_args_units(func):
     def new_func(*args, **kwargs):
 
         args = tuple([_remove_units(arg) for arg in args])
-
         kwargs = {key: _remove_units(val) for key, val in kwargs.items()}
-
         return func(*args, **kwargs)
 
     return new_func

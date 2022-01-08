@@ -17,8 +17,6 @@ from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.units import remove_args_units
 
 __all__ = [
-    "Axes3D",
-    "Axes",
     "cmyk2rgb",
     "NBlack",
     "NRed",
@@ -35,7 +33,7 @@ __all__ = [
 
 
 @maxes.subplot_class_factory
-class Axes(maxes.Axes):
+class _Axes(maxes.Axes):
     """
     Subclass of matplotlib Axes class
     """
@@ -43,38 +41,262 @@ class Axes(maxes.Axes):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    def draw(self, renderer):
+        #    # with plt.rc_context({"something": self.xxx}):
+        return super().draw(renderer)
+
+    @remove_args_units
+    def plot(self, *args, **kwargs):
+        return super().plot(*args, **kwargs)
+
+    @remove_args_units
+    def errorbar(self, *args, **kwargs):
+        return super().errorbar(*args, **kwargs)
+
+    @remove_args_units
+    def scatter(self, *args, **kwargs):
+        return super().scatter(*args, **kwargs)
+
+    @remove_args_units
+    def plot_date(self, *args, **kwargs):
+        return super().plot_date(*args, **kwargs)
+
+    @remove_args_units
+    def step(self, *args, **kwargs):
+        return super().step(*args, **kwargs)
+
+    @remove_args_units
+    def loglog(self, *args, **kwargs):
+        return super().loglog(*args, **kwargs)
+
+    @remove_args_units
+    def semilogx(self, *args, **kwargs):
+        return super().semilogx(*args, **kwargs)
+
+    @remove_args_units
+    def semilogy(self, *args, **kwargs):
+        return super().semilogy(*args, **kwargs)
+
+    @remove_args_units
+    def fill_between(self, *args, **kwargs):
+        return super().fill_between(*args, **kwargs)
+
+    @remove_args_units
+    def fill_betweenx(self, *args, **kwargs):
+        return super().fill_betweenx(*args, **kwargs)
+
+    @remove_args_units
+    def bar(self, *args, **kwargs):
+        return super().bar(*args, **kwargs)
+
+    @remove_args_units
+    def barh(self, *args, **kwargs):
+        return super().barh(*args, **kwargs)
+
+    @remove_args_units
+    def bar_label(self, *args, **kwargs):
+        return super().bar_label(*args, **kwargs)
+
+    @remove_args_units
+    def stem(self, *args, **kwargs):
+        return super().stem(*args, **kwargs)
+
+    @remove_args_units
+    def eventplot(self, *args, **kwargs):
+        return super().eventplot(*args, **kwargs)
+
+    @remove_args_units
+    def pie(self, *args, **kwargs):
+        return super().pie(*args, **kwargs)
+
+    @remove_args_units
+    def stackplot(self, *args, **kwargs):
+        return super().stackplot(*args, **kwargs)
+
+    @remove_args_units
+    def broken_barh(self, *args, **kwargs):
+        return super().broken_barh(*args, **kwargs)
+
+    @remove_args_units
+    def vlines(self, *args, **kwargs):
+        return super().vlines(*args, **kwargs)
+
+    @remove_args_units
+    def hlines(self, *args, **kwargs):
+        return super().hlines(*args, **kwargs)
+
+    @remove_args_units
+    def fill(self, *args, **kwargs):
+        return super().fill(*args, **kwargs)
+
+    @remove_args_units
+    def axhline(self, *args, **kwargs):
+        return super().axhline(*args, **kwargs)
+
+    @remove_args_units
+    def axhspan(self, *args, **kwargs):
+        return super().axhspan(*args, **kwargs)
+
+    @remove_args_units
+    def axvline(self, *args, **kwargs):
+        return super().axvline(*args, **kwargs)
+
+    @remove_args_units
+    def axvspan(self, *args, **kwargs):
+        return super().axvspan(*args, **kwargs)
+
+    @remove_args_units
+    def axline(self, *args, **kwargs):
+        return super().axline(*args, **kwargs)
+
+    @remove_args_units
+    def acorr(self, *args, **kwargs):
+        return super().acorr(*args, **kwargs)
+
+    @remove_args_units
+    def angle_spectrum(self, *args, **kwargs):
+        return super().angle_spectrum(*args, **kwargs)
+
+    @remove_args_units
+    def cohere(self, *args, **kwargs):
+        return super().cohere(*args, **kwargs)
+
+    @remove_args_units
+    def csd(self, *args, **kwargs):
+        return super().csd(*args, **kwargs)
+
+    @remove_args_units
+    def magnitude_spectrum(self, *args, **kwargs):
+        return super().magnitude_spectrum(*args, **kwargs)
+
+    @remove_args_units
+    def phase_spectrum(self, *args, **kwargs):
+        return super().phase_spectrum(*args, **kwargs)
+
+    @remove_args_units
+    def psd(self, *args, **kwargs):
+        return super().psd(*args, **kwargs)
+
+    @remove_args_units
+    def specgram(self, *args, **kwargs):
+        return super().specgram(*args, **kwargs)
+
+    @remove_args_units
+    def xcorr(self, *args, **kwargs):
+        return super().xcorr(*args, **kwargs)
+
+    @remove_args_units
+    def boxplot(self, *args, **kwargs):
+        return super().boxplot(*args, **kwargs)
+
+    @remove_args_units
+    def violinplot(self, *args, **kwargs):
+        return super().violinplot(*args, **kwargs)
+
+    @remove_args_units
+    def violin(self, *args, **kwargs):
+        return super().violin(*args, **kwargs)
+
+    @remove_args_units
+    def bxp(self, *args, **kwargs):
+        return super().bxp(*args, **kwargs)
+
+    @remove_args_units
+    def hexbin(self, *args, **kwargs):
+        return super().hexbin(*args, **kwargs)
+
+    @remove_args_units
+    def hist(self, *args, **kwargs):
+        return super().hist(*args, **kwargs)
+
+    @remove_args_units
+    def hist2d(self, *args, **kwargs):
+        return super().hist2d(*args, **kwargs)
+
+    @remove_args_units
+    def stairs(self, *args, **kwargs):
+        return super().stairs(*args, **kwargs)
+
+    @remove_args_units
+    def contour(self, *args, **kwargs):
+        return super().contour(*args, **kwargs)
+
+    @remove_args_units
+    def contourf(self, *args, **kwargs):
+        return super().contourf(*args, **kwargs)
+
+    @remove_args_units
+    def imshow(self, *args, **kwargs):
+        return super().imshow(*args, **kwargs)
+
+    @remove_args_units
+    def matshow(self, *args, **kwargs):
+        return super().matshow(*args, **kwargs)
+
+    @remove_args_units
+    def pcolor(self, *args, **kwargs):
+        return super().pcolor(*args, **kwargs)
+
+    @remove_args_units
+    def pcolorfast(self, *args, **kwargs):
+        return super().pcolorfast(*args, **kwargs)
+
+    @remove_args_units
+    def pcolormesh(self, *args, **kwargs):
+        return super().pcolormesh(*args, **kwargs)
+
+    @remove_args_units
+    def spy(self, *args, **kwargs):
+        return super().spy(*args, **kwargs)
+
+    @remove_args_units
+    def tripcolor(self, *args, **kwargs):
+        return super().tripcolor(*args, **kwargs)
+
+    @remove_args_units
+    def triplot(self, *args, **kwargs):
+        return super().triplot(*args, **kwargs)
+
+    @remove_args_units
+    def tricontour(self, *args, **kwargs):
+        return super().tricontour(*args, **kwargs)
+
+    @remove_args_units
+    def tricontourf(self, *args, **kwargs):
+        return super().tricontourf(*args, **kwargs)
+
     @remove_args_units
     def annotate(self, *args, **kwargs):
-        super().annotate(*args, **kwargs)
+        return super().annotate(*args, **kwargs)
+
+    @remove_args_units
+    def text(self, *args, **kwargs):
+        return super().text(*args, **kwargs)
+
+    @remove_args_units
+    def table(self, *args, **kwargs):
+        return super().table(*args, **kwargs)
+
+    @remove_args_units
+    def arrow(self, *args, **kwargs):
+        return super().arrow(*args, **kwargs)
 
     @remove_args_units
     def set_xlim(self, *args, **kwargs):
-        super().set_xlim(*args, **kwargs)
+        return super().set_xlim(*args, **kwargs)
 
     @remove_args_units
     def set_ylim(self, *args, **kwargs):
-        super().set_ylim(*args, **kwargs)
-
-    @remove_args_units
-    def axvline(self, x=0, ymin=0, ymax=1, **kwargs):
-        super().axvline(x, ymin, ymax, **kwargs)
-
-    def plot_surface(self, *args, **kwargs):
-        """ """
-        return
-
-    def draw(self, renderer):
-        #    # with plt.rc_context({"something": self.xxx}):
-        super().draw(renderer)
+        return super().set_ylim(*args, **kwargs)
 
 
-class Axes3D(maxes3D.Axes3D):
+class _Axes3D(maxes3D.Axes3D):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     @remove_args_units
     def plot_surface(self, *args, **kwargs):
-        super().plot_surface(*args, **kwargs)
+        return super().plot_surface(*args, **kwargs)
 
 
 # ............................................................................
