@@ -33,7 +33,12 @@ __dataset_methods__ = [
 import numpy as np
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
-from spectrochempy.utils import make_label, is_sequence, add_docstring  # , deprecated
+from spectrochempy.utils import (
+    make_label,
+    is_sequence,
+    add_docstring,
+    plot_method,
+)  # , deprecated
 from spectrochempy.core.dataset.coord import Coord
 
 
@@ -107,32 +112,12 @@ vshift : float, optional
 """
 
 
-# plot scatter ---------------------------------------------------------------
-@add_docstring(_PLOT1D_DOC)
+@plot_method("1D", _PLOT1D_DOC)
 def plot_scatter(dataset, **kwargs):
     """
     Plot a 1D dataset as a scatter plot (points can be added on lines).
 
     Alias of plot (with `method` argument set to ``scatter``.
-
-    Parameters
-    ----------
-    dataset : :class:`~spectrochempy.ddataset.nddataset.NDDataset`
-        Source of data to plot.
-    **kwargs : dict
-        See other parameters.
-
-    Other Parameters
-    ----------------
-    {0}
-
-    See Also
-    --------
-    plot_1D
-    plot_pen
-    plot_bar
-    plot_scatter_pen
-    plot_multiple
     """
     if kwargs.get("use_plotly", False):
         return dataset.plotly(**kwargs)  # pragma: no cover
@@ -140,34 +125,12 @@ def plot_scatter(dataset, **kwargs):
         return plot_1D(dataset, method="scatter", **kwargs)
 
 
-# plot pen (default) ---------------------------------------------------------
-
-
-@add_docstring(_PLOT1D_DOC)
+@plot_method("1D", _PLOT1D_DOC)
 def plot_pen(dataset, **kwargs):
     """
     Plot a 1D dataset with solid pen by default.
 
     Alias of plot (with `method` argument set to ``pen``.
-
-    Parameters
-    ----------
-    dataset : :class:`~spectrochempy.ddataset.nddataset.NDDataset`
-        Source of data to plot.
-    **kwargs : dict
-        See other parameters.
-
-    Other Parameters
-    ----------------
-    {0}
-
-    See Also
-    --------
-    plot_1D
-    plot_scatter
-    plot_bar
-    plot_scatter_pen
-    plot_multiple
     """
     if kwargs.get("use_plotly", False):
         return dataset.plotly(**kwargs)  # pragma: no cover
@@ -175,34 +138,12 @@ def plot_pen(dataset, **kwargs):
         return plot_1D(dataset, method="pen", **kwargs)
 
 
-# plot pen (default) ---------------------------------------------------------
-
-
-@add_docstring(_PLOT1D_DOC)
+@plot_method("1D", _PLOT1D_DOC)
 def plot_scatter_pen(dataset, **kwargs):
     """
     Plot a 1D dataset with solid pen by default.
 
     Alias of plot (with `method` argument set to ``scatter_pen``.
-
-    Parameters
-    ----------
-    dataset : :class:`~spectrochempy.ddataset.nddataset.NDDataset`
-        Source of data to plot.
-    **kwargs : dict
-        See other parameters.
-
-    Other Parameters
-    ----------------
-    {0}
-
-    See Also
-    --------
-    plot_1D
-    plot_pen
-    plot_scatter
-    plot_bar
-    plot_multiple
     """
     if kwargs.get("use_plotly", False):
         return dataset.plotly(**kwargs)  # pragma: no cover
@@ -210,34 +151,12 @@ def plot_scatter_pen(dataset, **kwargs):
         return plot_1D(dataset, method="scatter+pen", **kwargs)
 
 
-# plot bars ------------------------------------------------------------------
-
-
-@add_docstring(_PLOT1D_DOC)
+@plot_method("1D", _PLOT1D_DOC)
 def plot_bar(dataset, **kwargs):
     """
     Plot a 1D dataset with bars.
 
     Alias of plot (with `method` argument set to ``bar``.
-
-    Parameters
-    ----------
-    dataset : :class:`~spectrochempy.ddataset.nddataset.NDDataset`
-        Source of data to plot.
-    **kwargs : dict
-        See other parameters.
-
-    Other Parameters
-    ----------------
-    {0}
-
-    See Also
-    --------
-    plot_1D
-    plot_pen
-    plot_scatter
-    plot_scatter_pen
-    plot_multiple
     """
     if kwargs.get("use_plotly", False):
         return dataset.plotly(**kwargs)  # pragma: no cover
@@ -245,37 +164,10 @@ def plot_bar(dataset, **kwargs):
         return plot_1D(dataset, method="bar", **kwargs)
 
 
-# plot multiple --------------------------------------------------------------
-
-
-@add_docstring(_PLOT1D_DOC)
+@plot_method("1D", _PLOT1D_DOC)
 def plot_multiple(datasets, method="scatter", pen=True, labels=None, **kwargs):
     """
     Plot a series of 1D datasets as a scatter plot with optional lines between markers.
-
-    Parameters
-    ----------
-    datasets : a list of ndatasets
-    method : str among [scatter, pen]
-    pen : bool, optional, default: True
-        If method is scatter, this flag tells to draw also the lines
-        between the marks.
-    labels : a list of str, optional
-        Labels used for the legend.
-    **kwargs : dic
-        Other parameters that will be passed to the plot1D function.
-
-    Other Parameters
-    ----------------
-    {0}
-
-    See Also
-    --------
-    plot_1D
-    plot_pen
-    plot_scatter
-    plot_bar
-    plot_scatter_pen
     """
     if not is_sequence(datasets):
         # we need a sequence. Else it is a single plot.
