@@ -106,7 +106,7 @@ class Fit(HasTraits):
                 dataset.model_b,
             ) = self._get_modeldata(
                 dataset, exp_idx
-            )  # lgtm [py/mismatched-multiple-assignment]
+            )  # lgtm[py/mismatched-multiple-assignment]
 
     # *******************************************************************************
     # public methodss

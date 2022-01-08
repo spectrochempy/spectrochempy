@@ -458,6 +458,7 @@ def test_ndarray_methods(refarray, ndarray, ndarrayunit):
 
 
 def test_ndarray_slicing(refarray, ndarray):
+
     ref = refarray
     nd = ndarray.copy()
     assert not nd.is_masked
@@ -543,21 +544,6 @@ def test_ndarray_slicing(refarray, ndarray):
     amm = nd.data[..., am]
     assert_array_equal(nd[..., am].data, amm)
 
-
-def test_dim_names_specified(ndarray):
-    nd = ndarray.copy()
-    assert not nd.is_masked
-    assert nd.dims == ["y", "x"]
-
-    # set dim names
-    nd.dims = ["t", "y"]
-
-    assert nd.dims == ["t", "y"]
-
-    assert nd.dims == ["t", "y"]
-
-
-def test_ndarray_slice_labels():
     # slicing only-label array
 
     d0 = NDArray(labels="a b c d e f g h i j".split(), title="labelled")
@@ -570,6 +556,19 @@ def test_ndarray_slice_labels():
     assert d0["b"].values == "b"
     assert d0["c":"d"].shape == (2,)
     assert_array_equal(d0["c":"d"].values, np.array(["c", "d"]))
+
+
+def test_dim_names_specified(ndarray):
+    nd = ndarray.copy()
+    assert not nd.is_masked
+    assert nd.dims == ["y", "x"]
+
+    # set dim names
+    nd.dims = ["t", "y"]
+
+    assert nd.dims == ["t", "y"]
+
+    assert nd.dims == ["t", "y"]
 
 
 def test_ndarray_issue_23():

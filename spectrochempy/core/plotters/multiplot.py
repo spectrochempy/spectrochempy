@@ -31,7 +31,7 @@ from matplotlib.tight_layout import (
 import matplotlib as mpl
 
 from spectrochempy.utils import is_sequence
-
+from spectrochempy.utils.plots import _Axes
 
 # from spectrochempy.core import preferences, project_preferences
 
@@ -308,7 +308,8 @@ def multiplot(
                 or (sharex == "col" and irow == 0)
                 or (sharey == "row" and icol == 0)
             ):
-                ax = fig.add_subplot(nrow, ncol, irow * ncol + icol + 1)
+                ax = _Axes(fig, nrow, ncol, irow * ncol + icol + 1)
+                ax = fig.add_subplot(ax)
 
             else:
                 if sharex == "all":
@@ -329,9 +330,8 @@ def multiplot(
                 elif sharez == "col":
                     _sharez = axes["axe1{}".format(icol + 1)]
 
-                ax = fig.add_subplot(
-                    nrow, ncol, idx + 1, sharex=_sharex, sharey=_sharey
-                )
+                ax = _Axes(fig, nrow, ncol, idx + 1, sharex=_sharex, sharey=_sharey)
+                ax = fig.add_subplot(ax)
 
             ax._sharez = _sharez  # we add a new share info to the ax.
             # which will be useful for the interactive masks

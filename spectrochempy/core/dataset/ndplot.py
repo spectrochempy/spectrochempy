@@ -17,13 +17,14 @@ from cycler import cycler
 import matplotlib as mpl
 from matplotlib.colors import to_rgba
 
-# from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import pyplot as plt
+
 import plotly.graph_objects as go
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from traitlets import Dict, HasTraits, Instance, Union, default, TraitError
 
-from spectrochempy.utils import get_figure, pathclean
+from spectrochempy.utils.plots import get_figure, _Axes, _Axes3D
+from spectrochempy.utils import pathclean
 from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.core import preferences, plot_preferences, error_
 from spectrochempy.core.plotters.plot1d import plot_1D
@@ -42,9 +43,6 @@ class PreferencesSet(Meta):
     """
     Preferences setting.
     """
-
-    def __init__(self, **data):
-        super().__init__(**data)
 
     def __getitem__(self, key):
 
@@ -225,10 +223,25 @@ class PreferencesSet(Meta):
         print(TBold(f"{key} = {value} \t[default: {default}]"))
         print(f"{help}\n")
 
-    def makestyle(self, filename="mydefault", to_mpl=False):
+    def makestyle(self, stylename="mydefault", to_mpl=False):
+        """
+        Create Matplotlib Style files.
 
-        if filename.startswith("scpy"):
-            error_("`scpy` is READ-ONLY. Please use an another style name.")
+        Parameters
+        ----------
+        stylename:
+        to_mpl:
+
+        Returns
+        --------
+        stylename
+            Name of the style
+
+        """
+        if stylename.startswith("scpy"):
+            error_(
+                "Style name starting with `scpy` are READ-ONLY. Please use an another style name."
+            )
             return
 
         txt = ""
@@ -312,20 +325,17 @@ class PreferencesSet(Meta):
         for par in nonmplpars:
             txt += f"##@{par:37s} : {getattr(self, par)}\n"
 
-        stylesheet = (pathclean(self.stylesheets) / filename).with_suffix(".mplstyle")
+        stylesheet = (pathclean(self.stylesheets) / stylename).with_suffix(".mplstyle")
         stylesheet.write_text(txt)
 
         if to_mpl:
             # make it also accessible to pyplot
             stylelib = (
-                pathclean(mpl.get_configdir()) / "stylelib" / filename
+                pathclean(mpl.get_configdir()) / "stylelib" / stylename
             ).with_suffix(".mplstyle")
-            stylelib.write_text(txt)
+            stylelib.write_text()
 
-        # plot_preferences.traits()['style'].trait_types = plot_preferences.traits()['style'].trait_types +\
-        #                                                       (Unicode(filename),)
-        self.style = filename
-        return self.style
+        return stylename
 
 
 # ======================================================================================================================
@@ -341,14 +351,14 @@ class NDPlot(HasTraits):
     """
 
     # variable containing the matplotlib axis defined for a NDArray object.
-    _ax = Instance(plt.Axes, allow_none=True)
+    _ax = Instance(_Axes, allow_none=True)
 
     # The figure on which this NDArray can be plotted
     _fig = Union((Instance(plt.Figure), Instance(go.Figure)), allow_none=True)
 
     # The axes on which this dataset and other elements such as projections
     # and colorbar can be plotted
-    _ndaxes = Dict(Instance(plt.Axes))
+    _ndaxes = Dict(Instance(_Axes))
 
     # add metadata to store plot parameters
     _preferences = Instance(PreferencesSet, allow_none=True)
@@ -444,7 +454,7 @@ class NDPlot(HasTraits):
         if not method:
             method = prefs.method_2D if ndim == 2 else prefs.method_1D
 
-        ax3d = "3d" if method in ["surface"] else None
+        ax3d = method in ["surface"]
 
         # Get current figure information
         # ------------------------------
@@ -459,7 +469,7 @@ class NDPlot(HasTraits):
         # they will be ignored
         tax = kwargs.get("twinx", None)
         if tax is not None:
-            if isinstance(tax, plt.Axes):
+            if isinstance(tax, _Axes):
                 clear = False
                 ax = tax.twinx()
                 ax.name = "main"
@@ -478,7 +488,7 @@ class NDPlot(HasTraits):
         if ax is not None:
             # ax given in the plot parameters,
             # in this case we will plot on this ax
-            if isinstance(ax, (plt.Axes)):
+            if isinstance(ax, (_Axes)):
                 ax.name = "main"
                 self.ndaxes["main"] = ax
             else:
@@ -492,7 +502,12 @@ class NDPlot(HasTraits):
             # or create a new subplot
             # ax = self._fig.gca(projection=ax3d) :: passing parameters DEPRECATED in matplotlib 3.4
             # ---
-            ax = self._fig.add_subplot(projection=ax3d)
+            if not ax3d:
+                ax = _Axes(self._fig, 1, 1, 1)
+                ax = self._fig.add_subplot(ax)
+            else:
+                ax = _Axes3D(self._fig)
+                ax = self._fig.add_axes(ax, projection="3d")
 
             ax.name = "main"
             self.ndaxes["main"] = ax
@@ -731,7 +746,7 @@ class NDPlot(HasTraits):
                 self._ndaxes[ax.name] = ax
         elif isinstance(axes, dict):
             self._ndaxes.update(axes)
-        elif isinstance(axes, plt.Axes):
+        elif isinstance(axes, _Axes):
             # it's an axe! add it to our list
             self._ndaxes[axes.name] = axes
 

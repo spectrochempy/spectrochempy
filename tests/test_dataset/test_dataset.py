@@ -504,7 +504,7 @@ def test_nddataset_slicing_by_location_but_nocoords(ref_ds, ds1):
     da.delete_coordset()  # clear coords
     # this cannot work (no coords for location)
     with pytest.raises(SpectroChemPyException):
-        da[3666.7]
+        _ = da[3666.7]
 
 
 # slicing tests
@@ -520,6 +520,13 @@ def test_nddataset_simple_slicing():
     assert d3.squeeze().shape == ()
     d3 = d1[0]
     assert d3.shape == (1, 5)
+
+    with pytest.raises(SpectroChemPyException) as exc:
+        _ = d1[0 * ur.cm]
+    assert (
+        exc.value.args[0]
+        == "No coords have been defined. Slicing or selection by location (0.0) needs coords definition."
+    )
 
 
 def test_nddataset_slicing_with_mask():
@@ -543,6 +550,18 @@ def test_nddataset_slicing_with_coords(ds1):
     assert da00.shape == (1, 1, 3)
     assert da00.coordset["x"] == da00.coordset[0]
     assert da00.coordset["x"] == da.coordset[0]
+
+
+def test_slicing_with_quantities(ds1):
+    da = ds1.copy()
+
+    da00 = da[1000.0 * ur("cm^-1"), 0]
+    assert da00.shape == (1, 1, 3)
+    assert da00.coordset["x"] == da00.coordset[0]
+    assert da00.coordset["x"] == da.coordset[0]
+
+    with pytest.raises(ValueError):
+        _ = da[1000.0 * ur.K, 0]  # wrong units
 
 
 def test_nddataset_mask_array_input():
