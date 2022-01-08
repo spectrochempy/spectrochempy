@@ -16,8 +16,6 @@ __all__ = [
     "plot_map",
     "plot_stack",
     "plot_image",
-    "plot_surface",
-    "plot_waterfall",
 ]
 
 __dataset_methods__ = __all__
@@ -107,29 +105,6 @@ def plot_image(dataset, **kwargs):
     """
 
 
-@plot_method("2D", _PLOT2D_DOC)
-def plot_surface(dataset, **kwargs):
-    """
-    Plot a 2D dataset as a a 3D-surface.
-
-    Alias of plot_2D (with `method` argument set to ``surface``.
-    """
-    return
-
-
-@plot_method("2D", _PLOT2D_DOC)
-def plot_waterfall(dataset, **kwargs):
-    """
-    Plot a 2D dataset as a a 3D-waterfall plot.
-
-    Alias of plot_2D (with `method` argument set to ``waterfall``.
-    """
-    return
-
-
-# generic plot (default stack plot) -------------------------------------------
-
-
 @add_docstring(_PLOT2D_DOC)
 def plot_2D(dataset, method="stack", **kwargs):
     """
@@ -139,7 +114,7 @@ def plot_2D(dataset, method="stack", **kwargs):
     ----------
     dataset : |NDDataset|
         The dataset to plot.
-    method : ['stack', 'map', 'image', 'surface', 'waterfall'] , optional
+    method : ['stack', 'map', 'image'] , optional
         The method of plot of the dataset, which will determine the plotter to use. Default is stack.
     **kwargs : dic, optional
         Additional keywords parameters.

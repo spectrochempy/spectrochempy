@@ -28,8 +28,8 @@ from spectrochempy.utils import pathclean
 from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.core import preferences, plot_preferences, error_
 from spectrochempy.core.plotters.plot1d import plot_1D
-from spectrochempy.core.plotters.plot3d import plot_3D
 from spectrochempy.core.plotters.plot2d import plot_2D
+from spectrochempy.core.plotters.plot3d import plot_3D
 
 
 # from spectrochempy.utils import deprecated
