@@ -7,12 +7,18 @@
 
 import matplotlib as mpl
 from matplotlib import pyplot as plt
+import matplotlib.axes as maxes
+import mpl_toolkits.mplot3d.axes3d as maxes3D
+
 import plotly.graph_objects as go
 import numpy as np
 
 from spectrochempy.core.dataset.meta import Meta
+from spectrochempy.units import remove_args_units
 
 __all__ = [
+    "Axes3D",
+    "Axes",
     "cmyk2rgb",
     "NBlack",
     "NRed",
@@ -26,6 +32,49 @@ __all__ = [
     "make_attr",
     "make_label",
 ]
+
+
+@maxes.subplot_class_factory
+class Axes(maxes.Axes):
+    """
+    Subclass of matplotlib Axes class
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    @remove_args_units
+    def annotate(self, *args, **kwargs):
+        super().annotate(*args, **kwargs)
+
+    @remove_args_units
+    def set_xlim(self, *args, **kwargs):
+        super().set_xlim(*args, **kwargs)
+
+    @remove_args_units
+    def set_ylim(self, *args, **kwargs):
+        super().set_ylim(*args, **kwargs)
+
+    @remove_args_units
+    def axvline(self, x=0, ymin=0, ymax=1, **kwargs):
+        super().axvline(x, ymin, ymax, **kwargs)
+
+    def plot_surface(self, *args, **kwargs):
+        """ """
+        return
+
+    def draw(self, renderer):
+        #    # with plt.rc_context({"something": self.xxx}):
+        super().draw(renderer)
+
+
+class Axes3D(maxes3D.Axes3D):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    @remove_args_units
+    def plot_surface(self, *args, **kwargs):
+        super().plot_surface(*args, **kwargs)
 
 
 # ............................................................................

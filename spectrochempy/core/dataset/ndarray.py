@@ -709,7 +709,7 @@ class NDArray(HasTraits):
             # integer or float
             start = key
             if not isinstance(key, TYPE_INTEGER):
-                start = self._loc2index(key, units, dim)
+                start = self._loc2index(key, dim, units=units)
                 if isinstance(start, tuple):
                     start, info = start
                 if start is None:
@@ -723,11 +723,11 @@ class NDArray(HasTraits):
         else:
             start, stop, step = key.start, key.stop, key.step
             if start is not None and not isinstance(start, TYPE_INTEGER):
-                start = self._loc2index(start, units, dim)
+                start = self._loc2index(start, dim, units=units)
                 if isinstance(start, tuple):
                     start, info = start
             if stop is not None and not isinstance(stop, TYPE_INTEGER):
-                stop = self._loc2index(stop, units, dim)
+                stop = self._loc2index(stop, dim, units=units)
                 if isinstance(stop, tuple):
                     stop, info = stop
                 if start is not None and stop < start:
@@ -759,7 +759,7 @@ class NDArray(HasTraits):
         return None
 
     # ..........................................................................
-    def _loc2index(self, loc, units=None, dim=None):
+    def _loc2index(self, loc, dim=None, *, units=None):
         # Return the index of a location (label or values such as coordinates) along a 1D array.
         # Do not apply for multidimensional arrays (ndim>1)
         if self.ndim > 1:
@@ -769,7 +769,11 @@ class NDArray(HasTraits):
             )
 
         # check units compatibility
-        if units is not None and units != self.units:
+        if (
+            units is not None
+            and (is_number(loc) or is_sequence(loc))
+            and units != self.units
+        ):
             raise ValueError(
                 f"Units of the location {loc} {units} are not compatible with those of this array:"
                 f" {self.units}"

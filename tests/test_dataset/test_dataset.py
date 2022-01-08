@@ -523,8 +523,10 @@ def test_nddataset_simple_slicing():
 
     with pytest.raises(SpectroChemPyException) as exc:
         _ = d1[0 * ur.cm]
-    assert exc.value.args[0] == "No coords have been defined. Slicing or selection"
-    " by location ({}) needs coords definition.".format(0.0)
+    assert (
+        exc.value.args[0]
+        == "No coords have been defined. Slicing or selection by location (0.0) needs coords definition."
+    )
 
 
 def test_nddataset_slicing_with_mask():

@@ -17,21 +17,19 @@ from cycler import cycler
 import matplotlib as mpl
 from matplotlib.colors import to_rgba
 
-# from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import pyplot as plt
-import matplotlib.axes as maxes
 
 import plotly.graph_objects as go
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from traitlets import Dict, HasTraits, Instance, Union, default, TraitError
 
-from spectrochempy.utils import get_figure, pathclean
+from spectrochempy.utils import get_figure, pathclean, Axes, Axes3D
 from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.core import preferences, plot_preferences, error_
 from spectrochempy.core.plotters.plot1d import plot_1D
 from spectrochempy.core.plotters.plot3d import plot_3D
 from spectrochempy.core.plotters.plot2d import plot_2D
-from spectrochempy.units import remove_args_units
+
 
 # from spectrochempy.utils import deprecated
 
@@ -339,36 +337,6 @@ class PreferencesSet(Meta):
         return stylename
 
 
-@maxes.subplot_class_factory
-class _Axes(maxes.Axes):
-    """
-    Subclass of matplotlib Axes class
-    """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    @remove_args_units
-    def annotate(self, *args, **kwargs):
-        super().annotate(*args, **kwargs)
-
-    @remove_args_units
-    def set_xlim(self, *args, **kwargs):
-        super().set_xlim(*args, **kwargs)
-
-    @remove_args_units
-    def set_ylim(self, *args, **kwargs):
-        super().set_ylim(*args, **kwargs)
-
-    @remove_args_units
-    def axvline(self, x=0, ymin=0, ymax=1, **kwargs):
-        super().axvline(x, ymin, ymax, **kwargs)
-
-    def draw(self, renderer):
-        #    # with plt.rc_context({"something": self.xxx}):
-        super().draw(renderer)
-
-
 # ======================================================================================================================
 # Class NDPlot to handle plotting of datasets
 # ======================================================================================================================
@@ -382,14 +350,14 @@ class NDPlot(HasTraits):
     """
 
     # variable containing the matplotlib axis defined for a NDArray object.
-    _ax = Instance(_Axes, allow_none=True)
+    _ax = Instance(Axes, allow_none=True)
 
     # The figure on which this NDArray can be plotted
     _fig = Union((Instance(plt.Figure), Instance(go.Figure)), allow_none=True)
 
     # The axes on which this dataset and other elements such as projections
     # and colorbar can be plotted
-    _ndaxes = Dict(Instance(_Axes))
+    _ndaxes = Dict(Instance(Axes))
 
     # add metadata to store plot parameters
     _preferences = Instance(PreferencesSet, allow_none=True)
@@ -485,7 +453,7 @@ class NDPlot(HasTraits):
         if not method:
             method = prefs.method_2D if ndim == 2 else prefs.method_1D
 
-        ax3d = "3d" if method in ["surface"] else None
+        ax3d = method in ["surface"]
 
         # Get current figure information
         # ------------------------------
@@ -500,7 +468,7 @@ class NDPlot(HasTraits):
         # they will be ignored
         tax = kwargs.get("twinx", None)
         if tax is not None:
-            if isinstance(tax, _Axes):
+            if isinstance(tax, Axes):
                 clear = False
                 ax = tax.twinx()
                 ax.name = "main"
@@ -519,7 +487,7 @@ class NDPlot(HasTraits):
         if ax is not None:
             # ax given in the plot parameters,
             # in this case we will plot on this ax
-            if isinstance(ax, (_Axes)):
+            if isinstance(ax, (Axes)):
                 ax.name = "main"
                 self.ndaxes["main"] = ax
             else:
@@ -533,8 +501,12 @@ class NDPlot(HasTraits):
             # or create a new subplot
             # ax = self._fig.gca(projection=ax3d) :: passing parameters DEPRECATED in matplotlib 3.4
             # ---
-            ax = _Axes(self._fig, 1, 1, 1)
-            ax = self._fig.add_subplot(ax, projection=ax3d)
+            if not ax3d:
+                ax = Axes(self._fig, 1, 1, 1)
+                ax = self._fig.add_subplot(ax)
+            else:
+                ax = Axes3D(self._fig)
+                ax = self._fig.add_axes(ax, projection="3d")
 
             ax.name = "main"
             self.ndaxes["main"] = ax
@@ -773,7 +745,7 @@ class NDPlot(HasTraits):
                 self._ndaxes[ax.name] = ax
         elif isinstance(axes, dict):
             self._ndaxes.update(axes)
-        elif isinstance(axes, _Axes):
+        elif isinstance(axes, Axes):
             # it's an axe! add it to our list
             self._ndaxes[axes.name] = axes
 
