@@ -373,6 +373,26 @@ class NDArray(HasTraits):
             # Special case of fancy indexing
             items = (items,)
 
+        # allow passing a quantity as indice or in slices
+        def remove_units(items):
+
+            if isinstance(items, (tuple,)):
+                items = tuple(remove_units(item) for item in items)
+
+            elif isinstance(items, slice):
+                items = slice(
+                    remove_units(items.start),
+                    remove_units(items.stop),
+                    remove_units(items.step),
+                )
+
+            else:
+                items = items.m if isinstance(items, Quantity) else items
+
+            return items
+
+        items = remove_units(items)
+
         # choose, if we keep the same or create new object
         inplace = False
         if isinstance(items, tuple) and items[-1] == INPLACE:
