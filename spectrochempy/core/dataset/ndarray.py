@@ -373,25 +373,25 @@ class NDArray(HasTraits):
             # Special case of fancy indexing
             items = (items,)
 
-        # allow passing a quantity as indice or in slices
-        def remove_units(items):
-
-            if isinstance(items, (tuple,)):
-                items = tuple(remove_units(item) for item in items)
-
-            elif isinstance(items, slice):
-                items = slice(
-                    remove_units(items.start),
-                    remove_units(items.stop),
-                    remove_units(items.step),
-                )
-
-            else:
-                items = items.m if isinstance(items, Quantity) else items
-
-            return items
-
-        items = remove_units(items)
+        # # allow passing a quantity as indice or in slices
+        # def remove_units(items):
+        #     # recursive function
+        #     if isinstance(items, (tuple,)):
+        #         items = tuple(remove_units(item) for item in items)
+        #
+        #     elif isinstance(items, slice):
+        #         items = slice(
+        #             remove_units(items.start),
+        #             remove_units(items.stop),
+        #             remove_units(items.step),
+        #         )
+        #
+        #     else:
+        #         items = float(items.m) if isinstance(items, Quantity) else items
+        #
+        #     return items
+        #
+        # items = remove_units(items)
 
         # choose, if we keep the same or create new object
         inplace = False
@@ -680,11 +680,36 @@ class NDArray(HasTraits):
     def _get_slice(self, key, dim):
 
         info = None
+
+        # allow passing a quantity as indice or in slices
+        def remove_units(items):
+            # recursive function
+
+            units = None
+
+            if isinstance(items, (tuple,)):
+                items = tuple(remove_units(item) for item in items)
+
+            elif isinstance(items, slice):
+                start, units = remove_units(items.start)
+                end, _ = remove_units(items.stop)
+                step, _ = remove_units(items.step)
+                items = slice(start, end, step)
+
+            else:
+                if isinstance(items, Quantity):
+                    units = items.u
+                    items = float(items.m)
+
+            return items, units
+
+        key, units = remove_units(key)
+
         if not isinstance(key, slice):
             # integer or float
             start = key
             if not isinstance(key, TYPE_INTEGER):
-                start = self._loc2index(key, dim)
+                start = self._loc2index(key, units, dim)
                 if isinstance(start, tuple):
                     start, info = start
                 if start is None:
@@ -698,11 +723,11 @@ class NDArray(HasTraits):
         else:
             start, stop, step = key.start, key.stop, key.step
             if start is not None and not isinstance(start, TYPE_INTEGER):
-                start = self._loc2index(start, dim)
+                start = self._loc2index(start, units, dim)
                 if isinstance(start, tuple):
                     start, info = start
             if stop is not None and not isinstance(stop, TYPE_INTEGER):
-                stop = self._loc2index(stop, dim)
+                stop = self._loc2index(stop, units, dim)
                 if isinstance(stop, tuple):
                     stop, info = stop
                 if start is not None and stop < start:
@@ -734,7 +759,7 @@ class NDArray(HasTraits):
         return None
 
     # ..........................................................................
-    def _loc2index(self, loc, dim=None):
+    def _loc2index(self, loc, units=None, dim=None):
         # Return the index of a location (label or values such as coordinates) along a 1D array.
         # Do not apply for multidimensional arrays (ndim>1)
         if self.ndim > 1:
@@ -743,9 +768,16 @@ class NDArray(HasTraits):
                 f"(current ndim:{self.ndim})"
             )
 
+        # check units compatibility
+        if units is not None and units != self.units:
+            raise ValueError(
+                f"Units of the location {loc} {units} are not compatible with those of this array:"
+                f" {self.units}"
+            )
+
         if self.is_empty and not self.is_labeled:
 
-            raise IndexError(f"Could not find this location: {loc} on an empty array")
+            raise IndexError(f"Could not find this location {loc} on an empty array")
 
         else:
 
@@ -841,7 +873,7 @@ class NDArray(HasTraits):
             # the keys are in the order of the dimension in self.dims!
             # so we need to get the correct dim in the coordinates lists
             dim = self.dims[axis]
-            if is_sequence(key):
+            if is_sequence(key) and not isinstance(key, Quantity):
                 # fancy indexing
                 # all items of the sequence must be integer index
                 keys[axis] = key

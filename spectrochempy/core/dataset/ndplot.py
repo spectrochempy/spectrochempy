@@ -349,14 +349,12 @@ class _Axes(maxes.Axes):
         super().__init__(*args, **kwargs)
 
     @remove_args_units
-    def set_xlim(
-        self, left=None, right=None, emit=True, auto=False, *, xmin=None, xmax=None
-    ):
-        super().set_xlim(left, right, emit, auto, xmin=xmin, xmax=xmax)
+    def annotate(self, *args, **kwargs):
+        super().annotate(*args, **kwargs)
 
-    # @remove_args_units
-    # def set_ylim(self, bottom=None, top=None, emit=True, auto=False, *, ymin=None, ymax=None):
-    #    super().set_ylim(bottom, top, emit, auto, ymin=ymin, ymax=ymax)
+    @remove_args_units
+    def set_xlim(self, *args, **kwargs):
+        super().set_xlim(*args, **kwargs)
 
     @remove_args_units
     def set_ylim(self, *args, **kwargs):

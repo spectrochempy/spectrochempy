@@ -1252,7 +1252,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             return out.rstrip()
 
     # ..........................................................................
-    def _loc2index(self, loc, dim=-1):
+    def _loc2index(self, loc, units=None, dim=-1):
         # Return the index of a location (label or coordinates) along the dim
         # This can work only if `coords` exists.
 
@@ -1264,7 +1264,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         coord = self.coord(dim)
 
-        return coord._loc2index(loc)
+        return coord._loc2index(loc, units=units)
 
     # ..........................................................................
     def _str_dims(self):

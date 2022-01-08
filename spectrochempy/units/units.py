@@ -287,14 +287,20 @@ def remove_args_units(func):
     Decorator which remove units of arguments of a function
     """
 
+    def _remove_units(val):
+
+        if isinstance(val, Quantity):
+            val = val.m
+        elif isinstance(val, (list, tuple)):
+            val = type(val)([_remove_units(v) for v in val])
+        return val
+
     @wraps(func)
     def new_func(*args, **kwargs):
 
-        args = tuple([arg if not isinstance(arg, Quantity) else arg.m for arg in args])
+        args = tuple([_remove_units(arg) for arg in args])
 
-        kwargs = {
-            k: v if not isinstance(v, Quantity) else v.m for k, v in kwargs.items()
-        }
+        kwargs = {key: _remove_units(val) for key, val in kwargs.items()}
 
         return func(*args, **kwargs)
 
