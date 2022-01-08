@@ -164,10 +164,33 @@ def plot_bar(dataset, **kwargs):
         return plot_1D(dataset, method="bar", **kwargs)
 
 
-@plot_method("1D", _PLOT1D_DOC)
 def plot_multiple(datasets, method="scatter", pen=True, labels=None, **kwargs):
     """
     Plot a series of 1D datasets as a scatter plot with optional lines between markers.
+
+    Parameters
+    ----------
+    datasets : a list of ndatasets
+    method : str among [scatter, pen]
+    pen : bool, optional, default: True
+        If method is scatter, this flag tells to draw also the lines
+        between the marks.
+    labels : a list of str, optional
+        Labels used for the legend.
+    **kwargs : dic
+        Other parameters that will be passed to the plot1D function.
+
+    Other Parameters
+    ----------------
+    {0}
+
+    See Also
+    --------
+    plot_1D
+    plot_pen
+    plot_scatter
+    plot_bar
+    plot_scatter_pen
     """
     if not is_sequence(datasets):
         # we need a sequence. Else it is a single plot.
