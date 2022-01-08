@@ -89,7 +89,7 @@ pos
 # We can easily get the list of all individual maximas at this position
 
 # %%
-maximas = reg[:, pos.m].squeeze()
+maximas = reg[:, pos].squeeze()
 _ = maximas.plot(marker="s", ls="--", color="blue")
 
 # %% execution={"iopub.execute_input": "2020-06-22T12:21:38.304Z", "iopub.status.busy": "2020-06-22T12:21:38.285Z",
@@ -157,7 +157,7 @@ for p in pks:
     x, y = p.x.values, p.values + 0.02
     _ = ax.annotate(
         f"{x.m:0.0f}",
-        xy=(x.m, y.m),
+        xy=(x, y),
         xytext=(-5, 0),
         rotation=90,
         textcoords="offset points",
@@ -190,10 +190,10 @@ for peaks in peakslist:
 
 # %%
 # Find peak's position
-positions = [s.find_peaks()[0].x.values.m for s in reg[:, 2220.0:2180.0]]
+positions = [s.find_peaks()[0].x.values for s in reg[:, 2220.0:2180.0]]
 
 # Make a NDDataset
-evol = scp.NDDataset(positions, title="wavenumber at the maximum", units="1 /cm")
+evol = scp.NDDataset(positions, title="wavenumber at the maximum")
 evol.x = scp.Coord(
     reg.y, title="acquisition time"
 )  # the x coordinate is st to the acquisition time for each spectra
@@ -351,11 +351,10 @@ _ = peaks.plot_scatter(
 wl, wr = properties["left_bases"][0], properties["right_bases"][0]
 # wavenumbers of of left and right bases
 for w in (wl, wr):
-    wm = w.magnitude
-    ax.axvline(wm, linestyle="--")  # add vertical line at the bases
-    ax.plot(
-        wm, s[wm].data, "v", color="red"
-    )  # and a red mark  #TODO: add function to plot this easily
+    ax.axvline(w, linestyle="--")  # add vertical line at the bases
+    ax.plot(w, s[w].data, "v", color="red")
+    # and a red mark  #TODO: add function to plot this easily
+
 ax = ax.set_xlim(2310.0, 1900.0)  # change x limits to better see the 'left_base'
 
 # %% It leads to base marks at their expected locations. We can further check that the prominence of the [markdown]
@@ -363,7 +362,7 @@ ax = ax.set_xlim(2310.0, 1900.0)  # change x limits to better see the 'left_base
 # and the highest base, here the 'right_base':
 
 # %%
-prominence = peaks[0].values - s[wr.m].values
+prominence = peaks[0].values - s[wr].values
 print(f"calc. prominence = {prominence:0.4fK}")
 
 # %% Finally, we illustrate how the use of the `wlen` parameter - which limits the search of the "base [markdown]
@@ -423,8 +422,8 @@ _ = peaks.plot_scatter(
 )
 _ = ax.axhline(height, linestyle="--", color="blue")
 _ = ax.axhline(width_height, linestyle="--", color="red")
-_ = ax.axvline(wl.m, linestyle="--", color="green")
-_ = ax.axvline(wr.m, linestyle="--", color="green")
+_ = ax.axvline(wl, linestyle="--", color="green")
+_ = ax.axvline(wr, linestyle="--", color="green")
 
 # %% As stressed above, we see here that the peak width is very approximate and probably exaggerated in [markdown]
 # It is obvious here that the peak width is overestimated in the present case due to the presence of the second peak on
@@ -479,9 +478,9 @@ peaks.plot_scatter(
 
 for i in range(len(peaks)):
     for w in (properties["left_bases"][i], properties["right_bases"][i]):
-        ax.plot(w.m, s[0, w.m].data.T, "v", color="red")
+        ax.plot(w, s[0, w].data.T, "v", color="red")
     for w in (properties["left_ips"][i], properties["right_ips"][i]):
-        ax.axvline(w.m, linestyle="--", color="green")
+        ax.axvline(w, linestyle="--", color="green")
 
 # %% [markdown]
 # -- this is the end of this tutorial --

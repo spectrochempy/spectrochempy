@@ -19,6 +19,8 @@ from matplotlib.colors import to_rgba
 
 # from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import pyplot as plt
+import matplotlib.axes as maxes
+
 import plotly.graph_objects as go
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from traitlets import Dict, HasTraits, Instance, Union, default, TraitError
@@ -29,7 +31,7 @@ from spectrochempy.core import preferences, plot_preferences, error_
 from spectrochempy.core.plotters.plot1d import plot_1D
 from spectrochempy.core.plotters.plot3d import plot_3D
 from spectrochempy.core.plotters.plot2d import plot_2D
-
+from spectrochempy.units import remove_args_units
 
 # from spectrochempy.utils import deprecated
 
@@ -42,9 +44,6 @@ class PreferencesSet(Meta):
     """
     Preferences setting.
     """
-
-    def __init__(self, **data):
-        super().__init__(**data)
 
     def __getitem__(self, key):
 
@@ -225,10 +224,25 @@ class PreferencesSet(Meta):
         print(TBold(f"{key} = {value} \t[default: {default}]"))
         print(f"{help}\n")
 
-    def makestyle(self, filename="mydefault", to_mpl=False):
+    def makestyle(self, stylename="mydefault", to_mpl=False):
+        """
+        Create Matplotlib Style files.
 
-        if filename.startswith("scpy"):
-            error_("`scpy` is READ-ONLY. Please use an another style name.")
+        Parameters
+        ----------
+        stylename:
+        to_mpl:
+
+        Returns
+        --------
+        stylename
+            Name of the style
+
+        """
+        if stylename.startswith("scpy"):
+            error_(
+                "Style name starting with `scpy` are READ-ONLY. Please use an another style name."
+            )
             return
 
         txt = ""
@@ -312,20 +326,49 @@ class PreferencesSet(Meta):
         for par in nonmplpars:
             txt += f"##@{par:37s} : {getattr(self, par)}\n"
 
-        stylesheet = (pathclean(self.stylesheets) / filename).with_suffix(".mplstyle")
+        stylesheet = (pathclean(self.stylesheets) / stylename).with_suffix(".mplstyle")
         stylesheet.write_text(txt)
 
         if to_mpl:
             # make it also accessible to pyplot
             stylelib = (
-                pathclean(mpl.get_configdir()) / "stylelib" / filename
+                pathclean(mpl.get_configdir()) / "stylelib" / stylename
             ).with_suffix(".mplstyle")
-            stylelib.write_text(txt)
+            stylelib.write_text()
 
-        # plot_preferences.traits()['style'].trait_types = plot_preferences.traits()['style'].trait_types +\
-        #                                                       (Unicode(filename),)
-        self.style = filename
-        return self.style
+        return stylename
+
+
+@maxes.subplot_class_factory
+class _Axes(maxes.Axes):
+    """
+    Subclass of matplotlib Axes class
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    @remove_args_units
+    def set_xlim(
+        self, left=None, right=None, emit=True, auto=False, *, xmin=None, xmax=None
+    ):
+        super().set_xlim(left, right, emit, auto, xmin=xmin, xmax=xmax)
+
+    # @remove_args_units
+    # def set_ylim(self, bottom=None, top=None, emit=True, auto=False, *, ymin=None, ymax=None):
+    #    super().set_ylim(bottom, top, emit, auto, ymin=ymin, ymax=ymax)
+
+    @remove_args_units
+    def set_ylim(self, *args, **kwargs):
+        super().set_ylim(*args, **kwargs)
+
+    @remove_args_units
+    def axvline(self, x=0, ymin=0, ymax=1, **kwargs):
+        super().axvline(x, ymin, ymax, **kwargs)
+
+    def draw(self, renderer):
+        #    # with plt.rc_context({"something": self.xxx}):
+        super().draw(renderer)
 
 
 # ======================================================================================================================
@@ -341,14 +384,14 @@ class NDPlot(HasTraits):
     """
 
     # variable containing the matplotlib axis defined for a NDArray object.
-    _ax = Instance(plt.Axes, allow_none=True)
+    _ax = Instance(_Axes, allow_none=True)
 
     # The figure on which this NDArray can be plotted
     _fig = Union((Instance(plt.Figure), Instance(go.Figure)), allow_none=True)
 
     # The axes on which this dataset and other elements such as projections
     # and colorbar can be plotted
-    _ndaxes = Dict(Instance(plt.Axes))
+    _ndaxes = Dict(Instance(_Axes))
 
     # add metadata to store plot parameters
     _preferences = Instance(PreferencesSet, allow_none=True)
@@ -459,7 +502,7 @@ class NDPlot(HasTraits):
         # they will be ignored
         tax = kwargs.get("twinx", None)
         if tax is not None:
-            if isinstance(tax, plt.Axes):
+            if isinstance(tax, _Axes):
                 clear = False
                 ax = tax.twinx()
                 ax.name = "main"
@@ -478,7 +521,7 @@ class NDPlot(HasTraits):
         if ax is not None:
             # ax given in the plot parameters,
             # in this case we will plot on this ax
-            if isinstance(ax, (plt.Axes)):
+            if isinstance(ax, (_Axes)):
                 ax.name = "main"
                 self.ndaxes["main"] = ax
             else:
@@ -492,7 +535,8 @@ class NDPlot(HasTraits):
             # or create a new subplot
             # ax = self._fig.gca(projection=ax3d) :: passing parameters DEPRECATED in matplotlib 3.4
             # ---
-            ax = self._fig.add_subplot(projection=ax3d)
+            ax = _Axes(self._fig, 1, 1, 1)
+            ax = self._fig.add_subplot(ax, projection=ax3d)
 
             ax.name = "main"
             self.ndaxes["main"] = ax
@@ -731,7 +775,7 @@ class NDPlot(HasTraits):
                 self._ndaxes[ax.name] = ax
         elif isinstance(axes, dict):
             self._ndaxes.update(axes)
-        elif isinstance(axes, plt.Axes):
+        elif isinstance(axes, _Axes):
             # it's an axe! add it to our list
             self._ndaxes[axes.name] = axes
 
