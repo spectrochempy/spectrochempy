@@ -8,9 +8,17 @@
 The core interface to the Pint library.
 """
 
-__all__ = ["Unit", "Quantity", "ur", "set_nmr_context", "DimensionalityError"]
+__all__ = [
+    "Unit",
+    "Quantity",
+    "ur",
+    "set_nmr_context",
+    "DimensionalityError",
+    "remove_args_units",
+]
 
 from warnings import warn
+from functools import wraps
 
 from pint import (
     set_application_registry,
@@ -270,6 +278,28 @@ def set_nmr_context(larmor):
 # ------------------------------------------------------------------
 ur = U_
 Quantity = Q_
+
+# utilities
+
+
+def remove_args_units(func):
+    """
+    Decorator which remove units of arguments of a function
+    """
+
+    @wraps(func)
+    def new_func(*args, **kwargs):
+
+        args = tuple([arg if not isinstance(arg, Quantity) else arg.m for arg in args])
+
+        kwargs = {
+            k: v if not isinstance(v, Quantity) else v.m for k, v in kwargs.items()
+        }
+
+        return func(*args, **kwargs)
+
+    return new_func
+
 
 # ======================================================================================================================
 if __name__ == "__main__":
