@@ -16,7 +16,7 @@ def iris_dataset():
     f = path / "tests/data/iris_dataset.scp"
     if not f.exists():
         print(f"file {f} not found- create one")
-        save_iris_dataset(f)
+        save_iris_dataset()
     return scp.load(f)
 
 
