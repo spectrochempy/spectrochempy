@@ -2,6 +2,7 @@ import os
 
 import numpy as np
 
+from spectrochempy.utils import show
 from spectrochempy import read_omnic
 from spectrochempy.units import ur
 
@@ -74,4 +75,4 @@ def test_fix_issue_186():
     da = dt.to("absorbance")
     da.plot()
 
-    # show()
+    show()

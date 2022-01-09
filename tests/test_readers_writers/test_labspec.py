@@ -5,6 +5,7 @@
 from pathlib import Path
 
 import spectrochempy as scp
+from spectrochempy.utils import show
 
 
 def test_read_labspec():
@@ -31,4 +32,4 @@ def test_read_labspec():
     B = scp.read_dir(directory=ramandir / "subdir")
     B.plot()
 
-    # show()
+    show()

@@ -4,7 +4,7 @@
 
 from spectrochempy import NDDataset, os
 
-# from spectrochempy.utils import show
+from spectrochempy.utils import show
 
 # TODO: from spectrochempy.utils.testing import figures_dir, same_images
 
@@ -60,7 +60,7 @@ def test_plot_1D():
     # nd0.plot_lines()
     # nd0[:, ::100].plot_bar()
     #
-    # # show()
+    # show()
     #
     # # multiple
     # d = dataset[:, ::100]
@@ -96,7 +96,7 @@ def test_plot_1D():
     #     raise AssertionError('comparison fails')
     # os.remove('multiple_IR_dataset_1D_scatter.png')
 
-    # show()
+    show()
 
 
 # ======================================================================================================================

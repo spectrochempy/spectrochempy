@@ -24,7 +24,7 @@ def test_plot2D():
     A.plot()
     A.plot(style=["sans", "paper", "grayscale"], colorbar=False)
 
-    # show()
+    show()
 
 
 def test_plotly2D():

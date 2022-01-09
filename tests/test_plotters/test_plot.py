@@ -75,7 +75,7 @@
 #     dataset[1300.:900.] = MASKED
 #     dataset.plot_stack(colorbar=False)
 #     dataset.plot_map(colorbar=False)
-#     # show()
+#     show()
 #
 #
 # def test_plot_stack_multiple(IR_dataset_2D):
@@ -87,7 +87,7 @@
 #     # two on the same plot
 #     s1.plot_stack()
 #     s2.plot_stack(data_only=True, clear=False)
-#     # show()
+#     show()
 #
 #
 # # BUG FIXES IN PLOTS
@@ -98,7 +98,7 @@
 #     dataset[:, 1300.:900.] = MASKED
 #     dataset.plot_stack(colorbar=False)
 #     dataset.plot()  # in 0.1a3.28 bug because key colorbar is missing.
-#     # show()
+#     show()
 #
 #
 # def test_successive_plot_bug_with_colorbars(IR_dataset_2D):
@@ -108,7 +108,7 @@
 #     dataset.plot()
 #     dataset.plot()  # bug colorbars stacked on the first plot
 #     dataset.plot(method='map')  # bug: no colorbar
-#     # show()
+#     show()
 #
 #
 # @image_comparison(reference=['multiplot1', 'multiplot2'], force_creation=FORCE)

@@ -12,7 +12,7 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.analysis.pca import PCA
 from spectrochempy.utils import MASKED
 
-# from spectrochempy.utils import show
+from spectrochempy.utils import show
 from spectrochempy.utils.testing import assert_array_almost_equal
 
 from spectrochempy.optional import import_optional_dependency
@@ -41,7 +41,7 @@ def test_pca():
 
     pca.scoreplot(1, 2, 3)
 
-    # show()
+    show()
 
 
 def test_compare_scikit_learn():
@@ -80,4 +80,4 @@ def test_compare_scikit_learn():
         pca.ev_ratio.data[:5], pcas.explained_variance_ratio_[:5] * 100.0, 4
     )
 
-    # show()
+    show()

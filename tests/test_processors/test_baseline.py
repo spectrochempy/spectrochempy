@@ -6,6 +6,7 @@ import os
 import pytest
 
 # noinspection PyUnresolvedReferences
+from spectrochempy.utils import show
 import spectrochempy as scp
 from spectrochempy import BaselineCorrection, NDDataset, ur
 from spectrochempy.utils.testing import (
@@ -66,7 +67,7 @@ def test_basecor_sequential(IR_dataset_2D):
     )
     s.plot(cmap="copper")
 
-    # show()
+    show()
 
 
 def test_basecor_multivariate(IR_dataset_2D):
@@ -100,7 +101,7 @@ def test_basecor_multivariate(IR_dataset_2D):
     )
     s.plot(cmap="copper")
 
-    # show()
+    show()
 
 
 def test_notebook_basecor_bug():
@@ -189,7 +190,7 @@ def test_issue_227():
     )
     blc.corrected.T.plot()
 
-    # show()
+    show()
 
 
 @pytest.mark.skip()
@@ -213,4 +214,4 @@ def test_ab_nmr(NMR_dataset_1D):
     transfab.plot(xlim=(150, -150), clear=False, color="b")
     base.plot(xlim=(150, -150), ylim=[-2, 10], clear=False, color="y")
 
-    # show()
+    show()

@@ -427,6 +427,9 @@ def show():
         if get_figure(clear=False):
             plt.show(block=True)
 
+    else:
+        plt.close("all")
+
 
 # .............................................................................
 def get_figure(**kwargs):

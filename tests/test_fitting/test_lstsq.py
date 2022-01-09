@@ -5,6 +5,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+from spectrochempy.utils import show
 import spectrochempy.core as sc
 
 
@@ -30,7 +31,7 @@ def test_lstsq_from_scratch():
     plt.plot(t.data, dfit.data, ":r", label="Fitted line")
     plt.legend()
 
-    # show()
+    show()
 
 
 # ............................................................................

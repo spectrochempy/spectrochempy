@@ -7,7 +7,7 @@ import os
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core import preferences
 
-# from spectrochempy.utils import show
+from spectrochempy.utils import show
 from spectrochempy.core.plotters.multiplot import (
     multiplot,
     multiplot_map,
@@ -118,7 +118,7 @@ def test_multiplot():
         sharex=True,
     )
 
-    # show()
+    show()
 
 
 # ======================================================================================================================

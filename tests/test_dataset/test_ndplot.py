@@ -12,7 +12,7 @@ def test_plot_generic_1D(IR_dataset_1D):
         dataset = IR_dataset_1D.copy()
         dataset.plot(method=method)
 
-    # show()
+    show()
 
 
 def test_plot_generic_2D(IR_dataset_2D):
@@ -20,7 +20,7 @@ def test_plot_generic_2D(IR_dataset_2D):
         dataset = IR_dataset_2D.copy()
         dataset.plot(method=method)
 
-    # show()
+    show()
 
 
 prefs = preferences

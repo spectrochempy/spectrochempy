@@ -68,4 +68,4 @@ def test_unit_dimensionality():
 #     ax.set_xlabel('xxx ({})'.format(ax.get_xlabel()))
 #     assert ax.get_xlabel() == 'xxx (second)'
 #
-#     # show()
+#     show()

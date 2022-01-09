@@ -9,7 +9,7 @@ Tests for the ndplugin module.
 
 import numpy as np
 
-# from spectrochempy import show
+from spectrochempy.utils import show
 from spectrochempy.core.processors.autosub import autosub
 
 
@@ -63,4 +63,4 @@ def test_autosub(IR_dataset_2D):
     # s6 = s5.autosub(ref2, *ranges2, dim='y', method='varfit', inplace=False)
     # s6.plot()
 
-    # show()
+    show()

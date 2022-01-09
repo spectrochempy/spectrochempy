@@ -6,6 +6,7 @@ import pytest
 from pathlib import Path
 
 import spectrochempy as scp
+from spectrochempy.utils import show
 
 nmrdir = Path("nmrdata/bruker/tests/nmr")
 
@@ -47,7 +48,7 @@ def test_read_topspin():
     A = scp.read_topspin(directory=nmrdir)
     assert A.name == "topspin_2d expno:1 procno:1 (SER)"
 
-    # show()
+    show()
 
 
 def test_read_topspin_glob():

@@ -44,7 +44,7 @@ def test_MCRALS_no_coords():
 
     assert "converged !" in mcr2.logs[-15:]
 
-    # show()
+    show()
 
 
 def test_MCRALS():
@@ -83,7 +83,7 @@ def test_MCRALS():
 
     assert "converged !" in mcr2.logs[-15:]
 
-    # show()
+    show()
 
 
 # =============================================================================

@@ -67,7 +67,7 @@ def test_fit_single_dataset(IR_dataset_2D, script):
     f2.run(maxiter=1000, every=1)
 
     dataset2.plot(plot_model=True)
-    # show()
+    show()
 
 
 def test_fit_multiple_dataset(IR_dataset_2D, script):

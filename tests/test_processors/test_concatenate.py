@@ -6,6 +6,7 @@ from spectrochempy.core.processors.concatenate import concatenate, stack
 from spectrochempy.units import ur
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.utils.testing import assert_dataset_almost_equal
+from spectrochempy.utils import show
 
 
 def test_concatenate(IR_dataset_2D):
@@ -85,7 +86,7 @@ def test_concatenate(IR_dataset_2D):
     ss = concatenate(s0, s1, force_stack=True)
     assert ss.shape == (2, 5549)
 
-    # show()
+    show()
 
 
 def test_bug_243():

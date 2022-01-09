@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa
 
-
+from spectrochempy.utils import show
 from spectrochempy.core.analysis.efa import EFA
 from spectrochempy.utils import MASKED
 
@@ -25,4 +25,4 @@ def test_EFA(IR_dataset_2D):
     c = efa.get_conc(n_pc)
     c.T.plot()
 
-    # show()
+    show()

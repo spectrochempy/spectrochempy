@@ -57,4 +57,4 @@ def test_IRIS():
     f[0].plot(method="map", plottitle=True)
     X_hat[0].plot(plottitle=True)
 
-    # show()
+    show()
