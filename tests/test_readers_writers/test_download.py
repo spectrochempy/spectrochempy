@@ -13,9 +13,9 @@ from tests.test_readers_writers.main import _download_iris
 @pytest.fixture(scope="module")
 def iris_dataset():
     for p in pathlib.Path().cwd().parents:
-        if p.stem == "tests":
+        if p.stem == "spectrochempy":
             break
-    f = p / "data/iris_dataset.scp"
+    f = p / "tests/data/iris_dataset.scp"
     return scp.load(f)
 
 
