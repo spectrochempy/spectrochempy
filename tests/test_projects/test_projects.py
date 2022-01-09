@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-
-# ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
-# ======================================================================================================================
+# flake8: noqa
 
 from spectrochempy.core.project.project import Project
 from spectrochempy.core.scripts.script import Script, run_script

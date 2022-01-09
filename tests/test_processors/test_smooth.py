@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
+# flake8: noqa
 
-# ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
 
 import pytest
 
-from spectrochempy import show, np
+from spectrochempy import np
+
+# from spectrochempy.utils import show
 
 pytestmark = pytest.mark.skip("WIP with NMR data")
 
@@ -21,7 +20,7 @@ def test_smooth(NMR_dataset_1D):
     s = dataset.smooth()
     s.plot(clear=False, color="r", xlim=[20, -20])
 
-    show()
+    # show()
 
 
 def test_smooth_2D(IR_dataset_2D):
@@ -36,4 +35,4 @@ def test_smooth_2D(IR_dataset_2D):
     s2 = s.smooth(length=21, dim="y")
     (s2 - 0.25).plot(cmap="jet", clear=False, xlim=[4000, 3000])
 
-    show()
+    # show()

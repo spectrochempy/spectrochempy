@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
+# flake8: noqa
 
-# ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
 
 import os
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core import preferences, show
+from spectrochempy.core import preferences
+
+# from spectrochempy.utils import show
 from spectrochempy.core.plotters.multiplot import (
     multiplot,
     multiplot_map,
@@ -119,7 +118,7 @@ def test_multiplot():
         sharex=True,
     )
 
-    show()
+    # show()
 
 
 # ======================================================================================================================

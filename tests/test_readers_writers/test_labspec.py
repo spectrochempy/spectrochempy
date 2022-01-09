@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
+# flake8: noqa
 
-# ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
 
 from pathlib import Path
 
@@ -34,4 +31,4 @@ def test_read_labspec():
     B = scp.read_dir(directory=ramandir / "subdir")
     B.plot()
 
-    scp.show()
+    # show()

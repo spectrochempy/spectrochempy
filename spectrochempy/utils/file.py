@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory.
 # ======================================================================================================================
 """
 File utilities.
@@ -348,7 +348,6 @@ def get_filename(*filenames, **kwargs):
 
     from spectrochempy.core import preferences as prefs
     from spectrochempy import NO_DISPLAY, NO_DIALOG
-    from spectrochempy.core import open_dialog
 
     NODIAL = (
         NO_DIALOG or "DOC_BUILDING" in environ
@@ -441,6 +440,8 @@ def get_filename(*filenames, **kwargs):
             # we open a dialogue to select one or several files manually
             if not (NO_DISPLAY or NODIAL):
 
+                from spectrochempy.core import open_dialog
+
                 filenames = open_dialog(
                     single=False, directory=directory, filters=filetypes, **kwargs
                 )
@@ -455,6 +456,9 @@ def get_filename(*filenames, **kwargs):
         else:
 
             if not (NO_DISPLAY or NODIAL):
+
+                from spectrochempy.core import open_dialog
+
                 directory = open_dialog(
                     directory=directory, filters="directory", **kwargs
                 )
@@ -548,7 +552,6 @@ def readdirname(directory, **kwargs):
 
     from spectrochempy.core import preferences as prefs
     from spectrochempy import NO_DISPLAY, NO_DIALOG
-    from spectrochempy.core import open_dialog
 
     data_dir = pathclean(prefs.datadir)
     working_dir = Path.cwd()
@@ -578,6 +581,8 @@ def readdirname(directory, **kwargs):
         if (
             not NO_DISPLAY and not NO_DIALOG
         ):  # this is for allowing test to continue in the background
+            from spectrochempy.core import open_dialog
+
             directory = open_dialog(
                 single=False, directory=working_dir, filters="directory", **kwargs
             )
@@ -591,7 +596,6 @@ def check_filename_to_save(
 ):
 
     from spectrochempy import NO_DIALOG
-    from spectrochempy.core import save_dialog
 
     NODIAL = NO_DIALOG or "DOC_BUILDING" in environ
 
@@ -603,6 +607,9 @@ def check_filename_to_save(
             filename = filename + kwargs.get("suffix", ".scp")
 
         if not NODIAL and confirm:
+
+            from spectrochempy.core import save_dialog
+
             filename = save_dialog(
                 caption=kwargs.pop("caption", "Save as ..."),
                 filename=filename,

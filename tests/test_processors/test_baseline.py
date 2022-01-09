@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-
-# ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
-# ======================================================================================================================
+# flake8: noqa
 
 import os
 
@@ -11,7 +7,7 @@ import pytest
 
 # noinspection PyUnresolvedReferences
 import spectrochempy as scp
-from spectrochempy import show, BaselineCorrection, NDDataset, ur
+from spectrochempy import BaselineCorrection, NDDataset, ur
 from spectrochempy.utils.testing import (
     assert_dataset_almost_equal,
     assert_dataset_equal,
@@ -56,8 +52,6 @@ def test_basecor_sequential(IR_dataset_2D):
     assert_dataset_almost_equal(s1, s3, decimal=5)
     s3.plot(clear=False, color="cyan")
 
-    show()
-
     dataset = IR_dataset_2D[:15]
     basc = BaselineCorrection(dataset)
     s = basc(
@@ -72,7 +66,7 @@ def test_basecor_sequential(IR_dataset_2D):
     )
     s.plot(cmap="copper")
 
-    show()
+    # show()
 
 
 def test_basecor_multivariate(IR_dataset_2D):
@@ -105,7 +99,8 @@ def test_basecor_multivariate(IR_dataset_2D):
         interpolation="polynomial",
     )
     s.plot(cmap="copper")
-    show()
+
+    # show()
 
 
 def test_notebook_basecor_bug():
@@ -181,7 +176,6 @@ def test_issue_227():
         method="sequential"
     )
     blc.corrected.plot()
-    scp.show()
 
     # MS profiles, we want to make a baseline correction on the ion current vs. time axis:
     ms = scp.read("msdata/ion_currents.asc", timestamp=False)
@@ -194,7 +188,8 @@ def test_issue_227():
         method="sequential"
     )
     blc.corrected.T.plot()
-    scp.show()
+
+    # show()
 
 
 @pytest.mark.skip()
@@ -218,4 +213,4 @@ def test_ab_nmr(NMR_dataset_1D):
     transfab.plot(xlim=(150, -150), clear=False, color="b")
     base.plot(xlim=(150, -150), ylim=[-2, 10], clear=False, color="y")
 
-    show()
+    # show()

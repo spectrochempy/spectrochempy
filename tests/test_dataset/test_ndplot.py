@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
+# flake8: noqa
 
-# ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
+import pytest
 
+from spectrochempy import preferences, plt, os
 from spectrochempy.utils import show
 
 
@@ -13,7 +12,7 @@ def test_plot_generic_1D(IR_dataset_1D):
         dataset = IR_dataset_1D.copy()
         dataset.plot(method=method)
 
-    show()
+    # show()
 
 
 def test_plot_generic_2D(IR_dataset_2D):
@@ -21,4 +20,17 @@ def test_plot_generic_2D(IR_dataset_2D):
         dataset = IR_dataset_2D.copy()
         dataset.plot(method=method)
 
-    show()
+    # show()
+
+
+prefs = preferences
+
+styles = ["poster", "talk", "scpy", "sans", "serif", "grayscale", "notebook", "paper"]
+
+
+@pytest.mark.parametrize("style", styles)
+def test_styles(style):
+    try:
+        plt.style.use(style)
+    except OSError:
+        plt.style.use(os.path.join(prefs.stylesheets, style + ".mplstyle"))

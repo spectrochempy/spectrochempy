@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
+# flake8: noqa
 
-# ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
 
 from spectrochempy.core.analysis.efa import EFA
-from spectrochempy.utils import MASKED, show
+from spectrochempy.utils import MASKED
 
 
 def test_EFA(IR_dataset_2D):
@@ -28,4 +25,4 @@ def test_EFA(IR_dataset_2D):
     c = efa.get_conc(n_pc)
     c.T.plot()
 
-    show()
+    # show()

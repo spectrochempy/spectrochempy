@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
+# flake8: noqa
 
-# ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
 
 from pathlib import Path
 
@@ -33,7 +30,7 @@ def test_write():
     testing.assert_dataset_equal(nd2, nd)
     filename.unlink()
 
-    # if the filename is omitted, the a dialog is opened to select a name (and a protocol)
+    # if the filename is omitted, a dialog is opened to select a name (and a protocol)
     filename = nd.write()
     assert filename is not None
     assert filename.stem == nd.name

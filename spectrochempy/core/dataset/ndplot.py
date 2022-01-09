@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory.
 # ======================================================================================================================
 """
-This module defines the class |NDPlot| in which generic plot methods for a |NDDataset| are defined.
+This module defines the |NDPlot| class in which generic |NDDataset| plot methods are defined.
 """
 
 __all__ = ["NDPlot", "plot"]
@@ -350,21 +350,23 @@ class NDPlot(HasTraits):
     This class is used as basic plotting interface of the |NDDataset|.
     """
 
-    # variable containing the matplotlib axis defined for a NDArray object.
+    # Instance of the current matplotlib axis defined for a NDArray object.
+    # The _Axes class subclass matplotlib axes in order to allow methods with
+    # Quantities as arguments
     _ax = Instance(_Axes, allow_none=True)
 
     # The figure on which this NDArray can be plotted
     _fig = Union((Instance(plt.Figure), Instance(go.Figure)), allow_none=True)
 
-    # The axes on which this dataset and other elements such as projections
+    # A list of axes on which this dataset and other elements such as projections
     # and colorbar can be plotted
     _ndaxes = Dict(Instance(_Axes))
 
-    # add metadata to store plot parameters
+    # Metadata to store plot parameters
     _preferences = Instance(PreferencesSet, allow_none=True)
 
     # ------------------------------------------------------------------------
-    # generic plotter and plot related methods or properties
+    # Generic plotter and plot related methods or properties
     # ------------------------------------------------------------------------
     def plot(self, method=None, **kwargs):
         """
@@ -379,15 +381,46 @@ class NDPlot(HasTraits):
             Specify with plot method to use.
         **kwargs : dict, optional
             Any optional parameters to pass to the plot method.
+            See plot_1D, plot_2D and plot_3D for a  liste of possible arguments.
+
+        Returns
+        -------
+        axe
+            The axe instance on which the plot has bee performed.
+
+        See Also
+        --------
+        plot_1D
+        plot_pen
+        plot_bar
+        plot_scatter_pen
+        plot_multiple
+        plot_2D
+        plot_stack
+        plot_map
+        plot_image
+        plot_1D
+        plot_surface
+        plot_waterfall
+        multiplot
 
         Examples
         --------
 
+        For 1D data, the default plot is done with method scatter
+
         >>> nd = scp.NDDataset([1, 2, 3])
-        >>> _ = nd.plot()
+        >>> _ = nd.plot() # default to method="scatter"
 
         or
-        >>> _ = nd.plot(method='scatter')
+        >>> _ = nd.plot(method="scatter")
+
+        Equivalently, one can also specify the method to use as follow:
+        >>> _ = nd.plot_scatter()
+        >>> _ = nd.plot_1D()
+
+        For
+
         """
 
         # --------------------------------------------------------------------
@@ -532,15 +565,13 @@ class NDPlot(HasTraits):
 
         linestyles = ["-", "--", ":", "-."]
         markers = ["o", "s", "^"]
-        if ax is not None and (
-            kwargs.pop("scatter", False) or kwargs.pop("scatterpen", False)
-        ):
+        if ax is not None and "scatter" in method:
             ax.set_prop_cycle(
                 cycler("color", colors * len(linestyles) * len(markers))
                 + cycler("linestyle", linestyles * len(colors) * len(markers))
                 + cycler("marker", markers * len(colors) * len(linestyles))
             )
-        elif ax is not None and kwargs.pop("pen", False):
+        elif ax is not None and "scatter" not in method:
             ax.set_prop_cycle(
                 cycler("color", colors * len(linestyles))
                 + cycler("linestyle", linestyles * len(colors))
@@ -614,6 +645,8 @@ class NDPlot(HasTraits):
                 # plt.setp(axec.get_xticklabels(), visible=False)
                 axec.name = "colorbar"
                 self.ndaxes["colorbar"] = axec
+
+        return method
 
     # ------------------------------------------------------------------------
     # resume a figure plot

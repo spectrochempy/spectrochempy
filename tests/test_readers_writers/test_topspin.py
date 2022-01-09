@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
+# flake8: noqa
 
-# ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
 
 import pytest
 from pathlib import Path
@@ -50,7 +47,7 @@ def test_read_topspin():
     A = scp.read_topspin(directory=nmrdir)
     assert A.name == "topspin_2d expno:1 procno:1 (SER)"
 
-    scp.show()
+    # show()
 
 
 def test_read_topspin_glob():

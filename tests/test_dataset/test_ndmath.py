@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-
-# ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
-# ======================================================================================================================
+# flake8: noqa
 
 """
 Tests for the ndmath module
@@ -788,11 +784,9 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     nd2m = nd2.max("y")  # axis selected
     ax = nd2m.plot()
     nd2[0].plot(ax=ax, clear=False)
-    scp.show()
 
     nd2m2 = nd2.max("x")  # axis selected
     nd2m2.plot()
-    scp.show()
 
     nd2m = nd2.max("y", keepdims=True)
     assert nd2m.shape == (1, 5549)
@@ -808,11 +802,9 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     nd2m = nd2.min("y")  # axis selected
     ax = nd2m.plot()
     nd2[0].plot(ax=ax, clear=False)
-    scp.show()
 
     nd2m2 = nd2.min("x")  # axis selected
     nd2m2.plot()
-    scp.show()
 
     nd2m = nd2.min("y", keepdims=True)
     assert nd2m.shape == (1, 5549)

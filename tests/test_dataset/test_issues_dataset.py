@@ -1,8 +1,3 @@
-# ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
-
 import os
 
 import numpy as np
@@ -63,24 +58,20 @@ def test_fix_issue_186():
     da = scp.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
     da -= da.min()
     da.plot()
-    scp.show()
 
     dt = da.to("transmittance")
     dt.plot()
-    scp.show()
 
     dt.ito("absolute_transmittance")
     dt.plot()
-    scp.show()
 
     da = dt.to("absorbance")
     da.plot()
-    scp.show()
 
     dt.ito("transmittance")
     dt.plot()
-    scp.show()
 
     da = dt.to("absorbance")
     da.plot()
-    scp.show()
+
+    # show()

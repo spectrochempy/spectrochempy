@@ -1,28 +1,40 @@
 # -*- coding: utf-8 -*-
+# flake8: noqa
 
-# ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
 
-from spectrochempy import preferences, NDDataset, os, show
+from spectrochempy import NDDataset, os
+
+# from spectrochempy.utils import show
 
 # TODO: from spectrochempy.utils.testing import figures_dir, same_images
 
-prefs = preferences
+# https://stackoverflow.com/questions/27948126/how-can-i-write-unit-tests-against-code-that-uses-matplotlib
 
 
 # @pytest.mark.skip
-def test_1D():
-    dataset = NDDataset.read_omnic(
-        os.path.join(prefs.datadir, "irdata", "nh4y-activation.spg")
-    )
+def test_plot_1D():
 
-    # get first spectrum
-    nd0 = dataset[0]
+    dataset = NDDataset.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
 
-    # plot generic
+    # get first 1D spectrum
+    nd0 = dataset[0, 1550.0:1600.0]
+
+    # plot generic 1D
     nd0.plot()
+    nd0.plot_scatter(plottitle=True)
+    nd0.plot_scatter(marker="^", markevery=10, title="scatter+marker")
+    prefs = nd0.preferences
+    prefs.method_1D = "scatter+pen"
+
+    nd0.plot(title="xxxx")
+    prefs.method_1D = "pen"
+    nd0.plot(marker="o", markevery=10, title="with marker")
+
+    # plot 1D column
+    col = dataset[:, 3500.0]  # note the indexing using wavenumber!
+    _ = col.plot_scatter()
+
+    _ = col.plot_scatter(uselabel=True)
 
     # nd0.plot(output=os.path.join(figures_dir, 'IR_dataset_1D'),
     #          savedpi=150)
@@ -48,7 +60,7 @@ def test_1D():
     # nd0.plot_lines()
     # nd0[:, ::100].plot_bar()
     #
-    # show()
+    # # show()
     #
     # # multiple
     # d = dataset[:, ::100]
@@ -84,11 +96,7 @@ def test_1D():
     #     raise AssertionError('comparison fails')
     # os.remove('multiple_IR_dataset_1D_scatter.png')
 
-    # plot 1D column
-    col = dataset[:, 3500.0]  # note the indexing using wavenumber!
-    _ = col.plot_scatter()
-
-    show()
+    # show()
 
 
 # ======================================================================================================================

@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-
-# ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
+# flake8: noqa
 
 import os
 
@@ -61,4 +57,4 @@ def test_IRIS():
     f[0].plot(method="map", plottitle=True)
     X_hat[0].plot(plottitle=True)
 
-    show()
+    # show()

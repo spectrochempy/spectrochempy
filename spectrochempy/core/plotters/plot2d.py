@@ -106,7 +106,7 @@ def plot_image(dataset, **kwargs):
 
 
 @add_docstring(_PLOT2D_DOC)
-def plot_2D(dataset, method="stack", **kwargs):
+def plot_2D(dataset, method=None, **kwargs):
     """
     Plot of 2D array.
 
@@ -115,7 +115,9 @@ def plot_2D(dataset, method="stack", **kwargs):
     dataset : |NDDataset|
         The dataset to plot.
     method : ['stack', 'map', 'image'] , optional
-        The method of plot of the dataset, which will determine the plotter to use. Default is stack.
+        The method of plot of the dataset, which will determine the plotter to use.
+        Default method is given 'stack' but this can be changed using
+        ``dataset.preference.method_2D``.
     **kwargs : dic, optional
         Additional keywords parameters.
         See Other Parameters.
@@ -181,7 +183,7 @@ def plot_2D(dataset, method="stack", **kwargs):
 
     # Figure setup
     # ------------------------------------------------------------------------
-    new._figure_setup(ndim=2, method=method, **kwargs)
+    method = new._figure_setup(ndim=2, method=method, **kwargs)
 
     ax = new.ndaxes["main"]
     ax.name = ax.name + nameadd

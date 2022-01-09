@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-
-# ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
-# ======================================================================================================================
+# flake8: noqa
 
 import os
 
@@ -48,6 +44,8 @@ def test_MCRALS_no_coords():
 
     assert "converged !" in mcr2.logs[-15:]
 
+    # show()
+
 
 def test_MCRALS():
     data = NDDataset.read_matlab(
@@ -85,7 +83,7 @@ def test_MCRALS():
 
     assert "converged !" in mcr2.logs[-15:]
 
-    show()
+    # show()
 
 
 # =============================================================================

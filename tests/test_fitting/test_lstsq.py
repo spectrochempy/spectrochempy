@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
+# flake8: noqa
 
-# ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -32,7 +29,8 @@ def test_lstsq_from_scratch():
     dfit = lstsq.inverse_transform()
     plt.plot(t.data, dfit.data, ":r", label="Fitted line")
     plt.legend()
-    sc.show()
+
+    # show()
 
 
 # ............................................................................
@@ -56,8 +54,6 @@ def test_implicit_lstsq():
     d.plot_scatter(pen=False, markersize=10, mfc="r", mec="k")
     dfit = lstsq.inverse_transform()
     dfit.plot_pen(clear=False, color="g")
-
-    sc.show()
 
 
 def test_lstq_2D():

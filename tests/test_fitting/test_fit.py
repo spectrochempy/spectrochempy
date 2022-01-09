@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
-
-# ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
+# flake8: noqa
 
 import pytest
 
-from spectrochempy import Fit, show
+from spectrochempy import Fit
+from spectrochempy.utils import show
 from spectrochempy.utils.testing import assert_approx_equal
 
 
@@ -70,7 +67,7 @@ def test_fit_single_dataset(IR_dataset_2D, script):
     f2.run(maxiter=1000, every=1)
 
     dataset2.plot(plot_model=True)
-    show()
+    # show()
 
 
 def test_fit_multiple_dataset(IR_dataset_2D, script):

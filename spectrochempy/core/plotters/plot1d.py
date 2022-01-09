@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
 
-#
-# =============================================================================
-# Copyright (©) 2015-2022 LCS
-# Laboratoire Catalyse et Spectrochimie, Caen, France.
-#
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
-# See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
+#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory.
+# ======================================================================================================================
 """
 Module containing 1D plotting function(s).
 """
@@ -43,58 +39,69 @@ from spectrochempy.core.dataset.coord import Coord
 
 
 _PLOT1D_DOC = """\
-widget : Matplotlib or PyQtGraph widget (for GUI only)
-    The widget where to plot in the GUI application. This is not used if
-    plots are made in jupyter notebook.
+ax : Axe, optional
+    Axe where to plot. If not specified, create a new one.
+style : str, optional, default: `dataset.preferences.style` (scpy)
+    Matplotlib stylesheet (use `available_style` to get a list of available
+    styles for plotting.
+use_plotly : bool, optional, default: `preferences.use_plotly` (False)
+    Should we use plotly instead of matplotlib for plotting.
 twinx : :class:`~matplotlib.Axes` instance, optional, default: None
     If this is not None, then a twin axes will be created with a
     common x dimension.
-title : str
-    Title of the plot (or subplot) axe.
-style : str, optional, default='notebook'
-    Matplotlib stylesheet (use `available_style` to get a list of available
-    styles for plotting.
+clear : bool, optional, default: True
+    If false, hold the current figure and ax until a new plot is performed.
 reverse : bool or None [optional, default=None/False
     In principle, coordinates run from left to right,
     except for wavenumbers
     (*e.g.*, FTIR spectra) or ppm (*e.g.*, NMR), that spectrochempy
     will try to guess. But if reverse is set, then this is the
     setting which will be taken into account.
-clear : bool, optional, default: True
-    If false, hold the current figure and ax until a new plot is performed.
 data_only : bool, optional, default: False
     Only the plot is done. No addition of axes or label specifications.
 imag : bool, optional, default: False
-    Show imaginary component. By default only the real component is
+    Show imaginary component for complex data. By default the real component is
     displayed.
 show_complex : bool, optional, default: False
-    Show both real and imaginary component.
+    Show both real and imaginary component for complex data.
     By default only the real component is displayed.
-dpi : int, optional
-    the number of pixel per inches.
 figsize : tuple, optional, default is (3.4, 1.7)
     figure size.
-fontsize : int, optional
-    font size in pixels, default is 10.
-imag : bool, optional, default False
-    By default real component is shown.
-    Set to True to display the imaginary component
+dpi : int, optional
+    the number of pixel per inches.
 xlim : tuple, optional
     limit on the horizontal axis.
 zlim or ylim : tuple, optional
     limit on the vertical axis.
-color or c : matplotlib valid color, optional
-    color of the line.  # TODO : a list if several line
-linewidth or lw : float, optional
+color or c : color, optional, default: auto
+    color of the line.
+linewidth or lw : float, optional, default: auto
     line width.
-linestyle or ls : str, optional
+linestyle or ls : str, optional, default: auto
     line style definition.
+marker, m: str, optional, default: auto
+    marker type for scatter plot. If marker != "" then the scatter type of plot is chosen automatically.
+markeredgecolor or mec: color, optional
+markeredgewidth or mew: float, optional
+markerfacecolor or mfc: color, optional
+markersize or ms: float, optional
+markevery: None or int
+title : str
+    Title of the plot (or subplot) axe.
+plottitle: bool, optional, default: False
+    Use the name of the dataset as title. Works only if title is not defined
 xlabel : str, optional
     label on the horizontal axis.
 zlabel or ylabel : str, optional
     label on the vertical axis.
-showz : bool, optional, default=True
+uselabel_x: bool, optional
+    use x coordinate label as x tick labels
+show_z : bool, optional, default: True
     should we show the vertical axis.
+show_zero : bool, optional
+    show the zero basis.
+show_mask: bool, optional
+    Should we display the mask using colored area.
 plot_model : Bool,
     plot model data if available.
 modellinestyle or modls : str
@@ -103,8 +110,6 @@ offset : float
     offset of the model individual lines.
 commands : str,
     matplotlib commands to be executed.
-show_zero : boolean, optional
-    show the zero basis.
 output : str,
     name of the file to save the figure.
 vshift : float, optional
@@ -119,10 +124,6 @@ def plot_scatter(dataset, **kwargs):
 
     Alias of plot (with `method` argument set to ``scatter``.
     """
-    if kwargs.get("use_plotly", False):
-        return dataset.plotly(**kwargs)  # pragma: no cover
-    else:
-        return plot_1D(dataset, method="scatter", **kwargs)
 
 
 @plot_method("1D", _PLOT1D_DOC)
@@ -132,10 +133,6 @@ def plot_pen(dataset, **kwargs):
 
     Alias of plot (with `method` argument set to ``pen``.
     """
-    if kwargs.get("use_plotly", False):
-        return dataset.plotly(**kwargs)  # pragma: no cover
-    else:
-        return plot_1D(dataset, method="pen", **kwargs)
 
 
 @plot_method("1D", _PLOT1D_DOC)
@@ -145,10 +142,6 @@ def plot_scatter_pen(dataset, **kwargs):
 
     Alias of plot (with `method` argument set to ``scatter_pen``.
     """
-    if kwargs.get("use_plotly", False):
-        return dataset.plotly(**kwargs)  # pragma: no cover
-    else:
-        return plot_1D(dataset, method="scatter+pen", **kwargs)
 
 
 @plot_method("1D", _PLOT1D_DOC)
@@ -158,10 +151,6 @@ def plot_bar(dataset, **kwargs):
 
     Alias of plot (with `method` argument set to ``bar``.
     """
-    if kwargs.get("use_plotly", False):
-        return dataset.plotly(**kwargs)  # pragma: no cover
-    else:
-        return plot_1D(dataset, method="bar", **kwargs)
 
 
 def plot_multiple(datasets, method="scatter", pen=True, labels=None, **kwargs):
@@ -264,7 +253,7 @@ def plot_multiple(datasets, method="scatter", pen=True, labels=None, **kwargs):
 
 
 @add_docstring(_PLOT1D_DOC)
-def plot_1D(dataset, method="pen", **kwargs):
+def plot_1D(dataset, method=None, **kwargs):
     """
     Plot of one-dimensional data.
 
@@ -272,11 +261,13 @@ def plot_1D(dataset, method="pen", **kwargs):
     ----------
     dataset : :class:`~spectrochempy.ddataset.nddataset.NDDataset`
         Source of data to plot.
-    method : str, optional, default: pen
-        The method can be one among ``pen``, ``bar``,  or ``scatter``
-        Default values is ``pen``, i.e., solid lines are drawn.
-        To draw a Bar graph, use method : ``bar``.
-        For a Scatter plot, use method : ``scatter``.
+    method : str, optional, default: dataset.preference.method_1D
+        The method can be one among ``pen``, ``bar``, ``scatter`` or ``scatter+pen``.
+        Default values is ``pen``, i.e., solid lines are drawn. This default can be changed
+        using ``dataset.preference.method_1D``.
+        To draw a Bar graph, use method ``bar``.
+        For a Scatter plot, use method ``scatter``.
+        For pen and scatter simultaneously, use method ``scatter+pen``.
     **kwargs : dict
         See other parameters.
 
@@ -317,19 +308,6 @@ def plot_1D(dataset, method="pen", **kwargs):
     if kwargs.get("use_plotly", prefs.use_plotly):
         return dataset.plotly(**kwargs)
 
-    # Method of plot
-    # ------------------------------------------------------------------------
-
-    # some addtional options may exists in kwargs
-    pen = kwargs.pop("pen", False)  # lines and pen synonyms
-    scatter = kwargs.pop("scatter", False)
-
-    # final choice of method
-    pen = (method == "pen") or pen
-    scatter = (method == "scatter" and not pen) or scatter
-    scatterpen = ((method == "scatter" or scatter) and pen) or (method == "scatter+pen")
-    bar = method == "bar"
-
     # often we do need to plot only data
     # when plotting on top of a previous plot
     # data_only = kwargs.get("data_only", False)
@@ -353,20 +331,22 @@ def plot_1D(dataset, method="pen", **kwargs):
     color = kwargs.get("color", kwargs.get("c", "auto"))
     lw = kwargs.get("linewidth", kwargs.get("lw", "auto"))
     ls = kwargs.get("linestyle", kwargs.get("ls", "auto"))
+
     marker = kwargs.get("marker", kwargs.get("m", "auto"))
     markersize = kwargs.get("markersize", kwargs.get("ms", prefs.lines_markersize))
     markevery = kwargs.get("markevery", kwargs.get("me", 1))
     markerfacecolor = kwargs.get("markerfacecolor", kwargs.get("mfc", "auto"))
     markeredgecolor = kwargs.get("markeredgecolor", kwargs.get("mec", "k"))
 
-    # Figure setup  #
+    # Figure setup
     # ------------------------------------------------------------------------
-    new._figure_setup(ndim=1, scatter=scatter, scatterpen=scatterpen, **kwargs)
+    method = new._figure_setup(ndim=1, method=method, **kwargs)
+
+    pen = "pen" in method
+    scatter = "scatter" in method or marker
+    bar = "bar" in method
 
     ax = new.ndaxes["main"]
-
-    # If no method parameters was provided when this function was called,
-    # we first look in the meta parameters of the dataset for the defaults
 
     # Other ax properties that can be passed as arguments
     # ------------------------------------------------------------------------
@@ -439,8 +419,7 @@ def plot_1D(dataset, method="pen", **kwargs):
     # plot_lines
     # ------------------------------------------------------------------------
     label = kwargs.get("label", None)
-    if scatterpen:
-        # pen + scatter
+    if scatter and pen:
         (line,) = ax.plot(
             xdata,
             zdata.T,  # marker = marker,
@@ -452,7 +431,6 @@ def plot_1D(dataset, method="pen", **kwargs):
             label=label,
         )
     elif scatter:
-        # scatter only
         (line,) = ax.plot(
             xdata,
             zdata.T,
@@ -465,7 +443,6 @@ def plot_1D(dataset, method="pen", **kwargs):
             label=label,
         )
     elif pen:
-        # pen only
         (line,) = ax.plot(xdata, zdata.T, marker="", label=label)
 
     elif bar:
@@ -482,7 +459,7 @@ def plot_1D(dataset, method="pen", **kwargs):
         raise ValueError("label not valid")
 
     if show_complex and pen:
-        # add the imaginaly component for pen only plot
+        # add the imaginary component for pen only plot
         if new.is_quaternion:
             zimagdata = new.RI.masked_data
         else:
@@ -496,19 +473,19 @@ def plot_1D(dataset, method="pen", **kwargs):
         )  # TODO: improve this!!!
 
     # line attributes
-    if (pen or scatterpen) and not (isinstance(color, str) and color.upper() == "AUTO"):
+    if pen and not (isinstance(color, str) and color.upper() == "AUTO"):
         # set the color if defined in the preferences or options
         line.set_color(color)
 
-    if (pen or scatterpen) and not (isinstance(lw, str) and lw.upper() == "AUTO"):
+    if pen and not (isinstance(lw, str) and lw.upper() == "AUTO"):
         # set the line width if defined in the preferences or options
         line.set_linewidth(lw)
 
-    if (pen or scatterpen) and ls.upper() != "AUTO":
+    if pen and ls.upper() != "AUTO":
         # set the line style if defined in the preferences or options
         line.set_linestyle(ls)
 
-    if (scatter or scatterpen) and marker.upper() != "AUTO":
+    if scatter and marker.upper() != "AUTO":
         # set the line style if defined in the preferences or options
         line.set_marker(marker)
 
@@ -594,20 +571,20 @@ def plot_1D(dataset, method="pen", **kwargs):
 
     # x tick labels
 
-    uselabelx = kwargs.get("uselabel_x", False)
-    if (
-        x
-        and x.is_labeled
-        and (uselabelx or not np.any(x.data))
-        and len(x.labels) < number_x_labels + 1
-    ):
-        # TODO refine this to use different orders of labels
-        ax.set_xticks(xdata)
-        ax.set_xticklabels(x.labels)
+    uselabel = kwargs.get("uselabel", False)
+    if x and x.is_labeled and (uselabel or not np.any(x.data)):
+
+        if x.data is not None:
+            xt = ax.get_xticks()
+            ticklabels = x.labels[x._loc2index(xt), 0]
+            ax.set_xticks(ax.get_xticks(), labels=ticklabels, rotation=90.0)
+        else:
+            ax.set_xticks(xdata)
+            ax.set_xticklabels(x.labels)
 
     # z label
 
-    zlabel = kwargs.get("zlabel", None)
+    zlabel = kwargs.get("zlabel", kwargs.get("ylabel", None))
     if not zlabel:
         zlabel = make_label(new, "z")
 

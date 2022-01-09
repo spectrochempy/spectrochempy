@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-
-# ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
+# flake8: noqa
 
 
 import os
@@ -14,7 +10,8 @@ import pytest
 from spectrochempy.core import preferences as prefs
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.units import ur
-from spectrochempy.utils import show
+
+# from spectrochempy.utils import show
 from spectrochempy.utils.testing import (
     assert_equal,
     assert_array_equal,
@@ -55,6 +52,8 @@ def test_nmr_1D_show(NMR_dataset_1D):
     dataset = NMR_dataset_1D.copy()
     dataset.plot()
 
+    # show()
+
 
 def test_nmr_1D_show_complex(NMR_dataset_1D):
     dataset = NMR_dataset_1D.copy()
@@ -65,7 +64,7 @@ def test_nmr_1D_show_complex(NMR_dataset_1D):
     dataset.plot(
         show_complex=True, color="green", xlim=(0.0, 30000.0), zlim=(-200.0, 200.0)
     )
-    show()
+    # show()
 
 
 # apodization
@@ -118,7 +117,8 @@ def test_nmr_1D_apodization(NMR_dataset_1D):
     dataset, apod = dataset.gm(lb=-100.0 * ur.Hz, gb=100.0 * ur.Hz, retapod=True)
     dataset.plot(c="b", data_only=True, clear=False)
     apod.plot(c="r", data_only=True, clear=False)
-    show()
+
+    # show()
 
 
 # FFT
@@ -133,7 +133,7 @@ def test_nmr_fft_1D(NMR_dataset_1D):
     new2 = new.ifft()
     dataset1D.plot()
     (new2 - 1.0).plot(color="r", clear=False)
-    show()
+    # show()
 
 
 def test_nmr_fft_1D_our_Hz(NMR_dataset_1D):
@@ -144,7 +144,7 @@ def test_nmr_fft_1D_our_Hz(NMR_dataset_1D):
     dataset1D.gm(gb=GB, lb=LB)
     new = dataset1D.fft(size=32000, ppm=False)
     new.plot(xlim=[5000, -5000])
-    show()
+    # show()
 
 
 def test_nmr_manual_1D_phasing(NMR_dataset_1D):
@@ -173,7 +173,7 @@ def test_nmr_manual_1D_phasing(NMR_dataset_1D):
     transfph4 = transf.pk(pivot=100, verbose=True, inplace=True)
     (transfph4 - 10).plot(xlim=(20, -20), clear=False, color="r")
 
-    show()
+    # show()
 
 
 def test_nmr_auto_1D_phasing():
@@ -205,7 +205,7 @@ def test_nmr_auto_1D_phasing():
     transfph4 = transfph6.apk(algorithm="acme", verbose=True)
     (transfph4 - 6).plot(xlim=(20, -20), clear=False, color="b")
 
-    show()
+    # show()
 
 
 def test_nmr_multiple_manual_1D_phasing():
@@ -227,7 +227,7 @@ def test_nmr_multiple_manual_1D_phasing():
     transfph3 = transf.pk(52.43836, -16.8366, verbose=True)
     transfph3.plot(xlim=(20, -20), clear=False, color="b")
 
-    show()
+    # show()
 
 
 def test_nmr_multiple_auto_1D_phasing():
@@ -250,7 +250,7 @@ def test_nmr_multiple_auto_1D_phasing():
     t3 = t2.apk(algorithm="acme", verbose=True)
     (t3 - 15).plot(xlim=(20, -20), clear=False, color="r")
 
-    show()
+    # show()
 
 
 # #### 2D NMR ########
@@ -275,7 +275,7 @@ def test_nmr_2D_imag(NMR_dataset_2D):
     # plt.ion()
     dataset = NMR_dataset_2D.copy()
     dataset.plot(imag=True)
-    show()
+    # show()
     pass
 
 
@@ -285,7 +285,7 @@ def test_nmr_2D_imag_compare(NMR_dataset_2D):
     dataset.plot()
     dataset.plot(imag=True, cmap="jet", data_only=True, alpha=0.3, clear=False)
     # better not to replot a second colorbar
-    show()
+    # show()
     pass
 
 
@@ -293,7 +293,7 @@ def test_nmr_2D_hold(NMR_dataset_2D):
     dataset = NMR_dataset_2D
     dataset.plot()
     dataset.imag.plot(cmap="jet", data_only=True, clear=False)
-    show()
+    # show()
     pass
 
 
@@ -317,7 +317,7 @@ def test_nmr_2D_em_x(NMR_dataset_2D):
     assert dataset.shape == (96, 948)
     dataset.plot_map(cmap="copper", data_only=True, clear=False)  # em on dim=x
 
-    show()
+    # show()
     pass
 
 
@@ -338,11 +338,11 @@ def test_nmr_2D_em_y(NMR_dataset_2D):
     assert dataset.shape == (96, 948)
     dataset.plot_map(cmap="copper", data_only=True, clear=False)  # em on dim=x
 
-    show()
+    # show()
 
 
 def test_nmr_2D(NMR_dataset_2D):
     dataset = NMR_dataset_2D
     dataset.plot(nlevels=20)  # , start=0.15)
-    show()
+    # show()
     pass

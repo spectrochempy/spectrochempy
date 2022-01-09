@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
+# flake8: noqa
 
-# ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
+
 """
 Tests for the ndplugin module.
 
@@ -11,7 +9,7 @@ Tests for the ndplugin module.
 
 import numpy as np
 
-from spectrochempy import show
+# from spectrochempy import show
 from spectrochempy.core.processors.autosub import autosub
 
 
@@ -65,4 +63,4 @@ def test_autosub(IR_dataset_2D):
     # s6 = s5.autosub(ref2, *ranges2, dim='y', method='varfit', inplace=False)
     # s6.plot()
 
-    show()
+    # show()

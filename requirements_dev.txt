@@ -31,6 +31,7 @@ nodejs
 pytest
 pytest-doctestplus
 pytest-flake8
+pytest-mock
 scikit-image
 coverage
 black

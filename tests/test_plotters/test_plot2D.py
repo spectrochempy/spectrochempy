@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
+# flake8: noqa
 
-# ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
 
 from spectrochempy import NDDataset, show, preferences as prefs
 
@@ -26,8 +23,8 @@ def test_plot2D():
     prefs.axes.grid = True
     A.plot()
     A.plot(style=["sans", "paper", "grayscale"], colorbar=False)
-    show()
-    pass
+
+    # show()
 
 
 def test_plotly2D():

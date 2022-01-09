@@ -8,7 +8,7 @@
 In this module, methods are provided to download external datasets
 from public database.
 """
-__all__ = ["download_IRIS"]
+__all__ = ["download_iris"]
 __dataset_methods__ = __all__
 
 from io import StringIO
@@ -22,17 +22,17 @@ from spectrochempy.core import error_
 
 
 # ..............................................................................
-def download_IRIS():
+def download_iris():
     """
-    Upload the classical IRIS dataset.
+    Upload the classical `IRIS` dataset.
 
-    The IRIS dataset is a classical example for machine learning.It is downloaded from
+    The `IRIS` dataset is a classical example for machine learning.It is downloaded from
     the [UCI distant repository](https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data)
 
     Returns
     -------
     downloaded
-        The IRIS dataset.
+        The `IRIS` dataset.
 
     See Also
     --------
@@ -42,7 +42,7 @@ def download_IRIS():
     --------
     Upload a dataset form a distant server
 
-    >>> dataset = scp.download_IRIS()
+    >>> dataset = scp.download_iris()
     """
     url = "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data"
 
@@ -77,7 +77,7 @@ def download_IRIS():
             data,
             coordset=[coordy, coordx],
             title="size",
-            name="IRIS Dataset",
+            name="`IRIS` Dataset",
             units="cm",
         )
 
@@ -87,11 +87,11 @@ def download_IRIS():
 
     else:
         # Cannot download - use the scikit-learn dataset (if scikit-learn is installed)
-
+        raise Exception()
         try:
             from sklearn import datasets
         except ImportError:
-            raise IOError("Failed in uploading the IRIS dataset!")
+            raise IOError("Failed in uploading the `IRIS` dataset!")
 
         # import some data to play with
         data = datasets.load_iris()
@@ -107,7 +107,7 @@ def download_IRIS():
             data.data,
             coordset=[coordy, coordx],
             title="size",
-            name="IRIS Dataset",
+            name="`IRIS` Dataset",
             units="cm",
         )
 

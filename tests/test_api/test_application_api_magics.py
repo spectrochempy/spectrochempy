@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
+# flake8: noqa
 
 from subprocess import Popen, PIPE
 
-# ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
+
 import pytest
 
 from spectrochempy import APIref, set_loglevel, get_loglevel, warning_, version

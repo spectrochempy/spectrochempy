@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory.
 # ======================================================================================================================
 import textwrap
 
@@ -315,7 +315,8 @@ def plot_method(type, doc):
             if dataset.ndim < 2:
                 from spectrochempy.core.plotters.plot1d import plot_1D
 
-                return plot_1D(dataset, *args, **kwargs)
+                _ = kwargs.pop("method", None)
+                return plot_1D(dataset, *args, method=method, **kwargs)
 
             if kwargs.get("use_plotly", False):
                 return dataset.plotly(method=method, **kwargs)
@@ -348,6 +349,7 @@ plot_2D
 plot_stack
 plot_map
 plot_image
+plot_3D
 plot_surface
 plot_waterfall
 multiplot

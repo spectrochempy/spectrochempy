@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
+# flake8: noqa
 
-# ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
 
 from spectrochempy import ur, set_nmr_context, Quantity
 
@@ -71,4 +68,4 @@ def test_unit_dimensionality():
 #     ax.set_xlabel('xxx ({})'.format(ax.get_xlabel()))
 #     assert ax.get_xlabel() == 'xxx (second)'
 #
-#     show()
+#     # show()
