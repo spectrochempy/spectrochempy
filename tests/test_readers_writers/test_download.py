@@ -3,6 +3,7 @@
 
 
 import pytest
+import pathlib
 
 import spectrochempy as scp
 
@@ -11,10 +12,14 @@ from tests.test_readers_writers.main import _download_iris
 
 @pytest.fixture(scope="module")
 def iris_dataset():
-    return scp.load("../data/iris_dataset.scp")
+    for p in pathlib.Path().cwd().parents:
+        if p.stem == "tests":
+            break
+    f = p / "data/iris_dataset.scp"
+    return scp.load(f)
 
 
-@pytest.skip("mocking is much faster")
+@pytest.mark.skip("mocking is much faster")
 def test_download_iris(iris_dataset):
 
     actual = _download_iris()
