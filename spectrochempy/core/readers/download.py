@@ -87,7 +87,7 @@ def download_iris():
 
     else:
         # Cannot download - use the scikit-learn dataset (if scikit-learn is installed)
-        raise Exception()
+
         try:
             from sklearn import datasets
         except ImportError:
