@@ -613,6 +613,8 @@ def save_dialog(
         parent = kwargs.pop(
             "Qt_parent", None
         )  # in case this is launched from spectrochempy_gui
+
+        _ = pyqt.QApplication([])
         f = _QTFileDialogs._save_filename(
             parent=parent,
             filename=filename,
@@ -640,6 +642,7 @@ def open_dialog(
         parent = kwargs.pop(
             "Qt_parent", None
         )  # in case this is launched from spectrochempy_gui
+
         _ = pyqt.QApplication([])
         klass = _QTFileDialogs
     else:
