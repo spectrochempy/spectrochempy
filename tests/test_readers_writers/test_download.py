@@ -7,15 +7,16 @@ import pathlib
 
 import spectrochempy as scp
 
-from tests.test_readers_writers.main import _download_iris
+from tests.test_readers_writers.main import _download_iris, get_path, save_iris_dataset
 
 
 @pytest.fixture(scope="module")
 def iris_dataset():
-    for p in pathlib.Path().cwd().parents:
-        if p.stem == "spectrochempy":
-            break
-    f = p / "tests/data/iris_dataset.scp"
+    path = get_path()
+    f = path / "tests/data/iris_dataset.scp"
+    if not f.exists():
+        print(f"file {f} not found- create one")
+        save_iris_dataset(f)
     return scp.load(f)
 
 

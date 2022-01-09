@@ -19,9 +19,9 @@ import sys
 # Upload a dataset form a distant server
 
 try:
-    dataset = scp.download_IRIS()
+    dataset = scp.download_iris()
 except (IOError, OSError):
-    print("Could not load The IRIS dataset. Finishing here.")
+    print("Could not load The `IRIS` dataset. Finishing here.")
     sys.exit(0)
 
 ##############################################################

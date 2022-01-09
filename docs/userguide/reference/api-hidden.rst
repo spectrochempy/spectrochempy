@@ -330,7 +330,7 @@
    core.readers
    core.readers.api
    core.readers.download
-   core.readers.download.download_IRIS
+   core.readers.download.download_iris
    core.readers.importer
    core.readers.importer.read
    core.readers.readcsv
@@ -505,7 +505,7 @@
    NDDataset.dims
    NDDataset.directory
    NDDataset.divider
-   NDDataset.download_IRIS
+   NDDataset.download_iris
    NDDataset.dtype
    NDDataset.dump
    NDDataset.em
