@@ -23,6 +23,7 @@ def save_iris_dataset():
     ds = _download_iris()
 
     path = get_path()
+    path.mkdir(parents=True, exist_ok=True)
     ds.save_as(path / "tests/data/iris_dataset.scp", confirm=False)
 
 
