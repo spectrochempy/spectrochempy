@@ -1,9 +1,30 @@
 # What's new
 
-## Version 0.2.18rc2
+## Version 0.2.22
+
+
+
+## Version 0.2.21
 
 **NEW FEATURES**
 
+Indexing or slicing a NDArray with quantities is now possible.
+
+MatPlotLib Axes are subclassed in order to accept quantities for method arguments.
+
+**BUGS FIXED**
+
+FIX: NDArray constructor now accept a homogeneous list of quantities as data input. Units are set accordingly.
+
+FIX: Qt Dialogs. This is related to issue #198, as tk dialogs can be replaced by Qt when working with a terminal.
+
+FIX: Custom exception.
+
+FIX: Qt Dialogs. This is related to issue #198, as tk dialogs can be replaced by Qt when working with a terminal.
+
+FIX: Doc display problems.
+
+## Version 0.2.18
 
 **NEW TASKS**
 
