@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-
-# ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
+# flake8: noqa
 
 
 import os
@@ -14,6 +10,7 @@ import pytest
 from spectrochempy.core import preferences as prefs
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.units import ur
+
 from spectrochempy.utils import show
 from spectrochempy.utils.testing import (
     assert_equal,
@@ -54,6 +51,8 @@ def test_nmr_1D_show(NMR_dataset_1D):
 
     dataset = NMR_dataset_1D.copy()
     dataset.plot()
+
+    show()
 
 
 def test_nmr_1D_show_complex(NMR_dataset_1D):
@@ -118,6 +117,7 @@ def test_nmr_1D_apodization(NMR_dataset_1D):
     dataset, apod = dataset.gm(lb=-100.0 * ur.Hz, gb=100.0 * ur.Hz, retapod=True)
     dataset.plot(c="b", data_only=True, clear=False)
     apod.plot(c="r", data_only=True, clear=False)
+
     show()
 
 

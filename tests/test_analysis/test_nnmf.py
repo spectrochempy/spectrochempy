@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
+# flake8: noqa
 
-#  =====================================================================================================================
-#  Copyright (©) 2015-202 - Laboratoire Catalyse et Spectrochimie, Caen, France.
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
-#  =====================================================================================================================
-#
 import numpy as np
 import spectrochempy as scp
 from spectrochempy.utils.testing import assert_array_almost_equal

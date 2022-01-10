@@ -16,8 +16,6 @@ __all__ = [
     "plot_map",
     "plot_stack",
     "plot_image",
-    "plot_surface",
-    "plot_waterfall",
 ]
 
 __dataset_methods__ = __all__
@@ -29,10 +27,10 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 
-from spectrochempy.utils import make_label, add_docstring
+from spectrochempy.utils import make_label, add_docstring, plot_method
 from spectrochempy.core.dataset.coord import LinearCoord
 
-_PLOT2D_DOC = """\
+_PLOT2D_DOC = """
 ax : |Axes| instance. Optional
     The axe where to plot. The default is the current axe or to create a new one if is None.
 clear : bool, optional, default=`True`
@@ -80,216 +78,35 @@ x_reverse : `bool` or None [optional, default=None
 # ======================================================================================================================
 
 
-# contour map (default) -------------------------------------------------------
+@plot_method("2D", _PLOT2D_DOC)
+def plot_stack(dataset, **kwargs):
+    """
+    Plot a 2D dataset as a stack plot.
+
+    Alias of plot_2D (with `method` argument set to ``stack``).
+    """
 
 
-@add_docstring(_PLOT2D_DOC)
+@plot_method("2D", _PLOT2D_DOC)
 def plot_map(dataset, **kwargs):
     """
     Plot a 2D dataset as a contoured map.
 
     Alias of plot_2D (with `method` argument set to ``map``.
-
-    Parameters
-    ----------
-    dataset : |NDDataset|
-        The dataset to plot.
-    **kwargs : dic, optional
-        Additional keywords parameters.
-        See Other Parameters.
-
-    Other Parameters
-    ----------------
-    {0}
-
-    See Also
-    --------
-    plot_2D
-    plot_stack
-    plot_image
-    plot_surface
-    plot_waterfall
     """
-    if dataset.ndim < 2:
-        from spectrochempy.core.plotters.plot1d import plot_1D
-
-        return plot_1D(dataset, **kwargs)
-
-    if kwargs.get("use_plotly", False):
-        return dataset.plotly(**kwargs)
-    else:
-        return plot_2D(dataset, method="map", **kwargs)
 
 
-# stack plot  -----------------------------------------------------------------
-
-
-@add_docstring(_PLOT2D_DOC)
-def plot_stack(dataset, **kwargs):
-    """
-    Plot a 2D dataset as a stacked plot.
-
-    Alias of plot_2D (with `method` argument set to ``stack``).
-
-    Parameters
-    ----------
-    dataset : |NDDataset|
-        The dataset to plot.
-    **kwargs : dic, optional
-        Additional keywords parameters.
-        See Other Parameters.
-
-    Other Parameters
-    ----------------
-    {0}
-
-    See Also
-    --------
-    plot_map
-    plot_2D
-    plot_image
-    plot_surface
-    plot_waterfall
-    """
-    if dataset.ndim < 2:
-        from spectrochempy.core.plotters.plot1d import plot_1D
-
-        return plot_1D(dataset, **kwargs)
-
-    if kwargs.get("use_plotly", False):
-        return dataset.plotly(**kwargs)
-    else:
-        return plot_2D(dataset, method="stack", **kwargs)
-
-
-# image plot --------------------------------------------------------
-
-
-@add_docstring(_PLOT2D_DOC)
+@plot_method("2D", _PLOT2D_DOC)
 def plot_image(dataset, **kwargs):
     """
     Plot a 2D dataset as an image plot.
 
     Alias of plot_2D (with `method` argument set to ``image``).
-
-    Parameters
-    ----------
-    dataset : |NDDataset|
-        The dataset to plot.
-    **kwargs : dic, optional
-        Additional keywords parameters.
-        See Other Parameters.
-
-    Other Parameters
-    ----------------
-    {0}
-
-    See Also
-    --------
-    plot_map
-    plot_stack
-    plot_2D
-    plot_surface
-    plot_waterfall
     """
-    if dataset.ndim < 2:
-        from spectrochempy.core.plotters.plot1d import plot_1D
-
-        return plot_1D(dataset, **kwargs)
-
-    if kwargs.get("use_plotly", False):
-        return dataset.plotly(**kwargs)
-    else:
-        return plot_2D(dataset, method="image", **kwargs)
-
-
-# surface plot -----------------------------------------------------------------
 
 
 @add_docstring(_PLOT2D_DOC)
-def plot_surface(dataset, **kwargs):
-    """
-    Plot a 2D dataset as a a 3D-surface.
-
-    Alias of plot_2D (with `method` argument set to ``surface``.
-
-    Parameters
-    ----------
-    dataset : |NDDataset|
-        The dataset to plot.
-    **kwargs : dic, optional
-        Additional keywords parameters.
-        See Other Parameters.
-
-    Other Parameters
-    ----------------
-    {0}
-
-    See Also
-    --------
-    plot_map
-    plot_stack
-    plot_image
-    plot_2D
-    plot_waterfall
-    """
-    if dataset.ndim < 2:
-        from spectrochempy.core.plotters.plot1d import plot_1D
-
-        return plot_1D(dataset, **kwargs)
-
-    if kwargs.get("use_plotly", False):
-        return dataset.plotly(**kwargs)
-    else:
-        return plot_2D(dataset, method="surface", **kwargs)
-
-
-# waterfall plot -----------------------------------------------------------------
-
-
-@add_docstring(_PLOT2D_DOC)
-def plot_waterfall(dataset, **kwargs):
-    """
-    Plot a 2D dataset as a a 3D-waterfall plot.
-
-    Alias of plot_2D (with `method` argument set to ``waterfall``.
-
-    Parameters
-    ----------
-    dataset : |NDDataset|
-        The dataset to plot.
-    **kwargs : dic, optional
-        Additional keywords parameters.
-        See Other Parameters.
-
-    Other Parameters
-    ----------------
-    {0}
-
-    See Also
-    --------
-    plot_map
-    plot_stack
-    plot_image
-    plot_surface
-    plot_2D
-    """
-    if dataset.ndim < 2:
-        from spectrochempy.core.plotters.plot1d import plot_1D
-
-        return plot_1D(dataset, **kwargs)
-
-    if kwargs.get("use_plotly", False):
-        return dataset.plotly(**kwargs)
-    else:
-        return plot_2D(dataset, method="waterfall", **kwargs)
-
-
-# generic plot (default stack plot) -------------------------------------------
-
-
-@add_docstring(_PLOT2D_DOC)
-def plot_2D(dataset, method="stack", **kwargs):
+def plot_2D(dataset, method=None, **kwargs):
     """
     Plot of 2D array.
 
@@ -297,8 +114,10 @@ def plot_2D(dataset, method="stack", **kwargs):
     ----------
     dataset : |NDDataset|
         The dataset to plot.
-    method : ['stack', 'map', 'image', 'surface', 'waterfall'] , optional
-        The method of plot of the dataset, which will determine the plotter to use. Default is stack.
+    method : ['stack', 'map', 'image'] , optional
+        The method of plot of the dataset, which will determine the plotter to use.
+        Default method is given 'stack' but this can be changed using
+        ``dataset.preference.method_2D``.
     **kwargs : dic, optional
         Additional keywords parameters.
         See Other Parameters.
@@ -364,7 +183,7 @@ def plot_2D(dataset, method="stack", **kwargs):
 
     # Figure setup
     # ------------------------------------------------------------------------
-    new._figure_setup(ndim=2, method=method, **kwargs)
+    method = new._figure_setup(ndim=2, method=method, **kwargs)
 
     ax = new.ndaxes["main"]
     ax.name = ax.name + nameadd

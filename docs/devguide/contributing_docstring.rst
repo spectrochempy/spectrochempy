@@ -553,14 +553,14 @@ For example:
 
 .. code-block:: python
 
-    def download_IRIS():
+    def download_iris():
         """
-        Upload the classical IRIS dataset.
+        Upload the classical `IRIS` dataset.
 
         Returns
         -------
         downloaded
-           The IRIS dataset.
+           The `IRIS` dataset.
 
         See Also
         --------
@@ -618,14 +618,14 @@ A simple example could be
 
 .. code-block:: python
 
-    def download_IRIS():
+    def download_iris():
         """
-        Upload the classical IRIS dataset.
+        Upload the classical `IRIS` dataset.
 
         Returns
         -------
         downloaded
-           The IRIS dataset.
+           The `IRIS` dataset.
 
         See Also
         --------

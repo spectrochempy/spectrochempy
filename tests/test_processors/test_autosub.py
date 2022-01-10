@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
+# flake8: noqa
 
-# ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
+
 """
 Tests for the ndplugin module.
 
@@ -11,7 +9,7 @@ Tests for the ndplugin module.
 
 import numpy as np
 
-from spectrochempy import show
+from spectrochempy.utils import show
 from spectrochempy.core.processors.autosub import autosub
 
 

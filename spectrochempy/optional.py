@@ -12,7 +12,6 @@ import warnings
 # Update install_adds.rst when updating versions!
 
 VERSIONS = {
-    "scikit-learn": "*",
     "xarray": "*",
     "cantera": "2.5.1",
     "PyQt5": "*",
@@ -104,7 +103,7 @@ def import_optional_dependency(
     else:
         module_to_get = module
     minimum_version = min_version if min_version is not None else VERSIONS.get(parent)
-    if minimum_version != "*":
+    if minimum_version is not None and minimum_version != "*":
         version = get_module_version(module_to_get)
         if Version(version) < Version(minimum_version):
             msg = (

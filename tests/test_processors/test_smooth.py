@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
+# flake8: noqa
 
-# ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
 
 import pytest
 
-from spectrochempy import show, np
+from spectrochempy import np
+
+from spectrochempy.utils import show
 
 pytestmark = pytest.mark.skip("WIP with NMR data")
 

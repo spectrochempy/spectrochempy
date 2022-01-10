@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa
 # ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
 # ======================================================================================================================
-
 """
 PCA analysis example
 ---------------------
@@ -20,9 +19,9 @@ import sys
 # Upload a dataset form a distant server
 
 try:
-    dataset = scp.download_IRIS()
+    dataset = scp.download_iris()
 except (IOError, OSError):
-    print("Could not load The IRIS dataset. Finishing here.")
+    print("Could not load The `IRIS` dataset. Finishing here.")
     sys.exit(0)
 
 ##############################################################

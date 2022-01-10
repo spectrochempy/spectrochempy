@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
+# flake8: noqa
 
-# ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
 
 """
 Tests for the PCA module
@@ -13,7 +10,9 @@ import numpy as np
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.analysis.pca import PCA
-from spectrochempy.utils import MASKED, show
+from spectrochempy.utils import MASKED
+
+from spectrochempy.utils import show
 from spectrochempy.utils.testing import assert_array_almost_equal
 
 from spectrochempy.optional import import_optional_dependency
@@ -80,3 +79,5 @@ def test_compare_scikit_learn():
     assert_array_almost_equal(
         pca.ev_ratio.data[:5], pcas.explained_variance_ratio_[:5] * 100.0, 4
     )
+
+    show()

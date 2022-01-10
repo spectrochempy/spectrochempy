@@ -12,13 +12,13 @@ animation.ffmpeg_path                    : ffmpeg
 animation.frame_format                   : png
 animation.html                           : none
 animation.writer                         : ffmpeg
-axes.autolimit_mode                      : data
+axes.autolimit_mode                      : round_numbers
 axes.axisbelow                           : True
 axes.edgecolor                           : k
 axes.facecolor                           : F0F0F0
 axes.formatter.limits                    : -7, 7
 axes.formatter.min_exponent              : 0
-axes.formatter.offset_threshold          : 4
+axes.formatter.offset_threshold          : 2
 axes.formatter.use_locale                : False
 axes.formatter.use_mathtext              : False
 axes.formatter.useoffset                 : True
@@ -200,7 +200,7 @@ lines.markeredgewidth                    : 0.0
 lines.markerfacecolor                    : auto
 lines.markersize                         : 7.0
 lines.scale_dashes                       : False
-lines.solid_capstyle                     : round
+lines.solid_capstyle                     : projecting
 lines.solid_joinstyle                    : round
 
 markers.fillstyle                        : full
@@ -217,14 +217,14 @@ mathtext.tt                              : monospace
 patch.antialiased                        : True
 patch.edgecolor                          : k
 patch.facecolor                          : 4C72B0
-patch.force_edgecolor                    : False
+patch.force_edgecolor                    : True
 patch.linewidth                          : 0.3
 path.effects                             : 
 path.simplify                            : True
-path.simplify_threshold                  : 0.111111111111
+path.simplify_threshold                  : 0.1111111111111111
 path.sketch                              : None
 path.snap                                : True
-pcolor.shading                           : flat
+pcolor.shading                           : auto
 pcolormesh.snap                          : True
 pdf.compression                          : 6
 pdf.fonttype                             : 3

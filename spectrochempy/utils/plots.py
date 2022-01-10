@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory.
 # ======================================================================================================================
+import textwrap
 
 import matplotlib as mpl
 from matplotlib import pyplot as plt
@@ -29,6 +30,7 @@ __all__ = [
     "colorscale",
     "make_attr",
     "make_label",
+    "plot_method",
 ]
 
 
@@ -299,6 +301,67 @@ class _Axes3D(maxes3D.Axes3D):
         return super().plot_surface(*args, **kwargs)
 
 
+def plot_method(type, doc):
+    """
+    Decorator to to select a plot method from the function name
+    """
+
+    def decorator_plot_method(func):
+
+        method = func.__name__.split("plot_")[-1]
+
+        def wrapper(dataset, *args, **kwargs):
+
+            if dataset.ndim < 2:
+                from spectrochempy.core.plotters.plot1d import plot_1D
+
+                _ = kwargs.pop("method", None)
+                return plot_1D(dataset, *args, method=method, **kwargs)
+
+            if kwargs.get("use_plotly", False):
+                return dataset.plotly(method=method, **kwargs)
+            else:
+                return getattr(dataset, f"plot_{type}")(*args, method=method, **kwargs)
+
+        wrapper.__doc__ = f"""
+{textwrap.dedent(func.__doc__).strip()}
+
+Parameters
+----------
+dataset : |NDDataset|
+    The dataset to plot.
+**kwargs : dic, optional
+    Additional keywords parameters.
+    See Other Parameters.
+
+Other Parameters
+----------------
+{doc.strip()}
+
+See Also
+--------
+plot_1D
+plot_pen
+plot_bar
+plot_scatter_pen
+plot_multiple
+plot_2D
+plot_stack
+plot_map
+plot_image
+plot_3D
+plot_surface
+plot_waterfall
+multiplot
+""".replace(
+            f"\nplot_{method}", ""
+        )
+
+        return wrapper
+
+    return decorator_plot_method
+
+
 # ............................................................................
 # color conversion function
 def cmyk2rgb(C, M, Y, K):
@@ -359,8 +422,9 @@ def show():
     """
     from spectrochempy import NO_DISPLAY
 
-    if not NO_DISPLAY:
-
+    if NO_DISPLAY:
+        plt.close("all")
+    else:
         if get_figure(clear=False):
             plt.show(block=True)
 

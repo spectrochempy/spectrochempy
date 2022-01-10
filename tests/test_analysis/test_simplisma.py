@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
+# flake8: noqa
 
-# ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
 
 import os
 
+from spectrochempy.utils import show
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.analysis.simplisma import SIMPLISMA
 
@@ -30,3 +28,5 @@ def test_simplisma():
     pure.St.plot()
     pure.plotmerit()
     assert "3     29      29.0     0.0072     0.9981" in pure.logs
+
+    show()

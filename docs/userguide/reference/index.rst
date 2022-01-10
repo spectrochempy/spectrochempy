@@ -590,4 +590,4 @@ Utilities
     :nosignatures:
     :toctree: generated/
 
-    download_IRIS
+    download_iris

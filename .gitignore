@@ -88,7 +88,6 @@ docs/_templates_old
 # ----------------------------------------------------------------------------------------------------------------------
 tests/figures
 /tests_extern_packages/
-*.*scp
 *.json
 *.jdx
 
@@ -153,3 +152,5 @@ single_spectrum.csv
 
 # pip virtual environment
 /env/
+HIZECOKE_TEST.pscp
+process.pscp

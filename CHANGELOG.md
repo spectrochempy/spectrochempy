@@ -1,9 +1,34 @@
 # What's new
 
-## Version 0.2.18rc2
+## Version 0.2.22
+
+**BUGS FIXED**
+
+* QT save_dialog.
+
+* Plot_multiple bug.
+
+## Version 0.2.21
 
 **NEW FEATURES**
 
+* Indexing or slicing a NDArray with quantities is now possible.
+
+* MatPlotLib Axes are subclassed in order to accept quantities for method arguments.
+
+**BUGS FIXED**
+
+* NDArray constructor now accept a homogeneous list of quantities as data input. Units are set accordingly.
+
+* Qt Dialogs. This is related to issue #198, as tk dialogs can be replaced by Qt when working with a terminal.
+
+* Custom exception.
+
+* Qt Dialogs. This is related to issue #198, as tk dialogs can be replaced by Qt when working with a terminal.
+
+* Doc display problems.
+
+## Version 0.2.18
 
 **NEW TASKS**
 
@@ -17,15 +42,15 @@
 
 **BUGS FIXED**
 
-* FIX issue #310
+* Issue #310
 
-* FIX: the order of multicoordinates for a single dimension
+* The order of multicoordinates for a single dimension
 
-* FIX: integrate methods to avoid code-climate warnings (duplicate code)
+* Integrate methods to avoid code-climate warnings (duplicate code)
 
-* FIX: Documentation for the integrate methods
+* Documentation for the integrate methods
 
-* FIX: skipping test_sh under windows
+* skipping test_sh under windows
 
 
 ## Version 0.2.17
@@ -44,7 +69,7 @@
 
 * Comparing dataset with only labels coordinates was failing.
 
-* Issue #322 fixed : mean and other API reduce methods were sometimes failing.
+* Issue #322: mean and other API reduce methods were sometimes failing.
 
 ## Version 0.2.16
 
@@ -76,7 +101,7 @@
 
 * Document building configuration after update of external packages.
 
-* DOC: fix several broken links.
+* DOC: several broken links.
 
 * Baseline correction default changed.
 
@@ -94,7 +119,7 @@
 
 * Comparison of dataset when containing metadata in testing functions.
 
-* Some fixes relative to Project.
+* Project.
 
 * Bug in the `to` function.
 
@@ -108,7 +133,7 @@
 
 * Alignment along several dimensions (issue #248)
 
-* to() and ito() methods have been fixed to work correctly (issue #255)
+* to() and ito() methods to work correctly (issue #255)
 
 * Baseline correction works on all dimensions
 
@@ -176,7 +201,7 @@ They are now located in a separate conda package: `spectrochempy_data`.
 
 * Problem with trapz(), simps()
 
-* FIX: interferogram x scaling
+* interferogram x scaling
 
 ## Version 0.2.7
 
@@ -246,9 +271,9 @@ They are now located in a separate conda package: `spectrochempy_data`.
 
 **BUGS FIXED**
 
-* Fix a problem with importing the API.
+* Problem with importing the API.
 
-* Fix dim handling in processing functions.
+* Dim handling in processing functions.
 
 ## Version 0.2.0
 
@@ -312,7 +337,7 @@ They are now located in a separate conda package: `spectrochempy_data`.
 
 * NDpanel temporary removed from the master.
 
-* 2D IRIS fixed.
+* 2D IRIS.
 
 * Trapz integration to return NDDataset.
 
@@ -320,7 +345,7 @@ They are now located in a separate conda package: `spectrochempy_data`.
 
 * Error in SIMPLISMA (changed affectations such as C.data[...] = something by C[...] = something.
 
-* Cleaning mplstyle about non-style parameters and fix makestyle.
+* Cleaning mplstyle about non-style parameters and corrected makestyle.
 
 * Argument of set_xscale.
 

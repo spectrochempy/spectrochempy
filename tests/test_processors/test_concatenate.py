@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
+# flake8: noqa
 
-# ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
 
 from spectrochempy.core.processors.concatenate import concatenate, stack
 from spectrochempy.units import ur
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.utils.testing import assert_dataset_almost_equal
+from spectrochempy.utils import show
 
 
 def test_concatenate(IR_dataset_2D):
@@ -87,6 +85,8 @@ def test_concatenate(IR_dataset_2D):
     assert s1.shape == (5549,)
     ss = concatenate(s0, s1, force_stack=True)
     assert ss.shape == (2, 5549)
+
+    show()
 
 
 def test_bug_243():
