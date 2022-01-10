@@ -19,6 +19,7 @@ import requests
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core import error_
+from spectrochempy.optional import import_optional_dependency
 
 
 # ..............................................................................
@@ -31,26 +32,20 @@ def download_iris():
 
     Returns
     -------
-    downloaded
+    dataset
         The `IRIS` dataset.
 
     See Also
     --------
-    read : Ro read data from experimental data.
-
-    Examples
-    --------
-    Upload a dataset form a distant server
-
-    >>> dataset = scp.download_iris()
+    read : Read data from experimental data.
     """
     url = "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data"
 
     try:
         connection = True
         response = requests.get(url, stream=True, timeout=10)
-    except Exception as e:
-        error_(e)
+    except OSError:
+        error_("OSError: Cannot connect to the UCI repository. Try Scikit-Learn")
         connection = False
 
     if connection:  # Download data
@@ -65,7 +60,7 @@ def download_iris():
             labels = np.loadtxt(fil, delimiter=",", usecols=(4,), dtype="|S")
             labels = list((lab.decode("utf8") for lab in labels))
         except Exception:
-            raise IOError("{} is not a .csv file or its structure cannot be recognized")
+            raise OSError("Wrong CSV file")
 
         coordx = Coord(
             labels=["sepal_length", "sepal width", "petal_length", "petal_width"],
@@ -88,12 +83,11 @@ def download_iris():
     else:
         # Cannot download - use the scikit-learn dataset (if scikit-learn is installed)
 
-        try:
-            from sklearn import datasets
-        except ImportError:
-            raise IOError("Failed in uploading the `IRIS` dataset!")
+        sklearn = import_optional_dependency("sklearn", errors="ignore")
+        if sklearn is None:
+            raise OSError("Failed in uploading the `IRIS` dataset!")
+        from sklearn import datasets
 
-        # import some data to play with
         data = datasets.load_iris()
 
         coordx = Coord(

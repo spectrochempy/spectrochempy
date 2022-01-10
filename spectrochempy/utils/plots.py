@@ -422,13 +422,11 @@ def show():
     """
     from spectrochempy import NO_DISPLAY
 
-    if not NO_DISPLAY:
-
+    if NO_DISPLAY:
+        plt.close("all")
+    else:
         if get_figure(clear=False):
             plt.show(block=True)
-
-    else:
-        plt.close("all")
 
 
 # .............................................................................
