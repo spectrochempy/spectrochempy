@@ -7,6 +7,7 @@
 
 
 __all__ = [
+    "set_env",
     "assert_equal",
     "assert_array_equal",
     "assert_array_almost_equal",
@@ -41,6 +42,39 @@ from numpy.testing import (
     assert_raises,
     assert_array_compare,
 )
+
+import contextlib
+import os
+
+
+@contextlib.contextmanager
+def set_env(**environ):
+    """
+    Temporarily set the process environment variables.
+
+    Parameters
+    ----------
+    environ: dict(str)
+        Environment variables to set
+
+    Examples
+    --------
+    >>> with set_env(PLUGINS_DIR=u'test/plugins'):
+    ...   "PLUGINS_DIR" in os.environ
+    True
+
+    >>> "PLUGINS_DIR" in os.environ
+    False
+
+    """
+    # https://stackoverflow.com/questions/2059482/python-temporarily-modify-the-current-processs-environment/51754362
+    old_environ = dict(os.environ)
+    os.environ.update(environ)
+    try:
+        yield
+    finally:
+        os.environ.clear()
+        os.environ.update(old_environ)
 
 
 # ======================================================================================================================

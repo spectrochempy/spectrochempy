@@ -1,13 +1,7 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa
 
-
-from os import environ, devnull
-
 import spectrochempy.utils.exceptions
-
-environ["NO_DIALOG"] = "True"  # set to 0 to see dialogues when executed by pytest -k
-import io
 
 import pytest
 from unittest import mock
@@ -15,6 +9,7 @@ from unittest import mock
 from spectrochempy import NDDataset
 from spectrochempy import preferences as prefs
 from spectrochempy.utils import pathclean
+from spectrochempy.utils.testing import set_env
 
 from spectrochempy.core.readers.importer import (
     read,
@@ -80,8 +75,11 @@ def test_class_importer(mocker):
 
     # generic read without parameters and dialog cancel
     with mocker.patch("spectrochempy.core.open_dialog", return_value=None):
-        nd = read()
-        assert nd is None
+        with set_env(
+            KEEP_DIALOGS="True"
+        ):  # we ask to display dialogs as we will mock them.
+            nd = read()
+            assert nd is None
 
     # check if Filetype is not known
     f = DATADIR / "fakedir/not_exist_fakedata.fk"

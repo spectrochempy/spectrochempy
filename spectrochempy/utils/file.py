@@ -343,11 +343,11 @@ def get_filename(*filenames, **kwargs):
     """
 
     from spectrochempy.core import preferences as prefs
-    from spectrochempy import NO_DISPLAY, NO_DIALOG
+    from spectrochempy import NO_DIALOG
 
     NODIAL = (
         NO_DIALOG or "DOC_BUILDING" in environ
-    )  # flag to suppress dialog when doc is built or during full testing
+    ) and "KEEP_DIALOGS" not in environ  # flag to suppress dialog when doc is built or during full testing
 
     # allowed filetypes
     # -----------------
@@ -434,7 +434,7 @@ def get_filename(*filenames, **kwargs):
 
         if not getdir:
             # we open a dialogue to select one or several files manually
-            if not (NO_DISPLAY or NODIAL):
+            if not NODIAL:
 
                 from spectrochempy.core import open_dialog
 
@@ -451,7 +451,7 @@ def get_filename(*filenames, **kwargs):
 
         else:
 
-            if not (NO_DISPLAY or NODIAL):
+            if not NODIAL:
 
                 from spectrochempy.core import open_dialog
 
@@ -547,7 +547,7 @@ def readdirname(directory, **kwargs):
     """
 
     from spectrochempy.core import preferences as prefs
-    from spectrochempy import NO_DISPLAY, NO_DIALOG
+    from spectrochempy import NO_DIALOG
 
     data_dir = pathclean(prefs.datadir)
     working_dir = Path.cwd()
@@ -574,9 +574,7 @@ def readdirname(directory, **kwargs):
     else:
         # open a file dialog
         directory = data_dir
-        if (
-            not NO_DISPLAY and not NO_DIALOG
-        ):  # this is for allowing test to continue in the background
+        if not NO_DIALOG:  # this is for allowing test to continue in the background
             from spectrochempy.core import open_dialog
 
             directory = open_dialog(
