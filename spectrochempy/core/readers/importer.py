@@ -17,7 +17,7 @@ from traitlets import HasTraits, List, Dict, Type, Unicode
 
 from spectrochempy.utils import pathclean, check_filename_to_open
 from spectrochempy.utils.exceptions import DimensionsCompatibilityError, ProtocolError
-from spectrochempy.core import warning_
+from spectrochempy.core import warning_, error_
 
 FILETYPES = [
     ("scp", "SpectroChemPy files (*.scp)"),
@@ -89,8 +89,10 @@ class Importer(HasTraits):
         args, kwargs = self._setup_objtype(*args, **kwargs)
         res = check_filename_to_open(*args, **kwargs)
         if res:
+            # Normal return
             self.files = res
         else:
+            # Cancel in dialog!
             return None
 
         for key in self.files.keys():
@@ -106,7 +108,10 @@ class Importer(HasTraits):
                     self.datasets = self._do_merge(self.datasets, **kwargs)
 
             elif key and key[1:] not in list(zip(*FILETYPES))[0] + list(zip(*ALIAS))[0]:
-                continue
+                error_(
+                    f"KeyError: `{res}` has filetype `{key}` unknown in spectrochempy"
+                )
+                raise (KeyError)
 
             else:
                 # here files are read from the disk using filenames
@@ -185,8 +190,9 @@ class Importer(HasTraits):
                     datasets.extend(res)
 
             except FileNotFoundError:
-                warning_(f"No file with name `{filename}` could be found. Sorry! ")
+                error_(f"No file with name `{filename}` could be found. Sorry! ")
 
+                raise
             except IOError as e:
                 warning_(str(e))
 

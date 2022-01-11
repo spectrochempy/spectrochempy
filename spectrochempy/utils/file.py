@@ -248,10 +248,6 @@ def check_filenames(*args, **kwargs):
             if not isinstance(filename, list):
                 filename = [filename]
 
-            # for f in filename:
-            #    if not f.exists():
-            #        raise FileNotFoundError(f'{f} in {filename}')
-
             filenames_.extend(filename)
 
         filenames = filenames_
@@ -631,11 +627,16 @@ def check_filename_to_open(*args, **kwargs):
     # Check the args and keywords arg to determine the correct filename
 
     filenames = check_filenames(*args, **kwargs)
+
     if filenames is None:  # not args and
         # this is probably due to a cancel action for an open dialog.
-        return None
+        return
 
     if not isinstance(filenames, dict):
+
+        if len(filenames) == 1 and filenames[0] is None:
+            raise (FileNotFoundError)
+
         # deal with some specific cases
         key = filenames[0].suffix.lower()
         if not key:
