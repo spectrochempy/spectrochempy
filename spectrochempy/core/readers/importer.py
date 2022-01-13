@@ -36,7 +36,8 @@ FILETYPES = [
     ("csv", "CSV files (*.csv)"),
     ("excel", "Microsoft Excel files (*.xls)"),
     ("zip", "Compressed folder of data files (*.zip)"),
-    ("quadera", "Quadera ascii files (*.asc)")
+    ("quadera", "Quadera ascii files (*.asc)"),
+    ("carroucell", "Carroucell files (*spa)")
     #  ('all', 'All files (*.*)')
 ]
 ALIAS = [
@@ -101,6 +102,10 @@ class Importer(HasTraits):
 
         for key in self.files.keys():
 
+            if key == "" and kwargs.get("protocol") == ["carroucell"]:
+                key = ".carroucell"
+                self.files = {".carroucell": self.files[""]}
+
             if key == "frombytes":
                 # here we need to read contents
                 for filename, content in self.files[key].items():
@@ -113,7 +118,6 @@ class Importer(HasTraits):
 
             elif key and key[1:] not in list(zip(*FILETYPES))[0] + list(zip(*ALIAS))[0]:
                 raise TypeError(f"Filetype `{key}` is unknown in spectrochempy")
-
             else:
                 # here files are read from the disk using filenames
                 self._switch_protocol(key, self.files, **kwargs)

@@ -71,11 +71,11 @@ def test_ndio_2D(IR_dataset_2D):
     # test with a 2D
 
     ir2 = IR_dataset_2D.copy()
-    f = ir2.save_as("essai2D")
+    f = ir2.save_as("essai2D", confirm=False)
     assert ir2.directory == irdatadir
     with pytest.raises(FileNotFoundError):
-        nd = NDDataset.load("essai2D")
-    nd = NDDataset.load("irdata/essai2D")
+        NDDataset.load("essai2D")
+    nd = NDDataset.load(prefs.datadir / "irdata/essai2D")
     assert nd.directory == irdatadir
     f.unlink()
 

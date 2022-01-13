@@ -503,7 +503,7 @@ def get_filenames(*filenames, **kwargs):
             raise IOError("one of the list elements is not a filename!")
 
     # or a single filename
-    if isinstance(filenames, (Path, PosixPath, WindowsPath)):
+    if isinstance(filenames, (str, Path, PosixPath, WindowsPath)):
         filenames = [filenames]
 
     filenames = pathclean(filenames)
@@ -513,11 +513,12 @@ def get_filenames(*filenames, **kwargs):
             filenames.remove(filename)
 
     dictionary = kwargs.get("dictionary", True)
-    if dictionary and kwargs.get("protocol", None) != ["topspin"]:
+    protocol = kwargs.get("protocol", None)
+    if dictionary and protocol not in ["topspin"]:
         # make and return a dictionary
         filenames_dict = {}
         for filename in filenames:
-            if filename.is_dir():
+            if filename.is_dir() and not protocol == ["carroucell"]:
                 continue
             extension = filename.suffix.lower()
             if not extension:

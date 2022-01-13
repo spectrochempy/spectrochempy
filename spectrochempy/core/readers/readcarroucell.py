@@ -5,7 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory.
 # ======================================================================================================================
 """
-This module provides methods for reading data in a directory.
+This module provides methods for reading data in a directory after a carroucell experiment.
 """
 __all__ = ["read_carroucell"]
 __dataset_methods__ = __all__
@@ -21,15 +21,14 @@ import xlrd
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.utils import get_directory_name
+from spectrochempy.utils import get_directory_name, get_filenames
 from spectrochempy.core import info_, print_
 
-# from spectrochempy.core.readers.importer import importermethod, Importer
+from spectrochempy.core.readers.importer import importermethod, Importer
 
 
-# TODO: make an importer function, when a test directory will be provided.
 # ..............................................................................
-def read_carroucell(dataset=None, directory=None, **kwargs):
+def read_carroucell(directory=None, **kwargs):
     """
     Open .spa files in a directory after a carroucell experiment.
 
@@ -40,11 +39,13 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
 
     Parameters
     ----------
-    dataset : `NDDataset`
-        The dataset to store the data and metadata.
-        If None, a NDDataset is created.
     directory : str, optional
         If not specified, opens a dialog box.
+    **kwargs
+        Optional keyword parameters. See Other Parameters.
+
+    Other Parameters
+    ----------------
     spectra : arraylike of 2 int (min, max), optional, default=None
         The first and last spectrum to be loaded as determined by their number.
          If None all spectra are loaded.
@@ -80,16 +81,26 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
 
     Examples
     --------
+
+    >>> scp.read_carroucell( "irdata/carroucell_samp")
+    NDDataset: [float64] A (shape: (y:16975, x:10))
     """
+    kwargs["filetypes"] = ["Carroucell files (*.spa)"]
+    kwargs["protocol"] = ["carroucell"]
+    importer = Importer()
 
-    # check if the first parameter is a dataset
-    # because we allow not to pass it
-    if not isinstance(dataset, NDDataset):
-        # probably did not specify a dataset
-        # so the first parameter must be the directory
-        if isinstance(dataset, str) and dataset != "":
-            directory = dataset
+    return importer(directory, **kwargs)
 
+
+# ------------------------------------------------------------------
+# Private methods
+# ------------------------------------------------------------------
+
+
+@importermethod
+def _read_carroucell(*args, **kwargs):
+
+    _, directory = args
     directory = get_directory_name(directory)
 
     if not directory:
@@ -99,70 +110,45 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
 
     spectra = kwargs.get("spectra", None)
     discardbg = kwargs.get("discardbg", True)
-
     delta_clocks = datetime.timedelta(seconds=kwargs.get("delta_clocks", 0))
 
     datasets = []
 
     # get the sorted list of spa files in the directory
-    spafiles = sorted(
-        [
-            f
-            for f in os.listdir(directory)
-            if (os.path.isfile(os.path.join(directory, f)) and f[-4:].lower() == ".spa")
-        ]
-    )
-
-    # discard BKG files
-    if discardbg:
-        spafiles = sorted([f for f in spafiles if "BCKG" not in f])
+    spafiles = sorted(get_filenames(directory, **kwargs)[".spa"])
+    spafilespec = [f for f in spafiles if "BCKG" not in f.stem]
+    spafileback = [f for f in spafiles if "BCKG" in f.stem]
 
     # select files
+    prefix = lambda f: f.stem.split("_")[0]
+    number = lambda f: int(f.stem.split("_")[1])
     if spectra is not None:
         [min, max] = spectra
-        if discardbg:
-            spafiles = sorted(
-                [
-                    f
-                    for f in spafiles
-                    if min <= int(f.split("_")[2][:-4]) <= max and "BCKG" not in f
-                ]
-            )
-        if not discardbg:
-            spafilespec = sorted(
-                [
-                    f
-                    for f in spafiles
-                    if min <= int(f.split("_")[2][:-4]) <= max and "BCKG" not in f
-                ]
-            )
-            spafileback = sorted(
-                [
-                    f
-                    for f in spafiles
-                    if min <= int(f.split("_")[2][:-6]) <= max and "BCKG" in f
-                ]
-            )
-            spafiles = spafilespec + spafileback
+        spafilespec = [f for f in spafilespec if min <= number(f) <= max]
+        spafileback = [f for f in spafileback if min <= number(f) <= max]
 
+    # discard BKG files
+    spafiles = spafilespec
+    if not discardbg:
+        spafiles += spafileback
+
+    # merge dataset with the same number
     curfilelist = [spafiles[0]]
-    curprefix = spafiles[0][::-1].split("_", 1)[1][::-1]
-
+    curprefix = prefix(spafiles[0])
     for f in spafiles[1:]:
-        if f[::-1].split("_", 1)[1][::-1] != curprefix:
-            datasets.append(
-                NDDataset.read_omnic(curfilelist, sortbydate=True, directory=directory)
+        if prefix(f) != curprefix:
+            ds = NDDataset.read_omnic(
+                curfilelist, sortbydate=True, directory=directory, name=curprefix
             )
-            datasets[-1].name = os.path.basename(curprefix)
+            datasets.append(ds)
             curfilelist = [f]
-            curprefix = f[::-1].split("_", 1)[1][::-1]
+            curprefix = prefix(f)
         else:
             curfilelist.append(f)
-
-    datasets.append(
-        NDDataset.read_omnic(curfilelist, sortbydate=True, directory=directory)
+    ds = NDDataset.read_omnic(
+        curfilelist, sortbydate=True, directory=directory, name=curprefix
     )
-    datasets[-1].name = os.path.basename(curprefix)
+    datasets.append(ds)
 
     # Now manage temperature
     Tfile = sorted([f for f in os.listdir(directory) if f[-4:].lower() == ".xls"])

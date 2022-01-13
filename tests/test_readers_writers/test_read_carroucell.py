@@ -1,24 +1,28 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa
 
+# TODO: reduce the size of the data to accelerate the test
+# TODO: Add example to imporve coverage
 
-import os
+import spectrochempy
+from spectrochempy import NDDataset, preferences as prefs, pathclean, info_
 
-import pytest
-
-from spectrochempy.core import info_
-from spectrochempy.core.dataset.nddataset import NDDataset
-
-
-# uncomment the next line to test it manually
-@pytest.mark.skip("interactive so cannot be used with full testing")
-def test_read_carroucell_without_dirname():
-    NDDataset.read_carroucell()
+DATADIR = prefs.datadir
 
 
-def test_read_carroucell_with_dirname():
-    A = NDDataset.read_carroucell(os.path.join("irdata", "carroucell_samp"))
+def dialog_carroucell(*args, **kwargs):
+    # mock opening a dialog
+    return DATADIR / "irdata/carroucell_samp"
+
+
+def test_read_carroucell(monkeypatch):
+    monkeypatch.setattr(spectrochempy.core, "open_dialog", dialog_carroucell)
+    monkeypatch.setenv("KEEP_DIALOGS", "True")
+    B = NDDataset.read_carroucell()
+    assert B[3].shape == (6, 11098)
+
+    A = NDDataset.read_carroucell("irdata/carroucell_samp", spectra=(1, 2))
     for x in A:
         info_("  " + x.name + ": " + str(x.shape))
     assert len(A) == 11
-    assert A[3].shape == (6, 11098)
+    assert A[3].shape == (2, 11098)

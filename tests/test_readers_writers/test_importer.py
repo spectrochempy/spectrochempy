@@ -6,10 +6,12 @@ import os
 import spectrochempy.utils.exceptions
 from pathlib import Path
 import pytest
-import matplotlib as mpl
-from spectrochempy import NDDataset, preferences as prefs
+
+# import matplotlib as mpl
+from spectrochempy import NDDataset  # , preferences as prefs
 from spectrochempy.utils import pathclean
-from spectrochempy.utils.testing import set_env
+
+# from spectrochempy.utils.testing import set_env
 
 from spectrochempy.core.readers.importer import (
     read,

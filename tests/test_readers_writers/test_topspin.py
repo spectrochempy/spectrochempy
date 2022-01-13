@@ -57,4 +57,12 @@ def test_read_topspin_glob():
     print(D)
 
 
+def test_read_dir_nmr():
+    D = scp.read_dir("nmrdata/bruker/tests/nmr", protocol="topspin")
+    assert isinstance(D, list)
+    Dl = [item.name for item in D]
+    assert "topspin_2d expno:1 procno:1 (SER)" in Dl
+    assert "topspin_1d expno:1 procno:1 (FID)" in Dl
+
+
 # EOF
