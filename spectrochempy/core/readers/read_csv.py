@@ -25,7 +25,7 @@ from spectrochempy.core.readers.importer import Importer, importermethod
 
 try:
     locale.setlocale(locale.LC_ALL, "en_US")  # to avoid problems with date format
-except Exception:
+except Exception:  # pragma: no cover
     try:
         locale.setlocale(
             locale.LC_ALL, "en_US.utf8"
@@ -168,7 +168,7 @@ def _read_csv(*args, **kwargs):
             d = np.loadtxt(fid, unpack=True, delimiter=_delimiter)
             fid.close()
 
-        except Exception:
+        except Exception:  # pragma: no cover
             # in french, very often the decimal '.' is replaced by a
             # comma:  Let's try to correct this
             if fid:
