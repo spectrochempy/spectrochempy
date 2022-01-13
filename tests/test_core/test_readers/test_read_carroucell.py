@@ -3,18 +3,23 @@
 
 # TODO: reduce the size of the data to accelerate the test
 # TODO: Add example to imporve coverage
+import pytest
 
 import spectrochempy
-from spectrochempy import NDDataset, preferences as prefs, pathclean, info_
+from spectrochempy import NDDataset, preferences as prefs, info_
 
 DATADIR = prefs.datadir
+CARROUCELL_FOLDER = DATADIR / "irdata/carroucell_samp"
 
 
 def dialog_carroucell(*args, **kwargs):
     # mock opening a dialog
-    return DATADIR / "irdata/carroucell_samp"
+    return CARROUCELL_FOLDER
 
 
+@pytest.mark.skipif(
+    not CARROUCELL_FOLDER.exists(), reason="Experimental data not available for testing"
+)
 def test_read_carroucell(monkeypatch):
 
     nd = NDDataset.read_carroucell("irdata/carroucell_samp", spectra=(1, 2))

@@ -3,12 +3,21 @@
 
 
 from pathlib import Path
+import pytest
 
 import spectrochempy as scp
 from spectrochempy.core import preferences as prefs
 from spectrochempy.core.dataset.nddataset import NDDataset
 
+DATADIR = prefs.datadir
+AGIR_FOLDER = DATADIR / "agirdata"
+IR_FOLDER = DATADIR / "irdata"
 
+
+@pytest.mark.skipif(
+    not AGIR_FOLDER.exists() or not IR_FOLDER.exists(),
+    reason="Experimental data not available for testing",
+)
 def test_read_csv():
     datadir = prefs.datadir
     prefs.csv_delimiter = ","
@@ -32,3 +41,6 @@ def test_read_csv():
     content = p.read_bytes()
     E = scp.read_csv({"somename.csv": content})
     assert E == C
+
+    F = NDDataset.read_csv("irdata/IR.CSV", origin="opus")
+    assert not F

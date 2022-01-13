@@ -68,9 +68,6 @@ def read_csv(*paths, **kwargs):
 
     Other Parameters
     ----------------
-    protocol : {'scp', 'omnic', 'opus', 'topspin', 'matlab', 'jcamp', 'csv', 'excel'}, optional
-        Protocol used for reading. If not provided, the correct protocol
-        is inferred (whnever it is possible) from the file name extension.
     directory : str, optional
         From where to read the specified `filename`. If not specified, read in the default ``datadir`` specified in
         SpectroChemPy Preferences.
@@ -170,6 +167,7 @@ def _read_csv(*args, **kwargs):
             fid = _open()
             d = np.loadtxt(fid, unpack=True, delimiter=_delimiter)
             fid.close()
+
         except Exception:
             # in french, very often the decimal '.' is replaced by a
             # comma:  Let's try to correct this
@@ -222,7 +220,6 @@ def _read_csv(*args, **kwargs):
         # this will be treated as csv export from tga analysis
         dataset = _add_tga_info(dataset, **kwargs)
     elif origin:
-        origin = kwargs.get("origin", None)
         raise NotImplementedError(
             f"Sorry, but reading a csv file with '{origin}' origin is not implemented. "
             "Please, remove or set the keyword 'origin'\n "
