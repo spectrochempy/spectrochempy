@@ -431,7 +431,8 @@ def get_filenames(*filenames, **kwargs):
 
         getdir = kwargs.get(
             "listdir",
-            directory is not None or kwargs.get("protocol", None) == ["topspin"],
+            directory is not None or kwargs.get("protocol", None) == ["topspin"]
+            # or kwargs.get("protocol", None) == ["carroucell"],
         )
 
         if not getdir:
@@ -454,7 +455,6 @@ def get_filenames(*filenames, **kwargs):
         else:
 
             if not NODIAL:
-
                 from spectrochempy.core import open_dialog
 
                 directory = open_dialog(
@@ -514,7 +514,7 @@ def get_filenames(*filenames, **kwargs):
 
     dictionary = kwargs.get("dictionary", True)
     protocol = kwargs.get("protocol", None)
-    if dictionary and protocol not in ["topspin"]:
+    if dictionary and protocol != ["topspin"]:
         # make and return a dictionary
         filenames_dict = {}
         for filename in filenames:
