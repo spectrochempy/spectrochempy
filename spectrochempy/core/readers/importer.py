@@ -38,11 +38,13 @@ FILETYPES = [
     ("zip", "Compressed folder of data files (*.zip)"),
     ("quadera", "Quadera ascii files (*.asc)"),
     ("carroucell", "Carroucell files (*spa)")
+    ("galactic", "Thermo Galactic files (*.spc)")
     #  ('all', 'All files (*.*)')
 ]
 ALIAS = [
     ("spg", "omnic"),
     ("spa", "omnic"),
+    ("spc", "galactic"),
     ("srs", "omnic"),
     ("mat", "matlab"),
     ("txt", "labspec"),
@@ -76,6 +78,7 @@ class Importer(HasTraits):
         self.protocols = dict(zip(*temp))
 
         #  add alias
+
         self.alias = dict(ALIAS)
 
     # ..........................................................................
@@ -337,6 +340,7 @@ def read(*paths, **kwargs):
     read_labspec : Read Raman LABSPEC spectra.
     read_spg : Read Omnic *.spg grouped spectra.
     read_spa : Read Omnic *.Spa single spectra.
+    read_spc : Read Galactic *.spc files.
     read_srs : Read Omnic series.
     read_csv : Read CSV files.
     read_zip : Read Zip files.
