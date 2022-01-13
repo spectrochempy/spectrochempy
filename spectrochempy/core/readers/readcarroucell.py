@@ -103,7 +103,7 @@ def _read_carroucell(*args, **kwargs):
     _, directory = args
     directory = get_directory_name(directory)
 
-    if not directory:
+    if not directory:  # pragma: no cover
         # probably cancel has been chosen in the open dialog
         info_("No directory was selected.")
         return
@@ -203,7 +203,7 @@ def _read_carroucell(*args, **kwargs):
         return datasets[0]  # a single dataset is returned
 
     # several datasets returned, sorted by sample #
-    return sorted(datasets, key=lambda ds: int(re.split("-|_", ds.name)[0]))
+    return sorted(datasets, key=lambda ds: re.split("-|_", ds.name)[0])
 
 
 if __name__ == "__main__":
