@@ -124,12 +124,17 @@ class Importer(HasTraits):
 
         # now we will reset preference for this newly loaded datasets
         if len(self.datasets) > 0:
+
+            if all(self.datasets) is None:
+                return None
+
             prefs = self.datasets[0].preferences
             try:
                 prefs.reset()
-            except FileNotFoundError:
-                # probably style not found
+            except (FileNotFoundError, AttributeError):
                 pass
+        else:
+            return None
 
         if len(self.datasets) == 1:
             nd = self.datasets[0]  # a single dataset is returned

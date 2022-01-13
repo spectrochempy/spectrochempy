@@ -1,20 +1,22 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa
 
-
-from pathlib import Path
+import pytest
 
 import spectrochempy as scp
 from spectrochempy.utils import show
 
+RAMANDIR = scp.preferences.datadir / "ramandata"
 
+
+@pytest.mark.skipif(
+    not RAMANDIR.exists(),
+    reason="Experimental data not available for testing",
+)
 def test_read_labspec():
 
-    ramandir = Path("ramandata")
-    scp.info_(ramandir)
+    nd = scp.read_labspec("Activation.txt", directory=RAMANDIR)
+    assert nd.shape == (532, 1024)
 
-    A = scp.read_labspec("Activation.txt", directory=ramandir)
-
-    B = scp.read(protocol="labspec", directory=ramandir)
-
-    B = scp.read_dir(directory=ramandir / "subdir")
+    nd = scp.read_dir(directory=RAMANDIR / "subdir")
+    assert nd.shape == (6, 1024)

@@ -121,7 +121,7 @@ def _read_asc(*args, **kwargs):
     _, filename = args
     content = kwargs.get("content", False)
 
-    if content:
+    if content:  # pragma: no cover
         fid = io.BytesIO(content)
     else:
         fid = open(filename, "r")
@@ -156,7 +156,7 @@ def _read_asc(*args, **kwargs):
             "Columns names are  not those expected: the reading of your .asc file  could yield "
             "please notify this to the developers of scpectrochempy"
         )
-    if nchannels > 1 and colnames[3] != "Time":
+    if nchannels > 1 and colnames[3] != "Time":  # pragma: no cover
         warn(
             "The number of columms per channel is not that expected: the reading of your .asc file  could yield "
             "please notify this to the developers of spectrochempy"

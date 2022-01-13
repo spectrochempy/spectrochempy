@@ -162,8 +162,8 @@ def _read_mat(*args, **kwargs):
             datasets.append(dataset)
 
         elif all(
-            name in data.dtype.names
-            for name in ["moddate", "axisscale", "imageaxisscale"]
+            name_ in data.dtype.names
+            for name_ in ["moddate", "axisscale", "imageaxisscale"]
         ):
             # this is probably a DSO object
             dataset = _read_dso(dataset, name, data)
