@@ -194,6 +194,8 @@ def concatenate(*datasets, **kwargs):
     # coordinates units of NDDatasets must be compatible in all dimensions
     # get the coordss
     coordss = [dataset.coordset for dataset in datasets]
+    if set(coordss) == {None}:
+        coordss = None
 
     # def check_coordinates(coordss, force_stack):
     #
@@ -239,7 +241,7 @@ def concatenate(*datasets, **kwargs):
     # concatenate coords if they exists
     # ------------------------------------------------------------------------
 
-    if len(coordss) == 1 and coordss.pop() is None:
+    if coordss is None or (len(coordss) == 1 and coordss.pop() is None):
         # no coords
         coords = None
     else:
@@ -251,7 +253,7 @@ def concatenate(*datasets, **kwargs):
                 coords[dim], linear=False
             )  # de-linearize the coordinates
             coords[dim]._data = np.concatenate(tuple((c[dim].data for c in coordss)))
-        except ValueError:
+        except (KeyError, ValueError):
             pass
 
         # concatenation of the labels (first check the presence of at least one labeled coordinates)
@@ -301,7 +303,8 @@ def concatenate(*datasets, **kwargs):
     # coordinates
     out = dataset.copy()
     out._data = data
-    out._coordset[dim] = coords[dim]
+    if coords is not None:
+        out._coordset[dim] = coords[dim]
     out._mask = mask
     out._units = units
 

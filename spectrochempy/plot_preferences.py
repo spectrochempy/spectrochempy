@@ -26,6 +26,8 @@ from traitlets import (
 
 from spectrochempy.utils import MetaConfigurable, get_pkg_path, pathclean
 
+# from spectrochempy.core import warning_
+
 
 # ------------------------------------------------------------------
 # available matplotlib styles (equivalent of plt.style.available)
@@ -1024,8 +1026,11 @@ class PlotPreferences(MetaConfigurable):
             f = (
                 pathclean(mpl.__file__).parent / "mpl-data" / "stylelib" / _style
             ).with_suffix(".mplstyle")
-            if not f.exists():
-                raise TypeError(f"This style {_style} doesn't exists")
+            # if not f.exists() and _style=='scpy':
+            #     warning_(TypeError(f"The style `{_style}` doesn't exists"))
+            #     f = f.parent / 'classic.mplstyle'
+            #     if not f.exists:
+            #         raise TypeError
         txt = f.read_text()
         pars = txt.split("\n")
         for line in pars:

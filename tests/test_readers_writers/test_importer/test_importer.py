@@ -1,31 +1,31 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa
+import pathlib
+import os
 
 import spectrochempy.utils.exceptions
-
+from pathlib import Path
 import pytest
-from unittest import mock
-
-from spectrochempy import NDDataset
-from spectrochempy import preferences as prefs
+import matplotlib as mpl
+from spectrochempy import NDDataset, preferences as prefs
 from spectrochempy.utils import pathclean
 from spectrochempy.utils.testing import set_env
 
 from spectrochempy.core.readers.importer import (
     read,
+    read_dir,
     importermethod,
     Importer,
     FILETYPES,
     ALIAS,
 )
 
-DATADIR = pathclean(prefs.datadir)
+DATADIR = pathclean(Path.home() / "test_data")
 
 # Simulation of a read function
 
 
 def read_fake(*paths, **kwargs):
-
     kwargs["filetypes"] = ["FAKE files (*fk, *.fk1, .fk2)"]
     kwargs["protocol"] = ["fake", ".fk", "fk1", "fk2"]
     importer = Importer()
@@ -34,19 +34,23 @@ def read_fake(*paths, **kwargs):
 
 
 read_fk = read_fake
+setattr(NDDataset, "read_fk", read_fk)
 
 
 @importermethod
 def _read_fake(*args, **kwargs):
-
     dataset, filename = args
     content = kwargs.get("content", False)
 
     if content:
         dataset = fake_dataset(content=True)
     else:
-        if filename.exists():
-            dataset = fake_dataset()
+        # if filename.exists():    This does not work with fs
+        if os.path.exists(filename):
+            if filename.stem == "otherfake":
+                dataset = fake_dataset(size=6)
+            else:
+                dataset = fake_dataset()
         else:
             raise (FileNotFoundError)
 
@@ -55,246 +59,259 @@ def _read_fake(*args, **kwargs):
 
 @importermethod
 def _read_fk(*args, **kwargs):
-
     return Importer._read_fake(*args, **kwargs)
 
 
 # Test of the Importer class
 
 
-def fake_dataset(content=False):
-    """"""
-    if not content:
-        ds = NDDataset([1, 2, 4])
+def fake_dataset(*args, size=3, **kwargs):
+    if not args:
+        ds = NDDataset([range(size)])
     else:
-        ds = NDDataset([0, 2, 3, 4])
+        ds = NDDataset(
+            [[range(4)]],
+        )
     return ds
 
 
-def test_class_importer(mocker):
+def dialog_cancel(*args, **kwargs):
+    # mock a dialog cancel action
+    return None
 
-    # generic read without parameters and dialog cancel
-    with mocker.patch("spectrochempy.core.open_dialog", return_value=None):
-        with set_env(
-            KEEP_DIALOGS="True"
-        ):  # we ask to display dialogs as we will mock them.
-            nd = read()
-            assert nd is None
 
-    # check if Filetype is not known
-    f = DATADIR / "fakedir/not_exist_fakedata.fk"
-    with pytest.raises(KeyError):
+def dialog_open(*args, **kwargs):
+    # mock opening a dialog
+
+    directory = kwargs.get("directory", None)
+    if directory is None:
+        directory = pathclean(DATADIR / "fakedir")
+
+    if kwargs.get("filters") == "directory":
+        return directory
+
+    if not args and not kwargs.get("single"):
+        return [DATADIR / "fakedir" / f"fake{i + 1}.fk" for i in range(2)]
+
+    return [DATADIR / "fakedir" / f"fake{i+1}.fk" for i in range(4)]
+
+
+def directory_glob(*args, **kwargs):
+    res = [DATADIR / f"fakedir/fake{i+1}.fk" for i in range(4)]
+    if len(args) > 1 and args[1].startswith("**/"):
+        # recursive
+        res.append(DATADIR / "fakedir/subdir/fakesub1.fk")
+    return res
+
+
+def test_importer(monkeypatch, fs):
+
+    fs.create_file("/var/data/xx1.txt")
+    assert os.path.exists("/var/data/xx1.txt")
+
+    # mock filesystem
+    fs.create_dir(DATADIR)
+
+    # try to read unexistent scp file
+    f = DATADIR / "fakedir/fakescp.scp"
+    with pytest.raises(FileNotFoundError):
+        read(f)
+
+    # make fake file
+    fs.create_file(f)
+    monkeypatch.setattr(NDDataset, "load", fake_dataset)
+
+    nd = read(f)
+    assert nd == fake_dataset(f)
+
+    nd = read(f.stem, directory=DATADIR / "fakedir/", protocol="scp")
+    assert nd == fake_dataset(f)
+
+    nd = read(f.stem, directory=DATADIR / "fakedir/")
+    assert nd == fake_dataset(f)
+
+    # Generic read without parameters and dialog cancel
+    monkeypatch.setattr(spectrochempy.core, "open_dialog", dialog_cancel)
+    monkeypatch.setenv(
+        "KEEP_DIALOGS", "True"
+    )  # we ask to display dialogs as we will mock them.
+
+    nd = read()
+    assert nd is None
+
+    # read as class method
+    nd1 = NDDataset.read()
+    assert nd1 is None
+
+    # NDDataset instance as first arguments
+    nd = NDDataset()
+    nd2 = nd.read()
+    assert nd2 is None
+
+    nd = read(default_filter="matlab")
+    assert nd is None
+
+    # Check if Filetype is not known
+    f = DATADIR / "fakedir/not_exist_fake.fk"
+    with pytest.raises(TypeError):
         read_fake(f)
 
+    # Make fake type acceptable
     FILETYPES.append(("fake", "FAKE files (*.fk)"))
     ALIAS.append(("fk", "fake"))
-    mocker.patch("spectrochempy.core.readers.importer.FILETYPES", FILETYPES)
-    mocker.patch("spectrochempy.core.readers.importer.ALIAS", ALIAS)
+    monkeypatch.setattr("spectrochempy.core.readers.importer.FILETYPES", FILETYPES)
+    monkeypatch.setattr("spectrochempy.core.readers.importer.ALIAS", ALIAS)
 
-    # check not existing filename
-    f = DATADIR / "fakedir/not_exist_fakedata.fk"
+    # Check not existing filename
+    f = DATADIR / "fakedir/not_exist_fake.fk"
     with pytest.raises(FileNotFoundError):
         read_fake(f)
 
-    # simulate reading a content
+    # Generic read with a wrong protocol
+    with pytest.raises(spectrochempy.utils.exceptions.ProtocolError):
+        read(f, protocol="wrongfake")
+
+    # Generic read with a wrong file extension
+    with pytest.raises(TypeError):
+        g = DATADIR / "fakedir/otherfake.farfelu"
+        read(g)
+
+    # Mock file
+    f = DATADIR / "fakedir/fake.fk"
+    fs.create_file(f)
+
+    # specific read_(protocol) function
+    nd = read_fk(f)
+    assert nd == fake_dataset()
+
+    # should also be a Class function
+    nd = NDDataset.read_fk(f)
+    assert nd == fake_dataset()
+
+    # and a NDDataset isntance function
+    nd = NDDataset().read_fk(f)
+    assert nd == fake_dataset()
+
+    # single file without protocol inferred from filename
+    nd = read(f)
+    assert nd == fake_dataset()
+
+    # single file read with protocol specified
+    nd = read(f, protocol="fake")
+    assert nd == fake_dataset()
+
+    # attribute a new name
+    nd = read(f, name="toto")
+    assert nd.name == "toto"
+
+    # mock some fake file and assume they exists
+    f1 = DATADIR / "fakedir/fake1.fk"
+    f2 = DATADIR / "fakedir/fake2.fk"
+    f3 = DATADIR / "fakedir/fake3.fk"
+    f4 = DATADIR / "fakedir/fake4.fk"
+    f5 = DATADIR / "fakedir/otherdir/otherfake.fk"
+    fs.create_file(f1)
+    fs.create_file(f2)
+    fs.create_file(f3)
+    fs.create_file(f4)
+    fs.create_file(f5)
+
+    # l = list(pathclean("/Users/christian/test_data/fakedir").iterdir())
+
+    # multiple compatible 1D files automatically merged
+    nd = read(f1, f2, f3)
+    assert nd.shape == (3, 3)
+
+    nd = read([f1, f2, f3], name="fake_merged")
+    assert nd.shape == (3, 3)
+    assert nd.name == "fake_merged"
+
+    # multiple compatible 1D files not merged if the merge keyword is set to False
+    nd = read([f1, f2, f3], names=["a", "c", "b"], merge=False)
+    assert isinstance(nd, list)
+    assert len(nd) == 3 and nd[0] == fake_dataset()
+    assert nd[1].name == "c"
+
+    # do not merge inhomogeneous dataset
+    nd = read([f1, f2, f5])
+    assert isinstance(nd, list)
+
+    # too short list of names.  Not applied
+    nd = read([f1, f2, f3], names=["a", "c"], merge=False)
+    assert nd[0].name.startswith("NDDataset")
+
+    monkeypatch.setattr(spectrochempy.core, "open_dialog", dialog_open)
+    nd = (
+        read()
+    )  # should open a dialog (but to selects individual filename (here only simulated)
+    assert nd.shape == (2, 3)
+
+    # read in a directory
+    monkeypatch.setattr(pathlib.Path, "glob", directory_glob)
+
+    # directory selection
+    nd = read(protocol="fake", directory=DATADIR / "fakedir")
+    assert nd.shape == (4, 3)
+
+    nd = read(protocol="fake", directory=DATADIR / "fakedir", merge=False)
+    assert len(nd) == 4
+    assert isinstance(nd, list)
+
+    nd = read(listdir=True, directory=DATADIR / "fakedir")
+    assert len(nd) == 4
+    assert not isinstance(nd, list)
+
+    # if a directory is passed as a keyword, the behavior is different:
+    # a dialog for file selection occurs except if listdir is set to True
+    nd = read(directory=DATADIR / "fakedir", listdir=False)
+    assert nd.shape == (2, 3)  # -> file selection dialog
+
+    nd = read(directory=DATADIR / "fakedir", listdir=True)
+    assert nd.shape == (4, 3)  # -> directory selection dialog
+
+    # read_dir()
+
+    nd = read_dir(DATADIR / "fakedir")
+    assert nd.shape == (4, 3)
+
+    nd1 = read_dir()
+    assert nd1 == nd
+
+    nd = read_dir(
+        directory=DATADIR / "fakedir"
+    )  # open a dialog to eventually select directory inside the specified
+    # one
+    assert nd.shape == (4, 3)
+
+    fs.create_file(DATADIR / "fakedir/subdir/fakesub1.fk")
+    nd = read_dir(directory=DATADIR / "fakedir", recursive=True)
+    assert nd.shape == (5, 3)
+
+    # no merging
+    nd = read_dir(directory=DATADIR / "fakedir", recursive=True, merge=False)
+    assert len(nd) == 5
+    assert isinstance(nd, list)
+
+    # Simulate reading a content
     nd = read({"somename.fk": "a fake content"})
     assert nd == fake_dataset(content=True)
     nd = read_fake({"somename.fk": "a fake content"})
     assert nd == fake_dataset(content=True)
 
-    # mock file with fake data
-    f = DATADIR / "fakedir/fakedata.fk"
-    mocker.patch("pathlib.Path.exists", return_value=True)
-    mocker.patch(
-        "spectrochempy.core.readers.importer.check_filename_to_open",
-        mock.Mock(return_value={".fk": [f]}),
+    # read multiple contents and merge them
+    nd = read(
+        {
+            "somename.fk": "a fake content",
+            "anothername.fk": "another fake content",
+            "stillanothername.fk": "still another fake content",
+        }
     )
-    nd = read_fk(f)
-    assert nd == fake_dataset()
+    assert nd.shape == (3, 3)
 
-    # generic read
-    nd = read(f)
-    assert nd == fake_dataset()
-
-    # generic read with protocol
-    nd = read(f, protocol="fake")
-    assert nd == fake_dataset()
-
-    # generic read with a wrong protocol
-    with pytest.raises(spectrochempy.utils.exceptions.ProtocolError):
-        read(f, protocol="wrongfake")
-
-
-# # ..............................................................................
-# def test_read():
-#     f = Path("irdata/OPUS/test.0000")
-#
-#     A1 = NDDataset.read_opus(f)
-#     assert A1.shape == (1, 2567)
-#
-#     # single file read with protocol specified
-#     A2 = NDDataset.read(f, protocol="opus")
-#     assert A2 == A1
-#
-#     A3 = scp.read("irdata/nh4y-activation.spg", protocol="omnic")
-#     assert str(A3) == "NDDataset: [float64] a.u. (shape: (y:55, x:5549))"
-#
-#     # single file without protocol
-#     # inferred from filename
-#     A4 = NDDataset.read(f)
-#     assert A4 == A1
-#
-#     A5 = scp.read("irdata/nh4y-activation.spg")
-#     assert str(A5) == "NDDataset: [float64] a.u. (shape: (y:55, x:5549))"
-#
-#     # native format
-#     f = A5.save_as("nh4y.scp")
-#     A6 = scp.read("irdata/nh4y.scp")
-#     assert str(A6) == "NDDataset: [float64] a.u. (shape: (y:55, x:5549))"
-#
-#     A7 = scp.read("nh4y", directory="irdata", protocol="scp")
-#     assert str(A7) == "NDDataset: [float64] a.u. (shape: (y:55, x:5549))"
-#
-#     A8 = scp.read("nh4y", directory="irdata")
-#     assert str(A8) == "NDDataset: [float64] a.u. (shape: (y:55, x:5549))"
-#
-#     f.unlink()
-#
-#     # multiple compatible 1D files automatically merged
-#     B = NDDataset.read(
-#         "test.0000", "test.0001", "test.0002", directory=os.path.join("irdata", "OPUS")
-#     )
-#     assert str(B) == "NDDataset: [float64] a.u. (shape: (y:3, x:2567))"
-#     assert len(B) == 3
-#
-#     # multiple compatible 1D files not merged if the merge keyword is set to False
-#     C = scp.read(
-#         "test.0000",
-#         "test.0001",
-#         "test.0002",
-#         directory=os.path.join("irdata", "OPUS"),
-#         merge=False,
-#     )
-#     assert isinstance(C, list)
-#
-#     # multiple 1D files to merge
-#     D = NDDataset.read(
-#         ["test.0000", "test.0001", "test.0002"],
-#         directory=os.path.join("irdata", "OPUS"),
-#     )
-#     assert D.shape == (3, 2567)
-#
-#     # multiple 1D files not merged : they are passed as a list but merge is set to false
-#     E = scp.read(
-#         ["test.0000", "test.0001", "test.0002"],
-#         directory=os.path.join("irdata", "OPUS"),
-#         merge=False,
-#     )
-#     assert isinstance(E, list)
-#     assert len(E) == 3
-#
-#     # read contents
-#     datadir = Path(prefs.datadir)
-#     p = datadir / "irdata" / "OPUS" / "test.0000"
-#     content = p.read_bytes()
-#     F = NDDataset.read({p.name: content})
-#     assert F.name == p.name
-#     assert F.shape == (1, 2567)
-#
-#     # read multiple 1D contents and merge them
-#     lst = [datadir / "irdata" / "OPUS" / f"test.000{i}" for i in range(3)]
-#     G = NDDataset.read({p.name: p.read_bytes() for p in lst})
-#     assert G.shape == (3, 2567)
-#     assert len(G) == 3
-#
-#     # read multiple  1D contents awithout merging
-#     lst = [datadir / "irdata" / "OPUS" / f"test.000{i}" for i in range(3)]
-#     H = NDDataset.read({p.name: p.read_bytes() for p in lst}, merge=False)
-#     isinstance(H, list)
-#     assert len(H) == 3
-#
-#     filename = datadir / "wodger.spg"
-#     content = filename.read_bytes()
-#
-#     # change the filename to be sure that the file will be read from the passed content
-#     filename = "try.spg"
-#
-#     # The most direct way to pass the byte content information
-#     nd = NDDataset.read(filename, content=content)
-#     assert str(nd) == "NDDataset: [float64] a.u. (shape: (y:2, x:5549))"
-#
-#     # It can also be passed using a dictionary structure {filename:content, ....}
-#     nd = NDDataset.read({filename: content})
-#     assert str(nd) == "NDDataset: [float64] a.u. (shape: (y:2, x:5549))"
-#
-#     # Case where the filename is not provided
-#     nd = NDDataset.read(content)
-#     assert str(nd) == "NDDataset: [float64] a.u. (shape: (y:2, x:5549))"
-#
-#     # Try with an .spa file
-#     filename = datadir / "irdata/subdir/7_CZ0-100 Pd_101.SPA"
-#     content = filename.read_bytes()
-#     filename = "try.spa"
-#
-#     filename2 = datadir / "irdata/subdir/7_CZ0-100 Pd_102.SPA"
-#     content2 = filename2.read_bytes()
-#     filename = "try2.spa"
-#
-#     nd = NDDataset.read({filename: content})
-#     assert str(nd) == "NDDataset: [float64] a.u. (shape: (y:1, x:5549))"
-#
-#     # Try with only a .spa content
-#     nd = NDDataset.read(content)
-#     assert str(nd) == "NDDataset: [float64] a.u. (shape: (y:1, x:5549))"
-#
-#     # Try with several .spa content (should be stacked into a single nddataset)
-#     nd = NDDataset.read({filename: content, filename2: content2})
-#     assert str(nd) == "NDDataset: [float64] a.u. (shape: (y:2, x:5549))"
-#
-#     nd = NDDataset.read(content, content2)
-#     assert str(nd) == "NDDataset: [float64] a.u. (shape: (y:2, x:5549))"
-#
-#
-# def test_generic_read():
-#     # filename + extension specified
-#     ds = scp.read("wodger.spg")
-#     assert ds.name == "wodger"
-#
-#     # save with no filename (should save wodger.scp)
-#     path = ds.save()
-#
-#     assert isinstance(path, Path)
-#     assert path.stem == ds.name
-#     assert path.parent == ds.directory
-#     assert path.suffix == ".scp"
-#
-#     # read should be équivalent to load (but read is a more general function,
-#     dataset = NDDataset.load("wodger.scp")
-#     assert dataset.name == "wodger"
-#
-#
-# def test_read_dir():
-#     datadir = Path(prefs.datadir)
-#
-#     nd = scp.read()  # should open a dialog (but to selects individual filename
-#
-#     # if we want the whole dir  - listdir must be used
-#     # this is equivalent to read_dir with a dialog to select directories only
-#     nd = scp.read(listdir=True, directory=datadir / "irdata" / "subdir")
-#     assert len(A) == 4
-#     A1 = scp.read_dir(directory=datadir / "irdata" / "subdir")
-#     assert nd == A1
-#
-#     # listdir is not necessary if a directory location is given as a single argument
-#     B = scp.read(datadir / "irdata" / "subdir", listdir=True)
-#     B1 = scp.read(datadir / "irdata" / "subdir")
-#     assert B == B1
-#
-#     # if a directory is passed as a keyword, the behavior is different:
-#     # a dialog for file selection occurs except if listdir is set to True
-#     scp.read(
-#         directory=datadir / "irdata" / "subdir", listdir=True
-#     )  # -> file selection dialog
-#     scp.read(
-#         directory=datadir / "irdata" / "subdir", listdir=True
-#     )  # -> directory selection dialog
+    # do not merge
+    nd = read(
+        {"somename.fk": "a fake content", "anothername.fk": "another fake content"},
+        merge=False,
+    )
+    assert isinstance(nd, list)
+    assert len(nd) == 2

@@ -6,9 +6,9 @@
 #  =====================================================================================================================
 #
 """
-This module define a generic class to import files and contents.
+This module define a generic class to import directories, files and contents.
 """
-__all__ = ["read"]
+__all__ = ["read", "read_dir"]
 __dataset_methods__ = __all__
 
 from warnings import warn
@@ -16,8 +16,10 @@ from datetime import datetime, timezone
 from traitlets import HasTraits, List, Dict, Type, Unicode
 
 from spectrochempy.utils import pathclean, check_filename_to_open
+from spectrochempy.utils import get_directory_name, get_filenames
 from spectrochempy.utils.exceptions import DimensionsCompatibilityError, ProtocolError
-from spectrochempy.core import warning_, error_
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core import warning_
 
 FILETYPES = [
     ("scp", "SpectroChemPy files (*.scp)"),
@@ -65,12 +67,14 @@ class Importer(HasTraits):
 
     def __init__(self):
 
+        super().__init__()
+
         self.filetypes = dict(FILETYPES)
         temp = list(zip(*FILETYPES))
         temp.reverse()
         self.protocols = dict(zip(*temp))
-        #  add alias
 
+        #  add alias
         self.alias = dict(ALIAS)
 
     # ..........................................................................
@@ -108,10 +112,7 @@ class Importer(HasTraits):
                     self.datasets = self._do_merge(self.datasets, **kwargs)
 
             elif key and key[1:] not in list(zip(*FILETYPES))[0] + list(zip(*ALIAS))[0]:
-                error_(
-                    f"KeyError: `{res}` has filetype `{key}` unknown in spectrochempy"
-                )
-                raise (KeyError)
+                raise TypeError(f"Filetype `{key}` is unknown in spectrochempy")
 
             else:
                 # here files are read from the disk using filenames
@@ -120,7 +121,11 @@ class Importer(HasTraits):
         # now we will reset preference for this newly loaded datasets
         if len(self.datasets) > 0:
             prefs = self.datasets[0].preferences
-            prefs.reset()
+            try:
+                prefs.reset()
+            except FileNotFoundError:
+                # probably style not found
+                pass
 
         if len(self.datasets) == 1:
             nd = self.datasets[0]  # a single dataset is returned
@@ -176,12 +181,14 @@ class Importer(HasTraits):
                 return
         datasets = []
         for filename in files[key]:
-            try:
-                read_ = getattr(self, f"_read_{key[1:]}")
-            except AttributeError:
-                warning_(
-                    f"a file with extension {key} was found in this directory but will be ignored"
-                )
+            filename = pathclean(filename)
+            # try:
+            read_ = getattr(self, f"_read_{key[1:]}")
+            # except AttributeError:
+            #     warning_(
+            #         f"a file with extension {key} was found in this directory but will be ignored"
+            #     )
+            #
             try:
                 res = read_(self.objtype(), filename, **kwargs)
                 if not isinstance(res, list):
@@ -190,16 +197,18 @@ class Importer(HasTraits):
                     datasets.extend(res)
 
             except FileNotFoundError:
-                error_(f"No file with name `{filename}` could be found. Sorry! ")
-
                 raise
+
             except IOError as e:
                 warning_(str(e))
 
-            except Exception:
-                warning_(
-                    f"The file `{filename}` has a known extension but it could not be read. It is ignored!"
-                )
+            except NotImplementedError as e:
+                warning_(str(e))
+
+            # except Exception as e:
+            #     warning_(
+            #         f"The file `{filename}` has a known extension but it could not be read. It is ignored!"
+            #     )
 
         if len(datasets) > 1:
             datasets = self._do_merge(datasets, **kwargs)
@@ -220,13 +229,14 @@ class Importer(HasTraits):
             if dim0 == 1:
                 merged = kwargs.get("merge", True)  # priority to the keyword setting
         else:
+            # not homogeneous
             merged = kwargs.get("merge", False)
 
         if merged:
             # Try to stack the dataset into a single one
             try:
                 dataset = self.objtype.stack(datasets)
-                if kwargs.pop("sortbydate", True):
+                if dataset.coordset is not None and kwargs.pop("sortbydate", True):
                     dataset.sort(dim="y", inplace=True)
                     dataset.history = (
                         str(datetime.now(timezone.utc)) + ":sorted by date"
@@ -407,11 +417,85 @@ def read(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
+def read_dir(directory=None, **kwargs):
+    """
+    Read an entire directory.
+
+    Open a list of readable files in a and store data/metadata in a dataset or a list of datasets according to the
+    following rules :
+
+    * 2D spectroscopic data (e.g. valid *.spg files or matlab arrays, etc...) from
+      distinct files are stored in distinct NDdatasets.
+    * 1D spectroscopic data (e.g., *.spa files) in a given directory are grouped
+      into single NDDataset, providing their unique dimension are compatible. If not,
+      an error is generated.
+
+    Parameters
+    ----------
+    directory : str or pathlib
+        Folder where are located the files to read.
+
+    Returns
+    --------
+    read_dir
+        |NDDataset| or list of |NDDataset|.
+
+    Depending on the python version, the order of the datasets in the list may change.
+
+    See Also
+    --------
+    read_topspin : Read TopSpin Bruker NMR spectra.
+    read_omnic : Read Omnic spectra.
+    read_opus : Read OPUS spectra.
+    read_spg : Read Omnic *.spg grouped spectra.
+    read_spa : Read Omnic *.Spa single spectra.
+    read_srs : Read Omnic series.
+    read_csv : Read CSV files.
+    read_zip : Read Zip files.
+    read_matlab : Read Matlab files.
+
+    Examples
+    --------
+
+    >>> scp.preferences.csv_delimiter = ','
+    >>> A = scp.read_dir('irdata')
+    >>> len(A)
+    4
+
+    >>> B = scp.NDDataset.read_dir()
+    """
+    kwargs["listdir"] = True
+    importer = Importer()
+    return importer(directory, **kwargs)
+
+
+# ======================================================================================================================
+# Private functions
+# ======================================================================================================================
+
+
+@importermethod
+def _read_dir(*args, **kwargs):
+    _, directory = args
+    directory = get_directory_name(directory)
+    files = get_filenames(directory, **kwargs)
+    datasets = []
+    for key in files.keys():
+        if key:
+            importer = Importer()
+            nd = importer(files[key], **kwargs)
+            if not isinstance(nd, list):
+                nd = [nd]
+            datasets.extend(nd)
+    return datasets
+
+
 # ..............................................................................
 @importermethod
 def _read_scp(*args, **kwargs):
-    dataset, filename = args
-    return dataset.load(filename, **kwargs)
+    _, filename = args
+    nd = NDDataset.load(filename, **kwargs)
+    return nd
 
 
 # ..............................................................................
@@ -422,27 +506,27 @@ def _read_(*args, **kwargs):
     if not filename or filename.is_dir():
         return Importer._read_dir(*args, **kwargs)
 
-    protocol = kwargs.get("protocol", None)
-    if protocol and ".scp" in protocol:
-        return dataset.load(filename, **kwargs)
-
-    elif filename and filename.name in ("fid", "ser", "1r", "2rr", "3rrr"):
-        # probably an Topspin NMR file
-        return dataset.read_topspin(filename, **kwargs)
-    elif filename:
-        # try scp format
-        try:
-            return dataset.load(filename, **kwargs)
-        except Exception:
-            # lets try some common format
-            for key in ["omnic", "opus", "topspin", "labspec", "matlab", "jdx"]:
-                try:
-                    _read = getattr(dataset, f"read_{key}")
-                    f = f"{filename}.{key}"
-                    return _read(f, **kwargs)
-                except Exception:
-                    pass
-            raise NotImplementedError
+    # protocol = kwargs.get("protocol", None)
+    # if protocol and ".scp" in protocol:
+    #     return dataset.load(filename, **kwargs)
+    #
+    # elif filename and filename.name in ("fid", "ser", "1r", "2rr", "3rrr"):
+    #     # probably an Topspin NMR file
+    #     return dataset.read_topspin(filename, **kwargs)
+    # elif filename:
+    #     # try scp format
+    #     try:
+    #         return dataset.load(filename, **kwargs)
+    #     except Exception:
+    #         # lets try some common format
+    #         for key in ["omnic", "opus", "topspin", "labspec", "matlab", "jdx"]:
+    #             try:
+    #                 _read = getattr(dataset, f"read_{key}")
+    #                 f = f"{filename}.{key}"
+    #                 return _read(f, **kwargs)
+    #             except Exception:
+    #                 pass
+    #         raise NotImplementedError
 
 
 # ------------------------------------------------------------------

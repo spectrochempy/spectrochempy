@@ -13,8 +13,8 @@ import warnings
 from pathlib import Path, WindowsPath, PosixPath
 
 __all__ = [
-    "get_filename",
-    "readdirname",
+    "get_filenames",
+    "get_directory_name",
     "pathclean",
     "patterns",
     "check_filenames",
@@ -90,7 +90,7 @@ def pathclean(paths):
     from spectrochempy.utils import is_windows
 
     def _clean(path):
-        if isinstance(path, Path):
+        if isinstance(path, (Path, PosixPath, WindowsPath)):
             path = path.name
         if is_windows():
             path = WindowsPath(path)  # pragma: no cover
@@ -105,7 +105,7 @@ def pathclean(paths):
         return Path(path)
 
     if paths is not None:
-        if isinstance(paths, (str, Path)):
+        if isinstance(paths, (str, Path, PosixPath, WindowsPath)):
             path = str(paths)
             return _clean(path).expanduser()
         elif isinstance(paths, (list, tuple)):
@@ -171,7 +171,7 @@ def check_filenames(*args, **kwargs):
     filenames = None
 
     if args:
-        if isinstance(args[0], (str, Path)):
+        if isinstance(args[0], (str, Path, PosixPath, WindowsPath)):
             # one or several filenames are passed - make Path objects
             filenames = pathclean(args)
         elif isinstance(args[0], bytes):
@@ -179,7 +179,9 @@ def check_filenames(*args, **kwargs):
             # as filename where not given we passed the 'unnamed' string
             # return a dictionary
             return {pathclean(f"no_name_{i}"): arg for i, arg in enumerate(args)}
-        elif isinstance(args[0], list) and isinstance(args[0][0], (str, Path)):
+        elif isinstance(args[0], list) and isinstance(
+            args[0][0], (str, Path, PosixPath, WindowsPath)
+        ):
             filenames = pathclean(args[0])
         elif isinstance(args[0], list) and isinstance(args[0][0], bytes):
             return {pathclean(f"no_name_{i}"): arg for i, arg in enumerate(args[0])}
@@ -203,7 +205,7 @@ def check_filenames(*args, **kwargs):
         # no filename specified open a dialog
         filetypes = kwargs.pop("filetypes", ["all files (*)"])
         directory = pathclean(kwargs.pop("directory", None))
-        filenames = get_filename(
+        filenames = get_filenames(
             directory=directory, dictionary=True, filetypes=filetypes, **kwargs
         )
     if filenames and not isinstance(filenames, dict):
@@ -302,7 +304,7 @@ def _topspin_check_filename(filename, **kwargs):
     return filename
 
 
-def get_filename(*filenames, **kwargs):
+def get_filenames(*filenames, **kwargs):
     """
     Return a list or dictionary of the filenames of existing files, filtered by extensions.
 
@@ -364,7 +366,7 @@ def get_filename(*filenames, **kwargs):
     directory = None
     if len(filenames) == 1:
         # check if it is a directory
-        f = readdirname(filenames[0])
+        f = get_directory_name(filenames[0])
         if f and f.is_dir():
             # this specify a directory not a filename
             directory = f
@@ -385,7 +387,7 @@ def get_filename(*filenames, **kwargs):
             # will result to a error
             filenames = [directory / filename for filename in filenames]
         else:
-            directory = readdirname(directory)
+            directory = get_directory_name(directory)
 
     # check the parent directory
     # all filenames must reside in the same directory
@@ -399,8 +401,8 @@ def get_filename(*filenames, **kwargs):
                 "This is not accepted by the readfilename function."
             )
 
-        # use readdirname to complete eventual missing part of the absolute path
-        directory = readdirname(parents.pop())
+        # use get_directory_name to complete eventual missing part of the absolute path
+        directory = get_directory_name(parents.pop())
 
         filenames = [filename.name for filename in filenames]
 
@@ -463,10 +465,10 @@ def get_filename(*filenames, **kwargs):
                     return None
 
             elif NODIAL and not directory:
-                directory = readdirname(environ.get("TEST_FOLDER"))
+                directory = get_directory_name(environ.get("TEST_FOLDER"))
 
             elif NODIAL and kwargs.get("protocol", None) == ["topspin"]:
-                directory = readdirname(environ.get("TEST_NMR_FOLDER"))
+                directory = get_directory_name(environ.get("TEST_NMR_FOLDER"))
 
             if directory is None:
                 return None
@@ -495,11 +497,13 @@ def get_filename(*filenames, **kwargs):
 
     # now we have either a list of the selected files
     if isinstance(filenames, list):
-        if not all(isinstance(elem, Path) for elem in filenames):
+        if not all(
+            isinstance(elem, (Path, PosixPath, WindowsPath)) for elem in filenames
+        ):
             raise IOError("one of the list elements is not a filename!")
 
     # or a single filename
-    if isinstance(filenames, Path):
+    if isinstance(filenames, (Path, PosixPath, WindowsPath)):
         filenames = [filenames]
 
     filenames = pathclean(filenames)
@@ -531,7 +535,7 @@ def get_filename(*filenames, **kwargs):
         return filenames
 
 
-def readdirname(directory, **kwargs):
+def get_directory_name(directory, **kwargs):
     """
     Return a valid directory name.
 

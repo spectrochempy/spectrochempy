@@ -99,3 +99,6 @@ def test_read_opus():
     # No protocol?
     G = NDDataset.read(os.path.join("irdata", "OPUS", "test.0000"))
     assert G.shape == (1, 2567)
+
+    nd = NDDataset.read(protocol="opus", directory=datadir / "irdata" / "OPUS")
+    assert nd.shape == (4, 2567)

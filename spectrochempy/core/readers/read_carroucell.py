@@ -7,7 +7,7 @@
 """
 This module provides methods for reading data in a directory.
 """
-__all__ = ["read_dir", "read_carroucell"]
+__all__ = ["read_carroucell"]
 __dataset_methods__ = __all__
 
 import os
@@ -21,64 +21,10 @@ import xlrd
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.utils import get_filename, readdirname
+from spectrochempy.utils import get_directory_name
 from spectrochempy.core import info_, print_
-from spectrochempy.core.readers.importer import importermethod, Importer
 
-
-# ======================================================================================================================
-# Public functions
-# ======================================================================================================================
-def read_dir(directory=None, **kwargs):
-    """
-    Read an entire directory.
-
-    Open a list of readable files in a and store data/metadata in a dataset or a list of datasets according to the
-    following rules :
-
-    * 2D spectroscopic data (e.g. valid *.spg files or matlab arrays, etc...) from
-      distinct files are stored in distinct NDdatasets.
-    * 1D spectroscopic data (e.g., *.spa files) in a given directory are grouped
-      into single NDDataset, providing their unique dimension are compatible. If not,
-      an error is generated.
-
-    Parameters
-    ----------
-    directory : str or pathlib
-        Folder where are located the files to read.
-
-    Returns
-    --------
-    read_dir
-        |NDDataset| or list of |NDDataset|.
-
-    Depending on the python version, the order of the datasets in the list may change.
-
-    See Also
-    --------
-    read_topspin : Read TopSpin Bruker NMR spectra.
-    read_omnic : Read Omnic spectra.
-    read_opus : Read OPUS spectra.
-    read_spg : Read Omnic *.spg grouped spectra.
-    read_spa : Read Omnic *.Spa single spectra.
-    read_srs : Read Omnic series.
-    read_csv : Read CSV files.
-    read_zip : Read Zip files.
-    read_matlab : Read Matlab files.
-
-    Examples
-    --------
-
-    >>> scp.preferences.csv_delimiter = ','
-    >>> A = scp.read_dir('irdata')
-    >>> len(A)
-    4
-
-    >>> B = scp.NDDataset.read_dir()
-    """
-    kwargs["listdir"] = True
-    importer = Importer()
-    return importer(directory, **kwargs)
+# from spectrochempy.core.readers.importer import importermethod, Importer
 
 
 # TODO: make an importer function, when a test directory will be provided.
@@ -144,7 +90,7 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
         if isinstance(dataset, str) and dataset != "":
             directory = dataset
 
-    directory = readdirname(directory)
+    directory = get_directory_name(directory)
 
     if not directory:
         # probably cancel has been chosen in the open dialog
@@ -272,27 +218,6 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
 
     # several datasets returned, sorted by sample #
     return sorted(datasets, key=lambda ds: int(re.split("-|_", ds.name)[0]))
-
-
-# ======================================================================================================================
-# Private functions
-# ======================================================================================================================
-
-
-@importermethod
-def _read_dir(*args, **kwargs):
-    _, directory = args
-    directory = readdirname(directory)
-    files = get_filename(directory, **kwargs)
-    datasets = []
-    for key in files.keys():
-        if key:
-            importer = Importer()
-            nd = importer(files[key], **kwargs)
-            if not isinstance(nd, list):
-                nd = [nd]
-            datasets.extend(nd)
-    return datasets
 
 
 if __name__ == "__main__":
