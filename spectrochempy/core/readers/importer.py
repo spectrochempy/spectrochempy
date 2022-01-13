@@ -34,12 +34,14 @@ FILETYPES = [
     ("csv", "CSV files (*.csv)"),
     ("excel", "Microsoft Excel files (*.xls)"),
     ("zip", "Compressed folder of data files (*.zip)"),
-    ("quadera", "Quadera ascii files (*.asc)")
+    ("quadera", "Quadera ascii files (*.asc)"),
+    ("galactic", "Thermo Galactic files (*.spc)")
     #  ('all', 'All files (*.*)')
 ]
 ALIAS = [
     ("spg", "omnic"),
     ("spa", "omnic"),
+    ("spc", "galactic"),
     ("srs", "omnic"),
     ("mat", "matlab"),
     ("txt", "labspec"),
@@ -312,6 +314,7 @@ def read(*paths, **kwargs):
     read_labspec : Read Raman LABSPEC spectra.
     read_spg : Read Omnic *.spg grouped spectra.
     read_spa : Read Omnic *.Spa single spectra.
+    read_spc : Read Galactic *.spc files.
     read_srs : Read Omnic series.
     read_csv : Read CSV files.
     read_zip : Read Zip files.
@@ -429,7 +432,7 @@ def _read_(*args, **kwargs):
             return dataset.load(filename, **kwargs)
         except Exception:
             # lets try some common format
-            for key in ["omnic", "opus", "topspin", "labspec", "matlab", "jdx"]:
+            for key in ["omnic", "opus", "topspin", "labspec", "matlab", "jdx", "galactic"]:
                 try:
                     _read = getattr(dataset, f"read_{key}")
                     f = f"{filename}.{key}"
