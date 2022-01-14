@@ -131,7 +131,7 @@ jobs:
 
       - name: Report Coverage info to CodeClimate
         if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.9'
-          && matrix.os == 'ubuntu-latest' && steps.vars.outputs.HAS_CC_TEST_REPORTER_ID}}
+          && matrix.os == 'ubuntu-latest' && steps.vars.outputs.HAS_CC_TEST_REPORTER_ID == 'true'}}
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         run: |
