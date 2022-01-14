@@ -11,9 +11,5 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 
 def test_read_spc():
 
-    A = spc.read_spc("galacticdata/000001 Spectrum.spc")
-
-    assert A[0].description == "Dataset from spc file."
-
-
-
+    A = spc.read_spc("galacticdata/000001_Spectrum.spc")
+    assert A.description == "Dataset from spc file."
