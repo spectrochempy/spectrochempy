@@ -6,6 +6,7 @@ on:
     branches:
       - develop
       - master
+      - workflow
 
   pull_request:
 
@@ -103,9 +104,21 @@ jobs:
         run: |
           python setup.py develop
 
+      - name: Initialize CodeClimate variable
+        id: vars
+        shell: bash
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        run: |
+          # check for CC_TEST_REPORTER_ID availability 
+          unset HAS_CC_TEST_REPORTER_ID
+          if [ -n $CC_TEST_REPORTER_ID ]; then HAS_CC_TEST_REPORTER_ID='true' ; fi
+          echo set-output name=HAS_CC_TEST_REPORTER_ID::${HAS_CC_TEST_REPORTER_ID}
+          echo ::set-output name=HAS_CC_TEST_REPORTER_ID::${HAS_CC_TEST_REPORTER_ID}
+
       - name: Download CodeClimate reporter
         if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.9'
-          && matrix.os == 'ubuntu-latest' }}
+          && matrix.os == 'ubuntu-latest' && steps.vars.outputs.HAS_CC_TEST_REPORTER_ID == 'true'}}
         run: |
           # downloading cc-test-reporter
           curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
@@ -118,7 +131,7 @@ jobs:
 
       - name: Report Coverage info to CodeClimate
         if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.9'
-          && matrix.os == 'ubuntu-latest' }}
+          && matrix.os == 'ubuntu-latest' && steps.vars.outputs.HAS_CC_TEST_REPORTER_ID == 'true'}}
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         run: |
