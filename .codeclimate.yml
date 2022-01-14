@@ -20,13 +20,16 @@ checks:
       threshold: 100
   method-complexity:
     config:
-      threshold: 100
+      threshold: 150
   similar-code:
     config:
-      threshold: 50
+      threshold: 100
   nested-control-flow:
     config:
-      threshold: 5
+      threshold: 10
+  return-statements:
+    config:
+      threshold: 10
 
 exclude_patterns:
   - ".ci/"

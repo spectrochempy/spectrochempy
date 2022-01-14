@@ -1,10 +1,8 @@
 #  -*- coding: utf-8 -*-
 #
 #  =====================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie,
-#  Caen, France.
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in
-#  the root directory
+#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
 #  =====================================================================================================================
 #
 """
@@ -303,7 +301,7 @@ def read_spg(*paths, **kwargs):
     """
 
     kwargs["filetypes"] = ["OMNIC files (*.spg)"]
-    kwargs["protocol"] = ["spg"]
+    kwargs["protocol"] = ["spg", "spa"]
     importer = Importer()
     return importer(*paths, **kwargs)
 
@@ -530,11 +528,11 @@ def _read_spg(*args, **kwargs):
 
     # Check if it is really a spg file (in this case title his the filename
     # with extension spg)
-    if spg_title[-4:].lower() != ".spg":
-        # probably not a spg content
-        # try .spa
-        fid.close()
-        return _read_spa(*args, **kwargs)
+    # if spg_title[-4:].lower() != ".spg":  # pragma: no cover
+    #     # probably not a spg content
+    #     # try .spa
+    #     fid.close()
+    #     return _read_spa(*args, **kwargs)
 
     # Count the number of spectra
     # From hex 120 = decimal 304, individual spectra are described
@@ -575,7 +573,7 @@ def _read_spg(*args, **kwargs):
     # the number of occurences of the key '02' is number of spectra
     nspec = np.count_nonzero((keys == 2))
 
-    if nspec == 0:
+    if nspec == 0:  # pragma: no cover
         raise IOError(
             "Error : File format not recognized" " - information markers not found"
         )
@@ -609,25 +607,25 @@ def _read_spg(*args, **kwargs):
         titles.append(info02["title"])
 
     # check the consistency of xaxis and data units
-    if np.ptp(nx) != 0:
+    if np.ptp(nx) != 0:  # pragma: no cover
         raise ValueError(
             "Error : Inconsistent data set -"
             " number of wavenumber per spectrum should be "
             "identical"
         )
-    elif np.ptp(firstx) != 0:
+    elif np.ptp(firstx) != 0:  # pragma: no cover
         raise ValueError(
             "Error : Inconsistent data set - " "the x axis should start at same value"
         )
-    elif np.ptp(lastx) != 0:
+    elif np.ptp(lastx) != 0:  # pragma: no cover
         raise ValueError(
             "Error : Inconsistent data set -" " the x axis should end at same value"
         )
-    elif len(set(xunits)) != 1:
+    elif len(set(xunits)) != 1:  # pragma: no cover
         raise ValueError(
             "Error : Inconsistent data set - " "data units should be identical"
         )
-    elif len(set(units)) != 1:
+    elif len(set(units)) != 1:  # pragma: no cover
         raise ValueError(
             "Error : Inconsistent data set - " "x axis units should be identical"
         )
@@ -743,12 +741,6 @@ def _read_spg(*args, **kwargs):
 
 # ..............................................................................
 @importermethod
-def _read_omnic(*args, **kwargs):
-    return Importer._read_spg(*args, **kwargs)
-
-
-# ..............................................................................
-@importermethod
 def _read_spa(*args, **kwargs):
     dataset, filename = args
     content = kwargs.get("content", False)
@@ -829,7 +821,7 @@ def _read_spa(*args, **kwargs):
             history = _readbtext(fid, history_pos)
             gotinfos[2] = True
 
-        elif not key:
+        elif not key:  # pragma: no cover
             break
 
         pos += 16
@@ -890,7 +882,7 @@ def _read_srs(*args, **kwargs):
 
     if frombytes:
         # in this case, filename is actualy a byte content
-        fid = io.BytesIO(filename)
+        fid = io.BytesIO(filename)  # pragma: no cover
     else:
         fid = open(filename, "rb")
     # at pos=306 (hex:132) is the position of the xheader
@@ -928,7 +920,7 @@ def _read_srs(*args, **kwargs):
                 fid.seek(pos)
                 key = _fromfile(fid, dtype="uint16", count=1)
 
-                if key > 0:
+                if key > 0:  # pragma: no cover
                     # a background file was selected; it is present as a
                     # single sided interferogram
                     #  key could be the zpd of the double sided interferogram
@@ -986,7 +978,7 @@ def _read_srs(*args, **kwargs):
             # hex 02 00 00 00 18 00 00 00 00 00 48 43 00 50 43 47
             # this is likely header of data field of reprocessed series
             # the first one is skipped TODO: check the nature of these data
-            if background is None:
+            if background is None:  # pragma: no cover
                 # skip
                 background = NDDataset()
             else:  # this is likely the first spectrum of the series
@@ -1125,7 +1117,7 @@ def _readbtext(fid, pos):
     except UnicodeDecodeError:
         try:
             text = btext.decode(encoding="latin_1")
-        except UnicodeDecodeError:
+        except UnicodeDecodeError:  # pragma: no cover
             text = btext.decode(encoding="utf-8", errors="ignore")
     return text
 
@@ -1161,19 +1153,19 @@ def _readheader02(fid, pos):
     if key == 1:
         out["xunits"] = "cm ^ -1"
         out["xtitle"] = "wavenumbers"
-    elif key == 2:
+    elif key == 2:  # pragma: no cover
         out["xunits"] = None
         out["xtitle"] = "data points"
-    elif key == 3:
+    elif key == 3:  # pragma: no cover
         out["xunits"] = "nm"
         out["xtitle"] = "wavelengths"
-    elif key == 4:
+    elif key == 4:  # pragma: no cover
         out["xunits"] = "um"
         out["xtitle"] = "wavelengths"
-    elif key == 32:
+    elif key == 32:  # pragma: no cover
         out["xunits"] = "cm^-1"
         out["xtitle"] = "raman shift"
-    else:
+    else:  # pragma: no cover
         out["xunits"] = None
         out[
             "xtitle"
@@ -1185,28 +1177,28 @@ def _readheader02(fid, pos):
     if key == 17:
         out["units"] = "absorbance"
         out["title"] = "absorbance"
-    elif key == 16:
+    elif key == 16:  # pragma: no cover
         out["units"] = "percent"
         out["title"] = "transmittance"
-    elif key == 11:
+    elif key == 11:  # pragma: no cover
         out["units"] = "percent"
         out["title"] = "reflectance"
-    elif key == 12:
+    elif key == 12:  # pragma: no cover
         out["units"] = None
         out["title"] = "Log(1/R)"
-    elif key == 20:
+    elif key == 20:  # pragma: no cover
         out["units"] = "Kubelka_Munk"
         out["title"] = "Kubelka-Munk"
-    elif key == 22:
+    elif key == 22:  # pragma: no cover
         out["units"] = "V"
         out["title"] = "detector signal"
-    elif key == 26:
+    elif key == 26:  # pragma: no cover
         out["units"] = None
         out["title"] = "photoacoustic"
-    elif key == 31:
+    elif key == 31:  # pragma: no cover
         out["units"] = None
         out["title"] = "raman intensity"
-    else:
+    else:  # pragma: no cover
         out["units"] = None
         out[
             "title"
@@ -1235,7 +1227,7 @@ def _read_xheader(fid, pos):
     key = _fromfile(fid, dtype="uint8", count=1)
 
     if key not in (1, 3):
-        raise ValueError(
+        raise ValueError(  # pragma: no cover
             "xheader key={} not recognized yet.".format(key)
             + " Please report this error (and the corresponding srs "
             "file) to the developers"
@@ -1260,22 +1252,22 @@ def _read_xheader(fid, pos):
     # read xaxis unit
     fid.seek(pos + 8)
     key = _fromfile(fid, dtype="uint8", count=1)
-    if key == 1:
+    if key == 1:  # pragma: no cover
         out["xunits"] = "cm ^ -1"
         out["xtitle"] = "wavenumbers"
     elif key == 2:
         out["xunits"] = None
         out["xtitle"] = "data points"
-    elif key == 3:
+    elif key == 3:  # pragma: no cover
         out["xunits"] = "nm"
         out["xtitle"] = "wavelengths"
-    elif key == 4:
+    elif key == 4:  # pragma: no cover
         out["xunits"] = "um"
         out["xtitle"] = "wavelengths"
-    elif key == 32:
+    elif key == 32:  # pragma: no cover
         out["xunits"] = "cm^-1"
         out["xtitle"] = "raman shift"
-    else:
+    else:  # pragma: no cover
         out["xunits"] = None
         out[
             "xtitle"
@@ -1283,35 +1275,35 @@ def _read_xheader(fid, pos):
     # read data unit
     fid.seek(pos + 12)
     key = _fromfile(fid, dtype="uint8", count=1)
-    if key == 17:
+    if key == 17:  # pragma: no cover
         out["units"] = "absorbance"
         out["title"] = "absorbance"
-    elif key == 16:
+    elif key == 16:  # pragma: no cover
         out["units"] = "percent"
         out["title"] = "transmittance"
-    elif key == 11:
+    elif key == 11:  # pragma: no cover
         out["units"] = "percent"
         out["title"] = "reflectance"
-    elif key == 12:
+    elif key == 12:  # pragma: no cover
         out["units"] = None
         out["title"] = "log(1/R)"
-    elif key == 20:
+    elif key == 20:  # pragma: no cover
         out["units"] = "Kubelka_Munk"
         out["title"] = "Kubelka-Munk"
     elif key == 22:
         out["units"] = "V"
         out["title"] = "detector signal"
-    elif key == 26:
+    elif key == 26:  # pragma: no cover
         out["units"] = None
         out["title"] = "photoacoustic"
-    elif key == 31:
+    elif key == 31:  # pragma: no cover
         out["units"] = None
         out["title"] = "raman intensity"
-    else:
+    else:  # pragma: no cover
         out["title"] = None
-        out[
-            "title"
-        ] = "intensity"  # warning: 'The nature of data is not  # recognized, title set to \'Intensity\')
+        out["title"] = "intensity"
+        # warning: 'The nature of data is not
+        # recognized, title set to \'Intensity\')
 
     fid.seek(pos + 16)
     out["firstx"] = _fromfile(fid, "float32", 1)
@@ -1330,10 +1322,10 @@ def _read_xheader(fid, pos):
         #     out['title'] = 'Volts'
         #     out['xunits'] = 'dimensionless'
         #     out['xtitle'] = 'Data points'
-        if out["firstx"] > out["lastx"]:
+        if out["firstx"] > out["lastx"]:  # pragma: no cover
             out["firstx"], out["lastx"] = out["lastx"], out["firstx"]
         out["mode"] = "rapidscan"
-    else:
+    else:  # pragma: no cover
         out["mode"] = "GC-IR or TGA-IR"
 
     out["name"] = _readbtext(fid, pos + 938)

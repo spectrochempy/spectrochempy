@@ -8,7 +8,7 @@ import pytest
 
 from spectrochempy.core import preferences as prefs
 from spectrochempy import NO_DISPLAY
-from spectrochempy.utils import get_filename, check_filenames, pathclean
+from spectrochempy.utils import get_filenames, check_filenames, pathclean
 
 
 def test_pathclean():
@@ -36,12 +36,12 @@ def test_pathclean():
 def test_get_filename():
 
     # should read in the default prefs.datadir (and for testing we fix the name to environ['TEST_FILE']
-    f = get_filename(
+    f = get_filenames(
         filetypes=["OMNIC files (*.spg *.spa *.srs)", "SpectroChemPy files (*.scp)"]
     )
     assert isinstance(f, dict)
 
-    f = get_filename(
+    f = get_filenames(
         filetypes=["OMNIC files (*.spg *.spa *.srs)", "SpectroChemPy files (*.scp)"],
         dictionary=False,
     )
@@ -52,23 +52,23 @@ def test_get_filename():
         assert f[0] == prefs.datadir / environ["TEST_FILE"]
 
     # directory specified by a keyword as well as the filename
-    f = get_filename("nh4y-activation.spg", directory="irdata")
+    f = get_filenames("nh4y-activation.spg", directory="irdata")
     assert f == {".spg": [Path(prefs.datadir) / "irdata" / "nh4y-activation.spg"]}
 
     # directory specified in the filename as a subpath of the data directory
-    f = get_filename("irdata/nh4y-activation.spg")
+    f = get_filenames("irdata/nh4y-activation.spg")
     assert f == {".spg": [Path(prefs.datadir) / "irdata" / "nh4y-activation.spg"]}
 
     # no directory specified (filename must be in the working or the default  data directory
-    f = get_filename("wodger.spg")
+    f = get_filenames("wodger.spg")
 
     # if it is not found an error is generated
     with pytest.raises(IOError):
-        f = get_filename("nh4y-activation.spg")
+        f = get_filenames("nh4y-activation.spg")
 
     # directory is implicit (we get every files inside, with an allowed extension)
     # WARNING:  Must end with a backslash
-    f = get_filename(
+    f = get_filenames(
         "irdata/",
         filetypes=[
             "OMNIC files (*.spa, *.spg)",
@@ -83,7 +83,7 @@ def test_get_filename():
 
     # should raise an error
     with pytest.raises(IOError):
-        get_filename(
+        get_filenames(
             "~/xxxx",
             filetypes=[
                 "OMNIC files (*.sp*)",

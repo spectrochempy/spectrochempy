@@ -23,7 +23,6 @@ from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.utils import (
     SpectroChemPyException,
     pathclean,
-    check_filenames,
     ScpFile,
     check_filename_to_save,
     json_serialiser,
@@ -299,7 +298,8 @@ class NDIO(HasTraits):
             if kwargs.get("directory", None) is not None:
                 filename = pathclean(kwargs.get("directory")) / filename
             if not filename.exists():
-                filename = check_filenames(filename, **kwargs)[0]
+                raise FileNotFoundError(f"No file with name {filename} could be found.")
+                # filename = check_filenames(filename, **kwargs)[0]
             fid = open(filename, "rb")
 
         # get zip file

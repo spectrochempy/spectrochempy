@@ -691,9 +691,9 @@
    utils.exceptions.SpectroChemPyWarning
    utils.exceptions.UnitsCompatibilityError
    utils.file
-   utils.file.get_filename
+   utils.file.get_filenames
    utils.file.pathclean
-   utils.file.readdirname
+   utils.file.get_directory_name
    utils.jsonutils
    utils.jsonutils.json_decoder
    utils.jsonutils.json_serialiser

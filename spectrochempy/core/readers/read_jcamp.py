@@ -112,7 +112,7 @@ def read_jdx(*args, **kwargs):
     "read_dx reading method is deprecated and may be removed in next versions "
     "- use read_jcamp instead"
 )
-def read_dx(*args, **kwargs):
+def read_dx(*args, **kwargs):  # pragma: no cover
     return read_jcamp(*args, **kwargs)
 
 
@@ -142,14 +142,14 @@ def _read_jdx(*args, **kwargs):
         keyword, text = _readl(fid)
     if keyword != "EOF":
         jdx_title = text
-    else:
+    else:  # pragma: no cover
         raise ValueError("No ##TITLE LR in outer block header")
 
     while (keyword != "##DATA TYPE") and (keyword != "##DATATYPE"):
         keyword, text = _readl(fid)
     if keyword != "EOF":
         jdx_data_type = text
-    else:
+    else:  # pragma: no cover
         raise ValueError("No ##DATA TYPE LR in outer block header")
 
     if jdx_data_type == "LINK":
@@ -361,7 +361,7 @@ def _read_jdx(*args, **kwargs):
 
 # ..............................................................................
 @importermethod
-def _read_dx(*args, **kwargs):
+def _read_dx(*args, **kwargs):  # pragma: no cover
     return _read_jdx(*args, **kwargs)
 
 
