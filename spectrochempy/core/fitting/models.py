@@ -8,9 +8,33 @@
 This module holds the definitions all the various models.
 """
 
-__all__ = []
+__all__ = [
+    "polynomialbaseline",
+    "gaussianmodel",
+    "lorentzianmodel",
+    "voigtmodel",
+    "assymvoigtmodel",
+    "getmodel",
+]
 
 import numpy as np
+
+# from functools import wraps
+#
+# def make_ndarray_compatibility(func):
+#     """
+#     Decorator which add units to arguments of a model according to the input dataset units
+#     """
+#
+#     @wraps(func)
+#     def new_func(x, *args, **kwargs):
+#
+#         if hasattr(x, "implements") and x.implements in ['NDDataset', 'Coord', 'LinearCoord']:
+#         args = tuple([_remove_units(arg) for arg in args])
+#         kwargs = {key: _remove_units(val) for key, val in kwargs.items()}
+#         return func(*args, **kwargs)
+#
+#     return new_func
 
 
 ############
@@ -33,6 +57,7 @@ class polynomialbaseline(object):
         f(x) = ampl * \\sum_{i=2}^{max} c_i*x^i
     """
 
+    type = "1D"
     args = ["ampl"]
     args.extend(["c_%d" % i for i in range(2, 11)])
 
@@ -92,7 +117,9 @@ class gaussianmodel(object):
     where :math:`\\sigma = \\frac{width}{2.3548}`.
     """
 
+    type = "1D"
     args = ["ampl", "width", "pos"]
+
     script = """
     MODEL: line%(id)d\nshape: gaussianmodel
     $ ampl: %(ampl).3f, 0.0, None
@@ -121,7 +148,9 @@ class lorentzianmodel(object):
     where :math:`\\lambda = \\frac{width}{2}`.
     """
 
+    type = "1D"
     args = ["ampl", "width", "pos"]
+
     script = """
     MODEL: line%(id)d\nshape: lorentzianmodel
     $ ampl: %(ampl).3f, 0.0, None
@@ -147,7 +176,9 @@ class voigtmodel(object):
     Commonly used for spectral line fitting.
     """
 
+    type = "1D"
     args = ["ampl", "width", "ratio", "pos"]
+
     script = """
     MODEL: line%(id)d\nshape: voigtmodel
     $ ampl: %(ampl).3f, 0.0, None
@@ -180,6 +211,7 @@ class assymvoigtmodel(object):
     A. L. Stancik and E. B. Brauns, Vibrational Spectroscopy, 2008, 47, 66-69.
     """
 
+    type = "1D"
     args = ["ampl", "width", "ratio", "assym", "pos"]
 
     script = """
