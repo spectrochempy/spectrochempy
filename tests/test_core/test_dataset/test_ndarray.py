@@ -57,7 +57,7 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert hash(d0) is not None
     assert repr(d0) == "NDArray: empty (size: 0)"
 
-    # assignement to basic write allowed properties
+    # assignment to basic write allowed properties
 
     d0.data = [1, 2, 3]  # put some data
     assert_array_equal(d0.data, np.array([1, 2, 3]))
@@ -175,7 +175,7 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert len(ndarraymask.history) == 1  # one line already in
     assert len(d8.history) == 2  # copy added
 
-    # intialisation with only labels
+    # initialisation with only labels
 
     d9 = NDArray(labels="a b c d e f g h i j".split(), title="labeled")
     assert d9.is_labeled

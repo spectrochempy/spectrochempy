@@ -678,7 +678,7 @@ def _remove_digital_filter(dic, data):
 #
 #     # set the spectral parameters
 #     # (si,   sw_h, bf1, -sr + o1)
-#     # size,   sw, obs,      car)  (correspondance with nmrglue udic)
+#     # size,   sw, obs,      car)  (correspondence with nmrglue udic)
 #
 #     # derived units (these are in ppm)
 #
@@ -745,7 +745,7 @@ def read_topspin(*paths, **kwargs):
         Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
         The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
-        For exemples on how to use this feature, one can look in the ``tests/tests_readers`` directory.
+        For examples on how to use this feature, one can look in the ``tests/tests_readers`` directory.
     listdir : bool, optional
         If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
         is True. It is assumed that all the files correspond to current reading protocol (default=True)
@@ -1015,7 +1015,7 @@ def _read_topspin(*args, **kwargs):
         meta.isfreq = [True] * (parmode + 1)  # at least we assume this
         meta.phc0 = [0] * data.ndim
 
-    # this transformation is to make data coherent with bruker processsing
+    # this transformation is to make data coherent with bruker processing
     if meta.iscomplex[-1]:
         data = np.conj(data * np.exp(np.pi * 1j / 2.0))
 
@@ -1329,7 +1329,7 @@ def _read_topspin(*args, **kwargs):
 #             meta.si = [si for si in data.shape]
 #             meta.isfreq = [True] * (parmode + 1)  # at least we assume this
 #
-#         # this transformation is to make data coherent with bruker processsing
+#         # this transformation is to make data coherent with bruker processing
 #         if meta.iscomplex[-1]:
 #             data = np.conj(data * np.exp(np.pi * 1j / 2.))
 #
@@ -1345,7 +1345,7 @@ def _read_topspin(*args, **kwargs):
 #
 #         data = _norm(data)
 #
-#         # add some additional inforation in meta
+#         # add some additional information in meta
 #         meta.expno = [int(os.path.basename(path))]
 #
 #         # and the metadata (and make them readonly)
@@ -1435,7 +1435,7 @@ def _read_topspin(*args, **kwargs):
 #         # find what are the differences in meta
 #         meta = list_meta[0]
 #
-#         mkeys = set()  # will stroe the modified keys
+#         mkeys = set()  # will store the modified keys
 #         from spectrochempy.utils import dict_compare
 #         for i, d1 in enumerate(list_meta):
 #             for j, d2 in enumerate(list_meta[i + 1:]):
@@ -1463,9 +1463,9 @@ def _read_topspin(*args, **kwargs):
 #             else:
 #                 meta_diffs[key] = [meta[key][-1] for meta in list_meta]
 #
-#         # we can now store the meta for the datset object
+#         # we can now store the meta for the dataset object
 #         dataset.meta.update(list_meta[-1])
-#         # we additionaly set the list of variable parameters whch will indicate
+#         # we additionally set the list of variable parameters which will indicate
 #         # the orders of the labels for the new axis
 #         dataset.meta.labels = mkeys
 #         dataset.meta.readonly = True  # and from now no more modifications in metas
@@ -1477,7 +1477,7 @@ def _read_topspin(*args, **kwargs):
 #             # we create un array with the list of array
 #             newdata = np.stack(list_data, axis=0)
 #
-#             # store it in the current datset
+#             # store it in the current dataset
 #             dataset.data = newdata
 #             # complexity?
 #             complexity = [False] + meta.iscomplex

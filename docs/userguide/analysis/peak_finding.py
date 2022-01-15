@@ -278,7 +278,7 @@ offset = 0.15
     ax=ax, label=label, m="v", mfc=color, mec=color, ms=5, clear=False, data_only=True
 )
 
-# find peaks with distance >= 10 (only tht highest of the two maxima at ~ 2075 is detected)
+# find peaks with distance >= 10 (only the highest of the two maxima at ~ 2075 is detected)
 peaks, properties = s.find_peaks(distance=10)
 color = "red"
 label = "distance>10"

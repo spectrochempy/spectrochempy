@@ -1,0 +1,5 @@
+[codespell]
+skip = ./build,./.git,*/auto-examples
+count =
+summary =
+ignore-words-list = nd,ALS,ser,basf,hist

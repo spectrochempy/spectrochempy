@@ -73,7 +73,7 @@ def read_quadera(*paths, **kwargs):
         Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
         The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
-        For exemples on how to use this feature, one can look in the ``tests/tests_readers`` directory
+        For examples on how to use this feature, one can look in the ``tests/tests_readers`` directory
     listdir : bool, optional
         If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
         is True. It is assumed that all the files correspond to current reading protocol (default=True)
@@ -84,7 +84,7 @@ def read_quadera(*paths, **kwargs):
     ------
     Currently the acquisition time is that of the first channel as the timeshift of other channels are typically
     within few seconds, and the data of other channels are NOT interpolated
-    Todo: check with users wether data interpolation should be made
+    Todo: check with users whether data interpolation should be made
 
     See Also
     --------

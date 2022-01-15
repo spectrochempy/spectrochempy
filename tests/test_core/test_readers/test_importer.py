@@ -190,7 +190,7 @@ def test_importer(monkeypatch, fs):
     nd = NDDataset.read_fk(f)
     assert nd == fake_dataset()
 
-    # and a NDDataset isntance function
+    # and a NDDataset instance function
     nd = NDDataset().read_fk(f)
     assert nd == fake_dataset()
 

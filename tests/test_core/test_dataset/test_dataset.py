@@ -203,7 +203,7 @@ def test_nddataset_coords_indexer():
     coord0 = np.linspace(4000, 1000, 10)
     coord1 = np.linspace(0, 60, 10)  # wrong length
     coord2 = np.linspace(20, 30, 10)
-    with pytest.raises(ValueError):  # wrong lenth
+    with pytest.raises(ValueError):  # wrong length
         da = scp.NDDataset(
             dx,
             coordset=[coord0, coord1, coord2],
@@ -759,7 +759,7 @@ def test_nddataset_multiple_axis(
     assert da.coordset["x"] == coordm
     assert da["x"] == coordm
     assert da.x == coordm
-    # but we can also specify, which axis should be returned explicitely
+    # but we can also specify, which axis should be returned explicitly
     # by an index or a label
     assert da.coordset["x_1"] == coord2b
     assert da.coordset["x_2"] == coord2

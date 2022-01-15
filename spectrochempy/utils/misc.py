@@ -142,7 +142,7 @@ def as_quaternion(*args):
     Parameters
     ----------
     *args : ndarray with dtype:float or complex
-        The quaternion array components: If there is 4 components, then we assume it is the four compoents of the
+        The quaternion array components: If there is 4 components, then we assume it is the four components of the
         quaternion array: w, x, y, z. If there is only two, they are casted to complex and correspond respectively
         to w + i.x and y + j.z.
     """
@@ -345,7 +345,7 @@ def gt_eps(arr):
 
     Returns
     --------
-    bool : results ot checking
+    bool : results of checking
         True means that at least some values are greater than epsilon.
     """
     return np.any(arr > EPSILON)

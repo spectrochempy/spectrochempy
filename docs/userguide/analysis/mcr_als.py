@@ -183,7 +183,7 @@ _ = mcr1.St.plot()
 # the same order of magnitude.
 #
 # It is possible to normalize the intensity of the spectral profiles by setting the 'normSpec' parameter to True.
-# With this option, the spectra are normalized such that their euclidian norm is 1. The other normalization option is
+# With this option, the spectra are normalized such that their euclidean norm is 1. The other normalization option is
 # normspec = 'max', whereby the maximum intensity of the spectra is 1. Let's look at the effect of
 # both normalizations:
 

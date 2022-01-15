@@ -40,10 +40,10 @@ def _phase_method(method):
         else:
             new = dataset
 
-        swaped = False
+        swapped = False
         if axis != -1:
             new.swapdims(axis, -1, inplace=True)  # must be done in  place
-            swaped = True
+            swapped = True
 
         # Get the coordinates for the last dimension
         x = new.coordset[dim]
@@ -51,7 +51,7 @@ def _phase_method(method):
         # check if the dimensionality is compatible with this kind of functions
         if x.unitless or x.dimensionless or x.units.dimensionality != "[time]":
 
-            # extract inital phase from metadata
+            # extract initial phase from metadata
             def _check_units(par, default_units, inv=False):
                 if not isinstance(par, Quantity):
                     par *= Quantity(1.0, default_units)
@@ -119,8 +119,8 @@ def _phase_method(method):
                 "Phase processing was thus cancelled"
             )
 
-        # restore original data order if it was swaped
-        if swaped:
+        # restore original data order if it was swapped
+        if swapped:
             new.swapdims(axis, -1, inplace=True)  # must be done inplace
 
         return new
@@ -242,7 +242,7 @@ def pk_exp(dataset, phc0=0.0, pivot=0.0, exptc=0.0, **kwargs):
 #     entropyd: int, optional, default=2
 #         order of derivation for method entropy
 #     gamma: float, optional
-#         relative weigth for method entropy error with respect to negmin
+#         relative weight for method entropy error with respect to negmin
 #     axis: optional, default=-1
 #
 #     """

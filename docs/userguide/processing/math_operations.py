@@ -503,7 +503,7 @@ _ = dataset.plot(figsize=(6, 2.5))
 _ = dataset2.plot(figsize=(6, 2.5))
 
 # %% [markdown]
-# #### Arithmetics
+# #### Arithmetic
 
 # %% [markdown]
 # ##### add

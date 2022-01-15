@@ -35,10 +35,10 @@ def _zf_method(method):
         else:
             new = dataset
 
-        swaped = False
+        swapped = False
         if axis != -1:
             new.swapdims(axis, -1, inplace=True)  # must be done in  place
-            swaped = True
+            swapped = True
 
         x = new.coordset[dim]
         if hasattr(x, "_use_time_axis"):
@@ -71,8 +71,8 @@ def _zf_method(method):
                 "The processing was thus cancelled"
             )
 
-        # restore original data order if it was swaped
-        if swaped:
+        # restore original data order if it was swapped
+        if swapped:
             new.swapdims(axis, -1, inplace=True)  # must be done inplace
 
         return new

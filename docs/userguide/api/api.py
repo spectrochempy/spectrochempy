@@ -149,7 +149,7 @@ except ImportError as e:
     scp.error_("OOPS, THAT'S AN IMPORT ERROR! : %s" % e)
 
 # %% [markdown]
-# The error will stop the execution if not catched.
+# The error will stop the execution if not caught.
 #
 # This is a basic behavior of python : one way to avoid stopping the execution without displaying a message is :
 

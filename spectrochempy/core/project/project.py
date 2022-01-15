@@ -49,7 +49,7 @@ class Project(AbstractProject, NDIO):
         """
         A manager for projects, datasets and scripts.
 
-        It can handle multiple datsets, sub-projects, and scripts in a main project.
+        It can handle multiple datasets, sub-projects, and scripts in a main project.
 
         Parameters
         ----------
@@ -60,7 +60,7 @@ class Project(AbstractProject, NDIO):
         argnames : list, optional
             If not None, this list gives the names associated to each
             objects passed as args. It MUST be the same length that the
-            number of args, or an error wil be raised.
+            number of args, or an error will be raised.
             If None, the internal name of each object will be used instead.
         name : str, optional
             The name of the project.  If the name is not provided, it will be
@@ -323,7 +323,7 @@ class Project(AbstractProject, NDIO):
         if self._parent is not None:
             # A parent project already exists for this sub-project but the
             # entered values gives a different parent. This is not allowed,
-            # as it can produce impredictable results. We will fisrt remove it
+            # as it can produce impredictable results. We will first remove it
             # from the current project.
             self._parent.remove_project(self.name)
         self._parent = value

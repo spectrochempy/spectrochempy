@@ -27,7 +27,7 @@ def write_csv(*args, **kwargs):
 
     Parameters
     ----------
-    filename: str or pathlib objet, optional
+    filename: str or pathlib object, optional
         If not provided, a dialog is opened to select a file for writing.
     protocol : {'scp', 'matlab', 'jcamp', 'csv', 'excel'}, optional
         Protocol used for writing. If not provided, the correct protocol

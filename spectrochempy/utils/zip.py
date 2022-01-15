@@ -56,7 +56,7 @@ class ScpFile(Mapping):  # lgtm[py/missing-equals]
     It assumes that files in the archive have a ``.npy`` extension in
     the case of the dataset's ``.scp`` file format) ,  ``.scp``  extension
     in the case of project's ``.pscp`` file format and finally ``pars.json``
-    files which contains other information on the structure and  attibutes of
+    files which contains other information on the structure and  attributes of
     the saved objects. Other files are ignored.
     """
 

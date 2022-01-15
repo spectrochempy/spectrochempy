@@ -754,7 +754,7 @@ class PlotPreferences(MetaConfigurable):
         ["tight", "standard"],
         default_value="standard",
         help=r""""tight" or "standard". "tight" is
-    incompatible with pipe-based animation backends but will workd with temporary file based ones:
+    incompatible with pipe-based animation backends but will worked with temporary file based ones:
     e.g. setting animation.writer to ffmpeg will not work, use ffmpeg_file instead""",
     ).tag(config=True, kind="")
     savefig_pad_inches = Float(

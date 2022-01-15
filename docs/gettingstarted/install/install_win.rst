@@ -75,7 +75,7 @@ We highly recommend that all new users install |scpy| interface via Conda. You c
 #. Install |scpy|
 
    The conda installer has to solve all packages dependencies and is definitely
-   a bit slow. So we recommand to install `mamba <https://github.com/mamba-org/mamba>`__
+   a bit slow. So we recommend to install `mamba <https://github.com/mamba-org/mamba>`__
    as a drop-in replacement via:
 
    .. sourcecode:: bash

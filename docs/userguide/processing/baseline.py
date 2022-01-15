@@ -115,7 +115,7 @@ _ = scp.abc(X).plot()
 # select the 4500-3500 cm$^{-1}$ range. Note that the ordering has no importance and using `[3500.0, 4500.]` would
 # lead to exactly the same result. It is also possible to formally pick a single wavenumber `3750.`.
 #
-# The first step is then to select the verious regions that we expect to belong to the baseline
+# The first step is then to select the various regions that we expect to belong to the baseline
 
 # %%
 ranges = [5900.0, 5400.0], 4550.0, [4500.0, 4000.0], [2100.0, 2000.0], [1550.0, 1555.0]
@@ -225,7 +225,7 @@ _ = blc.corrected.plot()
 # (for detail: see [Vilmin et al. Analytica Chimica Acta 891 (2015)](http://dx.doi.org/10.1016/j.aca.2015.06.006)).
 #
 # If this option is selected, the user should also choose `npc`, the number of principal components used to model the
-# baseline. In a sense, this parameter has the same role as the `order` parameter, except tha it will affect how well
+# baseline. In a sense, this parameter has the same role as the `order` parameter, except that it will affect how well
 # the baseline fits the selected regions, but on *both dimensions: wavelength and acquisition time*. In particular a
 # large value of `npc` will lead to overfit of baseline variation with time and will lead to the same result as the
 # `sequential` method while a too small `value` would miss important principal component underlying the baseline change

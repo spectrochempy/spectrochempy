@@ -99,7 +99,7 @@ creation of the container, the image containing these componrents will be downlo
 
   The container will be unable to access directories at upper levels than those specified in ``-v`` bindings. Thus if
   for instance you need to access to a directory where you your data are savec you will need to write a binding
-  explicitely. You can bind as many directory you want.
+  explicitly. You can bind as many directory you want.
 
   .. sourcecode:: bash
 
@@ -124,7 +124,7 @@ creation of the container, the image containing these componrents will be downlo
 
 * ``start.sh jupyter lab`` This is a command to start the Jupyter lab server.
 
-Once the ``Docker run`` command is exectuted in a terminal, it will output somme informations and display the internal
+Once the ``Docker run`` command is exectuted in a terminal, it will output some information and display the internal
 address at the end:
 
 .. sourcecode:: bash
@@ -143,7 +143,7 @@ address at the end:
 
 Go to you browser and paste ``http://127.0.0.1:8888/lab?token=45bf716d7cf02f1b7157448de04db163df5e80eb78920004`` in
 the address bar to display the application interface.
-It your port binding is different, for exemple ``-p 10000:8888``, then you will have to change this address to:
+It your port binding is different, for example ``-p 10000:8888``, then you will have to change this address to:
 ``http://127.0.0.1:10000/lab?token=45bf716d7cf02f1b7157448de04db163df5e80eb78920004``. The token string is necessary
 for security reason, but can be replaced by a password.
 

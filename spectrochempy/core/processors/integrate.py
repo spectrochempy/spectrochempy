@@ -114,7 +114,7 @@ def trapz(dataset, **kwargs):
 
 
 trapz.__doc__ = f"""
-An alias of `trapezoid` kept for backwards compatibily.
+An alias of `trapezoid` kept for backwards compatibility.
 {trapezoid.__doc__}"""
 
 
@@ -181,5 +181,5 @@ def simps(dataset, **kwargs):
 
 
 simps__doc__ = f"""
-An alias of `Simpson` kept for backwards compatibily.
+An alias of `Simpson` kept for backwards compatibility.
 {trapezoid.__doc__}"""

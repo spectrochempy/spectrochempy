@@ -2,7 +2,7 @@
 # flake8: noqa
 
 # TODO: reduce the size of the data to accelerate the test
-# TODO: Add example to imporve coverage
+# TODO: Add example to improve coverage
 import pytest
 
 import spectrochempy

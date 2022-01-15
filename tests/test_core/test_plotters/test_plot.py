@@ -70,7 +70,7 @@
 #
 #
 # def test_plot_stack_masked(IR_dataset_2D):
-#     # just to see if masked area do not apppear on the figure
+#     # just to see if masked area do not appear on the figure
 #     dataset = IR_dataset_2D.copy() * 2.
 #     dataset[1300.:900.] = MASKED
 #     dataset.plot_stack(colorbar=False)

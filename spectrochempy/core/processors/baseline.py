@@ -106,12 +106,12 @@ class BaselineCorrection(HasTraits):
             if isinstance(ranges[0], TYPE_INTEGER + TYPE_FLOAT) and isinstance(
                 ranges[1], TYPE_INTEGER + TYPE_FLOAT
             ):
-                # a pair a values, we intepret this as a single range
+                # a pair a values, we interpret this as a single range
                 ranges = [[ranges[0], ranges[1]]]
         # find the single values
         for item in ranges:
             if isinstance(item, TYPE_INTEGER + TYPE_FLOAT):
-                # a single numerical value: intepret this as a single range
+                # a single numerical value: interpret this as a single range
                 item = [item, item]
             self.ranges.append(item)
 
@@ -176,10 +176,10 @@ class BaselineCorrection(HasTraits):
         # Swap the axes to be sure to be in this situation
         axis, dim = new.get_axis(**kwargs, negative_axis=True)
 
-        swaped = False
+        swapped = False
         if axis != -1:
             new.swapdims(axis, -1, inplace=True)
-            swaped = True
+            swapped = True
 
         lastcoord = new.coordset[dim]
 
@@ -279,7 +279,7 @@ class BaselineCorrection(HasTraits):
         else:
             new.history = "Interpolation: Pchip. \n"
 
-        if swaped:
+        if swapped:
             new = new.swapdims(axis, -1)
 
         self.corrected = new
@@ -320,11 +320,11 @@ class BaselineCorrection(HasTraits):
         # Swap the axes to be sure to be in this situation
         axis, dim = new.get_axis(**kwargs, negative_axis=True)
 
-        # swaped = False
+        # swapped = False
         if axis != -1:
             new.swapdims(axis, -1, inplace=True)
             origin.swapdims(axis, -1, inplace=True)
-            # swaped = True
+            # swapped = True
 
         lastcoord = new.coordset[dim]
 
@@ -517,7 +517,7 @@ def abc(dataset, dim=-1, **kwargs):
     basetype : string, optional, default: 'linear'
         See notes - available = linear, basf, ...
     window : float/int, optional, default is 0.05
-        If float <1 then the corresponding percentage ot the axis size is taken as window.
+        If float <1 then the corresponding percentage of the axis size is taken as window.
     nbzone : int, optional, default is 32
         Number of zones. We will divide the size of the last axis by this number
         to determine the number of points in each zone (nw).
@@ -584,10 +584,10 @@ def abc(dataset, dim=-1, **kwargs):
         new = dataset
 
     axis, dim = new.get_axis(dim, negative_axis=True)
-    swaped = False
+    swapped = False
     if axis != -1:
         new.swapdims(axis, -1, inplace=True)  # must be done in  place
-        swaped = True
+        swapped = True
 
     base = _basecor(new.data.real, **kwargs)
 
@@ -596,8 +596,8 @@ def abc(dataset, dim=-1, **kwargs):
     else:
         new.data = base  # return the baseline
 
-    # restore original data order if it was swaped
-    if swaped:
+    # restore original data order if it was swapped
+    if swapped:
         new.swapdims(axis, -1, inplace=True)  # must be done inplace
 
     new.history = "`abc` Baseline correction applied."

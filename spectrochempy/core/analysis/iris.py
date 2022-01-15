@@ -700,7 +700,7 @@ def menger(x, y):
         - x[1] * y[0]
         - x[2] * y[1]
     )
-    # Euclidian distances
+    # Euclidean distances
     r01 = (x[1] - x[0]) ** 2 + (y[1] - y[0]) ** 2
     r12 = (x[2] - x[1]) ** 2 + (y[2] - y[1]) ** 2
     r02 = (x[2] - x[0]) ** 2 + (y[2] - y[0]) ** 2

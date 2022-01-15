@@ -10,7 +10,7 @@ Installation using Conda
 
 The following steps have been checked only with OSX-Catalina but should work
 with previous versions as well and
-hopfully on the more recent OSX version.
+hopefully on the more recent OSX version.
 
 As said before, we highly recommend that all new users install |scpy|
 interface via Conda. You can install |scpy| in a dedicated
@@ -41,7 +41,7 @@ environment or an existing environment
 
 #.  **Recommended**: you should create a dedicated environment in order to
     isolate the changes made on the installed library from any other previous
-    installation for another applcation.
+    installation for another application.
 
     We will name this new environment `scpy` in this example
     but of course you can use whatever name you want.
@@ -92,7 +92,7 @@ environment or an existing environment
 #. Install |scpy|
 
    The conda installer has to solve all packages dependencies and is definitely
-   a bit slow. So we recommand to install `mamba <https://github.com/mamba-org/mamba>`__
+   a bit slow. So we recommend to install `mamba <https://github.com/mamba-org/mamba>`__
    as a drop-in replacement via:
 
    .. sourcecode:: bash

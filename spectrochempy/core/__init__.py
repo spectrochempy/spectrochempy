@@ -32,7 +32,7 @@ warnings.filterwarnings("ignore")
 # ======================================================================================================================
 
 __all__ = [
-    # Useful librairies alias for the end user avoiding to load them when wild card import is used
+    # Useful libraries alias for the end user avoiding to load them when wild card import is used
     # --------------------------------------------------------------------------------------------
     "np",
     "plt",

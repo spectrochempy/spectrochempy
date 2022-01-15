@@ -74,7 +74,7 @@ def read_jcamp(*paths, **kwargs):
         Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
         The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
-        For exemples on how to use this feature, one can look in the ``tests/tests_readers`` directory.
+        For examples on how to use this feature, one can look in the ``tests/tests_readers`` directory.
     listdir : bool, optional
         If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
         is True. It is assumed that all the files correspond to current reading protocol (default=True).
@@ -214,7 +214,7 @@ def _read_jdx(*args, **kwargs):
                 allintensities = []
                 while keyword != "##END":
                     keyword, text = _readl(fid)
-                    # for each line, get all the values exept the first one (first value = wavenumber)
+                    # for each line, get all the values except the first one (first value = wavenumber)
                     intensities = list(filter(None, text.split(" ")[1:]))
                     if len(intensities) > 0:
                         allintensities += intensities
@@ -254,7 +254,7 @@ def _read_jdx(*args, **kwargs):
                     )
         else:
             raise ValueError(
-                "##FIRST, ##LASTX or ##NPOINTS are unusuable in the spectrum n°", i + 1
+                "##FIRST, ##LASTX or ##NPOINTS are unusable in the spectrum n°", i + 1
             )
 
         # Creation of the acquisition date

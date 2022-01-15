@@ -106,10 +106,10 @@ def _ifft_positive(data):
 def _states_fft(data, tppi=False):
     # FFT transform according to STATES encoding
 
-    # warning: at this point, data must have been swaped so the last dimension is the one used for FFT
+    # warning: at this point, data must have been swapped so the last dimension is the one used for FFT
     wt, yt, xt, zt = as_float_array(
         data
-    ).T  # x and y are exchanged due to swaping of dims
+    ).T  # x and y are exchanged due to swapping of dims
     w, y, x, z = wt.T, yt.T, xt.T, zt.T
 
     sr = (w - 1j * y) / 2.0
@@ -131,10 +131,10 @@ def _states_fft(data, tppi=False):
 def _echoanti_fft(data):
     # FFT transform according to ECHO-ANTIECHO encoding
 
-    # warning: at this point, data must have been swaped so the last dimension is the one used for FFT
+    # warning: at this point, data must have been swapped so the last dimension is the one used for FFT
     wt, yt, xt, zt = as_float_array(
         data
-    ).T  # x and y are exchanged due to swaping of dims
+    ).T  # x and y are exchanged due to swapping of dims
     w, y, x, z = wt.T, xt.T, yt.T, zt.T
 
     c = (w + y) + 1j * (w - y)
@@ -149,10 +149,10 @@ def _echoanti_fft(data):
 def _tppi_fft(data):
     # FFT transform according to TPPI encoding
 
-    # warning: at this point, data must have been swaped so the last dimension is the one used for FFT
+    # warning: at this point, data must have been swapped so the last dimension is the one used for FFT
     wt, yt, xt, zt = as_float_array(
         data
-    ).T  # x and y are exchanged due to swaping of dims
+    ).T  # x and y are exchanged due to swapping of dims
     w, y, x, z = wt.T, xt.T, yt.T, zt.T
 
     sx = w + 1j * y
@@ -330,10 +330,10 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
 
     # The last dimension is always the dimension on which we apply the fourier transform.
     # If needed, we swap the dimensions to be sure to be in this situation
-    swaped = False
+    swapped = False
     if axis != -1:
         new.swapdims(axis, -1, inplace=True)  # must be done in  place
-        swaped = True
+        swapped = True
 
     # Select the last coordinates
     x = new.coordset[dim]
@@ -578,8 +578,8 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             new.meta.pivot[-1] = abs(new).coordmax(dim=dim)
             new.meta.readonly = True
 
-    # restore original data order if it was swaped
-    if swaped:
+    # restore original data order if it was swapped
+    if swapped:
         new.swapdims(axis, -1, inplace=True)  # must be done inplace
 
     return new

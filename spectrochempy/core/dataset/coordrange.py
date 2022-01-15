@@ -76,7 +76,7 @@ def trim_ranges(*ranges, reversed=False):
     """
     Set of ordered, non intersecting intervals.
 
-    An ordered set of ranges is contructed from the inputs and returned.
+    An ordered set of ranges is constructed from the inputs and returned.
     *e.g.,* [[a, b], [c, d]] with a < b < c < d or a > b > c > d.
 
     Parameters

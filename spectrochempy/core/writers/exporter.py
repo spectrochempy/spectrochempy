@@ -102,7 +102,7 @@ def write(dataset, filename=None, **kwargs):
     ----------
     dataset : |NDDataset|
         Dataset to write.
-    filename : str or pathlib objet, optional
+    filename : str or pathlib object, optional
         If not provided, a dialog is opened to select a file for writing.
     **kwargs : dict
         See other parameters.

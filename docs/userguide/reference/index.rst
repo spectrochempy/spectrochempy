@@ -21,7 +21,7 @@ To use the API, you must import it using one of the following syntax:
 
 .. ipython:: python
 
-    import spectrochempy as scp  # Recommanded!
+    import spectrochempy as scp  # Recommended!
     nd = scp.NDDataset()
 
 .. ipython:: python

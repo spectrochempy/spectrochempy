@@ -109,7 +109,7 @@ class Fit(HasTraits):
             )  # lgtm[py/mismatched-multiple-assignment]
 
     # *******************************************************************************
-    # public methodss
+    # public methods
     # *******************************************************************************
 
     @staticmethod
@@ -440,7 +440,7 @@ class Fit(HasTraits):
     @staticmethod
     def _ampbas(xi, expe, calc):
         # Automatically calculate correct amplitude A and baseline
-        # (baseline linear model a*i+b) by detemining the zero of the first derivative
+        # (baseline linear model a*i+b) by determining the zero of the first derivative
         # with respect to A, a, and b
         expe = expe.squeeze()
         n = xi.size

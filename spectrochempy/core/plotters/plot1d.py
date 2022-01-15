@@ -186,7 +186,7 @@ def plot_multiple(datasets, method="scatter", pen=True, labels=None, **kwargs):
         return datasets.plot(**kwargs)
 
     if not is_sequence(labels) or len(labels) != len(datasets):
-        # we need a sequence of labels of same lentgh as datasets
+        # we need a sequence of labels of same length as datasets
         raise ValueError(
             "the list of labels must be of same length " "as the datasets list"
         )
@@ -317,7 +317,7 @@ def plot_1D(dataset, method=None, **kwargs):
 
     new = dataset  # .copy()
     if new.size > 1:
-        # dont' apply to array of size one to preserve the x coordinate!!!!
+        # don't apply to array of size one to preserve the x coordinate!!!!
         new = new.squeeze()
 
     # is that a plot with twin axis
@@ -551,7 +551,7 @@ def plot_1D(dataset, method=None, **kwargs):
     ax.set_ylim(zlim)
 
     if data_only:
-        # if data only (we will  ot set axes and labels
+        # if data only (we will not set axes and labels
         # it was probably done already in a previous plot
         new._plot_resume(dataset, **kwargs)
         return ax

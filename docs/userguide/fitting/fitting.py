@@ -401,9 +401,9 @@ shape: assymvoigtmodel
 #   ```
 #
 #
-# * Assymetric Voigt Model -> `assymvoigtmodel`:
+# * Asymmetric Voigt Model -> `assymvoigtmodel`:
 #
-#   An assymetric Voigt model (A. L. Stancik and E. B. Brauns, Vibrational Spectroscopy, 2008, 47, 66-69)
+#   An asymmetric Voigt model (A. L. Stancik and E. B. Brauns, Vibrational Spectroscopy, 2008, 47, 66-69)
 #
 #   ```
 #   MODEL: linez

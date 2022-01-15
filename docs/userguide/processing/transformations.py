@@ -103,7 +103,7 @@ _ = datasetT.plot()
 # %% [markdown]
 # Units of the data and coordinates can be changed, but only towards compatible units. For instance, data are in
 # absorbance units, which are dimensionless (**a.u**). So a dimensionless units such as **radian** is allowed,
-# even if in this case it maks very little sense.
+# even if in this case it makes very little sense.
 
 # %%
 dataset.units = "radian"

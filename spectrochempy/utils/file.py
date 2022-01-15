@@ -60,7 +60,7 @@ def pathclean(paths):
 
     Returns
     -------
-    out : a pathlib object or a list of pathlib objets
+    out : a pathlib object or a list of pathlib objects
         Cleaned path(s)
 
     Examples
@@ -142,7 +142,7 @@ def check_filenames(*args, **kwargs):
     *args
         If passed it is a str, a list of str or a dictionary containing filenames or a byte's contents.
     **kwargs
-        Optional keywords parameters. See Othe parameters
+        Optional keywords parameters. See Other parameters
 
     Other Parameters
     ================
@@ -220,7 +220,7 @@ def check_filenames(*args, **kwargs):
             if directory and kw_directory and directory != kw_directory:
                 # conflict we do not take into account the kw.
                 warnings.warn(
-                    "Two differents directory where specified (from args and keywords arg). "
+                    "Two different directory where specified (from args and keywords arg). "
                     "Keyword `directory` will be ignored!"
                 )
             elif not directory and kw_directory:
