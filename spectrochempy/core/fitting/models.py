@@ -7,34 +7,64 @@
 """
 This module holds the definitions all the various models.
 """
+from functools import wraps
+import numpy as np
+
+from spectrochempy.units import Quantity
+from spectrochempy.core.dataset.ndarray import NDArray
 
 __all__ = [
     "polynomialbaseline",
     "gaussianmodel",
     "lorentzianmodel",
     "voigtmodel",
-    "assymvoigtmodel",
+    "asymmetricvoigtmodel",
+    "sigmoidmodel",
     "getmodel",
 ]
 
-import numpy as np
 
-# from functools import wraps
-#
-# def make_ndarray_compatibility(func):
-#     """
-#     Decorator which add units to arguments of a model according to the input dataset units
-#     """
-#
-#     @wraps(func)
-#     def new_func(x, *args, **kwargs):
-#
-#         if hasattr(x, "implements") and x.implements in ['NDDataset', 'Coord', 'LinearCoord']:
-#         args = tuple([_remove_units(arg) for arg in args])
-#         kwargs = {key: _remove_units(val) for key, val in kwargs.items()}
-#         return func(*args, **kwargs)
-#
-#     return new_func
+def make_units_compatibility(func):
+    """
+    Decorator to take into account the input units
+    """
+
+    def _convert(arg, x_units):
+        if isinstance(arg, Quantity):
+            arg.ito(x_units)  # eventually convert units and rescale
+        # set units to those of x
+        else:
+            if x_units is not None:
+                arg = arg * x_units
+            else:
+                # do not take into account unit of arg
+                return arg
+        return arg.magnitude
+
+    @wraps(func)
+    def wrapper(cls, x, *args, **kwargs):
+
+        if hasattr(x, "units"):
+            x_units = x.units
+            if isinstance(x, NDArray):
+                x = x.data
+            else:
+                x = x.magnitude
+
+            args = list(args)
+            for index, arg in enumerate(args):
+                param = cls.args[index]
+                if param in ["width", "pos"]:
+                    # implicit units: those of x else rescale
+                    args[index] = _convert(arg, x_units)
+            for param, arg in kwargs.items():
+                if param in ["width", "pos"]:
+                    # implicit units: those of x else rescale
+                    kwargs[param] = _convert(arg, x_units)
+
+        return func(cls, x, *args, **kwargs)
+
+    return wrapper
 
 
 ############
@@ -46,6 +76,8 @@ import numpy as np
 # ======================================================================================================================
 # PolynomialBaseline
 # ======================================================================================================================
+
+
 class polynomialbaseline(object):
     """
     Arbitrary-degree polynomial (degree limited to 10, however).
@@ -64,7 +96,7 @@ class polynomialbaseline(object):
     script = """
     MODEL: baseline%(id)d\nshape: polynomialbaseline
     # This polynom starts at the order 2
-    # as a linear baseline is additionnaly fitted automatically
+    # as a linear baseline is additionally fitted automatically
     # parameters must be in the form c_i where i is an integer as shown below
     $ ampl: %(scale).3g, 0.0, None
     $ c_2: 1.0, None, None
@@ -73,10 +105,11 @@ class polynomialbaseline(object):
     # etc...
     """
 
+    @make_units_compatibility
     def f(self, x, ampl, *c_, **kargs):
         c = [0.0, 0.0]
         c.extend(c_)
-        return ampl * np.polyval(np.array(tuple(c))[::-1], x - x[x.size / 2])
+        return ampl * np.polyval(np.array(tuple(c))[::-1], x - x[int(x.size / 2)])
 
 
 # ======================================================================================================================
@@ -118,7 +151,7 @@ class gaussianmodel(object):
     """
 
     type = "1D"
-    args = ["ampl", "width", "pos"]
+    args = ["ampl", "pos", "width"]
 
     script = """
     MODEL: line%(id)d\nshape: gaussianmodel
@@ -127,7 +160,8 @@ class gaussianmodel(object):
     $ pos: %(pos).3f, %(poslb).3f, %(poshb).3f
     """
 
-    def f(self, x, ampl, width, pos, **kargs):
+    @make_units_compatibility
+    def f(self, x, ampl, pos, width, **kargs):
         gb = width / 2.3548
         tsq = (x - pos) * 2 ** -0.5 / gb
         w = np.exp(-tsq * tsq) * (2 * np.pi) ** -0.5 / gb
@@ -149,7 +183,7 @@ class lorentzianmodel(object):
     """
 
     type = "1D"
-    args = ["ampl", "width", "pos"]
+    args = ["ampl", "pos", "width"]
 
     script = """
     MODEL: line%(id)d\nshape: lorentzianmodel
@@ -158,7 +192,8 @@ class lorentzianmodel(object):
     $ pos: %(pos).3f, %(poslb).3f, %(poshb).3f
     """
 
-    def f(self, x, ampl, width, pos, **kargs):
+    @make_units_compatibility
+    def f(self, x, ampl, pos, width, **kargs):
         lb = width / 2.0
         w = lb / np.pi / (x * x - 2 * x * pos + pos * pos + lb * lb)
         w = w * abs(x[1] - x[0])
@@ -177,7 +212,7 @@ class voigtmodel(object):
     """
 
     type = "1D"
-    args = ["ampl", "width", "ratio", "pos"]
+    args = ["ampl", "pos", "width", "ratio"]
 
     script = """
     MODEL: line%(id)d\nshape: voigtmodel
@@ -187,13 +222,14 @@ class voigtmodel(object):
     $ ratio: 0.1, 0.0, 1.0
     """
 
+    @make_units_compatibility
     def f(self, x, ampl, width, ratio, pos, **kargs):
         from scipy.special import wofz
 
         gb = ratio * width / 2.3548
         lb = (1.0 - ratio) * width / 2.0
         if gb < 1.0e-16:
-            return lorentzianmodel().f(x, ampl, lb * 2.0, pos, **kargs)
+            return lorentzianmodel().f(x, ampl, pos, lb * 2.0, **kargs)
         else:
             w = wofz(((x - pos) + 1.0j * lb) * 2 ** -0.5 / gb)
             w = w.real * (2.0 * np.pi) ** -0.5 / gb
@@ -202,17 +238,17 @@ class voigtmodel(object):
 
 
 # ======================================================================================================================
-# Assymetric Voigt Model
+# Asymmetric Voigt Model
 # ======================================================================================================================
-class assymvoigtmodel(object):
+class asymmetricvoigtmodel(object):
     """
-    An assymetric Voigt model.
+    An asymmetric Voigt model.
 
     A. L. Stancik and E. B. Brauns, Vibrational Spectroscopy, 2008, 47, 66-69.
     """
 
     type = "1D"
-    args = ["ampl", "width", "ratio", "assym", "pos"]
+    args = ["ampl", "pos", "width", "ratio", "asym"]
 
     script = """
         MODEL: line%(id)d\nshape: voigtmodel
@@ -220,7 +256,7 @@ class assymvoigtmodel(object):
         $ width: %(width).3f, 0.0, None
         $ pos: %(pos).3f, %(poslb).3f, %(poshb).3f
         $ ratio: 0.1, 0.0, 1.0
-        $ assym: 0.1, 0.0, 1.0
+        $ asym: 0.1, 0.0, 1.0
         """
 
     def lorentz(self, x, g_, pos):
@@ -236,11 +272,39 @@ class assymvoigtmodel(object):
     def g(self, x, width, a):
         return
 
-    def f(self, x, ampl, width, ratio, assym, pos, **kargs):
-        g = 2.0 * width / (1.0 + np.exp(assym * (x - pos)))
+    @make_units_compatibility
+    def f(self, x, ampl, pos, width, ratio, asym, **kargs):
         # sigmoid variation of width
+        g = 2.0 * sigmoidmodel().f(x, width, pos, asym / width)
+        if min(g) < max(g) / 1.0e16:
+            g = g + 1.0e-9
         w = ratio * self.lorentz(x, g, pos) + (1.0 - ratio) * self.gaussian(x, g, pos)
         w = w * abs(x[1] - x[0])
+        return ampl * w
+
+
+class sigmoidmodel(object):
+    """
+    A Sigmoid function.
+
+    .. math::
+        f(x) = \\frac{1.}{1 + \\exp(\\lambda (x-pos))}
+    """
+
+    type = "1D"
+    args = ["ampl", "pos", "asym"]
+
+    script = """
+    MODEL: line%(id)d\nshape: sigmoidmodel
+    $ ampl: %(ampl).3f, 0.0, None
+    $ pos: %(pos).3f, %(poslb).3f, %(poshb).3f
+    $ asym: %(asym).3f, 0.0, None
+
+    """
+
+    @make_units_compatibility
+    def f(self, x, ampl, pos, asym, **kargs):
+        w = 1.0 / (1.0 + np.exp(asym * (x - pos)))
         return ampl * w
 
 

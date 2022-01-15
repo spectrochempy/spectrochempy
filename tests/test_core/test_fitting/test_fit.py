@@ -28,19 +28,19 @@ def script():
     $ gratio: 0.1, 0.0, 1.0
 
     MODEL: LINE_1
-    shape: assymvoigtmodel
+    shape: asymmetricvoigtmodel
         * ampl:  1.0, 0.0, none
         $ pos:   3620, 3400.0, 3700.0
         $ ratio: 0.0147, 0.0, 1.0
-        $ assym: 0.1, 0, 1
+        $ asym: 0.1, 0, 1
         $ width: 200, 0, 1000
 
     MODEL: LINE_2
-    shape: assymvoigtmodel
+    shape: asymmetricvoigtmodel
         $ ampl:  0.2, 0.0, none
         $ pos:   3520, 3400.0, 3700.0
         > ratio: gratio
-        $ assym: 0.1, 0, 1
+        $ asym: 0.1, 0, 1
         $ width: 200, 0, 1000
     """
 

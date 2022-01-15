@@ -5,7 +5,7 @@ import numpy as np
 import spectrochempy as scp
 from spectrochempy.utils import show, MASKED
 
-from spectrochempy.core.fitting.models import assymvoigtmodel
+from spectrochempy.core.fitting.models import asymmetricvoigtmodel
 
 
 def test_EFA(IR_dataset_2D):
@@ -26,11 +26,11 @@ def test_EFA(IR_dataset_2D):
 
     data = np.zeros((ncomponents, ntimes), dtype=np.float64)
 
-    data[0] = assymvoigtmodel().f(
-        t, ampl=4, width=10, ratio=0.5, assym=0.4, pos=50.0
+    data[0] = asymmetricvoigtmodel().f(
+        t, ampl=4, width=10, ratio=0.5, asym=0.4, pos=50.0
     )  # compound 1
-    data[1] = assymvoigtmodel().f(
-        t, ampl=5, width=20, ratio=0.2, assym=0.9, pos=120.0
+    data[1] = asymmetricvoigtmodel().f(
+        t, ampl=5, width=20, ratio=0.2, asym=0.9, pos=120.0
     )  # compound 2
 
     dsc = scp.NDDataset(data=data, coords=[c, t])
