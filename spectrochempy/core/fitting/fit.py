@@ -64,7 +64,7 @@ def getmodel(x, y=None, modelname=None, par=None, **kargs):
     for p in a.args:
         try:
             args.append(par["%s_%s" % (p, modelname)])
-        except KeyError as e:
+        except KeyError as e:  # pragma: no cover
             if p.startswith("c_"):
                 # probably the end of the list
                 # due to a limited polynomial degree
@@ -139,9 +139,9 @@ class Fit(HasTraits):
         else:
             return
 
-        # get parameters form script
+        # get parameters from script
         self.parameterscript = ParameterScript(datasets=self.datasets, script=script)
-        if self.fp is None:
+        if self.fp is None:  # pragma: no cover
             # for unknown reason for now, this sometimes happens during tests
             warn("error with fp")
 
@@ -403,7 +403,6 @@ class Fit(HasTraits):
             return modeldata, names
 
         # Calculates model data
-
         # The first row (i=0) of the modeldata array is the baseline,
         # so we fill the array starting at row 1
         row = 0
@@ -535,16 +534,16 @@ class Fit(HasTraits):
         ) / den
 
         # in case the modeldata is zero, to avoid further errors
-        if np.isnan(A):
+        if np.isnan(A):  # pragma: no cover
             A = 0.0
-        if np.isnan(a):
+        if np.isnan(a):  # pragma: no cover
             a = 0.0
-        if np.isnan(b):
+        if np.isnan(b):  # pragma: no cover
             b = 0.0
         return A, a, b
 
     @staticmethod
-    def _ampbas2D(xi, yj, expe, calc):
+    def _ampbas2D(xi, yj, expe, calc):  # pragma: no cover
         n = float(xi.size)
         m = float(yj.size)
         sE = expe.sum()
