@@ -18,17 +18,18 @@ import io
 import struct
 
 import numpy as np
+from warnings import warn
 
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.importer import importermethod, Importer
 from spectrochempy.units import Quantity
-from spectrochempy.utils import SpectroChemPyException, SpectroChemPyWarning
-
 
 # ======================================================================================================================
 # Public function
 # ======================================================================================================================
+
+
 def read_spc(*paths, **kwargs):
     """
     Open a Thermo Nicolet file or a list of files with extension ``.spg``.
@@ -105,10 +106,8 @@ def read_spc(*paths, **kwargs):
 
     Examples
     ---------
-    >>> scp.read_spc('galacticdata/000001 Spectrum.spc')
-    NNDDataset: [float64] unitless (shape: (y:1, x:14334))
-    >>> scp.read_spa(directory='irdata/subdir', merge=True)
-    NDDataset: [float64] a.u. (shape: (y:4, x:5549))
+    >>> scp.read_spc("galacticdata/BENZENE.spc")
+    NDDataset: [float64] a.u. (shape: (y:1, x:1842))
     """
 
     kwargs["filetypes"] = ["GRAMS/Thermo Galactic files (*.spc)"]
@@ -152,7 +151,7 @@ def _read_spc(*args, **kwargs):
         int16_dtype = ">i2"
         int32_dtype = ">i4"
     else:
-        raise SpectroChemPyException(
+        raise NotImplementedError(
             f"The version {Fversn} is not yet supported. "
             f"Currently supported versions are b'\x4b' and b'\x4c'."
         )
@@ -273,7 +272,7 @@ def _read_spc(*args, **kwargs):
     technique = techniques[int.from_bytes(Fexper, endian)]
 
     if talabs:
-        SpectroChemPyWarning(
+        warn(
             "The SPC file has custom Unit Labels, but spc_reader does not yet take them into account "
             "and will use defaults. "
             "If needed let us know and submit a feature request :) "
@@ -446,7 +445,7 @@ def _read_spc(*args, **kwargs):
         y_title = "Emission"
 
     else:
-        SpectroChemPyWarning(
+        warn(
             "Wrong y unit label code in the SPC file. It will be set to arbitrary intensity"
         )
         y_unit = None
@@ -464,8 +463,15 @@ def _read_spc(*args, **kwargs):
     hour = (Fdate >> 6) % (2 ** 5)
     minute = Fdate % (2 ** 6)
 
-    acqdate = datetime(year, month, day, hour, minute)
-    timestamp = acqdate.timestamp()
+    if (
+        year == 0 or month == 0 or day == 0
+    ):  # occurs when acquision time is not reported
+        timestamp = 0
+        acqdate = datetime.fromtimestamp(0, tz=None)
+        warn(f"No collection time found. Arbitrarily set to {acqdate}")
+    else:
+        acqdate = datetime(year, month, day, hour, minute)
+        timestamp = acqdate.timestamp()
 
     sres = Fres.decode("utf-8")
     ssource = Fsource.decode("utf-8")
@@ -508,12 +514,12 @@ def _read_spc(*args, **kwargs):
             integerY = np.frombuffer(
                 content, offset=544 + txvals * Fnpts * 4, dtype=int16_dtype, count=Fnpts
             )
-            floatY = (2 ** iexp) * integerY / (2 ** 16)
+            floatY = (2 ** iexp) * (integerY / (2 ** 16))
         else:
             integerY = np.frombuffer(
                 content, offset=544 + txvals * Fnpts * 4, dtype=int32_dtype, count=Fnpts
             )
-            floatY = (2 ** iexp) * integerY / (2 ** 32)
+            floatY = (2 ** iexp) * (integerY / (2 ** 32))
 
     if Flogoff:  # read log data header
         (Logsizd, Logsizm, Logtxto, Logbins, Logdsks, Logspar,) = struct.unpack(

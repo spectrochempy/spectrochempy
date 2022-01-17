@@ -11,10 +11,8 @@ the determination of filetype, search locations,  etc...).
 
 The steps to add a specific reader - with the example of Thermo Galactic .spc files - are as follow:
 
-
 .. contents:: Table of Contents:
    :local:
-
 
 1. Add a test and sample files
 ==============================
@@ -37,14 +35,15 @@ folder forked from the `spectrochempy_data repository <https://github.com/spectr
 A minimum test could be, for instance:
 
 .. sourcecode:: python
-    def test_read_spc():
 
+    def test_read_spc():
         A = scp.read_spc("galacticdata/BENZENE.SPC")
         assert A.shape == (1, 1842)
 This will ensure that a dataset with the expected shape has been returned.
 
 For local testing, ensure that the default ``datadir`` correctly points to your local git repo of ``spectrochempy_data``, e.g.:
 .. sourcecode:: python
+
     prefs.datadir = Path(path/to/testdata)
 
 2. Complete FILETYPES and ALIAS
@@ -57,7 +56,8 @@ for galactic files:
     ("galactic", "GRAMS/Thermo Galactic files (*.spc)") #  filetype description to add in FILETYPES
     ("galactic", "spc") #  alias to add in ALIAS
 
-The alias (``spc``) will be used for the public (``scp.read_spc()``)and private ``_read_spc()``) reader funtions.
+The alias (``spc``) will be used to design the specific protocol to read the files.
+It must be used to name the public and private reader functions, e.g. ``scp.read_spc()`` and ``_read_spc()``).
 
 3. Create the reader_xxx.py file
 ================================
@@ -68,7 +68,6 @@ As illustrated below for the .spc example, the minimal file should contain:
 - the public function  ``read_spc``,
 - the private function ``_read_spc`` with the appropriate code
 
-
 .. sourcecode:: python
 
     __all__ = ["read_spc"]
@@ -78,8 +77,6 @@ As illustrated below for the .spc example, the minimal file should contain:
     import io
     from spectrochempy.core.dataset.nddataset import NDDataset
     from spectrochempy.core.readers.importer import importermethod, Importer
-    from spectrochempy.utils import SpectroChemPyException, SpectroChemPyWarning
-
 
     # ======================================================================================================================
     # Public function
@@ -149,14 +146,18 @@ For consistency with existing readers, the following guidelines should be follow
 - The NDDataset should be at least bi-dimensional with a first dimension `x` pertaining to the wavelength/frequency dimension
 and the second dimension `y` pertaining to the acquisition time axis, even if the dataset consists of single 1D spectrum.
 Fopr instance:
+
 .. sourcecode:: python
+
     dataset = NDDataset(np.expand_dims(ndarray,  axis=0))    # a 2D dataset from a 1D ndarray
 
 - The acquisition time axis, when relevant, should preferably use a timestamp as coordinate. The labels should at least contain:
 
     - the acquisition date(s), preferably as a datetime.datetime instances including the timezone (when such data are available in the source file)
     - the initial filename(s) of individual spectra when appropriate
+
 .. sourcecode:: python
+
     _y = Coord(
         [timestamp],
         title="acquisition timestamp (GMT)",
@@ -166,7 +167,9 @@ Fopr instance:
 - Use whenever possible appropriate units for the data and the coordinates (see userguide/units/units.html).
 
 - The NDDataset ``description`` should at least mention the type of file from which the data have been imported, e.g.:
+
 .. sourcecode:: python
+
     dataset.description = kwargs.get("description", "Dataset from spc file.\n")
 
 and whenever possible the informations related to the instrument, acquisition, paramnetrs, etc...
