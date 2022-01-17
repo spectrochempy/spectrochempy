@@ -174,8 +174,11 @@ Fopr instance:
 
 and whenever possible the informations related to the instrument, acquisition, paramnetrs, etc...
 
-4. Polish your code and make a Pull Request
-===========================================
+4. Polish your code and make the Pull Requests
+==============================================
 
 see: :ref:`Contributing to the code <_contributing_codebase>`
 
+Note that in order that the PR to ``spectrochempy` can be properly handeled by Workflow, a **a new release of
+**spectrochempy_data** with the new sample files must be done, else the automated tests will
+fail as these files will not be found.
