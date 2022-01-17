@@ -59,7 +59,7 @@ import spectrochempy as scp
 import numpy as np
 
 # %% [markdown]
-# We additionnaly import the three main SpectroChemPy objects that we will use through this tutorial
+# We additionally import the three main SpectroChemPy objects that we will use through this tutorial
 
 # %%
 from spectrochempy import NDDataset, CoordSet, Coord
@@ -363,7 +363,7 @@ d3D
 # %% [markdown]
 # or more complex objects.
 #
-# For instance here we use datetime.timedelta objets:
+# For instance here we use datetime.timedelta objects:
 
 # %%
 from datetime import timedelta
@@ -677,7 +677,7 @@ nd.preferences.reset()
 _ = nd.plot()
 
 # %% [markdown]
-# Even if we do not specify the **datadir**, the application first look in tht directory by default.
+# Even if we do not specify the **datadir**, the application first look in the directory by default.
 
 # %% [markdown]
 # Now, lets load a NMR dataset (in the Bruker format).

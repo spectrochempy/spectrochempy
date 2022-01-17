@@ -59,7 +59,7 @@ if "pytest" in sys.argv[0] or "py.test" in sys.argv[0]:
     NO_DIALOG = True
 
     # OK, but if we are doing individual function testing in PyCharm
-    # it is interesting to see the plots and the file dialogs (except if we set explicitely --nodisplay argument!
+    # it is interesting to see the plots and the file dialogs (except if we set explicitly --nodisplay argument!
     # if len(sys.argv) > 1 and not any([arg.endswith(".py") for arg in sys.argv[1:]]) and '--nodisplay' not in sys.argv:
     if (
         len(sys.argv) > 1
@@ -120,7 +120,7 @@ if IN_IPYTHON and KERNEL and not NO_DISPLAY:  # pragma: no cover
 
 # set_backend()
 
-# a usefull utilities for dealing with path
+# a useful utilities for dealing with path
 from .utils import pathclean
 
 DATADIR = pathclean(preferences.datadir)

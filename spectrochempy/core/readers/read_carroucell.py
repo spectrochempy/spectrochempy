@@ -76,7 +76,7 @@ def read_carroucell(directory=None, **kwargs):
     ------
     All files are expected to be present in the same directory and their filenames
     are expected to be in the format : X_samplename_YYY.spa
-    and for the backround files : X_BCKG_YYYBG.spa
+    and for the background files : X_BCKG_YYYBG.spa
     where X is the sample holder number and YYY the spectrum number.
 
     Examples

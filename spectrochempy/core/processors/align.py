@@ -93,7 +93,7 @@ def align(dataset, *others, **kwargs):
 
         * 'auto' : sampling is determined automatically from the existing data.
         * int :  if an integer values is specified, then the
-          sampling interval for the interpolated data will be splitted in
+          sampling interval for the interpolated data will be split in
           this number of points.
         * float : If a float value is provided, it determines the interval
         between the interpolated data.
@@ -116,7 +116,7 @@ def align(dataset, *others, **kwargs):
         Issued when the dimensions given in `dim` or `dims` argument are not
         compatibles (units, titles, etc.).
     """
-    # DEVELOPPER NOTE
+    # DEVELOPER NOTE
     # There is probably better methods, but to simplify dealing with
     # LinearCoord, we transform them in Coord before treatment (going back
     # to linear if possible at the end of the process)
@@ -138,7 +138,7 @@ def align(dataset, *others, **kwargs):
     # what's the method to use (by default='outer')
     method = kwargs.pop("method", "outer")
 
-    # trivial cases where alignment is not possible or unecessary
+    # trivial cases where alignment is not possible or unnecessary
     if not objects:
         warning_("No object provided for alignment!")
         return None
@@ -157,7 +157,7 @@ def align(dataset, *others, **kwargs):
     # check compatibility of the dims and prepare the dimension for alignment
     for axis, dim in zip(axis, dims):
 
-        # get all objets to align
+        # get all objects to align
         _objects = {}
         _nobj = 0
 
@@ -225,7 +225,7 @@ def align(dataset, *others, **kwargs):
             if reversed:
                 obj.sort(descend=False, dim=dim, inplace=True)
 
-            # get the current objet coordinates and check compatibility
+            # get the current object coordinates and check compatibility
             coord = obj.coordset[dim]
             if coord.implements("LinearCoord") or coord.linear:
                 coord = Coord(coord, linear=False, copy=True)
@@ -240,7 +240,7 @@ def align(dataset, *others, **kwargs):
             if coord.units != ref_coord.units:
                 coord.ito(ref_coord)
 
-            # adjust the new_cord depending on the method of alignement
+            # adjust the new_cord depending on the method of alignment
 
             new_coord_data = set(np.around(new_coord.data, ndec))
             coord_data = set(np.around(coord.data, ndec))
@@ -274,7 +274,7 @@ def align(dataset, *others, **kwargs):
             dim_index = obj.dims.index(dim)
 
             # prepare slicing keys ; set slice(None) for the untouched
-            # dimensions preceeding the dimension of interest
+            # dimensions preceding the dimension of interest
             prepend_keys = [slice(None)] * dim_index
 
             # New objects for obj must be created with the new coordinates

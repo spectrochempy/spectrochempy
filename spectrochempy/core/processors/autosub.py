@@ -34,7 +34,7 @@ def autosub(
     dataset : |NDDataset|
         Dataset to which we want to subtract the reference data.
     ref : |NDDataset|
-         1D reference data, with a size maching the axis to subtract.
+         1D reference data, with a size matching the axis to subtract.
          (axis parameter).  # TODO : optionally use title of axis.
     *ranges : pair(s) of values
         Any number of pairs is allowed.
@@ -44,7 +44,7 @@ def autosub(
         If dim is an integer it refers to the axis index.
     method : str, optional, default='vardiff'
         'vardiff': minimize the difference of the variance.
-        'ssdiff': minimize the sum of sqares difference of sum of squares.
+        'ssdiff': minimize the sum of squares difference of sum of squares.
     return_coefs : `bool`, optional, default=`False`
          Returns the table of coefficients.
     inplace : `bool`, optional, default=`False`
@@ -56,7 +56,7 @@ def autosub(
     out : |NDDataset|
         The subtracted dataset.
     coefs : `ndarray`.
-        The table of subtraction coeffcients
+        The table of subtraction coefficients
         (only if `return_coefs` is set to `True`).
 
     See Also
@@ -96,10 +96,10 @@ def autosub(
     except Exception:
         raise ValueError("Units of the dataset and reference are not compatible")
 
-    swaped = False
+    swapped = False
     if axis != -1:
         new = new.swapdims(axis, -1)
-        swaped = True
+        swapped = True
 
     # TODO: detect the case where the ref is not exactly with same coords: interpolate?
 
@@ -158,7 +158,7 @@ def autosub(
 
     new._data -= np.dot(x.reshape(-1, 1), ref.data.reshape(1, -1))
 
-    if swaped:
+    if swapped:
         new = new.swapdims(axis, -1)
 
     new.history = (

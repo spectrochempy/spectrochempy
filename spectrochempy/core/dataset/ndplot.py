@@ -127,7 +127,7 @@ class PreferencesSet(Meta):
                 if alias[0].endswith(key) and (not starts and self.parent is not None):
                     # it is a member of a group but we don't know which one:
                     raise KeyError(
-                        f"Found several keys for {key}: {alias}, so it is ambigous. Please choose on one of them"
+                        f"Found several keys for {key}: {alias}, so it is ambiguous. Please choose on one of them"
                     )
                 else:
                     if any([par.startswith(key) for par in alias]):

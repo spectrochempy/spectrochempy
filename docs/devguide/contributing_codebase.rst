@@ -33,17 +33,15 @@ Pre-commit
 
 We encourage you to use `pre-commit hooks <https://pre-commit.com/>`
 to automatically run ``black``, ``flake8`` when you make a git commit. This
-can be done by installing ``pre-commit``:
-
-.. sourcecode:: bash
+can be done by installing ``pre-commit``::
 
     pip install pre-commit
 
+
 and then running::
 
-.. sourcecode:: bash
-
     pre-commit install
+
 
 from the root of the spectrochempy repository. Now all of the styling checks will be
 run each time you commit changes without your needing to run each one manually.
@@ -70,7 +68,7 @@ Optional dependencies
 ---------------------
 
 Optional dependencies (e.g., cantera, nmrglue, ...) should be imported with the private helper
-``spectrochempy._optional.import_optional_dependency``. This ensures a
+``spectrochempy.optional.import_optional_dependency``. This ensures a
 consistent error message when the dependency is not met.
 
 All methods using an optional dependency should include a test asserting that an
@@ -79,7 +77,7 @@ should be skipped if the library is present.
 
 All optional dependencies should be documented in
 :ref:`install_adds` and the minimum required version should be
-set in the ``spectrochempy._optional.VERSIONS`` dict.
+set in the ``spectrochempy.optional.VERSIONS`` dict.
 
 
 .. _contributing.code-formatting:
@@ -153,6 +151,7 @@ directive to the deprecated functions or methods.
 
     def new_func():
         pass
+
 
 You'll also need to
 

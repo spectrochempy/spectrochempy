@@ -619,7 +619,7 @@ class CoordSet(HasTraits):
 
         Notes
         -----
-        If the args are not named, then the attributions are made in coordinate's  name alhabetical order :
+        If the args are not named, then the attributions are made in coordinate's  name alphabetical order :
         e.g, the first title will be for the `x` coordinates, the second for the `y`, etc.
         """
         if len(args) == 1 and (is_sequence(args[0]) or isinstance(args[0], CoordSet)):
@@ -643,7 +643,7 @@ class CoordSet(HasTraits):
 
         Notes
         -----
-        If the args are not named, then the attributions are made in coordinate's name alhabetical order :
+        If the args are not named, then the attributions are made in coordinate's name alphabetical order :
         e.g, the first units will be for the `x` coordinates, the second for the `y`, etc.
 
         Parameters
@@ -824,7 +824,7 @@ class CoordSet(HasTraits):
                 if self.titles.count(index) > 1:
                     warnings.warn(
                         f"Getting a coordinate from its title. However `{index}` occurs several time. Only"
-                        f" the first occurence is returned!"
+                        f" the first occurrence is returned!"
                     )
                 return self._coords.__getitem__(self.titles.index(index))
 
@@ -919,7 +919,7 @@ class CoordSet(HasTraits):
                 if self.titles.count(index) > 1:
                     warnings.warn(
                         f"Getting a coordinate from its title. However `{index}` occurs several time. Only"
-                        f" the first occurence is returned!",
+                        f" the first occurrence is returned!",
                         SpectroChemPyWarning,
                     )
                 index = self.titles.index(index)

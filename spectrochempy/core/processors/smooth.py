@@ -18,7 +18,7 @@ def smooth(dataset, window_length=5, window="flat", **kwargs):
 
     This method is based on the convolution of a scaled window with the signal.
     The signal is prepared by introducing reflected copies of the signal (with the window size) in both ends so that
-    transient parts are minimized in the begining and end part of the output data.
+    transient parts are minimized in the beginning and end part of the output data.
 
     Parameters
     ----------
@@ -70,10 +70,10 @@ def smooth(dataset, window_length=5, window="flat", **kwargs):
     else:
         is_ndarray = True
 
-    swaped = False
+    swapped = False
     if axis != -1:
         new.swapdims(axis, -1, inplace=True)  # must be done in  place
-        swaped = True
+        swapped = True
 
     if (window_length % 2) != 1:
         error_("Window length must be an odd integer.")
@@ -119,8 +119,8 @@ def smooth(dataset, window_length=5, window="flat", **kwargs):
             f"smoothing with a window:{window.__name__} of length {window_length}"
         )
 
-        # restore original data order if it was swaped
-        if swaped:
+        # restore original data order if it was swapped
+        if swapped:
             new.swapdims(axis, -1, inplace=True)  # must be done inplace
     else:
         new = data

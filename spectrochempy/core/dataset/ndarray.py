@@ -611,8 +611,8 @@ class NDArray(HasTraits):
         if kdims is not None:
             if dims is not None:
                 warnings.warn(
-                    "the unamed arguments are interpreted as `dims`. But a named argument `dims` or `axis`"
-                    "(DEPRECATED) has been specified. \nThe unamed arguments will thus be ignored.",
+                    "the unnamed arguments are interpreted as `dims`. But a named argument `dims` or `axis`"
+                    "(DEPRECATED) has been specified. \nThe unnamed arguments will thus be ignored.",
                     SpectroChemPyWarning,
                 )
             dims = kdims
@@ -825,7 +825,7 @@ class NDArray(HasTraits):
             elif isinstance(loc, datetime):
                 # not implemented yet
                 raise NotImplementedError(
-                    "datetime as location is not yet impemented"
+                    "datetime as location is not yet implemented"
                 )  # TODO: date!
 
             else:

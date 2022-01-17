@@ -533,7 +533,7 @@ class NDMath(object):
         #                return getattr(inputs[0], fname)()
         #
         #            if fname in ["fabs", ]:
-        #                # fonction not available for complex data
+        #                # function not available for complex data
         #                raise ValueError(f"Operation `{ufunc}` does not accept complex data!")
         #
         #        # If this reached, data are not complex or hypercomplex
@@ -1468,7 +1468,7 @@ class NDMath(object):
         units : str or ur instance
             Units of the returned object. If not provided, try to copy from the input object.
         coordset : list or Coordset object
-            Coordinates for the returned objet. If not provided, try to copy from the input object.
+            Coordinates for the returned object. If not provided, try to copy from the input object.
 
         See Also
         --------
@@ -1523,7 +1523,7 @@ class NDMath(object):
         units : str or ur instance
             Units of the returned object. If not provided, try to copy from the input object.
         coordset : list or Coordset object
-            Coordinates for the returned objet. If not provided, try to copy from the input object.
+            Coordinates for the returned object. If not provided, try to copy from the input object.
 
         See Also
         --------
@@ -1740,7 +1740,7 @@ class NDMath(object):
         units : str or ur instance
             Units of the returned object. If not provided, try to copy from the input object.
         coordset : list or Coordset object
-            Coordinates for the returned objet. If not provided, try to copy from the input object.
+            Coordinates for the returned object. If not provided, try to copy from the input object.
 
         See Also
         --------
@@ -1792,7 +1792,7 @@ class NDMath(object):
         units : str or ur instance
             Units of the returned object. If not provided, try to copy from the input object.
         coordset : list or Coordset object
-            Coordinates for the returned objet. If not provided, try to copy from the input object.
+            Coordinates for the returned object. If not provided, try to copy from the input object.
 
         See Also
         --------
@@ -2104,7 +2104,7 @@ class NDMath(object):
         units : str or ur instance
             Units of the returned object. If not provided, try to copy from the input object.
         coordset : list or Coordset object
-            Coordinates for the returned objet. If not provided, try to copy from the input object.
+            Coordinates for the returned object. If not provided, try to copy from the input object.
 
         See Also
         --------
@@ -2170,7 +2170,7 @@ class NDMath(object):
         units : str or ur instance
             Units of the returned object. If not provided, try to copy from the input object.
         coordset : list or Coordset object
-            Coordinates for the returned objet. If not provided, try to copy from the input object.
+            Coordinates for the returned object. If not provided, try to copy from the input object.
 
         See Also
         --------
@@ -2579,7 +2579,7 @@ class NDMath(object):
         units : str or ur instance
             Units of the returned object. If not provided, try to copy from the input object.
         coordset : list or Coordset object
-            Coordinates for the returned objet. If not provided, try to copy from the input object.
+            Coordinates for the returned object. If not provided, try to copy from the input object.
 
         See Also
         --------
@@ -2636,7 +2636,7 @@ class NDMath(object):
         units : str or ur instance
             Units of the returned object. If not provided, try to copy from the input object.
         coordset : list or Coordset object
-            Coordinates for the returned objet. If not provided, try to copy from the input object.
+            Coordinates for the returned object. If not provided, try to copy from the input object.
 
         See Also
         --------

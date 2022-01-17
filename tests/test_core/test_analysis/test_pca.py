@@ -81,3 +81,9 @@ def test_compare_scikit_learn():
     )
 
     show()
+
+
+def _test_issue_15():
+    x = NDDataset.read_omnic("irdata/nh4y-activation.spg")
+    my_pca = PCA(x)
+    my_pca.reconstruct(n_pc=3)

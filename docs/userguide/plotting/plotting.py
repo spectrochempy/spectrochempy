@@ -141,7 +141,7 @@ _ = dataset.plot()
 # %% [markdown]
 # ### Change the `NDDataset.preferences`
 # We can change the default plot configuration for this dataset by changing its `preferences' attributes
-# (see at the ned ot this tutorial  for an overview of all the available parameters).
+# (see at the end of this tutorial  for an overview of all the available parameters).
 
 # %%
 prefs = dataset.preferences  # we will use prefs instead of dataset.preference

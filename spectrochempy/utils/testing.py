@@ -42,7 +42,6 @@ from numpy.testing import (
     assert_raises,
     assert_array_compare,
 )
-
 import contextlib
 import os
 
@@ -388,7 +387,7 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
             "state",
         )
         for attr in exclude:
-            # these attibutes are not used for comparison (comparison based on
+            # these attributes are not used for comparison (comparison based on
             # data and units!)
             if attr in attrs:
                 if attr in attrs:
@@ -563,7 +562,7 @@ def assert_project_almost_equal(proj1, proj2, **kwargs):
 # ..............................................................................
 def assert_script_equal(sc1, sc2, **kwargs):
     if sc1 != sc2:
-        raise AssertionError(f"Scripts are differents: {sc1.content} != {sc2.content}")
+        raise AssertionError(f"Scripts are different: {sc1.content} != {sc2.content}")
 
 
 # ======================================================================================================================
@@ -824,7 +823,7 @@ class catch_warnings(warnings.catch_warnings):
 #         List the image filenames of the reference figures
 #         (located in ``.spectrochempy/figures``) which correspond in
 #         the same order to
-#         the various figures created in the decorated fonction. if
+#         the various figures created in the decorated function. if
 #         these files doesn't exist an error is generated, except if the
 #         force_creation argument is True. This should allow the creation
 #         of a reference figures, the first time the corresponding figures are

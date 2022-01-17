@@ -9,7 +9,7 @@ Import of spectroscopic data with their meta data from various file formats is a
 import is made through the generic ``read()`` function (in ``core.readers.importer``) which handles
 the determination of filetype, search locations,  etc...).
 
-The steps to add a specific reader - with the example of Thermo Galactic .spc files - are as follow:
+The steps to add a specific reader - with the example of Thermo Galactic .spc files - are as follows:
 
 .. contents:: Table of Contents:
    :local:
@@ -19,7 +19,7 @@ The steps to add a specific reader - with the example of Thermo Galactic .spc fi
 
 Contributors are encouraged to embrace Test-Driven Development (TDD) (see :ref:`_contributing.tdd`:)
 and reader implementation should start by writing an (initially failing) automated test case to read sample file(s) and
-then produce the *minimum* amount of code to successfully read this file, i.e. generate a NDDataset with a ``data``
+then produce the *minimum* amount of code to successfully read this file, i.e., generate a NDDataset with a ``data``
 attribute as expected from source file.
 
 The testing of the main readers functionalities has been made in the test_importer.py, and the test of
@@ -29,10 +29,10 @@ the types of file format types you want the reader to handle.
 For consistency add your test in ``tests/test_core/test_readers/test_xxx.py`` where ``xxx`` is an alias for the
 file format or reader protocol.
 
-The sample file(s) should be grouped in a subdirectoy (e.g. ``galacticdata/``) of the ``spectrochempy_data/testdata``
+The sample file(s) should be grouped in a subdirectory (e.g., ``galacticdata/``) of the ``spectrochempy_data/testdata``
 folder forked from the `spectrochempy_data repository <https://github.com/spectrochempy/spectrochempy_data/>`_.
 
-A minimum test could be, for instance:
+A minimum test could be, for instance
 
 .. sourcecode:: python
 
@@ -41,14 +41,15 @@ A minimum test could be, for instance:
         assert A.shape == (1, 1842)
 This will ensure that a dataset with the expected shape has been returned.
 
-For local testing, ensure that the default ``datadir`` correctly points to your local git repo of ``spectrochempy_data``, e.g.:
+For local testing, ensure that the default ``datadir`` correctly points to your local git repo of ``spectrochempy_data``, e.g.,
+
 .. sourcecode:: python
 
     prefs.datadir = Path(path/to/testdata)
 
 2. Complete FILETYPES and ALIAS
 ===============================
-They are located at the top of ``core/readers/importer.py`` with the specifics of your reader. E.g.
+They are located at the top of ``core/readers/importer.py`` with the specifics of your reader. e.g.,
 for galactic files:
 
 .. sourcecode:: python
@@ -145,7 +146,7 @@ For consistency with existing readers, the following guidelines should be follow
 
 - The NDDataset should be at least bi-dimensional with a first dimension `x` pertaining to the wavelength/frequency dimension
 and the second dimension `y` pertaining to the acquisition time axis, even if the dataset consists of single 1D spectrum.
-Fopr instance:
+For instance
 
 .. sourcecode:: python
 
@@ -172,13 +173,13 @@ Fopr instance:
 
     dataset.description = kwargs.get("description", "Dataset from spc file.\n")
 
-and whenever possible the informations related to the instrument, acquisition, paramnetrs, etc...
+and whenever possible the information related to the instrument, acquisition, parameters, etc...
 
 4. Polish your code and make the Pull Requests
 ==============================================
 
 see: :ref:`Contributing to the code <_contributing_codebase>`
 
-Note that in order that the PR to ``spectrochempy` can be properly handeled by Workflow, a **a new release of
+Note that in order that the PR to ``spectrochempy` can be properly handled by Workflow, a **a new release of
 **spectrochempy_data** with the new sample files must be done, else the automated tests will
 fail as these files will not be found.

@@ -130,7 +130,7 @@ class Coord(NDMath, NDArray):
             ``LinearCoord`` object.
         offset : float, optional
             Only used is linear is True.
-            If omitted a value of 0.0 is taken for tje coordinate offset.
+            If omitted a value of 0.0 is taken for the coordinate offset.
         increment : float, optional
             Only used if linear is true.
             If omitted a value of 1.0 is taken for the coordinate increment.
@@ -412,7 +412,7 @@ class Coord(NDMath, NDArray):
         Return coordinates spacing.
 
         It will be a scalar if the coordinates are uniformly spaced,
-        else an array of the differents spacings
+        else an array of the different spacings
         """
         if self.linear:
             return self.increment * self.units
@@ -987,7 +987,7 @@ class LinearCoord(Coord):
             array is performed (only if it is possible: regular spacing in
             the 1.e5 relative accuracy).
         offset : float, optional
-            If omitted a value of 0.0 is taken for tje coordinate offset.
+            If omitted a value of 0.0 is taken for the coordinate offset.
         increment : float, optional
             If omitted a value of 1.0 is taken for the coordinate increment.
         **kwargs
@@ -1084,7 +1084,7 @@ class LinearCoord(Coord):
     # ..........................................................................
     def __dir__(self):
         # remove some methods with respect to the full NDArray
-        # as they are not usefull for Coord.
+        # as they are not useful for Coord.
 
         return [
             "data",

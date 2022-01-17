@@ -123,7 +123,7 @@ def test_notebook_basecor_bug():
         [4574.26, 4616.04],
         [4980.10, 4998.01],
         [5437.52, 5994.70],
-    ]  # predifined ranges
+    ]  # predefined ranges
 
     _ = basc.run(
         *ranges,
@@ -135,7 +135,7 @@ def test_notebook_basecor_bug():
     )
 
     # The regions used to set the baseline are accessible using the `ranges`
-    #  attibute:
+    #  attribute:
     ranges = basc.ranges
     print(ranges)
 

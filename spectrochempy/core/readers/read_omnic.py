@@ -35,7 +35,7 @@ def read_omnic(*paths, **kwargs):
     ``.srs``
     and set data/metadata in the current dataset.
 
-    The collected metatdata are:
+    The collected metadata are:
     - names of spectra
     - acquisition dates (UTC)
     - units of spectra (absorbance, transmittance, reflectance, Log(1/R),
@@ -96,7 +96,7 @@ def read_omnic(*paths, **kwargs):
         The most convenient way is to use a dictionary. This feature is
         particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
-        For exemples on how to use this feature, one can look in the
+        For examples on how to use this feature, one can look in the
         ``tests/tests_readers`` directory.
     listdir : bool, optional
         If True and filename is None, all files present in the provided
@@ -142,7 +142,7 @@ def read_omnic(*paths, **kwargs):
     >>> scp.read_omnic(p)
     NDDataset: [float64] a.u. (shape: (y:55, x:5549))
 
-    The diretory can also be specified independantly, either as a string or
+    The directory can also be specified independently, either as a string or
     a pathlib object
 
     >>> scp.read_omnic('nh4y-activation.spg', directory=folder)
@@ -265,7 +265,7 @@ def read_spg(*paths, **kwargs):
         The most convenient way is to use a dictionary. This feature is
         particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
-        For exemples on how to use this feature, one can look in the
+        For examples on how to use this feature, one can look in the
         ``tests/tests_readers`` directory.
     listdir : bool, optional
         If True and filename is None, all files present in the provided
@@ -361,7 +361,7 @@ def read_spa(*paths, **kwargs):
         The most convenient way is to use a dictionary. This feature is
         particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
-        For exemples on how to use this feature, one can look in the
+        For examples on how to use this feature, one can look in the
         ``tests/tests_readers`` directory.
     listdir : bool, optional
         If True and filename is None, all files present in the provided
@@ -459,7 +459,7 @@ def read_srs(*paths, **kwargs):
         The most convenient way is to use a dictionary. This feature is
         particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
-        For exemples on how to use this feature, one can look in the
+        For examples on how to use this feature, one can look in the
         ``tests/tests_readers`` directory.
     listdir : bool, optional
         If True and filename is None, all files present in the provided
@@ -538,7 +538,7 @@ def _read_spg(*args, **kwargs):
     # From hex 120 = decimal 304, individual spectra are described
     # by blocks of lines starting with "key values",
     # for instance hex[02 6a 6b 69 1b 03 82] -> dec[02 106  107 105 27 03 130]
-    # Each of theses lines provides positions of data and metadata in the file:
+    # Each of these lines provides positions of data and metadata in the file:
     #
     #     key: hex 02, dec  02: position of spectral header (=> nx, firstx,
     #     lastx, nscans, nbkgscans)
@@ -570,7 +570,7 @@ def _read_spg(*args, **kwargs):
         keys[i] = _fromfile(fid, dtype="uint8", count=1)
         pos = pos + 16
 
-    # the number of occurences of the key '02' is number of spectra
+    # the number of occurrences of the key '02' is number of spectra
     nspec = np.count_nonzero((keys == 2))
 
     if nspec == 0:  # pragma: no cover
@@ -779,7 +779,7 @@ def _read_spa(*args, **kwargs):
     # From hex 120 = decimal 304, the spectrum is described
     # by blocks of lines starting with "key values",
     # for instance hex[02 6a 6b 69 1b 03 82] -> dec[02 106  107 105 27 03 130]
-    # Each of theses lines provides positions of data and metadata in the file:
+    # Each of these lines provides positions of data and metadata in the file:
     #
     #     key: hex 02, dec  02: position of spectral header (=> nx,
     #                                 firstx, lastx, nscans, nbkgscans)
@@ -881,7 +881,7 @@ def _read_srs(*args, **kwargs):
     frombytes = kwargs.get("frombytes", False)
 
     if frombytes:
-        # in this case, filename is actualy a byte content
+        # in this case, filename is actually a byte content
         fid = io.BytesIO(filename)  # pragma: no cover
     else:
         fid = open(filename, "rb")
@@ -1124,7 +1124,7 @@ def _readbtext(fid, pos):
 
 # ..............................................................................
 def _nextline(pos):
-    # reset current position to the begining of next line (16 bytes length)
+    # reset current position to the beginning of next line (16 bytes length)
     return 16 * (1 + pos // 16)
 
 

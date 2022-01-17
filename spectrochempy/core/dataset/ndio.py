@@ -55,7 +55,7 @@ class NDIO(HasTraits):
         """
         `Pathlib` object - current directory for this dataset.
 
-        ReadOnly property - automaticall set when the filename is updated if
+        ReadOnly property - automatically set when the filename is updated if
         it contains a parent on its path.
         """
         if self._filename:

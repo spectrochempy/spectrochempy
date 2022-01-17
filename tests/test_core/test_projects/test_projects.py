@@ -108,7 +108,7 @@ def test_project_with_script():
 
     # print(proj)
 
-    # save but do not chnge the original data
+    # save but do not change the original data
     proj.save_as("HIZECOKE_TEST", overwrite_data=False)
 
     newproj = Project.load("HIZECOKE_TEST")
@@ -119,7 +119,7 @@ def test_project_with_script():
 
     newproj.print_info(locals())
 
-    # attemps to resolve locals
+    # attempts to resolve locals
     newproj.print_info()
 
     proj.save_as("HIZECOKE_TEST")

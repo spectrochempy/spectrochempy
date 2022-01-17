@@ -61,10 +61,10 @@ def _apodize_method(**units):
 
             # The last dimension is always the dimension on which we apply the apodization window.
             # If needed, we swap the dimensions to be sure to be in this situation
-            swaped = False
+            swapped = False
             if axis != -1:
                 new.swapdims(axis, -1, inplace=True)  # must be done in  place
-                swaped = True
+                swapped = True
 
             # Get the coordinates for the last dimension
             x = new.coordset[dim]
@@ -136,8 +136,8 @@ def _apodize_method(**units):
                 )
                 apod_arr = 1.0
 
-            # restore original data order if it was swaped
-            if swaped:
+            # restore original data order if it was swapped
+            if swapped:
                 new.swapdims(axis, -1, inplace=True)  # must be done inplace
 
             if hasattr(x, "_use_time_axis"):

@@ -75,7 +75,7 @@ Quantity(10.0, ur.cm / ur.km)
 10.0 * ur.cm / ur.km
 
 # %% [markdown]
-# ## Do arithmetics with units
+# ## Do arithmetic with units
 
 # %%
 a = 900 * ur.km

@@ -89,7 +89,7 @@ class Importer(HasTraits):
         if "merge" not in kwargs.keys():
             # if merge is not specified, but the args are provided as a single list, then will are supposed to merge
             # the datasets. If merge is specified then it has priority.
-            # This is not usefull for the 1D datasets, as if they are compatible they are merged automatically
+            # This is not useful for the 1D datasets, as if they are compatible they are merged automatically
             if args and len(args) == 1 and isinstance(args[0], (list, tuple)):
                 kwargs["merge"] = True
 
@@ -153,7 +153,7 @@ class Importer(HasTraits):
                     nd.name = name
             elif names and len(names) != len(nds):
                 warn(
-                    "length of the `names` list and of the list of datsets mismatch - names not applied"
+                    "length of the `names` list and of the list of datasets mismatch - names not applied"
                 )
             return sorted(
                 nds, key=str
@@ -324,7 +324,7 @@ def read(*paths, **kwargs):
         Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
         The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
-        For exemples on how to use this feature, one can look in the ``tests/tests_readers`` directory.
+        For examples on how to use this feature, one can look in the ``tests/tests_readers`` directory.
     listdir : bool, optional
         If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
         is True. It is assumed that all the files correspond to current reading protocol (default=True)

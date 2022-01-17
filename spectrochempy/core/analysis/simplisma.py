@@ -60,7 +60,7 @@ class SIMPLISMA(HasTraits):
             If True, the determination of purest variables is carried out interactively
         n_pc : int, optional, default=2 in non-interactive mode; 100 in interactive mode
             The maximum number of pure compounds. Used only for non interactive analysis
-            (the default in interative mode (100) will never be reached in practice).
+            (the default in interactive mode (100) will never be reached in practice).
         tol : float, optional, default=0.1
             The convergence criterion on the percent of unexplained variance.
         noise : float or int, optional, default=5
@@ -136,7 +136,7 @@ class SIMPLISMA(HasTraits):
         if not interactive:
             logs = "*** Automatic SIMPL(I)SMA analysis *** \n"
         else:
-            logs = "*** Interative SIMPLISMA analysis *** \n"
+            logs = "*** Interactive SIMPLISMA analysis *** \n"
         logs += "dataset: {}\n".format(X.name)
         logs += "  noise: {:2} %\n".format(noise)
         if not interactive:
@@ -462,7 +462,7 @@ class SIMPLISMA(HasTraits):
     @property
     def logs(self):
         """
-        Logs ouptut.
+        Logs output.
         """
         return self._logs
 

@@ -426,7 +426,7 @@ def test_nddataset_binary_operation_with_other_1D():
     coord2 = Coord(np.linspace(1.0, 5.5, 5))
     d1 = NDDataset(np.random.random((10, 5)), coordset=[coord1, coord2])
     d2 = d1[0]
-    # this should work independantly of the value of the coordinates on dimension y
+    # this should work independently of the value of the coordinates on dimension y
     d3 = d1 - d2
     assert_array_equal(d3.data, d1.data - d2.data)
 

@@ -9,7 +9,7 @@ together with the
 `Orange-Spectroscopy Add-on <https://orange-spectroscopy.readthedocs.io/en/latest/>`_
 could be a good choice.
 
-If you are looking for librairies allowing the manipulation of dataset with
+If you are looking for libraries allowing the manipulation of dataset with
 coordinates, we advise to look at `pandas <https://pandas.pydata.org>`_ and
 `xarray <http://xarray.pydata.org/en/stable/>`_.
 

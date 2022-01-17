@@ -23,7 +23,7 @@ import numpy as np
 #
 # Data
 # ++++++
-# here we make use of numpy array functions to create the data fot coordinates
+# here we make use of numpy array functions to create the data for coordinates
 # axis and the array of data
 c0 = np.linspace(200.0, 300.0, 3)
 c1 = np.linspace(0.0, 60.0, 100)

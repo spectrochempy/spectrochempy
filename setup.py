@@ -108,7 +108,7 @@ class PostDevelopCommand(_develop):
 # Data for setuptools
 packages = []
 setup_args = dict(
-    # packages informations
+    # packages information
     name="spectrochempy",
     # use_scm_version=True,
     version=version(),

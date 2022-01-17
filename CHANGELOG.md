@@ -4,7 +4,10 @@
 
 **NEW FEATURES**
 
-* GRAMS/Thermo Galactic .spc file reader
+* GRAMS/Thermo Galactic .spc file reader.
+
+* Fitting models updated and tested.
+
 
 ## Version 0.2.23
 

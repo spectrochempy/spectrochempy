@@ -277,22 +277,22 @@ COMMON:
 # common parameters ex.
 # $ gwidth: 1.0, 0.0, none
 $ gratio: 0.1, 0.0, 1.0
-$ gassym: 0.1, 0, 1
+$ gasym: 0.1, 0, 1
 
 MODEL: LINE_1
-shape: assymvoigtmodel
+shape: asymmetricvoigtmodel
     * ampl:  1.0, 0.0, none
     $ pos:   3624.61, 3520.0, 3570.0
     > ratio: gratio
-    > assym: gassym
+    > asym: gasym
     $ width: 200, 0, 1000
 
 MODEL: LINE_2
-shape: assymvoigtmodel
+shape: asymmetricvoigtmodel
     $ ampl:  0.2, 0.0, none
     $ pos:   3541.68, 3400.0, 3700.0
     > ratio: gratio
-    > assym: gassym
+    > asym: gasym
     $ width: 200, 0, 1000
 
 """
@@ -401,9 +401,9 @@ shape: assymvoigtmodel
 #   ```
 #
 #
-# * Assymetric Voigt Model -> `assymvoigtmodel`:
+# * Asymmetric Voigt Model -> `asymmetricvoigtmodel`:
 #
-#   An assymetric Voigt model (A. L. Stancik and E. B. Brauns, Vibrational Spectroscopy, 2008, 47, 66-69)
+#   An asymmetric Voigt model (A. L. Stancik and E. B. Brauns, Vibrational Spectroscopy, 2008, 47, 66-69)
 #
 #   ```
 #   MODEL: linez
@@ -412,7 +412,7 @@ shape: assymvoigtmodel
 #   $ width: val, 0.0, None
 #   $ pos: val, lob, upb
 #   $ ratio: val, 0.0, 1.0
-#   $ assym: val, 0.0, 1.0
+#   $ asym: val, 0.0, 1.0
 #   ```
 
 # %%

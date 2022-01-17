@@ -21,10 +21,65 @@ import numpy as np
 from IPython import display
 
 from spectrochempy.core.fitting.parameters import ParameterScript
-from spectrochempy.core.fitting.models import getmodel
 from spectrochempy.core.fitting.optimization import optimize
 from spectrochempy.utils import htmldoc
 from spectrochempy.core import preferences, info_, INFO
+from spectrochempy.core.fitting import models as models_
+
+
+# ======================================================================================================================
+# getmodel
+# ======================================================================================================================
+def getmodel(x, y=None, modelname=None, par=None, **kargs):
+    """
+    Get the model for a given x vector.
+
+    Parameters
+    -----------
+    x : ndarray
+        Array of frequency where to evaluate the model values returned by the
+        f function.
+    y : ndarray or None
+        None for 1D, or index for the second dimension.
+    modelname : str
+        Name of the model class to use.
+    par : :class:`Parameters` instance
+        Parameter to pass to the f function.
+    kargs : any
+        Keywords arguments to pass to the f function.
+
+    Returns
+    -------
+    ndarray : float
+        An array containing the calculated model.
+    """
+    model = par.model[modelname]
+    modelcls = getattr(models_, model)
+
+    # take an instance of the model
+    a = modelcls()
+
+    # get the parameters for the given model
+    args = []
+    for p in a.args:
+        try:
+            args.append(par["%s_%s" % (p, modelname)])
+        except KeyError as e:  # pragma: no cover
+            if p.startswith("c_"):
+                # probably the end of the list
+                # due to a limited polynomial degree
+                pass
+            else:
+                raise ValueError(e.message)
+
+    x = np.array(x, dtype=np.float64)
+    if y is not None:
+        y = np.array(y, dtype=np.float64)
+
+    if y is None:
+        return a.f(x, *args, **kargs)
+    else:
+        return a.f(x, y, *args, **kargs)
 
 
 # ======================================================================================================================
@@ -84,9 +139,9 @@ class Fit(HasTraits):
         else:
             return
 
-        # get parameters form script
+        # get parameters from script
         self.parameterscript = ParameterScript(datasets=self.datasets, script=script)
-        if self.fp is None:
+        if self.fp is None:  # pragma: no cover
             # for unknown reason for now, this sometimes happens during tests
             warn("error with fp")
 
@@ -109,7 +164,7 @@ class Fit(HasTraits):
             )  # lgtm[py/mismatched-multiple-assignment]
 
     # *******************************************************************************
-    # public methodss
+    # public methods
     # *******************************************************************************
 
     @staticmethod
@@ -348,7 +403,6 @@ class Fit(HasTraits):
             return modeldata, names
 
         # Calculates model data
-
         # The first row (i=0) of the modeldata array is the baseline,
         # so we fill the array starting at row 1
         row = 0
@@ -440,7 +494,7 @@ class Fit(HasTraits):
     @staticmethod
     def _ampbas(xi, expe, calc):
         # Automatically calculate correct amplitude A and baseline
-        # (baseline linear model a*i+b) by detemining the zero of the first derivative
+        # (baseline linear model a*i+b) by determining the zero of the first derivative
         # with respect to A, a, and b
         expe = expe.squeeze()
         n = xi.size
@@ -480,16 +534,16 @@ class Fit(HasTraits):
         ) / den
 
         # in case the modeldata is zero, to avoid further errors
-        if np.isnan(A):
+        if np.isnan(A):  # pragma: no cover
             A = 0.0
-        if np.isnan(a):
+        if np.isnan(a):  # pragma: no cover
             a = 0.0
-        if np.isnan(b):
+        if np.isnan(b):  # pragma: no cover
             b = 0.0
         return A, a, b
 
     @staticmethod
-    def _ampbas2D(xi, yj, expe, calc):
+    def _ampbas2D(xi, yj, expe, calc):  # pragma: no cover
         n = float(xi.size)
         m = float(yj.size)
         sE = expe.sum()

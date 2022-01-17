@@ -47,7 +47,7 @@ import spectrochempy as scp
 # Retrieving Files and Directories, in day-to-day work is often made through Dialog Boxes. While we do not recommend
 # this procedure for advanced usage (see below), it is quite easy to do that with SCPy. To do so, we can use the
 # `read` function which open a dialog, allowing the selection of data file form various origin. By default,
-# the native SCPy type of data is proposed (file suffix: `.scp`). The desired type of files to display can be choosen
+# the native SCPy type of data is proposed (file suffix: `.scp`). The desired type of files to display can be chosen
 # in a dropdown field.
 
 # %%
@@ -103,7 +103,7 @@ print(X)
 #     - `read_matlab` to open MATLAB (.mat) files including Eingenvector's Dataset objects
 #
 #
-# - Additionaly
+# - Additionally
 #     - `read_dir` to open readable files in a directory
 #
 #
@@ -217,7 +217,7 @@ print(X)
 # os.getcwd()              # returns the absolute path of the current working directory preferences.datadir
 # os.path.expanduser("~")  # returns the home directory of the user
 # os.path.join('path1','path2','path3', ...)   # intelligently concatenates path components
-#                                              # using the system seprator (`/`or `\\`)
+#                                              # using the system separator (`/`or `\\`)
 # ```
 #
 # Using `Pathlib` is even simpler:

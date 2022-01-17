@@ -93,7 +93,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         e.g.,
         for binary operation such as additions or subtraction or during the application of mathematical operations.
         In addition or in replacement of numerical data for coordinates, NDDataset can also have labeled coordinates
-        where labels can be different kind of objects (strings, datetime, numpy nd.ndarray or othe NDDatasets, etc…).
+        where labels can be different kind of objects (strings, datetime, numpy nd.ndarray or other NDDatasets, etc…).
 
         Parameters
         ----------
@@ -166,7 +166,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         See Also
         --------
         Coord : Explicit coordinates object.
-        LinearCoord : Implicit coordinates objet.
+        LinearCoord : Implicit coordinates object.
         CoordSet : Set of coordinates.
 
         Notes
@@ -239,7 +239,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     # ..........................................................................
     def __dir__(self):
         # Only these attributes are used for saving dataset
-        # WARNING: be carefull to keep the present order of the three first elements! Needed for save/load operations
+        # WARNING: be careful to keep the present order of the three first elements! Needed for save/load operations
         return [
             "dims",
             "coordset",
@@ -395,7 +395,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         if key in DEFAULT_DIM_NAME:  # syntax such as ds.x, ds.y, etc...
             # Note the above test is important to avoid errors with traitlets
-            # even if it looks redundant with the folllowing
+            # even if it looks redundant with the following
             if key in self.dims:
                 if self._coordset is None:
                     # we need to create a coordset first
@@ -449,7 +449,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             "referencedata",
             "state",
         ):
-            # these attibutes are not used for comparison (comparison based on data and units!)
+            # these attributes are not used for comparison (comparison based on data and units!)
             try:
                 attrs.remove(attr)
             except ValueError:
@@ -887,7 +887,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             axis, dim = self.get_axis(axis=0)
 
         # get the corresponding coordinates (remember the their order can be different form the order
-        # of dimension  in dims. S we cannot jsut take the coord from the indice.
+        # of dimension  in dims. S we cannot just take the coord from the indice.
         coord = getattr(self, dim)  # get the coordinate using the syntax such as self.x
 
         descend = kwargs.pop("descend", None)
@@ -1274,7 +1274,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         self._coordset._html_output = (
             self._html_output
-        )  # transfert the html flag if necessary: false by default
+        )  # transfer the html flag if necessary: false by default
 
         txt = self._coordset._cstr()
         txt = txt.rstrip()  # remove the trailing '\n'

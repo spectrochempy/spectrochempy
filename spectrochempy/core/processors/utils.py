@@ -26,18 +26,18 @@ def _units_agnostic_method(method):
         else:
             new = dataset
 
-        swaped = False
+        swapped = False
         if axis != -1:
             new.swapdims(axis, -1, inplace=True)  # must be done in  place
-            swaped = True
+            swapped = True
 
         data = method(new.data, **kwargs)
         new._data = data
 
         new.history = f"`{method.__name__}` shift performed on dimension `{dim}` with parameters: {kwargs}"
 
-        # restore original data order if it was swaped
-        if swaped:
+        # restore original data order if it was swapped
+        if swapped:
             new.swapdims(axis, -1, inplace=True)  # must be done inplace
 
         return new

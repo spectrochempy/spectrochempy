@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-
+# pragma: no cover
+# excluded for coverage for the moment
 #
 # ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
@@ -715,7 +716,7 @@ class PFR:
 
         elif method == "differential_evolution":
             optimizer = "differential_evolution"
-            # then param_to_optimize are expected to be bounds for each varaible
+            # then param_to_optimize are expected to be bounds for each variable
 
         if optimizer in ["minimize", "least_squares"]:
             initial_guess = np.zeros((len(param_to_optimize)))
@@ -779,7 +780,7 @@ class PFR:
             )
 
         elif optimizer == "differential_evolution":
-            # set optional parameters / default set to scipy defauls
+            # set optional parameters / default set to scipy defaults
             if "strategy" in options:
                 strategy = options["strategy"]
             else:

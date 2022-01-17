@@ -350,7 +350,7 @@ Z3["Optik"]  # looks what is the Optik block:
 # [JCAMP-DX](http://www.jcamp-dx.org/) is an open format initially developed for IR data and extended to
 # other spectroscopies. At present, the JCAMP-DX reader implemented in Spectrochempy is limited to IR data and
 # AFFN encoding (see R. S. McDonald and Paul A. Wilks, JCAMP-DX: A Standard Form for Exchange of Infrared Spectra in
-# Readable Form, Appl. Spec., 1988, 1, 151–162. doi:10.1366/0003702884428734 fo details).
+# Readable Form, Appl. Spec., 1988, 1, 151–162. doi:10.1366/0003702884428734 for details).
 #
 # The JCAMP-DX reader of spectrochempy has been essentially written to read again the jcamp-dx files exported by
 # spectrochempy `write_jdx()` writer.
