@@ -184,7 +184,9 @@ class Coord(NDMath, NDArray):
         """bool - Whether the axis is reversed (readonly
         property).
         """
-        if self.units in ["1 / centimeter", "ppm"]:
+        if self.units == "ppm":
+            return True
+        elif self.units == "1 / centimeter" and "raman" not in self.title.lower():
             return True
         return False
 
