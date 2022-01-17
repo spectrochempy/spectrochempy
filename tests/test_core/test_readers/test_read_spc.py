@@ -5,7 +5,7 @@ import spectrochempy as scp
 
 
 def test_read_spc():
-    A = scp.read_spc("galacticdata/BARBITUATES.spc")
+    A = scp.read_spc("galacticdata/BARBITUATES.SPC")
     # "spc reader not implemented yet for multifiles"
     assert A is None
 
