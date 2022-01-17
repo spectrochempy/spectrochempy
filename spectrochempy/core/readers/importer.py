@@ -36,9 +36,8 @@ FILETYPES = [
     ("excel", "Microsoft Excel files (*.xls)"),
     ("zip", "Compressed folder of data files (*.zip)"),
     ("quadera", "Quadera ascii files (*.asc)"),
-    ("carroucell", "Carroucell files (*spa)")(
-        "galactic", "Thermo Galactic files (*.spc)"
-    )
+    ("carroucell", "Carroucell files (*spa)"),
+    ("galactic", "GRAMS/Thermo Galactic files (*.spc)")
     #  ('all', 'All files (*.*)')
 ]
 ALIAS = [

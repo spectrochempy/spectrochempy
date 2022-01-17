@@ -589,30 +589,6 @@ def _read_spc(*args, **kwargs):
     return dataset
 
 
-# ..............................................................................
-def _fromfile(fid, dtype, count):
-    # to replace np.fromfile in case of io.BytesIO object instead of byte object
-    t = {
-        "uint8": "B",
-        "int8": "b",
-        "uint16": "H",
-        "int16": "h",
-        "uint32": "I",
-        "int32": "i",
-        "float32": "f",
-    }
-    typ = t[dtype] * count
-    if dtype.endswith("16"):
-        count = count * 2
-    elif dtype.endswith("32"):
-        count = count * 4
-
-    out = struct.unpack(typ, fid.read(count))
-    if len(out) == 1:
-        return out[0]
-    return np.array(out)
-
-
 # ------------------------------------------------------------------
 if __name__ == "__main__":
     pass
