@@ -105,11 +105,10 @@ def read_spc(*paths, **kwargs):
 
     Examples
     ---------
-    #todo:
-    # >>> scp.read_spc('irdata/subdir/20-50/7_CZ0-100 Pd_21.SPA')
-    # NDDataset: [float64] a.u. (shape: (y:1, x:5549))
-    # >>> scp.read_spa(directory='irdata/subdir', merge=True)
-    # NDDataset: [float64] a.u. (shape: (y:4, x:5549))
+    >>> scp.read_spc('galacticdata/000001 Spectrum.spc')
+    NNDDataset: [float64] unitless (shape: (y:1, x:14334))
+    >>> scp.read_spa(directory='irdata/subdir', merge=True)
+    NDDataset: [float64] a.u. (shape: (y:4, x:5549))
     """
 
     kwargs["filetypes"] = ["GRAMS/Thermo Galactic files (*.spc)"]
@@ -133,6 +132,30 @@ def _read_spc(*args, **kwargs):
     else:
         fid = open(filename, "rb")
         content = fid.read()
+
+    # extract version
+    _, Fversn = struct.unpack("cc".encode("utf8"), content[:2])
+
+    # check spc version
+    if Fversn == b"\x4b":
+        endian = "little"
+        head_format = "<cccciddicccci9s9sh32s130s30siicchf48sfifc187s"
+        logstc_format = "<iiiiic"
+        float32_dtype = "<f4"
+        int16_dtype = "<i2"
+        int32_dtype = "<i4"
+    elif Fversn == b"\x4c":
+        endian = "big"
+        head_format = ">cccciddicccci9s9sh32s130s30siicchf48sfifc187s"
+        logstc_format = ">iiiiic"
+        float32_dtype = ">f4"
+        int16_dtype = ">i2"
+        int32_dtype = ">i4"
+    else:
+        raise SpectroChemPyException(
+            f"The version {Fversn} is not yet supported. "
+            f"Currently supported versions are b'\x4b' and b'\x4c'."
+        )
 
     # extract the header (see: Galactic Universal Data Format Specification 9/4/97)
     # from SPC.H Header File:
@@ -203,9 +226,14 @@ def _read_spc(*args, **kwargs):
         Fwinc,
         Fwtype,
         Freserv,
-    ) = struct.unpack(
-        "<cccciddicccci9s9sh32s130s30siicchf48sfifc187s".encode("utf8"), content[:512]
-    )
+    ) = struct.unpack(head_format.encode("utf8"), content[:512])
+
+    # check compatibility with current implementation
+    if Fnsub > 1:
+        raise NotImplementedError(
+            "spc reader not implemented yet for multifiles. If you need it, please "
+            "submit a feature request on spectrochempy repository :-)"
+        )
 
     # extract bit flags
     tsprec, tcgram, tmulti, trandm, tordrd, talabs, txyxys, txvals = [
@@ -225,13 +253,6 @@ def _read_spc(*args, **kwargs):
     #                     to flag as MS data for drawing as “sticks” rather than connected lines.
     # TXVALS     0x80h   Non-evenly spaced X data. File has X value array preceding Y data block(s).
 
-    # check spc version
-    if Fversn != b"\x4b":
-        raise SpectroChemPyException(
-            f"The version {Fversn} is not yet supported. "
-            f"Current supported versions is b'\x4b'."
-        )
-
     techniques = [
         "General SPC",
         "Gas Chromatogram",
@@ -249,7 +270,7 @@ def _read_spc(*args, **kwargs):
         "Chromatography Diode Array Spectra",
     ]
 
-    technique = techniques[int.from_bytes(Fexper, "little")]
+    technique = techniques[int.from_bytes(Fexper, endian)]
 
     if talabs:
         SpectroChemPyWarning(
@@ -326,7 +347,7 @@ def _read_spc(*args, **kwargs):
         "hour",
     ]
 
-    ixtype = int.from_bytes(Fxtype, "little")
+    ixtype = int.from_bytes(Fxtype, endian)
     if ixtype != 255:
         x_unit = x_or_z_unit[ixtype]
         x_title = x_or_z_title[ixtype]
@@ -335,7 +356,7 @@ def _read_spc(*args, **kwargs):
         x_title = "Double interferogram"
 
     # if Fnsub > 1:
-    #     iztype = int.from_bytes(Fztype, "little")
+    #     iztype = int.from_bytes(Fztype, endian)
     #     if iztype != 255:
     #         z_unit = x_or_z_unit[iztype]
     #         z_title = x_or_z_title[iztype]
@@ -403,7 +424,7 @@ def _read_spc(*args, **kwargs):
         None,
     ]
 
-    iytype = int.from_bytes(Fytype, "little")
+    iytype = int.from_bytes(Fytype, endian)
     if iytype < 128:
         y_unit = y_unit[iytype]
         y_title = y_title[iytype]
@@ -434,7 +455,7 @@ def _read_spc(*args, **kwargs):
     if Fexp == b"\x80":
         iexp = None  # floating Point Data
     else:
-        iexp = int.from_bytes(Fexp, "little")  # Datablock scaling Exponent
+        iexp = int.from_bytes(Fexp, endian)  # Datablock scaling Exponent
 
     # set date (from https://github.com/rohanisaac/spc/blob/master/spc/spc.py)
     year = Fdate >> 20
@@ -452,19 +473,13 @@ def _read_spc(*args, **kwargs):
     scmnt = Fcmnt.decode("utf-8")
 
     # if Fwplanes:
-    #     iwtype = int.from_bytes(Fwtype, "little")
+    #     iwtype = int.from_bytes(Fwtype, endian)
     #     if iwtype != 255:
     #         w_unit = x_or_z_unit[ixtype]
     #         w_title = x_or_z_title[ixtype]
     #     else:
     #         w_unit = None
     #         w_title = "Double interferogram"
-
-    if Fnsub > 1:
-        raise NotImplementedError(
-            "spc reader not implemented yet for multifiles. If you need it, please "
-            "submit a feature request on spectrochempy repository :-)"
-        )
 
     if not txvals:  # evenly spaced x data
         spacing = (Flast - Ffirst) / (Fnpts - 1)
@@ -476,25 +491,39 @@ def _read_spc(*args, **kwargs):
             units=x_unit,
         )
     else:
-        raise NotImplementedError(
-            "spc reader not implemented yet for unevenly spaced X values. If you need it, please "
-            "submit a feature request on spectrochempy repository :-)"
+        _x = Coord(
+            data=np.frombuffer(content, offset=512, dtype=float32_dtype, count=Fnpts),
+            title=x_title,
+            units=x_unit,
         )
 
     if iexp is None:
         # 32-bit IEEE floating numbers
-        floatY = np.frombuffer(content[544 : 544 + Fnpts * 4], np.float32)
+        floatY = np.frombuffer(
+            content, offset=544 + txvals * Fnpts * 4, dtype=float32_dtype, count=Fnpts
+        )
     else:
         # fixed point signed fractions
         if tsprec:
-            integerY = np.frombuffer(content[544 : 544 + Fnpts * 4], np.int16)
+            integerY = np.frombuffer(
+                content, offset=544 + txvals * Fnpts * 4, dtype=int16_dtype, count=Fnpts
+            )
             floatY = (2 ** iexp) * integerY / (2 ** 16)
         else:
-            integerY = np.frombuffer(content[544 : 544 + Fnpts * 4], np.int32)
+            integerY = np.frombuffer(
+                content, offset=544 + txvals * Fnpts * 4, dtype=int32_dtype, count=Fnpts
+            )
             floatY = (2 ** iexp) * integerY / (2 ** 32)
 
+    if Flogoff:  # read log data header
+        (Logsizd, Logsizm, Logtxto, Logbins, Logdsks, Logspar,) = struct.unpack(
+            logstc_format.encode("utf-8"), content[Flogoff : Flogoff + 21]
+        )
+
+        logtxt = str(content[Flogoff + Logtxto : len(content)].decode("utf-8"))
+
     # Create NDDataset Object for the series
-    dataset = NDDataset(floatY)
+    dataset = NDDataset(np.expand_dims(floatY, axis=0))
     dataset.name = "name"
     dataset.units = y_unit
     dataset.title = y_title
@@ -510,18 +539,36 @@ def _read_spc(*args, **kwargs):
 
     dataset.set_coordset(y=_y, x=_x)
 
-    dataset.description = kwargs.get("description", "Dataset from spc file.")
+    dataset.description = kwargs.get("description", "Dataset from spc file.\n")
     if ord(Fexper) != 0:
-        dataset.description += "Instrumental Technique: " + technique
+        dataset.description += "Instrumental Technique: " + technique + "\n"
     if Fres != b"\x00\x00\x00\x00\x00\x00\x00\x00\x00":
-        dataset.description += "Resolution: " + sres
+        dataset.description += "Resolution: " + sres + "\n"
     if Fsource != b"\x00\x00\x00\x00\x00\x00\x00\x00\x00":
-        dataset.description += "Source Instrument: " + ssource
+        dataset.description += "Source Instrument: " + ssource + "\n"
     if (
         Fcmnt
         != b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
     ):
-        dataset.description += "Memo: " + scmnt
+        dataset.description += "Memo: " + scmnt + "\n"
+    if Flogoff:
+        if Logtxto:
+            dataset.description += "Log Text: \n---------\n"
+            dataset.description += logtxt
+            dataset.description += "---------\n"
+        if Logbins or Logsizd:
+            if Logtxto:
+                dataset.description += (
+                    "Note: The Log block of the spc file also contains: \n"
+                )
+            else:
+                dataset.description += (
+                    "Note: The Log block of the spc file contains: \n"
+                )
+            if Logbins:
+                dataset.description += f"a Log binary block of size {Logbins} bytes "
+            if Logsizd:
+                dataset.description += f"a Log disk block of size {Logsizd} bytes "
 
     dataset.history = str(
         datetime.now(timezone.utc)
