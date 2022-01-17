@@ -154,3 +154,5 @@ single_spectrum.csv
 /env/
 HIZECOKE_TEST.pscp
 process.pscp
+
+.goutputstream*
