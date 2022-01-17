@@ -42,7 +42,6 @@ from numpy.testing import (
     assert_raises,
     assert_array_compare,
 )
-
 import contextlib
 import os
 

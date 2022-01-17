@@ -21,10 +21,64 @@ import numpy as np
 from IPython import display
 
 from spectrochempy.core.fitting.parameters import ParameterScript
-from spectrochempy.core.fitting.models import getmodel
 from spectrochempy.core.fitting.optimization import optimize
 from spectrochempy.utils import htmldoc
 from spectrochempy.core import preferences, info_, INFO
+
+
+# ======================================================================================================================
+# getmodel
+# ======================================================================================================================
+def getmodel(x, y=None, modelname=None, par=None, **kargs):
+    """
+    Get the model for a given x vector.
+
+    Parameters
+    -----------
+    x : ndarray
+        Array of frequency where to evaluate the model values returned by the
+        f function.
+    y : ndarray or None
+        None for 1D, or index for the second dimension.
+    modelname : str
+        Name of the model class to use.
+    par : :class:`Parameters` instance
+        Parameter to pass to the f function.
+    kargs : any
+        Keywords arguments to pass the the f function.
+
+    Returns
+    -------
+    ndarray : float
+        An array containing the calculated model.
+    """
+    model = par.model[modelname]
+    modelcls = globals()[model]
+
+    # take an instance of the model
+    a = modelcls()
+
+    # get the parameters for the given model
+    args = []
+    for p in a.args:
+        try:
+            args.append(par["%s_%s" % (p, modelname)])
+        except KeyError as e:
+            if p.startswith("c_"):
+                # probably the end of the list
+                # due to a limited polynomial degree
+                pass
+            else:
+                raise ValueError(e.message)
+
+    x = np.array(x, dtype=np.float64)
+    if y is not None:
+        y = np.array(y, dtype=np.float64)
+
+    if y is None:
+        return a.f(x, *args, **kargs)
+    else:
+        return a.f(x, y, *args, **kargs)
 
 
 # ======================================================================================================================

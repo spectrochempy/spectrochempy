@@ -11,7 +11,8 @@ from functools import wraps
 import numpy as np
 
 from spectrochempy.units import Quantity
-from spectrochempy.core.dataset.ndarray import NDArray
+from spectrochempy.core.dataset.coord import Coord, LinearCoord
+from spectrochempy.core.dataset.nddataset import NDDataset
 
 __all__ = [
     "polynomialbaseline",
@@ -20,16 +21,16 @@ __all__ = [
     "voigtmodel",
     "asymmetricvoigtmodel",
     "sigmoidmodel",
-    "getmodel",
 ]
 
 
 def make_units_compatibility(func):
     """
-    Decorator to take into account the input units
+    Decorator to take into account the input features (units, type...)
     """
 
-    def _convert(arg, x_units):
+    def _convert_to_units(arg, x_units):
+
         if isinstance(arg, Quantity):
             arg.ito(x_units)  # eventually convert units and rescale
         # set units to those of x
@@ -42,27 +43,52 @@ def make_units_compatibility(func):
         return arg.magnitude
 
     @wraps(func)
-    def wrapper(cls, x, *args, **kwargs):
+    def wrapper(cls, xinput, *args, **kwargs):
 
-        if hasattr(x, "units"):
-            x_units = x.units
-            if isinstance(x, NDArray):
-                x = x.data
+        returntype = "ndarray"
+        x = xinput.copy()
+
+        x_units = None
+        if hasattr(xinput, "units"):
+            x_units = xinput.units
+            if isinstance(xinput, Coord):
+                x = xinput.data
+                returntype = "NDDataset"
             else:
-                x = x.magnitude
+                x = xinput.m
 
-            args = list(args)
-            for index, arg in enumerate(args):
-                param = cls.args[index]
-                if param in ["width", "pos"]:
-                    # implicit units: those of x else rescale
-                    args[index] = _convert(arg, x_units)
-            for param, arg in kwargs.items():
-                if param in ["width", "pos"]:
-                    # implicit units: those of x else rescale
-                    kwargs[param] = _convert(arg, x_units)
+        # get args or their equivalent in kwargs and eventually convert units.
+        newargs = []
 
-        return func(cls, x, *args, **kwargs)
+        for index, param in enumerate(cls.args):
+            newargs.append(kwargs.get(param, args[index] if len(args) > index else 0))
+
+        for index, arg in enumerate(newargs):
+            # adapt units
+            if cls.args[index] in ["width", "pos"]:
+                # implicit units: those of x else rescale
+                newargs[index] = _convert_to_units(arg, x_units)
+
+        ampl_units = None
+        if hasattr(newargs[0], "units"):
+            ampl_units = newargs[0].units
+            newargs[0] = newargs[0].m
+
+        print(newargs)
+        _data = func(cls, x, *newargs)
+
+        if returntype == "NDDataset":
+            res = NDDataset(_data, units=ampl_units)
+            res.x = LinearCoord(xinput)
+            res.name = cls.__class__.__name__.split("model")[0]
+            res.title = "intensity"
+
+        else:
+            res = _data
+            if ampl_units:
+                res = res * ampl_units
+
+        return res
 
     return wrapper
 
@@ -275,7 +301,7 @@ class asymmetricvoigtmodel(object):
     @make_units_compatibility
     def f(self, x, ampl, pos, width, ratio, asym, **kargs):
         # sigmoid variation of width
-        g = 2.0 * sigmoidmodel().f(x, width, pos, asym / width)
+        g = 2.0 * sigmoidmodel().f(x, width, pos, asym)
         if min(g) < max(g) / 1.0e16:
             g = g + 1.0e-9
         w = ratio * self.lorentz(x, g, pos) + (1.0 - ratio) * self.gaussian(x, g, pos)
@@ -304,69 +330,8 @@ class sigmoidmodel(object):
 
     @make_units_compatibility
     def f(self, x, ampl, pos, asym, **kargs):
-        w = 1.0 / (1.0 + np.exp(asym * (x - pos)))
+        w = 1.0 / (1.0 + np.exp(asym * (x - pos) / ampl))
         return ampl * w
-
-
-#################
-#               #
-#    GENERAL    #
-#               #
-#################
-
-# ======================================================================================================================
-# getmodel
-# ======================================================================================================================
-def getmodel(x, y=None, modelname=None, par=None, **kargs):
-    """
-    Get the model for a given x vector.
-
-    Parameters
-    -----------
-    x : ndarray
-        Array of frequency where to evaluate the model values returned by the
-        f function.
-    y : ndarray or None
-        None for 1D, or index for the second dimension.
-    modelname : str
-        Name of the model class to use.
-    par : :class:`Parameters` instance
-        Parameter to pass to the f function.
-    kargs : any
-        Keywords arguments to pass the the f function.
-
-    Returns
-    -------
-    ndarray : float
-        An array containing the calculated model.
-    """
-    model = par.model[modelname]
-    modelcls = globals()[model]
-
-    # take an instance of the model
-    a = modelcls()
-
-    # get the parameters for the given model
-    args = []
-    for p in a.args:
-        try:
-            args.append(par["%s_%s" % (p, modelname)])
-        except KeyError as e:
-            if p.startswith("c_"):
-                # probably the end of the list
-                # due to a limited polynomial degree
-                pass
-            else:
-                raise ValueError(e.message)
-
-    x = np.array(x, dtype=np.float64)
-    if y is not None:
-        y = np.array(y, dtype=np.float64)
-
-    if y is None:
-        return a.f(x, *args, **kargs)
-    else:
-        return a.f(x, y, *args, **kargs)
 
 
 if __name__ == "__main__":
