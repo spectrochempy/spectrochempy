@@ -18,6 +18,7 @@ from traitlets import HasTraits, List, Dict, Type, Unicode
 from spectrochempy.utils import pathclean, check_filename_to_open
 from spectrochempy.utils import get_directory_name, get_filenames
 from spectrochempy.utils.exceptions import DimensionsCompatibilityError, ProtocolError
+from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core import warning_
 
 FILETYPES = [
@@ -36,9 +37,8 @@ FILETYPES = [
     ("excel", "Microsoft Excel files (*.xls)"),
     ("zip", "Compressed folder of data files (*.zip)"),
     ("quadera", "Quadera ascii files (*.asc)"),
-    ("carroucell", "Carroucell files (*spa)")(
-        "galactic", "Thermo Galactic files (*.spc)"
-    )
+    ("carroucell", "Carroucell files (*spa)")
+    ("galactic", "Thermo Galactic files (*.spc)")
     #  ('all', 'All files (*.*)')
 ]
 ALIAS = [
@@ -209,7 +209,7 @@ class Importer(HasTraits):
                     datasets.extend(res)
 
             except FileNotFoundError:
-                warning_(f"No file with name `{filename}` could be found. Sorry! ")
+                raise
 
             except IOError as e:
                 warning_(str(e))
@@ -506,8 +506,9 @@ def _read_dir(*args, **kwargs):
 # ..............................................................................
 @importermethod
 def _read_scp(*args, **kwargs):
-    dataset, filename = args
-    return dataset.load(filename, **kwargs)
+    _, filename = args
+    nd = NDDataset.load(filename, **kwargs)
+    return nd
 
 
 # ..............................................................................
