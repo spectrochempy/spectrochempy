@@ -24,6 +24,7 @@ from spectrochempy.core.fitting.parameters import ParameterScript
 from spectrochempy.core.fitting.optimization import optimize
 from spectrochempy.utils import htmldoc
 from spectrochempy.core import preferences, info_, INFO
+from spectrochempy.core.fitting import models as models_
 
 
 # ======================================================================================================================
@@ -45,7 +46,7 @@ def getmodel(x, y=None, modelname=None, par=None, **kargs):
     par : :class:`Parameters` instance
         Parameter to pass to the f function.
     kargs : any
-        Keywords arguments to pass the the f function.
+        Keywords arguments to pass to the f function.
 
     Returns
     -------
@@ -53,7 +54,7 @@ def getmodel(x, y=None, modelname=None, par=None, **kargs):
         An array containing the calculated model.
     """
     model = par.model[modelname]
-    modelcls = globals()[model]
+    modelcls = getattr(models_, model)
 
     # take an instance of the model
     a = modelcls()
