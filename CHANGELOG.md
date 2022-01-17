@@ -1,5 +1,17 @@
 # What's new
 
+## Version 0.2.24
+
+**NEW FEATURES**
+
+* GRAMS/Thermo Galactic .spc file reader
+
+## Version 0.2.23
+
+**BUGS FIXED**
+
+* Workflow/Codeclimate issues 
+
 ## Version 0.2.22
 
 **BUGS FIXED**
