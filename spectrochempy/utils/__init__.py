@@ -24,6 +24,7 @@ from numpy.ma.core import (
 # import util files content
 # ------------------------------------------------------------------
 
+from .fake import *
 from .print import *
 from .file import *
 from .jsonutils import *

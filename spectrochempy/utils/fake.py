@@ -1,6 +1,7 @@
 import numpy as np
 import spectrochempy as scp
 
+__all__ = ["generate_fake"]
 
 # ------------------------------------------------------------
 # Create fake data to be used by analysis routine for testing
@@ -24,84 +25,67 @@ def _make_spectra_matrix(modelname, ampl, pos, width, ratio=None, asym=None):
 
 
 def _make_concentrations_matrix(*profiles):
-    t = scp.Coord(np.linspace(0, 10, 50), units="hour", title="time")
+    t = scp.LinearCoord(np.linspace(0, 10, 50), units="hour", title="time")
     c = []
     for p in profiles:
         c.append(p(t.data))
     ct = np.vstack(c)
-    ct = ct - ct.min()
-    ct = ct / np.sum(ct, axis=0)
+    ct = ct - np.min(ct)
+    if ct.shape[0] > 1:
+        ct = ct / np.sum(ct, axis=0)
     ct = scp.NDDataset(data=ct, title="concentration", coordset=[range(len(ct)), t])
 
     return ct
 
 
-def _generate_2D_spectra(concentrations, spectra):
+def generate_fake():
     """
     Generate a fake 2D experimental spectra
 
-    Parameters
-    ----------
-    concentrations : |NDDataset|
-    spectra : |NDDataset|
-
-    Returns
+    returns
     -------
-    |NDDataset|
-
+    datasets:
+        2D spectra, individual spectra and concentrations
     """
-    from spectrochempy.core.dataset.npy import dot
-
-    return dot(concentrations.T, spectra)
-
-
-def generate_fake():
-    # from spectrochempy.utils import show
 
     # define properties of the spectra and concentration profiles
     # ----------------------------------------------------------------------------------------------------------------------
+    from spectrochempy.core.dataset.npy import dot
 
-    POS = (
-        6000.0,
-        4000.0,
-    )  # 2000., 2500.)
-    WIDTH = (6000.0, 1000.0)  # , 250., 800.)
-    AMPL = (100.0, 70.0)  # , 10., 50.)
-    RATIO = (0.0, 0.0)  # , .2, 1.)
-    ASYM = (0.0, 0.0)  # , .2, -.6)
-
-    MODEL = ("gaussian", "gaussian")  # , "asymmetricvoigt", "asymmetricvoigt")
+    # data for four peaks (one very broad)
+    POS = (6000.0, 4000.0, 2000.0, 2500.0)
+    WIDTH = (6000.0, 1000.0, 250.0, 800.0)
+    AMPL = (100.0, 70.0, 10.0, 50.0)
+    RATIO = (0.1, 0.5, 0.2, 1.0)
+    ASYM = (0.0, 0.0, 0, 4)
+    MODEL = ("gaussian", "voigt", "voigt", "asymmetricvoigt")
 
     def C1(t):
         return t * 0.05 + 0.01  # linear evolution of the baseline
 
     def C2(t):
-        return scp.sigmoidmodel().f(t, 0.5, max(t) / 2.0, -2)
+        return scp.sigmoidmodel().f(t, 1.0, max(t) / 2.0, 1, 2)
 
     def C3(t):
-        return np.exp(-t / 3.0) * 0.7
+        return scp.sigmoidmodel().f(t, 1.0, max(t) / 5.0, 1, -2)
 
     def C4(t):
         return 1.0 - C2(t) - C3(t)
 
-    spec = _make_spectra_matrix(MODEL, AMPL, POS, WIDTH, RATIO, ASYM)
-    spec.plot()
+    specs = _make_spectra_matrix(MODEL, AMPL, POS, WIDTH, RATIO, ASYM)
 
-    conc = _make_concentrations_matrix(C1, C2)  # , C3, C4)
-    conc.plot(colorbar=False)
+    concs = _make_concentrations_matrix(C1, C2, C3, C4)
 
-    d = _generate_2D_spectra(conc, spec)
+    # make 2D
+    d = dot(concs.T, specs)
+
     # add some noise
-    d.data = np.random.normal(d.data, 0.002 * d.data.max())
+    d.data = np.random.normal(d.data, 0.005 * d.data.max())
 
-    d.plot()
+    # d.plot()
+    return d, specs, concs
 
-
-#    d.save('test_full2D')
-#    spec.save('test_spectra')
-#    conc.save('test_concentration')
 
 if __name__ == "__main__":
 
-    generate_fake()
-    scp.show()
+    pass
