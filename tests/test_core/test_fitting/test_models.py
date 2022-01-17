@@ -2,8 +2,13 @@ import numpy as np
 
 import spectrochempy as scp
 from spectrochempy.units import ur
-from spectrochempy.utils.testing import assert_approx_equal
-import matplotlib.pyplot as plt
+from spectrochempy.utils.testing import (
+    # assert_array_equal,
+    # assert_array_almost_equal,
+    assert_approx_equal,
+)
+
+# import matplotlib.pyplot as plt
 
 
 def test_models():
@@ -18,7 +23,7 @@ def test_models():
     asym = 1.5
     pos = 500
 
-    max = 9.3944
+    max = 6.366197723675813
 
     array = model.f(x, ampl, pos, width, ratio, asym)
     assert array.shape == (1000,)
@@ -79,12 +84,12 @@ def test_models():
     for modelname, expected in [
         ("gaussianmodel", 0.9394292818892936),
         ("lorentzianmodel", 0.6366197723675814),
-        ("voigtmodel", 0.14024341343686939),
-        ("asymmetricvoigtmodel", 0.7880285255336164),
+        ("voigtmodel", 0.8982186579508358),
+        ("asymmetricvoigtmodel", 0.8982186579508358),
         ("polynomialbaseline", 0.0),
         ("sigmoidmodel", 50),
     ]:
-        print("\nmodel:", modelname)
+        # print("\nmodel:", modelname)
         model = getattr(scp, modelname)()
         if modelname == "sigmoid":
             kwargs["width"] = 0.01
@@ -93,5 +98,46 @@ def test_models():
         if modelname != "sigmoid":
             actual = actual * 100
         assert_approx_equal(actual.m, expected, 4)
-        array.plot(title=modelname)
-        plt.show()
+        # array.plot(title=modelname)
+        # plt.show()
+
+
+# def test_compare_shapes():
+#     # compare voigt with gaussian and lorentzian
+#     # do the same for various models
+#     x = scp.LinearCoord.arange(1000)
+#     kwargs = dict(
+#         ampl=1.0,
+#         width=100,
+#         pos=500,
+#     )
+#
+#     # array = scp.gaussianmodel().f(x, **kwargs)
+#     # ax = array.plot(title=f'gaussian')
+#     # array = scp.lorentzianmodel().f(x, **kwargs)
+#     # array.plot(ax=ax, title=f'lorentzian', clear=False)
+#     #
+#     # for ratio in [0., 0.25, 0.75, 1.]:
+#     #     array = scp.voigtmodel().f(x, ratio=ratio, **kwargs)
+#     #     array.plot(ax=ax, title=f'ratio {ratio}', clear=False)
+#     #
+#     # plt.show()
+#
+#     arrayG = scp.gaussianmodel().f(x, **kwargs)
+#     arrayL = scp.lorentzianmodel().f(x, **kwargs)
+#
+#     array = scp.voigtmodel().f(x, ratio=0., **kwargs)
+#     assert_array_equal(array, arrayL)
+#
+#     array = scp.voigtmodel().f(x, ratio=1., **kwargs)
+#     assert_array_almost_equal(array, arrayG, decimal=6)
+#
+#     arrayA = scp.asymmetricvoigtmodel().f(x, ratio=0, asym=0, **kwargs)
+#     array = scp.voigtmodel().f(x, ratio=0, **kwargs)
+#     #assert_array_almost_equal(array, arrayA, decimal=6)
+#     ax = arrayA.plot(c='r')
+#     array.plot(ax=ax, clear=False)
+#
+#     array = scp.asymmetricvoigtmodel().f(x, ratio=0, asym=2, **kwargs)
+#     array.plot(ax=ax, clear=False)
+#     plt.show()

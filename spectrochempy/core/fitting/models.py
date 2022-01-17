@@ -249,7 +249,7 @@ class voigtmodel(object):
     """
 
     @make_units_compatibility
-    def f(self, x, ampl, width, ratio, pos, **kargs):
+    def f(self, x, ampl, pos, width, ratio, **kargs):
         from scipy.special import wofz
 
         gb = ratio * width / 2.3548
@@ -266,6 +266,8 @@ class voigtmodel(object):
 # ======================================================================================================================
 # Asymmetric Voigt Model
 # ======================================================================================================================
+
+
 class asymmetricvoigtmodel(object):
     """
     An asymmetric Voigt model.
@@ -285,28 +287,20 @@ class asymmetricvoigtmodel(object):
         $ asym: 0.1, 0.0, 1.0
         """
 
-    def lorentz(self, x, g_, pos):
-        w = (2.0 / (np.pi * g_)) / (1.0 + 4.0 * ((x - pos) / g_) ** 2)
-        return w
-
-    def gaussian(self, x, g_, pos):
-        a = np.sqrt(4.0 * np.log(2.0) / np.pi) / g_
-        b = -4.0 * np.log(2.0) * ((x - pos) / g_) ** 2
-        w = a * np.exp(b)
-        return w
-
-    def g(self, x, width, a):
-        return
-
     @make_units_compatibility
     def f(self, x, ampl, pos, width, ratio, asym, **kargs):
-        # sigmoid variation of width
+        from scipy.special import wofz
+
         g = 2.0 * sigmoidmodel().f(x, width, pos, asym)
-        if min(g) < max(g) / 1.0e16:
-            g = g + 1.0e-9
-        w = ratio * self.lorentz(x, g, pos) + (1.0 - ratio) * self.gaussian(x, g, pos)
-        w = w * abs(x[1] - x[0])
-        return ampl * w
+        gb = ratio * g / 2.3548
+        lb = (1.0 - ratio) * g / 2.0
+        if ratio < 1.0e-16:
+            return lorentzianmodel().f(x, ampl, pos, lb * 2.0, **kargs)
+        else:
+            w = wofz(((x - pos) + 1.0j * lb) * 2 ** -0.5 / gb)
+            w = w.real * (2.0 * np.pi) ** -0.5 / gb
+            w = w * abs(x[1] - x[0])
+            return ampl * w
 
 
 class sigmoidmodel(object):
