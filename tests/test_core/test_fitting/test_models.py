@@ -89,7 +89,6 @@ def test_models():
         ("polynomialbaseline", 0.0),
         ("sigmoidmodel", 50),
     ]:
-        # print("\nmodel:", modelname)
         model = getattr(scp, modelname)()
         if modelname == "sigmoid":
             kwargs["width"] = 0.01
