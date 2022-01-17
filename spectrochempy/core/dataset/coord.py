@@ -186,7 +186,7 @@ class Coord(NDMath, NDArray):
         """
         if self.units == "ppm":
             return True
-        elif self.units == "ppm" and not 'raman' in self.title.lower():
+        elif self.units == "ppm" and "raman" not in self.title.lower():
             return True
         return False
 
