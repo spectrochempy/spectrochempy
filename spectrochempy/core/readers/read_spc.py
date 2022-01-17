@@ -80,7 +80,7 @@ def read_spc(*paths, **kwargs):
         The most convenient way is to use a dictionary. This feature is
         particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
-        For exemples on how to use this feature, one can look in the
+        For examples on how to use this feature, one can look in the
         ``tests/tests_readers`` directory.
     listdir : bool, optional
         If True and filename is None, all files present in the provided
