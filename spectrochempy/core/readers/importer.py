@@ -208,7 +208,7 @@ class Importer(HasTraits):
                     datasets.extend(res)
 
             except FileNotFoundError:
-                warning_(f"No file with name `{filename}` could be found. Sorry! ")
+                raise
 
             except IOError as e:
                 warning_(str(e))
