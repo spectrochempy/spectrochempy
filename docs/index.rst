@@ -88,7 +88,6 @@ User's Guide
 * :doc:`userguide/plotting/plotting`
 * :doc:`userguide/processing/processing`
 * :doc:`userguide/analysis/analysis`
-* :doc:`userguide/fitting/fitting`
 * :doc:`userguide/units/units`
 * :doc:`userguide/databases/databases`
 * :doc:`userguide/api/api`
@@ -104,7 +103,6 @@ User's Guide
     userguide/plotting/plotting
     userguide/processing/processing
     userguide/analysis/analysis
-    userguide/fitting/fitting
     userguide/units/units
     userguide/databases/databases
     userguide/api/api
