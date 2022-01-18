@@ -3,15 +3,12 @@
 
 import numpy as np
 import pytest
-from pathlib import Path
-
 import spectrochempy as scp
-from spectrochempy.utils import show
-
-nmrdir = Path("nmrdata/bruker/tests/nmr")
 
 DATADIR = scp.preferences.datadir
 NMRDATA = DATADIR / "nmrdata"
+
+nmrdir = NMRDATA / "bruker" / "tests" / "nmr"
 
 
 @pytest.mark.skipif(
