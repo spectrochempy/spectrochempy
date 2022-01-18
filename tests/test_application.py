@@ -14,7 +14,6 @@ set_loglevel("WARNING")
 def test_api():
     assert "EFA" in APIref
     assert "CRITICAL" in APIref
-    assert "np" in APIref
     assert "NDDataset" in APIref
     assert "abs" in APIref
 

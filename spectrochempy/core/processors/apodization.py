@@ -25,7 +25,7 @@ import functools
 import numpy as np
 from scipy.signal import windows
 
-from spectrochempy.units import Quantity
+from spectrochempy.core.units import Quantity
 from spectrochempy.utils import EPSILON
 from spectrochempy.core import error_
 

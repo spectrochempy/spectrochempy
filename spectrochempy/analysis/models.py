@@ -10,7 +10,7 @@ This module holds the definitions all the various models.
 from functools import wraps
 import numpy as np
 
-from spectrochempy.units import Quantity
+from spectrochempy.core.units import Quantity
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.nddataset import NDDataset
 

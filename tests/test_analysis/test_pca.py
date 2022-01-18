@@ -9,7 +9,7 @@ Tests for the PCA module
 import numpy as np
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.analysis.pca import PCA
+from spectrochempy.analysis.pca import PCA
 from spectrochempy.utils import MASKED
 
 from spectrochempy.utils import show

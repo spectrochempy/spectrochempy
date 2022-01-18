@@ -31,7 +31,7 @@ from spectrochempy.utils import (
     get_component,
     insert_masked_print,
 )
-from spectrochempy.units import Quantity
+from spectrochempy.core.units import Quantity
 
 
 # ======================================================================================================================

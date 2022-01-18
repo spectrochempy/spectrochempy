@@ -35,7 +35,7 @@
 
 # %%
 import spectrochempy as scp
-from spectrochempy.units import ur
+from spectrochempy.core.units import ur
 
 # %% [markdown]
 # ## Introduction

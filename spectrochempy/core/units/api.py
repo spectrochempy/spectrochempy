@@ -4,6 +4,11 @@
 #  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory.
 # ======================================================================================================================
-"""
-Package related to fitting of n-dimensional datasets.
-"""
+
+from spectrochempy.utils import generate_api
+
+__all__ = generate_api(__file__)
+
+# ======================================================================================================================
+if __name__ == "__main__":
+    pass

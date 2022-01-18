@@ -19,7 +19,7 @@ from spectrochempy.core.dataset.ndmath import (
     _binary_ufuncs,
     _comp_ufuncs,
 )
-from spectrochempy.units.units import ur, Quantity, Unit
+from spectrochempy.core.units.units import ur, Quantity, Unit
 from spectrochempy.utils import MASKED
 from spectrochempy.utils.testing import (
     assert_array_equal,

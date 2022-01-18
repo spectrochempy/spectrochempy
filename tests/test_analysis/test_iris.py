@@ -3,7 +3,7 @@
 
 import os
 
-from spectrochempy.core.analysis.iris import IRIS
+from spectrochempy.analysis.iris import IRIS
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import show

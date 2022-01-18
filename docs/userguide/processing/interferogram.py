@@ -38,7 +38,7 @@
 
 # %%
 import spectrochempy as scp
-from spectrochempy.units import ur
+from spectrochempy.core.units import ur
 
 # %%
 ir = scp.read_spa("irdata/interferogram/interfero.SPA")

@@ -16,7 +16,7 @@ __dataset_methods__ = __all__
 import functools
 import numpy as np
 
-from spectrochempy.units import ur, Quantity
+from spectrochempy.core.units import ur, Quantity
 from spectrochempy.core import error_
 
 pi = np.pi

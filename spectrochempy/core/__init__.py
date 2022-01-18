@@ -10,18 +10,9 @@ Package defining the *core* methods of the |scpy| API.
 Most the API methods such as plotting, processing, analysis, etc...
 """
 
-# warnings.simplefilter('ignore', (DeprecationWarning,
-#                                 FutureWarning, UserWarning))
-
-import os
 from os import environ
 import sys
 import warnings
-
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-import numpy as np
-import scipy
 
 from ..optional import import_optional_dependency
 
@@ -31,18 +22,7 @@ warnings.filterwarnings("ignore")
 # Tells here the methods or object we allow to import from this library
 # ======================================================================================================================
 
-__all__ = [
-    # Useful libraries alias for the end user avoiding to load them when wild card import is used
-    # --------------------------------------------------------------------------------------------
-    "np",
-    "plt",
-    "scipy",
-    "os",
-    "sys",
-    "mpl",
-    # methods and objects from other packages will be added
-    # later on this module (see below)
-]
+__all__ = []
 
 # ======================================================================================================================
 # logging functions
@@ -275,10 +255,10 @@ __all__ += api.__all__
 # units
 # ------------------------------------------------------------------
 _pbar_update()
-from ..units import units  # noqa: E402
-from ..units.units import *  # noqa: E402,F403,F401
+from .units import api  # noqa: E402
+from .units.api import *  # noqa: E402,F403,F401
 
-__all__ += units.__all__
+__all__ += api.__all__
 
 # databases
 # ------------------------------------------------------------------
@@ -291,16 +271,8 @@ __all__ += api.__all__
 # analysis
 # ------------------------------------------------------------------
 _pbar_update()
-from .analysis import api  # noqa: E402
-from .analysis.api import *  # noqa: E402,F403,F401
-
-__all__ += api.__all__
-
-# fitting
-# ------------------------------------------------------------------
-_pbar_update()
-from .fitting import api  # noqa: E402
-from .fitting.api import *  # noqa: E402,F403,F401
+from ..analysis import api  # noqa: E402
+from ..analysis.api import *  # noqa: E402,F403,F401
 
 __all__ += api.__all__
 

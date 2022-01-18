@@ -3,7 +3,6 @@
 
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils.testing import assert_dataset_almost_equal
 
 
 def test_read_jdx(JDX_2D):

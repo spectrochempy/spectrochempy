@@ -35,7 +35,7 @@ from spectrochempy.utils import (
     INPLACE,
     spacing_,
 )
-from spectrochempy.units import Quantity, ur
+from spectrochempy.core.units import Quantity, ur
 from spectrochempy.core import error_
 
 

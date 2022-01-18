@@ -7,28 +7,25 @@
 """
 Module to perform fitting of 1D or n-D spectral data.
 """
-__all__ = ["Fit"]
+__all__ = ["Fit", "optimize", "FitParameters", "ParameterScript"]
 
 __dataset_methods__ = []
 
 import sys
 import re
+from collections import UserDict
 from warnings import warn
-from traitlets import HasTraits, Bool, Any, List, Instance
-import numpy as np
 
-# IPython
+import numpy as np
+import scipy.optimize
+from traitlets import HasTraits, Bool, Any, Unicode, Instance, List, observe
 from IPython import display
 
-from spectrochempy.core.fitting.parameters import ParameterScript
-from spectrochempy.core.fitting.optimization import optimize
 from spectrochempy.utils import htmldoc
-from spectrochempy.core import preferences, info_, INFO
-from spectrochempy.core.fitting import models as models_
+from spectrochempy.core import preferences, info_, warning_, INFO
+from spectrochempy.analysis import models as models_
 
 
-# ======================================================================================================================
-# getmodel
 # ======================================================================================================================
 def getmodel(x, y=None, modelname=None, par=None, **kargs):
     """
@@ -63,14 +60,14 @@ def getmodel(x, y=None, modelname=None, par=None, **kargs):
     args = []
     for p in a.args:
         try:
-            args.append(par["%s_%s" % (p, modelname)])
-        except KeyError as e:  # pragma: no cover
+            args.append(par[f"{p}_{modelname}"])
+        except KeyError as e:
             if p.startswith("c_"):
                 # probably the end of the list
                 # due to a limited polynomial degree
                 pass
             else:
-                raise ValueError(e.message)
+                raise ValueError(e)
 
     x = np.array(x, dtype=np.float64)
     if y is not None:
@@ -82,11 +79,444 @@ def getmodel(x, y=None, modelname=None, par=None, **kargs):
         return a.f(x, y, *args, **kargs)
 
 
-# ======================================================================================================================
-#  Fit: main object to handle a fit
-# ======================================================================================================================
+# =============================================================================
+class FitParameters(UserDict):
+    """
+    Allow passing a dictionary of parameters with additional properties
+    to the fit function. Check if the parameter is between the specified bounds
+    if any.
+    """
+
+    # ------------------------------------------------------------------------
+    def __init__(self):
+        UserDict.__init__(self)  # Create a dictionary class
+        self.lob = {}  # Lower bound
+        self.upb = {}  # Upper bound
+        self.fixed = {}  # true for non-variable parameter
+        self.reference = {}  #
+        self.common = {}  # indicates if a parameters belong to a common block
+        self.model = {}  # model to use
+        self.models = []  # list of models
+        self.sequence = ""  # sequence used in the experiment
+        self.expvars = []  # list of parameters which are experiment dependent
+        self.expnumber = 1  # number of experiments
+
+    # ------------------------------------------------------------------------
+    def __setitem__(self, key, value):
+        key = str(key)
+        if key not in self.reference:
+            self.reference[key] = False
+        if self.reference[key]:
+            # we get a reference to another parameter
+            self.data[key] = str(value)
+            self.fixed[key] = True
+        elif isinstance(value, tuple) or isinstance(value, list):
+            self.data[key] = self._evaluate(value[0])
+            self.lob[key] = None
+            self.upb[key] = None
+            try:
+                if len(value) > 2:
+                    self.lob[key] = self._evaluate(value[1])
+                    self.upb[key] = self._evaluate(value[2])
+                    self._checkerror(key)
+            except Exception:
+                pass
+            self.fixed[key] = False
+            if isinstance(value[-1], bool):
+                self.fixed[key] = value[-1]
+        else:
+            self.data[key] = self._evaluate(value)
+            self.lob[key] = None
+            self.upb[key] = None
+            self.fixed[key] = False
+
+    # ------------------------------------------------------------------------
+    def __getitem__(self, key):
+        key = str(key)
+        if key in self.data:
+            return self.data[key]
+        raise KeyError(f"parameter `{key}` is not found")
+
+    # ------------------------------------------------------------------------
+    def iteritems(self):
+        return iter(self.data.items())
+
+    # ------------------------------------------------------------------------
+    def _checkerror(self, key):
+        key = str(key)
+        if self.lob[key] is None and self.upb[key] is None:
+            return False
+        elif (self.lob[key] is not None and self.data[key] < self.lob[key]) or (
+            self.upb[key] is not None and self.data[key] > self.upb[key]
+        ):
+            raise ValueError(f"`{key}` value ({self.data[key]}) is out of bounds")
+
+    # ------------------------------------------------------------------------
+    def __str__(self):
+
+        # .............................................................
+        def makestr(key):
+
+            keystring = key.split("_")[0]
+            if self.reference[key]:
+                return f"\t> {keystring}:{self.data[key]}\n"
+            else:
+                if self.fixed[key]:
+                    keystring = f"\t* {keystring}"
+                else:
+                    keystring = f"\t$ {keystring}"
+                lob = self.lob[key]
+                upb = self.upb[key]
+                if lob <= -0.1 / sys.float_info.epsilon:
+                    lob = "none"
+                if upb >= +0.1 / sys.float_info.epsilon:
+                    upb = "none"
+                val = str(self.data[key])
+
+                return f"{keystring}: {float(val):10.4f}, {lob}, {upb}\n"
+
+        # ..............................................................
+
+        message = "#PARAMETER SCRIPT\n\nCOMMON:\n"
+
+        var = ""
+        for item in self.expvars:
+            var += f" {item}"
+
+        if var:
+            message += f"\texperiment_number: {self.expnumber}\n"
+            message += f"\texperiment_variables: {var}\n"
+
+        # look for common parameters
+        for key in list(self.keys()):
+            keysp = key.split("_")[0]
+            if self.common[keysp]:
+                message += makestr(key)
+
+        # model parameters
+        models = self.models
+        for model in models:
+            message += f"\nMODEL: {model}\n"
+            message += f"shape: {self.model[model]}\n"
+            for key in sorted(self.keys()):
+                keyspl = key.split("_")
+                if model not in "_".join(keyspl[1:]):
+                    continue
+                message += makestr(key)
+        return message
+
+    # ------------------------------------------------------------------------
+    @staticmethod
+    def _evaluate(strg):
+        """
+        Allow the evaluation of strings containing some operations
+
+        Parameters
+        ----------
+        strg : string
+            A string to evaluate containing multiplier,
+            e.g., '10 k' evaluate to 10 000.
+
+        Return
+        ------
+        value : float or bool
+            Value of the string, or False, if there is an error
+        """
+        res = False
+
+        if isinstance(strg, str):
+            # strg=string.upper(strg)
+            p = re.compile(r"\s+")
+            m = p.split(strg.strip())
+
+            for i in range(len(m)):
+                try:
+                    res = eval(m[i])
+                except NameError:
+                    message = f"Cannot evaluate '{strg}' >> {m[i]} is not defined"
+                    raise NameError(message)
+                except SyntaxError:
+                    message = f"Syntax error in '{strg}'"
+                    raise SyntaxError(message)
+        else:
+            # not a string (probably a scalar that can be return as it is)
+            res = strg
+
+        return res
+
+    # ------------------------------------------------------------------------
+    def to_internal(self, key, expi=None):
+        """
+        If expi is not none, several parameters to create.
+        """
+        key = str(key)
+        if key not in self.data:
+            raise KeyError(f"parameter `{key}` is not found")
+
+        if expi is not None:
+            pe = self.data[key][expi]
+        else:
+            pe = self.data[key]
+        lob = self.lob[key]
+        upb = self.upb[key]
+
+        is_lob = (
+            lob is not None and lob > -0.1 / sys.float_info.epsilon
+        )  # lob is not None
+        is_upb = (
+            lob is not None and upb < +0.1 / sys.float_info.epsilon
+        )  # upb is not None
+
+        if is_lob and is_upb:
+            lob = min(pe, lob)
+            upb = max(pe, upb)
+            # With min and max bounds defined
+            pi = np.arcsin((2 * (pe - lob) / (upb - lob)) - 1.0)
+        elif is_upb:
+            upb = max(pe, upb)
+            # With only max defined
+            pi = np.sqrt((upb - pe + 1.0) ** 2 - 1.0)
+        elif is_lob:
+            lob = min(pe, lob)
+            # With only min defined
+            pi = np.sqrt((pe - lob + 1.0) ** 2 - 1.0)
+        else:
+            pi = pe
+        return pi
+
+    # ------------------------------------------------------------------------
+    def to_external(self, key, pi):
+
+        key = str(key)
+        if key not in self.data:
+            raise KeyError(f"parameter `{key}` is not found")
+
+        lob = self.lob[key]
+        upb = self.upb[key]
+
+        is_lob = (
+            lob is not None and lob > -0.1 / sys.float_info.epsilon
+        )  # lob is not None
+        is_upb = (
+            lob is not None and upb < +0.1 / sys.float_info.epsilon
+        )  # upb is not None
+
+        if not isinstance(pi, list):
+            pi = [
+                pi,
+            ]  # make a list
+
+        pe = []
+        for item in pi:
+            if is_lob and is_upb:
+                #  With min and max bounds defined
+                pei = lob + ((upb - lob) / 2.0) * (np.sin(item) + 1.0)
+            elif is_upb:
+                # With only max defined
+                pei = upb + 1.0 - np.sqrt(item ** 2 + 1.0)
+            elif is_lob:
+                # With only min defined
+                pei = lob - 1.0 + np.sqrt(item ** 2 + 1.0)
+            else:
+                pei = pi
+            pe.append(pei)
+
+        if len(pe) == 1:
+            pe = pe[0]
+
+        self.data[key] = pe
+
+        return pe
+
+    def copy(self):
+
+        import copy as cpy
+
+        data = cpy.copy(self.data)
+        lob = cpy.copy(self.lob)
+        upb = cpy.copy(self.upb)
+        fixed = cpy.copy(self.fixed)
+        reference = cpy.copy(self.reference)
+
+        c = cpy.copy(self)
+
+        c.data = data
+        c.lob = lob
+        c.upb = upb
+        c.fixed = fixed
+        c.reference = reference
+
+        return c
 
 
+# =============================================================================
+class ParameterScript(HasTraits):
+    """
+    This class allow some manipulation of the parameter list for modelling.
+    """
+
+    fp = Instance(FitParameters)
+
+    script = Unicode("")
+
+    datasets = List(Instance("spectrochempy.core.dataset.nddataset.NDDataset"))
+
+    # =========================================================================
+    # properties
+    # =========================================================================
+    # ------------------------------------------------------------------------
+    @observe("script")
+    def _check_parameters(self, change):
+        """
+        Check the validity of the parameters.
+        """
+        self.fp = self._interpret(self.script)
+
+    # ------------------------------------------------------------------------
+    def _interpret(self, script):
+        """
+        Interpreter of the script content.
+        """
+        # init some flags
+        modlabel = None
+        common = False
+        fixed = False
+        reference = False
+
+        # create a new FitParameters instance
+        fp = FitParameters()
+
+        # set the number of experiments
+        fp.expnumber = len(self.datasets)
+        info_(f"The number of experiment(s) is set to {fp.expnumber}")
+
+        # start interpreting ------------------------------------------------------
+        lines = script.split("\n")
+        lc = 0
+
+        for item in lines:
+            lc += 1  # -------------- count the lines
+            line = item.strip()
+            if line == "" or line.startswith("#"):
+                # this is a blank or comment line, go to next line
+                continue
+            # split around the semi-column
+            s = line.split(":")
+            if len(s) != 2:
+                raise ValueError(
+                    f"Cannot interpret line {lc}: A semi-column is missing?"
+                )
+
+            key, values = s
+            key = key.strip().lower()
+            if key.startswith("model"):
+                modlabel = values.lower().strip()
+                if modlabel not in fp.models:
+                    fp.models.append(modlabel)
+                common = False
+                continue
+            elif key.startswith("common") or key.startswith("vars"):
+                common = True
+                modlabel = "common"
+                continue
+            elif key.startswith("shape"):
+                shape = values.lower().strip()
+                if (
+                    shape is None
+                ):  # or (shape not in self._list_of_models and shape not in self._list_of_baselines):
+                    raise ValueError(
+                        f"Shape of this model `{shape}` was not specified or is not implemented"
+                    )
+                fp.model[modlabel] = shape
+                common = False
+                continue
+            elif key.startswith("experiment"):  # must be in common
+                if not common:
+                    raise ValueError(
+                        "'experiment_...' specification was found outside the common block."
+                    )
+                if "variables" in key:
+                    expvars = values.lower().strip()
+                    expvars = expvars.replace(",", " ").replace(";", " ")
+                    expvars = expvars.split()
+                    fp.expvars.extend(expvars)
+                continue
+            else:
+                if modlabel is None and not common:
+                    raise ValueError(
+                        "The first definition should be a label for a model or a block of variables or constants."
+                    )
+                # get the parameters
+                if key.startswith("*"):
+                    fixed = True
+                    reference = False
+                    key = key[1:].strip()
+                elif key.startswith("$"):
+                    fixed = False
+                    reference = False
+                    key = key[1:].strip()
+                elif key.startswith(">"):
+                    fixed = True
+                    reference = True
+                    key = key[1:].strip()
+                else:
+                    raise ValueError(
+                        f"Cannot interpret line {lc}: A parameter definition must start with *,$ or >"
+                    )
+
+                # store this parameter
+                s = values.split(",")
+                s = [ss.strip() for ss in s]
+                if len(s) > 1 and ("[" in s[0]) and ("]" in s[1]):  # list
+                    s[0] = "%s, %s" % (s[0], s[1])
+                    if len(s) > 2:
+                        s[1:] = s[2:]
+                if len(s) > 3:
+                    raise ValueError(
+                        f"line {lc}: value, min, max should be defined in this order"
+                    )
+                elif len(s) == 2:
+                    raise ValueError(f"only two items in line {lc}")
+                    # s.append('none')
+                elif len(s) == 1:
+                    s.extend(["none", "none"])
+                value, mini, maxi = s
+                if mini.strip().lower() in ["none", ""]:
+                    mini = str(-1.0 / sys.float_info.epsilon)
+                if maxi.strip().lower() in ["none", ""]:
+                    maxi = str(+1.0 / sys.float_info.epsilon)
+                if modlabel != "common":
+                    ks = f"{key}_{modlabel}"
+                    fp.common[key] = False
+                else:
+                    ks = f"{key}"
+                    fp.common[key] = True
+                fp.reference[ks] = reference
+                if not reference:
+                    val = value.strip()
+                    val = eval(val)
+                    if isinstance(val, list):
+                        # if the parameter is already a list, that's ok if the number of parameters is ok
+                        if len(val) != fp.expnumber:
+                            raise ValueError(
+                                f"the number of parameters {len(val)} is not the number of experiments."
+                            )
+                        if key not in fp.expvars:
+                            raise ValueError(
+                                f"parameter {key} is not declared as variable"
+                            )
+                    else:
+                        if key in fp.expvars:
+                            # we create a list of parameters corresponding
+                            val = [val] * fp.expnumber
+                    fp[ks] = val, mini.strip(), maxi.strip(), fixed
+                else:
+                    fp[ks] = value.strip()
+
+        return fp
+
+
+# ======================================================================================================================
 class Fit(HasTraits):
     """
     Fit a 1D or 2D dataset, or a list of datasets.
@@ -752,5 +1182,151 @@ class Fit(HasTraits):
         return A, a, b, c
 
 
-if __name__ == "__main__":
-    pass
+# ======================================================================================================================
+def optimize(
+    func,
+    fp0,
+    args=(),
+    constraints={},
+    method="SIMPLEX",
+    maxfun=None,
+    maxiter=1000,
+    ftol=1e-8,
+    xtol=1e-8,
+    callback=None,
+):
+    """
+        Parameters
+        ----------
+        func
+        fp0
+        args
+        constraints
+        method
+        maxfun
+        maxiter
+        ftol
+        xtol
+        callback
+
+
+    #  Internal/external transformation
+    #  These transformations are used in the MINUIT package,
+    #  and described in detail
+    #  in the section 1.3.1 of the MINUIT User's Guide.
+
+
+    """
+
+    global keys
+
+    def restore_external(fp, p, keys):
+        # restore external parameters
+        for key in list(fp.keys()):
+            keysp = key.split("_")
+            if keysp[0] in fp.expvars:
+                ps = []
+                for i in range(fp.expnumber):
+                    ks = "%s_exp%d" % (key, i)
+                    if ks not in keys:
+                        break
+                    k = keys.index(ks)
+                    ps.append(p[k])
+                if len(ps) > 0:
+                    fp.to_external(key, ps)
+            else:
+                if key not in keys:
+                    continue
+                k = keys.index(key)
+                fp.to_external(key, p[k])
+        return fp
+
+    def internal_func(p, dat, fp, keys, *args):
+        fp = restore_external(fp, p, keys)
+        return func(fp, dat, *args)
+
+    def internal_callback(*args):
+        if callback is None:
+            return
+        return callback(*args)
+
+    if not isinstance(fp0, FitParameters):
+        raise TypeError("fp0 is not of FitParameter type")
+
+    # make internal parameters
+    par = []
+    keys = []
+
+    for key in sorted(fp0.keys()):
+        if not fp0.fixed[key]:
+            # we make internal parameters in case of bounding
+            # We also take care of the multiple experiments
+            keysp = key.split("_")[0]
+            if keysp in fp0.expvars:
+                for i in range(fp0.expnumber):
+                    par.append(fp0.to_internal(key, i))
+                    keys.append("%s_exp%d" % (key, i))
+            else:
+                par.append(fp0.to_internal(key))
+                keys.append(key)
+
+    args = list(args)
+    args.append(fp0)
+    args.append(keys)
+    if constraints:
+        args.append(constraints)
+
+    if not maxfun:
+        maxfun = 4 * maxiter
+    if method.upper() == "SIMPLEX":
+        result = scipy.optimize.fmin(
+            internal_func,
+            par,
+            args=tuple(args),
+            maxfun=maxfun,
+            maxiter=maxiter,
+            ftol=ftol,
+            xtol=xtol,
+            full_output=True,
+            disp=False,
+            callback=internal_callback,
+        )
+        res, fopt, iterations, funcalls, warnmess = result
+
+    elif method.upper() == "HOPPING":
+        result = scipy.optimize.basinhopping(
+            internal_func,
+            par,
+            niter=100,
+            T=1.0,
+            stepsize=0.5,
+            minimizer_kwargs={"args": tuple(args)},
+            take_step=None,
+            accept_test=None,
+            callback=internal_callback,
+            interval=50,
+            disp=False,
+            niter_success=None,
+        )
+
+        # fmin(func, par, args=args, maxfun=maxfun, maxiter=maxiter, ftol=ftol, xtol=xtol,
+        #                                                full_output=True, disp=False, callback=callback)
+        res, fopt, warnmess = result.x, result.fun, result.message
+
+    elif method == "XXXX":
+        raise NotImplementedError("method: %s" % method)
+        # TODO: implement other algorithms
+    else:
+        raise NotImplementedError("method: %s" % method)
+
+    # restore the external parameter
+    fpe = restore_external(fp0, res, keys)
+    # for i, key in enumerate(keys):
+    #    fp0.to_external(key, res[i])
+
+    if warnmess == 1:
+        warning_("Maximum number of function evaluations made.")
+    if warnmess == 2:
+        warning_("Maximum number of iterations reached.")
+
+    return fpe, fopt
