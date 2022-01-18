@@ -118,6 +118,18 @@ def test_issue_375():
     # os.remove('multiple_IR_dataset_1D_scatter.png')
 
 
+def test_nmr_1D_show_complex(NMR_dataset_1D):
+    dataset = NMR_dataset_1D.copy()
+    dataset.plot(xlim=(0.0, 25000.0))
+    dataset.plot(imag=True, color="r", data_only=True, clear=False)
+
+    # display the real and complex at the same time
+    dataset.plot(
+        show_complex=True, color="green", xlim=(0.0, 30000.0), zlim=(-200.0, 200.0)
+    )
+    show()
+
+
 # ======================================================================================================================
 if __name__ == "__main__":
     pass
