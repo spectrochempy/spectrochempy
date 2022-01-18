@@ -94,7 +94,8 @@ def _apodize_method(**units):
 
                     apod[key] = par
                     if par.dimensionality == 1 / dunits.dimensionality:
-                        kwargs[key] = 1.0 / (1.0 / par).to(dunits)
+                        # kwargs[key] = 1.0 / (1.0 / par).to(dunits)
+                        kwargs[key] = par.to(1 / dunits)
                     else:
                         kwargs[key] = par.to(dunits)
 
