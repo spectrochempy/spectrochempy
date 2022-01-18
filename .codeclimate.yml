@@ -30,7 +30,6 @@ checks:
   return-statements:
     config:
       threshold: 10
-
 exclude_patterns:
   - ".ci/"
   - ".conda/"
@@ -41,6 +40,6 @@ exclude_patterns:
   - "docker/"
   - "docs/"
   - "scp_data/"
-  - "scripts/",
+  - "scripts/"
   - "*.egg-info/"
   - "tests/"
