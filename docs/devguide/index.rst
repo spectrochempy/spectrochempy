@@ -15,4 +15,5 @@ Developer's Guide
 
     contributing
     contributing_codebase
+    contributing_codespecifics
     contributing_documentation
