@@ -5,7 +5,7 @@ import numpy as np
 import spectrochempy as scp
 from spectrochempy.utils import show, MASKED
 
-from spectrochempy.core.fitting.models import asymmetricvoigtmodel
+from spectrochempy.analysis.models import asymmetricvoigtmodel
 
 
 def test_EFA(IR_dataset_2D):

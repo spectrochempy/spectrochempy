@@ -37,7 +37,13 @@ from traittypes import Array
 
 from spectrochempy.core import info_, error_, print_
 from spectrochempy.core.dataset.meta import Meta
-from spectrochempy.units import Unit, ur, Quantity, set_nmr_context, DimensionalityError
+from spectrochempy.core.units import (
+    Unit,
+    ur,
+    Quantity,
+    set_nmr_context,
+    DimensionalityError,
+)
 from spectrochempy.utils import (
     TYPE_INTEGER,
     TYPE_FLOAT,

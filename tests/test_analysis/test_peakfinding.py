@@ -3,7 +3,7 @@
 
 
 import pytest
-from spectrochempy.units import ur
+from spectrochempy.core.units import ur
 
 
 def test_findpeaks(IR_dataset_1D):

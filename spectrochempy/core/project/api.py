@@ -5,10 +5,8 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory.
 # ======================================================================================================================
 
-
 from spectrochempy.utils import generate_api
 
-# generate api
 __all__ = generate_api(__file__)
 
 # ======================================================================================================================

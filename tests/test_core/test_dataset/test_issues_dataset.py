@@ -4,7 +4,7 @@ import numpy as np
 
 from spectrochempy.utils import show
 from spectrochempy import read_omnic
-from spectrochempy.units import ur
+from spectrochempy.core.units import ur
 
 typequaternion = np.dtype(np.quaternion)
 

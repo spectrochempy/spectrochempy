@@ -12,7 +12,7 @@ import pytest
 
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.coordset import CoordSet
-from spectrochempy.units import ur, DimensionalityError
+from spectrochempy.core.units import ur, DimensionalityError
 
 
 # ======================================================================================================================

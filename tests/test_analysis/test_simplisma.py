@@ -6,7 +6,7 @@ import os
 
 from spectrochempy.utils import show
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.analysis.simplisma import SIMPLISMA
+from spectrochempy.analysis.simplisma import SIMPLISMA
 
 
 def test_simplisma():

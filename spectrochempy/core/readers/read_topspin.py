@@ -21,7 +21,7 @@ from nmrglue.fileio.bruker import read as read_fid, read_pdata, read_lowmem
 from spectrochempy.core import debug_
 from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.core.dataset.coord import LinearCoord
-from spectrochempy.units import ur
+from spectrochempy.core.units import ur
 from spectrochempy.utils.exceptions import deprecated
 from spectrochempy.core.readers.importer import Importer, importermethod
 
