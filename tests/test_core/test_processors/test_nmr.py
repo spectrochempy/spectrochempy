@@ -18,7 +18,7 @@ from spectrochempy.utils.testing import (
     assert_array_almost_equal,
 )
 
-pytestmark = pytest.mark.skip("all tests still WIP")
+# pytestmark = pytest.mark.skip("all tests still WIP")
 
 
 # 1D
@@ -339,10 +339,3 @@ def test_nmr_2D_em_y(NMR_dataset_2D):
     dataset.plot_map(cmap="copper", data_only=True, clear=False)  # em on dim=x
 
     show()
-
-
-def test_nmr_2D(NMR_dataset_2D):
-    dataset = NMR_dataset_2D
-    dataset.plot(nlevels=20)  # , start=0.15)
-    show()
-    pass

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa
 
-
+import numpy as np
 import pytest
 from pathlib import Path
 
@@ -12,15 +12,6 @@ nmrdir = Path("nmrdata/bruker/tests/nmr")
 
 DATADIR = scp.preferences.datadir
 NMRDATA = DATADIR / "nmrdata"
-
-
-@pytest.mark.skipif(
-    not NMRDATA.exists(),
-    reason="Experimental data not available for testing",
-)
-def test_deprecated():
-    with pytest.deprecated_call():
-        scp.read_bruker_nmr(nmrdir / "topspin_2d", expno=1, remove_digital_filter=True)
 
 
 @pytest.mark.skipif(
@@ -60,14 +51,26 @@ def test_readtopspin():
     assert str(nd[0]) == "NDDataset: [complex128] unitless (size: 16384)"
     assert str(nd[1]) == "NDDataset: [quaternion] unitless (shape: (y:1024, x:2048))"
 
+    # test read_dir
 
-@pytest.mark.skipif(
-    not NMRDATA.exists(),
-    reason="Experimental data not available for testing",
-)
-def test_readdir_for_nmr():
     nd = scp.read_dir("nmrdata/bruker/tests/nmr", protocol="topspin")
     assert isinstance(nd, list)
     nd1 = [item.name for item in nd]
     assert "topspin_2d expno:1 procno:1 (SER)" in nd1
     assert "topspin_1d expno:1 procno:1 (FID)" in nd1
+
+    # test deprecation
+
+    with pytest.deprecated_call():
+        scp.read_bruker_nmr(nmrdir / "topspin_2d", expno=1, remove_digital_filter=True)
+
+
+@pytest.mark.skipif(
+    not NMRDATA.exists(),
+    reason="Experimental data not available for testing",
+)
+def test_nmr_2D(NMR_dataset_2D):
+    # test fixture
+    dataset = NMR_dataset_2D
+    assert dataset.dtype == np.quaternion
+    assert dataset.shape == (96, 948)

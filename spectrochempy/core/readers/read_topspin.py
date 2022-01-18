@@ -17,7 +17,7 @@ import re
 import numpy as np
 from quaternion import as_quat_array
 
-from nmrglue.fileio.bruker import read as read_fid, read_pdata, read_lowmem
+from nmrglue.fileio.bruker import read as read_fid, read_pdata
 from spectrochempy.core import debug_
 from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.core.dataset.coord import LinearCoord
@@ -603,19 +603,19 @@ def _remove_digital_filter(dic, data):
     Remove the digital filter from Bruker data.
     nmrglue modified Digital Filter Processing
     """
-    if "acqus" not in dic:
+    if "acqus" not in dic:  # pragma: no cover
         raise KeyError("dictionary does not contain acqus parameters")
 
-    if "DECIM" not in dic["acqus"]:
+    if "DECIM" not in dic["acqus"]:  # pragma: no cover
         raise KeyError("dictionary does not contain DECIM parameter")
-    decim = dic["acqus"]["DECIM"]
 
     if "DSPFVS" not in dic["acqus"]:
         raise KeyError("dictionary does not contain DSPFVS parameter")
-    dspfvs = dic["acqus"]["DSPFVS"]
 
+    decim = dic["acqus"]["DECIM"]
+    dspfvs = dic["acqus"]["DSPFVS"]
     if "GRPDLY" not in dic["acqus"]:
-        grpdly = 0
+        grpdly = 0  # pragma: no cover
     else:
         grpdly = dic["acqus"]["GRPDLY"]
 
@@ -625,20 +625,21 @@ def _remove_digital_filter(dic, data):
     # Determine the phase correction
     else:
         if dspfvs >= 14:  # DSPFVS greater than 14 give no phase correction.
-            phase = 0.0
+            phase = 0.0  # pragma: no cover
         else:
             if dspfvs < 11:
                 dspfvs = 11  # default for DQD  # loop up the phase in the table
-            if dspfvs not in bruker_dsp_table:
+            if dspfvs not in bruker_dsp_table:  # pragma: no cover
                 raise KeyError("dspfvs not in lookup table")
-            if decim not in bruker_dsp_table[dspfvs]:
+            if decim not in bruker_dsp_table[dspfvs]:  # pragma: no cover
                 raise KeyError("decim not in lookup table")
             phase = bruker_dsp_table[dspfvs][decim]
+
     # fft
     si = data.shape[-1]
     pdata = np.fft.fftshift(np.fft.fft(data, si, axis=-1), -1) / float(si / 2)
-    pdata = (pdata.T - pdata.T[0]).T  # TODO: this allow generally to
-    # TODO: remove Bruker smiles, not so sure actually
+    pdata = (pdata.T - pdata.T[0]).T
+    # TODO: this allow generally to remove Bruker smiles, not so sure actually
 
     # Phasing
     si = float(pdata.shape[-1])
@@ -806,9 +807,6 @@ def _read_topspin(*args, **kwargs):
     # is-it a processed dataset (1r, 2rr ....
     processed = True if path.match("pdata/*/*") else False
 
-    # low memory handling (lowmem) ?
-    lowmem = kwargs.get("lowmem", False)  # load all in numero by default
-
     # ------------------------------------------------------------------------
     # start reading ....
     # ------------------------------------------------------------------------
@@ -838,14 +836,7 @@ def _read_topspin(*args, **kwargs):
 
     if not processed:
 
-        if not lowmem:
-            dic, data = read_fid(
-                f_expno, acqus_files=acqus_files, procs_files=procs_files
-            )
-        else:
-            dic, data = read_lowmem(
-                f_expno, acqus_files=acqus_files, procs_files=procs_files
-            )
+        dic, data = read_fid(f_expno, acqus_files=acqus_files, procs_files=procs_files)
 
         # apply a -90 phase shift to be compatible with topspin
         data = data * np.exp(-1j * np.pi / 2.0)
@@ -858,7 +849,7 @@ def _read_topspin(*args, **kwargs):
             td1 = dic["acqu2"]["TD"]
             try:
                 data = data.reshape(td1, -1)
-            except ValueError:
+            except ValueError:  # pragma: no cover
                 try:
                     td = dic["acqu"]["TD"] // 2
                     data = data.reshape(-1, td)
@@ -903,14 +894,15 @@ def _read_topspin(*args, **kwargs):
                 data, dataI = datalist
                 data = data + dataI * 1.0j
 
-            else:
+            else:  # pragma: no cover
                 return None
-        else:
+        else:  # pragma: no cover
             data = datalist
 
-    # ........................................................................................................
+    # ..............................................................................
     # we now make some rearrangement of the dic to have something more user friendly
-    # we assume that all experiments have similar (important) parameters so that the experiments are compatibles
+    # we assume that all experiments have similar (important) parameters
+    # so that the experiments are compatibles
 
     meta = Meta()  # This is the parameter dictionary
     datatype = path.name.upper() if not processed else f"{data.ndim}D"
@@ -919,7 +911,7 @@ def _read_topspin(*args, **kwargs):
 
     # we need the ndim of the data
     parmode = int(dic["acqus"].get("PARMODE", data.ndim - 1))
-    if parmode + 1 != data.ndim:
+    if parmode + 1 != data.ndim:  # pragma: no cover
         raise KeyError(
             f"The NMR data were not read properly as the PARMODE+1 parameter ({parmode + 1}) doesn't fit"
             f" the actual number of dimensions ({data.ndim})"
@@ -955,7 +947,7 @@ def _read_topspin(*args, **kwargs):
 
                 try:
                     meta[key.lower()][dim] = value
-                except Exception:
+                except Exception:  # pragma: no cover
                     pass
 
         else:
@@ -981,7 +973,7 @@ def _read_topspin(*args, **kwargs):
             # For historical reasons,
             # MC2 is interpreted when the acquisition status
             # parameter FnMODE has the value undefined, i.e. 0
-            if meta.mc2 is not None:
+            if meta.mc2 is not None:  # pragma: no cover
                 meta.fnmode[-2] = meta.mc2[-2] + 1
 
         meta.encoding[-2] = FnMODE[meta.fnmode[-2]]
