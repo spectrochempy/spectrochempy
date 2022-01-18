@@ -37,7 +37,6 @@ exclude_patterns:
   - ".github/"
   - ".git/"
   - ".eggs/"
-
   - "build/"
   - "docker/"
   - "docs/"
