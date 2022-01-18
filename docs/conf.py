@@ -179,11 +179,11 @@ rst_epilog = """
 
 .. |NDPlot| replace:: :class:`~spectrochempy.core.dataset.ndplot.NDPlot`
 
-.. |Unit| replace:: :class:`~spectrochempy.units.units.Unit`
+.. |Unit| replace:: :class:`~spectrochempy.core.units.units.Unit`
 
-.. |Quantity| replace:: :class:`~spectrochempy.units.units.Quantity`
+.. |Quantity| replace:: :class:`~spectrochempy.core.units.units.Quantity`
 
-.. |Measurement| replace:: :class:`~spectrochempy.units.units.Measurement`
+.. |Measurement| replace:: :class:`~spectrochempy.core.units.units.Measurement`
 
 .. |Axes| replace:: :class:`~matplotlib.Axes`
 

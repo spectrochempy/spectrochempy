@@ -2,8 +2,9 @@
 # flake8: noqa
 
 import pytest
-
-from spectrochempy import preferences, plt, os
+import os
+import matplotlib.pyplot as plt
+from spectrochempy import preferences
 from spectrochempy.utils import show
 
 

@@ -4,7 +4,7 @@ from pint.errors import UndefinedUnitError
 from quaternion import quaternion
 
 import spectrochempy as scp
-from spectrochempy.units import ur
+from spectrochempy.core.units import ur
 from spectrochempy.utils import get_user_and_node, SpectroChemPyException
 from spectrochempy.utils.testing import (
     assert_dataset_equal,

@@ -1,9 +1,18 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa
 
+import pytest
+
 import spectrochempy as scp
 
+DATADIR = scp.preferences.datadir
+GALACTICDATA = DATADIR / "galacticdata"
 
+
+@pytest.mark.skipif(
+    not GALACTICDATA.exists(),
+    reason="Experimental data not available for testing",
+)
 def test_read_spc():
     A = scp.read_spc("galacticdata/BARBITUATES.SPC")
     # "spc reader not implemented yet for multifiles"

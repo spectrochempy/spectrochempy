@@ -6,8 +6,8 @@ import os
 import numpy as np
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.analysis.efa import EFA
-from spectrochempy.core.analysis.mcrals import MCRALS
+from spectrochempy.analysis.efa import EFA
+from spectrochempy.analysis.mcrals import MCRALS
 from spectrochempy.utils import show
 
 

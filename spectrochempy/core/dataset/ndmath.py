@@ -26,7 +26,7 @@ import numpy as np
 from orderedset import OrderedSet
 from quaternion import as_float_array
 
-from spectrochempy.units.units import ur, Quantity, DimensionalityError
+from spectrochempy.core.units.units import ur, Quantity, DimensionalityError
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.utils import (
     NOMASK,

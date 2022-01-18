@@ -11,7 +11,6 @@ Application Programming Interface.
 # During the initialization of this package, a `matplotlib` backend is set
 # and some `IPython` configurations are made.
 
-
 import sys
 
 import matplotlib as mpl
@@ -20,7 +19,6 @@ from IPython.core.interactiveshell import InteractiveShell
 from IPython import get_ipython
 
 from pathlib import Path
-from os import environ
 
 # ------------------------------------------------------------------
 # Check the environment for plotting
@@ -59,8 +57,10 @@ if "pytest" in sys.argv[0] or "py.test" in sys.argv[0]:
     NO_DIALOG = True
 
     # OK, but if we are doing individual function testing in PyCharm
-    # it is interesting to see the plots and the file dialogs (except if we set explicitly --nodisplay argument!
-    # if len(sys.argv) > 1 and not any([arg.endswith(".py") for arg in sys.argv[1:]]) and '--nodisplay' not in sys.argv:
+    # it is interesting to see the plots and the file dialogs
+    # (except if we set explicitly --nodisplay argument!
+    # if len(sys.argv) > 1 and not any([arg.endswith(".py") for arg in
+    # sys.argv[1:]]) and '--nodisplay' not in sys.argv:
     if (
         len(sys.argv) > 1
         and any((arg.split("::")[0].endswith(".py") for arg in sys.argv[1:]))
@@ -96,11 +96,6 @@ if not IN_IPYTHON:
 
     initcolor()
 
-# def set_backend():
-
-# workaround this problem https://github.com/jupyter/notebook/issues/3385
-# ip.magic('matplotlib notebook')
-
 if IN_IPYTHON and KERNEL and not NO_DISPLAY:  # pragma: no cover
     try:
         if (
@@ -110,15 +105,13 @@ if IN_IPYTHON and KERNEL and not NO_DISPLAY:  # pragma: no cover
             # We are running from NBSphinx - the plot must be inline to show up.
             IP.magic("matplotlib inline")
         else:
-            # Do not set the widget backend.... do not work most of the time after upbgrade of the various
+            # Do not set the widget backend....
+            # do not work most of the time after upbgrade of the various
             # library and
             # jupyter!!! ...
             IP.magic("matplotlib inline")  # widget
     except Exception:
         IP.magic("matplotlib qt")
-
-
-# set_backend()
 
 # a useful utilities for dealing with path
 from .utils import pathclean
@@ -134,6 +127,8 @@ warnings.filterwarnings(action="ignore", module="matplotlib")  # , category=User
 
 if NO_DISPLAY:
     mpl.use("agg", force=True)
+
+    from os import environ
 
     # set test file and folder in environment
     # set a test file in environment

@@ -216,7 +216,7 @@ def set_nmr_context(larmor):
 
     First we set the NMR context,
 
-    >>> from spectrochempy.units import ur, set_nmr_context
+    >>> from spectrochempy.core.units import ur, set_nmr_context
     >>>
     >>> set_nmr_context(104.3 * ur.MHz)
 

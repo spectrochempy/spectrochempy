@@ -18,7 +18,7 @@ from scipy.signal import hilbert
 from quaternion import as_float_array
 
 from spectrochempy.core import error_
-from spectrochempy.units import ur
+from spectrochempy.core.units import ur
 from spectrochempy.core.dataset.coord import LinearCoord
 from spectrochempy.utils import (
     largest_power_of_2,

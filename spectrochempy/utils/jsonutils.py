@@ -17,7 +17,7 @@ import pathlib
 
 import numpy as np
 
-from spectrochempy.units import Quantity, Unit
+from spectrochempy.core.units import Quantity, Unit
 
 __all__ = ["json_serialiser", "json_decoder"]
 

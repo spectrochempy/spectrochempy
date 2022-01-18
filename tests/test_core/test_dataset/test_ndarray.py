@@ -10,7 +10,7 @@ import pytest
 from pint.errors import DimensionalityError
 
 from spectrochempy.core.dataset.ndarray import NDArray
-from spectrochempy.units import ur, Quantity
+from spectrochempy.core.units import ur, Quantity
 from spectrochempy.utils import (
     SpectroChemPyWarning,
     INPLACE,

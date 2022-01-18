@@ -127,7 +127,7 @@ def compare_ndarrays(this, other, approx=False, decimal=6, data_only=False):
     # Comparison based on attributes:
     #        data, dims, mask, labels, units, meta
 
-    from spectrochempy.units import ur
+    from spectrochempy.core.units import ur
 
     def compare(x, y):
         return _compare(x, y, decimal)
@@ -226,7 +226,7 @@ def compare_ndarrays(this, other, approx=False, decimal=6, data_only=False):
 
 def compare_coords(this, other, approx=False, decimal=6, data_only=False):
 
-    from spectrochempy.units import ur
+    from spectrochempy.core.units import ur
 
     def compare(x, y):
         return _compare(x, y, decimal)
@@ -332,7 +332,7 @@ def compare_coords(this, other, approx=False, decimal=6, data_only=False):
 
 
 def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
-    from spectrochempy.units import ur
+    from spectrochempy.core.units import ur
 
     def compare(x, y):
         return _compare(x, y, decimal)

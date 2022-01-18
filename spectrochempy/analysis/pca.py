@@ -19,7 +19,7 @@ from scipy import special
 from traitlets import HasTraits, Instance
 
 from spectrochempy.core import info_
-from spectrochempy.core.analysis.svd import SVD
+from spectrochempy.analysis.svd import SVD
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.npy import dot

@@ -18,7 +18,7 @@ from traitlets import HasTraits, Instance, Dict, Unicode
 # from collections.abc import Iterable
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.analysis.pca import PCA
+from spectrochempy.analysis.pca import PCA
 from spectrochempy.core.dataset.npy import dot
 from spectrochempy.core import info_, set_loglevel, INFO
 

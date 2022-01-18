@@ -1,13 +1,21 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa
 
-
 from pathlib import Path
+
+import pytest
 
 from spectrochempy.core import preferences as prefs
 from spectrochempy.core.dataset.nddataset import NDDataset
 
+DATADIR = prefs.datadir
+AGIRDATA = DATADIR / "galacticdata"
 
+
+@pytest.mark.skipif(
+    not AGIRDATA.exists(),
+    reason="Experimental data not available for testing",
+)
 def test_read_zip():
     datadir = prefs.datadir
 

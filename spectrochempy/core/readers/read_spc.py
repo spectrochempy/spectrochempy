@@ -23,7 +23,7 @@ from warnings import warn
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.importer import importermethod, Importer
-from spectrochempy.units import Quantity
+from spectrochempy.core.units import Quantity
 
 # ======================================================================================================================
 # Public function

@@ -15,7 +15,7 @@ import plotly.graph_objects as go
 import numpy as np
 
 from spectrochempy.core.dataset.meta import Meta
-from spectrochempy.units import remove_args_units
+from spectrochempy.core.units import remove_args_units
 
 __all__ = [
     "cmyk2rgb",

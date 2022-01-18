@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa
 
+import os
 
-from spectrochempy import NDDataset, os
-
+from spectrochempy import NDDataset
 from spectrochempy.utils import show
 
 # TODO: from spectrochempy.utils.testing import figures_dir, same_images

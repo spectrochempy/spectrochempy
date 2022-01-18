@@ -7,5 +7,4 @@
 
 from spectrochempy.utils import generate_api
 
-# generate api
 __all__ = generate_api(__file__)

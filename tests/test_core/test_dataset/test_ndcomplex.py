@@ -9,7 +9,7 @@ import numpy as np
 import pytest
 
 from spectrochempy.core.dataset.ndcomplex import NDComplexArray
-from spectrochempy.units import ur, Quantity
+from spectrochempy.core.units import ur, Quantity
 from spectrochempy.utils.testing import (
     assert_equal,
     assert_array_equal,
