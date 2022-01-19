@@ -95,6 +95,8 @@ __all__ += ["info_", "debug_", "error_", "warning_", "print_"]
 # Progress bar
 # ======================================================================================================================
 PBAR_COUNT = 0
+# import time
+# start_ = time.time()
 
 USE_TQDM = (
     environ.get("USE_TQDM", "Yes") == "Yes"
@@ -105,9 +107,9 @@ USE_TQDM = (
 if USE_TQDM:
     from tqdm import tqdm
 
-    pbar = tqdm(total=1211)
+    pbar = tqdm(total=100)
     pbar.set_description("Loading SpectroChemPy API")
-    val_tqdm = [1, 39, 52, 83, 83, 89, 92, 93, 94, 95, 96, 97, 98, 99, 100]
+    val_tqdm = [0.1, 3.9, 4.5, 5.3, 5.4, 7.5, 8.4, 8.4, 8.5, 8.6, 9.7, 9.8, 9.9, 10]
 
 
 def _pbar_update(close=None):

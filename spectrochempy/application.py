@@ -202,6 +202,9 @@ def _check_for_updates(*args):
 
     old = Version(__version__)
     conda_versions = _get_conda_package_version()
+    if conda_versions is None:
+        # probably no connection
+        return
 
     new_release = None
     new_version = None

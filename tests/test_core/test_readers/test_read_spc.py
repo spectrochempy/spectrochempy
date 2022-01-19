@@ -5,8 +5,8 @@ import pytest
 
 import spectrochempy as scp
 
-DATADIR = scp.preferences.datadir
-GALACTICDATA = DATADIR / "galacticdata"
+
+GALACTICDATA = scp.DATADIR / "galacticdata"
 
 
 @pytest.mark.skipif(
