@@ -202,10 +202,12 @@ class Importer(HasTraits):
             #
             try:
                 res = read_(self.objtype(), filename, **kwargs)
-                if not isinstance(res, list):
-                    datasets.append(res)
-                else:
-                    datasets.extend(res)
+                # sometimes read_ can return None (e.g. non labspec text file)
+                if res is not None:
+                    if not isinstance(res, list):
+                        datasets.append(res)
+                    else:
+                        datasets.extend(res)
 
             except FileNotFoundError:
                 raise
@@ -302,7 +304,7 @@ def read(*paths, **kwargs):
     ----------------
     protocol : {'scp', 'omnic', 'opus', 'topspin', 'matlab', 'jcamp', 'csv', 'excel'}, optional
         Protocol used for reading. If not provided, the correct protocol
-        is inferred (whnever it is possible) from the file name extension.
+        is inferred (whenever it is possible) from the file name extension.
     directory : str, optional
         From where to read the specified `filename`. If not specified, read in the default ``datadir`` specified in
         SpectroChemPy Preferences.
@@ -492,13 +494,15 @@ def _read_dir(*args, **kwargs):
     directory = get_directory_name(directory)
     files = get_filenames(directory, **kwargs)
     datasets = []
-    for key in files.keys():
+    valid_extensions = list(zip(*FILETYPES))[0] + list(zip(*ALIAS))[0]
+    for key in [key for key in files.keys() if key[1:] in valid_extensions]:
         if key:
             importer = Importer()
             nd = importer(files[key], **kwargs)
-            if not isinstance(nd, list):
-                nd = [nd]
-            datasets.extend(nd)
+            if nd is not None:
+                if not isinstance(nd, list):
+                    nd = [nd]
+                datasets.extend(nd)
     return datasets
 
 
