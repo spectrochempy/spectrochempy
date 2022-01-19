@@ -146,6 +146,19 @@ def _read_txt(*args, **kwargs):
         meta[key] = val.strip()
         i += 1
 
+    # .txt extension is fairly common. We determine non labspc files based
+    # on the absence of few keys. Two types of files (1D or 2D) are considered:
+    labspec_keys_1D = ["Acq. time (s)", "Dark correction"]
+    labspec_keys_2D = ["Exposition", "Grating"]
+
+    if all(keywd in meta.keys() for keywd in labspec_keys_1D):
+        pass
+    elif all(keywd in meta.keys() for keywd in labspec_keys_2D):
+        pass
+    else:
+        # this is not a labspec txt file"
+        return
+
     # read spec
     rawdata = np.genfromtxt(lines[i:], delimiter="\t")
 
@@ -172,8 +185,8 @@ def _read_txt(*args, **kwargs):
     # set dataset metadata
     dataset.data = data
     dataset.set_coordset(y=_y, x=_x)
-    dataset.title = "raman Intensity"
-    dataset.units = "absorbance"
+    dataset.title = "Counts"
+    dataset.units = None
     dataset.name = filename.stem
     dataset.meta = meta
 
