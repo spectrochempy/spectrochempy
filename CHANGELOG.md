@@ -1,19 +1,25 @@
 # What's new
 
-## Version 0.2.24
+## Version 0.3.0
 
 **NEW FEATURES**
+
+* Package refactoring which may break previous  behaviour. This is why we 
+  updated the minor version number from 0.2 to 0.3.
 
 * GRAMS/Thermo Galactic .spc file reader.
 
 * Fitting models updated and tested.
 
+**BUGS FIXED**
+
+* Bug in check_updates preventing working without connection.
 
 ## Version 0.2.23
 
 **BUGS FIXED**
 
-* Workflow/Codeclimate issues 
+* Workflow/Codeclimate issues
 
 ## Version 0.2.22
 
