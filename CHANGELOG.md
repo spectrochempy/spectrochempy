@@ -1,6 +1,6 @@
 # What's new
 
-## Version 0.3.0rc1
+## Version 0.3.0
 
 **NEW FEATURES**
 
