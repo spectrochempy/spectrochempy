@@ -1,13 +1,21 @@
 # What's new
 
-## Version 0.2.24
+## Version 0.3.0rc1
 
 **NEW FEATURES**
+
+* Package refactoring which may break previous behaviour. This is why we 
+  updated the minor version number 
 
 * GRAMS/Thermo Galactic .spc file reader.
 
 * Fitting models updated and tested.
 
+## Version 0.2.24
+
+**BUGS FIXED**
+
+* Bug in check_updates preventing working without connection.
 
 ## Version 0.2.23
 
