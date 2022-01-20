@@ -1,5 +1,19 @@
 # What's new
 
+# What's new
+
+## Version 0.2.24
+
+**BUGS FIXED**
+
+* Bug in check_updates preventing working without connection.  
+
+## Version 0.2.23
+
+**BUGS FIXED**
+
+* Workflow/Codeclimate issues
+
 ## Version 0.2.22
 
 **BUGS FIXED**
