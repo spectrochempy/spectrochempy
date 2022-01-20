@@ -32,6 +32,7 @@ class Exporter(HasTraits):
             ("jcamp", "JCAMP-DX files (*.jdx *dx)"),
             ("csv", "CSV files (*.csv)"),
             ("excel", "Microsoft Excel files (*.xls)"),
+            ("netcdf", "NetCDF - Network Common Data Form (*.nc)"),
         ]
 
         self.filetypes = dict(FILETYPES)
@@ -92,11 +93,11 @@ def exportermethod(func):
 
 
 # ------------------------------------------------------------------
-# Generic Read function
+# Generic write function
 # ------------------------------------------------------------------
 def write(dataset, filename=None, **kwargs):
     """
-    Write  the current dataset.
+    Write the current dataset.
 
     Parameters
     ----------

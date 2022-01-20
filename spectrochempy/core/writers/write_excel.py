@@ -16,17 +16,21 @@ __dataset_methods__ = __all__
 
 
 # ...............................................................................
-def write_excel(*args, **kwargs):
+def write_excel(dataset, filename, **kwargs):
     """
     Write a dataset in XLS format.
 
     Parameters
     ----------
-    filename: str or pathlib object, optional
-        If not provided, a dialog is opened to select a file for writing
-    protocol : {'scp', 'matlab', 'jcamp', 'csv', 'excel'}, optional
-        Protocol used for writing. If not provided, the correct protocol
-        is inferred (whnever it is possible) from the file name extension.
+    dataset : |NDDataset|
+        Dataset to write.
+    filename : str or pathlib object, optional
+        If not provided, a dialog is opened to select a file for writing.
+    **kwargs : dict
+        See other parameters.
+
+    Other Parameters
+    ----------------
     directory : str, optional
         Where to write the specified `filename`. If not specified, write in the current directory.
     description: str, optional
@@ -46,7 +50,7 @@ def write_excel(*args, **kwargs):
     exporter = Exporter()
     kwargs["filetypes"] = ["Microsoft Excel files (*.xls)"]
     kwargs["suffix"] = ".xls"
-    return exporter(*args, **kwargs)
+    return exporter(dataset, filename, **kwargs)
 
 
 write_xls = write_excel

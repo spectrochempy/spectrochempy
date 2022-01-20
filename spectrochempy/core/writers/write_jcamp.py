@@ -17,7 +17,7 @@ __dataset_methods__ = __all__
 
 
 # ...............................................................................
-def write_jcamp(*args, **kwargs):
+def write_jcamp(dataset, filename, **kwargs):
     """
     Write a dataset in JCAMP-DX format.
 
@@ -26,11 +26,15 @@ def write_jcamp(*args, **kwargs):
 
     Parameters
     ----------
-    filename: str or pathlib object, optional
+    dataset : |NDDataset|
+        Dataset to write.
+    filename : str or pathlib object, optional
         If not provided, a dialog is opened to select a file for writing.
-    protocol : {'scp', 'matlab', 'jcamp', 'csv', 'excel'}, optional
-        Protocol used for writing. If not provided, the correct protocol
-        is inferred (whnever it is possible) from the file name extension.
+    **kwargs : dict
+        See other parameters.
+
+    Other Parameters
+    ----------------
     directory : str, optional
         Where to write the specified `filename`. If not specified, write in the current directory.
     description: str, optional
@@ -43,13 +47,13 @@ def write_jcamp(*args, **kwargs):
 
     Examples
     --------
-    The extension will be added automatically
+    The extension `jdx` will be added automatically
     >>> X.write_jcamp('myfile')
     """
     exporter = Exporter()
     kwargs["filetypes"] = ["JCAMP-DX files (*.jdx)"]
     kwargs["suffix"] = ".jdx"
-    return exporter(*args, **kwargs)
+    return exporter(dataset, filename, **kwargs)
 
 
 write_jdx = write_jcamp

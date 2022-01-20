@@ -15,19 +15,30 @@ __dataset_methods__ = __all__
 
 
 # ...............................................................................
-def write_matlab(*args, **kwargs):
+def write_matlab(dataset, filename, **kwargs):
     """
     Write a dataset in CSV format.
 
     Parameters
     ----------
-    *args
-    **kwargs
+    dataset : |NDDataset|
+        Dataset to write.
+    filename : str or pathlib object, optional
+        If not provided, a dialog is opened to select a file for writing.
+    **kwargs : dict
+        See other parameters.
+
+    Other Parameters
+    ----------------
+    directory : str, optional
+        Where to write the specified `filename`. If not specified, write in the current directory.
+    description: str, optional
+        A Custom description.
 
     Returns
     -------
     out : `pathlib` object
-        Path of the saved file.
+        path of the saved file.
 
     Examples
     --------
@@ -38,7 +49,7 @@ def write_matlab(*args, **kwargs):
     exporter = Exporter()
     kwargs["filetypes"] = ["MATLAB files (*.mat)"]
     kwargs["suffix"] = ".mat"
-    return exporter(*args, **kwargs)
+    return exporter(dataset, filename, **kwargs)
 
 
 write_mat = write_matlab
