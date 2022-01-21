@@ -72,6 +72,15 @@ class Range(List):
     The trait-type Range.
 
     Create a trait with two values defining an ordered range of values.
+
+    Parameters
+    ----------
+    trait : TraitType [ optional ]
+        The type for restricting the contents of the Container.
+        If unspecified, types are not checked.
+    default_value : SequenceType [ optional ]
+        The default value for the Trait.  Must be list/tuple/set, and
+        will be cast to the container type.
     """
 
     klass = list
@@ -82,16 +91,7 @@ class Range(List):
     allow_none = True
 
     def __init__(self, trait=None, default_value=None, **kwargs):
-        """
-        Parameters
-        ----------
-        trait : TraitType [ optional ]
-            The type for restricting the contents of the Container.
-            If unspecified, types are not checked.
-        default_value : SequenceType [ optional ]
-            The default value for the Trait.  Must be list/tuple/set, and
-            will be cast to the container type.
-        """
+
         super(Range, self).__init__(trait=None, default_value=default_value, **kwargs)
 
     def length_error(self, obj, value):

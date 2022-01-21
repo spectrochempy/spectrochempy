@@ -330,9 +330,9 @@ Parameters
 ----------
 dataset : |NDDataset|
     The dataset to plot.
-**kwargs : dic, optional
-    Additional keywords parameters.
-    See Other Parameters.
+**kwargs
+    Optional keyword parameters (see Other Parameters).
+
 
 Other Parameters
 ----------------

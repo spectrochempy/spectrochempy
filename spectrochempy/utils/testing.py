@@ -53,13 +53,15 @@ def set_env(**environ):
 
     Parameters
     ----------
-    environ: dict(str)
+    environ : dict(str)
         Environment variables to set
 
     Examples
     --------
+    >>> import os
+    >>> from spectrochempy.utils.testing import set_env
     >>> with set_env(PLUGINS_DIR=u'test/plugins'):
-    ...   "PLUGINS_DIR" in os.environ
+    ...     "PLUGINS_DIR" in os.environ
     True
 
     >>> "PLUGINS_DIR" in os.environ

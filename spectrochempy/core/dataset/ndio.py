@@ -120,8 +120,8 @@ class NDIO(HasTraits):
 
         Parameters
         ----------
-        **kwargs : dict
-          See other parameters.
+        **kwargs
+            Optional keyword parameters (see Other Parameters).
 
         Other Parameters
         ----------------
@@ -182,8 +182,8 @@ class NDIO(HasTraits):
         ----------
         filename : str
             The filename of the file where to save the current dataset.
-        **kwargs : dict
-            See Other Parameters.
+        **kwargs
+            Optional keyword parameters (see Other Parameters).
 
         Other Parameters
         -----------------
@@ -253,9 +253,8 @@ class NDIO(HasTraits):
         ----------
         filename :  `str`, `pathlib` or `file` objects
             The name of the file to read (or a file objects.
-        **kwargs : dict, optional
-            Any additional keyword(s) to pass to the actual reader.
-            See Other Parameters.
+        **kwargs
+            Optional keyword parameters (see Other Parameters).
 
         Other Parameters
         ----------------

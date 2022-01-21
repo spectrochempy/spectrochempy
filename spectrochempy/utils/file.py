@@ -138,14 +138,14 @@ def check_filenames(*args, **kwargs):
     Return a list or a dictionary of filenames.
 
     Parameters
-    ==========
+    ----------
     *args
         If passed it is a str, a list of str or a dictionary containing filenames or a byte's contents.
     **kwargs
         Optional keywords parameters. See Other parameters
 
     Other Parameters
-    ================
+    ----------------
     filename :
     filetypes :
     content :
@@ -157,12 +157,12 @@ def check_filenames(*args, **kwargs):
     glob :
 
     See Also
-    ========
+    --------
     check_filename_to_open
     check_filename_to_save
 
     Examples
-    ========
+    --------
     """
     from spectrochempy.core import preferences as prefs
 
@@ -317,6 +317,11 @@ def get_filenames(*filenames, **kwargs):
     **kwargs
         Other optional keyword parameters. See Other Parameters.
 
+    Returns
+    --------
+    out
+        List of filenames.
+
     Other Parameters
     ----------------
     directory : `str` or pathlib object, optional.
@@ -334,11 +339,6 @@ def get_filenames(*filenames, **kwargs):
     Warnings
     --------
     if several filenames are provided in the arguments, they must all reside in the same directory!
-
-    Returns
-    --------
-    out
-        List of filenames.
 
     Examples
     --------

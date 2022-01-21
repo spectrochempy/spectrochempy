@@ -359,6 +359,13 @@ def sp(dataset, ssb=1, pow=1, **kwargs):
     pow : enum [1,2], optional, default=1
         Exponent value - If pow=2 a Squared Sine Bell window multiplication is performed.
 
+    Returns
+    -------
+    apodized
+        Dataset.
+    apod_arr
+        The apodization array only if 'retapod' is True.
+
     Other Parameters
     ----------------
     dim : str or int, keyword parameter, optional, default='x'
@@ -372,13 +379,6 @@ def sp(dataset, ssb=1, pow=1, **kwargs):
         True if we make the transform inplace.  If False, the function return a new dataset.
     retapod : bool, keyword parameter, optional, default=False
         True to return the apodization array along with the apodized object.
-
-    Returns
-    -------
-    apodized
-        Dataset.
-    apod_arr
-        The apodization array only if 'retapod' is True.
 
     See Also
     --------
@@ -459,7 +459,7 @@ def general_hamming(dataset, alpha, **kwargs):
     where M is the number of point of the input dataset.
 
     Both the common Hamming window and Hann window are special cases of the
-    generalized Hamming window with :math:`\alpha` = 0.54 and :math:`\alpha` =
+    generalized Hamming window with :math:`\alpha` = 0.54 and :math:\alpha =
     0.5, respectively
 
     Parameters
@@ -467,7 +467,16 @@ def general_hamming(dataset, alpha, **kwargs):
     dataset : array.
         Input dataset.
     alpha : float
-        The window coefficient, :math:`\alpha`.
+        The window coefficient, :math:\alpha.
+    **kwargs
+        Optional keyword parameters (see Other Parameters).
+
+    Returns
+    -------
+    apodized
+        Dataset.
+    apod_arr
+        The apodization array only if 'retapod' is True.
 
     Other Parameters
     ----------------
@@ -483,13 +492,6 @@ def general_hamming(dataset, alpha, **kwargs):
     retapod : bool, keyword parameter, optional, default=False
         True to return the apodization array along with the apodized object.
 
-    Returns
-    -------
-    apodized
-        Dataset.
-    apod_arr
-        The apodization array only if 'retapod' is True.
-
     See Also
     --------
     gm, sp, sine, sinm, qsin, hamming, triang, bartlett, blackmanharris
@@ -501,7 +503,7 @@ def general_hamming(dataset, alpha, **kwargs):
 
 
 def hamming(dataset, **kwargs):
-    """
+    r"""
     Calculate generalized Hamming (== Happ-Genzel) apodization.
 
     For multidimensional NDDataset,
@@ -515,14 +517,21 @@ def hamming(dataset, **kwargs):
     .. math::
         w(n) = \alpha - (1 - \alpha)\cos(\frac{2\pi n}{M-1})\qquad 0\leq n\leq M-1
 
-    where M is the number of point of the input dataset and :math:`\alpha` = 0.54.
+    where M is the number of point of the input dataset and :math:\alpha = 0.54.
 
     Parameters
     ----------
     dataset : array
         Input dataset.
-    alpha : float
-        The window coefficient, :math:`\alpha`.
+    **kwargs
+        Optional keyword parameters (see Other Parameters).
+
+    Returns
+    -------
+    apodized
+        Dataset.
+    apod_arr
+        The apodization array only if 'retapod' is True.
 
     Other Parameters
     ----------------
@@ -538,13 +547,6 @@ def hamming(dataset, **kwargs):
     retapod : bool, keyword parameter, optional, default=False
         True to return the apodization array along with the apodized object
 
-    Returns
-    -------
-    apodized
-        Dataset.
-    apod_arr
-        The apodization array only if 'retapod' is True.
-
     See Also
     --------
     general_hamming, hann
@@ -554,7 +556,7 @@ def hamming(dataset, **kwargs):
 
 
 def hann(dataset, **kwargs):
-    """
+    r"""
     Return a Hann window.
 
     For multidimensional NDDataset,
@@ -573,9 +575,15 @@ def hann(dataset, **kwargs):
     Parameters
     ----------
     dataset : array.
-        Input dataset.
-    alpha : float
-        The window coefficient, :math:`\alpha`.
+    **kwargs
+        Optional keyword parameters (see Other Parameters).
+
+    Returns
+    -------
+    apodized
+        Dataset.
+    apod_arr
+        The apodization array only if 'retapod' is True.
 
     Other Parameters
     ----------------
@@ -590,13 +598,6 @@ def hann(dataset, **kwargs):
         True if we make the transform inplace.  If False, the function return a new dataset
     retapod : bool, keyword parameter, optional, default=False
         True to return the apodization array along with the apodized object
-
-    Returns
-    -------
-    apodized
-        Dataset.
-    apod_arr
-        The apodization array only if 'retapod' is True.
 
     See Also
     --------
@@ -620,6 +621,8 @@ def triang(dataset, **kwargs):
     ----------
     dataset : array
         Input dataset.
+    **kwargs
+        Optional keyword parameters (see Other Parameters).
 
     Returns
     -------
@@ -654,7 +657,7 @@ def triang(dataset, **kwargs):
 
 @_apodize_method()
 def bartlett(dataset, **kwargs):
-    """
+    r"""
     Calculate Bartlett apodization (triangular window with end points at zero).
 
     For multidimensional NDDataset,
@@ -674,11 +677,13 @@ def bartlett(dataset, **kwargs):
     ----------
     dataset : Dataset
         Input dataset.
+    **kwargs
+        Additional keyword parameters (see Other Parameters).
 
     Returns
     -------
     apodized
-        dataset.
+        Dataset.
     apod_arr
         The apodization array only if 'retapod' is True.
 
@@ -725,7 +730,7 @@ def blackmanharris(dataset, **kwargs):
     Returns
     -------
     apodized
-        dataset.
+        Dataset.
     apod_arr
         The apodization array only if 'retapod' is True.
     **kwargs

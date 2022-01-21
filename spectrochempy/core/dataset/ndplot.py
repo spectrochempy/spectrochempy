@@ -198,7 +198,7 @@ class PreferencesSet(Meta):
 
         Parameters
         ----------
-        key: str
+        key : str
             Name of the parameter for which we want information.
         """
         from spectrochempy.utils import colored, TBold
@@ -229,8 +229,8 @@ class PreferencesSet(Meta):
 
         Parameters
         ----------
-        stylename:
-        to_mpl:
+        stylename :
+        to_mpl :
 
         Returns
         --------
@@ -379,7 +379,7 @@ class NDPlot(HasTraits):
         ----------
         method : str, optional, default: "generic"
             Specify with plot method to use.
-        **kwargs : dict, optional
+        **kwargs
             Any optional parameters to pass to the plot method.
             See plot_1D, plot_2D and plot_3D for a  liste of possible arguments.
 
@@ -410,7 +410,7 @@ class NDPlot(HasTraits):
         For 1D data, the default plot is done with method scatter
 
         >>> nd = scp.NDDataset([1, 2, 3])
-        >>> _ = nd.plot() # default to method="scatter"
+        >>> _ = nd.plot()  # default to method="scatter"
 
         or
         >>> _ = nd.plot(method="scatter")

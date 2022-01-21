@@ -980,14 +980,14 @@ class NDMath(object):
             sub-class' method does not implement `keepdims` any
             exceptions will be raised.
 
-        See Also
-        --------
-        all : Test whether all array elements along a given axis evaluate to True.
-
         Returns
         -------
         any
             A new boolean or `ndarray` is returned.
+
+        See Also
+        --------
+        all : Test whether all array elements along a given axis evaluate to True.
         """
 
         axis, dim = cls.get_axis(dim, allows_none=True)
@@ -1016,7 +1016,7 @@ class NDMath(object):
             start must also be given.
         dtype : dtype
             The type of the output array. If dtype is not given, infer the data type from the other input arguments.
-        **kwargs : dict
+        **kwargs
             Keywords argument used when creating the returned object, such as units, name, title, ...
 
         Returns
@@ -1401,7 +1401,7 @@ class NDMath(object):
             dimension name has been modified).
         dtype : dtype, optional
             The type of the returned array.
-        **kwargs : dict
+        **kwargs
             Additional keyword parameters to be passed to the NDDataset constructor.
 
         Returns
@@ -1454,8 +1454,8 @@ class NDMath(object):
             Shape of the empty array.
         dtype : data-type, optional
             Desired output data-type.
-        **kwargs : dict
-            See other parameters.
+        **kwargs
+            Optional keyword parameters (see Other Parameters).
 
         Returns
         -------
@@ -1510,8 +1510,8 @@ class NDMath(object):
             Object from which to copy the array structure.
         dtype : data-type, optional
             Overrides the data type of the result.
-        **kwargs : dict
-            See other parameters.
+        **kwargs
+            Optional keyword parameters (see Other Parameters).
 
         Returns
         -------
@@ -1619,7 +1619,7 @@ class NDMath(object):
         coordset : |Coordset| instance, optional
             If provided, this determine the shape and coordinates of each dimension of
             the returned |NDDataset|. If shape is also passed it will be ignored.
-        **kwargs : dict
+        **kwargs
             Other kwargs are passed to the final object constructor.
 
         Returns
@@ -1684,7 +1684,7 @@ class NDMath(object):
             The data-type of the returned array.
         count : int, optional
             The number of items to read from iterable. The default is -1, which means all data is read.
-        **kwargs : dict
+        **kwargs
             Other kwargs are passed to the final object constructor.
 
         Returns
@@ -1727,8 +1727,8 @@ class NDMath(object):
             Fill value.
         dtype : data-type, optional
             The desired data-type for the array, e.g., `np.int8`.  Default is fill_value.dtype.
-        **kwargs : dict
-            See other parameters.
+        **kwargs
+            Optional keyword parameters (see Other Parameters).
 
         Returns
         -------
@@ -1779,8 +1779,8 @@ class NDMath(object):
             Fill value.
         dtype : data-type, optional
             Overrides the data type of the result.
-        **kwargs : dict
-            See other parameters.
+        **kwargs
+            Optional keyword parameters (see Other Parameters).
 
         Returns
         -------
@@ -1856,7 +1856,7 @@ class NDMath(object):
         dtype : dtype
             The type of the output array.  If `dtype` is not given, infer the data
             type from the other input arguments.
-        **kwargs : dict
+        **kwargs
             Keywords argument used when creating the returned object, such as units, name, title, ...
 
         Returns
@@ -1941,7 +1941,7 @@ class NDMath(object):
             If True, return (samples, step), where step is the spacing between samples.
         dtype : dtype, optional
             The type of the array. If dtype is not given, infer the data type from the other input arguments.
-        **kwargs : dict
+        **kwargs
             Keywords argument used when creating the returned object, such as units, name, title, ...
 
         Returns
@@ -1988,7 +1988,7 @@ class NDMath(object):
         dtype : dtype
             The type of the output array.  If `dtype` is not given, infer the data
             type from the other input arguments.
-        **kwargs : dict
+        **kwargs
             Keywords argument used when creating the returned object, such as units, name, title, ...
 
         Returns
@@ -2090,9 +2090,8 @@ class NDMath(object):
             Shape of the new array, e.g., ``(2, 3)`` or ``2``.
         dtype : data-type, optional
             The desired data-type for the array, e.g., `numpy.int8`.  Default is
-            `numpy.float64`.
-        **kwargs : dict
-            See other parameters.
+        **kwargs
+            Optional keyword parameters (see Other Parameters).
 
         Returns
         -------
@@ -2157,8 +2156,8 @@ class NDMath(object):
             Object from which to copy the array structure.
         dtype : data-type, optional
             Overrides the data type of the result.
-        **kwargs : dict
-            See other parameters.
+        **kwargs
+            Optional keyword parameters (see Other Parameters).
 
         Returns
         -------
@@ -2294,7 +2293,7 @@ class NDMath(object):
         dtype : dtype, optional
             Desired dtype of the result, only float64 and float32 are supported.
             The default value is np.float64.
-        **kwargs : dict
+        **kwargs
             Keywords argument used when creating the returned object, such as units, name, title, ...
 
         Returns
@@ -2566,8 +2565,8 @@ class NDMath(object):
         dtype : data-type, optional
             The desired data-type for the array, e.g., `numpy.int8`.  Default is
             `numpy.float64`.
-        **kwargs : dict
-            See other parameters.
+        **kwargs
+            Optional keyword parameters (see Other Parameters).
 
         Returns
         -------
@@ -2623,8 +2622,9 @@ class NDMath(object):
             Object from which to copy the array structure.
         dtype : data-type, optional
             Overrides the data type of the result.
-        **kwargs : dict
-            See other parameters.
+        **kwargs
+            Optional keyword parameters (see Other Parameters).
+
 
         Returns
         -------

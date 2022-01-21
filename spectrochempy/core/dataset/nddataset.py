@@ -41,6 +41,138 @@ from spectrochempy.optional import import_optional_dependency
 
 
 class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
+    """
+    The main N-dimensional dataset class used by |scpy|.
+
+    The NDDataset is the main object use by SpectroChemPy. Like numpy
+    ndarrays, NDDataset have the capability to be
+    sliced, sorted and subject to mathematical operations. But, in addition,
+    NDDataset may have units,
+    can be masked
+    and each dimensions can have coordinates also with units. This make
+    NDDataset aware of unit compatibility,
+    e.g.,
+    for binary operation such as additions or subtraction or during the
+    application of mathematical operations.
+    In addition or in replacement of numerical data for coordinates,
+    NDDataset can also have labeled coordinates
+    where labels can be different kind of objects (strings, datetime,
+    numpy nd.ndarray or other NDDatasets, etc…).
+
+    Parameters
+    ----------
+    data : array of floats
+        Data array contained in the object. The data can be a list, a tuple,
+        a |ndarray|, a ndarray-like,
+        a |NDArray| or any subclass of |NDArray|. Any size or shape of data
+        is accepted. If not given, an empty
+        |NDArray| will be inited.
+        At the initialisation the provided data will be eventually casted to
+        a numpy-ndarray.
+        If a subclass of |NDArray| is passed which already contains some
+        mask, labels, or units, these elements
+        will
+        be used to accordingly set those of the created object. If possible,
+        the provided data will not be copied
+        for `data` input, but will be passed by reference, so you should
+        make a copy of the `data` before passing
+        them if that's the desired behavior or set the `copy` argument to True.
+    coordset : An instance of |CoordSet|, optional
+        `coords` contains the coordinates for the different dimensions of
+        the `data`. if `coords` is provided,
+        it must specified the `coord` and `labels` for all dimensions of the
+        `data`.
+        Multiple `coord`'s can be specified in an |CoordSet| instance for
+        each dimension.
+    coordunits : list, optional
+        A list of units corresponding to the dimensions in the order of the
+        coordset.
+    coordtitles : list, optional
+        A list of titles corresponding of the dimensions in the order of the
+        coordset.
+    **kwargs
+        Optional keyword parameters (see Other Parameters).
+
+    Other Parameters
+    ----------------
+    dtype : str or dtype, optional, default=np.float64
+        If specified, the data will be casted to this dtype, else the data
+        will be casted to float64 or complex128.
+    dims : list of chars, optional
+        If specified the list must have a length equal to the number od data
+        dimensions (ndim) and the chars
+        must be
+        taken among among x,y,z,u,v,w or t. If not specified, the dimension
+        names are automatically attributed in
+        this order.
+    name : str, optional
+        A user friendly name for this object. If not given, the automatic
+        `id` given at the object creation will be
+        used as a name.
+    labels : array of objects, optional
+        Labels for the `data`. labels can be used only for 1D-datasets.
+        The labels array may have an additional dimension, meaning several
+        series of labels for the same data.
+        The given array can be a list, a tuple, a |ndarray|, a ndarray-like,
+        a |NDArray| or any subclass of
+        |NDArray|.
+    mask : array of bool or `NOMASK`, optional
+        Mask for the data. The mask array must have the same shape as the
+        data. The given array can be a list,
+        a tuple, or a |ndarray|. Each values in the array must be `False`
+        where the data are *valid* and True when
+        they are not (like in numpy masked arrays). If `data` is already a
+        :class:`~numpy.ma.MaskedArray`, or any
+        array object (such as a |NDArray| or subclass of it), providing a
+        `mask` here will causes the mask from the
+        masked array to be ignored.
+    units : |Unit| instance or str, optional
+        Units of the data. If data is a |Quantity| then `units` is set to
+        the unit of the `data`; if a unit is also
+        explicitly provided an error is raised. Handling of units use the
+        `pint <https://pint.readthedocs.org/>`_
+        package.
+    title : str, optional
+        The title of the dimension. It will later be used for instance for
+        labelling plots of the data.
+        It is optional but recommended to give a title to each ndarray.
+    dlabel :  str, optional
+        Alias of `title`.
+    meta : dict-like object, optional
+        Additional metadata for this object. Must be dict-like but no
+        further restriction is placed on meta.
+    author : str, optional
+        Name(s) of the author(s) of this dataset. BNy default, name of the
+        computer note where this dataset is
+        created.
+    description : str, optional
+        A optional description of the nd-dataset. A shorter alias is `desc`.
+    history : str, optional
+        A string to add to the object history.
+    copy : bool, optional
+        Perform a copy of the passed object. Default is False.
+
+    See Also
+    --------
+    Coord : Explicit coordinates object.
+    LinearCoord : Implicit coordinates object.
+    CoordSet : Set of coordinates.
+
+    Notes
+    -----
+    The underlying array in a |NDDataset| object can be accessed through the
+    `data` attribute, which will return
+    a conventional |ndarray|.
+
+    Examples
+    --------
+    Usage by an end-user
+
+    >>> from spectrochempy import *
+    >>> x = NDDataset([1, 2, 3])
+    >>> print(x.data)  # doctest: +NORMALIZE_WHITESPACE
+    [       1        2        3]
+    """
 
     # coordinates
     _coordset = Instance(CoordSet, allow_none=True)
@@ -83,106 +215,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     def __init__(
         self, data=None, coordset=None, coordunits=None, coordtitles=None, **kwargs
     ):
-        """
-        The main N-dimensional dataset class used by |scpy|.
 
-        The NDDataset is the main object use by SpectroChemPy. Like numpy ndarrays, NDDataset have the capability to be
-        sliced, sorted and subject to mathematical operations. But, in addition, NDDataset may have units,
-        can be masked
-        and each dimensions can have coordinates also with units. This make NDDataset aware of unit compatibility,
-        e.g.,
-        for binary operation such as additions or subtraction or during the application of mathematical operations.
-        In addition or in replacement of numerical data for coordinates, NDDataset can also have labeled coordinates
-        where labels can be different kind of objects (strings, datetime, numpy nd.ndarray or other NDDatasets, etc…).
-
-        Parameters
-        ----------
-        data : array of floats
-            Data array contained in the object. The data can be a list, a tuple, a |ndarray|, a ndarray-like,
-            a |NDArray| or any subclass of |NDArray|. Any size or shape of data is accepted. If not given, an empty
-            |NDArray| will be inited.
-            At the initialisation the provided data will be eventually casted to a numpy-ndarray.
-            If a subclass of |NDArray| is passed which already contains some mask, labels, or units, these elements
-            will
-            be used to accordingly set those of the created object. If possible, the provided data will not be copied
-            for `data` input, but will be passed by reference, so you should make a copy of the `data` before passing
-            them if that's the desired behavior or set the `copy` argument to True.
-        coordset : An instance of |CoordSet|, optional
-            `coords` contains the coordinates for the different dimensions of the `data`. if `coords` is provided,
-            it must specified the `coord` and `labels` for all dimensions of the `data`.
-            Multiple `coord`'s can be specified in an |CoordSet| instance for each dimension.
-        coordunits : list, optional
-            A list of units corresponding to the dimensions in the order of the coordset.
-        coordtitles : list, optional
-            A list of titles corresponding of the dimensions in the order of the coordset.
-        **kwargs : dict
-            See other parameters.
-
-        Other Parameters
-        ----------------
-        dtype : str or dtype, optional, default=np.float64
-            If specified, the data will be casted to this dtype, else the data will be casted to float64 or complex128.
-        dims : list of chars, optional
-            If specified the list must have a length equal to the number od data dimensions (ndim) and the chars
-            must be
-            taken among among x,y,z,u,v,w or t. If not specified, the dimension names are automatically attributed in
-            this order.
-        name : str, optional
-            A user friendly name for this object. If not given, the automatic `id` given at the object creation will be
-            used as a name.
-        labels : array of objects, optional
-            Labels for the `data`. labels can be used only for 1D-datasets.
-            The labels array may have an additional dimension, meaning several series of labels for the same data.
-            The given array can be a list, a tuple, a |ndarray|, a ndarray-like, a |NDArray| or any subclass of
-            |NDArray|.
-        mask : array of bool or `NOMASK`, optional
-            Mask for the data. The mask array must have the same shape as the data. The given array can be a list,
-            a tuple, or a |ndarray|. Each values in the array must be `False` where the data are *valid* and True when
-            they are not (like in numpy masked arrays). If `data` is already a :class:`~numpy.ma.MaskedArray`, or any
-            array object (such as a |NDArray| or subclass of it), providing a `mask` here will causes the mask from the
-            masked array to be ignored.
-        units : |Unit| instance or str, optional
-            Units of the data. If data is a |Quantity| then `units` is set to the unit of the `data`; if a unit is also
-            explicitly provided an error is raised. Handling of units use the `pint <https://pint.readthedocs.org/>`_
-            package.
-        title : str, optional
-            The title of the dimension. It will later be used for instance for labelling plots of the data.
-            It is optional but recommended to give a title to each ndarray.
-        dlabel :  str, optional
-            Alias of `title`.
-        meta : dict-like object, optional
-            Additional metadata for this object. Must be dict-like but no
-            further restriction is placed on meta.
-        author : str, optional
-            Name(s) of the author(s) of this dataset. BNy default, name of the computer note where this dataset is
-            created.
-        description : str, optional
-            A optional description of the nd-dataset. A shorter alias is `desc`.
-        history : str, optional
-            A string to add to the object history.
-        copy : bool, optional
-            Perform a copy of the passed object. Default is False.
-
-        See Also
-        --------
-        Coord : Explicit coordinates object.
-        LinearCoord : Implicit coordinates object.
-        CoordSet : Set of coordinates.
-
-        Notes
-        -----
-        The underlying array in a |NDDataset| object can be accessed through the `data` attribute, which will return
-        a conventional |ndarray|.
-
-        Examples
-        --------
-        Usage by an end-user
-
-        >>> from spectrochempy import *
-        >>> x = NDDataset([1, 2, 3])
-        >>> print(x.data)  # doctest: +NORMALIZE_WHITESPACE
-        [       1        2        3]
-        """
         super().__init__(data, **kwargs)
 
         self._parent = None
@@ -632,8 +665,8 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             Coordinates object(s).
         dims : list
             Name of the coordinates.
-        **kwargs : dict
-            Keywords passed to the coordset.
+        **kwargs
+            Optional keyword parameters passed to the coordset.
         """
         if not coords and not kwargs:
             # reset coordinates

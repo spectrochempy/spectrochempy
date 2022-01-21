@@ -31,6 +31,45 @@ from spectrochempy.core.project.baseproject import AbstractProject
 # Project class
 # ======================================================================================================================
 class Project(AbstractProject, NDIO):
+    """
+    A manager for projects, datasets and scripts.
+
+    It can handle multiple datasets, sub-projects, and scripts in a main
+    project.
+
+    Parameters
+    ----------
+    *args : Series of objects, optional
+        Argument type will be interpreted correctly if they are of type
+        |NDDataset|, |Project|, or other objects such as |Script|.
+        This is optional, as they can be added later.
+    argnames : list, optional
+        If not None, this list gives the names associated to each
+        objects passed as args. It MUST be the same length that the
+        number of args, or an error will be raised.
+        If None, the internal name of each object will be used instead.
+    name : str, optional
+        The name of the project.  If the name is not provided, it will be
+        generated automatically.
+    **meta : dict
+        Any other attributes to described the project.
+
+    See Also
+    --------
+    NDDataset : The main object containing arrays.
+    Script : Executables scripts container.
+
+    Examples
+    --------
+
+    >>> myproj = scp.Project(name='project_1')
+    >>> ds = scp.NDDataset([1., 2., 3.], name='dataset_1')
+    >>> myproj.add_dataset(ds)
+    >>> print(myproj)
+    Project project_1:
+        ⤷ dataset_1 (dataset)
+    """
+
     _id = Unicode()
     _name = Unicode(allow_none=True)
 
@@ -46,43 +85,7 @@ class Project(AbstractProject, NDIO):
 
     # ..........................................................................
     def __init__(self, *args, argnames=None, name=None, **meta):
-        """
-        A manager for projects, datasets and scripts.
 
-        It can handle multiple datasets, sub-projects, and scripts in a main project.
-
-        Parameters
-        ----------
-        *args : Series of objects, optional
-            Argument type will be interpreted correctly if they are of type
-            |NDDataset|, |Project|, or other objects such as |Script|.
-            This is optional, as they can be added later.
-        argnames : list, optional
-            If not None, this list gives the names associated to each
-            objects passed as args. It MUST be the same length that the
-            number of args, or an error will be raised.
-            If None, the internal name of each object will be used instead.
-        name : str, optional
-            The name of the project.  If the name is not provided, it will be
-            generated automatically.
-        **meta : dict
-            Any other attributes to described the project.
-
-        See Also
-        --------
-        NDDataset : The main object containing arrays.
-        Script : Executables scripts container.
-
-        Examples
-        --------
-
-        >>> myproj = scp.Project(name='project_1')
-        >>> ds = scp.NDDataset([1., 2., 3.], name='dataset_1')
-        >>> myproj.add_dataset(ds)
-        >>> print(myproj)
-        Project project_1:
-            ⤷ dataset_1 (dataset)
-        """
         super().__init__()
 
         self.parent = None

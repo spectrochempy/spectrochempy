@@ -32,6 +32,14 @@ class EFA(HasTraits):
     Evolving Factor Analysis.
 
     Performs an Evolving Factor Analysis (forward and reverse) of the input |NDDataset|.
+
+    Parameters
+    ----------
+    dataset : |NDDataset| object
+        The input dataset has shape (M, N). M is the number of
+        observations (for examples a series of IR spectra) while N
+        is the number of features (for example the wavenumbers measured
+        in each IR spectrum).
     """
 
     _f_ev = Instance(NDDataset)
@@ -39,16 +47,7 @@ class EFA(HasTraits):
     _cutoff = Float(allow_none=True)
 
     def __init__(self, dataset):
-        """
-        Parameters
-        ----------
-        dataset : |NDDataset| object
-            The input dataset has shape (M, N). M is the number of
-            observations (for examples a series of IR spectra) while N
-            is the number of features (for example the wavenumbers measured
-            in each IR spectrum).
 
-        """
         super().__init__()
 
         # check if we have the correct input

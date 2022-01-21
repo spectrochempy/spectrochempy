@@ -39,6 +39,11 @@ class NNMF(HasTraits):
     **kwargs
         Optional keyword parameters. See Other Parameters below.
 
+    Returns
+    -------
+    C, St: |NDDataset|
+        Optimized concentration and spectral profile.
+
     Other Parameters
     ----------------
     tol: float, optional
@@ -49,11 +54,6 @@ class NNMF(HasTraits):
         Limit number of iterations.
     verbose:
         Print calculation details
-
-    Returns
-    -------
-    C, St: |NDDataset|
-        Optimized concentration and spectral profile.
 
     Notes
     -----

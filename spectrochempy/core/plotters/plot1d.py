@@ -166,7 +166,7 @@ def plot_multiple(datasets, method="scatter", pen=True, labels=None, **kwargs):
         between the marks.
     labels : a list of str, optional
         Labels used for the legend.
-    **kwargs : dic
+    **kwargs
         Other parameters that will be passed to the plot1D function.
 
     Other Parameters
@@ -268,8 +268,8 @@ def plot_1D(dataset, method=None, **kwargs):
         To draw a Bar graph, use method ``bar``.
         For a Scatter plot, use method ``scatter``.
         For pen and scatter simultaneously, use method ``scatter+pen``.
-    **kwargs : dict
-        See other parameters.
+    **kwargs
+        Optional keyword parameters (see Other Parameters).
 
     Other Parameters
     ----------------

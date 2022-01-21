@@ -62,17 +62,20 @@ class CoordinateMismatchError(SpectroChemPyException):
 
 
 class ProtocolError(SpectroChemPyException):
-    def __init__(self, protocol, available_protocols):
-        """
-        This exception is issued when a wrong protocol is secified to the spectrochempy importer.
+    """
+    This exception is issued when a wrong protocol is secified to the
+    spectrochempy importer.
 
-        Parameters
-        ==========
-        protocol: str
-            The protocol string that was at the origin of the exception.
-        available_protocols: list of str
-            The available (implemented) protocols.
-        """
+    Parameters
+    ----------
+    protocol : str
+        The protocol string that was at the origin of the exception.
+    available_protocols : list of str
+        The available (implemented) protocols.
+    """
+
+    def __init__(self, protocol, available_protocols):
+
         self.message = (
             f"IO - The `{protocol}` protocol is unknown or not yet implemented.\n"
         )
@@ -122,7 +125,7 @@ except ImportError:
             except exceptions :
                 pass
 
-        parameters
+        Parameters
         ----------
         *exceptions : Exception
             One or several exceptions to ignore.

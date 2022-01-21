@@ -707,8 +707,8 @@ def read_topspin(*paths, **kwargs):
     ----------
     *paths : str, optional
         Paths of the Bruker directories to read.
-    **kwargs : dict
-        See other parameters.
+    **kwargs
+        Optional keyword parameters (see Other Parameters).
 
     Returns
     --------

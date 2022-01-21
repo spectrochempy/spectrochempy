@@ -64,6 +64,33 @@ class SVD(HasTraits):
 
     If the dataset contains masked values, the corresponding ranges are
     ignored in the calculation.
+
+    Parameters
+    -----------
+    dataset : |NDDataset| object
+        The input dataset has shape (M, N). M is the number of
+        observations (for examples a series of IR spectra) while N
+        is the number of features (for example the wavenumbers measured
+        in each IR spectrum).
+    full_matrices : bool, optional, default=False.
+        If False , U and VT have the shapes (M,  k) and
+        (k, N), respectively, where k = min(M, N).
+        Otherwise the shapes will be (M, M) and (N, N),
+        respectively.
+    compute_uv : bool, optional, default: True.
+        Whether or not to compute U and VT in addition to s.
+
+    Examples
+    --------
+
+    >>> dataset = scp.read('irdata/nh4y-activation.spg')
+    >>> svd = scp.SVD(dataset)
+    >>> print(svd.ev.data)
+    [1.185e+04      634 ... 0.001089 0.000975]
+    >>> print(svd.ev_cum.data)
+    [   94.54     99.6 ...      100      100]
+    >>> print(svd.ev_ratio.data)
+    [   94.54    5.059 ... 8.687e-06 7.779e-06]
     """
 
     U = Instance(NDDataset, allow_none=True)
@@ -76,34 +103,7 @@ class SVD(HasTraits):
     """|NDDataset| - Contains a transpose matrix of the Loadings. Its shape depends on `full_matrices`"""
 
     def __init__(self, dataset, full_matrices=False, compute_uv=True):
-        """
-        Parameters
-        -----------
-        dataset : |NDDataset| object
-            The input dataset has shape (M, N). M is the number of
-            observations (for examples a series of IR spectra) while N
-            is the number of features (for example the wavenumbers measured
-            in each IR spectrum).
-        full_matrices : bool, optional, default=False.
-            If False , U and VT have the shapes (M,  k) and
-            (k, N), respectively, where k = min(M, N).
-            Otherwise the shapes will be (M, M) and (N, N),
-            respectively.
-        compute_uv : bool, optional, default: True.
-            Whether or not to compute U and VT in addition to s.
 
-        Examples
-        --------
-
-        >>> dataset = scp.read('irdata/nh4y-activation.spg')
-        >>> svd = SVD(dataset)
-        >>> print(svd.ev.data)
-        [1.185e+04      634 ... 0.001089 0.000975]
-        >>> print(svd.ev_cum.data)
-        [   94.54     99.6 ...      100      100]
-        >>> print(svd.ev_ratio.data)
-        [   94.54    5.059 ... 8.687e-06 7.779e-06]
-        """
         super().__init__()
 
         self._compute_uv = compute_uv

@@ -47,6 +47,23 @@ class PCA(HasTraits):
 
     If the dataset `X` contains masked values, these values are silently
     ignored in the calculation.
+
+    Parameters
+    ----------
+    dataset : |NDDataset| object
+        The input dataset has shape (M, N). M is the number of
+        observations (for examples a series of IR spectra) while N
+        is the number of features (for example the wavenumbers measured
+        in each IR spectrum).
+    centered : bool, optional, default:True
+        If True the data are centered around the mean values: :math:`X' = X
+        - mean(X)`.
+    standardized : bool, optional, default:False
+        If True the data are scaled to unit standard deviation: :math:`X' =
+        X / \\sigma`.
+    scaled : bool, optional, default:False
+        If True the data are scaled in the interval [0-1]: :math:`X' = (X -
+        min(X)) / (max(X)-min(X))`
     """
 
     _LT = Instance(NDDataset)
@@ -64,21 +81,7 @@ class PCA(HasTraits):
 
     # ..........................................................................
     def __init__(self, dataset, centered=True, standardized=False, scaled=False):
-        """
-        Parameters
-        ----------
-        dataset : |NDDataset| object
-            The input dataset has shape (M, N). M is the number of
-            observations (for examples a series of IR spectra) while N
-            is the number of features (for example the wavenumbers measured
-            in each IR spectrum).
-        centered : bool, optional, default:True
-            If True the data are centered around the mean values: :math:`X' = X - mean(X)`.
-        standardized : bool, optional, default:False
-            If True the data are scaled to unit standard deviation: :math:`X' = X / \\sigma`.
-        scaled : bool, optional, default:False
-            If True the data are scaled in the interval [0-1]: :math:`X' = (X - min(X)) / (max(X)-min(X))`
-        """
+
         super().__init__()
 
         self.prefs = dataset.preferences

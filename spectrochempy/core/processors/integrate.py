@@ -80,15 +80,15 @@ def trapezoid(dataset, **kwargs):
         Additional keywords parameters.
         See Other Parameters.
 
-    Other Parameters
-    ----------------
-    dim : int or str, optional, default: "x"
-        Dimension along which to integrate.       If an integer is provided, it is equivalent to the `axis` parameter for numpy arrays.
-
     Returns
     -------
     integral
         Definite integral as approximated by trapezoidal rule.
+
+    Other Parameters
+    ----------------
+    dim : int or str, optional, default: "x"
+        Dimension along which to integrate.       If an integer is provided, it is equivalent to the `axis` parameter for numpy arrays.
 
     See Also
     --------
@@ -139,6 +139,11 @@ def simpson(dataset, *args, **kwargs):
         Additional keywords parameters.
         See Other Parameters.
 
+    Returns
+    -------
+    integral
+        Definite integral as approximated using the composite Simpson's rule.
+
     Other Parameters
     ----------------
     dim : int or str, optional, default: "x"
@@ -153,15 +158,9 @@ def simpson(dataset, *args, **kwargs):
         'last' : Use Simpson's rule for the last N-2 intervals with a
                trapezoidal rule on the first interval.
 
-    Returns
-    -------
-    integral
-        Definite integral as approximated using the composite Simpson's rule.
-
     See Also
     --------
     simps : An alias of simpson.
-
     trapezoid : Integrate using the composite simpson rule.
 
     Example

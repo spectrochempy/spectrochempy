@@ -239,8 +239,8 @@ def ifft(dataset, size=None, **kwargs):
     size : int, optional
         Size of the transformed dataset dimension - a shorter parameter is `si`. by default, the size is the closest
         power of two greater than the data size.
-    **kwargs : dict
-        Other parameters (see other parameters).
+    **kwargs
+        Optional keyword parameters (see Other Parameters).
 
     Returns
     -------
@@ -289,8 +289,8 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         If True, an inverse Fourier transform is performed - size parameter is not taken into account.
     ppm : bool, optional, default=True
         If True, and data are from NMR, then a ppm scale is calculated instead of frequency.
-    **kwargs : dict
-        Other parameters (see other parameters).
+    **kwargs
+        Optional keyword parameters (see Other Parameters).
 
     Returns
     -------

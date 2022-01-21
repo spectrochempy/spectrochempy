@@ -35,7 +35,7 @@
 # # Import IR Data
 #
 # This tutorial shows the specifics related to infrared data import in Spectrochempy. As prerequisite, the user is
-# expected to have read the [Import Tutorial](Import.ipynb).
+# expected to have read the [Import Tutorial](import.ipynb).
 #
 # Let's first import spectrochempy:
 
@@ -74,8 +74,7 @@ import spectrochempy as scp
 #
 # ### a) import spg file
 #
-# Let's import an .spg file from the `datadir` (see [Import Tutorial](Import.ipynb)) and display
-# its main attributes:
+# Let's import an .spg file from the `datadir` (see [Import Tutorial](import.ipynb)) and display its main attributes:
 
 # %% {"pycharm": {"name": "#%%\n"}}
 X = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG")
@@ -90,10 +89,10 @@ X
 #
 # - `author` is that of the creator of the NDDataset (not of the .spg file, which, to our knowledge, does not have
 # this type of attribute). The string is composed of the username and of the machine name as given by the OS:
-# username@machinename. It can be accessed and changed using `X.author`
+# username@machinename. It can be accessed and changed using `X.author`.
 #
 # - `created` is the creation date of the NDDataset (again not that of the .spg file). It can be accessed (or even
-# changed) using `X.created`
+# changed) using `X.created`.
 #
 # - `description` indicates the complete pathname of the .spg file. As the pathname is also given in the history (below)
 # , it can be a good practice to give a self explaining description of the group, for instance:
@@ -115,7 +114,7 @@ X.description
 #
 # Then come the attributes related to the data themselves:
 #
-# - `title` (not to be confused with the `name` of the dataset) describes the nature of data (here **absorbance**)
+# - `title` (not to be confused with the `name` of the dataset) describes the nature of data (here **absorbance**).
 #
 # - `values` shows the data as quantity (with their units when they exist - here a.u. for absorbance units).
 #
@@ -157,7 +156,7 @@ X.y
 # - `dims`: Note that the `x` and `y` dimensions are the second and first dimension respectively. Hence, `X[i,j]`
 # will return
 # the absorbance of the ith spectrum at the jth  wavenumber. However, this is subject to change, for instance if you
-# perform operation on your data such as [Transposition](../processing/transformations#Transposition). At any time
+# perform operation on your data such as [Transposition](../processing/transformations.ipynb#Transposition). At any time
 # the attribute `dims` gives the correct names (which can be modified) and order of the dimensions.
 
 # %%
