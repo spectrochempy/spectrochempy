@@ -134,6 +134,15 @@ scp_data/testdata/nmrdata/bruker/tests/nmr/exam_CMCse_2
 scp_data/testdata/nmrdata/bruker/tests/nmr/exam_CMCse_3
 Icon*
 
+# pip virtual environment
+/env/
+HIZECOKE_TEST.pscp
+process.pscp
+
+# unknown
+.goutputstream*
+
+
 # Html Documentation
 /spectrochempy_docs/
 *.py-donotwork
@@ -150,9 +159,6 @@ scripts/single_spectrum.csv
 myfile.csv
 single_spectrum.csv
 
-# pip virtual environment
-/env/
-HIZECOKE_TEST.pscp
-process.pscp
-
-.goutputstream*
+# docs automatically generated
+generated/
+changelog.rst
