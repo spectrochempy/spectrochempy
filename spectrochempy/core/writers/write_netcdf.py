@@ -123,10 +123,11 @@ def _to_netCDF(cdf_obj, obj):
 
     if obj.implements("NDDataset"):
 
+        cdf_obj.type = "NDDataset"
         # Get the name of the dimensions and their order
-        dims = obj.dims  # this give the order of dimensions
+        dims = obj.dims
 
-        # Create the corresponding dimensions
+        # Write the corresponding dimensions / variables
         coords = []
         for index, dim in enumerate(dims):
             coord = getattr(obj, dim)
@@ -146,6 +147,7 @@ def _to_netCDF(cdf_obj, obj):
                 dim_.meta = coord.meta
             dim_.roi = coord.roi
 
+        # Write the data variable  and associated attributes
         cdf_obj.history = obj.history
         cdf_obj.author = obj.author
         cdf_obj.description = obj.description
@@ -167,4 +169,18 @@ def _to_netCDF(cdf_obj, obj):
         # 'date', 'modified', 'origin', 'roi', 'transposed',
         # 'modeldata', 'referencedata', 'state','ranges', 'filename']
 
-        # coord : ['data', 'labels', 'units', 'meta', 'title', 'name', 'offset', 'increment', 'linear', 'roi']
+    elif obj.implements("Project"):
+
+        cdf_obj.type = "Project"
+        NotImplementedError  # to do
+
+    elif isinstance(obj, list):
+
+        # try with a list of datasets or projects
+        NotImplementedError
+
+    else:
+
+        raise ValueError(
+            f"This kind of object : {type(obj)} is not known by this writer"
+        )
