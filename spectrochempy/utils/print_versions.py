@@ -1,14 +1,19 @@
 """Utility functions for printing version information."""
 
 import locale
-import os
 import platform
 import struct
 import subprocess
 import sys
+from os import environ
+
 from spectrochempy import optional
+from spectrochempy.utils import pathclean
+
 
 __all__ = ["show_versions"]
+
+REPOS = pathclean(__file__).parent.parent.parent
 
 
 def get_sys_info():
@@ -19,7 +24,7 @@ def get_sys_info():
 
     # get full commit hash
     commit = None
-    if os.path.isdir("../../.git") and os.path.isdir("../../spectrochempy"):
+    if (REPOS / ".git").is_dir() and REPOS.is_dir():
         try:
             pipe = subprocess.Popen(
                 'git log --format="%H" -n 1'.split(" "),
@@ -48,12 +53,11 @@ def get_sys_info():
                 ("python-bits", struct.calcsize("P") * 8),
                 ("OS", f"{sysname}"),
                 ("OS-release", f"{release}"),
-                # ("Version", f"{version}"),
                 ("machine", f"{machine}"),
                 ("processor", f"{processor}"),
                 ("byteorder", f"{sys.byteorder}"),
-                ("LC_ALL", f'{os.environ.get("LC_ALL", "None")}'),
-                ("LANG", f'{os.environ.get("LANG", "None")}'),
+                ("LC_ALL", f'{environ.get("LC_ALL", "None")}'),
+                ("LANG", f'{environ.get("LANG", "None")}'),
                 ("LOCALE", f"{locale.getlocale()}"),
             ]
         )
@@ -79,7 +83,7 @@ def show_versions(file=sys.stdout):
         print(f"{key}: {val}", file=file)
     print(file=file)
     deps = []
-    with open("../../environment.yml", "r") as f:
+    with open(REPOS / "environment.yml", "r") as f:
         start = False
         for dep in f.readlines():
             if "dependencies" in dep:
