@@ -3,7 +3,7 @@
 # BSD 3-Clause License
 
 from __future__ import annotations
-from pkg_resources import get_distribution
+from pkg_resources import get_distribution, DistributionNotFound
 
 import importlib
 import sys
@@ -31,7 +31,10 @@ def get_module_version(module: types.ModuleType) -> str:
     if version is None:
         version = getattr(module, "__VERSION__", None)
     if version is None:
-        version = get_distribution(module.__name__).version.split("+")[0]
+        try:
+            version = get_distribution(module.__name__).version.split("+")[0]
+        except DistributionNotFound:
+            pass
     if version is None:
         raise ImportError(f"Can't determine version for {module.__name__}")
     return version

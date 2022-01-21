@@ -8,15 +8,18 @@ import subprocess
 import sys
 from spectrochempy import optional
 
+__all__ = ["show_versions"]
+
 
 def get_sys_info():
     """Returns system information as a dict"""
+    # copied from XArray
 
     blob = []
 
     # get full commit hash
     commit = None
-    if os.path.isdir(".git") and os.path.isdir("xarray"):
+    if os.path.isdir("../../.git") and os.path.isdir("../../spectrochempy"):
         try:
             pipe = subprocess.Popen(
                 'git log --format="%H" -n 1'.split(" "),
@@ -69,12 +72,12 @@ def show_versions(file=sys.stdout):
         print to the given file-like object. Defaults to sys.stdout.
     """
 
-    print("\nINSTALLED VERSIONS")
-    print("------------------")
+    print("\nINSTALLED VERSIONS", file=file)
+    print("------------------", file=file)
 
     for key, val in get_sys_info():
-        print(f"{key}: {val}")
-    print()
+        print(f"{key}: {val}", file=file)
+    print(file=file)
     deps = []
     with open("../../environment.yml", "r") as f:
         start = False
@@ -92,10 +95,11 @@ def show_versions(file=sys.stdout):
         mod = optional.import_optional_dependency(dep, errors="ignore")
         try:
             print(
-                f"{dep}: {optional.get_module_version(mod) if mod is not None else None}"
+                f"{dep}: {optional.get_module_version(mod) if mod is not None else None}",
+                file=file,
             )
         except ImportError:
-            print(f"{dep}: (Can't determine version string)")
+            print(f"{dep}: (Can't determine version string)", file=file)
 
 
 if __name__ == "__main__":
