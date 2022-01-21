@@ -1,5 +1,16 @@
 # What's new
 
+## Version 0.3.1
+
+**NEW FEATURES**
+
+* Added a show_versions method in the API.
+
+* Improved bug reports and pull request templates. Requests for 
+  help are now made in github discussions.
+
+* Docs API reference has been hopefully improved.
+
 ## Version 0.3.0
 
 **NEW FEATURES**
