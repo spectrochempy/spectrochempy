@@ -4,5 +4,7 @@ contact_links:
     url: https://github.com/fernandezc/spectrochempy/discussions
     about: |
       Ask questions and discuss with other community members here.
-      If you have a question like "How do I concatenate a list of datasets?" then
+      If you have a question like "Why when I change the units of a 
+      coordinates it does not work?" 
+      then
       please include a self-contained reproducible example if possible.

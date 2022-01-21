@@ -26,7 +26,6 @@
    application.GeneralPreferences
    application.SpectroChemPy
    application.SpectroChemPyMagics
-
    analysis
    analysis.api
    analysis.cantera_utilities
@@ -74,7 +73,6 @@
    analysis.simplisma.SIMPLISMA
    analysis.svd
    analysis.svd.SVD
-
    core.dataset
    core.dataset.api
    core.dataset.coord
@@ -273,7 +271,7 @@
    core.readers.read_quadera.read_quadera
    core.readers.read_topspin
    core.readers.read_topspin.read_topspin
-   core.readers.read_bruker_nmr
+   core.readers.read_topspin.read_bruker_nmr
    core.readers.read_spc.read_spc
    core.readers.read_zip
    core.readers.read_zip.read_zip
@@ -301,12 +299,9 @@
    core.writers.write_matlab
    core.writers.write_matlab.write_mat
    core.writers.write_matlab.write_matlab
-
    databases.api
    databases.isotopes
    databases.isotopes.Isotopes
-
-
    utils.exceptions
    utils.exceptions.CoordinateMismatchError
    utils.exceptions.deprecated
@@ -362,11 +357,9 @@
    utils.zip
    utils.zip.make_zipfile
    utils.zip.ScpFile
-
    widgets.api
    widgets.fileselector
    widgets.fileselector.FileSelector
-
    Coord
    Coord.amax
    Coord.amin
@@ -430,7 +423,6 @@
    Coord.units
    Coord.value
    Coord.values
-
    CoordSet
    CoordSet.available_names
    CoordSet.coords
@@ -454,7 +446,6 @@
    CoordSet.to_dict
    CoordSet.units
    CoordSet.update
-
    LinearCoord
    LinearCoord.amax
    LinearCoord.amin
@@ -517,7 +508,6 @@
    LinearCoord.units
    LinearCoord.value
    LinearCoord.values
-
    ÑDDataset
    NDDataset.ab
    NDDataset.abc
