@@ -66,8 +66,8 @@ def read_omnic(*paths, **kwargs):
         except if `merge` is set to False. If a source is not provided (i.e.
         no `filename`, nor `content`),
         a dialog box will be opened to select files.
-    **kwargs : dict
-        See other parameters.
+    **kwargs
+        Optional keyword parameters (see Other Parameters).
 
     Returns
     --------
@@ -235,8 +235,8 @@ def read_spg(*paths, **kwargs):
         except if `merge` is set to False. If a source is not provided (i.e.
         no `filename`, nor `content`),
         a dialog box will be opened to select files.
-    **kwargs : dict
-        See other parameters.
+    **kwargs
+        Optional keyword parameters (see Other Parameters).
 
     Returns
     --------
@@ -327,8 +327,8 @@ def read_spa(*paths, **kwargs):
         except if `merge` is set to False. If a source is not provided (i.e.
         no `filename`, nor `content`),
         a dialog box will be opened to select files.
-    **kwargs : dict
-        See other parameters.
+    **kwargs
+        Optional keyword parameters (see Other Parameters).
 
     Returns
     --------
@@ -425,8 +425,8 @@ def read_srs(*paths, **kwargs):
         except if `merge` is set to False. If a source is not provided (i.e.
         no `filename`, nor `content`),
         a dialog box will be opened to select files.
-    **kwargs : dict
-        See other parameters.
+    **kwargs
+        Optional keyword parameters (see Other Parameters).
 
     Returns
     --------

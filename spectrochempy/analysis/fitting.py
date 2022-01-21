@@ -1196,18 +1196,18 @@ def optimize(
     callback=None,
 ):
     """
-        Parameters
-        ----------
-        func
-        fp0
-        args
-        constraints
-        method
-        maxfun
-        maxiter
-        ftol
-        xtol
-        callback
+    Parameters
+    ----------
+    func
+    fp0
+    args
+    constraints
+    method
+    maxfun
+    maxiter
+    ftol
+    xtol
+    callback
 
 
     #  Internal/external transformation

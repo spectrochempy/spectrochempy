@@ -24,81 +24,79 @@ from quadprog import solve_qp
 class IRIS:
     """
     Integral inversion solver for spectroscopic data.
+
+    Parameters
+    -----------
+    X : |NDDataset|
+        The 1D or 2D dataset on which to perform the IRIS analysis.
+    param : dict
+        Dictionary of parameters with the following keys :
+
+        *   'kernel': str or callable
+            Kernel function of the integral equation. Pre-defined functions can be chosen among
+            {'langmuir', 'ca', 'reactant-first-order', 'product-first-order', diffusion} (see Notes below).
+            A custom kernel consisting of a 2-variable lambda function `ker(p, eps)`
+            can be passed, where `p` and `eps` are an external experimental variable and an internal
+            physico-chemical parameter, respectively.
+        *   'epsRange': array-like of three values [start, stop, num]
+            Defines the interval of eps values.
+            start, stop: the starting and end values of eps, num: number of values.
+        *   'lambdaRange': None or array_like of two values [min, max] or three values [start, stop, num]
+            (see Notes below).
+        *   'p': array or coordinate of the external variable. If none is given, p = X.y.values.
+    verbose : bool
+        if true, print running information.
+
+    Attributes
+    ----------
+    f : |NDDataset|
+        A 3D/2D dataset containing the solutions (one per regularization parameter).
+    RSS: array of float
+        Residual sums of squares (one per regularization parameter).
+    SM : array of float
+        Values of the penalty function (one per regularization parameter).
+    lamda : array of float
+        Values of the regularization parameters.
+    log : str
+        Log of the optimization.
+    K : |NDDataset|
+        Kernel matrix.
+    X : |NDDataset|
+        Copy of the original dataset.
+
+    Notes
+    -----
+    IRIS solves integral equation of the first kind of 1 or 2 dimensions,
+    i.e. finds a distribution function :math:`f` of contributions to spectra
+    :math:`a(\nu,p)` or univariate measurement :math:`a(p)` evolving with an
+    external experimental variable :math:`p` (time, pressure, temperature,
+    concentration, ...) according to the integral transform:
+
+    .. math:: a(\nu, p) = \\int_{min}^{max} k(\\epsilon, \\p) f(\\nu, \\epsilon) dp
+
+    .. math:: a(p) = \\int_{min}^{max} k(\\epsilon, p) f(\\epsilon) dp
+
+    where the kernel :math:`k(\\epsilon, p)` expresses the functional
+    dependence of a single contribution with respect to the experimental
+    variable math:`p` and and 'internal' physico-chemical variable
+    :math:`\\epsilon`
+
+    Regularization is triggered when 'lambdaRange' is set to an array of two
+    or three values.
+
+    - If 'lambdaRange' has two values [min, max], the optimum regularization
+    parameter is searched between :math:`10^{min}` and :math:`10^{max}`.
+    Automatic search of the regularization is made using the
+    Cultrera_Callegaro algorithm (arXiv:1608.04571v2)
+    which involves the Menger curvature of a circumcircle and the golden
+    section search method.
+
+    - If three values are given ([min, max, num]), then the inversion will
+    be made for num values evenly spaced on a log scale between
+    :math:`10^{min}` and :math:`10^{max}`
     """
 
     def __init__(self, X, param, **kwargs):
-        """
-
-        Parameters
-        -----------
-        X : |NDDataset|
-            The 1D or 2D dataset on which to perform the IRIS analysis.
-        param : dict
-            Dictionary of parameters with the following keys :
-
-            *   'kernel': str or callable
-                Kernel function of the integral equation. Pre-defined functions can be chosen among
-                {'langmuir', 'ca', 'reactant-first-order', 'product-first-order', diffusion} (see Notes below).
-                A custom kernel consisting of a 2-variable lambda function `ker(p, eps)`
-                can be passed, where `p` and `eps` are an external experimental variable and an internal
-                physico-chemical parameter, respectively.
-            *   'epsRange': array-like of three values [start, stop, num]
-                Defines the interval of eps values.
-                start, stop: the starting and end values of eps, num: number of values.
-            *   'lambdaRange': None or array_like of two values [min, max] or three values [start, stop, num]
-                (see Notes below).
-            *   'p': array or coordinate of the external variable. If none is given, p = X.y.values.
-        verbose : bool
-            if true, print running information.
-
-        Attributes
-        ----------
-        f : |NDDataset|
-            A 3D/2D dataset containing the solutions (one per regularization parameter).
-        RSS: array of float
-            Residual sums of squares (one per regularization parameter).
-        SM : array of float
-            Values of the penalty function (one per regularization parameter).
-        lamda : array of float
-            Values of the regularization parameters.
-        log : str
-            Log of the optimization.
-        K : |NDDataset|
-            Kernel matrix.
-        X : |NDDataset|
-            Copy of the original dataset.
-
-        Notes
-        -----
-        IRIS solves integral equation of the first kind of 1 or 2 dimensions,
-        i.e. finds a distribution function :math:`f` of contributions to spectra
-        :math:`a(\nu,p)` or univariate measurement :math:`a(p)` evolving with an
-        external experimental variable :math:`p` (time, pressure, temperature,
-        concentration, ...) according to the integral transform:
-
-        .. math:: a(\nu, p) = \\int_{min}^{max} k(\\epsilon, \\p) f(\\nu, \\epsilon) dp
-
-        .. math:: a(p) = \\int_{min}^{max} k(\\epsilon, p) f(\\epsilon) dp
-
-        where the kernel :math:`k(\\epsilon, p)` expresses the functional
-        dependence of a single contribution with respect to the experimental
-        variable math:`p` and and 'internal' physico-chemical variable
-        :math:`\\epsilon`
-
-        Regularization is triggered when 'lambdaRange' is set to an array of two
-        or three values.
-
-        - If 'lambdaRange' has two values [min, max], the optimum regularization
-        parameter is searched between :math:`10^{min}` and :math:`10^{max}`.
-        Automatic search of the regularization is made using the
-        Cultrera_Callegaro algorithm (arXiv:1608.04571v2)
-        which involves the Menger curvature of a circumcircle and the golden
-        section search method.
-
-        - If three values are given ([min, max, num]), then the inversion will
-        be made for num values evenly spaced on a log scale between
-        :math:`10^{min}` and :math:`10^{max}`
-        """
 
         global _log
         _log = ""
@@ -558,14 +556,14 @@ class IRIS:
 
     def plotdistribution(self, index=None, **kwargs):
         """
-        Plots the input dataset, reconstructed dataset and residuals.
+        Plot the input dataset, reconstructed dataset and residuals.
 
         Parameters
         ----------
         index : optional, int, list or tuple of int. default: None.
             Index(es) of the inversions (i.e. of the lambda values) to consider.
             If 'None': plots for all indices.
-        kwargs:
+        **kwargs :
             Other optional arguments are passed in the plots.
 
         Returns

@@ -29,9 +29,10 @@ def make_zipfile(file, **kwargs):
 
     Parameters
     ----------
-    file:  file or str
+    file :  file or str
         The file to be zipped.
-    **kwargs: Optional keyword arguments
+    **kwargs
+        Additional keyword parameters.
         They are passed to the zipfile.ZipFile constructor.
 
     Returns
@@ -58,23 +59,23 @@ class ScpFile(Mapping):  # lgtm[py/missing-equals]
     in the case of project's ``.pscp`` file format and finally ``pars.json``
     files which contains other information on the structure and  attributes of
     the saved objects. Other files are ignored.
+
+    Parameters
+    ----------
+    fid : file or str
+        The zipped archive to open. This is either a file-like object
+        or a string containing the path to the archive.
+
+    Attributes
+    ----------
+    files : list of str
+        List of all files in the archive with a ``.npy`` extension.
+    zip : ZipFile instance
+        The ZipFile object initialized with the zipped archive.
     """
 
     def __init__(self, fid):
-        """
-        Parameters
-        ----------
-        fid : file or str
-            The zipped archive to open. This is either a file-like object
-            or a string containing the path to the archive.
 
-        Attributes
-        ----------
-        files : list of str
-            List of all files in the archive with a ``.npy`` extension.
-        zip : ZipFile instance
-            The ZipFile object initialized with the zipped archive.
-        """
         _zip = make_zipfile(fid)
 
         self.files = _zip.namelist()

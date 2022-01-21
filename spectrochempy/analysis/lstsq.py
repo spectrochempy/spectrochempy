@@ -28,22 +28,22 @@ class LSTSQ(HasTraits):
     Given a vector `X` and a vector Y, the equation `A.X + B = Y` is solved by
     computing  ``A``, and ``B`` that minimizes the Euclidean 2-norm
     `|| Y - (A.X + B) ||^2`.
+
+    Parameters
+    ----------
+    *datasets : one or two |NDDataset|'s or array-like objects
+        If a single dataset `Y` is provided, the `X` data will be the `x`
+        coordinates of the `Y` dataset, or the index of the data if not
+        coordinates exists.
+        If two datasets `X`, and `Y` are given, the `x` coordinates of `Y`
+        are ignored and replaced by the `X` data.
     """
 
     X = Instance(NDArray)
     Y = Instance(NDDataset)
 
     def __init__(self, *datasets):
-        """
-        Parameters
-        ----------
-        *datasets : one or two |NDDataset|'s or array-like objects
-            If a single dataset `Y` is provided, the `X` data will be the `x`
-            coordinates of the `Y` dataset, or the index of the data if not
-            coordinates exists.
-            If two datasets `X`, and `Y` are given, the `x` coordinates of `Y`
-            are ignored and replaced by the `X` data.
-        """
+
         super().__init__()
 
         if len(datasets) > 2 or len(datasets) < 1:
@@ -135,26 +135,25 @@ class NNLS(HasTraits):
     Least-squares solution to a linear matrix equation with non-negativity constraints.
 
     This is a wrapper to the `scipy.optimize.nnls`` function.
+
+    Parameters
+    ----------
+    *datasets : one or two |NDDataset|'s or array-like objects
+        If a single dataset `Y` is provided, the `X` data will be the `x`
+        coordinates of the `Y` dataset, or the index of the data if not
+        coordinates exists.
+        If two datasets `X`, and `Y` are given, the `x` coordinates of `Y`
+        are ignored and replaced by the `X` data.
+    maxiter: int, optional
+        Maximum number of iterations, optional.
+        Default is ``3 * X.shape``.
     """
 
     X = Instance(NDArray)
     Y = Instance(NDDataset)
 
     def __init__(self, *datasets):
-        """
-        Parameters
-        ----------
-        *datasets : one or two |NDDataset|'s or array-like objects
-            If a single dataset `Y` is provided, the `X` data will be the `x`
-            coordinates of the `Y` dataset, or the index of the data if not
-            coordinates exists.
-            If two datasets `X`, and `Y` are given, the `x` coordinates of `Y`
-            are ignored and replaced by the `X` data.
 
-        maxiter: int, optional
-            Maximum number of iterations, optional.
-            Default is ``3 * X.shape``.
-        """
         super().__init__()
 
         if len(datasets) > 2 or len(datasets) < 1:
@@ -248,6 +247,18 @@ class CurveFit(HasTraits):
     It assumes Y = f(X, *params) + eps.
 
     This is a wrapper to the `scipy.optimize.curve_fit`` function
+
+    Parameters
+    ----------
+    *datasets : one or two |NDDataset|'s or array-like objects
+        If a single dataset `Y` is provided, the `X` data will be the `x`
+        coordinates of the `Y` dataset, or the index of the data if not
+        coordinates exists.
+        If two datasets `X`, and `Y` are given, the `x` coordinates of `Y`
+        are ignored and replaced by the `X` data.
+    maxiter: int, optional
+        Maximum number of iterations, optional.
+        Default is ``3 * X.shape``.
     """
 
     # TODO: Something wrong here! This is exactly the same code as NNLS.
@@ -257,20 +268,7 @@ class CurveFit(HasTraits):
     Y = Instance(NDDataset)
 
     def __init__(self, *datasets):
-        """
-        Parameters
-        ----------
-        *datasets : one or two |NDDataset|'s or array-like objects
-            If a single dataset `Y` is provided, the `X` data will be the `x`
-            coordinates of the `Y` dataset, or the index of the data if not
-            coordinates exists.
-            If two datasets `X`, and `Y` are given, the `x` coordinates of `Y`
-            are ignored and replaced by the `X` data.
 
-        maxiter: int, optional
-            Maximum number of iterations, optional.
-            Default is ``3 * X.shape``.
-        """
         super().__init__()
 
         if len(datasets) > 2 or len(datasets) < 1:

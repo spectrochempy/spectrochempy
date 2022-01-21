@@ -33,6 +33,44 @@ __all__ = ["Meta"]
 
 
 class Meta(object):  # HasTraits):
+    """
+    A dictionary to store metadata.
+
+    The metadata are accessible by item or by attributes, and
+    the dictionary can be made read-only if necessary.
+
+    Parameters
+    ----------
+    **data : keywords
+        The dictionary can be already inited with some keywords.
+
+    Examples
+    --------
+
+    First we initialise a metadata object
+
+    >>> m = scp.Meta()
+
+    then, metadata can be set by attribute (or by key like in a regular
+    dictionary), and further accessed by attribute (or key):
+
+    >>> m.chaine = "a string"
+    >>> m["entier"] = 123456
+    >>> print(m.entier)
+    123456
+    >>> print(m.chaine)
+    a string
+
+    One can make the dictionary read-only
+
+    >>> m.readonly = True
+    >>> m.chaine = "a modified string"
+    Traceback (most recent call last):
+     ...
+    ValueError : 'the metadata `chaine` is read only'
+    >>> print(m.chaine)
+    a string
+    """
 
     # ------------------------------------------------------------------------
     # private attributes
@@ -52,44 +90,7 @@ class Meta(object):  # HasTraits):
     # special methods
     # ------------------------------------------------------------------------
     def __init__(self, **data):
-        """
-        A dictionary to store metadata.
 
-        The metadata are accessible by item or by attributes, and
-        the dictionary can be made read-only if necessary.
-
-        Parameters
-        ----------
-        **data : keywords
-            The dictionary can be already inited with some keywords.
-
-        Examples
-        --------
-
-        First we initialise a metadata object
-
-        >>> m = scp.Meta()
-
-        then, metadata can be set by attribute (or by key like in a regular
-        dictionary), and further accessed by attribute (or key):
-
-        >>> m.chaine = "a string"
-        >>> m["entier"] = 123456
-        >>> print(m.entier)
-        123456
-        >>> print(m.chaine)
-        a string
-
-        One can make the dictionary read-only
-
-        >>> m.readonly = True
-        >>> m.chaine = "a modified string"
-        Traceback (most recent call last):
-         ...
-        ValueError : 'the metadata `chaine` is read only'
-        >>> print(m.chaine)
-        a string
-        """
         self.parent = data.pop("parent", None)
         self.name = data.pop("name", None)
         self._data = data
@@ -204,8 +205,7 @@ class Meta(object):  # HasTraits):
         """
         Parameters
         ----------
-        :param key:
-        :return:
+        key
         """
         return self._data.get(key, default)
 
@@ -254,8 +254,6 @@ class Meta(object):  # HasTraits):
         >>> print(m.keys())
         ['si', 'td']
 
-        Notes
-        -----
         Alternatively, it is possible to iter directly on the Meta object
 
         >>> m = scp.Meta()

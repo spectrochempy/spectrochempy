@@ -104,8 +104,8 @@ def write(dataset, filename=None, **kwargs):
         Dataset to write.
     filename : str or pathlib object, optional
         If not provided, a dialog is opened to select a file for writing.
-    **kwargs : dict
-        See other parameters.
+    **kwargs
+        Optional keyword parameters (see Other Parameters).
 
     Returns
     -------

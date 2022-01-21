@@ -26,6 +26,72 @@ from spectrochempy.core import info_, set_loglevel, INFO
 class MCRALS(HasTraits):
     """
     Performs MCR-ALS of a dataset knowing the initial C or St matrix.
+
+    Parameters
+    ----------
+    dataset : |NDDataset|
+        The dataset on which to perform the MCR-ALS analysis
+    guess : |NDDataset|
+        Initial concentration or spectra
+    verbose : bool
+        If set to True, prints a summary of residuals and residuals change
+        at each iteration. default = False.
+        In any case, the same information is returned in self.logs
+    **kwargs
+        Optional keyword parameters (see Other Parameters).
+
+    Other Parameters
+    ----------------
+    tol : float, optional,  default=0.1
+        Convergence criterion on the change of resisuals.
+        (percent change of standard deviation of residuals).
+    maxit : int, optional, default=50
+        Maximum number of ALS minimizations.
+    maxdiv : int, optional, default=5.
+        Maximum number of successive non-converging iterations.
+    nonnegConc : list or tuple, default=Default [0, 1, ...] (only
+    non-negative concentrations)
+        Index of species having non-negative concentration profiles. For
+        instance [0, 2] indicates that species
+        #0 and #2 have non-negative conc profiles while species #1 can have
+        negative concentrations.
+    unimodConc : list or tuple, Default=[0, 1, ...] (only unimodal
+    concentration profiles)
+        index of species having unimodal concentrationsprofiles.
+    closureConc : list or tuple, Default=None  (no closure)
+        Index of species subjected to a closure constraint.
+    externalConc: list or tuple, Default None (no external concentration).
+        Index of species for which a concentration profile is provided by an
+        external function.
+    getExternalConc : callable
+        An external function that will provide `n_ext` concentration profiles:
+
+        getExternalConc(C, extConc, ext_to_C_idx, *args) -> extC
+
+        or
+
+        etExternalConc(C, extConc, ext_to_C_idx, *args) -> (extC, out2,
+        out3, ...)
+
+        where C is the current concentration matrix, *args are the
+        parameters needed to completely
+        specify the function, extC is a  nadarray or NDDataset of shape (
+        C.y, n_ext), and out1, out2, ... are
+        supplementary outputs returned by the function (e.g. optimized rate
+        parameters)
+    args : tuple, optional.
+        Extra arguments passed to the external function
+    external_to_C_idx : array or tuple, Default=np.arange(next)
+        Indicates the correspondence between the indexes of external chemical
+        profiles and the columns of the C matrix. [1, None, 0] indicates
+        that the first external profile is the
+        second pure species (index 1).
+    nonnegSpec : list or tuple, Default [1, ..., 1]  (only non-negative
+    spectra)
+        Indicates species having non-negative spectra
+    unimodSpec : list or tuple, Default [0, ..., 0]  (no unimodal
+    concentration profiles)
+        Indicates species having unimodal spectra
     """
 
     _X = Instance(NDDataset)
@@ -37,60 +103,6 @@ class MCRALS(HasTraits):
     _params = Dict()
 
     def __init__(self, dataset, guess, **kwargs):  # lgtm[py/missing-call-to-init]
-        """
-        Parameters
-        ----------
-        dataset : |NDDataset|
-            The dataset on which to perform the MCR-ALS analysis
-        guess : |NDDataset|
-            Initial concentration or spectra
-        verbose : bool
-            If set to True, prints a summary of residuals and residuals change at each iteration. default = False.
-            In any case, the same information is returned in self.logs
-        **kwargs : dict
-            Optimization parameters : See Other Parameters.
-
-        Other Parameters
-        ----------------
-        tol : float, optional,  default=0.1
-            Convergence criterion on the change of resisuals.
-            (percent change of standard deviation of residuals).
-        maxit : int, optional, default=50
-            Maximum number of ALS minimizations.
-        maxdiv : int, optional, default=5.
-            Maximum number of successive non-converging iterations.
-        nonnegConc : list or tuple, default=Default [0, 1, ...] (only non-negative concentrations)
-            Index of species having non-negative concentration profiles. For instance [0, 2] indicates that species
-            #0 and #2 have non-negative conc profiles while species #1 can have negative concentrations.
-        unimodConc : list or tuple, Default=[0, 1, ...] (only unimodal concentration profiles)
-            index of species having unimodal concentrationsprofiles.
-        closureConc : list or tuple, Default=None  (no closure)
-            Index of species subjected to a closure constraint.
-        externalConc: list or tuple, Default None (no external concentration).
-            Index of species for which a concentration profile is provided by an external function.
-        getExternalConc : callable
-            An external function that will provide `n_ext` concentration profiles:
-
-            getExternalConc(C, extConc, ext_to_C_idx, *args) -> extC
-
-            or
-
-            etExternalConc(C, extConc, ext_to_C_idx, *args) -> (extC, out2, out3, ...)
-
-            where C is the current concentration matrix, *args are the parameters needed to completely
-            specify the function, extC is a  nadarray or NDDataset of shape (C.y, n_ext), and out1, out2, ... are
-            supplementary outputs returned by the function (e.g. optimized rate parameters)
-        args : tuple, optional.
-            Extra arguments passed to the external function
-        external_to_C_idx : array or tuple, Default=np.arange(next)
-            Indicates the correspondence between the indexes of external chemical
-            profiles and the columns of the C matrix. [1, None, 0] indicates that the first external profile is the
-            second pure species (index 1).
-        nonnegSpec : list or tuple, Default [1, ..., 1]  (only non-negative spectra)
-            Indicates species having non-negative spectra
-        unimodSpec : list or tuple, Default [0, ..., 0]  (no unimodal concentration profiles)
-            Indicates species having unimodal spectra
-        """
 
         verbose = kwargs.pop("verbose", False)
         if verbose:

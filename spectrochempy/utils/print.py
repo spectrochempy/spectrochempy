@@ -321,7 +321,7 @@ def insert_masked_print(ds, mask_string="--"):
     -- copied from numpy.ma.core and modified
 
     Parameters
-    -----------
+    ----------
     ds : |NDDataset| instance
     mask_string : str
     """

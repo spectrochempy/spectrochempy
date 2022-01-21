@@ -60,8 +60,8 @@ def savgol_filter(
         last window_length // 2 output values.
     cval : scalar, optional
         Value to fill past the edges of the input if mode is ‘constant’. Default is 0.0.
-    **kwargs : dict
-        See other parameters.
+    **kwargs
+        Optional keyword parameters (see Other Parameters).
 
     Returns
     -------
@@ -167,8 +167,8 @@ def detrend(dataset, type="linear", bp=0, **kwargs):
         A sequence of break points. If given, an individual linear fit is
         performed for each part of `data` between two break points.
         Break points are specified as indices into `data`.
-    **kwargs : dict
-        See other parameters.
+    **kwargs
+        Optional keyword parameters (see Other Parameters).
 
     Returns
     -------

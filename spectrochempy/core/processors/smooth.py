@@ -29,8 +29,8 @@ def smooth(dataset, window_length=5, window="flat", **kwargs):
     window : str, optional, default='flat'
         The type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'.
         flat window will produce a moving average smoothing.
-    **kwargs : dict
-        See other parameters.
+    **kwargs
+        Optional keyword parameters (see Other Parameters).
 
     Returns
     -------

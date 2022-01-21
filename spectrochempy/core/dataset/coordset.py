@@ -42,6 +42,71 @@ from spectrochempy.utils import (
 # CoordSet
 # ======================================================================================================================
 class CoordSet(HasTraits):
+    """
+    A collection of Coord objects for a NDArray object with validation.
+
+    This object is an iterable containing a collection of Coord objects.
+
+    Parameters
+    ----------
+    *coords : |NDarray|, |NDArray| subclass or |CoordSet| sequence of objects.
+        If an instance of CoordSet is found, instead of an array, this means
+        that all coordinates in this coords describe the same axis.
+        It is assumed that the coordinates are passed in the order of the
+        dimensions of a nD numpy array (
+        `row-major <https://docs.scipy.org/doc/numpy-1.14.1/glossary.html#term-row-major>`_
+        order), i.e., for a 3d object : 'z', 'y', 'x'.
+    **kwargs
+        Additional keyword parameters (see Other Parameters).
+
+    Other Parameters
+    ----------------
+    x : |NDarray|, |NDArray| subclass or |CoordSet|
+        A single coordinate associated to the 'x'-dimension.
+        If a coord was already passed in the argument, this will overwrite
+        the previous. It is thus not recommended to simultaneously use
+        both way to initialize the coordinates to avoid such conflicts.
+    y, z, u, ... : |NDarray|, |NDArray| subclass or |CoordSet|
+        Same as `x` for the others dimensions.
+    dims : list of string, optional
+        Names of the dims to use corresponding to the coordinates. If not
+        given, standard names are used: x, y, ...
+    copy : bool, optional
+        Perform a copy of the passed object. Default is True.
+
+    See Also
+    --------
+    Coord : Explicit coordinates object.
+    LinearCoord : Implicit coordinates object.
+    NDDataset: The main object of SpectroChempy which makes use of CoordSet.
+
+    Examples
+    --------
+    >>> from spectrochempy import Coord, CoordSet
+
+    Define 4 coordinates, with two for the same dimension
+
+    >>> coord0 = Coord.linspace(10., 100., 5, units='m', title='distance')
+    >>> coord1 = Coord.linspace(20., 25., 4, units='K', title='temperature')
+    >>> coord1b = Coord.linspace(1., 10., 4, units='millitesla', title='magnetic field')
+    >>> coord2 = Coord.linspace(0., 1000., 6, units='hour', title='elapsed time')
+
+    Now create a coordset
+
+    >>> cs = CoordSet(t=coord0, u=coord2, v=[coord1, coord1b])
+
+    Display some coordinates
+
+    >>> cs.u
+    Coord: [float64] hr (size: 6)
+
+    >>> cs.v
+    CoordSet: [_1:temperature, _2:magnetic field]
+
+    >>> cs.v_1
+    Coord: [float64] K (size: 4)
+    """
+
     # Hidden attributes containing the collection of objects
     _coords = List(allow_none=True)
     _references = Dict()
@@ -67,69 +132,6 @@ class CoordSet(HasTraits):
     # ------------------------------------------------------------------------
     # ..........................................................................
     def __init__(self, *coords, **kwargs):
-        """
-        A collection of Coord objects for a NDArray object with validation.
-
-        This object is an iterable containing a collection of Coord objects.
-
-        Parameters
-        ----------
-        *coords : |NDarray|, |NDArray| subclass or |CoordSet| sequence of objects.
-            If an instance of CoordSet is found, instead of an array, this means
-            that all coordinates in this coords describe the same axis.
-            It is assumed that the coordinates are passed in the order of the
-            dimensions of a nD numpy array (
-            `row-major <https://docs.scipy.org/doc/numpy-1.14.1/glossary.html#term-row-major>`_
-            order), i.e., for a 3d object : 'z', 'y', 'x'.
-        **kwargs: dict
-            See other parameters.
-
-        Other Parameters
-        ----------------
-        x : |NDarray|, |NDArray| subclass or |CoordSet|
-            A single coordinate associated to the 'x'-dimension.
-            If a coord was already passed in the argument, this will overwrite
-            the previous. It is thus not recommended to simultaneously use
-            both way to initialize the coordinates to avoid such conflicts.
-        y, z, u, ... : |NDarray|, |NDArray| subclass or |CoordSet|
-            Same as `x` for the others dimensions.
-        dims : list of string, optional
-            Names of the dims to use corresponding to the coordinates. If not given, standard names are used: x, y, ...
-        copy : bool, optional
-            Perform a copy of the passed object. Default is True.
-
-        See Also
-        --------
-        Coord : Explicit coordinates object.
-        LinearCoord : Implicit coordinates object.
-        NDDataset: The main object of SpectroChempy which makes use of CoordSet.
-
-        Examples
-        --------
-        >>> from spectrochempy import Coord, CoordSet
-
-        Define 4 coordinates, with two for the same dimension
-
-        >>> coord0 = Coord.linspace(10., 100., 5, units='m', title='distance')
-        >>> coord1 = Coord.linspace(20., 25., 4, units='K', title='temperature')
-        >>> coord1b = Coord.linspace(1., 10., 4, units='millitesla', title='magnetic field')
-        >>> coord2 = Coord.linspace(0., 1000., 6, units='hour', title='elapsed time')
-
-        Now create a coordset
-
-        >>> cs = CoordSet(t=coord0, u=coord2, v=[coord1, coord1b])
-
-        Display some coordinates
-
-        >>> cs.u
-        Coord: [float64] hr (size: 6)
-
-        >>> cs.v
-        CoordSet: [_1:temperature, _2:magnetic field]
-
-        >>> cs.v_1
-        Coord: [float64] K (size: 4)
-        """
 
         self._copy = kwargs.pop("copy", True)
         self._sorted = kwargs.pop("sorted", True)
@@ -613,7 +615,7 @@ class CoordSet(HasTraits):
         args : str(s)
             The list of titles to apply to the set of coordinates (they must be given according to the coordinate's name
             alphabetical order.
-        **kwargs : str
+        **kwargs
             Keyword attribution of the titles. The keys must be valid names among the coordinate's name list. This
             is the recommended way to set titles as this will be less prone to errors.
 
@@ -641,21 +643,21 @@ class CoordSet(HasTraits):
         """
         Set one or more coord units at once.
 
-        Notes
-        -----
-        If the args are not named, then the attributions are made in coordinate's name alphabetical order :
-        e.g, the first units will be for the `x` coordinates, the second for the `y`, etc.
-
         Parameters
         ----------
         *args : str(s)
             The list of units to apply to the set of coordinates (they must be given according to the coordinate's name
             alphabetical order.
-        **kwargs : str
+        **kwargs
             Keyword attribution of the units. The keys must be valid names among the coordinate's name list. This
             is the recommended way to set units as this will be less prone to errors.
         force : bool, optional, default=False
             Whether or not the new units must be compatible with the current units. See the `Coord`.`to` method.
+
+        Notes
+        -----
+        If the args are not named, then the attributions are made in coordinate's name alphabetical order :
+        e.g, the first units will be for the `x` coordinates, the second for the `y`, etc.
         """
         force = kwargs.pop("force", False)
 

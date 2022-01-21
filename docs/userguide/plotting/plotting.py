@@ -43,7 +43,7 @@
 # for a better interactivity inside a notebook.
 #
 # Finally, some commands and objects used here are described in-depth in the sections related to
-# [import](../Importexport/import.ipynb) and [slicing](../processing/slicing.ipynb) of NDDatasets and the *
+# [import](../importexport/import.ipynb) and [slicing](../processing/slicing.ipynb) of NDDatasets and the *
 # [NDDatasets](../dataset/dataset.ipynb) themselves.
 # %% [markdown]
 # ## Load the API
@@ -56,7 +56,7 @@ import spectrochempy as scp
 # ## Loading the data
 # For sake of demonstration we import a NDDataset consisting in infrared spectra from an omnic .spg file
 # and make some (optional) preparation of the data to display
-# (see also [Import IR Data](../importexport/importIR.html)).
+# (see also [Import IR Data](../importexport/importIR.ipynb)).
 
 # %%
 dataset = scp.NDDataset.read("irdata/nh4y-activation.spg")

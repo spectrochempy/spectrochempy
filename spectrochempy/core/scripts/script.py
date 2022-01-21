@@ -24,6 +24,38 @@ __all__ = ["Script", "run_script", "run_all_scripts"]
 
 
 class Script(HasTraits):
+    """
+    Executable scripts.
+
+    The scripts are used in a project.
+
+    Parameters
+    ----------
+    name : str
+        Name of the script. The name should be unique.
+    content : str
+        Content of sthe script.
+    parent : instance of |Project|
+        Parent project.
+    priority: int
+        Default=50.
+
+    See Also
+    --------
+    Project: Object containing |NDDataset|s, sub-|Project|s and |Scripts|.
+
+    Examples
+    --------
+    Make a script
+
+    >>> s = "set_loglevel(INFO)"
+    >>> s = "info_('Hello')"
+    >>> myscript = scp.Script("print_hello_info", s)
+
+    Execute a script
+
+    >>> scp.run_script(myscript)
+    """
 
     _name = Unicode()
     _content = Unicode(allow_none=True)
@@ -31,38 +63,6 @@ class Script(HasTraits):
     _parent = Instance(AbstractProject, allow_none=True)
 
     def __init__(self, name="unamed_script", content=None, parent=None, priority=50.0):
-        """
-        Executable scripts.
-
-        The scripts are used in a project.
-
-        Parameters
-        ----------
-        name : str
-            Name of the script. The name should be unique.
-        content : str
-            Content of sthe script.
-        parent : instance of |Project|
-            Parent project.
-        priority: int
-            Default=50.
-
-        See Also
-        --------
-        Project: Object containing |NDDataset|s, sub-|Project|s and |Scripts|.
-
-        Examples
-        --------
-        Make a script
-
-        >>> s = "set_loglevel(INFO)"
-        >>> s = "info_('Hello')"
-        >>> myscript = scp.Script("print_hello_info", s)
-
-        Execute a script
-
-        >>> scp.run_script(myscript)
-        """
 
         self.name = name
         self.content = content
@@ -158,7 +158,7 @@ class Script(HasTraits):
 
         Parameters
         ----------
-        name: Object type name, optional
+        name : Object type name, optional
             If not None, the function return True is the object type correspond to name.
             If None the function return the object type name.
 

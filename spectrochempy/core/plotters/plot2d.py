@@ -118,9 +118,8 @@ def plot_2D(dataset, method=None, **kwargs):
         The method of plot of the dataset, which will determine the plotter to use.
         Default method is given 'stack' but this can be changed using
         ``dataset.preference.method_2D``.
-    **kwargs : dic, optional
-        Additional keywords parameters.
-        See Other Parameters.
+    **kwargs
+        Optional keyword parameters (see Other Parameters).
 
     Other Parameters
     ----------------

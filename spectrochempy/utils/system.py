@@ -53,12 +53,14 @@ def is_kernel():
 
 
 class _ExecCommand:
+    """
+    Parameters
+    ----------
+    command : shell command to execute
+    """
+
     def __init__(self, command):
-        """
-        Parameters
-        ----------
-        command: shell command to execute
-        """
+
         self.commands = [command]
 
     def __call__(self, *args, **kwargs):

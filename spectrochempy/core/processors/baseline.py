@@ -141,8 +141,9 @@ class BaselineCorrection(HasTraits):
         ----------
         *ranges : a variable number of pair-tuples
             The regions taken into account for the manual baseline correction.
-        **kwargs : dict
-            See other parameters.
+        **kwargs
+            Optional keyword parameters (see Other Parameters).
+
 
         Other Parameters
         ----------------
@@ -306,7 +307,7 @@ class BaselineCorrection(HasTraits):
         ----------
         *ranges : a variable number of pair-tuples
             The regions taken into account for the manual baseline correction.
-        **kwargs : dict
+        **kwargs
             See other parameter of method compute.
         """
         self._setup(**kwargs)
@@ -435,8 +436,8 @@ def basc(dataset, *ranges, **kwargs):
         The dataset where to calculate the baseline.
     *ranges : a variable number of pair-tuples
         The regions taken into account for the manual baseline correction.
-    **kwargs : dict
-        See other parameters.
+    **kwargs
+        Optional keyword parameters (see Other Parameters).
 
     Other Parameters
     ----------------
@@ -500,8 +501,9 @@ def abc(dataset, dim=-1, **kwargs):
         The dataset where to calculate the baseline.
     dim : str or int, optional
         The dataset dimentsion where to calculate the baseline. Default is -1.
-    **kwargs : dict
-        See other parameters.
+    **kwargs
+        Optional keyword parameters (see Other Parameters).
+
 
     Returns
     -------

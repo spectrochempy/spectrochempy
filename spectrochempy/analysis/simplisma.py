@@ -41,6 +41,27 @@ class SIMPLISMA(HasTraits):
     Chemometrics and Intelligent Laboratory Systems, 36, 1997, 3-16.
 
     TODO : adapt to 3DDataset ?
+
+    Parameters
+    ----------
+    dataset : |NDDataset|
+        A 2D dataset containing the data matrix (spectra in rows).
+    interactive : bool, optional, default=False
+        If True, the determination of purest variables is carried out
+        interactively
+    n_pc : int, optional, default=2 in non-interactive mode; 100 in
+    interactive mode
+        The maximum number of pure compounds. Used only for non interactive
+        analysis
+        (the default in interactive mode (100) will never be reached in
+        practice).
+    tol : float, optional, default=0.1
+        The convergence criterion on the percent of unexplained variance.
+    noise : float or int, optional, default=5
+        A correction factor (%) for low intensity variables (0 - no offset,
+        15 - large offset).
+    verbose : bool, optional, default=True
+        If True some information is given during the analysis.
     """
 
     _St = Instance(NDDataset)
@@ -51,23 +72,6 @@ class SIMPLISMA(HasTraits):
     _logs = Unicode
 
     def __init__(self, dataset, **kwargs):
-        """
-        Parameters
-        ----------
-        dataset : |NDDataset|
-            A 2D dataset containing the data matrix (spectra in rows).
-        interactive : bool, optional, default=False
-            If True, the determination of purest variables is carried out interactively
-        n_pc : int, optional, default=2 in non-interactive mode; 100 in interactive mode
-            The maximum number of pure compounds. Used only for non interactive analysis
-            (the default in interactive mode (100) will never be reached in practice).
-        tol : float, optional, default=0.1
-            The convergence criterion on the percent of unexplained variance.
-        noise : float or int, optional, default=5
-            A correction factor (%) for low intensity variables (0 - no offset, 15 - large offset).
-        verbose : bool, optional, default=True
-            If True some information is given during the analysis.
-        """
 
         super().__init__()
 
@@ -491,8 +495,11 @@ class SIMPLISMA(HasTraits):
 
         Parameters
         ----------
-        **kwargs : dict
-            Plotting parameters.
+        **kwargs
+            Optional keyword parameters (see Other Parameters).
+
+        Other Parameters
+        ----------------
 
         Returns
         -------

@@ -340,7 +340,7 @@ def gt_eps(arr):
     Lambda function to check that an array has at least some values greater than epsilon.
 
     Parameters
-    -----------
+    ----------
     arr : array to check
 
     Returns

@@ -162,3 +162,5 @@ single_spectrum.csv
 # docs automatically generated
 generated/
 changelog.rst
+/res.docstrings.txt
+opus.scp

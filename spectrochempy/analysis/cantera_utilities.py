@@ -226,7 +226,7 @@ def fit_to_concentrations(
     param_to_optimize: dict
         Reactive phase parameters to optimize.
 
-    **kwargs:
+    **kwargs
         Parameters for the optimization (see scipy.optimize.minimize).
 
     Returns
@@ -281,6 +281,13 @@ def fit_to_concentrations(
 class PFR:
     """
     PFR reactor as a CSTR in series.
+
+    Parameters
+    ----------
+    cti_file: str
+        The cti file must contain a gas phase named 'gas' and optionally a reactive surface named 'surface'.
+    init_X: dict, array or list of them
+        Initial composition of the reactors.
     """
 
     def __init__(
@@ -297,16 +304,7 @@ class PFR:
         K=1e-5,
         kin_param_to_set=None,
     ):
-        """
 
-        Parameters
-        ==========
-        cti_file: str,
-            The cti file must contain a gas phase named 'gas' and optionally a reactive surface named 'surface'.
-
-        init_X: dict, array or list of them
-            Initial composition of the reactors.
-        """
         if _cantera_is_not_available():
             raise ImportError
 
@@ -531,7 +529,7 @@ class PFR:
          logfile: None (default) or str
              name of the logfile
 
-         **kwargs:
+         **kwargs
              parameters for the optimization (see scipy.optimize.minimize)
 
          Returns
