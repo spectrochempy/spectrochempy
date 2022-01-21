@@ -4,7 +4,7 @@
 
 **NEW FEATURES**
 
-* Added a show_versions method in the API.
+* Added a `show_versions` method in the API.
 
 * Improved bug reports and pull request templates. Requests for 
   help are now made in github discussions.
