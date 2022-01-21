@@ -11,9 +11,9 @@
    api
    application
    plot_preferences
+   analysis
    core
    databases
-   units
    utils
    widgets
 
@@ -26,121 +26,55 @@
    application.GeneralPreferences
    application.SpectroChemPy
    application.SpectroChemPyMagics
-   Coord
-   Coord.amax
-   Coord.amin
-   Coord.arange
-   Coord.around
-   Coord.astype
-   Coord.copy
-   Coord.created
-   Coord.data
-   Coord.date
-   Coord.desc
-   Coord.description
-   Coord.dimensionless
-   Coord.dtype
-   Coord.filename
-   Coord.fromfunction
-   Coord.fromiter
-   Coord.geomspace
-   Coord.get_labels
-   Coord.has_data
-   Coord.has_defined_name
-   Coord.has_units
-   Coord.history
-   Coord.id
-   Coord.implements
-   Coord.is_empty
-   Coord.is_float
-   Coord.is_integer
-   Coord.is_labeled
-   Coord.is_units_compatible
-   Coord.itemsize
-   Coord.ito
-   Coord.ito_base_units
-   Coord.ito_reduced_units
-   Coord.labels
-   Coord.limits
-   Coord.linear
-   Coord.linspace
-   Coord.loc2index
-   Coord.logspace
-   Coord.m
-   Coord.magnitude
-   Coord.max
-   Coord.meta
-   Coord.min
-   Coord.modified
-   Coord.name
-   Coord.ptp
-   Coord.reversed
-   Coord.roi
-   Coord.round
-   Coord.round_
-   Coord.shape
-   Coord.size
-   Coord.title
-   Coord.to
-   Coord.to_base_units
-   Coord.to_reduced_units
-   Coord.umasked_data
-   Coord.unitless
-   Coord.units
-   Coord.value
-   Coord.values
-   CoordSet
-   CoordSet.available_names
-   CoordSet.coords
-   CoordSet.copy
-   CoordSet.default
-   CoordSet.has_defined_name
-   CoordSet.id
-   CoordSet.implements
-   CoordSet.is_empty
-   CoordSet.is_same_dim
-   CoordSet.keys
-   CoordSet.labels
-   CoordSet.names
-   CoordSet.select
-   CoordSet.set
-   CoordSet.set_titles
-   CoordSet.set_units
-   CoordSet.size
-   CoordSet.sizes
-   CoordSet.titles
-   CoordSet.to_dict
-   CoordSet.units
-   CoordSet.update
-   core.analysis
-   core.analysis.api
-   core.analysis.cantera_utilities
-   core.analysis.cantera_utilities.concentrations_vs_time
-   core.analysis.cantera_utilities.coverages_vs_time
-   core.analysis.cantera_utilities.fit_to_concentrations
-   core.analysis.cantera_utilities.modify_rate
-   core.analysis.cantera_utilities.modify_surface_kinetics
-   core.analysis.cantera_utilities.PFR
-   core.analysis.efa
-   core.analysis.efa.EFA
-   core.analysis.iris
-   core.analysis.iris.IRIS
-   core.analysis.iris.isPD
-   core.analysis.iris.menger
-   core.analysis.iris.nearestPD
-   core.analysis.iris.Smat
-   core.analysis.mcrals
-   core.analysis.mcrals.MCRALS
-   core.analysis.nnmf
-   core.analysis.nnmf.NNMF
-   core.analysis.pca
-   core.analysis.pca.PCA
-   core.analysis.peakfinding
-   core.analysis.peakfinding.find_peaks
-   core.analysis.simplisma
-   core.analysis.simplisma.SIMPLISMA
-   core.analysis.svd
-   core.analysis.svd.SVD
+
+   analysis
+   analysis.api
+   analysis.cantera_utilities
+   analysis.cantera_utilities.concentrations_vs_time
+   analysis.cantera_utilities.coverages_vs_time
+   analysis.cantera_utilities.fit_to_concentrations
+   analysis.cantera_utilities.modify_rate
+   analysis.cantera_utilities.modify_surface_kinetics
+   analysis.cantera_utilities.PFR
+   analysis.efa
+   analysis.efa.EFA
+   analysis.efa.EFA.get_conc
+   analysis.iris
+   analysis.iris.IRIS
+   analysis.iris.isPD
+   analysis.iris.menger
+   analysis.iris.nearestPD
+   analysis.iris.Smat
+   analysis.fitting
+   analysis.fitting.Fit
+   analysis.fitting.FitParameters
+   analysis.fitting.ParameterScript
+   analysis.fitting.optimize
+   analysis.fitting.getmodel
+   analysis.lstsq
+   analysis.lstsq.CurveFit
+   analysis.lstsq.LSTSQ
+   analysis.lstsq.NNLS
+   analysis.models
+   analysis.models.asymmetricvoigtmodel
+   analysis.models.gaussianmodel
+   analysis.models.lorentzianmodel
+   analysis.models.polynomialbaseline
+   analysis.models.voigtmodel
+   analysis.models.sigmoidmodel
+   analysis.mcrals
+   analysis.mcrals.MCRALS
+   analysis.nnmf
+   analysis.nnmf.NNMF
+   analysis.pca
+   analysis.pca.PCA
+   analysis.peakfinding
+   analysis.peakfinding.find_peaks
+   analysis.simplisma
+   analysis.simplisma.SIMPLISMA
+   analysis.svd
+   analysis.svd.SVD
+
    core.dataset
    core.dataset.api
    core.dataset.coord
@@ -210,26 +144,6 @@
    core.dataset.npy.dot
    core.debug_
    core.error_
-   core.fitting
-   core.fitting.api
-   core.fitting.fit
-   core.fitting.fit.Fit
-   core.fitting.lstsq
-   core.fitting.lstsq.CurveFit
-   core.fitting.lstsq.LSTSQ
-   core.fitting.lstsq.NNLS
-   core.fitting.models
-   core.fitting.models.assymvoigtmodel
-   core.fitting.models.gaussianmodel
-   core.fitting.models.getmodel
-   core.fitting.models.lorentzianmodel
-   core.fitting.models.polynomialbaseline
-   core.fitting.models.voigtmodel
-   core.fitting.optimization
-   core.fitting.optimization.optimize
-   core.fitting.parameters
-   core.fitting.parameters.FitParameters
-   core.fitting.parameters.ParameterScript
    core.info_
    core.open_dialog
    core.plotters
@@ -255,9 +169,10 @@
    core.plotters.plot2d.plot_image
    core.plotters.plot2d.plot_map
    core.plotters.plot2d.plot_stack
-   core.plotters.plot2d.plot_surface
-   core.plotters.plot2d.plot_waterfall
    core.plotters.plot3d
+   core.plotters.plot3d.plot_3D
+   core.plotters.plot3d.plot_surface
+   core.plotters.plot3d.plot_waterfall
    core.plotters.plotly
    core.print_
    core.processors
@@ -333,57 +248,213 @@
    core.readers.download.download_iris
    core.readers.importer
    core.readers.importer.read
-   core.readers.readcsv
-   core.readers.readcsv.read_csv
-   core.readers.readdir
-   core.readers.readdir.read_carroucell
-   core.readers.readdir.read_dir
-   core.readers.readjdx
-   core.readers.readjdx.read_jcamp
-   core.readers.readlabspec
-   core.readers.readlabspec.read_labspec
-   core.readers.readlabspec.read_txt
-   core.readers.readmatlab
-   core.readers.readmatlab.read_mat
-   core.readers.readmatlab.read_matlab
-   core.readers.readomnic
-   core.readers.readomnic.read_omnic
-   core.readers.readomnic.read_spa
-   core.readers.readomnic.read_spg
-   core.readers.readomnic.read_srs
-   core.readers.readopus
-   core.readers.readopus.read_opus
-   core.readers.readquadera
-   core.readers.readquadera.read_quadera
-   core.readers.readtopspin
-   core.readers.readtopspin.read_topspin
-   core.readers.readzip
-   core.readers.readzip.read_zip
+   core.readers.importer.read_dir
+   core.readers.read_csv
+   core.readers.read_csv.read_csv
+   core.readers.read_carroucell.read_carroucell
+   core.readers.read_jcamp
+   core.readers.read_jcamp.read_jcamp
+   core.readers.read_jcamp.read_jdx
+   core.readers.read_jcamp.read_dx
+   core.readers.read_labspec
+   core.readers.read_labspec.read_labspec
+   core.readers.read_labspec.read_txt
+   core.readers.read_matlab
+   core.readers.read_matlab.read_mat
+   core.readers.read_matlab.read_matlab
+   core.readers.read_omnic
+   core.readers.read_omnic.read_omnic
+   core.readers.read_omnic.read_spa
+   core.readers.read_omnic.read_spg
+   core.readers.read_omnic.read_srs
+   core.readers.read_opus
+   core.readers.read_opus.read_opus
+   core.readers.read_quadera
+   core.readers.read_quadera.read_quadera
+   core.readers.read_topspin
+   core.readers.read_topspin.read_topspin
+   core.readers.read_bruker_nmr
+   core.readers.read_spc.read_spc
+   core.readers.read_zip
+   core.readers.read_zip.read_zip
    core.save_dialog
    core.scripts
    core.scripts.api
    core.scripts.script
    core.scripts.script.run_all_scripts
    core.scripts.script.run_script
+   core.units.units
+   core.units.units.set_nmr_context
    core.warning_
    core.writers
    core.writers.api
    core.writers.exporter
    core.writers.exporter.write
-   core.writers.writecsv
-   core.writers.writecsv.write_csv
-   core.writers.writeexcel
-   core.writers.writeexcel.write_excel
-   core.writers.writeexcel.write_xls
-   core.writers.writejcamp
-   core.writers.writejcamp.write_jcamp
-   core.writers.writejcamp.write_jdx
-   core.writers.writematlab
-   core.writers.writematlab.write_mat
-   core.writers.writematlab.write_matlab
+   core.writers.write_csv
+   core.writers.write_csv.write_csv
+   core.writers.write_excel
+   core.writers.write_excel.write_excel
+   core.writers.write_excel.write_xls
+   core.writers.write_jcamp
+   core.writers.write_jcamp.write_jcamp
+   core.writers.write_jcamp.write_jdx
+   core.writers.write_matlab
+   core.writers.write_matlab.write_mat
+   core.writers.write_matlab.write_matlab
+
    databases.api
    databases.isotopes
    databases.isotopes.Isotopes
+
+
+   utils.exceptions
+   utils.exceptions.CoordinateMismatchError
+   utils.exceptions.deprecated
+   utils.exceptions.DimensionsCompatibilityError
+   utils.exceptions.SpectroChemPyException
+   utils.exceptions.SpectroChemPyWarning
+   utils.exceptions.UnitsCompatibilityError
+   utils.file
+   utils.file.get_filenames
+   utils.file.pathclean
+   utils.file.get_directory_name
+   utils.jsonutils
+   utils.jsonutils.json_decoder
+   utils.jsonutils.json_serialiser
+   utils.misc
+   utils.misc.add_docstring
+   utils.misc.as_quaternion
+   utils.misc.dict_compare
+   utils.misc.get_component
+   utils.misc.gt_eps
+   utils.misc.htmldoc
+   utils.misc.INPLACE
+   utils.misc.interleaved2complex
+   utils.misc.interleaved2quaternion
+   utils.misc.is_iterable
+   utils.misc.is_sequence
+   utils.misc.largest_power_of_2
+   utils.misc.make_new_object
+   utils.misc.quat_as_complex_array
+   utils.misc.spacing_
+   utils.packages
+   utils.packages.list_packages
+   utils.plots
+   utils.plots.cmyk2rgb
+   utils.plots.figure
+   utils.plots.get_figure
+   utils.plots.get_plotly_figure
+   utils.plots.show
+   utils.print
+   utils.print.insert_masked_print
+   utils.print.numpyprintoptions
+   utils.system
+   utils.system.is_kernel
+   utils.testing
+   utils.testing.catch_warnings
+   utils.testing.gisinf
+   utils.testing.RandomSeedContext
+   utils.traits
+   utils.traits.Range
+   utils.version
+   utils.version.InvalidVersion
+   utils.version.parse
+   utils.zip
+   utils.zip.make_zipfile
+   utils.zip.ScpFile
+
+   widgets.api
+   widgets.fileselector
+   widgets.fileselector.FileSelector
+
+   Coord
+   Coord.amax
+   Coord.amin
+   Coord.arange
+   Coord.around
+   Coord.astype
+   Coord.copy
+   Coord.created
+   Coord.data
+   Coord.date
+   Coord.desc
+   Coord.description
+   Coord.dimensionless
+   Coord.dtype
+   Coord.filename
+   Coord.fromfunction
+   Coord.fromiter
+   Coord.geomspace
+   Coord.get_labels
+   Coord.has_data
+   Coord.has_defined_name
+   Coord.has_units
+   Coord.history
+   Coord.id
+   Coord.implements
+   Coord.is_empty
+   Coord.is_float
+   Coord.is_integer
+   Coord.is_labeled
+   Coord.is_units_compatible
+   Coord.itemsize
+   Coord.ito
+   Coord.ito_base_units
+   Coord.ito_reduced_units
+   Coord.labels
+   Coord.limits
+   Coord.linear
+   Coord.linspace
+   Coord.loc2index
+   Coord.logspace
+   Coord.m
+   Coord.magnitude
+   Coord.max
+   Coord.meta
+   Coord.min
+   Coord.modified
+   Coord.name
+   Coord.ptp
+   Coord.reversed
+   Coord.roi
+   Coord.round
+   Coord.round_
+   Coord.shape
+   Coord.size
+   Coord.title
+   Coord.to
+   Coord.to_base_units
+   Coord.to_reduced_units
+   Coord.umasked_data
+   Coord.unitless
+   Coord.units
+   Coord.value
+   Coord.values
+
+   CoordSet
+   CoordSet.available_names
+   CoordSet.coords
+   CoordSet.copy
+   CoordSet.default
+   CoordSet.has_defined_name
+   CoordSet.id
+   CoordSet.implements
+   CoordSet.is_empty
+   CoordSet.is_same_dim
+   CoordSet.keys
+   CoordSet.labels
+   CoordSet.names
+   CoordSet.select
+   CoordSet.set
+   CoordSet.set_titles
+   CoordSet.set_units
+   CoordSet.size
+   CoordSet.sizes
+   CoordSet.titles
+   CoordSet.to_dict
+   CoordSet.units
+   CoordSet.update
+
    LinearCoord
    LinearCoord.amax
    LinearCoord.amin
@@ -446,6 +517,7 @@
    LinearCoord.units
    LinearCoord.value
    LinearCoord.values
+
    ÑDDataset
    NDDataset.ab
    NDDataset.abc
@@ -681,63 +753,3 @@
    NDDataset.zf_auto
    NDDataset.zf_double
    NDDataset.zf_size
-   units.units
-   units.units.set_nmr_context
-   utils.exceptions
-   utils.exceptions.CoordinateMismatchError
-   utils.exceptions.deprecated
-   utils.exceptions.DimensionsCompatibilityError
-   utils.exceptions.SpectroChemPyException
-   utils.exceptions.SpectroChemPyWarning
-   utils.exceptions.UnitsCompatibilityError
-   utils.file
-   utils.file.get_filenames
-   utils.file.pathclean
-   utils.file.get_directory_name
-   utils.jsonutils
-   utils.jsonutils.json_decoder
-   utils.jsonutils.json_serialiser
-   utils.misc
-   utils.misc.add_docstring
-   utils.misc.as_quaternion
-   utils.misc.dict_compare
-   utils.misc.get_component
-   utils.misc.gt_eps
-   utils.misc.htmldoc
-   utils.misc.INPLACE
-   utils.misc.interleaved2complex
-   utils.misc.interleaved2quaternion
-   utils.misc.is_iterable
-   utils.misc.is_sequence
-   utils.misc.largest_power_of_2
-   utils.misc.make_new_object
-   utils.misc.quat_as_complex_array
-   utils.misc.spacing_
-   utils.packages
-   utils.packages.list_packages
-   utils.plots
-   utils.plots.cmyk2rgb
-   utils.plots.figure
-   utils.plots.get_figure
-   utils.plots.get_plotly_figure
-   utils.plots.show
-   utils.print
-   utils.print.insert_masked_print
-   utils.print.numpyprintoptions
-   utils.system
-   utils.system.is_kernel
-   utils.testing
-   utils.testing.catch_warnings
-   utils.testing.gisinf
-   utils.testing.RandomSeedContext
-   utils.traits
-   utils.traits.Range
-   utils.version
-   utils.version.InvalidVersion
-   utils.version.parse
-   utils.zip
-   utils.zip.make_zipfile
-   utils.zip.ScpFile
-   widgets.api
-   widgets.fileselector
-   widgets.fileselector.FileSelector
