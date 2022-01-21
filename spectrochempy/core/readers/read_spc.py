@@ -547,7 +547,7 @@ def _read_spc(*args, **kwargs):
     dataset.set_coordset(y=_y, x=_x)
 
     dataset.description = kwargs.get("description", "Dataset from spc file.\n")
-    if ord(Fexper) != 0:
+    if ord(Fexper) != 0 and ord(Fexper) != 7:
         dataset.description += "Instrumental Technique: " + technique + "\n"
     if Fres != b"\x00\x00\x00\x00\x00\x00\x00\x00\x00":
         dataset.description += "Resolution: " + sres + "\n"
