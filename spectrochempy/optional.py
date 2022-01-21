@@ -3,6 +3,7 @@
 # BSD 3-Clause License
 
 from __future__ import annotations
+from pkg_resources import get_distribution
 
 import importlib
 import sys
@@ -28,9 +29,9 @@ INSTALL_MAPPING = {
 def get_module_version(module: types.ModuleType) -> str:
     version = getattr(module, "__version__", None)
     if version is None:
-        # xlrd uses a capitalized attribute name
         version = getattr(module, "__VERSION__", None)
-
+    if version is None:
+        version = get_distribution(module.__name__).version.split("+")[0]
     if version is None:
         raise ImportError(f"Can't determine version for {module.__name__}")
     return version
