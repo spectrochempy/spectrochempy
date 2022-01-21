@@ -208,9 +208,9 @@ _pbar_update()
 
 # constants
 # ------------------------------------------------------------------
-from ..utils import show, MASKED, NOMASK, EPSILON, INPLACE  # noqa: E402
+from ..utils import show, MASKED, NOMASK, EPSILON, INPLACE, show_versions  # noqa: E402
 
-__all__ += ["show", "MASKED", "NOMASK", "EPSILON", "INPLACE"]
+__all__ += ["show", "MASKED", "NOMASK", "EPSILON", "INPLACE", "show_versions"]
 
 # dataset
 # ------------------------------------------------------------------

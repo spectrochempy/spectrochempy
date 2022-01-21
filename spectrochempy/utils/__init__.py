@@ -36,3 +36,4 @@ from .traits import *
 from .zip import *
 from .exceptions import *
 from .version import *
+from .print_versions import *
