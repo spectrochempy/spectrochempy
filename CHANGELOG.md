@@ -1,5 +1,11 @@
 # What's new
 
+## version 0.3.2
+
+**BUGS FIXED**
+
+* TQDM progress bar
+
 ## Version 0.3.1
 
 **NEW FEATURES**
