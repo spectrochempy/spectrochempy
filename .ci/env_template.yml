@@ -25,7 +25,7 @@ dependencies:
     # for the core package
     - colorama
     - dill
-    - ipython
+    - ipython>=7.31.1
     - jinja2
     - matplotlib>=3.5
     - numba
