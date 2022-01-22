@@ -1181,3 +1181,43 @@ def test_nddataset_apply_funcs(dsm):
 
 def test_take(dsm):
     pass
+
+
+# Conversion
+
+
+def test_nddataset_to_xarray(IR_dataset_2D):
+
+    nd1 = IR_dataset_2D[0].squeeze()
+
+    xnd1 = nd1.to_xarray()
+    print(xnd1)
+    assert xnd1.x.attrs["units"] == nd1.x.units
+
+    nd2 = IR_dataset_2D
+
+    # add some attribute
+    nd2.meta.pression = 34
+    nd2.meta.temperature = 3000
+    assert nd2.meta.temperature == 3000
+    assert nd2.temperature == 3000  # alternative way to get the meta attribute
+
+    assert nd2.meta.essai is None  # do not exist in dict
+    with pytest.raises(AttributeError):
+        nd2.essai2  # can not find this attribute
+
+    # also for the coordinates
+    nd2.y.meta.pression = 3
+    assert nd2.y.meta["pression"] == 3
+    assert nd2.y.pression == 3  # alternative way to get the meta attribute
+
+    assert nd2.y.meta.essai is None  # not found so it is None
+    with pytest.raises(AttributeError):
+        nd2.y.essai  # can't find such attribute
+
+    # convert
+    xnd2 = nd2.to_xarray()
+    print(xnd2)
+    assert xnd2.y.attrs["units"] == nd2.y.units
+    assert xnd2.y.attrs["pression"] == nd2.y.meta["pression"]
+    assert xnd2.y.attrs["pression"] == nd2.y.pression

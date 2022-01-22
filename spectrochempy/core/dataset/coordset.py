@@ -855,7 +855,9 @@ class CoordSet(HasTraits):
             except IndexError:
                 pass
 
-            raise KeyError(f"Could not find `{index}` in coordinates names or titles")
+            raise AttributeError(
+                f"Could not find `{index}` key/attribute in coordinates names or titles"
+            )
 
         try:
             self._coords.__getitem__(index)

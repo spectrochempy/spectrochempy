@@ -409,6 +409,8 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
                 except Exception as err:
                     if item in self.dims:
                         return None
+                    elif item in self.meta.keys():  # try to find a metadata
+                        return self.meta[item]
                     else:
                         raise err
             elif attribute is not None:
@@ -1169,29 +1171,38 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         #     'units' and 'calendar' (the later two only for datetime arrays).
         #     Unrecognized keys are ignored.
 
-        xr = import_optional_dependency("xarray")
+        xr = import_optional_dependency("xarray", errors="ignore")
         if xr is None:
+            error_(
+                "Missing optional dependency 'xarray'.  Use conda or pip to install xarray."
+            )
             return
 
-        x, y = self.x, self.y
-        tx = x.title
-        if y:
-            ty = y.title
-            da = xr.DataArray(
-                np.array(self.data, dtype=np.float64),
-                coords=[(ty, y.data), (tx, x.data)],
-            )
+        coords = {}
+        for index, name in enumerate(self.dims):
+            coord = self.coordset[name]
+            coord_attrs = {
+                "units": str(coord.units),
+                "long_name": coord.title,
+                "labels": coord.labels if coord.is_labeled else [],
+            }
+            for k, v in coord.meta.items():  # add metadata
+                coord_attrs[k] = v
 
-            da.attrs["units"] = self.units
-        else:
-            da = xr.DataArray(
-                np.array(self.data, dtype=np.float64),
-                coords=[(tx, x.data)],
-            )
+            coords[name] = (name, coord.data, coord_attrs)
+        da = xr.DataArray(
+            np.array(self.data, dtype=np.float64),
+            dims=list(coords.keys()),
+            coords=coords,
+        )
 
-            da.attrs["units"] = self.units
-
-        da.attrs["title"] = self.title
+        da.attrs["units"] = str(self.units)
+        da.attrs["name"] = self.name
+        da.attrs["long_name"] = self.title
+        da.attrs["description"] = self.description
+        da.attrs["history"] = self.history
+        for k, v in self.meta.items():  # add metadata
+            da.attrs[k] = v
 
         return da
 

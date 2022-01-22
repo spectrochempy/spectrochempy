@@ -637,6 +637,37 @@ class Coord(NDMath, NDArray):
             "roi",
         ]
 
+    def __getattr__(self, item):
+
+        if (
+            item
+            in [
+                "__numpy_ufunc__",
+                "interface",
+                "_pytestfixturefunction",
+                "__dataclass_fields__",
+                "_ipython_canary_method_should_not_exist_",
+                "_baseclass",
+                "_fill_value",
+                "_ax_lines",
+                "_axcb",
+                "clevels",
+                "__wrapped__",
+                "coords",
+                "__await__",
+                "__aiter__",
+            ]
+            or "_validate" in item
+            or "_changed" in item
+        ):
+            # raise an error so that traits, ipython operation and more ... will be handled correctly
+            raise AttributeError
+
+        try:
+            return self.__getitem__(item)
+        except KeyError:
+            raise AttributeError(f"Can't find key/attribute `{item}`.")
+
     # ..........................................................................
     def __getitem__(self, items, **kwargs):
 
@@ -651,7 +682,13 @@ class Coord(NDMath, NDArray):
             inplace = True
 
         # Eventually get a better representation of the indexes
-        keys = self._make_index(items)
+        try:
+            keys = self._make_index(items)
+        except IndexError:
+            # maybe it is a metadata
+            if items in self.meta.keys():
+                return self.meta[items]
+            raise KeyError
 
         # init returned object
         if inplace:
