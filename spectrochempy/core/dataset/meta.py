@@ -8,8 +8,8 @@
 This module mainly contains the definition of a Meta class object.
 
 Such object is particularly used in `SpectrochemPy` by the |NDDataset| object
-to store metadata. Like a regular dictionary, the
-elements can be accessed by key, but also by attributes, *e.g.*
+to store metadata. Unlike a regular dictionary, the
+elements can be accessed not only by key, but also by attributes, *e.g.*
 ``a = meta['key']`` give the same results as ``a = meta.key``.
 """
 
@@ -287,12 +287,12 @@ class Meta(object):  # HasTraits):
 
     def swap(self, dim1, dim2, inplace=True):
         """
-        Permute meta corresponding to distinct axis to reflect swapping on the
+        Permute metadata corresponding to distinct axis to reflect swapping on the
         corresponding data array.
 
         Parameters
         ----------
-        dim1
+        dim1 :
         dim2
         inplace
 
