@@ -23,8 +23,15 @@ def test_write():
         scp.write()
 
     # the simplest way to save a dataset, is to use the function write with a filename as argument
-    filename = nd.write("essai.scp")
+    if (cwd / "essai.scp").exists():
+        (cwd / "essai.scp").unlink()
+
+    filename = nd.write("essai.scp")  # should not open a DIALOG
     assert filename == cwd / "essai.scp"
+    assert filename.exists()
+
+    # try to write it again
+    filename = nd.write("essai.scp")  # should open a DIALOG to confirm
 
     nd2 = NDDataset.load(filename)
     testing.assert_dataset_equal(nd2, nd)
