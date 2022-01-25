@@ -591,14 +591,17 @@ def get_directory_name(directory, **kwargs):
 
 # ..............................................................................
 def check_filename_to_save(
-    dataset, filename=None, save_as=True, confirm=True, **kwargs
+    dataset, filename=None, save_as=False, confirm=True, **kwargs
 ):
 
     from spectrochempy import NO_DIALOG
 
     NODIAL = NO_DIALOG or "DOC_BUILDING" in environ
 
-    if not filename or save_as:
+    if filename and pathclean(filename).parent.resolve() == Path.cwd():
+        filename = Path.cwd() / filename
+
+    if not filename or save_as or filename.exists():
 
         # no filename provided
         if filename is None or (NODIAL and pathclean(filename).is_dir()):
@@ -618,9 +621,6 @@ def check_filename_to_save(
             if filename is None:
                 # this is probably due to a cancel action for an open dialog.
                 return
-
-    if pathclean(filename).parent.resolve() == Path.cwd():
-        return Path.cwd() / filename
 
     return pathclean(filename)
 
