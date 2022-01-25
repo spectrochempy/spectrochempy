@@ -14,29 +14,15 @@ import copy as cpy
 import textwrap
 
 import numpy as np
-from traitlets import (
-    Bool,
-    observe,
-    All,
-    Unicode,
-    Integer,
-    Union,
-    CFloat,
-    CInt,
-    Instance,
-)
-from traitlets import default as traitdefault
+import traitlets as tr
 
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndmath import NDMath, _set_operators
-from spectrochempy.utils import (
-    colored_output,
-    NOMASK,
-    INPLACE,
-    spacing_,
-)
 from spectrochempy.core.units import Quantity, ur
-from spectrochempy.core import error_
+from spectrochempy.core import error_, warning_
+from spectrochempy.optional import import_optional_dependency
+
+from spectrochempy.utils import colored_output, NOMASK, INPLACE, spacing_
 
 
 # ======================================================================================================================
@@ -147,16 +133,16 @@ class Coord(NDMath, NDArray):
     Coord: [labels] [  a   b   c   d   e   f] (size: 6)
     """
 
-    _copy = Bool()
+    _copy = tr.Bool()
 
     _html_output = False
-    _parent_dim = Unicode(allow_none=True)
+    _parent_dim = tr.Unicode(allow_none=True)
 
     # For linear data generation
-    _offset = Union((CFloat(), CInt(), Instance(Quantity)))
-    _increment = Union((CFloat(), CInt(), Instance(Quantity)))
-    _size = Integer(0)
-    _linear = Bool(False)
+    _offset = tr.Union((tr.CFloat(), tr.CInt(), tr.Instance(Quantity)))
+    _increment = tr.Union((tr.CFloat(), tr.CInt(), tr.Instance(Quantity)))
+    _size = tr.Integer(0)
+    _linear = tr.Bool(False)
 
     # ------------------------------------------------------------------------
     # initialization
@@ -206,6 +192,9 @@ class Coord(NDMath, NDArray):
         else:
             data = self._data
 
+        # if self.is_dt64:
+        #    data = data.astype('timedelta64[m]')
+
         return data
 
     @data.setter
@@ -230,6 +219,34 @@ class Coord(NDMath, NDArray):
     @property
     def is_complex(self):
         return False  # always real
+
+    # ..........................................................................
+    @property
+    def is_dt64(self):
+        """
+        True if the data have a np.datetime64 or a np.timedelta dtype (bool).
+        """
+        if (
+            (self._data is not None and isinstance(self._data[0], np.datetime64))
+            or self.linear
+            and isinstance(self._increment, np.datetime64)
+        ):
+            return True
+        return False
+
+    # ..........................................................................
+    @property
+    def is_td64(self):
+        """
+        True if the data have a np.datetime64 or a np.timedelta dtype (bool).
+        """
+        if (
+            (self._data is not None and isinstance(self._data[0], np.timedelta64))
+            or self.linear
+            and isinstance(self._increment, np.timedelta64)
+        ):
+            return True
+        return False
 
     # ..........................................................................
     @property
@@ -266,15 +283,34 @@ class Coord(NDMath, NDArray):
     # ..........................................................................
     def to(self, other, inplace=False, force=False):
 
-        new = super().to(other, force=force)
+        if self.is_dt64:
+            new = self.copy()
+            warning_("method `to` cannot be used with datetime object. Ignored!")
+            new._units = None
+        else:
+            new = super().to(other, force=force)
+
+        # else:
+        #     units = get_units(other)
+        #     try:
+        #         to_dt64_units(units)
+        #     except DimensionalityError:
+        #         raise DimensionalityError(self.units, units,
+        #                                   extra_msg=f". Valid units values are  {[v for v in DT64_UNITS.values()]}")
+        #     new = self.copy()
+        #     new._units = units
 
         if inplace:
-            self._units = new._units
-            self._title = new._title
-            self._roi = new._roi
-            if not self.linear:
-                self._data = new._data
-            else:
+            # self._units = new._units
+            # self._long_name = new._long_name
+            # self._roi = new._roi
+            # if not self.linear:
+            #    self._data = new._data
+            # else:
+            if self.is_dt64:
+                self._units = new._units
+
+            if self.linear:
                 self._offset = new._offset
                 self._increment = new._increment
                 self._linear = new._linear
@@ -629,7 +665,7 @@ class Coord(NDMath, NDArray):
             "labels",
             "units",
             "meta",
-            "title",
+            "long_name",
             "name",
             "offset",
             "increment",
@@ -802,7 +838,7 @@ class Coord(NDMath, NDArray):
     # ------------------------------------------------------------------------
 
     # ..........................................................................
-    @traitdefault("_increment")
+    @tr.default("_increment")
     def _increment_default(self):
         return 1.0
 
@@ -838,9 +874,44 @@ class Coord(NDMath, NDArray):
             self._linear = False
 
     # ..........................................................................
-    @traitdefault("_offset")
+    @tr.default("_offset")
     def _offset_default(self):
         return 0
+
+    # ..........................................................................
+    def _to_xarray(self):
+
+        xr = import_optional_dependency("xarray")
+
+        var = xr.Variable(dims=self.name, data=np.array(self.data, dtype=np.float64))
+        var.attrs["name"] = self.name
+        var.attrs["units"] = str(self.units) if self.units is not None else None
+        var.attrs["long_name"] = self.long_name
+        var.attrs["offset"] = self.offset
+        var.attrs["increment"] = self.increment
+        var.attrs["linear"] = self.linear
+        if self.linear:
+            var.attrs["size"] = self.size
+        var.attrs["roi"] = self.roi
+        for k, v in self.meta.items():  # add metadata
+            if isinstance(v, Quantity):
+                var.attrs[k] = v.m
+                var.attrs[f"units_{k}"] = str(v.u)
+            else:
+                var.attrs[k] = v
+
+        coordinates = {self.name: var}
+
+        # auxiliary coordinates
+        if self.is_labeled:
+            for level in range(self.labels.shape[-1]):
+                label = self.labels[:, level]
+                label = list(map(str, label.tolist()))
+                label = xr.Variable(dims=self.name, data=label)
+                coordinates[f"{self.name}_labels_{level}"] = label
+
+        return coordinates
+        # TODO: add multiple coordinates
 
     # ..........................................................................
     def _set_data(self, data):
@@ -920,6 +991,7 @@ class Coord(NDMath, NDArray):
     @staticmethod
     def _unittransform(new, units):
         oldunits = new.units
+
         if not new.linear:
             udata = (new.data * oldunits).to(units)
             new._data = udata.m
@@ -935,28 +1007,13 @@ class Coord(NDMath, NDArray):
             roi = (np.array(new._roi) * oldunits).to(units)
             new._roi = list(roi)
 
-        # if new._linear:
-        #     # try to make it linear as well
-        #     new._linearize()
-        #     if not new._linear and new.implements("LinearCoord"):
-        #         # can't be linearized -> Coord
-        #         if inplace:
-        #             raise Exception(
-        #                     "A LinearCoord object cannot be transformed to a non linear coordinate "
-        #                     "`inplace`. "
-        #                     "Use to() instead of ito() and leave the `inplace` attribute to False"
-        #             )
-        #         else:
-        #             from spectrochempy import Coord
-        #
-        #             new = Coord(new)
         return new
 
     # ------------------------------------------------------------------------
     # Events
     # ------------------------------------------------------------------------
     # ..........................................................................
-    @observe(All)
+    @tr.observe(tr.All)
     def _anytrait_changed(self, change):
         # ex: change {
         #   'owner': object, # The HasTraits instance
@@ -1086,9 +1143,9 @@ class LinearCoord(Coord):
     >>> c2 = Coord(linear=True, offset=2.0, increment=2.0, size=10)
     """
 
-    _use_time = Bool(False)
-    _show_datapoints = Bool(True)
-    _zpd = Integer
+    _use_time = tr.Bool(False)
+    _show_datapoints = tr.Bool(True)
+    _zpd = tr.Integer
 
     def __init__(self, data=None, offset=0.0, increment=1.0, **kwargs):
 
@@ -1127,7 +1184,7 @@ class LinearCoord(Coord):
             "labels",
             "units",
             "meta",
-            "title",
+            "long_name",
             "name",
             "offset",
             "increment",

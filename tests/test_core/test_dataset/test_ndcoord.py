@@ -6,16 +6,18 @@ from copy import copy
 
 import numpy as np
 import pytest
+from pint.errors import DimensionalityError
 
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.units import ur, Quantity
+from spectrochempy.core import debug_
+
 from spectrochempy.utils.testing import (
     assert_array_equal,
     assert_equal_units,
     assert_approx_equal,
+    assert_produces_warning,
 )
-from spectrochempy.core import debug_
-
 
 # ======================================================================================================================
 # Coord
@@ -76,18 +78,28 @@ def test_coord():
     a._labels[3] = range(10)
     assert a._labels[3][2] == 2
 
-    # coords with datetime
-
-    from datetime import datetime
+    # coords with datetime in labels
 
     x = np.arange(10)
-    y = [datetime(2017, 6, 2 * (i + 1)) for i in x]
+    y = [np.datetime64(f"2017-06-{(2 * (i + 1)):02d}") for i in x]
 
     a = Coord(x, labels=y, title="time")
     assert a.title == "time"
     assert isinstance(a.data, np.ndarray)
     assert isinstance(a.labels, np.ndarray)
-    a._sort(by="label", descend=True)
+    b = a._sort(by="label", descend=True)
+    assert_array_equal(b.data, a.data[::-1])
+    b = a._sort(by="label", descend=True, inplace=True)
+    assert_array_equal(b.data, a.data)
+
+    # actually y can also be data
+    c = Coord(y, title="time")
+    assert c.title == "time"
+    assert isinstance(c.data, np.ndarray)
+    assert isinstance(c.data[0], np.datetime64)
+    assert c.dtype == np.dtype("datetime64[D]")
+    c._sort(descend=True, inplace=True)
+    assert_array_equal(b.labels, c.data)
 
     # but coordinates must be 1D
 
@@ -489,3 +501,29 @@ def test_linearcoord():
     assert coord1.is_1d
 
     assert coord0.transpose() == coord0
+
+
+def test_datetime64_coordinates(IR_dataset_2D):
+
+    X = IR_dataset_2D
+    assert X.y.dtype == np.dtype(
+        "datetime64[ns]"
+    )  # in spectrochempy internal datetime are in units of nanoseconds
+    assert (
+        X.y.units == None
+    )  # there is no units for this object as it is defined internally
+
+    # with assert_produces_warning(match="method `to` cannot be used with datetime object. Ignored!"):
+    X.y.to("tesla")  # can not change to a foreign unit (of course)
+
+    # subtract a datetime to a datetime array --> should be a float
+    X.y = X.y - X.y[0]  # subtract the acquisition timestamp of the first spectrum
+    assert X.y.data.dtype == np.dtype("float")
+
+    X.y = X.y.to("minute")  # convert to minutes
+    assert X.y.units == ur.minute
+    X.y += 2  # add 2 minutes
+    assert X.y.units == ur.minute
+    assert X.y[0].data == [
+        120
+    ]  # check that the addition is correctly done 2 min (internally 120s)
