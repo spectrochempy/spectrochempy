@@ -6,7 +6,7 @@
 
 * TQDM progress bar
 
-* Issue #360 : write a dataset with a specified filename do not open a dialog except if the file already exists.
+* Issue #360 : write a dataset with a specified filename do not open a dialog except if the file already exists and if confirm=True is set.
 
 ## Version 0.3.1
 
