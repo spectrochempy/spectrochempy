@@ -591,7 +591,7 @@ def get_directory_name(directory, **kwargs):
 
 # ..............................................................................
 def check_filename_to_save(
-    dataset, filename=None, save_as=False, confirm=True, **kwargs
+    dataset, filename=None, save_as=False, confirm=False, **kwargs
 ):
 
     from spectrochempy import NO_DIALOG
@@ -603,17 +603,30 @@ def check_filename_to_save(
 
     if not filename or save_as or filename.exists():
 
+        from spectrochempy.core import save_dialog
+
         # no filename provided
         if filename is None or (NODIAL and pathclean(filename).is_dir()):
             filename = dataset.name
             filename = filename + kwargs.get("suffix", ".scp")
+            caption = "Save as ..."
+            open_diag = True
 
-        if not NODIAL and confirm:
+        # existing filename provided
+        elif filename.exists():
+            if confirm:
+                caption = "File exists. Confirm overwrite"
+                open_diag = True
+            else:
+                warnings.warn(
+                    f"A file {filename} was present and has been overwritten."
+                )
+                open_diag = False
 
-            from spectrochempy.core import save_dialog
+        if not NODIAL and open_diag:
 
             filename = save_dialog(
-                caption=kwargs.pop("caption", "Save as ..."),
+                caption=kwargs.pop("caption", caption),
                 filename=filename,
                 filters=kwargs.pop("filetypes", ["All file types (*.*)"]),
                 **kwargs,
