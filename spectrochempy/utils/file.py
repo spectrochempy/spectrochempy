@@ -11,7 +11,6 @@ from os import environ
 import re
 import warnings
 from pathlib import Path, WindowsPath, PosixPath
-from spectrochempy.core import info_
 
 __all__ = [
     "get_filenames",
@@ -596,6 +595,7 @@ def check_filename_to_save(
 ):
 
     from spectrochempy import NO_DIALOG
+    from spectrochempy.core import info_
 
     NODIAL = NO_DIALOG or "DOC_BUILDING" in environ
 
