@@ -11,6 +11,7 @@ from os import environ
 import re
 import warnings
 from pathlib import Path, WindowsPath, PosixPath
+from spectrochempy.core import info_
 
 __all__ = [
     "get_filenames",
@@ -591,7 +592,7 @@ def get_directory_name(directory, **kwargs):
 
 # ..............................................................................
 def check_filename_to_save(
-    dataset, filename=None, save_as=False, confirm=False, **kwargs
+    dataset, filename=None, save_as=False, confirm=True, **kwargs
 ):
 
     from spectrochempy import NO_DIALOG
@@ -618,9 +619,7 @@ def check_filename_to_save(
                 caption = "File exists. Confirm overwrite"
                 open_diag = True
             else:
-                warnings.warn(
-                    f"A file {filename} was present and has been overwritten."
-                )
+                info_(f"A file {filename} was present and has been overwritten.")
                 open_diag = False
 
         if not NODIAL and open_diag:
