@@ -7,7 +7,7 @@
 """
 This module implements the IRIS class.
 """
-__all__ = ['IRIS', 'kern']
+__all__ = ["IRIS", "kern"]
 __dataset_methods__ = []
 
 import numpy as np
@@ -22,69 +22,71 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core import info_, warning_
 
 
-
 def kern(K, p, q):
     """kernel for fredholm equation of the 1st kind
 
-      Parameters
-      ----------
-      K :  str or callable
-          Pre-defined kernels can be chosen among:
-                  {'langmuir', 'ca', 'reactant-first-order', 'product-first-order', diffusion} (see Notes below).
-          A custom kernel consisting of a 2-variable lambda function `ker(p, q)` can be passed, where `p` and `q` are
-          an external experimental variable and an internal physico-chemical parameter, respectively.
+    Parameters
+    ----------
+    K :  str or callable
+        Pre-defined kernels can be chosen among:
+                {'langmuir', 'ca', 'reactant-first-order', 'product-first-order', diffusion} (see Notes below).
+        A custom kernel consisting of a 2-variable lambda function `ker(p, q)` can be passed, where `p` and `q` are
+        an external experimental variable and an internal physico-chemical parameter, respectively.
 
 
-      returns
-      ----------
-      a NDDataset
+    returns
+    ----------
+    a NDDataset
 
-      """
-
+    """
 
     if not isinstance(q, Coord):  # q was passed as a ndarray
-        q = Coord(data=q, name='internal variable', title='$q$', units='')
+        q = Coord(data=q, name="internal variable", title="$q$", units="")
         q_was_array = True
     else:
         q_was_array = False
     if not isinstance(q, Coord):  # p was passed as a ndarray
-        p = Coord(data=p, name='external variable', title='$p$', units='')
+        p = Coord(data=p, name="external variable", title="$p$", units="")
         p_was_array = True
     else:
         p_was_array = False
 
     if isinstance(K, str):
-        _adsorption = {'langmuir', 'ca'}
-        _kinetics = {'reactant-first-order', 'product-first-order'}
-        _diffusion = {'diffusion'}
+        _adsorption = {"langmuir", "ca"}
+        _kinetics = {"reactant-first-order", "product-first-order"}
+        _diffusion = {"diffusion"}
 
         if K.lower() in _adsorption:
-            if q_was_array: #change default values and units
-                q.name =  'reduced adsorption energy'
-                q.title = '$\Delta_{ads}G^{0}/RT$'
+            if q_was_array:  # change default values and units
+                q.name = "reduced adsorption energy"
+                q.title = "$\Delta_{ads}G^{0}/RT$"
             if p_was_array:  # change default values and units
-                p.name = 'relative pressure'
-                p.title = '$p_/p_^{0}$'
+                p.name = "relative pressure"
+                p.title = "$p_/p_^{0}$"
 
-            if K.lower() == 'langmuir':
-                K_ = np.exp(-q.data) * p.data[:, None] / (1 + np.exp(-q.data) * p.data[:, None])
+            if K.lower() == "langmuir":
+                K_ = (
+                    np.exp(-q.data)
+                    * p.data[:, None]
+                    / (1 + np.exp(-q.data) * p.data[:, None])
+                )
 
             else:  # this is 'ca'
                 K_ = np.ones((len(p.data), len(q.data)))
                 K_[p.data[:, None] < q.data] = 0
 
             title = "coverage"
-            
+
         if K.lower() in _kinetics:
             if q_was_array:  # change default values and units
-                q.name =  'Ln of rate constant'
-                q.title = '$\Ln k$'
+                q.name = "Ln of rate constant"
+                q.title = "$\Ln k$"
             if p_was_array:  # change default values and units
-                p.name = 'time'
-                p.title = '$t$'
-                p.units = 's'
+                p.name = "time"
+                p.title = "$t$"
+                p.units = "s"
 
-            if K.lower() == 'reactant-first-order':
+            if K.lower() == "reactant-first-order":
                 K_ = np.exp(-1 * np.exp(q.data) * p.data[:, None])
 
             else:  # 'product-first-order'
@@ -94,30 +96,31 @@ def kern(K, p, q):
 
         elif K.lower() in _diffusion:
             if q_was_array:  # change default values and units
-                q.name = 'Diffusion rate constant'
-                q.title = '$\\tau^{-1}$'
+                q.name = "Diffusion rate constant"
+                q.title = "$\\tau^{-1}$"
                 # q.to('1/s', force=True)
             if p_was_array:  # change default values and units
-                p.name = 'time'
-                p.title = '$t$'
+                p.name = "time"
+                p.title = "$t$"
                 # p.to('s', force=True)
 
             title = "fractional uptake"
-            
+
             K_ = np.zeros((p.size, q.size))
             for n in np.arange(1, 100):
-                K_ += (1 / n ** 2) * np.exp(- (1 / 9) * n ** 2 * np.pi ** 2 * q.data * p.data[:, None])
+                K_ += (1 / n ** 2) * np.exp(
+                    -(1 / 9) * n ** 2 * np.pi ** 2 * q.data * p.data[:, None]
+                )
             K_ = 1 - (6 / np.pi ** 2) * K_
 
         else:
             raise NameError(f"This kernel: <{K}> is not implemented")
 
-
     elif callable(K):
         K_ = K(p.data, q.data)
 
     else:
-        raise ValueError('K must be a str or a callable')
+        raise ValueError("K must be a str or a callable")
 
     # weighting coefficients for the numerical quadrature of the Fredholm integral
     w = np.zeros((q.size))
@@ -127,21 +130,21 @@ def kern(K, p, q):
 
     out = NDDataset(K_ * w)
     if isinstance(K, str):
-        out.name = K + ' kernel matrix'
+        out.name = K + " kernel matrix"
     else:
-        out.name = 'kernel matrix'
-    out.dims = ['y', 'x']
-    out.y=p
-    out.x=q
+        out.name = "kernel matrix"
+    out.dims = ["y", "x"]
+    out.y = p
+    out.x = q
     out.title = title
 
     return out
 
 
-
 class IRIS:
     """
     Integral inversion solver for spectroscopic data.
+    """
 
     def __init__(self, X, K, q=None, p=None, lamda=None):
         """
@@ -159,7 +162,7 @@ class IRIS:
         q: the internal parmete. Must be provided if the kernel is passed as a str or callable
         lamda: None or array_like of two values [min, max] or three values [start, stop, num]  (see Notes below)
 
-            
+
 
         Attributes
         ----------
@@ -208,25 +211,26 @@ class IRIS:
         global _log
         _log = ""
 
-
         # check if x dimension exists
-        if 'x' in X.dims:
+        if "x" in X.dims:
             # if multiple coords for a given dimension, take the default ones:
             channels = X.x.default
         else:
             # else, set a single channel:
             channels = Coord([0])
 
-
         if p is not None:  # supersedes the default
             if isinstance(p, Coord):
                 if p.shape[1] != X.shape[0]:
-                    raise ValueError('\'p\' should be consistent with the y coordinate of the dataset')
+                    raise ValueError(
+                        "'p' should be consistent with the y coordinate of the dataset"
+                    )
             else:
                 if len(p) != X.shape[0]:
-                    raise ValueError('\'p\' should be consistent with the y coordinate of the dataset')
-                p = Coord(p, title='External variable')
-                pval = p.data  # values
+                    raise ValueError(
+                        "'p' should be consistent with the y coordinate of the dataset"
+                    )
+                p = Coord(p, title="External variable")
         else:
             p = X.y.default
 
@@ -240,9 +244,10 @@ class IRIS:
             if isinstance(q, Iterable):
                 q = np.linspace(q[0], q[1], q[2])
             elif not isinstance(q, Coord):
-                raise ValueError("q must be provided as an iterable of 3 items "
-                                 "or a Coord")
-            msg = f'Build kernel matrix with: {K}\n'
+                raise ValueError(
+                    "q must be provided as an iterable of 3 items " "or a Coord"
+                )
+            msg = f"Build kernel matrix with: {K}\n"
             info_(msg)
             _log += msg
             K = kern(K, p, q)
@@ -259,12 +264,9 @@ class IRIS:
         elif len(lamda) == 3:
             regularization = True
             searchLambda = False
-            lamb = np.logspace(lamda[0],
-                               lamda[1],
-                               lamda[2])
+            lamb = np.logspace(lamda[0], lamda[1], lamda[2])
         else:
-            raise ValueError('lamda should be either None or a set of 2 or 3 integers')
-
+            raise ValueError("lamda should be either None or a set of 2 or 3 integers")
 
         # define containers for outputs
         if not regularization:
@@ -283,11 +285,11 @@ class IRIS:
             SM = np.zeros((4))
 
         # Define S matrix (sharpness), see function Smat() below
-        msg = f'Build S matrix (sharpness)\n'
+        msg = "Build S matrix (sharpness)\n"
         info_(msg)
         _log += msg
         S = Smat(q)
-        msg = '... done\n'
+        msg = "... done\n"
         info_(msg)
         _log += msg
 
@@ -344,12 +346,12 @@ class IRIS:
 
                 fi = np.zeros((len(q), len(channels.data)))
 
-                for j, _ in enumerate(channels.data):
+                for j, channel in enumerate(channels.data):
                     try:
                         G = G0 + 2 * lamda * S
                         fi[:, j] = quadprog.solve_qp(G, a[j].squeeze(), C, b)[0]
                     except ValueError:
-                        msg = f"Warning:G is not positive definite for log10(lambda)={np.log10(lamda):.2f} at {freq:.2f} {channels.units}, find nearest PD matrix"
+                        msg = f"Warning:G is not positive definite for log10(lambda)={np.log10(lamda):.2f} at {channel:.2f} {channels.units}, find nearest PD matrix"
                         warning_(msg)
                         _log += msg
                         try:
@@ -391,8 +393,8 @@ class IRIS:
 
             else:
                 msg = (
-		    f"Solving for {X.shape[1]} channel(s) and {X.shape[0]} observations, search "
-                    f"optimum regularization parameter in the range: [10**{min(lambdaRange)}, 10**{max(lambdaRange)}]\n"
+                    f"Solving for {X.shape[1]} channel(s) and {X.shape[0]} observations, search "
+                    f"optimum regularization parameter in the range: [10**{min(lamb)}, 10**{max(lamb)}]\n"
                 )
                 info_(msg)
                 _log += msg
@@ -487,7 +489,7 @@ class IRIS:
                         break
                 id_opt = np.argmin(np.abs(lamb - np.power(10, x_)))
                 id_opt_ranked = np.argmin(np.abs(np.argsort(lamb) - id_opt))
-                msg = f'\n optimum found: index = {id_opt_ranked} ; Log(lamba) = {x_:.3f} ; lambda = {np.power(10, x_):.5e} ; curvature = {C_:.3f}'
+                msg = f"\n optimum found: index = {id_opt_ranked} ; Log(lamba) = {x_:.3f} ; lambda = {np.power(10, x_):.5e} ; curvature = {C_:.3f}"
                 info_(msg)
                 _log += msg
 
@@ -498,7 +500,7 @@ class IRIS:
             SM = SM[argsort]
             f = f[argsort]
 
-        msg = '\n Done.'
+        msg = "\n Done."
         info_(msg)
         _log += msg
 
@@ -529,16 +531,22 @@ class IRIS:
         """
 
         if len(self.lamda) == 1:  # no regularization or single lambda
-            X_hat = NDDataset(np.zeros((self.X.shape)),
-                              title=self.X.title, units=self.X.units)
+            X_hat = NDDataset(
+                np.zeros((self.X.shape)), title=self.X.title, units=self.X.units
+            )
             X_hat.set_coordset(y=self.X.y, x=self.X.x)
             X_hat.data = np.expand_dims(np.dot(self.K.data, self.f.data.squeeze()), 1)
         else:
-            X_hat = NDDataset(np.zeros((self.f.z.size, *self.X.shape)),
-                              title=self.X.title, units=self.X.units)
+            X_hat = NDDataset(
+                np.zeros((self.f.z.size, *self.X.shape)),
+                title=self.X.title,
+                units=self.X.units,
+            )
             X_hat.set_coordset(z=self.f.z, y=self.X.y, x=self.X.x)
             for i in range(X_hat.z.size):
-                X_hat.data[i] = np.expand_dims(np.dot(self.K.data, self.f[i].data.squeeze()), 1)
+                X_hat.data[i] = np.expand_dims(
+                    np.dot(self.K.data, self.f[i].data.squeeze()), 1
+                )
 
         X_hat.name = "2D-IRIS Reconstructed datasets"
         return X_hat
@@ -603,7 +611,7 @@ class IRIS:
             ax = self.X.plot()
             ax.plot(self.X.x.data, X_hat_.squeeze().T.data, color=colXhat)
             ax.plot(self.X.x.data, res.T.data, color=colRes)
-            ax.set_title(f'2D IRIS merit plot, $\lambda$ = {self.lamda[i]:.2e}')
+            ax.set_title(f"2D IRIS merit plot, $\lambda$ = {self.lamda[i]:.2e}")
             axeslist.append(ax)
         return axeslist
 
@@ -637,12 +645,13 @@ class IRIS:
 # --------------------------------------------
 # Utility functions
 
+
 def menger(x, y):
     """
     returns the Menger curvature of a triplet of
     points. x, y = sets of 3 cartesian coordinates
     """
-    numerator = 2 * ( ((x[1] - x[0]) * (y[2] - y[1])) - ((y[1] - y[0]) * (x[2] - x[1])) )
+    numerator = 2 * (((x[1] - x[0]) * (y[2] - y[1])) - ((y[1] - y[0]) * (x[2] - x[1])))
     # euclidian distances
     r01 = (x[1] - x[0]) ** 2 + (y[1] - y[0]) ** 2
     r12 = (x[2] - x[1]) ** 2 + (y[2] - y[1]) ** 2
@@ -653,7 +662,7 @@ def menger(x, y):
 
 
 def Smat(q):
-    """ returns the matrix used to compute the norm of f second derivative  """
+    """returns the matrix used to compute the norm of f second derivative"""
     m = len(q)
     S = np.zeros((m, m))
     S[0, 0] = 6
