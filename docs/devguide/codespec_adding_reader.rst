@@ -9,7 +9,7 @@ Import of spectroscopic data with their meta data from various file formats is a
 import is made through the generic ``read()`` function (in ``core.readers.importer``) which handles
 the determination of filetype, search locations,  etc...).
 
-In the following, we descrube the steps to add a specific reader - with the example of Grams/Thermo .spc files.
+In the following, we describe the steps to add a specific reader - with the example of Grams/Thermo .spc files.
 
 .. contents:: Table of Contents:
    :local:
