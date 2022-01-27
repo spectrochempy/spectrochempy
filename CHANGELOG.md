@@ -8,6 +8,10 @@
 
 * Issue #360 : write a dataset with a specified filename do not open a dialog except if the file already exists.
 
+* read_dir: now ignores non readable files
+
+* read_labspec: now ignores non-labspec .txt files
+
 ## Version 0.3.1
 
 **NEW FEATURES**
