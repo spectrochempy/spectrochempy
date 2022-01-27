@@ -9,7 +9,7 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import show
 
- #pytestmark = pytest.mark.skip("WIP: iris dev on going")
+# pytestmark = pytest.mark.skip("WIP: iris dev on going")
 
 # import pytest
 # @pytest.mark.skip('do not work with workflow - need to solve this!')
@@ -45,18 +45,16 @@ def test_IRIS():
     # set the optimization parameters, perform the analysis
     # and plot the results
 
-    param = {"epsRange": [-8, -1, 20], "lambdaRange": [-7, -5, 3], "kernel": "langmuir"}
-
     X_ = X[:, 2250.0:1950.0]
     # X_.plot()
 
-    iris = IRIS(X_, param, verbose=True)
+    q = [-8, -1, 20]
+
+    # no regularization
+    iris = IRIS(X_, "langmuir", q=q)
 
     f = iris.f
+    assert f.shape == (1, q[2], X_.shape[1])
+
     X_hat = iris.reconstruct()
-
-    iris.plotlcurve(scale="ln")
-    f[0].plot(method="map", plottitle=True)
-    X_hat[0].plot(plottitle=True)
-
-    show()
+    assert X_hat.squeeze().shape == X_.shape
