@@ -30,7 +30,7 @@ def read_labspec(*paths, **kwargs):
     """
     Read a single Raman spectrum or a series of Raman spectra.
 
-    Files to open are *.txt file created by Labspec software.
+    Files to open are *.txt file created by Labspec software. Non-labspec .txt files are ignoired (return None)
 
     Parameters
     ----------
@@ -52,7 +52,7 @@ def read_labspec(*paths, **kwargs):
     Returns
     --------
     read
-        |NDDataset| or list of |NDDataset|.
+        |NDDataset| or list of |NDDataset| or None.
 
     Other Parameters
     ----------------
@@ -133,6 +133,9 @@ def _read_txt(*args, **kwargs):
             fid = open(filename, "r", encoding="latin-1")
             lines = fid.readlines()
             fid.close()
+
+    if len(lines) == 0:
+        return
 
     # Metadata
     meta = Meta()

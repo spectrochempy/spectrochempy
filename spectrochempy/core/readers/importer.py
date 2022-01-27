@@ -443,6 +443,7 @@ def read_dir(directory=None, **kwargs):
     * 1D spectroscopic data (e.g., *.spa files) in a given directory are grouped
       into single NDDataset, providing their unique dimension are compatible. If not,
       an error is generated.
+    * non readable files are ignored
 
     Parameters
     ----------
