@@ -9,7 +9,7 @@ Import of spectroscopic data with their meta data from various file formats is a
 import is made through the generic ``read()`` function (in ``core.readers.importer``) which handles
 the determination of filetype, search locations,  etc...).
 
-The steps to add a specific reader - with the example of Thermo Galactic .spc files - are as follows:
+In the following, we describe the steps to add a specific reader - with the example of Grams/Thermo .spc files.
 
 .. contents:: Table of Contents:
    :local:
@@ -23,7 +23,7 @@ then produce the *minimum* amount of code to successfully read this file, i.e., 
 attribute as expected from source file.
 
 The testing of the main readers functionalities has been made in the test_importer.py, and the test of
-specific readers such as ```read_spc`` should test only specifics to the reader. Add as many tests and sample files as
+specific readers such as ``read_spc`` should test only specifics to the reader. Add as many tests and sample files as
 the types of file format types you want the reader to handle.
 
 For consistency add your test in ``tests/test_core/test_readers/test_xxx.py`` where ``xxx`` is an alias for the
@@ -166,20 +166,19 @@ For instance
         labels=([acqdate], [filename]),
     )
 - Use whenever possible appropriate units for the data and the coordinates (see userguide/units/units.html).
-
 - The NDDataset ``description`` should at least mention the type of file from which the data have been imported, e.g.:
 
 .. sourcecode:: python
 
     dataset.description = kwargs.get("description", "Dataset from spc file.\n")
 
-and whenever possible the information related to the instrument, acquisition, parameters, etc...
+and whenever possible the information related to the instrument, acquisition parameters, etc...
 
 4. Polish your code and make the Pull Requests
 ==============================================
 
 see: :ref:`Contributing to the code <_contributing_codebase>`
 
-Note that in order that the PR to ``spectrochempy` can be properly handled by Workflow, a **a new release of
+Note that in order that the PR to ``spectrochempy` can be properly handled by Workflow, a new release of
 **spectrochempy_data** with the new sample files must be done, else the automated tests will
 fail as these files will not be found.

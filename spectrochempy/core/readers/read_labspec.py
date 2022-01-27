@@ -30,7 +30,7 @@ def read_labspec(*paths, **kwargs):
     """
     Read a single Raman spectrum or a series of Raman spectra.
 
-    Files to open are *.txt file created by Labspec software.
+    Files to open are *.txt file created by Labspec software. Non-labspec .txt files are ignored (return None)
 
     Parameters
     ----------
@@ -52,7 +52,7 @@ def read_labspec(*paths, **kwargs):
     Returns
     --------
     read
-        |NDDataset| or list of |NDDataset|.
+        |NDDataset| or list of |NDDataset| or None.
 
     Other Parameters
     ----------------
@@ -134,6 +134,9 @@ def _read_txt(*args, **kwargs):
             lines = fid.readlines()
             fid.close()
 
+    if len(lines) == 0:
+        return
+
     # Metadata
     meta = Meta()
 
@@ -145,6 +148,19 @@ def _read_txt(*args, **kwargs):
             key = f"{key} {i}"
         meta[key] = val.strip()
         i += 1
+
+    # .txt extension is fairly common. We determine non labspc files based
+    # on the absence of few keys. Two types of files (1D or 2D) are considered:
+    labspec_keys_1D = ["Acq. time (s)", "Dark correction"]
+    labspec_keys_2D = ["Exposition", "Grating"]
+
+    if all(keywd in meta.keys() for keywd in labspec_keys_1D):
+        pass
+    elif all(keywd in meta.keys() for keywd in labspec_keys_2D):
+        pass
+    else:
+        # this is not a labspec txt file"
+        return
 
     # read spec
     rawdata = np.genfromtxt(lines[i:], delimiter="\t")
@@ -172,8 +188,8 @@ def _read_txt(*args, **kwargs):
     # set dataset metadata
     dataset.data = data
     dataset.set_coordset(y=_y, x=_x)
-    dataset.title = "raman Intensity"
-    dataset.units = "absorbance"
+    dataset.title = "Counts"
+    dataset.units = None
     dataset.name = filename.stem
     dataset.meta = meta
 

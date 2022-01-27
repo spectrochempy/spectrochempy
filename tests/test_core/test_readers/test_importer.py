@@ -48,6 +48,8 @@ def _read_fake(*args, **kwargs):
         if os.path.exists(filename):
             if filename.stem == "otherfake":
                 dataset = fake_dataset(size=6)
+            elif filename.stem == "emptyfake":
+                dataset = None
             else:
                 dataset = fake_dataset()
         else:
@@ -97,6 +99,7 @@ def dialog_open(*args, **kwargs):
 
 def directory_glob(*args, **kwargs):
     res = [DATADIR / f"fakedir/fake{i+1}.fk" for i in range(4)]
+    res.append(DATADIR / "fakedir/emptyfake.fk")
     if len(args) > 1 and args[1].startswith("**/"):
         # recursive
         res.append(DATADIR / "fakedir/subdir/fakesub1.fk")
@@ -209,12 +212,13 @@ def test_importer(monkeypatch, fs):
     f3 = DATADIR / "fakedir/fake3.fk"
     f4 = DATADIR / "fakedir/fake4.fk"
     f5 = DATADIR / "fakedir/otherdir/otherfake.fk"
+    f6 = DATADIR / "fakedir/emptyfake.fk"  # return None when reader
     fs.create_file(f1)
     fs.create_file(f2)
     fs.create_file(f3)
     fs.create_file(f4)
     fs.create_file(f5)
-
+    fs.create_file(f6)
     # l = list(pathclean("/Users/christian/test_data/fakedir").iterdir())
 
     # multiple compatible 1D files automatically merged

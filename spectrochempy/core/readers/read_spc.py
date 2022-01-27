@@ -531,7 +531,7 @@ def _read_spc(*args, **kwargs):
 
     # Create NDDataset Object for the series
     dataset = NDDataset(np.expand_dims(floatY, axis=0))
-    dataset.name = "name"
+    dataset.name = str(filename)
     dataset.units = y_unit
     dataset.title = y_title
     dataset.origin = "thermo galactic"
@@ -547,7 +547,7 @@ def _read_spc(*args, **kwargs):
     dataset.set_coordset(y=_y, x=_x)
 
     dataset.description = kwargs.get("description", "Dataset from spc file.\n")
-    if ord(Fexper) != 0:
+    if ord(Fexper) != 0 and ord(Fexper) != 7:
         dataset.description += "Instrumental Technique: " + technique + "\n"
     if Fres != b"\x00\x00\x00\x00\x00\x00\x00\x00\x00":
         dataset.description += "Resolution: " + sres + "\n"
@@ -579,7 +579,7 @@ def _read_spc(*args, **kwargs):
 
     dataset.history = str(
         datetime.now(timezone.utc)
-    ) + ":imported from srs file {} ; ".format(filename)
+    ) + ":imported from spc file {} ; ".format(filename)
 
     if y_unit == "Interferogram":
         # interferogram
