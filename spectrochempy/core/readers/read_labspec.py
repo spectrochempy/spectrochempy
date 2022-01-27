@@ -30,7 +30,7 @@ def read_labspec(*paths, **kwargs):
     """
     Read a single Raman spectrum or a series of Raman spectra.
 
-    Files to open are *.txt file created by Labspec software. Non-labspec .txt files are ignoired (return None)
+    Files to open are *.txt file created by Labspec software. Non-labspec .txt files are ignored (return None)
 
     Parameters
     ----------
