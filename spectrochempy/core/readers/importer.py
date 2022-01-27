@@ -500,10 +500,9 @@ def _read_dir(*args, **kwargs):
         if key:
             importer = Importer()
             nd = importer(files[key], **kwargs)
-            if nd is not None:
-                if not isinstance(nd, list):
-                    nd = [nd]
-                datasets.extend(nd)
+            if not isinstance(nd, list):
+                nd = [nd]
+            datasets.extend(nd)
     return datasets
 
 
