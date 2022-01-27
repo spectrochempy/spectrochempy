@@ -28,11 +28,12 @@ def kern(K, p, q):
     Parameters
     ----------
     K :  str or callable
+    q : Coord or ndadarray
+    p : Coord or ndadarray
         Pre-defined kernels can be chosen among:
                 {'langmuir', 'ca', 'reactant-first-order', 'product-first-order', diffusion} (see Notes below).
         A custom kernel consisting of a 2-variable lambda function `ker(p, q)` can be passed, where `p` and `q` are
         an external experimental variable and an internal physico-chemical parameter, respectively.
-
 
     returns
     ----------
@@ -77,7 +78,7 @@ def kern(K, p, q):
 
             title = "coverage"
 
-        if K.lower() in _kinetics:
+        elif K.lower() in _kinetics:
             if q_was_array:  # change default values and units
                 q.name = "Ln of rate constant"
                 q.title = "$\Ln k$"
@@ -146,7 +147,7 @@ class IRIS:
     Integral inversion solver for spectroscopic data.
     """
 
-    def __init__(self, X, K, q=None, p=None, lamda=None):
+    def __init__(self, X, K, q=None, p=None, reg_par=None):
         """
         Parameters
         -----------
@@ -154,15 +155,13 @@ class IRIS:
             The 1D or 2D dataset on which to perform the IRIS analysis
         K : str or callable or NDDataset
                 Kernel of the integral equation. Pre-defined kernels can be chosen among
-                {'langmuir', 'ca', 'reactant-first-order', 'product-first-order', 'diffusion'}. If
-
-                A custom kernel consisting of a 2-variable lambda function `ker(p, q)`
-                can be passed, where `p` and `q` are ndarray or  of an external experimental variable and an internal
-                physico-chemical parameter, respectively.
-        q: the internal parmete. Must be provided if the kernel is passed as a str or callable
-        lamda: None or array_like of two values [min, max] or three values [start, stop, num]  (see Notes below)
-
-
+                {'langmuir', 'ca', 'reactant-first-order', 'product-first-order', 'diffusion'}. A custom kernel
+                consisting of a 2-variable lambda function `ker(p, q)` n be passed, where `p` and `q` are ndarray
+                of an external experimental variable and of a physico-chemical property value, respectively. Finally,
+                K can also be passed as a NDDataset. In this case, its coordinates
+        p: Coord or Iterable. external variable. Must be provided if the kernel is passed as a str or callable
+        q: Coord or Iterable of 3 values. Internal variable. Must be provided if the kernel is passed as a str or callable
+        reg_par: None or array_like of two values [min, max] or three values [start, stop, num]. regularization parameter
 
         Attributes
         ----------
@@ -179,31 +178,30 @@ class IRIS:
         K : |NDDataset|
             Kernel matrix
         X : |NDDataset|
-            Copy of the original dataset
+            dataset
 
         Notes
         -----
         IRIS solves integral equation of the first kind of 1 or 2 dimensions, i.e. finds a
-        distribution function :math:`f` of contributions to spectra :math:`a(\nu,p)` or univariate measurement
+        distribution function :math:`f` of contributions to spectra :math:`a(\nu,p)` or to univariate measurement
         :math:`a(p)` evolving with an external experimental variable :math:`p` (time, pressure,
         temperature, concentration, ...) according to the integral transform:
 
-        .. math:: a(\nu, p) = \int_{min}^{max} k(\epsilon, \p) f(\nu, \epsilon) dp
+        .. math:: a(\nu, p) = \int_{min}^{max} k(q, p) f(\nu, q) dq
 
-        .. math:: a(p) = \int_{min}^{max} k(\epsilon, p) f(\epsilon) dp
+        .. math:: a(p) = \int_{min}^{max} k(q, p) f(q) dq
 
-        where the kernel :math:`k(\epsilon, p)` expresses the functional dependence of a single contribution
-        with respect to the experimental variable math:`p` and and 'internal' physico-chemical variable math:`\epsilopn`
+        where the kernel :math:`k(q, p)` expresses the functional dependence of a single contribution
+        with respect to the experimental variable math:`p` and and 'internal' physico-chemical variable math:`q`
 
+        Regularization is triggered when 'reg_param' is set to an array of two or three values.
 
+        If 'lambdaRange' has two values [min, max], the optimum regularization parameter is searched between
+        :math:`10^{min}` and :math:`10^{max}`. Automatic search of the regularization is made using the
+        Cultrera_Callegaro algorithm (arXiv:1608.04571v2) which involves the Menger curvature of a circumcircle
+        and the golden section search method.
 
-        Regularization is triggered when 'lambdaRange' is set to an array of two or three values.
-
-        If 'lambdaRange' has two values [min, max], the optimum regularization parameter is searched between :math:`10^{min}` and
-        :math:`10^{max}`. Automatic search of the regularization is made using the Cultrera_Callegaro algorithm (arXiv:1608.04571v2)
-        which involves the Menger curvature of a circumcircle and the golden section search method.
-
-        If three values are given ([min, max, num]), then the inversion will be mùade for num values
+        If three values are given ([min, max, num]), then the inversion will be made for num values
         evenly spaced on a log scale between :math:`10^{min}` and :math:`10^{max}`
 
         """
@@ -238,15 +236,15 @@ class IRIS:
         # defines the kernel
 
         if isinstance(K, NDDataset):
-            # K = K.copy()
             q = K.x
         elif isinstance(K, str) or callable(K):
             if isinstance(q, Iterable):
                 q = np.linspace(q[0], q[1], q[2])
             elif not isinstance(q, Coord):
                 raise ValueError(
-                    "q must be provided as an iterable of 3 items " "or a Coord"
+                    "q must be provided as an iterable of 3 items or a Coord"
                 )
+
             msg = f"Build kernel matrix with: {K}\n"
             info_(msg)
             _log += msg
@@ -254,17 +252,18 @@ class IRIS:
             q = K.x  # q is now a Coord
 
         # defines regularization parameter values
-        if lamda is None:
+
+        if reg_par is None:
             regularization = False
             searchLambda = False
             lamb = [0]
-        elif len(lamda) == 2:
+        elif len(reg_par) == 2:
             regularization = True
             searchLambda = True
-        elif len(lamda) == 3:
+        elif len(reg_par) == 3:
             regularization = True
             searchLambda = False
-            lamb = np.logspace(lamda[0], lamda[1], lamda[2])
+            lamb = np.logspace(reg_par[0], reg_par[1], reg_par[2])
         else:
             raise ValueError("lamda should be either None or a set of 2 or 3 integers")
 
@@ -403,8 +402,8 @@ class IRIS:
                 epsilon = 0.1
                 phi = (1 + np.sqrt(5)) / 2
 
-                x[0] = min(lamda)
-                x[3] = max(lamda)
+                x[0] = min(reg_par)
+                x[3] = max(reg_par)
                 x[1] = (x[3] + phi * x[0]) / (1 + phi)
                 x[2] = x[0] + x[3] - x[1]
                 lamb = 10 ** x
