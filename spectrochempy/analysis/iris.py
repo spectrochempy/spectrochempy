@@ -24,12 +24,12 @@ from spectrochempy.core import info_, warning_
 
 def kern(K, p, q):
     """
-    Kernel for fredholm equation of the 1st kind.
+    Compute kernel of Fredholm equation of the 1st kind.
 
-    This function computes the kernel matrix and returns it as NDDataset. Pre-defined kernels can be chosen among:
-    {'langmuir', 'ca', 'reactant-first-order', 'product-first-order', diffusion} A custom kernel consisting of a
-    2-variable lambda function `ker(p, q)` can be passed, where `p` and `q` are  an external experimental variable
-    and an internal physico-chemical parameter, respectively.
+    This function computes a kernel matrix and returns it as NDDataset. Pre-defined kernels can be chosen among:
+    {'langmuir', 'ca', 'reactant-first-order', 'product-first-order', diffusion} A custom kernel fucntion - a
+    2-variable lambda function `ker(p, q)` or a function returning a ndarray can be passed. `p` and `q` contain
+    the values of an external experimental variable and an internal physico-chemical parameter, respectively.
 
     Parameters
     ----------
@@ -47,11 +47,30 @@ def kern(K, p, q):
 
     See Also
     --------
-    IRIS: Integral inversion solver for spectroscopic data.
+    IRIS : Integral inversion solver for spectroscopic data.
 
     Examples
     --------
+    # the two examples belmow are equivalents:
+    >>> import numpy as np
     >>> scp.kern('langmuir', np.linspace(0, 1, 100), np.logspace(-10, 1, 10))
+    NDDataset: [float64] unitless (shape: (y:100, x:10))
+
+    >>> F = lambda p, q : np.exp(-q) * p[:, None] / (1 + np.exp(-q) * p[:, None])
+    >>> scp.kern(F, np.linspace(0, 1, 100), np.logspace(-10, 1, 10))
+    NDDataset: [float64] unitless (shape: (y:100, x:10))
+
+    >>> def F(p,q):
+    ...    return np.exp(-q) * p[:, None] / (1 + np.exp(-q) * p[:, None])
+    >>>
+    >>> scp.kern(F, np.linspace(0, 1, 100), np.logspace(-10, 1, 10))
+    NDDataset: [float64] unitless (shape: (y:100, x:10))
+
+    # p and q can also be passed as coordinates:
+    >>> p = scp.Coord(np.linspace(0, 1, 100), name="pressure", title="p", units="torr")
+    >>> q = scp.Coord(np.logspace(-10, 1, 10), name="reduced adsorption energy",
+    ...              title="$\Delta_{ads}G^{0}/RT$", units="")
+    >>> scp.kern('langmuir', p, q)
     NDDataset: [float64] unitless (shape: (y:100, x:10))
     """
 
@@ -160,67 +179,77 @@ def kern(K, p, q):
 class IRIS:
     """
     Integral inversion solver for spectroscopic data.
+
+    Solves integral equations of the first kind of 1 or 2 dimensions, i.e. returns a
+    distribution :math:`f` of contributions to 1D ou 2D datasets.
+
+    Parameters
+    -----------
+    X : NDDataset
+        The 1D or 2D dataset on which to perform the IRIS analysis.
+    K : str or callable or NDDataset
+        Kernel of the integral equation. Pre-defined kernels can be chosen among
+        `["langmuir", "ca", "reactant-first-order", "product-first-order", "diffusion"]`.
+    p : Coord or Iterable
+        External variable. Must be provided if the kernel is passed as a str or callable.
+    q : Coord or Iterable of 3 values
+        Internal variable. Must be provided if the kernel is passed as a str or callable.
+    reg_par : None or array_like of two values `[min, max]` or three values `[start, stop, num]`
+        Regularization parameter.
+
+    Attributes
+    ----------
+    f : NDDataset
+        A 3D/2D dataset containing the solutions (one per regularization parameter).
+    RSS: array of float
+        Residual sums of squares (one per regularization parameter).
+    SM : array of float
+        Values of the regularization constraint (one per regularization parameter).
+    reg_par : None or array of float
+        Values of the regularization parameters.
+    log : str
+        Log of the optimization.
+    K : NDDataset
+        Kernel matrix.
+    X : NDDataset
+        The original dataset.
+
+    See Also
+    --------
+        ker : Compute kernel of Fredholm equation of the 1st kind.
+
+    Notes
+    -----
+    IRIS solves integral equation of the first kind of 1 or 2 dimensions, i.e. finds a distribution
+    function :math:`f(p)` or :math:`f(c,p)` of contributions to univariate data :math:`a(p)` or multivariate
+    :math:`a(c, p)` data evolving with an external experimental variable :math:`p` (time, pressure,
+    temperature, concentration, ...) according to the integral transform:
+
+    .. math:: a(c, p) = \int_{min}^{max} k(q, p) f(c, q) dq
+
+    .. math:: a(p) = \int_{min}^{max} k(q, p) f(q) dq
+
+    where the kernel :math:`k(q, p)` expresses the functional dependence of a single contribution
+    with respect to the experimental variable :math:`p` and and 'internal' physico-chemical variable :math:`q`
+    Regularization is triggered when 'reg_param' is set to an array of two or three values.
+    If 'reg_param' has two values [min, max], the optimum regularization parameter is searched between
+    :math:`10^{min}` and :math:`10^{max}`. Automatic search of the regularization is made using the
+    Cultrera_Callegaro algorithm (arXiv:1608.04571v2) which involves the Menger curvature of a circumcircle
+    and the golden section search method.
+    If three values are given (`[min, max, num]`), then the inversion will be made for num values
+    evenly spaced on a log scale between :math:`10^{min}` and :math:`10^{max}`
+
+    Examples:
+    --------
+    >>> X = scp.read("irdata/CO@Mo_Al2O3.SPG")
+    >>> p = [0.003, 0.004, 0.009, 0.014, 0.021, 0.026, 0.036, 0.051, 0.093, 0.150,
+    ...      0.203, 0.300, 0.404, 0.503, 0.602, 0.702, 0.801, 0.905, 1.004]
+    >>> iris = scp.IRIS(X[:,2250.0:1960.0], "langmuir", q = [-8, -1, 10])
+    >>> iris.f
+    NDDataset: [float64] unitless (shape: (z:1, y:10, x:42))
     """
 
-    def __init__(self, X, K, q=None, p=None, reg_par=None):
-        """
-        Parameters
-        -----------
-        X : |NDDataset|
-            The 1D or 2D dataset on which to perform the IRIS analysis
-        K : str or callable or NDDataset
-                Kernel of the integral equation. Pre-defined kernels can be chosen among
-                {'langmuir', 'ca', 'reactant-first-order', 'product-first-order', 'diffusion'}. A custom kernel
-                consisting of a 2-variable lambda function `ker(p, q)` n be passed, where `p` and `q` are ndarray
-                of an external experimental variable and of a physico-chemical property value, respectively. Finally,
-                K can also be passed as a NDDataset. In this case, its coordinates
-        p: Coord or Iterable. external variable. Must be provided if the kernel is passed as a str or callable
-        q: Coord or Iterable of 3 values. Internal variable. Must be provided if the kernel is passed as a str or callable
-        reg_par: None or array_like of two values [min, max] or three values [start, stop, num]. regularization parameter
-
-        Attributes
-        ----------
-        f : |NDDataset|
-            A 3D/2D dataset containing the solutions (one per regularization parameter)
-        RSS: array of float
-            Residual sums of squares (one per regularization parameter)
-        SM : array of float
-            Values of the penalty function (one per regularization parameter)
-        lamda : None or array of float
-            Values of the regularization parameters
-        log : str
-            Log of the optimization
-        K : |NDDataset|
-            Kernel matrix
-        X : |NDDataset|
-            dataset
-
-        Notes
-        -----
-        IRIS solves integral equation of the first kind of 1 or 2 dimensions, i.e. finds a
-        distribution function :math:`f` of contributions to spectra :math:`a(\nu,p)` or to univariate measurement
-        :math:`a(p)` evolving with an external experimental variable :math:`p` (time, pressure,
-        temperature, concentration, ...) according to the integral transform:
-
-        .. math:: a(\nu, p) = \int_{min}^{max} k(q, p) f(\nu, q) dq
-
-        .. math:: a(p) = \int_{min}^{max} k(q, p) f(q) dq
-
-        where the kernel :math:`k(q, p)` expresses the functional dependence of a single contribution
-        with respect to the experimental variable math:`p` and and 'internal' physico-chemical variable math:`q`
-
-        Regularization is triggered when 'reg_param' is set to an array of two or three values.
-
-        If 'lambdaRange' has two values [min, max], the optimum regularization parameter is searched between
-        :math:`10^{min}` and :math:`10^{max}`. Automatic search of the regularization is made using the
-        Cultrera_Callegaro algorithm (arXiv:1608.04571v2) which involves the Menger curvature of a circumcircle
-        and the golden section search method.
-
-        If three values are given ([min, max, num]), then the inversion will be made for num values
-        evenly spaced on a log scale between :math:`10^{min}` and :math:`10^{max}`
-
-        """
-
+    def __init__(self, X, K, p=None, q=None, reg_par=None):
         global _log
         _log = ""
 
@@ -543,8 +572,8 @@ class IRIS:
 
         Returns
         -------
-        X_hat : |NDDataset|
-            The reconstructed dataset.
+            NDDataset
+                The reconstructed dataset.
         """
 
         if len(self.reg_par) == 1:  # no regularization or single lambda
@@ -568,18 +597,21 @@ class IRIS:
 
     def plotlcurve(self, scale="ll", **kwargs):
         """
-        Plots the L Curve.
+        Plot the L Curve.
 
         Parameters
         ----------
         scale : str, optional, default='ll'
-            2 letters among 'l' (log) or 'n' (non-log) indicating whether the y and x
+            String of 2 letters among 'l' (log) or 'n' (non-log) indicating whether the y and x
             axes should be log scales.
 
+        **kwargs
+            Keywords arguments passed to the plot() function.
 
         Returns
         -------
-        ax : subplot axis
+            matplotlib.pyplot.axes
+                The axes.
         """
 
         fig = plt.figure()
@@ -596,16 +628,20 @@ class IRIS:
 
     def plotmerit(self, index=None, **kwargs):
         """
-        Plots the input dataset, reconstructed dataset and residuals.
+        Plot the input dataset, reconstructed dataset and residuals.
+
         Parameters
         ----------
         index : int, list or tuple of int, optional, default: None
             Index(es) of the inversions (i.e. of the lambda values) to consider.
             If 'None': plots for all indices.
 
+        **kwargs
+            Keywords arguments passed to the plot() function.
+
         Returns
         -------
-        list of axes
+            list of axes
         """
 
         colX, colXhat, colRes = kwargs.get("colors", ["blue", "green", "red"])

@@ -1,20 +1,17 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa
 
-import os
-import pytest
 
 from spectrochempy.analysis.iris import IRIS
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils import show
 
 # pytestmark = pytest.mark.skip("WIP: iris dev on going")
 
 # import pytest
 # @pytest.mark.skip('do not work with workflow - need to solve this!')
 def test_IRIS():
-    X = NDDataset.read_omnic(os.path.join("irdata", "CO@Mo_Al2O3.SPG"))
+    X = NDDataset.read_omnic("irdata/CO@Mo_Al2O3.SPG")
 
     p = [
         0.00300,
