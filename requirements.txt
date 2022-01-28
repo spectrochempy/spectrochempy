@@ -1,7 +1,7 @@
 # This file is auto-generated from environment.yml, do not modify.
 # See that file for comments about the need/usage of each dependency.
 
-quadprog==0.1.9
+quadprog
 brukeropusreader
 numpy-quaternion
 git+https://github.com/jjhelmus/nmrglue.git
