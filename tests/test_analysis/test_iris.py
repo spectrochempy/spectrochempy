@@ -42,19 +42,65 @@ def test_IRIS():
     # Using the `update` method is mandatory because it will preserve the name.
     # Indeed, setting using X.coordset[0] = Coord(...) fails unless name is specified: Coord(..., name='y')
 
-    # set the optimization parameters, perform the analysis
-    # and plot the results
+    # take a small region to reduce test time
+    X_ = X[:, 2105.0:1995.0]
 
-    X_ = X[:, 2250.0:1950.0]
-    # X_.plot()
+    # no regularization, langmuir
+    q = [-8, -1, 10]
+    iris1 = IRIS(X_, "langmuir", q=q)
+    f1 = iris1.f
+    assert f1.shape == (1, q[2], X_.shape[1])
 
-    q = [-8, -1, 20]
-
-    # no regularization
-    iris = IRIS(X_, "langmuir", q=q)
-
-    f = iris.f
-    assert f.shape == (1, q[2], X_.shape[1])
-
-    X_hat = iris.reconstruct()
+    X_hat = iris1.reconstruct()
     assert X_hat.squeeze().shape == X_.shape
+
+    # test with callable
+    def ker(p, q):
+        import numpy as np
+
+        return np.exp(-q) * p[:, None] / (1 + np.exp(-q) * p[:, None])
+
+    iris1 = IRIS(X_, ker, q=iris1.K.x)
+    f1 = iris1.f
+    assert f1.shape == (1, q[2], X_.shape[1])
+
+    # no regularization, ca, 1D, p and q passed as a ndarrays
+    iris1b = IRIS(X_[:, 2110.0], "ca", p=p, q=iris1.K.x.data)
+
+    f1b = iris1b.f
+    assert f1b.shape == (1, q[2], 1)
+
+    # manual regularization, keeping the previous kernel
+    K = iris1.K
+    reg_par = [-4, -2, 3]
+
+    iris2 = IRIS(X_, K, reg_par=reg_par)
+    f2 = iris2.f
+    assert f2.shape == (reg_par[2], q[2], X_.shape[1])
+
+    iris2.plotlcurve()
+    iris2.plotdistribution(-2)
+    _ = iris2.plotmerit(-2)
+
+    # with automated search, keeping the previous kernel
+    reg_par = [-4, -2]
+
+    iris3 = IRIS(X_, K, reg_par=reg_par)
+    f3 = iris3.f
+    assert (f3.shape[1], f3.shape[2]) == (q[2], X_.shape[1])
+
+    # test other kernels (beware: it is chemical non-sense !)
+    q = [5, 1, 10]
+    iris4 = IRIS(X_, "diffusion", q=q)
+    f4 = iris4.f
+    assert f4.shape == (1, q[2], X_.shape[1])
+
+    q = [5, 1, 10]
+    iris4 = IRIS(X_, "product-first-order", q=q)
+    f4 = iris4.f
+    assert f4.shape == (1, q[2], X_.shape[1])
+
+    q = [5, 1, 10]
+    iris4 = IRIS(X_[::-1], "reactant-first-order", q=q)
+    f4 = iris4.f
+    assert f4.shape == (1, q[2], X_.shape[1])
