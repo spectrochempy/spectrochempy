@@ -1,7 +1,7 @@
 blank_issues_enabled: false
 contact_links:
   - name: Usage question
-    url: https://github.com/fernandezc/spectrochempy/discussions
+    url: https://github.com/spectrochempy/spectrochempy/discussions
     about: |
       Ask questions and discuss with other community members here.
       If you have a question like "Why when I change the units of a 
