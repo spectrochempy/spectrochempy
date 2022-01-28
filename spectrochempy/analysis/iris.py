@@ -23,22 +23,36 @@ from spectrochempy.core import info_, warning_
 
 
 def kern(K, p, q):
-    """kernel for fredholm equation of the 1st kind
+    """
+    Kernel for fredholm equation of the 1st kind.
+
+    This function computes the kernel matrix and returns it as NDDataset. Pre-defined kernels can be chosen among:
+    {'langmuir', 'ca', 'reactant-first-order', 'product-first-order', diffusion} A custom kernel consisting of a
+    2-variable lambda function `ker(p, q)` can be passed, where `p` and `q` are  an external experimental variable
+    and an internal physico-chemical parameter, respectively.
 
     Parameters
     ----------
-    K :  str or callable
-    q : Coord or ndadarray
+    K : str or callable
+        Kernel type.
     p : Coord or ndadarray
-        Pre-defined kernels can be chosen among:
-                {'langmuir', 'ca', 'reactant-first-order', 'product-first-order', diffusion} (see Notes below).
-        A custom kernel consisting of a 2-variable lambda function `ker(p, q)` can be passed, where `p` and `q` are
-        an external experimental variable and an internal physico-chemical parameter, respectively.
+        External variable.
+    q : Coord or ndadarray
+        Internal variable.
 
-    returns
-    ----------
-    a NDDataset
+    Returns
+    -------
+    NDDataset
+        The kernel.
 
+    See Also
+    --------
+    IRIS: Integral inversion solver for spectroscopic data.
+
+    Examples
+    --------
+    >>> scp.kern('langmuir', np.linspace(0, 1, 100), np.logspace(-10, 1, 10))
+    NDDataset: [float64] unitless (shape: (y:100, x:10))
     """
 
     if not isinstance(q, Coord):  # q was passed as a ndarray
@@ -46,7 +60,7 @@ def kern(K, p, q):
         q_was_array = True
     else:
         q_was_array = False
-    if not isinstance(q, Coord):  # p was passed as a ndarray
+    if not isinstance(p, Coord):  # p was passed as a ndarray
         p = Coord(data=p, name="external variable", title="$p$", units="")
         p_was_array = True
     else:
@@ -119,6 +133,7 @@ def kern(K, p, q):
 
     elif callable(K):
         K_ = K(p.data, q.data)
+        title = ""
 
     else:
         raise ValueError("K must be a str or a callable")
@@ -235,14 +250,17 @@ class IRIS:
         # check options
         # defines the kernel
 
-        if isinstance(K, NDDataset):
+        if isinstance(K, NDDataset) and q is None:
             q = K.x
         elif isinstance(K, str) or callable(K):
-            if isinstance(q, Iterable):
-                q = np.linspace(q[0], q[1], q[2])
-            elif not isinstance(q, Coord):
+            if isinstance(q, Coord):
+                pass
+            elif isinstance(q, Iterable):
+                if len(q) == 3:
+                    q = np.linspace(q[0], q[1], q[2])
+            else:
                 raise ValueError(
-                    "q must be provided as an iterable of 3 items or a Coord"
+                    "q must be provided as a Coord, a NDarray or an iterable of 3 items"
                 )
 
             msg = f"Build kernel matrix with: {K}\n"
@@ -255,17 +273,19 @@ class IRIS:
 
         if reg_par is None:
             regularization = False
-            searchLambda = False
-            lamb = [0]
+            search_reg = False
+            reg_par = [0]
         elif len(reg_par) == 2:
             regularization = True
-            searchLambda = True
+            search_reg = True
         elif len(reg_par) == 3:
             regularization = True
-            searchLambda = False
-            lamb = np.logspace(reg_par[0], reg_par[1], reg_par[2])
+            search_reg = False
+            reg_par = np.logspace(reg_par[0], reg_par[1], reg_par[2])
         else:
-            raise ValueError("lamda should be either None or a set of 2 or 3 integers")
+            raise ValueError(
+                "reg_par should be either None or a set of 2 or 3 integers"
+            )
 
         # define containers for outputs
         if not regularization:
@@ -273,12 +293,12 @@ class IRIS:
             RSS = np.zeros((1))
             SM = np.zeros((1))
 
-        if regularization and not searchLambda:
-            f = np.zeros((len(lamb), len(q), len(channels.data)))
-            RSS = np.zeros((len(lamb)))
-            SM = np.zeros((len(lamb)))
+        if regularization and not search_reg:
+            f = np.zeros((len(reg_par), len(q), len(channels.data)))
+            RSS = np.zeros((len(reg_par)))
+            SM = np.zeros((len(reg_par)))
 
-        if regularization and searchLambda:
+        if regularization and search_reg:
             f = np.zeros((4, len(q), len(channels.data)))
             RSS = np.zeros((4))
             SM = np.zeros((4))
@@ -294,10 +314,8 @@ class IRIS:
 
         # Solve unregularized problem
         if not regularization:
-            msg = (
-                "Solving for {} wavenumbers and {} spectra, no regularization\n".format(
-                    X.shape[1], X.shape[0]
-                )
+            msg = "Solving for {} channels and {} observations, no regularization\n".format(
+                X.shape[1], X.shape[0]
             )
             _log += msg
             info_(msg)
@@ -324,7 +342,7 @@ class IRIS:
             C = np.eye(len(q))
             b = np.zeros(len(q))
 
-            def solve_for_lambda(X, K, G0, lamda, S):
+            def solve_for_reg_par(X, K, G0, reg_par, S):
                 """
                 QP optimization
 
@@ -333,7 +351,7 @@ class IRIS:
                 X: NDDataset of experimental spectra
                 K: NDDataset, kernel datase
                 G0: the lambda independent part of G
-                lamda: regularization parameter
+                reg_par: regularization parameter
                 S: penalty function (shaprness)
                 verbose: print info
 
@@ -347,14 +365,14 @@ class IRIS:
 
                 for j, channel in enumerate(channels.data):
                     try:
-                        G = G0 + 2 * lamda * S
+                        G = G0 + 2 * reg_par * S
                         fi[:, j] = quadprog.solve_qp(G, a[j].squeeze(), C, b)[0]
                     except ValueError:
-                        msg = f"Warning:G is not positive definite for log10(lambda)={np.log10(lamda):.2f} at {channel:.2f} {channels.units}, find nearest PD matrix"
+                        msg = f"Warning:G is not positive definite for log10(lambda)={np.log10(reg_par):.2f} at {channel:.2f} {channels.units}, find nearest PD matrix"
                         warning_(msg)
                         _log += msg
                         try:
-                            G = nearestPD(G0 + 2 * lamda * S, 0)
+                            G = nearestPD(G0 + 2 * reg_par * S, 0)
                             fi[:, j] = quadprog.solve_qp(G, a[j].squeeze(), C, b)[0]
                         except ValueError:
                             msg = (
@@ -363,7 +381,7 @@ class IRIS:
                             )
                             warning_(msg)
                             _log += msg
-                            G = nearestPD(G0 + 2 * lamda * S, 1e-3)
+                            G = nearestPD(G0 + 2 * reg_par * S, 1e-3)
                             fi[:, j] = quadprog.solve_qp(G, a[j].squeeze(), C, b)[0]
 
                 resi = X.data - np.dot(K.data, fi)
@@ -371,7 +389,7 @@ class IRIS:
                 SMi = np.linalg.norm(np.dot(np.dot(np.transpose(fi), S), fi))
 
                 msg = (
-                    f"log10(lambda)={np.log10(lamda):.3f} -->  residuals = {RSSi:.3e}    "
+                    f"log10(lambda)={np.log10(reg_par):.3f} -->  residuals = {RSSi:.3e}    "
                     f"regularization constraint  = {SMi:.3e}\n"
                 )
                 info_(msg)
@@ -379,21 +397,21 @@ class IRIS:
 
                 return fi, RSSi, SMi
 
-            if not searchLambda:
+            if not search_reg:
                 msg = (
-                    f"Solving for {X.shape[1]} channels, {X.shape[0]} spectra and "
-                    f"{len(lamb)} regularization parameters \n"
+                    f"Solving for {X.shape[1]} channels, {X.shape[0]} observations and "
+                    f"{len(reg_par)} regularization parameters \n"
                 )
                 info_(msg)
                 _log += msg
 
-                for i, lamda_ in enumerate(lamb):
-                    f[i], RSS[i], SM[i] = solve_for_lambda(X, K, G0, lamda_, S)
+                for i, lamda_ in enumerate(reg_par):
+                    f[i], RSS[i], SM[i] = solve_for_reg_par(X, K, G0, lamda_, S)
 
             else:
                 msg = (
                     f"Solving for {X.shape[1]} channel(s) and {X.shape[0]} observations, search "
-                    f"optimum regularization parameter in the range: [10**{min(lamb)}, 10**{max(lamb)}]\n"
+                    f"optimum regularization parameter in the range: [10**{min(reg_par)}, 10**{max(reg_par)}]\n"
                 )
                 info_(msg)
                 _log += msg
@@ -406,13 +424,13 @@ class IRIS:
                 x[3] = max(reg_par)
                 x[1] = (x[3] + phi * x[0]) / (1 + phi)
                 x[2] = x[0] + x[3] - x[1]
-                lamb = 10 ** x
+                reg_par = 10 ** x
                 msg = "Initial Log(lambda) values = " + str(x)
                 info_(msg)
                 _log += msg
 
                 for i, xi in enumerate(x):
-                    f[i], RSS[i], SM[i] = solve_for_lambda(X, K, G0, 10 ** xi, S)
+                    f[i], RSS[i], SM[i] = solve_for_reg_par(X, K, G0, 10 ** xi, S)
 
                 Rx = np.copy(RSS)
                 Sy = np.copy(SM)
@@ -435,8 +453,8 @@ class IRIS:
                         info_(msg)
                         _log += msg
 
-                        f_, Rx[1], Sy[1] = solve_for_lambda(X, K, G0, 10 ** x[1], S)
-                        lamb = np.append(lamb, np.array(10 ** x[1]))
+                        f_, Rx[1], Sy[1] = solve_for_reg_par(X, K, G0, 10 ** x[1], S)
+                        reg_par = np.append(reg_par, np.array(10 ** x[1]))
                         f = np.concatenate((f, np.atleast_3d(f_.T).T))
                         RSS = np.concatenate((RSS, np.array(Rx[1:2])))
                         SM = np.concatenate((SM, np.array(Sy[1:2])))
@@ -461,9 +479,9 @@ class IRIS:
                         msg = "New range (Log lambda): " + str(x)
                         info_(msg)
                         _log += msg
-                        f_, Rx[1], Sy[1] = solve_for_lambda(X, K, G0, 10 ** x[1], S)
+                        f_, Rx[1], Sy[1] = solve_for_reg_par(X, K, G0, 10 ** x[1], S)
                         f = np.concatenate((f, np.atleast_3d(f_.T).T))
-                        lamb = np.append(lamb, np.array(10 ** x[1]))
+                        reg_par = np.append(reg_par, np.array(10 ** x[1]))
                         RSS = np.concatenate((RSS, np.array(Rx[1:2])))
                         SM = np.concatenate((SM, np.array(Sy[1:2])))
                     else:
@@ -479,22 +497,22 @@ class IRIS:
                         msg = "New range (Log lambda):" + str(x)
                         info_(msg)
                         _log += msg
-                        f_, Rx[2], Sy[2] = solve_for_lambda(X, K, G0, 10 ** x[2], S)
+                        f_, Rx[2], Sy[2] = solve_for_reg_par(X, K, G0, 10 ** x[2], S)
                         f = np.concatenate((f, np.atleast_3d(f_.T).T))
-                        lamb = np.append(lamb, np.array(10 ** x[2]))
+                        reg_par = np.append(reg_par, np.array(10 ** x[2]))
                         RSS = np.concatenate((RSS, np.array(Rx[1:2])))
                         SM = np.concatenate((SM, np.array(Sy[1:2])))
                     if (10 ** x[3] - 10 ** x[0]) / 10 ** x[3] < epsilon:
                         break
-                id_opt = np.argmin(np.abs(lamb - np.power(10, x_)))
-                id_opt_ranked = np.argmin(np.abs(np.argsort(lamb) - id_opt))
-                msg = f"\n optimum found: index = {id_opt_ranked} ; Log(lamba) = {x_:.3f} ; lambda = {np.power(10, x_):.5e} ; curvature = {C_:.3f}"
+                id_opt = np.argmin(np.abs(reg_par - np.power(10, x_)))
+                id_opt_ranked = np.argmin(np.abs(np.argsort(reg_par) - id_opt))
+                msg = f"\n optimum found: index = {id_opt_ranked} ; Log(lambda) = {x_:.3f} ; lambda = {np.power(10, x_):.5e} ; curvature = {C_:.3f}"
                 info_(msg)
                 _log += msg
 
             # sort by lamba values
-            argsort = np.argsort(lamb)
-            lamb = lamb[argsort]
+            argsort = np.argsort(reg_par)
+            reg_par = reg_par[argsort]
             RSS = RSS[argsort]
             SM = SM[argsort]
             f = f[argsort]
@@ -507,11 +525,11 @@ class IRIS:
         f.name = "2D distribution functions"
         f.title = "density"
         f.history = "2D IRIS analysis of {} dataset".format(X.name)
-        f.set_coordset(z=Coord(data=lamb, title="lambda"), y=q.copy(), x=channels)
+        f.set_coordset(z=Coord(data=reg_par, title="lambda"), y=q.copy(), x=channels)
         self.f = f
         self.K = K
         self.X = X
-        self.lamda = lamb
+        self.reg_par = reg_par
         self.RSS = RSS
         self.SM = SM
         self.log = _log
@@ -529,7 +547,7 @@ class IRIS:
             The reconstructed dataset.
         """
 
-        if len(self.lamda) == 1:  # no regularization or single lambda
+        if len(self.reg_par) == 1:  # no regularization or single lambda
             X_hat = NDDataset(
                 np.zeros((self.X.shape)), title=self.X.title, units=self.X.units
             )
@@ -543,9 +561,7 @@ class IRIS:
             )
             X_hat.set_coordset(z=self.f.z, y=self.X.y, x=self.X.x)
             for i in range(X_hat.z.size):
-                X_hat.data[i] = np.expand_dims(
-                    np.dot(self.K.data, self.f[i].data.squeeze()), 1
-                )
+                X_hat.data[i] = np.dot(self.K.data, self.f[i].data.squeeze())
 
         X_hat.name = "2D-IRIS Reconstructed datasets"
         return X_hat
@@ -597,7 +613,7 @@ class IRIS:
         X_hat = self.reconstruct()
         axeslist = []
         if index is None:
-            index = range(len(self.lamda))
+            index = range(len(self.reg_par))
         if type(index) is int:
             index = [index]
 
@@ -610,7 +626,7 @@ class IRIS:
             ax = self.X.plot()
             ax.plot(self.X.x.data, X_hat_.squeeze().T.data, color=colXhat)
             ax.plot(self.X.x.data, res.T.data, color=colRes)
-            ax.set_title(f"2D IRIS merit plot, $\lambda$ = {self.lamda[i]:.2e}")
+            ax.set_title(f"2D IRIS merit plot, $\lambda$ = {self.reg_par[i]:.2e}")
             axeslist.append(ax)
         return axeslist
 
@@ -633,7 +649,7 @@ class IRIS:
 
         axeslist = []
         if index is None:
-            index = range(len(self.lamda))
+            index = range(len(self.reg_par))
         if type(index) is int:
             index = [index]
         for i in index:
