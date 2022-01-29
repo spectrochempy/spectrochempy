@@ -16,8 +16,8 @@ __all__ = []
 import re
 import sys
 import logging
+from logging.handlers import RotatingFileHandler
 import subprocess
-import datetime
 import warnings
 import pprint
 import json
@@ -28,6 +28,8 @@ import threading
 from pkg_resources import get_distribution, DistributionNotFound
 import requests
 from setuptools_scm import get_version
+
+import numpy as np
 
 from traitlets.config.configurable import Config
 from traitlets.config.application import Application
@@ -154,7 +156,7 @@ except LookupError:  # pragma: no cover
 
 # ............................................................................
 def _get_copyright():
-    current_year = datetime.date.today().year
+    current_year = np.datetime64("now", "Y")
     right = f"2014-{current_year}"
     right += " - A.Travert & C.Fernandez @ LCS"
     return right
@@ -817,6 +819,20 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
             self.log
         )  # we change the no name in order to avoid latter conflict with numpy.log
 
+        self.logs.setLevel(0)  # reset to NOTSET
+
+        # Set a log filehandler
+        logdir = self.get_config_dir().parent / "logs"
+        logdir.mkdir(exist_ok=True)
+        rh = RotatingFileHandler(
+            str(logdir / "spectrochempy.log"), maxBytes=32 * 1024, backupCount=5
+        )
+        rh.setLevel(INFO)
+        rh.setFormatter(logging.Formatter("%(message)s"))
+        self.logs.addHandler(rh)
+
+        self.log.info("started")
+
         self.initialize()
 
     def initialize(self, argv=None):
@@ -985,14 +1001,12 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
             json.dump(config, sys.stdout, indent=1, sort_keys=True, default=repr)
             # add trailing newlines
             sys.stdout.write("\n")
-            print()
             return self._start()
 
         if self._loaded_config_files:
             print("Loaded config files:")
             for fil in self._loaded_config_files:
                 print(f"  {fil}")
-            print()
 
         for classname in sorted(config):
             class_config = config[classname]
@@ -1006,7 +1020,6 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
             for traitname in sorted(class_config):
                 value = class_config[traitname]
                 print(f"  {traitname} = {pprint.pformat(value, **pformat_kwargs)}")
-        print()
 
         # now run the actual start function
         return self._start()
@@ -1083,6 +1096,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
             except Exception:
                 pass
 
+        self.logs.info("\n\nAPI loaded - application is ready")
         return True
 
     # ..........................................................................
@@ -1105,13 +1119,16 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
     @observe("log_level")
     def _log_level_changed(self, change):
 
-        self.log_format = "%(message)s"
+        # log file
         if change.new == DEBUG:
-            self.log_format = "[%(filename)s-%(funcName)s %(levelname)s] %(message)s"
-        self.logs._cache = {}
-        self.logs.level = self.log_level
-        for handler in self.logs.handlers:
-            handler.level = self.log_level
+            self.logs.handlers[0].setLevel(INFO)  # no debug in the stdout
+            self.logs.handlers[1].setLevel(DEBUG)
+        else:
+            self.logs.handlers[0].setLevel(change.new)
+            self.logs.handlers[1].setLevel(change.new)
+
+        # root
+        self.logs.setLevel(0)  # reset to NOTSET
         self.logs.info(
             f"changed default log_level to {logging.getLevelName(change.new)}"
         )

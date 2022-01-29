@@ -1,6 +1,9 @@
 # What's new
 
 ## version 0.3.2
+**NEW FEATURES**
+
+* Add a log file (rotating) 
 
 **BUGS FIXED**
 
