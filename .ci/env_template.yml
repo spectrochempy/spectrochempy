@@ -1,5 +1,23 @@
 name: {{ NAME }}
 
+# ========================================================================================
+#
+# NOTE: This file is used by the test github workflow to create the conda environment.
+#
+#       It is generated automatically by .ci/env_create.py (in the workflow)
+#
+#       However to maintain this file up to date in the master repository,
+#       you need to execute these steps:
+#
+#       - Any change in dependencies must be first reflected in .ci/env_template.
+#       - Then execute :
+#          * 'python .ci/create_requirements.py' for creating the 'environment.yaml'
+#             and 'requirements.txt' file
+#          * 'python .ci/create_requirements.py --dev' for creating 'environment-dev.yaml'
+#             and 'requirements.txt' file
+#
+# ========================================================================================
+
 channels:
     - conda-forge
     - spectrocat
@@ -55,7 +73,12 @@ dependencies:
     - nodejs
 
     {% if DEV %}
-    # DEV: just for testing
+    # DEV dependencies
+    # ----------------
+    # From here, the dependencies are essentially for development.
+    # They should not be necessary for the user of  spectrochempy.
+
+    # just for testing
     - pytest
     - pytest-doctestplus
     - pytest-flake8
