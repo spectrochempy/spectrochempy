@@ -1,22 +1,18 @@
 name: {{ NAME }}
 
-# ========================================================================================
+  {%- if HEADER is defined %}
+{{HEADER}}
+  {%- else %}
+# =============================================================================
 #
-# NOTE: This file is used by the test github workflow to create the conda environment.
+# NOTE: This template file is used by to create the conda environment for
+#       the test github action.
 #
-#       It is generated automatically by .ci/env_create.py (in the workflow)
+#       In the test workflow, environments are generated automatically by
+#      .ci/env_create.py (see .github/workflows/test_package.yml#job 1)
 #
-#       However to maintain this file up to date in the master repository,
-#       you need to execute these steps:
-#
-#       - Any change in dependencies must be first reflected in .ci/env_template.
-#       - Then execute :
-#          * 'python script/create_requirements.py' for creating the 'environment.yaml'
-#             and 'requirements.txt' file
-#          * 'python script/create_requirements.py --dev' for creating 'environment-dev.yaml'
-#             and 'requirements.txt' file
-#
-# ========================================================================================
+# =============================================================================
+  {%- endif %}
 
 channels:
     - conda-forge
