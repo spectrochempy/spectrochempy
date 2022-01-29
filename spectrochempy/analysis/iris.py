@@ -181,7 +181,7 @@ class IRIS:
     Integral inversion solver for spectroscopic data.
 
     Solves integral equations of the first kind of 1 or 2 dimensions, i.e. returns a
-    distribution :math:`f` of contributions to 1D ou 2D datasets.
+    distribution f of contributions to 1D ou 2D datasets.
 
     Parameters
     -----------
@@ -581,7 +581,7 @@ class IRIS:
                 np.zeros((self.X.shape)), title=self.X.title, units=self.X.units
             )
             X_hat.set_coordset(y=self.X.y, x=self.X.x)
-            X_hat.data = np.expand_dims(np.dot(self.K.data, self.f.data.squeeze()), 1)
+            X_hat.data = np.dot(self.K.data, self.f.data.squeeze())
         else:
             X_hat = NDDataset(
                 np.zeros((self.f.z.size, *self.X.shape)),
@@ -590,12 +590,14 @@ class IRIS:
             )
             X_hat.set_coordset(z=self.f.z, y=self.X.y, x=self.X.x)
             for i in range(X_hat.z.size):
-                X_hat.data[i] = np.dot(self.K.data, self.f[i].data.squeeze())
+                X_hat.data[i] = np.expand_dims(
+                    np.dot(self.K.data, self.f[i].data.squeeze()), 0
+                )
 
         X_hat.name = "2D-IRIS Reconstructed datasets"
         return X_hat
 
-    def plotlcurve(self, scale="ll", **kwargs):
+    def plotlcurve(self, scale="ll", title="L curve"):
         """
         Plot the L Curve.
 
@@ -604,9 +606,8 @@ class IRIS:
         scale : str, optional, default='ll'
             String of 2 letters among 'l' (log) or 'n' (non-log) indicating whether the y and x
             axes should be log scales.
-
-        **kwargs
-            Keywords arguments passed to the plot() function.
+        title : str, optional, default='L curve'
+            Plot title.
 
         Returns
         -------
@@ -617,7 +618,7 @@ class IRIS:
         fig = plt.figure()
         ax = fig.add_subplot(111)
         ax.set_title("L curve")
-        plt.plot(self.RSS, self.SM, "o", **kwargs)
+        plt.plot(self.RSS, self.SM, "o")
         ax.set_xlabel("Residuals")
         ax.set_ylabel("Curvature")
         if scale[1] == "l":
@@ -660,27 +661,27 @@ class IRIS:
                 X_hat_ = X_hat  # if single lambda or no regularization
             res = self.X - X_hat_
             ax = self.X.plot()
-            ax.plot(self.X.x.data, X_hat_.squeeze().T.data, color=colXhat)
-            ax.plot(self.X.x.data, res.T.data, color=colRes)
+            ax.plot(self.X.x.data, X_hat_.squeeze().T.data, "-", color=colXhat)
+            ax.plot(self.X.x.data, res.T.data, "-", color=colRes)
             ax.set_title(f"2D IRIS merit plot, $\lambda$ = {self.reg_par[i]:.2e}")
             axeslist.append(ax)
         return axeslist
 
     def plotdistribution(self, index=None, **kwargs):
         """
-        Plot the input dataset, reconstructed dataset and residuals.
+        Plot the distribution function
 
         Parameters
         ----------
         index : optional, int, list or tuple of int. default: None.
-            Index(es) of the inversions (i.e. of the lambda values) to consider.
+            Index(es) of the inversions (i.e. of the regularization parameter) to consider.
             If 'None': plots for all indices.
         **kwargs :
             Other optional arguments are passed in the plots.
 
         Returns
         -------
-        List of axes
+            List of axes
         """
 
         axeslist = []
@@ -689,7 +690,7 @@ class IRIS:
         if type(index) is int:
             index = [index]
         for i in index:
-            axeslist.append(self.f[i].plot(**kwargs))
+            axeslist.append(self.f[i].plot(method="map", **kwargs))
         return axeslist
 
 

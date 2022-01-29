@@ -36,25 +36,25 @@ print(X.coordset)
 # Hence, it would be interesting to add pressure coordinates to the ``y`` dimension:
 
 pressures = [
-    0.00300,
-    0.00400,
-    0.00900,
-    0.01400,
-    0.02100,
-    0.02600,
-    0.03600,
-    0.05100,
-    0.09300,
-    0.15000,
-    0.20300,
-    0.30000,
-    0.40400,
-    0.50300,
-    0.60200,
-    0.70200,
-    0.80100,
-    0.90500,
-    1.00400,
+    0.003,
+    0.004,
+    0.009,
+    0.014,
+    0.021,
+    0.026,
+    0.036,
+    0.051,
+    0.093,
+    0.150,
+    0.203,
+    0.300,
+    0.404,
+    0.503,
+    0.602,
+    0.702,
+    0.801,
+    0.905,
+    1.004,
 ]
 
 c_pressures = scp.Coord(pressures, title="pressure", units="torr")
@@ -95,24 +95,20 @@ _ = X_.plot_map()
 ########################################################################################################################
 # Perform IRIS without regularization (the loglevel can be set to `INFO` to have information on the running process)
 scp.set_loglevel(scp.INFO)
-param = {"epsRange": [-8, -1, 50], "kernel": "langmuir"}
-iris = scp.IRIS(X_, param)
+iris = scp.IRIS(X_, "langmuir", q=[-8, -1, 50])
 
 ########################################################################################################################
 # Plots the results
 iris.plotdistribution()
 _ = iris.plotmerit()
-
 ###############################################################################
 # With regularization and a manual search
 # ---------------------------------------
 
 ########################################################################################################################
 # Perform  IRIS with regularization, manual search
-param = {"epsRange": [-8, -1, 50], "lambdaRange": [-10, 1, 12], "kernel": "langmuir"}
 
-
-iris = scp.IRIS(X_, param)
+iris = scp.IRIS(X_, "langmuir", q=[-8, -1, 50], reg_par=[-10, 1, 12])
 iris.plotlcurve(title="L curve, manual search")
 iris.plotdistribution(-7)
 _ = iris.plotmerit(-7)
@@ -123,9 +119,7 @@ _ = iris.plotmerit(-7)
 ########################################################################################################################
 # Now try an automatic search of the regularization parameter:
 
-param = {"epsRange": [-8, -1, 50], "lambdaRange": [-10, 1], "kernel": "langmuir"}
-
-iris = scp.IRIS(X_, param)
+iris = scp.IRIS(X_, "langmuir", q=[-8, -1, 50], reg_par=[-10, 1])
 iris.plotlcurve(title="L curve, automated search")
 
 
