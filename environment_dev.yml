@@ -9,7 +9,7 @@ dependencies:
     - python=3.8
 
     # specific
-    - quadprog=0.1.9
+    - quadprog
     - brukeropusreader
     - quaternion
     - nmrglue

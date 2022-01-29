@@ -61,10 +61,6 @@
     analysis.iris.IRIS.plotlcurve
     analysis.iris.IRIS.plotmerit
     analysis.iris.IRIS.reconstruct
-    analysis.iris.isPD
-    analysis.iris.menger
-    analysis.iris.nearestPD
-    analysis.iris.Smat
     analysis.lstsq
     analysis.lstsq.CurveFit
     analysis.lstsq.CurveFit.inverse_transform

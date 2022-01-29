@@ -51,8 +51,7 @@ def kern(K, p, q):
 
     Examples
     --------
-    # the two examples belmow are equivalents:
-    >>> import numpy as np
+    # the three examples below are equivalents:
     >>> scp.kern('langmuir', np.linspace(0, 1, 100), np.logspace(-10, 1, 10))
     NDDataset: [float64] unitless (shape: (y:100, x:10))
 
@@ -239,14 +238,14 @@ class IRIS:
     If three values are given (`[min, max, num]`), then the inversion will be made for num values
     evenly spaced on a log scale between :math:`10^{min}` and :math:`10^{max}`
 
-    Examples:
+    Examples
     --------
     >>> X = scp.read("irdata/CO@Mo_Al2O3.SPG")
     >>> p = [0.003, 0.004, 0.009, 0.014, 0.021, 0.026, 0.036, 0.051, 0.093, 0.150,
     ...      0.203, 0.300, 0.404, 0.503, 0.602, 0.702, 0.801, 0.905, 1.004]
     >>> iris = scp.IRIS(X[:,2250.0:1960.0], "langmuir", q = [-8, -1, 10])
     >>> iris.f
-    NDDataset: [float64] unitless (shape: (z:1, y:10, x:42))
+    NDDataset: [float64] unitless (shape: (z:1, y:10, x:301))
     """
 
     def __init__(self, X, K, p=None, q=None, reg_par=None):
@@ -332,11 +331,11 @@ class IRIS:
             RSS = np.zeros((4))
             SM = np.zeros((4))
 
-        # Define S matrix (sharpness), see function Smat() below
+        # Define S matrix (sharpness), see function _Smat() below
         msg = "Build S matrix (sharpness)\n"
         info_(msg)
         _log += msg
-        S = Smat(q)
+        S = _Smat(q)
         msg = "... done\n"
         info_(msg)
         _log += msg
@@ -401,7 +400,7 @@ class IRIS:
                         warning_(msg)
                         _log += msg
                         try:
-                            G = nearestPD(G0 + 2 * reg_par * S, 0)
+                            G = _nearestPD(G0 + 2 * reg_par * S, 0)
                             fi[:, j] = quadprog.solve_qp(G, a[j].squeeze(), C, b)[0]
                         except ValueError:
                             msg = (
@@ -410,7 +409,7 @@ class IRIS:
                             )
                             warning_(msg)
                             _log += msg
-                            G = nearestPD(G0 + 2 * reg_par * S, 1e-3)
+                            G = _nearestPD(G0 + 2 * reg_par * S, 1e-3)
                             fi[:, j] = quadprog.solve_qp(G, a[j].squeeze(), C, b)[0]
 
                 resi = X.data - np.dot(K.data, fi)
@@ -464,8 +463,8 @@ class IRIS:
                 Rx = np.copy(RSS)
                 Sy = np.copy(SM)
                 while "convergence not reached":
-                    C1 = menger(np.log10(Rx[0:3]), np.log10(Sy[0:3]))
-                    C2 = menger(np.log10(Rx[1:4]), np.log10(Sy[1:4]))
+                    C1 = _menger(np.log10(Rx[0:3]), np.log10(Sy[0:3]))
+                    C2 = _menger(np.log10(Rx[1:4]), np.log10(Sy[1:4]))
                     msg = f"Curvatures of the inner points: C1 = {C1:.3f} ; C2 = {C2:.3f} \n"
                     info_(msg)
                     _log += msg
@@ -487,7 +486,7 @@ class IRIS:
                         f = np.concatenate((f, np.atleast_3d(f_.T).T))
                         RSS = np.concatenate((RSS, np.array(Rx[1:2])))
                         SM = np.concatenate((SM, np.array(Sy[1:2])))
-                        C2 = menger(np.log10(Rx[1:4]), np.log10(Sy[1:4]))
+                        C2 = _menger(np.log10(Rx[1:4]), np.log10(Sy[1:4]))
                         msg = f"new curvature: C2 = {C2:.3f}"
                         info_(msg)
                         _log += msg
@@ -643,6 +642,7 @@ class IRIS:
         Returns
         -------
             list of axes
+                The axes.
         """
 
         colX, colXhat, colRes = kwargs.get("colors", ["blue", "green", "red"])
@@ -669,19 +669,22 @@ class IRIS:
 
     def plotdistribution(self, index=None, **kwargs):
         """
-        Plot the distribution function
+        Plot the distribution function.
+
+        This fucntion plots the distribution function f of the IRIS object.
 
         Parameters
         ----------
-        index : optional, int, list or tuple of int. default: None.
+        index : optional, int, list or tuple of int. default: None
             Index(es) of the inversions (i.e. of the regularization parameter) to consider.
             If 'None': plots for all indices.
-        **kwargs :
+        **kwargs
             Other optional arguments are passed in the plots.
 
         Returns
         -------
             List of axes
+                The axes.
         """
 
         axeslist = []
@@ -695,10 +698,10 @@ class IRIS:
 
 
 # --------------------------------------------
-# Utility functions
+# Utility private functions
 
 
-def menger(x, y):
+def _menger(x, y):
     """
     returns the Menger curvature of a triplet of
     points. x, y = sets of 3 cartesian coordinates
@@ -713,7 +716,7 @@ def menger(x, y):
     return numerator / denominator
 
 
-def Smat(q):
+def _Smat(q):
     """returns the matrix used to compute the norm of f second derivative"""
     m = len(q)
     S = np.zeros((m, m))
@@ -744,7 +747,7 @@ def Smat(q):
     return S
 
 
-def nearestPD(A, shift):
+def _nearestPD(A, shift):
     """
     Find the nearest positive-definite matrix to input.
 
@@ -769,7 +772,7 @@ def nearestPD(A, shift):
     A2 = 0.5 * (B + H)
 
     A3 = 0.5 * (A2 + A2.T) + np.eye(A2.shape[0]).__mul__(shift)
-    if isPD(A3):
+    if _isPD(A3):
         return A3
 
     spacing = np.spacing(np.linalg.norm(A))
@@ -784,7 +787,7 @@ def nearestPD(A, shift):
     # below suggests.
     Ie = np.eye(A.shape[0])
     k = 1
-    while not isPD(A3):
+    while not _isPD(A3):
         mineig = np.min(np.real(np.linalg.eigvals(A3)))
         A3 += Ie * (-mineig * k ** 2 + spacing)
         k += 1
@@ -792,7 +795,7 @@ def nearestPD(A, shift):
     return A3
 
 
-def isPD(B):
+def _isPD(B):
     """
     Return True when input is positive-definite.
 
