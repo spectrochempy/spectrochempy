@@ -7,7 +7,7 @@
 #
 # =============================================================================
 
-quadprog==0.1.9
+quadprog
 brukeropusreader
 numpy-quaternion
 git+https://github.com/jjhelmus/nmrglue.git

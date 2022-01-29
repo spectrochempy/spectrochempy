@@ -15,6 +15,12 @@
 
 * read_labspec: now ignore non-labspec .txt files
 
+* IRIS: fix #296 quadprog version 
+
+**NEW FEATURES**
+
+* IRIS refactoring and better testing
+
 ## Version 0.3.1
 
 **NEW FEATURES**
