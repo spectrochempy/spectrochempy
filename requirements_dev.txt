@@ -1,5 +1,11 @@
-# This file is auto-generated from environment_dev.yml, do not modify.
-# See that file for comments about the need/usage of each dependency.
+# WARNING !!!
+# =============================================================================
+#
+# This file is auto-generated from environment_dev.yml file, do not modify it directly.
+#
+# See in `environment_dev.yml` for more information.
+#
+# =============================================================================
 
 quadprog
 brukeropusreader
@@ -39,7 +45,7 @@ black
 pre-commit
 mamba
 jupytext
-sphinx<4
+sphinx<4.0
 sphinx_rtd_theme
 autodocsumm
 sphinx-gallery<=0.7.0

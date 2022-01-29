@@ -1,5 +1,11 @@
-# This file is auto-generated from environment.yml, do not modify.
-# See that file for comments about the need/usage of each dependency.
+# WARNING !!!
+# =============================================================================
+#
+# This file is auto-generated from environment.yml file, do not modify it directly.
+#
+# See in `environment.yml` for more information.
+#
+# =============================================================================
 
 quadprog
 brukeropusreader

@@ -1,5 +1,19 @@
 name: {{ NAME }}
 
+  {%- if HEADER is defined %}
+{{HEADER}}
+  {%- else %}
+# =============================================================================
+#
+# NOTE: This template file is used by to create the conda environment for
+#       the test github action.
+#
+#       In the test workflow, environments are generated automatically by
+#      .ci/env_create.py (see .github/workflows/test_package.yml#job 1)
+#
+# =============================================================================
+  {%- endif %}
+
 channels:
     - conda-forge
     - spectrocat
@@ -55,7 +69,12 @@ dependencies:
     - nodejs
 
     {% if DEV %}
-    # DEV: just for testing
+    # DEV dependencies
+    # ----------------
+    # From here, the dependencies are essentially for development.
+    # They should not be necessary for the user of  spectrochempy.
+
+    # just for testing
     - pytest
     - pytest-doctestplus
     - pytest-flake8
