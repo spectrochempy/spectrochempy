@@ -28,7 +28,7 @@ dependencies:
     {%- endif %}
 
     # specific
-    - quadprog=0.1.9
+    - quadprog
     - brukeropusreader
     - quaternion
     - nmrglue
