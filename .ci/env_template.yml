@@ -11,9 +11,9 @@ name: {{ NAME }}
 #
 #       - Any change in dependencies must be first reflected in .ci/env_template.
 #       - Then execute :
-#          * 'python .ci/create_requirements.py' for creating the 'environment.yaml'
+#          * 'python script/create_requirements.py' for creating the 'environment.yaml'
 #             and 'requirements.txt' file
-#          * 'python .ci/create_requirements.py --dev' for creating 'environment-dev.yaml'
+#          * 'python script/create_requirements.py --dev' for creating 'environment-dev.yaml'
 #             and 'requirements.txt' file
 #
 # ========================================================================================
