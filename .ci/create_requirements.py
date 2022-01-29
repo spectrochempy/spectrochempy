@@ -1,16 +1,11 @@
 #!/usr/bin/env python3
 """
-Convert the conda environment.yml to the pip requirements-dev.txt,
-or check that they have the same packages (for the CI)
+Create a local conda environment.yml file and convert to the equivalent pip requirements.txt.
 
 Usage:
 
     Generate `requirements-dev.txt`
-    $ python scripts/generate_pip_deps_from_conda.py
-
-    Compare and fail (exit status != 0) if `requirements-dev.txt` has not been
-    generated with this script:
-    $ python scripts/generate_pip_deps_from_conda.py --compare
+    $ python create_requirements.py --dev
 
 Adapted from https://github.com/pandas-dev/pandas/scripts
 /generate_pip_deps_from_conda.py (BSD 3-Clause License)
@@ -86,7 +81,7 @@ def main(conda_fname, pip_fname):
     conda_fname : str
         Path to the conda file with dependencies (e.g. `environment.yml`).
     pip_fname : str
-        Path to the pip file with dependencies (e.g. `requirements-dev.txt`).
+        Path to the pip file with dependencies (e.g. `requirements.txt`).
 
     Returns
     -------
@@ -108,10 +103,14 @@ def main(conda_fname, pip_fname):
             raise ValueError(f"Unexpected dependency {dep}")
 
     fname = conda_fname.name
-    header = (
-        f"# This file is auto-generated from {fname}, do not modify.\n"
-        "# See that file for comments about the need/usage of each dependency.\n\n"
-    )
+    header = f"""# WARNING !!!
+# ======================================================================================================================
+# This file is auto-generated from {fname} file, do not modify it directly.
+# See in `{fname}` for more information.
+# ======================================================================================================================
+
+"""
+
     pip_content = header + "\n".join(pip_deps) + "\n"
 
     pip_fname.write_text(pip_content)
@@ -119,9 +118,7 @@ def main(conda_fname, pip_fname):
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(
-        description="convert (or compare) conda file to pip"
-    )
+    parser = argparse.ArgumentParser(description="convert conda file to pip")
 
     parser.add_argument(
         "name",
@@ -147,7 +144,7 @@ if __name__ == "__main__":
 
     name = args.name.split(".yml")[0]
     dev = "_dev" if args.dev else ""
-    print(dev)
+
     out = template.render(
         NAME=f"{name}{dev}",
         VERSION=args.version,
