@@ -1,10 +1,8 @@
 # intentionnaly masked with ~
-# ----------------------------------------------------------------------------------------------------------------------
 *~
 ~*
 
 # ignored extensions
-# ----------------------------------------------------------------------------------------------------------------------
 *.log
 .eggs
 *.egg-info
@@ -18,21 +16,29 @@
 *.bz2
 *.py[cod]
 *.pdf
+*.pptx
 *.zip
 *.egg
 *.manifest
 *.spec
 *.pyc
+.vscode
+
+# generated in tests and examples
+*.ipynb
+*.csv
+*.jdx
+*.nc
+*.scp
+*.pscp
 
 # git files
-# ----------------------------------------------------------------------------------------------------------------------
 *_LOCAL_*.*
 *_REMOTE_*.*
 *_BACKUP_*.*
 *_BASE_*.*
 
 # local files or directory
-# ----------------------------------------------------------------------------------------------------------------------
 .gitignore_*
 .editorconfig
 /extdata/
@@ -41,38 +47,22 @@
 thumb.png
 
 # Mac OS specific
-# ----------------------------------------------------------------------------------------------------------------------
 .DS_Store
 
 # pycharm project
-# ----------------------------------------------------------------------------------------------------------------------
 .idea/
 
 # Spyder project
-# ----------------------------------------------------------------------------------------------------------------------
 .spyderproject
 .spyproject
 
-# Example, ipython notebook checkpoints
-# ----------------------------------------------------------------------------------------------------------------------
-*.ipynb_checkpoints/
-Untitled.ipynb
-essai.ipynb
-*.ipynb
-
-# VS
-# ----------------------------------------------------------------------------------------------------------------------
-.vscode
-
 # caches
-# ----------------------------------------------------------------------------------------------------------------------
+*.ipynb_checkpoints/
 __pycache__/
 .cache/
 /.pytest_cache/
 
 # Sphinx documentation
-# ----------------------------------------------------------------------------------------------------------------------
-docs/api/generated
 docs/_build/
 docs/index.doctree
 generated/
@@ -83,19 +73,22 @@ gallery
 docs/modules/
 docs/savefig/
 docs/_templates_old
+*.py-donotwork
+/patch.diff
+.hypothesis/
+/htmlcov/
+cov.coverage
+cov.syspath.txt
+coverage.xml
 
 # tests
-# ----------------------------------------------------------------------------------------------------------------------
 tests/figures
 /tests_extern_packages/
-*.jdx
 
 # latex
-# ----------------------------------------------------------------------------------------------------------------------
 *.fdb_latexmk
 
 # data
-# ----------------------------------------------------------------------------------------------------------------------
 scpy.svg
 *.sample
 scp_data/testdata/figures
@@ -104,12 +97,10 @@ auditp.txt
 clevels
 
 # Docker / bitbucket
-# ----------------------------------------------------------------------------------------------------------------------
 .dockerignore
 .pipeline*.sh
 
 # Distribution / packaging
-# ----------------------------------------------------------------------------------------------------------------------
 .Python
 develop-eggs/
 eggs/
@@ -120,17 +111,7 @@ sdist/
 var/
 *.egg-info/
 .coverage
-
 saved_pkglist.txt
-
-
-scp_data/testdata/nmrdata/bruker/tests/nmr/exam1d_13C
-scp_data/testdata/nmrdata/bruker/tests/nmr/exam1d_1H
-# scp_data/testdata/nmrdata/bruker/tests/nmr/exam2d_HC
-# scp_data/testdata/nmrdata/bruker/tests/nmr/exam2d_HH
-scp_data/testdata/nmrdata/bruker/tests/nmr/exam_CMCse_1
-scp_data/testdata/nmrdata/bruker/tests/nmr/exam_CMCse_2
-scp_data/testdata/nmrdata/bruker/tests/nmr/exam_CMCse_3
 Icon*
 
 # pip virtual environment
@@ -140,26 +121,3 @@ process.pscp
 
 # unknown
 .goutputstream*
-
-
-# Html Documentation
-/spectrochempy_docs/
-*.py-donotwork
-/patch.diff
-
-*.pptx
-.hypothesis/
-/htmlcov/
-cov.coverage
-cov.syspath.txt
-coverage.xml
-scripts/myfile.csv
-scripts/single_spectrum.csv
-myfile.csv
-single_spectrum.csv
-
-# docs automatically generated
-generated/
-changelog.rst
-/res.docstrings.txt
-opus.scp
