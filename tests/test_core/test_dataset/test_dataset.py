@@ -12,11 +12,164 @@ from spectrochempy.utils.testing import (
     assert_equal,
     assert_array_almost_equal,
     assert_array_equal,
-    raises,
     RandomSeedContext,
 )
 
 typequaternion = np.dtype(np.quaternion)
+
+# ========
+# FIXTURES
+# ========
+with RandomSeedContext(12345):
+    ref_data = 10.0 * np.random.random((10, 8)) - 5.0
+    ref3d_data = 10.0 * np.random.random((10, 100, 3)) - 5.0
+    ref3d_2_data = np.random.random((9, 50, 4))
+
+ref_mask = ref_data < -4
+ref3d_mask = ref3d_data < -3
+ref3d_2_mask = ref3d_2_data < -2
+
+
+# ------------------------------------------------------------------
+# Fixtures: Some scp.NDDatasets
+# ------------------------------------------------------------------
+
+coord0_ = scp.Coord(
+    data=np.linspace(4000.0, 1000.0, 10),
+    labels=list("abcdefghij"),
+    units="cm^-1",
+    title="wavenumber",
+)
+
+
+@pytest.fixture(scope="function")
+def coord0():
+    return coord0_.copy()
+
+
+coord1_ = scp.Coord(data=np.linspace(0.0, 60.0, 100), units="s", title="time-on-stream")
+
+
+@pytest.fixture(scope="function")
+def coord1():
+    return coord1_.copy()
+
+
+coord2_ = scp.Coord(
+    data=np.linspace(200.0, 300.0, 3),
+    labels=["cold", "normal", "hot"],
+    units="K",
+    title="temperature",
+)
+
+
+@pytest.fixture(scope="function")
+def coord2():
+    return coord2_.copy()
+
+
+coord2b_ = scp.Coord(
+    data=np.linspace(1.0, 20.0, 3),
+    labels=["low", "medium", "high"],
+    units="tesla",
+    title="magnetic field",
+)
+
+
+@pytest.fixture(scope="function")
+def coord2b():
+    return coord2b_.copy()
+
+
+coord0_2_ = scp.Coord(
+    data=np.linspace(4000.0, 1000.0, 9),
+    labels=list("abcdefghi"),
+    units="cm^-1",
+    title="wavenumber",
+)
+
+
+@pytest.fixture(scope="function")
+def coord0_2():
+    return coord0_2_.copy()
+
+
+coord1_2_ = scp.Coord(
+    data=np.linspace(0.0, 60.0, 50), units="s", title="time-on-stream"
+)
+
+
+@pytest.fixture(scope="function")
+def coord1_2():
+    return coord1_2_.copy()
+
+
+coord2_2_ = scp.Coord(
+    data=np.linspace(200.0, 1000.0, 4),
+    labels=["cold", "normal", "hot", "veryhot"],
+    units="K",
+    title="temperature",
+)
+
+
+@pytest.fixture(scope="function")
+def coord2_2():
+    return coord2_2_.copy()
+
+
+@pytest.fixture(scope="function")
+def nd1d():
+    # a simple ddataset
+    return scp.NDDataset(ref_data[:, 1].squeeze()).copy()
+
+
+@pytest.fixture(scope="function")
+def nd2d():
+    # a simple 2D ndarrays
+    return scp.NDDataset(ref_data).copy()
+
+
+@pytest.fixture(scope="function")
+def ref_ds():
+    # a dataset with coordinates
+    return ref3d_data.copy()
+
+
+@pytest.fixture(scope="function")
+def ds1():
+    # a dataset with coordinates
+    return scp.NDDataset(
+        ref3d_data,
+        coordset=[coord0_, coord1_, coord2_],
+        title="absorbance",
+        units="absorbance",
+    ).copy()
+
+
+@pytest.fixture(scope="function")
+def ds2():
+    # another dataset
+    return scp.NDDataset(
+        ref3d_2_data,
+        coordset=[coord0_2_, coord1_2_, coord2_2_],
+        title="absorbance",
+        units="absorbance",
+    ).copy()
+
+
+@pytest.fixture(scope="function")
+def dsm():
+    # dataset with coords containing several axis and a mask
+
+    coordmultiple = scp.CoordSet(coord2_, coord2b_)
+    return scp.NDDataset(
+        ref3d_data,
+        coordset=[coord0_, coord1_, coordmultiple],
+        mask=ref3d_mask,
+        title="absorbance",
+        units="absorbance",
+    ).copy()
+
 
 # test minimal constructeur and dtypes
 adata = (
@@ -98,7 +251,7 @@ def test_2D_NDDataset(arr):
             assert ds.dtype == np.complex128
     else:
         with pytest.raises(ValueError):
-            ds = scp.NDDataset(arr, dtype=np.complex128)
+            scp.NDDataset(arr, dtype=np.complex128)
     if (arr.shape[-1] % 2) == 0 and (arr.shape[-2] % 2) == 0 and arr.ndim == 2:
         ds = scp.NDDataset(arr, dtype=np.quaternion)
         if ds.size == 0:
@@ -107,7 +260,7 @@ def test_2D_NDDataset(arr):
             assert ds.dtype == np.quaternion
     else:
         with pytest.raises(ValueError):
-            ds = scp.NDDataset(arr, dtype=np.quaternion)
+            scp.NDDataset(arr, dtype=np.quaternion)
     # test units
     ds1 = scp.NDDataset(arr * scp.ur.km)
     ds2 = scp.NDDataset(arr, units=scp.ur.km)
@@ -142,7 +295,7 @@ def test_nddataset_coordset():
         dx,
         coordset=(coord0, coord1, coord2),
         title="absorbance",
-        coordtitles=["wavelength", "time-on-stream", "temperature"],
+        coordlong_names=["wavelength", "time-on-stream", "temperature"],
         coordunits=["cm^-1", "s", "K"],
     )
     assert da.shape == (10, 7, 3)
@@ -169,7 +322,7 @@ def test_nddataset_coordset():
         dx,
         coordset=[coord0, coord1, coord2, cadd, coord2.copy()],
         title="absorbance",
-        coordtitles=coordtitles,
+        coordlong_names=coordtitles,
         coordunits=coordunits,
     )
     assert daa.coordset.titles == coordtitles[::-1]
@@ -204,7 +357,7 @@ def test_nddataset_coords_indexer():
     coord1 = np.linspace(0, 60, 10)  # wrong length
     coord2 = np.linspace(20, 30, 10)
     with pytest.raises(ValueError):  # wrong length
-        da = scp.NDDataset(
+        scp.NDDataset(
             dx,
             coordset=[coord0, coord1, coord2],
             title="absorbance",
@@ -248,17 +401,13 @@ def test_nddataset_coords_indexer():
 # ======================================================================================================================
 # Methods
 # ======================================================================================================================
-def test_nddataset_str():
+def test_nddataset_str_repr_methods():
+
     arr1d = scp.NDDataset([1, 2, 3])
     assert "[float64]" in str(arr1d)
     arr2d = scp.NDDataset(np.array([[1, 2], [3, 4]]))
     assert str(arr2d) == "NDDataset: [float64] unitless (shape: (y:2, x:2))"
-
-
-def test_nddataset_str_repr(ds1):
-    arr1d = scp.NDDataset(np.array([1, 2, 3]))
     assert repr(arr1d).startswith("NDDataset")
-    arr2d = scp.NDDataset(np.array([[1, 2], [3, 4]]))
     assert repr(arr2d).startswith("NDDataset")
 
 
@@ -296,7 +445,7 @@ def test_nddataset_units(nd1d):
     assert nd2.data[1] == np.sqrt(nd.data[1])
     assert nd2.units == ur.m ** 0.5
     nd.units = "cm"
-    nd2 = np.sqrt(nd)
+    _ = np.sqrt(nd)
     nd.ito("m")
     nd2 = np.sqrt(nd)
     assert isinstance(nd2, type(nd))
@@ -480,10 +629,10 @@ def test_nddataset_slicing_out_limits(caplog, ds1):
     assert str(y5) == "NDDataset: [float64] a.u. (shape: (z:4, y:100, x:3))"
 
 
-@raises(IndexError)
 def test_nddataset_slicing_toomanyindex(ds1):
     da = ds1
-    da[:, 3000.0:2000.0, :, 210.0]
+    with pytest.raises(IndexError):
+        da[:, 3000.0:2000.0, :, 210.0]
 
 
 def test_nddataset_slicing_by_index_nocoords(ds1):
@@ -816,8 +965,6 @@ def test_nddataset_bug_fixe_figopeninnotebookwithoutplot():
 
 
 def test_nddataset_bug_par_arnaud():
-    import spectrochempy as scp
-    import numpy as np
 
     x = scp.Coord(data=np.linspace(1000.0, 4000.0, num=6000), title="x")
     y = scp.Coord(data=np.linspace(0.0, 10, num=5), title="y")
@@ -1186,30 +1333,36 @@ def test_take(dsm):
 # Conversion
 
 
+@pytest.mark.skipif(
+    scp.optional.import_optional_dependency("xarray", errors="ignore") is None,
+    reason="need xarray package to run",
+)
 def test_nddataset_to_xarray(IR_dataset_2D):
 
     nd1 = IR_dataset_2D[0].squeeze()
 
     xnd1 = nd1.to_xarray()
     print(xnd1)
-    assert xnd1.x.attrs["units"] == nd1.x.units
+    assert xnd1.x.attrs["pint_units"] == nd1.x.units
 
+    # 2D
     nd2 = IR_dataset_2D
+    nd2[:, 1230.0:920.0] = scp.MASKED
 
     # add some attribute
-    nd2.meta.pression = 34
-    nd2.meta.temperature = 3000
-    assert nd2.meta.temperature == 3000
-    assert nd2.temperature == 3000  # alternative way to get the meta attribute
+    nd2.meta.pression = 34 * ur.pascal
+    nd2.meta.temperature = 3000 * ur.K
+    assert nd2.meta.temperature == 3000 * ur.K
+    assert nd2.temperature == 3000 * ur.K  # alternative way to get the meta attribute
 
     assert nd2.meta.essai is None  # do not exist in dict
     with pytest.raises(AttributeError):
         nd2.essai2  # can not find this attribute
 
     # also for the coordinates
-    nd2.y.meta.pression = 3
-    assert nd2.y.meta["pression"] == 3
-    assert nd2.y.pression == 3  # alternative way to get the meta attribute
+    nd2.y.meta.pression = 3 * ur.torr
+    assert nd2.y.meta["pression"] == 3 * ur.torr
+    assert nd2.y.pression == 3 * ur.torr  # alternative way to get the meta attribute
 
     assert nd2.y.meta.essai is None  # not found so it is None
     with pytest.raises(AttributeError):
@@ -1218,6 +1371,7 @@ def test_nddataset_to_xarray(IR_dataset_2D):
     # convert
     xnd2 = nd2.to_xarray()
     print(xnd2)
-    assert xnd2.y.attrs["units"] == nd2.y.units
-    assert xnd2.y.attrs["pression"] == nd2.y.meta["pression"]
-    assert xnd2.y.attrs["pression"] == nd2.y.pression
+    assert xnd2.y.attrs["pint_units"] == "None"
+    assert xnd2.y.attrs["meta_pression"] == nd2.y.meta["pression"].m
+    assert xnd2.y.attrs["meta_pression"] == nd2.y.pression.m
+    assert xnd2.y.attrs["pint_units_meta_pression"] == nd2.y.meta["pression"].u

@@ -29,3 +29,8 @@ def test_json_serialiser_decoder(IR_dataset_2D):
     jsd = json.loads(js_string, object_hook=json_decoder)
 
     assert np.all(pickle.loads(base64.b64decode(js["data"]["base64"])) == jsd["data"])
+
+    # backward compatibility
+    from spectrochempy import read, preferences as prefs
+
+    nd = read(prefs.datadir / "irdata/nh4y-activation.scp")

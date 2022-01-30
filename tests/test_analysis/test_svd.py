@@ -8,7 +8,7 @@
 from numpy.testing import assert_allclose
 
 from spectrochempy.analysis.svd import SVD
-from spectrochempy.utils import MASKED
+from spectrochempy.utils import MASKED, show
 
 
 # test svd
@@ -26,7 +26,7 @@ def test_svd(IR_dataset_2D):
     dataset[:, 1240.0:920.0] = MASKED  # do not forget to use float in slicing
     dataset[10:12] = MASKED
 
-    dataset.plot_stack()
+    dataset.plot_stack(colorbar=True)
 
     svd = SVD(dataset)
 
@@ -41,3 +41,5 @@ def test_svd(IR_dataset_2D):
     svd = SVD(dataset, full_matrices=True)
 
     assert_allclose(svd.ev_ratio.data[0], 93.8, rtol=1e-4, atol=0.01)
+
+    show()

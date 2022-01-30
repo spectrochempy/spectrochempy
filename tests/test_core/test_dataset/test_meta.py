@@ -5,9 +5,9 @@
 """
 
 """
+import pytest
 
 from spectrochempy.core.dataset.meta import Meta
-from spectrochempy.utils.testing import raises
 from spectrochempy.core.units import ur
 
 
@@ -37,7 +37,7 @@ def test_readonly():
     meta.chaine = "a string"
     assert meta.chaine == "a string"
     meta.readonly = True
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         meta.chaine = "a modified string"
     assert meta.chaine != "a modified string"
 
@@ -45,9 +45,9 @@ def test_readonly():
 def test_invalid_key():
     meta = Meta()
     meta.readonly = False  # this is accepted`
-    with raises(KeyError):
+    with pytest.raises(KeyError):
         meta["readonly"] = True  # this not because readonly is reserved
-    with raises(KeyError):
+    with pytest.raises(KeyError):
         meta["_data"] = True  # this not because _xxx type attributes are private
 
 

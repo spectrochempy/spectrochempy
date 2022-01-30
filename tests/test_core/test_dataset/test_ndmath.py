@@ -7,17 +7,18 @@ Tests for the ndmath module
 """
 import numpy as np
 import pytest
-from pint.errors import DimensionalityError
 from quaternion import quaternion
+from pint.errors import DimensionalityError
 
 from spectrochempy.core import info_, error_
-from spectrochempy.core.dataset.coord import Coord, LinearCoord
-from spectrochempy.core.dataset.coordset import CoordSet
+from spectrochempy.core.dataset.coord import Coord, LinearCoord, CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndmath import (
     _unary_ufuncs,
     _binary_ufuncs,
     _comp_ufuncs,
+    dot,
+    diag,
 )
 from spectrochempy.core.units.units import ur, Quantity, Unit
 from spectrochempy.utils import MASKED
@@ -32,9 +33,77 @@ import spectrochempy as scp
 
 typequaternion = np.dtype(np.quaternion)
 
+# ========
+# Fixtures
+# ========
+with RandomSeedContext(12345):
+    ref_data = 10.0 * np.random.random((10, 8)) - 5.0
+    ref3d_data = 10.0 * np.random.random((10, 100, 3)) - 5.0
+    ref3d_2_data = np.random.random((9, 50, 4))
 
+ref_mask = ref_data < -4
+ref3d_mask = ref3d_data < -3
+ref3d_2_mask = ref3d_2_data < -2
+
+
+# ------------------------------------------------------------------
+# Fixtures: Some scp.NDDatasets
+# ------------------------------------------------------------------
+
+coord0_ = scp.Coord(
+    data=np.linspace(4000.0, 1000.0, 10),
+    labels=list("abcdefghij"),
+    units="cm^-1",
+    title="wavenumber",
+)
+
+
+@pytest.fixture(scope="function")
+def coord0():
+    return coord0_.copy()
+
+
+coord1_ = scp.Coord(data=np.linspace(0.0, 60.0, 100), units="s", title="time-on-stream")
+
+
+@pytest.fixture(scope="function")
+def coord1():
+    return coord1_.copy()
+
+
+coord2_ = scp.Coord(
+    data=np.linspace(200.0, 300.0, 3),
+    labels=["cold", "normal", "hot"],
+    units="K",
+    title="temperature",
+)
+
+
+@pytest.fixture(scope="function")
+def coord2():
+    return coord2_.copy()
+
+
+@pytest.fixture(scope="function")
+def nd2d():
+    # a simple 2D ndarrays
+    return scp.NDDataset(ref_data).copy()
+
+
+@pytest.fixture(scope="function")
+def ds1():
+    # a dataset with coordinates
+    return scp.NDDataset(
+        ref3d_data,
+        coordset=[coord0_, coord1_, coord2_],
+        title="absorbance",
+        units="absorbance",
+    ).copy()
+
+
+# ===========
 # UNARY MATHS
-# -----------
+# ===========
 @pytest.mark.parametrize(("name", "comment"), _unary_ufuncs().items())
 def test_ndmath_unary_ufuncs_simple_data(nd2d, name, comment):
     nd1 = nd2d.copy() / 1.0e10  # divide to avoid some overflow in exp ufuncs
@@ -95,7 +164,7 @@ def test_bug_lost_dimensionless_units():
 
     dataset = NDDataset.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
     assert dataset.units == "absorbance"
-    dataset = dataset - 2.0 - 50.0  # artificially make negative some of the values
+    dataset = dataset - 2.0 - 50.0  # artificially make negative some values
     assert dataset.units == "absorbance"
 
     dataset = dataset.clip(-2.0, 2.0)
@@ -521,9 +590,8 @@ def test_simple_arithmetic_on_full_dataset():
     import os
 
     dataset = NDDataset.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
-    (
-        dataset - dataset[0]
-    )  # suppress the first spectrum to all other spectra in the series
+    _ = dataset - dataset[0]
+    # suppress the first spectrum to all other spectra in the series
 
 
 def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
@@ -535,7 +603,7 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     x = [1, 2, 3]
 
     # _like as an API method
-    ds = NDDataset(x).full_like(2.5, title="empty")
+    _ = NDDataset(x).full_like(2.5, title="empty")
     ds = scp.full_like(x, 2)
     assert np.all(ds.data == np.full((3,), 2))
     assert ds.implements("NDDataset")
@@ -606,7 +674,7 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     # ONES
     # ----
 
-    ds = NDDataset.ones((6,))
+    _ = NDDataset.ones((6,))
     ds = scp.full((6,), 0.1)
     assert ds.size == 6
     assert str(ds) == "NDDataset: [float64] unitless (size: 6)"
@@ -663,7 +731,7 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
 
     # adding coordset
     c1 = Coord.linspace(1, 20, 200, units="m", name="axe_x")
-    ds = scp.random((200,), units="km", coordset=scp.CoordSet(x=c1))
+    _ = scp.random((200,), units="km", coordset=scp.CoordSet(x=c1))
 
     # DIAGONAL
     # --------
@@ -761,9 +829,9 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     idx = nd1.argmax()
     assert idx == 3122
 
-    mx = nd1.max()
+    _ = nd1.max()
     # alternative
-    mx = scp.max(nd1)
+    _ = scp.max(nd1)
     mx = NDDataset.max(nd1)
     assert mx == Quantity(3.8080601692199707, "absorbance")
 
@@ -852,7 +920,7 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     val = np.abs(ndd)
 
     val = ndd[1] * 1.2 - 10.0
-    val = np.abs(val)
+    _ = np.abs(val)
 
     # FROMFUNCTION
     # ------------
@@ -1012,9 +1080,9 @@ def test_nddataset_fancy_indexing():
     c = (np.arange(3), np.arange(5))
     nd = NDDataset(a, coordset=c)
 
-    a = nd[[1, 0, 2]]
+    _ = nd[[1, 0, 2]]
 
-    a = nd[np.array([1, 0])]
+    _ = nd[np.array([1, 0])]
 
 
 def test_coord_add_units_with_different_scale():
@@ -1093,3 +1161,44 @@ def test_round_docstring_example():
     assert_dataset_equal(dsm_transformed1, dsm_transformed2)
     assert_dataset_equal(dsm_transformed1, dsm_transformed3)
     assert_dataset_equal(dsm_transformed1, dsm_transformed4)
+
+
+def test_npy(ds1):
+    # functions that keep units
+
+    # DIAG
+    with pytest.raises(ValueError):
+        df = diag(ds1)  # work only for 1d or 2D dataset
+
+    ds = ds1[0].squeeze()
+    assert ds.ndim == 2
+    df = diag(ds)
+    assert df.units == ds1.units
+    assert df.ndim == 1
+    assert df.size == ds.x.size
+
+    d = ds[0].squeeze()
+    assert d.ndim == 1
+    df = diag(d)
+    assert df.units == ds1.units
+    assert df.ndim == 2
+    assert df.size == d.x.size ** 2
+
+    df = diag(ds.data)
+    assert df.implements("NDDataset")
+
+    # DOT
+    a = ds  # 2D dataset
+    b = ds1[3].squeeze()  # second 2D dataset
+    b.ito("km", force=True)  # put some units to b
+    x = dot(a.T, b)
+    assert x.units == a.units * b.units
+    assert x.shape == (a.x.size, b.x.size)
+
+    # allow mixing numpy object with dataset
+    x = dot(a.T, b.data)
+    assert x.units == a.units
+
+    # if no dataset then is it equivalent to np.dot
+    x = dot(a.data.T, b.data)
+    assert isinstance(x, np.ndarray)

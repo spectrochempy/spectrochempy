@@ -153,7 +153,7 @@ def test_issue_227():
     )
 
     # baseline correction the transposed data along x (now on axis 0) -> should produce the same results
-    # baseline correction along axis -1 previuosly
+    # baseline correction along axis -1 previously
     blc = scp.BaselineCorrection(ir.T)
     s2 = blc(
         [5999.0, 3500.0],

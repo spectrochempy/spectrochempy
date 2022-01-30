@@ -1,12 +1,147 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa
+import pytest
+import numpy as np
 
 from spectrochempy.core.project.project import Project
 from spectrochempy.core.scripts.script import Script, run_script
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core import preferences, INPLACE
+from spectrochempy.utils.testing import RandomSeedContext
+import spectrochempy as scp
 
 prefs = preferences
+
+# ------------------------------------------------------------------
+# fixture Project
+# ------------------------------------------------------------------
+with RandomSeedContext(12345):
+    ref_data = 10.0 * np.random.random((10, 8)) - 5.0
+    ref3d_data = 10.0 * np.random.random((10, 100, 3)) - 5.0
+    ref3d_2_data = np.random.random((9, 50, 4))
+
+ref_mask = ref_data < -4
+ref3d_mask = ref3d_data < -3
+ref3d_2_mask = ref3d_2_data < -2
+
+
+@pytest.fixture(scope="function")
+def ds1():
+    # a dataset with coordinates
+    return scp.NDDataset(
+        ref3d_data,
+        coordset=[coord0_, coord1_, coord2_],
+        title="absorbance",
+        units="absorbance",
+    ).copy()
+
+
+@pytest.fixture(scope="function")
+def ds2():
+    # another dataset
+    return scp.NDDataset(
+        ref3d_2_data,
+        coordset=[coord0_2_, coord1_2_, coord2_2_],
+        title="absorbance",
+        units="absorbance",
+    ).copy()
+
+
+@pytest.fixture(scope="function")
+def dsm():
+    # dataset with coords containing several axis and a mask
+
+    coordmultiple = scp.CoordSet(coord2_, coord2b_)
+    return scp.NDDataset(
+        ref3d_data,
+        coordset=[coord0_, coord1_, coordmultiple],
+        mask=ref3d_mask,
+        title="absorbance",
+        units="absorbance",
+    ).copy()
+
+
+coord0_ = scp.Coord(
+    data=np.linspace(4000.0, 1000.0, 10),
+    labels=list("abcdefghij"),
+    units="cm^-1",
+    title="wavenumber",
+)
+
+
+@pytest.fixture(scope="function")
+def coord0():
+    return coord0_.copy()
+
+
+coord1_ = scp.Coord(data=np.linspace(0.0, 60.0, 100), units="s", title="time-on-stream")
+
+
+@pytest.fixture(scope="function")
+def coord1():
+    return coord1_.copy()
+
+
+coord2_ = scp.Coord(
+    data=np.linspace(200.0, 300.0, 3),
+    labels=["cold", "normal", "hot"],
+    units="K",
+    title="temperature",
+)
+
+
+@pytest.fixture(scope="function")
+def coord2():
+    return coord2_.copy()
+
+
+coord2b_ = scp.Coord(
+    data=np.linspace(1.0, 20.0, 3),
+    labels=["low", "medium", "high"],
+    units="tesla",
+    title="magnetic field",
+)
+
+
+@pytest.fixture(scope="function")
+def coord2b():
+    return coord2b_.copy()
+
+
+coord0_2_ = scp.Coord(
+    data=np.linspace(4000.0, 1000.0, 9),
+    labels=list("abcdefghi"),
+    units="cm^-1",
+    title="wavenumber",
+)
+
+
+@pytest.fixture(scope="function")
+def coord0_2():
+    return coord0_2_.copy()
+
+
+coord1_2_ = scp.Coord(
+    data=np.linspace(0.0, 60.0, 50), units="s", title="time-on-stream"
+)
+
+
+@pytest.fixture(scope="function")
+def coord1_2():
+    return coord1_2_.copy()
+
+
+coord2_2_ = scp.Coord(
+    data=np.linspace(200.0, 1000.0, 4),
+    labels=["cold", "normal", "hot", "veryhot"],
+    units="K",
+    title="temperature",
+)
+
+
+@pytest.fixture(scope="function")
+def coord2_2():
+    return coord2_2_.copy()
 
 
 # Basic
