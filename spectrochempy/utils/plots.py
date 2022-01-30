@@ -303,7 +303,7 @@ class _Axes3D(maxes3D.Axes3D):
 
 def plot_method(type, doc):
     """
-    Decorator to to select a plot method from the function name
+    Decorator to select a plot method from the function name
     """
 
     def decorator_plot_method(func):
@@ -554,14 +554,14 @@ colorscale = colorscale()
 # ............................................................................
 def make_label(ss, lab="<no_axe_label>", use_mpl=True):
     """
-    Make a label from title and units.
+    Make a label from long_name and units.
     """
 
     if ss is None:
         return lab
 
-    if ss.title:
-        label = ss.title  # .replace(' ', r'\ ')
+    if ss.long_name:
+        label = ss.long_name  # .replace(' ', r'\ ')
     else:
         label = lab
 

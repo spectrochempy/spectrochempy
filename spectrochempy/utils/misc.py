@@ -9,7 +9,6 @@ Various methods and classes used in other part of the program.
 """
 import re
 import functools
-from datetime import datetime, timezone
 import uuid
 import types
 import warnings
@@ -19,6 +18,7 @@ import numpy as np
 from quaternion import as_float_array, as_quat_array
 
 __all__ = [
+    "DEFAULT_DIM_NAME",
     "TYPE_INTEGER",
     "TYPE_COMPLEX",
     "TYPE_FLOAT",
@@ -47,6 +47,10 @@ __all__ = [
 #
 # constants
 #
+
+DEFAULT_DIM_NAME = list("xyzuvwpqrstijklmnoabcdefgh")[::-1]
+"""Default dimension names."""
+
 TYPE_INTEGER = (int, np.int_, np.int32, np.int64, np.uint32, np.uint64)
 TYPE_FLOAT = (float, np.float_, np.float32, np.float64)
 TYPE_COMPLEX = (complex, np.complex_, np.complex64, np.complex128)
@@ -497,7 +501,7 @@ def make_new_object(objtype):
 
     # new id and date
     new._id = "{}_{}".format(type(objtype).__name__, str(uuid.uuid1()).split("-")[0])
-    new._date = datetime.now(timezone.utc)
+    new._date = np.datetime64("now")
 
     return new
 

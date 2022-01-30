@@ -55,6 +55,7 @@ def generate_api(api_path):
     __all__ = []
 
     for pkg in pkgs:
+        # print(pkg)
         if pkg.endswith("api") or "test" in pkg:
             continue
         try:
@@ -71,6 +72,7 @@ def generate_api(api_path):
 
         __all__ += a
         for item in a:
+            # print(item)
 
             # set general method for the current package API
             obj = getattr(pkg, item)
