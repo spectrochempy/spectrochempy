@@ -7,11 +7,15 @@
 
 import warnings
 from contextlib import contextmanager
+from .misc import DEFAULT_DIM_NAME
 
 __all__ = [
     "SpectroChemPyWarning",
     "SpectroChemPyException",
     "UnitsCompatibilityError",
+    "InvalidDimensionNameError",
+    "InvalidCoordinatesTypeError",
+    "InvalidCoordinatesSizeError",
     "DimensionsCompatibilityError",
     "CoordinateMismatchError",
     "ProtocolError",
@@ -43,6 +47,34 @@ class UnitsCompatibilityError(SpectroChemPyException):
     """
     Exception raised when units are not compatible,
     preventing some mathematical operations.
+    """
+
+
+# ------------------------------------------------------------------------------
+class InvalidDimensionNameError(SpectroChemPyException):
+    """
+    Exception raised when dimension name are invalid.
+    """
+
+    def __init__(self, name, available_names=DEFAULT_DIM_NAME):
+
+        self.message = (
+            f"dim name must be one of {tuple(available_names)} "
+            f"with an optional subdir indication (e.g., 'x_2'. dim=`{name}` was given!"
+        )
+
+        super().__init__(self.message)
+
+
+class InvalidCoordinatesTypeError(SpectroChemPyException):
+    """
+    Exception raised when coordinates type is invalid.
+    """
+
+
+class InvalidCoordinatesSizeError(SpectroChemPyException):
+    """
+    Exception raised when size of coordinates does not match what is expected.
     """
 
 
@@ -85,7 +117,7 @@ class ProtocolError(SpectroChemPyException):
 
 
 # ------------------------------------------------------------------------------
-def deprecated(message):
+def deprecated(type="method", replace="", extra_msg=""):
     """
     Deprecation decorator.
 
@@ -97,10 +129,17 @@ def deprecated(message):
 
     def deprecation_decorator(func):
         def wrapper(*args, **kwargs):
+
             warnings.warn(
-                "The function `{} is deprecated : {}".format(func.__name__, message),
+                f" `{func.__name__}` {type} is now deprecated and could be completely removed in version 0.5.*."
+                + f" Use `{replace}`."
+                if replace
+                else "" + f" {extra_msg}."
+                if extra_msg
+                else "",
                 DeprecationWarning,
             )
+
             return func(*args, **kwargs)
 
         return wrapper
