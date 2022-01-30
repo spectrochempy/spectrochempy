@@ -1107,7 +1107,7 @@ class PlotPreferences(MetaConfigurable):
             key = self.to_rc_key(change.name)
             if key in mpl.rcParams:
                 if key.startswith("font"):
-                    print()
+                    pass
                 try:
                     mpl.rcParams[key] = change.new
                 except ValueError:  # pragma: no cover
