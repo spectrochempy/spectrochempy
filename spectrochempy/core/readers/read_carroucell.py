@@ -12,7 +12,6 @@ __dataset_methods__ = __all__
 
 import os
 import warnings
-import datetime
 import re
 
 import scipy.interpolate
@@ -111,7 +110,7 @@ def _read_carroucell(*args, **kwargs):
 
     spectra = kwargs.get("spectra", None)
     discardbg = kwargs.get("discardbg", True)
-    delta_clocks = datetime.timedelta(seconds=kwargs.get("delta_clocks", 0))
+    delta_clocks = np.timedelta64(kwargs.get("delta_clocks", 0), "s")
 
     datasets = []
 
@@ -172,9 +171,7 @@ def _read_carroucell(*args, **kwargs):
             sheet = book.sheet_by_index(0)
             for i in range(9, sheet.nrows):
                 try:
-                    time = datetime.datetime.strptime(
-                        sheet.cell(i, 0).value, "%d/%m/%y %H:%M:%S"
-                    ).replace(tzinfo=datetime.timezone.utc)
+                    time = np.datetime64(sheet.cell(i, 0).value)
                     if ti <= time <= tf:
                         t.append(time)
                         T.append(sheet.cell(i, 4).value)

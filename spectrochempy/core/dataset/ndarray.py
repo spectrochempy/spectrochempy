@@ -5,21 +5,22 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory.
 # ======================================================================================================================
 """
-This module implements the |NDArray| base class.
+This module implements the |NDArray| base class and a subclass of |NDArray| with complex/quaternion related attributes.
 """
 
-__all__ = ["NDArray", "DEFAULT_DIM_NAME"]
+__all__ = ["NDArray", "NDComplexArray"]
 
 import copy as cpy
 import warnings
 import re
-import textwrap
 import uuid
-import itertools
 import pathlib
-from datetime import datetime, timezone
+import itertools
+import textwrap
 
 import numpy as np
+from quaternion import as_float_array, as_quat_array
+
 from traitlets import (
     List,
     Unicode,
@@ -43,8 +44,11 @@ from spectrochempy.core.units import (
     Quantity,
     set_nmr_context,
     DimensionalityError,
+    get_units,
 )
 from spectrochempy.utils import (
+    DEFAULT_DIM_NAME,
+    TYPE_COMPLEX,
     TYPE_INTEGER,
     TYPE_FLOAT,
     MaskedConstant,
@@ -54,20 +58,18 @@ from spectrochempy.utils import (
     is_sequence,
     is_number,
     numpyprintoptions,
-    insert_masked_print,
     SpectroChemPyWarning,
     make_new_object,
     convert_to_html,
     get_user_and_node,
     pathclean,
+    deprecated,
+    typequaternion,
+    as_quaternion,
+    get_component,
+    insert_masked_print,
 )
-
-# ======================================================================================================================
-# Constants
-# ======================================================================================================================
-
-DEFAULT_DIM_NAME = list("xyzuvwpqrstijklmnoabcdefgh")[::-1]
-"""Default dimension names."""
+from spectrochempy.utils.datetime64 import from_dt64_units
 
 # ======================================================================================================================
 # Printing settings
@@ -135,11 +137,11 @@ class NDArray(HasTraits):
         Units of the data. If data is a |Quantity| then `units` is set to the unit of the `data`; if a unit is also
         explicitly provided an error is raised. Handling of units use the `pint <https://pint.readthedocs.org/>`_
         package.
-    title : str, optional
-        The title of the dimension. It will later be used for instance for labelling plots of the data.
-        It is optional but recommended giving a title to each ndarray.
+    long_name : str, optional
+        The long_name of the dimension. It will later be used for instance for labelling plots of the data.
+        It is optional but recommended giving a long_name to each ndarray.
     dlabel :  str, optional.
-        Alias of `title`.
+        Alias of `long_name`.
     meta : dict-like object, optional.
         Additional metadata for this object. Must be dict-like but no
         further restriction is placed on meta.
@@ -171,7 +173,7 @@ class NDArray(HasTraits):
     # Main array properties
     _id = Unicode()
     _name = Unicode()
-    _title = Unicode(allow_none=True)
+    _long_name = Unicode(allow_none=True)
     _data = Array(allow_none=True)
     _dtype = Instance(np.dtype, allow_none=True)
     _dims = List(Unicode())
@@ -183,13 +185,13 @@ class NDArray(HasTraits):
     _roi = List(allow_none=True)
 
     # Dates
-    _date = Instance(datetime)
-    _modified = Instance(datetime)
+    _date = Instance(np.datetime64)
+    _modified = Instance(np.datetime64)
 
     # Metadata
     _author = Unicode()
-    _description = Unicode()
-    _origin = Unicode()
+    _comment = Unicode()
+    _source = Unicode()
     _history = List(Unicode(), allow_none=True)
     _meta = Instance(Meta, allow_none=True)
     _transposed = Bool(False)
@@ -212,10 +214,10 @@ class NDArray(HasTraits):
     # ..........................................................................
     def __init__(self, data=None, **kwargs):
 
-        super().__init__()
+        super().__init__(**kwargs)
 
         # Creation date.
-        self._date = datetime.now(timezone.utc)
+        self._date = np.datetime64("now")
 
         # By default, we try to keep a reference to the data, so we do not copy them.
         self._copy = kwargs.pop("copy", False)  #
@@ -234,7 +236,7 @@ class NDArray(HasTraits):
         if self._labels_allowed:
             self.labels = kwargs.pop("labels", None)
 
-        self.title = kwargs.pop("title", self.title)
+        self.long_name = kwargs.pop("long_name", kwargs.pop("title", self.long_name))
 
         mask = kwargs.pop("mask", NOMASK)
         if mask is not NOMASK:
@@ -249,7 +251,9 @@ class NDArray(HasTraits):
 
         self.name = kwargs.pop("name", None)
 
-        self.description = kwargs.pop("description", kwargs.pop("desc", ""))
+        self.description = kwargs.pop(
+            "description", kwargs.pop("desc", kwargs.pop("comment", ""))
+        )
 
         author = kwargs.pop("author", get_user_and_node())
         if author:
@@ -286,12 +290,12 @@ class NDArray(HasTraits):
             "labels",
             "units",
             "meta",
-            "title",
+            "long_name",
             "name",
-            "origin",
+            "source",
             "roi",
             "author",
-            "description",
+            "comment",
             "history",
             "transposed",
         ]
@@ -379,7 +383,7 @@ class NDArray(HasTraits):
             # Special case of fancy indexing
             items = (items,)
 
-        # # allow passing a quantity as indice or in slices
+        # # allow passing a quantity as indices or in slices
         # def remove_units(items):
         #     # recursive function
         #     if isinstance(items, (tuple,)):
@@ -409,12 +413,10 @@ class NDArray(HasTraits):
         keys = self._make_index(items)
 
         # init returned object
-        if inplace:
-            new = self
-        else:
-            new = self.copy()
+        new = self if inplace else self.copy()
 
         # slicing by index of all internal array
+        udata = None
         if new.data is not None:
             udata = new.masked_data[keys]
             new._data = np.asarray(udata)
@@ -445,7 +447,7 @@ class NDArray(HasTraits):
 
     # ..........................................................................
     def __hash__(self):
-        # all instance of this class has same hash, so they can be compared
+        # all instance of this class have same hashes, so they can be compared
         return hash((type(self), self.shape, self._units))
 
     # ..........................................................................
@@ -528,7 +530,7 @@ class NDArray(HasTraits):
             return
 
         # all the time -> update modified date
-        self._modified = datetime.now(timezone.utc)
+        self._modified = np.datetime64("now")
         return
 
     # ..........................................................................
@@ -570,6 +572,17 @@ class NDArray(HasTraits):
         return args
 
     # ..........................................................................
+    @staticmethod
+    def _check_if_is_td64(data):
+        """
+        True if the data have a np.datetime64 or a np.timedelta dtype (bool).
+
+        """
+        if isinstance(data, np.ndarray):
+            return isinstance(data[0], np.timedelta64)
+        return isinstance(data, np.timedelta64)
+
+    # ..........................................................................
     def _cstr(self):
         out = f"{self._str_value()}\n{self._str_shape()}"
         out = out.rstrip()
@@ -579,6 +592,15 @@ class NDArray(HasTraits):
     @default("_data")
     def _data_default(self):
         return None
+
+    # ..........................................................................
+    @staticmethod
+    def _data_and_units_from_td64(data):
+
+        regex = r"(.*\[([m,u,n,p,f,a]*[Y,M,W,D,h,m,s]+)\])"
+        u = re.match(regex, str(data.dtype))
+        units = from_dt64_units(u.group(2))
+        return data.astype("float"), units
 
     # ..........................................................................
     @validate("_data")
@@ -600,6 +622,54 @@ class NDArray(HasTraits):
     @default("_dims")
     def _dims_default(self):
         return DEFAULT_DIM_NAME[-self.ndim :]
+
+    # ..........................................................................
+    @default("_long_name")
+    def _long_name_default(self):
+        return None
+
+    @classmethod
+    def _from_xarray(cls, xarr):
+
+        from spectrochempy.core.dataset.coord import Coord
+
+        new = cls()
+
+        if not xarr.attrs.get("linear", False):
+            new.data = xarr.data
+
+        # set attributes
+        exclude = [
+            "data",
+            "coordset",
+            "mask",
+            "labels",
+            "meta",
+            "preferences",
+            "transposed",
+            "referencedata",
+            "state",
+            "ranges",
+            "modeldata",
+        ]
+        for item in new.__dir__():
+            if item in exclude:
+                continue
+            if hasattr(xarr, item):
+                # attribute of xarr?
+                setattr(new, item, getattr(xarr, item))
+            elif xarr.attrs.get(item, None) is not None:
+                setattr(new, item, xarr.attrs.get(item))
+            else:
+                pass
+
+        # dimensions and coord
+        new.dims = xarr.coords.dims
+        coordset = {}
+        for dim in new.dims:
+            coordset[dim] = Coord._from_xarray(xarr.coords[dim])
+
+        new.set_coordset(coordset)
 
     # ..........................................................................
     def _get_dims_from_args(self, *dims, **kwargs):
@@ -828,7 +898,7 @@ class NDArray(HasTraits):
                 else:
                     raise IndexError(f"Could not find this label: {loc}")
 
-            elif isinstance(loc, datetime):
+            elif isinstance(loc, np.datetime64):
                 # not implemented yet
                 raise NotImplementedError(
                     "datetime as location is not yet implemented"
@@ -1052,12 +1122,8 @@ class NDArray(HasTraits):
         # sort an ndarray using data or label values
 
         args = self._argsort(by, pos, descend)
-
-        if not inplace:
-            new = self[args]
-        else:
-            new = self[args, INPLACE]
-
+        new = self if inplace else self.copy()
+        new = new[args, INPLACE]
         return new
 
     # ..........................................................................
@@ -1138,7 +1204,7 @@ class NDArray(HasTraits):
 
             text += mkbody(data, "", units)
 
-        out = ""  # f'        title: {self.title}\n' if self.title else ''
+        out = ""  # f'        long_name: {self.long_name}\n' if self.long_name else ''
         text = text.strip()
         if "\n" not in text:  # single line!
             out += header.replace("...", f"\0{text}\0")
@@ -1147,11 +1213,6 @@ class NDArray(HasTraits):
             out += "\0{}\0".format(textwrap.indent(text, " " * 9))
         out = out.rstrip()  # remove the trailing '\n'
         return out
-
-    # ..........................................................................
-    @default("_title")
-    def _title_default(self):
-        return None
 
     @staticmethod
     def _unittransform(new, units):
@@ -1336,30 +1397,48 @@ class NDArray(HasTraits):
     @date.setter
     def date(self, date):
 
-        if isinstance(date, datetime):
+        if isinstance(date, np.datetime64):
             self._date = date
 
         elif isinstance(date, str):
-            try:
-                self._date = datetime.strptime(date, "%Y/%m/%d")
-            except ValueError:
-                self._date = datetime.strptime(date, "%d/%m/%Y")
+            self._date = np.datetime64(date)
 
     # ...........................................................................................................
     @property
+    @deprecated(type="property", replace="comment")
     def description(self):
         """
         Provides a description of the underlying data (str).
         """
-        return self._description
-
-    desc = description
-    desc.__doc__ = """Alias to the description attribute."""
+        return self._comment
 
     # ..........................................................................
     @description.setter
+    @deprecated(type="property", replace="comment")
     def description(self, value):
-        self._description = value
+        self._comment = value
+
+    @property
+    @deprecated(type="property", replace="comment")
+    def desc(self):
+        """Alias to the `comment` attribute."""
+        return self._comment
+
+    @desc.setter
+    @deprecated(type="property", replace="comment")
+    def desc(self, value):
+        """Alias to the `description` attribute."""
+        self._comment = value
+
+    @property
+    def comment(self):
+        """Comment or description of the current object"""
+        return self._comment
+
+    @comment.setter
+    def comment(self, value):
+        """Alias to the `description` attribute."""
+        self._comment = value
 
     # ..........................................................................
     @property
@@ -1430,6 +1509,7 @@ class NDArray(HasTraits):
             self._dtype = self.data.dtype
         return self._dtype
 
+    # ..........................................................................
     @property
     def filename(self):
         """
@@ -1653,6 +1733,20 @@ class NDArray(HasTraits):
         True if the `data` array has only one dimension (bool).
         """
         return self.ndim == 1
+
+    # ..........................................................................
+    @property
+    def is_dt64(self):
+        """
+        True if the data have a np.datetime64 dtype (bool).
+        """
+        if (
+            (self._data is not None and isinstance(self._data[0], np.datetime64))
+            or self.linear
+            and isinstance(self._increment, np.datetime64)
+        ):
+            return True
+        return False
 
     # ..........................................................................
     @property
@@ -2009,12 +2103,25 @@ class NDArray(HasTraits):
         """
         Origin of the data (str).
         """
-        return self._origin
+        return self._source
 
     # ..........................................................................
     @origin.setter
-    def origin(self, origin):
-        self._origin = origin
+    def origin(self, value):
+        self._source = value
+
+    # ..........................................................................
+    @property
+    def source(self):
+        """
+        Alias of origin.
+        """
+        return self._source
+
+    # ..........................................................................
+    @source.setter
+    def source(self, value):
+        self._source = value
 
     @property
     def real(self):
@@ -2108,10 +2215,7 @@ class NDArray(HasTraits):
             If `dims` is not `None`, and the dimension being squeezed is not
             of length 1
         """
-        if inplace:
-            new = self
-        else:
-            new = self.copy()
+        new = self if inplace else self.copy()
 
         dims = self._get_dims_from_args(*dims, **kwargs)
 
@@ -2124,6 +2228,7 @@ class NDArray(HasTraits):
             return new, axis
 
         # recompute new dims
+        new._dims = list(new._dims)
         for i in axis[::-1]:
             del new._dims[i]
 
@@ -2183,7 +2288,7 @@ class NDArray(HasTraits):
     swapaxes = swapdims
     swapaxes.__doc__ = "Alias of `swapdims`."
 
-    # ..........................................................................
+    # .........................................................................
     @property
     def T(self):
         """
@@ -2197,25 +2302,82 @@ class NDArray(HasTraits):
         """
         return self.transpose()
 
+    # .........................................................................
+    @property
+    def tzinfo(self):
+        """
+        Timezone information.
+
+        A timezone's offset refers to how many hours the timezone
+        is from Coordinated Universal Time (UTC).
+
+        A `naive` datetime object contains no timezone information. The
+        easiest way to tell if a datetime object is naive is by checking
+        tzinfo.  will be set to None of the object is naive.
+
+        A naive datetime object is limited in that it cannot locate itself
+        in relation to offset-aware datetime objects.
+
+        In spectrochempy, all datetimes are stored in UTC, so that conversion
+        must be done during the display of these datetimes using tzinfo.
+
+
+        """
+        raise NotImplementedError
+
+    #
+    #         import datetime
+    #         import pytz
+    #         utc_now = pytz.utc.localize(datetime.datetime.utcnow())
+    #         pst_now = utc_now.astimezone(pytz.timezone('Europe/Paris'))
+    #         pst_now == utc_now
+    #         Out[13]: True
+    #         pst_now
+    #         Out[14]: datetime.datetime(2022, 1, 30, 16, 13, 9, 568610,
+    #                                    tzinfo= < DstTzInfo
+    #     np.datetime64('now')
+    #
+    #
+    # np.datetime64('now')
+    # Out[17]: numpy.datetime64('2022-01-30T15:14:33')
+    # .........................................................................
+    @tzinfo.setter
+    def tzinfo(self, val):
+        """
+
+        :param val:
+        :return:
+        """
+        raise NotImplementedError
+
     # ..........................................................................
     @property
+    @deprecated(type="property", replace="comment")
     def title(self):
-        """
-        An user friendly title (str).
+        """Alias to the `long_name` attribute."""
+        return self.long_name
 
-        When the title is provided, it can be used for labeling the object,
-        e.g., axe title in a matplotlib plot.
+    @title.setter
+    @deprecated(type="property", replace="comment")
+    def title(self, value):
+        self.long_name = value
+
+    @property
+    def long_name(self):
         """
-        if self._title:
-            return self._title
+        A user-friendly long_name (str).
+
+        When the long_name is provided, it can be used for labeling the object,
+        e.g., axe long_name in a matplotlib plot.
+        """
+        if self._long_name:
+            return self._long_name
         else:
             return "<untitled>"
 
-    @title.setter
-    def title(self, title):
-
-        if title:
-            self._title = title
+    @long_name.setter
+    def long_name(self, value):
+        self._long_name = value
 
     # ..........................................................................
     def to(self, other, inplace=False, force=False):
@@ -2269,33 +2431,24 @@ class NDArray(HasTraits):
         >>> ndd.to('second', force=True)
         NDArray: [float64] s (shape: (y:3, x:3))
 
-        By default the conversion is not done inplace, so the original is not
+        By default, the conversion is not done inplace, so the original is not
         modified :
 
         >>> print(ndd)
         NDArray: [float64] m (shape: (y:3, x:3))
         """
+        # TODO: revise this to avoid returning a new object if inplace is true
 
         new = self.copy()
 
         if other is None:
-            units = None
-            if self.units is None:
-                return new
-            elif force:
+            if force:
                 new._units = None
                 if inplace:
                     self._units = None
-                return new
+            return new
 
-        elif isinstance(other, str):
-            units = ur.Unit(other)
-
-        elif hasattr(other, "units"):
-            units = other.units
-
-        else:
-            units = ur.Unit(other)
+        units = get_units(other)
 
         if self.has_units:
 
@@ -2317,20 +2470,20 @@ class NDArray(HasTraits):
                             udata = (new.data * new.units).to(units)
                             new._data = -np.log10(udata.m)
                             new._units = units
-                            if new.title.lower() == "transmittance":
-                                new._title = "absorbance"
+                            if new.long_name.lower() == "transmittance":
+                                new._long_name = "absorbance"
 
                     elif str(oldunits) == "absorbance":
                         if str(units) in ["transmittance", "absolute_transmittance"]:
                             scale = Quantity(1.0, self._units).to(units).magnitude
                             new._data = 10.0 ** -new.data * scale
                             new._units = units
-                            if new.title.lower() == "absorbance":
-                                new._title = "transmittance"
+                            if new.long_name.lower() == "absorbance":
+                                new._long_name = "transmittance"
 
                     else:
                         new = self._unittransform(new, units)
-                        # change the title for spectrocopic units change
+                        # change the long_name for spectroscopic units change
                         if (
                             oldunits.dimensionality
                             in [
@@ -2340,13 +2493,13 @@ class NDArray(HasTraits):
                             ]
                             and new._units.dimensionality == "1/[time]"
                         ):
-                            new._title = "frequency"
+                            new._long_name = "frequency"
                         elif (
                             oldunits.dimensionality
                             in ["1/[time]", "[length] ** 2 * [mass] / [time] ** 2"]
                             and new._units.dimensionality == "1/[length]"
                         ):
-                            new._title = "wavenumber"
+                            new._long_name = "wavenumber"
                         elif (
                             oldunits.dimensionality
                             in [
@@ -2356,7 +2509,7 @@ class NDArray(HasTraits):
                             ]
                             and new._units.dimensionality == "[length]"
                         ):
-                            new._title = "wavelength"
+                            new._long_name = "wavelength"
                         elif (
                             oldunits.dimensionality
                             in ["1/[time]", "1/[length]", "[length]"]
@@ -2364,7 +2517,7 @@ class NDArray(HasTraits):
                             "[mass] / [time] "
                             "** 2"
                         ):
-                            new._title = "energy"
+                            new._long_name = "energy"
 
                 if force:
                     new._units = units
@@ -2384,7 +2537,7 @@ class NDArray(HasTraits):
         if inplace:
             self._data = new._data
             self._units = new._units
-            self._title = new._title
+            self._long_name = new._long_name
             self._roi = new._roi
 
         else:
@@ -2537,6 +2690,7 @@ class NDArray(HasTraits):
             raise TypeError(
                 "Units or string representation of unit is expected, not Quantity"
             )
+
         if self.has_units and units != self._units:
             # first try to cast
             try:
@@ -2575,3 +2729,649 @@ class NDArray(HasTraits):
         Alias of `values`.
         """
         return self.values
+
+
+# ======================================================================================================================
+# NDComplexArray
+# ======================================================================================================================
+
+
+class NDComplexArray(NDArray):
+    _interleaved = Bool(False)
+
+    # ..........................................................................
+    def __init__(self, data=None, **kwargs):
+        """
+        This class provides the complex/quaternion related functionalities to |NDArray|.
+
+        It is a subclass bringing complex and quaternion related attributes.
+
+        Parameters
+        ----------
+        data : array of complex number or quaternion.
+            Data array contained in the object. The data can be a list, a tuple, a |ndarray|, a ndarray-like,
+            a |NDArray| or any subclass of |NDArray|. Any size or shape of data is accepted. If not given, an empty
+            |NDArray| will be inited.
+            At the initialisation the provided data will be eventually casted to a numpy-ndarray.
+            If a subclass of |NDArray| is passed which already contains some mask, labels, or units, these elements will
+            be used to accordingly set those of the created object. If possible, the provided data will not be copied
+            for `data` input, but will be passed by reference, so you should make a copy of the `data` before passing
+            them if that's the desired behavior or set the `copy` argument to True.
+
+        Other Parameters
+        ----------------
+        dims : list of chars, optional.
+            if specified the list must have a length equal to the number od data dimensions (ndim) and the chars must be
+            taken among among x,y,z,u,v,w or t. If not specified, the dimension names are automatically attributed in
+            this order.
+        name : str, optional
+            A user friendly name for this object. If not given, the automatic `id` given at the object creation will be
+            used as a name.
+        labels : array of objects, optional
+            Labels for the `data`. labels can be used only for 1D-datasets.
+            The labels array may have an additional dimension, meaning several series of labels for the same data.
+            The given array can be a list, a tuple, a |ndarray|, a ndarray-like, a |NDArray| or any subclass of
+            |NDArray|.
+        mask : array of bool or `NOMASK`, optional
+            Mask for the data. The mask array must have the same shape as the data. The given array can be a list,
+            a tuple, or a |ndarray|. Each values in the array must be `False` where the data are *valid* and True when
+            they are not (like in numpy masked arrays). If `data` is already a :class:`~numpy.ma.MaskedArray`, or any
+            array object (such as a |NDArray| or subclass of it), providing a `mask` here will causes the mask from the
+            masked array to be ignored.
+        units : |Unit| instance or str, optional
+            Units of the data. If data is a |Quantity| then `units` is set to the unit of the `data`; if a unit is also
+            explicitly provided an error is raised. Handling of units use the `pint <https://pint.readthedocs.org/>`_
+            package.
+        long_name : str, optional
+            The long_name of the dimension. It will later be used for instance for labelling plots of the data.
+            It is optional but recommended giving a long_name to each ndarray.
+        dlabel :  str, optional.
+            Alias of `long_name`.
+        meta : dict-like object, optional.
+            Additional metadata for this object. Must be dict-like but no
+            further restriction is placed on meta.
+        author : str, optional.
+            name(s) of the author(s) of this dataset. BNy default, name of the computer note where this dataset is
+            created.
+        description : str, optional.
+            A optional description of the nd-dataset. A shorter alias is `desc`.
+        history : str, optional.
+            A string to add to the object history.
+        copy : bool, optional
+            Perform a copy of the passed object. Default is False.
+
+        See Also
+        --------
+        NDDataset : Object which subclass |NDArray| with the addition of coordinates.
+
+        Examples
+        --------
+        >>> from spectrochempy import NDComplexArray
+        >>> myarray = NDComplexArray([1. + 0j, 2., 3.])
+        >>> myarray
+        NDComplexArray: [complex128] unitless (size: 3)
+        """
+
+        super().__init__(data=data, **kwargs)
+
+    # ------------------------------------------------------------------------
+    # validators
+    # ------------------------------------------------------------------------
+
+    # ..........................................................................
+    @validate("_data")
+    def _data_validate(self, proposal):
+        # validation of the _data attribute
+        # overrides the NDArray method
+
+        data = proposal["value"]
+
+        # cast to the desired type
+        if self._dtype is not None:
+
+            if self._dtype == data.dtype:
+                pass  # nothing more to do
+
+            elif self._dtype not in [typequaternion] + list(TYPE_COMPLEX):
+                data = data.astype(np.dtype(self._dtype), copy=False)
+
+            elif self._dtype in TYPE_COMPLEX:
+                data = self._make_complex(data)
+
+            elif self._dtype == typequaternion:
+                data = self._make_quaternion(data)
+
+        elif data.dtype not in [typequaternion] + list(TYPE_COMPLEX):
+            data = data.astype(
+                np.float64, copy=False
+            )  # by default dta are float64 if the dtype is not fixed
+
+        # return the validated data
+        if self._copy:
+            return data.copy()
+        else:
+            return data
+
+    # ------------------------------------------------------------------------
+    # read-only properties / attributes
+    # ------------------------------------------------------------------------
+
+    # ..........................................................................
+    @property
+    def has_complex_dims(self):
+        """
+        bool - True if at least one of the `data` array dimension is complex
+        (Readonly property).
+        """
+        if self._data is None:
+            return False
+
+        return (self._data.dtype in TYPE_COMPLEX) or (
+            self._data.dtype == typequaternion
+        )
+
+    # ..........................................................................
+    @property
+    def is_complex(self):
+        """
+        bool - True if the 'data' are complex (Readonly property).
+        """
+        if self._data is None:
+            return False
+        return self._data.dtype in TYPE_COMPLEX
+
+    # ..........................................................................
+    @property
+    def is_quaternion(self):
+        """
+        bool - True if the `data` array is hypercomplex (Readonly property).
+        """
+        if self._data is None:
+            return False
+        return self._data.dtype == typequaternion
+
+    # ..........................................................................
+    @property
+    def is_interleaved(self):
+        """
+        bool - True if the `data` array is hypercomplex with interleaved data (Readonly property).
+        """
+        if self._data is None:
+            return False
+        return self._interleaved  # (self._data.dtype == typequaternion)
+
+    # ..........................................................................
+    @property
+    def is_masked(self):
+        """
+        bool - True if the `data` array has masked values (Readonly property).
+        """
+        try:
+            return super().is_masked
+        except Exception as e:
+            if self._data.dtype == typequaternion:
+                return np.any(self._mask["I"])
+            else:
+                raise e
+
+    # ..........................................................................
+    @property
+    def real(self):
+        """
+        array - The array with real component of the `data` (Readonly property).
+        """
+        new = self.copy()
+        if not new.has_complex_dims:
+            return new
+        ma = new.masked_data
+
+        if ma.dtype in TYPE_FLOAT:
+            new._data = ma
+        elif ma.dtype in TYPE_COMPLEX:
+            new._data = ma.real
+        elif ma.dtype == typequaternion:
+            # get the scalar component
+            # q = a + bi + cj + dk  ->   qr = a
+            new._data = as_float_array(ma)[..., 0]
+        else:
+            raise TypeError("dtype %s not recognized" % str(ma.dtype))
+
+        if isinstance(ma, np.ma.masked_array):
+            new._mask = ma.mask
+        return new
+
+    # ..........................................................................
+    @property
+    def imag(self):
+        """
+        array - The array with imaginary component of the `data` (Readonly property).
+        """
+        new = self.copy()
+        if not new.has_complex_dims:
+            return None
+
+        ma = new.masked_data
+        if ma.dtype in TYPE_FLOAT:
+            new._data = np.zeros_like(ma.data)
+        elif ma.dtype in TYPE_COMPLEX:
+            new._data = ma.imag.data
+        elif ma.dtype == typequaternion:
+            # this is a more complex situation than for real component
+            # get the imaginary component (vector component)
+            # q = a + bi + cj + dk  ->   qi = bi+cj+dk
+            as_float_array(ma)[..., 0] = 0  # keep only the imaginary component
+            new._data = ma  # .data
+        else:
+            raise TypeError("dtype %s not recognized" % str(ma.dtype))
+
+        if isinstance(ma, np.ma.masked_array):
+            new._mask = ma.mask
+        return new
+
+    # ..........................................................................
+    @property
+    def RR(self):
+        """
+        array - The array with real component in both dimension of
+        hypercomplex 2D `data`.
+
+        This readonly property is equivalent to the `real` property.
+        """
+        if not self.is_quaternion:
+            raise TypeError("Not an hypercomplex array")
+        return self.real
+
+    # ..........................................................................
+    @property
+    def RI(self):
+        """
+        array - The array with real-imaginary component of hypercomplex 2D `data` (Readonly property).
+        """
+        if not self.is_quaternion:
+            raise TypeError("Not an hypercomplex array")
+        return self.component("RI")
+
+    # ..........................................................................
+    @property
+    def IR(self):
+        """
+        array - The array with imaginary-real component of hypercomplex 2D `data` (Readonly property).
+        """
+        if not self.is_quaternion:
+            raise TypeError("Not an hypercomplex array")
+        return self.component("IR")
+
+    # ..........................................................................
+    @property
+    def II(self):
+        """
+        array - The array with imaginary-imaginary component of hypercomplex 2D data (Readonly property).
+        """
+        if not self.is_quaternion:
+            raise TypeError("Not an hypercomplex array")
+        return self.component("II")
+
+    # ..........................................................................
+    @property
+    def limits(self):
+        """
+        list - range of the data
+        """
+        if self.data is None:
+            return None
+
+        if self.data.dtype in TYPE_COMPLEX:
+            return [self.data.real.min(), self.data.imag.max()]
+        elif self.data.dtype == np.quaternion:
+            data = as_float_array(self.data)[..., 0]
+            return [data.min(), data.max()]
+        else:
+            return [self.data.min(), self.data.max()]
+
+    # ------------------------------------------------------------------------
+    # Public methods
+    # ------------------------------------------------------------------------
+
+    # ..........................................................................
+    def component(self, select="REAL"):
+        """
+        Take selected components of an hypercomplex array (RRR, RIR, ...).
+
+        Parameters
+        ----------
+        select : str, optional, default='REAL'
+            If 'REAL', only real component in all dimensions will be selected.
+            ELse a string must specify which real (R) or imaginary (I) component
+            has to be selected along a specific dimension. For instance,
+            a string such as 'RRI' for a 2D hypercomplex array indicated
+            that we take the real component in each dimension except the last
+            one, for which imaginary component is preferred.
+
+        Returns
+        -------
+        component
+            Component of the complex or hypercomplex array.
+        """
+        if not select:
+            # no selection - returns inchanged
+            return self
+
+        new = self.copy()
+
+        ma = self.masked_data
+
+        ma = get_component(ma, select)
+
+        if isinstance(ma, np.ma.masked_array):
+            new._data = ma.data
+            new._mask = ma.mask
+        else:
+            new._data = ma
+
+        if hasattr(ma, "mask"):
+            new._mask = ma.mask
+        else:
+            new._mask = NOMASK
+
+        return new
+
+    # ..........................................................................
+    def set_complex(self, inplace=False):
+        """
+        Set the object data as complex.
+
+        When nD-dimensional array are set to complex, we assume that it is along the first dimension.
+        Two succesives rows are merged to form a complex rows. This means that the number of row must be even
+        If the complexity is to be applied in other dimension, either transpose/swapdims your data before applying this
+        function in order that the complex dimension is the first in the array.
+
+        Parameters
+        ----------
+        inplace : bool, optional, default=False
+            Flag to say that the method return a new object (default)
+            or not (inplace=True).
+
+        Returns
+        -------
+        out
+            Same object or a copy depending on the ``inplace`` flag.
+
+        See Also
+        --------
+        set_quaternion, has_complex_dims, is_complex, is_quaternion
+        """
+        if not inplace:  # default is to return a new array
+            new = self.copy()
+        else:
+            new = self  # work inplace
+
+        if new.has_complex_dims:
+            # not necessary in this case, it is already complex
+            return new
+
+        new._data = new._make_complex(new._data)
+
+        return new
+
+    # ..........................................................................
+    def set_quaternion(self, inplace=False):
+        """
+        Set the object data as quaternion.
+
+        Parameters
+        ----------
+        inplace : bool, optional, default=False
+            Flag to say that the method return a new object (default)
+            or not (inplace=True).
+
+        Returns
+        -------
+        out
+            Same object or a copy depending on the ``inplace`` flag.
+        """
+        if not inplace:  # default is to return a new array
+            new = self.copy()
+        else:
+            new = self  # work inplace
+
+        if new.dtype != typequaternion:  # not already a quaternion
+            new._data = new._make_quaternion(new.data)
+
+        return new
+
+    set_hypercomplex = set_quaternion
+    set_hypercomplex.__doc__ = "Alias of set_quaternion."
+
+    # ..........................................................................
+    def transpose(self, *dims, inplace=False):
+        """
+        Transpose the complex array.
+
+        Parameters
+        ----------
+        dims : int, str or tuple of int or str, optional, default=(0,)
+            Dimension names or indexes along which the method should be applied.
+        inplace : bool, optional, default=False
+            Flag to say that the method return a new object (default)
+            or not (inplace=True)
+
+        Returns
+        -------
+        transposed
+            Same object or a copy depending on the ``inplace`` flag.
+        """
+
+        new = super().transpose(*dims, inplace=inplace)
+
+        if new.is_quaternion:
+            # here if it is hypercomplex quaternion
+            # we should interchange the imaginary component
+            w, x, y, z = as_float_array(new._data).T
+            q = as_quat_array(
+                list(zip(w.T.flatten(), y.T.flatten(), x.T.flatten(), z.T.flatten()))
+            )
+            new._data = q.reshape(new.shape)
+
+        return new
+
+    def swapdims(self, dim1, dim2, inplace=False):
+        """
+        Swap dimension the complex array.
+
+        swapdims and swapaxes are alias.
+
+        Parameters
+        ----------
+        dims : int, str or tuple of int or str, optional, default=(0,)
+            Dimension names or indexes along which the method should be applied.
+        inplace : bool, optional, default=False
+            Flag to say that the method return a new object (default)
+            or not (inplace=True)
+
+        Returns
+        -------
+        transposed
+            Same object or a copy depending on the ``inplace`` flag.
+        """
+
+        new = super().swapdims(dim1, dim2, inplace=inplace)
+
+        # we need also to swap the quaternion
+        # WARNING: this work only for 2D - when swapdims is equivalent to a 2D transpose
+        # TODO: implement something for any n-D array (n>2)
+        if self.is_quaternion:
+            # here if it is is_quaternion
+            # we should interchange the imaginary component
+            w, x, y, z = as_float_array(new._data).T
+            q = as_quat_array(
+                list(zip(w.T.flatten(), y.T.flatten(), x.T.flatten(), z.T.flatten()))
+            )
+            new._data = q.reshape(new.shape)
+
+        return new
+
+    # ------------------------------------------------------------------------
+    # private methods
+    # ------------------------------------------------------------------------
+
+    # ..........................................................................
+    def _str_shape(self):
+
+        if self.is_empty:
+            return "         size: 0\n"
+
+        out = ""
+        cplx = [False] * self.ndim
+        if self.is_quaternion:
+            cplx = [True, True]
+        elif self.is_complex:
+            cplx[-1] = True
+
+        shcplx = (
+            x
+            for x in itertools.chain.from_iterable(
+                list(zip(self.dims, self.shape, cplx))
+            )
+        )
+
+        shape = (
+            (", ".join(["{}:{}{}"] * self.ndim))
+            .format(*shcplx)
+            .replace("False", "")
+            .replace("True", "(complex)")
+        )
+
+        size = self.size
+        sizecplx = "" if not self.has_complex_dims else " (complex)"
+
+        out += (
+            f"         size: {size}{sizecplx}\n"
+            if self.ndim < 2
+            else f"        shape: ({shape})\n"
+        )
+
+        return out
+
+    # ..........................................................................
+    def _str_value(self, sep="\n", ufmt=" {:~K}", header="       values: ... \n"):
+        prefix = [""]
+        if self.is_empty:
+            return header + "{}".format(textwrap.indent("empty", " " * 9))
+
+        if self.has_complex_dims:
+            # we will display the different component separately
+            if self.is_quaternion:
+                prefix = ["RR", "RI", "IR", "II"]
+            else:
+                prefix = ["R", "I"]
+
+        units = ufmt.format(self.units) if self.has_units else ""
+
+        def mkbody(d, pref, units):
+            # work around printing masked values with formatting
+            ds = d.copy()
+            if self.is_masked:
+                dtype = self.dtype
+                mask_string = f"--{dtype}"
+                ds = insert_masked_print(ds, mask_string=mask_string)
+            body = np.array2string(ds, separator=" ", prefix=pref)
+            body = body.replace("\n", sep)
+            text = "".join([pref, body, units])
+            text += sep
+            return text
+
+        text = ""
+        if "I" not in "".join(prefix):  # case of pure real data (not hypercomplex)
+            if self._data is not None:
+                data = self.umasked_data
+                if isinstance(data, Quantity):
+                    data = data.magnitude
+                text += mkbody(data, "", units)
+        else:
+            for pref in prefix:
+                if self._data is not None:
+                    data = self.component(pref).umasked_data
+                    if isinstance(data, Quantity):
+                        data = data.magnitude
+                    text += mkbody(data, pref, units)
+
+        out = "          DATA \n"
+        out += f"        long_name: {self.long_name}\n" if self.title else ""
+        out += header
+        out += "\0{}\0".format(textwrap.indent(text.strip(), " " * 9))
+        out = out.rstrip()  # remove the trailings '\n'
+        return out
+
+    # ..........................................................................
+    def _make_complex(self, data):
+
+        if data.dtype in TYPE_COMPLEX:
+            return data.astype(np.complex128)
+
+        if data.shape[-1] % 2 != 0:
+            raise ValueError(
+                "An array of real data to be transformed to complex must have an even number of columns!."
+            )
+
+        data = data.astype(np.float64)
+
+        # to work the data must be in C order
+        fortran = np.isfortran(data)
+        if fortran:
+            data = np.ascontiguousarray(data)
+
+        data.dtype = np.complex128
+
+        # restore the previous order
+        if fortran:
+            data = np.asfortranarray(data)
+        else:
+            data = np.ascontiguousarray(data)
+
+        self._dtype = None  # reset dtype
+        return data
+
+    # ..........................................................................
+    def _make_quaternion(self, data):
+
+        if data.ndim % 2 != 0:
+            raise ValueError(
+                "An array of data to be transformed to quaternion must be 2D."
+            )
+
+        if data.dtype not in TYPE_COMPLEX:
+            if data.shape[1] % 2 != 0:
+                raise ValueError(
+                    "An array of real data to be transformed to quaternion must have even number of columns!."
+                )
+            # convert to double precision complex
+            data = self._make_complex(data)
+
+        if data.shape[0] % 2 != 0:
+            raise ValueError(
+                "An array data to be transformed to quaternion must have even number of rows!."
+            )
+
+        r = data[::2]
+        i = data[1::2]
+        #  _data = as_quat_array(list(zip(r.real.flatten(), r.imag.flatten(), i.real.flatten(), i.imag.flatten())))
+        #  _data = _data.reshape(r.shape)
+
+        self._dtype = None  # reset dtyep
+        return as_quaternion(r, i)
+
+    # ------------------------------------------------------------------------
+    # special methods
+    # ------------------------------------------------------------------------
+
+    # ..........................................................................
+    def __setitem__(self, items, value):
+
+        super().__setitem__(items, value)
+
+
+# ======================================================================================================================
+if __name__ == "__main__":
+    pass
+
+# end of module

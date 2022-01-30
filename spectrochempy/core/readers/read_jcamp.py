@@ -14,6 +14,7 @@ __dataset_methods__ = __all__
 import io
 import re
 from datetime import datetime, timezone
+
 import numpy as np
 
 from spectrochempy.core.dataset.coord import Coord
@@ -97,18 +98,12 @@ def read_jcamp(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
-@deprecated(
-    "read_jdx reading method is deprecated and may be removed in next versions "
-    "- use read_jcamp instead"
-)
+@deprecated(replace="read_jcamp")
 def read_jdx(*args, **kwargs):
     return read_jcamp(*args, **kwargs)
 
 
-@deprecated(
-    "read_dx reading method is deprecated and may be removed in next versions "
-    "- use read_jcamp instead"
-)
+@deprecated(replace="read_jcamp")
 def read_dx(*args, **kwargs):  # pragma: no cover
     return read_jcamp(*args, **kwargs)
 
@@ -138,7 +133,7 @@ def _read_jdx(*args, **kwargs):
     while keyword != "##TITLE":
         keyword, text = _readl(fid)
     if keyword != "EOF":
-        jdx_title = text
+        jdx_long_name = text
     else:  # pragma: no cover
         raise ValueError("No ##TITLE LR in outer block header")
 
@@ -162,7 +157,7 @@ def _read_jdx(*args, **kwargs):
     # ..........................................................................
     xaxis = np.array([])
     data = np.array([])
-    alltitles, alltimestamps, alldates, xunits, yunits = [], [], [], [], []
+    alllong_names, alltimestamps, alldates, xunits, yunits = [], [], [], [], []
     nx, firstx, lastx = (
         np.zeros(nspec, "int"),
         np.zeros(nspec, "float"),
@@ -186,8 +181,8 @@ def _read_jdx(*args, **kwargs):
             if keyword in ["##ORIGIN", "##OWNER", "##JCAMP-DX"]:
                 continue
             elif keyword == "##TITLE":
-                # Add the title of the spectrum in the list alltitles
-                alltitles.append(text)
+                # Add the long_name of the spectrum in the list alllong_names
+                alllong_names.append(text)
             elif keyword == "##LONGDATE":
                 [year, month, day] = text.split("/")
             elif keyword == "##TIME":
@@ -315,22 +310,22 @@ def _read_jdx(*args, **kwargs):
     fid.close()
 
     dataset.data = data
-    dataset.name = jdx_title
+    dataset.name = jdx_long_name
     if yunits[0].strip() == "ABSORBANCE":
         dataset.units = "absorbance"
-        dataset.title = "absorbance"
+        dataset.long_name = "absorbance"
     elif yunits[0].strip() == "TRANSMITTANCE":
         # TODO: This units not in pint. Add this
-        dataset.title = "transmittance"
+        dataset.long_name = "transmittance"
 
     # now add coordinates
-    _x = Coord(xaxis, title=axisname, units=axisunit)
+    _x = Coord(xaxis, long_name=axisname, units=axisunit)
     if jdx_data_type == "LINK":
         _y = Coord(
             alltimestamps,
-            title="acquisition timestamp (GMT)",
+            long_name="acquisition timestamp (GMT)",
             units="s",
-            labels=(alldates, alltitles),
+            labels=(alldates, alllong_names),
         )
         dataset.set_coordset(y=_y, x=_x)
     else:
@@ -338,19 +333,18 @@ def _read_jdx(*args, **kwargs):
     dataset.set_coordset(y=_y, x=_x)
 
     # Set origin, description and history
-    dataset.origin = "omnic"
-    dataset.description = "Dataset from jdx: '{0}'".format(jdx_title)
-
-    dataset.history = str(datetime.now(timezone.utc)) + ":imported from jdx file \n"
+    dataset.source = "omnic"
+    dataset.comment = "Dataset from jdx: '{0}'".format(jdx_long_name)
+    dataset.history = f"{np.datetime64('now')}: imported from jdx file"
 
     if sortbydate:
         dataset.sort(dim="x", inplace=True)
-        dataset.history = str(datetime.now(timezone.utc)) + ":sorted by date\n"
+        dataset.history = f"{np.datetime64('now')}: sorted by date\n"
     # Todo: make sure that the lowest index correspond to the largest wavenumber
     #  for compatibility with dataset created by read_omnic:
 
     # Set the NDDataset date
-    dataset._date = datetime.now(timezone.utc)
+    dataset._date = np.datetime64("now")
     dataset._modified = dataset.date
 
     return dataset

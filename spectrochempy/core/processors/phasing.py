@@ -614,7 +614,7 @@ def pk_exp(dataset, phc0=0.0, pivot=0.0, exptc=0.0, **kwargs):
 #             msg = ("Iteration: %d (chi2: %.5f)" % (niter, err) +
 #             ' Negative area (NA):%.3g Entropy (S) * gamma:%.3g' % (
 #                     nas, spe * gamma))
-#             auto_close_message(msg, title='Information', time=.001)
+#             auto_close_message(msg, long_name='Information', time=.001)
 #
 #             niter += 1
 #

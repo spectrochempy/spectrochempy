@@ -598,7 +598,7 @@ class NDPlot(HasTraits):
             self.colorbar = colorbar = kwargs.get("colorbar", prefs.colorbar)
 
             proj = kwargs.get("proj", prefs.show_projections)
-            # TODO: tell the axis by title.
+            # TODO: tell the axis by long_name.
 
             xproj = kwargs.get("xproj", prefs.show_projection_x)
 

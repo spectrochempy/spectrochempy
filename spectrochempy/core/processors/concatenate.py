@@ -10,14 +10,16 @@ __all__ = ["concatenate", "stack"]
 __dataset_methods__ = __all__
 
 import numpy as np
-import datetime as datetime
 from warnings import warn
 from orderedset import OrderedSet
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core.dataset.ndarray import DEFAULT_DIM_NAME
-from spectrochempy.utils import SpectroChemPyWarning, DimensionsCompatibilityError
+from spectrochempy.utils import (
+    SpectroChemPyWarning,
+    DimensionsCompatibilityError,
+    DEFAULT_DIM_NAME,
+)
 
 
 def concatenate(*datasets, **kwargs):
@@ -312,13 +314,13 @@ def concatenate(*datasets, **kwargs):
 
     out.description = "{} of {}  datasets:\n".format(thist, len(datasets))
     out.description += "( {}".format(datasets[0].name)
-    out.title = datasets[0].title
+    out.long_name = datasets[0].long_name
     authortuple = (datasets[0].author,)
 
     for dataset in datasets[1:]:
 
-        if out.title != dataset.title:
-            warn("Different data title => the title is that of the 1st dataset")
+        if out.long_name != dataset.long_name:
+            warn("Different data long_name => the title is that of the 1st dataset")
 
         if not (dataset.author in authortuple):
             authortuple = authortuple + (dataset.author,)
@@ -327,7 +329,7 @@ def concatenate(*datasets, **kwargs):
         out.description += ", {}".format(dataset.name)
 
     out.description += " )"
-    out._date = out._modified = datetime.datetime.now(datetime.timezone.utc)
+    out._date = out._modified = np.datetime64("now")
     out._history = [str(out.date) + ": Created by %s" % thist]
 
     return out

@@ -15,6 +15,8 @@ __all__ = [
     "set_nmr_context",
     "DimensionalityError",
     "remove_args_units",
+    "get_units",
+    "encode_quantity",
 ]
 
 from warnings import warn
@@ -33,6 +35,7 @@ from pint.unit import UnitsContainer, _Unit as Unit, UnitDefinition
 from pint.quantity import _Quantity as Quantity
 from pint.formatting import siunitx_format_unit
 from pint.converters import ScaleConverter
+
 
 # ======================================================================================================================
 # Modify the pint behaviour
@@ -175,7 +178,7 @@ if globals().get("U_", None) is None:
     U_.define(
         "__wrapped__ = 1"
     )  # <- hack to avoid an error with pytest (doctest activated)
-    U_.define("@alias point = count")
+    #  U_.define("@alias point = count")
     U_.define("transmittance = 1. / 100.")
     U_.define("absolute_transmittance = 1.")
     U_.define("absorbance = 1. = a.u.")
@@ -303,6 +306,30 @@ def remove_args_units(func):
         return func(*args, **kwargs)
 
     return new_func
+
+
+def get_units(other):
+
+    if isinstance(other, str):
+        units = ur.Unit(other)
+
+    elif hasattr(other, "units"):
+        units = other.units
+
+    else:
+        units = ur.Unit(other)
+
+    return units
+
+
+# utilities to encode quantity for export
+def encode_quantity(val):
+    # val is a dictionary containing quantity values
+    for k, v in val.copy().items():
+        if isinstance(v, Quantity):
+            val[f"{k}"] = v.m
+            val[f"pint_units_{k}"] = str(v.u)
+    return val
 
 
 # ======================================================================================================================

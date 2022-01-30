@@ -18,19 +18,19 @@ from traitlets import HasTraits, Instance, Bool, Float, validate, default, Dict,
 from traittypes import Array
 
 from spectrochempy.core.project.baseproject import AbstractProject
-from spectrochempy.core.dataset.ndarray import NDArray, DEFAULT_DIM_NAME
-from spectrochempy.core.dataset.ndcomplex import NDComplexArray
-from spectrochempy.core.dataset.coord import Coord, LinearCoord
-from spectrochempy.core.dataset.coordset import CoordSet
+from spectrochempy.core.dataset.ndarray import NDArray, NDComplexArray
+from spectrochempy.core.dataset.coord import Coord, LinearCoord, CoordSet
 from spectrochempy.core.dataset.ndmath import NDMath, _set_ufuncs, _set_operators
 from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.core.dataset.ndplot import NDPlot
 from spectrochempy.core.dataset.meta import Meta
+from spectrochempy.core.units import encode_quantity
 from spectrochempy.core import error_, warning_
 from spectrochempy.utils import (
     colored_output,
     SpectroChemPyException,
     MaskedConstant,
+    DEFAULT_DIM_NAME,
 )
 from spectrochempy.optional import import_optional_dependency
 
@@ -77,6 +77,11 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         for `data` input, but will be passed by reference, so you should
         make a copy of the `data` before passing
         them if that's the desired behavior or set the `copy` argument to True.
+    **kwargs
+        Optional keyword parameters (see Other Parameters).
+
+    Other Parameters
+    ----------------
     coordset : An instance of |CoordSet|, optional
         `coords` contains the coordinates for the different dimensions of
         the `data`. if `coords` is provided,
@@ -87,14 +92,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     coordunits : list, optional
         A list of units corresponding to the dimensions in the order of the
         coordset.
-    coordtitles : list, optional
-        A list of titles corresponding of the dimensions in the order of the
+    coordlong_names : list, optional
+        A list of long_names corresponding of the dimensions in the order of the
         coordset.
-    **kwargs
-        Optional keyword parameters (see Other Parameters).
-
-    Other Parameters
-    ----------------
     dtype : str or dtype, optional, default=np.float64
         If specified, the data will be casted to this dtype, else the data
         will be casted to float64 or complex128.
@@ -132,12 +132,12 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         explicitly provided an error is raised. Handling of units use the
         `pint <https://pint.readthedocs.org/>`_
         package.
-    title : str, optional
-        The title of the dimension. It will later be used for instance for
+    long_name : str, optional
+        The long_name of the dimension. It will later be used for instance for
         labelling plots of the data.
-        It is optional but recommended to give a title to each ndarray.
+        It is optional but recommended to give a long_name to each ndarray.
     dlabel :  str, optional
-        Alias of `title`.
+        Alias of `long_name`.
     meta : dict-like object, optional
         Additional metadata for this object. Must be dict-like but no
         further restriction is placed on meta.
@@ -212,15 +212,15 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     # initialisation
     # ------------------------------------------------------------------------
     # ..........................................................................
-    def __init__(
-        self, data=None, coordset=None, coordunits=None, coordtitles=None, **kwargs
-    ):
+    def __init__(self, data=None, **kwargs):
 
         super().__init__(data, **kwargs)
 
         self._parent = None
 
-        # eventually set the coordinates with optional units and title
+        # eventually set the coordinates with optional units and long_name
+
+        coordset = kwargs.pop("coordset", None)
 
         if isinstance(coordset, CoordSet):
             self.set_coordset(**coordset)
@@ -229,14 +229,18 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             if coordset is None:
                 coordset = [None] * self.ndim
 
+            coordunits = kwargs.pop("coordunits", None)
             if coordunits is None:
                 coordunits = [None] * self.ndim
 
-            if coordtitles is None:
-                coordtitles = [None] * self.ndim
+            coordlong_names = kwargs.pop(
+                "coordlong_names", kwargs.pop("coordtitles", None)
+            )
+            if coordlong_names is None:
+                coordlong_names = [None] * self.ndim
 
             _coordset = []
-            for c, u, t in zip(coordset, coordunits, coordtitles):
+            for c, u, t in zip(coordset, coordunits, coordlong_names):
                 if not isinstance(c, CoordSet):
                     if isinstance(c, LinearCoord):
                         coord = LinearCoord(c)
@@ -245,7 +249,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
                     if u is not None:
                         coord.units = u
                     if t is not None:
-                        coord.title = t
+                        coord.long_name = t
                 else:
                     if u:  # pragma: no cover
                         warning_(
@@ -254,7 +258,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
                         )
                     if t:  # pragma: no cover
                         warning_(
-                            "title will be ignored as they are only defined at the coordinates level"
+                            "long_name will be ignored as they are only defined at the coordinates level"
                         )
                     coord = c
 
@@ -278,17 +282,17 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             "coordset",
             "data",
             "name",
-            "title",
+            "long_name",
             "mask",
             "units",
             "meta",
             "preferences",
             "author",
-            "description",
+            "comment",
             "history",
             "date",
             "modified",
-            "origin",
+            "source",
             "roi",
             "transposed",
             "modeldata",
@@ -384,7 +388,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             # look also properties
             attribute = None
             index = 0
-            # print(item)
+
             if len(item) > 2 and item[1] == "_":
                 attribute = item[1:]
                 item = item[0]
@@ -471,11 +475,11 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             "filename",
             "preferences",
             "name",
-            "description",
+            "comment",
             "history",
             "date",
             "modified",
-            "origin",
+            "source",
             "show_datapoints",
             "roi",
             "modeldata",
@@ -1126,83 +1130,46 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         object
             A axrray.DataArray object.
         """
-        # Information about DataArray from the DataArray docstring
-        #
-        # Attributes
-        # ----------
-        # dims: tuple
-        #     Dimension names associated with this array.
-        # values: np.ndarray
-        #     Access or modify DataArray values as a numpy array.
-        # coords: dict-like
-        #     Dictionary of DataArray objects that label values along each dimension.
-        # name: str or None
-        #     Name of this array.
-        # attrs: OrderedDict
-        #     Dictionary for holding arbitrary metadata.
-        # Init docstring
-        #
-        # Parameters
-        # ----------
-        # data: array_like
-        #     Values for this array. Must be an ``numpy.ndarray``, ndarray like,
-        #     or castable to an ``ndarray``.
-        # coords: sequence or dict of array_like objects, optional
-        #     Coordinates (tick labels) to use for indexing along each dimension.
-        #     If dict-like, should be a mapping from dimension names to the
-        #     corresponding coordinates. If sequence-like, should be a sequence
-        #     of tuples where the first element is the dimension name and the
-        #     second element is the corresponding coordinate array_like object.
-        # dims: str or sequence of str, optional
-        #     Name(s) of the data dimension(s). Must be either a string (only
-        #     for 1D data) or a sequence of strings with length equal to the
-        #     number of dimensions. If this argument is omitted, dimension names
-        #     are taken from ``coords`` (if possible) and otherwise default to
-        #     ``['dim_0', ... 'dim_n']``.
-        # name: str or None, optional
-        #     Name of this array.
-        # attrs: dict_like or None, optional
-        #     Attributes to assign to the new instance. By default, an empty
-        #     attribute dictionary is initialized.
-        # encoding: dict_like or None, optional
-        #     Dictionary specifying how to encode this array's data into a
-        #     serialized format like netCDF4. Currently used keys (for netCDF)
-        #     include '_FillValue', 'scale_factor', 'add_offset', 'dtype',
-        #     'units' and 'calendar' (the later two only for datetime arrays).
-        #     Unrecognized keys are ignored.
 
-        xr = import_optional_dependency("xarray", errors="ignore")
-        if xr is None:
-            error_(
-                "Missing optional dependency 'xarray'.  Use conda or pip to install xarray."
-            )
-            return
+        xr = import_optional_dependency("xarray")
 
         coords = {}
         for index, name in enumerate(self.dims):
             coord = self.coordset[name]
-            coord_attrs = {
-                "units": str(coord.units),
-                "long_name": coord.title,
-                "labels": coord.labels if coord.is_labeled else [],
-            }
-            for k, v in coord.meta.items():  # add metadata
-                coord_attrs[k] = v
+            coords.update(coord._to_xarray())
 
-            coords[name] = (name, coord.data, coord_attrs)
+        if self.is_masked:
+            coords["mask"] = xr.Variable(dims=self.dims, data=self.mask)
+
         da = xr.DataArray(
             np.array(self.data, dtype=np.float64),
-            dims=list(coords.keys()),
+            dims=self.dims,
             coords=coords,
+            name=self.name,
         )
 
-        da.attrs["units"] = str(self.units)
+        # 'modeldata', TODO:
+
+        # 'referencedata', 'state', 'ranges'] # TODO: for GUI
+
         da.attrs["name"] = self.name
-        da.attrs["long_name"] = self.title
-        da.attrs["description"] = self.description
-        da.attrs["history"] = self.history
-        for k, v in self.meta.items():  # add metadata
-            da.attrs[k] = v
+        da.attrs["pint_units"] = str(self.units)
+        da.attrs["long_name"] = self.long_name
+        da.attrs["author"] = self.author
+        da.attrs["comment"] = self.comment
+        da.attrs["history"] = "\n".join(self.history)
+        da.attrs["roi"] = self.roi
+        da.attrs["date"] = str(self.date)
+        da.attrs["modified"] = str(self.modified)
+        da.attrs["source"] = self.origin
+        da.attrs["transposed"] = self.transposed
+        da.attrs["filename"] = self.filename
+        for k, v in self.preferences.items():
+            da.attrs[f"prefs_{k}"] = v
+        for k, v in self.meta.items():
+            da.attrs[f"meta_{k}"] = v
+
+        da.attrs = encode_quantity(da.attrs)
 
         return da
 

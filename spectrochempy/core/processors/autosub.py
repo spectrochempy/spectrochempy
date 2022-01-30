@@ -15,7 +15,7 @@ import numpy as np
 from scipy.optimize import minimize_scalar
 
 
-from spectrochempy.core.dataset.coordrange import trim_ranges
+from spectrochempy.core.dataset.coord import trim_ranges
 
 
 def autosub(
@@ -35,7 +35,7 @@ def autosub(
         Dataset to which we want to subtract the reference data.
     ref : |NDDataset|
          1D reference data, with a size matching the axis to subtract.
-         (axis parameter).  # TODO : optionally use title of axis.
+         (axis parameter).  # TODO : optionally use long_name of axis.
     *ranges : pair(s) of values
         Any number of pairs is allowed.
         Coord range(s) in which the variance is minimized.

@@ -8,7 +8,7 @@
 Plugin module to extend NDDataset with a JCAMP-DX export method.
 """
 import numpy as np
-from datetime import datetime, timezone
+from datetime import datetime
 
 from spectrochempy.core.writers.exporter import Exporter, exportermethod
 
@@ -96,7 +96,7 @@ def _write_jcamp(*args, **kwargs):
                     timestamp_index = i
 
         if timestamp_index is None:
-            timestamp = datetime.now(timezone.utc)
+            timestamp = np.datetime64("now")
 
         for i in range(dataset.shape[0]):
 

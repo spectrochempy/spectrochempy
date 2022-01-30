@@ -773,10 +773,7 @@ def read_topspin(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
-@deprecated(
-    "read_bruker_nmr reading method is deprecated and may be removed in next versions "
-    "- use read_topspin instead"
-)
+@deprecated(replace="read_topspin")
 def read_bruker_nmr(*args, **kwargs):
     return read_topspin(*args, **kwargs)
 

@@ -670,8 +670,9 @@ class Project(AbstractProject, NDIO):
 
 def makescript(priority=50):
     def decorator(func):
-        ss = dill.dumps(func)
-        print(ss)
+
+        _ = dill.dumps(func)
+        # print(ss)
 
         @wraps(func)
         def wrapper(*args, **kwargs):

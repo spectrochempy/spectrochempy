@@ -496,8 +496,6 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             sfo1 = 0 * ur.Hz
             bf1 = sfo1
             dw = x.spacing
-            if isinstance(dw, list):
-                print()
             sw = 1 / 2 / dw
             sf = -sw / 2
             size = size // 2
@@ -512,16 +510,16 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             newcoord = LinearCoord.arange(size) * deltaf + first
             newcoord.show_datapoints = False
             newcoord.name = x.name
-            new.title = "intensity"
+            new.long_name = "intensity"
             if is_nmr:
-                newcoord.title = f"${nucleus}$ frequency"
+                newcoord.long_name = f"${nucleus}$ frequency"
                 newcoord.ito("Hz")
             elif is_ir:
                 new._units = None
-                newcoord.title = "wavenumbers"
+                newcoord.long_name = "wavenumbers"
                 newcoord.ito("cm^-1")
             else:
-                newcoord.title = "frequency"
+                newcoord.long_name = "frequency"
                 newcoord.ito("Hz")
 
         else:
@@ -533,7 +531,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
 
             newcoord = LinearCoord.arange(size) * deltat
             newcoord.name = x.name
-            newcoord.title = "time"
+            newcoord.long_name = "time"
             newcoord.ito("us")
 
         if is_nmr and not inv:
@@ -541,7 +539,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             ppm = kwargs.get("ppm", True)
             if ppm:
                 newcoord.ito("ppm")
-                newcoord.title = fr"$\delta\ {nucleus}$"
+                newcoord.long_name = fr"$\delta\ {nucleus}$"
 
         new.coordset[dim] = newcoord
 

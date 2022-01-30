@@ -11,8 +11,8 @@ This module define a generic class to import directories, files and contents.
 __all__ = ["read", "read_dir"]
 __dataset_methods__ = __all__
 
+import numpy as np
 from warnings import warn
-from datetime import datetime, timezone
 from traitlets import HasTraits, List, Dict, Type, Unicode
 
 from spectrochempy.utils import pathclean, check_filename_to_open
@@ -37,7 +37,8 @@ FILETYPES = [
     ("zip", "Compressed folder of data files (*.zip)"),
     ("quadera", "Quadera ascii files (*.asc)"),
     ("carroucell", "Carroucell files (*spa)"),
-    ("galactic", "GRAMS/Thermo Galactic files (*.spc)")
+    ("galactic", "GRAMS/Thermo Galactic files (*.spc)"),
+    ("netcdf", "Xarray / NetCDF - Network Common Data Form (*.nc)"),
     #  ('all', 'All files (*.*)')
 ]
 ALIAS = [
@@ -51,6 +52,7 @@ ALIAS = [
     ("dx", "jcamp"),
     ("xls", "excel"),
     ("asc", "quadera"),
+    ("nc", "netcdf"),
 ]
 
 
@@ -251,9 +253,7 @@ class Importer(HasTraits):
                 dataset = self.objtype.stack(datasets)
                 if dataset.coordset is not None and kwargs.pop("sortbydate", True):
                     dataset.sort(dim="y", inplace=True)
-                    dataset.history = (
-                        str(datetime.now(timezone.utc)) + ":sorted by date"
-                    )
+                    dataset.history = f"{np.datetime64('now')}: sorted by date"
                 datasets = [dataset]
 
             except DimensionsCompatibilityError as e:
@@ -500,9 +500,10 @@ def _read_dir(*args, **kwargs):
         if key:
             importer = Importer()
             nd = importer(files[key], **kwargs)
-            if not isinstance(nd, list):
-                nd = [nd]
-            datasets.extend(nd)
+            if nd is not None:
+                if not isinstance(nd, list):
+                    nd = [nd]
+                datasets.extend(nd)
     return datasets
 
 

@@ -17,7 +17,7 @@ from traitlets import Int, Instance, HasTraits, Float, Unicode, Tuple, List
 from matplotlib.widgets import SpanSelector
 import matplotlib.pyplot as plt
 
-from spectrochempy.core.dataset.coordrange import trim_ranges
+from spectrochempy.core.dataset.coord import trim_ranges
 from spectrochempy.core.plotters.multiplot import multiplot
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import TYPE_INTEGER, TYPE_FLOAT

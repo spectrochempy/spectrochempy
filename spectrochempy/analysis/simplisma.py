@@ -24,7 +24,7 @@ import warnings
 from traitlets import HasTraits, Instance, Unicode
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.npy import dot
+from spectrochempy.core.dataset.ndmath import dot
 from spectrochempy.core import info_, set_loglevel, INFO
 
 

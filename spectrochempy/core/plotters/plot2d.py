@@ -33,14 +33,14 @@ from spectrochempy.core.dataset.coord import LinearCoord
 _PLOT2D_DOC = """
 ax : |Axes| instance. Optional
     The axe where to plot. The default is the current axe or to create a new one if is None.
-clear : bool, optional, default=`True`
+clear : bool, optional, default=True
     Should we plot on the ax previously used or create a new figure?.
 figsize : tuple, optional
     The figure size expressed as a tuple (w,h) in inch.
 fontsize : int, optional
     The font size in pixels, default is 10 (or read from preferences).
 style : str
-autolayout : `bool`, optional, default=True
+autolayout : bool, optional, default=True
     if True, layout will be set automatically.
 output : str
     A string containing a path to a filename. The output format is deduced
@@ -50,27 +50,29 @@ dpi : [ None | scalar > 0]
     The resolution in dots per inch. If None it will default to the
     value savefig.dpi in the matplotlibrc file.
 colorbar :
-transposed :
 clear :
 ax :
 twinx :
 use_plotly : bool, optional
     Should we use plotly instead of mpl for plotting. Default to `preferences.use_plotly`  (default=False)
-data_only : `bool` [optional, default=`False`]
+data_only : bool [optional, default=False]
     Only the plot is done. No addition of axes or label specifications
     (current if any or automatic settings are kept.
-method : str [optional among ``map``, ``stack``, ``image`` or ``3D``]
+method : str [optional among `map`, `stack`, `image` or `3D`]
     The type of plot,
-projections : `bool` [optional, default=False]
+projections : bool [optional, default=False]
 style : str, optional, default='notebook'
     Matplotlib stylesheet (use `available_style` to get a list of available
     styles for plotting
-reverse : `bool` or None [optional, default=None
+reverse : bool or None [optional, default=None
     In principle, coordinates run from left to right, except for wavenumbers
     (e.g., FTIR spectra) or ppm (e.g., NMR), that spectrochempy
     will try to guess. But if reverse is set, then this is the
     setting which will be taken into account.
-x_reverse : `bool` or None [optional, default=None
+x_reverse : bool or None, optional, default=None
+    Reverse the default direction of the x axis.
+transposed : bool; optional, default=False
+    If True, transposed data are plotted.
 """
 
 # ======================================================================================================================
@@ -83,7 +85,7 @@ def plot_stack(dataset, **kwargs):
     """
     Plot a 2D dataset as a stack plot.
 
-    Alias of plot_2D (with `method` argument set to ``stack``).
+    Alias of plot_2D (with `method` argument set to `stack``).
     """
 
 
@@ -465,6 +467,11 @@ def plot_2D(dataset, method=None, **kwargs):
         # map colors using the colormap
 
         vmin, vmax = ylim
+        if isinstance(vmin, np.datetime64):
+            vmin = vmin.astype(
+                int
+            )  # TODO: See if it is not possible to make Datetime display directly
+            vmax = vmax.astype(int)
         norm = mpl.colors.Normalize(
             vmin=vmin, vmax=vmax
         )  # we normalize to the max time
@@ -488,9 +495,13 @@ def plot_2D(dataset, method=None, **kwargs):
             li = cpy(line0)
             li.set_ydata(zdata[i])
             lines.append(li)
-            li.set_color(scalarMap.to_rgba(ydata[i]))
-            fmt = kwargs.get("label_fmt", "{:.5f}")
-            li.set_label(fmt.format(ydata[i]))
+            yd = (
+                ydata[i].astype(int)
+                if isinstance(ydata[0], np.datetime64)
+                else ydata[i]
+            )
+            li.set_color(scalarMap.to_rgba(yd))
+            li.set_label(str(yd))
             li.set_zorder(zdata.shape[0] + 1 - i)
 
         # store the full set of lines

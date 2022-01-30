@@ -52,7 +52,7 @@ def _integrate_method(method):
             idx = new._coordset.names.index(dim)
             del new._coordset.coords[idx]
 
-        new.title = "area"
+        new.long_name = "area"
         new._units = dataset.units * dataset.coord(dim).units
         new._history = [
             f"Dataset resulting from application of `{method.__name__}` method"
@@ -106,9 +106,7 @@ def trapezoid(dataset, **kwargs):
     return scipy.integrate.trapz(dataset, **kwargs)
 
 
-@deprecated(
-    "Use the Trapezoid method instead. This method may be removed in future version"
-)
+@deprecated(replace="trapezoid")
 def trapz(dataset, **kwargs):
     return trapezoid(dataset, **kwargs)
 
@@ -174,7 +172,7 @@ def simpson(dataset, *args, **kwargs):
     return scipy.integrate.simps(dataset.data, **kwargs)
 
 
-@deprecated("Use simpson method instead. This method may be removed in future version")
+@deprecated(replace="simpson")
 def simps(dataset, **kwargs):
     return simpson(dataset, **kwargs)
 

@@ -11,6 +11,7 @@ This module implements the NDMath class.
 
 __all__ = [
     "NDMath",
+    "dot",
 ]
 __dataset_methods__ = []
 
@@ -26,18 +27,23 @@ import numpy as np
 from orderedset import OrderedSet
 from quaternion import as_float_array
 
-from spectrochempy.core.units.units import ur, Quantity, DimensionalityError
+from spectrochempy.core.units.units import (
+    ur,
+    Quantity,
+    DimensionalityError,
+    # from_dt64_units,
+)
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.utils import (
     NOMASK,
     TYPE_COMPLEX,
     quat_as_complex_array,
     as_quaternion,
+    make_new_object,
 )
 from spectrochempy.core import warning_, error_
 from spectrochempy.utils.testing import assert_coord_almost_equal
 from spectrochempy.utils.exceptions import CoordinateMismatchError
-
 
 # ======================================================================================================================
 # utilities
@@ -140,6 +146,9 @@ class _from_numpy_method:
                 # separate object keyword from other specific to the function
                 kw = {}
                 keys = dir(klass())
+                keys.extend(["description", "source", "long_name"])
+                # These one have an equivalent but for historical reason are often passed
+                # (we will have to set them as deprecated)
                 for k in list(kwargs.keys())[:]:
                     if k not in keys:
                         kw[k] = kwargs[k]
@@ -450,7 +459,7 @@ class NDMath(object):
         "gt",
     ]
     __complex_funcs = ["real", "imag", "absolute", "abs"]
-    __keep_title = [
+    __keep_long_name = [
         "negative",
         "absolute",
         "abs",
@@ -462,7 +471,7 @@ class NDMath(object):
         "add",
         "subtract",
     ]
-    __remove_title = [
+    __remove_long_name = [
         "multiply",
         "divide",
         "true_divide",
@@ -547,14 +556,14 @@ class NDMath(object):
             return (getattr(np, fname))(inputs[0].masked_data)
 
         # case of a dataset
-        data, units, mask, returntype = self._op(ufunc, inputs, isufunc=True)
-        new = self._op_result(data, units, mask, history, returntype)
+        data, dtype, units, mask, returntype = self._op(ufunc, inputs, isufunc=True)
+        new = self._op_result(data, dtype, units, mask, history, returntype)
 
-        # make a new title depending on the operation
-        if fname in self.__remove_title:
-            new.title = f"<{fname}>"
-        elif fname not in self.__keep_title and isinstance(new, NDArray):
-            if hasattr(new, "title") and new.title is not None:
+        # make a new long_name depending on the operation
+        if fname in self.__remove_long_name:
+            new.long_name = f"<{fname}>"
+        elif fname not in self.__keep_long_name and isinstance(new, NDArray):
+            if hasattr(new, "long_name") and new.title is not None:
                 new.title = f"{fname}({new.title})"
             else:
                 new.title = f"{fname}(data)"
@@ -1646,7 +1655,7 @@ class NDMath(object):
         NDDataset: [float64] km (size: 6)
         """
 
-        from spectrochempy.core.dataset.coordset import CoordSet
+        from spectrochempy.core.dataset.coord import CoordSet
 
         if coordset is not None:
             if not isinstance(coordset, CoordSet):
@@ -2705,6 +2714,11 @@ class NDMath(object):
             objtype = type(obj).__name__
             objtypes.append(objtype)
 
+            # if hasattr(obj, "is_dt64") and obj.is_dt64:
+            #     if fname not in ["add", "sub"]:
+            #         raise RuntimeError('only add and sub operation are permited on datetime coordinates. For instance '
+            #                            'use x = x + y instead of x -= y')
+
             # units
             if hasattr(obj, "units"):
                 objunits.add(ur.get_dimensionality(obj.units))
@@ -2769,6 +2783,12 @@ class NDMath(object):
         remove_units = fname in self.__remove_units
         quaternion_aware = fname in self.__quaternion_aware
 
+        # special case of datetimes
+        is_dt64 = lambda obj: obj.is_dt64 if hasattr(obj, "is_dt64") else False
+        # Only if we work with coordinates
+
+        inputs = cpy.copy(inputs)
+
         (
             fname,
             inputs,
@@ -2780,13 +2800,8 @@ class NDMath(object):
 
         # Now we can proceed
 
-        obj = cpy.copy(inputs.pop(0))
+        obj = inputs.pop(0)
         objtype = objtypes.pop(0)
-
-        other = None
-        if inputs:
-            other = cpy.copy(inputs.pop(0))
-            othertype = objtypes.pop(0)
 
         # Is our first object a NDdataset
         # ------------------------------------------------------------------------------
@@ -2801,12 +2816,15 @@ class NDMath(object):
         # Do we have units?
         # We create a quantity q that will be used for unit calculations (without dealing with the whole object)
         def reduce_(magnitude):
+            # if is_dt64:
+            #    return 1.
             if hasattr(magnitude, "dtype"):
                 if magnitude.dtype in TYPE_COMPLEX:
                     magnitude = magnitude.real
                 elif magnitude.dtype == np.quaternion:
                     magnitude = as_float_array(magnitude)[..., 0]
                 magnitude = magnitude.max()
+
             return magnitude
 
         q = reduce_(d)
@@ -2821,18 +2839,23 @@ class NDMath(object):
 
         # If other is None, then it is a unary operation we can pass the following
 
-        if other is not None:
+        if inputs:  # a second input exists
+
+            other = cpy.copy(inputs.pop(0))
+            othertype = objtypes.pop(0)
 
             # First the units may require to be compatible, and if thet are sometimes they may need to be rescales
             if othertype in ["NDDataset", "Coord", "LinearCoord", "Quantity"]:
 
                 # rescale according to units
                 if not other.unitless:
-                    if hasattr(obj, "units"):
+                    if hasattr(obj, "units") and not is_dt64(obj):
                         # obj is a Quantity
                         if compatible_units:
                             # adapt the other units to that of object
                             other.ito(obj.units)
+
+            # is_dt64 = other.is_dt64 if hasattr(other, "is_dt64") else False  # Only if we work with coordinates
 
             # If all inputs are datasets BUT coordset mismatch.
             if (
@@ -2890,7 +2913,7 @@ class NDMath(object):
             else:
                 # Not a NDArray.
 
-                # if it is a quantity than separate units and magnitude
+                # if it is a quantity then separate units and magnitude
                 if isinstance(other, Quantity):
                     arg = other.m
                 else:
@@ -2972,7 +2995,7 @@ class NDMath(object):
             # some functions are not handled by pint regardings units, try to solve this here
             f_u = f
             if compatible_units:
-                f_u = np.add  # take a similar function handled by pint
+                f_u = operator.sub  # take a similar function handled by pint
 
             try:
                 res = f_u(q, *otherqs)
@@ -3046,8 +3069,15 @@ class NDMath(object):
                     datai = f(di, *args)
                     data = as_quaternion(datar, datai)
 
-            except Exception as e:
-                raise ArithmeticError(e.args[0])
+            except TypeError as e:
+                if (
+                    hasattr(d, "dtype")
+                    and str(d.dtype).startswith("datetime64")
+                    and f.__name__ == "isub"
+                ):
+                    data = operator.sub(d, *args)
+                else:
+                    raise ArithmeticError(e.args[0])
 
         # get possible mask
         if isinstance(data, np.ma.MaskedArray):
@@ -3056,8 +3086,14 @@ class NDMath(object):
         else:
             mask = NOMASK  # np.zeros_like(data, dtype=bool)
 
-        # return calculated data, units and mask
-        return data, units, mask, returntype
+        if self._check_if_is_td64(data):
+            data, units = self._data_and_units_from_td64(data)
+            dtype = np.dtype("float")
+        else:
+            dtype = None
+
+        # return calculated data, dtype, units and mask
+        return data, dtype, units, mask, returntype
 
     # ..........................................................................
     @staticmethod
@@ -3070,8 +3106,8 @@ class NDMath(object):
             else:
                 history = None
 
-            data, units, mask, returntype = self._op(f, [self])
-            return self._op_result(data, units, mask, history, returntype)
+            data, dtype, units, mask, returntype = self._op(f, [self])
+            return self._op_result(data, dtype, units, mask, history, returntype)
 
         return func
 
@@ -3141,8 +3177,8 @@ class NDMath(object):
             else:
                 history = None
 
-            data, units, mask, returntype = self._op(fm, objs)
-            new = self._op_result(data, units, mask, history, returntype)
+            data, dtype, units, mask, returntype = self._op(fm, objs)
+            new = self._op_result(data, dtype, units, mask, history, returntype)
             return new
 
         return func
@@ -3160,7 +3196,7 @@ class NDMath(object):
             objs = [self, other]
             fm, objs = self._check_order(fname, objs)
 
-            data, units, mask, returntype = self._op(fm, objs)
+            data, dtype, units, mask, returntype = self._op(fm, objs)
             if returntype != "LinearCoord":
                 self._data = data
             else:
@@ -3175,7 +3211,9 @@ class NDMath(object):
         return func
 
     # ..........................................................................
-    def _op_result(self, data, units=None, mask=None, history=None, returntype=None):
+    def _op_result(
+        self, data, dtype=None, units=None, mask=None, history=None, returntype=None
+    ):
         # make a new NDArray resulting of some operation
 
         new = self.copy()
@@ -3184,19 +3222,20 @@ class NDMath(object):
 
             new = NDDataset(new)
 
+        # update the attributes
+        new._dtype = dtype
+        new._units = cpy.copy(units)
+        if mask is not None and np.any(mask != NOMASK):
+            new._mask = cpy.copy(mask)
+        if history is not None and hasattr(new, "history"):
+            new._history.append(history.strip())
+
         if returntype != "LinearCoord":
             new._data = cpy.deepcopy(data)
         else:
             from spectrochempy.core.dataset.coord import LinearCoord
 
             new = LinearCoord(cpy.deepcopy(data))
-
-        # update the attributes
-        new._units = cpy.copy(units)
-        if mask is not None and np.any(mask != NOMASK):
-            new._mask = cpy.copy(mask)
-        if history is not None and hasattr(new, "history"):
-            new._history.append(history.strip())
 
         # case when we want to return a simple masked ndarray
         if returntype == "masked_array":
@@ -3358,6 +3397,103 @@ api_funcs = [  # creation functions
 for funcname in api_funcs:
     setattr(thismodule, funcname, getattr(NDMath, funcname))
     thismodule.__all__.append(funcname)
+
+
+# ............................................................................
+def dot(a, b, strict=True, out=None):
+    """
+    Return the dot product of two NDDatasets.
+
+    This function is the equivalent of `numpy.dot` that takes NDDataset as
+    input
+
+    .. note::
+      Works only with 2-D arrays at the moment.
+
+    Parameters
+    ----------
+    a, b : masked_array_like
+        Inputs arrays.
+    strict : bool, optional
+        Whether masked data are propagated (True) or set to 0 (False) for
+        the computation. Default is False.  Propagating the mask means that
+        if a masked value appears in a row or column, the whole row or
+        column is considered masked.
+    out : masked_array, optional
+        Output argument. This must have the exact kind that would be returned
+        if it was not used. In particular, it must have the right type, must be
+        C-contiguous, and its dtype must be the dtype that would be returned
+        for `dot(a,b)`. This is a performance feature. Therefore, if these
+        conditions are not met, an exception is raised, instead of attempting
+        to be flexible.
+
+    See Also
+    --------
+    numpy.dot : Equivalent function for ndarrays.
+    numpy.ma.dot : Equivalent function for masked ndarrays.
+    """
+    # if not a.implements('NDDataset'):
+    #     raise TypeError('A dataset of type NDDataset is  '
+    #                     'expected as a source of data, but an object'
+    #                     ' of type {} has been provided'.format(
+    #         type(a).__name__))
+    #
+    # if not b.implements('NDDataset'):
+    #     raise TypeError('A dataset of type NDDataset is  '
+    #                     'expected as a source of data, but an object'
+    #                     ' of type {} has been provided'.format(
+    #         type(b).__name__))
+
+    # TODO: may be we can be less strict, and allow dot products with
+    #      different kind of objects, as far they are numpy-like arrays
+
+    # Delayed import to avoid circular imports
+    from spectrochempy.core.dataset.nddataset import NDDataset
+
+    if not isinstance(a, NDDataset) and not isinstance(a, NDDataset):
+        # must be between numpy object or something non valid. Let numpy
+        # deal with this
+        return np.dot(a, b)
+
+    if not isinstance(a, NDDataset):
+        # try to cast to NDDataset
+        a = NDDataset(a)
+
+    if not isinstance(b, NDDataset):
+        # try to cast to NDDataset
+        b = NDDataset(b)
+
+    data = np.ma.dot(a.masked_data, b.masked_data)
+    mask = data.mask
+    data = data.data
+
+    if a.coordset is not None:
+        coordy = getattr(a, a.dims[0])
+    else:
+        coordy = None
+    if b.coordset is not None:
+        coordx = getattr(b, b.dims[1])
+    else:
+        coordx = None
+
+    history = "Dot product between %s and %s" % (a.name, b.name)
+
+    # make the output
+    # ------------------------------------------------------------------------
+    new = make_new_object(a)
+    new._data = data
+    new._mask = mask
+    new.set_coordset(y=coordy, x=coordx)
+    new.history = history
+    if a.unitless:
+        new.units = b.units
+    elif b.unitless:
+        new.units = a.units
+    else:
+        new.units = a.units * b.units
+
+    return new
+
 
 # ======================================================================================================================
 if __name__ == "__main__":

@@ -12,9 +12,9 @@ files.
 __all__ = ["read_omnic", "read_spg", "read_spa", "read_srs"]
 __dataset_methods__ = __all__
 
-from datetime import datetime, timezone, timedelta
 import io
 import struct
+from datetime import datetime, timezone, timedelta
 
 import numpy as np
 
@@ -636,7 +636,7 @@ def _read_spg(*args, **kwargs):
 
     # Get spectra titles & acquisition dates:
     # container to hold values
-    spectitles, acquisitiondates, timestamps = [], [], []
+    spectitles, acquisitiondates = [], []
 
     # Extract positions of '6B' keys (spectra titles & acquisition dates)
     key_is_6B = keys == 107
@@ -655,18 +655,10 @@ def _read_spg(*args, **kwargs):
 
         # and the acquisition date
         fid.seek(spa_title_pos + 256)
-        timestamp = _fromfile(fid, dtype="uint32", count=1)  #
-        # since 31/12/1899, 00:00
-        acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=timezone.utc) + timedelta(
-            seconds=int(timestamp)
-        )
-        acquisitiondates.append(acqdate)
-        timestamp = acqdate.timestamp()
-        # Transform back to timestamp for storage in the Coord object
-        # use datetime.fromtimestamp(d, timezone.utc))
-        # to transform back to datetime obkct
+        timestamp = _fromfile(fid, dtype="uint32", count=1)
+        acqdate = np.datetime64("1899-12-31") + np.timedelta64(int(timestamp), "s")
 
-        timestamps.append(timestamp)
+        acquisitiondates.append(acqdate)
 
         # Not used at present  # -------------------  # extract positions of
         # '1B' codes (history text  #  --  #  #  #  # sometimes absent,
@@ -701,32 +693,31 @@ def _read_spg(*args, **kwargs):
     )
 
     _y = Coord(
-        timestamps,
-        title="acquisition timestamp (GMT)",
-        units="s",
-        labels=(acquisitiondates, spectitles),
+        acquisitiondates,
+        title="acquisition date (GMT)",
+        units=None,
+        labels=(spectitles,),
     )
 
     dataset.set_coordset(y=_y, x=_x)
 
     # Set origin and description
-    dataset.origin = "omnic"
-    dataset.description = kwargs.get(
-        "description", f"Omnic title: {spg_title}\nOmnic " f"filename: {filename}"
+    dataset.source = "omnic"
+    dataset.comment = kwargs.get(
+        "comment",
+        kwargs.get(
+            "description", f"Omnic title: {spg_title}\nOmnic " f"filename: {filename}"
+        ),
     )
 
     # Set the NDDataset date
-    dataset._date = datetime.now(timezone.utc)
+    dataset._date = np.datetime64("now")
 
     # Set origin, description and history
-    dataset.history = str(dataset.date) + ":imported from spg file {} ; ".format(
-        filename
-    )
+    dataset.history = f"{dataset.date}: imported from spg file {filename}"
     if sortbydate:
         dataset.sort(dim="y", inplace=True)
-        dataset.history = str(dataset.date) + ":sorted by date"
-
-    # debug_("end of reading")
+        dataset.history = f"{dataset.date}: sorted by date"
 
     return dataset
 
@@ -848,9 +839,9 @@ def _read_spa(*args, **kwargs):
     dataset.description = kwargs.get(
         "description", f"Omnic title: {spa_title}\nOmnic " f"filename: {filename.name}"
     )
-    dataset.history = str(datetime.now(timezone.utc)) + ":imported from spa files"
+    dataset.history = f"{np.datetime64('now')}: imported from spa files"
     dataset.history = history
-    dataset._date = datetime.now(timezone.utc)
+    dataset._date = np.datetime64("now")
 
     if dataset.x.units is None and dataset.x.title == "data points":
         # interferogram
@@ -955,9 +946,7 @@ def _read_srs(*args, **kwargs):
                 background.title = "volts"
                 background.origin = "omnic"
                 background.description = "background from omnic srs file."
-                background.history = (
-                    str(datetime.now(timezone.utc)) + ":imported from srs file"
-                )
+                background.history = f"{np.datetime64('now')}: imported from srs file"
 
             else:  # this is likely the first interferogram of the series
                 found = True

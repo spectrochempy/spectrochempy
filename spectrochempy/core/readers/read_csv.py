@@ -15,7 +15,6 @@ __dataset_methods__ = __all__
 import warnings
 import locale
 import io
-from datetime import datetime, timezone
 
 import numpy as np
 
@@ -207,8 +206,8 @@ def _read_csv(*args, **kwargs):
     dataset.title = kwargs.get("title", None)
     dataset.units = kwargs.get("units", None)
     dataset.description = kwargs.get("description", '"name" ' + "read from .csv file")
-    dataset.history = str(datetime.now(timezone.utc)) + ":read from .csv file \n"
-    dataset._date = datetime.now(timezone.utc)
+    dataset._date = np.datetime64("now")
+    dataset.history = str(dataset.date) + ":read from .csv file \n"
     dataset._modified = dataset.date
 
     # here we can check some particular format
@@ -238,14 +237,12 @@ def _add_omnic_info(dataset, **kwargs):
     dataset.title = "absorbance"
     dataset.name = name
     dataset.description = "Dataset from .csv file: {}\n".format(desc)
-    dataset.history = (
-        str(datetime.now(timezone.utc)) + ":read from omnic exported csv file \n"
-    )
+    dataset._date = np.datetime64("now")
+    dataset._modified = dataset.date
+    dataset.history = str(dataset.date) + ":read from omnic exported csv file \n"
     dataset.origin = "omnic"
 
     # Set the NDDataset date
-    dataset._date = datetime.now(timezone.utc)
-    dataset._modified = dataset.date
 
     # x axis
     dataset.x.units = "cm^-1"
@@ -265,7 +262,7 @@ def _add_omnic_info(dataset, **kwargs):
         dat = dat.replace("Aout", "Aug")
 
         # get the dates
-        acqdate = datetime.strptime(dat, "%a %b %d %H-%M-%S %Y")
+        acqdate = np.datetime64(dat)
 
         # Transform back to timestamp for storage in the Coord object
         # use datetime.fromtimestamp(d, timezone.utc))

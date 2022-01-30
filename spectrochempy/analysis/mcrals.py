@@ -19,7 +19,7 @@ from traitlets import HasTraits, Instance, Dict, Unicode
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.analysis.pca import PCA
-from spectrochempy.core.dataset.npy import dot
+from spectrochempy.core.dataset.ndmath import dot
 from spectrochempy.core import info_, set_loglevel, INFO
 
 

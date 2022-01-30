@@ -44,12 +44,12 @@ def can_merge_or_align(coord1, coord2):
     else:
         # no the same coordinates
         can_merge = False  # we need to do alignment to merge
-        # can align only if data exists, units compatibles, and title are
+        # can align only if data exists, units compatibles, and long_name are
         # the same
         can_align = True
         can_align &= not coord1.is_empty
         can_align &= not coord2.is_empty
-        can_align &= coord1.title == coord2.title
+        can_align &= coord1.long_name == coord2.long_name
         if can_align and (coord1.has_units or coord2.has_units):
             if coord1.has_units:
                 can_align &= coord1.is_units_compatible(coord2)
@@ -114,7 +114,7 @@ def align(dataset, *others, **kwargs):
     ------
     ValueError
         Issued when the dimensions given in `dim` or `dims` argument are not
-        compatibles (units, titles, etc.).
+        compatibles (units, long_names, etc.).
     """
     # DEVELOPER NOTE
     # There is probably better methods, but to simplify dealing with
@@ -389,8 +389,8 @@ def align(dataset, *others, **kwargs):
     #     newaxes[axis]._labels =  #  np.array([''] * newaxisdata.size)  #  #     # transform the dataset  #
     #     inplace = kwargs.pop('inplace', False)  #  #     if inplace:  #  #     out = dataset  #     else:  #
     #     out = dataset.copy()  #  #  #     out._data = newdata  #     out._coords = newaxes  #     out._mask  #
-    #     = newmask  #  #     out.name = dataset.name  #     out.title =  #     dataset.title  #  #     out.history
+    #     = newmask  #  #     out.name = dataset.name  #     out.long_name =  #     dataset.long_name  #  #     out.history
     #     = '{}: Aligned along dim {}  #     with respect to dataset {} using coords {} \n'.format(  #  #     str(
-    #     dataset.modified), axis, ref.name, ref.coords[refaxis].title)  #  #     if is_sorted and out.coordset(
+    #     dataset.modified), axis, ref.name, ref.coords[refaxis].long_name)  #  #     if is_sorted and out.coordset(
     #     axis).reversed:  #  #  out.sort(axis, descend=True, inplace=True)  #         ref.sort(  #  refaxis,
     #     descend=True, inplace=True)  #  # return out

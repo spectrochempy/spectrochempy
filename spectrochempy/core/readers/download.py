@@ -64,14 +64,14 @@ def download_iris():
 
         coordx = Coord(
             labels=["sepal_length", "sepal width", "petal_length", "petal_width"],
-            title="features",
+            long_name="features",
         )
-        coordy = Coord(labels=labels, title="samples")
+        coordy = Coord(labels=labels, long_name="samples")
 
         new = NDDataset(
             data,
             coordset=[coordy, coordx],
-            title="size",
+            long_name="size",
             name="`IRIS` Dataset",
             units="cm",
         )
@@ -92,15 +92,15 @@ def download_iris():
 
         coordx = Coord(
             labels=["sepal_length", "sepal width", "petal_length", "petal_width"],
-            title="features",
+            long_name="features",
         )
         labels = [data.target_names[i] for i in data.target]
-        coordy = Coord(labels=labels, title="samples")
+        coordy = Coord(labels=labels, long_name="samples")
 
         new = NDDataset(
             data.data,
             coordset=[coordy, coordx],
-            title="size",
+            long_name="size",
             name="`IRIS` Dataset",
             units="cm",
         )

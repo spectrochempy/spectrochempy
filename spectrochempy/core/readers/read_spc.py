@@ -13,10 +13,9 @@ This module extend NDDataset with the import method for Thermo galactic (spc) da
 __all__ = ["read_spc"]
 __dataset_methods__ = __all__
 
-from datetime import datetime, timezone
 import io
 import struct
-
+from datetime import datetime, timezone
 import numpy as np
 from warnings import warn
 

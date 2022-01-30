@@ -12,12 +12,12 @@ __dataset_methods__ = __all__
 
 import io
 import numpy as np
-from datetime import datetime, timezone, timedelta
 
 from brukeropusreader.opus_parser import parse_data, parse_meta
 from spectrochempy.core.dataset.coord import LinearCoord, Coord
 from spectrochempy.core.readers.importer import Importer, importermethod
 from spectrochempy.core import debug_
+from datetime import datetime, timedelta, timezone
 
 
 # ======================================================================================================================
@@ -191,7 +191,7 @@ def _read_opus(*args, **kwargs):
     fxv = opus_data["AB Data Parameter"]["FXV"]
     lxv = opus_data["AB Data Parameter"]["LXV"]
     # xdata = linspace(fxv, lxv, npt)
-    xaxis = LinearCoord.linspace(fxv, lxv, npt, title="wavenumbers", units="cm^-1")
+    xaxis = LinearCoord.linspace(fxv, lxv, npt, long_name="wavenumbers", units="cm^-1")
 
     # yaxis
     name = opus_data["Sample"]["SNM"]
@@ -207,7 +207,7 @@ def _read_opus(*args, **kwargs):
 
     yaxis = Coord(
         [timestamp],
-        title="acquisition timestamp (GMT)",
+        long_name="acquisition timestamp (GMT)",
         units="s",
         labels=([utc_dt], [name], [filename]),
     )
@@ -215,14 +215,14 @@ def _read_opus(*args, **kwargs):
     # set dataset's Coordset
     dataset.set_coordset(y=yaxis, x=xaxis)
     dataset.units = "absorbance"
-    dataset.title = "absorbance"
+    dataset.long_name = "absorbance"
 
     # Set name, origin, description and history
     dataset.name = filename.name
-    dataset.origin = "opus"
-    dataset.description = "Dataset from opus files. \n"
-    dataset.history = str(datetime.now(timezone.utc)) + ": import from opus files \n"
-    dataset._date = datetime.now(timezone.utc)
+    dataset.source = "opus"
+    dataset.comment = "Dataset from opus files."
+    dataset.history = f"{np.datetime64('now')}: import from opus files"
+    dataset._date = np.datetime64("now")
     dataset._modified = dataset.date
 
     return dataset

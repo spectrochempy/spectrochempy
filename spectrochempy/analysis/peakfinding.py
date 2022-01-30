@@ -14,8 +14,6 @@ __all__ = ["find_peaks"]
 
 __dataset_methods__ = ["find_peaks"]
 
-from datetime import datetime, timezone
-
 from scipy import signal
 import numpy as np
 
@@ -311,8 +309,6 @@ def find_peaks(
             ]
 
     out.name = "peaks of " + X.name
-    out.history = (
-        f"{str(datetime.now(timezone.utc))}: find_peaks(): {len(peaks)} peak(s) found"
-    )
+    out.history = f"{np.datetime64('now')}: find_peaks(): {len(peaks)} peak(s) found"
 
     return out, properties

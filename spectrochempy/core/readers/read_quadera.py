@@ -14,7 +14,7 @@ __dataset_methods__ = __all__
 
 import io
 from warnings import warn
-from datetime import datetime, timezone
+from datetime import datetime
 import re
 
 import numpy as np
@@ -199,11 +199,11 @@ def _read_asc(*args, **kwargs):
     dataset.set_coordset(y=_y, x=_x)
 
     # Set the NDDataset date
-    dataset._date = datetime.now(timezone.utc)
+    dataset._date = np.datetime64("now")
     dataset._modified = dataset.date
 
     # Set origin, description and history
-    dataset.history = f"{dataset.date}:imported from Quadera asc file {filename}"
+    dataset.history = f"{dataset.date}: imported from Quadera asc file {filename}"
 
     return dataset
 

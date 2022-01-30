@@ -14,7 +14,7 @@ Utility functions to deal with Cantera input/output.
 
 # TODO: Testing !
 
-import datetime
+from time import time
 import numpy as np
 import warnings
 import logging
@@ -258,7 +258,7 @@ def fit_to_concentrations(
             f"         Initial function value: "
             f"{objective(guess_param, param_to_optimize, C, externalConc, external_to_C_idx, reactive_phase)}"
         )
-    tic = datetime.datetime.now(datetime.timezone.utc)
+    tic = time()
     res = minimize(
         objective,
         guess_param,
@@ -268,7 +268,7 @@ def fit_to_concentrations(
         tol=tol,
         options=options,
     )
-    toc = datetime.datetime.now(datetime.timezone.utc)
+    toc = time()
     final_param = res.x
     if options["disp"]:
         print(f"         Optimization time: {toc - tic}")
@@ -544,7 +544,7 @@ class PFR:
         func_values = []  # values of the objective functions
         popsize = None  # popsize for differential evolution
 
-        start_time = datetime.datetime.now()
+        start_time = time()
 
         if logfile:
             logging.basicConfig(
@@ -612,7 +612,7 @@ class PFR:
                 if popsize:
                     pop_sse.append(sse)
                     if not it % (popsize * len(param_to_optimize)):
-                        toc = datetime.datetime.now()
+                        toc = time()
                         gen = it // (popsize * len(param_to_optimize))
                         if gen > 0:
                             logging.info(
@@ -646,7 +646,7 @@ class PFR:
                             prev_min_sse = min_sse
                             pop_sse = []
 
-                        tic = datetime.datetime.now()
+                        tic = time()
                         logging.info(f"{tic}: Start calculation of population #{gen}")
                         logging.info(
                             "--------"
@@ -740,7 +740,7 @@ class PFR:
         if logfile:
             logging.info("*** Cantera/Spectrochempy kinetic model optimization log ***")
             logging.info(
-                f"{datetime.datetime.now()}: Starting optimization of the parameters"
+                f"{np.datetime64('now')}: Starting optimization of the parameters"
             )
             logging.info("   Parameters to optimize:")
             for param in param_to_optimize:
@@ -755,7 +755,7 @@ class PFR:
             if optimizer in ["minimize", "least_squares"]:
                 print(f"         Initial function value: {init_function_value}")
 
-        # tic = datetime.datetime.now()
+        # tic = time()
 
         if optimizer == "minimize":
             res = minimize(
@@ -873,7 +873,7 @@ class PFR:
             #    that can't be pickled.
 
         logging.info(f"\nEnd of optimization: {res.message}")
-        toc = datetime.datetime.now()
+        toc = time()
 
         if res.success:
             best_string = ""

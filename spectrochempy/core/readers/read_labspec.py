@@ -15,12 +15,14 @@ This module extend NDDataset with the import method for Labspec *.txt generated 
 __all__ = ["read_labspec"]
 __dataset_methods__ = __all__
 
-import datetime
 import numpy as np
 
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.readers.importer import importermethod, Importer
 from spectrochempy.core.dataset.meta import Meta
+from spectrochempy.utils import strptime64
+
+# from spectrochempy.utils.exceptions import deprecated
 
 
 # ======================================================================================================================
@@ -159,21 +161,37 @@ def _read_txt(*args, **kwargs):
         # this is not a labspec txt file"
         return
 
-    # read spec
+    # read raw data
     rawdata = np.genfromtxt(lines[i:], delimiter="\t")
 
+    # get some info for times
+    acquired = strptime64(meta.get("Acquired", meta.Date))
+    # date of acquisition
+    delay = np.timedelta64(meta.get("Delay time (s)", 0), "s")
+    acq = np.timedelta64(meta.get("Acq. time (s)", meta.Exposition), "s")
+    accu = int(meta.get("Accumulations", meta.Accumulation))
+
+    # delay between spectra (quite approximative as the delay,a cq etc
+    # are int number representing second) - And this assume that the
+    # acquisition of the spectra was very regular but it is not!)
+    delayspectra = acq * accu + delay
+
     # populate the dataset
-    if rawdata.shape[1] == 2:
+    if rawdata.shape[1] == 2:  # singlz dimension case
         data = rawdata[:, 1][np.newaxis]
-        _x = Coord(rawdata[:, 0], title="Raman shift", units="1/cm")
-        _y = Coord(None, title="Time", units="s")
-        date_acq, _y = _transf_meta(_y, meta)
+        xdata = rawdata[:, 0]
+        ydata = np.array([0]).astype("timedelta64[us]")
 
     else:
         data = rawdata[1:, 1:]
-        _x = Coord(rawdata[0, 1:], title="Raman shift", units="1/cm")
-        _y = Coord(rawdata[1:, 0], title="Time", units="s")
-        date_acq, _y = _transf_meta(_y, meta)
+        xdata = rawdata[0, 1:]
+        ydata = (rawdata[1:, 0] * 1.0e6).astype("timedelta64[us]")
+
+    # transform y  timedata to datetime64 using the acquired date a basis
+    ydata = (acquired - delayspectra) + ydata
+
+    _x = Coord(xdata, long_name="Raman shift", units="1/cm")
+    _y = Coord(ydata, long_name="Time", units=None)
 
     # try to transform to linear coord
     _x.linear = True
@@ -185,16 +203,16 @@ def _read_txt(*args, **kwargs):
     # set dataset metadata
     dataset.data = data
     dataset.set_coordset(y=_y, x=_x)
-    dataset.title = "Counts"
+    dataset.long_name = "Count"
     dataset.units = None
     dataset.name = filename.stem
     dataset.meta = meta
 
     # date_acq is Acquisition date at start (first moment of acquisition)
-    dataset.description = "Spectrum acquisition : " + str(date_acq)
+    dataset.comment = f"Spectrum acquisition : " f"{acquired.astype('datetime64[m]')}"
 
     # Set the NDDataset date
-    dataset._date = datetime.datetime.now(datetime.timezone.utc)
+    dataset._date = np.datetime64("now")
     dataset._modified = dataset.date
 
     # Set origin, description and history
@@ -203,60 +221,58 @@ def _read_txt(*args, **kwargs):
     return dataset
 
 
-def _transf_meta(y, meta):
-    # Reformats some of the metadata from Labspec6 information
-    # such as the acquisition date of the spectra and returns a list with the acquisition in datetime format,
-    # the list of effective dates for each spectrum
+# TODO: save in this format ? See below.
 
-    # def val_from_key_wo_time_units(k):
-    #     for key in meta:
-    #         h, m, s = 0, 0, 0
-    #         if k in key:
-    #             _, units = key.split(k)
-    #             units = units.strip()[1:-1]
-    #             if units == 's':
-    #                 s = meta[key]
-    #             elif units == 'mm:ss':
-    #                 m, s = meta[key].split(':')
-    #             elif units == 'hh:mm':
-    #                 h, m = meta[key].split(':')
-    #             break
-    #     return datetime.timedelta(seconds=int(s), minutes=int(m), hours=int(h))
-
-    if meta:
-        try:
-            dateacq = datetime.datetime.strptime(meta["Acquired"], "%d.%m.%Y %H:%M:%S")
-        except TypeError:
-            dateacq = datetime.datetime.strptime(meta["Date"], "%d/%m/%y %H:%M:%S")
-
-        acq = int(meta.get("Acq. time (s)", meta["Exposition"]))
-        accu = int(meta.get("Accumulations", meta.get("Accumulation")))
-        delay = int(meta.get("Delay time (s)", 0))
-        # total = val_from_key_wo_time_units('Full time')
-
-    else:
-        dateacq = datetime.datetime(2000, 1, 1, 0, 0, 0)
-        # datestr = '01/01/2000 00:00:00'
-        acq = 0
-        accu = 0
-        delay = 0
-        # total = datetime.timedelta(0)
-
-    # delay between spectra
-    delayspectra = datetime.timedelta(seconds=acq * accu + delay)
-
-    # Date d'acquisition : le temps indiqué est celui où l'on démarre l'acquisition
-    dateacq = dateacq - delayspectra
-
-    # Dates effectives de chacun des spectres de la série : le temps indiqué est celui où l'on démarre l'acquisition
-    # Labels for time : dates with the initial time for each spectrum
-    try:
-        y.labels = [dateacq + delayspectra * i for i in range(len(y))]
-    except Exception as e:
-        print(e)
-
-    return dateacq, y
-
+#
+# @deprecated('too inaccurate')
+# def _transf_meta(y, meta):
+#     # Reformats some of the metadata from Labspec6 information
+#     # such as the acquisition date of the spectra and returns a list with the acquisition in datetime format,
+#     # the list of effective dates for each spectrum
+#
+#     # IMPORTANT
+#     # ---------
+#     # because the number seems to be
+#     # saved as integer ! this method gives a very bad precision - it seems
+#     # better to base all this calculation on the y coordinates
+#
+#     if meta:
+#
+#         dateacq = strptime64(
+#             meta.get("Acquired", meta.Date)
+#         )
+#
+#         acq = np.timedelta64(meta.get("Acq. time (s)", meta.Exposition), "s")
+#         delay = np.timedelta64(meta.get("Delay time (s)", 0), "s")
+#
+#         accu = int(meta.get("Accumulations", meta.Accumulation))
+#         # total = val_from_key_wo_time_units('Full time')
+#
+#     else:
+#         dateacq = np.datetime64("2000:01.01T00:00:00", "us")
+#
+#         acq = np.timedelta64(0, "s")
+#         delay = np.timedelta64(0, "s")
+#         accu = 0
+#         # total = timedelta(0)
+#
+#     # Delay between spectra
+#     delayspectra = acq * accu + delay   # <--- this seems to be very
+#     # imprecise as acq is given in second (int. number)
+#
+#     # Acquisition date: the time indicated is when the acquisition is started
+#     dateacq = dateacq - delayspectra
+#
+#     # Effective dates of each of the spectra in the series: the time
+#     # indicated is the time when the acquisition is started
+#     # Labels for time : dates with the initial time for each spectrum
+#     try:
+#         y.labels = np.arange(y.size) * delayspectra + dateacq
+#     except Exception as e:
+#         print(e)
+#
+#     return dateacq, y
+#
 
 # def rgp_series(lsdatasets, sortbydate=True):
 #     """
@@ -298,7 +314,7 @@ def _transf_meta(y, meta):
 #     labels = out.y.labels
 #     out.y = lstime
 #     out.y.labels = labels, lsfile
-#     out.y.title = 'time'
+#     out.y.long_name = 'time'
 #     out.y.units = 's'
 #     out.name = 'Series concatenated'
 #
