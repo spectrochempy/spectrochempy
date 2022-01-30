@@ -330,7 +330,7 @@ d3D.v.has_data, d3D.v.is_empty
 # %%
 try:
     d3D.x
-except KeyError as e:
+except AttributeError as e:
     scp.error_(e)
 
 # %% [markdown]
@@ -363,13 +363,13 @@ d3D
 # %% [markdown]
 # or more complex objects.
 #
-# For instance here we use datetime.timedelta objects:
+# For instance here we use timedelta objects:
 
 # %%
-from datetime import timedelta
+from numpy import timedelta64
 
-start = timedelta(0)
-times = [start + timedelta(seconds=x * 60) for x in range(6)]
+start = timedelta64(0)
+times = [start + timedelta64(x * 60, "s") for x in range(6)]
 d3D.t = None
 d3D.t.labels = times
 d3D.t.title = "time"
@@ -594,7 +594,7 @@ ds = NDDataset.fromfunction(
     extra=100 * ur.cm ** -1,  # extra arguments passed to the function
     coordset=cs,
     name="mydataset",
-    title="absorbance",
+    long_name="absorbance",
     units=None,
 )  # when None, units will be determined from the function results
 

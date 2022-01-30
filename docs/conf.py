@@ -609,7 +609,6 @@ exclusions = (
     "print_subcommands",
     "print_version",
     "python_config_loader_class",
-    "raises",
     "section_names",
     "set_trait",
     "setup_instance",
