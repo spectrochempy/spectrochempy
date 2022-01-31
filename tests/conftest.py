@@ -37,7 +37,8 @@ def pytest_sessionfinish(session, exitstatus):  # pragma: no cover
             f.unlink()
     for f in list(cwd.glob("**/*.log")):
         f.unlink()
-
+    for f in list(cwd.glob("**/*.nc")):
+        f.unlink()
     docs = cwd / "docs"
     for f in list(docs.glob("**/*.ipynb")):
         f.unlink()
