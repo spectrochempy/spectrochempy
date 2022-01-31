@@ -3,23 +3,23 @@
 ## version 0.3.2
 **NEW FEATURES**
 
-* Add a log file (rotating) 
+* Add a log file (rotating)
 
 **BUGS FIXED**
 
 * TQDM progress bar
 
-* Issue #360 : write a dataset with a specified filename do not open a dialog except if the file already exists and if confirm=True is set.
+* Fix #360 : write a dataset with a specified filename do not open a dialog except if the file already exists and if
+  confirm=True is set.
 
-* read and read_dir: now ignore non readable files
+* `read` and `read_dir` now ignore non readable files.
 
-* read_labspec: now ignore non-labspec .txt files
+* `read_labspec` now ignore non-labspec .txt files.
 
-* IRIS: fix #296 quadprog version 
+* Fix #296 : IRIS and quadprog version.
 
-**NEW FEATURES**
+* Fix #375 : plotting issues.
 
-* IRIS refactoring and better testing
 
 ## Version 0.3.1
 
@@ -27,7 +27,7 @@
 
 * Added a `show_versions` method in the API.
 
-* Improved bug reports and pull request templates. Requests for 
+* Improved bug reports and pull request templates. Requests for
   help are now made in github discussions.
 
 * Docs API reference has been hopefully improved.
@@ -36,7 +36,7 @@
 
 **NEW FEATURES**
 
-* Package refactoring which may break previous  behaviour. This is why we 
+* Package refactoring which may break previous  behaviour. This is why we
   updated the minor version number from 0.2 to 0.3.
 
 * GRAMS/Thermo Galactic .spc file reader.
@@ -86,11 +86,11 @@
 **NEW TASKS**
 
 * pip installation now possible
- 
+
 * Some code revision
 
 * NNMF revision
-  
+
 * Documentation improvement
 
 **BUGS FIXED**

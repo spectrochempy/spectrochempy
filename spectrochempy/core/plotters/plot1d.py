@@ -321,7 +321,7 @@ def plot_1D(dataset, method=None, **kwargs):
         new = new.squeeze()
 
     # is that a plot with twin axis
-    is_twinx = kwargs.pop("twinx", None) is not None
+    is_twinx = kwargs.get("twinx", None) is not None
 
     # if dataset is complex it is possible to overlap
     # with the imaginary component
@@ -342,8 +342,8 @@ def plot_1D(dataset, method=None, **kwargs):
     # ------------------------------------------------------------------------
     method = new._figure_setup(ndim=1, method=method, **kwargs)
 
-    pen = "pen" in method
-    scatter = "scatter" in method or marker
+    pen = "pen" in method or kwargs.pop("pen", False)
+    scatter = "scatter" in method or marker != "auto"
     bar = "bar" in method
 
     ax = new.ndaxes["main"]
