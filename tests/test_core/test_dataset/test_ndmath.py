@@ -28,7 +28,10 @@ from spectrochempy.utils.testing import (
     assert_dataset_equal,
     RandomSeedContext,
 )
-from spectrochempy.utils.exceptions import CoordinateMismatchError
+from spectrochempy.utils.exceptions import (
+    CoordinateMismatchError,
+    IncompatibleShapeError,
+)
 import spectrochempy as scp
 
 typequaternion = np.dtype(np.quaternion)
@@ -238,7 +241,6 @@ def test_ndmath_binary_ufuncs_scalar(nd2d, name, comment):
 
     # simple NDDataset
     # -----------------
-
     f = getattr(np, name)
     r = f(nd1, nd2)
 
@@ -449,9 +451,8 @@ def test_nddataset_add_units_with_different_scale():
 def test_nddataset_add_mismatch_shape():
     d1 = NDDataset(np.ones((5, 5)))
     d2 = NDDataset(np.ones((6, 6)))
-    with pytest.raises(ArithmeticError) as exc:
+    with pytest.raises(IncompatibleShapeError) as exc:
         d1 += d2
-    assert exc.value.args[0].startswith("operands could not be broadcast together")
 
 
 def test_nddataset_add_with_masks():
@@ -514,9 +515,8 @@ def test_nddataset_subtract_mismatch_units():
 def test_nddataset_subtract_mismatch_shape():
     d1 = NDDataset(np.ones((5, 5)))
     d2 = NDDataset(np.ones((6, 6)) * 2.0)
-    with pytest.raises(ArithmeticError) as exc:
+    with pytest.raises(IncompatibleShapeError) as exc:
         d1 -= d2
-    assert exc.value.args[0].startswith("operands could not be broadcast together")
 
 
 def test_nddataset_multiply_with_numpy_array():

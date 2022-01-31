@@ -41,9 +41,12 @@ from spectrochempy.utils import (
     as_quaternion,
     make_new_object,
 )
-from spectrochempy.core import warning_, error_
+from spectrochempy.core import warning_, error_, exception_
 from spectrochempy.utils.testing import assert_coord_almost_equal
-from spectrochempy.utils.exceptions import CoordinateMismatchError
+from spectrochempy.utils.exceptions import (
+    CoordinateMismatchError,
+    IncompatibleShapeError,
+)
 
 # ======================================================================================================================
 # utilities
@@ -518,6 +521,12 @@ class NDMath(object):
         "isfinite",
         "absolute",
         "abs",
+    ]
+    __require_same_shape = list(_binary_ufuncs().keys()) + [
+        "iadd",
+        "isub",
+        "imul",
+        "idiv",
     ]
 
     # the following methods are to give NDArray based class
@@ -2782,6 +2791,7 @@ class NDMath(object):
         compatible_units = fname in self.__compatible_units
         remove_units = fname in self.__remove_units
         quaternion_aware = fname in self.__quaternion_aware
+        require_same_shape = fname in self.__require_same_shape
 
         # special case of datetimes
         is_dt64 = lambda obj: obj.is_dt64 if hasattr(obj, "is_dt64") else False
@@ -2843,6 +2853,21 @@ class NDMath(object):
 
             other = cpy.copy(inputs.pop(0))
             othertype = objtypes.pop(0)
+
+            if require_same_shape:
+                # element-wise binary function: require same shape of inputs.
+                # we do not do broadcatind on the data array because most of time we want to keep the shape integrity.
+                # if this is necessary, the data needs to be transformed before applyiing the ufunc.
+                # An exception is when one of the operand is of size one, or a type float.
+
+                if not isinstance(other, (float, int)) and (
+                    hasattr(other, "size") and other.size > 1 and other.size != obj.size
+                ):
+                    exception_(
+                        IncompatibleShapeError(
+                            obj, other, extra_msg="(element-wise function)"
+                        )
+                    )
 
             # First the units may require to be compatible, and if thet are sometimes they may need to be rescales
             if othertype in ["NDDataset", "Coord", "LinearCoord", "Quantity"]:
@@ -2980,8 +3005,13 @@ class NDMath(object):
                     if (
                         fname
                         in [
+                            "maximum",
+                            "minimum",
+                            "fmax",
+                            "fmin",
                             "add",
                             "sub",
+                            "subtract",
                             "iadd",
                             "isub",
                             "and",
