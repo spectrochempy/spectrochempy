@@ -2,8 +2,9 @@
 
 ## version 0.4.0rc1
 
-**NEW FEATURES**
+### NEW FEATURES
 
+#### NetCDF import/export
 Features related to the export and import format (see [issue #97- comment](
 https://github.com/spectrochempy/spectrochempy/issues/97#issuecomment-639590022))
 
@@ -18,11 +19,12 @@ https://github.com/spectrochempy/spectrochempy/issues/97#issuecomment-639590022)
 
 * `read_netcdf` : open netCDF files saved by spectrochempy or xarray (not tested with other sources).
 
-* `NDDataset.from_xarray`: Crete a new dataset from a `xarray.DataArray` object.
+* `NDDataset.from_xarray`: Create a new dataset from a `xarray.DataArray` object.
 
-Datetime coordinates
+#### Datetime coordinates
 
-* Coordinates can now be created with the numpy dtype  'datetime64'. Internally all datetime will be strored in UTC.
+
+* Coordinates can now be created with the numpy dtype  'datetime64'. Internally all datetimes will be stored in UTC.
   When reading a date or a datetime coordinates the return will be converted to the local timezone, except if the
   timezone property of the dataset is set differently.
 
@@ -34,11 +36,11 @@ VERSION 0.3
 
 
 ## version 0.3.2
-**NEW FEATURES**
+### NEW FEATURES
 
 * Add a log file (rotating)
 
-**BUGS FIXED**
+### BUGS FIXED
 
 * TQDM progress bar
 
@@ -55,7 +57,7 @@ VERSION 0.3
 
 ## Version 0.3.1
 
-**NEW FEATURES**
+### NEW FEATURES
 
 * Added a `show_versions` method in the API.
 
@@ -66,7 +68,7 @@ VERSION 0.3
 
 ## Version 0.3.0
 
-**NEW FEATURES**
+### NEW FEATURES
 
 * Package refactoring which may break previous  behaviour. This is why we
   updated the minor version number from 0.2 to 0.3.
@@ -75,7 +77,7 @@ VERSION 0.3
 
 * Fitting models updated and tested.
 
-**BUGS FIXED**
+### BUGS FIXED
 
 * Bug in check_updates preventing working without connection.
 
@@ -84,13 +86,13 @@ VERSION 0.2
 
 ## Version 0.2.23
 
-**BUGS FIXED**
+### BUGS FIXED
 
 * Workflow/Codeclimate issues
 
 ## Version 0.2.22
 
-**BUGS FIXED**
+### BUGS FIXED
 
 * QT save_dialog.
 
@@ -98,13 +100,13 @@ VERSION 0.2
 
 ## Version 0.2.21
 
-**NEW FEATURES**
+### NEW FEATURES
 
 * Indexing or slicing a NDArray with quantities is now possible.
 
 * MatPlotLib Axes are subclassed in order to accept quantities for method arguments.
 
-**BUGS FIXED**
+### BUGS FIXED
 
 * NDArray constructor now accept a homogeneous list of quantities as data input. Units are set accordingly.
 
@@ -118,7 +120,7 @@ VERSION 0.2
 
 ## Version 0.2.18
 
-**NEW TASKS**
+### NEW FEATURES
 
 * pip installation now possible
 
@@ -128,7 +130,7 @@ VERSION 0.2
 
 * Documentation improvement
 
-**BUGS FIXED**
+### BUGS FIXED
 
 * Issue #310
 
@@ -143,13 +145,13 @@ VERSION 0.2
 
 ## Version 0.2.17
 
-**NEW FEATURES**
+### NEW FEATURES
 
 * OPUS file reader: add filenames as labels.
 
 * OMNIC file reader: Documented more .spa header keys.
 
-**BUGS FIXED**
+### BUGS FIXED
 
 * Compatibility with matplotlib 3.5 (issue #316).
 
@@ -161,7 +163,7 @@ VERSION 0.2
 
 ## Version 0.2.16
 
-**NEW FEATURES**
+### NEW FEATURES
 
 * IRIS: Added 1D datasets.
 
@@ -179,7 +181,7 @@ VERSION 0.2
 
 * Use CodeClimate to show Coverage info
 
-**BUGS FIXED**
+### BUGS FIXED
 
 * IRIS example after modification of readers.
 
@@ -197,13 +199,13 @@ VERSION 0.2
 
 ## Version 0.2.15
 
-**NEW FEATURES**
+### NEW FEATURES
 
 * Added a baseline correction method: `basc`.
 
 * Baseline ranges can be stored in meta.regions['baseline'] - basc will recognize them.
 
-**BUGS FIXED**
+### BUGS FIXED
 
 * Comparison of dataset when containing metadata in testing functions.
 
@@ -213,11 +215,11 @@ VERSION 0.2
 
 ## Version 0.2.14
 
-**NEW FEATURES**
+### NEW FEATURES
 
 * A default coordinate can now be selected for multiple coordinates dimensions.
 
-**BUGS FIXED**
+### BUGS FIXED
 
 * Alignment along several dimensions (issue #248)
 
@@ -227,13 +229,13 @@ VERSION 0.2
 
 ## Version 0.2.13
 
-**BUGS FIXED**
+### BUGS FIXED
 
 * Solved the problem that reading of experimental datasets was too slow in v.0.2.12.
 
 ## Version 0.2.12
 
-**BUGS FIXED**
+### BUGS FIXED
 
 * LinearCoord operations now working.
 
@@ -247,7 +249,7 @@ VERSION 0.2
 
 ## Version 0.2.11
 
-**BUGS FIXED**
+### BUGS FIXED
 
 * Plot2D now works when more than one coord in 'y' axis (#238).
 
@@ -255,7 +257,7 @@ VERSION 0.2
 
 ## Version 0.2.10
 
-**NEW FEATURES**
+### NEW FEATURES
 
 * All data for tests and examples are now external.
 
@@ -263,19 +265,19 @@ They are now located in a separate conda package: `spectrochempy_data`.
 
 * Installation in Colab with Examples is now supported.
 
-**BUGS FIXED**
+### BUGS FIXED
 
 * Read_quadera() and examples now based on a correct asc file
 
 ## Version 0.2.9
 
-**BUGS FIXED**
+### BUGS FIXED
 
 * Hotfix regarding display of NMR x scale
 
 ## Version 0.2.8
 
-**NEW FEATURES**
+### NEW FEATURES
 
 * Added write_csv() dir 1D datasets
 
@@ -285,7 +287,7 @@ They are now located in a separate conda package: `spectrochempy_data`.
 
 * Improved displaying of Interferograms
 
-**BUGS FIXED**
+### BUGS FIXED
 
 * Problem with trapz(), simps()
 
@@ -293,7 +295,7 @@ They are now located in a separate conda package: `spectrochempy_data`.
 
 ## Version 0.2.7
 
-**NEW FEATURES**
+### NEW FEATURES
 
 * Test and data for read_carroucell(), read_srs(), read_dso()
 
@@ -301,7 +303,7 @@ They are now located in a separate conda package: `spectrochempy_data`.
 
 * Added FTIR interferogram processing.
 
-**BUGS FIXED**
+### BUGS FIXED
 
 * Problem with read_carroucell(), read_srs(), read_dso()
 
@@ -311,7 +313,7 @@ They are now located in a separate conda package: `spectrochempy_data`.
 
 ## Version 0.2.6
 
-**NEW FEATURES**
+### NEW FEATURES
 
 * Check for new version on anaconda cloud spectrocat channel.
 
@@ -319,7 +321,7 @@ They are now located in a separate conda package: `spectrochempy_data`.
 
 * Improved handling of Linear coordinates.
 
-**BUGS FIXED**
+### BUGS FIXED
 
 * Adding quantity to datasets with different scaling (#199).
 
@@ -335,13 +337,13 @@ They are now located in a separate conda package: `spectrochempy_data`.
 
 * Instructions to use it added in the documentation.
 
-**NEW FEATURES**
+### NEW FEATURES
 
 * Cantera installation optional.
 
 * Use of pyqt for matplotlib optional.
 
-**BUGS FIXED**
+### BUGS FIXED
 
 * Added fonts in order to solve missing fonts problems on Linux and windows.
 
@@ -353,11 +355,11 @@ They are now located in a separate conda package: `spectrochempy_data`.
 
 * NDMath (mathematical and dataset creation routines) module revisited. *Still some work to be done*.
 
-**NEW FEATURES**
+### NEW FEATURES
 
 * Changed CoordRange behavior.
 
-**BUGS FIXED**
+### BUGS FIXED
 
 * Problem with importing the API.
 
@@ -365,7 +367,7 @@ They are now located in a separate conda package: `spectrochempy_data`.
 
 ## Version 0.2.0
 
-**NEW FEATURES**
+### NEW FEATURES
 
 * Copyright update.
 
@@ -411,7 +413,7 @@ They are now located in a separate conda package: `spectrochempy_data`.
 
 * Comparison of datasets and projects.
 
-**BUGS FIXED**
+### BUGS FIXED
 
 * Dtype parameter was not taken into account during initialization of NDArrays.
 
