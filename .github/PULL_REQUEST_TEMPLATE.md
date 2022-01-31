@@ -1,9 +1,16 @@
 <!-- Remove items not relevant to your change -->
 
-Check List for a good PR:
-- [ ] Closes #xxxx (optional)
-- [ ] Tests added (most of the time necessary)
-- [ ] User visible changes (including notable bug fixes) are documented in `CHANGELOG.md` (Developpers only relevant change are generally not necessary included in CHANGELOG)
-- [ ] New methods are listed in `docs/userguide/reference/api.rst`. If an API method (ex. `core.readers.readomnic `) is also a NDDataset method, it must also be listed as `NDDataset.readomnic`
-- [ ] If dependencies have been updated, the `.scripts/create_requirements.py` script has been executed.
-- [ ] Docstring have been tested with `script/validate_docstrings.py`.
+**Checklist for a good PR**:
+- [ ] Close the #xxxx (optional)
+- [ ] Tests have been added (mostly required)
+- [ ] If dependencies have been updated, the script `.scripts/create_requirements.py` has been executed.
+- [ ] The docstrings have been tested with the script `script/validate_docstrings.py`.
+- [ ] User-visible changes (including notable bug fixes) have been documented in `CHANGELOG.md` (Changes relevant to
+  developers only are generally not needed in CHANGELOG as they are apparent in commit messages and PR comments)
+- [ ] The new methods have been listed in `docs/userguide/reference/api.rst`.  If an API method (e.g. `core.readers.
+  readomnic`) is a NDDataset method, it should also be listed as `NDDataset.readomnic`.
+- [ ] If you are a new contributor, you have added your name (affiliation and ORCID if you have one) in the .zenodo.json
+  in the field
+  contributors field. Be careful
+  not to break the json format (check the content of the file with the [JSON Validator](https://jsonformatter.curiousconcept.
+  com/))
