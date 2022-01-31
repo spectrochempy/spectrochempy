@@ -13,6 +13,7 @@ __all__ = [
     "SpectroChemPyWarning",
     "SpectroChemPyException",
     "UnitsCompatibilityError",
+    "IncompatibleShapeError",
     "InvalidDimensionNameError",
     "InvalidCoordinatesTypeError",
     "InvalidCoordinatesSizeError",
@@ -48,6 +49,21 @@ class UnitsCompatibilityError(SpectroChemPyException):
     Exception raised when units are not compatible,
     preventing some mathematical operations.
     """
+
+
+class IncompatibleShapeError(SpectroChemPyException):
+    """
+    Exception raised when shapes of the elements are incompatibles for math operations.
+    """
+
+    def __init__(self, obj1, obj2, extra_msg=""):
+
+        shape1 = obj1.shape if hasattr(obj1, "shape") else "<no shape>"
+        shape2 = obj2.shape if hasattr(obj2, "shape") else "<no shape>"
+        self.message = (
+            f"The shape of obj1:[{obj1.__class__.__name__}, shape={shape1}] and that of"
+            f" obj2:[{obj2.__class__.__name__}, shape={shape2}] are different!. {extra_msg}"
+        )
 
 
 # ------------------------------------------------------------------------------
