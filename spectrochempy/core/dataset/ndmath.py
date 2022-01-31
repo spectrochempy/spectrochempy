@@ -2694,10 +2694,9 @@ class NDMath(object):
     # private methods
     # ------------------------------------------------------------------------
 
-    def _preprocess_op_inputs(self, fname, inputs):
+    def _old_preprocess_op_inputs(self, fname, inputs):
 
-        inputs = list(inputs)  # work with a list of objs not tuples
-        # print(fname)
+        inputs = list(inputs)  # Work with a list of objs not tuples
 
         # By default the type of the result is set regarding the first obj in inputs
         # (except for some ufuncs that can return numpy arrays or masked numpy arrays
@@ -2710,8 +2709,11 @@ class NDMath(object):
         # use operation on masked arrays and/or on quaternion
 
         is_masked = False
-        objtypes = []
-        objunits = OrderedSet()
+
+        objmagnitude = []
+        objtypes = OrderedSet()
+        objunits = []
+
         returntype = None
 
         is_quaternion = False
@@ -2719,16 +2721,11 @@ class NDMath(object):
 
         for i, obj in enumerate(inputs):
 
-            # type
+            # Type
             objtype = type(obj).__name__
             objtypes.append(objtype)
 
-            # if hasattr(obj, "is_dt64") and obj.is_dt64:
-            #     if fname not in ["add", "sub"]:
-            #         raise RuntimeError('only add and sub operation are permited on datetime coordinates. For instance '
-            #                            'use x = x + y instead of x -= y')
-
-            # units
+            # Units
             if hasattr(obj, "units"):
                 objunits.add(ur.get_dimensionality(obj.units))
                 if len(objunits) > 1 and compatible_units:
@@ -2738,7 +2735,7 @@ class NDMath(object):
                         extra_msg=f", Units must be compatible for the `{fname}` operator",
                     )
 
-            # returntype
+            # Return type
             if objtype == "NDDataset":
                 returntype = "NDDataset"
             elif objtype == "Coord" and returntype != "NDDataset":
@@ -2749,7 +2746,7 @@ class NDMath(object):
                 # only the three above type have math capabilities in spectrochempy.
                 pass
 
-            # Do we have to deal with mask?
+            # Mask ?
             if hasattr(obj, "mask") and np.any(obj.mask):
                 is_masked = True
 
@@ -2780,10 +2777,20 @@ class NDMath(object):
             else:
                 raise NotImplementedError()
 
-        return fname, inputs, objtypes, returntype, is_masked, is_quaternion
+        return (
+            fname,
+            inputs,
+            objtypes,
+            objmagnitude,
+            objunits,
+            returntype,
+            is_masked,
+            is_quaternion,
+        )
 
     # ..........................................................................
-    def _op(self, f, inputs, isufunc=False):
+    def _old_op(self, f, inputs, isufunc=False):
+
         # Achieve an operation f on the objs
 
         fname = f.__name__
@@ -2868,6 +2875,436 @@ class NDMath(object):
                             obj, other, extra_msg="(element-wise function)"
                         )
                     )
+
+            # First the units may require to be compatible, and if thet are sometimes they may need to be rescales
+            if othertype in ["NDDataset", "Coord", "LinearCoord", "Quantity"]:
+
+                # rescale according to units
+                if not other.unitless:
+                    if hasattr(obj, "units") and not is_dt64(obj):
+                        # obj is a Quantity
+                        if compatible_units:
+                            # adapt the other units to that of object
+                            other.ito(obj.units)
+
+            # is_dt64 = other.is_dt64 if hasattr(other, "is_dt64") else False  # Only if we work with coordinates
+
+            # If all inputs are datasets BUT coordset mismatch.
+            if (
+                is_dataset
+                and (othertype == "NDDataset")
+                and (other._coordset != obj._coordset)
+            ):
+
+                obc = obj.coordset
+                otc = other.coordset
+
+                # here we can have several situations:
+                # -----------------------------------
+                # One acceptable situation could be that we have a single value
+                if other._squeeze_ndim == 0 or (
+                    (obc is None or obc.is_empty) and (otc is None or otc.is_empty)
+                ):
+                    pass
+
+                # Another acceptable situation is that the other NDDataset is 1D, with compatible
+                # coordinates in the x dimension
+                elif other._squeeze_ndim >= 1:
+                    try:
+                        assert_coord_almost_equal(
+                            obc[obj.dims[-1]],
+                            otc[other.dims[-1]],
+                            decimal=3,
+                            data_only=True,
+                        )  # we compare only data for this operation
+                    except AssertionError as e:
+                        raise CoordinateMismatchError(str(e))
+
+                # if other is multidimensional and as we are talking about element wise operation, we assume
+                # that all coordinates must match
+                elif other._squeeze_ndim > 1:
+                    for idx in range(obj.ndim):
+                        try:
+                            assert_coord_almost_equal(
+                                obc[obj.dims[idx]],
+                                otc[other.dims[idx]],
+                                decimal=3,
+                                data_only=True,
+                            )  # we compare only data for this operation
+                        except AssertionError as e:
+                            raise CoordinateMismatchError(str(e))
+
+            if othertype in ["NDDataset", "Coord", "LinearCoord"]:
+
+                # mask?
+                if is_masked:
+                    arg = other._umasked(other.data, other.mask)
+                else:
+                    arg = other.data
+
+            else:
+                # Not a NDArray.
+
+                # if it is a quantity then separate units and magnitude
+                if isinstance(other, Quantity):
+                    arg = other.m
+                else:
+                    # no units
+                    arg = other
+
+            args.append(arg)
+
+            otherq = reduce_(arg)
+
+            if hasattr(other, "units") and other.units is not None:
+                otherq = Quantity(otherq, other.units)
+                otherq = (
+                    otherq.values if hasattr(otherq, "values") else otherq
+                )  # case of nddataset, coord,
+            otherqs.append(otherq)
+
+        # Calculate the resulting units (and their compatibility for such operation)
+        # --------------------------------------------------------------------------------------------------------------
+        # Do the calculation with the units to find the final one
+
+        def check_require_units(fname, _units):
+            if fname in self.__require_units:
+                requnits = self.__require_units[fname]
+                if (
+                    requnits in (DIMENSIONLESS, "radian", "degree")
+                    and _units.dimensionless
+                ):
+                    # this is compatible:
+                    _units = DIMENSIONLESS
+                else:
+                    if requnits == DIMENSIONLESS:
+                        s = "DIMENSIONLESS input"
+                    else:
+                        s = f"`{requnits}` units"
+                    raise DimensionalityError(
+                        _units, requnits, extra_msg=f"\nFunction `{fname}` requires {s}"
+                    )
+
+            return _units
+
+        # define an arbitrary quantity `q` on which to perform the units calculation
+
+        units = UNITLESS
+
+        if not remove_units:
+
+            if hasattr(q, "units"):
+                # q = q.m * check_require_units(fname, q.units)
+                q = q.to(check_require_units(fname, q.units))
+
+            for i, otherq in enumerate(otherqs[:]):
+                if hasattr(otherq, "units"):
+                    if np.ma.isMaskedArray(otherq):
+                        otherqm = otherq.m.data
+                    else:
+                        otherqm = otherq.m
+                    otherqs[i] = otherqm * check_require_units(fname, otherq.units)
+                else:
+
+                    # here we want to change the behavior a pint regarding the addition of scalar to quantity
+                    #         # in principle it is only possible with dimensionless quantity, else a dimensionerror is
+                    #         raised.
+                    if (
+                        fname
+                        in [
+                            "maximum",
+                            "minimum",
+                            "fmax",
+                            "fmin",
+                            "add",
+                            "sub",
+                            "subtract",
+                            "iadd",
+                            "isub",
+                            "and",
+                            "xor",
+                            "or",
+                        ]
+                        and hasattr(q, "units")
+                    ):
+                        otherqs[i] = otherq * q.units  # take the unit of the first obj
+
+            # some functions are not handled by pint regardings units, try to solve this here
+            f_u = f
+            if compatible_units:
+                f_u = operator.sub  # take a similar function handled by pint
+
+            try:
+                res = f_u(q, *otherqs)
+
+            except Exception as e:
+                if not otherqs:
+                    # in this case easy we take the units of the single argument except for some function where units
+                    # can be dropped
+                    res = q
+                else:
+
+                    raise e
+
+            if hasattr(res, "units"):
+                units = res.units
+
+        # perform operation on magnitudes
+        # --------------------------------------------------------------------------------------------------------------
+        if isufunc:
+
+            with catch_warnings(record=True) as ws:
+
+                # try to apply the ufunc
+                if fname == "log1p":
+                    fname = "log"
+                    d = d + 1.0
+                if fname in ["arccos", "arcsin", "arctanh"]:
+                    if np.any(np.abs(d) > 1):
+                        d = d.astype(np.complex128)
+                elif fname in ["sqrt"]:
+                    if np.any(d < 0):
+                        d = d.astype(np.complex128)
+
+                if fname == "sqrt":  # do not work with masked array
+                    data = d ** (1.0 / 2.0)
+                elif fname == "cbrt":
+                    data = np.sign(d) * np.abs(d) ** (1.0 / 3.0)
+                else:
+                    data = getattr(np, fname)(d, *args)
+
+                # if a warning occurs, let handle it with complex numbers or return an exception:
+                if ws and "invalid value encountered in " in ws[-1].message.args[0]:
+                    ws = []  # clear
+                    # this can happen with some function that do not work on some real values such as log(-1)
+                    # then try to use complex
+                    data = getattr(np, fname)(
+                        d.astype(np.complex128), *args
+                    )  # data = getattr(np.emath, fname)(d, *args)
+                    if ws:
+                        raise ValueError(ws[-1].message.args[0])
+                elif ws and "overflow encountered" in ws[-1].message.args[0]:
+                    warning_(ws[-1].message.args[0])
+                elif ws:
+                    raise ValueError(ws[-1].message.args[0])
+
+            # TODO: check the complex nature of the result to return it
+
+        else:
+            # make a simple operation
+            try:
+                if not is_quaternion:
+                    data = f(d, *args)
+                elif quaternion_aware and all(
+                    (arg.dtype not in TYPE_COMPLEX for arg in args)
+                ):
+                    data = f(d, *args)
+                else:
+                    # in this case we will work on both complex separately
+                    dr, di = quat_as_complex_array(d)
+                    datar = f(dr, *args)
+                    datai = f(di, *args)
+                    data = as_quaternion(datar, datai)
+
+            except TypeError as e:
+                if (
+                    hasattr(d, "dtype")
+                    and str(d.dtype).startswith("datetime64")
+                    and f.__name__ == "isub"
+                ):
+                    data = operator.sub(d, *args)
+                else:
+                    raise ArithmeticError(e.args[0])
+
+        # get possible mask
+        if isinstance(data, np.ma.MaskedArray):
+            mask = data._mask
+            data = data._data
+        else:
+            mask = NOMASK  # np.zeros_like(data, dtype=bool)
+
+        if self._check_if_is_td64(data):
+            data, units = self._data_and_units_from_td64(data)
+            dtype = np.dtype("float")
+        else:
+            dtype = None
+
+        # return calculated data, dtype, units and mask
+        return data, dtype, units, mask, returntype
+
+    def _preprocess_op_inputs(self, fname, inputs):
+
+        inputs = list(inputs)  # Work with a list of objs not tuples
+
+        # By default the type of the result is set regarding the first obj in inputs
+        # (except for some ufuncs that can return numpy arrays or masked numpy arrays
+        # but sometimes we have something such as 2 * nd where nd is a NDDataset: In this case we expect a dataset.
+
+        # For binary function, we also determine if the function needs object with compatible units.
+        # If the object are not compatible then we raise an error
+
+        # Take the objects out of the input list and get their types, dimensionality, magnitude and units. Additionally
+        # determine if we need to
+        # use operation on masked arrays and/or on quaternion
+
+        # Expected Operand Order
+        order = {"Panel": 1, "NDDataset": 2, "Coord": 3, "LinearCoord": 4}
+
+        is_masked = False
+
+        objmagnitude = []
+        objtypes = OrderedSet()
+        objdimensionality = OrderedSet()
+        objshapes = OrderedSet()
+        objunits = []
+
+        is_quaternion = False
+        compatible_units = fname in self.__compatible_units
+        require_same_shape = fname in self.__require_same_shape
+
+        for i, obj in enumerate(inputs):
+
+            # Types
+            type_ = type(obj).__name__
+            objtype = type_ if type_ in order.keys() else None
+            objtypes.append(objtype)
+
+            # Dimensionalities
+            if hasattr(obj, "units"):
+                objdimensionality.add(ur.get_dimensionality(obj.units))
+                if len(objdimensionality) > 1 and compatible_units:
+                    objdimensionality = list(objdimensionality)
+                    raise DimensionalityError(
+                        *objdimensionality[::-1],
+                        extra_msg=f", Units must be compatible for the `{fname}` operator",
+                    )
+
+            # Shapes
+            # If an object has no shape - it is con
+            if hasattr(obj, "shape") and obj.shape > 1:
+                objshapes.add(obj.shape)
+                if len(objshapes) > 1 and require_same_shape:
+                    objshapes = list(objshapes)
+                    raise IncompatibleShapeError(*objshapes[::-1])
+
+            # Mask ?
+            if hasattr(obj, "mask") and np.any(obj.mask):
+                is_masked = True
+
+            # If one of the input is hypercomplex, this will demand a special treatment
+            is_quaternion = (
+                is_quaternion or False
+                if not hasattr(obj, "is_quaternion")
+                else obj.is_quaternion
+            )
+
+        # Expected Operand Order
+        order = {"Panel": 1, "NDDataset": 2, "Coord": 3, "LinearCoord": 4}
+
+        # Return type
+        returntype = sorted(objtypes, key=lambda x: order.get(x, 5))[0]
+
+        # Order to account the return type (first object must be of returntype)
+        if (
+            returntype in ["NDDataset", "Coord", "LinearCoord"]
+            and objtypes[0] != returntype
+        ):
+
+            inputs.reverse()
+            objtypes.reverse()
+
+            if fname in ["mul", "multiply", "add", "iadd"]:
+                pass
+            elif fname in ["truediv", "divide", "true_divide"]:
+                fname = "multiply"
+                inputs[0] = np.reciprocal(inputs[0])
+            elif fname in ["isub", "sub", "subtract"]:
+                fname = "add"
+                inputs[0] = np.negative(inputs[0])
+            else:
+                raise NotImplementedError()
+
+        return (
+            fname,
+            inputs,
+            objtypes,
+            objmagnitude,
+            objunits,
+            returntype,
+            is_masked,
+            is_quaternion,
+        )
+
+    def _op(self, f, inputs, isufunc=False):
+
+        # Achieve an operation f on the objs
+
+        fname = f.__name__
+
+        compatible_units = fname in self.__compatible_units
+        remove_units = fname in self.__remove_units
+        quaternion_aware = fname in self.__quaternion_aware
+
+        # special case of datetimes
+        is_dt64 = lambda obj: obj.is_dt64 if hasattr(obj, "is_dt64") else False
+        # Only if we work with coordinates
+
+        inputs = cpy.copy(inputs)
+
+        (
+            fname,
+            inputs,
+            objtypes,
+            returntype,
+            is_masked,
+            is_quaternion,
+        ) = self._preprocess_op_inputs(fname, inputs)
+
+        # Now we can proceed
+
+        obj = inputs.pop(0)
+        objtype = objtypes.pop(0)
+
+        # Is our first object a NDdataset
+        # ------------------------------------------------------------------------------
+        is_dataset = objtype == "NDDataset"
+
+        # Get the underlying data: If one of the input is masked, we will work with masked array
+        if is_masked and is_dataset:
+            d = obj._umasked(obj.data, obj.mask)
+        else:
+            d = obj.data
+
+        # Do we have units?
+        # We create a quantity q that will be used for unit calculations (without dealing with the whole object)
+        def reduce_(magnitude):
+            # if is_dt64:
+            #    return 1.
+            if hasattr(magnitude, "dtype"):
+                if magnitude.dtype in TYPE_COMPLEX:
+                    magnitude = magnitude.real
+                elif magnitude.dtype == np.quaternion:
+                    magnitude = as_float_array(magnitude)[..., 0]
+                magnitude = magnitude.max()
+
+            return magnitude
+
+        q = reduce_(d)
+        if hasattr(obj, "units") and obj.units is not None:
+            q = Quantity(q, obj.units)
+            q = q.values if hasattr(q, "values") else q  # case of nddataset, coord,
+
+        # Now we analyse the other operands
+        # ---------------------------------------------------------------------------
+        args = []
+        otherqs = []
+
+        # If other is None, then it is a unary operation we can pass the following
+
+        if inputs:  # a second input exists
+
+            other = cpy.copy(inputs.pop(0))
+            othertype = objtypes.pop(0)
 
             # First the units may require to be compatible, and if thet are sometimes they may need to be rescales
             if othertype in ["NDDataset", "Coord", "LinearCoord", "Quantity"]:

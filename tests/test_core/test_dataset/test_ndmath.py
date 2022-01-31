@@ -262,6 +262,12 @@ def test_ndmath_binary_ufuncs_scalar(nd2d, name, comment):
         assert r.units == nd1.units
 
 
+def test_multiply_unitless_by_units():
+
+    coord = LinearCoord.arange(10) * (2 * ur.MHz) + (1.0 * ur.kHz)
+    assert str(coord.units) == "MHz"
+
+
 # ------------------------------------------------------------------
 # non ufuncs
 # ------------------------------------------------------------------
