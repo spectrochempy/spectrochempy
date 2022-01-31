@@ -33,11 +33,18 @@ import logging
 import inspect
 
 
+def _get_class_function(stack):
+    function = stack.function
+    filename = stack.filename.split("/")[-1]
+
+    return filename + function
+
+
 def _format_args(*args, **kwargs):
 
     stg = ""
     formatter = logging.Formatter(
-        f"[ %(asctime)s - {args[0]}{inspect.stack()[2][3]} ] - %(message)s"
+        f"[ %(asctime)s - {_get_class_function(inspect.stack()[2])} ] - %(message)s"
     )
     app.logs.handlers[1].setFormatter(formatter)
     if app.logs.handlers[0].level == DEBUG:
@@ -79,15 +86,26 @@ def debug_(*args, **kwargs):
         pass
 
 
+def exception_(*args, **kwargs):
+    """
+    log exceptioon
+    """
+    name = args[0].__class__.__name__ + " | "
+    msg = args[0].message
+    stg = _format_args("", name, msg, *args[1:], **kwargs)
+    app.logs.error(stg)
+
+    raise args[0]
+
+
 # ------------------------------------------------------------------
 def error_(*args, **kwargs):
     """
     Formatted error message.
     """
-    stg = ""
-    if not isinstance(args[0], str):
-        stg += type(args[0]).__name__ + ": "
-    stg += _format_args("", "ERROR: ", *args, **kwargs)
+    name = "ERROR" + " | "
+
+    stg = _format_args("", name, *args, **kwargs)
     app.logs.error(stg)
 
 
