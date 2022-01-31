@@ -521,7 +521,7 @@ class NDPlot(HasTraits):
         if ax is not None:
             # ax given in the plot parameters,
             # in this case we will plot on this ax
-            if issubclass(type(tax), _Axes):
+            if issubclass(type(ax), _Axes):
                 ax.name = "main"
                 self.ndaxes["main"] = ax
             else:

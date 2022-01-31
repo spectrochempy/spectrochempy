@@ -48,9 +48,13 @@ def test_issue_375():
     cum = ratio.cumsum()
 
     ax1 = ratio.plot_bar(color=color1, title="Scree plot")
+    assert len(ax1.lines) == 0, "no lines"
+    assert len(ax1.patches) == 3, "bar present"
     ax2 = cum.plot_scatter(color=color2, pen=True, markersize=7.0, twinx=ax1)
+    assert len(ax2.lines) == 1, "1 lines"
+    assert len(ax2.patches) == 0, "no bar present on the second plot"
+    # TODO: Don't know yet how to get the marker present.
     ax1.set_title("Scree plot")
-
     show()
 
     # nd0.plot(output=os.path.join(figures_dir, 'IR_dataset_1D'),
