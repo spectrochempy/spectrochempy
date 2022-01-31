@@ -628,49 +628,6 @@ class NDArray(HasTraits):
     def _long_name_default(self):
         return None
 
-    @classmethod
-    def _from_xarray(cls, xarr):
-
-        from spectrochempy.core.dataset.coord import Coord
-
-        new = cls()
-
-        if not xarr.attrs.get("linear", False):
-            new.data = xarr.data
-
-        # set attributes
-        exclude = [
-            "data",
-            "coordset",
-            "mask",
-            "labels",
-            "meta",
-            "preferences",
-            "transposed",
-            "referencedata",
-            "state",
-            "ranges",
-            "modeldata",
-        ]
-        for item in new.__dir__():
-            if item in exclude:
-                continue
-            if hasattr(xarr, item):
-                # attribute of xarr?
-                setattr(new, item, getattr(xarr, item))
-            elif xarr.attrs.get(item, None) is not None:
-                setattr(new, item, xarr.attrs.get(item))
-            else:
-                pass
-
-        # dimensions and coord
-        new.dims = xarr.coords.dims
-        coordset = {}
-        for dim in new.dims:
-            coordset[dim] = Coord._from_xarray(xarr.coords[dim])
-
-        new.set_coordset(coordset)
-
     # ..........................................................................
     def _get_dims_from_args(self, *dims, **kwargs):
         # utility function to read dims args and kwargs

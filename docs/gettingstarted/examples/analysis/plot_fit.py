@@ -12,7 +12,7 @@ In this example, we find the least  square solution of a simple linear
 equation.
 
 """
-# sphinx_gallery_thumbnail_number = 2
+# sphinx_gallery_thumbnail_number = 3
 
 import spectrochempy as scp
 import os

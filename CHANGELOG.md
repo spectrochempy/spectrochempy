@@ -1,5 +1,38 @@
 # What's new
 
+## version 0.4.0rc1
+
+**NEW FEATURES**
+
+Features related to the export and import format (see [issue #97- comment](
+https://github.com/spectrochempy/spectrochempy/issues/97#issuecomment-639590022))
+
+* `write_netcdf`: Write to file in [netCDF](http://www.unidata.ucar.edu/software/netcdf/) format.
+* This type of file is a binary file format for self-described datasets
+  that originated in the geosciences. It is not much in chemistry (as far we know) but it is used by xarray as a
+  recommended way of saving data.
+  Also saving spectrochempy file in this format will allow an easy interchange between the two software.
+  (Saving on this format is only possible if [xarray](https://xarray.pydata.org/en/stable/) package is available).
+
+* `NDDataset.to_xarray`: A new dataset method creating a `xarray.DataArray` object suitable for use with `xarray`.
+
+* `read_netcdf` : open netCDF files saved by spectrochempy or xarray (not tested with other sources).
+
+* `NDDataset.from_xarray`: Crete a new dataset from a `xarray.DataArray` object.
+
+Datetime coordinates
+
+* Coordinates can now be created with the numpy dtype  'datetime64'. Internally all datetime will be strored in UTC.
+  When reading a date or a datetime coordinates the return will be converted to the local timezone, except if the
+  timezone property of the dataset is set differently.
+
+
+---
+VERSION 0.3
+
+## version 0.3.4
+
+
 ## version 0.3.2
 **NEW FEATURES**
 
@@ -19,7 +52,6 @@
 * Fix #296 : IRIS and quadprog version.
 
 * Fix #375 : plotting issues.
-
 
 ## Version 0.3.1
 
@@ -46,6 +78,9 @@
 **BUGS FIXED**
 
 * Bug in check_updates preventing working without connection.
+
+---
+VERSION 0.2
 
 ## Version 0.2.23
 
@@ -409,6 +444,9 @@ They are now located in a separate conda package: `spectrochempy_data`.
 * Baseline and fitting tutorials.
 
 * Removed dependency of isotopes.py to pandas.
+
+---
+VERSION 0.1
 
 ## Version 0.1.x
 

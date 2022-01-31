@@ -1302,6 +1302,45 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         _ = self.dims  # fire an update
 
     # ..........................................................................
+    def from_xarray(self, xarr):
+
+        new = type(self)()
+
+        if not xarr.attrs.get("linear", False):
+            new.data = xarr.data
+
+        # set attributes
+        exclude = [
+            "data",
+            "coordset",
+            "mask",
+            "labels",
+            "meta",
+            "preferences",
+            "transposed",
+            "referencedata",
+            "state",
+            "ranges",
+            "modeldata",
+        ]
+        for item in new.__dir__():
+            if item in exclude:
+                continue
+            if hasattr(xarr, item):
+                # attribute of xarr?
+                setattr(new, item, getattr(xarr, item))
+            elif xarr.attrs.get(item, None) is not None:
+                setattr(new, item, xarr.attrs.get(item))
+            else:
+                pass
+
+        # dimensions and coord
+        new.dims = xarr.coords.dims
+        coordset = {}
+        for dim in new.dims:
+            coordset[dim] = self.from_xarray(xarr.coords[dim])
+
+        new.set_coordset(coordset)
 
 
 # ======================================================================================================================
@@ -1319,6 +1358,7 @@ api_funcs = [
     "transpose",
     "to_array",
     "to_xarray",
+    "from_xarray",
     "take",
     "set_complex",
     "set_quaternion",
