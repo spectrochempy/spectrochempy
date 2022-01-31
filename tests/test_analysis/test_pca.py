@@ -51,7 +51,7 @@ def test_pca():
 
     pca.printev(n_pc=5)
 
-    pca.screeplot(n_pc=0.999)
+    pca.screeplot(n_pc=4)
 
     pca.screeplot(n_pc="auto")
 
