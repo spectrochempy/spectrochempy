@@ -29,7 +29,7 @@ except (IOError, OSError):
 pca = scp.PCA(dataset, centered=True)
 
 ##############################################################
-# Reduce the dataset to a lower dimensionality (number of
+# Reduce the data to a lower dimensionality (the number of
 # components is automatically determined)
 
 S, LT = pca.reduce(n_pc="auto")
@@ -37,9 +37,14 @@ S, LT = pca.reduce(n_pc="auto")
 print(LT)
 
 ###############################################################
-# Finally, display the results graphically
+# Print explained and cumulative variance:
 #
-# ScreePlot
+pca.printev()
+
+###############################################################
+# And display the results graphically
+#
+# The ScreePlot
 _ = pca.screeplot()
 
 ########################################################################################################################
