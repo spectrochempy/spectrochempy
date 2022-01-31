@@ -57,7 +57,8 @@ def pytest_sessionfinish(session, exitstatus):  # pragma: no cover
     for f in list(cwd.glob("**/*.jdx")):
         f.unlink()
     for f in list(cwd.glob("**/*.json")):
-        f.unlink()
+        if f.name() != ".zenodo.json":
+            f.unlink()
     for f in list(cwd.glob("**/*.log")):
         f.unlink()
 
