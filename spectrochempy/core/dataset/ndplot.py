@@ -502,10 +502,11 @@ class NDPlot(HasTraits):
         # they will be ignored
         tax = kwargs.get("twinx", None)
         if tax is not None:
-            if issubclass(type(tax), _Axes):
+            if issubclass(type(tax), mpl.axes.Axes):
                 clear = False
                 ax = tax.twinx()
                 # warning : this currently returns a normal Axes (so units-naive)
+                # TODO: try to solve this
                 ax.name = "main"
                 tax.name = "twin"  # the previous main is renamed!
                 self.ndaxes["main"] = ax
@@ -522,7 +523,7 @@ class NDPlot(HasTraits):
         if ax is not None:
             # ax given in the plot parameters,
             # in this case we will plot on this ax
-            if issubclass(type(ax), (_Axes, mpl.axes.Axes)):
+            if issubclass(type(ax), mpl.axes.Axes):
                 ax.name = "main"
                 self.ndaxes["main"] = ax
             else:
