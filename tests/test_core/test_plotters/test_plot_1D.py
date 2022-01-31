@@ -36,6 +36,23 @@ def test_plot_1D():
 
     _ = col.plot_scatter(uselabel=True)
 
+
+def test_issue_375():
+
+    # minimal example
+    n_pc = 3
+
+    color1, color2 = "b", "r"
+
+    ratio = NDDataset([1, 2, 3])
+    cum = ratio.cumsum()
+
+    ax1 = ratio.plot_bar(color=color1, title="Scree plot")
+    ax2 = cum.plot_scatter(color=color2, pen=True, markersize=7.0, twinx=ax1)
+    ax1.set_title("Scree plot")
+
+    show()
+
     # nd0.plot(output=os.path.join(figures_dir, 'IR_dataset_1D'),
     #          savedpi=150)
     #

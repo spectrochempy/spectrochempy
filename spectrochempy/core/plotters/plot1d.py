@@ -343,7 +343,7 @@ def plot_1D(dataset, method=None, **kwargs):
     method = new._figure_setup(ndim=1, method=method, **kwargs)
 
     pen = "pen" in method
-    scatter = "scatter" in method or marker
+    scatter = "scatter" in method or marker != "auto"
     bar = "bar" in method
 
     ax = new.ndaxes["main"]
