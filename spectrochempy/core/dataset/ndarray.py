@@ -1339,8 +1339,20 @@ class NDArray(HasTraits):
         self._set_data(data)
 
     # ..........................................................................
-    magnitude = data
-    m = data
+    @property
+    def magnitude(self):
+        """
+        Alias of data
+        """
+        return self.data
+
+    # ..........................................................................
+    @property
+    def m(self):
+        """
+        Alias of data
+        """
+        return self.data
 
     # ..........................................................................
     @property
