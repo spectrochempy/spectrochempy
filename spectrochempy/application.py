@@ -825,7 +825,9 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
         logdir = self.get_config_dir().parent / "logs"
         logdir.mkdir(exist_ok=True)
         rh = RotatingFileHandler(
-            str(logdir / "spectrochempy.log"), maxBytes=32 * 1024, backupCount=5
+            str(logdir / "spectrochempy.log"),
+            maxBytes=256 * 1024,
+            backupCount=5,  # 256 Kb
         )
         rh.setLevel(INFO)
         rh.setFormatter(logging.Formatter("%(message)s"))
