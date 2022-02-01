@@ -20,7 +20,7 @@ __all__ = [
     "assert_project_almost_equal",
     "assert_approx_equal",
     "assert_raises",
-    "assert_equal_units",
+    "assert_units_equal",
     "assert_array_compare",
     "assert_script_equal",
     "RandomSeedContext",
@@ -239,7 +239,9 @@ def compare_ndarrays(this, other, approx=False, decimal=6, data_only=False):
     return True
 
 
-def compare_coords(this, other, approx=False, decimal=6, data_only=False):
+def compare_coords(
+    this, other, approx=False, decimal=6, data_only=False, quantity_only=False
+):
 
     from spectrochempy.core.units import ur
 
@@ -249,19 +251,29 @@ def compare_coords(this, other, approx=False, decimal=6, data_only=False):
     eq = True
     thistype = this.implements()
 
+    if not data_only:
+        # we must rescale the two coordinates to the same base units for correct comparison
+        other = other.to(this.units)  # rescale data for common units if possible
+
+    if quantity_only:  # important to let it after the previous check
+        data_only = True
+
     if other.data is None and this.data is None and data_only:
         attrs = ["labels"]
+    elif quantity_only:  # important to have this before check on data_only
+        attrs = ["data", "units"]
     elif data_only:
         attrs = ["data"]
     else:
         attrs = ["data", "labels", "units", "meta", "long_name"]
-        # if 'long_name' in attrs:  #    attrs.remove('title')  #TODO: should we use title for comparison?
+        # if 'long_name' in attrs:  #    attrs.remove('title')  #TODO: should we use long for comparison?
 
     if other.linear == this.linear:
         # To còmpare linear coordinates
         attrs += ["offset", "increment", "linear", "size"]
 
     for attr in attrs:
+
         if attr != "units":
             sattr = getattr(this, f"_{attr}")
             if this.linear and attr == "data":
@@ -530,7 +542,15 @@ def assert_coord_almost_equal(nd1, nd2, **kwargs):
     # if data_only is True, compare only based on data (not labels and so on)
     # except if coord is label only!.
     data_only = kwargs.get("data_only", False)
-    compare_coords(nd1, nd2, approx=approx, decimal=decimal, data_only=data_only)
+    quantity_only = kwargs.get("quantity_only", False)
+    compare_coords(
+        nd1,
+        nd2,
+        approx=approx,
+        decimal=decimal,
+        quantity_only=quantity_only,
+        data_only=data_only,
+    )
     return True
 
 
@@ -625,8 +645,14 @@ class RandomSeedContext(object):
 
 
 # .............................................................................
-def assert_equal_units(unit1, unit2):
+def assert_units_equal(unit1, unit2):
     from pint.errors import DimensionalityError
+    from spectrochempy.core.units import ur
+
+    if unit1 is None:
+        unit1 = ur(unit1)
+    if unit2 is None:
+        unit2 = ur(unit2)
 
     try:
         x = (1.0 * unit1) / (1.0 * unit2)
