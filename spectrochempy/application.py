@@ -1128,7 +1128,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
             self.logs.handlers[1].setLevel(change.new)
 
         # root
-        self.logs.setLevel(0)  # reset to NOTSET
+        self.logs.setLevel(DEBUG)  # reset to DEBUG
         self.logs.info(
             f"changed default log_level to {logging.getLevelName(change.new)}"
         )
