@@ -56,8 +56,11 @@ except ModuleNotFoundError:  # pragma: no cover
 # SOME FIXTURES TO SHARE BETWEEN TEST FILES
 # -----------------------------------------
 
-from spectrochempy import preferences as prefs, NDDataset
+from spectrochempy import preferences as prefs, NDDataset, set_loglevel, DEBUG
 from spectrochempy.utils import pathclean
+
+# put in debug mode for development
+set_loglevel(DEBUG)
 
 datadir = pathclean(prefs.datadir)
 dataset = NDDataset.read_omnic(datadir / "irdata" / "nh4y-activation.spg")
