@@ -56,12 +56,12 @@ def test_read_omnic():
     assert nd2 == nd
 
     # test import sample IFG
-    nd = scp.read_spa(IRDATA / "carroucell_samp" / "2-BaSO4_0.spa", return_ifg="sample")
+    nd = scp.read_spa(IRDATA / "carroucell_samp" / "2-BaSO4_0.SPA", return_ifg="sample")
     assert str(nd) == "NDDataset: [float64] V (shape: (y:1, x:16384))"
 
     # test import background IFG
     nd = scp.read_spa(
-        IRDATA / "carroucell_samp" / "2-BaSO4_0.spa", return_ifg="background"
+        IRDATA / "carroucell_samp" / "2-BaSO4_0.SPA", return_ifg="background"
     )
     assert str(nd) == "NDDataset: [float64] V (shape: (y:1, x:16384))"
 
