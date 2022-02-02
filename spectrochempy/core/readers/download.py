@@ -8,18 +8,20 @@
 In this module, methods are provided to download external datasets
 from public database.
 """
-__all__ = ["download_iris"]
+__all__ = ["download_iris", "download_nist_ir"]
 __dataset_methods__ = __all__
 
 from io import StringIO
-
 import numpy as np
 import requests
+from datetime import datetime, timezone
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.readers.read_jcamp import read_jcamp
 from spectrochempy.core import error_
 from spectrochempy.optional import import_optional_dependency
+from spectrochempy.utils import is_iterable
 
 
 # ..............................................................................
@@ -60,7 +62,7 @@ def download_iris():
             labels = np.loadtxt(fil, delimiter=",", usecols=(4,), dtype="|S")
             labels = list((lab.decode("utf8") for lab in labels))
         except Exception:
-            raise OSError("Wrong CSV file")
+            raise OSError("can't read JCAMP file")
 
         coordx = Coord(
             labels=["sepal_length", "sepal width", "petal_length", "petal_width"],
@@ -86,7 +88,8 @@ def download_iris():
         sklearn = import_optional_dependency("sklearn", errors="ignore")
         if sklearn is None:
             raise OSError("Failed in uploading the `IRIS` dataset!")
-        from sklearn import datasets
+        else:
+            from sklearn import datasets
 
         data = datasets.load_iris()
 
@@ -108,6 +111,79 @@ def download_iris():
         new.history = "Loaded from scikit-learn datasets"
 
         return new
+
+
+def download_nist_ir(CAS, index):
+    """
+    Upload IR spectra from NIST webbook
+
+    Parameters
+    ----------
+    CAS : int or str
+        the CAS number, can be given as "XXXX-XX-X" (str), "XXXXXXX" (str), XXXXXXX (int)
+
+    index : str or int or tuple of ints
+        import all available spectra corresponding to the index, or a single spectrum,
+        or selected spectra.
+
+    Returns
+    -------
+    list of NDDataset or NDDataset
+        The dataset(s).
+
+    See Also
+    --------
+    read : Read data from experimental data.
+    """
+
+    if isinstance(CAS, str) and "-" in CAS:
+        CAS = CAS.replace("-", "")
+
+    if index == "all":
+        # test urls and return list if any...
+        return
+    elif isinstance(index, int):
+        index = [index]
+    elif not is_iterable(index):
+        raise ValueError("index must be 'all', int or iterable of int")
+
+    out = []
+    for i in index:
+        # sample adress (water, spectrum 1)
+        # https://webbook.nist.gov/cgi/cbook.cgi?JCAMP=C7732185&Index=1&Type=IR
+        url = f"https://webbook.nist.gov/cgi/cbook.cgi?JCAMP=C{CAS}&Index={i}&Type=IR"
+        try:
+            connection = True
+            response = requests.get(url, stream=True, timeout=10)
+        except OSError:
+            error_("OSError: Cannot connect to this url... please check !")
+            connection = False
+
+    if connection:  # Download data
+        txtdata = ""
+        for rd in response.iter_content():
+            txtdata += rd.decode("utf8")
+
+        with open("temp.jdx", "w") as f:
+            f.write(txtdata)
+        try:
+            ds = read_jcamp("temp.jdx")
+            # replace the default entry ":imported from jdx file":
+            ds.history[0] = ds.history[0][: len(str(datetime.now(timezone.utc)))] + (
+                f" : downloaded from NIST: {url}\n"
+            )
+            out.append(ds)
+        except Exception:
+            raise OSError("Wrong JCAMP file")
+
+    else:
+        # Cannot download
+        pass
+
+    if len(out) == 1:
+        return out[0]
+    else:
+        return out
 
 
 # ======================================================================================================================
