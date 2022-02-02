@@ -1231,8 +1231,10 @@ class NDMath(object):
         """
 
         if not cls.implements("NDDataset") or cls.coordset is None:
-            raise Exception(
-                "Method `coordmax` apply only on NDDataset and if it has defined coordinates"
+            exception_(
+                Exception(
+                    "Method `coordmax` apply only on NDDataset and if it has defined coordinates"
+                )
             )
 
         axis, dim = cls.get_axis(dim, allows_none=True)
@@ -1265,8 +1267,10 @@ class NDMath(object):
         """
 
         if not cls.implements("NDDataset") or cls.coordset is None:
-            raise Exception(
-                "Method `coordmin` apply only on NDDataset and if it has defined coordinates"
+            exception_(
+                Exception(
+                    "Method `coordmin` apply only on NDDataset and if it has defined coordinates"
+                )
             )
 
         axis, dim = cls.get_axis(dim, allows_none=True)
@@ -1401,7 +1405,7 @@ class NDMath(object):
             # ------------------
             return new.diagonal(offset=offset, **kwargs)
 
-        raise ValueError("Input must be 1- or 2-d.")
+        exception_(ValueError("Input must be 1- or 2-d."))
 
     # ..........................................................................
     @_reduce_method
@@ -2715,8 +2719,10 @@ class NDMath(object):
                     s = "DIMENSIONLESS input"
                 else:
                     s = f"`{requnits}` units"
-                raise DimensionalityError(
-                    units, requnits, extra_msg=f"\nFunction `{fname}` requires {s}"
+                exception_(
+                    DimensionalityError(
+                        units, requnits, extra_msg=f"\nFunction `{fname}` requires {s}"
+                    )
                 )
         return units
 
@@ -2934,11 +2940,14 @@ class NDMath(object):
             mask = obj.mask if hasattr(obj, "mask") and np.any(obj.mask) else NOMASK
             is_masked = np.any(mask != NOMASK)
             try:
-                if is_masked and objtypes[-1] == "NDDataset":
+                if is_masked and objtypes[i] == "NDDataset":
                     # Apply mask
                     magnitudes[i] = obj._umasked(magnitudes[i], mask)
+                elif is_masked:
+                    magnitudes[i] = np.ma.masked_array(magnitudes[i], mask=mask)
+
             except ValueError as e:
-                raise e
+                exception_(e)
 
         if is_masked:
             debug_(
@@ -2959,7 +2968,7 @@ class NDMath(object):
 
         # If one of the input is hypercomplex, this will demand a special treatment
         is_quaternion = self._is_quaternion_operands(this, other)
-        quaternion_aware = fname in self.__quaternion_aware
+        quaternion_aware = fname in self._quaternion_aware
 
         if isufunc:
 
@@ -2992,11 +3001,11 @@ class NDMath(object):
                         this.astype(np.complex128), other
                     )  # data = getattr(np.emath, fname)(d, *args)
                     if ws:
-                        raise ValueError(ws[-1].message.args[0])
+                        exception_(ValueError(ws[-1].message.args[0]))
                 elif ws and "overflow encountered" in ws[-1].message.args[0]:
                     warning_(ws[-1].message.args[0])
                 elif ws:
-                    raise ValueError(ws[-1].message.args[0])
+                    exception_(ValueError(ws[-1].message.args[0]))
 
             # TODO: check the complex nature of the result to return it
 
@@ -3028,7 +3037,7 @@ class NDMath(object):
                         else operator.sub(this)
                     )
                 else:
-                    raise ArithmeticError(e.args[0])
+                    exception_(ArithmeticError(e.args[0]))
 
         return data
 
@@ -3053,7 +3062,7 @@ class NDMath(object):
             else:
                 q1 = None
         except Exception as e:
-            raise e
+            exception_(e)
 
         # Some functions are not handled by pint regarding units, try to solve this here
         f_u = f
@@ -3065,7 +3074,7 @@ class NDMath(object):
             res = f_u(q0, q1) if q1 is not None else f_u(q0)
 
         except Exception as e:
-            raise e
+            exception_(e)
 
         units = res.units if hasattr(res, "units") else None
 
@@ -3205,7 +3214,7 @@ class NDMath(object):
                 inputs[0] *= np.log(inputs[1])
                 inputs = inputs[:1]
             else:
-                raise NotImplementedError()
+                exception_(NotImplementedError())
 
         if fname in ["exp"]:
             f = getattr(np, fname)
