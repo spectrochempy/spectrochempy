@@ -18,7 +18,7 @@ import struct
 
 import numpy as np
 
-from spectrochempy.core import info_
+from spectrochempy.core import info_, warning_
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.importer import importermethod, Importer
@@ -339,8 +339,10 @@ def read_spa(*paths, **kwargs):
 
     Other Parameters
     -----------------
-    return_ifg : bool, optional
-        Default value is False. If True, returns the interferogram of the spa file
+    return_ifg : str or None, optional
+        Default value is None. When set to 'sample' returns the sample interferogram
+        of the spa file if present or None if absent. When set to 'backgroung' returns
+        the backgroung interferogram of the spa file if present or None if absent.
     directory : str, optional
         From where to read the specified `filename`. If not specified,
         read in the default ``datadir`` specified in
@@ -435,10 +437,6 @@ def read_srs(*paths, **kwargs):
 
     Other Parameters
     -----------------
-    protocol : {'scp', 'omnic', 'opus', 'topspin', 'matlab', 'jcamp', 'csv',
-    'excel'}, optional
-        Protocol used for reading. If not provided, the correct protocol
-        is inferred (whnever it is possible) from the file name extension.
     directory : str, optional
         From where to read the specified `filename`. If not specified,
         read in the default ``datadir`` specified in
@@ -484,7 +482,7 @@ def read_srs(*paths, **kwargs):
     Notes
     -----
     This method is an alias of ``read_omnic``, except that the type of file
-    is contrain to *.srs.
+    is constrained to *.srs.
 
     Examples
     ---------
@@ -516,20 +514,12 @@ def _read_spg(*args, **kwargs):
     else:
         fid = open(filename, "rb")
 
-    # Read title:
-    # The file title starts at position hex 1e = decimal 30. Its max length
+    # Read name:
+    # The name starts at position hex 1e = decimal 30. Its max length
     # is 256 bytes. It is the original filename under which the group has been saved: it
-    #  won't match with the actual filename if a subsequent renaming has been done in the OS.
+    # won't match with the actual filename if a subsequent renaming has been done in the OS.
 
     spg_title = _readbtext(fid, 30)
-
-    # Check if it is really a spg file (in this case title his the filename
-    # with extension spg)
-    # if spg_title[-4:].lower() != ".spg":  # pragma: no cover
-    #     # probably not a spg content
-    #     # try .spa
-    #     fid.close()
-    #     return _read_spa(*args, **kwargs)
 
     # Count the number of spectra
     # From hex 120 = decimal 304, individual spectra are described
@@ -551,7 +541,7 @@ def _read_spg(*args, **kwargs):
     #     date follows at +256(dec)
     #     key: hex 80, dec 128: ?
     #     key: hex 82, dec 130: rotation angle
-
+    #
     # the number of line per block may change from file to file but the total
     # number of lines is given at hex 294, hence allowing counting the
     # number of spectra:
@@ -746,19 +736,17 @@ def _read_spa(*args, **kwargs):
     else:
         fid = open(filename, "rb")
 
-    return_ifg = kwargs.get("return_ifg", False)
+    return_ifg = kwargs.get("return_ifg", None)
+
     # Read name:
     # The name  starts at position hex 1e = decimal 30. Its max length
     # is 256 bytes. It is the original filename under which the spectrum has
     # been saved: it won't match with the actual filename if a subsequent
     # renaming has been done in the OS.
-
     spa_name = _readbtext(fid, 30)
 
     # The acquisition date (GMT) is at hex 128 = decimal 296.
-    # The format is HFS+ 32 bit hex value, little endian
     # Second since 31/12/1899, 00:00
-
     fid.seek(296)
     timestamp = _fromfile(fid, dtype="uint32", count=1)
     acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=timezone.utc) + timedelta(
@@ -767,8 +755,7 @@ def _read_spa(*args, **kwargs):
     acquisitiondate = acqdate
 
     # Transform back to timestamp for storage in the Coord object
-    # use datetime.fromtimestamp(d, timezone.utc))
-    # to transform back to datetime object
+    # use datetime.fromtimestamp(d, timezone.utc)) to transform back to datetime object
     timestamp = acqdate.timestamp()
 
     # From hex 120 = decimal 304, the spectrum is described
@@ -789,29 +776,32 @@ def _read_spa(*args, **kwargs):
     #     key: hex 80, dec 128: ?
     #     key: hex 82, dec 130: rotation angle
     #
-    # Teh line preceding the block start with '01'
+    # The line preceding the block start with '01'
     # The lines after the block generally start with '00', except in few cases
-    # - the lineds after the bloch start by '01'. In such cases, the '53' key is also present
-    # (before the '1B'.
+    # - the lines after the block start by '01'. In such cases, the '53' key is also present
+    # (before the '1B').
 
     # scan "key values"
     pos = 304
     while "continue":
         fid.seek(pos)
         key = _fromfile(fid, dtype="uint8", count=1)
+
         if key == 2:
             info02, _ = _read_header02(fid, pos)
 
-        elif key == 3 and not return_ifg:
+        elif key == 3 and return_ifg is None:
             intensities = _getintensities(fid, pos)
 
         elif key == 27:
             fid.seek(pos + 2)
             history_pos = _fromfile(fid, "uint32", 1)
-            # read history
             spa_history = _readbtext(fid, history_pos)
 
-        elif key == 102 and return_ifg:
+        elif key == 102 and return_ifg == "sample":
+            intensities = _getintensities(fid, pos)
+
+        elif key == 103 and return_ifg == "background":
             intensities = _getintensities(fid, pos)
 
         elif key == 00 or key == 1:
@@ -821,23 +811,31 @@ def _read_spa(*args, **kwargs):
 
     fid.close()
 
-    if "intensities" not in locals():  # if return_ifg and no sample ifg is found
+    if (return_ifg == "sample" and "s_ifg_intensities" not in locals()) or (
+        return_ifg == "background" and "s_ifg_intensities" not in locals()
+    ):
         info_("No interferogram found, read_spa returns None")
         return None
-    # load spectral content into the  NDDataset
+    # load intensity into the  NDDataset
     dataset.data = np.array(intensities[np.newaxis], dtype="float32")
+
+    if return_ifg == "background":
+        title = "sample acquisition timestamp (GMT)"  # bckg acquisition date is not known for the moment...
+    else:
+        title = "acquisition timestamp (GMT)"  # no ambiguity here
 
     _y = Coord(
         [timestamp],
-        title="acquisition timestamp (GMT)",
+        title=title,
         units="s",
         labels=([acquisitiondate], [filename]),
     )
 
-    if not return_ifg:
-        dataset.mask = np.isnan(
-            dataset.data
-        )  # when a part of the spectrum has been  blanked
+    # when a part of the spectrum/ifg has been  blanked:
+    dataset.mask = np.isnan(dataset.data)
+
+    if return_ifg is None:
+        default_description = f"Omnic name: {spa_name}\nOmnic filename: {filename.name}"
         dataset.units = info02["units"]
         dataset.title = info02["title"]
 
@@ -855,6 +853,12 @@ def _read_spa(*args, **kwargs):
         )
 
     else:  # interferogram
+        if return_ifg == "sample":
+            default_description = (
+                f"Omnic name: {spa_name} : sample IFG\nOmnic filename: {filename.name}"
+            )
+        else:
+            default_description = f"Omnic name: {spa_name} : background IFG\nOmnic filename: {filename.name}"
         zpd = info02["zpd"]
         spa_name += ": Sample IFG"
         dataset.units = "V"
@@ -874,9 +878,7 @@ def _read_spa(*args, **kwargs):
     # Set origin, description, history, date
     # Omnic spg file don't have specific "origin" field stating the oirigin of the data
 
-    dataset.description = kwargs.get(
-        "description", f"Omnic title: {spa_name}\nOmnic filename: {filename.name}"
-    )
+    dataset.description = kwargs.get("description", default_description)
     if "spa_history" in locals():
         dataset.history = (
             "Omnic 'DATA PROCESSING HISTORY' : \n----------------------------------\n"
@@ -890,18 +892,18 @@ def _read_spa(*args, **kwargs):
         # interferogram
         dataset.meta.interferogram = True
         dataset.meta.td = list(dataset.shape)
-        if zpd in locals():
+        if zpd in locals() and return_ifg != "background":
             if zpd == int(np.argmax(dataset)[-1]):
                 dataset.x._zpd = zpd
             else:
-                info_("Strange, zpd do not match with the max of ifg...")
+                warning_("Strange, Omnic zpd does not match with the max of ifg...")
                 dataset.x._zpd = int(np.argmax(dataset)[-1])
         else:
             dataset.x._zpd = int(np.argmax(dataset)[-1])
         dataset.meta.laser_frequency = Quantity("15798.26 cm^-1")
         dataset.x.set_laser_frequency()
         dataset.x._use_time_axis = (
-            False  # True to have time, else it will  # be optical path difference
+            False  # True to have time, else it will be optical path difference
         )
 
     return dataset
