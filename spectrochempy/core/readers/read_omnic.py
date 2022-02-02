@@ -18,7 +18,7 @@ import struct
 
 import numpy as np
 
-from spectrochempy.core import info_, warning_
+from spectrochempy.core import info_
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.importer import importermethod, Importer
@@ -540,7 +540,7 @@ def _read_spg(*args, **kwargs):
     #     key: hex 6b, dec 107: position of spectrum title, the acquisition
     #     date follows at +256(dec)
     #     key: hex 80, dec 128: ?
-    #     key: hex 82, dec 130: rotation angle
+    #     key: hex 82, dec 130: rotation angle ?
     #
     # the number of line per block may change from file to file but the total
     # number of lines is given at hex 294, hence allowing counting the
@@ -802,10 +802,10 @@ def _read_spa(*args, **kwargs):
             spa_history = _readbtext(fid, history_pos)
 
         elif key == 102 and return_ifg == "sample":
-            intensities = _getintensities(fid, pos)
+            s_ifg_intensities = _getintensities(fid, pos)
 
         elif key == 103 and return_ifg == "background":
-            intensities = _getintensities(fid, pos)
+            b_ifg_intensities = _getintensities(fid, pos)
 
         elif key == 00 or key == 1:
             break
@@ -815,10 +815,14 @@ def _read_spa(*args, **kwargs):
     fid.close()
 
     if (return_ifg == "sample" and "s_ifg_intensities" not in locals()) or (
-        return_ifg == "background" and "s_ifg_intensities" not in locals()
+        return_ifg == "background" and "b_ifg_intensities" not in locals()
     ):
         info_("No interferogram found, read_spa returns None")
         return None
+    elif return_ifg == "sample":
+        intensities = s_ifg_intensities
+    elif return_ifg == "background":
+        intensities = b_ifg_intensities
     # load intensity into the  NDDataset
     dataset.data = np.array(intensities[np.newaxis], dtype="float32")
 
@@ -862,7 +866,6 @@ def _read_spa(*args, **kwargs):
             )
         else:
             default_description = f"Omnic name: {spa_name} : background IFG\nOmnic filename: {filename.name}"
-        zpd = info02["zpd"]
         spa_name += ": Sample IFG"
         dataset.units = "V"
         dataset.title = "detector signal"
@@ -895,14 +898,7 @@ def _read_spa(*args, **kwargs):
         # interferogram
         dataset.meta.interferogram = True
         dataset.meta.td = list(dataset.shape)
-        if zpd in locals() and return_ifg != "background":
-            if zpd == int(np.argmax(dataset)[-1]):
-                dataset.x._zpd = zpd
-            else:
-                warning_("Strange, Omnic zpd does not match with the max of ifg...")
-                dataset.x._zpd = int(np.argmax(dataset)[-1])
-        else:
-            dataset.x._zpd = int(np.argmax(dataset)[-1])
+        dataset.x._zpd = int(np.argmax(dataset)[-1])
         dataset.meta.laser_frequency = Quantity("15798.26 cm^-1")
         dataset.x.set_laser_frequency()
         dataset.x._use_time_axis = (
@@ -1014,9 +1010,8 @@ def _read_srs(*args, **kwargs):
             # this is likely header of data field of reprocessed series
             # the first one is skipped TODO: check the nature of these data
             if background is None:  # pragma: no cover
-                # skip
                 background = NDDataset()
-            else:  # this is likely the first spectrum of the series
+            else:  # pragma: no cover # this is likely the first spectrum of the series
                 found = True
                 names.append(_readbtext(fid, pos + 64))
                 pos += 148
@@ -1216,7 +1211,7 @@ def _read_header02(fid, pos02):
     elif key == 32:  # pragma: no cover
         out["xunits"] = "cm^-1"
         out["xtitle"] = "raman shift"
-    else:
+    else:  # pragma: no cover
         out["xunits"] = None
         out["xtitle"] = "xaxis"
         info_("The nature of x data is not recognized, xtitle is set to 'xaxis'")
@@ -1227,28 +1222,28 @@ def _read_header02(fid, pos02):
     if key == 17:
         out["units"] = "absorbance"
         out["title"] = "absorbance"
-    elif key == 16:
+    elif key == 16:  # pragma: no cover
         out["units"] = "percent"
         out["title"] = "transmittance"
-    elif key == 11:
+    elif key == 11:  # pragma: no cover
         out["units"] = "percent"
         out["title"] = "reflectance"
-    elif key == 12:
+    elif key == 12:  # pragma: no cover
         out["units"] = None
         out["title"] = "log(1/R)"
-    elif key == 20:
+    elif key == 20:  # pragma: no cover
         out["units"] = "Kubelka_Munk"
         out["title"] = "Kubelka-Munk"
     elif key == 22:
         out["units"] = "V"
         out["title"] = "detector signal"
-    elif key == 26:
+    elif key == 26:  # pragma: no cover
         out["units"] = None
         out["title"] = "photoacoustic"
-    elif key == 31:
+    elif key == 31:  # pragma: no cover
         out["units"] = None
         out["title"] = "Raman intensity"
-    else:
+    else:  # pragma: no cover
         out["units"] = None
         out["title"] = "intensity"
         info_("The nature of data is not recognized, title set to 'Intensity'")
