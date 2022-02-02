@@ -660,19 +660,22 @@ def _read_spg(*args, **kwargs):
         timestamp = acqdate.timestamp()
         # Transform back to timestamp for storage in the Coord object
         # use datetime.fromtimestamp(d, timezone.utc))
-        # to transform back to datetime obkct
+        # to transform back to datetime object
 
         timestamps.append(timestamp)
 
-        # Not used at present  # -------------------  # extract positions of
-        # '1B' codes (history text  #  --  #  #  #  # sometimes absent,
-        # e.g. peakresolve)  # key_is_1B = (keys == 27)  # indices1B =  # np.nonzero(
-        #  key_is_1B)  #  #  # position1B = 304 * np.ones(len(
-        # indices1B[0]), dtype='int') + 16 * indices6B[0]  #
-        #  if len(  # position1B) != 0:  #    # read history texts
-        #    for j in range(  # nspec):  #        #  #  determine the position of information
-        #  #  # f.seek(position1B[j] + 2)  #        history_pos =  #  _fromfile(f,  # 'uint32', 1)
-        #        # read history  #  #    history =  # _readbtext(f, history_pos[0])
+        # Not used at present
+        # -------------------
+        # extract positions of '1B' codes (history text), sometimes absent,
+        # e.g. peakresolve)
+        #  key_is_1B = (keys == 27)
+        #  indices1B =  # np.nonzero(key_is_1B)
+        #  position1B = 304 * np.ones(len(indices1B[0]), dtype='int') + 16 * indices6B[0]
+        #  if len(position1B) != 0:  # read history texts
+        #     for j in range(nspec):  determine the position of information
+        #        f.seek(position1B[j] + 2)  #
+        #        history_pos = _fromfile(f,  'uint32', 1)
+        #        history =  _readbtext(f, history_pos[0])
         #        allhistories.append(history)
 
     fid.close()
@@ -777,8 +780,8 @@ def _read_spa(*args, **kwargs):
     #     key: hex 82, dec 130: rotation angle
     #
     # The line preceding the block start with '01'
-    # The lines after the block generally start with '00', except in few cases
-    # - the lines after the block start by '01'. In such cases, the '53' key is also present
+    # The lines after the block generally start with '00', except in few cases where
+    # they start by '01'. In such cases, the '53' key is also present
     # (before the '1B').
 
     # scan "key values"
@@ -831,7 +834,7 @@ def _read_spa(*args, **kwargs):
         labels=([acquisitiondate], [filename]),
     )
 
-    # when a part of the spectrum/ifg has been  blanked:
+    # useful when a part of the spectrum/ifg has been blanked:
     dataset.mask = np.isnan(dataset.data)
 
     if return_ifg is None:
