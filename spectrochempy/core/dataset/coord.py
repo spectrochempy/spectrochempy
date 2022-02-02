@@ -444,7 +444,7 @@ class Coord(NDMath, NDArray):
 
     # ..........................................................................
     def squeeze(self, *args, **kwargs):
-        raise NotImplementedError
+        return self
 
     # ..........................................................................
     def random(self, *args, **kwargs):

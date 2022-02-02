@@ -10,7 +10,7 @@ import pytest
 from quaternion import quaternion
 from pint.errors import DimensionalityError
 
-from spectrochempy.core import info_, error_
+from spectrochempy.core import info_, error_, debug_
 from spectrochempy.core.dataset.coord import Coord, LinearCoord, CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndmath import (
@@ -24,7 +24,7 @@ from spectrochempy.core.units.units import ur, Quantity, Unit
 from spectrochempy.utils import MASKED
 from spectrochempy.utils.testing import (
     assert_array_equal,
-    assert_equal_units,
+    assert_units_equal,
     assert_dataset_equal,
     RandomSeedContext,
 )
@@ -264,8 +264,8 @@ def test_ndmath_binary_ufuncs_scalar(nd2d, name, comment):
 
 def test_multiply_unitless_by_units():
 
-    coord = LinearCoord.arange(10) * (2 * ur.MHz) + (1.0 * ur.kHz)
-    assert str(coord.units) == "MHz"
+    coord = (2 * ur.MHz) * LinearCoord.arange(10) + (1.0 * ur.kHz)
+    assert str(coord.units) == "megahertz"
 
 
 # ------------------------------------------------------------------
@@ -403,17 +403,28 @@ def test_nddataset_add_inplace():
 
 
 def test_nddataset_add_mismatch_coords():
+
+    debug_("Start Math checkings")
+
     coord1 = Coord(np.arange(5.0))
+    coord2 = Coord(np.arange(4.0))
+    d1 = NDDataset(np.ones((5, 4)), coordset=[coord1, coord2])
+    d2 = NDDataset(np.zeros((4,)), coordset=[coord2])
+    d1 -= d2
+
     coord2 = Coord(np.arange(1.0, 5.5, 1.0))
     d1 = NDDataset(np.ones((5, 5)), coordset=[coord1, coord2])
     d2 = NDDataset(np.ones((5, 5)), coordset=[coord2, coord1])
     with pytest.raises(CoordinateMismatchError) as exc:
         d1 -= d2
-    assert str(exc.value).startswith("\nCoord.data attributes are not almost equal")
+
+    assert str(exc.value).startswith(
+        "Coordinates [Coord: [float64] unitless (size: 5)] "
+    )
     with pytest.raises(CoordinateMismatchError) as exc:
         d1 += d2
     assert str(exc.value).startswith(
-        "\nCoord.data attributes are not almost equal"
+        "Coordinates [Coord: [float64] unitless (size: 5)] "
     )  # TODO= make more tests like this for various functions
 
 
@@ -457,6 +468,11 @@ def test_nddataset_add_units_with_different_scale():
 def test_nddataset_add_mismatch_shape():
     d1 = NDDataset(np.ones((5, 5)))
     d2 = NDDataset(np.ones((6, 6)))
+    with pytest.raises(IncompatibleShapeError) as exc:
+        d1 += d2
+
+    d1 = NDDataset(np.ones((5, 5)))
+    d2 = NDDataset(np.ones((2, 5)))
     with pytest.raises(IncompatibleShapeError) as exc:
         d1 += d2
 
@@ -564,7 +580,7 @@ def test_ndmath_unit_conversion_operators(operation, result_units):
     in_m = NDDataset(in_km.data * 1000, units=ur.m)
     operator_km = in_km.__getattribute__(operation)
     combined = operator_km(in_m)
-    assert_equal_units(combined.units, result_units)
+    assert_units_equal(combined.units, result_units)
 
 
 @pytest.mark.parametrize(
@@ -588,7 +604,7 @@ def test_arithmetic_unit_calculation(unit1, unit2, op, result_units):
     try:
         assert result.units == result_units
     except AssertionError:
-        assert_equal_units(ndd1_method(ndd2).units, result_units)
+        assert_units_equal(ndd1_method(ndd2).units, result_units)
 
 
 def test_simple_arithmetic_on_full_dataset():
@@ -1208,3 +1224,16 @@ def test_npy(ds1):
     # if no dataset then is it equivalent to np.dot
     x = dot(a.data.T, b.data)
     assert isinstance(x, np.ndarray)
+
+
+def test_op_quantity_with_units():
+    t = Coord(data=[0, 1, 2, 3], units="hour", title="time")
+
+    d = NDDataset(
+        data=[-1, 0.2, 0.9, 2.1], coordset=[t], units="kilometer", title="distance"
+    )
+    _ = d / t
+
+    _ = t * (1 * ur("km"))
+
+    _ = d + Quantity(1, "km")

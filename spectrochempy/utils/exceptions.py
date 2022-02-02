@@ -42,6 +42,12 @@ class SpectroChemPyException(Exception):
     The base exception class for SpectroChemPy.
     """
 
+    def __init__(self, message):
+
+        self.message = message
+
+        super().__init__(message)
+
 
 # ------------------------------------------------------------------------------
 class UnitsCompatibilityError(SpectroChemPyException):
@@ -58,12 +64,8 @@ class IncompatibleShapeError(SpectroChemPyException):
 
     def __init__(self, obj1, obj2, extra_msg=""):
 
-        shape1 = obj1.shape if hasattr(obj1, "shape") else "<no shape>"
-        shape2 = obj2.shape if hasattr(obj2, "shape") else "<no shape>"
-        self.message = (
-            f"The shape of obj1:[{obj1.__class__.__name__}, shape={shape1}] and that of"
-            f" obj2:[{obj2.__class__.__name__}, shape={shape2}] are different!. {extra_msg}"
-        )
+        self.message = f"Shapes of [{obj1}] and [{obj2}] mismatch. {extra_msg}"
+        super().__init__(self.message)
 
 
 # ------------------------------------------------------------------------------
@@ -78,7 +80,6 @@ class InvalidDimensionNameError(SpectroChemPyException):
             f"dim name must be one of {tuple(available_names)} "
             f"with an optional subdir indication (e.g., 'x_2'. dim=`{name}` was given!"
         )
-
         super().__init__(self.message)
 
 
@@ -107,6 +108,11 @@ class CoordinateMismatchError(SpectroChemPyException):
     """
     Exception raised when object coordinates differ.
     """
+
+    def __init__(self, obj1, obj2, extra_msg=""):
+
+        self.message = f"Coordinates [{obj1}] and [{obj2}] mismatch. {extra_msg}"
+        super().__init__(self.message)
 
 
 class ProtocolError(SpectroChemPyException):
