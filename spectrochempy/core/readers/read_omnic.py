@@ -33,15 +33,13 @@ def read_omnic(*paths, **kwargs):
     Open a Thermo Nicolet OMNIC file.
 
     Open Omnic file or a list of files with extension ``.spg`` , ``.spa`` or
-    ``.srs``
-    and set data/metadata in the current dataset.
+    ``.srs`` and set data/metadata in the current dataset.
 
     The collected metadata are:
     - names of spectra
     - acquisition dates (UTC)
     - units of spectra (absorbance, transmittance, reflectance, Log(1/R),
-    Kubelka-Munk, Raman intensity,
-    photoacoustics, volts)
+    Kubelka-Munk, Raman intensity, photoacoustics, volts)
     - units of xaxis (wavenumbers in cm^-1, wavelengths in nm or micrometer,
     Raman shift in cm^-1)
     - spectra history (but only incorporated in the NDDataset if a single
@@ -220,6 +218,9 @@ def read_spg(*paths, **kwargs):
     """
     Open a Thermo Nicolet file or a list of files with extension ``.spg``.
 
+    Open Omnic file or a list of files with extension ``.spg`` and set
+    data/metadata in the current dataset.
+
     Parameters
     -----------
     *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
@@ -311,6 +312,9 @@ def read_spg(*paths, **kwargs):
 def read_spa(*paths, **kwargs):
     """
     Open a Thermo Nicolet file or a list of files with extension ``.spa``.
+
+    Open Omnic file or a list of files with extension ``.spa`` and set
+    data/metadata in the current dataset.
 
     Parameters
     -----------
@@ -409,6 +413,9 @@ def read_spa(*paths, **kwargs):
 def read_srs(*paths, **kwargs):
     """
     Open a Thermo Nicolet file or a list of files with extension ``.srs``.
+
+    Open Omnic file or a list of files with extension ``.srs`` and set
+    data/metadata in the current dataset.
 
     Parameters
     -----------
