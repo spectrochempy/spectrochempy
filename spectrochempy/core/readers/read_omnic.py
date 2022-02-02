@@ -519,10 +519,8 @@ def _read_spg(*args, **kwargs):
 
     # Read title:
     # The file title starts at position hex 1e = decimal 30. Its max length
-    # is 256 bytes.
-    #  It is the original filename under which the group has been saved: it
-    #  won't match with
-    #  the actual filename if a subsequent renaming has been done in the OS.
+    # is 256 bytes. It is the original filename under which the group has been saved: it
+    #  won't match with the actual filename if a subsequent renaming has been done in the OS.
 
     spg_title = _readbtext(fid, 30)
 
@@ -545,17 +543,18 @@ def _read_spg(*args, **kwargs):
     #     key: hex 03, dec  03: intensity position
     #     key: hex 04, dec  04: user text position
     #     key: hex 1B, dec  27: position of History text
+    #     key: hex 64, dec 100: ?
+    #     key: hex 66  dec 102: sample interferogram
+    #     key: hex 67  dec 103: background interferogram
     #     key: hex 69, dec 105: ?
     #     key: hex 6a, dec 106: ?
     #     key: hex 6b, dec 107: position of spectrum title, the acquisition
     #     date follows at +256(dec)
     #     key: hex 80, dec 128: ?
-    #     key: hex 82, dec 130: ?
-    #
-    # the number of line per block may change from one omnic version to
-    # another,
-    # but the total number of lines is given at hex 294, hence allowing
-    # counting
+    #     key: hex 82, dec 130: rotation angle
+
+    # the number of line per block may change from file to file but the total
+    # number of lines is given at hex 294, hence allowing counting the
     # number of spectra:
 
     # read total number of lines
@@ -658,12 +657,12 @@ def _read_spg(*args, **kwargs):
         spa_title_pos = _fromfile(fid, "uint32", 1)
 
         # read filename
-        spa_title = _readbtext(fid, spa_title_pos)  # [0])
+        spa_title = _readbtext(fid, spa_title_pos)
         spectitles.append(spa_title)
 
         # and the acquisition date
         fid.seek(spa_title_pos + 256)
-        timestamp = _fromfile(fid, dtype="uint32", count=1)  #
+        timestamp = _fromfile(fid, dtype="uint32", count=1)
         # since 31/12/1899, 00:00
         acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=timezone.utc) + timedelta(
             seconds=int(timestamp)
