@@ -161,10 +161,6 @@ class MCRALS(HasTraits):
     """
 
     # Todo: add unimodSpec (and unimodSpecMod, ...)  : list or tuple, default `"all"`
-    #     Unimodality constraint on spectra. If set to `'all'` (default) all spectral profiles are considered unimodal,
-    #     i.e. consisting in a single peak. If an array of indexes is passed, the corresponding profiles are considered
-    #     unimodal, not the others. For instance `[0, 2]` indicates that profile #0 and #2 are unimodal while
-    #      profile #1 *can* be multimodal. If set to `"None"` or `[]`, all profiles can be multimodal.
 
     _X = Instance(NDDataset)
     _C = Instance(NDDataset, allow_none=True)
@@ -226,7 +222,7 @@ class MCRALS(HasTraits):
             St.name = "Pure spectra profile, mcs-als of " + X.name
             nspecies = St.shape[0]
 
-        else:
+        else:  # pragma: no cover
             raise ValueError(
                 "the dimensions of initial concentration "
                 "or spectra dataset do not match the data"
@@ -242,7 +238,7 @@ class MCRALS(HasTraits):
 
         if nonnegConc == "all":
             nonnegConc = np.arange(nspecies)
-        elif nonnegConc is None:
+        elif nonnegConc is None:  # pragma: no cover
             nonnegConc = []
         elif len(nonnegConc) > nspecies or max(nonnegConc + 1) > nspecies:
             raise ValueError(
@@ -251,21 +247,25 @@ class MCRALS(HasTraits):
 
         if unimodConc == "all":
             unimodConc = np.arange(nspecies)
-        elif len(unimodConc) > nspecies or max(unimodConc + 1) > nspecies:
+        elif (
+            len(unimodConc) > nspecies or max(unimodConc + 1) > nspecies
+        ):  # pragma: no cover
             raise ValueError(
                 f"The guess has only {nspecies} species, please check unimodConc"
             )
 
         if closureTarget == "default":
             closureTarget = np.ones(ny)
-        elif len(closureTarget) > ny:
+        elif len(closureTarget) > ny:  # pragma: no cover
             raise ValueError(
                 f"The data contain only {ny} observations, please check closureTarget"
             )
 
         if hardC_to_C_idx == "default":
             hardC_to_C_idx = np.arange(nspecies)
-        elif len(hardC_to_C_idx) > nspecies or max(hardC_to_C_idx + 1) > nspecies:
+        elif (
+            len(hardC_to_C_idx) > nspecies or max(hardC_to_C_idx + 1) > nspecies
+        ):  # pragma: no cover
             raise ValueError(
                 f"The guess has only {nspecies} species, please check fixedConc_to_C_idx"
             )
@@ -273,7 +273,9 @@ class MCRALS(HasTraits):
         # constraints on spectra
         if nonnegSpec == "all":
             nonnegSpec = np.arange(nspecies)
-        elif len(nonnegSpec) > nspecies or max(nonnegSpec + 1) > nspecies:
+        elif (
+            len(nonnegSpec) > nspecies or max(nonnegSpec + 1) > nspecies
+        ):  # pragma: no cover
             raise ValueError(
                 f"The guess has only {nspecies} species, please check nonnegSpec"
             )
