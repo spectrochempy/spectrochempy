@@ -841,7 +841,7 @@ class NDArray(HasTraits):
                 index = []
                 for lo in loc:
                     index.append(
-                        (np.abs(data - lo)).argmin()
+                        (self.abs(data - lo)).argmin()
                     )  # TODO: add some precision to this result
                 return index
 
@@ -2161,53 +2161,86 @@ class NDArray(HasTraits):
             return self._data.size
 
     # ..........................................................................
-    def squeeze(self, *dims, inplace=False, return_axis=False, **kwargs):
+    def squeeze(self, *dims, inplace=False, keepdims=None, **kwargs):
         """
         Remove single-dimensional entries from the shape of an array.
 
         Parameters
         ----------
-        dims : None or int or tuple of ints, optional
+        *dims : None or int or tuple of ints, optional
             Selects a subset of the single-dimensional entries in the
             shape. If a dimension (dim) is selected with shape entry greater than
             one, an error is raised.
+        inplace : bool, optional, default=`False`
+            Keyword parameters to say that the method return a new object (default)
+            or not (inplace=True).
+        keepdims : None or int or tuple of ints, optional
+            Selects a subset of the single-dimensional entries in the
+            shape which remains preserved even if hey are of size 1.
+            Used only if the *dims are None.
+        **kwargs
+            Optional keyword parameters. See Other Parameters.
 
         Returns
         -------
         squeezed : same object type
             The input array, but with all or a subset of the
             dimensions of length 1 removed.
+        returned_axis
+            Only if return_axis=True.
+
+        Other Parameters
+        ----------------
+        return_axis : bool, optional
+            If True the previous index of the removed axis are returned.
+            This mainly for internal use in SpectroChemPy, but probably not
+            usefull for the end user.
 
         Raises
         ------
         ValueError
             If `dims` is not `None`, and the dimension being squeezed is not
-            of length 1
+            of length 1.
         """
         new = self if inplace else self.copy()
 
         dims = self._get_dims_from_args(*dims, **kwargs)
+        axes = self._get_dims_index(dims)
+        keepaxes = self._get_dims_index(keepdims)
 
-        if not dims:
+        if not axes and keepaxes:
+            axes = np.arange(new.ndim)
+            is_axis_to_remove = (np.array(new.shape) == 1) & (axes != keepaxes)
+            axes = axes[is_axis_to_remove].tolist()
+
+        elif not axes:
             s = np.array(new.shape)
-            dims = np.argwhere(s == 1).squeeze().tolist()
-        axis = self._get_dims_index(dims)
-        if axis is None:
-            # nothing to squeeze
-            return new, axis
+            axes = np.argwhere(s == 1).squeeze().tolist()
+            is_axis_to_remove = s == 1
 
-        # recompute new dims
-        new._dims = list(new._dims)
-        for i in axis[::-1]:
-            del new._dims[i]
+        else:
+            is_axis_to_remove = np.array(
+                [True if axis in axes else False for axis in range(new.ndim)]
+            )
+
+        if axes is None:
+            # nothing to squeeze
+            if kwargs.get("return_axis", False):
+                return new, axes
+            return new
+        axes = tuple(axes)
+
+        # recompute new dims by taking the dims not removed
+        new._dims = np.array(new._dims)[~is_axis_to_remove].tolist()
 
         # performs all required squeezing
-        new._data = new._data.squeeze(axis=axis)
+        new._data = new._data.squeeze(axis=axes)
         if self.is_masked:
-            new._mask = new._mask.squeeze(axis=axis)
+            new._mask = new._mask.squeeze(axis=axes)
 
-        if return_axis:  # in case we need to know which axis has been squeezed
-            return new, axis
+        if kwargs.get("return_axis", False):
+            # in case we need to know which axis has been squeezed
+            return new, axes
 
         return new
 

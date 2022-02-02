@@ -1375,3 +1375,38 @@ def test_nddataset_to_xarray(IR_dataset_2D):
     assert xnd2.y.attrs["meta_pression"] == nd2.y.meta["pression"].m
     assert xnd2.y.attrs["meta_pression"] == nd2.y.pression.m
     assert xnd2.y.attrs["pint_units_meta_pression"] == nd2.y.meta["pression"].u
+
+
+####
+def test_squeeze_method():
+
+    c1 = scp.Coord([2], units="m")
+    c2 = scp.Coord.arange(3, units="m^2")
+    c3 = scp.Coord([3], units="m^3")
+    nd = scp.NDDataset(np.ones((1, 3, 1)))
+
+    assert nd.shape == (1, 3, 1)
+
+    nd.x = c3
+    nd.y = c2
+    nd.z = c1
+
+    nd2 = nd.squeeze()
+
+    assert nd2.shape == (3,)
+
+    nd3 = nd.squeeze(0)
+
+    assert nd3.shape == (3, 1)
+
+    nd4 = nd.squeeze(keepdims=2)
+
+    assert nd4.shape == (3, 1)
+    assert str(nd4) == "NDDataset: [float64] unitless (shape: (y:3, x:1))"
+
+    nd5 = nd.squeeze("x")
+    assert nd5.shape == (1, 3)
+
+    nd6 = nd.squeeze(keepdims="x")
+
+    assert nd6.shape == (3, 1)

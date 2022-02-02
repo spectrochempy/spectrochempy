@@ -963,19 +963,23 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         return new
 
     # ..........................................................................
-    def squeeze(self, *dims, inplace=False):
+    def squeeze(self, *dims, inplace=False, keepdims=None):
         """
         Remove single-dimensional entries from the shape of a NDDataset.
 
         Parameters
         ----------
-        dim : None or int or tuple of ints, optional
+        *dims : None or int or tuple of ints, optional
             Selects a subset of the single-dimensional entries in the
             shape. If a dimension (dim) is selected with shape entry greater than
             one, an error is raised.
         inplace : bool, optional, default=`False`
-            Flag to say that the method return a new object (default)
+            Keyword parameters to say that the method return a new object (default)
             or not (inplace=True).
+        keepdims : None or int or tuple of ints, optional
+            Selects a subset of the single-dimensional entries in the
+            shape which remains preserved even if hey are of size 1.
+            Used only if the *dims are None.
 
         Returns
         -------
@@ -986,20 +990,22 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         Raises
         ------
         ValueError
-            If `dim` is not `None`, and the dimension being squeezed is not
-            of length 1.
+            If `dims` is not `None`, and the dimension being squeezed is not
+            of length 1
         """
         # make a copy of the original dims
         old = self.dims[:]
 
         # squeeze the data and determine which axis must be squeezed
-        new, axis = super().squeeze(*dims, inplace=inplace, return_axis=True)
+        new, axes = super().squeeze(
+            *dims, inplace=inplace, keepdims=keepdims, return_axis=True
+        )
 
-        if axis is not None and new._coordset is not None:
+        if axes is not None and new._coordset is not None:
             # if there are coordinates they have to be squeezed as well (remove
             # coordinate for the squeezed axis)
 
-            for i in axis:
+            for i in axes:
                 dim = old[i]
                 del new._coordset[dim]
 
@@ -1025,7 +1031,8 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         --------
         squeeze : The inverse operation, removing singleton dimensions.
         """
-        # TODO
+        # TODO : expand dims
+        raise NotImplementedError
 
     # ..........................................................................
     def swapdims(self, dim1, dim2, inplace=False):
