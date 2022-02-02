@@ -18,6 +18,7 @@ import struct
 
 import numpy as np
 
+from spectrochempy.core import info_
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.importer import importermethod, Importer
@@ -333,15 +334,13 @@ def read_spa(*paths, **kwargs):
     Returns
     --------
     read_spa
-        The dataset or a list of dataset corresponding to a (set of) .spg
+        The dataset or a list of dataset corresponding to the (set of) .spa
         file(s).
 
     Other Parameters
     -----------------
-    protocol : {'scp', 'omnic', 'opus', 'topspin', 'matlab', 'jcamp', 'csv',
-    'excel'}, optional
-        Protocol used for reading. If not provided, the correct protocol
-        is inferred (whnever it is possible) from the file name extension.
+    return_ifg : bool, optional
+        Default value is False. If True, returns the interferogram of the spa file
     directory : str, optional
         From where to read the specified `filename`. If not specified,
         read in the default ``datadir`` specified in
@@ -596,7 +595,7 @@ def _read_spg(*args, **kwargs):
     )  # ex: [304 432 ...]
 
     for i in range(nspec):
-        info02 = _readheader02(fid, position02[i])
+        info02, _ = _read_header02(fid, position02[i])
         nx[i] = info02["nx"]
         firstx[i] = info02["firstx"]
         lastx[i] = info02["lastx"]
@@ -747,20 +746,20 @@ def _read_spa(*args, **kwargs):
     else:
         fid = open(filename, "rb")
 
-    # Read title:
-    # The file title  starts at position hex 1e = decimal 30. Its max length
+    return_ifg = kwargs.get("return_ifg", False)
+    # Read name:
+    # The name  starts at position hex 1e = decimal 30. Its max length
     # is 256 bytes. It is the original filename under which the spectrum has
     # been saved: it won't match with the actual filename if a subsequent
     # renaming has been done in the OS.
 
-    spa_title = _readbtext(fid, 30)
+    spa_name = _readbtext(fid, 30)
 
     # The acquisition date (GMT) is at hex 128 = decimal 296.
     # The format is HFS+ 32 bit hex value, little endian
+    # Second since 31/12/1899, 00:00
 
     fid.seek(296)
-
-    # days since 31/12/1899, 00:00
     timestamp = _fromfile(fid, dtype="uint32", count=1)
     acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=timezone.utc) + timedelta(
         seconds=int(timestamp)
@@ -801,16 +800,9 @@ def _read_spa(*args, **kwargs):
         fid.seek(pos)
         key = _fromfile(fid, dtype="uint8", count=1)
         if key == 2:
-            info02 = _readheader02(fid, pos)
-            nx = info02["nx"]
-            firstx = info02["firstx"]
-            lastx = info02["lastx"]
-            xunit = info02["xunits"]
-            xtitle = info02["xtitle"]
-            units = info02["units"]
-            title = info02["title"]
+            info02, _ = _read_header02(fid, pos)
 
-        elif key == 3:
+        elif key == 3 and not return_ifg:
             intensities = _getintensities(fid, pos)
 
         elif key == 27:
@@ -819,6 +811,9 @@ def _read_spa(*args, **kwargs):
             # read history
             spa_history = _readbtext(fid, history_pos)
 
+        elif key == 102 and return_ifg:
+            intensities = _getintensities(fid, pos)
+
         elif key == 00 or key == 1:
             break
 
@@ -826,23 +821,11 @@ def _read_spa(*args, **kwargs):
 
     fid.close()
 
+    if "intensities" not in locals():  # if return_ifg and no sample ifg is found
+        info_("No interferogram found, read_spa returns None")
+        return None
     # load spectral content into the  NDDataset
     dataset.data = np.array(intensities[np.newaxis], dtype="float32")
-    dataset.mask = np.isnan(
-        dataset.data
-    )  # when a part of the spectrum has bveen  blanked
-    dataset.units = units
-    dataset.title = title
-    dataset.name = filename.stem
-    dataset.filename = str(filename)
-
-    # now add coordinates
-    # _x = Coord(np.around(np.linspace(firstx, lastx, nx, 3)), title=xtitle,
-    # units=xunit)
-    spacing = (lastx - firstx) / (nx - 1)
-    _x = LinearCoord(
-        offset=firstx, increment=spacing, size=nx, title=xtitle, units=xunit
-    )
 
     _y = Coord(
         [timestamp],
@@ -850,13 +833,49 @@ def _read_spa(*args, **kwargs):
         units="s",
         labels=([acquisitiondate], [filename]),
     )
+
+    if not return_ifg:
+        dataset.mask = np.isnan(
+            dataset.data
+        )  # when a part of the spectrum has been  blanked
+        dataset.units = info02["units"]
+        dataset.title = info02["title"]
+
+        # now add coordinates
+        nx = info02["nx"]
+        firstx = info02["firstx"]
+        lastx = info02["lastx"]
+        xunit = info02["xunits"]
+        xtitle = info02["xtitle"]
+
+        spacing = (lastx - firstx) / (nx - 1)
+
+        _x = LinearCoord(
+            offset=firstx, increment=spacing, size=nx, title=xtitle, units=xunit
+        )
+
+    else:  # interferogram
+        zpd = info02["zpd"]
+        spa_name += ": Sample IFG"
+        dataset.units = "V"
+        dataset.title = "detector signal"
+        _x = LinearCoord(
+            offset=0,
+            increment=1,
+            size=len(intensities),
+            title="data points",
+            units=None,
+        )
+
     dataset.set_coordset(y=_y, x=_x)
+    dataset.name = spa_name  # to be consistent with omnic behaviour
+    dataset.filename = str(filename)
 
     # Set origin, description, history, date
     # Omnic spg file don't have specific "origin" field stating the oirigin of the data
 
     dataset.description = kwargs.get(
-        "description", f"Omnic title: {spa_title}\nOmnic " f"filename: {filename.name}"
+        "description", f"Omnic title: {spa_name}\nOmnic filename: {filename.name}"
     )
     if "spa_history" in locals():
         dataset.history = (
@@ -871,7 +890,14 @@ def _read_spa(*args, **kwargs):
         # interferogram
         dataset.meta.interferogram = True
         dataset.meta.td = list(dataset.shape)
-        dataset.x._zpd = int(np.argmax(dataset)[-1])  # zero path difference
+        if zpd in locals():
+            if zpd == int(np.argmax(dataset)[-1]):
+                dataset.x._zpd = zpd
+            else:
+                info_("Strange, zpd do not match with the max of ifg...")
+                dataset.x._zpd = int(np.argmax(dataset)[-1])
+        else:
+            dataset.x._zpd = int(np.argmax(dataset)[-1])
         dataset.meta.laser_frequency = Quantity("15798.26 cm^-1")
         dataset.x.set_laser_frequency()
         dataset.x._use_time_axis = (
@@ -892,10 +918,8 @@ def _read_srs(*args, **kwargs):
         fid = io.BytesIO(filename)  # pragma: no cover
     else:
         fid = open(filename, "rb")
-    # at pos=306 (hex:132) is the position of the xheader
-    fid.seek(306)
-    pos_xheader = _fromfile(fid, dtype="int32", count=1)
-    info, pos = _read_xheader(fid, pos_xheader)
+    # at pos=304 (hex:130) is the position of the '02' key for series
+    info, pos = _read_header02(fid, 304)
 
     # reset current position at the start of next line
     pos = _nextline(pos)
@@ -1093,6 +1117,7 @@ def _fromfile(fid, dtype, count):
         "uint32": "I",
         "int32": "i",
         "float32": "f",
+        "char8": "c",
     }
     typ = t[dtype] * count
     if dtype.endswith("16"):
@@ -1110,10 +1135,9 @@ def _fromfile(fid, dtype, count):
 def _readbtext(fid, pos):
     # Read some text in binary file, until b\0\ is encountered.
     # Returns utf-8 string
-    fid.seek(pos)  # read first byte, ensure entering the while loop
+    fid.seek(pos)
     btext = fid.read(1)
-    while not (btext[len(btext) - 1] == 0):  # while the last byte of btext differs from
-        # zero
+    while not (btext[len(btext) - 1] == 0):  # while the last byte is not zero
         btext = btext + fid.read(1)  # append 1 byte
 
     btext = btext[0 : len(btext) - 1]  # cuts the last byte
@@ -1134,131 +1158,46 @@ def _nextline(pos):
 
 
 # ..............................................................................
-def _readheader02(fid, pos):
-    # read spectrum header, pos is the position of the 02 key
-    # returns a dict
-    fid.seek(pos + 2)  # go to line and skip 2 bytes
-    info_pos = _fromfile(fid, dtype="uint32", count=1)
+def _read_header02(fid, pos02):
+    """
+    read spectrum/ifg header
 
-    # other positions:
-    #   nx_pos = info_pos + 4
-    #   xaxis unit code = info_pos + 8
-    #   data unit code = info_pos + 12
-    #   fistx_pos = info_pos + 16
-    #   lastx_pos = info_pos + 20
-    #   nscan_pos = info_pos + 36;
-    #   nbkgscan_pos = info_pos + 52;
+    Parameters
+    ----------
+    fid : BufferedReader
+        The buffered binary stream.
 
-    fid.seek(info_pos + 4)
-    out = {"nx": _fromfile(fid, "uint32", 1)}
+    pos : int
+        The position of the 02 key in spa,spg or srs file.
 
-    # read xaxis unit
-    fid.seek(info_pos + 8)
-    key = _fromfile(fid, dtype="uint8", count=1)
-    if key == 1:
-        out["xunits"] = "cm ^ -1"
-        out["xtitle"] = "wavenumbers"
-    elif key == 2:  # pragma: no cover
-        out["xunits"] = None
-        out["xtitle"] = "data points"
-    elif key == 3:  # pragma: no cover
-        out["xunits"] = "nm"
-        out["xtitle"] = "wavelengths"
-    elif key == 4:  # pragma: no cover
-        out["xunits"] = "um"
-        out["xtitle"] = "wavelengths"
-    elif key == 32:  # pragma: no cover
-        out["xunits"] = "cm^-1"
-        out["xtitle"] = "raman shift"
-    else:  # pragma: no cover
-        out["xunits"] = None
-        out[
-            "xtitle"
-        ] = "xaxis"  # warning: 'The nature of data is not  # recognized, xtitle set to \'xaxis\')
+    Returns
+    -------
+        dict, int
+        Dictionary and current positon in file
+    """
 
-    # read data unit
-    fid.seek(info_pos + 12)
-    key = _fromfile(fid, dtype="uint8", count=1)
-    if key == 17:
-        out["units"] = "absorbance"
-        out["title"] = "absorbance"
-    elif key == 16:  # pragma: no cover
-        out["units"] = "percent"
-        out["title"] = "transmittance"
-    elif key == 11:  # pragma: no cover
-        out["units"] = "percent"
-        out["title"] = "reflectance"
-    elif key == 12:  # pragma: no cover
-        out["units"] = None
-        out["title"] = "Log(1/R)"
-    elif key == 20:  # pragma: no cover
-        out["units"] = "Kubelka_Munk"
-        out["title"] = "Kubelka-Munk"
-    elif key == 22:  # pragma: no cover
-        out["units"] = "V"
-        out["title"] = "detector signal"
-    elif key == 26:  # pragma: no cover
-        out["units"] = None
-        out["title"] = "photoacoustic"
-    elif key == 31:  # pragma: no cover
-        out["units"] = None
-        out["title"] = "raman intensity"
-    else:  # pragma: no cover
-        out["units"] = None
-        out[
-            "title"
-        ] = "intensity"  # warning: 'The nature of data is not  # recognized, title set to \'Intensity\')
+    out = {}
+    # determine the type of file
+    fid.seek(0)
+    bytes = fid.read(18)
+    if bytes == b"Spectral Data File":
+        filetype = "spa, spg"
+    elif bytes == b"Spectral Exte File":
+        filetype = "srs"
 
-    fid.seek(info_pos + 16)
-    out["firstx"] = _fromfile(fid, "float32", 1)
-    fid.seek(info_pos + 20)
-    out["lastx"] = _fromfile(fid, "float32", 1)
-    fid.seek(info_pos + 36)
-    out["nscan"] = _fromfile(fid, "uint32", 1)
-    fid.seek(info_pos + 52)
-    out["nbkgscan"] = _fromfile(fid, "uint32", 1)
+    # skip 2 bytes and read the position of the header
+    fid.seek(pos02 + 2)
+    pos = _fromfile(fid, dtype="uint32", count=1)
 
-    return out
-
-
-# ..............................................................................
-def _read_xheader(fid, pos):
-    # read spectrum header, pos is the position of the 03 or 01 key
-    # for series files
-    # return a dict and updated position in the file
-    # Todo: merge with _readheader02
-
-    fid.seek(pos)
-    key = _fromfile(fid, dtype="uint8", count=1)
-
-    if key not in (1, 3):
-        raise ValueError(  # pragma: no cover
-            "xheader key={} not recognized yet.".format(key)
-            + " Please report this error (and the corresponding srs "
-            "file) to the developers"
-            "They will do their best to fix the issue"
-        )
-    else:
-        out = {"xheader": key}
-
-    #   positions
-    #   nx_pos = info_pos + 4
-    #   xaxis unit code = info_pos + 8
-    #   data unit code = info_pos + 12
-    #   fistx_pos = info_pos + 16
-    #   lastx_pos = info_pos + 20
-    #   scan_pts_pos = info_pos + 29,
-    #   nscan_pos = info_pos + 36;
-    #   nbkgscan_pos = info_pos + 52;
-
+    # nx
     fid.seek(pos + 4)
     out["nx"] = _fromfile(fid, "uint32", count=1)
 
-    # read xaxis unit
+    # xunits
     fid.seek(pos + 8)
     key = _fromfile(fid, dtype="uint8", count=1)
-    if key == 1:  # pragma: no cover
-        out["xunits"] = "cm ^ -1"
+    if key == 1:
+        out["xunits"] = "cm^-1"
         out["xtitle"] = "wavenumbers"
     elif key == 2:
         out["xunits"] = None
@@ -1272,49 +1211,50 @@ def _read_xheader(fid, pos):
     elif key == 32:  # pragma: no cover
         out["xunits"] = "cm^-1"
         out["xtitle"] = "raman shift"
-    else:  # pragma: no cover
+    else:
         out["xunits"] = None
-        out[
-            "xtitle"
-        ] = "xaxis"  # warning: 'The nature of data is not  # recognized, xtitle set to \'xaxis\')
-    # read data unit
+        out["xtitle"] = "xaxis"
+        info_("The nature of x data is not recognized, xtitle is set to 'xaxis'")
+
+    # data units
     fid.seek(pos + 12)
     key = _fromfile(fid, dtype="uint8", count=1)
-    if key == 17:  # pragma: no cover
+    if key == 17:
         out["units"] = "absorbance"
         out["title"] = "absorbance"
-    elif key == 16:  # pragma: no cover
+    elif key == 16:
         out["units"] = "percent"
         out["title"] = "transmittance"
-    elif key == 11:  # pragma: no cover
+    elif key == 11:
         out["units"] = "percent"
         out["title"] = "reflectance"
-    elif key == 12:  # pragma: no cover
+    elif key == 12:
         out["units"] = None
         out["title"] = "log(1/R)"
-    elif key == 20:  # pragma: no cover
+    elif key == 20:
         out["units"] = "Kubelka_Munk"
         out["title"] = "Kubelka-Munk"
     elif key == 22:
         out["units"] = "V"
         out["title"] = "detector signal"
-    elif key == 26:  # pragma: no cover
+    elif key == 26:
         out["units"] = None
         out["title"] = "photoacoustic"
-    elif key == 31:  # pragma: no cover
+    elif key == 31:
         out["units"] = None
-        out["title"] = "raman intensity"
-    else:  # pragma: no cover
-        out["title"] = None
+        out["title"] = "Raman intensity"
+    else:
+        out["units"] = None
         out["title"] = "intensity"
-        # warning: 'The nature of data is not
-        # recognized, title set to \'Intensity\')
+        info_("The nature of data is not recognized, title set to 'Intensity'")
 
+    # firstx, lastx
     fid.seek(pos + 16)
     out["firstx"] = _fromfile(fid, "float32", 1)
     fid.seek(pos + 20)
     out["lastx"] = _fromfile(fid, "float32", 1)
     fid.seek(pos + 28)
+
     out["scan_pts"] = _fromfile(fid, "uint32", 1)
     fid.seek(pos + 32)
     out["zpd"] = _fromfile(fid, "uint32", 1)
@@ -1322,33 +1262,37 @@ def _read_xheader(fid, pos):
     out["nscan"] = _fromfile(fid, "uint32", 1)
     fid.seek(pos + 52)
     out["nbkgscan"] = _fromfile(fid, "uint32", 1)
-    if out["nbkgscan"] == 0:  # then probably interferogram in rapid scan mode
-        #     out['units'] = 'V'
-        #     out['title'] = 'Volts'
-        #     out['xunits'] = 'dimensionless'
-        #     out['xtitle'] = 'Data points'
-        if out["firstx"] > out["lastx"]:  # pragma: no cover
-            out["firstx"], out["lastx"] = out["lastx"], out["firstx"]
-        out["mode"] = "rapidscan"
-    else:  # pragma: no cover
-        out["mode"] = "GC-IR or TGA-IR"
 
-    out["name"] = _readbtext(fid, pos + 938)
-    fid.seek(pos + 1002)
-    out["coll_length"] = _fromfile(fid, "float32", 1) * 60
-    fid.seek(pos + 1006)
-    out["lasty"] = _fromfile(fid, "float32", 1)
-    fid.seek(pos + 1010)
-    out["firsty"] = _fromfile(fid, "float32", 1)
-    fid.seek(pos + 1026)
-    out["ny"] = _fromfile(fid, "uint32", 1)
-    #  y unit could be at pos+1030 with 01 = minutes ?
-    return out, pos + 1026
+    if filetype == "srs":
+        if (
+            out["nbkgscan"] == 0
+        ):  # then probably interferogram in rapid scan mode (series file)
+            if out["firstx"] > out["lastx"]:
+                out["firstx"], out["lastx"] = out["lastx"], out["firstx"]
+            out["mode"] = "rapidscan"
+        else:
+            out["mode"] = "GC-IR or TGA-IR"
+
+        out["name"] = _readbtext(fid, pos + 938)
+        fid.seek(pos + 1002)
+        out["coll_length"] = _fromfile(fid, "float32", 1) * 60
+        fid.seek(pos + 1006)
+        out["lasty"] = _fromfile(fid, "float32", 1)
+        fid.seek(pos + 1010)
+        out["firsty"] = _fromfile(fid, "float32", 1)
+        fid.seek(pos + 1026)
+        out["ny"] = _fromfile(fid, "uint32", 1)
+        #  y unit could be at pos+1030 with 01 = minutes ?
+        return out, pos + 1026
+
+    else:
+        return out, pos + 52
 
 
 # ..............................................................................
 def _getintensities(fid, pos):
-    # get intensities from the 03 key
+    # get intensities from the 03 (spectrum)
+    # or 66 (sample ifg) or 67 (bg ifg) key,
     # returns a ndarray
 
     fid.seek(pos + 2)  # skip 2 bytes
