@@ -61,3 +61,9 @@ def test_mock_download_iris(mocker):
     mocker.patch("requests.get", mock.Mock(return_value=requests_response(valid=False)))
     with pytest.raises(OSError):
         scp.download_iris()
+
+
+def test_download_nist():
+    CAS = "7732-18-5"
+    ds = scp.download_nist_ir(CAS, index=1)
+    assert ds.name == "WATER"

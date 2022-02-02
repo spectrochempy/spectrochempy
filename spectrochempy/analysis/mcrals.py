@@ -15,8 +15,6 @@ __dataset_methods__ = []
 import numpy as np
 from traitlets import HasTraits, Instance, Dict, Unicode
 
-# from collections.abc import Iterable
-
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.analysis.pca import PCA
 from spectrochempy.core.dataset.npy import dot
@@ -27,84 +25,182 @@ class MCRALS(HasTraits):
     """
     Performs MCR-ALS of a dataset knowing the initial C or St matrix.
 
+    MCR-ALS (Multivariate Curve Resolution - Alternating Least Squares) resolve"s a set (or several sets) of
+    spectra X of an evolving mixture (or a set of mixtures) into the spectra St of ‘pure’ species and their
+    concentration profiles C. In terms of matrix equation:
+    .. math::`X = CS^T + E`
+    where :math:`E` is the lmatrix of residuals.
+
     Parameters
     ----------
-    dataset : |NDDataset|
-        The dataset on which to perform the MCR-ALS analysis
-    guess : |NDDataset|
-        Initial concentration or spectra
-    verbose : bool
-        If set to True, prints a summary of residuals and residuals change
-        at each iteration. default = False.
-        In any case, the same information is returned in self.logs
-    **kwargs
-        Optional keyword parameters (see Other Parameters).
+    dataset : NDDataset
+        The dataset on which to perform the MCR-ALS analysis.
 
-    Other Parameters
-    ----------------
-    tol : float, optional,  default=0.1
-        Convergence criterion on the change of resisuals.
-        (percent change of standard deviation of residuals).
+    guess : NDDataset
+        Initial concentration or spectra.
+
+    tol : float, optional, default 0.1
+        Convergence criterion on the change of residuals (percent change of standard deviation of residuals).
+
     maxit : int, optional, default=50
         Maximum number of ALS minimizations.
-    maxdiv : int, optional, default=5.
+
+    maxdiv : int, optional, default=5
         Maximum number of successive non-converging iterations.
-    nonnegConc : list or tuple, default=Default [0, 1, ...] (only
-    non-negative concentrations)
-        Index of species having non-negative concentration profiles. For
-        instance [0, 2] indicates that species
-        #0 and #2 have non-negative conc profiles while species #1 can have
-        negative concentrations.
-    unimodConc : list or tuple, Default=[0, 1, ...] (only unimodal
-    concentration profiles)
-        index of species having unimodal concentrationsprofiles.
-    closureConc : list or tuple, Default=None  (no closure)
-        Index of species subjected to a closure constraint.
-    externalConc: list or tuple, Default None (no external concentration).
-        Index of species for which a concentration profile is provided by an
-        external function.
-    getExternalConc : callable
-        An external function that will provide `n_ext` concentration profiles:
 
-        getExternalConc(C, extConc, ext_to_C_idx, *args) -> extC
+    nonnegConc : str or array of indexes, default `"all"`
+        Non negativity constraint on concentrations. If set to `'all'` (default) all concentrations profiles are
+        considered non-negative. If an array of indexes is passed, the corresponding profiles are considered
+        non-negative, not the others. For instance `[0, 2]` indicates that profile #0 and #2 are non-negative while
+         profile #1 *can* be negative. If set to `"None"` or `[]`, all profiles can be negative.
 
-        or
+    unimodConc : str or array of indexes, default `"all"`
+        Unimodality constraint on concentrations. If set to `'all'` (default) all concentrations profiles are
+        considered unimodal. If an array of indexes is passed, the corresponding profiles are considered
+        unimodal, not the others. For instance `[0, 2]` indicates that profile #0 and #2 are unimodal while
+         profile #1 *can* be multimodal. If set to `"None"` or `[]`, all profiles can be multimodal.
 
-        etExternalConc(C, extConc, ext_to_C_idx, *args) -> (extC, out2,
-        out3, ...)
+    unimodMod : str, default "strict"
+        When set to `"strict"`, values deviating from unimodality are reset to the value of the previous point.
+        When set to `"smooth"`, both values (deviating point and previous point) are modified to avoid ="steps"
+        in the concentration profile.
 
-        where C is the current concentration matrix, *args are the
-        parameters needed to completely
-        specify the function, extC is a  nadarray or NDDataset of shape (
-        C.y, n_ext), and out1, out2, ... are
-        supplementary outputs returned by the function (e.g. optimized rate
-        parameters)
-    args : tuple, optional.
-        Extra arguments passed to the external function
-    external_to_C_idx : array or tuple, Default=np.arange(next)
-        Indicates the correspondence between the indexes of external chemical
-        profiles and the columns of the C matrix. [1, None, 0] indicates
-        that the first external profile is the
-        second pure species (index 1).
-    nonnegSpec : list or tuple, Default [1, ..., 1]  (only non-negative
-    spectra)
-        Indicates species having non-negative spectra
-    unimodSpec : list or tuple, Default [0, ..., 0]  (no unimodal
-    concentration profiles)
-        Indicates species having unimodal spectra
+    unimodTol : float, default 1.1
+        Tolerance parameter for unimodality. Correction is applied only if:
+        ```C[i,j] > C[i-1,j] * unimodTol```  on the decreasing branch of profile #j,
+        ```C[i,j] < C[i-1,j] * unimodTol```  on the increasing branch of profile  #j.
+
+    monoDecConc : `None` or array of indexes
+        Monotonic decrease constraint on concentrations.  If set to `None` (default) or `[]` no constraint is applied.
+        If an array of indexes is passed, the corresponding profiles are considered do decrease monotonically, not
+         the others. For instance `[0, 2]` indicates that profile #0 and #2 are decreasing while profile #1 *can*
+         increase.
+
+    monoDecTol : float, default 1.1
+         Tolerance parameter for monotonic decrease. Correction is applied only if:
+        ```C[i,j] > C[i-1,j] * unimodTol```  along profile #j.
+
+    monoIncConc : `None` or array of indexes
+        Monotonic increase constraint on concentrations.  If set to `None` (default) or `[]` no constraint is applied.
+        If an array of indexes is passed, the corresponding profiles are considered to increase monotonically, not
+         the others. For instance `[0, 2]` indicates that profile #0 and #2 are increasing while profile #1 *can*
+         decrease.
+
+    monoIncTol : float, default 1.1
+            Tolerance parameter for monotonic decrease. Correction is applied only if:
+        ```C[i,j] < C[i-1,j] * unimodTol``` along profile  #j.
+
+    closureConc : None or array of indexes, default `None`
+        Defines the concentration profiles subjected to closure constraint. If set to `None` or `[]`, no constraint is
+        applied. If an array of indexes is passed, the corresponding profile will be constrained so that their weighted
+        sum equals the `closureTarget`.
+
+    closureTarget : str or array of float, default `"default"`
+        The value of the sum of concentrations profiles subjected to closure.  If set to `default`, the total
+        concentration is set to 1.0 for all observations. If an array is passed: the values of concentration for each
+        observation. Hence,`np.ones[X.shape[0]` would be equivalent to "default".
+
+    closureMethod : str, `"scaling"` or `"constantSum"`, default `"scaling"`
+        The method used to enforce Closure. "scaling" recompute the concentration profiles using linear algebra:
+        ```
+        C.data[:, closureConc] = np.dot(C.data[:, closureConc],
+                                        np.diag(np.linalg.lstsq(C.data[:, closureConc], closureTarget.T, rcond=None)[0]))
+        ```
+        `"constantSum"` normalize the sum of concentration profiles to `closureTarget`.
+
+    hardConc : None or or array of indexes, default `None`
+        Defines hard constraints obn the concentration profiles. If set to `None` or `[]`, no constraint is
+        applied. If an array of indexes is passed, the corresponding profiles will set by `getC` (see below).
+
+    getC : Callable
+        An external function that will provide `len(hardConc)` concentration profiles:
+        ```
+        getC(*args) -> hardC
+        ```
+        or:
+        ```
+        getC(*args) -> (hardC, out2, out3, ...)
+        ```
+        where *args are the parameters needed to completely specify the function (see , `harC` is a nadarray or NDDataset
+        of shape `(C.y, len(hardConc)`, and `out1`, `out2`, ... are supplementary outputs returned by the function.
+
+    argsGetC : tuple, optional
+        Extra arguments passed to the external function.
+
+    hardC_to_C_idx : None or list or tuple, default None
+        Indicates the correspondence between the indexes of the columns of hardC and of the C matrix. [1, None, 0]
+        indicates that the first profile in hardC (index O) corrsponds to the second profile of C (index 1).
+
+    nonnegSpec : str, list or tuple, default `"all"`
+        Indicates non-negative spectral profile. If set to `'all'` (default) all spectral profiles are
+        considered non-negative. If an array of indexes is passed, the corresponding profiles are considered
+        non-negative, not the others. For instance `[0, 2]` indicates that profile #0 and #2 are non-negative while
+         profile #1 *can* be negative. If set to `"None"` or `[]`, all profiles can be negative.
+
+    normSpec : None or str, default None
+        Defines whether the spectral profiles should be normalized. If set to `None` no normalization is applied.
+        when set to "euclid", spectra are normalized with respect to their total area, when set to "max", spectra are
+        normalized with respect to the maximum af their value.
+
+    See Also
+    --------
+    PCA
+       Performs MCR-ALS of a |NDDataset| knowing the initial C or St matrix.
+    NNMF
+       Performs a Non Negative Matrix Factorization of a |NDDataset|.
+    EFA
+       Perform an Evolving Factor Analysis (forward and reverse) of the input |NDDataset|.
+
+    Examples
+    --------
+    >>> data = scp.read("matlabdata/als2004dataset.MAT")
+    >>> X, guess = data[-1], data[3]
+    >>> mcr = scp.MCRALS(X, guess)
+    >>> mcr.St, mcr.St
+    (NDDataset: [float64] unitless (shape: (y:4, x:96)), NDDataset: [float64] unitless (shape: (y:4, x:96)))
     """
+
+    # Todo: add unimodSpec (and unimodSpecMod, ...)  : list or tuple, default `"all"`
+    #     Unimodality constraint on spectra. If set to `'all'` (default) all spectral profiles are considered unimodal,
+    #     i.e. consisting in a single peak. If an array of indexes is passed, the corresponding profiles are considered
+    #     unimodal, not the others. For instance `[0, 2]` indicates that profile #0 and #2 are unimodal while
+    #      profile #1 *can* be multimodal. If set to `"None"` or `[]`, all profiles can be multimodal.
 
     _X = Instance(NDDataset)
     _C = Instance(NDDataset, allow_none=True)
-    _extC = Instance(NDDataset, allow_none=True)
+    _fixedC = Instance(NDDataset, allow_none=True)
     _extOutput = Instance(NDDataset, allow_none=True)
     _St = Instance(NDDataset, allow_none=True)
     _logs = Unicode
     _params = Dict()
 
-    def __init__(self, dataset, guess, **kwargs):  # lgtm[py/missing-call-to-init]
+    def __init__(
+        self,
+        dataset,
+        guess,
+        tol=0.1,
+        maxit=50,
+        maxdiv=5,
+        nonnegConc="all",
+        unimodConc="all",
+        unimodTol=1.1,
+        unimodMod="strict",
+        monoDecConc=None,
+        monoIncTol=1.1,
+        monoIncConc=None,
+        monoDecTol=1.1,
+        closureConc=None,
+        closureTarget="default",
+        closureMethod="scaling",
+        hardConc=None,
+        getConc=None,
+        argsGetConc=None,
+        hardC_to_C_idx="default",
+        nonnegSpec="all",
+        normSpec=None,
+        verbose=False,
+    ):
 
-        verbose = kwargs.pop("verbose", False)
         if verbose:
             set_loglevel(INFO)
 
@@ -138,50 +234,49 @@ class MCRALS(HasTraits):
 
         ny, _ = X.shape
 
-        # makes a PCA with same number of species
+        # makes a PCA with same number of species for further comparison
         Xpca = PCA(X).reconstruct(n_pc=nspecies)
 
-        # Get optional parameters in kwargs or set them to their default
-        # ------------------------------------------------------------------------
+        # reset default text to indexes
+        # ------------------------------
 
-        # TODO: make a preference  file to set this kwargs
-        # optimization
+        if nonnegConc == "all":
+            nonnegConc = np.arange(nspecies)
+        elif nonnegConc is None:
+            nonnegConc = []
+        elif len(nonnegConc) > nspecies or max(nonnegConc + 1) > nspecies:
+            raise ValueError(
+                f"The guess has only {nspecies} species, please check nonnegConc"
+            )
 
-        tol = kwargs.get("tol", 0.1)
-        maxit = kwargs.get("maxit", 50)
-        maxdiv = kwargs.get("maxdiv", 5)
+        if unimodConc == "all":
+            unimodConc = np.arange(nspecies)
+        elif len(unimodConc) > nspecies or max(unimodConc + 1) > nspecies:
+            raise ValueError(
+                f"The guess has only {nspecies} species, please check unimodConc"
+            )
 
-        # constraints on concentrations
-        nonnegConc = kwargs.get("nonnegConc", np.arange(nspecies))
-        unimodConc = kwargs.get("unimodConc", np.arange(nspecies))
-        unimodTol = kwargs.get("unimodTol", 1.1)
-        unimodMod = kwargs.get("unimodMod", "strict")
-        closureConc = kwargs.get("closureConc", None)
-        if closureConc is not None:
-            closureTarget = kwargs.get("closureTarget", np.ones(ny))
-            closureMethod = kwargs.get("closureMethod", "scaling")
-        monoDecConc = kwargs.get("monoDecConc", None)
-        monoDecTol = kwargs.get("monoDecTol", 1.1)
-        monoIncConc = kwargs.get("monoIncConc", None)
-        monoIncTol = kwargs.get("monoIncTol", 1.1)
-        externalConc = kwargs.get("externalConc", None)
-        if externalConc is not None:
-            external_to_C_idx = kwargs.get("external_to_C_idx", np.arange(nspecies))
-        if externalConc is not None:
-            try:
-                getExternalConc = kwargs.get("getExternalConc")
-            except Exception as exc:
-                raise ValueError(
-                    "A function must be given to get the external concentration profile(s)"
-                ) from exc
-            external_to_C_idx = kwargs.get("external_to_C_idx", externalConc)
-            args = kwargs.get("args", ())
+        if closureTarget == "default":
+            closureTarget = np.ones(ny)
+        elif len(closureTarget) > ny:
+            raise ValueError(
+                f"The data contain only {ny} observations, please check closureTarget"
+            )
+
+        if hardC_to_C_idx == "default":
+            hardC_to_C_idx = np.arange(nspecies)
+        elif len(hardC_to_C_idx) > nspecies or max(hardC_to_C_idx + 1) > nspecies:
+            raise ValueError(
+                f"The guess has only {nspecies} species, please check fixedConc_to_C_idx"
+            )
 
         # constraints on spectra
-        nonnegSpec = kwargs.get("nonnegSpec", np.arange(nspecies))
-        normSpec = kwargs.get("normSpec", None)
-
-        # TODO: add unimodal constraint on spectra
+        if nonnegSpec == "all":
+            nonnegSpec = np.arange(nspecies)
+        elif len(nonnegSpec) > nspecies or max(nonnegSpec + 1) > nspecies:
+            raise ValueError(
+                f"The guess has only {nspecies} species, please check nonnegSpec"
+            )
 
         # Compute initial spectra or concentrations   (first iteration...)
         # ------------------------------------------------------------------------
@@ -208,7 +303,7 @@ class MCRALS(HasTraits):
             C.set_coordset(y=cy, x=cx)
 
         change = tol + 1
-        stdev = X.std()  # .data[0]
+        stdev = X.std()
         niter = 0
         ndiv = 0
 
@@ -297,25 +392,25 @@ class MCRALS(HasTraits):
 
             # external concentration profiles
             # ------------------------------------------
-            if externalConc is not None:
-                extOutput = getExternalConc(
+            if hardConc is not None:
+                extOutput = getConc(
                     *(
                         (
                             C,
-                            externalConc,
-                            external_to_C_idx,
+                            hardConc,
+                            hardC_to_C_idx,
                         )
-                        + args
+                        + argsGetConc
                     )
                 )
                 if isinstance(extOutput, dict):
-                    extC = extOutput["concentrations"]
-                    args = extOutput["new_args"]
+                    fixedC = extOutput["concentrations"]
+                    argsGetConc = extOutput["new_args"]
                 else:
-                    extC = extOutput
-                if type(extC) is NDDataset:
-                    extC = extC.data
-                C.data[:, externalConc] = extC[:, external_to_C_idx]
+                    fixedC = extOutput
+                if type(fixedC) is NDDataset:
+                    extC = fixedC.data
+                C.data[:, hardConc] = fixedC[:, hardC_to_C_idx]
 
             # stores C in C_hard
             Chard = C.copy()
@@ -332,7 +427,7 @@ class MCRALS(HasTraits):
                 St.data[nonnegSpec, :] = St.data[nonnegSpec, :].clip(min=0)
 
             # recompute C for consistency(soft modeling)
-            C.data = np.linalg.lstsq(St.data.T, X.data.T, rcond=None)[0].T
+            C.data = np.linalg.lstsq(St.data.T, X.data.T)[0].T
 
             # rescale spectra & concentrations
             if normSpec == "max":
@@ -341,6 +436,7 @@ class MCRALS(HasTraits):
                 C.data = C.data * alpha.T
             elif normSpec == "euclid":
                 alpha = np.linalg.norm(St.data, axis=1).reshape(nspecies, 1)
+                print(alpha)
                 St.data = St.data / alpha
                 C.data = C.data * alpha.T
 
@@ -351,9 +447,7 @@ class MCRALS(HasTraits):
             change = 100 * (stdev2 - stdev) / stdev
             stdev = stdev2
 
-            stdev_PCA = (
-                X_hat - Xpca.data
-            ).std()  # TODO: Check PCA : values are different from the Arnaud version ?
+            stdev_PCA = (X_hat - Xpca.data).std()  #
 
             logentry = "{:3d}      {:10f}      {:10f}      {:10f}".format(
                 niter, stdev_PCA, stdev2, change
@@ -390,14 +484,36 @@ class MCRALS(HasTraits):
                 info_(logline)
 
         self._X = X
-        self._params = kwargs
+        self._params = {
+            "tol": tol,
+            "maxit": maxit,
+            "maxdiv": maxdiv,
+            "nonnegConc": nonnegConc,
+            "unimodConc": unimodConc,
+            "unimodTol": unimodTol,
+            "unimodMod": unimodMod,
+            "closureConc": closureConc,
+            "closureTarget ": closureTarget,
+            "closureMethod": closureMethod,
+            "monoDecConc": monoDecConc,
+            "monoDecTol": monoDecTol,
+            "monoIncConc": monoIncConc,
+            "monoIncTol": monoIncTol,
+            "hardConc": hardConc,
+            "getConc": getConc,
+            "argsGetConc": argsGetConc,
+            "hardC_to_C_idx": hardC_to_C_idx,
+            "nonnegSpec": nonnegSpec,
+            "normSpec": normSpec,
+            "verbose": verbose,
+        }
 
         self._C = C
-        if externalConc is not None:
-            self._extC = extC
+        if hardConc is not None:
+            self._fixedC = extC
             self._extOutput = extOutput
         else:
-            self._extC = None
+            self._fixedC = None
             self._extOutput = None
 
         self._St = St
@@ -414,11 +530,11 @@ class MCRALS(HasTraits):
         return self._X
 
     @property
-    def extC(self):
+    def fixedC(self):
         """
         The last concentration profiles including external profiles.
         """
-        return self._extC
+        return self._fixedC
 
     @property
     def extOutput(self):
@@ -494,6 +610,11 @@ class MCRALS(HasTraits):
     def plotmerit(self, **kwargs):
         """
         Plots the input dataset, reconstructed dataset and residuals.
+
+        Parameters
+        ----------
+        **kwargs
+            optional "colors" argument: tuple or array of 3 colors for :math:`X`, :math:`\hat X` and :math:`E`.
 
         Returns
         -------
