@@ -717,16 +717,14 @@ def _read_spg(*args, **kwargs):
 
     dataset.set_coordset(y=_y, x=_x)
 
-    # Set origin and description
-    dataset.origin = "omnic"
+    # Set description, date and history
+    # Omnic spg file don't have specific "origin" field stating the oirigin of the data
     dataset.description = kwargs.get(
         "description", f"Omnic title: {spg_title}\nOmnic " f"filename: {filename}"
     )
 
-    # Set the NDDataset date
     dataset._date = datetime.now(timezone.utc)
 
-    # Set origin, description and history
     dataset.history = str(dataset.date) + ":imported from spg file {} ; ".format(
         filename
     )
@@ -752,9 +750,8 @@ def _read_spa(*args, **kwargs):
 
     # Read title:
     # The file title  starts at position hex 1e = decimal 30. Its max length
-    # is 256 bytes. It is the original
-    # filename under which the group has  been saved: it won't match with
-    # the actual filename if a subsequent
+    # is 256 bytes. It is the original filename under which the spectrum has
+    # been saved: it won't match with the actual filename if a subsequent
     # renaming has been done in the OS.
 
     spa_title = _readbtext(fid, 30)
@@ -777,7 +774,7 @@ def _read_spa(*args, **kwargs):
     timestamp = acqdate.timestamp()
 
     # From hex 120 = decimal 304, the spectrum is described
-    # by blocks of lines starting with "key values",
+    # by a block of lines starting with "key values",
     # for instance hex[02 6a 6b 69 1b 03 82] -> dec[02 106  107 105 27 03 130]
     # Each of these lines provides positions of data and metadata in the file:
     #
@@ -786,17 +783,22 @@ def _read_spa(*args, **kwargs):
     #     key: hex 03, dec  03: intensity position
     #     key: hex 04, dec  04: user text position
     #     key: hex 1B, dec  27: position of History text
-    #     key: hex 66  dec 102: sample inferogram
-    #     key: hex 67  dec 103: background inferogram
+    #     key: hex 64, dec 100: ?
+    #     key: hex 66  dec 102: sample interferogram
+    #     key: hex 67  dec 103: background interferogram
     #     key: hex 69, dec 105: ?
     #     key: hex 6a, dec 106: ?
     #     key: hex 80, dec 128: ?
     #     key: hex 82, dec 130: rotation angle
+    #
+    # Teh line preceding the block start with '01'
+    # The lines after the block generally start with '00', except in few cases
+    # - the lineds after the bloch start by '01'. In such cases, the '53' key is also present
+    # (before the '1B'.
 
-    gotinfos = [False, False, False]  # spectral header, intensity, history
     # scan "key values"
     pos = 304
-    while not (all(gotinfos)):
+    while "continue":
         fid.seek(pos)
         key = _fromfile(fid, dtype="uint8", count=1)
         if key == 2:
@@ -808,20 +810,17 @@ def _read_spa(*args, **kwargs):
             xtitle = info02["xtitle"]
             units = info02["units"]
             title = info02["title"]
-            gotinfos[0] = True
 
         elif key == 3:
             intensities = _getintensities(fid, pos)
-            gotinfos[1] = True
 
         elif key == 27:
             fid.seek(pos + 2)
             history_pos = _fromfile(fid, "uint32", 1)
             # read history
-            history = _readbtext(fid, history_pos)
-            gotinfos[2] = True
+            spa_history = _readbtext(fid, history_pos)
 
-        elif not key:  # pragma: no cover
+        elif key == 00 or key == 1:
             break
 
         pos += 16
@@ -830,6 +829,9 @@ def _read_spa(*args, **kwargs):
 
     # load spectral content into the  NDDataset
     dataset.data = np.array(intensities[np.newaxis], dtype="float32")
+    dataset.mask = np.isnan(
+        dataset.data
+    )  # when a part of the spectrum has bveen  blanked
     dataset.units = units
     dataset.title = title
     dataset.name = filename.stem
@@ -852,12 +854,18 @@ def _read_spa(*args, **kwargs):
     dataset.set_coordset(y=_y, x=_x)
 
     # Set origin, description, history, date
-    dataset.origin = "omnic"
+    # Omnic spg file don't have specific "origin" field stating the oirigin of the data
+
     dataset.description = kwargs.get(
         "description", f"Omnic title: {spa_title}\nOmnic " f"filename: {filename.name}"
     )
-    dataset.history = str(datetime.now(timezone.utc)) + ":imported from spa files"
-    dataset.history = history
+    if "spa_history" in locals():
+        dataset.history = (
+            "Omnic 'DATA PROCESSING HISTORY' : \n----------------------------------\n"
+            + spa_history
+        )
+    dataset.history = str(datetime.now(timezone.utc)) + ":imported from spa file(s)"
+
     dataset._date = datetime.now(timezone.utc)
 
     if dataset.x.units is None and dataset.x.title == "data points":
@@ -903,8 +911,7 @@ def _read_srs(*args, **kwargs):
     data = np.zeros((info["ny"], info["nx"]))
 
     # find the position of the background and of the first interferogram
-    # based on
-    # empirical "fingerprints".
+    # based on empirical "fingerprints".
 
     while not found:
         pos += 16
@@ -1067,7 +1074,6 @@ def _read_srs(*args, **kwargs):
     # X.set_coordset(x=_x)
     # X.name = '?'
     # X.title = '?'
-    # X.origin = 'omnic'
     # X.description = 'unknown'
     # X.history = str(datetime.now(timezone.utc)) + ':imported from srs
 

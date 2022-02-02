@@ -355,7 +355,7 @@ def _read_jdx(*args, **kwargs):
         if len(origins) == 0:
             pass
         elif len(origins) == 1:
-            dataset.origin = origins[0]
+            dataset.origin = allorigins[0]
         else:
             dataset.origin = [(origin + "; ") for origin in set(allorigins)][0][:-2]
 
