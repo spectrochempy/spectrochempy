@@ -396,7 +396,7 @@ class IRIS:
                     try:
                         G = G0 + 2 * reg_par * S
                         fi[:, j] = quadprog.solve_qp(G, a[j].squeeze(), C, b)[0]
-                    except ValueError:
+                    except ValueError:  # pragma: no cover
                         msg = f"Warning:G is not positive definite for log10(lambda)={np.log10(reg_par):.2f} at {channel:.2f} {channels.units}, find nearest PD matrix"
                         warning_(msg)
                         _log += msg
@@ -748,7 +748,7 @@ def _Smat(q):
     return S
 
 
-def _nearestPD(A, shift):
+def _nearestPD(A, shift):  # pragma: no cover
     """
     Find the nearest positive-definite matrix to input.
 
@@ -796,7 +796,7 @@ def _nearestPD(A, shift):
     return A3
 
 
-def _isPD(B):
+def _isPD(B):  # pragma: no cover
     """
     Return True when input is positive-definite.
 

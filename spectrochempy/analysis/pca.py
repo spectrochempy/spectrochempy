@@ -64,7 +64,16 @@ class PCA(HasTraits):
         X / \\sigma`.
     scaled : bool, optional, default:False
         If True the data are scaled in the interval [0-1]: :math:`X' = (X -
-        min(X)) / (max(X)-min(X))`
+        min(X)) / (max(X)-min(X))`.
+
+    See Also
+    --------
+    EFA
+       Perform an Evolving Factor Analysis (forward and reverse) of the input |NDDataset|.
+    NNMF
+       Performs a Non Negative Matrix Factorization of a |NDDataset|.
+    MCRALS
+       Performs MCR-ALS of a |NDDataset| knowing the initial C or St matrix.
     """
 
     _LT = Instance(NDDataset)
@@ -335,8 +344,7 @@ class PCA(HasTraits):
 
     def reconstruct(self, n_pc=None):
         """
-        Transform data back to the original space using the given number of
-        PC's.
+        Transform data back to the original space using `n_pc` PC's.
 
         The following matrice operation is performed : :math:`X' = S'.L'^T`
         where S'=S[:, n_pc] and L=L[:, n_pc].
@@ -348,7 +356,7 @@ class PCA(HasTraits):
 
         Returns
         -------
-        X_reconstructed : |NDDataset|
+        |NDDataset|
             The reconstructed dataset based on n_pc principal components.
         """
 
@@ -376,7 +384,9 @@ class PCA(HasTraits):
 
     def printev(self, n_pc=None):
         """
-        Prints figures of merit : eigenvalues and explained variance for the first n_pc PS's.
+        Print PCA figures of merit.
+
+        Prints eigenvalues and explained variance for all or first n_pc PC's.
 
         Parameters
         ----------
@@ -392,10 +402,23 @@ class PCA(HasTraits):
         """
         Scree plot of explained variance + cumulative variance by PCA.
 
+        Explained variance by each PC is plot as a bar graph (left y axis)
+        and cumulative explained variance is plot as a scatter plot with lines
+        (right y axis).
+
         Parameters
         ----------
         n_pc : int
             Number of components to plot.
+
+        **kwargs
+            Extra arguments: `colors` (default: `[NBlue, NRed]`) to set the colors
+            of the bar plot and scatter plot; `ylims` (default `[(0, 100), "auto"]`).
+
+        Returns
+        -------
+            list of axes
+                The list of axes.
         """
         # get n_pc (automatic or determined by the n_pc arguments) - min = 3
         n_pc = max(self._get_n_pc(n_pc), 3)

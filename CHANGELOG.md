@@ -38,9 +38,15 @@ https://github.com/spectrochempy/spectrochempy/issues/97#issuecomment-639590022)
 ### version 0.3.2
 #### NEW FEATURES
 
+* add `download_nist_ir()` to download IR spectra from NIST/webbook
+
+* `read_spa()` now allows extracting sample and background interferograms
+
 * Add a log file (rotating)
 
 #### BUGS FIXED
+
+* fix gettingstarted/overview.py after IRIS refactoring
 
 * TQDM progress bar
 

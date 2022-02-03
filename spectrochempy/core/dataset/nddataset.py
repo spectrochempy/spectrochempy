@@ -108,8 +108,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         this order.
     name : str, optional
         A user friendly name for this object. If not given, the automatic
-        `id` given at the object creation will be
-        used as a name.
+        `id` given at the object creation will be used as a name.
     labels : array of objects, optional
         Labels for the `data`. labels can be used only for 1D-datasets.
         The labels array may have an additional dimension, meaning several
@@ -134,9 +133,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         `pint <https://pint.readthedocs.org/>`_
         package.
     long_name : str, optional
-        The long_name of the dimension. It will later be used for instance for
-        labelling plots of the data.
-        It is optional but recommended to give a long_name to each ndarray.
+        The long_name of the data dimension. The `long_name` attribute should not be confused with the `name`.
+        The `long_name` attribute is used for instance for labelling plots of the data.
+        It is optional but recommended to give a long_name to each ndarray data.
     dlabel :  str, optional
         Alias of `long_name`.
     meta : dict-like object, optional
@@ -146,8 +145,13 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         Name(s) of the author(s) of this dataset. BNy default, name of the
         computer note where this dataset is
         created.
-    description : str, optional
-        A optional description of the nd-dataset. A shorter alias is `desc`.
+    comment : str, optional
+        An optional description of the nd-dataset.
+    source : str, optional
+        Origin of the data: Name of organization, address, telephone number,
+        name of individual contributor, etc., as appropriate.
+    roi : list
+        Region of interest (ROI) limits
     history : str, optional
         A string to add to the object history.
     copy : bool, optional
@@ -162,8 +166,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     Notes
     -----
     The underlying array in a |NDDataset| object can be accessed through the
-    `data` attribute, which will return
-    a conventional |ndarray|.
+    `data` attribute, which will return a conventional |ndarray|.
 
     Examples
     --------

@@ -155,7 +155,6 @@ ds.y = scp.Coord(pressure, title="Pressure", units="torr")
 _ = ds.plot(colormap="magma")
 
 # %% jupyter={"source_hidden": true} pycharm={"name": "#%%\n"}
-param = {"epsRange": [-8, -1, 50], "lambdaRange": [-10, 1, 12], "kernel": "langmuir"}
 
-iris = scp.IRIS(ds, param, verbose=False)
+iris = scp.IRIS(ds, "langmuir", q=[-8, -1, 50], reg_par=[-10, 1, 12])
 _ = iris.plotdistribution(-7, colormap="magma")

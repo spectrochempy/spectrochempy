@@ -15,7 +15,7 @@
 
 import pytest
 
-pytestmark = pytest.mark.skip(reason="check when building docs in CI")
+# pytestmark = pytest.mark.skip(reason="check when building docs in CI")
 
 from pathlib import Path
 

@@ -158,7 +158,14 @@ def _read_jdx(*args, **kwargs):
     # ..........................................................................
     xaxis = np.array([])
     data = np.array([])
-    alllong_names, alltimestamps, alldates, xunits, yunits = [], [], [], [], []
+    alllong_names, alltimestamps, alldates, xunits, yunits, allsources = (
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+    )
     nx, firstx, lastx = (
         np.zeros(nspec, "int"),
         np.zeros(nspec, "float"),
@@ -179,8 +186,10 @@ def _read_jdx(*args, **kwargs):
         # Read JDX file for spectrum n° i
         while keyword != "##END":
             keyword, text = _readl(fid)
-            if keyword in ["##ORIGIN", "##OWNER", "##JCAMP-DX"]:
+            if keyword in ["##OWNER", "##JCAMP-DX"]:
                 continue
+            elif keyword == "##ORIGIN":
+                allsources.append(text)
             elif keyword == "##TITLE":
                 # Add the long_name of the spectrum in the list alllong_names
                 alllong_names.append(text)
@@ -334,13 +343,22 @@ def _read_jdx(*args, **kwargs):
     dataset.set_coordset(y=_y, x=_x)
 
     # Set origin, description and history
-    dataset.source = "omnic"
-    dataset.comment = "Dataset from jdx: '{0}'".format(jdx_long_name)
+    if nspec > 1:
+        sources = set(allsources)
+        if len(sources) == 0:
+            pass
+        elif len(sources) == 1:
+            dataset.source = allsources[0]
+        else:
+            dataset.source = [(source + "; ") for source in set(allsources)][0][:-2]
+
+    dataset.comment = "Dataset from jdx file: '{0}'".format(jdx_long_name)
+
     dataset.history = f"{np.datetime64('now')}: imported from jdx file"
 
-    if sortbydate:
+    if sortbydate and nspec > 1:
         dataset.sort(dim="x", inplace=True)
-        dataset.history = f"{np.datetime64('now')}: sorted by date\n"
+        dataset.history = f"{np.datetime64('now')}: sorted by date"
     # Todo: make sure that the lowest index correspond to the largest wavenumber
     #  for compatibility with dataset created by read_omnic:
 
