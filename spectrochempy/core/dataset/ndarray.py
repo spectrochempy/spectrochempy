@@ -2162,23 +2162,23 @@ class NDArray(HasTraits):
             return self._data.size
 
     # ..........................................................................
-    def squeeze(self, *dims, inplace=False, keepdims=(), **kwargs):
+    def squeeze(self, dims, inplace=False, keepdims=(), **kwargs):
         """
         Remove single-dimensional entries from the shape of an array.
 
         Parameters
         ----------
-        *dims : None or int or tuple of ints, optional
+        dims : None or int or tuple of ints, optional
             Selects a subset of the single-dimensional entries in the
             shape. If a dimension (dim) is selected with shape entry greater than
             one, an error is raised.
         inplace : bool, optional, default=`False`
             Keyword parameters to say that the method return a new object (default)
-            or not (inplace=True).
+            or not (`inplace=True`).
         keepdims : None or int or tuple of ints, optional
             Selects a subset of the single-dimensional entries in the
             shape which remains preserved even if hey are of size 1.
-            Used only if the *dims are None.
+            Used only if the `*dims` are None.
         **kwargs
             Optional keyword parameters. See Other Parameters.
 
@@ -2202,12 +2202,37 @@ class NDArray(HasTraits):
         ValueError
             If `dims` is not `None`, and the dimension being squeezed is not
             of length 1.
+
+        Notes
+        -----
+        * `keepdims` parameter added in version 0.4
+        * argument axis of the numpy function can be used as a keyword giving
+          full compatibility with the numpy behavior.
+
+        Examples
+        --------
+
+        # without arguments
+        >>> nd = scp.ones((1, 3, 1, 2))
+        >>> nd
+        NDDataset: [float64] unitless (shape: (u:1, z:3, y:1, x:2))
+
+        # numpy function applied to dataset
+        >>> np.squeeze(nd)
+        NDDataset: [float64] unitless (shape: (z:3, x:2))
+
+        >>> np.squeeze(nd, axis=2)
+        NDDataset: [float64] unitless (shape: (u:1, z:3, x:2))
+
+        >>>
+
+
         """
         new = self if inplace else self.copy()
 
         # debug_(dims, keepdims)
 
-        dims = self._get_dims_from_args(*dims, **kwargs)
+        dims = self._get_dims_from_args(dims, **kwargs)
         axes = self._get_dims_index(dims)
         axes = axes if axes is not None else ()
         axes = axes if is_sequence(axes) and axes is not None else axes

@@ -318,7 +318,7 @@ def plot_1D(dataset, method=None, **kwargs):
     # ---------------------------------------------------------------
 
     new = dataset  # .copy()
-    new = new.squeeze(keepdims="x")
+    new = new.squeeze(keepdims="x")  # Added Version 0.4
 
     # is that a plot with twin axis
     is_twinx = kwargs.get("twinx", None) is not None

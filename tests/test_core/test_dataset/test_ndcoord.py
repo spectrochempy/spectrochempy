@@ -462,7 +462,6 @@ NOTIMPL = [
     "sum",
     "swapdims",
     "swapaxes",
-    "squeeze",
     "random",
     "empty",
     "empty_like",

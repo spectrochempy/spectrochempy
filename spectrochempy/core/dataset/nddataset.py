@@ -964,13 +964,13 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         return new
 
     # ..........................................................................
-    def squeeze(self, *dims, inplace=False, keepdims=()):
+    def squeeze(self, dims=None, inplace=False, keepdims=(), **kwargs):
         """
         Remove single-dimensional entries from the shape of a NDDataset.
 
         Parameters
         ----------
-        *dims : None or int or tuple of ints, optional
+        dims : None or int or tuple of ints, optional
             Selects a subset of the single-dimensional entries in the
             shape. If a dimension (dim) is selected with shape entry greater than
             one, an error is raised.
@@ -999,7 +999,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         # squeeze the data and determine which axis must be squeezed
         new, axes = super().squeeze(
-            *dims, inplace=inplace, keepdims=keepdims, return_axis=True
+            dims, inplace=inplace, keepdims=keepdims, return_axis=True, **kwargs
         )
 
         if axes is not None and new._coordset is not None:
@@ -1035,7 +1035,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         # TODO : expand dims
         raise NotImplementedError
 
-    # ..........................................................................
     def swapdims(self, dim1, dim2, inplace=False):
         """
         Interchange two dimensions of a NDDataset.
