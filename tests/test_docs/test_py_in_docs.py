@@ -20,11 +20,9 @@ import pytest
 
 from pathlib import Path
 
-path = Path.cwd()
+repo = Path(__file__).parent.parent.parent
 
-scripts = list(
-    (path.parent.parent / "docs" / "gettingstarted" / "examples").glob("**/*.py")
-)
+scripts = list((repo / "docs" / "gettingstarted" / "examples").glob("**/*.py"))
 for item in scripts[:]:
     if "checkpoints" in str(item):
         scripts.remove(item)
