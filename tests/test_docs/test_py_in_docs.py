@@ -19,8 +19,8 @@ import pytest
 # Uncomment to avoid these long tests which are also done in docs
 # pytestmark = pytest.mark.skip(reason="check when building docs in CI")
 pytestmark = pytest.mark.skipif(
-    "sys.platform" == "win32" or sys.version_info < (3, 9), 
-    reason="1) Does not work on windows, 2) Execute this long run only one time on github workflow"
+    "sys.platform" == "win32" or sys.version_info < (3, 9),
+    reason="1) Does not work on windows, 2) Execute this long run only one time on github workflow",
 )
 
 from pathlib import Path
