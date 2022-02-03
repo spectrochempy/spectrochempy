@@ -240,7 +240,9 @@ class MCRALS(HasTraits):
             nonnegConc = np.arange(nspecies)
         elif nonnegConc is None:  # pragma: no cover
             nonnegConc = []
-        elif len(nonnegConc) > nspecies or max(nonnegConc + 1) > nspecies:
+        elif (
+            len(nonnegConc) > nspecies or max(nonnegConc + 1) > nspecies
+        ):  # pragma: no cover
             raise ValueError(
                 f"The guess has only {nspecies} species, please check nonnegConc"
             )

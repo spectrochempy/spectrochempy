@@ -6,8 +6,11 @@ import os
 import numpy as np
 
 from spectrochempy.core.dataset.nddataset import NDDataset, Coord
+from spectrochempy import dot
 from spectrochempy.analysis.efa import EFA
 from spectrochempy.analysis.mcrals import MCRALS
+
+
 from spectrochempy.analysis.models import (
     lorentzianmodel,
     gaussianmodel,
@@ -91,17 +94,73 @@ def test_MCRALS_synth():
     """Test with synthetic data"""
 
     n_PS = 5  # number of pure species
-    time_c = Coord(np.arange(0, 100, 1), title="time", units="s")
-    pressure_c = Coord(np.arange(0, 1, 0.01), title="relative pressure")
+    h = [1, 0.5, 2, 4, 1]
+    c = [250, 300, 500, 750, 900]
+    w = [100, 300, 50, 100, 50]
+    noise = [0.02, 0.01, 0.02, 0.01, 0.01]
 
-    def langmuir(K, P):
-        return K * P / (1 + K * P)
+    c0 = [10, 1, 5, 3, 2]
+    l = np.array([-1, 1, -1, 1, -2]) * 1e-2
 
-    y = Coord(np.arange(0, 100, 1), title="time", units="s")
-    x = Coord(np.arange(0, 1000, 1), title="wavelength", units="nm")
-    s = Coord(
-        range(0, n_PS), title="PS#", labels=["PS#" + str(i) for i in range(0, n_PS)]
+    t_c = Coord(np.arange(0, 100, 1), title="time", units="s")
+    wl_c = Coord(np.arange(0, 1000, 1), title="wavelength", units="nm")
+    PS_c = Coord(
+        range(5),
+        title="species",
+        units=None,
+        labels=["PS#" + str(i) for i in range(n_PS)],
     )
+
+    def gaussian(x, h, c, w, noise):
+        return h * (np.exp(-1 / 2 * ((x.data - c) / w) ** 2)) + noise * np.random.randn(
+            len(x)
+        )  # a gaussian with added noise
+
+    def expon(t, c0, l, noise):
+        return c0 * (np.exp(l * t.data) + noise * np.random.randn(len(t.data)))
+
+    St = NDDataset.zeros((n_PS, len(wl_c)), coordset=(PS_c, wl_c))
+    C = NDDataset.zeros((len(t_c), n_PS), coordset=(t_c, PS_c))
+
+    for i in range(n_PS):
+        C.data[:, i] = expon(t_c, c0[i], l[i], 0)
+        St.data[i, :] = gaussian(wl_c, h[i], c[i], w[i], noise[i])
+
+    C.T.plot()
+    St.plot()
+
+    D = dot(C, St)
+    D.title = "intensity"
+    D.plot()
+
+    guess = EFA(D).get_conc(2)
+    guess.T.plot(title="EFA guess")
+
+    mcr2 = MCRALS(
+        D,
+        guess,
+        normSpec="euclid",
+        monoDecConc=[0],
+        monoIncConc=[1],
+        closureConc=[0, 1],
+    )
+    assert "converged !" in mcr2.logs[-15:]
+
+    mcr2 = MCRALS(
+        D,
+        guess,
+        monoDecConc=[0],
+        monoIncConc=[1],
+        closureConc=[0, 1],
+        closureMethod="constantSum",
+    )
+    assert "converged !" in mcr2.logs[-15:]
+
+    mcr2.C.T.plot()
+    mcr2.St.plot()
+    mcr2.plotmerit()
+
+    show()
 
 
 # =============================================================================
