@@ -13,8 +13,11 @@ Usage::
     $ scripts/validate_docstrings.py
     $ scripts/scripts/validate_docstrings.py spectrochempy.NDDataset.read
 
-Copied and modified from https://github.com/pandas-dev/pandas/scripts/validate_docstrings.py (BSD 3-Clause License)
+Copied and modified from
+https://github.com/pandas-dev/pandas/scripts/validate_docstrings.py (BSD 3-Clause
+License)
 """
+
 import argparse
 import doctest
 import glob

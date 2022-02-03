@@ -1,9 +1,12 @@
 #  -*- coding: utf-8 -*-
+
+#  =====================================================================================
+#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
+#  See full LICENSE agreement in the root directory.
+#  =====================================================================================
+
 #
-#  =====================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-#  =====================================================================================================================
 #
 # author: Guillaume Clet (LCS)
 #
@@ -171,13 +174,13 @@ def _read_txt(*args, **kwargs):
     acq = np.timedelta64(meta.get("Acq. time (s)", meta.Exposition), "s")
     accu = int(meta.get("Accumulations", meta.Accumulation))
 
-    # delay between spectra (quite approximative as the delay,a cq etc
+    # delay between spectra (quite approximative as the delay,acq etc...
     # are int number representing second) - And this assume that the
     # acquisition of the spectra was very regular but it is not!)
     delayspectra = acq * accu + delay
 
     # populate the dataset
-    if rawdata.shape[1] == 2:  # singlz dimension case
+    if rawdata.shape[1] == 2:  # single dimension case
         data = rawdata[:, 1][np.newaxis]
         xdata = rawdata[:, 0]
         ydata = np.array([0]).astype("timedelta64[us]")

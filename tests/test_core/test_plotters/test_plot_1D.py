@@ -1,10 +1,18 @@
 # -*- coding: utf-8 -*-
+
+#  =====================================================================================
+#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
+#  See full LICENSE agreement in the root directory.
+#  =====================================================================================
+
 # flake8: noqa
 
 import os
 
 from spectrochempy import NDDataset
 from spectrochempy.utils import show
+from spectrochempy.utils.testing import assert_array_equal
 
 # TODO: from spectrochempy.utils.testing import figures_dir, same_images
 
@@ -17,10 +25,12 @@ def test_plot_1D():
     dataset = NDDataset.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
 
     # get first 1D spectrum
-    nd0 = dataset[0, 1550.0:1600.0]
+    nd0 = dataset[0, 1550.0:2000.0]
 
     # plot generic 1D
-    nd0.plot()
+    ax = nd0.plot()
+    assert_array_equal(ax.lines[0].get_ydata(), nd0.data.squeeze())
+
     nd0.plot_scatter(plottitle=True)
     nd0.plot_scatter(marker="^", markevery=10, title="scatter+marker")
     prefs = nd0.preferences
@@ -32,9 +42,10 @@ def test_plot_1D():
 
     # plot 1D column
     col = dataset[:, 3500.0]  # note the indexing using wavenumber!
-    _ = col.plot_scatter()
+    _ = col.plot_scatter()  # Note that is want a 1D we must
 
-    _ = col.plot_scatter(uselabel=True)
+    # _ = col.plot_scatter(uselabel=True)
+    show()
 
 
 def test_issue_375():

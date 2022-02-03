@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-# flake8: noqa
-# ======================================================================================================================
+#  =====================================================================================
 #  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
-# ======================================================================================================================
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
+#  See full LICENSE agreement in the root directory.
+#  =====================================================================================
 """
 MCR-ALS optimization example (original example from Jaumot)
 ===========================================================
@@ -23,15 +23,15 @@ For the user convenience, this dataset is present in the `datadir` of SpectroChe
 """
 import spectrochempy as scp
 
-########################################################################################################################
+########################################################################################
 # Load the dataset
 datasets = scp.read_matlab("matlabdata/als2004dataset.MAT")
 
-########################################################################################################################
+########################################################################################
 # As the .mat file contains 6 matrices, 6 NDDataset objects are returned:
 print("\n NDDataset names: " + str([ds.name for ds in datasets]))
 
-########################################################################################################################
+########################################################################################
 # We are interested in the last dataset ('m1') that contains a single HPLS-DAD run (51x96)  dataset.
 # As usual, the 51 rows correspond to the 'time axis' of the HPLC run, and the 96 columns to the 'wavelength' axis
 # of the UV spectra. The original dataset does not contain information as to the actual time and wavelength coordinates.
@@ -43,18 +43,18 @@ print("\n NDDataset names: " + str([ds.name for ds in datasets]))
 X = datasets[-1]
 guess = datasets[3]
 
-########################################################################################################################
+########################################################################################
 # Create a MCR-ALS object with the default settings
 # The verbose option can be set True to get a summary of optimization steps
 mcr = scp.MCRALS(X, guess, verbose=False)
 
-########################################################################################################################
+########################################################################################
 # The optimization has converged. We can get the concentration (C) and pure spectra profiles (St)
 # and plot them
 _ = mcr.C.T.plot()
 _ = mcr.St.plot()
 
-########################################################################################################################
+########################################################################################
 # Finally, plots the reconstructed dataset  (X_hat = C St) vs original dataset (X)
 # and residuals. The fit is good and comparable with the original paper.
 X_hat = mcr.plotmerit()

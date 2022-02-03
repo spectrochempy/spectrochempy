@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
-# ======================================================================================================================
+#  =====================================================================================
 #  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory.
-# ======================================================================================================================
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
+#  See full LICENSE agreement in the root directory.
+#  =====================================================================================
 """
 Module containing 1D plotting function(s).
 """
@@ -80,7 +81,8 @@ linewidth or lw : float, optional, default: auto
 linestyle or ls : str, optional, default: auto
     line style definition.
 marker, m: str, optional, default: auto
-    marker type for scatter plot. If marker != "" then the scatter type of plot is chosen automatically.
+    marker type for scatter plot. If marker != "" then the scatter type of plot
+    is chosen automatically.
 markeredgecolor or mec: color, optional
 markeredgewidth or mew: float, optional
 markerfacecolor or mfc: color, optional
@@ -263,8 +265,8 @@ def plot_1D(dataset, method=None, **kwargs):
         Source of data to plot.
     method : str, optional, default: dataset.preference.method_1D
         The method can be one among ``pen``, ``bar``, ``scatter`` or ``scatter+pen``.
-        Default values is ``pen``, i.e., solid lines are drawn. This default can be changed
-        using ``dataset.preference.method_1D``.
+        Default values is ``pen``, i.e., solid lines are drawn. This default can be
+        changed using ``dataset.preference.method_1D``.
         To draw a Bar graph, use method ``bar``.
         For a Scatter plot, use method ``scatter``.
         For pen and scatter simultaneously, use method ``scatter+pen``.
@@ -316,9 +318,7 @@ def plot_1D(dataset, method=None, **kwargs):
     # ---------------------------------------------------------------
 
     new = dataset  # .copy()
-    if new.size > 1:
-        # don't apply to array of size one to preserve the x coordinate!!!!
-        new = new.squeeze()
+    new = new.squeeze(keepdims="x")
 
     # is that a plot with twin axis
     is_twinx = kwargs.get("twinx", None) is not None
@@ -430,6 +430,7 @@ def plot_1D(dataset, method=None, **kwargs):
             markeredgecolor=markeredgecolor,
             label=label,
         )
+
     elif scatter:
         (line,) = ax.plot(
             xdata,
@@ -455,6 +456,7 @@ def plot_1D(dataset, method=None, **kwargs):
             align="center",
             label=label,
         )  # barwidth = line[0].get_width()
+
     else:
         raise ValueError("label not valid")
 
