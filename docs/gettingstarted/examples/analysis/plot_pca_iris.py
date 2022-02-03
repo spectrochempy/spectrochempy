@@ -57,7 +57,7 @@ _ = pca.scoreplot(1, 2, color_mapping="labels")
 
 ########################################################################################################################
 # The second one - in 3D for the 3 first PC's - indicates that a thid PC won't allow better distinguishing versicolor
-# from viginica. 
+# from viginica.
 ax = pca.scoreplot(1, 2, 3, color_mapping="labels")
 ax.view_init(10, 75)
 
