@@ -36,9 +36,9 @@ from spectrochempy.utils import (
 from spectrochempy.optional import import_optional_dependency
 
 
-# ======================================================================================================================
+# ======================================================================================
 # NDDataset class definition
-# ======================================================================================================================
+# ======================================================================================
 
 
 class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
@@ -553,7 +553,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     # ------------------------------------------------------------------------
     # TODO: refactor the spectrochempy preference system to have a common basis
 
-    # ...........................................................................................................
+    # ..................................................................................
     @property
     def state(self):
         # state of the controller window for this dataset
@@ -964,7 +964,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         return new
 
     # ..........................................................................
-    def squeeze(self, *dims, inplace=False, keepdims=None):
+    def squeeze(self, *dims, inplace=False, keepdims=()):
         """
         Remove single-dimensional entries from the shape of a NDDataset.
 
@@ -1351,9 +1351,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         new.set_coordset(coordset)
 
 
-# ======================================================================================================================
+# ======================================================================================
 # module function
-# ======================================================================================================================
+# ======================================================================================
 
 # make some NDDataset operation accessible from the spectrochempy API
 thismodule = sys.modules[__name__]
@@ -1392,9 +1392,9 @@ for funcname in api_funcs:
 load = NDDataset.load
 __all__ += ["load"]
 
-# ======================================================================================================================
+# ======================================================================================
 # Set the operators
-# ======================================================================================================================
+# ======================================================================================
 
 _set_operators(NDDataset, priority=100000)
 _set_ufuncs(NDDataset)

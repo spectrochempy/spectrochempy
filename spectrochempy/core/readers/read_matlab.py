@@ -24,9 +24,9 @@ from spectrochempy.core.dataset.nddataset import NDDataset, Coord
 from spectrochempy.core.readers.importer import Importer, importermethod
 
 
-# ======================================================================================================================
+# ======================================================================================
 # Public functions
-# ======================================================================================================================
+# ======================================================================================
 def read_matlab(*paths, **kwargs):
     """
     Read a matlab file with extension ``.mat`` and return its content as a list.

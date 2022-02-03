@@ -8,7 +8,7 @@
 #
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# ======================================================================================================================
+# ======================================================================================
 
 __all__ = ["fft", "ifft", "mc", "ps", "ht"]
 
@@ -32,9 +32,9 @@ from spectrochempy.core.processors.utils import _units_agnostic_method
 from spectrochempy.core.processors.zero_filling import zf_size
 
 
-# ======================================================================================================================
+# ======================================================================================
 # Private methods
-# ======================================================================================================================
+# ======================================================================================
 
 
 def _fft(data):
@@ -108,7 +108,8 @@ def _ifft_positive(data):
 def _states_fft(data, tppi=False):
     # FFT transform according to STATES encoding
 
-    # warning: at this point, data must have been swapped so the last dimension is the one used for FFT
+    # warning: at this point, data must have been swapped so the last dimension is
+    # the one used for FFT
     wt, yt, xt, zt = as_float_array(
         data
     ).T  # x and y are exchanged due to swapping of dims
@@ -133,7 +134,8 @@ def _states_fft(data, tppi=False):
 def _echoanti_fft(data):
     # FFT transform according to ECHO-ANTIECHO encoding
 
-    # warning: at this point, data must have been swapped so the last dimension is the one used for FFT
+    # warning: at this point, data must have been swapped so the last dimension
+    # is the one used for FFT
     wt, yt, xt, zt = as_float_array(
         data
     ).T  # x and y are exchanged due to swapping of dims
@@ -151,7 +153,8 @@ def _echoanti_fft(data):
 def _tppi_fft(data):
     # FFT transform according to TPPI encoding
 
-    # warning: at this point, data must have been swapped so the last dimension is the one used for FFT
+    # warning: at this point, data must have been swapped so the last dimension
+    # is the one used for FFT
     wt, yt, xt, zt = as_float_array(
         data
     ).T  # x and y are exchanged due to swapping of dims
@@ -217,9 +220,9 @@ def _interferogram_fft(data):
     return data.real[..., ::-1] / 2.0
 
 
-# ======================================================================================================================
+# ======================================================================================
 # Public methods
-# ======================================================================================================================
+# ======================================================================================
 
 
 def ifft(dataset, size=None, **kwargs):
@@ -330,7 +333,8 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
     else:
         new = dataset
 
-    # The last dimension is always the dimension on which we apply the fourier transform.
+    # The last dimension is always the dimension
+    # on which we apply the fourier transform.
     # If needed, we swap the dimensions to be sure to be in this situation
     swapped = False
     if axis != -1:
@@ -644,6 +648,6 @@ def ht(dataset, N=None):
     return z
 
 
-# ======================================================================================================================
+# ======================================================================================
 if __name__ == "__main__":  # pragma: no cover
     pass

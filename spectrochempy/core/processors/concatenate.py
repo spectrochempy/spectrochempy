@@ -302,7 +302,8 @@ def concatenate(*datasets, **kwargs):
 
             coords[dim]._labels = np.concatenate(labels)
 
-    # out = NDDataset(data, coordset=coords, mask=mask, units=units)    # This doesn't keep the order of the
+    # out = NDDataset(data, coordset=coords, mask=mask, units=units)
+    # This doesn't keep the order of the
     # coordinates
     out = dataset.copy()
     out._data = data

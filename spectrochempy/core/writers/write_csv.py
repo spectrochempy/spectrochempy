@@ -81,7 +81,8 @@ def _write_csv(*args, **kwargs):
     if dataset.ndim > 1:
         dataset = dataset.squeeze()
 
-    # Make csv file for 1D dataset: first and 2d column are the unique axis and data, respectively
+    # Make csv file for 1D dataset: first and 2d column are the unique axis and data,
+    # respectively
     with filename.open("w", newline="") as fid:
         writer = csv.writer(fid, delimiter=delimiter)
 

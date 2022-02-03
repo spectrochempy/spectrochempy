@@ -58,7 +58,8 @@ from spectrochempy.utils.exceptions import (
 def _reduce_method(method):
     # Decorator
     # ---------
-    # set the flag reduce to true for the _from numpy decorator. Must be placed above this decorator.
+    # set the flag reduce to true for the _from numpy decorator. Must be placed above
+    # this decorator.
     # e.g.,
     #    @_reduce_method
     #    @_from_numpy_method
@@ -72,7 +73,8 @@ class _from_numpy_method:
     # Decorator
     # ---------
     # This decorator assumes that the signature starts always by : (cls, ...)
-    # the second positional only argument can be `dataset` - in this case this mean that the function apply on a
+    # the second positional only argument can be `dataset` - in this case this mean
+    # that the function apply on a
     # dataset
 
     reduce = False

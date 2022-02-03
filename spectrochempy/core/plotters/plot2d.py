@@ -25,6 +25,7 @@ import matplotlib as mpl
 import numpy as np
 
 from spectrochempy.utils import make_label, add_docstring, plot_method
+from spectrochempy.core import exception_
 from spectrochempy.core.dataset.coord import LinearCoord
 
 _PLOT2D_DOC = """
@@ -72,9 +73,9 @@ transposed : bool; optional, default=False
     If True, transposed data are plotted.
 """
 
-# ======================================================================================================================
+# ======================================================================================
 # nddataset plot2D functions
-# ======================================================================================================================
+# ======================================================================================
 
 
 @plot_method("2D", _PLOT2D_DOC)
@@ -152,6 +153,13 @@ def plot_2D(dataset, method=None, **kwargs):
     # should we redirect the plotting to another method
     if dataset._squeeze_ndim < 2:
         return dataset.plot_1D(**kwargs)
+
+    # MAke the data 2D or raise an error if not possible
+    if dataset.ndim > 2:
+        try:
+            dataset = dataset.squeeze(keepdims=(-2, -1))
+        except Exception as e:
+            exception_(e)
 
     # if plotly execute plotly routine not this one
     if kwargs.get("use_plotly", prefs.use_plotly):
@@ -610,9 +618,9 @@ def plot_2D(dataset, method=None, **kwargs):
     return ax
 
 
-# ======================================================================================================================
+# ======================================================================================
 # Waterfall
-# ======================================================================================================================
+# ======================================================================================
 
 
 def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwargs):
@@ -798,9 +806,9 @@ def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwa
         ax.set_yticks([])
 
 
-# ======================================================================================================================
+# ======================================================================================
 # get clevels
-# ======================================================================================================================
+# ======================================================================================
 
 
 def _get_clevels(data, prefs, **kwargs):

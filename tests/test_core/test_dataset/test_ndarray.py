@@ -210,7 +210,8 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert d6.size == refarray.size
     assert_array_equal(d6.data, refarray)
     assert d6._data is ndarraymask._data  # by default we do not copy
-    # d6.data and ndarraym ask.data are however different due to the addition of un offset
+    # d6.data and ndarraym ask.data are however different due
+    # to the addition of un offset
     assert d6.is_masked
     assert_array_equal(d6.mask, refmask)
     assert d6.mask is ndarraymask.mask  # no copy by default
@@ -756,7 +757,8 @@ def test_ndcomplex_init_quaternion():
 
 
 def test_ndcomplex_init_quaternion_error1():
-    # test with complex data in all dimension but odd number of comlumn (should raise an error
+    # test with complex data in all dimension but odd number of comlumn
+    # (should raise an error
     d = np.random.random((3, 3)) * np.exp(0.1j)
     with pytest.raises(ValueError):
         NDComplexArray(d, dtype=typequaternion)  # with units & mask

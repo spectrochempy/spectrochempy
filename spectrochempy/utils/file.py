@@ -24,9 +24,9 @@ __all__ = [
 ]
 
 
-# ======================================================================================================================
+# ======================================================================================
 # Utility functions
-# ======================================================================================================================
+# ======================================================================================
 
 
 def _insensitive_case_glob(pattern):
@@ -296,7 +296,8 @@ def _topspin_check_filename(filename, **kwargs):
             else:
                 files_ = [f / "1r"]
 
-    # depending on the glob patterns too many files may have been selected : restriction to the valid subset
+    # depending on the glob patterns too many files may have been selected :
+    # restriction to the valid subset
     filename = []
     for item in files_:
         if item.name in ["fid", "ser", "1r", "2rr", "3rrr"]:

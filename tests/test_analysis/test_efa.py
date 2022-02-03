@@ -98,7 +98,7 @@ def test_EFA(IR_dataset_2D):
 
     # TODO: add "legend" keyword in NDDataset.plot()
 
-    # ########################################################################################################################
+    # ##################################################################################
     # # Get the abstract concentration profile based on the FIFO EFA analysis
     # #
     # efa.cutoff = None

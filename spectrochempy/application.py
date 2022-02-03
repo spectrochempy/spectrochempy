@@ -269,9 +269,9 @@ def _find_or_create_spectrochempy_dir():
     return directory
 
 
-# ======================================================================================================================
+# ======================================================================================
 # Magic ipython function
-# ======================================================================================================================
+# ======================================================================================
 @magics_class
 class SpectroChemPyMagics(Magics):
     """
@@ -397,9 +397,9 @@ class SpectroChemPyMagics(Magics):
         # name')  #  #  # return args
 
 
-# ======================================================================================================================
+# ======================================================================================
 # DataDir class
-# ======================================================================================================================
+# ======================================================================================
 
 
 class DataDir(HasTraits):
@@ -478,9 +478,9 @@ class DataDir(HasTraits):
         return self.listing().replace("\n", "<br/>").replace(" ", "&nbsp;")
 
 
-# ======================================================================================================================
+# ======================================================================================
 # General Preferences
-# ======================================================================================================================
+# ======================================================================================
 
 
 class GeneralPreferences(MetaConfigurable):
@@ -619,9 +619,9 @@ class GeneralPreferences(MetaConfigurable):
         super().__init__(jsonfile="GeneralPreferences", **kwargs)
 
 
-# ======================================================================================================================
+# ======================================================================================
 # Application
-# ======================================================================================================================
+# ======================================================================================
 
 
 class SpectroChemPy(Application):
@@ -721,13 +721,15 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
     )
     """Flag to set in NO DISPLAY mode."""
 
-    # last_project = Unicode('', help='Last used project').tag(config=True, type='project')
+    # last_project =
+    # Unicode('', help='Last used project').tag(config=True, type='project')
     # """Last used project"""
     #
     # @observe('last_project')
     # def _last_project_changed(self, change):
     #     if change.name in self.traits(config=True):
-    #         self.config_manager.update(self.config_file_name, {self.__class__.__name__: {change.name: change.new, }})
+    #         self.config_manager.update(self.config_file_name,
+    #         {self.__class__.__name__: {change.name: change.new, }})
 
     show_config = Bool(help="Dump configuration to stdout at startup").tag(config=True)
 
@@ -1137,7 +1139,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
         )
 
 
-# ======================================================================================================================
+# ======================================================================================
 
 if __name__ == "__main__":
     pass

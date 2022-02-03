@@ -55,7 +55,7 @@ def generate_fake():
     """
 
     # define properties of the spectra and concentration profiles
-    # ----------------------------------------------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     from spectrochempy.core.dataset.ndmath import dot
 
     # data for four peaks (one very broad)

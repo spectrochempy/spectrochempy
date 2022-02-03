@@ -29,7 +29,8 @@ def test_write():
     with pytest.raises(TypeError):
         scp.write()
 
-    # the simplest way to save a dataset, is to use the function write with a filename as argument
+    # the simplest way to save a dataset, is to use the function write with
+    # a filename as argument
     if (cwd / "essai.scp").exists():
         (cwd / "essai.scp").unlink()
 

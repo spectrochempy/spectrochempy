@@ -83,7 +83,8 @@ def autosub(
     else:
         new = dataset
 
-    # we assume that the last dimension ('x' for transposed array) is always the dimension to which we want
+    # we assume that the last dimension ('x' for transposed array) is always
+    # the dimension to which we want
     # to subtract.
 
     # Swap the axes to be sure to be in this situation

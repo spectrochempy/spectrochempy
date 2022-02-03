@@ -1234,7 +1234,7 @@ class NDArray(HasTraits):
         self._data = self._data.astype(dtype, **kwargs)
         return self
 
-    # ...........................................................................................................
+    # ..................................................................................
     @property
     def author(self):
         """
@@ -1373,7 +1373,7 @@ class NDArray(HasTraits):
         elif isinstance(date, str):
             self._date = np.datetime64(date)
 
-    # ...........................................................................................................
+    # ..................................................................................
     @property
     @deprecated(type="property", replace="comment")
     def description(self):

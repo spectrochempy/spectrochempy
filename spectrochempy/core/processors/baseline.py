@@ -487,9 +487,9 @@ def basc(dataset, *ranges, **kwargs):
     return blc.compute(*ranges, **kwargs)
 
 
-# ======================================================================================================================
+# ======================================================================================
 # abc # TODO: some work to perform on this
-# ======================================================================================================================
+# ======================================================================================
 def abc(dataset, dim=-1, **kwargs):
     """
     Automatic baseline correction.
@@ -566,11 +566,15 @@ def abc(dataset, dim=-1, **kwargs):
     #                      choices=['linear', 'poly', 'svd'], help="mode of correction")
     # parser.add_argument('--dryrun', action='store_true', help='dry flag')
     #
-    # parser.add_argument('--window', '-wi', default=0.05, type=float, help='selected window for linear and svd bc')
+    # parser.add_argument('--window', '-wi', default=0.05, type=float, help='selected
+    # window for linear and svd bc')
     # parser.add_argument('--step', '-st', default=5, type=int, help='step for svd bc')
-    # parser.add_argument('--nbzone', '-nz', default=32, type=int, help='number of zone for poly')
-    # parser.add_argument('--mult', '-mt', default=4, type=int, help='multiplicator of zone for poly')
-    # parser.add_argument('--order', '-or', default=5, type=int, help='polynom order for poly')
+    # parser.add_argument('--nbzone', '-nz', default=32, type=int, help='number of zone
+    # for poly')
+    # parser.add_argument('--mult', '-mt', default=4, type=int, help='multiplicator of
+    # zone for poly')
+    # parser.add_argument('--order', '-or', default=5, type=int, help='polynom order
+    # for poly')
     #
     # parser.add_argument('--verbose', action='store_true', help='verbose flag')
     # args = parser.parse_args(options.split())
@@ -646,9 +650,9 @@ def dc(dataset, **kwargs):
     return dataset
 
 
-# =======================================================================================================================
+# ======================================================================================
 # private functions
-# =======================================================================================================================
+# ======================================================================================
 def _basecor(data, **kwargs):
     mode = kwargs.pop("mode", "linear")
 
@@ -669,8 +673,10 @@ def _basecor(data, **kwargs):
 #
 def _linearbase(data, **kwargs):
     # Apply a linear baseline correction
-    # Very simple and naive procedure that compute a straight baseline from side to the other
-    # (averging on a window given by the window parameters : 5% of the total width on each side by default)
+    # Very simple and naive procedure that compute a straight baseline from side
+    # to the other
+    # (averging on a window given by the window parameters : 5% of the total width
+    # on each side by default)
 
     window = kwargs.pop("window", 0.05)
 

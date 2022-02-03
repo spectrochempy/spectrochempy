@@ -24,9 +24,9 @@ from spectrochempy.core.dataset.nddataset import NDDataset, Coord
 from spectrochempy.core.readers.importer import Importer, importermethod
 
 
-# ======================================================================================================================
+# ======================================================================================
 # Public functions
-# ======================================================================================================================
+# ======================================================================================
 def read_quadera(*paths, **kwargs):
     """
     Read a Pfeiffer Vacuum's QUADERA® mass spectrometer software file with extension ``.asc``.
@@ -143,7 +143,8 @@ def _read_asc(*args, **kwargs):
     nchannels = len(channels)
 
     # the next line contains the columns titles, repeated for each channels
-    # this routine assumes that for each channel are  Time / Time relative [s] / Ion Current [A]
+    # this routine assumes that for each channel are
+    # Time / Time relative [s] / Ion Current [A]
     # check it:
     i += 1
     colnames = re.split(r"\t+", lines[i].rstrip("\t"))

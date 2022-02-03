@@ -78,9 +78,9 @@ def get_n_decimals(val, accuracy):
     return nd
 
 
-# ======================================================================================================================
+# ======================================================================================
 # Private methods
-# ======================================================================================================================
+# ======================================================================================
 
 
 def _codechange(code_obj, changes):
@@ -119,9 +119,9 @@ class _DummyFile(object):
         pass
 
 
-# ======================================================================================================================
+# ======================================================================================
 # Public methods
-# ======================================================================================================================
+# ======================================================================================
 
 
 def add_docstring(*args):
@@ -600,7 +600,8 @@ def spacing_(arr):
     out : float or array
     """
     spacings = np.diff(arr)
-    # we need to take into account only the significative digits ( but round to some decimals doesn't work
+    # we need to take into account only the significative digits
+    # ( but round to some decimals doesn't work
     # for very small number
     #    mantissa, twoexp = np.frexp(spacings)
     #    mantissa = mantissa.round(6)
