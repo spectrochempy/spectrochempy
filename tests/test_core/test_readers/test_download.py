@@ -80,3 +80,7 @@ def test_download_nist():
 
     ds = scp.download_nist_ir(CAS, index=[0, 1, 2])
     assert len(ds) == 2
+
+    CAS = 2146363  # Acenaphthylene, dodecahydro-
+    ds = scp.download_nist_ir(CAS)
+    assert ds is None

@@ -15,6 +15,7 @@ from io import StringIO
 import numpy as np
 import requests
 from datetime import datetime, timezone
+from pathlib import Path
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.coord import Coord
@@ -159,7 +160,7 @@ def download_nist_ir(CAS, index="all"):
                 return None
 
         if len(index) == 0:
-            info_("NIST IR: no spectrum found")
+            error_("NIST IR: no spectrum found")
             return
         elif len(index) == 1:
             info_("NIST IR: 1 spectrum found")
@@ -179,7 +180,7 @@ def download_nist_ir(CAS, index="all"):
         try:
             response = requests.get(url, stream=True, timeout=10)
             if b"Spectrum not found" in response.content[:30]:
-                error_(f"Spectrum {i} does not exist... please check !")
+                error_(f"NIST IR: Spectrum {i} does not exist... please check !")
                 if i == index[-1] and out == []:
                     return None
                 else:
@@ -198,13 +199,18 @@ def download_nist_ir(CAS, index="all"):
             f.write(txtdata)
         try:
             ds = read_jcamp("temp.jdx")
+
             # replace the default entry ":imported from jdx file":
             ds.history[0] = ds.history[0][: len(str(datetime.now(timezone.utc)))] + (
                 f" : downloaded from NIST: {url}\n"
             )
             out.append(ds)
+            (Path(".") / "temp.jdx").unlink()
+
         except Exception:
-            raise OSError("Wrong JCAMP file")
+            raise OSError(
+                "Can't read this JCAMP file: please report the issue to Spectrochempy developpers"
+            )
 
     if len(out) == 1:
         return out[0]
