@@ -64,6 +64,19 @@ def test_mock_download_iris(mocker):
 
 
 def test_download_nist():
-    CAS = "7732-18-5"
-    ds = scp.download_nist_ir(CAS, index=1)
-    assert ds.name == "WATER"
+    CAS = "7732-18-5"  # WATER
+
+    ds = scp.download_nist_ir(CAS)
+    assert len(ds) == 2
+
+    ds = scp.download_nist_ir(CAS, index=0)
+    assert ds.name == "Water"
+
+    ds = scp.download_nist_ir(CAS, index=[0, 1])
+    assert len(ds) == 2
+
+    ds = scp.download_nist_ir(CAS, index=2)
+    assert ds is None
+
+    ds = scp.download_nist_ir(CAS, index=[0, 1, 2])
+    assert len(ds) == 2

@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.read_jcamp import read_jcamp
-from spectrochempy.core import error_
+from spectrochempy.core import error_, info_
 from spectrochempy.optional import import_optional_dependency
 from spectrochempy.utils import is_iterable
 
@@ -113,7 +113,7 @@ def download_iris():
         return new
 
 
-def download_nist_ir(CAS, index):
+def download_nist_ir(CAS, index="all"):
     """
     Upload IR spectra from NIST webbook
 
@@ -123,7 +123,7 @@ def download_nist_ir(CAS, index):
         the CAS number, can be given as "XXXX-XX-X" (str), "XXXXXXX" (str), XXXXXXX (int)
 
     index : str or int or tuple of ints
-        import all available spectra corresponding to the index, or a single spectrum,
+        If set to 'all' (default, import all available spectra for the compound corresponding to the index, or a single spectrum,
         or selected spectra.
 
     Returns
@@ -141,7 +141,31 @@ def download_nist_ir(CAS, index):
 
     if index == "all":
         # test urls and return list if any...
-        return
+        index = []
+        i = 0
+        while "continue":
+            url = (
+                f"https://webbook.nist.gov/cgi/cbook.cgi?JCAMP=C{CAS}&Index={i}&Type=IR"
+            )
+            try:
+                response = requests.get(url, timeout=10)
+                if b"Spectrum not found" in response.content[:30]:
+                    break
+                else:
+                    index.append(i)
+                    i += 1
+            except OSError:
+                error_("OSError: could not connect to NIST")
+                return None
+
+        if len(index) == 0:
+            info_("NIST IR: no spectrum found")
+            return
+        elif len(index) == 1:
+            info_("NIST IR: 1 spectrum found")
+        else:
+            info_("NISTR IR: {len(index)} spectra found")
+
     elif isinstance(index, int):
         index = [index]
     elif not is_iterable(index):
@@ -153,13 +177,19 @@ def download_nist_ir(CAS, index):
         # https://webbook.nist.gov/cgi/cbook.cgi?JCAMP=C7732185&Index=1&Type=IR
         url = f"https://webbook.nist.gov/cgi/cbook.cgi?JCAMP=C{CAS}&Index={i}&Type=IR"
         try:
-            connection = True
             response = requests.get(url, stream=True, timeout=10)
-        except OSError:
-            error_("OSError: Cannot connect to this url... please check !")
-            connection = False
+            if b"Spectrum not found" in response.content[:30]:
+                error_(f"Spectrum {i} does not exist... please check !")
+                if i == index[-1] and out == []:
+                    return None
+                else:
+                    break
 
-    if connection:  # Download data
+        except OSError:
+            error_("OSError: Cannot connect... ")
+            return None
+
+        # Load data
         txtdata = ""
         for rd in response.iter_content():
             txtdata += rd.decode("utf8")
@@ -175,10 +205,6 @@ def download_nist_ir(CAS, index):
             out.append(ds)
         except Exception:
             raise OSError("Wrong JCAMP file")
-
-    else:
-        # Cannot download
-        pass
 
     if len(out) == 1:
         return out[0]
