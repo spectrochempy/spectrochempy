@@ -39,7 +39,13 @@ class MCRALS(HasTraits):
     guess : NDDataset
         Initial concentration or spectra.
 
-    tol : float, optional, default 0.1
+    **kwargs
+        Optional parameters, see Other parameters below.
+
+    Other Parameters
+    ----------------
+
+        tol : float, optional, default 0.1
         Convergence criterion on the change of residuals (percent change of standard deviation of residuals).
 
     maxit : int, optional, default=50
@@ -160,8 +166,6 @@ class MCRALS(HasTraits):
     (NDDataset: [float64] unitless (shape: (y:4, x:96)), NDDataset: [float64] unitless (shape: (y:4, x:96)))
     """
 
-    # Todo: add unimodSpec (and unimodSpecMod, ...)  : list or tuple, default `"all"`
-
     _X = Instance(NDDataset)
     _C = Instance(NDDataset, allow_none=True)
     _fixedC = Instance(NDDataset, allow_none=True)
@@ -170,33 +174,32 @@ class MCRALS(HasTraits):
     _logs = Unicode
     _params = Dict()
 
-    def __init__(
-        self,
-        dataset,
-        guess,
-        tol=0.1,
-        maxit=50,
-        maxdiv=5,
-        nonnegConc="all",
-        unimodConc="all",
-        unimodTol=1.1,
-        unimodMod="strict",
-        monoDecConc=None,
-        monoIncTol=1.1,
-        monoIncConc=None,
-        monoDecTol=1.1,
-        closureConc=None,
-        closureTarget="default",
-        closureMethod="scaling",
-        hardConc=None,
-        getConc=None,
-        argsGetConc=None,
-        hardC_to_C_idx="default",
-        nonnegSpec="all",
-        normSpec=None,
-        verbose=False,
-    ):
+    def __init__(self, dataset, guess, **kwargs):
+        # list all default arguments:
+        # Todo: add unimodSpec (and unimodSpecMod, ...), default `None`
+        tol = kwargs.get("tol", 0.1)
+        maxit = kwargs.get("maxit", 50)
+        maxdiv = kwargs.get("maxdiv", 5)
+        nonnegConc = kwargs.get("nonnegConc", "all")
+        unimodConc = kwargs.get("unimodConc", "all")
+        unimodTol = kwargs.get("unimodTol", 1.1)
+        unimodMod = kwargs.get("unimodMod", "strict")
+        monoDecConc = kwargs.get("monoDecConc", None)
+        monoIncTol = kwargs.get("monoIncTol", 1.1)
+        monoIncConc = kwargs.get("monoIncConc", None)
+        monoDecTol = kwargs.get("monoDecTol", 1.1)
+        closureConc = kwargs.get("closureConc", None)
+        closureTarget = kwargs.get("closureTarget", "default")
+        closureMethod = kwargs.get("closureMethod", "scaling")
+        hardConc = kwargs.get("hardConc", None)
+        getConc = kwargs.get("getConc", None)
+        argsGetConc = kwargs.get("argsGetConc", None)
+        hardC_to_C_idx = kwargs.get("hardC_to_C_idx", "default")
+        nonnegSpec = kwargs.get("nonnegSpec", "all")
+        normSpec = kwargs.get("normSpec", None)
+        verbose = kwargs.get("verbose", False)
 
+        # now check input
         if verbose:
             set_loglevel(INFO)
 
