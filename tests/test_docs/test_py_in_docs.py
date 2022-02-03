@@ -9,14 +9,22 @@
 # flake8: noqa
 
 
-# ------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
 # Testing examples and notebooks (Py version) in docs
-# ------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
 
+import sys
 import pytest
 
 # Uncomment to avoid these long tests which are also done in docs
 # pytestmark = pytest.mark.skip(reason="check when building docs in CI")
+pytestmark = pytest.mark.skipif(
+    "sys.platform" == "win32", reason="seems that it does not work on windows"
+)
+pytestmark = pytest.mark.skipif(
+    sys.version_info < (3, 9),
+    reason="want to execute this long run only one tume on github workflow",
+)
 
 from pathlib import Path
 
@@ -28,7 +36,7 @@ for item in scripts[:]:
         scripts.remove(item)
 
 
-# ..............................................................................
+# ......................................................................................
 def example_run(path):
     import subprocess
 
@@ -46,7 +54,7 @@ def example_run(path):
     return pipe.returncode, so, serr
 
 
-# ..............................................................................
+# ......................................................................................
 @pytest.mark.parametrize("example", scripts)
 def test_example(example):
     # some test will failed due to the magic commands or for other known reasons
