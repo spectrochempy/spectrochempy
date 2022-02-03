@@ -50,9 +50,9 @@ from spectrochempy.utils.exceptions import (
     IncompatibleShapeError,
 )
 
-# ======================================================================================================================
+# ======================================================================================
 # utilities
-# ======================================================================================================================
+# ======================================================================================
 
 
 def _reduce_method(method):
@@ -2730,12 +2730,12 @@ class NDMath(object):
     @staticmethod
     def _get_operand_and_return_types(fname, objs):
 
-        debug_("Dtermine Return type from operand types ... ")
-        objtypes = OrderedSet()
+        debug_("Determine Return type from operand types ... ")
+        objtypes = []
         for obj in objs:
             type_ = type(obj).__name__
             objtype = type_ if type_ in ORDER.keys() else None
-            objtypes.add(objtype)
+            objtypes.append(objtype)
         if fname not in ["iadd", "isub", "imul", "idiv"]:
             returntype = sorted(objtypes, key=lambda x: ORDER.get(x, 5))[0]
         else:
@@ -2948,6 +2948,8 @@ class NDMath(object):
                     magnitudes[i] = np.ma.masked_array(magnitudes[i], mask=mask)
 
             except ValueError as e:
+                exception_(e)
+            except IndexError as e:
                 exception_(e)
 
         if is_masked:
@@ -3561,6 +3563,6 @@ def dot(a, b, strict=True, out=None):
     return new
 
 
-# ======================================================================================================================
+# ======================================================================================
 if __name__ == "__main__":
     pass

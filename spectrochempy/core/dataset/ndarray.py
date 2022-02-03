@@ -72,16 +72,16 @@ from spectrochempy.utils import (
 )
 from spectrochempy.utils.datetime64 import from_dt64_units
 
-# ======================================================================================================================
+# ======================================================================================
 # Printing settings
-# ======================================================================================================================
+# ======================================================================================
 
 numpyprintoptions()
 
 
-# ======================================================================================================================
+# ======================================================================================
 # The basic NDArray class
-# ======================================================================================================================
+# ======================================================================================
 
 
 class NDArray(HasTraits):
@@ -2162,7 +2162,7 @@ class NDArray(HasTraits):
             return self._data.size
 
     # ..........................................................................
-    def squeeze(self, *dims, inplace=False, keepdims=None, **kwargs):
+    def squeeze(self, *dims, inplace=False, keepdims=(), **kwargs):
         """
         Remove single-dimensional entries from the shape of an array.
 
@@ -2205,9 +2205,18 @@ class NDArray(HasTraits):
         """
         new = self if inplace else self.copy()
 
+        # debug_(dims, keepdims)
+
         dims = self._get_dims_from_args(*dims, **kwargs)
         axes = self._get_dims_index(dims)
+        axes = axes if axes is not None else ()
+        axes = axes if is_sequence(axes) and axes is not None else axes
+
         keepaxes = self._get_dims_index(keepdims)
+        keepaxes = keepaxes if keepaxes is not None else ()
+        keepaxes = (
+            keepaxes if is_sequence(keepaxes) and keepaxes is not None else [keepaxes]
+        )
 
         if not axes and keepaxes:
             axes = np.arange(new.ndim)
@@ -2217,19 +2226,24 @@ class NDArray(HasTraits):
         elif not axes:
             s = np.array(new.shape)
             axes = np.argwhere(s == 1).squeeze().tolist()
+            axes = [axes] if isinstance(axes, int) else axes
             is_axis_to_remove = s == 1
 
         else:
             is_axis_to_remove = np.array(
-                [True if axis in axes else False for axis in range(new.ndim)]
+                [True if axis in axes else False for axis in np.arange(new.ndim)]
             )
 
-        if axes is None:
+        # try to remove None from axes tuple or transform to () if axes is None
+        axes = list(axes) if axes is not None else []
+        axes.remove(None) if None in axes else axes
+        axes = tuple(axes)
+
+        if not axes:
             # nothing to squeeze
             if kwargs.get("return_axis", False):
                 return new, axes
             return new
-        axes = tuple(axes)
 
         # recompute new dims by taking the dims not removed
         new._dims = np.array(new._dims)[~is_axis_to_remove].tolist()
@@ -2734,9 +2748,9 @@ class NDArray(HasTraits):
         return self.values
 
 
-# ======================================================================================================================
+# ======================================================================================
 # NDComplexArray
-# ======================================================================================================================
+# ======================================================================================
 
 
 class NDComplexArray(NDArray):
@@ -3373,7 +3387,7 @@ class NDComplexArray(NDArray):
         super().__setitem__(items, value)
 
 
-# ======================================================================================================================
+# ======================================================================================
 if __name__ == "__main__":
     pass
 
