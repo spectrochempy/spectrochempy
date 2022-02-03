@@ -29,11 +29,29 @@ def test_pca():
 
     pca = PCA(dataset)
 
-    pca.printev(n_pc=5)
+    assert str(pca)[:3] == "\nPC"
+
+    # test alternative options
+    pca = PCA(dataset, centered=False, standardized=True, scaled=True)
 
     assert str(pca)[:3] == "\nPC"
 
-    pca.screeplot(n_pc=0.999)
+    _, LT = pca.reduce(n_pc="auto")
+    assert LT.shape[0] == 15
+
+    dataset_hat = pca.reconstruct(n_pc=5)
+    assert (dataset_hat - dataset).max() < 0.4
+
+    # test with observations < variables
+    pca2 = PCA(dataset[:, 4000.0:3995.0])
+    _, LT2 = pca2.reduce(n_pc="auto")
+    assert LT2.shape[0] == 5
+
+    # test text and plots outputs
+
+    pca.printev(n_pc=5)
+
+    pca.screeplot(n_pc=5)
 
     pca.screeplot(n_pc="auto")
 

@@ -31,7 +31,7 @@ class EFA(HasTraits):
     """
     Evolving Factor Analysis.
 
-    Performs an Evolving Factor Analysis (forward and reverse) of the input |NDDataset|.
+    Perform an Evolving Factor Analysis (forward and reverse) of the input |NDDataset|.
 
     Parameters
     ----------

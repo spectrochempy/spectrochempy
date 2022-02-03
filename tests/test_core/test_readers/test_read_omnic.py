@@ -55,5 +55,26 @@ def test_read_omnic():
     )  # wrong protocol but acceptable
     assert nd2 == nd
 
+    # test import sample IFG
+    nd = scp.read_spa(IRDATA / "carroucell_samp" / "2-BaSO4_0.SPA", return_ifg="sample")
+    assert str(nd) == "NDDataset: [float64] V (shape: (y:1, x:16384))"
+
+    # test import background IFG
+    nd = scp.read_spa(
+        IRDATA / "carroucell_samp" / "2-BaSO4_0.SPA", return_ifg="background"
+    )
+    assert str(nd) == "NDDataset: [float64] V (shape: (y:1, x:16384))"
+
+    # imùport IFG from file without IFG
+    a = scp.read_spa(
+        IRDATA / "subdir" / "20-50" / "7_CZ0-100 Pd_21.SPA", return_ifg="sample"
+    )
+    assert a is None
+
+    # rapid_sca series
     a = scp.read_srs("irdata/omnic series/rapid_scan.srs")
     assert str(a) == "NDDataset: [float64] V (shape: (y:643, x:4160))"
+
+    # non-rapid scan series
+    a = scp.read_srs("irdata/omnic series/GC Demo.srs")
+    assert a is None  # not rapid scan mode

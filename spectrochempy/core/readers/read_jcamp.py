@@ -165,7 +165,14 @@ def _read_jdx(*args, **kwargs):
     # ..........................................................................
     xaxis = np.array([])
     data = np.array([])
-    alltitles, alltimestamps, alldates, xunits, yunits = [], [], [], [], []
+    alltitles, alltimestamps, alldates, xunits, yunits, allorigins = (
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+    )
     nx, firstx, lastx = (
         np.zeros(nspec, "int"),
         np.zeros(nspec, "float"),
@@ -186,8 +193,10 @@ def _read_jdx(*args, **kwargs):
         # Read JDX file for spectrum n° i
         while keyword != "##END":
             keyword, text = _readl(fid)
-            if keyword in ["##ORIGIN", "##OWNER", "##JCAMP-DX"]:
+            if keyword in ["##OWNER", "##JCAMP-DX"]:
                 continue
+            elif keyword == "##ORIGIN":
+                allorigins.append(text)
             elif keyword == "##TITLE":
                 # Add the title of the spectrum in the list alltitles
                 alltitles.append(text)
@@ -341,12 +350,20 @@ def _read_jdx(*args, **kwargs):
     dataset.set_coordset(y=_y, x=_x)
 
     # Set origin, description and history
-    dataset.origin = "omnic"
-    dataset.description = "Dataset from jdx: '{0}'".format(jdx_title)
+    if nspec > 1:
+        origins = set(allorigins)
+        if len(origins) == 0:
+            pass
+        elif len(origins) == 1:
+            dataset.origin = allorigins[0]
+        else:
+            dataset.origin = [(origin + "; ") for origin in set(allorigins)][0][:-2]
 
-    dataset.history = str(datetime.now(timezone.utc)) + ":imported from jdx file \n"
+    dataset.description = "Dataset from jdx file: '{0}'".format(jdx_title)
 
-    if sortbydate:
+    dataset.history = str(datetime.now(timezone.utc)) + " : imported from jdx file \n"
+
+    if sortbydate and nspec > 1:
         dataset.sort(dim="x", inplace=True)
         dataset.history = str(datetime.now(timezone.utc)) + ":sorted by date\n"
     # Todo: make sure that the lowest index correspond to the largest wavenumber
