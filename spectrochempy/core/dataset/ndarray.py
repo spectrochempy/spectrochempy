@@ -12,32 +12,21 @@ This module implements the |NDArray| base class and a subclass of |NDArray| with
 __all__ = ["NDArray", "NDComplexArray"]
 
 import copy as cpy
-import warnings
 import re
 import uuid
 import pathlib
 import itertools
 import textwrap
+from datetime import datetime, tzinfo
+import pytz
 
 import numpy as np
 from quaternion import as_float_array, as_quat_array
 
-from traitlets import (
-    List,
-    Unicode,
-    Instance,
-    Bool,
-    Union,
-    Integer,
-    HasTraits,
-    default,
-    validate,
-    observe,
-    All,
-)
+import traitlets as tr
 from traittypes import Array
 
-from spectrochempy.core import info_, error_, print_
+from spectrochempy.core import info_, error_, print_, warning_
 from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.core.units import (
     Unit,
@@ -70,7 +59,7 @@ from spectrochempy.utils import (
     get_component,
     insert_masked_print,
 )
-from spectrochempy.utils.datetime64 import from_dt64_units
+from spectrochempy.utils.datetimeutils import from_dt64_units
 
 # ======================================================================================
 # Printing settings
@@ -84,7 +73,7 @@ numpyprintoptions()
 # ======================================================================================
 
 
-class NDArray(HasTraits):
+class NDArray(tr.HasTraits):
     """
     The basic |NDArray| object.
 
@@ -149,8 +138,11 @@ class NDArray(HasTraits):
     author : str, optional.
         name(s) of the author(s) of this dataset. BNy default, name of the computer note where this dataset is
         created.
-    description : str, optional.
-        An optional description of the nd-dataset. A shorter alias is `desc`.
+    comment : str, optional.
+        An optional comment on the nd-dataset.
+    timezone : datetime.tzinfo, optional
+        The timezone where the data were created. If not specified, the local timezone
+        is assumed.
     history : str, optional.
         A string to add to the object history.
     copy : bool, optional, Default:False.
@@ -172,45 +164,46 @@ class NDArray(HasTraits):
     # Hidden properties
 
     # Main array properties
-    _id = Unicode()
-    _name = Unicode()
-    _long_name = Unicode(allow_none=True)
+    _id = tr.Unicode()
+    _name = tr.Unicode()
+    _long_name = tr.Unicode(allow_none=True)
     _data = Array(allow_none=True)
-    _dtype = Instance(np.dtype, allow_none=True)
-    _dims = List(Unicode())
-    _mask = Union((Bool(), Array(Bool()), Instance(MaskedConstant)))
+    _dtype = tr.Instance(np.dtype, allow_none=True)
+    _dims = tr.List(tr.Unicode())
+    _mask = tr.Union((tr.Bool(), Array(tr.Bool()), tr.Instance(MaskedConstant)))
     _labels = Array(allow_none=True)
-    _units = Instance(Unit, allow_none=True)
+    _units = tr.Instance(Unit, allow_none=True)
 
     # Region of interest
-    _roi = List(allow_none=True)
+    _roi = tr.List(allow_none=True)
 
     # Dates
-    _date = Instance(np.datetime64)
-    _modified = Instance(np.datetime64)
+    _created = tr.Instance(datetime)
+    _modified = tr.Instance(datetime)
+    _timezone = tr.Instance(tzinfo)
 
     # Metadata
-    _author = Unicode()
-    _comment = Unicode()
-    _source = Unicode()
-    _history = List(Unicode(), allow_none=True)
-    _meta = Instance(Meta, allow_none=True)
-    _transposed = Bool(False)
+    _author = tr.Unicode()
+    _comment = tr.Unicode()
+    _source = tr.Unicode()
+    _history = tr.List(tr.Tuple(), allow_none=True)
+    _meta = tr.Instance(Meta, allow_none=True)
+    _transposed = tr.Bool(False)
 
     # Basic NDArray setting.
     # by default, we do shallow copy of the data
     # which means that if the same numpy array is used for too different NDArray,
     # they will share it.
-    _copy = Bool(False)
+    _copy = tr.Bool(False)
 
-    _labels_allowed = Bool(True)
+    _labels_allowed = tr.Bool(True)
     # Labels are allowed for the data, if the data are 1D only
     # they will essentially serve as coordinates labelling.
 
     # Other settings
-    _text_width = Integer(120)
-    _html_output = Bool(False)
-    _filename = Union((Instance(pathlib.Path), Unicode()), allow_none=True)
+    _text_width = tr.Integer(120)
+    _html_output = tr.Bool(False)
+    _filename = tr.Union((tr.Instance(pathlib.Path), tr.Unicode()), allow_none=True)
 
     # ..........................................................................
     def __init__(self, data=None, **kwargs):
@@ -218,7 +211,7 @@ class NDArray(HasTraits):
         super().__init__(**kwargs)
 
         # Creation date.
-        self._date = np.datetime64("now")
+        self._created = datetime.utcnow()
 
         # By default, we try to keep a reference to the data, so we do not copy them.
         self._copy = kwargs.pop("copy", False)  #
@@ -252,8 +245,8 @@ class NDArray(HasTraits):
 
         self.name = kwargs.pop("name", None)
 
-        self.description = kwargs.pop(
-            "description", kwargs.pop("desc", kwargs.pop("comment", ""))
+        self.comment = kwargs.pop(
+            "comment", kwargs.pop("desc", kwargs.pop("description", ""))
         )
 
         author = kwargs.pop("author", get_user_and_node())
@@ -268,7 +261,7 @@ class NDArray(HasTraits):
         if history is not None:
             self.history = history
 
-        self._modified = self._date
+        self._modified = self._created
 
     # ------------------------------------------------------------------------
     # Special methods
@@ -516,7 +509,7 @@ class NDArray(HasTraits):
     # ------------------------------------------------------------------------
 
     # ..........................................................................
-    @observe(All)
+    @tr.observe(tr.All)
     def _anytrait_changed(self, change):
 
         # ex: change {
@@ -531,7 +524,7 @@ class NDArray(HasTraits):
             return
 
         # all the time -> update modified date
-        self._modified = np.datetime64("now")
+        self._modified = datetime.utcnow()
         return
 
     # ..........................................................................
@@ -539,7 +532,7 @@ class NDArray(HasTraits):
         # found the indices sorted by values or labels
 
         if by is None:
-            warnings.warn(
+            warning_(
                 "parameter `by` should be set to `value` or `label`, use `value` by default",
                 SpectroChemPyWarning,
             )
@@ -550,9 +543,7 @@ class NDArray(HasTraits):
         elif "label" in by and not self.is_labeled:
             # by = 'value'
             # pos = None
-            warnings.warn(
-                "no label to sort, use `value` by default", SpectroChemPyWarning
-            )
+            warning_("no label to sort, use `value` by default", SpectroChemPyWarning)
             args = np.argsort(self.data)
         elif "label" in by and self.is_labeled:
             labels = self._labels
@@ -583,6 +574,14 @@ class NDArray(HasTraits):
             return isinstance(data[0], np.timedelta64)
         return isinstance(data, np.timedelta64)
 
+    @tr.validate("_created")
+    def _created_validate(self, proposal):
+        date = proposal["value"]
+        if date.tzinfo is not None:
+            # make the date utc naive
+            date = date.replace(tzinfo=None)
+        return date
+
     # ..........................................................................
     def _cstr(self):
         out = f"{self._str_value()}\n{self._str_shape()}"
@@ -590,7 +589,7 @@ class NDArray(HasTraits):
         return out
 
     # ..........................................................................
-    @default("_data")
+    @tr.default("_data")
     def _data_default(self):
         return None
 
@@ -604,7 +603,7 @@ class NDArray(HasTraits):
         return data.astype("float"), units
 
     # ..........................................................................
-    @validate("_data")
+    @tr.validate("_data")
     def _data_validate(self, proposal):
         # validation of the _data attribute
         data = proposal["value"]
@@ -620,12 +619,12 @@ class NDArray(HasTraits):
             return data
 
     # ..........................................................................
-    @default("_dims")
+    @tr.default("_dims")
     def _dims_default(self):
         return DEFAULT_DIM_NAME[-self.ndim :]
 
     # ..........................................................................
-    @default("_long_name")
+    @tr.default("_long_name")
     def _long_name_default(self):
         return None
 
@@ -644,7 +643,7 @@ class NDArray(HasTraits):
         kdims = kwargs.pop("dims", kwargs.pop("dim", axis))  # dim or dims keyword
         if kdims is not None:
             if dims is not None:
-                warnings.warn(
+                warning_(
                     "the unnamed arguments are interpreted as `dims`. But a named argument `dims` or `axis`"
                     "(DEPRECATED) has been specified. \nThe unnamed arguments will thus be ignored.",
                     SpectroChemPyWarning,
@@ -781,16 +780,28 @@ class NDArray(HasTraits):
         newkey = slice(start, stop, step)
         return newkey
 
+    # @tr.validate("_history")
+    # def _history_validate(self, proposal):
+    #     history = proposal["value"]
+    #     if isinstance(history, list) or history is None:
+    #         # reset
+    #         self._history = None
+    #     return history
+
     # ..........................................................................
-    @default("_id")
+    @tr.default("_id")
     def _id_default(self):
         # a unique id
         return f"{type(self).__name__}_{str(uuid.uuid1()).split('-')[0]}"
 
     # ..........................................................................
-    @default("_labels")
+    @tr.default("_labels")
     def _labels_default(self):
         return None
+
+    @tr.default("_timezone")
+    def _timezone_default(self):
+        return datetime.utcnow().astimezone().tzinfo
 
     # ..........................................................................
     def _loc2index(self, loc, dim=None, *, units=None):
@@ -920,12 +931,12 @@ class NDArray(HasTraits):
         return tuple(keys)
 
     # ..........................................................................
-    @default("_mask")
+    @tr.default("_mask")
     def _mask_default(self):
         return NOMASK if self._data is None else np.zeros(self._data.shape).astype(bool)
 
     # ..........................................................................
-    @validate("_mask")
+    @tr.validate("_mask")
     def _mask_validate(self, proposal):
         pv = proposal["value"]
         mask = pv
@@ -946,12 +957,20 @@ class NDArray(HasTraits):
             return mask
 
     # ..........................................................................
-    @default("_meta")
+    @tr.default("_meta")
     def _meta_default(self):
         return Meta()
 
+    @tr.validate("_modified")
+    def _modified_validate(self, proposal):
+        date = proposal["value"]
+        if date.tzinfo is not None:
+            # make the date utc naive
+            date = date.replace(tzinfo=None)
+        return date
+
     # ..........................................................................
-    @default("_name")
+    @tr.default("_name")
     def _name_default(self):
         return ""
 
@@ -1015,7 +1034,7 @@ class NDArray(HasTraits):
         return "".join([prefix, body, units, size])
 
     # ..........................................................................
-    @default("_roi")
+    @tr.default("_roi")
     def _roi_default(self):
         return None
 
@@ -1310,13 +1329,8 @@ class NDArray(HasTraits):
         """
         Creation date object (Datetime).
         """
-        return self._date
-
-    # ..........................................................................
-    @created.setter
-    def created(self, date):
-
-        self.date = date
+        created = pytz.utc.localize(self._created)
+        return created.astimezone(self.timezone).isoformat(sep=" ", timespec="seconds")
 
     # ..........................................................................
     @property
@@ -1355,47 +1369,35 @@ class NDArray(HasTraits):
         """
         return self.data
 
-    # ..........................................................................
-    @property
-    def date(self):
-        """
-        Creation date object - equivalent to the attribute `created` (Datetime).
-        """
-        return self._date
-
-    # ..........................................................................
-    @date.setter
-    def date(self, date):
-
-        if isinstance(date, np.datetime64):
-            self._date = date
-
-        elif isinstance(date, str):
-            self._date = np.datetime64(date)
-
     # ..................................................................................
     @property
-    @deprecated(type="property", replace="comment")
     def description(self):
         """
         Provides a description of the underlying data (str).
         """
+        warning_(
+            "Using the `description` attribute is now deprecated and could be completely "
+            "removed in version 0.5. Use `comment` instead.",
+            DeprecationWarning,
+        )
         return self._comment
 
     # ..........................................................................
     @description.setter
-    @deprecated(type="property", replace="comment")
     def description(self, value):
+        warning_(
+            "Setting the `description` attribute is now deprecated and could be completely "
+            "removed in version 0.5. Use `comment` instead.",
+            DeprecationWarning,
+        )
         self._comment = value
 
     @property
-    @deprecated(type="property", replace="comment")
     def desc(self):
         """Alias to the `comment` attribute."""
         return self._comment
 
     @desc.setter
-    @deprecated(type="property", replace="comment")
     def desc(self, value):
         """Alias to the `description` attribute."""
         self._comment = value
@@ -1434,7 +1436,8 @@ class NDArray(HasTraits):
         """
         Names of the dimensions (list).
 
-        The name of the dimensions are 'x', 'y', 'z'.... depending on the number of dimension.
+        The name of the dimensions are 'x', 'y', 'z'....
+        depending on the number of dimension.
         """
         ndim = self.ndim
         if ndim > 0:
@@ -1454,8 +1457,8 @@ class NDArray(HasTraits):
 
         if not is_sequence(values) or len(values) != self.ndim:
             raise ValueError(
-                f"a sequence of chars with a length of {self.ndim} is expected, but `{values}` "
-                f"has been provided"
+                f"a sequence of chars with a length of {self.ndim} is expected, "
+                f"but `{values}` has been provided"
             )
 
         for value in values:
@@ -1497,15 +1500,18 @@ class NDArray(HasTraits):
     # ..........................................................................
     def get_axis(self, *args, **kwargs):
         """
-        Helper function to determine an axis index whatever the syntax used (axis index or dimension names).
+        Helper function to determine an axis index.
+
+        It is designed to work whatever the syntax used: axis index or dimension names.
 
         Parameters
         ----------
         dim, axis, dims : str, int, or list of str or index
-            The axis indexes or dimensions names - they can be specified as argument or using keyword 'axis', 'dim'
-            or 'dims'.
+            The axis indexes or dimensions names - they can be specified as argument
+            or using keyword 'axis', 'dim'or 'dims'.
         negative_axis : bool, optional, default=False
-            If True a negative index is returned for the axis value (-1 for the last dimension, etc...).
+            If True a negative index is returned for the axis value
+            (-1 for the last dimension, etc...).
         allows_none : bool, optional, default=False
             If True, if input is none then None is returned.
         only_first : bool, optional, default: True
@@ -1573,7 +1579,7 @@ class NDArray(HasTraits):
             return None
 
         if level > self.labels.ndim - 1:
-            warnings.warn(
+            warning_(
                 "There is no such level in the existing labels", SpectroChemPyWarning
             )
             return None
@@ -1625,12 +1631,28 @@ class NDArray(HasTraits):
         """
         Describes the history of actions made on this array (List of strings).
         """
-        return self._history
+
+        history = []
+        for date, value in self._history:
+            date = pytz.utc.localize(date)
+            date = date.astimezone(self.timezone).isoformat(sep=" ", timespec="seconds")
+            value = value[0].capitalize() + value[1:]
+            history.append(f"{date}> {value}")
+        return history
 
     # ..........................................................................
     @history.setter
     def history(self, value):
-        self._history.append(value)
+        if value is None:
+            return
+        if isinstance(value, list):
+            # history will be replaced
+            self._history = []
+            if len(value) == 0:
+                return
+            value = value[0]
+        date = datetime.utcnow()
+        self._history.append((date, value))
 
     # ..........................................................................
     @property
@@ -1888,7 +1910,7 @@ class NDArray(HasTraits):
             return
 
         if self.ndim > 1:
-            warnings.warn(
+            warning_(
                 "We cannot set the labels for multidimentional data - Thus, these labels are ignored",
                 SpectroChemPyWarning,
             )
@@ -2029,7 +2051,8 @@ class NDArray(HasTraits):
         """
         Date of modification (readonly property).
         """
-        return self._modified
+        modified = pytz.utc.localize(self._modified)
+        return modified.astimezone(self.timezone).isoformat(sep=" ", timespec="seconds")
 
     # ..........................................................................
     @property
@@ -2073,11 +2096,21 @@ class NDArray(HasTraits):
         """
         Origin of the data (str).
         """
+        warning_(
+            "Using the `origin` attribute is now deprecated and could be completely "
+            "removed in version 0.5. Use `source` instead.",
+            DeprecationWarning,
+        )
         return self._source
 
     # ..........................................................................
     @origin.setter
     def origin(self, value):
+        warning_(
+            "Setting the `origin` attribute is now deprecated and could be completely "
+            "removed in version 0.5. Use `source` instead.",
+            DeprecationWarning,
+        )
         self._source = value
 
     # ..........................................................................
@@ -2346,7 +2379,7 @@ class NDArray(HasTraits):
 
     # .........................................................................
     @property
-    def tzinfo(self):
+    def timezone(self):
         """
         Timezone information.
 
@@ -2362,46 +2395,51 @@ class NDArray(HasTraits):
 
         In spectrochempy, all datetimes are stored in UTC, so that conversion
         must be done during the display of these datetimes using tzinfo.
-
-
         """
-        raise NotImplementedError
+        return self._timezone
 
-    #
-    #         import datetime
-    #         import pytz
-    #         utc_now = pytz.utc.localize(datetime.datetime.utcnow())
-    #         pst_now = utc_now.astimezone(pytz.timezone('Europe/Paris'))
-    #         pst_now == utc_now
-    #         Out[13]: True
-    #         pst_now
-    #         Out[14]: datetime.datetime(2022, 1, 30, 16, 13, 9, 568610,
-    #                                    tzinfo= < DstTzInfo
-    #     np.datetime64('now')
-    #
-    #
-    # np.datetime64('now')
-    # Out[17]: numpy.datetime64('2022-01-30T15:14:33')
     # .........................................................................
-    @tzinfo.setter
-    def tzinfo(self, val):
-        """
+    @property
+    def local_timezone(self):
+        return str(datetime.utcnow().astimezone().tzinfo)
 
-        :param val:
-        :return:
+    # .........................................................................
+    @timezone.setter
+    def timezone(self, val):
         """
-        raise NotImplementedError
+        Define the timezone information
+        """
+        try:
+            self._timezone = pytz.timezone(val)
+        except pytz.UnknownTimeZoneError as e:
+            error_(
+                f"{e}\nYou can get a list of valid timezones in "
+                "https://en.wikipedia.org/wiki/List_of_tz_database_time_zones "
+            )
 
     # ..........................................................................
     @property
-    @deprecated(type="property", replace="comment")
     def title(self):
         """Alias to the `long_name` attribute."""
+
+        warning_(
+            "Using the `title` attribute is now deprecated and could be completely "
+            "removed in version 0.5. Use `long_name` instead.",
+            DeprecationWarning,
+        )
+
         return self.long_name
 
     @title.setter
-    @deprecated(type="property", replace="comment")
+    @deprecated(type="property", replace="long_name")
     def title(self, value):
+
+        warning_(
+            "Setting the `title`attribute is now deprecated and could be completely "
+            "removed in version 0.5. Use `long_name` instead.",
+            DeprecationWarning,
+        )
+
         self.long_name = value
 
     @property
@@ -2574,7 +2612,7 @@ class NDArray(HasTraits):
             new._units = units
 
         else:
-            warnings.warn("There is no units for this NDArray!", SpectroChemPyWarning)
+            warning_("There is no units for this NDArray!", SpectroChemPyWarning)
 
         if inplace:
             self._data = new._data
@@ -2779,7 +2817,7 @@ class NDArray(HasTraits):
 
 
 class NDComplexArray(NDArray):
-    _interleaved = Bool(False)
+    _interleaved = tr.Bool(False)
 
     # ..........................................................................
     def __init__(self, data=None, **kwargs):
@@ -2861,7 +2899,7 @@ class NDComplexArray(NDArray):
     # ------------------------------------------------------------------------
 
     # ..........................................................................
-    @validate("_data")
+    @tr.validate("_data")
     def _data_validate(self, proposal):
         # validation of the _data attribute
         # overrides the NDArray method
@@ -3338,7 +3376,7 @@ class NDComplexArray(NDArray):
                     text += mkbody(data, pref, units)
 
         out = "          DATA \n"
-        out += f"        long_name: {self.long_name}\n" if self.title else ""
+        out += f"        long_name: {self.long_name}\n" if self.long_name else ""
         out += header
         out += "\0{}\0".format(textwrap.indent(text.strip(), " " * 9))
         out = out.rstrip()  # remove the trailings '\n'

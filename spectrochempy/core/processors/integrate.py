@@ -55,9 +55,9 @@ def _integrate_method(method):
 
         new.long_name = "area"
         new._units = dataset.units * dataset.coord(dim).units
-        new._history = [
+        new.history = (
             f"Dataset resulting from application of `{method.__name__}` method"
-        ]
+        )
 
         return new
 

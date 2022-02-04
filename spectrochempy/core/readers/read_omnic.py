@@ -90,8 +90,8 @@ def read_omnic(*paths, **kwargs):
         dimension) is returned (default=False).
     sortbydate : bool, optional
         Sort multiple spectra by acquisition date (default=True).
-    description : str, optional
-        A Custom description.
+    comment : str, optional
+        A Custom comment.
     content : bytes object, optional
         Instead of passing a filename for further reading, a bytes content
         can be directly provided as bytes objects.
@@ -262,8 +262,8 @@ def read_spg(*paths, **kwargs):
         dimension) is returned (default=False).
     sortbydate : bool, optional
         Sort multiple spectra by acquisition date (default=True).
-    description : str, optional
-        A Custom description.
+    comment : str, optional
+        A Custom comment.
     content : bytes object, optional
         Instead of passing a filename for further reading, a bytes content
         can be directly provided as bytes objects.
@@ -361,8 +361,8 @@ def read_spa(*paths, **kwargs):
         dimension) is returned (default=False).
     sortbydate : bool, optional
         Sort multiple spectra by acquisition date (default=True).
-    description: str, optional
-        A Custom description.
+    comment: str, optional
+        A Custom comment.
     content : bytes object, optional
         Instead of passing a filename for further reading, a bytes content
         can be directly provided as bytes objects.
@@ -458,8 +458,8 @@ def read_srs(*paths, **kwargs):
         dimension) is returned (default=False).
     sortbydate : bool, optional
         Sort multiple spectra by acquisition date (default=True).
-    description: str, optional
-        A Custom description.
+    comment: str, optional
+        A Custom comment.
     content : bytes object, optional
         Instead of passing a filename for further reading, a bytes content
         can be directly provided as bytes objects.
@@ -685,7 +685,7 @@ def _read_spg(*args, **kwargs):
     # Create Dataset Object of spectral content
     dataset.data = data
     dataset.units = units[0]
-    dataset.title = titles[0]
+    dataset.long_name = titles[0]
     dataset.name = filename.stem
     dataset.filename = filename
 
@@ -720,13 +720,13 @@ def _read_spg(*args, **kwargs):
     )
 
     # Set the NDDataset date
-    dataset._date = np.datetime64("now")
+    dataset._created = datetime.utcnow()
 
     # Set origin, description and history
-    dataset.history = f"{dataset.date}: imported from spg file {filename}"
+    dataset.history = f"imported from spg file {filename}"
     if sortbydate:
         dataset.sort(dim="y", inplace=True)
-        dataset.history = f"{dataset.date}: sorted by date"
+        dataset.history = "sorted by date"
 
     return dataset
 
@@ -848,7 +848,7 @@ def _read_spa(*args, **kwargs):
     if return_ifg is None:
         default_description = f"Omnic name: {spa_name}\nOmnic filename: {filename.name}"
         dataset.units = info02["units"]
-        dataset.title = info02["title"]
+        dataset.long_name = info02["title"]
 
         # now add coordinates
         nx = info02["nx"]
@@ -872,7 +872,7 @@ def _read_spa(*args, **kwargs):
             default_description = f"Omnic name: {spa_name} : background IFG\nOmnic filename: {filename.name}"
         spa_name += ": Sample IFG"
         dataset.units = "V"
-        dataset.title = "detector signal"
+        dataset.long_name = "detector signal"
         _x = LinearCoord(
             offset=0,
             increment=1,
@@ -888,17 +888,17 @@ def _read_spa(*args, **kwargs):
     # Set origin, description, history, date
     # Omnic spg file don't have specific "origin" field stating the oirigin of the data
 
-    dataset.description = kwargs.get("description", default_description)
+    dataset.source = kwargs.get("description", default_description)
     if "spa_history" in locals():
         dataset.history = (
             "Omnic 'DATA PROCESSING HISTORY' : \n----------------------------------\n"
             + spa_history
         )
-    dataset.history = str(datetime.now(timezone.utc)) + ":imported from spa file(s)"
+    dataset.history = "Imported from spa file(s)"
 
-    dataset._date = datetime.now(timezone.utc)
+    dataset._created = datetime.utcnow()
 
-    if dataset.x.units is None and dataset.x.title == "data points":
+    if dataset.x.units is None and dataset.x.long_name == "data points":
         # interferogram
         dataset.meta.interferogram = True
         dataset.meta.td = list(dataset.shape)
@@ -995,9 +995,9 @@ def _read_srs(*args, **kwargs):
                 background.set_coordset(x=_x)
                 background.name = background_name
                 background.units = "V"
-                background.title = "volts"
-                background.origin = "omnic"
-                background.description = "background from omnic srs file."
+                background.long_name = "volts"
+                background.source = "omnic"
+                background.source = "background from omnic srs file."
                 background.history = f"{np.datetime64('now')}: imported from srs file"
 
             else:  # this is likely the first interferogram of the series
@@ -1035,8 +1035,8 @@ def _read_srs(*args, **kwargs):
     dataset = NDDataset(data)
     dataset.name = info["name"]
     dataset.units = info["units"]
-    dataset.title = info["title"]
-    dataset.origin = "omnic"
+    dataset.long_name = info["title"]
+    dataset.source = "omnic"
 
     # now add coordinates
     spacing = (info["lastx"] - info["firstx"]) / (info["nx"] - 1)
@@ -1058,14 +1058,14 @@ def _read_srs(*args, **kwargs):
     dataset.set_coordset(y=_y, x=_x)
 
     # Set origin, description and history
-    dataset.origin = "omnic"
-    dataset.description = kwargs.get("description", "Dataset from omnic srs file.")
+    dataset.source = "omnic"
+    dataset.source = kwargs.get("description", "Dataset from omnic srs file.")
 
     dataset.history = str(
         datetime.now(timezone.utc)
     ) + ":imported from srs file {} ; ".format(filename)
 
-    if dataset.x.units is None and dataset.x.title == "data points":
+    if dataset.x.units is None and dataset.x.long_name == "data points":
         # interferogram
         dataset.meta.interferogram = True
         dataset.meta.td = list(dataset.shape)
@@ -1098,8 +1098,8 @@ def _read_srs(*args, **kwargs):
     #            units='minutes')
     # X.set_coordset(x=_x)
     # X.name = '?'
-    # X.title = '?'
-    # X.description = 'unknown'
+    # X.long_name = '?'
+    # X.source = 'unknown'
     # X.history = str(datetime.now(timezone.utc)) + ':imported from srs
 
     fid.close()

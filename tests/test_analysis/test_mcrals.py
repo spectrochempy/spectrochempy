@@ -62,14 +62,14 @@ def test_MCRALS_Jaumot():
 
     # the same with coordinates
     X.set_coordset(y=np.arange(51), x=np.arange(96))
-    X.title = "concentration"
+    X.long_name = "concentration"
     X.coordset.set_titles(y="spec coord.", x="elution time")
     X.plot(title="M1")
 
     guess = data[3]
     assert guess.name == "spure"  # spure
     guess.set_coordset(y=np.arange(4), x=np.arange(96))
-    guess.title = "concentration"
+    guess.long_name = "concentration"
     guess.coordset.set_titles(y="#components", x="elution time")
     guess.plot(title="spure")
 
@@ -137,7 +137,7 @@ def test_MCRALS_synth():
     St.plot()
 
     D = dot(C, St)
-    D.title = "intensity"
+    D.long_name = "intensity"
     D.plot()
 
     guess = EFA(D).get_conc(2)

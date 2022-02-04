@@ -16,6 +16,7 @@ __dataset_methods__ = __all__
 import warnings
 import locale
 import io
+from datetime import datetime
 
 import numpy as np
 
@@ -77,8 +78,8 @@ def read_csv(*paths, **kwargs):
         dimension) is returned (default=False).
     sortbydate : bool, optional
         Sort multiple spectra by acquisition date (default=True).
-    description: str, optional
-        A Custom description.
+    comment: str, optional
+        A Custom comment about the data.
     origin : {'omnic', 'tga'}, optional
         in order to properly interpret CSV file it can be necessary to set the origin of the spectra.
         Up to now only 'omnic' and 'tga' have been implemented.
@@ -204,12 +205,14 @@ def _read_csv(*args, **kwargs):
     name = filename.stem
     dataset.filename = filename
     dataset.name = kwargs.get("name", name)
-    dataset.title = kwargs.get("title", None)
+    dataset.long_name = kwargs.get("title", None)
     dataset.units = kwargs.get("units", None)
-    dataset.description = kwargs.get("description", '"name" ' + "read from .csv file")
-    dataset._date = np.datetime64("now")
-    dataset.history = str(dataset.date) + ":read from .csv file \n"
-    dataset._modified = dataset.date
+    dataset.comment = kwargs.get(
+        "comment", kwargs.get("description", f"{name} read from .csv file")
+    )
+    dataset._created = datetime.utcnow()
+    dataset.history = "Read from .csv file."
+    dataset._modified = dataset._created
 
     # here we can check some particular format
     origin = kwargs.get("origin", "")
@@ -235,13 +238,13 @@ def _add_omnic_info(dataset, **kwargs):
 
     # modify the dataset metadata
     dataset.units = "absorbance"
-    dataset.title = "absorbance"
+    dataset.long_name = "absorbance"
     dataset.name = name
-    dataset.description = "Dataset from .csv file: {}\n".format(desc)
-    dataset._date = np.datetime64("now")
-    dataset._modified = dataset.date
-    dataset.history = str(dataset.date) + ":read from omnic exported csv file \n"
-    dataset.origin = "omnic"
+    dataset.comment = "Dataset from .csv file: {}\n".format(desc)
+    dataset._created = datetime.utcnow()
+    dataset._modified = dataset._created
+    dataset.history = "Read from omnic exported csv file."
+    dataset.source = "omnic"
 
     # Set the NDDataset date
 
@@ -283,9 +286,9 @@ def _add_tga_info(dataset, **kwargs):
     # we add them here
     dataset.x.units = "hour"
     dataset.units = "weight_percent"
-    dataset.x.title = "time-on-stream"
-    dataset.title = "mass change"
-    dataset.origin = "tga"
+    dataset.x.long_name = "time-on-stream"
+    dataset.long_name = "mass change"
+    dataset.source = "tga"
 
     return dataset
 

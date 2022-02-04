@@ -19,11 +19,12 @@ __all__ = ["read_labspec"]
 __dataset_methods__ = __all__
 
 import numpy as np
+from datetime import datetime
 
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.readers.importer import importermethod, Importer
 from spectrochempy.core.dataset.meta import Meta
-from spectrochempy.utils import strptime64
+from spectrochempy.utils.datetimeutils import strptime64
 
 # from spectrochempy.utils.exceptions import deprecated
 
@@ -70,8 +71,8 @@ def read_labspec(*paths, **kwargs):
         dimension) is returned (default=False)
     sortbydate : bool, optional
         Sort multiple spectra by acquisition date (default=True)
-    description: str, optional
-        A Custom description.
+    comment: str, optional
+        A Custom comment.
     content : bytes object, optional
         Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
         The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
@@ -215,11 +216,11 @@ def _read_txt(*args, **kwargs):
     dataset.comment = f"Spectrum acquisition : " f"{acquired.astype('datetime64[m]')}"
 
     # Set the NDDataset date
-    dataset._date = np.datetime64("now")
-    dataset._modified = dataset.date
+    dataset._created = datetime.utcnow()
+    dataset._modified = dataset._created
 
-    # Set origin, description and history
-    dataset.history = f"{dataset.date}:imported from LabSpec6 text file {filename}"
+    # Set origin, comment and history
+    dataset.history = f"Imported from LabSpec6 text file {filename}"
 
     return dataset
 

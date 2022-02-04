@@ -67,20 +67,20 @@ def kern(K, p, q):
     NDDataset: [float64] unitless (shape: (y:100, x:10))
 
     # p and q can also be passed as coordinates:
-    >>> p = scp.Coord(np.linspace(0, 1, 100), name="pressure", title="p", units="torr")
+    >>> p = scp.Coord(np.linspace(0, 1, 100), name="pressure", long_name="p", units="torr")
     >>> q = scp.Coord(np.logspace(-10, 1, 10), name="reduced adsorption energy",
-    ...              title="$\Delta_{ads}G^{0}/RT$", units="")
+    ...              long_name="$\Delta_{ads}G^{0}/RT$", units="")
     >>> scp.kern('langmuir', p, q)
     NDDataset: [float64] unitless (shape: (y:100, x:10))
     """
 
     if not isinstance(q, Coord):  # q was passed as a ndarray
-        q = Coord(data=q, name="internal variable", title="$q$", units="")
+        q = Coord(data=q, name="internal variable", long_name="$q$", units="")
         q_was_array = True
     else:
         q_was_array = False
     if not isinstance(p, Coord):  # p was passed as a ndarray
-        p = Coord(data=p, name="external variable", title="$p$", units="")
+        p = Coord(data=p, name="external variable", long_name="$p$", units="")
         p_was_array = True
     else:
         p_was_array = False
@@ -93,10 +93,10 @@ def kern(K, p, q):
         if K.lower() in _adsorption:
             if q_was_array:  # change default values and units
                 q.name = "reduced adsorption energy"
-                q.title = "$\Delta_{ads}G^{0}/RT$"
+                q.long_name = "$\Delta_{ads}G^{0}/RT$"
             if p_was_array:  # change default values and units
                 p.name = "relative pressure"
-                p.title = "$p_/p_^{0}$"
+                p.long_name = "$p_/p_^{0}$"
 
             if K.lower() == "langmuir":
                 K_ = (
@@ -109,15 +109,15 @@ def kern(K, p, q):
                 K_ = np.ones((len(p.data), len(q.data)))
                 K_[p.data[:, None] < q.data] = 0
 
-            title = "coverage"
+            long_name = "coverage"
 
         elif K.lower() in _kinetics:
             if q_was_array:  # change default values and units
                 q.name = "Ln of rate constant"
-                q.title = "$\Ln k$"
+                q.long_name = "$\Ln k$"
             if p_was_array:  # change default values and units
                 p.name = "time"
-                p.title = "$t$"
+                p.long_name = "$t$"
                 p.units = "s"
 
             if K.lower() == "reactant-first-order":
@@ -126,19 +126,19 @@ def kern(K, p, q):
             else:  # 'product-first-order'
                 K_ = 1 - np.exp(-1 * np.exp(q.data) * p.data[:, None])
 
-            title = "coverage"
+            long_name = "coverage"
 
         elif K.lower() in _diffusion:
             if q_was_array:  # change default values and units
                 q.name = "Diffusion rate constant"
-                q.title = "$\\tau^{-1}$"
+                q.long_name = "$\\tau^{-1}$"
                 # q.to('1/s', force=True)
             if p_was_array:  # change default values and units
                 p.name = "time"
-                p.title = "$t$"
+                p.long_name = "$t$"
                 # p.to('s', force=True)
 
-            title = "fractional uptake"
+            long_name = "fractional uptake"
 
             K_ = np.zeros((p.size, q.size))
             for n in np.arange(1, 100):
@@ -152,7 +152,7 @@ def kern(K, p, q):
 
     elif callable(K):
         K_ = K(p.data, q.data)
-        title = ""
+        long_name = ""
 
     else:
         raise ValueError("K must be a str or a callable")
@@ -171,7 +171,7 @@ def kern(K, p, q):
     out.dims = ["y", "x"]
     out.y = p
     out.x = q
-    out.title = title
+    out.long_name = long_name
 
     return out
 
@@ -272,7 +272,7 @@ class IRIS:
                     raise ValueError(
                         "'p' should be consistent with the y coordinate of the dataset"
                     )
-                p = Coord(p, title="External variable")
+                p = Coord(p, long_name="External variable")
         else:
             p = X.y.default
 
@@ -552,9 +552,11 @@ class IRIS:
 
         f = NDDataset(f)
         f.name = "2D distribution functions"
-        f.title = "density"
-        f.history = "2D IRIS analysis of {} dataset".format(X.name)
-        f.set_coordset(z=Coord(data=reg_par, title="lambda"), y=q.copy(), x=channels)
+        f.long_name = "density"
+        f.history = f"2D IRIS analysis of {X.name} dataset."
+        f.set_coordset(
+            z=Coord(data=reg_par, long_name="lambda"), y=q.copy(), x=channels
+        )
         self.f = f
         self.K = K
         self.X = X
@@ -578,14 +580,14 @@ class IRIS:
 
         if len(self.reg_par) == 1:  # no regularization or single lambda
             X_hat = NDDataset(
-                np.zeros((self.X.shape)), title=self.X.title, units=self.X.units
+                np.zeros((self.X.shape)), long_name=self.X.long_name, units=self.X.units
             )
             X_hat.set_coordset(y=self.X.y, x=self.X.x)
             X_hat.data = np.dot(self.K.data, self.f.data.squeeze())
         else:
             X_hat = NDDataset(
                 np.zeros((self.f.z.size, *self.X.shape)),
-                title=self.X.title,
+                long_name=self.X.long_name,
                 units=self.X.units,
             )
             X_hat.set_coordset(z=self.f.z, y=self.X.y, x=self.X.x)
@@ -597,7 +599,7 @@ class IRIS:
         X_hat.name = "2D-IRIS Reconstructed datasets"
         return X_hat
 
-    def plotlcurve(self, scale="ll", title="L curve"):
+    def plotlcurve(self, scale="ll", long_name="L curve"):
         """
         Plot the L Curve.
 
@@ -606,7 +608,7 @@ class IRIS:
         scale : str, optional, default='ll'
             String of 2 letters among 'l' (log) or 'n' (non-log) indicating whether the y and x
             axes should be log scales.
-        title : str, optional, default='L curve'
+        long_name : str, optional, default='L curve'
             Plot title.
 
         Returns

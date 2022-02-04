@@ -106,7 +106,7 @@ class PCA(HasTraits):
         if centered:
             self._center = center = X.mean(dim=0)
             Xsc = X - center
-            Xsc.title = f"centered {X.title}"
+            Xsc.long_name = f"centered {X.long_name}"
 
         # Standardization
         # ---------------
@@ -114,7 +114,7 @@ class PCA(HasTraits):
         if standardized:
             self._std = Xsc.std(dim=0)
             Xsc /= self._std
-            Xsc.title = f"standardized {Xsc.title}"
+            Xsc.long_name = f"standardized {Xsc.long_name}"
 
         # Scaling
         # -------
@@ -124,7 +124,7 @@ class PCA(HasTraits):
             self._ampl = Xsc.ptp(dim=0)
             Xsc -= self._min
             Xsc /= self._ampl
-            Xsc.title = "scaled %s" % Xsc.title
+            Xsc.long_name = "scaled %s" % Xsc.long_name
 
         self._Xscaled = Xsc
 
@@ -141,23 +141,23 @@ class PCA(HasTraits):
         # loadings
 
         LT = VT
-        LT.title = "loadings (L^T) of " + X.name
+        LT.long_name = "loadings (L^T) of " + X.name
         LT.history = "Created by PCA"
 
         # scores
 
         S = dot(U, sigma)
-        S.title = "scores (S) of " + X.name
+        S.long_name = "scores (S) of " + X.name
         S.set_coordset(
             y=X.y,
             x=Coord(
                 None,
                 labels=["#%d" % (i + 1) for i in range(svd.s.size)],
-                title="principal component",
+                long_name="principal component",
             ),
         )
 
-        S.description = "scores (S) of " + X.name
+        S.comment = "scores (S) of " + X.name
         S.history = "Created by PCA"
 
         self._LT = LT
@@ -167,16 +167,16 @@ class PCA(HasTraits):
         # ----------------
 
         self._sv = svd.sv
-        self._sv.x.title = "PC #"
+        self._sv.x.long_name = "PC #"
 
         self._ev = svd.ev
-        self._ev.x.title = "PC #"
+        self._ev.x.long_name = "PC #"
 
         self._ev_ratio = svd.ev_ratio
-        self._ev_ratio.x.title = "PC #"
+        self._ev_ratio.x.long_name = "PC #"
 
         self._ev_cum = svd.ev_cum
-        self._ev_cum.x.title = "PC #"
+        self._ev_cum.x.long_name = "PC #"
 
         return
 
@@ -379,7 +379,7 @@ class PCA(HasTraits):
             X += self._center
 
         X.history = f"PCA reconstructed Dataset with {n_pc} principal components"
-        X.title = self._X.title
+        X.long_name = self._X.long_name
         return X
 
     def printev(self, n_pc=None):
@@ -433,12 +433,12 @@ class PCA(HasTraits):
             ylim2 = (y1, y2)
 
         ax1 = self._ev_ratio[:n_pc].plot_bar(
-            ylim=ylim1, color=color1, title="Scree plot"
+            ylim=ylim1, color=color1, long_name="Scree plot"
         )
         ax2 = self._ev_cum[:n_pc].plot_scatter(
             ylim=ylim2, color=color2, pen=True, markersize=7.0, twinx=ax1
         )
-        ax1.set_title("Scree plot")
+        ax1.set_long_name("Scree plot")
         return ax1, ax2
 
     def scoreplot(self, *pcs, colormap="viridis", color_mapping="index", **kwargs):
@@ -481,7 +481,7 @@ class PCA(HasTraits):
 
             fig = plt.figure(**kwargs)
             ax = fig.add_subplot(111)
-            ax.set_title("Score plot")
+            ax.set_long_name("Score plot")
 
             ax.set_xlabel(
                 "PC# {} ({:.3f}%)".format(pcs[0] + 1, self._ev_ratio.data[pcs[0]])
@@ -511,7 +511,7 @@ class PCA(HasTraits):
             # tridimensional score plot
             plt.figure(**kwargs)
             ax = plt.axes(projection="3d")
-            ax.set_title("Score plot")
+            ax.set_long_name("Score plot")
             ax.set_xlabel(
                 "PC# {} ({:.3f}%)".format(pcs[0] + 1, self._ev_ratio.data[pcs[0]])
             )

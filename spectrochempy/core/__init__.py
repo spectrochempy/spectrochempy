@@ -62,7 +62,7 @@ def print_(*args, **kwargs):
     """
     Formatted printing.
     """
-    stg = _format_args(*args, **kwargs)
+    stg = _format_args("", *args, **kwargs)
     print(stg)
 
 
@@ -116,13 +116,13 @@ def warning_(*args, **kwargs):
     """
     Formatted warning message.
     """
-    stg = _format_args("", "WARNING: ", *args, **kwargs)
+    stg = _format_args("", "WARNING: ", args[0], **kwargs)
     warnings.warn(stg)
     # also write warning in log
     app.logs.warning(stg)
 
 
-__all__ += ["info_", "debug_", "error_", "warning_", "print_"]
+__all__ += ["info_", "debug_", "error_", "warning_", "print_", "exception_"]
 
 # ======================================================================================
 # Progress bar
@@ -502,7 +502,7 @@ class _TKFileDialogs:  # pragma: no cover
     def _open_existing_directory(parent=None, caption="Select a folder", directory=""):
 
         directory = filedialog.askdirectory(
-            parent=parent, initialdir=directory, title=caption
+            parent=parent, initialdir=directory, long_name=caption
         )
 
         if directory:
@@ -540,7 +540,7 @@ class _TKFileDialogs:  # pragma: no cover
         filename = filedialog.askopenfilename(
             parent=parent,
             filetypes=self.filetypes(filters),
-            title="Select file to open",
+            long_name="Select file to open",
         )
 
         if parent is not None:
@@ -559,7 +559,7 @@ class _TKFileDialogs:  # pragma: no cover
         filename = filedialog.askopenfilenames(
             parent=parent,
             filetypes=self.filetypes(filters) + [("all files", ("*"))],
-            title="Select file(s) to open",
+            long_name="Select file(s) to open",
         )
 
         if parent is not None:

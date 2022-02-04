@@ -732,8 +732,8 @@ def read_topspin(*paths, **kwargs):
         dimension) is returned (default=False).
     sortbydate : bool, optional
         Sort multiple spectra by acquisition date (default=True).
-    description : str, optional
-        A Custom description.
+    comment : str, optional
+        A Custom comment.
     origin : {'omnic', 'tga'}, optional
         In order to properly interpret CSV file it can be necessary to set the origin of the spectra.
         Up to now only 'omnic' and 'tga' have been implemented.
@@ -1073,7 +1073,7 @@ def _read_topspin(*args, **kwargs):
                 nucleus = "^{" + mass + "}" + name
             else:
                 nucleus = ""
-            coord.title = fr"$\delta\ {nucleus}$"
+            coord.long_name = fr"$\delta\ {nucleus}$"
             coords.append(coord)
 
     dataset.data = data
@@ -1086,8 +1086,8 @@ def _read_topspin(*args, **kwargs):
     dataset.meta.readonly = True
     dataset.set_coordset(*tuple(coords))
 
-    dataset.title = "intensity"
-    dataset.origin = "topspin"
+    dataset.long_name = "intensity"
+    dataset.source = "topspin"
     dataset.name = f"{f_name.name} expno:{expno} procno:{procno} ({datatype})"
     dataset.filename = f_name
 
@@ -1392,8 +1392,8 @@ def _read_topspin(*args, **kwargs):
 #         dataset.meta.update(list_meta[0])
 #         dataset.meta.readonly = True
 #         dataset.set_coordset(*tuple(list_coords[0]))  # must be a tuple
-#         dataset.title = 'intensity'
-#         dataset.origin = 'bruker'
+#         dataset.long_name = 'intensity'
+#         dataset.source = 'bruker'
 #
 #     else:
 #
@@ -1501,6 +1501,6 @@ def _read_topspin(*args, **kwargs):
 #             # in principle... if not problem above or the experiments
 #             # are not compatibles
 #             dataset.coords = [axis] + list_coords[-1]
-#             dataset.origin = 'bruker'
+#             dataset.source = 'bruker'
 #
 #     return dataset

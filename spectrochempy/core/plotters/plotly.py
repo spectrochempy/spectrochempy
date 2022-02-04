@@ -323,7 +323,7 @@
 #
 #     fig.update_layout(
 #             dict(
-#                     yaxis=_make_axis('y', label=f'{new.title} / {new.units:~P}', **kwargs),
+#                     yaxis=_make_axis('y', label=f'{new.long_name} / {new.units:~P}', **kwargs),
 #                     )
 #             )
 #

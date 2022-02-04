@@ -48,8 +48,8 @@ def _apodize_method(**units):
             # what to return
             retapod = kwargs.pop("retapod", False)
             dryrun = kwargs.pop("dryrun", False)
-            # is_nmr = dataset.origin.lower() in ["topspin", ]
-            is_ir = dataset.origin.lower() in ["omnic", "opus"]
+            # is_nmr = dataset.source.lower() in ["topspin", ]
+            is_ir = dataset.source.lower() in ["omnic", "opus"]
 
             # On which axis do we want to apodize? (get axis from arguments)
             axis, dim = dataset.get_axis(**kwargs, negative_axis=True)

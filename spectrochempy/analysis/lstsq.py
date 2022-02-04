@@ -95,16 +95,16 @@ class LSTSQ(HasTraits):
             A = NDDataset(
                 data=P[0],
                 units=Y.units / X.units,
-                title="%s/%s" % (Y.title, X.title),
+                long_name="%s/%s" % (Y.long_name, X.long_name),
             )
             B = NDDataset(
                 data=P[1] * np.ones(X.size),
                 units=Y.units,
-                title="%s at origin" % Y.title,
+                long_name="%s at origin" % Y.long_name,
             )
 
-            A.history = "Computed by spectrochempy.lstsq \n"
-            B.history = "Computed by spectrochempy.lstsq \n"
+            A.history = "Computed by spectrochempy.lstsq."
+            B.history = "Computed by spectrochempy.lstsq."
 
         return A, B
 
@@ -204,16 +204,16 @@ class NNLS(HasTraits):
             A = NDDataset(
                 data=P[0],
                 units=Y.units / X.units,
-                title="%s/%s" % (Y.title, X.title),
+                long_name="%s/%s" % (Y.long_name, X.long_name),
             )
             B = NDDataset(
                 data=P[1] * np.ones(X.size),
                 units=Y.units,
-                title="%s at origin" % Y.title,
+                long_name="%s at origin" % Y.long_name,
             )
 
-            A.history = "Computed by spectrochempy.lstsq \n"
-            B.history = "Computed by spectrochempy.lstsq \n"
+            A.history = "Computed by spectrochempy.lstsq."
+            B.history = "Computed by spectrochempy.lstsq."
 
         return A, B
 
@@ -318,16 +318,16 @@ class CurveFit(HasTraits):
             A = NDDataset(
                 data=P[0],
                 units=Y.units / X.units,
-                title="%s/%s" % (Y.title, X.title),
+                long_name="%s/%s" % (Y.long_name, X.long_name),
             )
             B = NDDataset(
                 data=P[1] * np.ones(X.size),
                 units=Y.units,
-                title="%s at origin" % Y.title,
+                long_name="%s at origin" % Y.long_name,
             )
 
-            A.history = "Computed by spectrochempy.lstsq \n"
-            B.history = "Computed by spectrochempy.lstsq \n"
+            A.history = "Computed by spectrochempy.lstsq."
+            B.history = "Computed by spectrochempy.lstsq."
 
         return A, B
 

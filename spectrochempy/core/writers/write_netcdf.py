@@ -17,7 +17,7 @@ from spectrochempy.optional import import_optional_dependency
 from spectrochempy.core import debug_
 
 from spectrochempy.core.writers.exporter import Exporter, exportermethod
-from spectrochempy.utils.datetime64 import encode_datetime64
+from spectrochempy.utils.datetimeutils import encode_datetime64
 
 __all__ = ["write_netcdf"]
 __dataset_methods__ = __all__

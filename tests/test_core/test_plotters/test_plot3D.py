@@ -25,7 +25,7 @@ def test_plot2D_as_3D():
         y=Coord(title="elution time", units="s"),
         x=Coord(title="wavenumbers", units="cm^-1"),
     )
-    X.title = "intensity"
+    X.long_name = "intensity"
     X.plot_surface()
 
     X.plot_surface(colorbar=True)

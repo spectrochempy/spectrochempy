@@ -39,8 +39,8 @@ def write_csv(dataset, filename, **kwargs):
     ----------------
     directory : str, optional
         Where to write the specified `filename`. If not specified, write in the current directory.
-    description: str, optional
-        A Custom description.
+    comment: str, optional
+        A Custom comment.
     delimiter : str, optional
         Set the column delimiter in CSV file.
         By default it is ',' or the one set in SpectroChemPy `Preferences`.
@@ -89,16 +89,16 @@ def _write_csv(*args, **kwargs):
         if dataset.ndim == 1:  # if statement for future implementation for ndim > 1....
             if dataset.coordset is not None:
                 col_coord = True
-                title_1 = dataset.coordset[-1].title
+                title_1 = dataset.coordset[-1].long_name
                 if dataset.coordset[-1].units is not None:
                     title_1 += " / " + str(dataset.coordset[-1].units)
             else:
                 col_coord = False
 
             if dataset.units is not None:
-                title_2 = dataset.title + " / " + str(dataset.units)
+                title_2 = dataset.long_name + " / " + str(dataset.units)
             else:
-                title_2 = dataset.title
+                title_2 = dataset.long_name
 
             if col_coord:
                 coltitles = [title_1, title_2]

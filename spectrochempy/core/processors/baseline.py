@@ -270,16 +270,17 @@ class BaselineCorrection(HasTraits):
         if is_descendant:
             new.sort(axis=-1, inplace=True, descend=True)
 
-        new.history = str(new.modified) + ": " + "Baseline correction." + " Method: "
+        history = "Baseline correction Method:"
         if self.method == "Multivariate":
-            new.history = "Multivariate (" + str(self.npc) + " PCs)."
+            history = f"{history} Multivariate {self.npc} PCs)."
         else:
-            new.history = "Sequential."
+            history = f"{history} Sequential."
 
         if self.interpolation == "polynomial":
-            new.history = "Interpolation: Polynomial, order=" + str(self.order) + ".\n"
+            history = f"{history} Interpolation: Polynomial, order={self.order}"
         else:
-            new.history = "Interpolation: Pchip. \n"
+            history = f"{history} Interpolation: Pchip."
+        new.history = history
 
         if swapped:
             new = new.swapdims(axis, -1)

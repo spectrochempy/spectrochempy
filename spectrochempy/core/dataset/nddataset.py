@@ -15,7 +15,7 @@ import textwrap
 import sys
 
 import numpy as np
-from traitlets import HasTraits, Instance, Bool, Float, validate, default, Dict, Union
+import traitlets as tr
 from traittypes import Array
 
 from spectrochempy.core.project.baseproject import AbstractProject
@@ -146,7 +146,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         computer note where this dataset is
         created.
     comment : str, optional
-        An optional description of the nd-dataset.
+        An optional comment about the nd-dataset.
     source : str, optional
         Origin of the data: Name of organization, address, telephone number,
         name of individual contributor, etc., as appropriate.
@@ -154,6 +154,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         Region of interest (ROI) limits
     history : str, optional
         A string to add to the object history.
+    timezone : datetime.tzinfo, optional
+        The timezone where the data were created. If not specified, the local timezone
+        is assumed.
     copy : bool, optional
         Perform a copy of the passed object. Default is False.
 
@@ -179,38 +182,40 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     """
 
     # coordinates
-    _coordset = Instance(CoordSet, allow_none=True)
+    _coordset = tr.Instance(CoordSet, allow_none=True)
 
     # model data (e.g., for fit)
-    _modeldata = Array(Float(), allow_none=True)
+    _modeldata = Array(tr.Float(), allow_none=True)
 
     # some setting for NDDataset
-    _copy = Bool(False)
-    _labels_allowed = Bool(False)  # no labels for NDDataset
+    _copy = tr.Bool(False)
+    _labels_allowed = tr.Bool(False)  # no labels for NDDataset
 
     # dataset can be members of a project.
     # we use the abstract class to avoid circular imports.
-    _parent = Instance(AbstractProject, allow_none=True)
+    _parent = tr.Instance(AbstractProject, allow_none=True)
 
     # For the GUI interface
 
     # parameters state
-    _state = Dict()
+    _state = tr.Dict()
 
     # processed data (for GUI)
-    _processeddata = Array(Float(), allow_none=True)
+    _processeddata = Array(tr.Float(), allow_none=True)
 
     # processed mask (for GUI)
-    _processedmask = Union((Bool(), Array(Bool()), Instance(MaskedConstant)))
+    _processedmask = tr.Union(
+        (tr.Bool(), Array(tr.Bool()), tr.Instance(MaskedConstant))
+    )
 
     # baseline data (for GUI)
-    _baselinedata = Array(Float(), allow_none=True)
+    _baselinedata = Array(tr.Float(), allow_none=True)
 
     # reference data (for GUI)
-    _referencedata = Array(Float(), allow_none=True)
+    _referencedata = Array(tr.Float(), allow_none=True)
 
     # region ranges
-    _ranges = Instance(Meta)
+    _ranges = tr.Instance(Meta)
 
     # ------------------------------------------------------------------------
     # initialisation
@@ -294,7 +299,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             "author",
             "comment",
             "history",
-            "date",
+            "created",
             "modified",
             "source",
             "roi",
@@ -510,31 +515,31 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     # ------------------------------------------------------------------------
 
     # ..........................................................................
-    @default("_coordset")
+    @tr.default("_coordset")
     def _coordset_default(self):
         return None
 
     # ..........................................................................
-    @default("_modeldata")
+    @tr.default("_modeldata")
     def _modeldata_default(self):
         return None
 
     # ..........................................................................
-    @default("_processeddata")
+    @tr.default("_processeddata")
     def _processeddata_default(self):
         return None
 
     # ..........................................................................
-    @default("_baselinedata")
+    @tr.default("_baselinedata")
     def _baselinedata_default(self):
         return None
 
     # ..........................................................................
-    @default("_referencedata")
+    @tr.default("_referencedata")
     def _referencedata_default(self):
         return None
 
-    @default("_ranges")
+    @tr.default("_ranges")
     def _ranges_default(self):
         ranges = Meta()
         for dim in self.dims:
@@ -603,7 +608,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     # ------------------------------------------------------------------------
 
     # ..........................................................................
-    @validate("_coordset")
+    @tr.validate("_coordset")
     def _coordset_validate(self, proposal):
         coords = proposal["value"]
         return self._valid_coordset(coords)
@@ -692,7 +697,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         if self._coordset:
             # set a notifier to the updated traits of the CoordSet instance
-            HasTraits.observe(self._coordset, self._dims_update, "_updated")
+            tr.HasTraits.observe(self._coordset, self._dims_update, "_updated")
             # force it one time after this initialization
             self._coordset._updated = True
 
@@ -765,6 +770,16 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
     # ..........................................................................
     @property
+    def coordlong_names(self):
+        """
+        List of the |Coord| long_names.
+
+        Read only property. Use set_coordtitle to eventually set titles.
+        """
+        if self._coordset is not None:
+            return self._coordset.long_names
+
+    @property
     def coordtitles(self):
         """
         List of the |Coord| titles.
@@ -772,7 +787,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         Read only property. Use set_coordtitle to eventually set titles.
         """
         if self._coordset is not None:
-            return self._coordset.titles
+            return self._coordset.long_names
 
     # ..........................................................................
     @property
@@ -1169,9 +1184,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         da.attrs["comment"] = self.comment
         da.attrs["history"] = "\n".join(self.history)
         da.attrs["roi"] = self.roi
-        da.attrs["date"] = str(self.date)
-        da.attrs["modified"] = str(self.modified)
-        da.attrs["source"] = self.origin
+        da.attrs["date"] = self.created
+        da.attrs["modified"] = self.modified
+        da.attrs["source"] = self.source
         da.attrs["transposed"] = self.transposed
         da.attrs["filename"] = self.filename
         for k, v in self.preferences.items():
@@ -1220,8 +1235,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         out = ""
         out += "         name: {}\n".format(self.name)
         out += "       author: {}\n".format(self.author)
-        out += "      created: {}\n".format(self._date)
-        # out += '     modified: {}\n'.format(self._modified) if (self.modified - self.date).seconds > 1 else ''
+        out += "      created: {}\n".format(self.created)
 
         wrapper1 = textwrap.TextWrapper(
             initial_indent="",
@@ -1230,9 +1244,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             width=self._text_width,
         )
 
-        pars = self.description.strip().splitlines()
+        pars = self.comment.strip().splitlines()
         if pars:
-            out += "  description: "
+            out += "  comment: "
             desc = ""
             if pars:
                 desc += "{}\n".format(wrapper1.fill(pars[0]))

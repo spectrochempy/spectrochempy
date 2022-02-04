@@ -54,8 +54,8 @@ def read_zip(*paths, **kwargs):
         dimension) is returned (default=False).
     sortbydate : bool, optional
         Sort multiple spectra by acquisition date (default=True).
-    description: str, optional
-        A Custom description.
+    comment: str, optional
+        A Custom comment.
     origin : {'omnic', 'tga'}, optional
         in order to properly interpret CSV file it can be necessary to set the origin of the spectra.
         Up to now only 'omnic' and 'tga' have been implemented.

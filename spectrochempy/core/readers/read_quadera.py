@@ -68,8 +68,8 @@ def read_quadera(*paths, **kwargs):
         Default value is False. If True, and several filenames have been provided as arguments,
         then a single dataset with merged (stacked along the first
         dimension) is returned (default=False)
-    description: str, optional
-        A Custom description.
+    comment: str, optional
+        A Custom comment.
     content : bytes object, optional
         Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
         The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
@@ -189,7 +189,7 @@ def _read_asc(*args, **kwargs):
 
     dataset = NDDataset(ioncurrent)
     dataset.name = filename.stem
-    dataset.title = "ion current"
+    dataset.long_name = "ion current"
     dataset.units = "amp"
 
     if timestamp:
@@ -201,11 +201,11 @@ def _read_asc(*args, **kwargs):
     dataset.set_coordset(y=_y, x=_x)
 
     # Set the NDDataset date
-    dataset._date = np.datetime64("now")
-    dataset._modified = dataset.date
+    dataset._created = datetime.utcnow()
+    dataset._modified = dataset._created
 
-    # Set origin, description and history
-    dataset.history = f"{dataset.date}: imported from Quadera asc file {filename}"
+    # Set origin, comment and history
+    dataset.history = f"Imported from Quadera asc file {filename}"
 
     return dataset
 

@@ -359,37 +359,3 @@ def align(dataset, *others, **kwargs):
     # Now return
 
     return tuple(objects)
-
-    # if method == 'interpolate':  #  #     # reorders dataset and reference  # in ascending order  #     is_sorted
-    # = False  #     if  # dataset.coordset(axis).reversed:  #         datasetordered =  # dataset.sort(axis,
-    # descend=False)  #         refordered = ref.sort(  # refaxis, descend=False)  #         is_sorted = True  #
-    # else:  #  # datasetordered = dataset.copy()  #         refordered = ref.copy()  #  #     try:  #
-    # datasetordered.coordset(axis).to(  #     refordered.coordset(refaxis).units)  #     except:  #  #     raise
-    # ValueError(  #             'units of the dataset and  #     reference axes on which interpolate are not
-    # compatible')  #  #  #     oldaxisdata = datasetordered.coordset(axis).data  #  #     refaxisdata =
-    # refordered.coordset(refaxis).data  # TODO: at the  #      end restore the original order  #  #     method =
-    #  kwargs.pop(  #      'method', 'linear')  #     fill_value = kwargs.pop('fill_value',  #      np.NaN)  #  #
-    #  if method == 'linear':  #         interpolator  #      = lambda data, ax=0: scipy.interpolate.interp1d(  #  #
-    #  oldaxisdata, data, axis=ax, kind=method, bounds_error=False,  #             fill_value=fill_value,
-    #  assume_sorted=True)  #  #     elif  #             method == 'pchip':  #         interpolator = lambda data,
-    #             ax=0: scipy.interpolate.PchipInterpolator(  #  #             oldaxisdata, data, axis=ax,
-    #             extrapolate=False)  #  #             else:  #         raise AttributeError(f'{method} is not a  #
-    #             recognised option method for `align`')  #  #  #             interpolate_data = interpolator(
-    #             datasetordered.data,  #             axis)  #     newdata = interpolate_data(refaxisdata)  #  #  #
-    #             if datasetordered.is_masked:  #         interpolate_mask =  #             interpolator(
-    #             datasetordered.mask, axis)  #         newmask  #             = interpolate_mask(refaxisdata)  #
-    #             else:  #  #             newmask = NOMASK  #  #     # interpolate_axis =  #
-    #             interpolator(datasetordered.coordset(axis).data)  #     #  #             newaxisdata =
-    #             interpolate_axis(refaxisdata)  #  #             newaxisdata = refaxisdata.copy()  #  #     if
-    #             method ==  #             'pchip' and not np.isnan(fill_value):  #         index =  #
-    #             np.any(np.isnan(newdata))  #         newdata[index] =  #             fill_value  #  #
-    #             index = np.any(np.isnan(  #             newaxisdata))  #         newaxisdata[index] = fill_value
-    #  #     # create the new axis  #     newaxes = dataset.coords.copy()  #  #  newaxes[axis]._data = newaxisdata
-    #     newaxes[axis]._labels =  #  np.array([''] * newaxisdata.size)  #  #     # transform the dataset  #
-    #     inplace = kwargs.pop('inplace', False)  #  #     if inplace:  #  #     out = dataset  #     else:  #
-    #     out = dataset.copy()  #  #  #     out._data = newdata  #     out._coords = newaxes  #     out._mask  #
-    #     = newmask  #  #     out.name = dataset.name  #     out.long_name =  #     dataset.long_name  #  #     out.history
-    #     = '{}: Aligned along dim {}  #     with respect to dataset {} using coords {} \n'.format(  #  #     str(
-    #     dataset.modified), axis, ref.name, ref.coords[refaxis].long_name)  #  #     if is_sorted and out.coordset(
-    #     axis).reversed:  #  #  out.sort(axis, descend=True, inplace=True)  #         ref.sort(  #  refaxis,
-    #     descend=True, inplace=True)  #  # return out

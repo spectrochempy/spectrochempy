@@ -650,7 +650,7 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     # _like as an instance method
     ds = NDDataset(x).empty_like(title="empty")
     assert ds.implements("NDDataset")
-    assert ds.title == "empty"
+    assert ds.long_name == "empty"
 
     # from an array
     x = np.array([1, 2, 3])
@@ -781,7 +781,7 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     ndd = nd.diagonal(title="diag2")
     assert str(ndd) == "NDDataset: [float64] s (size: 2)"
     assert ndd.units == Unit("s")
-    assert ndd.title == "diag2"
+    assert ndd.long_name == "diag2"
 
     cx = scp.Coord([0, 1, 2])
     cy = scp.Coord([2, 5])
@@ -792,13 +792,13 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     ndd = nd.diagonal(title="diag3")
     assert str(ndd) == "NDDataset: [float64] s (size: 2)"
     assert ndd.units == Unit("s")
-    assert ndd.title == "diag3"
+    assert ndd.long_name == "diag3"
     assert_array_equal(nd.x.data[: ndd.x.size], ndd.x.data)
 
     ndd = nd.diagonal(title="diag4", dim="y")
     assert str(ndd) == "NDDataset: [float64] s (size: 2)"
     assert ndd.units == Unit("s")
-    assert ndd.title == "diag4"
+    assert ndd.long_name == "diag4"
     assert_array_equal(nd.y.data[: ndd.y.size], ndd.y.data)
 
     # DIAG

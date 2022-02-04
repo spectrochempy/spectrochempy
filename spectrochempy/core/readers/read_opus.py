@@ -64,8 +64,8 @@ def read_opus(*paths, **kwargs):
         dimension) is returned (default=False).
     sortbydate : bool, optional
         Sort multiple spectra by acquisition date (default=True).
-    description: str, optional
-        A Custom description.
+    comment: str, optional
+        A Custom comment.
     content : bytes object, optional
         Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
         The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
@@ -218,13 +218,13 @@ def _read_opus(*args, **kwargs):
     dataset.units = "absorbance"
     dataset.long_name = "absorbance"
 
-    # Set name, origin, description and history
+    # Set name, origin, comment and history
     dataset.name = filename.name
     dataset.source = "opus"
     dataset.comment = "Dataset from opus files."
-    dataset.history = f"{np.datetime64('now')}: import from opus files"
-    dataset._date = np.datetime64("now")
-    dataset._modified = dataset.date
+    dataset.history = "Import from opus files"
+    dataset._created = datetime.utcnow()
+    dataset._modified = dataset._created
 
     return dataset
 

@@ -15,7 +15,6 @@ __dataset_methods__ = __all__
 from io import StringIO
 import numpy as np
 import requests
-from datetime import datetime, timezone
 from pathlib import Path
 
 from spectrochempy.core.dataset.nddataset import NDDataset
@@ -200,9 +199,7 @@ def download_nist_ir(CAS, index="all"):
             ds = read_jcamp("temp.jdx")
 
             # replace the default entry ":imported from jdx file":
-            ds.history[0] = ds.history[0][: len(str(datetime.now(timezone.utc)))] + (
-                f" : downloaded from NIST: {url}\n"
-            )
+            ds.history = [f"downloaded from NIST: {url}"]
             out.append(ds)
             (Path(".") / "temp.jdx").unlink()
 

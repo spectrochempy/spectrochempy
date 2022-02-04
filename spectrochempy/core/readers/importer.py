@@ -14,7 +14,6 @@ This module define a generic class to import directories, files and contents.
 __all__ = ["read", "read_dir"]
 __dataset_methods__ = __all__
 
-import numpy as np
 from warnings import warn
 from traitlets import HasTraits, List, Dict, Type, Unicode
 
@@ -256,7 +255,7 @@ class Importer(HasTraits):
                 dataset = self.objtype.stack(datasets)
                 if dataset.coordset is not None and kwargs.pop("sortbydate", True):
                     dataset.sort(dim="y", inplace=True)
-                    dataset.history = f"{np.datetime64('now')}: sorted by date"
+                    dataset.history = "Sorted by date."
                 datasets = [dataset]
 
             except DimensionsCompatibilityError as e:
@@ -317,7 +316,7 @@ def read(*paths, **kwargs):
         dimension) is returned (default=False).
     sortbydate : bool, optional
         Sort multiple spectra by acquisition date (default=True).
-    description : str, optional
+    comment : str, optional
         A Custom description.
     origin : {'omnic', 'tga'}, optional
         In order to properly interpret CSV file it can be necessary to set the origin of the spectra.

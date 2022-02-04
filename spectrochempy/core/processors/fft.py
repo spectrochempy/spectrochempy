@@ -317,10 +317,10 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
     ifft : Inverse Fourier transform.
     """
     # datatype
-    is_nmr = dataset.origin.lower() in [
+    is_nmr = dataset.source.lower() in [
         "topspin",
     ]
-    is_ir = dataset.origin.lower() in ["omnic", "opus"]
+    is_ir = dataset.source.lower() in ["omnic", "opus"]
 
     # On which axis do we want to apply transform (get axis from arguments)
     dim = kwargs.pop("dim", kwargs.pop("axis", -1))

@@ -123,8 +123,8 @@ def write(dataset, filename=None, **kwargs):
         is inferred (whnever it is possible) from the file name extension.
     directory : str, optional
         Where to write the specified `filename`. If not specified, write in the current directory.
-    description: str, optional
-        A Custom description.
+    comment: str, optional
+        A Custom comment.
     csv_delimiter : str, optional
         Set the column delimiter in CSV file.
         By default it is the one set in SpectroChemPy `Preferences`.

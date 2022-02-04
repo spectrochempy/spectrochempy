@@ -294,7 +294,7 @@ class MCRALS(HasTraits):
                 C.set_coordset(y=X.y, x=C.x)
             St = NDDataset(np.linalg.lstsq(C.data, X.data, rcond=None)[0])
             St.name = "Pure spectra profile, mcs-als of " + X.name
-            St.title = X.title
+            St.long_name = X.long_name
             cy = C.x.copy() if C.x else None
             cx = X.x.copy() if X.x else None
             St.set_coordset(y=cy, x=cx)
@@ -305,7 +305,7 @@ class MCRALS(HasTraits):
             Ct = np.linalg.lstsq(St.data.T, X.data.T, rcond=None)[0]
             C = NDDataset(Ct.T)
             C.name = "Pure conc. profile, mcs-als of " + X.name
-            C.title = "concentration"
+            C.long_name = "concentration"
             cx = St.y.copy() if St.y else None
             cy = X.y.copy() if X.y else None
             C.set_coordset(y=cy, x=cx)
@@ -611,8 +611,8 @@ class MCRALS(HasTraits):
 
         X_hat = dot(C, St)
 
-        X_hat.history = "Dataset reconstructed by MCS ALS optimization"
-        X_hat.title = "X_hat: " + self.X.title
+        X_hat.history = "Dataset reconstructed by MCS ALS optimization."
+        X_hat.long_name = "X_hat: " + self.X.long_name
         return X_hat
 
     def plotmerit(self, **kwargs):
@@ -641,5 +641,5 @@ class MCRALS(HasTraits):
             ax.plot(X_hat.T.data, color=colXhat)
             ax.plot(res.T.data, color=colRes)
         ax.autoscale(enable=True)
-        ax.set_title("MCR ALS merit plot")
+        ax.set_long_name("MCR ALS merit plot")
         return ax

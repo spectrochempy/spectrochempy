@@ -159,7 +159,7 @@ class SIMPLISMA(HasTraits):
         Pt = NDDataset.zeros((n_pc, X.shape[-1]))
         Pt.name = "Purity spectra"
         Pt.set_coordset(y=Pt.y, x=X.x)
-        Pt.y.title = "# pure compound"
+        Pt.y.long_name = "# pure compound"
 
         # weight matrix
         w = NDDataset.zeros((n_pc, X.shape[-1]))
@@ -178,7 +178,7 @@ class SIMPLISMA(HasTraits):
         C = NDDataset.zeros((X.shape[-2], n_pc))
         C.name = "Relative Concentrations"
         C.set_coordset(y=X.y, x=C.x)
-        C.x.title = "# pure compound"
+        C.x.long_name = "# pure compound"
 
         # Pure component spectral profiles
         St = NDDataset.zeros((n_pc, X.shape[-1]))
@@ -230,10 +230,10 @@ class SIMPLISMA(HasTraits):
                     # TODO: fix the code below
                     # fig1, (ax1, ax2) = plt.subplots(2,1)
                     # Pt[j, :].plot(ax=ax1)
-                    # ax1.set_title('Purity spectrum #{}'.format(j+1))
+                    # ax1.set_long_name('Purity spectrum #{}'.format(j+1))
                     # ax1.axvline(maxPCoordinate[j], color='r')
                     # s[j, :].plot(ax=ax2)
-                    # ax2.set_title('standard deviation spectrum #{}'.format(j+1))
+                    # ax2.set_long_name('standard deviation spectrum #{}'.format(j+1))
                     # ax2.axvline(maxPCoordinate[j], color='r')
                     # plt.show()
 
@@ -312,13 +312,13 @@ class SIMPLISMA(HasTraits):
                     # should plot purity and stdev, does not work for the moment
                     # TODO: fix the code below
                     # ax1.clear()
-                    # ax1.set_title('Purity spectrum #{}'.format(j+1))
+                    # ax1.set_long_name('Purity spectrum #{}'.format(j+1))
                     # Pt[j, :].plot(ax=ax1)
                     # for coord in maxPCoordinate[:-1]:
                     #     ax1.axvline(coord, color='g')
                     # ax1.axvline(maxPCoordinate[j], color='r')
                     # ax2.clear()
-                    # ax2.set_title('standard deviation spectrum #{}'.format(j+1))
+                    # ax2.set_long_name('standard deviation spectrum #{}'.format(j+1))
                     # s[j, :].plot(ax=ax2)
                     # for coord in maxPCoordinate[:-1]:
                     #     ax2.axvline(coord, color='g')
@@ -416,10 +416,10 @@ class SIMPLISMA(HasTraits):
                     info_(llog)
                     finished = True
 
-        Pt.description = "Purity spectra from SIMPLISMA:\n" + logs
-        C.description = "Concentration/contribution matrix from SIMPLISMA:\n" + logs
-        St.description = "Pure compound spectra matrix from SIMPLISMA:\n" + logs
-        s.description = "Standard deviation spectra matrix from SIMPLISMA:\n" + logs
+        Pt.comment = "Purity spectra from SIMPLISMA:\n" + logs
+        C.comment = "Concentration/contribution matrix from SIMPLISMA:\n" + logs
+        St.comment = "Pure compound spectra matrix from SIMPLISMA:\n" + logs
+        s.comment = "Standard deviation spectra matrix from SIMPLISMA:\n" + logs
 
         self._logs = logs
         self._X = X
@@ -485,8 +485,8 @@ class SIMPLISMA(HasTraits):
         # reconstruct from concentration and spectra profiles
 
         X_hat = dot(self.C, self.St)
-        X_hat.description = "Dataset reconstructed by SIMPLISMA\n" + self.logs
-        X_hat.title = "X_hat: " + self.X.title
+        X_hat.comment = "Dataset reconstructed by SIMPLISMA\n" + self.logs
+        X_hat.long_name = "X_hat: " + self.X.long_name
         return X_hat
 
     def plotmerit(self, **kwargs):
@@ -516,7 +516,7 @@ class SIMPLISMA(HasTraits):
         ax = self.X.plot(label="$X$")
         ax.plot(X_hat.data.T, color=colXhat, label=r"$\hat{X}")
         ax.plot(res.data.T, color=colRes, label="Residual")
-        ax.set_title("SIMPLISMA plot: " + self.X.name)
+        ax.set_long_name("SIMPLISMA plot: " + self.X.name)
 
         return ax
 

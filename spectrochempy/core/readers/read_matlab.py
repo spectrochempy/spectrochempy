@@ -66,8 +66,8 @@ def read_matlab(*paths, **kwargs):
         Default value is False. If True, and several filenames have been provided as arguments,
         then a single dataset with merged (stacked along the first
         dimension) is returned (default=False)
-    description: str, optional
-        A Custom description.
+    comment: str, optional
+        A Custom comment.
     content : bytes object, optional
         Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
         The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
@@ -131,7 +131,7 @@ def _read_mat(*args, **kwargs):
 
         dataset = NDDataset()
         if name == "__header__":
-            dataset.description = str(data, "utf-8", "ignore")
+            dataset.comment = str(data, "utf-8", "ignore")
             continue
         if name.startswith("__"):
             continue
@@ -152,8 +152,8 @@ def _read_mat(*args, **kwargs):
             # this is an array of numbers
             dataset.data = data
             dataset.name = name
-            dataset.history = f"{np.datetime64('now')}: imported from .mat " f"file"
-            # TODO: reshape from fortran/Matlab order to C opder
+            dataset.history = "Imported from .mat file"
+            # TODO: reshape from fortran/Matlab order to C order
             # for 3D or higher datasets ?
             datasets.append(dataset)
 
@@ -250,10 +250,10 @@ def _read_dso(dataset, name, data):
 
                 if len(data["axisscale"][0][0][i][1]):  # some titles might be present
                     try:
-                        coord.title = data["axisscale"][0][0][i][1][0]
+                        coord.long_name = data["axisscale"][0][0][i][1][0]
                     except Exception:
                         try:
-                            coord.title = data["axisscale"][0][0][i][1][0][0]
+                            coord.long_name = data["axisscale"][0][0][i][1][0][0]
                         except Exception:
                             pass
 
@@ -266,18 +266,18 @@ def _read_dso(dataset, name, data):
         dataset.set_coordset(*[coord for coord in coords])
         dataset.author = author
         dataset.name = name
-        dataset.date = date
+        dataset._created = date
 
         # TODO: reshape from fortran/Matlab order to C order
         #  for 3D or higher datasets ?
 
-        for i in data["description"][0][0]:
-            dataset.description += i
+        for i in data["comment"][0][0]:
+            dataset.comment += i
 
         for i in data["history"][0][0][0][0]:
             dataset.history.append(i)
 
-        dataset.history = f"{np.datetime64('now')}: Imported by spectrochempy "
+        dataset.history = "Imported by spectrochempy "
 
     return dataset
 

@@ -73,8 +73,8 @@ def coverages_vs_time(surface, t, returnNDDataset=False):
         surface.coverages = init_coverages
     if returnNDDataset:
         coverages = NDDataset(coverages)
-        coverages.y = Coord(t, title="time")
-        coverages.x.title = "coverage / -"
+        coverages.y = Coord(t, long_name="time")
+        coverages.x.long_name = "coverage / -"
         coverages.x.labels = surface.species_names
     return coverages
 
@@ -101,7 +101,7 @@ def concentrations_vs_time(reactive_phase, t, reactorNet=None, returnNDDataset=F
             * reactive_phase.site_density
         )
         if returnNDDataset:
-            concentrations.x.title = "concentration"
+            concentrations.x.long_name = "concentration"
         return concentrations
 
     raise NotImplementedError(
@@ -119,8 +119,8 @@ def concentrations_vs_time(reactive_phase, t, reactorNet=None, returnNDDataset=F
     #
     # if returnNDDataset:
     #     concentrations = NDDataset(concentrations)
-    #     concentrations.y = Coord(t, title='time')
-    #     concentrations.x.title = 'concentrations'
+    #     concentrations.y = Coord(t, long_name='time')
+    #     concentrations.x.long_name = 'concentrations'
     #     concentrations.x.labels = reactive_phase.species_names
 
 
@@ -477,19 +477,19 @@ class PFR:
 
         if returnNDDataset:
             X = NDDataset(X)
-            X.title = "mol fraction"
+            X.long_name = "mol fraction"
 
-            X.z = Coord(time, title="time")
+            X.z = Coord(time, long_name="time")
             X.y.labels = [r.name for r in self.cstr]
-            X.x.title = "species"
+            X.x.long_name = "species"
             X.x.labels = self.cstr[0].kinetics.species_names
 
             coverages = NDDataset(coverages)
-            coverages.title = "coverage"
-            coverages.z = Coord(time, title="time")
-            coverages.x.title = "species"
+            coverages.long_name = "coverage"
+            coverages.z = Coord(time, long_name="time")
+            coverages.x.long_name = "species"
             coverages.x.labels = self.surface[0].kinetics.species_names
-            coverages.y.title = "reactor"
+            coverages.y.long_name = "reactor"
             coverages.y.labels = [r.name for r in self.cstr]
 
         return {"X": X, "coverages": coverages}
@@ -937,7 +937,7 @@ class PFR:
         newargs = (self, all_param)
 
         trials = NDDataset(trials)
-        trials.title = "Trial solutions"
+        trials.long_name = "Trial solutions"
 
         if optimizer == "differential_evolution":
             # label trials per generation
@@ -955,7 +955,9 @@ class PFR:
 
         trials.set_coordset(
             Coord(
-                data=func_values, labels=gen_labels, title="objective function values"
+                data=func_values,
+                labels=gen_labels,
+                long_name="objective function values",
             ),
             Coord(
                 data=None,

@@ -14,9 +14,10 @@ import uuid
 import types
 import warnings
 import textwrap
-
+from datetime import datetime
 import numpy as np
 from quaternion import as_float_array, as_quat_array
+
 
 __all__ = [
     "DEFAULT_DIM_NAME",
@@ -502,7 +503,7 @@ def make_new_object(objtype):
 
     # new id and date
     new._id = "{}_{}".format(type(objtype).__name__, str(uuid.uuid1()).split("-")[0])
-    new._date = np.datetime64("now")
+    new._created = datetime.utcnow()
 
     return new
 

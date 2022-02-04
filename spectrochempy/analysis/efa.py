@@ -82,9 +82,9 @@ class EFA(HasTraits):
         f = NDDataset(
             np.zeros((M, K)),
             coordset=[X.y, Coord(range(K))],
-            title="EigenValues",
-            description=f"Forward EFA of {X.name}",
-            history=f"{np.datetime64('now')}: created by spectrochempy",
+            long_name="EigenValues",
+            comment=f"Forward EFA of {X.name}",
+            history="Created by spectrochempy.",
         )
 
         # in case some rows are masked, take this into account, by masking
@@ -110,9 +110,9 @@ class EFA(HasTraits):
         b = NDDataset(
             np.zeros((M, K)),
             coordset=[X.y, Coord(range(K))],
-            title="EigenValues",
+            long_name="EigenValues",
             name=f"Backward EFA of {X.name}",
-            history=f"{np.datetime64('now')}: created by spectrochempy ",
+            history="Created by spectrochempy.",
         )
 
         b[masked_rows] = MASKED
@@ -187,14 +187,14 @@ class EFA(HasTraits):
         f = self.f_ev
         b = self.b_ev
 
-        xcoord = Coord(range(n_pc), title="PS#")
+        xcoord = Coord(range(n_pc), long_name="PS#")
         c = NDDataset(
             np.zeros((M, n_pc)),
             coordset=CoordSet(y=self._X.y, x=xcoord),
             name=f"C_EFA[{self._X.name}]",
-            title="relative concentration",
-            description="Concentration profile from EFA",
-            history=f"{np.datetime64('now')}: created by spectrochempy",
+            long_name="relative concentration",
+            comment="Concentration profile from EFA",
+            history="Created by spectrochempy.",
         )
         if self._X.is_masked:
             masked_rows = np.all(self._X.mask, axis=-1)

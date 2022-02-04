@@ -10,6 +10,7 @@ __all__ = ["concatenate", "stack"]
 
 __dataset_methods__ = __all__
 
+from datetime import datetime
 import numpy as np
 from warnings import warn
 from orderedset import OrderedSet
@@ -314,25 +315,25 @@ def concatenate(*datasets, **kwargs):
 
     thist = "Stack" if axis == 0 else "Concatenation"
 
-    out.description = "{} of {}  datasets:\n".format(thist, len(datasets))
-    out.description += "( {}".format(datasets[0].name)
+    out.comment = "{} of {}  datasets:\n".format(thist, len(datasets))
+    out.comment += "( {}".format(datasets[0].name)
     out.long_name = datasets[0].long_name
     authortuple = (datasets[0].author,)
 
     for dataset in datasets[1:]:
 
         if out.long_name != dataset.long_name:
-            warn("Different data long_name => the title is that of the 1st dataset")
+            warn("Different data long_name => the long_name is that of the 1st dataset")
 
         if not (dataset.author in authortuple):
             authortuple = authortuple + (dataset.author,)
             out.author = out.author + " & " + dataset.author
 
-        out.description += ", {}".format(dataset.name)
+        out.comment += ", {}".format(dataset.name)
 
-    out.description += " )"
-    out._date = out._modified = np.datetime64("now")
-    out._history = [str(out.date) + ": Created by %s" % thist]
+    out.comment += " )"
+    out._created = out._modified = datetime.utcnow()
+    out._history = f"Created by {thist}"
 
     return out
 

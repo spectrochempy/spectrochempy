@@ -196,7 +196,7 @@ def _read_carroucell(*args, **kwargs):
                 ]
                 T_ds = interpolator(tstamp_ds)
                 newlabels = np.hstack((ds.y.labels, T_ds.reshape((50, 1))))
-                ds.y = Coord(title=ds.y.title, data=ds.y.data, labels=newlabels)
+                ds.y = Coord(title=ds.y.long_name, data=ds.y.data, labels=newlabels)
 
     if len(datasets) == 1:
         return datasets[0]  # a single dataset is returned

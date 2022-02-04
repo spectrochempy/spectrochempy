@@ -208,12 +208,12 @@ def test_1D_NDDataset(a):
             assert ds.dtype is None
         else:
             assert ds.dtype == np.float32
-        assert ds.title == "<untitled>"
+        assert ds.long_name == "<untitled>"
         assert ds.mask == scp.NOMASK
         assert ds.meta == {}
         assert ds.name.startswith("NDDataset")
         assert ds.author == get_user_and_node()
-        assert ds.description == ""
+        assert ds.comment == ""
         assert ds.history == []
 
 
@@ -236,13 +236,13 @@ def test_2D_NDDataset(arr):
     else:
         assert ds.dtype == np.float64
         assert ds.dims == ["y", "x"][-ds.ndim :]
-    assert ds.title == "<untitled>"
+    assert ds.long_name == "<untitled>"
     assert ds.mask == scp.NOMASK
     assert ds.meta == {}
     assert ds.name.startswith("NDDataset")
     assert ds.author == get_user_and_node()
     assert not ds.history
-    assert ds.description == ""
+    assert ds.comment == ""
     # force dtype
     ds = scp.NDDataset(arr, dtype=np.float32)
     if ds.size == 0:
@@ -305,7 +305,7 @@ def test_nddataset_coordset():
         coordunits=["cm^-1", "s", "K"],
     )
     assert da.shape == (10, 7, 3)
-    assert da.coordset.titles == ["temperature", "time-on-stream", "wavelength"]
+    assert da.coordset.long_names == ["temperature", "time-on-stream", "wavelength"]
     assert da.coordset.names == ["x", "y", "z"]
     assert da.coordunits == [ur.Unit("K"), ur.Unit("s"), ur.Unit("cm^-1")]
     # order of dims follow data shape, but not necessarily the coord list (
@@ -317,7 +317,7 @@ def test_nddataset_coordset():
     assert dat.dims == ["x", "y", "z"]
     # dims changed but did not change coords order !
     assert dat.coordset.names == sorted(dat.dims)
-    assert dat.coordtitles == da.coordset.titles
+    assert dat.coordtitles == da.coordset.long_names
     assert dat.coordunits == da.coordset.units
 
     # too many coordinates
@@ -331,7 +331,7 @@ def test_nddataset_coordset():
         coordlong_names=coordtitles,
         coordunits=coordunits,
     )
-    assert daa.coordset.titles == coordtitles[::-1]
+    assert daa.coordset.long_names == coordtitles[::-1]
     assert daa.dims == ["z", "y", "x"]
     # with a CoordSet
     c0, c1 = scp.Coord(labels=["d%d" % i for i in range(6)]), scp.Coord(
@@ -792,16 +792,16 @@ def test_nddataset_with_mask_acts_like_masked_array():
 def test_nddataset_creationdate():
     ndd = scp.NDDataset([1.0, 2.0, 3.0])
     ndd2 = np.sqrt(ndd)
-    assert ndd2._date is not None
+    assert ndd2._created is not None
 
 
 def test_nddataset_title():
     ndd = scp.NDDataset([1.0, 2.0, 3.0], title="xxxx")
-    assert ndd.title == "xxxx"
+    assert ndd.long_name == "xxxx"
     ndd2 = scp.NDDataset(ndd, title="yyyy")
-    assert ndd2.title == "yyyy"
-    ndd2.title = "zzzz"
-    assert ndd2.title == "zzzz"
+    assert ndd2.long_name == "yyyy"
+    ndd2.long_name = "zzzz"
+    assert ndd2.long_name == "zzzz"
 
 
 def test_nddataset_real_imag():
@@ -957,8 +957,8 @@ def test_nddataset_use_of_mask(dsm):
 # ------------------------------------------------------------------
 def test_nddataset_repr_html_bug_undesired_display_complex():
     da = scp.NDDataset([1, 2, 3])
-    da.title = "intensity"
-    da.description = "Some experimental measurements"
+    da.long_name = "intensity"
+    da.source = "Some experimental measurements"
     da.units = "dimensionless"
     assert "(complex)" not in da._repr_html_()
     pass

@@ -822,7 +822,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
             self.log
         )  # we change the no name in order to avoid latter conflict with numpy.log
 
-        self.logs.setLevel(0)  # reset to NOTSET
+        self.logs.setLevel(WARNING)  # reset to WARNING
 
         # Set a log filehandler
         logdir = self.get_config_dir().parent / "logs"

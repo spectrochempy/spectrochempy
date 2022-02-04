@@ -40,4 +40,4 @@ from .zip import *
 from .exceptions import *
 from .version import *
 from .print_versions import *
-from .datetime64 import *
+from .datetimeutils import *

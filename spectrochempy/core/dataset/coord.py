@@ -927,7 +927,7 @@ class Coord(NDMath, NDArray):
                     # some attribute of NDDataset are missing in NDArray
                     pass
             try:
-                self.history = f"Copied from object:{data.name}"
+                self.history = f"Copied from object:{data.name}."
             except AttributeError:
                 pass
 
@@ -946,7 +946,7 @@ class Coord(NDMath, NDArray):
                     # some attribute of NDDataset are missing in NDArray
                     pass
             try:
-                self.history = f"Copied from object:{data.name}"
+                self.history = f"Copied from object:{data.name}."
             except AttributeError:
                 pass
 

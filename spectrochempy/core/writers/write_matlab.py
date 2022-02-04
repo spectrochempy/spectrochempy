@@ -33,8 +33,8 @@ def write_matlab(dataset, filename, **kwargs):
     ----------------
     directory : str, optional
         Where to write the specified `filename`. If not specified, write in the current directory.
-    description: str, optional
-        A Custom description.
+    comment: str, optional
+        A Custom comment.
 
     Returns
     -------

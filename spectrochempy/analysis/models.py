@@ -82,7 +82,7 @@ def make_units_compatibility(func):
             res = NDDataset(_data, units=ampl_units)
             res.x = LinearCoord(xinput)
             res.name = cls.__class__.__name__.split("model")[0]
-            res.title = "intensity"
+            res.long_name = "intensity"
 
         else:
             res = _data

@@ -38,8 +38,8 @@ def write_jcamp(dataset, filename, **kwargs):
     ----------------
     directory : str, optional
         Where to write the specified `filename`. If not specified, write in the current directory.
-    description: str, optional
-        A Custom description.
+    comment: str, optional
+        A Custom comment.
 
     Returns
     -------
@@ -97,7 +97,7 @@ def _write_jcamp(*args, **kwargs):
                     timestamp_index = i
 
         if timestamp_index is None:
-            timestamp = np.datetime64("now")
+            timestamp = datetime.utcnow()
 
         for i in range(dataset.shape[0]):
 
@@ -110,7 +110,7 @@ def _write_jcamp(*args, **kwargs):
                 fid.write(f"##TITLE={title}\n")
                 fid.write("##JCAMP-DX=5.01\n")
 
-            fid.write(f"##ORIGIN={dataset.origin}\n")
+            fid.write(f"##ORIGIN={dataset.source}\n")
             fid.write(f"##OWNER={dataset.author}\n")
 
             if timestamp_index is not None:

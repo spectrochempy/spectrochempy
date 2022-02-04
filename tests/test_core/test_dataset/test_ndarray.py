@@ -122,7 +122,7 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert d0.shape == ()
     assert d0.id.startswith("NDArray")
     assert d0.name == d0.id
-    assert d0.title == "<untitled>"
+    assert d0.long_name == "<untitled>"
     assert d0.ndim == 0
     assert d0.size is None
     assert not d0.is_masked
@@ -138,11 +138,11 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     d0.data = [1, 2, 3]  # put some data
     assert_array_equal(d0.data, np.array([1, 2, 3]))
     assert d0.dtype in TYPE_INTEGER
-    assert d0.date.astype("datetime64[D]") == np.datetime64("now", "D")
+    assert d0._created.astype("datetime64[D]") == np.datetime64("now", "D")
     d0.name = "xxxx"
     assert d0.name == "xxxx"
-    d0.title = "yyyy"
-    assert d0.title == "yyyy"
+    d0.long_name = "yyyy"
+    assert d0.long_name == "yyyy"
     d0.meta = []
     d0.meta.something = "a_value"
     assert d0.meta.something == "a_value"
@@ -204,7 +204,7 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     # initialization with an NDArray object
 
     d6 = NDArray(ndarraymask)
-    assert d6.title == "<untitled>"
+    assert d6.long_name == "<untitled>"
     assert d6.shape == refarray.shape
     assert d6.dims == ["y", "x"]
     assert d6.size == refarray.size
@@ -243,9 +243,9 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert d8.shape == refarray.shape
     assert d8.data.dtype == np.int64
     assert d8.dims == ["y", "x"]
-    assert d8.title == "<untitled>"
-    assert d8.description == "with mask"
-    assert d8.desc == d8.description
+    assert d8.long_name == "<untitled>"
+    assert d8.source == "with mask"
+    assert d8.desc == d8.source
     assert len(ndarraymask.history) == 1  # one line already in
     assert len(d8.history) == 2  # copy added
 

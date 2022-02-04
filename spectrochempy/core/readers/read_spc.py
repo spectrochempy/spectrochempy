@@ -16,7 +16,7 @@ __dataset_methods__ = __all__
 
 import io
 import struct
-from datetime import datetime, timezone
+from datetime import datetime
 import numpy as np
 from warnings import warn
 
@@ -72,8 +72,8 @@ def read_spc(*paths, **kwargs):
         dimension) is returned (default=False).
     sortbydate : bool, optional
         Sort multiple spectra by acquisition date (default=True).
-    description: str, optional
-        A Custom description.
+    comment: str, optional
+        A Custom comment.
     content : bytes object, optional
         Instead of passing a filename for further reading, a bytes content
         can be directly provided as bytes objects.
@@ -533,8 +533,8 @@ def _read_spc(*args, **kwargs):
     dataset = NDDataset(np.expand_dims(floatY, axis=0))
     dataset.name = str(filename)
     dataset.units = y_unit
-    dataset.title = y_title
-    dataset.origin = "thermo galactic"
+    dataset.long_name = y_title
+    dataset.source = "thermo galactic"
 
     # now add coordinates
     _y = Coord(
@@ -546,40 +546,36 @@ def _read_spc(*args, **kwargs):
 
     dataset.set_coordset(y=_y, x=_x)
 
-    dataset.description = kwargs.get("description", "Dataset from spc file.\n")
+    dataset.source = kwargs.get("description", "Dataset from spc file.\n")
     if ord(Fexper) != 0 and ord(Fexper) != 7:
-        dataset.description += "Instrumental Technique: " + technique + "\n"
+        dataset.source += "Instrumental Technique: " + technique + "\n"
     if Fres != b"\x00\x00\x00\x00\x00\x00\x00\x00\x00":
-        dataset.description += "Resolution: " + sres + "\n"
+        dataset.source += "Resolution: " + sres + "\n"
     if Fsource != b"\x00\x00\x00\x00\x00\x00\x00\x00\x00":
-        dataset.description += "Source Instrument: " + ssource + "\n"
+        dataset.source += "Source Instrument: " + ssource + "\n"
     if (
         Fcmnt
         != b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
     ):
-        dataset.description += "Memo: " + scmnt + "\n"
+        dataset.source += "Memo: " + scmnt + "\n"
     if Flogoff:
         if Logtxto:
-            dataset.description += "Log Text: \n---------\n"
-            dataset.description += logtxt
-            dataset.description += "---------\n"
+            dataset.source += "Log Text: \n---------\n"
+            dataset.source += logtxt
+            dataset.source += "---------\n"
         if Logbins or Logsizd:
             if Logtxto:
-                dataset.description += (
+                dataset.source += (
                     "Note: The Log block of the spc file also contains: \n"
                 )
             else:
-                dataset.description += (
-                    "Note: The Log block of the spc file contains: \n"
-                )
+                dataset.source += "Note: The Log block of the spc file contains: \n"
             if Logbins:
-                dataset.description += f"a Log binary block of size {Logbins} bytes "
+                dataset.source += f"a Log binary block of size {Logbins} bytes "
             if Logsizd:
-                dataset.description += f"a Log disk block of size {Logsizd} bytes "
+                dataset.source += f"a Log disk block of size {Logsizd} bytes "
 
-    dataset.history = str(
-        datetime.now(timezone.utc)
-    ) + ":imported from spc file {} ; ".format(filename)
+    dataset.history = f"Imported from spc file {filename}."
 
     if y_unit == "Interferogram":
         # interferogram

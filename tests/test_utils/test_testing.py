@@ -53,7 +53,7 @@ def test_compare_ndarrays(IR_dataset_1D):
 
     # equality does not depend on title
     nda3 = nda1.copy()
-    nda3.title = "xxx"
+    nda3.long_name = "xxx"
     testing.assert_ndarray_equal(nda1, nda3)
 
     # should have same units
@@ -94,7 +94,7 @@ def test_compare_coords(IR_dataset_2D):
 
     # equality do depend on title for coordinates
     y3 = y1.copy()
-    y3.title = "xxx"
+    y3.long_name = "xxx"
     with pytest.raises(AssertionError):
         testing.assert_coord_equal(y1, y3)
 
@@ -125,7 +125,7 @@ def test_compare_dataset(IR_dataset_1D):
     testing.assert_dataset_equal(nd1, nd2)
 
     nd3 = nd1.copy()
-    nd3.title = "ddd"
+    nd3.long_name = "ddd"
 
     with pytest.raises(AssertionError):
         testing.assert_dataset_equal(nd1, nd3)

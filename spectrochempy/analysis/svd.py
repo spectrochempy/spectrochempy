@@ -169,10 +169,10 @@ class SVD(HasTraits):
         # -------------------------------------------------------
 
         s = NDDataset(s)
-        s.title = "singular values of " + X.name
+        s.long_name = "singular values of " + X.name
         s.name = "sigma"
-        s.history = "Created by SVD \n"
-        s.description = (
+        s.history = "Created by SVD."
+        s.comment = (
             "Vector of singular values obtained  by SVD " "decomposition of " + X.name
         )
         self.s = s
@@ -207,28 +207,32 @@ class SVD(HasTraits):
             # --------------------------------
             U = NDDataset(U)
             U.name = "U"
-            U.title = "left singular vectors of " + X.name
+            U.long_name = "left singular vectors of " + X.name
             U.set_coordset(
-                x=Coord(labels=[f"#{i + 1}" for i in range(KU)], title="Components"),
+                x=Coord(
+                    labels=[f"#{i + 1}" for i in range(KU)], long_name="Components"
+                ),
                 y=X.y,
             )
-            U.description = "left singular vectors of " + X.name
-            U.history = "Created by SVD \n"
+            U.comment = "left singular vectors of " + X.name
+            U.history = "Created by SVD."
 
             # Returns the loadings (VT) as a NDDataset object
             # ------------------------------------------------
 
             VT = NDDataset(VT)
             VT.name = "V.T"
-            VT.title = "loadings (V.t) of " + X.name
+            VT.long_name = "loadings (V.t) of " + X.name
             VT.set_coordset(
                 x=X.x,
-                y=Coord(labels=[f"#{i + 1}" for i in range(KV)], title="Components"),
+                y=Coord(
+                    labels=[f"#{i + 1}" for i in range(KV)], long_name="Components"
+                ),
             )
-            VT.description = (
+            VT.comment = (
                 "Loadings obtained by singular value decomposition of " + X.name
             )
-            VT.history = str(VT.modified) + ": Created by SVD \n"
+            VT.history = "Created by SVD."
             # loadings keep the units of the original data
             VT.units = units
 
@@ -259,9 +263,13 @@ class SVD(HasTraits):
         size = self.s.size
         sv = self.s.copy()
         sv.name = "sv"
-        sv.title = "singular values"
+        sv.long_name = "singular values"
         sv.set_coordset(
-            Coord(None, labels=[f"#{(i + 1)}" for i in range(size)], title="Components")
+            Coord(
+                None,
+                labels=[f"#{(i + 1)}" for i in range(size)],
+                long_name="Components",
+            )
         )
         return sv
 
@@ -273,9 +281,13 @@ class SVD(HasTraits):
         size = self.s.size
         ev = self.s ** 2 / (size - 1)
         ev.name = "ev"
-        ev.title = "explained variance"
+        ev.long_name = "explained variance"
         ev.set_coordset(
-            Coord(None, labels=[f"#{(i + 1)}" for i in range(size)], title="Components")
+            Coord(
+                None,
+                labels=[f"#{(i + 1)}" for i in range(size)],
+                long_name="Components",
+            )
         )
         return ev
 
@@ -286,7 +298,7 @@ class SVD(HasTraits):
         """
         ev_cum = np.cumsum(self.ev_ratio)
         ev_cum.name = "ev_cum"
-        ev_cum.title = "cumulative explained variance"
+        ev_cum.long_name = "cumulative explained variance"
         ev_cum.units = "percent"
         return ev_cum
 
@@ -297,7 +309,7 @@ class SVD(HasTraits):
         """
         ratio = self.ev * 100.0 / np.sum(self.ev)
         ratio.name = "ev_ratio"
-        ratio.title = "explained variance"
+        ratio.long_name = "explained variance"
         ratio.units = "percent"
         return ratio
 

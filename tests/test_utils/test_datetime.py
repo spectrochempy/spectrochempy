@@ -7,7 +7,7 @@
 import numpy as np
 from datetime import datetime
 
-from spectrochempy.utils.datetime64 import strptime64
+from spectrochempy.utils.datetimeutils import strptime64
 
 
 def test_get_strptime64_method():

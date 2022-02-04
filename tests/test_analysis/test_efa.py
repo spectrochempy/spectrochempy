@@ -60,7 +60,7 @@ def test_EFA(IR_dataset_2D):
 
     dataset = scp.dot(dsc.T, dss)
     dataset.data = np.random.normal(dataset.data, 0.2)
-    dataset.title = "intensity"
+    dataset.long_name = "intensity"
 
     dataset.plot()
     show()

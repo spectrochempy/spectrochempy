@@ -310,6 +310,6 @@ def find_peaks(
             ]
 
     out.name = "peaks of " + X.name
-    out.history = f"{np.datetime64('now')}: find_peaks(): {len(peaks)} peak(s) found"
+    out.history = f"Find_peaks(): {len(peaks)} peak(s) found."
 
     return out, properties

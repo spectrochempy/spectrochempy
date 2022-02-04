@@ -67,8 +67,8 @@ def read_jcamp(*paths, **kwargs):
         dimension) is returned (default=False).
     sortbydate : bool, optional
         Sort multiple spectra by acquisition date (default=True).
-    description: str, optional
-        A Custom description.
+    comment: str, optional
+        A Custom comment.
     content : bytes object, optional
         Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
         The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
@@ -342,7 +342,7 @@ def _read_jdx(*args, **kwargs):
         _y = Coord()
     dataset.set_coordset(y=_y, x=_x)
 
-    # Set origin, description and history
+    # Set origin, comment and history
     if nspec > 1:
         sources = set(allsources)
         if len(sources) == 0:
@@ -354,17 +354,17 @@ def _read_jdx(*args, **kwargs):
 
     dataset.comment = "Dataset from jdx file: '{0}'".format(jdx_long_name)
 
-    dataset.history = f"{np.datetime64('now')}: imported from jdx file"
+    dataset.history = "Imported from jdx file"
 
     if sortbydate and nspec > 1:
         dataset.sort(dim="x", inplace=True)
-        dataset.history = f"{np.datetime64('now')}: sorted by date"
+        dataset.history = "Sorted by date"
     # Todo: make sure that the lowest index correspond to the largest wavenumber
     #  for compatibility with dataset created by read_omnic:
 
     # Set the NDDataset date
-    dataset._date = np.datetime64("now")
-    dataset._modified = dataset.date
+    dataset._created = datetime.utcnow()
+    dataset._modified = dataset._created
 
     return dataset
 

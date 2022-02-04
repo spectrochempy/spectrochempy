@@ -248,7 +248,7 @@ def pk_exp(dataset, phc0=0.0, pivot=0.0, exptc=0.0, **kwargs):
 #
 #     """
 #     # options evaluation
-#     parser = argparse.ArgumentParser(description='PK processing.', usage="""
+#     parser = argparse.ArgumentParser(comment='PK processing.', usage="""
 #     pk [-h] [--auto] [--fit_phc1] [--ediff EDIFF]
 #                            [--gamma GAMMA] [--select {standard,max,cols}]
 #                            [--threshold THRESHOLD] [--mode MODE]

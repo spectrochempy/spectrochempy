@@ -580,10 +580,10 @@ class NDMath(object):
         if fname in self._remove_long_name:
             new.long_name = f"<{fname}>"
         elif fname not in self._keep_long_name and isinstance(new, NDArray):
-            if hasattr(new, "long_name") and new.title is not None:
-                new.title = f"{fname}({new.title})"
+            if hasattr(new, "long_name") and new.long_name is not None:
+                new.long_name = f"{fname}({new.long_name})"
             else:
-                new.title = f"{fname}(data)"
+                new.long_name = f"{fname}(data)"
         return new
 
     # ------------------------------------------------------------------------
@@ -3095,16 +3095,15 @@ class NDMath(object):
         # Achieve an operation f on the objs
         inputs = list(inputs)  # Work with a list of objs not tuples
 
-        # By default the type of the returned result is set regarding the first obj in inputs.
-        # except for some ufuncs that can return numpy arrays or masked numpy arrays.
-        #
-        # But sometimes we have something such as 2 * nd where nd is a NDDataset: In this case we expect a dataset.
-        #
-        # For binary function, we must also determine if the function needs object with compatible units.
-        # If the object are not compatible then we raise an error
-        #
-        # The following  methods Take the objects out of the input list and get their types, dimensionality,
-        # magnitude and units. Additionally determine if we need to use operation on masked arrays and/or on quaternion.
+        # By default the type of the returned result is set regarding the first obj
+        # in inputs.except for some ufuncs that can return numpy arrays or masked
+        # numpy arrays. But sometimes we have something such as 2 * nd where nd is a
+        # NDDataset: In this case we expect a dataset.
+        # For binary function, we must also determine if the function needs object with
+        # compatible units. If the object are not compatible then we raise an error.
+        # The following  methods Take the objects out of the input list and get their
+        # types, dimensionality, magnitude and units. Additionally determine if we need
+        # to use operation on masked arrays and/or on quaternion.
 
         # is_dt64 = lambda o: o.is_dt64 if hasattr(o, "is_dt64") else False
 
@@ -3297,7 +3296,7 @@ class NDMath(object):
         if mask is not None and np.any(mask != NOMASK):
             new._mask = cpy.copy(mask)
         if history is not None and hasattr(new, "history"):
-            new._history.append(history.strip())
+            new.history = history.strip()
 
         if returntype != "LinearCoord":
             new._data = cpy.deepcopy(data)

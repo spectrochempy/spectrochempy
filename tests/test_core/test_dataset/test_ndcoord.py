@@ -100,8 +100,8 @@ def test_coord_init():
 
     # set properties
 
-    a.title = "xxxx"
-    assert a.title == "xxxx"
+    a.long_name = "xxxx"
+    assert a.long_name == "xxxx"
     a.name = "y"
     assert a.name == "y"
     a.meta = None
@@ -113,7 +113,7 @@ def test_coord_init():
     x = np.arange(10)
     y = list("abcdefghij")
     a = Coord(x, labels=y, title="processors", name="x")
-    assert a.title == "processors"
+    assert a.long_name == "processors"
     assert isinstance(a.data, np.ndarray)
     assert isinstance(a.labels, np.ndarray)
 
@@ -128,7 +128,7 @@ def test_coord_init():
 
     y = list("abcdefghij")
     a = Coord(labels=y, title="processors")
-    assert a.title == "processors"
+    assert a.long_name == "processors"
     assert isinstance(a.labels, np.ndarray)
     assert_array_equal(a.values, a.labels)
     # any kind of object can be a label
@@ -143,7 +143,7 @@ def test_coord_init():
     y = [np.datetime64(f"2017-06-{(2 * (i + 1)):02d}") for i in x]
 
     a = Coord(x, labels=y, title="time")
-    assert a.title == "time"
+    assert a.long_name == "time"
     assert isinstance(a.data, np.ndarray)
     assert isinstance(a.labels, np.ndarray)
     b = a._sort(by="label", descend=True)
@@ -153,7 +153,7 @@ def test_coord_init():
 
     # actually y can also be data
     c = Coord(y, title="time")
-    assert c.title == "time"
+    assert c.long_name == "time"
     assert isinstance(c.data, np.ndarray)
     assert isinstance(c.data[0], np.datetime64)
     assert c.dtype == np.dtype("datetime64[D]")
@@ -606,12 +606,12 @@ def test_coordset_init(coord0, coord1, coord2):
         "My name is titi",
         "wavenumber (coord0)",
     ]
-    assert coordsa.long_names == coordsa.titles
+    assert coordsa.long_names == coordsa.long_names
 
     # Dims specified
     coordsa = CoordSet(coord0, coord3, coord2, dims=["x", "y", "z"])
     assert coordsa.names == ["x", "y", "z"]
-    assert coordsa.titles == [
+    assert coordsa.long_names == [
         "wavenumber (coord0)",
         "My name is titi",
         "temperature (coord2)",
@@ -650,7 +650,7 @@ def test_coordset_init(coord0, coord1, coord2):
 
     # coordset as coordinates
     coordse = CoordSet(x=(coord1[:3], coord2[:3]), y=coord3, z=coord0)
-    assert coordse["x"].titles == CoordSet(coord1, coord2).titles
+    assert coordse["x"].long_names == CoordSet(coord1, coord2).long_names
     assert coordse["x_1"] == coord2
     assert coordse["My name is titi"] == coord3
 
@@ -794,7 +794,7 @@ def test_coordset_name_property(coord0):
 
 def test_coordset_titles_property(coord0, coord1):
     c = CoordSet(coord0, coord1)
-    assert c.titles == ["time-on-stream (coord1)", "wavenumber (coord0)"]
+    assert c.long_names == ["time-on-stream (coord1)", "wavenumber (coord0)"]
 
     with pytest.deprecated_call():
         _ = c.titles
