@@ -23,19 +23,38 @@ https://github.com/spectrochempy/spectrochempy/issues/97#issuecomment-639590022)
 
 * `NDDataset.from_xarray`: Create a new dataset from a `xarray.DataArray` object.
 
-##### Datetime coordinates
+##### Timezone info
 
+* A new attribute allows the user to change the timezone of the dataset. This affect the way 
+  attributes such are `created`are displayed. Internally stored in UTC format, they are display according to the timezone info. 
+
+##### Datetime coordinates
 
 * Coordinates can now be created with the numpy dtype  'datetime64'. Internally all datetimes will be stored in UTC.
   When reading a date or a datetime coordinates the return will be converted to the local timezone, except if the
   timezone property of the dataset is set differently.
 
+#### Other changes
+
+* History: Its behavior have been improved. See the docs for more information: .... to be completed with the link
 
 ---
 ## VERSION 0.3
 
+### version 0.3.3
+
+#### NEW FEATURES
+
+* add `download_nist_ir()` to download IR spectra from NIST/webbook
+
+* `read_spa()` now allows extracting sample and background interferograms
+
+#### BUGS FIXED
+
+* fix gettingstarted/overview.py after IRIS refactoring
 
 ### version 0.3.2
+
 #### NEW FEATURES
 
 * add `download_nist_ir()` to download IR spectra from NIST/webbook
