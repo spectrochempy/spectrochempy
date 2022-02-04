@@ -53,7 +53,7 @@ ds = scp.read("irdata/CO@Mo_Al2O3.SPG")
 
 # %%
 ds.y -= ds.y.data[0]  # start time a 0 for the  first spectrum
-ds.y.title = "time"
+ds.y.long_name = "time"
 ds.y = ds.y.to("minutes")
 
 # %% [markdown]

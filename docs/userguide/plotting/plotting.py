@@ -77,7 +77,7 @@ dataset = dataset[:, 4000.0:650.0]  # We keep only the region that we want to di
 # %%
 dataset.y -= dataset.y[0]
 dataset.y.ito("minutes")
-dataset.y.title = "relative time on stream"
+dataset.y.long_name = "relative time on stream"
 
 # %% [markdown]
 # We also mask a region that we do not want to display
@@ -133,7 +133,7 @@ _ = dataset.plot()
 # This is to avoid any output but the plot from this statement.
 #
 # Note also that the `plot()` method uses some of NDDataset metadata: the `NDDataset.x` coordinate `data` (here the
-# wavenumber values), `name` (here 'wavenumbers'), `units` (here 'cm-1') as well as the `NDDataset.title`
+# wavenumber values), `name` (here 'wavenumbers'), `units` (here 'cm-1') as well as the `NDDataset.long_name`
 # (here 'absorbance') and `NDDataset.units (here 'absorbance').
 # %% [markdown]
 # ## Changing the aspect of the plot

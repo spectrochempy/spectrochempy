@@ -96,7 +96,7 @@ newproj.print_info()
 ###############################################################################
 # Finally lets use a more useful script
 script_source_2 = """
-proj.A350.TG.plot_scatter(title='my scatter plot')
+proj.A350.TG.plot_scatter(long_name='my scatter plot')
 #show()
 """
 proj["tgscatter"] = scp.Script("tgscatter", script_source_2)

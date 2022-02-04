@@ -429,7 +429,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.rad2deg(dataset)
-out.title = "data"  # just to avoid a too long title
+out.long_name = "data"  # just to avoid a too long title
 _ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
@@ -439,7 +439,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.deg2rad(out)
-out.title = "data"
+out.long_name = "data"
 _ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]

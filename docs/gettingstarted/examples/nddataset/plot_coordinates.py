@@ -83,7 +83,7 @@ c_times = X.y.copy()
 ###############################################################################
 # Now we perform the replacement with this new coordinate:
 
-c_pressures = scp.Coord(pressures, title="pressure", units="torr")
+c_pressures = scp.Coord(pressures, long_name="pressure", units="torr")
 X.y = c_pressures
 print(X.y)
 

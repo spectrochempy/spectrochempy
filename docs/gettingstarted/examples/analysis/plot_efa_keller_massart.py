@@ -24,8 +24,8 @@ import numpy as np
 # 1) simulated chromatogram
 # *************************
 
-t = scp.Coord(np.arange(15), units="minutes", title="time")  # time coordinates
-c = scp.Coord(range(2), title="components")  # component coordinates
+t = scp.Coord(np.arange(15), units="minutes", long_name="time")  # time coordinates
+c = scp.Coord(range(2), long_name="components")  # component coordinates
 
 data = np.zeros((2, 15), dtype=np.float64)
 data[0, 3:8] = [1, 3, 6, 3, 1]  # compound 1
@@ -38,7 +38,7 @@ dsc = scp.NDDataset(data=data, coords=[c, t])
 # **********************
 
 spec = np.array([[2.0, 3.0, 4.0, 2.0], [3.0, 4.0, 2.0, 1.0]])
-w = scp.Coord(np.arange(1, 5, 1), units="nm", title="wavelength")
+w = scp.Coord(np.arange(1, 5, 1), units="nm", long_name="wavelength")
 
 dss = scp.NDDataset(data=spec, coords=[c, w])
 
@@ -48,7 +48,7 @@ dss = scp.NDDataset(data=spec, coords=[c, w])
 
 dataset = scp.dot(dsc.T, dss)
 dataset.data = np.random.normal(dataset.data, 0.2)
-dataset.title = "intensity"
+dataset.long_name = "intensity"
 
 dataset.plot()
 

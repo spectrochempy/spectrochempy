@@ -26,7 +26,7 @@ from spectrochempy import DimensionalityError, error_, MASKED
 # %%
 dataset = scp.NDDataset.read_omnic("irdata/nh4y-activation.spg")
 dataset.y -= dataset.y[0]
-dataset.y.title = "time"
+dataset.y.long_name = "time"
 dataset
 
 # %%

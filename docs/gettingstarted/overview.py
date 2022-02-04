@@ -88,7 +88,7 @@ _ = region.plot()
 
 # %% tags=[]
 region.y -= region.y[0]  # make y coordinate relative to the first point
-region.y.title = "time of dehydratation"
+region.y.long_name = "time of dehydratation"
 region -= region[-1]  # suppress the last spectra to all
 _ = region.plot(colorbar=True)
 
@@ -151,7 +151,7 @@ pressure = [
     0.90500,
     1.00400,
 ]
-ds.y = scp.Coord(pressure, title="Pressure", units="torr")
+ds.y = scp.Coord(pressure, long_name="Pressure", units="torr")
 _ = ds.plot(colormap="magma")
 
 # %% jupyter={"source_hidden": true} pycharm={"name": "#%%\n"}

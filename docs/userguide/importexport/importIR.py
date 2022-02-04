@@ -94,19 +94,19 @@ X
 # - `created` is the creation date of the NDDataset (again not that of the .spg file). It can be accessed (or even
 # changed) using `X.created`.
 #
-# - `description` indicates the complete pathname of the .spg file. As the pathname is also given in the history (below)
+# - `comment` indicates the complete pathname of the .spg file. As the pathname is also given in the history (below)
 # , it can be a good practice to give a self explaining description of the group, for instance:
 
 # %%
-X.description = "CO adsorption on CoMo/Al2O3, difference spectra"
-X.description
+X.comment = "CO adsorption on CoMo/Al2O3, difference spectra"
+X.comment
 
 # %% [markdown]
 # or directly at the import:
 
 # %%
-X = scp.read_omnic("irdata//CO@Mo_Al2O3.SPG", description="CO@CoMo/Al2O3, diff spectra")
-X.description
+X = scp.read_omnic("irdata//CO@Mo_Al2O3.SPG", comment="CO@CoMo/Al2O3, diff spectra")
+X.source
 
 # %% [markdown]
 # - `history` records changes made to the dataset. Here, right after its creation, it has been sorted by date

@@ -78,7 +78,7 @@ _ = X.plot()
 # the default coordinates (index) do the NDDataset and (iii) a proper name for these coordinates:
 
 # %%
-X.title = "absorbance"
+X.long_name = "absorbance"
 X.set_coordset(None, None)
 X.set_coordtitles(y="elution time", x="wavelength")
 X
@@ -284,7 +284,7 @@ A[1]
 
 # %%
 X2 = A[1]
-X2.title = "absorbance"
+X2.long_name = "absorbance"
 X2.set_coordset(None, None)
 X2.set_coordtitles(y="elution time", x="wavelength")
 surf = X2.plot_surface(colorbar=True, linewidth=0.2, ccount=100, figsize=(10, 5))

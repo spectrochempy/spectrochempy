@@ -50,7 +50,7 @@ X = ds[:20, 1250.0:1800.0]
 # %%
 X.y -= X.y[0]
 X.y.ito("min")
-X.y.title = "acquisition time"
+X.y.long_name = "acquisition time"
 
 # %% [markdown]
 # We set some plotting preferences and then plot the raw data
@@ -101,6 +101,6 @@ scp.plot_multiple(
 
 # %%
 diff = (inttrapz - intsimps) * 100.0 / intsimps
-diff.title = "difference"
+diff.long_name = "difference"
 diff.units = "percent"
 diff.plot(scatter=True, ms=5)

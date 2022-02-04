@@ -70,7 +70,7 @@ print(
 # Let's import a group of IR spectra, look at its content and plot it:
 
 # %%
-X = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG", description="CO adsorption, diff spectra")
+X = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG", comment="CO adsorption, diff spectra")
 X.y = (X.y - X[0].y).to("minute")
 X
 

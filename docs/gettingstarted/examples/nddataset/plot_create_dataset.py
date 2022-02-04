@@ -39,12 +39,12 @@ nd_data = np.array(
 # Coordinates
 # +++++++++++
 # The `Coord` object allow making an array of coordinates
-# with additional metadata such as units, labels, title, etc
+# with additional metadata such as units, labels, long_name, etc
 coord0 = scp.Coord(
-    data=c0, labels=["cold", "normal", "hot"], units="K", title="temperature"
+    data=c0, labels=["cold", "normal", "hot"], units="K", long_name="temperature"
 )
-coord1 = scp.Coord(data=c1, labels=None, units="minutes", title="time-on-stream")
-coord2 = scp.Coord(data=c2, labels=None, units="cm^-1", title="wavenumber")
+coord1 = scp.Coord(data=c1, labels=None, units="minutes", long_name="time-on-stream")
+coord2 = scp.Coord(data=c2, labels=None, units="cm^-1", long_name="wavenumber")
 
 ###############################################################################
 # Labels can be useful for instance for indexing
@@ -56,9 +56,12 @@ print(a)
 # +++++++++++
 # The |NDDataset| object allow making the array of data with units, etc...
 mydataset = scp.NDDataset(
-    nd_data, coordset=[coord0, coord1, coord2], title="Absorbance", units="absorbance"
+    nd_data,
+    coordset=[coord0, coord1, coord2],
+    long_name="Absorbance",
+    units="absorbance",
 )
-mydataset.description = """Dataset example created for this tutorial.
+mydataset.comment = """Dataset example created for this tutorial.
 It's a 3-D dataset (with dimensionless intensity: absorbance )"""
 mydataset.name = "An example from scratch"
 mydataset.author = "Blake and Mortimer"
