@@ -3152,6 +3152,7 @@ class NDMath(object):
             dtype = np.dtype("float")
         else:
             dtype = None
+
         # if returntype in order.keys() and objtypes[0] != returntype:
         #     # TODO: TEST, I AM NOT SURE THIS IS A POSSIBLE CASE IN SPECTROCHEMPY
         #     datas.reverse()

@@ -577,7 +577,7 @@ def test_datetime64_coordinates(IR_dataset_2D):
     # subtract a datetime to a datetime array --> should be a float
     X.y = X.y - X.y[0]  # subtract the acquisition timestamp of the first spectrum
     assert X.y.dtype == np.dtype("float")
-    assert X.y._units == ur.second
+    assert X.y.units == ur.second
 
     X.y = X.y.to("minute")  # convert to minutes
     assert X.y.units == ur.minute
