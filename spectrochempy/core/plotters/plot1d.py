@@ -302,7 +302,8 @@ def plot_1D(dataset, method=None, **kwargs):
     # Redirections ?
     # ------------------------------------------------------------------------
 
-    # should we redirect the plotting to another method
+    # should we redirect the plotting to another method if the dataset
+    # cannot be broadcasted to a 1D array
     if dataset._squeeze_ndim > 1:
         return dataset.plot_2D(**kwargs)
 
@@ -317,8 +318,7 @@ def plot_1D(dataset, method=None, **kwargs):
     # Get the data to plot
     # ---------------------------------------------------------------
 
-    new = dataset  # .copy()
-    new = new.squeeze(keepdims="x")  # Added Version 0.4
+    new = dataset.squeeze()  # Added Version 0.4
 
     # is that a plot with twin axis
     is_twinx = kwargs.get("twinx", None) is not None
@@ -422,7 +422,7 @@ def plot_1D(dataset, method=None, **kwargs):
     if scatter and pen:
         (line,) = ax.plot(
             xdata,
-            zdata.T,  # marker = marker,
+            zdata,  # marker = marker,
             markersize=markersize,
             markevery=markevery,
             markeredgewidth=1.0,
@@ -434,7 +434,7 @@ def plot_1D(dataset, method=None, **kwargs):
     elif scatter:
         (line,) = ax.plot(
             xdata,
-            zdata.T,
+            zdata,
             ls="",  # marker = marker,
             markersize=markersize,
             markeredgewidth=1.0,
@@ -450,7 +450,7 @@ def plot_1D(dataset, method=None, **kwargs):
         # bar only
         line = ax.bar(
             xdata,
-            zdata.squeeze(),
+            zdata,
             color=color,
             edgecolor="k",
             align="center",

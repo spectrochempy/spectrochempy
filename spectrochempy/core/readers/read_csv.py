@@ -266,16 +266,10 @@ def _add_omnic_info(dataset, **kwargs):
         dat = dat.replace("Aout", "Aug")
 
         # get the dates
-        acqdate = np.datetime64(dat)
-
-        # Transform back to timestamp for storage in the Coord object
-        # use datetime.fromtimestamp(d, timezone.utc))
-        # to transform back to datetime obkct
-        timestamp = acqdate.timestamp()
-
-        dataset.y = Coord(np.array([timestamp]), name="y")
+        acqdate = np.datetime64(datetime.strptime(dat, "%a %b %d %H-%M-%S %Y"))
+        dataset.y = Coord(np.array([acqdate]), name="y")
         dataset.set_coordtitles(y="acquisition timestamp (GMT)", x="wavenumbers")
-        dataset.y.labels = np.array([[acqdate], [name]])
+        dataset.y.labels = [name]
         dataset.y.units = "s"
 
     return dataset

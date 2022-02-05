@@ -73,7 +73,7 @@ def _encode_cf_variable(var):
 
     # apply to datetime64
     if np.issubdtype(data.dtype, np.datetime64):
-        new, attrs = encode_datetime64(data, attrs)
+        new, attrs = encode_datetime64(data, **attrs)
         data = new.reshape(data.shape)
 
         # case of ROI attrs

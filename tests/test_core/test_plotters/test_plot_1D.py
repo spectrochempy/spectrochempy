@@ -42,7 +42,7 @@ def test_plot_1D():
 
     # plot 1D column
     col = dataset[:, 3500.0]  # note the indexing using wavenumber!
-    _ = col.plot_scatter()  # Note that is want a 1D we must
+    _ = col.plot_scatter()
 
     # _ = col.plot_scatter(uselabel=True)
     show()
