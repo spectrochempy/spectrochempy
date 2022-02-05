@@ -36,7 +36,7 @@ def test_ndio_generic(NMR_dataset_1D):
     # save with the default filename or open a dialog if it doesn't exists
     # ------------------------------------------------------------------------
     # save with the default name (equivalent to save_as in this case)
-    # as this file (IR_1D.scp)  doesn't yet exist a confirmation dialog is opened
+    # as this file (NMR_1D.scp)  doesn't yet exist a confirmation dialog is opened
     f = nmr.save()
     assert nmr.filename == f.name
     assert nmr.directory == nmrdatadir

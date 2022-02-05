@@ -623,6 +623,10 @@ def check_filename_to_save(
             else:
                 info_(f"A file {filename} was present and has been overwritten.")
                 open_diag = False
+        else:
+            # name provided but file doesn't exist
+            caption = "Save as ..."
+            open_diag = True
 
         if not NODIAL and open_diag:
 
