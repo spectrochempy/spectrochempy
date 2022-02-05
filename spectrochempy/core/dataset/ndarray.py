@@ -2195,7 +2195,7 @@ class NDArray(tr.HasTraits):
             return self._data.size
 
     # ..........................................................................
-    def squeeze(self, dims, inplace=False, keepdims=(), **kwargs):
+    def squeeze(self, dims=None, inplace=False, keepdims=(), **kwargs):
         """
         Remove single-dimensional entries from the shape of an array.
 

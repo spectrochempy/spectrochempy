@@ -438,7 +438,7 @@ class PCA(HasTraits):
         ax2 = self._ev_cum[:n_pc].plot_scatter(
             ylim=ylim2, color=color2, pen=True, markersize=7.0, twinx=ax1
         )
-        ax1.set_long_name("Scree plot")
+        ax1.set_title("Scree plot")
         return ax1, ax2
 
     def scoreplot(self, *pcs, colormap="viridis", color_mapping="index", **kwargs):
@@ -481,7 +481,7 @@ class PCA(HasTraits):
 
             fig = plt.figure(**kwargs)
             ax = fig.add_subplot(111)
-            ax.set_long_name("Score plot")
+            ax.set_title("Score plot")
 
             ax.set_xlabel(
                 "PC# {} ({:.3f}%)".format(pcs[0] + 1, self._ev_ratio.data[pcs[0]])
@@ -511,7 +511,7 @@ class PCA(HasTraits):
             # tridimensional score plot
             plt.figure(**kwargs)
             ax = plt.axes(projection="3d")
-            ax.set_long_name("Score plot")
+            ax.set_title("Score plot")
             ax.set_xlabel(
                 "PC# {} ({:.3f}%)".format(pcs[0] + 1, self._ev_ratio.data[pcs[0]])
             )

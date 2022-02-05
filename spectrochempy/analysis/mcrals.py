@@ -641,5 +641,5 @@ class MCRALS(HasTraits):
             ax.plot(X_hat.T.data, color=colXhat)
             ax.plot(res.T.data, color=colRes)
         ax.autoscale(enable=True)
-        ax.set_long_name("MCR ALS merit plot")
+        ax.set_title("MCR ALS merit plot")
         return ax

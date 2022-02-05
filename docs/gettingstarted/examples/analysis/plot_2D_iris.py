@@ -24,14 +24,16 @@ X = scp.read("irdata/CO@Mo_Al2O3.SPG")
 # ``X`` has two coordinates:
 # * `wavenumbers` named "x"
 # * and `timestamps` (*i.e.,* the time of recording) named "y".
+
 print(X.coordset)
 
 ########################################################################################
 # Setting new coordinates
 # -----------------------
 #
-# The ``y`` coordinates of the dataset is the acquisition timestamp. However, each spectrum has been recorded
-# with a given pressure of CO in the infrared cell.
+# The ``y`` coordinates of the dataset is the acquisition timestamp.
+# However, each spectrum has been recorded with a given pressure of CO
+# in the infrared cell.
 #
 # Hence, it would be interesting to add pressure coordinates to the ``y`` dimension:
 
@@ -66,8 +68,15 @@ c_times = X.y.copy()  # the original coordinate
 X.y = [c_times, c_pressures]
 print(X.y)
 
+########################################################################################
+# You can use the `print_` method instead of `print` to get a detailed ad rich display
+# of these coordinates
+
+scp.print_(X.coordset)
+
 ###############################################################################
-# By default, the current coordinate is the first one (here `c_times`). For example, it will be used by default for
+# By default, the current coordinate is the first one (here `c_times`).
+# For example, it will be used by default for
 # plotting:
 
 prefs = X.preferences
@@ -79,7 +88,6 @@ _ = X.plot_map(colorbar=True)
 # To seamlessly work with the second coordinates (pressures), we can change the default coordinate:
 
 X.y.select(2)  # to select coordinate ``_2``
-X.y.default
 
 ########################################################################################
 # Let's now plot the spectral range of interest. The default coordinate is now used:

@@ -230,10 +230,10 @@ class SIMPLISMA(HasTraits):
                     # TODO: fix the code below
                     # fig1, (ax1, ax2) = plt.subplots(2,1)
                     # Pt[j, :].plot(ax=ax1)
-                    # ax1.set_long_name('Purity spectrum #{}'.format(j+1))
+                    # ax1.set_title('Purity spectrum #{}'.format(j+1))
                     # ax1.axvline(maxPCoordinate[j], color='r')
                     # s[j, :].plot(ax=ax2)
-                    # ax2.set_long_name('standard deviation spectrum #{}'.format(j+1))
+                    # ax2.set_title('standard deviation spectrum #{}'.format(j+1))
                     # ax2.axvline(maxPCoordinate[j], color='r')
                     # plt.show()
 
@@ -312,13 +312,13 @@ class SIMPLISMA(HasTraits):
                     # should plot purity and stdev, does not work for the moment
                     # TODO: fix the code below
                     # ax1.clear()
-                    # ax1.set_long_name('Purity spectrum #{}'.format(j+1))
+                    # ax1.set_title('Purity spectrum #{}'.format(j+1))
                     # Pt[j, :].plot(ax=ax1)
                     # for coord in maxPCoordinate[:-1]:
                     #     ax1.axvline(coord, color='g')
                     # ax1.axvline(maxPCoordinate[j], color='r')
                     # ax2.clear()
-                    # ax2.set_long_name('standard deviation spectrum #{}'.format(j+1))
+                    # ax2.set_title('standard deviation spectrum #{}'.format(j+1))
                     # s[j, :].plot(ax=ax2)
                     # for coord in maxPCoordinate[:-1]:
                     #     ax2.axvline(coord, color='g')
@@ -516,7 +516,7 @@ class SIMPLISMA(HasTraits):
         ax = self.X.plot(label="$X$")
         ax.plot(X_hat.data.T, color=colXhat, label=r"$\hat{X}")
         ax.plot(res.data.T, color=colRes, label="Residual")
-        ax.set_long_name("SIMPLISMA plot: " + self.X.name)
+        ax.set_title("SIMPLISMA plot: " + self.X.name)
 
         return ax
 

@@ -333,7 +333,7 @@ def concatenate(*datasets, **kwargs):
 
     out.comment += " )"
     out._created = out._modified = datetime.utcnow()
-    out._history = f"Created by {thist}"
+    out.history = f"Created by {thist}"
 
     return out
 
