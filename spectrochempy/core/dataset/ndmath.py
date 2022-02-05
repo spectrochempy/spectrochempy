@@ -3299,6 +3299,13 @@ class NDMath(object):
 
             new = NDDataset(new)
 
+        if returntype != "LinearCoord":
+            new._data = cpy.deepcopy(data)
+        else:
+            from spectrochempy.core.dataset.coord import LinearCoord
+
+            new = LinearCoord(cpy.deepcopy(data))
+
         # update the attributes
         new._dtype = dtype
         new._units = cpy.copy(units)
@@ -3306,13 +3313,6 @@ class NDMath(object):
             new._mask = cpy.copy(mask)
         if history is not None and hasattr(new, "history"):
             new.history = history.strip()
-
-        if returntype != "LinearCoord":
-            new._data = cpy.deepcopy(data)
-        else:
-            from spectrochempy.core.dataset.coord import LinearCoord
-
-            new = LinearCoord(cpy.deepcopy(data))
 
         # case when we want to return a simple masked ndarray
         if returntype == "masked_array":

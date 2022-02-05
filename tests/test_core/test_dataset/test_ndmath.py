@@ -1244,3 +1244,15 @@ def test_op_quantity_with_units():
     _ = t * (1 * ur("km"))
 
     _ = d + Quantity(1, "km")
+
+    t.ito(None, force=True)  # if coord has no units
+    assert t.units is None
+
+    t1 = t * Quantity(1, "km")
+    assert t1.units == ur("km")
+
+    # And with LinearCoord
+
+    v = LinearCoord.arange(1, 100, 0.1)
+    v1 = v * Quantity(1, "km")
+    assert v1.units == ur("km")

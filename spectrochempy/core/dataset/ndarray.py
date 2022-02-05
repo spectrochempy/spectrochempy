@@ -853,7 +853,7 @@ class NDArray(tr.HasTraits):
                 index = []
                 for lo in loc:
                     index.append(
-                        (self.abs(data - lo)).argmin()
+                        (np.abs(data - lo)).argmin()
                     )  # TODO: add some precision to this result
                 return index
 
