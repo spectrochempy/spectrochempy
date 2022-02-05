@@ -418,7 +418,7 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
             "preferences",
             "comment",
             "history",
-            "date",
+            "created",
             "modified",
             "source",
             "roi",

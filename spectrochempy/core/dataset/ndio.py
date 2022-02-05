@@ -345,7 +345,10 @@ class NDIO(HasTraits):
             for key, val in dic.items():
 
                 try:
-                    if "readonly" in dic.keys() and key in ["readonly", "name"]:
+                    if "readonly" in dic.keys() and key in [
+                        "readonly",
+                        "name",
+                    ]:
                         # case of the meta and preferences
                         pass
 
@@ -399,6 +402,8 @@ class NDIO(HasTraits):
                         if isinstance(obj, NDDataset) and key == "_filename":
                             obj.filename = val  # This is a hack because for some reason fileame attribute is not
                             # found ????
+                        elif key in ["_history"]:
+                            setattr(obj, "history", val)
                         else:
                             setattr(obj, key, val)
 

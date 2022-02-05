@@ -36,7 +36,7 @@ https://github.com/spectrochempy/spectrochempy/issues/97#issuecomment-639590022)
 
 #### Other changes
 
-* History: Its behavior have been improved. See the docs for more information: .... to be completed with the link
+* History: Its behavior have been improved. Dates for entries are set automatically and are timezone-aware. See the docs for more information: .... to be completed with the link
 
 ---
 ## VERSION 0.3

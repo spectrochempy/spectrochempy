@@ -22,6 +22,15 @@ from spectrochempy.utils.testing import RandomSeedContext
 # FIXTURES
 # ========
 
+with RandomSeedContext(12345):
+    ref_data = 10.0 * np.random.random((10, 8)) - 5.0
+    ref3d_data = 10.0 * np.random.random((10, 100, 3)) - 5.0
+    ref3d_2_data = np.random.random((9, 50, 4))
+
+ref_mask = ref_data < -4
+ref3d_mask = ref3d_data < -3
+ref3d_2_mask = ref3d_2_data < -2
+
 coord0_ = scp.Coord(
     data=np.linspace(4000.0, 1000.0, 10),
     labels=list("abcdefghij"),

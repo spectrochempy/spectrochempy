@@ -486,7 +486,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             "name",
             "comment",
             "history",
-            "date",
+            "created",
             "modified",
             "source",
             "show_datapoints",

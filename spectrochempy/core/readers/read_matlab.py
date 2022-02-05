@@ -271,7 +271,7 @@ def _read_dso(dataset, name, data):
         # TODO: reshape from fortran/Matlab order to C order
         #  for 3D or higher datasets ?
 
-        for i in data["comment"][0][0]:
+        for i in data["description"][0][0]:
             dataset.comment += i
 
         for i in data["history"][0][0][0][0]:

@@ -8,7 +8,7 @@
 
 # flake8: noqa
 
-
+from datetime import datetime
 from copy import copy, deepcopy
 from quaternion import as_quat_array, as_float_array, quaternion
 import numpy as np
@@ -138,7 +138,8 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     d0.data = [1, 2, 3]  # put some data
     assert_array_equal(d0.data, np.array([1, 2, 3]))
     assert d0.dtype in TYPE_INTEGER
-    assert d0._created.astype("datetime64[D]") == np.datetime64("now", "D")
+    assert isinstance(d0._created, datetime)
+    assert isinstance(d0.created, str)
     d0.name = "xxxx"
     assert d0.name == "xxxx"
     d0.long_name = "yyyy"
@@ -244,8 +245,8 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert d8.data.dtype == np.int64
     assert d8.dims == ["y", "x"]
     assert d8.long_name == "<untitled>"
-    assert d8.source == "with mask"
-    assert d8.desc == d8.source
+    assert d8.comment == "with mask"
+    assert d8.desc == d8.comment
     assert len(ndarraymask.history) == 1  # one line already in
     assert len(d8.history) == 2  # copy added
 
@@ -382,7 +383,6 @@ def test_ndarray_methods(refarray, ndarray, ndarrayunit):
     assert not nd.dimensionless  # no unit so dimensionless has no sense
 
     with assert_produces_warning(
-        SpectroChemPyWarning,
         raise_on_extra_warnings=False,
         match="There is no units for this NDArray!",
     ):
