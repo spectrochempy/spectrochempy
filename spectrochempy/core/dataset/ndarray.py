@@ -72,6 +72,25 @@ numpyprintoptions()
 # The basic NDArray class
 # ======================================================================================
 
+# ..........................................................................
+# Validators
+def _check_dtype():
+    def validator(trait, value):
+        if value.dtype.kind == "m":
+            raise TypeError(
+                f"dtype = '{value.dtype}' is not accepted.\n"
+                f"If you want to pass a timedelta64 array to the "
+                f"data attribute, use the property  "
+                f"'data' and not the hidden '_data' attribute.\n"
+                f""
+                f"e.g.,  self.data = a_timedelta64_array\n "
+                f"\tnot  self._data =a_timedelta64_array  "
+            )
+        else:
+            return value
+
+    return validator
+
 
 class NDArray(tr.HasTraits):
     """
@@ -167,7 +186,7 @@ class NDArray(tr.HasTraits):
     _id = tr.Unicode()
     _name = tr.Unicode()
     _long_name = tr.Unicode(allow_none=True)
-    _data = Array(allow_none=True)
+    _data = Array(allow_none=True).valid(_check_dtype())
     _dtype = tr.Instance(np.dtype, allow_none=True)
     _dims = tr.List(tr.Unicode())
     _mask = tr.Union((tr.Bool(), Array(tr.Bool()), tr.Instance(MaskedConstant)))
@@ -605,9 +624,8 @@ class NDArray(tr.HasTraits):
     # ..........................................................................
     @tr.validate("_data")
     def _data_validate(self, proposal):
-        # validation of the _data attribute
         data = proposal["value"]
-
+        # validation of the _data attribute
         # cast to the desired type
         if self._dtype is not None:
             data = data.astype(np.dtype(self._dtype, copy=False))
@@ -1090,8 +1108,13 @@ class NDArray(tr.HasTraits):
 
         else:
             data = np.array(data, subok=True, copy=self._copy)
-            if data.dtype == np.object_:  # likely None value
+            if data.dtype.kind == "O":  # likely None value
                 data = data.astype(float)
+
+            elif data.dtype.kind == "m":  # timedelta64
+                data, self._units = self._data_and_units_from_td64(data)
+                self._dtype = np.dtype("float")
+
             self._data = data
 
     # ..........................................................................
