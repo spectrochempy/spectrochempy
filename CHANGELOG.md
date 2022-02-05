@@ -38,6 +38,10 @@ https://github.com/spectrochempy/spectrochempy/issues/97#issuecomment-639590022)
 
 * History: Its behavior have been improved. Dates for entries are set automatically and are timezone-aware. See the docs for more information: [About-the-history-attribute](https://www.spectrochempy.fr/latest/userguide/dataset/dataset.html#About-the-history-attribute)
 
+###### Datetime64 coordinates of NDDataset.
+
+np.datetime64 numpy array can be used a coordinate transparently.  Regaring the math operation on such axis, only addtion or substraction are allowed.
+
 ---
 ## VERSION 0.3
 
