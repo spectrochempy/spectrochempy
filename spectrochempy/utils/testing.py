@@ -251,6 +251,23 @@ def compare_coords(
 
     eq = True
     thistype = this.implements()
+    if thistype == "CoordSet":  # this may happen for multicoordinates
+        for coord0, coord1 in zip(this, other):
+            eq &= compare_coords(
+                coord0,
+                coord1,
+                approx=approx,
+                decimal=decimal,
+                data_only=data_only,
+                quantity_only=quantity_only,
+            )
+        return eq
+
+    if thistype not in ["Coord", "LinearCoord"]:
+        raise TypeError(
+            "This function compare `Coord` or `LinearCoord` objects, "
+            "not `{thistype}`"
+        )
 
     if not data_only:
         # we must rescale the two coordinates to the same base units for correct comparison
