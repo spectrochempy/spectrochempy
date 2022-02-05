@@ -3046,7 +3046,7 @@ class NDMath(object):
 
         return data
 
-    def _perform_units_op(self, f, objunits):
+    def _perform_units_op(self, f, objunits, objtypes):
 
         debug_("Performs calculations on the units ...")
 
@@ -3057,6 +3057,9 @@ class NDMath(object):
 
         unit0 = objunits[0]
         unit1 = objunits[1] if len(objunits) > 1 else None
+
+        if unit1 is None and objtypes[1] is None:  # probably other is a scalar
+            unit1 = unit0
 
         # Create two random quantities which will be used for calculation on the units. We do calculation on
         # Quantities in order to avoid calculation with the whole data arrays.
@@ -3130,7 +3133,8 @@ class NDMath(object):
 
         # Final calculations
         data = self._perform_magnitude_op(f, *magnitudes, isufunc=isufunc)
-        units = self._perform_units_op(f, units)
+
+        units = self._perform_units_op(f, units, objtypes)
 
         data, mask = (
             (data._data, data._mask)

@@ -33,7 +33,7 @@ from spectrochempy.utils.testing import (
     assert_array_equal,
     assert_units_equal,
     assert_approx_equal,
-    # assert_produces_warning
+    assert_produces_warning,
 )
 
 from spectrochempy.utils.exceptions import (
@@ -568,9 +568,11 @@ def test_datetime64_coordinates(IR_dataset_2D):
     assert X.y.units is None
     # there is no units for this object as it is defined internally
 
-    # with assert_produces_warning(match="method `to` cannot be used with datetime object. Ignored!"):
-    X.y.to("tesla")
-    # can not change to a foreign unit (of course)
+    with assert_produces_warning(
+        match="method `to` cannot be used with datetime object. Ignored!"
+    ):
+        X.y.to("tesla")
+        # can not change to a foreign unit (of course)
 
     # subtract a datetime to a datetime array --> should be a float
     X.y = X.y - X.y[0]  # subtract the acquisition timestamp of the first spectrum
