@@ -3058,7 +3058,12 @@ class NDMath(object):
         unit0 = objunits[0]
         unit1 = objunits[1] if len(objunits) > 1 else None
 
-        if unit1 is None and objtypes[1] is None:  # probably other is a scalar
+        if (
+            unit1 is None
+            and f.__name__ in ["add", "iadd", "isub", "sub", "subtract"]
+            and len(objtypes) > 1
+            and objtypes[1] is None
+        ):  # probably other is a scalar - for add and sub we admit it is the same units!
             unit1 = unit0
 
         # Create two random quantities which will be used for calculation on the units. We do calculation on
