@@ -256,7 +256,7 @@ class IRIS:
         # check if x dimension exists
         if "x" in X.dims:
             # if multiple coords for a given dimension, take the default ones:
-            channels = X.x.default
+            channels = X.x.default.copy()
         else:
             # else, set a single channel:
             channels = Coord([0])
@@ -274,7 +274,7 @@ class IRIS:
                     )
                 p = Coord(p, long_name="External variable")
         else:
-            p = X.y.default
+            p = X.y.default.copy()
 
         # check options
         # defines the kernel
@@ -599,7 +599,7 @@ class IRIS:
         X_hat.name = "2D-IRIS Reconstructed datasets"
         return X_hat
 
-    def plotlcurve(self, scale="ll", long_name="L curve"):
+    def plotlcurve(self, scale="ll", title="L curve"):
         """
         Plot the L Curve.
 
@@ -608,7 +608,7 @@ class IRIS:
         scale : str, optional, default='ll'
             String of 2 letters among 'l' (log) or 'n' (non-log) indicating whether the y and x
             axes should be log scales.
-        long_name : str, optional, default='L curve'
+        title : str, optional, default='L curve'
             Plot title.
 
         Returns
@@ -619,7 +619,7 @@ class IRIS:
 
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        ax.set_title("L curve")
+        ax.set_title(title)
         plt.plot(self.RSS, self.SM, "o")
         ax.set_xlabel("Residuals")
         ax.set_ylabel("Curvature")
