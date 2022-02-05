@@ -89,6 +89,7 @@ def json_serialiser(byte_obj, encoding=None):
                 name in ["readonly"]
                 or (name == "dims" and "datasets" in objnames)
                 or [name in ["parent", "name"] and isinstance(byte_obj, PreferencesSet)]
+                and name not in ["created", "modified"]
             ):
                 val = getattr(byte_obj, name)
             else:
@@ -123,7 +124,7 @@ def json_serialiser(byte_obj, encoding=None):
             dic[k] = json_serialiser(v, encoding=encoding)
         return dic
 
-    elif isinstance(byte_obj, datetime.datetime):  # For backward compatibility
+    elif isinstance(byte_obj, datetime.datetime):
         return {
             "isoformat": byte_obj.strftime("%Y-%m-%dT%H:%M:%S.%f%Z"),
             "__class__": "DATETIME",
