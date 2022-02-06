@@ -40,8 +40,11 @@ def test_EFA(IR_dataset_2D):
         t, ampl=5, width=20, ratio=0.2, asym=0.9, pos=120.0
     )  # compound 2
 
-    dsc = scp.NDDataset(data=data, coords=[c, t])
-    dsc.plot()
+    dsc = scp.NDDataset(data=data, coordset=[c, t])
+    ax = dsc.plot()
+    assert ax is not None
+    assert len(ax.lines) == 2
+    assert ax.xaxis.label.get_text().startswith("values")
     show()
 
     ########################################################################################################################
@@ -51,8 +54,8 @@ def test_EFA(IR_dataset_2D):
     spec = np.array([[2.0, 3.0, 4.0, 2.0], [3.0, 4.0, 2.0, 1.0]])
     w = scp.Coord(np.arange(1, 5, 1), units="nm", title="wavelength")
 
-    dss = scp.NDDataset(data=spec, coords=[c, w])
-    dss.plot()
+    dss = scp.NDDataset(data=spec, coordset=[c, w])
+    ax = dss.plot()
 
     ########################################################################################################################
     # 3) simulated data matrix

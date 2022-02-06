@@ -19,6 +19,7 @@ __all__ = [
     "to_dt64_units",
     "from_dt64_units",
     "to_utc_iso8601",
+    "is_datetime64",
 ]
 
 
@@ -26,6 +27,32 @@ import numpy as np
 import re
 
 from spectrochempy.core.units import ur
+
+
+def is_datetime64(obj):
+    """
+    Utility to check if obj or obj.data is a np.datetime64 object.
+
+    Parameters
+    ----------
+    obj : np.ndarray like obj
+        If obj implement NDDataset or Coord obj, then the data attribute is checked.
+
+    Returns
+    -------
+    is_dt64 : bool
+        Whether the obj or obj.data has a np.datetime64 dtype or not
+    """
+    dt64 = np.datetime64
+    data = obj._data if hasattr(obj, "_data") else obj
+    linear = obj._linear if hasattr(obj, "_linear") else False
+    res = False
+    if data is not None:
+        res = isinstance(obj._data[0], dt64)
+    elif linear:
+        res = isinstance(obj._increment, dt64)
+    return res
+
 
 # Dicts and functions for the conversion between dt64 (numpy.datetime64) units
 # to and from spectrochempy (pint) units
@@ -77,7 +104,7 @@ def get_datetime_labels(data):
     for time_unit in CF_TO_DT64_UNITS.keys():
         if np.all(timedeltas % np.timedelta64(1, CF_TO_DT64_UNITS[time_unit]) == zero):
             break
-    label = f"{time_unit} since {str(reference_date).replace('T',' ')} (UTC)"
+    label = f"{time_unit} since {str(reference_date).replace('T',' ')}"
     newdata = (data - reference_date) // np.timedelta64(1, CF_TO_DT64_UNITS[time_unit])
     return label, newdata
 

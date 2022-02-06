@@ -180,6 +180,11 @@ def plot_2D(dataset, method=None, **kwargs):
     if kwargs.get("y_reverse", False):
         new = new[::-1]
 
+    # method
+    # ----------------------------------------------------------------------------------
+    # which method of plot
+    method = method if method is not None else prefs.method_2D
+
     # Figure and axes setup
     # ------------------------------------------------------------------------
     new._figure_setup(ndim=2, method=method, **kwargs)
@@ -244,9 +249,9 @@ def plot_2D(dataset, method=None, **kwargs):
     discrete_data = False
 
     # special case of datetime64
-    if x is not None and x.data.dtype.kind == "M":
+    if x is not None and x.is_dt64:
         xlabel, xdata = get_datetime_labels(x.data)
-        kwargs["xlabel"] = xlabel  # for latter use
+        kwargs["xlabel"] = xlabel + " (UTC)"  # for latter use
 
     # other cases
     elif x is not None and (not x.is_empty or x.is_labeled):
@@ -301,9 +306,9 @@ def plot_2D(dataset, method=None, **kwargs):
         y = LinearCoord.arange(ysize)
 
     # special case of datetime64
-    if y is not None and y.data.dtype.kind == "M":
+    if y is not None and y.is_dt64:
         ylabel, ydata = get_datetime_labels(y.data)
-        kwargs["ylabel"] = ylabel  # for latter use
+        kwargs["ylabel"] = ylabel + "(UTC)"  # for latter use
 
     # other cases
     elif y is not None and (not y.is_empty or y.is_labeled):

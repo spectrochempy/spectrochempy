@@ -402,9 +402,9 @@ def plot_1D(dataset, method=None, **kwargs):
     # xdata
 
     # special case of datetime64
-    if x is not None and x.data.dtype.kind == "M":
+    if x is not None and x.is_dt64:
         xlabel, xdata = get_datetime_labels(x.data)
-        kwargs["xlabel"] = xlabel  # for latter use
+        kwargs["xlabel"] = xlabel + " (UTC)"  # for latter use
 
     # normal case
     elif x is not None and (not x.is_empty or x.is_labeled):

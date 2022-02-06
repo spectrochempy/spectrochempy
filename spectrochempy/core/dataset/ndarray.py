@@ -47,6 +47,7 @@ from spectrochempy.utils import (
     INPLACE,
     is_sequence,
     is_number,
+    is_datetime64,
     numpyprintoptions,
     SpectroChemPyWarning,
     make_new_object,
@@ -1705,14 +1706,13 @@ class NDArray(tr.HasTraits):
 
         Examples
         --------
-        >>> from spectrochempy import NDArray
-        >>> ar = NDArray([1., 2., 3.])
+        >>> ar = scp.Coord([1., 2., 3.])
         >>> ar.implements('NDDataset')
         False
-        >>> ar.implements('NDArray')
+        >>> ar.implements('Coord')
         True
         >>> ar.implements()
-        'NDArray'
+        'Coord'
         """
         if name is None:
             return self.__class__.__name__
@@ -1755,13 +1755,7 @@ class NDArray(tr.HasTraits):
         """
         True if the data have a np.datetime64 dtype (bool).
         """
-        if (
-            (self._data is not None and isinstance(self._data[0], np.datetime64))
-            or self.linear
-            and isinstance(self._increment, np.datetime64)
-        ):
-            return True
-        return False
+        return is_datetime64(self)
 
     # ..........................................................................
     @property
@@ -2909,8 +2903,7 @@ class NDComplexArray(NDArray):
 
         Examples
         --------
-        >>> from spectrochempy import NDComplexArray
-        >>> myarray = NDComplexArray([1. + 0j, 2., 3.])
+        >>> myarray = scp.NDComplexArray([1. + 0j, 2., 3.])
         >>> myarray
         NDComplexArray: [complex128] unitless (size: 3)
         """
