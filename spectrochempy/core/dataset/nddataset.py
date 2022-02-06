@@ -1366,6 +1366,8 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         new.set_coordset(coordset)
 
+        return new
+
 
 # ======================================================================================
 # module function

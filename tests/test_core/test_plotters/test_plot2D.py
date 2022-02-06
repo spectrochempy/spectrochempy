@@ -12,10 +12,10 @@ import pytest
 from spectrochempy import NDDataset, show, preferences as prefs
 
 
-def test_plot2D():
-    A = NDDataset.read_omnic("irdata/nh4y-activation.spg")
+def test_plot2D(IR_dataset_2D):
+    A = IR_dataset_2D
 
-    ax = A.copy().plot_stack()
+    ax = A.copy().plot_stack(colorbar=True)
     show()
     assert len(ax.lines) == A.shape[0]
 
@@ -23,16 +23,21 @@ def test_plot2D():
     show()
     assert len(ax.lines) == 1110  # because we display only a subset
 
-    ax = A.copy().plot_image(style=["sans", "paper"], fontsize=9)
+    ax = A.copy().plot_image()
     show()
     assert len(ax.lines) == 0
 
+    ax = A.copy().plot_image(style=["sans", "paper"])
+    show()
+    assert len(ax.lines) == 0
+
+    A.preferences.reset()
     A.y -= A.y[0]
     A.y.to("hour", inplace=True)
-    A.y.long_name = u"Acquisition time"
+    A.y.long_name = "Acquisition time"
     A.copy().plot_stack()
     A.copy().plot_stack(transposed=True)
-    A.copy().plot_image(style=["sans", "paper"], fontsize=9)
+    A.copy().plot_image(style=["sans", "paper"])
 
     # use preferences
     prefs = A.preferences
@@ -52,7 +57,7 @@ def test_plotly2D():
     A = NDDataset.read_omnic("irdata/nh4y-activation.spg", directory=prefs.datadir)
     A.y -= A.y[0]
     A.y.to("hour", inplace=True)
-    A.y.long_name = u"Acquisition time"
+    A.y.long_name = "Acquisition time"
 
     # TODO: A.copy().plot(use_plotly=True)
 

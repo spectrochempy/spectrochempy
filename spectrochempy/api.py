@@ -59,7 +59,7 @@ if "pytest" in sys.argv[0] or "py.test" in sys.argv[0]:
 
     # OK, but if we are doing individual function testing in PyCharm
     # it is interesting to see the plots and the file dialogs
-    # (except if we set explicitly --nodisplay argument!
+    # except if we set explicitly --nodisplay argument!
     # if len(sys.argv) > 1 and not any([arg.endswith(".py") for arg in
     # sys.argv[1:]]) and '--nodisplay' not in sys.argv:
     if (
@@ -92,7 +92,7 @@ from .core import *  # noqa: F403, F401, E402
 ALL += core.__all__
 
 if not IN_IPYTHON:
-    # needed in windows terminal - but must not be inited in Jupyter notebook
+    # needed in Windows terminal - but must not be inited in Jupyter notebook
     from colorama import init as initcolor
 
     initcolor()

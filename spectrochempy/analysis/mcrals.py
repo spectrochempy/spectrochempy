@@ -175,9 +175,10 @@ class MCRALS(HasTraits):
     _logs = Unicode
     _params = Dict()
 
-    def __init__(self, dataset, guess, **kwargs):
+    def __init__(self, dataset, guess, *args, **kwargs):
         # list all default arguments:
         # Todo: add unimodSpec (and unimodSpecMod, ...), default `None`
+        super().__init__(*args, **kwargs)
         tol = kwargs.get("tol", 0.1)
         maxit = kwargs.get("maxit", 50)
         maxdiv = kwargs.get("maxdiv", 5)

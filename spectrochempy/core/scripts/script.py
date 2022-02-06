@@ -63,8 +63,17 @@ class Script(HasTraits):
     _priority = Float(min=0.0, max=100.0)
     _parent = Instance(AbstractProject, allow_none=True)
 
-    def __init__(self, name="unamed_script", content=None, parent=None, priority=50.0):
+    def __init__(
+        self,
+        name="unamed_script",
+        content=None,
+        parent=None,
+        priority=50.0,
+        *args,
+        **kwargs
+    ):
 
+        super().__init__(*args, **kwargs)
         self.name = name
         self.content = content
         self.parent = parent
@@ -150,7 +159,8 @@ class Script(HasTraits):
     # Public methods
     # ------------------------------------------------------------------------
     # ..........................................................................
-    def implements(self, name=None):
+    @staticmethod
+    def implements(name=None):
         """
         Utility to check if the current object implement `Project`.
 

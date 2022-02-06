@@ -35,6 +35,7 @@ from spectrochempy.utils import (
     is_sequence,
     add_docstring,
     plot_method,
+    get_datetime_labels,
 )  # , deprecated
 from spectrochempy.core.dataset.coord import Coord
 
@@ -42,40 +43,23 @@ from spectrochempy.core.dataset.coord import Coord
 _PLOT1D_DOC = """\
 ax : Axe, optional
     Axe where to plot. If not specified, create a new one.
-style : str, optional, default: `dataset.preferences.style` (scpy)
-    Matplotlib stylesheet (use `available_style` to get a list of available
-    styles for plotting.
-use_plotly : bool, optional, default: `preferences.use_plotly` (False)
-    Should we use plotly instead of matplotlib for plotting.
-twinx : :class:`~matplotlib.Axes` instance, optional, default: None
-    If this is not None, then a twin axes will be created with a
-    common x dimension.
 clear : bool, optional, default: True
     If false, hold the current figure and ax until a new plot is performed.
-reverse : bool or None [optional, default=None/False
-    In principle, coordinates run from left to right,
-    except for wavenumbers
-    (*e.g.*, FTIR spectra) or ppm (*e.g.*, NMR), that spectrochempy
-    will try to guess. But if reverse is set, then this is the
-    setting which will be taken into account.
+color or c : color, optional, default: auto
+    color of the line.
+commands : str,
+    matplotlib commands to be executed.
 data_only : bool, optional, default: False
     Only the plot is done. No addition of axes or label specifications.
+dpi : int, optional
+    the number of pixel per inches.
+figsize : tuple, optional, default is (3.4, 1.7)
+    figure size.
+grid: bool, optional, default: False
+    Display a grid if true
 imag : bool, optional, default: False
     Show imaginary component for complex data. By default the real component is
     displayed.
-show_complex : bool, optional, default: False
-    Show both real and imaginary component for complex data.
-    By default only the real component is displayed.
-figsize : tuple, optional, default is (3.4, 1.7)
-    figure size.
-dpi : int, optional
-    the number of pixel per inches.
-xlim : tuple, optional
-    limit on the horizontal axis.
-zlim or ylim : tuple, optional
-    limit on the vertical axis.
-color or c : color, optional, default: auto
-    color of the line.
 linewidth or lw : float, optional, default: auto
     line width.
 linestyle or ls : str, optional, default: auto
@@ -88,34 +72,53 @@ markeredgewidth or mew: float, optional
 markerfacecolor or mfc: color, optional
 markersize or ms: float, optional
 markevery: None or int
-title : str
-    Title of the plot (or subplot) axe.
-plottitle: bool, optional, default: False
-    Use the name of the dataset as title. Works only if title is not defined
-xlabel : str, optional
-    label on the horizontal axis.
-zlabel or ylabel : str, optional
-    label on the vertical axis.
-uselabel_x: bool, optional
-    use x coordinate label as x tick labels
-show_z : bool, optional, default: True
-    should we show the vertical axis.
-show_zero : bool, optional
-    show the zero basis.
-show_mask: bool, optional
-    Should we display the mask using colored area.
-plot_model : Bool,
-    plot model data if available.
 modellinestyle or modls : str
     line style of the model.
 offset : float
     offset of the model individual lines.
-commands : str,
-    matplotlib commands to be executed.
 output : str,
     name of the file to save the figure.
+plot_model : Bool,
+    plot model data if available.
+plottitle: bool, optional, default: False
+    Use the name of the dataset as title. Works only if title is not defined
+reverse : bool or None [optional, default=None/False
+    In principle, coordinates run from left to right,
+    except for wavenumbers
+    (*e.g.*, FTIR spectra) or ppm (*e.g.*, NMR), that spectrochempy
+    will try to guess. But if reverse is set, then this is the
+    setting which will be taken into account.
+show_mask: bool, optional
+    Should we display the mask using colored area.
+show_complex : bool, optional, default: False
+    Show both real and imaginary component for complex data.
+    By default only the real component is displayed.
+show_z : bool, optional, default: True
+    should we show the vertical axis.
+show_zero : bool, optional
+    show the zero basis.
+style : str, optional, default: `dataset.preferences.style` (scpy)
+    Matplotlib stylesheet (use `available_style` to get a list of available
+    styles for plotting.
+title : str
+    Title of the plot (or subplot) axe.
+twinx : :class:`~matplotlib.Axes` instance, optional, default: None
+    If this is not None, then a twin axes will be created with a
+    common x dimension.
+use_label_x: bool, optional
+    use x coordinate label as x tick labels
+use_plotly : bool, optional, default: `preferences.use_plotly` (False)
+    Should we use plotly instead of matplotlib for plotting.
 vshift : float, optional
     vertically shift the line from its baseline.
+xlim : tuple, optional
+    limit on the horizontal axis.
+xlabel : str, optional
+    label on the horizontal axis.
+zlim or ylim : tuple, optional
+    limit on the vertical axis.
+zlabel or ylabel : str, optional
+    label on the vertical axis.
 """
 
 
@@ -249,9 +252,9 @@ def plot_multiple(datasets, method="scatter", pen=True, labels=None, **kwargs):
     return ax
 
 
-# ------------------------------------------------------------------
+# ======================================================================================
 # plot_1D
-# ------------------------------------------------------------------
+# ======================================================================================
 
 
 @add_docstring(_PLOT1D_DOC)
@@ -287,7 +290,7 @@ def plot_1D(dataset, method=None, **kwargs):
     """
 
     # Get preferences
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
 
     prefs = dataset.preferences
 
@@ -300,25 +303,30 @@ def plot_1D(dataset, method=None, **kwargs):
     prefs.set_latex_font(prefs.font.family)  # reset latex settings
 
     # Redirections ?
-    # ------------------------------------------------------------------------
-
-    # should we redirect the plotting to another method if the dataset
-    # cannot be broadcasted to a 1D array
-    if dataset._squeeze_ndim > 1:
-        return dataset.plot_2D(**kwargs)
-
-    # if plotly execute plotly routine not this one
+    # ----------------------------------------------------------------------------------
+    # if plotly execute plotly routine, not this one
     if kwargs.get("use_plotly", prefs.use_plotly):
         return dataset.plotly(**kwargs)
 
-    # often we do need to plot only data
-    # when plotting on top of a previous plot
-    # data_only = kwargs.get("data_only", False)
+    # should we redirect the plotting to another method if the dataset
+    # cannot be broadcast to a 1D array
+    ndim = dataset._squeeze_ndim
+    if ndim > 1:
+        return dataset.plot_2D(**kwargs)
 
     # Get the data to plot
-    # ---------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
+    # create a squeezed copy
+    new = dataset.squeeze()
 
-    new = dataset.squeeze()  # Added Version 0.4
+    # Proceed with the settings
+    # ----------------------------------------------------------------------------------
+    # which method of plot
+    method = method if method is not None else prefs.method_1D
+
+    # often we do need to plot only data
+    # when plotting on top of a previous plot
+    data_only = kwargs.get("data_only", False)
 
     # is that a plot with twin axis
     is_twinx = kwargs.get("twinx", None) is not None
@@ -332,25 +340,25 @@ def plot_1D(dataset, method=None, **kwargs):
     lw = kwargs.get("linewidth", kwargs.get("lw", "auto"))
     ls = kwargs.get("linestyle", kwargs.get("ls", "auto"))
 
+    # marker option
     marker = kwargs.get("marker", kwargs.get("m", "auto"))
     markersize = kwargs.get("markersize", kwargs.get("ms", prefs.lines_markersize))
     markevery = kwargs.get("markevery", kwargs.get("me", 1))
     markerfacecolor = kwargs.get("markerfacecolor", kwargs.get("mfc", "auto"))
     markeredgecolor = kwargs.get("markeredgecolor", kwargs.get("mec", "k"))
 
-    # Figure setup
-    # ------------------------------------------------------------------------
-    method = new._figure_setup(ndim=1, method=method, **kwargs)
-
     pen = "pen" in method or kwargs.pop("pen", False)
     scatter = "scatter" in method or marker != "auto"
     bar = "bar" in method
 
+    # Figure and axes setup
+    # ------------------------------------------------------------------------
+    new._figure_setup(ndim=1, method=method, **kwargs)
     ax = new.ndaxes["main"]
 
     # Other ax properties that can be passed as arguments
     # ------------------------------------------------------------------------
-
+    # axis labels
     number_x_labels = prefs.number_of_x_labels
     number_y_labels = prefs.number_of_y_labels
     ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
@@ -365,19 +373,18 @@ def plot_1D(dataset, method=None, **kwargs):
     ax.xaxis.set_major_formatter(formatter)
     ax.yaxis.set_major_formatter(formatter)
 
+    # axis scale
     xscale = kwargs.get("xscale", "linear")
     yscale = kwargs.get("yscale", "linear")
-
     ax.set_xscale(xscale)
     ax.set_yscale(yscale)
 
-    ax.grid(prefs.axes_grid)
+    # axis grid
+    grid = kwargs.get("grid", prefs.axes_grid)
+    ax.grid(grid)
 
+    # abscissa axis data
     # ------------------------------------------------------------------------
-    # plot the dataset
-    # ------------------------------------------------------------------------
-
-    # abscissa axis
     # the actual dimension name is the first in the new.dims list
     dimx = new.dims[-1]
     x = getattr(new, dimx)
@@ -392,7 +399,15 @@ def plot_1D(dataset, method=None, **kwargs):
         # remove data and units for display
         x = Coord.arange(xsize)
 
-    if x is not None and (not x.is_empty or x.is_labeled):
+    # xdata
+
+    # special case of datetime64
+    if x is not None and x.data.dtype.kind == "M":
+        xlabel, xdata = get_datetime_labels(x.data)
+        kwargs["xlabel"] = xlabel  # for latter use
+
+    # normal case
+    elif x is not None and (not x.is_empty or x.is_labeled):
         xdata = x.data
         # discrete_data = False
         if not np.any(xdata):
@@ -408,7 +423,9 @@ def plot_1D(dataset, method=None, **kwargs):
     if xdata is None:
         xdata = range(xsize)
 
-    # ordinates (by default we plot real component of the data)
+    # ordinates axis data
+    # ----------------------------------------------------------------------------------
+    # by default we plot real component of the data
     if not kwargs.pop("imag", False) or kwargs.get("show_complex", False):
         z = new.real
         zdata = z.masked_data
@@ -416,9 +433,11 @@ def plot_1D(dataset, method=None, **kwargs):
         z = new.imag
         zdata = z.masked_data
 
-    # plot_lines
-    # ------------------------------------------------------------------------
+    # do the plot according the method
+    # ----------------------------------------------------------------------------------
     label = kwargs.get("label", None)
+
+    # scatter+pen plot
     if scatter and pen:
         (line,) = ax.plot(
             xdata,
@@ -431,6 +450,7 @@ def plot_1D(dataset, method=None, **kwargs):
             label=label,
         )
 
+    # scatter plot
     elif scatter:
         (line,) = ax.plot(
             xdata,
@@ -443,9 +463,12 @@ def plot_1D(dataset, method=None, **kwargs):
             markeredgecolor=markeredgecolor,
             label=label,
         )
+
+    # pen plot
     elif pen:
         (line,) = ax.plot(xdata, zdata.T, marker="", label=label)
 
+    # bar
     elif bar:
         # bar only
         line = ax.bar(
@@ -458,8 +481,9 @@ def plot_1D(dataset, method=None, **kwargs):
         )  # barwidth = line[0].get_width()
 
     else:
-        raise ValueError("label not valid")
+        raise ValueError("method not valid")
 
+    # show complex if required
     if show_complex and pen:
         # add the imaginary component for pen only plot
         if new.is_quaternion:
@@ -468,6 +492,8 @@ def plot_1D(dataset, method=None, **kwargs):
             zimagdata = new.imag.masked_data
         ax.plot(xdata, zimagdata.T, ls="--")
 
+    # plot the model data
+    # ----------------------------------------------------------------------------------
     if kwargs.get("plot_model", False):
         modeldata = new.modeldata  # TODO: what's about mask?
         ax.plot(
@@ -475,6 +501,7 @@ def plot_1D(dataset, method=None, **kwargs):
         )  # TODO: improve this!!!
 
     # line attributes
+    # ----------------------------------------------------------------------------------
     if pen and not (isinstance(color, str) and color.upper() == "AUTO"):
         # set the color if defined in the preferences or options
         line.set_color(color)
@@ -491,10 +518,8 @@ def plot_1D(dataset, method=None, **kwargs):
         # set the line style if defined in the preferences or options
         line.set_marker(marker)
 
-    # ------------------------------------------------------------------------
-    # axis
-    # ------------------------------------------------------------------------
-
+    # axis properties
+    # ----------------------------------------------------------------------------------
     data_only = kwargs.get("data_only", False)
 
     if len(xdata) > 1:
@@ -558,23 +583,23 @@ def plot_1D(dataset, method=None, **kwargs):
         new._plot_resume(dataset, **kwargs)
         return ax
 
-    # ------------------------------------------------------------------------
     # labels
-    # ------------------------------------------------------------------------
-
+    # ----------------------------------------------------------------------------------
     # x label
-
     xlabel = kwargs.get("xlabel", None)
+
+    # datapoints
     if show_x_points:
         xlabel = "data points"
+
     if not xlabel:
         xlabel = make_label(x, new.dims[-1])
+
     ax.set_xlabel(xlabel)
 
     # x tick labels
-
-    uselabel = kwargs.get("uselabel", False)
-    if x and x.is_labeled and (uselabel or not np.any(x.data)):
+    use_label = kwargs.get("use_label", False)
+    if x and x.is_labeled and (use_label or not np.any(x.data)):
 
         if x.data is not None:
             xt = ax.get_xticks()
@@ -585,7 +610,6 @@ def plot_1D(dataset, method=None, **kwargs):
             ax.set_xticklabels(x.labels)
 
     # z label
-
     zlabel = kwargs.get("zlabel", kwargs.get("ylabel", None))
     if not zlabel:
         zlabel = make_label(new, "z")
@@ -605,14 +629,11 @@ def plot_1D(dataset, method=None, **kwargs):
         ax.haxlines(label="zero_line")
 
     # display a title
-    # ------------------------------------------------------------------------
     title = kwargs.get("title", None)
     if title:
         ax.set_title(title)
     elif kwargs.get("plottitle", False):
         ax.set_title(new.name)
-
-    new._plot_resume(dataset, **kwargs)
 
     # masks
     if kwargs.get("show_mask", False):
@@ -626,8 +647,12 @@ def plot_1D(dataset, method=None, **kwargs):
             alpha=0.3,
         )
 
+    # resume
+    new._plot_resume(dataset, **kwargs)
+
     return ax
 
 
+# ======================================================================================
 if __name__ == "__main__":
     pass

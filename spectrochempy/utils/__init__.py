@@ -17,6 +17,7 @@ Package containing various utilities classes and functions.
 
 # masked arrays
 # ------------------------------------------------------------------
+# noinspection PyUnresolvedReferences
 from numpy.ma.core import (
     masked as MASKED,
     nomask as NOMASK,
@@ -26,9 +27,9 @@ from numpy.ma.core import (
 
 # import util files content
 # ------------------------------------------------------------------
-
-from .fake import *
+# noinspection PyUnresolvedReferences
 from .print import *
+from .fake import *
 from .file import *
 from .jsonutils import *
 from .misc import *

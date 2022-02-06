@@ -36,6 +36,7 @@
 # from pathlib import Path
 
 # %%
+# noinspection PyUnresolvedReferences
 from spectrochempy import NDDataset, Project, preferences as prefs, pathclean
 
 # %% [markdown]

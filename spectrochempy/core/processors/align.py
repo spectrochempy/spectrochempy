@@ -41,7 +41,7 @@ def can_merge_or_align(coord1, coord2):
         can_align = True  # of course as it is the same coordinate
 
     else:
-        # no the same coordinates
+        # not the same coordinates
         can_merge = False  # we need to do alignment to merge
         # can align only if data exists, units compatibles, and long_name are
         # the same
@@ -178,7 +178,7 @@ def align(dataset, *others, **kwargs):
 
         _last = _nobj - 1
 
-        # get the reference object (by default the first, except if method if
+        # get the reference object (by default the first, except if method is
         # set to 'last'
         ref_obj_index = 0
         if method == "last":
@@ -253,7 +253,7 @@ def align(dataset, *others, **kwargs):
 
             elif method == "inner":
                 # take only intersection of the coordinates
-                # and generate a warning if it result something null or
+                # and generate a warning if it results something null or
                 new_coord._data = sorted(coord_data & new_coord_data)
 
             elif method in ["first", "last"]:

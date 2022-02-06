@@ -82,6 +82,7 @@ class BaselineCorrection(HasTraits):
 
     # ..........................................................................
     def __init__(self, dataset, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.dataset = dataset
         self.corrected = self.dataset.copy()
         if args or kwargs:

@@ -556,6 +556,7 @@ class Fit(HasTraits):
 
     def __init__(self, *args, **kwargs):
 
+        super().__init__(*args, **kwargs)
         if args:
             # look in args
             if not isinstance(args[0], list):

@@ -105,14 +105,9 @@ copyright = spectrochempy.application.__copyright__
 today_fmt = "%B %d, %Y"
 
 #
-exclude_patterns = []
+exclude_patterns = ["_templates", "_static", "**.ipynb_checkpoints", "gallery", "~temp"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns.append("_templates")
-exclude_patterns.append("_static")
-exclude_patterns.append("**.ipynb_checkpoints")
-exclude_patterns.append("gallery")
-exclude_patterns.append("~temp")
 
 #
 # The reST default role (used for this markup: `text`) to use for all

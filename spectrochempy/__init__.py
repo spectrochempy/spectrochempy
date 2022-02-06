@@ -12,7 +12,7 @@
 #
 # This software is a computer program whose purpose is to provide a framework
 # for processing, analysing and modelling *Spectro*scopic
-# data for *Chem*istry with *Py*thon (SpectroChemPy). It is is a cross
+# data for *Chem*istry with *Py*thon (SpectroChemPy). It is a cross
 # platform software, running on Linux, Windows or OS X.
 #
 # This software is governed by the CeCILL-B license under French law and

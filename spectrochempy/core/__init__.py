@@ -20,7 +20,7 @@ from ..optional import import_optional_dependency
 warnings.filterwarnings("ignore")
 
 # ======================================================================================
-# Tells here the methods or object we allow to import from this library
+# Tells here the methods or object we allow importing from this library
 # ======================================================================================
 
 __all__ = []
@@ -84,7 +84,7 @@ def debug_(*args, **kwargs):
     try:
         app.logs.debug(stg)
     except NameError:  # pragma: no cover
-        # works only if app if already loaded
+        # works only if app is already loaded
         pass
 
 
@@ -172,6 +172,7 @@ from ..application import SpectroChemPy  # noqa: E402
 app = SpectroChemPy()
 __all__ += ["app"]
 
+# noinspection PyUnresolvedReferences
 from ..application import (  # noqa: E402
     __version__ as version,
     __release__ as release,
@@ -243,6 +244,7 @@ _pbar_update()
 
 # constants
 # ------------------------------------------------------------------
+# noinspection PyUnresolvedReferences
 from ..utils import show, MASKED, NOMASK, EPSILON, INPLACE, show_versions  # noqa: E402
 
 __all__ += ["show", "MASKED", "NOMASK", "EPSILON", "INPLACE", "show_versions"]
@@ -502,7 +504,7 @@ class _TKFileDialogs:  # pragma: no cover
     def _open_existing_directory(parent=None, caption="Select a folder", directory=""):
 
         directory = filedialog.askdirectory(
-            parent=parent, initialdir=directory, long_name=caption
+            parent=parent, initialdir=directory, title=caption
         )
 
         if directory:
@@ -540,7 +542,7 @@ class _TKFileDialogs:  # pragma: no cover
         filename = filedialog.askopenfilename(
             parent=parent,
             filetypes=self.filetypes(filters),
-            long_name="Select file to open",
+            title="Select file to open",
         )
 
         if parent is not None:
@@ -559,7 +561,7 @@ class _TKFileDialogs:  # pragma: no cover
         filename = filedialog.askopenfilenames(
             parent=parent,
             filetypes=self.filetypes(filters) + [("all files", ("*"))],
-            long_name="Select file(s) to open",
+            title="Select file(s) to open",
         )
 
         if parent is not None:

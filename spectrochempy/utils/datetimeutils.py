@@ -13,6 +13,7 @@ Datetime utilities
 """
 __all__ = [
     "strptime64",
+    "get_datetime_labels",
     "decode_datetime64",
     "encode_datetime64",
     "to_dt64_units",
@@ -68,22 +69,23 @@ CF_TO_DT64_UNITS = {
 }
 
 
-def encode_datetime64(data, **attrs):
-
+def get_datetime_labels(data):
     data = np.asarray(data).ravel()
     reference_date = data[0]
-
     timedeltas = np.unique(np.diff(data))
     zero = np.timedelta64(0, "ns")
-
     for time_unit in CF_TO_DT64_UNITS.keys():
         if np.all(timedeltas % np.timedelta64(1, CF_TO_DT64_UNITS[time_unit]) == zero):
             break
-    attrs["units"] = f"{time_unit} since {reference_date}"
+    label = f"{time_unit} since {str(reference_date).replace('T',' ')} (UTC)"
+    newdata = (data - reference_date) // np.timedelta64(1, CF_TO_DT64_UNITS[time_unit])
+    return label, newdata
+
+
+def encode_datetime64(data, **attrs):
+    label, data = get_datetime_labels(data)
+    attrs["units"] = label
     attrs["calendar"] = "proleptic_gregorian"
-
-    data = (data - reference_date) // np.timedelta64(1, CF_TO_DT64_UNITS[time_unit])
-
     return data, attrs
 
 

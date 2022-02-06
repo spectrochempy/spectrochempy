@@ -24,49 +24,50 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 
-from spectrochempy.utils import make_label, add_docstring, plot_method
+from spectrochempy.utils import (
+    make_label,
+    add_docstring,
+    plot_method,
+    get_datetime_labels,
+)
 from spectrochempy.core import exception_
 from spectrochempy.core.dataset.coord import LinearCoord
 
 _PLOT2D_DOC = """
+autolayout : bool, optional, default=True
+    if True, layout will be set automatically.
 ax : |Axes| instance. Optional
     The axe where to plot. The default is the current axe or to create a new one if is None.
 clear : bool, optional, default=True
     Should we plot on the ax previously used or create a new figure?.
+colorbar :
+data_only : bool [optional, default=False]
+    Only the plot is done. No addition of axes or label specifications
+    (current if any or automatic settings are kept.
+dpi : [ None | scalar > 0]
+    The resolution in dots per inch. If None it will default to the
+    value savefig.dpi in the matplotlibrc file.
 figsize : tuple, optional
     The figure size expressed as a tuple (w,h) in inch.
 fontsize : int, optional
     The font size in pixels, default is 10 (or read from preferences).
-style : str
-autolayout : bool, optional, default=True
-    if True, layout will be set automatically.
 output : str
     A string containing a path to a filename. The output format is deduced
     from the extension of the filename. If the filename has no extension,
     the value of the rc parameter savefig.format is used.
-dpi : [ None | scalar > 0]
-    The resolution in dots per inch. If None it will default to the
-    value savefig.dpi in the matplotlibrc file.
-colorbar :
-clear :
-ax :
-twinx :
-use_plotly : bool, optional
-    Should we use plotly instead of mpl for plotting. Default to `preferences.use_plotly`  (default=False)
-data_only : bool [optional, default=False]
-    Only the plot is done. No addition of axes or label specifications
-    (current if any or automatic settings are kept.
 method : str [optional among `map`, `stack`, `image` or `3D`]
     The type of plot,
 projections : bool [optional, default=False]
-style : str, optional, default='notebook'
-    Matplotlib stylesheet (use `available_style` to get a list of available
-    styles for plotting
 reverse : bool or None [optional, default=None
     In principle, coordinates run from left to right, except for wavenumbers
     (e.g., FTIR spectra) or ppm (e.g., NMR), that spectrochempy
     will try to guess. But if reverse is set, then this is the
     setting which will be taken into account.
+style : str, optional, default='notebook'
+    Matplotlib stylesheet (use `available_style` to get a list of available
+    styles for plotting
+use_plotly : bool, optional
+    Should we use plotly instead of mpl for plotting. Default to `preferences.use_plotly`  (default=False)
 x_reverse : bool or None, optional, default=None
     Reverse the default direction of the x axis.
 transposed : bool; optional, default=False
@@ -136,7 +137,6 @@ def plot_2D(dataset, method=None, **kwargs):
 
     # Get preferences
     # ------------------------------------------------------------------------
-
     prefs = dataset.preferences
 
     # before going further, check if the style is passed in the parameters
@@ -149,6 +149,9 @@ def plot_2D(dataset, method=None, **kwargs):
 
     # Redirections ?
     # ------------------------------------------------------------------------
+    # if plotly execute plotly routine not this one
+    if kwargs.get("use_plotly", prefs.use_plotly):
+        return dataset.plotly(**kwargs)
 
     # should we redirect the plotting to another method
     if dataset._squeeze_ndim < 2:
@@ -160,16 +163,6 @@ def plot_2D(dataset, method=None, **kwargs):
             dataset = dataset.squeeze(keepdims=(-2, -1))
         except Exception as e:
             exception_(e)
-
-    # if plotly execute plotly routine not this one
-    if kwargs.get("use_plotly", prefs.use_plotly):
-        return dataset.plotly(**kwargs)
-
-    # do not display colorbar if it's not a surface plot
-    # except if we have asked to d so
-
-    # often we do need to plot only data when plotting on top of a previous plot
-    data_only = kwargs.get("data_only", False)
 
     # Get the data to plot
     # ---------------------------------------------------------------
@@ -187,19 +180,18 @@ def plot_2D(dataset, method=None, **kwargs):
     if kwargs.get("y_reverse", False):
         new = new[::-1]
 
-    # Figure setup
+    # Figure and axes setup
     # ------------------------------------------------------------------------
-    method = new._figure_setup(ndim=2, method=method, **kwargs)
-
+    new._figure_setup(ndim=2, method=method, **kwargs)
     ax = new.ndaxes["main"]
     ax.name = ax.name + nameadd
 
     # Other properties that can be passed as arguments
     # ------------------------------------------------------------------------
-
     lw = kwargs.get("linewidth", kwargs.get("lw", prefs.lines_linewidth))
     alpha = kwargs.get("calpha", prefs.contour_alpha)
 
+    # axis labels
     number_x_labels = prefs.number_of_x_labels
     number_y_labels = prefs.number_of_y_labels
     number_z_labels = prefs.number_of_z_labels
@@ -225,11 +217,15 @@ def plot_2D(dataset, method=None, **kwargs):
     ax.xaxis.set_major_formatter(formatter)
     ax.yaxis.set_major_formatter(formatter)
 
-    # ------------------------------------------------------------------------
-    # Set axis
-    # ------------------------------------------------------------------------
+    # axis grid
+    grid = kwargs.get("grid", prefs.axes_grid)
+    ax.grid(grid)
 
-    # set the abscissa axis
+    # use data only?
+    # often we do need to plot only data when plotting on top of a previous plot
+    data_only = kwargs.get("data_only", False)
+
+    # abscissa axis data
     # ------------------------------------------------------------------------
     # the actual dimension name is the last in the new.dims list
     dimx = new.dims[-1]
@@ -247,7 +243,13 @@ def plot_2D(dataset, method=None, **kwargs):
 
     discrete_data = False
 
-    if x is not None and (not x.is_empty or x.is_labeled):
+    # special case of datetime64
+    if x is not None and x.data.dtype.kind == "M":
+        xlabel, xdata = get_datetime_labels(x.data)
+        kwargs["xlabel"] = xlabel  # for latter use
+
+    # other cases
+    elif x is not None and (not x.is_empty or x.is_labeled):
         xdata = x.data
         if not np.any(xdata):
             if x.is_labeled:
@@ -298,7 +300,13 @@ def plot_2D(dataset, method=None, **kwargs):
         # remove data and units for display
         y = LinearCoord.arange(ysize)
 
-    if y is not None and (not y.is_empty or y.is_labeled):
+    # special case of datetime64
+    if y is not None and y.data.dtype.kind == "M":
+        ylabel, ydata = get_datetime_labels(y.data)
+        kwargs["ylabel"] = ylabel  # for latter use
+
+    # other cases
+    elif y is not None and (not y.is_empty or y.is_labeled):
         ydata = y.data
 
         if not np.any(ydata):
@@ -383,7 +391,6 @@ def plot_2D(dataset, method=None, **kwargs):
     # ------------------------------------------------------------------------
     # plot the dataset
     # ------------------------------------------------------------------------
-    ax.grid(prefs.axes_grid)
 
     normalize = kwargs.get("normalize", None)
     cmap = kwargs.get("colormap", kwargs.get("cmap", prefs.colormap))
@@ -430,7 +437,7 @@ def plot_2D(dataset, method=None, **kwargs):
             method = "map"
 
         else:
-            kwargs["nlevels"] = 500
+            kwargs["nlevels"] = 200
             if not hasattr(new, "clevels") or new.clevels is None:
                 new.clevels = _get_clevels(zdata, prefs, **kwargs)
             c = ax.contourf(xdata, ydata, zdata, new.clevels, alpha=alpha)
@@ -544,57 +551,57 @@ def plot_2D(dataset, method=None, **kwargs):
         xlabel = "data points"
     if not xlabel:
         xlabel = make_label(x, new.dims[-1])
+
     ax.set_xlabel(xlabel)
 
-    uselabelx = kwargs.get("uselabel_x", False)
+    use_label_x = kwargs.get("use_label_x", False)
     if (
         x
         and x.is_labeled
-        and (uselabelx or not np.any(x.data))
+        and (use_label_x or not np.any(x.data))
         and len(x.labels) < number_x_labels + 1
     ):
         # TODO refine this to use different orders of labels
         ax.set_xticks(xdata)
         ax.set_xticklabels(x.labels)
 
-    # y label
+    # y and zlabel
     # ------------------------------------------------------------------------
+    # This depends on the plot method
+
     ylabel = kwargs.get("ylabel", None)
-    if show_y_points:
-        ylabel = "data points"
-    if not ylabel:
-        if method in ["stack"]:
-            ylabel = make_label(new, "values")
-
-        else:
-            ylabel = make_label(y, new.dims[-2])
-            # y tick labels
-            uselabely = kwargs.get("uselabel_y", False)
-            if (
-                y
-                and y.is_labeled
-                and (uselabely or not np.any(y.data))
-                and len(y.labels) < number_y_labels
-            ):
-                # TODO refine this to use different orders of labels
-                ax.set_yticks(ydata)
-                ax.set_yticklabels(y.labels)
-
-    # z label
-    # ------------------------------------------------------------------------
     zlabel = kwargs.get("zlabel", None)
-    if not zlabel:
-        if method in ["stack"]:
-            zlabel = make_label(y, new.dims[-2])
-        elif method in ["surface"]:
-            zlabel = make_label(new, "values")
-            ax.set_zlabel(zlabel)
-        else:
-            zlabel = make_label(new, "z")
+
+    if method in ["stack"]:
+        # in this case the ordinates axis  is the z axis
+
+        ordinates_label = make_label(new, "values") if not zlabel else zlabel
+        cb_label = make_label(y, new.dims[-2]) if not ylabel else ylabel
+
+    else:
+        # in other 2D case, the ordinates axis is the y axis
+
+        if show_y_points:
+            ylabel = "data points"
+
+        ordinates_label = make_label(y, new.dims[-2]) if not ylabel else ylabel
+        cb_label = make_label(new, "values") if not zlabel else zlabel
 
     # do we display the ordinate axis?
     if kwargs.get("show_y", True):
-        ax.set_ylabel(ylabel)
+        ax.set_ylabel(ordinates_label)
+
+        # y tick labels
+        uselabely = kwargs.get("use_label_y", False)
+        if (
+            y
+            and y.is_labeled
+            and (uselabely or not np.any(y.data))
+            and len(y.labels) < number_y_labels
+        ):
+            # TODO refine this to use different orders of labels
+            ax.set_yticks(ydata)
+            ax.set_yticklabels(y.labels)
     else:
         ax.set_yticks([])
 
@@ -605,7 +612,8 @@ def plot_2D(dataset, method=None, **kwargs):
             new._axcb = mpl.colorbar.ColorbarBase(
                 axec, cmap=plt.get_cmap(cmap), norm=norm
             )
-            new._axcb.set_label(zlabel)
+            new._axcb.set_label(cb_label)
+
     #        else:
     #            new._fig.colorbar(surf, shrink=0.5, aspect=10)
 

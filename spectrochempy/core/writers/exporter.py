@@ -25,8 +25,9 @@ class Exporter(HasTraits):
 
     object = Any
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
 
+        super().__init__(*args, **kwargs)
         FILETYPES = [
             ("scp", "SpectroChemPy files (*.scp)"),
             ("labspec", "LABSPEC exported files (*.txt)"),

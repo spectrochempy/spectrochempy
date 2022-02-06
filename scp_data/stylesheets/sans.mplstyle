@@ -25,7 +25,7 @@ savefig.facecolor: white
 savefig.edgecolor: white
 
 font.family      : sans-serif
-font.size        : 10
+font.size        : 9
 font.style       : normal
 font.weight      : normal
 

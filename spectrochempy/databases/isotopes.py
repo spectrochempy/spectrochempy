@@ -184,9 +184,10 @@ class Isotopes(Meta):  # lgtm[py/missing-call-to-init]
     # ------------------------------------------------------------------------
     # initializer
     # ------------------------------------------------------------------------
-    def __init__(self, nucleus="1H"):
+    def __init__(self, nucleus="1H", **data):
 
         # filename = resource_filename(PKG, 'isotopes.csv')
+        super().__init__(**data)
         DATABASES = pathlib.Path(prefs.databases_directory)
         filename = DATABASES / "isotopes.csv"
         txt = filename.read_text()
@@ -220,6 +221,8 @@ class Isotopes(Meta):  # lgtm[py/missing-call-to-init]
 
     def __setattr__(self, key, value):
         if key not in [
+            "parent",
+            "name",
             "nucleus",
             "readonly",
             "_data",
@@ -236,7 +239,8 @@ class Isotopes(Meta):  # lgtm[py/missing-call-to-init]
                 key
             ] = value  # to avoid a recursive call  # we can not use  # self._readonly = value!
 
-    def _isotopes_validate(self, pv):
+    @staticmethod
+    def _isotopes_validate(pv):
 
         for key, item in pv.items():
             if not key or not item:

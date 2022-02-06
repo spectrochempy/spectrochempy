@@ -2797,7 +2797,8 @@ class NDMath(object):
 
         debug_("... Shapes are compatibles")
 
-    def _check_compatible_operand_coordinates(self, objs):
+    @staticmethod
+    def _check_compatible_operand_coordinates(objs):
 
         debug_("If needed check that coordinates are compatible ...")
 
@@ -2935,7 +2936,8 @@ class NDMath(object):
 
         return objmagnitudes, objunits
 
-    def _check_masks_and_transform_data(self, inputs, objtypes, magnitudes):
+    @staticmethod
+    def _check_masks_and_transform_data(inputs, objtypes, magnitudes):
 
         debug_("Checking masks ...")
         objtypes = list(objtypes)

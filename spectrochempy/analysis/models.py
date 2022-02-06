@@ -263,6 +263,7 @@ class voigtmodel(object):
     #         w = w * abs(x[1] - x[0])
     #         return ampl * w
 
+    @make_units_compatibility
     def f(self, x, ampl, pos, width, ratio, **kargs):
 
         return asymmetricvoigtmodel().f(x, ampl, pos, width, ratio, asym=0.0)
