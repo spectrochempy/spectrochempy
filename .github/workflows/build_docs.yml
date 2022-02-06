@@ -12,7 +12,7 @@ on:
     types: [published]
 
   workflow_dispatch:
-
+  
 jobs:
 
   build_and_publish_documentation:
