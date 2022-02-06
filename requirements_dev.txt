@@ -22,7 +22,7 @@ orderedset
 pint==0.16.1
 plotly
 requests
-scipy
+scipy==1.7.3
 tqdm
 traitlets
 traittypes
