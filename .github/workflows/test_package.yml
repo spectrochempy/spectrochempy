@@ -45,10 +45,10 @@ jobs:
         run: |
           conda install jinja2
 
-      - name: Create environment scpy3.7
+      - name: Create environment scpy3.8
         run: |
-          python .ci/env_create.py -v 3.7 --dev scpy3.7.yml
-          mv .ci/scpy3.7.yml artifact/scpy3.7.yml
+          python .ci/env_create.py -v 3.8 --dev scpy3.8.yml
+          mv .ci/scpy3.8.yml artifact/scpy3.8.yml
 
       - name: Create environment scpy3.9
         run: |
@@ -80,7 +80,7 @@ jobs:
       max-parallel: 4
       matrix:
         os: [ubuntu-latest, windows-latest] #, macOS-latest]
-        pythonVersion: ["3.9", "3.7"]
+        pythonVersion: ["3.9", "3.8"]
 
     steps:
       - name: Checkout code

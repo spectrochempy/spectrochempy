@@ -121,3 +121,4 @@ process.pscp
 
 # unknown
 .goutputstream*
+changelog.rst

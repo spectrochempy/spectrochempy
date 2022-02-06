@@ -54,9 +54,7 @@ class BaselineCorrection(HasTraits):
     .. plot::
         :include-source:
 
-        from spectrochempy import *
-        nd = NDDataset.read_omnic(os.path.join('irdata',
-                                    'nh4y-activation.spg'))
+        nd = scp.NDDataset.read_omnic('irdata/nh4y-activation.spg')
         ndp = nd[:, 1291.0:5999.0]
         bc = BaselineCorrection(ndp)
         ranges=[[5996., 5998.], [1290., 1300.],
@@ -65,7 +63,7 @@ class BaselineCorrection(HasTraits):
         span = bc.compute(*ranges,method='multivariate',
                           interpolation='pchip', npc=8)
         _ = bc.corrected.plot_stack()
-        show()
+        scp.show()
     """
 
     dataset = Instance(NDDataset)
