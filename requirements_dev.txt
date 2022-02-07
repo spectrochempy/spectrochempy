@@ -10,7 +10,6 @@
 quadprog
 brukeropusreader
 numpy-quaternion
-git+https://github.com/jjhelmus/nmrglue.git
 colorama
 dill
 ipython>=7.31.1
@@ -55,4 +54,5 @@ json5
 sphinx-copybutton
 numpydoc
 pandoc
+git+https://github.com/jjhelmus/nmrglue.git
 autodoc_traits

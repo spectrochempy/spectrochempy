@@ -124,14 +124,6 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="convert conda file to pip")
 
-    parser.add_argument(
-        "name",
-        nargs="?",
-        default="scpy",
-        help="name of the environment (default scpy) ",
-    )
-
-    parser.add_argument("-v", "--version", help="Python version", default="3.8")
     parser.add_argument("--dash", help="use dash", action="store_true")
     parser.add_argument("--cantera", help="use cantera", action="store_true")
 
@@ -161,12 +153,7 @@ if __name__ == "__main__":
 #
 # =============================================================================
 """
-
-    name = args.name.split(".yml")[0]
-
     out = template.render(
-        NAME=f"{name}",
-        VERSION=args.version,
         DEV=False,
         DASH=args.dash,
         CANTERA=args.cantera,
@@ -182,8 +169,6 @@ if __name__ == "__main__":
     )
 
     out = template.render(
-        NAME=f"{name}_dev",
-        VERSION=args.version,
         DEV=True,
         DASH=args.dash,
         CANTERA=args.cantera,
