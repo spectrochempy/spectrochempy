@@ -3149,11 +3149,11 @@ class NDMath(object):
             else (data, NOMASK)
         )
 
-        if self._check_if_is_td64(data):
-            data, units = self._data_and_units_from_td64(data)
-            dtype = np.dtype("float")
-        else:
-            dtype = None
+        # if self._check_if_is_td64(data):
+        #     data, units = self._data_and_units_from_td64(data)
+        #     dtype = np.dtype("float")
+        # else:
+        #     dtype = None
 
         # if returntype in order.keys() and objtypes[0] != returntype:
         #     # TODO: TEST, I AM NOT SURE THIS IS A POSSIBLE CASE IN SPECTROCHEMPY
@@ -3171,6 +3171,7 @@ class NDMath(object):
         # --- returns -----
 
         # return calculated data, dtype, units and mask
+        dtype = data.dtype
         return data, dtype, units, mask, returntype
 
     # ..........................................................................
@@ -3302,16 +3303,18 @@ class NDMath(object):
 
             new = NDDataset(new)
 
+        # set the new units
+        new._units = cpy.copy(units)
+
+        # set the data
         if returntype != "LinearCoord":
-            new._data = cpy.deepcopy(data)
+            new.data = cpy.deepcopy(data)
         else:
             from spectrochempy.core.dataset.coord import LinearCoord
 
             new = LinearCoord(cpy.deepcopy(data))
 
-        # update the attributes
-        new._dtype = dtype
-        new._units = cpy.copy(units)
+        # update the other attributes
         if mask is not None and np.any(mask != NOMASK):
             new._mask = cpy.copy(mask)
         if history is not None and hasattr(new, "history"):

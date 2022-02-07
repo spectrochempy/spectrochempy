@@ -66,7 +66,7 @@ def read_matlab(*paths, **kwargs):
         Default value is False. If True, and several filenames have been provided as arguments,
         then a single dataset with merged (stacked along the first
         dimension) is returned (default=False)
-    comment: str, optional
+    comment : str, optional
         A Custom comment.
     content : bytes object, optional
         Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
@@ -258,7 +258,7 @@ def _read_dso(dataset, name, data):
                             pass
 
             if not isinstance(coord, Coord):
-                coord = Coord(data=[j for j in range(dat.shape[i])], title="index")
+                coord = Coord(data=[j for j in range(dat.shape[i])], long_name="index")
 
             coords.append(coord)
 

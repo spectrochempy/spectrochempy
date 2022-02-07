@@ -39,7 +39,7 @@ def write_csv(dataset, filename, **kwargs):
     ----------------
     directory : str, optional
         Where to write the specified `filename`. If not specified, write in the current directory.
-    comment: str, optional
+    comment : str, optional
         A Custom comment.
     delimiter : str, optional
         Set the column delimiter in CSV file.

@@ -54,7 +54,7 @@ from spectrochempy.utils import (
     convert_to_html,
     get_user_and_node,
     pathclean,
-    deprecated,
+    # deprecated,
     typequaternion,
     as_quaternion,
     get_component,
@@ -97,26 +97,36 @@ class NDArray(tr.HasTraits):
     """
     The basic |NDArray| object.
 
-    The |NDArray| class is an array (numpy |ndarray|-like) container, usually not intended to be used directly,
+    The |NDArray| class is an array (numpy |ndarray|-like) container, usually not
+    intended to be used directly,
     as its basic functionalities may be quite limited, but to be subclassed.
 
-    Indeed, both the classes |NDDataset| and |Coord| which respectively implement a full dataset (with
-    coordinates) and the coordinates in a given dimension, are derived from |NDArray| in |scpy|.
+    Indeed, both the classes |NDDataset| and |Coord| which respectively implement a
+    full dataset (with
+    coordinates) and the coordinates in a given dimension, are derived from |NDArray|
+    in |scpy|.
 
-    The key distinction from raw numpy |ndarray| is the presence of optional properties such as dimension names,
+    The key distinction from raw numpy |ndarray| is the presence of optional properties
+    such as dimension names,
     labels, masks, units and/or extensible metadata dictionary.
 
     Parameters
     ----------
     data : array of floats
-        Data array contained in the object. The data can be a list, a tuple, a |ndarray|, a ndarray-like,
-        a |NDArray| or any subclass of |NDArray|. Any size or shape of data is accepted. If not given, an empty
+        Data array contained in the object. The data can be a list, a tuple, a |ndarray|
+        , a ndarray-like,
+        a |NDArray| or any subclass of |NDArray|. Any size or shape of data is accepted.
+         If not given, an empty
         |NDArray| will be inited.
-        At the initialisation the provided data will be eventually cast to a numpy-ndarray.
-        If a subclass of |NDArray| is passed which already contains some mask, labels, or units, these elements
+        At the initialisation the provided data will be eventually cast to a
+        numpy-ndarray.
+        If a subclass of |NDArray| is passed which already contains some mask, labels,
+        or units, these elements
         will
-        be used to accordingly set those of the created object. If possible, the provided data will not be copied
-        for `data` input, but will be passed by reference, so you should make a copy of the `data` before passing
+        be used to accordingly set those of the created object. If possible, the
+        provided data will not be copied
+        for `data` input, but will be passed by reference, so you should make a copy
+        of the `data` before passing
         them if that's the desired behavior or set the `copy` argument to True.
     **kwargs
         Optional keywords parameters. See Other Parameters.
@@ -124,31 +134,44 @@ class NDArray(tr.HasTraits):
     Other Parameters
     ----------------
     dtype : str or dtype, optional, default=np.float64
-        If specified, the data will be cast to this dtype, else the data will be cast to float64.
+        If specified, the data will be cast to this dtype, else the data will be cast
+        to float64.
     dims : list of chars, optional.
-        If specified the list must have a length equal to the number of data dimensions (ndim).
-        If not specified, dimension names are automatically attributed in the order given by
+        If specified the list must have a length equal to the number of data dimensions
+        (ndim).
+        If not specified, dimension names are automatically attributed in the order
+        given by
         `DEFAULT_DIM_NAME`.
     name : str, optional
-        A user-friendly name for this object. If not given, the automatic `id` given at the object creation will be
+        A user-friendly name for this object. If not given, the automatic `id` given at
+        the object creation will be
         used as a name.
     labels : array of objects, optional
         Labels for the `data`. Note that the labels can be used only for 1D-datasets.
-        The labels array may have an additional dimension, meaning several series of labels for the same data.
-        The given array can be a list, a tuple, a |ndarray|, a ndarray-like, a |NDArray| or any subclass of
+        The labels array may have an additional dimension, meaning several series of
+        labels for the same data.
+        The given array can be a list, a tuple, a |ndarray|, a ndarray-like, a |NDArray|
+         or any subclass of
         |NDArray|.
     mask : array of bool or `NOMASK`, optional
-        Mask for the data. The mask array must have the same shape as the data. The given array can be a list,
-        a tuple, or a |ndarray|. Each values in the array must be `False` where the data are *valid* and True when
-        they are not (like in numpy masked arrays). If `data` is already a :class:`~numpy.ma.MaskedArray`, or any
-        array object (such as a |NDArray| or subclass of it), providing a `mask` here will cause the mask from the
+        Mask for the data. The mask array must have the same shape as the data. The
+        given array can be a list,
+        a tuple, or a |ndarray|. Each values in the array must be `False` where the
+        data are *valid* and True when
+        they are not (like in numpy masked arrays). If `data` is already a
+        :class:`~numpy.ma.MaskedArray`, or any
+        array object (such as a |NDArray| or subclass of it), providing a `mask` here
+        will cause the mask from the
         masked array to be ignored.
     units : |Unit| instance or str, optional
-        Units of the data. If data is a |Quantity| then `units` is set to the unit of the `data`; if a unit is also
-        explicitly provided an error is raised. Handling of units use the `pint <https://pint.readthedocs.org/>`_
+        Units of the data. If data is a |Quantity| then `units` is set to the unit of
+        the `data`; if a unit is also
+        explicitly provided an error is raised. Handling of units use the
+        `pint <https://pint.readthedocs.org/>`_
         package.
     long_name : str, optional
-        The long_name of the dimension. It will later be used for instance for labelling plots of the data.
+        The long_name of the dimension. It will later be used for instance for
+        labelling plots of the data.
         It is optional but recommended giving a long_name to each ndarray.
     dlabel :  str, optional.
         Alias of `long_name`.
@@ -156,7 +179,8 @@ class NDArray(tr.HasTraits):
         Additional metadata for this object. Must be dict-like but no
         further restriction is placed on meta.
     author : str, optional.
-        name(s) of the author(s) of this dataset. BNy default, name of the computer note where this dataset is
+        name(s) of the author(s) of this dataset. BNy default, name of the computer
+        note where this dataset is
         created.
     comment : str, optional.
         An optional comment on the nd-dataset.
@@ -221,7 +245,7 @@ class NDArray(tr.HasTraits):
     # they will essentially serve as coordinates labelling.
 
     # Other settings
-    _text_width = tr.Integer(120)
+    _text_width = tr.Integer(88)
     _html_output = tr.Bool(False)
     _filename = tr.Union((tr.Instance(pathlib.Path), tr.Unicode()), allow_none=True)
 
@@ -1096,27 +1120,32 @@ class NDArray(tr.HasTraits):
             not hasattr(data, "shape")
             or not hasattr(data, "__getitem__")
             or not hasattr(data, "__array_struct__")
-        ):
+        ) and not isinstance(data, (list, tuple)):
             # Data doesn't look like a numpy array, try converting it to
             # one.
+            self._data = np.array(data, subok=True, copy=False)
+
+        else:
             try:
-                self._data = np.array(data, subok=True, copy=False)
+                data = np.array(data, subok=True, copy=self._copy)
             except ValueError:
                 # happens if data is a list of quantities
                 if isinstance(data[0], Quantity):
                     self._data = np.array([d.m for d in data], subok=True, copy=False)
-                self._units = data[0].units
+                    self._units = data[0].units
+                    return
 
-        else:
-            data = np.array(data, subok=True, copy=self._copy)
             if data.dtype.kind == "O":  # likely None value
-                data = data.astype(float)
+                self._data = data.astype(float)
 
             elif data.dtype.kind == "m":  # timedelta64
-                data, self._units = self._data_and_units_from_td64(data)
-                self._dtype = np.dtype("float")
-
-            self._data = data
+                data, units = self._data_and_units_from_td64(data)
+                self._dtype = None
+                self._data, self._units = data, units
+                if "acquisition" in self._long_name.lower():
+                    self._long_name = "time"
+            else:
+                self._data = data
 
     # ..........................................................................
     def _sort(self, by=None, pos=None, descend=False, inplace=False):
@@ -1205,7 +1234,7 @@ class NDArray(tr.HasTraits):
 
             text += mkbody(data, "", units)
 
-        out = ""  # f'        long_name: {self.long_name}\n' if self.long_name else ''
+        out = ""  # f'     long_name: {self.long_name}\n' if self.long_name else ''
         text = text.strip()
         if "\n" not in text:  # single line!
             out += header.replace("...", f"\0{text}\0")
@@ -1501,10 +1530,8 @@ class NDArray(tr.HasTraits):
         Data type (np.dtype).
         """
         if self.is_empty:
-            self._dtype = None
-        else:
-            self._dtype = self.data.dtype
-        return self._dtype
+            return None
+        return self._data.dtype
 
     # ..........................................................................
     @property
@@ -2448,7 +2475,6 @@ class NDArray(tr.HasTraits):
         return self.long_name
 
     @title.setter
-    @deprecated(type="property", replace="long_name")
     def title(self, value):
 
         warning_(
@@ -2468,6 +2494,13 @@ class NDArray(tr.HasTraits):
         e.g., axe long_name in a matplotlib plot.
         """
         if self._long_name:
+            # ssme cleaning
+            if (
+                "GMT" in self._long_name
+                and self.dtype is not None
+                and self.dtype.kind in ["M", "m"]
+            ):
+                self._long_name = self._long_name.replace("GMT", "UTC")
             return self._long_name
         else:
             return "<untitled>"
@@ -3392,7 +3425,7 @@ class NDComplexArray(NDArray):
                     text += mkbody(data, pref, units)
 
         out = "          DATA \n"
-        out += f"        long_name: {self.long_name}\n" if self.long_name else ""
+        out += f"    long_name: {self.long_name}\n" if self.long_name else ""
         out += header
         out += "\0{}\0".format(textwrap.indent(text.strip(), " " * 9))
         out = out.rstrip()  # remove the trailings '\n'

@@ -308,7 +308,7 @@ def plot_2D(dataset, method=None, **kwargs):
     # special case of datetime64
     if y is not None and y.is_dt64:
         ylabel, ydata = get_datetime_labels(y.data)
-        kwargs["ylabel"] = ylabel + "(UTC)"  # for latter use
+        kwargs["ylabel"] = ylabel + " (UTC)"  # for latter use
 
     # other cases
     elif y is not None and (not y.is_empty or y.is_labeled):

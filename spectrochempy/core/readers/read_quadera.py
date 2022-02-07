@@ -68,7 +68,7 @@ def read_quadera(*paths, **kwargs):
         Default value is False. If True, and several filenames have been provided as arguments,
         then a single dataset with merged (stacked along the first
         dimension) is returned (default=False)
-    comment: str, optional
+    comment : str, optional
         A Custom comment.
     content : bytes object, optional
         Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
@@ -193,9 +193,9 @@ def _read_asc(*args, **kwargs):
     dataset.units = "amp"
 
     if timestamp:
-        _y = Coord(times[:, 0], title="acquisition timestamp (UTC)", units="s")
+        _y = Coord(times[:, 0], long_name="acquisition timestamp (UTC)", units="s")
     else:
-        _y = Coord(times[:, 0] - times[0, 0], title="Time", units="s")
+        _y = Coord(times[:, 0] - times[0, 0], long_name="Time", units="s")
 
     _x = Coord(labels=channels)
     dataset.set_coordset(y=_y, x=_x)

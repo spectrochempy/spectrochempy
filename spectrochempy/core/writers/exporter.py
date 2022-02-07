@@ -124,7 +124,7 @@ def write(dataset, filename=None, **kwargs):
         is inferred (whnever it is possible) from the file name extension.
     directory : str, optional
         Where to write the specified `filename`. If not specified, write in the current directory.
-    comment: str, optional
+    comment : str, optional
         A Custom comment.
     csv_delimiter : str, optional
         Set the column delimiter in CSV file.

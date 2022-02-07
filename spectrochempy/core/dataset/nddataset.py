@@ -32,6 +32,7 @@ from spectrochempy.utils import (
     SpectroChemPyException,
     MaskedConstant,
     DEFAULT_DIM_NAME,
+    deprecated,
 )
 from spectrochempy.optional import import_optional_dependency
 
@@ -774,7 +775,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         """
         List of the |Coord| long_names.
 
-        Read only property. Use set_coordtitle to eventually set titles.
+        Read only property.
         """
         if self._coordset is not None:
             return self._coordset.long_names
@@ -782,12 +783,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     @property
     def coordtitles(self):
         """
-        List of the |Coord| titles.
-
-        Read only property. Use set_coordtitle to eventually set titles.
+        DEPRECATED. Use coordlong_names
         """
-        if self._coordset is not None:
-            return self._coordset.long_names
+        return self.coordlong_names
 
     # ..........................................................................
     @property
@@ -878,17 +876,27 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         See Also
         --------
-        add_coords, set_coordtitles, set_coordunits
+        add_coords,
+        set_coordlong_names,
+        set_coordunits
         """
         self._coordset = None
         self.add_coordset(*args, dims=self.dims, **kwargs)
 
     # ..........................................................................
+    def set_coordlong_name(self, *args, **kwargs):
+        """
+        Set long_name of one or more coordinates.
+        """
+        self._coordset.set_long_names(*args, **kwargs)
+
+    # ..........................................................................
+    @deprecated(replace="set_coordlong_names")
     def set_coordtitles(self, *args, **kwargs):
         """
-        Set titles of the one or more coordinates.
+        DEPRECATED. Use set_coordlong_name
         """
-        self._coordset.set_titles(*args, **kwargs)
+        self.set_coordlong_name(*args, **kwargs)
 
     # ..........................................................................
     def set_coordunits(self, *args, **kwargs):
@@ -1246,10 +1254,11 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         pars = self.comment.strip().splitlines()
         if pars:
-            out += "  comment: "
+            out += "      comment: "
             desc = ""
             if pars:
-                desc += "{}\n".format(wrapper1.fill(pars[0]))
+                ppp = pars[0]
+                desc += "{}\n".format(wrapper1.fill(ppp))
             for par in pars[1:]:
                 desc += "{}\n".format(textwrap.indent(par, " " * 15))
             # the three escaped null characters are here to facilitate
@@ -1262,7 +1271,10 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             out += "      history: "
             hist = ""
             if pars:
-                hist += "{}\n".format(wrapper1.fill(pars[0]))
+                ppp = pars[0]
+                if len(ppp) > self._text_width:
+                    ppp = ppp[: min(self._text_width - 4, len(pars[0]))] + " ..."
+                hist += "{}\n".format(wrapper1.fill(ppp))
             for par in pars[1:]:
                 hist += "{}\n".format(textwrap.indent(par, " " * 15))
             # the three escaped null characters are here to facilitate

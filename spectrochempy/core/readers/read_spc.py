@@ -72,7 +72,7 @@ def read_spc(*paths, **kwargs):
         dimension) is returned (default=False).
     sortbydate : bool, optional
         Sort multiple spectra by acquisition date (default=True).
-    comment: str, optional
+    comment : str, optional
         A Custom comment.
     content : bytes object, optional
         Instead of passing a filename for further reading, a bytes content
@@ -539,7 +539,7 @@ def _read_spc(*args, **kwargs):
     # now add coordinates
     _y = Coord(
         [timestamp],
-        title="acquisition timestamp (GMT)",
+        long_name="acquisition timestamp (GMT)",
         units="s",
         labels=([acqdate], [filename]),
     )

@@ -15,7 +15,9 @@ __all__ = ["generate_fake"]
 
 
 def _make_spectra_matrix(modelname, ampl, pos, width, ratio=None, asym=None):
-    x = scp.Coord(np.linspace(6000.0, 1000.0, 4000), units="cm^-1", title="wavenumbers")
+    x = scp.Coord(
+        np.linspace(6000.0, 1000.0, 4000), units="cm^-1", long_name="wavenumbers"
+    )
     s = []
     for arg in zip(modelname, ampl, pos, width, ratio, asym):
         model = getattr(scp, arg[0] + "model")()
@@ -24,14 +26,17 @@ def _make_spectra_matrix(modelname, ampl, pos, width, ratio=None, asym=None):
 
     st = np.vstack(s)
     st = scp.NDDataset(
-        data=st, units="absorbance", title="absorbance", coordset=[range(len(st)), x]
+        data=st,
+        units="absorbance",
+        long_name="absorbance",
+        coordset=[range(len(st)), x],
     )
 
     return st
 
 
 def _make_concentrations_matrix(*profiles):
-    t = scp.LinearCoord(np.linspace(0, 10, 50), units="hour", title="time")
+    t = scp.LinearCoord(np.linspace(0, 10, 50), units="hour", long_name="time")
     c = []
     for p in profiles:
         c.append(p(t.data))
@@ -39,7 +44,7 @@ def _make_concentrations_matrix(*profiles):
     ct = ct - np.min(ct)
     if ct.shape[0] > 1:
         ct = ct / np.sum(ct, axis=0)
-    ct = scp.NDDataset(data=ct, title="concentration", coordset=[range(len(ct)), t])
+    ct = scp.NDDataset(data=ct, long_name="concentration", coordset=[range(len(ct)), t])
 
     return ct
 

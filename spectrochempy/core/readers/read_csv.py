@@ -78,7 +78,7 @@ def read_csv(*paths, **kwargs):
         dimension) is returned (default=False).
     sortbydate : bool, optional
         Sort multiple spectra by acquisition date (default=True).
-    comment: str, optional
+    comment : str, optional
         A Custom comment about the data.
     origin : {'omnic', 'tga'}, optional
         in order to properly interpret CSV file it can be necessary to set the origin of the spectra.
@@ -205,7 +205,7 @@ def _read_csv(*args, **kwargs):
     name = filename.stem
     dataset.filename = filename
     dataset.name = kwargs.get("name", name)
-    dataset.long_name = kwargs.get("title", None)
+    dataset.long_name = kwargs.get("long_name", None)
     dataset.units = kwargs.get("units", None)
     dataset.comment = kwargs.get(
         "comment", kwargs.get("description", f"{name} read from .csv file")
@@ -268,7 +268,7 @@ def _add_omnic_info(dataset, **kwargs):
         # get the dates
         acqdate = np.datetime64(datetime.strptime(dat, "%a %b %d %H-%M-%S %Y"))
         dataset.y = Coord(np.array([acqdate]), name="y")
-        dataset.set_coordtitles(y="acquisition timestamp (GMT)", x="wavenumbers")
+        dataset.set_coordlong_names(y="acquisition timestamp (GMT)", x="wavenumbers")
         dataset.y.labels = [name]
         dataset.y.units = "s"
 

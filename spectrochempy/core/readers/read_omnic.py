@@ -361,7 +361,7 @@ def read_spa(*paths, **kwargs):
         dimension) is returned (default=False).
     sortbydate : bool, optional
         Sort multiple spectra by acquisition date (default=True).
-    comment: str, optional
+    comment : str, optional
         A Custom comment.
     content : bytes object, optional
         Instead of passing a filename for further reading, a bytes content
@@ -458,7 +458,7 @@ def read_srs(*paths, **kwargs):
         dimension) is returned (default=False).
     sortbydate : bool, optional
         Sort multiple spectra by acquisition date (default=True).
-    comment: str, optional
+    comment : str, optional
         A Custom comment.
     content : bytes object, optional
         Instead of passing a filename for further reading, a bytes content
@@ -697,13 +697,13 @@ def _read_spg(*args, **kwargs):
         offset=firstx[0],
         increment=spacing,
         size=int(nx[0]),
-        title=xtitles[0],
+        long_name=xtitles[0],
         units=xunits[0],
     )
 
     _y = Coord(
         acquisitiondates,
-        title="acquisition date (GMT)",
+        long_name="acquisition date (GMT)",
         units=None,
         labels=(spectitles,),
     )
@@ -837,7 +837,7 @@ def _read_spa(*args, **kwargs):
 
     _y = Coord(
         [timestamp],
-        title=title,
+        long_name=title,
         units="s",
         labels=([acquisitiondate], [filename]),
     )
@@ -860,7 +860,7 @@ def _read_spa(*args, **kwargs):
         spacing = (lastx - firstx) / (nx - 1)
 
         _x = LinearCoord(
-            offset=firstx, increment=spacing, size=nx, title=xtitle, units=xunit
+            offset=firstx, increment=spacing, size=nx, long_name=xtitle, units=xunit
         )
 
     else:  # interferogram
@@ -877,7 +877,7 @@ def _read_spa(*args, **kwargs):
             offset=0,
             increment=1,
             size=len(intensities),
-            title="data points",
+            long_name="data points",
             units=None,
         )
 

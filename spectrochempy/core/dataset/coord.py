@@ -686,6 +686,7 @@ class Coord(NDMath, NDArray):
                 "coords",
                 "__await__",
                 "__aiter__",
+                "dtype",
             ]
             or "_validate" in item
             or "_changed" in item
@@ -789,7 +790,7 @@ class Coord(NDMath, NDArray):
         out = ""
         if not self.is_empty and print_size:
             out += f"{self._str_shape().rstrip()}\n"
-        out += f"        long_name: {self.long_name}\n" if self.long_name else ""
+        out += f"    long_name: {self.long_name}\n" if self.long_name else ""
         if self.has_data:
             out += "{}\n".format(self._str_value(header=header))
         elif self.is_empty and not self.is_labeled:
@@ -964,17 +965,32 @@ class Coord(NDMath, NDArray):
             not hasattr(data, "shape")
             or not hasattr(data, "__getitem__")
             or not hasattr(data, "__array_struct__")
-        ):
+        ) and not isinstance(data, (list, tuple)):
             # Data doesn't look like a numpy array, try converting it to
             # one. Non-numerical input are converted to an array of objects.
             self._data = np.array(data, subok=True, copy=False)
 
         else:
-            data = np.array(data, subok=True, copy=self._copy)
-            if data.dtype == np.object_:
-                # likely None value
-                data = data.astype(float)
-            self._data = data
+            try:
+                data = np.array(data, subok=True, copy=self._copy)
+
+                if data.dtype.kind == "O":  # likely None value
+                    self._data = data.astype(float)
+
+                elif data.dtype.kind == "m":  # timedelta64
+                    data, units = self._data_and_units_from_td64(data)
+                    self._dtype = None
+                    self._data, self._units = data, units
+                    if "acquisition" in self._long_name.lower():
+                        self._long_name = "time"
+                else:
+                    self._data = data
+
+            except ValueError:
+                # happens if data is a list of quantities
+                if isinstance(data[0], Quantity):
+                    self._data = np.array([d.m for d in data], subok=True, copy=False)
+                    self._units = data[0].units
 
         if self.linear:
             # we try to replace data by only an offset and an increment
@@ -1229,6 +1245,16 @@ class LinearCoord(Coord):
         self._use_time = val
         if "laser_frequency" in self.meta:
             self.set_laser_frequency(self.meta.laser_frequency)
+
+    # ..........................................................................
+    @property
+    def dtype(self):
+        """
+        Data type (np.dtype).
+        """
+        if self.is_empty:
+            return None
+        return self.data.dtype
 
     @property
     def show_datapoints(self):

@@ -1050,7 +1050,7 @@ def _read_topspin(*args, **kwargs):
                 increment=dw,
                 units="us",
                 size=meta.td[axis],
-                title=f"F{axis + 1} acquisition time",
+                long_name=f"F{axis + 1} acquisition time",
             )
             coord.meta.larmor = meta.sfo1[axis]
             coords.append(coord)
@@ -1073,7 +1073,7 @@ def _read_topspin(*args, **kwargs):
                 nucleus = "^{" + mass + "}" + name
             else:
                 nucleus = ""
-            coord.long_name = fr"$\delta\ {nucleus}$"
+            coord.long_name = rf"$\delta\ {nucleus}$"
             coords.append(coord)
 
     dataset.data = data

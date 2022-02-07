@@ -71,7 +71,7 @@ def read_labspec(*paths, **kwargs):
         dimension) is returned (default=False)
     sortbydate : bool, optional
         Sort multiple spectra by acquisition date (default=True)
-    comment: str, optional
+    comment : str, optional
         A Custom comment.
     content : bytes object, optional
         Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.

@@ -96,7 +96,37 @@ CF_TO_DT64_UNITS = {
 }
 
 
-def get_datetime_labels(data):
+def get_datetime_labels(data, resolution=None):
+    """
+    A helper function to convert datetime axis to the CF format
+
+    Datetime are given in seconds (or other) from a reference date
+    depending on the resolution of the datetimes. To change the default resolution,
+    we can use the `resolution` parameter
+
+    Parameters
+    ----------
+    data : an array of np.datetime64
+        The data to be converted.
+    resolution : str
+        By default the data are in the units of the CF object
+        (often in seconds). To change this on can use one of the units among:
+
+         * "days".
+         * "hours".
+         * "minute".
+         * "second".
+         * "millisecond".
+         * "microsecond".
+         * "nanosecond".
+
+    Returns
+    -------
+    label : str
+        A label in the form "<resolution> since <reference_date>"
+    data : an array of float
+        The array values relative to the reference date.
+    """
     data = np.asarray(data).ravel()
     reference_date = data[0]
     timedeltas = np.unique(np.diff(data))
