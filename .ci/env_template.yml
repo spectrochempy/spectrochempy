@@ -1,4 +1,6 @@
+  {%- if NAME is defined %}
 name: {{ NAME }}
+  {%- endif %}
 
   {%- if HEADER is defined %}
 {{HEADER}}
@@ -31,7 +33,6 @@ dependencies:
     - quadprog
     - brukeropusreader
     - quaternion
-    - nmrglue
     {%- if CANTERA %}
     - cantera
     {%- endif %}
@@ -116,9 +117,9 @@ dependencies:
     - dash-daq
     - jupyter-dash
     {%- endif %}
-    {%- if DEV or DASH%}
     - pip
     - pip:
+        - git+https://github.com/jjhelmus/nmrglue.git
         {%- if DEV %}
         - autodoc_traits
         {%- endif %}
@@ -126,4 +127,3 @@ dependencies:
         - dash_defer_js_import
         - dash-ace
         {%- endif %}
-    {%- endif %}

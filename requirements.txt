@@ -10,7 +10,6 @@
 quadprog
 brukeropusreader
 numpy-quaternion
-git+https://github.com/jjhelmus/nmrglue.git
 colorama
 dill
 ipython>=7.31.1
@@ -34,3 +33,4 @@ ipywidgets
 ipympl
 jupyterlab>=2.2.10
 nodejs
+git+https://github.com/jjhelmus/nmrglue.git
