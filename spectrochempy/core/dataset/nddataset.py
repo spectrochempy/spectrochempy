@@ -884,7 +884,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         self.add_coordset(*args, dims=self.dims, **kwargs)
 
     # ..........................................................................
-    def set_coordlong_name(self, *args, **kwargs):
+    def set_coordlong_names(self, *args, **kwargs):
         """
         Set long_name of one or more coordinates.
         """
@@ -896,7 +896,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         """
         DEPRECATED. Use set_coordlong_name
         """
-        self.set_coordlong_name(*args, **kwargs)
+        self.set_coordlong_names(*args, **kwargs)
 
     # ..........................................................................
     def set_coordunits(self, *args, **kwargs):
