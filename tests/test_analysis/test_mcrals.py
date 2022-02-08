@@ -9,8 +9,6 @@ from spectrochempy.core.dataset.nddataset import NDDataset, Coord
 from spectrochempy import dot
 from spectrochempy.analysis.efa import EFA
 from spectrochempy.analysis.mcrals import MCRALS
-
-
 from spectrochempy.analysis.models import (
     lorentzianmodel,
     gaussianmodel,
@@ -125,7 +123,7 @@ def test_MCRALS_synth():
     for i in range(n_PS):
         C.data[:, i] = expon(t_c, c0[i], l[i], 0)
         St.data[i, :] = gaussian(wl_c, h[i], c[i], w[i], noise[i])
-
+    gaussianmodel
     C.T.plot()
     St.plot()
 
