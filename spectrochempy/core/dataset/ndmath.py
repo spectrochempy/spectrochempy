@@ -3298,21 +3298,22 @@ class NDMath(object):
         # make a new NDArray resulting of some operation
 
         new = self.copy()
-        if returntype == "NDDataset" and not new.implements("NDDataset"):
+        if returntype == "NDDataset":  # and not new.implements("NDDataset"):
             from spectrochempy.core.dataset.nddataset import NDDataset
 
             new = NDDataset(new)
+        if returntype in ["LinearCoord", "Coord"]:
+            from spectrochempy.core.dataset.coord import Coord
+
+            new = Coord(new)
 
         # set the new units
-        new._units = cpy.copy(units)
+        new._units = units
 
         # set the data
-        if returntype != "LinearCoord":
-            new.data = cpy.deepcopy(data)
-        else:
-            from spectrochempy.core.dataset.coord import LinearCoord
-
-            new = LinearCoord(cpy.deepcopy(data))
+        new.data = cpy.deepcopy(data)
+        if returntype == "LinearCoord":
+            new.linear = True
 
         # update the other attributes
         if mask is not None and np.any(mask != NOMASK):

@@ -157,7 +157,8 @@ class Importer(HasTraits):
                     nd.name = name
             elif names and len(names) != len(nds):
                 warn(
-                    "length of the `names` list and of the list of datasets mismatch - names not applied"
+                    "length of the `names` list and of the list of datasets mismatch"
+                    " - names not applied"
                 )
             return sorted(
                 nds, key=str

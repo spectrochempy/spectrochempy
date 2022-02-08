@@ -1531,7 +1531,7 @@ class NDArray(tr.HasTraits):
         """
         if self.is_empty:
             return None
-        return self._data.dtype
+        return self.data.dtype
 
     # ..........................................................................
     @property

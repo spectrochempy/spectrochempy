@@ -1253,6 +1253,12 @@ def test_op_quantity_with_units():
 
     # And with LinearCoord
 
+
+def test_op_linearcord_and_quantity_with_units():
+
     v = LinearCoord.arange(1, 100, 0.1)
     v1 = v * Quantity(1, "km")
     assert v1.units == ur("km")
+
+    v2 = np.sqrt(v1)
+    assert v2.units == ur("km^0.5")

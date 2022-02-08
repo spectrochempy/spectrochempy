@@ -49,12 +49,11 @@ def read_omnic(*paths, **kwargs):
     spa is read)
 
     An error is generated if attempt is made to inconsistent datasets: units
-    of spectra and
-    xaxis, limits and number of points of the xaxis.
+    of spectra and xaxis, limits and number of points of the xaxis.
 
     Parameters
     -----------
-    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
+    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects
         The data source(s) can be specified by the name or a list of name
         for the file(s) to be loaded:
 
@@ -81,30 +80,25 @@ def read_omnic(*paths, **kwargs):
     -----------------
     directory : str, optional
         From where to read the specified `filename`. If not specified,
-        read in the default ``datadir`` specified in
-        SpectroChemPy Preferences.
+        read in the default ``datadir`` specified in SpectroChemPy preferences.
     merge : bool, optional
         Default value is False. If True, and several filenames have been
-        provided as arguments,
-        then a single dataset with merged (stacked along the first
-        dimension) is returned (default=False).
+        provided as arguments, then a single dataset with merged (stacked along the
+        first dimension) is returned (default=False).
     sortbydate : bool, optional
         Sort multiple spectra by acquisition date (default=True).
     comment : str, optional
         A Custom comment.
     content : bytes object, optional
         Instead of passing a filename for further reading, a bytes content
-        can be directly provided as bytes objects.
-        The most convenient way is to use a dictionary. This feature is
-        particularly useful for a GUI Dash application
-        to handle drag and drop of files into a Browser.
-        For examples on how to use this feature, one can look in the
-        ``tests/tests_readers`` directory.
+        can be directly provided as bytes objects. The most convenient way is to use a
+        dictionary. This feature is particularly useful for a GUI Dash application
+        to handle drag and drop of files into a Browser. For examples on how to use
+        this feature, one can look in the ``tests/tests_readers`` directory.
     listdir : bool, optional
-        If True and filename is None, all files present in the provided
-        `directory` are returned (and merged if `merge`
-        is True. It is assumed that all the files correspond to current
-        reading protocol (default=True).
+        If True and filename is None, all files present in the provided `directory` are
+        returned (and merged if `merge` is True. It is assumed that all the files
+        correspond to current reading protocol (default=True).
     recursive : bool, optional
         Read also in subfolders. (default=False).
 
@@ -226,7 +220,7 @@ def read_spg(*paths, **kwargs):
 
     Parameters
     -----------
-    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
+    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects
         The data source(s) can be specified by the name or a list of name
         for the file(s) to be loaded:
 
@@ -702,7 +696,7 @@ def _read_spg(*args, **kwargs):
     )
 
     _y = Coord(
-        acquisitiondates,
+        np.array(acquisitiondates),
         long_name="acquisition date (GMT)",
         units=None,
         labels=(spectitles,),
@@ -710,23 +704,18 @@ def _read_spg(*args, **kwargs):
 
     dataset.set_coordset(y=_y, x=_x)
 
-    # Set origin and description
+    # Set comment/description
     dataset.source = "omnic"
+    default_comment = f"Omnic title: {spg_title}\nOmnic " f"filename: {filename}"
     dataset.comment = kwargs.get(
-        "comment",
-        kwargs.get(
-            "description", f"Omnic title: {spg_title}\nOmnic " f"filename: {filename}"
-        ),
+        "comment", kwargs.get("description", kwargs.get("desc", default_comment))
     )
 
-    # Set the NDDataset date
-    dataset._created = datetime.utcnow()
-
     # Set origin, description and history
-    dataset.history = f"imported from spg file {filename}"
+    dataset.history = f"Imported from spg file {filename}"
     if sortbydate:
         dataset.sort(dim="y", inplace=True)
-        dataset.history = "sorted by date"
+        dataset.history = "Sorted by date"
 
     return dataset
 
@@ -846,7 +835,7 @@ def _read_spa(*args, **kwargs):
     dataset.mask = np.isnan(dataset.data)
 
     if return_ifg is None:
-        default_description = f"Omnic name: {spa_name}\nOmnic filename: {filename.name}"
+        default_comment = f"Omnic name: {spa_name}\nOmnic filename: {filename.name}"
         dataset.units = info02["units"]
         dataset.long_name = info02["title"]
 
@@ -865,11 +854,14 @@ def _read_spa(*args, **kwargs):
 
     else:  # interferogram
         if return_ifg == "sample":
-            default_description = (
+            default_comment = (
                 f"Omnic name: {spa_name} : sample IFG\nOmnic filename: {filename.name}"
             )
         else:
-            default_description = f"Omnic name: {spa_name} : background IFG\nOmnic filename: {filename.name}"
+            default_comment = (
+                f"Omnic name: {spa_name} : "
+                f"background IFG\nOmnic filename: {filename.name}"
+            )
         spa_name += ": Sample IFG"
         dataset.units = "V"
         dataset.long_name = "detector signal"
@@ -884,19 +876,16 @@ def _read_spa(*args, **kwargs):
     dataset.set_coordset(y=_y, x=_x)
     dataset.name = spa_name  # to be consistent with omnic behaviour
     dataset.filename = str(filename)
-
-    # Set origin, description, history, date
-    # Omnic spg file don't have specific "origin" field stating the oirigin of the data
-
-    dataset.source = kwargs.get("description", default_description)
+    dataset.source = "omnic"
+    dataset.comment = kwargs.get(
+        "comment", kwargs.get("description", kwargs.get("desc", default_comment))
+    )
     if "spa_history" in locals():
         dataset.history = (
             "Omnic 'DATA PROCESSING HISTORY' : \n----------------------------------\n"
             + spa_history
         )
     dataset.history = "Imported from spa file(s)"
-
-    dataset._created = datetime.utcnow()
 
     if dataset.x.units is None and dataset.x.long_name == "data points":
         # interferogram
@@ -997,7 +986,7 @@ def _read_srs(*args, **kwargs):
                 background.units = "V"
                 background.long_name = "volts"
                 background.source = "omnic"
-                background.source = "background from omnic srs file."
+                background.comment = "background from omnic srs file."
                 background.history = f"{np.datetime64('now')}: imported from srs file"
 
             else:  # this is likely the first interferogram of the series
@@ -1032,11 +1021,7 @@ def _read_srs(*args, **kwargs):
         pos += info["nx"] * 4
 
     # Create NDDataset Object for the series
-    dataset = NDDataset(data)
-    dataset.name = info["name"]
-    dataset.units = info["units"]
-    dataset.long_name = info["title"]
-    dataset.source = "omnic"
+    dataset.data = data
 
     # now add coordinates
     spacing = (info["lastx"] - info["firstx"]) / (info["nx"] - 1)
@@ -1057,13 +1042,20 @@ def _read_srs(*args, **kwargs):
 
     dataset.set_coordset(y=_y, x=_x)
 
-    # Set origin, description and history
+    # Set attributes
+    dataset.name = info["name"]
+    dataset.units = info["units"]
+    dataset.long_name = info["title"]
     dataset.source = "omnic"
-    dataset.source = kwargs.get("description", "Dataset from omnic srs file.")
-
-    dataset.history = str(
-        datetime.now(timezone.utc)
-    ) + ":imported from srs file {} ; ".format(filename)
+    dataset.name = info["name"]
+    dataset.units = info["units"]
+    dataset.long_name = info["title"]
+    dataset.source = "omnic"
+    default_comment = "Dataset from omnic srs file."
+    dataset.comment = kwargs.get(
+        "comment", kwargs.get("description", kwargs.get("desc", default_comment))
+    )
+    dataset.history = f"Imported from srs file {filename}"
 
     if dataset.x.units is None and dataset.x.long_name == "data points":
         # interferogram
