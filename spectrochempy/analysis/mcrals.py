@@ -45,7 +45,7 @@ class MCRALS(HasTraits):
     Other Parameters
     ----------------
 
-        tol : float, optional, default 0.1
+    tol : float, optional, default 0.1
         Convergence criterion on the change of residuals (percent change of standard deviation of residuals).
 
     maxit : int, optional, default=50
