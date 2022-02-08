@@ -573,8 +573,8 @@ class NDMath(object):
             return (getattr(np, fname))(inputs[0].masked_data)
 
         # case of a dataset
-        data, dtype, units, mask, returntype = self._op(ufunc, inputs, isufunc=True)
-        new = self._op_result(data, dtype, units, mask, history, returntype)
+        data, units, mask, returntype = self._op(ufunc, inputs, isufunc=True)
+        new = self._op_result(data, units, mask, history, returntype)
 
         # make a new long_name depending on the operation
         if fname in self._remove_long_name:
