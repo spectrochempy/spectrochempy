@@ -131,11 +131,17 @@ def get_datetime_labels(data, resolution=None):
     reference_date = data[0]
     timedeltas = np.unique(np.diff(data))
     zero = np.timedelta64(0, "ns")
-    for time_unit in CF_TO_DT64_UNITS.keys():
-        if np.all(timedeltas % np.timedelta64(1, CF_TO_DT64_UNITS[time_unit]) == zero):
-            break
-    label = f"{time_unit} since {str(reference_date).replace('T',' ')}"
-    newdata = (data - reference_date) // np.timedelta64(1, CF_TO_DT64_UNITS[time_unit])
+    if resolution is None:
+        for time_units in CF_TO_DT64_UNITS.keys():
+            if np.all(
+                timedeltas % np.timedelta64(1, CF_TO_DT64_UNITS[time_units]) == zero
+            ):
+                break
+    else:
+        time_units = resolution
+
+    label = f"{time_units} since {str(reference_date).replace('T',' ')}"
+    newdata = (data - reference_date) / np.timedelta64(1, CF_TO_DT64_UNITS[time_units])
     return label, newdata
 
 

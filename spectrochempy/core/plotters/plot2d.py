@@ -250,7 +250,9 @@ def plot_2D(dataset, method=None, **kwargs):
 
     # special case of datetime64
     if x is not None and x.is_dt64:
-        xlabel, xdata = get_datetime_labels(x.data)
+        xlabel, xdata = get_datetime_labels(
+            x.data, resolution=kwargs.get("time_units", None)
+        )
         kwargs["xlabel"] = xlabel + " (UTC)"  # for latter use
 
     # other cases
@@ -307,7 +309,9 @@ def plot_2D(dataset, method=None, **kwargs):
 
     # special case of datetime64
     if y is not None and y.is_dt64:
-        ylabel, ydata = get_datetime_labels(y.data)
+        ylabel, ydata = get_datetime_labels(
+            y.data, resolution=kwargs.get("time_units", None)
+        )
         kwargs["ylabel"] = ylabel + " (UTC)"  # for latter use
 
     # other cases
@@ -563,7 +567,7 @@ def plot_2D(dataset, method=None, **kwargs):
     if (
         x
         and x.is_labeled
-        and (use_label_x or not np.any(x.data))
+        and (use_label_x or x.data is None)
         and len(x.labels) < number_x_labels + 1
     ):
         # TODO refine this to use different orders of labels
@@ -601,7 +605,7 @@ def plot_2D(dataset, method=None, **kwargs):
         if (
             y
             and y.is_labeled
-            and (uselabely or not np.any(y.data))
+            and (uselabely or y.data is None)
             and len(y.labels) < number_y_labels
         ):
             # TODO refine this to use different orders of labels

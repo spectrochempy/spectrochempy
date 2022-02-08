@@ -403,7 +403,9 @@ def plot_1D(dataset, method=None, **kwargs):
 
     # special case of datetime64
     if x is not None and x.is_dt64:
-        xlabel, xdata = get_datetime_labels(x.data)
+        xlabel, xdata = get_datetime_labels(
+            x.data, resolution=kwargs.get("time_units", None)
+        )
         kwargs["xlabel"] = xlabel + " (UTC)"  # for latter use
 
     # normal case
@@ -599,7 +601,7 @@ def plot_1D(dataset, method=None, **kwargs):
 
     # x tick labels
     use_label = kwargs.get("use_label", False)
-    if x and x.is_labeled and (use_label or not np.any(x.data)):
+    if x and x.is_labeled and (use_label or x.data is None):
 
         if x.data is not None:
             xt = ax.get_xticks()

@@ -466,7 +466,7 @@ class PCA(HasTraits):
         # colors
         if color_mapping == "index":
 
-            if np.any(self._S.y.data):
+            if self._S.y.data is not None:
                 colors = self._S.y.data
             else:
                 colors = np.array(range(self._S.shape[0]))
