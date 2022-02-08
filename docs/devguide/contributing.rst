@@ -145,7 +145,7 @@ We'll now install |scpy| in development mode following 2 steps:
    .. sourcecode:: bash
 
       python .cienv_create.py -v 3.9 --dev scpy3.9.yml
-      mamba env create -f .ciscpy3.9.yml
+      mamba env create -f .ci/scpy3.9.yml
       conda activate scpy3.9
 
 2. Install |scpy|

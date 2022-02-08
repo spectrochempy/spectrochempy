@@ -26,7 +26,6 @@
     Coord.copy
     Coord.created
     Coord.data
-    Coord.date
     Coord.desc
     Coord.description
     Coord.dimensionless
@@ -72,7 +71,7 @@
     Coord.round_
     Coord.size
     Coord.spacing
-    Coord.title
+    Coord.long_name
     Coord.to
     Coord.to_base_units
     Coord.to_reduced_units
@@ -95,11 +94,11 @@
     CoordSet.names
     CoordSet.select
     CoordSet.set
-    CoordSet.set_titles
+    CoordSet.set_long_names
     CoordSet.set_units
     CoordSet.size
     CoordSet.sizes
-    CoordSet.titles
+    CoordSet.long_names
     CoordSet.to_dict
     CoordSet.units
     CoordSet.update
@@ -125,7 +124,6 @@
     LinearCoord.copy
     LinearCoord.created
     LinearCoord.data
-    LinearCoord.date
     LinearCoord.desc
     LinearCoord.description
     LinearCoord.dimensionless
@@ -172,7 +170,7 @@
     LinearCoord.show_datapoints
     LinearCoord.size
     LinearCoord.spacing
-    LinearCoord.title
+    LinearCoord.long_name
     LinearCoord.to
     LinearCoord.to_base_units
     LinearCoord.to_reduced_units
@@ -187,7 +185,7 @@
     LSTSQ.transform
     MCRALS.C
     MCRALS.Chard
-    MCRALS.extC
+    MCRALS.fixedC
     MCRALS.extOutput
     MCRALS.logs
     MCRALS.params
@@ -235,14 +233,14 @@
     NDDataset.coordmin
     NDDataset.coordnames
     NDDataset.coordset
-    NDDataset.coordtitles
+    NDDataset.coordlong_names
     NDDataset.coordunits
     NDDataset.copy
+	NDDataset.comment
     NDDataset.created
     NDDataset.cs
     NDDataset.cumsum
     NDDataset.data
-    NDDataset.date
     NDDataset.dc
     NDDataset.delete_coordset
     NDDataset.desc
@@ -328,7 +326,7 @@
     NDDataset.ndim
     NDDataset.ones
     NDDataset.ones_like
-    NDDataset.origin
+    NDDataset.source
     NDDataset.parent
     NDDataset.pipe
     NDDataset.pk
@@ -381,7 +379,7 @@
     NDDataset.savgol_filter
     NDDataset.set_complex
     NDDataset.set_coordset
-    NDDataset.set_coordtitles
+    NDDataset.set_coordlong_names
     NDDataset.set_coordunits
     NDDataset.set_hypercomplex
     NDDataset.set_quaternion
@@ -402,7 +400,7 @@
     NDDataset.swapdims
     NDDataset.T
     NDDataset.take
-    NDDataset.title
+    NDDataset.long_name
     NDDataset.to
     NDDataset.to_array
     NDDataset.to_base_units
