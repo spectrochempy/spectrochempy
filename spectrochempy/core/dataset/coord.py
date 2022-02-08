@@ -1061,6 +1061,14 @@ class Coord(NDMath, NDArray):
         else:
             return increment
 
+    def copy(self, deep=True, keepname=False, **kwargs):
+
+        new = super().copy(deep=True, keepname=False, **kwargs)
+        if new.linear and new.implements("Coord"):
+            # we also need to set the size
+            new._size = self.data.size
+        return new
+
 
 # ======================================================================================
 # Coord

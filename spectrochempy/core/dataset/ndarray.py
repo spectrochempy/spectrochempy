@@ -2230,13 +2230,13 @@ class NDArray(tr.HasTraits):
         in the array).
         """
 
-        if self._data is None and self.is_labeled:
+        if self.data is None and self.is_labeled:
             return self.labels.shape[-1]
 
-        elif self._data is None:
+        elif self.data is None:
             return None
         else:
-            return self._data.size
+            return self.data.size
 
     # ..........................................................................
     def squeeze(self, dims=None, inplace=False, keepdims=(), **kwargs):
