@@ -1,16 +1,14 @@
-# -*- coding: utf-8 -*-
-# %% [raw]
-# #  =====================================================================================
-# #  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
-# #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
-# #  See full LICENSE agreement in the root directory.
-# #  =====================================================================================
-# """
-# Plotting with datetime axis
-# ===========================
-#
-#
-# """
+# =====================================================================================
+# Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
+# See full LICENSE agreement in the root directory.
+# =====================================================================================
+"""
+Plotting with datetime axis
+===========================
+
+
+"""
 
 # %%
 import spectrochempy as scp
