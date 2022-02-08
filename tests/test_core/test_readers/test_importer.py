@@ -14,7 +14,7 @@ import spectrochempy.utils.exceptions
 from pathlib import Path
 import pytest
 
-from spectrochempy import NDDataset  # , preferences as prefs
+from spectrochempy.core.dataset.nddataset import NDDataset  # , preferences as prefs
 from spectrochempy.utils import pathclean
 
 from spectrochempy.core.readers.importer import (

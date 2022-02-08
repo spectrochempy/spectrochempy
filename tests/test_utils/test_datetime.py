@@ -49,6 +49,6 @@ def test_get_strptime64_method():
     assert date == np.datetime64("2016-11-24")
 
     time = strptime64("11:12:59")
-    assert time.astype(int) // 1000000 // 3600 == 11
+    assert time.astype("int64") // 1000000 // 3600 == 11
 
     # date = strptime64("Fri Aug 30 09-35-07 2013")
