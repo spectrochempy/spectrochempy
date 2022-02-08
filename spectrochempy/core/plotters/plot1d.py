@@ -608,8 +608,9 @@ def plot_1D(dataset, method=None, **kwargs):
             ticklabels = x.labels[x._loc2index(xt), 0]
             ax.set_xticks(ax.get_xticks(), labels=ticklabels, rotation=90.0)
         else:
-            ax.set_xticks(xdata)
-            ax.set_xticklabels(x.labels)
+            step = int(len(x.labels) / number_x_labels)
+            ax.set_xticks(xdata[::step])
+            ax.set_xticklabels(x.labels[::step])
 
     # z label
     zlabel = kwargs.get("zlabel", kwargs.get("ylabel", None))

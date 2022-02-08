@@ -408,9 +408,10 @@ class PCA(HasTraits):
 
         Parameters
         ----------
-        n_pc : int
-            Number of components to plot.
-
+        n_pc : None, int or "auto"
+            Number of components to plot. If None all pc's are kept.
+            If "auto" they are not automatically determined.
+            If n_pc is specified, then this number is used as the number of pc to plot.
         **kwargs
             Extra arguments: `colors` (default: `[NBlue, NRed]`) to set the colors
             of the bar plot and scatter plot; `ylims` (default `[(0, 100), "auto"]`).

@@ -258,7 +258,7 @@ def plot_2D(dataset, method=None, **kwargs):
     # other cases
     elif x is not None and (not x.is_empty or x.is_labeled):
         xdata = x.data
-        if not np.any(xdata):
+        if xdata is None:  # not np.any(xdata):
             if x.is_labeled:
                 discrete_data = True
                 # take into account the fact that sometimes axis have just labels
@@ -318,7 +318,7 @@ def plot_2D(dataset, method=None, **kwargs):
     elif y is not None and (not y.is_empty or y.is_labeled):
         ydata = y.data
 
-        if not np.any(ydata):
+        if ydata is None:  # not np.any(ydata):
             if y.is_labeled:
                 ydata = range(1, len(y.labels) + 1)
     else:
@@ -600,17 +600,18 @@ def plot_2D(dataset, method=None, **kwargs):
     if kwargs.get("show_y", True):
         ax.set_ylabel(ordinates_label)
 
-        # y tick labels
-        uselabely = kwargs.get("use_label_y", False)
-        if (
-            y
-            and y.is_labeled
-            and (uselabely or y.data is None)
-            and len(y.labels) < number_y_labels
-        ):
-            # TODO refine this to use different orders of labels
-            ax.set_yticks(ydata)
-            ax.set_yticklabels(y.labels)
+        if method != "stack":
+            # y tick labels
+            uselabely = kwargs.get("use_label_y", False)
+            if (
+                y
+                and y.is_labeled
+                and (uselabely or y.data is None)
+                and len(y.labels) < number_y_labels
+            ):
+                # TODO refine this to use different orders of labels
+                ax.set_yticks(ydata)
+                ax.set_yticklabels(y.labels)
     else:
         ax.set_yticks([])
 

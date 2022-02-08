@@ -18,7 +18,7 @@ import spectrochempy as scp
 
 dataset = scp.read_omnic("irdata/nh4y-activation.spg")
 print(dataset)
-dataset.plot_stack()
+_ = dataset.plot_stack()
 
 ##############################################################
 # Create a PCA object
@@ -28,14 +28,14 @@ pca = scp.PCA(dataset, centered=False)
 # Reduce the dataset to a lower dimensionality (number of
 # components is automatically determined)
 
-S, LT = pca.reduce(n_pc=0.99)
+S, LT = pca.reduce(n_pc="auto")
 
 print(LT)
 
 ###############################################################
 # Finally, display the results graphically
 # ScreePlot
-_ = pca.screeplot()
+_ = pca.screeplot(n_pc="auto")
 
 ########################################################################################
 # Score Plot
@@ -50,4 +50,4 @@ _ = pca.scoreplot(1, 2, 3)
 
 LT[:4].plot_stack()
 
-# scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
+scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
