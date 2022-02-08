@@ -643,8 +643,8 @@ def _remove_digital_filter(dic, data):
     # TODO: this allow generally to remove Bruker smiles, not so sure actually
 
     # Phasing
-    si = float(pdata.shape[-1])
-    ph = 2.0j * np.pi * phase * np.arange(si) / si
+    si = pdata.shape[-1]
+    ph = 2.0j * np.pi * phase * np.arange(si) / float(si)
     pdata = pdata * np.exp(ph)
 
     # ifft
