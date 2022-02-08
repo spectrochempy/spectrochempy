@@ -71,7 +71,7 @@ _ = dataset.plot(figsize=(6, 4), colorbar=True, colormap="magma")
 # The first solution, if we don't need to keep reference to the reference date, it to transform them in timedelta values:
 
 # %%
-dataset.y = dataset.y - dataset.y[0]
+dataset.y -= dataset.y[0]
 scp.print_(dataset.y)
 
 # %% [markdown]
@@ -79,6 +79,7 @@ scp.print_(dataset.y)
 
 # %%
 dataset.y.ito("hours")
+scp.print_(dataset.y)
 
 # %% [markdown]
 # And now the result is:
