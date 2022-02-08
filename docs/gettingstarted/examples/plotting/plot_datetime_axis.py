@@ -80,7 +80,7 @@ newdataset = (
 )  # we copy it as we will need the original dataset for solution 2
 
 newdataset.y -= newdataset.y[0]
-scp.print_(newdataset.y)
+newdataset.y
 
 # %%
 # This way we have subtracted the first value of the y axis array to all other values.
@@ -88,7 +88,7 @@ scp.print_(newdataset.y)
 # just do this:
 
 newdataset.y.ito("hours")
-scp.print_(newdataset.y)
+newdataset.y
 
 # %%
 # And now the result is:
