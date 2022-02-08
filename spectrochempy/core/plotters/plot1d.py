@@ -608,7 +608,7 @@ def plot_1D(dataset, method=None, **kwargs):
             ticklabels = x.labels[x._loc2index(xt), 0]
             ax.set_xticks(ax.get_xticks(), labels=ticklabels, rotation=90.0)
         else:
-            step = int(len(x.labels) / number_x_labels)
+            step = max(1, int(len(x.labels) / number_x_labels))
             ax.set_xticks(xdata[::step])
             ax.set_xticklabels(x.labels[::step])
 
