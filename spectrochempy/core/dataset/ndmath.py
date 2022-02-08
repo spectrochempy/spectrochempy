@@ -3170,9 +3170,8 @@ class NDMath(object):
 
         # --- returns -----
 
-        # return calculated data, dtype, units and mask
-        dtype = data.dtype
-        return data, dtype, units, mask, returntype
+        # return calculated data, units and mask
+        return data, units, mask, returntype
 
     # ..........................................................................
     @staticmethod
@@ -3185,8 +3184,8 @@ class NDMath(object):
             else:
                 history = None
 
-            data, dtype, units, mask, returntype = self._op(f, [self])
-            return self._op_result(data, dtype, units, mask, history, returntype)
+            data, units, mask, returntype = self._op(f, [self])
+            return self._op_result(data, units, mask, history, returntype)
 
         return func
 
@@ -3218,12 +3217,12 @@ class NDMath(object):
             inputs.reverse()
             objtypes.reverse()
 
-            if fname in ["mul", "add", "iadd"]:
+            if fname in ["mul", "add"]:
                 pass
             elif fname in ["truediv", "divide", "true_divide"]:
                 fname = "mul"
                 inputs[0] = np.reciprocal(inputs[0])
-            elif fname in ["isub", "sub", "subtract"]:
+            elif fname in ["sub", "subtract"]:
                 fname = "add"
                 inputs[0] = np.negative(inputs[0])
             elif fname in ["pow"]:
@@ -3258,8 +3257,8 @@ class NDMath(object):
             else:
                 history = None
 
-            data, dtype, units, mask, returntype = self._op(fm, objs)
-            new = self._op_result(data, dtype, units, mask, history, returntype)
+            data, units, mask, returntype = self._op(fm, objs)
+            new = self._op_result(data, units, mask, history, returntype)
             return new
 
         return func
@@ -3269,39 +3268,42 @@ class NDMath(object):
     def _inplace_binary_op(f):
         @functools.wraps(f)
         def func(self, other):
+
             fname = f.__name__
-            if hasattr(self, "history"):
-                self.history = f"Inplace binary op: {fname}  with `{_get_name(other)}` "
-            # else:
-            #    history = None
             objs = [self, other]
-            fm, objs = self._check_order(fname, objs)
-
-            data, dtype, units, mask, returntype = self._op(fm, objs)
-            if returntype != "LinearCoord":
-                self._data = data
+            if hasattr(self, "history"):
+                history = f"Inplace binary op: {fname}  with `{_get_name(other)}` "
             else:
-                from spectrochempy.core.dataset.coord import LinearCoord
+                history = None
 
-                self = LinearCoord(data)
-            self._units = units
-            self._mask = mask
-
+            dt64 = self.dtype.kind == "M"
+            if dt64 == "M":
+                # inplace binary does not work yet for datetime64 object type.
+                # take the regular binary op instead
+                fm = _get_op(fname[1:])  # remove the i in the operator name
+            else:
+                fm = f
+            data, units, mask, returntype = self._op(fm, objs)
+            self = self._op_result(
+                data, units, mask, history, returntype, inplace=not dt64
+            )
             return self
 
         return func
 
     # ..........................................................................
     def _op_result(
-        self, data, dtype=None, units=None, mask=None, history=None, returntype=None
+        self, data, units=None, mask=None, history=None, returntype=None, inplace=False
     ):
         # make a new NDArray resulting of some operation
 
-        new = self.copy()
+        new = self.copy() if not inplace else self
+
         if returntype == "NDDataset":  # and not new.implements("NDDataset"):
             from spectrochempy.core.dataset.nddataset import NDDataset
 
             new = NDDataset(new)
+
         if returntype in ["LinearCoord", "Coord"]:
             from spectrochempy.core.dataset.coord import Coord
 
