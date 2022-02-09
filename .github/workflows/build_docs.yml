@@ -41,7 +41,7 @@ jobs:
           auto-activate-base: false
           auto-update-conda: true
 
-      - names: Install optional libraries needed for tests
+      - name: Install optional libraries needed for tests
         run: |
           mamba install xarray
 
