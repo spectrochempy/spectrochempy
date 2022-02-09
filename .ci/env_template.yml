@@ -83,6 +83,7 @@ dependencies:
     - scikit-image
     - coverage
     - black
+    - flake8
     - pre-commit
 
     # DEV: code and docs

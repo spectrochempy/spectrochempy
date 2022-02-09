@@ -130,11 +130,10 @@ def get_datetime_labels(data, resolution=None):
     data = np.asarray(data).ravel()
     reference_date = data[0]
     timedeltas = np.unique(np.diff(data))
-    zero = np.timedelta64(0, "ns")
     if resolution is None:
-        for time_units in CF_TO_DT64_UNITS.keys():
+        for time_units in list(CF_TO_DT64_UNITS.keys()):
             if np.all(
-                timedeltas % np.timedelta64(1, CF_TO_DT64_UNITS[time_units]) == zero
+                timedeltas / np.timedelta64(1, CF_TO_DT64_UNITS[time_units]) > 0.5
             ):
                 break
     else:

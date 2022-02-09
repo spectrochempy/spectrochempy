@@ -65,7 +65,7 @@ _ = section.plot(figsize=(6, 3), c="red", lw=3)
 
 # %%
 # It may be desirable to change the default units on the datetime axis,
-# *e.g.,* from seconds to hours in the above example.
+# *e.g.,* from minutes to seconds in the above example.
 
 # %%
 # Solution 1
@@ -87,7 +87,7 @@ newdataset.y
 # The values are now in units of seconds. To change this in hours for instance,
 # just do this:
 
-newdataset.y.ito("hours")
+newdataset.y.ito("seconds")
 newdataset.y
 
 # %%
@@ -102,8 +102,10 @@ _ = newdataset.plot_map(figsize=(6, 4))
 # Another solution is to pass the keword parameters `time_units` in the plot command.
 # This time_units must be a string among : ["days", "hours", "minute", "second", "millisecond", "microsecond", "nanosecond"]
 
-_ = dataset.plot_map(figsize=(6, 4), time_units="minutes")
+_ = dataset.plot_map(figsize=(6, 4), time_units="hours")
 
 # %%
 
-_ = section.plot(figsize=(6, 3), time_units="hours", c="red", lw=3)
+_ = section.plot(figsize=(6, 3), time_units="seconds", c="red", lw=3)
+
+scp.show()
