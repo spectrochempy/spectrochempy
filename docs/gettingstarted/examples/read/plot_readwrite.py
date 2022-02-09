@@ -5,24 +5,22 @@
 #  =====================================================================================
 
 """
-Loading Bruker OPUS files
-============================================
+Load and save NDDataset
+=======================
 
-Here we load an experimental Bruker OPUS files and plot it.
+To import data from different software, there is several `readers` taht can be used.
+In this example, we show how to load and save data in a SpectroChempy format.
 
 """
 
 import spectrochempy as scp
 
-Z = scp.read_opus(
-    ["test.0000", "test.0001", "test.0002", "test.0003"], directory="irdata/OPUS"
-)
-print(Z)
+datadir = scp.preferences.datadir
+dataset = scp.NDDataset.read_omnic(datadir / "irdata" / "nh4y-activation.spg")
 
 # %%
-# plot it
+# Display content:
 
-Z.plot()
-
+dataset._repr_html_()
 
 scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

@@ -2,46 +2,6 @@
 
 ## VERSION 0.4
 
-### version 0.4.0rc1
-
-#### NEW FEATURES
-
-##### NetCDF import/export
-Features related to the export and import format (see [issue #97- comment](
-https://github.com/spectrochempy/spectrochempy/issues/97#issuecomment-639590022))
-
-* `write_netcdf`: Write to file in [netCDF](http://www.unidata.ucar.edu/software/netcdf/) format.
-* This type of file is a binary file format for self-described datasets
-  that originated in the geosciences. It is not much in chemistry (as far we know) but it is used by xarray as a
-  recommended way of saving data.
-  Also saving spectrochempy file in this format will allow an easy interchange between the two software.
-  (Saving on this format is only possible if [xarray](https://xarray.pydata.org/en/stable/) package is available).
-
-* `NDDataset.to_xarray`: A new dataset method creating a `xarray.DataArray` object suitable for use with `xarray`.
-
-* `read_netcdf` : open netCDF files saved by spectrochempy or xarray (not tested with other sources).
-
-* `NDDataset.from_xarray`: Create a new dataset from a `xarray.DataArray` object.
-
-##### Timezone info
-
-* A new attribute allows the user to change the timezone of the dataset. This affect the way 
-  attributes such are `created`are displayed. Internally stored in UTC format, they are display according to the timezone info. 
-
-##### Datetime coordinates
-
-* Coordinates can now be created with the numpy dtype  'datetime64'. Internally all datetimes will be stored in UTC.
-  When reading a date or a datetime coordinates the return will be converted to the local timezone, except if the
-  timezone property of the dataset is set differently.
-
-#### Other changes
-
-* History: Its behavior have been improved. Dates for entries are set automatically and are timezone-aware. See the docs for more information: [About-the-history-attribute](https://www.spectrochempy.fr/latest/userguide/dataset/dataset.html#About-the-history-attribute)
-
-###### Datetime64 coordinates of NDDataset.
-
-np.datetime64 numpy array can be used a coordinate transparently.  Regaring the math operation on such axis, only addtion or substraction are allowed.
-
 ---
 ## VERSION 0.3
 
