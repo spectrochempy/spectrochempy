@@ -292,6 +292,33 @@ class _Axes(maxes.Axes):
     def set_ylim(self, *args, **kwargs):
         return super().set_ylim(*args, **kwargs)
 
+    def _twinx(self):
+        self, ax2 = _make_twin_axes(self, sharex=self)
+        ax2.yaxis.tick_right()
+        ax2.yaxis.set_label_position("right")
+        ax2.yaxis.set_offset_position("right")
+        ax2.set_autoscalex_on(self.get_autoscalex_on())
+        ax2.set_xlim(self.get_xlim())
+        self.yaxis.tick_left()
+        ax2.xaxis.set_visible(False)
+        ax2.patch.set_visible(False)
+        return ax2
+
+
+def _make_twin_axes(tax, *args, **kwargs):
+    twin = tax.figure.add_subplot(tax.get_subplotspec(), *args, **kwargs)
+    tax.set_adjustable("datalim")
+    twin.set_adjustable("datalim")
+    tax._twinned_axes.join(tax, twin)
+    return tax, twin
+
+
+# twin = self.figure.add_subplot(self.get_subplotspec(), *args, **kwargs)
+# self.set_adjustable('datalim')
+# twin.set_adjustable('datalim')
+# self._twinned_axes.join(self, twin)
+# return twin
+
 
 class _Axes3D(maxes3D.Axes3D):
     def __init__(self, *args, **kwargs):

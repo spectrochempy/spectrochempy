@@ -504,17 +504,16 @@ class NDPlot(HasTraits):
         if tax is not None:
             if issubclass(type(tax), mpl.axes.Axes):
                 clear = False
-                ax = tax.twinx()
-                # warning : this currently returns a normal Axes (so units-naive)
-                # TODO: try to solve this
+                ax = tax._twinx()
                 ax.name = "main"
                 tax.name = "twin"  # the previous main is renamed!
                 self.ndaxes["main"] = ax
                 self.ndaxes["twin"] = tax
+                self._fig = ax.figure
             else:
                 raise ValueError(f"{tax} is not recognized as a valid Axe")
-
-        self._fig = get_figure(preferences=prefs, **kwargs)
+        else:
+            self._fig = get_figure(preferences=prefs, **kwargs)
 
         if clear:
             self._ndaxes = {}  # reset ndaxes

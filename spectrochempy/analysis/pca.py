@@ -429,7 +429,7 @@ class PCA(HasTraits):
         ylim1, ylim2 = kwargs.get("ylims", [(0, 100), "auto"])
 
         if ylim2 == "auto":
-            y1 = np.around(self._ev_ratio.data[0] * 0.95, -1)
+            y1 = max(np.around(self._ev_ratio.data[0] * 0.95, -1) - 1.0, 0.0)
             y2 = 101.0
             ylim2 = (y1, y2)
 
@@ -440,6 +440,10 @@ class PCA(HasTraits):
             ylim=ylim2, color=color2, pen=True, markersize=7.0, twinx=ax1
         )
         ax1.set_title("Scree plot")
+
+        formatter = ScalarFormatter(useOffset=False)
+        ax2.yaxis.set_major_formatter(formatter)
+
         return ax1, ax2
 
     def scoreplot(self, *pcs, colormap="viridis", color_mapping="index", **kwargs):
