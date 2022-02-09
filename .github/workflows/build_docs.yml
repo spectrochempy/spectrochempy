@@ -76,6 +76,11 @@ jobs:
           echo "$VERSION"
           echo "$DEVSTRING"
 
+      - name: Setup timezone
+        uses: zcong1993/setup-timezone@master
+        with:
+          timezone: CET
+
       - name: Build docs
         run: |
           mkdir -p build
