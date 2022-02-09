@@ -16,19 +16,19 @@ equation.
 import spectrochempy as scp
 import os
 
-########################################################################
+# %%
 #  Let's take an IR spectrum
 
 nd = scp.NDDataset.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
 
-########################################################################
+# %%
 # where we select only region (OH region)
 
 ndOH = nd[54, 3700.0:3400.0]
 
 ndOH.plot()
 
-########################################################################
+# %%
 # Perform a Fit
 # Fit parameters are defined in a script (a single text as below)
 
@@ -68,12 +68,12 @@ shape: asymmetricvoigtmodel
 
 """
 
-##############################################################################
+# %%
 # create a fit object
 
 f1 = scp.Fit(ndOH, script, silent=True)
 
-##############################################################################
+# %%
 # Show plot and the starting model before the fit (of course it is advisable
 # to be as close as possible of a good expectation
 
@@ -83,7 +83,7 @@ ndOH.plot(plot_model=True)
 
 f1.run(maxiter=1000)
 
-##############################################################################
+# %%
 # Show the result after 1000 iterations
 
 ndOH.plot(plot_model=True)

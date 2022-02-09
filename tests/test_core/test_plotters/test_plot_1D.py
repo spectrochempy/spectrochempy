@@ -45,43 +45,14 @@ def test_issue_375():
     ax1 = ratio.plot_bar(color=color1, title="Scree plot")
     assert len(ax1.lines) == 0, "no lines"
     assert len(ax1.patches) == 3, "bar present"
+
     ax2 = cum.plot_scatter(color=color2, pen=True, markersize=7.0, twinx=ax1)
     assert len(ax2.lines) == 1, "1 lines"
     assert len(ax2.patches) == 0, "no bar present on the second plot"
+
     # TODO: Don't know yet how to get the marker present.
     ax1.set_title("Scree plot")
     show()
-
-    # nd0.plot(output=os.path.join(figures_dir, 'IR_dataset_1D'),  #
-    # savedpi=150)  #  # # plot generic style  # nd0.plot(style='poster',  #
-    # output=os.path.join(figures_dir, 'IR_dataset_1D_poster'),  #
-    # savedpi=150)  #  # # check that style reinit to default  # nd0.plot(
-    # output='IR_dataset_1D', savedpi=150)  # # try:  # #     assert same_images(
-    # 'IR_dataset_1D.png',  # #                        os.path.join(figures_dir,
-    # 'IR_dataset_1D.png'))  # # except AssertionError:  # #     os.remove(
-    # 'IR_dataset_1D.png')  # #     raise AssertionError('comparison fails')  # #
-    # os.remove('IR_dataset_1D.png')  #  # # try other type of plots  # nd0.plot_pen(
-    # )  # nd0[:, ::100].plot_scatter()  # nd0.plot_lines()  # nd0[:,
-    # ::100].plot_bar()  #  # show()  #  # # multiple  # d = dataset[:, ::100]  #
-    # datasets = [d[0], d[10], d[20], d[50], d[53]]  # labels = ['sample {}'.format(
-    # label) for label in  #           ["S1", "S10", "S20", "S50", "S53"]]  #  # #
-    # plot multiple  # plot_multiple(method='scatter',  #
-    # datasets=datasets, labels=labels, legend='best',  #
-    # output=os.path.join(figures_dir,  #
-    # 'multiple_IR_dataset_1D_scatter'),  #               savedpi=150)  #  # # plot
-    # mupltiple with style  # plot_multiple(method='scatter', style='sans',  #
-    # datasets=datasets, labels=labels, legend='best',  #
-    # output=os.path.join(figures_dir,  #
-    # 'multiple_IR_dataset_1D_scatter_sans'),  #               savedpi=150)  #  # #
-    # check that style reinit to default  # plot_multiple(method='scatter',  #
-    # datasets=datasets, labels=labels, legend='best',  #
-    # output='multiple_IR_dataset_1D_scatter',  #               savedpi=150)  # try:
-    #     assert same_images('multiple_IR_dataset_1D_scatter',  #
-    #     os.path.join(figures_dir,  #
-    #     'multiple_IR_dataset_1D_scatter'))  # except AssertionError:  #
-    #     os.remove('multiple_IR_dataset_1D_scatter.png')  #     raise
-    #     AssertionError('comparison fails')  # os.remove(
-    #     'multiple_IR_dataset_1D_scatter.png')
 
 
 def test_nmr_1D_show_complex(NMR_dataset_1D):

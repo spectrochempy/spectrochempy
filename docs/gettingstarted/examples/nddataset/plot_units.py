@@ -14,11 +14,11 @@ In this example, we show how units can be used in SpectroChemPy
 
 import spectrochempy as scp
 
-###############################################################################
+# %%
 # Spectrochempy can do calculations with units - it uses [pint](https://pint.readthedocs.io) to define and perform
 # operation on data with units.
 
-###############################################################################
+# %%
 # Create quantities
 # -----------------
 # To create quantity, use for instance, one of the following expression:
@@ -28,16 +28,16 @@ scp.Quantity("10.0 cm^-1")
 ""
 scp.Quantity(1.0, "cm^-1/hour")
 
-###############################################################################
+# %%
 # or may be simpler using `ur`:
 
 ur = scp.ur
 10.0 * ur.meter / ur.gram / ur.volt
 
-###############################################################################
+# %%
 # `ur` stands for **unit registry**, which handle many type of units (and conversion between them)
 
-###############################################################################
+# %%
 # Units for dataset
 # -----------------
 #
@@ -48,11 +48,11 @@ prefs = ds.preferences
 prefs.figure.figsize = (7, 3)
 _ = ds.plot()
 
-###############################################################################
+# %%
 # * `wavenumbers` (`x`) coordinates are here expressed in $cm^{-1}$
 # * and `data` are in absorbance ($a.u.$) units.
 
-###############################################################################
+# %%
 # Convert between units
 # ----------------------
 #
@@ -61,13 +61,13 @@ _ = ds.plot()
 x = 36 * ur("km/hr")
 x.to("cm/s")
 
-###############################################################################
+# %%
 # We can make the conversion *inplace* using *ito* instead of *to*
 
 x.ito("m/s")
 x
 
-###############################################################################
+# %%
 # Obviously you cannot convert between incompatible units
 
 try:
@@ -75,14 +75,14 @@ try:
 except scp.DimensionalityError as e:
     scp.error_(e)
 
-###############################################################################
+# %%
 # This, of course, also applies to NDDataset.
 # Let's try for the `x` coordinate. It is `wavenumber` in $cm^{-1}$ that can be transformed in $Hz$ for instance:
 
 ds.x.ito("terahertz")
 _ = ds.plot()
 
-###############################################################################
+# %%
 # We can also change the wavenumbers (or frequency units), to energy units or wavelength as
 # Spectrochempy (thanks to [pint](https://pint.readthedocs.io)) knows how to make the transformation.
 
@@ -100,7 +100,7 @@ ds.x = ds.x.to("nanometer")
 _ = ds.plot()
 print(ds.x)  # The LinearCoord object is transformed into a Coord object
 
-###############################################################################
+# %%
 # ``absorbance`` units (the units of the data) can also be transformed into ``transmittance``
 
 ds.ito("transmittance")

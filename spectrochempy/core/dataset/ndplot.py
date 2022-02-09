@@ -27,7 +27,7 @@ from traitlets import Dict, HasTraits, Instance, Union, default, TraitError
 from spectrochempy.utils.plots import get_figure, _Axes, _Axes3D
 from spectrochempy.utils import pathclean
 from spectrochempy.core.dataset.meta import Meta
-from spectrochempy.core import preferences, plot_preferences, error_, warning_
+from spectrochempy.core import preferences, plot_preferences, error_  # , warning_
 from spectrochempy.core.plotters.plot1d import plot_1D
 from spectrochempy.core.plotters.plot2d import plot_2D
 from spectrochempy.core.plotters.plot3d import plot_3D
@@ -711,11 +711,6 @@ class NDPlot(HasTraits):
                     key = key[4:]
                     kw[key] = value
             self._fig.savefig(savename, **kw)
-
-    def _get_datetime_labels(self, data):
-        if data.dtype.kind != "M":
-            warning_("This is only for datetime64 array")
-            return
 
     # ------------------------------------------------------------------------
     # Special attributes

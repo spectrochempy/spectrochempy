@@ -544,7 +544,7 @@
     utils.system
     utils.system.is_kernel
     utils.testing
-    utils.testing.catch_warnings
+    utils.testing.assert_produces_warning
     utils.testing.RandomSeedContext
     utils.testing.set_env
     utils.traits

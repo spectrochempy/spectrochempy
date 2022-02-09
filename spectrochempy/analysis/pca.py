@@ -434,7 +434,7 @@ class PCA(HasTraits):
             ylim2 = (y1, y2)
 
         ax1 = self._ev_ratio[:n_pc].plot_bar(
-            ylim=ylim1, color=color1, long_name="Scree plot"
+            ylim=ylim1, color=color1, title="Scree plot"
         )
         ax2 = self._ev_cum[:n_pc].plot_scatter(
             ylim=ylim2, color=color2, pen=True, markersize=7.0, twinx=ax1

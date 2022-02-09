@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # ---
 # jupyter:
 #   jupytext:
@@ -7,7 +8,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.13.5
+#       jupytext_version: 1.13.6
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -233,9 +234,12 @@ print(X)
 #
 # ## Another default search directory: `datadir`
 #
-# Spectrochempy also comes with the definition of a second default directory path where to look at the data:
-# the `datadir` directory. It is defined in the variable `preferences.datadir` which is imported at the same
-# time as spectrochempy. By default, `datadir` points in the 'scp_data\testdata' folder of SpectroChemPy:
+# Spectrochempy also comes with the definition of a second default directory path where
+# to look at the data:
+# the `datadir` directory. It is defined in the variable `preferences.datadir` which is
+# imported at the same
+# time as spectrochempy. By default, `datadir` points in the 'scp_data\testdata' folder
+# of SpectroChemPy:
 
 # %%
 DATADIR = scp.preferences.datadir
@@ -248,16 +252,19 @@ DATADIR
 X = scp.read_omnic(DATADIR / "wodger.spg")
 
 # %% [markdown]
-# It can be set to another pathname *permanently* (i.e., even after computer restart) by a new assignment:
+# It can be set to another pathname *permanently* (i.e., even after computer restart)
+# by a new assignment:
 #
 # ```ipython3
 # scp.preferences.datadir = 'C:/users/Brian/s/Life'
 # ```
 #
-# This will change the default value in the SCPy preference file located in the hidden folder
+# This will change the default value in the SCPy preference file located in the hidden
+# folder
 # `.spectrochempy/` at the root of the user home directory.
 #
-# Finally, by default, the import functions used in Sepctrochempy will search the data files using this order of
+# Finally, by default, the import functions used in Spectrochempy will search the data
+# files using this order of
 # precedence:
 #
 #    1. try absolute path

@@ -12,7 +12,7 @@ In this example, we create a Project from scratch
 """
 import spectrochempy as scp
 
-##############################################################################
+# %%
 # Let's assume we have three subproject to group in a single project
 
 proj = scp.Project(
@@ -27,7 +27,7 @@ proj = scp.Project(
 
 assert proj.projects_names == ["P350", "A350", "B350"]
 
-##############################################################################
+# %%
 # Add for example two datasets to the ``A350`` subproject.
 
 ir = scp.NDDataset([1.1, 2.2, 3.3], coords=[[1, 2, 3]])
@@ -37,7 +37,7 @@ print(tg)
 proj.A350["IR"] = ir
 proj.A350["TG"] = tg
 
-##############################################################################
+# %%
 # Members of the project or attributes are easily accessed:
 
 print(proj.A350)
@@ -45,12 +45,12 @@ print(proj)
 print(proj.A350.label)
 print(proj.A350.TG)
 
-##############################################################################
+# %%
 # Save this project
 
 proj.save()
 
-##############################################################################
+# %%
 # RELOAD the project from disk as newproj
 
 newproj = scp.Project.load("project_1")
@@ -59,7 +59,7 @@ print(newproj)
 assert str(newproj) == str(proj)
 assert newproj.A350.label == proj.A350.label
 
-##############################################################################
+# %%
 # Now we add a script to the original proj
 
 script_source = """
@@ -70,29 +70,29 @@ info_('samples contained in the project are:%s'%proj.projects_names)
 proj["print_info"] = scp.Script("print_info", script_source)
 print(proj)
 print("*******************************************")
-##############################################################################
+# %%
 # save but do not change the original data
 
 proj.save(overwrite_data=False)
 
-##############################################################################
+# %%
 # RELOAD it
 
 newproj = scp.Project.load("project_1")
 print(newproj)
 
-##############################################################################
+# %%
 # Execute a script
 
 scp.run_script(newproj.print_info)
 
-##############################################################################
+# %%
 # Another way to do the same thing is ith the following syntax (which may
 # seem simpler
 
 newproj.print_info()
 
-###############################################################################
+# %%
 # Finally lets use a more useful script
 script_source_2 = """
 proj.A350.TG.plot_scatter(long_name='my scatter plot')
