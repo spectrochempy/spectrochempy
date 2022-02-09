@@ -522,8 +522,6 @@ def plot_1D(dataset, method=None, **kwargs):
 
     # axis properties
     # ----------------------------------------------------------------------------------
-    data_only = kwargs.get("data_only", False)
-
     if len(xdata) > 1:
         # abscissa limits?
         xl = [xdata[0], xdata[-1]]
