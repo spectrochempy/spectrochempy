@@ -79,7 +79,7 @@ jobs:
       - name: Setup timezone
         uses: zcong1993/setup-timezone@master
         with:
-          timezone: CET
+          timezone: Central European Time
 
       - name: Build docs
         run: |
