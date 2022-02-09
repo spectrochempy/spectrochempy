@@ -1,4 +1,4 @@
-name: 🔬 Tests
+name: Tests 🔬
 
 on:
   push:
@@ -11,7 +11,7 @@ on:
   pull_request:
 
   workflow_dispatch:
-  
+
 jobs:
 
   # Job 1
@@ -102,6 +102,10 @@ jobs:
           auto-activate-base: false
           auto-update-conda: true
 
+      - names: Install optional libraries needed for tests
+        run: |
+          mamba install xarray
+
       - name: Install spectrochempy
         run: |
           python setup.py develop
@@ -112,7 +116,7 @@ jobs:
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         run: |
-          # check for CC_TEST_REPORTER_ID availability 
+          # check for CC_TEST_REPORTER_ID availability
           unset HAS_CC_TEST_REPORTER_ID
           if [ ! -z $CC_TEST_REPORTER_ID ]; then HAS_CC_TEST_REPORTER_ID='true' ; fi
           echo set-output name=HAS_CC_TEST_REPORTER_ID::${HAS_CC_TEST_REPORTER_ID}

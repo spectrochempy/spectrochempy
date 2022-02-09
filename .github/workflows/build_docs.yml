@@ -12,7 +12,7 @@ on:
     types: [published]
 
   workflow_dispatch:
-  
+
 jobs:
 
   build_and_publish_documentation:
@@ -40,6 +40,10 @@ jobs:
           condarc-file: .ci/condarc.yml
           auto-activate-base: false
           auto-update-conda: true
+
+      - names: Install optional libraries needed for tests
+        run: |
+          mamba install xarray
 
       - name: Install spectrochempy
         run: |
