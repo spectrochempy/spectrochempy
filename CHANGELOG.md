@@ -37,7 +37,7 @@ https://github.com/spectrochempy/spectrochempy/issues/97#issuecomment-639590022)
 ##### Timezone info
 
 * A new attribute allows the user to change the timezone of the dataset. This affect the way
-  attributes such are `created`are displayed. Internally stored in UTC format, they are display according to the timezone info.
+  attributes such are `created` are displayed. Internally stored in UTC format, they are display according to the timezone info.
 
 ##### Datetime coordinates
 
@@ -69,9 +69,9 @@ assert nd2.meta.temperature == 3000
 assert nd2.temperature == 3000 # alternative way to get the meta attribute
 
 # also for the coordinates
-nd2.y.meta.pression = 3
-assert nd2.y.meta["pression"] == 3
-assert nd2.y.pression == 3  # alternative way to get the meta attribute
+nd2.y.meta.pressure = 3
+assert nd2.y.meta["pressure"] == 3
+assert nd2.y.pressure == 3  # alternative way to get the meta attribute
 ```
 * Change the size of rotating log to 256K instead of 32K.
 
@@ -84,7 +84,7 @@ assert nd2.y.pression == 3  # alternative way to get the meta attribute
 * Integration method are now located with the analysis methods
 * Datetime axis now taken into account in plot methods.
 * Datetime best units estimated automatically
-*
+
 #### BUGS FIXED
 
 * Coordinate _sort method
@@ -93,7 +93,7 @@ assert nd2.y.pression == 3  # alternative way to get the meta attribute
 * Revision of some testing methods : comparison of multicoordinates now works.
 * NDDataset/NDArray.squeeze() and  add test for this method.
   It was failing when *dim argument were passed.
-  In addition Ia new argument keepdims has been added to define dimension
+  In addition, a new argument keepdims has been added to define dimension
   to keep even if they are of size 1.
 * Update iris.py to avoid muticoordinate's names change.
   Multicoordinates work bad for name indexing if their name is not _1, _2 ...
