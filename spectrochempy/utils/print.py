@@ -125,8 +125,8 @@ def convert_to_html(obj):
     tr = (
         "<tr>"
         "<td style='padding-right:5px; padding-bottom:0px; padding-top:0px; "
-        "font-size: 14pt; width:88px'>{0}</td>"
-        "<td style='font-size: 14pt; text-align:left; padding-bottom:0px; "
+        "font-size: 0.8em; width:88px'>{0}</td>"
+        "<td style='font-size: 0.8em; text-align:left; padding-bottom:0px; "
         "padding-top:0px; {2} '>{1}</td><tr>\n"
     )
 

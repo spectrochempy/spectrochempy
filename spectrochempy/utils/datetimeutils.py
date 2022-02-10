@@ -145,7 +145,8 @@ def get_datetime_labels(data, resolution=None, labels=None):
     if labels == "cf_format":
         label = f"{time_units} since {str(acquisition_date).replace('T',' ')}"
     else:
-        label = f"relative time / {time_units}"
+        units = from_dt64_units(CF_TO_DT64_UNITS[time_units])
+        label = f"relative time / {units:~K}"
     newdata = (data - acquisition_date) / np.timedelta64(
         1, CF_TO_DT64_UNITS[time_units]
     )
