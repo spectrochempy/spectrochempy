@@ -37,7 +37,7 @@ https://github.com/spectrochempy/spectrochempy/issues/97#issuecomment-639590022)
 ##### Timezone info
 
 * A new attribute allows the user to change the timezone of the dataset. This affect the way
-  attributes such are `created`are displayed. Internally stored in UTC format, they are display according to the timezone info.
+  attributes such are `created` are displayed. Internally stored in UTC format, they are display according to the timezone info.
 
 ##### Datetime coordinates
 
@@ -63,15 +63,15 @@ https://github.com/spectrochempy/spectrochempy/issues/97#issuecomment-639590022)
 nd2 = IR_dataset_2D
 
 # add some attribute
-nd2.meta.pression = 34
+nd2.meta.pressure = 34
 nd2.meta.temperature = 3000
 assert nd2.meta.temperature == 3000
 assert nd2.temperature == 3000 # alternative way to get the meta attribute
 
 # also for the coordinates
 nd2.y.meta.pression = 3
-assert nd2.y.meta["pression"] == 3
-assert nd2.y.pression == 3  # alternative way to get the meta attribute
+assert nd2.y.meta["pressure"] == 3
+assert nd2.y.pressure == 3  # alternative way to get the meta attribute
 ```
 * Change the size of rotating log to 256K instead of 32K.
 
@@ -84,7 +84,7 @@ assert nd2.y.pression == 3  # alternative way to get the meta attribute
 * Integration method are now located with the analysis methods
 * Datetime axis now taken into account in plot methods.
 * Datetime best units estimated automatically
-*
+
 #### BUGS FIXED
 
 * Coordinate _sort method
