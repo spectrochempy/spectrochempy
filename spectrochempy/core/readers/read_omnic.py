@@ -684,8 +684,6 @@ def _read_spg(*args, **kwargs):
     dataset.filename = filename
 
     # now add coordinates
-    # _x = Coord(np.around(np.linspace(firstx[0], lastx[0], nx[0]), 3),
-    #           title=xtitles[0], units=xunits[0])
     spacing = (lastx[0] - firstx[0]) / int(nx[0] - 1)
     _x = LinearCoord(
         offset=firstx[0],
@@ -697,12 +695,14 @@ def _read_spg(*args, **kwargs):
 
     _y = Coord(
         np.array(acquisitiondates),
-        long_name="acquisition date (GMT)",
+        long_name="acquisition date (UTC)",
         units=None,
         labels=(spectitles,),
     )
 
     dataset.set_coordset(y=_y, x=_x)
+    if sortbydate:
+        dataset.sort(dim="y", inplace=True)
 
     # Set comment/description
     dataset.source = "omnic"
@@ -710,11 +710,8 @@ def _read_spg(*args, **kwargs):
     dataset.comment = kwargs.get(
         "comment", kwargs.get("description", kwargs.get("desc", default_comment))
     )
-
-    # Set origin, description and history
     dataset.history = f"Imported from spg file {filename}"
     if sortbydate:
-        dataset.sort(dim="y", inplace=True)
         dataset.history = "Sorted by date"
 
     return dataset

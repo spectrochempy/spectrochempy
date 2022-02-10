@@ -546,34 +546,34 @@ def _read_spc(*args, **kwargs):
 
     dataset.set_coordset(y=_y, x=_x)
 
-    dataset.source = kwargs.get("description", "Dataset from spc file.\n")
+    dataset.comment = kwargs.get("description", "Dataset from spc file.\n")
     if ord(Fexper) != 0 and ord(Fexper) != 7:
-        dataset.source += "Instrumental Technique: " + technique + "\n"
+        dataset.comment += "Instrumental Technique: " + technique + "\n"
     if Fres != b"\x00\x00\x00\x00\x00\x00\x00\x00\x00":
-        dataset.source += "Resolution: " + sres + "\n"
+        dataset.comment += "Resolution: " + sres + "\n"
     if Fsource != b"\x00\x00\x00\x00\x00\x00\x00\x00\x00":
-        dataset.source += "Source Instrument: " + ssource + "\n"
+        dataset.comment += "Source Instrument: " + ssource + "\n"
     if (
         Fcmnt
         != b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
     ):
-        dataset.source += "Memo: " + scmnt + "\n"
+        dataset.comment += "Memo: " + scmnt + "\n"
     if Flogoff:
         if Logtxto:
-            dataset.source += "Log Text: \n---------\n"
-            dataset.source += logtxt
-            dataset.source += "---------\n"
+            dataset.comment += "Log Text: \n---------\n"
+            dataset.comment += logtxt
+            dataset.comment += "---------\n"
         if Logbins or Logsizd:
             if Logtxto:
-                dataset.source += (
+                dataset.comment += (
                     "Note: The Log block of the spc file also contains: \n"
                 )
             else:
-                dataset.source += "Note: The Log block of the spc file contains: \n"
+                dataset.comment += "Note: The Log block of the spc file contains: \n"
             if Logbins:
-                dataset.source += f"a Log binary block of size {Logbins} bytes "
+                dataset.comment += f"a Log binary block of size {Logbins} bytes "
             if Logsizd:
-                dataset.source += f"a Log disk block of size {Logsizd} bytes "
+                dataset.comment += f"a Log disk block of size {Logsizd} bytes "
 
     dataset.history = f"Imported from spc file {filename}."
 
