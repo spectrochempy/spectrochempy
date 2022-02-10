@@ -149,7 +149,7 @@ def get_datetime_labels(data, resolution=None, labels=None):
     newdata = (data - acquisition_date) / np.timedelta64(
         1, CF_TO_DT64_UNITS[time_units]
     )
-    return label, newdata, acquisition_date
+    return label, newdata
 
 
 def encode_datetime64(data, **attrs):
@@ -262,7 +262,8 @@ def to_utc_iso8601(date):
 
     elif isinstance(date, str):
         # format YYYY-MM-DD[T]HH:MM:SS.ffffff (higher resolution: us)
-        # assume datetime are given in local time. They stored in UTC using the timezone
+        # assume datetime are given in local time. They are stored in UTC using the
+        # timezone
         # dataset attribute if set of the local timezone of the platform where
         # spectrochempy is executed.
 
