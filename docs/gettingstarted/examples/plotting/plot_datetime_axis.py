@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+# %%
 # =====================================================================================
 # Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -18,6 +20,7 @@ import spectrochempy as scp
 
 datadir = scp.preferences.datadir
 
+
 # %%
 # Let's read on of the dataset (in `spg` Omnic format)
 
@@ -30,34 +33,44 @@ dataset
 # the second one is the acquisition datetime axis. The intensity is in a dimensionless
 # units: absorbance.
 
+# Let's set some plotting preferences
+prefs = dataset.preferences  # we will use prefs instead of dataset.preference
+prefs.figure.figsize = (6, 3)
+
 # %%
 # By default it is plotted with the stack method
 
-_ = dataset.plot(figsize=(6, 4))
+_ = dataset.plot()
 
 # %%
 # Previously plotted as a stack plot, this dataset can also be plotted
 # using a contour plot (method: map)
 
-_ = dataset.plot_map(figsize=(6, 4))
+_ = dataset.plot_map()
 
 # %%
-# As you see, spectrochempy does not display the datetimes on the vertical axis,
-# because in this case the interval betwwen the date is relatively small.
-# So it s displayed in seconds, with the starting reference noted on the aixs label.
+# As you see, spectrochempy does not display the dates on the vertical axis,
+# because in this case the interval between the dates is relatively small.
+# So it is displayed in seconds in the vertical label, relative to the starting
+# acquisition datetime.
+#
+# The acquisition date can be easily read in the `acquisition_date` attribute of the
+# dataset (or of the y coordinate - both are identical).
+
+dataset.acquisition_date
 
 # %%
 # Let's see another display of the datetime, that is in colorbar:
 
 # %%
-_ = dataset.plot(figsize=(6, 4), colorbar=True, colormap="magma")
+_ = dataset.plot(colorbar=True, colormap="magma")
 
 # %%
 # It is also displayed on 1D sections:
 
 # %%
 section = dataset[:, 3200.0]
-_ = section.plot(figsize=(6, 3), c="red", lw=3)
+_ = section.plot(c="red", lw=3)
 
 # %%
 # How to change the time units?
@@ -71,7 +84,7 @@ _ = section.plot(figsize=(6, 3), c="red", lw=3)
 # Solution 1
 # ++++++++++
 #
-# The first solution, if we don't need to keep reference to the reference date,
+# The first solution, if we don't need to keep reference to the acquisition date,
 # it to transform them in timedelta values:
 
 # %%
@@ -89,23 +102,39 @@ newdataset.y
 
 newdataset.y.ito("seconds")
 newdataset.y
+newsection = newdataset[:, 3200.0]
 
 # %%
 # And now the result is:
 
-_ = newdataset.plot_map(figsize=(6, 4))
+_ = newdataset.plot_map()
+_ = newsection.plot(c="green", lw=3)
 
 # %%
 # Solution 2
 # ++++++++++
 #
-# Another solution is to pass the keword parameters `time_units` in the plot command.
+# Another solution is to pass the keyword parameters `time_units` in the plot command.
 # This time_units must be a string among : ["days", "hours", "minute", "second", "millisecond", "microsecond", "nanosecond"]
 
-_ = dataset.plot_map(figsize=(6, 4), time_units="hours")
+_ = dataset.plot_map(time_units="hours")
 
 # %%
 
-_ = section.plot(figsize=(6, 3), time_units="seconds", c="red", lw=3)
+_ = section.plot(time_units="seconds", c="red", lw=3)
 
+# %%
+# Final remark:
+# It is important to note that axis in solution one is a timedelta axis, meaning that
+# the information on the actual acquisition date is lost. However it is always
+# possible to retrieve it using the acquisition_date attribute of the dataset.
+# e.g., the first value
+
+newdataset.y[0].value
+
+# %%
+# while
+dataset.y[0].value
+
+# %%
 scp.show()

@@ -665,6 +665,7 @@ class Coord(NDMath, NDArray):
             "increment",
             "linear",
             "roi",
+            "acquisition_date",
         ]
 
     def __getattr__(self, item):
@@ -983,9 +984,9 @@ class Coord(NDMath, NDArray):
                     self._data, self._units = data, units
                     if "acquisition" in self._long_name.lower():
                         self._long_name = "time"
-                else:
+                elif data.dtype.kind == "M":  # datetime64:
+                    self._acquisition_date = data.min()
                     self._data = data
-
             except ValueError:
                 # happens if data is a list of quantities
                 if isinstance(data[0], Quantity):

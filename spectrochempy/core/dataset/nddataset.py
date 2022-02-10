@@ -33,6 +33,7 @@ from spectrochempy.utils import (
     MaskedConstant,
     DEFAULT_DIM_NAME,
     deprecated,
+    is_datetime64,
 )
 from spectrochempy.optional import import_optional_dependency
 
@@ -669,6 +670,25 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     # ------------------------------------------------------------------------
     # public methods
     # ------------------------------------------------------------------------
+
+    @property
+    def acquisition_date(self):
+        """
+        Acquisition date (Datetime).
+
+        If there is one datetime axis in the dataset coordinate, this method return
+        the fisrt datetimme, which is then considered as the acquisition date. Tjhis
+        assume that there is only one datetime axis in the dataset coordinates.
+        """
+
+        def get_acq(cs):
+            for c in cs:
+                if isinstance(c, Coord) and is_datetime64(c):
+                    return c.acquisition_date
+                if isinstance(c, CoordSet):
+                    return get_acq(c)
+
+        return get_acq(self.coordset)
 
     # ..........................................................................
     def add_coordset(self, *coords, dims=None, **kwargs):

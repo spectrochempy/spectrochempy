@@ -47,7 +47,6 @@ from spectrochempy.utils import (
     INPLACE,
     is_sequence,
     is_number,
-    is_datetime64,
     numpyprintoptions,
     SpectroChemPyWarning,
     make_new_object,
@@ -59,8 +58,9 @@ from spectrochempy.utils import (
     as_quaternion,
     get_component,
     insert_masked_print,
+    is_datetime64,
+    from_dt64_units,
 )
-from spectrochempy.utils.datetimeutils import from_dt64_units
 
 # ======================================================================================
 # Printing settings
@@ -224,7 +224,8 @@ class NDArray(tr.HasTraits):
     # Dates
     _created = tr.Instance(datetime)
     _modified = tr.Instance(datetime)
-    _timezone = tr.Instance(tzinfo)
+    _acquisition_date = tr.Instance(np.datetime64, allow_none=True)
+    _timezone = tr.Instance(tzinfo, allow_none=True)
 
     # Metadata
     _author = tr.Unicode()
@@ -336,6 +337,7 @@ class NDArray(tr.HasTraits):
             "comment",
             "history",
             "transposed",
+            "acquisition_date",
         ]
 
     # ..........................................................................
@@ -1387,6 +1389,18 @@ class NDArray(tr.HasTraits):
 
     # ..........................................................................
     @property
+    def acquisition_date(self):
+        """
+        Acquisition date (Datetime).
+        """
+        if self._acquisition_date is not None:
+            if is_datetime64(self._acquisition_date):
+                acq = datetime.fromisoformat(str(self._acquisition_date))
+            acq = pytz.utc.localize(acq)
+            return acq.astimezone(self.timezone).isoformat(sep=" ", timespec="seconds")
+
+    # ...................................................................................
+    @property
     def data(self):
         """
         The `data` array (|ndarray|).
@@ -1395,13 +1409,14 @@ class NDArray(tr.HasTraits):
         """
         return self._data
 
-    # ..........................................................................
+    # ..................................................................................
     @data.setter
     def data(self, data):
         # property.setter for data
         # note that a subsequent validation is done in _data_validate
         # NOTE: as property setter doesn't work with super(),
-        # see https://stackoverflow.com/questions/10810369/python-super-and-setting-parent-class-property
+        # see
+        # https://stackoverflow.com/questions/10810369/python-super-and-setting-parent-class-property
         # we use an intermediate function that can be called from a subclass
 
         self._set_data(data)
@@ -2840,7 +2855,13 @@ class NDArray(tr.HasTraits):
         """
 
         if self.data is not None:
-            if self.is_masked:
+            if is_datetime64(self.data) and self.data.size == 1:
+                value = datetime.fromisoformat(str(self.data[0]))
+                value = pytz.utc.localize(value)
+                return value.astimezone(self.timezone).isoformat(
+                    sep=" ", timespec="seconds"
+                )
+            elif self.is_masked:
                 data = self._umasked(self.masked_data, self.mask)
                 if self.units:
                     return Quantity(data, self.units)

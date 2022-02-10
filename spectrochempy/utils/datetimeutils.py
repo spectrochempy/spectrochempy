@@ -35,7 +35,7 @@ def is_datetime64(obj):
 
     Parameters
     ----------
-    obj : np.ndarray like obj
+    obj : datetime or np.ndarray like obj
         If obj implement NDDataset or Coord obj, then the data attribute is checked.
 
     Returns
@@ -44,11 +44,15 @@ def is_datetime64(obj):
         Whether the obj or obj.data has a np.datetime64 dtype or not
     """
     dt64 = np.datetime64
-    data = obj._data if hasattr(obj, "_data") else obj
+    if hasattr(obj, "_data"):
+        data = obj._data[0] if obj._data is not None else None
+    else:
+        data = obj
     linear = obj._linear if hasattr(obj, "_linear") else False
     res = False
     if data is not None:
-        res = isinstance(obj._data[0], dt64)
+        data = np.array(data, subok=True, copy=False)
+        res = data.dtype.kind == "M"
     elif linear:
         res = isinstance(obj._increment, dt64)
     return res
@@ -169,7 +173,7 @@ def decode_datetime64(data, *attrs):
 
 # Utility to convert between ISO8601 string, datetime, datetime64 and timestamps
 # ----------------------------------------------------------------------
-def strptime64(val, fmt=None):
+def strptime64(val, fmt=None, tz=None):
 
     # If created from a 64-bit integer, it represents an offset from
     # 1970-01-01T00:00:00.
