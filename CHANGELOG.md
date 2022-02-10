@@ -2,6 +2,109 @@
 
 ## VERSION 0.4
 
+### version 0.4.0rc1
+
+#### NEW FEATURES
+
+##### NetCDF import/export
+Features related to the export and import format (see [issue #97- comment](
+https://github.com/spectrochempy/spectrochempy/issues/97#issuecomment-639590022))
+
+* `write_netcdf`: Write to file in [netCDF](http://www.unidata.ucar.edu/software/netcdf/) format.
+* This type of file is a binary file format for self-described datasets
+  that originated in the geosciences. It is not much in chemistry (as far we know) but it is used by xarray as a
+  recommended way of saving data.
+  Also saving spectrochempy file in this format will allow an easy interchange between the two software.
+  (Saving on this format is only possible if [xarray](https://xarray.pydata.org/en/stable/) package is available).
+
+* `NDDataset.to_xarray`: A new dataset method creating a `xarray.DataArray` object suitable for use with `xarray`.
+
+* `read_netcdf` : open netCDF files saved by spectrochempy or xarray (not tested with other sources).
+
+* `NDDataset.from_xarray`: Create a new dataset from a `xarray.DataArray` object.
+
+* refactoring related to the export to netCDF.
+
+    Note the renaming of three attributes
+    have been made to improve conversion from and to xarray.
+
+    - title --> long_name
+    - origin --> source
+    - description --> comment
+
+    Backwards compatibility is preserved in reading
+
+##### Timezone info
+
+* A new attribute allows the user to change the timezone of the dataset. This affect the way
+  attributes such are `created`are displayed. Internally stored in UTC format, they are display according to the timezone info.
+
+##### Datetime coordinates
+
+* Coordinates can now be created with the numpy dtype  'datetime64'. Internally all datetimes will be stored in UTC.
+  When reading a date or a datetime coordinates the return will be converted to the local timezone, except if the
+  timezone property of the dataset is set differently.
+
+#### Other changes
+
+* History
+  Its behavior have been improved.
+  Dates for entries are set automatically and are timezone-aware.
+  See the docs for more information:
+[About-the-history-attribute](https://www.spectrochempy.fr/latest/userguide/dataset/dataset.html#About-the-history-attribute)
+
+* Datetime64 coordinates of NDDataset.
+
+    np.datetime64 numpy array can be used a coordinate transparently.  Regaring the math operation on such axis, only addtion or substraction are allowed.
+
+* reading of metadata simplified:
+
+```python
+nd2 = IR_dataset_2D
+
+# add some attribute
+nd2.meta.pression = 34
+nd2.meta.temperature = 3000
+assert nd2.meta.temperature == 3000
+assert nd2.temperature == 3000 # alternative way to get the meta attribute
+
+# also for the coordinates
+nd2.y.meta.pression = 3
+assert nd2.y.meta["pression"] == 3
+assert nd2.y.pression == 3  # alternative way to get the meta attribute
+```
+* Change the size of rotating log to 256K instead of 32K.
+
+* Revision of the math operations :
+  This function is at the heart of the mathematical calculations on the
+  data sets and coordinates. However the complexity of its structure made
+  it very difficult to maintain and debug. Thus, an
+  important rewrite of this function has been performed in order to make
+  it more understandable and therefore easier to maintain.
+* Integration method are now located with the analysis methods
+* Datetime axis now taken into account in plot methods.
+* Datetime best units estimated automatically
+*
+#### BUGS FIXED
+
+* Coordinate _sort method
+* Add m and magnitude (properties)
+  They are Alias of data but the previous definition was not working.
+* Revision of some testing methods : comparison of multicoordinates now works.
+* NDDataset/NDArray.squeeze() and  add test for this method.
+  It was failing when *dim argument were passed.
+  In addition Ia new argument keepdims has been added to define dimension
+  to keep even if they are of size 1.
+* Update iris.py to avoid muticoordinate's names change.
+  Multicoordinates work bad for name indexing if their name is not _1, _2 ...
+* Missing case in check_filename_to_save.
+* Bug for math operation on LinearCoordinates: unit loss
+  The integrate method so it takes into account Datetime64 axis.
+* math _op method for LinearCoord.
+* inplace binary methods to work with datetime64 coordinates.
+* Copy method of Coord now copy the size attribute.
+* display problem in PCA examples.
+* Docs display problems for twinx (both axes are now unit-aware)
 ---
 ## VERSION 0.3
 

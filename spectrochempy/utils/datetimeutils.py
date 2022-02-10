@@ -96,11 +96,11 @@ CF_TO_DT64_UNITS = {
 }
 
 
-def get_datetime_labels(data, resolution=None):
+def get_datetime_labels(data, resolution=None, labels=None):
     """
-    A helper function to convert datetime axis to the CF format
+    A helper function to convert datetime axis to a relative time axis.
 
-    Datetime are given in seconds (or other) from a reference date
+    Datetime are given in seconds (or other) from a acquisition date
     depending on the resolution of the datetimes. To change the default resolution,
     we can use the `resolution` parameter
 
@@ -109,9 +109,8 @@ def get_datetime_labels(data, resolution=None):
     data : an array of np.datetime64
         The data to be converted.
     resolution : str
-        By default the data are in the units of the CF object
+        By default the data are in the units of the datetime object
         (often in seconds). To change this on can use one of the units among:
-
          * "days".
          * "hours".
          * "minute".
@@ -119,16 +118,20 @@ def get_datetime_labels(data, resolution=None):
          * "millisecond".
          * "microsecond".
          * "nanosecond".
+    labels : str, optional, default: None
+        By default the axis label is given as a "relative time / <units>".
+        If this parameter is set to "cf_format", then the axis label will include
+        the acquisition date: "<units> since <acquisition_date>"
 
     Returns
     -------
     label : str
-        A label in the form "<resolution> since <reference_date>"
-    data : an array of float
-        The array values relative to the reference date.
+        The axis label
+    data : numpy array of floats
+        The array of values relative to the acquisition date.
     """
     data = np.asarray(data).ravel()
-    reference_date = data[0]
+    acquisition_date = data[0]
     timedeltas = np.unique(np.diff(data))
     if resolution is None:
         for time_units in list(CF_TO_DT64_UNITS.keys()):
@@ -139,13 +142,18 @@ def get_datetime_labels(data, resolution=None):
     else:
         time_units = resolution
 
-    label = f"{time_units} since {str(reference_date).replace('T',' ')}"
-    newdata = (data - reference_date) / np.timedelta64(1, CF_TO_DT64_UNITS[time_units])
-    return label, newdata
+    if labels == "cf_format":
+        label = f"{time_units} since {str(acquisition_date).replace('T',' ')}"
+    else:
+        label = f"relative time / {time_units}"
+    newdata = (data - acquisition_date) / np.timedelta64(
+        1, CF_TO_DT64_UNITS[time_units]
+    )
+    return label, newdata, acquisition_date
 
 
 def encode_datetime64(data, **attrs):
-    label, data = get_datetime_labels(data)
+    label, data = get_datetime_labels(data, labels="cf_format")
     attrs["units"] = label
     attrs["calendar"] = "proleptic_gregorian"
     return data, attrs

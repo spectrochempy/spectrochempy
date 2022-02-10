@@ -253,7 +253,7 @@ def plot_2D(dataset, method=None, **kwargs):
         xlabel, xdata = get_datetime_labels(
             x.data, resolution=kwargs.get("time_units", None)
         )
-        kwargs["xlabel"] = xlabel + " (UTC)"  # for latter use
+        kwargs["xlabel"] = xlabel  # for latter use
 
     # other cases
     elif x is not None and (not x.is_empty or x.is_labeled):
@@ -312,7 +312,7 @@ def plot_2D(dataset, method=None, **kwargs):
         ylabel, ydata = get_datetime_labels(
             y.data, resolution=kwargs.get("time_units", None)
         )
-        kwargs["ylabel"] = ylabel + " (UTC)"  # for latter use
+        kwargs["ylabel"] = ylabel  # for latter use
 
     # other cases
     elif y is not None and (not y.is_empty or y.is_labeled):

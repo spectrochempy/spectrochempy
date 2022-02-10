@@ -406,7 +406,7 @@ def plot_1D(dataset, method=None, **kwargs):
         xlabel, xdata = get_datetime_labels(
             x.data, resolution=kwargs.get("time_units", None)
         )
-        kwargs["xlabel"] = xlabel + " (UTC)"  # for latter use
+        kwargs["xlabel"] = xlabel  # for latter use
 
     # normal case
     elif x is not None and (not x.is_empty or x.is_labeled):
