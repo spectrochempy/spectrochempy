@@ -90,7 +90,7 @@ def debug_(*args, **kwargs):
 
 def exception_(*args, **kwargs):
     """
-    log exceptioon
+    log exception
     """
     name = args[0].__class__.__name__ + " | "
     msg = args[0].message if hasattr(args[0], "message") else args[0]
