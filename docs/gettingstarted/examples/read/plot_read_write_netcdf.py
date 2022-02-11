@@ -6,40 +6,43 @@ Import / Export to netCDF and xarray
 In this example we show how to import/export netCDF files.
 
 """
-
 # %%
-# [NetCDF](http://www.unidata.ucar.edu/software/netcdf) (Network Common Data Form)
+# `NetCDF`_ (Network Common Data Form)
 # is a file format designed to support the creation,
 # access and sharing of scientific data. It is widely used among the oceanographic and
 # atmospheric communities to store variables, such as temperature, pressure, wind speed,
 # and wave height.
 #
 # Less known and used in the chemistry community,
-# it is not lacking of interest to store data and structure of NDDataset in Spectrochempy.
+# it is not lacking of interest to store data and structure of NDDataset
+# in Spectrochempy.
 #
-# NetCDF data are :
+# `NetCDF`_ data are :
+#
 # * self-describing, meaning that a netCDF file includes information about the data it
-#   contains, such as when the data elements were captured and what units of measurement were used;
+#   contains, such as when the data elements were captured and what units of
+#   measurement were used;
 # * portable, or cross-platform, in the sense that a netCDF file created on one type
-#   of operating system can often be read by software on another type of operating system;
+#   of operating system can often be read by software on another type of operating
+#   system;
 # * scalable, in the sense that it is possible to efficiently access a small part
 #   of a large netCDF file without having to read the whole file.
 #
-# In SpectroChemPy we do not use yet all the features, but saving and reading such data is possible.
-# This for instance makes easy the excahnge of data between
-# [xarray](https://xarray.pydata.org/en/stable/getting-started-guide/why-xarray.html)
-# and SpectroChemPy.
+# In SpectroChemPy we do not use yet all the features, but saving and reading such
+# data is possible. This for instance makes easy the exchange of data between
+# `xarray`_ and SpectroChemPy.
+#
+# .. _xarray: https://xarray.pydata.org/en/stable/getting-started-guide/why-xarray.html
+# .. _NetCDF: http://www.unidata.ucar.edu/software/netcdf
 
 # %%
-# <div class='alert alert-warning'><b>WARNING</b></div>
-# This example works only if the xarray package is installed.
-# If it is not the case, do it using conda, or pip
-# ```
-# conda install xarray
-# ```
+# .. warning:
+#
+#   This example works only if the xarray package is installed.
+#   If it is not the case, do it using conda, or pip.
 
 # %%
-# Let's start this example by reading some Infrared spectroscpic data.
+# Let's start this example by reading some Infrared spectroscopic data.
 import spectrochempy as scp
 
 datadir = scp.preferences.datadir
@@ -59,7 +62,8 @@ othernd = scp.read_netcdf(f)
 othernd
 
 # %%
-# we can check that the newly created dataset from the netCDF file is equivalent to the original one
+# we can check that the newly created dataset from the netCDF file is equivalent to
+# the original one
 assert othernd == nd
 
 # %%
@@ -69,7 +73,9 @@ import xarray as xr
 xrd = xr.open_dataarray(f)
 
 # %%
-# xrd is a xarray DataArray
+# xrd is a
+# `xarray.DataArray <https://xarray.pydata.org/en/stable/generated/xarray.DataArray.html#xarray.DataArray>`_
+# object.
 xrd
 
 # %%
