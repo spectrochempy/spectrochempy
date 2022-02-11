@@ -89,7 +89,7 @@ def json_serialiser(byte_obj, encoding=None):
                 name in ["readonly"]
                 or (name == "dims" and "datasets" in objnames)
                 or [name in ["parent", "name"] and isinstance(byte_obj, PreferencesSet)]
-                and name not in ["created", "modified"]
+                and name not in ["created", "modified", "acquisition_date"]
             ):
                 val = getattr(byte_obj, name)
             else:

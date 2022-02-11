@@ -2855,13 +2855,14 @@ class NDArray(tr.HasTraits):
         """
 
         if self.data is not None:
-            if is_datetime64(self.data) and self.data.size == 1:
-                value = datetime.fromisoformat(str(self.data[0]))
-                value = pytz.utc.localize(value)
-                return value.astimezone(self.timezone).isoformat(
-                    sep=" ", timespec="seconds"
-                )
-            elif self.is_masked:
+            # if is_datetime64(self.data) and self.data.size == 1:
+            #     value = datetime.fromisoformat(str(self.data[0]))
+            #     value = pytz.utc.localize(value)
+            #     return value.astimezone(self.timezone).isoformat(
+            #         sep=" ", timespec="seconds"
+            #     )
+            # el
+            if self.is_masked:
                 data = self._umasked(self.masked_data, self.mask)
                 if self.units:
                     return Quantity(data, self.units)

@@ -498,34 +498,36 @@ def get_figure(**kwargs):
     if not n or clear:
         # create a figure
         prefs = kwargs.pop("preferences", None)
+        if prefs is None:
+            return
+        else:
+            figsize = kwargs.get("figsize", prefs.figure_figsize)
+            dpi = kwargs.get("dpi", prefs.figure_dpi)
+            facecolor = kwargs.get("facecolor", prefs.figure_facecolor)
+            edgecolor = kwargs.get("edgecolor", prefs.figure_edgecolor)
+            frameon = kwargs.get("frameon", prefs.figure_frameon)
+            tight_layout = kwargs.get("autolayout", prefs.figure_autolayout)
 
-        figsize = kwargs.get("figsize", prefs.figure_figsize)
-        dpi = kwargs.get("dpi", prefs.figure_dpi)
-        facecolor = kwargs.get("facecolor", prefs.figure_facecolor)
-        edgecolor = kwargs.get("edgecolor", prefs.figure_edgecolor)
-        frameon = kwargs.get("frameon", prefs.figure_frameon)
-        tight_layout = kwargs.get("autolayout", prefs.figure_autolayout)
+            # get the current figure (or the last used)
+            fig = plt.figure(figsize=figsize)
 
-        # get the current figure (or the last used)
-        fig = plt.figure(figsize=figsize)
-
-        fig.set_dpi(dpi)
-        fig.set_frameon(frameon)
-        try:
-            fig.set_edgecolor(edgecolor)
-        except ValueError:
-            fig.set_edgecolor(eval(edgecolor))
-        try:
-            fig.set_facecolor(facecolor)
-        except ValueError:
+            fig.set_dpi(dpi)
+            fig.set_frameon(frameon)
             try:
-                fig.set_facecolor(eval(facecolor))
+                fig.set_edgecolor(edgecolor)
             except ValueError:
-                fig.set_facecolor("#" + eval(facecolor))
-        fig.set_dpi(dpi)
-        fig.set_tight_layout(tight_layout)
+                fig.set_edgecolor(eval(edgecolor))
+            try:
+                fig.set_facecolor(facecolor)
+            except ValueError:
+                try:
+                    fig.set_facecolor(eval(facecolor))
+                except ValueError:
+                    fig.set_facecolor("#" + eval(facecolor))
+            fig.set_dpi(dpi)
+            fig.set_tight_layout(tight_layout)
 
-        return fig
+            return fig
 
     # a figure already exists - if several we take the last
     return plt.figure(n[-1])

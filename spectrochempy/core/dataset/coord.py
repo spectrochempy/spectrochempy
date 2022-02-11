@@ -987,6 +987,9 @@ class Coord(NDMath, NDArray):
                 elif data.dtype.kind == "M":  # datetime64:
                     self._acquisition_date = data.min()
                     self._data = data
+                else:
+                    self._data = data
+
             except ValueError:
                 # happens if data is a list of quantities
                 if isinstance(data[0], Quantity):
