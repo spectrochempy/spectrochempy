@@ -219,7 +219,7 @@ class NDArray(tr.HasTraits):
     _units = tr.Instance(Unit, allow_none=True)
 
     # Region of interest
-    _roi = tr.List(allow_none=True)
+    _roi = Array(allow_none=True)
 
     # Dates
     _created = tr.Instance(datetime)
@@ -366,10 +366,9 @@ class NDArray(tr.HasTraits):
 
         if attrs is None:
             attrs = self.__dir__()
-
-        for attr in ["name", "history"]:
-            if attr in attrs:
-                attrs.remove(attr)
+            for attr in ["name", "history"]:
+                if attr in attrs:
+                    attrs.remove(attr)
 
         for attr in attrs:
             if attr != "units":
@@ -393,7 +392,12 @@ class NDArray(tr.HasTraits):
                         else:
                             if other.mask != self.mask:
                                 return False
-                    eq &= np.all(sattr == oattr)
+                    if attr == "data" and sattr is not None and sattr.dtype.kind == "M":
+                        eq &= np.mean(sattr - oattr) < np.timedelta64(10, "ns")
+                    elif attr == "coordset":
+                        eq &= sattr.__eq__(oattr, attrs)
+                    else:
+                        eq &= np.all(sattr == oattr)
                     if not eq:
                         return False
                 else:
@@ -1395,7 +1399,7 @@ class NDArray(tr.HasTraits):
         """
         if self._acquisition_date is not None:
             if is_datetime64(self._acquisition_date):
-                acq = datetime.fromisoformat(str(self._acquisition_date))
+                acq = datetime.fromisoformat(str(self._acquisition_date).split(".")[0])
             acq = pytz.utc.localize(acq)
             return acq.astimezone(self.timezone).isoformat(sep=" ", timespec="seconds")
 
@@ -2022,7 +2026,7 @@ class NDArray(tr.HasTraits):
         if self.data is None:
             return None
 
-        return [self.data.min(), self.data.max()]
+        return np.array([self.data.min(), self.data.max()])
 
     # ..........................................................................
     @property
@@ -2208,7 +2212,7 @@ class NDArray(tr.HasTraits):
 
     @roi.setter
     def roi(self, val):
-        self._roi = val
+        self._roi = np.array(val)
 
     @property
     def roi_values(self):

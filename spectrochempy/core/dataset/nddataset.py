@@ -25,7 +25,7 @@ from spectrochempy.core.dataset.ndmath import NDMath, _set_ufuncs, _set_operator
 from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.core.dataset.ndplot import NDPlot
 from spectrochempy.core.dataset.meta import Meta
-from spectrochempy.core.units import encode_quantity
+from spectrochempy.core.units import Unit, encode_quantity
 from spectrochempy.core import error_, warning_
 from spectrochempy.utils import (
     colored_output,
@@ -483,6 +483,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     def __eq__(self, other, attrs=None):
         attrs = self.__dir__()
         for attr in (
+            "authors",
             "filename",
             "preferences",
             "name",
@@ -493,18 +494,19 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             "source",
             "show_datapoints",
             "roi",
+            "ranges",
             "modeldata",
             "processeddata",
             "baselinedata",
             "referencedata",
             "state",
+            "acquisition_date",
         ):
             # these attributes are not used for comparison (comparison based on data and units!)
             try:
                 attrs.remove(attr)
             except ValueError:
                 pass
-
         return super().__eq__(other, attrs)
 
     # ..........................................................................
@@ -1358,14 +1360,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         _ = self.dims  # fire an update
 
     # ..........................................................................
-    def from_xarray(self, xarr):
+    @classmethod
+    def from_xarray(cls, xarr):
 
-        new = type(self)()
-
-        if not xarr.attrs.get("linear", False):
-            new.data = xarr.data
-
-        # set attributes
         exclude = [
             "data",
             "coordset",
@@ -1378,23 +1375,52 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             "state",
             "ranges",
             "modeldata",
+            "modified",
+            "linear",
         ]
-        for item in new.__dir__():
-            if item in exclude:
-                continue
-            if hasattr(xarr, item):
-                # attribute of xarr?
-                setattr(new, item, getattr(xarr, item))
-            elif xarr.attrs.get(item, None) is not None:
-                setattr(new, item, xarr.attrs.get(item))
+
+        def _from_xarray(klass, obj):
+
+            if not (obj.attrs.get("linear", 0) == 1):  # bool are stored as int.
+                new = klass()
+                new.data = obj.data
             else:
-                pass
+                if klass == Coord:
+                    new = LinearCoord()
+                else:
+                    new = klass()
+
+            # set attributes
+            for item in new.__dir__():
+                if item in exclude:
+                    continue
+                try:
+                    if item == "units":
+                        if (
+                            hasattr(obj, "pint_units")
+                            and getattr(obj, "pint_units") != "None"
+                        ):
+                            setattr(new, "_units", Unit(getattr(obj, "pint_units")))
+                    elif hasattr(obj, item):
+                        setattr(new, item, getattr(obj, item))
+                    elif obj.attrs.get(item, None) is not None:
+                        setattr(new, item, obj.attrs.get(item))
+                    else:
+                        pass
+                except Exception as e:
+                    print(item)
+                    error_(e)
+
+            return new
+
+        new = _from_xarray(cls, xarr)
 
         # dimensions and coord
         new.dims = xarr.coords.dims
         coordset = {}
         for dim in new.dims:
-            coordset[dim] = self.from_xarray(xarr.coords[dim])
+            coord = xarr.coords[dim]
+            coordset[dim] = _from_xarray(Coord, coord)
 
         new.set_coordset(coordset)
 
@@ -1416,7 +1442,6 @@ api_funcs = [
     "transpose",
     "to_array",
     "to_xarray",
-    "from_xarray",
     "take",
     "set_complex",
     "set_quaternion",

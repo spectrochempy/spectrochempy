@@ -331,9 +331,9 @@ class Coord(NDMath, NDArray):
     @linear.setter
     def linear(self, val):
 
-        self._linear = (
-            val  # it val is true this lead to a linearisation (  # see observe)
-        )
+        self._linear = bool(
+            val
+        )  # it val is true this lead to a linearisation (  # see observe)
 
         # if val and self._data is not None:  #     # linearisation of the data, if possible  #     self._linearize()
 
@@ -407,6 +407,14 @@ class Coord(NDMath, NDArray):
             return self._size
         else:
             return super().size
+
+    @size.setter
+    def size(self, val):
+        if self.linear:
+            self._size = val
+        else:
+            self._size = self.data.size
+            error_("Size of Coord cannot be changed, except isf linear is True")
 
     # ..........................................................................
     @property
@@ -1215,6 +1223,7 @@ class LinearCoord(Coord):
             "size",
             "roi",
             "show_datapoints",
+            "acquisition_date",
         ]
 
     def set_laser_frequency(self, frequency=15798.26 * ur("cm^-1")):
@@ -1635,11 +1644,19 @@ class CoordSet(tr.HasTraits):
         return ["coords", "references", "is_same_dim", "name"]
 
     # ..........................................................................
-    def __eq__(self, other):
+    def __eq__(self, other, attrs=None):
+        if attrs is not None:
+            attrs.remove("coordset")
+            attrs.remove("transposed")
+            attrs.remove("mask")
+            attrs.remove("dims")
         if other is None:
             return False
         try:
-            return self._coords == other._coords
+            eq = True
+            for c, oc in zip(self._coords, other._coords):
+                eq &= c.__eq__(oc, attrs)
+            return eq
         except Exception:
             return False
 

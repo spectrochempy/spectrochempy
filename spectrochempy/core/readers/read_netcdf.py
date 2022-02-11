@@ -120,7 +120,7 @@ def _read_netcdf(*args, **kwargs):
 
     xr = import_optional_dependency("xarray")
     xarr = xr.open_dataarray(filename)
-    dataset = NDDataset._from_xarray(xarr)  # convert
+    dataset = NDDataset.from_xarray(xarr)  # convert
 
     return dataset
 
