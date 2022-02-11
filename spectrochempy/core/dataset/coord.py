@@ -1025,7 +1025,7 @@ class Coord(NDMath, NDArray):
 
         if new._roi is not None:
             roi = (np.array(new._roi) * oldunits).to(units)
-            new._roi = list(roi)
+            new._roi = np.array(roi)
 
         return new
 
@@ -1646,10 +1646,15 @@ class CoordSet(tr.HasTraits):
     # ..........................................................................
     def __eq__(self, other, attrs=None):
         if attrs is not None:
-            attrs.remove("coordset")
-            attrs.remove("transposed")
-            attrs.remove("mask")
-            attrs.remove("dims")
+            # attrs.remove("coordset")
+            if "transposed" in attrs:
+                attrs.remove("transposed")
+            if "mask" in attrs:
+                attrs.remove("mask")
+            if "dims" in attrs:
+                attrs.remove("dims")
+            if "author" in attrs:
+                attrs.remove("author")
         if other is None:
             return False
         try:

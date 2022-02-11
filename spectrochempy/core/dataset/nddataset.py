@@ -289,9 +289,11 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         # Only these attributes are used for saving dataset
         # WARNING: be careful to keep the present order of the three first elements! Needed for save/load operations
         return [
+            # Keep the following order
             "dims",
             "coordset",
             "data",
+            # From here it is free
             "name",
             "long_name",
             "mask",

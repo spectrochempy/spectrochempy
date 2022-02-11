@@ -177,7 +177,7 @@ def dsm():
     ).copy()
 
 
-# test minimal constructeur and dtypes
+# test minimal constructor and dtypes
 adata = (
     [],
     [None, 1.0],
@@ -188,7 +188,12 @@ adata = (
     [0.0 + 1j, np.nan + 3.0j],
 )
 
+############################
+# TEST SUITE FOR nddataset #
+############################
 
+
+##########
 @pytest.mark.parametrize("a", adata)
 def test_1D_NDDataset(a):
     # 1D

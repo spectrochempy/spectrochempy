@@ -376,6 +376,8 @@ class NDArray(tr.HasTraits):
                 if hasattr(other, f"_{attr}"):
                     oattr = getattr(other, f"_{attr}")
                     # to avoid deprecation warning issue for unequal array
+                    if sattr is None and oattr is None:
+                        continue
                     if sattr is None and oattr is not None:  # pragma: no cover
                         return False
                     if oattr is None and sattr is not None:  # pragma: no cover
@@ -395,6 +397,8 @@ class NDArray(tr.HasTraits):
                     if attr == "data" and sattr is not None and sattr.dtype.kind == "M":
                         eq &= np.mean(sattr - oattr) < np.timedelta64(10, "ns")
                     elif attr == "coordset":
+                        if not hasattr(sattr, "coordset"):
+                            continue
                         eq &= sattr.__eq__(oattr, attrs)
                     else:
                         eq &= np.all(sattr == oattr)
