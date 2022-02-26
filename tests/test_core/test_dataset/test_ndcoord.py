@@ -489,3 +489,12 @@ def test_linearcoord():
     assert coord1.is_1d
 
     assert coord0.transpose() == coord0
+
+
+def test_coord_linearization():
+    from spectrochempy.utils.testing import RandomSeedContext
+
+    with RandomSeedContext(12345):
+        d = np.linspace(0, 60, 100) + np.random.random(100) / 100.0
+    coord = LinearCoord(d, decimals=3, copy=True)
+    coord

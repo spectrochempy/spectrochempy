@@ -157,6 +157,7 @@ class Coord(NDMath, NDArray):
     _increment = Union((CFloat(), CInt(), Instance(Quantity)))
     _size = Integer(0)
     _linear = Bool(False)
+    _decimals = Integer(5)
 
     # ------------------------------------------------------------------------
     # initialization
@@ -172,6 +173,8 @@ class Coord(NDMath, NDArray):
         self._increment = kwargs.pop("increment", 1.0)
         self._offset = kwargs.pop("offset", 0.0)
         self._size = kwargs.pop("size", 0)
+        self._decimals = kwargs.pop("decimals", 5)
+
         # self._accuracy = kwargs.pop('accuracy', None)
 
     # ------------------------------------------------------------------------
@@ -787,10 +790,10 @@ class Coord(NDMath, NDArray):
         if data.size > 1:
             inc = np.diff(data)
             variation = (inc.max() - inc.min()) / data.ptp()
-            if variation < 1.0e-5:
-                self._increment = (
-                    data.ptp() / (data.size - 1) * np.sign(inc[0])
-                )  # np.mean(inc)  # np.round(np.mean(inc), 5)
+            if variation < 10.0 ** (-self._decimals):
+                self._increment = np.round(
+                    data.ptp() / (data.size - 1) * np.sign(inc[0]), self._decimals
+                )
                 self._offset = data[0]
                 self._size = data.size
                 self._data = None
@@ -1057,8 +1060,8 @@ class LinearCoord(Coord):
 
         if data is not None and isinstance(data, Coord) and not data.linear:
             raise ValueError(
-                "Only linear Coord (with attribute linear set to True, can be transformed into "
-                "LinearCoord class"
+                "Only linear Coord (with attribute linear set to True, "
+                "can be transformed into LinearCoord class"
             )
 
         super().__init__(data, **kwargs)
