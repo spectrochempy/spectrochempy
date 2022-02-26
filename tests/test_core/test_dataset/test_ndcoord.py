@@ -498,3 +498,4 @@ def test_coord_linearization():
         d = np.linspace(0, 60, 100) + np.random.random(100) / 100.0
     coord = LinearCoord(d, decimals=3, copy=True)
     assert coord.increment == 0.606
+    assert coord.offset == 0.009
