@@ -117,8 +117,8 @@ class Coord(NDMath, NDArray):
     increment : float, optional
         Only used if linear is true.
         If omitted a value of 1.0 is taken for the coordinate increment.
-    decimals : int, optional, default=5
-        Specify a threshold for linearisation of existing data. By default, decimals=5.
+    decimals : int, optional, default=7
+        Specify a threshold for linearisation of existing data. By default, decimals=7.
         which means that if the difference in spacing of all data is less than
         10^(-decimals), then linearisation occurs, and inc are rounded to the number
         of specified decimals.
@@ -162,7 +162,7 @@ class Coord(NDMath, NDArray):
     _increment = Union((CFloat(), CInt(), Instance(Quantity)))
     _size = Integer(0)
     _linear = Bool(False)
-    _decimals = Integer(5)
+    _decimals = Integer(7)
 
     # ------------------------------------------------------------------------
     # initialization
@@ -178,7 +178,7 @@ class Coord(NDMath, NDArray):
         self._increment = kwargs.pop("increment", 1.0)
         self._offset = kwargs.pop("offset", 0.0)
         self._size = kwargs.pop("size", 0)
-        self._decimals = kwargs.pop("decimals", 5)
+        self._decimals = kwargs.pop("decimals", 7)
 
         # self._accuracy = kwargs.pop('accuracy', None)
 
