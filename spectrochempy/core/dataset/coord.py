@@ -117,6 +117,11 @@ class Coord(NDMath, NDArray):
     increment : float, optional
         Only used if linear is true.
         If omitted a value of 1.0 is taken for the coordinate increment.
+    decimals : int, optional, default=5
+        Specify a threshold for linearisation of existing data. By default, decimals=5.
+        which means that if the difference in spacing of all data is less than
+        10^(-decimals), then linearisation occurs, and inc are rounded to the number
+        of specified decimals.
 
     See Also
     --------
