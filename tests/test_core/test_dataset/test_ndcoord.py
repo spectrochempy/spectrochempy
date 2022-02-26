@@ -478,7 +478,7 @@ def test_linearcoord():
     coordc = coord1.copy()
     assert coord1 == coordc
 
-    assert_approx_equal(coord1.spacing.m, 0.606060606)
+    assert_approx_equal(coord1.spacing.m, 0.60606)
 
     assert coord1.author is None
     assert not coord1.history
