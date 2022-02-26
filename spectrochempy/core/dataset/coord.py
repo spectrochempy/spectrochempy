@@ -1080,7 +1080,7 @@ class LinearCoord(Coord):
         elif not self.linear:
             # in case it was not already a linear array
             self.offset = offset
-            self.increment = increment
+            self.increment = np.round(increment, self._decimals)
             self._linear = True
 
     # ..........................................................................
