@@ -799,7 +799,7 @@ class Coord(NDMath, NDArray):
                 self._increment = np.round(
                     data.ptp() / (data.size - 1) * np.sign(inc[0]), self._decimals
                 )
-                self._offset = data[0]
+                self._offset = np.round(data[0], self._decimals)
                 self._size = data.size
                 self._data = None
                 self._linear = True
