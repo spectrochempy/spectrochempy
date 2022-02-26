@@ -497,4 +497,4 @@ def test_coord_linearization():
     with RandomSeedContext(12345):
         d = np.linspace(0, 60, 100) + np.random.random(100) / 100.0
     coord = LinearCoord(d, decimals=3, copy=True)
-    coord
+    assert coord.increment == 0.606
