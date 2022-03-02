@@ -1180,21 +1180,15 @@ def _read_header(fid, pos):
         The buffered binary stream.
 
     pos : int
-        The position of a byte "key" which in turn will allow positioning the header
-        (see Notes).
+        The position of the header (see Notes).
 
     Returns
     -------
         dict, int
         Dictionary and current position in file
 
-    Notes:
-        For spa and spg, pos is the position of the "02" byte key (see comments in _read_spa
-         and read_spg). The header position is located 2 bytes behind.
-        For srs files, pos is the position, of the bytestring
-        b'\x02\x00\x00\x00\x18\x00\x00\x00\x00\x00\x48\x43\x00\x50\x43\x47'.
-        The header is located 152 bytes before.
-
+    Notes
+    -----
         So far, the header structure is as follows:
         - starts with b'\x01' , b'\x02', b'\x03' ... maybe indicating the header "type"
         - nx (UInt32): 4 bytes behind
