@@ -7,11 +7,15 @@
 
 * add linearcoord rounding possibility.
 
+* `read_srs()` now allows extracting background interferogram or spectrum
+
 * add `download_nist_ir()` to download IR spectra from NIST/webbook
 
 * `read_spa()` now allows extracting sample and background interferograms
 
 #### BUGS FIXED
+
+* fix bug in read_srs 
 
 * fix gettingstarted/overview.py after IRIS refactoring
 
