@@ -438,12 +438,14 @@ def read_srs(*paths, **kwargs):
 
     Returns
     --------
-    read_srs
-        The dataset or a list of dataset corresponding to a (set of) .spg
-        file(s).
+    NDDataset
+        The dataset or a list of dataset corresponding to a (set of) series
+        or backgroun files.
 
     Other Parameters
     -----------------
+    return_bg : bool, optional
+        Default value is False. When set to 'True' returns the series background
     directory : str, optional
         From where to read the specified `filename`. If not specified,
         read in the default ``datadir`` specified in
@@ -592,14 +594,18 @@ def _read_spg(*args, **kwargs):
     )  # ex: [304 432 ...]
 
     for i in range(nspec):
-        info02, _ = _read_header02(fid, position02[i])
-        nx[i] = info02["nx"]
-        firstx[i] = info02["firstx"]
-        lastx[i] = info02["lastx"]
-        xunits.append(info02["xunits"])
-        xtitles.append(info02["xtitle"])
-        units.append(info02["units"])
-        titles.append(info02["title"])
+        # read the position of the header
+        fid.seek(position02[i] + 2)
+        pos_header = _fromfile(fid, dtype="uint32", count=1)
+        # get infos
+        info = _read_header(fid, pos_header)
+        nx[i] = info["nx"]
+        firstx[i] = info["firstx"]
+        lastx[i] = info["lastx"]
+        xunits.append(info["xunits"])
+        xtitles.append(info["xtitle"])
+        units.append(info["units"])
+        titles.append(info["title"])
 
     # check the consistency of xaxis and data units
     if np.ptp(nx) != 0:  # pragma: no cover
@@ -798,7 +804,10 @@ def _read_spa(*args, **kwargs):
         key = _fromfile(fid, dtype="uint8", count=1)
 
         if key == 2:
-            info02, _ = _read_header02(fid, pos)
+            # read the position of the header
+            fid.seek(pos + 2)
+            pos_header = _fromfile(fid, dtype="uint32", count=1)
+            info = _read_header(fid, pos_header)
 
         elif key == 3 and return_ifg is None:
             intensities = _getintensities(fid, pos)
@@ -850,15 +859,15 @@ def _read_spa(*args, **kwargs):
 
     if return_ifg is None:
         default_description = f"Omnic name: {spa_name}\nOmnic filename: {filename.name}"
-        dataset.units = info02["units"]
-        dataset.title = info02["title"]
+        dataset.units = info["units"]
+        dataset.title = info["title"]
 
         # now add coordinates
-        nx = info02["nx"]
-        firstx = info02["firstx"]
-        lastx = info02["lastx"]
-        xunit = info02["xunits"]
-        xtitle = info02["xtitle"]
+        nx = info["nx"]
+        firstx = info["firstx"]
+        lastx = info["lastx"]
+        xunit = info["xunits"]
+        xtitle = info["xtitle"]
 
         spacing = (lastx - firstx) / (nx - 1)
 
@@ -921,124 +930,110 @@ def _read_srs(*args, **kwargs):
     dataset, filename = args
     frombytes = kwargs.get("frombytes", False)
 
+    return_bg = kwargs.get("return_bg", False)
+
     if frombytes:
         # in this case, filename is actually a byte content
         fid = io.BytesIO(filename)  # pragma: no cover
     else:
         fid = open(filename, "rb")
-    # at pos=304 (hex:130) is the position of the '02' key for series
-    info, pos = _read_header02(fid, 304)
 
-    # reset current position at the start of next line
-    pos = _nextline(pos)
+    # determine whether the srs is reprocessed. At pos=292 (hex:124) appears a difference between
+    # and reprocessed series
+    fid.seek(292)
+    key = _fromfile(fid, dtype="uint8", count=16)[0]
+    if key == 39:  # (hex: 27)
+        is_reprocessed = False
+    elif key == 15:  # (hex = 0F)
+        is_reprocessed = True
+    # if key == 72 (hex:48), could be TGA
 
-    if info["mode"] != "rapidscan":
+    """ At pos=304 (hex:130) is the position of the '02' key for series. Herte we don't use it.
+    Instead, we use the following sequence :
+    b'\x02\x00\x00\x00\x18\x00\x00\x00\x00\x00\x48\x43\x00\x50\x43\x47'
+    which appears 3 times in rapid-scan srs. They are used to assert the srs file is rapid_scan
+    and to locate headers and data:
+    - The 1st one is located 152 bytes after the series header position
+    - The 2nd one is located 152 bytes before the background header position and
+       56 bytes before either the background data / or the background title and infos
+       followed by the background data
+    - The 3rd one is located 64 bytes before the series data (spectre/ifg names and
+    intensities"""
+
+    sub = b"\x02\x00\x00\x00\x18\x00\x00\x00\x00\x00\x48\x43\x00\x50\x43\x47"
+
+    # find the 3 starting indexes of sub.we will use the 1st (-> series info),
+    # the 2nd (-> background) and the 3rd (-> data)
+    fid.seek(0)
+    bytestring = fid.read()
+    start = 0
+    index = []
+    while start != -1:
+        i = bytestring.find(sub, start + 1)
+        index.append(i)
+        start = i
+    index = np.array(index[:-1])
+
+    if len(index) != 3:
         raise NotImplementedError("Only implemented for rapidscan")
 
-    # read the data part of series files
-    found = False
-    background = None
-    names = []
-    data = np.zeros((info["ny"], info["nx"]))
+    index += [-152, -152, 60]
 
-    # find the position of the background and of the first interferogram
-    # based on empirical "fingerprints".
+    # read series data, except if the user asks for the background
+    if not return_bg:
+        info = _read_header(fid, index[0])
+        # container for names and data
+        names = []
+        data = np.zeros((info["ny"], info["nx"]))
 
-    while not found:
-        pos += 16
-        fid.seek(pos)
-        line = _fromfile(fid, dtype="uint8", count=16)
-        if np.all(line == [15, 0, 0, 0, 2, 0, 0, 0, 24, 0, 0, 0, 0, 0, 72, 67]):
-            # hex 0F 00 00 00 02 00 00 00 18 00 00 00 00 00 48 43
-            # this is a fingerprint of header of data fields for
-            # non-processed series
-            # the first one is the background
-            if background is None:
-                pos += 52
-                fid.seek(pos)
-                key = _fromfile(fid, dtype="uint16", count=1)
-
-                if key > 0:  # pragma: no cover
-                    # a background file was selected; it is present as a
-                    # single sided interferogram
-                    #  key could be the zpd of the double sided interferogram
-                    background_size = key - 2
-                    pos += 8
-                    background_name = _readbtext(fid, pos)
-                    pos += 256  # max length of text
-                    pos += 8  # unknown info ?
-                    fid.seek(pos)
-                    background = _fromfile(fid, dtype="float32", count=background_size)
-                    pos += background_size * 4
-                    pos = _nextline(pos)
-
-                elif key == 0:
-                    # no background file was selected; the background is the
-                    # one that was recorded with the series
-                    background_size = info["nx"]
-                    pos += 8
-                    fid.seek(pos)
-                    background = _fromfile(fid, dtype="float32", count=background_size)
-                    pos += background_size * 4
-                    background_name = _readbtext(fid, pos)
-                    # uncomment below to read unused data (noise measurement ?)
-                    # pos += 268
-                    # f.seek(pos)
-                    # noisy_data = _fromfile(f, dtype='float32', count=499)
-                    pos = _nextline(pos)
-
-                # Create a NDDataset for the background
-
-                background = NDDataset(background)
-                _x = Coord(
-                    np.around(np.linspace(0, background_size - 1, background_size), 0),
-                    title="data points",
-                    units="dimensionless",
-                )
-                background.set_coordset(x=_x)
-                background.name = background_name
-                background.units = "V"
-                background.title = "volts"
-                background.origin = "omnic"
-                background.description = "background from omnic srs file."
-                background.history = (
-                    str(datetime.now(timezone.utc)) + ":imported from srs file"
-                )
-
-            else:  # this is likely the first interferogram of the series
-                found = True
-                names.append(_readbtext(fid, pos + 64))
-                pos += 148
-
-        elif np.all(
-            line == [2, 0, 0, 0, 24, 0, 0, 0, 0, 0, 72, 67, 0, 80, 67, 71]
-        ) or np.all(line == [30, 0, 0, 0, 2, 0, 0, 0, 24, 0, 0, 0, 0, 0, 72, 67]):
-            # hex 02 00 00 00 18 00 00 00 00 00 48 43 00 50 43 47
-            # this is likely header of data field of reprocessed series
-            # the first one is skipped TODO: check the nature of these data
-            if background is None:  # pragma: no cover
-                background = NDDataset()
-            else:  # pragma: no cover # this is likely the first spectrum of the series
-                found = True
-                names.append(_readbtext(fid, pos + 64))
-                pos += 148
-
-    # read first data
-    fid.seek(pos)
-    data[0, :] = _fromfile(fid, dtype="float32", count=info["nx"])[:]
-    pos += info["nx"] * 4
-    # and the remaining part:
-    for i in np.arange(info["ny"])[1:]:
-        pos += 16
+        # now read the spectra/interferogram names and data
+        # the first one....
+        pos = index[2]
         names.append(_readbtext(fid, pos))
         pos += 84
         fid.seek(pos)
-        data[i, :] = _fromfile(fid, dtype="float32", count=info["nx"])[:]
+        data[0, :] = _fromfile(fid, dtype="float32", count=info["nx"])[:]
         pos += info["nx"] * 4
+        # ... and the remaining ones:
+        for i in np.arange(info["ny"])[1:]:
+            pos += 16
+            names.append(_readbtext(fid, pos))
+            pos += 84
+            fid.seek(pos)
+            data[i, :] = _fromfile(fid, dtype="float32", count=info["nx"])[:]
+            pos += info["nx"] * 4
+
+        # now get series history
+        if not is_reprocessed:
+            history = info["history"]
+        else:
+            # In reprocessed series the updated "DATA PROCESSING HISTORY" is located right after
+            # the following 16 byte sequence:
+            sub = b"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
+            pos = bytestring.find(sub) + 16
+            history = _readbtext(fid, pos)
+
+    # read the background if the user asked for it.
+    if return_bg:
+
+        # First get background info
+        info = _read_header(fid, index[1])
+
+        if "background_name" not in info.keys():
+            # it is a short header
+            fid.seek(index[1] + 208)
+            data = _fromfile(fid, dtype="float32", count=info["nx"])
+        else:
+            # longer header, in such case the header indicates a spectrum
+            # but the data are those of an ifg... For now need more examples
+            return None
 
     # Create NDDataset Object for the series
-    dataset = NDDataset(data)
-    dataset.name = info["name"]
+    if not return_bg:
+        dataset = NDDataset(data)
+    else:
+        dataset = NDDataset(np.expand_dims(data, axis=0))
+
     dataset.units = info["units"]
     dataset.title = info["title"]
     dataset.origin = "omnic"
@@ -1053,12 +1048,18 @@ def _read_srs(*args, **kwargs):
         units=info["xunits"],
     )
 
-    _y = Coord(
-        np.around(np.linspace(info["firsty"], info["lasty"], info["ny"]), 3),
-        title="Time",
-        units="minute",
-        labels=names,
-    )
+    # specific infos for series data
+    if not return_bg:
+        dataset.name = info["name"]
+        _y = Coord(
+            np.around(np.linspace(info["firsty"], info["lasty"], info["ny"]), 3),
+            title="Time",
+            units="minute",
+            labels=names,
+        )
+
+    else:
+        _y = Coord()
 
     dataset.set_coordset(y=_y, x=_x)
 
@@ -1066,9 +1067,14 @@ def _read_srs(*args, **kwargs):
     dataset.origin = "omnic"
     dataset.description = kwargs.get("description", "Dataset from omnic srs file.")
 
-    dataset.history = str(
-        datetime.now(timezone.utc)
-    ) + ":imported from srs file {} ; ".format(filename)
+    if "history" in locals():
+        dataset.history.append(
+            "Omnic 'DATA PROCESSING HISTORY' :\n"
+            "--------------------------------\n" + history
+        )
+    dataset.history.append(
+        str(datetime.now(timezone.utc)) + ": imported from srs file " + str(filename)
+    )
 
     if dataset.x.units is None and dataset.x.title == "data points":
         # interferogram
@@ -1078,34 +1084,33 @@ def _read_srs(*args, **kwargs):
         dataset.meta.laser_frequency = Quantity("15798.26 cm^-1")
         dataset.x.set_laser_frequency()
         dataset.x._use_time_axis = (
-            False  # True to have time, else it will  # be optical path difference
+            False  # True to have time, else it will  be optical path difference
         )
 
-    # uncomment below to load the last datafield
-    # has the same dimension as the time axis
-    # its function is not known. related to Grams-schmidt ?
+        # uncomment below to load the last datafield has the same dimension as the time axis
+        # its function is not known. related to Grams-schmidt ?
 
-    # pos = _nextline(pos)
-    # found = False
-    # while not found:
-    #     pos += 16
-    #     f.seek(pos)
-    #     key = _fromfile(f, dtype='uint8', count=1)
-    #     if key == 1:
-    #         pos += 4
-    #         f.seek(pos)
-    #         X = _fromfile(f, dtype='float32', count=info['ny'])
-    #         found = True
-    #
-    # X = NDDataset(X)
-    # _x = Coord(np.around(np.linspace(0, info['ny']-1, info['ny']), 0),
-    #            title='time',
-    #            units='minutes')
-    # X.set_coordset(x=_x)
-    # X.name = '?'
-    # X.title = '?'
-    # X.description = 'unknown'
-    # X.history = str(datetime.now(timezone.utc)) + ':imported from srs
+        # pos = _nextline(pos)
+        # found = False
+        # while not found:
+        #     pos += 16
+        #     f.seek(pos)
+        #     key = _fromfile(f, dtype='uint8', count=1)
+        #     if key == 1:
+        #         pos += 4
+        #         f.seek(pos)
+        #         X = _fromfile(f, dtype='float32', count=info['ny'])
+        #         found = True
+        #
+        # X = NDDataset(X)
+        # _x = Coord(np.around(np.linspace(0, info['ny']-1, info['ny']), 0),
+        #            title='time',
+        #            units='minutes')
+        # X.set_coordset(x=_x)
+        # X.name = '?'
+        # X.title = '?'
+        # X.description = 'unknown'
+        # X.history = str(datetime.now(timezone.utc)) + ':imported from srs
 
     fid.close()
 
@@ -1165,9 +1170,9 @@ def _nextline(pos):
 
 
 # ..............................................................................
-def _read_header02(fid, pos02):
+def _read_header(fid, pos):
     """
-    read spectrum/ifg header
+    read spectrum/ifg/series header
 
     Parameters
     ----------
@@ -1175,12 +1180,53 @@ def _read_header02(fid, pos02):
         The buffered binary stream.
 
     pos : int
-        The position of the 02 key in spa,spg or srs file.
+        The position of the header (see Notes).
 
     Returns
     -------
         dict, int
-        Dictionary and current positon in file
+        Dictionary and current position in file
+
+    Notes
+    -----
+        So far, the header structure is as follows:
+        - starts with b'\x01' , b'\x02', b'\x03' ... maybe indicating the header "type"
+        - nx (UInt32): 4 bytes behind
+        - xunits (UInt8): 8 bytes behind. So far, we have the following correspondence:
+            `x\01`: wavenumbers, cm-1
+            `x\02`: datapoints (interferogram)
+            `x\03`: wavelength, nm
+            `x\04': wavelength, um
+            `x\20': Raman shift, cm-1
+        - data units (UInt8): 12 bytes behind. So far, we have the following correspondence:
+            `x\11`: absorbance
+            `x\10`: transmittance (%)
+            `x\0B`: reflectance (%)
+            `x\0C`: Kubelka_Munk
+            `x\16`:  Volts (interferogram)
+            `x\1A`:  photoacoustic
+            `x\1F`: Raman intensity
+        - first x value (float32), 16 bytes behind
+        - last x value (float32), 20 bytes behind
+        - scan points (UInt32), 28 bytes behind
+        - zpd (UInt32),  32 bytes behind
+        - number of scans (UInt32), 36 bytes behind
+        ... infos from 40 to 51 bytes behind are not none yet
+        - number of background scans (UInt32), 52 bytes behind
+
+        For spa and spg infos between 56 and 207 bytes behind are not none yet
+        - spectrum history (text), 208 bytes behind
+
+        For "rapid-scan" srs files:
+        - series name (text), 938 bytes behind
+        - collection length (float32), 1002 bytes behind
+        - last y (float 32), 1006 bytes behind
+        - first y (float 32), 1010 bytes behind
+        - ny (UInt32), 1026
+        ... y unit could be at pos+1030 with 01 = minutes ?
+        - history (text), 1200 bytes behind (only initila hgistopry.
+           When reprocessed, updated histopry is at the end of the file after the
+           b`\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF` sequance
     """
 
     out = {}
@@ -1191,10 +1237,6 @@ def _read_header02(fid, pos02):
         filetype = "spa, spg"
     elif bytes == b"Spectral Exte File":
         filetype = "srs"
-
-    # skip 2 bytes and read the position of the header
-    fid.seek(pos02 + 2)
-    pos = _fromfile(fid, dtype="uint32", count=1)
 
     # nx
     fid.seek(pos + 4)
@@ -1270,15 +1312,14 @@ def _read_header02(fid, pos02):
     fid.seek(pos + 52)
     out["nbkgscan"] = _fromfile(fid, "uint32", 1)
 
+    if filetype == "spa, spg":
+        out["history"] = _readbtext(fid, pos + 208)
+
     if filetype == "srs":
-        if (
-            out["nbkgscan"] == 0
-        ):  # then probably interferogram in rapid scan mode (series file)
+        if out["nbkgscan"] == 0:
+            # an interferogram in rapid scan mode
             if out["firstx"] > out["lastx"]:
                 out["firstx"], out["lastx"] = out["lastx"], out["firstx"]
-            out["mode"] = "rapidscan"
-        else:
-            out["mode"] = "GC-IR or TGA-IR"
 
         out["name"] = _readbtext(fid, pos + 938)
         fid.seek(pos + 1002)
@@ -1290,10 +1331,13 @@ def _read_header02(fid, pos02):
         fid.seek(pos + 1026)
         out["ny"] = _fromfile(fid, "uint32", 1)
         #  y unit could be at pos+1030 with 01 = minutes ?
-        return out, pos + 1026
+        out["history"] = _readbtext(fid, pos + 1200)
 
-    else:
-        return out, pos + 52
+        if _readbtext(fid, pos + 208)[:10] == "Background":
+            # it is the header of a background
+            out["background_name"] = _readbtext(fid, pos + 208)[10:]
+
+    return out
 
 
 # ..............................................................................
