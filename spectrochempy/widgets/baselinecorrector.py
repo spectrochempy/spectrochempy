@@ -1,6 +1,7 @@
 import ipywidgets as widgets
 import numpy as np
 from IPython.display import display, clear_output
+import matplotlib.pyplot as plt
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.processors.concatenate import concatenate, stack
@@ -15,8 +16,10 @@ class BaselineCorrector:
     """
     Launch a GUI for baseline corrections.
 
-    Wrapper of scp.BaselineCorrection(X), with widgets for dataset slicing, input parameters and graphical output.
-    Should be run in jupyter notebook (not jupyter lab) with the widget backend (magic `%matplotlib widget`).
+    Wrapper of scp.BaselineCorrection(X), with widgets for dataset slicing,
+    input parameters and graphical output.
+    Should be run in jupyter notebook (not jupyter lab) with the widget backend
+    (magic `%matplotlib widget`).
 
     Parameters
     ----------
@@ -40,24 +43,31 @@ class BaselineCorrector:
     -----
     The `BaselineCorrector()` widget can be used in jupyter notebooks.
     - The GUI buttons are as follows:
-        - `upload`: upload files (disabled if a NDDataset is passed as parameter). Uploading file will not trigger the reading
-           and processing. To do so, the user is expected to click the `process` button.
-        - `process`: triggers baseline correct and plotting of original dataset + baseline and corrected datasets
+        - `upload`: upload files (disabled if a NDDataset is passed as parameter).
+          Uploading file will not trigger the reading
+          and processing. To do so, the user is expected to click the `process` button.
+        - `process`: triggers baseline correct and plotting of original
+          dataset + baseline and corrected datasets
         - `save as`: save the baseline corrected NDDataset
 
-    - The `x slice` and `y slice` textboxes can be used to slice the initial dataset with the usual `[start:stop:stride]`
-      format. In the `x` dimension, coordinates or indexes can be used (e.g. `[3000.0:2000.0:1]` or `[0:100:1]` are valid
-      entries). In the `y` dimension only indexes can be used (e.g. `[0:10:1]`). Note also that currently none of the
-      `start`, `stop`, `stride` parameters can be omitted, e.g. `[3000.0:2000.0]` or `[:,:]` are not valid entries.
-    - Method and Interpolation are self explaining, see BaselineCorrection() for details.
+    - The `x slice` and `y slice` textboxes can be used to slice the initial
+      dataset with the usual `[start:stop:stride]`
+      format. In the `x` dimension, coordinates or indexes can be used
+      (e.g. `[3000.0:2000.0:1]` or `[0:100:1]` are valid
+      entries). In the `y` dimension only indexes can be used (e.g. `[0:10:1]`).
+      Note also that currently none of the
+      `start`, `stop`, `stride` parameters can be omitted, e.g. `[3000.0:2000.0]`
+      or `[:,:]` are not valid entries.
+    - Method and Interpolation are self explaining, see BaselineCorrection() for
+      details.
     - Ranges should be entered as a tuple of intervals or wavenumbers, e.g.
-        ```
-        (
-        [5900.0, 5400.0],
-        2000.0,
-        [1550.0, 1555.0],
-        )
-        ```
+      ```
+      (
+      [5900.0, 5400.0],
+      2000.0,
+      [1550.0, 1555.0],
+      )
+      ```
 
     Examples
     --------
@@ -160,15 +170,18 @@ class BaselineCorrector:
                 self._ranges_control,
             ]
         )
+        self._fig = None
         self._input = widgets.HBox(children=[io, controls])
-        display(self._input, self._output)
+        display(self._input)
 
         if self._X is not None:
             self.process_clicked("dummy")
         else:
             self.corrected = NDDataset()
 
-    def blcorrect_and_plot(self, clear=False):
+        self.output = self._output
+
+    def blcorrect_and_plot(self, clear=True):
         slice_x = _str_to_slice(self._x_limits_control.value, self._X)
         slice_y = _str_to_slice(self._y_limits_control.value, self._X)
         self.original = self._X[slice_y, slice_x]
@@ -181,24 +194,28 @@ class BaselineCorrector:
             npc=self._npcslider.value,
         )
         self.baseline = self.original - self.corrected
+
         with self._output:
             if clear:
-                clear_output(True)
+                self._output.clear_output(True)
+
             axes = multiplot(
                 [concatenate(self.original, self.baseline, dims="y"), self.corrected],
                 labels=["Original", "Corrected"],
                 sharex=True,
                 nrow=2,
                 ncol=1,
+                fig=self._fig,
                 figsize=(7, 6),
                 dpi=96,
             )
-
             axes["axe11"].get_xaxis().set_visible(False)
             blc.show_regions(axes["axe21"])
+            self._fig = axes['axe11'].figure
+
         self._done = True
 
-    def process_clicked(self, b):
+    def process_clicked(self, b=None):
         """(re)process dataset (slicing) and baseline correct"""
         if self._X is None:
             # no dataset loaded, read data (byte content)

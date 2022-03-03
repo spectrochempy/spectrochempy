@@ -4,7 +4,10 @@ import spectrochempy as scp
 def test_baselinecorrector():
 
     X = scp.read_omnic("irdata/nh4y-activation.spg")
-    out = scp.BaselineCorrector(X[0:10, 0:100])
+    X = X[0:10, 0:100]
+
+    out = scp.BaselineCorrector(X)
+
     # no selection possible if we are not in a notebook
     assert out.corrected.shape == (10, 99)
 
@@ -19,3 +22,5 @@ def test_baselinecorrector():
 
     # try multivariate, with 2 pcs
     out._npcslider.value = 2
+
+    out.process_clicked()
