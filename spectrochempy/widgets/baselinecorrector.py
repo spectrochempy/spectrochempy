@@ -172,7 +172,8 @@ class BaselineCorrector:
         slice_x = _str_to_slice(self._x_limits_control.value, self._X)
         slice_y = _str_to_slice(self._y_limits_control.value, self._X)
         self.original = self._X[slice_y, slice_x]
-        blc = BaselineCorrection(self.original)
+        if self.original is not None:
+            blc = BaselineCorrection(self.original)
         self.corrected = blc.compute(
             *eval(self._ranges_control.value),
             interpolation=self._interpolationselector.value,
@@ -242,7 +243,11 @@ class BaselineCorrector:
             self.blcorrect_and_plot(clear=True)
 
     def save_clicked(self, b):
-        self.corrected.write()
+        try:
+            self.corrected.write()
+        except AttributeError:
+            # the user has cancelled
+            pass
 
 
 # Utility functions
