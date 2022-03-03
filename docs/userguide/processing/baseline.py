@@ -278,7 +278,7 @@ blc.show_regions(axes["axe21"])
 
 # %% [markdown]
 # ### Widget for "advanced" baseline corrections
-# The `BaselineCorrector()` widget can be used in jupyter notebooks.
+# The `BaselineCorrector()` widget can be used in jupyter notebook (not jupyter lab).
 # - The buttons are as follows:
 #   - `upload`: upload files (disabled if a NDDataset is passed as parameter). Uploading file will not trigger the reading
 # and processing. To do so, the user is expected to click the `process` button.
