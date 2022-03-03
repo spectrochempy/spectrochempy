@@ -578,5 +578,7 @@
     utils.zip.ScpFile.keys
     utils.zip.ScpFile.values
     widgets.api
+    widgets.baselinecorrector
+    widgets.baselinecorrector.BaselineCorrector
     widgets.fileselector
     widgets.fileselector.FileSelector

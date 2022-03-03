@@ -277,6 +277,39 @@ axes = scp.multiplot(
 blc.show_regions(axes["axe21"])
 
 # %% [markdown]
+# ### Widget for "advanced" baseline corrections
+# The `BaselineCorrector()` widget can be used in jupyter notebooks.
+# - The buttons are as follows:
+#   - `upload`: upload files (disabled if a NDDataset is passed as parameter). Uploading file will not trigger the reading
+# and processing. To do so, the user is expected to click the `process` button.
+#   - `process`: baseline correct and plot original dataset + baseline and  corrected datasets
+#   - `save as`: save the baseline corrected NDDataset
+# - The `x slice` anbd `y slice` textboxes can be used to slice the initial dataset with the usual `[start:stop:step]`
+# format. In the `x` dimension, coordinates or indexes can be used (e.g. `[3000.0:2000.0:1]` or `[0:100:1]` are valid
+# entries). In the `y` dimension only indexes can be used (e.g. `[0:10:1]`). Note also that currently none of the
+# `start`, `stop`, `step` parameters can be omitted, e.g. `[3000.0:2000.0]` or `[:,:]` are not valid entries.
+# - Method and Interpolation are self-explaining, see above for details
+# - Ranges should be entered as a tuple of numerals or wavenumbers, e.g.
+# ```
+# (
+# [5900.0, 5400.0],
+# 2000.0,
+# [1550.0, 1555.0],
+# )
+
+# %%
+X = scp.read_omnic("irdata/nh4y-activation.spg")
+out = scp.BaselineCorrector(X)
+
+# %% [markdown]
+# After processing, one can get the original (sliced) dataset, corrected dataset and baselines
+# through the following attributes:
+
+# %%
+out.original, out.corrected, out.baseline
+
+
+# %% [markdown]
 # <div class='alert alert-info'>
 #     <b>Exercises</b>
 #

@@ -6,6 +6,8 @@
 
 #### NEW FEATURES
 
+* add `BaselineCorrector()` widget
+
 * `read_srs()` now allows extracting background interferogram or spectrum
 
 * add `download_nist_ir()` to download IR spectra from NIST/webbook
@@ -14,7 +16,7 @@
 
 #### BUGS FIXED
 
-* fix bug in read_srs 
+* fix bug in `read_srs()` 
 
 * fix gettingstarted/overview.py after IRIS refactoring
 
