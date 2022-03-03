@@ -1,7 +1,6 @@
 import ipywidgets as widgets
 import numpy as np
-from IPython.display import display, clear_output
-import matplotlib.pyplot as plt
+from IPython.display import display
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.processors.concatenate import concatenate, stack
@@ -185,35 +184,28 @@ class BaselineCorrector:
         slice_x = _str_to_slice(self._x_limits_control.value, self._X)
         slice_y = _str_to_slice(self._y_limits_control.value, self._X)
         self.original = self._X[slice_y, slice_x]
-        blc = BaselineCorrection(self.original)
-        self.corrected = blc.compute(
-            *eval(self._ranges_control.value),
-            interpolation=self._interpolationselector.value,
-            order=self._orderslider.value,
-            method=self._methodselector.value,
-            npc=self._npcslider.value,
-        )
-        self.baseline = self.original - self.corrected
 
-        with self._output:
-            if clear:
-                self._output.clear_output(True)
+        if self.original is not None:  # slicing was OK
+            blc = BaselineCorrection(self.original)
+            self.corrected = blc.compute(*eval(self._ranges_control.value),
+                    interpolation=self._interpolationselector.value,
+                    order=self._orderslider.value, method=self._methodselector.value,
+                    npc=self._npcslider.value, )
+            self.baseline = self.original - self.corrected
 
-            axes = multiplot(
-                [concatenate(self.original, self.baseline, dims="y"), self.corrected],
-                labels=["Original", "Corrected"],
-                sharex=True,
-                nrow=2,
-                ncol=1,
-                fig=self._fig,
-                figsize=(7, 6),
-                dpi=96,
-            )
-            axes["axe11"].get_xaxis().set_visible(False)
-            blc.show_regions(axes["axe21"])
-            self._fig = axes['axe11'].figure
+            with self._output :
+                if clear :
+                    self._output.clear_output(True)
 
-        self._done = True
+                axes = multiplot([concatenate(self.original, self.baseline, dims="y"),
+                                  self.corrected], labels=["Original", "Corrected"],
+                        sharex=True, nrow=2, ncol=1, fig=self._fig, figsize=(7, 6),
+                        dpi=96, )
+                axes["axe11"].get_xaxis().set_visible(False)
+                blc.show_regions(axes["axe21"])
+                self._fig = axes['axe11'].figure
+
+            self._done = True
 
     def process_clicked(self, b=None):
         """(re)process dataset (slicing) and baseline correct"""
@@ -258,8 +250,12 @@ class BaselineCorrector:
             # with new parameters
             self.blcorrect_and_plot(clear=True)
 
-    def save_clicked(self, b):
-        self.corrected.write()
+    def save_clicked(self, b=None):
+        try:
+            self.corrected.write()
+        except AttributeError:
+            # the user has cancelled
+            pass
 
 
 # Utility functions
