@@ -199,8 +199,7 @@ class BaselineCorrector:
             with self._output:
                 if clear:
                     self._output.clear_output(True)
-                    print("cleared")
-                print("first process")
+
                 axes = multiplot(
                     [
                         concatenate(self.original, self.baseline, dims="y"),
@@ -216,7 +215,7 @@ class BaselineCorrector:
                 )
                 axes["axe11"].get_xaxis().set_visible(False)
                 blc.show_regions(axes["axe21"])
-                self._fig = axes["axe11"].figure
+                self._fig = axes["axe21"].figure
 
             self._done = True
 
