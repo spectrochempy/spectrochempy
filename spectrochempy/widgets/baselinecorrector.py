@@ -191,6 +191,19 @@ class BaselineCorrector:
         self.original = self._X[slice_y, slice_x]
         ranges = eval(self._ranges_control.value.strip())
         if self.original is not None:  # slicing was OK
+
+            # check that no range is outside coordinates
+            new_ranges = _update_ranges(
+                self._ranges_control.value, self.original.x.data
+            )
+            if new_ranges != self._ranges_control.value:
+                self._ranges_control.value = (
+                    str(new_ranges)
+                    .replace("(", "(\n")
+                    .replace("], ", "],\n")
+                    .replace(")", "\n)")
+                )
+
             blc = BaselineCorrection(self.original)
             self.corrected = blc.compute(
                 *ranges,
@@ -317,3 +330,26 @@ def _round_ranges(ranges, decimals=2):
             for j, sub_item in enumerate(item):
                 ranges[i][j] = round(sub_item, decimals)
     return ranges
+
+
+def _update_ranges(ranges, coord, decimals=2):
+    """return valid ranges
+
+    Ranges outside the coord limits (if any), are replaced
+    by the min or max the coords. Ranges with the limits or including
+    the limits are unchanged.
+    returns:
+    --------
+     list of ranges"""
+
+    for i, item in enumerate(ranges):
+        if isinstance(item, float):
+            if item < min(coord):
+                ranges[i] = round(min(coord), decimals)
+            elif item > max(coord):
+                ranges[i] = round(max(coord), decimals)
+        else:
+            if max(item) < min(coord):
+                ranges[i] = round(min(coord), decimals)
+            if min(item) > max(coord):
+                ranges[i] = round(min(coord), decimals)
