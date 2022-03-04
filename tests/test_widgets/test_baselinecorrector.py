@@ -8,8 +8,7 @@ def test_baselinecorrector():
     assert out._fig is None, "No plot"
     assert not hasattr(out, "original")
     assert out.corrected.is_empty
-    # check uploader (see https://github.com/jupyter-widgets/ipywidgets/blob/master
-    # /python/ipywidgets/ipywidgets/widgets/tests/test_widget_upload.py)
+    # check uploader
     datadir = scp.preferences.datadir
     with open(datadir / "irdata/nh4y-activation.spg", "rb") as fil:
         content = fil.read()
