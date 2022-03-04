@@ -1,5 +1,5 @@
 import ipywidgets as widgets
-import numpy as np
+
 from IPython.display import display
 
 from spectrochempy.core.dataset.nddataset import NDDataset
@@ -174,15 +174,15 @@ class BaselineCorrector:
         display(self._input)
 
         if self._X is not None:
-            self.process_clicked("dummy")
+            self.process_clicked()
         else:
             self.corrected = NDDataset()
 
         self.output = self._output
 
-    def blcorrect_and_plot(self, clear=True):
-        slice_x = _str_to_slice(self._x_limits_control.value, self._X)
-        slice_y = _str_to_slice(self._y_limits_control.value, self._X)
+    def blcorrect_and_plot(self, clear=False):
+        slice_x = _str_to_slice(self._x_limits_control.value, self._X, "x")
+        slice_y = _str_to_slice(self._y_limits_control.value, self._X, "y")
         self.original = self._X[slice_y, slice_x]
 
         if self.original is not None:  # slicing was OK
@@ -199,7 +199,6 @@ class BaselineCorrector:
             with self._output:
                 if clear:
                     self._output.clear_output(True)
-
                 axes = multiplot(
                     [
                         concatenate(self.original, self.baseline, dims="y"),
@@ -252,7 +251,9 @@ class BaselineCorrector:
                 .replace("], ", "],\n")
                 .replace(")", "\n)")
             )
-            self._x_limits_control.value = _x_slice_to_str(slice(0, -1, 1), self._X)
+            self._x_limits_control.value = _x_slice_to_str(
+                slice(0, len(self._X.x), 1), self._X
+            )
             self._y_limits_control.value = _y_slice_to_str(slice(0, len(self._X.y), 1))
             # ... and baseline correct with defaults
             self.blcorrect_and_plot(self._X)
@@ -274,25 +275,22 @@ class BaselineCorrector:
 
 
 def _x_slice_to_str(s, A, decimals=2):
-    return f"[{round(A.x.data[s.start], decimals)} : {round(A.x.data[s.stop], decimals)} : {s.step}]"
+    return (
+        f"[{round(A.x.data[s.start], decimals)} : "
+        f"{round(A.x.data[s.stop-1], decimals)} : {s.step}]"
+    )
 
 
 def _y_slice_to_str(s):
     return f"[{s.start} : {s.stop} : {s.step}]"
 
 
-def _str_to_slice(st, A):
+def _str_to_slice(st, A, dim):
     start, stop, step = st.replace("[", " ").replace("]", " ").replace(":", " ").split()
-    if "." in start:
-        start = np.argmin(np.abs(A.x.data - float(start)))
-    else:
-        start = int(start)
-    if "." in stop:
-        stop = np.argmin(np.abs(A.x.data - float(stop)))
-    else:
-        stop = int(stop)
+    start = int(start) if "." not in start else float(start)
+    stop = int(stop) if "." not in stop else float(stop)
     step = int(step)
-    return slice(start, stop, step)
+    return A._get_slice(slice(start, stop, step), dim)
 
 
 def _round_ranges(ranges, decimals=2):
