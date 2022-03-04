@@ -3,10 +3,12 @@ import ipywidgets as widgets
 from IPython.display import display
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.processors.concatenate import concatenate, stack
+from spectrochempy.core.processors.concatenate import concatenate
 from spectrochempy.core.processors.baseline import BaselineCorrection
 from spectrochempy.core.readers.importer import read
 from spectrochempy.core.plotters.multiplot import multiplot
+from spectrochempy.core import error_
+
 
 __all__ = ["BaselineCorrector"]
 
@@ -184,14 +186,14 @@ class BaselineCorrector:
             self.corrected = NDDataset()
 
     def blcorrect_and_plot(self, clear=False):
-        slice_x = _str_to_slice(self._x_limits_control.value, self._X, "x")
-        slice_y = _str_to_slice(self._y_limits_control.value, self._X, "y")
+        slice_x = _str_to_slice(self._x_limits_control.value.strip(), self._X, "x")
+        slice_y = _str_to_slice(self._y_limits_control.value.strip(), self._X, "y")
         self.original = self._X[slice_y, slice_x]
-
+        ranges = eval(self._ranges_control.value.strip())
         if self.original is not None:  # slicing was OK
             blc = BaselineCorrection(self.original)
             self.corrected = blc.compute(
-                *eval(self._ranges_control.value),
+                *ranges,
                 interpolation=self._interpolationselector.value,
                 order=self._orderslider.value,
                 method=self._methodselector.value,
@@ -226,18 +228,15 @@ class BaselineCorrector:
         """(re)process dataset (slicing) and baseline correct"""
         if self._X is None:
             # no dataset loaded, read data (byte content)
-            ds = []
-            for key in self._uploader.value.keys():
-                ds.append(read({key: self._uploader.value[key]["content"]}))
-            self._ds = ds
-            if len(ds) == 1:
-                self._X = ds[0]
+            value = self._uploader.value
+            dicvalue = {key: value[key]["content"] for key in value.keys()}
+            ds = read(dicvalue)
+            if isinstance(ds, NDDataset):
+                self._X = ds
             else:
-                self._X = stack(*ds)
-
-            if not isinstance(self._X, NDDataset):
                 with self._output:
-                    print("Could not read uploaded files")
+                    error_("Could not read or merge uploaded files")
+                return
 
         if not self._done:
             # first processing,
@@ -303,7 +302,8 @@ def _str_to_slice(st, A, dim):
 def _round_ranges(ranges, decimals=2):
     """round x values for better reading"""
     for i, item in enumerate(ranges):
-        if isinstance(item, float):
+        if isinstance(item, float):  # pragma: cover
+            # can not be reached in the current implementation of baselinecorrector
             ranges[i] = round(item, decimals)
         else:
             for j, sub_item in enumerate(item):
