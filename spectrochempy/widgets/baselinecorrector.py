@@ -194,7 +194,7 @@ class BaselineCorrector:
 
             # check that no range is outside coordinates
             new_ranges = _update_ranges(
-                self._ranges_control.value, self.original.x.data
+                eval(self._ranges_control.value), self.original.x.data
             )
             if new_ranges != self._ranges_control.value:
                 self._ranges_control.value = (
