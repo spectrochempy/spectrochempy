@@ -197,8 +197,8 @@ class BaselineCorrector:
             self.baseline = self.original - self.corrected
 
             with self._output:
-                if clear:
-                    self._output.clear_output(True)
+                # if clear:
+                #     self._output.clear_output(True)
                 axes = multiplot(
                     [
                         concatenate(self.original, self.baseline, dims="y"),
