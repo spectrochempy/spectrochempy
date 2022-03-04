@@ -214,7 +214,7 @@ class BaselineCorrector:
                 )
                 axes["axe11"].get_xaxis().set_visible(False)
                 blc.show_regions(axes["axe21"])
-                self._fig = axes["axe11"].figure
+                self._fig = axes["axe21"].figure
 
             self._done = True
 
