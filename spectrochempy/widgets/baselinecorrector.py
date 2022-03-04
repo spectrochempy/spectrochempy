@@ -199,7 +199,8 @@ class BaselineCorrector:
             with self._output:
                 if clear:
                     self._output.clear_output(True)
-
+                    print("cleared")
+                print("first process")
                 axes = multiplot(
                     [
                         concatenate(self.original, self.baseline, dims="y"),
