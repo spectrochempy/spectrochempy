@@ -187,23 +187,35 @@ class BaselineCorrector:
 
         if self.original is not None:  # slicing was OK
             blc = BaselineCorrection(self.original)
-            self.corrected = blc.compute(*eval(self._ranges_control.value),
-                    interpolation=self._interpolationselector.value,
-                    order=self._orderslider.value, method=self._methodselector.value,
-                    npc=self._npcslider.value, )
+            self.corrected = blc.compute(
+                *eval(self._ranges_control.value),
+                interpolation=self._interpolationselector.value,
+                order=self._orderslider.value,
+                method=self._methodselector.value,
+                npc=self._npcslider.value,
+            )
             self.baseline = self.original - self.corrected
 
-            with self._output :
-                if clear :
+            with self._output:
+                if clear:
                     self._output.clear_output(True)
 
-                axes = multiplot([concatenate(self.original, self.baseline, dims="y"),
-                                  self.corrected], labels=["Original", "Corrected"],
-                        sharex=True, nrow=2, ncol=1, fig=self._fig, figsize=(7, 6),
-                        dpi=96, )
+                axes = multiplot(
+                    [
+                        concatenate(self.original, self.baseline, dims="y"),
+                        self.corrected,
+                    ],
+                    labels=["Original", "Corrected"],
+                    sharex=True,
+                    nrow=2,
+                    ncol=1,
+                    fig=self._fig,
+                    figsize=(7, 6),
+                    dpi=96,
+                )
                 axes["axe11"].get_xaxis().set_visible(False)
                 blc.show_regions(axes["axe21"])
-                self._fig = axes['axe11'].figure
+                self._fig = axes["axe11"].figure
 
             self._done = True
 
