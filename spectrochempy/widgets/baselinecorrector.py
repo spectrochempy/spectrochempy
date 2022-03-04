@@ -56,12 +56,12 @@ class BaselineCorrector:
         - `save as`: save the baseline corrected NDDataset
 
     - The `x slice` and `y slice` textboxes can be used to slice the initial
-      dataset with the usual `[start:stop:stride]`
+      dataset with the usual `[start:stop:step]`
       format. In the `x` dimension, coordinates or indexes can be used
       (e.g. `[3000.0:2000.0:1]` or `[0:100:1]` are valid
       entries). In the `y` dimension only indexes can be used (e.g. `[0:10:1]`).
       Note also that currently none of the
-      `start`, `stop`, `stride` parameters can be omitted, e.g. `[3000.0:2000.0]`
+      `start`, `stop`, `step` parameters can be omitted, e.g. `[3000.0:2000.0]`
       or `[:,:]` are not valid entries.
     - Method and Interpolation are self explaining, see BaselineCorrection() for
       details.
@@ -193,10 +193,10 @@ class BaselineCorrector:
         if self.original is not None:  # slicing was OK
 
             # check that no range is outside coordinates
-            new_ranges = _update_ranges(
+            new_ranges, changed = _update_ranges(
                 eval(self._ranges_control.value), self.original.x.data
             )
-            if new_ranges != eval(self._ranges_control.value):
+            if changed:
                 self._ranges_control.value = (
                     str(new_ranges)
                     .replace("(", "(\n")
@@ -340,16 +340,25 @@ def _update_ranges(ranges, coord, decimals=2):
     the limits are unchanged.
     returns:
     --------
-     list of ranges"""
+     list of ranges
+     Bool True if changed
+    """
 
     for i, item in enumerate(ranges):
+        ranges = list(ranges)
+        changed = False
         if isinstance(item, float):
             if item < min(coord):
                 ranges[i] = round(min(coord), decimals)
+                changed = True
             elif item > max(coord):
                 ranges[i] = round(max(coord), decimals)
+                changed = True
         else:
             if max(item) < min(coord):
                 ranges[i] = round(min(coord), decimals)
+                changed = True
             if min(item) > max(coord):
-                ranges[i] = round(min(coord), decimals)
+                ranges[i] = round(max(coord), decimals)
+                changed = True
+    return tuple(ranges), changed
