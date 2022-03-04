@@ -6,10 +6,11 @@ def test_baselinecorrector():
 
     X = scp.read_omnic("irdata/nh4y-activation.spg")
     X = X[0:10, 0:100]
-
-    out = scp.BaselineCorrector(X)
-
-    # no selection possible if we are not in a notebook
+    initial_ranges = (
+        [5900.0, 5400.0],
+        [4000.0, 4500.0],
+    )
+    out = scp.BaselineCorrector(X, initial_ranges=initial_ranges)
     assert out.corrected.shape == (10, 100)
     assert len(out._fig.axes[0].lines) == 20, "original + baselines"
     assert len(out._fig.axes[1].lines) == 10, "corrected"
@@ -21,6 +22,7 @@ def test_baselinecorrector():
     assert out.corrected.shape == (10, 100)
     assert len(out._fig.axes[0].lines) == 20, "original + baselines"
     assert len(out._fig.axes[1].lines) == 10, "corrected"
+    assert np.all(out._fig.axes[1].lines[0].get_xdata() == X.x.data)
 
     # try multivariate
     out._methodselector.value = "multivariate"
