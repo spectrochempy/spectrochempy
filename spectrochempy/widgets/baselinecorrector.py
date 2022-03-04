@@ -196,7 +196,7 @@ class BaselineCorrector:
             new_ranges = _update_ranges(
                 eval(self._ranges_control.value), self.original.x.data
             )
-            if new_ranges != self._ranges_control.value:
+            if new_ranges != eval(self._ranges_control.value):
                 self._ranges_control.value = (
                     str(new_ranges)
                     .replace("(", "(\n")
