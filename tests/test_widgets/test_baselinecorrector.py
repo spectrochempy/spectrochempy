@@ -1,5 +1,6 @@
 import spectrochempy as scp
 import numpy as np
+import pytest
 
 
 def test_baselinecorrector():
@@ -45,9 +46,18 @@ def test_baselinecorrector():
     assert len(out._fig.axes[1].lines) == 10, "corrected"
     assert np.all(out._fig.axes[1].lines[0].get_xdata() == _X.x.data)
 
+    # sequential
+    assert out._methodselector in out._method_control.children
+    assert out._npcslider not in out._method_control.children
+
+    out._interpolationselector.value = "pchip"
+    out.process_clicked()
+
     # try higher polyorder
     out._orderslider.value = 3
+    out._interpolationselector.value = "polynomial"
     out.process_clicked()
+
     assert out.corrected.shape == (10, 100)
     assert len(out._fig.axes[0].lines) == 20, "original + baselines"
     assert len(out._fig.axes[1].lines) == 10, "corrected"
@@ -55,10 +65,18 @@ def test_baselinecorrector():
 
     # try multivariate
     out._methodselector.value = "multivariate"
+    assert out._methodselector in out._method_control.children
+    assert out._npcslider in out._method_control.children
 
     # try multivariate, with 2 pcs
     out._npcslider.value = 2
+    out.process_clicked()
 
+    out._methodselector.value = "sequential"
+    assert out._methodselector in out._method_control.children
+    assert out._npcslider not in out._method_control.children
+
+    # #####
     out = scp.BaselineCorrector(X)
     out._x_limits_control.value = "[5000.56 : 649.9 : 1]"
     out._y_limits_control.value = "[0:55:2]"
@@ -99,3 +117,6 @@ def test_baselinecorrector():
     assert np.all(
         out._fig.axes[1].lines[0].get_xdata() == out2._fig.axes[1].lines[0].get_xdata()
     )
+
+    with pytest.raises(ValueError):
+        scp.BaselineCorrector(X.x)
