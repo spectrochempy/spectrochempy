@@ -1,9 +1,21 @@
 import spectrochempy as scp
+import spectrochempy
+
 import numpy as np
 import pytest
 
 
-def test_baselinecorrector():
+def dialog_cancel(*args, **kwargs):
+    # mock a dialog cancel action
+    return None
+
+
+def dialog_save(*args, **kwargs):
+    # mock a dialog to save
+    return "spec.scp"
+
+
+def test_baselinecorrector(monkeypatch):
 
     out = scp.BaselineCorrector()
     assert out._fig is None, "No plot"
@@ -120,3 +132,18 @@ def test_baselinecorrector():
 
     with pytest.raises(ValueError):
         scp.BaselineCorrector(X.x)
+
+    # save
+    # write without parameters and dialog cancel
+    monkeypatch.setenv(
+        "KEEP_DIALOGS", "True"
+    )  # we ask to display dialogs as we will mock them.
+
+    monkeypatch.setattr(spectrochempy.core, "save_dialog", dialog_cancel)
+    out2.save_clicked()
+
+    monkeypatch.setattr(spectrochempy.core, "save_dialog", dialog_save)
+    out2.save_clicked()
+    filename = scp.pathclean("spec.scp")
+    assert filename.exists()
+    filename.unlink()
