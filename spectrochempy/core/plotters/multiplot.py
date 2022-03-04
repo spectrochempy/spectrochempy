@@ -236,6 +236,8 @@ def multiplot(
     fig = kwargs.pop("fig", None)
     if fig is None:
         fig = plt.figure(figsize=figsize, dpi=dpi)
+    else:
+        fig.clf()
 
     fig.rcParams = plt.rcParams.copy()  # save params used for this figure
 
