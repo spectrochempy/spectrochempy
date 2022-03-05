@@ -316,7 +316,7 @@ def _str_to_slice(strg, dataset, dim):
         step = _str_to_num(match.group(3))
         return dataset._get_slice(slice(start, stop, step), dim)
     else:
-        ValueError(f"Something is wrong in the slice definition: {strg}.")
+        raise ValueError(f"Something is wrong in the slice definition: {strg}.")
 
 
 def _round_ranges(ranges, decimals=2):
