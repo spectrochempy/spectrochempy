@@ -58,12 +58,9 @@ class BaselineCorrector:
 
     - The `x slice` and `y slice` textboxes can be used to slice the initial
       dataset with the usual `[start:stop:step]`
-      format. In the `x` dimension, coordinates or indexes can be used
+      format. Coordinates or indexes can be used
       (e.g. `[3000.0:2000.0:1]` or `[0:100:1]` are valid
-      entries). In the `y` dimension only indexes can be used (e.g. `[0:10:1]`).
-      Note also that currently none of the
-      `start`, `stop`, `step` parameters can be omitted, e.g. `[3000.0:2000.0]`
-      or `[:,:]` are not valid entries.
+      entries).
     - Method and Interpolation are self explaining, see BaselineCorrection() for
       details.
     - Ranges should be entered as a tuple of intervals or wavenumbers, e.g.
