@@ -199,8 +199,6 @@ class BaselineCorrector:
         else:
             self.corrected = NDDataset()
 
-        self._uploader.observe(load_data, names="value")
-
     def blcorrect_and_plot(self, clear=False):
         slice_x = _str_to_slice(self._x_limits_control.value.strip(), self._X, "x")
         slice_y = _str_to_slice(self._y_limits_control.value.strip(), self._X, "y")
