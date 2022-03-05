@@ -105,6 +105,22 @@ class BaselineCorrector:
             disabled=disabled,
         )
 
+        def load_data(change):
+            # no dataset loaded, read data (byte content)
+            value = self._uploader.value
+            dicvalue = {key: value[key]["content"] for key in value.keys()}
+            ds = read(dicvalue)
+            if isinstance(ds, NDDataset):
+                self._X = ds
+                self.process_clicked()
+
+            else:
+                with self._output:
+                    error_("Could not read or merge uploaded files")
+                return
+
+        self._uploader.observe(load_data, names="value")
+
         self._processbutton = widgets.Button(description="process", icon="fa-play")
         self._processbutton.on_click(self.process_clicked)
 
@@ -240,17 +256,6 @@ class BaselineCorrector:
 
     def process_clicked(self, b=None):
         """(re)process dataset (slicing) and baseline correct"""
-        if self._X is None:
-            # no dataset loaded, read data (byte content)
-            value = self._uploader.value
-            dicvalue = {key: value[key]["content"] for key in value.keys()}
-            ds = read(dicvalue)
-            if isinstance(ds, NDDataset):
-                self._X = ds
-            else:
-                with self._output:
-                    error_("Could not read or merge uploaded files")
-                return
 
         if not self._done:
             # first processing,
