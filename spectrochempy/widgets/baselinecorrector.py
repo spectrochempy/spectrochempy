@@ -197,8 +197,9 @@ class BaselineCorrector:
                 eval(self._ranges_control.value), self.original.x.data
             )
             if changed:
+                ranges = _round_ranges(new_ranges)
                 self._ranges_control.value = (
-                    str(new_ranges)
+                    str(ranges)
                     .replace("(", "(\n")
                     .replace("], ", "],\n")
                     .replace(")", "\n)")
@@ -343,22 +344,26 @@ def _update_ranges(ranges, coord, decimals=2):
      list of ranges
      Bool True if changed
     """
-
+    ranges = list(ranges)
+    changed = False
+    # sort coord id needed
+    if coord[-1] < coord[0]:
+        coord = coord[::-1]
     for i, item in enumerate(ranges):
-        ranges = list(ranges)
-        changed = False
+        # if out of range, makes it within coord limits"
+
         if isinstance(item, float):
-            if item < min(coord):
-                ranges[i] = round(min(coord), decimals)
+            if item < coord[0]:
+                ranges[i] = coord[1]
                 changed = True
-            elif item > max(coord):
-                ranges[i] = round(max(coord), decimals)
+            elif item > coord[-1]:
+                ranges[i] = coord[-2]
                 changed = True
         else:
-            if max(item) < min(coord):
-                ranges[i] = round(min(coord), decimals)
+            if max(item) < coord[0]:
+                ranges[i] = [coord[0], coord[1]]
                 changed = True
-            if min(item) > max(coord):
-                ranges[i] = round(max(coord), decimals)
+            if min(item) > coord[-1]:
+                ranges[i] = [coord[-2], coord[-1]]
                 changed = True
     return tuple(ranges), changed
