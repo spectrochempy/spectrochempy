@@ -270,12 +270,7 @@ class BaselineCorrector:
             self.blcorrect_and_plot(clear=True)
 
     def save_clicked(self, b=None):
-        try:
-            filename = self.corrected.write()
-        except AttributeError:
-            # the user has cancelled
-            filename = None
-        return filename
+        return self.corrected.write()
 
 
 # Utility functions
