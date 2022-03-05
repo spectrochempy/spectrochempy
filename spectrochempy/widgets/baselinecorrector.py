@@ -82,14 +82,13 @@ class BaselineCorrector:
            out = scp.BaselineCorrector(X)
     """
 
-    def __init__(self, X=None, initial_ranges=None):
+    def __init__(self, X=None):
 
         if not isinstance(X, (NDDataset, type(None))):
             raise ValueError("X must be None or a valid NDDataset")
 
         self._X = X
         self._fig = None
-        self._initial_ranges = initial_ranges
         self._done = False
 
         self._output = widgets.Output()
@@ -113,7 +112,6 @@ class BaselineCorrector:
             if isinstance(ds, NDDataset):
                 self._X = ds
                 self.process_clicked()
-
             else:
                 with self._output:
                     error_("Could not read or merge uploaded files")
@@ -198,8 +196,8 @@ class BaselineCorrector:
 
         if self._X is not None:
             self.process_clicked()
-        else:
-            self.corrected = NDDataset()
+
+        self._uploader.observe(load_data, names="value")
 
     def blcorrect_and_plot(self, clear=False):
         slice_x = _str_to_slice(self._x_limits_control.value.strip(), self._X, "x")
@@ -232,8 +230,8 @@ class BaselineCorrector:
             self.baseline = self.original - self.corrected
 
             with self._output:
-                # if clear:
-                #     self._output.clear_output(True)
+                if clear:
+                    self._output.clear_output(True)
                 axes = multiplot(
                     [
                         concatenate(self.original, self.baseline, dims="y"),
@@ -261,15 +259,12 @@ class BaselineCorrector:
             # first processing,
             # defines default ranges (10% of the X axis at both ends)...
             len_ = int(len(self._X.x) / 10)
-            if self._initial_ranges:
-                ranges = self._initial_ranges
-            else:
-                ranges = _round_ranges(
-                    (
-                        [self._X.x.data[0], self._X.x.data[len_]],
-                        [self._X.x.data[-len_], self._X.x.data[-1]],
-                    )
+            ranges = _round_ranges(
+                (
+                    [self._X.x.data[0], self._X.x.data[len_]],
+                    [self._X.x.data[-len_], self._X.x.data[-1]],
                 )
+            )
             self._ranges_control.value = (
                 str(ranges)
                 .replace("(", "(\n")
