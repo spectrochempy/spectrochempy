@@ -292,7 +292,7 @@ def compare_coords(this, other, approx=False, decimal=6, data_only=False):
                             f"equal",
                         )
 
-                elif attr == "offset" and approx:
+                elif attr in ["offset", "increment"] and approx:
                     assert_approx_equal(
                         sattr,
                         oattr,

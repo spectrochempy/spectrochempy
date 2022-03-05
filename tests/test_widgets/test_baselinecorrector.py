@@ -126,7 +126,7 @@ def test_baselinecorrector_slicing(X):
 
     out._x_limits_control.value = "::100"  # y location
     out.process_clicked()
-    assert out.corrected.shape == (5, 5549)
+    assert out.corrected.shape == (5, 56)
 
 
 def test_baselinecorrector_not_a_NDDataset(X):
