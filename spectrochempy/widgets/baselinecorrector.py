@@ -1,14 +1,14 @@
-import ipywidgets as widgets
+import re
 
+import ipywidgets as widgets
 from IPython.display import display
 
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.processors.concatenate import concatenate
-from spectrochempy.core.processors.baseline import BaselineCorrection
-from spectrochempy.core.readers.importer import read
-from spectrochempy.core.plotters.multiplot import multiplot
 from spectrochempy.core import error_
-
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.plotters.multiplot import multiplot
+from spectrochempy.core.processors.baseline import BaselineCorrection
+from spectrochempy.core.processors.concatenate import concatenate
+from spectrochempy.core.readers.importer import read
 
 __all__ = ["BaselineCorrector"]
 
@@ -271,32 +271,43 @@ class BaselineCorrector:
 
     def save_clicked(self, b=None):
         try:
-            self.corrected.write()
+            filename = self.corrected.write()
         except AttributeError:
             # the user has cancelled
-            pass
+            filename = None
+        return filename
 
 
 # Utility functions
 
 
-def _x_slice_to_str(s, A, decimals=2):
+def _x_slice_to_str(slice, dataset, decimals=2):
     return (
-        f"[{round(A.x.data[s.start], decimals)} : "
-        f"{round(A.x.data[s.stop-1], decimals)} : {s.step}]"
+        f"[{round(dataset.x.data[slice.start], decimals)} : "
+        f"{round(dataset.x.data[slice.stop - 1], decimals)} : {slice.step}]"
     )
 
 
-def _y_slice_to_str(s):
-    return f"[{s.start} : {s.stop} : {s.step}]"
+def _y_slice_to_str(slice):
+    return f"[{slice.start} : {slice.stop} : {slice.step}]"
 
 
-def _str_to_slice(st, A, dim):
-    start, stop, step = st.replace("[", " ").replace("]", " ").replace(":", " ").split()
-    start = int(start) if "." not in start else float(start)
-    stop = int(stop) if "." not in stop else float(stop)
-    step = int(step)
-    return A._get_slice(slice(start, stop, step), dim)
+def _str_to_num(strg):
+    num = None
+    if strg:
+        num = int(strg) if "." not in strg else float(strg)
+    return num
+
+
+def _str_to_slice(strg, dataset, dim):
+    regex = r"^\[?(\d*\.?\d*)\:?(\d*\.?\d*)\:?(-?\d*)\]?$"
+    strg = strg.replace(" ", "")
+    match = re.search(regex, strg)
+    if match:
+        start = _str_to_num(match.group(1))
+        stop = _str_to_num(match.group(2))
+        step = _str_to_num(match.group(3))
+    return dataset._get_slice(slice(start, stop, step), dim)
 
 
 def _round_ranges(ranges, decimals=2):
