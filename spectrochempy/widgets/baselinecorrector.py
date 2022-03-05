@@ -251,8 +251,7 @@ class BaselineCorrector:
         if isinstance(ds, NDDataset):
             self._X = ds
         else:
-            with self._output:
-                raise IOError("Could not read or merge uploaded files")
+            raise IOError("Could not read or merge uploaded files")
 
     def process_clicked(self, b=None):
         """(re)process dataset (slicing) and baseline correct"""

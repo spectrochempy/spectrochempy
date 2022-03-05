@@ -54,7 +54,7 @@ def test_baselinecorrector_uploader():
     out = scp.BaselineCorrector()
     CONTENT3 = CONTENT
     CONTENT3.update(CONTENT2)
-    with pytest.raises(OSError):
+    with pytest.raises(IOError):
         out._uploader.set_trait("value", CONTENT3)
 
 
