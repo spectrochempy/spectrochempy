@@ -196,6 +196,8 @@ class BaselineCorrector:
 
         if self._X is not None:
             self.process_clicked()
+        else:
+            self.corrected = NDDataset()
 
         self._uploader.observe(load_data, names="value")
 
