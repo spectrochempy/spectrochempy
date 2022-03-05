@@ -10,9 +10,7 @@ from spectrochempy.core.processors.concatenate import concatenate
 from spectrochempy.core.readers.importer import read
 
 
-from spectrochempy.core import set_loglevel, debug_, DEBUG
-
-set_loglevel(DEBUG)
+from spectrochempy.core import warning_
 
 
 __all__ = ["BaselineCorrector"]
@@ -106,7 +104,7 @@ class BaselineCorrector:
             disabled=disabled,
         )
 
-        # self._uploader.observe(self.process_clicked, names="value")
+        self._uploader.observe(self.process_clicked, names="value")
 
         self._processbutton = widgets.Button(description="process", icon="play")
         self._processbutton.on_click(self.process_clicked)
@@ -184,6 +182,9 @@ class BaselineCorrector:
         self._output = widgets.Output()
         display(self._input)
 
+        # if self._X is None:             # THIS WORK in jupyter lab
+        #    self._X = read()
+
         if self._X is not None:
             self.process_clicked()
         else:
@@ -220,11 +221,8 @@ class BaselineCorrector:
             self.baseline = self.original - self.corrected
 
             with self._output:
-                # debug_('clear', clear)
                 if clear:
-                    debug_("clear_output")
                     self._output.clear_output(True)
-                debug_("multiplot")
                 axes = multiplot(
                     [
                         concatenate(self.original, self.baseline, dims="y"),
@@ -248,7 +246,6 @@ class BaselineCorrector:
     def _load_data(self):
         # no dataset loaded, read data (byte content)
         value = self._uploader.value
-        debug_("load_data", list(value.keys()))
         dicvalue = {key: value[key]["content"] for key in value.keys()}
         ds = read(dicvalue)
         if isinstance(ds, NDDataset):
@@ -262,16 +259,14 @@ class BaselineCorrector:
 
         if self._X is None:
             if self._uploader.value:
-                debug_("load_data...")
                 self._load_data()
 
         if self._X is None:
             with self._output:
-                debug_("process canceled because X is None")
+                warning_("process canceled because X is None")
                 return
 
         if not self._done:
-            debug_("first processing")
             # first processing,
             # defines default ranges (10% of the X axis at both ends)...
             len_ = int(len(self._X.x) / 10)
@@ -300,7 +295,6 @@ class BaselineCorrector:
         else:
             # was processed once, the user probably asks re-processing
             # with new parameters
-            debug_("reprocess")
             self.blcorrect_and_plot(clear=True)
 
     def save_clicked(self, b=None):
@@ -308,8 +302,6 @@ class BaselineCorrector:
 
 
 # Utility functions
-
-
 def _x_slice_to_str(slice, dataset, decimals=2):
     return (
         f"[{round(dataset.x.data[slice.start], decimals)} : "

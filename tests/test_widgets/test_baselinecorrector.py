@@ -25,7 +25,7 @@ def test_baselinecorrector_uploader_single():
         content = fil.read()
     CONTENT = {"nh4y-activation.spg": {"content": memoryview(content)}}
     out._uploader.set_trait("value", CONTENT)
-    out.process_clicked()
+    # out.process_clicked()
     # process is triggered properly
     assert out.original.name == "nh4y-activation"
     assert out.original.shape == (55, 5549)
@@ -54,8 +54,8 @@ def test_baselinecorrector_uploader():
     out = scp.BaselineCorrector()
     CONTENT3 = CONTENT
     CONTENT3.update(CONTENT2)
-    out._uploader.set_trait("value", CONTENT3)
-    assert not hasattr(out, "original")
+    with pytest.raises(OSError):
+        out._uploader.set_trait("value", CONTENT3)
 
 
 def test_baselinecorrector_slicing(X):
