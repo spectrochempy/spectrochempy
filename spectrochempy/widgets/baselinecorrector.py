@@ -302,7 +302,9 @@ def _str_to_slice(strg, dataset, dim):
         start = _str_to_num(match.group(1))
         stop = _str_to_num(match.group(2))
         step = _str_to_num(match.group(3))
-    return dataset._get_slice(slice(start, stop, step), dim)
+        return dataset._get_slice(slice(start, stop, step), dim)
+    else:
+        ValueError(f"Something is wrong in the slice definition: {strg}.")
 
 
 def _round_ranges(ranges, decimals=2):
