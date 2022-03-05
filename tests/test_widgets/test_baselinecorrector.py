@@ -12,7 +12,7 @@ def X():
     return X
 
 
-def test_baselinecorrector_uploader():
+def test_baselinecorrector_uploader_single():
     # check uploader
 
     # single file
@@ -26,8 +26,18 @@ def test_baselinecorrector_uploader():
     CONTENT = {"nh4y-activation.spg": {"content": memoryview(content)}}
     out._uploader.set_trait("value", CONTENT)
     out.process_clicked()
+    # process is triggered properly
     assert out.original.name == "nh4y-activation"
     assert out.original.shape == (55, 5549)
+
+
+def test_baselinecorrector_uploader():
+    # check uploader
+
+    datadir = scp.preferences.datadir
+    with open(datadir / "irdata/nh4y-activation.spg", "rb") as fil:
+        content = fil.read()
+    CONTENT = {"nh4y-activation.spg": {"content": memoryview(content)}}
 
     # multiple files that can be merged
     out = scp.BaselineCorrector()
@@ -37,7 +47,6 @@ def test_baselinecorrector_uploader():
             content = fil.read()
             CONTENT2.update({f"test.000{i}": {"content": memoryview(content)}})
     out._uploader.set_trait("value", CONTENT2)
-    out.process_clicked()
     assert out.original.name == "test.0003"
     assert out.original.shape == (4, 2567)
 
@@ -46,7 +55,6 @@ def test_baselinecorrector_uploader():
     CONTENT3 = CONTENT
     CONTENT3.update(CONTENT2)
     out._uploader.set_trait("value", CONTENT3)
-    out.process_clicked()
     assert not hasattr(out, "original")
 
 

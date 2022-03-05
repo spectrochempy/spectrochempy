@@ -3,12 +3,17 @@ import re
 import ipywidgets as widgets
 from IPython.display import display
 
-from spectrochempy.core import error_
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.plotters.multiplot import multiplot
 from spectrochempy.core.processors.baseline import BaselineCorrection
 from spectrochempy.core.processors.concatenate import concatenate
 from spectrochempy.core.readers.importer import read
+
+
+from spectrochempy.core import set_loglevel, debug_, DEBUG
+
+set_loglevel(DEBUG)
+
 
 __all__ = ["BaselineCorrector"]
 
@@ -90,8 +95,6 @@ class BaselineCorrector:
         self._initial_ranges = initial_ranges
         self._done = False
 
-        self._output = widgets.Output()
-
         if X is not None:
             disabled = True
         else:
@@ -103,25 +106,12 @@ class BaselineCorrector:
             disabled=disabled,
         )
 
-        def load_data(change):
-            # no dataset loaded, read data (byte content)
-            value = self._uploader.value
-            dicvalue = {key: value[key]["content"] for key in value.keys()}
-            ds = read(dicvalue)
-            if isinstance(ds, NDDataset):
-                self._X = ds
-                self.process_clicked()
-            else:
-                with self._output:
-                    error_("Could not read or merge uploaded files")
-                return
+        # self._uploader.observe(self.process_clicked, names="value")
 
-        self._uploader.observe(load_data, names="value")
-
-        self._processbutton = widgets.Button(description="process", icon="fa-play")
+        self._processbutton = widgets.Button(description="process", icon="play")
         self._processbutton.on_click(self.process_clicked)
 
-        self._savebutton = widgets.Button(description="save as", icon="fa-save")
+        self._savebutton = widgets.Button(description="save as", icon="save")
         self._savebutton.on_click(self.save_clicked)
 
         self._methodselector = widgets.Dropdown(
@@ -191,6 +181,7 @@ class BaselineCorrector:
         )
 
         self._input = widgets.HBox(children=[io, controls])
+        self._output = widgets.Output()
         display(self._input)
 
         if self._X is not None:
@@ -229,8 +220,11 @@ class BaselineCorrector:
             self.baseline = self.original - self.corrected
 
             with self._output:
+                # debug_('clear', clear)
                 if clear:
+                    debug_("clear_output")
                     self._output.clear_output(True)
+                debug_("multiplot")
                 axes = multiplot(
                     [
                         concatenate(self.original, self.baseline, dims="y"),
@@ -251,22 +245,33 @@ class BaselineCorrector:
 
             self._done = True
 
+    def _load_data(self):
+        # no dataset loaded, read data (byte content)
+        value = self._uploader.value
+        debug_("load_data", list(value.keys()))
+        dicvalue = {key: value[key]["content"] for key in value.keys()}
+        ds = read(dicvalue)
+        if isinstance(ds, NDDataset):
+            self._X = ds
+        else:
+            with self._output:
+                raise IOError("Could not read or merge uploaded files")
+
     def process_clicked(self, b=None):
         """(re)process dataset (slicing) and baseline correct"""
 
         if self._X is None:
-            # no dataset loaded, read data (byte content)
-            value = self._uploader.value
-            dicvalue = {key: value[key]["content"] for key in value.keys()}
-            ds = read(dicvalue)
-            if isinstance(ds, NDDataset):
-                self._X = ds
-            else:
-                with self._output:
-                    error_("Could not read or merge uploaded files")
+            if self._uploader.value:
+                debug_("load_data...")
+                self._load_data()
+
+        if self._X is None:
+            with self._output:
+                debug_("process canceled because X is None")
                 return
 
         if not self._done:
+            debug_("first processing")
             # first processing,
             # defines default ranges (10% of the X axis at both ends)...
             len_ = int(len(self._X.x) / 10)
@@ -290,11 +295,12 @@ class BaselineCorrector:
             )
             self._y_limits_control.value = _y_slice_to_str(slice(0, len(self._X.y), 1))
             # ... and baseline correct with defaults
-            self.blcorrect_and_plot(self._X)
+            self.blcorrect_and_plot()
 
         else:
             # was processed once, the user probably asks re-processing
             # with new parameters
+            debug_("reprocess")
             self.blcorrect_and_plot(clear=True)
 
     def save_clicked(self, b=None):
