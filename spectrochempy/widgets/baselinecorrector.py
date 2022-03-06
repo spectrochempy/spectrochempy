@@ -97,14 +97,12 @@ class BaselineCorrector:
             disabled = True
         else:
             disabled = False
-        self.loadbutton = widgets.Button(
-            description="load",
-            button_style="info",
-            tooltip="select files",
+        self._loadbutton = widgets.Button(
+            description="upload",
             icon="fa-upload",
             disabled=disabled,
         )
-        self.loadbutton.on_click(self.load_clicked)
+        self._loadbutton.on_click(self.load_clicked)
 
         self._processbutton = widgets.Button(description="process", icon="play")
         self._processbutton.on_click(self.process_clicked)
@@ -164,7 +162,7 @@ class BaselineCorrector:
 
         io = widgets.VBox(
             children=[
-                self._uploader,
+                self._loadbutton,
                 self._processbutton,
                 self._savebutton,
             ]
