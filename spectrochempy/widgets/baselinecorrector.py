@@ -241,7 +241,7 @@ class BaselineCorrector:
 
             self._done = True
 
-    def load_clicked(self):
+    def load_clicked(self, b=None):
         # no dataset loaded, read data (byte content)
         ds = read()
         if ds is not None:
