@@ -97,14 +97,14 @@ class BaselineCorrector:
             disabled = True
         else:
             disabled = False
-        self._uploader = widgets.FileUpload(
-            accept="",  # Accepted file extension e.g. '.txt', '.pdf', 'image/*', 'image/*,.pdf'
-            multiple=True,  # True to accept multiple files upload else False
-            description="upload",
+        self.loadbutton = widgets.Button(
+            description="load",
+            button_style="info",
+            tooltip="select files",
+            icon="fa-upload",
             disabled=disabled,
         )
-
-        self._uploader.observe(self.process_clicked, names="value")
+        self.loadbutton.on_click(self.load_clicked)
 
         self._processbutton = widgets.Button(description="process", icon="play")
         self._processbutton.on_click(self.process_clicked)
@@ -243,27 +243,20 @@ class BaselineCorrector:
 
             self._done = True
 
-    def _load_data(self):
+    def load_clicked(self):
         # no dataset loaded, read data (byte content)
-        value = self._uploader.value
-        dicvalue = {key: value[key]["content"] for key in value.keys()}
-        ds = read(dicvalue)
-        if isinstance(ds, NDDataset):
-            self._X = ds
+        ds = read()
+        if ds is not None:
+            if isinstance(ds, NDDataset):
+                self._X = ds
+                self.process_clicked()
+            else:
+                raise IOError("Could not read or merge uploaded files")
         else:
-            raise IOError("Could not read or merge uploaded files")
+            warning_("process canceled because X is None")
 
     def process_clicked(self, b=None):
         """(re)process dataset (slicing) and baseline correct"""
-
-        if self._X is None:
-            if self._uploader.value:
-                self._load_data()
-
-        if self._X is None:
-            with self._output:
-                warning_("process canceled because X is None")
-                return
 
         if not self._done:
             # first processing,
