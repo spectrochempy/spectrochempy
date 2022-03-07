@@ -122,6 +122,7 @@ def multiplot(
     colorbar=False,
     suptitle=None,
     suptitle_color="k",
+    mpl_event=True,
     **kwargs
 ):
     """
@@ -233,7 +234,11 @@ def multiplot(
     figsize = kwargs.pop("figsize", None)
     dpi = kwargs.pop("dpi", 150)
 
-    fig = kwargs.pop("fig", plt.figure(figsize=figsize, dpi=dpi))
+    fig = kwargs.pop("fig", None)
+    if fig is None:
+        fig = plt.figure(figsize=figsize, dpi=dpi)
+    else:
+        fig.clf()
 
     fig.rcParams = plt.rcParams.copy()  # save params used for this figure
 
@@ -407,7 +412,7 @@ def multiplot(
             axeslist,
             subplots_list,
             renderer,
-            pad=1.08,
+            pad=1.1,
             h_pad=0,
             w_pad=0,
             rect=None,
@@ -429,16 +434,17 @@ def multiplot(
 
     do_tight_layout(fig, axes, suptitle, **kwargs)
 
-    # make an event that will trigger subplot adjust each time the mouse leave
-    # or enter the axes or figure
-    def _onenter(event):
-        do_tight_layout(fig, axes, suptitle, **kwargs)
-        fig.canvas.draw()
+    if mpl_event:
+        # make an event that will trigger subplot adjust each time the mouse leave
+        # or enter the axes or figure
+        def _onenter(event):
+            do_tight_layout(fig, axes, suptitle, **kwargs)
+            fig.canvas.draw()
 
-    fig.canvas.mpl_connect("axes_enter_event", _onenter)
-    fig.canvas.mpl_connect("axes_leave_event", _onenter)
-    fig.canvas.mpl_connect("figure_enter_event", _onenter)
-    fig.canvas.mpl_connect("figure_leave_event", _onenter)
+        fig.canvas.mpl_connect("axes_enter_event", _onenter)
+        fig.canvas.mpl_connect("axes_leave_event", _onenter)
+        fig.canvas.mpl_connect("figure_enter_event", _onenter)
+        fig.canvas.mpl_connect("figure_leave_event", _onenter)
 
     return axes
 

@@ -597,7 +597,7 @@ def check_filename_to_save(
     from spectrochempy import NO_DIALOG
     from spectrochempy.core import info_
 
-    NODIAL = NO_DIALOG or "DOC_BUILDING" in environ
+    NODIAL = (NO_DIALOG or "DOC_BUILDING" in environ) and "KEEP_DIALOGS" not in environ
 
     if filename and pathclean(filename).parent.resolve() == Path.cwd():
         filename = Path.cwd() / filename

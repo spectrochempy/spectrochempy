@@ -52,6 +52,8 @@ class Exporter(HasTraits):
                     protocol = self.protocols[pathclean(args[0]).suffix]
                     kwargs["filetypes"] = [self.filetypes[protocol]]
             filename = check_filename_to_save(self.object, *args, **kwargs)
+            if filename is None:
+                return
             if kwargs.get("suffix", ""):
                 filename = filename.with_suffix(kwargs.get("suffix", ""))
             protocol = self.protocols[filename.suffix]

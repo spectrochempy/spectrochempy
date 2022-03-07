@@ -43,9 +43,9 @@ class _Axes(maxes.Axes):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def draw(self, renderer):
-        #    # with plt.rc_context({"something": self.xxx}):
-        return super().draw(renderer)
+    # def draw(self, renderer):
+    #    #    # with plt.rc_context({"something": self.xxx}):
+    #    return super().draw(renderer)
 
     @remove_args_units
     def plot(self, *args, **kwargs):
