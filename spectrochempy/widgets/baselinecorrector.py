@@ -8,7 +8,7 @@ from spectrochempy.core.plotters.multiplot import multiplot
 from spectrochempy.core.processors.baseline import BaselineCorrection
 from spectrochempy.core.processors.concatenate import concatenate
 from spectrochempy.core.readers.importer import read
-
+from spectrochempy.utils import show
 from spectrochempy.core import warning_
 
 __all__ = ["BaselineCorrector"]
@@ -210,7 +210,7 @@ class BaselineCorrector:
             )
             self.baseline = self.original - self.corrected
 
-            self._output.clear_output()
+            self._output.clear_output(True)
             with self._output:
                 axes = multiplot(
                     [
@@ -229,7 +229,7 @@ class BaselineCorrector:
                 axes["axe11"].get_xaxis().set_visible(False)
                 blc.show_regions(axes["axe21"])
                 self._fig = axes["axe21"].figure
-                self._fig.show()
+                show()
             self._done = True
 
     def load_clicked(self, b=None):
