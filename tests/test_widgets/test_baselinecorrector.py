@@ -39,15 +39,15 @@ def test_baselinecorrector_load_clicked(X, monkeypatch):
     )  # we ask to display dialogs as we will mock them.
 
     monkeypatch.setattr(spectrochempy.core, "open_dialog", open_cancel)
-    assert out.load_clicked() is None
+    assert out._load_clicked() is None
 
     monkeypatch.setattr(spectrochempy.core, "open_dialog", open_ok)
-    out.load_clicked()
+    out._load_clicked()
     assert out.original.name == "nh4y-activation"
 
     out = scp.BaselineCorrector()
     monkeypatch.setattr(spectrochempy.core, "open_dialog", open_wrong)
-    out.load_clicked()
+    out._load_clicked()
     assert not hasattr(out, "original")
 
 
@@ -64,7 +64,7 @@ def test_baselinecorrector_slicing(X):
     # slicing
     out._x_limits_control.value = "[5000.56 : 649.9 : 1]"
     out._y_limits_control.value = "[0:55:2]"
-    out.process_clicked()
+    out._process_clicked()
     assert len(out._fig.axes[0].lines) == 56, "original + baselines"
     assert len(out._fig.axes[1].lines) == 28, "corrected"
     assert np.all(out._fig.axes[1].lines[0].get_xdata() == X.x[5000.56:649.9].data)
@@ -82,7 +82,7 @@ def test_baselinecorrector_slicing(X):
     [800.0, 850.0],
     )
     """
-    out.process_clicked()
+    out._process_clicked()
     assert out.corrected.shape == (28, 4771)
     initial_ranges = (
         [5900.0, 5400.0],
@@ -95,7 +95,7 @@ def test_baselinecorrector_slicing(X):
     )
     out2 = scp.BaselineCorrector(X, initial_ranges=initial_ranges)
     out2._x_limits_control.value = "[5400.56 : 800.9 : 1]"
-    out2.process_clicked()
+    out2._process_clicked()
     assert np.all(out2._fig.axes[1].lines[0].get_xdata() == X.x[5400.56:800.9].data)
 
     assert np.all(
@@ -111,7 +111,7 @@ def test_baselinecorrector_slicing(X):
     [800.0, 850.0],
     )
     """
-    out.process_clicked()
+    out._process_clicked()
     assert out.corrected.shape == (2, 2075)
 
     out._ranges_control.value = """
@@ -120,7 +120,7 @@ def test_baselinecorrector_slicing(X):
     [800.0, 850.0],
     )
     """
-    out.process_clicked()
+    out._process_clicked()
     assert out.corrected.shape == (2, 2075)
 
     out._ranges_control.value = """
@@ -129,35 +129,35 @@ def test_baselinecorrector_slicing(X):
     850.0
     )
     """
-    out.process_clicked()
+    out._process_clicked()
     assert out.corrected.shape == (2, 2075)
 
     # other slicing format
     out = scp.BaselineCorrector(X)
     out._y_limits_control.value = "[0.0:3000.0:1]"  # y location
-    out.process_clicked()
+    out._process_clicked()
     assert out.corrected.shape == (6, 5549)
 
     # missing parts in slice
     out._y_limits_control.value = "[:3000.0]"  # y location
-    out.process_clicked()
+    out._process_clicked()
     assert out.corrected.shape == (6, 5549)
 
     out._y_limits_control.value = "::2"  # y location
-    out.process_clicked()
+    out._process_clicked()
     assert out.corrected.shape == (28, 5549)
 
     out._y_limits_control.value = "0:10:2"  # y location
-    out.process_clicked()
+    out._process_clicked()
     assert out.corrected.shape == (5, 5549)
 
     out._x_limits_control.value = "::100"  # y location
-    out.process_clicked()
+    out._process_clicked()
     assert out.corrected.shape == (5, 56)
 
     out._x_limits_control.value = "::100:"  # y location
     with pytest.raises(ValueError):
-        out.process_clicked()
+        out._process_clicked()
 
 
 def test_baselinecorrector_not_a_NDDataset(X):
@@ -173,12 +173,12 @@ def test_baselinecorrector_parameters(X):
     assert out._npcslider not in out._method_control.children
 
     out._interpolationselector.value = "pchip"
-    out.process_clicked()
+    out._process_clicked()
 
     # try higher polyorder
     out._orderslider.value = 3
     out._interpolationselector.value = "polynomial"
-    out.process_clicked()
+    out._process_clicked()
 
     assert out.corrected.shape == (10, 100)
     assert len(out._fig.axes[0].lines) == 20, "original + baselines"
@@ -192,7 +192,7 @@ def test_baselinecorrector_parameters(X):
 
     # try multivariate, with 2 pcs
     out._npcslider.value = 2
-    out.process_clicked()
+    out._process_clicked()
 
     out._methodselector.value = "sequential"
     assert out._methodselector in out._method_control.children
@@ -216,10 +216,10 @@ def test_baselinecorrector_save_clicked(X, monkeypatch):
     )  # we ask to display dialogs as we will mock them.
 
     monkeypatch.setattr(spectrochempy.core, "save_dialog", dialog_cancel)
-    assert out.save_clicked() is None
+    assert out._save_clicked() is None
 
     monkeypatch.setattr(spectrochempy.core, "save_dialog", dialog_save)
-    filename = out.save_clicked()
+    filename = out._save_clicked()
     assert filename == scp.pathclean("spec.scp")  # <-
     assert filename.exists()
     if filename.exists:

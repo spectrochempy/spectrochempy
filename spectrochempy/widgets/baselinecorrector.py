@@ -25,7 +25,7 @@ class BaselineCorrector:
 
     Parameters
     ----------
-    X : NDDataset, default: None
+    X : |NDDataset|, default: None
         The NDDataset to process. If None, a FileUpload widget is enabled.
     initial_ranges : list, optional, default: None
         The initial regions where to compute the baseline. If not given, 5% on each
@@ -46,24 +46,22 @@ class BaselineCorrector:
 
     Notes
     -----
-    The `BaselineCorrector()` widget can be used in jupyter notebook (does not always run
-    properly in jupyter lab).
-    - The GUI buttons are as follows:
-        - `upload`: upload files.
+    The `BaselineCorrector()` widget can be used in jupyter notebook and jupyter lab.
+    - The GUI buttons are the following:
+        - `upload`: allows uploading files.
           Uploading file will trigger the reading and processing with default parameters
           (linear baseline with ranges of 5% of the x axis at both ends). If a NDDataset
           has been passed or a file has been previously loaded, BaselineCorrector will
           be reset with the new file(s).
         - `process`: triggers baseline correct and plotting of original
           dataset + baseline and corrected datasets
-        - `save as`: save the baseline corrected NDDataset
+        - `save as`: save the baseline corrected dataset
     - The `x slice` and `y slice` textboxes can be used to slice the initial
       dataset with the usual `[start:stop:step]`
-      format. Coordinates or indexes can be used
-      (e.g. `[3000.0:2000.0:1]` or `[0:100:1]` are valid
-      entries).
-    - Method and Interpolation are self explaining, see BaselineCorrection() for
-      details.
+      format. In both dimensions, coordinates or indexes
+      can be used (for example, [3000.0::2] or [:100:5] are valid entries).
+    - `Method` and `Interpolation` dropdown fields are self explaining,
+      see BaselineCorrection() for details.
     - Ranges should be entered as a tuple of intervals or wavenumbers, e.g.
       ```
       (
@@ -92,13 +90,13 @@ class BaselineCorrector:
         self._done = False
 
         self._loadbutton = widgets.Button(description="upload", icon="upload")
-        self._loadbutton.on_click(self.load_clicked)
+        self._loadbutton.on_click(self._load_clicked)
 
         self._processbutton = widgets.Button(description="process", icon="play")
-        self._processbutton.on_click(self.process_clicked)
+        self._processbutton.on_click(self._process_clicked)
 
         self._savebutton = widgets.Button(description="save as", icon="save")
-        self._savebutton.on_click(self.save_clicked)
+        self._savebutton.on_click(self._save_clicked)
 
         self._methodselector = widgets.Dropdown(
             description="Method",
@@ -171,7 +169,7 @@ class BaselineCorrector:
         display(self._input, self._output)
 
         if self._X is not None:
-            self.process_clicked()
+            self._process_clicked()
         else:
             with self._output:
                 warning_(
@@ -180,7 +178,7 @@ class BaselineCorrector:
                 )
             self.corrected = NDDataset()
 
-    def blcorrect_and_plot(self):
+    def _blcorrect_and_plot(self):
         slice_x = _str_to_slice(self._x_limits_control.value.strip(), self._X, "x")
         slice_y = _str_to_slice(self._y_limits_control.value.strip(), self._X, "y")
         self.original = self._X[slice_y, slice_x]
@@ -232,7 +230,7 @@ class BaselineCorrector:
                 show()
             self._done = True
 
-    def load_clicked(self, b=None):
+    def _load_clicked(self, b=None):
         # read data and reset defaults
         ds = read()
         if ds is not None:
@@ -243,13 +241,13 @@ class BaselineCorrector:
                 self._orderslider.value = 1
                 self._npcslider.value = 1
                 self._done = False
-                self.process_clicked()
+                self._process_clicked()
             else:
                 raise IOError("Could not read or merge uploaded files")
         else:
             warning_("process canceled because X is None")
 
-    def process_clicked(self, b=None):
+    def _process_clicked(self, b=None):
         """(re)process dataset (slicing) and baseline correct"""
 
         if not self._done:
@@ -277,9 +275,9 @@ class BaselineCorrector:
             self._y_limits_control.value = _y_slice_to_str(slice(0, len(self._X.y), 1))
             # ... and baseline correct with defaults
 
-        self.blcorrect_and_plot()
+        self._blcorrect_and_plot()
 
-    def save_clicked(self, b=None):
+    def _save_clicked(self, b=None):
         return self.corrected.write()
 
 
