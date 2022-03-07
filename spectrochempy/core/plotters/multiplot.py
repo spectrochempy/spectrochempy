@@ -239,6 +239,7 @@ def multiplot(
         fig = plt.figure(figsize=figsize, dpi=dpi)
     else:
         fig.clf()
+        fig.set_size_inches(*figsize)
 
     fig.rcParams = plt.rcParams.copy()  # save params used for this figure
 

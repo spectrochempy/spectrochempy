@@ -9,9 +9,7 @@ from spectrochempy.core.processors.baseline import BaselineCorrection
 from spectrochempy.core.processors.concatenate import concatenate
 from spectrochempy.core.readers.importer import read
 
-
 from spectrochempy.core import warning_
-
 
 __all__ = ["BaselineCorrector"]
 
@@ -169,15 +167,20 @@ class BaselineCorrector:
         )
 
         self._input = widgets.HBox(children=[io, controls])
-        self._output = widgets.Output()
-        display(self._input)
+        self._output = widgets.Output(layout={"border": ".1px solid black"})
+        display(self._input, self._output)
 
         if self._X is not None:
             self.process_clicked()
         else:
+            with self._output:
+                warning_(
+                    "No data have been defined.\n"
+                    "Use the upload button to load data to be processed!."
+                )
             self.corrected = NDDataset()
 
-    def blcorrect_and_plot(self, clear=False):
+    def blcorrect_and_plot(self):
         slice_x = _str_to_slice(self._x_limits_control.value.strip(), self._X, "x")
         slice_y = _str_to_slice(self._y_limits_control.value.strip(), self._X, "y")
         self.original = self._X[slice_y, slice_x]
@@ -207,9 +210,8 @@ class BaselineCorrector:
             )
             self.baseline = self.original - self.corrected
 
+            self._output.clear_output()
             with self._output:
-                if clear:
-                    self._output.clear_output(True)
                 axes = multiplot(
                     [
                         concatenate(self.original, self.baseline, dims="y"),
@@ -227,7 +229,7 @@ class BaselineCorrector:
                 axes["axe11"].get_xaxis().set_visible(False)
                 blc.show_regions(axes["axe21"])
                 self._fig = axes["axe21"].figure
-
+                self._fig.show()
             self._done = True
 
     def load_clicked(self, b=None):
@@ -274,12 +276,8 @@ class BaselineCorrector:
             )
             self._y_limits_control.value = _y_slice_to_str(slice(0, len(self._X.y), 1))
             # ... and baseline correct with defaults
-            self.blcorrect_and_plot()
 
-        else:
-            # was processed once, the user probably asks re-processing
-            # with new parameters
-            self.blcorrect_and_plot(clear=True)
+        self.blcorrect_and_plot()
 
     def save_clicked(self, b=None):
         return self.corrected.write()
