@@ -22,17 +22,16 @@ class BaselineCorrector:
 
     Wrapper of scp.BaselineCorrection(X), with widgets for dataset slicing,
     input parameters and graphical output.
-    Should be run in jupyter notebook (does not always run properly on jupyter lab) with the widget backend
-    (magic `%matplotlib widget`).
+    Should be run in jupyter notebook (does not always run properly in jupyter
+     lab) with the widget backend (magic `%matplotlib widget`).
 
     Parameters
     ----------
     X : NDDataset, default: None
         The NDDataset to process. If None, a FileUpload widget is enabled.
     initial_ranges : list, optional, default: None
-        The initial regions where to compute the baseline. If not given, 10% on each
+        The initial regions where to compute the baseline. If not given, 5% on each
         side of the spectra will be taken as a starting range's list.
-
 
     Attributes
     ----------
@@ -49,16 +48,17 @@ class BaselineCorrector:
 
     Notes
     -----
-    The `BaselineCorrector()` widget can be used in jupyter notebooks (does not always run
-    properly in jupyterr lab).
+    The `BaselineCorrector()` widget can be used in jupyter notebook (does not always run
+    properly in jupyter lab).
     - The GUI buttons are as follows:
-        - `upload`: upload files (disabled if a NDDataset is passed as parameter).
+        - `upload`: upload files.
           Uploading file will trigger the reading and processing with default parameters
-          (linear baseline with ranges of 10% of the x axis at both ends).
+          (linear baseline with ranges of 5% of the x axis at both ends). If a NDDataset
+          has been passed or a file has been previously loaded, BaselineCorrector will
+          be reset with the new file(s).
         - `process`: triggers baseline correct and plotting of original
           dataset + baseline and corrected datasets
         - `save as`: save the baseline corrected NDDataset
-
     - The `x slice` and `y slice` textboxes can be used to slice the initial
       dataset with the usual `[start:stop:step]`
       format. Coordinates or indexes can be used
@@ -93,15 +93,7 @@ class BaselineCorrector:
         self._initial_ranges = initial_ranges
         self._done = False
 
-        if X is not None:
-            disabled = True
-        else:
-            disabled = False
-        self._loadbutton = widgets.Button(
-            description="upload",
-            icon="fa-upload",
-            disabled=disabled,
-        )
+        self._loadbutton = widgets.Button(description="upload", icon="upload")
         self._loadbutton.on_click(self.load_clicked)
 
         self._processbutton = widgets.Button(description="process", icon="play")
@@ -180,9 +172,6 @@ class BaselineCorrector:
         self._output = widgets.Output()
         display(self._input)
 
-        # if self._X is None:             # THIS WORK in jupyter lab
-        #    self._X = read()
-
         if self._X is not None:
             self.process_clicked()
         else:
@@ -242,11 +231,16 @@ class BaselineCorrector:
             self._done = True
 
     def load_clicked(self, b=None):
-        # no dataset loaded, read data (byte content)
+        # read data and reset defaults
         ds = read()
         if ds is not None:
             if isinstance(ds, NDDataset):
                 self._X = ds
+                self._methodselector.value = "sequential"
+                self._interpolationselector.value = "polynomial"
+                self._orderslider.value = 1
+                self._npcslider.value = 1
+                self._done = False
                 self.process_clicked()
             else:
                 raise IOError("Could not read or merge uploaded files")
@@ -258,8 +252,8 @@ class BaselineCorrector:
 
         if not self._done:
             # first processing,
-            # defines default ranges (10% of the X axis at both ends)...
-            len_ = int(len(self._X.x) / 10)
+            # defines default ranges (5% of the X axis at both ends)...
+            len_ = int(len(self._X.x) / 20)
             if self._initial_ranges:
                 ranges = self._initial_ranges
             else:
@@ -325,6 +319,7 @@ def _str_to_slice(strg, dataset, dim):
 
 def _round_ranges(ranges, decimals=2):
     """round x values for better reading"""
+    ranges = list(ranges)
     for i, item in enumerate(ranges):
         if isinstance(item, float):  # pragma: cover
             # can not be reached in the current implementation of baselinecorrector
@@ -332,7 +327,7 @@ def _round_ranges(ranges, decimals=2):
         else:
             for j, sub_item in enumerate(item):
                 ranges[i][j] = round(sub_item, decimals)
-    return ranges
+    return tuple(ranges)
 
 
 def _update_ranges(ranges, coord, decimals=2):
@@ -353,7 +348,6 @@ def _update_ranges(ranges, coord, decimals=2):
         coord = coord[::-1]
     for i, item in enumerate(ranges):
         # if out of range, makes it within coord limits"
-
         if isinstance(item, float):
             if item < coord[0]:
                 ranges[i] = coord[1]
