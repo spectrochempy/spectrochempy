@@ -413,7 +413,7 @@ def multiplot(
             axeslist,
             subplots_list,
             renderer,
-            pad=1.1,
+            # pad=1.1,
             h_pad=0,
             w_pad=0,
             rect=None,

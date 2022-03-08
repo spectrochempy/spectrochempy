@@ -48,7 +48,7 @@ def test_baselinecorrector_load_clicked(X, monkeypatch):
     out = scp.BaselineCorrector()
     monkeypatch.setattr(spectrochempy.core, "open_dialog", open_wrong)
     out._load_clicked()
-    assert not hasattr(out, "original")
+    assert out.original.is_empty
 
 
 def test_baselinecorrector_slicing(X):
@@ -169,15 +169,15 @@ def test_baselinecorrector_parameters(X):
     _X = X[0:10, 0:100]
     out = scp.BaselineCorrector(_X)
     # sequential
-    assert out._methodselector in out._method_control.children
-    assert out._npcslider not in out._method_control.children
+    assert out._method_selector in out._method_control.children
+    assert out._npc_slider not in out._method_control.children
 
-    out._interpolationselector.value = "pchip"
+    out._interpolation_selector.value = "pchip"
     out._process_clicked()
 
     # try higher polyorder
-    out._orderslider.value = 3
-    out._interpolationselector.value = "polynomial"
+    out._order_slider.value = 3
+    out._interpolation_selector.value = "polynomial"
     out._process_clicked()
 
     assert out.corrected.shape == (10, 100)
@@ -186,17 +186,17 @@ def test_baselinecorrector_parameters(X):
     assert np.all(out._fig.axes[1].lines[0].get_xdata() == _X.x.data)
 
     # try multivariate
-    out._methodselector.value = "multivariate"
-    assert out._methodselector in out._method_control.children
-    assert out._npcslider in out._method_control.children
+    out._method_selector.value = "multivariate"
+    assert out._method_selector in out._method_control.children
+    assert out._npc_slider in out._method_control.children
 
     # try multivariate, with 2 pcs
-    out._npcslider.value = 2
+    out._npc_slider.value = 2
     out._process_clicked()
 
-    out._methodselector.value = "sequential"
-    assert out._methodselector in out._method_control.children
-    assert out._npcslider not in out._method_control.children
+    out._method_selector.value = "sequential"
+    assert out._method_selector in out._method_control.children
+    assert out._npc_slider not in out._method_control.children
 
 
 def test_baselinecorrector_save_clicked(X, monkeypatch):

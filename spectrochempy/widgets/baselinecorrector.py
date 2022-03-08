@@ -1,6 +1,7 @@
 import re
+from functools import partial
 
-import ipywidgets as widgets
+from ipywidgets import widgets, Layout
 from IPython.display import display
 
 from spectrochempy.core.dataset.nddataset import NDDataset
@@ -9,7 +10,7 @@ from spectrochempy.core.processors.baseline import BaselineCorrection
 from spectrochempy.core.processors.concatenate import concatenate
 from spectrochempy.core.readers.importer import read
 from spectrochempy.utils import show
-from spectrochempy.core import warning_
+from spectrochempy.core import warning_, info_
 
 __all__ = ["BaselineCorrector"]
 
@@ -26,7 +27,7 @@ class BaselineCorrector:
     Parameters
     ----------
     X : |NDDataset|, default: None
-        The NDDataset to process. If None, a FileUpload widget is enabled.
+        The NDDataset to process. If None, an upload button can be used to load data.
     initial_ranges : list, optional, default: None
         The initial regions where to compute the baseline. If not given, 5% on each
         side of the spectra will be taken as a starting range's list.
@@ -62,13 +63,11 @@ class BaselineCorrector:
       can be used (for example, [3000.0::2] or [:100:5] are valid entries).
     - `Method` and `Interpolation` dropdown fields are self explaining,
       see BaselineCorrection() for details.
-    - Ranges should be entered as a tuple of intervals or wavenumbers, e.g.
+    - Ranges should be entered as a series of intervals or wavenumbers, e.g.
       ```
-      (
       [5900.0, 5400.0],
       2000.0,
       [1550.0, 1555.0],
-      )
       ```
 
     Examples
@@ -89,57 +88,35 @@ class BaselineCorrector:
         self._initial_ranges = initial_ranges
         self._done = False
 
-        self._loadbutton = widgets.Button(description="upload", icon="upload")
-        self._loadbutton.on_click(self._load_clicked)
+        # I/O and processing widgets
+        self._load_button = widgets.Button(description="Upload", icon="upload")
+        self._load_button.on_click(self._load_clicked)
+        self._process_button = widgets.Button(description="Process", icon="play")
+        self._process_button.on_click(self._process_clicked)
+        self._save_button = widgets.Button(description="Save as", icon="save")
+        self._save_button.on_click(self._save_clicked)
 
-        self._processbutton = widgets.Button(description="process", icon="play")
-        self._processbutton.on_click(self._process_clicked)
+        # Parameters widgets
+        self._npc_slider = widgets.IntSlider(description="N pc", value=1, min=1, max=5)
+        self._order_slider = widgets.IntSlider(
+            description="Order", layout=Layout(width="350px"), value=1, min=1, max=6
+        )
 
-        self._savebutton = widgets.Button(description="save as", icon="save")
-        self._savebutton.on_click(self._save_clicked)
-
-        self._methodselector = widgets.Dropdown(
+        self._method_selector = widgets.Dropdown(
             description="Method",
             options=["sequential", "multivariate"],
             value="sequential",
         )
+        self._method_control = widgets.HBox(children=[self._method_selector])
 
-        self._npcslider = widgets.IntSlider(description="npc", value=1, min=1, max=5)
-
-        self._method_control = widgets.HBox(children=[self._methodselector])
-
-        def toggle_npc(change):
-            if self._methodselector.value == "multivariate":
-                self._method_control.children = [self._methodselector, self._npcslider]
-            else:
-                self._method_control.children = [self._methodselector]
-
-        self._methodselector.observe(toggle_npc, names="value")
-
-        self._interpolationselector = widgets.Dropdown(
+        self._interpolation_selector = widgets.Dropdown(
             description="Interpolation",
             options=["polynomial", "pchip"],
             value="polynomial",
         )
-
-        self._orderslider = widgets.IntSlider(
-            description="orderslider", value=1, min=1, max=6
-        )
-
         self._interpolation_control = widgets.HBox(
-            children=[self._interpolationselector, self._orderslider]
+            children=[self._interpolation_selector, self._order_slider]
         )
-
-        def toggle_polyorder(change):
-            if self._interpolationselector.value == "polynomial":
-                self._interpolation_control.children = [
-                    self._interpolationselector,
-                    self._orderslider,
-                ]
-            else:
-                self._interpolation_control.children = [self._interpolationselector]
-
-        self._interpolationselector.observe(toggle_polyorder, names="value")
 
         self._ranges_control = widgets.Textarea(description="Ranges:")
         self._x_limits_control = widgets.Text(description="x slice:")
@@ -148,63 +125,106 @@ class BaselineCorrector:
             children=[self._x_limits_control, self._y_limits_control]
         )
 
-        io = widgets.VBox(
-            children=[
-                self._loadbutton,
-                self._processbutton,
-                self._savebutton,
+        self._io = widgets.VBox()
+        self._controls = widgets.VBox()
+
+        self._input = widgets.HBox(children=[self._io, self._controls])
+        self._output = widgets.Output()
+        display(self._input, self._output)
+
+        # init attributes
+        self.original = NDDataset()
+        self.corrected = NDDataset()
+        self.baseline = NDDataset()
+
+        # events
+        for control in [
+            "x_limits_control",
+            "y_limits_control",
+            "ranges_control",
+            "npc_slider",
+            "order_slider",
+            "method_selector",
+            "interpolation_selector",
+        ]:
+            getattr(self, f"_{control}").observe(
+                partial(self._update, control=control), names="value"
+            )
+
+        # Start
+        if self._X is not None:
+            self._enabled_process(True)
+            self._process_clicked()
+        else:
+            self._enabled_process(False)
+
+    def _enabled_process(self, flag):
+        if flag:
+            self._io.children = [
+                self._load_button,
+                self._process_button,
+                self._save_button,
             ]
-        )
-        controls = widgets.VBox(
-            children=[
+            self._controls.children = [
                 self._limits_control,
                 self._method_control,
                 self._interpolation_control,
                 self._ranges_control,
             ]
-        )
 
-        self._input = widgets.HBox(children=[io, controls])
-        self._output = widgets.Output(layout={"border": ".1px solid black"})
-        display(self._input, self._output)
-
-        if self._X is not None:
-            self._process_clicked()
         else:
+            self._io.children = [self._load_button]
+            self._controls.children = []
             with self._output:
-                warning_(
+                info_(
                     "No data have been defined.\n"
                     "Use the upload button to load data to be processed!."
                 )
-            self.corrected = NDDataset()
+
+    def _update(self, *args, **kwargs):
+
+        control = kwargs.get("control")
+        if control == "method_selector":
+            self._method_control.children = (self._method_selector,)
+            if self._method_selector.value == "multivariate":
+                self._method_control.children = (
+                    self._method_selector,
+                    self._npc_slider,
+                )
+
+        elif control == "interpolation_selector":
+            self._interpolation_control.children = (self._interpolation_selector,)
+            if self._interpolation_selector.value == "polynomial":
+                self._interpolation_control.children = (
+                    self._interpolation_selector,
+                    self._order_slider,
+                )
+
+        self._process_button.disabled = False  # probably need a reprocessing
 
     def _blcorrect_and_plot(self):
-        slice_x = _str_to_slice(self._x_limits_control.value.strip(), self._X, "x")
-        slice_y = _str_to_slice(self._y_limits_control.value.strip(), self._X, "y")
+        slice_x = _str_to_slice(self._x_limits_control.value, self._X, "x")
+        slice_y = _str_to_slice(self._y_limits_control.value, self._X, "y")
         self.original = self._X[slice_y, slice_x]
-        ranges = eval(self._ranges_control.value.strip())
+        ranges = _str_to_ranges(self._ranges_control.value)
+
         if self.original is not None:  # slicing was OK
 
             # check that no range is outside coordinates
             new_ranges, changed = _update_ranges(
-                eval(self._ranges_control.value.replace(" ", "")), self.original.x.data
+                _str_to_ranges(self._ranges_control.value), self.original.x.data
             )
             if changed:
                 ranges = _round_ranges(new_ranges)
-                self._ranges_control.value = (
-                    str(ranges)
-                    .replace("(", "(\n")
-                    .replace("], ", "],\n")
-                    .replace(")", "\n)")
-                )
+                self._ranges_control.value = _ranges_to_str(ranges)
 
             blc = BaselineCorrection(self.original)
             self.corrected = blc.compute(
                 *ranges,
-                interpolation=self._interpolationselector.value,
-                order=self._orderslider.value,
-                method=self._methodselector.value,
-                npc=self._npcslider.value,
+                interpolation=self._interpolation_selector.value,
+                order=self._order_slider.value,
+                method=self._method_selector.value,
+                npc=self._npc_slider.value,
             )
             self.baseline = self.original - self.corrected
 
@@ -220,8 +240,9 @@ class BaselineCorrector:
                     nrow=2,
                     ncol=1,
                     fig=self._fig,
-                    figsize=(7, 6),
+                    figsize=(8, 6),
                     dpi=96,
+                    left=0.12,
                     mpl_event=False,
                 )
                 axes["axe11"].get_xaxis().set_visible(False)
@@ -236,15 +257,17 @@ class BaselineCorrector:
         if ds is not None:
             if isinstance(ds, NDDataset):
                 self._X = ds
-                self._methodselector.value = "sequential"
-                self._interpolationselector.value = "polynomial"
-                self._orderslider.value = 1
-                self._npcslider.value = 1
+                self._method_selector.value = "sequential"
+                self._interpolation_selector.value = "polynomial"
+                self._order_slider.value = 1
+                self._npc_slider.value = 1
                 self._done = False
+                self._enabled_process(True)
                 self._process_clicked()
             else:
                 raise IOError("Could not read or merge uploaded files")
         else:
+            self._enabled_process(False)
             warning_("process canceled because X is None")
 
     def _process_clicked(self, b=None):
@@ -263,12 +286,8 @@ class BaselineCorrector:
                         [self._X.x.data[-len_], self._X.x.data[-1]],
                     )
                 )
-            self._ranges_control.value = (
-                str(ranges)
-                .replace("(", "(\n")
-                .replace("], ", "],\n")
-                .replace(")", "\n)")
-            )
+            self._ranges_control.value = _ranges_to_str(ranges)
+
             self._x_limits_control.value = _x_slice_to_str(
                 slice(0, len(self._X.x), 1), self._X
             )
@@ -276,9 +295,11 @@ class BaselineCorrector:
             # ... and baseline correct with defaults
 
         self._blcorrect_and_plot()
+        self._process_button.disabled = True
 
     def _save_clicked(self, b=None):
-        return self.corrected.write()
+        if self.corrected is not None:
+            return self.corrected.write()
 
 
 # Utility functions
@@ -302,6 +323,7 @@ def _str_to_num(strg):
 
 def _str_to_slice(strg, dataset, dim):
     regex = r"^\[?(\d*\.?\d*)\:?(\d*\.?\d*)\:?(-?\d*)\]?$"
+    strg = strg.strip()
     strg = strg.replace(" ", "")
     match = re.search(regex, strg)
     if match:
@@ -311,6 +333,16 @@ def _str_to_slice(strg, dataset, dim):
         return dataset._get_slice(slice(start, stop, step), dim)
     else:
         raise ValueError(f"Something is wrong in the slice definition: {strg}.")
+
+
+def _ranges_to_str(ranges):
+    return str(ranges).replace("(", "").replace("], ", "],\n").replace(")", "")
+
+
+def _str_to_ranges(strg):
+    strg = strg.strip()
+    strg = strg.replace(" ", "")
+    return eval(f"({strg})")
 
 
 def _round_ranges(ranges, decimals=2):
