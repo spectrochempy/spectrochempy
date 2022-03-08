@@ -37,7 +37,7 @@
 import spectrochempy as scp
 
 # %% [markdown]
-# Now let's import and plot a typical IR dataset which wase recorded during the
+# Now let's import and plot a typical IR dataset which was recorded during the
 # removal of ammonia from a NH4-Y
 # zeolite:
 
@@ -157,23 +157,21 @@ _ = Xcorr.plot()
 #
 #
 # The previous correction was made using the default parameters for the interpolation
-# ,i.e. an interpolation using
-# cubic Hermite spline interpolation: `interpolation='pchip'` (`pchip` stands for
+# ,i.e. an interpolation using cubic Hermite spline interpolation:
+# `interpolation='pchip'` (`pchip` stands for
 # **P**iecewise **C**ubic **H**ermite
 # **I**nterpolating **P**olynomial). This option triggers the use of
 # [scipy.interpolate.PchipInterpolator()](
 # https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.PchipInterpolator.html)
-# to which we refer
-# the interested readers. The other interpolation method is the classical polynomial
-# interpolation
-# (`interpolation='polynomial'`) in which case the order can also be set
-# (e.g. `order=3`, the default value being 6).
+# to which we refer the interested readers. The other interpolation method is the
+# classical polynomial interpolation (`interpolation='polynomial'`) in which case the
+# order can also be set (e.g. `order=3`, the default value being 6).
 # In this case, the base methods used for the interpolation are those of the
 # [polynomial module](
 # https://numpy.org/doc/stable/reference/routines.polynomials.polynomial.html)
 # of spectrochempy, in particular the
-# [polyfit()](https://numpy.org/doc/stable/reference/generated/numpy.polynomial.polynomial.polyfit.html#numpy
-# .polynomial.polynomial.polyfit) method.
+# [polyfit()](
+# https://numpy.org/doc/stable/reference/generated/numpy.polynomial.polynomial.polyfit.html#numpy.polynomial.polynomial.polyfit) method.
 #
 # For instance:
 
@@ -335,7 +333,7 @@ blc.show_regions(axes["axe21"])
 # %%
 X = scp.read_omnic("irdata/nh4y-activation.spg")
 # Uncomment the following line to execute BaselineCorrector:
-# # %matplotlib widget
+# %matplotlib widget
 out = scp.BaselineCorrector(X)
 
 # %% [markdown]
