@@ -130,7 +130,8 @@ class BaselineCorrector:
 
         self._input = widgets.HBox(children=[self._io, self._controls])
         self._output = widgets.Output()
-        display(self._input, self._output)
+        display(self._input)
+        display(self._output)
 
         # init attributes
         self.original = NDDataset()

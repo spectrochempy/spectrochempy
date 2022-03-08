@@ -332,14 +332,15 @@ blc.show_regions(axes["axe21"])
 
 # %%
 X = scp.read_omnic("irdata/nh4y-activation.spg")
-# Uncomment the following line to execute BaselineCorrector:
-# %matplotlib widget
 out = scp.BaselineCorrector(X)
 
 # %% [markdown]
 # After processing, one can get the original (sliced) dataset, corrected dataset
 # and baselines
 # through the following attributes:
+
+# %%
+out.original, out.corrected, out.baseline
 
 # %% [markdown]
 # <div class='alert alert-info'>

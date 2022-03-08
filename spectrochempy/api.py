@@ -105,11 +105,7 @@ if IN_IPYTHON and KERNEL and not NO_DISPLAY:  # pragma: no cover
             # We are running from NBSphinx - the plot must be inline to show up.
             IP.magic("matplotlib inline")
         else:
-            # Do not set the widget backend....
-            # do not work most of the time after upbgrade of the various
-            # library and
-            # jupyter!!! ...
-            IP.magic("matplotlib inline")  # widget
+            IP.magic("matplotlib widget")  # widget
     except Exception:
         IP.magic("matplotlib qt")
 
