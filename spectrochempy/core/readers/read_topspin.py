@@ -17,7 +17,7 @@ import re
 import numpy as np
 from quaternion import as_quat_array
 
-from spectrochempy.core import debug_, exception_
+from spectrochempy.core import debug_, warning_
 from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.core.dataset.coord import LinearCoord
 from spectrochempy.core.units import ur
@@ -808,8 +808,10 @@ def _get_files(path, typ="acqu"):
 @importermethod
 def _read_topspin(*args, **kwargs):
     debug_("Bruker TOPSPIN file reading")
+    dataset, path = args
+
     if not HAS_NMRGLUE:
-        exception_(
+        warning_(
             ImportError(
                 "nmrglue package is needed for reading TOPSPIN files.\n"
                 "Install it using pip:\n"
@@ -817,7 +819,8 @@ def _read_topspin(*args, **kwargs):
                 "git+https://github.com/jjhelmus/nmrglue.git"
             )
         )
-    dataset, path = args
+        return dataset
+
     #    content = kwargs.get('content', None)
 
     # is-it a processed dataset (1r, 2rr ....
