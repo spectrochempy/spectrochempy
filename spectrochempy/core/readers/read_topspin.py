@@ -17,13 +17,22 @@ import re
 import numpy as np
 from quaternion import as_quat_array
 
-from nmrglue.fileio.bruker import read as read_fid, read_pdata, read_lowmem
-from spectrochempy.core import debug_
+from spectrochempy.core import debug_, exception_
 from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.core.dataset.coord import LinearCoord
 from spectrochempy.core.units import ur
 from spectrochempy.utils.exceptions import deprecated
 from spectrochempy.core.readers.importer import Importer, importermethod
+from spectrochempy.optional import import_optional_dependency
+
+HAS_NMRGLUE = False
+ng = import_optional_dependency("nmrglue.fileio.bruker", errors="ignore")
+
+if ng is not None:
+    read_fid = ng.read
+    read_pdata = ng.read_pdata
+    read_lowmem = ng.read_lowmem
+    HAS_NMRGLUE = True
 
 # ======================================================================================================================
 # Constants
@@ -765,12 +774,12 @@ def read_topspin(*paths, **kwargs):
     read_zip : Read Zip files.
     read_matlab : Read Matlab files.
     """
+
     kwargs["filetypes"] = [
         "Bruker TOPSPIN fid's or processed data files (fid ser 1[r|i] 2[r|i]* 3[r|i]*)",
         "Compressed TOPSPIN data directories (*.zip)",
     ]
     kwargs["protocol"] = ["topspin"]
-
     importer = Importer()
     return importer(*paths, **kwargs)
 
@@ -798,8 +807,16 @@ def _get_files(path, typ="acqu"):
 
 @importermethod
 def _read_topspin(*args, **kwargs):
-    debug_("Bruker TOPSPIN import")
-
+    debug_("Bruker TOPSPIN file reading")
+    if not HAS_NMRGLUE:
+        exception_(
+            ImportError(
+                "nmrglue package is needed for reading TOPSPIN files.\n"
+                "Install it using pip:\n"
+                "\tpip install "
+                "git+https://github.com/jjhelmus/nmrglue.git"
+            )
+        )
     dataset, path = args
     #    content = kwargs.get('content', None)
 

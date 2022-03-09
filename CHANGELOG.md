@@ -6,7 +6,9 @@
 
 #### NEW FEATURES
 
-* add `BaselineCorrector()` widget  
+* Issue #402: Install using pip improved.
+
+* add `BaselineCorrector()` widget
 
 * `read_srs()` now allows extracting background interferogram or spectrum
 
@@ -16,7 +18,7 @@
 
 #### BUGS FIXED
 
-* fix bug in read_srs 
+* fix bug in read_srs
 
 * fix gettingstarted/overview.py after IRIS refactoring
 

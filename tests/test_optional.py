@@ -24,11 +24,6 @@ def test_import_optional():
     assert result is None
 
 
-def test_cantera_version_fallback():
-    pytest.importorskip("cantera")
-    import_optional_dependency("cantera")
-
-
 def test_bad_version(monkeypatch):
     name = "fakemodule"
     module = types.ModuleType(name)
