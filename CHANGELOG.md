@@ -10,6 +10,8 @@
 
 * Improve `pip` installation (see Issue #402)
 
+* Make `widget` as the default backend for matplotlib plots.
+
 * Add `BaselineCorrector()` widget.
 
 * Add `download_nist_ir()` to download IR spectra from NIST/webbook.
