@@ -8,7 +8,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "name",
     nargs="?",
-    default="scpy.yml",
+    default="scpy3.10.yml",
     help="name of the output yml file (ext must be .yml!) ",
 )
 parser.add_argument(

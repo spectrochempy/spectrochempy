@@ -11,7 +11,7 @@ on:
   pull_request:
 
   workflow_dispatch:
-  
+
 jobs:
 
   # Job 1
@@ -55,6 +55,11 @@ jobs:
           python .ci/env_create.py -v 3.9 --dev scpy3.9.yml
           mv .ci/scpy3.9.yml artifact/scpy3.9.yml
 
+      - name: Create environment scpy3.10
+        run: |
+          python .ci/env_create.py -v 3.10 --dev scpy3.10.yml
+          mv .ci/scpy3.10.yml artifact/scpy3.10.yml
+
       - name: Store artifact
         uses: actions/upload-artifact@v2
         with:
@@ -79,8 +84,8 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        os: [ubuntu-latest, windows-latest] #, macOS-latest]
-        pythonVersion: ["3.9", "3.7"]
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        pythonVersion: ["3.10", "3.9", "3.7"]
 
     steps:
       - name: Checkout code
@@ -112,7 +117,7 @@ jobs:
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         run: |
-          # check for CC_TEST_REPORTER_ID availability 
+          # check for CC_TEST_REPORTER_ID availability
           unset HAS_CC_TEST_REPORTER_ID
           if [ ! -z $CC_TEST_REPORTER_ID ]; then HAS_CC_TEST_REPORTER_ID='true' ; fi
           echo set-output name=HAS_CC_TEST_REPORTER_ID::${HAS_CC_TEST_REPORTER_ID}

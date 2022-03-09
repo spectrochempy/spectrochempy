@@ -36,8 +36,8 @@ dependencies:
     - ipython>=7.31.1
     - jinja2
     - matplotlib>=3.5
-    - numba
-    - numpy>=1.21.0
+    - numba=0.55.0
+    - numpy=1.21.5
     - orderedset
     - pint=0.16.1
     - plotly
@@ -62,7 +62,7 @@ dependencies:
     - jupyterlab>=2.2.10
     - nodejs
 
-
+    
     # DEV dependencies
     # ----------------
     # From here, the dependencies are essentially for development.
@@ -102,7 +102,8 @@ dependencies:
     # - xarray
     # - datashader
     # - scikit-learn
-
+    
     - pip
     - pip:
+
         - autodoc_traits
