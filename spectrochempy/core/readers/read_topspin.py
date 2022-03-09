@@ -17,22 +17,13 @@ import re
 import numpy as np
 from quaternion import as_quat_array
 
-from spectrochempy.core import debug_, warning_
+from spectrochempy.core import debug_
 from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.core.dataset.coord import LinearCoord
 from spectrochempy.core.units import ur
 from spectrochempy.utils.exceptions import deprecated
 from spectrochempy.core.readers.importer import Importer, importermethod
-from spectrochempy.optional import import_optional_dependency
-
-HAS_NMRGLUE = False
-ng = import_optional_dependency("nmrglue.fileio.bruker", errors="ignore")
-
-if ng is not None:
-    read_fid = ng.read
-    read_pdata = ng.read_pdata
-    read_lowmem = ng.read_lowmem
-    HAS_NMRGLUE = True
+from spectrochempy.utils.nmrglue import read_fid, read_pdata
 
 # ======================================================================================================================
 # Constants
@@ -809,25 +800,10 @@ def _get_files(path, typ="acqu"):
 def _read_topspin(*args, **kwargs):
     debug_("Bruker TOPSPIN file reading")
     dataset, path = args
-
-    if not HAS_NMRGLUE:
-        warning_(
-            ImportError(
-                "nmrglue package is needed for reading TOPSPIN files.\n"
-                "Install it using pip:\n"
-                "\tpip install "
-                "git+https://github.com/jjhelmus/nmrglue.git"
-            )
-        )
-        return dataset
-
     #    content = kwargs.get('content', None)
 
     # is-it a processed dataset (1r, 2rr ....
     processed = True if path.match("pdata/*/*") else False
-
-    # low memory handling (lowmem) ?
-    lowmem = kwargs.get("lowmem", False)  # load all in numero by default
 
     # ------------------------------------------------------------------------
     # start reading ....
@@ -858,14 +834,7 @@ def _read_topspin(*args, **kwargs):
 
     if not processed:
 
-        if not lowmem:
-            dic, data = read_fid(
-                f_expno, acqus_files=acqus_files, procs_files=procs_files
-            )
-        else:
-            dic, data = read_lowmem(
-                f_expno, acqus_files=acqus_files, procs_files=procs_files
-            )
+        dic, data = read_fid(f_expno, acqus_files=acqus_files, procs_files=procs_files)
 
         # apply a -90 phase shift to be compatible with topspin
         data = data * np.exp(-1j * np.pi / 2.0)

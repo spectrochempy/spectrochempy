@@ -33,4 +33,3 @@ ipywidgets
 ipympl
 jupyterlab>=2.2.10
 nodejs
-git+https://github.com/jjhelmus/nmrglue.git

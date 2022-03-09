@@ -54,5 +54,4 @@ json5
 sphinx-copybutton
 numpydoc
 pandoc
-git+https://github.com/jjhelmus/nmrglue.git
 autodoc_traits

@@ -6,21 +6,23 @@
 
 #### NEW FEATURES
 
-* Issue #402: Install using pip improved.
+* Remove the dependency to `nmrglue`.
 
-* add `BaselineCorrector()` widget
+* Improve `pip` installation (see Issue #402)
 
-* `read_srs()` now allows extracting background interferogram or spectrum
+* Add `BaselineCorrector()` widget.
 
-* add `download_nist_ir()` to download IR spectra from NIST/webbook
+* Add `download_nist_ir()` to download IR spectra from NIST/webbook.
 
-* `read_spa()` now allows extracting sample and background interferograms
+* Allow extracting background interferogram or spectrum in `read_srs()`.
+
+* Allow extracting sample and background interferograms in `read_spa()`.
 
 #### BUGS FIXED
 
-* fix bug in read_srs
+* Fix bug in `read_srs`.
 
-* fix gettingstarted/overview.py after IRIS refactoring
+* Fix gettingstarted/overview.py after IRIS refactoring.
 
 ### version 0.3.2
 
