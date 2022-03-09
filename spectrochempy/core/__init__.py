@@ -480,7 +480,9 @@ class _TKFileDialogs:  # pragma: no cover
     def _open_existing_directory(parent=None, caption="Select a folder", directory=""):
 
         directory = filedialog.askdirectory(
-            parent=parent, initialdir=directory, title=caption
+            # parent=parent,
+            initialdir=directory,
+            title=caption,
         )
 
         if directory:
@@ -516,7 +518,7 @@ class _TKFileDialogs:  # pragma: no cover
     ):
 
         filename = filedialog.askopenfilename(
-            parent=parent,
+            # parent=parent,
             filetypes=self.filetypes(filters),
             title="Select file to open",
         )
@@ -535,7 +537,7 @@ class _TKFileDialogs:  # pragma: no cover
         Return one or several files to open
         """
         filename = filedialog.askopenfilenames(
-            parent=parent,
+            # parent=parent,
             filetypes=self.filetypes(filters) + [("all files", ("*"))],
             title="Select file(s) to open",
         )
@@ -549,7 +551,11 @@ class _TKFileDialogs:  # pragma: no cover
         return None
 
     def _save_filename(
-        self, parent=None, filename="", caption="Save as...", filters=None
+        self,
+        # parent=None,
+        filename="",
+        caption="Save as...",
+        filters=None,
     ):
 
         from ..utils import pathclean

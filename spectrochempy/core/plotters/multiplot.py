@@ -239,6 +239,7 @@ def multiplot(
         fig = plt.figure(figsize=figsize, dpi=dpi)
     else:
         fig.clf()
+        fig.set_size_inches(*figsize)
 
     fig.rcParams = plt.rcParams.copy()  # save params used for this figure
 
@@ -412,7 +413,7 @@ def multiplot(
             axeslist,
             subplots_list,
             renderer,
-            pad=1.1,
+            # pad=1.1,
             h_pad=0,
             w_pad=0,
             rect=None,
