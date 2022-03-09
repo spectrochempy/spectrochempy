@@ -62,7 +62,7 @@ dependencies:
     - jupyterlab>=2.2.10
     - nodejs
 
-    
+
     # DEV dependencies
     # ----------------
     # From here, the dependencies are essentially for development.
@@ -102,8 +102,7 @@ dependencies:
     # - xarray
     # - datashader
     # - scikit-learn
-    
+
     - pip
     - pip:
-        - git+https://github.com/jjhelmus/nmrglue.git
         - autodoc_traits

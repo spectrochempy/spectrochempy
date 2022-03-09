@@ -17,13 +17,13 @@ import re
 import numpy as np
 from quaternion import as_quat_array
 
-from nmrglue.fileio.bruker import read as read_fid, read_pdata, read_lowmem
 from spectrochempy.core import debug_
 from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.core.dataset.coord import LinearCoord
 from spectrochempy.core.units import ur
 from spectrochempy.utils.exceptions import deprecated
 from spectrochempy.core.readers.importer import Importer, importermethod
+from spectrochempy.utils.nmrglue import read_fid, read_pdata
 
 # ======================================================================================================================
 # Constants
@@ -765,12 +765,12 @@ def read_topspin(*paths, **kwargs):
     read_zip : Read Zip files.
     read_matlab : Read Matlab files.
     """
+
     kwargs["filetypes"] = [
         "Bruker TOPSPIN fid's or processed data files (fid ser 1[r|i] 2[r|i]* 3[r|i]*)",
         "Compressed TOPSPIN data directories (*.zip)",
     ]
     kwargs["protocol"] = ["topspin"]
-
     importer = Importer()
     return importer(*paths, **kwargs)
 
@@ -798,16 +798,12 @@ def _get_files(path, typ="acqu"):
 
 @importermethod
 def _read_topspin(*args, **kwargs):
-    debug_("Bruker TOPSPIN import")
-
+    debug_("Bruker TOPSPIN file reading")
     dataset, path = args
     #    content = kwargs.get('content', None)
 
     # is-it a processed dataset (1r, 2rr ....
     processed = True if path.match("pdata/*/*") else False
-
-    # low memory handling (lowmem) ?
-    lowmem = kwargs.get("lowmem", False)  # load all in numero by default
 
     # ------------------------------------------------------------------------
     # start reading ....
@@ -838,14 +834,7 @@ def _read_topspin(*args, **kwargs):
 
     if not processed:
 
-        if not lowmem:
-            dic, data = read_fid(
-                f_expno, acqus_files=acqus_files, procs_files=procs_files
-            )
-        else:
-            dic, data = read_lowmem(
-                f_expno, acqus_files=acqus_files, procs_files=procs_files
-            )
+        dic, data = read_fid(f_expno, acqus_files=acqus_files, procs_files=procs_files)
 
         # apply a -90 phase shift to be compatible with topspin
         data = data * np.exp(-1j * np.pi / 2.0)

@@ -61,8 +61,3 @@ dependencies:
     - ipympl
     - jupyterlab>=2.2.10
     - nodejs
-
-    
-    - pip
-    - pip:
-        - git+https://github.com/jjhelmus/nmrglue.git

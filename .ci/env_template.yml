@@ -119,7 +119,6 @@ dependencies:
     {%- endif %}
     - pip
     - pip:
-        - git+https://github.com/jjhelmus/nmrglue.git
         {%- if DEV %}
         - autodoc_traits
         {%- endif %}
