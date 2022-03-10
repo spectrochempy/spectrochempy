@@ -248,8 +248,7 @@ class Importer(HasTraits):
         if merged:
             # Try to stack the dataset into a single one
             try:
-                homogeneous = kwargs.pop("homogeneous", True)
-                dataset = self.objtype.stack(datasets, homogeneous=homogeneous)
+                dataset = self.objtype.stack(datasets)
                 if dataset.coordset is not None and kwargs.pop("sortbydate", True):
                     dataset.sort(dim="y", inplace=True)
                     dataset.history = (
@@ -313,10 +312,6 @@ def read(*paths, **kwargs):
         Default value is False. If True, and several filenames have been provided as arguments,
         then a single dataset with merged (stacked along the first
         dimension) is returned (default=False).
-    homogeneous : bool, optional, default=False
-        If True, the datasets extracted from each file are assumed to homogeneous: same shapes, same coordinates and
-        labels all dimensions but one (along which the merge will be applied), same units, etc... This avoids many
-        checks and save times when reading hundreds or thousands files.
     sortbydate : bool, optional
         Sort multiple spectra by acquisition date (default=True).
     description : str, optional
