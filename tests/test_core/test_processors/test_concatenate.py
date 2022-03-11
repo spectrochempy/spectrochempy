@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa
 
-
+from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.processors.concatenate import concatenate, stack
 from spectrochempy.core.units import ur
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.utils.testing import assert_dataset_almost_equal
 from spectrochempy.utils import show
+from spectrochempy.utils.exceptions import DimensionsCompatibilityError
+
+import pytest
 
 
 def test_concatenate(IR_dataset_2D):
@@ -59,7 +62,7 @@ def test_concatenate(IR_dataset_2D):
     assert s.shape[0] == (s1.shape[0] + s2.shape[0])
     assert s.y.size == (s1.y.size + s2.y.size)
 
-    # concatenation in the first dimenson using stack
+    # concatenation in the first dimension using stack
     s = stack(s1, s2)
     assert s.units == s1.units
     assert s.shape[0] == (s1.shape[0] + s2.shape[0])
@@ -77,6 +80,22 @@ def test_concatenate(IR_dataset_2D):
     ss = s0.concatenate(s1, force_stack=True)
     assert s0.shape == (1, 5549)
     assert ss.shape == (2, 5549)
+
+    # if incompatible dimensions
+    s0 = s[0, :1000]
+    s1 = s[1]
+    with pytest.raises(DimensionsCompatibilityError):
+        s0.concatenate(s1, force_stack=True)
+    s0 = s[0]
+    s1 = s[1].squeeze()
+    with pytest.raises(DimensionsCompatibilityError):
+        s0.concatenate(s1, force_stack=True)
+
+    s0 = s[0]
+    s1 = s[1]
+    s0.author = "sdqe65g4rf"
+    s2 = concatenate(s0, s1)
+    assert "sdqe65g4rf" in s2.author and s1.author in s2.author
 
     # stack squeezed nD dataset
     s0 = s[0].copy().squeeze()

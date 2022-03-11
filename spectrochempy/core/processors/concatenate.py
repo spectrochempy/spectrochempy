@@ -103,143 +103,145 @@ def concatenate(*datasets, **kwargs):
         if isinstance(datasets[0], (list, tuple)):
             datasets = datasets[0]
 
-    # make a copy of the objects (in order that input data are not modified)
+    # make a first copy of the objects in order that input data are not modified
     datasets = [ds.copy() for ds in datasets]
-
+    # and a second one in case the first run (assuming homogeneous datasets for fast processing, is failing)
+    datasets_bak = [ds.copy() for ds in datasets]
     # a flag to force stacking of dataset instead of the default concatenation
     force_stack = kwargs.get("force_stack", False)
 
-    # try assuming homogeneous NDDataset
+    if force_stack:
+        # when stacking, we add a new first dimension except if this dimension is of size one,
+        # in this case we use this dimension for stacking. Here we assume that all datasets have
+        # the same shape, if not an error will be catched below
+
+        if datasets[0].shape[0] != 1:
+            for i, dataset in enumerate(datasets):
+                datasets[i] = _prepend_dim(dataset, i)
+
+        axis, dim = datasets[0].get_axis(dim=0)
+
+    else:
+        # get axis from arguments (or set it to the default)
+        axis, dim = datasets[0].get_axis(**kwargs)
+
+    units = datasets[0].units
+
+    # concatenate or stack the data array + mask
+    # ------------------------------------------------------------------------
+
+    sss = []
+    for i, dataset in enumerate(datasets):
+        d = dataset.masked_data
+        sss.append(d)
+
     try:
-        if force_stack:
-            # when stacking, we add a new first dimension except if this dimension is of size one,
-            # in this case we use this dimension for stacking
+        sconcat = np.ma.concatenate(sss, axis=axis)
 
-            if datasets[0].shape[0] != 1:
-                for i, dataset in enumerate(datasets):
-                    datasets[i] = _prepend_dim(dataset, i)
+    except ValueError:
+        # probably a dimension mismatch, we need to get the shapes and ndims for comparison
+        datasets = datasets_bak
+        rshapes = []
+        rndims = []
+        for item in datasets:
+            sh = list(item.shape)
+            rshapes.append(sh)
+            rndims.append(len(sh))
 
-            axis, dim = datasets[0].get_axis(dim=0)
-
-        else:
-            # get axis from arguments (or set it to the default)
-            axis, dim = datasets[0].get_axis(**kwargs)
-
-        units = datasets[0].units
-        coords = datasets[0].coordset
-
-        if coords is not None:
-            # check labels, coords type and concatenate them
-
-            labels = []
-            if coords[dim].implements() in ["Coord", "LinearCoord"]:
-                if coords[dim].is_labeled:
-                    for ds in datasets:
-                        labels.append(ds.coordset[dim].labels)
-                    coords[dim]._labels = np.concatenate(labels)
-
-            if coords[dim].implements("CoordSet"):
-                for coord in coords[dim]:
-                    if coord.is_labeled:
-                        for ds in datasets:
-                            labels.append(ds.coordset[dim].labels)
-
-                    for i, coord in enumerate(coords[dim]):
-                        coord._labels = np.concatenate(labels[i :: len(coords[dim])])
-
-            coords[dim] = Coord(coords[dim], linear=False)
-            coords[dim]._data = np.concatenate(
-                tuple((ds.coordset[dim].data for ds in datasets))
+        # In any case the number of dimensions is expected to be the same for all datasets
+        if len(list(set(rndims))) > 1:
+            raise DimensionsCompatibilityError(
+                "Only NDDataset with the same number of dimensions can be concatenated."
             )
 
-        # concatenate or stack the data array + mask
-        # ------------------------------------------------------------------------
+        rcompat = list(map(list, list(map(set, list(zip(*rshapes))))))
 
+        if force_stack:
+            if len(set(list(map(len, rcompat)))) != 1:
+                warn(
+                    "These datasets have not the same shape, so they cannot be stacked. By default they will be "
+                    "concatenated along the first dimension.",
+                    category=SpectroChemPyWarning,
+                )
+                axis, dim = datasets[0].get_axis(dim=0)
+
+        # now check if data shapes are compatible (all dimension must have the same size
+        # except the one to be concatenated)
+        for i, item in enumerate(zip(*rshapes)):
+            if i != axis and len(set(item)) > 1:
+                raise DimensionsCompatibilityError(
+                    "Datasets must have the same shape for all dimensions except the one along which the"
+                    " concatenation is performed"
+                )
         sss = []
         for i, dataset in enumerate(datasets):
             d = dataset.masked_data
             sss.append(d)
 
-        try:
-            sconcat = np.ma.concatenate(sss, axis=axis)
+        # retry
+        sconcat = np.ma.concatenate(sss, axis=axis)
 
-        except ValueError as e:
-            print(f"---err sconcat = np.ma.concatenate(sss, axis=axis): {e}")
-            # probably a dimension mismatch
-            # get the shapes and ndims for comparison
-            rshapes = []
-            rndims = []
-            for item in datasets:
-                sh = list(item.shape)
-                rshapes.append(sh)
-                rndims.append(len(sh))
+    data = np.asarray(sconcat)
+    mask = sconcat.mask
 
-            # The number of dimensions is expected to be the same for all datasets
-            if len(list(set(rndims))) > 1:
-                raise DimensionsCompatibilityError(
-                    "Only NDDataset with the same number of dimensions can be concatenated."
-                )
+    # now manage coordinates and labels
+    coords = datasets[0].coordset
 
-            rcompat = list(map(list, list(map(set, list(zip(*rshapes))))))
+    if coords is not None:
+        # check labels, coords type and concatenate them
 
-            if force_stack:
-                # in
-                if len(set(list(map(len, rcompat)))) != 1:
-                    warn(
-                        "These datasets have not the same shape, so they cannot be stacked. By default they will be "
-                        "concatenated along the first dimension.",
-                        category=SpectroChemPyWarning,
-                    )
-                    axis, dim = datasets[0].get_axis(dim=0)
+        labels = []
+        if coords[dim].implements() in ["Coord", "LinearCoord"]:
+            if coords[dim].is_labeled:
+                for ds in datasets:
+                    labels.append(ds.coordset[dim].labels)
+                coords[dim]._labels = np.concatenate(labels)
 
-            # now check if data shapes are compatible (all dimension must have the same size
-            # except the one to be concatenated)
-            for i, item in enumerate(zip(*rshapes)):
-                if i != axis and len(set(item)) > 1:
-                    raise DimensionsCompatibilityError(
-                        "Datasets must have the same shape for all dimensions except the one along which the"
-                        " concatenation is performed"
-                    )
+        if coords[dim].implements("CoordSet"):
+            for coord in coords[dim]:
+                if coord.is_labeled:
+                    for ds in datasets:
+                        labels.append(ds.coordset[dim].labels)
 
-            # retry
-            sconcat = np.ma.concatenate(sss, axis=axis)
+                for i, coord in enumerate(coords[dim]):
+                    coord._labels = np.concatenate(labels[i :: len(coords[dim])])
 
-        data = np.asarray(sconcat)
-        mask = sconcat.mask
+        coords[dim] = Coord(coords[dim], linear=False)
+        coords[dim]._data = np.concatenate(
+            tuple((ds.coordset[dim].data for ds in datasets))
+        )
 
-        out = dataset.copy()
-        out._data = data
-        if coords is not None:
-            out._coordset[dim] = coords[dim]
-        out._mask = mask
-        out._units = units
+    out = dataset.copy()
+    out._data = data
+    if coords is not None:
+        out._coordset[dim] = coords[dim]
+    out._mask = mask
+    out._units = units
 
-        thist = "Stack" if axis == 0 else "Concatenation"
+    thist = "Stack" if axis == 0 else "Concatenation"
 
-        out.description = "{} of {}  datasets:\n".format(thist, len(datasets))
-        out.description += "( {}".format(datasets[0].name)
-        out.title = datasets[0].title
-        authortuple = (datasets[0].author,)
+    out.description = "{} of {}  datasets:\n".format(thist, len(datasets))
+    out.description += "( {}".format(datasets[0].name)
+    out.title = datasets[0].title
+    authortuple = (datasets[0].author,)
 
-        for dataset in datasets[1:]:
+    for dataset in datasets[1:]:
 
-            if out.title != dataset.title:
-                warn("Different data title => the title is that of the 1st dataset")
+        if out.title != dataset.title:
+            warn("Different data title => the title is that of the 1st dataset")
 
-            if not (dataset.author in authortuple):
-                authortuple = authortuple + (dataset.author,)
-                out.author = out.author + " & " + dataset.author
+        if not (dataset.author in authortuple):
+            authortuple = authortuple + (dataset.author,)
 
-            out.description += ", {}".format(dataset.name)
+        out.author = " & ".join([str(author) for author in authortuple])
 
-        out.description += " )"
-        out._date = out._modified = datetime.datetime.now(datetime.timezone.utc)
-        out._history = [str(out.date) + ": Created by %s" % thist]
+        out.description += ", {}".format(dataset.name)
 
-        return out
+    out.description += " )"
+    out._date = out._modified = datetime.datetime.now(datetime.timezone.utc)
+    out._history = [str(out.date) + ": Created by %s" % thist]
 
-    except Exception as e:
-        print(f"oups : {e}")
+    return out
 
     # except Exception:
     #     # there has been an error, could be due incompatible units, missing labels...
@@ -369,6 +371,10 @@ def stack(*datasets, **kwargs):
     """
 
     return concatenate(*datasets, force_stack=True, **kwargs)
+
+
+# utility functions
+# --------------------
 
 
 def _prepend_dim(dataset, coord_value):
