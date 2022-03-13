@@ -2317,17 +2317,19 @@ class NDArray(HasTraits):
                             udata = (new.data * new.units).to(units)
                             new._data = -np.log10(udata.m)
                             new._units = units
-                            if new.title.lower() == "transmittance":
-                                new._title = "absorbance"
+                            new._title = str(oldunits)
+
+                        elif "transmittance" in str(oldunits):
+                            new._data = (new.data * new.units).to(units)
+                            new._units = units
+                            new._title = str(oldunits)
 
                     elif str(oldunits) == "absorbance":
                         if str(units) in ["transmittance", "absolute_transmittance"]:
                             scale = Quantity(1.0, self._units).to(units).magnitude
                             new._data = 10.0 ** -new.data * scale
                             new._units = units
-                            if new.title.lower() == "absorbance":
-                                new._title = "transmittance"
-
+                            new._title = str(oldunits)
                     else:
                         new = self._unittransform(new, units)
                         # change the title for spectrocopic units change
