@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa
 
-from spectrochempy.core.dataset.nddataset import NDDataset
+import numpy as np
+
+import spectrochempy as scp
 from spectrochempy.core.processors.concatenate import concatenate, stack
 from spectrochempy.core.units import ur
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.utils.testing import assert_dataset_almost_equal
-from spectrochempy.utils import show
 from spectrochempy.utils.exceptions import DimensionsCompatibilityError
 
 import pytest
@@ -21,7 +22,7 @@ def test_concatenate(IR_dataset_2D):
 
     # specify axis
     dim = "x"
-    s = concatenate(s1, s2, dims=dim)
+    s = concatenate(s1, s2, dim=dim)
     assert s.units == s1.units
     assert s.shape[-1] == (s1.shape[-1] + s2.shape[-1])
     assert s.x.size == (s1.x.size + s2.x.size)
@@ -62,50 +63,57 @@ def test_concatenate(IR_dataset_2D):
     assert s.shape[0] == (s1.shape[0] + s2.shape[0])
     assert s.y.size == (s1.y.size + s2.y.size)
 
-    # concatenation in the first dimension using stack
-    s = stack(s1, s2)
-    assert s.units == s1.units
-    assert s.shape[0] == (s1.shape[0] + s2.shape[0])
-    assert s.y.size == (s1.y.size + s2.y.size)
-
-    # Stacking of datasets:
-    # for nDimensional datasets (with the same shape), a new dimension is added
-    ss = concatenate(s.copy(), s.copy(), force_stack=True)  # make a copy of s
-    # (dataset cannot be concatenated to itself!)
-    assert ss.shape == (2, 45, 5549)
-
-    # If one of the dimensions is of size one, then this dimension is removed before stacking
-    s0 = s[0]
-    s1 = s[1]
-    ss = s0.concatenate(s1, force_stack=True)
-    assert s0.shape == (1, 5549)
-    assert ss.shape == (2, 5549)
-
-    # if incompatible dimensions
-    s0 = s[0, :1000]
-    s1 = s[1]
-    with pytest.raises(DimensionsCompatibilityError):
-        s0.concatenate(s1, force_stack=True)
-    s0 = s[0]
-    s1 = s[1].squeeze()
-    with pytest.raises(DimensionsCompatibilityError):
-        s0.concatenate(s1, force_stack=True)
-
     s0 = s[0]
     s1 = s[1]
     s0.author = "sdqe65g4rf"
     s2 = concatenate(s0, s1)
     assert "sdqe65g4rf" in s2.author and s1.author in s2.author
 
-    # stack squeezed nD dataset
-    s0 = s[0].copy().squeeze()
-    assert s0.shape == (5549,)
-    s1 = s[1].squeeze()
-    assert s1.shape == (5549,)
-    ss = concatenate(s0, s1, force_stack=True)
-    assert ss.shape == (2, 5549)
+    # incompatible dimensions
+    s0 = scp.NDDataset(np.zeros((10, 100)))
+    s1 = scp.NDDataset(np.zeros((1, 100)))
+    with pytest.raises(DimensionsCompatibilityError):
+        s0.concatenate(s1[0].squeeze())
 
-    show()
+    with pytest.raises(DimensionsCompatibilityError):
+        s0.concatenate(s1[:, 50])
+
+    # incompatible units
+    s0 = scp.NDDataset(np.zeros((10, 100)), units="V")
+    s1 = scp.NDDataset(np.zeros((10, 100)), units="A")
+    with pytest.raises(ValueError):
+        scp.concatenate(s0, s1)
+
+    s1 = scp.NDDataset(np.ones((10, 100)), units="mV")
+    s01 = scp.concatenate(s0, s1)
+    assert s01.data[-1, -1] == 0.001
+
+    # -------------------
+    # Stack
+
+    # concatenation using stack
+    s1 = dataset[:10]
+    s2 = dataset[-10:]
+    s = stack(s1, s2)
+    assert s.units == s1.units
+    assert s.shape == (2, s1.shape[0], s1.shape[1])
+    assert s.y.size == s1.y.size
+    assert s.x.size == s1.x.size
+
+    # If one of the dimensions is of size one, then this dimension is NOT removed before stacking
+    s0 = dataset[0]
+    s1 = dataset[1]
+    ss = stack(s0, s1)
+    assert s0.shape == (1, 5549)
+    assert ss.shape == (2, s1.shape[0], s1.shape[1])
+
+    # # stack squeezed nD dataset
+    s0 = dataset[0].copy().squeeze()
+    assert s0.shape == (5549,)
+    s1 = dataset[1].squeeze()
+    assert s1.shape == (5549,)
+    s = stack(s0, s1)
+    assert s.shape == (2, 5549)
 
 
 def test_bug_243():
