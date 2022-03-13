@@ -7,6 +7,9 @@
 #### NEW FEATURES
 * Compatibility with Python 3.10
 
+#### BUG FIXED
+* Transmittance and absorbance units now correctly handled
+
 ### version 0.3.3
 
 #### NEW FEATURES
