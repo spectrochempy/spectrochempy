@@ -39,7 +39,7 @@ dependencies:
     - numba=0.55.0
     - numpy=1.21.5
     - orderedset
-    - pint=0.16.1
+    - pint
     - plotly
     - requests
     - scipy=1.7.3
@@ -62,5 +62,5 @@ dependencies:
     - jupyterlab>=2.2.10
     - nodejs
 
-    
+
     - pip

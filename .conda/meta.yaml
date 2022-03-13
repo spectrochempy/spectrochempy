@@ -46,7 +46,7 @@ requirements:
     - matplotlib-base
     - numpy
     - orderedset
-    - pint=0.16.1
+    - pint
     - plotly
     - requests
     - scipy

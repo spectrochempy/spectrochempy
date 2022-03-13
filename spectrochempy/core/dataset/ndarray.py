@@ -968,7 +968,7 @@ class NDArray(HasTraits):
                 data = ""
                 if self.implements("Coord") or self.implements("LinearCoord"):
                     size = f" (size: {self.data.size})"
-                units = " {:~K}".format(self.units) if self.has_units else " unitless"
+                units = " {:~P}".format(self.units) if self.has_units else " unitless"
 
             else:
                 # no data but labels
@@ -1097,7 +1097,7 @@ class NDArray(HasTraits):
         return out
 
     # ..........................................................................
-    def _str_value(self, sep="\n", ufmt=" {:~K}", header="         data: ... \n"):
+    def _str_value(self, sep="\n", ufmt=" {:~P}", header="         data: ... \n"):
         # prefix = ['']
         if self.is_empty and "data: ..." not in header:
             return header + "{}".format(textwrap.indent("empty", " " * 9))

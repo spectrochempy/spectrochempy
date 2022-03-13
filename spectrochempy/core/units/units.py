@@ -24,13 +24,11 @@ from pint import (
     set_application_registry,
     UnitRegistry,
     DimensionalityError,
-    formatting,
     Context,
 )
 
-# from pint.measurement import _Measurement as Measure
-from pint.unit import UnitsContainer, _Unit as Unit, UnitDefinition
-from pint.quantity import _Quantity as Quantity
+from pint.unit import UnitsContainer, Unit, UnitDefinition
+from pint.quantity import Quantity
 from pint.formatting import siunitx_format_unit
 from pint.converters import ScaleConverter
 
@@ -38,61 +36,6 @@ from pint.converters import ScaleConverter
 # Modify the pint behaviour
 # ======================================================================================================================
 #  TODO: better ways ??
-
-_PRETTY_EXPONENTS = "⁰¹²³⁴⁵⁶⁷⁸⁹"
-
-
-# ------------------------------------------------------------------
-def _pretty_fmt_exponent(num):
-    """
-    Format a number into a pretty printed exponent using unicode.
-    """
-    # work badly for decimals as superscript dot do not exist in unicode
-    # (as far as we know)
-    ret = "{0:n}".format(num).replace("-", "⁻").replace(".", "\u22C5")
-    for n in range(10):
-        ret = ret.replace(str(n), _PRETTY_EXPONENTS[n])
-    return ret
-
-
-formats = {
-    "P": {  # Pretty format.
-        "as_ratio": False,  # True in pint
-        "single_denominator": False,
-        "product_fmt": "·",
-        "division_fmt": "/",
-        "power_fmt": "{}{}",
-        "parentheses_fmt": "({})",
-        "exp_call": _pretty_fmt_exponent,
-    },
-    "L": {  # spectrochempy Latex format.
-        "as_ratio": False,  # True in pint
-        "single_denominator": True,
-        "product_fmt": r" \cdot ",
-        "division_fmt": r"\frac[{}][{}]",
-        "power_fmt": "{}^[{}]",
-        "parentheses_fmt": r"\left({}\right)",
-    },
-    "H": {  # spectrochempy HTML format.
-        "as_ratio": False,  # True in pint
-        "single_denominator": False,
-        "product_fmt": r".",
-        "division_fmt": r"{}/{}",
-        "power_fmt": "{}<sup>{}</sup>",
-        "parentheses_fmt": r"{}",
-    },
-    "K": {  # spectrochempy Compact format.
-        "as_ratio": False,
-        "single_denominator": False,
-        "product_fmt": ".",
-        "division_fmt": "/",
-        "power_fmt": "{}^{}",
-        "parentheses_fmt": r"({})",
-    },
-}
-
-formatting._FORMATS.update(formats)
-formatting._KNOWN_TYPES = frozenset(list(formatting._FORMATS.keys()) + ["~"])
 
 
 def _repr_html_(cls):
@@ -126,7 +69,7 @@ def __format__(self, spec):
         return r"\si[]{%s}" % siunitx_format_unit(self)
 
     if (
-        "~" in spec or "K" in spec or "T" in spec or "L" in spec
+        "~" in spec or "P" in spec or "T" in spec or "L" in spec
     ):  # spectrochempy modified
         if self.dimensionless and "absorbance" not in self._units:
             if self._units == "ppm":
@@ -186,9 +129,9 @@ if globals().get("U_", None) is None:
     U_.define(UnitDefinition("percent", "pct", (), ScaleConverter(1 / 100.0)))
     U_.define(UnitDefinition("weight_percent", "wt_pct", (), ScaleConverter(1 / 100.0)))
 
-    U_.default_format = ""  # .2fK'
+    U_.default_format = ""
     Q_ = U_.Quantity
-    Q_.default_format = ""  # .2fK'
+    Q_.default_format = ""
 
     set_application_registry(U_)
     del UnitRegistry  # to avoid importing it
