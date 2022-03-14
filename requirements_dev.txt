@@ -52,6 +52,6 @@ nbsphinx==0.8.1
 jupyter_sphinx
 json5
 sphinx-copybutton
-numpydoc
+numpydoc>=1.2
 pandoc
 autodoc_traits
