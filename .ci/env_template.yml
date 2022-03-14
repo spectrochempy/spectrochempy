@@ -97,7 +97,7 @@ dependencies:
     - jupyter_sphinx
     - json5
     - sphinx-copybutton
-    - numpydoc
+    - numpydoc>=1.2
     - pandoc
 
     # DEV: build
