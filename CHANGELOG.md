@@ -5,13 +5,15 @@
 ### version 0.4.0
 
 #### BREAKING CHANGES
-* Requires pint>=0.18
+* Requires pint >= 0.18
 
 #### NEW FEATURES
 * Compatibility with Python 3.10
+  - Spectrochempy is tested with 3.10, 3.9 version of python, and on Windows and linux platform. Older versions > 3.6 of python or different platforms may still work, but with no guaranty.
 
 #### BUG FIXED
-* Transmittance and absorbance units now correctly handled
+* Transmittance and absorbance units now correctly handled.
+* Save dialog selection.
 
 ## VERSION 0.3
 
