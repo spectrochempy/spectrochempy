@@ -24,6 +24,7 @@ from pint import (
     set_application_registry,
     UnitRegistry,
     DimensionalityError,
+    formatting,
     Context,
 )
 
@@ -35,7 +36,161 @@ from pint.converters import ScaleConverter
 # ======================================================================================================================
 # Modify the pint behaviour
 # ======================================================================================================================
-#  TODO: better ways ??
+
+formats = {
+    "P": {  # Pretty format.
+        "as_ratio": False,  # True in pint
+        "single_denominator": False,
+        "product_fmt": "·",
+        "division_fmt": "/",
+        "power_fmt": "{}{}",
+        "parentheses_fmt": "({})",
+        "exp_call": formatting._pretty_fmt_exponent,
+    },
+    "L": {  # Latex format.
+        "as_ratio": False,  # True in pint
+        "single_denominator": True,
+        "product_fmt": r" \cdot ",
+        "division_fmt": r"\frac[{}][{}]",
+        "power_fmt": "{}^[{}]",
+        "parentheses_fmt": r"\left({}\right)",
+    },
+    "H": {  # HTML format.
+        "as_ratio": False,  # True in pint
+        "single_denominator": False,
+        "product_fmt": r" ",
+        "division_fmt": r"{}/{}",
+        "power_fmt": r"{}<sup>{}</sup>",
+        "parentheses_fmt": r"({})",
+    },
+    "": {  # Default format.
+        "as_ratio": True,
+        "single_denominator": False,
+        "product_fmt": " * ",
+        "division_fmt": " / ",
+        "power_fmt": "{} ** {}",
+        "parentheses_fmt": r"({})",
+    },
+    "C": {  # Compact format.
+        "as_ratio": False,
+        "single_denominator": False,
+        "product_fmt": "*",  # TODO: Should this just be ''?
+        "division_fmt": "/",
+        "power_fmt": "{}**{}",
+        "parentheses_fmt": r"({})",
+    },
+    "K": {  # spectrochempy Compact format.
+        "as_ratio": False,
+        "single_denominator": False,
+        "product_fmt": ".",
+        "division_fmt": "/",
+        "power_fmt": "{}^{}",
+        "parentheses_fmt": r"({})",
+    },
+}
+
+del formatting._FORMATTERS["P"]
+
+
+@formatting.register_unit_format("P")
+def format_pretty(unit, registry, **options):
+    return formatting.formatter(
+        unit.items(),
+        as_ratio=False,
+        single_denominator=False,
+        product_fmt=".",
+        division_fmt="/",
+        power_fmt="{}{}",
+        parentheses_fmt="({})",
+        exp_call=formatting._pretty_fmt_exponent,
+        **options,
+    )
+
+
+@formatting.register_unit_format("K")
+def format_spectrochempy_compact(unit, registry, **options):
+    return formatting.formatter(
+        unit.items(),
+        as_ratio=False,
+        single_denominator=False,
+        product_fmt=".",
+        division_fmt="/",
+        power_fmt="{}^{}",
+        parentheses_fmt=r"({})",
+        **options,
+    )
+
+
+del formatting._FORMATTERS["L"]
+
+
+@formatting.register_unit_format("L")
+def format_latex(unit, registry, **options):
+    preprocessed = {
+        r"\mathrm{{{}}}".format(u.replace("_", r"\_")): p for u, p in unit.items()
+    }
+    formatted = formatting.formatter(
+        preprocessed.items(),
+        as_ratio=False,
+        single_denominator=True,
+        product_fmt=r" \cdot ",
+        division_fmt=r"\frac[{}][{}]",
+        power_fmt="{}^[{}]",
+        parentheses_fmt=r"\left({}\right)",
+        **options,
+    )
+    return formatted.replace("[", "{").replace("]", "}")
+
+
+del formatting._FORMATTERS["H"]
+
+
+@formatting.register_unit_format("H")
+def format_html(unit, registry, **options):
+    return formatting.formatter(
+        unit.items(),
+        as_ratio=False,
+        single_denominator=True,
+        product_fmt=r".",
+        division_fmt=r"{}/{}",
+        power_fmt=r"{}<sup>{}</sup>",
+        parentheses_fmt=r"({})",
+        **options,
+    )
+
+
+del formatting._FORMATTERS["D"]
+
+
+@formatting.register_unit_format("D")
+def format_default(unit, registry, **options):
+    return formatting.formatter(
+        unit.items(),
+        as_ratio=False,
+        single_denominator=False,
+        product_fmt=" * ",
+        division_fmt=" / ",
+        power_fmt="{} ** {}",
+        parentheses_fmt=r"({})",
+        **options,
+    )
+
+
+del formatting._FORMATTERS["C"]
+
+
+@formatting.register_unit_format("C")
+def format_compact(unit, registry, **options):
+    return formatting.formatter(
+        unit.items(),
+        as_ratio=False,
+        single_denominator=False,
+        product_fmt="*",
+        division_fmt="/",
+        power_fmt="{}**{}",
+        parentheses_fmt=r"({})",
+        **options,
+    )
 
 
 def _repr_html_(cls):
@@ -69,7 +224,7 @@ def __format__(self, spec):
         return r"\si[]{%s}" % siunitx_format_unit(self)
 
     if (
-        "~" in spec or "P" in spec or "T" in spec or "L" in spec
+        "~" in spec or "K" in spec or "T" in spec or "L" in spec
     ):  # spectrochempy modified
         if self.dimensionless and "absorbance" not in self._units:
             if self._units == "ppm":
