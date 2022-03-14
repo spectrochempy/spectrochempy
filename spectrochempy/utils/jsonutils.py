@@ -73,7 +73,6 @@ def json_serialiser(byte_obj, encoding=None):
     """
     from spectrochempy.core.dataset.ndplot import PreferencesSet
 
-    encoded = None
     if byte_obj is None:
         return None
 
@@ -98,67 +97,67 @@ def json_serialiser(byte_obj, encoding=None):
             # Warning with parent-> circular dependencies!
             if name != "parent":
                 dic[name] = json_serialiser(val, encoding=encoding)
-        encoded = dic
+        return dic
 
     elif isinstance(byte_obj, (str, int, float, bool)):
-        encoded = byte_obj
+        return byte_obj
 
     elif isinstance(byte_obj, np.bool_):
-        encoded = bool(byte_obj)
+        return bool(byte_obj)
 
     elif isinstance(byte_obj, (np.float64, np.float32, float)):
-        encoded = float(byte_obj)
+        return float(byte_obj)
 
     elif isinstance(byte_obj, (np.int64, np.int32, int)):
-        encoded = int(byte_obj)
+        return int(byte_obj)
 
     elif isinstance(byte_obj, tuple):
-        encoded = tuple([json_serialiser(v, encoding=encoding) for v in byte_obj])
+        return tuple([json_serialiser(v, encoding=encoding) for v in byte_obj])
 
     elif isinstance(byte_obj, list):
-        encoded = [json_serialiser(v, encoding=encoding) for v in byte_obj]
+        return [json_serialiser(v, encoding=encoding) for v in byte_obj]
 
     elif isinstance(byte_obj, dict):
         dic = {}
         for k, v in byte_obj.items():
             dic[k] = json_serialiser(v, encoding=encoding)
-        encoded = dic
+        return dic
 
     elif isinstance(byte_obj, datetime):
-        encoded = {
+        return {
             "isoformat": byte_obj.strftime("%Y-%m-%dT%H:%M:%S.%f%Z"),
             "__class__": "DATETIME",
         }  # .isoformat()
 
     elif isinstance(byte_obj, np.ndarray):
         if encoding is None:
-            encoded = {
+            return {
                 "tolist": json_serialiser(byte_obj.tolist(), encoding=encoding),
                 "dtype": str(byte_obj.dtype),
                 "__class__": "NUMPY_ARRAY",
             }
         else:
-            encoded = {
+            return {
                 "base64": base64.b64encode(pickle.dumps(byte_obj)).decode(),
                 "__class__": "NUMPY_ARRAY",
             }
 
     elif isinstance(byte_obj, pathlib.PosixPath):
-        encoded = {"str": str(byte_obj), "__class__": "PATH"}
+        return {"str": str(byte_obj), "__class__": "PATH"}
 
     elif isinstance(byte_obj, Unit):
         strunits = f"{byte_obj:D}"
-        encoded = {"str": strunits, "__class__": "UNIT"}
+        return {"str": strunits, "__class__": "UNIT"}
 
     elif isinstance(byte_obj, Quantity):
-        encoded = {
+        return {
             "tuple": json_serialiser(byte_obj.to_tuple(), encoding=encoding),
             "__class__": "QUANTITY",
         }
 
     elif isinstance(byte_obj, (np.complex128, np.complex64, np.complex)):
         if encoding is None:
-            encoded = {
+            return {
                 "tolist": json_serialiser(
                     [byte_obj.real, byte_obj.imag], encoding=encoding
                 ),
@@ -166,13 +165,10 @@ def json_serialiser(byte_obj, encoding=None):
                 "__class__": "COMPLEX",
             }
         else:
-            encoded = {
+            return {
                 "base64": base64.b64encode(pickle.dumps(byte_obj)).decode(),
                 "__class__": "COMPLEX",
             }
-
-    if encoded:
-        return encoded
 
     raise ValueError(f"No encoding handler for data type {type(byte_obj)}")
 
