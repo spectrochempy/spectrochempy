@@ -2329,7 +2329,7 @@ class NDArray(HasTraits):
                         elif units in [ur.transmittance, ur.absolute_transmittance]:
                             new._data = (new.data * new.units).to(units)
                             new._units = units
-                            new._title = "absorbance"
+                            new._title = "transmittance"
 
                     elif oldunits == ur.absorbance:
                         if units in [ur.transmittance, ur.absolute_transmittance]:
