@@ -789,7 +789,7 @@ class NDPlot(HasTraits):
     @property
     def ax(self):
         """
-        the main matplotlib axe associated to this dataset.
+        The main matplotlib axe associated to this dataset.
         """
         return self._ndaxes["main"]
 
@@ -797,7 +797,7 @@ class NDPlot(HasTraits):
     @property
     def axT(self):
         """
-        the matplotlib axe associated to the transposed dataset.
+        The matplotlib axe associated to the transposed dataset.
         """
         return self._ndaxes["mainT"]
 

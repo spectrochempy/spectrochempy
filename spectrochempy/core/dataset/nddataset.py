@@ -150,7 +150,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         Origin of the data: Name of organization, address, telephone number,
         name of individual contributor, etc., as appropriate.
     roi : list
-        Region of interest (ROI) limits
+        Region of interest (ROI) limits.
     history : str, optional
         A string to add to the object history.
     copy : bool, optional
@@ -552,7 +552,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     # ...........................................................................................................
     @property
     def state(self):
-        # state of the controller window for this dataset
+        """
+        State of the controller window for this dataset.
+        """
         return self._state
 
     @state.setter
@@ -561,6 +563,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
     @property
     def processeddata(self):
+        """
+        Data after processing (optionaly used).
+        """
         return self._processeddata
 
     @processeddata.setter
@@ -569,6 +574,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
     @property
     def processedmask(self):
+        """
+        Mask for the optional processed data.
+        """
         return self._processedmask
 
     @processedmask.setter
@@ -577,6 +585,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
     @property
     def baselinedata(self):
+        """
+        Data for an optional baseline.
+        """
         return self._baselinedata
 
     @baselinedata.setter
@@ -585,6 +596,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
     @property
     def referencedata(self):
+        """
+        Data for an optional reference spectra.
+        """
         return self._referencedata
 
     @referencedata.setter
@@ -828,7 +842,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     @property
     def parent(self):
         """
-        |Project| instance
+        |Project| instance.
 
         The parent project of the dataset.
         """
@@ -856,7 +870,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         See Also
         --------
-        add_coords, set_coordtitles, set_coordunits
+        add_coordset : Add one or a set of coordinates from a dataset.
+        set_coordtitles : Set titles of the one or more coordinates.
+        set_coordunits : Set units of the one or more coordinates.
         """
         self._coordset = None
         self.add_coordset(*args, dims=self.dims, **kwargs)
@@ -901,7 +917,8 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         Returns
         -------
-        sorted_dataset
+        |NDDataset|
+            Sorted dataset.
         """
 
         inplace = kwargs.get("inplace", False)
@@ -966,7 +983,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         Parameters
         ----------
-        dim : None or int or tuple of ints, optional
+        *dims : None or int or tuple of ints, optional
             Selects a subset of the single-dimensional entries in the
             shape. If a dimension (dim) is selected with shape entry greater than
             one, an error is raised.
@@ -976,7 +993,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         Returns
         -------
-        squeezed
+        |NDDataset|
             The input array, but with all or a subset of the
             dimensions of length 1 removed.
 
@@ -1015,7 +1032,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         Returns
         -------
-        result : ndarray
+        |NDDataset|
             View of `a` with the number of dimensions increased.
 
         See Also
@@ -1041,11 +1058,12 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         Returns
         -------
-        swaped_dataset
+        |NDDataset|
+            Swaped dataset.
 
         See Also
         --------
-        transpose
+        transpose : Transpose a dataset.
         """
 
         new = super().swapdims(dim1, dim2, inplace=inplace)
@@ -1067,13 +1085,10 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         """
         Take elements from an array.
 
-        Parameters
-        ----------
-        indices
-        kwargs
-
         Returns
         -------
+        |NDDataset|
+            A sub dataset defined by the input indices.
         """
 
         # handle the various syntax to pass the axis
@@ -1097,7 +1112,14 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
     def to_array(self):
         """
-        Return a numpy masked array (i.e., other NDDataset attributes are lost.
+        Return a numpy masked array.
+
+        Other NDDataset attributes are lost.
+
+        Returns
+        -------
+        |ndarray|
+            The numpy masked array from the NDDataset data.
 
         Examples
         ========
@@ -1205,7 +1227,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         Parameters
         ----------
-        dims : sequence of dimension indexes or names, optional
+        *dims : sequence of dimension indexes or names, optional
             By default, reverse the dimensions, otherwise permute the dimensions
             according to the values given.
         inplace : bool, optional, default=`False`
@@ -1214,7 +1236,8 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         Returns
         -------
-        transposed_array
+        NDDataset
+            Transposed NDDataset.
 
         See Also
         --------

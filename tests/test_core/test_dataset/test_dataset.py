@@ -15,6 +15,7 @@ from spectrochempy.utils.testing import (
     raises,
     RandomSeedContext,
 )
+from spectrochempy.utils import check_docstrings as chd
 
 typequaternion = np.dtype(np.quaternion)
 
@@ -28,6 +29,18 @@ adata = (
     [0.0 + 1j, 10.0 + 3.0j],
     [0.0 + 1j, np.nan + 3.0j],
 )
+
+
+# test docstring
+def test_nddataset_docstring():
+    chd.PRIVATE_CLASSES = []  # override default to test private class docstring
+    module = "spectrochempy.core.dataset.nddataset"
+    chd.check_docstrings(
+        module,
+        obj=scp.NDDataset,
+        # exclude some errors - remove whatever you want to check
+        exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
+    )
 
 
 @pytest.mark.parametrize("a", adata)
