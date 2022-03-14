@@ -952,6 +952,16 @@ class NDArray(HasTraits):
         return out
 
     # ..........................................................................
+    def _repr_units(self):
+        if self.has_units:
+            # if not self.units.dimensionless or self.units.scaling != 1:
+            strunits = f"{self.units:~P}"
+            if strunits == "":
+                strunits = "dimensionless"
+        else:
+            strunits = "unitless"
+        return strunits
+
     def _repr_value(self):
 
         numpyprintoptions(precision=4, edgeitems=0, spc=1, linewidth=120)
@@ -968,8 +978,7 @@ class NDArray(HasTraits):
                 data = ""
                 if self.implements("Coord") or self.implements("LinearCoord"):
                     size = f" (size: {self.data.size})"
-                units = " {:~P}".format(self.units) if self.has_units else " unitless"
-
+                units = " " + self._repr_units()
             else:
                 # no data but labels
                 lab = self.get_labels()
@@ -1563,9 +1572,7 @@ class NDArray(HasTraits):
         --------
         unitless, dimensionless
         """
-        if self._units:
-            if not str(self.units).strip():
-                return False
+        if self._units is not None:
             return True
         return False
 
@@ -2312,24 +2319,24 @@ class NDArray(HasTraits):
                 # particular case of dimensionless units: absorbance and transmittance
                 else:
 
-                    if str(oldunits) in ["transmittance", "absolute_transmittance"]:
-                        if str(units) == "absorbance":
+                    if oldunits in [ur.transmittance, ur.absolute_transmittance]:
+                        if units == ur.absorbance:
                             udata = (new.data * new.units).to(units)
                             new._data = -np.log10(udata.m)
                             new._units = units
-                            new._title = str(oldunits)
+                            new._title = "absorbance"
 
-                        elif "transmittance" in str(oldunits):
+                        elif units in [ur.transmittance, ur.absolute_transmittance]:
                             new._data = (new.data * new.units).to(units)
                             new._units = units
-                            new._title = str(oldunits)
+                            new._title = "absorbance"
 
-                    elif str(oldunits) == "absorbance":
-                        if str(units) in ["transmittance", "absolute_transmittance"]:
+                    elif oldunits == ur.absorbance:
+                        if units in [ur.transmittance, ur.absolute_transmittance]:
                             scale = Quantity(1.0, self._units).to(units).magnitude
                             new._data = 10.0 ** -new.data * scale
                             new._units = units
-                            new._title = str(oldunits)
+                            new._title = "transmittance"
                     else:
                         new = self._unittransform(new, units)
                         # change the title for spectrocopic units change

@@ -573,15 +573,15 @@ class _TKFileDialogs:  # pragma: no cover
         # -defaultextension, -filetypes, -initialdir, -initialfile, -message, -parent, -title, -typevariable,
         # -command, or -confirmoverwrite
         filename = filedialog.asksaveasfilename(
-            parent=parent,
+            # parent=parent,
             title=caption,
             initialdir=str(directory),
             initialfile=filename.name,
             defaultextension=dftext,
             filetypes=self.filetypes(filters),
         )
-        if parent is not None:
-            parent.destroy
+        #        if parent is not None:
+        #            parent.destroy
 
         if filename:
             return pathclean(filename)

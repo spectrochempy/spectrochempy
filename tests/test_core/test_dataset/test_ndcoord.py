@@ -120,7 +120,7 @@ def test_coord():
     assert coord0.units.dimensionless
     assert coord0.units.scaling == 1.0
     assert coord0.data[0] == 4000.0
-    assert repr(coord0) == "Coord: [float64]  (size: 10)"
+    assert repr(coord0) == "Coord: [float64] dimensionless (size: 10)"
 
     # scaled dimensionless coordinates
 

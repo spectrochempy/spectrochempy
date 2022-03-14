@@ -105,3 +105,32 @@ def test_bug_243():
 
     # D2.x.data[-1] is 40., as expected, but not D12.x.data[-1]:
     assert D12.x.data[-1] == D2.x.data[-1]
+
+
+def test_bug_doctring():
+    import spectrochempy as scp
+
+    A = scp.read("irdata/nh4y-activation.spg", protocol="omnic")
+    B = scp.read("irdata/nh4y-activation.scp")
+    C = scp.concatenate(A[10:], B[3:5], A[:10], axis=0)
+    assert (A[10:].shape, B[3:5].shape, A[:10].shape, C.shape) == (
+        (45, 5549),
+        (2, 5549),
+        (10, 5549),
+        (57, 5549),
+    )
+
+    D = A.concatenate(B, B, axis=0)
+    assert (A.shape, B.shape, D.shape) == ((55, 5549), (55, 5549), (165, 5549))
+
+    E = A.concatenate(B, axis=1)
+    assert (A.shape, B.shape, E.shape) == ((55, 5549), (55, 5549), (55, 11098))
+
+    F = A.concatenate(B, force_stack=True)
+    assert (A.shape, B.shape, F.shape) == ((55, 5549), (55, 5549), (2, 55, 5549))
+
+    G = A[0].concatenate(B[0], force_stack=True)
+    assert (A[0].shape, B[0].shape, G.shape) == ((1, 5549), (1, 5549), (2, 5549))
+
+    C = scp.stack(A, B)
+    assert str(C) == "NDDataset: [float64] a.u. (shape: (z:2, y:55, x:5549))"
