@@ -15,14 +15,14 @@ import pytest
 
 def test_concatenate(IR_dataset_2D):
     dataset = IR_dataset_2D
-
+    dim = "x"
     # print(dataset)
+    s = dataset
     s1 = dataset[:, -10:]
     s2 = dataset[:, :-10]
 
     # specify axis
-    dim = "x"
-    s = concatenate(s1, s2, dim=dim)
+    s = concatenate(s1, s2, dims=dim)
     assert s.units == s1.units
     assert s.shape[-1] == (s1.shape[-1] + s2.shape[-1])
     assert s.x.size == (s1.x.size + s2.x.size)
@@ -30,7 +30,7 @@ def test_concatenate(IR_dataset_2D):
     s = s.sort(dims=dim, descend=True)  #
     assert_dataset_almost_equal(s.x, Coord(dataset.x, linear=False), decimal=3)
 
-    # default concatenation in the last dimensions
+    # default concatenation in the last dimension
     s = concatenate(s1, s2)
     assert s.units == s1.units
     assert s.shape[-1] == (s1.shape[-1] + s2.shape[-1])
@@ -44,34 +44,46 @@ def test_concatenate(IR_dataset_2D):
     # check with derived units
     s1.to(ur.m, force=True)
     s2.to(ur.dm, force=True)
-    s = concatenate(s1, s2, dim=0)
+    s = concatenate(s1, s2, dims=0)
     assert s.units == s1.units
     assert s.shape[0] == (s1.shape[0] + s2.shape[0])
     assert s.y.size == (s1.y.size + s2.y.size)
     s = s.sort(dim="y")
-    s.plot()
 
     # second syntax
-    s = s1.concatenate(s2, dim=0)
+    s = s1.concatenate(s2, dims=0)
     assert s.units == s1.units
     assert s.shape[0] == (s1.shape[0] + s2.shape[0])
     assert s.y.size == (s1.y.size + s2.y.size)
 
     # third syntax
-    s = concatenate((s1, s2), dim=0)
+    s = concatenate((s1, s2), dims=0)
     assert s.units == s1.units
     assert s.shape[0] == (s1.shape[0] + s2.shape[0])
     assert s.y.size == (s1.y.size + s2.y.size)
 
+    # coordset
+    coord_2 = Coord(np.log(s.y.data), title="log_time")
+    s.set_coordset(y=[s.y, coord_2], x=s.x)
+    s1 = s[:2]
+    s2 = s[-5:]
+    s12 = concatenate(s1, s2, axis=0)
+    assert (s2["y"].labels[1] == s12["y"].labels[1][-5:]).all()
+
+    # authors
     s0 = s[0]
     s1 = s[1]
     s0.author = "sdqe65g4rf"
     s2 = concatenate(s0, s1)
     assert "sdqe65g4rf" in s2.author and s1.author in s2.author
 
+    # titles
+    s0.title = "new_title"
+    assert concatenate(s0, s1).title == "new_title"
+
     # incompatible dimensions
     s0 = scp.NDDataset(np.zeros((10, 100)))
-    s1 = scp.NDDataset(np.zeros((1, 100)))
+    s1 = scp.NDDataset(np.zeros((10, 100)))
     with pytest.raises(DimensionsCompatibilityError):
         s0.concatenate(s1[0].squeeze())
 
@@ -115,6 +127,10 @@ def test_concatenate(IR_dataset_2D):
     s = stack(s0, s1)
     assert s.shape == (2, 5549)
 
+    # # stack squeezed nD dataset
+    s2 = s1[0:100]
+    with pytest.raises(DimensionsCompatibilityError):
+        s = stack(s0, s2)
 
 def test_bug_243():
     import spectrochempy as scp
@@ -132,32 +148,3 @@ def test_bug_243():
 
     # D2.x.data[-1] is 40., as expected, but not D12.x.data[-1]:
     assert D12.x.data[-1] == D2.x.data[-1]
-
-
-def test_bug_doctring():
-    import spectrochempy as scp
-
-    A = scp.read("irdata/nh4y-activation.spg", protocol="omnic")
-    B = scp.read("irdata/nh4y-activation.scp")
-    C = scp.concatenate(A[10:], B[3:5], A[:10], axis=0)
-    assert (A[10:].shape, B[3:5].shape, A[:10].shape, C.shape) == (
-        (45, 5549),
-        (2, 5549),
-        (10, 5549),
-        (57, 5549),
-    )
-
-    D = A.concatenate(B, B, axis=0)
-    assert (A.shape, B.shape, D.shape) == ((55, 5549), (55, 5549), (165, 5549))
-
-    E = A.concatenate(B, axis=1)
-    assert (A.shape, B.shape, E.shape) == ((55, 5549), (55, 5549), (55, 11098))
-
-    F = A.concatenate(B, force_stack=True)
-    assert (A.shape, B.shape, F.shape) == ((55, 5549), (55, 5549), (2, 55, 5549))
-
-    G = A[0].concatenate(B[0], force_stack=True)
-    assert (A[0].shape, B[0].shape, G.shape) == ((1, 5549), (1, 5549), (2, 5549))
-
-    C = scp.stack(A, B)
-    assert str(C) == "NDDataset: [float64] a.u. (shape: (z:2, y:55, x:5549))"

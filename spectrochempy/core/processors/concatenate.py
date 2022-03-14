@@ -19,7 +19,7 @@ from spectrochempy.core.dataset.ndarray import DEFAULT_DIM_NAME
 from spectrochempy.utils import DimensionsCompatibilityError
 
 
-def concatenate(*datasets, dim="x"):
+def concatenate(*datasets, **kwargs):
     """
     Concatenation of |NDDataset| objects along a given axis.
 
@@ -38,18 +38,25 @@ def concatenate(*datasets, dim="x"):
         The dataset(s) to be concatenated to the current dataset. The datasets
         must have the same shape, except in the dimension corresponding to axis
         (the last, by default).
-    dim : str or int, optional, default='x'
-        The dimension along which the operation is applied.
+    **kwargs
+        Optional keyword parameters (see Other Parameters).
 
     Returns
     --------
     out
         A |NDDataset| created from the contenations of the |NDDataset| input objects.
 
+    Other Parameters
+    ----------------
+    dims : str, optional, default='x'
+        The dimension along which the operation is applied.
+
+    axis : int, optional
+        The axis along which the operation is applied.
 
     See Also
     ---------
-    stack : Stack of |NDDataset| objects along a new dimension
+    stack : Stack of |NDDataset| objects along a new dimension.
 
     Examples
     --------
@@ -73,8 +80,13 @@ def concatenate(*datasets, dim="x"):
     # get a copy of input datasets in order that input data are not modified
     datasets = _get_copy(datasets)
 
-    # get axis from arguments (or set it to the default)
-    axis, dim = datasets[0].get_axis(dim)
+    # get axis from arguments
+    axis, dim = datasets[0].get_axis(**kwargs)
+
+    # check shapes, except for dim along which concatenation will be done
+    shapes = {ds.shape[:axis] + ds.shape[axis + 1 :] for ds in datasets}
+    if len(shapes) != 1:
+        raise DimensionsCompatibilityError("all input arrays must have the same shape")
 
     # check units
     units = tuple(set(ds.units for ds in datasets))
@@ -111,29 +123,30 @@ def concatenate(*datasets, dim="x"):
     coords = datasets[0].coordset
 
     if coords is not None:
-        # check labels, coords type and concatenate them
+
         if not coords[dim].is_empty:
 
             labels = []
+            if coords[dim].is_labeled:
+                for ds in datasets:
+                    labels.append(ds.coordset[dim].labels)
+
             if coords[dim].implements() in ["Coord", "LinearCoord"]:
-                if coords[dim].is_labeled:
-                    for ds in datasets:
-                        labels.append(ds.coordset[dim].labels)
+                coords[dim] = Coord(coords[dim], linear=False)
+                if labels != []:
                     coords[dim]._labels = np.concatenate(labels)
-
-            if coords[dim].implements("CoordSet"):
-                for coord in coords[dim]:
-                    if coord.is_labeled:
-                        for ds in datasets:
-                            labels.append(ds.coordset[dim].labels)
-
+            elif coords[dim].implements("CoordSet"):
+                if labels != []:
+                    labels = np.array(labels)
                     for i, coord in enumerate(coords[dim]):
-                        coord._labels = np.concatenate(labels[i :: len(coords[dim])])
+                        if labels[:i].size != 0:
+                            coord._labels = np.concatenate(
+                                [label for label in labels[:, i]]
+                            )
 
-            coords[dim] = Coord(coords[dim], linear=False)
-            coords[dim]._data = np.concatenate(
-                tuple((ds.coordset[dim].data for ds in datasets))
-            )
+        coords[dim]._data = np.concatenate(
+            tuple((ds.coordset[dim].data for ds in datasets))
+        )
 
     out = dataset.copy()
     out._data = data
@@ -188,6 +201,10 @@ def stack(*datasets):
     out
         A |NDDataset| created from the stack of the `datasets` datasets.
 
+    See Also
+    --------
+    concatenate : concatenate |NDDataset| objects along a given dimension.
+
     Examples
     --------
 
@@ -196,6 +213,7 @@ def stack(*datasets):
     >>> C = scp.stack(A, B)
     >>> print(C)
     NDDataset: [float64] a.u. (shape: (z:2, y:55, x:5549))
+
     """
     datasets = _get_copy(datasets)
 
@@ -203,7 +221,7 @@ def stack(*datasets):
     if len(shapes) != 1:
         raise DimensionsCompatibilityError("all input arrays must have the same shape")
 
-    # add a new dimension
+    # prepend a new dimension
     for i, dataset in enumerate(datasets):
         dataset._data = dataset.data[np.newaxis]
         dataset._mask = dataset.mask[np.newaxis]
@@ -212,7 +230,7 @@ def stack(*datasets):
         dataset.add_coordset(newcoord)
         dataset.dims = [newcoord.name] + dataset.dims
 
-    return concatenate(*datasets, dim=0)
+    return concatenate(*datasets, dims=0)
 
 
 # utility functions

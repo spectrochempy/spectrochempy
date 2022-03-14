@@ -522,6 +522,13 @@ class CoordSet(HasTraits):
         """
         return [item.labels for item in self]
 
+    @property
+    def is_labeled(self):
+        """
+        returns True if one of the coords is labeled.
+        """
+        return any([item.is_labeled for item in self])
+
     # ..........................................................................
     @property
     def units(self):
