@@ -75,7 +75,7 @@ def test_coordset_init(coord0, coord1, coord2):
     for i, coord in enumerate(coordsa):
         assert isinstance(coord, Coord)
 
-    assert repr(coord0) == "Coord: [float64] cm^-1 (size: 10)"
+    assert repr(coord0) == "Coord: [float64] cm⁻¹ (size: 10)"
 
     coords = CoordSet(coord0.copy(), coord0)
 

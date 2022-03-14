@@ -6,7 +6,6 @@ on:
     branches:
       - develop
       - master
-      - workflow
 
   pull_request:
 
@@ -45,15 +44,10 @@ jobs:
         run: |
           conda install jinja2
 
-      - name: Create environment scpy3.7
-        run: |
-          python .ci/env_create.py -v 3.7 --dev scpy3.7.yml
-          mv .ci/scpy3.7.yml artifact/scpy3.7.yml
-
-      - name: Create environment scpy3.9
-        run: |
-          python .ci/env_create.py -v 3.9 --dev scpy3.9.yml
-          mv .ci/scpy3.9.yml artifact/scpy3.9.yml
+#      - name: Create environment scpy3.9
+#        run: |
+#          python .ci/env_create.py -v 3.9 --dev scpy3.9.yml
+#          mv .ci/scpy3.9.yml artifact/scpy3.9.yml
 
       - name: Create environment scpy3.10
         run: |
@@ -84,8 +78,10 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
-        pythonVersion: ["3.10", "3.9", "3.7"]
+        os: [ubuntu-latest, windows-latest]
+        pythonVersion: ["3.10"]
+        # test only 3.10 as 3.8 and 3.9 are at least partially tested in
+        # build docs and packages
 
     steps:
       - name: Checkout code
@@ -124,7 +120,7 @@ jobs:
           echo ::set-output name=HAS_CC_TEST_REPORTER_ID::${HAS_CC_TEST_REPORTER_ID}
 
       - name: Download CodeClimate reporter
-        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.9'
+        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.10'
           && matrix.os == 'ubuntu-latest' && steps.vars.outputs.HAS_CC_TEST_REPORTER_ID == 'true'}}
         run: |
           # downloading cc-test-reporter
@@ -137,7 +133,7 @@ jobs:
           coverage run --rcfile=tests/.coveragerc -m pytest -v tests
 
       - name: Report Coverage info to CodeClimate
-        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.9'
+        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.10'
           && matrix.os == 'ubuntu-latest' && steps.vars.outputs.HAS_CC_TEST_REPORTER_ID == 'true'}}
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}

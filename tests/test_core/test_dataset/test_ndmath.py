@@ -347,14 +347,14 @@ def test_nddataset_add_mismatch_units():
     with pytest.raises(DimensionalityError) as exc:
         d1 + d2
     assert str(exc.value).startswith(
-        "Cannot convert from '[length]' to '[length] ** 2', "
+        "Cannot convert from '[length]' to '[length]^2', "
         "Units must be compatible for the `add` operator"
     )
 
     with pytest.raises(DimensionalityError) as exc:
         d1 += d2
     assert str(exc.value).startswith(
-        "Cannot convert from '[length]' to '[length] ** 2', "
+        "Cannot convert from '[length]' to '[length]^2', "
         "Units must be compatible for the `iadd` operator"
     )
 
@@ -437,7 +437,7 @@ def test_nddataset_subtract_mismatch_units():
     with pytest.raises(DimensionalityError) as exc:
         d1 -= d2
     assert (
-        str(exc.value) == "Cannot convert from '[length] / [time]' to '[length]', "
+        str(exc.value) == "Cannot convert from '[length]*[time]^-1' to '[length]', "
         "Units must be compatible for the `isub` operator"
     )
 
@@ -949,7 +949,7 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
 
     mxd = scp.mean(nd, dim="y")
     assert str(mxd) == "NDDataset: [float64] a.u. (size: 5549)"
-    assert str(mxd.x) == "LinearCoord: [float64] cm^-1 (size: 5549)"
+    assert str(mxd.x) == "LinearCoord: [float64] cm⁻¹ (size: 5549)"
 
     # ----
     nd2 = NDDataset([[0, 1, 2], [3, 4, 5]])  # no coord (check issues

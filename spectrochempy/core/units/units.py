@@ -28,31 +28,15 @@ from pint import (
     Context,
 )
 
-# from pint.measurement import _Measurement as Measure
-from pint.unit import UnitsContainer, _Unit as Unit, UnitDefinition
-from pint.quantity import _Quantity as Quantity
+
+from pint.unit import UnitsContainer, Unit, UnitDefinition
+from pint.quantity import Quantity
 from pint.formatting import siunitx_format_unit
 from pint.converters import ScaleConverter
 
 # ======================================================================================================================
 # Modify the pint behaviour
 # ======================================================================================================================
-#  TODO: better ways ??
-
-_PRETTY_EXPONENTS = "⁰¹²³⁴⁵⁶⁷⁸⁹"
-
-
-# ------------------------------------------------------------------
-def _pretty_fmt_exponent(num):
-    """
-    Format a number into a pretty printed exponent using unicode.
-    """
-    # work badly for decimals as superscript dot do not exist in unicode
-    # (as far as we know)
-    ret = "{0:n}".format(num).replace("-", "⁻").replace(".", "\u22C5")
-    for n in range(10):
-        ret = ret.replace(str(n), _PRETTY_EXPONENTS[n])
-    return ret
 
 
 formats = {
@@ -63,9 +47,9 @@ formats = {
         "division_fmt": "/",
         "power_fmt": "{}{}",
         "parentheses_fmt": "({})",
-        "exp_call": _pretty_fmt_exponent,
+        "exp_call": formatting._pretty_fmt_exponent,
     },
-    "L": {  # spectrochempy Latex format.
+    "L": {  # Latex format.
         "as_ratio": False,  # True in pint
         "single_denominator": True,
         "product_fmt": r" \cdot ",
@@ -73,13 +57,29 @@ formats = {
         "power_fmt": "{}^[{}]",
         "parentheses_fmt": r"\left({}\right)",
     },
-    "H": {  # spectrochempy HTML format.
+    "H": {  # HTML format.
         "as_ratio": False,  # True in pint
         "single_denominator": False,
-        "product_fmt": r".",
+        "product_fmt": r" ",
         "division_fmt": r"{}/{}",
-        "power_fmt": "{}<sup>{}</sup>",
-        "parentheses_fmt": r"{}",
+        "power_fmt": r"{}<sup>{}</sup>",
+        "parentheses_fmt": r"({})",
+    },
+    "": {  # Default format.
+        "as_ratio": True,
+        "single_denominator": False,
+        "product_fmt": " * ",
+        "division_fmt": " / ",
+        "power_fmt": "{} ** {}",
+        "parentheses_fmt": r"({})",
+    },
+    "C": {  # Compact format.
+        "as_ratio": False,
+        "single_denominator": False,
+        "product_fmt": "*",  # TODO: Should this just be ''?
+        "division_fmt": "/",
+        "power_fmt": "{}**{}",
+        "parentheses_fmt": r"({})",
     },
     "K": {  # spectrochempy Compact format.
         "as_ratio": False,
@@ -91,8 +91,108 @@ formats = {
     },
 }
 
-formatting._FORMATS.update(formats)
-formatting._KNOWN_TYPES = frozenset(list(formatting._FORMATS.keys()) + ["~"])
+del formatting._FORMATTERS["P"]
+
+
+@formatting.register_unit_format("P")
+def format_pretty(unit, registry, **options):
+    return formatting.formatter(
+        unit.items(),
+        as_ratio=False,
+        single_denominator=False,
+        product_fmt=".",
+        division_fmt="/",
+        power_fmt="{}{}",
+        parentheses_fmt="({})",
+        exp_call=formatting._pretty_fmt_exponent,
+        **options,
+    )
+
+
+@formatting.register_unit_format("K")
+def format_spectrochempy_compact(unit, registry, **options):
+    return formatting.formatter(
+        unit.items(),
+        as_ratio=False,
+        single_denominator=False,
+        product_fmt=".",
+        division_fmt="/",
+        power_fmt="{}^{}",
+        parentheses_fmt=r"({})",
+        **options,
+    )
+
+
+del formatting._FORMATTERS["L"]
+
+
+@formatting.register_unit_format("L")
+def format_latex(unit, registry, **options):
+    preprocessed = {
+        r"\mathrm{{{}}}".format(u.replace("_", r"\_")): p for u, p in unit.items()
+    }
+    formatted = formatting.formatter(
+        preprocessed.items(),
+        as_ratio=False,
+        single_denominator=True,
+        product_fmt=r" \cdot ",
+        division_fmt=r"\frac[{}][{}]",
+        power_fmt="{}^[{}]",
+        parentheses_fmt=r"\left({}\right)",
+        **options,
+    )
+    return formatted.replace("[", "{").replace("]", "}")
+
+
+del formatting._FORMATTERS["H"]
+
+
+@formatting.register_unit_format("H")
+def format_html(unit, registry, **options):
+    return formatting.formatter(
+        unit.items(),
+        as_ratio=False,
+        single_denominator=True,
+        product_fmt=r".",
+        division_fmt=r"{}/{}",
+        power_fmt=r"{}<sup>{}</sup>",
+        parentheses_fmt=r"({})",
+        **options,
+    )
+
+
+del formatting._FORMATTERS["D"]
+
+
+@formatting.register_unit_format("D")
+def format_default(unit, registry, **options):
+    return formatting.formatter(
+        unit.items(),
+        as_ratio=False,
+        single_denominator=False,
+        product_fmt="*",
+        division_fmt="/",
+        power_fmt="{}^{}",
+        parentheses_fmt=r"({})",
+        **options,
+    )
+
+
+del formatting._FORMATTERS["C"]
+
+
+@formatting.register_unit_format("C")
+def format_compact(unit, registry, **options):
+    return formatting.formatter(
+        unit.items(),
+        as_ratio=False,
+        single_denominator=False,
+        product_fmt="*",
+        division_fmt="/",
+        power_fmt="{}**{}",
+        parentheses_fmt=r"({})",
+        **options,
+    )
 
 
 def _repr_html_(cls):
@@ -186,9 +286,9 @@ if globals().get("U_", None) is None:
     U_.define(UnitDefinition("percent", "pct", (), ScaleConverter(1 / 100.0)))
     U_.define(UnitDefinition("weight_percent", "wt_pct", (), ScaleConverter(1 / 100.0)))
 
-    U_.default_format = ""  # .2fK'
+    U_.default_format = "~P"
     Q_ = U_.Quantity
-    Q_.default_format = ""  # .2fK'
+    Q_.default_format = "~P"
 
     set_application_registry(U_)
     del UnitRegistry  # to avoid importing it
@@ -278,6 +378,7 @@ def set_nmr_context(larmor):
 # ------------------------------------------------------------------
 ur = U_
 Quantity = Q_
+
 
 # utilities
 

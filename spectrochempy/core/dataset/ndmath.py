@@ -1121,7 +1121,7 @@ class NDMath(object):
         >>> m
         NDDataset: [float64] a.u. (size: 5549)
         >>> m.x
-        LinearCoord: [float64] cm^-1 (size: 5549)
+        LinearCoord: [float64] cm⁻¹ (size: 5549)
         >>> m = scp.average(nd, dim='y', weights=np.arange(55))
         >>> m.data
         array([   1.789,    1.789, ...,    1.222,     1.22])
@@ -2063,7 +2063,7 @@ class NDMath(object):
         >>> m
         NDDataset: [float64] a.u. (size: 5549)
         >>> m.x
-        LinearCoord: [float64] cm^-1 (size: 5549)
+        LinearCoord: [float64] cm⁻¹ (size: 5549)
         """
 
         axis, dim = cls.get_axis(dim, allows_none=True)

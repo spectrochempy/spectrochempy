@@ -556,7 +556,7 @@ class NDComplexArray(NDArray):
         return out
 
     # ..........................................................................
-    def _str_value(self, sep="\n", ufmt=" {:~K}", header="       values: ... \n"):
+    def _str_value(self, sep="\n", ufmt=" {:~P}", header="       values: ... \n"):
         prefix = [""]
         if self.is_empty:
             return header + "{}".format(textwrap.indent("empty", " " * 9))

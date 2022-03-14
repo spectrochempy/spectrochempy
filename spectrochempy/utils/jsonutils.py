@@ -146,7 +146,8 @@ def json_serialiser(byte_obj, encoding=None):
         return {"str": str(byte_obj), "__class__": "PATH"}
 
     elif isinstance(byte_obj, Unit):
-        return {"str": str(byte_obj), "__class__": "UNIT"}
+        strunits = f"{byte_obj:D}"
+        return {"str": strunits, "__class__": "UNIT"}
 
     elif isinstance(byte_obj, Quantity):
         return {

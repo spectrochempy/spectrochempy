@@ -607,17 +607,16 @@ def check_filename_to_save(
         from spectrochempy.core import save_dialog
 
         # no filename provided
+        open_diag = True
+        caption = "Save as ..."
         if filename is None or (NODIAL and pathclean(filename).is_dir()):
             filename = dataset.name
             filename = filename + kwargs.get("suffix", ".scp")
-            caption = "Save as ..."
-            open_diag = True
 
         # existing filename provided
         elif filename.exists():
             if confirm:
                 caption = "File exists. Confirm overwrite"
-                open_diag = True
             else:
                 info_(f"A file {filename} was present and has been overwritten.")
                 open_diag = False
