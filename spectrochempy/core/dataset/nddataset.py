@@ -171,8 +171,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     --------
     Usage by an end-user
 
-    >>> from spectrochempy import *
-    >>> x = NDDataset([1, 2, 3])
+    >>> x = scp.NDDataset([1, 2, 3])
     >>> print(x.data)  # doctest: +NORMALIZE_WHITESPACE
     [       1        2        3]
     """

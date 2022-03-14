@@ -275,7 +275,7 @@ class DocstringError(Exception):
         message += f"{' '*10}{'-'*26}\n"
         for err_code, err_desc in result["errors"]:
             if err_code == "EX02":  # Failing examples are printed at the end
-                message += "{' '*2}Examples do not pass tests\n"
+                message += f"{' '*2}Examples do not pass tests\n"
                 continue
             message += f"{' '*10}* {err_code}: {err_desc}\n"
         if result["examples_errs"]:
