@@ -168,9 +168,9 @@ def format_default(unit, registry, **options):
         unit.items(),
         as_ratio=False,
         single_denominator=False,
-        product_fmt=" * ",
-        division_fmt=" / ",
-        power_fmt="{} ** {}",
+        product_fmt="*",
+        division_fmt="/",
+        power_fmt="{}^{}",
         parentheses_fmt=r"({})",
         **options,
     )
@@ -284,9 +284,9 @@ if globals().get("U_", None) is None:
     U_.define(UnitDefinition("percent", "pct", (), ScaleConverter(1 / 100.0)))
     U_.define(UnitDefinition("weight_percent", "wt_pct", (), ScaleConverter(1 / 100.0)))
 
-    U_.default_format = ""
+    U_.default_format = "~P"
     Q_ = U_.Quantity
-    Q_.default_format = ""
+    Q_.default_format = "~P"
 
     set_application_registry(U_)
     del UnitRegistry  # to avoid importing it
@@ -376,6 +376,7 @@ def set_nmr_context(larmor):
 # ------------------------------------------------------------------
 ur = U_
 Quantity = Q_
+
 
 # utilities
 
