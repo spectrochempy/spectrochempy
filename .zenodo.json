@@ -35,8 +35,6 @@
     }
   ],
 
-  "license": "CeCILL-B",
-
   "upload_type": "software",
 
   "keywords": ["Spectroscopy", "processing",  "chemistry",  "datasets", "data-analysis"]
