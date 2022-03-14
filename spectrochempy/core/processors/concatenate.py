@@ -75,8 +75,8 @@ def concatenate(*datasets, **kwargs):
     >>> E = A.concatenate(B, axis=1)
     >>> A.shape, B.shape, E.shape
     ((55, 5549), (55, 5549), (55, 11098))
-
     """
+
     # get a copy of input datasets in order that input data are not modified
     datasets = _get_copy(datasets)
 
@@ -181,7 +181,7 @@ def concatenate(*datasets, **kwargs):
 
 def stack(*datasets):
     """
-    Stack of |NDDataset| objects along a new dimension
+    Stack of |NDDataset| objects along a new dimension.
 
     Any number of |NDDataset| objects can be stacked. For this operation
     to be defined the following must be true :
@@ -189,7 +189,6 @@ def stack(*datasets):
     #. all inputs must be valid dataset objects,
     #. units of data and axis must be compatible (rescaling is applied
        automatically if necessary).
-
 
     Parameters
     ----------
@@ -203,7 +202,7 @@ def stack(*datasets):
 
     See Also
     --------
-    concatenate : concatenate |NDDataset| objects along a given dimension.
+    concatenate : Concatenate |NDDataset| objects along a given dimension.
 
     Examples
     --------
@@ -213,8 +212,8 @@ def stack(*datasets):
     >>> C = scp.stack(A, B)
     >>> print(C)
     NDDataset: [float64] a.u. (shape: (z:2, y:55, x:5549))
-
     """
+
     datasets = _get_copy(datasets)
 
     shapes = {ds.shape for ds in datasets}
