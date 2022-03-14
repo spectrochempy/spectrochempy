@@ -166,15 +166,16 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     -----
     The underlying array in a |NDDataset| object can be accessed through the
     `data` attribute, which will return a conventional |ndarray|.
-
-    Examples
-    --------
-    Usage by an end-user
-
-    >>> x = scp.NDDataset([1, 2, 3])
-    >>> print(x.data)  # doctest: +NORMALIZE_WHITESPACE
-    [       1        2        3]
     """
+
+    # Examples
+    # --------
+    # Usage by an end-user
+    #
+    # >>> x = scp.NDDataset([1, 2, 3])
+    # >>> print(x.data)  # doctest: +NORMALIZE_WHITESPACE
+    # [       1        2        3.]
+    # """
 
     # coordinates
     _coordset = Instance(CoordSet, allow_none=True)
