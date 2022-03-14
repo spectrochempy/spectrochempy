@@ -4,6 +4,9 @@
 
 ### version 0.3.4
 
+#### BREAKING CHANGES
+* Requires pint>=0.18
+
 #### NEW FEATURES
 * Compatibility with Python 3.10
 

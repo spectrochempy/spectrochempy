@@ -68,7 +68,7 @@ def get_sys_info():
 
 
 def show_versions(file=sys.stdout):
-    """print the versions of xarray and its dependencies
+    """print the versions of spectrochempy and its dependencies
 
     Parameters
     ----------
@@ -86,7 +86,7 @@ def show_versions(file=sys.stdout):
     with open(REPOS / "environment.yml", "r") as f:
         start = False
         for dep in f.readlines():
-            if "dependencies" in dep:
+            if "dependencies" in dep and not dep.startswith("#"):
                 start = True
             if not start:
                 continue

@@ -10,8 +10,6 @@ import sys
 import types
 import warnings
 
-# Update install_adds.rst when updating versions!
-
 VERSIONS = {
     "xarray": "*",
     "cantera": "2.5.1",

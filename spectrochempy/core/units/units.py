@@ -28,6 +28,7 @@ from pint import (
     Context,
 )
 
+
 from pint.unit import UnitsContainer, Unit, UnitDefinition
 from pint.quantity import Quantity
 from pint.formatting import siunitx_format_unit
@@ -36,6 +37,7 @@ from pint.converters import ScaleConverter
 # ======================================================================================================================
 # Modify the pint behaviour
 # ======================================================================================================================
+
 
 formats = {
     "P": {  # Pretty format.
