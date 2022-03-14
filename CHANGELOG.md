@@ -1,8 +1,8 @@
 # What's new
 
-## VERSION 0.3
+## VERSION 0.4
 
-### version 0.3.4
+### version 0.4.0
 
 #### BREAKING CHANGES
 * Requires pint>=0.18
@@ -13,7 +13,7 @@
 #### BUG FIXED
 * Transmittance and absorbance units now correctly handled
 
-### version 0.3.3
+## VERSION 0.3
 
 #### NEW FEATURES
 
