@@ -16,18 +16,22 @@
     {
       "orcid": "0000-0001-5999-5880",
       "affiliation": "Laboratoire Catalyse et Spectrochimie (LCS), Ensicaen/Université Caen-Normandie/CNRS",
-      "name": "Clet, Guillaume"
+      "name": "Clet, Guillaume",
+      "type": "Researcher"
     },
     {
       "orcid": "0000-0002-1825-0097",
       "affiliation": "Laboratoire Catalyse et Spectrochimie (LCS), Ensicaen/Université Caen-Normandie/CNRS",
-      "name": "Ait Blal, Abdelhafid"
+      "name": "Ait Blal, Abdelhafid",
+      "type": "Researcher"
     },
     {
-      "name": "Guerin, William"
+      "name": "Guerin, William",
+      "type": "Researcher"
     },
     {
-      "name": "Mailänder, Matthias"
+      "name": "Mailänder, Matthias",
+      "type": "Researcher"
     }
   ],
 
