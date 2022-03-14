@@ -77,6 +77,11 @@ def concatenate(*datasets, **kwargs):
     ((55, 5549), (55, 5549), (55, 11098))
     """
 
+    # check uise
+    if "force_stack" in kwargs:
+        warn("force_stack not used anymore, use stack() instead")
+        return stack(datasets)
+
     # get a copy of input datasets in order that input data are not modified
     datasets = _get_copy(datasets)
 

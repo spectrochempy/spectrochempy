@@ -4,8 +4,10 @@
 
 ### version 0.4.2
 
-
-
+#### NEW FEATURES
+* Concatenate and stack:
+  - `force_stack` keyword in concatenate() now deprecated. 
+  - `stack()` method now generates a new dim, even if a dim of size one in present  
 
 ### version 0.4.1
 

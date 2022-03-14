@@ -88,7 +88,7 @@ def test_concatenate(IR_dataset_2D):
         s0.concatenate(s1[0].squeeze())
 
     with pytest.raises(DimensionsCompatibilityError):
-        s0.concatenate(s1[:, 50])
+        s0.concatenate(s1[:, :50], axis=0)
 
     # incompatible units
     s0 = scp.NDDataset(np.zeros((10, 100)), units="V")
@@ -112,6 +112,9 @@ def test_concatenate(IR_dataset_2D):
     assert s.y.size == s1.y.size
     assert s.x.size == s1.x.size
 
+    with pytest.warns(UserWarning):
+        concatenate(s1, s2, force_stack=True)
+
     # If one of the dimensions is of size one, then this dimension is NOT removed before stacking
     s0 = dataset[0]
     s1 = dataset[1]
@@ -131,6 +134,7 @@ def test_concatenate(IR_dataset_2D):
     s2 = s1[0:100]
     with pytest.raises(DimensionsCompatibilityError):
         s = stack(s0, s2)
+
 
 def test_bug_243():
     import spectrochempy as scp
