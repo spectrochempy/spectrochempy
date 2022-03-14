@@ -2,7 +2,12 @@
 
 ## VERSION 0.4
 
-### version 0.4.0
+### version 0.4.2
+
+
+
+
+### version 0.4.1
 
 #### BREAKING CHANGES
 * Requires pint >= 0.18
