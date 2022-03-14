@@ -112,7 +112,7 @@ def concatenate(*datasets, **kwargs):
                 ds.ito(units)
 
     # concatenate or stack the data array + mask
-    # ------------------------------------------------------------------------
+    # --------------------------------------------
 
     sss = []
     for i, dataset in enumerate(datasets):
