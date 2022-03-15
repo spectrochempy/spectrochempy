@@ -8,7 +8,10 @@ from spectrochempy.core.processors.concatenate import concatenate, stack
 from spectrochempy.core.units import ur
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.utils.testing import assert_dataset_almost_equal
-from spectrochempy.utils.exceptions import DimensionsCompatibilityError
+from spectrochempy.utils.exceptions import (
+    DimensionsCompatibilityError,
+    UnitsCompatibilityError,
+)
 
 import pytest
 
@@ -93,7 +96,7 @@ def test_concatenate(IR_dataset_2D):
     # incompatible units
     s0 = scp.NDDataset(np.zeros((10, 100)), units="V")
     s1 = scp.NDDataset(np.zeros((10, 100)), units="A")
-    with pytest.raises(ValueError):
+    with pytest.raises(UnitsCompatibilityError):
         scp.concatenate(s0, s1)
 
     s1 = scp.NDDataset(np.ones((10, 100)), units="mV")
@@ -112,7 +115,7 @@ def test_concatenate(IR_dataset_2D):
     assert s.y.size == s1.y.size
     assert s.x.size == s1.x.size
 
-    with pytest.warns(UserWarning):
+    with pytest.warns(DeprecationWarning):
         concatenate(s1, s2, force_stack=True)
 
     # If one of the dimensions is of size one, then this dimension is NOT removed before stacking

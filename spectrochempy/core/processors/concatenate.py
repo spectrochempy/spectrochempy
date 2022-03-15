@@ -16,7 +16,7 @@ from orderedset import OrderedSet
 
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.ndarray import DEFAULT_DIM_NAME
-from spectrochempy.utils import DimensionsCompatibilityError
+from spectrochempy.utils import DimensionsCompatibilityError, UnitsCompatibilityError
 
 
 def concatenate(*datasets, **kwargs):
@@ -79,7 +79,7 @@ def concatenate(*datasets, **kwargs):
 
     # check uise
     if "force_stack" in kwargs:
-        warn("force_stack not used anymore, use stack() instead")
+        warn("force_stack not used anymore, use stack() instead", DeprecationWarning)
         return stack(datasets)
 
     # get a copy of input datasets in order that input data are not modified
@@ -102,7 +102,7 @@ def concatenate(*datasets, **kwargs):
         for i, u1 in enumerate(units[:-1]):
             for u2 in units[i + 1 :]:
                 if u1.dimensionality != u2.dimensionality:
-                    raise ValueError(
+                    raise UnitsCompatibilityError(
                         f"Units of the data are {[str(u) for u in units]}. The datasets can't be concatenated"
                     )
         # should be compatible, so convert
