@@ -42,6 +42,7 @@ scikit-image
 coverage
 black
 pre-commit
+cffconvert
 mamba
 jupytext
 sphinx<4.0

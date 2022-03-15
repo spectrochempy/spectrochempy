@@ -62,7 +62,7 @@ dependencies:
     - jupyterlab>=2.2.10
     - nodejs
 
-
+    
     # DEV dependencies
     # ----------------
     # From here, the dependencies are essentially for development.
@@ -78,6 +78,7 @@ dependencies:
     - coverage
     - black
     - pre-commit
+    - cffconvert
 
     # DEV: code and docs
     - mamba
@@ -102,7 +103,7 @@ dependencies:
     # - xarray
     # - datashader
     # - scikit-learn
-
+    
     - pip
     - pip:
 
