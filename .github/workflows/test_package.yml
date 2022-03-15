@@ -78,7 +78,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [macos-latest] # ubuntu-latest, windows-latest]
         pythonVersion: ["3.10"]
         # test only 3.10 as 3.8 and 3.9 are at least partially tested in
         # build docs and packages
