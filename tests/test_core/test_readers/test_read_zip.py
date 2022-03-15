@@ -47,4 +47,4 @@ def test_read_zip():
         csv_delimiter=";",
         merge=True,
     )
-    assert C.shape == (2, 10, 2843)
+    assert C.shape == (20, 2843)

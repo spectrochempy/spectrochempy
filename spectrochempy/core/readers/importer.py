@@ -248,10 +248,7 @@ class Importer(HasTraits):
         if merged:
             # Try to stack the dataset into a single one
             try:
-                if dim0 == 0:
-                    dataset = self.objtype.stack(datasets)
-                else:
-                    dataset = self.objtype.concatenate(datasets, axis=1)
+                dataset = self.objtype.concatenate(datasets, axis=0)
                 if dataset.coordset is not None and kwargs.pop("sortbydate", True):
                     dataset.sort(dim="y", inplace=True)
                     dataset.history = (

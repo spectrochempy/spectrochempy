@@ -149,9 +149,9 @@ def concatenate(*datasets, **kwargs):
                                 [label for label in labels[:, i]]
                             )
 
-        coords[dim]._data = np.concatenate(
-            tuple((ds.coordset[dim].data for ds in datasets))
-        )
+            coords[dim]._data = np.concatenate(
+                tuple((ds.coordset[dim].data for ds in datasets))
+            )
 
     out = dataset.copy()
     out._data = data
