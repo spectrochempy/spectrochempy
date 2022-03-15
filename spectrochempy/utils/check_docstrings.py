@@ -10,7 +10,8 @@ import os
 import pathlib
 import subprocess
 import tempfile
-import traceback
+
+# import traceback
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -281,18 +282,19 @@ class DocstringError(Exception):
         if result["examples_errs"]:
             message += "\n\nDoctests:\n---------\n"
             message += result["examples_errs"]
-        traceback_details = {
-            "filename": result["file"],
-            "lineno": result["file_line"],
-            "name": result["member_name"],
-            "type": "DocstringError",
-            "message": message,
-        }
-        traceback.format_exc()
-        traceback_template = """
-        Docstring format error:
-          File "%(filename)s", line %(lineno)s,
-          in %(name)s.
-          %(message)s\n
-        """
-        print(traceback_template % traceback_details)
+
+        # traceback_details = {
+        #     "filename": result["file"],
+        #     "lineno": result["file_line"],
+        #     "name": result["member_name"],
+        #     "type": "DocstringError",
+        #     "message": message,
+        # }
+        # traceback.format_exc()
+        # traceback_template = """
+        # Docstring format error:
+        #   File "%(filename)s", line %(lineno)s,
+        #   in %(name)s.
+        #   %(message)s\n
+        # """
+        # print(traceback_template % traceback_details)
