@@ -85,6 +85,7 @@ dependencies:
     - coverage
     - black
     - pre-commit
+    - cffconvert
 
     # DEV: code and docs
     - mamba
