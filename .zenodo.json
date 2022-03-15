@@ -1,43 +1,73 @@
 {
-  "creators": [
-    {
-      "orcid": "0000-0002-9579-8910",
-      "affiliation": "Laboratoire Catalyse et Spectrochimie (LCS), Ensicaen/Université Caen-Normandie/CNRS",
-      "name": "Travert, Arnaud"
-    },
-    {
-      "orcid": "0000-0002-5476-3148",
-      "affiliation": "Laboratoire Catalyse et Spectrochimie (LCS), Ensicaen/Université Caen-Normandie/CNRS",
-      "name": "Fernandez, Christian"
-    }
-  ],
-
+  "title": "SpectroChemPy",
+  "publication_date": "2022-03-15",
+  "version": "0.4.2",
   "contributors": [
     {
+      "type": "Other",
       "orcid": "0000-0001-5999-5880",
-      "affiliation": "Laboratoire Catalyse et Spectrochimie (LCS), Ensicaen/Université Caen-Normandie/CNRS",
-      "name": "Clet, Guillaume",
-      "type": "Other"
+      "affiliation": "Laboratoire Catalyse et Spectrochimie (LCS), Ensicaen/Universit\u00e9 Caen-Normandie/CNRS",
+      "name": "Clet, Guillaume"
     },
     {
+      "type": "Other",
       "orcid": "0000-0002-1825-0097",
-      "affiliation": "Laboratoire Catalyse et Spectrochimie (LCS), Ensicaen/Université Caen-Normandie/CNRS",
-      "name": "Ait Blal, Abdelhafid",
-      "type": "Other"
+      "affiliation": "Laboratoire Catalyse et Spectrochimie (LCS), Ensicaen/Universit\u00e9 Caen-Normandie/CNRS",
+      "name": "Ait Blal, Abdelhafid"
     },
     {
-      "name": "Guerin, William",
-      "type": "Other"
+      "type": "Other",
+      "name": "Guerin, William"
     },
     {
-      "name": "Mailänder, Matthias",
-      "type": "Other"
+      "type": "Other",
+      "name": "Mail\u00e4nder, Matthias"
+    }
+  ],
+  "creators": [
+    {
+      "orcid": "0000-0002-5476-3148",
+      "affiliation": "Laboratoire Catalyse et Spectrochimie (LCS), Ensicaen/Universit\u00e9 Caen-Normandie/CNRS",
+      "name": "Fernandez, Christian"
+    },
+    {
+      "orcid": "0000-0002-9579-8910",
+      "affiliation": "Laboratoire Catalyse et Spectrochimie (LCS), Ensicaen/Universit\u00e9 Caen-Normandie/CNRS",
+      "name": "Travert, Arnaud"
     }
   ],
   "license": "CECILL-B",
-
+  "related_identifiers": [
+    {
+      "scheme": "url",
+      "identifier": "https://github.com/spectrochempy/spectrochempy/tree/0.4.1",
+      "relation": "isSupplementTo"
+    },
+    {
+      "scheme": "doi",
+      "identifier": "10.5281/zenodo.3823841",
+      "relation": "isVersionOf"
+    }
+  ],
+  "keywords": [
+    "chemistry",
+    "data-analysis",
+    "datasets",
+    "ftir",
+    "ftir-data-analysis",
+    "infrared",
+    "nmr",
+    "nmr-data",
+    "nmr-spectroscopy",
+    "processing",
+    "python",
+    "raman",
+    "raman-spectra",
+    "raman-spectroscopy",
+    "spectroscopy",
+    "uv-vis"
+  ],
   "upload_type": "software",
-
-  "keywords": ["Spectroscopy", "processing",  "chemistry",  "datasets", "data-analysis"]
-
+  "access_right": "open",
+  "description": "<p>SpectroChemPy is a framework for processing, analyzing and modeling Spectroscopic data for Chemistry with Python. It is a cross-platform software, running on Linux, Windows or OS X.</p>"
 }
