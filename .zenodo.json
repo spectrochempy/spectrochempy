@@ -1,14 +1,14 @@
 {
   "creators": [
     {
-      "orcid": "0000-0002-5476-3148",
-      "affiliation": "Laboratoire Catalyse et Spectrochimie (LCS), Ensicaen/Université Caen-Normandie/CNRS",
-      "name": "Fernandez, Christian"
-    },
-    {
       "orcid": "0000-0002-9579-8910",
       "affiliation": "Laboratoire Catalyse et Spectrochimie (LCS), Ensicaen/Université Caen-Normandie/CNRS",
       "name": "Travert, Arnaud"
+    },
+    {
+      "orcid": "0000-0002-5476-3148",
+      "affiliation": "Laboratoire Catalyse et Spectrochimie (LCS), Ensicaen/Université Caen-Normandie/CNRS",
+      "name": "Fernandez, Christian"
     }
   ],
 

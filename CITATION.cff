@@ -1,0 +1,37 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: >-
+  SpectroChemPy, Processing, analyzing and modeling
+  spectroscopic data.
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Arnaud
+    family-names: Travert
+    email: arnaud.travert@ensicaen.fr
+    affiliation: >-
+      ENSICAEN, Université de Caen, CNRS (Laboratoire
+      Catalyse et Spectrochimie)
+    orcid: 'https://orcid.org/0000-0002-9579-8910'
+  - given-names: Christian
+    family-names: Fernandez
+    email: christian.fernandez@ensicaen.fr
+    affiliation: >-
+      ENSICAEN, Université de Caen, CNRS (Laboratoire
+      Catalyse et Spectrochimie)
+    orcid: 'https://orcid.org/0000-0002-5476-3148'
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.3823841
+repository-code: 'https://github.com/spectrochempy/spectrochempy'
+url: 'https://www.spectrochempy.fr'
+abstract: >
+  SpectroChemPy is a framework for processing,
+  analyzing and modeling Spectroscopic data for
+  Chemistry with Python. It is a cross-platform
+  software, running on Linux, Windows or OS X.
+license: CECILL-B
