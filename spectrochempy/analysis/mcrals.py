@@ -252,9 +252,9 @@ class MCRALS(HasTraits):
 
         if unimodConc == "all":
             unimodConc = np.arange(nspecies)
-        elif (
-            len(unimodConc) > nspecies or max(unimodConc + 1) > nspecies
-        ):  # pragma: no cover
+        elif unimodConc is None:
+            unimodConc = []
+        elif len(unimodConc) > nspecies:  # pragma: no cover
             raise ValueError(
                 f"The guess has only {nspecies} species, please check unimodConc"
             )
@@ -332,7 +332,7 @@ class MCRALS(HasTraits):
 
             # Force unimodal concentration
             # ----------------------------
-            if unimodConc is not None:
+            if unimodConc != []:
                 for s in unimodConc:
                     maxid = np.argmax(C.data[:, s])
                     curmax = C.data[maxid, s]
