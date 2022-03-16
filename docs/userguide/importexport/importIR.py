@@ -328,7 +328,10 @@ Z2 = scp.read_opus("irdata/OPUS")
 print(Z2)
 
 # %% [markdown]
-# Note that supplementary information can be obtained by the direct use of
+# Note above that a warning was issued because the `irdata/OPUS` contains a background file
+# (single beam) which is not read by SpectroChemPy.
+#
+# Finally, supplementary information can be obtained by the direct use of
 # `brukeropusreader`.
 #
 # For instance:
