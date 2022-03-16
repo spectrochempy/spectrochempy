@@ -315,7 +315,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
     is_nmr = dataset.origin.lower() in [
         "topspin",
     ]
-    is_ir = dataset.origin.lower() in ["omnic", "opus"]
+    is_ir = dataset.meta.interferogram
 
     # On which axis do we want to apply transform (get axis from arguments)
     dim = kwargs.pop("dim", kwargs.pop("axis", -1))

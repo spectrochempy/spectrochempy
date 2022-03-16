@@ -285,11 +285,11 @@ X = scp.read_omnic(list_files, directory="irdata/subdir")
 print(X)
 
 # %% [markdown]
-# In such a case ase these .spa files are alone in the directory, a very convenient is to call the read_omnic method
+# When compatible .spa files are alone in a directory, a very convenient is to call the read_omnic method
 # using only the directory path as argument that will gather the .spa files together:
 
 # %%
-X = scp.read_omnic("irdata/subdir")
+X = scp.read_omnic("irdata/subdir/1-20")
 print(X)
 
 # %% [markdown]
@@ -328,7 +328,10 @@ Z2 = scp.read_opus("irdata/OPUS")
 print(Z2)
 
 # %% [markdown]
-# Note that supplementary information can be obtained by the direct use of
+# Note above that a warning was issued because the `irdata/OPUS` contains a background file
+# (single beam) which is not read by SpectroChemPy.
+#
+# Finally, supplementary information can be obtained by the direct use of
 # `brukeropusreader`.
 #
 # For instance:
