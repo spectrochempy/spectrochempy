@@ -616,16 +616,40 @@ class RandomSeedContext(object):
 # ======================================================================================================================
 
 # .............................................................................
-def assert_equal_units(unit1, unit2):
+def assert_equal_units(unit1, unit2, strict=False):
+    """
+    Compare units.
+
+    Parameters
+    ----------
+    unit1 : units
+        Units to be compared.
+    unit2 : units
+        Other units to be compared
+    strict :  bool, optional, default: False
+        If True, units should be exactly the same: `km` != `mm`.
+    """
     from pint import DimensionalityError
 
     try:
-        x = (1.0 * unit1) / (1.0 * unit2)
+        x = (1.0 * unit1).to_base_units() / (1.0 * unit2).to_base_units()
     except DimensionalityError:
-        return False
-    if x.dimensionless:
+        raise AssertionError
+
+    if x.dimensionless and (x == 1.0 or not strict):
+        _check_absorbance_related_units(unit1, unit2)
         return True
-    return False
+
+    raise AssertionError
+
+
+def _check_absorbance_related_units(unit1, unit2):
+    # particular case of absorbance, transmittance and absolute_transmitttance units
+    lunit = ["absorbance", "transmittance", "absolute_transmittance"]
+    if f"{unit1:P}" in lunit and f"{unit2:P}" in lunit:
+        if f"{unit1:P}" != f"{unit2:P}":
+            raise AssertionError
+    return True
 
 
 # .............................................................................
