@@ -1093,3 +1093,33 @@ def test_round_docstring_example():
     assert_dataset_equal(dsm_transformed1, dsm_transformed2)
     assert_dataset_equal(dsm_transformed1, dsm_transformed3)
     assert_dataset_equal(dsm_transformed1, dsm_transformed4)
+
+
+def test_issue417():
+    X = scp.read_omnic("irdata/nh4y-activation.spg")
+    x = X - X[-1]
+
+    print("--subtract with ds from read_omnic")
+    print(f"mean x: {np.mean(x.data)}")
+    print(f"var x: {np.var(x.data)}")
+    print("")
+
+    f = X.write("X.scp")
+    X_r = scp.read("X.scp")
+    x_r = X_r - X_r[-1]
+
+    print("--subtract after write/read_scp")
+    print(f"mean x_r: {np.mean(x_r.data)}")
+    print(f"var x_r: {np.var(x_r.data)}")
+    print("")
+
+    x_r2 = X_r - X_r[-1].data
+    print("--subtract with data field")
+    print(f"mean x_r2: {np.mean(x_r2.data)}")
+    print(f"var x_r2: {np.var(x_r2.data)}")
+
+    assert_array_equal(x.data, x_r2.data)
+    assert_array_equal(x.data, x_r.data)
+    assert_dataset_equal(x, x_r)
+
+    f.unlink()
