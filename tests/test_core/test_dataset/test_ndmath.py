@@ -1106,6 +1106,13 @@ def test_issue417():
 
     f = X.write("X.scp")
     X_r = scp.read("X.scp")
+    f.unlink()
+
+    assert_array_equal(X.data, X_r.data)
+    assert_dataset_equal(X, X_r)
+    assert_equal_units(X.units, X_r.units)
+    assert_dataset_equal(X[-1], X_r[-1])
+
     x_r = X_r - X_r[-1]
 
     print("--subtract after write/read_scp")
@@ -1121,5 +1128,3 @@ def test_issue417():
     assert_array_equal(x.data, x_r2.data)
     assert_array_equal(x.data, x_r.data)
     assert_dataset_equal(x, x_r)
-
-    f.unlink()
