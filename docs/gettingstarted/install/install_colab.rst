@@ -4,7 +4,7 @@
 Install in Google Colaboratory (Colab)
 ****************************************
 
-May be you want to try or run SpectroChemPy without installing python and all the necessary packages on your computer.
+Maybe you want to try or run SpectroChemPy without installing python and all the necessary packages on your computer.
 
 To do this you can use `Colaboratory <https://colab.research.google.com/notebooks/intro.ipynb?hl=en#>`__,
 in short `Colab`, which allows you to run python notebooks in your browser without any installation.
@@ -36,12 +36,12 @@ Then as usual you can start using SpectroChemPy by inserting adding new code cel
 
 .. warning::
 
-   Colab notebooks are isolated and thus you need to perform the above operation for all notebook you create.
+   Colab notebooks are isolated and thus you need to perform the above operation for all notebook you create... and to run it each time you reopen the notebook for further processing or analysis.
 
 Load data files
 ---------------
 As Colab notebooks are hosted on Google servers, they have no direct access to your local drive
-(unlike a jupyter notebook for instance). There are several ways to load datafiles on the server:
+(unlike a Jupyter notebook for instance). There are several ways to load datafiles on the server:
 
 * Through the file-explorer pane located on the left-hand side of the Colab window (NOT the File menu which is devoted to notebooks and scripts management !),
 
@@ -55,17 +55,16 @@ widget (works best on Google Chrome).
 
 * By connecting the notebook to your Google Drive (this of course requires that your local files are synchronized with Google drive), using the file-explorer pane.
 
-* By cloning a GitHub repository using `git clone`. In particular, this is the easiest way to access the sample data
-required to reproduce the examples and tutorials fo the spectrochempy documentation. The following block shows
-how to clone this repository (by default in the `\content` folder) and to indicate SpectroChemPy
-its location:
+* By cloning a GitHub repository using `git clone`. In particular, this is the easiest way to access the sample data required to reproduce the examples and tutorials fo the spectrochempy documentation.
+
+The following block shows how to clone this repository (by default in the `\content` folder) and to indicate SpectroChemPy its location:
 
 .. sourcecode:: ipython3
 
     ! git clone https://github.com/spectrochempy/spectrochempy_data
     scp.preferences.datadir = "/content/spectrochempy_data/testdata"
 
-The new folder will appear after clicking the Rresh button of the file-explorer pane. The example data can then be loaded in as described in the examples and tutorials.
+The new folder will appear after clicking the Refresh button of the file-explorer pane. The example data can then be loaded in as described in the examples and tutorials.
 For instance:
 
 .. image:: images/colab_2.png
