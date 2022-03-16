@@ -22,4 +22,3 @@ def test_citation_update():
 
     assert str(citation) is not None
     assert citation.apa == str(citation)
-    assert citation.bibtex.startwith("@software")
