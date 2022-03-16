@@ -14,37 +14,59 @@ The Colab Notebooks are very similar to Jupyter Notebook (from which they derive
 To start with Colab, go to the `Colab website <https://colab.research.google.com/notebooks/intro.ipynb#recent=true>`_
 and create a new notebook.
 
-In the a cell, you enter and execute the following block of instructions to load SpectroChemPy and the
-tests/examples files in Colab.
+Load and install SpectroChemPy with pip
+---------------------------------------
+
+In the first cell, enter and execute the following block of instructions to load and install SpectroChemPy in Colab.
 
 .. sourcecode:: ipython3
 
-    !wget -c "https://www.spectrochempy.fr/downloads/set_colab.sh" &> /dev/null
-    !bash set_colab.sh
+    ! pip install spectrochempy &>> output.log
     exit()
 
 .. note::
 
-  Do not pay attention to the message about killed kernel.
-  It is restarted automatically!
-  You can safely close the popup messages.
+  The whole process takes 1-2 minutes. The `exit()` instruction allows restarting runtime automatically: do not pay
+  attention to the popup messages about session crash/restart. You can safely close them.
 
-Then as usual you can start using SpectroChemPy.
+Then as usual you can start using SpectroChemPy by inserting adding new code cells:
 
-.. image:: images/colab.png
+.. image:: images/colab_1.png
        :alt: Colab windows
-
 
 .. warning::
 
    Colab notebooks are isolated and thus you need to perform the above operation for all notebook you create.
 
-Example of a Colab session
---------------------------
+Load data files
+---------------
+As Colab notebooks are hosted on Google servers, they have no direct access to your local drive
+(unlike a jupyter notebook for instance). There are several ways to load datafiles on the server:
 
-.. raw:: html
+* Through the file-explorer pane located on the left-hand side of the Colab window (NOT the File menu which is devoted to notebooks and scripts management !),
 
-   <video width="696" controls>
-   <source src="../../_static/video/capsule_colab.mp4" type="video/mp4">
-   Your browser does not support the video tag.
-   </video>
+* Equivalently by importing the `files` module from the `google.colab` library and runing the `files.upload()`
+widget (works best on Google Chrome).
+
+.. sourcecode:: ipython3
+
+    from google.colab import files
+    files.upload()
+
+* By connecting the notebook to your Google Drive (this of course requires that your local files are synchronized with Google drive), using the file-explorer pane.
+
+* By cloning a GitHub repository using `git clone`. In particular, this is the easiest way to access the sample data
+required to reproduce the examples and tutorials fo the spectrochempy documentation. The following block shows
+how to clone this repository (by default in the `\content` folder) and to indicate SpectroChemPy
+its location:
+
+.. sourcecode:: ipython3
+
+    ! git clone https://github.com/spectrochempy/spectrochempy_data
+    scp.preferences.datadir = "/content/spectrochempy_data/testdata"
+
+The new folder will appear after clicking the Rresh button of the file-explorer pane. The example data can then be loaded in as described in the examples and tutorials.
+For instance:
+
+.. image:: images/colab_2.png
+       :alt: Colab windows
