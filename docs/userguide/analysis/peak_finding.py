@@ -468,7 +468,7 @@ for key in properties:
     table_property = "  ".join(
         [f"{properties[key][i].m:>10.3f}" for i in range(len(peaks))]
     )
-    title = f"{key:>.16} ({properties[key][0].u:>.6K})"
+    title = f"{key:>.16} ({properties[key][0].u})"
     print(f"{title:>26}: {table_property}")
 
 ax = s.plot()
