@@ -37,18 +37,6 @@
     }
   ],
   "license": "CECILL-B",
-  "related_identifiers": [
-    {
-      "scheme": "url",
-      "identifier": "https://github.com/spectrochempy/spectrochempy/tree/0.4.1",
-      "relation": "isSupplementTo"
-    },
-    {
-      "scheme": "doi",
-      "identifier": "10.5281/zenodo.3823841",
-      "relation": "isVersionOf"
-    }
-  ],
   "keywords": [
     "chemistry",
     "data-analysis",
