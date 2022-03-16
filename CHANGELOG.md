@@ -6,8 +6,12 @@
 
 #### NEW FEATURES
 * Concatenate and stack:
-  - `force_stack` keyword in concatenate() now deprecated. 
-  - `stack()` method now generates a new dim, even if a dim of size one in present  
+  - `force_stack` keyword in concatenate() now deprecated.
+  - `stack()` method now generates a new dim, even if a dim of size one in present
+
+#### BUG FIXED:
+* issue #417
+* Transmittance and absorbance units now correctly handled.
 
 ### version 0.4.1
 
