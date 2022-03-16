@@ -326,9 +326,11 @@ html_context = {
         ("latest", '/latest/index.html"'),
         ("stable", "/stable/index.html"),
     ),
-    "version": "{" + f"{version}" + "}",
-    "month": "{" + f"{datetime.today().month}" + "}",
-    "year": "{" + f"{datetime.today().year}" + "}",
+    "version": version,
+    "bibversion": "{" + version + "}",
+    "bibmonth": "{" + datetime.today().month + "}",
+    "year": "{" + datetime.today().year + "}",
+    "bibyear": datetime.today().year,
 }
 
 #
