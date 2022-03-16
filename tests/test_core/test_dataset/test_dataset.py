@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 from pint.errors import UndefinedUnitError
 from quaternion import quaternion
+from os import environ
 
 import spectrochempy as scp
 from spectrochempy.core.units import ur
@@ -28,6 +29,25 @@ adata = (
     [0.0 + 1j, 10.0 + 3.0j],
     [0.0 + 1j, np.nan + 3.0j],
 )
+
+
+# test docstring
+# but this is not intended to work with the debugger - use run instead of debug!
+@pytest.mark.skipif(
+    environ.get("PYDEVD_LOAD_VALUES_ASYNC", None),
+    reason="debug mode cause error when checking docstrings",
+)
+def test_nddataset_docstring():
+    from spectrochempy.utils import check_docstrings as chd
+
+    chd.PRIVATE_CLASSES = []  # do not test private class docstring
+    module = "spectrochempy.core.dataset.nddataset"
+    chd.check_docstrings(
+        module,
+        obj=scp.NDDataset,
+        # exclude some errors - remove whatever you want to check
+        exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
+    )
 
 
 @pytest.mark.parametrize("a", adata)

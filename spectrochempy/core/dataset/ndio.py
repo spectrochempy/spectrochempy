@@ -53,7 +53,7 @@ class NDIO(HasTraits):
     @property
     def directory(self):
         """
-        `Pathlib` object - current directory for this dataset.
+        Current directory for this dataset.
 
         ReadOnly property - automatically set when the filename is updated if
         it contains a parent on its path.
@@ -66,7 +66,7 @@ class NDIO(HasTraits):
     @property
     def filename(self):
         """
-        `Pathlib` object - current filename for this dataset.
+        Current filename for this dataset.
         """
         if self._filename:
             return self._filename.stem + self.suffix
@@ -79,13 +79,16 @@ class NDIO(HasTraits):
 
     @property
     def filetype(self):
+        """
+        Type of current file.
+        """
         klass = self.implements()
         return [f"SpectroChemPy {klass} file (*{SCPY_SUFFIX[klass]})"]
 
     @property
     def suffix(self):
         """
-        filename suffix.
+        Filename suffix.
 
         Read Only property - automatically set when the filename is updated
         if it has a suffix, else give

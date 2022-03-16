@@ -1376,13 +1376,14 @@ class NDArray(HasTraits):
         """
         True if the `data` array is dimensionless - Readonly property (bool).
 
-        Notes
-        -----
-        `Dimensionless` is different of `unitless` which means no unit.
-
         See Also
         --------
-        unitless, has_units
+        unitless : True if data has no units.
+        has_units : True if data has units.
+
+         Notes
+        -----
+        `Dimensionless` is different of `unitless` which means no unit.
         """
         if self.unitless:
             return False
@@ -1546,7 +1547,8 @@ class NDArray(HasTraits):
     @property
     def has_data(self):
         """
-        True if the `data` array is not empty and size > 0 (Bool).
+        True if the `data` array is not empty and size > 0.
+
         (Readonly property).
         """
         if (self.data is None) or (self.data.size == 0):
@@ -1570,7 +1572,8 @@ class NDArray(HasTraits):
 
         See Also
         --------
-        unitless, dimensionless
+        unitless : True if the data has no unit.
+        dimensionless : True if the data have dimensionless units.
         """
         if self._units is not None:
             return True
@@ -1665,8 +1668,9 @@ class NDArray(HasTraits):
     @property
     def is_empty(self):
         """
-        True if the `data` array is empty or size=0, and if no label are present
-        - Readonly property (bool).
+        True if the `data` array is empty or size=0, and if no label are present.
+
+        Readonly property (bool).
         """
         if ((self._data is None) or (self._data.size == 0)) and not self.is_labeled:
             return True
@@ -1737,22 +1741,6 @@ class NDArray(HasTraits):
         except DimensionalityError:
             return False
         return True
-
-    # ..........................................................................
-    @property
-    def itemsize(self):
-        """
-        Data type size (int).
-        """
-        if self.data is None:
-            return None
-
-        return self.data.dtype.itemsize
-
-    # ..........................................................................
-    @property
-    def iterdims(self):
-        return list(range(self.ndim))
 
     # ..........................................................................
     def ito(self, other, force=False):

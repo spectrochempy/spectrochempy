@@ -163,7 +163,8 @@ class NDComplexArray(NDArray):
     @property
     def has_complex_dims(self):
         """
-        bool - True if at least one of the `data` array dimension is complex
+        True if at least one of the `data` array dimension is complex.
+
         (Readonly property).
         """
         if self._data is None:
@@ -177,7 +178,7 @@ class NDComplexArray(NDArray):
     @property
     def is_complex(self):
         """
-        bool - True if the 'data' are complex (Readonly property).
+        True if the 'data' are complex (Readonly property).
         """
         if self._data is None:
             return False
@@ -187,7 +188,9 @@ class NDComplexArray(NDArray):
     @property
     def is_quaternion(self):
         """
-        bool - True if the `data` array is hypercomplex (Readonly property).
+        True if the `data` array is hypercomplex .
+
+        (Readonly property).
         """
         if self._data is None:
             return False
@@ -197,7 +200,9 @@ class NDComplexArray(NDArray):
     @property
     def is_interleaved(self):
         """
-        bool - True if the `data` array is hypercomplex with interleaved data (Readonly property).
+        True if the `data` array is hypercomplex with interleaved data.
+
+        (Readonly property).
         """
         if self._data is None:
             return False
@@ -207,7 +212,9 @@ class NDComplexArray(NDArray):
     @property
     def is_masked(self):
         """
-        bool - True if the `data` array has masked values (Readonly property).
+        True if the `data` array has masked values.
+
+        (Readonly property).
         """
         try:
             return super().is_masked
@@ -221,7 +228,9 @@ class NDComplexArray(NDArray):
     @property
     def real(self):
         """
-        array - The array with real component of the `data` (Readonly property).
+        The array with real component of the `data`.
+
+        (Readonly property).
         """
         new = self.copy()
         if not new.has_complex_dims:
@@ -247,7 +256,9 @@ class NDComplexArray(NDArray):
     @property
     def imag(self):
         """
-        array - The array with imaginary component of the `data` (Readonly property).
+        The array with imaginary component of the `data`.
+
+        (Readonly property).
         """
         new = self.copy()
         if not new.has_complex_dims:
@@ -275,8 +286,7 @@ class NDComplexArray(NDArray):
     @property
     def RR(self):
         """
-        array - The array with real component in both dimension of
-        hypercomplex 2D `data`.
+        The array with real component in both dimension of hypercomplex 2D `data`.
 
         This readonly property is equivalent to the `real` property.
         """
@@ -288,7 +298,9 @@ class NDComplexArray(NDArray):
     @property
     def RI(self):
         """
-        array - The array with real-imaginary component of hypercomplex 2D `data` (Readonly property).
+        The array with real-imaginary component of hypercomplex 2D `data`.
+
+        (Readonly property).
         """
         if not self.is_quaternion:
             raise TypeError("Not an hypercomplex array")
@@ -298,7 +310,9 @@ class NDComplexArray(NDArray):
     @property
     def IR(self):
         """
-        array - The array with imaginary-real component of hypercomplex 2D `data` (Readonly property).
+        The array with imaginary-real component of hypercomplex 2D `data`.
+
+        (Readonly property).
         """
         if not self.is_quaternion:
             raise TypeError("Not an hypercomplex array")
@@ -308,7 +322,9 @@ class NDComplexArray(NDArray):
     @property
     def II(self):
         """
-        array - The array with imaginary-imaginary component of hypercomplex 2D data (Readonly property).
+        The array with imaginary-imaginary component of hypercomplex 2D data.
+
+        (Readonly property).
         """
         if not self.is_quaternion:
             raise TypeError("Not an hypercomplex array")
@@ -318,7 +334,7 @@ class NDComplexArray(NDArray):
     @property
     def limits(self):
         """
-        list - range of the data
+        Range of the data.
         """
         if self.data is None:
             return None
