@@ -46,7 +46,8 @@ sys.path.insert(0, os.path.join(BASE_PATH))
 import spectrochempy  # isort:skip
 
 sys.path.insert(1, os.path.join(BASE_PATH, "doc", "sphinxext"))
-from numpydoc.validate import validate, Docstring  # isort:skip
+from numpydoc.docscrape import get_doc_object
+from numpydoc.validate import Validator, validate  # isort:skip
 
 
 PRIVATE_CLASSES = []
@@ -157,7 +158,13 @@ def get_api_items(api_doc_fd):
         previous_line = line
 
 
-class SpectroChemPyDocstring(Docstring):
+class SpectroChemPyDocstring(Validator):
+    def __init__(self, func_name: str, doc_obj=None) -> None:
+        self.func_name = func_name
+        if doc_obj is None:
+            doc_obj = get_doc_object(Validator._load_obj(func_name))
+        super().__init__(doc_obj)
+
     @property
     def mentioned_private_classes(self):
         return [klass for klass in PRIVATE_CLASSES if klass in self.raw_doc]
