@@ -47,7 +47,6 @@
     Coord.is_integer
     Coord.is_labeled
     Coord.is_units_compatible
-    Coord.itemsize
     Coord.ito
     Coord.ito_base_units
     Coord.ito_reduced_units
@@ -146,7 +145,6 @@
     LinearCoord.is_integer
     LinearCoord.is_labeled
     LinearCoord.is_units_compatible
-    LinearCoord.itemsize
     LinearCoord.ito
     LinearCoord.ito_base_units
     LinearCoord.ito_reduced_units
@@ -187,7 +185,6 @@
     LSTSQ.transform
     MCRALS.C
     MCRALS.Chard
-    MCRALS.extC
     MCRALS.extOutput
     MCRALS.logs
     MCRALS.params
@@ -303,7 +300,6 @@
     NDDataset.is_masked
     NDDataset.is_quaternion
     NDDataset.is_units_compatible
-    NDDataset.itemsize
     NDDataset.ito
     NDDataset.ito_base_units
     NDDataset.ito_reduced_units

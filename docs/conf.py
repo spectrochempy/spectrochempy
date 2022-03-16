@@ -13,6 +13,7 @@ import inspect
 import os
 import sys
 import warnings
+from datetime import datetime
 
 #
 import sphinx_rtd_theme  # Theme for the website
@@ -325,6 +326,8 @@ html_context = {
         ("latest", '/latest/index.html"'),
         ("stable", "/stable/index.html"),
     ),
+    "version": version,
+    "year": datetime.today().year,
 }
 
 #
@@ -664,8 +667,22 @@ def shorter_signature(app, what, name, obj, options, signature, return_annotatio
     return new_sig, return_annotation
 
 
-#
+def rstjinja(app, docname, source):
+    """
+    Render our pages as a jinja template for fancy templating goodness.
+
+    Copied from site: https://ericholscher.com/blog/2016/jul/25/integrating-jinja-rst-sphinx/
+    """
+    # Make sure we're outputting HTML
+    if app.builder.format != "html":
+        return
+    src = source[0]
+    rendered = app.builder.templates.render_string(src, app.config.html_context)
+    source[0] = rendered
+
+
 def setup(app):
+    app.connect("source-read", rstjinja)
     app.connect("autodoc-skip-member", autodoc_skip_member)
     app.connect("autodoc-process-signature", shorter_signature)
     app.add_css_file("theme_override.css")  # also can be a full URL
