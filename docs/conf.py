@@ -326,8 +326,9 @@ html_context = {
         ("latest", '/latest/index.html"'),
         ("stable", "/stable/index.html"),
     ),
-    "version": version,
-    "year": datetime.today().year,
+    "version": "{" + f"{version}" + "}",
+    "month": "{" + f"{datetime.today().month}" + "}",
+    "year": "{" + f"{datetime.today().year}" + "}",
 }
 
 #
