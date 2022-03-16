@@ -25,5 +25,4 @@ print(Z)
 
 Z.plot()
 
-
-scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
+# scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
