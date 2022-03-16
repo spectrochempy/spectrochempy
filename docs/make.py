@@ -168,8 +168,40 @@ def make_changelog():
 
     print(f'\n{"-" * 80}\nMake `changelogs`\n{"-" * 80}')
 
-    outfile = REFERENCE / "changelog.rst"
+    # check that a section corresponding to the current version is present
+    vers = version.split(".")[:3]
+    minor = ".".join(vers[:2])
+    revision = ".".join(vers[:3])
+    file = PROJECT / "CHANGELOG.md"
+    md = file.read_text()
+    # suppress empty lines and split file into separate lines
+    lmd = md.replace("\n\n", "\n").split("\n")
+    # remove trailing spaces
+    lmd = list(map(str.rstrip, lmd))
+    # check if the current minor version is in the file,
+    # else put the needed fields
+    try:
+        id = lmd.index(f"## VERSION {minor}")
+        try:
+            id = lmd.index(f"## VERSION {revision}")
+        except ValueError:
+            lmd.insert(
+                id + 1,
+                f"### version {revision}\n#### NEW "
+                f"FEATURES\n* \n#### BUG FIXED\n* ",
+            )
+    except ValueError:
+        # add it
+        lmd.insert(
+            1,
+            f"## VERSION {minor}\n### version {revision}\n#### NEW "
+            f"FEATURES\n* \n#### BUG FIXED\n* ",
+        )
+    # rebuild the md file
+    md = "\n".join(lmd)
+    file.write_text(md)
 
+    outfile = REFERENCE / "changelog.rst"
     sh(f'pandoc {PROJECT / "CHANGELOG.md"} -f  markdown -t rst -o {outfile}')
 
     print(f"`Complete what's new` log written to:\n{outfile}\n")
