@@ -4,10 +4,12 @@
 #    Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 #    CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
 #  =====================================================================================================================
+import pytest
 
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.scripts.script import Script
 from spectrochempy.utils import testing
+from spectrochempy.core.units import ur
 
 
 def test_compare_ndarrays(IR_dataset_1D):
@@ -125,3 +127,13 @@ def test_compare_project(simple_project):
 
     with testing.raises(AssertionError):
         testing.assert_project_equal(proj1, proj3)
+
+
+def test_compare_units():
+
+    testing.assert_equal_units(ur.km, ur.m)
+    with pytest.raises(AssertionError):
+        testing.assert_equal_units(ur.km, ur.m, strict=True)
+
+    with pytest.raises(AssertionError):
+        testing.assert_equal_units(ur.absorbance, ur.transmittance)
