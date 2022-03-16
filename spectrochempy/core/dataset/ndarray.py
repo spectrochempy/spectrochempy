@@ -2307,20 +2307,23 @@ class NDArray(HasTraits):
                 # particular case of dimensionless units: absorbance and transmittance
                 else:
 
-                    if oldunits in [ur.transmittance, ur.absolute_transmittance]:
-                        if units == ur.absorbance:
+                    if f"{oldunits:P}" in ["transmittance", "absolute_transmittance"]:
+                        if f"{units:P}" == "absorbance":
                             udata = (new.data * new.units).to(units)
                             new._data = -np.log10(udata.m)
                             new._units = units
                             new._title = "absorbance"
 
-                        elif units in [ur.transmittance, ur.absolute_transmittance]:
+                        elif f"{units:P}" in [
+                            "transmittance",
+                            "absolute_transmittance",
+                        ]:
                             new._data = (new.data * new.units).to(units)
                             new._units = units
                             new._title = "transmittance"
 
-                    elif oldunits == ur.absorbance:
-                        if units in [ur.transmittance, ur.absolute_transmittance]:
+                    elif f"{oldunits:P}" == "absorbance":
+                        if f"{units:P}" in ["transmittance", "absolute_transmittance"]:
                             scale = Quantity(1.0, self._units).to(units).magnitude
                             new._data = 10.0 ** -new.data * scale
                             new._units = units
