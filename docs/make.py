@@ -175,7 +175,7 @@ def make_changelog():
     file = PROJECT / "CHANGELOG.md"
     md = file.read_text()
     # suppress empty lines and split file into separate lines
-    lmd = md.replace("\n\n", "\n").split("\n")
+    lmd = md.replace("\n\n\n", "\n\n").split("\n")
     # remove trailing spaces
     lmd = list(map(str.rstrip, lmd))
     # check if the current minor version is in the file,
@@ -183,12 +183,12 @@ def make_changelog():
     try:
         id = lmd.index(f"## VERSION {minor}")
         try:
-            id = lmd.index(f"## VERSION {revision}")
+            id = lmd.index(f"### version {revision}")
         except ValueError:
             lmd.insert(
                 id + 1,
-                f"### version {revision}\n#### NEW "
-                f"FEATURES\n* \n#### BUG FIXED\n* ",
+                f"### version {revision}\n\n#### NEW "
+                f"FEATURES\n* \n\n#### BUG FIXED\n* \n",
             )
     except ValueError:
         # add it
