@@ -328,9 +328,9 @@ html_context = {
     ),
     "version": version,
     "bibversion": "{" + version + "}",
-    "bibmonth": "{" + datetime.today().month + "}",
-    "year": "{" + datetime.today().year + "}",
-    "bibyear": datetime.today().year,
+    "bibmonth": "{" + f"{datetime.today().month}" + "}",
+    "year": "{" + f"{datetime.today().year}" + "}",
+    "bibyear": f"{datetime.today().year}",
 }
 
 #
