@@ -580,7 +580,7 @@ class IRIS:
                 np.zeros((self.X.shape)), title=self.X.title, units=self.X.units
             )
             X_hat.set_coordset(y=self.X.y, x=self.X.x)
-            X_hat.data = np.dot(self.K.data, self.f.data.squeeze())
+            X_hat.data = np.dot(self.K.data, self.f.data.squeeze(axis=0))
         else:
             X_hat = NDDataset(
                 np.zeros((self.f.z.size, *self.X.shape)),
@@ -589,9 +589,7 @@ class IRIS:
             )
             X_hat.set_coordset(z=self.f.z, y=self.X.y, x=self.X.x)
             for i in range(X_hat.z.size):
-                X_hat.data[i] = np.expand_dims(
-                    np.dot(self.K.data, self.f[i].data.squeeze()), 0
-                )
+                X_hat.data[i] = np.dot(self.K.data, self.f[i].data.squeeze(axis=0))
 
         X_hat.name = "2D-IRIS Reconstructed datasets"
         return X_hat
