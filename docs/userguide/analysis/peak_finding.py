@@ -463,12 +463,12 @@ peaks, properties = s.find_peaks(
 )
 
 table_pos = "  ".join([f"{peaks[i].x.value.m:>10.3f}" for i in range(len(peaks))])
-print(f'{"peak_position (cm^-1)":>26}: {table_pos}')
+print(f'{"peak_position (cm⁻¹)":>26}: {table_pos}')
 for key in properties:
     table_property = "  ".join(
         [f"{properties[key][i].m:>10.3f}" for i in range(len(peaks))]
     )
-    title = f"{key:>.16} ({properties[key][0].u})"
+    title = f"{key:>.16} ({properties[key][0].u:~P})"
     print(f"{title:>26}: {table_property}")
 
 ax = s.plot()
