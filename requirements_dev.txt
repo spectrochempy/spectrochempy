@@ -25,11 +25,11 @@ traitlets
 traittypes
 xlrd
 pyyaml
+ipywidgets
+ipympl
 setuptools
 setuptools_scm
 gitpython
-ipywidgets
-ipympl
 jupyterlab>=2.2.10
 nodejs
 pytest

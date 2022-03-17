@@ -53,6 +53,8 @@ dependencies:
     - traittypes
     - xlrd
     - pyyaml
+    - ipywidgets
+    - ipympl
 
     # example and test data
     - spectrochempy_data
@@ -65,8 +67,6 @@ dependencies:
   {% if DEV %}
 
     # Jupyter lab
-    - ipywidgets
-    - ipympl
     - jupyterlab>=2.2.10
     - nodejs
 

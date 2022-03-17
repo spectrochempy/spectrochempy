@@ -25,6 +25,8 @@ traitlets
 traittypes
 xlrd
 pyyaml
+ipywidgets
+ipympl
 setuptools
 setuptools_scm
 gitpython

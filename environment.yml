@@ -46,6 +46,8 @@ dependencies:
     - traittypes
     - xlrd
     - pyyaml
+    - ipywidgets
+    - ipympl
 
     # example and test data
     - spectrochempy_data
