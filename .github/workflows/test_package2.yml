@@ -38,12 +38,15 @@ jobs:
         with:
           python-version: ${{ matrix.pythonVersion }}
 
+      - name: Install Data
+        run: |
+          git clone https://github.com/spectrochempy/spectrochempy_data
+          mv -v ./spectrochempy_data/testdata /home/runner/.spectrochempy/testdata
+
       - name: Install spectrochempy
         run: |
           python3 -m pip install --upgrade pip setuptools wheel
           python3 -m pip install .
-          git clone https://github.com/spectrochempy/spectrochempy_data
-          mv -v ./spectrochempy_data/testdata /home/runner/.spectrochempy/testdata
           pwd
 
       - name: Initialize CodeClimate variable
