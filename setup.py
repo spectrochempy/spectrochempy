@@ -156,9 +156,6 @@ setup_args = dict(
         "develop": PostDevelopCommand,
         "install": PostInstallCommand,
     },
-    # scripts
-    # # scripts = {'scripts/launch_api.py'},
-    # entry_points={'console_scripts': ['scpy_update=spectrochempy.scripts.scpy_update:main'], },
 )
 
 # ======================================================================================================================
