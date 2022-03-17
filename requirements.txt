@@ -24,6 +24,7 @@ tqdm
 traitlets
 traittypes
 xlrd
+pyyaml
 setuptools
 setuptools_scm
 gitpython

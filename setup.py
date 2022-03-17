@@ -154,6 +154,7 @@ setup_args = dict(
         "numba==0.55.0",
         "numpy==1.21.5",
         "pint>=0.18",
+        "pyyaml",
         # "plotly",
         "requests",
         "scipy==1.7.3",

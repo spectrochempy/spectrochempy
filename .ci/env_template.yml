@@ -52,6 +52,7 @@ dependencies:
     - traitlets
     - traittypes
     - xlrd
+    - pyyaml
 
     # example and test data
     - spectrochempy_data
