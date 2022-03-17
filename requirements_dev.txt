@@ -45,7 +45,7 @@ pre-commit
 cffconvert
 mamba
 jupytext
-sphinx<4.0
+sphinx
 sphinx_rtd_theme
 autodocsumm
 sphinx-gallery<=0.7.0
