@@ -42,9 +42,9 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Python ${{ matrix.python-version }}
-          uses: actions/setup-python@v2
-          with:
-            python-version: ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
 
       - name: Install spectrochempy
         shell: bash
@@ -52,7 +52,8 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           python -m pip install .
           git clone https://github.com/spectrochempy/spectrochempy_data
-
+          pwd
+          ls
       - name: Initialize CodeClimate variable
         id: vars
         shell: bash
