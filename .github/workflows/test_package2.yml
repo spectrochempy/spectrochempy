@@ -69,7 +69,8 @@ jobs:
 
       - name: Test, generate coverage information
         run: |
-          python3 -m pip install coverage
+          python3 -m pip install coverage pytest pytest-doctestplus pytest-flake8
+          python3 -m pip install pytest-mock pyfakefs cffconvert
           coverage run --rcfile=tests/.coveragerc -m pytest tests
 
       - name: Report Coverage info to CodeClimate
