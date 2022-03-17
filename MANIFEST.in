@@ -1,4 +1,4 @@
-include LICENSE MANIFEST.in README.md
+include LICENSE MANIFEST.in README.md CITATION.cff CHANGELOG.md titre.png requirements.txt
 prune docs
 prune tests
 prune .ci
