@@ -56,7 +56,7 @@ def _install_mpl():
     for src in styles:
         dest = stylelib / src.name
         shutil.copy(src, dest)
-    print(f"Stylesheets installed in {dest}")
+        print(f"Stylesheet {src} installed in {dest}")
 
     # install fonts in mpl-data
     # https://stackoverflow.com/a/47743010
@@ -121,7 +121,7 @@ setup_args = dict(
     name="spectrochempy",
     # use_scm_version=True,
     version=version(),
-    license="CeCILL-B Free Software",
+    license="CECILL-B",
     author="Arnaud Travert & Christian Fernandez",
     author_email="contact@spectrochempy.fr",
     maintainer="C. Fernandez",
