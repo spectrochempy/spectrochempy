@@ -15,7 +15,7 @@ jobs:
 
 
   # Job 1  (only for non release)
-  test-package:
+  test-package2:
 
     if: "!startsWith(github.ref, 'refs/release/')"
 
