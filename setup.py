@@ -14,6 +14,8 @@ from setuptools.command.develop import develop as _develop
 from setuptools.command.install import install as _install
 from setuptools_scm import get_version
 
+from pip._internal.req import parse_requirements
+
 
 def version():
     return get_version(root=".", relative_to=__file__).split("+")[0]
@@ -141,33 +143,7 @@ setup_args = dict(
     include_package_data=True,  # requirements
     python_requires=">=3.7",
     setup_requires=["setuptools_scm>=6.3.2", "matplotlib>=3.5.1"],
-    install_requires=[
-        "setuptools_scm",
-        "quadprog",
-        "numpy-quaternion",
-        "brukeropusreader",
-        "colorama",
-        "dill",
-        "ipython>=7.31.1",
-        "jinja2",
-        "matplotlib>=3.5",
-        "numba==0.55.0",
-        "numpy==1.21.5",
-        "pint>=0.18",
-        "pyyaml",
-        # "plotly",
-        "requests",
-        "scipy==1.7.3",
-        "tqdm",
-        "traitlets",
-        "traittypes",
-        "xlrd",
-        # "gitpython",
-        # "ipywidgets",
-        # "ipympl",
-        # "jupyterlab>=2.2.10",
-        # "nodejs",
-    ],
+    install_requires=parse_requirements("requirements.txt", session="hack"),
     # post-commands
     cmdclass={
         "develop": PostDevelopCommand,
