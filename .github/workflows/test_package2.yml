@@ -9,8 +9,6 @@ on:
 
 jobs:
 
-
-  # Job 1  (only for non release)
   test-package2:
 
     name: Test using ${{ matrix.os }} and python ${{ matrix.pythonVersion }}
@@ -48,6 +46,7 @@ jobs:
           git clone https://github.com/spectrochempy/spectrochempy_data
           pwd
           ls
+
       - name: Initialize CodeClimate variable
         id: vars
         shell: bash
@@ -61,8 +60,6 @@ jobs:
           echo ::set-output name=HAS_CC_TEST_REPORTER_ID::${HAS_CC_TEST_REPORTER_ID}
 
       - name: Download CodeClimate reporter
-        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.10'
-          && matrix.os == 'ubuntu-latest' && steps.vars.outputs.HAS_CC_TEST_REPORTER_ID == 'true'}}
         run: |
           # downloading cc-test-reporter
           curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
@@ -74,8 +71,6 @@ jobs:
           coverage run --rcfile=tests/.coveragerc -m pytest tests
 
       - name: Report Coverage info to CodeClimate
-        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.10'
-          && matrix.os == 'ubuntu-latest' && steps.vars.outputs.HAS_CC_TEST_REPORTER_ID == 'true'}}
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         run: |
