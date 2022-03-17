@@ -41,6 +41,7 @@ jobs:
       - name: Install Data
         run: |
           git clone https://github.com/spectrochempy/spectrochempy_data
+          mkdir -p /home/runner/.spectrochempy
           mv -v ./spectrochempy_data/testdata /home/runner/.spectrochempy/testdata
 
       - name: Install spectrochempy
