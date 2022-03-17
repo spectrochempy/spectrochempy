@@ -14,8 +14,6 @@ from setuptools.command.develop import develop as _develop
 from setuptools.command.install import install as _install
 from setuptools_scm import get_version
 
-from pip._internal.req import parse_requirements
-
 
 def version():
     return get_version(root=".", relative_to=__file__).split("+")[0]
@@ -91,6 +89,15 @@ def _install_mpl():
             print(f"Deleted font cache {file}.")
 
 
+def read_requirements():
+    path = Path("requirements.txt")
+    req = path.read_text().strip()
+    req = req.split("\n")
+    req = list(map(str.strip, req))
+    req.remove("")
+    return [r for r in req if not r.startswith("#")]
+
+
 class PostInstallCommand(_install):
     """Post-installation for installation mode."""
 
@@ -143,7 +150,7 @@ setup_args = dict(
     include_package_data=True,  # requirements
     python_requires=">=3.7",
     setup_requires=["setuptools_scm>=6.3.2", "matplotlib>=3.5.1"],
-    install_requires=parse_requirements("requirements.txt", session="hack"),
+    install_requires=read_requirements(),
     # post-commands
     cmdclass={
         "develop": PostDevelopCommand,
