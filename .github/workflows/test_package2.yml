@@ -24,7 +24,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        os: [macos-latest] # ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest]
         pythonVersion: ["3.10"]
 
     steps:
@@ -43,8 +43,8 @@ jobs:
           python3 -m pip install --upgrade pip setuptools wheel
           python3 -m pip install .
           git clone https://github.com/spectrochempy/spectrochempy_data
+
           pwd
-          ls
 
       - name: Initialize CodeClimate variable
         id: vars
