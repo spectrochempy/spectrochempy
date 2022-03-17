@@ -1,22 +1,25 @@
-# This file is auto-generated from environment.yml, do not modify.
-# See that file for comments about the need/usage of each dependency.
+# WARNING !!!
+# =============================================================================
+#
+# This file is auto-generated from environment.yml file, do not modify it directly.
+#
+# See in `environment.yml` for more information.
+#
+# =============================================================================
 
-quadprog==0.1.9
+quadprog
 brukeropusreader
 numpy-quaternion
-git+https://github.com/jjhelmus/nmrglue.git
 colorama
 dill
-ipython
+ipython>=7.31.1
 jinja2
-matplotlib
-numba
-numpy>=1.21.0
-orderedset
-pint
-plotly
+matplotlib>=3.5
+numba==0.55.0
+numpy==1.21.5
+pint>=0.18
 requests
-scipy
+scipy==1.7.3
 tqdm
 traitlets
 traittypes
@@ -24,7 +27,3 @@ xlrd
 setuptools
 setuptools_scm
 gitpython
-ipywidgets
-ipympl
-jupyterlab>=2.2.10
-nodejs

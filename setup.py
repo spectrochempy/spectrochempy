@@ -153,7 +153,6 @@ setup_args = dict(
         "matplotlib>=3.5",
         "numba==0.55.0",
         "numpy==1.21.5",
-        "orderedset",
         "pint>=0.18",
         # "plotly",
         "requests",

@@ -72,7 +72,7 @@ def conda_package_to_pip(package):
     return package
 
 
-def main(conda_fname, pip_fname):
+def main(conda_fname, pip_fnames):
     """
     Generate the pip dependencies file from the conda file.
 
@@ -80,8 +80,8 @@ def main(conda_fname, pip_fname):
     ----------
     conda_fname : str
         Path to the conda file with dependencies (e.g. `environment.yml`).
-    pip_fname : str
-        Path to the pip file with dependencies (e.g. `requirements.txt`).
+    pip_fnames : str or list of str
+        Path to the pip file(s) with dependencies (e.g. `requirements.txt`).
 
     Returns
     -------
@@ -116,7 +116,11 @@ def main(conda_fname, pip_fname):
 
     pip_content = header + "\n".join(pip_deps) + "\n"
 
-    pip_fname.write_text(pip_content)
+    if not isinstance(pip_fnames, list):
+        pip_fnames = [pip_fnames]
+
+    for fname in pip_fnames:
+        fname.write_text(pip_content)
 
 
 if __name__ == "__main__":
@@ -164,7 +168,10 @@ if __name__ == "__main__":
 
     main(
         filename,
-        repo_path / "requirements.txt",
+        [
+            repo_path / "requirements.txt",
+            repo_path / "docs" / "_static" / "downloads" / "requirements.txt",
+        ],
     )
 
     out = template.render(
@@ -177,7 +184,4 @@ if __name__ == "__main__":
     filename.write_text(out)
 
     # generate requirements
-    main(
-        filename,
-        repo_path / "requirements_dev.txt",
-    )
+    main(filename, repo_path / "requirements_dev.txt")
