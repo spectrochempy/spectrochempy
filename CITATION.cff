@@ -23,7 +23,7 @@ identifiers:
 license: CECILL-B
 message: If you use this software, please cite it using the metadata from this file.
 repository-code: https://github.com/spectrochempy/spectrochempy
-title: SpectroChemPy
+title: SpectroChemPy, a framework for processing, analyzing and modeling spectroscopic data for chemistry with Python
 type: software
 url: https://www.spectrochempy.fr
-version: 0.4.2
+version: 0.4.3
