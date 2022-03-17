@@ -11,11 +11,11 @@ from matplotlib import pyplot as plt
 import matplotlib.axes as maxes
 import mpl_toolkits.mplot3d.axes3d as maxes3D
 
-import plotly.graph_objects as go
 import numpy as np
 
 from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.core.units import remove_args_units
+from spectrochempy.optional import import_optional_dependency
 
 __all__ = [
     "cmyk2rgb",
@@ -522,6 +522,10 @@ def get_plotly_figure(clear=True, fig=None, **kwargs):
     -------
     Plotly figure instance
     """
+    go = import_optional_dependency("plotly.graph_objects", errors="ignore")
+
+    if go is None:
+        raise ImportError("Plotly is not installed. Uee pip or conda to install it")
 
     if clear or fig is None:
         # create a figure
