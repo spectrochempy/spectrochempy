@@ -362,7 +362,7 @@ class NDPlot(HasTraits):
     if HAS_PLOTLY:
         _fig = Union((Instance(plt.Figure), Instance(go.Figure)), allow_none=True)
     else:
-        _fig = Union((Instance(plt.Figure)), allow_none=True)
+        _fig = Instance(plt.Figure, allow_none=True)
 
     # A list of axes on which this dataset and other elements such as projections
     # and colorbar can be plotted

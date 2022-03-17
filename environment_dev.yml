@@ -40,7 +40,6 @@ dependencies:
     - numpy=1.21.5
     - orderedset
     - pint>=0.18
-    - plotly
     - requests
     - scipy=1.7.3
     - tqdm
@@ -56,13 +55,14 @@ dependencies:
     - setuptools_scm
     - git
 
-    # need this, because the API is mainly designed to run in Jupyter notebook
+  
+
+    # Jupyter notebook
     - ipywidgets
     - ipympl
     - jupyterlab>=2.2.10
     - nodejs
 
-    
     # DEV dependencies
     # ----------------
     # From here, the dependencies are essentially for development.
