@@ -19,7 +19,7 @@ import datetime
 import numpy as np
 
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
-from spectrochempy.core.readers.importer import importermethod, Importer
+from spectrochempy.core.readers.importer import _importer_method, Importer
 from spectrochempy.core.dataset.meta import Meta
 
 
@@ -113,7 +113,7 @@ read_txt = read_labspec
 # ======================================================================================================================
 
 # ..............................................................................
-@importermethod
+@_importer_method
 def _read_txt(*args, **kwargs):
     # read Labspec *txt files or series
 

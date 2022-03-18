@@ -21,7 +21,7 @@ import numpy as np
 
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core import preferences as prefs
-from spectrochempy.core.readers.importer import Importer, importermethod
+from spectrochempy.core.readers.importer import Importer, _importer_method
 
 try:
     locale.setlocale(locale.LC_ALL, "en_US")  # to avoid problems with date format
@@ -138,7 +138,7 @@ def read_csv(*paths, **kwargs):
 # ======================================================================================================================
 
 
-@importermethod
+@_importer_method
 def _read_csv(*args, **kwargs):
     # read csv file
     dataset, filename = args

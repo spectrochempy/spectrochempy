@@ -77,7 +77,7 @@ As illustrated below for the .spc example, the minimal file should contain:
     # minimum import section
     import io
     from spectrochempy.core.dataset.nddataset import NDDataset
-    from spectrochempy.core.readers.importer import importermethod, Importer
+    from spectrochempy.core.readers.importer import _importer_method, Importer
 
     # ======================================================================================================================
     # Public function
@@ -115,7 +115,7 @@ As illustrated below for the .spc example, the minimal file should contain:
     # Private functions
     # ======================================================================================================================
     # ..............................................................................
-    @importermethod
+    @_importer_method
     def _read_spc(*args, **kwargs):
         dataset, filename = args
         content = kwargs.get("content", False)

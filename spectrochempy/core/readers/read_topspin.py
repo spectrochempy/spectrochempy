@@ -22,7 +22,7 @@ from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.core.dataset.coord import LinearCoord
 from spectrochempy.core.units import ur
 from spectrochempy.utils.exceptions import deprecated
-from spectrochempy.core.readers.importer import Importer, importermethod
+from spectrochempy.core.readers.importer import Importer, _importer_method
 from spectrochempy.utils.nmrglue import read_fid, read_pdata
 
 # ======================================================================================================================
@@ -796,7 +796,7 @@ def _get_files(path, typ="acqu"):
     return files
 
 
-@importermethod
+@_importer_method
 def _read_topspin(*args, **kwargs):
     debug_("Bruker TOPSPIN file reading")
     dataset, path = args

@@ -20,7 +20,7 @@ import numpy as np
 import scipy.io as sio
 
 from spectrochempy.core.dataset.nddataset import NDDataset, Coord
-from spectrochempy.core.readers.importer import Importer, importermethod
+from spectrochempy.core.readers.importer import Importer, _importer_method
 
 
 # ======================================================================================================================
@@ -116,7 +116,7 @@ read_mat = read_matlab
 # ------------------------------------------------------------------
 
 
-@importermethod
+@_importer_method
 def _read_mat(*args, **kwargs):
     _, filename = args
     content = kwargs.get("content", False)
@@ -177,7 +177,7 @@ def _read_mat(*args, **kwargs):
     return datasets
 
 
-@importermethod
+@_importer_method
 def _read_dso(dataset, name, data):
     name_mat = data["name"][0][0]
     if len(name_mat) == 0:

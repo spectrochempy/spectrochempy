@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 import numpy as np
 
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core.readers.importer import Importer, importermethod
+from spectrochempy.core.readers.importer import Importer, _importer_method
 from spectrochempy.utils.exceptions import deprecated
 
 
@@ -121,7 +121,7 @@ def read_dx(*args, **kwargs):  # pragma: no cover
 # ======================================================================================================================
 
 
-@importermethod
+@_importer_method
 def _read_jdx(*args, **kwargs):
 
     # read jdx file
@@ -377,7 +377,7 @@ def _read_jdx(*args, **kwargs):
 
 
 # ..............................................................................
-@importermethod
+@_importer_method
 def _read_dx(*args, **kwargs):  # pragma: no cover
     return _read_jdx(*args, **kwargs)
 

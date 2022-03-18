@@ -20,7 +20,7 @@ import re
 import numpy as np
 
 from spectrochempy.core.dataset.nddataset import NDDataset, Coord
-from spectrochempy.core.readers.importer import Importer, importermethod
+from spectrochempy.core.readers.importer import Importer, _importer_method
 
 
 # ======================================================================================================================
@@ -116,7 +116,7 @@ def read_quadera(*paths, **kwargs):
 # ------------------------------------------------------------------
 
 
-@importermethod
+@_importer_method
 def _read_asc(*args, **kwargs):
     _, filename = args
     content = kwargs.get("content", False)
