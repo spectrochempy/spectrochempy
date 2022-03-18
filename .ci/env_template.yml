@@ -56,8 +56,8 @@ dependencies:
     - ipywidgets
     - ipympl
 
-    # example and test data
-    - spectrochempy_data
+    # examples and test data
+    - spectrochempy_data=1.3
 
     # mainly for install and a bit more...
     - setuptools

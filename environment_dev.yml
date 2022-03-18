@@ -50,14 +50,14 @@ dependencies:
     - ipympl
 
     # example and test data
-    - spectrochempy_data
+    - spectrochempy_data=1.3
 
     # mainly for install and a bit more...
     - setuptools
     - setuptools_scm
     - git
 
-
+  
 
     # Jupyter lab
     - jupyterlab>=2.2.10
@@ -103,7 +103,7 @@ dependencies:
     # - xarray
     # - datashader
     # - scikit-learn
-
+    
     - pip
     - pip:
 
