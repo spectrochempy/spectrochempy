@@ -57,7 +57,7 @@ dependencies:
     - setuptools_scm
     - git
 
-  
+
 
     # Jupyter lab
     - jupyterlab>=2.2.10
@@ -83,7 +83,7 @@ dependencies:
     # DEV: code and docs
     - mamba
     - jupytext
-    - sphinx
+    - sphinx<4.0
     - sphinx_rtd_theme
     - autodocsumm
     - sphinx-gallery<=0.7.0
@@ -103,7 +103,7 @@ dependencies:
     # - xarray
     # - datashader
     # - scikit-learn
-    
+
     - pip
     - pip:
 
