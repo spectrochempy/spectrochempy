@@ -46,6 +46,7 @@ jobs:
         shell: bash
         run: |
           git clone https://github.com/spectrochempy/spectrochempy_data
+          git checkout tags/1.3 -b master
           mkdir -p $HOME/.spectrochempy
           mv -v ./spectrochempy_data/testdata $HOME/.spectrochempy/testdata
           echo $HOME
