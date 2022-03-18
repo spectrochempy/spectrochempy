@@ -19,11 +19,11 @@ from spectrochempy.core.readers.importer import (
     ALIAS,
 )
 
-DATADIR = pathclean(Path.home() / "test_data")
+from spectrochempy.core import preferences as prefs
+
+DATADIR = prefs.datadir
 
 # Simulation of a read function
-
-
 def read_fake(*paths, **kwargs):
     kwargs["filetypes"] = ["FAKE files (*fk, *.fk1, .fk2)"]
     kwargs["protocol"] = ["fake", ".fk", "fk1", "fk2"]

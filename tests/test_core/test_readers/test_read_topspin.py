@@ -14,20 +14,23 @@ DATADIR = scp.preferences.datadir
 NMRDATA = DATADIR / "nmrdata"
 
 
-@pytest.mark.skipif(
-    not NMRDATA.exists(),
-    reason="Experimental data not available for testing",
-)
+# @pytest.mark.skipif(
+#     not NMRDATA.exists(),
+#     reason="Experimental data not available for testing",
+# )
 def test_deprecated():
     with pytest.deprecated_call():
         scp.read_bruker_nmr(nmrdir / "topspin_2d", expno=1, remove_digital_filter=True)
 
 
-@pytest.mark.skipif(
-    not NMRDATA.exists(),
-    reason="Experimental data not available for testing",
-)
+# @pytest.mark.skipif(
+#     not NMRDATA.exists(),
+#     reason="Experimental data not available for testing",
+# )
 def test_readtopspin():
+
+    # first download missing data
+    scp.read_remote(nmrdir, replace_existing=False)
 
     # A.plot()
     nd = scp.read_topspin(nmrdir / "exam2d_HC/3/pdata/1/2rr")
@@ -61,10 +64,10 @@ def test_readtopspin():
     assert str(nd[1]) == "NDDataset: [quaternion] unitless (shape: (y:1024, x:2048))"
 
 
-@pytest.mark.skipif(
-    not NMRDATA.exists(),
-    reason="Experimental data not available for testing",
-)
+# @pytest.mark.skipif(
+#     not NMRDATA.exists(),
+#     reason="Experimental data not available for testing",
+# )
 def test_readdir_for_nmr():
     nd = scp.read_dir("nmrdata/bruker/tests/nmr", protocol="topspin")
     assert isinstance(nd, list)

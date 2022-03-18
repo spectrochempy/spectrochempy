@@ -498,7 +498,7 @@ def read_srs(*paths, **kwargs):
 
     Examples
     ---------
-    >>> scp.read_srs('irdata/omnic series/rapid_scan_reprocessed.srs')
+    >>> scp.read_srs('irdata/omnic_series/rapid_scan_reprocessed.srs')
     NDDataset: [float64] a.u. (shape: (y:643, x:3734))
     """
 

@@ -8,10 +8,10 @@ DATADIR = prefs.datadir
 MSDATA = DATADIR / "msdata"
 
 
-@pytest.mark.skipif(
-    not MSDATA.exists(),
-    reason="Experimental data not available for testing",
-)
+# @pytest.mark.skipif(
+#     not MSDATA.exists(),
+#     reason="Experimental data not available for testing",
+# )
 # ..............................................................................
 def test_read_quadera():
     # single file

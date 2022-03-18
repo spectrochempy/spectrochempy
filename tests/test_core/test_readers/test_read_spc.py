@@ -9,10 +9,10 @@ DATADIR = scp.preferences.datadir
 GALACTICDATA = DATADIR / "galacticdata"
 
 
-@pytest.mark.skipif(
-    not GALACTICDATA.exists(),
-    reason="Experimental data not available for testing",
-)
+# @pytest.mark.skipif(
+#     not GALACTICDATA.exists(),
+#     reason="Experimental data not available for testing",
+# )
 def test_read_spc():
     A = scp.read_spc("galacticdata/BARBITUATES.SPC")
     # "spc reader not implemented yet for multifiles"
@@ -29,15 +29,15 @@ def test_read_spc():
     # "The version b'M' is not yet supported"
     assert D is None
 
-    E = scp.read_spc("galacticdata/DEMO 3D.SPC")
+    E = scp.read_spc("galacticdata/DEMO_3D.SPC")
     # "The version b'M' is not yet supported"
     assert E is None
 
-    F = scp.read_spc("galacticdata/DRUG SAMPLE.SPC")
+    F = scp.read_spc("galacticdata/DRUG_SAMPLE.SPC")
     # multi file, can't be read yet
     assert F is None
 
-    G = scp.read_spc("galacticdata/DRUG SAMPLE_PEAKS.SPC")
+    G = scp.read_spc("galacticdata/DRUG_SAMPLE_PEAKS.SPC")
     # multi file, can't be read yet
     assert G is None
 
@@ -63,7 +63,7 @@ def test_read_spc():
     N = scp.read_spc("galacticdata/KKSAM.SPC")
     assert N.shape == (1, 751)
 
-    O = scp.read_spc("galacticdata/LC DIODE ARRAY.SPC")
+    O = scp.read_spc("galacticdata/LC_DIODE ARRAY.SPC")
     # "The version b'M' is not yet supported"
     assert O is None
 
@@ -73,10 +73,10 @@ def test_read_spc():
     Q = scp.read_spc("galacticdata/POLYS.SPC")
     assert Q.shape == (1, 1844)
 
-    R = scp.read_spc("galacticdata/SINGLE POLYMER FILM.SPC")
+    R = scp.read_spc("galacticdata/SINGLE_POLYMER_FILM.SPC")
     assert R.shape == (1, 1844)
 
-    S = scp.read_spc("galacticdata/SPECTRUM WITH BAD BASELINE.SPC")
+    S = scp.read_spc("galacticdata/SPECTRUM_WITH_BAD_BASELINE.SPC")
     # no acquisition time
     assert S.shape == (1, 1400)
 
@@ -86,7 +86,7 @@ def test_read_spc():
     U = scp.read_spc("galacticdata/TUMIX.SPC")
     assert U.shape == (1, 1775)
 
-    V = scp.read_spc("galacticdata/TWO POLYMER FILMS.SPC")
+    V = scp.read_spc("galacticdata/TWO_POLYMER_FILMS.SPC")
     assert V.shape == (1, 1844)
 
     W = scp.read_spc("galacticdata/XYTRACE.SPC")

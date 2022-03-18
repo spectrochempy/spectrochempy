@@ -17,10 +17,15 @@ def dialog_carroucell(*args, **kwargs):
     return CARROUCELL_FOLDER
 
 
-@pytest.mark.skipif(
-    not CARROUCELL_FOLDER.exists(), reason="Experimental data not available for testing"
-)
+# @pytest.mark.skipif(
+#         not CARROUCELL_FOLDER.exists(), reason="Experimental data not available for testing"
+#         )
 def test_read_carroucell(monkeypatch):
+
+    # Before testing we need to download the data locally if not yet done:
+    # because read carrousel is not designed to download itself.
+    # Use the read_remote for that:
+    NDDataset.read_remote("irdata/carroucell_samp", replace_existing=False)
 
     nd = NDDataset.read_carroucell("irdata/carroucell_samp", spectra=(1, 2))
     for x in nd:
