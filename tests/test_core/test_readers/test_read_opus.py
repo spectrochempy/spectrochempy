@@ -15,10 +15,10 @@ DATADIR = prefs.datadir
 OPUSDATA = DATADIR / "irdata" / "OPUS"
 
 
-@pytest.mark.skipif(
-    not OPUSDATA.exists(),
-    reason="Experimental data not available for testing",
-)
+# @pytest.mark.skipif(
+#     not OPUSDATA.exists(),
+#     reason="Experimental data not available for testing",
+# )
 # ..............................................................................
 def test_read_opus():
     # single file

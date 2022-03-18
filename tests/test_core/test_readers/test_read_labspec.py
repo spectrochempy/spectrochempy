@@ -9,10 +9,10 @@ from pathlib import Path
 RAMANDIR = scp.preferences.datadir / "ramandata"
 
 
-@pytest.mark.skipif(
-    not RAMANDIR.exists(),
-    reason="Experimental data not available for testing",
-)
+# @pytest.mark.skipif(
+#     not RAMANDIR.exists(),
+#     reason="Experimental data not available for testing",
+# )
 def test_read_labspec():
 
     # single file
@@ -20,6 +20,9 @@ def test_read_labspec():
     assert nd.shape == (532, 1024)
 
     # with read_dir
+    # First download data as read_dir will not
+    scp.read_remote(RAMANDIR / "subdir", replace_existing=False)
+
     nd = scp.read_dir(directory=RAMANDIR / "subdir")
     assert nd.shape == (6, 1024)
 

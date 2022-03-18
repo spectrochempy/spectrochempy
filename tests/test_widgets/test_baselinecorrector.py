@@ -7,7 +7,7 @@ import spectrochempy as scp
 
 DATADIR = scp.preferences.datadir
 SPG_FILE = DATADIR / "irdata/nh4y-activation.spg"
-UNREADABLE = DATADIR / "irdata/omnic series/GC Demo.srs"
+UNREADABLE = DATADIR / "irdata/omnic_series/GC_Demo.srs"
 
 
 @pytest.fixture(scope="module")

@@ -7,10 +7,10 @@ from spectrochempy import NDDataset, preferences as prefs
 MATLABDATA = prefs.datadir / "matlabdata"
 
 
-@pytest.mark.skipif(
-    not MATLABDATA.exists(),
-    reason="Experimental data not available for testing",
-)
+# @pytest.mark.skipif(
+#     not MATLABDATA.exists(),
+#     reason="Experimental data not available for testing",
+# )
 def test_read_matlab():
 
     A = NDDataset.read_matlab(MATLABDATA / "als2004dataset.MAT")
