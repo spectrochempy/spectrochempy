@@ -21,13 +21,16 @@ import numpy as np
 from spectrochempy.core import info_
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.readers.importer import importermethod, Importer
+from spectrochempy.core.readers.importer import (
+    _importer_method,
+    Importer,
+)
 from spectrochempy.core.units import Quantity
 
 
-# ======================================================================================================================
+# ======================================================================================
 # Public functions
-# ======================================================================================================================
+# ======================================================================================
 def read_omnic(*paths, **kwargs):
     """
     Open a Thermo Nicolet OMNIC file.
@@ -505,12 +508,12 @@ def read_srs(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
-# ======================================================================================================================
+# ======================================================================================
 # Private functions
-# ======================================================================================================================
+# ======================================================================================
 
-# ..............................................................................
-@importermethod
+# ......................................................................................
+@_importer_method
 def _read_spg(*args, **kwargs):
     # read spg file
 
@@ -742,7 +745,7 @@ def _read_spg(*args, **kwargs):
 
 
 # ..............................................................................
-@importermethod
+@_importer_method
 def _read_spa(*args, **kwargs):
     dataset, filename = args
     content = kwargs.get("content", False)
@@ -925,7 +928,7 @@ def _read_spa(*args, **kwargs):
 
 
 # ..............................................................................
-@importermethod
+@_importer_method
 def _read_srs(*args, **kwargs):
     dataset, filename = args
     frombytes = kwargs.get("frombytes", False)

@@ -24,7 +24,7 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.utils import get_directory_name, get_filenames
 from spectrochempy.core import info_, print_
 
-from spectrochempy.core.readers.importer import importermethod, Importer
+from spectrochempy.core.readers.importer import _importer_method, Importer
 
 
 # ..............................................................................
@@ -98,7 +98,7 @@ def read_carroucell(directory=None, **kwargs):
 # ------------------------------------------------------------------
 
 
-@importermethod
+@_importer_method
 def _read_carroucell(*args, **kwargs):
 
     _, directory = args

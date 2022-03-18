@@ -11,6 +11,7 @@ This module define a generic class to import directories, files and contents.
 __all__ = ["read", "read_dir"]
 __dataset_methods__ = __all__
 
+import requests
 from warnings import warn
 from datetime import datetime, timezone
 from traitlets import HasTraits, List, Dict, Type, Unicode
@@ -193,24 +194,15 @@ class Importer(HasTraits):
         datasets = []
         for filename in files[key]:
             filename = pathclean(filename)
-            # try:
             read_ = getattr(self, f"_read_{key[1:]}")
-            # except AttributeError:
-            #     warning_(
-            #         f"a file with extension {key} was found in this directory but will be ignored"
-            #     )
-            #
             try:
                 res = read_(self.objtype(), filename, **kwargs)
                 # sometimes read_ can return None (e.g. non labspec text file)
-                if res is not None:
-                    if not isinstance(res, list):
-                        datasets.append(res)
-                    else:
-                        datasets.extend(res)
 
             except FileNotFoundError:
-                raise
+                # try to get the file from github
+                kwargs["read_method"] = read_
+                res = _read_remote(self.objtype(), filename, **kwargs)
 
             except IOError as e:
                 warning_(str(e))
@@ -218,10 +210,11 @@ class Importer(HasTraits):
             except NotImplementedError as e:
                 warning_(str(e))
 
-            # except Exception as e:
-            #     warning_(
-            #         f"The file `{filename}` has a known extension but it could not be read. It is ignored!"
-            #     )
+            if res is not None:
+                if not isinstance(res, list):
+                    datasets.append(res)
+                else:
+                    datasets.extend(res)
 
         if len(datasets) > 1:
             datasets = self._do_merge(datasets, **kwargs)
@@ -263,8 +256,8 @@ class Importer(HasTraits):
 
 
 # ..............................................................................
-def importermethod(func):
-    # Decorateur
+def _importer_method(func):
+    # Decorator to define a given read function as belonging to Importer
     setattr(Importer, func.__name__, staticmethod(func))
     return func
 
@@ -484,12 +477,52 @@ def read_dir(directory=None, **kwargs):
     return importer(directory, **kwargs)
 
 
+def _read_remote(*args, **kwargs):
+    from spectrochempy.core import preferences as prefs
+
+    datadir = prefs.datadir
+
+    dataset, path = args
+    # path of the required files (in principle they have been transformed to absolute
+    # paths already
+    path = pathclean(path)
+    parent = path.parent
+    filename = path.name
+
+    if not parent.match("*/spectrochempy_data/testdata/*"):
+        # TODO: implement reading from other URLs
+        raise FileNotFoundError
+
+    else:
+        # in principle the data came from  github. Try to download it:
+        relative_path = pathclean("").joinpath(
+            *path.parts[parent.parts.index("testdata") :]
+        )
+        url = (
+            "https://github.com/spectrochempy/spectrochempy_data/raw/"
+            f"master/{relative_path}"
+        )
+        print("downloading data from github archive ...")
+        r = requests.get(url, allow_redirects=True)
+
+        # write downloaded file
+        if not parent.exists():
+            # create the eventually missing subdirectory
+            parent.mkdir(exist_ok=True)
+        dst = datadir.parent / relative_path
+        dst.write_bytes(r.content)
+        print(f"{filename} has been written in {relative_path} folder")
+
+    read_method = kwargs.pop("read_method", read)
+    return read_method(dataset, dst, **kwargs)
+
+
 # ======================================================================================================================
 # Private functions
 # ======================================================================================================================
 
 
-@importermethod
+@_importer_method
 def _read_dir(*args, **kwargs):
     _, directory = args
     directory = get_directory_name(directory)
@@ -507,14 +540,14 @@ def _read_dir(*args, **kwargs):
 
 
 # ..............................................................................
-@importermethod
+@_importer_method
 def _read_scp(*args, **kwargs):
     dataset, filename = args
     return dataset.load(filename, **kwargs)
 
 
 # ..............................................................................
-@importermethod
+@_importer_method
 def _read_(*args, **kwargs):
     dataset, filename = args
 

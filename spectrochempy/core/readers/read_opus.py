@@ -16,7 +16,7 @@ from datetime import datetime, timezone, timedelta
 
 from brukeropusreader.opus_parser import parse_data, parse_meta
 from spectrochempy.core.dataset.coord import LinearCoord, Coord
-from spectrochempy.core.readers.importer import Importer, importermethod
+from spectrochempy.core.readers.importer import Importer, _importer_method
 from spectrochempy.core import debug_
 
 
@@ -165,7 +165,7 @@ def read_opus(*paths, **kwargs):
 # ======================================================================================================================
 
 # ..............................................................................
-@importermethod
+@_importer_method
 def _read_opus(*args, **kwargs):
     debug_("Bruker OPUS import")
 

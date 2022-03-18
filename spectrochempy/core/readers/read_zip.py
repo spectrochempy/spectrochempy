@@ -10,7 +10,7 @@ __dataset_methods__ = __all__
 
 import io
 
-from spectrochempy.core.readers.importer import Importer, importermethod
+from spectrochempy.core.readers.importer import Importer, _importer_method
 
 
 # ======================================================================================================================
@@ -107,7 +107,7 @@ def read_zip(*paths, **kwargs):
 # ======================================================================================================================
 
 
-@importermethod
+@_importer_method
 def _read_zip(*args, **kwargs):
     # Below we assume that files to read are in a unique directory
     from spectrochempy.core.dataset.nddataset import NDDataset

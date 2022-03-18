@@ -13,7 +13,7 @@ from spectrochempy.utils import pathclean
 from spectrochempy.core.readers.importer import (
     read,
     read_dir,
-    importermethod,
+    _importer_method,
     Importer,
     FILETYPES,
     ALIAS,
@@ -36,7 +36,7 @@ read_fk = read_fake
 setattr(NDDataset, "read_fk", read_fk)
 
 
-@importermethod
+@_importer_method
 def _read_fake(*args, **kwargs):
     dataset, filename = args
     content = kwargs.get("content", False)
@@ -58,7 +58,7 @@ def _read_fake(*args, **kwargs):
     return dataset  # empty if file
 
 
-@importermethod
+@_importer_method
 def _read_fk(*args, **kwargs):
     return Importer._read_fake(*args, **kwargs)
 

@@ -22,7 +22,7 @@ from warnings import warn
 
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.readers.importer import importermethod, Importer
+from spectrochempy.core.readers.importer import _importer_method, Importer
 from spectrochempy.core.units import Quantity
 
 # ======================================================================================================================
@@ -121,7 +121,7 @@ def read_spc(*paths, **kwargs):
 # ======================================================================================================================
 
 # ..............................................................................
-@importermethod
+@_importer_method
 def _read_spc(*args, **kwargs):
     dataset, filename = args
     content = kwargs.get("content", False)
