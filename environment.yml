@@ -38,15 +38,16 @@ dependencies:
     - matplotlib>=3.5
     - numba=0.55.0
     - numpy=1.21.5
-    - orderedset
     - pint>=0.18
-    - plotly
     - requests
     - scipy=1.7.3
     - tqdm
     - traitlets
     - traittypes
     - xlrd
+    - pyyaml
+    - ipywidgets
+    - ipympl
 
     # example and test data
     - spectrochempy_data
@@ -56,11 +57,5 @@ dependencies:
     - setuptools_scm
     - git
 
-    # need this, because the API is mainly designed to run in Jupyter notebook
-    - ipywidgets
-    - ipympl
-    - jupyterlab>=2.2.10
-    - nodejs
-
-    
+  
     - pip

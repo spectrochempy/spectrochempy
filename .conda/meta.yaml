@@ -37,7 +37,6 @@ requirements:
     - quadprog
     - brukeropusreader
     - quaternion
-    - nmrglue
     - colorama
     - dill
     - ipython>=7.31.1
@@ -46,9 +45,7 @@ requirements:
     - matplotlib>=3.5
     - numba=0.55.0
     - numpy=1.21.5
-    - orderedset
     - pint>=0.18
-    - plotly
     - requests
     - scipy=1.7.3
     - tqdm

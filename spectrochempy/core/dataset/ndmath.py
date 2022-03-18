@@ -23,9 +23,9 @@ import operator
 from warnings import catch_warnings
 
 import numpy as np
-from orderedset import OrderedSet
 from quaternion import as_float_array
 
+from spectrochempy.utils.orderedset import OrderedSet
 from spectrochempy.core.units.units import ur, Quantity, DimensionalityError
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.utils import (

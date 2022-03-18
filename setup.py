@@ -56,7 +56,7 @@ def _install_mpl():
     for src in styles:
         dest = stylelib / src.name
         shutil.copy(src, dest)
-    print(f"Stylesheets installed in {dest}")
+        print(f"Stylesheet {src} installed in {dest}")
 
     # install fonts in mpl-data
     # https://stackoverflow.com/a/47743010
@@ -89,6 +89,15 @@ def _install_mpl():
             print(f"Deleted font cache {file}.")
 
 
+def read_requirements():
+    path = Path("requirements.txt")
+    req = path.read_text().strip()
+    req = req.split("\n")
+    req = list(map(str.strip, req))
+    req.remove("")
+    return [r for r in req if not r.startswith("#")]
+
+
 class PostInstallCommand(_install):
     """Post-installation for installation mode."""
 
@@ -112,7 +121,7 @@ setup_args = dict(
     name="spectrochempy",
     # use_scm_version=True,
     version=version(),
-    license="CeCILL-B Free Software",
+    license="CECILL-B",
     author="Arnaud Travert & Christian Fernandez",
     author_email="contact@spectrochempy.fr",
     maintainer="C. Fernandez",
@@ -141,42 +150,12 @@ setup_args = dict(
     include_package_data=True,  # requirements
     python_requires=">=3.7",
     setup_requires=["setuptools_scm>=6.3.2", "matplotlib>=3.5.1"],
-    install_requires=[
-        "setuptools_scm",
-        "quadprog",
-        "numpy-quaternion",
-        "brukeropusreader",
-        "colorama",
-        "dill",
-        "ipython>=7.31.1",
-        "jinja2",
-        "matplotlib>=3.5",
-        "nmrglue",
-        "numba==0.55.0",
-        "numpy==1.21.5",
-        "orderedset",
-        "pint>=0.18",
-        "plotly",
-        "requests",
-        "scipy==1.7.3",
-        "tqdm",
-        "traitlets",
-        "traittypes",
-        "xlrd",
-        "gitpython",
-        "ipywidgets",
-        "ipympl",
-        "jupyterlab>=2.2.10",
-        "nodejs",
-    ],
+    install_requires=read_requirements(),
     # post-commands
     cmdclass={
         "develop": PostDevelopCommand,
         "install": PostInstallCommand,
     },
-    # scripts
-    # # scripts = {'scripts/launch_api.py'},
-    # entry_points={'console_scripts': ['scpy_update=spectrochempy.scripts.scpy_update:main'], },
 )
 
 # ======================================================================================================================

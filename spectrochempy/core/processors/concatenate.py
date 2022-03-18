@@ -12,8 +12,8 @@ __dataset_methods__ = __all__
 import numpy as np
 import datetime as datetime
 from warnings import warn
-from orderedset import OrderedSet
 
+from spectrochempy.utils.orderedset import OrderedSet
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.ndarray import DEFAULT_DIM_NAME
 from spectrochempy.utils import DimensionsCompatibilityError, UnitsCompatibilityError

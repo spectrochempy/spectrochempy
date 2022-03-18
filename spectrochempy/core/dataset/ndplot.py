@@ -19,7 +19,6 @@ from matplotlib.colors import to_rgba
 
 from matplotlib import pyplot as plt
 
-import plotly.graph_objects as go
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from traitlets import Dict, HasTraits, Instance, Union, default, TraitError
 
@@ -31,6 +30,10 @@ from spectrochempy.core.plotters.plot1d import plot_1D
 from spectrochempy.core.plotters.plot2d import plot_2D
 from spectrochempy.core.plotters.plot3d import plot_3D
 
+from spectrochempy.optional import import_optional_dependency
+
+go = import_optional_dependency("plotly.graph_objects", errors="ignore")
+HAS_PLOTLY = go is not None
 
 # from spectrochempy.utils import deprecated
 
@@ -356,7 +359,10 @@ class NDPlot(HasTraits):
     _ax = Instance(_Axes, allow_none=True)
 
     # The figure on which this NDArray can be plotted
-    _fig = Union((Instance(plt.Figure), Instance(go.Figure)), allow_none=True)
+    if HAS_PLOTLY:
+        _fig = Union((Instance(plt.Figure), Instance(go.Figure)), allow_none=True)
+    else:
+        _fig = Instance(plt.Figure, allow_none=True)
 
     # A list of axes on which this dataset and other elements such as projections
     # and colorbar can be plotted
