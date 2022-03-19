@@ -531,8 +531,8 @@ def read_remote(file_or_dir, **kwargs):
     read_topspin : Read TopSpin Bruker NMR spectra.
     read_omnic : Read Omnic spectra.
     read_opus : Read OPUS spectra.
-    read_spg : Read Omnic *.spg grouped spectra.
-    read_spa : Read Omnic *.Spa single spectra.
+    read_spg : Read Omnic \*.spg grouped spectra.
+    read_spa : Read Omnic \*.spa single spectra.
     read_srs : Read Omnic series.
     read_csv : Read CSV files.
     read_zip : Read Zip files.
@@ -581,7 +581,6 @@ def _download_from_url(url, dst, replace=False):
             f"https://github.com/spectrochempy/spectrochempy_data/raw/master/"
             f"testdata/{url}"
         )
-    print("Downloading data from url ...\n")
     # first determine if it is a directory
     r = requests.get(url + "/__index__", allow_redirects=True)
     index = None

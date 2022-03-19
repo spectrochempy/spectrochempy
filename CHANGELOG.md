@@ -52,6 +52,8 @@
 
 ## VERSION 0.3
 
+### version 0.3.3
+
 #### NEW FEATURES
 * Remove the dependency to `nmrglue`.
 * Improve `pip` installation (see Issue #402)

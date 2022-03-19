@@ -91,7 +91,7 @@ def deprecated(message):
 
     Parameters
     ----------
-    message : str,
+    message : str
         The deprecation message.
     """
 
