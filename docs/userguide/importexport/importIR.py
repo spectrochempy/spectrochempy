@@ -265,7 +265,7 @@ X.y.values  # displays the `y` dimension
 # The import of a single spectrum follows exactly the same rules as that of the import of a group:
 
 # %%
-Y = scp.read_omnic("irdata/subdir/7_CZ0-100 Pd_101.SPA")
+Y = scp.read_omnic("irdata/subdir/7_CZ0-100_Pd_101.SPA")
 Y
 
 # %% [markdown]
@@ -276,10 +276,10 @@ Y
 
 # %%
 list_files = [
-    "7_CZ0-100 Pd_101.SPA",
-    "7_CZ0-100 Pd_102.SPA",
-    "7_CZ0-100 Pd_103.SPA",
-    "7_CZ0-100 Pd_104.SPA",
+    "7_CZ0-100_Pd_101.SPA",
+    "7_CZ0-100_Pd_102.SPA",
+    "7_CZ0-100_Pd_103.SPA",
+    "7_CZ0-100_Pd_104.SPA",
 ]
 X = scp.read_omnic(list_files, directory="irdata/subdir")
 print(X)
