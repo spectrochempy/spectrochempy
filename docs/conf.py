@@ -517,8 +517,8 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "ipython": ("https://ipython.readthedocs.io/en/stable/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
-    "SciPy": ("https://docs.scipy.org/doc/scipy/reference", None),
-    "matplotlib": ("https://matplotlib.org/", None),
+    "SciPy": ("https://docs.scipy.org/doc/scipy/", None),
+    "matplotlib": ("https://matplotlib.org/stable/", None),
     "sklearn": ("https://scikit-learn.org/stable/", None),
 }
 
