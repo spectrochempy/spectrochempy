@@ -181,7 +181,3 @@ and whenever possible the information related to the instrument, acquisition par
 ==============================================
 
 see: :ref:`Contributing to the code <_contributing_codebase>`_
-
-Note that in order that the PR to ``spectrochempy` can be properly handled by Workflow, a new release of
-**spectrochempy_data** with the new sample files must be done, else the automated tests will
-fail as these files will not be found.
