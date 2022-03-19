@@ -63,7 +63,7 @@ def test_read_spc():
     N = scp.read_spc("galacticdata/KKSAM.SPC")
     assert N.shape == (1, 751)
 
-    O = scp.read_spc("galacticdata/LC_DIODE ARRAY.SPC")
+    O = scp.read_spc("galacticdata/LC_DIODE_ARRAY.SPC")
     # "The version b'M' is not yet supported"
     assert O is None
 
