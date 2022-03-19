@@ -39,6 +39,7 @@ A minimum test could be, for instance
     def test_read_spc():
         A = scp.read_spc("galacticdata/BENZENE.SPC")
         assert A.shape == (1, 1842)
+
 This will ensure that a dataset with the expected shape has been returned.
 
 For local testing, ensure that the default ``datadir`` correctly points to your local git repo of ``spectrochempy_data``, e.g.,
@@ -136,6 +137,7 @@ As illustrated below for the .spc example, the minimal file should contain:
     # ------------------------------------------------------------------
     if __name__ == "__main__":
         pass
+
 Once the minimal code is functional (i.e. returns the dataset with the appropriate ``data`` attribute), the metadata can
 be added.
 
@@ -145,8 +147,8 @@ be added.
 For consistency with existing readers, the following guidelines should be followed as closely as possible:
 
 - The NDDataset should be at least bi-dimensional with a first dimension `x` pertaining to the wavelength/frequency dimension
-and the second dimension `y` pertaining to the acquisition time axis, even if the dataset consists of single 1D spectrum.
-For instance
+  and the second dimension `y` pertaining to the acquisition time axis, even if the dataset consists of single 1D spectrum.
+  For instance
 
 .. sourcecode:: python
 
@@ -165,6 +167,7 @@ For instance
         units="s",
         labels=([acqdate], [filename]),
     )
+
 - Use whenever possible appropriate units for the data and the coordinates (see userguide/units/units.html).
 - The NDDataset ``description`` should at least mention the type of file from which the data have been imported, e.g.:
 
@@ -177,7 +180,7 @@ and whenever possible the information related to the instrument, acquisition par
 4. Polish your code and make the Pull Requests
 ==============================================
 
-see: :ref:`Contributing to the code <_contributing_codebase>`
+see: :ref:`Contributing to the code <_contributing_codebase>`_
 
 Note that in order that the PR to ``spectrochempy` can be properly handled by Workflow, a new release of
 **spectrochempy_data** with the new sample files must be done, else the automated tests will
