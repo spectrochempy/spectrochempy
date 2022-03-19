@@ -206,6 +206,9 @@ class Importer(HasTraits):
                 try:
                     res = _read_remote(self.objtype(), filename, **kwargs)
 
+                except OSError:
+                    raise e
+
                 except IOError as e:
                     warning_(str(e))
                     res = None

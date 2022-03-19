@@ -26,14 +26,14 @@ ramandir = datadir / "ramandata"
 A = scp.read_labspec("Activation.txt", directory=ramandir)
 A.plot()
 
-A = scp.read_labspec("532nm-191216-Si 200mu.txt", directory=ramandir)
+A = scp.read_labspec("532nm-191216-Si_200mu.txt", directory=ramandir)
 A.plot()
 
 A = scp.read_labspec("serie190214-1.txt", directory=ramandir)
 A.plot(colorbar=True)
 A.plot_map(colorbar=True)
 
-A = scp.read_labspec("SMC1-Initial RT.txt", directory=ramandir)
+A = scp.read_labspec("SMC1-Initial_RT.txt", directory=ramandir)
 A.plot()
 
 # %%
@@ -45,4 +45,4 @@ B = scp.read_labspec(directory=ramandir)
 B = scp.read_labspec(ramandir / "subdir")
 B.plot()
 
-scp.show()
+# scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
