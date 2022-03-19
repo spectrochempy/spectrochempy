@@ -597,6 +597,26 @@ def _download_from_url(url, dst, replace=False):
             _download_from_url(f"{url}/{folder}", dst / folder)
 
 
+def _is_relative_to(path, base):
+    # try to emulate the pathlib is_relative_to method which does not work on python
+    # 3.7 (needed for Colab!)
+    # TODO: replace if Colab is (unlikely) updated to a compatible version
+    pparts = path.parts
+    bparts = base.parts
+    idx = pparts.index(bparts[-1])
+    pparts_base = pparts[: idx + 1]
+    return pparts_base == bparts
+
+
+def _relative_to(path, base):
+    pparts = path.parts
+    bparts = base.parts
+    idx = pparts.index(bparts[-1])
+    pparts_base = pparts[: idx + 1]
+    if pparts_base == bparts:
+        return pathclean("/".join(pparts[idx + 1 :]))
+
+
 @_importer_method
 def _read_remote(*args, **kwargs):
     from spectrochempy.core import preferences as prefs
@@ -607,9 +627,9 @@ def _read_remote(*args, **kwargs):
     # path of the required files
     path = pathclean(path)
 
-    if path.is_relative_to(datadir):
+    if _is_relative_to(path, datadir):
         # try to make it relative for remote downloading
-        relative_path = path.relative_to(datadir)
+        relative_path = _relative_to(path, datadir)
     else:
         # assume it is already relative
         relative_path = path
