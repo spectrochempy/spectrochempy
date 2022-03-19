@@ -357,6 +357,7 @@
     NDDataset.read_omnic
     NDDataset.read_opus
     NDDataset.read_quadera
+    NDDataset.read_remote
     NDDataset.read_spa
     NDDataset.read_spc
     NDDataset.read_spg

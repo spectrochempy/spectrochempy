@@ -39,6 +39,7 @@
 # namespace, so that all spectrochempy commands will be called as ``scp.method(<method parameters>)``.
 
 # %%
+
 import spectrochempy as scp
 
 # %% [markdown]
@@ -51,6 +52,7 @@ import spectrochempy as scp
 # in a dropdown field.
 
 # %%
+
 X = scp.read()
 
 # %% [markdown]
@@ -72,6 +74,7 @@ X = scp.read()
 # * the `y` and  `x` dimension sizes:
 
 # %%
+
 print(X)
 
 # %% [markdown]
@@ -87,8 +90,10 @@ print(X)
 # </div>
 
 # %%
+
 X = scp.read_omnic("irdata/subdir")
 print(X)
+
 # %% [markdown]
 # See below for more information
 #
@@ -239,6 +244,7 @@ print(X)
 # time as spectrochempy. By default, `datadir` points in the 'scp_data\testdata' folder of SpectroChemPy:
 
 # %%
+
 DATADIR = scp.preferences.datadir
 DATADIR
 
@@ -246,6 +252,7 @@ DATADIR
 # DATADIR is already a pathlib object and so can be used easily
 
 # %%
+
 X = scp.read_omnic(DATADIR / "wodger.spg")
 
 # %% [markdown]
@@ -275,6 +282,7 @@ X = scp.read_omnic(DATADIR / "wodger.spg")
 #
 
 # %%
+
 datadir = scp.preferences.datadir
 fs = scp.FileSelector(path=datadir, filters=["spg", "spa"])
 fs
@@ -283,4 +291,5 @@ fs
 # After validation of the selection, one can read the path and name of the selected files.
 
 # %%
+
 fs.value, fs.path, fs.fullpath
