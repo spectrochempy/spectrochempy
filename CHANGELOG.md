@@ -12,11 +12,17 @@
 
 #### BUG FIXED
 
-
 #### BREAKING CHANGES
 * python<3.9 versions are no more tested and thus not supported.
 
 ## VERSION 0.4
+### version 0.4.3
+
+#### NEW FEATURES
+*
+
+#### BUG FIXED
+*
 
 ### version 0.4.2
 

@@ -218,6 +218,11 @@ class BuildDocumentation(object):
         else:
             self._doc_version = "stable"
 
+        import spectrochempy as scp
+
+        datadir = scp.preferences.datadir
+        scp.read_remote(datadir, download_only=True)
+
     # ..........................................................................
     @property
     def doc_version(self):
