@@ -29,9 +29,6 @@ def test_deprecated():
 # )
 def test_readtopspin():
 
-    # first download missing data
-    scp.read_remote(nmrdir, replace_existing=False)
-
     # A.plot()
     nd = scp.read_topspin(nmrdir / "exam2d_HC/3/pdata/1/2rr")
     assert str(nd) == "NDDataset: [quaternion] unitless (shape: (y:1024, x:1024))"
