@@ -28,7 +28,7 @@ from spectrochempy.utils.testing import RandomSeedContext
 # first download missing data
 datadir = pathclean(prefs.datadir)
 print("DATADIR: ", datadir)
-scp.read_remote(datadir, replace_existing=False)
+scp.read_remote(datadir, download_only=True)
 
 # ======================================================================================================================
 # FIXTURES
