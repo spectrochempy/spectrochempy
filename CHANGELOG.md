@@ -2,6 +2,10 @@
 
 ## VERSION 0.5
 
+### version 0.5.2
+
+This version simply restore compatibility for python>=3.7.
+
 ### version 0.5.1
 
 #### NEW FEATURES
