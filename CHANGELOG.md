@@ -1,16 +1,22 @@
 # What's new
 
-## VERSION 0.4
+## VERSION 0.5
 
-### version 0.4.3
+### version 0.5.1
 
 #### NEW FEATURES
 * Individual test data files can be automatically downloaded from the Github
   `spectrochempy_data` repository is not present in the default `preferences.datadir`.
   Installing the conda package `spectrochempy_data` is still possible but not necessary.
+  This feature requires using python>=3.9 version.
 
 #### BUG FIXED
-*
+
+
+#### BREAKING CHANGES
+* python<3.9 versions are no more tested and thus not supported.
+
+## VERSION 0.4
 
 ### version 0.4.2
 

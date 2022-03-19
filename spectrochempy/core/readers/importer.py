@@ -508,13 +508,23 @@ def read_remote(file_or_dir, **kwargs):
     file_or_dir : str or pathlib
         Folder where are located the files to read
         (it should be written as if it was locally downloaded already).
+    **kwargs : optional keywords parameters
+        See Other Parameters.
+
+    Other Parameters
+    ----------------
+    merge : bool, optional, default: False
+        By default files read are noot merged
+    replace_existing: bool, optional, default: False
+        By default, existing files are not replaced so not downloaded.
+    download_only: bool, optional, default: False
+        If True, only downloading and saving of the files is performed, with no
+        attempt to read their content.
 
     Returns
     --------
     dataset(s)
         |NDDataset| or list of |NDDataset|.
-
-    Depending on the python version, the order of the datasets in the list may change.
 
     See Also
     --------
@@ -597,7 +607,6 @@ def _read_remote(*args, **kwargs):
     dataset, path = args
     # path of the required files
     path = pathclean(path)
-    parent = path.parent
 
     if path.is_relative_to(datadir):
         # try to make it relative for remote downloading
@@ -605,7 +614,6 @@ def _read_remote(*args, **kwargs):
     else:
         # assume it is already relative
         relative_path = path
-        parent = datadir / parent
 
     # in principle the data came from github. Try to download it
 
