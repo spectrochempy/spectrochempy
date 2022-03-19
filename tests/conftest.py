@@ -25,6 +25,11 @@ from spectrochempy import preferences as prefs
 from spectrochempy.utils import pathclean
 from spectrochempy.utils.testing import RandomSeedContext
 
+# first download missing data
+datadir = pathclean(prefs.datadir)
+print("DATADIR: ", datadir)
+scp.read_remote(datadir, replace_existing=False)
+
 # ======================================================================================================================
 # FIXTURES
 # ======================================================================================================================
@@ -278,7 +283,6 @@ def dsm():
     ).copy()
 
 
-datadir = pathclean(prefs.datadir)
 dataset = scp.NDDataset.read_omnic(datadir / "irdata" / "nh4y-activation.spg")
 
 
