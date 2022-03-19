@@ -63,6 +63,12 @@ GALLERY = GETTINGSTARTED / "gallery"
 
 __all__ = []
 
+# create the testdata directory
+import spectrochempy as scp
+
+datadir = scp.preferences.datadir
+scp.read_remote(datadir, download_only=True)
+
 
 # %%
 def sync_notebooks():
@@ -217,11 +223,6 @@ class BuildDocumentation(object):
             self._doc_version = "latest"
         else:
             self._doc_version = "stable"
-
-        import spectrochempy as scp
-
-        datadir = scp.preferences.datadir
-        scp.read_remote(datadir, download_only=True)
 
     # ..........................................................................
     @property

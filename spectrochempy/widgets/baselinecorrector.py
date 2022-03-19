@@ -35,11 +35,11 @@ class BaselineCorrector:
     Attributes
     ----------
     original : NDDataset
-        The (sliced) NDDataset, without baseline correction
+        The (sliced) NDDataset, without baseline correction.
     corrected : NDDataset
-        The baseline corrected NDDataset
+        The baseline corrected NDDataset.
     baseline : NDDataset
-        The baselines
+        The baselines.
 
     See Also
     --------
@@ -48,6 +48,7 @@ class BaselineCorrector:
     Notes
     -----
     The `BaselineCorrector()` widget can be used in jupyter notebook and jupyter lab.
+
     - The GUI buttons are the following:
         - `upload`: allows uploading files.
           Uploading file will trigger the reading and processing with default parameters
@@ -64,6 +65,7 @@ class BaselineCorrector:
     - `Method` and `Interpolation` dropdown fields are self explaining,
       see BaselineCorrection() for details.
     - Ranges should be entered as a series of intervals or wavenumbers, e.g.
+
       ```
       [5900.0, 5400.0],
       2000.0,
@@ -72,8 +74,9 @@ class BaselineCorrector:
 
     Examples
     --------
-    # runs only in Jupyter notebook/ipython environment.
-    # See : User's Guide > Processing > Baseline corrections for an example.
+    Runs only in Jupyter notebook/ipython environment.
+    See : User's Guide > Processing > Baseline corrections for an example.
+
     [In 2] X = scp.read_omnic("irdata/nh4y-activation.spg")
            out = scp.BaselineCorrector(X)
     """
