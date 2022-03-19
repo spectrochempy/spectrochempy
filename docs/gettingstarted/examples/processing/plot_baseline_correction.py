@@ -23,7 +23,8 @@ import spectrochempy as scp
 ###############################################################################
 # Load data:
 
-nd = scp.NDDataset.read_omnic("irdata/nh4y-activation.spg")
+datadir = scp.preferences.datadir
+nd = scp.NDDataset.read_omnic(datadir / "irdata" / "nh4y-activation.spg")
 
 ###############################################################################
 # Do some slicing to keep only the interesting region:
