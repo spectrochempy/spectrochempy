@@ -217,7 +217,7 @@ def make_changelog(version):
         md = md.replace(
             "# What's new", "# What's new\n\n## Unreleased\n\n### NEW FEATURES\n*"
         )
-    # file.write_text(md)
+    file.write_text(md)
 
     sh(f"pandoc {CHANGELOG} -f  markdown -t rst -o {CHANGELOGRST}")
     print(f"`Complete what's new` log written to:\n{CHANGELOGRST}\n")
