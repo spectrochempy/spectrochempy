@@ -17,19 +17,27 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           python3 -m pip install json5 pyyaml cffconvert
-          python3 -m pip install setuptools_scm pandoc
+          python3 -m pip install setuptools_scm
       - name: Create branch
         run: git checkout -b release/v${{ github.event.inputs.versionString }}
       - name: Initialize mandatory git config
         run: |
           git config user.name "GitHub Actions"
           git config user.email noreply@github.com
-      - name: Update version in CHANGELOG, .zenodo.json and CITATION.cff
+      - name: Update requirements.txt
         run: |
           python scripts/create_requirements.py
       - name: Update version in CHANGELOG, .zenodo.json and CITATION.cff
         run: |
           python scripts/update_version_and_changelog.py ${{ github.event.inputs.versionString }}
+      - name: convert CHANGELOG.md to rst via pandoc
+        uses: docker://pandoc/core:2.9
+          with:
+            args: >-
+              -f  markdown
+              -t rst
+              -o docs/userguide/reference/changelog.rst
+              CHANGELOG.md
       - name: Commit tracked file
         id: make-commit
         run: |
@@ -40,13 +48,10 @@ jobs:
       - name: Create pull request into master
         uses: thomaseizinger/create-pull-request@1.0.0
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           head: release/v${{ github.event.inputs.versionString }}
           base: master
           title: v${{ github.event.inputs.versionString }} into master
           body: |
             This PR was created in response workflow running.
             I've updated the version string and code commit: ${{ steps.make-commit.outputs.commit }}.
-      - name: Prepare next changelog
-        run: |
-          python scripts/update_version_and_changelog.py unreleased
