@@ -4,7 +4,6 @@ from pathlib import Path
 from datetime import date
 import json
 import yaml
-from subprocess import run, PIPE, STDOUT
 from setuptools_scm import get_version
 from cffconvert.cli.create_citation import create_citation
 
@@ -18,54 +17,6 @@ CITATION = PROJECT / "CITATION.cff"
 ZENODO = PROJECT / ".zenodo.json"
 
 gitversion = get_version(root="..", relative_to=__file__)
-
-
-class _ExecCommand:
-    """
-    Parameters
-    ----------
-    command : shell command to execute
-    """
-
-    def __init__(self, command):
-
-        self.commands = [command]
-
-    def __call__(self, *args, **kwargs):
-
-        self.commands.extend(args)
-
-        silent = kwargs.pop("silent", False)
-        proc = run(
-            self.commands, text=True, stdout=PIPE, stderr=STDOUT
-        )  # capture_output=True)
-
-        # TODO: handle error codes
-        if not silent and proc.stdout:
-            print(proc.stdout)
-        return proc.stdout
-
-
-class sh(object):
-    """
-    Utility to run subprocess run command as if they were functions.
-    """
-
-    def __getattr__(self, command):
-
-        return _ExecCommand(command)
-
-    def __call__(self, script, silent=False):
-        # use to run shell script
-
-        proc = run(script, text=True, shell=True, stdout=PIPE, stderr=STDOUT)
-
-        if not silent:
-            print(proc.stdout)
-        return proc.stdout
-
-
-sh = sh()
 
 
 class Zenodo:
@@ -218,9 +169,6 @@ def make_changelog(version):
             "# What's new", "# What's new\n\n## Unreleased\n\n### NEW FEATURES\n*"
         )
     file.write_text(md)
-
-    sh(f"pandoc {CHANGELOG} -f  markdown -t rst -o {CHANGELOGRST}")
-    print(f"`Complete what's new` log written to:\n{CHANGELOGRST}\n")
 
 
 def make_citation(version):
