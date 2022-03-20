@@ -603,18 +603,23 @@ def _is_relative_to(path, base):
     # TODO: replace if Colab is (unlikely) updated to a compatible version
     pparts = path.parts
     bparts = base.parts
-    idx = pparts.index(bparts[-1])
-    pparts_base = pparts[: idx + 1]
-    return pparts_base == bparts
+    if bparts[-1] in pparts:
+        idx = pparts.index(bparts[-1])
+        pparts_base = pparts[: idx + 1]
+        return pparts_base == bparts
+    return False
 
 
 def _relative_to(path, base):
     pparts = path.parts
     bparts = base.parts
-    idx = pparts.index(bparts[-1])
-    pparts_base = pparts[: idx + 1]
-    if pparts_base == bparts:
+    if bparts[-1] in pparts:
+        idx = pparts.index(bparts[-1])
         return pathclean("/".join(pparts[idx + 1 :]))
+    raise ValueError(
+        f"'{path}' is not in the subpath of '{base}' OR one path is "
+        f"relative and the other absolute."
+    )
 
 
 @_importer_method
