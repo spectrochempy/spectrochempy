@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - develop
 
   pull_request:
 
@@ -43,7 +42,7 @@ jobs:
 
       - name: Install spectrochempy
         run: |
-          python setup.py install
+          python -m pip install .
 
       - name: Set up version environment variable
         run: |
