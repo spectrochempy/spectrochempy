@@ -37,4 +37,4 @@ COPY --chown=${NB_UID}:${NB_GID} . /home/$NB_USER/spectrochempy/
 
 RUN cd spectrochempy && \
     git checkout $BRANCH && \
-    python setup.py install
+    python -m pip install .
