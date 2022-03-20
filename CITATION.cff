@@ -15,7 +15,7 @@ authors:
   given-names: Christian
   orcid: https://orcid.org/0000-0002-5476-3148
 cff-version: 1.2.0
-date-released: '2022-03-19'
+date-released: '2022-03-20'
 identifiers:
 - description: Persistent identifier for all versions of SpectroChemPy
   type: doi
