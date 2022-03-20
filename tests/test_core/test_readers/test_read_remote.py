@@ -25,5 +25,5 @@ def test_read_remote():
     filesaved = filename.rename("~irdata_save")
 
     # now try to read
-    nd2 = NDDataset.read_omnic(IRDATA / "nh4y-activation.spg")
+    nd2 = NDDataset.read_omnic("irdata/nh4y-activation.spg")
     assert str(nd2) == "NDDataset: [float64] a.u. (shape: (y:55, x:5549))"

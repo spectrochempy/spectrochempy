@@ -39,11 +39,13 @@ class Zenodo:
         """
         self._js["publication_date"] = date.today().isoformat()
 
-    def update_version(self):
+    def update_version(self, version=None):
         """
         Update the version string metadata
         """
-        self._js["version"] = ".".join(scp.version.split(".")[:3])
+        if version is None:
+            version = scp.version
+        self._js["version"] = ".".join(version.split(".")[:3])
 
     def __str__(self):
         return json.dumps(self._js, indent=2)
@@ -127,8 +129,10 @@ class Citation:
         """
         self._citation.cffobj["date-released"] = date.today().isoformat()
 
-    def update_version(self):
+    def update_version(self, version=None):
         """
         Update the version metadata.
         """
-        self._citation.cffobj["version"] = ".".join(scp.version.split(".")[:3])
+        if version is None:
+            version = scp.version
+        self._citation.cffobj["version"] = ".".join(version.split(".")[:3])
