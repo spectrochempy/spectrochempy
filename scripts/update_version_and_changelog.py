@@ -178,7 +178,7 @@ def make_citation(version):
     citation.update_version(version)
     citation.update_date()
     print(citation)
-    # citation.save()
+    citation.save()
 
 
 def make_zenodo(version):
@@ -188,7 +188,7 @@ def make_zenodo(version):
     zenodo.update_version(version)
     zenodo.update_date()
     print(zenodo)
-    # zenodo.save()
+    zenodo.save()
 
 
 if __name__ == "__main__":
