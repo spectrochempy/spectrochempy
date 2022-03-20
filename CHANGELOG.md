@@ -1,6 +1,6 @@
 # What's new
 
-## Unreleased
+## Version 0.4.3 [2022-03-20]
 
 ### NEW FEATURES
 * Individual test data files can be automatically downloaded from the Github
