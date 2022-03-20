@@ -156,7 +156,7 @@ We'll now install |scpy| in development mode following 2 steps:
    .. sourcecode:: bash
 
       (scpy3.9) $ cd <spectrochempy folder>
-      (scpy3.9) $ python setup.py develop
+      (scpy3.9) $ python -m pip install -e .
 
    At this point you should be able to import spectrochempy from your local
    development version:

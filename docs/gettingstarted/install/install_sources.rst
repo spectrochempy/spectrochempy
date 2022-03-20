@@ -85,7 +85,7 @@ Install |scpy| in this environment
 
 .. sourcecode:: bash
 
-   (scpy) $ python setup.py install
+   (scpy) $ python -m pip install .
 
 
 At this point you should be able to ``import spectrochempy``:
@@ -128,11 +128,11 @@ To update your local master branch, you can do:
 
    (scpy) $ git pull upstream master --ff-only
 
-and if some changes are notified, run setup.py again:
+and if some changes are notified, run pip again:
 
 .. sourcecode:: bash
 
-   (scpy) $ python setup.py install
+   (scpy) $ python -m pip install .
 
 
 To go further and eventually contribute to the code on the upstream, you can consult the :ref:`develguide`.
