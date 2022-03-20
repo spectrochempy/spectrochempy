@@ -32,12 +32,12 @@ jobs:
           python scripts/update_version_and_changelog.py ${{ github.event.inputs.versionString }}
       - name: convert CHANGELOG.md to rst via pandoc
         uses: docker://pandoc/core:2.9
-          with:
-            args: >-
-              -f  markdown
-              -t rst
-              -o docs/userguide/reference/changelog.rst
-              CHANGELOG.md
+        with:
+          args: >-
+            -f  markdown
+            -t rst
+            -o docs/userguide/reference/changelog.rst
+            CHANGELOG.md
       - name: Commit tracked file
         id: make-commit
         run: |
