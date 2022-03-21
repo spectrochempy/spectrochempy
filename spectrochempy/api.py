@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 # ======================================================================================================================
-#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory.
+# Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root
+# directory.
 # ======================================================================================================================
 """
 Application Programming Interface.
@@ -36,7 +37,7 @@ if InteractiveShell.initialized():  # pragma: no cover
 NO_DISPLAY = False
 NO_DIALOG = False
 
-# Are we buidings the docs ?
+# Are we buildings the docs ?
 if Path(sys.argv[0]).name in ["make.py", "validate_docstrings.py"]:  # pragma: no cover
     # if we are building the documentation, in principle it should be done
     # using the make.py located at the root of the spectrochempy package.
@@ -57,8 +58,8 @@ if "pytest" in sys.argv[0] or "py.test" in sys.argv[0]:
     NO_DIALOG = True
 
     # OK, but if we are doing individual function testing in PyCharm
-    # it is interesting to see the plots and the file dialogs
-    # (except if we set explicitly --nodisplay argument!
+    # it is interesting to see the plots and the file dialogs,
+    # except if we set explicitly --nodisplay argument!
     # if len(sys.argv) > 1 and not any([arg.endswith(".py") for arg in
     # sys.argv[1:]]) and '--nodisplay' not in sys.argv:
     if (
@@ -91,10 +92,12 @@ from .core import *  # noqa: F403, F401, E402
 ALL += core.__all__
 
 if not IN_IPYTHON:
-    # needed in windows terminal - but must not be inited in Jupyter notebook
+    # needed in Windows terminal - but must not be inited in Jupyter notebook
     from colorama import init as initcolor
 
     initcolor()
+
+RUNNING_IN_COLAB = "google.colab" in str(get_ipython())
 
 if IN_IPYTHON and KERNEL and not NO_DISPLAY:  # pragma: no cover
     try:
@@ -105,6 +108,11 @@ if IN_IPYTHON and KERNEL and not NO_DISPLAY:  # pragma: no cover
             # We are running from NBSphinx - the plot must be inline to show up.
             IP.magic("matplotlib inline")
         else:
+            if RUNNING_IN_COLAB:  # pragma: no cover
+                # allow using matplotlib widget
+                from google.colab import output
+
+                output.enable_custom_widget_manager()
             IP.magic("matplotlib widget")  # widget
     except Exception:
         IP.magic("matplotlib qt")
