@@ -18,7 +18,7 @@ jobs:
           python3 -m pip install --upgrade pip
           python3 -m pip install json5 pyyaml cffconvert
           python3 -m pip install setuptools_scm
-      - name: Create branch
+      - name: Create release branch
         run: git checkout -b release/v${{ github.event.inputs.versionString }}
       - name: Initialize mandatory git config
         run: |
