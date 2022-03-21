@@ -1,35 +1,48 @@
-name: Create release
+name: Create new draft release
+
+# This workflow is adapted from
+# https://github.com/thomaseizinger/github-action-gitflow-release-workflow/blob/dev/.github/workflows/draft-new-release.yml
 
 on:
   workflow_dispatch:
     inputs:
       versionString:
-        description: 'version  (e.g. 0.4.2)'
+        description: 'The version we want to release (e.g. 0.4.2)'
         required: true
+
 jobs:
 
-  create_release:
+  draft_new_release:
+    name: "Draft a new release"
     runs-on: ubuntu-latest
+
     steps:
+
       - name: Checkout code
         uses: actions/checkout@v2
+
       - name: Install dependancies
         run: |
           python3 -m pip install --upgrade pip
           python3 -m pip install json5 pyyaml cffconvert
           python3 -m pip install setuptools_scm
+
       - name: Create release branch
-        run: git checkout -b release/v${{ github.event.inputs.versionString }}
+        run: git checkout -b release/${{ github.event.inputs.versionString }}
+
       - name: Initialize mandatory git config
         run: |
           git config user.name "GitHub Actions"
           git config user.email noreply@github.com
+
       - name: Update requirements.txt
         run: |
           python scripts/create_requirements.py
+
       - name: Update version in CHANGELOG, .zenodo.json and CITATION.cff
         run: |
           python scripts/update_version_and_changelog.py ${{ github.event.inputs.versionString }}
+
       - name: convert CHANGELOG.md to rst via pandoc
         uses: docker://pandoc/core:2.9
         with:
@@ -38,21 +51,34 @@ jobs:
             -t rst
             -o docs/userguide/reference/changelog.rst
             CHANGELOG.md
-      - name: Commit tracked file
+
+      - name: Commit tracked files
         id: make-commit
         run: |
           git commit -a --message "Prepare release ${{ github.event.inputs.versionString }}"
           echo "::set-output name=commit::$(git rev-parse HEAD)"
+
       - name: Push new branch
-        run: git push origin release/v${{ github.event.inputs.versionString }}
+        run: git push origin release/${{ github.event.inputs.versionString }}
+
       - name: Create pull request into master
         uses: thomaseizinger/create-pull-request@1.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          head: release/v${{ github.event.inputs.versionString }}
+          head:  release/${{ github.event.inputs.versionString }}
           base: master
-          title: v${{ github.event.inputs.versionString }} into master
+          reviewers: ${{ github.actor }}
+          title: Release version ${{ github.event.inputs.versionString }}
           body: |
-            This PR was created in response workflow running.
-            I've updated the version string and code commit: ${{ steps.make-commit.outputs.commit }}.
+            Hi @${{ github.actor }}!
+
+            This PR was created in response to a manual trigger of the release workflow
+            here:
+            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}.
+
+            I've updated the CHANGELOG.md, CITATION.cff, .zenodo.json plus eventually
+            change on the requirements/environment files:
+            ${{ steps.make-commit.outputs.commit }}.
+            Merging this PR will create a GitHub release and upload all the update
+            that are made as part of the build of the release.
