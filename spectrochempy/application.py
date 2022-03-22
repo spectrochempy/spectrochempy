@@ -13,21 +13,20 @@ the default application preferences and IPython magic functions.
 
 __all__ = []
 
-import re
 import sys
 import logging
 from logging.handlers import RotatingFileHandler
 import subprocess
 import warnings
 import pprint
-import json
 from os import environ
 from pathlib import Path
 import threading
-
-from pkg_resources import get_distribution, DistributionNotFound
+import json
+from pkg_resources import parse_version, get_distribution, DistributionNotFound
 import requests
 from setuptools_scm import get_version
+from datetime import date, timedelta
 
 import numpy as np
 
@@ -175,58 +174,85 @@ __release_date__ = _get_release_date()
 "Last release date of this package"
 
 
-def _get_conda_package_version():
+def _get_pypi_version():
     """
-    Get last conda package version
+    Get the last released pypi version
     """
-    # Get version
-    conda_url = "https://anaconda.org/spectrocat/spectrochempy/files"
+    url = "https://pypi.python.org/pypi/spectrochempy/json"
     try:
-        response = requests.get(conda_url)
+        response = requests.get(url)
+        if response.status_code != 200:
+            return
     except requests.exceptions.RequestException:  # pragma: no cover
         return
-
-    regex = (
-        r"\/\d{1,2}\.\d{1,2}\.\d{1,2}\/download\/noarch"
-        r"\/spectrochempy-(\d{1,2}\.\d{1,2}\.\d{1,2})\-(dev\d{1,"
-        r"2}|stable).tar.bz2"
+    releases = json.loads(response.text)["releases"]
+    versions = sorted(releases, key=parse_version)
+    last_version = versions[-1]
+    release_date = date.fromisoformat(
+        releases[last_version][0]["upload_time_iso_8601"].split("T")[0]
     )
-    matches = re.finditer(regex, response.text, re.MULTILINE)
-    vavailables = []
-    for match in matches:
-        vers = match[1] if match[2] == "stable" else f"{match[1]}.{match[2]}"
-        vavailables.append(vers)
-
-    return sorted(map(Version, vavailables))
+    return Version(last_version), release_date
 
 
 def _check_for_updates(*args):
 
     old = Version(__version__)
-    conda_versions = _get_conda_package_version()
-    if conda_versions is None:
+    version, release_date = _get_pypi_version()
+    # conda_versions = _get_conda_package_version()
+    if version is None:
         # probably no connection
         return
 
     new_release = None
-    new_version = None
 
-    for new in conda_versions:
-        if new > old:  # pragma: no cover
-            new_version = new.public
-            if not new.is_devrelease:
-                new_release = new_version
+    if version > old:  # pragma: no cover  # TODO: change back the comparison sign
+        new_version = version.public
+        if not version.is_devrelease:
+            new_release = new_version
 
     fil = Path.home() / ".scpy_update"
-    if new_release and environ.get("DOC_BUILDING") is not None:  # pragma: no cover
-        fil.write_text(
-            f"You are running SpectrocChemPy-{__version__} but version {new_release} is available."
-            f"Please consider updating for bug fixes and new features! "
-        )
-
+    if new_release and environ.get("DOC_BUILDING") is None:  # pragma: no cover
+        if not fil.exists():  # This new version is checked for the first time
+            # write the information: date of writing, status, message
+            fil.write_text(
+                f"{date.isoformat(date.today())}%%NOT_YET_DISPLAYED%%"
+                f"SpectroChemPy v.{new_release} is available.\n"
+                f"Please consider updating, using pip or conda, for bug fixes and new "
+                f"features! "
+            )
     else:  # pragma: no cover
         if fil.exists():
             fil.unlink()
+
+
+def _display_needs_update_message():
+    fil = Path.home() / ".scpy_update"
+    message = None
+    if fil.exists():
+        try:
+            msg = fil.read_text()
+            check_date, status, message = msg.split("%%")
+            if status == "NOT_YET_DISPLAYED":
+                fil.write_text(f"{date.isoformat(date.today())}%%DISPLAYED%%{message}")
+            else:
+                # don't notice again if the message was already displayed in the last 7 days
+                last_view_delay = date.today() - date.fromisoformat(check_date)
+                if last_view_delay < timedelta(days=3):
+                    message = None
+        except Exception:
+            pass
+
+    if message:
+        # TODO : find how to make a non blocking dialog
+        # may be something like this:
+        # https://stackoverflow.com/questions/61251055/showinfo-and-showwarning-appearing-in-the-background-in-tkinter-messagebox
+        # import tkinter as tk
+        # from tkinter.messagebox import showinfo
+        # root = tk.Tk()
+        # root.withdraw()
+        # showinfo("New version available", message)
+        # root.mainloop()
+        return message
 
 
 CHECK_UPDATE = threading.Thread(target=_check_for_updates, args=(1,))
@@ -548,6 +574,12 @@ class GeneralPreferences(MetaConfigurable):
     csv_delimiter = Enum(
         [",", ";", r"\t", " "], default_value=",", help="CSV data delimiter"
     ).tag(config=True, gui=True)
+
+    check_update_frequency = Enum(
+        ["day", "week", "month"],
+        default_value="day",
+        help="Frequency of checking for update",
+    )
 
     @default("project_directory")
     def _get_default_project_directory(self):
@@ -1087,14 +1119,9 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
         self.running = True
 
         # display needs for update
-        # time.sleep(1)
-        fil = Path.home() / ".scpy_update"
-        if fil.exists():
-            try:
-                msg = fil.read_text()
-                self.logs.warning(msg)
-            except Exception:
-                pass
+        msg = _display_needs_update_message()
+        if msg:
+            self.log.warning(msg)
 
         self.logs.info("\n\nAPI loaded - application is ready")
         return True
