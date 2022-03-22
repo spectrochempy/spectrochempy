@@ -116,10 +116,8 @@ dependencies:
     - jupyter-dash
     - plotly
     {%- endif %}
-    - pip
     {%- if DEV %}
     - pip:
-
         - autodoc_traits
         {%- endif %}
         {%- if DASH %}

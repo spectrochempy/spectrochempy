@@ -101,7 +101,5 @@ dependencies:
     # - datashader
     # - scikit-learn
     
-    - pip
     - pip:
-
         - autodoc_traits
