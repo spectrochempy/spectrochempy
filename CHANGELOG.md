@@ -1,5 +1,11 @@
 # What's new
 
+## Unreleased
+
+### NEW FEATURES
+* Increase compatibility with Google Colaboratory (COLAB).
+* Enable custom widget in COLAB in orter to make its configuration easier.
+
 ## Version 0.4.3 [2022-03-20]
 
 ### NEW FEATURES
@@ -27,7 +33,9 @@
 
 ### NEW FEATURES
 * Compatibility with Python 3.10
-    - Spectrochempy is tested with 3.10, 3.9 version of python, and on Windows and linux platform. Older versions > 3.6 of python or different platforms may still work, but with no guaranty.
+    - Spectrochempy is tested with 3.10, 3.9 version of python,
+      and on Windows and linux platform. Older versions > 3.6 of python
+      or different platforms may still work, but with no guaranty.
 
 ### BUG FIXED
 * Transmittance and absorbance units now correctly handled.
@@ -55,8 +63,8 @@
 
 ### BUGS FIXED
 * TQDM progress bar
-* Fix #360 : write a dataset with a specified filename do not open a dialog except if the file already exists and if
-  confirm=True is set.
+* Fix #360 : write a dataset with a specified filename do not open a dialog except
+  if the file already exists and if confirm=True is set.
 * `read` and `read_dir` now ignore non readable files.
 * `read_labspec` now ignore non-labspec .txt files.
 * Fix #296 : IRIS and quadprog version.
@@ -99,10 +107,13 @@
 * MatPlotLib Axes are subclassed in order to accept quantities for method arguments.
 
 ### BUGS FIXED
-* NDArray constructor now accept a homogeneous list of quantities as data input. Units are set accordingly.
-* Qt Dialogs. This is related to issue #198, as tk dialogs can be replaced by Qt when working with a terminal.
+* NDArray constructor now accept a homogeneous list of quantities as data input.
+  Units are set accordingly.
+* Qt Dialogs. This is related to issue #198, as tk dialogs can be replaced by Qt when
+  working with a terminal.
 * Custom exceptions.
-* Qt Dialogs. This is related to issue #198, as tk dialogs can be replaced by Qt when working with a terminal.
+* Qt Dialogs. This is related to issue #198, as tk dialogs can be replaced by Qt when
+  working with a terminal.
 * Doc display problems.
 
 ## Version 0.2.18 [2022-01-05]
@@ -141,7 +152,8 @@
 * Cantera: Added differential evolution algorithm in cantera utilities.
 * Cantera: Added PFR object in cantera utilities.
 * DOC: Added list of papers citing spectrochempy.
-* Github action workflows to test, build and publish conda package and docs in replacement of Travis CI.
+* Github action workflows to test, build and publish conda package and docs in
+  replacement of Travis CI.
 * Use CodeClimate to show Coverage info
 
 ### BUGS FIXED
@@ -261,7 +273,8 @@
 
 ### NEW FEATURES
 * Documentation largely revisited and hopefully improved. *Still some work to be done*.
-* NDMath (mathematical and dataset creation routines) module revisited. *Still some work to be done*.
+* NDMath (mathematical and dataset creation routines) module revisited.
+  *Still some work to be done*.
 * Changed CoordRange behavior.
 
 ### BUGS FIXED
@@ -303,8 +316,10 @@
 * NDpanel temporary removed from the master.
 * 2D IRIS.
 * Trapz integration to return NDDataset.
-* Suppressed a forgotten sleep statement that was slowing down the SpectroChemPy initialization.
-* Error in SIMPLISMA (changed affectations such as C.data[...] = something by C[...] = something.
+* Suppressed a forgotten sleep statement that was slowing down the SpectroChemPy
+  initialization.
+* Error in SIMPLISMA (changed affectations such as C.data[...] = something
+  by C[...] = something.
 * Cleaning mplstyle about non-style parameters and corrected makestyle.
 * Argument of set_xscale.
 * Use read_topspin instead of the deprecated function read_bruker_nmr.
