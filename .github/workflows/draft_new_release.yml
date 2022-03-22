@@ -77,8 +77,8 @@ jobs:
             here:
             https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}.
 
-            I've updated the CHANGELOG.md, CITATION.cff, .zenodo.json plus eventually
-            change on the requirements/environment files:
+            I've updated the CHANGELOG.md, CITATION.cff, .zenodo.json plus eventual
+            changes on the requirements/environment files:
             ${{ steps.make-commit.outputs.commit }}.
-            Merging this PR will create a GitHub release and upload all the update
-            that are made as part of the build of the release.
+            Merging this PR will be followed by the creation of the corresponding
+            release and publishing on pypi, anaconda and zenodo.

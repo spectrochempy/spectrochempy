@@ -39,15 +39,3 @@ jobs:
           name: ${{ env.RELEASE_VERSION }}
           draft: false
           prerelease: false
-
-      - name: Merge master into develop branch
-        uses: thomaseizinger/create-pull-request@1.0.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          head: master
-          base: develop
-          title: Merge master into develop branch
-          body: |
-            This PR merges the master branch back into dev.
-            This happens to ensure that the updates that happend on the release branch, i.e. CHANGELOG and other updates are also present on the dev branch.
