@@ -5,6 +5,7 @@
 ### NEW FEATURES
 * Increase compatibility with Google Colaboratory (COLAB).
 * Enable custom widget in COLAB in orter to make its configuration easier.
+* Check update regularly and notify only every 3 days.
 
 ## Version 0.4.3 [2022-03-20]
 
@@ -16,14 +17,13 @@
 ## Version 0.4.2 [2022-03-16]
 
 ### NEW FEATURES
-* Concatenate and stack:
-    - `stack()` method now generates a new dim, even if a dim of size one in present
+* `stack()` method now generates a new dim, even if a dim of size one in present
 
 ### DEPRECATED
-* `force_stack` keyword in concatenate() now deprecated.
+* "force_stack" keyword in `concatenate()` now deprecated.
 
 ### BUG FIXED:
-* issue #417
+* Issue #417
 * Transmittance and absorbance units now correctly handled.
 
 ## Version 0.4.1 [2022-03-14]
