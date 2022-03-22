@@ -1,6 +1,6 @@
 # What's new
 
-## Unreleased
+## Version 0.4.4 [2022-03-22]
 
 ### NEW FEATURES
 * Increase compatibility with Google Colaboratory (COLAB).
