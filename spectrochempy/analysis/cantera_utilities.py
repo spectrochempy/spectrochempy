@@ -503,38 +503,43 @@ class PFR:
         logfile=None,
         **kwargs,
     ):
-        r"""
-         Function fitting rate parameters and concentrations to a given concentration profile at the outlet of the pfr.
+        """
+        Fit rate parameters and concentration for a given concentration profile.
 
-         Parameters
+        Function fitting rate parameters and concentrations to a given concentration
+        profile at the outlet of the pfr.
+
+        Parameters
         ------------
 
-         exp_conc: NDDataset
-             experimental concentration profiles on which to fit the model. Can contain more concentration
-             profiles than those to fit. the y Coord should be time
+        exp_conc: NDDataset
+            experimental concentration profiles on which to fit the model. Can contain
+            more concentration profiles than those to fit. the y Coord should be time.
 
-         exp_idx:
-             indexes of experimental concentration profiles on which the model will be fitted
+        exp_idx:
+            indexes of experimental concentration profiles on which the model
+            will be fitted.
 
-         fit_to_exp_idx:
-             correspondence between optimized concentration profile and experimental
-             concentration profile
+        fit_to_exp_idx:
+            correspondence between optimized concentration profile and experimental
+            concentration profile.
 
-         param_to_optimize: dict
-             reactive phase parameters to optimize
+        param_to_optimize: dict
+            reactive phase parameters to optimize.
 
-         param_to_set: dict
-             names of kinetic parameters differing from the cti file but fixed during optimization
+        param_to_set: dict
+            names of kinetic parameters differing from the cti file but fixed
+            during optimization.
 
-         logfile: None (default) or str
-             name of the logfile
+        logfile: None (default) or str
+            name of the logfile.
 
-         **kwargs
-             parameters for the optimization (see scipy.optimize.minimize)
+        **kwargs
+            parameters for the optimization (see scipy.optimize.minimize).
 
-         Returns
-         ----------
-         a dictionary
+        Returns
+        -------
+        dict
         """
         # global variables to keep track of iterations and optimization history
         global it, trials, func_values, popsize, pop_sse, prev_min_sse
