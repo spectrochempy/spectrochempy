@@ -17,7 +17,7 @@ In the following, we describe the steps to add a specific reader - with the exam
 1. Add a test and sample files
 ==============================
 
-Contributors are encouraged to embrace Test-Driven Development (TDD) (see :ref:`_contributing.tdd` )
+Contributors are encouraged to embrace Test-Driven Development (TDD) (see :ref:`contributing.tdd` )
 and reader implementation should start by writing an (initially failing) automated test case to read sample file(s) and
 then produce the *minimum* amount of code to successfully read this file, i.e., generate a NDDataset with a ``data``
 attribute as expected from source file.
@@ -180,4 +180,4 @@ and whenever possible the information related to the instrument, acquisition par
 4. Polish your code and make the Pull Requests
 ==============================================
 
-see: :ref:`_contributing_codebase`
+see: :ref:`contributing_codebase`
