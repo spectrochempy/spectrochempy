@@ -82,7 +82,10 @@ CRITICAL = logging.CRITICAL
 def display_info_string(**kwargs):  # pragma: no cover
     _template = """
     {{widgetcss}}
-    <table><tr><td>
+    <div>
+    <table>
+    <tr>
+    <td>
     {% if logo %}
     <img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAAlw
     SFlzAAAJOgAACToB8GSSSgAAAetpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6
@@ -115,13 +118,17 @@ def display_info_string(**kwargs):  # pragma: no cover
     JDjbR5XggPRZlRnS6bRQRtLpn4++cuie/Yvn2svmNxuLw9WCcYIl4fEoTEGiSTUqJdfgU+8ROqf1iMkLzS389YtNPXc/PH8l8ONB
     JZkHD+4JtD04HmVEDWWErmBhzV2/2LB1bemJG6krzv2S6NOHUgtEP0Oif5pE/3fHoruP7N8RiP61GArzSwbUhJJQpXJKiKbfr/3b
     IhKq76sKPUdF9NW/LSqfSn6vjv8C45H/6FSgvZQAAAAASUVORK5CYII='
-         style='height:25px; border-radius:12px; display:inline-block; float:left; vertical-align:middle'></img>
+         style='height:25px; border-radius:12px; display:inline-block; float:left; vertical-align:middle'>
+    </img>
     {% endif %}
-    </td><td>
+    </td>
+    <td>
     {% if message %}
     &nbsp;&nbsp;<span style='font-size:12px'>{{ message }}</span>
     {% endif %}
-    </td></tr></table>
+    </td>
+    </tr>
+    </table>
     </div>
     """
 
