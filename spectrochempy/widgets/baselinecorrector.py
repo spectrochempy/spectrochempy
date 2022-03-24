@@ -21,8 +21,8 @@ class BaselineCorrector:
 
     Wrapper of scp.BaselineCorrection(X), with widgets for dataset slicing,
     input parameters and graphical output.
-    Should be run in jupyter notebook (does not always run properly in jupyter
-     lab) with the widget backend (magic `%matplotlib widget`).
+    Should be run in jupyter notebook (does not always run properly in jupyter lab)
+    with the widget backend (magic `%matplotlib widget`).
 
     Parameters
     ----------
