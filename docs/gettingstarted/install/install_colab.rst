@@ -16,7 +16,9 @@ The Colab Notebooks are very similar to Jupyter Notebook (from which they derive
 
 To start with Colab, go to the
 `Colab website <https://colab.research.google.com/notebooks/intro.ipynb#recent=true>`__
-and create a new notebook.
+and create a new notebook or simply execute the example notebook here :
+<a href="https://colab.research.google.com/github/spectrochempy/spectrochempy_tutorials/blob/master/scp_data/colab/spectrochempy_on_colaboratory.ipynb" target="_parent"><img
+src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 
 Load and install SpectroChemPy with pip
 ---------------------------------------
@@ -71,9 +73,3 @@ There are several ways to load datafiles on the server:
 
 .. image:: images/colab_2.png
        :alt: Colab windows
-
-For the exercise/tutorials with SpectroChemPy, note that some data are available in the
-`Github directory (spectrochempy_data/testdata) <https://github.com/spectrochempy/spectrochempy_data/tree/master/testdata>`__.
-You don't need to download them because if they are not yet found in the default data
-directory when you use them, they will be downloaded automatically and saved
-(so they will not be downloaded next time you need it)
