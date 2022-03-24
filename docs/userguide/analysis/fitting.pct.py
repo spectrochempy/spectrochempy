@@ -44,8 +44,8 @@ from spectrochempy import ur
 # ## Solving a linear equation using the least square method (LSTSQ)
 # In the first example, we find the least square solution of a simple linear equation.
 #
-# Let's first create a NDDataset with some data. We have for instance some noisy data that represent the distance `d`
-# traveled by some objects versus time `t`:
+# Let's first create a NDDataset with some data. We have for instance some noisy data
+# that represent the distance `d` traveled by some objects versus time `t`:
 
 # %%
 def func(t, v, var):
