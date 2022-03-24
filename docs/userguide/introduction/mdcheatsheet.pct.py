@@ -2,7 +2,7 @@
 # ---
 # jupyter:
 #   jupytext:
-#     cell_metadata_filter: -all
+#     cell_metadata_filter: all
 #     formats: ipynb,py:percent
 #     notebook_metadata_filter: all
 #     text_representation:
@@ -11,9 +11,21 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.13.7
 #   kernelspec:
-#     display_name: Python 3
+#     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
+#   language_info:
+#     codemirror_mode:
+#       name: ipython
+#       version: 3
+#     file_extension: .py
+#     mimetype: text/x-python
+#     name: python
+#     nbconvert_exporter: python
+#     pygments_lexer: ipython3
+#     version: 3.9.10
+#   nbsphinx:
+#     orphan: true
 # ---
 
 # %% [markdown]
@@ -232,4 +244,3 @@
 # ```
 # Surround the link with two underscores (_) on each side
 # __[link text](https://github.com/spectrochempy/spectrochempy)__
-# %%
