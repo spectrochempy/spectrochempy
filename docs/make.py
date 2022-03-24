@@ -236,13 +236,13 @@ class BuildDocumentation(object):
         if args.clean and args.pdf:
             self.clean("latex")
 
-        if args.delnb:
-            delnb()
+        #  if args.delnb:
+        delnb()
 
-        self.sync_notebook = args.syncnb
+        # self.sync_notebook = args.syncnb
 
         if args.html:
-            self.sync_notebook = True
+            # self.sync_notebook = True
             self.make_docs("html")
             self.make_tutorials()
 
@@ -288,13 +288,13 @@ class BuildDocumentation(object):
         if clean:
             print("CLEAN:")
             self.clean(builder)
-            self.sync_notebook = True
+            # self.sync_notebook = True
             self.regenerate_api = True
         self.make_dirs()
 
         # update modified notebooks
-        if self.sync_notebook:
-            sync_notebooks()
+        #  if self.sync_notebook:
+        #      sync_notebooks()
 
         if self.regenerate_api:
             shutil.rmtree(API, ignore_errors=True)
