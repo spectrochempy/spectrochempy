@@ -5,6 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory
 # ============================================================================================
 
+import functools
 import warnings
 from contextlib import contextmanager
 
@@ -96,6 +97,7 @@ def deprecated(message):
     """
 
     def deprecation_decorator(func):
+        @functools.wraps(func)
         def wrapper(*args, **kwargs):
             warnings.warn(
                 "The function `{} is deprecated : {}".format(func.__name__, message),
