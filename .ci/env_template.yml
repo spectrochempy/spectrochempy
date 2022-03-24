@@ -87,11 +87,11 @@ dependencies:
     # DEV: code and docs
     - mamba
     - jupytext
-    - sphinx<4.0
+    - sphinx
     - sphinx_rtd_theme
     - autodocsumm
     - sphinx-gallery<=0.7.0
-    - nbsphinx=0.8.1
+    - nbsphinx
     - jupyter_sphinx
     - json5
     - sphinx-copybutton
