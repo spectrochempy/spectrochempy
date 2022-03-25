@@ -8,12 +8,13 @@
 This module implements the MCRALS class.
 """
 
-__all__ = ["MCRALS"]
+__all__ = ["MCRALS", "_unimodal_1D"]
 
 __dataset_methods__ = []
 
 import numpy as np
 from traitlets import HasTraits, Instance, Dict, Unicode
+import warnings
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.analysis.pca import PCA
@@ -44,7 +45,6 @@ class MCRALS(HasTraits):
 
     Other Parameters
     ----------------
-
     tol : float, optional, default 0.1
         Convergence criterion on the change of residuals (percent change of standard deviation of residuals).
 
@@ -66,7 +66,7 @@ class MCRALS(HasTraits):
         unimodal, not the others. For instance `[0, 2]` indicates that profile #0 and #2 are unimodal while
          profile #1 *can* be multimodal. If set to `"None"` or `[]`, all profiles can be multimodal.
 
-    unimodMod : str, default "strict"
+    unimodConcMod : str, default "strict"
         When set to `"strict"`, values deviating from unimodality are reset to the value of the previous point.
         When set to `"smooth"`, both values (deviating point and previous point) are modified to avoid ="steps"
         in the concentration profile.
@@ -148,6 +148,23 @@ class MCRALS(HasTraits):
         when set to "euclid", spectra are normalized with respect to their total area, when set to "max", spectra are
         normalized with respect to the maximum af their value.
 
+     unimodSpec : str or array of indexes, default `None`
+        Unimodality constraint on Spectra. If set to `None` (default) none of spectral profiles is
+        considered unimodal. If an array of indexes is passed, the corresponding profiles are considered
+        unimodal, not the others. For instance `[0, 2]` indicates that profile #0 and #2 are unimodal while
+         profile #1 *can* be multimodal. If set to `"None"` or `[]`, all profiles can be multimodal.
+
+    unimodSpecMod : str, default "strict"
+        When set to `"strict"`, values deviating from unimodality are reset to the value of the previous point.
+        When set to `"smooth"`, both values (deviating point and previous point) are modified to avoid ="steps"
+        in the concentration profile.
+
+    unimodSpecTol : float, default 1.1
+        Tolerance parameter for unimodality. Correction is applied only if the deviating point is larger/lower than
+        ```St[j,i] > St[j, i-1] * unimodSpecTol```  on the decreasing branch of profile #j,
+        ```St[j,i] < St[j, i-1] * unimodTol```  on the increasing branch of profile  #j.
+
+
     See Also
     --------
     PCA
@@ -175,32 +192,56 @@ class MCRALS(HasTraits):
     _params = Dict()
 
     def __init__(self, dataset, guess, **kwargs):
+
         # list all default arguments:
-        # Todo: add unimodSpec (and unimodSpecMod, ...), default `None`
+
         tol = kwargs.get("tol", 0.1)
         maxit = kwargs.get("maxit", 50)
         maxdiv = kwargs.get("maxdiv", 5)
+
         nonnegConc = kwargs.get("nonnegConc", "all")
+
         unimodConc = kwargs.get("unimodConc", "all")
-        unimodTol = kwargs.get("unimodTol", 1.1)
-        unimodMod = kwargs.get("unimodMod", "strict")
+        unimodConcTol = kwargs.get("unimodConcTol", 1.1)
+        unimodConcMod = kwargs.get("unimodMod", "strict")
+        if "unimodTol" in kwargs.keys():
+            warnings.warn(
+                "unimodTol deprecated, use unimodConcTol instead", DeprecationWarning
+            )
+            unimodConcTol = kwargs.get("unimodTol", 1.1)
+        if "unimodMod" in kwargs.keys():
+            warnings.warn(
+                "unimodMod deprecated, use unimodConcMod instead", DeprecationWarning
+            )
+            unimodConcTol = kwargs.get("unimodConcMod", "strict")
+
         monoDecConc = kwargs.get("monoDecConc", None)
         monoIncTol = kwargs.get("monoIncTol", 1.1)
         monoIncConc = kwargs.get("monoIncConc", None)
         monoDecTol = kwargs.get("monoDecTol", 1.1)
+
         closureConc = kwargs.get("closureConc", None)
         closureTarget = kwargs.get("closureTarget", "default")
         closureMethod = kwargs.get("closureMethod", "scaling")
+
         hardConc = kwargs.get("hardConc", None)
         getConc = kwargs.get("getConc", None)
         argsGetConc = kwargs.get("argsGetConc", None)
         hardC_to_C_idx = kwargs.get("hardC_to_C_idx", "default")
-        nonnegSpec = kwargs.get("nonnegSpec", "all")
-        normSpec = kwargs.get("normSpec", None)
-        verbose = kwargs.get("verbose", False)
 
-        # now check input
-        if verbose:
+        unimodSpec = kwargs.get("unimodSpec", None)
+        unimodSpecTol = kwargs.get("unimodSpecTol", 1.1)
+        unimodSpecMod = kwargs.get("unimodSpecMod", "strict")
+
+        nonnegSpec = kwargs.get("nonnegSpec", "all")
+
+        normSpec = kwargs.get("normSpec", None)
+
+        if "verbose" in kwargs.keys():
+            warnings.warn(
+                "verbose deprecated. Instead, use set_loglevel(INFO) before launching MCRALS",
+                DeprecationWarning,
+            )
             set_loglevel(INFO)
 
         # Check initial data
@@ -276,6 +317,16 @@ class MCRALS(HasTraits):
             )
 
         # constraints on spectra
+
+        if unimodSpec == "all":
+            unimodSpec = np.arange(nspecies)
+        elif unimodSpec is None:
+            unimodSpec = []
+        elif len(unimodSpec) > nspecies:  # pragma: no cover
+            raise ValueError(
+                f"The guess has only {nspecies} species, please check unimodSpec"
+            )
+
         if nonnegSpec == "all":
             nonnegSpec = np.arange(nspecies)
         elif (
@@ -315,8 +366,8 @@ class MCRALS(HasTraits):
         ndiv = 0
 
         logs = "*** ALS optimisation log***\n"
-        logs += "#iter     Error/PCA        Error/Exp      %change\n"
-        logs += "---------------------------------------------------"
+        logs += "#iter     Error/PCA        Error/Exp      %change \n"
+        logs += "------------------------------------------------- \n"
         info_(logs)
 
         while change >= tol and niter < maxit and ndiv < maxdiv:
@@ -333,37 +384,13 @@ class MCRALS(HasTraits):
             # Force unimodal concentration
             # ----------------------------
             if unimodConc != []:
-                for s in unimodConc:
-                    maxid = np.argmax(C.data[:, s])
-                    curmax = C.data[maxid, s]
-                    curid = maxid
-
-                    while curid > 0:
-                        curid -= 1
-                        if C.data[curid, s] > curmax * unimodTol:
-                            if unimodMod == "strict":
-                                C.data[curid, s] = C.data[curid + 1, s]
-                            if unimodMod == "smooth":
-                                C.data[curid, s] = (
-                                    C.data[curid, s] + C.data[curid + 1, s]
-                                ) / 2
-                                C.data[curid + 1, s] = C.data[curid, s]
-                                curid = curid + 2
-                        curmax = C.data[curid, s]
-
-                    curid = maxid
-                    while curid < ny - 1:
-                        curid += 1
-                        if C.data[curid, s] > curmax * unimodTol:
-                            if unimodMod == "strict":
-                                C.data[curid, s] = C.data[curid - 1, s]
-                            if unimodMod == "smooth":
-                                C.data[curid, s] = (
-                                    C.data[curid, s] + C.data[curid - 1, s]
-                                ) / 2
-                                C.data[curid - 1, s] = C.data[curid, s]
-                                curid = curid - 2
-                        curmax = C.data[curid, s]
+                C.data = _unimodal_2D(
+                    C.data,
+                    idxes=unimodConc,
+                    axis=0,
+                    tol=unimodConcTol,
+                    mod=unimodConcMod,
+                )
 
             # Force monotonic increase
             # ------------------------
@@ -433,6 +460,17 @@ class MCRALS(HasTraits):
             if nonnegSpec is not None:
                 St.data[nonnegSpec, :] = St.data[nonnegSpec, :].clip(min=0)
 
+            # Force unimodal spectra
+            # ----------------------------
+            if unimodSpec != []:
+                St.data = _unimodal_2D(
+                    St.data,
+                    idxes=unimodSpec,
+                    axis=1,
+                    tol=unimodSpecTol,
+                    mod=unimodSpecMod,
+                )
+
             # recompute C for consistency(soft modeling)
             C.data = np.linalg.lstsq(St.data.T, X.data.T)[0].T
 
@@ -443,7 +481,6 @@ class MCRALS(HasTraits):
                 C.data = C.data * alpha.T
             elif normSpec == "euclid":
                 alpha = np.linalg.norm(St.data, axis=1).reshape(nspecies, 1)
-                print(alpha)
                 St.data = St.data / alpha
                 C.data = C.data * alpha.T
 
@@ -497,8 +534,8 @@ class MCRALS(HasTraits):
             "maxdiv": maxdiv,
             "nonnegConc": nonnegConc,
             "unimodConc": unimodConc,
-            "unimodTol": unimodTol,
-            "unimodMod": unimodMod,
+            "unimodConcTol": unimodConcTol,
+            "unimodConcMod": unimodConcMod,
             "closureConc": closureConc,
             "closureTarget ": closureTarget,
             "closureMethod": closureMethod,
@@ -511,8 +548,10 @@ class MCRALS(HasTraits):
             "argsGetConc": argsGetConc,
             "hardC_to_C_idx": hardC_to_C_idx,
             "nonnegSpec": nonnegSpec,
+            "unimodSpec": unimodConc,
+            "unimodSpecTol": unimodSpecTol,
+            "unimodSpecMod": unimodSpecMod,
             "normSpec": normSpec,
-            "verbose": verbose,
         }
 
         self._C = C
@@ -642,3 +681,91 @@ class MCRALS(HasTraits):
         ax.autoscale(enable=True)
         ax.set_title("MCR ALS merit plot")
         return ax
+
+
+# ---------------------------------
+def _unimodal_2D(a, axis, idxes, tol, mod):
+    """Force unimodality on given lines or or columnns od a 2D ndarray
+
+    a: ndarray
+
+    axis: int
+        axis along which the correction is applied
+
+    idxes: list of int
+        indexes at which the correction is applied
+
+    mod : str
+        When set to `"strict"`, values deviating from unimodality are reset to the value of the previous point.
+        When set to `"smooth"`, both values (deviating point and previous point) are modified to avoid "steps"
+        in the profile.
+
+    tol: float
+        Tolerance parameter for unimodality. Correction is applied only if:
+        `a[i] > a[i-1] * unimodTol`  on a decreasing branch of profile,
+        `a[i] < a[i-1] * unimodTol`  on an increasing branch of profile.
+    """
+
+    if axis == 0:
+        a_ = a
+    elif axis == 1:
+        a_ = a.T
+    else:
+        raise ValueError("axis must be 0 or 1")
+
+    for col, idx in zip(a_[:, idxes].T, idxes):
+        a_[:, idx] = _unimodal_1D(col, tol, mod)
+
+    return a
+
+
+def _unimodal_1D(a: np.ndarray, tol: str, mod: str) -> np.ndarray:
+    """force unimodal concentration
+
+    makes a vector unimodal
+
+    parameters:
+    ----------
+    a : 1D ndarray
+
+    mod : str
+        When set to `"strict"`, values deviating from unimodality are reset to the value of the previous point.
+        When set to `"smooth"`, both values (deviating point and previous point) are modified to avoid "steps"
+        in the profile.
+
+    tol: float
+        Tolerance parameter for unimodality. Correction is applied only if:
+        `a[i] > a[i-1] * unimodTol`  on a decreasing branch of profile,
+        `a[i] < a[i-1] * unimodTol`  on an increasing branch of profile.
+    """
+
+    maxid = np.argmax(a)
+    curmax = max(a)
+    curid = maxid
+
+    while curid > 0:
+        # run backward
+        curid -= 1
+        if a[curid] > curmax * tol:
+            if mod == "strict":
+                a[curid] = a[curid + 1]
+            if mod == "smooth":
+                a[curid] = (a[curid] + a[curid + 1]) / 2
+                a[curid + 1] = a[curid]
+                curid = curid + 2
+        curmax = a[curid]
+
+    curid = maxid
+    curmax = a[maxid]
+    while curid < len(a) - 1:
+        curid += 1
+        if a[curid] > curmax * tol:
+            if mod == "strict":
+                a[curid] = a[curid - 1]
+            if mod == "smooth":
+                a[curid] = (a[curid] + a[curid - 1]) / 2
+                a[curid - 1] = a[curid]
+                curid = curid - 2
+        curmax = a[curid]
+
+    return a

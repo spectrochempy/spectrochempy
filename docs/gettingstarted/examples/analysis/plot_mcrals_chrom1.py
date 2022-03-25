@@ -46,7 +46,7 @@ guess = datasets[3]
 ########################################################################################################################
 # Create a MCR-ALS object with the default settings
 # The verbose option can be set True to get a summary of optimization steps
-mcr = scp.MCRALS(X, guess, verbose=False)
+mcr = scp.MCRALS(X, guess)
 
 ########################################################################################################################
 # The optimization has converged. We can get the concentration (C) and pure spectra profiles (St)

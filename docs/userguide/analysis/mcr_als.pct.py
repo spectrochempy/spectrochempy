@@ -117,10 +117,10 @@ _ = St0.plot()
 #
 # #### ALS Optimization
 # With this guess 'St0' and the dataset 'X' we can create a MCRALS object. At this point of the tutorial, we will use
-# all the default parameters except for the 'verbose' option which is switched on to have a summary
-# of the ALS iterations:
+# all the default parameters. We switch to `log_level = "INFO"` have a summary of the ALS iterations:
 
 # %%
+scp.set_loglevel("INFO")
 mcr = scp.MCRALS(X, St0, verbose="True")
 
 # %% [markdown]
@@ -139,7 +139,7 @@ mcr = scp.MCRALS(X, St0, verbose="True")
 # For instance:
 
 # %%
-mcr = scp.MCRALS(X, St0, tol=0.01, verbose="True")
+mcr = scp.MCRALS(X, St0, tol=0.01)
 
 # %% [markdown]
 # As could be expected more iterations have been necessary to reach this stricter convergence criterion.  The other
@@ -149,16 +149,17 @@ mcr = scp.MCRALS(X, St0, tol=0.01, verbose="True")
 # of iterations is reached (maxit, 50 by default) or when no improvement is during 5 successive iterations (maxdiv).
 
 # %%
-mcr = scp.MCRALS(X, St0, tol=0.001, verbose="True")
+mcr = scp.MCRALS(X, St0, tol=0.001)
 
 # %% [markdown]
 # #### Solutions
 #
 # The solutions of the MCR ALS optimization are the optimized concentration and pure spectra matrices. They can be
-# obtained by the MCRALS.transform() method. let's reset a MCRALS object with the default settings,
-# ('tol' = 0.1 and verbose = False), and get the solution datasets C and St.
+# obtained by the MCRALS.transform() method. Let's reset the `log_level` to default, generate a MCRALS
+#  object with the default settings, and get the solution datasets C and St.
 
 # %%
+scp.set_loglevel("WARNING")
 mcr1 = scp.MCRALS(X, St0)
 
 # %% [markdown]
@@ -264,7 +265,7 @@ _ = C0.T.plot()
 # The MCR ALS can then be launched using this new guess:
 
 # %%
-mcr4 = scp.MCRALS(X, guess=C0, maxit=100, normSpec="euclid", verbose=True)
+mcr4 = scp.MCRALS(X, guess=C0, maxit=100, normSpec="euclid")
 
 # %%
 _ = mcr4.C.T.plot()
@@ -291,7 +292,7 @@ surf = X2.plot_surface(colorbar=True, linewidth=0.2, ccount=100, figsize=(10, 5)
 _ = X2.plot(method="map")
 
 # %%
-mcr5 = scp.MCRALS(X2, guess=St0, unimodConc=None, verbose=True)
+mcr5 = scp.MCRALS(X2, guess=St0, unimodConc=None)
 
 # %%
 _ = mcr5.C.T.plot()
