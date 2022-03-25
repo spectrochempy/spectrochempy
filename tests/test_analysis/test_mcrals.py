@@ -79,7 +79,7 @@ def test_MCRALS_Jaumot():
     mcr2 = MCRALS(X, guess, normSpec="euclid")
     assert "converged !" in mcr2.logs[-15:]
 
-    mcr3 = MCRALS(X, guess, unimodMod="smooth", normSpec="max")
+    mcr3 = MCRALS(X, guess, unimodConcMod="smooth", normSpec="max")
     assert "converged !" in mcr3.logs[-15:]
 
     mcr4 = MCRALS(X, guess, maxit=1)
@@ -129,7 +129,6 @@ def test_MCRALS_synth():
 
     D = dot(C, St)
     D.title = "intensity"
-    D.plot()
 
     guess = EFA(D).get_conc(2)
     guess.T.plot(title="EFA guess")
@@ -153,12 +152,6 @@ def test_MCRALS_synth():
         closureMethod="constantSum",
     )
     assert "converged !" in mcr2.logs[-15:]
-
-    mcr2.C.T.plot()
-    mcr2.St.plot()
-    mcr2.plotmerit()
-
-    show()
 
 
 # =============================================================================
