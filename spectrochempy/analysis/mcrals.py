@@ -8,7 +8,7 @@
 This module implements the MCRALS class.
 """
 
-__all__ = ["MCRALS", "_unimodal_1D"]
+__all__ = ["MCRALS"]
 
 __dataset_methods__ = []
 
