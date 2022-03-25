@@ -432,7 +432,7 @@
     NNLS.itrans
     NNLS.trans
     NNLS.transform
-    NNMF._nlssubprob
+    NNMF.nlssubprob
     NNMF.nmf
     PCA.ev
     PCA.ev_cum

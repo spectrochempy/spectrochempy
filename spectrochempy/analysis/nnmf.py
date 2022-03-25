@@ -90,7 +90,7 @@ class NNMF(HasTraits):
         self.C = Ci.copy()
         self.St = Sti.copy()
 
-        self.C.data, self.St.data = self._nmf(
+        self.C.data, self.St.data = self.nmf(
             dataset.data, self.C.data, self.St.data, tol, maxtime, maxit
         )
 
@@ -99,7 +99,7 @@ class NNMF(HasTraits):
         self.St.name = "Optimized spectral profile"
         self.St.history = "nnmf optimiaation"
 
-    def _nmf(self, V, Winit, Hinit, tol, maxtime, maxiter):
+    def nmf(self, V, Winit, Hinit, tol, maxtime, maxiter):
         """
         NMF by alternative non-negative least squares using projected gradients.
 
@@ -146,14 +146,14 @@ class NNMF(HasTraits):
             if projnorm < tol * initgrad or time() - initt > maxtime:
                 break
 
-            (W, gradW, iterW) = self._nlssubprob(V.T, H.T, W.T, tolW, 1000)
+            (W, gradW, iterW) = self.nlssubprob(V.T, H.T, W.T, tolW, 1000)
             W = W.T
             gradW = gradW.T
 
             if iterW == 1:
                 tolW = 0.1 * tolW
 
-            (H, gradH, iterH) = self._nlssubprob(V, W, H, tolH, 1000)
+            (H, gradH, iterH) = self.nlssubprob(V, W, H, tolH, 1000)
 
             if iterH == 1:
                 tolH = 0.1 * tolH
@@ -165,7 +165,7 @@ class NNMF(HasTraits):
         return W, H
 
     @staticmethod
-    def _nlssubprob(V, W, Hinit, tol, maxiter):
+    def nlssubprob(V, W, Hinit, tol, maxiter):
         """
         Parameters
         ----------
@@ -223,7 +223,7 @@ class NNMF(HasTraits):
                 Hp = Hn
 
         if n_iter == maxiter:
-            debug_("Max iter in _nlssubprob")
+            debug_("Max iter in nlssubprob")
 
         return H, grad, n_iter
 
