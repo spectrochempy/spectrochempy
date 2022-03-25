@@ -16,10 +16,10 @@ The Colab Notebooks are very similar to Jupyter Notebook (from which they derive
 
 To start with Colab, go to the
 `Colab website <https://colab.research.google.com/notebooks/intro.ipynb#recent=true>`__
-and create a new notebook or simply execute the example notebook on Colab: |Open in Colab|
+and create a new notebook or simply execute the `example notebook on Colab <https://colab.research.google.com/github/spectrochempy/spectrochempy_tutorials/blob/main/colab/spectrochempy_on_colaboratory.ipynb>`__  |Open in Colab|
 
 .. |Open in Colab| image:: https://colab.research.google.com/assets/colab-badge.svg
-   :target: https://colab.research.google.com/github/spectrochempy/spectrochempy_tutorials/blob/master/colab/spectrochempy_on_colaboratory.ipynb
+   :target: https://colab.research.google.com/github/spectrochempy/spectrochempy_tutorials/blob/main/colab/spectrochempy_on_colaboratory.ipynb
 
 Load and install SpectroChemPy with pip
 ---------------------------------------
