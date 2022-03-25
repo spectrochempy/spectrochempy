@@ -105,7 +105,7 @@ class PCA(HasTraits):
         if centered:
             self._center = center = X.mean(dim=0)
             Xsc = X - center
-            Xsc.title = f"centered {X.title}"
+            Xsc.name = f"centered {X.name}"
 
         # Standardization
         # ---------------
@@ -113,7 +113,7 @@ class PCA(HasTraits):
         if standardized:
             self._std = Xsc.std(dim=0)
             Xsc /= self._std
-            Xsc.title = f"standardized {Xsc.title}"
+            Xsc.name = f"standardized {Xsc.name}"
 
         # Scaling
         # -------
@@ -123,7 +123,7 @@ class PCA(HasTraits):
             self._ampl = Xsc.ptp(dim=0)
             Xsc -= self._min
             Xsc /= self._ampl
-            Xsc.title = "scaled %s" % Xsc.title
+            Xsc.name = "scaled %s" % Xsc.name
 
         self._Xscaled = Xsc
 
@@ -258,7 +258,7 @@ class PCA(HasTraits):
         M, N = self._X.shape
 
         if rank > len(spectrum):
-            raise ValueError("The tested rank cannot exceed the rank of the" " dataset")
+            raise ValueError("The tested rank cannot exceed the rank of the dataset")
 
         pu = -rank * np.log(2.0)
         for i in range(rank):
@@ -378,6 +378,7 @@ class PCA(HasTraits):
             X += self._center
 
         X.history = f"PCA reconstructed Dataset with {n_pc} principal components"
+        X.name = self._X.name
         X.title = self._X.title
         return X
 

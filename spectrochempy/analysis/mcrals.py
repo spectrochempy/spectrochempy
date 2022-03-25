@@ -112,7 +112,7 @@ class MCRALS(HasTraits):
         C.data[:, closureConc] = np.dot(C.data[:, closureConc],
                                         np.diag(np.linalg.lstsq(C.data[:, closureConc], closureTarget.T, rcond=None)[0]))
         ```
-        `"constantSum"` normalize the sum of concentration profiles to `closureTarget`.
+        "constantSum"` normalize the sum of concentration profiles to `closureTarget`.
 
     hardConc : None or or array of indexes, default `None`
         Defines hard constraints obn the concentration profiles. If set to `None` or `[]`, no constraint is
@@ -213,7 +213,7 @@ class MCRALS(HasTraits):
             warnings.warn(
                 "unimodMod deprecated, use unimodConcMod instead", DeprecationWarning
             )
-            unimodConcTol = kwargs.get("unimodConcMod", "strict")
+            unimodConcMod = kwargs.get("unimodConcMod", "strict")
 
         monoDecConc = kwargs.get("monoDecConc", None)
         monoIncTol = kwargs.get("monoIncTol", 1.1)
