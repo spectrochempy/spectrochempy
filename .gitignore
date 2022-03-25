@@ -53,12 +53,10 @@ thumb.png
 .spyderproject
 .spyproject
 
-# Example, ipython notebook checkpoints
+# Example, ipython notebook,  checkpoints
 # ----------------------------------------------------------------------------------------------------------------------
 *.ipynb_checkpoints/
-scratch*.ipynb
-Untitled.ipynb
-essai.ipynb
+*.ipynb
 
 # VS
 # ----------------------------------------------------------------------------------------------------------------------
