@@ -9,8 +9,6 @@ from spectrochempy.core.dataset.nddataset import NDDataset, Coord
 from spectrochempy import dot
 from spectrochempy.analysis.efa import EFA
 from spectrochempy.analysis.mcrals import MCRALS
-
-
 from spectrochempy.analysis.models import (
     lorentzianmodel,
     gaussianmodel,
@@ -81,7 +79,7 @@ def test_MCRALS_Jaumot():
     mcr2 = MCRALS(X, guess, normSpec="euclid")
     assert "converged !" in mcr2.logs[-15:]
 
-    mcr3 = MCRALS(X, guess, unimodMod="smooth", normSpec="max")
+    mcr3 = MCRALS(X, guess, unimodConcMod="smooth", normSpec="max")
     assert "converged !" in mcr3.logs[-15:]
 
     mcr4 = MCRALS(X, guess, maxit=1)
@@ -125,13 +123,12 @@ def test_MCRALS_synth():
     for i in range(n_PS):
         C.data[:, i] = expon(t_c, c0[i], l[i], 0)
         St.data[i, :] = gaussian(wl_c, h[i], c[i], w[i], noise[i])
-
+    gaussianmodel
     C.T.plot()
     St.plot()
 
     D = dot(C, St)
     D.title = "intensity"
-    D.plot()
 
     guess = EFA(D).get_conc(2)
     guess.T.plot(title="EFA guess")
@@ -155,12 +152,6 @@ def test_MCRALS_synth():
         closureMethod="constantSum",
     )
     assert "converged !" in mcr2.logs[-15:]
-
-    mcr2.C.T.plot()
-    mcr2.St.plot()
-    mcr2.plotmerit()
-
-    show()
 
 
 # =============================================================================
