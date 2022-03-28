@@ -117,6 +117,7 @@ dependencies:
     - plotly
     {%- endif %}
     {%- if DEV %}
+    - pip
     - pip:
         - autodoc_traits
         {%- endif %}
