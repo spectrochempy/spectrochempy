@@ -72,6 +72,15 @@ jobs:
           echo "$VERSION"
           echo "$DEVSTRING"
 
+      - name: convert CHANGELOG.md to rst via pandoc
+        uses: docker://pandoc/core:2.9
+        with:
+          args: >-
+            -f  markdown
+            -t rst
+            -o docs/userguide/reference/changelog.rst
+            CHANGELOG.md
+            
       - name: Build docs
         run: |
           mkdir -p build
