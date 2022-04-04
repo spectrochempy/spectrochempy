@@ -398,7 +398,7 @@ class PCA(HasTraits):
         """
         colX, colXhat, colRes = kwargs.get("colors", ["blue", "green", "red"])
 
-        X_hat = self.reconstruct()
+        X_hat = self.reconstruct(n_pc=n_pc)
         res = self.X - X_hat
         ax = self.X.plot()
         if self.X.x is not None:
