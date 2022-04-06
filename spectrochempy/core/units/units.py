@@ -31,7 +31,8 @@ from pint import (
 
 from pint.unit import UnitsContainer, Unit, UnitDefinition
 from pint.quantity import Quantity
-from pint.formatting import siunitx_format_unit
+
+# from pint.formatting import siunitx_format_unit
 from pint.converters import ScaleConverter
 
 # ======================================================================================================================
@@ -224,7 +225,7 @@ def __format__(self, spec):
         if not self._units:
             return ""
 
-        ## Spectrochempy
+        # Spectrochempy
         if self.dimensionless and "absorbance" not in self._units:
             if self._units == "ppm":
                 units = UnitsContainer({"ppm": 1})
@@ -245,9 +246,12 @@ def __format__(self, spec):
                     {"scaled-dimensionless (%.2g)" % self.scaling: 1}
                 )
         else:
-            units = UnitsContainer(dict(
-                (self._REGISTRY._get_symbol(key), value) for key, value in
-                self._units.items()))
+            units = UnitsContainer(
+                dict(
+                    (self._REGISTRY._get_symbol(key), value)
+                    for key, value in self._units.items()
+                )
+            )
         spec = spec.replace("~", "")
     else:
         units = self._units
