@@ -525,7 +525,7 @@ def index2trace_opp(shape, index):
     pindex = [v // 2 for v in index]
     pshape = [i // 2 for i in shape]
     nbase = index2trace_flat(pshape, pindex)
-    return nbase * 2 ** n + nphase
+    return nbase * 2**n + nphase
 
 
 def trace2index_opp(shape, ntrace):
@@ -534,7 +534,7 @@ def trace2index_opp(shape, ntrace):
     ordering
     """
     n = len(shape)
-    q, r = divmod(ntrace, 2 ** n)
+    q, r = divmod(ntrace, 2**n)
     to_add = list(trace2index_flat([2] * n, r))[::-1]
     pshape = [i // 2 for i in shape]
     base = list(trace2index_flat(pshape, q))
@@ -555,7 +555,7 @@ def index2trace_reg(shape, index):
     pindex = [v // 2 for v in index]
     pshape = [i // 2 for i in shape]
     nbase = index2trace_flat(pshape, pindex)
-    return nbase * 2 ** n + nphase
+    return nbase * 2**n + nphase
 
 
 def trace2index_reg(shape, ntrace):
@@ -564,7 +564,7 @@ def trace2index_reg(shape, ntrace):
     ordering
     """
     n = len(shape)
-    q, r = divmod(ntrace, 2 ** n)
+    q, r = divmod(ntrace, 2**n)
     to_add = list(trace2index_flat([2] * n, r))
     pshape = [i // 2 for i in shape]
     base = list(trace2index_flat(pshape, q))
@@ -1583,7 +1583,7 @@ def array_to_int(data):
     """
 
     for _ in range(30):
-        if np.max(abs(data)) < 2 ** 28:
+        if np.max(abs(data)) < 2**28:
             data *= 2
         else:
             break

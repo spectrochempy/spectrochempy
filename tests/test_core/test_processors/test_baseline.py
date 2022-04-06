@@ -199,7 +199,7 @@ def test_ab_nmr(NMR_dataset_1D):
     dataset /= dataset.real.data.max()  # nromalize
 
     dataset.em(10.0 * ur.Hz, inplace=True)
-    dataset = dataset.fft(tdeff=8192, size=2 ** 15)
+    dataset = dataset.fft(tdeff=8192, size=2**15)
     dataset = dataset[150.0:-150.0] + 1.0
 
     dataset.plot()

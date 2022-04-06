@@ -314,14 +314,14 @@ def test_nddataset_units(nd1d):
     nd2 = np.sqrt(nd)
     assert isinstance(nd2, type(nd))
     assert nd2.data[1] == np.sqrt(nd.data[1])
-    assert nd2.units == ur.m ** 0.5
+    assert nd2.units == ur.m**0.5
     nd.units = "cm"
     nd2 = np.sqrt(nd)
     nd.ito("m")
     nd2 = np.sqrt(nd)
     assert isinstance(nd2, type(nd))
     assert nd2.data[1] == np.sqrt(nd.data[1])
-    assert nd2.units == ur.m ** 0.5
+    assert nd2.units == ur.m**0.5
 
 
 def test_bugs_units_change():
@@ -861,7 +861,7 @@ def test_nddataset_repr_html_bug_undesired_display_complex():
 
 def test_nddataset_bug_fixe_figopeninnotebookwithoutplot():
     da = scp.NDDataset([1, 2, 3])
-    da2 = np.sqrt(da ** 3)
+    da2 = np.sqrt(da**3)
     assert da2._fig is None  # no figure should open
 
 

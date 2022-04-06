@@ -141,7 +141,7 @@ class MCRALS(HasTraits):
         Indicates non-negative spectral profile. If set to `'all'` (default) all spectral profiles are
         considered non-negative. If an array of indexes is passed, the corresponding profiles are considered
         non-negative, not the others. For instance `[0, 2]` indicates that profile #0 and #2 are non-negative while
-         profile #1 *can* be negative. If set to `"None"` or `[]`, all profiles can be negative.
+        profile #1 *can* be negative. If set to `"None"` or `[]`, all profiles can be negative.
 
     normSpec : None or str, default None
         Defines whether the spectral profiles should be normalized. If set to `None` no normalization is applied.
@@ -152,7 +152,7 @@ class MCRALS(HasTraits):
         Unimodality constraint on Spectra. If set to `None` (default) none of spectral profiles is
         considered unimodal. If an array of indexes is passed, the corresponding profiles are considered
         unimodal, not the others. For instance `[0, 2]` indicates that profile #0 and #2 are unimodal while
-         profile #1 *can* be multimodal. If set to `"None"` or `[]`, all profiles can be multimodal.
+        profile #1 *can* be multimodal. If set to `"None"` or `[]`, all profiles can be multimodal.
 
     unimodSpecMod : str, default "strict"
         When set to `"strict"`, values deviating from unimodality are reset to the value of the previous point.

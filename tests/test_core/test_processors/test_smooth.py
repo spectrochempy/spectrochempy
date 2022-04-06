@@ -13,7 +13,7 @@ pytestmark = pytest.mark.skip("WIP with NMR data")
 def test_smooth(NMR_dataset_1D):
     dataset = NMR_dataset_1D.copy()
     dataset /= dataset.real.data.max()  # normalize
-    dataset = dataset.fft(tdeff=8192, size=2 ** 15) + np.random.random(2 ** 15) * 5.0
+    dataset = dataset.fft(tdeff=8192, size=2**15) + np.random.random(2**15) * 5.0
     dataset.plot()
 
     s = dataset.smooth()
