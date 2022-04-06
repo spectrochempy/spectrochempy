@@ -323,7 +323,7 @@ def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
     else:
         g = np.zeros_like(x)
 
-    return np.exp(e - g ** 2)
+    return np.exp(e - g**2)
 
 
 # ..............................................................................

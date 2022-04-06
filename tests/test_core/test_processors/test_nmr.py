@@ -128,7 +128,7 @@ def test_nmr_fft_1D(NMR_dataset_1D):
     dataset1D = NMR_dataset_1D.copy()
     dataset1D /= dataset1D.real.data.max()  # normalize
     dataset1D.x.ito("s")
-    new = dataset1D.fft(tdeff=8192, size=2 ** 15)
+    new = dataset1D.fft(tdeff=8192, size=2**15)
     new.plot()
     new2 = new.ifft()
     dataset1D.plot()
@@ -152,7 +152,7 @@ def test_nmr_manual_1D_phasing(NMR_dataset_1D):
     dataset1D /= dataset1D.real.data.max()  # normalize
 
     dataset1D.em(10.0 * ur.Hz)  # inplace broadening
-    transf = dataset1D.fft(tdeff=8192, size=2 ** 15)  # fft
+    transf = dataset1D.fft(tdeff=8192, size=2**15)  # fft
     transf.plot()  # plot)
 
     # manual phasing
@@ -183,7 +183,7 @@ def test_nmr_auto_1D_phasing():
     ndd = NDDataset.read_topspin(path, expno=1, remove_digital_filter=True)
     ndd /= ndd.real.data.max()  # normalize
     ndd.em(10.0 * ur.Hz, inplace=True)
-    transf = ndd.fft(tdeff=8192, size=2 ** 15)
+    transf = ndd.fft(tdeff=8192, size=2**15)
     transf.plot(xlim=(20, -20), ls=":", color="k")
 
     transfph2 = transf.pk(verbose=True)
@@ -216,7 +216,7 @@ def test_nmr_multiple_manual_1D_phasing():
     ndd /= ndd.real.data.max()  # normalize
     ndd.em(10.0 * ur.Hz)  # inplace broadening
 
-    transf = ndd.fft(tdeff=8192, size=2 ** 15)
+    transf = ndd.fft(tdeff=8192, size=2**15)
 
     transfph1 = transf.pk(verbose=True)
     transfph1.plot(xlim=(20, -20), color="k")
@@ -238,7 +238,7 @@ def test_nmr_multiple_auto_1D_phasing():
     ndd /= ndd.real.data.max()  # normalize
     ndd.em(10.0 * ur.Hz)  # inplace broadening
 
-    transf = ndd.fft(tdeff=8192, size=2 ** 15)
+    transf = ndd.fft(tdeff=8192, size=2**15)
     transf.plot(xlim=(20, -20), ls=":", color="k")
 
     t1 = transf.apk(algorithm="neg_peak", verbose=True)

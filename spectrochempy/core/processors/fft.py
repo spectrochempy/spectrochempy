@@ -541,7 +541,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             ppm = kwargs.get("ppm", True)
             if ppm:
                 newcoord.ito("ppm")
-                newcoord.title = fr"$\delta\ {nucleus}$"
+                newcoord.title = rf"$\delta\ {nucleus}$"
 
         new.coordset[dim] = newcoord
 
@@ -597,7 +597,7 @@ def mc(dataset):
 
     Calculates sqrt(real^2 + imag^2)
     """
-    return np.sqrt(dataset.real ** 2 + dataset.imag ** 2)
+    return np.sqrt(dataset.real**2 + dataset.imag**2)
 
 
 @_units_agnostic_method
@@ -607,7 +607,7 @@ def ps(dataset):
 
     Calculated real^2+imag^2
     """
-    return dataset.real ** 2 + dataset.imag ** 2
+    return dataset.real**2 + dataset.imag**2
 
 
 @_units_agnostic_method

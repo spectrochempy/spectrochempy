@@ -100,7 +100,7 @@ class EFA(HasTraits):
                 fsvd = SVD(X[: i + 1], compute_uv=False)
                 k = fsvd.s.size
                 # print(i, k)
-                f[i, :k] = fsvd.s.data ** 2
+                f[i, :k] = fsvd.s.data**2
                 f[i, k:] = MASKED
             else:
                 f[i] = MASKED
@@ -124,7 +124,7 @@ class EFA(HasTraits):
             if not masked_rows[i]:
                 bsvd = SVD(X[i:M], compute_uv=False)
                 k = bsvd.s.size
-                b[i, :k] = bsvd.s.data ** 2
+                b[i, :k] = bsvd.s.data**2
                 b[i, k:] = MASKED
             else:
                 b[i] = MASKED
