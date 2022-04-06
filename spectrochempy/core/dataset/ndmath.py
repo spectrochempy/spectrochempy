@@ -593,11 +593,11 @@ class NDMath(object):
             )  # not a complex, return fabs should be faster
 
         elif not cls.is_quaternion:
-            data = np.ma.sqrt(dataset.real ** 2 + dataset.imag ** 2)
+            data = np.ma.sqrt(dataset.real**2 + dataset.imag**2)
 
         else:
             data = np.ma.sqrt(
-                dataset.real ** 2
+                dataset.real**2
                 + dataset.part("IR") ** 2
                 + dataset.part("RI") ** 2
                 + dataset.part("II") ** 2,
@@ -2954,19 +2954,15 @@ class NDMath(object):
                     # here we want to change the behavior a pint regarding the addition of scalar to quantity
                     #         # in principle it is only possible with dimensionless quantity, else a dimensionerror is
                     #         raised.
-                    if (
-                        fname
-                        in [
-                            "add",
-                            "sub",
-                            "iadd",
-                            "isub",
-                            "and",
-                            "xor",
-                            "or",
-                        ]
-                        and hasattr(q, "units")
-                    ):
+                    if fname in [
+                        "add",
+                        "sub",
+                        "iadd",
+                        "isub",
+                        "and",
+                        "xor",
+                        "or",
+                    ] and hasattr(q, "units"):
                         otherqs[i] = otherq * q.units  # take the unit of the first obj
 
             # some functions are not handled by pint regardings units, try to solve this here

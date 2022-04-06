@@ -270,7 +270,7 @@ class SVD(HasTraits):
         Explained variance (|NDDataset|).
         """
         size = self.s.size
-        ev = self.s ** 2 / (size - 1)
+        ev = self.s**2 / (size - 1)
         ev.name = "ev"
         ev.title = "explained variance"
         ev.set_coordset(

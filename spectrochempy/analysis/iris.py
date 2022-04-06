@@ -141,10 +141,10 @@ def kern(K, p, q):
 
             K_ = np.zeros((p.size, q.size))
             for n in np.arange(1, 100):
-                K_ += (1 / n ** 2) * np.exp(
-                    -(1 / 9) * n ** 2 * np.pi ** 2 * q.data * p.data[:, None]
+                K_ += (1 / n**2) * np.exp(
+                    -(1 / 9) * n**2 * np.pi**2 * q.data * p.data[:, None]
                 )
-            K_ = 1 - (6 / np.pi ** 2) * K_
+            K_ = 1 - (6 / np.pi**2) * K_
 
         else:
             raise NameError(f"This kernel: <{K}> is not implemented")
@@ -352,7 +352,7 @@ class IRIS:
             for j, _ in enumerate(channels.data):
                 f[0, :, j] = optimize.nnls(K.data, X[:, j].data.squeeze())[0]
             res = X.data - np.dot(K.data, f[0].data)
-            RSS[0] = np.sum(res ** 2)
+            RSS[0] = np.sum(res**2)
             SM[0] = np.linalg.norm(np.dot(np.dot(np.transpose(f[0]), S), f[0]))
 
             msg = "-->  residuals = {:.2e}    curvature = {:.2e}".format(RSS[0], SM[0])
@@ -413,7 +413,7 @@ class IRIS:
                             fi[:, j] = quadprog.solve_qp(G, a[j].squeeze(), C, b)[0]
 
                 resi = X.data - np.dot(K.data, fi)
-                RSSi = np.sum(resi ** 2)
+                RSSi = np.sum(resi**2)
                 SMi = np.linalg.norm(np.dot(np.dot(np.transpose(fi), S), fi))
 
                 msg = (
@@ -452,13 +452,13 @@ class IRIS:
                 x[3] = max(reg_par)
                 x[1] = (x[3] + phi * x[0]) / (1 + phi)
                 x[2] = x[0] + x[3] - x[1]
-                reg_par = 10 ** x
+                reg_par = 10**x
                 msg = "Initial Log(lambda) values = " + str(x)
                 info_(msg)
                 _log += msg
 
                 for i, xi in enumerate(x):
-                    f[i], RSS[i], SM[i] = solve_for_reg_par(X, K, G0, 10 ** xi, S)
+                    f[i], RSS[i], SM[i] = solve_for_reg_par(X, K, G0, 10**xi, S)
 
                 Rx = np.copy(RSS)
                 Sy = np.copy(SM)
@@ -787,7 +787,7 @@ def _nearestPD(A, shift):  # pragma: no cover
     k = 1
     while not _isPD(A3):
         mineig = np.min(np.real(np.linalg.eigvals(A3)))
-        A3 += Ie * (-mineig * k ** 2 + spacing)
+        A3 += Ie * (-mineig * k**2 + spacing)
         k += 1
         print("makes PD matrix")
     return A3

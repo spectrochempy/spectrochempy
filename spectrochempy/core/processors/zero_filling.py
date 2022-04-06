@@ -140,7 +140,7 @@ def zf_double(dataset, n, mid=False, **kwargs):
     ndata : ndarray
         Zero filled array of NMR data.
     """
-    return _zf_pad(dataset, int((dataset.shape[-1] * 2 ** n) - dataset.shape[-1]), mid)
+    return _zf_pad(dataset, int((dataset.shape[-1] * 2**n) - dataset.shape[-1]), mid)
 
 
 @_zf_method

@@ -149,7 +149,7 @@ d2.plot_scatter(markersize=7, mfc="red")
 # Now we must use the first syntax LSTQ(X, Y) as the variation is not proportional to time, but to its square.
 
 # %%
-X = time ** 2
+X = time**2
 lst = scp.LSTSQ(X, d2)
 
 v, d0 = lst.transform()
@@ -177,7 +177,7 @@ dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
 # In this case, we can use the NNLS method of fitting. It operates as ``LSTSQ`` but keep the Y values always positive.
 
 # %%
-X = time ** 2
+X = time**2
 lst = scp.NNLS(X, d2)
 
 v, d0 = lst.transform()

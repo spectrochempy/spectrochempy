@@ -28,7 +28,7 @@ def test_npy(ds1):
     df = diag(d)
     assert df.units == ds1.units
     assert df.ndim == 2
-    assert df.size == d.x.size ** 2
+    assert df.size == d.x.size**2
 
     df = diag(ds.data)
     assert df.implements("NDDataset")

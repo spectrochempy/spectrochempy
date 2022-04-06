@@ -9,7 +9,7 @@ def test_plot2D():
     A = NDDataset.read_omnic("irdata/nh4y-activation.spg")
     A.y -= A.y[0]
     A.y.to("hour", inplace=True)
-    A.y.title = u"Acquisition time"
+    A.y.title = "Acquisition time"
     A.copy().plot_stack()
     A.copy().plot_stack(data_transposed=True)
     A.copy().plot_image(style=["sans", "paper"], fontsize=9)
@@ -31,7 +31,7 @@ def test_plotly2D():
     A = NDDataset.read_omnic("irdata/nh4y-activation.spg", directory=prefs.datadir)
     A.y -= A.y[0]
     A.y.to("hour", inplace=True)
-    A.y.title = u"Acquisition time"
+    A.y.title = "Acquisition time"
 
     # TODO: A.copy().plot(use_plotly=True)
 

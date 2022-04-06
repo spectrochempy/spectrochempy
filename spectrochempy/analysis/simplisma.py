@@ -190,11 +190,11 @@ class SIMPLISMA(HasTraits):
         sigma = np.std(X.data, axis=0)
         mu = np.mean(X.data, axis=0)
         alpha = (noise / 100) * np.max(mu.data)
-        lamda = np.sqrt(mu ** 2 + sigma ** 2)
+        lamda = np.sqrt(mu**2 + sigma**2)
         p = sigma / (mu + alpha)
 
         # scale dataset
-        Xscaled = X.data / np.sqrt(mu ** 2 + (sigma + alpha) ** 2)
+        Xscaled = X.data / np.sqrt(mu**2 + (sigma + alpha) ** 2)
 
         # COO dispersion matrix
         COO = (1 / X.shape[-2]) * np.dot(Xscaled.T, Xscaled)
@@ -205,7 +205,7 @@ class SIMPLISMA(HasTraits):
         while not finished:
             # compute first purest variable and weights
             if j == 0:
-                w[j, :] = lamda ** 2 / (mu ** 2 + (sigma + alpha) ** 2)
+                w[j, :] = lamda**2 / (mu**2 + (sigma + alpha) ** 2)
                 s[j, :] = sigma * w[j, :]
                 Pt[j, :] = p * w[j, :]
 

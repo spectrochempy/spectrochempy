@@ -189,7 +189,7 @@ class gaussianmodel(object):
     @make_units_compatibility
     def f(self, x, ampl, pos, width, **kargs):
         gb = width / 2.3548
-        tsq = (x - pos) * 2 ** -0.5 / gb
+        tsq = (x - pos) * 2**-0.5 / gb
         w = np.exp(-tsq * tsq) * (2 * np.pi) ** -0.5 / gb
         w = w * abs(x[1] - x[0])
         return ampl * w
@@ -304,7 +304,7 @@ class asymmetricvoigtmodel(object):
         if ratio < 1.0e-16:
             return lorentzianmodel().f(x, ampl, pos, lb * 2.0, **kargs)
         else:
-            w = wofz(((x - pos) + 1.0j * lb) * 2 ** -0.5 / gb)
+            w = wofz(((x - pos) + 1.0j * lb) * 2**-0.5 / gb)
             w = w.real * (2.0 * np.pi) ** -0.5 / gb
             w = w * abs(x[1] - x[0])
             return ampl * w

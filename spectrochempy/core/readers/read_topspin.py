@@ -1075,7 +1075,7 @@ def _read_topspin(*args, **kwargs):
                 nucleus = "^{" + mass + "}" + name
             else:
                 nucleus = ""
-            coord.title = fr"$\delta\ {nucleus}$"
+            coord.title = rf"$\delta\ {nucleus}$"
             coords.append(coord)
 
     dataset.data = data
