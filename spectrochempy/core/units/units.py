@@ -219,15 +219,12 @@ setattr(
 def __format__(self, spec):
     # modify Pint unit __format__
 
-    spec = spec or self.default_format
+    spec = formatting.extract_custom_flags(spec or self.default_format)
+    if "~" in spec:
+        if not self._units:
+            return ""
 
-    # special cases
-    if "Lx" in spec:  # the LaTeX siunitx code
-        return r"\si[]{%s}" % siunitx_format_unit(self)
-
-    if (
-        "~" in spec or "K" in spec or "T" in spec or "L" in spec
-    ):  # spectrochempy modified
+        ## Spectrochempy
         if self.dimensionless and "absorbance" not in self._units:
             if self._units == "ppm":
                 units = UnitsContainer({"ppm": 1})
@@ -248,21 +245,14 @@ def __format__(self, spec):
                     {"scaled-dimensionless (%.2g)" % self.scaling: 1}
                 )
         else:
-            units = UnitsContainer(
-                dict(
-                    (self._REGISTRY._get_symbol(key), value)
-                    for key, value in list(self._units.items())
-                )
-            )
+            units = UnitsContainer(dict(
+                (self._REGISTRY._get_symbol(key), value) for key, value in
+                self._units.items()))
         spec = spec.replace("~", "")
     else:
         units = self._units
 
-    if "H" in spec:
-        # HTML / Jupyter Notebook (
-        return r"\[" + format(units, spec).replace(" ", r"\ ") + r"\]"
-
-    return "%s" % (format(units, spec))
+    return formatting.format_unit(units, spec, registry=self._REGISTRY)
 
 
 setattr(Unit, "__format__", __format__)
