@@ -251,7 +251,7 @@ d1D  # note the eV symbol of the units added to the values field below
 # This allows to make units-aware calculations:
 
 # %%
-d1D ** 2  # note the results in eV^2
+d1D**2  # note the results in eV^2
 
 # %%
 np.sqrt(d1D)  # note the result in e^0.5
@@ -591,7 +591,7 @@ def func(x, y, extra):
 # %%
 ds = NDDataset.fromfunction(
     func,
-    extra=100 * ur.cm ** -1,  # extra arguments passed to the function
+    extra=100 * ur.cm**-1,  # extra arguments passed to the function
     coordset=cs,
     name="mydataset",
     title="absorbance",

@@ -459,10 +459,10 @@ def _read_spc(*args, **kwargs):
 
     # set date (from https://github.com/rohanisaac/spc/blob/master/spc/spc.py)
     year = Fdate >> 20
-    month = (Fdate >> 16) % (2 ** 4)
-    day = (Fdate >> 11) % (2 ** 5)
-    hour = (Fdate >> 6) % (2 ** 5)
-    minute = Fdate % (2 ** 6)
+    month = (Fdate >> 16) % (2**4)
+    day = (Fdate >> 11) % (2**5)
+    hour = (Fdate >> 6) % (2**5)
+    minute = Fdate % (2**6)
 
     if (
         year == 0 or month == 0 or day == 0
@@ -515,12 +515,12 @@ def _read_spc(*args, **kwargs):
             integerY = np.frombuffer(
                 content, offset=544 + txvals * Fnpts * 4, dtype=int16_dtype, count=Fnpts
             )
-            floatY = (2 ** iexp) * (integerY / (2 ** 16))
+            floatY = (2**iexp) * (integerY / (2**16))
         else:
             integerY = np.frombuffer(
                 content, offset=544 + txvals * Fnpts * 4, dtype=int32_dtype, count=Fnpts
             )
-            floatY = (2 ** iexp) * (integerY / (2 ** 32))
+            floatY = (2**iexp) * (integerY / (2**32))
 
     if Flogoff:  # read log data header
         (Logsizd, Logsizm, Logtxto, Logbins, Logdsks, Logspar,) = struct.unpack(

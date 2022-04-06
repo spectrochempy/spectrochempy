@@ -313,10 +313,10 @@ class FitParameters(UserDict):
                 pei = lob + ((upb - lob) / 2.0) * (np.sin(item) + 1.0)
             elif is_upb:
                 # With only max defined
-                pei = upb + 1.0 - np.sqrt(item ** 2 + 1.0)
+                pei = upb + 1.0 - np.sqrt(item**2 + 1.0)
             elif is_lob:
                 # With only min defined
-                pei = lob - 1.0 + np.sqrt(item ** 2 + 1.0)
+                pei = lob - 1.0 + np.sqrt(item**2 + 1.0)
             else:
                 pei = pi
             pe.append(pei)
@@ -707,7 +707,7 @@ class Fit(HasTraits):
                 #                     merror *= v * 10.
 
                 diff = data - mdata
-                chi2 += np.sum(diff ** 2) * merror
+                chi2 += np.sum(diff**2) * merror
                 som += np.sum(data[0] ** 2)
 
             chi2 = np.sqrt(chi2 / som)
@@ -935,30 +935,30 @@ class Fit(HasTraits):
         sI = sum(xi)
         sEF = sum(expe * calc)
         sEI = sum(xi * expe)
-        sId = sum(xi ** 2)
+        sId = sum(xi**2)
 
         den = (
-            n * sFI ** 2
+            n * sFI**2
             - n * sFd * sId
-            + sF ** 2 * sId
+            + sF**2 * sId
             - 2 * sF * sFI * sI
-            + sFd * sI ** 2
+            + sFd * sI**2
         )
 
         a = (
             -sE * (sF * sFI - sFd * sI)
             + sEF * (n * sFI - sF * sI)
-            - sEI * (n * sFd - sF ** 2)
+            - sEI * (n * sFd - sF**2)
         ) / den
 
         A = (
             sE * (sF * sId - sFI * sI)
-            - sEF * (n * sId - sI ** 2)
+            - sEF * (n * sId - sI**2)
             + sEI * (n * sFI - sF * sI)
         ) / den
 
         b = (
-            sE * (sFI ** 2 - sFd * sId)
+            sE * (sFI**2 - sFd * sId)
             + sEF * (sF * sId - sFI * sI)
             - sEI * (sF * sFI - sFd * sI)
         ) / den
@@ -987,37 +987,37 @@ class Fit(HasTraits):
         sEF = (expe * calc).sum()
         sEI = (xi * expe).sum()
         sEJ = (yj * expe.T).sum()
-        sId = sum(xi ** 2)
-        sJd = sum(yj ** 2)
+        sId = sum(xi**2)
+        sJd = sum(yj**2)
 
         den = (
-            -(m ** 2) * n ** 2 * sFd * sId * sJd
-            + m ** 2 * n * sFJ ** 2 * sId
-            + m ** 2 * n * sFd * sI ** 2 * sJd
-            - m ** 2 * sFJ ** 2 * sI ** 2
-            + m * n ** 2 * sFI ** 2 * sJd
-            + m * n ** 2 * sFd * sId * sJ ** 2
-            + m * n * sF ** 2 * sId * sJd
+            -(m**2) * n**2 * sFd * sId * sJd
+            + m**2 * n * sFJ**2 * sId
+            + m**2 * n * sFd * sI**2 * sJd
+            - m**2 * sFJ**2 * sI**2
+            + m * n**2 * sFI**2 * sJd
+            + m * n**2 * sFd * sId * sJ**2
+            + m * n * sF**2 * sId * sJd
             - 2 * m * n * sF * sFI * sI * sJd
             - 2 * m * n * sF * sFJ * sId * sJ
             + 2 * m * n * sFI * sFJ * sI * sJ
             - 2 * m * n * sFI * sFJ * sIJ
             - 2 * m * n * sFd * sI * sIJ * sJ
-            + m * n * sFd * sIJ ** 2
+            + m * n * sFd * sIJ**2
             + 2 * m * sF * sFJ * sI * sIJ
-            - n ** 2 * sFI ** 2 * sJ ** 2
+            - n**2 * sFI**2 * sJ**2
             + 2 * n * sF * sFI * sIJ * sJ
-            - sF ** 2 * sIJ ** 2
+            - sF**2 * sIJ**2
         )
 
         c = (
             sE
             * (
                 -m * n * sFd * sId * sJd
-                + m * sFJ ** 2 * sId
-                + n * sFI ** 2 * sJd
+                + m * sFJ**2 * sId
+                + n * sFI**2 * sJd
                 - 2 * sFI * sFJ * sIJ
-                + sFd * sIJ ** 2
+                + sFd * sIJ**2
             )
             + sEF
             * (
@@ -1026,12 +1026,12 @@ class Fit(HasTraits):
                 - m * n * sFJ * sId * sJ
                 + m * sFJ * sI * sIJ
                 + n * sFI * sIJ * sJ
-                - sF * sIJ ** 2
+                - sF * sIJ**2
             )
             + sEI
             * (
                 m * n * sFd * sI * sJd
-                - m * sFJ ** 2 * sI
+                - m * sFJ**2 * sI
                 - n * sF * sFI * sJd
                 + n * sFI * sFJ * sJ
                 - n * sFd * sIJ * sJ
@@ -1043,7 +1043,7 @@ class Fit(HasTraits):
                 - m * sF * sFJ * sId
                 + m * sFI * sFJ * sI
                 - m * sFd * sI * sIJ
-                - n * sFI ** 2 * sJ
+                - n * sFI**2 * sJ
                 + sF * sFI * sIJ
             )
         ) / den
@@ -1056,22 +1056,22 @@ class Fit(HasTraits):
                 - m * sF * sI * sJd
                 + m * sFJ * sI * sJ
                 - m * sFJ * sIJ
-                - n * sFI * sJ ** 2
+                - n * sFI * sJ**2
                 + sF * sIJ * sJ
             )
             + n
             * sEI
             * (
                 -m * n * sFd * sJd
-                + m * sFJ ** 2
-                + n * sFd * sJ ** 2
-                + sF ** 2 * sJd
+                + m * sFJ**2
+                + n * sFd * sJ**2
+                + sF**2 * sJd
                 - 2 * sF * sFJ * sJ
             )
             + sE
             * (
                 m * n * sFd * sI * sJd
-                - m * sFJ ** 2 * sI
+                - m * sFJ**2 * sI
                 - n * sF * sFI * sJd
                 + n * sFI * sFJ * sJ
                 - n * sFd * sIJ * sJ
@@ -1084,7 +1084,7 @@ class Fit(HasTraits):
                 - m * n * sFd * sIJ
                 - m * sF * sFJ * sI
                 - n * sF * sFI * sJ
-                + sF ** 2 * sIJ
+                + sF**2 * sIJ
             )
         ) / den
 
@@ -1094,16 +1094,16 @@ class Fit(HasTraits):
             * sEF
             * (
                 -m * n * sId * sJd
-                + m * sI ** 2 * sJd
-                + n * sId * sJ ** 2
+                + m * sI**2 * sJd
+                + n * sId * sJ**2
                 - 2 * sI * sIJ * sJ
-                + sIJ ** 2
+                + sIJ**2
             )
             + m
             * sEJ
             * (
                 m * n * sFJ * sId
-                - m * sFJ * sI ** 2
+                - m * sFJ * sI**2
                 - n * sF * sId * sJ
                 + n * sFI * sI * sJ
                 - n * sFI * sIJ
@@ -1116,7 +1116,7 @@ class Fit(HasTraits):
                 - m * sF * sI * sJd
                 + m * sFJ * sI * sJ
                 - m * sFJ * sIJ
-                - n * sFI * sJ ** 2
+                - n * sFI * sJ**2
                 + sF * sIJ * sJ
             )
             + sE
@@ -1126,7 +1126,7 @@ class Fit(HasTraits):
                 - m * n * sFJ * sId * sJ
                 + m * sFJ * sI * sIJ
                 + n * sFI * sIJ * sJ
-                - sF * sIJ ** 2
+                - sF * sIJ**2
             )
         ) / den
 
@@ -1135,7 +1135,7 @@ class Fit(HasTraits):
             * sEF
             * (
                 m * n * sFJ * sId
-                - m * sFJ * sI ** 2
+                - m * sFJ * sI**2
                 - n * sF * sId * sJ
                 + n * sFI * sI * sJ
                 - n * sFI * sIJ
@@ -1145,9 +1145,9 @@ class Fit(HasTraits):
             * sEJ
             * (
                 -m * n * sFd * sId
-                + m * sFd * sI ** 2
-                + n * sFI ** 2
-                + sF ** 2 * sId
+                + m * sFd * sI**2
+                + n * sFI**2
+                + sF**2 * sId
                 - 2 * sF * sFI * sI
             )
             + sE
@@ -1156,7 +1156,7 @@ class Fit(HasTraits):
                 - m * sF * sFJ * sId
                 + m * sFI * sFJ * sI
                 - m * sFd * sI * sIJ
-                - n * sFI ** 2 * sJ
+                - n * sFI**2 * sJ
                 + sF * sFI * sIJ
             )
             - sEI
@@ -1166,7 +1166,7 @@ class Fit(HasTraits):
                 - m * n * sFd * sIJ
                 - m * sF * sFJ * sI
                 - n * sF * sFI * sJ
-                + sF ** 2 * sIJ
+                + sF**2 * sIJ
             )
         ) / den
 

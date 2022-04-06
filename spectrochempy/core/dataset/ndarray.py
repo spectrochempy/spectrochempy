@@ -2325,7 +2325,7 @@ class NDArray(HasTraits):
                     elif f"{oldunits:P}" == "absorbance":
                         if f"{units:P}" in ["transmittance", "absolute_transmittance"]:
                             scale = Quantity(1.0, self._units).to(units).magnitude
-                            new._data = 10.0 ** -new.data * scale
+                            new._data = 10.0**-new.data * scale
                             new._units = units
                             new._title = "transmittance"
                     else:
