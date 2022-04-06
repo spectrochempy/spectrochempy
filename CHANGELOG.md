@@ -6,7 +6,7 @@
 * Documentation improvement.
 * Add spectra unimodality constraint on MCRALS
   unimodMod and unimodTol now deprectated 
-
+* Add `plotmerit()` method
 
 ## Version 0.4.4 [2022-03-22]
 
