@@ -382,6 +382,35 @@ class PCA(HasTraits):
         X.title = self._X.title
         return X
 
+    def plotmerit(self, n_pc=None, **kwargs):
+        """
+        Plots the input dataset, reconstructed dataset and residuals.
+
+        Parameters
+        ----------
+        **kwargs
+            optional "colors" argument: tuple or array of 3 colors for :math:`X`, :math:`\hat X` and :math:`E`.
+
+        Returns
+        -------
+        ax
+            subplot.
+        """
+        colX, colXhat, colRes = kwargs.get("colors", ["blue", "green", "red"])
+
+        X_hat = self.reconstruct(n_pc=n_pc)
+        res = self.X - X_hat
+        ax = self.X.plot()
+        if self.X.x is not None:
+            ax.plot(self.X.x.data, X_hat.T.data, color=colXhat)
+            ax.plot(self.X.x.data, res.T.data, color=colRes)
+        else:
+            ax.plot(X_hat.T.data, color=colXhat)
+            ax.plot(res.T.data, color=colRes)
+        ax.autoscale(enable=True)
+        ax.set_title("PCA merit plot")
+        return ax
+
     def printev(self, n_pc=None):
         """
         Print PCA figures of merit.

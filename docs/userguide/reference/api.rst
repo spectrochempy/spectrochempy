@@ -438,6 +438,7 @@
     PCA.ev_cum
     PCA.ev_ratio
     PCA.LT
+    PCA.plotmerit
     PCA.printev
     PCA.reconstruct
     PCA.reduce
