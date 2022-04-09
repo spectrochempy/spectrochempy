@@ -170,7 +170,7 @@ if __name__ == "__main__":
         filename,
         [
             repo_path / "requirements.txt",
-            repo_path / "docs" / "_static" / "downloads" / "requirements.txt",
+            # repo_path / "docs" / "_static" / "downloads" / "requirements.txt",
         ],
     )
 
