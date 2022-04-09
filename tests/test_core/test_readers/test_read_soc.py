@@ -1,5 +1,8 @@
 import requests
 from pathlib import Path
+import platform
+
+
 import spectrochempy as scp
 
 
@@ -29,4 +32,7 @@ def test_read_SOC():
             else:
                 ds_ = scp.read_sdr(fname)
             assert ds_.name == ds.name
-            Path(fname).unlink(missing_ok=True)
+            if int(platform.python_version_tuple()[1]) > 7:
+                Path(fname).unlink(missing_ok=True)
+            else:
+                Path(fname).unlink()
