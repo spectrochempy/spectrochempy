@@ -1286,6 +1286,9 @@ def _read_header(fid, pos):
     elif key == 20:  # pragma: no cover
         out["units"] = "Kubelka_Munk"
         out["title"] = "Kubelka-Munk"
+    elif key == 21:
+        out["units"] = None
+        out["title"] = "reflectance"
     elif key == 22:
         out["units"] = "V"
         out["title"] = "detector signal"

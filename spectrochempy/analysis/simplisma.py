@@ -60,8 +60,6 @@ class SIMPLISMA(HasTraits):
     noise : float or int, optional, default=5
         A correction factor (%) for low intensity variables (0 - no offset,
         15 - large offset).
-    verbose : bool, optional, default=True
-        If True some information is given during the analysis.
     """
 
     _St = Instance(NDDataset)
@@ -117,8 +115,11 @@ class SIMPLISMA(HasTraits):
             warnings.warn("SIMPLISMA does not handle easily negative values.")
             # TODO: check whether negative values should be set to zero or not.
 
-        verbose = kwargs.get("verbose", True)
-        if verbose:
+        if "verbose" in kwargs.keys():
+            warnings.warn(
+                "verbose deprecated. Instead, use set_loglevel(INFO) before launching MCRALS",
+                DeprecationWarning,
+            )
             set_loglevel(INFO)
 
         interactive = kwargs.get("interactive", False)
@@ -222,7 +223,7 @@ class SIMPLISMA(HasTraits):
                 )
                 logs += llog + "\n"
 
-                if verbose or interactive:
+                if interactive:
                     print(llog)
 
                 if interactive:
@@ -303,7 +304,7 @@ class SIMPLISMA(HasTraits):
                 )
                 logs += llog + "\n"
 
-                if verbose or interactive:
+                if interactive:
                     info_(llog)
 
                 if (
