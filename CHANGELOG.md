@@ -6,7 +6,8 @@
 * Documentation improvement.
 * Add spectra unimodality constraint on MCRALS
   unimodMod and unimodTol now deprectated 
-* Add `plotmerit()` method
+* Add `plotmerit()` method in PCA
+* Add Surface Optics Corp. reader
 
 ### BUG FIXED
 * Compatibility with pint=0.19

@@ -349,7 +349,9 @@
     NDDataset.read
     NDDataset.read_carroucell
     NDDataset.read_csv
+    NDDataset.read_ddr
     NDDataset.read_dir
+    NDDataset.read_hdr
     NDDataset.read_jcamp
     NDDataset.read_labspec
     NDDataset.read_mat
@@ -358,6 +360,8 @@
     NDDataset.read_opus
     NDDataset.read_quadera
     NDDataset.read_remote
+    NDDataset.read_sdr
+    NDDataset.read_soc
     NDDataset.read_spa
     NDDataset.read_spc
     NDDataset.read_spg
