@@ -1,6 +1,6 @@
 # What's new
 
-## Unreleased
+## Version 0.4.5 [2022-04-09]
 
 ### NEW FEATURES
 * Documentation improvement.
