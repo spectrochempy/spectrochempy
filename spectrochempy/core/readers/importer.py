@@ -26,7 +26,7 @@ from spectrochempy.core import warning_
 FILETYPES = [
     ("scp", "SpectroChemPy files (*.scp)"),
     ("omnic", "Nicolet OMNIC files and series (*.spa *.spg *.srs)"),
-    ("soc", "Surface Optics Corp. (*.ddr *.hdr *.srs)"),
+    ("soc", "Surface Optics Corp. (*.ddr *.hdr *.sdr)"),
     ("labspec", "LABSPEC exported files (*.txt)"),
     ("opus", "Bruker OPUS files (*.[0-9]*)"),
     (
