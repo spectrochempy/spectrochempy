@@ -4,10 +4,10 @@
 
 ### NEW FEATURES
 * Documentation improvement.
-* Add spectra unimodality constraint on MCRALS
-  unimodMod and unimodTol now deprectated 
-* Add `plotmerit()` method in PCA
-* Add Surface Optics Corp. reader
+* MCRALS: add spectra unimodality constraint on MCRALS, `unimodMod` and `unimodTol now deprectated 
+* PCA: add `plotmerit()` method in PCA
+* Readers: add Surface Optics Corp. reader
+* SIMPLISMA: `verbose` now deprecated
 
 ### BUG FIXED
 * Compatibility with pint=0.19
