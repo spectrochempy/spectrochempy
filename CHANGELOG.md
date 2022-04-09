@@ -4,7 +4,7 @@
 
 ### NEW FEATURES
 * Documentation improvement.
-* MCRALS: add spectra unimodality constraint on MCRALS, `unimodMod` and `unimodTol now deprectated
+* MCRALS: add spectra unimodality constraint on MCRALS, `unimodMod` and `unimodTol now deprectated.
 * PCA: add `plotmerit()` method in PCA
 * Readers: add Surface Optics Corp. reader.
 * SIMPLISMA: `verbose` parameter now deprecated.
@@ -29,7 +29,7 @@
 ## Version 0.4.2 [2022-03-16]
 
 ### NEW FEATURES
-* `stack()` method now generates a new dim, even if a dim of size one in present
+* `stack()` method now generates a new dim, even if a dim of size one in present.
 
 ### DEPRECATED
 * "force_stack" keyword in `concatenate()` now deprecated.
@@ -44,7 +44,7 @@
 * Requires pint >= 0.18
 
 ### NEW FEATURES
-* Compatibility with Python 3.10
+* Compatibility with Python 3.10:
     - Spectrochempy is tested with 3.10, 3.9 version of python,
       and on Windows and linux platform. Older versions > 3.6 of python
       or different platforms may still work, but with no guaranty.
@@ -71,7 +71,7 @@
 ## Version 0.3.2 [2022-01-31]
 
 ### NEW FEATURES
-* Add a log file (rotating)
+* Add a log file (rotating).
 
 ### BUGS FIXED
 * TQDM progress bar
