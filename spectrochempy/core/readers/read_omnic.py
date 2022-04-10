@@ -905,10 +905,11 @@ def _read_spa(*args, **kwargs):
 
     dataset.description = kwargs.get("description", default_description)
     if "spa_history" in locals():
-        dataset.history = (
-            "Omnic 'DATA PROCESSING HISTORY' : \n----------------------------------\n"
-            + spa_history
-        )
+        if len("spa_history".strip(" ")) > 0:
+            dataset.history = (
+                "Omnic 'DATA PROCESSING HISTORY' : \n------------------------------\n"
+                + spa_history
+            )
     dataset.history = str(datetime.now(timezone.utc)) + ":imported from spa file(s)"
 
     dataset._date = datetime.now(timezone.utc)
