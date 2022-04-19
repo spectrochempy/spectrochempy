@@ -14,8 +14,8 @@ __dataset_methods__ = __all__
 
 from datetime import datetime, timezone, timedelta
 import io
+import re
 import struct
-
 import numpy as np
 
 from spectrochempy.core import info_
@@ -531,7 +531,7 @@ def _read_spg(*args, **kwargs):
     # is 256 bytes. It is the original filename under which the group has been saved: it
     # won't match with the actual filename if a subsequent renaming has been done in the OS.
 
-    spg_title = _readbtext(fid, 30)
+    spg_title = _readbtext(fid, 30, 256)
 
     # Count the number of spectra
     # From hex 120 = decimal 304, individual spectra are described
@@ -662,7 +662,7 @@ def _read_spg(*args, **kwargs):
         spa_title_pos = _fromfile(fid, "uint32", 1)
 
         # read filename
-        spa_title = _readbtext(fid, spa_title_pos)
+        spa_title = _readbtext(fid, spa_title_pos, 256)
         spectitles.append(spa_title)
 
         # and the acquisition date
@@ -762,7 +762,7 @@ def _read_spa(*args, **kwargs):
     # is 256 bytes. It is the original filename under which the spectrum has
     # been saved: it won't match with the actual filename if a subsequent
     # renaming has been done in the OS.
-    spa_name = _readbtext(fid, 30)
+    spa_name = _readbtext(fid, 30, 256)
 
     # The acquisition date (GMT) is at hex 128 = decimal 296.
     # Second since 31/12/1899, 00:00
@@ -785,26 +785,36 @@ def _read_spa(*args, **kwargs):
     #     key: hex 02, dec  02: position of spectral header (=> nx,
     #                                 firstx, lastx, nscans, nbkgscans)
     #     key: hex 03, dec  03: intensity position
-    #     key: hex 04, dec  04: user text position
-    #     key: hex 1B, dec  27: position of History text
+    #     key: hex 04, dec  04: user text position (custom info, can be present
+    #                           several times. The text length is five bytes later)
+    #     key: hex 1B, dec  27: position of History text, The text length
+    #                           is five bytes later
+    #     key: hex 53, dec  83: probably not a position, present when 'Retrieved from library'
     #     key: hex 64, dec 100: ?
     #     key: hex 66  dec 102: sample interferogram
     #     key: hex 67  dec 103: background interferogram
     #     key: hex 69, dec 105: ?
     #     key: hex 6a, dec 106: ?
     #     key: hex 80, dec 128: ?
-    #     key: hex 82, dec 130: rotation angle
+    #     key: hex 82, dec 130: position of 'Experiment Information', The text length
+    #                           is five bytes later. The block gives Experiment filename (at +10)
+    #                           Experiment title (+90), custom text (+254), accessory name (+413)
+    #     key: hex 92, dec 146: position of 'custom infos', The text length
+    #                           is five bytes later.
     #
-    # The line preceding the block start with '01'
+    # The line preceding the block start with '01' or '0A'
     # The lines after the block generally start with '00', except in few cases where
     # they start by '01'. In such cases, the '53' key is also present
     # (before the '1B').
 
     # scan "key values"
     pos = 304
+    spa_comments = []  # several custom comments can be present
     while "continue":
         fid.seek(pos)
         key = _fromfile(fid, dtype="uint8", count=1)
+
+        # print(key, end=' ; ')
 
         if key == 2:
             # read the position of the header
@@ -815,10 +825,20 @@ def _read_spa(*args, **kwargs):
         elif key == 3 and return_ifg is None:
             intensities = _getintensities(fid, pos)
 
+        elif key == 4:
+            fid.seek(pos + 2)
+            comments_pos = _fromfile(fid, "uint32", 1)
+            fid.seek(pos + 6)
+            comments_len = _fromfile(fid, "uint32", 1)
+            fid.seek(comments_pos)
+            spa_comments.append(fid.read(comments_len).decode("latin-1", "replace"))
+
         elif key == 27:
             fid.seek(pos + 2)
             history_pos = _fromfile(fid, "uint32", 1)
-            spa_history = _readbtext(fid, history_pos)
+            fid.seek(pos + 6)
+            history_len = _fromfile(fid, "uint32", 1)
+            spa_history = _readbtext(fid, history_pos, history_len)
 
         elif key == 102 and return_ifg == "sample":
             s_ifg_intensities = _getintensities(fid, pos)
@@ -861,7 +881,7 @@ def _read_spa(*args, **kwargs):
     dataset.mask = np.isnan(dataset.data)
 
     if return_ifg is None:
-        default_description = f"Omnic name: {spa_name}\nOmnic filename: {filename.name}"
+        default_description = f"# Omnic name: {spa_name}\n# Filename: {filename.name}"
         dataset.units = info["units"]
         dataset.title = info["title"]
 
@@ -881,10 +901,10 @@ def _read_spa(*args, **kwargs):
     else:  # interferogram
         if return_ifg == "sample":
             default_description = (
-                f"Omnic name: {spa_name} : sample IFG\nOmnic filename: {filename.name}"
+                f"# Omnic name: {spa_name} : sample IFG\n # Filename: {filename.name}"
             )
         else:
-            default_description = f"Omnic name: {spa_name} : background IFG\nOmnic filename: {filename.name}"
+            default_description = f"# Omnic name: {spa_name} : background IFG\n # Filename: {filename.name}"
         spa_name += ": Sample IFG"
         dataset.units = "V"
         dataset.title = "detector signal"
@@ -903,14 +923,20 @@ def _read_spa(*args, **kwargs):
     # Set origin, description, history, date
     # Omnic spg file don't have specific "origin" field stating the oirigin of the data
 
-    dataset.description = kwargs.get("description", default_description)
+    dataset.description = kwargs.get("description", default_description) + "\n"
+    if len(spa_comments) > 1:
+        dataset.description += "# Comments from Omnic:\n"
+        for comment in spa_comments:
+            dataset.description += spa_comments + "\n---------------------\n"
+
+    dataset.history = str(datetime.now(timezone.utc)) + ":imported from spa file(s)"
+
     if "spa_history" in locals():
         if len("spa_history".strip(" ")) > 0:
             dataset.history = (
-                "Omnic 'DATA PROCESSING HISTORY' : \n------------------------------\n"
+                "Data processing history from Omnic :\n------------------------------------\n"
                 + spa_history
             )
-    dataset.history = str(datetime.now(timezone.utc)) + ":imported from spa file(s)"
 
     dataset._date = datetime.now(timezone.utc)
 
@@ -924,7 +950,6 @@ def _read_spa(*args, **kwargs):
         dataset.x._use_time_axis = (
             False  # True to have time, else it will be optical path difference
         )
-
     return dataset
 
 
@@ -993,7 +1018,7 @@ def _read_srs(*args, **kwargs):
         # now read the spectra/interferogram names and data
         # the first one....
         pos = index[2]
-        names.append(_readbtext(fid, pos))
+        names.append(_readbtext(fid, pos, 256))
         pos += 84
         fid.seek(pos)
         data[0, :] = _fromfile(fid, dtype="float32", count=info["nx"])[:]
@@ -1001,7 +1026,7 @@ def _read_srs(*args, **kwargs):
         # ... and the remaining ones:
         for i in np.arange(info["ny"])[1:]:
             pos += 16
-            names.append(_readbtext(fid, pos))
+            names.append(_readbtext(fid, pos, 256))
             pos += 84
             fid.seek(pos)
             data[i, :] = _fromfile(fid, dtype="float32", count=info["nx"])[:]
@@ -1015,7 +1040,7 @@ def _read_srs(*args, **kwargs):
             # the following 16 byte sequence:
             sub = b"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
             pos = bytestring.find(sub) + 16
-            history = _readbtext(fid, pos)
+            history = _readbtext(fid, pos, None)
 
     # read the background if the user asked for it.
     if return_bg:
@@ -1148,15 +1173,25 @@ def _fromfile(fid, dtype, count):
 
 
 # ..............................................................................
-def _readbtext(fid, pos):
-    # Read some text in binary file, until b\0\ is encountered.
+def _readbtext(fid, pos, size):
+    # Read some text in binary file of given size. If size is None, the etxt is read
+    # until b\0\ is encountered.
     # Returns utf-8 string
     fid.seek(pos)
-    btext = fid.read(1)
-    while not (btext[len(btext) - 1] == 0):  # while the last byte is not zero
-        btext = btext + fid.read(1)  # append 1 byte
+    if size is None:
+        btext = b""
+        while fid.read(1) != b"\x00":
+            btext += fid.read(1)
+    else:
+        btext = fid.read(size)
+    btext = re.sub(b"\x00+", b"\n", btext)
 
-    btext = btext[0 : len(btext) - 1]  # cuts the last byte
+    if btext[:1] == b"\n":
+        btext = btext[1:]
+
+    if btext[-1:] == b"\n":
+        btext = btext[:-1]
+
     try:
         text = btext.decode(encoding="utf-8")  # decode btext to string
     except UnicodeDecodeError:
@@ -1320,7 +1355,7 @@ def _read_header(fid, pos):
     out["nbkgscan"] = _fromfile(fid, "uint32", 1)
 
     if filetype == "spa, spg":
-        out["history"] = _readbtext(fid, pos + 208)
+        out["history"] = _readbtext(fid, pos + 208, None)
 
     if filetype == "srs":
         if out["nbkgscan"] == 0:
@@ -1328,7 +1363,7 @@ def _read_header(fid, pos):
             if out["firstx"] > out["lastx"]:
                 out["firstx"], out["lastx"] = out["lastx"], out["firstx"]
 
-        out["name"] = _readbtext(fid, pos + 938)
+        out["name"] = _readbtext(fid, pos + 938, 256)
         fid.seek(pos + 1002)
         out["coll_length"] = _fromfile(fid, "float32", 1) * 60
         fid.seek(pos + 1006)
@@ -1338,11 +1373,11 @@ def _read_header(fid, pos):
         fid.seek(pos + 1026)
         out["ny"] = _fromfile(fid, "uint32", 1)
         #  y unit could be at pos+1030 with 01 = minutes ?
-        out["history"] = _readbtext(fid, pos + 1200)
+        out["history"] = _readbtext(fid, pos + 1200, None)
 
         if _readbtext(fid, pos + 208)[:10] == "Background":
             # it is the header of a background
-            out["background_name"] = _readbtext(fid, pos + 208)[10:]
+            out["background_name"] = _readbtext(fid, pos + 208, 256)[10:]
 
     return out
 
