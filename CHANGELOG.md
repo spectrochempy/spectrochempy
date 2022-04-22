@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+### BUG FIXED
+* Issue #462, correct load and dump of multicoordinates in scp format.
 
 ## Version 0.4.5 [2022-04-09]
 
