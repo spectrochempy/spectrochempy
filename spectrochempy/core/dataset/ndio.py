@@ -20,6 +20,7 @@ from numpy.lib.npyio import zipfile_factory
 from traitlets import HasTraits, Instance, Union, Unicode
 
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
+from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.utils import (
     SpectroChemPyException,
     pathclean,
@@ -365,15 +366,31 @@ class NDIO(HasTraits):
                         _coords = []
                         for v in val["coords"]:
                             if "data" in v:
+                                # coords
                                 _coords.append(item_to_attr(Coord(), v))
+                            elif "coords" in v:
+                                # likely a coordset (multicoordinates)
+                                if v["is_same_dim"]:
+                                    _mcoords = []
+                                    for mv in v["coords"]:
+                                        if "data" in mv:
+                                            # coords
+                                            _mcoords.append(item_to_attr(Coord(), mv))
+                                        else:
+                                            # likely a linearcoord
+                                            _mcoords.append(
+                                                item_to_attr(LinearCoord(), mv)
+                                            )
+                                    cs = CoordSet(*_mcoords[::-1], name=v["name"])
+                                    _coords.append(cs)
+                                else:
+                                    raise ValueError("Invalid : not a multicoordinate")
                             else:
+                                # likely a linearcoord
                                 _coords.append(item_to_attr(LinearCoord(), v))
 
-                        if val["is_same_dim"]:
-                            obj.set_coordset(_coords)
-                        else:
-                            coords = dict((c.name, c) for c in _coords)
-                            obj.set_coordset(coords)
+                        coords = dict((c.name, c) for c in _coords)
+                        obj.set_coordset(coords)
                         obj._name = val["name"]
                         obj._references = val["references"]
 
