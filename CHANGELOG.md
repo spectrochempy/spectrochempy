@@ -2,12 +2,17 @@
 
 ## Unreleased
 
+### BUG FIXED
+* MCRALS: handling of `nonnegSpec=[]` or `None` 
+
+### DEPRECATED
+* MCRALS: 'logs' attribute now replaced by `log`.
 
 ## Version 0.4.5 [2022-04-09]
 
 ### NEW FEATURES
 * Documentation improvement.
-* MCRALS: add spectra unimodality constraint on MCRALS, `unimodMod` and `unimodTol now deprecated.
+* MCRALS: add spectra unimodality constraint on MCRALS, `unimodMod` and `unimodTol` now deprecated.
 * PCA: add `plotmerit()` method in PCA.
 * Readers: add Surface Optics Corp. reader.
 * SIMPLISMA: `verbose` parameter now deprecated.

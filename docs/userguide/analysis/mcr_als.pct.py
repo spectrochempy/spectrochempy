@@ -121,7 +121,7 @@ _ = St0.plot()
 
 # %%
 scp.set_loglevel("INFO")
-mcr = scp.MCRALS(X, St0, verbose="True")
+mcr = scp.MCRALS(X, St0)
 
 # %% [markdown]
 # The optimization has converged within few iterations. The figures reported for each iteration are defined as follows:
