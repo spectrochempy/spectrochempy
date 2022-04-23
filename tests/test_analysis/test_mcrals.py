@@ -31,8 +31,8 @@ def test_MCRALS():
     h = [1, 1]
     c = [250, 750]
     w = [100, 100]
-    noise_spec = [0.05, 0.05]
-    noise_conc = [0.05, 0.05]
+    noise_spec = [0.0, 0.0]
+    noise_conc = [0.0, 0.0]
 
     c0 = [10, 1]
     l = np.array([-2, 2]) * 1e-2
