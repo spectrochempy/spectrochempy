@@ -125,9 +125,8 @@ def test_MCRALS():
         unimodSpec="all",
         nonnegSpec=None,
         normSpec="max",
-        maxit=3,
+        maxit=1,
     )
-    assert "Convergence criterion ('tol')" in mcr.log[-100:]
     set_loglevel("WARN")
 
     # guess = C0.data, test with other parameters
