@@ -20,6 +20,7 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.analysis.pca import PCA
 from spectrochempy.core.dataset.npy import dot
 from spectrochempy.core import info_, set_loglevel, INFO
+from spectrochempy.utils.exceptions import deprecated
 
 
 class MCRALS(HasTraits):
@@ -54,11 +55,11 @@ class MCRALS(HasTraits):
     maxdiv : int, optional, default=5
         Maximum number of successive non-converging iterations.
 
-    nonnegConc : str or array of indexes, default `"all"`
+    nonnegConc : str or array of indexes or `None`, default `"all"`
         Non negativity constraint on concentrations. If set to `'all'` (default) all concentrations profiles are
         considered non-negative. If an array of indexes is passed, the corresponding profiles are considered
         non-negative, not the others. For instance `[0, 2]` indicates that profile #0 and #2 are non-negative while
-         profile #1 *can* be negative. If set to `"None"` or `[]`, all profiles can be negative.
+         profile #1 *can* be negative. If set to `None` or `[]`, all profiles can be negative.
 
     unimodConc : str or array of indexes, default `"all"`
         Unimodality constraint on concentrations. If set to `'all'` (default) all concentrations profiles are
@@ -127,7 +128,7 @@ class MCRALS(HasTraits):
         ```
         getC(*args) -> (hardC, out2, out3, ...)
         ```
-        where *args are the parameters needed to completely specify the function (see , `harC` is a nadarray or NDDataset
+        where *args are the parameters needed to completely specify the function. `harC` is a nadarray or NDDataset
         of shape `(C.y, len(hardConc)`, and `out1`, `out2`, ... are supplementary outputs returned by the function.
 
     argsGetC : tuple, optional
@@ -137,11 +138,11 @@ class MCRALS(HasTraits):
         Indicates the correspondence between the indexes of the columns of hardC and of the C matrix. [1, None, 0]
         indicates that the first profile in hardC (index O) corrsponds to the second profile of C (index 1).
 
-    nonnegSpec : str, list or tuple, default `"all"`
+    nonnegSpec : str, list or tuple or `None`, default `"all"`
         Indicates non-negative spectral profile. If set to `'all'` (default) all spectral profiles are
         considered non-negative. If an array of indexes is passed, the corresponding profiles are considered
         non-negative, not the others. For instance `[0, 2]` indicates that profile #0 and #2 are non-negative while
-        profile #1 *can* be negative. If set to `"None"` or `[]`, all profiles can be negative.
+        profile #1 *can* be negative. If set to `None` or `[]`, all profiles can be negative.
 
     normSpec : None or str, default None
         Defines whether the spectral profiles should be normalized. If set to `None` no normalization is applied.
@@ -188,7 +189,7 @@ class MCRALS(HasTraits):
     _fixedC = Instance(NDDataset, allow_none=True)
     _extOutput = Instance(NDDataset, allow_none=True)
     _St = Instance(NDDataset, allow_none=True)
-    _logs = Unicode
+    _log = Unicode
     _params = Dict()
 
     def __init__(self, dataset, guess, **kwargs):
@@ -266,11 +267,8 @@ class MCRALS(HasTraits):
             St.name = "Pure spectra profile, mcs-als of " + X.name
             nspecies = St.shape[0]
 
-        else:  # pragma: no cover
-            raise ValueError(
-                "the dimensions of initial concentration "
-                "or spectra dataset do not match the data"
-            )
+        else:
+            raise ValueError("the dimensions of guess do not match the data")
 
         ny, _ = X.shape
 
@@ -282,11 +280,11 @@ class MCRALS(HasTraits):
 
         if nonnegConc == "all":
             nonnegConc = np.arange(nspecies)
-        elif nonnegConc is None:  # pragma: no cover
+        elif nonnegConc is None:
             nonnegConc = []
-        elif (
-            len(nonnegConc) > nspecies or max(nonnegConc + 1) > nspecies
-        ):  # pragma: no cover
+        elif nonnegConc != [] and (
+            len(nonnegConc) > nspecies or max(nonnegConc) + 1 > nspecies
+        ):
             raise ValueError(
                 f"The guess has only {nspecies} species, please check nonnegConc"
             )
@@ -295,25 +293,25 @@ class MCRALS(HasTraits):
             unimodConc = np.arange(nspecies)
         elif unimodConc is None:
             unimodConc = []
-        elif len(unimodConc) > nspecies:  # pragma: no cover
+        elif unimodConc != [] and (
+            len(unimodConc) > nspecies or max(unimodConc) + 1 > nspecies
+        ):
             raise ValueError(
                 f"The guess has only {nspecies} species, please check unimodConc"
             )
 
         if closureTarget == "default":
             closureTarget = np.ones(ny)
-        elif len(closureTarget) > ny:  # pragma: no cover
+        elif len(closureTarget) != ny:
             raise ValueError(
                 f"The data contain only {ny} observations, please check closureTarget"
             )
 
         if hardC_to_C_idx == "default":
             hardC_to_C_idx = np.arange(nspecies)
-        elif (
-            len(hardC_to_C_idx) > nspecies or max(hardC_to_C_idx + 1) > nspecies
-        ):  # pragma: no cover
+        elif len(hardC_to_C_idx) > nspecies or max(hardC_to_C_idx) + 1 > nspecies:
             raise ValueError(
-                f"The guess has only {nspecies} species, please check fixedConc_to_C_idx"
+                f"The guess has only {nspecies} species, please check hardC_to_C_idx"
             )
 
         # constraints on spectra
@@ -322,16 +320,20 @@ class MCRALS(HasTraits):
             unimodSpec = np.arange(nspecies)
         elif unimodSpec is None:
             unimodSpec = []
-        elif len(unimodSpec) > nspecies:  # pragma: no cover
+        elif unimodSpec != [] and (
+            len(unimodSpec) > nspecies or max(unimodSpec) + 1 > nspecies
+        ):
             raise ValueError(
                 f"The guess has only {nspecies} species, please check unimodSpec"
             )
 
         if nonnegSpec == "all":
             nonnegSpec = np.arange(nspecies)
-        elif (
-            len(nonnegSpec) > nspecies or max(nonnegSpec + 1) > nspecies
-        ):  # pragma: no cover
+        elif nonnegSpec is None:
+            nonnegSpec = []
+        elif nonnegSpec != [] and (
+            len(nonnegSpec) > nspecies or max(nonnegSpec) + 1 > nspecies
+        ):
             raise ValueError(
                 f"The guess has only {nspecies} species, please check nonnegSpec"
             )
@@ -365,10 +367,10 @@ class MCRALS(HasTraits):
         niter = 0
         ndiv = 0
 
-        logs = "*** ALS optimisation log***\n"
-        logs += "#iter     Error/PCA        Error/Exp      %change \n"
-        logs += "------------------------------------------------- \n"
-        info_(logs)
+        log = "*** ALS optimisation log***\n"
+        log += "#iter     Error/PCA        Error/Exp      %change \n"
+        log += "------------------------------------------------- \n"
+        info_(log)
 
         while change >= tol and niter < maxit and ndiv < maxdiv:
 
@@ -427,23 +429,13 @@ class MCRALS(HasTraits):
             # external concentration profiles
             # ------------------------------------------
             if hardConc is not None:
-                extOutput = getConc(
-                    *(
-                        (
-                            C,
-                            hardConc,
-                            hardC_to_C_idx,
-                        )
-                        + argsGetConc
-                    )
-                )
+                extOutput = getConc(*argsGetConc)
                 if isinstance(extOutput, dict):
                     fixedC = extOutput["concentrations"]
                     argsGetConc = extOutput["new_args"]
                 else:
                     fixedC = extOutput
-                if type(fixedC) is NDDataset:
-                    extC = fixedC.data
+
                 C.data[:, hardConc] = fixedC[:, hardC_to_C_idx]
 
             # stores C in C_hard
@@ -496,7 +488,7 @@ class MCRALS(HasTraits):
             logentry = "{:3d}      {:10f}      {:10f}      {:10f}".format(
                 niter, stdev_PCA, stdev2, change
             )
-            logs += logentry + "\n"
+            log += logentry + "\n"
             info_(logentry)
 
             if change > 0:
@@ -507,7 +499,7 @@ class MCRALS(HasTraits):
 
             if change < tol:
                 logentry = "converged !"
-                logs += logentry + "\n"
+                log += logentry + "\n"
                 info_(logentry)
 
             if ndiv == maxdiv:
@@ -516,7 +508,7 @@ class MCRALS(HasTraits):
                     f"or 'tol' set too small ?\n"
                 )
                 logline += "Stop ALS optimization"
-                logs += logline + "\n"
+                log += logline + "\n"
                 info_(logline)
 
             if niter == maxit:
@@ -524,7 +516,7 @@ class MCRALS(HasTraits):
                     maxit
                 )
                 logline += "Stop ALS optimization"
-                logs += logline + "\n"
+                log += logline + "\n"
                 info_(logline)
 
         self._X = X
@@ -556,14 +548,14 @@ class MCRALS(HasTraits):
 
         self._C = C
         if hardConc is not None:
-            self._fixedC = extC
+            self._fixedC = fixedC
             self._extOutput = extOutput
         else:
             self._fixedC = None
             self._extOutput = None
 
         self._St = St
-        self._logs = logs
+        self._log = log
 
         self._Stsoft = Stsoft
         self._Chard = Chard
@@ -625,11 +617,19 @@ class MCRALS(HasTraits):
         return self._params
 
     @property
+    def log(self):
+        """
+        Logs output.
+        """
+        return self._log
+
+    @property
+    @deprecated("Use log instead. This attribute may be removed in future version")
     def logs(self):
         """
         Logs output.
         """
-        return self._logs
+        return self._log
 
     def reconstruct(self):
         """
@@ -710,8 +710,6 @@ def _unimodal_2D(a, axis, idxes, tol, mod):
         a_ = a
     elif axis == 1:
         a_ = a.T
-    else:
-        raise ValueError("axis must be 0 or 1")
 
     for col, idx in zip(a_[:, idxes].T, idxes):
         a_[:, idx] = _unimodal_1D(col, tol, mod)
