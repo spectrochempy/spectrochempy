@@ -1068,6 +1068,9 @@ def _read_srs(*args, **kwargs):
     else:
         dataset = NDDataset(np.expand_dims(data, axis=0))
 
+    # in case part of the spectra/ifg has been blanked:
+    dataset.mask = np.isnan(dataset.data)
+
     dataset.units = info["units"]
     dataset.title = info["title"]
     dataset.origin = "omnic"

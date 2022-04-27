@@ -106,11 +106,9 @@ _ = irth.plot(xlim=(3999, 400))
 # %%
 irs = scp.read_spa("irdata/interferogram/spectre.SPA")
 prefs.figure.figsize = (7, 6)
-_ = irs.plot(label="omnic")
-_ = (irt - 0.4).plot(
-    c="red", linestyle="solid", clear=False, xlim=(3999, 400), label="no hamming"
-)
-ax = (irth - 0.2).plot(
-    c="green", linestyle="solid", clear=False, xlim=(3999, 400), label="hamming"
-)
+ax = irs.plot(label="omnic")
+(irt + 0.4).plot(c="red", linestyle="solid", clear=False, label="no hamming")
+(irth + 0.2).plot(c="green", linestyle="solid", clear=False, label="hamming")
+ax.set_xlim(4000.0, 400.0)
+ax.set_ylim(0.0, 3.1)
 _ = ax.legend()
