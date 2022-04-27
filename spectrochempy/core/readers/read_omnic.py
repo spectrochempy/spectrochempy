@@ -1114,7 +1114,7 @@ def _read_srs(*args, **kwargs):
     )
 
     dataset.meta.laser_frequency = info["reference_frequency"] * ur("cm^-1")
-    dataset.meta.collection_length = info["meta.collection_length"] * ur("s")
+    dataset.meta.collection_length = info["collection_length"] * ur("s")
 
     if dataset.x.units is None and dataset.x.title == "data points":
         # interferogram
