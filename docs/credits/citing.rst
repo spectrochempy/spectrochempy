@@ -6,7 +6,7 @@ Citing  |scpy|
 When using |scpy| for your own work, you are kindly requested to cite it this
 way::
 
-  Travert A., Fernandez C. ({{ year }}). SpectroChemPy, a framework for processing,
+  Travert Arnaud, Fernandez Christian ({{ year }}). SpectroChemPy, a framework for processing,
   analyzing and modeling spectroscopic data for chemistry with Python (version {{ version }}).
   Zenodo, DOI: 10.5281/zenodo.3823841 URL: https://www.spectrochempy.fr
 
@@ -16,9 +16,10 @@ Bibtex field::
   author = {Travert, Arnaud and Fernandez, Christian},
   license = {CECILL-B},
   month = {{ bibmonth }},
-  publisher = {zenodo}
+  publisher = {zenodo},
   title = {SpectroChemPy, a framework for processing, analyzing and modeling spectroscopic data for chemistry with Python},
-  url = {https://github.com/spectrochempy/spectrochempy},
+  url = {https://www.spectrochempy.fr},
   version = {{ bibversion }},
+  doi = {10.5281/zenodo.3823841},
   year = {{ bibyear }}
   }

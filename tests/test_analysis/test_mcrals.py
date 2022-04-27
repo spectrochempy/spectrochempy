@@ -6,108 +6,13 @@ import os
 import numpy as np
 
 from spectrochempy.core.dataset.nddataset import NDDataset, Coord
-from spectrochempy import dot
-from spectrochempy.analysis.efa import EFA
+from spectrochempy import dot, show, set_loglevel
 from spectrochempy.analysis.mcrals import MCRALS
-from spectrochempy.analysis.models import (
-    lorentzianmodel,
-    gaussianmodel,
-    asymmetricvoigtmodel,
-)
 from spectrochempy.utils import show
 
 
-def test_MCRALS_Jaumot():
-    print("")
-    data = NDDataset.read_matlab(os.path.join("matlabdata", "als2004dataset.MAT"))
-    print("Dataset (Jaumot et al., Chemometr. Intell. Lab. 76 (2005) 101-110)):")
-    print("")
-    for mat in data:
-        print("    " + mat.name, str(mat.shape))
-
-    print(
-        "\n test on single experiment (m1) with given estimate of pure species (spure)...\n"
-    )
-
-    X = data[-1]
-    assert X.name == "m1"
-    guess = data[3]
-    assert guess.name == "spure"
-
-    # test without coordinates
-    mcr = MCRALS(X, guess, verbose=True)
-
-    mcr.C.T.plot()
-    mcr.St.plot()
-    mcr.plotmerit()
-
-    print(
-        "\n test on single experiment (m1) with EFA estimate of pure species (verbose off)...\n"
-    )
-    guess = EFA(X).get_conc(4)
-
-    mcr2 = MCRALS(X, guess, normSpec="max")
-    mcr2.plotmerit()
-
-    assert "converged !" in mcr2.logs[-15:]
-
-    # the same with coordinates
-    X.set_coordset(y=np.arange(51), x=np.arange(96))
-    X.title = "concentration"
-    X.coordset.set_titles(y="spec coord.", x="elution time")
-    X.plot(title="M1")
-
-    guess = data[3]
-    assert guess.name == "spure"  # spure
-    guess.set_coordset(y=np.arange(4), x=np.arange(96))
-    guess.title = "concentration"
-    guess.coordset.set_titles(y="#components", x="elution time")
-    guess.plot(title="spure")
-
-    mcr = MCRALS(X, guess, verbose=True)
-
-    mcr.C.T.plot(title="Concentration")
-
-    mcr.St.plot(title="spectra")
-
-    mcr.plotmerit()
-
-    guess = EFA(X).get_conc(4)
-    guess.T.plot(title="EFA guess")
-
-    # few variations on options to improve coverage...
-    mcr2 = MCRALS(X, guess, normSpec="euclid")
-    assert "converged !" in mcr2.logs[-15:]
-
-    mcr3 = MCRALS(X, guess, unimodConcMod="smooth", normSpec="max")
-    assert "converged !" in mcr3.logs[-15:]
-
-    mcr4 = MCRALS(X, guess, maxit=1)
-    assert "Convergence criterion ('tol') not reached" in mcr4.logs[-100:]
-
-    show()
-
-
-def test_MCRALS_synth():
-    """Test with synthetic data"""
-
-    n_PS = 5  # number of pure species
-    h = [1, 0.5, 2, 4, 1]
-    c = [250, 300, 500, 750, 900]
-    w = [100, 300, 50, 100, 50]
-    noise = [0.02, 0.01, 0.02, 0.01, 0.01]
-
-    c0 = [10, 1, 5, 3, 2]
-    l = np.array([-1, 1, -1, 1, -2]) * 1e-2
-
-    t_c = Coord(np.arange(0, 100, 1), title="time", units="s")
-    wl_c = Coord(np.arange(0, 1000, 1), title="wavelength", units="nm")
-    PS_c = Coord(
-        range(5),
-        title="species",
-        units=None,
-        labels=["PS#" + str(i) for i in range(n_PS)],
-    )
+def test_MCRALS():
+    """Test MCRALS with synthetic data"""
 
     def gaussian(x, h, c, w, noise):
         return h * (np.exp(-1 / 2 * ((x.data - c) / w) ** 2)) + noise * np.random.randn(
@@ -115,45 +20,194 @@ def test_MCRALS_synth():
         )  # a gaussian with added noise
 
     def expon(t, c0, l, noise):
-        return c0 * (np.exp(l * t.data) + noise * np.random.randn(len(t.data)))
+        return c0 * (np.exp(l * t.data)) + noise * np.random.randn(len(t.data))
+
+    def get_C(C):
+        return C
+
+    n_PS = 2  # number of pure species
+    n_t = 10
+    n_wl = 10
+    h = [1, 1]
+    c = [250, 750]
+    w = [100, 100]
+    noise_spec = [0.0, 0.0]
+    noise_conc = [0.0, 0.0]
+
+    c0 = [10, 1]
+    l = np.array([-2, 2]) * 1e-2
+
+    t_c = Coord(np.arange(0, 100, 100 / n_t), title="time", units="s")
+    wl_c = Coord(np.arange(0, 1000, 1000 / n_wl), title="wavelength", units="nm")
+    PS_c = Coord(
+        range(n_PS),
+        title="species",
+        units=None,
+        labels=["PS#" + str(i) for i in range(n_PS)],
+    )
 
     St = NDDataset.zeros((n_PS, len(wl_c)), coordset=(PS_c, wl_c))
     C = NDDataset.zeros((len(t_c), n_PS), coordset=(t_c, PS_c))
 
-    for i in range(n_PS):
-        C.data[:, i] = expon(t_c, c0[i], l[i], 0)
-        St.data[i, :] = gaussian(wl_c, h[i], c[i], w[i], noise[i])
-    gaussianmodel
-    C.T.plot()
-    St.plot()
+    St0 = NDDataset.zeros((n_PS, len(wl_c)), coordset=(PS_c, wl_c))
+    C0 = NDDataset.zeros((len(t_c), n_PS), coordset=(t_c, PS_c))
+
+    for i, id in enumerate((0, 1)):
+        C.data[:, i] = expon(t_c, c0[id], l[id], noise_conc[id])
+        St.data[i, :] = gaussian(wl_c, h[id], c[id], w[id], noise_spec[id])
+
+        C0.data[:, i] = expon(t_c, c0[id], l[id], 0)
+        St0.data[i, :] = gaussian(wl_c, h[id], c[id], w[id], 0)
 
     D = dot(C, St)
     D.title = "intensity"
 
-    guess = EFA(D).get_conc(2)
-    guess.T.plot(title="EFA guess")
+    #############################
+    # Test normal functioning
 
-    mcr2 = MCRALS(
+    # guess = C0
+    mcr = MCRALS(D, C0, tol=30.0)
+
+    assert "converged !" in mcr.log[-15:]
+
+    # test attributes
+    for attr in [
+        "log",
+        "logs",
+        "params",
+        "Chard",
+        "Stsoft",
+        "St",
+        "C",
+        "extOutput",
+        "fixedC",
+        "X",
+    ]:
+        assert hasattr(mcr, attr)
+
+    # test plot
+    mcr.plotmerit()
+    show()
+
+    # test diverging
+    mcr = MCRALS(
         D,
-        guess,
+        C0,
+        monoIncConc=[0, 1],
+        monoIncTol=1.0,
+        unimodSpec=[0, 1],
         normSpec="euclid",
-        monoDecConc=[0],
-        monoIncConc=[1],
-        closureConc=[0, 1],
-    )
-    assert "converged !" in mcr2.logs[-15:]
-
-    mcr2 = MCRALS(
-        D,
-        guess,
-        monoDecConc=[0],
-        monoIncConc=[1],
         closureConc=[0, 1],
         closureMethod="constantSum",
+        maxdiv=1,
     )
-    assert "converged !" in mcr2.logs[-15:]
+    assert "Stop ALS optimization" in mcr.log[-40:]
 
+    # guess = C0, hard modeling
+    mcr = MCRALS(D, C0, hardConc=[0, 1], getConc=get_C, argsGetConc=(C0,), tol=30.0)
+    assert "converged !" in mcr.log[-15:]
 
-# =============================================================================
-if __name__ == "__main__":
-    pass
+    # guess = C, test with deprecated parameters
+    # and few other parameters set to non-default values to improve coverage
+    mcr = MCRALS(
+        D,
+        C0,
+        # deprecated:
+        unimodMod="strict",
+        unimodTol=1.1,
+        verbose=True,
+        # other parameters set to non-default values
+        monoIncConc=[0],
+        monoDecConc=[1],
+        closureConc=[0, 1],
+        nonnegConc=None,
+        unimodConc=None,
+        unimodSpec="all",
+        nonnegSpec=None,
+        normSpec="max",
+        maxit=1,
+    )
+    set_loglevel("WARN")
+
+    # guess = C0.data, test with other parameters
+    mcr = MCRALS(
+        D,
+        C0.data,
+        normSpec="euclid",
+        closureConc=[0, 1],
+        closureMethod="constantSum",
+        maxit=1,
+    )
+    assert "Convergence criterion ('tol')" in mcr.log[-100:]
+
+    # guess = St as ndarray
+    mcr = MCRALS(D, St0.data, tol=15.0)
+    assert "converged !" in mcr.log[-15:]
+
+    #########################
+    # Text exceptions
+
+    # guess with wrong number of dimensions
+    try:
+        mcr = MCRALS(
+            D,
+            np.random.rand(n_t - 1, n_PS),
+        )
+    except ValueError as e:
+        assert e.args[0] == "the dimensions of guess do not match the data"
+
+    # guess with wrong nonnegConc parameter
+    try:
+        mcr = MCRALS(D, C, nonnegConc=[2])
+    except ValueError as e:
+        assert "please check nonnegConc" in e.args[0]
+    try:
+        mcr = MCRALS(D, C, nonnegConc=[0, 1, 1])
+    except ValueError as e:
+        assert "please check nonnegConc" in e.args[0]
+
+    # guess with wrong unimodConc parameter
+    try:
+        mcr = MCRALS(D, C, unimodConc=[2])
+    except ValueError as e:
+        assert "please check unimodConc" in e.args[0]
+    try:
+        mcr = MCRALS(D, C, unimodConc=[0, 1, 1])
+    except ValueError as e:
+        assert "please check unimodConc" in e.args[0]
+
+    # wrong closureTarget
+    try:
+        mcr = MCRALS(D, C, closureTarget=[0, 1, 1])
+    except ValueError as e:
+        assert "please check closureTarget" in e.args[0]
+
+    # wrong hardC_to_C_idx
+    try:
+        mcr = MCRALS(D, C, hardC_to_C_idx=[2])
+    except ValueError as e:
+        assert "please check hardC_to_C_idx" in e.args[0]
+    try:
+        mcr = MCRALS(D, C, hardC_to_C_idx=[0, 1, 1])
+    except ValueError as e:
+        assert "please check hardC_to_C_idx" in e.args[0]
+
+    # wrong unimodSpec
+    try:
+        mcr = MCRALS(D, C, unimodSpec=[2])
+    except ValueError as e:
+        assert "please check unimodSpec" in e.args[0]
+    try:
+        mcr = MCRALS(D, C, unimodSpec=[0, 1, 1])
+    except ValueError as e:
+        assert "please check unimodSpec" in e.args[0]
+
+    # wrong nonnegSpec
+    try:
+        mcr = MCRALS(D, C, nonnegSpec=[2])
+    except ValueError as e:
+        assert "please check nonnegSpec" in e.args[0]
+    try:
+        mcr = MCRALS(D, C, nonnegSpec=[0, 1, 1])
+    except ValueError as e:
+        assert "please check nonnegSpec" in e.args[0]
