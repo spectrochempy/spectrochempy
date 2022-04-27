@@ -26,7 +26,7 @@ from spectrochempy.core.readers.importer import (
     _importer_method,
     Importer,
 )
-from spectrochempy.core.units import Quantity
+from spectrochempy.core.units import ur
 
 
 # ======================================================================================
@@ -941,9 +941,9 @@ def _read_spa(*args, **kwargs):
 
     dataset._date = datetime.now(timezone.utc)
 
-    dataset.meta.collection_length = Quantity(f"{info['collection_length']/100} s")
+    dataset.meta.collection_length = info["collection_length"] / 100 * ur("s")
     dataset.meta.optical_velocity = info["optical_velocity"]
-    dataset.meta.laser_frequency = Quantity(f"{info['reference_frequency']} cm^-1")
+    dataset.meta.laser_frequency = info["reference_frequency"] * ur("cm^-1")
 
     if dataset.x.units is None and dataset.x.title == "data points":
         # interferogram
@@ -1113,7 +1113,8 @@ def _read_srs(*args, **kwargs):
         str(datetime.now(timezone.utc)) + ": imported from srs file " + str(filename)
     )
 
-    dataset.meta.laser_frequency = Quantity(f"{info['reference_frequency']} cm^-1")
+    dataset.meta.laser_frequency = info["reference_frequency"] * ur("cm^-1")
+    dataset.meta.collection_length = info["meta.collection_length"] * ur("s")
 
     if dataset.x.units is None and dataset.x.title == "data points":
         # interferogram
@@ -1369,7 +1370,7 @@ def _read_header(fid, pos):
     fid.seek(pos + 52)
     out["nbkgscan"] = _fromfile(fid, "uint32", 1)
     fid.seek(pos + 68)
-    out["collection_length"] = _fromfile(fid, "float32", 1)
+    out["collection_length"] = _fromfile(fid, "uint32", 1)
     fid.seek(pos + 80)
     out["reference_frequency"] = _fromfile(fid, "float32", 1)
     fid.seek(pos + 188)
@@ -1386,7 +1387,7 @@ def _read_header(fid, pos):
 
         out["name"] = _readbtext(fid, pos + 938, 256)
         fid.seek(pos + 1002)
-        out["coll_length"] = _fromfile(fid, "float32", 1) * 60
+        out["collection_length"] = _fromfile(fid, "float32", 1) * 60
         fid.seek(pos + 1006)
         out["lasty"] = _fromfile(fid, "float32", 1)
         fid.seek(pos + 1010)

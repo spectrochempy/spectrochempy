@@ -69,8 +69,14 @@ ir.x.show_datapoints = False
 _ = ir.plot(xlim=(-0.04, 0.04))
 
 # %% [markdown]
-# Note that the `x` scale of the interferogram has been calculated using a laser frequency of 15798.26 cm$^{-1}$. If
-# this is not correct you can change it using the `set_laser_frequency` coordinate method:
+# Note that the `x` scale of the interferogram has been calculated using the laser frequency indicated in the original
+# omnic file. It is stored in the `meta` attribute of the NDDataset:
+
+# %%
+print(ir.meta.laser_frequency)
+
+# %% [markdown]
+# If absent, it can be set using the `set_laser_frequency()` method, e.g.:
 
 # %%
 ir.x.set_laser_frequency(15798.26 * ur("cm^-1"))
