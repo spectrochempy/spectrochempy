@@ -16,6 +16,7 @@ from datetime import datetime, timezone, timedelta
 import io
 import re
 import struct
+
 import numpy as np
 
 from spectrochempy.core import info_
@@ -785,7 +786,7 @@ def _read_spa(*args, **kwargs):
     #     key: hex 02, dec  02: position of spectral header (=> nx,
     #                                 firstx, lastx, nscans, nbkgscans)
     #     key: hex 03, dec  03: intensity position
-    #     key: hex 04, dec  04: user text position (custom info, can be present
+    #     #     key: hex 04, dec  04: user text position (custom info, can be present
     #                           several times. The text length is five bytes later)
     #     key: hex 1B, dec  27: position of History text, The text length
     #                           is five bytes later
@@ -940,16 +941,20 @@ def _read_spa(*args, **kwargs):
 
     dataset._date = datetime.now(timezone.utc)
 
+    dataset.meta.collection_length = Quantity(f"{info['collection_length']/100} s")
+    dataset.meta.optical_velocity = info["optical_velocity"]
+    dataset.meta.laser_frequency = Quantity(f"{info['reference_frequency']} cm^-1")
+
     if dataset.x.units is None and dataset.x.title == "data points":
         # interferogram
         dataset.meta.interferogram = True
         dataset.meta.td = list(dataset.shape)
         dataset.x._zpd = int(np.argmax(dataset)[-1])
-        dataset.meta.laser_frequency = Quantity("15798.26 cm^-1")
         dataset.x.set_laser_frequency()
         dataset.x._use_time_axis = (
             False  # True to have time, else it will be optical path difference
         )
+
     return dataset
 
 
@@ -991,7 +996,7 @@ def _read_srs(*args, **kwargs):
 
     sub = b"\x02\x00\x00\x00\x18\x00\x00\x00\x00\x00\x48\x43\x00\x50\x43\x47"
 
-    # find the 3 starting indexes of sub.we will use the 1st (-> series info),
+    # find the 3 starting indexes of sub. we will use the 1st (-> series info),
     # the 2nd (-> background) and the 3rd (-> data)
     fid.seek(0)
     bytestring = fid.read()
@@ -1105,12 +1110,13 @@ def _read_srs(*args, **kwargs):
         str(datetime.now(timezone.utc)) + ": imported from srs file " + str(filename)
     )
 
+    dataset.meta.laser_frequency = Quantity(f"{info['reference_frequency']} cm^-1")
+
     if dataset.x.units is None and dataset.x.title == "data points":
         # interferogram
         dataset.meta.interferogram = True
         dataset.meta.td = list(dataset.shape)
         dataset.x._zpd = int(np.argmax(dataset)[-1])  # zero path difference
-        dataset.meta.laser_frequency = Quantity("15798.26 cm^-1")
         dataset.x.set_laser_frequency()
         dataset.x._use_time_axis = (
             False  # True to have time, else it will  be optical path difference
@@ -1247,13 +1253,19 @@ def _read_header(fid, pos):
             `x\1F`: Raman intensity
         - first x value (float32), 16 bytes behind
         - last x value (float32), 20 bytes behind
+        - ... unknown
         - scan points (UInt32), 28 bytes behind
         - zpd (UInt32),  32 bytes behind
         - number of scans (UInt32), 36 bytes behind
-        ... infos from 40 to 51 bytes behind are not none yet
+        - ... unknown
         - number of background scans (UInt32), 52 bytes behind
-
-        For spa and spg infos between 56 and 207 bytes behind are not none yet
+        - ... unknown
+        - collection length in 1/100th of sec (UIint32), 68 bytes behind
+        - ... unknown
+        - reference frequency (float32), 80 bytes behind
+        - ...
+        - optical velocity (float32), 188 bytes behind
+        - ...
         - spectrum history (text), 208 bytes behind
 
         For "rapid-scan" srs files:
@@ -1264,8 +1276,8 @@ def _read_header(fid, pos):
         - ny (UInt32), 1026
         ... y unit could be at pos+1030 with 01 = minutes ?
         - history (text), 1200 bytes behind (only initila hgistopry.
-           When reprocessed, updated histopry is at the end of the file after the
-           b`\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF` sequance
+           When reprocessed, updated history is at the end of the file after the
+           b`\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF` sequence
     """
 
     out = {}
@@ -1353,6 +1365,12 @@ def _read_header(fid, pos):
     out["nscan"] = _fromfile(fid, "uint32", 1)
     fid.seek(pos + 52)
     out["nbkgscan"] = _fromfile(fid, "uint32", 1)
+    fid.seek(pos + 68)
+    out["collection_length"] = _fromfile(fid, "float32", 1)
+    fid.seek(pos + 80)
+    out["reference_frequency"] = _fromfile(fid, "float32", 1)
+    fid.seek(pos + 188)
+    out["optical_velocity"] = _fromfile(fid, "float32", 1)
 
     if filetype == "spa, spg":
         out["history"] = _readbtext(fid, pos + 208, None)
