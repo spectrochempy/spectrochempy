@@ -69,8 +69,14 @@ ir.x.show_datapoints = False
 _ = ir.plot(xlim=(-0.04, 0.04))
 
 # %% [markdown]
-# Note that the `x` scale of the interferogram has been calculated using a laser frequency of 15798.26 cm$^{-1}$. If
-# this is not correct you can change it using the `set_laser_frequency` coordinate method:
+# Note that the `x` scale of the interferogram has been calculated using the laser frequency indicated in the original
+# omnic file. It is stored in the `meta` attribute of the NDDataset:
+
+# %%
+print(ir.meta.laser_frequency)
+
+# %% [markdown]
+# If absent, it can be set using the `set_laser_frequency()` method, e.g.:
 
 # %%
 ir.x.set_laser_frequency(15798.26 * ur("cm^-1"))
@@ -106,7 +112,9 @@ _ = irth.plot(xlim=(3999, 400))
 # %%
 irs = scp.read_spa("irdata/interferogram/spectre.SPA")
 prefs.figure.figsize = (7, 6)
-_ = irs.plot(label="omnic")
-_ = (irt - 0.4).plot(c="red", clear=False, xlim=(3999, 400), label="no hamming")
-ax = (irth - 0.2).plot(c="green", clear=False, xlim=(3999, 400), label="hamming")
+ax = irs.plot(label="omnic")
+(irt + 0.4).plot(c="red", linestyle="solid", clear=False, label="no hamming")
+(irth + 0.2).plot(c="green", linestyle="solid", clear=False, label="hamming")
+ax.set_xlim(4000.0, 400.0)
+ax.set_ylim(0.0, 3.1)
 _ = ax.legend()

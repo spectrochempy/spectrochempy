@@ -2,12 +2,17 @@
 
 ## Unreleased
 
+### NEW FEATURES
+* `read_omnic()`: now collects and store in meta: `collection_length`, `laser_frequency`, and `optical_velocity`.
+
 ### BUG FIXED
 * Issue #462, correct load and dump of multicoordinates in scp format.
 * MCRALS: handling of `nonnegSpec=[]` or `None` 
+* apodization: recognition of interferogram 
+* `read_srs()`: add mask when NAN values are present 
 
 ### DEPRECATED
-* MCRALS: 'logs' attribute now replaced by `log`.
+* MCRALS: `logs` attribute now replaced by `log`.
 
 ## Version 0.4.5 [2022-04-09]
 
