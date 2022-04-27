@@ -48,7 +48,7 @@ def _apodize_method(**units):
             retapod = kwargs.pop("retapod", False)
             dryrun = kwargs.pop("dryrun", False)
             # is_nmr = dataset.origin.lower() in ["topspin", ]
-            is_ir = dataset.origin.lower() in ["omnic", "opus"]
+            is_ir = dataset.meta.interferogram
 
             # On which axis do we want to apodize? (get axis from arguments)
             axis, dim = dataset.get_axis(**kwargs, negative_axis=True)

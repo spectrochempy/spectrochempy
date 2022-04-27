@@ -928,7 +928,7 @@ def _read_spa(*args, **kwargs):
     if len(spa_comments) > 1:
         dataset.description += "# Comments from Omnic:\n"
         for comment in spa_comments:
-            dataset.description += spa_comments + "\n---------------------\n"
+            dataset.description += comment + "\n---------------------\n"
 
     dataset.history = str(datetime.now(timezone.utc)) + ":imported from spa file(s)"
 
@@ -1393,7 +1393,7 @@ def _read_header(fid, pos):
         #  y unit could be at pos+1030 with 01 = minutes ?
         out["history"] = _readbtext(fid, pos + 1200, None)
 
-        if _readbtext(fid, pos + 208)[:10] == "Background":
+        if _readbtext(fid, pos + 208, 256)[:10] == "Background":
             # it is the header of a background
             out["background_name"] = _readbtext(fid, pos + 208, 256)[10:]
 
