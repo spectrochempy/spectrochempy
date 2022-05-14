@@ -21,7 +21,7 @@ pint>=0.18
 requests
 scipy==1.7.3
 tqdm
-traitlets
+traitlets<5.2
 traittypes
 xlrd
 pyyaml
@@ -44,11 +44,11 @@ pre-commit
 cffconvert
 mamba
 jupytext
-sphinx<4.0
+sphinx
 sphinx_rtd_theme
 autodocsumm
-sphinx-gallery<=0.7.0
-nbsphinx==0.8.1
+sphinx-gallery
+nbsphinx
 jupyter_sphinx
 json5
 sphinx-copybutton

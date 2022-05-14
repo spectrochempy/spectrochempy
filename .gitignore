@@ -168,3 +168,5 @@ NMR.pscp
 .ci/scpy3.10.yml
 .ci/scpy3.7.yml
 .ci/scpy3.9.yml
+A.scp
+C.scp
