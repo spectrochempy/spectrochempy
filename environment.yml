@@ -42,7 +42,7 @@ dependencies:
     - requests
     - scipy=1.7.3
     - tqdm
-    - traitlets
+    - traitlets<5.2
     - traittypes
     - xlrd
     - pyyaml
@@ -53,5 +53,3 @@ dependencies:
     - setuptools
     - setuptools_scm
     - git
-
-  
