@@ -7,9 +7,10 @@
 
 ### BUG FIXED
 * Issue #462, correct load and dump of multicoordinates in scp format.
-* MCRALS: handling of `nonnegSpec=[]` or `None` 
-* apodization: recognition of interferogram 
-* `read_srs()`: add mask when NAN values are present 
+* MCRALS: handling of `nonnegSpec=[]` or `None`.
+* apodization: recognition of interferogram.
+* `read_srs()`: add mask when NAN values are present.
+* Issues #468, Conda install problems.
 
 ### DEPRECATED
 * MCRALS: `logs` attribute now replaced by `log`.
