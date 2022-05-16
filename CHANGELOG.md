@@ -1,6 +1,6 @@
 # What's new
 
-## Unreleased
+## Version 0.4.6 [2022-05-16]
 
 ### NEW FEATURES
 * `read_omnic()`: now collects and store in meta: `collection_length`, `laser_frequency`, and `optical_velocity`.
