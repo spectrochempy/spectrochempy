@@ -82,24 +82,87 @@ def show_versions(file=sys.stdout):
     for key, val in get_sys_info():
         print(f"{key}: {val}", file=file)
     print(file=file)
-    deps = []
-    with open(REPOS / "environment.yml", "r") as f:
-        start = False
-        for dep in f.readlines():
-            if "dependencies" in dep and not dep.startswith("#"):
-                start = True
-            if not start:
-                continue
-            if dep.strip().startswith("-"):
-                dep = dep.strip()[2:].split("<")[0].split(">")[0].split("=")[0]
-                if dep != "python":
-                    deps.append(dep)
-    deps.append("spectrochempy")
+
+    # dependancies - TODO: update this list upon changes in env_template.yml
+    deps = (
+        """
+        quadprog,
+        brukeropusreader,
+        quaternion,
+        cantera,
+        colorama,
+        dill,
+        ipython,
+        jinja2,
+        matplotlib,
+        numba,
+        numpy,
+        pint,
+        requests,
+        scipy,
+        tqdm,
+        traitlets,
+        traittypes,
+        xlrd,
+        pyyaml,
+        ipywidgets,
+        ipympl,
+        setuptools,
+        setuptools_scm,
+        git,
+        jupyterlab,
+        nodejs,
+        pytest,
+        pytest-doctestplus,
+        pytest-flake8,
+        pytest-mock,
+        pyfakefs,
+        scikit-image,
+        coverage,
+        black,
+        pre-commit,
+        cffconvert,
+        mamba,
+        jupytext,
+        sphinx,
+        sphinx_rtd_theme,
+        autodocsumm,
+        sphinx-gallery,
+        nbsphinx,
+        jupyter_sphinx,
+        json5,
+        sphinx-copybutton,
+        numpydoc,
+        pandoc,
+        conda-build,
+        conda-verify,
+        anaconda-client,
+        xarray,
+        scikit-learn,
+        dash,
+        dash-bootstrap-components,
+        dash,
+        daq,
+        jupyter-dash,
+        plotly,
+        pip,
+        autodoc_traits,
+        dash_defer_js_import,
+        dash-ace,
+        spectrochempy
+        """.replace(
+            "\n", ""
+        )
+        .replace(" ", "")
+        .split(",")
+    )
+
     for dep in deps:
         mod = optional.import_optional_dependency(dep, errors="ignore")
         try:
             print(
-                f"{dep}: {optional.get_module_version(mod) if mod is not None else None}",
+                f"{dep}: "
+                f"{optional.get_module_version(mod) if mod is not None else None}",
                 file=file,
             )
         except ImportError:
