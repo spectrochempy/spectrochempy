@@ -53,6 +53,10 @@ def _integrate_method(method):
             del new._coordset.coords[idx]
 
         new.title = "area"
+        new.description = (
+            f"Integration of NDDataset '{dataset.name}' along dim: '{dim}'."
+        )
+
         if dataset.units is not None and dataset.coord(dim).units is not None:
             new._units = dataset.units * dataset.coord(dim).units
         elif dataset.units is not None:
@@ -175,7 +179,6 @@ def simpson(dataset, *args, **kwargs):
     >>> dataset[:,1250.:1800.].simps()
     NDDataset: [float64] a.u..cm^-1 (size: 55)
     """
-
     return scipy.integrate.simps(dataset.data, **kwargs)
 
 
