@@ -1,5 +1,10 @@
 # What's new
 
+## Unreleased
+
+### BUG FIXED
+* show_versions utility now work with user installation only.
+
 ## Version 0.4.6 [2022-05-16]
 
 ### NEW FEATURES
