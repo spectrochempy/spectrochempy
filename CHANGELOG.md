@@ -1,5 +1,10 @@
 # What's new
 
+## Unrealeased
+
+### BUG FIXED
+* read_opus handles "%Y/%m/%d" date format
+
 ## Version 0.4.7 [2022-05-16]
 
 ### BUG FIXED
