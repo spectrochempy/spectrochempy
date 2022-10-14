@@ -38,12 +38,14 @@ dependencies:
     - matplotlib=3.5
     - numba=0.55.0
     - numpy=1.21.5
+    
     - pint>=0.18
     - requests
     - scipy=1.7.3
     - tqdm
     - traitlets<5.2
     - traittypes
+    - tkinter
     - xlrd
     - pyyaml
     - ipywidgets

@@ -23,6 +23,7 @@ scipy==1.7.3
 tqdm
 traitlets<5.2
 traittypes
+tkinter
 xlrd
 pyyaml
 ipywidgets
