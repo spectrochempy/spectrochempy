@@ -2,6 +2,9 @@
 
 ## Unrealeased
 
+### NEW FEATURES
+* `cmap=None` can be used in `plot(method='stack')` 
+
 ### BUG FIXED
 * read_opus handles "%Y/%m/%d" date format
 

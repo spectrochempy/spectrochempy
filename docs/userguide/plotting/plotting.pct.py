@@ -153,6 +153,14 @@ prefs.axes.grid = True
 
 _ = dataset.plot()
 
+
+# %% [markdown]
+# The colormap can also be changed by setting `cmap` in the arguments.
+# If you prefer not using colormap, `cmap=None` should be used. For instance:
+
+# %%
+_ = dataset.plot(cmap=None)
+
 # %% [markdown]
 # Note that, by default, **sans-serif** font are used for all text in the figure.
 # But if you prefer, **serif**, or *monospace* font can be used instead. For instance:
