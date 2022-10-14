@@ -52,6 +52,7 @@ dependencies:
     - tqdm
     - traitlets<5.2
     - traittypes
+    - tkinter
     - xlrd
     - pyyaml
     - ipywidgets
