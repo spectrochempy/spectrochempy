@@ -465,8 +465,14 @@ class _QTFileDialogs:  # pragma: no cover
 
 class _TKFileDialogs:  # pragma: no cover
     def __init__(self):
-        import tkinter as tk
-
+        try:
+            import tkinter as tk
+        except ImportError as imp:
+            msg = (
+                "Spectrochempy requires tkinter."
+                "You should consider installing it via the command: `pip install tk`"
+            )
+            raise ImportError(msg) from imp
         root = tk.Tk()
         root.withdraw()
         root.overrideredirect(True)
