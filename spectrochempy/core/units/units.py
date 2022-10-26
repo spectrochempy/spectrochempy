@@ -26,10 +26,19 @@ from pint import (
     DimensionalityError,
     formatting,
     Context,
+    __version__,
 )
 
+pint_version = int(__version__.split(".")[1])
 
-from pint.unit import UnitsContainer, Unit, UnitDefinition
+if pint_version < 20:
+    from pint.unit import UnitsContainer, Unit, UnitDefinition
+else:
+    from pint.util import UnitsContainer
+    from pint import Unit
+    from pint.facets.plain import UnitDefinition
+
+# from pint.util import
 from pint.quantity import Quantity
 
 # from pint.formatting import siunitx_format_unit
