@@ -33,16 +33,13 @@ pint_version = int(__version__.split(".")[1])
 
 if pint_version < 20:
     from pint.unit import UnitsContainer, Unit, UnitDefinition
+    from pint.quantity import Quantity
+    from pint.converters import ScaleConverter
 else:
     from pint.util import UnitsContainer
-    from pint import Unit
-    from pint.facets.plain import UnitDefinition
+    from pint import Unit, Quantity
+    from pint.facets.plain import UnitDefinition, ScaleConverter
 
-# from pint.util import
-from pint.quantity import Quantity
-
-# from pint.formatting import siunitx_format_unit
-from pint.converters import ScaleConverter
 
 # ======================================================================================================================
 # Modify the pint behaviour
@@ -286,8 +283,26 @@ if globals().get("U_", None) is None:
 
     U_.define("ppm = 1. = ppm")
 
-    U_.define(UnitDefinition("percent", "pct", (), ScaleConverter(1 / 100.0)))
-    U_.define(UnitDefinition("weight_percent", "wt_pct", (), ScaleConverter(1 / 100.0)))
+    if pint_version < 20:
+        U_.define(UnitDefinition("percent", "pct", (), ScaleConverter(1 / 100.0)))
+        U_.define(
+            UnitDefinition("weight_percent", "wt_pct", (), ScaleConverter(1 / 100.0))
+        )
+    else:
+        U_.define(
+            UnitDefinition(
+                "percent", "pct", (), ScaleConverter(1 / 100.0), UnitsContainer()
+            )
+        )
+        U_.define(
+            UnitDefinition(
+                "weight_percent",
+                "wt_pct",
+                (),
+                ScaleConverter(1 / 100.0),
+                UnitsContainer(),
+            )
+        )
 
     U_.default_format = "~P"
     Q_ = U_.Quantity
