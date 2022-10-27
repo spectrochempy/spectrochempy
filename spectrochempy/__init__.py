@@ -54,36 +54,13 @@ It is a cross platform software, running on Linux, Windows or OS X.
 
 __all__ = ["api"]
 
+
 # import the main api
 
 from spectrochempy import api
 from spectrochempy.api import *  # noqa: F401
 
 __all__ += api.__all__
-
-
-# check version of pint
-def _check_pint_version():
-    import pint
-
-    from spectrochempy import optional
-    from spectrochempy.utils.version import Version
-    from spectrochempy.utils.exceptions import SpectroChemPyWarning
-    import warnings
-
-    vers = Version(optional.get_module_version(pint))
-    if vers < Version("0.18"):
-        raise ImportError("Minimal version of pint must be 0.18")
-    if vers < Version("0.20"):
-        warnings.warn(
-            "Your current pint version (0.19) could be not supported in the future.\\"
-            "Please consider upgrading:\\"
-            "> pip install pint --upgrade",
-            SpectroChemPyWarning,
-        )
-
-
-_check_pint_version()
 
 # ==============================================================================
 if __name__ == "__main__":
