@@ -33,7 +33,7 @@ from pint import (
 pint_version = int(__version__.split(".")[1])
 if pint_version < 18:
     raise ImportError(
-        "Minimal version of pint must be 0.18. Please consider upgrading it "
+        "!!!v={pint_version} !!! Minimal version of pint must be 0.18. Please consider upgrading it "
         "(e.g. `> pip install pint --upgrade` or `> conda update pint`)\n"
     )
 if pint_version < 20:
