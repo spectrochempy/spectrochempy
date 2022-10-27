@@ -29,14 +29,19 @@ from pint import (
     __version__,
 )
 
+# check pin version
 pint_version = int(__version__.split(".")[1])
-
+if pint_version < 18:
+    raise ImportError(
+        "Current pint version is {__version__} but must be 0.18 or higher. Please consider upgrading it "
+        "(e.g. `> pip install pint --upgrade` or `> conda update pint`)\n"
+    )
 if pint_version < 20:
     print(
-        f"Spectrochempy Warning: your current pint version is ({__version__}). It might not be suppported in the future."
-        "Please consider upgrading it to 0.20 or higher:"
+        f"Warning: current pint version is {__version__}. It might not be supported by SpectroChemPy in the future.\n"
+        f"Please consider upgrading it to 0.20 or higher (e.g. `> pip install pint --upgrade` or `> conda update pint`)\n"
     )
-    print("> pip install pint --upgrade")
+
     from pint.unit import UnitsContainer, Unit, UnitDefinition
     from pint.quantity import Quantity
     from pint.converters import ScaleConverter
