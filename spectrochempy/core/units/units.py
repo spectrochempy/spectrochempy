@@ -26,14 +26,25 @@ from pint import (
     DimensionalityError,
     formatting,
     Context,
+    __version__,
 )
 
+pint_version = int(__version__.split(".")[1])
 
-from pint.unit import UnitsContainer, Unit, UnitDefinition
-from pint.quantity import Quantity
+if pint_version < 20:
+    print(
+        f"Spectrochempy Warning: your current pint version is ({__version__}). It might not be suppported in the future."
+        "Please consider upgrading it to 0.20 or higher:"
+    )
+    print("> pip install pint --upgrade")
+    from pint.unit import UnitsContainer, Unit, UnitDefinition
+    from pint.quantity import Quantity
+    from pint.converters import ScaleConverter
+else:
+    from pint.util import UnitsContainer
+    from pint import Unit, Quantity
+    from pint.facets.plain import UnitDefinition, ScaleConverter
 
-# from pint.formatting import siunitx_format_unit
-from pint.converters import ScaleConverter
 
 # ======================================================================================================================
 # Modify the pint behaviour
@@ -277,8 +288,26 @@ if globals().get("U_", None) is None:
 
     U_.define("ppm = 1. = ppm")
 
-    U_.define(UnitDefinition("percent", "pct", (), ScaleConverter(1 / 100.0)))
-    U_.define(UnitDefinition("weight_percent", "wt_pct", (), ScaleConverter(1 / 100.0)))
+    if pint_version < 20:
+        U_.define(UnitDefinition("percent", "pct", (), ScaleConverter(1 / 100.0)))
+        U_.define(
+            UnitDefinition("weight_percent", "wt_pct", (), ScaleConverter(1 / 100.0))
+        )
+    else:
+        U_.define(
+            UnitDefinition(
+                "percent", "pct", (), ScaleConverter(1 / 100.0), UnitsContainer()
+            )
+        )
+        U_.define(
+            UnitDefinition(
+                "weight_percent",
+                "wt_pct",
+                (),
+                ScaleConverter(1 / 100.0),
+                UnitsContainer(),
+            )
+        )
 
     U_.default_format = "~P"
     Q_ = U_.Quantity
