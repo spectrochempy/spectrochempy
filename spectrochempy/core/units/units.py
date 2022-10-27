@@ -29,7 +29,7 @@ from pint import (
     __version__,
 )
 
-# check pin version
+# check pint version
 pint_version = int(__version__.split(".")[1])
 if pint_version < 18:
     raise ImportError(
