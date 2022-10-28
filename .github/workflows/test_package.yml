@@ -1,12 +1,14 @@
 name: Tests
 
-on:
+on: 
   push:
-
     branches:
       - master
       - develop
-
+  
+  schedule:
+    - cron:  '15 8 * * *'
+  
   pull_request:
 
   workflow_dispatch:
