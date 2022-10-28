@@ -7,7 +7,7 @@ on:
       - develop
   
   schedule:
-    - cron:  '15 8 * * *'
+    - cron:  '00 9 * * *'
   
   pull_request:
 
