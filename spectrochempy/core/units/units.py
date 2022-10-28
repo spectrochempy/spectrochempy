@@ -26,14 +26,30 @@ from pint import (
     DimensionalityError,
     formatting,
     Context,
+    __version__,
 )
 
+# check pint version
+pint_version = int(__version__.split(".")[1])
+if pint_version < 18:
+    raise ImportError(
+        "Current pint version is {__version__} but must be 0.18 or higher. Please consider upgrading it "
+        "(e.g. `> pip install pint --upgrade` or `> conda update pint`)\n"
+    )
+if pint_version < 20:
+    print(
+        f"Warning: current pint version is {__version__}. It might not be supported by SpectroChemPy in the future.\n"
+        f"Please consider upgrading it to 0.20 or higher (e.g. `> pip install pint --upgrade` or `> conda update pint`)\n"
+    )
 
-from pint.unit import UnitsContainer, Unit, UnitDefinition
-from pint.quantity import Quantity
+    from pint.unit import UnitsContainer, Unit, UnitDefinition
+    from pint.quantity import Quantity
+    from pint.converters import ScaleConverter
+else:
+    from pint.util import UnitsContainer
+    from pint import Unit, Quantity
+    from pint.facets.plain import UnitDefinition, ScaleConverter
 
-# from pint.formatting import siunitx_format_unit
-from pint.converters import ScaleConverter
 
 # ======================================================================================================================
 # Modify the pint behaviour
@@ -277,8 +293,26 @@ if globals().get("U_", None) is None:
 
     U_.define("ppm = 1. = ppm")
 
-    U_.define(UnitDefinition("percent", "pct", (), ScaleConverter(1 / 100.0)))
-    U_.define(UnitDefinition("weight_percent", "wt_pct", (), ScaleConverter(1 / 100.0)))
+    if pint_version < 20:
+        U_.define(UnitDefinition("percent", "pct", (), ScaleConverter(1 / 100.0)))
+        U_.define(
+            UnitDefinition("weight_percent", "wt_pct", (), ScaleConverter(1 / 100.0))
+        )
+    else:
+        U_.define(
+            UnitDefinition(
+                "percent", "pct", (), ScaleConverter(1 / 100.0), UnitsContainer()
+            )
+        )
+        U_.define(
+            UnitDefinition(
+                "weight_percent",
+                "wt_pct",
+                (),
+                ScaleConverter(1 / 100.0),
+                UnitsContainer(),
+            )
+        )
 
     U_.default_format = "~P"
     Q_ = U_.Quantity
