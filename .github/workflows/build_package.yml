@@ -7,7 +7,7 @@ on:
       - develop
       
   schedule:
-    - cron: '00 2 * * *'
+    - cron: '00 0 * * *'
   
   pull_request:
 
@@ -15,7 +15,6 @@ on:
     types: [published]
 
 jobs:
-
   # Job 1
   build-and-publish_pypi:
 
