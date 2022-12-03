@@ -58,7 +58,8 @@ jobs:
           # check for CC_TEST_REPORTER_ID availability
           unset HAS_CC_TEST_REPORTER_ID
           if [ ! -z $CC_TEST_REPORTER_ID ]; then HAS_CC_TEST_REPORTER_ID='true' ; fi
-          echo "{name}={HAS_CC_TEST_REPORTER_ID::${HAS_CC_TEST_REPORTER_ID}}"  >> $GITHUB_OUTPUT
+          echo set-output name=HAS_CC_TEST_REPORTER_ID::${HAS_CC_TEST_REPORTER_ID}
+          echo ::set-output name=HAS_CC_TEST_REPORTER_ID::${HAS_CC_TEST_REPORTER_ID}
 
       - name: Download CodeClimate reporter
         if: ${{ github.event_name == 'push'
