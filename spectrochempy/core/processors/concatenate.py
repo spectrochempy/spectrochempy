@@ -148,10 +148,12 @@ def concatenate(*datasets, **kwargs):
                             coord._labels = np.concatenate(
                                 [label for label in labels[:, i]]
                             )
-
-            coords[dim]._data = np.concatenate(
-                tuple((ds.coordset[dim].data for ds in datasets))
-            )
+            coord_data_tuple = tuple((ds.coordset[dim].data for ds in datasets))
+            none_coord = len([x for x in coord_data_tuple if x is None])
+            if not none_coord:
+                coords[dim]._data = np.concatenate(coord_data_tuple)
+            else:
+                warn(f"Some dataset(s) coordinates in the {dim} dimension are None.")
 
     out = dataset.copy()
     out._data = data
