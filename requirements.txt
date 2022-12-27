@@ -14,9 +14,9 @@ colorama
 dill
 ipython>=7.31.1
 jinja2<3.1
-matplotlib==3.5
-numba==0.55.0
-numpy==1.21.5
+matplotlib>=3.5
+numba==0.55.2
+numpy>=1.22
 pint>=0.18
 requests
 scipy==1.7.3
