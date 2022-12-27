@@ -1,5 +1,5 @@
 <h1 align ="center">
-<img src='https://github.com/cambiegroup/spectrochempy/raw/master/docs/_static/scpy.png' width="150">
+<img src='https://github.com/spectrochempy/spectrochempy/raw/master/docs/_static/scpy.png' width="150">
 <br>
 SpectroChemPy
 </h1>

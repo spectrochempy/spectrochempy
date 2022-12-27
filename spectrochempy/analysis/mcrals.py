@@ -363,14 +363,18 @@ class MCRALS(HasTraits):
             C.set_coordset(y=cy, x=cx)
 
         change = tol + 1
-        stdev = X.std()
+        stdev = np.std(X.data)
         niter = 0
         ndiv = 0
 
-        log = "*** ALS optimisation log***\n"
-        log += "#iter     Error/PCA        Error/Exp      %change \n"
-        log += "------------------------------------------------- \n"
+        log = "*** ALS optimisation log*** \n"
         info_(log)
+        logentry = "#iter     RSE / PCA        RSE / Exp      %change \n"
+        log += logentry
+        info_(logentry)
+        logentry = "------------------------------------------------- \n"
+        log += logentry
+        info_(logentry)
 
         while change >= tol and niter < maxit and ndiv < maxdiv:
 
@@ -479,11 +483,11 @@ class MCRALS(HasTraits):
             # compute residuals
             # -----------------
             X_hat = dot(C, St)
-            stdev2 = (X_hat - X.data).std()
+            stdev2 = np.std(X_hat.data - X.data)
             change = 100 * (stdev2 - stdev) / stdev
             stdev = stdev2
 
-            stdev_PCA = (X_hat - Xpca.data).std()  #
+            stdev_PCA = np.std(X_hat.data - Xpca.data)  #
 
             logentry = "{:3d}      {:10f}      {:10f}      {:10f}".format(
                 niter, stdev_PCA, stdev2, change

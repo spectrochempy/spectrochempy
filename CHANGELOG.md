@@ -2,7 +2,12 @@
 
 ## Unrealeased
 
+### NEW FEATURES
+* `cmap=None` can be used in `plot(method='stack')` 
+* deprecation warning when pint version < 0.20
+
 ### BUG FIXED
+* issue #490, compatibility with pint 0.20
 * read_opus handles "%Y/%m/%d" date format
 
 ## Version 0.4.7 [2022-05-16]

@@ -484,11 +484,16 @@ def plot_2D(dataset, method=None, **kwargs):
 
         line0 = mpl.lines.Line2D(xdata, zdata[0], lw=lw, picker=True)
 
+        if cmap is None:
+            colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
         for i in range(zdata.shape[0]):
             li = cpy(line0)
             li.set_ydata(zdata[i])
             lines.append(li)
-            li.set_color(scalarMap.to_rgba(ydata[i]))
+            if cmap is not None:
+                li.set_color(scalarMap.to_rgba(ydata[i]))
+            else:
+                li.set_color(colors[i % len(colors)])
             fmt = kwargs.get("label_fmt", "{:.5f}")
             li.set_label(fmt.format(ydata[i]))
             li.set_zorder(zdata.shape[0] + 1 - i)
