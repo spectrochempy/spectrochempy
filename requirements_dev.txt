@@ -15,13 +15,13 @@ dill
 ipython>=7.31.1
 jinja2
 matplotlib>=3.5
-numba==0.55.2
+numba>=0.55.2
 numpy>=1.22
 pint>=0.18
 requests
-scipy==1.7.3
+scipy>=1.7.3
 tqdm
-traitlets<5.2
+traitlets>=5.2
 traittypes
 xlrd
 pyyaml
