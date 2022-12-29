@@ -49,7 +49,7 @@ dependencies:
     - requests
     - scipy>=1.7.3
     - tqdm
-    - traitlets>=5.2
+    - traitlets
     - traittypes
     - xlrd
     - pyyaml
