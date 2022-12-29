@@ -334,6 +334,21 @@ def get_config_dir():
     return config
 
 
+def get_log_dir():
+
+    # first look for SCP_LOGS
+    logdir = environ.get("SCP_LOGS")
+
+    if logdir is not None and Path(logdir).exists():
+        return Path(logdir)
+
+    logdir = _find_or_create_spectrochempy_dir() / "logs"
+    if not logdir.exists():
+        logdir.mkdir(exist_ok=True)
+
+    return logdir
+
+
 # ======================================================================================================================
 # Magic ipython function
 # ======================================================================================================================
@@ -836,7 +851,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
             "rotatingfile": {
                 "class": "logging.handlers.RotatingFileHandler",
                 "level": "DEBUG",
-                "filename": str(get_config_dir().parent / "logs" / "spectrochempy.log"),
+                "filename": str(get_log_dir() / "spectrochempy.log"),
                 "maxBytes": 32768,
                 "backupCount": 5,
             }
@@ -1164,15 +1179,10 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
     def _log_level_changed(self, change):
 
         # log file
-        if change.new == DEBUG:
-            self.log.handlers[0].setLevel(INFO)  # no debug in the stdout
-            self.log.handlers[1].setLevel(DEBUG)
-        else:
-            self.log.handlers[0].setLevel(change.new)
-            self.log.handlers[1].setLevel(change.new)
+        self.log.setLevel(change.new)
+        self.log.handlers[0].setLevel(change.new)
+        self.log.handlers[1].setLevel(DEBUG)
 
-        # root
-        self.log.setLevel(DEBUG)  # reset to DEBUG
         self.log.info(
             f"changed default log_level to {logging.getLevelName(change.new)}"
         )

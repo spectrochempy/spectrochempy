@@ -23,12 +23,12 @@ def test_logger(caplog):
 
     # We can set the level using strings
     set_loglevel("DEBUG")
-    assert logger.handlers[0].level == INFO  # DEBUG only on the file
+    assert logger.handlers[0].level == DEBUG
     assert logger.handlers[1].level == DEBUG
 
     set_loglevel(WARNING)
     assert logger.handlers[0].level == WARNING
-    assert logger.handlers[1].level == WARNING
+    assert logger.handlers[1].level == DEBUG
 
     error_("\n" + "*" * 80 + "\n")
     debug_("debug in WARNING level - should not appear")
@@ -40,7 +40,7 @@ def test_logger(caplog):
 
     set_loglevel(INFO)
     assert logger.handlers[0].level == INFO
-    assert logger.handlers[1].level == INFO
+    assert logger.handlers[1].level == DEBUG
 
     debug_("debug in INFO level - should not appear on stdout")
     info_("OK - info in INFO level")
@@ -48,10 +48,6 @@ def test_logger(caplog):
     error_("OK This is an Error")
 
     error_("\n" + "*" * 80 + "\n")
-
-    set_loglevel("DEBUG")
-    assert logger.handlers[0].level == INFO
-    assert logger.handlers[1].level == DEBUG
 
     debug_("OK - debug in DEBUG level")
     info_("OK - info in DEBUG level")

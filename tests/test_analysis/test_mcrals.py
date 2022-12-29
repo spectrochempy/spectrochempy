@@ -6,7 +6,7 @@ import os
 import numpy as np
 
 from spectrochempy.core.dataset.nddataset import NDDataset, Coord
-from spectrochempy import dot, show, set_loglevel
+from spectrochempy import dot, set_loglevel
 from spectrochempy.analysis.mcrals import MCRALS
 from spectrochempy.utils import show
 
