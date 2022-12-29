@@ -55,7 +55,7 @@ jobs:
           python3 -m pip install pytest-mock pyfakefs cffconvert
           python3 -m pip install numpydoc>=1.2
 
-      - name: Setup Code Climate reporting
+      - name: Test, coverage and Code Climate reporting
         uses: paambaati/codeclimate-action@v3.2.0
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
