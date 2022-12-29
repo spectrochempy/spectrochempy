@@ -851,7 +851,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
             "rotatingfile": {
                 "class": "logging.handlers.RotatingFileHandler",
                 "level": "DEBUG",
-                "filename": str(get_config_dir().parent / "logs" / "spectrochempy.log"),
+                "filename": str(get_log_dir() / "spectrochempy.log"),
                 "maxBytes": 32768,
                 "backupCount": 5,
             }
