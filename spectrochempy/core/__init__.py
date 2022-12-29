@@ -39,11 +39,11 @@ def _format_args(*args, **kwargs):
     formatter = logging.Formatter(
         f"[ %(asctime)s - {args[0]}{inspect.stack()[2][3]} ] - %(message)s"
     )
-    app.logs.handlers[1].setFormatter(formatter)
-    if app.logs.handlers[0].level == DEBUG:
-        app.logs.handlers[0].setFormatter(formatter)
+    app.log.handlers[1].setFormatter(formatter)
+    if app.log.handlers[0].level == DEBUG:
+        app.log.handlers[0].setFormatter(formatter)
     else:
-        app.logs.handlers[0].setFormatter(logging.Formatter("%(message)s"))
+        app.log.handlers[0].setFormatter(logging.Formatter("%(message)s"))
     for arg in args[1:]:
         stg += pstr(arg, **kwargs) + " "
     return stg.replace("\0", "").replace("\n", " ").strip()
@@ -63,7 +63,7 @@ def info_(*args, **kwargs):
     Formatted info message.
     """
     stg = _format_args("", *args, **kwargs)
-    app.logs.info(stg)
+    app.log.info(stg)
 
 
 # ------------------------------------------------------------------
@@ -73,7 +73,7 @@ def debug_(*args, **kwargs):
     """
     stg = _format_args("", "DEBUG: ", *args, **kwargs)
     try:
-        app.logs.debug(stg)
+        app.log.debug(stg)
     except NameError:  # pragma: no cover
         # works only if app if already loaded
         pass
@@ -88,7 +88,7 @@ def error_(*args, **kwargs):
     if not isinstance(args[0], str):
         stg += type(args[0]).__name__ + ": "
     stg += _format_args("", "ERROR: ", *args, **kwargs)
-    app.logs.error(stg)
+    app.log.error(stg)
 
 
 # ------------------------------------------------------------------
@@ -99,7 +99,7 @@ def warning_(*args, **kwargs):
     stg = _format_args("", "WARNING: ", *args, **kwargs)
     warnings.warn(stg)
     # also write warning in log
-    app.logs.warning(stg)
+    app.log.warning(stg)
 
 
 __all__ += ["info_", "debug_", "error_", "warning_", "print_"]

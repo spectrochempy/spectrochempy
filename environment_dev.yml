@@ -33,16 +33,16 @@ dependencies:
     # for the core package
     - colorama
     - dill
-    - ipython>=7.31.1
-    - jinja2<3.1
-    - matplotlib>=3.5
-    - numba=0.55.2
-    - numpy>=1.22
-    - pint>=0.18
+    - ipython
+    - jinja2
+    - matplotlib
+    - numba
+    - numpy
+    - pint
     - requests
-    - scipy=1.7.3
+    - scipy
     - tqdm
-    - traitlets<5.2
+    - traitlets
     - traittypes
     - xlrd
     - pyyaml
@@ -54,7 +54,7 @@ dependencies:
     - setuptools_scm
     - git
 
-
+  
 
     # Jupyter lab
     - jupyterlab>=2.2.10
@@ -100,7 +100,7 @@ dependencies:
     # - xarray
     # - datashader
     # - scikit-learn
-
+    
     - pip
     - pip:
         - autodoc_traits

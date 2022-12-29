@@ -15,7 +15,6 @@ __all__ = []
 
 import sys
 import logging
-from logging.handlers import RotatingFileHandler
 import subprocess
 import warnings
 import pprint
@@ -289,6 +288,7 @@ __cite__ = (
 "How to cite this package"
 
 
+# Directories
 # ..........................................................................
 def _find_or_create_spectrochempy_dir():
     directory = Path.home() / ".spectrochempy"
@@ -300,6 +300,53 @@ def _find_or_create_spectrochempy_dir():
         raise IOError(msg.format(directory))
 
     return directory
+
+
+def get_config_dir():
+    """
+    Determines the SpectroChemPy configuration directory name and
+    creates the directory if it doesn't exist.
+
+    This directory is typically ``$HOME/.spectrochempy/config``,
+    but if the
+    SCP_CONFIG_HOME environment variable is set and the
+    ``$SCP_CONFIG_HOME`` directory exists, it will be that
+    directory.
+
+    If neither exists, the former will be created.
+
+    Returns
+    -------
+    config_dir : str
+        The absolute path to the configuration directory.
+    """
+
+    # first look for SCP_CONFIG_HOME
+    scp = environ.get("SCP_CONFIG_HOME")
+
+    if scp is not None and Path(scp).exists():
+        return Path(scp)
+
+    config = _find_or_create_spectrochempy_dir() / "config"
+    if not config.exists():
+        config.mkdir(exist_ok=True)
+
+    return config
+
+
+def get_log_dir():
+
+    # first look for SCP_LOGS
+    logdir = environ.get("SCP_LOGS")
+
+    if logdir is not None and Path(logdir).exists():
+        return Path(logdir)
+
+    logdir = _find_or_create_spectrochempy_dir() / "logs"
+    if not logdir.exists():
+        logdir.mkdir(exist_ok=True)
+
+    return logdir
 
 
 # ======================================================================================================================
@@ -741,18 +788,13 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
 
     @default("config_dir")
     def _get_config_dir_default(self):
-        return self.get_config_dir()
+        return get_config_dir()
 
     config_manager = Instance(BaseJSONConfigManager)
 
     @default("config_manager")
     def _get_default_config_manager(self):
         return BaseJSONConfigManager(config_dir=str(self.config_dir))
-
-    log_format = Unicode(
-        "%(highlevel)s %(message)s",
-        help="The Logging format template",
-    ).tag(config=True)
 
     debug = Bool(True, help="Set DEBUG mode, with full outputs").tag(config=True)
     """Flag to set debugging mode."""
@@ -797,6 +839,32 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
 
     port = Integer(7000, help="Dash server port").tag(config=True)
     """Dash server port."""
+
+    # logger
+    log_format = Unicode(
+        "%(highlevel)s %(message)s",
+        help="The Logging format template",
+    ).tag(config=True)
+
+    logging_config = {
+        "handlers": {
+            "rotatingfile": {
+                "class": "logging.handlers.RotatingFileHandler",
+                "level": "DEBUG",
+                "filename": str(get_log_dir() / "spectrochempy.log"),
+                "maxBytes": 32768,
+                "backupCount": 5,
+            }
+        },
+        "loggers": {
+            "SpectroChemPy": {
+                "level": "DEBUG",
+                # NOTE: if you don't list the default "console"
+                # handler here then it will be disabled
+                "handlers": ["console", "rotatingfile"],
+            },
+        },
+    }
 
     # Command line interface
     # ------------------------------------------------------------------------
@@ -862,25 +930,6 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
     def __init__(self, **kwargs):
 
         super().__init__(**kwargs)
-
-        self.logs = (
-            self.log
-        )  # we change the no name in order to avoid latter conflict with numpy.log
-
-        self.logs.setLevel(0)  # reset to NOTSET
-
-        # Set a log filehandler
-        logdir = self.get_config_dir().parent / "logs"
-        logdir.mkdir(exist_ok=True)
-        rh = RotatingFileHandler(
-            str(logdir / "spectrochempy.log"), maxBytes=32 * 1024, backupCount=5
-        )
-        rh.setLevel(INFO)
-        rh.setFormatter(logging.Formatter("%(message)s"))
-        self.logs.addHandler(rh)
-
-        self.log.info("started")
-
         self.initialize()
 
     def initialize(self, argv=None):
@@ -937,7 +986,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
         # warning handler
         # --------------------------------------------------------------------
         def send_warnings_to_log(message, category):
-            self.logs.warning(f"{category.__name__} - {message}")
+            self.log.warning(f"{category.__name__} - {message}")
 
         warnings.showwarning = send_warnings_to_log
 
@@ -953,7 +1002,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
                 if self.log_level == logging.DEBUG:
                     shell.showtraceback((etype, evalue, tb), tb_offset=tb_offset)
                 else:
-                    self.logs.error(f"{etype.__name__}: {evalue}")
+                    self.log.error(f"{etype.__name__}: {evalue}")
 
             ipy.set_custom_exc((Exception,), _custom_exc)
 
@@ -999,39 +1048,6 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
         )  # config=self.config)  -- passing args deprecated in traitlets 4.2
         self.preferences = GeneralPreferences(config=self.config, parent=self)
         self.plot_preferences = PlotPreferences(config=self.config, parent=self)
-
-    # ..........................................................................
-    @staticmethod
-    def get_config_dir():
-        """
-        Determines the SpectroChemPy configuration directory name and
-        creates the directory if it doesn't exist.
-
-        This directory is typically ``$HOME/.spectrochempy/config``,
-        but if the
-        SCP_CONFIG_HOME environment variable is set and the
-        ``$SCP_CONFIG_HOME`` directory exists, it will be that
-        directory.
-
-        If neither exists, the former will be created.
-
-        Returns
-        -------
-        config_dir : str
-            The absolute path to the configuration directory.
-        """
-
-        # first look for SCP_CONFIG_HOME
-        scp = environ.get("SCP_CONFIG_HOME")
-
-        if scp is not None and Path(scp).exists():
-            return Path(scp)
-
-        config = _find_or_create_spectrochempy_dir() / "config"
-        if not config.exists():
-            config.mkdir(exist_ok=True)
-
-        return config
 
     def start_show_config(self):
         """
@@ -1139,7 +1155,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
         if msg:
             self.log.warning(msg)
 
-        self.logs.info("\n\nAPI loaded - application is ready")
+        self.log.info("\n\nAPI loaded - application is ready")
         return True
 
     # ..........................................................................
@@ -1151,7 +1167,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
 
         if not fname.exists() or self.reset_config:
             sfil = self.generate_config_file()
-            self.logs.info(f"Generating default config file: {fname}")
+            self.log.info(f"Generating default config file: {fname}")
             with open(fname, "w") as fil:
                 fil.write(sfil)
 
@@ -1163,16 +1179,11 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
     def _log_level_changed(self, change):
 
         # log file
-        if change.new == DEBUG:
-            self.logs.handlers[0].setLevel(INFO)  # no debug in the stdout
-            self.logs.handlers[1].setLevel(DEBUG)
-        else:
-            self.logs.handlers[0].setLevel(change.new)
-            self.logs.handlers[1].setLevel(change.new)
+        self.log.setLevel(change.new)
+        self.log.handlers[0].setLevel(change.new)
+        self.log.handlers[1].setLevel(DEBUG)
 
-        # root
-        self.logs.setLevel(DEBUG)  # reset to DEBUG
-        self.logs.info(
+        self.log.info(
             f"changed default log_level to {logging.getLevelName(change.new)}"
         )
 
