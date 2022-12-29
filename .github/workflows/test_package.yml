@@ -60,5 +60,5 @@ jobs:
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         with:
-          coverageCommand: coverage run --rcfile=tests/.coveragerc -m pytest tests
+          coverageCommand:  bash .ci/test_coverage.sh
           debug: true
