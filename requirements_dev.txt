@@ -30,7 +30,7 @@ ipympl
 setuptools
 setuptools_scm
 gitpython
-jupyterlab>=2.2.10
+jupyterlab
 nodejs
 pytest
 pytest-doctestplus
@@ -52,6 +52,6 @@ nbsphinx
 jupyter_sphinx
 json5
 sphinx-copybutton
-numpydoc>=1.2
+numpydoc
 pandoc
 autodoc_traits
