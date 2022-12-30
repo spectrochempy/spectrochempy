@@ -58,7 +58,6 @@ jobs:
       - name: Test, coverage and Code Climate reporting
         uses: paambaati/codeclimate-action@v3.2.0
         env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+          CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
         with:
           coverageCommand:  bash .ci/test_coverage.sh
-          debug: true
