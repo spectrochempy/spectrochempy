@@ -1,19 +1,21 @@
 # What's new
 
-## Unrealeased
+## Unreleased
 
 ### NEW FEATURES
-* `cmap=None` can be used in `plot(method='stack')` 
-* deprecation warning when pint version < 0.20
+* `cmap=None` can be used in `plot(method='stack')`
+* Deprecation warning when pint version < 0.20
+* Compatibility with matplotlib >= 3.5
+* Compatibility with numpy >= 1.22
 
 ### BUG FIXED
-* issue #490, compatibility with pint 0.20
-* read_opus handles "%Y/%m/%d" date format
+* Issue #490, compatibility with pint 0.20
+* `read_opus` handles "%Y/%m/%d" date format
 
 ## Version 0.4.7 [2022-05-16]
 
 ### BUG FIXED
-* show_versions utility now work with user installation only.
+* Show_versions utility now work with user installation only.
 
 ## Version 0.4.6 [2022-05-16]
 
