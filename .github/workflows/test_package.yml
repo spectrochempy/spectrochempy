@@ -55,9 +55,14 @@ jobs:
           python3 -m pip install pytest-mock pyfakefs cffconvert
           python3 -m pip install numpydoc>=1.2
 
-      - name: Test, coverage and Code Climate reporting
+      - name: Test and coverage
+        run: |
+          coverage run --rcfile=tests/.coveragerc -m pytest tests
+          coverage report
+          coverage xml
+
+      - name:Code Climate reporting
+        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.10' && matrix.os == 'ubuntu-latest' }}
         uses: paambaati/codeclimate-action@v3.2.0
         env:
           CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
-        with:
-          coverageCommand:  bash .ci/test_coverage.sh
