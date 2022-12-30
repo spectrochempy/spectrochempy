@@ -118,7 +118,7 @@ jobs:
 
       - name: Build package
         run: |
-          conda update -n base -c defaults conda
+          conda update conda
           conda install conda-build conda-verify
           conda-build .conda --output-folder out
 
