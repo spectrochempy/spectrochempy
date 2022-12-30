@@ -61,7 +61,7 @@ jobs:
           coverage report
           coverage xml
 
-      - name:Code Climate reporting
+      - name: Code Climate reporting
         uses: paambaati/codeclimate-action@v3.2.0
         env:
           CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
