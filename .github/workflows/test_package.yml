@@ -5,10 +5,10 @@ on:
     branches:
       - master
       - develop
-  
+
   schedule:
     - cron: '00 0 * * *'
-  
+
   pull_request:
 
   workflow_dispatch:
@@ -49,42 +49,20 @@ jobs:
           python3 -m pip install --upgrade pip setuptools wheel
           python3 -m pip install .
 
-      - name: Initialize CodeClimate variable
-        id: vars
-        shell: bash
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+      - name: Install dependencies for testing
         run: |
-          # check for CC_TEST_REPORTER_ID availability
-          unset HAS_CC_TEST_REPORTER_ID
-          if [ ! -z $CC_TEST_REPORTER_ID ]; then HAS_CC_TEST_REPORTER_ID='true' ; fi
-          echo set-output name=HAS_CC_TEST_REPORTER_ID::${HAS_CC_TEST_REPORTER_ID}
-          echo ::set-output name=HAS_CC_TEST_REPORTER_ID::${HAS_CC_TEST_REPORTER_ID}
-
-      - name: Download CodeClimate reporter
-        if: ${{ github.event_name == 'push'
-                && matrix.pythonVersion == '3.10'
-                && matrix.os == 'ubuntu-latest'
-                && steps.vars.outputs.HAS_CC_TEST_REPORTER_ID == 'true'}}
-        run: |
-          # downloading cc-test-reporter
-          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-          chmod +x ./cc-test-reporter
-          ./cc-test-reporter before-build
-
-      - name: Test, generate coverage information
-        run: |
-          # install dependencies for testing
           python3 -m pip install coverage pytest pytest-doctestplus pytest-flake8
           python3 -m pip install pytest-mock pyfakefs cffconvert
           python3 -m pip install numpydoc>=1.2
-          coverage run --rcfile=tests/.coveragerc -m pytest tests
 
-      - name: Report Coverage info to CodeClimate
-        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.10'
-          && matrix.os == 'ubuntu-latest' && steps.vars.outputs.HAS_CC_TEST_REPORTER_ID == 'true'}}
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+      - name: Test and coverage
         run: |
+          coverage run --rcfile=tests/.coveragerc -m pytest tests
+          coverage report
           coverage xml
-          ./cc-test-reporter after-build
+
+      - name: Code Climate reporting
+        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.10' && matrix.os == 'ubuntu-latest' }}
+        uses: paambaati/codeclimate-action@v3.2.0
+        env:
+          CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
