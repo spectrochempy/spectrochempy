@@ -17,7 +17,13 @@ jobs:
 
   test-package:
 
-    if: "!startsWith(github.ref, 'refs/release/')"
+    # prevent cron jobs from running on forks or release
+    if:
+      (github.event_name == 'schedule'
+       && github.repository == 'spectrochempy/spectrochempy'
+       && !startsWith(github.ref, 'refs/release/')) || (
+       github.event_name != 'schedule'
+       && !startsWith(github.ref, 'refs/release/'))
 
     name: Test using ${{ matrix.os }} and python ${{ matrix.pythonVersion }}
 

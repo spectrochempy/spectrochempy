@@ -1,8 +1,8 @@
 channels:
+  - conda-forge
   - spectrocat
   - cantera
   - cantera/label/dev
-  - conda-forge
   - plotly
   - defaults
 ssl_verify: true
