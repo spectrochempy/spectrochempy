@@ -18,6 +18,10 @@ jobs:
   # Job 1
   build-and-publish_pypi:
 
+    # prevent cron jobs from running on forks
+    if:
+      (github.event_name == 'schedule' && github.repository == 'spectrochempy/spectrochempy') || (github.event_name != 'schedule')
+
     name: Build and publish distribution to PyPI
     runs-on: ubuntu-latest
 
@@ -64,6 +68,10 @@ jobs:
     name: Build and publish Conda package to Anaconda
     runs-on: ubuntu-latest
 
+    # prevent cron jobs from running on forks
+    if:
+      (github.event_name == 'schedule' && github.repository == 'spectrochempy/spectrochempy') || (github.event_name != 'schedule')
+    
     defaults:
       run:
         shell: bash -l {0}
@@ -81,7 +89,7 @@ jobs:
 #          python-version: "3.9"
 #          environment-file: environment_dev.yml
 #          condarc-file: .ci/condarc.yml
-      
+
       - name: Install Conda environment with Micromamba
         uses: mamba-org/provision-with-micromamba@main
         with:
