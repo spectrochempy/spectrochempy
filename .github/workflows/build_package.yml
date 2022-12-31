@@ -35,7 +35,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.9'
 
       - name: Install pypa/build
         run: |
@@ -75,12 +75,22 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install miniconda
-        uses: conda-incubator/setup-miniconda@v2.2.0
+#      - name: Install miniconda
+#        uses: conda-incubator/setup-miniconda@v2.2.0
+#        with:
+#          python-version: "3.9"
+#          environment-file: environment_dev.yml
+#          condarc-file: .ci/condarc.yml
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
-          python-version: "3.9"
-          environment-file: environment_dev.yml
-          condarc-file: .ci/condarc.yml
+          python-version: '3.9'
+
+      - name: Install dependencies
+          run: |
+            # $CONDA is an environment variable pointing to the root of the miniconda directory
+            $CONDA/bin/conda update -n base -c defaults conda
+            $CONDA/bin/conda env update --file environment_dev.yml --name base
 
       - name: Install spectrochempy
         run: |
