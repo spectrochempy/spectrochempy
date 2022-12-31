@@ -90,7 +90,7 @@ jobs:
         run: |
           # $CONDA is an environment variable pointing to the root of the miniconda directory
           $CONDA/bin/conda update -n base -c defaults conda
-          $CONDA/bin/conda install mamba
+          $CONDA/bin/conda install mamba -n base -c conda-forge
           $CONDA/bin/mamba env update --file environment_dev.yml --name base
 
       - name: Install spectrochempy
