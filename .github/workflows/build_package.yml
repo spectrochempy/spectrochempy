@@ -75,10 +75,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install miniconda (scpy)
+      - name: Install miniconda
         uses: conda-incubator/setup-miniconda@v2.2.0
         with:
-          python-version: "3.10"
+          python-version: "3.9"
           environment-file: environment_dev.yml
           condarc-file: .ci/condarc.yml
 

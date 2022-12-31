@@ -1,12 +1,11 @@
 channels:
+  - conda-forge
   - spectrocat
   - cantera
   - cantera/label/dev
-  - conda-forge
   - plotly
   - defaults
 ssl_verify: true
-auto_update_conda: true
 anaconda_upload: false
 channel_priority: strict
 always_yes: true
