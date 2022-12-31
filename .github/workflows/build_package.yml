@@ -86,15 +86,15 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install dependencies
-        run: |
-          # $CONDA is an environment variable pointing to the root of the miniconda directory
-          $CONDA/bin/conda update -n base -c defaults conda
-          $CONDA/bin/conda install mamba -n base -c conda-forge
-          $CONDA/bin/mamba env update --file environment_dev.yml --name base
+      - name: Install Conda environment with Micromamba
+        uses: mamba-org/provision-with-micromamba@main
+        with:
+          environment-file: environment_dev.yml
+          environment-name: scpy
 
       - name: Install spectrochempy
         run: |
+          conda activate scpy
           python -m pip install .
 
       - name: Set up version environment variable
@@ -126,18 +126,18 @@ jobs:
 
       - name: Build package
         run: |
-          $CONDA/bin/conda-build .conda --output-folder out
+          conda-build .conda --output-folder out
 
       - name: Publish package for release
         if: (github.event_name == 'release' && github.event.action == 'published' && github.repository == 'spectrochempy/spectrochempy')
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
         run: |
-          $CONDA/bin/anaconda upload --force out/*/*.tar.bz2
+          anaconda upload --force out/*/*.tar.bz2
 
       - name: Publish development package
         if: (github.event_name == 'push' && github.repository == 'spectrochempy/spectrochempy')
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
         run: |
-          $CONDA/bin/anaconda upload -l dev --force out/*/*.tar.bz2
+          anaconda upload -l dev --force out/*/*.tar.bz2
