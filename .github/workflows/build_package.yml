@@ -90,7 +90,8 @@ jobs:
         run: |
           # $CONDA is an environment variable pointing to the root of the miniconda directory
           $CONDA/bin/conda update -n base -c defaults conda
-          $CONDA/bin/conda env update --file environment_dev.yml --name base
+          $CONDA/bin/conda install mamba
+          $CONDA/bin/mamba env update --file environment_dev.yml --name base
 
       - name: Install spectrochempy
         run: |
@@ -125,19 +126,18 @@ jobs:
 
       - name: Build package
         run: |
-          conda-build .conda --output-folder out
+          $CONDA/bin/conda-build .conda --output-folder out
 
       - name: Publish package for release
         if: (github.event_name == 'release' && github.event.action == 'published' && github.repository == 'spectrochempy/spectrochempy')
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
         run: |
-          anaconda upload --force out/*/*.tar.bz2
+          $CONDA/bin/anaconda upload --force out/*/*.tar.bz2
 
       - name: Publish development package
         if: (github.event_name == 'push' && github.repository == 'spectrochempy/spectrochempy')
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
         run: |
-          conda install anaconda-client
-          anaconda upload -l dev --force out/*/*.tar.bz2
+          $CONDA/bin/anaconda upload -l dev --force out/*/*.tar.bz2
