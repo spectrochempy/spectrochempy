@@ -87,10 +87,10 @@ jobs:
           python-version: '3.9'
 
       - name: Install dependencies
-          run: |
-            # $CONDA is an environment variable pointing to the root of the miniconda directory
-            $CONDA/bin/conda update -n base -c defaults conda
-            $CONDA/bin/conda env update --file environment_dev.yml --name base
+        run: |
+          # $CONDA is an environment variable pointing to the root of the miniconda directory
+          $CONDA/bin/conda update -n base -c defaults conda
+          $CONDA/bin/conda env update --file environment_dev.yml --name base
 
       - name: Install spectrochempy
         run: |
