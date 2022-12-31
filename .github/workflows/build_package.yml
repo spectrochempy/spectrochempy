@@ -81,20 +81,17 @@ jobs:
 #          python-version: "3.9"
 #          environment-file: environment_dev.yml
 #          condarc-file: .ci/condarc.yml
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-
+      
       - name: Install Conda environment with Micromamba
         uses: mamba-org/provision-with-micromamba@main
         with:
           environment-file: environment_dev.yml
           environment-name: scpy
+          extra-specs: |
+            python=3.9
 
       - name: Install spectrochempy
         run: |
-          conda activate scpy
           python -m pip install .
 
       - name: Set up version environment variable
