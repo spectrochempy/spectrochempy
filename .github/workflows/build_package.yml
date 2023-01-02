@@ -14,12 +14,16 @@ on:
   release:
     types: [published]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   # Job 1
   build-and-publish_pypi:
 
     # prevent cron jobs from running on forks
-    if:
+    if: |
       (github.event_name == 'schedule' && github.repository == 'spectrochempy/spectrochempy') || (github.event_name != 'schedule')
 
     name: Build and publish distribution to PyPI
@@ -69,9 +73,9 @@ jobs:
     runs-on: ubuntu-latest
 
     # prevent cron jobs from running on forks
-    if:
+    if: |
       (github.event_name == 'schedule' && github.repository == 'spectrochempy/spectrochempy') || (github.event_name != 'schedule')
-    
+
     defaults:
       run:
         shell: bash -l {0}

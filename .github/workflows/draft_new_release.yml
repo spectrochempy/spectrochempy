@@ -15,6 +15,7 @@ jobs:
   draft_new_release:
     name: "Draft a new release"
     runs-on: ubuntu-latest
+    if: github.repository == 'spectrochempy/spectrochempy'
 
     steps:
 

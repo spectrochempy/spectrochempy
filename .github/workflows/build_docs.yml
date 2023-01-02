@@ -13,6 +13,10 @@ on:
 
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
 
   build_and_publish_documentation:
@@ -80,7 +84,7 @@ jobs:
             -t rst
             -o docs/userguide/reference/changelog.rst
             CHANGELOG.md
-            
+
       - name: Build docs
         run: |
           mkdir -p build
