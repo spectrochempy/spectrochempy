@@ -43,6 +43,7 @@ black
 pre-commit
 cffconvert
 mamba
+docrep
 jupytext
 sphinx
 sphinx_rtd_theme
