@@ -86,6 +86,7 @@ dependencies:
 
     # DEV: code and docs
     - mamba
+    - docrep
     - jupytext
     - sphinx
     - sphinx_rtd_theme
