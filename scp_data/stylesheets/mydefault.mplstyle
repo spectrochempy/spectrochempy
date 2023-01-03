@@ -4,10 +4,10 @@ _internal.classic_mode                   : True
 agg.path.chunksize                       : 20000
 animation.bitrate                        : -1
 animation.codec                          : mpeg4
-animation.convert_args                   : 
+animation.convert_args                   :
 animation.convert_path                   : convert
 animation.embed_limit                    : 20.0
-animation.ffmpeg_args                    : 
+animation.ffmpeg_args                    :
 animation.ffmpeg_path                    : ffmpeg
 animation.frame_format                   : png
 animation.html                           : none
@@ -159,7 +159,7 @@ keymap.help                              : f1
 keymap.home                              : h, r, home
 keymap.pan                               : p
 keymap.quit                              : ctrl+w, cmd+w
-keymap.quit_all                          : 
+keymap.quit_all                          :
 keymap.save                              : s, ctrl+s
 keymap.xscale                            : k, L
 keymap.yscale                            : l
@@ -219,7 +219,7 @@ patch.edgecolor                          : k
 patch.facecolor                          : 4C72B0
 patch.force_edgecolor                    : True
 patch.linewidth                          : 0.3
-path.effects                             : 
+path.effects                             :
 path.simplify                            : True
 path.simplify_threshold                  : 0.1111111111111111
 path.sketch                              : None
@@ -230,7 +230,7 @@ pdf.compression                          : 6
 pdf.fonttype                             : 3
 pdf.inheritcolor                         : False
 pdf.use14corefonts                       : False
-pgf.preamble                             : 
+pgf.preamble                             :
 pgf.rcfonts                              : True
 pgf.texsystem                            : xelatex
 polaraxes.grid                           : True
@@ -259,7 +259,7 @@ text.color                               : .15
 text.hinting                             : auto
 text.hinting_factor                      : 8
 text.kerning_factor                      : 0
-text.latex.preamble                      : 
+text.latex.preamble                      :
 text.usetex                              : False
 
 xaxis.labellocation                      : center

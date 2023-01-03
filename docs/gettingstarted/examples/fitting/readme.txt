@@ -2,4 +2,3 @@
 
 Example of the fitting package usage
 -------------------------------------
-
