@@ -8,8 +8,8 @@ import numpy as np
 import re
 from colorama import Fore, Style
 
-from . import NOMASK
-from .misc import TYPE_INTEGER, TYPE_COMPLEX, TYPE_FLOAT
+from spectrochempy.utils import NOMASK
+from spectrochempy.utils.misc import TYPE_INTEGER, TYPE_COMPLEX, TYPE_FLOAT
 
 __all__ = [
     "numpyprintoptions",

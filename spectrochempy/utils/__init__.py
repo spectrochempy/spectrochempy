@@ -24,16 +24,16 @@ from numpy.ma.core import (
 # import util files content
 # ------------------------------------------------------------------
 
-from .fake import *
-from .print import *
-from .file import *
-from .jsonutils import *
-from .misc import *
-from .packages import *
-from .plots import *
-from .system import *
-from .traits import *
-from .zip import *
-from .exceptions import *
-from .version import *
-from .print_versions import *
+from spectrochempy.utils.fake import *
+from spectrochempy.utils.print import *
+from spectrochempy.utils.file import *
+from spectrochempy.utils.jsonutils import *
+from spectrochempy.utils.misc import *
+from spectrochempy.utils.packages import *
+from spectrochempy.utils.plots import *
+from spectrochempy.utils.system import *
+from spectrochempy.utils.traits import *
+from spectrochempy.utils.zip import *
+from spectrochempy.utils.exceptions import *
+from spectrochempy.utils.version import *
+from spectrochempy.utils.print_versions import *

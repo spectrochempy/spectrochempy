@@ -2,4 +2,3 @@
 
 Example of the analysis package usage
 --------------------------------------
-

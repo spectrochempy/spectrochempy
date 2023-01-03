@@ -14,7 +14,7 @@ from os import environ
 import sys
 import warnings
 
-from ..optional import import_optional_dependency
+from spectrochempy.optional import import_optional_dependency
 
 warnings.filterwarnings("ignore")
 
@@ -28,7 +28,7 @@ __all__ = []
 # logging functions
 # ======================================================================================================================
 
-from ..utils import pstr  # noqa: E402
+from spectrochempy.utils import pstr  # noqa: E402
 import logging
 import inspect
 
@@ -145,12 +145,12 @@ def _pbar_update(close=None):
 # ======================================================================================================================
 
 _pbar_update()
-from ..application import SpectroChemPy  # noqa: E402
+from spectrochempy.application import SpectroChemPy  # noqa: E402
 
 app = SpectroChemPy()
 __all__ += ["app"]
 
-from ..application import (  # noqa: E402
+from spectrochempy.application import (  # noqa: E402
     __version__ as version,
     __release__ as release,
     __copyright__ as copyright,
@@ -221,95 +221,102 @@ _pbar_update()
 
 # constants
 # ------------------------------------------------------------------
-from ..utils import show, MASKED, NOMASK, EPSILON, INPLACE, show_versions  # noqa: E402
+from spectrochempy.utils import (
+    show,
+    MASKED,
+    NOMASK,
+    EPSILON,
+    INPLACE,
+    show_versions,
+)  # noqa: E402
 
 __all__ += ["show", "MASKED", "NOMASK", "EPSILON", "INPLACE", "show_versions"]
 
 # dataset
 # ------------------------------------------------------------------
 _pbar_update()
-from .dataset import api  # noqa: E402
-from .dataset.api import *  # noqa: E402,F403,F401
+from spectrochempy.core.dataset import api  # noqa: E402
+from spectrochempy.core.dataset.api import *  # noqa: E402,F403,F401
 
 __all__ += api.__all__
 
 # plotters
 # ------------------------------------------------------------------
 _pbar_update()
-from .plotters import api  # noqa: E402
-from .plotters.api import *  # noqa: E402,F403,F401
+from spectrochempy.core.plotters import api  # noqa: E402
+from spectrochempy.core.plotters.api import *  # noqa: E402,F403,F401
 
 __all__ += api.__all__
 
 # processors
 # ------------------------------------------------------------------
 _pbar_update()
-from .processors import api  # noqa: E402
-from .processors.api import *  # noqa: E402,F403,F401
+from spectrochempy.core.processors import api  # noqa: E402
+from spectrochempy.core.processors.api import *  # noqa: E402,F403,F401
 
 __all__ += api.__all__
 
 # readers
 # ------------------------------------------------------------------
 _pbar_update()
-from .readers import api  # noqa: E402
-from .readers.api import *  # noqa: E402,F403,F401
+from spectrochempy.core.readers import api  # noqa: E402
+from spectrochempy.core.readers.api import *  # noqa: E402,F403,F401
 
 __all__ += api.__all__
 
 # writers
 # ------------------------------------------------------------------
 _pbar_update()
-from .writers import api  # noqa: E402
-from .writers.api import *  # noqa: E402,F403,F401
+from spectrochempy.core.writers import api  # noqa: E402
+from spectrochempy.core.writers.api import *  # noqa: E402,F403,F401
 
 __all__ += api.__all__
 
 # units
 # ------------------------------------------------------------------
 _pbar_update()
-from .units import api  # noqa: E402
-from .units.api import *  # noqa: E402,F403,F401
+from spectrochempy.core.units import api  # noqa: E402
+from spectrochempy.core.units.api import *  # noqa: E402,F403,F401
 
 __all__ += api.__all__
 
 # databases
 # ------------------------------------------------------------------
 _pbar_update()
-from ..databases import api  # noqa: E402
-from ..databases.api import *  # noqa: E402,F403,F401
+from spectrochempy.databases import api  # noqa: E402
+from spectrochempy.databases.api import *  # noqa: E402,F403,F401
 
 __all__ += api.__all__
 
 # analysis
 # ------------------------------------------------------------------
 _pbar_update()
-from ..analysis import api  # noqa: E402
-from ..analysis.api import *  # noqa: E402,F403,F401
+from spectrochempy.analysis import api  # noqa: E402
+from spectrochempy.analysis.api import *  # noqa: E402,F403,F401
 
 __all__ += api.__all__
 
 # project
 # ------------------------------------------------------------------
 _pbar_update()
-from .project import api  # noqa: E402
-from .project.api import *  # noqa: E402,F403,F401
+from spectrochempy.core.project import api  # noqa: E402
+from spectrochempy.core.project.api import *  # noqa: E402,F403,F401
 
 __all__ += api.__all__
 
 # script
 # ------------------------------------------------------------------
 _pbar_update()
-from .scripts import api  # noqa: E402
-from .scripts.api import *  # noqa: E402,F403,F401
+from spectrochempy.core.scripts import api  # noqa: E402
+from spectrochempy.core.scripts.api import *  # noqa: E402,F403,F401
 
 __all__ += api.__all__
 
 # widgets
 # ------------------------------------------------------------------
 _pbar_update()
-from ..widgets import api  # noqa: E402
-from ..widgets.api import *  # noqa: E402,F403,F401
+from spectrochempy.widgets import api  # noqa: E402
+from spectrochempy.widgets.api import *  # noqa: E402,F403,F401
 
 __all__ += api.__all__
 
@@ -558,7 +565,7 @@ class _TKFileDialogs:  # pragma: no cover
         filters=None,
     ):
 
-        from ..utils import pathclean
+        from spectrochempy.utils import pathclean
 
         dftext = ""
         directory = "."
@@ -617,7 +624,7 @@ def save_dialog(
             filename=filename, caption=caption, filters=filters
         )
 
-    from ..utils import pathclean
+    from spectrochempy.utils import pathclean
 
     return pathclean(f)
 
@@ -652,7 +659,7 @@ def open_dialog(
     else:
         f = klass._open_multiple_filenames(parent=parent, filters=filters)
 
-    from ..utils import pathclean
+    from spectrochempy.utils import pathclean
 
     return pathclean(f)
 

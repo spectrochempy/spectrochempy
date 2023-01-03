@@ -85,8 +85,8 @@ ALL = ["NO_DISPLAY", "NO_DIALOG"]
 # Now we can start loading the API
 # ------------------------------------------------------------------
 # import the core api
-from . import core
-from .core import *  # noqa: F403, F401, E402
+from spectrochempy import core
+from spectrochempy.core import *  # noqa: F403, F401, E402
 
 ALL += core.__all__
 
@@ -117,7 +117,7 @@ if IN_IPYTHON and KERNEL and not NO_DISPLAY:  # pragma: no cover
         IP.magic("matplotlib qt")
 
 # a useful utilities for dealing with path
-from .utils import pathclean
+from spectrochempy.utils import pathclean
 
 DATADIR = pathclean(preferences.datadir)
 
