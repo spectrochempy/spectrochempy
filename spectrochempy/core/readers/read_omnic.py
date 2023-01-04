@@ -729,12 +729,10 @@ def _read_spg(*args, **kwargs):
 
     dataset._date = datetime.now(timezone.utc)
 
-    dataset.history = str(dataset.date) + ":imported from spg file {} ; ".format(
-        filename
-    )
+    dataset.history = f"Imported from spg file {filename}."
     if sortbydate:
         dataset.sort(dim="y", inplace=True)
-        dataset.history = str(dataset.date) + ":sorted by date"
+        dataset.history = "Sorted by date"
 
     # debug_("end of reading")
 
@@ -926,7 +924,7 @@ def _read_spa(*args, **kwargs):
         for comment in spa_comments:
             dataset.description += comment + "\n---------------------\n"
 
-    dataset.history = str(datetime.now(timezone.utc)) + ":imported from spa file(s)"
+    dataset.history = "Imported from spa file(s)"
 
     if "spa_history" in locals():
         if len("spa_history".strip(" ")) > 0:

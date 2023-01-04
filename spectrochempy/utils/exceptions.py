@@ -9,6 +9,8 @@ import functools
 import warnings
 from contextlib import contextmanager
 
+import pytz
+
 __all__ = [
     "SpectroChemPyWarning",
     "SpectroChemPyException",
@@ -146,6 +148,12 @@ except ImportError:
             yield
         except exceptions:
             pass
+
+
+class UnknownTimeZoneError(pytz.UnknownTimeZoneError):
+    """
+    Exception raised when Timezone code is not recognized.
+    """
 
 
 # ==============================================================================

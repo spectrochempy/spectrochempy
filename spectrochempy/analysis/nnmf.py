@@ -94,9 +94,9 @@ class NNMF(HasTraits):
         )
 
         self.C.name = "Optimmized concentration profile"
-        self.C.history = "nnmf optimiaation"
+        self.C.history = "nnmf optimization"
         self.St.name = "Optimized spectral profile"
-        self.St.history = "nnmf optimiaation"
+        self.St.history = "nnmf optimization"
 
     def nmf(self, V, Winit, Hinit, tol, maxtime, maxiter):
         """

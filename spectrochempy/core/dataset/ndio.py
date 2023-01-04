@@ -412,6 +412,9 @@ class NDIO(HasTraits):
                         # automatically set
                         pass
 
+                    elif key in ["_history"]:
+                        obj.history = val
+
                     else:
                         if isinstance(val, TYPE_BOOL) and key == "_mask":
                             val = np.bool_(val)

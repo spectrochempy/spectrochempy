@@ -14,7 +14,8 @@ from quaternion import quaternion
 
 import spectrochempy as scp
 from spectrochempy.core.units import ur
-from spectrochempy.utils import SpectroChemPyException, get_user_and_node
+from spectrochempy.utils import get_user_and_node
+from spectrochempy.utils.exceptions import SpectroChemPyException, UnknownTimeZoneError
 from spectrochempy.utils.testing import (
     RandomSeedContext,
     assert_array_almost_equal,
@@ -1113,6 +1114,16 @@ def test_nddataset_init_complex_1D_with_mask():
     assert not d1R.has_complex_dims
     assert d1R._data.shape == (5,)
     assert d1R._mask.shape == (5,)
+
+
+def test_nddataset_timezone():
+    nd = scp.NDDataset(np.ones((1, 3, 1, 2)), name="value")
+    assert nd.timezone is not None
+    assert str(nd.timezone) == nd.local_timezone
+    nd.timezone = "UTC"
+    assert nd.timezone != nd.local_timezone
+    with pytest.raises(UnknownTimeZoneError):
+        nd.timezone = "XXX"
 
 
 def test_nddataset_transpose_swapdims(ds1):

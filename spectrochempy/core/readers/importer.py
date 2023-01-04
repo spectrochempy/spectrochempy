@@ -10,7 +10,6 @@ This module define a generic class to import directories, files and contents.
 __all__ = ["read", "read_dir", "read_remote"]
 __dataset_methods__ = __all__
 
-from datetime import datetime, timezone
 from warnings import warn
 
 import requests
@@ -269,9 +268,7 @@ class Importer(HasTraits):
                 dataset = self.objtype.concatenate(datasets, axis=0)
                 if dataset.coordset is not None and kwargs.pop("sortbydate", True):
                     dataset.sort(dim="y", inplace=True)
-                    dataset.history = (
-                        str(datetime.now(timezone.utc)) + ":sorted by date"
-                    )
+                    dataset.history = "Sorted by date"
                 datasets = [dataset]
 
             except DimensionsCompatibilityError as e:

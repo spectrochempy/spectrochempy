@@ -198,7 +198,7 @@ def _read_txt(*args, **kwargs):
     dataset._modified = dataset.date
 
     # Set origin, description and history
-    dataset.history = f"{dataset.date}:imported from LabSpec6 text file {filename}"
+    dataset.history = f"Imported from LabSpec6 text file {filename}"
 
     return dataset
 

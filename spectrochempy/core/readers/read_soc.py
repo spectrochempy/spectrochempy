@@ -10,7 +10,6 @@ This module extend NDDataset with the import method for Thermo galactic (spc) da
 __all__ = ["read_soc", "read_ddr", "read_sdr", "read_hdr"]
 __dataset_methods__ = __all__
 
-from datetime import datetime, timezone
 
 from spectrochempy.core.readers.importer import Importer, _importer_method
 from spectrochempy.core.readers.read_omnic import _read_spa
@@ -361,21 +360,21 @@ def read_sdr(*paths, **kwargs):
 @_importer_method
 def _read_ddr(*args, **kwargs):
     ds = _read_spa(*args, **kwargs)
-    ds.history[-1] = str(datetime.now(timezone.utc)) + ":imported from ddr file(s)"
+    ds.history[-1] = "Imported from ddr file(s)"
     return ds
 
 
 @_importer_method
 def _read_hdr(*args, **kwargs):
     ds = _read_spa(*args, **kwargs)
-    ds.history[-1] = str(datetime.now(timezone.utc)) + ":imported from hdr file(s)"
+    ds.history[-1] = "Imported from hdr file(s)"
     return ds
 
 
 @_importer_method
 def _read_sdr(*args, **kwargs):
     ds = _read_spa(*args, **kwargs)
-    ds.history[-1] = str(datetime.now(timezone.utc)) + ":imported from sdr file(s)"
+    ds.history[-1] = "Imported from sdr file(s)"
     return ds
 
 

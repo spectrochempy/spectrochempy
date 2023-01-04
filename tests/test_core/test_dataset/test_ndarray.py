@@ -175,8 +175,6 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert d8.title == "<untitled>"
     assert d8.description == "with mask"
     assert d8.desc == d8.description
-    assert len(ndarraymask.history) == 1  # one line already in
-    assert len(d8.history) == 2  # copy added
 
     # initialisation with only labels
 
@@ -189,7 +187,6 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
         title="labeled",
         dims=["q"],
         author="Blake",
-        history="Created from scratch",
     )
     assert d11.dims == ["q"]
     assert d11.author == "Blake"

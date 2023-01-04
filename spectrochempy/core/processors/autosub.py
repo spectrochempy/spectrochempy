@@ -160,9 +160,7 @@ def autosub(
     if swapped:
         new = new.swapdims(axis, -1)
 
-    new.history = (
-        str(new.modified) + ": " + "Automatic subtraction of:" + ref.name + "\n"
-    )
+    new.history = f"Automatic subtraction of {ref.name}"
 
     if return_coefs:
         return new, x

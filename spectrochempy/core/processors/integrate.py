@@ -65,7 +65,7 @@ def _integrate_method(method):
             new._units = dataset.units
         elif dataset.coord(dim).units is not None:
             new._units = dataset.coord(dim).units
-        new._history = [
+        new.history = [
             f"Dataset resulting from application of `{method.__name__}` method"
         ]
 

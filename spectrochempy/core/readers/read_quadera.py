@@ -202,7 +202,7 @@ def _read_asc(*args, **kwargs):
     dataset._modified = dataset.date
 
     # Set origin, description and history
-    dataset.history = f"{dataset.date}:imported from Quadera asc file {filename}"
+    dataset.history = f"Imported from Quadera asc file {filename}"
 
     return dataset
 
