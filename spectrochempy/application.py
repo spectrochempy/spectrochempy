@@ -13,51 +13,50 @@ the default application preferences and IPython magic functions.
 
 __all__ = []
 
-import sys
+import json
 import logging
-import subprocess
-import warnings
 import pprint
+import subprocess
+import sys
+import threading
+import warnings
+from datetime import date, timedelta
 from os import environ
 from pathlib import Path
-import threading
-import json
-from pkg_resources import parse_version, get_distribution, DistributionNotFound
-import requests
-from setuptools_scm import get_version
-from datetime import date, timedelta
 
+import matplotlib as mpl
 import numpy as np
-
-from traitlets.config.configurable import Config
-from traitlets.config.application import Application
+import requests
+from IPython import get_ipython
+from IPython.core.error import UsageError
+from IPython.core.interactiveshell import InteractiveShell
+from IPython.core.magic import Magics, line_cell_magic, magics_class
+from IPython.core.magics.code import extract_symbols
+from IPython.display import clear_output, publish_display_data
+from IPython.utils.text import get_text_list
+from jinja2 import Template
+from matplotlib import pyplot as plt
+from pkg_resources import DistributionNotFound, get_distribution, parse_version
+from setuptools_scm import get_version
 from traitlets import (
     Bool,
-    Unicode,
-    List,
-    Integer,
     Enum,
-    Union,
     HasTraits,
     Instance,
+    Integer,
+    List,
+    Unicode,
+    Union,
     default,
     observe,
     validate,
 )
+from traitlets.config.application import Application
+from traitlets.config.configurable import Config
 from traitlets.config.manager import BaseJSONConfigManager
-import matplotlib as mpl
-from matplotlib import pyplot as plt
-from IPython import get_ipython
-from IPython.core.interactiveshell import InteractiveShell
-from IPython.core.magic import Magics, magics_class, line_cell_magic
-from IPython.core.magics.code import extract_symbols
-from IPython.core.error import UsageError
-from IPython.utils.text import get_text_list
-from IPython.display import publish_display_data, clear_output
-from jinja2 import Template
 
-from spectrochempy.utils import MetaConfigurable, pathclean, get_pkg_path, Version
 from spectrochempy.plot_preferences import PlotPreferences
+from spectrochempy.utils import MetaConfigurable, Version, get_pkg_path, pathclean
 
 # set the default style
 plt.style.use(["classic"])

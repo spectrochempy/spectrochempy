@@ -16,7 +16,7 @@ import pytest
 
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.coordset import CoordSet
-from spectrochempy.core.units import ur, DimensionalityError
+from spectrochempy.core.units import DimensionalityError, ur
 
 
 # ======================================================================================================================
@@ -415,8 +415,9 @@ def test_coordset_set(coord0, coord1, coord2):
 
 def test_issue_310():
 
-    import spectrochempy as scp
     import numpy as np
+
+    import spectrochempy as scp
 
     D = scp.NDDataset(np.zeros((10, 5)))
     c5 = scp.Coord.linspace(start=0.0, stop=1000.0, num=5, name="xcoord")

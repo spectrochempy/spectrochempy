@@ -11,19 +11,19 @@ __all__ = ["Fit", "optimize", "FitParameters", "ParameterScript"]
 
 __dataset_methods__ = []
 
-import sys
 import re
+import sys
 from collections import UserDict
 from warnings import warn
 
 import numpy as np
 import scipy.optimize
-from traitlets import HasTraits, Bool, Any, Unicode, Instance, List, observe
 from IPython import display
+from traitlets import Any, Bool, HasTraits, Instance, List, Unicode, observe
 
-from spectrochempy.utils import htmldoc
-from spectrochempy.core import preferences, info_, warning_, INFO
 from spectrochempy.analysis import models as models_
+from spectrochempy.core import INFO, info_, preferences, warning_
+from spectrochempy.utils import htmldoc
 
 
 # ======================================================================================================================

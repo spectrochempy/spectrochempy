@@ -15,8 +15,9 @@ In this example, we perform the Evolving Factor Analysis
 ########################################################################################################################
 # sphinx_gallery_thumbnail_number = 2
 
-import spectrochempy as scp
 import os
+
+import spectrochempy as scp
 
 ########################################################################################################################
 # Upload and preprocess a dataset

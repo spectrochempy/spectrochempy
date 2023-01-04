@@ -11,7 +11,8 @@ from pathlib import Path
 import pytest
 
 import spectrochempy as scp
-from spectrochempy import NDDataset, preferences as prefs
+from spectrochempy import NDDataset
+from spectrochempy import preferences as prefs
 from spectrochempy.utils import pathclean, testing
 
 irdatadir = pathclean(prefs.datadir) / "irdata"

@@ -11,13 +11,14 @@ __all__ = ["read_opus"]
 __dataset_methods__ = __all__
 
 import io
-import numpy as np
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 
+import numpy as np
 from brukeropusreader.opus_parser import parse_data, parse_meta
-from spectrochempy.core.dataset.coord import LinearCoord, Coord
-from spectrochempy.core.readers.importer import Importer, _importer_method
+
 from spectrochempy.core import debug_
+from spectrochempy.core.dataset.coord import Coord, LinearCoord
+from spectrochempy.core.readers.importer import Importer, _importer_method
 
 
 # ======================================================================================================================

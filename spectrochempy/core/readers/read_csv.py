@@ -11,15 +11,15 @@ __dataset_methods__ = __all__
 # standard and other imports
 # ------------------------------------------------------------------
 
-import warnings
-import locale
 import io
+import locale
+import warnings
 from datetime import datetime, timezone
 
 import numpy as np
 
-from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core import preferences as prefs
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer, _importer_method
 
 try:

@@ -21,14 +21,14 @@ __all__ = [
 
 __dataset_methods__ = []
 
-import numpy as np
+import matplotlib as mpl
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.tight_layout import (
     get_renderer,
-    get_tight_layout_figure,
     get_subplotspec_list,
+    get_tight_layout_figure,
 )
-import matplotlib as mpl
 
 from spectrochempy.utils import is_sequence
 from spectrochempy.utils.plots import _Axes

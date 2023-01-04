@@ -6,10 +6,11 @@
 # ======================================================================================
 # flake8: noqa
 
+from pathlib import Path
+
 import pytest
 
 import spectrochempy as scp
-from pathlib import Path
 
 RAMANDIR = scp.preferences.datadir / "ramandata"
 

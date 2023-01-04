@@ -13,9 +13,9 @@ In this example, we use sine bell or squared sine bell window multiplication to 
 
 """
 
-import spectrochempy as scp
 import os
 
+import spectrochempy as scp
 
 path = os.path.join(
     scp.preferences.datadir, "nmrdata", "bruker", "tests", "nmr", "topspin_1d"

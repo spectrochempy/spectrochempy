@@ -18,21 +18,20 @@ import itertools
 import textwrap
 
 import numpy as np
-from traitlets import validate, Bool
 from quaternion import as_float_array, as_quat_array
+from traitlets import Bool, validate
 
 from spectrochempy.core.dataset.ndarray import NDArray
+from spectrochempy.core.units import Quantity
 from spectrochempy.utils import (
     NOMASK,
-    TYPE_FLOAT,
     TYPE_COMPLEX,
-    typequaternion,
+    TYPE_FLOAT,
     as_quaternion,
     get_component,
     insert_masked_print,
+    typequaternion,
 )
-from spectrochempy.core.units import Quantity
-
 
 # ======================================================================================================================
 # NDComplexArray

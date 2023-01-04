@@ -5,10 +5,10 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # flake8: noqa
-import requests
-from pathlib import Path
 import platform
+from pathlib import Path
 
+import requests
 
 import spectrochempy as scp
 

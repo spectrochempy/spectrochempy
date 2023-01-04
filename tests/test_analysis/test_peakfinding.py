@@ -7,6 +7,7 @@
 # flake8: noqa
 
 import pytest
+
 from spectrochempy.core.units import ur
 
 

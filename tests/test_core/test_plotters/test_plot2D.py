@@ -6,7 +6,9 @@
 # ======================================================================================
 # flake8: noqa
 
-from spectrochempy import NDDataset, show, preferences as prefs
+from spectrochempy import NDDataset
+from spectrochempy import preferences as prefs
+from spectrochempy import show
 
 
 def test_plot2D():

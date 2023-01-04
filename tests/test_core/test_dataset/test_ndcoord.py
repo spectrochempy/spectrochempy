@@ -11,15 +11,14 @@ from copy import copy
 import numpy as np
 import pytest
 
+from spectrochempy.core import debug_
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
-from spectrochempy.core.units import ur, Quantity
+from spectrochempy.core.units import Quantity, ur
 from spectrochempy.utils.testing import (
+    assert_approx_equal,
     assert_array_equal,
     assert_equal_units,
-    assert_approx_equal,
 )
-from spectrochempy.core import debug_
-
 
 # ======================================================================================================================
 # Coord

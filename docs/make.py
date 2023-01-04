@@ -12,14 +12,14 @@ Clean, build, and release the HTML and PDF documentation for SpectroChemPy.
 where optional parameters indicates which job(s) is(are) to perform.
 """
 
-from os import environ, utime
-
 import argparse
 import shutil
 import sys
 import warnings
 import zipfile
+from os import environ, utime
 from pathlib import Path
+
 import numpy as np
 from skimage.io import imread, imsave
 from skimage.transform import resize

@@ -12,6 +12,7 @@
 # --------------------------------------------------------------------------------------
 
 import sys
+
 import pytest
 
 # Uncomment to avoid these long tests which are also done in docs

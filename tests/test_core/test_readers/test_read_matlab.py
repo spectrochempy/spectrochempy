@@ -7,7 +7,9 @@
 # flake8: noqa
 
 import pytest
-from spectrochempy import NDDataset, preferences as prefs
+
+from spectrochempy import NDDataset
+from spectrochempy import preferences as prefs
 
 MATLABDATA = prefs.datadir / "matlabdata"
 

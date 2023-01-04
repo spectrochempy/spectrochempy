@@ -23,6 +23,7 @@
 
 # %%
 import numpy as np
+
 import spectrochempy as scp
 
 # %% [markdown]

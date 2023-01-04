@@ -12,16 +12,15 @@ __all__ = ["NNMF"]
 
 __dataset_methods__ = []
 
+from sys import stdout
+from time import time
+
 import numpy as np
 from numpy.linalg import norm
-from time import time
-from sys import stdout
+from traitlets import Float, HasTraits, Instance, Int
 
-from traitlets import HasTraits, Float, Int, Instance
-
-from spectrochempy.core import info_, debug_
+from spectrochempy.core import INFO, debug_, get_loglevel, info_, set_loglevel
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core import get_loglevel, set_loglevel, INFO
 
 
 class NNMF(HasTraits):

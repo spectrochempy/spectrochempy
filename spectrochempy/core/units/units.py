@@ -17,16 +17,16 @@ __all__ = [
     "remove_args_units",
 ]
 
-from warnings import warn
 from functools import wraps
+from warnings import warn
 
 from pint import (
-    set_application_registry,
-    UnitRegistry,
-    DimensionalityError,
-    formatting,
     Context,
+    DimensionalityError,
+    UnitRegistry,
     __version__,
+    formatting,
+    set_application_registry,
 )
 
 # check pint version
@@ -42,13 +42,13 @@ if pint_version < 20:
         f"Please consider upgrading it to 0.20 or higher (e.g. `> pip install pint --upgrade` or `> conda update pint`)\n"
     )
 
-    from pint.unit import UnitsContainer, Unit, UnitDefinition
-    from pint.quantity import Quantity
     from pint.converters import ScaleConverter
+    from pint.quantity import Quantity
+    from pint.unit import Unit, UnitDefinition, UnitsContainer
 else:
+    from pint import Quantity, Unit
+    from pint.facets.plain import ScaleConverter, UnitDefinition
     from pint.util import UnitsContainer
-    from pint import Unit, Quantity
-    from pint.facets.plain import UnitDefinition, ScaleConverter
 
 
 # ======================================================================================================================

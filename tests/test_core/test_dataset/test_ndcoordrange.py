@@ -6,12 +6,11 @@
 # ======================================================================================
 # flake8: noqa
 
-from traitlets import TraitError, HasTraits
+from traitlets import HasTraits, TraitError
 
 from spectrochempy.core.dataset.coordrange import trim_ranges
 from spectrochempy.utils import Range
 from spectrochempy.utils.testing import raises
-
 
 # ======================================================================================================================
 # trim_ranges

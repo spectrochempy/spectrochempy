@@ -12,14 +12,15 @@ __all__ = ["MCRALS"]
 
 __dataset_methods__ = []
 
-import numpy as np
-from traitlets import HasTraits, Instance, Dict, Unicode
 import warnings
 
-from spectrochempy.core.dataset.nddataset import NDDataset
+import numpy as np
+from traitlets import Dict, HasTraits, Instance, Unicode
+
 from spectrochempy.analysis.pca import PCA
+from spectrochempy.core import INFO, info_, set_loglevel
+from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.npy import dot
-from spectrochempy.core import info_, set_loglevel, INFO
 from spectrochempy.utils.exceptions import deprecated
 
 

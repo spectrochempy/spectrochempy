@@ -6,12 +6,11 @@
 # ======================================================================================
 # flake8: noqa
 
-from subprocess import Popen, PIPE
-
+from subprocess import PIPE, Popen
 
 import pytest
 
-from spectrochempy import APIref, set_loglevel, get_loglevel, warning_, version
+from spectrochempy import APIref, get_loglevel, set_loglevel, version, warning_
 
 set_loglevel("WARNING")
 

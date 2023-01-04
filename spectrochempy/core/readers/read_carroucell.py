@@ -10,21 +10,20 @@ This module provides methods for reading data in a directory after a carroucell 
 __all__ = ["read_carroucell"]
 __dataset_methods__ = __all__
 
-import os
-import warnings
 import datetime
+import os
 import re
+import warnings
 
-import scipy.interpolate
 import numpy as np
+import scipy.interpolate
 import xlrd
 
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.utils import get_directory_name, get_filenames
 from spectrochempy.core import info_, print_
-
-from spectrochempy.core.readers.importer import _importer_method, Importer
+from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.readers.importer import Importer, _importer_method
+from spectrochempy.utils import get_directory_name, get_filenames
 
 
 # ..............................................................................

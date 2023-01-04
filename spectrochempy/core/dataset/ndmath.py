@@ -17,27 +17,26 @@ __dataset_methods__ = []
 import copy as cpy
 import functools
 import inspect
-import sys
-import re
 import operator
+import re
+import sys
 from warnings import catch_warnings
 
 import numpy as np
 from quaternion import as_float_array
 
-from spectrochempy.utils.orderedset import OrderedSet
-from spectrochempy.core.units.units import ur, Quantity, DimensionalityError
+from spectrochempy.core import error_, warning_
 from spectrochempy.core.dataset.ndarray import NDArray
+from spectrochempy.core.units.units import DimensionalityError, Quantity, ur
 from spectrochempy.utils import (
     NOMASK,
     TYPE_COMPLEX,
-    quat_as_complex_array,
     as_quaternion,
+    quat_as_complex_array,
 )
-from spectrochempy.core import warning_, error_
-from spectrochempy.utils.testing import assert_coord_almost_equal
 from spectrochempy.utils.exceptions import CoordinateMismatchError
-
+from spectrochempy.utils.orderedset import OrderedSet
+from spectrochempy.utils.testing import assert_coord_almost_equal
 
 # ======================================================================================================================
 # utilities
@@ -74,8 +73,8 @@ class _from_numpy_method:
         def func(*args, **kwargs):
 
             # Delayed import to avoid circular reference
-            from spectrochempy.core.dataset.nddataset import NDDataset
             from spectrochempy.core.dataset.coord import Coord
+            from spectrochempy.core.dataset.nddataset import NDDataset
 
             method = self.method.__name__
             pars = inspect.signature(self.method).parameters

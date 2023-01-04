@@ -6,7 +6,6 @@
 # ======================================================================================
 # flake8: noqa
 
-from os import environ
 import pathlib
 
 import numpy as np
@@ -22,7 +21,6 @@ except ModuleNotFoundError:  # pragma: no cover
 
 import spectrochempy as scp
 from spectrochempy import preferences as prefs
-
 from spectrochempy.utils import pathclean
 from spectrochempy.utils.testing import RandomSeedContext
 

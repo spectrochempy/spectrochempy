@@ -7,11 +7,10 @@
 import textwrap
 
 import matplotlib as mpl
-from matplotlib import pyplot as plt
 import matplotlib.axes as maxes
 import mpl_toolkits.mplot3d.axes3d as maxes3D
-
 import numpy as np
+from matplotlib import pyplot as plt
 
 from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.core.units import remove_args_units

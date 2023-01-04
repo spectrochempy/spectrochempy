@@ -7,8 +7,8 @@
 # flake8: noqa
 
 from spectrochempy.core.dataset.meta import Meta
-from spectrochempy.utils.testing import raises
 from spectrochempy.core.units import ur
+from spectrochempy.utils.testing import raises
 
 
 def test_init():

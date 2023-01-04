@@ -6,26 +6,23 @@
 # ======================================================================================
 # flake8: noqa
 
-import pathlib
 import os
+import pathlib
 
-import spectrochempy.utils.exceptions
-from pathlib import Path
 import pytest
 
+import spectrochempy.utils.exceptions
 from spectrochempy import NDDataset  # , preferences as prefs
-from spectrochempy.utils import pathclean
-
+from spectrochempy.core import preferences as prefs
 from spectrochempy.core.readers.importer import (
+    ALIAS,
+    FILETYPES,
+    Importer,
+    _importer_method,
     read,
     read_dir,
-    _importer_method,
-    Importer,
-    FILETYPES,
-    ALIAS,
 )
-
-from spectrochempy.core import preferences as prefs
+from spectrochempy.utils import pathclean
 
 DATADIR = prefs.datadir
 

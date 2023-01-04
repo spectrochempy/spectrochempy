@@ -9,14 +9,12 @@
 __all__ = ["CurveFit", "LSTSQ", "NNLS"]
 
 import numpy as np
-import scipy.optimize as sopt
 import scipy.linalg as lng
-
+import scipy.optimize as sopt
 from traitlets import HasTraits, Instance
 
-from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndarray import NDArray
-
+from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units import Quantity
 
 

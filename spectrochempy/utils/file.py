@@ -7,10 +7,10 @@
 """
 File utilities.
 """
-from os import environ
 import re
 import warnings
-from pathlib import Path, WindowsPath, PosixPath
+from os import environ
+from pathlib import Path, PosixPath, WindowsPath
 
 __all__ = [
     "get_filenames",
@@ -344,8 +344,8 @@ def get_filenames(*filenames, **kwargs):
     --------
     """
 
-    from spectrochempy.core import preferences as prefs
     from spectrochempy import NO_DIALOG
+    from spectrochempy.core import preferences as prefs
 
     NODIAL = (
         NO_DIALOG or "DOC_BUILDING" in environ
@@ -551,8 +551,8 @@ def get_directory_name(directory, **kwargs):
         valid directory name.
     """
 
-    from spectrochempy.core import preferences as prefs
     from spectrochempy import NO_DIALOG
+    from spectrochempy.core import preferences as prefs
 
     data_dir = pathclean(prefs.datadir)
     working_dir = Path.cwd()

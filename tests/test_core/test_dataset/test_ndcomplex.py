@@ -8,16 +8,16 @@
 
 from copy import copy, deepcopy
 
-from quaternion import as_quat_array, as_float_array, quaternion
 import numpy as np
 import pytest
+from quaternion import as_float_array, as_quat_array, quaternion
 
 from spectrochempy.core.dataset.ndcomplex import NDComplexArray
-from spectrochempy.core.units import ur, Quantity
+from spectrochempy.core.units import Quantity, ur
 from spectrochempy.utils.testing import (
-    assert_equal,
-    assert_array_equal,
     assert_approx_equal,
+    assert_array_equal,
+    assert_equal,
 )
 
 # TODO: a lot of repetition - must be simplified with some logics

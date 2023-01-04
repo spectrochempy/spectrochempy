@@ -32,8 +32,8 @@ Widgets for the Jupyter notebook and Jupyter lab.
 """
 from contextlib import contextmanager
 
-from IPython.core.interactiveshell import InteractiveShell
 import IPython
+from IPython.core.interactiveshell import InteractiveShell
 
 from spectrochempy.utils import pathclean
 

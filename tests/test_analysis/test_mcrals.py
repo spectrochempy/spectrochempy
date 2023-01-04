@@ -6,13 +6,12 @@
 # ======================================================================================
 # flake8: noqa
 
-import os
 
 import numpy as np
 
-from spectrochempy.core.dataset.nddataset import NDDataset, Coord
 from spectrochempy import dot, set_loglevel
 from spectrochempy.analysis.mcrals import MCRALS
+from spectrochempy.core.dataset.nddataset import Coord, NDDataset
 from spectrochempy.utils import show
 
 

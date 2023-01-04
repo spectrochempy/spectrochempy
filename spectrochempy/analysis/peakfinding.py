@@ -16,8 +16,8 @@ __dataset_methods__ = ["find_peaks"]
 
 from datetime import datetime, timezone
 
-from scipy import signal
 import numpy as np
+from scipy import signal
 
 from spectrochempy.core.dataset.coord import Coord
 

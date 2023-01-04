@@ -5,11 +5,11 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # import atexit
-import warnings
 import shutil
+import warnings
 from pathlib import Path
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 from setuptools.command.develop import develop as _develop
 from setuptools.command.install import install as _install
 from setuptools_scm import get_version

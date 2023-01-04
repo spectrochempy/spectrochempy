@@ -15,8 +15,9 @@ equation.
 """
 # sphinx_gallery_thumbnail_number = 2
 
-import spectrochempy as scp
 import os
+
+import spectrochempy as scp
 
 ########################################################################
 #  Let's take an IR spectrum

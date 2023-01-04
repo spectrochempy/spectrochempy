@@ -16,7 +16,7 @@ __all__ = [
 import getpass
 import platform
 import sys
-from subprocess import run, PIPE, STDOUT
+from subprocess import PIPE, STDOUT, run
 
 
 def is_windows():

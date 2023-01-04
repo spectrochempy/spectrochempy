@@ -5,10 +5,10 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 from pathlib import Path
-from matplotlib import cycler
 
-from traitlets.config.configurable import Configurable
+from matplotlib import cycler
 from traitlets import All, List, TraitError, observe
+from traitlets.config.configurable import Configurable
 
 __all__ = ["MetaConfigurable", "Range"]
 

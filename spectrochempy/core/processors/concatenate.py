@@ -9,14 +9,15 @@ __all__ = ["concatenate", "stack"]
 
 __dataset_methods__ = __all__
 
-import numpy as np
 import datetime as datetime
 from warnings import warn
 
-from spectrochempy.utils.orderedset import OrderedSet
+import numpy as np
+
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.ndarray import DEFAULT_DIM_NAME
 from spectrochempy.utils import DimensionsCompatibilityError, UnitsCompatibilityError
+from spectrochempy.utils.orderedset import OrderedSet
 
 
 def concatenate(*datasets, **kwargs):

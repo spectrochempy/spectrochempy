@@ -13,16 +13,16 @@ Utility functions to deal with Cantera input/output.
 # TODO: Testing !
 
 import datetime
-import numpy as np
-import warnings
 import logging
+import warnings
 from collections.abc import Iterable
 
-from scipy.optimize import minimize, differential_evolution, least_squares
+import numpy as np
+from scipy.optimize import differential_evolution, least_squares, minimize
 
-from spectrochempy.optional import import_optional_dependency
 from spectrochempy.core import error_
-from spectrochempy.core.dataset.nddataset import NDDataset, Coord
+from spectrochempy.core.dataset.nddataset import Coord, NDDataset
+from spectrochempy.optional import import_optional_dependency
 
 __all__ = [
     "coverages_vs_time",

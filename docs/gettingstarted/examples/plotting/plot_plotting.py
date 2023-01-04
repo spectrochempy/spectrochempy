@@ -11,8 +11,9 @@ Introduction to the plotting librairie
 
 
 """
-import spectrochempy as scp
 import os
+
+import spectrochempy as scp
 
 # this also import the os namespace
 

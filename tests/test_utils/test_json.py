@@ -5,12 +5,13 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # flake8: noqa
-import json
 import base64
+import json
 import pickle
+
 import numpy as np
 
-from spectrochempy.utils import json_serialiser, json_decoder
+from spectrochempy.utils import json_decoder, json_serialiser
 
 
 def test_json_serialiser_decoder(IR_dataset_2D):

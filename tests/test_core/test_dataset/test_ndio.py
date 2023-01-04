@@ -11,13 +11,13 @@
 """
 
 import pathlib
+
 import pytest
 
-from spectrochempy.utils.testing import assert_dataset_equal
-from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core import preferences as prefs
-from spectrochempy.utils.testing import assert_array_equal
+from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import pathclean
+from spectrochempy.utils.testing import assert_array_equal, assert_dataset_equal
 
 irdatadir = pathclean(prefs.datadir) / "irdata"
 nmrdatadir = pathclean(prefs.datadir) / "nmrdata" / "bruker" / "tests" / "nmr"

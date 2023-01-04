@@ -7,6 +7,7 @@
 # flake8: noqa
 
 import numpy as np
+
 import spectrochempy as scp
 from spectrochempy.utils.testing import assert_array_almost_equal
 

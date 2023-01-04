@@ -7,16 +7,16 @@
 import re
 from functools import partial
 
-from ipywidgets import widgets, Layout
 from IPython.display import display
+from ipywidgets import Layout, widgets
 
+from spectrochempy.core import info_, warning_
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.plotters.multiplot import multiplot
 from spectrochempy.core.processors.baseline import BaselineCorrection
 from spectrochempy.core.processors.concatenate import concatenate
 from spectrochempy.core.readers.importer import read
 from spectrochempy.utils import show
-from spectrochempy.core import warning_, info_
 
 __all__ = ["BaselineCorrector"]
 

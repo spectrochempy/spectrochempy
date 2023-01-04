@@ -5,6 +5,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 import numpy as np
+
 import spectrochempy as scp
 
 __all__ = ["generate_fake"]

@@ -9,8 +9,8 @@ import pytest
 
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.scripts.script import Script
-from spectrochempy.utils import testing
 from spectrochempy.core.units import ur
+from spectrochempy.utils import testing
 
 
 def test_compare_ndarrays(IR_dataset_1D):

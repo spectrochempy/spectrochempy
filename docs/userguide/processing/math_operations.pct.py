@@ -20,8 +20,9 @@
 
 # %%
 import numpy as np
+
 import spectrochempy as scp
-from spectrochempy import error_, DimensionalityError, MASKED
+from spectrochempy import MASKED, DimensionalityError, error_
 
 # %% [markdown]
 # ## Ufuncs (Universal Numpy's functions)

@@ -36,7 +36,8 @@
 # from pathlib import Path
 
 # %%
-from spectrochempy import NDDataset, Project, preferences as prefs, pathclean
+from spectrochempy import NDDataset, Project, pathclean
+from spectrochempy import preferences as prefs
 
 # %% [markdown]
 # ## Project creation

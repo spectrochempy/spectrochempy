@@ -5,23 +5,24 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # flake8: noqa
+from os import environ
+
 import numpy as np
 import pytest
 from pint.errors import UndefinedUnitError
 from quaternion import quaternion
-from os import environ
 
 import spectrochempy as scp
 from spectrochempy.core.units import ur
-from spectrochempy.utils import get_user_and_node, SpectroChemPyException
+from spectrochempy.utils import SpectroChemPyException, get_user_and_node
 from spectrochempy.utils.testing import (
-    assert_dataset_equal,
-    assert_dataset_almost_equal,
-    assert_equal,
+    RandomSeedContext,
     assert_array_almost_equal,
     assert_array_equal,
+    assert_dataset_almost_equal,
+    assert_dataset_equal,
+    assert_equal,
     raises,
-    RandomSeedContext,
 )
 
 typequaternion = np.dtype(np.quaternion)
@@ -863,7 +864,6 @@ def test_nddataset_repr_html_bug_undesired_display_complex():
     da.description = "Some experimental measurements"
     da.units = "dimensionless"
     assert "(complex)" not in da._repr_html_()
-    pass
 
 
 def test_nddataset_bug_fixe_figopeninnotebookwithoutplot():
@@ -873,8 +873,9 @@ def test_nddataset_bug_fixe_figopeninnotebookwithoutplot():
 
 
 def test_nddataset_bug_par_arnaud():
-    import spectrochempy as scp
     import numpy as np
+
+    import spectrochempy as scp
 
     x = scp.Coord(data=np.linspace(1000.0, 4000.0, num=6000), title="x")
     y = scp.Coord(data=np.linspace(0.0, 10, num=5), title="y")

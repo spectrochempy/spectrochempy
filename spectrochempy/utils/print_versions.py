@@ -18,7 +18,6 @@ from os import environ
 from spectrochempy import optional
 from spectrochempy.utils import pathclean
 
-
 __all__ = ["show_versions"]
 
 REPOS = pathclean(__file__).parent.parent.parent
