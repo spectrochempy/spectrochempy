@@ -484,7 +484,6 @@ def test_linearcoord():
     assert_approx_equal(coord1.spacing.m, 0.606060606)
 
     assert coord1.author is None
-    assert not coord1.history
 
     assert not coord1.descendant
     assert coord2.descendant

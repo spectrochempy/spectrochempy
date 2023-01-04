@@ -813,10 +813,6 @@ class Coord(NDMath, NDArray):
                 except AttributeError:
                     # some attribute of NDDataset are missing in NDArray
                     pass
-            try:
-                self.history = f"Copied from object:{data.name}"
-            except AttributeError:
-                pass
 
         elif isinstance(data, NDArray):
             # init data with data from another NDArray or NDArray's subclass
@@ -832,10 +828,6 @@ class Coord(NDMath, NDArray):
                 except AttributeError:
                     # some attribute of NDDataset are missing in NDArray
                     pass
-            try:
-                self.history = f"Copied from object:{data.name}"
-            except AttributeError:
-                pass
 
         elif isinstance(data, Quantity):
             self._data = np.array(data.magnitude, subok=True, copy=self._copy)

@@ -12,7 +12,7 @@ __dataset_methods__ = __all__
 
 import io
 import struct
-from datetime import datetime, timezone
+from datetime import datetime
 from warnings import warn
 
 import numpy as np
@@ -574,9 +574,7 @@ def _read_spc(*args, **kwargs):
             if Logsizd:
                 dataset.description += f"a Log disk block of size {Logsizd} bytes "
 
-    dataset.history = str(
-        datetime.now(timezone.utc)
-    ) + ":imported from spc file {} ; ".format(filename)
+    dataset.history = f"Imported from spc file {filename}."
 
     if y_unit == "Interferogram":
         # interferogram

@@ -206,7 +206,7 @@ def _read_csv(*args, **kwargs):
     dataset.title = kwargs.get("title", None)
     dataset.units = kwargs.get("units", None)
     dataset.description = kwargs.get("description", '"name" ' + "read from .csv file")
-    dataset.history = str(datetime.now(timezone.utc)) + ":read from .csv file \n"
+    dataset.history = "Read from .csv file"
     dataset._date = datetime.now(timezone.utc)
     dataset._modified = dataset.date
 
@@ -237,9 +237,7 @@ def _add_omnic_info(dataset, **kwargs):
     dataset.title = "absorbance"
     dataset.name = name
     dataset.description = "Dataset from .csv file: {}\n".format(desc)
-    dataset.history = (
-        str(datetime.now(timezone.utc)) + ":read from omnic exported csv file \n"
-    )
+    dataset.history = "Read from omnic exported csv file."
     dataset.origin = "omnic"
 
     # Set the NDDataset date
