@@ -268,7 +268,7 @@ class BaselineCorrection(HasTraits):
         if is_descendant:
             new.sort(axis=-1, inplace=True, descend=True)
 
-        new.history = str(new.modified) + ": " + "Baseline correction." + " Method: "
+        new.history = "Baseline correction." + " Method: "
         if self.method == "Multivariate":
             new.history = "Multivariate (" + str(self.npc) + " PCs)."
         else:

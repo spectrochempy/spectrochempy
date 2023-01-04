@@ -11,7 +11,6 @@ from public database.
 __all__ = ["download_iris", "download_nist_ir"]
 __dataset_methods__ = __all__
 
-from datetime import datetime, timezone
 from io import StringIO
 from pathlib import Path
 
@@ -202,9 +201,7 @@ def download_nist_ir(CAS, index="all"):
             ds = read_jcamp("temp.jdx")
 
             # replace the default entry ":imported from jdx file":
-            ds.history[0] = ds.history[0][: len(str(datetime.now(timezone.utc)))] + (
-                f" : downloaded from NIST: {url}\n"
-            )
+            ds.history[0] = f"Downloaded from NIST: {url}"
             out.append(ds)
             (Path(".") / "temp.jdx").unlink()
 

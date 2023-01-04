@@ -1432,7 +1432,7 @@ class NDMath(object):
 
         if dtype is not None:
             cls.data = cls.data.astype(dtype)
-        cls._history = []
+        cls.history = []
 
         # set the new coordinates
         if hasattr(cls, "coordset") and cls.coordset is not None:
@@ -3191,7 +3191,7 @@ class NDMath(object):
         if mask is not None and np.any(mask != NOMASK):
             new._mask = cpy.copy(mask)
         if history is not None and hasattr(new, "history"):
-            new._history.append(history.strip())
+            new.history = history.strip()
 
         # case when we want to return a simple masked ndarray
         if returntype == "masked_array":

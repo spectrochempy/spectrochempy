@@ -148,8 +148,6 @@ class NDArray(HasTraits):
         created.
     description : str, optional.
         An optional description of the nd-dataset. A shorter alias is `desc`.
-    history : str, optional.
-        A string to add to the object history.
     copy : bool, optional, Default:False.
         If True, a deep copy of the passed object is performed.
 
@@ -190,7 +188,6 @@ class NDArray(HasTraits):
     _author = Unicode()
     _description = Unicode()
     _origin = Unicode()
-    _history = List(Unicode(), allow_none=True)
     _meta = Instance(Meta, allow_none=True)
     _transposed = Bool(False)
 
@@ -259,10 +256,6 @@ class NDArray(HasTraits):
                 # This happens for coord for which we cannot set the author (no need)
                 pass
 
-        history = kwargs.pop("history", None)
-        if history is not None:
-            self.history = history
-
         self._modified = self._date
 
     # ------------------------------------------------------------------------
@@ -292,7 +285,6 @@ class NDArray(HasTraits):
             "roi",
             "author",
             "description",
-            "history",
             "transposed",
         ]
 
@@ -323,7 +315,7 @@ class NDArray(HasTraits):
         if attrs is None:
             attrs = self.__dir__()
 
-        for attr in ["name", "history"]:
+        for attr in ["name"]:
             if attr in attrs:
                 attrs.remove(attr)
 
@@ -1020,10 +1012,6 @@ class NDArray(HasTraits):
                 except AttributeError:
                     # some attribute of NDDataset are missing in NDArray
                     pass
-            try:
-                self.history = f"Copied from object:{data.name}"
-            except AttributeError:
-                pass
 
         elif isinstance(data, Quantity):
             self._data = np.array(data.magnitude, subok=True, copy=self._copy)
@@ -1580,17 +1568,8 @@ class NDArray(HasTraits):
         return False
 
     # ..........................................................................
-    @property
-    def history(self):
-        """
-        Describes the history of actions made on this array (List of strings).
-        """
-        return self._history
 
     # ..........................................................................
-    @history.setter
-    def history(self, value):
-        self._history.append(value)
 
     # ..........................................................................
     @property

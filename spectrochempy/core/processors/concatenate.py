@@ -182,7 +182,7 @@ def concatenate(*datasets, **kwargs):
 
     out.description += " )"
     out._date = out._modified = datetime.datetime.now(datetime.timezone.utc)
-    out._history = [str(out.date) + ": Created by concatenate"]
+    out.history = ["Created by concatenate"]
 
     return out
 

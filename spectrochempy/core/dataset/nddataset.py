@@ -12,9 +12,22 @@ __all__ = ["NDDataset"]
 
 import sys
 import textwrap
+from datetime import datetime, tzinfo
 
 import numpy as np
-from traitlets import Bool, Dict, Float, HasTraits, Instance, Union, default, validate
+import pytz  # TODO: for py>=3.9, we could use builtin zoneinfo library instead of pyt but we need compatibility with 3.7 (Colab).
+from traitlets import (
+    Bool,
+    Dict,
+    Float,
+    HasTraits,
+    Instance,
+    List,
+    Tuple,
+    Union,
+    default,
+    validate,
+)
 from traittypes import Array
 
 from spectrochempy.core import error_, warning_
@@ -28,7 +41,8 @@ from spectrochempy.core.dataset.ndmath import NDMath, _set_operators, _set_ufunc
 from spectrochempy.core.dataset.ndplot import NDPlot
 from spectrochempy.core.project.baseproject import AbstractProject
 from spectrochempy.optional import import_optional_dependency
-from spectrochempy.utils import MaskedConstant, SpectroChemPyException, colored_output
+from spectrochempy.utils import MaskedConstant, colored_output, get_user_and_node
+from spectrochempy.utils.exceptions import SpectroChemPyException, UnknownTimeZoneError
 
 # ======================================================================================================================
 # NDDataset class definition
@@ -126,6 +140,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         explicitly provided an error is raised. Handling of units use the
         `pint <https://pint.readthedocs.org/>`_
         package.
+    timezone : datetime.tzinfo, optional
+        The timezone where the data were created. If not specified, the local timezone
+        is assumed.
     title : str, optional
         The title of the data dimension. The `title` attribute should not be confused with the `name`.
         The `title` attribute is used for instance for labelling plots of the data.
@@ -206,6 +223,15 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     # region ranges
     _ranges = Instance(Meta)
 
+    # history
+    _history = List(Tuple(), allow_none=True)
+
+    # Dates
+    _acquisition_date = Instance(datetime, allow_none=True)
+    _created = Instance(datetime)
+    _modified = Instance(datetime)
+    _timezone = Instance(tzinfo, allow_none=True)
+
     # ------------------------------------------------------------------------
     # initialisation
     # ------------------------------------------------------------------------
@@ -215,6 +241,14 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     ):
 
         super().__init__(data, **kwargs)
+
+        self._created = datetime.utcnow()
+        self.description = kwargs.pop("description", "")
+        self.author = kwargs.pop("author", get_user_and_node())
+
+        history = kwargs.pop("history", None)
+        if history is not None:
+            self.history = history
 
         self._parent = None
 
@@ -493,51 +527,49 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         # all instance of this class has same hash, so they can be compared
         return super().__hash__ + hash(self._coordset)
 
-    # ------------------------------------------------------------------------
-    # Default values
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
+    # Private methods and properties
+    # ----------------------------------------------------------------------------------
 
-    # ..........................................................................
     @default("_coordset")
-    def _coordset_default(self):
+    def __coordset_default(self):
         return None
 
-    # ..........................................................................
     @default("_modeldata")
-    def _modeldata_default(self):
+    def __modeldata_default(self):
         return None
 
-    # ..........................................................................
     @default("_processeddata")
-    def _processeddata_default(self):
+    def __processeddata_default(self):
         return None
 
-    # ..........................................................................
     @default("_baselinedata")
-    def _baselinedata_default(self):
+    def __baselinedata_default(self):
         return None
 
-    # ..........................................................................
     @default("_referencedata")
-    def _referencedata_default(self):
+    def __referencedata_default(self):
         return None
 
     @default("_ranges")
-    def _ranges_default(self):
+    def __ranges_default(self):
         ranges = Meta()
         for dim in self.dims:
             ranges[dim] = dict(masks={}, baselines={}, integrals={}, others={})
         return ranges
 
-    # ..........................................................................
-    @property
-    def ranges(self):
-        return self._ranges
+    @default("_timezone")
+    def __timezone_default(self):
+        # Return the default timezone (UTC)
+        return datetime.utcnow().astimezone().tzinfo
 
-    # ..........................................................................
-    @ranges.setter
-    def ranges(self, value):
-        self._ranges = value
+    @validate("_history")
+    def __history_validate(self, proposal):
+        history = proposal["value"]
+        if isinstance(history, list) or history is None:
+            # reset
+            self._history = None
+        return history
 
     # ------------------------------------------------------------------------
     # GUI options
@@ -599,6 +631,40 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     @referencedata.setter
     def referencedata(self, val):
         self._referencedata = val
+
+    @property
+    def history(self):
+        """
+        Describes the history of actions made on this array (tr.List of strings).
+        """
+
+        history = []
+        for date, value in self._history:
+            date = pytz.utc.localize(date)
+            date = date.astimezone(self.timezone).isoformat(sep=" ", timespec="seconds")
+            value = value[0].capitalize() + value[1:]
+            history.append(f"{date}> {value}")
+        return history
+
+    @history.setter
+    def history(self, value):
+        if value is None:
+            return
+        if isinstance(value, list):
+            # history will be replaced
+            self._history = []
+            if len(value) == 0:
+                return
+            value = value[0]
+        date = datetime.utcnow()
+        self._history.append((date, value))
+
+    @property
+    def local_timezone(self):
+        """
+        Return the local timezone.
+        """
+        return str(datetime.utcnow().astimezone().tzinfo)
 
     # ------------------------------------------------------------------------
     # Validators
@@ -1037,6 +1103,16 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         # TODO
 
     # ..........................................................................
+    @property
+    def ranges(self):
+        return self._ranges
+
+    # ..........................................................................
+    @ranges.setter
+    def ranges(self, value):
+        self._ranges = value
+
+    # ..........................................................................
     def swapdims(self, dim1, dim2, inplace=False):
         """
         Interchange two dimensions of a NDDataset.
@@ -1104,6 +1180,36 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         )
         new = self[index]
         return new
+
+    @property
+    def timezone(self):
+        """
+        Return the timezone information.
+
+        A timezone's offset refers to how many hours the timezone
+        is from Coordinated Universal Time (UTC).
+
+        A `naive` datetime object contains no timezone information. The
+        easiest way to tell if a datetime object is naive is by checking
+        tzinfo.  will be set to None of the object is naive.
+
+        A naive datetime object is limited in that it cannot locate itself
+        in relation to offset-aware datetime objects.
+
+        In spectrochempy, all datetimes are stored in UTC, so that conversion
+        must be done during the display of these datetimes using tzinfo.
+        """
+        return self._timezone
+
+    @timezone.setter
+    def timezone(self, val):
+        try:
+            self._timezone = pytz.timezone(val)
+        except pytz.UnknownTimeZoneError:
+            raise UnknownTimeZoneError(
+                "You can get a list of valid timezones in "
+                "https://en.wikipedia.org/wiki/tr.List_of_tz_database_time_zones ",
+            )
 
     def to_array(self):
         """
