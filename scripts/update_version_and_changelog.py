@@ -1,11 +1,12 @@
-import sys
-import re
-from pathlib import Path
-from datetime import date
 import json
+import re
+import sys
+from datetime import date
+from pathlib import Path
+
 import yaml
-from setuptools_scm import get_version
 from cffconvert.cli.create_citation import create_citation
+from setuptools_scm import get_version
 
 SCRIPTS = Path(__file__).parent
 PROJECT = SCRIPTS.parent

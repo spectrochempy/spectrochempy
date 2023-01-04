@@ -13,11 +13,10 @@ Adapted from https://github.com/pandas-dev/pandas/scripts
 """
 import argparse
 import re
+from pathlib import Path
 
 import yaml
-
 from jinja2 import Template
-from pathlib import Path
 
 EXCLUDE = {
     "python",

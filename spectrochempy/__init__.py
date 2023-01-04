@@ -46,20 +46,10 @@ SpectroChemPy is a framework for processing, analyzing and modeling Spectroscopi
 It is a cross platform software, running on Linux, Windows or OS X.
 """
 
-# check for update
-# import sys
-
-# from time import time
-# from pathlib import Path
-
-__all__ = ["api"]
-
-
-# import the main api
-
 from spectrochempy import api
 from spectrochempy.api import *  # noqa: F401
 
+__all__ = ["api"]
 __all__ += api.__all__
 
 # ==============================================================================

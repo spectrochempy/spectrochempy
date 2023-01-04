@@ -7,18 +7,17 @@
 # flake8: noqa
 
 import numpy as np
+import pytest
 
 import spectrochempy as scp
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.processors.concatenate import concatenate, stack
 from spectrochempy.core.units import ur
-from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.utils.testing import assert_dataset_almost_equal
 from spectrochempy.utils.exceptions import (
     DimensionsCompatibilityError,
     UnitsCompatibilityError,
 )
-
-import pytest
+from spectrochempy.utils.testing import assert_dataset_almost_equal
 
 
 def test_concatenate(IR_dataset_2D):

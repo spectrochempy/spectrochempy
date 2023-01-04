@@ -23,11 +23,10 @@ import json
 import os
 import sys
 import tempfile
+from io import StringIO
 from typing import List, Optional
 
 import flake8.main.application
-
-from io import StringIO
 
 # Template backend makes matplotlib to not plot anything. This is useful
 # to avoid that plot windows are open from the doctests while running the

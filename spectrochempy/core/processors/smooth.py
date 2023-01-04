@@ -8,6 +8,7 @@ __all__ = ["smooth"]
 __dataset_methods__ = __all__
 
 import numpy as np
+
 from spectrochempy.core import error_
 
 

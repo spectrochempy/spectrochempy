@@ -15,25 +15,25 @@ import pytest
 from pint.errors import DimensionalityError
 from quaternion import quaternion
 
-from spectrochempy.core import info_, error_
+import spectrochempy as scp
+from spectrochempy.core import error_, info_
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndmath import (
-    _unary_ufuncs,
     _binary_ufuncs,
     _comp_ufuncs,
+    _unary_ufuncs,
 )
-from spectrochempy.core.units.units import ur, Quantity, Unit
+from spectrochempy.core.units.units import Quantity, Unit, ur
 from spectrochempy.utils import MASKED
-from spectrochempy.utils.testing import (
-    assert_array_equal,
-    assert_equal_units,
-    assert_dataset_equal,
-    RandomSeedContext,
-)
 from spectrochempy.utils.exceptions import CoordinateMismatchError
-import spectrochempy as scp
+from spectrochempy.utils.testing import (
+    RandomSeedContext,
+    assert_array_equal,
+    assert_dataset_equal,
+    assert_equal_units,
+)
 
 typequaternion = np.dtype(np.quaternion)
 

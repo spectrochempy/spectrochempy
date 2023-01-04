@@ -10,13 +10,13 @@ import logging
 
 from spectrochempy import (
     DEBUG,
-    WARNING,
     INFO,
-    error_,
+    WARNING,
     debug_,
+    error_,
     info_,
-    warning_,
     set_loglevel,
+    warning_,
 )
 
 

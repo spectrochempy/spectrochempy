@@ -7,13 +7,13 @@
 """
 Various methods and classes used in other part of the program.
 """
-import re
 import functools
-from datetime import datetime, timezone
-import uuid
-import types
-import warnings
+import re
 import textwrap
+import types
+import uuid
+import warnings
+from datetime import datetime, timezone
 
 import numpy as np
 from quaternion import as_float_array, as_quat_array

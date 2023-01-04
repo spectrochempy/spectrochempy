@@ -4,9 +4,10 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-import os
 import json
+import os
 from collections.abc import Mapping
+
 from numpy.lib.format import read_array
 
 from spectrochempy.utils import json_decoder

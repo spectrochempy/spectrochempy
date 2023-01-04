@@ -13,10 +13,11 @@ __all__ = ["pk", "pk_exp"]
 __dataset_methods__ = __all__
 
 import functools
+
 import numpy as np
 
-from spectrochempy.core.units import ur, Quantity
 from spectrochempy.core import error_
+from spectrochempy.core.units import Quantity, ur
 
 pi = np.pi
 

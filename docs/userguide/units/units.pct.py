@@ -29,10 +29,11 @@
 #       version_minor: 0
 # ---
 
+import numpy as np
+
 # %%
 import spectrochempy as scp
-from spectrochempy import ur, Quantity  # to simplify further writing
-import numpy as np
+from spectrochempy import Quantity, ur  # to simplify further writing
 
 # %% [markdown]
 # # Units & Quantities

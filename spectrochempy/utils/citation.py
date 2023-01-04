@@ -5,12 +5,11 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 import json
-import yaml
-import sys
 import pathlib
-
+import sys
 from datetime import date
 
+import yaml
 from cffconvert.cli.create_citation import create_citation
 
 import spectrochempy as scp

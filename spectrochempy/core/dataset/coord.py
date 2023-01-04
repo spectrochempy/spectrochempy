@@ -14,29 +14,15 @@ import copy as cpy
 import textwrap
 
 import numpy as np
-from traitlets import (
-    Bool,
-    observe,
-    All,
-    Unicode,
-    Integer,
-    Union,
-    CFloat,
-    CInt,
-    Instance,
-)
+from traitlets import All, Bool, CFloat, CInt, Instance, Integer, Unicode, Union
 from traitlets import default as traitdefault
+from traitlets import observe
 
+from spectrochempy.core import error_
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndmath import NDMath, _set_operators
-from spectrochempy.utils import (
-    colored_output,
-    NOMASK,
-    INPLACE,
-    spacing_,
-)
 from spectrochempy.core.units import Quantity, ur
-from spectrochempy.core import error_
+from spectrochempy.utils import INPLACE, NOMASK, colored_output, spacing_
 
 
 # ======================================================================================================================

@@ -1,7 +1,8 @@
-from jinja2 import Template
-from pathlib import Path
 import argparse
 import sys
+from pathlib import Path
+
+from jinja2 import Template
 
 parser = argparse.ArgumentParser()
 

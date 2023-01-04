@@ -6,12 +6,11 @@
 # ======================================================================================
 # flake8: noqa
 
-from pathlib import Path
 import pytest
 
 import spectrochempy as scp
-from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core import preferences as prefs
+from spectrochempy.core.dataset.nddataset import NDDataset
 
 DATADIR = prefs.datadir
 IRDATA = DATADIR / "irdata"

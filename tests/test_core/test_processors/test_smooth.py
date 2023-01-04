@@ -6,8 +6,8 @@
 # ======================================================================================
 # flake8: noqa
 
-import pytest
 import numpy as np
+import pytest
 
 from spectrochempy.utils import show
 

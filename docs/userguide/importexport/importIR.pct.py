@@ -377,7 +377,7 @@ print(newS0)
 
 # %%
 def difference(x, y):
-    from numpy import max, abs
+    from numpy import abs, max
 
     nonzero = y.data != 0
     error = abs(x.data - y.data)

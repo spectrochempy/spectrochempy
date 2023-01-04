@@ -17,9 +17,10 @@ Borrowed from https://github.com/dask/dask-gateway/blob/master/docs/sphinxext/au
 
 """
 
+from sphinx.ext.autodoc import DataDocumenter, ModuleDocumenter
+
 # %%
 from traitlets import TraitType, Undefined
-from sphinx.ext.autodoc import DataDocumenter, ModuleDocumenter
 
 
 # %%

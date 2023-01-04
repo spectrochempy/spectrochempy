@@ -6,11 +6,11 @@
 # ======================================================================================
 # flake8: noqa
 
-from unittest import mock
 import sys
+from unittest import mock
 
-import pytest
 import numpy as np
+import pytest
 
 import spectrochempy as scp
 

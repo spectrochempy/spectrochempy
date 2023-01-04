@@ -14,21 +14,20 @@ import pytest
 from pint.errors import DimensionalityError
 
 from spectrochempy.core.dataset.ndarray import NDArray
-from spectrochempy.core.units import ur, Quantity
+from spectrochempy.core.units import Quantity, ur
 from spectrochempy.utils import (
-    SpectroChemPyWarning,
     INPLACE,
     MASKED,
-    TYPE_INTEGER,
     TYPE_FLOAT,
+    TYPE_INTEGER,
+    SpectroChemPyWarning,
 )
 from spectrochempy.utils.testing import (
-    assert_equal,
     assert_array_equal,
-    raises,
+    assert_equal,
     catch_warnings,
+    raises,
 )
-
 
 # ------------------------------------------------------------------
 #  NDARRAY INITIALIZATION

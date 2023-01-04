@@ -8,9 +8,8 @@
 import numpy as np
 
 import spectrochempy as scp
-from spectrochempy.utils import show, MASKED
-
 from spectrochempy.analysis.models import asymmetricvoigtmodel
+from spectrochempy.utils import MASKED, show
 
 
 def test_EFA(IR_dataset_2D):

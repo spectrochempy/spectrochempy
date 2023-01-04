@@ -6,14 +6,14 @@
 # ======================================================================================
 # flake8: noqa
 
-from pathlib import Path
 from os import environ
+from pathlib import Path
 
 import pytest
 
-from spectrochempy.core import preferences as prefs
 from spectrochempy import NO_DISPLAY
-from spectrochempy.utils import get_filenames, check_filenames, pathclean
+from spectrochempy.core import preferences as prefs
+from spectrochempy.utils import check_filenames, get_filenames, pathclean
 
 
 def test_pathclean():

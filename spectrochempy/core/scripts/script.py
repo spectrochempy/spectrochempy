@@ -4,20 +4,13 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-import re
 import ast
+import re
 
-from traitlets import (
-    HasTraits,
-    Unicode,
-    validate,
-    TraitError,
-    Instance,
-    Float,
-)
+from traitlets import Float, HasTraits, Instance, TraitError, Unicode, validate
 
-from spectrochempy.core.project.baseproject import AbstractProject
 from spectrochempy.core import error_
+from spectrochempy.core.project.baseproject import AbstractProject
 
 __all__ = ["Script", "run_script", "run_all_scripts"]
 

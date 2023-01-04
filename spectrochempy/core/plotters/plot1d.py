@@ -29,14 +29,13 @@ __dataset_methods__ = [
 import numpy as np
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
-from spectrochempy.utils import (
-    make_label,
-    is_sequence,
-    add_docstring,
-    plot_method,
-)  # , deprecated
 from spectrochempy.core.dataset.coord import Coord
-
+from spectrochempy.utils import (  # , deprecated
+    add_docstring,
+    is_sequence,
+    make_label,
+    plot_method,
+)
 
 _PLOT1D_DOC = """\
 ax : Axe, optional

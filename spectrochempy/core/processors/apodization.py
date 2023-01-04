@@ -22,12 +22,13 @@ __all__ = [
 __dataset_methods__ = __all__
 
 import functools
+
 import numpy as np
 from scipy.signal import windows
 
+from spectrochempy.core import error_
 from spectrochempy.core.units import Quantity
 from spectrochempy.utils import EPSILON
-from spectrochempy.core import error_
 
 pi = np.pi
 

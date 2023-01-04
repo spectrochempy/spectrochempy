@@ -6,9 +6,11 @@
 # ======================================================================================
 # flake8: noqa
 
-import pytest
 import os
+
 import matplotlib.pyplot as plt
+import pytest
+
 from spectrochempy import preferences
 from spectrochempy.utils import show
 

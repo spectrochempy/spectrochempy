@@ -10,22 +10,22 @@ __all__ = ["fft", "ifft", "mc", "ps", "ht"]
 __dataset_methods__ = __all__
 
 import re
+
 import numpy as np
-from scipy.signal import hilbert
 from quaternion import as_float_array
+from scipy.signal import hilbert
 
 from spectrochempy.core import error_
-from spectrochempy.core.units import ur
 from spectrochempy.core.dataset.coord import LinearCoord
-from spectrochempy.utils import (
-    largest_power_of_2,
-    get_component,
-    typequaternion,
-    as_quaternion,
-)
 from spectrochempy.core.processors.utils import _units_agnostic_method
 from spectrochempy.core.processors.zero_filling import zf_size
-
+from spectrochempy.core.units import ur
+from spectrochempy.utils import (
+    as_quaternion,
+    get_component,
+    largest_power_of_2,
+    typequaternion,
+)
 
 # ======================================================================================================================
 # Private methods

@@ -10,7 +10,7 @@ This module implements the class _CoordRange.
 
 __all__ = __slots__ = ["trim_ranges"]
 
-from traitlets import HasTraits, List, Bool
+from traitlets import Bool, HasTraits, List
 
 from spectrochempy.utils.traits import Range
 

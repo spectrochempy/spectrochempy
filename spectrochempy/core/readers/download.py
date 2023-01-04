@@ -11,16 +11,17 @@ from public database.
 __all__ = ["download_iris", "download_nist_ir"]
 __dataset_methods__ = __all__
 
-from io import StringIO
-import numpy as np
-import requests
 from datetime import datetime, timezone
+from io import StringIO
 from pathlib import Path
 
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core.readers.read_jcamp import read_jcamp
+import numpy as np
+import requests
+
 from spectrochempy.core import error_, info_
+from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.readers.read_jcamp import read_jcamp
 from spectrochempy.optional import import_optional_dependency
 from spectrochempy.utils import is_iterable
 

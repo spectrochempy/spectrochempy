@@ -6,9 +6,9 @@
 # ======================================================================================
 # flake8: noqa
 
-import sys
-import pytest
 from pathlib import Path
+
+import pytest
 
 import spectrochempy as scp
 from spectrochempy.utils import show

@@ -24,8 +24,10 @@ __all__ = [
     "RandomSeedContext",
 ]
 
-import operator
+import contextlib
 import functools
+import operator
+import os
 import warnings
 
 import numpy as np
@@ -33,15 +35,13 @@ import numpy as np
 # import matplotlib.pyplot as plt
 # from matplotlib.testing.compare import calculate_rms, ImageAssertionError
 from numpy.testing import (
-    assert_equal,
-    assert_array_equal,
-    assert_array_almost_equal,
     assert_approx_equal,
-    assert_raises,
+    assert_array_almost_equal,
     assert_array_compare,
+    assert_array_equal,
+    assert_equal,
+    assert_raises,
 )
-import contextlib
-import os
 
 
 @contextlib.contextmanager
@@ -81,7 +81,7 @@ def set_env(**environ):
 # ======================================================================================================================
 def gisinf(x):
     # copied from numpy.testing._private.utils
-    from numpy.core import isinf, errstate
+    from numpy.core import errstate, isinf
 
     with errstate(invalid="ignore"):
         st = isinf(x)
@@ -92,9 +92,9 @@ def gisinf(x):
 
 def _compare(x, y, decimal):
     # copied from numpy.testing._private.utils
-    from numpy.core import number, float_, result_type, array
-    from numpy.core.numerictypes import issubdtype
+    from numpy.core import array, float_, number, result_type
     from numpy.core.fromnumeric import any as npany
+    from numpy.core.numerictypes import issubdtype
 
     try:
         if npany(gisinf(x)) or npany(gisinf(y)):

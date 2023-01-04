@@ -8,19 +8,19 @@ import matplotlib as mpl
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
 from traitlets import (
-    Bool,
-    Unicode,
-    Tuple,
-    List,
-    Integer,
-    Float,
-    Enum,
-    observe,
     All,
-    default,
-    TraitError,
-    Union,
+    Bool,
+    Enum,
+    Float,
+    Integer,
+    List,
     Set,
+    TraitError,
+    Tuple,
+    Unicode,
+    Union,
+    default,
+    observe,
 )
 
 from spectrochempy.utils import MetaConfigurable, get_pkg_path, pathclean

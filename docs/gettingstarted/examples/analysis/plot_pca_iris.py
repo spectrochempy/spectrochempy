@@ -13,8 +13,9 @@ In this example, we perform the PCA dimensionality reduction of the classical ``
 
 """
 
-import spectrochempy as scp
 import sys
+
+import spectrochempy as scp
 
 ############################################################
 # Upload a dataset form a distant server

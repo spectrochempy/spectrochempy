@@ -12,13 +12,13 @@ __all__ = ["read_matlab", "read_mat"]
 __dataset_methods__ = __all__
 
 import io
-from warnings import warn
 from datetime import datetime, timezone
+from warnings import warn
 
 import numpy as np
 import scipy.io as sio
 
-from spectrochempy.core.dataset.nddataset import NDDataset, Coord
+from spectrochempy.core.dataset.nddataset import Coord, NDDataset
 from spectrochempy.core.readers.importer import Importer, _importer_method
 
 

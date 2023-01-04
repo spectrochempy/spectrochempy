@@ -7,10 +7,10 @@
 """
 File utilities.
 """
-from os import environ
 import re
 import warnings
-from pathlib import Path, WindowsPath, PosixPath
+from os import environ
+from pathlib import Path, PosixPath, WindowsPath
 
 __all__ = [
     "get_filenames",
@@ -87,9 +87,14 @@ def pathclean(paths):
     >>> filename.parent.name
     'irdata'
     """
-    from spectrochempy.utils import is_windows
+    import platform
+
+    def is_windows():
+        win = "Windows" in platform.platform()
+        return win
 
     def _clean(path):
+
         if isinstance(path, (Path, PosixPath, WindowsPath)):
             path = path.name
         if is_windows():
@@ -344,8 +349,8 @@ def get_filenames(*filenames, **kwargs):
     --------
     """
 
-    from spectrochempy.core import preferences as prefs
     from spectrochempy import NO_DIALOG
+    from spectrochempy.core import preferences as prefs
 
     NODIAL = (
         NO_DIALOG or "DOC_BUILDING" in environ
@@ -551,8 +556,8 @@ def get_directory_name(directory, **kwargs):
         valid directory name.
     """
 
-    from spectrochempy.core import preferences as prefs
     from spectrochempy import NO_DIALOG
+    from spectrochempy.core import preferences as prefs
 
     data_dir = pathclean(prefs.datadir)
     working_dir = Path.cwd()

@@ -11,54 +11,54 @@ This module implements the |NDArray| base class.
 __all__ = ["NDArray", "DEFAULT_DIM_NAME"]
 
 import copy as cpy
-import warnings
+import itertools
+import pathlib
 import re
 import textwrap
 import uuid
-import itertools
-import pathlib
+import warnings
 from datetime import datetime, timezone
 
 import numpy as np
 from traitlets import (
+    All,
+    Bool,
+    HasTraits,
+    Instance,
+    Integer,
     List,
     Unicode,
-    Instance,
-    Bool,
     Union,
-    Integer,
-    HasTraits,
     default,
-    validate,
     observe,
-    All,
+    validate,
 )
 from traittypes import Array
 
-from spectrochempy.core import info_, error_, print_
+from spectrochempy.core import error_, info_, print_
 from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.core.units import (
-    Unit,
-    ur,
-    Quantity,
-    set_nmr_context,
     DimensionalityError,
+    Quantity,
+    Unit,
+    set_nmr_context,
+    ur,
 )
 from spectrochempy.utils import (
-    TYPE_INTEGER,
-    TYPE_FLOAT,
-    MaskedConstant,
+    INPLACE,
     MASKED,
     NOMASK,
-    INPLACE,
-    is_sequence,
-    is_number,
-    numpyprintoptions,
-    insert_masked_print,
+    TYPE_FLOAT,
+    TYPE_INTEGER,
+    MaskedConstant,
     SpectroChemPyWarning,
-    make_new_object,
     convert_to_html,
     get_user_and_node,
+    insert_masked_print,
+    is_number,
+    is_sequence,
+    make_new_object,
+    numpyprintoptions,
     pathclean,
 )
 

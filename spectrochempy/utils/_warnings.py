@@ -4,14 +4,10 @@
 
 from __future__ import annotations
 
-from contextlib import contextmanager
 import re
-from typing import (
-    Sequence,
-    Type,
-    cast,
-)
 import warnings
+from contextlib import contextmanager
+from typing import Sequence, Type, cast
 
 
 @contextmanager
@@ -186,10 +182,7 @@ def _is_unexpected_warning(
 def _assert_raised_with_correct_stacklevel(
     actual_warning: warnings.WarningMessage,
 ) -> None:
-    from inspect import (
-        getframeinfo,
-        stack,
-    )
+    from inspect import getframeinfo, stack
 
     caller = getframeinfo(stack()[4][0])
     msg = (

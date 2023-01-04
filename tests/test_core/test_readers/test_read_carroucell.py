@@ -11,7 +11,8 @@
 import pytest
 
 import spectrochempy
-from spectrochempy import NDDataset, preferences as prefs, info_
+from spectrochempy import NDDataset, info_
+from spectrochempy import preferences as prefs
 
 DATADIR = prefs.datadir
 CARROUCELL_FOLDER = DATADIR / "irdata/carroucell_samp"

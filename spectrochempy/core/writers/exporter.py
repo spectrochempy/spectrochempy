@@ -10,9 +10,9 @@ This module define a generic class to import files and contents.
 __all__ = ["write"]
 __dataset_methods__ = __all__
 
-from traitlets import HasTraits, Any
+from traitlets import Any, HasTraits
 
-from spectrochempy.utils import pathclean, check_filename_to_save, patterns
+from spectrochempy.utils import check_filename_to_save, pathclean, patterns
 
 
 # ------------------------------------------------------------------

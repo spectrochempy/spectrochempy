@@ -14,12 +14,11 @@ import pytest
 from spectrochempy.core import preferences as prefs
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units import ur
-
 from spectrochempy.utils import show
 from spectrochempy.utils.testing import (
-    assert_equal,
-    assert_array_equal,
     assert_array_almost_equal,
+    assert_array_equal,
+    assert_equal,
 )
 
 pytestmark = pytest.mark.skip("all tests still WIP")
@@ -280,7 +279,6 @@ def test_nmr_2D_imag(NMR_dataset_2D):
     dataset = NMR_dataset_2D.copy()
     dataset.plot(imag=True)
     show()
-    pass
 
 
 def test_nmr_2D_imag_compare(NMR_dataset_2D):
@@ -290,7 +288,6 @@ def test_nmr_2D_imag_compare(NMR_dataset_2D):
     dataset.plot(imag=True, cmap="jet", data_only=True, alpha=0.3, clear=False)
     # better not to replot a second colorbar
     show()
-    pass
 
 
 def test_nmr_2D_hold(NMR_dataset_2D):
@@ -298,7 +295,6 @@ def test_nmr_2D_hold(NMR_dataset_2D):
     dataset.plot()
     dataset.imag.plot(cmap="jet", data_only=True, clear=False)
     show()
-    pass
 
 
 # apodization
@@ -322,7 +318,6 @@ def test_nmr_2D_em_x(NMR_dataset_2D):
     dataset.plot_map(cmap="copper", data_only=True, clear=False)  # em on dim=x
 
     show()
-    pass
 
 
 def test_nmr_2D_em_y(NMR_dataset_2D):
@@ -349,4 +344,3 @@ def test_nmr_2D(NMR_dataset_2D):
     dataset = NMR_dataset_2D
     dataset.plot(nlevels=20)  # , start=0.15)
     show()
-    pass

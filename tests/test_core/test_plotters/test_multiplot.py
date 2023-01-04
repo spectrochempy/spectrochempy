@@ -8,15 +8,14 @@
 
 import os
 
-from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core import preferences
-
-from spectrochempy.utils import show
+from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.plotters.multiplot import (
     multiplot,
     multiplot_map,
     multiplot_stack,
 )
+from spectrochempy.utils import show
 
 prefs = preferences
 

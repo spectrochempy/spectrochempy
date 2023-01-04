@@ -10,18 +10,12 @@ __all__ = [
     "get_node",
     "is_kernel",
     "sh",
-    "is_windows",
 ]
 
 import getpass
 import platform
 import sys
-from subprocess import run, PIPE, STDOUT
-
-
-def is_windows():
-    win = "Windows" in platform.platform()
-    return win
+from subprocess import PIPE, STDOUT, run
 
 
 def get_user():

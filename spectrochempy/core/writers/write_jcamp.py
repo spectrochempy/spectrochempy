@@ -7,8 +7,9 @@
 """
 Plugin module to extend NDDataset with a JCAMP-DX export method.
 """
-import numpy as np
 from datetime import datetime, timezone
+
+import numpy as np
 
 from spectrochempy.core.writers.exporter import Exporter, exportermethod
 

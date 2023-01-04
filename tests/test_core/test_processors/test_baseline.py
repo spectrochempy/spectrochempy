@@ -9,10 +9,11 @@ import os
 
 import pytest
 
-# noinspection PyUnresolvedReferences
-from spectrochempy.utils import show
 import spectrochempy as scp
 from spectrochempy import BaselineCorrection, NDDataset, ur
+
+# noinspection PyUnresolvedReferences
+from spectrochempy.utils import show
 from spectrochempy.utils.testing import (
     assert_dataset_almost_equal,
     assert_dataset_equal,

@@ -10,16 +10,16 @@ This module extend NDDataset with the import method for Thermo galactic (spc) da
 __all__ = ["read_spc"]
 __dataset_methods__ = __all__
 
-from datetime import datetime, timezone
 import io
 import struct
+from datetime import datetime, timezone
+from warnings import warn
 
 import numpy as np
-from warnings import warn
 
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.readers.importer import _importer_method, Importer
+from spectrochempy.core.readers.importer import Importer, _importer_method
 from spectrochempy.core.units import Quantity
 
 # ======================================================================================================================

@@ -13,7 +13,9 @@ __all__ = ["simps", "trapz", "simpson", "trapezoid"]
 __dataset_methods__ = ["simps", "trapz", "simpson", "trapezoid"]
 
 import functools
+
 import scipy.integrate
+
 from spectrochempy.utils import deprecated
 
 

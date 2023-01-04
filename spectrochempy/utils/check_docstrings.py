@@ -10,20 +10,19 @@ Analyze docstrings to detect errors.
 Adapted from Pandas (see License in the root directory)
 """
 import doctest
-import io
 import inspect
+import io
 import os
 import pathlib
 import subprocess
 import tempfile
-
 import traceback
 
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy
 from numpydoc.docscrape import get_doc_object
-from numpydoc.validate import Validator, validate, error
+from numpydoc.validate import Validator, error, validate
 
 import spectrochempy
 

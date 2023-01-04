@@ -11,30 +11,30 @@ This module implements class |CoordSet|.
 __all__ = ["CoordSet"]
 
 import copy as cpy
-import warnings
 import uuid
+import warnings
 
 import numpy as np
 from traitlets import (
-    HasTraits,
-    List,
-    Bool,
-    Unicode,
-    observe,
     All,
-    validate,
-    default,
+    Bool,
     Dict,
+    HasTraits,
     Int,
+    List,
+    Unicode,
+    default,
+    observe,
+    validate,
 )
 
-from spectrochempy.core.dataset.ndarray import NDArray, DEFAULT_DIM_NAME
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
+from spectrochempy.core.dataset.ndarray import DEFAULT_DIM_NAME, NDArray
 from spectrochempy.utils import (
-    is_sequence,
+    SpectroChemPyWarning,
     colored_output,
     convert_to_html,
-    SpectroChemPyWarning,
+    is_sequence,
 )
 
 

@@ -37,11 +37,12 @@
 # %%
 import spectrochempy as scp
 
+# %%
+from spectrochempy import ur
+
 # %% [markdown]
 # Additional import to simplify the use of units
 
-# %%
-from spectrochempy import ur
 
 # %% [markdown]
 # ## Processing of NMR dataset with hypercomplex detection (phase-sensitive)

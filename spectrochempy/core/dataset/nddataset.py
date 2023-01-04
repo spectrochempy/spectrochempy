@@ -10,30 +10,25 @@ This module implements the |NDDataset| class.
 
 __all__ = ["NDDataset"]
 
-import textwrap
 import sys
+import textwrap
 
 import numpy as np
-from traitlets import HasTraits, Instance, Bool, Float, validate, default, Dict, Union
+from traitlets import Bool, Dict, Float, HasTraits, Instance, Union, default, validate
 from traittypes import Array
 
-from spectrochempy.core.project.baseproject import AbstractProject
-from spectrochempy.core.dataset.ndarray import NDArray, DEFAULT_DIM_NAME
-from spectrochempy.core.dataset.ndcomplex import NDComplexArray
+from spectrochempy.core import error_, warning_
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.coordset import CoordSet
-from spectrochempy.core.dataset.ndmath import NDMath, _set_ufuncs, _set_operators
-from spectrochempy.core.dataset.ndio import NDIO
-from spectrochempy.core.dataset.ndplot import NDPlot
 from spectrochempy.core.dataset.meta import Meta
-from spectrochempy.core import error_, warning_
-from spectrochempy.utils import (
-    colored_output,
-    SpectroChemPyException,
-    MaskedConstant,
-)
+from spectrochempy.core.dataset.ndarray import DEFAULT_DIM_NAME, NDArray
+from spectrochempy.core.dataset.ndcomplex import NDComplexArray
+from spectrochempy.core.dataset.ndio import NDIO
+from spectrochempy.core.dataset.ndmath import NDMath, _set_operators, _set_ufuncs
+from spectrochempy.core.dataset.ndplot import NDPlot
+from spectrochempy.core.project.baseproject import AbstractProject
 from spectrochempy.optional import import_optional_dependency
-
+from spectrochempy.utils import MaskedConstant, SpectroChemPyException, colored_output
 
 # ======================================================================================================================
 # NDDataset class definition

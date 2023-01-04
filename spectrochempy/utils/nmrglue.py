@@ -5,8 +5,8 @@ files.
 
 Copied and adapted from NMRGLUE (See NMRGLUE_LICENCES in root folder LICENSES)
 """
-import locale
 import io
+import locale
 
 __developer_info__ = """
 Bruker file format information
@@ -29,11 +29,11 @@ the file with nmrglue.
 
 """
 
-from functools import reduce
-import os
-from warnings import warn
-import string
 import itertools
+import os
+import string
+from functools import reduce
+from warnings import warn
 
 import numpy as np
 

@@ -10,17 +10,21 @@ This module define a generic class to import directories, files and contents.
 __all__ = ["read", "read_dir", "read_remote"]
 __dataset_methods__ = __all__
 
+from datetime import datetime, timezone
+from warnings import warn
+
 import requests
 import yaml
+from traitlets import Dict, HasTraits, List, Type, Unicode
 
-from warnings import warn
-from datetime import datetime, timezone
-from traitlets import HasTraits, List, Dict, Type, Unicode
-
-from spectrochempy.utils import pathclean, check_filename_to_open
-from spectrochempy.utils import get_directory_name, get_filenames
-from spectrochempy.utils.exceptions import DimensionsCompatibilityError, ProtocolError
 from spectrochempy.core import warning_
+from spectrochempy.utils import (
+    check_filename_to_open,
+    get_directory_name,
+    get_filenames,
+    pathclean,
+)
+from spectrochempy.utils.exceptions import DimensionsCompatibilityError, ProtocolError
 
 FILETYPES = [
     ("scp", "SpectroChemPy files (*.scp)"),

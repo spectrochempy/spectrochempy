@@ -11,7 +11,6 @@
 """
 from spectrochempy.core.processors.align import align
 
-
 # align
 # -------
 

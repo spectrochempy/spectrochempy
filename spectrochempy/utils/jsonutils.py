@@ -7,10 +7,10 @@
 """
 JSON utilities.
 """
-from datetime import datetime
-import pickle
 import base64
 import pathlib
+import pickle
+from datetime import datetime
 
 import numpy as np
 

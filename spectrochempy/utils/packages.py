@@ -5,8 +5,8 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
-import sys
 import os
+import sys
 from pkgutil import walk_packages
 
 from traitlets import import_item

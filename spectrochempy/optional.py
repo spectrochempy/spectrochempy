@@ -3,12 +3,13 @@
 # BSD 3-Clause License
 
 from __future__ import annotations
-from pkg_resources import get_distribution, DistributionNotFound
 
 import importlib
 import sys
 import types
 import warnings
+
+from pkg_resources import DistributionNotFound, get_distribution
 
 VERSIONS = {
     "xarray": "*",

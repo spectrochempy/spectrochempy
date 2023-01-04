@@ -109,8 +109,9 @@ def read_zip(*paths, **kwargs):
 @_importer_method
 def _read_zip(*args, **kwargs):
     # Below we assume that files to read are in a unique directory
-    from spectrochempy.core.dataset.nddataset import NDDataset
     import zipfile
+
+    from spectrochempy.core.dataset.nddataset import NDDataset
 
     # read zip file
     _, filename = args

@@ -16,11 +16,12 @@ __all__ = ["Isotopes"]
 import pathlib
 import re
 from fractions import Fraction
+
 import numpy as np
 
-from spectrochempy.core.units import ur
 from spectrochempy.core import preferences as prefs
 from spectrochempy.core.dataset.meta import Meta
+from spectrochempy.core.units import ur
 
 
 # ======================================================================================================================

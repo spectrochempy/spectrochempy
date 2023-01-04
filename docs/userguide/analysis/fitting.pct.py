@@ -36,9 +36,9 @@
 
 # %%
 import numpy as np
+
 import spectrochempy as scp
 from spectrochempy import ur
-
 
 # %% [markdown]
 # ## Solving a linear equation using the least square method (LSTSQ)
@@ -46,6 +46,7 @@ from spectrochempy import ur
 #
 # Let's first create a NDDataset with some data. We have for instance some noisy data
 # that represent the distance `d` traveled by some objects versus time `t`:
+
 
 # %%
 def func(t, v, var):

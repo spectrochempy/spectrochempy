@@ -17,11 +17,11 @@ import numpy as np
 from quaternion import as_quat_array
 
 from spectrochempy.core import debug_
-from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.core.dataset.coord import LinearCoord
+from spectrochempy.core.dataset.meta import Meta
+from spectrochempy.core.readers.importer import Importer, _importer_method
 from spectrochempy.core.units import ur
 from spectrochempy.utils.exceptions import deprecated
-from spectrochempy.core.readers.importer import Importer, _importer_method
 from spectrochempy.utils.nmrglue import read_fid, read_pdata
 
 # ======================================================================================================================

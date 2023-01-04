@@ -4,12 +4,13 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-import numpy as np
 import re
+
+import numpy as np
 from colorama import Fore, Style
 
 from spectrochempy.utils import NOMASK
-from spectrochempy.utils.misc import TYPE_INTEGER, TYPE_COMPLEX, TYPE_FLOAT
+from spectrochempy.utils.misc import TYPE_COMPLEX, TYPE_FLOAT, TYPE_INTEGER
 
 __all__ = [
     "numpyprintoptions",

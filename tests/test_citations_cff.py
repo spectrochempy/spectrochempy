@@ -6,7 +6,7 @@
 # ======================================================================================
 # flake8: noqa
 
-from spectrochempy.utils.citation import Zenodo, Citation
+from spectrochempy.utils.citation import Citation, Zenodo
 
 
 def test_zenodo_update():

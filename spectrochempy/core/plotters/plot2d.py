@@ -18,13 +18,13 @@ __dataset_methods__ = __all__
 
 from copy import copy as cpy
 
-from matplotlib.ticker import MaxNLocator, ScalarFormatter
-import matplotlib.pyplot as plt
 import matplotlib as mpl
+import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
-from spectrochempy.utils import make_label, add_docstring, plot_method
 from spectrochempy.core.dataset.coord import LinearCoord
+from spectrochempy.utils import add_docstring, make_label, plot_method
 
 _PLOT2D_DOC = """
 ax : |Axes| instance. Optional

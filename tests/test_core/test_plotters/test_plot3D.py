@@ -8,7 +8,7 @@
 
 import os
 
-from spectrochempy import NDDataset, Coord, show
+from spectrochempy import Coord, NDDataset, show
 
 
 def test_plot2D_as_3D():
@@ -28,8 +28,6 @@ def test_plot2D_as_3D():
     X.plot_surface(colorbar=True)
 
     show()
-
-    pass
 
 
 # =============================================================================

@@ -17,17 +17,17 @@ import pathlib
 
 import numpy as np
 from numpy.lib.npyio import zipfile_factory
-from traitlets import HasTraits, Instance, Union, Unicode
+from traitlets import HasTraits, Instance, Unicode, Union
 
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.utils import (
-    SpectroChemPyException,
-    pathclean,
+    TYPE_BOOL,
     ScpFile,
+    SpectroChemPyException,
     check_filename_to_save,
     json_serialiser,
-    TYPE_BOOL,
+    pathclean,
 )
 
 SCPY_SUFFIX = {"NDDataset": ".scp", "Project": ".pscp"}
@@ -338,8 +338,8 @@ class NDIO(HasTraits):
     @classmethod
     def loads(cls, js):
 
-        from spectrochempy.core.project.project import Project
         from spectrochempy.core.dataset.nddataset import NDDataset
+        from spectrochempy.core.project.project import Project
         from spectrochempy.core.scripts.script import Script
 
         # .........................
@@ -443,8 +443,8 @@ class NDIO(HasTraits):
         """
 
         # Stage data in a temporary file on disk, before writing to zip.
-        import zipfile
         import tempfile
+        import zipfile
 
         # prepare the json data
         try:

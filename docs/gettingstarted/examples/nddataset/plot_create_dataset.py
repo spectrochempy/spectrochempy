@@ -11,10 +11,11 @@ NDDataset creation and plotting example
 In this example, we create a 3D NDDataset from scratch,
 and then we plot one section (a 2D plane)
 """
+import numpy as np
+
 ###############################################################################
 # As usual, we start by loading the spectrochempy library
 import spectrochempy as scp
-import numpy as np
 
 ###############################################################################
 # Creation

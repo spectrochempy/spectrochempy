@@ -6,11 +6,11 @@
 # ======================================================================================
 # flake8: noqa
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
-from spectrochempy.utils import show
 import spectrochempy.core as sc
+from spectrochempy.utils import show
 
 
 # ............................................................................

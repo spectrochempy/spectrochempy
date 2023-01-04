@@ -6,19 +6,18 @@
 # ======================================================================================
 __all__ = ["Project"]
 
-from copy import deepcopy as cpy
-import uuid
 import pathlib
+import uuid
+from copy import deepcopy as cpy
 from functools import wraps
 
 import dill
-from traitlets import Dict, Instance, Unicode, This, default
+from traitlets import Dict, Instance, This, Unicode, default
 
-from spectrochempy.core.dataset.nddataset import NDDataset, NDIO
-from spectrochempy.core.scripts.script import Script
 from spectrochempy.core.dataset.meta import Meta
+from spectrochempy.core.dataset.nddataset import NDIO, NDDataset
 from spectrochempy.core.project.baseproject import AbstractProject
-
+from spectrochempy.core.scripts.script import Script
 
 # from collections import OrderedDict
 
