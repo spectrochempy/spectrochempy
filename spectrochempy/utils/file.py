@@ -87,9 +87,14 @@ def pathclean(paths):
     >>> filename.parent.name
     'irdata'
     """
-    from spectrochempy.utils import is_windows
+    import platform
+
+    def is_windows():
+        win = "Windows" in platform.platform()
+        return win
 
     def _clean(path):
+
         if isinstance(path, (Path, PosixPath, WindowsPath)):
             path = path.name
         if is_windows():

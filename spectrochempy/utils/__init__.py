@@ -8,14 +8,9 @@
 """
 Package containing various utilities classes and functions.
 """
-# some useful constants
-# ------------------------------------------------------------------
-# import numpy as np
 
-# masked arrays
-# ------------------------------------------------------------------
 from numpy.ma.core import MaskedArray, MaskedConstant
-from numpy.ma.core import masked as MASKED  # noqa: F401
+from numpy.ma.core import masked as MASKED
 from numpy.ma.core import nomask as NOMASK
 
 from spectrochempy.utils.exceptions import *
@@ -31,6 +26,3 @@ from spectrochempy.utils.system import *
 from spectrochempy.utils.traits import *
 from spectrochempy.utils.version import *
 from spectrochempy.utils.zip import *
-
-# import util files content
-# ------------------------------------------------------------------
