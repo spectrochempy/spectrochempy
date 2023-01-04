@@ -6,6 +6,8 @@
 # ======================================================================================
 """
 Application Programming Interface.
+
+isort:skip_file
 """
 
 # During the initialization of this package, a `matplotlib` backend is set
