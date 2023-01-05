@@ -15,7 +15,8 @@ import subprocess
 import sys
 from os import environ
 
-from spectrochempy import optional
+from utils import optional
+
 from spectrochempy.utils import pathclean
 
 __all__ = ["show_versions"]

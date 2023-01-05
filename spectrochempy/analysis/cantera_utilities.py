@@ -19,10 +19,10 @@ from collections.abc import Iterable
 
 import numpy as np
 from scipy.optimize import differential_evolution, least_squares, minimize
+from utils.optional import import_optional_dependency
 
 from spectrochempy.core import error_
 from spectrochempy.core.dataset.nddataset import Coord, NDDataset
-from spectrochempy.optional import import_optional_dependency
 
 __all__ = [
     "coverages_vs_time",
