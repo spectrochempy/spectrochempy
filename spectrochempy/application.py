@@ -843,7 +843,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
                 "class": "logging.handlers.RotatingFileHandler",
                 "level": "DEBUG",
                 "filename": str(get_log_dir() / "spectrochempy.log"),
-                "maxBytes": 32768,
+                "maxBytes": 262144,
                 "backupCount": 5,
             }
         },
