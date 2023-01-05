@@ -1,4 +1,4 @@
-name: "Publish new draft release"
+name: Publish new draft release
 
 on:
 
