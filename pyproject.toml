@@ -2,3 +2,11 @@
 requires = ["setuptools>=42", "wheel", "setuptools_scm[toml]>=3.4"]
 
 #[tool.setuptools_scm]
+
+[tool.autoflake]
+check = true
+exclude = "docs/*"
+
+[tool.isort]
+profile = "black"
+extend_skip_glob = ["*.pct.py"]
