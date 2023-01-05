@@ -35,19 +35,26 @@
 # %% [markdown]
 # The NDDataset is the main object use by **SpectroChemPy**.
 #
-# Like numpy ndarrays, NDDataset have the capability to be sliced, sorted and subject to mathematical operations.
+# Like numpy ndarrays, NDDataset have the capability to be sliced, sorted and subject to
+# mathematical operations.
 #
-# But, in addition, NDDataset may have units, can be masked and each dimensions can have coordinates also with units.
-# This make NDDataset aware of units compatibility, *e.g.*, for binary operation such as additions or subtraction or
-# during the application of mathematical operations. In addition or in replacement of numerical data for coordinates,
-# NDDataset can also have labeled coordinates where labels can be different kind of objects (strings, datetime,
+# But, in addition, NDDataset may have units, can be masked and each dimensions can have
+# coordinates also with units.
+# This make NDDataset aware of units compatibility, *e.g.*, for binary operation such as
+# additions or subtraction or during the application of mathematical operations.
+# In addition or in replacement of numerical data for coordinates,
+# NDDataset can also have labeled coordinates where labels can be different kind of
+# objects (strings, datetime,
 # numpy nd.ndarray or other NDDatasets, etc...).
 #
-# This offers a lot of flexibility in using NDDatasets that,  we hope, will be useful for applications.
-# See the **[Examples](../../gettingstarted/gallery/auto_examples/index.rst)** for additional information about such possible applications.
+# This offers a lot of flexibility in using NDDatasets that,  we hope, will be useful
+# for applications.
+# See the **[Examples](../../gettingstarted/gallery/auto_examples/index.rst)** for
+# additional information about such possible applications.
 
 # %% [markdown]
-# **Below (and in the next sections), we try to give an almost complete view of the NDDataset features.**
+# **Below (and in the next sections), we try to give an almost complete view of the
+# NDDataset features.**
 
 # %%
 import numpy as np
