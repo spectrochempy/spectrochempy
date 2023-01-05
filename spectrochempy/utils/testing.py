@@ -642,7 +642,7 @@ def _check_absorbance_related_units(unit1, unit2):
     return True
 
 
-class raises(object):
+class raises(object):  # noqa: N801
     """
     A decorator to mark that a test should raise a given exception.
     Use as follows::
@@ -683,7 +683,7 @@ class raises(object):
         return self._ctx.__exit__(*exc_info)
 
 
-class catch_warnings(warnings.catch_warnings):
+class catch_warnings(warnings.catch_warnings):  # noqa: N801
     """
     A high-powered version of warnings.catch_warnings to use for testing
     and to make sure that there is no dependence on the order in which

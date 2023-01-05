@@ -81,7 +81,7 @@ nd = scp.NDDataset()
 # or in the second syntax, with a wild `*` import.
 
 # %%
-from spectrochempy import *  # SYNTAX 2
+from spectrochempy import *  # SYNTAX 2 (# noqa: F403)
 
 nd = NDDataset()
 

@@ -105,7 +105,7 @@ def make_units_compatibility(func):
 # ======================================================================================================================
 
 
-class polynomialbaseline(object):
+class polynomialbaseline(object):  # noqa: N801
     """
     Arbitrary-degree polynomial (degree limited to 10, however).
 
@@ -167,7 +167,7 @@ class polynomialbaseline(object):
 # ======================================================================================================================
 # GaussianModel
 # ======================================================================================================================
-class gaussianmodel(object):
+class gaussianmodel(object):  # noqa: N801
     """
     Normalized 1D gaussian function.
 
@@ -199,7 +199,7 @@ class gaussianmodel(object):
 # ======================================================================================================================
 # LorentzianModel
 # ======================================================================================================================
-class lorentzianmodel(object):
+class lorentzianmodel(object):  # noqa: N801
     """
     A standard Lorentzian function (also known as the Cauchy distribution).
 
@@ -230,7 +230,7 @@ class lorentzianmodel(object):
 # ======================================================================================================================
 # VoigtModel
 # ======================================================================================================================
-class voigtmodel(object):
+class voigtmodel(object):  # noqa: N801
     """
     A Voigt model constructed as the convolution of a :class:`GaussianModel` and
     a :class:`LorentzianModel`.
@@ -273,7 +273,7 @@ class voigtmodel(object):
 # ======================================================================================================================
 
 
-class asymmetricvoigtmodel(object):
+class asymmetricvoigtmodel(object):  # noqa: N801
     """
     An asymmetric Voigt model.
 
@@ -311,7 +311,7 @@ class asymmetricvoigtmodel(object):
             return ampl * w
 
 
-class sigmoidmodel(object):
+class sigmoidmodel(object):  # noqa: N801
     """
     A Sigmoid function.
 

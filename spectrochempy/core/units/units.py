@@ -233,7 +233,7 @@ setattr(
 
 
 # ------------------------------------------------------------------
-def __format__(self, spec):
+def __format__(self, spec):  # noqa:807
     # modify Pint unit __format__
 
     spec = formatting.extract_custom_flags(spec or self.default_format)

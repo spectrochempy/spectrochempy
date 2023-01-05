@@ -71,8 +71,7 @@ class _ExecCommand:
         return proc.stdout
 
 
-# noinspection PyPep8Naming
-class sh(object):
+class sh(object):  # noqa: N801
     """
     Utility to run subprocess run command as if they were functions.
     """

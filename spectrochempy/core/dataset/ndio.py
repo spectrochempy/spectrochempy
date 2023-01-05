@@ -24,7 +24,7 @@ from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.utils import (
     TYPE_BOOL,
     ScpFile,
-    SpectroChemPyException,
+    SpectroChemPyError,
     check_filename_to_save,
     json_serialiser,
     pathclean,
@@ -306,11 +306,11 @@ class NDIO(HasTraits):
         try:
             obj = ScpFile(fid)
         except FileNotFoundError:
-            raise SpectroChemPyException(f"File {filename} doesn't exist!")
+            raise SpectroChemPyError(f"File {filename} doesn't exist!")
         except Exception as e:
             if str(e) == "File is not a zip file":
-                raise SpectroChemPyException("File not in 'scp' or 'pscp' format!")
-            raise SpectroChemPyException("Undefined error!")
+                raise SpectroChemPyError("File not in 'scp' or 'pscp' format!")
+            raise SpectroChemPyError("Undefined error!")
 
         js = obj[obj.files[0]]
         if kwargs.get("json", False):

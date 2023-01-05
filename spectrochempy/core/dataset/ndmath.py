@@ -56,7 +56,7 @@ def _reduce_method(method):
     return method
 
 
-class _from_numpy_method:
+class _from_numpy_method:  # noqa: 801
     # Decorator
     # ---------
     # This decorator assumes that the signature starts always by : (cls, ...)
@@ -562,7 +562,7 @@ class NDMath(object):
     # ------------------------------------------------------------------------
 
     @_from_numpy_method
-    def absolute(cls, dataset, dtype=None):
+    def absolute(cls, dataset, dtype=None):  # noqa: N805
         """
         Calculate the absolute value of the given NDDataset element-wise.
 
@@ -611,7 +611,7 @@ class NDMath(object):
     )
 
     @_from_numpy_method
-    def conjugate(cls, dataset, dim="x"):
+    def conjugate(cls, dataset, dim="x"):  # noqa: N805
         """
         Conjugate of the NDDataset in the specified dimension.
 
@@ -651,7 +651,7 @@ class NDMath(object):
     conj.__doc__ = "Conjugate of the NDDataset in the specified dimension.\n\nEquivalent to conjugate."
 
     @_from_numpy_method
-    def around(cls, dataset, decimals=0):
+    def around(cls, dataset, decimals=0):  # noqa: N805
         """
         Evenly round to the given number of decimals.
 
@@ -699,7 +699,7 @@ class NDMath(object):
 
     @_reduce_method
     @_from_numpy_method
-    def all(cls, dataset, dim=None, keepdims=False):
+    def all(cls, dataset, dim=None, keepdims=False):  # noqa: N805
         """
         Test whether all array elements along a given axis evaluate to True.
 
@@ -743,7 +743,7 @@ class NDMath(object):
 
     @_reduce_method
     @_from_numpy_method
-    def amax(cls, dataset, dim=None, keepdims=False, **kwargs):
+    def amax(cls, dataset, dim=None, keepdims=False, **kwargs):  # noqa: N805
         """
         Return the maximum of the dataset or maxima along given dimensions.
 
@@ -846,7 +846,7 @@ class NDMath(object):
 
     @_reduce_method
     @_from_numpy_method
-    def amin(cls, dataset, dim=None, keepdims=False, **kwargs):
+    def amin(cls, dataset, dim=None, keepdims=False, **kwargs):  # noqa: N805
         """
         Return the maximum of the dataset or maxima along given dimensions.
 
@@ -944,7 +944,7 @@ class NDMath(object):
 
     @_reduce_method
     @_from_numpy_method
-    def any(cls, dataset, dim=None, keepdims=False):
+    def any(cls, dataset, dim=None, keepdims=False):  # noqa: N805
         """
         Test whether any array element along a given axis evaluates to True.
 
@@ -984,7 +984,7 @@ class NDMath(object):
         return data
 
     @_from_numpy_method
-    def arange(cls, start=0, stop=None, step=None, dtype=None, **kwargs):
+    def arange(cls, start=0, stop=None, step=None, dtype=None, **kwargs):  # noqa: N805
         """
         Return evenly spaced values within a given interval.
 
@@ -1027,7 +1027,7 @@ class NDMath(object):
 
     @_reduce_method
     @_from_numpy_method
-    def argmax(cls, dataset, dim=None):
+    def argmax(cls, dataset, dim=None):  # noqa: N805
         """
         Indexes of maximum of data along axis.
         """
@@ -1040,7 +1040,7 @@ class NDMath(object):
 
     @_reduce_method
     @_from_numpy_method
-    def argmin(cls, dataset, dim=None):
+    def argmin(cls, dataset, dim=None):  # noqa: N805
         """
         Indexes of minimum of data along axis.
         """
@@ -1053,7 +1053,7 @@ class NDMath(object):
 
     @_reduce_method
     @_from_numpy_method
-    def average(cls, dataset, dim=None, weights=None, keepdims=False):
+    def average(cls, dataset, dim=None, weights=None, keepdims=False):  # noqa: N805
         """
         Compute the weighted average along the specified axis.
 
@@ -1130,7 +1130,7 @@ class NDMath(object):
         return cls
 
     @_from_numpy_method
-    def clip(cls, dataset, a_min=None, a_max=None, **kwargs):
+    def clip(cls, dataset, a_min=None, a_max=None, **kwargs):  # noqa: N805
         """
         Clip (limit) the values in a dataset.
 
@@ -1186,7 +1186,7 @@ class NDMath(object):
 
     @_reduce_method
     @_from_numpy_method
-    def coordmax(cls, dataset, dim=None):
+    def coordmax(cls, dataset, dim=None):  # noqa: N805
         """
         Find coordinates of the maximum of data along axis.
         """
@@ -1219,7 +1219,7 @@ class NDMath(object):
 
     @_reduce_method
     @_from_numpy_method
-    def coordmin(cls, dataset, dim=None):
+    def coordmin(cls, dataset, dim=None):  # noqa: N805
         """
         Find oordinates of the mainimum of data along axis.
         """
@@ -1251,7 +1251,7 @@ class NDMath(object):
         return coord
 
     @_from_numpy_method
-    def cumsum(cls, dataset, dim=None, dtype=None):
+    def cumsum(cls, dataset, dim=None, dtype=None):  # noqa: N805
         """
         Return the cumulative sum of the elements along a given axis.
 
@@ -1300,7 +1300,7 @@ class NDMath(object):
         return cls
 
     @_from_numpy_method
-    def diag(cls, dataset, offset=0, **kwargs):
+    def diag(cls, dataset, offset=0, **kwargs):  # noqa: N805
         """
         Extract a diagonal or construct a diagonal array.
 
@@ -1363,7 +1363,7 @@ class NDMath(object):
 
     @_reduce_method
     @_from_numpy_method
-    def diagonal(cls, dataset, offset=0, dim="x", dtype=None, **kwargs):
+    def diagonal(cls, dataset, offset=0, dim="x", dtype=None, **kwargs):  # noqa: N805
         """
         Return the diagonal of a 2D array.
 
@@ -1424,7 +1424,7 @@ class NDMath(object):
         return cls
 
     @_from_numpy_method
-    def empty(cls, shape, dtype=None, **kwargs):
+    def empty(cls, shape, dtype=None, **kwargs):  # noqa: N805
         """
         Return a new |NDDataset| of given shape and type, without initializing entries.
 
@@ -1477,7 +1477,7 @@ class NDMath(object):
         return cls(np.empty(shape, dtype), dtype=dtype, **kwargs)
 
     @_from_numpy_method
-    def empty_like(cls, dataset, dtype=None, **kwargs):
+    def empty_like(cls, dataset, dtype=None, **kwargs):  # noqa: N805
         """
         Return a new uninitialized |NDDataset|.
 
@@ -1528,7 +1528,7 @@ class NDMath(object):
         return cls
 
     @_from_numpy_method
-    def eye(cls, N, M=None, k=0, dtype=float, **kwargs):
+    def eye(cls, N, M=None, k=0, dtype=float, **kwargs):  # noqa: N805
         """
         Return a 2-D array with ones on the diagonal and zeros elsewhere.
 
@@ -1575,7 +1575,7 @@ class NDMath(object):
     @_from_numpy_method
     def fromfunction(
         cls, function, shape=None, dtype=float, units=None, coordset=None, **kwargs
-    ):
+    ):  # noqa: N805
         """
         Construct a nddataset by executing a function over each coordinate.
 
@@ -1652,7 +1652,7 @@ class NDMath(object):
         return new
 
     @_from_numpy_method
-    def fromiter(cls, iterable, dtype=np.float64, count=-1, **kwargs):
+    def fromiter(cls, iterable, dtype=np.float64, count=-1, **kwargs):  # noqa: N805
         """
         Create a new 1-dimensional array from an iterable object.
 
@@ -1695,7 +1695,7 @@ class NDMath(object):
         return cls(np.fromiter(iterable, dtype=dtype, count=count), **kwargs)
 
     @_from_numpy_method
-    def full(cls, shape, fill_value=0.0, dtype=None, **kwargs):
+    def full(cls, shape, fill_value=0.0, dtype=None, **kwargs):  # noqa: N805
         """
         Return a new |NDDataset| of given shape and type, filled with `fill_value`.
 
@@ -1744,7 +1744,7 @@ class NDMath(object):
         return cls(np.full(shape, fill_value, dtype), dtype=dtype, **kwargs)
 
     @_from_numpy_method
-    def full_like(cls, dataset, fill_value=0.0, dtype=None, **kwargs):
+    def full_like(cls, dataset, fill_value=0.0, dtype=None, **kwargs):  # noqa: N805
         """
         Return a |NDDataset| of fill_value.
 
@@ -1812,7 +1812,9 @@ class NDMath(object):
         return cls
 
     @_from_numpy_method
-    def geomspace(cls, start, stop, num=50, endpoint=True, dtype=None, **kwargs):
+    def geomspace(
+        cls, start, stop, num=50, endpoint=True, dtype=None, **kwargs
+    ):  # noqa: N805
         """
         Return numbers spaced evenly on a log scale (a geometric progression).
 
@@ -1857,7 +1859,7 @@ class NDMath(object):
         return cls(np.geomspace(start, stop, num, endpoint, dtype), **kwargs)
 
     @_from_numpy_method
-    def identity(cls, n, dtype=None, **kwargs):
+    def identity(cls, n, dtype=None, **kwargs):  # noqa: N805
         """
         Return the identity |NDDataset| of a given shape.
 
@@ -1898,7 +1900,7 @@ class NDMath(object):
     @_from_numpy_method
     def linspace(
         cls, start, stop, num=50, endpoint=True, retstep=False, dtype=None, **kwargs
-    ):
+    ):  # noqa: N805
         """
         Return evenly spaced numbers over a specified interval.
 
@@ -1939,7 +1941,7 @@ class NDMath(object):
     @_from_numpy_method
     def logspace(
         cls, start, stop, num=50, endpoint=True, base=10.0, dtype=None, **kwargs
-    ):
+    ):  # noqa: N805
         """
         Return numbers spaced evenly on a log scale.
 
@@ -1990,7 +1992,7 @@ class NDMath(object):
 
     @_reduce_method
     @_from_numpy_method
-    def mean(cls, dataset, dim=None, dtype=None, keepdims=False):
+    def mean(cls, dataset, dim=None, dtype=None, keepdims=False):  # noqa: N805
         """
         Compute the arithmetic mean along the specified axis.
 
@@ -2059,7 +2061,7 @@ class NDMath(object):
         return cls
 
     @_from_numpy_method
-    def ones(cls, shape, dtype=None, **kwargs):
+    def ones(cls, shape, dtype=None, **kwargs):  # noqa: N805
         """
         Return a new |NDDataset| of given shape and type, filled with ones.
 
@@ -2122,7 +2124,7 @@ class NDMath(object):
         return cls(np.ones(shape), dtype=dtype, **kwargs)
 
     @_from_numpy_method
-    def ones_like(cls, dataset, dtype=None, **kwargs):
+    def ones_like(cls, dataset, dtype=None, **kwargs):  # noqa: N805
         """
         Return |NDDataset| of ones.
 
@@ -2177,7 +2179,7 @@ class NDMath(object):
 
         return cls
 
-    def pipe(self, func, *args, **kwargs):
+    def pipe(self, func, *args, **kwargs):  # noqa: N805
         """
         Apply func(self, *args, **kwargs).
 
@@ -2218,7 +2220,7 @@ class NDMath(object):
 
     @_reduce_method
     @_from_numpy_method
-    def ptp(cls, dataset, dim=None, keepdims=False):
+    def ptp(cls, dataset, dim=None, keepdims=False):  # noqa: N805
         """
         Range of values (maximum - minimum) along a dimension.
 
@@ -2254,7 +2256,7 @@ class NDMath(object):
         return cls
 
     @_from_numpy_method
-    def random(cls, size=None, dtype=None, **kwargs):
+    def random(cls, size=None, dtype=None, **kwargs):  # noqa: N805
         """
         Return random floats in the half-open interval [0.0, 1.0).
 
@@ -2287,7 +2289,7 @@ class NDMath(object):
 
     @_reduce_method
     @_from_numpy_method
-    def std(cls, dataset, dim=None, dtype=None, ddof=0, keepdims=False):
+    def std(cls, dataset, dim=None, dtype=None, ddof=0, keepdims=False):  # noqa: N805
         """
         Compute the standard deviation along the specified axis.
 
@@ -2379,7 +2381,7 @@ class NDMath(object):
 
     @_reduce_method
     @_from_numpy_method
-    def sum(cls, dataset, dim=None, dtype=None, keepdims=False):
+    def sum(cls, dataset, dim=None, dtype=None, keepdims=False):  # noqa: N805
         """
         Sum of array elements over a given axis.
 
@@ -2440,7 +2442,7 @@ class NDMath(object):
 
     @_reduce_method
     @_from_numpy_method
-    def var(cls, dataset, dim=None, dtype=None, ddof=0, keepdims=False):
+    def var(cls, dataset, dim=None, dtype=None, ddof=0, keepdims=False):  # noqa: N805
         """
         Compute the variance along the specified axis.
 
@@ -2529,7 +2531,7 @@ class NDMath(object):
         return cls
 
     @_from_numpy_method
-    def zeros(cls, shape, dtype=None, **kwargs):
+    def zeros(cls, shape, dtype=None, **kwargs):  # noqa: N805
         """
         Return a new |NDDataset| of given shape and type, filled with zeros.
 
@@ -2584,7 +2586,7 @@ class NDMath(object):
         return cls(np.zeros(shape), dtype=dtype, **kwargs)
 
     @_from_numpy_method
-    def zeros_like(cls, dataset, dtype=None, **kwargs):
+    def zeros_like(cls, dataset, dtype=None, **kwargs):  # noqa: N805
         """
         Return a |NDDataset| of zeros.
 
@@ -3190,7 +3192,7 @@ def _get_op(name):
     return getattr(operator, _op_str(name))
 
 
-class _ufunc:
+class _ufunc:  # noqa: N801
     def __init__(self, name):
         self.name = name
         self.ufunc = getattr(np, name)
