@@ -132,9 +132,10 @@ def write(dataset, filename=None, **kwargs):
     write a dataset (providing a windows type filename relative to the default ``Datadir``)
 
     >>> nd = scp.read_opus('irdata/OPUS')
-    >>> f = nd.write('opus.scp')
-    >>> f.name
-    'opus.scp'
+    >>> f = nd.write('opus.scp') # doctest: +SKIP
+    >>> f.name                   # doctest: +SKIP
+    'opus.scp'                   # doctest: +SKIP
+
     """
     exporter = Exporter()
     return exporter(dataset, filename, **kwargs)

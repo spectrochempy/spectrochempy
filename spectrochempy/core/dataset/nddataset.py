@@ -982,6 +982,22 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         """
         self._coordset = None
 
+    # ...........................................................................................................
+    @property
+    def description(self):
+        """
+        Provides a description of the underlying data (str).
+        """
+        return self._description
+
+    comment = description
+    comment.__doc__ = """Provides a comment (Alias to the description attribute)."""
+
+    # ..........................................................................
+    @description.setter
+    def description(self, value):
+        self._description = value
+
     @property
     def local_timezone(self):
         """

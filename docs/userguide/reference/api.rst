@@ -24,10 +24,7 @@
     Coord.around
     Coord.astype
     Coord.copy
-    Coord.created
     Coord.data
-    Coord.desc
-    Coord.description
     Coord.dimensionless
     Coord.dtype
     Coord.filename
@@ -38,7 +35,6 @@
     Coord.has_data
     Coord.has_defined_name
     Coord.has_units
-    Coord.history
     Coord.id
     Coord.implements
     Coord.is_empty
@@ -60,7 +56,6 @@
     Coord.max
     Coord.meta
     Coord.min
-    Coord.modified
     Coord.name
     Coord.offset
     Coord.ptp
@@ -121,11 +116,7 @@
     LinearCoord.around
     LinearCoord.astype
     LinearCoord.copy
-    LinearCoord.created
     LinearCoord.data
-    LinearCoord.date
-    LinearCoord.desc
-    LinearCoord.description
     LinearCoord.dimensionless
     LinearCoord.dtype
     LinearCoord.filename
@@ -136,7 +127,6 @@
     LinearCoord.has_data
     LinearCoord.has_defined_name
     LinearCoord.has_units
-    LinearCoord.history
     LinearCoord.id
     LinearCoord.implements
     LinearCoord.is_empty
@@ -158,7 +148,6 @@
     LinearCoord.max
     LinearCoord.meta
     LinearCoord.min
-    LinearCoord.modified
     LinearCoord.name
     LinearCoord.offset
     LinearCoord.ptp
@@ -233,15 +222,14 @@
     NDDataset.coordset
     NDDataset.coordtitles
     NDDataset.coordunits
+    NDDataset.comment
     NDDataset.copy
     NDDataset.created
     NDDataset.cs
     NDDataset.cumsum
     NDDataset.data
-    NDDataset.date
     NDDataset.dc
     NDDataset.delete_coordset
-    NDDataset.desc
     NDDataset.description
     NDDataset.detrend
     NDDataset.diag
@@ -305,6 +293,7 @@
     NDDataset.limits
     NDDataset.linspace
     NDDataset.load
+    NDDataset.local_timezone
     NDDataset.logspace
     NDDataset.ls
     NDDataset.m
@@ -402,6 +391,7 @@
     NDDataset.swapdims
     NDDataset.T
     NDDataset.take
+    NDDataset.timezone
     NDDataset.title
     NDDataset.to
     NDDataset.to_array
