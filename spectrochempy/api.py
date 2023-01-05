@@ -21,6 +21,7 @@ from IPython.core.interactiveshell import InteractiveShell
 from IPython import get_ipython
 
 from pathlib import Path
+from spectrochempy.utils.optional import import_optional_dependency
 
 # ------------------------------------------------------------------
 # Check the environment for plotting
@@ -111,7 +112,10 @@ if IN_IPYTHON and KERNEL and not NO_DISPLAY:  # pragma: no cover
         else:
             if RUNNING_IN_COLAB:  # pragma: no cover
                 # allow using matplotlib widget
-                from google.colab import output
+                colab = import_optional_dependency("google.colab", errors="ignore")
+                if colab is not None:
+                    output = colab.output
+                    output.enable_custom_widget_manager()
 
                 output.enable_custom_widget_manager()
             IP.magic("matplotlib widget")  # widget
