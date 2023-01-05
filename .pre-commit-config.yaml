@@ -21,14 +21,13 @@ repos:
   - repo: https://github.com/PyCQA/autoflake
     rev: "v2.0.0"
     hooks:
-      - id: autoflake # isort should run before black as black sometimes tweaks the isort output
+      - id: autoflake
         args: ["--in-place", "--ignore-init-module-imports"]
 
   - repo: https://github.com/pycqa/isort
     rev: 5.11.4
     hooks:
       - id: isort
-        args: ["--profile", "black"]
 
   - repo: https://github.com/ambv/black
     rev: 22.12.0
