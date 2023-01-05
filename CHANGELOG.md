@@ -3,13 +3,6 @@
 ## Unreleased
 
 ### NEW FEATURES
-
-### BUG FIXED
-
-
-## Version 0.4.9 [2023-01-05]
-
-### NEW FEATURES
 * History:
   Its behavior have been improved.
   Dates for entries are set automatically and are timezone-aware.
@@ -18,6 +11,13 @@
 * A new attribute allows the user to change the timezone of the dataset.
   This affect the way attributes such are `created` are displayed.
   Internally stored in UTC format, they are displayed according to the timezone info.
+
+### BUG FIXED
+
+
+## Version 0.4.9 [2023-01-05]
+
+### NEW FEATURES
 * `cmap=None` can be used in `plot(method='stack')`
 * Deprecation warning when pint version < 0.20
 * Compatibility with matplotlib >= 3.5
