@@ -43,3 +43,5 @@ exclude_patterns:
   - "scp_data"
   - "*.egg-info/"
   - "tests/"
+  - "build/"
+  - "scripts/"
