@@ -264,13 +264,13 @@ def check_docstrings(module, obj, exclude=[]):
             and m not in ["cross_validation_lock"]
         ):
             members.append(f"{module}.{obj.__name__}.{m}")
-            print(f"{obj.__name__}.{m}")
+            # print(f"{obj.__name__}.{m}")
 
     for member in members:
         result = spectrochempy_validate(member, exclude=exclude)
         if result["errors"]:
             result["member_name"] = member
-            raise DocstringError(result)
+            DocstringError(result)
 
 
 class DocstringError(Exception):

@@ -110,7 +110,7 @@ class NDArray(HasTraits):
     ----------------
     dtype : str or dtype, optional, default=np.float64
         If specified, the data will be cast to this dtype, else the data will be cast to float64.
-    dims : list of chars, optional.
+    dims : list of chars, optional
         If specified the list must have a length equal to the number of data dimensions (ndim).
         If not specified, dimension names are automatically attributed in the order given by
         `DEFAULT_DIM_NAME`.
@@ -135,12 +135,12 @@ class NDArray(HasTraits):
     title : str, optional
         The title of the dimension. It will later be used for instance for labelling plots of the data.
         It is optional but recommended giving a title to each ndarray.
-    dlabel :  str, optional.
+    dlabel :  str, optional
         Alias of `title`.
-    meta : dict-like object, optional.
+    meta : dict-like object, optional
         Additional metadata for this object. Must be dict-like but no
         further restriction is placed on meta.
-    copy : bool, optional, Default:False.
+    copy : bool, optional, Default:False
         If True, a deep copy of the passed object is performed.
 
     See Also
@@ -1344,6 +1344,7 @@ class NDArray(HasTraits):
         Parameters
         ----------
         level : int, optional, default:0
+            Label level.
 
         Returns
         -------
@@ -1539,8 +1540,7 @@ class NDArray(HasTraits):
 
     def ito(self, other, force=False):
         """
-        Inplace scaling of the current object data to different units.
-        (same as `to` with inplace= True).
+        Inplace scaling to different units. (same as `to` with inplace= True).
 
         Parameters
         ----------
@@ -1889,7 +1889,7 @@ class NDArray(HasTraits):
 
     def swapdims(self, dim1, dim2, inplace=False):
         """
-        Interchange two dims of a |NDArray|.
+        Interchange a two dims of a |NDArray|.
 
         Parameters
         ----------
@@ -1907,7 +1907,7 @@ class NDArray(HasTraits):
 
         See Also
         --------
-        transpose
+        transpose: Permute the dimensions of an array.
         """
         if not inplace:
             new = self.copy()
@@ -1941,7 +1941,7 @@ class NDArray(HasTraits):
 
         See Also
         --------
-        transpose
+        transpose: Permute the dimensions of an array.
         """
         return self.transpose()
 
