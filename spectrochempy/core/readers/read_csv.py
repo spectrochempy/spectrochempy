@@ -14,7 +14,7 @@ __dataset_methods__ = __all__
 import io
 import locale
 import warnings
-from datetime import datetime, timezone
+from datetime import datetime
 
 import numpy as np
 
@@ -207,8 +207,6 @@ def _read_csv(*args, **kwargs):
     dataset.units = kwargs.get("units", None)
     dataset.description = kwargs.get("description", '"name" ' + "read from .csv file")
     dataset.history = "Read from .csv file"
-    dataset._date = datetime.now(timezone.utc)
-    dataset._modified = dataset.date
 
     # here we can check some particular format
     origin = kwargs.get("origin", "")
@@ -224,10 +222,13 @@ def _read_csv(*args, **kwargs):
             "Please, remove or set the keyword 'origin'\n "
             "(Up to now implemented csv files are: `omnic`, `tga`)"
         )
+
+    # reset modification date to cretion date
+    dataset._modified = dataset._created
+
     return dataset
 
 
-# .............................................................................
 def _add_omnic_info(dataset, **kwargs):
     # get the time and name
     name = desc = dataset.name
@@ -239,10 +240,6 @@ def _add_omnic_info(dataset, **kwargs):
     dataset.description = "Dataset from .csv file: {}\n".format(desc)
     dataset.history = "Read from omnic exported csv file."
     dataset.origin = "omnic"
-
-    # Set the NDDataset date
-    dataset._date = datetime.now(timezone.utc)
-    dataset._modified = dataset.date
 
     # x axis
     dataset.x.units = "cm^-1"
@@ -273,6 +270,9 @@ def _add_omnic_info(dataset, **kwargs):
         dataset.set_coordtitles(y="acquisition timestamp (GMT)", x="wavenumbers")
         dataset.y.labels = np.array([[acqdate], [name]])
         dataset.y.units = "s"
+
+    # reset modification date to cretion date
+    dataset._modified = dataset._created
 
     return dataset
 

@@ -14,7 +14,6 @@ __all__ = ["write_matlab", "write_mat"]
 __dataset_methods__ = __all__
 
 
-# ...............................................................................
 def write_matlab(*args, **kwargs):
     """
     Write a dataset in CSV format.

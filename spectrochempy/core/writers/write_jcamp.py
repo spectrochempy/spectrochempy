@@ -17,7 +17,6 @@ __all__ = ["write_jcamp", "write_jdx"]
 __dataset_methods__ = __all__
 
 
-# ...............................................................................
 def write_jcamp(*args, **kwargs):
     """
     Write a dataset in JCAMP-DX format.

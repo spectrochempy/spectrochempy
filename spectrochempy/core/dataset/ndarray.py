@@ -17,11 +17,10 @@ import re
 import textwrap
 import uuid
 import warnings
-from datetime import datetime, timezone
+from datetime import datetime
 
 import numpy as np
 from traitlets import (
-    All,
     Bool,
     HasTraits,
     Instance,
@@ -30,7 +29,6 @@ from traitlets import (
     Unicode,
     Union,
     default,
-    observe,
     validate,
 )
 from traittypes import Array
@@ -53,7 +51,6 @@ from spectrochempy.utils import (
     MaskedConstant,
     SpectroChemPyWarning,
     convert_to_html,
-    get_user_and_node,
     insert_masked_print,
     is_number,
     is_sequence,
@@ -143,11 +140,6 @@ class NDArray(HasTraits):
     meta : dict-like object, optional.
         Additional metadata for this object. Must be dict-like but no
         further restriction is placed on meta.
-    author : str, optional.
-        name(s) of the author(s) of this dataset. BNy default, name of the computer note where this dataset is
-        created.
-    description : str, optional.
-        An optional description of the nd-dataset. A shorter alias is `desc`.
     copy : bool, optional, Default:False.
         If True, a deep copy of the passed object is performed.
 
@@ -176,19 +168,12 @@ class NDArray(HasTraits):
     _mask = Union((Bool(), Array(Bool()), Instance(MaskedConstant)))
     _labels = Array(allow_none=True)
     _units = Instance(Unit, allow_none=True)
+    _meta = Instance(Meta, allow_none=True)
 
     # Region of interest
     _roi = List(allow_none=True)
 
-    # Dates
-    _date = Instance(datetime)
-    _modified = Instance(datetime)
-
-    # Metadata
-    _author = Unicode()
-    _description = Unicode()
-    _origin = Unicode()
-    _meta = Instance(Meta, allow_none=True)
+    # Transposition flag
     _transposed = Bool(False)
 
     # Basic NDArray setting.
@@ -206,13 +191,9 @@ class NDArray(HasTraits):
     _html_output = Bool(False)
     _filename = Union((Instance(pathlib.Path), Unicode()), allow_none=True)
 
-    # ..........................................................................
     def __init__(self, data=None, **kwargs):
 
         super().__init__()
-
-        # Creation date.
-        self._date = datetime.now(timezone.utc)
 
         # By default, we try to keep a reference to the data, so we do not copy them.
         self._copy = kwargs.pop("copy", False)  #
@@ -242,35 +223,20 @@ class NDArray(HasTraits):
 
         self.units = kwargs.pop("units", None)
 
-        self.meta = kwargs.pop("meta", None)
+        self.meta = kwargs.pop("meta", {})
 
         self.name = kwargs.pop("name", None)
-
-        self.description = kwargs.pop("description", kwargs.pop("desc", ""))
-
-        author = kwargs.pop("author", get_user_and_node())
-        if author:
-            try:
-                self.author = author
-            except AttributeError:
-                # This happens for coord for which we cannot set the author (no need)
-                pass
-
-        self._modified = self._date
 
     # ------------------------------------------------------------------------
     # Special methods
     # ------------------------------------------------------------------------
 
-    # ..........................................................................
     def __copy__(self):
         return self.copy(deep=False)
 
-    # ..........................................................................
     def __deepcopy__(self, memo=None):
         return self.copy(deep=True, memo=memo)
 
-    # ..........................................................................
     def __dir__(self):
         return [
             "data",
@@ -281,14 +247,10 @@ class NDArray(HasTraits):
             "meta",
             "title",
             "name",
-            "origin",
             "roi",
-            "author",
-            "description",
             "transposed",
         ]
 
-    # ..........................................................................
     def __eq__(self, other, attrs=None):
 
         eq = True
@@ -364,7 +326,6 @@ class NDArray(HasTraits):
 
         return eq
 
-    # ..........................................................................
     def __getitem__(self, items, return_index=False):
 
         if isinstance(items, list):
@@ -435,12 +396,10 @@ class NDArray(HasTraits):
         else:
             return new, keys
 
-    # ..........................................................................
     def __hash__(self):
         # all instance of this class has same hash, so they can be compared
         return hash((type(self), self.shape, self._units))
 
-    # ..........................................................................
     def __iter__(self):
         # iterate on the first dimension
         if self.ndim == 0:
@@ -450,7 +409,6 @@ class NDArray(HasTraits):
         for n in range(len(self)):
             yield self[n]
 
-    # ..........................................................................
     def __len__(self):
         # len of the last dimension
         if not self.is_empty:
@@ -458,17 +416,14 @@ class NDArray(HasTraits):
         else:
             return 0
 
-    # ..........................................................................
     def __ne__(self, other, attrs=None):
         return not self.__eq__(other, attrs)
 
-    # ..........................................................................
     def __repr__(self):
         out = f"{self._repr_value().strip()} ({self._repr_shape().strip()})"
         out = out.rstrip()
         return out
 
-    # ..........................................................................
     def __setitem__(self, items, value):
 
         keys = self._make_index(items)
@@ -496,7 +451,6 @@ class NDArray(HasTraits):
         else:
             self._data[keys] = value
 
-    # ..........................................................................
     def __str__(self):
         return repr(self)
 
@@ -504,26 +458,6 @@ class NDArray(HasTraits):
     # Private methods and properties
     # ------------------------------------------------------------------------
 
-    # ..........................................................................
-    @observe(All)
-    def _anytrait_changed(self, change):
-
-        # ex: change {
-        #   'owner': object, # The HasTraits instance
-        #   'new': 6, # The new value
-        #   'old': 5, # The old value
-        #   'name': "foo", # The name of the changed trait
-        #   'type': 'change', # The event type of the notification, usually 'change'
-        # }
-
-        if change["name"] in ["_date", "_modified", "trait_added"]:
-            return
-
-        # all the time -> update modified date
-        self._modified = datetime.now(timezone.utc)
-        return
-
-    # ..........................................................................
     def _argsort(self, by=None, pos=None, descend=False):
         # found the indices sorted by values or labels
 
@@ -561,18 +495,15 @@ class NDArray(HasTraits):
             args = args[::-1]
         return args
 
-    # ..........................................................................
     def _cstr(self):
         out = f"{self._str_value()}\n{self._str_shape()}"
         out = out.rstrip()
         return out
 
-    # ..........................................................................
     @default("_data")
     def _data_default(self):
         return None
 
-    # ..........................................................................
     @validate("_data")
     def _data_validate(self, proposal):
         # validation of the _data attribute
@@ -588,12 +519,10 @@ class NDArray(HasTraits):
         else:
             return data
 
-    # ..........................................................................
     @default("_dims")
     def _dims_default(self):
         return DEFAULT_DIM_NAME[-self.ndim :]
 
-    # ..........................................................................
     def _get_dims_from_args(self, *dims, **kwargs):
         # utility function to read dims args and kwargs
         # sequence of dims or axis, or `dim`, `dims` or `axis` keyword are accepted
@@ -632,7 +561,6 @@ class NDArray(HasTraits):
 
         return dims
 
-    # ..........................................................................
     def _get_dims_index(self, dims):
         # get the index(es) corresponding to the given dim(s) which can be expressed as integer or string
 
@@ -674,7 +602,6 @@ class NDArray(HasTraits):
 
         return axis
 
-    # ..........................................................................
     def _get_slice(self, key, dim):
 
         info = None
@@ -745,18 +672,15 @@ class NDArray(HasTraits):
         newkey = slice(start, stop, step)
         return newkey
 
-    # ..........................................................................
     @default("_id")
     def _id_default(self):
         # a unique id
         return f"{type(self).__name__}_{str(uuid.uuid1()).split('-')[0]}"
 
-    # ..........................................................................
     @default("_labels")
     def _labels_default(self):
         return None
 
-    # ..........................................................................
     def _loc2index(self, loc, dim=None, *, units=None):
         # Return the index of a location (label or values such as coordinates) along a 1D array.
         # Do not apply for multidimensional arrays (ndim>1)
@@ -829,7 +753,6 @@ class NDArray(HasTraits):
             else:
                 raise IndexError(f"Could not find this location: {loc}")
 
-    # ..........................................................................
     def _make_index(self, key):
 
         if isinstance(key, np.ndarray) and key.dtype == bool:
@@ -883,12 +806,10 @@ class NDArray(HasTraits):
                 keys[axis] = self._get_slice(key, dim)
         return tuple(keys)
 
-    # ..........................................................................
     @default("_mask")
     def _mask_default(self):
         return NOMASK if self._data is None else np.zeros(self._data.shape).astype(bool)
 
-    # ..........................................................................
     @validate("_mask")
     def _mask_validate(self, proposal):
         pv = proposal["value"]
@@ -909,21 +830,17 @@ class NDArray(HasTraits):
         else:
             return mask
 
-    # ..........................................................................
     @default("_meta")
     def _meta_default(self):
         return Meta()
 
-    # ..........................................................................
     @default("_name")
     def _name_default(self):
         return ""
 
-    # ..........................................................................
     def _repr_html_(self):
         return convert_to_html(self)
 
-    # ..........................................................................
     def _repr_shape(self):
 
         if self.is_empty:
@@ -943,7 +860,6 @@ class NDArray(HasTraits):
 
         return out
 
-    # ..........................................................................
     def _repr_units(self):
         if self.has_units:
             # if not self.units.dimensionless or self.units.scaling != 1:
@@ -987,12 +903,10 @@ class NDArray(HasTraits):
         numpyprintoptions()
         return "".join([prefix, body, units, size])
 
-    # ..........................................................................
     @default("_roi")
     def _roi_default(self):
         return None
 
-    # ..........................................................................
     def _set_data(self, data):
 
         if data is None:
@@ -1044,7 +958,6 @@ class NDArray(HasTraits):
                 data = data.astype(float)
             self._data = data
 
-    # ..........................................................................
     def _sort(self, by=None, pos=None, descend=False, inplace=False):
         # sort an ndarray using data or label values
 
@@ -1057,7 +970,6 @@ class NDArray(HasTraits):
 
         return new
 
-    # ..........................................................................
     @property
     def _squeeze_ndim(self):
         # The number of dimensions of the squeezed`data` array (Readonly property).
@@ -1069,7 +981,6 @@ class NDArray(HasTraits):
         else:
             return len([x for x in self.data.shape if x > 1])
 
-    # ..........................................................................
     def _str_shape(self):
 
         if self.is_empty:
@@ -1093,7 +1004,6 @@ class NDArray(HasTraits):
 
         return out
 
-    # ..........................................................................
     def _str_value(self, sep="\n", ufmt=" {:~P}", header="         data: ... \n"):
         # prefix = ['']
         if self.is_empty and "data: ..." not in header:
@@ -1145,7 +1055,6 @@ class NDArray(HasTraits):
         out = out.rstrip()  # remove the trailing '\n'
         return out
 
-    # ..........................................................................
     @default("_title")
     def _title_default(self):
         return None
@@ -1163,7 +1072,6 @@ class NDArray(HasTraits):
 
         return new
 
-    # ..........................................................................
     @staticmethod
     def _uarray(data, units=None):
         # return the array or scalar with units
@@ -1176,7 +1084,6 @@ class NDArray(HasTraits):
         else:
             return uar
 
-    # ..........................................................................
     @staticmethod
     def _umasked(data, mask):
         # This ensures that a masked array is returned.
@@ -1212,20 +1119,6 @@ class NDArray(HasTraits):
         self._data = self._data.astype(dtype, **kwargs)
         return self
 
-    # ...........................................................................................................
-    @property
-    def author(self):
-        """
-        Creator of the array (str).
-        """
-        return self._author
-
-    # ..........................................................................
-    @author.setter
-    def author(self, value):
-        self._author = value
-
-    # ..........................................................................
     def copy(self, deep=True, keepname=False, **kwargs):
         """
         Make a disconnected copy of the current object.
@@ -1282,21 +1175,6 @@ class NDArray(HasTraits):
 
         return new
 
-    # ..........................................................................
-    @property
-    def created(self):
-        """
-        Creation date object (Datetime).
-        """
-        return self._date
-
-    # ..........................................................................
-    @created.setter
-    def created(self, date):
-
-        self.date = date
-
-    # ..........................................................................
     @property
     def data(self):
         """
@@ -1306,7 +1184,6 @@ class NDArray(HasTraits):
         """
         return self._data
 
-    # ..........................................................................
     @data.setter
     def data(self, data):
         # property.setter for data
@@ -1317,48 +1194,9 @@ class NDArray(HasTraits):
 
         self._set_data(data)
 
-    # ..........................................................................
     magnitude = data
     m = data
 
-    # ..........................................................................
-    @property
-    def date(self):
-        """
-        Creation date object - equivalent to the attribute `created` (Datetime).
-        """
-        return self._date
-
-    # ..........................................................................
-    @date.setter
-    def date(self, date):
-
-        if isinstance(date, datetime):
-            self._date = date
-
-        elif isinstance(date, str):
-            try:
-                self._date = datetime.strptime(date, "%Y/%m/%d")
-            except ValueError:
-                self._date = datetime.strptime(date, "%d/%m/%Y")
-
-    # ...........................................................................................................
-    @property
-    def description(self):
-        """
-        Provides a description of the underlying data (str).
-        """
-        return self._description
-
-    desc = description
-    desc.__doc__ = """Alias to the description attribute."""
-
-    # ..........................................................................
-    @description.setter
-    def description(self, value):
-        self._description = value
-
-    # ..........................................................................
     @property
     def dimensionless(self):
         """
@@ -1377,7 +1215,6 @@ class NDArray(HasTraits):
             return False
         return self._units.dimensionless
 
-    # ..........................................................................
     @property
     def dims(self):
         """
@@ -1394,7 +1231,6 @@ class NDArray(HasTraits):
         else:
             return []
 
-    # ..........................................................................
     @dims.setter
     def dims(self, values):
 
@@ -1416,7 +1252,6 @@ class NDArray(HasTraits):
 
         self._dims = tuple(values)
 
-    # ..........................................................................
     @property
     def dtype(self):
         """
@@ -1442,7 +1277,6 @@ class NDArray(HasTraits):
     def filename(self, val):
         self._filename = pathclean(val)
 
-    # ..........................................................................
     def get_axis(self, *args, **kwargs):
         """
         Helper function to determine an axis index whatever the syntax used (axis index or dimension names).
@@ -1500,7 +1334,6 @@ class NDArray(HasTraits):
 
         return axis, dims
 
-    # ..........................................................................
     def get_labels(self, level=0):
         """
         Get the labels at a given level.
@@ -1531,7 +1364,6 @@ class NDArray(HasTraits):
         else:
             return self._labels
 
-    # ..........................................................................
     @property
     def has_data(self):
         """
@@ -1544,7 +1376,6 @@ class NDArray(HasTraits):
 
         return True
 
-    # ..........................................................................
     @property
     def has_defined_name(self):
         """
@@ -1552,7 +1383,6 @@ class NDArray(HasTraits):
         """
         return not (self.name == self.id)
 
-    # ..........................................................................
     @property
     def has_units(self):
         """
@@ -1567,11 +1397,6 @@ class NDArray(HasTraits):
             return True
         return False
 
-    # ..........................................................................
-
-    # ..........................................................................
-
-    # ..........................................................................
     @property
     def id(self):
         """
@@ -1579,12 +1404,10 @@ class NDArray(HasTraits):
         """
         return self._id
 
-    # ..........................................................................
     @property
     def imag(self):
         return None
 
-    # ..........................................................................
     def implements(self, name=None):
         """
         Utility to check if the current object implements a given class.
@@ -1613,7 +1436,6 @@ class NDArray(HasTraits):
         else:
             return name == self.__class__.__name__
 
-    # ..........................................................................
     @property
     def is_float(self):
         """
@@ -1624,7 +1446,6 @@ class NDArray(HasTraits):
 
         return self.data.dtype in TYPE_FLOAT
 
-    # ..........................................................................
     @property
     def is_integer(self):
         """
@@ -1635,7 +1456,6 @@ class NDArray(HasTraits):
 
         return self.data.dtype in TYPE_INTEGER
 
-    # ..........................................................................
     @property
     def is_1d(self):
         """
@@ -1643,7 +1463,6 @@ class NDArray(HasTraits):
         """
         return self.ndim == 1
 
-    # ..........................................................................
     @property
     def is_empty(self):
         """
@@ -1656,7 +1475,6 @@ class NDArray(HasTraits):
 
         return False
 
-    # ..........................................................................
     @property
     def is_labeled(self):
         """
@@ -1671,7 +1489,6 @@ class NDArray(HasTraits):
         else:
             return False
 
-    # ..........................................................................
     @property
     def is_masked(self):
         """
@@ -1686,7 +1503,6 @@ class NDArray(HasTraits):
 
         return False
 
-    # ..........................................................................
     def is_units_compatible(self, other):
         """
         Check the compatibility of units with another object.
@@ -1721,7 +1537,6 @@ class NDArray(HasTraits):
             return False
         return True
 
-    # ..........................................................................
     def ito(self, other, force=False):
         """
         Inplace scaling of the current object data to different units.
@@ -1744,7 +1559,6 @@ class NDArray(HasTraits):
         """
         self.to(other, inplace=True, force=force)
 
-    # ..........................................................................
     def ito_base_units(self):
         """
         Inplace rescaling to base units.
@@ -1759,7 +1573,6 @@ class NDArray(HasTraits):
         """
         self.to_base_units(inplace=True)
 
-    # ..........................................................................
     def ito_reduced_units(self):
         """
         Quantity scaled in place to reduced units, inplace.
@@ -1778,7 +1591,6 @@ class NDArray(HasTraits):
         """
         self.to_reduced_units(inplace=True)
 
-    # ..........................................................................
     @property
     def labels(self):
         """
@@ -1790,7 +1602,6 @@ class NDArray(HasTraits):
         """
         return self._labels
 
-    # ..........................................................................
     @labels.setter
     def labels(self, labels):
 
@@ -1842,7 +1653,6 @@ class NDArray(HasTraits):
                     else:
                         self._labels = labels
 
-    # ..........................................................................
     @property
     def limits(self):
         """
@@ -1853,7 +1663,6 @@ class NDArray(HasTraits):
 
         return [self.data.min(), self.data.max()]
 
-    # ..........................................................................
     @property
     def mask(self):
         """
@@ -1864,7 +1673,6 @@ class NDArray(HasTraits):
 
         return self._mask
 
-    # ..........................................................................
     @mask.setter
     def mask(self, mask):
 
@@ -1907,7 +1715,6 @@ class NDArray(HasTraits):
                 else:
                     self._mask = mask
 
-    # ..........................................................................
     @property
     def masked_data(self):
         """
@@ -1918,7 +1725,6 @@ class NDArray(HasTraits):
         else:
             return self.data
 
-    # ..........................................................................
     @property
     def meta(self):
         """
@@ -1926,22 +1732,12 @@ class NDArray(HasTraits):
         """
         return self._meta
 
-    # ..........................................................................
     @meta.setter
     def meta(self, meta):
 
         if meta is not None:
             self._meta.update(meta)
 
-    # ..........................................................................
-    @property
-    def modified(self):
-        """
-        Date of modification (readonly property).
-        """
-        return self._modified
-
-    # ..........................................................................
     @property
     def name(self):
         """
@@ -1954,7 +1750,6 @@ class NDArray(HasTraits):
         else:
             return self._id
 
-    # ..........................................................................
     @name.setter
     def name(self, name):
 
@@ -1963,7 +1758,6 @@ class NDArray(HasTraits):
                 pass
             self._name = name
 
-    # ..........................................................................
     @property
     def ndim(self):
         """
@@ -1977,31 +1771,16 @@ class NDArray(HasTraits):
         else:
             return self.data.ndim
 
-    # ..........................................................................
-    @property
-    def origin(self):
-        """
-        Origin of the data (str).
-        """
-        return self._origin
-
-    # ..........................................................................
-    @origin.setter
-    def origin(self, origin):
-        self._origin = origin
-
     @property
     def real(self):
         return self
 
-    # ..........................................................................
     def remove_masks(self):
         """
         Remove all masks previously set on this array.
         """
         self._mask = NOMASK
 
-    # ..........................................................................
     @property
     def roi(self):
         """
@@ -2022,7 +1801,6 @@ class NDArray(HasTraits):
         else:
             return list(self._uarray(self.roi, self.units))
 
-    # ..........................................................................
     @property
     def shape(self):
         """
@@ -2040,7 +1818,6 @@ class NDArray(HasTraits):
         else:
             return self.data.shape
 
-    # ..........................................................................
     @property
     def size(self):
         """
@@ -2058,7 +1835,6 @@ class NDArray(HasTraits):
         else:
             return self._data.size
 
-    # ..........................................................................
     def squeeze(self, *dims, inplace=False, return_axis=False, **kwargs):
         """
         Remove single-dimensional entries from the shape of an array.
@@ -2111,7 +1887,6 @@ class NDArray(HasTraits):
 
         return new
 
-    # ..........................................................................
     def swapdims(self, dim1, dim2, inplace=False):
         """
         Interchange two dims of a |NDArray|.
@@ -2157,7 +1932,6 @@ class NDArray(HasTraits):
     swapaxes = swapdims
     swapaxes.__doc__ = "Alias of `swapdims`."
 
-    # ..........................................................................
     @property
     def T(self):
         """
@@ -2171,7 +1945,6 @@ class NDArray(HasTraits):
         """
         return self.transpose()
 
-    # ..........................................................................
     @property
     def title(self):
         """
@@ -2191,7 +1964,6 @@ class NDArray(HasTraits):
         if title:
             self._title = title
 
-    # ..........................................................................
     def to(self, other, inplace=False, force=False):
         """
         Return the object with data rescaled to different units.
@@ -2427,7 +2199,6 @@ class NDArray(HasTraits):
         if not inplace:
             return new
 
-    # ..........................................................................
     def transpose(self, *dims, inplace=False):
         """
         Permute the dimensions of an array.
@@ -2476,7 +2247,6 @@ class NDArray(HasTraits):
     def transposed(self):
         return self._transposed
 
-    # ..........................................................................
     @property
     def umasked_data(self):
         """
@@ -2488,7 +2258,6 @@ class NDArray(HasTraits):
             return None
         return self._uarray(self.masked_data, self.units)
 
-    # ..........................................................................
     @property
     def unitless(self):
         """
@@ -2496,7 +2265,6 @@ class NDArray(HasTraits):
         """
         return not self.has_units
 
-    # ..........................................................................
     @property
     def units(self):
         """
@@ -2504,7 +2272,6 @@ class NDArray(HasTraits):
         """
         return self._units
 
-    # ..........................................................................
     @units.setter
     def units(self, units):
 
@@ -2527,7 +2294,6 @@ class NDArray(HasTraits):
                 )
         self._units = units
 
-    # ..........................................................................
     @property
     def values(self):
         """

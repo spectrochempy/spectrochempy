@@ -16,7 +16,6 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import make_new_object
 
 
-# ............................................................................
 def dot(a, b, strict=True, out=None):
     """
     Return the dot product of two NDDatasets.

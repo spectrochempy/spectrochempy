@@ -15,7 +15,6 @@ __all__ = ["write_excel"]
 __dataset_methods__ = __all__
 
 
-# ...............................................................................
 def write_excel(*args, **kwargs):
     """
     Write a dataset in XLS format.

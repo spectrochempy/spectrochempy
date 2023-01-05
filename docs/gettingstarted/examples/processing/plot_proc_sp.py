@@ -22,13 +22,13 @@ path = os.path.join(
 )
 dataset1D = scp.read_topspin(path, expno=1, remove_digital_filter=True)
 
-########################################################################################################################
+# %%
 # Normalize the dataset values and reduce the time domain
 
 dataset1D /= dataset1D.real.data.max()  # normalize
 dataset1D = dataset1D[0.0:15000.0]
 
-########################################################################################################################
+# %%
 # Apply Sine bell window apodization with parameter ssb=2, which correspond to a cosine function
 
 new1, curve1 = scp.sinm(dataset1D, ssb=2, retapod=True, inplace=False)
@@ -39,24 +39,24 @@ _ = dataset1D.sinm(ssb=2, retapod=True, inplace=False)
 # or also
 _ = scp.sp(dataset1D, ssb=2, pow=1, retapod=True, inplace=False)
 
-########################################################################################################################
+# %%
 # Apply Sine bell window apodization with parameter ssb=2, which correspond to a sine function
 
 new2, curve2 = dataset1D.sinm(ssb=1, retapod=True, inplace=False)
 
-########################################################################################################################
+# %%
 # Apply Squared Sine bell window apodization with parameter ssb=1 and ssb=2
 
 new3, curve3 = scp.qsin(dataset1D, ssb=2, retapod=True, inplace=False)
 
 new4, curve4 = dataset1D.qsin(ssb=1, retapod=True, inplace=False)
 
-########################################################################################################################
+# %%
 # Apply shifted Sine bell window apodization with parameter ssb=8 (mixed sine/cosine window)
 
 new5, curve5 = dataset1D.sinm(ssb=8, retapod=True, inplace=False)
 
-########################################################################################################################
+# %%
 # Plotting
 
 p = dataset1D.plot(zlim=(-2, 2), color="k")

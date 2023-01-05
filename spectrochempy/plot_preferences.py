@@ -879,7 +879,6 @@ class PlotPreferences(MetaConfigurable):
         config=True
     )
 
-    # ..........................................................................
     def __init__(self, **kwargs):
         super().__init__(jsonfile="PlotPreferences", **kwargs)
         for key in plt.rcParams:

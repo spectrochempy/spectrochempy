@@ -21,7 +21,8 @@ OPUSDATA = DATADIR / "irdata" / "OPUS"
 #     not OPUSDATA.exists(),
 #     reason="Experimental data not available for testing",
 # )
-# ..............................................................................
+
+
 def test_read_opus():
     # single file
     A = NDDataset.read_opus(OPUSDATA / "test.0000")

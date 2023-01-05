@@ -238,7 +238,6 @@ def em(dataset, lb=1, shifted=0, **kwargs):
     return np.exp(-e)
 
 
-# ..............................................................................
 @_apodize_method(gb="Hz", lb="Hz", shifted="us")
 def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
     r"""
@@ -327,7 +326,6 @@ def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
     return np.exp(e - g**2)
 
 
-# ..............................................................................
 @_apodize_method(ssb=None, pow=None)
 def sp(dataset, ssb=1, pow=1, **kwargs):
     r"""
@@ -404,7 +402,6 @@ def sp(dataset, ssb=1, pow=1, **kwargs):
     return np.sin((np.pi - phi) * t + phi) ** pow
 
 
-# ..............................................................................
 def sine(dataset, *args, **kwargs):
     """
     Strictly equivalent to :meth:`sp`.
@@ -416,7 +413,6 @@ def sine(dataset, *args, **kwargs):
     return sp(dataset, *args, **kwargs)
 
 
-# ..............................................................................
 def sinm(dataset, ssb=1, **kwargs):
     """
     Equivalent to :meth:`sp`, with pow = 1 (sine bell apodization window).
@@ -428,7 +424,6 @@ def sinm(dataset, ssb=1, **kwargs):
     return sp(dataset, ssb=ssb, pow=1, **kwargs)
 
 
-# ..............................................................................
 def qsin(dataset, ssb=1, **kwargs):
     """
     Equivalent to :meth:`sp`, with pow = 2 (squared sine bell apodization window).
@@ -440,7 +435,6 @@ def qsin(dataset, ssb=1, **kwargs):
     return sp(dataset, ssb=ssb, pow=2, **kwargs)
 
 
-# ..............................................................................
 @_apodize_method(alpha=None)
 def general_hamming(dataset, alpha, **kwargs):
     r"""

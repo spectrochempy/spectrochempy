@@ -103,7 +103,6 @@ def read_soc(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
-# ..............................................................................
 def read_ddr(*paths, **kwargs):
     """
     Open a Surface Optics Corps. file or a list of files with extension ``.ddr``.
@@ -186,7 +185,6 @@ def read_ddr(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
-# ..............................................................................
 def read_hdr(*paths, **kwargs):
     """
     Open a Surface Optics Corps. file or a list of files with extension ``.hdr``.
@@ -269,7 +267,6 @@ def read_hdr(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
-# ..............................................................................
 def read_sdr(*paths, **kwargs):
     """
     Open a Surface Optics Corps. file or a list of files with extension ``.sdr``.
@@ -356,7 +353,7 @@ def read_sdr(*paths, **kwargs):
 # Private functions
 # ======================================================================================================================
 
-# ..............................................................................
+
 @_importer_method
 def _read_ddr(*args, **kwargs):
     ds = _read_spa(*args, **kwargs)

@@ -78,7 +78,6 @@ class BaselineCorrection(HasTraits):
     figsize = Tuple((7, 5))
     sps = List()
 
-    # ..........................................................................
     def __init__(self, dataset, *args, **kwargs):
         self.dataset = dataset
         self.corrected = self.dataset.copy()
@@ -89,7 +88,6 @@ class BaselineCorrection(HasTraits):
                 "Here they are ignored."
             )
 
-    # ..........................................................................
     def _extendranges(self, *ranges, **kwargs):
         if not ranges:
             # look in the kwargs
@@ -114,7 +112,6 @@ class BaselineCorrection(HasTraits):
                 item = [item, item]
             self.ranges.append(item)
 
-    # ..........................................................................
     def _setup(self, **kwargs):
 
         self.method = kwargs.get("method", self.method)
@@ -126,12 +123,10 @@ class BaselineCorrection(HasTraits):
         self.zoompreview = kwargs.get("zoompreview", self.zoompreview)
         self.figsize = kwargs.get("figsize", self.figsize)
 
-    # ..........................................................................
     def __call__(self, *ranges, **kwargs):
 
         return self.compute(*ranges, **kwargs)
 
-    # ..........................................................................
     def compute(self, *ranges, **kwargs):
         """
         Base function for dataset baseline correction.
@@ -285,7 +280,6 @@ class BaselineCorrection(HasTraits):
         self.corrected = new
         return new
 
-    # ..........................................................................
     def show_regions(self, ax):
         if self.sps:
             for sp in self.sps:
@@ -297,7 +291,6 @@ class BaselineCorrection(HasTraits):
             sp = ax.axvspan(x[0], x[1], facecolor="#2ca02c", alpha=0.5)
             self.sps.append(sp)
 
-    # ..........................................................................
     def run(self, *ranges, **kwargs):
         """
         Interactive version of the baseline correction.
@@ -417,7 +410,6 @@ class BaselineCorrection(HasTraits):
         return
 
 
-# ..............................................................................
 def basc(dataset, *ranges, **kwargs):
     """
     Compute a baseline correction using the BaselineCorrection processor.
@@ -605,7 +597,6 @@ def abc(dataset, dim=-1, **kwargs):
     return new
 
 
-# ..............................................................................
 def ab(dataset, dim=-1, **kwargs):
     """
     Alias of `abc`.
@@ -613,7 +604,6 @@ def ab(dataset, dim=-1, **kwargs):
     return abs(dataset, dim, **kwargs)
 
 
-# ..............................................................................
 @_units_agnostic_method
 def dc(dataset, **kwargs):
     """
