@@ -5,7 +5,6 @@
 - [ ] Tests have been added (mostly required)
 - [ ] If dependencies have been updated, the script `.scripts/create_requirements.py`
       has been executed.
-- [ ] The docstrings have been tested with the script `script/validate_docstrings.py`.
 - [ ] User-visible changes (including notable bug fixes) have been documented in
       `CHANGELOG.md` (Changes relevant to developers only are generally not needed in
       CHANGELOG as they are apparent in commit messages and PR comments)
