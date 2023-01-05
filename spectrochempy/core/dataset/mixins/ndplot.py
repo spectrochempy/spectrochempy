@@ -19,13 +19,13 @@ from matplotlib import pyplot as plt
 from matplotlib.colors import to_rgba
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from traitlets import Dict, HasTraits, Instance, TraitError, Union, default
+from utils.optional import import_optional_dependency
 
 from spectrochempy.core import error_, plot_preferences, preferences
 from spectrochempy.core.common.meta import Meta
 from spectrochempy.core.plotters.plot1d import plot_1D
 from spectrochempy.core.plotters.plot2d import plot_2D
 from spectrochempy.core.plotters.plot3d import plot_3D
-from spectrochempy.optional import import_optional_dependency
 from spectrochempy.utils import pathclean
 from spectrochempy.utils.plots import _Axes, _Axes3D, get_figure
 

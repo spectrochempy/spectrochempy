@@ -16,7 +16,7 @@ from os import environ
 import sys
 import warnings
 
-from spectrochempy.optional import import_optional_dependency
+from utils.optional import import_optional_dependency
 
 warnings.filterwarnings("ignore")
 
@@ -153,19 +153,8 @@ app = SpectroChemPy()
 __all__ += ["app"]
 
 from spectrochempy.application import (  # noqa: E402
-    __version__ as version,
-    __release__ as release,
-    __copyright__ as copyright,
-    __license__ as license,
-    __release_date__ as release_date,
-    __author__ as authors,
-    __contributor__ as contributors,
-    __url__ as url,
     DEBUG,
     WARNING,
-    ERROR,
-    CRITICAL,
-    INFO,
 )
 
 preferences = app.preferences
@@ -223,14 +212,6 @@ _pbar_update()
 
 # constants
 # ------------------------------------------------------------------
-from spectrochempy.utils import (
-    show,
-    MASKED,
-    NOMASK,
-    EPSILON,
-    INPLACE,
-    show_versions,
-)  # noqa: E402
 
 __all__ += ["show", "MASKED", "NOMASK", "EPSILON", "INPLACE", "show_versions"]
 

@@ -11,10 +11,10 @@ Tests for the PCA module
 
 """
 import numpy as np
+from utils.optional import import_optional_dependency
 
 from spectrochempy.analysis.pca import PCA
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.optional import import_optional_dependency
 from spectrochempy.utils import MASKED, show
 from spectrochempy.utils.testing import assert_array_almost_equal
 
