@@ -54,7 +54,7 @@ dependencies:
     - setuptools_scm
     - git
 
-  
+
 
     # Jupyter lab
     - jupyterlab
@@ -101,7 +101,7 @@ dependencies:
     # - xarray
     # - datashader
     # - scikit-learn
-    
+
     - pip
     - pip:
         - autodoc_traits
