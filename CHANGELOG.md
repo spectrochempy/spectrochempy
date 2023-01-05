@@ -1,6 +1,6 @@
 # What's new
 
-## Unreleased
+## Version 0.4.9 [2023-01-05]
 
 ### NEW FEATURES
 * `cmap=None` can be used in `plot(method='stack')`
