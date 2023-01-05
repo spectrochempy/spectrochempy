@@ -114,7 +114,6 @@ class NDIO(HasTraits):
     # Public methods
     # ------------------------------------------------------------------------
 
-    # ..........................................................................
     def save(self, **kwargs):
         """
         Save the current object in SpectroChemPy format.
@@ -177,7 +176,6 @@ class NDIO(HasTraits):
         self.name = filename.stem
         return self.dump(filename, **kwargs)
 
-    # ..........................................................................
     def save_as(self, filename="", **kwargs):
         """
         Save the current |NDDataset| in SpectroChemPy format (*.scp).
@@ -247,7 +245,6 @@ class NDIO(HasTraits):
             self.filename = filename
             return self.dump(filename, **kwargs)
 
-    # ..........................................................................
     @classmethod
     def load(cls, filename, **kwargs):
         """
@@ -434,7 +431,6 @@ class NDIO(HasTraits):
 
         return new
 
-    # ..........................................................................
     def dump(self, filename, **kwargs):
         """
         Save the current object into compressed native spectrochempy format.

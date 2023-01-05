@@ -13,7 +13,6 @@ import spectrochempy.core as sc
 from spectrochempy.utils import show
 
 
-# ............................................................................
 def test_lstsq_from_scratch():
     t = sc.NDDataset(data=[0, 1, 2, 3], title="time", units="hour")
 
@@ -38,7 +37,6 @@ def test_lstsq_from_scratch():
     show()
 
 
-# ............................................................................
 def test_implicit_lstsq():
     t = sc.Coord(data=[0, 1, 2, 3], units="hour", title="time")
 

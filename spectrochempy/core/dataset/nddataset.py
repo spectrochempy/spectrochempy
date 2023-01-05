@@ -17,15 +17,16 @@ from datetime import datetime, tzinfo
 import numpy as np
 import pytz  # TODO: for py>=3.9, we could use builtin zoneinfo library instead of pyt but we need compatibility with 3.7 (Colab).
 from traitlets import (
+    All,
     Bool,
-    Dict,
     Float,
     HasTraits,
     Instance,
     List,
     Tuple,
-    Union,
+    Unicode,
     default,
+    observe,
     validate,
 )
 from traittypes import Array
@@ -33,7 +34,6 @@ from traittypes import Array
 from spectrochempy.core import error_, warning_
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.coordset import CoordSet
-from spectrochempy.core.dataset.meta import Meta
 from spectrochempy.core.dataset.ndarray import DEFAULT_DIM_NAME, NDArray
 from spectrochempy.core.dataset.ndcomplex import NDComplexArray
 from spectrochempy.core.dataset.ndio import NDIO
@@ -41,7 +41,7 @@ from spectrochempy.core.dataset.ndmath import NDMath, _set_operators, _set_ufunc
 from spectrochempy.core.dataset.ndplot import NDPlot
 from spectrochempy.core.project.baseproject import AbstractProject
 from spectrochempy.optional import import_optional_dependency
-from spectrochempy.utils import MaskedConstant, colored_output, get_user_and_node
+from spectrochempy.utils import colored_output, get_user_and_node
 from spectrochempy.utils.exceptions import SpectroChemPyException, UnknownTimeZoneError
 
 # ======================================================================================================================
@@ -206,36 +206,41 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     # For the GUI interface
 
     # parameters state
-    _state = Dict()
+    # _state = Dict()
 
     # processed data (for GUI)
-    _processeddata = Array(Float(), allow_none=True)
+    # _processeddata = Array(Float(), allow_none=True)
 
     # processed mask (for GUI)
-    _processedmask = Union((Bool(), Array(Bool()), Instance(MaskedConstant)))
+    # _processedmask = Union((Bool(), Array(Bool()), Instance(MaskedConstant)))
 
     # baseline data (for GUI)
-    _baselinedata = Array(Float(), allow_none=True)
+    # _baselinedata = Array(Float(), allow_none=True)
 
     # reference data (for GUI)
-    _referencedata = Array(Float(), allow_none=True)
+    # _referencedata = Array(Float(), allow_none=True)
 
     # region ranges
-    _ranges = Instance(Meta)
+    # _ranges = Instance(Meta)
 
     # history
     _history = List(Tuple(), allow_none=True)
 
     # Dates
-    _acquisition_date = Instance(datetime, allow_none=True)
+    # _acquisition_date = Instance(datetime, allow_none=True)
     _created = Instance(datetime)
     _modified = Instance(datetime)
     _timezone = Instance(tzinfo, allow_none=True)
 
-    # ------------------------------------------------------------------------
+    # Metadata
+    _author = Unicode()
+    _description = Unicode()
+    _origin = Unicode()
+
+    # ----------------------------------------------------------------------------------
     # initialisation
-    # ------------------------------------------------------------------------
-    # ..........................................................................
+    # ----------------------------------------------------------------------------------
+
     def __init__(
         self, data=None, coordset=None, coordunits=None, coordtitles=None, **kwargs
     ):
@@ -297,18 +302,21 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             }:  # if they are no coordinates do nothing
                 self.set_coordset(*_coordset)
 
-    # ------------------------------------------------------------------------
-    # special methods
-    # ------------------------------------------------------------------------
+        self._modified = self._created
 
-    # ..........................................................................
+    # ----------------------------------------------------------------------------------
+    # Special methods
+    # ----------------------------------------------------------------------------------
+
     def __dir__(self):
         # Only these attributes are used for saving dataset
         # WARNING: be careful to keep the present order of the three first elements! Needed for save/load operations
         return [
+            # Keep the following order
             "dims",
             "coordset",
             "data",
+            # From here it is free
             "name",
             "title",
             "mask",
@@ -318,18 +326,20 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             "author",
             "description",
             "history",
-            "date",
+            "created",
             "modified",
+            # "acquisition_date",
             "origin",
             "roi",
             "transposed",
             "modeldata",
-            "referencedata",
-            "state",
-            "ranges",
+            # "processeddata",
+            # "referencedata",
+            # "baselinedata",
+            # "state",
+            # "ranges",
         ] + NDIO().__dir__()
 
-    # ..........................................................................
     def __getitem__(self, items, **kwargs):
 
         saveditems = items
@@ -382,7 +392,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         new.history = f"Slice extracted: ({saveditems})"
         return new
 
-    # ..........................................................................
     def __getattr__(self, item):
         # when the attribute was not found
         if (
@@ -494,16 +503,16 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         else:
             super().__setattr__(key, value)
 
-    # ..........................................................................
     def __eq__(self, other, attrs=None):
         attrs = self.__dir__()
         for attr in (
             "filename",
             "preferences",
             "name",
+            "author",
             "description",
             "history",
-            "date",
+            "created",
             "modified",
             "origin",
             "show_datapoints",
@@ -513,8 +522,9 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             "baselinedata",
             "referencedata",
             "state",
+            "ranges",
         ):
-            # these attributes are not used for comparison (comparison based on data and units!)
+            # These attributes are not used for comparison (comparison based on data and units!)
             try:
                 attrs.remove(attr)
             except ValueError:
@@ -522,7 +532,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         return super().__eq__(other, attrs)
 
-    # ..........................................................................
     def __hash__(self):
         # all instance of this class has same hash, so they can be compared
         return super().__hash__ + hash(self._coordset)
@@ -539,29 +548,37 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
     def __modeldata_default(self):
         return None
 
-    @default("_processeddata")
-    def __processeddata_default(self):
-        return None
-
-    @default("_baselinedata")
-    def __baselinedata_default(self):
-        return None
-
-    @default("_referencedata")
-    def __referencedata_default(self):
-        return None
-
-    @default("_ranges")
-    def __ranges_default(self):
-        ranges = Meta()
-        for dim in self.dims:
-            ranges[dim] = dict(masks={}, baselines={}, integrals={}, others={})
-        return ranges
+    # @default("_processeddata")
+    # def __processeddata_default(self):
+    #     return None
+    #
+    # @default("_baselinedata")
+    # def __baselinedata_default(self):
+    #     return None
+    #
+    # @default("_referencedata")
+    # def __referencedata_default(self):
+    #     return None
+    #
+    # @default("_ranges")
+    # def __ranges_default(self):
+    #     ranges = Meta()
+    #     for dim in self.dims:
+    #         ranges[dim] = dict(masks={}, baselines={}, integrals={}, others={})
+    #     return ranges
 
     @default("_timezone")
     def __timezone_default(self):
         # Return the default timezone (UTC)
         return datetime.utcnow().astimezone().tzinfo
+
+    @validate("_created")
+    def __created_validate(self, proposal):
+        date = proposal["value"]
+        if date.tzinfo is not None:
+            # make the date utc naive
+            date = date.replace(tzinfo=None)
+        return date
 
     @validate("_history")
     def __history_validate(self, proposal):
@@ -571,106 +588,126 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             self._history = None
         return history
 
-    # ------------------------------------------------------------------------
-    # GUI options
-    # ------------------------------------------------------------------------
-    # TODO: refactor the spectrochempy preference system to have a common basis
+    @validate("_modified")
+    def __modified_validate(self, proposal):
+        date = proposal["value"]
+        if date.tzinfo is not None:
+            # make the date utc naive
+            date = date.replace(tzinfo=None)
+        return date
 
-    # ...........................................................................................................
-    @property
-    def state(self):
-        """
-        State of the controller window for this dataset.
-        """
-        return self._state
+    @observe(All)
+    def _anytrait_changed(self, change):
 
-    @state.setter
-    def state(self, val):
-        self._state = val
+        # ex: change {
+        #   'owner': object, # The HasTraits instance
+        #   'new': 6, # The new value
+        #   'old': 5, # The old value
+        #   'name': "foo", # The name of the changed trait
+        #   'type': 'change', # The event type of the notification, usually 'change'
+        # }
 
-    @property
-    def processeddata(self):
-        """
-        Data after processing (optionaly used).
-        """
-        return self._processeddata
-
-    @processeddata.setter
-    def processeddata(self, val):
-        self._processeddata = val
-
-    @property
-    def processedmask(self):
-        """
-        Mask for the optional processed data.
-        """
-        return self._processedmask
-
-    @processedmask.setter
-    def processedmask(self, val):
-        self._processedmask = val
-
-    @property
-    def baselinedata(self):
-        """
-        Data for an optional baseline.
-        """
-        return self._baselinedata
-
-    @baselinedata.setter
-    def baselinedata(self, val):
-        self._baselinedata = val
-
-    @property
-    def referencedata(self):
-        """
-        Data for an optional reference spectra.
-        """
-        return self._referencedata
-
-    @referencedata.setter
-    def referencedata(self, val):
-        self._referencedata = val
-
-    @property
-    def history(self):
-        """
-        Describes the history of actions made on this array (tr.List of strings).
-        """
-
-        history = []
-        for date, value in self._history:
-            date = pytz.utc.localize(date)
-            date = date.astimezone(self.timezone).isoformat(sep=" ", timespec="seconds")
-            value = value[0].capitalize() + value[1:]
-            history.append(f"{date}> {value}")
-        return history
-
-    @history.setter
-    def history(self, value):
-        if value is None:
+        if change["name"] in ["_created", "_modified", "trait_added"]:
             return
-        if isinstance(value, list):
-            # history will be replaced
-            self._history = []
-            if len(value) == 0:
-                return
-            value = value[0]
-        date = datetime.utcnow()
-        self._history.append((date, value))
 
-    @property
-    def local_timezone(self):
-        """
-        Return the local timezone.
-        """
-        return str(datetime.utcnow().astimezone().tzinfo)
+        # all the time -> update modified date
+        self._modified = datetime.utcnow()
+        return
 
-    # ------------------------------------------------------------------------
-    # Validators
-    # ------------------------------------------------------------------------
+    def _cstr(self):
+        # Display the metadata of the object and partially the data
+        out = ""
+        out += "         name: {}\n".format(self.name)
+        out += "       author: {}\n".format(self.author)
+        out += "      created: {}\n".format(self.created)
+        out += (
+            "     modified: {}\n".format(self.modified)
+            if (self._modified - self._created).seconds > 30
+            else ""
+        )
 
-    # ..........................................................................
+        wrapper1 = textwrap.TextWrapper(
+            initial_indent="",
+            subsequent_indent=" " * 15,
+            replace_whitespace=True,
+            width=self._text_width,
+        )
+
+        pars = self.description.strip().splitlines()
+        if pars:
+            out += "  description: "
+            desc = ""
+            if pars:
+                desc += "{}\n".format(wrapper1.fill(pars[0]))
+            for par in pars[1:]:
+                desc += "{}\n".format(textwrap.indent(par, " " * 15))
+            # the three escaped null characters are here to facilitate
+            # the generation of html outputs
+            desc = "\0\0\0{}\0\0\0\n".format(desc.rstrip())
+            out += desc
+
+        if self._history:
+            pars = self.history
+            out += "      history: "
+            hist = ""
+            if pars:
+                hist += "{}\n".format(wrapper1.fill(pars[0]))
+            for par in pars[1:]:
+                hist += "{}\n".format(textwrap.indent(par, " " * 15))
+            # the three escaped null characters are here to facilitate
+            # the generation of html outputs
+            hist = "\0\0\0{}\0\0\0\n".format(hist.rstrip())
+            out += hist
+
+        out += "{}\n".format(self._str_value().rstrip())
+        out += "{}\n".format(self._str_shape().rstrip()) if self._str_shape() else ""
+        out += "{}\n".format(self._str_dims().rstrip())
+
+        if not out.endswith("\n"):
+            out += "\n"
+        out += "\n"
+
+        if not self._html_output:
+            return colored_output(out.rstrip())
+        else:
+            return out.rstrip()
+
+    def _loc2index(self, loc, dim=-1, *, units=None):
+        # Return the index of a location (label or coordinates) along the dim
+        # This can work only if `coords` exists.
+
+        if self._coordset is None:
+            raise SpectroChemPyException(
+                "No coords have been defined. Slicing or selection"
+                " by location ({}) needs coords definition.".format(loc)
+            )
+
+        coord = self.coord(dim)
+
+        return coord._loc2index(loc, units=units)
+
+    def _str_dims(self):
+        if self.is_empty:
+            return ""
+        if len(self.dims) < 1 or not hasattr(self, "_coordset"):
+            return ""
+        if not self._coordset or len(self._coordset) < 1:
+            return ""
+
+        self._coordset._html_output = (
+            self._html_output
+        )  # transfer the html flag if necessary: false by default
+
+        txt = self._coordset._cstr()
+        txt = txt.rstrip()  # remove the trailing '\n'
+        return txt
+
+    _repr_dims = _str_dims
+
+    def _dims_update(self, change=None):
+        # when notified that a coords names have been updated
+        _ = self.dims  # fire an update
+
     @validate("_coordset")
     def _coordset_validate(self, proposal):
         coords = proposal["value"]
@@ -719,7 +756,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         coords._parent = self
         return coords
 
-    # ..........................................................................
     @property
     def _dict_dims(self):
         _dict = {}
@@ -729,10 +765,42 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         return _dict
 
     # ------------------------------------------------------------------------
-    # public methods
+    # Public methods and property
     # ------------------------------------------------------------------------
 
-    # ..........................................................................
+    # @property
+    # def acquisition_date(self):
+    #     """
+    #     Acquisition date (Datetime).
+    #
+    #     The acquisition date can be assigned by the user. In this case this date
+    #     is returned.
+    #     But if it is not the case, and if there is one datetime axis in the dataset
+    #     coordinate, this method return the first datetime, which is then considered
+    #     as the acquisition date. This assume that there is only one datetime axis in
+    #     the dataset coordinates. If there is more than one, the first found in the
+    #     coordset is used.
+    #     """
+    #
+    #     def get_acq(cs):
+    #         for c in cs:
+    #             if isinstance(c, Coord) and is_datetime64(c):
+    #                 return c._acquisition_date
+    #             if isinstance(c, CoordSet):
+    #                 return get_acq(c)
+    #
+    #     if self._acquisition_date is not None:
+    #         # take the one which has been previously set for this dataset
+    #         acq = self._acquisition_date
+    #     else:
+    #         # try to get one datetime axis to determine it
+    #         acq = get_acq(self.coordset)
+    #     if acq is not None:
+    #         if is_datetime64(acq):
+    #             acq = datetime.fromisoformat(str(acq).split(".")[0])
+    #         acq = pytz.utc.localize(acq)
+    #         return acq.astimezone(self.timezone).isoformat(sep=" ", timespec="seconds")
+
     def add_coordset(self, *coords, dims=None, **kwargs):
         """
         Add one or a set of coordinates from a dataset.
@@ -764,7 +832,44 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             # force it one time after this initialization
             self._coordset._updated = True
 
-    # ..........................................................................
+    @property
+    def author(self):
+        """
+        Creator of the dataset (str).
+        """
+        return self._author
+
+    @author.setter
+    def author(self, value):
+        self._author = value
+
+    @property
+    def history(self):
+        """
+        Describes the history of actions made on this array (tr.List of strings).
+        """
+
+        history = []
+        for date, value in self._history:
+            date = pytz.utc.localize(date)
+            date = date.astimezone(self.timezone).isoformat(sep=" ", timespec="seconds")
+            value = value[0].capitalize() + value[1:]
+            history.append(f"{date}> {value}")
+        return history
+
+    @history.setter
+    def history(self, value):
+        if value is None:
+            return
+        if isinstance(value, list):
+            # history will be replaced
+            self._history = []
+            if len(value) == 0:
+                return
+            value = value[0]
+        date = datetime.utcnow()
+        self._history.append((date, value))
+
     def coord(self, dim="x"):
         """
         Return the coordinates along the given dimension.
@@ -798,7 +903,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             error_(f"could not find this dimenson name: `{name}`")
             return None
 
-    # ..........................................................................
     @property
     def coordset(self):
         """
@@ -812,7 +916,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             return None
         return self._coordset
 
-    # ..........................................................................
     @coordset.setter
     def coordset(self, coords):
         if isinstance(coords, CoordSet):
@@ -820,7 +923,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         else:
             self.set_coordset(coords)
 
-    # ..........................................................................
     @property
     def coordnames(self):
         """
@@ -831,7 +933,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         if self._coordset is not None:
             return self._coordset.names
 
-    # ..........................................................................
     @property
     def coordtitles(self):
         """
@@ -842,7 +943,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         if self._coordset is not None:
             return self._coordset.titles
 
-    # ..........................................................................
     @property
     def coordunits(self):
         """
@@ -853,7 +953,14 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         if self._coordset is not None:
             return self._coordset.units
 
-    # ..........................................................................
+    @property
+    def created(self):
+        """
+        Creation date object (Datetime).
+        """
+        created = pytz.utc.localize(self._created)
+        return created.astimezone(self.timezone).isoformat(sep=" ", timespec="seconds")
+
     @property
     def data(self):
         """
@@ -863,28 +970,25 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         """
         return super().data
 
-    # ..........................................................................
     @data.setter
     def data(self, data):
         # as we can't write super().data = data, we call _set_data
         # see comment in the data.setter of NDArray
         super()._set_data(data)
 
-    # ..........................................................................
     def delete_coordset(self):
         """
         Delete all coordinate settings.
         """
         self._coordset = None
 
-    # ..........................................................................
     @property
-    def labels(self):
-        # not valid for NDDataset
-        # There is no label for nd-dataset
-        raise NotImplementedError  # pragma: no cover
+    def local_timezone(self):
+        """
+        Return the local timezone.
+        """
+        return str(datetime.utcnow().astimezone().tzinfo)
 
-    # ..........................................................................
     @property
     def modeldata(self):
         """
@@ -894,12 +998,31 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         """
         return self._modeldata
 
-    # ..........................................................................
     @modeldata.setter
     def modeldata(self, data):
         self._modeldata = data
 
-    # ..........................................................................
+    @property
+    def modified(self):
+        """
+        Date of modification (readonly property).
+        """
+        modified = pytz.utc.localize(self._modified)
+        return modified.astimezone(self.timezone).isoformat(sep=" ", timespec="seconds")
+
+    @property
+    def origin(self):
+        """
+        Origin of the data.
+
+        e.g. spectrometer or software
+        """
+        return self._origin
+
+    @origin.setter
+    def origin(self, value):
+        self._origin = value
+
     @property
     def parent(self):
         """
@@ -909,7 +1032,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         """
         return self._parent
 
-    # ..........................................................................
     @parent.setter
     def parent(self, value):
         if self._parent is not None:
@@ -920,7 +1042,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
             self._parent.remove_dataset(self.name)
         self._parent = value
 
-    # ..........................................................................
     def set_coordset(self, *args, **kwargs):
         """
         Set one or more coordinates at once.
@@ -935,24 +1056,22 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         set_coordtitles : Set titles of the one or more coordinates.
         set_coordunits : Set units of the one or more coordinates.
         """
+
         self._coordset = None
         self.add_coordset(*args, dims=self.dims, **kwargs)
 
-    # ..........................................................................
     def set_coordtitles(self, *args, **kwargs):
         """
         Set titles of the one or more coordinates.
         """
         self._coordset.set_titles(*args, **kwargs)
 
-    # ..........................................................................
     def set_coordunits(self, *args, **kwargs):
         """
         Set units of the one or more coordinates.
         """
         self._coordset.set_units(*args, **kwargs)
 
-    # ..........................................................................
     def sort(self, **kwargs):
         """
         Return the dataset sorted along a given dimension.
@@ -1037,7 +1156,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         return new
 
-    # ..........................................................................
     def squeeze(self, *dims, inplace=False):
         """
         Remove single-dimensional entries from the shape of a NDDataset.
@@ -1102,17 +1220,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         """
         # TODO
 
-    # ..........................................................................
-    @property
-    def ranges(self):
-        return self._ranges
-
-    # ..........................................................................
-    @ranges.setter
-    def ranges(self, value):
-        self._ranges = value
-
-    # ..........................................................................
     def swapdims(self, dim1, dim2, inplace=False):
         """
         Interchange two dimensions of a NDDataset.
@@ -1141,7 +1248,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         new.history = f"Data swapped between dims {dim1} and {dim2}"
         return new
 
-    # ..........................................................................
     @property
     def T(self):
         """
@@ -1151,7 +1257,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         """
         return self.transpose()
 
-    # ..........................................................................
     def take(self, indices, **kwargs):
         """
         Take elements from an array.
@@ -1238,7 +1343,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         """
         return np.ma.array(self)
 
-    # ..........................................................................
     def to_xarray(self):
         """
         Convert a NDDataset instance to an `~xarray.DataArray` object.
@@ -1321,7 +1425,6 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         return da
 
-    # ..........................................................................
     def transpose(self, *dims, inplace=False):
         """
         Permute the dimensions of a NDDataset.
@@ -1349,113 +1452,80 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
 
         return new
 
-    # ------------------------------------------------------------------------
-    # private methods
-    # ------------------------------------------------------------------------
-
-    # ..........................................................................
-    def _cstr(self):
-        # Display the metadata of the object and partially the data
-        out = ""
-        out += "         name: {}\n".format(self.name)
-        out += "       author: {}\n".format(self.author)
-        out += "      created: {}\n".format(self._date)
-        # out += '     modified: {}\n'.format(self._modified) if (self.modified - self.date).seconds > 1 else ''
-
-        wrapper1 = textwrap.TextWrapper(
-            initial_indent="",
-            subsequent_indent=" " * 15,
-            replace_whitespace=True,
-            width=self._text_width,
-        )
-
-        pars = self.description.strip().splitlines()
-        if pars:
-            out += "  description: "
-            desc = ""
-            if pars:
-                desc += "{}\n".format(wrapper1.fill(pars[0]))
-            for par in pars[1:]:
-                desc += "{}\n".format(textwrap.indent(par, " " * 15))
-            # the three escaped null characters are here to facilitate
-            # the generation of html outputs
-            desc = "\0\0\0{}\0\0\0\n".format(desc.rstrip())
-            out += desc
-
-        if self._history:
-            pars = self.history
-            out += "      history: "
-            hist = ""
-            if pars:
-                hist += "{}\n".format(wrapper1.fill(pars[0]))
-            for par in pars[1:]:
-                hist += "{}\n".format(textwrap.indent(par, " " * 15))
-            # the three escaped null characters are here to facilitate
-            # the generation of html outputs
-            hist = "\0\0\0{}\0\0\0\n".format(hist.rstrip())
-            out += hist
-
-        out += "{}\n".format(self._str_value().rstrip())
-        out += "{}\n".format(self._str_shape().rstrip()) if self._str_shape() else ""
-        out += "{}\n".format(self._str_dims().rstrip())
-
-        if not out.endswith("\n"):
-            out += "\n"
-        out += "\n"
-
-        if not self._html_output:
-            return colored_output(out.rstrip())
-        else:
-            return out.rstrip()
-
-    # ..........................................................................
-    def _loc2index(self, loc, dim=-1, *, units=None):
-        # Return the index of a location (label or coordinates) along the dim
-        # This can work only if `coords` exists.
-
-        if self._coordset is None:
-            raise SpectroChemPyException(
-                "No coords have been defined. Slicing or selection"
-                " by location ({}) needs coords definition.".format(loc)
-            )
-
-        coord = self.coord(dim)
-
-        return coord._loc2index(loc, units=units)
-
-    # ..........................................................................
-    def _str_dims(self):
-        if self.is_empty:
-            return ""
-        if len(self.dims) < 1 or not hasattr(self, "_coordset"):
-            return ""
-        if not self._coordset or len(self._coordset) < 1:
-            return ""
-
-        self._coordset._html_output = (
-            self._html_output
-        )  # transfer the html flag if necessary: false by default
-
-        txt = self._coordset._cstr()
-        txt = txt.rstrip()  # remove the trailing '\n'
-        return txt
-
-    _repr_dims = _str_dims
-
-    # ------------------------------------------------------------------------
-    # events
-    # ------------------------------------------------------------------------
-
-    def _dims_update(self, change=None):
-        # when notified that a coords names have been updated
-        _ = self.dims  # fire an update
-
-    # ..........................................................................
+    # # ----------------------------------------------------------------------------------
+    # # DASH GUI options  (Work in Progress - not used for now)
+    # # ----------------------------------------------------------------------------------
+    # #
+    # # TODO: refactor the spectrochempy preference system to have a common basis
+    #
+    #
+    # @property
+    # def ranges(self):
+    #     return self._ranges
+    #
+    # @ranges.setter
+    # def ranges(self, value):
+    #     self._ranges = value
+    #
+    # @property
+    # def state(self):
+    #     """
+    #     State of the controller window for this dataset.
+    #     """
+    #     return self._state
+    #
+    # @state.setter
+    # def state(self, val):
+    #     self._state = val
+    #
+    # @property
+    # def processeddata(self):
+    #     """
+    #     Data after processing (optionaly used).
+    #     """
+    #     return self._processeddata
+    #
+    # @processeddata.setter
+    # def processeddata(self, val):
+    #     self._processeddata = val
+    #
+    # @property
+    # def processedmask(self):
+    #     """
+    #     Mask for the optional processed data.
+    #     """
+    #     return self._processedmask
+    #
+    # @processedmask.setter
+    # def processedmask(self, val):
+    #     self._processedmask = val
+    #
+    # @property
+    # def baselinedata(self):
+    #     """
+    #     Data for an optional baseline.
+    #     """
+    #     return self._baselinedata
+    #
+    # @baselinedata.setter
+    # def baselinedata(self, val):
+    #     self._baselinedata = val
+    #
+    # @property
+    # def referencedata(self):
+    #     """
+    #     Data for an optional reference spectra.
+    #     """
+    #     return self._referencedata
+    #
+    # @referencedata.setter
+    # def referencedata(self, val):
+    #     self._referencedata = val
 
 
-# ======================================================================================================================
+# ======================================================================================
 # module function
-# ======================================================================================================================
+# ======================================================================================
 
 # make some NDDataset operation accessible from the spectrochempy API
 thismodule = sys.modules[__name__]

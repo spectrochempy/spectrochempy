@@ -373,7 +373,7 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
             "preferences",
             "description",
             "history",
-            "date",
+            "created",
             "modified",
             "origin",
             "roi",
@@ -483,14 +483,12 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
     return True
 
 
-# ..............................................................................
 def assert_dataset_equal(nd1, nd2, **kwargs):
     kwargs["approx"] = False
     assert_dataset_almost_equal(nd1, nd2, **kwargs)
     return True
 
 
-# ..............................................................................
 def assert_dataset_almost_equal(nd1, nd2, **kwargs):
     decimal = kwargs.get("decimal", 6)
     approx = kwargs.get("approx", True)
@@ -501,14 +499,12 @@ def assert_dataset_almost_equal(nd1, nd2, **kwargs):
     return True
 
 
-# ..............................................................................
 def assert_coord_equal(nd1, nd2, **kwargs):
     kwargs["approx"] = False
     assert_coord_almost_equal(nd1, nd2, **kwargs)
     return True
 
 
-# ..............................................................................
 def assert_coord_almost_equal(nd1, nd2, **kwargs):
     decimal = kwargs.get("decimal", 6)
     approx = kwargs.get("approx", True)
@@ -519,14 +515,12 @@ def assert_coord_almost_equal(nd1, nd2, **kwargs):
     return True
 
 
-# ..............................................................................
 def assert_ndarray_equal(nd1, nd2, **kwargs):
     kwargs["approx"] = False
     assert_ndarray_almost_equal(nd1, nd2, **kwargs)
     return True
 
 
-# ..............................................................................
 def assert_ndarray_almost_equal(nd1, nd2, **kwargs):
     decimal = kwargs.get("decimal", 6)
     approx = kwargs.get("approx", True)
@@ -542,7 +536,6 @@ def assert_project_equal(proj1, proj2, **kwargs):
     return True
 
 
-# ..............................................................................
 def assert_project_almost_equal(proj1, proj2, **kwargs):
     assert len(proj1.datasets) == len(proj2.datasets)
     for nd1, nd2 in zip(proj1.datasets, proj2.datasets):
@@ -559,7 +552,6 @@ def assert_project_almost_equal(proj1, proj2, **kwargs):
     return True
 
 
-# ..............................................................................
 def assert_script_equal(sc1, sc2, **kwargs):
     if sc1 != sc2:
         raise AssertionError(f"Scripts are different: {sc1.content} != {sc2.content}")
@@ -569,7 +561,7 @@ def assert_script_equal(sc1, sc2, **kwargs):
 # RandomSeedContext
 # ======================================================================================================================
 
-# .............................................................................
+
 class RandomSeedContext(object):
     """
     A context manager (for use with the ``with`` statement) that will seed the
@@ -613,7 +605,7 @@ class RandomSeedContext(object):
 # raises and assertions (mostly copied from astropy)
 # ======================================================================================================================
 
-# .............................................................................
+
 def assert_equal_units(unit1, unit2, strict=False):
     """
     Compare units.
@@ -650,7 +642,6 @@ def _check_absorbance_related_units(unit1, unit2):
     return True
 
 
-# .............................................................................
 class raises(object):
     """
     A decorator to mark that a test should raise a given exception.
@@ -692,7 +683,6 @@ class raises(object):
         return self._ctx.__exit__(*exc_info)
 
 
-# .............................................................................
 class catch_warnings(warnings.catch_warnings):
     """
     A high-powered version of warnings.catch_warnings to use for testing
@@ -745,13 +735,13 @@ class catch_warnings(warnings.catch_warnings):
 #
 #
 # #
-# .............................................................................
+
 # def _compute_rms(x, y):
 #     return calculate_rms(x, y)
 #
 #
 # #
-# .............................................................................
+
 # def _image_compare(imgpath1, imgpath2, REDO_ON_TYPEERROR):
 #     # compare two images saved in files imgpath1 and imgpath2
 #
@@ -792,7 +782,7 @@ class catch_warnings(warnings.catch_warnings):
 #
 #
 # #
-# .............................................................................
+
 # def compare_images(imgpath1, imgpath2,
 #                    max_rms=None,
 #                    min_similarity=None, ):
@@ -819,14 +809,14 @@ class catch_warnings(warnings.catch_warnings):
 #
 #
 # #
-# .............................................................................
+
 # def same_images(imgpath1, imgpath2):
 #     if compare_images(imgpath1, imgpath2).startswith('identical'):
 #         return True
 #
 #
 # #
-# .............................................................................
+
 # def image_comparison(reference=None,
 #                      extension=None,
 #                      max_rms=None,

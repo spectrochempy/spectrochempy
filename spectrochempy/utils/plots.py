@@ -361,7 +361,6 @@ multiplot
     return decorator_plot_method
 
 
-# ............................................................................
 # color conversion function
 def cmyk2rgb(C, M, Y, K):
     """
@@ -399,7 +398,6 @@ NBlue = cmyk2rgb(100, 30, 0, 0)
 NGreen = cmyk2rgb(85, 0, 60, 10)
 
 
-# .............................................................................
 def figure(preferences=Meta(), **kwargs):
     """
     Method to open a new figure.
@@ -414,7 +412,6 @@ def figure(preferences=Meta(), **kwargs):
     return get_figure(preferences=preferences, **kwargs)
 
 
-# .............................................................................
 def show():
     """
     Method to force the `matplotlib` figure display.
@@ -428,7 +425,6 @@ def show():
             plt.show(block=True)
 
 
-# .............................................................................
 def get_figure(**kwargs):
     """
     Get the figure where to plot.
@@ -503,7 +499,8 @@ def get_figure(**kwargs):
 
 
 # FOR PLOTLY
-# .............................................................................
+
+
 def get_plotly_figure(clear=True, fig=None, **kwargs):
     """
     Get the figure where to plot.
@@ -554,7 +551,6 @@ class colorscale:
 colorscale = colorscale()
 
 
-# ............................................................................
 def make_label(ss, lab="<no_axe_label>", use_mpl=True):
     """
     Make a label from title and units.

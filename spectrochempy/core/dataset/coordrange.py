@@ -23,7 +23,6 @@ class _CoordRange(HasTraits):
     ranges = List(Range())
     reversed = Bool()
 
-    # ..........................................................................
     def __init__(self, *ranges, reversed=False):
 
         self.reversed = reversed
@@ -44,7 +43,7 @@ class _CoordRange(HasTraits):
     # ------------------------------------------------------------------------
     # private methods
     # ------------------------------------------------------------------------
-    # ..........................................................................
+
     def _clean_ranges(self, ranges):
         """Sort and merge overlapping ranges
         It works as follows::

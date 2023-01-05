@@ -3,6 +3,14 @@
 ## Unreleased
 
 ### NEW FEATURES
+* History:
+  Its behavior have been improved.
+  Dates for entries are set automatically and are timezone-aware.
+  See the docs for more information:
+  [About-the-history-attribute](https://www.spectrochempy.fr/latest/userguide/dataset/dataset.html#About-the-history-attribute)
+* A new attribute allows the user to change the timezone of the dataset.
+  This affect the way attributes such are `created` are displayed.
+  Internally stored in UTC format, they are displayed according to the timezone info.
 * `cmap=None` can be used in `plot(method='stack')`
 * Deprecation warning when pint version < 0.20
 * Compatibility with matplotlib >= 3.5

@@ -594,7 +594,6 @@ def get_directory_name(directory, **kwargs):
         return pathclean(directory)
 
 
-# ..............................................................................
 def check_filename_to_save(
     dataset, filename=None, save_as=False, confirm=True, **kwargs
 ):
@@ -641,7 +640,6 @@ def check_filename_to_save(
     return pathclean(filename)
 
 
-# ..........................................................................
 def check_filename_to_open(*args, **kwargs):
     # Check the args and keywords arg to determine the correct filename
 

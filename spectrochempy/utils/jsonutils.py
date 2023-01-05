@@ -8,9 +8,9 @@
 JSON utilities.
 """
 import base64
+import datetime
 import pathlib
 import pickle
-from datetime import datetime
 
 import numpy as np
 
@@ -21,15 +21,15 @@ __all__ = ["json_serialiser", "json_decoder"]
 
 def fromisoformat(s):
     try:
-        date = datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f%Z")
+        date = datetime.datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f%Z")
     except Exception:
-        date = datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f")
+        date = datetime.datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f")
     return date
 
 
-# ======================================================================================================================
+# ======================================================================================
 # JSON UTILITIES
-# ======================================================================================================================
+# ======================================================================================
 
 
 def json_decoder(dic):
@@ -42,6 +42,8 @@ def json_decoder(dic):
         klass = dic["__class__"]
         if klass == "DATETIME":
             return fromisoformat(dic["isoformat"])
+        elif klass == "DATETIME64":
+            return np.datetime64(dic["isoformat"])
         elif klass == "NUMPY_ARRAY":
             if "base64" in dic:
                 return pickle.loads(base64.b64decode(dic["base64"]))
@@ -88,6 +90,7 @@ def json_serialiser(byte_obj, encoding=None):
                 name in ["readonly"]
                 or (name == "dims" and "datasets" in objnames)
                 or [name in ["parent", "name"] and isinstance(byte_obj, PreferencesSet)]
+                and name not in ["created", "modified", "acquisition_date"]
             ):
                 val = getattr(byte_obj, name)
             else:
@@ -122,17 +125,26 @@ def json_serialiser(byte_obj, encoding=None):
             dic[k] = json_serialiser(v, encoding=encoding)
         return dic
 
-    elif isinstance(byte_obj, datetime):
+    elif isinstance(byte_obj, datetime.datetime):
         return {
             "isoformat": byte_obj.strftime("%Y-%m-%dT%H:%M:%S.%f%Z"),
             "__class__": "DATETIME",
-        }  # .isoformat()
+        }
+
+    elif isinstance(byte_obj, np.datetime64):
+        return {
+            "isoformat": np.datetime_as_string(byte_obj, timezone="UTC"),
+            "__class__": "DATETIME64",
+        }
 
     elif isinstance(byte_obj, np.ndarray):
         if encoding is None:
+            dtype = byte_obj.dtype
+            if str(byte_obj.dtype).startswith("datetime64"):
+                byte_obj = np.datetime_as_string(byte_obj, timezone="UTC")
             return {
                 "tolist": json_serialiser(byte_obj.tolist(), encoding=encoding),
-                "dtype": str(byte_obj.dtype),
+                "dtype": str(dtype),
                 "__class__": "NUMPY_ARRAY",
             }
         else:

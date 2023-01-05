@@ -26,7 +26,6 @@ from spectrochempy.core.readers.importer import Importer, _importer_method
 from spectrochempy.utils import get_directory_name, get_filenames
 
 
-# ..............................................................................
 def read_carroucell(directory=None, **kwargs):
     """
     Open .spa files in a directory after a carroucell experiment.

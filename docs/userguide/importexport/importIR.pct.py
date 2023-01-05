@@ -34,7 +34,8 @@
 # %% [markdown]
 # # Import IR Data
 #
-# This tutorial shows the specifics related to infrared data import in Spectrochempy. As prerequisite, the user is
+# This tutorial shows the specifics related to infrared data import in Spectrochempy.
+# As prerequisite, the user is
 # expected to have read the [Import Tutorial](import.ipynb).
 #
 # Let's first import spectrochempy:
@@ -45,15 +46,18 @@ import spectrochempy as scp
 # %% [markdown]
 # ## Supported file formats
 #
-# At the time of writing of this tutorial (Scpy v.0.2), spectrochempy has the following readers which are specific
+# At the time of writing of this tutorial (Scpy v.0.2), spectrochempy has the following
+# readers which are specific
 # to IR data:
 #
 # - `read_omnic()` to open omnic (spa and spg) files
 # - `read_opus()` to open Opus (*.0, ...) files
 # - `read_jcamp()` to open an IR JCAMP-DX datafile
-# - `read()` which is the generic reader. The type of data is then deduced from the file extension.
+# - `read()` which is the generic reader. The type of data is then deduced from the
+# file extension.
 #
-# General purpose data exchange formats such as  \*.csv or \*.mat will be treated in another tutorial (yet to come...)
+# General purpose data exchange formats such as  \*.csv or \*.mat will be treated in
+# another tutorial (yet to come...)
 # can also be read using:
 #
 # - `read_csv()` to open csv files
@@ -61,20 +65,21 @@ import spectrochempy as scp
 #
 # ## Import of OMNIC files
 #
-# Thermo Scientific [OMNIC](https://www.thermofisher.com/search/results?query=OMNIC) software
-# have two proprietary binary file formats:
+# Thermo Scientific [OMNIC](https://www.thermofisher.com/search/results?query=OMNIC)
+# software have two proprietary binary file formats:
 #
 # - .spa files that handle single spectra
 # - .spg files which contain a group of spectra
 #
-# Both have been reverse engineered, hence allowing extracting their key data. The Omnic reader of
-#  Spectrochempy (`read_omnic()`) has been developed based on posts in open forums on the .spa
-#  file format and extended to .spg file formats.
+# Both have been reverse engineered, hence allowing extracting their key data.
+# The Omnic reader of Spectrochempy (`read_omnic()`) has been developed based on
+# posts in open forums on the .spa file format and extended to .spg file formats.
 #
 #
 # ### a) import spg file
 #
-# Let's import an .spg file from the `datadir` (see [Import Tutorial](import.ipynb)) and display its main attributes:
+# Let's import an .spg file from the `datadir` (see [Import Tutorial](import.ipynb))
+# and display its main attributes:
 
 # %% {"pycharm": {"name": "#%%\n"}}
 X = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG")

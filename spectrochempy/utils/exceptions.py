@@ -112,7 +112,6 @@ def deprecated(message):
     return deprecation_decorator
 
 
-# ..............................................................................
 try:
     from contextlib import ignored
 except ImportError:

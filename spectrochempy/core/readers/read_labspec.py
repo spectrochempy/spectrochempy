@@ -105,11 +105,11 @@ def read_labspec(*paths, **kwargs):
 read_txt = read_labspec
 
 
-# ======================================================================================================================
+# ======================================================================================
 # Private functions
-# ======================================================================================================================
+# ======================================================================================
 
-# ..............................................................................
+
 @_importer_method
 def _read_txt(*args, **kwargs):
     # read Labspec *txt files or series
@@ -193,12 +193,11 @@ def _read_txt(*args, **kwargs):
     # date_acq is Acquisition date at start (first moment of acquisition)
     dataset.description = "Spectrum acquisition : " + str(date_acq)
 
-    # Set the NDDataset date
-    dataset._date = datetime.datetime.now(datetime.timezone.utc)
-    dataset._modified = dataset.date
-
     # Set origin, description and history
     dataset.history = f"Imported from LabSpec6 text file {filename}"
+
+    # reset modification date to cretion date
+    dataset._modified = dataset._created
 
     return dataset
 

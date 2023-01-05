@@ -81,7 +81,6 @@ class Project(AbstractProject, NDIO):
     _filename = Instance(pathlib.Path, allow_none=True)
     _directory = Instance(pathlib.Path, allow_none=True)
 
-    # ..........................................................................
     def __init__(self, *args, argnames=None, name=None, **meta):
 
         super().__init__()
@@ -102,7 +101,6 @@ class Project(AbstractProject, NDIO):
     # Private methods
     # ------------------------------------------------------------------------
 
-    # ..........................................................................
     def _set_from_type(self, obj, name=None):
 
         if isinstance(obj, NDDataset):
@@ -124,11 +122,9 @@ class Project(AbstractProject, NDIO):
                 "cannot be appended to the project ".format(type(obj).__name__)
             )
 
-    # ..........................................................................
     def _get_from_type(self, name):
         pass  # TODO: ???
 
-    # ..........................................................................
     def _repr_html_(self):
 
         h = self.__str__()
@@ -141,7 +137,6 @@ class Project(AbstractProject, NDIO):
     # Special methods
     # ------------------------------------------------------------------------
 
-    # ..........................................................................
     def __getitem__(self, key):
 
         if not isinstance(key, str):
@@ -167,7 +162,6 @@ class Project(AbstractProject, NDIO):
         else:
             raise KeyError(f"{key}: This object name does not exist in this project.")
 
-    # ..........................................................................
     def __setitem__(self, key, value):
 
         if not isinstance(key, str):
@@ -192,7 +186,6 @@ class Project(AbstractProject, NDIO):
             # the key does not exists
             self._set_from_type(value, name=key)
 
-    # ..........................................................................
     def __getattr__(self, item):
 
         if "_validate" in item or "_changed" in item:
@@ -212,12 +205,10 @@ class Project(AbstractProject, NDIO):
                 "`%s` has no attribute `%s`" % (type(self).__name__, item)
             )
 
-    # ..........................................................................
     def __iter__(self):
         for items in self.allitems:
             yield items
 
-    # ..........................................................................
     def __str__(self):
 
         s = "Project {}:\n".format(self.name)
@@ -276,13 +267,11 @@ class Project(AbstractProject, NDIO):
     # properties
     # ------------------------------------------------------------------------
 
-    # ..........................................................................
     @default("_id")
     def _id_default(self):
         # a unique id
         return f"{type(self).__name__}_{str(uuid.uuid1()).split('-')[0]}"
 
-    # ..........................................................................
     @property
     def id(self):
         """
@@ -290,7 +279,6 @@ class Project(AbstractProject, NDIO):
         """
         return self._id
 
-    # ..........................................................................
     @property
     def name(self):
         """
@@ -300,7 +288,6 @@ class Project(AbstractProject, NDIO):
         """
         return self._name
 
-    # ..........................................................................
     @name.setter
     def name(self, name):
         # property.setter for name
@@ -309,7 +296,6 @@ class Project(AbstractProject, NDIO):
         else:
             self.name = "Project-" + self.id.split("-")[0]
 
-    # ..........................................................................
     @property
     def parent(self):
         """
@@ -318,7 +304,6 @@ class Project(AbstractProject, NDIO):
         """
         return self._parent
 
-    # ..........................................................................
     @parent.setter
     def parent(self, value):
         if self._parent is not None:
@@ -329,17 +314,14 @@ class Project(AbstractProject, NDIO):
             self._parent.remove_project(self.name)
         self._parent = value
 
-    # ..........................................................................
     @default("_parent")
     def _get_parent(self):
         return None
 
-    # ..........................................................................
     @default("_meta")
     def _meta_default(self):
         return Meta()
 
-    # ..........................................................................
     @property
     def meta(self):
         """
@@ -350,7 +332,6 @@ class Project(AbstractProject, NDIO):
         """
         return self._meta
 
-    # ..........................................................................
     @property
     def datasets_names(self):
         """
@@ -364,7 +345,6 @@ class Project(AbstractProject, NDIO):
     def directory(self):
         return self._directory
 
-    # ..........................................................................
     @property
     def datasets(self):
         """
@@ -381,7 +361,6 @@ class Project(AbstractProject, NDIO):
 
         self.add_datasets(*datasets)
 
-    # ..........................................................................
     @property
     def projects_names(self):
         """
@@ -390,7 +369,6 @@ class Project(AbstractProject, NDIO):
         lst = list(self._projects.keys())
         return lst
 
-    # ..........................................................................
     @property
     def projects(self):
         """
@@ -406,7 +384,6 @@ class Project(AbstractProject, NDIO):
 
         self.add_projects(*projects)
 
-    # ..........................................................................
     @property
     def scripts_names(self):
         """
@@ -415,7 +392,6 @@ class Project(AbstractProject, NDIO):
         lst = list(self._scripts.keys())
         return lst
 
-    # ..........................................................................
     @property
     def scripts(self):
         """
@@ -453,7 +429,6 @@ class Project(AbstractProject, NDIO):
     # Public methods
     # ------------------------------------------------------------------------
 
-    # ..........................................................................
     def implements(self, name=None):
         """
         Utility to check if the current object implement `Project`.
@@ -476,7 +451,6 @@ class Project(AbstractProject, NDIO):
     # dataset items
     # ------------------------------------------------------------------------
 
-    # ..........................................................................
     def add_datasets(self, *datasets):
         """
         Add several datasets to the current project.
@@ -504,7 +478,6 @@ class Project(AbstractProject, NDIO):
         for ds in datasets:
             self.add_dataset(ds)
 
-    # ..........................................................................
     def add_dataset(self, dataset, name=None):
         """
         Add a single dataset to the current project.
@@ -543,7 +516,6 @@ class Project(AbstractProject, NDIO):
         dataset.name = name
         self._datasets[name] = dataset
 
-    # ..........................................................................
     def remove_dataset(self, name):
         """
         Remove a dataset from the project.
@@ -556,7 +528,6 @@ class Project(AbstractProject, NDIO):
         self._datasets[name]._parent = None  # remove the parent info
         del self._datasets[name]  # remove the object from the list of datasets
 
-    # ..........................................................................
     def remove_all_dataset(self):
         """
         Remove all dataset from the project.
@@ -569,7 +540,6 @@ class Project(AbstractProject, NDIO):
     # project items
     # ------------------------------------------------------------------------
 
-    # ..........................................................................
     def add_projects(self, *projects):
         """
         Add one or a series of projects to the current project.
@@ -582,7 +552,6 @@ class Project(AbstractProject, NDIO):
         for proj in projects:
             self.add_project(proj)
 
-    # ..........................................................................
     def add_project(self, proj, name=None):
         """
         Add one project to the current project.
@@ -599,7 +568,6 @@ class Project(AbstractProject, NDIO):
             proj.name = name
         self._projects[name] = proj
 
-    # ..........................................................................
     def remove_project(self, name):
         """
         Remove one project from the current project.
@@ -612,7 +580,6 @@ class Project(AbstractProject, NDIO):
         self._projects[name]._parent = None
         del self._projects[name]
 
-    # ..........................................................................
     def remove_all_project(self):
         """
         Remove all projects from the current project.
@@ -625,7 +592,6 @@ class Project(AbstractProject, NDIO):
     # script items
     # ------------------------------------------------------------------------
 
-    # ..........................................................................
     def add_scripts(self, *scripts):
         """
         Add one or a series of scripts to the current project.
@@ -637,7 +603,6 @@ class Project(AbstractProject, NDIO):
         for sc in scripts:
             self.add_script(sc)
 
-    # ..........................................................................
     def add_script(self, script, name=None):
         """
         Add one script to the current project.
@@ -654,12 +619,10 @@ class Project(AbstractProject, NDIO):
             script.name = name
         self._scripts[name] = script
 
-    # ..........................................................................
     def remove_script(self, name):
         self._scripts[name]._parent = None
         del self._scripts[name]
 
-    # ..........................................................................
     def remove_all_script(self):
         for v in self._scripts.values():
             v._parent = None

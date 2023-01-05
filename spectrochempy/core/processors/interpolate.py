@@ -21,7 +21,6 @@ __dataset_methods__ = __all__
 # from spectrochempy.core import warning_, error_
 
 
-# ............................................................................
 def interpolate(dataset, axis=0, size=None):
     # TODO: a simple interpolator of the data (either to reduce
     #      or increase number of points in every dimension)

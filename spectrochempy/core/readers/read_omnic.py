@@ -213,7 +213,6 @@ def read_omnic(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
-# ..............................................................................
 def read_spg(*paths, **kwargs):
     """
     Open a Thermo Nicolet file or a list of files with extension ``.spg``.
@@ -308,7 +307,6 @@ def read_spg(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
-# ..............................................................................
 def read_spa(*paths, **kwargs):
     """
     Open a Thermo Nicolet file or a list of files with extension ``.spa``.
@@ -409,7 +407,6 @@ def read_spa(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
-# ..............................................................................
 def read_srs(*paths, **kwargs):
     """
     Open a Thermo Nicolet file or a list of files with extension ``.srs``.
@@ -509,7 +506,7 @@ def read_srs(*paths, **kwargs):
 # Private functions
 # ======================================================================================
 
-# ......................................................................................
+
 @_importer_method
 def _read_spg(*args, **kwargs):
     # read spg file
@@ -739,7 +736,6 @@ def _read_spg(*args, **kwargs):
     return dataset
 
 
-# ..............................................................................
 @_importer_method
 def _read_spa(*args, **kwargs):
     dataset, filename = args
@@ -952,7 +948,6 @@ def _read_spa(*args, **kwargs):
     return dataset
 
 
-# ..............................................................................
 @_importer_method
 def _read_srs(*args, **kwargs):
     dataset, filename = args
@@ -1150,7 +1145,6 @@ def _read_srs(*args, **kwargs):
     return dataset
 
 
-# ..............................................................................
 def _fromfile(fid, dtype, count):
     # to replace np.fromfile in case of io.BytesIO object instead of byte
     # object
@@ -1176,7 +1170,6 @@ def _fromfile(fid, dtype, count):
     return np.array(out)
 
 
-# ..............................................................................
 def _readbtext(fid, pos, size):
     # Read some text in binary file of given size. If size is None, the etxt is read
     # until b\0\ is encountered.
@@ -1206,13 +1199,11 @@ def _readbtext(fid, pos, size):
     return text
 
 
-# ..............................................................................
 def _nextline(pos):
     # reset current position to the beginning of next line (16 bytes length)
     return 16 * (1 + pos // 16)
 
 
-# ..............................................................................
 def _read_header(fid, pos):
     """
     read spectrum/ifg/series header
@@ -1398,7 +1389,6 @@ def _read_header(fid, pos):
     return out
 
 
-# ..............................................................................
 def _getintensities(fid, pos):
     # get intensities from the 03 (spectrum)
     # or 66 (sample ifg) or 67 (bg ifg) key,

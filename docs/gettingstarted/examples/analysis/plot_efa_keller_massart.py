@@ -20,9 +20,9 @@ import spectrochempy as scp
 
 # sphinx_gallery_thumbnail_number = 5
 
-########################################################################################################################
+# %%
 # Generate a test dataset
-# ------------------------------------------------------------------
+# -----------------------
 # 1) simulated chromatogram
 # *************************
 
@@ -35,7 +35,7 @@ data[1, 5:11] = [1, 3, 5, 3, 1, 0.5]  # compound 2
 
 dsc = scp.NDDataset(data=data, coords=[c, t])
 
-########################################################################################################################
+# %%
 # 2) absorption spectra
 # **********************
 
@@ -44,7 +44,7 @@ w = scp.Coord(np.arange(1, 5, 1), units="nm", title="wavelength")
 
 dss = scp.NDDataset(data=spec, coords=[c, w])
 
-########################################################################################################################
+# %%
 # 3) simulated data matrix
 # ************************
 
@@ -54,13 +54,13 @@ dataset.title = "intensity"
 
 dataset.plot()
 
-########################################################################################################################
+# %%
 # 4) evolving factor analysis (EFA)
 # *********************************
 
 efa = scp.EFA(dataset)
 
-########################################################################################################################
+# %%
 # Plots of the log(EV) for the forward and backward analysis
 #
 
@@ -68,7 +68,7 @@ efa.f_ev.T.plot(yscale="log", legend=efa.f_ev.y.labels)
 
 efa.b_ev.T.plot(yscale="log")
 
-########################################################################################################################
+# %%
 # Looking at these EFA curves, it is quite obvious that only two components
 # are really significant, and this corresponds to the data that we have in
 # input.
@@ -81,14 +81,14 @@ efa.cutoff = np.max(efa.f_ev[:, n_pc].data)
 f2 = efa.f_ev
 b2 = efa.b_ev
 
+# %%
 # we concatenate the datasets to plot them in a single figure
 both = scp.concatenate(f2, b2)
 both.T.plot(yscale="log")
 
 # TODO: add "legend" keyword in NDDataset.plot()
 
-
-########################################################################################################################
+# %%
 # Get the abstract concentration profile based on the FIFO EFA analysis
 #
 efa.cutoff = None

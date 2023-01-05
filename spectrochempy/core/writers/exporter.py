@@ -39,7 +39,6 @@ class Exporter(HasTraits):
             for s in patterns(filter, allcase=False):
                 self.protocols[s[1:]] = protocol
 
-    # ..........................................................................
     def __call__(self, *args, **kwargs):
 
         args = self._setup_object(*args)
@@ -63,7 +62,6 @@ class Exporter(HasTraits):
         except Exception as e:
             raise e
 
-    # ..........................................................................
     def _setup_object(self, *args):
 
         # check if the first argument is an instance of NDDataset or Project
@@ -85,7 +83,6 @@ class Exporter(HasTraits):
         return args
 
 
-# ..............................................................................
 def exportermethod(func):
     # Decorator
     setattr(Exporter, func.__name__, staticmethod(func))
@@ -143,7 +140,6 @@ def write(dataset, filename=None, **kwargs):
     return exporter(dataset, filename, **kwargs)
 
 
-# ..............................................................................
 @exportermethod
 def _write_scp(*args, **kwargs):
     dataset, filename = args
