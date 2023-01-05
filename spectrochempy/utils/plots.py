@@ -8,7 +8,7 @@ import textwrap
 
 import matplotlib as mpl
 import matplotlib.axes as maxes
-import mpl_toolkits.mplot3d.axes3d as maxes3D
+import mpl_toolkits.mplot3d.axes3d as maxes3D  # noqa: N812
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -531,7 +531,7 @@ def get_plotly_figure(clear=True, fig=None, **kwargs):
     return fig
 
 
-class colorscale:
+class ColorScale:
     def normalize(self, vmin, vmax, cmap="viridis", rev=False, offset=0):
         """ """
         if rev:
@@ -548,7 +548,7 @@ class colorscale:
         return f"rgba{tuple(c)}"
 
 
-colorscale = colorscale()
+colorscale = ColorScale()
 
 
 def make_label(ss, lab="<no_axe_label>", use_mpl=True):

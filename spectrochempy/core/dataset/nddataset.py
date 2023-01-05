@@ -42,7 +42,7 @@ from spectrochempy.core.dataset.ndcomplex import NDComplexArray
 from spectrochempy.core.project.baseproject import AbstractProject
 from spectrochempy.optional import import_optional_dependency
 from spectrochempy.utils import colored_output, get_user_and_node
-from spectrochempy.utils.exceptions import SpectroChemPyException, UnknownTimeZoneError
+from spectrochempy.utils.exceptions import SpectroChemPyError, UnknownTimeZoneError
 
 # ======================================================================================================================
 # NDDataset class definition
@@ -677,7 +677,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         # This can work only if `coords` exists.
 
         if self._coordset is None:
-            raise SpectroChemPyException(
+            raise SpectroChemPyError(
                 "No coords have been defined. Slicing or selection"
                 " by location ({}) needs coords definition.".format(loc)
             )

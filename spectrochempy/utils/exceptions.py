@@ -13,7 +13,7 @@ import pytz
 
 __all__ = [
     "SpectroChemPyWarning",
-    "SpectroChemPyException",
+    "SpectroChemPyError",
     "UnitsCompatibilityError",
     "DimensionsCompatibilityError",
     "CoordinateMismatchError",
@@ -35,14 +35,14 @@ class SpectroChemPyWarning(Warning):
 
 
 # ------------------------------------------------------------------------------
-class SpectroChemPyException(Exception):
+class SpectroChemPyError(Exception):
     """
     The base exception class for SpectroChemPy.
     """
 
 
 # ------------------------------------------------------------------------------
-class UnitsCompatibilityError(SpectroChemPyException):
+class UnitsCompatibilityError(SpectroChemPyError):
     """
     Exception raised when units are not compatible,
     preventing some mathematical operations.
@@ -50,7 +50,7 @@ class UnitsCompatibilityError(SpectroChemPyException):
 
 
 # ------------------------------------------------------------------------------
-class DimensionsCompatibilityError(SpectroChemPyException):
+class DimensionsCompatibilityError(SpectroChemPyError):
     """
     Exception raised when dimensions are not compatible
     for concatenation for instance.
@@ -58,13 +58,13 @@ class DimensionsCompatibilityError(SpectroChemPyException):
 
 
 # ------------------------------------------------------------------------------
-class CoordinateMismatchError(SpectroChemPyException):
+class CoordinateMismatchError(SpectroChemPyError):
     """
     Exception raised when object coordinates differ.
     """
 
 
-class ProtocolError(SpectroChemPyException):
+class ProtocolError(SpectroChemPyError):
     """
     This exception is issued when a wrong protocol is secified to the
     spectrochempy importer.

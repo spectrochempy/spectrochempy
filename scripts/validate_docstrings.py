@@ -137,7 +137,7 @@ def get_api_items(api_doc_fd):
         previous_line = line
 
 
-class spectrochempyDocstring(Validator):
+class SpectroChemPyDocstring(Validator):
     def __init__(self, func_name: str, doc_obj=None) -> None:
         self.func_name = func_name
         if doc_obj is None:
@@ -234,7 +234,7 @@ def spectrochempy_validate(func_name: str):
     func_obj = Validator._load_obj(func_name)
     # Some objects are instances, e.g. IndexSlice, which numpydoc can't validate
     doc_obj = get_doc_object(func_obj, doc=func_obj.__doc__)
-    doc = spectrochempyDocstring(func_name, doc_obj)
+    doc = SpectroChemPyDocstring(func_name, doc_obj)
     result = validate(doc_obj)
 
     mentioned_errs = doc.mentioned_private_classes

@@ -74,7 +74,7 @@ def create_blank_udic(ndim):
     return udic
 
 
-class unit_conversion:
+class unit_conversion:  # noqa: N801
     """
     Provides methods to convert between common NMR units
 
