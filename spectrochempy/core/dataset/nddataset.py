@@ -30,7 +30,6 @@ from traitlets import (
     validate,
 )
 from traittypes import Array
-from utils.optional import import_optional_dependency
 
 from spectrochempy.core import error_, warning_
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
@@ -43,6 +42,7 @@ from spectrochempy.core.dataset.ndcomplex import NDComplexArray
 from spectrochempy.core.project.baseproject import AbstractProject
 from spectrochempy.utils import colored_output, get_user_and_node
 from spectrochempy.utils.exceptions import SpectroChemPyError, UnknownTimeZoneError
+from spectrochempy.utils.optional import import_optional_dependency
 
 # ======================================================================================================================
 # NDDataset class definition
