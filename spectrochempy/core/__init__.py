@@ -16,7 +16,7 @@ from os import environ
 import sys
 import warnings
 
-from utils.optional import import_optional_dependency
+from spectrochempy.utils.optional import import_optional_dependency
 
 warnings.filterwarnings("ignore")
 
