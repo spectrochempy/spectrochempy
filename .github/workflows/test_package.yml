@@ -67,7 +67,7 @@ jobs:
 
       - name: Install optional libraries needed for tests
         run: |
-          mamba install xarray
+          python3 -m pip install xarray
 
       - name: Test and coverage
         run: |
