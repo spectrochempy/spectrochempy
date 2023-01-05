@@ -12,10 +12,6 @@ In this example, we create a 3D NDDataset from scratch,
 and then we plot one section (a 2D plane)
 """
 # %%
-# As usual, we start by loading the spectrochempy library
-import spectrochempy as scp
-
-# %%
 # Creation
 # ------------------------------------------------------------------
 # Now we will create a 3D NDDataset from scratch
@@ -24,6 +20,12 @@ import spectrochempy as scp
 # ++++++
 # here we make use of numpy array functions to create the data for coordinates
 # axis and the array of data
+import numpy as np
+
+# %%
+# As usual, we start by loading the spectrochempy library
+import spectrochempy as scp
+
 c0 = np.linspace(200.0, 300.0, 3)
 c1 = np.linspace(0.0, 60.0, 100)
 c2 = np.linspace(4000.0, 1000.0, 100)
