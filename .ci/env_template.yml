@@ -1,10 +1,6 @@
-  {%- if NAME is defined %}
+{%- if NAME is defined %}
 name: {{ NAME }}
-  {%- endif %}
-
-  {%- if HEADER is defined %}
-{{HEADER}}
-  {%- else %}
+{%- endif %}{%- if HEADER is defined %}{{HEADER}}{%- else %}
 # =============================================================================
 #
 # NOTE: This template file is used by to create the conda environment for
@@ -13,29 +9,25 @@ name: {{ NAME }}
 #       In the test workflow, environments are generated automatically by
 #      .ci/env_create.py (see .github/workflows/test_package.yml#job 1)
 #
-# =============================================================================
-  {%- endif %}
-
+# ============================================================================={%- endif %}
 channels:
     - conda-forge
     - spectrocat
     - defaults
-    {%- if CANTERA %}
+{%- if CANTERA %}
     - cantera
-    {%- endif %}
+{%- endif %}
 
 dependencies:
-    {%- if VERSION %}
+{%- if VERSION %}
     - python={{ VERSION }}
-    {%- endif %}
+{%- endif %}
 
     # specific
     - quadprog
     - brukeropusreader
-    - quaternion
-    {%- if CANTERA %}
-    - cantera
-    {%- endif %}
+    - quaternion{%- if CANTERA %}
+    - cantera{%- endif %}
 
     # for the core package
     - colorama
@@ -60,9 +52,7 @@ dependencies:
     - setuptools
     - setuptools_scm
     - git
-
-  {% if DEV %}
-
+{% if DEV %}
     # Jupyter lab
     - jupyterlab
     - nodejs
@@ -108,21 +98,22 @@ dependencies:
     # - xarray
     # - datashader
     # - scikit-learn
-    {% endif %}
-    {%- if DASH %}
+{% endif %}
+{%- if DASH %}
     # dash
     - dash
     - dash-bootstrap-components
     - dash-daq
     - jupyter-dash
     - plotly
-    {%- endif %}
-    {%- if DEV %}
+{%- endif %}
+{%- if DEV %}
     - pip
     - pip:
         - autodoc_traits
-        {%- endif %}
-        {%- if DASH %}
+{%- endif %}
+{%- if DASH %}
         - dash_defer_js_import
         - dash-ace
-    {%- endif %}
+{%- endif %}
+# EOF
