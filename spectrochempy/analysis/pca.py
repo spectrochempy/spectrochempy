@@ -87,7 +87,6 @@ class PCA(HasTraits):
     _ev_cum = Instance(NDDataset)
     """|NDDataset| - Cumulative Explained Variances."""
 
-    # ..........................................................................
     def __init__(self, dataset, centered=True, standardized=False, scaled=False):
 
         super().__init__()

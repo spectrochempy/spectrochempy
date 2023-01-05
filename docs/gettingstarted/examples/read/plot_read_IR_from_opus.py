@@ -7,7 +7,7 @@
 # flake8: noqa
 """
 Loading Bruker OPUS files
-============================================
+==========================
 
 Here we load an experimental Bruker OPUS files and plot it.
 

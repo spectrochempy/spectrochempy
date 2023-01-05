@@ -513,14 +513,12 @@ class NDMath(object):
     # the following methods are to give NDArray based class
     # a behavior similar to np.ndarray regarding the ufuncs
 
-    # ..........................................................................
     @property
     def __array_struct__(self):
         if hasattr(self.umasked_data, "mask"):
             self._mask = self.umasked_data.mask
         return self.data.__array_struct__
 
-    # ..........................................................................
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
 
         fname = ufunc.__name__
@@ -562,8 +560,6 @@ class NDMath(object):
     # ------------------------------------------------------------------------
     # public methods
     # ------------------------------------------------------------------------
-
-    # ..........................................................................
 
     @_from_numpy_method
     def absolute(cls, dataset, dtype=None):
@@ -614,7 +610,6 @@ class NDMath(object):
         "Calculate the absolute value element-wise.\n\nEquivalent to absolute."
     )
 
-    # ..........................................................................
     @_from_numpy_method
     def conjugate(cls, dataset, dim="x"):
         """
@@ -655,7 +650,6 @@ class NDMath(object):
     conj = conjugate
     conj.__doc__ = "Conjugate of the NDDataset in the specified dimension.\n\nEquivalent to conjugate."
 
-    # ..........................................................................
     @_from_numpy_method
     def around(cls, dataset, decimals=0):
         """
@@ -703,7 +697,6 @@ class NDMath(object):
         "Evenly round to the given number of decimals.\n\nEquivalent to around."
     )
 
-    # ..........................................................................
     @_reduce_method
     @_from_numpy_method
     def all(cls, dataset, dim=None, keepdims=False):
@@ -748,7 +741,6 @@ class NDMath(object):
         data = np.all(dataset, axis, keepdims=keepdims)
         return data
 
-    # ..........................................................................
     @_reduce_method
     @_from_numpy_method
     def amax(cls, dataset, dim=None, keepdims=False, **kwargs):
@@ -852,7 +844,6 @@ class NDMath(object):
 
     max = amax
 
-    # ..........................................................................
     @_reduce_method
     @_from_numpy_method
     def amin(cls, dataset, dim=None, keepdims=False, **kwargs):
@@ -951,7 +942,6 @@ class NDMath(object):
 
     min = amin
 
-    # ..........................................................................
     @_reduce_method
     @_from_numpy_method
     def any(cls, dataset, dim=None, keepdims=False):
@@ -993,7 +983,6 @@ class NDMath(object):
         data = np.any(dataset, axis, keepdims=keepdims)
         return data
 
-    # ..........................................................................
     @_from_numpy_method
     def arange(cls, start=0, stop=None, step=None, dtype=None, **kwargs):
         """
@@ -1036,7 +1025,6 @@ class NDMath(object):
 
         return cls(np.arange(start, stop, step, dtype), **kwargs)
 
-    # ..........................................................................
     @_reduce_method
     @_from_numpy_method
     def argmax(cls, dataset, dim=None):
@@ -1050,7 +1038,6 @@ class NDMath(object):
             idx = np.unravel_index(idx, cls.shape)
         return idx
 
-    # ..........................................................................
     @_reduce_method
     @_from_numpy_method
     def argmin(cls, dataset, dim=None):
@@ -1142,7 +1129,6 @@ class NDMath(object):
 
         return cls
 
-    # ..........................................................................
     @_from_numpy_method
     def clip(cls, dataset, a_min=None, a_max=None, **kwargs):
         """
@@ -1198,7 +1184,6 @@ class NDMath(object):
             cls._data = m
         return cls
 
-    # ..........................................................................
     @_reduce_method
     @_from_numpy_method
     def coordmax(cls, dataset, dim=None):
@@ -1232,7 +1217,6 @@ class NDMath(object):
 
         return coord
 
-    # ..........................................................................
     @_reduce_method
     @_from_numpy_method
     def coordmin(cls, dataset, dim=None):
@@ -1266,7 +1250,6 @@ class NDMath(object):
 
         return coord
 
-    # ..........................................................................
     @_from_numpy_method
     def cumsum(cls, dataset, dim=None, dtype=None):
         """
@@ -1316,7 +1299,6 @@ class NDMath(object):
         cls._data = data
         return cls
 
-    # ..........................................................................
     @_from_numpy_method
     def diag(cls, dataset, offset=0, **kwargs):
         """
@@ -1379,7 +1361,6 @@ class NDMath(object):
 
         raise ValueError("Input must be 1- or 2-d.")
 
-    # ..........................................................................
     @_reduce_method
     @_from_numpy_method
     def diagonal(cls, dataset, offset=0, dim="x", dtype=None, **kwargs):
@@ -2007,7 +1988,6 @@ class NDMath(object):
 
         return cls(np.logspace(start, stop, num, endpoint, base, dtype), **kwargs)
 
-    # ..........................................................................
     @_reduce_method
     @_from_numpy_method
     def mean(cls, dataset, dim=None, dtype=None, keepdims=False):
@@ -2236,7 +2216,6 @@ class NDMath(object):
 
         return func(self, *args, **kwargs)
 
-    # ..........................................................................
     @_reduce_method
     @_from_numpy_method
     def ptp(cls, dataset, dim=None, keepdims=False):
@@ -2306,7 +2285,6 @@ class NDMath(object):
 
         return cls(rng.random(size, dtype), **kwargs)
 
-    # ..........................................................................
     @_reduce_method
     @_from_numpy_method
     def std(cls, dataset, dim=None, dtype=None, ddof=0, keepdims=False):
@@ -2399,7 +2377,6 @@ class NDMath(object):
 
         return cls
 
-    # ..........................................................................
     @_reduce_method
     @_from_numpy_method
     def sum(cls, dataset, dim=None, dtype=None, keepdims=False):
@@ -2461,7 +2438,6 @@ class NDMath(object):
 
         return cls
 
-    # ..........................................................................
     @_reduce_method
     @_from_numpy_method
     def var(cls, dataset, dim=None, dtype=None, ddof=0, keepdims=False):
@@ -2758,7 +2734,6 @@ class NDMath(object):
 
         return fname, inputs, objtypes, returntype, is_masked, is_quaternion
 
-    # ..........................................................................
     def _op(self, f, inputs, isufunc=False):
         # Achieve an operation f on the objs
 
@@ -3054,7 +3029,6 @@ class NDMath(object):
         # return calculated data, units and mask
         return data, units, mask, returntype
 
-    # ..........................................................................
     @staticmethod
     def _unary_op(f):
         @functools.wraps(f)
@@ -3070,7 +3044,6 @@ class NDMath(object):
 
         return func
 
-    # ..........................................................................
     @staticmethod
     def _check_order(fname, inputs):
         objtypes = []
@@ -3119,7 +3092,6 @@ class NDMath(object):
             f = getattr(operator, fname)
         return f, inputs
 
-    # ..........................................................................
     @staticmethod
     def _binary_op(f, reflexive=False):
         @functools.wraps(f)
@@ -3142,7 +3114,6 @@ class NDMath(object):
 
         return func
 
-    # ..........................................................................
     @staticmethod
     def _inplace_binary_op(f):
         @functools.wraps(f)
@@ -3169,7 +3140,6 @@ class NDMath(object):
 
         return func
 
-    # ..........................................................................
     def _op_result(self, data, units=None, mask=None, history=None, returntype=None):
         # make a new NDArray resulting of some operation
 
@@ -3212,12 +3182,10 @@ CMP_BINARY_OPS = ["lt", "le", "ge", "gt"]
 NUM_BINARY_OPS = ["add", "sub", "and", "xor", "or", "mul", "truediv", "floordiv", "pow"]
 
 
-# ..........................................................................
 def _op_str(name):
     return f"__{name}__"
 
 
-# ..........................................................................
 def _get_op(name):
     return getattr(operator, _op_str(name))
 
@@ -3280,7 +3248,6 @@ def _set_ufuncs(cls):
         thismodule.__all__ += [func]
 
 
-# ..........................................................................
 def _set_operators(cls, priority=50):
     cls.__array_priority__ = priority
 

@@ -73,8 +73,6 @@ scp.read_remote(datadir, download_only=True)
 
 
 class BuildDocumentation(object):
-
-    # ..........................................................................
     def __init__(self):
         # determine if we are in the development branch (latest) or master (stable)
 
@@ -83,7 +81,6 @@ class BuildDocumentation(object):
         else:
             self._doc_version = "stable"
 
-    # ..........................................................................
     @property
     def doc_version(self):
         return self._doc_version
@@ -118,7 +115,6 @@ class BuildDocumentation(object):
         with open(HTML / "index.html", "w") as f:
             f.write(html)
 
-    # ..........................................................................
     def __call__(self):
 
         parser = argparse.ArgumentParser()
@@ -193,7 +189,6 @@ class BuildDocumentation(object):
             ).lower()
         return answer[:1] == "y"
 
-    # ..........................................................................
     def make_docs(self, builder="html", clean=False):
         # Make the html or latex documentation
 
@@ -375,7 +370,6 @@ class BuildDocumentation(object):
             print("\nAll notebooks are up-to-date and synchronised with py files")
         print("\n")
 
-    # ..........................................................................
     def zip_tutorials(self):
         # make tutorials.zip
 
@@ -413,7 +407,6 @@ class BuildDocumentation(object):
             f"mv ~notebooks.zip {DOWNLOADS}/{self.doc_version}-{PROJECTNAME}-notebooks.zip"
         )
 
-    # ..........................................................................
     def clean(self, builder):
         # Clean/remove the built documentation.
 
@@ -436,7 +429,6 @@ class BuildDocumentation(object):
             shutil.rmtree(LATEX / doc_version, ignore_errors=True)
             print(f"remove {LATEX / doc_version}")
 
-    # ..........................................................................
     def make_dirs(self):
         # Create the directories required to build the documentation.
 

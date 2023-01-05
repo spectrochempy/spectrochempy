@@ -19,7 +19,6 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.utils import MASKED, UnitsCompatibilityError, get_n_decimals
 
 
-# ..........................................................................
 def can_merge_or_align(coord1, coord2):
     """
     Check if two coordinates can be merged or aligned.
@@ -57,7 +56,6 @@ def can_merge_or_align(coord1, coord2):
     return can_merge, can_align
 
 
-# ............................................................................
 def align(dataset, *others, **kwargs):
     """
     Align individual |NDDataset| along given dimensions using various methods.

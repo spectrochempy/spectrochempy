@@ -25,7 +25,6 @@ from spectrochempy.optional import import_optional_dependency
 from spectrochempy.utils import is_iterable
 
 
-# ..............................................................................
 def download_iris():
     """
     Upload the classical `IRIS` dataset.

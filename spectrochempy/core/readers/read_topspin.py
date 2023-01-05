@@ -782,7 +782,6 @@ def read_bruker_nmr(*args, **kwargs):
     return read_topspin(*args, **kwargs)
 
 
-# ..............................................................................
 def _get_files(path, typ="acqu"):
     files = []
     for i in ["", 2, 3]:
@@ -896,7 +895,6 @@ def _read_topspin(*args, **kwargs):
         else:
             data = datalist
 
-    # ........................................................................................................
     # we now make some rearrangement of the dic to have something more user friendly
     # we assume that all experiments have similar (important) parameters so that the experiments are compatibles
 

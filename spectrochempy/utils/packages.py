@@ -18,7 +18,7 @@ __all__ = ["list_packages", "generate_api", "get_pkg_path"]
 # PACKAGE and API UTILITIES
 # ======================================================================================================================
 
-# ..............................................................................
+
 def list_packages(package):
     """
     Return a list of the names of a package and its subpackages.
@@ -38,7 +38,6 @@ def list_packages(package):
     return names
 
 
-# ..............................................................................
 def generate_api(api_path):
     # name of the package
 

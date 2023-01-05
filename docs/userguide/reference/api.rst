@@ -26,7 +26,6 @@
     Coord.copy
     Coord.created
     Coord.data
-    Coord.date
     Coord.desc
     Coord.description
     Coord.dimensionless

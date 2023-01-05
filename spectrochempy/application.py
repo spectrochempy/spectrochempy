@@ -159,7 +159,6 @@ except LookupError:  # pragma: no cover
     __version__ = __release__
 
 
-# ............................................................................
 def _get_copyright():
     current_year = np.datetime64("now", "Y")
     right = f"2014-{current_year}"
@@ -171,7 +170,6 @@ __copyright__ = _get_copyright()
 "Copyright string of this package"
 
 
-# .............................................................................
 def _get_release_date():
     return subprocess.getoutput("git log -1 --tags --date=short --format='%ad'")
 
@@ -265,7 +263,7 @@ CHECK_UPDATE = threading.Thread(target=_check_for_updates, args=(1,))
 CHECK_UPDATE.start()
 
 # other info
-# ............................................................................
+
 
 __url__ = "https://www.spectrochempy.fr"
 "URL for the documentation of this package"
@@ -288,7 +286,8 @@ __cite__ = (
 
 
 # Directories
-# ..........................................................................
+
+
 def _find_or_create_spectrochempy_dir():
     directory = Path.home() / ".spectrochempy"
 
@@ -656,24 +655,20 @@ class GeneralPreferences(MetaConfigurable):
 
         return pscp
 
-    # ..........................................................................
     @default("workspace")
     def _get_workspace_default(self):
         # the spectra path in package data
         return Path.home()
 
-    # ..........................................................................
     @default("databases_directory")
     def _get_databases_directory_default(self):
         # the spectra path in package data
         return pathclean(get_pkg_path("databases", "scp_data"))
 
-    # ..........................................................................
     @default("datadir")
     def _get_default_datadir(self):
         return pathclean(self.parent.datadir.path)
 
-    # ..........................................................................
     @observe("datadir")
     def _datadir_changed(self, change):
         self.parent.datadir.path = pathclean(change["new"])
@@ -686,7 +681,6 @@ class GeneralPreferences(MetaConfigurable):
             datadir = pathclean(datadir)
         return datadir
 
-    # ..........................................................................
     @property
     def log_level(self):
         """
@@ -694,7 +688,6 @@ class GeneralPreferences(MetaConfigurable):
         """
         return self.parent.log_level
 
-    # ..........................................................................
     @log_level.setter
     def log_level(self, value):
         if isinstance(value, str):
@@ -707,7 +700,6 @@ class GeneralPreferences(MetaConfigurable):
                 )
         self.parent.log_level = value
 
-    # ..........................................................................
     def __init__(self, **kwargs):
         super().__init__(jsonfile="GeneralPreferences", **kwargs)
 
@@ -1157,7 +1149,6 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
         self.log.info("\n\nAPI loaded - application is ready")
         return True
 
-    # ..........................................................................
     def _make_default_config_file(self):
         """auto generate default config file."""
 

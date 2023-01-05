@@ -450,7 +450,6 @@ class NDPlot(HasTraits):
     # plotter: plot_generic
     # ------------------------------------------------------------------------
 
-    # ..........................................................................
     def _plot_generic(self, **kwargs):
 
         if self._squeeze_ndim == 1:
@@ -482,7 +481,6 @@ class NDPlot(HasTraits):
     # setup figure properties
     # ------------------------------------------------------------------------
 
-    # ..........................................................................
     def _figure_setup(self, ndim=1, method=None, **kwargs):
 
         prefs = self.preferences
@@ -657,7 +655,6 @@ class NDPlot(HasTraits):
     # resume a figure plot
     # ------------------------------------------------------------------------
 
-    # ..........................................................................
     def _plot_resume(self, origin, **kwargs):
 
         # put back the axes in the original dataset
@@ -720,7 +717,6 @@ class NDPlot(HasTraits):
     # Special attributes
     # ------------------------------------------------------------------------
 
-    # ..........................................................................
     def __dir__(self):
         return ["fignum", "ndaxes", "divider"]
 
@@ -728,14 +724,12 @@ class NDPlot(HasTraits):
     # Properties
     # ------------------------------------------------------------------------
 
-    # ..........................................................................
     @default("_preferences")
     def _preferences_default(self):
         # Reset all preferences
         prefs = PreferencesSet()
         return prefs
 
-    # ..........................................................................
     @property
     def preferences(self):
         """
@@ -743,14 +737,12 @@ class NDPlot(HasTraits):
         """
         return self._preferences
 
-    # ..........................................................................
     @preferences.setter
     def preferences(self, preferences):
         # property.setter for preferences
         if preferences is not None:
             self._preferences.update(preferences)
 
-    # ..........................................................................
     @property
     def fig(self):
         """
@@ -758,7 +750,6 @@ class NDPlot(HasTraits):
         """
         return self._fig
 
-    # ..........................................................................
     @property
     def fignum(self):
         """
@@ -766,7 +757,6 @@ class NDPlot(HasTraits):
         """
         return self._fignum
 
-    # ..........................................................................
     @property
     def ndaxes(self):
         """
@@ -774,7 +764,6 @@ class NDPlot(HasTraits):
         """
         return self._ndaxes
 
-    # ..........................................................................
     @ndaxes.setter
     def ndaxes(self, axes):
         # we assume that the axes have a name
@@ -788,7 +777,6 @@ class NDPlot(HasTraits):
             # it's an axe! add it to our list
             self._ndaxes[axes.name] = axes
 
-    # ..........................................................................
     @property
     def ax(self):
         """
@@ -796,7 +784,6 @@ class NDPlot(HasTraits):
         """
         return self._ndaxes["main"]
 
-    # ..........................................................................
     @property
     def axT(self):
         """
@@ -804,7 +791,6 @@ class NDPlot(HasTraits):
         """
         return self._ndaxes["mainT"]
 
-    # ..........................................................................
     @property
     def axec(self):
         """
@@ -812,7 +798,6 @@ class NDPlot(HasTraits):
         """
         return self._ndaxes["colorbar"]
 
-    # ..........................................................................
     @property
     def axecT(self):
         """
@@ -820,7 +805,6 @@ class NDPlot(HasTraits):
         """
         return self._ndaxes["colorbarT"]
 
-    # ..........................................................................
     @property
     def axex(self):
         """
@@ -828,7 +812,6 @@ class NDPlot(HasTraits):
         """
         return self._ndaxes["xproj"]
 
-    # ..........................................................................
     @property
     def axey(self):
         """
@@ -836,7 +819,6 @@ class NDPlot(HasTraits):
         """
         return self._ndaxes["yproj"]
 
-    # ..........................................................................
     @property
     def divider(self):
         """
@@ -845,7 +827,6 @@ class NDPlot(HasTraits):
         return self._divider
 
 
-# .............................................................................
 plot = NDPlot.plot  # make plot accessible directly from the scp API
 
 # ======================================================================================================================

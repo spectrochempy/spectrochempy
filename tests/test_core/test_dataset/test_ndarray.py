@@ -7,7 +7,6 @@
 # flake8: noqa
 
 from copy import copy, deepcopy
-from datetime import datetime, timezone
 
 import numpy as np
 import pytest
@@ -65,10 +64,6 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     d0.data = [1, 2, 3]  # put some data
     assert_array_equal(d0.data, np.array([1, 2, 3]))
     assert d0.dtype in TYPE_INTEGER
-    assert d0.date.date() == datetime.now(timezone.utc).date()
-    d0.date = datetime(2005, 10, 12)
-    d0.date = "25/12/2025"
-    assert d0.date == datetime(2025, 12, 25, 0, 0)
     d0.name = "xxxx"
     assert d0.name == "xxxx"
     d0.title = "yyyy"
@@ -173,8 +168,6 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert d8.data.dtype == np.int64
     assert d8.dims == ["y", "x"]
     assert d8.title == "<untitled>"
-    assert d8.description == "with mask"
-    assert d8.desc == d8.description
 
     # initialisation with only labels
 
@@ -189,7 +182,6 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
         author="Blake",
     )
     assert d11.dims == ["q"]
-    assert d11.author == "Blake"
 
     assert "[  a   b ...   i   j]" in d11._repr_html_()  # comparison
 

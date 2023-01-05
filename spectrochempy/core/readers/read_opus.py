@@ -165,7 +165,7 @@ def read_opus(*paths, **kwargs):
 # Private Functions
 # ======================================================================================================================
 
-# ..............................................................................
+
 @_importer_method
 def _read_opus(*args, **kwargs):
     debug_("Bruker OPUS import")
@@ -231,13 +231,13 @@ def _read_opus(*args, **kwargs):
     dataset.origin = "opus"
     dataset.description = "Dataset from opus files. \n"
     dataset.history = str(datetime.now(timezone.utc)) + ": import from opus files \n"
-    dataset._date = datetime.now(timezone.utc)
-    dataset._modified = dataset.date
+
+    # reset modification date to cretion date
+    dataset._modified = dataset._created
 
     return dataset
 
 
-# ..............................................................................
 def _read_data(fid):
     data = fid.read()
     meta_data = parse_meta(data)

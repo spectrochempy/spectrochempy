@@ -136,7 +136,7 @@ def _read_jdx(*args, **kwargs):
         fid = open(filename, "r")
 
     # Read header of outer Block
-    # ..........................................................................
+
     keyword = ""
 
     while keyword != "##TITLE":
@@ -163,7 +163,7 @@ def _read_jdx(*args, **kwargs):
         raise ValueError("DATA TYPE must be LINK or INFRARED SPECTRUM")
 
     # Create variables
-    # ..........................................................................
+
     xaxis = np.array([])
     data = np.array([])
     alltitles, alltimestamps, alldates, xunits, yunits, allorigins = (
@@ -181,7 +181,7 @@ def _read_jdx(*args, **kwargs):
     )
 
     # Read the spectra
-    # ..........................................................................
+
     for i in range(nspec):
 
         # Reset variables
@@ -370,20 +370,17 @@ def _read_jdx(*args, **kwargs):
     # Todo: make sure that the lowest index correspond to the largest wavenumber
     #  for compatibility with dataset created by read_omnic:
 
-    # Set the NDDataset date
-    dataset._date = datetime.now(timezone.utc)
-    dataset._modified = dataset.date
+    # reset modification date to cretion date
+    dataset._modified = dataset._created
 
     return dataset
 
 
-# ..............................................................................
 @_importer_method
 def _read_dx(*args, **kwargs):  # pragma: no cover
     return _read_jdx(*args, **kwargs)
 
 
-# ..............................................................................
 def _readl(fid):
     line = fid.readline()
     if not line:

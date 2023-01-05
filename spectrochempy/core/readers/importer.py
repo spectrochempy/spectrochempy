@@ -89,7 +89,6 @@ class Importer(HasTraits):
 
         self.alias = dict(ALIAS)
 
-    # ..........................................................................
     def __call__(self, *args, **kwargs):
 
         self.datasets = []
@@ -168,7 +167,6 @@ class Importer(HasTraits):
                 nds, key=str
             )  # return a sorted list (sorted according to their string representation)
 
-    # ..........................................................................
     def _setup_objtype(self, *args, **kwargs):
         # check if the first argument is an instance of NDDataset or Project
 
@@ -190,7 +188,6 @@ class Importer(HasTraits):
 
         return args, kwargs
 
-    # ..........................................................................
     def _switch_protocol(self, key, files, **kwargs):
 
         protocol = kwargs.get("protocol", None)
@@ -277,7 +274,6 @@ class Importer(HasTraits):
         return datasets
 
 
-# ..............................................................................
 def _importer_method(func):
     # Decorator to define a given read function as belonging to Importer
     setattr(Importer, func.__name__, staticmethod(func))
@@ -676,14 +672,12 @@ def _read_dir(*args, **kwargs):
     return datasets
 
 
-# ..............................................................................
 @_importer_method
 def _read_scp(*args, **kwargs):
     dataset, filename = args
     return dataset.load(filename, **kwargs)
 
 
-# ..............................................................................
 @_importer_method
 def _read_(*args, **kwargs):
     dataset, filename = args

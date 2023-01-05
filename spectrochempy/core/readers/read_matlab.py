@@ -106,7 +106,6 @@ def read_matlab(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
-# ..............................................................................
 read_mat = read_matlab
 
 

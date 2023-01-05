@@ -153,8 +153,6 @@ class FitParameters(UserDict):
 
     # ------------------------------------------------------------------------
     def __str__(self):
-
-        # .............................................................
         def makestr(key):
 
             keystring = key.split("_")[0]
@@ -174,8 +172,6 @@ class FitParameters(UserDict):
                 val = str(self.data[key])
 
                 return f"{keystring}: {float(val):10.4f}, {lob}, {upb}\n"
-
-        # ..............................................................
 
         message = "#PARAMETER SCRIPT\n\nCOMMON:\n"
 

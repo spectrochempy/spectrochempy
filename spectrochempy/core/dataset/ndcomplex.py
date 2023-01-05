@@ -41,7 +41,6 @@ from spectrochempy.utils import (
 class NDComplexArray(NDArray):
     _interleaved = Bool(False)
 
-    # ..........................................................................
     def __init__(self, data=None, **kwargs):
         """
         This class provides the complex/quaternion related functionalities to |NDArray|.
@@ -120,7 +119,6 @@ class NDComplexArray(NDArray):
     # validators
     # ------------------------------------------------------------------------
 
-    # ..........................................................................
     @validate("_data")
     def _data_validate(self, proposal):
         # validation of the _data attribute
@@ -158,7 +156,6 @@ class NDComplexArray(NDArray):
     # read-only properties / attributes
     # ------------------------------------------------------------------------
 
-    # ..........................................................................
     @property
     def has_complex_dims(self):
         """
@@ -173,7 +170,6 @@ class NDComplexArray(NDArray):
             self._data.dtype == typequaternion
         )
 
-    # ..........................................................................
     @property
     def is_complex(self):
         """
@@ -183,7 +179,6 @@ class NDComplexArray(NDArray):
             return False
         return self._data.dtype in TYPE_COMPLEX
 
-    # ..........................................................................
     @property
     def is_quaternion(self):
         """
@@ -195,7 +190,6 @@ class NDComplexArray(NDArray):
             return False
         return self._data.dtype == typequaternion
 
-    # ..........................................................................
     @property
     def is_interleaved(self):
         """
@@ -207,7 +201,6 @@ class NDComplexArray(NDArray):
             return False
         return self._interleaved  # (self._data.dtype == typequaternion)
 
-    # ..........................................................................
     @property
     def is_masked(self):
         """
@@ -223,7 +216,6 @@ class NDComplexArray(NDArray):
             else:
                 raise e
 
-    # ..........................................................................
     @property
     def real(self):
         """
@@ -251,7 +243,6 @@ class NDComplexArray(NDArray):
             new._mask = ma.mask
         return new
 
-    # ..........................................................................
     @property
     def imag(self):
         """
@@ -281,7 +272,6 @@ class NDComplexArray(NDArray):
             new._mask = ma.mask
         return new
 
-    # ..........................................................................
     @property
     def RR(self):
         """
@@ -293,7 +283,6 @@ class NDComplexArray(NDArray):
             raise TypeError("Not an hypercomplex array")
         return self.real
 
-    # ..........................................................................
     @property
     def RI(self):
         """
@@ -305,7 +294,6 @@ class NDComplexArray(NDArray):
             raise TypeError("Not an hypercomplex array")
         return self.component("RI")
 
-    # ..........................................................................
     @property
     def IR(self):
         """
@@ -317,7 +305,6 @@ class NDComplexArray(NDArray):
             raise TypeError("Not an hypercomplex array")
         return self.component("IR")
 
-    # ..........................................................................
     @property
     def II(self):
         """
@@ -329,7 +316,6 @@ class NDComplexArray(NDArray):
             raise TypeError("Not an hypercomplex array")
         return self.component("II")
 
-    # ..........................................................................
     @property
     def limits(self):
         """
@@ -350,7 +336,6 @@ class NDComplexArray(NDArray):
     # Public methods
     # ------------------------------------------------------------------------
 
-    # ..........................................................................
     def component(self, select="REAL"):
         """
         Take selected components of an hypercomplex array (RRR, RIR, ...).
@@ -393,7 +378,6 @@ class NDComplexArray(NDArray):
 
         return new
 
-    # ..........................................................................
     def set_complex(self, inplace=False):
         """
         Set the object data as complex.
@@ -431,7 +415,6 @@ class NDComplexArray(NDArray):
 
         return new
 
-    # ..........................................................................
     def set_quaternion(self, inplace=False):
         """
         Set the object data as quaternion.
@@ -460,7 +443,6 @@ class NDComplexArray(NDArray):
     set_hypercomplex = set_quaternion
     set_hypercomplex.__doc__ = "Alias of set_quaternion."
 
-    # ..........................................................................
     def transpose(self, *dims, inplace=False):
         """
         Transpose the complex array.
@@ -532,7 +514,6 @@ class NDComplexArray(NDArray):
     # private methods
     # ------------------------------------------------------------------------
 
-    # ..........................................................................
     def _str_shape(self):
 
         if self.is_empty:
@@ -570,7 +551,6 @@ class NDComplexArray(NDArray):
 
         return out
 
-    # ..........................................................................
     def _str_value(self, sep="\n", ufmt=" {:~P}", header="       values: ... \n"):
         prefix = [""]
         if self.is_empty:
@@ -620,7 +600,6 @@ class NDComplexArray(NDArray):
         out = out.rstrip()  # remove the trailings '\n'
         return out
 
-    # ..........................................................................
     def _make_complex(self, data):
 
         if data.dtype in TYPE_COMPLEX:
@@ -649,7 +628,6 @@ class NDComplexArray(NDArray):
         self._dtype = None  # reset dtype
         return data
 
-    # ..........................................................................
     def _make_quaternion(self, data):
 
         if data.ndim % 2 != 0:
@@ -682,7 +660,6 @@ class NDComplexArray(NDArray):
     # special methods
     # ------------------------------------------------------------------------
 
-    # ..........................................................................
     def __setitem__(self, items, value):
 
         super().__setitem__(items, value)

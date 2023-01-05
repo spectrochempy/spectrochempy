@@ -19,7 +19,6 @@ irdatadir = pathclean(prefs.datadir) / "irdata"
 cwd = Path.cwd()
 
 
-# ..............................................................................
 def test_write():
     nd = scp.read_omnic("irdata/nh4y-activation.spg")
 

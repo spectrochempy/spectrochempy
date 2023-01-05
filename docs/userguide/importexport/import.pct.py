@@ -256,16 +256,19 @@ DATADIR
 X = scp.read_omnic(DATADIR / "wodger.spg")
 
 # %% [markdown]
-# It can be set to another pathname *permanently* (i.e., even after computer restart) by a new assignment:
+# It can be set to another pathname *permanently* (i.e., even after computer restart)
+# by a new assignment:
 #
 # ```ipython3
 # scp.preferences.datadir = 'C:/users/Brian/s/Life'
 # ```
 #
-# This will change the default value in the SCPy preference file located in the hidden folder
+# This will change the default value in the SCPy preference file located in the hidden
+# folder
 # `.spectrochempy/` at the root of the user home directory.
 #
-# Finally, by default, the import functions used in Sepctrochempy will search the data files using this order of
+# Finally, by default, the import functions used in Spectrochempy will search the data
+# files using this order of
 # precedence:
 #
 #    1. try absolute path

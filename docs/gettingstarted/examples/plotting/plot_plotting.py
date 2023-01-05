@@ -11,32 +11,35 @@ Introduction to the plotting librairie
 
 
 """
-import os
 
 import spectrochempy as scp
 
-# this also import the os namespace
+# %%
+# The location of the spectrochempy_data can be found in preferences
 
-# sp.set_loglevel('DEBUG')
 datadir = scp.preferences.datadir
-dataset = scp.NDDataset.read_omnic(
-    os.path.join(datadir, "irdata", "nh4y-activation.spg")
-)
 
-########################################################################################################################
-# plot generic
+# %%
+# Let's read on of the dataset (in `spg` Omnnic format)
+
+dataset = scp.NDDataset.read_omnic(datadir / "irdata" / "nh4y-activation.spg")
+
+# %%
+# First we do a generic plot (with the default style):
+
 ax = dataset[0].plot()
 
-########################################################################################################################
+# %%
 # plot generic style
+
 ax = dataset[0].plot(style="classic")
 
-########################################################################################################################
+# %%
 # check that style reinit to default
-# should be identical to the first
+# should be identical to the first one
 ax = dataset[0].plot()
 
-########################################################################################################################
+# %%
 # Multiple plots
 dataset = dataset[:, ::100]
 
@@ -45,13 +48,13 @@ labels = ["sample {}".format(label) for label in ["S1", "S10", "S20", "S50", "S5
 
 scp.plot_multiple(method="scatter", datasets=datasets, labels=labels, legend="best")
 
-########################################################################################################################
+# %%
 # plot multiple with style
 scp.plot_multiple(
     method="scatter", style="sans", datasets=datasets, labels=labels, legend="best"
 )
 
-########################################################################################################################
+# %%
 # check that style reinit to default
 scp.plot_multiple(method="scatter", datasets=datasets, labels=labels, legend="best")
 
