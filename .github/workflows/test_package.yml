@@ -65,6 +65,10 @@ jobs:
           python3 -m pip install pytest-mock pyfakefs cffconvert
           python3 -m pip install numpydoc>=1.2
 
+      - name: Install optional libraries needed for tests
+        run: |
+          mamba install xarray
+
       - name: Test and coverage
         run: |
           coverage run --rcfile=tests/.coveragerc -m pytest tests
