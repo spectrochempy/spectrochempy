@@ -31,7 +31,7 @@ def _install_mpl():
         warnings.warn(
             "Sorry, but we cannot install mpl plotting styles and fonts "
             "if MatPlotLib is not installed.\n"
-            "Please install MatPlotLib using:\n"
+            "Please install matplotLib using:\n"
             "  pip install matplotlib\n"
             "or\n"
             "  conda install matplotlib\n"
@@ -139,9 +139,9 @@ setup_args = dict(
         "Intended Audience :: Science/Research",
         "License :: CeCILL-B Free Software License Agreement (CECILL-B)",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
     platforms=["Windows", "Mac OS X", "Linux"],
     # packages discovery
@@ -158,7 +158,10 @@ setup_args = dict(
     },
 )
 
-# ======================================================================================================================
+# ======================================================================================
 if __name__ == "__main__":
     # execute setup
     setup(**setup_args)
+
+
+# TODO: ideally it should be (at least partially) replaced by a configuration setup.cfg
