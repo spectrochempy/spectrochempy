@@ -53,7 +53,8 @@
 # additional information about such possible applications.
 
 # %% [markdown]
-# **Below (and in the next sections), we try to give an almost complete view of the NDDataset features.**
+# **Below (and in the next sections), we try to give an almost complete view of the
+# NDDataset features.**
 
 # %%
 import spectrochempy as scp
