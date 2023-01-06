@@ -31,12 +31,13 @@ dependencies:
     # for the core package
     - colorama
     - dill
+    - docrep
     - ipython
     - jinja2
     - matplotlib
     - numba
     - numpy
-    - pint
+    - pint>=20
     - requests
     - scipy
     - tqdm

@@ -57,7 +57,6 @@ from traitlets.config.configurable import Config
 from traitlets.config.manager import BaseJSONConfigManager
 
 from spectrochempy.plot_preferences import PlotPreferences
-
 from spectrochempy.utils.packages import get_pkg_path
 from spectrochempy.utils.paths import pathclean
 from spectrochempy.utils.traits import MetaConfigurable
