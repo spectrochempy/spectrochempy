@@ -45,7 +45,7 @@ cffconvert
 mamba
 docrep
 jupytext
-sphinx
+sphinx==5.3
 sphinx_rtd_theme
 autodocsumm
 sphinx-gallery
