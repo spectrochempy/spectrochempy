@@ -3,7 +3,7 @@
 ## Unreleased
 
 ### NEW FEATURES
-* History:
+* Modified attribute history:
   Its behavior have been improved.
   Dates for entries are set automatically and are timezone-aware.
   See the docs for more information:
@@ -13,7 +13,7 @@
   Internally stored in UTC format, they are displayed according to the timezone info.
 
 ### BUG FIXED
-
+* Suppression of the error when automatically checking the update but working offline.
 
 ## Version 0.4.9 [2023-01-05]
 
