@@ -2,9 +2,10 @@ name: Tests
 
 on:
   push:
-    - master
-    - develop
-    - feature/*
+    branches:
+      - master
+      - develop
+      - feature/*
 
   schedule:
     - cron: '00 0 * * *'
