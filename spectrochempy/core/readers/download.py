@@ -21,7 +21,7 @@ from spectrochempy.core import error_, info_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.read_jcamp import read_jcamp
-from spectrochempy.utils import is_iterable
+from spectrochempy.utils.compare import is_iterable
 from spectrochempy.utils.optional import import_optional_dependency
 
 
@@ -85,11 +85,9 @@ def download_iris():
     else:
         # Cannot download - use the scikit-learn dataset (if scikit-learn is installed)
 
-        sklearn = import_optional_dependency("sklearn", errors="ignore")
-        if sklearn is None:
+        datasets = import_optional_dependency("sklearn.datasets", errors="ignore")
+        if datasets is None:
             raise OSError("Failed in uploading the `IRIS` dataset!")
-        else:
-            from sklearn import datasets
 
         data = datasets.load_iris()
 

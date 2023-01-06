@@ -158,8 +158,7 @@ myfile.csv
 single_spectrum.csv
 
 # docs automatically generated
-generated/
-changelog.rst
+generated/changelog.rst
 /res.docstrings.txt
 opus.scp
 essai.py

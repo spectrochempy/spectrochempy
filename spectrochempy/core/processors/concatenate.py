@@ -16,7 +16,10 @@ import numpy as np
 
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.ndarray import DEFAULT_DIM_NAME
-from spectrochempy.utils import DimensionsCompatibilityError, UnitsCompatibilityError
+from spectrochempy.utils.exceptions import (
+    DimensionsCompatibilityError,
+    UnitsCompatibilityError,
+)
 from spectrochempy.utils.orderedset import OrderedSet
 
 

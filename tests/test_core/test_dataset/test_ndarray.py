@@ -14,13 +14,8 @@ from pint.errors import DimensionalityError
 
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.units import Quantity, ur
-from spectrochempy.utils import (
-    INPLACE,
-    MASKED,
-    TYPE_FLOAT,
-    TYPE_INTEGER,
-    SpectroChemPyWarning,
-)
+from spectrochempy.utils.constants import INPLACE, MASKED, TYPE_FLOAT, TYPE_INTEGER
+from spectrochempy.utils.exceptions import SpectroChemPyWarning
 from spectrochempy.utils.testing import (
     assert_array_equal,
     assert_equal,

@@ -6,10 +6,11 @@
 # ======================================================================================
 # flake8: noqa
 
-from spectrochempy.core import INPLACE, preferences
+from spectrochempy.core import preferences
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.project.project import Project
 from spectrochempy.core.scripts.script import Script, run_script
+from spectrochempy.utils.constants import INPLACE
 
 prefs = preferences
 

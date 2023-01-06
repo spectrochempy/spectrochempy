@@ -17,13 +17,13 @@ import yaml
 from traitlets import Dict, HasTraits, List, Type, Unicode
 
 from spectrochempy.core import warning_
-from spectrochempy.utils import (
+from spectrochempy.utils.exceptions import DimensionsCompatibilityError, ProtocolError
+from spectrochempy.utils.file import (
     check_filename_to_open,
     get_directory_name,
     get_filenames,
-    pathclean,
 )
-from spectrochempy.utils.exceptions import DimensionsCompatibilityError, ProtocolError
+from spectrochempy.utils.paths import pathclean
 
 FILETYPES = [
     ("scp", "SpectroChemPy files (*.scp)"),
@@ -209,12 +209,8 @@ class Importer(HasTraits):
                 try:
                     res = _read_remote(self.objtype(), filename, **kwargs)
 
-                except OSError:
+                except (IOError, OSError):
                     raise e
-
-                except IOError as e:
-                    warning_(str(e))
-                    res = None
 
                 except NotImplementedError as e:
                     warning_(str(e))

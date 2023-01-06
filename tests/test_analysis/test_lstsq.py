@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import spectrochempy.core as sc
-from spectrochempy.utils import show
+from spectrochempy.utils.plots import show
 
 
 def test_lstsq_from_scratch():

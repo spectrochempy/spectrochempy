@@ -24,7 +24,8 @@ import numpy as np
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
 from spectrochempy.core.dataset.coord import LinearCoord
-from spectrochempy.utils import add_docstring, make_label, plot_method
+from spectrochempy.utils.docstrings import add_docstring
+from spectrochempy.utils.plots import make_label, plot_method
 
 _PLOT2D_DOC = """
 ax : |Axes| instance. Optional

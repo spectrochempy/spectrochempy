@@ -7,25 +7,154 @@
 """
 File utilities.
 """
+import base64
+import datetime
+import json
+import os
+import pathlib
+import pickle
 import re
 import warnings
+from collections.abc import Mapping
 from os import environ
 from pathlib import Path, PosixPath, WindowsPath
 
-__all__ = [
-    "get_filenames",
-    "get_directory_name",
-    "pathclean",
-    "patterns",
-    "check_filenames",
-    "check_filename_to_open",
-    "check_filename_to_save",
-]
+import numpy as np
+from numpy.lib.format import read_array
+
+from spectrochempy.utils.paths import pathclean
 
 
-# ======================================================================================================================
-# Utility functions
-# ======================================================================================================================
+def make_zipfile(file, **kwargs):
+    """
+    Create a ZipFile.
+
+    Allows for Zip64 (useful if files are larger than 4 GiB)
+    (adapted from numpy)
+
+    Parameters
+    ----------
+    file :  file or str
+        The file to be zipped.
+    **kwargs
+        Additional keyword parameters.
+        They are passed to the zipfile.ZipFile constructor.
+
+    Returns
+    -------
+    zipfile
+    """
+    import zipfile
+
+    kwargs["allowZip64"] = True
+    return zipfile.ZipFile(file, **kwargs)
+
+
+class ScpFile(Mapping):  # lgtm[py/missing-equals]
+    """
+    ScpFile(fid).
+
+    (largely inspired by ``NpzFile`` object in numpy).
+
+    `ScpFile` is used to load files stored in ``.scp`` or ``.pscp``
+    format.
+
+    It assumes that files in the archive have a ``.npy`` extension in
+    the case of the dataset's ``.scp`` file format) ,  ``.scp``  extension
+    in the case of project's ``.pscp`` file format and finally ``pars.json``
+    files which contains other information on the structure and  attributes of
+    the saved objects. Other files are ignored.
+
+    Parameters
+    ----------
+    fid : file or str
+        The zipped archive to open. This is either a file-like object
+        or a string containing the path to the archive.
+
+    Attributes
+    ----------
+    files : list of str
+        List of all files in the archive with a ``.npy`` extension.
+    zip : ZipFile instance
+        The ZipFile object initialized with the zipped archive.
+    """
+
+    def __init__(self, fid):
+
+        _zip = make_zipfile(fid)
+
+        self.files = _zip.namelist()
+        self.zip = _zip
+
+        if hasattr(fid, "close"):
+            self.fid = fid
+        else:
+            self.fid = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+
+    def close(self):
+        """
+        Close the file.
+        """
+        if self.zip is not None:
+            self.zip.close()
+            self.zip = None
+        if self.fid is not None:
+            self.fid.close()
+            self.fid = None
+
+    def __del__(self):
+        try:
+            self.close()
+        except AttributeError as e:
+            if str(e) == "'ScpFile' object has no attribute 'zip'":
+                pass
+        except Exception as e:
+            raise e
+
+    def __iter__(self):
+        return iter(self.files)
+
+    def __len__(self):
+        return len(self.files)
+
+    def __getitem__(self, key):
+
+        member = False
+        ext = None
+
+        if key in self.files:
+            member = True
+            _, ext = os.path.splitext(key)
+
+        if member and ext in [".npy"]:
+            f = self.zip.open(key)
+            return read_array(f, allow_pickle=True)
+
+        elif member and ext in [".scp"]:
+            from spectrochempy.core.dataset.nddataset import NDDataset
+
+            # f = io.BytesIO(self.zip.read(key))
+            content = self.zip.read(key)
+            return NDDataset.load(key, content=content)
+
+        elif member and ext in [".json"]:
+            content = self.zip.read(key)
+            return json.loads(content, object_hook=json_decoder)
+
+        elif member:
+            return self.zip.read(key)
+
+        else:
+            raise KeyError("%s is not a file in the archive or is not " "allowed" % key)
+
+    def __contains__(self, key):
+        return self.files.__contains__(key)
 
 
 def _insensitive_case_glob(pattern):
@@ -47,76 +176,6 @@ def patterns(filetypes, allcase=True):
         return patterns
     else:
         return [_insensitive_case_glob(p) for p in patterns]
-
-
-def pathclean(paths):
-    """
-    Clean a path or a series of path in order to be compatible with windows and unix-based system.
-
-    Parameters
-    ----------
-    paths :  str or a list of str
-        Path to clean. It may contain windows or conventional python separators.
-
-    Returns
-    -------
-    out : a pathlib object or a list of pathlib objects
-        Cleaned path(s)
-
-    Examples
-    --------
-    >>> from spectrochempy.utils import pathclean
-
-    Using unix/mac way to write paths
-    >>> filename = pathclean('irdata/nh4y-activation.spg')
-    >>> filename.suffix
-    '.spg'
-    >>> filename.parent.name
-    'irdata'
-
-    or Windows
-    >>> filename = pathclean("irdata\\\\nh4y-activation.spg")
-    >>> filename.parent.name
-    'irdata'
-
-    Due to the escape character \\ in Unix, path string should be escaped \\\\ or the raw-string prefix `r` must be used
-    as shown below
-    >>> filename = pathclean(r"irdata\\nh4y-activation.spg")
-    >>> filename.suffix
-    '.spg'
-    >>> filename.parent.name
-    'irdata'
-    """
-    import platform
-
-    def is_windows():
-        win = "Windows" in platform.platform()
-        return win
-
-    def _clean(path):
-
-        if isinstance(path, (Path, PosixPath, WindowsPath)):
-            path = path.name
-        if is_windows():
-            path = WindowsPath(path)  # pragma: no cover
-        else:  # some replacement so we can handle window style path on unix
-            path = path.strip()
-            path = path.replace("\\", "/")
-            path = path.replace("\n", "/n")
-            path = path.replace("\t", "/t")
-            path = path.replace("\b", "/b")
-            path = path.replace("\a", "/a")
-            path = PosixPath(path)
-        return Path(path)
-
-    if paths is not None:
-        if isinstance(paths, (str, Path, PosixPath, WindowsPath)):
-            path = str(paths)
-            return _clean(path).expanduser()
-        elif isinstance(paths, (list, tuple)):
-            return [_clean(p).expanduser() if isinstance(p, str) else p for p in paths]
-
-    return paths
 
 
 def _get_file_for_protocol(f, **kwargs):
@@ -672,6 +731,173 @@ def check_filename_to_open(*args, **kwargs):
     else:
         # probably no args (which means that we are coming from a dialog or from a full list of a directory
         return filenames
+
+
+def fromisoformat(s):
+    try:
+        date = datetime.datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f%Z")
+    except Exception:
+        date = datetime.datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f")
+    return date
+
+
+# ======================================================================================
+# JSON UTILITIES
+# ======================================================================================
+
+
+def json_decoder(dic):
+    """
+    Decode a serialised json object.
+    """
+    from spectrochempy.core.units import Quantity, Unit
+
+    if "__class__" in dic:
+
+        klass = dic["__class__"]
+        if klass == "DATETIME":
+            return fromisoformat(dic["isoformat"])
+        elif klass == "DATETIME64":
+            return np.datetime64(dic["isoformat"])
+        elif klass == "NUMPY_ARRAY":
+            if "base64" in dic:
+                return pickle.loads(base64.b64decode(dic["base64"]))
+            elif "tolist" in dic:
+                return np.array(dic["tolist"], dtype=dic["dtype"])
+        elif klass == "PATH":
+            return Path(dic["str"])
+        elif klass == "QUANTITY":
+            return Quantity.from_tuple(dic["tuple"])
+        elif klass == "UNIT":
+            return Unit(dic["str"])
+        elif klass == "COMPLEX":
+            if "base64" in dic:
+                return pickle.loads(base64.b64decode(dic["base64"]))
+            elif "tolist" in dic:
+                return np.array(dic["tolist"], dtype=dic["dtype"]).data[()]
+
+        raise TypeError(dic["__class__"])
+
+    return dic
+
+
+def json_serialiser(byte_obj, encoding=None):
+    """
+    Return a serialised json object.
+    """
+    from spectrochempy.core.dataset.mixins.ndplot import PreferencesSet
+    from spectrochempy.core.units import Quantity, Unit
+
+    if byte_obj is None:
+        return None
+
+    elif hasattr(byte_obj, "implements"):
+
+        objnames = byte_obj.__dir__()
+
+        # particular case of Linear Coordinates
+        if byte_obj.implements("LinearCoord"):
+            objnames.remove("data")
+
+        dic = {}
+        for name in objnames:
+
+            if (
+                name in ["readonly"]
+                or (name == "dims" and "datasets" in objnames)
+                or [name in ["parent", "name"] and isinstance(byte_obj, PreferencesSet)]
+                and name not in ["created", "modified", "acquisition_date"]
+            ):
+                val = getattr(byte_obj, name)
+            else:
+                val = getattr(byte_obj, f"_{name}")
+
+            # Warning with parent-> circular dependencies!
+            if name != "parent":
+                dic[name] = json_serialiser(val, encoding=encoding)
+        return dic
+
+    elif isinstance(byte_obj, (str, int, float, bool)):
+        return byte_obj
+
+    elif isinstance(byte_obj, np.bool_):
+        return bool(byte_obj)
+
+    elif isinstance(byte_obj, (np.float64, np.float32, float)):
+        return float(byte_obj)
+
+    elif isinstance(byte_obj, (np.int64, np.int32, int)):
+        return int(byte_obj)
+
+    elif isinstance(byte_obj, tuple):
+        return tuple([json_serialiser(v, encoding=encoding) for v in byte_obj])
+
+    elif isinstance(byte_obj, list):
+        return [json_serialiser(v, encoding=encoding) for v in byte_obj]
+
+    elif isinstance(byte_obj, dict):
+        dic = {}
+        for k, v in byte_obj.items():
+            dic[k] = json_serialiser(v, encoding=encoding)
+        return dic
+
+    elif isinstance(byte_obj, datetime.datetime):
+        return {
+            "isoformat": byte_obj.strftime("%Y-%m-%dT%H:%M:%S.%f%Z"),
+            "__class__": "DATETIME",
+        }
+
+    elif isinstance(byte_obj, np.datetime64):
+        return {
+            "isoformat": np.datetime_as_string(byte_obj, timezone="UTC"),
+            "__class__": "DATETIME64",
+        }
+
+    elif isinstance(byte_obj, np.ndarray):
+        if encoding is None:
+            dtype = byte_obj.dtype
+            if str(byte_obj.dtype).startswith("datetime64"):
+                byte_obj = np.datetime_as_string(byte_obj, timezone="UTC")
+            return {
+                "tolist": json_serialiser(byte_obj.tolist(), encoding=encoding),
+                "dtype": str(dtype),
+                "__class__": "NUMPY_ARRAY",
+            }
+        else:
+            return {
+                "base64": base64.b64encode(pickle.dumps(byte_obj)).decode(),
+                "__class__": "NUMPY_ARRAY",
+            }
+
+    elif isinstance(byte_obj, pathlib.PosixPath):
+        return {"str": str(byte_obj), "__class__": "PATH"}
+
+    elif isinstance(byte_obj, Unit):
+        strunits = f"{byte_obj:D}"
+        return {"str": strunits, "__class__": "UNIT"}
+
+    elif isinstance(byte_obj, Quantity):
+        return {
+            "tuple": json_serialiser(byte_obj.to_tuple(), encoding=encoding),
+            "__class__": "QUANTITY",
+        }
+
+    elif isinstance(byte_obj, (np.complex128, np.complex64, np.complex)):
+        if encoding is None:
+            return {
+                "tolist": json_serialiser(
+                    [byte_obj.real, byte_obj.imag], encoding=encoding
+                ),
+                "dtype": str(byte_obj.dtype),
+                "__class__": "COMPLEX",
+            }
+        else:
+            return {
+                "base64": base64.b64encode(pickle.dumps(byte_obj)).decode(),
+                "__class__": "COMPLEX",
+            }
+
+    raise ValueError(f"No encoding handler for data type {type(byte_obj)}")
 
 
 # EOF

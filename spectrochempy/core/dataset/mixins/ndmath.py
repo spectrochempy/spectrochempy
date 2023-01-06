@@ -28,12 +28,8 @@ from quaternion import as_float_array
 from spectrochempy.core import error_, warning_
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.units.units import DimensionalityError, Quantity, ur
-from spectrochempy.utils import (
-    NOMASK,
-    TYPE_COMPLEX,
-    as_quaternion,
-    quat_as_complex_array,
-)
+from spectrochempy.utils.complex import as_quaternion, quat_as_complex_array
+from spectrochempy.utils.constants import NOMASK, TYPE_COMPLEX
 from spectrochempy.utils.exceptions import CoordinateMismatchError
 from spectrochempy.utils.orderedset import OrderedSet
 from spectrochempy.utils.testing import assert_coord_almost_equal

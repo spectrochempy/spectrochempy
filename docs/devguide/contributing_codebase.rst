@@ -310,6 +310,7 @@ The tests can then be run directly inside your Git clone by typing::
 
 .. code-block:: bash
 
+
     pytest .
 
 The test suite is exhaustive and takes several minutes to run.  Often it is

@@ -18,7 +18,7 @@ endian), and whose data type is determined by the parameter DTYPA (0 = int32,
 method of removing this filter is unknown but an approximation is available.
 
 Bruker JCAMP-DX files (acqus, etc) are text file which are described by the
-`JCAMP-DX standard <http://www.jcamp-dx.org/>`_.  Bruker parameters are
+`JCAMP-DX standard <https://www.jcamp-dx.org/>`_.  Bruker parameters are
 prefixed with a '$'.
 
 Bruker pulseprogram files are text files described in various Bruker manuals.

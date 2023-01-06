@@ -21,7 +21,7 @@ def write_jcamp(*args, **kwargs):
     """
     Write a dataset in JCAMP-DX format.
 
-    (see Published JCAMP-DX Protocols http://www.jcamp-dx.org/protocols.html#ir4.24)
+    (see Published JCAMP-DX Protocols https://www.jcamp-dx.org/protocols.html#ir4.24)
     Up to now, only IR output is available.
 
     Parameters

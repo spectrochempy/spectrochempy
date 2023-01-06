@@ -14,8 +14,9 @@ import numpy as np
 
 from spectrochempy.analysis.pca import PCA
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils import MASKED, show
+from spectrochempy.utils.constants import MASKED
 from spectrochempy.utils.optional import import_optional_dependency
+from spectrochempy.utils.plots import show
 from spectrochempy.utils.testing import assert_array_almost_equal
 
 # test pca

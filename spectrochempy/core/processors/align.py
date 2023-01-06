@@ -16,7 +16,9 @@ import numpy as np
 
 from spectrochempy.core import error_, warning_
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.utils import MASKED, UnitsCompatibilityError, get_n_decimals
+from spectrochempy.utils.constants import MASKED
+from spectrochempy.utils.exceptions import UnitsCompatibilityError
+from spectrochempy.utils.misc import get_n_decimals
 
 
 def can_merge_or_align(coord1, coord2):

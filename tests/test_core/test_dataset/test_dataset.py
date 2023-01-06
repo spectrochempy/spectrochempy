@@ -17,8 +17,9 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units import ur
-from spectrochempy.utils import MASKED, NOMASK, get_user_and_node
+from spectrochempy.utils.constants import MASKED, NOMASK, TYPE_QUATERNION
 from spectrochempy.utils.exceptions import SpectroChemPyError, UnknownTimeZoneError
+from spectrochempy.utils.system import get_user_and_node
 from spectrochempy.utils.testing import (
     RandomSeedContext,
     assert_array_almost_equal,
@@ -28,8 +29,6 @@ from spectrochempy.utils.testing import (
     assert_equal,
     raises,
 )
-
-typequaternion = np.dtype(np.quaternion)
 
 # test minimal constructeur and dtypes
 adata = (
@@ -910,7 +909,7 @@ def test_nddataset_create_from_complex_data():
             [1.0, 2.0],
             [1.0, 2.0],
         ],
-        dtype=typequaternion,
+        dtype=TYPE_QUATERNION,
     )
     assert nd.data.size == 2
     assert nd.size == 2

@@ -26,7 +26,7 @@ from spectrochempy.core.dataset.mixins.ndmath import (
 )
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units.units import Quantity, Unit, ur
-from spectrochempy.utils import MASKED
+from spectrochempy.utils.constants import MASKED, TYPE_QUATERNION
 from spectrochempy.utils.exceptions import CoordinateMismatchError
 from spectrochempy.utils.testing import (
     RandomSeedContext,
@@ -34,8 +34,6 @@ from spectrochempy.utils.testing import (
     assert_dataset_equal,
     assert_equal_units,
 )
-
-typequaternion = np.dtype(np.quaternion)
 
 
 # UNARY MATHS
@@ -1089,7 +1087,7 @@ def test_round_docstring_example():
     assert_dataset_equal(ds_transformed1, ds_transformed5)
     assert_dataset_equal(ds_transformed1, ds_transformed6)
 
-    ds[:, 3000.0:3500.0] = scp.MASKED
+    ds[:, 3000.0:3500.0] = MASKED
     dsm_transformed1 = np.ma.round(ds)
     dsm_transformed2 = np.around(ds)
     dsm_transformed3 = scp.around(ds)

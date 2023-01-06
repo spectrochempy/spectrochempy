@@ -3,7 +3,8 @@
 ## Unreleased
 
 ### NEW FEATURES
-* History:
+* Compatibility with pint<20 veriosns removed.
+* Modified attribute history:
   Its behavior have been improved.
   Dates for entries are set automatically and are timezone-aware.
   See the docs for more information:

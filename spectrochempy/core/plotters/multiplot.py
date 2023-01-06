@@ -30,7 +30,7 @@ from matplotlib.tight_layout import (
     get_tight_layout_figure,
 )
 
-from spectrochempy.utils import is_sequence
+from spectrochempy.utils.compare import is_sequence
 from spectrochempy.utils.plots import _Axes
 
 # from spectrochempy.core import preferences, project_preferences

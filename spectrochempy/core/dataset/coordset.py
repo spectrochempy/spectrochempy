@@ -30,12 +30,9 @@ from traitlets import (
 
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.ndarray import DEFAULT_DIM_NAME, NDArray
-from spectrochempy.utils import (
-    SpectroChemPyWarning,
-    colored_output,
-    convert_to_html,
-    is_sequence,
-)
+from spectrochempy.utils.compare import is_sequence
+from spectrochempy.utils.exceptions import SpectroChemPyWarning
+from spectrochempy.utils.print import colored_output, convert_to_html
 
 
 # ======================================================================================================================

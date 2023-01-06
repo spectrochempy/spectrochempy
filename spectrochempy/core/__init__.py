@@ -30,7 +30,7 @@ __all__ = []
 # logging functions
 # ======================================================================================================================
 
-from spectrochempy.utils import pstr  # noqa: E402
+from spectrochempy.utils.print import pstr  # noqa: E402
 import logging
 import inspect
 
@@ -152,10 +152,21 @@ from spectrochempy.application import SpectroChemPy  # noqa: E402
 app = SpectroChemPy()
 __all__ += ["app"]
 
-from spectrochempy.application import (  # noqa: E402
+from spectrochempy.application import (
+    CRITICAL,
     DEBUG,
+    ERROR,
+    INFO,
     WARNING,
-)
+    __author__ as authors,
+    __contributor__ as contributors,
+    __copyright__ as copyright,
+    __license__ as license,
+    __release__ as release,
+    __release_date__ as release_date,
+    __url__ as url,
+    __version__ as version,
+)  # noqa: E402
 
 preferences = app.preferences
 plot_preferences = app.plot_preferences
@@ -210,10 +221,13 @@ __all__ += [
 
 _pbar_update()
 
-# constants
+# print
 # ------------------------------------------------------------------
+from spectrochempy.utils.plots import show  # noqa: E402
+from spectrochempy.utils.print_versions import show_versions  # noqa: E402
 
-__all__ += ["show", "MASKED", "NOMASK", "EPSILON", "INPLACE", "show_versions"]
+
+__all__ += ["show", "show_versions"]
 
 # dataset
 # ------------------------------------------------------------------
@@ -548,7 +562,7 @@ class _TKFileDialogs:  # pragma: no cover
         filters=None,
     ):
 
-        from spectrochempy.utils import pathclean
+        from spectrochempy.utils.paths import pathclean
 
         dftext = ""
         directory = "."
@@ -607,7 +621,7 @@ def save_dialog(
             filename=filename, caption=caption, filters=filters
         )
 
-    from spectrochempy.utils import pathclean
+    from spectrochempy.utils.paths import pathclean
 
     return pathclean(f)
 
@@ -642,7 +656,7 @@ def open_dialog(
     else:
         f = klass._open_multiple_filenames(parent=parent, filters=filters)
 
-    from spectrochempy.utils import pathclean
+    from spectrochempy.utils.paths import pathclean
 
     return pathclean(f)
 

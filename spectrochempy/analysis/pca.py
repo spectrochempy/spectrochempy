@@ -23,7 +23,7 @@ from spectrochempy.core import info_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.mixins.npy import dot
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils import NBlue, NRed
+from spectrochempy.utils.plots import NBlue, NRed
 
 # ======================================================================================================================
 # class PCA

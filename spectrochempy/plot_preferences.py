@@ -23,7 +23,9 @@ from traitlets import (
     observe,
 )
 
-from spectrochempy.utils import MetaConfigurable, get_pkg_path, pathclean
+from spectrochempy.utils.packages import get_pkg_path
+from spectrochempy.utils.paths import pathclean
+from spectrochempy.utils.traits import MetaConfigurable
 
 # from spectrochempy.core import warning_
 
@@ -420,7 +422,7 @@ class PlotPreferences(MetaConfigurable):
     axes_unicode_minus = Bool(
         True,
         help=r"""use unicode for the minus symbol rather than hyphen. See
-                                http://en.wikipedia.org/wiki/Plus_and_minus_signs#Character_codes""",
+                                https://en.wikipedia.org/wiki/Plus_and_minus_signs#Character_codes""",
     ).tag(config=True, kind="")
     axes_prop_cycle = Unicode(
         "cycler('color', ['007200', '009E73', 'D55E00', 'CC79A7', 'F0E442', '56B4E9'])",

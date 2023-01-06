@@ -22,7 +22,9 @@ from spectrochempy.core import error_
 from spectrochempy.core.dataset.mixins.ndmath import NDMath, _set_operators
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.units import Quantity, ur
-from spectrochempy.utils import INPLACE, NOMASK, colored_output, spacing_
+from spectrochempy.utils.constants import INPLACE, NOMASK
+from spectrochempy.utils.misc import spacing_
+from spectrochempy.utils.print import colored_output
 
 
 # ======================================================================================================================

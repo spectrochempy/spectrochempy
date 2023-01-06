@@ -21,14 +21,10 @@ from traitlets import HasTraits, Instance, Unicode, Union
 
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.coordset import CoordSet
-from spectrochempy.utils import (
-    TYPE_BOOL,
-    ScpFile,
-    SpectroChemPyError,
-    check_filename_to_save,
-    json_serialiser,
-    pathclean,
-)
+from spectrochempy.utils.constants import TYPE_BOOL
+from spectrochempy.utils.exceptions import SpectroChemPyError
+from spectrochempy.utils.file import ScpFile, check_filename_to_save, json_serialiser
+from spectrochempy.utils.paths import pathclean
 
 SCPY_SUFFIX = {"NDDataset": ".scp", "Project": ".pscp"}
 

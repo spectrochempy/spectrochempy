@@ -1,29 +1,30 @@
 # -*- coding: utf-8 -*-
-# ======================================================================================
-# Copyright (©) 2015-2023 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
-# See full LICENSE agreement in the root directory.
-# ======================================================================================
-"""
-This module implements the class _CoordRange.
-"""
 
-__all__ = __slots__ = ["trim_ranges"]
+# ======================================================================================
+#  Copyright (©) 2015-2022 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
+#  See full LICENSE agreement in the root directory.
+# ======================================================================================
 
-from traitlets import Bool, HasTraits, List
+"""
+This module implements the class |Coord|.
+"""
+import traitlets as tr
 
 from spectrochempy.utils.traits import Range
 
 
-# ======================================================================================================================
+# ======================================================================================
 # _CoordRange
-# ======================================================================================================================
-class _CoordRange(HasTraits):
+# ======================================================================================
+class _CoordRange(tr.HasTraits):
     # TODO: May use also units ???
-    ranges = List(Range())
-    reversed = Bool()
+    ranges = tr.List(Range())
+    reversed = tr.Bool()
 
-    def __init__(self, *ranges, reversed=False):
+    def __init__(self, *ranges, reversed=False, **kwargs):
+
+        super().__init__(**kwargs)
 
         self.reversed = reversed
         if len(ranges) == 0:
@@ -31,7 +32,7 @@ class _CoordRange(HasTraits):
             self.ranges = []
         elif len(ranges) == 2 and all(isinstance(elt, (int, float)) for elt in ranges):
             # second case: a pair of scalars has been passed
-            # using the Interval class, we have autochecking of the interval
+            # using the Interval class, we have auto checking of the interval
             # validity
             self.ranges = [list(map(float, ranges))]
         else:
@@ -73,7 +74,7 @@ class _CoordRange(HasTraits):
 
 def trim_ranges(*ranges, reversed=False):
     """
-    Set of ordered, non intersecting intervals.
+    Set of ordered, non-intersecting intervals.
 
     An ordered set of ranges is constructed from the inputs and returned.
     *e.g.,* [[a, b], [c, d]] with a < b < c < d or a > b > c > d.
@@ -82,10 +83,12 @@ def trim_ranges(*ranges, reversed=False):
     -----------
     *ranges :  iterable
         An interval or a set of intervals.
-        set of  intervals. If none is given, the range will be a set of an empty interval [[]]. The interval
-        limits do not need to be ordered, and the intervals do not need to be distincts.
+        set of  intervals. If none is given, the range will be a set of an empty
+        interval [[]]. The interval limits do not need to be ordered, and the
+        intervals do not need to be distincts.
     reversed : bool, optional
-        The intervals are ranked by decreasing order if True or increasing order if False.
+        The intervals are ranked by decreasing order if True or increasing order
+        if False.
 
     Returns
     -------
@@ -99,8 +102,3 @@ def trim_ranges(*ranges, reversed=False):
     [[1, 4], [5, 10]]
     """
     return _CoordRange(*ranges, reversed=reversed).ranges
-
-
-# ======================================================================================================================
-if __name__ == "__main__":
-    pass

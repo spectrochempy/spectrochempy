@@ -16,7 +16,7 @@ from spectrochempy.analysis.svd import SVD
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils import MASKED
+from spectrochempy.utils.constants import MASKED
 
 __all__ = ["EFA"]
 

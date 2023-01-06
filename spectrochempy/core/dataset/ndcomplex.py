@@ -23,15 +23,15 @@ from traitlets import Bool, validate
 
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.units import Quantity
-from spectrochempy.utils import (
+from spectrochempy.utils.complex import as_quaternion
+from spectrochempy.utils.constants import (
     NOMASK,
     TYPE_COMPLEX,
     TYPE_FLOAT,
-    as_quaternion,
-    get_component,
-    insert_masked_print,
-    typequaternion,
+    TYPE_QUATERNION,
 )
+from spectrochempy.utils.misc import get_component
+from spectrochempy.utils.print import insert_masked_print
 
 # ======================================================================================================================
 # NDComplexArray
@@ -132,16 +132,16 @@ class NDComplexArray(NDArray):
             if self._dtype == data.dtype:
                 pass  # nothing more to do
 
-            elif self._dtype not in [typequaternion] + list(TYPE_COMPLEX):
+            elif self._dtype not in [TYPE_QUATERNION] + list(TYPE_COMPLEX):
                 data = data.astype(np.dtype(self._dtype), copy=False)
 
             elif self._dtype in TYPE_COMPLEX:
                 data = self._make_complex(data)
 
-            elif self._dtype == typequaternion:
+            elif self._dtype == TYPE_QUATERNION:
                 data = self._make_quaternion(data)
 
-        elif data.dtype not in [typequaternion] + list(TYPE_COMPLEX):
+        elif data.dtype not in [TYPE_QUATERNION] + list(TYPE_COMPLEX):
             data = data.astype(
                 np.float64, copy=False
             )  # by default dta are float64 if the dtype is not fixed
@@ -167,7 +167,7 @@ class NDComplexArray(NDArray):
             return False
 
         return (self._data.dtype in TYPE_COMPLEX) or (
-            self._data.dtype == typequaternion
+            self._data.dtype == TYPE_QUATERNION
         )
 
     @property
@@ -188,7 +188,7 @@ class NDComplexArray(NDArray):
         """
         if self._data is None:
             return False
-        return self._data.dtype == typequaternion
+        return self._data.dtype == TYPE_QUATERNION
 
     @property
     def is_interleaved(self):
@@ -199,7 +199,7 @@ class NDComplexArray(NDArray):
         """
         if self._data is None:
             return False
-        return self._interleaved  # (self._data.dtype == typequaternion)
+        return self._interleaved  # (self._data.dtype == TYPE_QUATERNION )
 
     @property
     def is_masked(self):
@@ -211,7 +211,7 @@ class NDComplexArray(NDArray):
         try:
             return super().is_masked
         except Exception as e:
-            if self._data.dtype == typequaternion:
+            if self._data.dtype == TYPE_QUATERNION:
                 return np.any(self._mask["I"])
             else:
                 raise e
@@ -232,7 +232,7 @@ class NDComplexArray(NDArray):
             new._data = ma
         elif ma.dtype in TYPE_COMPLEX:
             new._data = ma.real
-        elif ma.dtype == typequaternion:
+        elif ma.dtype == TYPE_QUATERNION:
             # get the scalar component
             # q = a + bi + cj + dk  ->   qr = a
             new._data = as_float_array(ma)[..., 0]
@@ -259,7 +259,7 @@ class NDComplexArray(NDArray):
             new._data = np.zeros_like(ma.data)
         elif ma.dtype in TYPE_COMPLEX:
             new._data = ma.imag.data
-        elif ma.dtype == typequaternion:
+        elif ma.dtype == TYPE_QUATERNION:
             # this is a more complex situation than for real component
             # get the imaginary component (vector component)
             # q = a + bi + cj + dk  ->   qi = bi+cj+dk
@@ -435,7 +435,7 @@ class NDComplexArray(NDArray):
         else:
             new = self  # work inplace
 
-        if new.dtype != typequaternion:  # not already a quaternion
+        if new.dtype != TYPE_QUATERNION:  # not already a quaternion
             new._data = new._make_quaternion(new.data)
 
         return new

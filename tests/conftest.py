@@ -20,8 +20,8 @@ except ModuleNotFoundError:  # pragma: no cover
     )
 
 import spectrochempy as scp
-from spectrochempy import preferences as prefs
-from spectrochempy.utils import pathclean
+from spectrochempy.core import preferences as prefs
+from spectrochempy.utils.paths import pathclean
 from spectrochempy.utils.testing import RandomSeedContext
 
 # first download missing data

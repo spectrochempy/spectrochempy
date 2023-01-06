@@ -79,7 +79,7 @@ def import_optional_dependency(
         is False, or when the package's version is too old and `errors`
         is ``'warn'``.
     """
-    from spectrochempy.utils import Version
+    from spectrochempy.utils.version import Version
 
     assert errors in {"warn", "raise", "ignore"}
 

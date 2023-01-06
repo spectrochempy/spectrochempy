@@ -9,10 +9,11 @@
 
 import numpy as np
 
-from spectrochempy import dot, set_loglevel
 from spectrochempy.analysis.mcrals import MCRALS
+from spectrochempy.core import set_loglevel
+from spectrochempy.core.dataset.mixins.npy import dot
 from spectrochempy.core.dataset.nddataset import Coord, NDDataset
-from spectrochempy.utils import show
+from spectrochempy.utils.plots import show
 
 
 def test_MCRALS():

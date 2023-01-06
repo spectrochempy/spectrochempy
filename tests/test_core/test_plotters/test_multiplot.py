@@ -15,7 +15,7 @@ from spectrochempy.core.plotters.multiplot import (
     multiplot_map,
     multiplot_stack,
 )
-from spectrochempy.utils import show
+from spectrochempy.utils.plots import show
 
 prefs = preferences
 

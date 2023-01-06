@@ -42,21 +42,22 @@ from spectrochempy.core.units import (
     set_nmr_context,
     ur,
 )
-from spectrochempy.utils import (
+from spectrochempy.utils.compare import is_number, is_sequence
+from spectrochempy.utils.constants import (
     INPLACE,
     MASKED,
     NOMASK,
     TYPE_FLOAT,
     TYPE_INTEGER,
     MaskedConstant,
-    SpectroChemPyWarning,
+)
+from spectrochempy.utils.exceptions import SpectroChemPyWarning
+from spectrochempy.utils.misc import make_new_object
+from spectrochempy.utils.paths import pathclean
+from spectrochempy.utils.print import (
     convert_to_html,
     insert_masked_print,
-    is_number,
-    is_sequence,
-    make_new_object,
     numpyprintoptions,
-    pathclean,
 )
 
 # ======================================================================================================================

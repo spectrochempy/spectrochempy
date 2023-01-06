@@ -12,7 +12,8 @@ __dataset_methods__ = __all__
 
 from traitlets import Any, HasTraits
 
-from spectrochempy.utils import check_filename_to_save, pathclean, patterns
+from spectrochempy.utils.file import check_filename_to_save, patterns
+from spectrochempy.utils.paths import pathclean
 
 
 # ------------------------------------------------------------------

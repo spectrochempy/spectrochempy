@@ -9,25 +9,6 @@ import re
 import numpy as np
 from colorama import Fore, Style
 
-from spectrochempy.utils import NOMASK
-from spectrochempy.utils.misc import TYPE_COMPLEX, TYPE_FLOAT, TYPE_INTEGER
-
-__all__ = [
-    "numpyprintoptions",
-    "insert_masked_print",
-    "TBold",
-    "TRed",
-    "TGreen",
-    "TBlue",
-    "TCyan",
-    "TMagenta",
-    "TYellow",
-    "colored",
-    "colored_output",
-    "pstr",
-    "convert_to_html",
-]
-
 
 def pstr(object, **kwargs):
     if hasattr(object, "implements") and object.implements() in [
@@ -332,6 +313,7 @@ def insert_masked_print(ds, mask_string="--"):
     ds : |NDDataset| instance
     mask_string : str
     """
+    from spectrochempy.utils.constants import NOMASK
 
     mask = ds._mask
     if mask is NOMASK:
@@ -388,6 +370,7 @@ def numpyprintoptions(
     linewidth
     kargs
     """
+    from spectrochempy.utils.constants import TYPE_COMPLEX, TYPE_FLOAT, TYPE_INTEGER
 
     def _format_object(x):
 

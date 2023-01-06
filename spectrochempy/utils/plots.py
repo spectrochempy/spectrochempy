@@ -16,22 +16,6 @@ from spectrochempy.core.common.meta import Meta
 from spectrochempy.core.units import remove_args_units
 from spectrochempy.utils.optional import import_optional_dependency
 
-__all__ = [
-    "cmyk2rgb",
-    "NBlack",
-    "NRed",
-    "NBlue",
-    "NGreen",
-    "figure",
-    "show",
-    "get_figure",  # Plotly specific
-    "get_plotly_figure",
-    "colorscale",
-    "make_attr",
-    "make_label",
-    "plot_method",
-]
-
 
 @maxes.subplot_class_factory
 class _Axes(maxes.Axes):

@@ -16,7 +16,7 @@ import functools
 
 import scipy.integrate
 
-from spectrochempy.utils import deprecated
+from spectrochempy.utils.exceptions import deprecated
 
 
 def _integrate_method(method):

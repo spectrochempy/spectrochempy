@@ -40,9 +40,10 @@ from spectrochempy.core.dataset.mixins.ndplot import NDPlot
 from spectrochempy.core.dataset.ndarray import DEFAULT_DIM_NAME, NDArray
 from spectrochempy.core.dataset.ndcomplex import NDComplexArray
 from spectrochempy.core.project.baseproject import AbstractProject
-from spectrochempy.utils import colored_output, get_user_and_node
 from spectrochempy.utils.exceptions import SpectroChemPyError, UnknownTimeZoneError
 from spectrochempy.utils.optional import import_optional_dependency
+from spectrochempy.utils.print import colored_output
+from spectrochempy.utils.system import get_user_and_node
 
 # ======================================================================================================================
 # NDDataset class definition

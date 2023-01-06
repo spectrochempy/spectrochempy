@@ -13,7 +13,8 @@ import pytest
 import spectrochempy as scp
 from spectrochempy.core import preferences as prefs
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils import pathclean, testing
+from spectrochempy.utils import testing
+from spectrochempy.utils.paths import pathclean
 
 irdatadir = pathclean(prefs.datadir) / "irdata"
 cwd = Path.cwd()

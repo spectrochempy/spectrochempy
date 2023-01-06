@@ -27,7 +27,7 @@ from sphinx.application import Sphinx
 from sphinx.deprecation import RemovedInSphinx70Warning
 
 from spectrochempy.api import version
-from spectrochempy.utils import sh
+from spectrochempy.utils.system import sh
 
 warnings.filterwarnings(action="ignore", module="matplotlib", category=UserWarning)
 warnings.filterwarnings(action="ignore", category=RemovedInSphinx70Warning)

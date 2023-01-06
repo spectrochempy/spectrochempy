@@ -42,8 +42,9 @@
 """
 SpectroChemPy API.
 
-SpectroChemPy is a framework for processing, analyzing and modeling Spectroscopic data for Chemistry with Python.
-It is a cross platform software, running on Linux, Windows or OS X.
+SpectroChemPy is a framework for processing, analyzing and modeling Spectroscopic data
+for Chemistry with Python.
+It is a cross-platform software, running on Linux, Windows or OS X.
 """
 
 from spectrochempy import api

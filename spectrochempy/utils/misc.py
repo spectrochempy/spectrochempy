@@ -16,49 +16,7 @@ import warnings
 from datetime import datetime, timezone
 
 import numpy as np
-from quaternion import as_float_array, as_quat_array
-
-__all__ = [
-    "TYPE_INTEGER",
-    "TYPE_COMPLEX",
-    "TYPE_FLOAT",
-    "TYPE_BOOL",
-    "EPSILON",
-    "INPLACE",
-    "typequaternion",
-    "make_new_object",
-    "getdocfrom",
-    "dict_compare",
-    "htmldoc",
-    "is_iterable",
-    "is_sequence",
-    "is_number",
-    "spacing_",
-    "largest_power_of_2",
-    "get_component",
-    "interleaved2quaternion",
-    "interleaved2complex",
-    "as_quaternion",
-    "quat_as_complex_array",
-    "get_n_decimals",
-    "add_docstring",
-]
-
-#
-# constants
-#
-TYPE_INTEGER = (int, np.int_, np.int32, np.int64, np.uint32, np.uint64)
-TYPE_FLOAT = (float, np.float_, np.float32, np.float64)
-TYPE_COMPLEX = (complex, np.complex_, np.complex64, np.complex128)
-TYPE_BOOL = (bool, np.bool_)
-
-EPSILON = epsilon = np.finfo(float).eps
-"Minimum value before considering it as zero value."
-
-INPLACE = "INPLACE"
-"Flag used to specify inplace slicing."
-
-typequaternion = np.dtype(np.quaternion)
+from quaternion import as_float_array
 
 
 def get_n_decimals(val, accuracy):
@@ -134,52 +92,6 @@ def add_docstring(*args):
     return new_doc
 
 
-def as_quaternion(*args):
-    """
-    Recombine the arguments to produce a numpy array with quaternion dtype.
-
-    Parameters
-    ----------
-    *args : ndarray with dtype:float or complex
-        The quaternion array components: If there is 4 components, then we assume it is the four components of the
-        quaternion array: w, x, y, z. If there is only two, they are casted to complex and correspond respectively
-        to w + i.x and y + j.z.
-    """
-    if len(args) == 4:
-        # we assume here that the for components have been provided w, x, y, z
-        w, x, y, z = args
-
-    if len(args) == 2:
-        r, i = args
-        w, x, y, z = r.real, r.imag, i.real, i.imag
-
-    data = as_quat_array(list(zip(w.flatten(), x.flatten(), y.flatten(), z.flatten())))
-    return data.reshape(w.shape)
-
-
-def quat_as_complex_array(arr):
-    """
-    Recombine the component of a quaternion array into a tuple of two complex array.
-
-    Parameters
-    ----------
-    arr : quaternion ndarray
-        The arr will be separated into (w + i.x) and (y + i.z).
-    Returns
-    -------
-    tuple
-        Tuple of two complex array.
-    """
-    if not arr.dtype == np.quaternion:
-        # no change
-        return arr
-
-    wt, xt, yt, zt = as_float_array(arr).T
-    w, x, y, z = wt.T, xt.T, yt.T, zt.T
-
-    return (w + 1j * x), (y + 1j * z)
-
-
 def dict_compare(d1, d2, check_equal_only=True):
     """
     Compare two dictionaries.
@@ -213,6 +125,7 @@ def dict_compare(d1, d2, check_equal_only=True):
     """
     # from http://stackoverflow.com/questions/4527942/comparing-two-dictionaries-in-python
     # modified to account for the comparison of list objects
+    from spectrochempy.utils.compare import is_sequence
 
     d1_keys = set(d1.keys())
     d2_keys = set(d2.keys())
@@ -269,6 +182,8 @@ def get_component(data, select="REAL"):
         dataset:
         e.g., for dims = ['y','x'], 'IR' means that the `y` component is imaginary while the `x` is real.
     """
+    from spectrochempy.utils.constants import TYPE_COMPLEX, TYPE_QUATERNION
+
     if not select:
         return data
 
@@ -279,7 +194,7 @@ def get_component(data, select="REAL"):
 
     w = x = y = z = None
 
-    if new.dtype == typequaternion:
+    if new.dtype == TYPE_QUATERNION:
         w, x, y, z = as_float_array(new).T
         w, x, y, z = w.T, x.T, y.T, z.T
         if select == "R":
@@ -344,6 +259,8 @@ def gt_eps(arr):
     bool : results of checking
         True means that at least some values are greater than epsilon.
     """
+    from spectrochempy.utils.constants import EPSILON
+
     return np.any(arr > EPSILON)
 
 
@@ -397,30 +314,6 @@ def interleaved2quaternion(data):
     Make a complex array from interleaved data.
     """
     return data[..., ::2] + 1j * data[..., 1::2]
-
-
-def is_iterable(arg):
-    """
-    Determine if an object is iterable.
-    """
-    return hasattr(arg, "__iter__")
-
-
-def is_number(x):
-    try:
-        if isinstance(x, np.ndarray):
-            return False
-        x + 1
-        return True
-    except TypeError:
-        return False
-
-
-def is_sequence(arg):
-    """
-    Determine if an object is iterable but is not a string.
-    """
-    return (not hasattr(arg, "strip")) and hasattr(arg, "__iter__")
 
 
 def largest_power_of_2(value):

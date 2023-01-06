@@ -13,7 +13,8 @@ import pytest
 
 from spectrochempy import NO_DISPLAY
 from spectrochempy.core import preferences as prefs
-from spectrochempy.utils import check_filenames, get_filenames, pathclean
+from spectrochempy.utils.file import check_filenames, get_filenames
+from spectrochempy.utils.paths import pathclean
 
 
 def test_pathclean():

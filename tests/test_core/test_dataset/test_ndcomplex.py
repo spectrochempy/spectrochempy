@@ -14,6 +14,7 @@ from quaternion import as_float_array, as_quat_array, quaternion
 
 from spectrochempy.core.dataset.ndcomplex import NDComplexArray
 from spectrochempy.core.units import Quantity, ur
+from spectrochempy.utils.constants import TYPE_QUATERNION
 from spectrochempy.utils.testing import (
     assert_approx_equal,
     assert_array_equal,
@@ -21,8 +22,6 @@ from spectrochempy.utils.testing import (
 )
 
 # TODO: a lot of repetition - must be simplified with some logics
-
-typequaternion = np.dtype(np.quaternion)
 
 
 def test_ndarray_comparison(ndarray, ndarrayunit, ndarraycplx, ndarrayquaternion):
@@ -79,7 +78,7 @@ def test_ndcomplex_init_quaternion():
         d,
         units=ur.Hz,
         mask=[[False, True, False], [True, False, False]],
-        dtype=typequaternion,
+        dtype=TYPE_QUATERNION,
     )  # with units & mask
     assert d0.shape == (2, 3)
     assert "NDComplexArray: [quaternion] Hz" in repr(d0)
@@ -89,14 +88,14 @@ def test_ndcomplex_init_quaternion_error1():
     # test with complex data in all dimension but odd number of comlumn (should raise an error
     d = np.random.random((3, 3)) * np.exp(0.1j)
     with pytest.raises(ValueError):
-        NDComplexArray(d, dtype=typequaternion)  # with units & mask
+        NDComplexArray(d, dtype=TYPE_QUATERNION)  # with units & mask
 
 
 def test_ndcomplex_init_quaternion_error2():
     # test with complex data in all dimension but odd number of rows(should raise an error
     d = np.random.random((3, 4))
     with pytest.raises(ValueError):
-        NDComplexArray(d, dtype=typequaternion)  # with units & mask
+        NDComplexArray(d, dtype=TYPE_QUATERNION)  # with units & mask
 
 
 def test_ndcomplex_init_complex_with_copy_of_ndarray():
@@ -202,8 +201,8 @@ def test_ndcomplex_quaternion_fixture(ndarrayquaternion):
     assert nd.shape == (5, 4)
     assert nd.has_complex_dims
     assert nd.is_quaternion
-    assert nd.data.dtype == typequaternion
-    assert nd.dtype == typequaternion
+    assert nd.data.dtype == TYPE_QUATERNION
+    assert nd.dtype == TYPE_QUATERNION
     assert nd.ndim == 2
 
 
@@ -278,18 +277,18 @@ def test_ndcomplex_str_representation_for_complex():
 def test_ndcomplex_quaternion_str_representation():
     np.random.seed(12345)
     d = np.random.random((4, 2)) * np.exp(0.1j)
-    NDComplexArray(d, dtype=typequaternion)
+    NDComplexArray(d, dtype=TYPE_QUATERNION)
 
 
 def test_ndcomplex_real_imag_quaternion():
     np.random.seed(12345)
     d = np.random.random((2, 2)) * np.exp(0.1j)
-    d3 = NDComplexArray(d, dtype=typequaternion)
+    d3 = NDComplexArray(d, dtype=TYPE_QUATERNION)
     d3r = d3.real
     assert d3r.dtype == np.float64
     assert d3r.shape == (1, 2)
     d3i = d3.imag
-    assert d3i.dtype == typequaternion
+    assert d3i.dtype == TYPE_QUATERNION
 
 
 def test_ndcomplex_swapdims_quaternion():
@@ -300,7 +299,7 @@ def test_ndcomplex_swapdims_quaternion():
         d,
         units=ur.Hz,
         mask=[[False, True, False], [True, False, False]],
-        dtype=typequaternion,
+        dtype=TYPE_QUATERNION,
     )  # quaternion with units & mask
 
     assert d3.shape == (2, 3)

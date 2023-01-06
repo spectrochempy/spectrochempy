@@ -20,12 +20,9 @@ from spectrochempy.core.dataset.coord import LinearCoord
 from spectrochempy.core.processors.utils import _units_agnostic_method
 from spectrochempy.core.processors.zero_filling import zf_size
 from spectrochempy.core.units import ur
-from spectrochempy.utils import (
-    as_quaternion,
-    get_component,
-    largest_power_of_2,
-    typequaternion,
-)
+from spectrochempy.utils.complex import as_quaternion
+from spectrochempy.utils.constants import TYPE_QUATERNION
+from spectrochempy.utils.misc import get_component, largest_power_of_2
 
 # ======================================================================================================================
 # Private methods
@@ -33,7 +30,7 @@ from spectrochempy.utils import (
 
 
 def _fft(data):
-    if data.dtype == typequaternion:
+    if data.dtype == TYPE_QUATERNION:
 
         dr = get_component(data, "R")
         fr = np.fft.fftshift(np.fft.fft(dr), -1)
@@ -50,7 +47,7 @@ def _fft(data):
 
 
 def _ifft(data):
-    if data.dtype == typequaternion:
+    if data.dtype == TYPE_QUATERNION:
 
         fr = get_component(data, "R")
         dr = np.fft.ifft(np.fft.ifftshift(fr, -1))
@@ -67,7 +64,7 @@ def _ifft(data):
 
 
 def _fft_positive(data):
-    if data.dtype == typequaternion:
+    if data.dtype == TYPE_QUATERNION:
 
         dr = get_component(data, "R")
         fr = np.fft.fftshift(np.fft.ifft(dr).astype(data.dtype)) * data.shape[-1]
@@ -84,7 +81,7 @@ def _fft_positive(data):
 
 
 def _ifft_positive(data):
-    if data.dtype == typequaternion:
+    if data.dtype == TYPE_QUATERNION:
 
         fr = get_component(data, "R")
         dr = np.fft.fft(np.fft.ifftshift(fr, -1)) * data.shape[-1]

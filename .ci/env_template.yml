@@ -1,6 +1,5 @@
-{%- if NAME is defined %}
-name: {{ NAME }}
-{%- endif %}{%- if HEADER is defined %}{{HEADER}}{%- else %}
+{%- if NAME is defined %}name: {{ NAME }}{%- endif %}
+{%- if HEADER is defined %}{{ HEADER }}{%- else %}
 # =============================================================================
 #
 # NOTE: This template file is used by to create the conda environment for
@@ -37,7 +36,7 @@ dependencies:
     - matplotlib
     - numba
     - numpy
-    - pint
+    - pint>=20
     - requests
     - scipy
     - tqdm

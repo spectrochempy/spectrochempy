@@ -30,12 +30,9 @@ import numpy as np
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.utils import (  # , deprecated
-    add_docstring,
-    is_sequence,
-    make_label,
-    plot_method,
-)
+from spectrochempy.utils.compare import is_sequence
+from spectrochempy.utils.docstrings import add_docstring
+from spectrochempy.utils.plots import make_label, plot_method
 
 _PLOT1D_DOC = """\
 ax : Axe, optional

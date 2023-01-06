@@ -23,7 +23,7 @@ from traitlets import Any, Bool, HasTraits, Instance, List, Unicode, observe
 
 from spectrochempy.analysis import models as models_
 from spectrochempy.core import INFO, info_, preferences, warning_
-from spectrochempy.utils import htmldoc
+from spectrochempy.utils.misc import htmldoc
 
 
 # ======================================================================================================================

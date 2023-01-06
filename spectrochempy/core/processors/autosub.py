@@ -14,7 +14,7 @@ __dataset_methods__ = __all__
 import numpy as np
 from scipy.optimize import minimize_scalar
 
-from spectrochempy.core.common.coordrange import trim_ranges
+from spectrochempy.core.common.trimrange import trim_ranges
 
 
 def autosub(
