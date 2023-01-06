@@ -24,13 +24,12 @@ import numpy as np
 from skimage.io import imread, imsave
 from skimage.transform import resize
 from sphinx.application import Sphinx
-from sphinx.deprecation import RemovedInSphinx60Warning, RemovedInSphinx70Warning
+from sphinx.deprecation import RemovedInSphinx70Warning
 
 from spectrochempy.api import version
-from spectrochempy.utils import sh
+from spectrochempy.utils.system import sh
 
 warnings.filterwarnings(action="ignore", module="matplotlib", category=UserWarning)
-warnings.filterwarnings(action="ignore", category=RemovedInSphinx60Warning)
 warnings.filterwarnings(action="ignore", category=RemovedInSphinx70Warning)
 
 # CONSTANT
