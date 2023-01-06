@@ -161,7 +161,7 @@ X.y
 # - `dims`: Note that the `x` and `y` dimensions are the second and first dimension respectively. Hence, `X[i,j]`
 # will return
 # the absorbance of the ith spectrum at the jth  wavenumber. However, this is subject to change, for instance if you
-# perform operation on your data such as [Transposition](../processing/transformations.ipynb#Transposition). At any time
+# perform operation on your data such as [Transposition](../../processing/transformations.ipynb#Transposition). At any time
 # the attribute `dims` gives the correct names (which can be modified) and order of the dimensions.
 
 # %%

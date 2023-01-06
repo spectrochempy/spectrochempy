@@ -57,6 +57,7 @@ from traitlets.config.configurable import Config
 from traitlets.config.manager import BaseJSONConfigManager
 
 from spectrochempy.plot_preferences import PlotPreferences
+
 from spectrochempy.utils.packages import get_pkg_path
 from spectrochempy.utils.paths import pathclean
 from spectrochempy.utils.traits import MetaConfigurable
@@ -195,6 +196,7 @@ def _get_pypi_version():
             response = requests.get(url)
             if response.status_code != 200:
                 return
+            break  # exit the while loop in case of success
 
         except (ConnectionError, requests.exceptions.RequestException):
             if time.time() > start_time + connection_timeout:
