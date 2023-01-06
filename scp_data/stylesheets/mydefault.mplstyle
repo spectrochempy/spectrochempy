@@ -85,6 +85,7 @@ boxplot.whiskerprops.linestyle           : --
 boxplot.whiskerprops.linewidth           : 1.0
 boxplot.whiskers                         : 1.5
 
+contour.algorithm                        : mpl2014
 contour.corner_mask                      : True
 contour.linewidth                        : None
 contour.negative_linestyle               : dashed
@@ -112,6 +113,8 @@ figure.edgecolor                         : white
 figure.facecolor                         : white
 figure.figsize                           : 6.8, 4.4
 figure.frameon                           : True
+figure.labelsize                         : medium
+figure.labelweight                       : normal
 figure.subplot.bottom                    : 0.12
 figure.subplot.hspace                    : 0.0
 figure.subplot.left                      : 0.15
@@ -260,6 +263,7 @@ text.hinting                             : auto
 text.hinting_factor                      : 8
 text.kerning_factor                      : 0
 text.latex.preamble                      :
+text.parse_math                          : True
 text.usetex                              : False
 
 xaxis.labellocation                      : center

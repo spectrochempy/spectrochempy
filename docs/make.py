@@ -224,7 +224,7 @@ class BuildDocumentation(object):
         srcdir = confdir = DOCS
         outdir = f"{BUILDDIR}/{doc_version}"
         doctreesdir = f"{DOCTREES}/{doc_version}"
-        sp = Sphinx(srcdir, confdir, outdir, doctreesdir, builder)
+        sp = Sphinx(str(srcdir), str(confdir), str(outdir), str(doctreesdir), builder)
         sp.verbosity = 1
         sp.build()
 
