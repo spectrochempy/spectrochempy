@@ -30,10 +30,12 @@
 
        {% for item in attributes %}
    .. autoattribute:: {{ item }}
+
        {%- endfor %}
 
      {% endif %}
    {% endblock %}
+
 
 .. include:: /gettingstarted/gallery/backreferences/{{fullname}}.examples
 

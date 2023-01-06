@@ -19,6 +19,7 @@ import pprint
 import subprocess
 import sys
 import threading
+import time
 import warnings
 from datetime import date, timedelta
 from os import environ
@@ -56,7 +57,10 @@ from traitlets.config.configurable import Config
 from traitlets.config.manager import BaseJSONConfigManager
 
 from spectrochempy.plot_preferences import PlotPreferences
-from spectrochempy.utils import MetaConfigurable, Version, get_pkg_path, pathclean
+from spectrochempy.utils.file import pathclean
+from spectrochempy.utils.packages import get_pkg_path
+from spectrochempy.utils.traits import MetaConfigurable
+from spectrochempy.utils.version import Version
 
 # set the default style
 plt.style.use(["classic"])
@@ -183,12 +187,23 @@ def _get_pypi_version():
     Get the last released pypi version
     """
     url = "https://pypi.python.org/pypi/spectrochempy/json"
-    try:
-        response = requests.get(url)
-        if response.status_code != 200:
-            return
-    except requests.exceptions.RequestException:  # pragma: no cover
-        return
+
+    connection_timeout = 30  # secondss
+    start_time = time.time()
+    while True:
+        try:
+            response = requests.get(url)
+            if response.status_code != 200:
+                return
+            break  # exit the while loop in case of success
+
+        except (ConnectionError, requests.exceptions.RequestException):
+            if time.time() > start_time + connection_timeout:
+                # 'Unable to get updates after {} seconds of ConnectionErrors'
+                return
+            else:
+                time.sleep(1)  # attempting once every second
+
     releases = json.loads(response.text)["releases"]
     versions = sorted(releases, key=parse_version)
     last_version = versions[-1]
@@ -201,10 +216,11 @@ def _get_pypi_version():
 def _check_for_updates(*args):
 
     old = Version(__version__)
-    version, release_date = _get_pypi_version()
-    # conda_versions = _get_conda_package_version()
-    if version is None:
-        # probably no connection
+    res = _get_pypi_version()
+    if res is not None:
+        version, release_date = res
+    else:
+        # probably a ConnectionError
         return
 
     new_release = None
