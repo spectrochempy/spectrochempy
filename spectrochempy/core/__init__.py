@@ -152,6 +152,9 @@ from spectrochempy.application import SpectroChemPy  # noqa: E402
 app = SpectroChemPy()
 __all__ += ["app"]
 
+from numpy.ma.core import masked as MASKED
+from numpy.ma.core import nomask as NOMASK
+
 from spectrochempy.application import (
     CRITICAL,
     DEBUG,
@@ -189,12 +192,15 @@ def get_loglevel():
 
 
 __all__ += [
-    # Helpers
+    # constants
+    "MASKED",
+    "NOMASK",
     "DEBUG",
     "WARNING",
     "ERROR",
     "CRITICAL",
     "INFO",
+    # Helpers
     "preferences",
     "plot_preferences",
     "config_manager",
