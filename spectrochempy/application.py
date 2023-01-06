@@ -195,6 +195,7 @@ def _get_pypi_version():
             response = requests.get(url)
             if response.status_code != 200:
                 return
+            break  # exit the while loop in case of success
 
         except (ConnectionError, requests.exceptions.RequestException):
             if time.time() > start_time + connection_timeout:
