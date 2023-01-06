@@ -38,15 +38,23 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install miniconda (scpy)
-        uses: conda-incubator/setup-miniconda@v2
+#      - name: Install miniconda (scpy)
+#        uses: conda-incubator/setup-miniconda@v2
+#        with:
+#          python-version: "3.9"
+#          activate-environment: scpy
+#          environment-file: environment_dev.yml
+#          condarc-file: .ci/condarc.yml
+#          auto-activate-base: false
+#          auto-update-conda: true
+
+      - name: Install Conda environment with Micromamba
+        uses: mamba-org/provision-with-micromamba@main
         with:
-          python-version: "3.9"
-          activate-environment: scpy
           environment-file: environment_dev.yml
-          condarc-file: .ci/condarc.yml
-          auto-activate-base: false
-          auto-update-conda: true
+          environment-name: scpy
+          extra-specs: |
+            python=3.9
 
       - name: Install spectrochempy
         run: |
@@ -78,6 +86,11 @@ jobs:
 
           echo "$VERSION"
           echo "$DEVSTRING"
+
+      - name: Setup timezone
+        uses: zcong1993/setup-timezone@master
+        with:
+          timezone: Central European Time
 
       - name: convert CHANGELOG.md to rst via pandoc
         uses: docker://pandoc/core:2.9
