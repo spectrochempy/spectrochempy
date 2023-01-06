@@ -19,8 +19,8 @@ from traitlets import default as traitdefault
 from traitlets import observe
 
 from spectrochempy.core import error_
+from spectrochempy.core.dataset.mixins.ndmath import NDMath, _set_operators
 from spectrochempy.core.dataset.ndarray import NDArray
-from spectrochempy.core.dataset.ndmath import NDMath, _set_operators
 from spectrochempy.core.units import Quantity, ur
 from spectrochempy.utils import INPLACE, NOMASK, colored_output, spacing_
 

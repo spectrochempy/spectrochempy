@@ -12,9 +12,12 @@ import pytest
 from pint.errors import UndefinedUnitError
 from quaternion import quaternion
 
-import spectrochempy as scp
+from spectrochempy.core.common.meta import Meta
+from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.coordset import CoordSet
+from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units import ur
-from spectrochempy.utils import get_user_and_node
+from spectrochempy.utils import MASKED, NOMASK, get_user_and_node
 from spectrochempy.utils.exceptions import SpectroChemPyException, UnknownTimeZoneError
 from spectrochempy.utils.testing import (
     RandomSeedContext,
@@ -53,7 +56,7 @@ def test_nddataset_docstring():
     module = "spectrochempy.core.dataset.nddataset"
     chd.check_docstrings(
         module,
-        obj=scp.NDDataset,
+        obj=NDDataset,
         # exclude some errors - remove whatever you want to check
         exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
     )
@@ -63,7 +66,7 @@ def test_nddataset_docstring():
 def test_1D_NDDataset(a):
     # 1D
     for arr in [a, np.array(a)]:
-        ds = scp.NDDataset(arr)
+        ds = NDDataset(arr)
         assert ds.size == len(arr)
         assert ds.shape == (ds.size,)
         if ds.size == 0:
@@ -73,13 +76,13 @@ def test_1D_NDDataset(a):
             assert ds.dtype in [np.float64, np.complex128]
             assert ds.dims == ["x"]
         # force dtype
-        ds = scp.NDDataset(arr, dtype=np.float32)
+        ds = NDDataset(arr, dtype=np.float32)
         if ds.size == 0:
             assert ds.dtype is None
         else:
             assert ds.dtype == np.float32
         assert ds.title == "<untitled>"
-        assert ds.mask == scp.NOMASK
+        assert ds.mask == NOMASK
         assert ds.meta == {}
         assert ds.name.startswith("NDDataset")
         assert ds.author == get_user_and_node()
@@ -97,7 +100,7 @@ arrdata = (
 @pytest.mark.parametrize("arr", arrdata)
 def test_2D_NDDataset(arr):
     # 2D
-    ds = scp.NDDataset(arr)
+    ds = NDDataset(arr)
     assert ds.size == arr.size
     assert ds.shape == arr.shape
     if ds.size == 0:
@@ -107,47 +110,47 @@ def test_2D_NDDataset(arr):
         assert ds.dtype == np.float64
         assert ds.dims == ["y", "x"][-ds.ndim :]
     assert ds.title == "<untitled>"
-    assert ds.mask == scp.NOMASK
+    assert ds.mask == NOMASK
     assert ds.meta == {}
     assert ds.name.startswith("NDDataset")
     assert ds.author == get_user_and_node()
     assert not ds.history
     assert ds.description == ""
     # force dtype
-    ds = scp.NDDataset(arr, dtype=np.float32)
+    ds = NDDataset(arr, dtype=np.float32)
     if ds.size == 0:
         assert ds.dtype is None
     else:
         assert ds.dtype == np.float32
     if ds.shape[-1] % 2 == 0:  # must be even
-        ds = scp.NDDataset(arr, dtype=np.complex128)
+        ds = NDDataset(arr, dtype=np.complex128)
         if ds.size == 0:
             assert ds.dtype is None
         else:
             assert ds.dtype == np.complex128
     else:
         with pytest.raises(ValueError):
-            ds = scp.NDDataset(arr, dtype=np.complex128)
+            ds = NDDataset(arr, dtype=np.complex128)
     if (arr.shape[-1] % 2) == 0 and (arr.shape[-2] % 2) == 0 and arr.ndim == 2:
-        ds = scp.NDDataset(arr, dtype=np.quaternion)
+        ds = NDDataset(arr, dtype=np.quaternion)
         if ds.size == 0:
             assert ds.dtype is None
         else:
             assert ds.dtype == np.quaternion
     else:
         with pytest.raises(ValueError):
-            ds = scp.NDDataset(arr, dtype=np.quaternion)
+            ds = NDDataset(arr, dtype=np.quaternion)
     # test units
-    ds1 = scp.NDDataset(arr * scp.ur.km)
-    ds2 = scp.NDDataset(arr, units=scp.ur.km)
-    assert ds1.units == scp.ur.km
-    assert ds2.units == scp.ur.km
+    ds1 = NDDataset(arr * ur.km)
+    ds2 = NDDataset(arr, units=ur.km)
+    assert ds1.units == ur.km
+    assert ds2.units == ur.km
     assert_dataset_equal(ds1, ds2)
     # masking
-    ds1[0] = scp.MASKED
+    ds1[0] = MASKED
     assert ds1.is_masked
     # init with another dataset
-    ds2 = scp.NDDataset(ds1)
+    ds2 = NDDataset(ds1)
     assert_dataset_equal(ds1, ds2)
     # check no coordinates
     assert not ds2.is_complex
@@ -156,7 +159,7 @@ def test_2D_NDDataset(arr):
     with pytest.raises(AttributeError):
         ds2.t
     # dim attributes
-    ds2 = scp.NDDataset(arr, dims=["u", "w"])
+    ds2 = NDDataset(arr, dims=["u", "w"])
     assert ds2.ndim == 2
     assert ds2.dims == ["u", "w"]
 
@@ -167,7 +170,7 @@ def test_nddataset_coordset():
     coord0 = np.arange(10)
     coord1 = np.arange(7)
     coord2 = np.arange(3) * 100.0
-    da = scp.NDDataset(
+    da = NDDataset(
         dx,
         coordset=(coord0, coord1, coord2),
         title="absorbance",
@@ -191,10 +194,10 @@ def test_nddataset_coordset():
     assert dat.coordunits == da.coordset.units
 
     # too many coordinates
-    cadd = scp.Coord(labels=["d%d" % i for i in range(6)])
+    cadd = Coord(labels=["d%d" % i for i in range(6)])
     coordtitles = ["wavelength", "time-on-stream", "temperature"]
     coordunits = ["cm^-1", "s", None]
-    daa = scp.NDDataset(
+    daa = NDDataset(
         dx,
         coordset=[coord0, coord1, coord2, cadd, coord2.copy()],
         title="absorbance",
@@ -204,12 +207,10 @@ def test_nddataset_coordset():
     assert daa.coordset.titles == coordtitles[::-1]
     assert daa.dims == ["z", "y", "x"]
     # with a CoordSet
-    c0, c1 = scp.Coord(labels=["d%d" % i for i in range(6)]), scp.Coord(
-        data=[1, 2, 3, 4, 5, 6]
-    )
-    cc = scp.CoordSet(c0, c1)
-    cd = scp.CoordSet(x=cc, y=c1)
-    ds = scp.NDDataset([1, 2, 3, 6, 8, 0], coordset=cd, units="m")
+    c0, c1 = Coord(labels=["d%d" % i for i in range(6)]), Coord(data=[1, 2, 3, 4, 5, 6])
+    cc = CoordSet(c0, c1)
+    cd = CoordSet(x=cc, y=c1)
+    ds = NDDataset([1, 2, 3, 6, 8, 0], coordset=cd, units="m")
     assert ds.dims == ["x"]
     assert ds.x == cc
     ds.history = "essai: 1"
@@ -221,10 +222,10 @@ def test_nddataset_coordset():
     with pytest.raises(AttributeError):
         ds.y
     # invalid_length
-    coord1 = scp.Coord(np.arange(9), title="wavelengths")  # , units='m')
-    coord2 = scp.Coord(np.arange(20), title="time")  # , units='s')
+    coord1 = Coord(np.arange(9), title="wavelengths")  # , units='m')
+    coord2 = Coord(np.arange(20), title="time")  # , units='s')
     with pytest.raises(ValueError):
-        scp.NDDataset(np.random.random((10, 20)), coordset=(coord1, coord2))
+        NDDataset(np.random.random((10, 20)), coordset=(coord1, coord2))
 
 
 def test_nddataset_coords_indexer():
@@ -233,7 +234,7 @@ def test_nddataset_coords_indexer():
     coord1 = np.linspace(0, 60, 10)  # wrong length
     coord2 = np.linspace(20, 30, 10)
     with pytest.raises(ValueError):  # wrong length
-        da = scp.NDDataset(
+        da = NDDataset(
             dx,
             coordset=[coord0, coord1, coord2],
             title="absorbance",
@@ -241,7 +242,7 @@ def test_nddataset_coords_indexer():
             coordunits=["cm^-1", "s", "K"],
         )
     coord1 = np.linspace(0, 60, 100)
-    da = scp.NDDataset(
+    da = NDDataset(
         dx,
         coordset=[coord0, coord1, coord2],
         title="absorbance",
@@ -278,21 +279,21 @@ def test_nddataset_coords_indexer():
 # Methods
 # ======================================================================================================================
 def test_nddataset_str():
-    arr1d = scp.NDDataset([1, 2, 3])
+    arr1d = NDDataset([1, 2, 3])
     assert "[float64]" in str(arr1d)
-    arr2d = scp.NDDataset(np.array([[1, 2], [3, 4]]))
+    arr2d = NDDataset(np.array([[1, 2], [3, 4]]))
     assert str(arr2d) == "NDDataset: [float64] unitless (shape: (y:2, x:2))"
 
 
 def test_nddataset_str_repr(ds1):
-    arr1d = scp.NDDataset(np.array([1, 2, 3]))
+    arr1d = NDDataset(np.array([1, 2, 3]))
     assert repr(arr1d).startswith("NDDataset")
-    arr2d = scp.NDDataset(np.array([[1, 2], [3, 4]]))
+    arr2d = NDDataset(np.array([[1, 2], [3, 4]]))
     assert repr(arr2d).startswith("NDDataset")
 
 
 def test_nddataset_mask_valid():
-    scp.NDDataset(np.random.random((10, 10)), mask=np.random.random((10, 10)) > 0.5)
+    NDDataset(np.random.random((10, 10)), mask=np.random.random((10, 10)) > 0.5)
 
 
 def test_nddataset_copy_ref():
@@ -300,20 +301,20 @@ def test_nddataset_copy_ref():
     Tests to ensure that creating a new NDDataset object copies by *reference*.
     """
     a = np.ones((10, 10))
-    nd_ref = scp.NDDataset(a)
+    nd_ref = NDDataset(a)
     a[0, 0] = 0
     assert nd_ref.data[0, 0] == 0
 
 
 def test_nddataset_conversion():
-    nd = scp.NDDataset(np.array([[1, 2, 3], [4, 5, 6]]))
+    nd = NDDataset(np.array([[1, 2, 3], [4, 5, 6]]))
     assert nd.data.size == 6
     assert nd.data.dtype == np.dtype("float64")
 
 
 def test_nddataset_invalid_units():
     with pytest.raises(UndefinedUnitError):
-        scp.NDDataset(np.ones((5, 5)), units="NotAValidUnit")
+        NDDataset(np.ones((5, 5)), units="NotAValidUnit")
 
 
 def test_nddataset_units(nd1d):
@@ -335,7 +336,7 @@ def test_nddataset_units(nd1d):
 
 def test_bugs_units_change():
     # check for bug on transmittance conversion
-    X = scp.NDDataset([0.0, 0.3, 1.3, 5.0], units="absorbance")
+    X = NDDataset([0.0, 0.3, 1.3, 5.0], units="absorbance")
 
     # A to T
     X1 = X.to("transmittance")
@@ -366,7 +367,7 @@ def test_bugs_units_change():
 def test_nddataset_masked_array_input():
     a = np.random.randn(100)
     marr = np.ma.masked_where(a > 0, a)
-    nd = scp.NDDataset(marr)
+    nd = NDDataset(marr)
     # check that masks and data match
     assert_array_equal(nd.mask, marr.mask)
     assert_array_equal(nd.data, marr.data)
@@ -465,8 +466,8 @@ def test_nddataset_slicing_by_index(ref_ds, ds1):
     assert element.dims == ["z", "y", "x"]
     # squeeze
     row1 = row0.squeeze()
-    assert row1.mask == scp.NOMASK
-    row1[0] = scp.MASKED
+    assert row1.mask == NOMASK
+    row1[0] = MASKED
     assert row1.dims == ["x"]
     assert row1.shape == (3,)
     assert row1.mask.shape == (3,)
@@ -568,7 +569,7 @@ def test_nddataset_slicing_by_location_but_nocoords(ref_ds, ds1):
 
 # slicing tests
 def test_nddataset_simple_slicing():
-    d1 = scp.NDDataset(np.ones((5, 5)))
+    d1 = NDDataset(np.ones((5, 5)))
     assert d1.data.shape == (5, 5)
     assert d1.shape == (5, 5)
     d2 = d1[2:3, 2:3]
@@ -591,7 +592,7 @@ def test_nddataset_simple_slicing():
 def test_nddataset_slicing_with_mask():
     mask = np.zeros((5, 5)).astype(bool)
     mask[1, 1] = True
-    d1 = scp.NDDataset(np.ones((5, 5)), mask=mask)
+    d1 = NDDataset(np.ones((5, 5)), mask=mask)
     assert d1[1].shape == (1, 5)
     assert d1[1, 1].mask
 
@@ -599,7 +600,7 @@ def test_nddataset_slicing_with_mask():
 def test_nddataset_slicing_with_mask_units():
     mask = np.zeros((5, 5)).astype(bool)
     mask[1, 1] = True
-    d1 = scp.NDDataset(np.ones((5, 5)), mask=mask, units="m")
+    d1 = NDDataset(np.ones((5, 5)), mask=mask, units="m")
     assert d1[0].shape == (1, 5)
 
 
@@ -625,15 +626,15 @@ def test_slicing_with_quantities(ds1):
 
 def test_nddataset_mask_array_input():
     marr = np.ma.array([1.0, 2.0, 5.0])  # Masked array with no masked entries
-    nd = scp.NDDataset(marr)
+    nd = NDDataset(marr)
     assert not nd.is_masked
     marr = np.ma.array([1.0, 2.0, 5.0], mask=[True, False, False])  # Masked array
-    nd = scp.NDDataset(marr)
+    nd = NDDataset(marr)
     assert nd.is_masked
 
 
 def test_nddataset_unmasked_in_operation_with_masked_numpy_array():
-    ndd = scp.NDDataset(np.array([1, 2, 3]))
+    ndd = NDDataset(np.array([1, 2, 3]))
     np_data = -np.ones_like(ndd)
     np_mask = np.array([True, False, True])
     np_arr_masked = np.ma.array(np_data, mask=np_mask)
@@ -655,9 +656,7 @@ def test_nddataset_unmasked_in_operation_with_masked_numpy_array():
 def test_nddataset_mask_invalid_shape(shape):
     with pytest.raises(ValueError) as exc:
         with RandomSeedContext(789):
-            scp.NDDataset(
-                np.random.random((10, 10)), mask=np.random.random(shape) > 0.5
-            )
+            NDDataset(np.random.random((10, 10)), mask=np.random.random(shape) > 0.5)
     assert exc.value.args[0] == "mask {} and data (10, 10) shape mismatch!".format(
         shape
     )
@@ -667,7 +666,7 @@ def test_nddataset_mask_invalid_shape(shape):
     "mask_in", [np.array([True, False]), np.array([1, 0]), [True, False], [1, 0]]
 )
 def test_nddataset_mask_init_without_np_array(mask_in):
-    ndd = scp.NDDataset(np.array([1, 1]), mask=mask_in)
+    ndd = NDDataset(np.array([1, 1]), mask=mask_in)
     assert (ndd.mask == mask_in).all()
 
 
@@ -675,7 +674,7 @@ def test_nddataset_with_mask_acts_like_masked_array():
     # test for #2414
     input_mask = np.array([True, False, False])
     input_data = np.array([1.0, 2.0, 3.0])
-    ndd_masked = scp.NDDataset(input_data.copy(), mask=input_mask.copy())
+    ndd_masked = NDDataset(input_data.copy(), mask=input_mask.copy())
     #   ndd_masked = np.sqrt(ndd_masked)
     other = -np.ones_like(input_data)
     result1 = np.multiply(ndd_masked, other)
@@ -694,15 +693,15 @@ def test_nddataset_with_mask_acts_like_masked_array():
 
 
 def test_nddataset_creationdate():
-    ndd = scp.NDDataset([1.0, 2.0, 3.0])
+    ndd = NDDataset([1.0, 2.0, 3.0])
     ndd2 = np.sqrt(ndd)
     assert ndd2._date is not None
 
 
 def test_nddataset_title():
-    ndd = scp.NDDataset([1.0, 2.0, 3.0], title="xxxx")
+    ndd = NDDataset([1.0, 2.0, 3.0], title="xxxx")
     assert ndd.title == "xxxx"
-    ndd2 = scp.NDDataset(ndd, title="yyyy")
+    ndd2 = NDDataset(ndd, title="yyyy")
     assert ndd2.title == "yyyy"
     ndd2.title = "zzzz"
     assert ndd2.title == "zzzz"
@@ -712,14 +711,14 @@ def test_nddataset_real_imag():
     na = np.array(
         [[1.0 + 2.0j, 2.0 + 0j], [1.3 + 2.0j, 2.0 + 0.5j], [1.0 + 4.2j, 2.0 + 3j]]
     )
-    nd = scp.NDDataset(na)
+    nd = NDDataset(na)
     # in the last dimension
     assert_array_equal(nd.real, na.real)
     assert_array_equal(nd.imag, na.imag)
 
 
 def test_nddataset_comparison():
-    ndd = scp.NDDataset([1.0, 2.0 + 1j, 3.0])
+    ndd = NDDataset([1.0, 2.0 + 1j, 3.0])
     val = ndd * 1.2 - 10.0
     val = np.abs(val)
     assert np.all(val >= 6.0)
@@ -727,28 +726,28 @@ def test_nddataset_comparison():
 
 def test_nddataset_repr_html():
     dx = np.random.random((10, 100, 3))
-    coord0 = scp.Coord(
+    coord0 = Coord(
         data=np.linspace(4000.0, 1000.0, 10),
         labels="a b c d e f g h i j".split(),
         mask=None,
         units="cm^-1",
         title="wavelength",
     )
-    coord1 = scp.Coord(
+    coord1 = Coord(
         data=np.linspace(0.0, 60.0, 100),
         labels=None,
         mask=None,
         units="s",
         title="time-on-stream",
     )
-    coord2 = scp.Coord(
+    coord2 = Coord(
         data=np.linspace(200.0, 300.0, 3),
         labels=["cold", "normal", "hot"],
         mask=None,
         units="K",
         title="temperature",
     )
-    da = scp.NDDataset(
+    da = NDDataset(
         dx, coordset=[coord0, coord1, coord2], title="absorbance", units="absorbance"
     )
     da._repr_html_()
@@ -757,7 +756,7 @@ def test_nddataset_repr_html():
 # ### Metadata ################################################################
 def test_nddataset_with_meta(ds1):
     da = ds1.copy()
-    meta = scp.Meta()
+    meta = Meta()
     meta.essai = ["try_metadata", 10]
     da.meta = meta
     # check copy of meta
@@ -804,7 +803,7 @@ def test_nddataset_multiple_axis(
 ):  # dsm is defined in conftest
     ref = ref_ds
     da = dsm.copy()
-    coordm = scp.CoordSet(coord2, coord2b)
+    coordm = CoordSet(coord2, coord2b)
     # check indexing
     assert da.shape == ref.shape
     coords = da.coordset
@@ -845,22 +844,22 @@ def test_nddataset_coords_manipulation(dsm):
 
 def test_nddataset_square_dataset_with_identical_coordinates():
     a = np.random.rand(3, 3)
-    c = scp.Coord(np.arange(3) * 0.25, title="time", units="us")
-    nd = scp.NDDataset(a, coordset=scp.CoordSet(x=c, y="x"))
+    c = Coord(np.arange(3) * 0.25, title="time", units="us")
+    nd = NDDataset(a, coordset=CoordSet(x=c, y="x"))
     assert nd.x == nd.y
 
 
 # ### Test masks ######
 def test_nddataset_use_of_mask(dsm):
     nd = dsm
-    nd[950.0:1260.0] = scp.MASKED
+    nd[950.0:1260.0] = MASKED
 
 
 # ------------------------------------------------------------------
 # additional tests made following some bug fixes
 # ------------------------------------------------------------------
 def test_nddataset_repr_html_bug_undesired_display_complex():
-    da = scp.NDDataset([1, 2, 3])
+    da = NDDataset([1, 2, 3])
     da.title = "intensity"
     da.description = "Some experimental measurements"
     da.units = "dimensionless"
@@ -868,7 +867,7 @@ def test_nddataset_repr_html_bug_undesired_display_complex():
 
 
 def test_nddataset_bug_fixe_figopeninnotebookwithoutplot():
-    da = scp.NDDataset([1, 2, 3])
+    da = NDDataset([1, 2, 3])
     da2 = np.sqrt(da**3)
     assert da2._fig is None  # no figure should open
 
@@ -881,7 +880,7 @@ def test_nddataset_bug_par_arnaud():
     x = scp.Coord(data=np.linspace(1000.0, 4000.0, num=6000), title="x")
     y = scp.Coord(data=np.linspace(0.0, 10, num=5), title="y")
     data = np.random.rand(x.size, y.size)
-    ds = scp.NDDataset(data, coordset=[x, y])
+    ds = NDDataset(data, coordset=[x, y])
     ds2 = ds[2000.0:3200.0, :]
     assert ds2.coordset.y.data.shape[0] == 2400, "taille axe 0 doit être 2400"
     assert ds2.data.shape[0] == 2400, "taille dimension 0 doit être 2400"
@@ -890,13 +889,13 @@ def test_nddataset_bug_par_arnaud():
 # ################ Complex and Quaternion, and NMR ##################
 def test_nddataset_create_from_complex_data():
     # 1D (complex)
-    nd = scp.NDDataset([1.0 + 2.0j, 2.0 + 0j])
+    nd = NDDataset([1.0 + 2.0j, 2.0 + 0j])
     assert nd.data.size == 2
     assert nd.size == 2
     assert nd.data.shape == (2,)
     assert nd.shape == (2,)
     # 2D (complex in the last dimension - automatic detection)
-    nd = scp.NDDataset(
+    nd = NDDataset(
         [[1.0 + 2.0j, 2.0 + 0j], [1.3 + 2.0j, 2.0 + 0.5j], [1.0 + 4.2j, 2.0 + 3j]]
     )
     assert nd.data.size == 6
@@ -904,7 +903,7 @@ def test_nddataset_create_from_complex_data():
     assert nd.data.shape == (3, 2)
     assert nd.shape == (3, 2)
     # 2D quaternion
-    nd = scp.NDDataset(
+    nd = NDDataset(
         [
             [1.0, 2.0],
             [1.3, 2.0],
@@ -924,7 +923,7 @@ def test_nddataset_create_from_complex_data():
 
 
 def test_nddataset_set_complex_1D_during_math_op():
-    nd = scp.NDDataset([1.0, 2.0], coordset=[scp.Coord([10, 20])], units="meter")
+    nd = NDDataset([1.0, 2.0], coordset=[Coord([10, 20])], units="meter")
     assert nd.data.size == 2
     assert nd.size == 2
     assert nd.shape == (2,)
@@ -937,7 +936,7 @@ def test_nddataset_set_complex_1D_during_math_op():
 
 def test_nddataset_create_from_complex_data_with_units():
     # 1D
-    nd = scp.NDDataset([1.0 + 2.0j, 2.0 + 0j])
+    nd = NDDataset([1.0 + 2.0j, 2.0 + 0j])
     assert nd.data.size == 2
     assert nd.size == 2
     assert nd.data.shape == (2,)
@@ -946,7 +945,7 @@ def test_nddataset_create_from_complex_data_with_units():
     nd.units = "m**-1"
     nd.ito("cm^-1")
     # 2D
-    nd2 = scp.NDDataset(
+    nd2 = NDDataset(
         [[1.0 + 2.0j, 2.0 + 0j], [1.3 + 2.0j, 2.0 + 0.5j], [1.0 + 4.2j, 2.0 + 3j]]
     )
     assert nd2.data.size == 6
@@ -962,7 +961,7 @@ def test_nddataset_real_imag_quaternion():
     na = np.array(
         [[1.0 + 2.0j, 2.0 + 0j, 1.3 + 2.0j], [2.0 + 0.5j, 1.0 + 4.2j, 2.0 + 3j]]
     )
-    nd = scp.NDDataset(na)
+    nd = NDDataset(na)
     # in the last dimension
     assert_array_equal(nd.real, na.real)
     assert_array_equal(nd.imag, na.imag)
@@ -978,7 +977,7 @@ def test_nddataset_real_imag_quaternion():
             [5.0 + 4.2j, 2.0 + 3j],
         ]
     )
-    nd = scp.NDDataset(na)
+    nd = NDDataset(na)
     nd.set_quaternion(inplace=True)
     assert nd.is_quaternion
     assert_array_equal(nd.real.data, na[::2, :].real)
@@ -990,7 +989,7 @@ def test_nddataset_real_imag_quaternion():
             [5.0 + 4.2j, 2.0 + 3j],
         ]
     )
-    ndj = scp.NDDataset(nb, dtype=quaternion)
+    ndj = NDDataset(nb, dtype=quaternion)
     assert nd.imag == ndj
 
 
@@ -1003,7 +1002,7 @@ def test_nddataset_quaternion():
             [5.0, 4.2, 2.0, 3.0, 3.0, 3.0],
         ]
     )
-    nd = scp.NDDataset(na0)
+    nd = NDDataset(na0)
     assert nd.shape == (4, 6)
     nd.dims = ["v", "u"]
     nd.set_coordset(v=np.linspace(-1, 1, 4), u=np.linspace(-10.0, 10.0, 6))
@@ -1031,7 +1030,7 @@ def test_nddataset_max_with_2D_quaternion(NMR_dataset_2D):
 def test_nddataset_max_min_with_1D(NMR_dataset_1D):
     # test on a 1D NDDataset
     nd1 = NMR_dataset_1D
-    nd1[4] = scp.MASKED
+    nd1[4] = MASKED
     assert nd1.is_masked
     mx = nd1.max()
     assert (mx.real, mx.imag) == pytest.approx((2283.5096153847107, -2200.383064516033))
@@ -1056,7 +1055,7 @@ def test_nddataset_comparison_of_dataset(NMR_dataset_1D):
 
 def test_nddataset_complex_dataset_slicing_by_index():
     na0 = np.array([1.0 + 2.0j, 2.0, 0.0, 0.0, -1.0j, 1j] * 4)
-    nd = scp.NDDataset(na0)
+    nd = NDDataset(na0)
     assert nd.shape == (24,)
     assert nd.data.shape == (24,)
     coords = (np.linspace(-10.0, 10.0, 24),)
@@ -1074,8 +1073,8 @@ def test_nddataset_complex_dataset_slicing_by_index():
     assert nd2.shape == (5,)
     assert nd2.data.shape == (5,)
     na0 = na0.reshape(6, 4)
-    nd = scp.NDDataset(na0)
-    coords = scp.CoordSet(np.linspace(-10.0, 10.0, 6), np.linspace(-1.0, 1.0, 4))
+    nd = NDDataset(na0)
+    coords = CoordSet(np.linspace(-10.0, 10.0, 6), np.linspace(-1.0, 1.0, 4))
     nd.set_coordset(**coords)
     assert nd.shape == (6, 4)
     assert nd.data.shape == (6, 4)
@@ -1101,8 +1100,8 @@ def test_nddataset_init_complex_1D_with_mask():
     # test with complex with mask and units
     np.random.seed(12345)
     d = np.random.random((5)) * np.exp(0.1j)
-    d1 = scp.NDDataset(d, units=ur.Hz)  # with units
-    d1[1] = scp.MASKED
+    d1 = NDDataset(d, units=ur.Hz)  # with units
+    d1[1] = MASKED
     assert d1.shape == (5,)
     assert d1._data.shape == (5,)
     assert d1.size == 5
@@ -1117,7 +1116,7 @@ def test_nddataset_init_complex_1D_with_mask():
 
 
 def test_nddataset_timezone():
-    nd = scp.NDDataset(np.ones((1, 3, 1, 2)), name="value")
+    nd = NDDataset(np.ones((1, 3, 1, 2)), name="value")
     assert nd.timezone is not None
     assert str(nd.timezone) == nd.local_timezone
     nd.timezone = "UTC"
@@ -1169,7 +1168,7 @@ def test_nddataset_set_coordinates(nd2d, ds1):
     assert nd.dims == ["x", "y"]
     assert nd.y == np.arange(ny)
     assert nd.x.is_empty
-    assert nd.coordset == scp.CoordSet(np.arange(ny), None)
+    assert nd.coordset == CoordSet(np.arange(ny), None)
     nd = nd2d.copy()
     ny, nx = nd.shape
     nd.set_coordset(None, np.arange(nx))
@@ -1192,30 +1191,26 @@ def test_nddataset_set_coordinates(nd2d, ds1):
     # set coordinates all together
     nd = nd2d.copy()
     ny, nx = nd.shape
-    nd.coordset = scp.CoordSet(u=np.arange(nx), v=np.arange(ny))
+    nd.coordset = CoordSet(u=np.arange(nx), v=np.arange(ny))
     assert nd.dims != ["u", "v"]  # dims = ['y','x']
     # set dim names
     nd.dims = ["u", "v"]
-    nd.set_coordset(**scp.CoordSet(u=np.arange(ny), v=np.arange(nx)))
+    nd.set_coordset(**CoordSet(u=np.arange(ny), v=np.arange(nx)))
     assert nd.dims == ["u", "v"]
 
 
 # ## issue 29
 def test_nddataset_issue_29_mulitlabels():
-    DS = scp.NDDataset(np.random.rand(3, 4))
+    DS = NDDataset(np.random.rand(3, 4))
     with pytest.raises(ValueError):
         # shape data and label mismatch
         DS.set_coordset(
             DS.y,
-            scp.Coord(
-                title="xaxis", units="s", data=[1, 2, 3, 4], labels=["a", "b", "c"]
-            ),
+            Coord(title="xaxis", units="s", data=[1, 2, 3, 4], labels=["a", "b", "c"]),
         )
-    c = scp.Coord(
-        title="xaxis", units="s", data=[1, 2, 3, 4], labels=["a", "b", "c", "d"]
-    )
+    c = Coord(title="xaxis", units="s", data=[1, 2, 3, 4], labels=["a", "b", "c", "d"])
     DS.set_coordset(x=c)
-    c = scp.Coord(
+    c = Coord(
         title="xaxis",
         units="s",
         data=[1, 2, 3, 4],
@@ -1243,7 +1238,7 @@ def test_nddataset_issue_29_mulitlabels():
 def test_nddataset_apply_funcs(dsm):
     # convert to masked array
     np.ma.array(dsm)
-    dsm[1] = scp.MASKED
+    dsm[1] = MASKED
     np.ma.array(dsm)
     np.array(dsm)
 
@@ -1254,17 +1249,17 @@ def test_take(dsm):
 
 def test_bug_462():
 
-    A = scp.random((10, 100))
-    A.x = scp.Coord(np.arange(0.0, 100.0, 1), title="coord1")
+    A = NDDataset.random((10, 100))
+    A.x = Coord(np.arange(0.0, 100.0, 1), title="coord1")
     A.write("A.scp", confirm=False)
-    B = scp.read("A.scp")
+    B = NDDataset.read("A.scp")
     assert B.x == A.x, "incorrect encoding/decoding"
 
-    C = scp.random((10, 100))
+    C = NDDataset.random((10, 100))
     C.x = [
-        scp.Coord(np.arange(0.0, 100.0, 1), title="coord1"),
-        scp.Coord(np.arange(0.0, 1000.0, 10), title="coord2"),
+        Coord(np.arange(0.0, 100.0, 1), title="coord1"),
+        Coord(np.arange(0.0, 1000.0, 10), title="coord2"),
     ]
     C.write("C.scp", confirm=False)
-    D = scp.read("C.scp")
+    D = NDDataset.read("C.scp")
     assert len(D.x) == 2, "incorrect encoding/decoding"

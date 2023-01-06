@@ -21,8 +21,8 @@ import numpy as np
 from traitlets import HasTraits, Instance, Unicode
 
 from spectrochempy.core import INFO, info_, set_loglevel
+from spectrochempy.core.dataset.mixins.npy import dot
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.npy import dot
 
 # ============================================================================
 # class SIMPLISMA

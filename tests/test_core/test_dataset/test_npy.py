@@ -10,7 +10,7 @@ import numpy as np
 import pytest
 
 from spectrochempy import diag
-from spectrochempy.core.dataset.npy import dot
+from spectrochempy.core.dataset.mixins.npy import dot
 
 
 def test_npy(ds1):

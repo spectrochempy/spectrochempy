@@ -34,11 +34,11 @@ from traittypes import Array
 from spectrochempy.core import error_, warning_
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.coordset import CoordSet
+from spectrochempy.core.dataset.mixins.ndio import NDIO
+from spectrochempy.core.dataset.mixins.ndmath import NDMath, _set_operators, _set_ufuncs
+from spectrochempy.core.dataset.mixins.ndplot import NDPlot
 from spectrochempy.core.dataset.ndarray import DEFAULT_DIM_NAME, NDArray
 from spectrochempy.core.dataset.ndcomplex import NDComplexArray
-from spectrochempy.core.dataset.ndio import NDIO
-from spectrochempy.core.dataset.ndmath import NDMath, _set_operators, _set_ufuncs
-from spectrochempy.core.dataset.ndplot import NDPlot
 from spectrochempy.core.project.baseproject import AbstractProject
 from spectrochempy.optional import import_optional_dependency
 from spectrochempy.utils import colored_output, get_user_and_node

@@ -19,8 +19,8 @@ from traitlets import Dict, HasTraits, Instance, Unicode
 
 from spectrochempy.analysis.pca import PCA
 from spectrochempy.core import INFO, info_, set_loglevel
+from spectrochempy.core.dataset.mixins.npy import dot
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.npy import dot
 from spectrochempy.utils.exceptions import deprecated
 
 

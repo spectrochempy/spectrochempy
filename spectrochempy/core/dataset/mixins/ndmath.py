@@ -3315,6 +3315,8 @@ api_funcs = [  # creation functions
     "conj",
     "all",
     "any",
+    "around",
+    "round",
 ]
 
 for funcname in api_funcs:

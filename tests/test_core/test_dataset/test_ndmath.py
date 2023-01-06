@@ -19,12 +19,12 @@ import spectrochempy as scp
 from spectrochempy.core import error_, info_
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.coordset import CoordSet
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndmath import (
+from spectrochempy.core.dataset.mixins.ndmath import (
     _binary_ufuncs,
     _comp_ufuncs,
     _unary_ufuncs,
 )
+from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units.units import Quantity, Unit, ur
 from spectrochempy.utils import MASKED
 from spectrochempy.utils.exceptions import CoordinateMismatchError

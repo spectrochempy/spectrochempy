@@ -8,7 +8,7 @@
 
 from traitlets import HasTraits, TraitError
 
-from spectrochempy.core.dataset.coordrange import trim_ranges
+from spectrochempy.core.common.coordrange import trim_ranges
 from spectrochempy.utils import Range
 from spectrochempy.utils.testing import raises
 

@@ -21,8 +21,8 @@ from traitlets import HasTraits, Instance
 from spectrochempy.analysis.svd import SVD
 from spectrochempy.core import info_
 from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.mixins.npy import dot
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.npy import dot
 from spectrochempy.utils import NBlue, NRed
 
 # ======================================================================================================================

@@ -57,7 +57,7 @@ def generate_fake():
 
     # define properties of the spectra and concentration profiles
     # ----------------------------------------------------------------------------------------------------------------------
-    from spectrochempy.core.dataset.npy import dot
+    from spectrochempy.core.dataset.mixins.npy import dot
 
     # data for four peaks (one very broad)
     POS = (6000.0, 4000.0, 2000.0, 2500.0)

@@ -70,7 +70,7 @@ def json_serialiser(byte_obj, encoding=None):
     """
     Return a serialised json object.
     """
-    from spectrochempy.core.dataset.ndplot import PreferencesSet
+    from spectrochempy.core.dataset.mixins.ndplot import PreferencesSet
 
     if byte_obj is None:
         return None
