@@ -30,16 +30,9 @@ requirements:
     - setuptools_scm
   run:
     - python
+
   test:
     - python
-
-test:
-  script_env:
-    - VERSION
-    - DEVSTRING
-
-  imports:
-    - spectrochempy
 
 about:
   home: "https://github.com/spectrochempy/spectrochempy"
