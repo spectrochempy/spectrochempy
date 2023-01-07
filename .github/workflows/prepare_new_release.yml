@@ -5,10 +5,10 @@ name: Prepare a new release
 
 on:
   workflow_dispatch:
-#    inputs:
-#      versionString:
-#        description: 'The version we want to release (e.g. 0.4.2)'
-#        required: true
+    inputs:
+      versionString:
+        description: 'The version we want to release (e.g. 0.4.2)'
+        required: true
 
 jobs:
 
@@ -29,9 +29,7 @@ jobs:
           python3 -m pip install setuptools_scm
 
       - name: Create release branch
-        run: |
-          bash .ci/set_env_var.sh
-          git checkout -b release/${{ env.VERSION }}
+        run: git checkout -b release/${{ github.event.inputs.versionString }}
 
       - name: Initialize mandatory git config
         run: |
@@ -44,7 +42,7 @@ jobs:
 
       - name: Update version in CHANGELOG, .zenodo.json and CITATION.cff
         run: |
-          python .ci/update_version_and_changelog.py ${{ env.VERSION }}
+          python .ci/update_version_and_changelog.py ${{ github.event.inputs.versionString }}
 
       - name: convert CHANGELOG.md to rst via pandoc
         uses: docker://pandoc/core:2.9
@@ -61,21 +59,21 @@ jobs:
           pip install pre-commit
           pre-commit install
           pre-commit run --all-files
-          git commit -a --message "Prepare release ${{ env.VERSION }}"
+          git commit -a --message "Prepare release ${{ github.event.inputs.versionString }}"
           echo "commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
 
       - name: Push new branch
-        run: git push origin release/${{ env.VERSION }}
+        run: git push origin release/${{ github.event.inputs.versionString }}
 
       - name: Create pull request into master
         uses: thomaseizinger/create-pull-request@1.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          head:  release/${{ env.VERSION }}
+          head:  release/${{ github.event.inputs.versionString }}
           base: master
           reviewers: ${{ github.actor }}
-          title: Release version ${{ env.VERSION }}
+          title: Release version ${{ github.event.inputs.versionString }}
           body: |
             Hi @${{ github.actor }}!
 
