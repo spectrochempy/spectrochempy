@@ -37,6 +37,7 @@ pytest-doctestplus
 pytest-flake8
 pytest-mock
 pyfakefs
+pep8-naming
 scikit-image
 coverage
 black

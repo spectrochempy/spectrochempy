@@ -17,7 +17,6 @@
 #
 # =============================================================================
 
-
 channels:
     - conda-forge
     - spectrocat
@@ -49,7 +48,9 @@ dependencies:
     - ipywidgets
     - ipympl
 
-    # mainly for install and a bit more...
+    # mainly for install and a bit more ...
     - setuptools
     - setuptools_scm
     - git
+
+# EOF
