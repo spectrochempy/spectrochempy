@@ -55,6 +55,7 @@ class Zenodo:
 
     def __str__(self):
         return json.dumps(self._js, indent=2)
+        fid.write('\n') # add a trailing blank line for pre-commit compat.
 
 
 class Citation:
