@@ -1,6 +1,6 @@
 # What's new
 
-## Unreleased
+## Version 0.4.10 [2023-01-07]
 
 ### NEW FEATURES
 * Modified attribute history:
