@@ -1,7 +1,9 @@
 {%- if NAME is defined %}
 name: {{ NAME }}
 {%- endif %}
-{%- if HEADER is defined %}{{ HEADER }}{%- else %}
+{%- if HEADER is defined %}
+{{ HEADER }}
+{%- else %}
 # =============================================================================
 #
 # NOTE: This template file is used by to create the conda environment for
@@ -10,7 +12,9 @@ name: {{ NAME }}
 #       In the test workflow, environments are generated automatically by
 #      .ci/env_create.py (see .github/workflows/test_package.yml#job 1)
 #
-# ============================================================================={%- endif %}
+# =============================================================================
+{%- endif %}
+
 channels:
     - conda-forge
     - spectrocat
@@ -27,8 +31,10 @@ dependencies:
     # specific
     - quadprog
     - brukeropusreader
-    - quaternion{%- if CANTERA %}
-    - cantera{%- endif %}
+    - quaternion
+{%- if CANTERA %}
+    - cantera
+{%- endif %}
 
     # for the core package
     - colorama
