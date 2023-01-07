@@ -1,33 +1,14 @@
-{%- if NAME is defined %}
-name: {{ NAME }}
-{%- endif %}
-{%- if HEADER is defined %}
-{{ HEADER }}
-{%- else %}
-# =============================================================================
-#
-# NOTE: This template file is used by to create the conda environment for
-#       the test github action.
-#
-#       In the test workflow, environments are generated automatically by
-#      .ci/env_create.py (see .github/workflows/test_package.yml#job 1)
-#
-# =============================================================================
-{%- endif %}
-channels:
-    - conda-forge
-    - spectrocat
-    - defaults
-{%- if CANTERA %}
-    - cantera
-{%- endif %}
+{#-
+---------------------------------------------------------------------------------------
+DEPENDENCIES template
+---------------------------------------------------------------------------------------
+Change SpectroChemPy project dependencies here only.
 
-dependencies:
-{%- if VERSION %}
-    - python={{ VERSION }}
-{%- endif %}
+requirements[_dev].text, environment[_dev].yml and .conda/meta.yaml will be created
+or updated accordingly
 
-    # specific
+#}
+    # specific dependencies
     - quadprog
     - brukeropusreader
     - quaternion
@@ -35,7 +16,7 @@ dependencies:
     - cantera
 {%- endif %}
 
-    # for the core package
+    # dependencies for the core package
     - colorama
     - dill
     - ipython
@@ -54,21 +35,21 @@ dependencies:
     - ipywidgets
     - ipympl
 
-    # mainly for install and a bit more ...
+    # dependencies needed mainly for install and a bit more ...
     - setuptools
     - setuptools_scm
     - git
-{% if DEV %}
+
     # Jupyter lab
     - jupyterlab
     - nodejs
 
+{% if DEV -%}
     # DEV dependencies
     # ----------------
     # From here, the dependencies are essentially for development.
     # They should not be necessary for the user of  spectrochempy.
 
-    # just for testing
     - pytest
     - pytest-doctestplus
     - pytest-flake8
@@ -80,8 +61,6 @@ dependencies:
     - black
     - pre-commit
     - cffconvert
-
-    # DEV: code and docs
     - mamba
     - docrep
     - jupytext
@@ -95,19 +74,12 @@ dependencies:
     - sphinx-copybutton
     - numpydoc
     - pandoc
-
-    # DEV: build
     - conda-build
     - conda-verify
     - anaconda-client
-
-    # optional
-    # - xarray
-    # - datashader
-    # - scikit-learn
 {% endif %}
 {%- if DASH %}
-    # dash
+    # dash dependencies
     - dash
     - dash-bootstrap-components
     - dash-daq
@@ -122,5 +94,5 @@ dependencies:
 {%- if DASH %}
         - dash_defer_js_import
         - dash-ace
-{% endif %}
-# EOF
+{%- endif %}
+#EOF

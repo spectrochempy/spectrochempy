@@ -1,12 +1,12 @@
-# WARNING !!!
-# =============================================================================
+# ======================================================================================
 #
-# This file is auto-generated from environment.yml file, do not modify it directly.
+# This file is auto-generated from environment_dev.yml file.
 #
-# See in `environment.yml` for more information.
+# !!! DO NOT MODIFY !!!
 #
-# =============================================================================
-
+# See in `environment_dev.yml` for more information.
+#
+# ======================================================================================
 quadprog
 brukeropusreader
 numpy-quaternion
@@ -30,3 +30,5 @@ ipympl
 setuptools
 setuptools_scm
 gitpython
+jupyterlab
+nodejs
