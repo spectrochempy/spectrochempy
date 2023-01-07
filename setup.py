@@ -94,7 +94,10 @@ def read_requirements():
     req = path.read_text().strip()
     req = req.split("\n")
     req = list(map(str.strip, req))
-    req.remove("")
+    try:
+        req.remove("")
+    except Exception:
+        pass
     return [r for r in req if not r.startswith("#")]
 
 

@@ -9,7 +9,7 @@ repos:
       - id: create-requirements
         name: create-requirements
         description: Create environment and requirement files according to a template
-        entry: scripts/create_requirements.py
+        entry: .ci/create_requirements.py
         language: python
         additional_dependencies: [pyyaml, jinja2]
         pass_filenames: false

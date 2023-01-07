@@ -1,0 +1,26 @@
+{#
+---------------------------------------------------------------------------------------
+Environment[_dev].yml template
+---------------------------------------------------------------------------------------
+-#}
+{%- if NAME is defined %}
+name: {{ NAME }}
+{%- endif -%}
+{%- if HEADER is defined -%}
+{{ HEADER }}
+{%- endif -%}
+channels:
+    - conda-forge
+    - spectrocat
+    - defaults
+{%- if CANTERA %}
+    - cantera
+{%- endif %}
+
+dependencies:
+{%- if VERSION %}
+    - python={{ VERSION }}
+{%- endif %}
+{#-
+Here the content of dependencies.tmpl will be added. Change any dependencies there!
+-#}

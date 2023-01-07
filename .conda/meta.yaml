@@ -16,7 +16,6 @@ build:
   script_env:
     - VERSION
     - DEVSTRING
-    - CONDA_BLD_PATH
   string: "{{ devstring }}"
   noarch: python
   script:
@@ -29,46 +28,16 @@ requirements:
     - python >=3.7
     - setuptools
     - setuptools_scm
-    - nodejs
-    - jupyterlab >=2.2.10
-    - matplotlib-base
-
   run:
-    - quadprog
-    - brukeropusreader
-    - quaternion
-    - colorama
-    - dill
-    - ipython>=7.31.1
-    - jinja2<3.1
-    - mamba
-    - matplotlib>=3.5
-    - numba=0.55.2
-    - numpy>=1.22
-    - pint>=0.18
-    - requests
-    - scipy=1.7.3
-    - tqdm
-    - traitlets<5.2
-    - traittypes
-    - xlrd
-    - setuptools
-    - setuptools_scm
-    - git
-    - pyyaml
-    - ipywidgets
-    - ipympl
-    - jupyterlab >=2.2.10
-    - nodejs
-
+    - python
   test:
-    - python                {{ python }}
+    - python
 
 test:
   script_env:
     - VERSION
     - DEVSTRING
-    - CONDA_BLD_PATH
+
   imports:
     - spectrochempy
 
