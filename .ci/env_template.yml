@@ -1,4 +1,6 @@
-{%- if NAME is defined %}name: {{ NAME }}{%- endif %}
+{%- if NAME is defined %}
+name: {{ NAME }}
+{%- endif %}
 {%- if HEADER is defined %}{{ HEADER }}{%- else %}
 # =============================================================================
 #
@@ -37,7 +39,7 @@ dependencies:
     - matplotlib
     - numba
     - numpy
-    - pint>=20
+    - pint>=0.20
     - requests
     - scipy
     - tqdm
@@ -48,7 +50,7 @@ dependencies:
     - ipywidgets
     - ipympl
 
-    # mainly for install and a bit more...
+    # mainly for install and a bit more ...
     - setuptools
     - setuptools_scm
     - git
@@ -116,5 +118,5 @@ dependencies:
 {%- if DASH %}
         - dash_defer_js_import
         - dash-ace
-{%- endif %}
+{% endif %}
 # EOF

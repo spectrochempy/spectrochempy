@@ -37,7 +37,7 @@ dependencies:
     - matplotlib
     - numba
     - numpy
-    - pint>=20
+    - pint>=0.20
     - requests
     - scipy
     - tqdm
@@ -48,7 +48,7 @@ dependencies:
     - ipywidgets
     - ipympl
 
-    # mainly for install and a bit more...
+    # mainly for install and a bit more ...
     - setuptools
     - setuptools_scm
     - git

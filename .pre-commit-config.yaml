@@ -4,6 +4,16 @@ default_language_version:
 
 repos:
 
+  - repo: local
+    hooks:
+      - id: create-requirements
+        name: create-requirements
+        description: Create environment and requirement files according to a template
+        entry: scripts/create_requirements.py
+        language: python
+        additional_dependencies: [pyyaml, jinja2]
+        pass_filenames: false
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:

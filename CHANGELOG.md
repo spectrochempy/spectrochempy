@@ -4,7 +4,7 @@
 
 ### NEW FEATURES
 
-* Compatibility with pint<20 versions removed.
+* Compatibility with pint<0.20 versions removed.
 * Modified attribute history:
   Its behavior have been improved.
   Dates for entries are set automatically and are timezone-aware.

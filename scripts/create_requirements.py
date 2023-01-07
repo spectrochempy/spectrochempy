@@ -128,14 +128,13 @@ if __name__ == "__main__":
 
     parser.add_argument("--dash", help="use dash", action="store_true")
     parser.add_argument("--cantera", help="use cantera", action="store_true")
-
     args = parser.parse_args()
 
     repo_path = Path(__file__).parent.parent
 
     # generate environment yaml file
     tempfile = repo_path / ".ci" / "env_template.yml"
-    template = Template(tempfile.read_text("utf-8"))
+    template = Template(tempfile.read_text("utf-8"), keep_trailing_newline=True)
     header = """
 # =============================================================================
 #
@@ -174,12 +173,7 @@ if __name__ == "__main__":
         ],
     )
 
-    out = template.render(
-        DEV=True,
-        DASH=args.dash,
-        CANTERA=args.cantera,
-        HEADER=header,
-    )
+    out = template.render(DEV=True, DASH=args.dash, CANTERA=args.cantera, HEADER=header)
     filename = repo_path / "environment_dev.yml"
     filename.write_text(out)
 

@@ -18,7 +18,7 @@ jinja2
 matplotlib
 numba
 numpy
-pint>=20
+pint>=0.20
 requests
 scipy
 tqdm
