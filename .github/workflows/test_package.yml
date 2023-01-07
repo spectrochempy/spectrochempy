@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - develop
+      - feature/*
 
   schedule:
     - cron: '00 0 * * *'
@@ -64,6 +65,10 @@ jobs:
           python3 -m pip install coverage pytest pytest-doctestplus pytest-flake8
           python3 -m pip install pytest-mock pyfakefs cffconvert
           python3 -m pip install numpydoc>=1.2
+
+      - name: Install optional libraries needed for tests
+        run: |
+          python3 -m pip install xarray
 
       - name: Test and coverage
         run: |

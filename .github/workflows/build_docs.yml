@@ -1,4 +1,4 @@
-name: 📕 Docs
+name: Docs 📕
 
 on:
   push:
@@ -59,6 +59,10 @@ jobs:
       - name: Install spectrochempy
         run: |
           python -m pip install .
+
+      - name: Install optional libraries needed for tests
+        run: |
+          mamba install xarray
 
       - name: Set up version environment variable
         run: |
