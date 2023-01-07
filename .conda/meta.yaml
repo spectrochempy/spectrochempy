@@ -38,6 +38,9 @@ test:
   script_env:
     - VERSION
     - DEVSTRING
+  script:
+    - conda env update -f environment.yml
+    - python <<< "import spectrochempy as scp"
 
 about:
   home: "https://github.com/spectrochempy/spectrochempy"
