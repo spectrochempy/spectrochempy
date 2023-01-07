@@ -26,40 +26,38 @@ build:
 requirements:
   host:
     - pip
-    - python >=3.7
+    - python >3.7
     - setuptools
     - setuptools_scm
     - nodejs
-    - jupyterlab >=2.2.10
+    - jupyterlab
     - matplotlib-base
 
   run:
+    # specific
     - quadprog
     - brukeropusreader
     - quaternion
+
+    # for the core package
     - colorama
     - dill
-    - ipython>=7.31.1
-    - jinja2<3.1
-    - mamba
-    - matplotlib>=3.5
-    - numba=0.55.2
-    - numpy>=1.22
-    - pint>=0.18
+    - docrep
+    - ipython
+    - jinja2
+    - matplotlib
+    - numba
+    - numpy
+    - pint
     - requests
-    - scipy=1.7.3
+    - scipy
     - tqdm
-    - traitlets<5.2
+    - traitlets
     - traittypes
     - xlrd
-    - setuptools
-    - setuptools_scm
-    - git
     - pyyaml
     - ipywidgets
     - ipympl
-    - jupyterlab >=2.2.10
-    - nodejs
 
   test:
     - python                {{ python }}
