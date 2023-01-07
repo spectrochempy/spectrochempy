@@ -34,6 +34,11 @@ requirements:
   test:
     - python
 
+test:
+  script_env:
+    - VERSION
+    - DEVSTRING
+
 about:
   home: "https://github.com/spectrochempy/spectrochempy"
   license: CeCILL-B

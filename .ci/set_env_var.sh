@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ## get version string from setuptools_scm
 PVS="$(python setup.py --version)"
