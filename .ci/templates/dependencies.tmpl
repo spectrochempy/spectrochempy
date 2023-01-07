@@ -2,13 +2,13 @@
 ---------------------------------------------------------------------------------------
 DEPENDENCIES template
 ---------------------------------------------------------------------------------------
-   Change SpectroChemPy project dependencies here only.
+Change SpectroChemPy project dependencies here only.
 
-   requirements[_dev].text, environment[_dev].yml and .conda/meta.yaml will be created
-   or updated accordingly
+requirements[_dev].text, environment[_dev].yml and .conda/meta.yaml will be created
+or updated accordingly
 
 #}
-# specific dependencies
+    # specific dependencies
     - quadprog
     - brukeropusreader
     - quaternion
@@ -16,7 +16,7 @@ DEPENDENCIES template
     - cantera
 {%- endif %}
 
-# dependencies for the core package
+    # dependencies for the core package
     - colorama
     - dill
     - ipython
@@ -35,20 +35,20 @@ DEPENDENCIES template
     - ipywidgets
     - ipympl
 
-# dependencies needed mainly for install and a bit more ...
+    # dependencies needed mainly for install and a bit more ...
     - setuptools
     - setuptools_scm
     - git
 
-# Jupyter lab
+    # Jupyter lab
     - jupyterlab
     - nodejs
 
 {% if DEV -%}
-# DEV dependencies
-# ----------------
-# From here, the dependencies are essentially for development.
-# They should not be necessary for the user of  spectrochempy.
+    # DEV dependencies
+    # ----------------
+    # From here, the dependencies are essentially for development.
+    # They should not be necessary for the user of  spectrochempy.
 
     - pytest
     - pytest-doctestplus
@@ -79,7 +79,7 @@ DEPENDENCIES template
     - anaconda-client
 {% endif %}
 {%- if DASH %}
-# dash dependencies
+    # dash dependencies
     - dash
     - dash-bootstrap-components
     - dash-daq

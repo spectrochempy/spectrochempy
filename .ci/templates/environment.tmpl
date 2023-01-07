@@ -6,8 +6,8 @@ Environment[_dev].yml template
 {%- if NAME is defined %}
 name: {{ NAME }}
 {%- endif -%}
-{%- if HEADER is defined -%}
-{{ HEADER }}
+{%- if COMMENT is defined -%}
+{{ COMMENT }}
 {%- endif -%}
 channels:
     - conda-forge

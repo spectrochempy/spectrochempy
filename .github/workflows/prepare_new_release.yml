@@ -15,7 +15,7 @@ jobs:
   Prepare_new_release:
     name: "Prepare a new release"
     runs-on: ubuntu-latest
-    # if: github.repository == 'spectrochempy/spectrochempy'
+    if: github.repository == 'spectrochempy/spectrochempy'
 
     steps:
 
@@ -58,6 +58,9 @@ jobs:
       - name: Commit tracked files
         id: make-commit
         run: |
+          pip install pre-commit
+          pre-commit install
+          pre-commit run --all-files
           git commit -a --message "Prepare release ${{ env.VERSION }}"
           echo "commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
 

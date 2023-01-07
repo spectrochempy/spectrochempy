@@ -1,12 +1,12 @@
-# =============================================================================
+# ======================================================================================
 #
-# This file is auto-generated from environment.yml file.
+# This file is auto-generated from environment_dev.yml file.
 #
 # !!! DO NOT MODIFY !!!
 #
-# See in `environment.yml` for more information.
+# See in `environment_dev.yml` for more information.
 #
-# =============================================================================
+# ======================================================================================
 quadprog
 brukeropusreader
 numpy-quaternion
