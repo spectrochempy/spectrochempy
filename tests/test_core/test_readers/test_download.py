@@ -45,8 +45,9 @@ def test_mock_download_iris(mocker):
     mocker.patch(
         "requests.get", side_effect=OSError("Failed in uploading the `IRIS` dataset!")
     )
+    sys.modules["sklearn"] = mock.MagicMock(__name__="sklearn", __VERSION__="0.0.1")
     sys.modules["sklearn.datasets"] = mock.MagicMock(
-        __name__="sklearn.datasets", __VERSION__="0.0.0"
+        __name__="sklearn.datasets", __VERSION__="0.0.1"
     )
     mocker.patch("sklearn.datasets.load_iris", return_value=sklearn_data())
     ds2 = scp.download_iris()

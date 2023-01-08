@@ -85,11 +85,11 @@ def download_iris():
     else:
         # Cannot download - use the scikit-learn dataset (if scikit-learn is installed)
 
-        datasets = import_optional_dependency("sklearn.datasets", errors="ignore")
-        if datasets is None:
+        sklearn = import_optional_dependency("sklearn", errors="ignore")
+        if sklearn is None:
             raise OSError("Failed in uploading the `IRIS` dataset!")
 
-        data = datasets.load_iris()
+        data = sklearn.datasets.load_iris()
 
         coordx = Coord(
             labels=["sepal_length", "sepal width", "petal_length", "petal_width"],
