@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - develop
+      - feature/*
 
   pull_request:
 
@@ -60,7 +61,11 @@ jobs:
         run: |
           python -m pip install .
 
-      - name: Install optional libraries needed for tests
+      - name: Install spectrochempy_data
+        run: |
+          mamba install spectrochempy_data
+
+      - name: Install optional libraries
         run: |
           mamba install xarray
 
