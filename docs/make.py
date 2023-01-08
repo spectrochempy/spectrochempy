@@ -66,9 +66,11 @@ __all__ = []
 
 # create the testdata directory
 import spectrochempy as scp
+from spectrochempy.utils.file import download_testdata
 
 datadir = scp.preferences.datadir
-scp.read_remote(datadir, download_only=True)
+# this process is relatively long, so we do not want to do it several time:
+download_testdata()  # (download done using mamba install spectrochempy_data)
 
 
 class BuildDocumentation(object):
