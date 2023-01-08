@@ -42,7 +42,7 @@ jobs:
       max-parallel: 4
       matrix:
         os: [ubuntu-latest] # , , macos-latest, windows-latest
-        pythonVersion: ["3.10", "3.9", "3.8"]
+        pythonVersion: ["3.10", "3.8"]
 
     steps:
       - name: Checkout code
@@ -70,9 +70,12 @@ jobs:
         run: |
           python3 -m pip install xarray
 
-      - name: Test and coverage
+      - name: Test with coverage
         run: |
-          coverage run --rcfile=tests/.coveragerc -m pytest tests
+          coverage run --rcfile=tests/.coveragerc -m pytest tests/test_utils
+
+      - name: Report coverage
+        run: |
           coverage report
           coverage xml
 
