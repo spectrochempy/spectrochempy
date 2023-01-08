@@ -14,21 +14,11 @@ on:
 
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
 
   test-package:
 
-    # prevent cron jobs from running on forks or release
-    if: |
-      (github.event_name == 'schedule'
-       && github.repository == 'spectrochempy/spectrochempy'
-       && !startsWith(github.ref, 'refs/release/')) || (
-       github.event_name != 'schedule'
-       && !startsWith(github.ref, 'refs/release/'))
+    if: "!startsWith(github.ref, 'refs/release/')"
 
     name: Test using ${{ matrix.os }} and python ${{ matrix.pythonVersion }}
 
@@ -46,12 +36,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
         with:
           fetch-depth: 0
 
       - name: Set up Python ${{ matrix.pythonVersion }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.pythonVersion }}
 
@@ -60,24 +50,42 @@ jobs:
           python3 -m pip install --upgrade pip setuptools wheel
           python3 -m pip install .
 
-      - name: Install dependencies for testing
+      - name: Initialize CodeClimate variable
+        id: vars
+        shell: bash
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         run: |
+          # check for CC_TEST_REPORTER_ID availability
+          unset HAS_CC_TEST_REPORTER_ID
+          if [ ! -z $CC_TEST_REPORTER_ID ]; then HAS_CC_TEST_REPORTER_ID='true' ; fi
+          echo set-output name=HAS_CC_TEST_REPORTER_ID::${HAS_CC_TEST_REPORTER_ID}
+          echo ::set-output name=HAS_CC_TEST_REPORTER_ID::${HAS_CC_TEST_REPORTER_ID}
+
+      - name: Download CodeClimate reporter
+        if: ${{ github.event_name == 'push'
+                && matrix.pythonVersion == '3.10'
+                && matrix.os == 'ubuntu-latest'
+                && steps.vars.outputs.HAS_CC_TEST_REPORTER_ID == 'true'}}
+        run: |
+          # downloading cc-test-reporter
+          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+          chmod +x ./cc-test-reporter
+          ./cc-test-reporter before-build
+
+      - name: Test, generate coverage information
+        run: |
+          # install dependencies for testing
           python3 -m pip install coverage pytest pytest-doctestplus pytest-flake8
           python3 -m pip install pytest-mock pyfakefs cffconvert
           python3 -m pip install numpydoc>=1.2
-
-      - name: Install optional libraries needed for tests
-        run: |
-          python3 -m pip install xarray
-
-      - name: Test and coverage
-        run: |
           coverage run --rcfile=tests/.coveragerc -m pytest tests
-          coverage report
-          coverage xml
 
-      - name: Code Climate reporting
-        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.10' && matrix.os == 'ubuntu-latest' }}
-        uses: paambaati/codeclimate-action@v3.2.0
+      - name: Report Coverage info to CodeClimate
+        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.10'
+          && matrix.os == 'ubuntu-latest' && steps.vars.outputs.HAS_CC_TEST_REPORTER_ID == 'true'}}
         env:
-          CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        run: |
+          coverage xml
+          ./cc-test-reporter after-build
