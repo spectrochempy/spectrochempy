@@ -590,7 +590,7 @@ def _download_full_testdata_directory():
         if name.endswith("/") or "testdata/" not in name:  # dir
             continue
         uncompressed = zipfile.read(name)
-        p = list(pathclean(name).parts)[1:]
+        p = list(pathclean(name).parts)[2:]
         dst = datadir.joinpath("/".join(p))
         _write_downloaded_file(uncompressed, dst)
 
