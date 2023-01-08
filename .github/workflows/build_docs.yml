@@ -61,9 +61,9 @@ jobs:
         run: |
           python -m pip install .
 
-      - name: Install spectrochempy_data
-        run: |
-          mamba install spectrochempy_data
+ #     - name: Install spectrochempy_data
+ #       run: |
+ #         mamba install spectrochempy_data
 
       - name: Install optional libraries
         run: |
