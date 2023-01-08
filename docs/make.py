@@ -96,7 +96,7 @@ class BuildDocumentation(object):
 
     @staticmethod
     def make_redirection_page():
-        # create an index page a the site root to redirect to latest version
+        # create an index page at the site root to redirect to the latest version.
 
         html = f"""
         <html>
@@ -226,8 +226,14 @@ class BuildDocumentation(object):
         srcdir = confdir = DOCS
         outdir = f"{BUILDDIR}/{doc_version}"
         doctreesdir = f"{DOCTREES}/{doc_version}"
-        sp = Sphinx(str(srcdir), str(confdir), str(outdir), str(doctreesdir), builder)
-        sp.verbosity = 1
+
+        sp = Sphinx(srcdir, confdir, outdir, doctreesdir, builder)
+        # verbosity: int = 0,
+        # parallel: int = 0,
+        # keep_going: bool = False,
+        # pdb: bool = False
+        sp.parallel = 8
+        sp.verbosity = 0
         sp.build()
 
         print(

@@ -24,7 +24,7 @@ import numpy
 from numpydoc.docscrape import get_doc_object
 from numpydoc.validate import Validator, error, validate
 
-import spectrochempy
+__all__ = ["check_docstrings"]
 
 # With template backend, matplotlib plots nothing
 matplotlib.use("template")
@@ -46,6 +46,29 @@ ERROR_MSGS = {
     "EX04": "Do not import {imported_library}, as it is imported "
     "automatically for the examples (numpy as np, spectrochempy as scp)",
 }
+
+
+def check_docstrings(module, obj, exclude=[]):
+    members = [f"{module}.{obj.__name__}"]
+    print(module)
+    print(obj.__name__)
+    for m in dir(obj):
+        member = getattr(obj, m)
+        if not m.startswith("_") and (
+            (
+                member.__class__.__name__ == "property"
+                or (hasattr(member, "__module__") and member.__module__ == module)
+            )
+            and m not in ["cross_validation_lock"]
+        ):
+            members.append(f"{module}.{obj.__name__}.{m}")
+            # print(f"{obj.__name__}.{m}")
+
+    for member in members:
+        result = spectrochempy_validate(member, exclude=exclude)
+        if result["errors"]:
+            result["member_name"] = member
+            DocstringError(result)
 
 
 def spectrochempy_error(code, **kwargs):
@@ -77,6 +100,8 @@ class SpectroChemPyDocstring(Validator):
 
     @property
     def examples_errors(self):
+        import spectrochempy
+
         flags = doctest.NORMALIZE_WHITESPACE | doctest.IGNORE_EXCEPTION_DETAIL
         finder = doctest.DocTestFinder()
         runner = doctest.DocTestRunner(optionflags=flags)
@@ -248,29 +273,6 @@ def spectrochempy_validate(func_name, exclude=[]):
                 pass
 
     return result
-
-
-def check_docstrings(module, obj, exclude=[]):
-    members = [f"{module}.{obj.__name__}"]
-    print(module)
-    print(obj.__name__)
-    for m in dir(obj):
-        member = getattr(obj, m)
-        if not m.startswith("_") and (
-            (
-                member.__class__.__name__ == "property"
-                or (hasattr(member, "__module__") and member.__module__ == module)
-            )
-            and m not in ["cross_validation_lock"]
-        ):
-            members.append(f"{module}.{obj.__name__}.{m}")
-            # print(f"{obj.__name__}.{m}")
-
-    for member in members:
-        result = spectrochempy_validate(member, exclude=exclude)
-        if result["errors"]:
-            result["member_name"] = member
-            DocstringError(result)
 
 
 class DocstringError(Exception):

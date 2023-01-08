@@ -17,14 +17,7 @@ __all__ = [
     "plot_scatter_pen",
 ]
 
-__dataset_methods__ = [
-    "plot_1D",
-    "plot_lines",
-    "plot_pen",
-    "plot_scatter",
-    "plot_bar",
-    "plot_scatter_pen",
-]
+__dataset_methods__ = __all__
 
 import numpy as np
 from matplotlib.ticker import MaxNLocator, ScalarFormatter

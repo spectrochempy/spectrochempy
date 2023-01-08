@@ -9,6 +9,8 @@ import warnings
 from contextlib import contextmanager
 from typing import Sequence, Type, cast
 
+__all__ = ["assert_produces_warning"]
+
 
 @contextmanager
 def assert_produces_warning(

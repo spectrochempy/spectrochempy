@@ -10,8 +10,6 @@ from collections.abc import Mapping
 
 from numpy.lib.format import read_array
 
-from spectrochempy.utils import json_decoder
-
 __all__ = ["make_zipfile", "ScpFile"]
 
 
@@ -119,6 +117,7 @@ class ScpFile(Mapping):  # lgtm[py/missing-equals]
         return len(self.files)
 
     def __getitem__(self, key):
+        from spectrochempy.utils import json_decoder
 
         member = False
         ext = None

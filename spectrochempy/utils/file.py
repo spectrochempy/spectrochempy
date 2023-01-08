@@ -30,13 +30,15 @@ __all__ = [
 
 
 def download_testdata():
-    import spectrochempy as scp
+    from spectrochempy.core import preferences
+    from spectrochempy.core.readers.importer import read_remote
+    from spectrochempy.utils import pathclean
 
-    datadir = pathclean(scp.preferences.datadir)
+    datadir = pathclean(preferences.datadir)
     # this process is relatively long, so we do not want to do it several time:
     downloaded = datadir / "__downloaded__"
     if not downloaded.exists():
-        scp.read_remote(datadir, download_only=True)
+        read_remote(datadir, download_only=True)
         downloaded.touch(exist_ok=True)
 
 

@@ -12,6 +12,7 @@ import numpy as np
 import pytest
 from quaternion import as_float_array, as_quat_array, quaternion
 
+from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndcomplex import NDComplexArray
 from spectrochempy.core.units import Quantity, ur
 from spectrochempy.utils.testing import (

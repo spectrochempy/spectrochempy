@@ -47,7 +47,7 @@ adata = (
     reason="debug mode cause error when checking docstrings",
 )
 def test_nddataset_docstring():
-    from spectrochempy.utils import check_docstrings as chd
+    from spectrochempy.utils import docstrings as chd
 
     chd.PRIVATE_CLASSES = []  # do not test private class docstring
     module = "spectrochempy.core.dataset.nddataset"

@@ -12,10 +12,6 @@ import mpl_toolkits.mplot3d.axes3d as maxes3D
 import numpy as np
 from matplotlib import pyplot as plt
 
-from spectrochempy.core.dataset.meta import Meta
-from spectrochempy.core.units import remove_args_units
-from spectrochempy.optional import import_optional_dependency
-
 __all__ = [
     "cmyk2rgb",
     "NBlack",
@@ -38,6 +34,8 @@ class _Axes(maxes.Axes):
     """
     Subclass of matplotlib Axes class
     """
+
+    from spectrochempy.core.units import remove_args_units
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -292,6 +290,8 @@ class _Axes(maxes.Axes):
 
 
 class _Axes3D(maxes3D.Axes3D):
+    from spectrochempy.core.units import remove_args_units
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -302,7 +302,7 @@ class _Axes3D(maxes3D.Axes3D):
 
 def plot_method(type, doc):
     """
-    Decorator to to select a plot method from the function name
+    Decorator to select a plot method from the function name
     """
 
     def decorator_plot_method(func):
@@ -398,7 +398,7 @@ NBlue = cmyk2rgb(100, 30, 0, 0)
 NGreen = cmyk2rgb(85, 0, 60, 10)
 
 
-def figure(preferences=Meta(), **kwargs):
+def figure(preferences=None, **kwargs):
     """
     Method to open a new figure.
 
@@ -409,6 +409,11 @@ def figure(preferences=Meta(), **kwargs):
     Preferences : Meta dictionary
         Per object saved plot configuration.
     """
+
+    from spectrochempy.core.dataset.meta import Meta
+
+    if preferences is None:
+        preferences = Meta()
     return get_figure(preferences=preferences, **kwargs)
 
 
@@ -518,6 +523,8 @@ def get_plotly_figure(clear=True, fig=None, **kwargs):
     -------
     Plotly figure instance
     """
+    from spectrochempy.optional import import_optional_dependency
+
     go = import_optional_dependency("plotly.graph_objects", errors="ignore")
 
     if go is None:

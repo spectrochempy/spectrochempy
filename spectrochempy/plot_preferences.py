@@ -897,7 +897,7 @@ class PlotPreferences(MetaConfigurable):
 
     @property
     def members(self):
-        return self.members
+        return self._members
 
     @property
     def groups(self):

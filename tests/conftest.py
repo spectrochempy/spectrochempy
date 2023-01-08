@@ -21,6 +21,8 @@ except ModuleNotFoundError:  # pragma: no cover
 
 import spectrochempy as scp
 from spectrochempy import preferences as prefs
+from spectrochempy.core.dataset.ndarray import NDArray
+from spectrochempy.core.dataset.ndcomplex import NDComplexArray
 from spectrochempy.utils import pathclean
 from spectrochempy.utils.file import download_testdata
 from spectrochempy.utils.testing import RandomSeedContext
@@ -88,7 +90,7 @@ ref3d_2_mask = ref3d_2_data < -2
 
 
 # ------------------------------------------------------------------
-# Fixtures: some scp.NDArray's
+# Fixtures: some NDArray's
 # ------------------------------------------------------------------
 
 
@@ -105,19 +107,19 @@ def refmask():
 @pytest.fixture(scope="function")
 def ndarray():
     # return a simple ndarray with some data
-    return scp.NDArray(ref_data, desc="An array", copy=True).copy()
+    return NDArray(ref_data, desc="An array", copy=True).copy()
 
 
 @pytest.fixture(scope="function")
 def ndarrayunit():
     # return a simple ndarray with some data and units
-    return scp.NDArray(ref_data, units="m/s", copy=True).copy()
+    return NDArray(ref_data, units="m/s", copy=True).copy()
 
 
 @pytest.fixture(scope="function")
 def ndarraymask():
     # return a simple ndarray with some data and units
-    return scp.NDArray(
+    return NDArray(
         ref_data, mask=ref_mask, units="m/s", history="Creation with mask", copy=True
     ).copy()
 
@@ -130,17 +132,13 @@ def ndarraymask():
 @pytest.fixture(scope="function")
 def ndarraycplx():
     # return a complex ndarray
-    return scp.NDComplexArray(
-        ref_data, units="m/s", dtype=np.complex128, copy=True
-    ).copy()
+    return NDComplexArray(ref_data, units="m/s", dtype=np.complex128, copy=True).copy()
 
 
 @pytest.fixture(scope="function")
 def ndarrayquaternion():
     # return a quaternion ndarray
-    return scp.NDComplexArray(
-        ref_data, units="m/s", dtype=np.quaternion, copy=True
-    ).copy()
+    return NDComplexArray(ref_data, units="m/s", dtype=np.quaternion, copy=True).copy()
 
 
 # ------------------------------------------------------------------

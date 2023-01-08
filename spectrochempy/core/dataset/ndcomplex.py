@@ -8,11 +8,7 @@
 This module implements a subclass of |NDArray| with complex/quaternion related attributes.
 """
 
-__all__ = [
-    "NDComplexArray",
-]
-
-__dataset_methods__ = []
+__all__ = []
 
 import itertools
 import textwrap

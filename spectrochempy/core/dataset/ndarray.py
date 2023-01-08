@@ -8,7 +8,7 @@
 This module implements the |NDArray| base class.
 """
 
-__all__ = ["NDArray", "DEFAULT_DIM_NAME"]
+__all__ = []
 
 import copy as cpy
 import itertools
