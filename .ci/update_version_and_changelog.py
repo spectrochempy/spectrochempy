@@ -38,6 +38,7 @@ class Zenodo:
         """
         with self._infile.open("w") as fid:
             json.dump(self._js, fid, indent=2)
+            fid.write("\n")  # add a trailing blank line for pre-commit compat.
 
     def update_date(self):
         """

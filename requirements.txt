@@ -1,24 +1,23 @@
-# WARNING !!!
-# =============================================================================
+# ======================================================================================
 #
-# This file is auto-generated from environment.yml file, do not modify it directly.
+# This file is auto-generated from environment_dev.yml file.
 #
-# See in `environment.yml` for more information.
+# !!! DO NOT MODIFY !!!
 #
-# =============================================================================
-
+# See in `environment_dev.yml` for more information.
+#
+# ======================================================================================
 quadprog
 brukeropusreader
 numpy-quaternion
 colorama
 dill
-docrep
 ipython
 jinja2
 matplotlib
 numba
 numpy
-pint>=0.20
+pint
 requests
 scipy
 tqdm
@@ -31,3 +30,5 @@ ipympl
 setuptools
 setuptools_scm
 gitpython
+jupyterlab
+nodejs

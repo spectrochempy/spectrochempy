@@ -1,4 +1,4 @@
-name: Create new draft release
+name: Prepare a new release
 
 # This workflow is adapted from
 # https://github.com/thomaseizinger/github-action-gitflow-release-workflow/blob/dev/.github/workflows/draft-new-release.yml
@@ -12,8 +12,8 @@ on:
 
 jobs:
 
-  draft_new_release:
-    name: "Draft a new release"
+  Prepare_new_release:
+    name: "Prepare a new release"
     runs-on: ubuntu-latest
     if: github.repository == 'spectrochempy/spectrochempy'
 
@@ -22,7 +22,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install dependancies
+      - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
           python3 -m pip install json5 pyyaml cffconvert
@@ -38,11 +38,11 @@ jobs:
 
       - name: Update requirements.txt
         run: |
-          python scripts/create_requirements.py
+          python .ci/create_requirements.py
 
       - name: Update version in CHANGELOG, .zenodo.json and CITATION.cff
         run: |
-          python scripts/update_version_and_changelog.py ${{ github.event.inputs.versionString }}
+          python .ci/update_version_and_changelog.py ${{ github.event.inputs.versionString }}
 
       - name: convert CHANGELOG.md to rst via pandoc
         uses: docker://pandoc/core:2.9
@@ -56,7 +56,7 @@ jobs:
       - name: Commit tracked files
         id: make-commit
         run: |
-          git commit -a --message "Prepare release ${{ github.event.inputs.versionString }}"
+          git commit -a --no-verify --message "Prepare release ${{ github.event.inputs.versionString }}"
           echo "commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
 
       - name: Push new branch

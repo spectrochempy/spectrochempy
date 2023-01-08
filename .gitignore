@@ -158,7 +158,7 @@ myfile.csv
 single_spectrum.csv
 
 # docs automatically generated
-generated/changelog.rst
+changelog.rst
 /res.docstrings.txt
 opus.scp
 essai.py
@@ -170,3 +170,4 @@ NMR.pscp
 .ci/scpy3.9.yml
 A.scp
 C.scp
+/out/
