@@ -68,7 +68,11 @@ __all__ = []
 import spectrochempy as scp
 
 datadir = scp.preferences.datadir
-scp.read_remote(datadir, download_only=True)
+# this process is relatively long, so we do not want to do it several time:
+downloaded = datadir / "__downloaded__"
+if not downloaded.exists():
+    scp.read_remote(datadir, download_only=True)
+    downloaded.touch(exit_ok=True)
 
 
 class BuildDocumentation(object):

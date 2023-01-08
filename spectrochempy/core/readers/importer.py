@@ -10,13 +10,15 @@ This module define a generic class to import directories, files and contents.
 __all__ = ["read", "read_dir", "read_remote"]
 __dataset_methods__ = __all__
 
+from io import BytesIO
 from warnings import warn
+from zipfile import ZipFile
 
 import requests
 import yaml
 from traitlets import Dict, HasTraits, List, Type, Unicode
 
-from spectrochempy.core import warning_
+from spectrochempy.core import info_, warning_
 from spectrochempy.utils import (
     check_filename_to_open,
     get_directory_name,
@@ -209,10 +211,7 @@ class Importer(HasTraits):
                 try:
                     res = _read_remote(self.objtype(), filename, **kwargs)
 
-                except OSError:
-                    raise e
-
-                except IOError as e:
+                except (OSError, IOError) as e:
                     warning_(str(e))
                     res = None
 
@@ -552,6 +551,14 @@ def read_remote(file_or_dir, **kwargs):
     return importer(file_or_dir, **kwargs)
 
 
+def _write_downloaded_file(content, dst):
+    if not dst.parent.exists():
+        # create the eventually missing subdirectory
+        dst.parent.mkdir(parents=True, exist_ok=True)
+    dst.write_bytes(content)
+    info_(f"{dst.name} has been downloaded and written in {dst.parent}")
+
+
 def _get_url_content_and_save(url, dst, replace):
 
     if not replace and dst.exists():
@@ -561,14 +568,31 @@ def _get_url_content_and_save(url, dst, replace):
         r = requests.get(url, allow_redirects=True)
 
         # write downloaded file
-        if not dst.parent.exists():
-            # create the eventually missing subdirectory
-            dst.parent.mkdir(parents=True, exist_ok=True)
-        dst.write_bytes(r.content)
-        print(f"{dst.name} has been downloaded and written in {dst.parent}")
+        _write_downloaded_file(r.content, dst)
 
     except OSError:
         raise FileNotFoundError(f"Not found locally or on github (url:{url}")
+
+
+def _download_full_testdata_directory():
+    from spectrochempy.core import preferences as prefs
+
+    datadir = prefs.datadir
+
+    url = "https://github.com/spectrochempy/spectrochempy_data/archive/refs/heads/master.zip"
+
+    resp = requests.get(url)
+    zipfile = ZipFile(BytesIO(resp.content))
+    files = [zipfile.open(file_name) for file_name in zipfile.namelist()]
+
+    for file in files:
+        name = file.name
+        if name.endswith("/") or "testdata/" not in name:  # dir
+            continue
+        uncompressed = zipfile.read(name)
+        p = list(pathclean(name).parts)[1:]
+        dst = datadir.joinpath("/".join(p))
+        _write_downloaded_file(uncompressed, dst)
 
 
 def _download_from_url(url, dst, replace=False):
@@ -643,7 +667,11 @@ def _read_remote(*args, **kwargs):
 
     replace = kwargs.pop("replace_existing", False)
     dst = datadir / relative_path
-    _download_from_url(relative_path, dst, replace)
+    if dst.name != "testdata":
+        _download_from_url(relative_path, dst, replace)
+    else:
+        # we are going to download the whole testdata directory -> use a faster method
+        _download_full_testdata_directory()
 
     if not kwargs.pop("download_only", False):
         read_method = kwargs.pop("read_method", read)

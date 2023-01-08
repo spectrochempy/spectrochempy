@@ -32,7 +32,7 @@ print("DATADIR: ", datadir)
 downloaded = datadir / "__downloaded__"
 if not downloaded.exists():
     scp.read_remote(datadir, download_only=True)
-    downloaded.write_text("")
+    downloaded.touch(exit_ok=True)
 
 # ======================================================================================================================
 # FIXTURES
