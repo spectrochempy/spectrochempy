@@ -12,6 +12,7 @@ brukeropusreader
 numpy-quaternion
 colorama
 dill
+docrep
 ipython
 jinja2
 matplotlib

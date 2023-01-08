@@ -28,6 +28,7 @@ dependencies:
     # dependencies for the core package
     - colorama
     - dill
+    - docrep
     - ipython
     - jinja2
     - matplotlib
