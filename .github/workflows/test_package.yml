@@ -42,7 +42,7 @@ jobs:
       max-parallel: 4
       matrix:
         os: [ubuntu-latest] # , , macos-latest, windows-latest
-        pythonVersion: ["3.10"] # , "3.8"]
+        pythonVersion: ["3.10" , "3.8"]
 
     steps:
       - name: Checkout code
