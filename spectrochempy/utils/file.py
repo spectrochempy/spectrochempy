@@ -20,12 +20,23 @@ __all__ = [
     "check_filenames",
     "check_filename_to_open",
     "check_filename_to_save",
+    "download_testdata",
 ]
 
 
 # ======================================================================================================================
 # Utility functions
 # ======================================================================================================================
+
+
+def download_testdata():
+    import spectrochempy as scp
+
+    # this process is relatively long, so we do not want to do it several time:
+    downloaded = scp.datadir / "__downloaded__"
+    if not downloaded.exists():
+        scp.read_remote(scp.datadir, download_only=True)
+        downloaded.touch(exist_ok=True)
 
 
 def _insensitive_case_glob(pattern):
