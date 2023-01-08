@@ -151,7 +151,7 @@ setup_args = dict(
     zip_safe=False,
     packages=find_packages() + packages,
     include_package_data=True,  # requirements
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     setup_requires=["setuptools_scm>=6.3.2", "matplotlib>=3.5.1"],
     install_requires=read_requirements(),
     # post-commands
