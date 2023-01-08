@@ -9,7 +9,7 @@ This module define the class |NDIO| in which input/output standard
 methods for a |NDDataset| are defined.
 """
 
-__all__ = ["NDIO", "SCPY_SUFFIX"]
+__all__ = []
 
 import io
 import json

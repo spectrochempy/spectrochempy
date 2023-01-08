@@ -8,11 +8,9 @@
 This module implements the class _CoordRange.
 """
 
-__all__ = __slots__ = ["trim_ranges"]
+__all__ = ["trim_ranges"]
 
 from traitlets import Bool, HasTraits, List
-
-from spectrochempy.utils.traits import Range
 
 
 # ======================================================================================================================
@@ -20,6 +18,8 @@ from spectrochempy.utils.traits import Range
 # ======================================================================================================================
 class _CoordRange(HasTraits):
     # TODO: May use also units ???
+    from spectrochempy.utils.traits import Range
+
     ranges = List(Range())
     reversed = Bool()
 

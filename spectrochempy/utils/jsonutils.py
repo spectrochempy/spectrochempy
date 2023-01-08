@@ -14,8 +14,6 @@ import pickle
 
 import numpy as np
 
-from spectrochempy.core.units import Quantity, Unit
-
 __all__ = ["json_serialiser", "json_decoder"]
 
 
@@ -36,6 +34,7 @@ def json_decoder(dic):
     """
     Decode a serialised json object.
     """
+    from spectrochempy.core.units import Quantity, Unit
 
     if "__class__" in dic:
 
@@ -71,6 +70,7 @@ def json_serialiser(byte_obj, encoding=None):
     Return a serialised json object.
     """
     from spectrochempy.core.dataset.ndplot import PreferencesSet
+    from spectrochempy.core.units import Quantity, Unit
 
     if byte_obj is None:
         return None

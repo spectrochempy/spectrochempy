@@ -39,6 +39,7 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 # ======================================================================================================================
+# flake8: noqa
 """
 SpectroChemPy API.
 
@@ -48,12 +49,12 @@ It is a cross platform software, running on Linux, Windows or OS X.
 
 from spectrochempy import api
 from spectrochempy.api import *  # noqa: F401
+from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.coordset import CoordSet
+from spectrochempy.core.dataset.nddataset import NDDataset
 
-__all__ = ["api"]
-__all__ += api.__all__
+__all__ = api.__all__
 
 # ==============================================================================
 if __name__ == "__main__":
-    # test imports
-    # import spectrochempy as scp
     pass

@@ -9,9 +9,7 @@ This module implements the NDMath class.
 """
 # TODO: test binary ufunc and put them in docs
 
-__all__ = [
-    "NDMath",
-]
+__all__ = []
 __dataset_methods__ = []
 
 import copy as cpy

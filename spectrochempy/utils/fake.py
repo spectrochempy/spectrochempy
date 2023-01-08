@@ -6,8 +6,6 @@
 # ======================================================================================
 import numpy as np
 
-import spectrochempy as scp
-
 __all__ = ["generate_fake"]
 
 # ------------------------------------------------------------
@@ -16,6 +14,8 @@ __all__ = ["generate_fake"]
 
 
 def _make_spectra_matrix(modelname, ampl, pos, width, ratio=None, asym=None):
+    import spectrochempy as scp
+
     x = scp.Coord(np.linspace(6000.0, 1000.0, 4000), units="cm^-1", title="wavenumbers")
     s = []
     for arg in zip(modelname, ampl, pos, width, ratio, asym):
@@ -32,6 +32,8 @@ def _make_spectra_matrix(modelname, ampl, pos, width, ratio=None, asym=None):
 
 
 def _make_concentrations_matrix(*profiles):
+    import spectrochempy as scp
+
     t = scp.LinearCoord(np.linspace(0, 10, 50), units="hour", title="time")
     c = []
     for p in profiles:
@@ -57,6 +59,7 @@ def generate_fake():
 
     # define properties of the spectra and concentration profiles
     # ----------------------------------------------------------------------------------------------------------------------
+    import spectrochempy as scp
     from spectrochempy.core.dataset.npy import dot
 
     # data for four peaks (one very broad)

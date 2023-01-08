@@ -12,7 +12,7 @@ from datetime import date
 import yaml
 from cffconvert.cli.create_citation import create_citation
 
-import spectrochempy as scp
+__all__ = ["Citation", "Zenodo"]
 
 sys.tracebacklimit = 2
 
@@ -48,8 +48,10 @@ class Zenodo:
         """
         Update the version string metadata
         """
+        from spectrochempy.core import version as scpversion
+
         if version is None:
-            version = scp.version
+            version = scpversion
         self._js["version"] = ".".join(version.split(".")[:3])
 
     def __str__(self):
@@ -138,6 +140,8 @@ class Citation:
         """
         Update the version metadata.
         """
+        from spectrochempy.core import version as scpversion
+
         if version is None:
-            version = scp.version
+            version = scpversion
         self._citation.cffobj["version"] = ".".join(version.split(".")[:3])

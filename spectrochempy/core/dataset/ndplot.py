@@ -8,7 +8,7 @@
 This module defines the |NDPlot| class in which generic |NDDataset| plot methods are defined.
 """
 
-__all__ = ["NDPlot", "plot"]
+__all__ = ["plot"]
 
 import re
 import textwrap

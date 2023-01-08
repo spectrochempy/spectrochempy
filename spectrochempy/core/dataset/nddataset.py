@@ -1569,10 +1569,8 @@ api_funcs = [
     "remove_masks",
 ]
 
-# todo: check the fact that some function are defined also in ndmath
 for funcname in api_funcs:
     setattr(thismodule, funcname, getattr(NDDataset, funcname))
-
     thismodule.__all__.append(funcname)
 
 # load one method from NDIO
