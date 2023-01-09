@@ -17,7 +17,7 @@ import numpy as np
 from quaternion import as_float_array, as_quat_array
 from traitlets import Bool, validate
 
-from spectrochempy.core.dataset.ndarray import NDArray
+from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.units import Quantity
 from spectrochempy.utils import (
     NOMASK,

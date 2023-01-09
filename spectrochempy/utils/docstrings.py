@@ -16,6 +16,7 @@ import os
 import pathlib
 import subprocess
 import tempfile
+import textwrap
 import traceback
 
 import matplotlib
@@ -24,7 +25,7 @@ import numpy
 from numpydoc.docscrape import get_doc_object
 from numpydoc.validate import Validator, error, validate
 
-__all__ = ["check_docstrings"]
+__all__ = ["check_docstrings", "add_docstring"]
 
 # With template backend, matplotlib plots nothing
 matplotlib.use("template")
@@ -307,3 +308,19 @@ class DocstringError(Exception):
           %(message)s\n
         """
         print(traceback_template % traceback_details)
+
+
+def add_docstring(*args):
+    """
+    Decorator which add a docstring to the actual func doctring.
+    """
+
+    def new_doc(func):
+
+        for item in args:
+            item.strip()
+
+        func.__doc__ = textwrap.dedent(func.__doc__).format(*args)
+        return func
+
+    return new_doc

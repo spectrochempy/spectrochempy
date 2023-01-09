@@ -10,7 +10,9 @@ import os
 import pytest
 
 import spectrochempy as scp
-from spectrochempy import BaselineCorrection, NDDataset, ur
+from spectrochempy import NDDataset
+from spectrochempy.core.processors.baseline import BaselineCorrection
+from spectrochempy.core.units import ur
 
 # noinspection PyUnresolvedReferences
 from spectrochempy.utils import show

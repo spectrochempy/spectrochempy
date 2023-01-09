@@ -14,7 +14,6 @@ __all__ = [
     "ur",
     "set_nmr_context",
     "DimensionalityError",
-    "remove_args_units",
 ]
 
 from functools import wraps

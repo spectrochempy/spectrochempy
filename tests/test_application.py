@@ -10,7 +10,7 @@ from subprocess import PIPE, Popen
 
 import pytest
 
-from spectrochempy import APIref, get_loglevel, set_loglevel, version, warning_
+from spectrochempy.core import APIref, get_loglevel, set_loglevel, version, warning_
 
 set_loglevel("WARNING")
 
@@ -19,7 +19,7 @@ def test_api():
     assert "EFA" in APIref
     assert "CRITICAL" in APIref
     assert "NDDataset" in APIref
-    assert "abs" in APIref
+    assert "fromfunction" in APIref
 
 
 def test_datadir():

@@ -15,8 +15,8 @@ __dataset_methods__ = []
 import numpy as np
 from traitlets import HasTraits, Instance
 
+from spectrochempy.core.dataset.basearrays.ndarray import MASKED
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core.dataset.ndarray import MASKED
 from spectrochempy.core.dataset.nddataset import NDDataset
 
 

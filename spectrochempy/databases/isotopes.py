@@ -20,7 +20,7 @@ from fractions import Fraction
 import numpy as np
 
 from spectrochempy.core import preferences as prefs
-from spectrochempy.core.dataset.meta import Meta
+from spectrochempy.core.common.meta import Meta
 from spectrochempy.core.units import ur
 
 

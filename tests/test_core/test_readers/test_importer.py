@@ -136,7 +136,7 @@ def test_importer(monkeypatch, fs):
     assert nd == fake_dataset(f)
 
     # Generic read without parameters and dialog cancel
-    monkeypatch.setattr(spectrochempy.core, "open_dialog", dialog_cancel)
+    monkeypatch.setattr(spectrochempy.core.common.dialogs, "open_dialog", dialog_cancel)
     monkeypatch.setenv(
         "KEEP_DIALOGS", "True"
     )  # we ask to display dialogs as we will mock them.
@@ -246,7 +246,7 @@ def test_importer(monkeypatch, fs):
     nd = read([f1, f2, f3], names=["a", "c"], merge=False)
     assert nd[0].name.startswith("NDDataset")
 
-    monkeypatch.setattr(spectrochempy.core, "open_dialog", dialog_open)
+    monkeypatch.setattr(spectrochempy.core.common.dialogs, "open_dialog", dialog_open)
     nd = (
         read()
     )  # should open a dialog (but to selects individual filename (here only simulated)

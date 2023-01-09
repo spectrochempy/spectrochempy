@@ -17,14 +17,14 @@ from quaternion import quaternion
 
 import spectrochempy as scp
 from spectrochempy.core import error_, info_
-from spectrochempy.core.dataset.coord import Coord, LinearCoord
-from spectrochempy.core.dataset.coordset import CoordSet
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndmath import (
+from spectrochempy.core.dataset.arraymixins.ndmath import (
     _binary_ufuncs,
     _comp_ufuncs,
     _unary_ufuncs,
 )
+from spectrochempy.core.dataset.coord import Coord, LinearCoord
+from spectrochempy.core.dataset.coordset import CoordSet
+from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units.units import Quantity, Unit, ur
 from spectrochempy.utils import MASKED
 from spectrochempy.utils.exceptions import CoordinateMismatchError
@@ -100,7 +100,7 @@ def test_bug_lost_dimensionless_units():
 
     dataset = NDDataset.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
     assert dataset.units == "absorbance"
-    dataset = dataset - 2.0 - 50.0  # artificially make negative some of the values
+    dataset = dataset - 2.0 - 50.0  # artificially negate some values
     assert dataset.units == "absorbance"
 
     dataset = dataset.clip(-2.0, 2.0)
@@ -740,9 +740,6 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     b = np.all(ds)
     assert not b
 
-    b = scp.all(ds)
-    assert not b
-
     b = ds.all()
     assert not b
 
@@ -768,7 +765,6 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
 
     mx = nd1.max()
     # alternative
-    mx = scp.max(nd1)
     mx = NDDataset.max(nd1)
     assert mx == Quantity(3.8080601692199707, "absorbance")
 
@@ -841,9 +837,6 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
 
     # ABS
     # ----
-    nd2a = scp.abs(nd2)
-    mxa = nd2a.min()
-    assert mxa > 0
 
     nd2a = NDDataset.abs(nd2)
     mxa = nd2a.min()
@@ -940,41 +933,41 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
 
     nd = IR_dataset_2D.copy()
 
-    m = scp.mean(nd)
+    m = np.mean(nd)
 
     assert m.shape == ()
     assert m == Quantity(np.mean(nd.data), "absorbance")
 
-    m = scp.average(nd)
+    m = nd.average()
     assert m.shape == ()
     assert m == Quantity(np.average(nd.data), "absorbance")
 
-    mx = scp.mean(nd, keepdims=True)
+    mx = nd.mean(keepdims=True)
     assert mx.shape == (1, 1)
 
-    mxd = scp.mean(nd, dim="y")
+    mxd = nd.mean(dim="y")  # cannot make n
     assert str(mxd) == "NDDataset: [float64] a.u. (size: 5549)"
     assert str(mxd.x) == "LinearCoord: [float64] cm⁻¹ (size: 5549)"
 
     # ----
     nd2 = NDDataset([[0, 1, 2], [3, 4, 5]])  # no coord (check issues
 
-    m = scp.mean(nd2)
+    m = np.mean(nd2)
 
     assert m.shape == ()
     assert m == np.mean(nd2.data)
     assert m == 2.5
 
-    m = scp.mean(nd2, keepdims=True)
+    m = np.mean(nd2, keepdims=True)
     assert m.shape == (1, 1)
     assert m.data == [[2.5]]
 
-    m = scp.mean(nd2, dim="y")
+    m = nd2.mean(dim="y")
     assert m.shape == (3,)
     assert_array_equal(m.data, [1.5, 2.5, 3.5])
     assert str(m) == "NDDataset: [float64] unitless (size: 3)"
 
-    m = scp.mean(nd2, dim=0, keepdims=True)
+    m = nd2.mean(dim=0, keepdims=True)
     assert m.shape == (1, 3)
     assert_array_equal(m.data, [[1.5, 2.5, 3.5]])
     assert str(m) == "NDDataset: [float64] unitless (shape: (y:1, x:3))"
@@ -1078,25 +1071,19 @@ def test_round_docstring_example():
     ds = scp.read("wodger.spg")
     ds_transformed1 = np.round(ds, 3)
     ds_transformed2 = np.around(ds, 3)
-    ds_transformed3 = scp.around(ds, 3)
-    ds_transformed4 = scp.round(ds, 3)
     ds_transformed5 = ds.round(3)
     ds_transformed6 = NDDataset.round(ds, 3)
 
     assert_dataset_equal(ds_transformed1, ds_transformed2)
-    assert_dataset_equal(ds_transformed1, ds_transformed3)
-    assert_dataset_equal(ds_transformed1, ds_transformed4)
     assert_dataset_equal(ds_transformed1, ds_transformed5)
     assert_dataset_equal(ds_transformed1, ds_transformed6)
 
     ds[:, 3000.0:3500.0] = scp.MASKED
     dsm_transformed1 = np.ma.round(ds)
     dsm_transformed2 = np.around(ds)
-    dsm_transformed3 = scp.around(ds)
     dsm_transformed4 = ds.round()
 
     assert_dataset_equal(dsm_transformed1, dsm_transformed2)
-    assert_dataset_equal(dsm_transformed1, dsm_transformed3)
     assert_dataset_equal(dsm_transformed1, dsm_transformed4)
 
 

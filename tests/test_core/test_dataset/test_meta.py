@@ -6,7 +6,7 @@
 # ======================================================================================
 # flake8: noqa
 
-from spectrochempy.core.dataset.meta import Meta
+from spectrochempy.core.common.meta import Meta
 from spectrochempy.core.units import ur
 from spectrochempy.utils.testing import raises
 

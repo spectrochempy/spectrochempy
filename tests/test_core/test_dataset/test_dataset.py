@@ -13,9 +13,10 @@ from pint.errors import UndefinedUnitError
 from quaternion import quaternion
 
 import spectrochempy as scp
+from spectrochempy.core.common.meta import Meta
 from spectrochempy.core.units import ur
 from spectrochempy.utils import get_user_and_node
-from spectrochempy.utils.exceptions import SpectroChemPyException, UnknownTimeZoneError
+from spectrochempy.utils.exceptions import SpectroChemPyError, UnknownTimeZoneError
 from spectrochempy.utils.testing import (
     RandomSeedContext,
     assert_array_almost_equal,
@@ -562,7 +563,7 @@ def test_nddataset_slicing_by_location_but_nocoords(ref_ds, ds1):
     # the selection is by index starting at zero
     da.delete_coordset()  # clear coords
     # this cannot work (no coords for location)
-    with pytest.raises(SpectroChemPyException):
+    with pytest.raises(SpectroChemPyError):
         _ = da[3666.7]
 
 
@@ -580,7 +581,7 @@ def test_nddataset_simple_slicing():
     d3 = d1[0]
     assert d3.shape == (1, 5)
 
-    with pytest.raises(SpectroChemPyException) as exc:
+    with pytest.raises(SpectroChemPyError) as exc:
         _ = d1[0 * ur.cm]
     assert (
         exc.value.args[0]
@@ -757,7 +758,7 @@ def test_nddataset_repr_html():
 # ### Metadata ################################################################
 def test_nddataset_with_meta(ds1):
     da = ds1.copy()
-    meta = scp.Meta()
+    meta = Meta()
     meta.essai = ["try_metadata", 10]
     da.meta = meta
     # check copy of meta

@@ -11,8 +11,6 @@ It also defines
 the default application preferences and IPython magic functions.
 """
 
-__all__ = []
-
 import json
 import logging
 import pprint

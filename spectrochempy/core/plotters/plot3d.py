@@ -8,7 +8,7 @@
 This module should be able to handle a large set of plot types related to 3D plots.
 """
 
-__all__ = ["plot_surface", "plot_waterfall"]
+__all__ = ["plot_3D", "plot_surface", "plot_waterfall"]
 
 __dataset_methods__ = __all__
 

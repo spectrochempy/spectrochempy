@@ -18,7 +18,7 @@ from os import environ
 __all__ = ["show_versions"]
 
 
-def get_sys_info():
+def _get_sys_info():
     """Returns system information as a dict"""
     # copied from XArray
     from spectrochempy.utils import pathclean
@@ -80,12 +80,12 @@ def show_versions(file=sys.stdout):
     file : file-like, optional
         print to the given file-like object. Defaults to sys.stdout.
     """
-    from spectrochempy import optional
+    from spectrochempy.utils import optional
 
     print("\nINSTALLED VERSIONS", file=file)
     print("------------------", file=file)
 
-    for key, val in get_sys_info():
+    for key, val in _get_sys_info():
         print(f"{key}: {val}", file=file)
     print(file=file)
 

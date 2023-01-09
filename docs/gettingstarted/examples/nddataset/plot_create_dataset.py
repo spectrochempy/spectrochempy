@@ -13,7 +13,7 @@ and then we plot one section (a 2D plane)
 """
 # %%
 # Creation
-# ------------------------------------------------------------------
+# --------
 # Now we will create a 3D NDDataset from scratch
 #
 # Data

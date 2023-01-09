@@ -7,7 +7,7 @@
 """
 Module to perform fitting of 1D or n-D spectral data.
 """
-__all__ = ["Fit", "optimize", "FitParameters", "ParameterScript"]
+__all__ = ["Fit", "FitParameters", "ParameterScript"]
 
 __dataset_methods__ = []
 

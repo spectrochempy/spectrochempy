@@ -35,7 +35,7 @@ class _Axes(maxes.Axes):
     Subclass of matplotlib Axes class
     """
 
-    from spectrochempy.core.units import remove_args_units
+    from spectrochempy.core.units.units import remove_args_units
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -290,7 +290,7 @@ class _Axes(maxes.Axes):
 
 
 class _Axes3D(maxes3D.Axes3D):
-    from spectrochempy.core.units import remove_args_units
+    from spectrochempy.core.units.units import remove_args_units
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -410,7 +410,7 @@ def figure(preferences=None, **kwargs):
         Per object saved plot configuration.
     """
 
-    from spectrochempy.core.dataset.meta import Meta
+    from spectrochempy.core.common.meta import Meta
 
     if preferences is None:
         preferences = Meta()
@@ -523,7 +523,7 @@ def get_plotly_figure(clear=True, fig=None, **kwargs):
     -------
     Plotly figure instance
     """
-    from spectrochempy.optional import import_optional_dependency
+    from spectrochempy.utils.optional import import_optional_dependency
 
     go = import_optional_dependency("plotly.graph_objects", errors="ignore")
 

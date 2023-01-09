@@ -21,8 +21,8 @@ from spectrochempy.core import error_, info_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.read_jcamp import read_jcamp
-from spectrochempy.optional import import_optional_dependency
 from spectrochempy.utils import is_iterable
+from spectrochempy.utils.optional import import_optional_dependency
 
 
 def download_iris():

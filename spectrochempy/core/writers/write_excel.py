@@ -11,7 +11,7 @@ Plugin module to extend NDDataset with a JCAMP-DX export method.
 
 from spectrochempy.core.writers.exporter import Exporter, exportermethod
 
-__all__ = ["write_excel"]
+__all__ = ["write_excel", "write_xls"]
 __dataset_methods__ = __all__
 
 
