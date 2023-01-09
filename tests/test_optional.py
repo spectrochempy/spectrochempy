@@ -6,7 +6,7 @@ import types
 import pytest
 
 import spectrochempy.utils.warnings as tm
-from spectrochempy.optional import VERSIONS, import_optional_dependency
+from spectrochempy.utils.optional import VERSIONS, import_optional_dependency
 
 
 def test_import_optional():

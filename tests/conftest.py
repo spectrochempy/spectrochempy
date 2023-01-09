@@ -19,10 +19,14 @@ except ModuleNotFoundError:  # pragma: no cover
         "You must install spectrochempy and its dependencies before executing tests!"
     )
 
-import spectrochempy as scp
-from spectrochempy import preferences as prefs
-from spectrochempy.core.dataset.ndarray import NDArray
-from spectrochempy.core.dataset.ndcomplex import NDComplexArray
+from spectrochempy.core import preferences as prefs
+from spectrochempy.core.dataset.basearrays.ndarray import NDArray
+from spectrochempy.core.dataset.basearrays.ndcomplex import NDComplexArray
+from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.coordset import CoordSet
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.project.project import Project
+from spectrochempy.core.scripts.script import Script
 from spectrochempy.utils import pathclean
 from spectrochempy.utils.file import download_testdata
 from spectrochempy.utils.testing import RandomSeedContext
@@ -142,10 +146,10 @@ def ndarrayquaternion():
 
 
 # ------------------------------------------------------------------
-# Fixtures: Some scp.NDDatasets
+# Fixtures: Some NDDatasets
 # ------------------------------------------------------------------
 
-coord0_ = scp.Coord(
+coord0_ = Coord(
     data=np.linspace(4000.0, 1000.0, 10),
     labels=list("abcdefghij"),
     units="cm^-1",
@@ -158,7 +162,7 @@ def coord0():
     return coord0_.copy()
 
 
-coord1_ = scp.Coord(data=np.linspace(0.0, 60.0, 100), units="s", title="time-on-stream")
+coord1_ = Coord(data=np.linspace(0.0, 60.0, 100), units="s", title="time-on-stream")
 
 
 @pytest.fixture(scope="function")
@@ -166,7 +170,7 @@ def coord1():
     return coord1_.copy()
 
 
-coord2_ = scp.Coord(
+coord2_ = Coord(
     data=np.linspace(200.0, 300.0, 3),
     labels=["cold", "normal", "hot"],
     units="K",
@@ -179,7 +183,7 @@ def coord2():
     return coord2_.copy()
 
 
-coord2b_ = scp.Coord(
+coord2b_ = Coord(
     data=np.linspace(1.0, 20.0, 3),
     labels=["low", "medium", "high"],
     units="tesla",
@@ -192,7 +196,7 @@ def coord2b():
     return coord2b_.copy()
 
 
-coord0_2_ = scp.Coord(
+coord0_2_ = Coord(
     data=np.linspace(4000.0, 1000.0, 9),
     labels=list("abcdefghi"),
     units="cm^-1",
@@ -205,9 +209,7 @@ def coord0_2():
     return coord0_2_.copy()
 
 
-coord1_2_ = scp.Coord(
-    data=np.linspace(0.0, 60.0, 50), units="s", title="time-on-stream"
-)
+coord1_2_ = Coord(data=np.linspace(0.0, 60.0, 50), units="s", title="time-on-stream")
 
 
 @pytest.fixture(scope="function")
@@ -215,7 +217,7 @@ def coord1_2():
     return coord1_2_.copy()
 
 
-coord2_2_ = scp.Coord(
+coord2_2_ = Coord(
     data=np.linspace(200.0, 1000.0, 4),
     labels=["cold", "normal", "hot", "veryhot"],
     units="K",
@@ -231,13 +233,13 @@ def coord2_2():
 @pytest.fixture(scope="function")
 def nd1d():
     # a simple ddataset
-    return scp.NDDataset(ref_data[:, 1].squeeze()).copy()
+    return NDDataset(ref_data[:, 1].squeeze()).copy()
 
 
 @pytest.fixture(scope="function")
 def nd2d():
     # a simple 2D ndarrays
-    return scp.NDDataset(ref_data).copy()
+    return NDDataset(ref_data).copy()
 
 
 @pytest.fixture(scope="function")
@@ -249,7 +251,7 @@ def ref_ds():
 @pytest.fixture(scope="function")
 def ds1():
     # a dataset with coordinates
-    return scp.NDDataset(
+    return NDDataset(
         ref3d_data,
         coordset=[coord0_, coord1_, coord2_],
         title="absorbance",
@@ -260,7 +262,7 @@ def ds1():
 @pytest.fixture(scope="function")
 def ds2():
     # another dataset
-    return scp.NDDataset(
+    return NDDataset(
         ref3d_2_data,
         coordset=[coord0_2_, coord1_2_, coord2_2_],
         title="absorbance",
@@ -272,8 +274,8 @@ def ds2():
 def dsm():
     # dataset with coords containing several axis and a mask
 
-    coordmultiple = scp.CoordSet(coord2_, coord2b_)
-    return scp.NDDataset(
+    coordmultiple = CoordSet(coord2_, coord2b_)
+    return NDDataset(
         ref3d_data,
         coordset=[coord0_, coord1_, coordmultiple],
         mask=ref3d_mask,
@@ -282,7 +284,7 @@ def dsm():
     ).copy()
 
 
-dataset = scp.NDDataset.read_omnic(datadir / "irdata" / "nh4y-activation.spg")
+dataset = NDDataset.read_omnic(datadir / "irdata" / "nh4y-activation.spg")
 
 
 @pytest.fixture(scope="function")
@@ -307,16 +309,14 @@ def IR_dataset_1D():
 @pytest.fixture(scope="function")
 def NMR_dataset_1D():
     path = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_1d" / "1" / "fid"
-    dataset = scp.NDDataset.read_topspin(
-        path, remove_digital_filter=True, name="NMR_1D"
-    )
+    dataset = NDDataset.read_topspin(path, remove_digital_filter=True, name="NMR_1D")
     return dataset.copy()
 
 
 @pytest.fixture(scope="function")
 def NMR_dataset_2D():
     path = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_2d" / "1" / "ser"
-    dataset = scp.NDDataset.read_topspin(
+    dataset = NDDataset.read_topspin(
         path, expno=1, remove_digital_filter=True, name="NMR_2D"
     )
     return dataset.copy()
@@ -414,18 +414,18 @@ def JDX_2D():
 
 
 # ------------------------------------------------------------------
-# fixture scp.Project
+# fixture Project
 # ------------------------------------------------------------------
 
 
 @pytest.yield_fixture(scope="function")
 def simple_project():
 
-    proj = scp.Project(
+    proj = Project(
         # subprojects
-        scp.Project(name="P350", label=r"$\mathrm{M_P}\,(623\,K)$"),
-        scp.Project(name="A350", label=r"$\mathrm{M_A}\,(623\,K)$"),
-        scp.Project(name="B350", label=r"$\mathrm{M_B}\,(623\,K)$"),
+        Project(name="P350", label=r"$\mathrm{M_P}\,(623\,K)$"),
+        Project(name="A350", label=r"$\mathrm{M_A}\,(623\,K)$"),
+        Project(name="B350", label=r"$\mathrm{M_B}\,(623\,K)$"),
         # attributes
         name="project_1",
         label="main project",
@@ -433,8 +433,8 @@ def simple_project():
 
     assert proj.projects_names == ["P350", "A350", "B350"]
 
-    ir = scp.NDDataset([1.1, 2.2, 3.3], coordset=[[1, 2, 3]])
-    tg = scp.NDDataset([1, 3, 4], coordset=[[1, 2, 3]])
+    ir = NDDataset([1.1, 2.2, 3.3], coordset=[[1, 2, 3]])
+    tg = NDDataset([1, 3, 4], coordset=[[1, 2, 3]])
     proj.A350["IR"] = ir
     proj.A350["TG"] = tg
     script_source = (
@@ -442,5 +442,5 @@ def simple_project():
         'info_(f"samples contained in the project are {proj.projects_names}")'
     )
 
-    proj["print_info"] = scp.Script("print_info", script_source)
+    proj["print_info"] = Script("print_info", script_source)
     return proj

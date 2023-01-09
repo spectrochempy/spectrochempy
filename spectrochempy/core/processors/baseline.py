@@ -16,14 +16,13 @@ import numpy as np
 import scipy.interpolate
 from matplotlib.widgets import SpanSelector
 from traitlets import Float, HasTraits, Instance, Int, List, Tuple, Unicode
-from utils.coordrange import trim_ranges
 
 from spectrochempy.core import debug_, warning_
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.plotters.multiplot import multiplot
 from spectrochempy.core.processors.smooth import smooth
 from spectrochempy.core.processors.utils import _units_agnostic_method
-from spectrochempy.utils import TYPE_FLOAT, TYPE_INTEGER
+from spectrochempy.utils import TYPE_FLOAT, TYPE_INTEGER, trim_ranges
 
 
 class BaselineCorrection(HasTraits):

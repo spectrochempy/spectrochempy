@@ -12,6 +12,7 @@ from colorama import Fore, Style
 __all__ = [
     "numpyprintoptions",
     "insert_masked_print",
+    "TBlack",
     "TBold",
     "TRed",
     "TGreen",

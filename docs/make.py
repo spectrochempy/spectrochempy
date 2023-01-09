@@ -256,8 +256,6 @@ class BuildDocumentation(object):
             self.resize_img(GALLERY, size=580.0)
 
     # pdf
-    # ----------------------------------------------------------------------------------
-
     @staticmethod
     def resize_img(folder, size):
         # image resizing mainly for pdf doc
@@ -306,7 +304,7 @@ class BuildDocumentation(object):
         )
 
     # Tutorials
-    # ----------------------------------------------------------------------------------
+    # ----------
 
     @staticmethod
     def sync_notebooks():

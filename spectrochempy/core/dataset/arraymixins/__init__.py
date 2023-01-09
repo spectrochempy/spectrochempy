@@ -4,10 +4,8 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-from spectrochempy.utils import generate_api
+# flake8: noqa
 
-__all__ = generate_api(__file__)
-
-# ======================================================================================================================
-if __name__ == "__main__":
-    pass
+# This is necessary for a correct generation of the core API
+# from spectrochempy.core.dataset.arraymixins.ndmath import *
+# from spectrochempy.core.dataset.arraymixins.ndmath import __all__

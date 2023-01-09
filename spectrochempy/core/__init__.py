@@ -4,6 +4,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
+# flake8: noqa
 """
 Package defining the *core* methods of the |scpy| API.
 
@@ -12,25 +13,21 @@ Most the API methods such as plotting, processing, analysis, etc...
 isort:skip_file
 """
 
+__all__ = []  # modified below
+
 from os import environ
 import sys
 import warnings
 
-from spectrochempy.optional import import_optional_dependency
+from spectrochempy.utils.optional import import_optional_dependency
 
 warnings.filterwarnings("ignore")
-
-# ======================================================================================================================
-# Tells here the methods or object we allow to import from this library
-# ======================================================================================================================
-
-__all__ = []
 
 # ======================================================================================================================
 # logging functions
 # ======================================================================================================================
 
-from spectrochempy.utils import pstr  # noqa: E402
+from spectrochempy.utils import pstr
 import logging
 import inspect
 
@@ -59,7 +56,6 @@ def print_(*args, **kwargs):
     print(stg)
 
 
-# ------------------------------------------------------------------
 def info_(*args, **kwargs):
     """
     Formatted info message.
@@ -68,7 +64,6 @@ def info_(*args, **kwargs):
     app.log.info(stg)
 
 
-# ------------------------------------------------------------------
 def debug_(*args, **kwargs):
     """
     Formatted debug message.
@@ -81,7 +76,6 @@ def debug_(*args, **kwargs):
         pass
 
 
-# ------------------------------------------------------------------
 def error_(*args, **kwargs):
     """
     Formatted error message.
@@ -93,7 +87,6 @@ def error_(*args, **kwargs):
     app.log.error(stg)
 
 
-# ------------------------------------------------------------------
 def warning_(*args, **kwargs):
     """
     Formatted warning message.
@@ -152,7 +145,7 @@ from spectrochempy.application import SpectroChemPy  # noqa: E402
 app = SpectroChemPy()
 __all__ += ["app"]
 
-from spectrochempy.application import (  # noqa: E402
+from spectrochempy.application import (
     __version__ as version,
     __release__ as release,
     __copyright__ as copyright,
@@ -166,7 +159,7 @@ from spectrochempy.application import (  # noqa: E402
     ERROR,
     CRITICAL,
     INFO,
-)
+)  # noqa: E402
 
 preferences = app.preferences
 plot_preferences = app.plot_preferences
@@ -216,13 +209,13 @@ __all__ += [
 ]
 
 # IPython methods
-# ------------------------------------------------------------------
+# ---------------
 # we put them before so that we can eventually overwrite them
 
 _pbar_update()
 
 # constants
-# ------------------------------------------------------------------
+# ---------
 from spectrochempy.utils import (
     show,
     MASKED,
@@ -230,12 +223,12 @@ from spectrochempy.utils import (
     EPSILON,
     INPLACE,
     show_versions,
-)  # noqa: E402
+)
 
 __all__ += ["show", "MASKED", "NOMASK", "EPSILON", "INPLACE", "show_versions"]
 
 # dataset
-# ------------------------------------------------------------------
+# -------
 _pbar_update()
 from spectrochempy.core.dataset import api  # noqa: E402
 from spectrochempy.core.dataset.api import *  # noqa: E402,F403,F401
@@ -243,7 +236,7 @@ from spectrochempy.core.dataset.api import *  # noqa: E402,F403,F401
 __all__ += api.__all__
 
 # plotters
-# ------------------------------------------------------------------
+# --------
 _pbar_update()
 from spectrochempy.core.plotters import api  # noqa: E402
 from spectrochempy.core.plotters.api import *  # noqa: E402,F403,F401
@@ -251,7 +244,7 @@ from spectrochempy.core.plotters.api import *  # noqa: E402,F403,F401
 __all__ += api.__all__
 
 # processors
-# ------------------------------------------------------------------
+# ----------
 _pbar_update()
 from spectrochempy.core.processors import api  # noqa: E402
 from spectrochempy.core.processors.api import *  # noqa: E402,F403,F401
@@ -259,7 +252,7 @@ from spectrochempy.core.processors.api import *  # noqa: E402,F403,F401
 __all__ += api.__all__
 
 # readers
-# ------------------------------------------------------------------
+# -------
 _pbar_update()
 from spectrochempy.core.readers import api  # noqa: E402
 from spectrochempy.core.readers.api import *  # noqa: E402,F403,F401
@@ -267,7 +260,7 @@ from spectrochempy.core.readers.api import *  # noqa: E402,F403,F401
 __all__ += api.__all__
 
 # writers
-# ------------------------------------------------------------------
+# -------
 _pbar_update()
 from spectrochempy.core.writers import api  # noqa: E402
 from spectrochempy.core.writers.api import *  # noqa: E402,F403,F401
@@ -275,7 +268,7 @@ from spectrochempy.core.writers.api import *  # noqa: E402,F403,F401
 __all__ += api.__all__
 
 # units
-# ------------------------------------------------------------------
+# -----
 _pbar_update()
 from spectrochempy.core.units import api  # noqa: E402
 from spectrochempy.core.units.api import *  # noqa: E402,F403,F401
@@ -283,7 +276,7 @@ from spectrochempy.core.units.api import *  # noqa: E402,F403,F401
 __all__ += api.__all__
 
 # databases
-# ------------------------------------------------------------------
+# ---------
 _pbar_update()
 from spectrochempy.databases import api  # noqa: E402
 from spectrochempy.databases.api import *  # noqa: E402,F403,F401
@@ -291,7 +284,7 @@ from spectrochempy.databases.api import *  # noqa: E402,F403,F401
 __all__ += api.__all__
 
 # analysis
-# ------------------------------------------------------------------
+# --------
 _pbar_update()
 from spectrochempy.analysis import api  # noqa: E402
 from spectrochempy.analysis.api import *  # noqa: E402,F403,F401
@@ -299,7 +292,7 @@ from spectrochempy.analysis.api import *  # noqa: E402,F403,F401
 __all__ += api.__all__
 
 # project
-# ------------------------------------------------------------------
+# -------
 _pbar_update()
 from spectrochempy.core.project import api  # noqa: E402
 from spectrochempy.core.project.api import *  # noqa: E402,F403,F401
@@ -307,7 +300,7 @@ from spectrochempy.core.project.api import *  # noqa: E402,F403,F401
 __all__ += api.__all__
 
 # script
-# ------------------------------------------------------------------
+# ------
 _pbar_update()
 from spectrochempy.core.scripts import api  # noqa: E402
 from spectrochempy.core.scripts.api import *  # noqa: E402,F403,F401
@@ -315,7 +308,7 @@ from spectrochempy.core.scripts.api import *  # noqa: E402,F403,F401
 __all__ += api.__all__
 
 # widgets
-# ------------------------------------------------------------------
+# -------
 _pbar_update()
 from spectrochempy.widgets import api  # noqa: E402
 from spectrochempy.widgets.api import *  # noqa: E402,F403,F401
@@ -324,9 +317,7 @@ __all__ += api.__all__
 
 
 # Helpers
-# ------------------------------------------------------------------
-
-
+# -------
 def APIref():
     """
     Helper to display public objects and methods from the API
@@ -349,322 +340,6 @@ _pbar_update(close=True)
 _started = app.start()
 
 warnings.filterwarnings(action="ignore", module="matplotlib", category=UserWarning)
-
-# ------------------------------------------------------------------
-# File Dialogs
-# ------------------------------------------------------------------
-
-__all__ += ["open_dialog", "save_dialog"]
-
-# Set flags
-USE_QT = preferences.use_qt or environ.get("SCPY_GUI", None) == "RUNNING"
-
-if USE_QT:  # pragma: no cover
-
-    try:
-        pyqt = import_optional_dependency("PyQt5.QtWidgets")
-        FileDialog = pyqt.QFileDialog
-
-    except ImportError as e:
-        error_(e)
-        USE_QT = False
-        from tkinter import filedialog
-
-else:
-
-    from tkinter import filedialog
-
-
-# ------------------------------------------------------------------------
-# Private functions
-# ------------------------------------------------------------------------
-
-
-class _QTFileDialogs:  # pragma: no cover
-    @classmethod
-    def _open_existing_directory(
-        cls, parent=None, caption="Select a folder", directory=None
-    ):
-
-        if directory is None:
-            directory = str(preferences.datadir)
-
-        options = FileDialog.DontResolveSymlinks | FileDialog.ShowDirsOnly
-        directory = FileDialog.getExistingDirectory(
-            parent=parent, caption=caption, directory=directory, options=options
-        )
-
-        if directory:
-            return directory
-
-        return None
-
-    # noinspection PyRedundantParentheses
-    @classmethod
-    def _open_filename(
-        cls, parent=None, directory=None, caption="Select file", filters=None
-    ):
-
-        if directory is None:
-            directory = str(preferences.datadir)
-
-        filename, _ = FileDialog.getOpenFileName(
-            parent=parent,
-            caption=caption,
-            directory=directory,
-            filter=";;".join(filters),
-        )
-        if filename:
-            return filename
-
-        return None
-
-    # noinspection PyRedundantParentheses
-    @classmethod
-    def _open_multiple_filenames(
-        cls, parent=None, directory=None, caption="Select file(s)", filters=None
-    ):
-        """
-        Return one or several files to open
-        """
-
-        if directory is None:
-            directory = str(preferences.datadir)
-
-        files, _ = FileDialog.getOpenFileNames(
-            parent=parent,
-            caption=caption,
-            directory=directory,
-            filter=";;".join(filters),
-        )
-        if files:
-            return files
-
-        return None
-
-    @classmethod
-    def _save_filename(
-        cls,
-        parent=None,
-        filename=None,
-        caption="Save as...",
-        filters=None,
-    ):
-
-        directory = str(filename)
-
-        options = (
-            FileDialog.DontConfirmOverwrite
-        )  # bug : this seems to work only with DontUseNativeDialog on OSX.
-        # TODO: Check on windows and Linux
-        # second problems: if we confirm overwrite here a new dialog is opened,
-        # and thus the main one do not close on exit!
-        filename, _ = FileDialog.getSaveFileName(
-            parent=parent,
-            caption=caption,
-            directory=directory,
-            filter=";;".join(filters),
-            options=options,
-        )
-        if filename:
-            return filename
-
-        return None
-
-
-class _TKFileDialogs:  # pragma: no cover
-    def __init__(self):
-        import tkinter as tk
-
-        root = tk.Tk()
-        root.withdraw()
-        root.overrideredirect(True)
-        root.geometry("0x0+0+0")
-        root.deiconify()
-        root.lift()
-        root.focus_force()
-        self.root = root
-
-    @staticmethod
-    def _open_existing_directory(parent=None, caption="Select a folder", directory=""):
-
-        directory = filedialog.askdirectory(
-            # parent=parent,
-            initialdir=directory,
-            title=caption,
-        )
-
-        if directory:
-            return directory
-
-        return None
-
-    @staticmethod
-    def filetypes(filters):
-        # convert QT filters to TK
-        import re
-
-        regex = r"(.*)\((.*)\)"
-        filetypes = []
-        for _filter in filters:
-            matches = re.finditer(regex, _filter)
-            match = list(matches)[0]
-            g = list(match.groups())
-            g[1] = g[1].replace("[0-9]", "")
-            g[1] = g[1].replace("1[r|i]", "*.*")
-            g[1] = g[1].replace("2[r|i]*", "*.*")
-            g[1] = g[1].replace("3[r|i]*", "*.*")
-            g[1] = g[1].replace(" ", ",")
-            g[1] = tuple(set(g[1].split(",")))
-            filetypes.append((g[0], (g[1])))
-        return filetypes
-
-    # noinspection PyRedundantParentheses
-    def _open_filename(
-        self,
-        parent=None,
-        filters=None,
-    ):
-
-        filename = filedialog.askopenfilename(
-            # parent=parent,
-            filetypes=self.filetypes(filters),
-            title="Select file to open",
-        )
-
-        if parent is not None:
-            parent.destroy()
-
-        if filename:
-            return filename
-
-        return None
-
-    # noinspection PyRedundantParentheses
-    def _open_multiple_filenames(self, parent=None, filters=None):
-        """
-        Return one or several files to open
-        """
-        filename = filedialog.askopenfilenames(
-            # parent=parent,
-            filetypes=self.filetypes(filters) + [("all files", ("*"))],
-            title="Select file(s) to open",
-        )
-
-        if parent is not None:
-            parent.destroy()
-
-        if filename:
-            return filename
-
-        return None
-
-    def _save_filename(
-        self,
-        # parent=None,
-        filename="",
-        caption="Save as...",
-        filters=None,
-    ):
-
-        from spectrochempy.utils import pathclean
-
-        dftext = ""
-        directory = "."
-        if filename:
-            filename = pathclean(filename)
-            directory = filename.parent
-            dftext = filename.suffix
-
-        if not dftext:
-            dftext = ".scp"
-
-        # -defaultextension, -filetypes, -initialdir, -initialfile, -message, -parent, -title, -typevariable,
-        # -command, or -confirmoverwrite
-        filename = filedialog.asksaveasfilename(
-            # parent=parent,
-            title=caption,
-            initialdir=str(directory),
-            initialfile=filename.name,
-            defaultextension=dftext,
-            filetypes=self.filetypes(filters),
-        )
-        #        if parent is not None:
-        #            parent.destroy
-
-        if filename:
-            return pathclean(filename)
-
-        return None
-
-
-# ------------------------------------------------------------------------
-# Public functions
-# ------------------------------------------------------------------------
-
-# noinspection PyRedundantParentheses
-def save_dialog(
-    filename=None, caption="Save as...", filters=("All Files (*)"), **kwargs
-):  # pragma: no cover
-    """
-    Return a file where to save.
-    """
-    if USE_QT:
-        parent = kwargs.pop(
-            "Qt_parent", None
-        )  # in case this is launched from spectrochempy_gui
-
-        _ = pyqt.QApplication([])
-        f = _QTFileDialogs._save_filename(
-            parent=parent,
-            filename=filename,
-            caption=caption,
-            filters=filters,
-        )
-    else:
-        f = _TKFileDialogs()._save_filename(
-            filename=filename, caption=caption, filters=filters
-        )
-
-    from spectrochempy.utils import pathclean
-
-    return pathclean(f)
-
-
-# noinspection PyRedundantParentheses
-def open_dialog(
-    single=True, directory=None, filters=("All Files (*)"), **kwargs
-):  # pragma: no cover
-    """
-    Return one or several files to open.
-    """
-    if USE_QT:
-        parent = kwargs.pop(
-            "Qt_parent", None
-        )  # in case this is launched from spectrochempy_gui
-
-        _ = pyqt.QApplication([])
-        klass = _QTFileDialogs
-    else:
-        klass = _TKFileDialogs()
-        parent = klass.root
-
-    if directory is None:
-        directory = ""
-    if filters == "directory":
-        caption = "Select a folder"
-        f = klass._open_existing_directory(
-            parent=parent, caption=caption, directory=str(directory)
-        )
-    elif single:
-        f = klass._open_filename(parent=parent, filters=filters)
-    else:
-        f = klass._open_multiple_filenames(parent=parent, filters=filters)
-
-    from spectrochempy.utils import pathclean
-
-    return pathclean(f)
-
 
 # ======================================================================================================================
 if __name__ == "__main__":

@@ -14,7 +14,7 @@ from functools import wraps
 import dill
 from traitlets import Dict, Instance, This, Unicode, default
 
-from spectrochempy.core.dataset.meta import Meta
+from spectrochempy.core.common.meta import Meta
 from spectrochempy.core.dataset.nddataset import NDIO, NDDataset
 from spectrochempy.core.project.baseproject import AbstractProject
 from spectrochempy.core.scripts.script import Script

@@ -42,7 +42,9 @@ def test_read_carroucell(monkeypatch):
     nd = NDDataset.read_carroucell("irdata/carroucell_samp", spectra=(1, 1))
     assert isinstance(nd, NDDataset)
 
-    monkeypatch.setattr(spectrochempy.core, "open_dialog", dialog_carroucell)
+    monkeypatch.setattr(
+        spectrochempy.core.common.dialogs, "open_dialog", dialog_carroucell
+    )
     monkeypatch.setenv("KEEP_DIALOGS", "True")
     nd = NDDataset.read_carroucell(spectra=(1, 3))
     assert nd[3].shape == (3, 11098)

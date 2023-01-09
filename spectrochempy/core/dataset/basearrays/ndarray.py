@@ -34,7 +34,7 @@ from traitlets import (
 from traittypes import Array
 
 from spectrochempy.core import error_, info_, print_
-from spectrochempy.core.dataset.meta import Meta
+from spectrochempy.core.common.meta import Meta
 from spectrochempy.core.units import (
     DimensionalityError,
     Quantity,

@@ -25,7 +25,7 @@ class BaselineCorrector:
     """
     Launch a GUI for baseline corrections.
 
-    Wrapper of scp.BaselineCorrection(X), with widgets for dataset slicing,
+    Wrapper of BaselineCorrection(X), with widgets for dataset slicing,
     input parameters and graphical output.
     Should be run in jupyter notebook (does not always run properly in jupyter lab)
     with the widget backend (magic `%matplotlib widget`).
@@ -58,7 +58,7 @@ class BaselineCorrector:
     - The GUI buttons are the following:
         - `upload`: allows uploading files.
           Uploading file will trigger the reading and processing with default parameters
-          (linear baseline with ranges of 5% of the x axis at both ends). If a NDDataset
+          (linear baseline with ranges of 5% of the x-axis at both ends). If a NDDataset
           has been passed or a file has been previously loaded, BaselineCorrector will
           be reset with the new file(s).
         - `process`: triggers baseline correct and plotting of original

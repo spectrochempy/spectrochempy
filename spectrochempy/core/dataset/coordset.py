@@ -28,8 +28,8 @@ from traitlets import (
     validate,
 )
 
+from spectrochempy.core.dataset.basearrays.ndarray import DEFAULT_DIM_NAME, NDArray
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
-from spectrochempy.core.dataset.ndarray import DEFAULT_DIM_NAME, NDArray
 from spectrochempy.utils import (
     SpectroChemPyWarning,
     colored_output,

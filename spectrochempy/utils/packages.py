@@ -35,7 +35,7 @@ def list_packages(package):
     ):
         names.append(name)
 
-    return names
+    return sorted(names)
 
 
 def generate_api(api_path):

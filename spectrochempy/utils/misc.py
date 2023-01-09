@@ -9,7 +9,6 @@ Various methods and classes used in other part of the program.
 """
 import functools
 import re
-import textwrap
 import types
 import uuid
 import warnings
@@ -41,7 +40,7 @@ __all__ = [
     "as_quaternion",
     "quat_as_complex_array",
     "get_n_decimals",
-    "add_docstring",
+    "gt_eps",
 ]
 
 #
@@ -116,22 +115,6 @@ class _DummyFile(object):
 # ======================================================================================================================
 # Public methods
 # ======================================================================================================================
-
-
-def add_docstring(*args):
-    """
-    Decorator which add a docstring to the actual func doctring.
-    """
-
-    def new_doc(func):
-
-        for item in args:
-            item.strip()
-
-        func.__doc__ = textwrap.dedent(func.__doc__).format(*args)
-        return func
-
-    return new_doc
 
 
 def as_quaternion(*args):

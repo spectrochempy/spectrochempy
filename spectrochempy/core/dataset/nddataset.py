@@ -32,24 +32,27 @@ from traitlets import (
 from traittypes import Array
 
 from spectrochempy.core import error_, warning_
+from spectrochempy.core.dataset.arraymixins.ndio import NDIO
+from spectrochempy.core.dataset.arraymixins.ndmath import (  # _set_ufuncs,
+    NDMath,
+    _set_operators,
+)
+from spectrochempy.core.dataset.arraymixins.ndplot import NDPlot
+from spectrochempy.core.dataset.basearrays.ndarray import DEFAULT_DIM_NAME, NDArray
+from spectrochempy.core.dataset.basearrays.ndcomplex import NDComplexArray
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.coordset import CoordSet
-from spectrochempy.core.dataset.ndarray import DEFAULT_DIM_NAME, NDArray
-from spectrochempy.core.dataset.ndcomplex import NDComplexArray
-from spectrochempy.core.dataset.ndio import NDIO
-from spectrochempy.core.dataset.ndmath import NDMath, _set_operators, _set_ufuncs
-from spectrochempy.core.dataset.ndplot import NDPlot
 from spectrochempy.core.project.baseproject import AbstractProject
-from spectrochempy.optional import import_optional_dependency
 from spectrochempy.utils import colored_output, get_user_and_node
-from spectrochempy.utils.exceptions import SpectroChemPyException, UnknownTimeZoneError
+from spectrochempy.utils.exceptions import SpectroChemPyError, UnknownTimeZoneError
+from spectrochempy.utils.optional import import_optional_dependency
 
 # ======================================================================================================================
 # NDDataset class definition
 # ======================================================================================================================
 
 
-class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
+class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     """
     The main N-dimensional dataset class used by |scpy|.
 
@@ -677,7 +680,7 @@ class NDDataset(NDIO, NDPlot, NDMath, NDComplexArray):
         # This can work only if `coords` exists.
 
         if self._coordset is None:
-            raise SpectroChemPyException(
+            raise SpectroChemPyError(
                 "No coords have been defined. Slicing or selection"
                 " by location ({}) needs coords definition.".format(loc)
             )
@@ -1577,9 +1580,9 @@ for funcname in api_funcs:
 load = NDDataset.load
 __all__ += ["load"]
 
-# ======================================================================================================================
+
+# ======================================================================================
 # Set the operators
-# ======================================================================================================================
+# ======================================================================================
 
 _set_operators(NDDataset, priority=100000)
-_set_ufuncs(NDDataset)

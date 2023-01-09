@@ -24,7 +24,6 @@ import numpy as np
 from quaternion import as_float_array
 
 from spectrochempy.core import error_, warning_
-from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.units.units import DimensionalityError, Quantity, ur
 from spectrochempy.utils import (
     NOMASK,
@@ -71,6 +70,7 @@ class _from_numpy_method:
         def func(*args, **kwargs):
 
             # Delayed import to avoid circular reference
+            from spectrochempy.core.dataset.basearrays.ndarray import NDArray
             from spectrochempy.core.dataset.coord import Coord
             from spectrochempy.core.dataset.nddataset import NDDataset
 
@@ -152,7 +152,7 @@ class _from_numpy_method:
             # Create from an existing array
             # ------------------------------
 
-            # Replace some of the attribute according to the kwargs
+            # Replace some attribute according to the kwargs
             for k, v in list(kwargs.items())[:]:
                 if k != "units":
                     setattr(new, k, v)
@@ -534,6 +534,7 @@ class NDMath(object):
         #        # If this reached, data are not complex or hypercomplex
         #        if fname in ['absolute', 'abs']:
         #            f = np.fabs
+        from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 
         # set history string
         history = f"Ufunc {fname} applied."
@@ -3239,11 +3240,12 @@ class _ufunc:
 thismodule = sys.modules[__name__]
 
 
-def _set_ufuncs(cls):
-    for func in _unary_ufuncs():
-        # setattr(cls, func, _ufunc(func))
-        setattr(thismodule, func, _ufunc(func))
-        thismodule.__all__ += [func]
+# def _set_ufuncs(cls):
+#     for func in _unary_ufuncs():
+#         # setattr(cls, func, _ufunc(func))
+#         setattr(thismodule, func, _ufunc(func))
+#         thismodule.__all__ += [func]
+# TODO: make NDDataset method instead
 
 
 def _set_operators(cls, priority=50):
@@ -3267,55 +3269,56 @@ def _set_operators(cls, priority=50):
 # module functions
 # ------------------------------------------------------------------
 # make some NDMath operation accessible from the spectrochempy API
-
-
-# make some API functions
-api_funcs = [  # creation functions
-    "empty_like",
-    "zeros_like",
-    "ones_like",
-    "full_like",
-    "empty",
-    "zeros",
-    "ones",
-    "full",
-    "eye",
-    "identity",
-    "random",
-    "linspace",
-    "arange",
-    "logspace",
-    "geomspace",
-    "fromfunction",
-    "fromiter",  #
-    "diagonal",
-    "diag",
-    "sum",
-    "average",
-    "mean",
-    "std",
-    "var",
+api_funcs = [
+    "abs",
+    "absolute",
+    "all",
     "amax",
     "amin",
-    "min",
-    "max",
-    "argmin",
-    "argmax",
-    "cumsum",
-    "coordmin",
-    "coordmax",
-    "clip",
-    "ptp",
-    "pipe",
-    "abs",
-    "conjugate",
-    "absolute",
-    "conj",
-    "all",
     "any",
+    "arange",
+    "argmax",
+    "argmin",
+    "around",
+    "average",
+    "clip",
+    "conj",
+    "conjugate",
+    "coordmax",
+    "coordmin",
+    "cumsum",
+    "diag",
+    "diagonal",
+    "empty",
+    "empty_like",
+    "eye",
+    "fromfunction",
+    "fromiter",
+    "full",
+    "full_like",
+    "geomspace",
+    "identity",
+    "linspace",
+    "logspace",
+    "max",
+    "mean",
+    "min",
+    "ones",
+    "ones_like",
+    "pipe",
+    "ptp",
+    "random",
+    "round",
+    "round_",
+    "std",
+    "sum",
+    "var",
+    "zeros",
+    "zeros_like",
 ]
 
 for funcname in api_funcs:
+    # if hasattr(NDMath, funcname):
     setattr(thismodule, funcname, getattr(NDMath, funcname))
     thismodule.__all__.append(funcname)
 

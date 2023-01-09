@@ -7,6 +7,7 @@
 # flake8: noqa
 """
 Package containing various utilities classes and functions.
+isort:skip_file
 """
 
 from numpy.ma.core import MaskedArray, MaskedConstant
@@ -21,7 +22,7 @@ from spectrochempy.utils.fake import *
 from spectrochempy.utils.file import *
 from spectrochempy.utils.jsonutils import *
 from spectrochempy.utils.misc import *
-from spectrochempy.utils.nmrglue import *
+from spectrochempy.utils.optional import *
 from spectrochempy.utils.orderedset import *
 from spectrochempy.utils.packages import *
 from spectrochempy.utils.plots import *
