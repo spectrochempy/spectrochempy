@@ -3266,59 +3266,23 @@ def _set_operators(cls, priority=50):
 
 
 # ------------------------------------------------------------------
-# module functions
+# Add module functions from NDMath
 # ------------------------------------------------------------------
 # make some NDMath operation accessible from the spectrochempy API
-api_funcs = [
-    "abs",
-    "absolute",
-    "all",
-    "amax",
-    "amin",
-    "any",
-    "arange",
-    "argmax",
-    "argmin",
-    "around",
-    "average",
-    "clip",
-    "conj",
-    "conjugate",
-    "coordmax",
-    "coordmin",
-    "cumsum",
-    "diag",
-    "diagonal",
-    "empty",
-    "empty_like",
-    "eye",
-    "fromfunction",
-    "fromiter",
-    "full",
-    "full_like",
-    "geomspace",
-    "identity",
-    "linspace",
-    "logspace",
-    "max",
-    "mean",
-    "min",
-    "ones",
-    "ones_like",
-    "pipe",
-    "ptp",
-    "random",
-    "round",
-    "round_",
-    "std",
-    "sum",
-    "var",
-    "zeros",
-    "zeros_like",
-]
+def _update_api_funclist(obj):
+    # Automatically create a list of all math function to be published as API functions
+    funcs = []
+    for item in inspect.getmembers(obj):
+        _name, _type = item
+        if not _name.startswith("_"):
+            funcs.append(_name)
+    return funcs
+
+
+api_funcs = _update_api_funclist(NDMath)
+# print(api_funcs)
 
 for funcname in api_funcs:
-    # if hasattr(NDMath, funcname):
     setattr(thismodule, funcname, getattr(NDMath, funcname))
     thismodule.__all__.append(funcname)
 
