@@ -87,13 +87,6 @@ jobs:
         with:
           fetch-depth: 0
 
-#      - name: Install miniconda
-#        uses: conda-incubator/setup-miniconda@v2.2.0
-#        with:
-#          python-version: "3.9"
-#          environment-file: environment_dev.yml
-#          condarc-file: .ci/condarc.yml
-
       - name: Install Conda environment with Micromamba
         uses: mamba-org/provision-with-micromamba@main
         with:
