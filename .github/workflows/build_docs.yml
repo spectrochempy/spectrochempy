@@ -25,6 +25,12 @@ jobs:
 
   build_and_publish_documentation:
 
+    # prevent cron jobs from running on forks
+    if: |
+      (github.event_name == 'schedule'
+       && github.repository == 'spectrochempy/spectrochempy') || (
+       github.event_name != 'schedule')
+
     name: Build and publish documentation
     runs-on: ubuntu-latest
 
