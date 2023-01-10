@@ -1576,11 +1576,6 @@ for funcname in api_funcs:
     setattr(thismodule, funcname, getattr(NDDataset, funcname))
     thismodule.__all__.append(funcname)
 
-# load one method from NDIO
-load = NDDataset.load
-__all__ += ["load"]
-
-
 # ======================================================================================
 # Set the operators
 # ======================================================================================

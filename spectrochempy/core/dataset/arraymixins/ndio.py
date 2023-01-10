@@ -9,7 +9,7 @@ This module define the class |NDIO| in which input/output standard
 methods for a |NDDataset| are defined.
 """
 
-__all__ = []
+__all__ = ["load"]
 
 import io
 import json
@@ -467,6 +467,8 @@ class NDIO(HasTraits):
 
         return filename
 
+
+load = NDIO.load  # make plot accessible directly from the scp API
 
 # ======================================================================================================================
 if __name__ == "__main__":
