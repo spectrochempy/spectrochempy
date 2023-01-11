@@ -16,4 +16,5 @@ Reading of Opus file use the `BrukerOpusReader <https://github.com/qedsoftware/b
 Third-party Licences
 ====================
 
-..toctree:
+..todo:
+    Add licences about other works that may be included in SpectroChemPy

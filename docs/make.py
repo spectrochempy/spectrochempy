@@ -113,16 +113,8 @@ class BuildDocumentation(object):
             "--tutorials", help="zip and upload tutorials", action="store_true"
         )
 
-        parser.add_argument("--delnb", help="delete all ipynb", action="store_true")
-
         parser.add_argument(
-            "--execnb",
-            help="pre-execute ipynb file before running sphinx",
-            action="store_true",
-        )
-
-        parser.add_argument(
-            "--syncnb", help="sync all py/ipynb pairs", action="store_true"
+            "--delnb", help="delete all ipynb files", action="store_true"
         )
 
         parser.add_argument(
@@ -145,12 +137,6 @@ class BuildDocumentation(object):
 
         if args.clean and (args.pdf or args.all):
             self.clean("latex")
-
-        if args.clean or args.syncnb:
-            self.sync_notebooks()
-
-        if args.clean or args.execnb:
-            self.preexecutenb()
 
         if args.clean or args.apigen:
             self.apigen()
@@ -233,6 +219,8 @@ class BuildDocumentation(object):
         )
 
         self.make_dirs()
+
+        self.sync_notebooks()
 
         # run sphinx
         print(f"\n{builder.upper()} BUILDING:")
@@ -321,7 +309,7 @@ class BuildDocumentation(object):
 
     @staticmethod
     def sync_notebooks():
-        # Use  jupytext to sync py and ipynb files in userguide and tutorials
+        # Use  jupytext to sync py and ipynb files in userguide
 
         pyfiles = set()
         print(f'\n{"-" * 80}\nSync *.py and *.ipynb using jupytex\n{"-" * 80}')
@@ -386,7 +374,7 @@ class BuildDocumentation(object):
                 utime(py, (atime, mtime))
 
         if count == 0:
-            print("\nAll notebooks are up-to-date and synchronised with pct.py files")
+            print("\nAll notebooks are up-to-date and synchronised with rst files")
         print("\n")
 
     def zip_tutorials(self):
@@ -449,6 +437,8 @@ class BuildDocumentation(object):
         else:
             shutil.rmtree(LATEX / doc_version, ignore_errors=True)
             print(f"remove {LATEX / doc_version}")
+
+        self.delnb()
 
     def make_dirs(self):
         # Create the directories required to build the documentation.
