@@ -13,20 +13,27 @@ where optional parameters indicates which job(s) is(are) to perform.
 """
 
 import argparse
+import inspect
 import shutil
 import sys
 import warnings
 import zipfile
 from os import environ, utime
 from pathlib import Path
+from warnings import warn
 
 import numpy as np
 from skimage.io import imread, imsave
 from skimage.transform import resize
 from sphinx.application import Sphinx
 from sphinx.deprecation import RemovedInSphinx70Warning
+from traitlets import import_item
 
+import spectrochempy
+from spectrochempy.api import preferences as prefs
 from spectrochempy.api import version
+from spectrochempy.utils.file import download_testdata
+from spectrochempy.utils.packages import list_packages
 from spectrochempy.utils.system import sh
 
 warnings.filterwarnings(action="ignore", module="matplotlib", category=UserWarning)
@@ -65,22 +72,103 @@ GALLERY = GETTINGSTARTED / "gallery"
 __all__ = []
 
 # create the testdata directory
-import spectrochempy as scp
-from spectrochempy.utils.file import download_testdata
 
-datadir = scp.preferences.datadir
+datadir = prefs.datadir
 # this process is relatively long, so we do not want to do it several time:
 download_testdata()  # (download done using mamba install spectrochempy_data)
 
 
+# ======================================================================================
+# Class BuildDocumentation
+# ======================================================================================
 class BuildDocumentation(object):
     def __init__(self):
+
         # determine if we are in the development branch (latest) or master (stable)
 
         if "dev" in version:
             self._doc_version = "latest"
         else:
             self._doc_version = "stable"
+
+    def __call__(self):
+
+        parser = argparse.ArgumentParser()
+
+        parser.add_argument(
+            "-H", "--html", help="create html pages", action="store_true"
+        )
+
+        parser.add_argument(
+            "-P", "--pdf", help="create pdf manual", action="store_true"
+        )
+
+        parser.add_argument(
+            "--clean",
+            help="clean for a full regeneration of the documentation",
+            action="store_true",
+        )
+
+        parser.add_argument(
+            "--tutorials", help="zip and upload tutorials", action="store_true"
+        )
+
+        parser.add_argument("--delnb", help="delete all ipynb", action="store_true")
+
+        parser.add_argument(
+            "--execnb",
+            help="pre-execute ipynb file before running sphinx",
+            action="store_true",
+        )
+
+        parser.add_argument(
+            "--syncnb", help="sync all py/ipynb pairs", action="store_true"
+        )
+
+        parser.add_argument(
+            "--apigen",
+            help="execute a full regeneration of the api",
+            action="store_true",
+        )
+
+        parser.add_argument("--all", help="Build all docs", action="store_true")
+
+        args = parser.parse_args()
+
+        if len(sys.argv) == 1:
+            parser.print_help(sys.stderr)
+            print("by default, option is set to --html")
+            args.html = True
+
+        if args.clean and (args.html or args.all):
+            self.clean("html")
+
+        if args.clean and (args.pdf or args.all):
+            self.clean("latex")
+
+        if args.clean or args.syncnb:
+            self.sync_notebooks()
+
+        if args.clean or args.execnb:
+            self.preexecutenb()
+
+        if args.clean or args.apigen:
+            self.apigen()
+
+        if args.html:
+            self.make_docs("html")
+
+        if args.pdf:
+            self.make_docs("latex")
+            self.make_pdf()
+
+        if args.all:
+            self.make_docs("html")
+            self.make_docs("latex")
+            self.make_pdf()
+
+        if args.tutorials:
+            self.zip_tutorials()
 
     @property
     def doc_version(self):
@@ -116,70 +204,6 @@ class BuildDocumentation(object):
         with open(HTML / "index.html", "w") as f:
             f.write(html)
 
-    def __call__(self):
-
-        parser = argparse.ArgumentParser()
-
-        parser.add_argument(
-            "-H", "--html", help="create html pages", action="store_true"
-        )
-        parser.add_argument(
-            "-P", "--pdf", help="create pdf manual", action="store_true"
-        )
-        parser.add_argument(
-            "--clean",
-            help="clean for a full regeneration of the documentation",
-            action="store_true",
-        )
-        parser.add_argument("--delnb", help="delete all ipynb", action="store_true")
-        parser.add_argument(
-            "--syncnb", help="sync all py/ipynb pairs", action="store_true"
-        )
-
-        parser.add_argument(
-            "-m",
-            "--message",
-            default="DOCS: updated",
-            help="optional git commit message",
-        )
-        parser.add_argument(
-            "--api", help="execute a full regeneration of the api", action="store_true"
-        )
-
-        parser.add_argument("--all", help="Build all docs", action="store_true")
-
-        args = parser.parse_args()
-
-        if len(sys.argv) == 1:
-            parser.print_help(sys.stderr)
-
-            # ny default we run with option -H
-            print("by default, option is set to --html")
-            args.html = True
-
-        self.regenerate_api = args.api
-
-        if args.clean and args.html:
-            self.clean("html")
-
-        if args.clean and args.pdf:
-            self.clean("latex")
-
-        if args.html:
-            # self.sync_notebook = True
-            self.make_docs("html")
-            self.zip_tutorials()
-
-        if args.pdf:
-            self.make_docs("latex")
-            self.make_pdf()
-
-        if args.all:
-            self.make_docs("html", clean=True)
-            self.make_docs("latex", clean=True)
-            self.make_pdf()
-            self.zip_tutorials()
-
     @staticmethod
     def _confirm(action):
         # private method to ask user to enter Y or N (case-insensitive).
@@ -190,11 +214,8 @@ class BuildDocumentation(object):
             ).lower()
         return answer[:1] == "y"
 
-    def make_docs(self, builder="html", clean=False):
+    def make_docs(self, builder="html"):
         # Make the html or latex documentation
-
-        # self.delnb()
-        self.sync_notebooks()
 
         doc_version = self.doc_version
 
@@ -211,17 +232,7 @@ class BuildDocumentation(object):
             f'\n{"-" * 80}'
         )
 
-        # recreate dir if needed
-        if clean:
-            print("CLEAN:")
-            self.clean(builder)
-            # self.sync_notebook = True
-            self.regenerate_api = True
         self.make_dirs()
-
-        if self.regenerate_api:
-            shutil.rmtree(API, ignore_errors=True)
-            print(f"remove {API}")
 
         # run sphinx
         print(f"\n{builder.upper()} BUILDING:")
@@ -253,7 +264,7 @@ class BuildDocumentation(object):
             self.make_redirection_page()
 
         # a workaround to reduce the size of the image in the pdf document
-        # TODO: v.0.2 probably better solution exists?
+        # TODO:probably better solution exists?
         if builder == "latex":
             self.resize_img(GALLERY, size=580.0)
 
@@ -308,9 +319,6 @@ class BuildDocumentation(object):
             f"{LATEXDIR / PROJECTNAME}.pdf {DOWNLOADS}/{doc_version}-{PROJECTNAME}.pdf"
         )
 
-    # Tutorials
-    # ----------
-
     @staticmethod
     def sync_notebooks():
         # Use  jupytext to sync py and ipynb files in userguide and tutorials
@@ -347,22 +355,23 @@ class BuildDocumentation(object):
                 # ipynb is more recent else positive
 
             args = None
-            if not py.exists() or difftime < -0.5:
-                args = [
-                    "--update-metadata",
-                    '{"jupytext": {"notebook_metadata_filter":"all"}}',
-                    "--to",
-                    "py:percent",
-                    ipynb,
-                ]
 
-            elif not ipynb.exists() or difftime > 0.5:
+            if not ipynb.exists() or difftime > 0.5:
                 args = [
                     "--update-metadata",
                     '{"jupytext": {"notebook_metadata_filter":"all"}}',
                     "--to",
                     "ipynb",
                     py,
+                ]
+
+            elif not py.exists() or difftime < -0.5:
+                args = [
+                    "--update-metadata",
+                    '{"jupytext": {"notebook_metadata_filter":"all"}}',
+                    "--to",
+                    "py:percent",
+                    ipynb,
                 ]
 
             if args is not None:
@@ -382,6 +391,7 @@ class BuildDocumentation(object):
 
     def zip_tutorials(self):
         # make tutorials.zip
+        print(f'\n{"-" * 80}\nMake tutorials.zip\n{"-" * 80}')
 
         # clean notebooks output
         for nb in DOCS.rglob("**/*.ipynb"):
@@ -459,9 +469,119 @@ class BuildDocumentation(object):
         for d in build_dirs:
             Path.mkdir(d, parents=True, exist_ok=True)
 
+    def apigen(self):
+        print(f'\n{"-" * 80}\nRegenerate the reference API list\n{"-" * 80}')
+
+        Apigen()
+
 
 # %%
 Build = BuildDocumentation()
+
+
+# ======================================================================================
+# Class Apigen
+# ======================================================================================
+class Apigen:
+
+    header = """\
+.. Generate API reference pages, but don't display these in tables.
+
+:orphan:
+
+.. currentmodule:: spectrochempy
+.. autosummary::
+   :toctree: generated/
+
+"""
+
+    def __init__(self):
+        entries = self.list_entries()
+        self.write_api_rst(entries)
+
+    def get_packages(self):
+        pkgs = list_packages(spectrochempy)
+        for pkg in pkgs[:]:
+            if pkg.endswith(".api"):
+                pkgs.remove(pkg)
+        return pkgs
+
+    def get_members(self, obj, objname, alls=None):
+        res = []
+        members = inspect.getmembers(obj)
+        for member in members:
+            _name, _type = member
+
+            if (
+                (alls is not None and _name not in alls)
+                or not str(_type).startswith("<")
+                or str(_name).startswith("_")
+                or "HasTraits" in str(_type)
+                or "cross_validation_lock" in str(_name)
+                or not (
+                    str(_type).startswith("<class")
+                    or str(_type).startswith("<function")
+                    or str(_type).startswith("<property")
+                )
+            ):
+                # we keep only the members in __all__ but the constants
+                # print(f">>>>>>>>>>>>>>>>   {_name}\t\t{_type}")
+                continue
+            else:
+                module = ".".join(objname.split(".")[1:])
+                if module == "core":
+                    continue
+
+                module = module + "." if module else ""
+                print(f"{module}{_name}\t\t{_type}")
+                #          o = import_item(f"{objname}")
+
+                res.append(f"{module}{_name}")
+
+                if str(_type).startswith("<class"):
+                    # find also members in class
+                    klass = getattr(obj, _name)
+
+                    subres = self.get_members(klass, objname + "." + _name)
+                    res.extend(subres)
+
+        return res
+
+    def list_entries(self):
+
+        pkgs = self.get_packages()
+
+        results = []
+        for pkg_name in pkgs:
+
+            print()
+            print("*" * 88)
+            print(pkg_name)
+            print("-" * len(pkg_name))
+
+            pkg = import_item(pkg_name)
+            try:
+                alls = getattr(pkg, "__all__")
+                print(alls)
+
+            except AttributeError:
+                warn("This module has no __all__ attribute")
+                continue
+
+            if alls == []:
+                continue
+
+            res = self.get_members(pkg, pkg_name, alls)
+            results.extend(res)
+
+        return results
+
+    def write_api_rst(self, items):
+        with open(REFERENCE / "api.rst", "w") as f:
+            f.write(self.header)
+            for item in items:
+                f.write(f"    {item}\n")
+
 
 # %%
 if __name__ == "__main__":

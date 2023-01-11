@@ -68,7 +68,8 @@ def set_env(**environ):
     False
 
     """
-    # https://stackoverflow.com/questions/2059482/python-temporarily-modify-the-current-processs-environment/51754362
+    # https://stackoverflow.com/questions/2059482/
+    # python-temporarily-modify-the-current-processs-environment/51754362
     old_environ = dict(os.environ)
     os.environ.update(environ)
     try:
@@ -78,9 +79,9 @@ def set_env(**environ):
         os.environ.update(old_environ)
 
 
-# ======================================================================================================================
+# ======================================================================================
 # NDDataset comparison
-# ======================================================================================================================
+# ======================================================================================
 def gisinf(x):
     # copied from numpy.testing._private.utils
     from numpy.core import errstate, isinf
@@ -242,7 +243,8 @@ def compare_coords(this, other, approx=False, decimal=6, data_only=False):
         attrs = ["data"]
     else:
         attrs = ["data", "labels", "units", "meta", "title"]
-        # if 'title' in attrs:  #    attrs.remove('title')  #TODO: should we use title for comparison?
+        # if 'title' in attrs:  #    attrs.remove('title')
+        # #TODO: should we use title for comparison?
 
     if other.linear == this.linear:
         # To còmpare linear coordinates
@@ -359,7 +361,8 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
     #     elif this.has_units and otherunits:
     #         eq = np.all(this._data * this._units == otherdata * otherunits)
     #     else:
-    #         raise AssertionError(f"units of {this} and {other} objects does not match")
+    #         raise AssertionError(
+    #         f"units of {this} and {other} objects does not match")
     #     return eq
 
     thistype = this.implements()
