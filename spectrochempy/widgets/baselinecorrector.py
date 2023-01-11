@@ -40,11 +40,11 @@ class BaselineCorrector:
 
     Attributes
     ----------
-    original : NDDataset
+    original : |NDDataset|
         The (sliced) NDDataset, without baseline correction.
-    corrected : NDDataset
+    corrected : |NDDataset|
         The baseline corrected NDDataset.
-    baseline : NDDataset
+    baseline : |NDDataset|
         The baselines.
 
     See Also
