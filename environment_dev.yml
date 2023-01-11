@@ -26,6 +26,7 @@ dependencies:
     - quaternion
 
     # dependencies for the core package
+    - cffconvert
     - colorama
     - dill
     - ipython
@@ -68,7 +69,6 @@ dependencies:
     - coverage
     - black
     - pre-commit
-    - cffconvert
     - mamba
     - docrep
     - jupytext
