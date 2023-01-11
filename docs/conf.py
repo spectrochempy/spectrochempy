@@ -442,7 +442,6 @@ suppress_warnings = [
     "sphinx_gallery",
 ]
 
-#
 # nbsphinx ---------------------------------------------------------------------
 
 #
@@ -456,7 +455,7 @@ nbsphinx_execute_arguments = [
 # Execute notebooks before conversion: 'always', 'never', 'auto' (default)
 nbsphinx_execute = "always"
 nbsphinx_allow_errors = True
-nbsphinx_timeout = 180
+nbsphinx_timeout = 90
 nbsphinx_prolog = """
 """
 nbsphinx_epilog = """
@@ -474,7 +473,7 @@ nbsphinx_custom_formats = {
     # ".md": ["jupytext.reads", {"fmt": "Rmd"}],
 }
 
-#
+
 # configuration for intersphinx ------------------------------------------------
 
 #
