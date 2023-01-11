@@ -104,7 +104,6 @@ User's Guide
     userguide/processing/processing
     userguide/analysis/analysis
     userguide/units/units
-    userguide/databases/databases
     userguide/api/api
 
 ***********************
