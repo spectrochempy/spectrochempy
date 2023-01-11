@@ -193,7 +193,8 @@ class BuildDocumentation(object):
     def make_docs(self, builder="html", clean=False):
         # Make the html or latex documentation
 
-        self.delnb()
+        # self.delnb()
+        # self.sync_notebooks()
 
         doc_version = self.doc_version
 
@@ -233,7 +234,7 @@ class BuildDocumentation(object):
         # keep_going: bool = False,
         # pdb: bool = False
         sp.parallel = 8
-        sp.verbosity = 0
+        sp.verbosity = 1
         sp.build()
 
         print(
@@ -372,7 +373,7 @@ class BuildDocumentation(object):
                 utime(py, (atime, mtime))
 
         if count == 0:
-            print("\nAll notebooks are up-to-date and synchronised with py files")
+            print("\nAll notebooks are up-to-date and synchronised with pct.py files")
         print("\n")
 
     def zip_tutorials(self):

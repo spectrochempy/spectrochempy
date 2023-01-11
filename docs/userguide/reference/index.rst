@@ -316,11 +316,6 @@ Clipping and rounding
     :toctree: generated/
 
     clip
-    rint
-    floor
-    ceil
-    fix
-    trunc
     around
     round
 
@@ -347,7 +342,6 @@ Logic functions
 
     all
     any
-    sign
 
 
 Sums, integal, difference
@@ -406,8 +400,6 @@ Units manipulation
     ito_base_units
     ito_reduced_units
     is_units_compatible
-    deg2rad
-    rad2deg
 
 
 Unary mathematical operations
@@ -416,32 +408,6 @@ Unary mathematical operations
 .. autosummary::
     :nosignatures:
     :toctree: generated/
-
-    fabs
-    negative
-    exp
-    exp2
-    log
-    log2
-    log10
-    expm1
-    log1p
-    sqrt
-    square
-    cbrt
-    reciprocal
-    sin
-    cos
-    tan
-    arcsin
-    arccos
-    arctan
-    sinh
-    cosh
-    tanh
-    arcsinh
-    arccosh
-    arctanh
 
 
 Statistical operations

@@ -235,7 +235,9 @@ html_favicon = "_static/scpy.ico"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
-
+html_css_files = [
+    "theme_override.css",
+]
 #
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
@@ -467,8 +469,8 @@ nbsphinx_kernel_name = "python3"
 
 # Support for notebook formats other than .ipynb
 nbsphinx_custom_formats = {
-    ".pct.py": ["jupytext.reads", {"fmt": "py:percent"}],
-    ".md": ["jupytext.reads", {"fmt": "Rmd"}],
+    # ".pct.py": ["jupytext.reads", {"fmt": "py:percent"}],
+    # ".md": ["jupytext.reads", {"fmt": "Rmd"}],
 }
 
 #
