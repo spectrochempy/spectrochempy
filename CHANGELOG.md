@@ -1,6 +1,6 @@
 # What's new
 
-## Unreleased
+## Version 0.4.11 [2023-01-11]
 
 ### NEW FEATURES
 * Improved documentation.
