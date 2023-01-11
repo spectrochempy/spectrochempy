@@ -10,6 +10,7 @@
 quadprog
 brukeropusreader
 numpy-quaternion
+cffconvert
 colorama
 dill
 ipython
@@ -42,7 +43,6 @@ scikit-image
 coverage
 black
 pre-commit
-cffconvert
 mamba
 docrep
 jupytext

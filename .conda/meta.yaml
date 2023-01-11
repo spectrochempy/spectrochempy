@@ -37,6 +37,7 @@ requirements:
     - quaternion
 
     # dependencies for the core package
+    - cffconvert
     - colorama
     - dill
     - ipython

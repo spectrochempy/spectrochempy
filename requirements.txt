@@ -10,6 +10,7 @@
 quadprog
 brukeropusreader
 numpy-quaternion
+cffconvert
 colorama
 dill
 ipython
