@@ -8,6 +8,10 @@
 ### BUG FIXED
 * Missing pytz dependencies in requirements.txt (pip) and environment.
 
+### BREAKING CHANGES
+* numpy ufunc function can no longer be called as `scp.ufunc(nddataset)`,
+  use `np.ufunc(nddataset)` instead.
+
 ## Version 0.4.10 [2023-01-07]
 
 ### NEW FEATURES
