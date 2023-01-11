@@ -118,7 +118,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         names are automatically attributed in
         this order.
     name : str, optional
-        A user friendly name for this object. If not given, the automatic
+        A user-friendly name for this object. If not given, the automatic
         `id` given at the object creation will be used as a name.
     labels : array of objects, optional
         Labels for the `data`. labels can be used only for 1D-datasets.
@@ -135,7 +135,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         they are not (like in numpy masked arrays). If `data` is already a
         :class:`~numpy.ma.MaskedArray`, or any
         array object (such as a |NDArray| or subclass of it), providing a
-        `mask` here will causes the mask from the
+        `mask` here, will causes the mask from the
         masked array to be ignored.
     units : |Unit| instance or str, optional
         Units of the data. If data is a |Quantity| then `units` is set to

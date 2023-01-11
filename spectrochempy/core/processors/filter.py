@@ -39,17 +39,17 @@ def savgol_filter(
     Parameters
     ----------
     dataset : |NDDataset|
-        The data to be filtered. If dataset.data is not a single or double precision
+        The dataset to be filtered. If dataset.data is not a single or double precision
         floating point array, it will be converted to type numpy.float64 before
         filtering.
     window_length : int
         The length of the filter window (i.e. the number of coefficients).
         window_length must be a positive odd integer.
     polyorder : int
-        The order of the polynomial used to fit the NDDataset. polyorder must be less
+        The order of the polynomial used to fit the NDDataset. `polyorder` must be less
         than window_length.
     deriv : int, optional
-        The order of the derivative to compute. This must be a nonnegative integer.
+        The order of the derivative to compute. This must be a non-negative integer.
         The default is 0, which means to filter the data without differentiating.
     delta : float, optional
         The spacing of the samples to which the filter will be applied. This is only
@@ -91,26 +91,28 @@ def savgol_filter(
 
     Details on the `mode` options:
 
-    * 'mirror':
+    * `mirror`:
       Repeats the values at the edges in reverse order.  The value
       closest to the edge is not included.
-    * 'nearest':
+    * `nearest`:
       The extension contains the nearest input value.
-    * 'constant':
+    * `constant`:
       The extension contains the value given by the `cval` argument.
-    * 'wrap':
+    * `wrap`:
       The extension contains the values from the other end of the array.
 
     For example, if the input is [1, 2, 3, 4, 5, 6, 7, 8], and
     `window_length` is 7, the following shows the extended data for
-    the various `mode` options (assuming `cval` is 0)::
+    the various `mode` options (assuming `cval` is 0)
 
-    mode       |   Ext   |         Input          |   Ext
-    -----------+---------+------------------------+---------
-    'mirror'   | 4  3  2 | 1  2  3  4  5  6  7  8 | 7  6  5
-    'nearest'  | 1  1  1 | 1  2  3  4  5  6  7  8 | 8  8  8
-    'constant' | 0  0  0 | 1  2  3  4  5  6  7  8 | 0  0  0
-    'wrap'     | 6  7  8 | 1  2  3  4  5  6  7  8 | 1  2  3
+    +-----------+---------+------------------------+---------+
+    | mode      |   Ext   |         Input          |   Ext
+    *-----------+---------+------------------------+---------+
+    | 'mirror'  | 4  3  2 | 1  2  3  4  5  6  7  8 | 7  6  5 |
+    | 'nearest' | 1  1  1 | 1  2  3  4  5  6  7  8 | 8  8  8 |
+    | 'constant'| 0  0  0 | 1  2  3  4  5  6  7  8 | 0  0  0 |
+    | 'wrap'    | 6  7  8 | 1  2  3  4  5  6  7  8 | 1  2  3 |
+    +-----------+---------+------------------------+---------+
 
     See Also
     ---------

@@ -111,16 +111,19 @@ class Coord(NDMath, NDArray):
     --------
 
     We first import the object from the api :
+
     >>> from spectrochempy import Coord
 
     We then create a numpy |ndarray| and use it as the numerical `data`
-    axis of our new |Coord| object.
+    axis of our new |Coord| object :
+
     >>> c0 = Coord.arange(1., 12., 2., title='frequency', units='Hz')
     >>> c0
     Coord: [float64] Hz (size: 6)
 
     We can take a series of str to create a non numerical but labelled
     axis :
+
     >>> tarr = list('abcdef')
     >>> tarr
     ['a', 'b', 'c', 'd', 'e', 'f']
@@ -894,11 +897,11 @@ class LinearCoord(Coord):
     dims : list of chars, optional.
         if specified the list must have a length equal to the number od
         data dimensions (ndim) and the chars must be
-        taken among among x,y,z,u,v,w or t. If not specified,
+        taken among x,y,z,u,v,w or t. If not specified,
         the dimension names are automatically attributed in
         this order.
     name : str, optional
-        A user friendly name for this object. If not given,
+        A user-friendly name for this object. If not given,
         the automatic `id` given at the object creation will be
         used as a name.
     labels : array of objects, optional
