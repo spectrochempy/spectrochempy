@@ -1,5 +1,12 @@
 # What's new
+
 ## Unreleased
+
+### NEW FEATURES
+* Improved documentation.
+
+### BUG FIXED
+* Missing pytz dependencies in requirements.txt (pip) and environment.
 
 ## Version 0.4.10 [2023-01-07]
 
