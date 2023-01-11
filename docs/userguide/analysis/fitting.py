@@ -94,8 +94,8 @@ print("speed : {:.3fK},  distance at time 0 : {:.3fK}".format(v, d0))
 # <div class="alert alert-info">
 # <b>Note</b>
 #
-# In the particular case where the variation is proportional to the x dataset coordinate, the same result can be
-# obtained directly using `d` as a single
+# In the particular case where the variation is proportional to the x dataset
+# coordinate, the same result can be obtained directly using `d` as a single
 # parameter on LSTSQ (as `t` is the `x` coordinate axis!)
 # </div>
 
@@ -147,7 +147,8 @@ d2 = scp.NDDataset.fromfunction(
 d2.plot_scatter(markersize=7, mfc="red")
 
 # %% [markdown]
-# Now we must use the first syntax LSTQ(X, Y) as the variation is not proportional to time, but to its square.
+# Now we must use the first syntax LSTQ(X, Y) as the variation is not proportional
+# to time, but to its square.
 
 # %%
 X = time**2
@@ -172,10 +173,11 @@ dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
 # ## Least square with non-negativity constraint (NNLS)
 
 # %% [markdown]
-# When fitting data with LSTSQ, it happens that we get some negative values were it should not, for instance having a
-# negative distance at time 0.
+# When fitting data with LSTSQ, it happens that we get some negative values were
+# it should not, for instance having a negative distance at time 0.
 #
-# In this case, we can use the NNLS method of fitting. It operates as ``LSTSQ`` but keep the Y values always positive.
+# In this case, we can use the NNLS method of fitting. It operates as ``LSTSQ``
+# but keep the Y values always positive.
 
 # %%
 X = time**2
@@ -224,8 +226,9 @@ ndOH.plot()
 # ### Baseline correction
 
 # %% [markdown]
-# We can perform a linear baseline correction to start with this data (see the [baseline tutorial](
-# ../processing/baseline.ipynb)). For removing a linear baseline, the fastest method is however to use the ``abc`` (
+# We can perform a linear baseline correction to start with this data (see the
+# [baseline tutorial](../processing/baseline.ipynb)).
+# For removing a linear baseline, the fastest method is however to use the ``abc`` (
 # automatic baseline correction)
 
 # %%
@@ -235,8 +238,9 @@ ndOHcorr.plot()
 # %% [markdown]
 # ### Peak finding
 #
-# Below we will need to start with some guess of the peak position and width. For this we can use the `find_peaks()`
-# method (see [Peak finding tutorial](../analysis/peak_finding.ipynb))
+# Below we will need to start with some guess of the peak position and width.
+# For this we can use the `find_peaks()` method
+# (see [Peak finding tutorial](../analysis/peak_finding.ipynb))
 
 # %%
 peaks, _ = ndOHcorr.find_peaks()
@@ -301,7 +305,8 @@ shape: asymmetricvoigtmodel
 # %% [markdown]
 # #### Syntax for parameters definition
 #
-# In such script, the char `#` at the beginning of a line denote that the whole line is a comment. Comments are
+# In such script, the char `#` at the beginning of a line denote that the whole line is
+# a comment. Comments are
 # obviously optional but may be useful to explain
 #
 # Each individual model component is identified by the keyword `MODEL`
@@ -310,32 +315,39 @@ shape: asymmetricvoigtmodel
 #
 # Then come for each model components its `shape`, *i.e.,* the shape of the line.
 #
-# Come after the definition of the model parameters depending on the shape, e.g., for a `gaussianmodel` we have three
+# Come after the definition of the model parameters depending on the shape, e.g., for
+# a `gaussianmodel` we have three
 # parameters: `amplitude` (`ampl`), `width` and `position` (`pos`) of the line.
 #
-# To define a given parameter, we have to write its `name` and a set of 3 values: the expected `value` and 2 limits
+# To define a given parameter, we have to write its `name` and a set of 3 values:
+# the expected `value` and 2 limits
 # for the allowed variations : `low_bound`,  `high_bound`
 # ```
 # name : value, low_bound,  high_bound
 # ````
-# These parameters are preceded by a mark saying what kind of parameter it will behave in the fit procedure:
+# These parameters are preceded by a mark saying what kind of parameter it will behave
+# in the fit procedure:
 #
 # * `$` is the default and denote a variable parameters
 # * `*` denotes fixed parameters
 # * `>` say that the given parameters is actually defined in a COMMON block
 #
-# `COMMON`is the common block containing parameters to which a parameter in the MODEL blocks can make reference using
+# `COMMON`is the common block containing parameters to which a parameter in the MODEL
+# blocks can make reference using
 # the  `>` markers.  (`>` obviously is forbidden in the COMMON block)
 # common block parameters should not have a `_`(underscore) in their names
 #
-# With this parameter script definition, you can thus make rather complex search for modelling, as you can make
+# With this parameter script definition, you can thus make rather complex search for
+# modelling, as you can make
 # parameters dependents or fixed.
 #
-# The line shape can be (up to now) in the following list of shape (for 1D models - see below for 2D):
+# The line shape can be (up to now) in the following list of shape (for 1D models -
+# see below for 2D):
 #
 # * PolynomialBaseline -> `polynomialbaseline`:
 #
-#   Arbitrary-degree polynomial (degree limited to 10, however). As a linear baseline is automatically calculated
+#   Arbitrary-degree polynomial (degree limited to 10, however). As a linear
+#   baseline is automatically calculated
 #   during fitting, this polynom is always of
 #   greater or equal to order 2 (parabolic function at the minimum).
 #
@@ -404,7 +416,8 @@ shape: asymmetricvoigtmodel
 #
 # * Asymmetric Voigt Model -> `asymmetricvoigtmodel`:
 #
-#   An asymmetric Voigt model (A. L. Stancik and E. B. Brauns, Vibrational Spectroscopy, 2008, 47, 66-69)
+#   An asymmetric Voigt model
+#   (A. L. Stancik and E. B. Brauns, Vibrational Spectroscopy, 2008, 47, 66-69)
 #
 #   ```
 #   MODEL: linez

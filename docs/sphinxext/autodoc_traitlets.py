@@ -13,7 +13,8 @@
 # %%
 """autodoc extension for configurable traitlets
 
-Borrowed from https://github.com/dask/dask-gateway/blob/master/docs/sphinxext/autodoc_traitlets.py
+Borrowed from
+https://github.com/dask/dask-gateway/blob/master/docs/sphinxext/autodoc_traitlets.py
 
 """
 

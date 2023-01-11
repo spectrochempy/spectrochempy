@@ -33,10 +33,12 @@
 # # Overview
 
 # %% [markdown]
-# The purpose of this page is to give you some quick examples of what can be done with SpectroChemPy.
+# The purpose of this page is to give you some quick examples of what can be done with
+# SpectroChemPy.
 #
-# See the [gallery of examples](gallery/auto_examples/index.rst) and consult the [user's guide](
-# ../userguide/introduction/introduction.ipynb) for more information on using SpectroChemPy
+# See the [gallery of examples](gallery/auto_examples/index.rst) and consult the
+# [user's guide](../userguide/introduction/introduction.ipynb)
+# for more information on using SpectroChemPy
 #
 # Before using the package, we must load the **API (Application Programming Interface)**
 
@@ -47,10 +49,12 @@ import spectrochempy as scp
 # ## NDDataset, the main object
 
 # %% [markdown]
-# NDDataset is a python object, actually a container, which can represent most of your multidimensional spectroscopic
+# NDDataset is a python object, actually a container, which can represent most of your
+# multidimensional spectroscopic
 # data.
 #
-# For instance, in the following we read data from a series of FTIR experiments, provided  by the OMNIC software:
+# For instance, in the following we read data from a series of FTIR experiments,
+# provided  by the OMNIC software:
 
 # %%
 ds = scp.read("irdata/nh4y-activation.spg")

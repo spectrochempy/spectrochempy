@@ -17,10 +17,12 @@
 # %% [markdown]
 # # Peak integration
 #
-# This tutorial shows how to find peak maxima and determine peak areas with spectrochempy. As prerequisite,
+# This tutorial shows how to find peak maxima and determine peak areas with
+# spectrochempy. As prerequisite,
 # the user is expected to have read the [Import](../importexport/import.ipynb),
 # [Import IR](../importexport/importIR.ipynb),
-# [slicing](../processing/slicing.ipynb) and [baseline correction](../processing/baseline.ipynb) tutorials.
+# [slicing](../processing/slicing.ipynb) and
+# [baseline correction](../processing/baseline.ipynb) tutorials.
 
 # %% [markdown]
 # First lets import the SpectroChemPy API
@@ -38,7 +40,8 @@ ds
 # %% [markdown]
 # It's a series of 55 spectra.
 #
-# For the demonstration select only the first 20 on a limited region from 1250 to 1800 cm$^{-1}$ (Do not forget to
+# For the demonstration select only the first 20 on a limited region from 1250 to
+# 1800 cm$^{-1}$ (Do not forget to
 # use floating numbers for slicing)
 
 # %%
@@ -77,7 +80,8 @@ Xcorr = blc.compute(*regions)  # compute the corrected NDDataset
 Xcorr.plot()
 
 # %% [markdown]
-# To integrate each row on the full range, we can use the sum or trapz method of a NDDataset.
+# To integrate each row on the full range, we can use the sum or trapz method of a
+# NDDataset.
 
 # %%
 inttrapz = Xcorr.trapz(dim="x")
@@ -96,7 +100,8 @@ scp.plot_multiple(
 )
 
 # %% [markdown]
-# The difference between the trapezoidal and simpson integration methods is visualized below. In this case they are
+# The difference between the trapezoidal and simpson integration methods is visualized
+# below. In this case they are
 # extremely close.
 
 # %%

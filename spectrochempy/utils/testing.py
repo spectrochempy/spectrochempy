@@ -395,7 +395,8 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
                 if attr in attrs:
                     attrs.remove(attr)
 
-        # if 'title' in attrs:  #    attrs.remove('title')  #TODO: should we use title for comparison?
+        # if 'title' in attrs:  #    attrs.remove('title')
+        # #TODO: should we use title for comparison?
 
     for attr in attrs:
         if attr != "units":

@@ -10,7 +10,10 @@ from spectrochempy.utils.optional import VERSIONS, import_optional_dependency
 
 
 def test_import_optional():
-    match = "Missing optional dependency 'notapackage'.  Use conda or pip to install notapackage."
+    match = (
+        "Missing optional dependency 'notapackage'.  "
+        "Use conda or pip to install notapackage."
+    )
     with pytest.raises(ImportError, match=match) as exc_info:
         import_optional_dependency("notapackage")
     # The original exception should be there as context:

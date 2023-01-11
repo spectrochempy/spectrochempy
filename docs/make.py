@@ -205,7 +205,8 @@ class BuildDocumentation(object):
 
         print(
             f'{"-" * 80}\n'
-            f"building {builder.upper()} documentation ({doc_version.capitalize()} version : {version})"
+            f"building {builder.upper()} documentation ({doc_version.capitalize()} "
+            f"version : {version})"
             f"\n in {BUILDDIR}"
             f'\n{"-" * 80}'
         )
@@ -288,7 +289,8 @@ class BuildDocumentation(object):
 
         print("FIRST COMPILATION:")
         sh(
-            f"cd {LATEXDIR}; lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex"
+            f"cd {LATEXDIR}; "
+            f"lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex"
         )
 
         print("MAKEINDEX:")
@@ -296,12 +298,14 @@ class BuildDocumentation(object):
 
         print("SECOND COMPILATION:")
         sh(
-            f"cd {LATEXDIR}; lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex"
+            f"cd {LATEXDIR}; "
+            f"lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex"
         )
 
         print("move pdf file in the download dir")
         sh(
-            f"cp {LATEXDIR / PROJECTNAME}.pdf {DOWNLOADS}/{doc_version}-{PROJECTNAME}.pdf"
+            f"cp "
+            f"{LATEXDIR / PROJECTNAME}.pdf {DOWNLOADS}/{doc_version}-{PROJECTNAME}.pdf"
         )
 
     # Tutorials
@@ -410,7 +414,8 @@ class BuildDocumentation(object):
         zipf.close()
 
         sh(
-            f"mv ~notebooks.zip {DOWNLOADS}/{self.doc_version}-{PROJECTNAME}-notebooks.zip"
+            f"mv ~notebooks.zip "
+            f"{DOWNLOADS}/{self.doc_version}-{PROJECTNAME}-notebooks.zip"
         )
 
     def clean(self, builder):
