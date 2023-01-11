@@ -45,7 +45,9 @@ requirements:
     - matplotlib
     - numba
     - numpy
+    - numpydoc
     - pint
+    - pytz
     - requests
     - scipy
     - tqdm
