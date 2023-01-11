@@ -8,7 +8,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.13.7
+#       jupytext_version: 1.14.4
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -23,13 +23,13 @@
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
 #     version: 3.9.1
+#   nbsphinx:
+#     orphan: true
 #   widgets:
 #     application/vnd.jupyter.widget-state+json:
 #       state: {}
 #       version_major: 2
 #       version_minor: 0
-#   nbsphinx:
-#     orphan: true
 # ---
 
 # %% [markdown]

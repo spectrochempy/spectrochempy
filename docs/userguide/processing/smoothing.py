@@ -9,7 +9,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.13.7
+#       jupytext_version: 1.14.4
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -25,7 +25,7 @@
 #
 # We first import spectrochempy, the other libraries used in this tutorial, and a sample dataset (
 # nh4y-activation.spg) from which we extract a noisy part:
-
+#
 import numpy as np
 
 # %%

@@ -7,49 +7,777 @@
    :toctree: generated/
 
     BaselineCorrection
+    BaselineCorrection.compute
+    BaselineCorrection.run
+    BaselineCorrection.show_regions
     BaselineCorrector
     Coord
+    Coord.T
+    Coord.abs
+    Coord.absolute
+    Coord.all
+    Coord.amax
+    Coord.amin
+    Coord.any
+    Coord.arange
+    Coord.argmax
+    Coord.argmin
+    Coord.around
+    Coord.asfortranarray
+    Coord.astype
+    Coord.author
+    Coord.average
+    Coord.clip
+    Coord.conj
+    Coord.conjugate
+    Coord.coordmax
+    Coord.coordmin
+    Coord.copy
+    Coord.cumsum
+    Coord.data
+    Coord.default
+    Coord.descendant
+    Coord.diag
+    Coord.diagonal
+    Coord.dimensionless
+    Coord.dims
+    Coord.dtype
+    Coord.empty
+    Coord.empty_like
+    Coord.eye
+    Coord.filename
+    Coord.fromfunction
+    Coord.fromiter
+    Coord.full
+    Coord.full_like
+    Coord.geomspace
+    Coord.get_axis
+    Coord.get_labels
+    Coord.has_data
+    Coord.has_defined_name
+    Coord.has_units
+    Coord.id
+    Coord.identity
+    Coord.imag
+    Coord.implements
+    Coord.increment
+    Coord.increment_value
+    Coord.is_1d
+    Coord.is_complex
+    Coord.is_empty
+    Coord.is_float
+    Coord.is_integer
+    Coord.is_labeled
+    Coord.is_masked
+    Coord.is_units_compatible
+    Coord.ito
+    Coord.ito_base_units
+    Coord.ito_reduced_units
+    Coord.labels
+    Coord.limits
+    Coord.linear
+    Coord.linspace
+    Coord.loc2index
+    Coord.logspace
+    Coord.m
+    Coord.magnitude
+    Coord.mask
+    Coord.masked_data
+    Coord.max
+    Coord.mean
+    Coord.meta
+    Coord.min
+    Coord.name
+    Coord.ndim
+    Coord.offset
+    Coord.offset_value
+    Coord.ones
+    Coord.ones_like
+    Coord.origin
+    Coord.pipe
+    Coord.ptp
+    Coord.random
+    Coord.real
+    Coord.remove_masks
+    Coord.reversed
+    Coord.roi
+    Coord.roi_values
+    Coord.round
+    Coord.round_
+    Coord.shape
+    Coord.size
+    Coord.spacing
+    Coord.squeeze
+    Coord.std
+    Coord.sum
+    Coord.swapaxes
+    Coord.swapdims
+    Coord.title
+    Coord.to
+    Coord.to_base_units
+    Coord.to_reduced_units
+    Coord.transpose
+    Coord.transposed
+    Coord.umasked_data
+    Coord.unitless
+    Coord.units
+    Coord.value
+    Coord.values
+    Coord.var
+    Coord.zeros
+    Coord.zeros_like
     CoordSet
+    CoordSet.available_names
+    CoordSet.coords
+    CoordSet.copy
+    CoordSet.data
+    CoordSet.default
+    CoordSet.has_defined_name
+    CoordSet.id
+    CoordSet.implements
+    CoordSet.is_empty
+    CoordSet.is_labeled
+    CoordSet.is_same_dim
+    CoordSet.keys
+    CoordSet.labels
+    CoordSet.name
+    CoordSet.names
+    CoordSet.references
+    CoordSet.select
+    CoordSet.set
+    CoordSet.set_titles
+    CoordSet.set_units
+    CoordSet.size
+    CoordSet.sizes
+    CoordSet.titles
+    CoordSet.to_dict
+    CoordSet.units
+    CoordSet.update
     CurveFit
+    CurveFit.inverse_transform
+    CurveFit.itrans
+    CurveFit.trans
+    CurveFit.transform
+    DimensionalityError
     EFA
+    EFA.b_ev
+    EFA.cutoff
+    EFA.f_ev
+    EFA.get_conc
     FileSelector
+    FileSelector.changed
+    FileSelector.make_options
+    FileSelector.stop
+    FileSelector.up
     Fit
+    Fit.dry_run
+    Fit.fp
+    Fit.run
+    Fit.script
+    Fit.script_default
     FitParameters
+    FitParameters.clear
+    FitParameters.copy
+    FitParameters.get
+    FitParameters.items
+    FitParameters.iteritems
+    FitParameters.keys
+    FitParameters.pop
+    FitParameters.popitem
+    FitParameters.setdefault
+    FitParameters.to_external
+    FitParameters.to_internal
+    FitParameters.update
+    FitParameters.values
     IRIS
+    IRIS.plotdistribution
+    IRIS.plotlcurve
+    IRIS.plotmerit
+    IRIS.reconstruct
     Isotopes
+    Isotopes.A
+    Isotopes.Q
+    Isotopes.Z
+    Isotopes.abundance
+    Isotopes.copy
+    Isotopes.data
+    Isotopes.gamma
+    Isotopes.get
+    Isotopes.implements
+    Isotopes.isotope
+    Isotopes.items
+    Isotopes.keys
+    Isotopes.name
+    Isotopes.nucleus
+    Isotopes.permute
+    Isotopes.spin
+    Isotopes.stability
+    Isotopes.swap
+    Isotopes.symbol
+    Isotopes.to_dict
+    Isotopes.update
     LSTSQ
+    LSTSQ.inverse_transform
+    LSTSQ.itrans
+    LSTSQ.trans
+    LSTSQ.transform
     LinearCoord
+    LinearCoord.T
+    LinearCoord.abs
+    LinearCoord.absolute
+    LinearCoord.all
+    LinearCoord.amax
+    LinearCoord.amin
+    LinearCoord.any
+    LinearCoord.arange
+    LinearCoord.argmax
+    LinearCoord.argmin
+    LinearCoord.around
+    LinearCoord.asfortranarray
+    LinearCoord.astype
+    LinearCoord.author
+    LinearCoord.average
+    LinearCoord.clip
+    LinearCoord.conj
+    LinearCoord.conjugate
+    LinearCoord.coordmax
+    LinearCoord.coordmin
+    LinearCoord.copy
+    LinearCoord.cumsum
+    LinearCoord.data
+    LinearCoord.default
+    LinearCoord.descendant
+    LinearCoord.diag
+    LinearCoord.diagonal
+    LinearCoord.dimensionless
+    LinearCoord.dims
+    LinearCoord.dtype
+    LinearCoord.empty
+    LinearCoord.empty_like
+    LinearCoord.eye
+    LinearCoord.filename
+    LinearCoord.fromfunction
+    LinearCoord.fromiter
+    LinearCoord.full
+    LinearCoord.full_like
+    LinearCoord.geomspace
+    LinearCoord.get_axis
+    LinearCoord.get_labels
+    LinearCoord.has_data
+    LinearCoord.has_defined_name
+    LinearCoord.has_units
+    LinearCoord.id
+    LinearCoord.identity
+    LinearCoord.imag
+    LinearCoord.implements
+    LinearCoord.increment
+    LinearCoord.increment_value
+    LinearCoord.is_1d
+    LinearCoord.is_complex
+    LinearCoord.is_empty
+    LinearCoord.is_float
+    LinearCoord.is_integer
+    LinearCoord.is_labeled
+    LinearCoord.is_masked
+    LinearCoord.is_units_compatible
+    LinearCoord.ito
+    LinearCoord.ito_base_units
+    LinearCoord.ito_reduced_units
+    LinearCoord.labels
+    LinearCoord.laser_frequency
+    LinearCoord.limits
+    LinearCoord.linear
+    LinearCoord.linspace
+    LinearCoord.loc2index
+    LinearCoord.logspace
+    LinearCoord.m
+    LinearCoord.magnitude
+    LinearCoord.mask
+    LinearCoord.masked_data
+    LinearCoord.max
+    LinearCoord.mean
+    LinearCoord.meta
+    LinearCoord.min
+    LinearCoord.name
+    LinearCoord.ndim
+    LinearCoord.offset
+    LinearCoord.offset_value
+    LinearCoord.ones
+    LinearCoord.ones_like
+    LinearCoord.origin
+    LinearCoord.pipe
+    LinearCoord.ptp
+    LinearCoord.random
+    LinearCoord.real
+    LinearCoord.remove_masks
+    LinearCoord.reversed
+    LinearCoord.roi
+    LinearCoord.roi_values
+    LinearCoord.round
+    LinearCoord.round_
+    LinearCoord.set_laser_frequency
+    LinearCoord.shape
+    LinearCoord.show_datapoints
+    LinearCoord.size
+    LinearCoord.spacing
+    LinearCoord.squeeze
+    LinearCoord.std
+    LinearCoord.sum
+    LinearCoord.swapaxes
+    LinearCoord.swapdims
+    LinearCoord.title
+    LinearCoord.to
+    LinearCoord.to_base_units
+    LinearCoord.to_reduced_units
+    LinearCoord.transpose
+    LinearCoord.transposed
+    LinearCoord.umasked_data
+    LinearCoord.unitless
+    LinearCoord.units
+    LinearCoord.value
+    LinearCoord.values
+    LinearCoord.var
+    LinearCoord.zeros
+    LinearCoord.zeros_like
     MCRALS
+    MCRALS.C
+    MCRALS.Chard
+    MCRALS.St
+    MCRALS.Stsoft
+    MCRALS.X
+    MCRALS.extOutput
+    MCRALS.fixedC
+    MCRALS.log
+    MCRALS.logs
+    MCRALS.params
+    MCRALS.plotmerit
+    MCRALS.reconstruct
     NDDataset
+    NDDataset.II
+    NDDataset.IR
+    NDDataset.RI
+    NDDataset.RR
+    NDDataset.T
+    NDDataset.ab
+    NDDataset.abc
+    NDDataset.abs
+    NDDataset.absolute
+    NDDataset.add_coordset
+    NDDataset.align
+    NDDataset.all
+    NDDataset.amax
+    NDDataset.amin
+    NDDataset.any
+    NDDataset.arange
+    NDDataset.argmax
+    NDDataset.argmin
+    NDDataset.around
+    NDDataset.asfortranarray
+    NDDataset.astype
+    NDDataset.author
+    NDDataset.autosub
+    NDDataset.average
+    NDDataset.ax
+    NDDataset.axT
+    NDDataset.axec
+    NDDataset.axecT
+    NDDataset.axex
+    NDDataset.axey
+    NDDataset.bartlett
+    NDDataset.basc
+    NDDataset.blackmanharris
+    NDDataset.clip
+    NDDataset.close_figure
+    NDDataset.comment
+    NDDataset.component
+    NDDataset.concatenate
+    NDDataset.conj
+    NDDataset.conjugate
+    NDDataset.coord
+    NDDataset.coordmax
+    NDDataset.coordmin
+    NDDataset.coordnames
+    NDDataset.coordset
+    NDDataset.coordtitles
+    NDDataset.coordunits
+    NDDataset.copy
+    NDDataset.created
+    NDDataset.cs
+    NDDataset.cumsum
+    NDDataset.data
+    NDDataset.dc
+    NDDataset.delete_coordset
+    NDDataset.description
+    NDDataset.detrend
+    NDDataset.diag
+    NDDataset.diagonal
+    NDDataset.dimensionless
+    NDDataset.dims
+    NDDataset.directory
+    NDDataset.divider
+    NDDataset.download_iris
+    NDDataset.download_nist_ir
+    NDDataset.dtype
+    NDDataset.dump
+    NDDataset.dumps
+    NDDataset.em
+    NDDataset.empty
+    NDDataset.empty_like
+    NDDataset.expand_dims
+    NDDataset.eye
+    NDDataset.fft
+    NDDataset.fig
+    NDDataset.fignum
+    NDDataset.filename
+    NDDataset.filetype
+    NDDataset.find_peaks
+    NDDataset.fromfunction
+    NDDataset.fromiter
+    NDDataset.fsh
+    NDDataset.fsh2
+    NDDataset.full
+    NDDataset.full_like
+    NDDataset.general_hamming
+    NDDataset.geomspace
+    NDDataset.get_axis
+    NDDataset.get_labels
+    NDDataset.gm
+    NDDataset.hamming
+    NDDataset.hann
+    NDDataset.has_complex_dims
+    NDDataset.has_data
+    NDDataset.has_defined_name
+    NDDataset.has_units
+    NDDataset.history
+    NDDataset.ht
+    NDDataset.id
+    NDDataset.identity
+    NDDataset.ifft
+    NDDataset.imag
+    NDDataset.implements
+    NDDataset.interpolate
+    NDDataset.is_1d
+    NDDataset.is_complex
+    NDDataset.is_empty
+    NDDataset.is_float
+    NDDataset.is_integer
+    NDDataset.is_interleaved
+    NDDataset.is_labeled
+    NDDataset.is_masked
+    NDDataset.is_quaternion
+    NDDataset.is_units_compatible
+    NDDataset.ito
+    NDDataset.ito_base_units
+    NDDataset.ito_reduced_units
+    NDDataset.labels
+    NDDataset.limits
+    NDDataset.linspace
+    NDDataset.local_timezone
+    NDDataset.logspace
+    NDDataset.ls
+    NDDataset.m
+    NDDataset.magnitude
+    NDDataset.mask
+    NDDataset.masked_data
+    NDDataset.max
+    NDDataset.mc
+    NDDataset.mean
+    NDDataset.meta
+    NDDataset.min
+    NDDataset.modeldata
+    NDDataset.modified
+    NDDataset.name
+    NDDataset.ndaxes
+    NDDataset.ndim
+    NDDataset.ones
+    NDDataset.ones_like
+    NDDataset.origin
+    NDDataset.parent
+    NDDataset.pipe
+    NDDataset.pk
+    NDDataset.pk_exp
+    NDDataset.plot
+    NDDataset.plot_1D
+    NDDataset.plot_2D
+    NDDataset.plot_3D
+    NDDataset.plot_bar
+    NDDataset.plot_image
+    NDDataset.plot_map
+    NDDataset.plot_multiple
+    NDDataset.plot_pen
+    NDDataset.plot_scatter
+    NDDataset.plot_scatter_pen
+    NDDataset.plot_stack
+    NDDataset.plot_surface
+    NDDataset.plot_waterfall
+    NDDataset.preferences
+    NDDataset.ps
+    NDDataset.ptp
+    NDDataset.qsin
+    NDDataset.random
+    NDDataset.read
+    NDDataset.read_bruker_nmr
+    NDDataset.read_carroucell
+    NDDataset.read_csv
+    NDDataset.read_ddr
+    NDDataset.read_dir
+    NDDataset.read_dx
+    NDDataset.read_hdr
+    NDDataset.read_jcamp
+    NDDataset.read_jdx
+    NDDataset.read_labspec
+    NDDataset.read_mat
+    NDDataset.read_matlab
+    NDDataset.read_omnic
+    NDDataset.read_opus
+    NDDataset.read_quadera
+    NDDataset.read_remote
+    NDDataset.read_sdr
+    NDDataset.read_soc
+    NDDataset.read_spa
+    NDDataset.read_spc
+    NDDataset.read_spg
+    NDDataset.read_srs
+    NDDataset.read_topspin
+    NDDataset.read_zip
+    NDDataset.real
+    NDDataset.remove_masks
+    NDDataset.roi
+    NDDataset.roi_values
+    NDDataset.roll
+    NDDataset.round
+    NDDataset.round_
+    NDDataset.rs
+    NDDataset.save
+    NDDataset.save_as
+    NDDataset.savgol_filter
+    NDDataset.set_complex
+    NDDataset.set_coordset
+    NDDataset.set_coordtitles
+    NDDataset.set_coordunits
+    NDDataset.set_hypercomplex
+    NDDataset.set_quaternion
+    NDDataset.shape
+    NDDataset.simps
+    NDDataset.simpson
+    NDDataset.sine
+    NDDataset.sinm
+    NDDataset.size
+    NDDataset.smooth
+    NDDataset.sort
+    NDDataset.sp
+    NDDataset.squeeze
+    NDDataset.stack
+    NDDataset.std
+    NDDataset.suffix
+    NDDataset.sum
+    NDDataset.swapaxes
+    NDDataset.swapdims
+    NDDataset.take
+    NDDataset.timezone
+    NDDataset.title
+    NDDataset.to
+    NDDataset.to_array
+    NDDataset.to_base_units
+    NDDataset.to_reduced_units
+    NDDataset.to_xarray
+    NDDataset.transpose
+    NDDataset.transposed
+    NDDataset.trapezoid
+    NDDataset.trapz
+    NDDataset.triang
+    NDDataset.umasked_data
+    NDDataset.unitless
+    NDDataset.units
+    NDDataset.value
+    NDDataset.values
+    NDDataset.var
+    NDDataset.write
+    NDDataset.write_csv
+    NDDataset.write_excel
+    NDDataset.write_jcamp
+    NDDataset.write_jdx
+    NDDataset.write_mat
+    NDDataset.write_matlab
+    NDDataset.write_xls
+    NDDataset.zeros
+    NDDataset.zeros_like
+    NDDataset.zf
+    NDDataset.zf_auto
+    NDDataset.zf_double
+    NDDataset.zf_size
     NNLS
+    NNLS.inverse_transform
+    NNLS.itrans
+    NNLS.trans
+    NNLS.transform
     NNMF
+    NNMF.nlssubprob
+    NNMF.nmf
     PCA
+    PCA.LT
+    PCA.S
+    PCA.X
+    PCA.ev
+    PCA.ev_cum
+    PCA.ev_ratio
+    PCA.plotmerit
+    PCA.printev
+    PCA.reconstruct
+    PCA.reduce
+    PCA.scoreplot
+    PCA.screeplot
     PFR
+    PFR.advance
+    PFR.composition_vs_time
+    PFR.fit_to_gas_concentrations
+    PFR.time
     ParameterScript
     Project
+    Project.add_dataset
+    Project.add_datasets
+    Project.add_project
+    Project.add_projects
+    Project.add_script
+    Project.add_scripts
+    Project.allitems
+    Project.allnames
+    Project.copy
+    Project.datasets
+    Project.datasets_names
+    Project.directory
+    Project.dump
+    Project.dumps
+    Project.filename
+    Project.filetype
+    Project.id
+    Project.implements
+    Project.meta
+    Project.name
+    Project.parent
+    Project.projects
+    Project.projects_names
+    Project.remove_all_dataset
+    Project.remove_all_project
+    Project.remove_all_script
+    Project.remove_dataset
+    Project.remove_project
+    Project.remove_script
+    Project.save
+    Project.save_as
+    Project.scripts
+    Project.scripts_names
+    Project.suffix
+    Quantity
+    Quantity.T
+    Quantity.UnitsContainer
+    Quantity.check
+    Quantity.clip
+    Quantity.compare
+    Quantity.compatible_units
+    Quantity.compute
+    Quantity.dimensionality
+    Quantity.dimensionless
+    Quantity.dot
+    Quantity.fill
+    Quantity.flat
+    Quantity.force_ndarray
+    Quantity.force_ndarray_like
+    Quantity.format_babel
+    Quantity.imag
+    Quantity.is_compatible_with
+    Quantity.ito
+    Quantity.ito_base_units
+    Quantity.ito_reduced_units
+    Quantity.ito_root_units
+    Quantity.m
+    Quantity.m_as
+    Quantity.magnitude
+    Quantity.ndim
+    Quantity.persist
+    Quantity.plus_minus
+    Quantity.prod
+    Quantity.put
+    Quantity.real
+    Quantity.searchsorted
+    Quantity.shape
+    Quantity.to
+    Quantity.to_base_units
+    Quantity.to_compact
+    Quantity.to_reduced_units
+    Quantity.to_root_units
+    Quantity.to_timedelta
+    Quantity.to_tuple
+    Quantity.tolist
+    Quantity.u
+    Quantity.unitless
+    Quantity.units
+    Quantity.visualize
     SIMPLISMA
+    SIMPLISMA.C
+    SIMPLISMA.Pt
+    SIMPLISMA.St
+    SIMPLISMA.X
+    SIMPLISMA.logs
+    SIMPLISMA.plotmerit
+    SIMPLISMA.reconstruct
+    SIMPLISMA.s
     SVD
+    SVD.ev
+    SVD.ev_cum
+    SVD.ev_ratio
+    SVD.sv
     Script
+    Script.content
+    Script.execute
+    Script.implements
+    Script.name
+    Script.parent
+    Unit
+    Unit.compare
+    Unit.compatible_units
+    Unit.dimensionality
+    Unit.dimensionless
+    Unit.format_babel
+    Unit.from_
+    Unit.is_compatible_with
+    Unit.m_from
+    Unit.scaling
+    Unit.systems
     ab
     abc
     abs
     absolute
     align
-    app
+    all
+    amax
+    amin
+    any
     arange
+    argmax
+    argmin
     around
     asymmetricvoigtmodel
+    asymmetricvoigtmodel.f
     autosub
+    average
     bartlett
     basc
     blackmanharris
+    clip
     component
     concatenate
     concentrations_vs_time
+    conj
+    conjugate
+    coordmax
+    coordmin
     copy
     coverages_vs_time
     cs
+    cumsum
     dc
+    debug_
     detrend
     diag
     diagonal
@@ -59,6 +787,7 @@
     em
     empty
     empty_like
+    error_
     eye
     fft
     find_peaks
@@ -70,6 +799,7 @@
     full
     full_like
     gaussianmodel
+    gaussianmodel.f
     general_hamming
     geomspace
     get_loglevel
@@ -79,6 +809,7 @@
     ht
     identity
     ifft
+    info_
     interpolate
     is_units_compatible
     ito
@@ -86,11 +817,14 @@
     ito_reduced_units
     kern
     linspace
-    load
     logspace
     lorentzianmodel
+    lorentzianmodel.f
     ls
+    max
     mc
+    mean
+    min
     modify_rate
     modify_surface_kinetics
     multiplot
@@ -103,6 +837,7 @@
     ones
     ones_like
     pathclean
+    pipe
     pk
     pk_exp
     plot
@@ -114,7 +849,6 @@
     plot_map
     plot_multiple
     plot_pen
-    plot_preferences
     plot_scatter
     plot_scatter_pen
     plot_stack
@@ -122,8 +856,10 @@
     plot_waterfall
     plot_with_transposed
     polynomialbaseline
-    preferences
+    polynomialbaseline.f
+    print_
     ps
+    ptp
     qsin
     random
     read
@@ -152,9 +888,9 @@
     read_topspin
     read_zip
     remove_masks
-    reset_preferences
     roll
     round
+    round_
     rs
     run_all_scripts
     run_script
@@ -167,6 +903,7 @@
     show
     show_versions
     sigmoidmodel
+    sigmoidmodel.f
     simps
     simpson
     sine
@@ -176,6 +913,8 @@
     sp
     squeeze
     stack
+    std
+    sum
     swapdims
     take
     to
@@ -187,7 +926,10 @@
     trapezoid
     trapz
     triang
+    var
     voigtmodel
+    voigtmodel.f
+    warning_
     write
     write_csv
     write_excel
@@ -203,306 +945,698 @@
     zf_double
     zf_size
     analysis.cantera_utilities.PFR
+    analysis.cantera_utilities.PFR.advance
+    analysis.cantera_utilities.PFR.composition_vs_time
+    analysis.cantera_utilities.PFR.fit_to_gas_concentrations
+    analysis.cantera_utilities.PFR.time
     analysis.cantera_utilities.concentrations_vs_time
     analysis.cantera_utilities.coverages_vs_time
     analysis.cantera_utilities.fit_to_concentrations
     analysis.cantera_utilities.modify_rate
     analysis.cantera_utilities.modify_surface_kinetics
     analysis.efa.EFA
+    analysis.efa.EFA.b_ev
+    analysis.efa.EFA.cutoff
+    analysis.efa.EFA.f_ev
+    analysis.efa.EFA.get_conc
     analysis.fitting.Fit
+    analysis.fitting.Fit.dry_run
+    analysis.fitting.Fit.fp
+    analysis.fitting.Fit.run
+    analysis.fitting.Fit.script
+    analysis.fitting.Fit.script_default
     analysis.fitting.FitParameters
+    analysis.fitting.FitParameters.clear
+    analysis.fitting.FitParameters.copy
+    analysis.fitting.FitParameters.get
+    analysis.fitting.FitParameters.items
+    analysis.fitting.FitParameters.iteritems
+    analysis.fitting.FitParameters.keys
+    analysis.fitting.FitParameters.pop
+    analysis.fitting.FitParameters.popitem
+    analysis.fitting.FitParameters.setdefault
+    analysis.fitting.FitParameters.to_external
+    analysis.fitting.FitParameters.to_internal
+    analysis.fitting.FitParameters.update
+    analysis.fitting.FitParameters.values
     analysis.fitting.ParameterScript
     analysis.iris.IRIS
+    analysis.iris.IRIS.plotdistribution
+    analysis.iris.IRIS.plotlcurve
+    analysis.iris.IRIS.plotmerit
+    analysis.iris.IRIS.reconstruct
     analysis.iris.kern
     analysis.lstsq.CurveFit
+    analysis.lstsq.CurveFit.inverse_transform
+    analysis.lstsq.CurveFit.itrans
+    analysis.lstsq.CurveFit.trans
+    analysis.lstsq.CurveFit.transform
     analysis.lstsq.LSTSQ
+    analysis.lstsq.LSTSQ.inverse_transform
+    analysis.lstsq.LSTSQ.itrans
+    analysis.lstsq.LSTSQ.trans
+    analysis.lstsq.LSTSQ.transform
     analysis.lstsq.NNLS
+    analysis.lstsq.NNLS.inverse_transform
+    analysis.lstsq.NNLS.itrans
+    analysis.lstsq.NNLS.trans
+    analysis.lstsq.NNLS.transform
     analysis.mcrals.MCRALS
+    analysis.mcrals.MCRALS.C
+    analysis.mcrals.MCRALS.Chard
+    analysis.mcrals.MCRALS.St
+    analysis.mcrals.MCRALS.Stsoft
+    analysis.mcrals.MCRALS.X
+    analysis.mcrals.MCRALS.extOutput
+    analysis.mcrals.MCRALS.fixedC
+    analysis.mcrals.MCRALS.log
+    analysis.mcrals.MCRALS.logs
+    analysis.mcrals.MCRALS.params
+    analysis.mcrals.MCRALS.plotmerit
+    analysis.mcrals.MCRALS.reconstruct
     analysis.models.asymmetricvoigtmodel
+    analysis.models.asymmetricvoigtmodel.f
     analysis.models.gaussianmodel
+    analysis.models.gaussianmodel.f
     analysis.models.lorentzianmodel
+    analysis.models.lorentzianmodel.f
     analysis.models.polynomialbaseline
+    analysis.models.polynomialbaseline.f
     analysis.models.sigmoidmodel
+    analysis.models.sigmoidmodel.f
     analysis.models.voigtmodel
+    analysis.models.voigtmodel.f
     analysis.nnmf.NNMF
+    analysis.nnmf.NNMF.nlssubprob
+    analysis.nnmf.NNMF.nmf
     analysis.pca.PCA
+    analysis.pca.PCA.LT
+    analysis.pca.PCA.S
+    analysis.pca.PCA.X
+    analysis.pca.PCA.ev
+    analysis.pca.PCA.ev_cum
+    analysis.pca.PCA.ev_ratio
+    analysis.pca.PCA.plotmerit
+    analysis.pca.PCA.printev
+    analysis.pca.PCA.reconstruct
+    analysis.pca.PCA.reduce
+    analysis.pca.PCA.scoreplot
+    analysis.pca.PCA.screeplot
     analysis.peakfinding.find_peaks
     analysis.simplisma.SIMPLISMA
+    analysis.simplisma.SIMPLISMA.C
+    analysis.simplisma.SIMPLISMA.Pt
+    analysis.simplisma.SIMPLISMA.St
+    analysis.simplisma.SIMPLISMA.X
+    analysis.simplisma.SIMPLISMA.logs
+    analysis.simplisma.SIMPLISMA.plotmerit
+    analysis.simplisma.SIMPLISMA.reconstruct
+    analysis.simplisma.SIMPLISMA.s
     analysis.svd.SVD
-    core.BaselineCorrection
-    core.BaselineCorrector
-    core.Coord
-    core.CoordSet
-    core.CurveFit
-    core.EFA
-    core.FileSelector
-    core.Fit
-    core.FitParameters
-    core.IRIS
-    core.Isotopes
-    core.LSTSQ
-    core.LinearCoord
-    core.MCRALS
-    core.NDDataset
-    core.NNLS
-    core.NNMF
-    core.PCA
-    core.PFR
-    core.ParameterScript
-    core.Project
-    core.SIMPLISMA
-    core.SVD
-    core.Script
-    core.ab
-    core.abc
-    core.abs
-    core.absolute
-    core.align
-    core.app
-    core.arange
-    core.around
-    core.asymmetricvoigtmodel
-    core.autosub
-    core.bartlett
-    core.basc
-    core.blackmanharris
-    core.component
-    core.concatenate
-    core.concentrations_vs_time
-    core.copy
-    core.coverages_vs_time
-    core.cs
-    core.dc
-    core.detrend
-    core.diag
-    core.diagonal
-    core.dot
-    core.download_iris
-    core.download_nist_ir
-    core.em
-    core.empty
-    core.empty_like
-    core.eye
-    core.fft
-    core.find_peaks
-    core.fit_to_concentrations
-    core.fromfunction
-    core.fromiter
-    core.fsh
-    core.fsh2
-    core.full
-    core.full_like
-    core.gaussianmodel
-    core.general_hamming
-    core.geomspace
-    core.get_loglevel
-    core.gm
-    core.hamming
-    core.hann
-    core.ht
-    core.identity
-    core.ifft
-    core.interpolate
-    core.is_units_compatible
-    core.ito
-    core.ito_base_units
-    core.ito_reduced_units
-    core.kern
-    core.linspace
-    core.load
-    core.logspace
-    core.lorentzianmodel
-    core.ls
-    core.mc
-    core.modify_rate
-    core.modify_surface_kinetics
-    core.multiplot
-    core.multiplot_image
-    core.multiplot_lines
-    core.multiplot_map
-    core.multiplot_scatter
-    core.multiplot_stack
-    core.multiplot_with_transposed
-    core.ones
-    core.ones_like
-    core.pk
-    core.pk_exp
-    core.plot
-    core.plot_1D
-    core.plot_2D
-    core.plot_3D
-    core.plot_bar
-    core.plot_image
-    core.plot_map
-    core.plot_multiple
-    core.plot_pen
-    core.plot_preferences
-    core.plot_scatter
-    core.plot_scatter_pen
-    core.plot_stack
-    core.plot_surface
-    core.plot_waterfall
-    core.plot_with_transposed
-    core.polynomialbaseline
-    core.preferences
-    core.ps
-    core.qsin
-    core.random
-    core.read
-    core.read_bruker_nmr
-    core.read_carroucell
-    core.read_csv
-    core.read_ddr
-    core.read_dir
-    core.read_dx
-    core.read_hdr
-    core.read_jcamp
-    core.read_jdx
-    core.read_labspec
-    core.read_mat
-    core.read_matlab
-    core.read_omnic
-    core.read_opus
-    core.read_quadera
-    core.read_remote
-    core.read_sdr
-    core.read_soc
-    core.read_spa
-    core.read_spc
-    core.read_spg
-    core.read_srs
-    core.read_topspin
-    core.read_zip
-    core.remove_masks
-    core.reset_preferences
-    core.roll
-    core.round
-    core.rs
-    core.run_all_scripts
-    core.run_script
-    core.savgol_filter
-    core.set_complex
-    core.set_hypercomplex
-    core.set_loglevel
-    core.set_nmr_context
-    core.set_quaternion
-    core.show
-    core.show_versions
-    core.sigmoidmodel
-    core.simps
-    core.simpson
-    core.sine
-    core.sinm
-    core.smooth
-    core.sort
-    core.sp
-    core.squeeze
-    core.stack
-    core.swapdims
-    core.take
-    core.to
-    core.to_array
-    core.to_base_units
-    core.to_reduced_units
-    core.to_xarray
-    core.transpose
-    core.trapezoid
-    core.trapz
-    core.triang
-    core.voigtmodel
-    core.write
-    core.write_csv
-    core.write_excel
-    core.write_jcamp
-    core.write_jdx
-    core.write_mat
-    core.write_matlab
-    core.write_xls
-    core.zeros
-    core.zeros_like
-    core.zf
-    core.zf_auto
-    core.zf_double
-    core.zf_size
+    analysis.svd.SVD.ev
+    analysis.svd.SVD.ev_cum
+    analysis.svd.SVD.ev_ratio
+    analysis.svd.SVD.sv
     core.common.dialogs.open_dialog
     core.common.dialogs.save_dialog
     core.common.meta.Meta
+    core.common.meta.Meta.copy
+    core.common.meta.Meta.data
+    core.common.meta.Meta.get
+    core.common.meta.Meta.implements
+    core.common.meta.Meta.items
+    core.common.meta.Meta.keys
+    core.common.meta.Meta.permute
+    core.common.meta.Meta.swap
+    core.common.meta.Meta.to_dict
+    core.common.meta.Meta.update
+    core.dataset.arraymixins.ndmath.abs
+    core.dataset.arraymixins.ndmath.absolute
+    core.dataset.arraymixins.ndmath.all
+    core.dataset.arraymixins.ndmath.amax
+    core.dataset.arraymixins.ndmath.amin
+    core.dataset.arraymixins.ndmath.any
+    core.dataset.arraymixins.ndmath.arange
+    core.dataset.arraymixins.ndmath.argmax
+    core.dataset.arraymixins.ndmath.argmin
+    core.dataset.arraymixins.ndmath.around
+    core.dataset.arraymixins.ndmath.average
+    core.dataset.arraymixins.ndmath.clip
+    core.dataset.arraymixins.ndmath.conj
+    core.dataset.arraymixins.ndmath.conjugate
+    core.dataset.arraymixins.ndmath.coordmax
+    core.dataset.arraymixins.ndmath.coordmin
+    core.dataset.arraymixins.ndmath.cumsum
+    core.dataset.arraymixins.ndmath.diag
+    core.dataset.arraymixins.ndmath.diagonal
+    core.dataset.arraymixins.ndmath.empty
+    core.dataset.arraymixins.ndmath.empty_like
+    core.dataset.arraymixins.ndmath.eye
+    core.dataset.arraymixins.ndmath.fromfunction
+    core.dataset.arraymixins.ndmath.fromiter
+    core.dataset.arraymixins.ndmath.full
+    core.dataset.arraymixins.ndmath.full_like
+    core.dataset.arraymixins.ndmath.geomspace
+    core.dataset.arraymixins.ndmath.identity
+    core.dataset.arraymixins.ndmath.linspace
+    core.dataset.arraymixins.ndmath.logspace
+    core.dataset.arraymixins.ndmath.max
+    core.dataset.arraymixins.ndmath.mean
+    core.dataset.arraymixins.ndmath.min
+    core.dataset.arraymixins.ndmath.ones
+    core.dataset.arraymixins.ndmath.ones_like
+    core.dataset.arraymixins.ndmath.pipe
+    core.dataset.arraymixins.ndmath.ptp
+    core.dataset.arraymixins.ndmath.random
+    core.dataset.arraymixins.ndmath.round
+    core.dataset.arraymixins.ndmath.round_
+    core.dataset.arraymixins.ndmath.std
+    core.dataset.arraymixins.ndmath.sum
+    core.dataset.arraymixins.ndmath.var
+    core.dataset.arraymixins.ndmath.zeros
+    core.dataset.arraymixins.ndmath.zeros_like
+    core.dataset.arraymixins.ndplot.plot
+    core.dataset.arraymixins.npy.dot
     core.dataset.coord.Coord
+    core.dataset.coord.Coord.T
+    core.dataset.coord.Coord.abs
+    core.dataset.coord.Coord.absolute
+    core.dataset.coord.Coord.all
+    core.dataset.coord.Coord.amax
+    core.dataset.coord.Coord.amin
+    core.dataset.coord.Coord.any
+    core.dataset.coord.Coord.arange
+    core.dataset.coord.Coord.argmax
+    core.dataset.coord.Coord.argmin
+    core.dataset.coord.Coord.around
+    core.dataset.coord.Coord.asfortranarray
+    core.dataset.coord.Coord.astype
+    core.dataset.coord.Coord.author
+    core.dataset.coord.Coord.average
+    core.dataset.coord.Coord.clip
+    core.dataset.coord.Coord.conj
+    core.dataset.coord.Coord.conjugate
+    core.dataset.coord.Coord.coordmax
+    core.dataset.coord.Coord.coordmin
+    core.dataset.coord.Coord.copy
+    core.dataset.coord.Coord.cumsum
+    core.dataset.coord.Coord.data
+    core.dataset.coord.Coord.default
+    core.dataset.coord.Coord.descendant
+    core.dataset.coord.Coord.diag
+    core.dataset.coord.Coord.diagonal
+    core.dataset.coord.Coord.dimensionless
+    core.dataset.coord.Coord.dims
+    core.dataset.coord.Coord.dtype
+    core.dataset.coord.Coord.empty
+    core.dataset.coord.Coord.empty_like
+    core.dataset.coord.Coord.eye
+    core.dataset.coord.Coord.filename
+    core.dataset.coord.Coord.fromfunction
+    core.dataset.coord.Coord.fromiter
+    core.dataset.coord.Coord.full
+    core.dataset.coord.Coord.full_like
+    core.dataset.coord.Coord.geomspace
+    core.dataset.coord.Coord.get_axis
+    core.dataset.coord.Coord.get_labels
+    core.dataset.coord.Coord.has_data
+    core.dataset.coord.Coord.has_defined_name
+    core.dataset.coord.Coord.has_units
+    core.dataset.coord.Coord.id
+    core.dataset.coord.Coord.identity
+    core.dataset.coord.Coord.imag
+    core.dataset.coord.Coord.implements
+    core.dataset.coord.Coord.increment
+    core.dataset.coord.Coord.increment_value
+    core.dataset.coord.Coord.is_1d
+    core.dataset.coord.Coord.is_complex
+    core.dataset.coord.Coord.is_empty
+    core.dataset.coord.Coord.is_float
+    core.dataset.coord.Coord.is_integer
+    core.dataset.coord.Coord.is_labeled
+    core.dataset.coord.Coord.is_masked
+    core.dataset.coord.Coord.is_units_compatible
+    core.dataset.coord.Coord.ito
+    core.dataset.coord.Coord.ito_base_units
+    core.dataset.coord.Coord.ito_reduced_units
+    core.dataset.coord.Coord.labels
+    core.dataset.coord.Coord.limits
+    core.dataset.coord.Coord.linear
+    core.dataset.coord.Coord.linspace
+    core.dataset.coord.Coord.loc2index
+    core.dataset.coord.Coord.logspace
+    core.dataset.coord.Coord.m
+    core.dataset.coord.Coord.magnitude
+    core.dataset.coord.Coord.mask
+    core.dataset.coord.Coord.masked_data
+    core.dataset.coord.Coord.max
+    core.dataset.coord.Coord.mean
+    core.dataset.coord.Coord.meta
+    core.dataset.coord.Coord.min
+    core.dataset.coord.Coord.name
+    core.dataset.coord.Coord.ndim
+    core.dataset.coord.Coord.offset
+    core.dataset.coord.Coord.offset_value
+    core.dataset.coord.Coord.ones
+    core.dataset.coord.Coord.ones_like
+    core.dataset.coord.Coord.origin
+    core.dataset.coord.Coord.pipe
+    core.dataset.coord.Coord.ptp
+    core.dataset.coord.Coord.random
+    core.dataset.coord.Coord.real
+    core.dataset.coord.Coord.remove_masks
+    core.dataset.coord.Coord.reversed
+    core.dataset.coord.Coord.roi
+    core.dataset.coord.Coord.roi_values
+    core.dataset.coord.Coord.round
+    core.dataset.coord.Coord.round_
+    core.dataset.coord.Coord.shape
+    core.dataset.coord.Coord.size
+    core.dataset.coord.Coord.spacing
+    core.dataset.coord.Coord.squeeze
+    core.dataset.coord.Coord.std
+    core.dataset.coord.Coord.sum
+    core.dataset.coord.Coord.swapaxes
+    core.dataset.coord.Coord.swapdims
+    core.dataset.coord.Coord.title
+    core.dataset.coord.Coord.to
+    core.dataset.coord.Coord.to_base_units
+    core.dataset.coord.Coord.to_reduced_units
+    core.dataset.coord.Coord.transpose
+    core.dataset.coord.Coord.transposed
+    core.dataset.coord.Coord.umasked_data
+    core.dataset.coord.Coord.unitless
+    core.dataset.coord.Coord.units
+    core.dataset.coord.Coord.value
+    core.dataset.coord.Coord.values
+    core.dataset.coord.Coord.var
+    core.dataset.coord.Coord.zeros
+    core.dataset.coord.Coord.zeros_like
     core.dataset.coord.LinearCoord
+    core.dataset.coord.LinearCoord.T
+    core.dataset.coord.LinearCoord.abs
+    core.dataset.coord.LinearCoord.absolute
+    core.dataset.coord.LinearCoord.all
+    core.dataset.coord.LinearCoord.amax
+    core.dataset.coord.LinearCoord.amin
+    core.dataset.coord.LinearCoord.any
+    core.dataset.coord.LinearCoord.arange
+    core.dataset.coord.LinearCoord.argmax
+    core.dataset.coord.LinearCoord.argmin
+    core.dataset.coord.LinearCoord.around
+    core.dataset.coord.LinearCoord.asfortranarray
+    core.dataset.coord.LinearCoord.astype
+    core.dataset.coord.LinearCoord.author
+    core.dataset.coord.LinearCoord.average
+    core.dataset.coord.LinearCoord.clip
+    core.dataset.coord.LinearCoord.conj
+    core.dataset.coord.LinearCoord.conjugate
+    core.dataset.coord.LinearCoord.coordmax
+    core.dataset.coord.LinearCoord.coordmin
+    core.dataset.coord.LinearCoord.copy
+    core.dataset.coord.LinearCoord.cumsum
+    core.dataset.coord.LinearCoord.data
+    core.dataset.coord.LinearCoord.default
+    core.dataset.coord.LinearCoord.descendant
+    core.dataset.coord.LinearCoord.diag
+    core.dataset.coord.LinearCoord.diagonal
+    core.dataset.coord.LinearCoord.dimensionless
+    core.dataset.coord.LinearCoord.dims
+    core.dataset.coord.LinearCoord.dtype
+    core.dataset.coord.LinearCoord.empty
+    core.dataset.coord.LinearCoord.empty_like
+    core.dataset.coord.LinearCoord.eye
+    core.dataset.coord.LinearCoord.filename
+    core.dataset.coord.LinearCoord.fromfunction
+    core.dataset.coord.LinearCoord.fromiter
+    core.dataset.coord.LinearCoord.full
+    core.dataset.coord.LinearCoord.full_like
+    core.dataset.coord.LinearCoord.geomspace
+    core.dataset.coord.LinearCoord.get_axis
+    core.dataset.coord.LinearCoord.get_labels
+    core.dataset.coord.LinearCoord.has_data
+    core.dataset.coord.LinearCoord.has_defined_name
+    core.dataset.coord.LinearCoord.has_units
+    core.dataset.coord.LinearCoord.id
+    core.dataset.coord.LinearCoord.identity
+    core.dataset.coord.LinearCoord.imag
+    core.dataset.coord.LinearCoord.implements
+    core.dataset.coord.LinearCoord.increment
+    core.dataset.coord.LinearCoord.increment_value
+    core.dataset.coord.LinearCoord.is_1d
+    core.dataset.coord.LinearCoord.is_complex
+    core.dataset.coord.LinearCoord.is_empty
+    core.dataset.coord.LinearCoord.is_float
+    core.dataset.coord.LinearCoord.is_integer
+    core.dataset.coord.LinearCoord.is_labeled
+    core.dataset.coord.LinearCoord.is_masked
+    core.dataset.coord.LinearCoord.is_units_compatible
+    core.dataset.coord.LinearCoord.ito
+    core.dataset.coord.LinearCoord.ito_base_units
+    core.dataset.coord.LinearCoord.ito_reduced_units
+    core.dataset.coord.LinearCoord.labels
+    core.dataset.coord.LinearCoord.laser_frequency
+    core.dataset.coord.LinearCoord.limits
+    core.dataset.coord.LinearCoord.linear
+    core.dataset.coord.LinearCoord.linspace
+    core.dataset.coord.LinearCoord.loc2index
+    core.dataset.coord.LinearCoord.logspace
+    core.dataset.coord.LinearCoord.m
+    core.dataset.coord.LinearCoord.magnitude
+    core.dataset.coord.LinearCoord.mask
+    core.dataset.coord.LinearCoord.masked_data
+    core.dataset.coord.LinearCoord.max
+    core.dataset.coord.LinearCoord.mean
+    core.dataset.coord.LinearCoord.meta
+    core.dataset.coord.LinearCoord.min
+    core.dataset.coord.LinearCoord.name
+    core.dataset.coord.LinearCoord.ndim
+    core.dataset.coord.LinearCoord.offset
+    core.dataset.coord.LinearCoord.offset_value
+    core.dataset.coord.LinearCoord.ones
+    core.dataset.coord.LinearCoord.ones_like
+    core.dataset.coord.LinearCoord.origin
+    core.dataset.coord.LinearCoord.pipe
+    core.dataset.coord.LinearCoord.ptp
+    core.dataset.coord.LinearCoord.random
+    core.dataset.coord.LinearCoord.real
+    core.dataset.coord.LinearCoord.remove_masks
+    core.dataset.coord.LinearCoord.reversed
+    core.dataset.coord.LinearCoord.roi
+    core.dataset.coord.LinearCoord.roi_values
+    core.dataset.coord.LinearCoord.round
+    core.dataset.coord.LinearCoord.round_
+    core.dataset.coord.LinearCoord.set_laser_frequency
+    core.dataset.coord.LinearCoord.shape
+    core.dataset.coord.LinearCoord.show_datapoints
+    core.dataset.coord.LinearCoord.size
+    core.dataset.coord.LinearCoord.spacing
+    core.dataset.coord.LinearCoord.squeeze
+    core.dataset.coord.LinearCoord.std
+    core.dataset.coord.LinearCoord.sum
+    core.dataset.coord.LinearCoord.swapaxes
+    core.dataset.coord.LinearCoord.swapdims
+    core.dataset.coord.LinearCoord.title
+    core.dataset.coord.LinearCoord.to
+    core.dataset.coord.LinearCoord.to_base_units
+    core.dataset.coord.LinearCoord.to_reduced_units
+    core.dataset.coord.LinearCoord.transpose
+    core.dataset.coord.LinearCoord.transposed
+    core.dataset.coord.LinearCoord.umasked_data
+    core.dataset.coord.LinearCoord.unitless
+    core.dataset.coord.LinearCoord.units
+    core.dataset.coord.LinearCoord.value
+    core.dataset.coord.LinearCoord.values
+    core.dataset.coord.LinearCoord.var
+    core.dataset.coord.LinearCoord.zeros
+    core.dataset.coord.LinearCoord.zeros_like
     core.dataset.coordset.CoordSet
-    core.dataset.mixins.ndmath.abs
-    core.dataset.mixins.ndmath.absolute
-    core.dataset.mixins.ndmath.arange
-    core.dataset.mixins.ndmath.arccos
-    core.dataset.mixins.ndmath.arccosh
-    core.dataset.mixins.ndmath.arcsin
-    core.dataset.mixins.ndmath.arcsinh
-    core.dataset.mixins.ndmath.arctan
-    core.dataset.mixins.ndmath.arctanh
-    core.dataset.mixins.ndmath.around
-    core.dataset.mixins.ndmath.cbrt
-    core.dataset.mixins.ndmath.ceil
-    core.dataset.mixins.ndmath.cos
-    core.dataset.mixins.ndmath.cosh
-    core.dataset.mixins.ndmath.deg2rad
-    core.dataset.mixins.ndmath.degrees
-    core.dataset.mixins.ndmath.diag
-    core.dataset.mixins.ndmath.diagonal
-    core.dataset.mixins.ndmath.empty
-    core.dataset.mixins.ndmath.empty_like
-    core.dataset.mixins.ndmath.exp
-    core.dataset.mixins.ndmath.exp2
-    core.dataset.mixins.ndmath.expm1
-    core.dataset.mixins.ndmath.eye
-    core.dataset.mixins.ndmath.fabs
-    core.dataset.mixins.ndmath.fix
-    core.dataset.mixins.ndmath.floor
-    core.dataset.mixins.ndmath.fromfunction
-    core.dataset.mixins.ndmath.fromiter
-    core.dataset.mixins.ndmath.full
-    core.dataset.mixins.ndmath.full_like
-    core.dataset.mixins.ndmath.geomspace
-    core.dataset.mixins.ndmath.identity
-    core.dataset.mixins.ndmath.isfinite
-    core.dataset.mixins.ndmath.isinf
-    core.dataset.mixins.ndmath.isnan
-    core.dataset.mixins.ndmath.linspace
-    core.dataset.mixins.ndmath.log
-    core.dataset.mixins.ndmath.log10
-    core.dataset.mixins.ndmath.log1p
-    core.dataset.mixins.ndmath.log2
-    core.dataset.mixins.ndmath.logical_not
-    core.dataset.mixins.ndmath.logspace
-    core.dataset.mixins.ndmath.negative
-    core.dataset.mixins.ndmath.ones
-    core.dataset.mixins.ndmath.ones_like
-    core.dataset.mixins.ndmath.rad2deg
-    core.dataset.mixins.ndmath.radians
-    core.dataset.mixins.ndmath.random
-    core.dataset.mixins.ndmath.reciprocal
-    core.dataset.mixins.ndmath.rint
-    core.dataset.mixins.ndmath.round
-    core.dataset.mixins.ndmath.sign
-    core.dataset.mixins.ndmath.signbit
-    core.dataset.mixins.ndmath.sin
-    core.dataset.mixins.ndmath.sinh
-    core.dataset.mixins.ndmath.sqrt
-    core.dataset.mixins.ndmath.square
-    core.dataset.mixins.ndmath.tan
-    core.dataset.mixins.ndmath.tanh
-    core.dataset.mixins.ndmath.trunc
-    core.dataset.mixins.ndmath.zeros
-    core.dataset.mixins.ndmath.zeros_like
-    core.dataset.mixins.ndplot.plot
-    core.dataset.mixins.npy.dot
+    core.dataset.coordset.CoordSet.available_names
+    core.dataset.coordset.CoordSet.coords
+    core.dataset.coordset.CoordSet.copy
+    core.dataset.coordset.CoordSet.data
+    core.dataset.coordset.CoordSet.default
+    core.dataset.coordset.CoordSet.has_defined_name
+    core.dataset.coordset.CoordSet.id
+    core.dataset.coordset.CoordSet.implements
+    core.dataset.coordset.CoordSet.is_empty
+    core.dataset.coordset.CoordSet.is_labeled
+    core.dataset.coordset.CoordSet.is_same_dim
+    core.dataset.coordset.CoordSet.keys
+    core.dataset.coordset.CoordSet.labels
+    core.dataset.coordset.CoordSet.name
+    core.dataset.coordset.CoordSet.names
+    core.dataset.coordset.CoordSet.references
+    core.dataset.coordset.CoordSet.select
+    core.dataset.coordset.CoordSet.set
+    core.dataset.coordset.CoordSet.set_titles
+    core.dataset.coordset.CoordSet.set_units
+    core.dataset.coordset.CoordSet.size
+    core.dataset.coordset.CoordSet.sizes
+    core.dataset.coordset.CoordSet.titles
+    core.dataset.coordset.CoordSet.to_dict
+    core.dataset.coordset.CoordSet.units
+    core.dataset.coordset.CoordSet.update
     core.dataset.nddataset.NDDataset
+    core.dataset.nddataset.NDDataset.II
+    core.dataset.nddataset.NDDataset.IR
+    core.dataset.nddataset.NDDataset.RI
+    core.dataset.nddataset.NDDataset.RR
+    core.dataset.nddataset.NDDataset.T
+    core.dataset.nddataset.NDDataset.ab
+    core.dataset.nddataset.NDDataset.abc
+    core.dataset.nddataset.NDDataset.abs
+    core.dataset.nddataset.NDDataset.absolute
+    core.dataset.nddataset.NDDataset.add_coordset
+    core.dataset.nddataset.NDDataset.align
+    core.dataset.nddataset.NDDataset.all
+    core.dataset.nddataset.NDDataset.amax
+    core.dataset.nddataset.NDDataset.amin
+    core.dataset.nddataset.NDDataset.any
+    core.dataset.nddataset.NDDataset.arange
+    core.dataset.nddataset.NDDataset.argmax
+    core.dataset.nddataset.NDDataset.argmin
+    core.dataset.nddataset.NDDataset.around
+    core.dataset.nddataset.NDDataset.asfortranarray
+    core.dataset.nddataset.NDDataset.astype
+    core.dataset.nddataset.NDDataset.author
+    core.dataset.nddataset.NDDataset.autosub
+    core.dataset.nddataset.NDDataset.average
+    core.dataset.nddataset.NDDataset.ax
+    core.dataset.nddataset.NDDataset.axT
+    core.dataset.nddataset.NDDataset.axec
+    core.dataset.nddataset.NDDataset.axecT
+    core.dataset.nddataset.NDDataset.axex
+    core.dataset.nddataset.NDDataset.axey
+    core.dataset.nddataset.NDDataset.bartlett
+    core.dataset.nddataset.NDDataset.basc
+    core.dataset.nddataset.NDDataset.blackmanharris
+    core.dataset.nddataset.NDDataset.clip
+    core.dataset.nddataset.NDDataset.close_figure
+    core.dataset.nddataset.NDDataset.comment
+    core.dataset.nddataset.NDDataset.component
+    core.dataset.nddataset.NDDataset.concatenate
+    core.dataset.nddataset.NDDataset.conj
+    core.dataset.nddataset.NDDataset.conjugate
+    core.dataset.nddataset.NDDataset.coord
+    core.dataset.nddataset.NDDataset.coordmax
+    core.dataset.nddataset.NDDataset.coordmin
+    core.dataset.nddataset.NDDataset.coordnames
+    core.dataset.nddataset.NDDataset.coordset
+    core.dataset.nddataset.NDDataset.coordtitles
+    core.dataset.nddataset.NDDataset.coordunits
+    core.dataset.nddataset.NDDataset.copy
+    core.dataset.nddataset.NDDataset.created
+    core.dataset.nddataset.NDDataset.cs
+    core.dataset.nddataset.NDDataset.cumsum
+    core.dataset.nddataset.NDDataset.data
+    core.dataset.nddataset.NDDataset.dc
+    core.dataset.nddataset.NDDataset.delete_coordset
+    core.dataset.nddataset.NDDataset.description
+    core.dataset.nddataset.NDDataset.detrend
+    core.dataset.nddataset.NDDataset.diag
+    core.dataset.nddataset.NDDataset.diagonal
+    core.dataset.nddataset.NDDataset.dimensionless
+    core.dataset.nddataset.NDDataset.dims
+    core.dataset.nddataset.NDDataset.directory
+    core.dataset.nddataset.NDDataset.divider
+    core.dataset.nddataset.NDDataset.download_iris
+    core.dataset.nddataset.NDDataset.download_nist_ir
+    core.dataset.nddataset.NDDataset.dtype
+    core.dataset.nddataset.NDDataset.dump
+    core.dataset.nddataset.NDDataset.dumps
+    core.dataset.nddataset.NDDataset.em
+    core.dataset.nddataset.NDDataset.empty
+    core.dataset.nddataset.NDDataset.empty_like
+    core.dataset.nddataset.NDDataset.expand_dims
+    core.dataset.nddataset.NDDataset.eye
+    core.dataset.nddataset.NDDataset.fft
+    core.dataset.nddataset.NDDataset.fig
+    core.dataset.nddataset.NDDataset.fignum
+    core.dataset.nddataset.NDDataset.filename
+    core.dataset.nddataset.NDDataset.filetype
+    core.dataset.nddataset.NDDataset.find_peaks
+    core.dataset.nddataset.NDDataset.fromfunction
+    core.dataset.nddataset.NDDataset.fromiter
+    core.dataset.nddataset.NDDataset.fsh
+    core.dataset.nddataset.NDDataset.fsh2
+    core.dataset.nddataset.NDDataset.full
+    core.dataset.nddataset.NDDataset.full_like
+    core.dataset.nddataset.NDDataset.general_hamming
+    core.dataset.nddataset.NDDataset.geomspace
+    core.dataset.nddataset.NDDataset.get_axis
+    core.dataset.nddataset.NDDataset.get_labels
+    core.dataset.nddataset.NDDataset.gm
+    core.dataset.nddataset.NDDataset.hamming
+    core.dataset.nddataset.NDDataset.hann
+    core.dataset.nddataset.NDDataset.has_complex_dims
+    core.dataset.nddataset.NDDataset.has_data
+    core.dataset.nddataset.NDDataset.has_defined_name
+    core.dataset.nddataset.NDDataset.has_units
+    core.dataset.nddataset.NDDataset.history
+    core.dataset.nddataset.NDDataset.ht
+    core.dataset.nddataset.NDDataset.id
+    core.dataset.nddataset.NDDataset.identity
+    core.dataset.nddataset.NDDataset.ifft
+    core.dataset.nddataset.NDDataset.imag
+    core.dataset.nddataset.NDDataset.implements
+    core.dataset.nddataset.NDDataset.interpolate
+    core.dataset.nddataset.NDDataset.is_1d
+    core.dataset.nddataset.NDDataset.is_complex
+    core.dataset.nddataset.NDDataset.is_empty
+    core.dataset.nddataset.NDDataset.is_float
+    core.dataset.nddataset.NDDataset.is_integer
+    core.dataset.nddataset.NDDataset.is_interleaved
+    core.dataset.nddataset.NDDataset.is_labeled
+    core.dataset.nddataset.NDDataset.is_masked
+    core.dataset.nddataset.NDDataset.is_quaternion
+    core.dataset.nddataset.NDDataset.is_units_compatible
+    core.dataset.nddataset.NDDataset.ito
+    core.dataset.nddataset.NDDataset.ito_base_units
+    core.dataset.nddataset.NDDataset.ito_reduced_units
+    core.dataset.nddataset.NDDataset.labels
+    core.dataset.nddataset.NDDataset.limits
+    core.dataset.nddataset.NDDataset.linspace
+    core.dataset.nddataset.NDDataset.local_timezone
+    core.dataset.nddataset.NDDataset.logspace
+    core.dataset.nddataset.NDDataset.ls
+    core.dataset.nddataset.NDDataset.m
+    core.dataset.nddataset.NDDataset.magnitude
+    core.dataset.nddataset.NDDataset.mask
+    core.dataset.nddataset.NDDataset.masked_data
+    core.dataset.nddataset.NDDataset.max
+    core.dataset.nddataset.NDDataset.mc
+    core.dataset.nddataset.NDDataset.mean
+    core.dataset.nddataset.NDDataset.meta
+    core.dataset.nddataset.NDDataset.min
+    core.dataset.nddataset.NDDataset.modeldata
+    core.dataset.nddataset.NDDataset.modified
+    core.dataset.nddataset.NDDataset.name
+    core.dataset.nddataset.NDDataset.ndaxes
+    core.dataset.nddataset.NDDataset.ndim
+    core.dataset.nddataset.NDDataset.ones
+    core.dataset.nddataset.NDDataset.ones_like
+    core.dataset.nddataset.NDDataset.origin
+    core.dataset.nddataset.NDDataset.parent
+    core.dataset.nddataset.NDDataset.pipe
+    core.dataset.nddataset.NDDataset.pk
+    core.dataset.nddataset.NDDataset.pk_exp
+    core.dataset.nddataset.NDDataset.plot
+    core.dataset.nddataset.NDDataset.plot_1D
+    core.dataset.nddataset.NDDataset.plot_2D
+    core.dataset.nddataset.NDDataset.plot_3D
+    core.dataset.nddataset.NDDataset.plot_bar
+    core.dataset.nddataset.NDDataset.plot_image
+    core.dataset.nddataset.NDDataset.plot_map
+    core.dataset.nddataset.NDDataset.plot_multiple
+    core.dataset.nddataset.NDDataset.plot_pen
+    core.dataset.nddataset.NDDataset.plot_scatter
+    core.dataset.nddataset.NDDataset.plot_scatter_pen
+    core.dataset.nddataset.NDDataset.plot_stack
+    core.dataset.nddataset.NDDataset.plot_surface
+    core.dataset.nddataset.NDDataset.plot_waterfall
+    core.dataset.nddataset.NDDataset.preferences
+    core.dataset.nddataset.NDDataset.ps
+    core.dataset.nddataset.NDDataset.ptp
+    core.dataset.nddataset.NDDataset.qsin
+    core.dataset.nddataset.NDDataset.random
+    core.dataset.nddataset.NDDataset.read
+    core.dataset.nddataset.NDDataset.read_bruker_nmr
+    core.dataset.nddataset.NDDataset.read_carroucell
+    core.dataset.nddataset.NDDataset.read_csv
+    core.dataset.nddataset.NDDataset.read_ddr
+    core.dataset.nddataset.NDDataset.read_dir
+    core.dataset.nddataset.NDDataset.read_dx
+    core.dataset.nddataset.NDDataset.read_hdr
+    core.dataset.nddataset.NDDataset.read_jcamp
+    core.dataset.nddataset.NDDataset.read_jdx
+    core.dataset.nddataset.NDDataset.read_labspec
+    core.dataset.nddataset.NDDataset.read_mat
+    core.dataset.nddataset.NDDataset.read_matlab
+    core.dataset.nddataset.NDDataset.read_omnic
+    core.dataset.nddataset.NDDataset.read_opus
+    core.dataset.nddataset.NDDataset.read_quadera
+    core.dataset.nddataset.NDDataset.read_remote
+    core.dataset.nddataset.NDDataset.read_sdr
+    core.dataset.nddataset.NDDataset.read_soc
+    core.dataset.nddataset.NDDataset.read_spa
+    core.dataset.nddataset.NDDataset.read_spc
+    core.dataset.nddataset.NDDataset.read_spg
+    core.dataset.nddataset.NDDataset.read_srs
+    core.dataset.nddataset.NDDataset.read_topspin
+    core.dataset.nddataset.NDDataset.read_zip
+    core.dataset.nddataset.NDDataset.real
+    core.dataset.nddataset.NDDataset.remove_masks
+    core.dataset.nddataset.NDDataset.roi
+    core.dataset.nddataset.NDDataset.roi_values
+    core.dataset.nddataset.NDDataset.roll
+    core.dataset.nddataset.NDDataset.round
+    core.dataset.nddataset.NDDataset.round_
+    core.dataset.nddataset.NDDataset.rs
+    core.dataset.nddataset.NDDataset.save
+    core.dataset.nddataset.NDDataset.save_as
+    core.dataset.nddataset.NDDataset.savgol_filter
+    core.dataset.nddataset.NDDataset.set_complex
+    core.dataset.nddataset.NDDataset.set_coordset
+    core.dataset.nddataset.NDDataset.set_coordtitles
+    core.dataset.nddataset.NDDataset.set_coordunits
+    core.dataset.nddataset.NDDataset.set_hypercomplex
+    core.dataset.nddataset.NDDataset.set_quaternion
+    core.dataset.nddataset.NDDataset.shape
+    core.dataset.nddataset.NDDataset.simps
+    core.dataset.nddataset.NDDataset.simpson
+    core.dataset.nddataset.NDDataset.sine
+    core.dataset.nddataset.NDDataset.sinm
+    core.dataset.nddataset.NDDataset.size
+    core.dataset.nddataset.NDDataset.smooth
+    core.dataset.nddataset.NDDataset.sort
+    core.dataset.nddataset.NDDataset.sp
+    core.dataset.nddataset.NDDataset.squeeze
+    core.dataset.nddataset.NDDataset.stack
+    core.dataset.nddataset.NDDataset.std
+    core.dataset.nddataset.NDDataset.suffix
+    core.dataset.nddataset.NDDataset.sum
+    core.dataset.nddataset.NDDataset.swapaxes
+    core.dataset.nddataset.NDDataset.swapdims
+    core.dataset.nddataset.NDDataset.take
+    core.dataset.nddataset.NDDataset.timezone
+    core.dataset.nddataset.NDDataset.title
+    core.dataset.nddataset.NDDataset.to
+    core.dataset.nddataset.NDDataset.to_array
+    core.dataset.nddataset.NDDataset.to_base_units
+    core.dataset.nddataset.NDDataset.to_reduced_units
+    core.dataset.nddataset.NDDataset.to_xarray
+    core.dataset.nddataset.NDDataset.transpose
+    core.dataset.nddataset.NDDataset.transposed
+    core.dataset.nddataset.NDDataset.trapezoid
+    core.dataset.nddataset.NDDataset.trapz
+    core.dataset.nddataset.NDDataset.triang
+    core.dataset.nddataset.NDDataset.umasked_data
+    core.dataset.nddataset.NDDataset.unitless
+    core.dataset.nddataset.NDDataset.units
+    core.dataset.nddataset.NDDataset.value
+    core.dataset.nddataset.NDDataset.values
+    core.dataset.nddataset.NDDataset.var
+    core.dataset.nddataset.NDDataset.write
+    core.dataset.nddataset.NDDataset.write_csv
+    core.dataset.nddataset.NDDataset.write_excel
+    core.dataset.nddataset.NDDataset.write_jcamp
+    core.dataset.nddataset.NDDataset.write_jdx
+    core.dataset.nddataset.NDDataset.write_mat
+    core.dataset.nddataset.NDDataset.write_matlab
+    core.dataset.nddataset.NDDataset.write_xls
+    core.dataset.nddataset.NDDataset.zeros
+    core.dataset.nddataset.NDDataset.zeros_like
+    core.dataset.nddataset.NDDataset.zf
+    core.dataset.nddataset.NDDataset.zf_auto
+    core.dataset.nddataset.NDDataset.zf_double
+    core.dataset.nddataset.NDDataset.zf_size
     core.dataset.nddataset.component
     core.dataset.nddataset.copy
     core.dataset.nddataset.is_units_compatible
     core.dataset.nddataset.ito
     core.dataset.nddataset.ito_base_units
     core.dataset.nddataset.ito_reduced_units
-    core.dataset.nddataset.load
     core.dataset.nddataset.remove_masks
     core.dataset.nddataset.set_complex
     core.dataset.nddataset.set_hypercomplex
@@ -553,6 +1687,9 @@
     core.processors.apodization.triang
     core.processors.autosub.autosub
     core.processors.baseline.BaselineCorrection
+    core.processors.baseline.BaselineCorrection.compute
+    core.processors.baseline.BaselineCorrection.run
+    core.processors.baseline.BaselineCorrection.show_regions
     core.processors.baseline.ab
     core.processors.baseline.abc
     core.processors.baseline.basc
@@ -585,6 +1722,40 @@
     core.processors.zero_filling.zf_double
     core.processors.zero_filling.zf_size
     core.project.project.Project
+    core.project.project.Project.add_dataset
+    core.project.project.Project.add_datasets
+    core.project.project.Project.add_project
+    core.project.project.Project.add_projects
+    core.project.project.Project.add_script
+    core.project.project.Project.add_scripts
+    core.project.project.Project.allitems
+    core.project.project.Project.allnames
+    core.project.project.Project.copy
+    core.project.project.Project.datasets
+    core.project.project.Project.datasets_names
+    core.project.project.Project.directory
+    core.project.project.Project.dump
+    core.project.project.Project.dumps
+    core.project.project.Project.filename
+    core.project.project.Project.filetype
+    core.project.project.Project.id
+    core.project.project.Project.implements
+    core.project.project.Project.meta
+    core.project.project.Project.name
+    core.project.project.Project.parent
+    core.project.project.Project.projects
+    core.project.project.Project.projects_names
+    core.project.project.Project.remove_all_dataset
+    core.project.project.Project.remove_all_project
+    core.project.project.Project.remove_all_script
+    core.project.project.Project.remove_dataset
+    core.project.project.Project.remove_project
+    core.project.project.Project.remove_script
+    core.project.project.Project.save
+    core.project.project.Project.save_as
+    core.project.project.Project.scripts
+    core.project.project.Project.scripts_names
+    core.project.project.Project.suffix
     core.readers.download.download_iris
     core.readers.download.download_nist_ir
     core.readers.importer.read
@@ -613,8 +1784,70 @@
     core.readers.read_topspin.read_topspin
     core.readers.read_zip.read_zip
     core.scripts.script.Script
+    core.scripts.script.Script.content
+    core.scripts.script.Script.execute
+    core.scripts.script.Script.implements
+    core.scripts.script.Script.name
+    core.scripts.script.Script.parent
     core.scripts.script.run_all_scripts
     core.scripts.script.run_script
+    core.units.units.DimensionalityError
+    core.units.units.Quantity
+    core.units.units.Quantity.T
+    core.units.units.Quantity.UnitsContainer
+    core.units.units.Quantity.check
+    core.units.units.Quantity.clip
+    core.units.units.Quantity.compare
+    core.units.units.Quantity.compatible_units
+    core.units.units.Quantity.compute
+    core.units.units.Quantity.dimensionality
+    core.units.units.Quantity.dimensionless
+    core.units.units.Quantity.dot
+    core.units.units.Quantity.fill
+    core.units.units.Quantity.flat
+    core.units.units.Quantity.force_ndarray
+    core.units.units.Quantity.force_ndarray_like
+    core.units.units.Quantity.format_babel
+    core.units.units.Quantity.imag
+    core.units.units.Quantity.is_compatible_with
+    core.units.units.Quantity.ito
+    core.units.units.Quantity.ito_base_units
+    core.units.units.Quantity.ito_reduced_units
+    core.units.units.Quantity.ito_root_units
+    core.units.units.Quantity.m
+    core.units.units.Quantity.m_as
+    core.units.units.Quantity.magnitude
+    core.units.units.Quantity.ndim
+    core.units.units.Quantity.persist
+    core.units.units.Quantity.plus_minus
+    core.units.units.Quantity.prod
+    core.units.units.Quantity.put
+    core.units.units.Quantity.real
+    core.units.units.Quantity.searchsorted
+    core.units.units.Quantity.shape
+    core.units.units.Quantity.to
+    core.units.units.Quantity.to_base_units
+    core.units.units.Quantity.to_compact
+    core.units.units.Quantity.to_reduced_units
+    core.units.units.Quantity.to_root_units
+    core.units.units.Quantity.to_timedelta
+    core.units.units.Quantity.to_tuple
+    core.units.units.Quantity.tolist
+    core.units.units.Quantity.u
+    core.units.units.Quantity.unitless
+    core.units.units.Quantity.units
+    core.units.units.Quantity.visualize
+    core.units.units.Unit
+    core.units.units.Unit.compare
+    core.units.units.Unit.compatible_units
+    core.units.units.Unit.dimensionality
+    core.units.units.Unit.dimensionless
+    core.units.units.Unit.format_babel
+    core.units.units.Unit.from_
+    core.units.units.Unit.is_compatible_with
+    core.units.units.Unit.m_from
+    core.units.units.Unit.scaling
+    core.units.units.Unit.systems
     core.units.units.set_nmr_context
     core.writers.exporter.write
     core.writers.write_csv.write_csv
@@ -625,8 +1858,38 @@
     core.writers.write_matlab.write_mat
     core.writers.write_matlab.write_matlab
     databases.isotopes.Isotopes
+    databases.isotopes.Isotopes.A
+    databases.isotopes.Isotopes.Q
+    databases.isotopes.Isotopes.Z
+    databases.isotopes.Isotopes.abundance
+    databases.isotopes.Isotopes.copy
+    databases.isotopes.Isotopes.data
+    databases.isotopes.Isotopes.gamma
+    databases.isotopes.Isotopes.get
+    databases.isotopes.Isotopes.implements
+    databases.isotopes.Isotopes.isotope
+    databases.isotopes.Isotopes.items
+    databases.isotopes.Isotopes.keys
+    databases.isotopes.Isotopes.name
+    databases.isotopes.Isotopes.nucleus
+    databases.isotopes.Isotopes.permute
+    databases.isotopes.Isotopes.spin
+    databases.isotopes.Isotopes.stability
+    databases.isotopes.Isotopes.swap
+    databases.isotopes.Isotopes.symbol
+    databases.isotopes.Isotopes.to_dict
+    databases.isotopes.Isotopes.update
     utils.citation.Citation
+    utils.citation.Citation.format
+    utils.citation.Citation.load
+    utils.citation.Citation.save
+    utils.citation.Citation.update_date
+    utils.citation.Citation.update_version
     utils.citation.Zenodo
+    utils.citation.Zenodo.load
+    utils.citation.Zenodo.save
+    utils.citation.Zenodo.update_date
+    utils.citation.Zenodo.update_version
     utils.coordrange.trim_ranges
     utils.docstrings.add_docstring
     utils.docstrings.check_docstrings
@@ -650,6 +1913,7 @@
     utils.file.patterns
     utils.jsonutils.json_decoder
     utils.jsonutils.json_serialiser
+    utils.misc.as_quaternion
     utils.misc.dict_compare
     utils.misc.get_component
     utils.misc.get_n_decimals
@@ -663,14 +1927,21 @@
     utils.misc.is_sequence
     utils.misc.largest_power_of_2
     utils.misc.make_new_object
+    utils.misc.quat_as_complex_array
+    utils.misc.spacing_
     utils.optional.get_module_version
     utils.optional.import_optional_dependency
     utils.orderedset.OrderedSet
+    utils.orderedset.OrderedSet.add
+    utils.orderedset.OrderedSet.clear
+    utils.orderedset.OrderedSet.discard
+    utils.orderedset.OrderedSet.isdisjoint
+    utils.orderedset.OrderedSet.pop
+    utils.orderedset.OrderedSet.remove
     utils.packages.generate_api
     utils.packages.get_pkg_path
     utils.packages.list_packages
     utils.plots.cmyk2rgb
-    utils.plots.colorscale
     utils.plots.figure
     utils.plots.get_figure
     utils.plots.get_plotly_figure
@@ -697,11 +1968,11 @@
     utils.system.get_user
     utils.system.get_user_and_node
     utils.system.is_kernel
-    utils.system.sh
     utils.testing.RandomSeedContext
     utils.testing.assert_approx_equal
     utils.testing.assert_array_almost_equal
     utils.testing.assert_array_equal
+    utils.testing.assert_coord_almost_equal
     utils.testing.assert_coord_equal
     utils.testing.assert_dataset_almost_equal
     utils.testing.assert_dataset_equal
@@ -713,16 +1984,75 @@
     utils.testing.assert_project_equal
     utils.testing.assert_raises
     utils.testing.assert_script_equal
+    utils.testing.catch_warnings
     utils.testing.raises
     utils.testing.set_env
     utils.traits.MetaConfigurable
+    utils.traits.MetaConfigurable.to_dict
+    utils.traits.MetaConfigurable.update_config
     utils.traits.Range
+    utils.traits.Range.class_init
+    utils.traits.Range.default
+    utils.traits.Range.default_value_repr
+    utils.traits.Range.error
+    utils.traits.Range.from_string
+    utils.traits.Range.from_string_list
+    utils.traits.Range.get
+    utils.traits.Range.get_default_value
+    utils.traits.Range.get_metadata
+    utils.traits.Range.info
+    utils.traits.Range.init_default_value
+    utils.traits.Range.instance_init
+    utils.traits.Range.item_from_string
+    utils.traits.Range.klass
+    utils.traits.Range.length_error
+    utils.traits.Range.make_dynamic_default
+    utils.traits.Range.set
+    utils.traits.Range.set_metadata
+    utils.traits.Range.subclass_init
+    utils.traits.Range.tag
+    utils.traits.Range.validate
+    utils.traits.Range.validate_elements
     utils.version.InvalidVersion
     utils.version.LegacyVersion
+    utils.version.LegacyVersion.base_version
+    utils.version.LegacyVersion.dev
+    utils.version.LegacyVersion.epoch
+    utils.version.LegacyVersion.is_devrelease
+    utils.version.LegacyVersion.is_postrelease
+    utils.version.LegacyVersion.is_prerelease
+    utils.version.LegacyVersion.local
+    utils.version.LegacyVersion.post
+    utils.version.LegacyVersion.pre
+    utils.version.LegacyVersion.public
+    utils.version.LegacyVersion.release
     utils.version.Version
+    utils.version.Version.base_version
+    utils.version.Version.dev
+    utils.version.Version.epoch
+    utils.version.Version.is_devrelease
+    utils.version.Version.is_postrelease
+    utils.version.Version.is_prerelease
+    utils.version.Version.local
+    utils.version.Version.major
+    utils.version.Version.micro
+    utils.version.Version.minor
+    utils.version.Version.post
+    utils.version.Version.pre
+    utils.version.Version.public
+    utils.version.Version.release
     utils.version.parse
     utils.warnings.assert_produces_warning
     utils.zip.ScpFile
+    utils.zip.ScpFile.close
+    utils.zip.ScpFile.get
+    utils.zip.ScpFile.items
+    utils.zip.ScpFile.keys
+    utils.zip.ScpFile.values
     utils.zip.make_zipfile
     widgets.baselinecorrector.BaselineCorrector
     widgets.fileselector.FileSelector
+    widgets.fileselector.FileSelector.changed
+    widgets.fileselector.FileSelector.make_options
+    widgets.fileselector.FileSelector.stop
+    widgets.fileselector.FileSelector.up
