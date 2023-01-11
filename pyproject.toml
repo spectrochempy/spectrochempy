@@ -9,4 +9,4 @@ exclude = "docs/*"
 
 [tool.isort]
 profile = "black"
-extend_skip_glob = ["*.pct.py"]
+skip_glob = ["docs/*" ]

@@ -194,7 +194,7 @@ class BuildDocumentation(object):
         # Make the html or latex documentation
 
         # self.delnb()
-        # self.sync_notebooks()
+        self.sync_notebooks()
 
         doc_version = self.doc_version
 
