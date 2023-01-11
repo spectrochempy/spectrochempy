@@ -72,16 +72,15 @@
 # you want - except something already in use):
 
 # %%
-import spectrochempy as scp  # SYNTAX 1
+import spectrochempy as scp
 
 nd = scp.NDDataset()
-
 
 # %% [markdown]
 # or in the second syntax, with a wild `*` import.
 
 # %%
-from spectrochempy import *  # SYNTAX 2
+from spectrochempy import *  # noqa: F403
 
 nd = NDDataset()
 
