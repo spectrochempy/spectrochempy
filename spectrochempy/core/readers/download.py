@@ -27,10 +27,11 @@ from spectrochempy.utils.optional import import_optional_dependency
 
 def download_iris():
     """
-    Upload the classical `IRIS` dataset.
+    Upload the classical "iris" dataset.
 
-    The `IRIS` dataset is a classical example for machine learning.It is downloaded from
-    the [UCI distant repository](https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data)
+    The "IRIS" dataset is a classical example for machine learning.It is downloaded from
+    the
+    [UCI distant repository](https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data)
 
     Returns
     -------

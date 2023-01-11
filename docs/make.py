@@ -518,10 +518,18 @@ class Apigen:
                 # print(f">>>>>>>>>>>>>>>>   {_name}\t\t{_type}")
                 continue
             else:
-                module = ".".join(objname.split(".")[1:])
-                if module == "core":
+
+                if objname != "spectrochempy" and objname.split(".")[1:][0] in [
+                    "core",
+                    "analysis",
+                    "utils",
+                    "databases",
+                    "widgets",
+                ]:
+
                     continue
 
+                module = ".".join(objname.split(".")[1:])
                 module = module + "." if module else ""
                 print(f"{module}{_name}\t\t{_type}")
                 #          o = import_item(f"{objname}")
