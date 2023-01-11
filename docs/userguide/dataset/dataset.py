@@ -60,19 +60,22 @@
 import spectrochempy as scp
 
 # %% [markdown]
-# As we will make some reference to the **[numpy](https://numpy.org/doc/stable/index.html)** library, we also import it here.
+# As we will make some reference to the
+# **[numpy](https://numpy.org/doc/stable/index.html)** library, we also import it here.
 
 # %%
 import numpy as np
 
 # %% [markdown]
-# We additionally import the three main SpectroChemPy objects that we will use through this tutorial
+# We additionally import the three main SpectroChemPy objects that we will use through
+# this tutorial
 
 # %%
 from spectrochempy import NDDataset, CoordSet, Coord
 
 # %% [markdown]
-# For a convenient usage of units, we will also directly import **[ur]((../units/units.ipynb)**, the unit registry which contains all available
+# For a convenient usage of units, we will also directly import
+# **[ur]((../units/units.ipynb)**, the unit registry which contains all available
 # units.
 
 # %%
@@ -118,10 +121,13 @@ d1D
 # <div class='alert alert-info'>
 #     <b>Note</b>
 #
-#  In the above code, run in a notebook, the output of d1D is in html for a nice display.
+#  In the above code, run in a notebook, the output of d1D is in html for a nice
+#  display.
 #
-#  To get the same effect, from a console script, one can use `print_` (with an underscore) and not the usual python
-#  function `print`. As you can see below, the `print` function only gives a short summary of the information,
+#  To get the same effect, from a console script, one can use `print_`
+#  (with an underscore) and not the usual python
+#  function `print`. As you can see below, the `print` function only gives a short
+#  summary of the information,
 #  while the `print_` method gives more detailed output
 #
 # </div>
@@ -137,8 +143,13 @@ _ = d1D.plot(figsize=(3, 2))
 
 # %% [markdown]
 # Except few additional metadata such `author`, `created` ..., there is not much
-# difference with respect to a conventional **[numpy.array](https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array)**. For example, one
-# can apply numpy **[ufunc](https://numpy.org/doc/stable/reference/ufuncs.html#available-ufuncs)'s** directly to a NDDataset or make basic arithmetic
+# difference with respect to a conventional
+# **[numpy.array](
+# https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array)**.
+# For example, one
+# can apply numpy
+# **[ufunc](https://numpy.org/doc/stable/reference/ufuncs.html#available-ufuncs)'s**
+# directly to a NDDataset or make basic arithmetic
 # operation with these objects:
 
 # %%
@@ -152,12 +163,14 @@ d1D
 # As seen above, there are some attributes that are automatically added to the dataset:
 #
 # * `id`      : This is a unique identifier for the object.
-# * `name`: A short and unique name for the dataset. It will beequal to the automatic `id` if it is not provided.
+# * `name`: A short and unique name for the dataset. It will beequal to the automatic
+# `id` if it is not provided.
 # * `author`  : Author determined from the computer name if not provided.
 # * `created` : Date and time of creation.
 # * `modified`: Date and time of modification.
 #
-# These attributes can be modified by the user, but the `id`, `created` and `modified` attributes are read only.
+# These attributes can be modified by the user, but the `id`, `created` and `modified`
+# attributes are read only.
 #
 # Some other attributes are defined to describe the data:
 # * `title`: A long name that will be used in plots or in some other operations.
@@ -190,7 +203,8 @@ d1D.ndim  # the number of dimensions
 d1D.dims  # the name of the dimension (it has been automatically attributed)
 
 # %% [markdown]
-# **Note**: The names of the dimensions are set automatically. But they can be changed, with <u>the limitation</u> that the
+# **Note**: The names of the dimensions are set automatically. But they can be changed,
+# with <u>the limitation</u> that the
 # name must be a single letter.
 
 # %%
@@ -203,7 +217,8 @@ d1D.dims
 # ### nD-Dataset (multidimensional dataset)
 
 # %% [markdown]
-# To create a nD NDDataset, we can provide a nD-array like object to the NDDataset instance constructor
+# To create a nD NDDataset, we can provide a nD-array like object to the NDDataset
+# instance constructor
 
 # %%
 a = np.random.rand(2, 4, 6)
@@ -235,7 +250,8 @@ d3D = NDDataset(
 d3D
 
 # %% [markdown]
-# Three names are attributed at the creation (if they are not provided with the `dims` attribute, then the name are:
+# Three names are attributed at the creation (if they are not provided with the `dims`
+# attribute, then the name are:
 # 'z','y','x' automatically attributed)
 
 # %%
@@ -250,7 +266,8 @@ d3D.shape
 # %% [markdown]
 # ## About the dates and times
 # The dates and times are stored internally as
-# [UTC (Coordinated_Universal_Time)](https://en.wikipedia.org/wiki/Coordinated_Universal_Time).
+# [UTC (Coordinated_Universal_Time)](https://en.wikipedia.org/wiki/Coordinated_
+# Universal_Time).
 # Timezone information is stored in the timezone attribute.
 # If not set, the default is to use the local timezone,
 # which is probably the most common case.
@@ -260,7 +277,8 @@ nd = NDDataset()
 nd.created
 
 # %% [markdown]
-# In this case our local timezone has been used by default for the conversion from UTC datetime.
+# In this case our local timezone has been used by default for the conversion from
+# UTC datetime.
 
 # %%
 nd.local_timezone
@@ -270,13 +288,16 @@ nd.timezone = "EST"
 nd.created
 
 # %% [markdown]
-# For a list of timezone code (TZ) you can have a look at [List_of_tz_database_time_zones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+# For a list of timezone code (TZ) you can have a look at
+# [List_of_tz_database_time_zones](
+# https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
 
 # %% [markdown]
 # ## About the `history` attribute
 
 # %% [markdown]
-# The history is saved internally into a list, but its has a different behaviour than the usual list.
+# The history is saved internally into a list, but its has a different behaviour than
+# the usual list.
 # The first time a NDDataset is created, the list is empty
 
 # %%
@@ -284,7 +305,9 @@ nd = NDDataset()
 nd.history
 
 # %% [markdown]
-# Assigning a string to the history attribute has two effects. The first one is that the string is appended automatically to the previous history list, and second it is preceeded by the time it has been added.
+# Assigning a string to the history attribute has two effects. The first one is that
+# the string is appended automatically to the previous history list, and second it is
+# preceeded by the time it has been added.
 
 # %%
 nd.history = "some history"
@@ -312,7 +335,8 @@ nd.history
 # ## Units
 
 # %% [markdown]
-# One interesting possibility for a NDDataset is to have defined units for the internal data.
+# One interesting possibility for a NDDataset is to have defined units for the internal
+# data.
 
 # %%
 d1D.units = ur.eV  # ur is a registry containing all available units
@@ -346,7 +370,8 @@ d1D.to("K")
 # ## Coordinates
 
 # %% [markdown]
-# The above created `d3D` dataset has 3 dimensions, but no coordinate for these dimensions. Here arises a big difference
+# The above created `d3D` dataset has 3 dimensions, but no coordinate for these
+# dimensions. Here arises a big difference
 # with simple `numpy`-arrays:
 # * We can add coordinates to each dimension of a NDDataset.
 
@@ -386,7 +411,8 @@ d3D["t"]  # another alternative way to get a given coordinates
 d3D.u, d3D.v
 
 # %% [markdown]
-# When the dataset is printed, only the information for the existing coordinates is given.
+# When the dataset is printed, only the information for the existing coordinates is
+# given.
 
 # %%
 d3D
@@ -407,8 +433,10 @@ except KeyError as e:
     scp.error_(e)
 
 # %% [markdown]
-# In some case it can also be useful to get a coordinate from its title instead of its name (the limitation is that if
-# several coordinates have the same title, then only the first ones that is found in the coordinate list, will be
+# In some case it can also be useful to get a coordinate from its title instead of its
+# name (the limitation is that if
+# several coordinates have the same title, then only the first ones that is found in
+# the coordinate list, will be
 # returned - this can be ambiguous)
 
 # %%
@@ -421,7 +449,8 @@ d3D.time
 # ## Labels
 
 # %% [markdown]
-# It is possible to use labels instead of numerical coordinates. They are sequence of objects .The length of the
+# It is possible to use labels instead of numerical coordinates. They are sequence of
+# objects .The length of the
 # sequence must be equal to the size of a dimension.
 
 # %% [markdown]
@@ -449,7 +478,8 @@ d3D.t.title = "time"
 d3D
 
 # %% [markdown]
-# In this case, getting a coordinate that doesn't possess numerical data but labels, will return the labels
+# In this case, getting a coordinate that doesn't possess numerical data but labels,
+# will return the labels
 
 # %%
 d3D.time
@@ -461,9 +491,11 @@ d3D.time
 # ## Sharing coordinates between dimensions
 
 # %% [markdown]
-# Sometimes it is not necessary to have different coordinates for each axe. Some can be shared between axes.
+# Sometimes it is not necessary to have different coordinates for each axe. Some can be
+# shared between axes.
 #
-# For example, if we have a square matrix with the same coordinate in the two dimensions, the second dimension can
+# For example, if we have a square matrix with the same coordinate in the two
+# dimensions, the second dimension can
 # refer to the first. Here we create a square 2D dataset, using the `diag` method:
 
 # %%
@@ -482,7 +514,8 @@ nd
 # ## Setting coordinates using `set_coordset`
 
 # %% [markdown]
-# Let's create 3 `Coord` objects to be used as coordinates for the 3 dimensions of the previous d3D dataset.
+# Let's create 3 `Coord` objects to be used as coordinates for the 3 dimensions of the
+# previous d3D dataset.
 
 # %%
 d3D.dims = ["t", "v", "u"]
@@ -527,7 +560,8 @@ d3D.v_1
 # Some additional information about coordinate setting syntax
 
 # %% [markdown]
-# **A.** First syntax (probably the safer because the name of the dimension is specified, so this is less prone to
+# **A.** First syntax (probably the safer because the name of the dimension is
+# specified, so this is less prone to
 # errors!)
 
 # %%
@@ -537,7 +571,8 @@ d3D.set_coordset(u=coord2, v=CoordSet(coord1, coord1b), t=coord0)
 d3D
 
 # %% [markdown]
-# **B.** Second syntax assuming the coordinates are given in the order of the dimensions.
+# **B.** Second syntax assuming the coordinates are given in the order of the
+# dimensions.
 #
 # Remember that we can check this order using the `dims` attribute of a NDDataset
 
@@ -580,7 +615,8 @@ d3D
 # </div>
 
 # %% [markdown]
-# This raise an error (list have another signification: it's used to set a "same dim" CoordSet see example A or B)
+# This raise an error (list have another signification: it's used to set a "same dim"
+# CoordSet see example A or B)
 
 # %%
 try:
@@ -628,7 +664,8 @@ d3D
 #
 # There are many ways to create `NDDataset` objects.
 #
-# Let's first create 2 coordinate objects, for which we can define `labels` and `units`! Note the use of the function
+# Let's first create 2 coordinate objects, for which we can define `labels` and `units`!
+# Note the use of the function
 # `linspace`to generate the data.
 
 # %%
@@ -650,7 +687,8 @@ cs
 
 
 # %% [markdown]
-# Now we will generate the full dataset, using a ``fromfunction`` method. All needed information are passed as
+# Now we will generate the full dataset, using a ``fromfunction`` method.
+# All needed information are passed as
 # parameter of the NDDataset instance constructor.
 
 # %% [markdown]
@@ -733,7 +771,8 @@ d3Dduplicate
 #
 # NDDataset can be created from the importation of external data
 #
-# A **test**'s data folder contains some data for experimenting some features of datasets.
+# A **test**'s data folder contains some data for experimenting some features of
+# datasets.
 
 # %%
 # let check if this directory exists and display its actual content:
@@ -750,7 +789,8 @@ nd.preferences.reset()
 _ = nd.plot()
 
 # %% [markdown]
-# Even if we do not specify the **datadir**, the application first look in the directory by default.
+# Even if we do not specify the **datadir**, the application first look in the
+# directory by default.
 
 # %% [markdown]
 # Now, lets load a NMR dataset (in the Bruker format).
