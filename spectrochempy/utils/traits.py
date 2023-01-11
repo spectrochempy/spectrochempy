@@ -7,7 +7,7 @@
 from pathlib import Path
 
 from matplotlib import cycler
-from traitlets import All, List, TraitError, observe
+from traitlets import All, List, TraitError, Undefined, observe
 from traitlets.config.configurable import Configurable
 
 __all__ = ["MetaConfigurable", "Range"]
@@ -62,9 +62,9 @@ class MetaConfigurable(Configurable):
             self.updated = True
 
 
-# ======================================================================================================================
+# ======================================================================================
 # Range trait type
-# ======================================================================================================================
+# ======================================================================================
 
 
 class Range(List):
@@ -90,9 +90,11 @@ class Range(List):
     info_text = "An ordered interval trait."
     allow_none = True
 
-    def __init__(self, trait=None, default_value=None, **kwargs):
+    def __init__(self, trait=Undefined, default_value=Undefined, **kwargs):
 
-        super(Range, self).__init__(trait=None, default_value=default_value, **kwargs)
+        super(Range, self).__init__(
+            trait=Undefined, default_value=default_value, **kwargs
+        )
 
     def length_error(self, obj, value):
         e = (
@@ -119,6 +121,6 @@ class Range(List):
         return value
 
 
-# ======================================================================================================================
+# ======================================================================================
 if __name__ == "__main__":
     pass
