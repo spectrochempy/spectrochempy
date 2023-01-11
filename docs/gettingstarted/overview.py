@@ -21,7 +21,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.9.9
+#     version: 3.10.8
 #   widgets:
 #     application/vnd.jupyter.widget-state+json:
 #       state: {}

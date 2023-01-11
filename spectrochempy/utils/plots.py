@@ -438,7 +438,7 @@ def get_figure(**kwargs):
     ----------
     clear : bool
         If False the last used figure is returned.
-    figsize : 2-tuple of floats, default: rcParams["figure.figsize"] (default: [6.4, 4.8])
+    figsize : 2-tuple of floats, default: rcParams["figure.figsize"])
         Figure dimension (width, height) in inches.
     dpi : float, default: rcParams["figure.dpi"] (default: 100.0)
         Dots per inch.
@@ -448,13 +448,14 @@ def get_figure(**kwargs):
         The figure patch edge color.
     frameon : bool, default: preferences.figure_frameon (default: True)
         If False, suppress drawing the figure background patch.
-    tight_layout : bool or dict, default: preferences.figure.autolayout (default: False)
-        If False use subplotpars. If True adjust subplot parameters using tight_layout with default padding.
-        When providing a dict containing the keys pad, w_pad, h_pad, and rect,
-        the default tight_layout paddings will be overridden.
-    constrained_layout : bool, default: preferences.figure_constrained_layout (default: False)
+    tight_layout : bool or dict, default: preferences.figure.autolayout
+        If False use subplotpars. If True adjust subplot parameters using tight_layout
+        with default padding.nWhen providing a dict containing the keys pad, w_pad,
+        h_pad, and rect, the default tight_layout paddings will be overridden.
+    constrained_layout : bool, default: preferences.figure_constrained_layout
         If True use constrained layout to adjust positioning of plot elements.
-        Like tight_layout, but designed to be more flexible. See Constrained Layout Guide for examples.
+        Like tight_layout, but designed to be more flexible.
+        See Constrained Layout Guide for examples.
     preferences : Meta object,
         Per object plot configuration.
 

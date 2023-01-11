@@ -123,8 +123,10 @@ def html_output(out):
 def convert_to_html(obj):
     tr = (
         "<tr>"
-        "<td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'>{0}</td>"
-        "<td style='text-align:left; padding-bottom:0px; padding-top:0px; {2} '>{1}</td><tr>\n"
+        "<td style='padding-right:5px; padding-bottom:0px; "
+        "padding-top:0px; width:124px'>{0}</td>"
+        "<td style='text-align:left; padding-bottom:0px; "
+        "padding-top:0px; {2} '>{1}</td><tr>\n"
     )
 
     obj._html_output = True

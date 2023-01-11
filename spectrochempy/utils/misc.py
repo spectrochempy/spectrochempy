@@ -294,7 +294,8 @@ def get_component(data, select="REAL"):
             )
     else:
         warnings.warn(
-            f"No selection was performed because datasets with complex data have no `{select}` component. "
+            f"No selection was performed because datasets with complex data have no "
+            f"`{select}` component. "
         )
 
     return new
@@ -316,7 +317,8 @@ def getdocfrom(origin):
 
 def gt_eps(arr):
     """
-    Lambda function to check that an array has at least some values greater than epsilon.
+    Lambda function to check that an array has at least some values greater than
+    epsilon.
 
     Parameters
     ----------
@@ -555,7 +557,8 @@ def make_new_object(objtype):
 
 def spacing_(arr):
     """
-    Return a scalar for the spacing in the one-dimensional input array (if it is uniformly spaced,
+    Return a scalar for the spacing in the one-dimensional input array
+    (if it is uniformly spaced,
     else return an array of the different spacings.
 
     Parameters
@@ -567,7 +570,8 @@ def spacing_(arr):
     out : float or array
     """
     spacings = np.diff(arr)
-    # we need to take into account only the significative digits ( but round to some decimals doesn't work
+    # we need to take into account only the significative digits
+    # ( but round to some decimals doesn't work
     # for very small number
     #    mantissa, twoexp = np.frexp(spacings)
     #    mantissa = mantissa.round(6)
