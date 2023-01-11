@@ -15,7 +15,7 @@ jobs:
   Prepare_new_release:
     name: "Prepare a new release"
     runs-on: ubuntu-latest
-    if: github.repository == 'spectrochempy/spectrochempy'
+    #if: github.repository == 'spectrochempy/spectrochempy'
 
     steps:
 
