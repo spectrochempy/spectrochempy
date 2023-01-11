@@ -173,7 +173,7 @@ if __name__ == "__main__":
     out_dependencies = template_dependencies.render(
         DEV=False, DASH=args.dash, CANTERA=args.cantera, COMMENT=comment
     )
-    filename = repo_path / "environment_dev.yml"
+    filename = repo_path / "environment.yml"
     filename.write_text(out_header + out_dependencies)
 
     generate_pip_requirements(filename, repo_path / "requirements.txt")

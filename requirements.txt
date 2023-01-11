@@ -1,10 +1,10 @@
 # ======================================================================================
 #
-# This file is auto-generated from environment_dev.yml file.
+# This file is auto-generated from environment.yml file.
 #
 # !!! DO NOT MODIFY !!!
 #
-# See in `environment_dev.yml` for more information.
+# See in `environment.yml` for more information.
 #
 # ======================================================================================
 quadprog
