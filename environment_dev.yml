@@ -34,7 +34,9 @@ dependencies:
     - matplotlib
     - numba
     - numpy
+    - numpydoc
     - pint
+    - pytz
     - requests
     - scipy
     - tqdm
@@ -80,7 +82,6 @@ dependencies:
     - jupyter_sphinx
     - json5
     - sphinx-copybutton
-    - numpydoc
     - pandoc
     - conda-build
     - conda-verify
