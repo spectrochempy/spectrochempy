@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### NEW FEATURES
+* Completed public API reference in documentation
 
 ### BUG FIXED
 
