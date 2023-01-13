@@ -1,0 +1,20 @@
+What's new in revision 0.2.6
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.2.6. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+New features
+~~~~~~~~~~~~
+
+-  Check for new version on anaconda cloud spectrocat channel.
+-  1D NMR processing with the addition of several new methods.
+-  Improved handling of Linear coordinates.
+
+
+Bug fixes
+~~~~~~~~~
+
+-  Adding quantity to datasets with different scaling (#199).
+-  Math now operates on linear coordinates.
+-  Compatibility with python 3.6

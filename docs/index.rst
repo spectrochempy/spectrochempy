@@ -51,9 +51,10 @@ Among its major features:
     `Issue Tracker <https://github.com/spectrochempy/spectrochempy/issues>`__
 
 .. toctree::
-   :hidden:
+    :hidden:
 
-   Home <self>
+    Home <self>
+    whatsnew/latest
 
 ****************
 Getting Started
@@ -110,9 +111,9 @@ User's Guide
 Reference & Help
 ***********************
 
-* :doc:`userguide/reference/changelog`
 * :doc:`userguide/reference/index`
 * :doc:`userguide/reference/faq`
+* :doc:`whatsnew/index`
 * :doc:`devguide/issues`
 * :doc:`devguide/examples`
 * :doc:`devguide/index`
@@ -122,9 +123,9 @@ Reference & Help
     :hidden:
     :caption: Reference & Help
 
-    userguide/reference/changelog
     userguide/reference/index
     userguide/reference/faq
+    whatsnew/index
     Bug reports & feature request <devguide/issues>
     Sharing examples & tutorials <devguide/examples>
     devguide/index

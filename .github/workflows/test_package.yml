@@ -72,7 +72,7 @@ jobs:
 
       - name: Test with coverage
         run: |
-          coverage run --rcfile=tests/.coveragerc -m pytest tests
+          coverage run --rcfile=tests/.coveragerc -m pytest tests -m 'test slow'
 
       - name: Report coverage
         run: |

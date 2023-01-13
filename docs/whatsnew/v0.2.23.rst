@@ -1,0 +1,10 @@
+What's new in revision 0.2.23 [2022-01-16]
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.2.23. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+Bug fixes
+~~~~~~~~~
+
+-  Workflow/Codeclimate issues

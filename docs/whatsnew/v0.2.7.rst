@@ -1,0 +1,20 @@
+What's new in revision 0.2.7
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.2.7. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+New features
+~~~~~~~~~~~~
+
+-  Test and data for read_carroucell(), read_srs(), read_dso()
+-  Added NMR processing of 2D spectra.
+-  Added FTIR interferogram processing.
+
+
+Bug fixes
+~~~~~~~~~
+
+-  Problem with read_carroucell(), read_srs(), read_dso()
+-  Colaboratory compatibility
+-  Improved check updates
