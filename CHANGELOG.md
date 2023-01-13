@@ -1,12 +1,18 @@
 # What's new
 
+## Unreleased
+
+### NEW FEATURES
+* Completed public API reference in documentation
+
+### BUG FIXED
+
+### BREAKING CHANGES
+
 ## Version 0.5.0 [2023-01-11]
 
 ### NEW FEATURES
 * Improved documentation.
-
-### BUG FIXED
-* Missing pytz dependencies in requirements.txt (pip) and environment.
 
 ### BREAKING CHANGES
 * numpy ufunc function can no longer be called as `scp.ufunc(nddataset)`,

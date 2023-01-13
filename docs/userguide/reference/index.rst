@@ -154,22 +154,34 @@ Creation from from external sources
     :nosignatures:
     :toctree: generated/
 
+    load
     read
-    read_omnic
-    read_spg
-    read_spa
-    read_srs
-    read_opus
+    read_bruker_nmr
+    read_carroucell
+    read_csv
+    read_ddr
+    read_dir
+    read_dx
+    read_hdr
+    read_jcamp
+    read_jdx
     read_labspec
+    read_mat
+    read_matlab
+    read_omnic
+    read_opus
+    read_quadera
+    read_remote
+    read_sdr
+    read_soc
+    read_spa
+    read_spc
+    read_spg
+    read_srs
     read_topspin
     read_zip
-    read_csv
-    read_jcamp
-    read_matlab
-    read_quadera
-    read_dir
     read_carroucell
-
+    download_nist_ir
 
 ******************
 Export a NDDataset
@@ -181,9 +193,14 @@ Export a NDDataset
 
     NDDataset.save
     NDDataset.save_as
-    load
     write
+    write_csv
+    write_excel
     write_jcamp
+    write_jdx
+    write_mat
+    write_matlab
+    write_xls
     to_array
     to_xarray
 
@@ -212,14 +229,25 @@ Plotting functions
     plot_1D
     plot_pen
     plot_scatter
+    plot_scatter_pen
+    plot_with_transposed
     plot_bar
     plot_2D
     plot_map
     plot_stack
     plot_image
+    plot_3D
     plot_surface
     plot_waterfall
-
+    plot_multiple
+    multiplot
+    multiplot_image
+    multiplot_lines
+    multiplot_map
+    multiplot_scatter
+    multiplot_stack
+    multiplot_with_transposed
+    show
 
 ************
 Processing
@@ -303,6 +331,8 @@ Minimum and maximum
     argmax
     coordmin
     coordmax
+    amin
+    amax
     min
     max
     ptp
@@ -353,7 +383,9 @@ Sums, integal, difference
 
     sum
     cumsum
+    trapz
     trapezoid
+    simps
     simpson
 
 
@@ -370,6 +402,7 @@ Complex
     NDDataset.RI
     NDDataset.IR
     NDDataset.II
+    NDDataset.component
     conj
     conjugate
     abs
@@ -393,6 +426,8 @@ Units manipulation
     :nosignatures:
     :toctree: generated/
 
+    Unit
+    Quantity
     to
     to_base_units
     to_reduced_units
@@ -400,15 +435,18 @@ Units manipulation
     ito_base_units
     ito_reduced_units
     is_units_compatible
+    set_nmr_context
 
 
-Unary mathematical operations
-==============================
+mathematical operations
+=======================
 
 .. autosummary::
     :nosignatures:
     :toctree: generated/
 
+    mc
+    ps
 
 Statistical operations
 =======================
@@ -432,11 +470,13 @@ Baseline correction
     :toctree: generated/
 
     BaselineCorrection
+    BaselineCorrector
     autosub
     ab
     abc
     basc
     detrend
+    dc
 
 
 Fourier transform
@@ -448,6 +488,43 @@ Fourier transform
 
     fft
     ifft
+    ht
+    fsh
+    fsh2
+
+Zero-filling
+============
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    zf
+    zf_auto
+    zf_double
+    zf_size
+
+Rolling
+=======
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    cs
+    ls
+    roll
+    rs
+
+Phasing
+=======
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    pk
+    pk_exp
 
 
 Smoothing, apodization
@@ -462,6 +539,8 @@ Smoothing, apodization
     bartlett
     blackmanharris
     hamming
+    general_hamming
+    hann
     triang
     em
     gm
@@ -501,9 +580,26 @@ Fitting
     :toctree: generated/
 
     Fit
+    ParameterScript
+    FitParameters
     CurveFit
     LSTSQ
     NNLS
+
+
+Fitting models
+==============
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    gaussianmodel
+    lorentzianmodel
+    voigtmodel
+    asymmetricvoigtmodel
+    sigmoidmodel
+    polynomialbaseline
 
 
 *******************
@@ -521,7 +617,7 @@ Analysis
     SIMPLISMA
     MCRALS
     IRIS
-
+    kern
 
 ********************
 Project management
@@ -540,20 +636,48 @@ Scripting
 
 This is rather experimental
 
-
 .. autosummary::
     :nosignatures:
     :toctree: generated/
 
     Script
-
+    run_script
+    run_all_scripts
 
 **********
 Utilities
 **********
 
+Logging
+=======
+
 .. autosummary::
     :nosignatures:
     :toctree: generated/
 
-    download_iris
+    set_loglevel
+    get_loglevel
+    debug_
+    info_
+    print_
+    warning_
+    error_
+
+Misc
+====
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    show_versions
+
+File
+====
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    FileSelector
+    pathclean
