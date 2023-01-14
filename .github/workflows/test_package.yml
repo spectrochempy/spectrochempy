@@ -58,7 +58,7 @@ jobs:
       - name: Install spectrochempy
         run: |
           python3 -m pip install --upgrade pip setuptools wheel
-          python3 -m pip install --no-deps -e .
+          python3 -m pip install -e .
 
       - name: Install dependencies for testing
         run: |
