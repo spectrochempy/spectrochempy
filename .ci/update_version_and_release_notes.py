@@ -179,6 +179,9 @@ def make_release_note_index(revision):
         if item.strip().endswith("(do not delete this comment)"):
             # nothing has been added to this section, clear it totally
             arr[i] = ""
+        else:
+            arr[i] = item.strip() + "\n"
+
     changelog_content = "\n".join(arr)
     changelog_content = changelog_content.strip() + "\n"  # end of file
 
@@ -214,7 +217,6 @@ Release notes
 This is the list of changes to SpectroChemPy between each release. For full details,
 see the `commit logs <https://github.com/spectrochempy/spectrochempy/commits/>`_.
 For install and upgrade instructions, see :ref:`installation`.
-
 """
         )
         for i, vers in enumerate(dicvers):

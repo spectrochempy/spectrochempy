@@ -23,6 +23,7 @@ repos:
         language: python
         additional_dependencies: [pyyaml, cffconvert, setuptools_scm]
         pass_filenames: false
+        exclude: docs/whatsnew/.*
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
