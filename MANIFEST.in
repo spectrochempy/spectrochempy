@@ -3,6 +3,4 @@ prune tests
 prune .ci
 prune .github
 recursive-include scp_data *
-recursive-include spectrochempy/gui/assets *
-exclude .*
-include LICENSE MANIFEST.in README.md CITATION.cff CHANGELOG.md titre.png requirements.txt
+include README.md

@@ -16,7 +16,7 @@ axes.autolimit_mode                      : round_numbers
 axes.axisbelow                           : True
 axes.edgecolor                           : black
 axes.facecolor                           : white
-axes.formatter.limits                    : -5, 6
+axes.formatter.limits                    : -7, 7
 axes.formatter.min_exponent              : 0
 axes.formatter.offset_threshold          : 2
 axes.formatter.use_locale                : False
@@ -26,10 +26,10 @@ axes.grid                                : False
 axes.grid.axis                           : both
 axes.grid.which                          : major
 axes.labelcolor                          : black
-axes.labelpad                            : 4.0
+axes.labelpad                            : 5.0
 axes.labelsize                           : 9.0
 axes.labelweight                         : normal
-axes.linewidth                           : 0.8
+axes.linewidth                           : 1.0
 axes.prop_cycle                          : cycler('color', ['0.00', '0.40', '0.60', '0.70'])
 axes.spines.bottom                       : True
 axes.spines.left                         : True
@@ -42,8 +42,8 @@ axes.titlesize                           : 12.0
 axes.titleweight                         : normal
 axes.titley                              : 1.0
 axes.unicode_minus                       : True
-axes.xmargin                             : 0.05
-axes.ymargin                             : 0.05
+axes.xmargin                             : 0.0
+axes.ymargin                             : 0.0
 axes.zmargin                             : 0.05
 axes3d.grid                              : True
 
@@ -100,7 +100,7 @@ date.autoformatter.year                  : %Y
 date.converter                           : auto
 date.interval_multiples                  : True
 
-errorbar.capsize                         : 1.0
+errorbar.capsize                         : 3.0
 
 figure.autolayout                        : True
 figure.constrained_layout.h_pad          : 0.04167
@@ -140,17 +140,17 @@ grid.color                               : black
 grid.linestyle                           : -
 grid.linewidth                           : 0.85
 
-hatch.color                              : black
+hatch.color                              : k
 hatch.linewidth                          : 1.0
-hist.bins                                : auto
+hist.bins                                : 10
 
 image.aspect                             : equal
 image.cmap                               : gray
 image.composite_image                    : True
-image.interpolation                      : antialiased
+image.interpolation                      : bilinear
 image.lut                                : 256
 image.origin                             : upper
-image.resample                           : True
+image.resample                           : False
 
 keymap.back                              : left, c, backspace
 keymap.copy                              : ctrl+c, cmd+c
@@ -171,18 +171,18 @@ keymap.zoom                              : o
 legend.borderaxespad                     : 0.5
 legend.borderpad                         : 0.4
 legend.columnspacing                     : 0.5
-legend.edgecolor                         : 0.8
+legend.edgecolor                         : inherit
 legend.facecolor                         : inherit
-legend.fancybox                          : True
+legend.fancybox                          : False
 legend.fontsize                          : 8.0
-legend.framealpha                        : 0.8
+legend.framealpha                        : None
 legend.frameon                           : False
 legend.handleheight                      : 0.7
 legend.handlelength                      : 2.0
 legend.handletextpad                     : 0.1
 legend.labelcolor                        : None
 legend.labelspacing                      : 0.2
-legend.loc                               : best
+legend.loc                               : upper right
 legend.markerscale                       : 1.0
 legend.numpoints                         : 1
 legend.scatterpoints                     : 1
@@ -244,7 +244,7 @@ ps.useafm                                : False
 ps.usedistiller                          : None
 
 savefig.bbox                             : standard
-savefig.dpi                              : 300.0
+savefig.dpi                              : 100.0
 savefig.edgecolor                        : white
 savefig.facecolor                        : white
 savefig.format                           : png
@@ -276,17 +276,17 @@ xtick.labelcolor                         : inherit
 xtick.labelsize                          : 8.0
 xtick.labeltop                           : False
 xtick.major.bottom                       : True
-xtick.major.pad                          : 3.5
-xtick.major.size                         : 3.5
+xtick.major.pad                          : 4.0
+xtick.major.size                         : 4.0
 xtick.major.top                          : True
-xtick.major.width                        : 0.8
+xtick.major.width                        : 0.5
 xtick.minor.bottom                       : True
-xtick.minor.pad                          : 3.4
+xtick.minor.pad                          : 4.0
 xtick.minor.size                         : 2.0
 xtick.minor.top                          : True
 xtick.minor.visible                      : False
-xtick.minor.width                        : 0.6
-xtick.top                                : False
+xtick.minor.width                        : 0.5
+xtick.top                                : True
 
 yaxis.labellocation                      : center
 ytick.alignment                          : center
@@ -298,17 +298,17 @@ ytick.labelright                         : False
 ytick.labelsize                          : 8.0
 ytick.left                               : True
 ytick.major.left                         : True
-ytick.major.pad                          : 3.5
+ytick.major.pad                          : 4.0
 ytick.major.right                        : True
-ytick.major.size                         : 3.5
-ytick.major.width                        : 0.8
+ytick.major.size                         : 4.0
+ytick.major.width                        : 0.5
 ytick.minor.left                         : True
-ytick.minor.pad                          : 3.4
+ytick.minor.pad                          : 4.0
 ytick.minor.right                        : True
 ytick.minor.size                         : 2.0
 ytick.minor.visible                      : False
-ytick.minor.width                        : 0.6
-ytick.right                              : False
+ytick.minor.width                        : 0.5
+ytick.right                              : True
 
 
 ##
