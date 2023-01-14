@@ -45,9 +45,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: precommit
-        uses: pre-commit/action@v3.0.0
-
       - name: Install Conda environment with Micromamba
         uses: mamba-org/provision-with-micromamba@main
         with:
