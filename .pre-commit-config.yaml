@@ -14,16 +14,16 @@ repos:
         additional_dependencies: [pyyaml, jinja2]
         pass_filenames: false
 
-  - repo: local
-    hooks:
-      - id: update-version-and-release-notes
-        name: update-version-and-release-notes
-        description: Update version and release notes
-        entry: python .ci/update_version_and_release_notes.py
-        language: python
-        additional_dependencies: [pyyaml, cffconvert, setuptools_scm]
-        pass_filenames: false
-        exclude: docs/whatsnew/.*
+#  - repo: local
+#    hooks:
+#      - id: update-version-and-release-notes
+#        name: update-version-and-release-notes
+#        description: Update version and release notes
+#        entry: python .ci/update_version_and_release_notes.py
+#        language: python
+#        additional_dependencies: [pyyaml, cffconvert, setuptools_scm]
+#        pass_filenames: false
+#        exclude: docs/whatsnew/.*
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
