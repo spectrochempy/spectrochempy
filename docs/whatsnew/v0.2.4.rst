@@ -1,0 +1,20 @@
+What's new in revision 0.2.4
+---------------------------------------------------------------------------------------
+These are the changes in SpectroChemPy-0.2.4. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+New features
+~~~~~~~~~~~~
+
+-  Documentation largely revisited and hopefully improved. *Still some
+   work to be done*.
+-  NDMath (mathematical and dataset creation routines) module revisited.
+   *Still some work to be done*.
+-  Changed CoordRange behavior.
+
+
+Bug fixes
+~~~~~~~~~
+
+-  Problem with importing the API.
+-  Dim handling in processing functions.

@@ -296,7 +296,7 @@ class PreferencesSet(Meta):
                 )
             if key == "savefig.bbox":
                 line = f"{key:40s} : standard\n"
-            txt += line.replace("#", "")
+            txt += line.replace("#", "").rstrip() + "\n"
 
         # Non matplotlib parameters,
         # some parameters are not saved in matplotlib style sheets so we willa dd them here

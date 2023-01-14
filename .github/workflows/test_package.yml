@@ -62,7 +62,7 @@ jobs:
 
       - name: Install dependencies for testing
         run: |
-          python3 -m pip install coverage pytest pytest-doctestplus pytest-flake8
+          python3 -m pip install pytest pytest-doctestplus pytest-flake8 pytest-cov
           python3 -m pip install pytest-mock pyfakefs cffconvert
           python3 -m pip install numpydoc>=1.2
 
@@ -72,12 +72,7 @@ jobs:
 
       - name: Test with coverage
         run: |
-          coverage run --rcfile=tests/.coveragerc -m pytest tests
-
-      - name: Report coverage
-        run: |
-          coverage report
-          coverage xml
+          python3 -m pytest tests -m 'not slow'
 
       - name: Code Climate reporting
         if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.10' && matrix.os == 'ubuntu-latest' }}

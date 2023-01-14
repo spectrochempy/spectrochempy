@@ -1,10 +1,8 @@
 # intentionnaly masked with ~
-# ----------------------------------------------------------------------------------------------------------------------
 *~
 ~*
 
 # ignored extensions
-# ----------------------------------------------------------------------------------------------------------------------
 *.log
 .eggs
 *.egg-info
@@ -23,17 +21,20 @@
 *.manifest
 *.spec
 *.pyc
+*.scp
+*.pscp
+*.pptx
+*.jdx
+*.sample
 
 # git files
-# ----------------------------------------------------------------------------------------------------------------------
 *_LOCAL_*.*
 *_REMOTE_*.*
 *_BACKUP_*.*
 *_BASE_*.*
+.gitignore_*
 
 # local files or directory
-# ----------------------------------------------------------------------------------------------------------------------
-.gitignore_*
 .editorconfig
 /extdata/
 /git_hooks/
@@ -41,74 +42,54 @@
 thumb.png
 
 # Mac OS specific
-# ----------------------------------------------------------------------------------------------------------------------
 .DS_Store
 
 # pycharm project
-# ----------------------------------------------------------------------------------------------------------------------
 .idea/
 
 # Spyder project
-# ----------------------------------------------------------------------------------------------------------------------
 .spyderproject
 .spyproject
 
 # Example, ipython notebook,  jupytext, checkpoints
-# ----------------------------------------------------------------------------------------------------------------------
 *.ipynb_checkpoints/
 *.ipynb
 *.pct.md
 
 # VS
-# ----------------------------------------------------------------------------------------------------------------------
 .vscode
 
 # caches
-# ----------------------------------------------------------------------------------------------------------------------
 __pycache__/
 .cache/
 /.pytest_cache/
 
 # Sphinx documentation
-# ----------------------------------------------------------------------------------------------------------------------
 docs/api/generated
 docs/_build/
 docs/index.doctree
+docs/modules/
+docs/savefig/
+docs/_templates_old
 generated/
 dist/
 build/
 */gen_modules/
 gallery
-docs/modules/
-docs/savefig/
-docs/_templates_old
+
 
 # tests
-# ----------------------------------------------------------------------------------------------------------------------
 tests/figures
 /tests_extern_packages/
-*.jdx
 
-# latex
-# ----------------------------------------------------------------------------------------------------------------------
+# Latex
 *.fdb_latexmk
 
-# data
-# ----------------------------------------------------------------------------------------------------------------------
-scpy.svg
-*.sample
-scp_data/testdata/figures
-audita.txt
-auditp.txt
-clevels
-
 # Docker / bitbucket
-# ----------------------------------------------------------------------------------------------------------------------
 .dockerignore
 .pipeline*.sh
 
 # Distribution / packaging
-# ----------------------------------------------------------------------------------------------------------------------
 .Python
 develop-eggs/
 eggs/
@@ -122,14 +103,6 @@ var/
 
 saved_pkglist.txt
 
-
-scp_data/testdata/nmrdata/bruker/tests/nmr/exam1d_13C
-scp_data/testdata/nmrdata/bruker/tests/nmr/exam1d_1H
-# scp_data/testdata/nmrdata/bruker/tests/nmr/exam2d_HC
-# scp_data/testdata/nmrdata/bruker/tests/nmr/exam2d_HH
-scp_data/testdata/nmrdata/bruker/tests/nmr/exam_CMCse_1
-scp_data/testdata/nmrdata/bruker/tests/nmr/exam_CMCse_2
-scp_data/testdata/nmrdata/bruker/tests/nmr/exam_CMCse_3
 Icon*
 
 # pip virtual environment
@@ -146,28 +119,15 @@ process.pscp
 *.py-donotwork
 /patch.diff
 
-*.pptx
+
 .hypothesis/
 /htmlcov/
 cov.coverage
 cov.syspath.txt
 coverage.xml
-scripts/myfile.csv
-scripts/single_spectrum.csv
-myfile.csv
-single_spectrum.csv
 
 # docs automatically generated
-changelog.rst
 /res.docstrings.txt
-opus.scp
 essai.py
-project_1.pscp
-X.scp
-NMR.pscp
-.ci/scpy3.10.yml
-.ci/scpy3.7.yml
-.ci/scpy3.9.yml
-A.scp
-C.scp
 /out/
+*dev*.rst

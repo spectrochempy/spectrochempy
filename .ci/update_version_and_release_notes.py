@@ -1,5 +1,4 @@
 import json
-import re
 import sys
 from datetime import date
 from pathlib import Path
@@ -8,14 +7,12 @@ import yaml
 from cffconvert.cli.create_citation import create_citation
 from setuptools_scm import get_version
 
-SCRIPTS = Path(__file__).parent
-PROJECT = SCRIPTS.parent
-REFERENCE = PROJECT / "docs" / "userguide" / "reference"
-
-CHANGELOG = PROJECT / "CHANGELOG.md"
-CHANGELOGRST = REFERENCE / "changelog.rst"
+CI = Path(__file__).parent
+PROJECT = CI.parent
 CITATION = PROJECT / "CITATION.cff"
 ZENODO = PROJECT / ".zenodo.json"
+DOCS = PROJECT / "docs"
+WN = DOCS / "whatsnew"
 
 gitversion = get_version(root="..", relative_to=__file__)
 
@@ -132,7 +129,7 @@ class Citation:
 
     def update_date(self):
         """
-        Update the realesed-date metadata .
+        Update the released-date metadata .
         """
         self._citation.cffobj["date-released"] = date.today().isoformat()
 
@@ -143,34 +140,6 @@ class Citation:
         if version is None:
             version = gitversion
         self._citation.cffobj["version"] = ".".join(version.split(".")[:3])
-
-
-def make_changelog(version):
-
-    # check that a section named unreleased is present
-
-    file = CHANGELOG
-    md = file.read_text()
-
-    if version != "unreleased":
-        print(f'\n{"-" * 80}\nMake `changelogs`\n{"-" * 80}')
-
-        vers = version.split(".")[:3]
-        revision = ".".join(vers[:3])
-
-        # split in sections
-        lmd = re.split("\n##\s", md)
-        lmd[1] = lmd[1].replace(
-            "Unreleased\n", f"Version {revision} " f"[{date.today().isoformat()}]\n"
-        )
-
-        # rebuild the md file
-        md = "\n## ".join(lmd)
-    else:
-        md = md.replace(
-            "# What's new", "# What's new\n\n## Unreleased\n\n### NEW FEATURES\n*"
-        )
-    file.write_text(md)
 
 
 def make_citation(version):
@@ -193,11 +162,140 @@ def make_zenodo(version):
     zenodo.save()
 
 
+def make_release_note_index(revision):
+
+    # remove old rev files
+    files = WN.glob("v*.dev*.rst")
+    for file in files:
+        file.unlink()
+    if (WN / "latest.rst").exists():
+        (WN / "latest.rst").unlink()
+
+    # Create or update file with the current version number
+    if revision == "unreleased":
+        revision = gitversion.split("+")[0]
+
+    changelog_content = (WN / "changelog.rst").read_text()
+    arr = changelog_content.split(".. _new_section")
+    for i, item in enumerate(arr[:]):
+        if item.strip().endswith("(do not delete this comment)"):
+            # nothing has been added to this section, clear it totally
+            arr[i] = ""
+        else:
+            arr[i] = item.strip() + "\n"
+
+    changelog_content = "\n".join(arr)
+    changelog_content = changelog_content.strip() + "\n"  # end of file
+
+    changelog_content = changelog_content.replace("{{ revision }}", revision)
+
+    if ".dev" in revision:
+        (WN / "latest.rst").write_text(changelog_content)
+    else:
+        # in principle this happens for release, create the related rst file
+        (WN / f"v{revision}.rst").write_text(changelog_content)
+        # void changelog (keep only section titles)
+        (WN / "changelog.rst").write_text(
+            """What's new in revision {{ revision }}
+---------------------------------------------------------------------------------------
+.. do not remove the  `revision` marker. It will be replaced during doc building
+
+These are the changes in SpectroChemPy-{{ revision }}. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+.. _new_section
+
+New features
+~~~~~~~~~~~~
+.. Add here new public features (do not delete this comment)
+
+
+.. _new_section
+
+Bug fixes
+~~~~~~~~~
+.. Add here new bug fixes (do not delete this comment)
+
+
+.. _new_section
+
+Breaking changes
+~~~~~~~~~~~~~~~~
+.. Add here new breaking changes (do not delete this comment)
+
+
+.. _new_section
+
+Deprecations
+~~~~~~~~~~~~
+.. Add here new deprecations (do not delete this comment)
+
+
+.. _new_section
+
+Developer's information
+~~~~~~~~~~~~~~~~~~~~~~~
+.. Add here changes in the code  (do not delete this comment)
+
+ """
+        )
+    # Create the new index.rst file
+    files = WN.glob("v*.rst")
+    names = []
+    for file in files:
+        name = file.name
+        names.append(name)
+    names.sort()
+    names.reverse()
+    dicvers = {}
+    for name in names:
+        arr = name.split(".")
+        base = ".".join(arr[:3])
+        v = f"{arr[0][1]}.{arr[1]}"
+        if v in dicvers:
+            dicvers[v].append(base)
+        else:
+            dicvers[v] = [base]
+
+    with open(WN / "index.rst", "w") as f:
+        f.write(
+            """.. _release:
+
+*************
+Release notes
+*************
+
+This is the list of changes to SpectroChemPy between each release. For full details,
+see the `commit logs <https://github.com/spectrochempy/spectrochempy/commits/>`_.
+For install and upgrade instructions, see :ref:`installation`.
+"""
+        )
+        for i, vers in enumerate(dicvers):
+            latest = "\n    latest" if i == 0 and ".dev" in revision else ""
+            f.write(
+                f"""
+Version {vers}
+--------------
+
+.. toctree::
+    :maxdepth: 2
+{latest}
+"""
+            )
+            li = sorted(dicvers[vers], key=lambda x: int(str.split(x, ".")[2]))
+            li.reverse()
+            for rev in li:
+                f.write(f"    {rev}\n")
+
+
 if __name__ == "__main__":
 
     if len(sys.argv) > 1:
-        new_version = sys.argv[1]
-        if new_version != "unreleased":
-            make_citation(new_version)
-            make_zenodo(new_version)
-        make_changelog(new_version)
+        new_revision = sys.argv[1]
+    else:
+        new_revision = "unreleased"
+
+    if new_revision != "unreleased":
+        make_citation(new_revision)
+        make_zenodo(new_revision)
+    make_release_note_index(new_revision)

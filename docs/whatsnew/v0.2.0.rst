@@ -1,0 +1,54 @@
+What's new in revision 0.2.0
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.2.0. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+New features
+~~~~~~~~~~~~
+
+-  Copyright update.
+-  Requirements and env yml files updated.
+-  Use of the coordinates in math operation improved.
+-  Added ROI and Offset properties to NDArrays.
+-  Readers / Writers revisited.
+-  Bruker TOPSPIN reader.
+-  Added LabSpec reader for .txt exported files.
+-  Simplified the format of scp file - now zipped JSON files.
+-  Rewriting json serialiser.
+-  Add function pathclean to the API.
+-  Add some array creation function to NDMath.
+-  Refactoring plotting preference system.
+-  Baseline correction now accepts single value for ranges.
+-  Add a waterfall plot.
+-  Refactoring plot2D and 1D methods.
+-  Added Simpson’rule integration.
+-  Addition of multiple coordinates to a dimension works better.
+-  Added Linear coordinates (EXPERIMENTAL).
+-  Test for NDDataset dtype change at initialization.
+-  Added subdir of txt files in ramandata.
+-  Comparison of datasets improved in testing.py.
+-  Comparison of datasets and projects.
+
+Bug fixes
+~~~~~~~~~
+
+-  Dtype parameter was not taken into account during initialization of
+   NDArrays.
+-  Math function behavior for coords.
+-  Color normalization on the full range for colorscale.
+-  Configuration settings in the main application.
+-  Compatibility read_zip with py3.7.
+-  NDpanel temporary removed from the master.
+-  2D IRIS.
+-  Trapz integration to return NDDataset.
+-  Suppressed a forgotten sleep statement that was slowing down the
+   SpectroChemPy initialization.
+-  Error in SIMPLISMA (changed affectations such as C.data[…] =
+   something by C[…] = something.
+-  Cleaning mplstyle about non-style parameters and corrected makestyle.
+-  Argument of set_xscale.
+-  Use read_topspin instead of the deprecated function read_bruker_nmr.
+-  Some issues with interactive baseline.
+-  Baseline and fitting tutorials.
+-  Removed dependency of isotopes.py to pandas.

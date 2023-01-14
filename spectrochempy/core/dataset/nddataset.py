@@ -33,10 +33,8 @@ from traittypes import Array
 
 from spectrochempy.core import error_, warning_
 from spectrochempy.core.dataset.arraymixins.ndio import NDIO
-from spectrochempy.core.dataset.arraymixins.ndmath import (  # _set_ufuncs,
-    NDMath,
-    _set_operators,
-)
+from spectrochempy.core.dataset.arraymixins.ndmath import NDMath  # _set_ufuncs,
+from spectrochempy.core.dataset.arraymixins.ndmath import _set_operators
 from spectrochempy.core.dataset.arraymixins.ndplot import NDPlot
 from spectrochempy.core.dataset.basearrays.ndarray import DEFAULT_DIM_NAME, NDArray
 from spectrochempy.core.dataset.basearrays.ndcomplex import NDComplexArray
