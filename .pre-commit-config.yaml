@@ -9,9 +9,19 @@ repos:
       - id: create-requirements
         name: create-requirements
         description: Create environment and requirement files according to a template
-        entry: .ci/create_requirements.py
+        entry: python .ci/create_requirements.py
         language: python
         additional_dependencies: [pyyaml, jinja2]
+        pass_filenames: false
+
+  - repo: local
+    hooks:
+      - id: update-version-and-release-notes
+        name: create-requirements
+        description: Update version and
+        entry: python .ci/update_version_and_release_notes.py
+        language: python
+        additional_dependencies: [pyyaml, cffconvert, setuptools_scm]
         pass_filenames: false
 
   - repo: https://github.com/pre-commit/pre-commit-hooks

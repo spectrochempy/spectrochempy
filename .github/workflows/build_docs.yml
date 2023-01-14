@@ -45,9 +45,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Update requirements.txt
-        run: |
-          python .ci/create_requirements.py
+      - name: precommit
+        uses: pre-commit/action@v3.0.0
 
       - name: Install Conda environment with Micromamba
         uses: mamba-org/provision-with-micromamba@main
@@ -73,11 +72,6 @@ jobs:
         uses: zcong1993/setup-timezone@master
         with:
           timezone: Central European Time
-
-
-      - name: Update version in release notes, .zenodo.json and CITATION.cff
-        run: |
-          python .ci/update_version_and_release_notes.py
 
       - name: Build docs
         run: |

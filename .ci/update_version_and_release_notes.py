@@ -180,6 +180,7 @@ def make_release_note_index(revision):
             # nothing has been added to this section, clear it totally
             arr[i] = ""
     changelog_content = "\n".join(arr)
+    changelog_content = changelog_content.strip() + "\n"  # end of file
 
     changelog_content = changelog_content.replace("{{ revision }}", revision)
     (WN / "latest.rst").write_text(changelog_content)

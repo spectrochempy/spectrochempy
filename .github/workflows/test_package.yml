@@ -55,6 +55,9 @@ jobs:
         with:
           python-version: ${{ matrix.pythonVersion }}
 
+      - name: precommit
+        uses: pre-commit/action@v3.0.0
+
       - name: Install spectrochempy
         run: |
           python3 -m pip install --upgrade pip setuptools wheel
