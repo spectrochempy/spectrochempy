@@ -62,7 +62,7 @@ jobs:
 
       - name: Install dependencies for testing
         run: |
-          python3 -m pip install coverage pytest pytest-doctestplus pytest-flake8
+          python3 -m pip install pytest pytest-doctestplus pytest-flake8 pytest-cov
           python3 -m pip install pytest-mock pyfakefs cffconvert
           python3 -m pip install numpydoc>=1.2
 
