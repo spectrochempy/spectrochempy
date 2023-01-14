@@ -49,6 +49,10 @@ jobs:
         run: |
           python -m pip install build --user
 
+      - name: Update requirements.txt
+        run: |
+          python .ci/create_requirements.py
+
       - name: Build a binary wheel and a source tarball
         run: |
           python -m build --sdist --wheel --outdir dist/ .
@@ -86,6 +90,10 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
+      - name: Update environment
+        run: |
+          python .ci/create_requirements.py
 
       - name: Install Conda environment with Micromamba
         uses: mamba-org/provision-with-micromamba@main

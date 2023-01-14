@@ -45,6 +45,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Update requirements.txt
+        run: |
+          python .ci/create_requirements.py
+
       - name: Install Conda environment with Micromamba
         uses: mamba-org/provision-with-micromamba@main
         with:
@@ -69,6 +73,7 @@ jobs:
         uses: zcong1993/setup-timezone@master
         with:
           timezone: Central European Time
+
 
       - name: Update version in release notes, .zenodo.json and CITATION.cff
         run: |
