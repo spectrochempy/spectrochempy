@@ -77,7 +77,7 @@ jobs:
 
       - name: Update version in release notes, .zenodo.json and CITATION.cff
         run: |
-          python .ci/update_version_and_release_notes
+          python .ci/update_version_and_release_notes.py
 
       - name: Build docs
         run: |
