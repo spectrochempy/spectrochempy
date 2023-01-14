@@ -40,18 +40,9 @@ jobs:
         run: |
           python .ci/create_requirements.py
 
-      - name: Update version in CHANGELOG, .zenodo.json and CITATION.cff
+      - name: Update version in release notes, .zenodo.json and CITATION.cff
         run: |
           python .ci/update_version_and_changelog.py ${{ github.event.inputs.versionString }}
-
-      - name: convert CHANGELOG.md to rst via pandoc
-        uses: docker://pandoc/core:2.9
-        with:
-          args: >-
-            -f  markdown
-            -t rst
-            -o docs/userguide/reference/changelog.rst
-            CHANGELOG.md
 
       - name: Commit tracked files
         id: make-commit
