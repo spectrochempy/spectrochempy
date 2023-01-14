@@ -58,7 +58,7 @@ jobs:
       - name: Install spectrochempy
         run: |
           python3 -m pip install --upgrade pip setuptools wheel
-          python3 -m pip install .
+          python3 -m pip install --no-deps -e .
 
       - name: Install dependencies for testing
         run: |
@@ -70,12 +70,16 @@ jobs:
         run: |
           python3 -m pip install xarray
 
-      - name: Test with coverage
-        run: |
-          python3 -m pytest tests --cov=spectrochempy --cov-report xml --cov-config=.coveragerc --no-cov-on-fail -m 'not slow'
-
       - name: Code Climate reporting
         if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.10' && matrix.os == 'ubuntu-latest' }}
         uses: paambaati/codeclimate-action@v3.2.0
         env:
           CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
+        with:
+          coverageCommand: |
+            python3 -m pytest tests
+            --cov=spectrochempy
+            --cov-report=xml
+            --cov-config=.coveragerc
+            --no-cov-on-fail
+            -m 'not slow'
