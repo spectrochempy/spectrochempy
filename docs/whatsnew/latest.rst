@@ -1,8 +1,8 @@
-What's new in revision 0.5.1.dev22
+What's new in revision 0.5.1.dev24
 ---------------------------------------------------------------------------------------
 .. do not remove the  `revision` marker. It will be replaced during doc building
 
-These are the changes in SpectroChemPy-0.5.1.dev22. See :ref:`release` for a full changelog
+These are the changes in SpectroChemPy-0.5.1.dev24. See :ref:`release` for a full changelog
 including other versions of SpectroChemPy.
 
 New features
@@ -22,4 +22,4 @@ Developer's information
 .. Add here changes in the code  (do not delete this comment)
 
 - The pull-request template has been modified to reflect the latest workflow changes.
-- Coverage analysis in CI is now triggered by the plugin pytest-cov
+- Coverage analysis in CI is now triggered by the plugin pytest-cov.

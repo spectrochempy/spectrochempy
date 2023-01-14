@@ -47,4 +47,4 @@ Developer's information
 .. Add here changes in the code  (do not delete this comment)
 
 - The pull-request template has been modified to reflect the latest workflow changes.
-- Coverage analysis in CI is now triggered by the plugin pytest-cov
+- Coverage analysis in CI is now triggered by the plugin pytest-cov.
