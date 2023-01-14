@@ -168,6 +168,8 @@ def make_release_note_index(revision):
     files = WN.glob("v*.dev*.rst")
     for file in files:
         file.unlink()
+    if (WN / "latest.rst").exists():
+        (WN / "latest.rst").unlink()
 
     # Create or update file with the current version number
     if revision == "unreleased":
@@ -186,7 +188,11 @@ def make_release_note_index(revision):
     changelog_content = changelog_content.strip() + "\n"  # end of file
 
     changelog_content = changelog_content.replace("{{ revision }}", revision)
-    (WN / "latest.rst").write_text(changelog_content)
+
+    if ".dev" in revision:
+        (WN / "latest.rst").write_text(changelog_content)
+    else:
+        (WN / f"v{revision}.rst").write_text(changelog_content)
 
     # Create the new index.rst file
     files = WN.glob("v*.rst")
@@ -220,7 +226,7 @@ For install and upgrade instructions, see :ref:`installation`.
 """
         )
         for i, vers in enumerate(dicvers):
-            latest = "\n    latest" if i == 0 else ""
+            latest = "\n    latest" if i == 0 and ".dev" in revision else ""
             f.write(
                 f"""
 Version {vers}
