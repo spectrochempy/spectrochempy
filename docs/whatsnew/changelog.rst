@@ -16,8 +16,6 @@ New features
   From now all public change in SpectroChemPy code should be reflected
   in the `docs/whatsnew/unreleased.rst file. Building of the index.rst is automatic.
 
-
-
 .. _new_section
 
 Bug fixes

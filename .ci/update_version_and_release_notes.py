@@ -192,8 +192,53 @@ def make_release_note_index(revision):
     if ".dev" in revision:
         (WN / "latest.rst").write_text(changelog_content)
     else:
+        # in principle this happens for release, create the related rst file
         (WN / f"v{revision}.rst").write_text(changelog_content)
+        # void changelog (keep only section titles)
+        (WN / "changelog.rst").write_text(
+            """What's new in revision {{ revision }}
+---------------------------------------------------------------------------------------
+.. do not remove the  `revision` marker. It will be replaced during doc building
 
+These are the changes in SpectroChemPy-{{ revision }}. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+.. _new_section
+
+New features
+~~~~~~~~~~~~
+.. Add here new public features (do not delete this comment)
+
+
+.. _new_section
+
+Bug fixes
+~~~~~~~~~
+.. Add here new bug fixes (do not delete this comment)
+
+
+.. _new_section
+
+Breaking changes
+~~~~~~~~~~~~~~~~
+.. Add here new breaking changes (do not delete this comment)
+
+
+.. _new_section
+
+Deprecations
+~~~~~~~~~~~~
+.. Add here new deprecations (do not delete this comment)
+
+
+.. _new_section
+
+Developer's information
+~~~~~~~~~~~~~~~~~~~~~~~
+.. Add here changes in the code  (do not delete this comment)
+
+ """
+        )
     # Create the new index.rst file
     files = WN.glob("v*.rst")
     names = []
