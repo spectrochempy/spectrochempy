@@ -1,8 +1,8 @@
-What's new in revision 0.5.1.dev15
+What's new in revision 0.5.1.dev16
 ---------------------------------------------------------------------------------------
 .. do not remove the  `revision` marker. It will be replaced during doc building
 
-These are the changes in SpectroChemPy-0.5.1.dev15. See :ref:`release` for a full changelog
+These are the changes in SpectroChemPy-0.5.1.dev16. See :ref:`release` for a full changelog
 including other versions of SpectroChemPy.
 
 
