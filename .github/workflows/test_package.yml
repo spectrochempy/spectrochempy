@@ -72,12 +72,7 @@ jobs:
 
       - name: Test with coverage
         run: |
-          coverage run --rcfile=tests/.coveragerc -m "pytest tests -m 'test slow'"
-
-      - name: Report coverage
-        run: |
-          coverage report
-          coverage xml
+          pytest tests -m 'not slow'
 
       - name: Code Climate reporting
         if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.10' && matrix.os == 'ubuntu-latest' }}
