@@ -1,11 +1,9 @@
-What's new in revision {{ revision }}
+What's new in revision 0.5.1.dev21
 ---------------------------------------------------------------------------------------
 .. do not remove the  `revision` marker. It will be replaced during doc building
 
-These are the changes in SpectroChemPy-{{ revision }}. See :ref:`release` for a full changelog
+These are the changes in SpectroChemPy-0.5.1.dev21. See :ref:`release` for a full changelog
 including other versions of SpectroChemPy.
-
-.. _new_section
 
 New features
 ~~~~~~~~~~~~
@@ -18,31 +16,6 @@ New features
 
 
 
-.. _new_section
-
-Bug fixes
-~~~~~~~~~
-.. Add here new bug fixes (do not delete this comment)
-
-
-
-
-.. _new_section
-
-Breaking changes
-~~~~~~~~~~~~~~~~
-.. Add here new breaking changes (do not delete this comment)
-
-
-
-.. _new_section
-
-Deprecations
-~~~~~~~~~~~~
-.. Add here new deprecations (do not delete this comment)
-
-
-.. _new_section
 
 Developer's information
 ~~~~~~~~~~~~~~~~~~~~~~~
