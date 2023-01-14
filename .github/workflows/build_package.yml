@@ -47,7 +47,7 @@ jobs:
 
       - name: Install pypa/build
         run: |
-          python -m pip install build --user
+          python -m pip install build yaml jinja2 --user
 
       - name: Update requirements.txt
         run: |
