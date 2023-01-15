@@ -65,6 +65,10 @@ jobs:
         run: |
           bash .ci/set_env_var.sh
 
+      - name: Update version in release notes
+        run: |
+          python .ci/update_version_and_release_notes.py ${{ env.VERSIONSTRING }}
+
       - name: Setup timezone
         uses: zcong1993/setup-timezone@master
         with:
