@@ -43,7 +43,8 @@ jobs:
       - name: Commit tracked files
         id: make-commit
         run: |
-          git commit -a --message "Prepare release ${{ github.event.inputs.versionString }}"
+          git add -A
+          git commit --message "Prepare release ${{ github.event.inputs.versionString }}"
           echo "commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
 
       - name: Push new branch
