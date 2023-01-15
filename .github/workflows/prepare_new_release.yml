@@ -40,7 +40,7 @@ jobs:
         run: |
           python .ci/update_version_and_release_notes.py ${{ github.event.inputs.versionString }}
           pre-commit run --all-files
-          
+
       - name: Commit tracked files
         id: make-commit
         run: |
