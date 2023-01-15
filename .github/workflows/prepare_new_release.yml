@@ -39,7 +39,8 @@ jobs:
       - name: Update version in release notes, .zenodo.json and CITATION.cff
         run: |
           python .ci/update_version_and_release_notes.py ${{ github.event.inputs.versionString }}
-
+          pre-commit run --all-files
+          
       - name: Commit tracked files
         id: make-commit
         run: |
