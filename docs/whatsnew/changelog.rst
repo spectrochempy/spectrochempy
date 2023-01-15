@@ -22,8 +22,7 @@ Bug fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
-
-
+- many display problems in the documentation pages
 
 .. _new_section
 
