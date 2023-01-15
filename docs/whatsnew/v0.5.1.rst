@@ -3,23 +3,3 @@ What's new in revision 0.5.1
 
 These are the changes in SpectroChemPy-0.5.1.
 See :ref:`release` for a full changelog including other versions of SpectroChemPy.
-
-..
-    Do not remove the `revision` marker. It will be replaced during doc building
-    Add your list of changes between .. (.. Add here..) and (
-
-) comments
-    keeping a blank line before and after this block
-    example:
-
-        - first changes
-        - second change ...
-
-
-
-
-Deprecations
-~~~~~~~~~~~~
-.. Add here new deprecations (do not delete this comment)
-
-.. EOF

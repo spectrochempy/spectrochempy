@@ -1,4 +1,5 @@
 import json
+import re
 import sys
 from datetime import date
 from pathlib import Path
@@ -175,18 +176,27 @@ def make_release_note_index(revision):
     if revision == "unreleased":
         revision = gitversion.split("+")[0]
 
-    changelog_content = (WN / "changelog.rst").read_text()
-    arr = changelog_content.split(".. _new_section")
-    for i, item in enumerate(arr[:]):
-        if item.strip().endswith("(do not delete this comment)"):
-            # nothing has been added to this section, clear it totally
-            arr[i] = ""
-        else:
-            arr[i] = item.strip() + "\n"
+    content = (WN / "changelog.rst").read_text()
 
-    changelog_content = "\n".join(arr)
+    sections = re.split(r"^\.\. section$", content, flags=re.M)
+
+    # remove void sections and clean other sections
+    header = re.sub(r"(\.\.\n(.*\n)*)", "", sections[0], 0)
+    header = header.strip() + "\n"
+    cleaned_sections = [
+        header,
+    ]
+    for section in sections[1:]:
+        if section.strip().endswith("(do not delete this comment)"):
+            continue
+        content = re.sub(
+            r"(\.\. Add.*\(do not delete this comment\)\n)", "", section, 0
+        )
+        content = content.strip() + "\n"
+        cleaned_sections.append(content)
+
+    changelog_content = "\n".join(cleaned_sections)
     changelog_content = changelog_content.strip() + "\n"  # end of file
-
     changelog_content = changelog_content.replace("{{ revision }}", revision)
 
     if ".dev" in revision:
@@ -196,47 +206,48 @@ def make_release_note_index(revision):
         (WN / f"v{revision}.rst").write_text(changelog_content)
         # void changelog (keep only section titles)
         (WN / "changelog.rst").write_text(
-            """What's new in revision {{ revision }}
+            """
+What's new in revision {{ revision }}
 ---------------------------------------------------------------------------------------
 
 These are the changes in SpectroChemPy-{{ revision }}.
 See :ref:`release` for a full changelog including other versions of SpectroChemPy.
 
 ..
-    Do not remove the `revision` marker. It will be replaced during doc building
-    Add your list of changes between .. (.. Add here..) and (.. _new_section) comments
-    keeping a blank line before and after this block
-    example:
+   Do not remove the `revision` marker. It will be replaced during doc building.
+   Also do not delete the section titles.
+   Add your list of changes between (Add here) and (section) comments
+   keeping a blank line before and after this list.
 
-        - first changes
-        - second change ...
 
-.. _new_section
+.. section
 
 New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
-.. _new_section
+
+.. section
 
 Bug fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
-.. _new_section
+
+.. section
 
 Breaking changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
 
-.. _new_section
+
+.. section
 
 Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
 
-.. EOF
- """
+"""
         )
     # Create the new index.rst file
     files = WN.glob("v*.rst")
