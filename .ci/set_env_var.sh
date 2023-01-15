@@ -24,5 +24,6 @@ echo "$VERSION"
 echo "$DEVSTRING"
 
 ## Export variable in the github environment
+echo "VERSIONSTRING=$LATEST" >> $GITHUB_ENV
 echo "VERSION=$VERSION" >> $GITHUB_ENV
 echo "DEVSTRING=$DEVSTRING" >> $GITHUB_ENV
