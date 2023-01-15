@@ -58,7 +58,7 @@ jobs:
       - name: Install spectrochempy
         run: |
           python3 -m pip install --upgrade pip setuptools wheel
-          python3 -m pip install -e .
+          python3 -m pip install .
 
       - name: Install dependencies for testing
         run: |
@@ -71,8 +71,7 @@ jobs:
           python3 -m pip install xarray
 
       - name: Test with coverage
-        run: |
-          python3 -m pytest tests
+        run: python3 -m pytest tests
           --cov=spectrochempy
           --cov-report=xml
           --cov-config=.coveragerc
