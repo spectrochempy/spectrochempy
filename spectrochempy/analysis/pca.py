@@ -183,8 +183,9 @@ class PCA(HasTraits):
 
     def __str__(self, n_pc=5):
 
-        s = "\nPC\t\tEigenvalue\t\t%variance\t" "%cumulative\n"
-        s += "   \t\tof cov(X)\t\t per PC\t" "     variance\n"
+        s = "\n"
+        s += "PC\tEigenvalue\t\t%variance\t\t%cumulative\n"
+        s += "  \t of cov(X)\t\t   per PC\t\t   variance\n"
 
         n_pc = min(n_pc, len(self.ev.data))
         for i in range(n_pc):
@@ -194,7 +195,7 @@ class PCA(HasTraits):
                 self.ev_ratio.data[i],
                 self.ev_cum.data[i],
             )
-            s += "#{}  \t{:8.3e}\t\t {:6.3f}\t      {:6.3f}\n".format(*tup)
+            s += "#{}\t{:10.3e}\t\t{:9.3f}\t\t{:11.3f}\n".format(*tup)
 
         return s
 

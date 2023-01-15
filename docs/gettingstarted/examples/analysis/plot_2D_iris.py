@@ -147,5 +147,4 @@ iris.plotlcurve(title="L curve, automated search")
 iris.plotdistribution(-2)
 _ = iris.plotmerit(-2)
 
-""
 # scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

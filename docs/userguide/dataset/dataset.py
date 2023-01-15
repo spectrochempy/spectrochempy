@@ -62,17 +62,23 @@ import spectrochempy as scp
 # %% [markdown]
 # As we will make some reference to the
 # **[numpy](https://numpy.org/doc/stable/index.html)** library, we also import it here.
+
+# %%
 import numpy as np
 
 # %% [markdown]
 # We additionally import the three main SpectroChemPy objects that we will use through
 # this tutorial
+
+# %%
 from spectrochempy import Coord, CoordSet, NDDataset
 
 # %% [markdown]
 # For a convenient usage of units, we will also directly import
 # **[ur]((../units/units.ipynb)**, the unit registry which contains all available
 # units.
+
+# %%
 from spectrochempy import ur
 
 # %% [markdown]

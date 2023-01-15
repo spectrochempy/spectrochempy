@@ -10,9 +10,19 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.14.4
 #   kernelspec:
-#     display_name: Python 3
+#     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
+#   language_info:
+#     codemirror_mode:
+#       name: ipython
+#       version: 3
+#     file_extension: .py
+#     mimetype: text/x-python
+#     name: python
+#     nbconvert_exporter: python
+#     pygments_lexer: ipython3
+#     version: 3.10.8
 # ---
 
 # %% [markdown]
@@ -46,14 +56,6 @@ np.sqrt(x)
 # %%
 dx = scp.NDDataset(x)
 np.sqrt(dx)
-
-# %% [markdown]
-# It is worth to note, that in spectrochempy, when can use internal equivalent of these `ufunc`'s.
-#
-# For instance, the square root can be calculated using the following syntax:
-
-# %%
-scp.sqrt(dx)
 
 # %% [markdown]
 # ## List of UFuncs working on `NDDataset`:

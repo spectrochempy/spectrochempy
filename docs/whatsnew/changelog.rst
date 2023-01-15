@@ -13,8 +13,8 @@ New features
 
 - Completed public API reference in documentation
 - Replaced the CHANGELOG.md by a whatsnew folder in the docs.
-  From now all public change in SpectroChemPy code should be reflected
-  in the `docs/whatsnew/unreleased.rst file. Building of the index.rst is automatic.
+  From now all public changes in SpectroChemPy code should be reflected
+  in the `docs/whatsnew/changelog.rst file. Building of the index.rst is automatic.
 
 .. _new_section
 
@@ -22,8 +22,7 @@ Bug fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
-
-
+- many display problems in the documentation pages
 
 .. _new_section
 
@@ -38,13 +37,3 @@ Breaking changes
 Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
-
-
-.. _new_section
-
-Developer's information
-~~~~~~~~~~~~~~~~~~~~~~~
-.. Add here changes in the code  (do not delete this comment)
-
-- The pull-request template has been modified to reflect the latest workflow changes.
-- Coverage analysis in CI is now triggered by the plugin pytest-cov.

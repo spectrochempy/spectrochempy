@@ -33,9 +33,11 @@ dataset1D = dataset1D[0.0:15000.0]
 
 new1, curve1 = scp.sinm(dataset1D, ssb=2, retapod=True, inplace=False)
 
+# %%
 # this is equivalent to
 _ = dataset1D.sinm(ssb=2, retapod=True, inplace=False)
 
+# %%
 # or also
 _ = scp.sp(dataset1D, ssb=2, pow=1, retapod=True, inplace=False)
 
