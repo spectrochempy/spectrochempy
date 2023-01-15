@@ -308,4 +308,5 @@ if __name__ == "__main__":
     if new_revision != "unreleased":
         make_citation(new_revision)
         make_zenodo(new_revision)
+
     make_release_note_index(new_revision)
