@@ -39,12 +39,11 @@ jobs:
       - name: Update version in release notes, .zenodo.json and CITATION.cff
         run: |
           python .ci/update_version_and_release_notes.py ${{ github.event.inputs.versionString }}
-          pre-commit run --all-files
 
       - name: Commit tracked files
         id: make-commit
         run: |
-          git commit -a --no-verify --message "Prepare release ${{ github.event.inputs.versionString }}"
+          git commit -a --message "Prepare release ${{ github.event.inputs.versionString }}"
           echo "commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
 
       - name: Push new branch
