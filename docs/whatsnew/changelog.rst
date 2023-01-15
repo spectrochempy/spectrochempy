@@ -37,6 +37,4 @@ Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
 
-.. EOF (be sure to keep on blank line after this to avoid pre-commit problems
-
- 
+.. EOF
