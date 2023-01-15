@@ -231,12 +231,6 @@ Deprecations
 .. Add here new deprecations (do not delete this comment)
 
 
-.. _new_section
-
-Developer's information
-~~~~~~~~~~~~~~~~~~~~~~~
-.. Add here changes in the code  (do not delete this comment)
-
  """
         )
     # Create the new index.rst file
