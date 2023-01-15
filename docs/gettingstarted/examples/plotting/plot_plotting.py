@@ -7,7 +7,7 @@
 # flake8: noqa
 """
 Introduction to the plotting librairie
-===========================================
+=======================================
 
 
 """
@@ -46,16 +46,16 @@ dataset = dataset[:, ::100]
 datasets = [dataset[0], dataset[10], dataset[20], dataset[50], dataset[53]]
 labels = ["sample {}".format(label) for label in ["S1", "S10", "S20", "S50", "S53"]]
 
-scp.plot_multiple(method="scatter", datasets=datasets, labels=labels, legend="best")
+_ = scp.plot_multiple(method="scatter", datasets=datasets, labels=labels, legend="best")
 
 # %%
 # plot multiple with style
-scp.plot_multiple(
+_ = scp.plot_multiple(
     method="scatter", style="sans", datasets=datasets, labels=labels, legend="best"
 )
 
 # %%
 # check that style reinit to default
-scp.plot_multiple(method="scatter", datasets=datasets, labels=labels, legend="best")
+_ = scp.plot_multiple(method="scatter", datasets=datasets, labels=labels, legend="best")
 
 # scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

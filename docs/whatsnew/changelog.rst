@@ -13,7 +13,7 @@ New features
 
 - Completed public API reference in documentation
 - Replaced the CHANGELOG.md by a whatsnew folder in the docs.
-  From now all public change in SpectroChemPy code should be reflected
+  From now all public changes in SpectroChemPy code should be reflected
   in the `docs/whatsnew/changelog.rst file. Building of the index.rst is automatic.
 
 .. _new_section

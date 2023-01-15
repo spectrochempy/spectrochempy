@@ -23,6 +23,6 @@ print(Z)
 # %%
 # plot it
 
-Z.plot()
+_ = Z.plot()
 
 # scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
