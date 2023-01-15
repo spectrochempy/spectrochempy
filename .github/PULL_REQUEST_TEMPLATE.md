@@ -2,7 +2,7 @@
 
 - [ ] Close the #xxxx (optional)
 - [ ] Tests have been added (mostly required)
-- [ ] `.ci/templates/dependencies.tmpl`file has been updated with new dependencies
+- [ ] `.ci/templates/dependencies.tmpl` file has been updated with new dependencies
 - [ ] User-visible changes (including notable bug fixes) have been documented in `docs/whatsnew/changelog.rst`.
 - [ ] You  have run: `python .ci/update_version_and_release_notes.py` after each changes in `docs/whatsnew/changelog.rst`.
 - [ ] The new API methods have been included in a section of `docs/userguide/reference/index.rst`.

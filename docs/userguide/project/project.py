@@ -165,6 +165,6 @@ _ = proj2.NMR_1D.plot()
 proj2.NMR_2D
 
 # %%
-proj.NMR_2D.plot()
+_ = proj.NMR_2D.plot()
 
 # %%

@@ -29,6 +29,8 @@ traittypes
 xlrd
 pyyaml
 ipywidgets
+widgetsnbextension
+jupyterlab_widgets
 ipympl
 setuptools
 setuptools_scm

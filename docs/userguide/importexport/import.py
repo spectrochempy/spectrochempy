@@ -10,7 +10,7 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.14.4
 #   kernelspec:
-#     display_name: Python 3
+#     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
 #   language_info:
@@ -22,7 +22,9 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.9.0
+#     version: 3.10.8
+#   toc-showcode: false
+#   toc-showtags: false
 #   widgets:
 #     application/vnd.jupyter.widget-state+json:
 #       state: {}
@@ -39,7 +41,6 @@
 # namespace, so that all spectrochempy commands will be called as ``scp.method(<method parameters>)``.
 
 # %%
-
 import spectrochempy as scp
 
 # %% [markdown]
@@ -52,7 +53,6 @@ import spectrochempy as scp
 # in a dropdown field.
 
 # %%
-
 X = scp.read()
 
 # %% [markdown]
@@ -74,7 +74,6 @@ X = scp.read()
 # * the `y` and  `x` dimension sizes:
 
 # %%
-
 print(X)
 
 # %% [markdown]
@@ -90,8 +89,9 @@ print(X)
 # </div>
 
 # %%
-
-X = scp.read_omnic("irdata/subdir")
+X = scp.read_omnic(
+    "irdata/subdir"
+)  # a WARNING is issued when some files are unreadable in the subdir (and thus ignored)
 print(X)
 
 # %% [markdown]
@@ -244,7 +244,6 @@ print(X)
 # time as spectrochempy. By default, `datadir` points in the 'scp_data\testdata' folder of SpectroChemPy:
 
 # %%
-
 DATADIR = scp.preferences.datadir
 DATADIR
 
@@ -252,7 +251,6 @@ DATADIR
 # DATADIR is already a pathlib object and so can be used easily
 
 # %%
-
 X = scp.read_omnic(DATADIR / "wodger.spg")
 
 # %% [markdown]
@@ -285,7 +283,6 @@ X = scp.read_omnic(DATADIR / "wodger.spg")
 #
 
 # %%
-
 datadir = scp.preferences.datadir
 fs = scp.FileSelector(path=datadir, filters=["spg", "spa"])
 fs
@@ -294,5 +291,6 @@ fs
 # After validation of the selection, one can read the path and name of the selected files.
 
 # %%
-
 fs.value, fs.path, fs.fullpath
+
+# %%

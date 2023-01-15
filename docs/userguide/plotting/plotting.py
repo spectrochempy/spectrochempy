@@ -454,16 +454,3 @@ prefs.help("lines_linewidth")
 
 # %%
 prefs.all()
-
-# %% [markdown]
-# ## A last graph for the road and fun...
-
-# %%
-prefs.font.family = "fantasy"
-import matplotlib.pyplot as plt
-
-with plt.xkcd():
-    # print(mpl.rcParams)
-    prefs.lines.linewidth = 2
-    ax = dataset[-1].plot(figsize=(7.5, 4))
-    ax.text(2800.0, 1.5, "A XKCD plot!...")

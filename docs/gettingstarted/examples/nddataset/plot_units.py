@@ -112,5 +112,4 @@ ds.ito("absorbance")
 ds.x.ito("cm^-1")
 _ = ds.plot()
 
-""
 # scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
