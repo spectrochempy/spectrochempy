@@ -1,9 +1,17 @@
 What's new in revision {{ revision }}
 ---------------------------------------------------------------------------------------
-.. do not remove the  `revision` marker. It will be replaced during doc building
 
 These are the changes in SpectroChemPy-{{ revision }}. See :ref:`release` for a full changelog
 including other versions of SpectroChemPy.
+
+..
+    Do not remove the `revision` marker. It will be replaced during doc building
+    Add your list of changes between .. (.. Add here..) and (.. _new_section) comments
+    keeping a blank line before and after this block
+    example:
+
+        - first changes
+        - second change ...
 
 .. _new_section
 
