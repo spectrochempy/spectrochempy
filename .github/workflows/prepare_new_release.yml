@@ -33,6 +33,7 @@ jobs:
 
       - name: Initialize mandatory git config
         run: |
+          git config user.email "github-actions@users.noreply.github.com"
           git config user.name "GitHub Actions"
 
       - name: Update version in release notes, .zenodo.json and CITATION.cff
@@ -42,7 +43,8 @@ jobs:
       - name: Commit tracked files
         id: make-commit
         run: |
-          git commit -a --no-verify --message "Prepare release ${{ github.event.inputs.versionString }}"
+          git add -A
+          git commit --message "Prepare release ${{ github.event.inputs.versionString }}"
           echo "commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
 
       - name: Push new branch
