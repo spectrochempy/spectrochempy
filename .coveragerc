@@ -1,6 +1,6 @@
 [run]
 source =
-    spectrochempy
+    */spectrochempy
 branch = false
 
 [report]
@@ -14,14 +14,4 @@ exclude_lines =
     def __repr__
     if self.debug:
     if settings.DEBUG
-
-omit =
-    */tests/*
-    */docs/*
-    */setup.py
-    */make.py
-    */*checkpoints/*
-    */*conftest.py
-    */config/*
-
 ignore_errors = false

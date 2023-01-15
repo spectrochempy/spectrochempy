@@ -71,8 +71,12 @@ jobs:
           python3 -m pip install xarray
 
       - name: Test with coverage
-        run: |
-          python3 -m pytest tests -m 'not slow'
+        run: python3 -m pytest tests
+          --cov=spectrochempy
+          --cov-report=xml
+          --cov-config=.coveragerc
+          --no-cov-on-fail
+          -m 'not slow'
 
       - name: Code Climate reporting
         if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.10' && matrix.os == 'ubuntu-latest' }}
