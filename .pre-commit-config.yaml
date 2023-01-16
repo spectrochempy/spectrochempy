@@ -32,7 +32,6 @@ repos:
     rev: "v2.0.0"
     hooks:
       - id: autoflake
-        args: ["--in-place", "--ignore-init-module-imports"]
 
   - repo: https://github.com/pycqa/isort
     rev: 5.11.4

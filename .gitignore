@@ -131,3 +131,4 @@ coverage.xml
 essai.py
 /out/
 *dev*.rst
+coverage.json
