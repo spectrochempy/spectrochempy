@@ -62,8 +62,13 @@ jobs:
 
       - name: Install dependencies for testing
         run: |
-          python3 -m pip install pytest pytest-doctestplus pytest-flake8 pytest-cov
-          python3 -m pip install pytest-mock pyfakefs cffconvert
+          python3 -m pip install pytest
+          python3 -m pip install pytest-doctestplus
+          python3 -m pip install pytest-flake8
+          python3 -m pip install pytest-mock
+          python3 -m pip install pyfakefs
+          python3 -m pip install cffconvert
+          python3 -m pip install coverage
           python3 -m pip install numpydoc>=1.2
 
       - name: Install optional libraries needed for tests
@@ -71,12 +76,9 @@ jobs:
           python3 -m pip install xarray
 
       - name: Test with coverage
-        run: python3 -m pytest tests
-          --cov=spectrochempy
-          --cov-report=xml
-          --cov-config=.coveragerc
-          --no-cov-on-fail
-          -m 'not slow'
+        run: |
+          coverage run -m pytest tests
+          coverage xml
 
       - name: Code Climate reporting
         if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.10' && matrix.os == 'ubuntu-latest' }}
