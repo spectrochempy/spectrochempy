@@ -5,8 +5,6 @@ SpectroChemPy
 </h1>
 
 [![Tests Actions Status](https://github.com/spectrochempy/spectrochempy/actions/workflows/test_package.yml/badge.svg)](https://github.com/spectrochempy/spectrochempy/actions)
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/spectrochempy/spectrochempy.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/spectrochempy/spectrochempy/alerts/)
-[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/spectrochempy/spectrochempy.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/spectrochempy/spectrochempy/context:python)
 [![Maintainability](https://api.codeclimate.com/v1/badges/78681bc1aabbb8ca915f/maintainability)](https://codeclimate.com/github/spectrochempy/spectrochempy/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/78681bc1aabbb8ca915f/test_coverage)](https://codeclimate.com/github/spectrochempy/spectrochempy/test_coverage)
 ![Conda](https://img.shields.io/conda/v/spectrocat/spectrochempy)
