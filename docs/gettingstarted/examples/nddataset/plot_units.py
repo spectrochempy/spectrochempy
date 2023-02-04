@@ -74,7 +74,7 @@ x
 try:
     x.to("hour")
 except scp.DimensionalityError as e:
-    scp.error_(e)
+    scp.error_(scp.DimensionalityError, e)
 
 # %%
 # This, of course, also applies to NDDataset.
@@ -94,7 +94,7 @@ _ = ds.plot()
 try:
     ds.x.ito("nanometer")
 except Exception as e:
-    scp.error_(e)
+    scp.error_(Exception, e)
 
 ""
 ds.x = ds.x.to("nanometer")
