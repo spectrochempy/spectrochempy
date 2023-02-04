@@ -133,7 +133,9 @@ x = 10 * ur.meters
 try:
     np.cos(x)
 except scp.DimensionalityError as e:  # catch the error
-    scp.error_(e)  # generate the error message (see API configuration)
+    scp.error_(
+        scp.DimensionalityError, e
+    )  # generate the error message (see API configuration)
 
 # Consistency of the units are checked and errors are generated if quantities have not appropriate units
 # with the math operation...

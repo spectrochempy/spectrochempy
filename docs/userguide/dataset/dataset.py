@@ -426,7 +426,7 @@ d3D.v.has_data, d3D.v.is_empty
 try:
     d3D.x
 except KeyError as e:
-    scp.error_(e)
+    scp.error_(KeyError, e)
 
 # %% [markdown]
 # In some case it can also be useful to get a coordinate from its title instead of its
@@ -619,7 +619,8 @@ try:
     d3D.coordset = [coord0, coord1, coord2]
 except ValueError:
     scp.error_(
-        "Coordinates must be of the same size for a dimension with multiple coordinates"
+        ValueError,
+        "Coordinates must be of the same size for a dimension with multiple coordinates",
     )
 
 # %% [markdown]

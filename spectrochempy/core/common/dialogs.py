@@ -25,7 +25,7 @@ if USE_QT:  # pragma: no cover
         FileDialog = pyqt.QFileDialog
 
     except ImportError as e:
-        error_(e)
+        error_(ImportError, e)
         USE_QT = False
         from tkinter import filedialog
 

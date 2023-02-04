@@ -118,7 +118,7 @@ _ = dataset.plot()
 try:
     dataset.to("meter")
 except DimensionalityError as e:
-    error_(e)
+    error_(DimensionalityError, e)
 
 # %% [markdown]
 # If this is for some reasons something you want to do, you must for the change:
