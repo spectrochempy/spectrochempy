@@ -159,7 +159,7 @@ scp.debug_("this is a debug message!")
 try:
     from spectrochempy import toto
 except ImportError as e:
-    scp.error_("OOPS, THAT'S AN IMPORT ERROR! : %s" % e)
+    scp.error_(ImportError, "OOPS, THAT'S AN IMPORT ERROR! : %s" % e)
 
 # %% [markdown]
 # The error will stop the execution if not caught.

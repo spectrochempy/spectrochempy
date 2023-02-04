@@ -957,6 +957,10 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
         with self._fmtcontext():
             if self.log_level == logging.DEBUG:
                 # print(etype, type(etype))
+                if isinstance(etype, str):
+                    # probably the type was not provided!
+                    evalue = etype
+                    etype = Exception
                 self.log.error(f"{etype.__name__}: {evalue}")
                 if tb:
                     format_exception = traceback.format_tb(tb)
