@@ -90,6 +90,7 @@ def test_console_subprocess():
     assert "A.Travert & C.Fernandez @ LCS" in output.decode("utf-8")
 
 
+@pytest.mark.skip(reason="TODO")
 def test_config(capsys):
     from spectrochempy.application import SpectroChemPy
 

@@ -227,7 +227,7 @@ path.simplify                            : True
 path.simplify_threshold                  : 0.1111111111111111
 path.sketch                              : None
 path.snap                                : True
-pcolor.shading                           : flat
+pcolor.shading                           : auto
 pcolormesh.snap                          : True
 pdf.compression                          : 6
 pdf.fonttype                             : 3

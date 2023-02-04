@@ -190,7 +190,7 @@ class MCRALS(HasTraits):
     _fixedC = Instance(NDDataset, allow_none=True)
     _extOutput = Instance(NDDataset, allow_none=True)
     _St = Instance(NDDataset, allow_none=True)
-    _log = Unicode
+    _log = Unicode()
     _params = Dict()
 
     def __init__(self, dataset, guess, **kwargs):

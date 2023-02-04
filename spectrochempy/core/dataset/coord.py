@@ -955,7 +955,7 @@ class LinearCoord(Coord):
 
     _use_time = Bool(False)
     _show_datapoints = Bool(True)
-    _zpd = Integer
+    _zpd = Integer()
 
     def __init__(self, data=None, offset=0.0, increment=1.0, **kwargs):
 

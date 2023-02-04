@@ -19,7 +19,7 @@ from spectrochempy.utils import check_filename_to_save, pathclean, patterns
 class Exporter(HasTraits):
     # Exporter class
 
-    object = Any
+    object = Any()
 
     def __init__(self):
 

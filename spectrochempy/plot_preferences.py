@@ -60,9 +60,9 @@ class PlotPreferences(MetaConfigurable):
     name = Unicode("PlotPreferences")
     description = Unicode("Options for Matplotlib")
     updated = Bool(False)
-    _groups = Set(Unicode)
-    _subgroups = Set(Unicode)
-    _members = Set(Unicode)
+    _groups = Set(Unicode())
+    _subgroups = Set(Unicode())
+    _members = Set(Unicode())
     # ------------------------------------------------------------------------
     # Configuration entries based on the classic matplotlib style
     # ------------------------------------------------------------------------

@@ -24,82 +24,6 @@ from spectrochempy.utils.optional import import_optional_dependency
 warnings.filterwarnings("ignore")
 
 # ======================================================================================================================
-# logging functions
-# ======================================================================================================================
-
-from spectrochempy.utils import pstr
-import logging
-import inspect
-
-
-def _format_args(*args, **kwargs):
-
-    stg = ""
-    formatter = logging.Formatter(
-        f"[ %(asctime)s - {args[0]}{inspect.stack()[2][3]} ] - %(message)s"
-    )
-    app.log.handlers[1].setFormatter(formatter)
-    if app.log.handlers[0].level == DEBUG:
-        app.log.handlers[0].setFormatter(formatter)
-    else:
-        app.log.handlers[0].setFormatter(logging.Formatter("%(message)s"))
-    for arg in args[1:]:
-        stg += pstr(arg, **kwargs) + " "
-    return stg.replace("\0", "").replace("\n", " ").strip()
-
-
-def print_(*args, **kwargs):
-    """
-    Formatted printing.
-    """
-    stg = _format_args(*args, **kwargs)
-    print(stg)
-
-
-def info_(*args, **kwargs):
-    """
-    Formatted info message.
-    """
-    stg = _format_args("", *args, **kwargs)
-    app.log.info(stg)
-
-
-def debug_(*args, **kwargs):
-    """
-    Formatted debug message.
-    """
-    stg = _format_args("", "DEBUG: ", *args, **kwargs)
-    try:
-        app.log.debug(stg)
-    except NameError:  # pragma: no cover
-        # works only if app if already loaded
-        pass
-
-
-def error_(*args, **kwargs):
-    """
-    Formatted error message.
-    """
-    stg = ""
-    if not isinstance(args[0], str):
-        stg += type(args[0]).__name__ + ": "
-    stg += _format_args("", "ERROR: ", *args, **kwargs)
-    app.log.error(stg)
-
-
-def warning_(*args, **kwargs):
-    """
-    Formatted warning message.
-    """
-    stg = _format_args("", "WARNING: ", *args, **kwargs)
-    warnings.warn(stg)
-    # also write warning in log
-    app.log.warning(stg)
-
-
-__all__ += ["info_", "debug_", "error_", "warning_", "print_"]
-
-# ======================================================================================================================
 # Progress bar
 # ======================================================================================================================
 PBAR_COUNT = 0
@@ -140,9 +64,8 @@ def _pbar_update(close=None):
 # ======================================================================================================================
 
 _pbar_update()
-from spectrochempy.application import SpectroChemPy  # noqa: E402
+from spectrochempy.application import app  # noqa: E402
 
-app = SpectroChemPy()
 __all__ += ["app"]
 
 from spectrochempy.application import (
@@ -159,21 +82,28 @@ from spectrochempy.application import (
     ERROR,
     CRITICAL,
     INFO,
+    error_,
+    warning_,
+    debug_,
+    info_,
+    preferences,
+    plot_preferences,
+    description,
+    long_description,
+    config_dir,
+    config_manager,
+    reset_preferences,
 )  # noqa: E402
-
-preferences = app.preferences
-plot_preferences = app.plot_preferences
-description = app.description
-long_description = app.long_description
-config_manager = app.config_manager
-config_dir = app.config_dir
-reset_preferences = app.reset_preferences
 
 
 # datadir = app.datadir
 
 
 def set_loglevel(level=WARNING):
+    if isinstance(level, str):
+        import logging
+
+        level = getattr(logging, level)
     preferences.log_level = level
 
 
@@ -188,6 +118,10 @@ __all__ += [
     "ERROR",
     "CRITICAL",
     "INFO",
+    "error_",
+    "warning_",
+    "debug_",
+    "info_",
     "preferences",
     "plot_preferences",
     "config_manager",

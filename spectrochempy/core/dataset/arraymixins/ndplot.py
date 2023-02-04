@@ -240,7 +240,8 @@ class PreferencesSet(Meta):
         """
         if stylename.startswith("scpy"):
             error_(
-                "Style name starting with `scpy` are READ-ONLY. Please use an another style name."
+                NameError,
+                "Style name starting with `scpy` are READ-ONLY. Please use an another style name.",
             )
             return
 

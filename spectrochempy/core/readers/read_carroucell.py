@@ -19,7 +19,7 @@ import numpy as np
 import scipy.interpolate
 import xlrd
 
-from spectrochempy.core import info_, print_
+from spectrochempy.core import info_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.importer import Importer, _importer_method
@@ -152,7 +152,7 @@ def _read_carroucell(*args, **kwargs):
     # Now manage temperature
     Tfile = sorted([f for f in os.listdir(directory) if f[-4:].lower() == ".xls"])
     if len(Tfile) == 0:
-        print_("no temperature file")
+        info_("no temperature file")
     elif len(Tfile) > 1:
         warnings.warn("several .xls/.csv files. The temperature will not be read")
     else:

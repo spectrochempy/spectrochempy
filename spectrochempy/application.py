@@ -11,6 +11,7 @@ It also defines
 the default application preferences and IPython magic functions.
 """
 
+import inspect
 import json
 import logging
 import pprint
@@ -18,6 +19,7 @@ import subprocess
 import sys
 import threading
 import time
+import traceback
 import warnings
 from datetime import date, timedelta
 from os import environ
@@ -26,6 +28,7 @@ from pathlib import Path
 import matplotlib as mpl
 import numpy as np
 import requests
+import traitlets as tr
 from IPython import get_ipython
 from IPython.core.error import UsageError
 from IPython.core.interactiveshell import InteractiveShell
@@ -37,19 +40,6 @@ from jinja2 import Template
 from matplotlib import pyplot as plt
 from pkg_resources import DistributionNotFound, get_distribution, parse_version
 from setuptools_scm import get_version
-from traitlets import (
-    Bool,
-    Enum,
-    HasTraits,
-    Instance,
-    Integer,
-    List,
-    Unicode,
-    Union,
-    default,
-    observe,
-    validate,
-)
 from traitlets.config.application import Application
 from traitlets.config.configurable import Config
 from traitlets.config.manager import BaseJSONConfigManager
@@ -60,8 +50,14 @@ from spectrochempy.utils.packages import get_pkg_path
 from spectrochempy.utils.traits import MetaConfigurable
 from spectrochempy.utils.version import Version
 
+# ======================================================================================
+# Setup
+# ======================================================================================
+# --------------------------------------------------------------------------------------
 # set the default style
+# --------------------------------------------------------------------------------------
 plt.style.use(["classic"])
+_START_UP_LOG_LEVEL = environ.get("SCPY_START_UP_LOG_LEVEL", "INFO")
 
 # ------------------------------------------------------------------
 # Log levels
@@ -79,7 +75,7 @@ CRITICAL = logging.CRITICAL
 # ------------------------------------------------------------------
 
 
-def display_info_string(**kwargs):  # pragma: no cover
+def _display_info_string(**kwargs):  # pragma: no cover
     _template = """
     {{widgetcss}}
     <div>
@@ -314,7 +310,7 @@ def _find_or_create_spectrochempy_dir():
     return directory
 
 
-def get_config_dir():
+def _get_config_dir():
     """
     Determines the SpectroChemPy configuration directory name and
     creates the directory if it doesn't exist.
@@ -346,7 +342,7 @@ def get_config_dir():
     return config
 
 
-def get_log_dir():
+def _get_log_dir():
 
     # first look for SCP_LOGS
     logdir = environ.get("SCP_LOGS")
@@ -494,14 +490,14 @@ class SpectroChemPyMagics(Magics):
 # ======================================================================================================================
 
 
-class DataDir(HasTraits):
+class DataDir(tr.HasTraits):
     """
     A class used to determine the path to the testdata directory.
     """
 
-    path = Instance(Path)
+    path = tr.Instance(Path)
 
-    @default("path")
+    @tr.default("path")
     def _get_path_default(self, **kwargs):  # pragma: no cover
 
         super().__init__(**kwargs)
@@ -582,73 +578,76 @@ class GeneralPreferences(MetaConfigurable):
     They should be accessible from the main API.
     """
 
-    name = Unicode("GeneralPreferences")
-    description = Unicode("General options for the SpectroChemPy application")
-    updated = Bool(False)
+    name = tr.Unicode("GeneralPreferences")
+    description = tr.Unicode("General options for the SpectroChemPy application")
+    updated = tr.Bool(False)
 
     # ------------------------------------------------------------------------
     # Configuration entries
     # ------------------------------------------------------------------------
 
     # NON GUI
-    show_info_on_loading = Bool(True, help="Display info on loading").tag(config=True)
-    use_qt = Bool(
+    show_info_on_loading = tr.Bool(True, help="Display info on loading").tag(
+        config=True
+    )
+    use_qt = tr.Bool(
         False,
         help="Use QT for dialog instead of TK which is the default. "
         "If True the PyQt libraries must be installed",
     ).tag(config=True)
 
     # GUI
-    databases_directory = Union(
-        (Instance(Path), Unicode()),
+    databases_directory = tr.Union(
+        (tr.Instance(Path), tr.Unicode()),
         help="Directory where to look for database files such as csv",
     ).tag(config=True, gui=True, kind="folder")
 
-    datadir = Union(
-        (Instance(Path), Unicode()), help="Directory where to look for data by default"
+    datadir = tr.Union(
+        (tr.Instance(Path), tr.Unicode()),
+        help="Directory where to look for data by default",
     ).tag(config=True, gui=True, kind="folder")
 
-    workspace = Union(
-        (Instance(Path), Unicode()), help="Workspace directory by default"
+    workspace = tr.Union(
+        (tr.Instance(Path), tr.Unicode()), help="Workspace directory by default"
     ).tag(config=True, gui=True, kind="folder")
 
     # ------------------------------------------------------------------------
     # Configuration entries
     # ------------------------------------------------------------------------
 
-    autoload_project = Bool(
+    autoload_project = tr.Bool(
         True, help="Automatic loading of the last project at startup"
     ).tag(config=True, gui=True)
 
-    autosave_project = Bool(True, help="Automatic saving of the current project").tag(
-        config=True, gui=True
-    )
+    autosave_project = tr.Bool(
+        True, help="Automatic saving of the current project"
+    ).tag(config=True, gui=True)
 
-    project_directory = Union(
-        (Instance(Path), Unicode()),
+    project_directory = tr.Union(
+        (tr.Instance(Path), tr.Unicode()),
         help="Directory where projects are stored by default",
     ).tag(config=True, kind="folder")
 
-    last_project = Union(
-        (Instance(Path, allow_none=True), Unicode()), help="Last used project"
+    last_project = tr.Union(
+        (tr.Instance(Path, allow_none=True), tr.Unicode()), help="Last used project"
     ).tag(config=True, gui=True, kind="file")
 
-    show_close_dialog = Bool(
+    show_close_dialog = tr.Bool(
         True,
         help="Display the close project dialog project changing or on application exit",
     ).tag(config=True, gui=True)
 
-    csv_delimiter = Enum(
+    csv_delimiter = tr.Enum(
         [",", ";", r"\t", " "], default_value=",", help="CSV data delimiter"
     ).tag(config=True, gui=True)
 
-    check_update_frequency = Enum(
+    check_update_frequency = tr.Enum(
         ["day", "week", "month"],
         default_value="day",
         help="Frequency of checking for update",
     )
 
-    @default("project_directory")
+    @tr.default("project_directory")
     def _get_default_project_directory(self):
         # Determines the SpectroChemPy project directory name and creates the directory if it doesn't exist.
         # This directory is typically ``$HOME/spectrochempy/projects``, but if the SCP_PROJECTS_HOME environment
@@ -669,25 +668,25 @@ class GeneralPreferences(MetaConfigurable):
 
         return pscp
 
-    @default("workspace")
+    @tr.default("workspace")
     def _get_workspace_default(self):
         # the spectra path in package data
         return Path.home()
 
-    @default("databases_directory")
+    @tr.default("databases_directory")
     def _get_databases_directory_default(self):
         # the spectra path in package data
         return pathclean(get_pkg_path("databases", "scp_data"))
 
-    @default("datadir")
+    @tr.default("datadir")
     def _get_default_datadir(self):
         return pathclean(self.parent.datadir.path)
 
-    @observe("datadir")
+    @tr.observe("datadir")
     def _datadir_changed(self, change):
         self.parent.datadir.path = pathclean(change["new"])
 
-    @validate("datadir")
+    @tr.validate("datadir")
     def _data_validate(self, proposal):
         # validation of the datadir attribute
         datadir = proposal["value"]
@@ -695,25 +694,27 @@ class GeneralPreferences(MetaConfigurable):
             datadir = pathclean(datadir)
         return datadir
 
-    @property
-    def log_level(self):
-        """
-        Logging level (int).
-        """
-        return self.parent.log_level
-
-    @log_level.setter
-    def log_level(self, value):
-        if isinstance(value, str):
-            value = getattr(logging, value, None)
-            if value is None:  # pragma: no cover
-                warnings.warn(
-                    "Log level not changed: invalid value given\n"
-                    "string values must be DEBUG, INFO, WARNING, "
-                    "or ERROR"
-                )
-        self.parent.log_level = value
-
+    # @property
+    # def log_level(self):
+    #     """
+    #     Logging level (int).
+    #     """
+    #     return self.parent.log_level
+    #
+    # @log_level.setter
+    # def log_level(self, value):
+    #     if isinstance(value, str):
+    #         value = getattr(logging, value, None)
+    #         if value is None:  # pragma: no cover
+    #             warnings.warn(
+    #                 "Log level not changed: invalid value given\n"
+    #                 "string values must be DEBUG, INFO, WARNING, "
+    #                 "or ERROR"
+    #             )
+    #     self.parent.log_level = value
+    # ----------------------------------------------------------------------------------
+    # Class Initialisation
+    # ----------------------------------------------------------------------------------
     def __init__(self, **kwargs):
         super().__init__(jsonfile="GeneralPreferences", **kwargs)
 
@@ -729,25 +730,25 @@ class SpectroChemPy(Application):
     configuration and more.
     """
 
-    icon = Unicode("scpy.png")
+    icon = tr.Unicode("scpy.png")
     "Icon for the application"
 
-    running = Bool(False)
+    running = tr.Bool(False)
     "Running status of the |scpy| application"
 
-    name = Unicode("SpectroChemPy")
+    name = tr.Unicode("SpectroChemPy")
     "Running name of the application"
 
-    description = Unicode(
+    description = tr.Unicode(
         "SpectroChemPy is a framework for processing, analysing and modelling Spectroscopic data for "
         "Chemistry with Python."
     )
     "Short description of the |scpy| application"
 
-    long_description = Unicode()
+    long_description = tr.Unicode()
     "Long description of the |scpy| application"
 
-    @default("long_description")
+    @tr.default("long_description")
     def _get_long_description(self):
         desc = f"""
 <p><strong>SpectroChemPy</strong> is a framework for processing, analysing and modelling
@@ -772,104 +773,106 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
 
     # Config file setting
     # ------------------------------------------------------------------------
-    _loaded_config_files = List()
+    _loaded_config_files = tr.List()
 
-    reset_config = Bool(False, help="Should we restore a default configuration ?").tag(
-        config=True
-    )
+    reset_config = tr.Bool(
+        False, help="Should we restore a default configuration ?"
+    ).tag(config=True)
     """Flag: True if one wants to reset settings to the original config defaults."""
 
-    config_file_name = Unicode(None, help="Configuration file name").tag(config=True)
+    config_file_name = tr.Unicode(None, help="Configuration file name").tag(config=True)
     """Configuration file name."""
 
-    @default("config_file_name")
+    @tr.default("config_file_name")
     def _get_config_file_name_default(self):
         return str(self.name).lower() + "_cfg"
 
-    config_dir = Instance(Path, help="Set the configuration directory location").tag(
+    config_dir = tr.Instance(Path, help="Set the configuration directory location").tag(
         config=True
     )
     """Configuration directory."""
 
-    @default("config_dir")
+    @tr.default("config_dir")
     def _get_config_dir_default(self):
-        return get_config_dir()
+        return _get_config_dir()
 
-    config_manager = Instance(BaseJSONConfigManager)
+    config_manager = tr.Instance(BaseJSONConfigManager)
 
-    @default("config_manager")
+    @tr.default("config_manager")
     def _get_default_config_manager(self):
         return BaseJSONConfigManager(config_dir=str(self.config_dir))
 
-    debug = Bool(True, help="Set DEBUG mode, with full outputs").tag(config=True)
+    debug = tr.Bool(True, help="Set DEBUG mode, with full outputs").tag(config=True)
     """Flag to set debugging mode."""
 
-    info = Bool(False, help="Set INFO mode, with msg outputs").tag(config=True)
+    info = tr.Bool(False, help="Set INFO mode, with msg outputs").tag(config=True)
     """Flag to set info mode."""
 
-    quiet = Bool(False, help="Set Quiet mode, with minimal outputs").tag(config=True)
+    quiet = tr.Bool(False, help="Set Quiet mode, with minimal outputs").tag(config=True)
     """Flag to set in fully quite mode (even no warnings)."""
 
-    nodisplay = Bool(False, help="Set NO DISPLAY mode, i.e., no graphics outputs").tag(
-        config=True
-    )
+    nodisplay = tr.Bool(
+        False, help="Set NO DISPLAY mode, i.e., no graphics outputs"
+    ).tag(config=True)
     """Flag to set in NO DISPLAY mode."""
 
-    # last_project = Unicode('', help='Last used project').tag(config=True, type='project')
+    # last_project = tr.Unicode('', help='Last used project').tag(config=True, type='project')
     # """Last used project"""
     #
-    # @observe('last_project')
+    # @tr.observe('last_project')
     # def _last_project_changed(self, change):
     #     if change.name in self.traits(config=True):
     #         self.config_manager.update(self.config_file_name, {self.__class__.__name__: {change.name: change.new, }})
 
-    show_config = Bool(help="Dump configuration to stdout at startup").tag(config=True)
+    show_config = tr.Bool(help="Dump configuration to stdout at startup").tag(
+        config=True
+    )
 
-    @observe("show_config")
+    @tr.observe("show_config")
     def _show_config_changed(self, change):
         if change.new:
             self._save_start = self.start
             self.start = self.start_show_config
 
-    show_config_json = Bool(help="Dump configuration to stdout (as JSON)").tag(
+    show_config_json = tr.Bool(help="Dump configuration to stdout (as JSON)").tag(
         config=True
     )
 
-    @observe("show_config_json")
+    @tr.observe("show_config_json")
     def _show_config_json_changed(self, change):
         self.show_config = change.new
 
-    test = Bool(False, help="test flag").tag(config=True)
+    test = tr.Bool(False, help="test flag").tag(config=True)
     """Flag to set the application in testing mode."""
 
-    port = Integer(7000, help="Dash server port").tag(config=True)
+    port = tr.Integer(7000, help="Dash server port").tag(config=True)
     """Dash server port."""
 
     # logger
-    log_format = Unicode(
+    log_format = tr.Unicode(
         "%(highlevel)s %(message)s",
         help="The Logging format template",
     ).tag(config=True)
 
-    logging_config = {
-        "handlers": {
-            "rotatingfile": {
-                "class": "logging.handlers.RotatingFileHandler",
-                "level": "DEBUG",
-                "filename": str(get_log_dir() / "spectrochempy.log"),
-                "maxBytes": 32768,
-                "backupCount": 5,
-            }
-        },
-        "loggers": {
-            "SpectroChemPy": {
-                "level": "DEBUG",
-                # NOTE: if you don't list the default "console"
-                # handler here then it will be disabled
-                "handlers": ["console", "rotatingfile"],
+    logging_config = tr.Dict(
+        {
+            "handlers": {
+                "rotatingfile": {
+                    "class": "logging.handlers.RotatingFileHandler",
+                    "level": "DEBUG",
+                    "filename": str(_get_log_dir() / "spectrochempy.log"),
+                    "maxBytes": 262144,
+                    "backupCount": 5,
+                }
             },
-        },
-    }
+            "loggers": {
+                "SpectroChemPy": {
+                    "level": "DEBUG",
+                    "handlers": ["console", "rotatingfile"],
+                },
+            },
+        }
+    ).tag(config=True)
 
     # Command line interface
     # ------------------------------------------------------------------------
@@ -920,7 +923,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
         ),
     )
 
-    classes = List(
+    classes = tr.List(
         [
             GeneralPreferences,
             PlotPreferences,
@@ -928,93 +931,48 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
         ]
     )
 
-    # ------------------------------------------------------------------------
-    # Initialisation of the application
-    # ------------------------------------------------------------------------
+    _from_warning_ = tr.Bool(False)
 
+    # ----------------------------------------------------------------------------------
+    # Initialisation of the application
+    # ----------------------------------------------------------------------------------
     def __init__(self, **kwargs):
 
         super().__init__(**kwargs)
+        log_level = kwargs.pop("log_level", None)
+        self.debug_("*" * 40)
         self.initialize()
+        if log_level is not None:
+            self.log_level = log_level
 
-    def initialize(self, argv=None):
-        """
-        Initialisation function for the API applications.
+    def _ipython_catch_exceptions(self, shell, etype, evalue, tb, tb_offset=None):
+        # output the full traceback only in DEBUG mode
+        if self.log_level == logging.DEBUG:
+            shell.showtraceback((etype, evalue, tb), tb_offset=tb_offset)
+        else:
+            self.log.error(f"{etype.__name__}: {evalue}")
 
-        Parameters
-        ----------
-        argv :  List, [optional].
-            List of configuration parameters.
-        """
+    def _catch_exceptions(self, etype, evalue, tb=None):
+        # output the full traceback only in DEBUG mode
+        with self._fmtcontext():
+            if self.log_level == logging.DEBUG:
+                # print(etype, type(etype))
+                self.log.error(f"{etype.__name__}: {evalue}")
+                if tb:
+                    format_exception = traceback.format_tb(tb)
+                    for line in format_exception:
+                        parts = line.splitlines()
+                        for p in parts:
+                            self.log.error(p)
+            else:
+                self.log.error(f"{etype.__name__}: {evalue}")
 
-        # parse the argv
-        # --------------------------------------------------------------------
-
-        # if we are running this under ipython and jupyter notebooks
-        # deactivate potential command line arguments
-        # (such that those from jupyter which cause problems here)
-
-        in_python = False
-        if InteractiveShell.initialized():
-            in_python = True
-
-        if not in_python:
-            # remove argument not known by spectrochempy
-            if (
-                "make.py" in sys.argv[0]
-                or "pytest" in sys.argv[0]
-                or "validate_docstrings" in sys.argv[0]
-            ):  # building docs
-                options = []
-                for item in sys.argv[:]:
-                    for k in list(self.flags.keys()):
-                        if item.startswith("--" + k) or k in ["--help", "--help-all"]:
-                            options.append(item)
-                        continue
-                    for k in list(self.aliases.keys()):
-                        if item.startswith("-" + k) or k in [
-                            "h",
-                        ]:
-                            options.append(item)
-                self.parse_command_line(options)
-            else:  # pragma: no cover
-                self.parse_command_line(sys.argv)
-
-        # Get preferences from the config file and init everything
-        # ---------------------------------------------------------------------
-
-        self._init_all_preferences()
-
-        # we catch warnings and error for a lighter display to the end-user.
-        # except if we are in debugging mode
-
-        # warning handler
-        # --------------------------------------------------------------------
-        def send_warnings_to_log(message, category):
-            self.log.warning(f"{category.__name__} - {message}")
-
-        warnings.showwarning = send_warnings_to_log
-
-        # exception handler
-        # --------------------------------------------------------------------
-
-        if in_python:  # pragma: no cover
-
-            ipy = get_ipython()
-
-            def _custom_exc(shell, etype, evalue, tb, tb_offset=None):
-
-                if self.log_level == logging.DEBUG:
-                    shell.showtraceback((etype, evalue, tb), tb_offset=tb_offset)
-                else:
-                    self.log.error(f"{etype.__name__}: {evalue}")
-
-            ipy.set_custom_exc((Exception,), _custom_exc)
-
-            # load our custom magic extensions
-            # --------------------------------------------------------------------
-            if ipy is not None:
-                ipy.register_magics(SpectroChemPyMagics)
+    def _custom_warning(
+        self, message, category, filename, lineno, file=None, line=None
+    ):
+        with self._fmtcontext():
+            self._formatter(message)
+            self.log.warning(f"({category.__name__}) {message}")
 
     def _init_all_preferences(self):
 
@@ -1093,6 +1051,82 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
         # now run the actual start function
         return self._start()
 
+    # ----------------------------------------------------------------------------------
+    # Public methods and properties
+    # ----------------------------------------------------------------------------------
+    def initialize(self, argv=None):
+        """
+        Initialisation function for the API applications.
+
+        Parameters
+        ----------
+        argv :  List, [optional].
+            List of configuration parameters.
+        """
+
+        # parse the argv
+        # --------------------------------------------------------------------
+
+        # if we are running this under ipython and jupyter notebooks
+        # deactivate potential command line arguments
+        # (such that those from jupyter which cause problems here)
+
+        ipy = get_ipython() if InteractiveShell.initialized() else None
+
+        if ipy is None:
+            # remove argument not known by spectrochempy
+            if (
+                "make.py" in sys.argv[0]
+                or "pytest" in sys.argv[0]
+                or "validate_docstrings" in sys.argv[0]
+            ):  # building docs
+                options = []
+                for item in sys.argv[:]:
+                    for k in list(self.flags.keys()):
+                        if item.startswith("--" + k) or k in ["--help", "--help-all"]:
+                            options.append(item)
+                        continue
+                    for k in list(self.aliases.keys()):
+                        if item.startswith("-" + k) or k in [
+                            "h",
+                        ]:
+                            options.append(item)
+                self.parse_command_line(options)
+            else:  # pragma: no cover
+                self.parse_command_line(sys.argv)
+
+        # Get preferences from the config file and init everything
+        # ---------------------------------------------------------------------
+
+        self._init_all_preferences()
+
+        # we catch warnings and error for a lighter display to the end-user.
+        # except if we are in debugging mode
+
+        # warning handler
+        # --------------------------------------------------------------------
+        def send_warnings_to_log(message, category):
+            self.log.warning(f"{category.__name__} - {message}")
+
+        warnings.showwarning = send_warnings_to_log
+
+        # Warning handler
+        # we catch warnings and error for a lighter display to the end-user.
+        # except if we are in debugging mode
+
+        warnings.showwarning = self._custom_warning
+
+        # exception handler
+        if ipy is not None:  # pragma: no cover
+            ipy.set_custom_exc((Exception,), self._ipython_catch_exceptions)
+        else:
+            sys.excepthook = self._catch_exceptions
+
+            # load our custom magic extensions
+            # --------------------------------------------------------------------
+            if ipy is not None:
+                ipy.register_magics(SpectroChemPyMagics)
+
     def reset_preferences(self):
         """
         Reset all preferences to default.
@@ -1116,6 +1150,72 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
 
         return self._start()
 
+    from contextlib import contextmanager
+
+    @contextmanager
+    def _fmtcontext(self):
+        fmt = self.log_format, self.log.handlers[1].formatter
+        try:
+            yield fmt
+        finally:
+            self.log_format = fmt[0]
+            self.log.handlers[1].setFormatter(fmt[1])
+
+    def info_(self, msg, *args, **kwargs):
+        """
+        Formatted info message.
+        """
+        with self._fmtcontext():
+            self._formatter(msg)
+            self.log.info(msg, *args, **kwargs)
+
+    def debug_(self, msg, *args, **kwargs):
+        """
+        Formatted debug message.
+        """
+        with self._fmtcontext():
+            self._formatter(msg)
+            self.log.debug("DEBUG | " + msg, *args, **kwargs)
+
+    def error_(self, *args, **kwargs):
+        """
+        Formatted error message.
+        """
+        etype = args[0] if args else kwargs.get("type", None)
+        emessage = args[1] if args and len(args) > 1 else kwargs.get("message", None)
+        self._catch_exceptions(etype, emessage, None)
+
+    def warning_(self, msg, *args, **kwargs):
+        """
+        Formatted warning message.
+        """
+        self._from_warning_ = True
+        warnings.warn(msg, *args, **kwargs)
+        self._from_warning_ = False
+
+    def _formatter(self, *args):
+        # We need a custom formatter (maybe there is a better way to do this suing
+        # the logging library directly?)
+
+        rootfolder = Path(__file__).parent
+        st = 2
+        if "_showwarnmsg" in inspect.stack()[2][3]:
+            st = 4 if self._from_warning_ else 3
+
+        filename = Path(inspect.stack()[st][1])
+        try:
+            module = filename.relative_to(rootfolder)
+        except ValueError:
+            module = filename
+        line = inspect.stack()[st][2]
+        func = inspect.stack()[st][3]
+
+        # rotatingfilehandler formatter (DEBUG)
+        formatter = logging.Formatter(
+            f"<%(asctime)s:{module}/{func}::{line}> %(highlevel)s %(message)s"
+        )
+        self.log.handlers[1].setFormatter(formatter)
+
     # ------------------------------------------------------------------------
     # Private methods
     # ------------------------------------------------------------------------
@@ -1132,11 +1232,11 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
             )
             ipy = get_ipython()
             if ipy is not None and "TerminalInteractiveShell" not in str(ipy):
-                display_info_string(message=info_string.strip())
+                _display_info_string(message=info_string.strip())
 
             else:
                 if "/bin/scpy" not in sys.argv[0]:  # deactivate for console scripts
-                    print(info_string.strip())
+                    info_(info_string.strip())
 
         # force update of rcParams
         for rckey in mpl.rcParams.keys():
@@ -1160,7 +1260,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
         if msg:
             self.log.warning(msg)
 
-        self.log.info("\n\nAPI loaded - application is ready")
+        debug_("API loaded - application is ready")
         return True
 
     def _make_default_config_file(self):
@@ -1175,22 +1275,24 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
             with open(fname, "w") as fil:
                 fil.write(sfil)
 
-    # ------------------------------------------------------------------------
-    # Events from Application
-    # ------------------------------------------------------------------------
 
-    @observe("log_level")
-    def _log_level_changed(self, change):
+# ======================================================================================
+# Start instance od Spectrochempy and expose public members in all
+# ======================================================================================
 
-        # log file
-        self.log.setLevel(change.new)
-        self.log.handlers[0].setLevel(change.new)
-        self.log.handlers[1].setLevel(DEBUG)
-
-        self.log.info(
-            f"changed default log_level to {logging.getLevelName(change.new)}"
-        )
-
+app = SpectroChemPy(log_level=_START_UP_LOG_LEVEL)
+preferences = app.preferences
+error_ = app.error_
+warning_ = app.warning_
+info_ = app.info_
+debug_ = app.debug_
+preferences = app.preferences
+plot_preferences = app.plot_preferences
+description = app.description
+long_description = app.long_description
+config_manager = app.config_manager
+config_dir = app.config_dir
+reset_preferences = app.reset_preferences
 
 # ======================================================================================================================
 

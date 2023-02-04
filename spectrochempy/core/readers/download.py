@@ -48,7 +48,7 @@ def download_iris():
         connection = True
         response = requests.get(url, stream=True, timeout=10)
     except OSError:
-        error_("OSError: Cannot connect to the UCI repository. Try Scikit-Learn")
+        error_(OSError, "Cannot connect to the UCI repository. Try Scikit-Learn")
         connection = False
 
     if connection:  # Download data
@@ -160,7 +160,7 @@ def download_nist_ir(CAS, index="all"):
                 return None
 
         if len(index) == 0:
-            error_("NIST IR: no spectrum found")
+            error_(IOError, "NIST IR: no spectrum found")
             return
         elif len(index) == 1:
             info_("NIST IR: 1 spectrum found")
@@ -180,7 +180,9 @@ def download_nist_ir(CAS, index="all"):
         try:
             response = requests.get(url, stream=True, timeout=10)
             if b"Spectrum not found" in response.content[:30]:
-                error_(f"NIST IR: Spectrum {i} does not exist... please check !")
+                error_(
+                    IOError, f"NIST IR: Spectrum {i} does not exist... please check !"
+                )
                 if i == index[-1] and out == []:
                     return None
                 else:
@@ -206,7 +208,7 @@ def download_nist_ir(CAS, index="all"):
             (Path(".") / "temp.jdx").unlink()
 
         except Exception:
-            raise OSError(
+            raise IOError(
                 "Can't read this JCAMP file: please report the issue to Spectrochempy developpers"
             )
 

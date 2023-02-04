@@ -33,7 +33,7 @@ from traitlets import (
 )
 from traittypes import Array
 
-from spectrochempy.core import error_, info_, print_
+from spectrochempy.core import error_, info_
 from spectrochempy.core.common.meta import Meta
 from spectrochempy.core.units import (
     DimensionalityError,
@@ -378,8 +378,9 @@ class NDArray(HasTraits):
 
         if new.is_empty:
             error_(
+                IndexError,
                 f"Empty array of shape {new._data.shape} resulted from slicing.\n"
-                f"Check the indexes and make sure to use floats for location slicing"
+                f"Check the indexes and make sure to use floats for location slicing",
             )
             new = None
 
@@ -403,7 +404,7 @@ class NDArray(HasTraits):
     def __iter__(self):
         # iterate on the first dimension
         if self.ndim == 0:
-            error_("iteration over a 0-d array is not possible")
+            error_(ValueError, "iteration over a 0-d array is not possible")
             return None
 
         for n in range(len(self)):
@@ -713,7 +714,7 @@ class NDArray(HasTraits):
                 # get the index of a given values
                 error = None
                 if np.all(loc > data.max()) or np.all(loc < data.min()):
-                    print_(
+                    info_(
                         f"This coordinate ({loc}) is outside the axis limits ({data.min()}-{data.max()}).\n"
                         f"The closest limit index is returned"
                     )

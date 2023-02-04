@@ -36,7 +36,7 @@ def test_coord():
     assert not a.is_labeled
     assert a.units is None
     assert a.unitless
-    debug_(a.meta)
+    debug_(repr(a.meta))
     assert not a.meta
     assert a.name == "x"
 

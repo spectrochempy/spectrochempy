@@ -526,7 +526,7 @@ def test_nddataset_slicing_out_limits(caplog, ds1):
     assert y2 is None  # as we are out of limits
     assert caplog.records[-1].levelname == "ERROR"
     assert caplog.records[-1].message.startswith(
-        "ERROR: Empty array of shape (0, 100, 3) resulted from slicing."
+        "IndexError: Empty array of shape (0, 100, 3) resulted from slicing."
     )
     y3 = da[:, 95:105]
     assert str(y3) == "NDDataset: [float64] a.u. (shape: (z:10, y:5, x:3))"
@@ -534,7 +534,7 @@ def test_nddataset_slicing_out_limits(caplog, ds1):
     assert y2 is None  # as we are out of limits
     assert caplog.records[-1].levelname == "ERROR"
     assert caplog.records[-1].message.startswith(
-        "ERROR: Empty array of shape (0, 100, 3) resulted from slicing."
+        "IndexError: Empty array of shape (0, 100, 3) resulted from slicing."
     )
     y5 = da[5000.0:3000.0]
     assert str(y5) == "NDDataset: [float64] a.u. (shape: (z:4, y:100, x:3))"
