@@ -1216,7 +1216,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
 
         # rotatingfilehandler formatter (DEBUG)
         formatter = logging.Formatter(
-            f"<%(asctime)s:{module}/{func}::{line}> %(highlevel)s %(message)s"
+            f"<%(asctime)s:{module}/{func}::{line}> %(message)s"
         )
         self.log.handlers[1].setFormatter(formatter)
 
