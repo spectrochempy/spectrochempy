@@ -80,7 +80,7 @@ _ = scp.multiplot_map(
 try:
     nd2 + nd4
 except Exception as e:
-    scp.error_(str(e) + " Cannot add unaligned datasets.")
+    scp.error_(Exception, str(e) + " Cannot add unaligned datasets.")
 
 # %% [markdown]
 # Let try to align them, in the `y` dimension (*i.e.* the first) as this the one which differ in size.
@@ -126,7 +126,7 @@ _ = scp.multiplot_map(
 try:
     nd1 + nd2
 except Exception as e:
-    scp.error_(str(e) + " Cannot add unaligned datasets.")
+    scp.error_(Exception, str(e) + " Cannot add unaligned datasets.")
 
 # %%
 nd1a, nd2a = scp.align(nd1, nd2, dim="x", method="outer")

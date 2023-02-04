@@ -2207,7 +2207,8 @@ class NDMath(object):
             func, target = func
             if target in kwargs:
                 error_(
-                    f"{target} is both the pipe target and a keyword argument. Operation not applied!"
+                    Exception,
+                    f"{target} is both the pipe target and a keyword argument. Operation not applied!",
                 )
                 return self
             kwargs[target] = self

@@ -266,7 +266,7 @@ x = scp.NDDataset(np.arange(5), units="m")
 try:
     np.exp(x)  # A dimensionality error will be generated
 except DimensionalityError as e:
-    error_(e)
+    error_(DimensionalityError, e)
 
 # %% [markdown]
 # ##### exp2

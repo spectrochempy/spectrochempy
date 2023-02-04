@@ -613,8 +613,9 @@ class Coord(NDMath, NDArray):
 
         if new.is_empty:
             error_(
+                IndexError,
                 f"Empty array of shape {new._data.shape} resulted from slicing.\n"
-                f"Check the indexes and make sure to use floats for location slicing"
+                f"Check the indexes and make sure to use floats for location slicing",
             )
             new = None
 
@@ -628,7 +629,7 @@ class Coord(NDMath, NDArray):
     def __setitem__(self, items, value):
 
         if self.linear:
-            error_("Linearly defined array are readonly")
+            error_(Exception, "Linearly defined array are readonly")
             return
 
         super().__setitem__(items, value)
@@ -693,7 +694,7 @@ class Coord(NDMath, NDArray):
         self._linear = False  # to avoid action of the observer
 
         if self._squeeze_ndim > 1:
-            error_("Linearization is only implemented for 1D data")
+            error_(NotImplementedError, "Linearization is only implemented for 1D data")
             return
 
         data = self._data.squeeze()

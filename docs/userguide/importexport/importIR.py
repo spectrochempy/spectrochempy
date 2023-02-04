@@ -409,7 +409,7 @@ print(f"Max relative difference in wavenumber: {max_rel_error:.3g}")
 try:
     S0 - newS0
 except Exception as e:
-    scp.error_(e)
+    scp.error_(Exception, e)
 
 # %% [markdown]
 # returns an error because of the small shift of coordinates. We will see in another tutorial how to re-align datasets

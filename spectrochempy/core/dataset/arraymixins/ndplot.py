@@ -68,7 +68,7 @@ class PreferencesSet(Meta):
                 res = super().__getitem__(key)
                 if res is None:
                     error_(
-                        f"not found {key}"
+                        KeyError, f"not found {key}"
                     )  # key = key.replace('_','.').replace('...', '_').replace('..',
                     # '-')  #  # res = mpl.rcParams[key]
 
@@ -98,7 +98,7 @@ class PreferencesSet(Meta):
                 setattr(plot_preferences, newkey, value)
                 self.parent[newkey] = value
             else:
-                error_(f"not found {key}")
+                error_(KeyError, f"not found {key}")
             return
 
         super().__setitem__(key, value)
@@ -435,8 +435,9 @@ class NDPlot(HasTraits):
             if _plotter is None:
                 # no plotter found
                 error_(
+                    NameError,
                     "The specified plotter for method "
-                    "`{}` was not found!".format(method)
+                    "`{}` was not found!".format(method),
                 )
                 raise IOError
         else:
@@ -466,7 +467,7 @@ class NDPlot(HasTraits):
             ax = plot_3D(self, **kwargs)
 
         else:
-            error_("Cannot guess an adequate plotter, nothing done!")
+            error_(Exception, "Cannot guess an adequate plotter, nothing done!")
             return False
 
         return ax
