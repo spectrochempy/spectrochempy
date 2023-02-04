@@ -72,7 +72,7 @@ class Project(AbstractProject, NDIO):
     _name = Unicode(allow_none=True)
 
     _parent = This()
-    _projects = Dict(This)
+    _projects = Dict(This())
     _datasets = Dict(Instance(NDDataset))
     _scripts = Dict(Instance(Script))
     _others = Dict()

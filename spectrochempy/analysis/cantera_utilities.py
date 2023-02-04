@@ -39,7 +39,8 @@ ct = import_optional_dependency("cantera", errors="ignore")
 def _cantera_is_not_available():
     if ct is None:
         error_(
-            "Missing optional dependency 'cantera'.  Use conda or pip to install cantera."
+            ImportError,
+            "Missing optional dependency 'cantera'.  Use conda or pip to install cantera.",
         )
     return ct is None
 

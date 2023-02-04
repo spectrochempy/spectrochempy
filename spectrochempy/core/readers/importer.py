@@ -69,14 +69,14 @@ ALIAS = [
 class Importer(HasTraits):
     # Private _Importer class
 
-    objtype = Type
-    datasets = List
-    files = Dict
-    default_key = Unicode
-    protocol = Unicode
+    objtype = Type()
+    datasets = List()
+    files = Dict()
+    default_key = Unicode()
+    protocol = Unicode()
 
-    protocols = Dict
-    filetypes = Dict
+    protocols = Dict()
+    filetypes = Dict()
 
     def __init__(self):
 

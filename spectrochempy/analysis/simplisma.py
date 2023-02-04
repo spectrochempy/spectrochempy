@@ -63,7 +63,7 @@ class SIMPLISMA(HasTraits):
     _X = Instance(NDDataset)
     _Pt = Instance(NDDataset)
     _s = Instance(NDDataset)
-    _logs = Unicode
+    _logs = Unicode()
 
     def __init__(self, dataset, **kwargs):
 

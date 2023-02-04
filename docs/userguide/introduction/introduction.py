@@ -129,12 +129,6 @@ nd = NDDataset.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
 print(nd)
 
 # %% [markdown]
-# A much Longer (and colored) information text can be obtained using the spectrochempy provided ``print_`` function.
-
-# %%
-scp.print_(nd)
-
-# %% [markdown]
 # * **Displaying html**, inside a jupyter notebook, by just typing the name of the dataset (must be the last
 # instruction of a cell, however!)
 

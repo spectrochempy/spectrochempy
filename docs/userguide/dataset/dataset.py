@@ -128,15 +128,11 @@ d1D
 #  (with an underscore) and not the usual python
 #  function `print`. As you can see below, the `print` function only gives a short
 #  summary of the information,
-#  while the `print_` method gives more detailed output
 #
 # </div>
 
 # %%
 print(d1D)
-
-# %%
-scp.print_(d1D)
 
 # %%
 _ = d1D.plot(figsize=(3, 2))
