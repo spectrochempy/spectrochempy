@@ -117,20 +117,6 @@ d1D = NDDataset(
 )
 d1D
 
-# %% [markdown]
-# <div class='alert alert-info'>
-#     <b>Note</b>
-#
-#  In the above code, run in a notebook, the output of d1D is in html for a nice
-#  display.
-#
-#  To get the same effect, from a console script, one can use `print_`
-#  (with an underscore) and not the usual python
-#  function `print`. As you can see below, the `print` function only gives a short
-#  summary of the information,
-#
-# </div>
-
 # %%
 print(d1D)
 
