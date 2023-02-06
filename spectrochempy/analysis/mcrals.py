@@ -436,7 +436,7 @@ class MCRALS(HasTraits):
                 extOutput = getConc(*argsGetConc)
                 if isinstance(extOutput, tuple):
                     fixedC = extOutput[0]
-                    argsGetConc = extOutput[1:]
+                    argsGetConc = extOutput
                 else:
                     fixedC = extOutput
 
