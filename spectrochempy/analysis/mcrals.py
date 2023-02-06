@@ -129,11 +129,11 @@ class MCRALS(HasTraits):
         ```
         getC(*args) -> (hardC, out2, out3, ...)
         ```
-        where *args are the parameters needed to completely specify the function. `harC` is a nadarray or NDDataset
+        where *args are the parameters needed to completely specify the function. `hardC` is a nadarray or NDDataset
         of shape `(C.y, len(hardConc)`, and `out1`, `out2`, ... are supplementary outputs returned by the function.
 
     argsGetC : tuple, optional
-        Extra arguments passed to the external function.
+        Arguments passed to the external function.
 
     hardC_to_C_idx : None or list or tuple, default None
         Indicates the correspondence between the indexes of the columns of hardC and of the C matrix. [1, None, 0]
@@ -188,7 +188,6 @@ class MCRALS(HasTraits):
     _X = Instance(NDDataset)
     _C = Instance(NDDataset, allow_none=True)
     _fixedC = Instance(NDDataset, allow_none=True)
-    _extOutput = Instance(NDDataset, allow_none=True)
     _St = Instance(NDDataset, allow_none=True)
     _log = Unicode()
     _params = Dict()
@@ -435,9 +434,9 @@ class MCRALS(HasTraits):
             # ------------------------------------------
             if hardConc is not None:
                 extOutput = getConc(*argsGetConc)
-                if isinstance(extOutput, dict):
-                    fixedC = extOutput["concentrations"]
-                    argsGetConc = extOutput["new_args"]
+                if isinstance(extOutput, tuple):
+                    fixedC = extOutput[0]
+                    argsGetConc = extOutput[1:]
                 else:
                     fixedC = extOutput
 
@@ -582,7 +581,7 @@ class MCRALS(HasTraits):
     @property
     def extOutput(self):
         """
-        The last output of the external function used to get.
+        The last output of the external function used to get concentrations.
         """
         return self._extOutput
 
