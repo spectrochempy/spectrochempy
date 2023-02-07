@@ -123,17 +123,26 @@ class MCRALS(HasTraits):
     getC : Callable
         An external function that will provide `len(hardConc)` concentration profiles:
         ```
-        getC(*args) -> hardC
+        getC(Ccurr, *argsGetC, **kwargsGetC) -> hardC
         ```
         or:
         ```
-        getC(*args) -> (hardC, out2, out3, ...)
+        getC(Ccurr, *argsGetC, **kwargsGetC) -> hardC, newArgsGetC
         ```
-        where *args are the parameters needed to completely specify the function. `harC` is a nadarray or NDDataset
-        of shape `(C.y, len(hardConc)`, and `out1`, `out2`, ... are supplementary outputs returned by the function.
+        or:
+        ```
+        getC(Ccurr, *argsGetCn, **kargsGetC) -> hardC, newArgsGetC, extOutput
+        ```
+        where Ccurr  is the current C martrix, *argsGetC are the parameters needed to completely specify the function. `hardC` is a nadarray or NDDataset
+        of shape `(C.y, len(hardConc)`, newArgsGetC are the updated parameters for the next iteration (can be None), and
+        extOutput can be any relevant output to be kept in extOutput attribute (only the last iteration extOutput is
+        kept)
 
-    argsGetC : tuple, optional
-        Extra arguments passed to the external function.
+    argsGetConc : tuple, optional
+        supplementary positional arguments passed to the external function.
+
+    kwargsGetConc: tuple, optional
+        supplementary keyword arguments passed to the external function
 
     hardC_to_C_idx : None or list or tuple, default None
         Indicates the correspondence between the indexes of the columns of hardC and of the C matrix. [1, None, 0]
@@ -187,14 +196,11 @@ class MCRALS(HasTraits):
 
     _X = Instance(NDDataset)
     _C = Instance(NDDataset, allow_none=True)
-    _fixedC = Instance(NDDataset, allow_none=True)
-    _extOutput = Instance(NDDataset, allow_none=True)
     _St = Instance(NDDataset, allow_none=True)
     _log = Unicode()
     _params = Dict()
 
     def __init__(self, dataset, guess, **kwargs):
-
         # list all default arguments:
 
         tol = kwargs.get("tol", 0.1)
@@ -229,6 +235,7 @@ class MCRALS(HasTraits):
         hardConc = kwargs.get("hardConc", None)
         getConc = kwargs.get("getConc", None)
         argsGetConc = kwargs.get("argsGetConc", None)
+        kwargsGetConc = kwargs.get("kwargsGetConc", None)
         hardC_to_C_idx = kwargs.get("hardC_to_C_idx", "default")
 
         unimodSpec = kwargs.get("unimodSpec", None)
@@ -378,7 +385,6 @@ class MCRALS(HasTraits):
         info_(logentry)
 
         while change >= tol and niter < maxit and ndiv < maxdiv:
-
             C.data = np.linalg.lstsq(St.data.T, X.data.T, rcond=None)[0].T
             niter += 1
 
@@ -434,16 +440,25 @@ class MCRALS(HasTraits):
             # external concentration profiles
             # ------------------------------------------
             if hardConc is not None:
-                extOutput = getConc(*argsGetConc)
-                if isinstance(extOutput, dict):
-                    fixedC = extOutput["concentrations"]
-                    argsGetConc = extOutput["new_args"]
+                if kwargsGetConc is not None and argsGetConc is not None:
+                    output = getConc(C, *argsGetConc, **kwargsGetConc)
+                elif kwargsGetConc is None and argsGetConc is not None:
+                    output = getConc(C, *argsGetConc)
+                elif kwargsGetConc is not None and argsGetConc is None:
+                    output = getConc(C, **kwargsGetConc)
                 else:
-                    fixedC = extOutput
+                    output = getConc(C)
+                if isinstance(output, tuple):
+                    fixedC = output[0]
+                    argsGetConc = output[1]
+                    if len(output) == 3:
+                        extOutput = output[2]
+                else:
+                    fixedC = output
 
                 C.data[:, hardConc] = fixedC[:, hardC_to_C_idx]
 
-            # stores C in C_hard
+            # stores C in Chard
             Chard = C.copy()
 
             # compute St
@@ -553,10 +568,8 @@ class MCRALS(HasTraits):
 
         self._C = C
         if hardConc is not None:
-            self._fixedC = fixedC
             self._extOutput = extOutput
         else:
-            self._fixedC = None
             self._extOutput = None
 
         self._St = St
@@ -573,16 +586,9 @@ class MCRALS(HasTraits):
         return self._X
 
     @property
-    def fixedC(self):
-        """
-        The last concentration profiles including external profiles.
-        """
-        return self._fixedC
-
-    @property
     def extOutput(self):
         """
-        The last output of the external function used to get.
+        The last output of the external function used to get concentrations.
         """
         return self._extOutput
 
