@@ -123,14 +123,20 @@ class MCRALS(HasTraits):
     getC : Callable
         An external function that will provide `len(hardConc)` concentration profiles:
         ```
-        getC(*args) -> hardC
+        getC(*argsGetC) -> hardC
         ```
         or:
         ```
-        getC(*args) -> (hardC, out2, out3, ...)
+        getC(*argsGetC) -> hardC, newArgsGetC
         ```
-        where *args are the parameters needed to completely specify the function. `hardC` is a nadarray or NDDataset
-        of shape `(C.y, len(hardConc)`, and `out1`, `out2`, ... are supplementary outputs returned by the function.
+        or:
+        ```
+        getC(*argsGetC) -> hardC, newArgsGetC, extOutput
+        ```
+        where *argsGetC are the parameters needed to completely specify the function. `hardC` is a nadarray or NDDataset
+        of shape `(C.y, len(hardConc)`, newArgsGetC are the updated parameters for the next iteration (can be None), and
+        extOutput can be any relevant output to be kept in extOutput attribute (only the last iteration extOutput is
+        kept)
 
     argsGetC : tuple, optional
         Arguments passed to the external function.
@@ -187,13 +193,11 @@ class MCRALS(HasTraits):
 
     _X = Instance(NDDataset)
     _C = Instance(NDDataset, allow_none=True)
-    _fixedC = Instance(NDDataset, allow_none=True)
     _St = Instance(NDDataset, allow_none=True)
     _log = Unicode()
     _params = Dict()
 
     def __init__(self, dataset, guess, **kwargs):
-
         # list all default arguments:
 
         tol = kwargs.get("tol", 0.1)
@@ -377,7 +381,6 @@ class MCRALS(HasTraits):
         info_(logentry)
 
         while change >= tol and niter < maxit and ndiv < maxdiv:
-
             C.data = np.linalg.lstsq(St.data.T, X.data.T, rcond=None)[0].T
             niter += 1
 
@@ -433,16 +436,18 @@ class MCRALS(HasTraits):
             # external concentration profiles
             # ------------------------------------------
             if hardConc is not None:
-                extOutput = getConc(*argsGetConc)
-                if isinstance(extOutput, tuple):
-                    fixedC = extOutput[0]
-                    argsGetConc = extOutput
+                output = getConc(*argsGetConc)
+                if isinstance(output, tuple):
+                    fixedC = output[0]
+                    argsGetConc = output[1]
+                    if len(output) == 3:
+                        extOutput = output[2]
                 else:
-                    fixedC = extOutput
+                    fixedC = output
 
                 C.data[:, hardConc] = fixedC[:, hardC_to_C_idx]
 
-            # stores C in C_hard
+            # stores C in Chard
             Chard = C.copy()
 
             # compute St
@@ -552,10 +557,8 @@ class MCRALS(HasTraits):
 
         self._C = C
         if hardConc is not None:
-            self._fixedC = fixedC
             self._extOutput = extOutput
         else:
-            self._fixedC = None
             self._extOutput = None
 
         self._St = St
@@ -570,13 +573,6 @@ class MCRALS(HasTraits):
         The original dataset.
         """
         return self._X
-
-    @property
-    def fixedC(self):
-        """
-        The last concentration profiles including external profiles.
-        """
-        return self._fixedC
 
     @property
     def extOutput(self):
