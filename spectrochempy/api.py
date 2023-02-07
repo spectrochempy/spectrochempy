@@ -107,16 +107,16 @@ if IN_IPYTHON and KERNEL and not NO_DISPLAY:  # pragma: no cover
             and "--InlineBackend.rc={'figure.dpi': 96}" in sys.argv
         ):
             # We are running from NBSphinx - the plot must be inline to show up.
-            IP.magic("matplotlib inline")
+            IP.run_line_magic("matplotlib", "inline")
         else:
             if RUNNING_IN_COLAB:  # pragma: no cover
                 # allow using matplotlib widget
                 from google.colab import output
 
                 output.enable_custom_widget_manager()
-            IP.magic("matplotlib widget")  # widget
+            IP.run_line_magic("matplotlib", "widget")
     except Exception:
-        IP.magic("matplotlib qt")
+        IP.run_line_magic("matplotlib", "qt")
 
 # a useful utilities for dealing with path
 from spectrochempy.utils import pathclean
