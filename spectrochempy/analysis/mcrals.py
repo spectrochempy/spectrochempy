@@ -123,23 +123,26 @@ class MCRALS(HasTraits):
     getC : Callable
         An external function that will provide `len(hardConc)` concentration profiles:
         ```
-        getC(*argsGetC) -> hardC
+        getC(Ccurr, *argsGetC, **kwargsGetC) -> hardC
         ```
         or:
         ```
-        getC(*argsGetC) -> hardC, newArgsGetC
+        getC(Ccurr, *argsGetC, **kwargsGetC) -> hardC, newArgsGetC
         ```
         or:
         ```
-        getC(*argsGetC) -> hardC, newArgsGetC, extOutput
+        getC(Ccurr, *argsGetCn, **kargsGetC) -> hardC, newArgsGetC, extOutput
         ```
-        where *argsGetC are the parameters needed to completely specify the function. `hardC` is a nadarray or NDDataset
+        where Ccurr  is the current C martrix, *argsGetC are the parameters needed to completely specify the function. `hardC` is a nadarray or NDDataset
         of shape `(C.y, len(hardConc)`, newArgsGetC are the updated parameters for the next iteration (can be None), and
         extOutput can be any relevant output to be kept in extOutput attribute (only the last iteration extOutput is
         kept)
 
-    argsGetC : tuple, optional
-        Arguments passed to the external function.
+    argsGetConc : tuple, optional
+        supplementary positional arguments passed to the external function.
+
+    kwargsGetConc: tuple, optional
+        supplementary keyword arguments passed to the external function
 
     hardC_to_C_idx : None or list or tuple, default None
         Indicates the correspondence between the indexes of the columns of hardC and of the C matrix. [1, None, 0]
@@ -232,6 +235,7 @@ class MCRALS(HasTraits):
         hardConc = kwargs.get("hardConc", None)
         getConc = kwargs.get("getConc", None)
         argsGetConc = kwargs.get("argsGetConc", None)
+        kwargsGetConc = kwargs.get("kwargsGetConc", None)
         hardC_to_C_idx = kwargs.get("hardC_to_C_idx", "default")
 
         unimodSpec = kwargs.get("unimodSpec", None)
@@ -436,7 +440,14 @@ class MCRALS(HasTraits):
             # external concentration profiles
             # ------------------------------------------
             if hardConc is not None:
-                output = getConc(*argsGetConc)
+                if kwargsGetConc is not None and argsGetConc is not None:
+                    output = getConc(C, *argsGetConc, **kwargsGetConc)
+                elif kwargsGetConc is None and argsGetConc is not None:
+                    output = getConc(C, *argsGetConc)
+                elif kwargsGetConc is not None and argsGetConc is None:
+                    output = getConc(C, **kwargsGetConc)
+                else:
+                    output = getConc(C)
                 if isinstance(output, tuple):
                     fixedC = output[0]
                     argsGetConc = output[1]
