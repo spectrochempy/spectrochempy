@@ -84,7 +84,6 @@ def test_MCRALS():
         "St",
         "C",
         "extOutput",
-        "fixedC",
         "X",
     ]:
         assert hasattr(mcr, attr)
