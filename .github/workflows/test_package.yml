@@ -78,6 +78,9 @@ jobs:
       - name: Test with coverage
         run: |
           coverage run -m pytest tests
+
+      - name: Coverage report to xml
+        run: |
           coverage xml
 
       - name: Code Climate reporting
