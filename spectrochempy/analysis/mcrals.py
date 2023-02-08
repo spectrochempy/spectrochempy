@@ -448,13 +448,17 @@ class MCRALS(HasTraits):
                     output = getConc(C, **kwargsGetConc)
                 else:
                     output = getConc(C)
+
                 if isinstance(output, tuple):
                     fixedC = output[0]
                     argsGetConc = output[1]
                     if len(output) == 3:
                         extOutput = output[2]
+                    else:
+                        extOutput = None
                 else:
                     fixedC = output
+                    extOutput = None
 
                 C.data[:, hardConc] = fixedC[:, hardC_to_C_idx]
 

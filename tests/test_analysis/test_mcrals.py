@@ -107,7 +107,7 @@ def test_MCRALS():
     assert "Stop ALS optimization" in mcr.log[-40:]
 
     # guess = C0, hard modeling
-    mcr = MCRALS(D, C0, hardConc=[0, 1], getConc=get_C, argsGetConc=(C0,), tol=30.0)
+    mcr = MCRALS(D, C0, hardConc=[0, 1], getConc=get_C, argsGetConc=None, tol=30.0)
     assert "converged !" in mcr.log[-15:]
 
     # guess = C, test with deprecated parameters
@@ -148,7 +148,7 @@ def test_MCRALS():
     assert "converged !" in mcr.log[-15:]
 
     #########################
-    # Text exceptions
+    # Test exceptions
 
     # guess with wrong number of dimensions
     try:
