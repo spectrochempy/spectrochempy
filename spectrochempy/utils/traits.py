@@ -14,6 +14,12 @@ __all__ = ["MetaConfigurable", "Range"]
 
 
 class MetaConfigurable(Configurable):
+    """
+    A subclass of Configurable that store change in configuration if json file
+    so they can retrieved
+    between different run of the main application.
+    """
+
     def __init__(self, jsonfile=None, **kwargs):  # lgtm[py/missing-call-to-init]
 
         super().__init__(**kwargs)

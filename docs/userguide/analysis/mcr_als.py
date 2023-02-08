@@ -9,9 +9,19 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.14.4
 #   kernelspec:
-#     display_name: Python 3
+#     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
+#   language_info:
+#     codemirror_mode:
+#       name: ipython
+#       version: 3
+#     file_extension: .py
+#     mimetype: text/x-python
+#     name: python
+#     nbconvert_exporter: python
+#     pygments_lexer: ipython3
+#     version: 3.10.8
 # ---
 
 # %% [markdown]
@@ -137,12 +147,32 @@ _ = St0.plot()
 # #### ALS Optimization
 # With this guess 'St0' and the dataset 'X' we can create a MCRALS object. At this point
 # of the tutorial, we will use
-# all the default parameters. We switch to `log_level = "INFO"` have a summary of the
-# ALS iterations:
+# all the default parameters.
+
+# %% [markdown]
+# First, we create an instance of a MCRALS object:
 
 # %%
-scp.set_loglevel("INFO")
-mcr = scp.MCRALS(X, St0)
+mcr = scp.MCRALS(log_level="INFO")
+
+# %% [markdown]
+# Next, we set the data and spectra profile
+
+# %%
+mcr.X = X
+mcr.St = St0
+
+# %% [markdown]
+# Note that we can also do this initialization in a single step:
+
+# %%
+mcr = scp.MCRALS(X, St0, log_level="INFO")
+
+# %% [markdown]
+# The `run` method of `mcr` is now used to start the iteration process. As the log level has been set to  "INFO" at the MCRALS instance creation, so we have a summary of the ALS iterations
+
+# %%
+mcr.run()
 
 # %% [markdown]
 # The optimization has converged within few iterations. The figures reported for each
@@ -166,7 +196,8 @@ mcr = scp.MCRALS(X, St0)
 # For instance:
 
 # %%
-mcr = scp.MCRALS(X, St0, tol=0.01)
+mcr.tol = 0.01
+mcr.run()
 
 # %% [markdown]
 # As could be expected more iterations have been necessary to reach this stricter
@@ -181,20 +212,21 @@ mcr = scp.MCRALS(X, St0, tol=0.01)
 # successive iterations (maxdiv).
 
 # %%
-mcr = scp.MCRALS(X, St0, tol=0.001)
+mcr.tol = 0.001
+mcr.run()
 
 # %% [markdown]
 # #### Solutions
 #
 # The solutions of the MCR ALS optimization are the optimized concentration and pure
 # spectra matrices. They can be
-# obtained by the MCRALS.transform() method. Let's reset the `log_level` to default,
+# obtained by the MCRALS.transform() method. Let's
 # generate a MCRALS
-#  object with the default settings, and get the solution datasets C and St.
+#  object with the default settings, and get the solution datasets C and St. Note that the default log_level is "WARNING" so we do not see any output here.
 
 # %%
-scp.set_loglevel("WARNING")
 mcr1 = scp.MCRALS(X, St0)
+mcr1.run()
 
 # %% [markdown]
 # As the dimensions of C are such that the rows' direction (C.y) corresponds to the
@@ -359,3 +391,5 @@ _ = mcr5.St.plot()
 
 # %% [markdown]
 # [To be continued...]
+
+# %%

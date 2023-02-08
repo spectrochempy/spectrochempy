@@ -22,6 +22,7 @@ import time
 import traceback
 import warnings
 from datetime import date, timedelta
+from io import StringIO
 from os import environ
 from pathlib import Path
 
@@ -57,7 +58,6 @@ from spectrochempy.utils.version import Version
 # set the default style
 # --------------------------------------------------------------------------------------
 plt.style.use(["classic"])
-_START_UP_LOG_LEVEL = environ.get("SCPY_START_UP_LOG_LEVEL", "INFO")
 
 # ------------------------------------------------------------------
 # Log levels
@@ -864,12 +864,18 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
                     "filename": str(_get_log_dir() / "spectrochempy.log"),
                     "maxBytes": 262144,
                     "backupCount": 5,
-                }
+                },
+                "string": {
+                    "class": "logging.StreamHandler",
+                    "formatter": "console",
+                    "level": "INFO",
+                    "stream": StringIO(),
+                },
             },
             "loggers": {
                 "SpectroChemPy": {
                     "level": "DEBUG",
-                    "handlers": ["console", "rotatingfile"],
+                    "handlers": ["console", "rotatingfile", "string"],
                 },
             },
         }
@@ -940,11 +946,8 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
     def __init__(self, **kwargs):
 
         super().__init__(**kwargs)
-        log_level = kwargs.pop("log_level", None)
         self.debug_("*" * 40)
         self.initialize()
-        if log_level is not None:
-            self.log_level = log_level
 
     def _ipython_catch_exceptions(self, shell, etype, evalue, tb, tb_offset=None):
         # output the full traceback only in DEBUG mode
@@ -1285,7 +1288,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
 # Start instance od Spectrochempy and expose public members in all
 # ======================================================================================
 
-app = SpectroChemPy(log_level=_START_UP_LOG_LEVEL)
+app = SpectroChemPy()
 preferences = app.preferences
 error_ = app.error_
 warning_ = app.warning_

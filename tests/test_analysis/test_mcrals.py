@@ -8,11 +8,12 @@
 
 
 import numpy as np
+import traitlets
 
 from spectrochempy import dot, set_loglevel
 from spectrochempy.analysis.mcrals import MCRALS
 from spectrochempy.core.dataset.nddataset import Coord, NDDataset
-from spectrochempy.utils import show
+from spectrochempy.utils import show, testing
 
 
 def test_MCRALS():
@@ -67,18 +68,37 @@ def test_MCRALS():
     D.title = "intensity"
 
     #############################
-    # Test normal functioning
+    # Test normal workflow
 
-    # guess = C0
-    mcr = MCRALS(D, C0, tol=30.0)
+    # Instanciate a MCRALS object, with some log_level
+    # Note that the console log will never show debug
+    # ( For this look to attribute log or in the spectrochempy log file)
+    try:
+        mcr = MCRALS(maxit=25, inexistant=0, log_level="DEBUG")
+    except KeyError as exc:
+        assert "'inexistant' is not a valid" in exc.args[0]
 
-    assert "converged !" in mcr.log[-15:]
+    mcr = MCRALS(log_level="INFO")
+
+    # set data (dataset X)
+    mcr.X = D
+
+    # set or guess a profile (here concentrations C0)
+    mcr.set_profile(C0)
+
+    # Now set or modify some configuration parameters
+    mcr.tol = 30.0
+
+    # Check the current configuration parameters using
+
+    # execute the main process
+    mcr.run()
+
+    assert mcr.log.endswith("converged !")
 
     # test attributes
     for attr in [
         "log",
-        "logs",
-        "params",
         "Chard",
         "Stsoft",
         "St",
@@ -88,45 +108,98 @@ def test_MCRALS():
     ]:
         assert hasattr(mcr, attr)
 
+    params = mcr.parameters()
+    assert len(params) == 24
+    assert np.all(params.closureTarget == [1] * 10)
+
     # test plot
     mcr.plotmerit()
     show()
 
     # test diverging
-    mcr = MCRALS(
-        D,
-        C0,
-        monoIncConc=[0, 1],
-        monoIncTol=1.0,
-        unimodSpec=[0, 1],
-        normSpec="euclid",
-        closureConc=[0, 1],
-        closureMethod="constantSum",
-        maxdiv=1,
-    )
-    assert "Stop ALS optimization" in mcr.log[-40:]
+    # we reuse the same initialised MCRALS object as only some parameters changes
+    mcr.tol = 0.1
+    mcr.monoIncConc = [0, 1]
+    mcr.monoIncTol = 1.0
+    mcr.unimodSpec = [0, 1]
+    mcr.normSpec = "euclid"
+    mcr.closureConc = [0, 1]
+    mcr.closureMethod = "constantSum"
+    mcr.maxdiv = 1
+
+    mcr.run()
+
+    assert mcr.log.endswith("Stop ALS optimization.")
 
     # guess = C0, hard modeling
-    mcr = MCRALS(D, C0, hardConc=[0, 1], getConc=get_C, argsGetConc=None, tol=30.0)
+    mcr = MCRALS(
+        D, C0
+    )  # we reinit with a new MCRALS object as we want to come back to the default configuration
+    # TODO: use config to reset and uplaod previous configuration
+    mcr.hardConc = [0, 1]
+    mcr.getConc = get_C
+    mcr.argsGetConc = ()
+    mcr.kwargsGetConc = {}
+    mcr.tol = 30.0
+    mcr.run()
     assert "converged !" in mcr.log[-15:]
 
     # guess = C, test with deprecated parameters
     # and few other parameters set to non-default values to improve coverage
+    with testing.catch_warnings() as w:
+        _ = MCRALS(unimodMod="strict")
+    assert w[-1].category == DeprecationWarning
+
+    with testing.catch_warnings() as w:
+        _ = MCRALS(unimodTol=1.0)
+    assert w[-1].category == DeprecationWarning
+
+    with testing.catch_warnings() as w:
+        _ = MCRALS(verbose=True)
+    assert w[-1].category == DeprecationWarning
+
+    try:
+        mcr.unimodSpec = "alls"
+        raise ValueError  # should not arrive here
+    except traitlets.TraitError:
+        # expect a str = 'all' or a list
+        pass
+
+    try:
+        mcr.nonnegConc = None
+        raise ValueError  # should not arrive here
+    except traitlets.TraitError:
+        # expect a list or a str not None
+        pass
+
+    try:
+        mcr.unimodConc = None
+        raise ValueError  # should not arrive here
+    except traitlets.TraitError:
+        # expect a list or a str not None
+        pass
+
+    try:
+        mcr.nonnegSpec = None
+        raise ValueError  # should not arrive here
+    except traitlets.TraitError:
+        # expect a list or a str not None
+        pass
+
+    try:
+        mcr.nonnegSpec = None
+        raise ValueError  # should not arrive here
+    except traitlets.TraitError:
+        # expect a list or a str not None
+        pass
+
     mcr = MCRALS(
         D,
         C0,
-        # deprecated:
-        unimodMod="strict",
-        unimodTol=1.1,
-        verbose=True,
         # other parameters set to non-default values
         monoIncConc=[0],
         monoDecConc=[1],
         closureConc=[0, 1],
-        nonnegConc=None,
-        unimodConc=None,
-        unimodSpec="all",
-        nonnegSpec=None,
         normSpec="max",
         maxit=1,
     )
@@ -141,76 +214,91 @@ def test_MCRALS():
         closureMethod="constantSum",
         maxit=1,
     )
+    mcr.run()
     assert "Convergence criterion ('tol')" in mcr.log[-100:]
 
     # guess = St as ndarray
     mcr = MCRALS(D, St0.data, tol=15.0)
+    mcr.run()
     assert "converged !" in mcr.log[-15:]
 
     #########################
-    # Test exceptions
+    # Text exceptions
 
     # guess with wrong number of dimensions
     try:
-        mcr = MCRALS(
+        _ = MCRALS(
             D,
             np.random.rand(n_t - 1, n_PS),
         )
     except ValueError as e:
-        assert e.args[0] == "the dimensions of guess do not match the data"
+        assert "None of the dimensions of the given profile" in e.args[0]
 
     # guess with wrong nonnegConc parameter
     try:
-        mcr = MCRALS(D, C, nonnegConc=[2])
+        _ = MCRALS(D, C, nonnegConc=[2])
     except ValueError as e:
-        assert "please check nonnegConc" in e.args[0]
+        assert "please check the" in e.args[0]
     try:
-        mcr = MCRALS(D, C, nonnegConc=[0, 1, 1])
+        _ = MCRALS(D, C, nonnegConc=[0, 1, 1])
     except ValueError as e:
-        assert "please check nonnegConc" in e.args[0]
+        assert "please check the" in e.args[0]
 
     # guess with wrong unimodConc parameter
     try:
-        mcr = MCRALS(D, C, unimodConc=[2])
+        _ = MCRALS(D, C, unimodConc=[2])
     except ValueError as e:
-        assert "please check unimodConc" in e.args[0]
+        assert "please check the" in e.args[0]
     try:
-        mcr = MCRALS(D, C, unimodConc=[0, 1, 1])
+        _ = MCRALS(D, C, unimodConc=[0, 1, 1])
     except ValueError as e:
-        assert "please check unimodConc" in e.args[0]
+        assert "please check the" in e.args[0]
 
     # wrong closureTarget
     try:
-        mcr = MCRALS(D, C, closureTarget=[0, 1, 1])
+        _ = MCRALS(D, C, closureTarget=[0, 1, 1])
     except ValueError as e:
-        assert "please check closureTarget" in e.args[0]
+        assert "please check the" in e.args[0]
 
     # wrong hardC_to_C_idx
     try:
-        mcr = MCRALS(D, C, hardC_to_C_idx=[2])
+        _ = MCRALS(D, C, hardC_to_C_idx=[2])
     except ValueError as e:
-        assert "please check hardC_to_C_idx" in e.args[0]
+        assert "please check the" in e.args[0]
     try:
-        mcr = MCRALS(D, C, hardC_to_C_idx=[0, 1, 1])
+        _ = MCRALS(D, C, hardC_to_C_idx=[0, 1, 1])
     except ValueError as e:
-        assert "please check hardC_to_C_idx" in e.args[0]
+        assert "please check the" in e.args[0]
 
     # wrong unimodSpec
     try:
-        mcr = MCRALS(D, C, unimodSpec=[2])
+        _ = MCRALS(D, C, unimodSpec=[2])
     except ValueError as e:
-        assert "please check unimodSpec" in e.args[0]
+        assert "please check the" in e.args[0]
     try:
-        mcr = MCRALS(D, C, unimodSpec=[0, 1, 1])
+        _ = MCRALS(D, C, unimodSpec=[0, 1, 1])
     except ValueError as e:
-        assert "please check unimodSpec" in e.args[0]
+        assert "please check the" in e.args[0]
 
     # wrong nonnegSpec
     try:
-        mcr = MCRALS(D, C, nonnegSpec=[2])
+        _ = MCRALS(D, C, nonnegSpec=[2])
     except ValueError as e:
-        assert "please check nonnegSpec" in e.args[0]
+        assert "please check the" in e.args[0]
     try:
-        mcr = MCRALS(D, C, nonnegSpec=[0, 1, 1])
+        _ = MCRALS(D, C, nonnegSpec=[0, 1, 1])
     except ValueError as e:
-        assert "please check nonnegSpec" in e.args[0]
+        assert "please check the" in e.args[0]
+
+    # check same things but when setting the attributes
+    mcr = MCRALS(D, C)
+
+    try:
+        mcr.nonnegSpec = [0, 1, 1]
+    except ValueError as e:
+        assert "please check the" in e.args[0]
+
+    try:
+        mcr.closureTarget = [0, 1, 1]
+    except ValueError as e:
+        assert "please check the" in e.args[0]
