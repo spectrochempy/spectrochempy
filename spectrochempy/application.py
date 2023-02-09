@@ -694,24 +694,25 @@ class GeneralPreferences(MetaConfigurable):
             datadir = pathclean(datadir)
         return datadir
 
-    # @property
-    # def log_level(self):
-    #     """
-    #     Logging level (int).
-    #     """
-    #     return self.parent.log_level
-    #
-    # @log_level.setter
-    # def log_level(self, value):
-    #     if isinstance(value, str):
-    #         value = getattr(logging, value, None)
-    #         if value is None:  # pragma: no cover
-    #             warnings.warn(
-    #                 "Log level not changed: invalid value given\n"
-    #                 "string values must be DEBUG, INFO, WARNING, "
-    #                 "or ERROR"
-    #             )
-    #     self.parent.log_level = value
+    @property
+    def log_level(self):
+        """
+        Logging level (int).
+        """
+        return self.parent.log_level
+
+    @log_level.setter
+    def log_level(self, value):
+        if isinstance(value, str):
+            value = getattr(logging, value, None)
+            if value is None:  # pragma: no cover
+                warnings.warn(
+                    "Log level not changed: invalid value given\n"
+                    "string values must be DEBUG, INFO, WARNING, "
+                    "or ERROR"
+                )
+        self.parent.log_level = value
+
     # ----------------------------------------------------------------------------------
     # Class Initialisation
     # ----------------------------------------------------------------------------------
