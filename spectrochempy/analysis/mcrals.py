@@ -917,9 +917,9 @@ class MCRALS(Configurable):
 
     # Utility functions
 
-    def parameters(self):
+    def parameters(self, default=False):
         """
-        Return current configuration values
+        Return current or default configuration values
 
         Parameters
         ----------
@@ -931,19 +931,19 @@ class MCRALS(Configurable):
         -------
         dict
         """
-        names = MCRALS.class_trait_names(config=True)
         d = Meta()
-        for name in names:
-            d[name] = getattr(self, name)
-
+        if not default:
+            d.update(self.trait_values(config=True))
+        else:
+            d.update(self.trait_defaults(config=True))
         return d
 
-    def print_config_help(self):
+    def help(self):
         """
         Return a description of all configuration parameters with their default value
 
         """
-        print(self.class_config_rst_doc())
+        return self.class_config_rst_doc()
 
 
 # ---------------------------------
