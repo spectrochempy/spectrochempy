@@ -19,7 +19,7 @@ import tempfile
 import textwrap
 import traceback
 
-import matplotlib
+# import matplotlib
 import matplotlib.pyplot as plt
 import numpy
 from numpydoc.docscrape import get_doc_object
@@ -28,7 +28,7 @@ from numpydoc.validate import Validator, error, validate
 __all__ = ["check_docstrings", "add_docstring"]
 
 # With template backend, matplotlib plots nothing
-matplotlib.use("template")
+# matplotlib.use("template")
 
 
 PRIVATE_CLASSES = [
