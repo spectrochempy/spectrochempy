@@ -945,6 +945,13 @@ class MCRALS(Configurable):
         """
         return self.class_config_rst_doc()
 
+    def reset(self):
+        """
+        Reset configuration to default
+        """
+        for k, v in self.parameters(default=True).items():
+            setattr(self, k, v)
+
 
 # ---------------------------------
 def _unimodal_2D(a, axis, idxes, tol, mod):

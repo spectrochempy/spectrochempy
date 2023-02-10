@@ -153,9 +153,11 @@ def test_MCRALS(model, data):
     mcr.plotmerit()
     show()
 
+    # reset to default
+    mcr.reset()
+    assert mcr.tol == 0.1
+
     # test diverging
-    # we reuse the same initialised MCRALS object as only some parameters changes
-    mcr.tol = 0.1
     mcr.monoIncConc = [0, 1]
     mcr.monoIncTol = 1.0
     mcr.unimodSpec = [0, 1]
@@ -169,10 +171,8 @@ def test_MCRALS(model, data):
     assert mcr.log.endswith("Stop ALS optimization.")
 
     # guess = C0, hard modeling
-    mcr = MCRALS(
-        D, C0
-    )  # we reinit with a new MCRALS object as we want to come back to the default configuration
-    # TODO: use config to reset and uplaod previous configuration
+    mcr.reset()  # we reset everything to default
+
     mcr.hardConc = [0, 1]
     mcr.getConc = get_C
     mcr.argsGetConc = ()
