@@ -9,6 +9,7 @@
 import numpy as np
 import pytest
 import traitlets
+from traitlets.config import Config
 
 from spectrochempy.analysis.mcrals import MCRALS
 from spectrochempy.core import set_loglevel
@@ -108,11 +109,11 @@ def test_MCRALS(model, data):
 
     mcr = MCRALS(log_level="INFO")
 
-    # set data (dataset X)
-    mcr.X = D
-
-    # set or guess a profile (here concentrations C0)
-    mcr.set_profile(C0)
+    # # set data (dataset X)
+    # mcr.X = D
+    #
+    # # set or guess a profile (here concentrations C0)
+    # mcr.set_profile(C0)
 
     # Now set or modify some configuration parameters
     mcr.tol = 30.0
@@ -121,7 +122,7 @@ def test_MCRALS(model, data):
     print(mcr.help())
 
     # execute the main process
-    mcr.run()
+    mcr.fit(D, C0)
 
     # assert result
     # =============
@@ -166,7 +167,7 @@ def test_MCRALS(model, data):
     mcr.closureMethod = "constantSum"
     mcr.maxdiv = 1
 
-    mcr.run()
+    mcr.fit()  # by default take the previously used X and C0 data
 
     assert mcr.log.endswith("Stop ALS optimization.")
 
@@ -178,9 +179,10 @@ def test_MCRALS(model, data):
     mcr.argsGetConc = ()
     mcr.kwargsGetConc = {}
     mcr.tol = 30.0
-    mcr.run()
+    mcr.fit()
     assert "converged !" in mcr.log[-15:]
 
+    # using the full MCRALS constructor
     mcr = MCRALS(
         D,
         C0,
@@ -191,7 +193,8 @@ def test_MCRALS(model, data):
         normSpec="max",
         maxit=1,
     )
-    set_loglevel("WARN")
+    set_loglevel("WARNING")
+    mcr.fit()
 
     # guess = C0.data, test with other parameters
     mcr = MCRALS(
@@ -202,12 +205,12 @@ def test_MCRALS(model, data):
         closureMethod="constantSum",
         maxit=1,
     )
-    mcr.run()
+    mcr.fit()
     assert "Convergence criterion ('tol')" in mcr.log[-100:]
 
     # guess = St as ndarray
     mcr = MCRALS(D, St0.data, tol=15.0)
-    mcr.run()
+    mcr.fit()
     assert "converged !" in mcr.log[-15:]
 
 
@@ -246,15 +249,15 @@ def test_MCRALS_errors(model, data):
     # and few other parameters set to non-default values to improve coverage
     with testing.catch_warnings() as w:
         _ = MCRALS(unimodMod="strict")
-    assert w[-1].category == DeprecationWarning
+    assert w[0].category == DeprecationWarning
 
     with testing.catch_warnings() as w:
         _ = MCRALS(unimodTol=1.0)
-    assert w[-1].category == DeprecationWarning
+    assert w[0].category == DeprecationWarning
 
     with testing.catch_warnings() as w:
         _ = MCRALS(verbose=True)
-    assert w[-1].category == DeprecationWarning
+    assert w[0].category == DeprecationWarning
 
     try:
         mcr.unimodSpec = "alls"

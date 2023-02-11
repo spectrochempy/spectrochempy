@@ -6,6 +6,7 @@
 # ======================================================================================
 from pathlib import Path
 
+import numpy as np
 from matplotlib import cycler
 from traitlets import All, List, TraitError, Undefined, observe
 from traitlets.config.configurable import Configurable
@@ -15,9 +16,10 @@ __all__ = ["MetaConfigurable", "Range"]
 
 class MetaConfigurable(Configurable):
     """
-    A subclass of Configurable that store change in configuration if json file
-    so they can retrieved
-    between different run of the main application.
+    A subclass of Configurable that stores configuration changes in a json file.
+
+    Saving the configuration changes allows to retrieve them between different
+    executions of the main application.
     """
 
     def __init__(self, jsonfile=None, **kwargs):  # lgtm[py/missing-call-to-init]
@@ -45,7 +47,8 @@ class MetaConfigurable(Configurable):
 
     @observe(All)
     def _anytrait_changed(self, change):
-        # update configuration
+        # update configuration after any change
+
         if not hasattr(self, "cfg"):
             # not yet initialized
             return
@@ -53,8 +56,13 @@ class MetaConfigurable(Configurable):
         if change.name in self.traits(config=True):
 
             value = change.new
+            # replace non serialisable value by an equivalent
             if isinstance(value, (type(cycler), Path)):
                 value = str(value)
+            if isinstance(value, np.ndarray):
+                # we ned to transform it to a list of elements, bUT with python built-in
+                # types, which is not the cas for instance for int64
+                value = value.tolist()
 
             self.cfg.update(
                 self.jsonfile,

@@ -17,7 +17,6 @@ import warnings
 
 import numpy as np
 import traitlets as tr
-from traitlets.config import Configurable
 
 from spectrochempy.analysis.pca import PCA
 from spectrochempy.core import app, debug_, info_, set_loglevel
@@ -25,8 +24,7 @@ from spectrochempy.core.common.meta import Meta
 from spectrochempy.core.dataset.arraymixins.npy import dot
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils.exceptions import deprecated
-
-# from spectrochempy.utils.traits import MetaConfigurable
+from spectrochempy.utils.traits import MetaConfigurable
 
 # Developper notes
 # ----------------
@@ -38,7 +36,7 @@ from spectrochempy.utils.exceptions import deprecated
 
 
 # class MCRALS(tr.HasTraits):
-class MCRALS(Configurable):
+class MCRALS(MetaConfigurable):
     """
     Performs MCR-ALS of a dataset knowing the initial C or St matrix.
 
@@ -51,18 +49,18 @@ class MCRALS(Configurable):
 
     Parameters
     ----------
-     Parameters
-    ----------
     X : NDDataset or an array-like object, optional, default:None
         The dataset on which to perform the MCR-ALS analysis.
-        If not initialized here, it should be done by
-        attribute assignment
-
+        DeprecationWarning: Passing parameter in MCRALS class constructor
+        will be deprecated in future version..
+        If X is not initialized here, it should be done by
+        attribute assignment or in the class method (e.g.  mcr.Fit(X, CO)).
+        This is the recommanded way.
     profile : NDDataset or an array-like object, optional, default:None
         Initial concentration or spectra.
-        If not initialized here, it should be done by
-        attribute assignment
-
+        If profile is not initialized here, it should be done by
+        attribute assignment or in the class method (e.g.  mcr.Fit(X, CO)).
+        This is the recommanded way.
     **kwargs
         Optional parameters, see Other parameters below.
 
@@ -70,8 +68,14 @@ class MCRALS(Configurable):
     ----------------
     log_level : ["INFO", "DEBUG", "WARNING", "ERROR"], optional, default:"WARNING"
         The log level at startup
-
-    config :
+    config : Config object
+    warm_start : bool, optional, default: false
+        When fitting with MCRALS repeatedly on the same dataset, but for multiple
+        parameter values (such as to find the value maximizing performance),
+        it may be possible to reuse previous model learned from the previous parameter
+        value, saving time.
+        When warm_start is true, the existing fitted model attributes is used to
+        initialize the new model in a subsequent call to fit.
 
     See Also
     --------
@@ -88,22 +92,26 @@ class MCRALS(Configurable):
     # Notice that variable not defined this way lack this type validation, so they are
     # more prone to errors.
 
+    name = tr.Unicode("PlotPreferences")
+    description = tr.Unicode("MCRALS class")
+
     # ----------------------------------------------------------------------------------
     # Runtime Parameters
     # ----------------------------------------------------------------------------------
-
-    _X = tr.Instance(NDDataset)
-    _C = tr.Instance(NDDataset)
-    _Chard = tr.Instance(NDDataset)
-    _St = tr.Instance(NDDataset)
-    _StSoft = tr.Instance(NDDataset)
+    _X = tr.Instance(NDDataset, allow_none=True)
+    _C = tr.Instance(NDDataset, allow_none=True)
+    _Chard = tr.Instance(NDDataset, allow_none=True)
+    _St = tr.Instance(NDDataset, allow_none=True)
+    _StSoft = tr.Instance(NDDataset, allow_none=True)
     _extOutput = tr.Instance(NDDataset, allow_none=True)
-    _nspecies = tr.Integer(allow_none=True)
+    _nspecies = tr.Integer(0)
+    _warm_start = tr.Bool(False)
+    _fitted = tr.Instance(NDDataset, allow_none=True)
 
     # ----------------------------------------------------------------------------------
     # Configuration parameters
     # They will be written in a file from which the default can be modified)
-    # Obviously, the parameters can also be modified at runtime as usual by affectation.
+    # Obviously, the parameters can also be modified at runtime as usual by assignment.
     # ----------------------------------------------------------------------------------
 
     tol = tr.Float(
@@ -140,7 +148,7 @@ profile #1 *can* be multimodal. If set to `[]`, all profiles can be multimodal."
     ).tag(config=True)
 
     unimodConcMod = tr.Enum(
-        ["strict"],
+        ["strict", "smooth"],
         default_value="strict",
         help="""When set to 'strict', values deviating from unimodality are reset to the
 value of the previous point. When set to 'smooth', both values (deviating point
@@ -164,7 +172,7 @@ others. For instance `[0, 2]` indicates that profile #0 and #2 are decreasing
 while profile #1 *can* increase.""",
     ).tag(config=True)
 
-    unimodDecTol = tr.Float(
+    monoDecTol = tr.Float(
         default_value=1.1,
         help="""Tolerance parameter for monotonic decrease. Correction is applied only
 if:```C[i,j] > C[i-1,j] * unimodTol```  along profile #j.""",
@@ -194,8 +202,8 @@ weighted sum equals the `closureTarget`.""",
     ).tag(config=True)
 
     closureTarget = tr.Union(
-        (tr.Enum(["default"]), tr.List()),
-        default_value="default",
+        (tr.Enum(["all"]), tr.List()),
+        default_value="all",
         help="""The value of the sum of concentrations profiles subjected to closure.
 If set to `default`, the total concentration is set to 1.0 for all observations.
 If an array is passed: the values of concentration for each observation. Hence,
@@ -294,7 +302,7 @@ while profile #1 *can* be multimodal.""",
     ).tag(config=True)
 
     unimodSpecMod = tr.Enum(
-        ["strict"],
+        ["strict", "smooth"],
         default_value="strict",
         help=""" When set to `"strict"`, values deviating from unimodality are reset to
 the value of the previous point. When set to `"smooth"`, both values (deviating
@@ -311,20 +319,34 @@ profile #j,
 ```St[j,i] < St[j, i-1] * unimodTol```  on the increasing branch of profile  #j.""",
     ).tag(config=True)
 
+    # ----------------------------------------------------------------------------------
+    # Initialization
+    # ----------------------------------------------------------------------------------
     def __init__(
-        self, X=None, guess=None, *, log_level=logging.WARNING, config=None, **kwargs
+        self,
+        X=None,
+        profile=None,
+        *,
+        log_level=logging.WARNING,
+        config=None,
+        warm_start=False,
+        **kwargs,
     ):
+
+        # call the super class for initialisation
+        super().__init__(jsonfile="MCRALS", config=config, parent=app)
+
         # warn about deprecation
         # ----------------------
         # We use pop to remove the deprecated argument before processing the rest
         # TODO: These arguments should be removed in version 0.6 probably
 
-        # VERBOSE
+        # verbose
         verbose = kwargs.pop("verbose", None)
         if verbose is not None:
             warnings.warn(
-                "verbose deprecated. Instead, use log_level= 'INFO' instead.",
-                DeprecationWarning,
+                "verbose is deprecated. Instead, use log_level= 'INFO' instead.",
+                category=DeprecationWarning,
             )
         if verbose:
             log_level = "INFO"
@@ -335,51 +357,72 @@ profile #j,
         # unimodTol deprecation
         if "unimodTol" in kwargs.keys():
             warnings.warn(
-                "unimodTol is deprecated, use unimodConcTol instead", DeprecationWarning
+                "unimodTol is deprecated, use unimodConcTol instead",
+                category=DeprecationWarning,
             )
             self.unimodConcTol = kwargs.pop("unimodTol", 1.1)
 
         # unimodMod deprecation
         if "unimodMod" in kwargs.keys():
             warnings.warn(
-                "unimodMod is deprecated, use unimodConcMod instead", DeprecationWarning
+                "unimodMod is deprecated, use unimodConcMod instead",
+                category=DeprecationWarning,
             )
             self.unimodConcMod = kwargs.pop("unimodMod", "strict")
 
-        # initialize the Configurable superclass
-        # we could also pass the kwargs, but the superclass unfortunately doenst check
-        # if the parameters exists or if it is a configuration parameters
-        # thus we will do it after
-        super().__init__(config=config)
+        # initial configuration
+        # reset to default if not warm_start
+        defaults = self.parameters(default=True)
+        configkw = {} if warm_start else defaults
+        # eventually take parameters form kwargs
+        configkw.update(kwargs)
+
+        for k, v in configkw.items():
+            if k in defaults.keys():
+                setattr(self, k, v)
+            else:
+                raise KeyError(
+                    f"'{k}' is not a valid configuration parameters. "
+                    f"Use the method `parameters()` to check the current "
+                    f"allowed parameters and their current value."
+                )
 
         # Now, initialize the data
         if X is not None:
             self.X = X
-        if guess is not None:
-            self.set_profile(guess)
+            warnings.warn(
+                "Passing X at the initiliztion of the estimator is deprecated",
+                category=PendingDeprecationWarning,
+            )
 
-        for kw in list(kwargs.keys()):
-            if kw in MCRALS.class_trait_names(config=True):
-                v = kwargs.pop(kw)
-                setattr(self, kw, v)
-            else:
-                raise KeyError(
-                    f"'{kw}' is not a valid configuration parameters. "
-                    f"Use the method `parameters()` to check the current "
-                    f"allowed parameters and their current value."
-                )
+        # if warm start we can use the previous fit as starting profile.
+        self._warm_start = warm_start
+        if warm_start and self._fitted:
+            (
+                C,
+                St,
+            ) = (
+                self._fitted
+            )  # TODO: check this possibility to get data from previous estimation
+
+        if profile is not None:
+            self.set_profile(profile)
+            warnings.warn(
+                "Passing X at the initilization of the estimator is deprecated",
+                category=PendingDeprecationWarning,
+            )
 
     # -----
     # Data
     # -----
     @property
     def X(self):
-        if self._X is not None:
-            return self._X
-        else:
-            raise ValueError(
-                "input X dataset must be initialized" " before any other operation."
-            )
+        # if self._X is not None:
+        return self._X
+        # else:
+        #     raise ValueError(
+        #         "input X dataset must be initialized before any other operation."
+        #     )
 
     @X.setter
     def X(self, value):
@@ -440,6 +483,22 @@ profile #j,
         # initialisation required
         return St
 
+    def _X_is_missing(self):
+        if self._X is None:
+            warnings.warn(
+                "Sorry, but the X dataset must be defined "
+                "before you can use MCRALS methods."
+            )
+            return True
+
+    def _C_and_St_are_missing(self):
+        if self._C is None and self._St is None:
+            warnings.warn(
+                "Sorry, but one of C or St guess profile must be defined "
+                "before you can use MCRALS methods."
+            )
+            return True
+
     def set_profile(self, profile):
         """
         Set or guess an initial profile.
@@ -449,8 +508,8 @@ profile #j,
         profile : array-like
             Initial guess for the concentration or spectra profile.
         """
-        if self.X is None:
-            raise ValueError("X dataset must be defined first")
+        if self._X_is_missing():
+            return
 
         # Eventually transform the given profile to a NDDataset
         if not isinstance(profile, NDDataset):
@@ -494,7 +553,9 @@ profile #j,
             # if everything went well here, C and St are set, we return !
             return
 
-        except ValueError:
+        except ValueError as exc:
+            if "please check the" in exc.args[0]:
+                raise exc
             pass
 
         # Again if something is wrong we let it raise the error
@@ -520,17 +581,13 @@ profile #j,
 
     @property
     def nspecies(self):
-        if self._nspecies is None:
-            raise ValueError(
-                "Species has not yet been initialized. "
-                "Use `set_profile` function to set the concentration "
-                "or spectra profiles"
-            )
         return self._nspecies
 
     @tr.validate("nonnegConc")
     def _validate_nonnegConc(self, proposal):
         nonnegConc = proposal.value
+        if not self.nspecies:  # not initialized or 0
+            return nonnegConc
         if nonnegConc == "all":
             nonnegConc = np.arange(self.nspecies)
         elif np.any(nonnegConc) and (
@@ -546,6 +603,8 @@ profile #j,
     @tr.validate("unimodConc")
     def _validate_unimodConc(self, proposal):
         unimodConc = proposal.value
+        if not self.nspecies:  # not initialized or 0
+            return unimodConc
         if unimodConc == "all":
             unimodConc = np.arange(self.nspecies)
         elif np.any(unimodConc) and (
@@ -560,8 +619,10 @@ profile #j,
     @tr.validate("closureTarget")
     def _validate_closureTarget(self, proposal):
         closureTarget = proposal.value
+        if self._X_is_missing():
+            return closureTarget
         ny = self.X.shape[0]
-        if closureTarget == "default":
+        if closureTarget == "all":
             closureTarget = np.ones(ny)
         elif len(closureTarget) != ny:
             raise ValueError(
@@ -575,6 +636,8 @@ profile #j,
     @tr.validate("hardC_to_C_idx")
     def _validate_hardC_to_C_idx(self, proposal):
         hardC_to_C_idx = proposal.value
+        if not self.nspecies:  # not initialized or 0
+            return hardC_to_C_idx
         if hardC_to_C_idx == "default":
             hardC_to_C_idx = np.arange(self.nspecies)
         elif (
@@ -590,6 +653,8 @@ profile #j,
     @tr.validate("nonnegSpec")
     def _validate_nonnegSpec(self, proposal):
         nonnegSpec = proposal.value
+        if not self.nspecies:  # not initialized or 0
+            return nonnegSpec
         if nonnegSpec == "all":
             nonnegSpec = np.arange(self.nspecies)
         elif np.any(nonnegSpec) and (
@@ -604,6 +669,8 @@ profile #j,
     @tr.validate("unimodSpec")
     def _validate_unimodSpec(self, proposal):
         unimodSpec = proposal.value
+        if not self.nspecies:  # not initialized or 0
+            return unimodSpec
         if unimodSpec == "all":
             unimodSpec = np.arange(self.nspecies)
         elif np.any(unimodSpec) and (
@@ -621,7 +688,7 @@ profile #j,
             # perform a validation of default configuration parameters
             # Indeed, if not forced here these parameters are validated only when they
             # are set explicitely.
-            # Here is a ugly trick to force this validation.
+            # Here is an ugly trick to force this validation. # TODO: better way?
             self.nonnegConc = self.nonnegConc
             self.nonnegSpec = self.nonnegSpec
             self.unimodConc = self.unimodConc
@@ -630,9 +697,17 @@ profile #j,
             self.hardC_to_C_idx = self.hardC_to_C_idx
 
     # ----------------------
-    # Main execution routine
+    # Fit
     # ----------------------
-    def run(self):
+    def fit(self, X=None, profile=None):
+
+        if X is not None:
+            self.X = X
+        if profile is not None:
+            self.set_profile(profile)
+
+        if self._X_is_missing() or (self._C_and_St_are_missing()):
+            return
 
         ny, _ = self.X.shape
         change = self.tol + 1
@@ -865,12 +940,12 @@ profile #j,
         """
         Transform data back to the original space.
 
-        The following matrice operation is performed : :math:`X'_{hat} = C'.S'^t`.
+        The following matrix operation is performed : :math:`X'_{hat} = C'.S'^t`.
 
         Returns
         -------
-        X_hat : |NDDataset|
-            The reconstructed dataset based on the MCS-ALS optimization.
+        |NDDataset|
+            The reconstructed X_hat dataset based on the MCS-ALS optimization.
         """
 
         # reconstruct from concentration and spectra profiles
@@ -890,7 +965,8 @@ profile #j,
         Parameters
         ----------
         **kwargs
-            optional "colors" argument: tuple or array of 3 colors for :math:`X`, :math:`\hat X` and :math:`E`.
+            optional "colors" argument: tuple or array of 3 colors
+            for :math:`X`, :math:`\hat X` and :math:`E`.
 
         Returns
         -------

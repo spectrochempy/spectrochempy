@@ -1003,6 +1003,13 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
                         # remove the user json file to reset to defaults
                         jsonname.unlink()
                     else:
+                        # check integrity of the file
+                        with jsonname.open() as f:
+                            try:
+                                json.load(f)
+                            except json.JSONDecodeError:
+                                jsonname.unlink()
+                                continue
                         configfiles.append(jsonname)
 
             for cfgname in configfiles:

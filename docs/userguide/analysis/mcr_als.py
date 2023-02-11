@@ -156,23 +156,11 @@ _ = St0.plot()
 mcr = scp.MCRALS(log_level="INFO")
 
 # %% [markdown]
-# Next, we set the data and spectra profile
+# The `fit` method of `mcr` is now used to start the iteration process.
+# As the log level has been set to  "INFO" at the MCRALS instance creation, so we have a summary of the ALS iterations
 
 # %%
-mcr.X = X
-mcr.St = St0
-
-# %% [markdown]
-# Note that we can also do this initialization in a single step:
-
-# %%
-mcr = scp.MCRALS(X, St0, log_level="INFO")
-
-# %% [markdown]
-# The `run` method of `mcr` is now used to start the iteration process. As the log level has been set to  "INFO" at the MCRALS instance creation, so we have a summary of the ALS iterations
-
-# %%
-mcr.run()
+mcr.fit(X, St0)
 
 # %% [markdown]
 # The optimization has converged within few iterations. The figures reported for each
