@@ -28,7 +28,7 @@
 # # MCR ALS
 
 # %%
-import spectrochempy as scp
+from spectrochempy import read_matlab, MCRALS, PCA, EFA
 
 # %% [markdown]
 # ## Introduction
@@ -63,7 +63,7 @@ import spectrochempy as scp
 # 'datadir' of spectrochempy in 'als2004dataset.MAT' and can be read as follows in Scpy:
 
 # %%
-A = scp.read_matlab("matlabdata/als2004dataset.MAT")
+A = read_matlab("matlabdata/als2004dataset.MAT")
 
 # %% [markdown]
 # The .mat file contains 6 matrices which are thus returned in A as a list of 6
@@ -71,7 +71,7 @@ A = scp.read_matlab("matlabdata/als2004dataset.MAT")
 
 # %%
 for a in A:
-    print(a.name + ": " + str(a.shape))
+    print(f"{a.name} : {a.shape}")
 
 # %% [markdown]
 # In this tutorial, we are first interested in the dataset named ('m1') that contains
@@ -153,11 +153,13 @@ _ = St0.plot()
 # First, we create an instance of a MCRALS object:
 
 # %%
-mcr = scp.MCRALS(log_level="INFO")
+mcr = MCRALS(log_level="INFO")
+
 
 # %% [markdown]
 # The `fit` method of `mcr` is now used to start the iteration process.
-# As the log level has been set to  "INFO" at the MCRALS instance creation, so we have a summary of the ALS iterations
+# As the log level has been set to  "INFO" at the MCRALS instance creation,
+# so we have a summary of the ALS iterations
 
 # %%
 mcr.fit(X, St0)
@@ -185,7 +187,7 @@ mcr.fit(X, St0)
 
 # %%
 mcr.tol = 0.01
-mcr.run()
+mcr.fit()
 
 # %% [markdown]
 # As could be expected more iterations have been necessary to reach this stricter
@@ -201,7 +203,7 @@ mcr.run()
 
 # %%
 mcr.tol = 0.001
-mcr.run()
+mcr.fit()
 
 # %% [markdown]
 # #### Solutions
@@ -213,8 +215,8 @@ mcr.run()
 #  object with the default settings, and get the solution datasets C and St. Note that the default log_level is "WARNING" so we do not see any output here.
 
 # %%
-mcr1 = scp.MCRALS(X, St0)
-mcr1.run()
+mcr1 = MCRALS()
+mcr1.fit(X, St0)
 
 # %% [markdown]
 # As the dimensions of C are such that the rows' direction (C.y) corresponds to the
@@ -251,9 +253,12 @@ _ = mcr1.St.plot()
 # both normalizations:
 
 # %%
-mcr2 = scp.MCRALS(X, St0, normSpec="euclid")
+mcr2 = MCRALS()
+mcr2.normSpec = "euclid"
+mcr2.fit(X, St0)
 
-mcr3 = scp.MCRALS(X, St0, normSpec="max")
+mcr3 = MCRALS(X, St0, normSpec="max")
+mcr3.fit(X, St0)
 
 _ = mcr1.St.plot()
 _ = mcr2.St.plot()
@@ -288,7 +293,7 @@ _ = mcr3.C.T.plot()
 # Let's first analyse our dataset using PCA and plot a screeplot:
 
 # %%
-pca = scp.PCA(X)
+pca = PCA(X)
 pca.printev(n_pc=10)
 _ = pca.screeplot(n_pc=8)
 
@@ -321,8 +326,8 @@ _ = LT.plot()
 # 29 in the present case:
 
 # %%
-pca = scp.PCA(X)
-S3, LT3 = scp.PCA(X).reduce(n_pc="auto")
+pca = PCA(X)
+S3, LT3 = PCA(X).reduce(n_pc="auto")
 S3.shape
 
 # %% [markdown]
@@ -333,7 +338,7 @@ S3.shape
 #
 
 # %%
-efa = scp.EFA(X)
+efa = EFA(X)
 C0 = efa.get_conc(n_pc=4)
 _ = C0.T.plot()
 
@@ -341,7 +346,8 @@ _ = C0.T.plot()
 # The MCR ALS can then be launched using this new guess:
 
 # %%
-mcr4 = scp.MCRALS(X, guess=C0, maxit=100, normSpec="euclid")
+mcr4 = MCRALS(maxit=100, normSpec="euclid")
+mcr4.fit(X, C0)
 
 # %%
 _ = mcr4.C.T.plot()
@@ -369,7 +375,8 @@ surf = X2.plot_surface(colorbar=True, linewidth=0.2, ccount=100, figsize=(10, 5)
 _ = X2.plot(method="map")
 
 # %%
-mcr5 = scp.MCRALS(X2, guess=St0, unimodConc=None)
+mcr5 = MCRALS(unimodConc=[])
+mcr5.fit(X2, St0)
 
 # %%
 _ = mcr5.C.T.plot()
