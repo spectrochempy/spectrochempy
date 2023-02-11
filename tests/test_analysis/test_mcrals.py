@@ -158,6 +158,20 @@ def test_MCRALS(model, data):
     mcr.reset()
     assert mcr.tol == 0.1
 
+    # test chaining fit runs
+    mcr = MCRALS()
+    mcr.tol == 0.1
+    out = mcr.fit(D, C0)
+    mcr.tol == 0.01
+    out1 = mcr.fit(D, out)
+
+    mcr = MCRALS()
+    mcr.tol == 0.01
+    out2 = mcr.fit(D, C0)
+
+    assert np.max(np.abs(out1[0] - out2[0])) < 3.0e-14
+    assert np.max(np.abs(out1[1] - out2[1])) < 4.0e-15
+
     # test diverging
     mcr.monoIncConc = [0, 1]
     mcr.monoIncTol = 1.0

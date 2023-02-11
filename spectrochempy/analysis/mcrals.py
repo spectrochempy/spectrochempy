@@ -23,7 +23,7 @@ from spectrochempy.core import app, debug_, info_, set_loglevel
 from spectrochempy.core.common.meta import Meta
 from spectrochempy.core.dataset.arraymixins.npy import dot
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils.exceptions import deprecated
+from spectrochempy.utils import exceptions
 from spectrochempy.utils.traits import MetaConfigurable
 
 # Developper notes
@@ -106,7 +106,7 @@ class MCRALS(MetaConfigurable):
     _extOutput = tr.Instance(NDDataset, allow_none=True)
     _nspecies = tr.Integer(0)
     _warm_start = tr.Bool(False)
-    _fitted = tr.Instance(NDDataset, allow_none=True)
+    _fitted = tr.Bool(False)
 
     # ----------------------------------------------------------------------------------
     # Configuration parameters
@@ -385,8 +385,12 @@ profile #j,
                     f"allowed parameters and their current value."
                 )
 
-        # if warm start we can use the previous fit as starting profile.
+        # if warm start we can use the previous fit as starting profiles.
         self._warm_start = warm_start
+        if not warm_start:
+            # We should not be able to use any methods requiring fit results
+            # until the fit method has been executed
+            self._fitted = False
 
     # -----
     # Data
@@ -673,12 +677,20 @@ profile #j,
             self.hardC_to_C_idx = self.hardC_to_C_idx
 
     # ----------------------
-    # Fit
+    # MCRALS methods
     # ----------------------
     def fit(self, X, profile):
 
+        self._fitted = False  # reiniit this flag
+
         self.X = X
-        self.set_profile(profile)
+
+        if isinstance(profile, (list, tuple)):
+            # we assume that the starting C and St are already computed
+            # (for ex. from a previous run of fit)
+            self._C, self._St = profile
+        else:
+            self.set_profile(profile)
 
         if self._X_is_missing() or (self._C_and_St_are_missing()):
             return
@@ -873,6 +885,9 @@ profile #j,
         self._St.data = Stdata
         self._Stsoft.data = Stsoftdata
         self._Chard.data = Charddata
+        self._fitted = True
+
+        return (self._C, self._St)
 
     @property
     def extOutput(self):
@@ -905,7 +920,9 @@ profile #j,
         return app.log.handlers[2].stream.getvalue().rstrip()
 
     @property
-    @deprecated("Use log instead. This attribute may be removed in future version")
+    @exceptions.deprecated(
+        "Use log instead. This attribute will be removed in future version"
+    )
     def logs(self):
         """
         Logs output.
@@ -923,6 +940,10 @@ profile #j,
         |NDDataset|
             The reconstructed X_hat dataset based on the MCS-ALS optimization.
         """
+        if not self._fitted:
+            raise exceptions.NotFittedError(
+                "The fit method must be used " "before using this method"
+            )
 
         # reconstruct from concentration and spectra profiles
         C = self.C
@@ -933,6 +954,10 @@ profile #j,
         X_hat.history = "Dataset reconstructed by MCS ALS optimization"
         X_hat.title = "X_hat: " + self.X.title
         return X_hat
+
+    # TODO: the plotmerit method is very similar between differnt estimator in the
+    #  analysis package. It woul be nice to put this in the plotter package for an
+    #  universal use and decreasing code redundancy.
 
     def plotmerit(self, **kwargs):
         """
@@ -949,6 +974,11 @@ profile #j,
         ax
             subplot.
         """
+        if not self._fitted:
+            raise exceptions.NotFittedError(
+                "The fit method must be used " "before using this method"
+            )
+
         colX, colXhat, colRes = kwargs.get("colors", ["blue", "green", "red"])
 
         X_hat = self.reconstruct()
