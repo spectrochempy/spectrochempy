@@ -895,6 +895,8 @@ profile #j,
         else:
             self._extOutput = None
 
+        self._C.data = Cdata
+        self._St.data = Stdata
         self._Stsoft.data = Stsoftdata
         self._Chard.data = Charddata
 
