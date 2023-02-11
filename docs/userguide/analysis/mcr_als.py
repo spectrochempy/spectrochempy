@@ -187,7 +187,7 @@ mcr.fit(X, St0)
 
 # %%
 mcr.tol = 0.01
-mcr.fit()
+mcr.fit(X, St0)
 
 # %% [markdown]
 # As could be expected more iterations have been necessary to reach this stricter
@@ -203,7 +203,7 @@ mcr.fit()
 
 # %%
 mcr.tol = 0.001
-mcr.fit()
+mcr.fit(X, St0)
 
 # %% [markdown]
 # #### Solutions
