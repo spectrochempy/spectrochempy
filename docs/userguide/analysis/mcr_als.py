@@ -205,6 +205,9 @@ mcr.fit(X, St0)
 mcr.tol = 0.001
 mcr.fit(X, St0)
 
+# %%
+mcr.fit(X, St0)
+
 # %% [markdown]
 # #### Solutions
 #
@@ -253,11 +256,10 @@ _ = mcr1.St.plot()
 # both normalizations:
 
 # %%
-mcr2 = MCRALS()
-mcr2.normSpec = "euclid"
+mcr2 = MCRALS(normSpec="euclid")
 mcr2.fit(X, St0)
 
-mcr3 = MCRALS(X, St0, normSpec="max")
+mcr3 = MCRALS(normSpec="max")
 mcr3.fit(X, St0)
 
 _ = mcr1.St.plot()

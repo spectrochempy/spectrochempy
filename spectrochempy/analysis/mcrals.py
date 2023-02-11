@@ -324,8 +324,6 @@ profile #j,
     # ----------------------------------------------------------------------------------
     def __init__(
         self,
-        X=None,
-        profile=None,
         *,
         log_level=logging.WARNING,
         config=None,
@@ -387,30 +385,8 @@ profile #j,
                     f"allowed parameters and their current value."
                 )
 
-        # Now, initialize the data
-        if X is not None:
-            self.X = X
-            warnings.warn(
-                "Passing X at the initiliztion of the estimator is deprecated",
-                category=PendingDeprecationWarning,
-            )
-
         # if warm start we can use the previous fit as starting profile.
         self._warm_start = warm_start
-        if warm_start and self._fitted:
-            (
-                C,
-                St,
-            ) = (
-                self._fitted
-            )  # TODO: check this possibility to get data from previous estimation
-
-        if profile is not None:
-            self.set_profile(profile)
-            warnings.warn(
-                "Passing X at the initilization of the estimator is deprecated",
-                category=PendingDeprecationWarning,
-            )
 
     # -----
     # Data
@@ -699,12 +675,10 @@ profile #j,
     # ----------------------
     # Fit
     # ----------------------
-    def fit(self, X=None, profile=None):
+    def fit(self, X, profile):
 
-        if X is not None:
-            self.X = X
-        if profile is not None:
-            self.set_profile(profile)
+        self.X = X
+        self.set_profile(profile)
 
         if self._X_is_missing() or (self._C_and_St_are_missing()):
             return
