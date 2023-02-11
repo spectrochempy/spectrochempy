@@ -162,7 +162,7 @@ mcr = MCRALS(log_level="INFO")
 # so we have a summary of the ALS iterations
 
 # %%
-mcr.fit(X, St0)
+out = mcr.fit(X, St0)
 
 # %% [markdown]
 # The optimization has converged within few iterations. The figures reported for each
@@ -205,8 +205,13 @@ mcr.fit(X, St0)
 mcr.tol = 0.001
 mcr.fit(X, St0)
 
+# %% [markdown]
+# #### More information about the MCRALS estimator
+#
+# ##### To get help about the different configuration parameters
+
 # %%
-mcr.fit(X, St0)
+print(mcr.help)
 
 # %% [markdown]
 # #### Solutions

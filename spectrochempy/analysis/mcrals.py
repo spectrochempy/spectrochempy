@@ -987,19 +987,20 @@ profile #j,
             d.update(self.trait_defaults(config=True))
         return d
 
-    def help(self):
-        """
-        Return a description of all configuration parameters with their default value
-
-        """
-        return self.class_config_rst_doc()
-
     def reset(self):
         """
         Reset configuration to default
         """
         for k, v in self.parameters(default=True).items():
             setattr(self, k, v)
+
+    @classmethod
+    @property
+    def help(cls):
+        """
+        Return a description of all configuration parameters with their default value
+        """
+        return cls.class_config_rst_doc()
 
 
 # ---------------------------------
