@@ -211,7 +211,7 @@ mcr.fit(X, St0)
 # ##### To get help about the different configuration parameters
 
 # %%
-print(mcr.help)
+# print(mcr.help)
 
 # %%
 # It is possible to chain fit runs, without recomputing everything for example for
@@ -224,18 +224,25 @@ out1 = mcr.fit(X, St0)
 # %%
 mcr = MCRALS(tol=0.1, log_level="INFO")
 out = mcr.fit(X, St0)
+
+# %%
 mcr.tol = 0.01
-print("second run with the ouput of the first")
 out = mcr.fit(X, out)  # reuse C and ST computed at the previous run
-print("third run with the ouput of the second")
+print("second run with the ouput of the first")
+
+# %%
 mcr.tol = 0.001
 out2 = mcr.fit(X, out)
+print("third run with the ouput of the second")
 
 # %%
 import numpy as np
 
 assert np.max(np.abs(out1[0] - out2[0])) < 1e-13
 assert np.max(np.abs(out1[1] - out2[1])) < 1e-13
+
+# %%
+np.max(np.abs(out1[0])), np.max(np.abs(out1[1]))
 
 # %% [markdown]
 # #### Solutions

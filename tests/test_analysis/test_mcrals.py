@@ -81,11 +81,11 @@ def model():
             self.C = C = NDDataset.zeros((len(t_c), n_PS), coordset=(t_c, PS_c))
 
             for i, id in enumerate((0, 1)):
-                C.data[:, i] = expon(t_c, c0[id], l[id], noise_conc[id])
-                St.data[i, :] = gaussian(wl_c, h[id], c[id], w[id], noise_spec[id])
+                self.C.data[:, i] = expon(t_c, c0[id], l[id], noise_conc[id])
+                self.St.data[i, :] = gaussian(wl_c, h[id], c[id], w[id], noise_spec[id])
 
-                C0.data[:, i] = expon(t_c, c0[id], l[id], 0)
-                St0.data[i, :] = gaussian(wl_c, h[id], c[id], w[id], 0)
+                self.C0.data[:, i] = expon(t_c, c0[id], l[id], 0)
+                self.St0.data[i, :] = gaussian(wl_c, h[id], c[id], w[id], 0)
 
     return Model()
 

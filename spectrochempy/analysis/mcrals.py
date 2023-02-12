@@ -18,13 +18,12 @@ import warnings
 import numpy as np
 import traitlets as tr
 
+from spectrochempy.analysis.abstractanalysis import AnalysisConfigurable
 from spectrochempy.analysis.pca import PCA
-from spectrochempy.core import app, debug_, info_, set_loglevel
-from spectrochempy.core.common.meta import Meta
+from spectrochempy.core import app, debug_, info_
 from spectrochempy.core.dataset.arraymixins.npy import dot
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import exceptions
-from spectrochempy.utils.traits import MetaConfigurable
 
 # Developper notes
 # ----------------
@@ -35,8 +34,7 @@ from spectrochempy.utils.traits import MetaConfigurable
 # some parameters.
 
 
-# class MCRALS(tr.HasTraits):
-class MCRALS(MetaConfigurable):
+class MCRALS(AnalysisConfigurable):
     """
     Performs MCR-ALS of a dataset knowing the initial C or St matrix.
 
@@ -92,28 +90,25 @@ class MCRALS(MetaConfigurable):
     # Notice that variable not defined this way lack this type validation, so they are
     # more prone to errors.
 
-    name = tr.Unicode("MCRALS")
-    description = tr.Unicode("MCRALS class")
+    description = tr.Unicode("to be written")
 
     # ----------------------------------------------------------------------------------
     # Runtime Parameters
     # ----------------------------------------------------------------------------------
-    _X = tr.Instance(NDDataset, allow_none=True)
+    # _X already defined in the superclass
+    # define here only the variable that you use in fit or transform functions
     _C = tr.Instance(NDDataset, allow_none=True)
     _Chard = tr.Instance(NDDataset, allow_none=True)
     _St = tr.Instance(NDDataset, allow_none=True)
     _StSoft = tr.Instance(NDDataset, allow_none=True)
     _extOutput = tr.Instance(NDDataset, allow_none=True)
     _nspecies = tr.Integer(0)
-    _warm_start = tr.Bool(False)
-    _fitted = tr.Bool(False)
 
     # ----------------------------------------------------------------------------------
     # Configuration parameters
     # They will be written in a file from which the default can be modified)
     # Obviously, the parameters can also be modified at runtime as usual by assignment.
     # ----------------------------------------------------------------------------------
-
     tol = tr.Float(
         0.1,
         help="""Convergence criterion on the change of residuals (percent change of
@@ -331,9 +326,6 @@ profile #j,
         **kwargs,
     ):
 
-        # call the super class for initialisation
-        super().__init__(section="MCRALS", config=config, parent=app)
-
         # warn about deprecation
         # ----------------------
         # We use pop to remove the deprecated argument before processing the rest
@@ -348,9 +340,6 @@ profile #j,
             )
         if verbose:
             log_level = "INFO"
-
-        # set log_level of the console report
-        set_loglevel(log_level)
 
         # unimodTol deprecation
         if "unimodTol" in kwargs.keys():
@@ -368,53 +357,19 @@ profile #j,
             )
             self.unimodConcMod = kwargs.pop("unimodMod", "strict")
 
-        # initial configuration
-        # reset to default if not warm_start
-        defaults = self.parameters(default=True)
-        configkw = {} if warm_start else defaults
-        # eventually take parameters form kwargs
-        configkw.update(kwargs)
-
-        for k, v in configkw.items():
-            if k in defaults.keys():
-                setattr(self, k, v)
-            else:
-                raise KeyError(
-                    f"'{k}' is not a valid configuration parameters. "
-                    f"Use the method `parameters()` to check the current "
-                    f"allowed parameters and their current value."
-                )
-
-        # if warm start we can use the previous fit as starting profiles.
-        self._warm_start = warm_start
-        if not warm_start:
-            # We should not be able to use any methods requiring fit results
-            # until the fit method has been executed
-            self._fitted = False
+        # call the super class for initialisation
+        super().__init__(
+            log_level=log_level,
+            warn_start=warm_start,
+            config=config,
+            parent=app,
+            **kwargs,
+        )
 
     # -----
     # Data
     # -----
-    @property
-    def X(self):
-        # if self._X is not None:
-        return self._X
-        # else:
-        #     raise ValueError(
-        #         "input X dataset must be initialized before any other operation."
-        #     )
-
-    @X.setter
-    def X(self, value):
-        self._X = value
-        # this implies an automatic validation of the X value
-
-    @tr.validate("_X")
-    def _X_validate(self, proposal):
-        X = proposal.value
-        if not isinstance(X, NDDataset):
-            X = NDDataset(X)
-        return X
+    # X define and validation already done in superclass
 
     @property
     def C(self):
@@ -462,14 +417,6 @@ profile #j,
             )
         # initialisation required
         return St
-
-    def _X_is_missing(self):
-        if self._X is None:
-            warnings.warn(
-                "Sorry, but the X dataset must be defined "
-                "before you can use MCRALS methods."
-            )
-            return True
 
     def _C_and_St_are_missing(self):
         if self._C is None and self._St is None:
@@ -677,7 +624,7 @@ profile #j,
             self.hardC_to_C_idx = self.hardC_to_C_idx
 
     # ----------------------
-    # MCRALS methods
+    # Public methods
     # ----------------------
     def fit(self, X, profile):
 
@@ -910,25 +857,6 @@ profile #j,
         """
         return self._Chard
 
-    @property
-    def log(self):
-        """
-        Logs output.
-        """
-        # A string handler (#2) is defined for the Spectrochempy logger,
-        # thus we will return it's content
-        return app.log.handlers[2].stream.getvalue().rstrip()
-
-    @property
-    @exceptions.deprecated(
-        "Use log instead. This attribute will be removed in future version"
-    )
-    def logs(self):
-        """
-        Logs output.
-        """
-        return self.log
-
     def reconstruct(self):
         """
         Transform data back to the original space.
@@ -954,83 +882,6 @@ profile #j,
         X_hat.history = "Dataset reconstructed by MCS ALS optimization"
         X_hat.title = "X_hat: " + self.X.title
         return X_hat
-
-    # TODO: the plotmerit method is very similar between differnt estimator in the
-    #  analysis package. It woul be nice to put this in the plotter package for an
-    #  universal use and decreasing code redundancy.
-
-    def plotmerit(self, **kwargs):
-        """
-        Plots the input dataset, reconstructed dataset and residuals.
-
-        Parameters
-        ----------
-        **kwargs
-            optional "colors" argument: tuple or array of 3 colors
-            for :math:`X`, :math:`\hat X` and :math:`E`.
-
-        Returns
-        -------
-        ax
-            subplot.
-        """
-        if not self._fitted:
-            raise exceptions.NotFittedError(
-                "The fit method must be used " "before using this method"
-            )
-
-        colX, colXhat, colRes = kwargs.get("colors", ["blue", "green", "red"])
-
-        X_hat = self.reconstruct()
-        res = self.X - X_hat
-        ax = self.X.plot()
-        if self.X.x is not None:
-            ax.plot(self.X.x.data, X_hat.T.data, color=colXhat)
-            ax.plot(self.X.x.data, res.T.data, color=colRes)
-        else:
-            ax.plot(X_hat.T.data, color=colXhat)
-            ax.plot(res.T.data, color=colRes)
-        ax.autoscale(enable=True)
-        ax.set_title("MCR ALS merit plot")
-        return ax
-
-    # Utility functions
-
-    def parameters(self, default=False):
-        """
-        Return current or default configuration values
-
-        Parameters
-        ----------
-        default : Bool, optional, default: False
-            If 'default' is True, the default parameters are returned,
-            else the current values.
-
-        Returns
-        -------
-        dict
-        """
-        d = Meta()
-        if not default:
-            d.update(self.trait_values(config=True))
-        else:
-            d.update(self.trait_defaults(config=True))
-        return d
-
-    def reset(self):
-        """
-        Reset configuration to default
-        """
-        for k, v in self.parameters(default=True).items():
-            setattr(self, k, v)
-
-    @classmethod
-    @property
-    def help(cls):
-        """
-        Return a description of all configuration parameters with their default value
-        """
-        return cls.class_config_rst_doc()
 
 
 # ---------------------------------
