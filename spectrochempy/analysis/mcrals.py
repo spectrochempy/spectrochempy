@@ -9,8 +9,8 @@ This module implements the MCRALS class.
 """
 
 __all__ = ["MCRALS"]
-
 __dataset_methods__ = []
+__configurables__ = ["MCRALS"]
 
 import logging
 import warnings
@@ -52,7 +52,7 @@ class MCRALS(MetaConfigurable):
     X : NDDataset or an array-like object, optional, default:None
         The dataset on which to perform the MCR-ALS analysis.
         DeprecationWarning: Passing parameter in MCRALS class constructor
-        will be deprecated in future version..
+        will be deprecated in future version.
         If X is not initialized here, it should be done by
         attribute assignment or in the class method (e.g.  mcr.Fit(X, CO)).
         This is the recommanded way.
@@ -92,7 +92,7 @@ class MCRALS(MetaConfigurable):
     # Notice that variable not defined this way lack this type validation, so they are
     # more prone to errors.
 
-    name = tr.Unicode("PlotPreferences")
+    name = tr.Unicode("MCRALS")
     description = tr.Unicode("MCRALS class")
 
     # ----------------------------------------------------------------------------------

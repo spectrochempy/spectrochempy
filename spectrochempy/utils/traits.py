@@ -60,7 +60,7 @@ class MetaConfigurable(Configurable):
             if isinstance(value, (type(cycler), Path)):
                 value = str(value)
             if isinstance(value, np.ndarray):
-                # we ned to transform it to a list of elements, bUT with python built-in
+                # we need to transform it to a list of elements, bUT with python built-in
                 # types, which is not the cas for instance for int64
                 value = value.tolist()
 

@@ -54,15 +54,15 @@ from spectrochempy.utils.version import Version
 # ======================================================================================
 # Setup
 # ======================================================================================
+
 # --------------------------------------------------------------------------------------
 # set the default style
 # --------------------------------------------------------------------------------------
 plt.style.use(["classic"])
 
-# ------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
 # Log levels
-# ------------------------------------------------------------------
-
+# --------------------------------------------------------------------------------------
 DEBUG = logging.DEBUG
 INFO = logging.INFO
 WARNING = logging.WARNING
@@ -70,11 +70,9 @@ ERROR = logging.ERROR
 CRITICAL = logging.CRITICAL
 
 
-# ------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
 # logo / copyright display
-# ------------------------------------------------------------------
-
-
+# --------------------------------------------------------------------------------------
 def _display_info_string(**kwargs):  # pragma: no cover
     _template = """
     {{widgetcss}}
@@ -140,9 +138,9 @@ def _display_info_string(**kwargs):  # pragma: no cover
     publish_display_data(data={"text/html": html})
 
 
-# ------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
 # Version
-# ------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
 try:
     __release__ = get_distribution("spectrochempy").version.split("+")[0]
     "Release version string of this package"
@@ -272,9 +270,9 @@ def _display_needs_update_message():
 CHECK_UPDATE = threading.Thread(target=_check_for_updates, args=(1,))
 CHECK_UPDATE.start()
 
-# other info
-
-
+# --------------------------------------------------------------------------------------
+# Other info
+# --------------------------------------------------------------------------------------
 __url__ = "https://www.spectrochempy.fr"
 "URL for the documentation of this package"
 
@@ -357,9 +355,9 @@ def _get_log_dir():
     return logdir
 
 
-# ======================================================================================================================
+# ======================================================================================
 # Magic ipython function
-# ======================================================================================================================
+# ======================================================================================
 @magics_class
 class SpectroChemPyMagics(Magics):
     """
@@ -582,9 +580,9 @@ class GeneralPreferences(MetaConfigurable):
     description = tr.Unicode("General options for the SpectroChemPy application")
     updated = tr.Bool(False)
 
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     # Configuration entries
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
 
     # NON GUI
     show_info_on_loading = tr.Bool(True, help="Display info on loading").tag(
@@ -934,8 +932,8 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
         [
             GeneralPreferences,
             PlotPreferences,
-            DataDir,
-        ]
+        ],
+        help="List of configurables",
     )
 
     _from_warning_ = tr.Bool(False)
@@ -949,6 +947,9 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
         self.debug_("*" * 40)
         self.initialize()
 
+    # ----------------------------------------------------------------------------------
+    # Error/warning capture
+    # ----------------------------------------------------------------------------------
     def _ipython_catch_exceptions(self, shell, etype, evalue, tb, tb_offset=None):
         # output the full traceback only in DEBUG mode
         if self.log_level == logging.DEBUG:
@@ -982,6 +983,9 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
             self._formatter(message)
             self.log.warning(f"({category.__name__}) {message}")
 
+    # ----------------------------------------------------------------------------------
+    # Initialisation of the configurables
+    # ----------------------------------------------------------------------------------
     def _init_all_preferences(self):
 
         # Get preferences from the config file
@@ -1017,15 +1021,15 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
                 if cfgname not in self._loaded_config_files:
                     self._loaded_config_files.append(cfgname)
 
-        # Eventually write the default config file
-        # --------------------------------------
-        self._make_default_config_file()
-
         self.datadir = (
             DataDir()
         )  # config=self.config)  -- passing args deprecated in traitlets 4.2
         self.preferences = GeneralPreferences(config=self.config, parent=self)
         self.plot_preferences = PlotPreferences(config=self.config, parent=self)
+
+    # ----------------------------------------------------------------------------------
+    # Public methods and properties
+    # ----------------------------------------------------------------------------------
 
     def start_show_config(self):
         """
@@ -1064,11 +1068,8 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
                 print(f"  {traitname} = {pprint.pformat(value, **pformat_kwargs)}")
 
         # now run the actual start function
-        return self._start()
+        return self.start()
 
-    # ----------------------------------------------------------------------------------
-    # Public methods and properties
-    # ----------------------------------------------------------------------------------
     def initialize(self, argv=None):
         """
         Initialisation function for the API applications.
@@ -1160,10 +1161,49 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
 
         All configuration must have been done before calling this function.
         """
+        if self.running:
+            # API already started. Nothing done!
+            return True
 
-        # print(f'{sys.argv}')
+        if self.preferences.show_info_on_loading:
+            info_string = (
+                f"SpectroChemPy's API - v.{__version__}\n© Copyright {__copyright__}"
+            )
+            ipy = get_ipython()
+            if ipy is not None and "TerminalInteractiveShell" not in str(ipy):
+                _display_info_string(message=info_string.strip())
 
-        return self._start()
+            else:
+                if "/bin/scpy" not in sys.argv[0]:  # deactivate for console scripts
+                    info_(info_string.strip())
+
+        # force update of rcParams
+        for rckey in mpl.rcParams.keys():
+            key = rckey.replace("_", "__").replace(".", "_").replace("-", "___")
+            try:
+                mpl.rcParams[rckey] = getattr(self.plot_preferences, key)
+            except ValueError:
+                mpl.rcParams[rckey] = getattr(self.plot_preferences, key).replace(
+                    "'", ""
+                )
+            except AttributeError:
+                # print(f'{e} -> you may want to add it to PlotPreferences.py')
+                pass
+
+        self.plot_preferences.set_latex_font(self.plot_preferences.font_family)
+
+        # display needs for update
+        msg = _display_needs_update_message()
+        if msg:
+            self.log.warning(msg)
+
+        # Eventually write the default config file
+        # --------------------------------------
+        self._make_default_config_file()
+
+        debug_("API loaded - application is ready")
+        self.running = True
+        return True
 
     from contextlib import contextmanager
 
@@ -1235,57 +1275,28 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
     # Private methods
     # ------------------------------------------------------------------------
 
-    def _start(self):
-
-        if self.running:
-            # API already started. Nothing done!
-            return True
-
-        if self.preferences.show_info_on_loading:
-            info_string = (
-                f"SpectroChemPy's API - v.{__version__}\n© Copyright {__copyright__}"
-            )
-            ipy = get_ipython()
-            if ipy is not None and "TerminalInteractiveShell" not in str(ipy):
-                _display_info_string(message=info_string.strip())
-
-            else:
-                if "/bin/scpy" not in sys.argv[0]:  # deactivate for console scripts
-                    info_(info_string.strip())
-
-        # force update of rcParams
-        for rckey in mpl.rcParams.keys():
-            key = rckey.replace("_", "__").replace(".", "_").replace("-", "___")
-            try:
-                mpl.rcParams[rckey] = getattr(self.plot_preferences, key)
-            except ValueError:
-                mpl.rcParams[rckey] = getattr(self.plot_preferences, key).replace(
-                    "'", ""
-                )
-            except AttributeError:
-                # print(f'{e} -> you may want to add it to PlotPreferences.py')
-                pass
-
-        self.plot_preferences.set_latex_font(self.plot_preferences.font_family)
-
-        self.running = True
-
-        # display needs for update
-        msg = _display_needs_update_message()
-        if msg:
-            self.log.warning(msg)
-
-        debug_("API loaded - application is ready")
-        return True
-
     def _make_default_config_file(self):
         """auto generate default config file."""
 
-        fname = self.config_dir / self.config_file_name
-        fname = fname.with_suffix(".py")
+        # first we will complete self.classes with a list of configurable in analysis
+        from spectrochempy.analysis.api import __configurables__
 
-        if not fname.exists() or self.reset_config:
-            sfil = self.generate_config_file()
+        # remove old configuration file spectrochempy_cfg.py
+
+        self.classes.extend(__configurables__)
+        config_classes = list(self._classes_with_config_traits(self.classes))
+        for cls in config_classes:
+            name = cls.__name__ if cls.__name__ != "Application" else "application"
+            fname = self.config_dir / f"{name}.cfg.py"
+            if fname.exists() and not self.reset_config:
+                continue
+            """generate default config file from Configurables"""
+            lines = [f"# Configuration file for SpectroChemPy::{name}"]
+            lines.append("")
+            lines.append("c = get_config()  # noqa")
+            lines.append("")
+            lines.append(cls.class_config_section([cls]))
+            sfil = "\n".join(lines)
             self.log.info(f"Generating default config file: {fname}")
             with open(fname, "w") as fil:
                 fil.write(sfil)

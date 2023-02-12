@@ -38,9 +38,12 @@ def list_packages(package):
     return sorted(names)
 
 
-def generate_api(api_path):
-    # name of the package
+def generate_api(api_path, configurables=False):
 
+    from spectrochempy.application import debug_
+    from spectrochempy.core.dataset.nddataset import NDDataset
+
+    # name of the package
     dirname, name = os.path.split(os.path.split(api_path)[0])
 
     if not dirname.endswith("spectrochempy"):
@@ -52,34 +55,39 @@ def generate_api(api_path):
     pkgs = list_packages(pkgs)
 
     __all__ = []
+    __configurables__ = []
 
     for pkg in pkgs:
         if pkg.endswith("api") or "test" in pkg:
             continue
         try:
             pkg = import_item(pkg)
-        except Exception:
+        except Exception as exc:
+            debug_(exc)
             if not hasattr(pkg, "__all__"):
                 continue
             raise ImportError(pkg)
         if not hasattr(pkg, "__all__"):
             continue
 
-        a = getattr(pkg, "__all__", [])
+        # Some  methods are classmethod of NDDatasets
         dmethods = getattr(pkg, "__dataset_methods__", [])
+        for item in dmethods:
+            setattr(NDDataset, item, getattr(pkg, item))
 
+        # set general method for the current package API
+        a = getattr(pkg, "__all__", [])
         __all__ += a
         for item in a:
-
-            # set general method for the current package API
             obj = getattr(pkg, item)
             setattr(api, item, obj)
+            confs = getattr(pkg, "__configurables__", [])
+            for conf in confs:
+                __configurables__.append(getattr(pkg, conf))
 
-            # some  methods are class method of NDDatasets
-            if item in dmethods:
-                from spectrochempy.core.dataset.nddataset import NDDataset
-
-                setattr(NDDataset, item, getattr(pkg, item))
+    # if required get also a list of configurables
+    if configurables:
+        return __all__, __configurables__
 
     return __all__
 
