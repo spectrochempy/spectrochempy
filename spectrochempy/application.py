@@ -715,7 +715,7 @@ class GeneralPreferences(MetaConfigurable):
     # Class Initialisation
     # ----------------------------------------------------------------------------------
     def __init__(self, **kwargs):
-        super().__init__(jsonfile="GeneralPreferences", **kwargs)
+        super().__init__(section="GeneralPreferences", **kwargs)
 
 
 # ======================================================================================================================
@@ -779,12 +779,12 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
     ).tag(config=True)
     """Flag: True if one wants to reset settings to the original config defaults."""
 
-    config_file_name = tr.Unicode(None, help="Configuration file name").tag(config=True)
-    """Configuration file name."""
-
-    @tr.default("config_file_name")
-    def _get_config_file_name_default(self):
-        return str(self.name).lower() + "_cfg"
+    # config_file_name = tr.Unicode(None, help="Configuration file name").tag(config=True)
+    # """Configuration file name."""
+    #
+    # @tr.default("config_file_name")
+    # def _get_config_file_name_default(self):
+    #     return str(self.name).lower() + "_cfg"
 
     config_dir = tr.Instance(Path, help="Set the configuration directory location").tag(
         config=True
@@ -988,20 +988,25 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
     # ----------------------------------------------------------------------------------
     def _init_all_preferences(self):
 
-        # Get preferences from the config file
+        # Get preferences from the config files
         # ---------------------------------------------------------------------
 
         if not self.config:
             self.config = Config()
 
         configfiles = []
-        if self.config_file_name:
-            config_file = self.config_dir / self.config_file_name
-            configfiles.append(config_file)
+        if self.config_dir:
 
             lis = self.config_dir.iterdir()
             for fil in lis:
-                if fil.suffix == ".json":
+                if fil.suffix == ".py":
+                    pyname = self.config_dir / fil
+                    if self.reset_config:
+                        # remove the py file to reset to defaults
+                        pyname.unlink()
+                    else:
+                        configfiles.append(pyname)
+                elif fil.suffix == ".jso":
                     jsonname = self.config_dir / fil
                     if self.reset_config or fil == "PlotPreferences.json":
                         # remove the user json file to reset to defaults
@@ -1282,11 +1287,15 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
         from spectrochempy.analysis.api import __configurables__
 
         # remove old configuration file spectrochempy_cfg.py
+        fname = self.config_dir / "spectrochempy_cfg.py"  # Old configuration file
+        if fname.exists():
+            fname.unlink()
 
+        # create a configuration file for each configurables
         self.classes.extend(__configurables__)
         config_classes = list(self._classes_with_config_traits(self.classes))
         for cls in config_classes:
-            name = cls.__name__ if cls.__name__ != "Application" else "application"
+            name = cls.__name__
             fname = self.config_dir / f"{name}.cfg.py"
             if fname.exists() and not self.reset_config:
                 continue

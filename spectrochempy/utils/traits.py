@@ -10,6 +10,7 @@ import numpy as np
 from matplotlib import cycler
 from traitlets import All, List, TraitError, Undefined, observe
 from traitlets.config.configurable import Configurable
+from traitlets.config.loader import LazyConfigValue
 
 __all__ = ["MetaConfigurable", "Range"]
 
@@ -22,14 +23,12 @@ class MetaConfigurable(Configurable):
     executions of the main application.
     """
 
-    def __init__(self, jsonfile=None, **kwargs):  # lgtm[py/missing-call-to-init]
+    def __init__(self, section, **kwargs):  # lgtm[py/missing-call-to-init]
 
         super().__init__(**kwargs)
 
         self.cfg = self.parent.config_manager
-        self.jsonfile = self.parent.config_file_name
-        if jsonfile is not None:
-            self.jsonfile = jsonfile
+        self.section = section
 
     def to_dict(self):
         """
@@ -45,6 +44,17 @@ class MetaConfigurable(Configurable):
             d[k] = v.default_value
         return d
 
+    def trait_defaults(self, *names, **metadata):
+        # override traitlets trait default to take into accound changes in the config file
+        defaults = super().trait_defaults(*names, **metadata)
+        # modify with the loaded external config
+        if not names:  # full dictionary
+            config = self.config[self.section]
+            if "shape" in config and isinstance(config["shape"], LazyConfigValue):
+                del config["shape"]  # remove the lazy configurable object
+            defaults.update(config)
+        return defaults
+
     @observe(All)
     def _anytrait_changed(self, change):
         # update configuration after any change
@@ -56,16 +66,16 @@ class MetaConfigurable(Configurable):
         if change.name in self.traits(config=True):
 
             value = change.new
-            # replace non serialisable value by an equivalent
+            # replace non serializable value by an equivalent
             if isinstance(value, (type(cycler), Path)):
                 value = str(value)
             if isinstance(value, np.ndarray):
                 # we need to transform it to a list of elements, bUT with python built-in
-                # types, which is not the cas for instance for int64
+                # types, which is not the case e.g., for int64
                 value = value.tolist()
 
             self.cfg.update(
-                self.jsonfile,
+                self.section,
                 {
                     self.__class__.__name__: {
                         change.name: value,

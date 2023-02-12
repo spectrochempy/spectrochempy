@@ -332,7 +332,7 @@ profile #j,
     ):
 
         # call the super class for initialisation
-        super().__init__(jsonfile="MCRALS", config=config, parent=app)
+        super().__init__(section="MCRALS", config=config, parent=app)
 
         # warn about deprecation
         # ----------------------
