@@ -609,10 +609,6 @@ class GeneralPreferences(MetaConfigurable):
         (tr.Instance(Path), tr.Unicode()), help="Workspace directory by default"
     ).tag(config=True, gui=True, kind="folder")
 
-    # ------------------------------------------------------------------------
-    # Configuration entries
-    # ------------------------------------------------------------------------
-
     autoload_project = tr.Bool(
         True, help="Automatic loading of the last project at startup"
     ).tag(config=True, gui=True)
@@ -647,9 +643,12 @@ class GeneralPreferences(MetaConfigurable):
 
     @tr.default("project_directory")
     def _get_default_project_directory(self):
-        # Determines the SpectroChemPy project directory name and creates the directory if it doesn't exist.
-        # This directory is typically ``$HOME/spectrochempy/projects``, but if the SCP_PROJECTS_HOME environment
-        # variable is set and the `$SCP_PROJECTS_HOME` directory exists, it will be that directory.
+        # Determines the SpectroChemPy project directory name and creates the directory
+        # if it doesn't exist.
+        # This directory is typically ``$HOME/spectrochempy/projects``, but if the
+        # SCP_PROJECTS_HOME environment
+        # variable is set and the `$SCP_PROJECTS_HOME` directory exists, it will be
+        # that directory.
         # If neither exists, the former will be created.
 
         # first look for SCP_PROJECTS_HOME
@@ -718,9 +717,9 @@ class GeneralPreferences(MetaConfigurable):
         super().__init__(section="GeneralPreferences", **kwargs)
 
 
-# ======================================================================================================================
+# ======================================================================================
 # Application
-# ======================================================================================================================
+# ======================================================================================
 
 
 class SpectroChemPy(Application):
@@ -739,8 +738,8 @@ class SpectroChemPy(Application):
     "Running name of the application"
 
     description = tr.Unicode(
-        "SpectroChemPy is a framework for processing, analysing and modelling Spectroscopic data for "
-        "Chemistry with Python."
+        "SpectroChemPy is a framework for processing, analysing and modelling "
+        "Spectroscopic data for Chemistry with Python."
     )
     "Short description of the |scpy| application"
 
@@ -751,13 +750,16 @@ class SpectroChemPy(Application):
     def _get_long_description(self):
         desc = f"""
 <p><strong>SpectroChemPy</strong> is a framework for processing, analysing and modelling
- <strong>Spectro</>scopic data for <strong>Chem</strong>istry with <strong>Py</strong>thon.
+ <strong>Spectro</>scopic data for <strong>Chem</strong>istry with
+ <strong>Py</strong>thon.
  It is a cross platform software, running on Linux, Windows or OS X.</p><br><br>
 <strong>Version:</strong> {__release__}<br>
 <strong>Authors:</strong> {__author__}<br>
 <strong>License:</strong> {__license__}<br>
-<div class='warning'> SpectroChemPy is still experimental and under active development. Its current design and
- functionalities are subject to major changes, reorganizations, bugs and crashes!!!. Please report any issues
+<div class='warning'> SpectroChemPy is still experimental and under active development.
+Its current design and
+ functionalities are subject to major changes, reorganizations, bugs and crashes!!!.
+ Please report any issues
 to the <a url='https://github.com/spectrochempy/spectrochempy/issues'>Issue Tracker<a>
 </div><br><br>
 When using <strong>SpectroChemPy</strong> for your own work,
@@ -1329,7 +1331,7 @@ config_manager = app.config_manager
 config_dir = app.config_dir
 reset_preferences = app.reset_preferences
 
-# ======================================================================================================================
+# ======================================================================================
 
 if __name__ == "__main__":
     pass
