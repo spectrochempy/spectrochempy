@@ -340,7 +340,7 @@ class PCA(AnalysisConfigurable):
         self._S = S
 
         self._fitted = True
-        return S, LT
+        return self  # To be in line with the scikit-learn behavior
 
     def reduce(self, n_pc=None):
         """

@@ -161,16 +161,16 @@ def test_MCRALS(model, data):
     # test chaining fit runs
     mcr = MCRALS()
     mcr.tol == 0.1
-    out = mcr.fit(D, C0)
+    mcr.fit(D, C0)
     mcr.tol == 0.01
-    out1 = mcr.fit(D, out)
+    mcr.fit(D, (mcr.C, mcr.St))
 
-    mcr = MCRALS()
-    mcr.tol == 0.01
-    out2 = mcr.fit(D, C0)
+    mcr1 = MCRALS()
+    mcr1.tol == 0.01
+    mcr1.fit(D, C0)
 
-    assert np.max(np.abs(out1[0] - out2[0])) < 1.0e-13
-    assert np.max(np.abs(out1[1] - out2[1])) < 1.0e-13
+    assert np.max(np.abs(mcr.C - mcr1.C)) < 1.0e-13
+    assert np.max(np.abs(mcr.St - mcr1.St)) < 1.0e-13
 
     # test diverging
     mcr.monoIncConc = [0, 1]

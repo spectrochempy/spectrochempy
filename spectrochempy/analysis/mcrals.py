@@ -840,7 +840,8 @@ profile #j,
         self._Chard.data = Charddata
         self._fitted = True
 
-        return (self._C, self._St)
+        return self  # to be in line with scikit learn behavior
+        # self.fit(X).reconstruct()  must work
 
     @property
     def extOutput(self):

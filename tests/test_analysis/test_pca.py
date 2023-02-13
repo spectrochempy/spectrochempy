@@ -53,6 +53,11 @@ def test_pca():
     dataset_hat_2 = pca.fit_reconstruct(dataset, n_pc=5)
     assert testing.assert_dataset_equal(dataset_hat, dataset_hat_2)
 
+    # test fit + reconstruct
+    pca = PCA(centered=False, standardized=True, scaled=True)
+    dataset_hat_3 = pca.fit(dataset).reconstruct(n_pc=5)
+    assert testing.assert_dataset_equal(dataset_hat, dataset_hat_3)
+
     # test with observations < variables
     pca2 = PCA()
     pca2.fit(dataset[:, 4000.0:3995.0])

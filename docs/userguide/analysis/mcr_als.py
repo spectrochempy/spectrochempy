@@ -162,7 +162,7 @@ mcr = MCRALS(log_level="INFO")
 # so we have a summary of the ALS iterations
 
 # %%
-out = mcr.fit(X, St0)
+mcr.fit(X, St0)
 
 # %% [markdown]
 # The optimization has converged within few iterations. The figures reported for each
@@ -218,31 +218,28 @@ mcr.fit(X, St0)
 # optimization of some parameters
 
 mcr = MCRALS(tol=0.001, log_level="INFO")
-out1 = mcr.fit(X, St0)
+mcr.fit(X, St0)
 
 
 # %%
-mcr = MCRALS(tol=0.1, log_level="INFO")
-out = mcr.fit(X, St0)
+mcr1 = MCRALS(tol=0.1, log_level="INFO")
+mcr1.fit(X, St0)
 
 # %%
-mcr.tol = 0.01
-out = mcr.fit(X, out)  # reuse C and ST computed at the previous run
+mcr1.tol = 0.01
+mcr1.fit(X, (mcr1.C, mcr1.St))  # reuse C and ST computed at the previous run
 print("second run with the ouput of the first")
 
 # %%
-mcr.tol = 0.001
-out2 = mcr.fit(X, out)
+mcr1.tol = 0.001
+mcr1.fit(X, (mcr1.C, mcr1.St))
 print("third run with the ouput of the second")
 
 # %%
 import numpy as np
 
-assert np.max(np.abs(out1[0] - out2[0])) < 1e-13
-assert np.max(np.abs(out1[1] - out2[1])) < 1e-13
-
-# %%
-np.max(np.abs(out1[0])), np.max(np.abs(out1[1]))
+assert np.max(np.abs(mcr.C - mcr1.C)) < 1e-13
+assert np.max(np.abs(mcr.St - mcr1.St)) < 1e-13
 
 # %% [markdown]
 # #### Solutions
