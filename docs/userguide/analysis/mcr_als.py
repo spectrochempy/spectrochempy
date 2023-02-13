@@ -332,7 +332,8 @@ _ = mcr3.C.T.plot()
 # Let's first analyse our dataset using PCA and plot a screeplot:
 
 # %%
-pca = PCA(X)
+pca = PCA()
+pca.fit(X)
 pca.printev(n_pc=10)
 _ = pca.screeplot(n_pc=8)
 
@@ -365,8 +366,9 @@ _ = LT.plot()
 # 29 in the present case:
 
 # %%
-pca = PCA(X)
-S3, LT3 = PCA(X).reduce(n_pc="auto")
+pca = PCA()
+pca.fit(X)
+S3, LT3 = pca.reduce(n_pc="auto")
 S3.shape
 
 # %% [markdown]

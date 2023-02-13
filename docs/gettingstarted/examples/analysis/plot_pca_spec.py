@@ -30,7 +30,8 @@ _ = dataset.plot()
 
 ##############################################################
 # Create a PCA object
-pca = scp.PCA(dataset, centered=False)
+pca = scp.PCA(centered=False)
+pca.fit(dataset)
 
 ##############################################################
 # Reduce the dataset to a lower dimensionality (number of
