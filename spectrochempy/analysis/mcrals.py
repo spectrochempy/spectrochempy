@@ -19,7 +19,7 @@ import traitlets as tr
 
 from spectrochempy.analysis.abstractanalysis import AnalysisConfigurable
 from spectrochempy.analysis.pca import PCA
-from spectrochempy.core import app, debug_, info_
+from spectrochempy.core import debug_, info_
 from spectrochempy.core.dataset.arraymixins.npy import dot
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import exceptions
@@ -77,7 +77,7 @@ class MCRALS(AnalysisConfigurable):
     # Notice that variable not defined this way lack this type validation, so they are
     # more prone to errors.
 
-    description = tr.Unicode("to be written")
+    description = tr.Unicode("MCRALS model")
 
     # ----------------------------------------------------------------------------------
     # Runtime Parameters
@@ -349,7 +349,6 @@ profile #j,
             log_level=log_level,
             warn_start=warm_start,
             config=config,
-            parent=app,
             **kwargs,
         )
 
