@@ -33,8 +33,9 @@ class AnalysisConfigurable(MetaConfigurable):
     # ----------------------------------------------------------------------------------
     # Runtime Parameters
     # ----------------------------------------------------------------------------------
-    _warm_start = tr.Bool(False)
-    _fitted = tr.Bool(False)
+    _warm_start = tr.Bool(False, help="If True previous execution state " "is reused")
+    _fitted = tr.Bool(False, help="False if the model was not yet fitted")
+    _copy = tr.Bool(True, help="If True passed X data are copied")
 
     _X = tr.Instance(NDDataset, allow_none=True)  # Data to fit an estimate
 
@@ -53,6 +54,7 @@ class AnalysisConfigurable(MetaConfigurable):
         log_level=logging.WARNING,
         config=None,
         warm_start=False,
+        copy=True,
         **kwargs,
     ):
 
@@ -86,6 +88,9 @@ class AnalysisConfigurable(MetaConfigurable):
             # until the fit method has been executed
             self._fitted = False
 
+        # should we copy the data (default True)
+        self.copy = copy
+
     # ----------------------------------------------------------------------------------
     # Data
     # ----------------------------------------------------------------------------------
@@ -102,7 +107,9 @@ class AnalysisConfigurable(MetaConfigurable):
     def _X_validate(self, proposal):
         X = proposal.value
         if not isinstance(X, NDDataset):
-            X = NDDataset(X)
+            X = NDDataset(X, copy=self.copy)
+        elif self.copy:
+            X = X.copy()
         return X
 
     def _X_is_missing(self):

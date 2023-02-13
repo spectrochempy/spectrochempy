@@ -99,6 +99,7 @@ class PCA(AnalysisConfigurable):
     def __init__(
         self,
         *,
+        copy=True,
         log_level="WARNING",
         config=None,
         warm_start=False,
@@ -106,6 +107,7 @@ class PCA(AnalysisConfigurable):
     ):
         # call the super class for initialisation
         super().__init__(
+            copy=True,
             log_level=log_level,
             warn_start=warm_start,
             config=config,
@@ -142,17 +144,6 @@ class PCA(AnalysisConfigurable):
     # ------------------------------------------------------------------------
     # Private methods
     # ------------------------------------------------------------------------
-    @tr.validate("_X")
-    def _X_validate(self, proposal):
-        # override the default validator
-
-        X = proposal.value
-        if not isinstance(X, NDDataset):
-            X = NDDataset(X, copy=True)
-        else:
-            X = X.copy()
-        return X
-
     @tr.observe("_X")
     def _preprocess_as_X_changed(self, change):
 
