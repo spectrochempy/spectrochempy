@@ -9,7 +9,6 @@ This module implements the MCRALS class.
 """
 
 __all__ = ["MCRALS"]
-__dataset_methods__ = []
 __configurables__ = ["MCRALS"]
 
 import logging
@@ -47,26 +46,12 @@ class MCRALS(AnalysisConfigurable):
 
     Parameters
     ----------
-    X : NDDataset or an array-like object, optional, default:None
-        The dataset on which to perform the MCR-ALS analysis.
-        DeprecationWarning: Passing parameter in MCRALS class constructor
-        will be deprecated in future version.
-        If X is not initialized here, it should be done by
-        attribute assignment or in the class method (e.g.  mcr.Fit(X, CO)).
-        This is the recommanded way.
-    profile : NDDataset or an array-like object, optional, default:None
-        Initial concentration or spectra.
-        If profile is not initialized here, it should be done by
-        attribute assignment or in the class method (e.g.  mcr.Fit(X, CO)).
-        This is the recommanded way.
-    **kwargs
-        Optional parameters, see Other parameters below.
-
-    Other Parameters
-    ----------------
     log_level : ["INFO", "DEBUG", "WARNING", "ERROR"], optional, default:"WARNING"
         The log level at startup
-    config : Config object
+    config : Config object, optional
+        By default the configuration is determined by the MCRALS.py
+        file in the configuration directory. A traitlets.config.Config() object can
+        eventually be used here.
     warm_start : bool, optional, default: false
         When fitting with MCRALS repeatedly on the same dataset, but for multiple
         parameter values (such as to find the value maximizing performance),
@@ -74,6 +59,8 @@ class MCRALS(AnalysisConfigurable):
         value, saving time.
         When warm_start is true, the existing fitted model attributes is used to
         initialize the new model in a subsequent call to fit.
+    **kwargs
+        Optional configuration  parameters.
 
     See Also
     --------
@@ -627,7 +614,20 @@ profile #j,
     # Public methods
     # ----------------------
     def fit(self, X, profile):
+        """
 
+        Parameters
+        ----------
+        X : NDDataset or an array-like object
+            Dataset to fit with MCRALS
+        profile : NDDataset or an array-like object,
+            Initial concentration or spectra.
+
+        Returns
+        -------
+        tuple of NDDataset
+            C and St computed dataset.
+        """
         self._fitted = False  # reiniit this flag
 
         self.X = X
