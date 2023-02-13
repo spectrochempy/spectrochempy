@@ -117,7 +117,7 @@ class AnalysisConfigurable(MetaConfigurable):
 
     @tr.default("name")
     def _name_default(self):
-        return __class__.__name__
+        raise NameError("The name of the object was not defined.")
 
     # ----------------------------------------------------------------------------------
     # Public methods
@@ -159,9 +159,9 @@ class AnalysisConfigurable(MetaConfigurable):
                 "The fit method must be used " "before using this method"
             )
 
-        colX, colXhat, colRes = kwargs.get("colors", ["blue", "green", "red"])
+        colX, colXhat, colRes = kwargs.pop("colors", ["blue", "green", "red"])
 
-        X_hat = self.reconstruct()
+        X_hat = self.reconstruct(**kwargs)
         res = self.X - X_hat
         ax = self.X.plot()
         if self.X.x is not None:
@@ -171,7 +171,7 @@ class AnalysisConfigurable(MetaConfigurable):
             ax.plot(X_hat.T.data, color=colXhat)
             ax.plot(res.T.data, color=colRes)
         ax.autoscale(enable=True)
-        ax.set_title("MCR ALS merit plot")
+        ax.set_title(f"{self.name} merit plot")
         return ax
 
     # ----------------------------------------------------------------------------------

@@ -77,6 +77,7 @@ class MCRALS(AnalysisConfigurable):
     # Notice that variable not defined this way lack this type validation, so they are
     # more prone to errors.
 
+    name = tr.Unicode("MCRALS")
     description = tr.Unicode("MCRALS model")
 
     # ----------------------------------------------------------------------------------
@@ -90,6 +91,7 @@ class MCRALS(AnalysisConfigurable):
     _StSoft = tr.Instance(NDDataset, allow_none=True)
     _extOutput = tr.Instance(NDDataset, allow_none=True)
     _nspecies = tr.Integer(0)
+    _pca = tr.Instance(NDDataset)
 
     # ----------------------------------------------------------------------------------
     # Configuration parameters
@@ -609,6 +611,11 @@ profile #j,
             self.closureTarget = self.closureTarget
             self.hardC_to_C_idx = self.hardC_to_C_idx
 
+            # fire the computation of PCA use in fit.
+            pca = PCA()
+            pca.fit(self.X)
+            self._pca = pca.reconstruct(n_pc=self.nspecies)
+
     # ----------------------
     # Public methods
     # ----------------------
@@ -659,8 +666,8 @@ profile #j,
         self._Chard = self._C.copy()
         self._Stsoft = self._St.copy()
 
-        # makes a PCA with same number of species for further comparison
-        Xpcadata = PCA(self.X).reconstruct(n_pc=self.nspecies).data
+        # get PCA with same number of species for further comparison
+        Xpcadata = self._pca.data
 
         while change >= self.tol and niter < self.maxit and ndiv < self.maxdiv:
 

@@ -9,28 +9,27 @@ This module implement the PCA (Principal Component Analysis) class.
 """
 
 __all__ = ["PCA"]
-
-__dataset_methods__ = []
+__configurables__ = __all__
 
 import numpy as np
+import traitlets as tr
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 from scipy import special
-from traitlets import HasTraits, Instance
 
+from spectrochempy.analysis.abstractanalysis import AnalysisConfigurable
 from spectrochempy.analysis.svd import SVD
 from spectrochempy.core import info_
 from spectrochempy.core.dataset.arraymixins.npy import dot
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils import NBlue, NRed
+from spectrochempy.utils import NBlue, NRed, exceptions
 
-# ======================================================================================================================
+
+# ======================================================================================
 # class PCA
-# ======================================================================================================================
-
-
-class PCA(HasTraits):
+# ======================================================================================
+class PCA(AnalysisConfigurable):
     """
     Principal Component Analysis.
 
@@ -49,20 +48,7 @@ class PCA(HasTraits):
 
     Parameters
     ----------
-    dataset : |NDDataset| object
-        The input dataset has shape (M, N). M is the number of
-        observations (for examples a series of IR spectra) while N
-        is the number of features (for example the wavenumbers measured
-        in each IR spectrum).
-    centered : bool, optional, default:True
-        If True the data are centered around the mean values: :math:`X' = X
-        - mean(X)`.
-    standardized : bool, optional, default:False
-        If True the data are scaled to unit standard deviation: :math:`X' =
-        X / \\sigma`.
-    scaled : bool, optional, default:False
-        If True the data are scaled in the interval [0-1]: :math:`X' = (X -
-        min(X)) / (max(X)-min(X))`.
+
 
     See Also
     --------
@@ -74,114 +60,68 @@ class PCA(HasTraits):
        Performs MCR-ALS of a |NDDataset| knowing the initial C or St matrix.
     """
 
-    _LT = Instance(NDDataset)
-    _S = Instance(NDDataset)
-    _X = Instance(NDDataset)
+    name = tr.Unicode("PCA")
+    description = tr.Unicode("PCA model")
 
-    _ev = Instance(NDDataset)
-    """|NDDataset| - Explained variances (The eigenvalues of the covariance matrix)."""
+    # ----------------------------------------------------------------------------------
+    # Runtime Parameters
+    # ----------------------------------------------------------------------------------
+    # _X already defined in the superclass
+    # define here only the variable that you use in fit or transform functions
 
-    _ev_ratio = Instance(NDDataset)
-    """|NDDataset| - Explained variance per singular values."""
+    _LT = tr.Instance(NDDataset, allow_none=True, help="Loadings")
+    _S = tr.Instance(NDDataset, allow_none=True, help="Scores")
+    _Xscaled = tr.Instance(NDDataset, help="preprocessed X")
+    _svd = tr.Instance(SVD)
 
-    _ev_cum = Instance(NDDataset)
-    """|NDDataset| - Cumulative Explained Variances."""
+    # ----------------------------------------------------------------------------------
+    # Configuration parameters
+    # ----------------------------------------------------------------------------------
+    centered = tr.Bool(
+        default_value=True,
+        help="If True the data are centered around the mean values: "
+        ":math:`X' = X - mean(X)`",
+    ).tag(config=True)
+    standardized = tr.Bool(
+        default_value=False,
+        help="If True the data are scaled to unit standard deviation: "
+        ":math:`X' = X / \\sigma`",
+    ).tag(config=True)
+    scaled = tr.Bool(
+        default_value=False,
+        help="If True the data are scaled in the interval [0-1]: "
+        ":math:`X' = (X - min(X)) / (max(X)-min(X))`",
+    ).tag(config=True)
 
-    def __init__(self, dataset, centered=True, standardized=False, scaled=False):
-
-        super().__init__()
-
-        self.prefs = dataset.preferences
-
-        self._X = X = dataset
-
-        Xsc = X.copy()
-
-        # mean center the dataset
-        # -----------------------
-        self._centered = centered
-        if centered:
-            self._center = center = X.mean(dim=0)
-            Xsc = X - center
-            Xsc.name = f"centered {X.name}"
-
-        # Standardization
-        # ---------------
-        self._standardized = standardized
-        if standardized:
-            self._std = Xsc.std(dim=0)
-            Xsc /= self._std
-            Xsc.name = f"standardized {Xsc.name}"
-
-        # Scaling
-        # -------
-        self._scaled = scaled
-        if scaled:
-            self._min = Xsc.min(dim=0)
-            self._ampl = Xsc.ptp(dim=0)
-            Xsc -= self._min
-            Xsc /= self._ampl
-            Xsc.name = "scaled %s" % Xsc.name
-
-        self._Xscaled = Xsc
-
-        # perform SVD
-        # -----------
-        svd = SVD(Xsc)
-        sigma = svd.s.diag()
-        U = svd.U
-        VT = svd.VT
-
-        # select n_pc loadings & compute scores
-        # --------------------------------------------------------------------
-
-        # loadings
-
-        LT = VT
-        LT.title = "loadings (L^T) of " + X.name
-        LT.history = "Created by PCA"
-
-        # scores
-
-        S = dot(U, sigma)
-        S.title = "scores (S) of " + X.name
-        S.set_coordset(
-            y=X.y,
-            x=Coord(
-                None,
-                labels=["#%d" % (i + 1) for i in range(svd.s.size)],
-                title="principal component",
-            ),
+    # ----------------------------------------------------------------------------------
+    # Initialization
+    # ----------------------------------------------------------------------------------
+    def __init__(
+        self,
+        *,
+        log_level="WARNING",
+        config=None,
+        warm_start=False,
+        **kwargs,
+    ):
+        # call the super class for initialisation
+        super().__init__(
+            log_level=log_level,
+            warn_start=warm_start,
+            config=config,
+            **kwargs,
         )
-
-        S.description = "scores (S) of " + X.name
-        S.history = "Created by PCA"
-
-        self._LT = LT
-        self._S = S
-
-        # other attributes
-        # ----------------
-
-        self._sv = svd.sv
-        self._sv.x.title = "PC #"
-
-        self._ev = svd.ev
-        self._ev.x.title = "PC #"
-
-        self._ev_ratio = svd.ev_ratio
-        self._ev_ratio.x.title = "PC #"
-
-        self._ev_cum = svd.ev_cum
-        self._ev_cum.x.title = "PC #"
-
-        return
 
     # ------------------------------------------------------------------------
     # Special methods
     # ------------------------------------------------------------------------
 
     def __str__(self, n_pc=5):
+
+        if not self._fitted:
+            raise exceptions.NotFittedError(
+                f"The fit method must be used prior using the {self.name} model"
+            )
 
         s = "\n"
         s += "PC\tEigenvalue\t\t%variance\t\t%cumulative\n"
@@ -202,6 +142,46 @@ class PCA(HasTraits):
     # ------------------------------------------------------------------------
     # Private methods
     # ------------------------------------------------------------------------
+    @tr.validate("_X")
+    def _X_validate(self, proposal):
+        # override the default validator
+
+        X = proposal.value
+        if not isinstance(X, NDDataset):
+            X = NDDataset(X, copy=True)
+        else:
+            X = X.copy()
+        return X
+
+    @tr.observe("_X")
+    def _preprocess_as_X_changed(self, change):
+
+        Xsc = self.X
+
+        # mean center the dataset
+        # -----------------------
+        if self.centered:
+            self._center = center = Xsc.mean(dim=0)
+            Xsc = Xsc - center
+            Xsc.name = f"centered {Xsc.name}"
+
+        # Standardization
+        # ---------------
+        if self.standardized:
+            self._std = Xsc.std(dim=0)
+            Xsc /= self._std
+            Xsc.name = f"standardized {Xsc.name}"
+
+        # Scaling
+        # -------
+        if self.scaled:
+            self._min = Xsc.min(dim=0)
+            self._ampl = Xsc.ptp(dim=0)
+            Xsc -= self._min
+            Xsc /= self._ampl
+            Xsc.name = "scaled %s" % Xsc.name
+
+        self._Xscaled = Xsc
 
     def _get_n_pc(self, n_pc=None):
 
@@ -253,8 +233,8 @@ class PCA(HasTraits):
         Automatic Choice of Dimensionality for PCA. NIPS 2000 : 598-604.
         Copied and modified from scikit-learn.decomposition.pca (BSD-3 license)
         """
-        spectrum = self._ev.data
-        M, N = self._X.shape
+        spectrum = self.ev.data
+        M, N = self.X.shape
 
         if rank > len(spectrum):
             raise ValueError("The tested rank cannot exceed the rank of the dataset")
@@ -298,7 +278,7 @@ class PCA(HasTraits):
         Copied and modified from _infer_dimensions in
         scikit-learn.decomposition.pca (BSD-3 license).
         """
-        n_ev = self._ev.size
+        n_ev = self.ev.size
         ll = np.empty(n_ev)
         for rank in range(n_ev):
             ll[rank] = self._assess_dimension_(rank)
@@ -307,6 +287,59 @@ class PCA(HasTraits):
     # ------------------------------------------------------------------------
     # Public methods
     # ------------------------------------------------------------------------
+
+    def fit(self, X):
+        """
+        Fit the PCA model
+
+        Parameters
+        ----------
+        X : |NDDataset| object
+            The input dataset has shape (M, N). M is the number of
+            observations (for examples a series of IR spectra) while N
+            is the number of features (for example the wavenumbers measured
+            in each IR spectrum).
+        """
+        self.X = X  # fire the preprocessing validation
+
+        # Xscaled has been computed when X was set
+        Xsc = self._Xscaled
+
+        # perform SVD
+        # -----------
+        svd = SVD(Xsc)
+        sigma = svd.s.diag()
+        U = svd.U
+        VT = svd.VT
+        self._svd = svd
+
+        # loadings
+
+        LT = VT
+        LT.title = "loadings (L^T) of " + X.name
+        LT.history = "Created by PCA"
+
+        # scores
+
+        S = dot(U, sigma)
+        S.title = "scores (S) of " + X.name
+        S.set_coordset(
+            y=X.y,
+            x=Coord(
+                None,
+                labels=["#%d" % (i + 1) for i in range(svd.s.size)],
+                title="principal component",
+            ),
+        )
+
+        S.description = "scores (S) of " + X.name
+        S.history = "Created by PCA"
+
+        self._LT = LT
+        self._S = S
+
+        self._fitted = True
+        return S, LT
 
     def reduce(self, n_pc=None):
         """
@@ -328,6 +361,10 @@ class PCA(HasTraits):
         S, LT : |NDDataset| objects.
             n_pc loadings and their corresponding scores for each observations.
         """
+        if not self._fitted:
+            raise exceptions.NotFittedError(
+                "The fit method must be used " "before using this method"
+            )
 
         # get n_pc (automatic or determined by the n_pc arguments)
         n_pc = self._get_n_pc(n_pc)
@@ -335,10 +372,13 @@ class PCA(HasTraits):
         # scores (S) and loading (L^T) matrices
         # ------------------------------------
 
-        S = self._S[:, :n_pc]
-        LT = self._LT[:n_pc]
+        S = self.S[:, :n_pc]
+        LT = self.LT[:n_pc]
 
         return S, LT
+
+    transform = reduce
+    transform.__doc__ = "Alias of reduce (Scikit-learn terminology)"
 
     def reconstruct(self, n_pc=None):
         """
@@ -357,58 +397,41 @@ class PCA(HasTraits):
         |NDDataset|
             The reconstructed dataset based on n_pc principal components.
         """
+        if not self._fitted:
+            raise exceptions.NotFittedError(
+                "The fit method must be used " "before using this method"
+            )
 
         # get n_pc (automatic or determined by the n_pc arguments)
         n_pc = self._get_n_pc(n_pc)
 
         # reconstruct from scores and loadings using n_pc components
-        S = self._S[:, :n_pc]
-        LT = self._LT[:n_pc]
+        S = self.S[:, :n_pc]
+        LT = self.LT[:n_pc]
 
         X = dot(S, LT)
 
         # try to reconstruct something close to the original scaled, standardized or centered data
-        if self._scaled:
+        if self.scaled:
             X *= self._ampl
             X += self._min
-        if self._standardized:
+        if self.standardized:
             X *= self._std
-        if self._centered:
+        if self.centered:
             X += self._center
 
         X.history = f"PCA reconstructed Dataset with {n_pc} principal components"
-        X.name = self._X.name
-        X.title = self._X.title
+        X.name = self.X.name
+        X.title = self.X.title
         return X
 
+    inverse_transform = reconstruct
+    inverse_transform.__doc__ = "Alias of reconstruct (Scikit-learn terminology)"
+
     def plotmerit(self, n_pc=None, **kwargs):
-        """
-        Plots the input dataset, reconstructed dataset and residuals.
+        # call the super plotmerit with an additional argument: n_pc
 
-        Parameters
-        ----------
-        **kwargs
-            optional "colors" argument: tuple or array of 3 colors for :math:`X`, :math:`\hat X` and :math:`E`.
-
-        Returns
-        -------
-        ax
-            subplot.
-        """
-        colX, colXhat, colRes = kwargs.get("colors", ["blue", "green", "red"])
-
-        X_hat = self.reconstruct(n_pc=n_pc)
-        res = self.X - X_hat
-        ax = self.X.plot()
-        if self.X.x is not None:
-            ax.plot(self.X.x.data, X_hat.T.data, color=colXhat)
-            ax.plot(self.X.x.data, res.T.data, color=colRes)
-        else:
-            ax.plot(X_hat.T.data, color=colXhat)
-            ax.plot(res.T.data, color=colRes)
-        ax.autoscale(enable=True)
-        ax.set_title("PCA merit plot")
-        return ax
+        super().plotmerit(n_pc=n_pc, **kwargs)
 
     def printev(self, n_pc=None):
         """
@@ -422,6 +445,11 @@ class PCA(HasTraits):
             The number of components to print.
         """
         # get n_pc (automatic or determined by the n_pc arguments)
+        if not self._fitted:
+            raise exceptions.NotFittedError(
+                "The fit method must be used " "before using this method"
+            )
+
         n_pc = self._get_n_pc(n_pc)
 
         print((self.__str__(n_pc)))
@@ -449,6 +477,11 @@ class PCA(HasTraits):
                 The list of axes.
         """
         # get n_pc (automatic or determined by the n_pc arguments) - min = 3
+        if not self._fitted:
+            raise exceptions.NotFittedError(
+                "The fit method must be used " "before using this method"
+            )
+
         n_pc = max(self._get_n_pc(n_pc), 3)
 
         color1, color2 = kwargs.get("colors", [NBlue, NRed])
@@ -456,14 +489,14 @@ class PCA(HasTraits):
         ylim1, ylim2 = kwargs.get("ylims", [(0, 100), "auto"])
 
         if ylim2 == "auto":
-            y1 = np.around(self._ev_ratio.data[0] * 0.95, -1)
+            y1 = np.around(self.ev_ratio.data[0] * 0.95, -1)
             y2 = 101.0
             ylim2 = (y1, y2)
 
-        ax1 = self._ev_ratio[:n_pc].plot_bar(
+        ax1 = self.ev_ratio[:n_pc].plot_bar(
             ylim=ylim1, color=color1, title="Scree plot"
         )
-        ax2 = self._ev_cum[:n_pc].plot_scatter(
+        ax2 = self.ev_cum[:n_pc].plot_scatter(
             ylim=ylim2, color=color2, pen=True, markersize=7.0, twinx=ax1
         )
         ax1.set_title("Scree plot")
@@ -484,6 +517,12 @@ class PCA(HasTraits):
             on the colormap. If labels, the labels of the n_observation are
             used for color mapping.
         """
+        if not self._fitted:
+            raise exceptions.NotFittedError(
+                "The fit method must be used " "before using this method"
+            )
+
+        self.prefs = self.X.preferences
 
         if isinstance(pcs[0], (list, tuple, set)):
             pcs = pcs[0]
@@ -494,15 +533,15 @@ class PCA(HasTraits):
         # colors
         if color_mapping == "index":
 
-            if np.any(self._S.y.data):
-                colors = self._S.y.data
+            if np.any(self.S.y.data):
+                colors = self.S.y.data
             else:
-                colors = np.array(range(self._S.shape[0]))
+                colors = np.array(range(self.S.shape[0]))
 
         elif color_mapping == "labels":
 
-            labels = list(set(self._S.y.labels))
-            colors = [labels.index(lab) for lab in self._S.y.labels]
+            labels = list(set(self.S.y.labels))
+            colors = [labels.index(lab) for lab in self.S.y.labels]
 
         if len(pcs) == 2:
             # bidimentional score plot
@@ -512,14 +551,14 @@ class PCA(HasTraits):
             ax.set_title("Score plot")
 
             ax.set_xlabel(
-                "PC# {} ({:.3f}%)".format(pcs[0] + 1, self._ev_ratio.data[pcs[0]])
+                "PC# {} ({:.3f}%)".format(pcs[0] + 1, self.ev_ratio.data[pcs[0]])
             )
             ax.set_ylabel(
-                "PC# {} ({:.3f}%)".format(pcs[1] + 1, self._ev_ratio.data[pcs[1]])
+                "PC# {} ({:.3f}%)".format(pcs[1] + 1, self.ev_ratio.data[pcs[1]])
             )
             axsc = ax.scatter(
-                self._S.masked_data[:, pcs[0]],
-                self._S.masked_data[:, pcs[1]],
+                self.S.masked_data[:, pcs[0]],
+                self.S.masked_data[:, pcs[1]],
                 s=30,
                 c=colors,
                 cmap=colormap,
@@ -541,18 +580,18 @@ class PCA(HasTraits):
             ax = plt.axes(projection="3d")
             ax.set_title("Score plot")
             ax.set_xlabel(
-                "PC# {} ({:.3f}%)".format(pcs[0] + 1, self._ev_ratio.data[pcs[0]])
+                "PC# {} ({:.3f}%)".format(pcs[0] + 1, self.ev_ratio.data[pcs[0]])
             )
             ax.set_ylabel(
-                "PC# {} ({:.3f}%)".format(pcs[1] + 1, self._ev_ratio.data[pcs[1]])
+                "PC# {} ({:.3f}%)".format(pcs[1] + 1, self.ev_ratio.data[pcs[1]])
             )
             ax.set_zlabel(
-                "PC# {} ({:.3f}%)".format(pcs[2] + 1, self._ev_ratio.data[pcs[2]])
+                "PC# {} ({:.3f}%)".format(pcs[2] + 1, self.ev_ratio.data[pcs[2]])
             )
             axsc = ax.scatter(
-                self._S.masked_data[:, pcs[0]],
-                self._S.masked_data[:, pcs[1]],
-                self._S.masked_data[:, pcs[2]],
+                self.S.masked_data[:, pcs[0]],
+                self.S.masked_data[:, pcs[1]],
+                self.S.masked_data[:, pcs[2]],
                 zdir="z",
                 s=30,
                 c=colors,
@@ -574,10 +613,48 @@ class PCA(HasTraits):
         return ax
 
     @property
+    def sv(self):
+        """Singular values"""
+        if not self._fitted:
+            return
+        sv = self._svd.sv
+        sv.x.title = "PC #"
+        return sv
+
+    @property
+    def ev(self):
+        """Explained variances (The eigenvalues of the covariance matrix)."""
+        if not self._fitted:
+            return
+        ev = self._svd.ev
+        ev.x.title = "PC #"
+        return ev
+
+    @property
+    def ev_ratio(self):
+        """Explained variance per singular values."""
+        if not self._fitted:
+            return
+        ev_ratio = self._svd.ev_ratio
+        ev_ratio.x.title = "PC #"
+        return ev_ratio
+
+    @property
+    def ev_cum(self):
+        """Cumulative Explained Variances."""
+        if not self._fitted:
+            return
+        ev_cum = self._svd.ev_cum
+        ev_cum.x.title = "PC #"
+        return ev_cum
+
+    @property
     def LT(self):
         """
         LT.
         """
+        if not self._fitted:
+            return
         return self._LT
 
     @property
@@ -585,37 +662,9 @@ class PCA(HasTraits):
         """
         S.
         """
+        if not self._fitted:
+            return
         return self._S
-
-    @property
-    def X(self):
-        """
-        X.
-        """
-        return self._X
-
-    @property
-    def ev(self):
-        """
-        Explained variances (|NDDataset|).
-
-        (The eigenvalues of the covariance matrix).
-        """
-        return self._ev
-
-    @property
-    def ev_ratio(self):
-        """
-        Explained variance per singular values (|NDDataset|).
-        """
-        return self._ev_ratio
-
-    @property
-    def ev_cum(self):
-        """
-        Cumulative Explained Variances (|NDDataset|).
-        """
-        return self._ev_cum
 
 
 # ============================================================================

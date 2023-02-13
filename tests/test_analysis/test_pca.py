@@ -14,7 +14,7 @@ import numpy as np
 
 from spectrochempy.analysis.pca import PCA
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils import MASKED, show
+from spectrochempy.utils import MASKED, exceptions, show
 from spectrochempy.utils.optional import import_optional_dependency
 from spectrochempy.utils.testing import assert_array_almost_equal
 
@@ -28,12 +28,18 @@ def test_pca():
     # with masks
     dataset[:, 1240.0:920.0] = MASKED  # do not forget to use float in slicing
 
-    pca = PCA(dataset)
+    pca = PCA()
+    try:
+        str(pca)[:3] == "\nPC"
+    except exceptions.NotFittedError:
+        pass
 
+    pca.fit(dataset)
     assert str(pca)[:3] == "\nPC"
 
     # test alternative options
-    pca = PCA(dataset, centered=False, standardized=True, scaled=True)
+    pca = PCA(centered=False, standardized=True, scaled=True)
+    pca.fit(dataset)
 
     assert str(pca)[:3] == "\nPC"
 
@@ -44,7 +50,8 @@ def test_pca():
     assert (dataset_hat - dataset).max() < 0.4
 
     # test with observations < variables
-    pca2 = PCA(dataset[:, 4000.0:3995.0])
+    pca2 = PCA()
+    pca2.fit(dataset[:, 4000.0:3995.0])
     _, LT2 = pca2.reduce(n_pc="auto")
     assert LT2.shape[0] == 5
 
@@ -79,21 +86,22 @@ def test_compare_scikit_learn():
     pcas = sklPCA(n_components=2)
     pcas.fit(X)
 
-    pca = PCA(NDDataset(X))
+    pca = PCA()
+    pca.fit(NDDataset(X))
     pca.printev(n_pc=2)
 
     assert_array_almost_equal(pca._sv.data, pcas.singular_values_)
     assert_array_almost_equal(pca.ev_ratio.data, pcas.explained_variance_ratio_ * 100.0)
 
     dataset = NDDataset.read("irdata/nh4y-activation.spg")
-    X1 = dataset.copy().data
+    X1 = dataset.copy()  # skl can use directly nddataset but will transform
+    # them to simple array
 
     pcas = sklPCA(n_components=5, svd_solver="full")
     pcas.fit(X1)
 
-    X2 = NDDataset(dataset.copy())
-    pca = PCA(X2)
-
+    pca = PCA()
+    pca.fit(X1)
     pca.printev(n_pc=5)
 
     assert_array_almost_equal(pca._sv.data[:5], pcas.singular_values_[:5], 4)
@@ -106,5 +114,6 @@ def test_compare_scikit_learn():
 
 def _test_issue_15():
     x = NDDataset.read_omnic("irdata/nh4y-activation.spg")
-    my_pca = PCA(x)
+    my_pca = PCA()
+    my_pca.fit(x)
     my_pca.reconstruct(n_pc=3)
