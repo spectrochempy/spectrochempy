@@ -20,17 +20,24 @@ import spectrochempy as scp
 
 dataset = scp.read_omnic("irdata/nh4y-activation.spg")
 print(dataset)
-dataset.plot_stack()
+_ = dataset.plot()
+
+""
+dataset[
+    :, 882.0:1280.0
+] = scp.MASKED  # remember: use float numbers for slicing (not integer)
+_ = dataset.plot()
 
 ##############################################################
 # Create a PCA object
-pca = scp.PCA(dataset, centered=False)
+pca = scp.PCA(centered=False)
+pca.fit(dataset)
 
 ##############################################################
 # Reduce the dataset to a lower dimensionality (number of
-# components is automatically determined)
+# components is automatically determined: 3 in this case)
 
-S, LT = pca.reduce(n_pc=0.99)
+S, LT = pca.reduce(n_pc=0.999)
 
 print(LT)
 
@@ -48,8 +55,11 @@ _ = pca.scoreplot(1, 2)
 _ = pca.scoreplot(1, 2, 3)
 
 ##############################################################################
-# Displays the 4-first loadings
+# Displays the 3 loadings
 
-LT[:4].plot_stack()
+_ = LT.plot(legend=True)
 
-# scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
+# uncomment the line below to see plot if needed (not necessary in jupyter notebook)
+# scp.show()
+
+""

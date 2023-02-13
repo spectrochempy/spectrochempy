@@ -33,8 +33,9 @@ class AnalysisConfigurable(MetaConfigurable):
     # ----------------------------------------------------------------------------------
     # Runtime Parameters
     # ----------------------------------------------------------------------------------
-    _warm_start = tr.Bool(False)
-    _fitted = tr.Bool(False)
+    _warm_start = tr.Bool(False, help="If True previous execution state " "is reused")
+    _fitted = tr.Bool(False, help="False if the model was not yet fitted")
+    _copy = tr.Bool(True, help="If True passed X data are copied")
 
     _X = tr.Instance(NDDataset, allow_none=True)  # Data to fit an estimate
 
@@ -53,6 +54,7 @@ class AnalysisConfigurable(MetaConfigurable):
         log_level=logging.WARNING,
         config=None,
         warm_start=False,
+        copy=True,
         **kwargs,
     ):
 
@@ -86,6 +88,9 @@ class AnalysisConfigurable(MetaConfigurable):
             # until the fit method has been executed
             self._fitted = False
 
+        # should we copy the data (default True)
+        self.copy = copy
+
     # ----------------------------------------------------------------------------------
     # Data
     # ----------------------------------------------------------------------------------
@@ -102,7 +107,9 @@ class AnalysisConfigurable(MetaConfigurable):
     def _X_validate(self, proposal):
         X = proposal.value
         if not isinstance(X, NDDataset):
-            X = NDDataset(X)
+            X = NDDataset(X, copy=self.copy)
+        elif self.copy:
+            X = X.copy()
         return X
 
     def _X_is_missing(self):
@@ -117,27 +124,58 @@ class AnalysisConfigurable(MetaConfigurable):
 
     @tr.default("name")
     def _name_default(self):
-        return __class__.__name__
+        raise NameError("The name of the object was not defined.")
 
     # ----------------------------------------------------------------------------------
     # Public methods
     # ----------------------------------------------------------------------------------
-    def fit(self, X, profile):
+    def fit(self, X, y):
         # to be overriden by user defined function (with the same name)
         self._fitted = False  # reiniit this flag
-        self.X = X
-
-        #######
-        # ....
-        results = None
-        #######
-        self._fitted = True
-        return results
+        raise NotImplementedError("fit method has not yet been implemented")
 
     def reconstruct(self):
         """
         to be overriden
         """
+        raise NotImplementedError(
+            "reconstruct/inverse_transform has not yet been implemented"
+        )
+
+    inverse_transform = reconstruct
+    inverse_transform.__doc__ = "Alias of reconstruct (Scikit-learn terminology)"
+
+    def reduce(self):
+        """
+        to be overriden
+        """
+        raise NotImplementedError("reduce/transform has not yet been implemented")
+
+    transform = reconstruct
+    transform.__doc__ = "Alias of reduce (Scikit-learn terminology)"
+
+    def fit_reconstruct(self, X, y=None, **kwargs):
+        """
+        Fit the model with X and apply the dimensionality reduction on X.
+
+        Parameters
+        ----------
+        X : NDDataset
+            Input dataset of shape (n_observation, n_feature) to fit
+        y : Optional target
+            It's presence or not depends on the model.
+        **kwargs : Additional optional keywords parameters
+
+        Returns
+        -------
+        NDDataset
+        """
+        self.fit(X, y)
+        Xhat = self.reconstruct(**kwargs)
+        return Xhat
+
+    fit_transform = fit_reconstruct
+    fit_transform.__doc__ = "Alias of fit_transform (Scikit-learn terminology)"
 
     def plotmerit(self, **kwargs):
         """
@@ -159,9 +197,9 @@ class AnalysisConfigurable(MetaConfigurable):
                 "The fit method must be used " "before using this method"
             )
 
-        colX, colXhat, colRes = kwargs.get("colors", ["blue", "green", "red"])
+        colX, colXhat, colRes = kwargs.pop("colors", ["blue", "green", "red"])
 
-        X_hat = self.reconstruct()
+        X_hat = self.reconstruct(**kwargs)
         res = self.X - X_hat
         ax = self.X.plot()
         if self.X.x is not None:
@@ -171,13 +209,12 @@ class AnalysisConfigurable(MetaConfigurable):
             ax.plot(X_hat.T.data, color=colXhat)
             ax.plot(res.T.data, color=colRes)
         ax.autoscale(enable=True)
-        ax.set_title("MCR ALS merit plot")
+        ax.set_title(f"{self.name} merit plot")
         return ax
 
     # ----------------------------------------------------------------------------------
     # Utility functions
     # ----------------------------------------------------------------------------------
-
     def parameters(self, default=False):
         """
         Return current or default configuration values

@@ -19,7 +19,7 @@ import traitlets as tr
 
 from spectrochempy.analysis.abstractanalysis import AnalysisConfigurable
 from spectrochempy.analysis.pca import PCA
-from spectrochempy.core import app, debug_, info_
+from spectrochempy.core import debug_, info_
 from spectrochempy.core.dataset.arraymixins.npy import dot
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import exceptions
@@ -77,7 +77,8 @@ class MCRALS(AnalysisConfigurable):
     # Notice that variable not defined this way lack this type validation, so they are
     # more prone to errors.
 
-    description = tr.Unicode("to be written")
+    name = tr.Unicode("MCRALS")
+    description = tr.Unicode("MCRALS model")
 
     # ----------------------------------------------------------------------------------
     # Runtime Parameters
@@ -91,6 +92,7 @@ class MCRALS(AnalysisConfigurable):
     # ext_Output can be of anytype
     # _extOutput = tr.Instance(NDDataset, allow_none=True)
     _nspecies = tr.Integer(0)
+    _pca = tr.Instance(NDDataset)
 
     # ----------------------------------------------------------------------------------
     # Configuration parameters
@@ -354,9 +356,8 @@ profile #j,
         # call the super class for initialisation
         super().__init__(
             log_level=log_level,
-            warn_start=warm_start,
+            warm_start=warm_start,
             config=config,
-            parent=app,
             **kwargs,
         )
 
@@ -616,6 +617,11 @@ profile #j,
             self.closureTarget = self.closureTarget
             self.hardC_to_C_idx = self.hardC_to_C_idx
 
+            # fire the computation of PCA use in fit.
+            pca = PCA()
+            pca.fit(self.X)
+            self._pca = pca.reconstruct(n_pc=self.nspecies)
+
     # ----------------------
     # Public methods
     # ----------------------
@@ -666,8 +672,8 @@ profile #j,
         self._Chard = self._C.copy()
         self._Stsoft = self._St.copy()
 
-        # makes a PCA with same number of species for further comparison
-        Xpcadata = PCA(self.X).reconstruct(n_pc=self.nspecies).data
+        # get PCA with same number of species for further comparison
+        Xpcadata = self._pca.data
 
         while change >= self.tol and niter < self.maxit and ndiv < self.maxdiv:
             Cdata = np.linalg.lstsq(Stdata.T, Xdata.T, rcond=None)[0].T
@@ -841,7 +847,8 @@ profile #j,
         self._Chard.data = Charddata
         self._fitted = True
 
-        return (self._C, self._St)
+        return self  # to be in line with scikit learn behavior
+        # self.fit(X).reconstruct()  must work
 
     @property
     def extOutput(self):

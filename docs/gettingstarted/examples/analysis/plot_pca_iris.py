@@ -28,7 +28,8 @@ except (IOError, OSError):
 
 ##############################################################
 # Create a PCA object
-pca = scp.PCA(dataset, centered=True)
+pca = scp.PCA(centered=True)
+pca.fit(dataset)
 
 ##############################################################
 # Reduce the data to a lower dimensionality. Here, the number of
