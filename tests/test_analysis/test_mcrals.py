@@ -222,6 +222,15 @@ def test_MCRALS(model, data):
     mcr.fit(D, St0.data)
     assert "converged !" in mcr.log[-15:]
 
+    # reconstruct
+    Dh = mcr.reconstruct()
+    assert (Dh - D).abs().max() < 1.0e-14
+
+    # fit_reconstruct
+    mcr = MCRALS(tol=15.0)
+    Dh2 = mcr.fit_reconstruct(D, St0)
+    testing.assert_dataset_equal(Dh, Dh2)
+
 
 def test_MCRALS_errors(model, data):
     # Text exceptions

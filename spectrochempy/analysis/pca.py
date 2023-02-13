@@ -288,7 +288,7 @@ class PCA(AnalysisConfigurable):
     # Public methods
     # ------------------------------------------------------------------------
 
-    def fit(self, X):
+    def fit(self, X, y=None):
         """
         Fit the PCA model
 
@@ -299,6 +299,7 @@ class PCA(AnalysisConfigurable):
             observations (for examples a series of IR spectra) while N
             is the number of features (for example the wavenumbers measured
             in each IR spectrum).
+        y : ignored
         """
         self.X = X  # fire the preprocessing validation
 

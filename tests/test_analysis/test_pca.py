@@ -14,9 +14,8 @@ import numpy as np
 
 from spectrochempy.analysis.pca import PCA
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils import MASKED, exceptions, show
+from spectrochempy.utils import MASKED, exceptions, show, testing
 from spectrochempy.utils.optional import import_optional_dependency
-from spectrochempy.utils.testing import assert_array_almost_equal
 
 # test pca
 # ---------
@@ -48,6 +47,11 @@ def test_pca():
 
     dataset_hat = pca.reconstruct(n_pc=5)
     assert (dataset_hat - dataset).max() < 0.4
+
+    # test fit_reconstruct
+    pca = PCA(centered=False, standardized=True, scaled=True)
+    dataset_hat_2 = pca.fit_reconstruct(dataset, n_pc=5)
+    assert testing.assert_dataset_equal(dataset_hat, dataset_hat_2)
 
     # test with observations < variables
     pca2 = PCA()
@@ -90,8 +94,10 @@ def test_compare_scikit_learn():
     pca.fit(NDDataset(X))
     pca.printev(n_pc=2)
 
-    assert_array_almost_equal(pca._sv.data, pcas.singular_values_)
-    assert_array_almost_equal(pca.ev_ratio.data, pcas.explained_variance_ratio_ * 100.0)
+    testing.assert_array_almost_equal(pca._sv.data, pcas.singular_values_)
+    testing.assert_array_almost_equal(
+        pca.ev_ratio.data, pcas.explained_variance_ratio_ * 100.0
+    )
 
     dataset = NDDataset.read("irdata/nh4y-activation.spg")
     X1 = dataset.copy()  # skl can use directly nddataset but will transform
@@ -104,8 +110,8 @@ def test_compare_scikit_learn():
     pca.fit(X1)
     pca.printev(n_pc=5)
 
-    assert_array_almost_equal(pca._sv.data[:5], pcas.singular_values_[:5], 4)
-    assert_array_almost_equal(
+    testing.assert_array_almost_equal(pca._sv.data[:5], pcas.singular_values_[:5], 4)
+    testing.assert_array_almost_equal(
         pca.ev_ratio.data[:5], pcas.explained_variance_ratio_[:5] * 100.0, 4
     )
 

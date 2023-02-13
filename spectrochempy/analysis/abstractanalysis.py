@@ -122,22 +122,51 @@ class AnalysisConfigurable(MetaConfigurable):
     # ----------------------------------------------------------------------------------
     # Public methods
     # ----------------------------------------------------------------------------------
-    def fit(self, X, profile):
+    def fit(self, X, y):
         # to be overriden by user defined function (with the same name)
         self._fitted = False  # reiniit this flag
-        self.X = X
-
-        #######
-        # ....
-        results = None
-        #######
-        self._fitted = True
-        return results
+        raise NotImplementedError("fit method has not yet been implemented")
 
     def reconstruct(self):
         """
         to be overriden
         """
+        raise NotImplementedError(
+            "reconstruct/inverse_transform has not yet been implemented"
+        )
+
+    inverse_transform = reconstruct
+    inverse_transform.__doc__ = "Alias of reconstruct (Scikit-learn terminology)"
+
+    def reduce(self):
+        """
+        to be overriden
+        """
+        raise NotImplementedError("reduce/transform has not yet been implemented")
+
+    transform = reconstruct
+    transform.__doc__ = "Alias of reduce (Scikit-learn terminology)"
+
+    def fit_reconstruct(self, X, y=None, **kwargs):
+        """
+        Fit the model with X and apply the dimensionality reduction on X.
+
+        Parameters
+        ----------
+        X : NDDataset
+            Input dataset of shape (n_observation, n_feature) to fit
+        y : ignored
+
+        Returns
+        -------
+        NDDataset
+        """
+        self.fit(X, y)
+        Xhat = self.reconstruct(**kwargs)
+        return Xhat
+
+    fit_transform = fit_reconstruct
+    fit_transform.__doc__ = "Alias of fit_transform (Scikit-learn terminology)"
 
     def plotmerit(self, **kwargs):
         """
@@ -177,7 +206,6 @@ class AnalysisConfigurable(MetaConfigurable):
     # ----------------------------------------------------------------------------------
     # Utility functions
     # ----------------------------------------------------------------------------------
-
     def parameters(self, default=False):
         """
         Return current or default configuration values
