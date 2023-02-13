@@ -155,7 +155,9 @@ class AnalysisConfigurable(MetaConfigurable):
         ----------
         X : NDDataset
             Input dataset of shape (n_observation, n_feature) to fit
-        y : ignored
+        y : Optional target
+            It's presence or not depends on the model.
+        **kwargs : Additional optional keywords parameters
 
         Returns
         -------
