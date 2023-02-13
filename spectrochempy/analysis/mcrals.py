@@ -88,7 +88,8 @@ class MCRALS(AnalysisConfigurable):
     _Chard = tr.Instance(NDDataset, allow_none=True)
     _St = tr.Instance(NDDataset, allow_none=True)
     _StSoft = tr.Instance(NDDataset, allow_none=True)
-    _extOutput = tr.Instance(NDDataset, allow_none=True)
+    # ext_Output can be of anytype
+    # _extOutput = tr.Instance(NDDataset, allow_none=True)
     _nspecies = tr.Integer(0)
 
     # ----------------------------------------------------------------------------------
@@ -227,10 +228,10 @@ or:
 ```
 getC(Ccurr, *argsGetCn, **kargsGetC) -> hardC, newArgsGetC, extOutput
 ```
-where Ccurr  is the current C matrix, *argsGetC are the parameters needed to
+where Ccurr  is the current C NDDataset, *argsGetC are the parameters needed to
 completely specify the function. `hardC` is a nadarray or NDDataset of shape
 `(C.y, len(hardConc)`, newArgsGetC are the updated parameters for the next
-iteration (can be None), and extOutput can be any relevant output to be kept
+iteration (can be None), and extOutput can be any other nrelevant output to be kept
 in extOutput attribute (only the last iteration extOutput is kept)""",
     ).tag(config=True)
 
@@ -306,12 +307,18 @@ profile #j,
     # ----------------------------------------------------------------------------------
     def __init__(
         self,
-        *,
+        *args,
         log_level=logging.WARNING,
         config=None,
         warm_start=False,
         **kwargs,
     ):
+        if len(args) > 0:
+            raise ValueError(
+                "MCARL: Passing arguments such as MCRALS(X, profile) is now deprecated. "
+                "Instead, use MCRAL() followed by MCRALS.fit(X, profile). See the documention"
+                "and exemples"
+            )
 
         # warn about deprecation
         # ----------------------
@@ -442,7 +449,6 @@ profile #j,
         # make the profile
 
         try:  # first try on concentration
-
             # The data are validated in _C_validate()
             # if it fails here due to shape mismatch, it goes to the except
             C = self._C = profile.copy()
@@ -664,7 +670,6 @@ profile #j,
         Xpcadata = PCA(self.X).reconstruct(n_pc=self.nspecies).data
 
         while change >= self.tol and niter < self.maxit and ndiv < self.maxdiv:
-
             Cdata = np.linalg.lstsq(Stdata.T, Xdata.T, rcond=None)[0].T
             niter += 1
 
@@ -724,16 +729,18 @@ profile #j,
             # external concentration profiles
             # ------------------------------------------
             if np.any(self.hardConc):
+                # getconc takes the C NDDataset as first argument (to take advantage of useful metadata
+                self._C.data = Cdata
                 if self.kwargsGetConc != {} and self.argsGetConc != ():
                     output = self.getConc(
-                        Cdata, *self.argsGetConc, **self.kwargsGetConc
+                        self._C, *self.argsGetConc, **self.kwargsGetConc
                     )
                 elif self.kwargsGetConc == {} and self.argsGetConc != ():
-                    output = self.getConc(Cdata, *self.argsGetConc)
+                    output = self.getConc(self._C, *self.argsGetConc)
                 elif self.kwargsGetConc != {} and self.argsGetConc == ():
-                    output = self.getConc(Cdata, **self.kwargsGetConc)
+                    output = self.getConc(self._C, **self.kwargsGetConc)
                 else:
-                    output = self.getConc(Cdata)
+                    output = self.getConc(self._C)
 
                 if isinstance(output, tuple):
                     fixedC = output[0]
@@ -839,7 +846,7 @@ profile #j,
     @property
     def extOutput(self):
         """
-        The last output of the external function used to get concentrations.
+        The last relevant output of the external function used to get concentrations.
         """
         return self._extOutput
 

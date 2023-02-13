@@ -18,21 +18,377 @@ import warnings
 from collections.abc import Iterable
 
 import numpy as np
+from scipy.integrate import solve_ivp
 from scipy.optimize import differential_evolution, least_squares, minimize
 
+from spectrochempy.analysis.abstractanalysis import AnalysisConfigurable
 from spectrochempy.core import error_
 from spectrochempy.core.dataset.nddataset import Coord, NDDataset
 from spectrochempy.utils.optional import import_optional_dependency
 
 __all__ = [
-    "coverages_vs_time",
-    "concentrations_vs_time",
-    "modify_rate",
-    "modify_surface_kinetics",
-    "fit_to_concentrations",
+    "ActionMassKinetics",
     "PFR",
 ]
 
+R = 8.314
+
+
+class ActionMassKinetics(AnalysisConfigurable):
+    """A class which stores a reaction network of elementary reactions, its rate parameterization,
+    initial concentrations, temperature profile, with methods for evaluating production rates and concentration
+    profiles asssuming action mass kinetic and closed reactor.
+
+    Parameters
+    ----------
+    equations: iterable object of `n_r` strings
+         Strings giving the `n_r` chemical equation of the network. Reactants and products must be separated by a "->"
+         symbol, stoichiometric coefficients, species names and "+" symbols must be separated by at leat one space *
+         (" "). The name of each species should match a key of the `species` dict.
+
+         "A + B -> C"
+         "2 A -> D"
+
+    species : dict of `n_s` float, optional
+         Dict of initial concentrations of the `n_s` species.
+    k : iterable of shape n_reactions x 2
+         Arrhenius rate parameters ((A_1, Ea_1), ... (A_n, Ea_n))
+    T : float or callable T(t)
+         Temperature
+    """
+
+    def __init__(
+        self, equations: Iterable, species_concentrations: dict, k: Iterable, T=298.0
+    ):
+        self.equations = equations
+        self.species_concentrations = species_concentrations
+        self.species = list(species_concentrations.keys())
+        self.concentrations = list(species_concentrations.values())
+        self.k = k
+        if isinstance(T, float):
+            self.T = lambda t: T
+        else:
+            self.T = T
+        self.n_r = len(self.equations)
+        self.n_s = len(self.species)
+        self.A, self.B = self.stoichio_matrices
+        self.BmAt = (self.B - self.A).T
+
+    @property
+    def stoichio_matrices(self):
+        """Stoechiometry matrices
+
+        Generates stoichiometry matrices from the chemical equations
+        Stoichiometry matrices A and B are defined in Chellaboina et al., "Modeling and analysis of
+        mass-action kinetics", IEEE control systems (2009), DOI: 10.1109/MCS.2009.932926"""
+
+        A = np.zeros((self.n_r, self.n_s))
+        B = np.zeros_like(A)
+        for i, rxn in enumerate(self.equations):
+            rp = rxn.split("->")
+            if len(rp) != 2:
+                raise ValueError(
+                    f'in reaction #{i}, reactants and products must be separated by "->" '
+                )
+            r = rp[0].split("+")  # reactants
+            p = rp[1].split("+")  # products
+
+            for ns in r:
+                if len(ns.split()) == 1:
+                    n = 1
+                    s = ns.split()[0]
+                elif len(ns.split()) == 2:
+                    n = ns.split()[0]
+                    try:
+                        n = int(n)
+                    except ValueError:
+                        raise ValueError(
+                            f'syntax error in reaction {i}: a stoichimetric coefficient is expected, not "{n}"'
+                        )
+                    s = ns.split()[1]
+
+                if s not in self.species:
+                    raise ValueError(
+                        f'reactant "{s}" in reaction {i} is not listed in species'
+                    )
+
+                A[i, list(self.species_concentrations).index(s)] = n
+
+            for ns in p:
+                if len(ns.split()) == 1:
+                    n = 1
+                    s = ns.split()[0]
+                elif len(ns.split()) == 2:
+                    n = ns.split()[0]
+                    try:
+                        n = int(n)
+                    except ValueError:
+                        raise ValueError(
+                            f'syntax error in reaction {i}: a stoichimetric coefficient is expected, not "{n}"'
+                        )
+                    s = ns.split()[1]
+
+                if s not in self.species:
+                    raise ValueError(
+                        f'product "{s}" in reaction {i} is not listed in species'
+                    )
+
+                B[i, list(self.species_concentrations).index(s)] = n
+        return A, B
+
+    def integrate(self, t, method="RK45", return_NDDataset=True, **kwargs):
+        """Integrate the kinetic equations at times t.
+
+        This function computes and integrates the set of n_s kinetic differential
+        equations given the initial concentration values::
+        $$ dC / dt =  (B - A).T  K C^A $$
+        $$ C(t0) = C0 $$
+
+        where $A$ and $B$ are the stoichiometry matrices, $K$ is the diagonal matrix of rate constants
+        and $C^A$ is the vector-matrix exponentiation of C by A
+
+        Parameters
+        ----------
+        t: iterable of length t_points
+            time values at which the concentrations are computed
+
+        method : string or `OdeSolver`, optional
+            Integration method to use:
+
+            * 'RK45' (default): Explicit Runge-Kutta method of order 5(4)
+            * 'RK23': Explicit Runge-Kutta method of order 3(2)
+            * 'DOP853': Explicit Runge-Kutta method of order 8
+            * 'Radau': Implicit Runge-Kutta method of the Radau IIA family of
+              order 5
+            * 'BDF': Implicit multi-step variable-order (1 to 5) method based
+              on a backward differentiation formula for the derivative
+              approximation
+            * 'LSODA': Adams/BDF method with automatic stiffness detection and
+              switching
+
+        Explicit Runge-Kutta methods ('RK23', 'RK45', 'DOP853') should be used
+        for non-stiff problems and implicit methods ('Radau', 'BDF') for
+        stiff problems. Among Runge-Kutta methods, 'DOP853' is recommended
+        for solving with high precision (low values of `rtol` and `atol`).
+        If not sure, first try to run 'RK45'. If it makes unusually many
+        iterations, diverges, or fails, your problem is likely to be stiff and
+        you should use 'Radau' or 'BDF'. 'LSODA' can also be a good universal
+        choice, but it might be somewhat less convenient to work with as it
+        wraps old Fortran code.
+        You can also pass an arbitrary class derived from `OdeSolver` which
+        implements the solver.
+
+        Returns
+        -------
+        C : ndarray or NDDataset, shape (t_points, n_species)
+            Values of the solution at `t`.
+        meta : Bunch object with the following fields defined:
+        t : ndarray, shape (t_points,)
+            Time points.
+        sol : `OdeSolution` or None
+            Found solution as `OdeSolution` instance; None if `dense_output` was
+            set to False.
+        t_events : list of ndarray or None
+            Contains for each event type a list of arrays at which an event of
+            that type event was detected. None if `events` was None.
+        y_events : list of ndarray or None
+            For each value of `t_events`, the corresponding value of the solution.
+            None if `events` was None.
+        nfev : int
+            Number of evaluations of the right-hand side.
+        njev : int
+            Number of evaluations of the Jacobian.
+        nlu : int
+            Number of LU decompositions.
+        status : int
+            Reason for algorithm termination:
+                * -1: Integration step failed.
+                *  0: The solver successfully reached the end of `tspan`.
+                *  1: A termination event occurred.
+        message : string
+            Human-readable description of the termination reason.
+        success : bool
+            True if the solver reached the interval end or a termination event
+            occurred (``status >= 0``).
+
+        """
+
+        def production_rates(ti, Ci):
+            """compute the production rates dC/dt
+
+            Compute the n_s production rates at time ti according to:
+            $$ dC / dt =  (B - A).T  K Ci^A $$
+            $$ Ci = C(ti) $$
+
+            where $A$ and $B$ are the soichiometry matrices, $K$ is the diagonal matrix of rate constants
+            and $Ci^A$ is the vector-matrix exponentiation of Ci by A
+
+            parameters:
+            ----------
+            ti: float
+                time
+            Ci: 1D vector
+                concentrations at time ti
+            """
+            beta = 1 / R / self.T(ti)
+            K = np.diag(self.k[:, 0] * np.exp(-beta * self.k[:, 1]))
+            return np.dot(np.dot(self.BmAt, K), _vm_exp(Ci, self.A))
+
+        bunch = solve_ivp(
+            production_rates,
+            (t[0], t[-1]),
+            self.concentrations,
+            t_eval=t,
+            method=method,
+        )
+
+        if return_NDDataset:
+            C = NDDataset(bunch.y.T, name="Concentrations")
+            C.y = Coord(bunch.t, title="time")
+            C.x = Coord(range(self.n_s), labels=self.species, title="species")
+            t = Coord(bunch.t, title="time")
+
+        else:
+            C = bunch.y.T
+
+        meta = {
+            "t": bunch.t,
+            "nfev": bunch.nfev,
+            "t_events": bunch.t_events,
+            "y_events": bunch.y_events,
+            "njev": bunch.njev,
+            "nlu": bunch.nlu,
+            "status": bunch.status,
+            "message": bunch.message,
+            "success": bunch.success,
+        }
+        return C, meta
+
+    def modify_kinetics(self, dict_param):
+        for item in dict_param:
+            i_r, p = item.split("[")[-1].split("].")
+            if p == "A":
+                self.k[int(i_r), 0] = dict_param[item]
+            elif p == "Ea":
+                self.k[int(i_r), 1] = dict_param[item]
+            else:
+                raise ValueError(
+                    "something went wrong in parsing the dhe dict of params"
+                )
+
+    def fit_to_concentrations(
+        self, Cexp, iexp, i2iexp, dict_param_to_optimize, **kwargs
+    ):
+        """
+        Function fitting rate parameters and concentrations to a given concentration profile.
+
+        Parameters
+        ------------
+
+        Cexp: NDDataset
+            Experimental concentration profiles on which to fit the model.
+            Cexp can contain more concentration profiles than those to fit.
+        iexp:
+            Indexes of experimental concentration profiles on which the model will be fitted
+        iexp_to_i:
+            Correspondence between optimized (external) concentration profile and experimental
+            concentration profile.
+        param_to_optimize: dict
+            rate parameters to optimize. Keys should be 'k[i].A' and 'k[i].Ea' for preexponential
+            factor
+
+        **kwargs
+            Parameters for the optimization (see scipy.optimize.minimize).
+
+        Returns
+        ----------
+        result
+            A result dictionary.
+        """
+
+        def objective(params, Cexp, iexp, i2iexp, dict_param_to_optimize):
+            for param, item in zip(params, dict_param_to_optimize):
+                dict_param_to_optimize[item] = param
+            self.modify_kinetics(dict_param_to_optimize)
+            Chat = self.integrate(Cexp.y.data, return_NDDataset=False)[0]
+            return np.sum(np.square(Cexp.data[:, iexp] - Chat[:, i2iexp]))
+
+        method = kwargs.get("method", "Nelder-Mead")
+        bounds = kwargs.get("bounds", None)
+        tol = kwargs.get("tol", None)
+        options = kwargs.get("options", {"disp": True})
+
+        guess_param = np.zeros((len(dict_param_to_optimize)))
+        for i, param in enumerate(dict_param_to_optimize):
+            guess_param[i] = dict_param_to_optimize[param]
+
+        if options["disp"]:
+            print("Optimization of the parameters.")
+            print(f"         Initial parameters: {guess_param}")
+            print(
+                f"         Initial function value: "
+                f"{objective(guess_param, Cexp, iexp, i2iexp, dict_param_to_optimize)}"
+            )
+        tic = datetime.datetime.now(datetime.timezone.utc)
+        optim_res = minimize(
+            objective,
+            guess_param,
+            args=(Cexp, iexp, i2iexp, dict_param_to_optimize),
+            method=method,
+            bounds=bounds,
+            tol=tol,
+            options=options,
+        )
+        toc = datetime.datetime.now(datetime.timezone.utc)
+        opt_param = optim_res.x
+        if options["disp"]:
+            print(f"         Optimization time: {toc - tic}")
+            print(f"         Final parameters: {opt_param}")
+
+        Ckin, meta = self.integrate(Cexp.y.data, return_NDDataset=False)
+
+        for i, param in enumerate(dict_param_to_optimize):
+            dict_param_to_optimize[param] = opt_param[i]
+
+        return Ckin, (iexp, i2iexp, dict_param_to_optimize), optim_res
+
+
+def _vm_exp(x: Iterable, A: Iterable):
+    """Vector matrix exponentiation
+
+    The vector-matrix exponentiation is the operation that maps x
+    and A to its vector-matrix power $x^A$ which given by:
+    $$ \left[ x_1^{A_{11}}x_2^{A_{21}} ... x_n^{A_{n1}} \;\; x_1^{A_{1n}}x_2^{A_{2n}} ... x_n^{A_{nn}} \right]$$
+
+    parameters:
+    ----------
+    x: (px1) iterable of float
+         Columns vector
+    A: (pxq) iterable of int
+         Matrix
+
+    returns:
+    -------
+    Vm_exp: (px1) iterable
+         x^A vector
+
+    References:
+    ----------
+    [1] Chellaboina et al., "Modeling and analysis of mass-action kinetics", IEEE control systems (2009),
+    DOI: 10.1109/MCS.2009.932926
+    [2] Gjerrit Meinsma, "Dimensional and Scaling Analysis" SIAM review, Vol. 61, No. 1, pp. 159–184 (2009),
+    DOI: 10.1137/16M1107127
+    """
+    out = [1] * len(A)
+    for i, A_i in enumerate(A):
+        for x_j, A_ij in zip(x, A_i):
+            out[i] *= x_j**A_ij
+    return out
+
+
+# --------
+# CANTERA UTILITIES
+# -------
 ct = import_optional_dependency("cantera", errors="ignore")
 
 
@@ -45,90 +401,13 @@ def _cantera_is_not_available():
     return ct is None
 
 
-def coverages_vs_time(surface, t, returnNDDataset=False):
+def _ct_modify_rate(reactive_phase, i_reaction, rate):
     """
-    Returns the surface coverages at time(s) t.
+    Modify the reaction rate of with index i_reaction to have the same rate parameters as rate.
 
     Parameters
     ----------
-    surface: instance of cantera.composite.Interface.
-    tim: iterable or spectrochempy.Coord.
-        Times at which the coverages must be computed.
-    returnNDDataset: boolean, default: False.
-        If True returns the concentration matrix as a NDDataset, else as a np.ndarray.
-    """
-
-    init_coverages = surface.coverages
-    coverages = np.zeros((len(t), surface.coverages.shape[0]))
-
-    if isinstance(t, Coord):
-        t = t.data
-
-    for i, tim in enumerate(t):
-        surface.coverages = init_coverages
-        surface.advance_coverages(tim)
-        coverages[i, :] = surface.coverages
-        surface.coverages = init_coverages
-    if returnNDDataset:
-        coverages = NDDataset(coverages)
-        coverages.y = Coord(t, title="time")
-        coverages.x.title = "coverage / -"
-        coverages.x.labels = surface.species_names
-    return coverages
-
-
-def concentrations_vs_time(reactive_phase, t, reactorNet=None, returnNDDataset=False):
-    """
-    Returns the  concentrations at time(s) t.
-
-    Parameters
-    ----------
-    surface: instance of cantera.composite.Interface.
-    tim: iterable or Coord.
-        Times at which the concentrations must be computed.
-    return_NDDataset: boolean, default: False.
-        If True returns the concentration matrix as a NDDataset, else as a np.ndarray.
-    """
-
-    if _cantera_is_not_available():
-        return
-
-    if isinstance(reactive_phase, ct.composite.Interface):
-        concentrations = (
-            coverages_vs_time(reactive_phase, t, returnNDDataset)
-            * reactive_phase.site_density
-        )
-        if returnNDDataset:
-            concentrations.x.title = "concentration"
-        return concentrations
-
-    raise NotImplementedError(
-        f"not implemented for reactive_phase={str(type(reactive_phase))}"
-    )
-    # # code for reactorNet
-    # if type(t) is Coord:
-    #     t = t.data
-    #
-    # for i, ti in enumerate(t):
-    #     reactorNet.advance(ti)
-    #     concentrations[i, :] = reactive_phase.concentrations
-    #     reactive_phase.concentrations = init_concentrations
-    #
-    #
-    # if returnNDDataset:
-    #     concentrations = NDDataset(concentrations)
-    #     concentrations.y = Coord(t, title='time')
-    #     concentrations.x.title = 'concentrations'
-    #     concentrations.x.labels = reactive_phase.species_names
-
-
-def modify_rate(reactive_phase, i_reaction, rate):
-    """
-    Modify the reaction rate with index i_reaction to have the same rate parameters as rate.
-
-    Parameters
-    ----------
-    reactive_phase : instance of indeal_gas or cantera.composite.Interface
+    reactive_phase : instance of cantera.ideal_gas or cantera.composite.Interface
     i_reaction : index of reaction
     rate : the new rate expression or parameters
 
@@ -143,9 +422,9 @@ def modify_rate(reactive_phase, i_reaction, rate):
     return reactive_phase
 
 
-def modify_surface_kinetics(surface, param_to_set):
+def _ct_modify_surface_kinetics(surface, param_to_set):
     """
-    Changes a set of numerical parameters of a an Interface among following:
+    Changes a set of numerical parameters of an Interface among following:
     site_density, coverages, concentrations,
     pre-exponential factor, temperature_exponent, activation_energy.
     """
@@ -181,7 +460,7 @@ def modify_surface_kinetics(surface, param_to_set):
                 str_rate + ".temperature_exponent," + str_rate + ".activation_energy "
             )
             rxn = int(param.split(".")[0].split("[")[-1].split("]")[0])
-            modify_rate(surface, rxn, ct.Arrhenius(param_to_set[param], b, E))
+            _ct_modify_rate(surface, rxn, ct.Arrhenius(param_to_set[param], b, E))
 
         elif param.split(".")[-1] == "temperature_exponent":
             str_rate = "surface." + ".".join(param.split(".")[-3:-1])
@@ -189,7 +468,7 @@ def modify_surface_kinetics(surface, param_to_set):
                 str_rate + "pre_exponential_factor," + str_rate + ".activation_energy "
             )
             rxn = int(param.split(".")[0].split("[")[-1].split("]")[0])
-            modify_rate(surface, rxn, ct.Arrhenius(A, param_to_set[param], E))
+            _ct_modify_rate(surface, rxn, ct.Arrhenius(A, param_to_set[param], E))
 
         elif param.split(".")[-1] == "activation_energy":
             str_rate = "surface." + ".".join(param.split(".")[-3:-1])
@@ -200,81 +479,7 @@ def modify_surface_kinetics(surface, param_to_set):
                 + ".temperature_exponent"
             )
             rxn = int(param.split(".")[0].split("[")[-1].split("]")[0])
-            modify_rate(surface, rxn, ct.Arrhenius(A, b, param_to_set[param]))
-
-
-def fit_to_concentrations(
-    C, externalConc, external_to_C_idx, reactive_phase, param_to_optimize, **kwargs
-):
-    """
-    Function fitting rate parameters and concentrations to a given concentration profile.
-
-    Parameters
-    ------------
-
-    C: NDDataset
-        Experimental concentration profiles on which to fit the model. C can contain more concentration
-        profiles than those to fit.
-    externalConc:
-        Indexes of experimental concentration profiles on which the model will be fitted
-    external_to_C_idx:
-        Correspondence between optimized (external) concentration profile and experimental
-        concentration profile.
-    reactivePhase:
-        Cantera active phase. Currently implemented for surface only.
-    param_to_optimize: dict
-        Reactive phase parameters to optimize.
-
-    **kwargs
-        Parameters for the optimization (see scipy.optimize.minimize).
-
-    Returns
-    ----------
-    result
-        A result dictionary.
-    """
-
-    def objective(
-        param_value, param_to_optimize, C, externalConc, external_to_C_idx, surface
-    ):
-        modify_surface_kinetics(surface, param_to_optimize)
-        Chat = concentrations_vs_time(surface, C.y)
-        return np.sum(np.square(C.data[:, externalConc] - Chat[:, external_to_C_idx]))
-
-    method = kwargs.get("method", "Nelder-Mead")
-    bounds = kwargs.get("bounds", None)
-    tol = kwargs.get("tol", None)
-    options = kwargs.get("options", {"disp": True})
-
-    guess_param = np.zeros((len(param_to_optimize)))
-    for i, param in enumerate(param_to_optimize):
-        guess_param[i] = param_to_optimize[param]
-
-    if options["disp"]:
-        print("Optimization of the parameters.")
-        print(f"         Initial parameters: {guess_param}")
-        print(
-            f"         Initial function value: "
-            f"{objective(guess_param, param_to_optimize, C, externalConc, external_to_C_idx, reactive_phase)}"
-        )
-    tic = datetime.datetime.now(datetime.timezone.utc)
-    res = minimize(
-        objective,
-        guess_param,
-        args=(param_to_optimize, C, externalConc, external_to_C_idx, reactive_phase),
-        method=method,
-        bounds=bounds,
-        tol=tol,
-        options=options,
-    )
-    toc = datetime.datetime.now(datetime.timezone.utc)
-    final_param = res.x
-    if options["disp"]:
-        print(f"         Optimization time: {toc - tic}")
-        print(f"         Final parameters: {final_param}")
-    Ckin = concentrations_vs_time(reactive_phase, C.y, returnNDDataset=True)
-    newargs = (reactive_phase, param_to_optimize, final_param)
-    return {"concentrations": Ckin, "results": res, "new_args": newargs}
+            _ct_modify_rate(surface, rxn, ct.Arrhenius(A, b, param_to_set[param]))
 
 
 class PFR:
@@ -348,7 +553,7 @@ class PFR:
         if add_surface:
             surface = ct.Interface(self._cti, phaseid="surface", phases=[initial_gas])
             if kin_param_to_set is not None:
-                modify_surface_kinetics(surface, kin_param_to_set)
+                _ct_modify_surface_kinetics(surface, kin_param_to_set)
             self.n_surface_species = len(surface.X)
             self.surface.append(
                 ct.ReactorSurface(kin=surface, r=self.cstr[0], A=area[0])
@@ -417,7 +622,7 @@ class PFR:
                 )
                 self.n_surface_species = len(surface.X)
                 if kin_param_to_set is not None:
-                    modify_surface_kinetics(surface, kin_param_to_set)
+                    _ct_modify_surface_kinetics(surface, kin_param_to_set)
                 self.surface.append(
                     ct.ReactorSurface(kin=surface, r=self.cstr[i], A=area[i])
                 )

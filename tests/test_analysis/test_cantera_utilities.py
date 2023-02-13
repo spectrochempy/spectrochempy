@@ -8,7 +8,7 @@
 import pytest
 
 # import spectrochempy
-from spectrochempy.analysis import cantera_utilities as cu
+from spectrochempy.analysis import kinetic_utilities as cu
 
 
 @pytest.mark.skipif(
