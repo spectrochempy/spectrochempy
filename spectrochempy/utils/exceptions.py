@@ -42,6 +42,13 @@ class SpectroChemPyError(Exception):
     """
 
 
+# Analysis method errors
+class NotFittedError(SpectroChemPyError):
+    """
+    Exception raised when an analysis estimtor is not fitted before use.
+    """
+
+
 # ------------------------------------------------------------------------------
 class UnitsCompatibilityError(SpectroChemPyError):
     """
