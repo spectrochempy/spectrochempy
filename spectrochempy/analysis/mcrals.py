@@ -90,7 +90,7 @@ class MCRALS(AnalysisConfigurable):
     _St = tr.Instance(NDDataset, allow_none=True)
     _StSoft = tr.Instance(NDDataset, allow_none=True)
     # ext_Output can be of anytype
-    # _extOutput = tr.Instance(NDDataset, allow_none=True)
+    _extOutput = tr.Any()
     _nspecies = tr.Integer(0)
     _pca = tr.Instance(NDDataset)
 
