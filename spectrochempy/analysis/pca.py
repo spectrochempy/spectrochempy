@@ -109,7 +109,7 @@ class PCA(AnalysisConfigurable):
         super().__init__(
             copy=True,
             log_level=log_level,
-            warn_start=warm_start,
+            warm_start=warm_start,
             config=config,
             **kwargs,
         )

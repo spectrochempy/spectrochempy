@@ -349,7 +349,7 @@ profile #j,
         # call the super class for initialisation
         super().__init__(
             log_level=log_level,
-            warn_start=warm_start,
+            warm_start=warm_start,
             config=config,
             **kwargs,
         )
