@@ -28,10 +28,10 @@ repos:
         name: absolufy-imports
         files: ^spectrochempy/
 
-  - repo: https://github.com/PyCQA/autoflake
-    rev: "v2.0.0"
-    hooks:
-      - id: autoflake
+#  - repo: https://github.com/PyCQA/autoflake
+#    rev: "v2.0.0"
+#    hooks:
+#      - id: autoflake
 
   - repo: https://github.com/pycqa/isort
     rev: 5.12.0

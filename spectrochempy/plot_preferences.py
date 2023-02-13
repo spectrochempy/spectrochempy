@@ -881,7 +881,7 @@ class PlotPreferences(MetaConfigurable):
     )
 
     def __init__(self, **kwargs):
-        super().__init__(jsonfile="PlotPreferences", **kwargs)
+        super().__init__(section="PlotPreferences", **kwargs)
         for key in plt.rcParams:
             lis = key.split(".")
             if len(lis) > 1:
