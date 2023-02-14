@@ -18,7 +18,8 @@ New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
-
+* Compatibility with matplotlib 3.7
+* Refactoring of the configuration files
 .. section
 
 Bug fixes
