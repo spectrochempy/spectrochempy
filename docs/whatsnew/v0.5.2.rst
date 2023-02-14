@@ -1,8 +1,14 @@
-What's new in revision 0.5.2.dev16
+What's new in revision 0.5.2
 ---------------------------------------------------------------------------------------
 
-These are the changes in SpectroChemPy-0.5.2.dev16.
+These are the changes in SpectroChemPy-0.5.2.
 See :ref:`release` for a full changelog including other versions of SpectroChemPy.
+
+New features
+~~~~~~~~~~~~
+
+* Compatibility with matplotlib 3.7
+* Refactoring of the configuration files
 
 Bug fixes
 ~~~~~~~~~
