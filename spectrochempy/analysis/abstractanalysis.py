@@ -5,18 +5,19 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-This module implements the MCRALS class.
+This module implements the base abstract class to define estimators such as PCA, ...
 """
 
 import logging
 import warnings
 
+import numpy as np
 import traitlets as tr
 
 from spectrochempy.core import app, set_loglevel
 from spectrochempy.core.common.meta import Meta
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils import exceptions
+from spectrochempy.utils import MASKED, exceptions
 from spectrochempy.utils.traits import MetaConfigurable
 
 
@@ -35,13 +36,21 @@ class AnalysisConfigurable(MetaConfigurable):
     # ----------------------------------------------------------------------------------
     _warm_start = tr.Bool(False, help="If True previous execution state " "is reused")
     _fitted = tr.Bool(False, help="False if the model was not yet fitted")
-    _copy = tr.Bool(True, help="If True passed X data are copied")
+    _masked_rc = tr.Tuple(allow_none=True, help="List of masked rows ans columns")
 
-    _X = tr.Instance(NDDataset, allow_none=True)  # Data to fit an estimate
+    _X = tr.Instance(NDDataset, allow_none=True, help="Data to fit an estimate")
+    _X_mask = tr.instance(
+        NDDataset, allow_none=True, help="mask information of the " "input data"
+    )
+    _shape = tr.Tuple(help="original shape of the data, before any transformation")
 
     # ----------------------------------------------------------------------------------
     # Configuration parameters (depends on the estimator)
     # ----------------------------------------------------------------------------------
+
+    copy = tr.Bool(default_value=True, help="If True passed X data are copied").tag(
+        config=True
+    )
 
     # write traits like e.g.,  A = Unicode("A", help='description").tag(config=True)
 
@@ -54,7 +63,6 @@ class AnalysisConfigurable(MetaConfigurable):
         log_level=logging.WARNING,
         config=None,
         warm_start=False,
-        copy=True,
         **kwargs,
     ):
 
@@ -88,15 +96,95 @@ class AnalysisConfigurable(MetaConfigurable):
             # until the fit method has been executed
             self._fitted = False
 
-        # should we copy the data (default True)
-        self.copy = copy
-
     # ----------------------------------------------------------------------------------
     # Data
     # ----------------------------------------------------------------------------------
+    def _get_masked_rc(self, mask):
+        if np.any(mask):
+            masked_columns = np.all(mask, axis=-2)
+            masked_rows = np.all(mask, axis=-1)
+        else:
+            masked_columns = np.zeros(self._shape[-1], dtype=bool)
+            masked_rows = np.zeros(self._shape[-2], dtype=bool)
+        return masked_rows, masked_columns
+
+    def _remove_masked_data(self, X):
+
+        # Retains only valid rows and columns
+        # -----------------------------------
+        # unfortunately, the implementation of linalg library
+        # doesn't support numpy masked arrays as input. So we will have to
+        # remove the masked values ourselves
+
+        # the following however assumes that entire rows or columns are masked,
+        # not only some individual data (if this is what you wanted, this
+        # will fail)
+
+        if not hasattr(X, "mask"):
+            return X
+
+        # store the mask because it will be destroyed
+        self._X_mask = X._mask
+
+        # remove masked rows and columns
+        masked_rows, masked_columns = self._get_masked_rc(X._mask)
+
+        data = X.data[:, ~masked_columns]
+        data = data[~masked_rows]
+
+        # destroy the mask
+        X._mask = None
+
+        # return the modified X dataset
+        X.data = data
+        return X
+
+    def _restore_masked_data(self, D, axis=-1):
+        # by default we restore columns, put axis=0 to restore rows instead
+        # Note that it is very important to use here the ma version of zeros
+        # array constructor or both if both axis should be restored
+        if self._X_mask is None:
+            # return it inchanged as wa had no mask originally
+            return D
+
+        rowsize, colsize = self._shape
+        masked_rows, masked_columns = self._get_masked_rc(self._X_mask)
+        M, N = D.shape
+
+        # Put back masked columns in D
+        # ----------------------------
+        if (axis == -1 or axis == 1) and D.shape[0] == rowsize:
+            if np.any(masked_columns):
+                Dtemp = np.ma.zeros((M, colsize))  # note np.ma, not np.
+                Dtemp[:, ~masked_columns] = D
+                Dtemp[:, masked_columns] = MASKED
+                D = Dtemp
+        else:
+            raise IndexError("Can not restore mask. Please check the given index")
+
+        # Put back masked rows in D
+        # -------------------------
+        if (axis == -2 or axis == 0 or axis == "both") and D.shape(1) == colsize:
+            if np.any(masked_rows):
+                Dtemp = np.ma.zeros((rowsize, N))
+                Dtemp[~masked_rows] = D
+                Dtemp[masked_rows] = MASKED
+                D = Dtemp
+        else:
+            raise IndexError("Can not restore mask. Please check the given index")
+
+        # return the D array with restored masked data
+        return D
+
     @property
     def X(self):
-        return self._X
+        # We use X property only to show this information to the end user. Internally
+        # we must always use _X attribute to refer to the input data
+        X = self._X.copy()
+        if self._X_mask is not None:
+            # restore masked row and column if necessary
+            X = self._restore_masked_data(self, X, axis="both")
+        return X
 
     @X.setter
     def X(self, value):
@@ -106,10 +194,23 @@ class AnalysisConfigurable(MetaConfigurable):
     @tr.validate("_X")
     def _X_validate(self, proposal):
         X = proposal.value
+
+        # we need a dataset with eventually  a copy of the original data (default being
+        # to copy them)
         if not isinstance(X, NDDataset):
             X = NDDataset(X, copy=self.copy)
         elif self.copy:
             X = X.copy()
+
+        # as in fit methods we often use np.linalg library, we cannot handle directly
+        # masked data (so we remove them here and they will be restored at the end of
+        # the process during transform or inverse transform methods
+
+        # store the original shape as it will be eventually modified
+        self._shape = X.shape
+
+        # remove masked data and return modified dataset
+        X = self._remove_masked_data(X)
         return X
 
     def _X_is_missing(self):
@@ -129,14 +230,14 @@ class AnalysisConfigurable(MetaConfigurable):
     # ----------------------------------------------------------------------------------
     # Public methods
     # ----------------------------------------------------------------------------------
-    def fit(self, X, y):
+    def fit(self, X, y=None):
         # to be overriden by user defined function (with the same name)
         self._fitted = False  # reiniit this flag
         raise NotImplementedError("fit method has not yet been implemented")
 
     def reconstruct(self):
         """
-        to be overriden
+        Intended to be replaced in the subclasses
         """
         raise NotImplementedError(
             "reconstruct/inverse_transform has not yet been implemented"
@@ -144,7 +245,7 @@ class AnalysisConfigurable(MetaConfigurable):
 
     def reduce(self):
         """
-        to be overriden
+        Intended to be replaced in the subclasses
         """
         raise NotImplementedError("reduce/transform has not yet been implemented")
 

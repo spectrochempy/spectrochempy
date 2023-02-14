@@ -7,14 +7,20 @@
 """
 This module implement several wrapper to scikit-learn model and estimators
 """
-import numpy as np
-import traitlets as tr
-from numpy.random import RandomState
-from sklearn import decomposition
-from spectrochempy.core.dataset.coord import Coord
 from functools import wraps
 
+import numpy as np
+import traitlets as tr
+from matplotlib import pyplot as plt
+from matplotlib.ticker import MaxNLocator, ScalarFormatter
+from numpy.random import RandomState
+from sklearn import decomposition
+
 from spectrochempy.analysis.abstractanalysis import AnalysisConfigurable
+from spectrochempy.core.dataset.coord import Coord
+
+__all__ = ["SKL_PCA"]
+__configurables__ = __all__
 
 
 class _wrap_sklearn_output_to_nddataset:
@@ -22,18 +28,23 @@ class _wrap_sklearn_output_to_nddataset:
         self.method = method
 
     def __get__(self, instance, cls):
-        self.instance = instance
-
         @wraps(self.method)
         def wrapper(*args, **kwargs):
-            # get the output of the sklearn data output
-            data = self.method(self.instance, *args, **kwargs)
+            # determine the input X dataset
+            if isinstance(args[0], NDDataset):
+                X = args[0]
+            else:
+                X = instance.X
+            # get the sklearn data output
+            data = self.method(instance, *args, **kwargs)
             # make a new dataset with this
             X_transf = NDDataset(data)
             # Now set the NDDataset attributes
             X_transf.units = X.units
-            X_transf.name = f"{X.name}_{self.method}"
-            X_transf.history = f"Created by method {self.method}"
+            X_transf.name = f"{X.name}_{instance.name}.{self.method.__name__}"
+            X_transf.history = (
+                f"Created by method {instance.name}.{self.method.__name__}"
+            )
             # title = kw.pop("title", f"{X.title} transformed by {self.method} method")
             # X_transf.title = title
             n_samples, n_features = X.shape
@@ -41,7 +52,7 @@ class _wrap_sklearn_output_to_nddataset:
             # set coordinates
             if X_transf.shape == X.shape:
                 X.transf.set_coordset(y=X.y, x=X.x)
-            elif X_transf.shape[-1] == n_features:
+            elif X_transf.shape == (instance.n_components, n_features):
                 X_transf.set_coordset(
                     y=Coord(
                         None,
@@ -50,7 +61,7 @@ class _wrap_sklearn_output_to_nddataset:
                     ),
                     x=X.x,
                 )
-            elif X_transf.shape[0] == n_samples:
+            elif X_transf.shape == (n_samples, instance.n_components):
                 X_transf.set_coordset(
                     y=X.y,
                     x=Coord(
@@ -90,11 +101,12 @@ class SKL_PCA(AnalysisConfigurable):
     # ----------------------------------------------------------------------------------
     # Configuration parameters
     # ----------------------------------------------------------------------------------
-    centered = tr.Bool(
-        default_value=True,
-        help="If True the data are centered around the mean values: "
-        ":math:`X' = X - mean(X)`",
-    ).tag(config=True)
+    # centered = tr.Bool(
+    #     default_value=True,
+    #     help="If True the data are centered around the mean values: "
+    #     ":math:`X' = X - mean(X)`",
+    # ).tag(config=True)
+    # sklearn PCA is always on centered data
 
     standardized = tr.Bool(
         default_value=False,
@@ -220,7 +232,17 @@ for reproducible results across multiple function calls.""",
         )
 
         # initialize sklearn PCA
-        self._pca = decomposition.PCA()
+        self._pca = decomposition.PCA(
+            n_components=self.n_components,
+            copy=self.copy,
+            whiten=self.whiten,
+            svd_solver=self.svd_solver,
+            tol=self.tol,
+            iterated_power=self.iterated_power,
+            n_oversamples=self.n_oversamples,
+            power_iteration_normalizer=self.power_iteration_normalizer,
+            random_state=self.random_state,
+        )
 
     # ------------------------------------------------------------------------
     # Special methods
@@ -301,11 +323,12 @@ for reproducible results across multiple function calls.""",
         """
         # fire the preprocessing validation
         self.X = X
+
         # Xscaled has been computed when X was set
         Xsc = self._Xscaled
-        # call the sklearn _fit function on data (it outputs SVD results)
-        U, sigma, VT = self._pca._fit(Xsc.data)
-
+        # call the sklearn _fit function on data
+        # (it outputs SVD results)
+        self._svd = self._pca._fit(Xsc.data)
         self._fitted = True
         return self
 
@@ -315,35 +338,164 @@ for reproducible results across multiple function calls.""",
             return
         return self._pca.transform(X.data)
 
-    @property
-    @_wrap_sklearn_output_to_nddataset
-    def LT(self):
-        """
-        LT.
-        """
-        if not self._pca._fitted:
-            return
-        LT = self._pca.components_
-        return self._LT
+    # @property
+    # @_wrap_sklearn_output_to_nddataset
+    # def LT(self):
+    #     """
+    #     LT.
+    #     """
+    #     if not self._pca._fitted:
+    #         return
+    #     LT = self._pca.components_
+    #     return LT
 
-    @property
-    def S(self):
+    # @property
+    # def S(self):
+    #     """
+    #     S.
+    #     """
+    #     if not self._pca._fitted:
+    #         return
+    #     S = self._pca.sc
+    #
+
+    def scoreplot(
+        self, Xhat, *pcs, colormap="viridis", color_mapping="index", **kwargs
+    ):
         """
-        S.
+        2D or 3D scoreplot of samples.
+
+        Parameters
+        ----------
+        *pcs : a series of int argument or a list/tuple
+            Must contain 2 or 3 elements.
+        colormap : str
+            A matplotlib colormap.
+        color_mapping : 'index' or 'labels'
+            If 'index', then the colors of each n_scores is mapped sequentially
+            on the colormap. If labels, the labels of the n_observation are
+            used for color mapping.
         """
-        if not self._pca._fitted:
-            return
-        S = self._pca.sc
+        if not self._fitted:
+            raise exceptions.NotFittedError(
+                "The fit method must be used " "before using this method"
+            )
+
+        self.prefs = self.X.preferences
+
+        if isinstance(pcs[0], (list, tuple, set)):
+            pcs = pcs[0]
+
+        # transform to internal index of component's index (1->0 etc...)
+        pcs = np.array(pcs) - 1
+
+        # colors
+        if color_mapping == "index":
+
+            if np.any(Xhat.y.data):
+                colors = Xhat.y.data
+            else:
+                colors = np.array(range(Xhat.shape[0]))
+
+        elif color_mapping == "labels":
+
+            labels = list(set(Xhat.y.labels))
+            colors = [labels.index(lab) for lab in Xhat.y.labels]
+
+        if len(pcs) == 2:
+            # bidimensional score plot
+
+            fig = plt.figure(**kwargs)
+            ax = fig.add_subplot(111)
+            ax.set_title("Score plot")
+
+            # ax.set_xlabel(
+            #     "PC# {} ({:.3f}%)".format(pcs[0] + 1, self.ev_ratio.data[pcs[0]])
+            # )
+            # ax.set_ylabel(
+            #     "PC# {} ({:.3f}%)".format(pcs[1] + 1, self.ev_ratio.data[pcs[1]])
+            # )
+            axsc = ax.scatter(
+                Xhat.masked_data[:, pcs[0]],
+                Xhat.masked_data[:, pcs[1]],
+                s=30,
+                c=colors,
+                cmap=colormap,
+            )
+
+            number_x_labels = self.prefs.number_of_x_labels  # get from config
+            number_y_labels = self.prefs.number_of_y_labels
+            # the next two line are to avoid multipliers in axis scale
+            y_formatter = ScalarFormatter(useOffset=False)
+            ax.yaxis.set_major_formatter(y_formatter)
+            ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
+            ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
+            ax.xaxis.set_ticks_position("bottom")
+            ax.yaxis.set_ticks_position("left")
+
+        if len(pcs) == 3:
+            # tridimensional score plot
+            plt.figure(**kwargs)
+            ax = plt.axes(projection="3d")
+            ax.set_title("Score plot")
+            ax.set_xlabel(
+                "PC# {} ({:.3f}%)".format(pcs[0] + 1, self.ev_ratio.data[pcs[0]])
+            )
+            ax.set_ylabel(
+                "PC# {} ({:.3f}%)".format(pcs[1] + 1, self.ev_ratio.data[pcs[1]])
+            )
+            ax.set_zlabel(
+                "PC# {} ({:.3f}%)".format(pcs[2] + 1, self.ev_ratio.data[pcs[2]])
+            )
+            axsc = ax.scatter(
+                Xhat.masked_data[:, pcs[0]],
+                Xhat.masked_data[:, pcs[1]],
+                Xhat.masked_data[:, pcs[2]],
+                zdir="z",
+                s=30,
+                c=colors,
+                cmap=colormap,
+                depthshade=True,
+            )
+
+        if color_mapping == "labels":
+            import matplotlib.patches as mpatches
+
+            leg = []
+            for lab in labels:
+                i = labels.index(lab)
+                c = axsc.get_cmap().colors[int(255 / (len(labels) - 1) * i)]
+                leg.append(mpatches.Patch(color=c, label=lab))
+
+            ax.legend(handles=leg, loc="best")
+
+        return ax
 
 
 if __name__ == "__main__":
-    from spectrochempy import NDDataset, MASKED
+    import matplotlib.pyplot as plt
+
+    from spectrochempy import MASKED, NDDataset
     from spectrochempy.utils import exceptions
 
     dataset = NDDataset.read("irdata/nh4y-activation.spg")
-    dataset[:, 1240.0:920.0] = MASKED  # do not forget to use float in slicing
+    # dataset[:, 1240.0:920.0] = MASKED  # do not forget to use float in slicing
 
-    pca = SKL_PCA(n_components=2)
+    pca = SKL_PCA(n_components=2, svd_solver="full")
     pca.fit(dataset)
     x_hat = pca.transform(dataset)
-    x_hat
+    pca.scoreplot(x_hat, 1, 2)
+    plt.show()
+
+    # compare with our PCA
+    from spectrochempy.analysis.pca import PCA
+
+    pca1 = PCA()
+    pca1.fit(dataset)
+    x1_hat, _ = pca1.reduce(n_pc=2)
+    pca1.scoreplot(1, 2)
+    plt.show()
+
+    from spectrochempy.utils import testing
+
+    assert testing.assert_array_equal(x_hat.data, x1_hat[0].data)
