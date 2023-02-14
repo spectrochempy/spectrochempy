@@ -92,7 +92,7 @@ def show_versions(file=sys.stdout):
 
     # dependencies
     deps = []
-    reqs = Path(__file__).parent.parent.parent / "requirements_dev.txt"
+    reqs = Path(__file__).parent.parent.parent / "requirements" / "requirements_dev.txt"
     reqs = reqs.read_text().split("\n")
     for req in reqs:
         req = req.strip()

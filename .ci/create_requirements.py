@@ -176,7 +176,7 @@ if __name__ == "__main__":
     filename = repo_path / "environment.yml"
     filename.write_text(out_header + out_dependencies)
 
-    generate_pip_requirements(filename, repo_path / "requirements.txt")
+    generate_pip_requirements(filename, repo_path / "requirements" / "requirements.txt")
 
     # Generate environment_dev.yml and requirements_dev.txt files ......................
     out_dev_header = template_header.render(
@@ -188,7 +188,9 @@ if __name__ == "__main__":
     filename = repo_path / "environment_dev.yml"
     filename.write_text(out_dev_header + out_dev_dependencies)
 
-    generate_pip_requirements(filename, repo_path / "requirements_dev.txt")
+    generate_pip_requirements(
+        filename, repo_path / "requirements" / "requirements_dev.txt"
+    )
 
     # generate meta.yaml for conda recipe ..............................................
     out_meta = file_meta.read_text("utf-8")
