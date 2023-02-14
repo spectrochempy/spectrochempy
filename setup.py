@@ -90,7 +90,7 @@ def _install_mpl():
 
 
 def read_requirements():
-    path = Path("requirements.txt")
+    path = Path("requirements/requirements.txt")
     req = path.read_text().strip()
     req = req.split("\n")
     req = list(map(str.strip, req))
