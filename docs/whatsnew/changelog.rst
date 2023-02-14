@@ -18,19 +18,13 @@ New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
-* Compatibility with matplotlib 3.7
-* Refactoring of the configuration files
+
 .. section
 
 Bug fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
-* Fix: problems related to a wrong configuration of the logger.
-  If you still have errors or strange behavior in the console
-  log output or in the `<HOME/.spectrochempy/logs/spectrochempy.log` file,
-  it may be necessary to delete the `<HOME/.spectrochempy/logs>`
-  and `<HOME/.spectrochempy/config>` files.
 
 .. section
 
@@ -44,3 +38,4 @@ Breaking changes
 Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
+
