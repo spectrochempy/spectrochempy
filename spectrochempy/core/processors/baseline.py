@@ -401,7 +401,7 @@ class BaselineCorrection(HasTraits):
             minspan=5,
             button=[1],
             useblit=True,
-            rectprops=dict(alpha=0.5, facecolor="blue"),
+            props=dict(alpha=0.5, facecolor="blue"),
         )
 
         fig.canvas.draw()
