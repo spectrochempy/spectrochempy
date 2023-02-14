@@ -369,9 +369,6 @@ class PCA(AnalysisConfigurable):
 
         return S, LT
 
-    transform = reduce
-    transform.__doc__ = "Alias of reduce (Scikit-learn terminology)"
-
     def reconstruct(self, n_pc=None):
         """
         Transform data back to the original space using `n_pc` PC's.
@@ -416,9 +413,6 @@ class PCA(AnalysisConfigurable):
         X.name = self.X.name
         X.title = self.X.title
         return X
-
-    inverse_transform = reconstruct
-    inverse_transform.__doc__ = "Alias of reconstruct (Scikit-learn terminology)"
 
     def plotmerit(self, n_pc=None, **kwargs):
         # call the super plotmerit with an additional argument: n_pc
