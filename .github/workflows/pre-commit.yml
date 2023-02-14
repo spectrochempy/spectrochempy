@@ -3,13 +3,12 @@ name: Pre-commit 🔦
 on:
   pull_request:
 
-  push:
-
   schedule:
     - cron: '00 0 * * *'
 
 jobs:
   pre-commit:
+    if: !startsWith(github.head_ref, 'release/')
     runs-on: ubuntu-latest
     concurrency:
       group: ${{ github.ref }}-pre-commit
