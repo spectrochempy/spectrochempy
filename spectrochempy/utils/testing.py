@@ -424,7 +424,10 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
                             this.mask,
                             f"{this} and {other} masks are different.",
                         )
-                if attr in ["data", "mask"]:
+                if attr in ["data"]:
+                    # we must compare masked array
+                    sattr = this.masked_data
+                    oattr = other.masked_data
                     if approx:
                         assert_array_compare(
                             compare,
