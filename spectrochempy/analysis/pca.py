@@ -5,92 +5,153 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-This module implement the PCA (Principal Component Analysis) class.
+This module implement several wrapper to scikit-learn model and estimators
 """
+import numpy as np
+import traitlets as tr
+from numpy.random import RandomState
+from sklearn import decomposition
+from traittypes import Array
+
+from spectrochempy.analysis.abstractanalysis import AnalysisConfigurable
+from spectrochempy.utils import exceptions
 
 __all__ = ["PCA"]
 __configurables__ = __all__
 
-import numpy as np
-import traitlets as tr
-from matplotlib import pyplot as plt
-from matplotlib.ticker import MaxNLocator, ScalarFormatter
-from scipy import special
 
-from spectrochempy.analysis.abstractanalysis import AnalysisConfigurable
-from spectrochempy.analysis.svd import SVD
-from spectrochempy.core import info_
-from spectrochempy.core.dataset.arraymixins.npy import dot
-from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils import NBlue, NRed, exceptions
-
-
-# ======================================================================================
-# class PCA
-# ======================================================================================
 class PCA(AnalysisConfigurable):
     """
-    Principal Component Analysis.
+    PCA analysis is here done using the sklearn PCA model.
 
-    This class performs a Principal Component Analysis of a |NDDataset|,
-    *i.e.*, a linear dimensionality reduction using Singular Value
-    Decomposition (`SVD`)
-    of the data to perform its projection to a lower dimensional space.
-
-    The reduction of a dataset :math:`X` with shape (`M`,`N`) is achieved
-    using the decomposition : :math:`X = S.L^T`, where
-    :math:`S` is the score's matrix with shape (`M`, `n_pc`) and :math:`L^T` is
-    the transposed loading's matrix with shape (`n_pc`, `N`).
-
-    If the dataset `X` contains masked values, these values are silently
-    ignored in the calculation.
-
-    Parameters
-    ----------
-
-
-    See Also
-    --------
-    EFA
-       Perform an Evolving Factor Analysis (forward and reverse) of the input |NDDataset|.
-    NNMF
-       Performs a Non Negative Matrix Factorization of a |NDDataset|.
-    MCRALS
-       Performs MCR-ALS of a |NDDataset| knowing the initial C or St matrix.
+    We just implement fit, reduce, reconstruct and fit_reconstruct
     """
 
     name = tr.Unicode("PCA")
-    description = tr.Unicode("PCA model")
+    description = tr.Unicode("Scikit-learn PCA model")
 
     # ----------------------------------------------------------------------------------
     # Runtime Parameters
     # ----------------------------------------------------------------------------------
     # _X already defined in the superclass
     # define here only the variable that you use in fit or transform functions
+    _VT = Array(allow_none=True, help="Loadings")
+    _S = Array(allow_none=True, help="Scores")
+    _svd = tr.List(Array())
 
-    _LT = tr.Instance(NDDataset, allow_none=True, help="Loadings")
-    _S = tr.Instance(NDDataset, allow_none=True, help="Scores")
-    _Xscaled = tr.Instance(NDDataset, help="preprocessed X")
-    _svd = tr.Instance(SVD)
+    _pca = tr.Instance(decomposition.PCA)
 
     # ----------------------------------------------------------------------------------
     # Configuration parameters
     # ----------------------------------------------------------------------------------
-    centered = tr.Bool(
-        default_value=True,
-        help="If True the data are centered around the mean values: "
-        ":math:`X' = X - mean(X)`",
-    ).tag(config=True)
+    # centered = tr.Bool(
+    #     default_value=True,
+    #     help="If True the data are centered around the mean values: "
+    #     ":math:`X' = X - mean(X)`",
+    # ).tag(config=True)
+
+    # sklearn PCA is always on centered data
+
     standardized = tr.Bool(
         default_value=False,
         help="If True the data are scaled to unit standard deviation: "
         ":math:`X' = X / \\sigma`",
     ).tag(config=True)
+
     scaled = tr.Bool(
         default_value=False,
         help="If True the data are scaled in the interval [0-1]: "
         ":math:`X' = (X - min(X)) / (max(X)-min(X))`",
+    ).tag(config=True)
+
+    n_components = tr.Union(
+        (tr.Enum(["mle"]), tr.Int(), tr.Float()),
+        allow_none=True,
+        default_value=None,
+        help="""Number of components to keep.
+if n_components is not set all components are kept::
+    n_components == min(n_observations, n_features)
+If ``n_components == 'mle'`` and ``svd_solver == 'full'``, Minka's MLE is used to guess
+the dimension. Use of ``n_components == 'mle'`` will interpret ``svd_solver == 'auto'``
+as ``svd_solver == 'full'``.
+If ``0 < n_components < 1`` and ``svd_solver == 'full'``, select the number of
+components such that the amount of variance that needs to be explained is greater than
+the percentage specified by n_components.
+If ``svd_solver == 'arpack'``, the number of components must be strictly less than the
+minimum of n_features and n_observations. Hence, the None case results in::
+    n_components == min(n_observations, n_features) - 1""",
+    ).tag(config=True)
+
+    copy = tr.Bool(
+        default_value=True,
+        help="""If False, data passed to fit are overwritten and running
+fit(X).transform(X) will not yield the expected results,
+use fit_transform(X) instead.""",
+    ).tag(config=True)
+
+    whiten = tr.Bool(
+        default_value=False,
+        help="""When True (False by default) the `components_` vectors are multiplied
+by the square root of n_observations and then divided by the singular values to ensure
+uncorrelated outputs with unit component-wise variances. Whitening will remove some
+information from the transformed signal (the relative variance scales of the components)
+but can sometime improve the predictive accuracy of the downstream estimators by making
+their data respect some hard-wired assumptions.""",
+    ).tag(config=True)
+
+    svd_solver = tr.Enum(
+        ["auto", "full", "arpack", "randomized"],
+        default_value="auto",
+        help="""If auto :
+The solver is selected by a default policy based on `X.shape`
+and `n_components`: if the input data is larger than 500x500 and the number of
+components to extract is lower than 80% of the smallest dimension of the data, then the
+more efficient 'randomized' method is enabled. Otherwise the exact full SVD is computed
+and optionally truncated afterwards.
+If full :
+run exact full SVD calling the standard LAPACK solver via `scipy.linalg.svd` and select
+the components by postprocessing
+If arpack :
+run SVD truncated to n_components calling ARPACK solver via `scipy.sparse.linalg.svds`.
+It requires strictly 0 < n_components < min(X.shape)
+If randomized :
+run randomized SVD by the method of Halko et al.""",
+    ).tag(config=True)
+
+    tol = tr.Float(
+        default_value=0.0,
+        help="""Tolerance for singular values computed by svd_solver == 'arpack'.
+Must be of range [0.0, infinity).""",
+    ).tag(config=True)
+
+    iterated_power = tr.Union(
+        (tr.Int(), tr.Enum(["auto"])),
+        default_value="auto",
+        help="""Number of iterations for the power method computed by
+svd_solver == 'randomized'. Must be of range [0, infinity).""",
+    ).tag(config=True)
+
+    n_oversamples = tr.Int(
+        default_value=10,
+        help="""This parameter is only relevant when `svd_solver="randomized"`.
+It corresponds to the additional number of random vectors to sample the range of `X` so
+as to ensure proper conditioning. See :func:`~sklearn.utils.extmath.randomized_svd`
+for more details.""",
+    ).tag(config=True)
+
+    power_iteration_normalizer = tr.Enum(
+        ["auto", "QR", "LU", "none"],
+        default_value="auto",
+        help="""Power iteration normalizer for randomized SVD solver. Not used by
+ARPACK. See :func:`~sklearn.utils.extmath.randomized_svd` for more details.""",
+    ).tag(config=True)
+
+    random_state = tr.Union(
+        (tr.Int(), tr.Instance(RandomState)),
+        allow_none=True,
+        default_value=None,
+        help="""Used when the 'arpack' or 'randomized' solvers are used. Pass an int
+for reproducible results across multiple function calls.""",
     ).tag(config=True)
 
     # ----------------------------------------------------------------------------------
@@ -112,6 +173,19 @@ class PCA(AnalysisConfigurable):
             warm_start=warm_start,
             config=config,
             **kwargs,
+        )
+
+        # initialize sklearn PCA
+        self._pca = decomposition.PCA(
+            n_components=self.n_components,
+            copy=self.copy,
+            whiten=self.whiten,
+            svd_solver=self.svd_solver,
+            tol=self.tol,
+            iterated_power=self.iterated_power,
+            n_oversamples=self.n_oversamples,
+            power_iteration_normalizer=self.power_iteration_normalizer,
+            random_state=self.random_state,
         )
 
     # ------------------------------------------------------------------------
@@ -141,518 +215,94 @@ class PCA(AnalysisConfigurable):
 
         return s
 
-    # ------------------------------------------------------------------------
-    # Private methods
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
+    # Private methods (overloading abstract classes)
+    # ----------------------------------------------------------------------------------
     @tr.observe("_X")
     def _preprocess_as_X_changed(self, change):
 
-        Xsc = self.X
-
-        # mean center the dataset
-        # -----------------------
-        if self.centered:
-            self._center = center = Xsc.mean(dim=0)
-            Xsc = Xsc - center
-            Xsc.name = f"centered {Xsc.name}"
+        X = change.new
 
         # Standardization
         # ---------------
         if self.standardized:
-            self._std = Xsc.std(dim=0)
-            Xsc /= self._std
-            Xsc.name = f"standardized {Xsc.name}"
+            self._std = X.std(dim=0)
+            X /= self._std
+            X.name = f"standardized {X.name}"
 
         # Scaling
         # -------
         if self.scaled:
-            self._min = Xsc.min(dim=0)
-            self._ampl = Xsc.ptp(dim=0)
-            Xsc -= self._min
-            Xsc /= self._ampl
-            Xsc.name = "scaled %s" % Xsc.name
+            self._min = X.min(dim=0)
+            self._ampl = X.ptp(dim=0)
+            X -= self._min
+            X /= self._ampl
+            X.name = "scaled %s" % X.name
+
+        # we keep only the data
+        self._X_preprocessed = X.data
+
+    def _fit(self, X):
+        # this method is called by the abstract class fit.
+        # Input X is a np.ndarray
+
+        # call the sklearn _fit function on data (it outputs SVD results)
+        # _outfit is a tuple handle the eventual output of _fit for further processing.
+        # The _outfit members are np.ndarrays
+        self._outfit = self._pca._fit(X)
+
+        # get the calculated attributes
+        self.noise_variance_ = self._pca.noise_variance_
+        self.n_observations_ = self._pca.n_samples_
+        self.components_ = self._pca.components_
+        self.n_components_ = self._pca.n_components_
+        self.explained_variance_ = self._pca.explained_variance_
+        self.explained_variance_ratio_ = self._pca.explained_variance_ratio_
+        self.singular_values_ = self._pca.singular_values_
+
+    def _reduce(self, X, **kwargs):
+        return self._pca.transform(X)
+
+    def _reconstruct(self, X_reduced):
+        return self._pca.inverse_transform(X_reduced)
 
-        self._Xscaled = Xsc
 
-    def _get_n_pc(self, n_pc=None):
-
-        max_n_pc = self.ev.size
-        if n_pc is None:
-            n_pc = max_n_pc
-            return n_pc
-        elif isinstance(n_pc, int):
-            n_pc = min(n_pc, max_n_pc)
-            return n_pc
-        elif n_pc == "auto":
-            M, N = self.X.shape
-            if M >= N:
-                n_pc = self._infer_pc_()
-                return n_pc
-            else:
-                info_(
-                    "Cannot use `auto` if n_observations < "
-                    "n_features. Try with threshold 0.9999"
-                )
-                n_pc = 0.9999
-
-        if 0 < n_pc < 1.0:
-            # number of PC for which the cumulated explained variance is
-            # less than a given ratio
-            n_pc = np.searchsorted(self.ev_cum.data / 100.0, n_pc) + 1
-            return n_pc
-        else:
-            raise ValueError("could not get a valid number of components")
-
-    def _assess_dimension_(self, rank):
-        """Compute the likelihood of a rank ``rank`` dataset
-        The dataset is assumed to be embedded in gaussian noise having
-        spectrum ``spectrum`` (here, the explained variances `ev` ).
-
-        Parameters
-        ----------
-        rank : int
-            Tested rank value.
-
-        Returns
-        -------
-        float
-            The log-likelihood.
-
-        Notes
-        -----
-        This implements the method of Thomas P. Minka :
-        Automatic Choice of Dimensionality for PCA. NIPS 2000 : 598-604.
-        Copied and modified from scikit-learn.decomposition.pca (BSD-3 license)
-        """
-        spectrum = self.ev.data
-        M, N = self.X.shape
-
-        if rank > len(spectrum):
-            raise ValueError("The tested rank cannot exceed the rank of the dataset")
-
-        pu = -rank * np.log(2.0)
-        for i in range(rank):
-            pu += special.gammaln((N - i) / 2.0) - np.log(np.pi) * (N - i) / 2.0
-
-        pl = np.sum(np.log(spectrum[:rank]))
-        pl = -pl * M / 2.0
-
-        if rank == N:
-            pv = 0
-            v = 1
-        else:
-            v = np.sum(spectrum[rank:]) / (N - rank)
-            pv = -np.log(v) * M * (N - rank) / 2.0
-
-        m = N * rank - rank * (rank + 1.0) / 2.0
-        pp = np.log(2.0 * np.pi) * (m + rank + 1.0) / 2.0
-
-        pa = 0.0
-        spectrum_ = spectrum.copy()
-        spectrum_[rank:N] = v
-        for i in range(rank):
-            for j in range(i + 1, len(spectrum)):
-                pa += np.log(
-                    (spectrum[i] - spectrum[j])
-                    * (1.0 / spectrum_[j] - 1.0 / spectrum_[i])
-                ) + np.log(M)
-
-        ll = pu + pl + pv + pp - pa / 2.0 - rank * np.log(M) / 2.0
-
-        return ll
-
-    def _infer_pc_(self):
-        """Infers the number of principal components.
-
-        Notes
-        -----
-        Copied and modified from _infer_dimensions in
-        scikit-learn.decomposition.pca (BSD-3 license).
-        """
-        n_ev = self.ev.size
-        ll = np.empty(n_ev)
-        for rank in range(n_ev):
-            ll[rank] = self._assess_dimension_(rank)
-        return ll.argmax()
-
-    # ------------------------------------------------------------------------
-    # Public methods
-    # ------------------------------------------------------------------------
-
-    def fit(self, X, y=None):
-        """
-        Fit the PCA model
-
-        Parameters
-        ----------
-        X : |NDDataset| object
-            The input dataset has shape (M, N). M is the number of
-            observations (for examples a series of IR spectra) while N
-            is the number of features (for example the wavenumbers measured
-            in each IR spectrum).
-        y : ignored
-        """
-        self.X = X  # fire the preprocessing validation
-
-        # Xscaled has been computed when X was set
-        Xsc = self._Xscaled
-
-        # perform SVD
-        # -----------
-        svd = SVD(Xsc)
-        sigma = svd.s.diag()
-        U = svd.U
-        VT = svd.VT
-        self._svd = svd
-
-        # loadings
-
-        LT = VT
-        LT.title = "loadings (L^T) of " + X.name
-        LT.history = "Created by PCA"
-
-        # scores
-
-        S = dot(U, sigma)
-        S.title = "scores (S) of " + X.name
-        S.set_coordset(
-            y=X.y,
-            x=Coord(
-                None,
-                labels=["#%d" % (i + 1) for i in range(svd.s.size)],
-                title="principal component",
-            ),
-        )
-
-        S.description = "scores (S) of " + X.name
-        S.history = "Created by PCA"
-
-        self._LT = LT
-        self._S = S
-
-        self._fitted = True
-        return self  # To be in line with the scikit-learn behavior
-
-    def reduce(self, n_pc=None):
-        """
-        Apply a dimensionality reduction to the X dataset of shape [M, N].
-
-        Loadings `L` with shape [``n_pc``, `N`] and scores `S`
-        with shape [`M`, `n_pc`] are obtained using the following
-        decomposition : :math:`X = S.L^T`.
-
-        Parameters
-        ----------
-        n_pc : int, optional
-            The number of principal components to compute. If not set all
-            components are returned, except if n_pc is set to ``auto`` for
-            an automatic determination of the number of components.
-
-        Returns
-        -------
-        S, LT : |NDDataset| objects.
-            n_pc loadings and their corresponding scores for each observations.
-        """
-        if not self._fitted:
-            raise exceptions.NotFittedError(
-                "The fit method must be used " "before using this method"
-            )
-
-        # get n_pc (automatic or determined by the n_pc arguments)
-        n_pc = self._get_n_pc(n_pc)
-
-        # scores (S) and loading (L^T) matrices
-        # ------------------------------------
-
-        S = self.S[:, :n_pc]
-        LT = self.LT[:n_pc]
-
-        return S, LT
-
-    def reconstruct(self, n_pc=None):
-        """
-        Transform data back to the original space using `n_pc` PC's.
-
-        The following matrice operation is performed : :math:`X' = S'.L'^T`
-        where S'=S[:, n_pc] and L=L[:, n_pc].
-
-        Parameters
-        ----------
-        n_pc : int, optional
-            The number of PC to use for the reconstruction.
-
-        Returns
-        -------
-        |NDDataset|
-            The reconstructed dataset based on n_pc principal components.
-        """
-        if not self._fitted:
-            raise exceptions.NotFittedError(
-                "The fit method must be used " "before using this method"
-            )
-
-        # get n_pc (automatic or determined by the n_pc arguments)
-        n_pc = self._get_n_pc(n_pc)
-
-        # reconstruct from scores and loadings using n_pc components
-        S = self.S[:, :n_pc]
-        LT = self.LT[:n_pc]
-
-        X = dot(S, LT)
-
-        # try to reconstruct something close to the original scaled, standardized or centered data
-        if self.scaled:
-            X *= self._ampl
-            X += self._min
-        if self.standardized:
-            X *= self._std
-        if self.centered:
-            X += self._center
-
-        X.history = f"PCA reconstructed Dataset with {n_pc} principal components"
-        X.name = self.X.name
-        X.title = self.X.title
-        return X
-
-    def plotmerit(self, n_pc=None, **kwargs):
-        # call the super plotmerit with an additional argument: n_pc
-
-        super().plotmerit(n_pc=n_pc, **kwargs)
-
-    def printev(self, n_pc=None):
-        """
-        Print PCA figures of merit.
-
-        Prints eigenvalues and explained variance for all or first n_pc PC's.
-
-        Parameters
-        ----------
-        n_pc : int, optional
-            The number of components to print.
-        """
-        # get n_pc (automatic or determined by the n_pc arguments)
-        if not self._fitted:
-            raise exceptions.NotFittedError(
-                "The fit method must be used " "before using this method"
-            )
-
-        n_pc = self._get_n_pc(n_pc)
-
-        print((self.__str__(n_pc)))
-
-    def screeplot(self, n_pc=None, **kwargs):
-        """
-        Scree plot of explained variance + cumulative variance by PCA.
-
-        Explained variance by each PC is plot as a bar graph (left y axis)
-        and cumulative explained variance is plot as a scatter plot with lines
-        (right y axis).
-
-        Parameters
-        ----------
-        n_pc : int
-            Number of components to plot.
-
-        **kwargs
-            Extra arguments: `colors` (default: `[NBlue, NRed]`) to set the colors
-            of the bar plot and scatter plot; `ylims` (default `[(0, 100), "auto"]`).
-
-        Returns
-        -------
-            list of axes
-                The list of axes.
-        """
-        # get n_pc (automatic or determined by the n_pc arguments) - min = 3
-        if not self._fitted:
-            raise exceptions.NotFittedError(
-                "The fit method must be used " "before using this method"
-            )
-
-        n_pc = max(self._get_n_pc(n_pc), 3)
-
-        color1, color2 = kwargs.get("colors", [NBlue, NRed])
-        # pen = kwargs.get('pen', True)
-        ylim1, ylim2 = kwargs.get("ylims", [(0, 100), "auto"])
-
-        if ylim2 == "auto":
-            y1 = np.around(self.ev_ratio.data[0] * 0.95, -1)
-            y2 = 101.0
-            ylim2 = (y1, y2)
-
-        ax1 = self.ev_ratio[:n_pc].plot_bar(
-            ylim=ylim1, color=color1, title="Scree plot"
-        )
-        ax2 = self.ev_cum[:n_pc].plot_scatter(
-            ylim=ylim2, color=color2, pen=True, markersize=7.0, twinx=ax1
-        )
-        ax1.set_title("Scree plot")
-        return ax1, ax2
-
-    def scoreplot(self, *pcs, colormap="viridis", color_mapping="index", **kwargs):
-        """
-        2D or 3D scoreplot of samples.
-
-        Parameters
-        ----------
-        *pcs : a series of int argument or a list/tuple
-            Must contain 2 or 3 elements.
-        colormap : str
-            A matplotlib colormap.
-        color_mapping : 'index' or 'labels'
-            If 'index', then the colors of each n_scores is mapped sequentially
-            on the colormap. If labels, the labels of the n_observation are
-            used for color mapping.
-        """
-        if not self._fitted:
-            raise exceptions.NotFittedError(
-                "The fit method must be used " "before using this method"
-            )
-
-        self.prefs = self.X.preferences
-
-        if isinstance(pcs[0], (list, tuple, set)):
-            pcs = pcs[0]
-
-        # transform to internal index of component's index (1->0 etc...)
-        pcs = np.array(pcs) - 1
-
-        # colors
-        if color_mapping == "index":
-
-            if np.any(self.S.y.data):
-                colors = self.S.y.data
-            else:
-                colors = np.array(range(self.S.shape[0]))
-
-        elif color_mapping == "labels":
-
-            labels = list(set(self.S.y.labels))
-            colors = [labels.index(lab) for lab in self.S.y.labels]
-
-        if len(pcs) == 2:
-            # bidimentional score plot
-
-            fig = plt.figure(**kwargs)
-            ax = fig.add_subplot(111)
-            ax.set_title("Score plot")
-
-            ax.set_xlabel(
-                "PC# {} ({:.3f}%)".format(pcs[0] + 1, self.ev_ratio.data[pcs[0]])
-            )
-            ax.set_ylabel(
-                "PC# {} ({:.3f}%)".format(pcs[1] + 1, self.ev_ratio.data[pcs[1]])
-            )
-            axsc = ax.scatter(
-                self.S.masked_data[:, pcs[0]],
-                self.S.masked_data[:, pcs[1]],
-                s=30,
-                c=colors,
-                cmap=colormap,
-            )
-
-            number_x_labels = self.prefs.number_of_x_labels  # get from config
-            number_y_labels = self.prefs.number_of_y_labels
-            # the next two line are to avoid multipliers in axis scale
-            y_formatter = ScalarFormatter(useOffset=False)
-            ax.yaxis.set_major_formatter(y_formatter)
-            ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
-            ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
-            ax.xaxis.set_ticks_position("bottom")
-            ax.yaxis.set_ticks_position("left")
-
-        if len(pcs) == 3:
-            # tridimensional score plot
-            plt.figure(**kwargs)
-            ax = plt.axes(projection="3d")
-            ax.set_title("Score plot")
-            ax.set_xlabel(
-                "PC# {} ({:.3f}%)".format(pcs[0] + 1, self.ev_ratio.data[pcs[0]])
-            )
-            ax.set_ylabel(
-                "PC# {} ({:.3f}%)".format(pcs[1] + 1, self.ev_ratio.data[pcs[1]])
-            )
-            ax.set_zlabel(
-                "PC# {} ({:.3f}%)".format(pcs[2] + 1, self.ev_ratio.data[pcs[2]])
-            )
-            axsc = ax.scatter(
-                self.S.masked_data[:, pcs[0]],
-                self.S.masked_data[:, pcs[1]],
-                self.S.masked_data[:, pcs[2]],
-                zdir="z",
-                s=30,
-                c=colors,
-                cmap=colormap,
-                depthshade=True,
-            )
-
-        if color_mapping == "labels":
-            import matplotlib.patches as mpatches
-
-            leg = []
-            for lab in labels:
-                i = labels.index(lab)
-                c = axsc.get_cmap().colors[int(255 / (len(labels) - 1) * i)]
-                leg.append(mpatches.Patch(color=c, label=lab))
-
-            ax.legend(handles=leg, loc="best")
-
-        return ax
-
-    @property
-    def sv(self):
-        """Singular values"""
-        if not self._fitted:
-            return
-        sv = self._svd.sv
-        sv.x.title = "PC #"
-        return sv
-
-    @property
-    def ev(self):
-        """Explained variances (The eigenvalues of the covariance matrix)."""
-        if not self._fitted:
-            return
-        ev = self._svd.ev
-        ev.x.title = "PC #"
-        return ev
-
-    @property
-    def ev_ratio(self):
-        """Explained variance per singular values."""
-        if not self._fitted:
-            return
-        ev_ratio = self._svd.ev_ratio
-        ev_ratio.x.title = "PC #"
-        return ev_ratio
-
-    @property
-    def ev_cum(self):
-        """Cumulative Explained Variances."""
-        if not self._fitted:
-            return
-        ev_cum = self._svd.ev_cum
-        ev_cum.x.title = "PC #"
-        return ev_cum
-
-    @property
-    def LT(self):
-        """
-        LT.
-        """
-        if not self._fitted:
-            return
-        return self._LT
-
-    @property
-    def S(self):
-        """
-        S.
-        """
-        if not self._fitted:
-            return
-        return self._S
-
-
-# ============================================================================
 if __name__ == "__main__":
-    pass
+    import matplotlib.pyplot as plt
+
+    from spectrochempy import MASKED, NDDataset
+    from spectrochempy.utils import testing
+
+    dataset = NDDataset.read("irdata/nh4y-activation.spg")
+    dataset[:, 1240.0:920.0] = MASKED  # do not forget to use float in slicing
+
+    pca1 = PCA()
+    pca1.fit(dataset)
+
+    assert pca1._X.shape == (55, 5216), "missing row or col removed"
+    assert testing.assert_dataset_equal(
+        pca1.X, dataset
+    ), "input dataset should be reflected in the internal variable X"
+
+    # display scores
+    scores1 = pca1.reduce(n_components=2)
+    pca1.scoreplot(scores1, 1, 2)
+    plt.show()
+
+    # show loadings
+    loadings1 = pca1.get_components(n_components=2)
+    loadings1.plot(legend=True)
+    plt.show()
+
+    # reconstruct
+    X_hat = pca1.reconstruct(scores1)
+    pca1.plotmerit(dataset, X_hat)
+    plt.show()
+
+    # two other valid ways to get the reduction
+    # 1
+    scores2 = PCA().fit_reduce(dataset, n_components=2)
+    assert testing.assert_dataset_equal(scores2, scores1)
+    # 2
+    scores3 = PCA().fit(dataset).reduce(n_components=2)
+    assert testing.assert_dataset_equal(scores3, scores1)

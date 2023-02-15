@@ -13,48 +13,17 @@ __all__ = ["SVD"]
 __dataset_methods__ = []
 
 import numpy as np
-from traitlets import HasTraits, Instance
+import traitlets as tr
 
+from spectrochempy.analysis._analysisutils import _svd_flip
+from spectrochempy.analysis.abstractanalysis import AnalysisConfigurable
 from spectrochempy.core.dataset.basearrays.ndarray import MASKED
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 
 
-def _svd_flip(U, VT, u_based_decision=True):
-    """
-    Sign correction to ensure deterministic output from SVD.
-    Adjusts the columns of u and the rows of v such that the loadings in the
-    columns in u that are largest in absolute value are always positive.
-
-    Parameters
-    ----------
-    u_based_decision : boolean, (default=True)
-        If True, use the columns of u as the basis for sign flipping.
-        Otherwise, use the rows of v.
-
-    Notes
-    -----
-    Copied and modified from scikit-learn.utils.extmath (BSD 3 Licence)
-    """
-
-    if u_based_decision:
-        # columns of U, rows of VT
-        max_abs_cols = np.argmax(np.abs(U), axis=0)
-        signs = np.sign(U[max_abs_cols, range(U.shape[1])])
-        U *= signs
-        VT *= signs[:, np.newaxis]
-    else:
-        # rows of V, columns of U
-        max_abs_rows = np.argmax(np.abs(VT), axis=1)
-        signs = np.sign(VT[range(VT.shape[0]), max_abs_rows])
-        U *= signs
-        VT *= signs[:, np.newaxis]
-
-    return U, VT
-
-
 # ------------------------------------------------------------------
-class SVD(HasTraits):
+class SVD(AnalysisConfigurable):
     """
     Performs a Singular Value Decomposition of a dataset.
 
@@ -93,13 +62,13 @@ class SVD(HasTraits):
     [   94.54    5.059 ... 8.687e-06 7.779e-06]
     """
 
-    U = Instance(NDDataset, allow_none=True)
+    U = tr.Instance(NDDataset, allow_none=True)
     """|NDDataset| - Contains the left unitary matrix. Its shape depends on `full_matrices`"""
 
-    s = Instance(NDDataset)
+    s = tr.Instance(NDDataset)
     """|NDDataset| - Vector of singular values"""
 
-    VT = Instance(NDDataset, allow_none=True)
+    VT = tr.Instance(NDDataset, allow_none=True)
     """|NDDataset| - Contains a transpose matrix of the Loadings. Its shape depends on `full_matrices`"""
 
     def __init__(self, dataset, full_matrices=False, compute_uv=True):
