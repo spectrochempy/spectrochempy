@@ -7,6 +7,8 @@
 """
 This module implement some common utilities for the various analysis model.
 """
+from functools import partial
+
 import numpy as np
 
 
@@ -41,3 +43,98 @@ def _svd_flip(U, VT, u_based_decision=True):
         VT *= signs[:, np.newaxis]
 
     return U, VT
+
+
+class _set_output(object):
+    # A decorator to transform np.ndarray output from models to NDDataset
+    # according to the X input
+
+    def __init__(
+        self, method, *args, keepunits=True, keeptitle=True, typex=None, typey=None
+    ):
+        self.method = method
+        self.keepunits = keepunits
+        self.keeptitle = keeptitle
+        self.typex = typex
+        self.typey = typey
+
+    def __repr__(self):
+        """Return the method's docstring."""
+        return self.method.__doc__
+
+    def __get__(self, obj, objtype):
+        """Support instance methods."""
+        return partial(self.__call__, obj)
+
+    def __call__(self, obj, *args, **kwargs):
+
+        from spectrochempy.core.dataset.coord import Coord
+        from spectrochempy.core.dataset.nddataset import NDDataset
+
+        # determine the input X dataset
+        X = obj.X
+        # get the sklearn data output
+        data = self.method(obj, *args, **kwargs)
+
+        # restore eventually masked rows and columns
+        axis = "both"
+        if self.typex is not None:
+            axis = 0
+        elif self.typey is not None:
+            axis = 1
+
+        data = obj._restore_masked_data(data, axis=axis)
+
+        # make a new dataset with this data
+        X_transf = NDDataset(data)
+        # Now set the NDDataset attributes
+        if self.keepunits:
+            X_transf.units = X.units
+        X_transf.name = f"{X.name}_{obj.name}.{self.method.__name__}"
+        X_transf.history = f"Created by method {obj.name}.{self.method.__name__}"
+        if self.keeptitle:
+            X_transf.title = X.title
+        # make coordset
+        M, N = X.shape
+        if X_transf.shape == X.shape:
+            X_transf.set_coordset(y=X.y, x=X.x)
+        elif self.typey == "components":
+            X_transf.set_coordset(
+                y=Coord(
+                    None,
+                    labels=["#%d" % (i + 1) for i in range(X_transf.shape[0])],
+                    title="components",
+                ),
+                x=X.x,
+            )
+        elif self.typex == "components":
+            X_transf.set_coordset(
+                y=X.y,
+                x=Coord(
+                    None,
+                    labels=["#%d" % (i + 1) for i in range(X_transf.shape[1])],
+                    title="components",
+                ),
+            )
+        return X_transf
+
+
+# wrap _set_output to allow for deferred calling
+def _wrap_ndarray_output_to_nddataset(
+    method=None, keepunits=True, keeptitle=True, typex=None, typey=None
+):
+    if method:
+        # case of the decorator without argument
+        return _set_output(method)
+    else:
+        # and with argument
+        def wrapper(method):
+            return _set_output(
+                method,
+                keepunits=keepunits,
+                keeptitle=keeptitle,
+                typex=typex,
+                typey=typey,
+            )
+
+        return wrapper

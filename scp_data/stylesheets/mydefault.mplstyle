@@ -46,6 +46,9 @@ axes.xmargin                             : 0.0
 axes.ymargin                             : 0.0
 axes.zmargin                             : 0.05
 axes3d.grid                              : True
+axes3d.xaxis.panecolor                   : (0.95, 0.95, 0.95, 0.5)
+axes3d.yaxis.panecolor                   : (0.9, 0.9, 0.9, 0.5)
+axes3d.zaxis.panecolor                   : (0.925, 0.925, 0.925, 0.5)
 
 boxplot.bootstrap                        : None
 boxplot.boxprops.color                   : b
@@ -113,6 +116,7 @@ figure.edgecolor                         : white
 figure.facecolor                         : white
 figure.figsize                           : 3.5, 2.5
 figure.frameon                           : True
+figure.hooks                             :
 figure.labelsize                         : medium
 figure.labelweight                       : normal
 figure.subplot.bottom                    : 0.12

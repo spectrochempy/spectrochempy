@@ -80,51 +80,94 @@ def test_pca():
 
     show()
 
+    import matplotlib.pyplot as plt
 
-def test_compare_scikit_learn():
-
-    try:
-        import_optional_dependency("scikit-learn")
-    except ImportError:
-        return
-
-    from sklearn.decomposition import PCA as sklPCA
-
-    X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
-
-    pcas = sklPCA(n_components=2)
-    pcas.fit(X)
-
-    pca = PCA()
-    pca.fit(NDDataset(X))
-    pca.printev(n_pc=2)
-
-    testing.assert_array_almost_equal(pca._sv.data, pcas.singular_values_)
-    testing.assert_array_almost_equal(
-        pca.ev_ratio.data, pcas.explained_variance_ratio_ * 100.0
-    )
+    from spectrochempy import MASKED, NDDataset
+    from spectrochempy.utils import testing
 
     dataset = NDDataset.read("irdata/nh4y-activation.spg")
-    X1 = dataset.copy()  # skl can use directly nddataset but will transform
-    # them to simple array
+    dataset[:, 1240.0:920.0] = MASKED  # do not forget to use float in slicing
 
-    pcas = sklPCA(n_components=5, svd_solver="full")
-    pcas.fit(X1)
+    pca1 = PCA()
+    pca1.fit(dataset)
 
-    pca = PCA()
-    pca.fit(X1)
-    pca.printev(n_pc=5)
+    assert pca1._X.shape == (55, 5216), "missing row or col removed"
+    assert testing.assert_dataset_equal(
+        pca1.X, dataset
+    ), "input dataset should be reflected in the internal variable X"
 
-    testing.assert_array_almost_equal(pca._sv.data[:5], pcas.singular_values_[:5], 4)
-    testing.assert_array_almost_equal(
-        pca.ev_ratio.data[:5], pcas.explained_variance_ratio_[:5] * 100.0, 4
-    )
+    # display scores
+    scores1 = pca1.reduce(n_components=2)
+    pca1.scoreplot(scores1, 1, 2)
+    plt.show()
 
-    show()
+    # show all calculated loadings
+    loadings = pca1.components  # all calculated loadings
 
+    # show only some loadings
+    loadings1 = pca1.get_components(n_components=2)
+    loadings1.plot(legend=True)
+    plt.show()
 
-def _test_issue_15():
-    x = NDDataset.read_omnic("irdata/nh4y-activation.spg")
-    my_pca = PCA()
-    my_pca.fit(x)
-    my_pca.reconstruct(n_pc=3)
+    # reconstruct
+    X_hat = pca1.reconstruct(scores1)
+    pca1.plotmerit(dataset, X_hat)
+    plt.show()
+
+    # printev
+    pca1.printev(n_components=5)
+    s = pca1.__str__(n_components=5)
+
+    # two other valid ways to get the reduction
+    # 1
+    scores2 = PCA().fit_reduce(dataset, n_components=2)
+    assert testing.assert_dataset_equal(scores2, scores1)
+    # 2
+    scores3 = PCA().fit(dataset).reduce(n_components=2)
+    assert testing.assert_dataset_equal(scores3, scores1)
+
+    import matplotlib.pyplot as plt
+
+    from spectrochempy import MASKED, NDDataset
+    from spectrochempy.utils import testing
+
+    dataset = NDDataset.read("irdata/nh4y-activation.spg")
+    dataset[:, 1240.0:920.0] = MASKED  # do not forget to use float in slicing
+
+    pca1 = PCA()
+    pca1.fit(dataset)
+
+    assert pca1._X.shape == (55, 5216), "missing row or col removed"
+    assert testing.assert_dataset_equal(
+        pca1.X, dataset
+    ), "input dataset should be reflected in the internal variable X"
+
+    # display scores
+    scores1 = pca1.reduce(n_components=2)
+    pca1.scoreplot(scores1, 1, 2)
+    plt.show()
+
+    # show all calculated loadings
+    loadings = pca1.components  # all calculated loadings
+
+    # show only some loadings
+    loadings1 = pca1.get_components(n_components=2)
+    loadings1.plot(legend=True)
+    plt.show()
+
+    # reconstruct
+    X_hat = pca1.reconstruct(scores1)
+    pca1.plotmerit(dataset, X_hat)
+    plt.show()
+
+    # printev
+    pca1.printev(n_components=5)
+    s = pca1.__str__(n_components=5)
+
+    # two other valid ways to get the reduction
+    # 1
+    scores2 = PCA().fit_reduce(dataset, n_components=2)
+    assert testing.assert_dataset_equal(scores2, scores1)
+    # 2
+    scores3 = PCA().fit(dataset).reduce(n_components=2)
+    assert testing.assert_dataset_equal(scores3, scores1)

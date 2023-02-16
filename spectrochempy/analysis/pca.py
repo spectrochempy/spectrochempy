@@ -7,13 +7,18 @@
 """
 This module implement several wrapper to scikit-learn model and estimators
 """
+import matplotlib.pyplot as plt
 import numpy as np
 import traitlets as tr
+from matplotlib.ticker import MaxNLocator, ScalarFormatter
 from numpy.random import RandomState
 from sklearn import decomposition
 from traittypes import Array
 
+from spectrochempy.analysis._analysisutils import _wrap_ndarray_output_to_nddataset
 from spectrochempy.analysis.abstractanalysis import AnalysisConfigurable
+from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import exceptions
 
 __all__ = ["PCA"]
@@ -31,15 +36,17 @@ class PCA(AnalysisConfigurable):
     description = tr.Unicode("Scikit-learn PCA model")
 
     # ----------------------------------------------------------------------------------
-    # Runtime Parameters
+    # Runtime Parameters,
+    # only those specific to PCA, the other being defined in AnalysisConfigurable.
     # ----------------------------------------------------------------------------------
     # _X already defined in the superclass
     # define here only the variable that you use in fit or transform functions
-    _VT = Array(allow_none=True, help="Loadings")
-    _S = Array(allow_none=True, help="Scores")
-    _svd = tr.List(Array())
-
-    _pca = tr.Instance(decomposition.PCA)
+    _svd = tr.List(Array(), help="Result from the  _fit operation")
+    _pca = tr.Instance(
+        decomposition.PCA,
+        help="""The instance of
+sklearn.decomposition.PCA used in this model""",
+    )
 
     # ----------------------------------------------------------------------------------
     # Configuration parameters
@@ -188,33 +195,6 @@ for reproducible results across multiple function calls.""",
             random_state=self.random_state,
         )
 
-    # ------------------------------------------------------------------------
-    # Special methods
-    # ------------------------------------------------------------------------
-
-    def __str__(self, n_pc=5):
-
-        if not self._fitted:
-            raise exceptions.NotFittedError(
-                f"The fit method must be used prior using the {self.name} model"
-            )
-
-        s = "\n"
-        s += "PC\tEigenvalue\t\t%variance\t\t%cumulative\n"
-        s += "  \t of cov(X)\t\t   per PC\t\t   variance\n"
-
-        n_pc = min(n_pc, len(self.ev.data))
-        for i in range(n_pc):
-            tup = (
-                i + 1,
-                np.sqrt(self.ev.data[i]),
-                self.ev_ratio.data[i],
-                self.ev_cum.data[i],
-            )
-            s += "#{}\t{:10.3e}\t\t{:9.3f}\t\t{:11.3f}\n".format(*tup)
-
-        return s
-
     # ----------------------------------------------------------------------------------
     # Private methods (overloading abstract classes)
     # ----------------------------------------------------------------------------------
@@ -252,57 +232,243 @@ for reproducible results across multiple function calls.""",
         self._outfit = self._pca._fit(X)
 
         # get the calculated attributes
-        self.noise_variance_ = self._pca.noise_variance_
-        self.n_observations_ = self._pca.n_samples_
-        self.components_ = self._pca.components_
-        self.n_components_ = self._pca.n_components_
-        self.explained_variance_ = self._pca.explained_variance_
-        self.explained_variance_ratio_ = self._pca.explained_variance_ratio_
-        self.singular_values_ = self._pca.singular_values_
+        self._noise_variance = self._pca.noise_variance_
+        self._n_observations = self._pca.n_samples_
+        self._components = self._pca.components_
+        self._explained_variance = self._pca.explained_variance_
+        self._explained_variance_ratio = self._pca.explained_variance_ratio_
+        self._singular_values = self._pca.singular_values_
+
+        # unlike to sklearn, we will update the n_components value here with the
+        # eventually calculated ones: this will simplify further process
+        # indeed in sklearn, the value after processing is n_components_
+        # with an underscore at the end
+
+        self.n_components = self._pca.n_components_
 
     def _reduce(self, X, **kwargs):
         return self._pca.transform(X)
 
     def _reconstruct(self, X_reduced):
-        return self._pca.inverse_transform(X_reduced)
+        # we need to  set self._pca.components_ to a compatible size but without
+        # destroying the full matrix:
+        store_components_ = self._pca.components_
+        self._pca.components_ = self._pca.components_[: X_reduced.shape[1]]
+        X = self._pca.inverse_transform(X_reduced)
+        # restore
+        self._pca.components_ = store_components_
+        return X
+
+    @property
+    @_wrap_ndarray_output_to_nddataset
+    def components(self):
+        """Return a NDDataset with the principal axes in feature space.
+
+        Represent the directions of maximum variance in the data. Equivalently, the
+        right singular vectors of the centered input data, parallel to its eigenvectors.
+        The components are sorted by decreasing explained_variance.
+
+        See Also
+        --------
+        get_components: retrieve only the specified number of components
+        """
+        return self._pca.components_
+
+    @property
+    def explained_variance(self):
+        ev = NDDataset(self._pca.explained_variance_)
+        ev.name = "ev"
+        ev.title = "explained variance"
+        ev.set_coordset(
+            Coord(
+                None,
+                labels=[f"#{(i + 1)}" for i in range(self.n_components)],
+                title="components",
+            )
+        )
+        return ev
+
+    ev = explained_variance
+
+    @property
+    def explained_variance_ratio(self):
+        ratio = NDDataset(self._pca.explained_variance_ratio_ * 100.0)
+        ratio.name = "ev_ratio"
+        ratio.title = "explained variance ratio"
+        ratio.units = "percent"
+        return ratio
+
+    ev_ratio = explained_variance_ratio
+
+    @property
+    def cumulative_explained_variance(self):
+        ev_cum = NDDataset(np.cumsum(self._pca.explained_variance_ratio_))
+        ev_cum.name = "ev_cum"
+        ev_cum.title = "cumulative explained variance"
+        ev_cum.units = "percent"
+        return ev_cum
+
+    ev_cum = cumulative_explained_variance
+
+    # ----------------------------------------------------------------------------------
+    # reporting
+    # ----------------------------------------------------------------------------------
+
+    def __str__(self, n_components=5):
+
+        if not self._fitted:
+            raise exceptions.NotFittedError(
+                f"The fit method must be used prior using the {self.name} model"
+            )
+
+        s = "\n"
+        s += "PC\tEigenvalue\t\t%variance\t\t%cumulative\n"
+        s += "  \t of cov(X)\t\t   per PC\t\t   variance\n"
+
+        if n_components is None or n_components > self.n_components:
+            n_components = self.n_components
+        for i in range(n_components):
+            tup = (
+                i + 1,
+                np.sqrt(self.ev.data[i]),
+                self.ev_ratio.data[i],
+                self.ev_cum.data[i],
+            )
+            s += "#{}\t{:10.3e}\t\t{:9.3f}\t\t{:11.3f}\n".format(*tup)
+
+        return s
+
+    def printev(self, n_components=None):
+        """
+        Print PCA figures of merit.
+
+        Prints eigenvalues and explained variance for all or first n_pc PC's.
+
+        Parameters
+        ----------
+        n_pc : int, optional
+            The number of components to print.
+        """
+        if not self._fitted:
+            raise exceptions.NotFittedError(
+                "The fit method must be used " "before using this method"
+            )
+
+        if n_components is None or n_components > self.n_components:
+            n_components = self.n_components
+        print((self.__str__(n_components)))
+
+    # ----------------------------------------------------------------------------------
+    # Plot methods
+    # ----------------------------------------------------------------------------------
+
+    def scoreplot(
+        self, scores, *pcs, colormap="viridis", color_mapping="index", **kwargs
+    ):
+        """
+        2D or 3D scoreplot of observations.
+
+        Parameters
+        ----------
+        *pcs : a series of int argument or a list/tuple
+            Must contain 2 or 3 elements.
+        colormap : str
+            A matplotlib colormap.
+        color_mapping : 'index' or 'labels'
+            If 'index', then the colors of each n_scores is mapped sequentially
+            on the colormap. If labels, the labels of the n_observation are
+            used for color mapping.
+        """
+        self.prefs = self.X.preferences
+
+        if isinstance(pcs[0], (list, tuple, set)):
+            pcs = pcs[0]
+
+        # transform to internal index of component's index (1->0 etc...)
+        pcs = np.array(pcs) - 1
+
+        # colors
+        if color_mapping == "index":
+
+            if np.any(scores.y.data):
+                colors = scores.y.data
+            else:
+                colors = np.array(range(scores.shape[0]))
+
+        elif color_mapping == "labels":
+
+            labels = list(set(scores.y.labels))
+            colors = [labels.index(lab) for lab in scores.y.labels]
+
+        if len(pcs) == 2:
+            # bidimensional score plot
+
+            fig = plt.figure(**kwargs)
+            ax = fig.add_subplot(111)
+            ax.set_title("Score plot")
+
+            ax.set_xlabel(
+                "PC# {} ({:.3f}%)".format(pcs[0] + 1, self.ev_ratio.data[pcs[0]])
+            )
+            ax.set_ylabel(
+                "PC# {} ({:.3f}%)".format(pcs[1] + 1, self.ev_ratio.data[pcs[1]])
+            )
+            axsc = ax.scatter(
+                scores.masked_data[:, pcs[0]],
+                scores.masked_data[:, pcs[1]],
+                s=30,
+                c=colors,
+                cmap=colormap,
+            )
+
+            number_x_labels = self.prefs.number_of_x_labels  # get from config
+            number_y_labels = self.prefs.number_of_y_labels
+            # the next two line are to avoid multipliers in axis scale
+            y_formatter = ScalarFormatter(useOffset=False)
+            ax.yaxis.set_major_formatter(y_formatter)
+            ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
+            ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
+            ax.xaxis.set_ticks_position("bottom")
+            ax.yaxis.set_ticks_position("left")
+
+        if len(pcs) == 3:
+            # tridimensional score plot
+            plt.figure(**kwargs)
+            ax = plt.axes(projection="3d")
+            ax.set_title("Score plot")
+            ax.set_xlabel(
+                "PC# {} ({:.3f}%)".format(pcs[0] + 1, self.ev_ratio.data[pcs[0]])
+            )
+            ax.set_ylabel(
+                "PC# {} ({:.3f}%)".format(pcs[1] + 1, self.ev_ratio.data[pcs[1]])
+            )
+            ax.set_zlabel(
+                "PC# {} ({:.3f}%)".format(pcs[2] + 1, self.ev_ratio.data[pcs[2]])
+            )
+            axsc = ax.scatter(
+                scores.masked_data[:, pcs[0]],
+                scores.masked_data[:, pcs[1]],
+                scores.masked_data[:, pcs[2]],
+                zdir="z",
+                s=30,
+                c=colors,
+                cmap=colormap,
+                depthshade=True,
+            )
+
+        if color_mapping == "labels":
+            import matplotlib.patches as mpatches
+
+            leg = []
+            for lab in labels:
+                i = labels.index(lab)
+                c = axsc.get_cmap().colors[int(255 / (len(labels) - 1) * i)]
+                leg.append(mpatches.Patch(color=c, label=lab))
+
+            ax.legend(handles=leg, loc="best")
+
+        return ax
 
 
 if __name__ == "__main__":
-    import matplotlib.pyplot as plt
-
-    from spectrochempy import MASKED, NDDataset
-    from spectrochempy.utils import testing
-
-    dataset = NDDataset.read("irdata/nh4y-activation.spg")
-    dataset[:, 1240.0:920.0] = MASKED  # do not forget to use float in slicing
-
-    pca1 = PCA()
-    pca1.fit(dataset)
-
-    assert pca1._X.shape == (55, 5216), "missing row or col removed"
-    assert testing.assert_dataset_equal(
-        pca1.X, dataset
-    ), "input dataset should be reflected in the internal variable X"
-
-    # display scores
-    scores1 = pca1.reduce(n_components=2)
-    pca1.scoreplot(scores1, 1, 2)
-    plt.show()
-
-    # show loadings
-    loadings1 = pca1.get_components(n_components=2)
-    loadings1.plot(legend=True)
-    plt.show()
-
-    # reconstruct
-    X_hat = pca1.reconstruct(scores1)
-    pca1.plotmerit(dataset, X_hat)
-    plt.show()
-
-    # two other valid ways to get the reduction
-    # 1
-    scores2 = PCA().fit_reduce(dataset, n_components=2)
-    assert testing.assert_dataset_equal(scores2, scores1)
-    # 2
-    scores3 = PCA().fit(dataset).reduce(n_components=2)
-    assert testing.assert_dataset_equal(scores3, scores1)
+    pass

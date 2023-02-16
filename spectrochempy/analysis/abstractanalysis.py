@@ -10,102 +10,17 @@ This module implements the base abstract class to define estimators such as PCA,
 
 import logging
 import warnings
-from functools import partial
 
 import numpy as np
 import traitlets as tr
-from matplotlib import pyplot as plt
-from matplotlib.ticker import MaxNLocator, ScalarFormatter
 from traittypes import Array
 
+from spectrochempy.analysis._analysisutils import _wrap_ndarray_output_to_nddataset
 from spectrochempy.core import app, set_loglevel
 from spectrochempy.core.common.meta import Meta
-from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import MASKED, NOMASK, exceptions
 from spectrochempy.utils.traits import MetaConfigurable
-
-
-class _set_output(object):
-    # A decorator to transform np.ndarray output from models to NDDataset
-    # according to the X input
-
-    def __init__(
-        self, method, *args, keepunits=True, keeptitle=True, typex=None, typey=None
-    ):
-        self.method = method
-        self.keepunits = keepunits
-        self.keeptitle = keeptitle
-        self.typex = typex
-        self.typey = typey
-
-    def __repr__(self):
-        """Return the method's docstring."""
-        return self.method.__doc__
-
-    def __get__(self, obj, objtype):
-        """Support instance methods."""
-        return partial(self.__call__, obj)
-
-    def __call__(self, obj, *args, **kwargs):
-
-        # determine the input X dataset
-        X = obj.X
-        # get the sklearn data output
-        data = self.method(obj, *args, **kwargs)
-        # make a new dataset with this data
-        X_transf = NDDataset(data)
-        # Now set the NDDataset attributes
-        if self.keepunits:
-            X_transf.units = X.units
-        X_transf.name = f"{X.name}_{obj.name}.{self.method.__name__}"
-        X_transf.history = f"Created by method {obj.name}.{self.method.__name__}"
-        if self.keeptitle:
-            X_transf.title = X.title
-        # make coordset
-        M, N = X.shape
-        if X_transf.shape == X.shape:
-            X_transf.set_coordset(y=X.y, x=X.x)
-        elif self.typey == "components":
-            X_transf.set_coordset(
-                y=Coord(
-                    None,
-                    labels=["#%d" % (i + 1) for i in range(X_transf.shape[0])],
-                    title="components",
-                ),
-                x=X.x,
-            )
-        elif self.typex == "components":
-            X_transf.set_coordset(
-                y=X.y,
-                x=Coord(
-                    None,
-                    labels=["#%d" % (i + 1) for i in range(X_transf.shape[1])],
-                    title="components",
-                ),
-            )
-        return X_transf
-
-
-# wrap _set_output to allow for deferred calling
-def _wrap_ndarray_output_to_nddataset(
-    method=None, keepunits=True, keeptitle=True, typex=None, typey=None
-):
-    if method:
-        # case of the decorator without argument
-        return _set_output(method)
-    else:
-        # and with argument
-        def wrapper(method):
-            return _set_output(
-                method,
-                keepunits=keepunits,
-                keeptitle=keeptitle,
-                typex=typex,
-                typey=typey,
-            )
-
-        return wrapper
 
 
 class AnalysisConfigurable(MetaConfigurable):
@@ -130,6 +45,8 @@ class AnalysisConfigurable(MetaConfigurable):
     _X_preprocessed = Array(help="preprocessed X")
     _shape = tr.Tuple(help="original shape of the data, before any transformation")
     _outfit = tr.Any(help="the output of the _fit method")
+    _n_components = tr.Integer(help="The actual number of components")
+    _components = Array(help="the array of n_components components")
 
     # ----------------------------------------------------------------------------------
     # Configuration parameters (depends on the estimator)
@@ -377,7 +294,7 @@ class AnalysisConfigurable(MetaConfigurable):
         return self
 
     @_wrap_ndarray_output_to_nddataset
-    def reconstruct(self, X_reduced=None, n_components=None, **kwargs):
+    def reconstruct(self, X_reduced=None, **kwargs):
         """
         Transform data back to its original space.
 
@@ -403,34 +320,17 @@ class AnalysisConfigurable(MetaConfigurable):
         if "n_pc" in kwargs:
             warnings.warn("n_pc argument is deprecated, use n_components instead")
 
-        # self.n_components_ is the value calculated during fit
-        n_components = kwargs.pop(
-            "n_components", kwargs.pop("n_pc", self.n_components_)
-        )
-        if n_components > self.n_components_:
-            warnings.warn(
-                "The number of components required for reconstruction "
-                "cannot be greater than the fitted model components : "
-                f"{self.n_components_}. We then use this latter value."
-            )
-
         if isinstance(X_reduced, NDDataset):
             X_reduced = X_reduced.data
 
-        if n_components < self.n_components_:
-            X_reduced = X_reduced[:, :n_components]
-
         X = self._reconstruct(X_reduced)
-
-        # restore eventually masked rows and columns
-        X = self._restore_masked_data(X, axis="both")
 
         return X
 
     @_wrap_ndarray_output_to_nddataset(
         keepunits=False, keeptitle=False, typex="components"
     )
-    def reduce(self, X=None, n_components=None, **kwargs):
+    def reduce(self, X=None, **kwargs):
         """Apply dimensionality reduction to X.
 
         X is projected on the first principal components previously extracted
@@ -456,17 +356,6 @@ class AnalysisConfigurable(MetaConfigurable):
         if "n_pc" in kwargs:
             warnings.warn("n_pc argument is deprecated, use n_components instead")
 
-        # self.n_components_ is the value calculated during fit
-        n_components = kwargs.pop(
-            "n_components", kwargs.pop("n_pc", self.n_components_)
-        )
-        if n_components > self.n_components_:
-            warnings.warn(
-                "The number of components required for reduction "
-                "cannot be greater than the fitted model components : "
-                f"{self.n_components_}. We then use this latter value."
-            )
-
         if X is not None:
             # fire the validation and preprocessing
             self._X = X
@@ -476,13 +365,15 @@ class AnalysisConfigurable(MetaConfigurable):
         X_reduced = self._reduce(newX, **kwargs)
 
         # slice according to n_components
-        if n_components < self.n_components_:
+        n_components = kwargs.pop("n_components", kwargs.pop("n_pc", self.n_components))
+        if n_components > self.n_components:
+            warnings.warn(
+                "The number of components required for reduction "
+                "cannot be greater than the fitted model components : "
+                f"{self.n_components}. We then use this latter value."
+            )
+        if n_components < self.n_components:
             X_reduced = X_reduced[:, :n_components]
-
-        self.n_components = n_components
-
-        # restore eventually masked rows
-        X_reduced = self._restore_masked_data(X_reduced, axis=0)
 
         return X_reduced
 
@@ -518,124 +409,14 @@ class AnalysisConfigurable(MetaConfigurable):
     def get_components(self, n_components=None):
         # also known as loadings
         # self.n_components_ is the value calculated during fit
-        if n_components is None or n_components > self.n_components_:
-            n_components = self.n_components_
-        components = self.components_[:n_components]
-
-        # restore eventually masked columns
-        components = self._restore_masked_data(components, axis=1)
-        assert components.shape[-1] == self._shape[-1]
+        if n_components is None or n_components > self.n_components:
+            n_components = self.n_components
+        components = self._components[:n_components]
         return components
 
     # ----------------------------------------------------------------------------------
     # Plot methods
     # ----------------------------------------------------------------------------------
-    def scoreplot(
-        self, scores, *pcs, colormap="viridis", color_mapping="index", **kwargs
-    ):
-        """
-        2D or 3D scoreplot of observations.
-
-        Parameters
-        ----------
-        *pcs : a series of int argument or a list/tuple
-            Must contain 2 or 3 elements.
-        colormap : str
-            A matplotlib colormap.
-        color_mapping : 'index' or 'labels'
-            If 'index', then the colors of each n_scores is mapped sequentially
-            on the colormap. If labels, the labels of the n_observation are
-            used for color mapping.
-        """
-        self.prefs = self.X.preferences
-
-        if isinstance(pcs[0], (list, tuple, set)):
-            pcs = pcs[0]
-
-        # transform to internal index of component's index (1->0 etc...)
-        pcs = np.array(pcs) - 1
-
-        # colors
-        if color_mapping == "index":
-
-            if np.any(scores.y.data):
-                colors = scores.y.data
-            else:
-                colors = np.array(range(scores.shape[0]))
-
-        elif color_mapping == "labels":
-
-            labels = list(set(scores.y.labels))
-            colors = [labels.index(lab) for lab in scores.y.labels]
-
-        if len(pcs) == 2:
-            # bidimensional score plot
-
-            fig = plt.figure(**kwargs)
-            ax = fig.add_subplot(111)
-            ax.set_title("Score plot")
-
-            # ax.set_xlabel(
-            #     "PC# {} ({:.3f}%)".format(pcs[0] + 1, self.ev_ratio.data[pcs[0]])
-            # )
-            # ax.set_ylabel(
-            #     "PC# {} ({:.3f}%)".format(pcs[1] + 1, self.ev_ratio.data[pcs[1]])
-            # )
-            axsc = ax.scatter(
-                scores.masked_data[:, pcs[0]],
-                scores.masked_data[:, pcs[1]],
-                s=30,
-                c=colors,
-                cmap=colormap,
-            )
-
-            number_x_labels = self.prefs.number_of_x_labels  # get from config
-            number_y_labels = self.prefs.number_of_y_labels
-            # the next two line are to avoid multipliers in axis scale
-            y_formatter = ScalarFormatter(useOffset=False)
-            ax.yaxis.set_major_formatter(y_formatter)
-            ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
-            ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
-            ax.xaxis.set_ticks_position("bottom")
-            ax.yaxis.set_ticks_position("left")
-
-        if len(pcs) == 3:
-            # tridimensional score plot
-            plt.figure(**kwargs)
-            ax = plt.axes(projection="3d")
-            ax.set_title("Score plot")
-            ax.set_xlabel(
-                "PC# {} ({:.3f}%)".format(pcs[0] + 1, self.ev_ratio.data[pcs[0]])
-            )
-            ax.set_ylabel(
-                "PC# {} ({:.3f}%)".format(pcs[1] + 1, self.ev_ratio.data[pcs[1]])
-            )
-            ax.set_zlabel(
-                "PC# {} ({:.3f}%)".format(pcs[2] + 1, self.ev_ratio.data[pcs[2]])
-            )
-            axsc = ax.scatter(
-                scores.masked_data[:, pcs[0]],
-                scores.masked_data[:, pcs[1]],
-                scores.masked_data[:, pcs[2]],
-                zdir="z",
-                s=30,
-                c=colors,
-                cmap=colormap,
-                depthshade=True,
-            )
-
-        if color_mapping == "labels":
-            import matplotlib.patches as mpatches
-
-            leg = []
-            for lab in labels:
-                i = labels.index(lab)
-                c = axsc.get_cmap().colors[int(255 / (len(labels) - 1) * i)]
-                leg.append(mpatches.Patch(color=c, label=lab))
-
-            ax.legend(handles=leg, loc="best")
-
-        return ax
 
     def plotmerit(self, X, X_hat, **kwargs):
         """
