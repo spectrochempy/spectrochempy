@@ -10,9 +10,9 @@ This module implement the EFA (Evolving Factor Analysis) class.
 from datetime import datetime, timezone
 
 import numpy as np
+from numpy.linalg import svd
 from traitlets import Float, HasTraits, Instance
 
-from spectrochempy.analysis.svd import SVD
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
@@ -21,10 +21,6 @@ from spectrochempy.utils import MASKED
 __all__ = ["EFA"]
 
 __dataset_methods__ = []
-
-
-# from spectrochempy.core.plotters.plot1d import plot_multiple
-# from spectrochempy.utils import show
 
 
 class EFA(HasTraits):
@@ -37,7 +33,7 @@ class EFA(HasTraits):
     ----------
     dataset : |NDDataset| object
         The input dataset has shape (M, N). M is the number of
-        observations (for examples a series of IR spectra) while N
+        observations (for example a series of IR spectra) while N
         is the number of features (for example the wavenumbers measured
         in each IR spectrum).
     """
@@ -47,7 +43,6 @@ class EFA(HasTraits):
     _cutoff = Float(allow_none=True)
 
     def __init__(self, dataset):
-
         super().__init__()
 
         # check if we have the correct input
@@ -56,8 +51,6 @@ class EFA(HasTraits):
         X = dataset
 
         if isinstance(X, NDDataset):
-            # As seen below, we cannot performs SVD on the masked array
-            # so let's take the ndarray only
             self._X = X
             M, N = X.shape
         else:
@@ -72,8 +65,10 @@ class EFA(HasTraits):
         # in case some row are masked, we need to take this into account
         if X.is_masked:
             masked_rows = np.all(X.mask, axis=-1)
+            Xdata = np.delete(X.data, np.where(masked_rows), 0)
         else:
             masked_rows = np.array([False] * M)
+            Xdata = X.data
 
         K = min(K, len(np.where(~masked_rows)[0]))
 
@@ -97,10 +92,10 @@ class EFA(HasTraits):
         for i in range(M):
             # if some rows are masked, we must skip them
             if not masked_rows[i]:
-                fsvd = SVD(X[: i + 1], compute_uv=False)
-                k = fsvd.s.size
+                s = svd(Xdata[: i + 1], compute_uv=False)
+                k = s.size
                 # print(i, k)
-                f[i, :k] = fsvd.s.data**2
+                f.data[i, :k] = s**2
                 f[i, k:] = MASKED
             else:
                 f[i] = MASKED
@@ -122,9 +117,9 @@ class EFA(HasTraits):
         for i in range(M - 1, -1, -1):
             # if some rows are masked, we must skip them
             if not masked_rows[i]:
-                bsvd = SVD(X[i:M], compute_uv=False)
-                k = bsvd.s.size
-                b[i, :k] = bsvd.s.data**2
+                s = svd(Xdata[i:M], compute_uv=False)
+                k = s.size
+                b.data[i, :k] = s**2
                 b[i, k:] = MASKED
             else:
                 b[i] = MASKED
