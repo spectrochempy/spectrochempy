@@ -38,4 +38,3 @@ Breaking changes
 Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
-

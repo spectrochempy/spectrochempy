@@ -10,12 +10,10 @@ This module implement the EFA (Evolving Factor Analysis) class.
 from datetime import datetime, timezone
 
 import numpy as np
-import numpy.ma as ma
 from numpy.linalg import svd
 from traitlets import Float, HasTraits, Instance
 
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core import info_
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import MASKED
@@ -125,7 +123,9 @@ class EFA(HasTraits):
                 b[i, k:] = MASKED
             else:
                 b[i] = MASKED
-            print(f"Evolving Factor Analysis: {int(100 - i / (2 * M) * 100)} % \r", end="")
+            print(
+                f"Evolving Factor Analysis: {int(100 - i / (2 * M) * 100)} % \r", end=""
+            )
 
         self._f_ev = f
         self._b_ev = b
