@@ -29,7 +29,7 @@ class PCA(AnalysisConfigurable):
     """
     PCA analysis is here done using the sklearn PCA model.
 
-    We just implement fit, reduce, reconstruct and fit_reconstruct
+    We just implement fit, transform, inverse_transform and fit_transform
     """
 
     name = tr.Unicode("PCA")
@@ -44,8 +44,7 @@ class PCA(AnalysisConfigurable):
     _svd = tr.List(Array(), help="Result from the  _fit operation")
     _pca = tr.Instance(
         decomposition.PCA,
-        help="""The instance of
-sklearn.decomposition.PCA used in this model""",
+        help="The instance of sklearn.decomposition.PCA used in this model",
     )
 
     # ----------------------------------------------------------------------------------
@@ -167,7 +166,6 @@ for reproducible results across multiple function calls.""",
     def __init__(
         self,
         *,
-        copy=True,
         log_level="WARNING",
         config=None,
         warm_start=False,
@@ -175,7 +173,6 @@ for reproducible results across multiple function calls.""",
     ):
         # call the super class for initialisation
         super().__init__(
-            copy=True,
             log_level=log_level,
             warm_start=warm_start,
             config=config,
@@ -222,16 +219,17 @@ for reproducible results across multiple function calls.""",
         # we keep only the data
         self._X_preprocessed = X.data
 
-    def _fit(self, X):
+    def _fit(self, X, y=None):
         # this method is called by the abstract class fit.
         # Input X is a np.ndarray
+        # y is ignored
 
         # call the sklearn _fit function on data (it outputs SVD results)
         # _outfit is a tuple handle the eventual output of _fit for further processing.
         # The _outfit members are np.ndarrays
         self._outfit = self._pca._fit(X)
 
-        # get the calculated attributes
+        # get the calculated attribute
         self._noise_variance = self._pca.noise_variance_
         self._n_observations = self._pca.n_samples_
         self._components = self._pca.components_
@@ -246,15 +244,15 @@ for reproducible results across multiple function calls.""",
 
         self.n_components = self._pca.n_components_
 
-    def _reduce(self, X, **kwargs):
+    def _transform(self, X):
         return self._pca.transform(X)
 
-    def _reconstruct(self, X_reduced):
+    def _inverse_transform(self, X_transform):
         # we need to  set self._pca.components_ to a compatible size but without
         # destroying the full matrix:
         store_components_ = self._pca.components_
-        self._pca.components_ = self._pca.components_[: X_reduced.shape[1]]
-        X = self._pca.inverse_transform(X_reduced)
+        self._pca.components_ = self._pca.components_[: X_transform.shape[1]]
+        X = self._pca.inverse_transform(X_transform)
         # restore
         self._pca.components_ = store_components_
         return X
@@ -262,7 +260,8 @@ for reproducible results across multiple function calls.""",
     @property
     @_wrap_ndarray_output_to_nddataset
     def components(self):
-        """Return a NDDataset with the principal axes in feature space.
+        """
+        Return a NDDataset with the principal axes in feature space.
 
         Represent the directions of maximum variance in the data. Equivalently, the
         right singular vectors of the centered input data, parallel to its eigenvectors.

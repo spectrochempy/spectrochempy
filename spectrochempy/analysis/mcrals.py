@@ -622,16 +622,17 @@ profile #j,
             pca.fit(self.X)
             self._pca = pca.reconstruct(n_pc=self.nspecies)
 
-    # ----------------------
-    # Public methods
-    # ----------------------
-    def fit(self, X, profile):
+    # ----------------------------------------------------------------------------------
+    # Private methods (overloading abstract classes)
+    # ----------------------------------------------------------------------------------
+
+    def _fit(self, X, profile):
         """
 
         Parameters
         ----------
-        X : NDDataset or an array-like object
-            Dataset to fit with MCRALS
+        X : an array-like object
+            Data to fit with MCRALS.
         profile : NDDataset or an array-like object,
             Initial concentration or spectra.
 

@@ -49,7 +49,7 @@ class AnalysisConfigurable(MetaConfigurable):
     _components = Array(help="the array of n_components components")
 
     # ----------------------------------------------------------------------------------
-    # Configuration parameters (depends on the estimator)
+    # Configuration parameters (mostly depends on the estimator)
     # ----------------------------------------------------------------------------------
 
     copy = tr.Bool(default_value=True, help="If True passed X data are copied").tag(
@@ -235,12 +235,22 @@ class AnalysisConfigurable(MetaConfigurable):
     @tr.observe("_X")
     def _preprocess_as_X_changed(self, change):
         # to be optionally replaced by user defined function (with the same name)
-        X = self.X
+        X = change.new
 
         # .... preprocessing as scaling, centering, ...
 
         # return a np.ndarray
         self._X_preprocessed = X.data
+
+    @tr.observe("_Y")
+    def _preprocess_as_Y_changed(self, change):
+        # to be optionally replaced by user defined function (with the same name)
+        Y = change.new
+
+        # .... preprocessing as scaling, centering, ...
+
+        # return a np.ndarray
+        self._Y_preprocessed = Y.data
 
     def _fit(self, X, y=None):
         #  Intended to be replaced in the subclasses by user defined function
@@ -262,8 +272,8 @@ class AnalysisConfigurable(MetaConfigurable):
     # ----------------------------------------------------------------------------------
     # Public methods
     # ----------------------------------------------------------------------------------
-    def fit(self, X, y=None, **kwargs):
-        """Fit the model with X.
+    def fit(self, X, Y=None, **kwargs):
+        """Fit the model with X and optional y data
 
         Parameters
         ----------
@@ -271,7 +281,9 @@ class AnalysisConfigurable(MetaConfigurable):
             Training data, where `n_observations` is the number of observations
             and `n_features` is the number of features.
 
-        y : array_like, optional
+        Y : array_like, optional
+            For example Y is not used in PCA, but corresponds to the guess profiles in
+            MCRALS
 
         Returns
         -------
@@ -280,21 +292,30 @@ class AnalysisConfigurable(MetaConfigurable):
         """
         self._fitted = False  # reiniit this flag
 
-        # fire the X validation and preprocessing.
+        # fire the X and eventually Y validation and preprocessing.
         self._X = X
+        if Y is not None:
+            self._Y = Y
 
-        # _X_preprocessed has been computed when X was set
+        # _X_preprocessed has been computed when X was set, as well as _Y_preprocessed.
+        # At this stage they should be simple ndarrays
         newX = self._X_preprocessed
+        newY = self._Y_preprocessed if hasattr(self, "_Y_preprocessed") else None
 
         # call to the actual _fit method (overloaded in the subclass)
-        # _fit must take X.data not X as argument
-        self._fit(newX)
+        # warning : _fit must take ndarray arguments not NDDataset arguments.
+        # when method must return NDDataset from the calculated data,
+        # we use the decorator _wrap_ndarray_output_to_nddataset, as below or in the PCA
+        # model for example.
+        self._fit(newX, newY)
 
+        # if the process was succesful,_fitted is set to True so that other method which
+        # needs fit will be possibly used.
         self._fitted = True
         return self
 
     @_wrap_ndarray_output_to_nddataset
-    def reconstruct(self, X_reduced=None, **kwargs):
+    def inverse_transform(self, X_transform=None, **kwargs):
         """
         Transform data back to its original space.
 
@@ -302,9 +323,10 @@ class AnalysisConfigurable(MetaConfigurable):
 
         Parameters
         ----------
-        X_reduced : array-like of shape (n_observations, n_components)
+        X_transform : array-like of shape (n_observations, n_components), optional
             Reduced X data, where `n_observations` is the number of observations
-            and `n_components` is the number of components.
+            and `n_components` is the number of components. If X_transform is not
+            provided, but
 
         Returns
         -------
@@ -318,20 +340,21 @@ class AnalysisConfigurable(MetaConfigurable):
             )
 
         if "n_pc" in kwargs:
-            warnings.warn("n_pc argument is deprecated, use n_components instead")
+            warnings.warn("`n_pc` argument is deprecated, use `n_components` instead")
 
-        if isinstance(X_reduced, NDDataset):
-            X_reduced = X_reduced.data
+        if isinstance(X_transform, NDDataset):
+            X_transform = X_transform.data
 
-        X = self._reconstruct(X_reduced)
+        X = self._inverse_transform(X_transform)
 
         return X
 
     @_wrap_ndarray_output_to_nddataset(
         keepunits=False, keeptitle=False, typex="components"
     )
-    def reduce(self, X=None, **kwargs):
-        """Apply dimensionality reduction to X.
+    def transform(self, X=None, **kwargs):
+        """
+        Apply dimensionality reduction to X.
 
         X is projected on the first principal components previously extracted
         from a training set.
@@ -342,6 +365,16 @@ class AnalysisConfigurable(MetaConfigurable):
             New data, where `n_observations` is the number of observations
             and `n_features` is the number of features.
             if not provided, the input dataset of the fit method will be used.
+
+        **kwargs
+            Additional keyword parameters. See Other Parameters
+
+        Other Parameters
+        ----------------
+        n_components : int, optional
+            The number of components to use for the transformation. If not given
+            Thhe number of compopnents is eventually the one specified or determined
+            in the fit process.
 
         Returns
         -------
@@ -362,7 +395,7 @@ class AnalysisConfigurable(MetaConfigurable):
 
         # get the processed ndarray data
         newX = self._X_preprocessed
-        X_reduced = self._reduce(newX, **kwargs)
+        X_transform = self._transform(newX)
 
         # slice according to n_components
         n_components = kwargs.pop("n_components", kwargs.pop("n_pc", self.n_components))
@@ -373,11 +406,11 @@ class AnalysisConfigurable(MetaConfigurable):
                 f"{self.n_components}. We then use this latter value."
             )
         if n_components < self.n_components:
-            X_reduced = X_reduced[:, :n_components]
+            X_transform = X_transform[:, :n_components]
 
-        return X_reduced
+        return X_transform
 
-    def fit_reduce(self, X, y=None, **kwargs):
+    def fit_transform(self, X, y=None, **kwargs):
         """
         Fit the model with X and apply the dimensionality reduction on X.
 
@@ -385,30 +418,41 @@ class AnalysisConfigurable(MetaConfigurable):
         ----------
         X : NDDataset
             Input dataset of shape (n_observation, n_feature) to fit
-        **kwargs : Additional optional keywords parameters
+        **kwargs :
+            Additional optional keywords parameters as for the `transform` method.
 
         Returns
         -------
         NDDataset(n_observations, n_components)
         """
         self.fit(X, y=None, **kwargs)
-        X_reduced = self.reduce(X, **kwargs)
-        return X_reduced
+        X_transform = self.transform(X, y=y, **kwargs)
+        return X_transform
 
     # Alias To be able to use functions with the same terminology as sklearn
-    transform = reduce
-    transform.__doc__ = reduce.__doc__
-    inverse_Transform = reconstruct
-    inverse_Transform.__doc__ = reconstruct.__doc__
-    fit_transform = fit_reduce
-    fit_transform.__doc__ = fit_reduce.__doc__
+    @exceptions.deprecated("Use `transform` instead.")
+    def reduce(self, *args, **kwargs):
+        return self.transform(*args, **kwargs)
+
+    reduce.__doc__ = transform.__doc__
+
+    @exceptions.deprecated("Use `inverse_transform` instead.")
+    def reconstruct(self, X_transform):
+        return self.inverse_transform(self, X_transform)
+
+    reconstruct.__doc__ = inverse_transform.__doc__
+
+    @exceptions.deprecated("Use `fit_transform` instead.")
+    def fit_reduce(self, *args, **kwargs):
+        return self.fit_transform(*args, **kwargs)
+
+    fit_reduce.__doc__ = fit_transform.__doc__
 
     @_wrap_ndarray_output_to_nddataset(
         keepunits=None, keeptitle=False, typey="components"
     )
     def get_components(self, n_components=None):
         # also known as loadings
-        # self.n_components_ is the value calculated during fit
         if n_components is None or n_components > self.n_components:
             n_components = self.n_components
         components = self._components[:n_components]
@@ -501,13 +545,3 @@ class AnalysisConfigurable(MetaConfigurable):
         # A string handler (#2) is defined for the Spectrochempy logger,
         # thus we will return it's content
         return app.log.handlers[2].stream.getvalue().rstrip()
-
-    @property
-    @exceptions.deprecated(
-        "Use log instead. This attribute will be removed in future version"
-    )
-    def logs(self):
-        """
-        Logs output.
-        """
-        return self.log

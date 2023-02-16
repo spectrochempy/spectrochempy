@@ -103,7 +103,7 @@ def test_MCRALS(model, data):
     St0 = model.St0
     C0 = model.C0
 
-    # Instanciate a MCRALS object, with some log_level
+    # Instantiate a MCRALS object, with some log_level
     # Note that the console log will never show debug
     # ( For this, look to attribute log or in the spectrochempy log file)
 

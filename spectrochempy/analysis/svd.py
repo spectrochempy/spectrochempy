@@ -23,7 +23,7 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 
 
 # ------------------------------------------------------------------
-class SVD(AnalysisConfigurable):
+class SVD(tr.HasTraits):
     """
     Performs a Singular Value Decomposition of a dataset.
 
