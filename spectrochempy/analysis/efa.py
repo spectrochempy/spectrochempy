@@ -10,9 +10,9 @@ This module implement the EFA (Evolving Factor Analysis) class.
 from datetime import datetime, timezone
 
 import numpy as np
+from numpy.linalg import svd
 from traitlets import Float, HasTraits, Instance
 
-from spectrochempy.analysis.svd import SVD
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
@@ -22,9 +22,6 @@ __all__ = ["EFA"]
 
 __dataset_methods__ = []
 
-
-# from spectrochempy.core.plotters.plot1d import plot_multiple
-# from spectrochempy.utils import show
 
 
 class EFA(HasTraits):
@@ -56,8 +53,6 @@ class EFA(HasTraits):
         X = dataset
 
         if isinstance(X, NDDataset):
-            # As seen below, we cannot performs SVD on the masked array
-            # so let's take the ndarray only
             self._X = X
             M, N = X.shape
         else:
@@ -77,6 +72,7 @@ class EFA(HasTraits):
 
         K = min(K, len(np.where(~masked_rows)[0]))
 
+
         # --------------------------------------------------------------------
         # forward analysis
         # --------------------------------------------------------------------
@@ -93,14 +89,15 @@ class EFA(HasTraits):
         # the corresponding rows of f
         f[masked_rows] = MASKED
 
+
         # performs the analysis
         for i in range(M):
             # if some rows are masked, we must skip them
             if not masked_rows[i]:
-                fsvd = SVD(X[: i + 1], compute_uv=False)
-                k = fsvd.s.size
+                s = svd(X.data[: i + 1], compute_uv=False)
+                k = s.size
                 # print(i, k)
-                f[i, :k] = fsvd.s.data**2
+                f.data[i, :k] = s**2
                 f[i, k:] = MASKED
             else:
                 f[i] = MASKED
@@ -122,9 +119,9 @@ class EFA(HasTraits):
         for i in range(M - 1, -1, -1):
             # if some rows are masked, we must skip them
             if not masked_rows[i]:
-                bsvd = SVD(X[i:M], compute_uv=False)
-                k = bsvd.s.size
-                b[i, :k] = bsvd.s.data**2
+                s = svd(X.data[i:M], compute_uv=False)
+                k = s.size
+                b.data[i, :k] = s**2
                 b[i, k:] = MASKED
             else:
                 b[i] = MASKED
