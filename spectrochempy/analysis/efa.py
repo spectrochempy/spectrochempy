@@ -23,7 +23,6 @@ __all__ = ["EFA"]
 __dataset_methods__ = []
 
 
-
 class EFA(HasTraits):
     """
     Evolving Factor Analysis.
@@ -44,7 +43,6 @@ class EFA(HasTraits):
     _cutoff = Float(allow_none=True)
 
     def __init__(self, dataset):
-
         super().__init__()
 
         # check if we have the correct input
@@ -72,7 +70,6 @@ class EFA(HasTraits):
 
         K = min(K, len(np.where(~masked_rows)[0]))
 
-
         # --------------------------------------------------------------------
         # forward analysis
         # --------------------------------------------------------------------
@@ -88,7 +85,6 @@ class EFA(HasTraits):
         # in case some row are masked, take this into account, by masking
         # the corresponding rows of f
         f[masked_rows] = MASKED
-
 
         # performs the analysis
         for i in range(M):
@@ -125,9 +121,7 @@ class EFA(HasTraits):
                 b[i, k:] = MASKED
             else:
                 b[i] = MASKED
-            print(
-                f"Evolving Factor Analysis: {int(100 - i / (2 * M) * 100)} % \r", end=""
-            )
+            print(f"Evolving Factor Analysis: {int(100 - i / (2 * M) * 100)} % \r", end="")
 
         self._f_ev = f
         self._b_ev = b
