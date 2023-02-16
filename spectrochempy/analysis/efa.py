@@ -10,10 +10,12 @@ This module implement the EFA (Evolving Factor Analysis) class.
 from datetime import datetime, timezone
 
 import numpy as np
+import numpy.ma as ma
 from numpy.linalg import svd
 from traitlets import Float, HasTraits, Instance
 
 from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core import info_
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import MASKED
@@ -33,7 +35,7 @@ class EFA(HasTraits):
     ----------
     dataset : |NDDataset| object
         The input dataset has shape (M, N). M is the number of
-        observations (for examples a series of IR spectra) while N
+        observations (for example a series of IR spectra) while N
         is the number of features (for example the wavenumbers measured
         in each IR spectrum).
     """
@@ -65,8 +67,10 @@ class EFA(HasTraits):
         # in case some row are masked, we need to take this into account
         if X.is_masked:
             masked_rows = np.all(X.mask, axis=-1)
+            Xdata = np.delete(X.data, np.where(masked_rows), 0)
         else:
             masked_rows = np.array([False] * M)
+            Xdata = X.data
 
         K = min(K, len(np.where(~masked_rows)[0]))
 
@@ -90,7 +94,7 @@ class EFA(HasTraits):
         for i in range(M):
             # if some rows are masked, we must skip them
             if not masked_rows[i]:
-                s = svd(X.data[: i + 1], compute_uv=False)
+                s = svd(Xdata[: i + 1], compute_uv=False)
                 k = s.size
                 # print(i, k)
                 f.data[i, :k] = s**2
@@ -115,7 +119,7 @@ class EFA(HasTraits):
         for i in range(M - 1, -1, -1):
             # if some rows are masked, we must skip them
             if not masked_rows[i]:
-                s = svd(X.data[i:M], compute_uv=False)
+                s = svd(Xdata[i:M], compute_uv=False)
                 k = s.size
                 b.data[i, :k] = s**2
                 b[i, k:] = MASKED
