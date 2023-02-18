@@ -38,14 +38,7 @@ class SpectroChemPyWarning(Warning):
 # ------------------------------------------------------------------------------
 class SpectroChemPyError(Exception):
     """
-    The base exception class for SpectroChemPy.
-    """
-
-
-# Analysis method errors
-class NotFittedError(SpectroChemPyError):
-    """
-    Exception raised when an analysis estimtor is not fitted before use.
+    The base exception class for SpectroChemPy exceptions.
     """
 
 

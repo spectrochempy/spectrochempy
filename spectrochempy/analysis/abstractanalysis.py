@@ -15,7 +15,10 @@ import numpy as np
 import traitlets as tr
 from traittypes import Array
 
-from spectrochempy.analysis._analysisutils import _wrap_ndarray_output_to_nddataset
+from spectrochempy.analysis._analysisutils import (
+    NotFittedError,
+    _wrap_ndarray_output_to_nddataset,
+)
 from spectrochempy.core import app, set_loglevel
 from spectrochempy.core.common.meta import Meta
 from spectrochempy.core.dataset.nddataset import NDDataset
@@ -30,8 +33,9 @@ class AnalysisConfigurable(MetaConfigurable):
     Subclass this to get a minimal structure
     """
 
-    name = tr.Unicode()
-    description = tr.Unicode()
+    name = tr.Unicode(help="name of the implemented model")
+    # name must be defined in subclass with the name of the model: PCA, MCRALS, ...
+    description = tr.Unicode(help="optional description of the implemented model")
 
     # ----------------------------------------------------------------------------------
     # Runtime Parameters
@@ -40,21 +44,17 @@ class AnalysisConfigurable(MetaConfigurable):
     _fitted = tr.Bool(False, help="False if the model was not yet fitted")
     _masked_rc = tr.Tuple(allow_none=True, help="List of masked rows and columns")
 
-    _X = tr.Instance(NDDataset, allow_none=True, help="Data to fit an estimate")
+    _X = tr.Instance(NDDataset, allow_none=True, help="Data to fit a model")
     _X_mask = Array(allow_none=True, help="mask information of the " "input data")
-    _X_preprocessed = Array(help="preprocessed X")
+    _X_preprocessed = Array(help="preprocessed inital X input data")
     _shape = tr.Tuple(help="original shape of the data, before any transformation")
-    _outfit = tr.Any(help="the output of the _fit method")
-    _n_components = tr.Integer(help="The actual number of components")
-    _components = Array(help="the array of n_components components")
+    _outfit = tr.Any(help="the output of the _fit method - generally a tuple")
+    _copy = tr.Bool(default_value=True, help="If True passed X data are copied")
 
     # ----------------------------------------------------------------------------------
-    # Configuration parameters (mostly depends on the estimator)
+    # Configuration parameters (mostly defined in subclass
+    # as they depends on the model estimator)
     # ----------------------------------------------------------------------------------
-
-    copy = tr.Bool(default_value=True, help="If True passed X data are copied").tag(
-        config=True
-    )
 
     # write traits like e.g.,  A = Unicode("A", help='description").tag(config=True)
 
@@ -67,6 +67,7 @@ class AnalysisConfigurable(MetaConfigurable):
         log_level=logging.WARNING,
         config=None,
         warm_start=False,
+        copy=True,
         **kwargs,
     ):
 
@@ -100,9 +101,20 @@ class AnalysisConfigurable(MetaConfigurable):
             # until the fit method has been executed
             self._fitted = False
 
+        # copy passed data
+        self._copy = copy
+
     # ----------------------------------------------------------------------------------
-    # Data
+    # Private methods
     # ----------------------------------------------------------------------------------
+    def _make_dataset(self, d):
+        # Transform an array-like object to NDDataset (optionally copy data)
+        if not isinstance(d, NDDataset):
+            d = NDDataset(d, copy=self._copy)
+        elif self._copy:
+            d = d.copy()
+        return d
+
     def _get_masked_rc(self, mask):
         if np.any(mask):
             masked_columns = np.all(mask, axis=-2)
@@ -113,7 +125,6 @@ class AnalysisConfigurable(MetaConfigurable):
         return masked_rows, masked_columns
 
     def _remove_masked_data(self, X):
-
         # Retains only valid rows and columns
         # -----------------------------------
         # unfortunately, the implementation of linalg library
@@ -147,7 +158,7 @@ class AnalysisConfigurable(MetaConfigurable):
         # by default we restore columns, put axis=0 to restore rows instead
         # Note that it is very important to use here the ma version of zeros
         # array constructor or both if both axis should be restored
-        if self._X_mask is None:
+        if not np.any(self._X_mask):
             # return it inchanged as wa had no mask originally
             return D
 
@@ -180,54 +191,43 @@ class AnalysisConfigurable(MetaConfigurable):
         # return the D array with restored masked data
         return D
 
-    @property
-    def X(self):
-        """
-        Return the X input dataset (eventually modified by the model)
-        """
-        # We use X property only to show this information to the end user. Internally
-        # we use _X attribute to refer to the input data
-        X = self._X.copy()
-        if self._X_mask is not None:
-            # restore masked row and column if necessary
-            X.data = self._restore_masked_data(X.data, axis="both")
-        return X
+    # ----------------------------------------------------------------------------------
+    # Private validation and default getter methods
+    # ----------------------------------------------------------------------------------
+    @tr.default("name")
+    def _name_default(self):
+        # this ensure a name has been defined for the subclassed model estimators
+        # or an error is returned
+        raise NameError("The name of the object was not defined.")
+
+    @tr.default("_X")
+    def _X_default(self):
+        raise NotFittedError
 
     @tr.validate("_X")
     def _X_validate(self, proposal):
+        # validation fired when self._X is assigned
         X = proposal.value
-
         # we need a dataset with eventually  a copy of the original data (default being
         # to copy them)
-        if not isinstance(X, NDDataset):
-            X = NDDataset(X, copy=self.copy)
-        elif self.copy:
-            X = X.copy()
-
+        X = self._make_dataset(X)
         # as in fit methods we often use np.linalg library, we cannot handle directly
         # masked data (so we remove them here and they will be restored at the end of
         # the process during transform or inverse transform methods
-
         # store the original shape as it will be eventually modified
         self._shape = X.shape
-
         # remove masked data and return modified dataset
         X = self._remove_masked_data(X)
         return X
 
     def _X_is_missing(self):
+        # check wether or not X has been already defined
         if self._X is None:
             warnings.warn(
                 "Sorry, but the X dataset must be defined "
                 f"before you can use {self.name} methods."
             )
             return True
-
-    # ....
-
-    @tr.default("name")
-    def _name_default(self):
-        raise NameError("The name of the object was not defined.")
 
     # ----------------------------------------------------------------------------------
     # Private methods that should be most of the time overloaded in subclass
@@ -236,48 +236,38 @@ class AnalysisConfigurable(MetaConfigurable):
     def _preprocess_as_X_changed(self, change):
         # to be optionally replaced by user defined function (with the same name)
         X = change.new
-
         # .... preprocessing as scaling, centering, ...
-
-        # return a np.ndarray
+        # set a np.ndarray
         self._X_preprocessed = X.data
-
-    @tr.observe("_Y")
-    def _preprocess_as_Y_changed(self, change):
-        # to be optionally replaced by user defined function (with the same name)
-        Y = change.new
-
-        # .... preprocessing as scaling, centering, ...
-
-        # return a np.ndarray
-        self._Y_preprocessed = Y.data
 
     def _fit(self, X, y=None):
         #  Intended to be replaced in the subclasses by user defined function
         #  (with the same name)
         raise NotImplementedError("fit method has not yet been implemented")
 
-    def _reduce(self, *args, **kwargs):
-        """
-        Intended to be replaced in the subclasses
-        """
-        raise NotImplementedError("transform has not yet been implemented")
-
-    def _reconstruct(self, *args, **kwargs):
-        """
-        Intended to be replaced in the subclasses
-        """
-        raise NotImplementedError("inverse_transform has not yet been implemented")
-
     # ----------------------------------------------------------------------------------
     # Public methods
     # ----------------------------------------------------------------------------------
+    @property
+    def X(self):
+        """
+        Return the X input dataset (eventually modified by the model)
+        """
+        # We use X property only to show this information to the end user. Internally
+        # we use _X attribute to refer to the input data
+        X = self._X.copy()
+        if np.any(self._X_mask):
+            # restore masked row and column if necessary
+            X.data = self._restore_masked_data(X.data, axis="both")
+        return X
+
     def fit(self, X, Y=None, **kwargs):
-        """Fit the model with X and optional y data
+        """
+        Fit the model with X and optional Y data
 
         Parameters
         ----------
-        X : array-like of shape (n_observations, n_features)
+        X : NDDataset or array-like of shape (n_observations, n_features)
             Training data, where `n_observations` is the number of observations
             and `n_features` is the number of features.
 
@@ -307,199 +297,15 @@ class AnalysisConfigurable(MetaConfigurable):
         # when method must return NDDataset from the calculated data,
         # we use the decorator _wrap_ndarray_output_to_nddataset, as below or in the PCA
         # model for example.
-        self._fit(newX, newY)
+        self._outfit = self._fit(newX, newY)
 
         # if the process was succesful,_fitted is set to True so that other method which
         # needs fit will be possibly used.
         self._fitted = True
         return self
 
-    @_wrap_ndarray_output_to_nddataset
-    def inverse_transform(self, X_transform=None, **kwargs):
-        """
-        Transform data back to its original space.
-
-        In other words, return an input `X_original` whose reduce/transform would be X.
-
-        Parameters
-        ----------
-        X_transform : array-like of shape (n_observations, n_components), optional
-            Reduced X data, where `n_observations` is the number of observations
-            and `n_components` is the number of components. If X_transform is not
-            provided, but
-
-        Returns
-        -------
-        NDDataset(n_observations, n_features)
-            Data with the original X shape
-            eventually filtered by the reduce/transform operation.
-        """
-        if not self._fitted:
-            raise exceptions.NotFittedError(
-                "The fit method must be used before using reconstruct method"
-            )
-
-        if "n_pc" in kwargs:
-            warnings.warn("`n_pc` argument is deprecated, use `n_components` instead")
-
-        if isinstance(X_transform, NDDataset):
-            X_transform = X_transform.data
-
-        X = self._inverse_transform(X_transform)
-
-        return X
-
-    @_wrap_ndarray_output_to_nddataset(
-        keepunits=False, keeptitle=False, typex="components"
-    )
-    def transform(self, X=None, **kwargs):
-        """
-        Apply dimensionality reduction to X.
-
-        X is projected on the first principal components previously extracted
-        from a training set.
-
-        Parameters
-        ----------
-        X : array-like of shape (n_observations, n_features), optional
-            New data, where `n_observations` is the number of observations
-            and `n_features` is the number of features.
-            if not provided, the input dataset of the fit method will be used.
-
-        **kwargs
-            Additional keyword parameters. See Other Parameters
-
-        Other Parameters
-        ----------------
-        n_components : int, optional
-            The number of components to use for the transformation. If not given
-            Thhe number of compopnents is eventually the one specified or determined
-            in the fit process.
-
-        Returns
-        -------
-        NDDataset(n_observations, n_components)
-            Projection of X in the first principal components, where `n_observations`
-            is the number of observations and `n_components` is the number of the components.
-        """
-        if not self._fitted:
-            raise exceptions.NotFittedError(
-                "The fit method must be used before using reduce method"
-            )
-        if "n_pc" in kwargs:
-            warnings.warn("n_pc argument is deprecated, use n_components instead")
-
-        if X is not None:
-            # fire the validation and preprocessing
-            self._X = X
-
-        # get the processed ndarray data
-        newX = self._X_preprocessed
-        X_transform = self._transform(newX)
-
-        # slice according to n_components
-        n_components = kwargs.pop("n_components", kwargs.pop("n_pc", self.n_components))
-        if n_components > self.n_components:
-            warnings.warn(
-                "The number of components required for reduction "
-                "cannot be greater than the fitted model components : "
-                f"{self.n_components}. We then use this latter value."
-            )
-        if n_components < self.n_components:
-            X_transform = X_transform[:, :n_components]
-
-        return X_transform
-
-    def fit_transform(self, X, y=None, **kwargs):
-        """
-        Fit the model with X and apply the dimensionality reduction on X.
-
-        Parameters
-        ----------
-        X : NDDataset
-            Input dataset of shape (n_observation, n_feature) to fit
-        **kwargs :
-            Additional optional keywords parameters as for the `transform` method.
-
-        Returns
-        -------
-        NDDataset(n_observations, n_components)
-        """
-        self.fit(X, y=None, **kwargs)
-        X_transform = self.transform(X, y=y, **kwargs)
-        return X_transform
-
-    # Alias To be able to use functions with the same terminology as sklearn
-    @exceptions.deprecated("Use `transform` instead.")
-    def reduce(self, *args, **kwargs):
-        return self.transform(*args, **kwargs)
-
-    reduce.__doc__ = transform.__doc__
-
-    @exceptions.deprecated("Use `inverse_transform` instead.")
-    def reconstruct(self, X_transform):
-        return self.inverse_transform(self, X_transform)
-
-    reconstruct.__doc__ = inverse_transform.__doc__
-
-    @exceptions.deprecated("Use `fit_transform` instead.")
-    def fit_reduce(self, *args, **kwargs):
-        return self.fit_transform(*args, **kwargs)
-
-    fit_reduce.__doc__ = fit_transform.__doc__
-
-    @_wrap_ndarray_output_to_nddataset(
-        keepunits=None, keeptitle=False, typey="components"
-    )
-    def get_components(self, n_components=None):
-        # also known as loadings
-        if n_components is None or n_components > self.n_components:
-            n_components = self.n_components
-        components = self._components[:n_components]
-        return components
-
     # ----------------------------------------------------------------------------------
-    # Plot methods
-    # ----------------------------------------------------------------------------------
-
-    def plotmerit(self, X, X_hat, **kwargs):
-        """
-        Plots the input dataset, reconstructed dataset and residuals.
-
-        Parameters
-        ----------
-        **kwargs
-            optional "colors" argument: tuple or array of 3 colors
-            for :math:`X`, :math:`\hat X` and :math:`E`.
-
-        Returns
-        -------
-        ax
-            subplot.
-        """
-        if not self._fitted:
-            raise exceptions.NotFittedError(
-                "The fit method must be used " "before using this method"
-            )
-
-        colX, colXhat, colRes = kwargs.pop("colors", ["blue", "green", "red"])
-
-        res = X - X_hat
-        ax = X.plot()
-        ma = X.max()
-        if X.x is not None:
-            ax.plot(X.x.data, X_hat.T.masked_data - ma, color=colXhat)
-            ax.plot(X.x.data, res.T.masked_data - 1.2 * ma, color=colRes)
-        else:
-            ax.plot(X_hat.T.masked_data, color=colXhat)
-            ax.plot(res.T.masked_data, color=colRes)
-        ax.autoscale(enable=True, axis="y")
-        ax.set_title(f"{self.name} merit plot")
-        ax.yaxis.set_visible(False)
-        return ax
-
-    # ----------------------------------------------------------------------------------
-    # Utility functions
+    # Public utility functions
     # ----------------------------------------------------------------------------------
     def parameters(self, default=False):
         """
@@ -545,3 +351,303 @@ class AnalysisConfigurable(MetaConfigurable):
         # A string handler (#2) is defined for the Spectrochempy logger,
         # thus we will return it's content
         return app.log.handlers[2].stream.getvalue().rstrip()
+
+
+class DecompositionAnalysisConfigurable(AnalysisConfigurable):
+    """
+    Abstract class to write analysis decomposition model such as PCA, ...
+
+    Subclass this to get a minimal structure
+    """
+
+    # THis class is subclass Analysisonfigurable so we define only additional
+    # attributes and methods necessary for decomposition model.
+
+    # ----------------------------------------------------------------------------------
+    # Runtime Parameters (in addition to those of AnalysisConfigurable)
+    # ----------------------------------------------------------------------------------
+    _Y = tr.Union(
+        (tr.Tuple(tr.Instance(NDDataset)), tr.Instance((NDDataset))),
+        default_value=None,
+        allow_none=True,
+        help="Target/profiles taken into account to fit a model",
+    )
+    _Y_preprocessed = Array(help="preprocessed Y")
+    _n_components = tr.Integer(help="""The actual number of components.""")
+    _components = Array(help="the array of (n_components, n_features) components")
+
+    # ----------------------------------------------------------------------------------
+    # Private validation and default getter methods
+    # ----------------------------------------------------------------------------------
+    @tr.validate("_Y")
+    def _Y_validate(self, proposal):
+        # validation of the _Y attribute: fired when self._Y is assigned
+        Y = proposal.value
+
+        # we need a dataset or a list of NDDataset with eventually  a copy of the
+        # original data (default being to copy them)
+
+        if isinstance(Y, (tuple, list)):
+            Y = [self._make_dataset(d) for d in Y]
+        else:
+            Y = self._make_dataset(Y)
+        return Y
+
+    def _Y_is_missing(self):
+        # check if the Y parameter has been defined
+        if self._Y is None:
+            warnings.warn(
+                "Sorry, but the Y parameter must be defined in fit method"
+                f"before you can use {self.name} methods."
+            )
+            return True
+
+    @tr.default("_n_components")
+    def _n_components_default(self):
+        # ensure model fitted before using this value
+        if not self._fitted:
+            raise NotFittedError("_n_components")
+
+    # ----------------------------------------------------------------------------------
+    # Private methods that should be most of the time overloaded in subclass
+    # ----------------------------------------------------------------------------------
+    @tr.observe("_Y")
+    def _preprocess_as_Y_changed(self, change):
+        # to be optionally replaced by user defined function (with the same name)
+        Y = change.new
+        # optional preprocessing as scaling, centering, ...
+        # return a np.ndarray
+        self._Y_preprocessed = Y.data
+
+    def _transform(self, *args, **kwargs):
+        # to be overriden in subclass such as PCA, MCRALS, ...
+        raise NotImplementedError("transform has not yet been implemented")
+
+    def _inverse_transform(self, *args, **kwargs):
+        # to be overriden in subclass such as PCA, MCRALS, ...
+        raise NotImplementedError("inverse_transform has not yet been implemented")
+
+    def _get_components(self, n_components=None):
+        # to be overriden in subclass such as PCA, MCRALS, ...
+        raise NotImplementedError("get_components has not yet been implemented")
+
+    # ----------------------------------------------------------------------------------
+    # Public methods
+    # ----------------------------------------------------------------------------------
+    @property
+    def Y(self):
+        """
+        Return the Y input dataset or a list of dataset
+
+        This describes for example starting Concentration and Spectra in MCRALS
+        """
+        # We use Y property only to show this information to the end user. Internally
+        # we use _Y attribute to refer to the input data
+        Y = self._Y
+        return Y
+
+    @_wrap_ndarray_output_to_nddataset(
+        keepunits=False, keeptitle=False, typex="components"
+    )
+    def transform(self, X=None, **kwargs):
+        """
+        Apply dimensionality reduction to X.
+
+        X is projected on the first principal components previously extracted
+        from a training set.
+
+        Parameters
+        ----------
+        X : array-like of shape (n_observations, n_features), optional
+            New data, where `n_observations` is the number of observations
+            and `n_features` is the number of features.
+            if not provided, the input dataset of the fit method will be used.
+
+        **kwargs
+            Additional keyword parameters. See Other Parameters
+
+        Other Parameters
+        ----------------
+        n_components : int, optional
+            The number of components to use for the transformation. If not given
+            Thhe number of compopnents is eventually the one specified or determined
+            in the fit process.
+
+        Returns
+        -------
+        NDDataset(n_observations, n_components)
+            Projection of X in the first principal components, where `n_observations`
+            is the number of observations and `n_components` is the number of the components.
+        """
+        if not self._fitted:
+            raise NotFittedError()
+
+        if X is not None:
+            # fire the validation and preprocessing
+            self._X = X
+
+        # get the processed ndarray data
+        newX = self._X_preprocessed
+        X_transform = self._transform(newX)
+
+        # slice according to n_components
+        n_components = kwargs.pop(
+            "n_components", kwargs.pop("n_pc", self._n_components)
+        )
+        if n_components > self._n_components:
+            warnings.warn(
+                "The number of components required for reduction "
+                "cannot be greater than the fitted model components : "
+                f"{self._n_components}. We then use this latter value."
+            )
+        if n_components < self._n_components:
+            X_transform = X_transform[:, :n_components]
+
+        return X_transform
+
+    @_wrap_ndarray_output_to_nddataset
+    def inverse_transform(self, X_transform=None):
+        """
+        Transform data back to its original space.
+
+        In other words, return an input `X_original` whose reduce/transform would be X.
+
+        Parameters
+        ----------
+        X_transform : array-like of shape (n_observations, n_components), optional
+            Reduced X data, where `n_observations` is the number of observations
+            and `n_components` is the number of components. If X_transform is not
+            provided, but
+
+        Returns
+        -------
+        NDDataset(n_observations, n_features)
+            Data with the original X shape
+            eventually filtered by the reduce/transform operation.
+        """
+        if not self._fitted:
+            raise NotFittedError(
+                "The fit method must be used before using reconstruct/inverse_transform "
+                "method"
+            )
+
+        if isinstance(X_transform, NDDataset):
+            X_transform = X_transform.data
+
+        X = self._inverse_transform(X_transform)
+
+        return X
+
+    def fit_transform(self, X, Y=None, **kwargs):
+        """
+        Fit the model with X and apply the dimensionality reduction on X.
+
+        Parameters
+        ----------
+        X : NDDataset
+            Input dataset of shape (n_observation, n_feature) to fit
+        **kwargs :
+            Additional optional keywords parameters as for the `transform` method.
+
+        Returns
+        -------
+        NDDataset(n_observations, n_components)
+        """
+        self.fit(X, y=None, **kwargs)
+        X_transform = self.transform(X, Y=Y, **kwargs)
+        return X_transform
+
+    @exceptions.deprecated("Use `transform` instead.")
+    def reduce(self, *args, **kwargs):
+        return self.transform(*args, **kwargs)
+
+    reduce.__doc__ = transform.__doc__
+
+    @exceptions.deprecated("Use `inverse_transform` instead.")
+    def reconstruct(self, X_transform):
+        return self.inverse_transform(self, X_transform)
+
+    reconstruct.__doc__ = inverse_transform.__doc__
+
+    @exceptions.deprecated("Use `fit_transform` instead.")
+    def fit_reduce(self, *args, **kwargs):
+        return self.fit_transform(*args, **kwargs)
+
+    fit_reduce.__doc__ = fit_transform.__doc__
+
+    @_wrap_ndarray_output_to_nddataset(
+        keepunits=None, keeptitle=False, typey="components"
+    )
+    def get_components(self, n_components=None):
+        """
+        Returns the components dataset: (selected n_components, n_features).
+
+        Parameters
+        ----------
+        n_components : int, optional
+            The number of components to keep in the output nddataset
+            If None, all calculated components are eturned.
+
+        Returns
+        -------
+        NDDataset
+            A nddataset with shape (n_components, n_features).
+        """
+        if n_components is None or n_components > self._n_components:
+            n_components = self._n_components
+
+        # we call the specific _get_components method defined in subclasses
+        components = self._get_components()[:n_components]
+
+        return components
+
+    @property
+    @_wrap_ndarray_output_to_nddataset
+    def components(self):
+        """
+        Return a NDDataset with the components in feature space.
+
+        See Also
+        --------
+        get_components: retrieve only the specified number of components
+        """
+        return self._get_components()
+
+    # ----------------------------------------------------------------------------------
+    # Plot methods
+    # ----------------------------------------------------------------------------------
+    def plotmerit(self, X, X_hat, **kwargs):
+        """
+        Plots the input dataset, reconstructed dataset and residuals.
+
+        Parameters
+        ----------
+        **kwargs
+            optional "colors" argument: tuple or array of 3 colors
+            for :math:`X`, :math:`\hat X` and :math:`E`.
+
+        Returns
+        -------
+        ax
+            subplot.
+        """
+        if not self._fitted:
+            raise NotFittedError(
+                "The fit method must be used " "before using this method"
+            )
+
+        colX, colXhat, colRes = kwargs.pop("colors", ["blue", "green", "red"])
+
+        res = X - X_hat
+        ax = X.plot()
+        ma = X.max()
+        if X.x is not None:
+            ax.plot(X.x.data, X_hat.T.masked_data - ma, color=colXhat)
+            ax.plot(X.x.data, res.T.masked_data - 1.2 * ma, color=colRes)
+        else:
+            ax.plot(X_hat.T.masked_data, color=colXhat)
+            ax.plot(res.T.masked_data, color=colRes)
+        ax.autoscale(enable=True, axis="y")
+        ax.set_title(f"{self.name} plot of merit")
+        ax.yaxis.set_visible(False)
+        return ax

@@ -13,19 +13,17 @@ import traitlets as tr
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 from numpy.random import RandomState
 from sklearn import decomposition
-from traittypes import Array
 
-from spectrochempy.analysis._analysisutils import _wrap_ndarray_output_to_nddataset
-from spectrochempy.analysis.abstractanalysis import AnalysisConfigurable
+from spectrochempy.analysis._analysisutils import NotFittedError
+from spectrochempy.analysis.abstractanalysis import DecompositionAnalysisConfigurable
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils import exceptions
 
 __all__ = ["PCA"]
 __configurables__ = __all__
 
 
-class PCA(AnalysisConfigurable):
+class PCA(DecompositionAnalysisConfigurable):
     """
     PCA analysis is here done using the sklearn PCA model.
 
@@ -39,9 +37,7 @@ class PCA(AnalysisConfigurable):
     # Runtime Parameters,
     # only those specific to PCA, the other being defined in AnalysisConfigurable.
     # ----------------------------------------------------------------------------------
-    # _X already defined in the superclass
     # define here only the variable that you use in fit or transform functions
-    _svd = tr.List(Array(), help="Result from the  _fit operation")
     _pca = tr.Instance(
         decomposition.PCA,
         help="The instance of sklearn.decomposition.PCA used in this model",
@@ -50,14 +46,7 @@ class PCA(AnalysisConfigurable):
     # ----------------------------------------------------------------------------------
     # Configuration parameters
     # ----------------------------------------------------------------------------------
-    # centered = tr.Bool(
-    #     default_value=True,
-    #     help="If True the data are centered around the mean values: "
-    #     ":math:`X' = X - mean(X)`",
-    # ).tag(config=True)
-
     # sklearn PCA is always on centered data
-
     standardized = tr.Bool(
         default_value=False,
         help="If True the data are scaled to unit standard deviation: "
@@ -70,29 +59,22 @@ class PCA(AnalysisConfigurable):
         ":math:`X' = (X - min(X)) / (max(X)-min(X))`",
     ).tag(config=True)
 
-    n_components = tr.Union(
+    used_components = tr.Union(
         (tr.Enum(["mle"]), tr.Int(), tr.Float()),
         allow_none=True,
         default_value=None,
         help="""Number of components to keep.
-if n_components is not set all components are kept::
-    n_components == min(n_observations, n_features)
-If ``n_components == 'mle'`` and ``svd_solver == 'full'``, Minka's MLE is used to guess
-the dimension. Use of ``n_components == 'mle'`` will interpret ``svd_solver == 'auto'``
+if used_components is not set all components are kept::
+    used_components == min(n_observations, n_features)
+If ``used_components == 'mle'`` and ``svd_solver == 'full'``, Minka's MLE is used to guess
+the dimension. Use of ``used_components == 'mle'`` will interpret ``svd_solver == 'auto'``
 as ``svd_solver == 'full'``.
-If ``0 < n_components < 1`` and ``svd_solver == 'full'``, select the number of
+If ``0 < used_components < 1`` and ``svd_solver == 'full'``, select the number of
 components such that the amount of variance that needs to be explained is greater than
-the percentage specified by n_components.
+the percentage specified by used_components.
 If ``svd_solver == 'arpack'``, the number of components must be strictly less than the
 minimum of n_features and n_observations. Hence, the None case results in::
-    n_components == min(n_observations, n_features) - 1""",
-    ).tag(config=True)
-
-    copy = tr.Bool(
-        default_value=True,
-        help="""If False, data passed to fit are overwritten and running
-fit(X).transform(X) will not yield the expected results,
-use fit_transform(X) instead.""",
+    used_components == min(n_observations, n_features) - 1""",
     ).tag(config=True)
 
     whiten = tr.Bool(
@@ -110,7 +92,7 @@ their data respect some hard-wired assumptions.""",
         default_value="auto",
         help="""If auto :
 The solver is selected by a default policy based on `X.shape`
-and `n_components`: if the input data is larger than 500x500 and the number of
+and `used_components`: if the input data is larger than 500x500 and the number of
 components to extract is lower than 80% of the smallest dimension of the data, then the
 more efficient 'randomized' method is enabled. Otherwise the exact full SVD is computed
 and optionally truncated afterwards.
@@ -118,8 +100,8 @@ If full :
 run exact full SVD calling the standard LAPACK solver via `scipy.linalg.svd` and select
 the components by postprocessing
 If arpack :
-run SVD truncated to n_components calling ARPACK solver via `scipy.sparse.linalg.svds`.
-It requires strictly 0 < n_components < min(X.shape)
+run SVD truncated to used_components calling ARPACK solver via `scipy.sparse.linalg.svds`.
+It requires strictly 0 < used_components < min(X.shape)
 If randomized :
 run randomized SVD by the method of Halko et al.""",
     ).tag(config=True)
@@ -169,21 +151,24 @@ for reproducible results across multiple function calls.""",
         log_level="WARNING",
         config=None,
         warm_start=False,
+        copy=True,
         **kwargs,
     ):
-        # call the super class for initialisation
+        # call the super class for initialisation of the configuration parameters
+        # to do before anything else!
         super().__init__(
             log_level=log_level,
             warm_start=warm_start,
             config=config,
+            copy=copy,
             **kwargs,
         )
 
         # initialize sklearn PCA
         self._pca = decomposition.PCA(
-            n_components=self.n_components,
-            copy=self.copy,
+            n_components=self.used_components,
             whiten=self.whiten,
+            copy=copy,
             svd_solver=self.svd_solver,
             tol=self.tol,
             iterated_power=self.iterated_power,
@@ -219,20 +204,41 @@ for reproducible results across multiple function calls.""",
         # we keep only the data
         self._X_preprocessed = X.data
 
-    def _fit(self, X, y=None):
+        # final check on the configuration used_components parameter
+        # (which can be done only when X is defined in fit arguments)
+        n_observations, n_features = X.shape
+
+        n_components = self.used_components
+        if n_components is None:
+            pass
+        elif n_components == "mle":
+            if n_observations < n_features:
+                raise ValueError(
+                    "used_components='mle' is only supported if n_observations >= n_features"
+                )
+        elif not 0 <= n_components <= min(n_observations, n_features):
+            raise ValueError(
+                "used_components=%r must be between 0 and "
+                "min(n_observations, n_features)=%r with "
+                "svd_solver='full'" % (n_components, min(n_observations, n_features))
+            )
+
+    def _fit(self, X, Y=None):
         # this method is called by the abstract class fit.
         # Input X is a np.ndarray
-        # y is ignored
+        # Y is ignored in this model
 
         # call the sklearn _fit function on data (it outputs SVD results)
         # _outfit is a tuple handle the eventual output of _fit for further processing.
+
         # The _outfit members are np.ndarrays
-        self._outfit = self._pca._fit(X)
+        _outfit = self._pca._fit(X)
 
         # get the calculated attribute
+        self._components = self._pca.components_
+
         self._noise_variance = self._pca.noise_variance_
         self._n_observations = self._pca.n_samples_
-        self._components = self._pca.components_
         self._explained_variance = self._pca.explained_variance_
         self._explained_variance_ratio = self._pca.explained_variance_ratio_
         self._singular_values = self._pca.singular_values_
@@ -242,7 +248,10 @@ for reproducible results across multiple function calls.""",
         # indeed in sklearn, the value after processing is n_components_
         # with an underscore at the end
 
-        self.n_components = self._pca.n_components_
+        self._n_components = int(
+            self._pca.n_components_
+        )  # cast the returned int64 to int
+        return _outfit
 
     def _transform(self, X):
         return self._pca.transform(X)
@@ -257,21 +266,36 @@ for reproducible results across multiple function calls.""",
         self._pca.components_ = store_components_
         return X
 
+    def _get_components(self):
+        self._components = self._pca.components_
+        return self._components
+
+    # ----------------------------------------------------------------------------------
+    # Public methods and properties specific to PCA
+    # ----------------------------------------------------------------------------------
     @property
-    @_wrap_ndarray_output_to_nddataset
-    def components(self):
+    def n_components(self):
         """
-        Return a NDDataset with the principal axes in feature space.
-
-        Represent the directions of maximum variance in the data. Equivalently, the
-        right singular vectors of the centered input data, parallel to its eigenvectors.
-        The components are sorted by decreasing explained_variance.
-
-        See Also
-        --------
-        get_components: retrieve only the specified number of components
+        Return the number of components that were fitted.
         """
-        return self._pca.components_
+        if self._fitted:
+            return self._n_components
+        else:
+            raise NotFittedError("n_components")
+
+    @property
+    def loadings(self):
+        """
+        Return PCA loadings.
+        """
+        return self.get_components()
+
+    @property
+    def scores(self):
+        """
+        Returns PCA scores.
+        """
+        return self.transform(self.X)
 
     @property
     def explained_variance(self):
@@ -310,13 +334,12 @@ for reproducible results across multiple function calls.""",
     ev_cum = cumulative_explained_variance
 
     # ----------------------------------------------------------------------------------
-    # reporting
+    # Reporting specific to PCA
     # ----------------------------------------------------------------------------------
-
     def __str__(self, n_components=5):
 
         if not self._fitted:
-            raise exceptions.NotFittedError(
+            raise NotFittedError(
                 f"The fit method must be used prior using the {self.name} model"
             )
 
@@ -349,7 +372,7 @@ for reproducible results across multiple function calls.""",
             The number of components to print.
         """
         if not self._fitted:
-            raise exceptions.NotFittedError(
+            raise NotFittedError(
                 "The fit method must be used " "before using this method"
             )
 
@@ -358,9 +381,8 @@ for reproducible results across multiple function calls.""",
         print((self.__str__(n_components)))
 
     # ----------------------------------------------------------------------------------
-    # Plot methods
+    # Plot methods specific to PCA
     # ----------------------------------------------------------------------------------
-
     def scoreplot(
         self, scores, *pcs, colormap="viridis", color_mapping="index", **kwargs
     ):

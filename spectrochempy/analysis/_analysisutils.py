@@ -7,9 +7,32 @@
 """
 This module implement some common utilities for the various analysis model.
 """
+import inspect
 from functools import partial
 
 import numpy as np
+
+from spectrochempy.utils import exceptions
+
+
+# specific Analysis method exceptions
+class NotFittedError(exceptions.SpectroChemPyError):
+    """
+    Exception raised when an analysis estimator is not fitted before use.
+
+    Parameters
+    ----------
+    """
+
+    def __init__(self, attr=None):
+        frame = inspect.currentframe().f_back
+        caller = frame.f_code.co_name if attr is None else attr
+        model = frame.f_locals["self"].name
+        message = (
+            f"To use `{caller}`,  the method `fit` of model `{model}`"
+            f" should be executed first"
+        )
+        super().__init__(message)
 
 
 def _svd_flip(U, VT, u_based_decision=True):
@@ -70,6 +93,11 @@ class _set_output(object):
 
         from spectrochempy.core.dataset.coord import Coord
         from spectrochempy.core.dataset.nddataset import NDDataset
+
+        # HACK to be able to used deprecated alias of the method, without error
+        # because if not this modification obj appears two times
+        if args and type(args[0]) == type(obj):
+            args = args[1:]
 
         # determine the input X dataset
         X = obj.X
