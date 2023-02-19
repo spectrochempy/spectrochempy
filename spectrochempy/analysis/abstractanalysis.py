@@ -109,7 +109,12 @@ class AnalysisConfigurable(MetaConfigurable):
     # ----------------------------------------------------------------------------------
     def _make_dataset(self, d):
         # Transform an array-like object to NDDataset (optionally copy data)
-        if not isinstance(d, NDDataset):
+        # or a list of array-like to alist of NDQataset
+        if d is None:
+            return
+        if isinstance(d, (tuple, list)):
+            d = [self._make_dataset(item) for item in d]
+        elif not isinstance(d, NDDataset):
             d = NDDataset(d, copy=self._copy)
         elif self._copy:
             d = d.copy()
@@ -220,13 +225,13 @@ class AnalysisConfigurable(MetaConfigurable):
         X = self._remove_masked_data(X)
         return X
 
+    @property
     def _X_is_missing(self):
         # check wether or not X has been already defined
-        if self._X is None:
-            warnings.warn(
-                "Sorry, but the X dataset must be defined "
-                f"before you can use {self.name} methods."
-            )
+        try:
+            if self._X is None:
+                return True
+        except NotFittedError:
             return True
 
     # ----------------------------------------------------------------------------------
@@ -240,7 +245,7 @@ class AnalysisConfigurable(MetaConfigurable):
         # set a np.ndarray
         self._X_preprocessed = X.data
 
-    def _fit(self, X, y=None):
+    def _fit(self, X, Y=None):
         #  Intended to be replaced in the subclasses by user defined function
         #  (with the same name)
         raise NotImplementedError("fit method has not yet been implemented")
@@ -253,6 +258,8 @@ class AnalysisConfigurable(MetaConfigurable):
         """
         Return the X input dataset (eventually modified by the model)
         """
+        if self._X_is_missing:
+            raise NotFittedError
         # We use X property only to show this information to the end user. Internally
         # we use _X attribute to refer to the input data
         X = self._X.copy()
@@ -283,9 +290,10 @@ class AnalysisConfigurable(MetaConfigurable):
         self._fitted = False  # reiniit this flag
 
         # fire the X and eventually Y validation and preprocessing.
-        self._X = X
+        # X and Y are epected to be resp. NDDataset and NDDataset or list of NDDataset.
+        self._X = self._make_dataset(X)
         if Y is not None:
-            self._Y = Y
+            self._Y = self._make_dataset(Y)
 
         # _X_preprocessed has been computed when X was set, as well as _Y_preprocessed.
         # At this stage they should be simple ndarrays
@@ -367,7 +375,10 @@ class DecompositionAnalysisConfigurable(AnalysisConfigurable):
     # Runtime Parameters (in addition to those of AnalysisConfigurable)
     # ----------------------------------------------------------------------------------
     _Y = tr.Union(
-        (tr.Tuple(tr.Instance(NDDataset)), tr.Instance((NDDataset))),
+        (
+            tr.Tuple(tr.Instance(NDDataset), tr.Instance(NDDataset)),
+            tr.Instance((NDDataset)),
+        ),
         default_value=None,
         allow_none=True,
         help="Target/profiles taken into account to fit a model",
@@ -387,19 +398,16 @@ class DecompositionAnalysisConfigurable(AnalysisConfigurable):
         # we need a dataset or a list of NDDataset with eventually  a copy of the
         # original data (default being to copy them)
 
-        if isinstance(Y, (tuple, list)):
-            Y = [self._make_dataset(d) for d in Y]
-        else:
-            Y = self._make_dataset(Y)
+        Y = self._make_dataset(Y)
         return Y
 
+    @property
     def _Y_is_missing(self):
-        # check if the Y parameter has been defined
-        if self._Y is None:
-            warnings.warn(
-                "Sorry, but the Y parameter must be defined in fit method"
-                f"before you can use {self.name} methods."
-            )
+        # check wether or not Y has been already defined
+        try:
+            if self._Y is None:
+                return True
+        except NotFittedError:
             return True
 
     @tr.default("_n_components")
@@ -443,6 +451,8 @@ class DecompositionAnalysisConfigurable(AnalysisConfigurable):
         """
         # We use Y property only to show this information to the end user. Internally
         # we use _Y attribute to refer to the input data
+        if self._Y_is_missing:
+            raise NotFittedError
         Y = self._Y
         return Y
 
@@ -482,12 +492,12 @@ class DecompositionAnalysisConfigurable(AnalysisConfigurable):
         if not self._fitted:
             raise NotFittedError()
 
-        if X is not None:
-            # fire the validation and preprocessing
-            self._X = X
+        # fire the validation and preprocessing
+        self._X = X if X is not None else self.X
 
         # get the processed ndarray data
         newX = self._X_preprocessed
+
         X_transform = self._transform(newX)
 
         # slice according to n_components
@@ -506,7 +516,7 @@ class DecompositionAnalysisConfigurable(AnalysisConfigurable):
         return X_transform
 
     @_wrap_ndarray_output_to_nddataset
-    def inverse_transform(self, X_transform=None):
+    def inverse_transform(self, X_transform=None, **kwargs):
         """
         Transform data back to its original space.
 
@@ -517,7 +527,16 @@ class DecompositionAnalysisConfigurable(AnalysisConfigurable):
         X_transform : array-like of shape (n_observations, n_components), optional
             Reduced X data, where `n_observations` is the number of observations
             and `n_components` is the number of components. If X_transform is not
-            provided, but
+            provided, but a starsform of X provided in fit is performed first.
+        **kwargs
+            Additional keyword parameters. See Other Parameters
+
+        Other Parameters
+        ----------------
+        n_components : int, optional
+            The number of components to use for the inverse_transformation. If not given
+            The number of compopnents is eventually the one specified or determined
+            in the fit process.
 
         Returns
         -------
@@ -531,8 +550,27 @@ class DecompositionAnalysisConfigurable(AnalysisConfigurable):
                 "method"
             )
 
+        # get optional n_components
+        n_components = kwargs.pop(
+            "n_components", kwargs.pop("n_pc", self._n_components)
+        )
+        if n_components > self._n_components:
+            warnings.warn(
+                "The number of components required for reduction "
+                "cannot be greater than the fitted model components : "
+                f"{self._n_components}. We then use this latter value."
+            )
+
         if isinstance(X_transform, NDDataset):
             X_transform = X_transform.data
+            if n_components > X_transform.shape[1]:
+                warnings.warn(
+                    "The number of components required for reduction "
+                    "cannot be greater than the X_transform size : "
+                    f"{X_transform.shape[1]}. We then use this latter value."
+                )
+        elif X_transform is None:
+            X_transform = self.transform(**kwargs)
 
         X = self._inverse_transform(X_transform)
 
@@ -553,25 +591,25 @@ class DecompositionAnalysisConfigurable(AnalysisConfigurable):
         -------
         NDDataset(n_observations, n_components)
         """
-        self.fit(X, y=None, **kwargs)
-        X_transform = self.transform(X, Y=Y, **kwargs)
+        self.fit(X, Y, **kwargs)
+        X_transform = self.transform(X, **kwargs)
         return X_transform
 
     @exceptions.deprecated("Use `transform` instead.")
-    def reduce(self, *args, **kwargs):
-        return self.transform(*args, **kwargs)
+    def reduce(self, X=None, **kwargs):
+        return self.transform(X, **kwargs)
 
     reduce.__doc__ = transform.__doc__
 
     @exceptions.deprecated("Use `inverse_transform` instead.")
-    def reconstruct(self, X_transform):
-        return self.inverse_transform(self, X_transform)
+    def reconstruct(self, X_transform=None, **kwargs):
+        return self.inverse_transform(self, X_transform, **kwargs)
 
     reconstruct.__doc__ = inverse_transform.__doc__
 
     @exceptions.deprecated("Use `fit_transform` instead.")
-    def fit_reduce(self, *args, **kwargs):
-        return self.fit_transform(*args, **kwargs)
+    def fit_reduce(self, X, Y=None, **kwargs):
+        return self.fit_transform(X, Y, **kwargs)
 
     fit_reduce.__doc__ = fit_transform.__doc__
 

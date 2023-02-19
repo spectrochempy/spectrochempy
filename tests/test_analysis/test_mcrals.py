@@ -8,14 +8,13 @@
 
 import numpy as np
 import pytest
-import traitlets
-from traitlets.config import Config
+import traitlets as tr
 
 from spectrochempy.analysis.mcrals import MCRALS
 from spectrochempy.core import set_loglevel
 from spectrochempy.core.dataset.arraymixins.npy import dot
 from spectrochempy.core.dataset.nddataset import Coord, NDDataset
-from spectrochempy.utils import show, testing
+from spectrochempy.utils import MASKED, show, testing
 
 
 def gaussian(x, h, c, w, noise):
@@ -52,7 +51,7 @@ def model():
     class Model(object):
         def __init__(self):
             n_t = 10
-            n_wl = 10
+            n_wl = 100
             h = [1, 1]
             c = [250, 750]
             w = [100, 100]
@@ -109,12 +108,6 @@ def test_MCRALS(model, data):
 
     mcr = MCRALS(log_level="INFO")
 
-    # # set data (dataset X)
-    # mcr.X = D
-    #
-    # # set or guess a profile (here concentrations C0)
-    # mcr.set_profile(C0)
-
     # Now set or modify some configuration parameters
     mcr.tol = 30.0
 
@@ -125,22 +118,12 @@ def test_MCRALS(model, data):
     mcr.fit(D, C0)
 
     # assert result
-    # =============
     assert mcr.log.endswith("converged !")
 
-    # test attributes
-    for attr in [
-        "log",
-        "Chard",
-        "Stsoft",
-        "St",
-        "C",
-        "extOutput",
-        "X",
-    ]:
-        assert hasattr(mcr, attr)
+    # transform
+    assert mcr.transform(D) == mcr.C
 
-    # test current aprameters
+    # test current parameters
     params = mcr.parameters()
     assert len(params) == 24
     assert np.all(params.closureTarget == [1] * 10)
@@ -150,8 +133,12 @@ def test_MCRALS(model, data):
     params = mcr.parameters(default=True)
     assert params.tol == 0.1
 
+    # full process
+    mcr.fit(D, C0)
+    X_hat = mcr.inverse_transform()
+
     # test plot
-    mcr.plotmerit()
+    mcr.plotmerit(D, X_hat)
     show()
 
     # reset to default
@@ -226,16 +213,11 @@ def test_MCRALS(model, data):
     Dh = mcr.reconstruct()
     assert (Dh - D).abs().max() < 1.0e-14
 
-    # fit_reconstruct
-    mcr = MCRALS(tol=15.0)
-    Dh2 = mcr.fit_reconstruct(D, St0)
-    testing.assert_dataset_equal(Dh, Dh2)
-
 
 def test_MCRALS_errors(model, data):
     # Text exceptions
     D = data
-    C = model.C
+    C0 = model.C0
     mcr = MCRALS()
 
     # inexistant keyword parameters
@@ -254,14 +236,16 @@ def test_MCRALS_errors(model, data):
         assert "None of the dimensions of the given profile" in e.args[0]
 
     # guess with wrong nonnegConc parameter
-    try:
+    mcr = MCRALS()
+    mcr.fit(D, C0)
+
+    with pytest.raises(ValueError) as e:
         mcr.nonnegConc = [2]
-    except ValueError as e:
-        assert "please check the" in e.args[0]
-    try:
+    assert "please check the" in e.value.args[0]
+
+    with pytest.raises(ValueError) as e:
         mcr.nonnegConc = [0, 1, 1]
-    except ValueError as e:
-        assert "please check the" in e.args[0]
+    assert "please check the" in e.value.args[0]
 
     # guess = C, test with deprecated parameters
     # and few other parameters set to non-default values to improve coverage
@@ -278,77 +262,55 @@ def test_MCRALS_errors(model, data):
         MCRALS(verbose=True)
     assert w[0].category == DeprecationWarning
 
-    try:
+    with pytest.raises(tr.TraitError):
         mcr.unimodSpec = "alls"
-        raise ValueError  # should not arrive here
-    except traitlets.TraitError:
-        # expect a str = 'all' or a list
-        pass
 
-    try:
+    with pytest.raises(tr.TraitError):
         mcr.unimodConc = None
-        raise ValueError  # should not arrive here
-    except traitlets.TraitError:
-        # expect a list or a str not None
-        pass
 
-    try:
+    with pytest.raises(tr.TraitError):
         mcr.nonnegSpec = None
-        raise ValueError  # should not arrive here
-    except traitlets.TraitError:
-        # expect a list or a str not None
-        pass
 
-    try:
+    with pytest.raises(tr.TraitError):
         mcr.nonnegSpec = None
-        raise ValueError  # should not arrive here
-    except traitlets.TraitError:
-        # expect a list or a str not None
-        pass
 
     # guess with wrong unimodConc parameter
-    try:
+    with pytest.raises(ValueError) as e:
         mcr.unimodConc = [2]
-    except ValueError as e:
-        assert "please check the" in e.args[0]
-    try:
+    assert "please check the" in e.value.args[0]
+
+    with pytest.raises(ValueError) as e:
         mcr.unimodConc = [0, 1, 1]
-    except ValueError as e:
-        assert "please check the" in e.args[0]
+    assert "please check the" in e.value.args[0]
 
     # wrong closureTarget
-    try:
+    with pytest.raises(ValueError) as e:
         mcr.closureTarget = [0, 1, 1]
-    except ValueError as e:
-        assert "please check the" in e.args[0]
+    assert "please check the" in e.value.args[0]
 
     # wrong hardC_to_C_idx
-    try:
+    with pytest.raises(ValueError) as e:
         mcr.hardC_to_C_idx = [2]
-    except ValueError as e:
-        assert "please check the" in e.args[0]
+    assert "please check the" in e.value.args[0]
 
-    try:
+    with pytest.raises(ValueError) as e:
         mcr.hardC_to_C_idx = [0, 1, 1]
-    except ValueError as e:
-        assert "please check the" in e.args[0]
+    assert "please check the" in e.value.args[0]
 
     # wrong unimodSpec
-    try:
+    with pytest.raises(ValueError) as e:
         mcr.unimodSpec = [2]
-    except ValueError as e:
-        assert "please check the" in e.args[0]
-    try:
+    assert "please check the" in e.value.args[0]
+
+    with pytest.raises(ValueError) as e:
         mcr.unimodSpec = [0, 1, 1]
-    except ValueError as e:
-        assert "please check the" in e.args[0]
+    assert "please check the" in e.value.args[0]
 
     # wrong nonnegSpec
-    try:
+    with pytest.raises(ValueError) as e:
         mcr.nonnegSpec = [2]
-    except ValueError as e:
-        assert "please check the" in e.args[0]
-    try:
+    assert "please check the" in e.value.args[0]
+
+    with pytest.raises(ValueError) as e:
         mcr.nonnegSpec = [0, 1, 1]
-    except ValueError as e:
-        assert "please check the" in e.args[0]
+    assert "please check the" in e.value.args[0]

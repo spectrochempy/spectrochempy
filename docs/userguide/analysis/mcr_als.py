@@ -38,7 +38,7 @@ from spectrochempy import read_matlab, MCRALS, PCA, EFA
 # mixture (or a set of mixtures) into the spectra $S^t$ of 'pure'
 # species and their concentration profiles $C$. In terms of matrix equation:
 #
-# $$ X = C S^t + E $$
+# $$ X = C.S^t + E $$
 #
 # The ALS algorithm allows applying soft or hard constraints (e.g., non negativity,
 # unimodality, equality to a given profile) to the spectra or concentration profiles

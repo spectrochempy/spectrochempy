@@ -16,7 +16,8 @@ import numpy as np
 import traitlets as tr
 
 from spectrochempy.analysis._analysisutils import _svd_flip
-from spectrochempy.analysis.abstractanalysis import AnalysisConfigurable
+
+# from spectrochempy.analysis.abstractanalysis import AnalysisConfigurable
 from spectrochempy.core.dataset.basearrays.ndarray import MASKED
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset

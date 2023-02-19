@@ -110,6 +110,11 @@ def test_pca():
     scores = pca.transform(dataset, n_components=2)
     assert scores == pca.scores[:, :2]
 
+    # if dataset is the same as used in fit, it is optional to pass it to the transform
+    # method
+    scores = pca.transform(n_components=2)
+    assert scores == pca.scores[:, :2]
+
     # display scores
     pca.scoreplot(scores, 1, 2)
     plt.show()
@@ -124,6 +129,11 @@ def test_pca():
 
     # inverse_transform / reconstruct
     X_hat = pca.inverse_transform(scores)
+
+    # if scores was not determined or the X used for score is the same as in fit
+    # score is optional
+    X_hat = pca.inverse_transform()
+
     pca.plotmerit(dataset, X_hat)
     plt.show()
 

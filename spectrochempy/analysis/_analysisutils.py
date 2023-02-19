@@ -119,7 +119,7 @@ class _set_output(object):
         if self.keepunits:
             X_transf.units = X.units
         X_transf.name = f"{X.name}_{obj.name}.{self.method.__name__}"
-        X_transf.history = f"Created by method {obj.name}.{self.method.__name__}"
+        X_transf.history = f"Created using method {obj.name}.{self.method.__name__}"
         if self.keeptitle:
             X_transf.title = X.title
         # make coordset

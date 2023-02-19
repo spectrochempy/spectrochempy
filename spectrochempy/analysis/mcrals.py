@@ -16,13 +16,16 @@ import warnings
 
 import numpy as np
 import traitlets as tr
+from sklearn import decomposition
+from traittypes import Array
 
-from spectrochempy.analysis.abstractanalysis import AnalysisConfigurable
-from spectrochempy.analysis.pca import PCA
-from spectrochempy.core import debug_, info_
-from spectrochempy.core.dataset.arraymixins.npy import dot
+from spectrochempy.analysis._analysisutils import (
+    NotFittedError,
+    _wrap_ndarray_output_to_nddataset,
+)
+from spectrochempy.analysis.abstractanalysis import DecompositionAnalysisConfigurable
+from spectrochempy.core import info_
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils import exceptions
 
 # Developper notes
 # ----------------
@@ -33,7 +36,7 @@ from spectrochempy.utils import exceptions
 # some parameters.
 
 
-class MCRALS(AnalysisConfigurable):
+class MCRALS(DecompositionAnalysisConfigurable):
     """
     Performs MCR-ALS of a dataset knowing the initial C or St matrix.
 
@@ -41,7 +44,7 @@ class MCRALS(AnalysisConfigurable):
     (or several sets) of spectra X of an evolving mixture (or a set of mixtures) into
     the spectra St of ‘pure’ species and their concentration profiles C. In terms of
     matrix equation:
-    .. math::`X = CS^T + E`
+    .. math::`X = C.S^T + E`
     where :math:`E` is the matrix of residuals.
 
     Parameters
@@ -76,23 +79,8 @@ class MCRALS(AnalysisConfigurable):
     # information)
     # Notice that variable not defined this way lack this type validation, so they are
     # more prone to errors.
-
     name = tr.Unicode("MCRALS")
     description = tr.Unicode("MCRALS model")
-
-    # ----------------------------------------------------------------------------------
-    # Runtime Parameters
-    # ----------------------------------------------------------------------------------
-    # _X already defined in the superclass
-    # define here only the variable that you use in fit or transform functions
-    _C = tr.Instance(NDDataset, allow_none=True)
-    _Chard = tr.Instance(NDDataset, allow_none=True)
-    _St = tr.Instance(NDDataset, allow_none=True)
-    _StSoft = tr.Instance(NDDataset, allow_none=True)
-    # ext_Output can be of anytype
-    _extOutput = tr.Any()
-    _nspecies = tr.Integer(0)
-    _pca = tr.Instance(NDDataset)
 
     # ----------------------------------------------------------------------------------
     # Configuration parameters
@@ -187,12 +175,12 @@ weighted sum equals the `closureTarget`.""",
     ).tag(config=True)
 
     closureTarget = tr.Union(
-        (tr.Enum(["all"]), tr.List()),
-        default_value="all",
+        (tr.Enum(["default"]), Array()),
+        default_value="default",
         help="""The value of the sum of concentrations profiles subjected to closure.
 If set to `default`, the total concentration is set to 1.0 for all observations.
 If an array is passed: the values of concentration for each observation. Hence,
-`np.ones[X.shape[0]` would be equivalent to 'default'.""",
+`np.ones(X.shape[0])` would be equivalent to 'default'.""",
     ).tag(config=True)
 
     closureMethod = tr.Enum(
@@ -211,7 +199,7 @@ np.linalg.lstsq(C.data[:, closureConc], closureTarget.T, rcond=None)[0]))
         default_value=[],
         help="""Defines hard constraints on the concentration profiles. If set to
 `[]`, no constraint is applied. If an array of indexes is passed, the
-corresponding profiles will set by `getC` (see below)..""",
+corresponding profiles will set by `getC`.""",
     ).tag(config=True)
 
     getC = tr.Callable(
@@ -233,7 +221,7 @@ getC(Ccurr, *argsGetCn, **kargsGetC) -> hardC, newArgsGetC, extOutput
 where Ccurr  is the current C NDDataset, *argsGetC are the parameters needed to
 completely specify the function. `hardC` is a nadarray or NDDataset of shape
 `(C.y, len(hardConc)`, newArgsGetC are the updated parameters for the next
-iteration (can be None), and extOutput can be any other nrelevant output to be kept
+iteration (can be None), and extOutput can be any other relevant output to be kept
 in extOutput attribute (only the last iteration extOutput is kept)""",
     ).tag(config=True)
 
@@ -313,11 +301,12 @@ profile #j,
         log_level=logging.WARNING,
         config=None,
         warm_start=False,
+        copy=True,
         **kwargs,
     ):
         if len(args) > 0:
             raise ValueError(
-                "MCARL: Passing arguments such as MCRALS(X, profile) is now deprecated. "
+                "Passing arguments such as MCRALS(X, profile) is now deprecated. "
                 "Instead, use MCRAL() followed by MCRALS.fit(X, profile). See the documention"
                 "and exemples"
             )
@@ -358,192 +347,151 @@ profile #j,
             log_level=log_level,
             warm_start=warm_start,
             config=config,
+            copy=copy,
             **kwargs,
         )
 
-    # -----
-    # Data
-    # -----
-    # X define and validation already done in superclass
-
-    @property
-    def C(self):
-        """
-        The final concentration profiles.
-        """
-        return self._C
-
-    @C.setter
-    def C(self, value):
-        # do the profile initialisation process
-        self.set_profile(value)
-
-    @tr.validate("_C")
-    def _C_validate(self, proposal):
-        C = proposal["value"]
-        if self.X.shape[0] != C.shape[0]:
-            # An error will be raised before if X is None.
-            raise ValueError(
-                f"the dimensions of C [{C.shape}] do not match those "
-                f"of X [{self.X.shape}]."
-            )
-        return C
-
-    @property
-    def St(self):
-        """
-        The final spectra profiles.
-        """
-        return self._St
-
-    @St.setter
-    def St(self, value):
-        # do the profile initialisation process
-        self.set_profile(value)
-
-    @tr.validate("_St")
-    def _St_validate(self, proposal):
-        St = proposal["value"]
-        if self.X.shape[1] != St.shape[1]:
-            # An error will be raised before if X is None.
-            raise ValueError(
-                f"The dimensions of St [{St.shape}] do not match those "
-                f"of X [{self.X.shape}]."
-            )
-        # initialisation required
-        return St
-
-    def _C_and_St_are_missing(self):
-        if self._C is None and self._St is None:
-            warnings.warn(
-                "Sorry, but one of C or St guess profile must be defined "
-                "before you can use MCRALS methods."
-            )
-            return True
-
-    def set_profile(self, profile):
+    # ----------------------------------------------------------------------------------
+    # Private methods
+    # ----------------------------------------------------------------------------------
+    def _guess_profile(self, profile):
         """
         Set or guess an initial profile.
 
         Parameters
         ----------
-        profile : array-like
+        profile : np.ndarray
             Initial guess for the concentration or spectra profile.
         """
-        if self._X_is_missing():
+        if self._X_is_missing:
             return
 
-        # Eventually transform the given profile to a NDDataset
-        if not isinstance(profile, NDDataset):
-            profile = NDDataset(profile)
-
         # check the dimensions compatibility
-        if (self.X.shape[1] != profile.shape[1]) and (
-            self.X.shape[0] != profile.shape[0]
+        # however as the dimension of profile should match the initial shape
+        # of X we use self._shape not self._X.shape (because for this masked columns or
+        # rows have already been removed
+        if (self._shape[1] != profile.shape[1]) and (
+            self._shape[0] != profile.shape[0]
         ):
             raise ValueError(
                 f"None of the dimensions of the given profile "
                 f"[{profile.shape}] correspond to any of those "
-                f"of X [{self.X.shape}]."
+                f"of X [{self._shape}]."
             )
 
-        # make the profile
+        # data array
+        Xdata = self._X.data
 
+        # mask info
+        if np.any(self._X_mask):
+            masked_rows, masked_columns = self._get_masked_rc(self._X_mask)
+
+        # make the profile
         try:  # first try on concentration
             # The data are validated in _C_validate()
             # if it fails here due to shape mismatch, it goes to the except
-            C = self._C = profile.copy()
 
-            C.name = "Pure conc. profile, mcs-als of " + self.X.name
-            if C.coordset is None:
-                C.set_coordset(y=self.X.y, x=C.x)
-            self._nspecies = C.shape[1]
-            debug_("Concentration profile initialized")
+            Cdata = profile.copy()
+            n_components = Cdata.shape[1]
+            info_(f"Concentration profile initialized with {n_components} components")
+            # compute initial spectra (using the Xdata eventually masked
+            Stdata = np.linalg.lstsq(Cdata, Xdata, rcond=None)[0]
+            info_("Spectra profile computed")
+            # if everything went well here, C and St are set, we return
+            # after having removed the eventual C mask!
+            if np.any(self._X_mask):
+                Cdata = Cdata[~masked_rows]
+            # update the number of components
+            self._n_components = n_components
 
-            # compute initial spectra
-            St = self._St = NDDataset(
-                np.linalg.lstsq(C.data, self.X.data, rcond=None)[0]
-            )
-            St.name = "Pure spectra profile, mcs-als of " + self.X.name
-            St.title = self.X.title
-            cy = C.x.copy() if C.x else None
-            cx = self.X.x.copy() if self.X.x else None
-            St.set_coordset(y=cy, x=cx)
-            debug_("Spectra profile computed")
+            return Cdata, Stdata
 
-            # if everything went well here, C and St are set, we return !
-            return
-
-        except ValueError as exc:
-            if "please check the" in exc.args[0]:
+        except np.linalg.LinAlgError as exc:
+            if "Incompatible dimensions" not in exc.args[0]:
                 raise exc
             pass
 
         # Again if something is wrong we let it raise the error
         # as there is no other possibility (but this should not occur as we did
         # already the test on the dimension's compatibility.
-        St = self._St = profile.copy()
-        St.name = "Pure spectra profile, mcs-als of " + self.X.name
-        if St.coordset is None:
-            St.set_coordset(y=St.y, x=self.X.x)
-        self._nspecies = St.shape[0]
-        debug_("Spectra profile initialized")
-
+        Stdata = profile.copy()
+        n_components = Stdata.shape[0]
+        info_(f"Spectra profile initialized with {n_components} components")
         # compute initial concentration
-        Ct = np.linalg.lstsq(St.data.T, self.X.data.T, rcond=None)[0]
-        C = self._C = NDDataset(Ct.T)
-        C.name = "Pure conc. profile, mcs-als of " + self.X.name
-        C.title = "concentration"
-        cx = St.y.copy() if St.y else None
-        cy = self.X.y.copy() if self.X.y else None
-        C.set_coordset(y=cy, x=cx)
-        debug_("Concentration profile computed")
-        return
+        Ctdata = np.linalg.lstsq(Stdata.T, Xdata.T, rcond=None)[0]
+        Cdata = NDDataset(Ctdata.T)
+        info_("Concentration profile computed")
+        # if everything went well here, C and St are set, we return
+        # after having removed the eventual St mask!
+        if np.any(self._X_mask):
+            Stdata = Stdata[:, ~masked_columns]
+        # update the number of components
+        self._n_components = n_components
 
-    @property
-    def nspecies(self):
-        return self._nspecies
+        return Cdata, Stdata
 
+    @_wrap_ndarray_output_to_nddataset(
+        keepunits=False, keeptitle=False, typex="components"
+    )
+    def _C_2_NDDataset(self, C):
+        # getconc takes the C NDDataset as first argument (to take advantage
+        # of useful metadata). But the current C in fit method is a ndarray (without
+        # the masked rows and colums, nor the coord information: this
+        # function will create the corresponding dataset
+        return C
+
+    # ----------------------------------------------------------------------------------
+    # Private validation methods and default getter
+    # ----------------------------------------------------------------------------------
     @tr.validate("nonnegConc")
     def _validate_nonnegConc(self, proposal):
+        if self._X_is_missing:
+            return proposal.value
         nonnegConc = proposal.value
-        if not self.nspecies:  # not initialized or 0
+        if not self._n_components:  # not initialized or 0
             return nonnegConc
         if nonnegConc == "all":
-            nonnegConc = np.arange(self.nspecies)
+            nonnegConc = np.arange(
+                self._n_components
+            ).tolist()  # IMPORTANT! .tolist, not list()
+            # to get integer type not int64 which are not compatible with the setting
         elif np.any(nonnegConc) and (
-            len(nonnegConc) > self.nspecies or max(nonnegConc) + 1 > self.nspecies
+            len(nonnegConc) > self._n_components
+            or max(nonnegConc) + 1 > self._n_components
         ):  # note that we use np.any(nnonnegConc) instead of nnonnegConc != []
             # due to a deprecation warning from traitlets.
             raise ValueError(
-                f"The profile has only {self.nspecies} species, please check "
+                f"The profile has only {self._n_components} species, please check "
                 f"the `nonnegConc` configuration (value:{nonnegConc})"
             )
         return nonnegConc
 
     @tr.validate("unimodConc")
     def _validate_unimodConc(self, proposal):
+        if self._X_is_missing:
+            return proposal.value
         unimodConc = proposal.value
-        if not self.nspecies:  # not initialized or 0
+        if not self._n_components:  # not initialized or 0
             return unimodConc
         if unimodConc == "all":
-            unimodConc = np.arange(self.nspecies)
+            unimodConc = np.arange(self._n_components).tolist()
         elif np.any(unimodConc) and (
-            len(unimodConc) > self.nspecies or max(unimodConc) + 1 > self.nspecies
+            len(unimodConc) > self._n_components
+            or max(unimodConc) + 1 > self._n_components
         ):
             raise ValueError(
-                f"The profile has only {self.nspecies} species, please check the "
+                f"The profile has only {self._n_components} species, please check the "
                 f"`unimodConc` configuration (value:{unimodConc})"
             )
         return unimodConc
 
     @tr.validate("closureTarget")
     def _validate_closureTarget(self, proposal):
+        if self._X_is_missing:
+            return proposal.value
         closureTarget = proposal.value
-        if self._X_is_missing():
-            return closureTarget
         ny = self.X.shape[0]
-        if closureTarget == "all":
+        if closureTarget == "default":
             closureTarget = np.ones(ny)
         elif len(closureTarget) != ny:
             raise ValueError(
@@ -552,112 +500,132 @@ profile #j,
             )
         return closureTarget
 
-    # constraints on spectra
-
     @tr.validate("hardC_to_C_idx")
     def _validate_hardC_to_C_idx(self, proposal):
+        if self._X_is_missing:
+            return proposal.value
         hardC_to_C_idx = proposal.value
-        if not self.nspecies:  # not initialized or 0
+        if not self._n_components:  # not initialized or 0
             return hardC_to_C_idx
         if hardC_to_C_idx == "default":
-            hardC_to_C_idx = np.arange(self.nspecies)
+            hardC_to_C_idx = np.arange(self._n_components).tolist()
         elif (
-            len(hardC_to_C_idx) > self.nspecies
-            or max(hardC_to_C_idx) + 1 > self.nspecies
+            len(hardC_to_C_idx) > self._n_components
+            or max(hardC_to_C_idx) + 1 > self._n_components
         ):
             raise ValueError(
-                f"The profile has only {self.nspecies} species, please check "
+                f"The profile has only {self._n_components} species, please check "
                 f"the `hardC_to_C_idx`  configuration (value:{hardC_to_C_idx})"
             )
         return hardC_to_C_idx
 
     @tr.validate("nonnegSpec")
     def _validate_nonnegSpec(self, proposal):
+        if self._X_is_missing:
+            return proposal.value
         nonnegSpec = proposal.value
-        if not self.nspecies:  # not initialized or 0
+        if not self._n_components:  # not initialized or 0
             return nonnegSpec
         if nonnegSpec == "all":
-            nonnegSpec = np.arange(self.nspecies)
+            nonnegSpec = np.arange(self._n_components).tolist()
         elif np.any(nonnegSpec) and (
-            len(nonnegSpec) > self.nspecies or max(nonnegSpec) + 1 > self.nspecies
+            len(nonnegSpec) > self._n_components
+            or max(nonnegSpec) + 1 > self._n_components
         ):
             raise ValueError(
-                f"The profile has only {self.nspecies} species, please check "
+                f"The profile has only {self._n_components} species, please check "
                 f"the `nonnegSpec`configuration (value:{nonnegSpec})"
             )
         return nonnegSpec
 
     @tr.validate("unimodSpec")
     def _validate_unimodSpec(self, proposal):
+        if self._X_is_missing:
+            return proposal.value
         unimodSpec = proposal.value
-        if not self.nspecies:  # not initialized or 0
+        if not self._n_components:  # not initialized or 0
             return unimodSpec
         if unimodSpec == "all":
-            unimodSpec = np.arange(self.nspecies)
+            unimodSpec = np.arange(self._n_components).tolist()
         elif np.any(unimodSpec) and (
-            len(unimodSpec) > self.nspecies or max(unimodSpec) + 1 > self.nspecies
+            len(unimodSpec) > self._n_components
+            or max(unimodSpec) + 1 > self._n_components
         ):
             raise ValueError(
-                f"The profile has only {self.nspecies} species, please check the "
+                f"The profile has only {self._n_components} species, please check the "
                 f"`unimodSpec`configuration"
             )
         return unimodSpec
 
-    @tr.observe("_nspecies")
-    def _observe_nspecies_change(self, change):
-        if self._nspecies > 0:
+    @tr.observe("_Y_preprocessed")
+    def _Y_preprocessed_change(self, change):
+        if self._n_components > 0:
             # perform a validation of default configuration parameters
             # Indeed, if not forced here these parameters are validated only when they
             # are set explicitely.
             # Here is an ugly trick to force this validation. # TODO: better way?
+            self.closureTarget = self.closureTarget
+            self.hardC_to_C_idx = self.hardC_to_C_idx
             self.nonnegConc = self.nonnegConc
             self.nonnegSpec = self.nonnegSpec
             self.unimodConc = self.unimodConc
             self.unimodSpec = self.unimodSpec
-            self.closureTarget = self.closureTarget
-            self.hardC_to_C_idx = self.hardC_to_C_idx
 
-            # fire the computation of PCA use in fit.
-            pca = PCA()
-            pca.fit(self.X)
-            self._pca = pca.reconstruct(n_pc=self.nspecies)
+    @tr.default("_components")
+    def _components_default(self):
+        if self._fitted:
+            # note: _outfit = (C, St, C_hard, St_soft, extOutput)
+            return self._outfit[1]
+        else:
+            raise NotFittedError("The model was not yet fitted. Execute `fit` first!")
 
     # ----------------------------------------------------------------------------------
     # Private methods (overloading abstract classes)
     # ----------------------------------------------------------------------------------
-
-    def _fit(self, X, profile):
-        """
-
-        Parameters
-        ----------
-        X : an array-like object
-            Data to fit with MCRALS.
-        profile : NDDataset or an array-like object,
-            Initial concentration or spectra.
-
-        Returns
-        -------
-        tuple of NDDataset
-            C and St computed dataset.
-        """
-        self._fitted = False  # reiniit this flag
-
-        self.X = X
-
-        if isinstance(profile, (list, tuple)):
+    # To see all accessible members it is interesting to use the structure tab of
+    # PyCharm
+    @tr.observe("_Y")
+    def _preprocess_as_Y_changed(self, change):
+        # should be a tuple of profiles or only concentrations/spectra profiles
+        profiles = change.new
+        if isinstance(profiles, (list, tuple)):
             # we assume that the starting C and St are already computed
             # (for ex. from a previous run of fit)
-            self._C, self._St = profile
+            Cdata, Stdata = [item.data for item in profiles]
+            self._n_components = Cdata.shape[1]
+            # eventually remove mask
+            if np.any(self._X_mask):
+                masked_rows, masked_columns = self._get_masked_rc(self._X_mask)
+                Stdata = Stdata[:, ~masked_columns]
+                Cdata = Cdata[~masked_rows]
         else:
-            self.set_profile(profile)
+            # not passed explicitly, try to guess
+            Cdata, Stdata = self._guess_profile(profiles.data)
 
-        if self._X_is_missing() or (self._C_and_St_are_missing()):
-            return
+        # we do a last validation
+        shape = self._X.shape
+        if shape[0] != Cdata.shape[0]:
+            # An error will be raised before if X is None.
+            raise ValueError("The dimensions of C do not match those of X.")
+        if shape[1] != Stdata.shape[1]:
+            # An error will be raised before if X is None.
+            raise ValueError("The dimensions of St do not match those of X.")
+        # return the list of C and St data
+        # (with mask removed to fit the size of the _X data)
+        self._Y_preprocessed = (Cdata, Stdata)
 
-        ny, _ = self.X.shape
+    def _fit(self, X, Y):
+        # this method is called by the abstract class fit.
+        # Input X is a np.ndarray
+        # Y is a tuple of guessed profiles (each of them being np.ndarray)
+        # So every computation below implies only numpy arrays, not NDDataset
+        # as in previous versions
+
+        C, St = Y
+        ny, _ = X.shape
+        n_components = self._n_components
         change = self.tol + 1
-        stdev = self.X.std()
+        stdev = X.std()
         niter = 0
         ndiv = 0
 
@@ -665,32 +633,26 @@ profile #j,
         info_("#iter     RSE / PCA        RSE / Exp      %change")
         info_("-------------------------------------------------")
 
-        # Get the data member only once
-        Stdata = self.St.data
-        Xdata = self.X.data
-
-        # init the Chard and Stsoft
-        self._Chard = self._C.copy()
-        self._Stsoft = self._St.copy()
-
-        # get PCA with same number of species for further comparison
-        Xpcadata = self._pca.data
+        # get sklearn PCA with same number of components for further comparison
+        pca = decomposition.PCA(n_components=n_components)
+        Xtransf = pca.fit_transform(X)
+        Xpca = pca.inverse_transform(Xtransf)
 
         while change >= self.tol and niter < self.maxit and ndiv < self.maxdiv:
-            Cdata = np.linalg.lstsq(Stdata.T, Xdata.T, rcond=None)[0].T
+            C = np.linalg.lstsq(St.T, X.T, rcond=None)[0].T
             niter += 1
 
             # Force non-negative concentration
             # --------------------------------
             if np.any(self.nonnegConc):
                 for s in self.nonnegConc:
-                    Cdata[:, s] = Cdata[:, s].clip(min=0)
+                    C[:, s] = C[:, s].clip(min=0)
 
             # Force unimodal concentration
             # ----------------------------
             if np.any(self.unimodConc):
-                Cdata = _unimodal_2D(
-                    Cdata,
+                C = _unimodal_2D(
+                    C,
                     idxes=self.unimodConc,
                     axis=0,
                     tol=self.unimodConcTol,
@@ -702,52 +664,49 @@ profile #j,
             if np.any(self.monoIncConc):
                 for s in self.monoIncConc:
                     for curid in np.arange(ny - 1):
-                        if Cdata[curid + 1, s] < Cdata[curid, s] / self.monoIncTol:
-                            Cdata[curid + 1, s] = Cdata[curid, s]
+                        if C[curid + 1, s] < C[curid, s] / self.monoIncTol:
+                            C[curid + 1, s] = C[curid, s]
 
             # Force monotonic decrease
             # ----------------------------------------------
             if np.any(self.monoDecConc):
                 for s in self.monoDecConc:
                     for curid in np.arange(ny - 1):
-                        if Cdata[curid + 1, s] > Cdata[curid, s] * self.monoDecTol:
-                            Cdata[curid + 1, s] = Cdata[curid, s]
+                        if C[curid + 1, s] > C[curid, s] * self.monoDecTol:
+                            C[curid + 1, s] = C[curid, s]
 
             # Closure
             # ------------------------------------------
             if self.closureConc:
                 if self.closureMethod == "scaling":
                     Q = np.linalg.lstsq(
-                        Cdata[:, self.closureConc],
+                        C[:, self.closureConc],
                         self.closureTarget.T,
                         rcond=None,
                     )[0]
-                    Cdata[:, self.closureConc] = np.dot(
-                        Cdata[:, self.closureConc], np.diag(Q)
-                    )
+                    C[:, self.closureConc] = np.dot(C[:, self.closureConc], np.diag(Q))
                 elif self.closureMethod == "constantSum":
-                    totalConc = np.sum(Cdata[:, self.closureConc], axis=1)
-                    Cdata[:, self.closureConc] = (
-                        Cdata[:, self.closureConc]
+                    totalConc = np.sum(C[:, self.closureConc], axis=1)
+                    C[:, self.closureConc] = (
+                        C[:, self.closureConc]
                         * self.closureTarget[:, None]
                         / totalConc[:, None]
                     )
 
             # external concentration profiles
             # ------------------------------------------
+            extOutput = None
             if np.any(self.hardConc):
-                # getconc takes the C NDDataset as first argument (to take advantage of useful metadata
-                self._C.data = Cdata
+
+                _C = self._C_2_NDDataset(C)
                 if self.kwargsGetConc != {} and self.argsGetConc != ():
-                    output = self.getConc(
-                        self._C, *self.argsGetConc, **self.kwargsGetConc
-                    )
+                    output = self.getConc(_C, *self.argsGetConc, **self.kwargsGetConc)
                 elif self.kwargsGetConc == {} and self.argsGetConc != ():
-                    output = self.getConc(self._C, *self.argsGetConc)
+                    output = self.getConc(_C, *self.argsGetConc)
                 elif self.kwargsGetConc != {} and self.argsGetConc == ():
-                    output = self.getConc(self._C, **self.kwargsGetConc)
+                    output = self.getConc(_C, **self.kwargsGetConc)
                 else:
-                    output = self.getConc(self._C)
+                    output = self.getConc(_C)
 
                 if isinstance(output, tuple):
                     fixedC = output[0]
@@ -760,27 +719,27 @@ profile #j,
                     fixedC = output
                     extOutput = None
 
-                Cdata[:, self.hardConc] = fixedC[:, self.hardC_to_C_idx]
+                C[:, self.hardConc] = fixedC[:, self.hardC_to_C_idx]
 
-            # stores C in Chard
-            Charddata = Cdata.copy()
+            # stores C in C_hard
+            C_hard = C.copy()
 
             # compute St
-            Stdata = np.linalg.lstsq(Cdata, Xdata, rcond=None)[0]
+            St = np.linalg.lstsq(C, X, rcond=None)[0]
 
-            # stores St in Stsoft
-            Stsoftdata = Stdata.copy()
+            # stores St in St_soft
+            St_soft = St.copy()
 
             # Force non-negative spectra
             # --------------------------
             if np.any(self.nonnegSpec):
-                Stdata[self.nonnegSpec, :] = Stdata[self.nonnegSpec, :].clip(min=0)
+                St[self.nonnegSpec, :] = St[self.nonnegSpec, :].clip(min=0)
 
             # Force unimodal spectra
             # ----------------------------
             if np.any(self.unimodSpec):
-                Stdata = _unimodal_2D(
-                    Stdata,
+                St = _unimodal_2D(
+                    St,
                     idxes=self.unimodSpec,
                     axis=1,
                     tol=self.unimodSpecTol,
@@ -788,26 +747,26 @@ profile #j,
                 )
 
             # recompute C for consistency(soft modeling)
-            Cdata = np.linalg.lstsq(Stdata.T, Xdata.T)[0].T
+            C = np.linalg.lstsq(St.T, X.T)[0].T
 
             # rescale spectra & concentrations
             if self.normSpec == "max":
-                alpha = np.max(Stdata, axis=1).reshape(self.nspecies, 1)
-                Stdata = Stdata / alpha
-                Cdata = Cdata * alpha.T
+                alpha = np.max(St, axis=1).reshape(self._n_components, 1)
+                St = St / alpha
+                C = C * alpha.T
             elif self.normSpec == "euclid":
-                alpha = np.linalg.norm(Stdata, axis=1).reshape(self.nspecies, 1)
-                Stdata = Stdata / alpha
-                Cdata = Cdata * alpha.T
+                alpha = np.linalg.norm(St, axis=1).reshape(self._n_components, 1)
+                St = St / alpha
+                C = C * alpha.T
 
             # compute residuals
             # -----------------
-            Xhatdata = np.dot(Cdata, Stdata)
-            stdev2 = np.std(Xhatdata - Xdata)
+            Xhat = np.dot(C, St)
+            stdev2 = np.std(Xhat - X)
             change = 100 * (stdev2 - stdev) / stdev
             stdev = stdev2
 
-            stdev_PCA = np.std(Xhatdata - Xpcadata)  #
+            stdev_PCA = np.std(Xhat - Xpca)  #
 
             info_(
                 f"{niter:3d}{' '*6}{stdev_PCA:10f}{' '*6}"
@@ -837,66 +796,62 @@ profile #j,
                 )
                 info_("Stop ALS optimization.")
 
-        if np.any(self.hardConc):
-            self._extOutput = extOutput
-        else:
-            self._extOutput = None
+        # return _fit results
+        _outfit = (C, St, C_hard, St_soft, extOutput)
+        return _outfit
 
-        self._C.data = Cdata
-        self._St.data = Stdata
-        self._Stsoft.data = Stsoftdata
-        self._Chard.data = Charddata
-        self._fitted = True
+    def _transform(self, X=None):
+        # X is ignored for MCRALS
+        return self._outfit[0]
 
-        return self  # to be in line with scikit learn behavior
-        # self.fit(X).reconstruct()  must work
+    def _inverse_transform(self, X_transform=None):
+        # X_transform is ignored for MCRALS
+        return np.dot(self._transform(), self._components)
+
+    def _get_components(self):
+        return self._components
+
+    # ----------------------------------------------------------------------------------
+    # Public methods and properties
+    # ----------------------------------------------------------------------------------
+    @property
+    def C(self):
+        """
+        The final concentration profiles.
+        """
+        C = self.transform()
+        C.name = "Pure concentration profile, mcs-als of " + self.X.name
+        return C
+
+    @property
+    def St(self):
+        """
+        The final spectra profiles.
+        """
+        St = self.components
+        St.name = "Pure spectra profile, mcs-als of " + self.X.name
+        return St
 
     @property
     def extOutput(self):
         """
         The last relevant output of the external function used to get concentrations.
         """
-        return self._extOutput
+        return self._outfit[4]
 
     @property
-    def Stsoft(self):
+    def St_soft(self):
         """
         The soft spectra profiles.
         """
-        return self._Stsoft
+        return self._outfit[3]
 
     @property
-    def Chard(self):
+    def C_hard(self):
         """
         The hard concentration profiles.
         """
-        return self._Chard
-
-    def reconstruct(self):
-        """
-        Transform data back to the original space.
-
-        The following matrix operation is performed : :math:`X'_{hat} = C'.S'^t`.
-
-        Returns
-        -------
-        |NDDataset|
-            The reconstructed X_hat dataset based on the MCS-ALS optimization.
-        """
-        if not self._fitted:
-            raise exceptions.NotFittedError(
-                "The fit method must be used " "before using this method"
-            )
-
-        # reconstruct from concentration and spectra profiles
-        C = self.C
-        St = self.St
-
-        X_hat = dot(C, St)
-
-        X_hat.history = "Dataset reconstructed by MCS ALS optimization"
-        X_hat.title = "X_hat: " + self.X.title
-        return X_hat
+        return self._outfit[4]
 
 
 # ---------------------------------
