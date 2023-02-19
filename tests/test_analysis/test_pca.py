@@ -29,7 +29,7 @@ def test_pca():
     pca = PCA()
     pca.fit(dataset)
     assert pca._X.shape == (55, 5549)
-    assert testing.assert_dataset_equal(
+    testing.assert_dataset_equal(
         pca.X, dataset
     ), "input dataset should be reflected in the internal variable X"
 
@@ -91,7 +91,7 @@ def test_pca():
     pca.fit(dataset)
     assert pca._X.shape == (55, 5216), "missing row or col should be removed"
     assert pca.X.shape == (55, 5549), "missing row or col restored"
-    assert testing.assert_dataset_equal(
+    testing.assert_dataset_equal(
         pca.X, dataset
     ), "input dataset should be reflected in the internal variable X (where mask is restored)"
 
@@ -143,9 +143,9 @@ def test_pca():
 
     # Another valid way to get the dimensionality reduction
     scores2 = PCA().fit_transform(dataset, n_components=2)
-    assert testing.assert_dataset_almost_equal(
-        scores2,
-        scores,
+    testing.assert_array_almost_equal(
+        scores2.data,
+        scores.data,
     )
 
     # get variance

@@ -23,7 +23,7 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils.plots import NBlue, NRed
 
 __all__ = ["PCA"]
-__configurables__ = __all__
+__configurables__ = ["PCA"]
 
 
 class PCA(DecompositionAnalysisConfigurable):
