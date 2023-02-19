@@ -18,6 +18,7 @@ from spectrochempy.analysis._analysisutils import NotFittedError
 from spectrochempy.analysis.abstractanalysis import DecompositionAnalysisConfigurable
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.utils.plots import NBlue, NRed
 
 __all__ = ["PCA"]
 __configurables__ = __all__
@@ -154,6 +155,15 @@ for reproducible results across multiple function calls.""",
         copy=True,
         **kwargs,
     ):
+        # we have changed the name n_components use in sklearn by
+        # used_components (in order  to avoid conflict with the rest of the progrma)
+        # warn th user:
+        if "n_components" in kwargs:
+            raise KeyError(
+                "`n_components` is not a valid parameter. Did-you mean "
+                "`used_components`?"
+            )
+
         # call the super class for initialisation of the configuration parameters
         # to do before anything else!
         super().__init__(
@@ -325,7 +335,7 @@ for reproducible results across multiple function calls.""",
 
     @property
     def cumulative_explained_variance(self):
-        ev_cum = NDDataset(np.cumsum(self._pca.explained_variance_ratio_))
+        ev_cum = NDDataset(np.cumsum(self._pca.explained_variance_ratio_) * 100.0)
         ev_cum.name = "ev_cum"
         ev_cum.title = "cumulative explained variance"
         ev_cum.units = "percent"
@@ -383,6 +393,52 @@ for reproducible results across multiple function calls.""",
     # ----------------------------------------------------------------------------------
     # Plot methods specific to PCA
     # ----------------------------------------------------------------------------------
+    def screeplot(self, n_components=None, **kwargs):
+        """
+        Scree plot of explained variance + cumulative variance by PCA.
+
+        Explained variance by each PC is plot as a bar graph (left y axis)
+        and cumulative explained variance is plot as a scatter plot with lines
+        (right y axis).
+
+        Parameters
+        ----------
+        n_components : int
+            Number of components to plot.
+
+        **kwargs
+            Extra arguments: `colors` (default: `[NBlue, NRed]`) to set the colors
+            of the bar plot and scatter plot; `ylims` (default `[(0, 100), "auto"]`).
+
+        Returns
+        -------
+        list of axes
+            The list of axes.
+        """
+        # get n_components
+        if n_components is None:
+            n_components = self.n_components
+        else:
+            n_components = min(self.n_components, n_components)
+
+        color1, color2 = kwargs.get("colors", [NBlue, NRed])
+        # pen = kwargs.get('pen', True)
+        ylim1, ylim2 = kwargs.get("ylims", [(0, 100), "auto"])
+
+        if ylim2 == "auto":
+            y1 = np.around(self.ev_ratio.data[0] * 0.95, -1)
+            y2 = 101.0
+            ylim2 = (y1, y2)
+
+        ax1 = self.ev_ratio[:n_components].plot_bar(
+            ylim=ylim1, color=color1, title="Scree plot"
+        )
+        ax2 = self.ev_cum[:n_components].plot_scatter(
+            ylim=ylim2, color=color2, pen=True, markersize=7.0, twinx=ax1
+        )
+        ax1.set_title("Scree plot")
+        return ax1, ax2
+
     def scoreplot(
         self, scores, *pcs, colormap="viridis", color_mapping="index", **kwargs
     ):
@@ -391,6 +447,8 @@ for reproducible results across multiple function calls.""",
 
         Parameters
         ----------
+        scores : NDDataset object
+            The NDDataset containing the scores to plot
         *pcs : a series of int argument or a list/tuple
             Must contain 2 or 3 elements.
         colormap : str
@@ -401,6 +459,12 @@ for reproducible results across multiple function calls.""",
             used for color mapping.
         """
         self.prefs = self.X.preferences
+
+        # checks args
+        if not isinstance(scores, NDDataset):
+            raise ValueError(
+                "The fist argument of scoreplot must be the score NDDataset"
+            )
 
         if isinstance(pcs[0], (list, tuple, set)):
             pcs = pcs[0]
