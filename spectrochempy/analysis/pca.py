@@ -14,9 +14,11 @@ from matplotlib.ticker import MaxNLocator, ScalarFormatter
 from numpy.random import RandomState
 from sklearn import decomposition
 
-from spectrochempy.analysis._analysisutils import NotFittedError
+from spectrochempy.analysis._analysisutils import (
+    NotFittedError,
+    _wrap_ndarray_output_to_nddataset,
+)
 from spectrochempy.analysis.abstractanalysis import DecompositionAnalysisConfigurable
-from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils.plots import NBlue, NRed
 
@@ -308,38 +310,50 @@ for reproducible results across multiple function calls.""",
         return self.transform(self.X)
 
     @property
+    @_wrap_ndarray_output_to_nddataset(
+        keepunits=None, keeptitle=False, typesingle="components"
+    )
     def explained_variance(self):
-        ev = NDDataset(self._pca.explained_variance_)
-        ev.name = "ev"
-        ev.title = "explained variance"
-        ev.set_coordset(
-            Coord(
-                None,
-                labels=[f"#{(i + 1)}" for i in range(self.n_components)],
-                title="components",
-            )
-        )
-        return ev
+        # ev = NDDataset(self._pca.explained_variance_)
+        # ev.name = "ev"
+        # ev.title = "explained variance"
+        # ev.set_coordset(
+        #     Coord(
+        #         None,
+        #         labels=[f"#{(i + 1)}" for i in range(self.n_components)],
+        #         title="components",
+        #     )
+        # )
+        # return ev
+        return self._pca.explained_variance_
 
     ev = explained_variance
 
     @property
+    @_wrap_ndarray_output_to_nddataset(
+        keepunits=None, keeptitle=False, typesingle="components"
+    )
     def explained_variance_ratio(self):
-        ratio = NDDataset(self._pca.explained_variance_ratio_ * 100.0)
-        ratio.name = "ev_ratio"
-        ratio.title = "explained variance ratio"
-        ratio.units = "percent"
-        return ratio
+        # ratio = NDDataset(self._pca.explained_variance_ratio_ * 100.0)
+        # ratio.name = "ev_ratio"
+        # ratio.title = "explained variance ratio"
+        # ratio.units = "percent"
+        # return ratio
+        return self._pca.explained_variance_ratio_ * 100.0
 
     ev_ratio = explained_variance_ratio
 
     @property
+    @_wrap_ndarray_output_to_nddataset(
+        keepunits=None, keeptitle=False, typesingle="components"
+    )
     def cumulative_explained_variance(self):
-        ev_cum = NDDataset(np.cumsum(self._pca.explained_variance_ratio_) * 100.0)
-        ev_cum.name = "ev_cum"
-        ev_cum.title = "cumulative explained variance"
-        ev_cum.units = "percent"
-        return ev_cum
+        # ev_cum = NDDataset(np.cumsum(self._pca.explained_variance_ratio_) * 100.0)
+        # ev_cum.name = "ev_cum"
+        # ev_cum.title = "cumulative explained variance"
+        # ev_cum.units = "percent"
+        # return ev_cum
+        return np.cumsum(self._pca.explained_variance_ratio_) * 100.0
 
     ev_cum = cumulative_explained_variance
 

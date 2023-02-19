@@ -83,19 +83,20 @@ _ = Ckin.T.plot(clear=False, cmap=None)
 # %%
 # Even though very approximate, the same values can be used to run a hard-soft MCR-ALS:
 # %%
+X = D[:, 300.0:500.0]
 param_to_optimize = {"k[0].A": 0.5, "k[1].A": 0.05}
 mcr_2 = scp.MCRALS()
 mcr_2.hardConc = [0, 1, 2]
 mcr_2.getConc = kin.fit_to_concentrations
 mcr_2.argsGetConc = ([0, 1, 2], [0, 1, 2], param_to_optimize)
-mcr_2.fit(D[:, 300.0:500.0], Ckin)
+mcr_2.fit(X, Ckin)
 
 # %%
 # Now, let's compare the concentration profile of the hard-soft MCAR-ALS (C = X(C$_{kin}^+$ X)$^+$) with
 # that of the optimized kinetic model (C$_{kin}$):
 # %%
 _ = mcr_2.C.T.plot()
-_ = mcr_2.Chard.T.plot(clear=False)
+_ = mcr_2.C_hard.T.plot(clear=False)
 
 # %%
 # Finally, let's plot the pure spectra profiles St, and the
@@ -103,6 +104,7 @@ _ = mcr_2.Chard.T.plot(clear=False)
 # and residuals.
 # %%
 _ = mcr_2.St.plot()
-_ = mcr_2.plotmerit()
+X_hat = mcr_2.inverse_transform()
+_ = mcr_2.plotmerit(X, X_hat)
 
-# scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
+scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

@@ -833,13 +833,19 @@ profile #j,
         return St
 
     @property
-    def extOutput(self):
+    @_wrap_ndarray_output_to_nddataset(
+        keepunits=False, keeptitle=False, typex="components"
+    )
+    def C_hard(self):
         """
-        The last relevant output of the external function used to get concentrations.
+        The hard concentration profiles.
         """
-        return self._outfit[4]
+        return self._outfit[2]
 
     @property
+    @_wrap_ndarray_output_to_nddataset(
+        keepunits=None, keeptitle=False, typey="components"
+    )
     def St_soft(self):
         """
         The soft spectra profiles.
@@ -847,9 +853,9 @@ profile #j,
         return self._outfit[3]
 
     @property
-    def C_hard(self):
+    def extOutput(self):
         """
-        The hard concentration profiles.
+        The last relevant output of the external function used to get concentrations.
         """
         return self._outfit[4]
 

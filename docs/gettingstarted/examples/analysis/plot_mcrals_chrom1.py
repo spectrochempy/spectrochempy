@@ -22,6 +22,8 @@ This dataset (and others) can be loaded from the
 For the user convenience, this dataset is present in the `datadir` of SpectroChemPy as 'als2004dataset.MAT' .
 
 """
+# %%
+# Import the spectrochempy API package
 import spectrochempy as scp
 
 # %%
@@ -51,14 +53,15 @@ mcr = scp.MCRALS()
 mcr.fit(X, guess)
 
 # %%
-# The optimization has converged. We can get the concentration (C) and pure spectra profiles (St)
-# and plot them
+# The optimization has converged. We can get the concentration (C) and
+# pure spectra profiles (St) and plot them
 _ = mcr.C.T.plot()
 _ = mcr.St.plot()
 
 # %%
 # Finally, plots the reconstructed dataset  (X_hat = C St) vs original dataset (X)
 # and residuals. The fit is good and comparable with the original paper.
-X_hat = mcr.plotmerit()
+X_hat = mcr.inverse_transform()
+mcr.plotmerit(X, X_hat)
 
-# scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
+scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

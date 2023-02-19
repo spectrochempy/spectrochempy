@@ -73,13 +73,21 @@ class _set_output(object):
     # according to the X input
 
     def __init__(
-        self, method, *args, keepunits=True, keeptitle=True, typex=None, typey=None
+        self,
+        method,
+        *args,
+        keepunits=True,
+        keeptitle=True,
+        typex=None,
+        typey=None,
+        typesingle=None,
     ):
         self.method = method
         self.keepunits = keepunits
         self.keeptitle = keeptitle
         self.typex = typex
         self.typey = typey
+        self.typesingle = typesingle
 
     def __repr__(self):
         """Return the method's docstring."""
@@ -111,7 +119,9 @@ class _set_output(object):
         elif self.typey is not None:
             axis = 1
 
-        data = obj._restore_masked_data(data, axis=axis)
+        if self.typesingle is None:
+            # not applicable for single array such as pca.ev
+            data = obj._restore_masked_data(data, axis=axis)
 
         # make a new dataset with this data
         X_transf = NDDataset(data)
@@ -140,7 +150,16 @@ class _set_output(object):
                 y=X.y,
                 x=Coord(
                     None,
-                    labels=["#%d" % (i + 1) for i in range(X_transf.shape[1])],
+                    labels=["#%d" % (i + 1) for i in range(X_transf.shape[-1])],
+                    title="components",
+                ),
+            )
+        elif self.typesingle == "components":
+            # occurs when the data are 1D such as ev_ratio...
+            X_transf.set_coordset(
+                x=Coord(
+                    None,
+                    labels=["#%d" % (i + 1) for i in range(X_transf.shape[-1])],
                     title="components",
                 ),
             )
@@ -149,7 +168,7 @@ class _set_output(object):
 
 # wrap _set_output to allow for deferred calling
 def _wrap_ndarray_output_to_nddataset(
-    method=None, keepunits=True, keeptitle=True, typex=None, typey=None
+    method=None, keepunits=True, keeptitle=True, typex=None, typey=None, typesingle=None
 ):
     if method:
         # case of the decorator without argument
@@ -163,6 +182,7 @@ def _wrap_ndarray_output_to_nddataset(
                 keeptitle=keeptitle,
                 typex=typex,
                 typey=typey,
+                typesingle=typesingle,
             )
 
         return wrapper

@@ -678,13 +678,13 @@ class DecompositionAnalysisConfigurable(AnalysisConfigurable):
 
         res = X - X_hat
         ax = X.plot()
-        ma = X.max()
+        ma = max(X.max(), X_hat.max())
         if X.x is not None:
             ax.plot(X.x.data, X_hat.T.masked_data - ma, color=colXhat)
             ax.plot(X.x.data, res.T.masked_data - 1.2 * ma, color=colRes)
         else:
-            ax.plot(X_hat.T.masked_data, color=colXhat)
-            ax.plot(res.T.masked_data, color=colRes)
+            ax.plot(X_hat.T.masked_data - ma, color=colXhat)
+            ax.plot(res.T.masked_data - 1.2 * ma, color=colRes)
         ax.autoscale(enable=True, axis="y")
         ax.set_title(f"{self.name} plot of merit")
         ax.yaxis.set_visible(False)
