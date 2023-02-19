@@ -408,7 +408,7 @@ class PlotPreferences(MetaConfigurable):
         False, help=r"""When True, use mathtext for scientific notation."""
     ).tag(config=True, kind="")
     axes_formatter_useoffset = Bool(
-        True,
+        False,
         help=r"""If True, the tick label formatter will default to labeling ticks
                                     relative to an offset when the data range is small compared to the minimum
                                     absolute value of the data.""",

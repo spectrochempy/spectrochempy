@@ -21,7 +21,7 @@ axes.formatter.min_exponent              : 0
 axes.formatter.offset_threshold          : 2
 axes.formatter.use_locale                : False
 axes.formatter.use_mathtext              : False
-axes.formatter.useoffset                 : True
+axes.formatter.useoffset                 : False
 axes.grid                                : False
 axes.grid.axis                           : both
 axes.grid.which                          : major
