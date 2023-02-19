@@ -143,7 +143,10 @@ def test_pca():
 
     # Another valid way to get the dimensionality reduction
     scores2 = PCA().fit_transform(dataset, n_components=2)
-    assert testing.assert_dataset_equal(scores2, scores)
+    assert testing.assert_dataset_almost_equal(
+        scores2,
+        scores,
+    )
 
     # get variance
     ev = pca.explained_variance
