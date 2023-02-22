@@ -322,7 +322,7 @@ profile #j,
             exceptions.deprecated(
                 "verbose", replace="log_level='INFO'", removed="0.6.5"
             )
-            verbose = kwargs.pop["verbose"]
+            verbose = kwargs.pop("verbose")
             if verbose:
                 log_level = "INFO"
 
