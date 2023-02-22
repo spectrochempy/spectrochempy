@@ -25,7 +25,7 @@ cwd = pathlib.Path.cwd()
 
 
 # Basic
-# ------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
 def test_ndio_generic(NMR_dataset_1D):
     nmr = NMR_dataset_1D
     assert nmr.directory == nmrdatadir

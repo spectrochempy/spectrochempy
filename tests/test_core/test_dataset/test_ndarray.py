@@ -14,13 +14,7 @@ from pint.errors import DimensionalityError
 
 from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.units import Quantity, ur
-from spectrochempy.utils import (
-    INPLACE,
-    MASKED,
-    TYPE_FLOAT,
-    TYPE_INTEGER,
-    SpectroChemPyWarning,
-)
+from spectrochempy.utils import INPLACE, MASKED, TYPE_FLOAT, TYPE_INTEGER
 from spectrochempy.utils.testing import (
     assert_array_equal,
     assert_equal,
@@ -28,9 +22,9 @@ from spectrochempy.utils.testing import (
     raises,
 )
 
-# ------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
 #  NDARRAY INITIALIZATION
-# ------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
 
 
 def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
@@ -300,7 +294,7 @@ def test_ndarray_methods(refarray, ndarray, ndarrayunit):
     with catch_warnings() as w:
         # try to change to an array with units
         nd.to("m")  # should not change anything (but raise a warning)
-        assert w[-1].category == SpectroChemPyWarning
+        assert w[-1].category == UserWarning
 
     assert nd.unitless
 
@@ -313,7 +307,7 @@ def test_ndarray_methods(refarray, ndarray, ndarrayunit):
     nd.ito("m")
     assert nd.units == ur.meter
 
-    # change of units - ok if it can be casted to the current one
+    # change of units - ok if it can be cast to the current one
 
     nd.units = "cm"
 

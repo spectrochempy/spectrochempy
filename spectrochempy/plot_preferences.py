@@ -29,9 +29,9 @@ from spectrochempy.utils.traits import MetaConfigurable
 # from spectrochempy.core import warning_
 
 
-# ------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
 # available matplotlib styles (equivalent of plt.style.available)
-# ------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
 def available_styles():
     """
     All matplotlib `styles <https://matplotlib.org/users/style_sheets.html>`_

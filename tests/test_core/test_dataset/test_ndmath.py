@@ -27,7 +27,7 @@ from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units.units import Quantity, Unit, ur
 from spectrochempy.utils import MASKED
-from spectrochempy.utils.exceptions import CoordinateMismatchError
+from spectrochempy.utils.exceptions import CoordinatesMismatchError
 from spectrochempy.utils.testing import (
     RandomSeedContext,
     assert_array_equal,
@@ -196,9 +196,9 @@ def test_ndmath_binary_ufuncs_scalar(nd2d, name, comment):
         assert r.units == nd1.units
 
 
-# ------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
 # non ufuncs
-# ------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
 
 REDUCE_KEEPDIMS_METHODS = [
     "max",
@@ -335,13 +335,13 @@ def test_nddataset_add_mismatch_coords():
     coord2 = Coord(np.arange(1.0, 5.5, 1.0))
     d1 = NDDataset(np.ones((5, 5)), coordset=[coord1, coord2])
     d2 = NDDataset(np.ones((5, 5)), coordset=[coord2, coord1])
-    with pytest.raises(CoordinateMismatchError) as exc:
+    with pytest.raises(CoordinatesMismatchError) as exc:
         d1 -= d2
-    assert str(exc.value).startswith("\nCoord.data attributes are not almost equal")
-    with pytest.raises(CoordinateMismatchError) as exc:
+    assert str(exc.value).startswith("Coordinates [[")
+    with pytest.raises(CoordinatesMismatchError) as exc:
         d1 += d2
     assert str(exc.value).startswith(
-        "\nCoord.data attributes are not almost equal"
+        "Coordinates [["
     )  # TODO= make more tests like this for various functions
 
 

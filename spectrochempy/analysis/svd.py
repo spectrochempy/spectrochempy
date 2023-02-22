@@ -53,7 +53,7 @@ def _svd_flip(U, VT, u_based_decision=True):
     return U, VT
 
 
-# ------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
 class SVD(HasTraits):
     """
     Performs a Singular Value Decomposition of a dataset.

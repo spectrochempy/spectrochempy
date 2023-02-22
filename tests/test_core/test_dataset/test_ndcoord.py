@@ -315,7 +315,7 @@ def test_coord_slicing():
 
 
 # Math
-# ------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
 
 # first operand has units km, second is a scalar with units m
 @pytest.mark.parametrize(
