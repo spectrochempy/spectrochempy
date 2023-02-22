@@ -13,6 +13,7 @@ In this example, we show how coordinates can be used in SpectroChemPy
 
 """
 
+# %%
 import spectrochempy as scp
 
 # %%

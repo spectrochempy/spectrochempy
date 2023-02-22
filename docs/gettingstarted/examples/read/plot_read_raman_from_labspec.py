@@ -12,7 +12,7 @@ Loading RAMAN experimental file
 Here we load experimental LABSPEC spectra and plot them.
 
 """
-
+# %%
 import spectrochempy as scp
 
 # %%

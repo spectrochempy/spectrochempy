@@ -12,7 +12,7 @@ Project creation
 In this example, we create a Project from scratch
 
 """
-import spectrochempy as scp
+# %%
 
 # %%
 # Let's assume we have three subproject to group in a single project

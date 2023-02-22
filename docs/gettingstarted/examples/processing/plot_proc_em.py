@@ -13,6 +13,8 @@ In this example, we perform exponential window multiplication to apodize a NMR s
 
 """
 
+# %%
+
 import spectrochempy as scp
 
 Hz = scp.ur.Hz

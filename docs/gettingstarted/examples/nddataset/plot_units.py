@@ -13,6 +13,8 @@ In this example, we show how units can be used in SpectroChemPy
 
 """
 
+# %%
+
 import spectrochempy as scp
 
 # %%
