@@ -12,8 +12,6 @@ __all__ = ["MCRALS"]
 
 __dataset_methods__ = []
 
-import warnings
-
 import numpy as np
 from traitlets import Dict, HasTraits, Instance, Unicode
 
@@ -21,7 +19,7 @@ from spectrochempy.analysis.pca import PCA
 from spectrochempy.core import INFO, info_, set_loglevel
 from spectrochempy.core.dataset.arraymixins.npy import dot
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils.exceptions import deprecated
+from spectrochempy.utils import exceptions
 
 
 class MCRALS(HasTraits):
@@ -212,15 +210,11 @@ class MCRALS(HasTraits):
         unimodConc = kwargs.get("unimodConc", "all")
         unimodConcTol = kwargs.get("unimodConcTol", 1.1)
         unimodConcMod = kwargs.get("unimodMod", "strict")
-        if "unimodTol" in kwargs.keys():
-            warnings.warn(
-                "unimodTol deprecated, use unimodConcTol instead", DeprecationWarning
-            )
+        if "unimodTol" in kwargs:
+            exceptions.deprecated("unimodTol", replace="unimodConcTol")
             unimodConcTol = kwargs.get("unimodTol", 1.1)
         if "unimodMod" in kwargs.keys():
-            warnings.warn(
-                "unimodMod deprecated, use unimodConcMod instead", DeprecationWarning
-            )
+            exceptions.deprecated("unimodMod", replace="unimodConcMod")
             unimodConcMod = kwargs.get("unimodConcMod", "strict")
 
         monoDecConc = kwargs.get("monoDecConc", None)
@@ -247,9 +241,8 @@ class MCRALS(HasTraits):
         normSpec = kwargs.get("normSpec", None)
 
         if "verbose" in kwargs.keys():
-            warnings.warn(
-                "verbose deprecated. Instead, use set_loglevel(INFO) before launching MCRALS",
-                DeprecationWarning,
+            exceptions.deprecated(
+                "verbose", replace="set_loglevel('INFO') before launching MCRALS"
             )
             set_loglevel(INFO)
 
@@ -639,7 +632,7 @@ class MCRALS(HasTraits):
         return self._log
 
     @property
-    @deprecated("Use log instead. This attribute may be removed in future version")
+    @exceptions.deprecated(replace="log")
     def logs(self):
         """
         Logs output.

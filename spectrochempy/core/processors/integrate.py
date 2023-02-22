@@ -16,7 +16,7 @@ import functools
 
 import scipy.integrate
 
-from spectrochempy.utils import deprecated
+from spectrochempy.utils import exceptions
 
 
 def _integrate_method(method):
@@ -117,9 +117,7 @@ def trapezoid(dataset, **kwargs):
     return scipy.integrate.trapz(dataset, **kwargs)
 
 
-@deprecated(
-    "Use the Trapezoid method instead. This method may be removed in future version"
-)
+@exceptions.deprecated(replace="Trapezoid")
 def trapz(dataset, **kwargs):
     return trapezoid(dataset, **kwargs)
 
@@ -184,7 +182,7 @@ def simpson(dataset, *args, **kwargs):
     return scipy.integrate.simps(dataset.data, **kwargs)
 
 
-@deprecated("Use simpson method instead. This method may be removed in future version")
+@exceptions.deprecated(replace="simpson")
 def simps(dataset, **kwargs):
     return simpson(dataset, **kwargs)
 

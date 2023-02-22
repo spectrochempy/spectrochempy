@@ -30,12 +30,7 @@ from traitlets import (
 
 from spectrochempy.core.dataset.basearrays.ndarray import DEFAULT_DIM_NAME, NDArray
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
-from spectrochempy.utils import (
-    SpectroChemPyWarning,
-    colored_output,
-    convert_to_html,
-    is_sequence,
-)
+from spectrochempy.utils import colored_output, convert_to_html, is_sequence
 
 
 # ======================================================================================================================
@@ -892,9 +887,9 @@ class CoordSet(HasTraits):
                 # selection by coord titles
                 if self.titles.count(index) > 1:
                     warnings.warn(
-                        f"Getting a coordinate from its title. However `{index}` occurs several time. Only"
-                        f" the first occurrence is returned!",
-                        SpectroChemPyWarning,
+                        f"Getting a coordinate from its title. However `{index}` "
+                        f"occurs several time. Only"
+                        f" the first occurrence is returned!"
                     )
                 index = self.titles.index(index)
                 coord.name = self.names[index]

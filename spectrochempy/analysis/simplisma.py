@@ -14,15 +14,13 @@ __dataset_methods__ = []
 
 import warnings
 
-# ----------------------------------------------------------------------------
-# imports
-# ----------------------------------------------------------------------------
 import numpy as np
 from traitlets import HasTraits, Instance, Unicode
 
 from spectrochempy.core import INFO, info_, set_loglevel
 from spectrochempy.core.dataset.arraymixins.npy import dot
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.utils import exceptions
 
 # ============================================================================
 # class SIMPLISMA
@@ -112,9 +110,8 @@ class SIMPLISMA(HasTraits):
             # TODO: check whether negative values should be set to zero or not.
 
         if "verbose" in kwargs.keys():
-            warnings.warn(
-                "verbose deprecated. Instead, use set_loglevel(INFO) before launching MCRALS",
-                DeprecationWarning,
+            exceptions.deprecated(
+                "verbose", replace="use set_loglevel(INFO) before launching SIMPLISMA"
             )
             set_loglevel(INFO)
 

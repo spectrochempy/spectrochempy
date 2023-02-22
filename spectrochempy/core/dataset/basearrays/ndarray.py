@@ -49,7 +49,6 @@ from spectrochempy.utils import (
     TYPE_FLOAT,
     TYPE_INTEGER,
     MaskedConstant,
-    SpectroChemPyWarning,
     convert_to_html,
     insert_masked_print,
     is_number,
@@ -464,8 +463,7 @@ class NDArray(HasTraits):
 
         if by is None:
             warnings.warn(
-                "parameter `by` should be set to `value` or `label`, use `value` by default",
-                SpectroChemPyWarning,
+                "parameter `by` should be set to `value` or `label`, use `value` by default"
             )
             by = "value"
 
@@ -474,9 +472,7 @@ class NDArray(HasTraits):
         elif "label" in by and not self.is_labeled:
             # by = 'value'
             # pos = None
-            warnings.warn(
-                "no label to sort, use `value` by default", SpectroChemPyWarning
-            )
+            warnings.warn("no label to sort, use `value` by default")
             args = np.argsort(self.data)
         elif "label" in by and self.is_labeled:
             labels = self._labels
@@ -541,7 +537,7 @@ class NDArray(HasTraits):
                 warnings.warn(
                     "the unnamed arguments are interpreted as `dims`. But a named argument `dims` or `axis`"
                     "(DEPRECATED) has been specified. \nThe unnamed arguments will thus be ignored.",
-                    SpectroChemPyWarning,
+                    UserWarning,
                 )
             dims = kdims
 
@@ -1356,9 +1352,7 @@ class NDArray(HasTraits):
             return None
 
         if level > self.labels.ndim - 1:
-            warnings.warn(
-                "There is no such level in the existing labels", SpectroChemPyWarning
-            )
+            warnings.warn("There is no such level in the existing labels")
             return None
 
         if self.labels.ndim > 1:
@@ -1611,8 +1605,7 @@ class NDArray(HasTraits):
 
         if self.ndim > 1:
             warnings.warn(
-                "We cannot set the labels for multidimentional data - Thus, these labels are ignored",
-                SpectroChemPyWarning,
+                "We cannot set the labels for multidimentional data - Thus, these labels are ignored"
             )
         else:
 
@@ -2131,7 +2124,7 @@ class NDArray(HasTraits):
             new._units = units
 
         else:
-            warnings.warn("There is no units for this NDArray!", SpectroChemPyWarning)
+            warnings.warn("There is no units for this NDArray!")
 
         if inplace:
             self._data = new._data
