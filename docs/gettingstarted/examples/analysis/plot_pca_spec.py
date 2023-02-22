@@ -33,7 +33,6 @@ pca.fit(dataset)
 # (We obtain 23 components)
 pca.n_components
 
-
 # %%
 # Transform the dataset to a lower dimensionality using all the fitted components
 scores = pca.transform()
