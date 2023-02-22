@@ -318,7 +318,7 @@ profile #j,
         # TODO: These arguments should be removed in version 0.6 probably
 
         # verbose
-        if "verbose" in kwargs.keys():
+        if "verbose" in kwargs:
             exceptions.deprecated(
                 "verbose", replace="log_level='INFO'", removed="0.6.5"
             )
@@ -327,14 +327,14 @@ profile #j,
                 log_level = "INFO"
 
         # unimodTol deprecation
-        if "unimodTol" in kwargs.keys():
+        if "unimodTol" in kwargs:
             exceptions.deprecated("unimodTol", replace="unimodConcTol", removed="0.6.5")
-            kwargs["unimodConcTol"] = kwargs.pop("unimodTol", 1.1)
+            kwargs["unimodConcTol"] = kwargs.pop("unimodTol")
 
         # unimodMod deprecation
-        if "unimodMod" in kwargs.keys():
+        if "unimodMod" in kwargs:
             exceptions.deprecated("unimodMod", replace="unimodConcMod", removed="0.6.5")
-            kwargs["unimodConcMod"] = kwargs.pop("unimodMod", "strict")
+            kwargs["unimodConcMod"] = kwargs.pop("unimodMod")
 
         # call the super class for initialisation
         super().__init__(
