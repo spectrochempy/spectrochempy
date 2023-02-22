@@ -4,7 +4,6 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-
 __all__ = ["concatenate", "stack"]
 
 __dataset_methods__ = __all__
