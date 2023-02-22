@@ -11,6 +11,7 @@ Introduction to the plotting librairie
 
 
 """
+# %%
 
 import spectrochempy as scp
 

@@ -12,6 +12,7 @@ Loading Bruker OPUS files
 Here we load an experimental Bruker OPUS files and plot it.
 
 """
+# %%
 
 import spectrochempy as scp
 

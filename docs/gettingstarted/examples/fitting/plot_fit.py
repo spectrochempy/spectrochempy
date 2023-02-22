@@ -15,8 +15,8 @@ equation.
 """
 # sphinx_gallery_thumbnail_number = 2
 
+# %%
 import os
-
 import spectrochempy as scp
 
 # %%

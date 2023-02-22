@@ -12,7 +12,7 @@ Loading of experimental 1D NMR data
 In this example, we load a NMR dataset (in the Bruker format) and plot it.
 
 """
-
+# %%
 import spectrochempy as scp
 
 # %%

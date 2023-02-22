@@ -18,6 +18,8 @@ interactively, using the ``multivariate`` method and a ``pchip`` interpolation.
 # As usual we start by importing the useful library, and at least  the
 # spectrochempy library.
 
+# %%
+
 import spectrochempy as scp
 
 # %%
