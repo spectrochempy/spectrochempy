@@ -38,7 +38,7 @@ from spectrochempy.utils import exceptions
 
 class MCRALS(DecompositionAnalysisConfigurable):
     """
-    Performs MCR-ALS of a dataset knowing the initial C or St matrix.
+    Perform MCR-ALS of a dataset knowing the initial C or St matrix.
 
     MCR-ALS (Multivariate Curve Resolution - Alternating Least Squares) resolve"s a set
     (or several sets) of spectra X of an evolving mixture (or a set of mixtures) into
@@ -71,6 +71,7 @@ class MCRALS(DecompositionAnalysisConfigurable):
     NNMF : Performs a Non-Negative Matrix Factorization of a |NDDataset|.
     EFA : Perform an Evolving Factor Analysis (forward and reverse) of the input
           |NDDataset|.
+    SIMPLISMA : SIMPLe to use Interactive Self-modeling Mixture Analysis.
     """
 
     # Developer notes
@@ -318,18 +319,22 @@ profile #j,
 
         # verbose
         if "verbose" in kwargs.keys():
-            exceptions.deprecated("verbose", replace="log_level='INFO'")
-            log_level = "INFO"
+            exceptions.deprecated(
+                "verbose", replace="log_level='INFO'", removed="0.6.5"
+            )
+            verbose = kwargs.pop["verbose"]
+            if verbose:
+                log_level = "INFO"
 
         # unimodTol deprecation
         if "unimodTol" in kwargs.keys():
-            exceptions.deprecated("unimodTol", replace="unimodConcTol")
-            self.unimodConcTol = kwargs.get("unimodTol", 1.1)
+            exceptions.deprecated("unimodTol", replace="unimodConcTol", removed="0.6.5")
+            kwargs["unimodConcTol"] = kwargs.pop("unimodTol", 1.1)
 
         # unimodMod deprecation
         if "unimodMod" in kwargs.keys():
-            exceptions.deprecated("unimodMod", replace="unimodConcMod")
-            self.unimodConcMod = kwargs.get("unimodConcMod", "strict")
+            exceptions.deprecated("unimodMod", replace="unimodConcMod", removed="0.6.5")
+            kwargs["unimodConcMod"] = kwargs.pop("unimodMod", "strict")
 
         # call the super class for initialisation
         super().__init__(
