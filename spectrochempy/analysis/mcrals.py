@@ -12,7 +12,6 @@ __all__ = ["MCRALS"]
 __configurables__ = ["MCRALS"]
 
 import logging
-import warnings
 
 import numpy as np
 import traitlets as tr
@@ -26,6 +25,7 @@ from spectrochempy.analysis._analysisutils import (
 from spectrochempy.analysis.abstractanalysis import DecompositionAnalysisConfigurable
 from spectrochempy.core import info_
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.utils import exceptions
 
 # Developper notes
 # ----------------
@@ -307,8 +307,8 @@ profile #j,
         if len(args) > 0:
             raise ValueError(
                 "Passing arguments such as MCRALS(X, profile) is now deprecated. "
-                "Instead, use MCRAL() followed by MCRALS.fit(X, profile). See the documention"
-                "and exemples"
+                "Instead, use MCRAL() followed by MCRALS.fit(X, profile). "
+                "See the documentation and exemples"
             )
 
         # warn about deprecation
@@ -317,30 +317,19 @@ profile #j,
         # TODO: These arguments should be removed in version 0.6 probably
 
         # verbose
-        verbose = kwargs.pop("verbose", None)
-        if verbose is not None:
-            warnings.warn(
-                "verbose is deprecated. Instead, use log_level= 'INFO' instead.",
-                category=DeprecationWarning,
-            )
-        if verbose:
+        if "verbose" in kwargs.keys():
+            exceptions.deprecated("verbose", replace="log_level='INFO'")
             log_level = "INFO"
 
         # unimodTol deprecation
         if "unimodTol" in kwargs.keys():
-            warnings.warn(
-                "unimodTol is deprecated, use unimodConcTol instead",
-                category=DeprecationWarning,
-            )
-            self.unimodConcTol = kwargs.pop("unimodTol", 1.1)
+            exceptions.deprecated("unimodTol", replace="unimodConcTol")
+            self.unimodConcTol = kwargs.get("unimodTol", 1.1)
 
         # unimodMod deprecation
         if "unimodMod" in kwargs.keys():
-            warnings.warn(
-                "unimodMod is deprecated, use unimodConcMod instead",
-                category=DeprecationWarning,
-            )
-            self.unimodConcMod = kwargs.pop("unimodMod", "strict")
+            exceptions.deprecated("unimodMod", replace="unimodConcMod")
+            self.unimodConcMod = kwargs.get("unimodConcMod", "strict")
 
         # call the super class for initialisation
         super().__init__(

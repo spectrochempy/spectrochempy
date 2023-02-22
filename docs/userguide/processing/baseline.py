@@ -290,7 +290,7 @@ method = "sequential"  # choose 'sequential' or 'multivariate'
 npc = 3  # only used for 'multivariate'
 
 # code: compute baseline, plot original and corrected NDDatasets and ranges
-# -------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
 blc = scp.BaselineCorrection(X)
 Xcorr = blc.compute(
     *ranges, interpolation=interpolation, order=order, method=method, npc=npc

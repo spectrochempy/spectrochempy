@@ -12,6 +12,7 @@ Sine bell and squared Sine bell window multiplication
 In this example, we use sine bell or squared sine bell window multiplication to apodize a NMR signal in the time domain.
 
 """
+# %%
 
 import os
 

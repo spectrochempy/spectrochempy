@@ -13,6 +13,7 @@ Here we load an experimental SPG file (OMNIC) and plot it.
 
 """
 
+# %%
 import spectrochempy as scp
 
 # %%

@@ -31,19 +31,20 @@ from spectrochempy.utils import (
     as_quaternion,
     quat_as_complex_array,
 )
-from spectrochempy.utils.exceptions import CoordinateMismatchError
+from spectrochempy.utils.exceptions import CoordinatesMismatchError
 from spectrochempy.utils.orderedset import OrderedSet
 from spectrochempy.utils.testing import assert_coord_almost_equal
 
-# ======================================================================================================================
+# ======================================================================================
 # utilities
-# ======================================================================================================================
+# ======================================================================================
 
 
 def _reduce_method(method):
     # Decorator
     # ---------
-    # set the flag reduce to true for the _from numpy decorator. Must be placed above this decorator.
+    # set the flag reduce to true for the _from numpy decorator. Must be placed above
+    # this decorator.
     # e.g.,
     #    @_reduce_method
     #    @_from_numpy_method
@@ -57,7 +58,8 @@ class _from_numpy_method:
     # Decorator
     # ---------
     # This decorator assumes that the signature starts always by : (cls, ...)
-    # the second positional only argument can be `dataset` - in this case this mean that the function apply on a
+    # the second positional only argument can be `dataset` - in this case this mean that
+    # the function apply on a
     # dataset
 
     reduce = False
@@ -145,7 +147,8 @@ class _from_numpy_method:
                 # now call the np function and make the object
                 new = self.method(klass, *argpos, **kwargs)
                 if new.implements("NDDataset"):
-                    new.history = f"Created using method : {method}"  # (args:{argpos}, kwargs:{kwargs})'
+                    new.history = f"Created using method : {method}"  # (args:{argpos},
+                    # kwargs:{kwargs})'
                 return new
 
             # -----------------------------
@@ -161,7 +164,8 @@ class _from_numpy_method:
                     new.ito(v, force=True)
                     del kwargs[k]
 
-            # Be sure that the dataset passed to the numpy function are a numpy (masked) array
+            # Be sure that the dataset passed to the numpy function are a numpy
+            # (masked) array
             if isinstance(argpos[0], (NDDataset, Coord)):
                 # argpos[0] = argpos[0].real.masked_data
                 argpos[0] = argpos[0].masked_data
@@ -173,7 +177,8 @@ class _from_numpy_method:
 
                 new = self.method(new, *argpos)
                 if new.implements("NDDataset"):
-                    new.history = f"Created using method : {method}"  # (args:{argpos}, kwargs:{kw})'
+                    new.history = f"Created using method : {method}"  # (args:{argpos},
+                    # kwargs:{kw})'
                 return new
 
             # reduce methods
@@ -529,7 +534,8 @@ class NDMath(object):
         #
         #            if fname in ["fabs", ]:
         #                # function not available for complex data
-        #                raise ValueError(f"Operation `{ufunc}` does not accept complex data!")
+        #                raise ValueError(f"Operation `{ufunc}` does not accept complex
+        #                data!")
         #
         #        # If this reached, data are not complex or hypercomplex
         #        if fname in ['absolute', 'abs']:
@@ -565,7 +571,8 @@ class NDMath(object):
         """
         Calculate the absolute value of the given NDDataset element-wise.
 
-        `abs` is a shorthand for this function. For complex input, a + ib, the absolute value is
+        `abs` is a shorthand for this function. For complex input, a + ib, the absolute
+        value is
         :math:`\\sqrt{ a^2 + b^2}`.
 
         Parameters
@@ -573,7 +580,8 @@ class NDMath(object):
         dataset : array_like
             Input array or object that can be converted to an array.
         dtype : dtype
-            The type of the output array. If dtype is not given, infer the data type from the other input arguments.
+            The type of the output array. If dtype is not given, infer the data type
+            from the other input arguments.
 
         Returns
         -------
@@ -647,7 +655,10 @@ class NDMath(object):
         return cls
 
     conj = conjugate
-    conj.__doc__ = "Conjugate of the NDDataset in the specified dimension.\n\nEquivalent to conjugate."
+    conj.__doc__ = (
+        "Conjugate of the NDDataset in the specified dimension."
+        "\n\nEquivalent to conjugate."
+    )
 
     @_from_numpy_method
     def around(cls, dataset, decimals=0):
@@ -674,7 +685,8 @@ class NDMath(object):
 
         See Also
         --------
-        numpy.round, around, spectrochempy.round, spectrochempy.around: Equivalent methods.
+        numpy.round, around, spectrochempy.round, spectrochempy.around: Equivalent
+        methods.
         ceil, fix, floor, rint, trunc
         """
 
@@ -751,7 +763,8 @@ class NDMath(object):
         dataset : array_like
             Input array or object that can be converted to an array.
         dim : None or int or dimension name or tuple of int or dimensions, optional
-            Dimension or dimensions along which to operate.  By default, flattened input is used.
+            Dimension or dimensions along which to operate.  By default, flattened input
+            is used.
             If this is a tuple, the maximum is selected over multiple dimensions,
             instead of a single dimension or all the dimensions as before.
         keepdims : bool, optional
@@ -767,7 +780,7 @@ class NDMath(object):
 
         See Also
         --------
-        amin : The minimum value of a dataset along a given dimension, propagating any NaNs.
+        amin : The minimum value of a dataset along a given dimension, propagating NaNs.
         minimum : Element-wise minimum of two datasets, propagating any NaNs.
         maximum : Element-wise maximum of two datasets, propagating any NaNs.
         fmax : Element-wise maximum of two datasets, ignoring any NaNs.
@@ -854,7 +867,8 @@ class NDMath(object):
         dataset : array_like
             Input array or object that can be converted to an array.
         dim : None or int or dimension name or tuple of int or dimensions, optional
-            Dimension or dimensions along which to operate.  By default, flattened input is used.
+            Dimension or dimensions along which to operate.  By default, flattened input
+            is used.
             If this is a tuple, the minimum is selected over multiple dimensions,
             instead of a single dimension or all the dimensions as before.
         keepdims : bool, optional
@@ -870,7 +884,7 @@ class NDMath(object):
 
         See Also
         --------
-        amax : The maximum value of a dataset along a given dimension, propagating any NaNs.
+        amax : The maximum value of a dataset along a given dimension, propagating NaNs.
         minimum : Element-wise minimum of two datasets, propagating any NaNs.
         maximum : Element-wise maximum of two datasets, propagating any NaNs.
         fmax : Element-wise maximum of two datasets, ignoring any NaNs.
@@ -992,19 +1006,26 @@ class NDMath(object):
         Parameters
         ----------
         start : number, optional
-            Start of interval. The interval includes this value. The default start value is 0.
+            Start of interval. The interval includes this value. The default start value
+            is 0.
         stop : number
-            End of interval. The interval does not include this value, except in some cases
-            where step is not an integer and floating point round-off affects the length of out.
+            End of interval. The interval does not include this value, except in some
+            cases
+            where step is not an integer and floating point round-off affects the length
+            of out.
             It might be prefereble to use inspace in such case.
         step : number, optional
-            Spacing between values. For any output out, this is the distance between two adjacent values,
-            out[i+1] - out[i]. The default step size is 1. If step is specified as a position argument,
+            Spacing between values. For any output out, this is the distance between
+            two adjacent values,
+            out[i+1] - out[i]. The default step size is 1. If step is specified as a
+            position argument,
             start must also be given.
         dtype : dtype
-            The type of the output array. If dtype is not given, infer the data type from the other input arguments.
+            The type of the output array. If dtype is not given, infer the data type
+            from the other input arguments.
         **kwargs
-            Keywords argument used when creating the returned object, such as units, name, title, ...
+            Keywords argument used when creating the returned object, such as units,
+            name, title, ...
 
         Returns
         -------
@@ -1061,14 +1082,16 @@ class NDMath(object):
         dataset : array_like
             Array containing data to be averaged.
         dim : None or int or dimension name or tuple of int or dimensions, optional
-            Dimension or dimensions along which to operate.  By default, flattened input is used.
+            Dimension or dimensions along which to operate.  By default, flattened
+            input is used.
             If this is a tuple, the minimum is selected over multiple dimensions,
             instead of a single dimension or all the dimensions as before.
         weights : array_like, optional
             An array of weights associated with the values in `dataset`. Each value in
             `a` contributes to the average according to its associated weight.
             The weights array can either be 1-D (in which case its length must be
-            the size of `dataset` along the given axis) or of the same shape as `dataset`.
+            the size of `dataset` along the given axis) or of the same shape as
+            `dataset`.
             If `weights=None`, then all data in `dataset` are assumed to have a
             weight equal to one.  The 1-D calculation is::
 
@@ -1162,7 +1185,8 @@ class NDMath(object):
             with `a_max`.
         """
         # if len(args) > 2 or len(args) == 0:
-        #     raise ValueError('Clip requires at least one argument or at most two arguments')
+        #     raise ValueError('Clip requires at least one argument or at most two
+        #     arguments')
         # amax = kwargs.pop('a_max', args[0] if len(args) == 1 else args[1])
         # amin = kwargs.pop('a_min', self.min() if len(args) == 1 else args[0])
         # amin, amax = np.minimum(amin, amax), max(amin, amax)
@@ -1192,7 +1216,8 @@ class NDMath(object):
 
         if not cls.implements("NDDataset") or cls.coordset is None:
             raise Exception(
-                "Method `coordmax` apply only on NDDataset and if it has defined coordinates"
+                "Method `coordmax` apply only on NDDataset and if it has defined "
+                "coordinates"
             )
 
         axis, dim = cls.get_axis(dim, allows_none=True)
@@ -1225,7 +1250,8 @@ class NDMath(object):
 
         if not cls.implements("NDDataset") or cls.coordset is None:
             raise Exception(
-                "Method `coordmin` apply only on NDDataset and if it has defined coordinates"
+                "Method `coordmin` apply only on NDDataset and if it has defined "
+                "coordinates"
             )
 
         axis, dim = cls.get_axis(dim, allows_none=True)
@@ -1259,7 +1285,8 @@ class NDMath(object):
         dataset : array_like
             Calculate the cumulative sum of these values.
         dim : None or int or dimension name , optional
-            Dimension or dimensions along which to operate.  By default, flattened input is used.
+            Dimension or dimensions along which to operate.  By default, flattened
+            input is used.
         dtype : dtype, optional
             Type to use in computing the standard deviation. For arrays of
             integer type the default is float64, for arrays of float types it is
@@ -1315,7 +1342,8 @@ class NDMath(object):
             If `dataset` is a 1-D array, return a 2-D array with `v` on the `k`-th.
             diagonal.
         offset : int, optional
-            Diagonal in question. The default is 0. Use offset>0 for diagonals above the main diagonal, and offset<0 for
+            Diagonal in question. The default is 0. Use offset>0 for diagonals above
+            the main diagonal, and offset<0 for
             diagonals below the main diagonal.
 
         Returns
@@ -1366,7 +1394,8 @@ class NDMath(object):
         """
         Return the diagonal of a 2D array.
 
-        As we reduce a 2D to a 1D we must specified which is the dimension for the coordinates to keep!.
+        As we reduce a 2D to a 1D we must specified which is the dimension for the
+        coordinates to keep!.
 
         Parameters
         ----------
@@ -1376,7 +1405,8 @@ class NDMath(object):
             Offset of the diagonal from the main diagonal.  Can be positive or
             negative.  Defaults to main diagonal (0).
         dim : str, optional
-            Dimension to keep for coordinates. By default it is the last (-1, `x` or another name if the default
+            Dimension to keep for coordinates. By default it is the last (-1, `x` or
+            another name if the default
             dimension name has been modified).
         dtype : dtype, optional
             The type of the returned array.
@@ -1445,9 +1475,11 @@ class NDMath(object):
         Other Parameters
         ----------------
         units : str or ur instance
-            Units of the returned object. If not provided, try to copy from the input object.
+            Units of the returned object. If not provided, try to copy from the input
+            object.
         coordset : list or Coordset object
-            Coordinates for the returned object. If not provided, try to copy from the input object.
+            Coordinates for the returned object. If not provided, try to copy from the
+            input object.
 
         See Also
         --------
@@ -1480,7 +1512,8 @@ class NDMath(object):
         """
         Return a new uninitialized |NDDataset|.
 
-        The returned |NDDataset| have the same shape and type as a given array. Units, coordset, ... can be added in
+        The returned |NDDataset| have the same shape and type as a given array. Units,
+        coordset, ... can be added in
         kwargs.
 
         Parameters
@@ -1500,13 +1533,16 @@ class NDMath(object):
         Other Parameters
         ----------------
         units : str or ur instance
-            Units of the returned object. If not provided, try to copy from the input object.
+            Units of the returned object. If not provided, try to copy from the input
+            object.
         coordset : list or Coordset object
-            Coordinates for the returned object. If not provided, try to copy from the input object.
+            Coordinates for the returned object. If not provided, try to copy from the
+            input object.
 
         See Also
         --------
-        full_like : Return an array with a given fill value with shape and type of the input.
+        full_like : Return an array with a given fill value with shape and type of the
+        input.
         ones_like : Return an array of ones with shape and type of input.
         zeros_like : Return an array of zeros with shape and type of input.
         empty : Return a new uninitialized array.
@@ -1544,7 +1580,8 @@ class NDMath(object):
         dtype : data-type, optional
             Data-type of the returned array.
         **kwargs
-            Other parameters to be passed to the object constructor (units, coordset, mask ...).
+            Other parameters to be passed to the object constructor (units, coordset,
+            mask ...).
 
         Returns
         -------
@@ -1578,7 +1615,8 @@ class NDMath(object):
         """
         Construct a nddataset by executing a function over each coordinate.
 
-        The resulting array therefore has a value ``fn(x, y, z)`` at coordinate ``(x, y, z)`` .
+        The resulting array therefore has a value ``fn(x, y, z)`` at coordinate
+        ``(x, y, z)`` .
 
         Parameters
         ----------
@@ -1662,7 +1700,8 @@ class NDMath(object):
         dtype : data-type
             The data-type of the returned array.
         count : int, optional
-            The number of items to read from iterable. The default is -1, which means all data is read.
+            The number of items to read from iterable. The default is -1, which means
+            all data is read.
         **kwargs
             Other kwargs are passed to the final object constructor.
 
@@ -1673,11 +1712,13 @@ class NDMath(object):
 
         See Also
         --------
-        fromfunction : Construct a nddataset by executing a function over each coordinate.
+        fromfunction : Construct a nddataset by executing a function over each
+        coordinate.
 
         Notes
         -----
-            Specify count to improve performance. It allows fromiter to pre-allocate the output array,
+            Specify count to improve performance. It allows fromiter to pre-allocate the
+             output array,
             instead of resizing it on demand.
 
         Examples
@@ -1705,7 +1746,8 @@ class NDMath(object):
         fill_value : scalar
             Fill value.
         dtype : data-type, optional
-            The desired data-type for the array, e.g., `np.int8`.  Default is fill_value.dtype.
+            The desired data-type for the array, e.g., `np.int8`.  Default is
+            fill_value.dtype.
         **kwargs
             Optional keyword parameters (see Other Parameters).
 
@@ -1717,9 +1759,11 @@ class NDMath(object):
         Other Parameters
         ----------------
         units : str or ur instance
-            Units of the returned object. If not provided, try to copy from the input object.
+            Units of the returned object. If not provided, try to copy from the input
+            object.
         coordset : list or Coordset object
-            Coordinates for the returned object. If not provided, try to copy from the input object.
+            Coordinates for the returned object. If not provided, try to copy from the
+            input object.
 
         See Also
         --------
@@ -1747,7 +1791,8 @@ class NDMath(object):
         """
         Return a |NDDataset| of fill_value.
 
-        The returned |NDDataset| have the same shape and type as a given array. Units, coordset, ... can be added in
+        The returned |NDDataset| have the same shape and type as a given array. Units,
+        coordset, ... can be added in
         kwargs
 
         Parameters
@@ -1769,9 +1814,11 @@ class NDMath(object):
         Other Parameters
         ----------------
         units : str or ur instance
-            Units of the returned object. If not provided, try to copy from the input object.
+            Units of the returned object. If not provided, try to copy from the input
+            object.
         coordset : list or Coordset object
-            Coordinates for the returned object. If not provided, try to copy from the input object.
+            Coordinates for the returned object. If not provided, try to copy from the
+            input object.
 
         See Also
         --------
@@ -1836,7 +1883,8 @@ class NDMath(object):
             The type of the output array.  If `dtype` is not given, infer the data
             type from the other input arguments.
         **kwargs
-            Keywords argument used when creating the returned object, such as units, name, title, ...
+            Keywords argument used when creating the returned object, such as units,
+            name, title, ...
 
         Returns
         -------
@@ -1870,7 +1918,8 @@ class NDMath(object):
         dtype : data-type, optional
             Data-type of the output.  Defaults to ``float``.
         **kwargs
-            Other parameters to be passed to the object constructor (units, coordset, mask ...).
+            Other parameters to be passed to the object constructor (units, coordset,
+            mask ...).
 
         Returns
         -------
@@ -1901,7 +1950,8 @@ class NDMath(object):
         """
         Return evenly spaced numbers over a specified interval.
 
-        Returns num evenly spaced samples, calculated over the interval [start, stop]. The endpoint of the interval
+        Returns num evenly spaced samples, calculated over the interval [start, stop].
+        The endpoint of the interval
         can optionally be excluded.
 
         Parameters
@@ -1910,23 +1960,29 @@ class NDMath(object):
             The starting value of the sequence.
         stop : array_like
             The end value of the sequence, unless endpoint is set to False.
-            In that case, the sequence consists of all but the last of num + 1 evenly spaced samples, so that stop is
+            In that case, the sequence consists of all but the last of num + 1 evenly
+            spaced samples, so that stop is
             excluded. Note that the step size changes when endpoint is False.
         num : int, optional
             Number of samples to generate. Default is 50. Must be non-negative.
         endpoint : bool, optional
-            If True, stop is the last sample. Otherwise, it is not included. Default is True.
+            If True, stop is the last sample. Otherwise, it is not included. Default is
+            True.
         retstep : bool, optional
             If True, return (samples, step), where step is the spacing between samples.
         dtype : dtype, optional
-            The type of the array. If dtype is not given, infer the data type from the other input arguments.
+            The type of the array. If dtype is not given, infer the data type from the
+            other input arguments.
         **kwargs
-            Keywords argument used when creating the returned object, such as units, name, title, ...
+            Keywords argument used when creating the returned object, such as units,
+
+            name, title, ...
 
         Returns
         -------
         linspace : ndarray
-            There are num equally spaced samples in the closed interval [start, stop] or the half-open interval
+            There are num equally spaced samples in the closed interval [start, stop]
+            or the half-open interval
             [start, stop) (depending on whether endpoint is True or False).
         step : float, optional
             Only returned if retstep is True
@@ -1968,7 +2024,8 @@ class NDMath(object):
             The type of the output array.  If `dtype` is not given, infer the data
             type from the other input arguments.
         **kwargs
-            Keywords argument used when creating the returned object, such as units, name, title, ...
+            Keywords argument used when creating the returned object, such as units,
+            name, title, ...
 
         Returns
         -------
@@ -2079,9 +2136,11 @@ class NDMath(object):
         Other Parameters
         ----------------
         units : str or ur instance
-            Units of the returned object. If not provided, try to copy from the input object.
+            Units of the returned object. If not provided, try to copy from the input
+            object.
         coordset : list or Coordset object
-            Coordinates for the returned object. If not provided, try to copy from the input object.
+            Coordinates for the returned object. If not provided, try to copy from the
+            input object.
 
         See Also
         --------
@@ -2125,7 +2184,8 @@ class NDMath(object):
         """
         Return |NDDataset| of ones.
 
-        The returned |NDDataset| have the same shape and type as a given array. Units, coordset, ... can be added in
+        The returned |NDDataset| have the same shape and type as a given array. Units,
+        coordset, ... can be added in
         kwargs.
 
         Parameters
@@ -2145,13 +2205,16 @@ class NDMath(object):
         Other Parameters
         ----------------
         units : str or ur instance
-            Units of the returned object. If not provided, try to copy from the input object.
+            Units of the returned object. If not provided, try to copy from the input
+            object.
         coordset : list or Coordset object
-            Coordinates for the returned object. If not provided, try to copy from the input object.
+            Coordinates for the returned object. If not provided, try to copy from the
+            input object.
 
         See Also
         --------
-        full_like : Return an array with a given fill value with shape and type of the input.
+        full_like : Return an array with a given fill value with shape and type of the
+        input.
         zeros_like : Return an array of zeros with shape and type of input.
         empty_like : Return an empty array with shape and type of input.
         zeros : Return a new array setting values to zero.
@@ -2208,7 +2271,8 @@ class NDMath(object):
             if target in kwargs:
                 error_(
                     Exception,
-                    f"{target} is both the pipe target and a keyword argument. Operation not applied!",
+                    f"{target} is both the pipe target and a keyword argument. "
+                    f"Operation not applied!",
                 )
                 return self
             kwargs[target] = self
@@ -2259,25 +2323,29 @@ class NDMath(object):
         Return random floats in the half-open interval [0.0, 1.0).
 
         Results are from the “continuous uniform” distribution over the stated interval.
-        To sample :math:`\\mathrm{Uniform}[a, b), b > a` multiply the output of random by (b-a) and add a:
+        To sample :math:`\\mathrm{Uniform}[a, b), b > a` multiply the output of random
+        by (b-a) and add a:
 
             (b - a) * random() + a
 
         Parameters
         ----------
         size : int or tuple of ints, optional
-            Output shape. If the given shape is, e.g., (m, n, k), then m * n * k samples are drawn.
+            Output shape. If the given shape is, e.g., (m, n, k), then m * n * k samples
+             are drawn.
             Default is None, in which case a single value is returned.
         dtype : dtype, optional
             Desired dtype of the result, only float64 and float32 are supported.
             The default value is np.float64.
         **kwargs
-            Keywords argument used when creating the returned object, such as units, name, title, ...
+            Keywords argument used when creating the returned object, such as units,
+            name, title, ...
 
         Returns
         -------
         random
-            Array of random floats of shape size (unless size=None, in which case a single float is returned).
+            Array of random floats of shape size (unless size=None, in which case a
+            single float is returned).
         """
         from numpy.random import default_rng
 
@@ -2300,7 +2368,8 @@ class NDMath(object):
         dataset : array_like
             Calculate the standard deviation of these values.
         dim : None or int or dimension name , optional
-            Dimension or dimensions along which to operate.  By default, flattened input is used.
+            Dimension or dimensions along which to operate.  By default, flattened input
+             is used.
         dtype : dtype, optional
             Type to use in computing the standard deviation. For arrays of
             integer type the default is float64, for arrays of float types it is
@@ -2388,7 +2457,8 @@ class NDMath(object):
         dataset : array_like
             Calculate the sum of these values.
         dim : None or int or dimension name , optional
-            Dimension or dimensions along which to operate.  By default, flattened input is used.
+            Dimension or dimensions along which to operate.  By default, flattened input
+             is used.
         dtype : dtype, optional
             Type to use in computing the standard deviation. For arrays of
             integer type the default is float64, for arrays of float types it is
@@ -2453,7 +2523,8 @@ class NDMath(object):
         dataset : array_like
             Array containing numbers whose variance is desired.
         dim : None or int or dimension name , optional
-            Dimension or dimensions along which to operate.  By default, flattened input is used.
+            Dimension or dimensions along which to operate.  By default, flattened
+            input is used.
         dtype : dtype, optional
             Type to use in computing the standard deviation. For arrays of
             integer type the default is float64, for arrays of float types it is
@@ -2551,9 +2622,11 @@ class NDMath(object):
         Other Parameters
         ----------------
         units : str or ur instance
-            Units of the returned object. If not provided, try to copy from the input object.
+            Units of the returned object. If not provided, try to copy from the input
+            object.
         coordset : list or Coordset object
-            Coordinates for the returned object. If not provided, try to copy from the input object.
+            Coordinates for the returned object. If not provided, try to copy from the
+            input object.
 
         See Also
         --------
@@ -2588,8 +2661,8 @@ class NDMath(object):
         """
         Return a |NDDataset| of zeros.
 
-        The returned |NDDataset| have the same shape and type as a given array. Units, coordset, ... can be added in
-        kwargs.
+        The returned |NDDataset| have the same shape and type as a given array. Units,
+        coordset, ... can be added in kwargs.
 
         Parameters
         ----------
@@ -2609,13 +2682,15 @@ class NDMath(object):
         Other Parameters
         ----------------
         units : str or ur instance
-            Units of the returned object. If not provided, try to copy from the input object.
+            Units of the returned object. If not provided, try to copy from the input
+            object.
         coordset : list or Coordset object
-            Coordinates for the returned object. If not provided, try to copy from the input object.
+            Coordinates for the returned object. If not provided, try to copy from the
+            input object.
 
         See Also
         --------
-        full_like : Return an array with a given fill value with shape and type of the input.
+        full_like : Return an array with a fill value with shape and type of the input.
         ones_like : Return an array of ones with shape and type of input.
         empty_like : Return an empty array with shape and type of input.
         zeros : Return a new array setting values to zero.
@@ -2658,12 +2733,15 @@ class NDMath(object):
 
         # By default the type of the result is set regarding the first obj in inputs
         # (except for some ufuncs that can return numpy arrays or masked numpy arrays
-        # but sometimes we have something such as 2 * nd where nd is a NDDataset: In this case we expect a dataset.
+        # but sometimes we have something such as 2 * nd where nd is a NDDataset: In
+        # this case we expect a dataset.
 
-        # For binary function, we also determine if the function needs object with compatible units.
+        # For binary function, we also determine if the function needs object with
+        # compatible units.
         # If the object are not compatible then we raise an error
 
-        # Take the objects out of the input list and get their types and units. Additionally determine if we need to
+        # Take the objects out of the input list and get their types and units.
+        # Additionally determine if we need to
         # use operation on masked arrays and/or on quaternion
 
         is_masked = False
@@ -2687,7 +2765,8 @@ class NDMath(object):
                     objunits = list(objunits)
                     raise DimensionalityError(
                         *objunits[::-1],
-                        extra_msg=f", Units must be compatible for the `{fname}` operator",
+                        extra_msg=f", Units must be compatible "
+                        f"for the `{fname}` operator",
                     )
 
             # returntype
@@ -2766,14 +2845,16 @@ class NDMath(object):
         # ------------------------------------------------------------------------------
         is_dataset = objtype == "NDDataset"
 
-        # Get the underlying data: If one of the input is masked, we will work with masked array
+        # Get the underlying data: If one of the input is masked, we will work with
+        # masked array
         if is_masked and is_dataset:
             d = obj._umasked(obj.data, obj.mask)
         else:
             d = obj.data
 
         # Do we have units?
-        # We create a quantity q that will be used for unit calculations (without dealing with the whole object)
+        # We create a quantity q that will be used for unit calculations (without
+        # dealing with the whole object)
         def reduce_(magnitude):
             if hasattr(magnitude, "dtype"):
                 if magnitude.dtype in TYPE_COMPLEX:
@@ -2826,7 +2907,8 @@ class NDMath(object):
                 ):
                     pass
 
-                # Another acceptable situation is that the other NDDataset is 1D, with compatible
+                # Another acceptable situation is that the other NDDataset is 1D, with
+                # compatible
                 # coordinates in the x dimension
                 elif other._squeeze_ndim >= 1:
                     try:
@@ -2836,10 +2918,13 @@ class NDMath(object):
                             decimal=3,
                             data_only=True,
                         )  # we compare only data for this operation
-                    except AssertionError as e:
-                        raise CoordinateMismatchError(str(e))
+                    except AssertionError:
+                        raise CoordinatesMismatchError(
+                            obc[obj.dims[-1]].data, otc[obj.dims[-1]].data
+                        )
 
-                # if other is multidimensional and as we are talking about element wise operation, we assume
+                # if other is multidimensional and as we are talking about element wise
+                # operation, we assume
                 # that all coordinates must match
                 elif other._squeeze_ndim > 1:
                     for idx in range(obj.ndim):
@@ -2850,8 +2935,10 @@ class NDMath(object):
                                 decimal=3,
                                 data_only=True,
                             )  # we compare only data for this operation
-                        except AssertionError as e:
-                            raise CoordinateMismatchError(str(e))
+                        except AssertionError:
+                            raise CoordinatesMismatchError(
+                                obc[obj.dims[idx]].data, otc[other.dims[idx]].data
+                            )
 
             if othertype in ["NDDataset", "Coord", "LinearCoord"]:
 
@@ -2883,7 +2970,7 @@ class NDMath(object):
             otherqs.append(otherq)
 
         # Calculate the resulting units (and their compatibility for such operation)
-        # --------------------------------------------------------------------------------------------------------------
+        # ------------------------------------------------------------------------------
         # Do the calculation with the units to find the final one
 
         def check_require_units(fname, _units):
@@ -2925,8 +3012,10 @@ class NDMath(object):
                     otherqs[i] = otherqm * check_require_units(fname, otherq.units)
                 else:
 
-                    # here we want to change the behavior a pint regarding the addition of scalar to quantity
-                    #         # in principle it is only possible with dimensionless quantity, else a dimensionerror is
+                    # here we want to change the behavior a pint regarding the addition
+                    # of scalar to quantity
+                    #         # in principle it is only possible with dimensionless
+                    #         quantity, else a dimensionerror is
                     #         raised.
                     if fname in [
                         "add",
@@ -2939,7 +3028,8 @@ class NDMath(object):
                     ] and hasattr(q, "units"):
                         otherqs[i] = otherq * q.units  # take the unit of the first obj
 
-            # some functions are not handled by pint regardings units, try to solve this here
+            # some functions are not handled by pint regardings units, try to solve this
+            # here
             f_u = f
             if compatible_units:
                 f_u = np.add  # take a similar function handled by pint
@@ -2949,7 +3039,8 @@ class NDMath(object):
 
             except Exception as e:
                 if not otherqs:
-                    # in this case easy we take the units of the single argument except for some function where units
+                    # in this case easy we take the units of the single argument except
+                    # for some function where units
                     # can be dropped
                     res = q
                 else:
@@ -2960,7 +3051,7 @@ class NDMath(object):
                 units = res.units
 
         # perform operation on magnitudes
-        # --------------------------------------------------------------------------------------------------------------
+        # ------------------------------------------------------------------------------
         if isufunc:
 
             with catch_warnings(record=True) as ws:
@@ -2983,10 +3074,12 @@ class NDMath(object):
                 else:
                     data = getattr(np, fname)(d, *args)
 
-                # if a warning occurs, let handle it with complex numbers or return an exception:
+                # if a warning occurs, let handle it with complex numbers or return an
+                # exception:
                 if ws and "invalid value encountered in " in ws[-1].message.args[0]:
                     ws = []  # clear
-                    # this can happen with some function that do not work on some real values such as log(-1)
+                    # this can happen with some function that do not work on some real
+                    # values such as log(-1)
                     # then try to use complex
                     data = getattr(np, fname)(
                         d.astype(np.complex128), *args
@@ -3104,7 +3197,10 @@ class NDMath(object):
             fm, objs = self._check_order(fname, objs)
 
             if hasattr(self, "history"):
-                history = f"Binary operation {fm.__name__} with `{_get_name(objs[-1])}` has been performed"
+                history = (
+                    f"Binary operation {fm.__name__} with "
+                    f"`{_get_name(objs[-1])}` has been performed"
+                )
             else:
                 history = None
 
@@ -3170,9 +3266,9 @@ class NDMath(object):
         return new
 
 
-# ------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
 # ARITHMETIC ON NDArray
-# ------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
 
 # unary operators
 UNARY_OPS = ["neg", "pos", "abs"]
@@ -3221,9 +3317,11 @@ class _ufunc:
 
             Notes
             -----
-            Numpy Ufuncs referenced in our documentation can be directly applied to |NDDataset| or |Coord| type
+            Numpy Ufuncs referenced in our documentation can be directly applied to
+            |NDDataset| or |Coord| type
             of SpectrochemPy objects.
-            Most of these Ufuncs, however, instead of returning a numpy array, will return the same type of object.
+            Most of these Ufuncs, however, instead of returning a numpy array, will
+            return the same type of object.
 
             Examples
             --------
@@ -3231,7 +3329,8 @@ class _ufunc:
             >>> ds = scp.read('wodger.spg')
             >>> ds_transformed = scp.{self.name}(ds)
 
-            Numpy Ufuncs can also be transparently applied directly to SpectroChemPy object
+            Numpy Ufuncs can also be transparently applied directly to SpectroChemPy
+            object
 
             >>> ds_transformed = np.{self.name}(ds)
             """
@@ -3266,9 +3365,9 @@ def _set_operators(cls, priority=50):
         setattr(cls, _op_str("i" + name), cls._inplace_binary_op(_get_op("i" + name)))
 
 
-# ------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
 # Add module functions from NDMath
-# ------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
 # make some NDMath operation accessible from the spectrochempy API
 def _update_api_funclist(obj):
     # Automatically create a list of all math function to be published as API functions
@@ -3287,6 +3386,6 @@ for funcname in api_funcs:
     setattr(thismodule, funcname, getattr(NDMath, funcname))
     thismodule.__all__.append(funcname)
 
-# ======================================================================================================================
+# ======================================================================================
 if __name__ == "__main__":
     pass

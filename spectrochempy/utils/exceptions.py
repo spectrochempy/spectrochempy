@@ -4,45 +4,147 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-
-import functools
-import warnings
+"""
+SpectroChemPy specific exceptions
+"""
 from contextlib import contextmanager
+from warnings import warn
 
+import pint
 import pytz
 
-__all__ = [
-    "SpectroChemPyWarning",
-    "SpectroChemPyError",
-    "UnitsCompatibilityError",
-    "UnknownTimeZoneError",
-    "DimensionsCompatibilityError",
-    "CoordinateMismatchError",
-    "ProtocolError",
-    "deprecated",
-    "ignored",
-]
 
-
-# ==============================================================================
-# Exception and Warning Subclass
-# ==============================================================================
-
-# ------------------------------------------------------------------------------
-class SpectroChemPyWarning(Warning):
+# ======================================================================================
+# Warning subclasses
+# ======================================================================================
+class KeyErrorWarning(UserWarning):
     """
-    The base warning class for SpectroChemPy warnings.
+    Warning raised when an issue arise regarding units
     """
 
 
-# ------------------------------------------------------------------------------
+class UnitErrorWarning(UserWarning):
+    """
+    Warning raised when an issue arise regarding units
+    """
+
+
+class LabelErrorWarning(UserWarning):
+    """
+    Warning raised when an issue arise regarding labels
+    """
+
+
+class ValueErrorWarning(UserWarning):
+    """
+    Warning raised when an issue arise arguments or attributes
+    """
+
+
+class NeedsUpdateWarning(UserWarning):
+    """
+    Warning raised when an issue arise arguments or attributes
+    """
+
+
+# ======================================================================================
+# Exception Subclasses
+# ======================================================================================
 class SpectroChemPyError(Exception):
     """
-    The base exception class for SpectroChemPy exceptions.
+    The base exception class for SpectroChemPy.
+    """
+
+    def __init__(self, message):
+        self.message = message
+
+        super().__init__(message)
+
+
+class CastingError(SpectroChemPyError):
+    """
+    Exception raised when an array cannot be cast to the required data type
+    """
+
+    def __init__(self, dtype, message):
+        message = f" Assigned value has type {dtype} but {message}"
+        super().__init__(message)
+
+
+class InvalidNameError(SpectroChemPyError):
+    """
+    Exception when a object name is not valid
     """
 
 
-# ------------------------------------------------------------------------------
+class ShapeError(SpectroChemPyError):
+    """
+    Exception raised when an array cannot be set due to a wrong shape.
+    """
+
+    def __init__(self, shape, message):
+        message = f" Assigned value has shape {shape} but {message}"
+        super().__init__(message)
+
+
+# Analysis method errors
+class NotFittedError(SpectroChemPyError):
+    """
+    Exception raised when an analysis estimtor is not fitted before use.
+    """
+
+
+class MissingDataError(SpectroChemPyError):
+    """
+    Exception raised when no data is present in an object.
+    """
+
+
+class NDDatasetAttributeError(SpectroChemPyError):
+    """
+    Exception raised when a dataset attribute was not found.
+    """
+
+    def __init__(self, attr):
+        message = f" NDDataset attribute `{attr}` was not found."
+        super().__init__(message)
+
+
+class CoordinatesAttributeError(SpectroChemPyError):
+    """
+    Exception raised when a dataset attribute was not found.
+    """
+
+    def __init__(self, attr):
+        message = f" Coord attribute `{attr}` was not found."
+        super().__init__(message)
+
+
+class MissingCoordinatesError(SpectroChemPyError):
+    """
+    Exception raised when no coordinates in present in an object.
+    """
+
+
+class LabelsError(SpectroChemPyError):
+    """
+    Exception raised when an array cannot be labeled.
+
+    For instance, if the array is multidimensional.
+    """
+
+
+class NotHyperComplexArrayError(SpectroChemPyError):
+    """Returned when a hypercomplex related method is applied to a not hypercomplex
+    array"""
+
+
+class UnknownTimeZoneError(pytz.UnknownTimeZoneError):
+    """
+    Exception raised when Timezone code is not recognized.
+    """
+
+
 class UnitsCompatibilityError(SpectroChemPyError):
     """
     Exception raised when units are not compatible,
@@ -50,7 +152,34 @@ class UnitsCompatibilityError(SpectroChemPyError):
     """
 
 
-# ------------------------------------------------------------------------------
+class InvalidUnitsError(SpectroChemPyError):
+    """
+    Exception raised when units is not valid.
+    """
+
+
+class InvalidReferenceError(SpectroChemPyError):
+    """
+    Exception raised when a reference to another coordinate is not valid
+    """
+
+
+class DimensionalityError(pint.DimensionalityError):
+    """
+    Exception raised when units have a dimensionality problem.
+    """
+
+
+class CoordinatesMismatchError(SpectroChemPyError):
+    """
+    Exception raised when object coordinates differ.
+    """
+
+    def __init__(self, obj1, obj2, extra_msg=""):
+        self.message = f"Coordinates [{obj1}] and [{obj2}] mismatch. {extra_msg}"
+        super().__init__(self.message)
+
+
 class DimensionsCompatibilityError(SpectroChemPyError):
     """
     Exception raised when dimensions are not compatible
@@ -58,10 +187,54 @@ class DimensionsCompatibilityError(SpectroChemPyError):
     """
 
 
-# ------------------------------------------------------------------------------
-class CoordinateMismatchError(SpectroChemPyError):
+class IncompatibleShapeError(SpectroChemPyError):
     """
-    Exception raised when object coordinates differ.
+    Exception raised when shapes of the elements are incompatibles for math operations.
+    """
+
+    def __init__(self, obj1, obj2, extra_msg=""):
+        self.message = f"Shapes of [{obj1}] and [{obj2}] mismatch. {extra_msg}"
+        super().__init__(self.message)
+
+
+class NonWritableCoordSetError(SpectroChemPyError):
+    """
+    Exception raised when the CoordSEt is readonly,
+    but an attempt to write it has been done.
+    """
+
+
+class InvalidDimensionNameError(SpectroChemPyError):
+    """
+    Exception raised when dimension name are invalid.
+    """
+
+    from spectrochempy.utils.constants import DEFAULT_DIM_NAME
+
+    def __init__(self, name, available_names=DEFAULT_DIM_NAME):
+        self.message = (
+            f"dim name must be one of {tuple(available_names)} "
+            f"with an optional subdir indication (e.g., 'x_2') but axis=`"
+            f"{name}` was given!"
+        )
+        super().__init__(self.message)
+
+
+class InvalidCoordinatesSizeError(SpectroChemPyError):
+    """
+    Exception raised when size of coordinates does not match what is expected.
+    """
+
+
+class InvalidCoordinatesTypeError(SpectroChemPyError):
+    """
+    Exception raised when coordinates type is invalid.
+    """
+
+
+class InvalidCoordSetSizeError(SpectroChemPyError):
+    """
+    Exception raised when size of coordset does not match what is expected.
     """
 
 
@@ -82,30 +255,58 @@ class ProtocolError(SpectroChemPyError):
 
         self.message = (
             f"IO - The `{protocol}` protocol is unknown or not yet implemented.\n"
+            f"It is expected to be one of {tuple(available_protocols)}"
         )
-        f"It is expected to be one of {tuple(available_protocols)}"
 
         super().__init__(self.message)
 
 
-# ------------------------------------------------------------------------------
-def deprecated(message):
+class WrongFileFormatError(SpectroChemPyError):
+    """ """
+
+
+# noinspection PyDeprecation
+def deprecated(name=None, *, kind="method", replace="", removed=None, extra_msg=""):
     """
     Deprecation decorator.
 
     Parameters
     ----------
-    message : str
-        The deprecation message.
+    name : str
+        If name is specified, kind is mandatory set to attribute
+        and the deprecated function is no more acting as a decorator.
+    kind : str
+        By default, it is method.
+    replace : str, optional, default:None
+        Name of the method that replace the deprecated one or None
+    extra_msg : str
+        Additional message.
+    removed : str, optional
+        Version string when this method will be removed
     """
 
+    def output_warning_message(name, kind, replace, removed, extra_msg):
+        sreplace = f"Use `{replace}` instead. " if replace is not None else ""
+        msg = f" The `{name}` {kind} is now deprecated. {sreplace}"
+        sremoved = f"version {removed}" if removed else "future version"
+        msg += f"`{name}` {kind} will be removed in {sremoved}. "
+        msg += extra_msg
+        warn(
+            msg,
+            category=DeprecationWarning,
+        )
+
+    if name is not None:
+        kind = "attribute"
+        output_warning_message(name, kind, replace, removed, extra_msg)
+        return
+
     def deprecation_decorator(func):
-        @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            warnings.warn(
-                "The function `{} is deprecated : {}".format(func.__name__, message),
-                DeprecationWarning,
-            )
+            name = func.__qualname__
+            if name.endswith("__init__"):
+                name = name.split(".", maxsplit=1)[0]
+            output_warning_message(name, kind, replace, removed, extra_msg)
             return func(*args, **kwargs)
 
         return wrapper
@@ -113,48 +314,34 @@ def deprecated(message):
     return deprecation_decorator
 
 
-try:
-    from contextlib import ignored
-except ImportError:
+@contextmanager
+def ignored(*exc):
+    """
+    A context manager for ignoring exceptions.
 
-    @contextmanager
-    def ignored(*exceptions):
-        """
-        A context manager for ignoring exceptions.
+    This is equivalent to::
 
-        This is equivalent to::
-
-            try :
-                <body>
-            except exceptions :
-                pass
-
-        Parameters
-        ----------
-        *exceptions : Exception
-            One or several exceptions to ignore.
-
-        Examples
-        --------
-
-        >>> import os
-        >>> from spectrochempy.utils import ignored
-        >>>
-        >>> with ignored(OSError):
-        ...     os.remove('file-that-does-not-exist')
-        """
-
-        try:
-            yield
-        except exceptions:
+        try :
+            <body>
+        except exc :
             pass
 
+    Parameters
+    ----------
+    *exc : Exception
+        One or several exceptions to ignore.
 
-class UnknownTimeZoneError(pytz.UnknownTimeZoneError):
+    Examples
+    --------
+
+    >>> import os
+    >>> from spectrochempy.utils.exceptions import ignored
+    >>>
+    >>> with ignored(OSError):
+    ...     os.remove('file-that-does-not-exist')
     """
-    Exception raised when Timezone code is not recognized.
-    """
 
-
-# ==============================================================================
-# EOF
+    try:
+        yield
+    except exc:
+        pass

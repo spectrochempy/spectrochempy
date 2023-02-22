@@ -12,6 +12,8 @@ Project creation
 In this example, we create a Project from scratch
 
 """
+# %%
+
 import spectrochempy as scp
 
 # %%

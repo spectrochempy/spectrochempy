@@ -22,7 +22,7 @@ def test_protocolerror():
 
 
 def test_deprecated():
-    @deprecated("This func is deprecated")
+    @deprecated(replace="something")
     def deprecated_function():
         pass
 
