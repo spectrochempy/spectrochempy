@@ -277,8 +277,7 @@ def plot_1D(dataset, method=None, **kwargs):
     """
 
     # Get preferences
-    # ------------------------------------------------------------------------
-
+    # ----------------------------------------------------------------------------------
     prefs = dataset.preferences
 
     # before going further, check if the style is passed in the parameters

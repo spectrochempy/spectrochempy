@@ -385,7 +385,6 @@ def cmyk2rgb(C, M, Y, K):
 
 # Constants
 # --------------------------------------------------------------------------------------
-
 # For color blind people, it is safe to use only 4 colors in graphs:
 # see http://jfly.iam.u-tokyo.ac.jp/color/ichihara_etal_2008.pdf
 #   Black CMYK=0,0,0,0

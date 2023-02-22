@@ -45,9 +45,9 @@ from spectrochempy.utils import colored_output, get_user_and_node
 from spectrochempy.utils.exceptions import SpectroChemPyError, UnknownTimeZoneError
 from spectrochempy.utils.optional import import_optional_dependency
 
-# ======================================================================================================================
+# ======================================================================================
 # NDDataset class definition
-# ======================================================================================================================
+# ======================================================================================
 
 
 class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
@@ -239,9 +239,8 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     _origin = Unicode()
 
     # ----------------------------------------------------------------------------------
-    # initialisation
+    # Initialisation
     # ----------------------------------------------------------------------------------
-
     def __init__(
         self, data=None, coordset=None, coordunits=None, coordtitles=None, **kwargs
     ):
@@ -308,7 +307,6 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     # ----------------------------------------------------------------------------------
     # Special methods
     # ----------------------------------------------------------------------------------
-
     def __dir__(self):
         # Only these attributes are used for saving dataset
         # WARNING: be careful to keep the present order of the three first elements! Needed for save/load operations
@@ -540,7 +538,6 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     # ----------------------------------------------------------------------------------
     # Private methods and properties
     # ----------------------------------------------------------------------------------
-
     @default("_coordset")
     def __coordset_default(self):
         return None
@@ -765,10 +762,9 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
                 _dict[dim] = {"size": self.shape[index], "coord": getattr(self, dim)}
         return _dict
 
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     # Public methods and property
-    # ------------------------------------------------------------------------
-
+    # ----------------------------------------------------------------------------------
     # @property
     # def acquisition_date(self):
     #     """
@@ -1543,7 +1539,6 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
 # ======================================================================================
 # module function
 # ======================================================================================
-
 # make some NDDataset operation accessible from the spectrochempy API
 thismodule = sys.modules[__name__]
 
@@ -1577,5 +1572,4 @@ for funcname in api_funcs:
 # ======================================================================================
 # Set the operators
 # ======================================================================================
-
 _set_operators(NDDataset, priority=100000)

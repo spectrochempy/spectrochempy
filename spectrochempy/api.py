@@ -25,7 +25,6 @@ from pathlib import Path
 # --------------------------------------------------------------------------------------
 # Check the environment for plotting
 # --------------------------------------------------------------------------------------
-
 # Do we run in IPython ?
 IN_IPYTHON = False
 KERNEL = None

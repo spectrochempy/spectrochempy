@@ -22,9 +22,9 @@ from spectrochempy.core.dataset.nddataset import Coord, NDDataset
 from spectrochempy.core.readers.importer import Importer, _importer_method
 
 
-# ======================================================================================================================
+# ======================================================================================
 # Public functions
-# ======================================================================================================================
+# ======================================================================================
 def read_quadera(*paths, **kwargs):
     """
     Read a Pfeiffer Vacuum's QUADERA® mass spectrometer software file with extension ``.asc``.
