@@ -595,19 +595,19 @@ class DecompositionAnalysisConfigurable(AnalysisConfigurable):
         X_transform = self.transform(X, **kwargs)
         return X_transform
 
-    @exceptions.deprecated("Use `transform` instead.")
+    @exceptions.deprecated(replace="transform")
     def reduce(self, X=None, **kwargs):
         return self.transform(X, **kwargs)
 
     reduce.__doc__ = transform.__doc__
 
-    @exceptions.deprecated("Use `inverse_transform` instead.")
+    @exceptions.deprecated(replace="inverse_transform")
     def reconstruct(self, X_transform=None, **kwargs):
         return self.inverse_transform(self, X_transform, **kwargs)
 
     reconstruct.__doc__ = inverse_transform.__doc__
 
-    @exceptions.deprecated("Use `fit_transform` instead.")
+    @exceptions.deprecated(replace="fit_transform")
     def fit_reduce(self, X, Y=None, **kwargs):
         return self.fit_transform(X, Y, **kwargs)
 
