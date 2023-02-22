@@ -4,7 +4,6 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-
 import numpy as np
 from numpy.ma.core import MaskedArray, MaskedConstant  # noqa: F401
 from numpy.ma.core import masked as MASKED  # noqa: F401

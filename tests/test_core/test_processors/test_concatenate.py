@@ -107,7 +107,7 @@ def test_concatenate(IR_dataset_2D):
     s01 = scp.concatenate(s0, s1)
     assert s01.data[-1, -1] == 0.001
 
-    # -------------------
+    # ----------------------------------------------------------------------------------
     # Stack
 
     # concatenation using stack

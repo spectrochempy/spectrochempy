@@ -54,7 +54,6 @@ from spectrochempy.utils.version import Version
 # ======================================================================================
 # Setup
 # ======================================================================================
-
 # --------------------------------------------------------------------------------------
 # set the default style
 # --------------------------------------------------------------------------------------
@@ -583,7 +582,6 @@ class GeneralPreferences(MetaConfigurable):
     # ----------------------------------------------------------------------------------
     # Configuration entries
     # ----------------------------------------------------------------------------------
-
     # NON GUI
     show_info_on_loading = tr.Bool(True, help="Display info on loading").tag(
         config=True
@@ -720,8 +718,6 @@ class GeneralPreferences(MetaConfigurable):
 # ======================================================================================
 # Application
 # ======================================================================================
-
-
 class SpectroChemPy(Application):
     """
     This class SpectroChemPy is the main class, containing most of the setup,
@@ -1037,7 +1033,6 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
     # ----------------------------------------------------------------------------------
     # Public methods and properties
     # ----------------------------------------------------------------------------------
-
     def start_show_config(self):
         """
         Start function used when show_config is True.
@@ -1316,7 +1311,6 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
 # ======================================================================================
 # Start instance od Spectrochempy and expose public members in all
 # ======================================================================================
-
 app = SpectroChemPy()
 preferences = app.preferences
 error_ = app.error_
@@ -1332,6 +1326,5 @@ config_dir = app.config_dir
 reset_preferences = app.reset_preferences
 
 # ======================================================================================
-
 if __name__ == "__main__":
     pass

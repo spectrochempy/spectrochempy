@@ -37,8 +37,6 @@ else:
 # --------------------------------------------------------------------------------------
 # Private functions
 # --------------------------------------------------------------------------------------
-
-
 class _QTFileDialogs:  # pragma: no cover
     @classmethod
     def _open_existing_directory(
@@ -261,7 +259,6 @@ class _TKFileDialogs:  # pragma: no cover
 # --------------------------------------------------------------------------------------
 # Public functions
 # --------------------------------------------------------------------------------------
-
 # noinspection PyRedundantParentheses
 def save_dialog(
     filename=None, caption="Save as...", filters=("All Files (*)"), **kwargs

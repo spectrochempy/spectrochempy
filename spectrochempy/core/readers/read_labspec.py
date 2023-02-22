@@ -20,9 +20,9 @@ from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.readers.importer import Importer, _importer_method
 
 
-# ======================================================================================================================
+# ======================================================================================
 # Public functions
-# ======================================================================================================================
+# ======================================================================================
 def read_labspec(*paths, **kwargs):
     """
     Read a single Raman spectrum or a series of Raman spectra.
