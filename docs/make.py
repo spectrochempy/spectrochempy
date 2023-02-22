@@ -504,8 +504,8 @@ class Apigen:
 
             if (
                 (alls is not None and _name not in alls)
-                or not str(_type).startswith("<")
                 or str(_name).startswith("_")
+                or not str(_type).startswith("<")
                 or "HasTraits" in str(_type)
                 or "cross_validation_lock" in str(_name)
                 or not (
