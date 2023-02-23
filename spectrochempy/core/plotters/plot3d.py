@@ -41,11 +41,10 @@ x_reverse : `bool` or None [optional, default=None
 y_reverse : `bool` or None [optional, default=None
 """
 
+
 # ======================================================================================
 # nddataset plot3D functions
 # ======================================================================================
-
-
 @plot_method("2D", _PLOT3D_DOC)
 def plot_surface(dataset, **kwargs):
     """

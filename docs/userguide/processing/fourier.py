@@ -30,7 +30,6 @@
 #       version_major: 2
 #       version_minor: 0
 # ---
-
 # %% [markdown]
 # # One-dimensional (1D) Fourier transformation
 

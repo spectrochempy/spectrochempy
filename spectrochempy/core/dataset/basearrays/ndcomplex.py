@@ -29,11 +29,10 @@ from spectrochempy.utils import (
     typequaternion,
 )
 
+
 # ======================================================================================
 # NDComplexArray
 # ======================================================================================
-
-
 class NDComplexArray(NDArray):
     _interleaved = Bool(False)
 

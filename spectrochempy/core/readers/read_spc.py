@@ -22,11 +22,10 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.importer import Importer, _importer_method
 from spectrochempy.core.units import Quantity
 
+
 # ======================================================================================
 # Public function
 # ======================================================================================
-
-
 def read_spc(*paths, **kwargs):
     """
     Open a Thermo Nicolet file or a list of files with extension ``.spg``.
@@ -116,8 +115,6 @@ def read_spc(*paths, **kwargs):
 # ======================================================================================
 # Private functions
 # ======================================================================================
-
-
 @_importer_method
 def _read_spc(*args, **kwargs):
     dataset, filename = args

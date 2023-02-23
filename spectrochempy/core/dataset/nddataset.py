@@ -45,11 +45,10 @@ from spectrochempy.utils import colored_output, get_user_and_node
 from spectrochempy.utils.exceptions import SpectroChemPyError, UnknownTimeZoneError
 from spectrochempy.utils.optional import import_optional_dependency
 
+
 # ======================================================================================
 # NDDataset class definition
 # ======================================================================================
-
-
 class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     """
     The main N-dimensional dataset class used by |scpy|.

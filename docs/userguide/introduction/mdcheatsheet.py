@@ -27,7 +27,6 @@
 #   nbsphinx:
 #     orphan: true
 # ---
-
 # %% [markdown]
 # # Markdown Cheat Sheet
 

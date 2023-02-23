@@ -100,7 +100,7 @@ def test_models():
         array = model.f(x3, **kwargs)
         actual = array[pos].value
         if modelname != "sigmoid":
-            actual = actual * 100
+            actual *= 100
         assert_approx_equal(actual.m, expected, 4)
         # array.plot(title=modelname)
         # plt.show()

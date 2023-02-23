@@ -117,7 +117,6 @@ def concatenate(*datasets, **kwargs):
 
     # concatenate or stack the data array + mask
     # --------------------------------------------
-
     sss = []
     for i, dataset in enumerate(datasets):
         d = dataset.masked_data
@@ -245,8 +244,6 @@ def stack(*datasets):
 
 # utility functions
 # --------------------
-
-
 def _get_copy(datasets):
     # get a copy of datasets from the input
     if isinstance(datasets, tuple):

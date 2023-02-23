@@ -8,11 +8,10 @@ import numpy as np
 
 __all__ = ["generate_fake"]
 
+
 # --------------------------------------------------------------------------------------
 # Create fake data to be used by analysis routine for testing
 # --------------------------------------------------------------------------------------
-
-
 def _make_spectra_matrix(modelname, ampl, pos, width, ratio=None, asym=None):
     from spectrochempy.analysis import models
     from spectrochempy.core.dataset.coord import Coord
@@ -61,7 +60,7 @@ def generate_fake():
     """
 
     # define properties of the spectra and concentration profiles
-    # ----------------------------------------------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     from spectrochempy.analysis import models
     from spectrochempy.core.dataset.arraymixins.npy import dot
 

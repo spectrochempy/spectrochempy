@@ -14,10 +14,9 @@ from numpy.testing import assert_allclose
 from spectrochempy.analysis.svd import SVD
 from spectrochempy.utils import MASKED
 
+
 # test svd
 # -----------
-
-
 def test_svd(IR_dataset_2D):
     dataset = IR_dataset_2D
 

@@ -10,7 +10,7 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.14.4
 #   kernelspec:
-#     display_name: Python 3
+#     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
 #   language_info:
@@ -22,14 +22,13 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.9.1
+#     version: 3.10.8
 #   widgets:
 #     application/vnd.jupyter.widget-state+json:
 #       state: {}
 #       version_major: 2
 #       version_minor: 0
 # ---
-
 # %% [markdown] {"slideshow": {"slide_type": "slide"}}
 # # Introduction
 #

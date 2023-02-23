@@ -9,11 +9,20 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.14.4
 #   kernelspec:
-#     display_name: Python 3
+#     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
+#   language_info:
+#     codemirror_mode:
+#       name: ipython
+#       version: 3
+#     file_extension: .py
+#     mimetype: text/x-python
+#     name: python
+#     nbconvert_exporter: python
+#     pygments_lexer: ipython3
+#     version: 3.10.8
 # ---
-
 # %% [markdown]
 # # MCR ALS
 
@@ -28,7 +37,7 @@ import spectrochempy as scp
 # mixture (or a set of mixtures) into the spectra $S^t$ of 'pure'
 # species and their concentration profiles $C$. In terms of matrix equation:
 #
-# $$ X = C S^t + E $$
+# $$ X = C.S^t + E $$
 #
 # The ALS algorithm allows applying soft or hard constraints (e.g., non negativity,
 # unimodality, equality to a given profile) to the spectra or concentration profiles

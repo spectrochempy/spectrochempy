@@ -108,8 +108,6 @@ read_txt = read_labspec
 # ======================================================================================
 # Private functions
 # ======================================================================================
-
-
 @_importer_method
 def _read_txt(*args, **kwargs):
     # read Labspec *txt files or series

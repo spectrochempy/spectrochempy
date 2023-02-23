@@ -16,8 +16,6 @@ prefs = preferences
 
 # Basic
 # --------------------------------------------------------------------------------------
-
-
 def test_project(ds1, ds2, dsm):
     myp = Project(name="AGIR processing", method="stack")
 

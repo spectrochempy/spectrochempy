@@ -7,8 +7,8 @@
 from pathlib import Path
 
 import numpy as np
+import traitlets as tr
 from matplotlib import cycler
-from traitlets import All, List, TraitError, Undefined, observe
 from traitlets.config.configurable import Configurable
 from traitlets.config.loader import LazyConfigValue
 
@@ -55,7 +55,7 @@ class MetaConfigurable(Configurable):
             defaults.update(config)
         return defaults
 
-    @observe(All)
+    @tr.observe(tr.All)
     def _anytrait_changed(self, change):
         # update configuration after any change
 
@@ -89,9 +89,7 @@ class MetaConfigurable(Configurable):
 # ======================================================================================
 # Range trait type
 # ======================================================================================
-
-
-class Range(List):
+class Range(tr.List):
     """
     The trait-type Range.
 
@@ -99,33 +97,20 @@ class Range(List):
 
     Parameters
     ----------
-    trait : TraitType [ optional ]
-        The type for restricting the contents of the Container.
-        If unspecified, types are not checked.
     default_value : SequenceType [ optional ]
         The default value for the Trait.  Must be list/tuple/set, and
         will be cast to the container type.
     """
 
-    klass = list
-    _cast_types = (tuple,)
-
     # Describe the trait type
     info_text = "An ordered interval trait."
-    allow_none = True
-
-    def __init__(self, trait=Undefined, default_value=Undefined, **kwargs):
-
-        super(Range, self).__init__(
-            trait=Undefined, default_value=default_value, **kwargs
-        )
 
     def length_error(self, obj, value):
         e = (
             "The '%s' trait of '%s' instance must be of length 2 exactly,"
             " but a value of %s was specified." % (self.name, type(obj), value)
         )
-        raise TraitError(e)
+        raise tr.TraitError(e)
 
     def validate_elements(self, obj, value):
         if value is None or len(value) == 0:
@@ -134,12 +119,12 @@ class Range(List):
         if length != 2:
             self.length_error(obj, value)
         value.sort()
-        value = super(Range, self).validate_elements(obj, value)
+        value = super().validate_elements(obj, value)
         return value
 
     def validate(self, obj, value):
 
-        value = super(Range, self).validate(object, value)
+        value = super().validate(object, value)
         value = self.validate_elements(obj, value)
 
         return value
@@ -147,5 +132,4 @@ class Range(List):
 
 # ======================================================================================
 if __name__ == "__main__":
-
     pass

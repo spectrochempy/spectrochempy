@@ -424,7 +424,10 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
                             this.mask,
                             f"{this} and {other} masks are different.",
                         )
-                if attr in ["data", "mask"]:
+                if attr in ["data"]:
+                    # we must compare masked array
+                    sattr = this.masked_data
+                    oattr = other.masked_data
                     if approx:
                         assert_array_compare(
                             compare,
@@ -563,11 +566,9 @@ def assert_script_equal(sc1, sc2, **kwargs):
         raise AssertionError(f"Scripts are different: {sc1.content} != {sc2.content}")
 
 
-# ======================================================================================================================
+# ======================================================================================
 # RandomSeedContext
-# ======================================================================================================================
-
-
+# ======================================================================================
 class RandomSeedContext(object):
     """
     A context manager (for use with the ``with`` statement) that will seed the
@@ -607,11 +608,9 @@ class RandomSeedContext(object):
         random.set_state(self.startstate)
 
 
-# ======================================================================================================================
+# ======================================================================================
 # raises and assertions (mostly copied from astropy)
-# ======================================================================================================================
-
-
+# ======================================================================================
 def assert_equal_units(unit1, unit2, strict=False):
     """
     Compare units.

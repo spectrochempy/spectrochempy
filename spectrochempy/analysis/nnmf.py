@@ -150,12 +150,12 @@ class NNMF(HasTraits):
             gradW = gradW.T
 
             if iterW == 1:
-                tolW = 0.1 * tolW
+                tolW *= 0.1
 
             (H, gradH, iterH) = self.nlssubprob(V, W, H, tolH, 1000)
 
             if iterH == 1:
-                tolH = 0.1 * tolH
+                tolH *= 0.1
 
             if myiter % 10 == 0:
                 stdout.write(".")
@@ -213,12 +213,12 @@ class NNMF(HasTraits):
                 if suff_decr:
                     H = Hn
                     break
-                alpha = alpha * beta
+                alpha *= beta
             else:
                 if not suff_decr or (Hp == Hn).all():
                     H = Hp
                     break
-                alpha = alpha / beta
+                alpha /= beta
                 Hp = Hn
 
         if n_iter == maxiter:

@@ -505,8 +505,6 @@ def read_srs(*paths, **kwargs):
 # ======================================================================================
 # Private functions
 # ======================================================================================
-
-
 @_importer_method
 def _read_spg(*args, **kwargs):
     # read spg file
@@ -562,7 +560,7 @@ def _read_spg(*args, **kwargs):
     for i in range(nlines):
         fid.seek(pos)
         keys[i] = _fromfile(fid, dtype="uint8", count=1)
-        pos = pos + 16
+        pos += 16
 
     # the number of occurrences of the key '02' is number of spectra
     nspec = np.count_nonzero((keys == 2))
@@ -1160,9 +1158,9 @@ def _fromfile(fid, dtype, count):
     }
     typ = t[dtype] * count
     if dtype.endswith("16"):
-        count = count * 2
+        count *= 2
     elif dtype.endswith("32"):
-        count = count * 4
+        count *= 4
 
     out = struct.unpack(typ, fid.read(count))
     if len(out) == 1:

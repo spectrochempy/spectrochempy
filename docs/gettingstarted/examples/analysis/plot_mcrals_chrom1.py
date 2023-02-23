@@ -23,7 +23,7 @@ For the user convenience, this dataset is present in the `datadir` of SpectroChe
 
 """
 # %%
-
+# Import the spectrochempy API package
 import spectrochempy as scp
 
 # %%

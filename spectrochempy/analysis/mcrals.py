@@ -247,8 +247,7 @@ class MCRALS(HasTraits):
             set_loglevel(INFO)
 
         # Check initial data
-        # ------------------------------------------------------------------------
-
+        # ------------------------------------------------------------------------------
         initConc, initSpec = False, False
 
         if type(guess) is np.ndarray:
@@ -278,7 +277,6 @@ class MCRALS(HasTraits):
 
         # reset default text to indexes
         # ------------------------------
-
         if nonnegConc == "all":
             nonnegConc = np.arange(nspecies)
         elif nonnegConc is None:
@@ -340,8 +338,7 @@ class MCRALS(HasTraits):
             )
 
         # Compute initial spectra or concentrations   (first iteration...)
-        # ------------------------------------------------------------------------
-
+        # ------------------------------------------------------------------------------
         if initConc:
             if C.coordset is None:
                 C.set_coordset(y=X.y, x=C.x)

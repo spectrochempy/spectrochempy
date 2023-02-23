@@ -13,7 +13,6 @@
 #     language: python
 #     name: python3
 # ---
-
 # %% [markdown]
 # # Peak integration
 #

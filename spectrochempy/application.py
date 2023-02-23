@@ -482,11 +482,9 @@ class SpectroChemPyMagics(Magics):
         # name')  #  #  # return args
 
 
-# ======================================================================================================================
+# ======================================================================================
 # DataDir class
-# ======================================================================================================================
-
-
+# ======================================================================================
 class DataDir(tr.HasTraits):
     """
     A class used to determine the path to the testdata directory.
@@ -563,11 +561,9 @@ class DataDir(tr.HasTraits):
         return self.listing().replace("\n", "<br/>").replace(" ", "&nbsp;")
 
 
-# ======================================================================================================================
+# ======================================================================================
 # General Preferences
-# ======================================================================================================================
-
-
+# ======================================================================================
 class GeneralPreferences(MetaConfigurable):
     """
     Preferences that apply to the |scpy| application in general.
@@ -764,12 +760,10 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
 
         return desc
 
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     # Configuration parameters
-    # ------------------------------------------------------------------------
-
+    # ----------------------------------------------------------------------------------
     # Config file setting
-    # ------------------------------------------------------------------------
     _loaded_config_files = tr.List()
 
     reset_config = tr.Bool(
@@ -878,8 +872,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
     ).tag(config=True)
 
     # Command line interface
-    # ------------------------------------------------------------------------
-
+    # ----------------------------------------------------------------------------------
     aliases = dict(
         test="SpectroChemPy.test",
         project="SpectroChemPy.last_project",
@@ -988,7 +981,6 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
 
         # Get preferences from the config files
         # ---------------------------------------------------------------------
-
         if not self.config:
             self.config = Config()
 
@@ -1084,7 +1076,6 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
 
         # parse the argv
         # --------------------------------------------------------------------
-
         # if we are running this under ipython and jupyter notebooks
         # deactivate potential command line arguments
         # (such that those from jupyter which cause problems here)
@@ -1115,7 +1106,6 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
 
         # Get preferences from the config file and init everything
         # ---------------------------------------------------------------------
-
         self._init_all_preferences()
 
         # we catch warnings and error for a lighter display to the end-user.
@@ -1153,10 +1143,9 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
         self._init_all_preferences()
         self.reset_config = False
 
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     # start the application
-    # ------------------------------------------------------------------------
-
+    # ----------------------------------------------------------------------------------
     def start(self):
         """
         Start the |scpy| API.
@@ -1273,10 +1262,9 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
         )
         self.log.handlers[1].setFormatter(formatter)
 
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     # Private methods
-    # ------------------------------------------------------------------------
-
+    # ----------------------------------------------------------------------------------
     def _make_default_config_file(self):
         """auto generate default config file."""
 

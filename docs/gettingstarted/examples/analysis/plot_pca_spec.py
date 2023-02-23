@@ -12,9 +12,8 @@ In this example, we perform the PCA dimensionality reduction of a spectra
 dataset
 
 """
-
 # %%
-
+# Import the spectrochempy API package
 import spectrochempy as scp
 
 # %%

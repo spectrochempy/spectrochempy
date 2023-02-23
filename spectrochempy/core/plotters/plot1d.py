@@ -242,8 +242,6 @@ def plot_multiple(datasets, method="scatter", pen=True, labels=None, **kwargs):
 # --------------------------------------------------------------------------------------
 # plot_1D
 # --------------------------------------------------------------------------------------
-
-
 @add_docstring(_PLOT1D_DOC)
 def plot_1D(dataset, method=None, **kwargs):
     """
@@ -290,7 +288,6 @@ def plot_1D(dataset, method=None, **kwargs):
 
     # Redirections ?
     # ------------------------------------------------------------------------
-
     # should we redirect the plotting to another method
     if dataset._squeeze_ndim > 1:
         return dataset.plot_2D(**kwargs)
@@ -305,7 +302,6 @@ def plot_1D(dataset, method=None, **kwargs):
 
     # Get the data to plot
     # ---------------------------------------------------------------
-
     new = dataset  # .copy()
     if new.size > 1:
         # don't apply to array of size one to preserve the x coordinate!!!!
@@ -341,7 +337,6 @@ def plot_1D(dataset, method=None, **kwargs):
 
     # Other ax properties that can be passed as arguments
     # ------------------------------------------------------------------------
-
     number_x_labels = prefs.number_of_x_labels
     number_y_labels = prefs.number_of_y_labels
     ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
@@ -364,10 +359,9 @@ def plot_1D(dataset, method=None, **kwargs):
 
     ax.grid(prefs.axes_grid)
 
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     # plot the dataset
-    # ------------------------------------------------------------------------
-
+    # ----------------------------------------------------------------------------------
     # abscissa axis
     # the actual dimension name is the first in the new.dims list
     dimx = new.dims[-1]
@@ -480,10 +474,9 @@ def plot_1D(dataset, method=None, **kwargs):
         # set the line style if defined in the preferences or options
         line.set_marker(marker)
 
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     # axis
-    # ------------------------------------------------------------------------
-
+    # ----------------------------------------------------------------------------------
     data_only = kwargs.get("data_only", False)
 
     if len(xdata) > 1:
@@ -550,7 +543,6 @@ def plot_1D(dataset, method=None, **kwargs):
     # ------------------------------------------------------------------------
     # labels
     # ------------------------------------------------------------------------
-
     # x label
 
     xlabel = kwargs.get("xlabel", None)
