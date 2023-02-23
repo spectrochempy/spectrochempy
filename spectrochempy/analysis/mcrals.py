@@ -24,7 +24,6 @@ from spectrochempy.analysis._analysisutils import (
 )
 from spectrochempy.analysis.abstractanalysis import DecompositionAnalysisConfigurable
 from spectrochempy.core import info_
-from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import exceptions
 
 # Developper notes
@@ -413,7 +412,7 @@ profile #j,
         info_(f"Spectra profile initialized with {n_components} components")
         # compute initial concentration
         Ctdata = np.linalg.lstsq(Stdata.T, Xdata.T, rcond=None)[0]
-        Cdata = NDDataset(Ctdata.T)
+        Cdata = Ctdata.T
         info_("Concentration profile computed")
         # if everything went well here, C and St are set, we return
         # after having removed the eventual St mask!
