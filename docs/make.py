@@ -525,7 +525,6 @@ class Apigen:
                     "core",
                     "analysis",
                     "utils",
-                    "databases",
                     "widgets",
                 ]:
 

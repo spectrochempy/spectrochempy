@@ -47,7 +47,8 @@ from traitlets.config.manager import BaseJSONConfigManager
 
 from spectrochempy.plot_preferences import PlotPreferences
 from spectrochempy.utils.file import pathclean
-from spectrochempy.utils.packages import get_pkg_path
+
+# from spectrochempy.utils.packages import get_pkg_path
 from spectrochempy.utils.traits import MetaConfigurable
 from spectrochempy.utils.version import Version
 
@@ -589,10 +590,10 @@ class GeneralPreferences(MetaConfigurable):
     ).tag(config=True)
 
     # GUI
-    databases_directory = tr.Union(
-        (tr.Instance(Path), tr.Unicode()),
-        help="Directory where to look for database files such as csv",
-    ).tag(config=True, gui=True, kind="folder")
+    # databases_directory = tr.Union(
+    #     (tr.Instance(Path), tr.Unicode()),
+    #     help="Directory where to look for database files such as csv",
+    # ).tag(config=True, gui=True, kind="folder")
 
     datadir = tr.Union(
         (tr.Instance(Path), tr.Unicode()),
@@ -664,10 +665,10 @@ class GeneralPreferences(MetaConfigurable):
         # the spectra path in package data
         return Path.home()
 
-    @tr.default("databases_directory")
-    def _get_databases_directory_default(self):
-        # the spectra path in package data
-        return pathclean(get_pkg_path("databases", "scp_data"))
+    # @tr.default("databases_directory")
+    # def _get_databases_directory_default(self):
+    #     # the spectra path in package data
+    #     return pathclean(get_pkg_path("databases", "scp_data"))
 
     @tr.default("datadir")
     def _get_default_datadir(self):
