@@ -85,7 +85,7 @@ class AnalysisConfigurable(MetaConfigurable):
         configkw.update(kwargs)
 
         for k, v in configkw.items():
-            if k in defaults.keys():
+            if k in defaults:
                 setattr(self, k, v)
             else:
                 raise KeyError(
@@ -298,7 +298,7 @@ class AnalysisConfigurable(MetaConfigurable):
         # _X_preprocessed has been computed when X was set, as well as _Y_preprocessed.
         # At this stage they should be simple ndarrays
         newX = self._X_preprocessed
-        newY = self._Y_preprocessed if hasattr(self, "_Y_preprocessed") else None
+        newY = self._Y_preprocessed if Y is not None else None
 
         # call to the actual _fit method (overloaded in the subclass)
         # warning : _fit must take ndarray arguments not NDDataset arguments.
@@ -679,7 +679,7 @@ class DecompositionAnalysisConfigurable(AnalysisConfigurable):
         res = X - X_hat
         ax = X.plot()
         ma = max(X.max(), X_hat.max())
-        if X.x is not None:
+        if X.x.data is not None:
             ax.plot(X.x.data, X_hat.T.masked_data - ma, color=colXhat)
             ax.plot(X.x.data, res.T.masked_data - 1.2 * ma, color=colRes)
         else:
