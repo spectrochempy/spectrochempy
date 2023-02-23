@@ -26,6 +26,7 @@ requests
 scipy
 tqdm
 traitlets
+traittypes
 scikit-learn
 xlrd
 pyyaml
@@ -60,5 +61,4 @@ jupyter_sphinx
 json5
 sphinx-copybutton
 pandoc
-traittypes@git+https://github.com/spectrochempy/traittypes.git
 autodoc_traits
