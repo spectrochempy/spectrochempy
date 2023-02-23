@@ -29,13 +29,13 @@ __configurables__ = ["PCA"]
 # ======================================================================================
 # class PCA
 # ======================================================================================
-
 class PCA(DecompositionAnalysisConfigurable):
     """
     PCA analysis is here done using the sklearn PCA model.
 
     We just implement fit, transform, inverse_transform and fit_transform
     """
+
     name = tr.Unicode("PCA")
     description = tr.Unicode("Scikit-learn PCA model")
 

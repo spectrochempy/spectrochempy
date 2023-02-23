@@ -19,7 +19,6 @@ import traitlets as tr
 from spectrochempy.analysis.abstractanalysis import DecompositionAnalysisConfigurable
 from spectrochempy.core import info_
 from spectrochempy.utils import exceptions
-from spectrochempy.utils.traits import NDDatasetType
 
 
 # ======================================================================================
@@ -59,6 +58,7 @@ class SIMPLISMA(DecompositionAnalysisConfigurable):
           |NDDataset|.
     MCRALS : Perform MCR-ALS of a dataset knowing the initial C or St matrix.
     """
+
     # TODO : adapt to 3DDataset ?
 
     name = tr.Unicode("SIMPLISMA")

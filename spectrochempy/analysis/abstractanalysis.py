@@ -23,7 +23,7 @@ from spectrochempy.core import app, set_loglevel
 from spectrochempy.core.common.meta import Meta
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import MASKED, NOMASK, exceptions
-from spectrochempy.utils.traits import MetaConfigurable
+from spectrochempy.utils.traits import MetaConfigurable, NDDatasetType
 
 
 class AnalysisConfigurable(MetaConfigurable):
@@ -44,7 +44,7 @@ class AnalysisConfigurable(MetaConfigurable):
     _fitted = tr.Bool(False, help="False if the model was not yet fitted")
     _masked_rc = tr.Tuple(allow_none=True, help="List of masked rows and columns")
 
-    _X = tr.Instance(NDDataset, allow_none=True, help="Data to fit a model")
+    _X = NDDatasetType(allow_none=True, help="Data to fit a model")
     _X_mask = Array(allow_none=True, help="mask information of the " "input data")
     _X_preprocessed = Array(help="preprocessed inital X input data")
     _shape = tr.Tuple(help="original shape of the data, before any transformation")
@@ -376,8 +376,8 @@ class DecompositionAnalysisConfigurable(AnalysisConfigurable):
     # ----------------------------------------------------------------------------------
     _Y = tr.Union(
         (
-            tr.Tuple(tr.Instance(NDDataset), tr.Instance(NDDataset)),
-            tr.Instance((NDDataset)),
+            tr.Tuple(NDDatasetType(), NDDatasetType()),
+            NDDatasetType(),
         ),
         default_value=None,
         allow_none=True,
