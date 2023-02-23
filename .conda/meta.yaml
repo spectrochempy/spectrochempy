@@ -53,6 +53,7 @@ requirements:
     - scipy
     - tqdm
     - traitlets
+    - traittypes
     - scikit-learn
     - xlrd
     - pyyaml
@@ -71,9 +72,6 @@ requirements:
     - nodejs
 
 
-    - pip
-    - pip:
-        - traittypes@git+https://github.com/spectrochempy/traittypes.git
 #EOF
 
 
