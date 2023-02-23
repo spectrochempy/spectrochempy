@@ -454,7 +454,14 @@ for reproducible results across multiple function calls.""",
         return ax1, ax2
 
     def scoreplot(
-        self, scores, *pcs, colormap="viridis", color_mapping="index", **kwargs
+        self,
+        scores,
+        *pcs,
+        colormap="viridis",
+        color_mapping="index",
+        show_labels=False,
+        labels_column=0,
+        **kwargs,
     ):
         """
         2D or 3D scoreplot of observations.
@@ -469,8 +476,13 @@ for reproducible results across multiple function calls.""",
             A matplotlib colormap.
         color_mapping : 'index' or 'labels'
             If 'index', then the colors of each n_scores is mapped sequentially
-            on the colormap. If labels, the labels of the n_observation are
+            on the colormap. If labels, the labels of the n_observations are
             used for color mapping.
+        show_labels : bool, optional, default: False
+            If True each observation will be annotated with its label.
+        labels_column : int, optional, default:0
+            If several columns of labels are present indicates which column has to be
+            used to show labels.
         """
         self.prefs = self.X.preferences
 
@@ -488,16 +500,19 @@ for reproducible results across multiple function calls.""",
 
         # colors
         if color_mapping == "index":
-
             if np.any(scores.y.data):
                 colors = scores.y.data
             else:
                 colors = np.array(range(scores.shape[0]))
 
         elif color_mapping == "labels":
-
             labels = list(set(scores.y.labels))
             colors = [labels.index(lab) for lab in scores.y.labels]
+
+        # labels
+        labels = None
+        if show_labels:
+            labels = scores.y.labels[:, labels_column]
 
         if len(pcs) == 2:
             # bidimensional score plot
@@ -512,13 +527,19 @@ for reproducible results across multiple function calls.""",
             ax.set_ylabel(
                 "PC# {} ({:.3f}%)".format(pcs[1] + 1, self.ev_ratio.data[pcs[1]])
             )
-            axsc = ax.scatter(
-                scores.masked_data[:, pcs[0]],
-                scores.masked_data[:, pcs[1]],
-                s=30,
-                c=colors,
-                cmap=colormap,
-            )
+            x = scores.masked_data[:, pcs[0]]
+            y = scores.masked_data[:, pcs[1]]
+            axsc = ax.scatter(x, y, s=30, c=colors, cmap=colormap)
+
+            if labels is not None:
+                for idx, lab in enumerate(labels):
+                    ax.annotate(
+                        lab,
+                        xy=(x[idx], y[idx]),
+                        xytext=(-10, 10),
+                        textcoords="offset pixels",
+                        color=axsc.to_rgba(colors[idx]),
+                    )
 
             number_x_labels = self.prefs.number_of_x_labels  # get from config
             number_y_labels = self.prefs.number_of_y_labels
