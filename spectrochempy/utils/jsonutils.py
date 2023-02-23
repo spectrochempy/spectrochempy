@@ -73,12 +73,12 @@ def json_serialiser(byte_obj, encoding=None):
     if byte_obj is None:
         return None
 
-    elif hasattr(byte_obj, "implements"):
+    elif hasattr(byte_obj, "_implements"):
 
         objnames = byte_obj.__dir__()
 
         # particular case of Linear Coordinates
-        if byte_obj.implements("LinearCoord"):
+        if byte_obj._implements("LinearCoord"):
             objnames.remove("data")
 
         dic = {}

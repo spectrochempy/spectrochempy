@@ -293,8 +293,8 @@ def test_coordset_copy(coord0, coord1):
 def test_coordset_implements(coord0, coord1):
     coordsa = CoordSet(coord0, coord1)
 
-    assert coordsa.implements("CoordSet")
-    assert coordsa.implements() == "CoordSet"
+    assert coordsa._implements("CoordSet")
+    assert coordsa._implements() == "CoordSet"
 
 
 def test_coordset_sizes(coord0, coord1):

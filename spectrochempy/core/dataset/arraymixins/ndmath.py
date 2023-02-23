@@ -144,7 +144,7 @@ class _from_numpy_method:
                 kwargs["kw"] = kw
                 # now call the np function and make the object
                 new = self.method(klass, *argpos, **kwargs)
-                if new.implements("NDDataset"):
+                if new._implements("NDDataset"):
                     new.history = f"Created using method : {method}"  # (args:{argpos},
                     # kwargs:{kwargs})'
                 return new
@@ -173,7 +173,7 @@ class _from_numpy_method:
             if not self.reduce:  # _like' in method:
 
                 new = self.method(new, *argpos)
-                if new.implements("NDDataset"):
+                if new._implements("NDDataset"):
                     new.history = f"Created using method : {method}"  # (args:{argpos},
                     # kwargs:{kw})'
                 return new
@@ -524,7 +524,7 @@ class NDMath(object):
         fname = ufunc.__name__
 
         #        # case of complex or hypercomplex data
-        #        if self.implements(NDComplexArray) and self.has_complex_dims:
+        #        if self._implements(NDComplexArray) and self.has_complex_dims:
         #
         #            if fname in self.__complex_funcs:
         #                return getattr(inputs[0], fname)()
@@ -1210,7 +1210,7 @@ class NDMath(object):
         Find coordinates of the maximum of data along axis.
         """
 
-        if not cls.implements("NDDataset") or cls.coordset is None:
+        if not cls._implements("NDDataset") or cls.coordset is None:
             raise Exception(
                 "Method `coordmax` apply only on NDDataset and if it has defined "
                 "coordinates"
@@ -1244,7 +1244,7 @@ class NDMath(object):
         Find oordinates of the mainimum of data along axis.
         """
 
-        if not cls.implements("NDDataset") or cls.coordset is None:
+        if not cls._implements("NDDataset") or cls.coordset is None:
             raise Exception(
                 "Method `coordmin` apply only on NDDataset and if it has defined "
                 "coordinates"
@@ -3234,7 +3234,7 @@ class NDMath(object):
         # make a new NDArray resulting of some operation
 
         new = self.copy()
-        if returntype == "NDDataset" and not new.implements("NDDataset"):
+        if returntype == "NDDataset" and not new._implements("NDDataset"):
             from spectrochempy.core.dataset.nddataset import NDDataset
 
             new = NDDataset(new)

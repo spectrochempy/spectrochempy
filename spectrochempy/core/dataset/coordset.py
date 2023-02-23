@@ -265,11 +265,11 @@ class CoordSet(HasTraits):
         super().__init__(**kwargs)
 
     @staticmethod
-    def implements(name=None):
+    def _implements(name=None):
         """
         Utility to check if the current object implement `CoordSet`.
 
-        Rather than isinstance(obj, CoordSet) use object.implements('CoordSet').
+        Rather than isinstance(obj, CoordSet) use object._implements('CoordSet').
 
         This is useful to check type without importing the module.
         """

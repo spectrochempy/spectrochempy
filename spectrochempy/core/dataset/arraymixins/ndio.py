@@ -14,6 +14,7 @@ __all__ = ["load"]
 import io
 import json
 import pathlib
+from warnings import warn
 
 import numpy as np
 from numpy.lib.npyio import zipfile_factory
@@ -80,7 +81,7 @@ class NDIO(HasTraits):
         """
         Type of current file.
         """
-        klass = self.implements()
+        klass = self._implements()
         return [f"SpectroChemPy {klass} file (*{SCPY_SUFFIX[klass]})"]
 
     @property
@@ -95,7 +96,7 @@ class NDIO(HasTraits):
         if self._filename and self._filename.suffix:
             return self._filename.suffix
         else:
-            klass = self.implements()
+            klass = self._implements()
             return SCPY_SUFFIX[klass]
 
     # ----------------------------------------------------------------------------------
@@ -157,12 +158,12 @@ class NDIO(HasTraits):
         else:
             filename = pathclean(self.directory) / self.name
 
-        default_suffix = SCPY_SUFFIX[self.implements()]
+        default_suffix = SCPY_SUFFIX[self._implements()]
         filename = filename.with_suffix(default_suffix)
 
         if not filename.exists() and kwargs.get("confirm", True):
             # never saved
-            kwargs["caption"] = f"Save the current {self.implements()} as ... "
+            kwargs["caption"] = f"Save the current {self._implements()} as ... "
             return self.save_as(filename, **kwargs)
 
         # was already saved previously with this name,
@@ -226,12 +227,12 @@ class NDIO(HasTraits):
 
         # suffix must be specified which correspond to the type of the
         # object to save
-        default_suffix = SCPY_SUFFIX[self.implements()]
+        default_suffix = SCPY_SUFFIX[self._implements()]
         if filename is not None and not filename.is_dir():
             filename = filename.with_suffix(default_suffix)
 
         kwargs["filetypes"] = self.filetype
-        kwargs["caption"] = f"Save the current {self.implements()} as ... "
+        kwargs["caption"] = f"Save the current {self._implements()} as ... "
         filename = check_filename_to_save(
             self, filename, save_as=True, suffix=default_suffix, **kwargs
         )
@@ -444,7 +445,7 @@ class NDIO(HasTraits):
         try:
             js = self.dumps(encoding="base64")
         except Exception as e:
-            print(e)
+            warn(str(e))
 
         # write in a temp file
         _, tmpfile = tempfile.mkstemp(suffix="-spectrochempy")

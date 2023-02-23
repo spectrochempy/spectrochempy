@@ -13,6 +13,7 @@ numpy-quaternion
 cffconvert
 colorama
 dill
+docrep
 ipython
 jinja2
 matplotlib
@@ -25,7 +26,6 @@ requests
 scipy
 tqdm
 traitlets
-traittypes
 scikit-learn
 xlrd
 pyyaml
@@ -38,3 +38,4 @@ setuptools_scm
 gitpython
 jupyterlab
 nodejs
+traittypes@git+https://github.com/spectrochempy/traittypes.git

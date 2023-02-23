@@ -47,7 +47,7 @@ def _integrate_method(method):
 
         del new._dims[axis]
         if (
-            new.implements("NDDataset")
+            new._implements("NDDataset")
             and new._coordset
             and (dim in new._coordset.names)
         ):

@@ -136,7 +136,7 @@ def compare_ndarrays(this, other, approx=False, decimal=6, data_only=False):
         return _compare(x, y, decimal)
 
     eq = True
-    thistype = this.implements()
+    thistype = this._implements()
 
     if other.data is None and this.data is None and data_only:
         attrs = ["labels"]
@@ -235,7 +235,7 @@ def compare_coords(this, other, approx=False, decimal=6, data_only=False):
         return _compare(x, y, decimal)
 
     eq = True
-    thistype = this.implements()
+    thistype = this._implements()
 
     if other.data is None and this.data is None and data_only:
         attrs = ["labels"]
@@ -365,7 +365,7 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
     #         f"units of {this} and {other} objects does not match")
     #     return eq
 
-    thistype = this.implements()
+    thistype = this._implements()
 
     if other.data is None and this.data is None and data_only:
         attrs = ["labels"]
