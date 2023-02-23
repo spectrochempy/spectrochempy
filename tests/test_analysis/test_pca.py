@@ -19,7 +19,6 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import MASKED, exceptions, show, testing
 
 
-
 # test pca
 # ---------
 def test_pca():
