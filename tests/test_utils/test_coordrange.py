@@ -12,11 +12,10 @@ from spectrochempy.utils import Range
 from spectrochempy.utils.coordrange import trim_ranges
 from spectrochempy.utils.testing import raises
 
+
 # ======================================================================================
 # trim_ranges
 # ======================================================================================
-
-
 def test_trim_ranges():
     r = trim_ranges()
     assert r == []
@@ -35,8 +34,6 @@ def test_trim_ranges():
 # ======================================================================================
 # Range
 # ======================================================================================
-
-
 def test_range():
     class MyClass(HasTraits):
         r = Range()  # Initialized with some default values

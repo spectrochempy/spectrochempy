@@ -13,9 +13,9 @@ __all__ = ["trim_ranges"]
 from traitlets import Bool, HasTraits, List
 
 
-# ======================================================================================================================
+# ======================================================================================
 # _CoordRange
-# ======================================================================================================================
+# ======================================================================================
 class _CoordRange(HasTraits):
     # TODO: May use also units ???
     from spectrochempy.utils.traits import Range
@@ -40,10 +40,9 @@ class _CoordRange(HasTraits):
         if self.ranges:
             self._clean_ranges(self.ranges)
 
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     # private methods
-    # ------------------------------------------------------------------------
-
+    # ----------------------------------------------------------------------------------
     def _clean_ranges(self, ranges):
         """Sort and merge overlapping ranges
         It works as follows::
@@ -82,10 +81,12 @@ def trim_ranges(*ranges, reversed=False):
     -----------
     *ranges :  iterable
         An interval or a set of intervals.
-        set of  intervals. If none is given, the range will be a set of an empty interval [[]]. The interval
+        set of  intervals. If none is given, the range will be a set of an empty
+        interval [[]]. The interval
         limits do not need to be ordered, and the intervals do not need to be distincts.
     reversed : bool, optional
-        The intervals are ranked by decreasing order if True or increasing order if False.
+        The intervals are ranked by decreasing order if True or increasing order if
+        False.
 
     Returns
     -------
@@ -101,6 +102,6 @@ def trim_ranges(*ranges, reversed=False):
     return _CoordRange(*ranges, reversed=reversed).ranges
 
 
-# ======================================================================================================================
+# ======================================================================================
 if __name__ == "__main__":
     pass

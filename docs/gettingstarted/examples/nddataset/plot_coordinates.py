@@ -19,7 +19,6 @@ import spectrochempy as scp
 # %%
 # Uploading a dataset
 # -------------------
-
 X = scp.read("irdata/CO@Mo_Al2O3.SPG")
 
 # %%

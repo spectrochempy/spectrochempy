@@ -141,7 +141,6 @@ class CoordSet(HasTraits):
 
         # First evaluate passed args
         # --------------------------
-
         # some cleaning
         if coords:
 
@@ -200,7 +199,6 @@ class CoordSet(HasTraits):
 
         # now evaluate keywords argument
         # ------------------------------
-
         for key, coord in list(kwargs.items())[:]:
             # remove the already used kwargs (Fix: deprecation warning in Traitlets - all args, kwargs must be used)
             del kwargs[key]
@@ -266,7 +264,8 @@ class CoordSet(HasTraits):
         # initialize the base class with the eventual remaining arguments
         super().__init__(**kwargs)
 
-    def implements(self, name=None):
+    @staticmethod
+    def implements(name=None):
         """
         Utility to check if the current object implement `CoordSet`.
 
@@ -418,7 +417,8 @@ class CoordSet(HasTraits):
             _sizes = list(set(_sizes))
             if len(_sizes) > 1:
                 raise ValueError(
-                    "Coordinates must be of the same size for a dimension with multiple coordinates"
+                    "Coordinates must be of the same size for a dimension with multiple "
+                    "coordinates"
                 )
             return _sizes[0]
         return _sizes
@@ -590,16 +590,20 @@ class CoordSet(HasTraits):
         Parameters
         ----------
         args : str(s)
-            The list of titles to apply to the set of coordinates (they must be given according to the coordinate's name
+            The list of titles to apply to the set of coordinates (they must be given
+            according to the coordinate's name
             alphabetical order.
         **kwargs
-            Keyword attribution of the titles. The keys must be valid names among the coordinate's name list. This
+            Keyword attribution of the titles. The keys must be valid names among the
+            coordinate's name list. This
             is the recommended way to set titles as this will be less prone to errors.
 
         Notes
         -----
-        If the args are not named, then the attributions are made in coordinate's  name alphabetical order :
-        e.g, the first title will be for the `x` coordinates, the second for the `y`, etc.
+        If the args are not named, then the attributions are made in coordinate's  name
+        alphabetical order :
+        e.g, the first title will be for the `x` coordinates, the second for the `y`,
+        etc.
         """
         if len(args) == 1 and (is_sequence(args[0]) or isinstance(args[0], CoordSet)):
             args = args[0]
@@ -622,17 +626,21 @@ class CoordSet(HasTraits):
         Parameters
         ----------
         *args : str(s)
-            The list of units to apply to the set of coordinates (they must be given according to the coordinate's name
+            The list of units to apply to the set of coordinates (they must be given
+            according to the coordinate's name
             alphabetical order.
         **kwargs
-            Keyword attribution of the units. The keys must be valid names among the coordinate's name list. This
+            Keyword attribution of the units. The keys must be valid names among the
+            coordinate's name list. This
             is the recommended way to set units as this will be less prone to errors.
         force : bool, optional, default=False
-            Whether or not the new units must be compatible with the current units. See the `Coord`.`to` method.
+            Whether or not the new units must be compatible with the current units. See
+            the `Coord`.`to` method.
 
         Notes
         -----
-        If the args are not named, then the attributions are made in coordinate's name alphabetical order :
+        If the args are not named, then the attributions are made in coordinate's name
+        alphabetical order :
         e.g, the first units will be for the `x` coordinates, the second for the `y`, etc.
         """
         force = kwargs.pop("force", False)
@@ -658,7 +666,8 @@ class CoordSet(HasTraits):
         Returns
         -------
         out : dict
-            A dictionary where keys are the names of the coordinates, and the values the coordinates themselves.
+            A dictionary where keys are the names of the coordinates, and the values
+            the coordinates themselves.
         """
         return dict(zip(self.names, self._coords))
 
@@ -669,7 +678,8 @@ class CoordSet(HasTraits):
         Parameters
         ----------
         k**warg
-            Only keywords among the CoordSet.names are allowed - they denotes the name of a dimension.
+            Only keywords among the CoordSet.names are allowed - they denotes the name
+            of a dimension.
         """
         dims = kwargs.keys()
         for dim in list(dims)[:]:
@@ -680,8 +690,7 @@ class CoordSet(HasTraits):
 
     # ----------------------------------------------------------------------------------
     # private methods
-    # ------------------------------------------------------------------------
-
+    # ----------------------------------------------------------------------------------
     def _append(self, coord):
         # utility function to append coordinate with full validation
         if not isinstance(coord, tuple):
@@ -716,10 +725,9 @@ class CoordSet(HasTraits):
         for coord in self._coords:
             coord._parent_dim = name
 
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     # special methods
-    # ------------------------------------------------------------------------
-
+    # ----------------------------------------------------------------------------------
     # @staticmethod
     def __dir__(self):
         return ["coords", "references", "is_same_dim", "name"]
@@ -789,7 +797,8 @@ class CoordSet(HasTraits):
                 # selection by coord titles
                 if self.titles.count(index) > 1:
                     warnings.warn(
-                        f"Getting a coordinate from its title. However `{index}` occurs several time. Only"
+                        f"Getting a coordinate from its title. However `{index}` occurs "
+                        f"several time. Only"
                         f" the first occurrence is returned!"
                     )
                 return self._coords.__getitem__(self.titles.index(index))
@@ -1065,10 +1074,9 @@ class CoordSet(HasTraits):
     def __ne__(self, other):
         return not self.__eq__(other)
 
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     # Events
-    # ------------------------------------------------------------------------
-
+    # ----------------------------------------------------------------------------------
     def _coords_update(self, change):
         # when notified that a coord name have been updated
         self._updated = True
@@ -1087,6 +1095,6 @@ class CoordSet(HasTraits):
             self._updated = False  # reset
 
 
-# ======================================================================================================================
+# ======================================================================================
 if __name__ == "__main__":
     pass

@@ -42,6 +42,7 @@ dependencies:
     - tqdm
     - traitlets
     - traittypes
+    - scikit-learn
     - xlrd
     - pyyaml
     - ipywidgets

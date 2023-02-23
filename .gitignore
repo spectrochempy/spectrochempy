@@ -132,3 +132,6 @@ essai.py
 /out/
 *dev*.rst
 coverage.json
+
+scp_data/stylesheets/mydefault.mplstyle
+docs/userguide/reference/api.rst

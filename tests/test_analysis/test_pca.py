@@ -18,10 +18,9 @@ from spectrochempy.utils import MASKED, show
 from spectrochempy.utils.optional import import_optional_dependency
 from spectrochempy.utils.testing import assert_array_almost_equal
 
+
 # test pca
 # ---------
-
-
 def test_pca():
     dataset = NDDataset.read("irdata/nh4y-activation.spg")
 

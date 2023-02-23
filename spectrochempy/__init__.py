@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# ======================================================================================================================
+# ======================================================================================
 # Copyright (©) 2015-2023 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 #
@@ -38,12 +38,13 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
-# ======================================================================================================================
+# ======================================================================================
 # flake8: noqa
 """
 SpectroChemPy API.
 
-SpectroChemPy is a framework for processing, analyzing and modeling Spectroscopic data for Chemistry with Python.
+SpectroChemPy is a framework for processing, analyzing and modeling Spectroscopic data
+for Chemistry with Python.
 It is a cross-platform software, running on Linux, Windows or OS X.
 """
 
@@ -55,6 +56,6 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 
 __all__ = api.__all__
 
-# ==============================================================================
+# ======================================================================================
 if __name__ == "__main__":
     pass

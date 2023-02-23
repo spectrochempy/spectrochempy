@@ -459,7 +459,8 @@ class BuildDocumentation(object):
         for d in build_dirs:
             Path.mkdir(d, parents=True, exist_ok=True)
 
-    def apigen(self):
+    @staticmethod
+    def apigen():
         print(f'\n{"-" * 80}\nRegenerate the reference API list\n{"-" * 80}')
 
         Apigen()
@@ -489,7 +490,8 @@ class Apigen:
         entries = self.list_entries()
         self.write_api_rst(entries)
 
-    def get_packages(self):
+    @staticmethod
+    def get_packages():
         pkgs = list_packages(spectrochempy)
         for pkg in pkgs[:]:
             if pkg.endswith(".api"):
@@ -504,8 +506,8 @@ class Apigen:
 
             if (
                 (alls is not None and _name not in alls)
-                or not str(_type).startswith("<")
                 or str(_name).startswith("_")
+                or not str(_type).startswith("<")
                 or "HasTraits" in str(_type)
                 or "cross_validation_lock" in str(_name)
                 or not (

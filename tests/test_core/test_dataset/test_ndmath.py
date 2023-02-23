@@ -110,8 +110,6 @@ def test_bug_lost_dimensionless_units():
 
 # BINARY MATH
 # ------------
-
-
 @pytest.mark.parametrize(("name", "comment"), _binary_ufuncs().items())
 def test_ndmath_binary_ufuncs_two_datasets(nd2d, name, comment):
     nd1 = nd2d.copy()
@@ -151,7 +149,6 @@ def test_ndmath_comp_ufuncs_two_datasets(nd2d, name, comment):
 
     # simple NDDataset
     # -----------------
-
     f = getattr(np, name)
     r = f(nd1, nd2)
 
@@ -174,7 +171,6 @@ def test_ndmath_binary_ufuncs_scalar(nd2d, name, comment):
 
     # simple NDDataset
     # -----------------
-
     f = getattr(np, name)
     r = f(nd1, nd2)
 
@@ -534,7 +530,6 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
 
     # CREATION _LIKE METHODS
     # ----------------------
-
     # from a list
     x = [1, 2, 3]
 
@@ -595,21 +590,18 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
 
     # FULL
     # ----
-
     ds = NDDataset.full((6,), 0.1)
     assert ds.size == 6
     assert str(ds) == "NDDataset: [float64] unitless (size: 6)"
 
     # ZEROS
     # -----
-
     ds = NDDataset.zeros((6,), units="km")
     assert ds.size == 6
     assert str(ds) == "NDDataset: [float64] km (size: 6)"
 
     # ONES
     # ----
-
     ds = NDDataset.ones((6,))
     ds = scp.full((6,), 0.1)
     assert ds.size == 6
@@ -622,7 +614,6 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
 
     # LINSPACE
     # --------
-
     c2 = Coord.linspace(1, 20, 200, units="m", name="mycoord")
     assert c2.name == "mycoord"
     assert c2.size == 200
@@ -631,7 +622,6 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
 
     # ARANGE
     # -------
-
     c3 = Coord.arange(1, 20.0001, 1, units="s", name="mycoord")
     assert c3.name == "mycoord"
     assert c3.size == 20
@@ -640,7 +630,6 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
 
     # EYE
     # ----
-
     ds1 = scp.NDDataset.eye(2, dtype=int)
     assert str(ds1) == "NDDataset: [float64] unitless (shape: (y:2, x:2))"
     ds = scp.eye(3, k=1, units="km")
@@ -649,7 +638,6 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
 
     # IDENTITY
     # --------
-
     ds = scp.identity(3, units="km")
     assert (
         ds.data
@@ -661,7 +649,6 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
 
     # RANDOM
     # ------
-
     ds = scp.random((3, 3), units="km")
     assert str(ds) == "NDDataset: [float64] km (shape: (y:3, x:3))"
 
@@ -671,7 +658,6 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
 
     # DIAGONAL
     # --------
-
     # extract diagonal
     nd = scp.full((2, 2), 0.5, units="s", title="initial")
     assert str(nd) == "NDDataset: [float64] s (shape: (y:2, x:2))"
@@ -710,7 +696,6 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
 
     # DIAG
     # ----
-
     ref = NDDataset(np.diag((3, 3.4, 2.3)), units="m", title="something")
 
     # Three forms should return the same NDDataset
@@ -734,7 +719,6 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
 
     # BOOL : ALL and ANY
     # ------------------
-
     ds = NDDataset([[True, False], [True, True]])
     b = np.all(ds)
     assert not b
@@ -753,7 +737,6 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
 
     # ARGMAX, MAX
     # -----------
-
     nd1 = IR_dataset_1D.copy()
     nd1[1290.0:890.0] = MASKED
     assert nd1.is_masked
@@ -836,7 +819,6 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
 
     # ABS
     # ----
-
     nd2a = NDDataset.abs(nd2)
     mxa = nd2a.min()
     assert mxa > 0
@@ -929,7 +911,6 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
 
     # MEAN, AVERAGE
     # -----
-
     nd = IR_dataset_2D.copy()
 
     m = np.mean(nd)

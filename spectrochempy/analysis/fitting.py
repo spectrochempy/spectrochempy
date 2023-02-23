@@ -26,7 +26,7 @@ from spectrochempy.core import INFO, info_, preferences, warning_
 from spectrochempy.utils import htmldoc
 
 
-# ======================================================================================================================
+# ======================================================================================
 def getmodel(x, y=None, modelname=None, par=None, **kargs):
     """
     Get the model for a given x vector.
@@ -87,7 +87,7 @@ class FitParameters(UserDict):
     if any.
     """
 
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def __init__(self):
         UserDict.__init__(self)  # Create a dictionary class
         self.lob = {}  # Lower bound
@@ -101,7 +101,7 @@ class FitParameters(UserDict):
         self.expvars = []  # list of parameters which are experiment dependent
         self.expnumber = 1  # number of experiments
 
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def __setitem__(self, key, value):
         key = str(key)
         if key not in self.reference:
@@ -130,18 +130,18 @@ class FitParameters(UserDict):
             self.upb[key] = None
             self.fixed[key] = False
 
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def __getitem__(self, key):
         key = str(key)
         if key in self.data:
             return self.data[key]
         raise KeyError(f"parameter `{key}` is not found")
 
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def iteritems(self):
         return iter(self.data.items())
 
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def _checkerror(self, key):
         key = str(key)
         if self.lob[key] is None and self.upb[key] is None:
@@ -151,7 +151,7 @@ class FitParameters(UserDict):
         ):
             raise ValueError(f"`{key}` value ({self.data[key]}) is out of bounds")
 
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def __str__(self):
         def makestr(key):
 
@@ -201,7 +201,7 @@ class FitParameters(UserDict):
                 message += makestr(key)
         return message
 
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     @staticmethod
     def _evaluate(strg):
         """
@@ -240,7 +240,7 @@ class FitParameters(UserDict):
 
         return res
 
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def to_internal(self, key, expi=None):
         """
         If expi is not none, several parameters to create.
@@ -280,7 +280,7 @@ class FitParameters(UserDict):
             pi = pe
         return pi
 
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def to_external(self, key, pi):
 
         key = str(key)
@@ -367,7 +367,7 @@ class ParameterScript(HasTraits):
         """
         self.fp = self._interpret(self.script)
 
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     def _interpret(self, script):
         """
         Interpreter of the script content.
@@ -511,7 +511,7 @@ class ParameterScript(HasTraits):
         return fp
 
 
-# ======================================================================================================================
+# ======================================================================================
 class Fit(HasTraits):
     """
     Fit a 1D or 2D dataset, or a list of datasets.
@@ -1177,7 +1177,7 @@ class Fit(HasTraits):
         return A, a, b, c
 
 
-# ======================================================================================================================
+# ======================================================================================
 def optimize(
     func,
     fp0,

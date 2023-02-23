@@ -13,17 +13,17 @@ In this example, we perform the PCA dimensionality reduction of the classical ``
 
 """
 # %%
-
-import sys
+# First we laod the spectrochempy API package
 import spectrochempy as scp
 
 # %%
 # Upload a dataset form a distant server
-
 try:
     dataset = scp.download_iris()
 except (IOError, OSError):
     print("Could not load The `IRIS` dataset. Finishing here.")
+    import sys
+
     sys.exit(0)
 
 # %%

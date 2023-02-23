@@ -425,7 +425,8 @@ class Project(AbstractProject, NDIO):
     # ----------------------------------------------------------------------------------
     # Public methods
     # ----------------------------------------------------------------------------------
-    def implements(self, name=None):
+    @staticmethod
+    def implements(name=None):
         """
         Utility to check if the current object implement `Project`.
 

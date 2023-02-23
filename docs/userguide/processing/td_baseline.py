@@ -28,7 +28,6 @@
 #       version_major: 2
 #       version_minor: 0
 # ---
-
 # %% [markdown]
 # # Time domain baseline correction (NMR)
 #
