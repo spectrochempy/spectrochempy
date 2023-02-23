@@ -4,7 +4,6 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# flake8: noqa
 """
 Package defining the *core* methods of the |scpy| API.
 
@@ -12,6 +11,7 @@ Most the API methods such as plotting, processing, analysis, etc...
 
 isort:skip_file
 """
+# flake8: noqa
 
 __all__ = []  # modified below
 
@@ -66,8 +66,30 @@ from spectrochempy.application import app  # noqa: E402
 __all__ += ["app"]
 
 from spectrochempy.application import (
+    __version__ as version,
+    __release__ as release,
+    __copyright__ as copyright,
+    __license__ as license,
+    __release_date__ as release_date,
+    __author__ as authors,
+    __contributor__ as contributors,
+    __url__ as url,
+    DEBUG,
     WARNING,
+    ERROR,
+    CRITICAL,
+    INFO,
+    error_,
+    warning_,
+    debug_,
+    info_,
     preferences,
+    plot_preferences,
+    description,
+    long_description,
+    config_dir,
+    config_manager,
+    reset_preferences,
 )  # noqa: E402
 
 
@@ -125,6 +147,14 @@ _pbar_update()
 
 # constants
 # ---------
+from spectrochempy.utils import (
+    show,
+    MASKED,
+    NOMASK,
+    EPSILON,
+    INPLACE,
+    show_versions,
+)
 
 __all__ += ["show", "MASKED", "NOMASK", "EPSILON", "INPLACE", "show_versions"]
 
@@ -175,6 +205,7 @@ from spectrochempy.core.units import api  # noqa: E402
 from spectrochempy.core.units.api import *  # noqa: E402,F403,F401
 
 __all__ += api.__all__
+
 
 # analysis
 # --------
