@@ -136,33 +136,43 @@ class _set_output(object):
         M, N = X.shape
         if X_transf.shape == X.shape:
             X_transf.set_coordset(y=X.y, x=X.x)
-        elif self.typey == "components":
-            X_transf.set_coordset(
-                y=Coord(
-                    None,
-                    labels=["#%d" % (i + 1) for i in range(X_transf.shape[0])],
-                    title="components",
-                ),
-                x=X.x,
-            )
-        elif self.typex == "components":
-            X_transf.set_coordset(
-                y=X.y,
-                x=Coord(
-                    None,
-                    labels=["#%d" % (i + 1) for i in range(X_transf.shape[-1])],
-                    title="components",
-                ),
-            )
-        elif self.typesingle == "components":
-            # occurs when the data are 1D such as ev_ratio...
-            X_transf.set_coordset(
-                x=Coord(
-                    None,
-                    labels=["#%d" % (i + 1) for i in range(X_transf.shape[-1])],
-                    title="components",
-                ),
-            )
+        else:
+            if self.typey == "components":
+                X_transf.set_coordset(
+                    y=Coord(
+                        None,
+                        labels=["#%d" % (i + 1) for i in range(X_transf.shape[0])],
+                        title="components",
+                    ),
+                    x=X.x,
+                )
+            if self.typex == "components":
+                X_transf.set_coordset(
+                    y=X.y,
+                    x=Coord(
+                        None,
+                        labels=["#%d" % (i + 1) for i in range(X_transf.shape[-1])],
+                        title="components",
+                    ),
+                )
+            if self.typex == "feature":
+                X_transf.set_coordset(
+                    y=Coord(
+                        None,
+                        labels=["#%d" % (i + 1) for i in range(X_transf.shape[-1])],
+                        title="components",
+                    ),
+                    x=X.x,
+                )
+            if self.typesingle == "components":
+                # occurs when the data are 1D such as ev_ratio...
+                X_transf.set_coordset(
+                    x=Coord(
+                        None,
+                        labels=["#%d" % (i + 1) for i in range(X_transf.shape[-1])],
+                        title="components",
+                    ),
+                )
         return X_transf
 
 

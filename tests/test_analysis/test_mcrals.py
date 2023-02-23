@@ -93,6 +93,12 @@ def model():
 def data(model):
     D = dot(model.C, model.St)
     D.title = "intensity"
+    D.units = "absorbance"
+    D.set_coordset(None, None)
+    D.y.title = "elution time"
+    D.x.title = "wavelength"
+    D.y.units = "hours"
+    D.x.units = "cm^-1"
     return D
 
 
@@ -138,6 +144,8 @@ def test_MCRALS(model, data):
     X_hat = mcr.inverse_transform()
 
     # test plot
+    mcr.C.T.plot(title="Concentration")
+    mcr.St.plot(title="Components")
     mcr.plotmerit(D, X_hat)
     show()
 
