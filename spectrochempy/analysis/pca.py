@@ -26,6 +26,9 @@ __all__ = ["PCA"]
 __configurables__ = ["PCA"]
 
 
+# ======================================================================================
+# class PCA
+# ======================================================================================
 class PCA(DecompositionAnalysisConfigurable):
     """
     PCA analysis is here done using the sklearn PCA model.
@@ -419,7 +422,6 @@ for reproducible results across multiple function calls.""",
         ----------
         n_components : int
             Number of components to plot.
-
         **kwargs
             Extra arguments: `colors` (default: `[NBlue, NRed]`) to set the colors
             of the bar plot and scatter plot; `ylims` (default `[(0, 100), "auto"]`).

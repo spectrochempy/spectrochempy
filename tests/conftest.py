@@ -94,8 +94,6 @@ ref3d_2_mask = ref3d_2_data < -2
 # --------------------------------------------------------------------------------------
 # Fixtures: some NDArray's
 # --------------------------------------------------------------------------------------
-
-
 @pytest.fixture(scope="function")
 def refarray():
     return ref_data.copy()
@@ -129,8 +127,6 @@ def ndarraymask():
 # --------------------------------------------------------------------------------------
 # Fixtures: Some NDComplex's array
 # --------------------------------------------------------------------------------------
-
-
 @pytest.fixture(scope="function")
 def ndarraycplx():
     # return a complex ndarray

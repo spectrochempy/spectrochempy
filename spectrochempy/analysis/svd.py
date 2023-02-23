@@ -80,7 +80,6 @@ class SVD(tr.HasTraits):
 
         # check if we have the correct input
         # ----------------------------------
-
         X = dataset
 
         if isinstance(X, NDDataset):
@@ -101,7 +100,6 @@ class SVD(tr.HasTraits):
 
         # Retains only valid rows and columns
         # -----------------------------------
-
         # unfortunately, the present SVD implementation in linalg library
         # doesn't support numpy masked arrays as input. So we will have to
         # remove the masked values ourselves
@@ -122,7 +120,6 @@ class SVD(tr.HasTraits):
 
         # Performs the SVD
         # ----------------
-
         if data.size == 0 and np.product(data.shape[-2:]) == 0:
             raise np.linalg.LinAlgError(
                 "Arrays cannot be empty. You may " "want to check the masked data. "
@@ -136,7 +133,6 @@ class SVD(tr.HasTraits):
 
         # Returns the diagonal sigma matrix as a NDDataset object
         # -------------------------------------------------------
-
         s = NDDataset(s)
         s.title = "singular values of " + X.name
         s.name = "sigma"
@@ -186,7 +182,6 @@ class SVD(tr.HasTraits):
 
             # Returns the loadings (VT) as a NDDataset object
             # ------------------------------------------------
-
             VT = NDDataset(VT)
             VT.name = "V.T"
             VT.title = "loadings (V.t) of " + X.name
@@ -207,19 +202,17 @@ class SVD(tr.HasTraits):
             self.U = None
             self.VT = None
 
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     # special methods
-    # ------------------------------------------------------------------------
-
+    # ----------------------------------------------------------------------------------
     def __repr__(self):
         if self._compute_uv:
             return f"<svd: U{self.U.shape}, s({self.s.size}), VT{self.VT.shape}>"
         return f"<svd: s({self.s.size}), U, VT:not computed>"
 
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     #  Properties
-    # ------------------------------------------------------------------------
-
+    # ----------------------------------------------------------------------------------
     @property
     def sv(self):
         """

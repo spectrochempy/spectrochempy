@@ -35,11 +35,10 @@ from spectrochempy.utils.exceptions import CoordinatesMismatchError
 from spectrochempy.utils.orderedset import OrderedSet
 from spectrochempy.utils.testing import assert_coord_almost_equal
 
+
 # ======================================================================================
 # utilities
 # ======================================================================================
-
-
 def _reduce_method(method):
     # Decorator
     # ---------
@@ -134,7 +133,6 @@ class _from_numpy_method:
             # -----------------------------
             # Creation from scratch methods
             # -----------------------------
-
             if "dataset" not in pars:
                 # separate object keyword from other specific to the function
                 kw = {}
@@ -154,7 +152,6 @@ class _from_numpy_method:
             # -----------------------------
             # Create from an existing array
             # ------------------------------
-
             # Replace some attribute according to the kwargs
             for k, v in list(kwargs.items())[:]:
                 if k != "units":
@@ -1357,7 +1354,6 @@ class NDMath(object):
 
             # construct a diagonal array
             # --------------------------
-
             data = np.diag(new.data)
 
             mask = NOMASK
@@ -2724,7 +2720,6 @@ class NDMath(object):
     # ------------------------------------------------------------------------
     # private methods
     # ------------------------------------------------------------------------
-
     def _preprocess_op_inputs(self, fname, inputs):
 
         inputs = list(inputs)  # work with a list of objs not tuples

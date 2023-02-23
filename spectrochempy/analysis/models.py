@@ -103,8 +103,6 @@ def make_units_compatibility(func):
 # ======================================================================================
 # PolynomialBaseline
 # ======================================================================================
-
-
 class polynomialbaseline(object):
     """
     Arbitrary-degree polynomial (degree limited to 10, however).
@@ -139,7 +137,6 @@ class polynomialbaseline(object):
         return ampl * np.polyval(np.array(tuple(c))[::-1], x - x[int(x.size / 2)])
 
 
-# ======================================================================================
 # #===============================================================================
 # # Gaussian2DModel
 # #===============================================================================
@@ -162,8 +159,6 @@ class polynomialbaseline(object):
 #        ydenom = 2*gby*gby
 #        return amp*np.exp(-xo*xo/xdenom-yo*yo/ydenom)
 # ======================================================================================
-
-
 # ======================================================================================
 # GaussianModel
 # ======================================================================================
@@ -263,7 +258,8 @@ class voigtmodel(object):
     #         w = w * abs(x[1] - x[0])
     #         return ampl * w
 
-    def f(self, x, ampl, pos, width, ratio, **kargs):
+    @staticmethod
+    def f(x, ampl, pos, width, ratio, **kargs):
 
         return asymmetricvoigtmodel().f(x, ampl, pos, width, ratio, asym=0.0)
 
@@ -271,8 +267,6 @@ class voigtmodel(object):
 # ======================================================================================
 # Asymmetric Voigt Model
 # ======================================================================================
-
-
 class asymmetricvoigtmodel(object):
     """
     An asymmetric Voigt model.

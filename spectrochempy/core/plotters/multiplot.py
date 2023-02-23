@@ -185,7 +185,6 @@ def multiplot(
 
     # some basic checking
     # ------------------------------------------------------------------------
-
     show_transposed = False
     if method in "with_transposed":
         show_transposed = True

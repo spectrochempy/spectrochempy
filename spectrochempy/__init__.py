@@ -43,7 +43,8 @@
 """
 SpectroChemPy API.
 
-SpectroChemPy is a framework for processing, analyzing and modeling Spectroscopic data for Chemistry with Python.
+SpectroChemPy is a framework for processing, analyzing and modeling Spectroscopic data
+for Chemistry with Python.
 It is a cross-platform software, running on Linux, Windows or OS X.
 """
 
@@ -55,6 +56,6 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 
 __all__ = api.__all__
 
-# ==============================================================================
+# ======================================================================================
 if __name__ == "__main__":
     pass

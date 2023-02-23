@@ -104,8 +104,6 @@ def read_zip(*paths, **kwargs):
 # ======================================================================================
 # Private functions
 # ======================================================================================
-
-
 @_importer_method
 def _read_zip(*args, **kwargs):
     # Below we assume that files to read are in a unique directory

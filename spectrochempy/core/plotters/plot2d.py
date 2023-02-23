@@ -69,11 +69,10 @@ reverse : `bool` or None [optional, default=None
 x_reverse : `bool` or None [optional, default=None
 """
 
+
 # ======================================================================================
 # nddataset plot2D functions
 # ======================================================================================
-
-
 @plot_method("2D", _PLOT2D_DOC)
 def plot_stack(dataset, **kwargs):
     """
@@ -143,8 +142,7 @@ def plot_2D(dataset, method=None, **kwargs):
     prefs.set_latex_font(prefs.font.family)  # reset latex settings
 
     # Redirections ?
-    # ------------------------------------------------------------------------
-
+    # ----------------------------------------------------------------------------------
     # should we redirect the plotting to another method
     if dataset._squeeze_ndim < 2:
         return dataset.plot_1D(**kwargs)
@@ -161,7 +159,6 @@ def plot_2D(dataset, method=None, **kwargs):
 
     # Get the data to plot
     # ---------------------------------------------------------------
-
     # if we want to plot the transposed dataset
     transposed = kwargs.get("transposed", False)
     if transposed:
@@ -180,11 +177,10 @@ def plot_2D(dataset, method=None, **kwargs):
     method = new._figure_setup(ndim=2, method=method, **kwargs)
 
     ax = new.ndaxes["main"]
-    ax.name = ax.name + nameadd
+    ax.name += nameadd
 
     # Other properties that can be passed as arguments
     # ------------------------------------------------------------------------
-
     lw = kwargs.get("linewidth", kwargs.get("lw", prefs.lines_linewidth))
     alpha = kwargs.get("calpha", prefs.contour_alpha)
 
@@ -216,9 +212,7 @@ def plot_2D(dataset, method=None, **kwargs):
     # ------------------------------------------------------------------------
     # Set axis
     # ------------------------------------------------------------------------
-
     # set the abscissa axis
-    # ------------------------------------------------------------------------
     # the actual dimension name is the last in the new.dims list
     dimx = new.dims[-1]
     x = getattr(new, dimx)
@@ -316,7 +310,6 @@ def plot_2D(dataset, method=None, **kwargs):
 
     # z intensity (by default we plot real component of the data)
     # ------------------------------------------------------------------------
-
     if not kwargs.get("imag", False):
         zdata = new.real.masked_data
     else:
@@ -341,7 +334,6 @@ def plot_2D(dataset, method=None, **kwargs):
 
         # set the limits
         # ---------------
-
         if yscale == "log" and min(zlim) <= 0:
             # set the limits wrt smallest and largest strictly positive values
             ax.set_ylim(
@@ -454,9 +446,7 @@ def plot_2D(dataset, method=None, **kwargs):
 
         # stack plot
         # ----------
-
         # now plot the collection of lines
-        # --------------------------------
         # map colors using the colormap
 
         vmin, vmax = ylim
@@ -517,12 +507,10 @@ def plot_2D(dataset, method=None, **kwargs):
     elif kwargs.get("plottitle", False):
         ax.set_title(new.name)
 
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     # labels
-    # ------------------------------------------------------------------------
-
+    # ----------------------------------------------------------------------------------
     # x label
-    # ------------------------------------------------------------------------
     xlabel = kwargs.get("xlabel", None)
     if show_x_points:
         xlabel = "data points"
@@ -585,7 +573,7 @@ def plot_2D(dataset, method=None, **kwargs):
     if "colorbar" in new.ndaxes:
         if "surface" not in method and (not hasattr(new, "_axcb") or not new._axcb):
             axec = new.ndaxes["colorbar"]
-            axec.name = axec.name + nameadd
+            axec.name += nameadd
             new._axcb = mpl.colorbar.ColorbarBase(
                 axec, cmap=plt.get_cmap(cmap), norm=norm
             )
@@ -605,8 +593,6 @@ def plot_2D(dataset, method=None, **kwargs):
 # ======================================================================================
 # Waterfall
 # ======================================================================================
-
-
 def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwargs):
     degazim = kwargs.get("azim", 10)
     degelev = kwargs.get("elev", 30)
@@ -746,9 +732,7 @@ def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwa
     # ------------------------------------------------------------------------
     # labels
     # ------------------------------------------------------------------------
-
     # x label
-    # ------------------------------------------------------------------------
     xlabel = kwargs.get("xlabel", None)
     if not xlabel:
         xlabel = make_label(new.x, "x")
@@ -793,8 +777,6 @@ def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwa
 # ======================================================================================
 # get clevels
 # ======================================================================================
-
-
 def _get_clevels(data, prefs, **kwargs):
     # Utility function to determine contours levels
 

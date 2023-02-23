@@ -27,8 +27,6 @@ __all__ = [
 # ======================================================================================
 # Utility functions
 # ======================================================================================
-
-
 def download_testdata():
     from spectrochempy.core import preferences
     from spectrochempy.core.readers.importer import read_remote

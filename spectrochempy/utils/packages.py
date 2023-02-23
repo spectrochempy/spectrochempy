@@ -16,8 +16,6 @@ __all__ = ["list_packages", "generate_api", "get_pkg_path"]
 # ======================================================================================
 # PACKAGE and API UTILITIES
 # ======================================================================================
-
-
 def list_packages(package):
     """
     Return a list of the names of a package and its subpackages.
@@ -104,6 +102,5 @@ def get_pkg_path(data_name, package=None):
 
 
 # ======================================================================================
-
 if __name__ == "__main__":
     pass

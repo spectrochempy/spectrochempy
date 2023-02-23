@@ -18,10 +18,9 @@ from spectrochempy.analysis.pca import PCA
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import MASKED, exceptions, show, testing
 
+
 # test pca
 # ---------
-
-
 def test_pca():
 
     dataset = NDDataset.read("irdata/nh4y-activation.spg")

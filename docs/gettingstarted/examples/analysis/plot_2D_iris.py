@@ -19,7 +19,6 @@ import spectrochempy as scp
 # %%
 # Uploading dataset
 # -----------------
-
 X = scp.read("irdata/CO@Mo_Al2O3.SPG")
 
 # %%
@@ -104,7 +103,6 @@ _ = X_.plot_map()
 # %%
 # IRIS analysis without regularization
 # ------------------------------------
-
 # %%
 # Perform IRIS without regularization (the loglevel can be set to `INFO` to have
 # information on the running process)
@@ -121,7 +119,6 @@ _ = iris.plotmerit()
 # %%
 # With regularization and a manual search
 # ---------------------------------------
-
 # %%
 # Perform  IRIS with regularization, manual search
 
@@ -133,7 +130,6 @@ _ = iris.plotmerit(-7)
 # %%
 # Automatic search
 # ----------------
-
 # %%
 # Now try an automatic search of the regularization parameter:
 

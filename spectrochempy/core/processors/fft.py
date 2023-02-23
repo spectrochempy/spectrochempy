@@ -26,11 +26,10 @@ from spectrochempy.utils import (
     typequaternion,
 )
 
+
 # ======================================================================================
 # Private methods
 # ======================================================================================
-
-
 def _fft(data):
     if data.dtype == typequaternion:
 
@@ -214,8 +213,6 @@ def _interferogram_fft(data):
 # ======================================================================================
 # Public methods
 # ======================================================================================
-
-
 def ifft(dataset, size=None, **kwargs):
     """
     Apply a inverse fast fourier transform.

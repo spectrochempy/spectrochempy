@@ -24,7 +24,6 @@
 #     pygments_lexer: ipython3
 #     version: 3.7.9
 # ---
-
 # %% [markdown]
 # # Peak Maxima Finding
 #

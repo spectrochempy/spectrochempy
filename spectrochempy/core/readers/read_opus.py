@@ -164,8 +164,6 @@ def read_opus(*paths, **kwargs):
 # ======================================================================================
 # Private Functions
 # ======================================================================================
-
-
 @_importer_method
 def _read_opus(*args, **kwargs):
     debug_("Bruker OPUS import")

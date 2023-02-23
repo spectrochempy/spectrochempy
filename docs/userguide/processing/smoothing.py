@@ -25,7 +25,6 @@
 #     pygments_lexer: ipython3
 #     version: 3.10.8
 # ---
-
 # %% [markdown]
 # # Smoothing
 #

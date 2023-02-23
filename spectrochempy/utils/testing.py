@@ -569,8 +569,6 @@ def assert_script_equal(sc1, sc2, **kwargs):
 # ======================================================================================
 # RandomSeedContext
 # ======================================================================================
-
-
 class RandomSeedContext(object):
     """
     A context manager (for use with the ``with`` statement) that will seed the
@@ -613,8 +611,6 @@ class RandomSeedContext(object):
 # ======================================================================================
 # raises and assertions (mostly copied from astropy)
 # ======================================================================================
-
-
 def assert_equal_units(unit1, unit2, strict=False):
     """
     Compare units.

@@ -24,7 +24,6 @@
 #     pygments_lexer: ipython3
 #     version: 3.10.8
 # ---
-
 # %% [markdown]
 # # Mathematical operations
 
@@ -152,7 +151,7 @@ _ = dataset.plot()
 # present negative values, and we will also mask some data
 
 # %%
-dataset = dataset - 2.0  # add an offset to make that some of the values become negative
+dataset -= 2.0  # add an offset to make that some of the values become negative
 dataset[1290.0:890.0] = scp.MASKED  # additionally we mask some data
 _ = dataset.plot()
 

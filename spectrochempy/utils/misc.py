@@ -75,8 +75,6 @@ def get_n_decimals(val, accuracy):
 # ======================================================================================
 # Private methods
 # ======================================================================================
-
-
 def _codechange(code_obj, changes):
     code = types.CodeType
     names = [
@@ -115,8 +113,6 @@ class _DummyFile(object):
 # ======================================================================================
 # Public methods
 # ======================================================================================
-
-
 def as_quaternion(*args):
     """
     Recombine the arguments to produce a numpy array with quaternion dtype.
@@ -362,7 +358,7 @@ def htmldoc(text):
         html[i] = html[i].replace("Methods", "<h4>Methods</h4>")
         if html[i] != "":
             if "</h" not in html[i]:
-                html[i] = html[i] + "<br/>"
+                html[i] += "<br/>"
             if not html[i].strip().startswith("<"):
                 html[i] = "&nbsp;&nbsp;&nbsp;&nbsp;" + html[i]
     html = "".join(html)

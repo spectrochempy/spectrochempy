@@ -44,8 +44,6 @@ def pstr(object, **kwargs):
 # ======================================================================================
 # Terminal colors and styles
 # ======================================================================================
-
-
 def TBold(text):
     return Style.BRIGHT + str(text) + Style.RESET_ALL
 
@@ -201,8 +199,6 @@ def convert_to_html(obj):
 #  the non-public interface of numpy.ma
 #  see the header of numpy.ma.core.py for the license
 # ======================================================================================
-
-
 class _MaskedPrintOption(object):
 
     # """
@@ -363,8 +359,6 @@ def insert_masked_print(ds, mask_string="--"):
 # ======================================================================================
 # numpy printoptions
 # ======================================================================================
-
-
 def numpyprintoptions(
     precision=4,
     threshold=6,

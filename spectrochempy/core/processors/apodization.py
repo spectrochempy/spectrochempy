@@ -35,8 +35,6 @@ pi = np.pi
 # ======================================================================================
 # Decorators
 # ======================================================================================
-
-
 def _apodize_method(**units):
     # Decorator to set units of parameters according to dataset units
 
@@ -102,7 +100,6 @@ def _apodize_method(**units):
 
                 # Call to the apodize function
                 # ----------------------------
-
                 # now call the method with unitless parameters
                 if is_ir:
                     # we must apodize at the top of the interferogram.
@@ -157,8 +154,6 @@ def _apodize_method(**units):
 # ======================================================================================
 # Public module methods
 # ======================================================================================
-
-
 @_apodize_method(lb="Hz", shifted="us")
 def em(dataset, lb=1, shifted=0, **kwargs):
     r"""

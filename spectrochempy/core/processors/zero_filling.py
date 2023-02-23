@@ -16,11 +16,10 @@ from spectrochempy.core import error_
 from spectrochempy.core.dataset.coord import LinearCoord
 from spectrochempy.utils import largest_power_of_2
 
+
 # ======================================================================================
 # Decorators
 # ======================================================================================
-
-
 def _zf_method(method):
     @functools.wraps(method)
     def wrapper(dataset, **kwargs):
@@ -82,8 +81,6 @@ def _zf_method(method):
 # ======================================================================================
 # Private methods
 # ======================================================================================
-
-
 def _zf_pad(data, pad=0, mid=False, **kwargs):
     """
     Zero fill by padding with zeros.
@@ -118,8 +115,6 @@ def _zf_pad(data, pad=0, mid=False, **kwargs):
 # ======================================================================================
 # Public methods
 # ======================================================================================
-
-
 @_zf_method
 def zf_double(dataset, n, mid=False, **kwargs):
     """

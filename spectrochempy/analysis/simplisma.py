@@ -21,6 +21,9 @@ from spectrochempy.core import info_
 from spectrochempy.utils import exceptions
 
 
+# ======================================================================================
+# class SIMPLISMA
+# ======================================================================================
 class SIMPLISMA(DecompositionAnalysisConfigurable):
     """
     SIMPLe to use Interactive Self-modeling Mixture Analysis.
@@ -555,6 +558,6 @@ class SIMPLISMA(DecompositionAnalysisConfigurable):
         return s
 
 
-# ============================================================================
+# ======================================================================================
 if __name__ == "__main__":
     pass

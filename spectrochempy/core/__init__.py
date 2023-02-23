@@ -60,7 +60,6 @@ def _pbar_update(close=None):
 # loading module libraries
 # here we also construct the __all__ list automatically
 # ======================================================================================
-
 _pbar_update()
 from spectrochempy.application import app  # noqa: E402
 

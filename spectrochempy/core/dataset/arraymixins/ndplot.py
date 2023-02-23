@@ -34,11 +34,10 @@ HAS_PLOTLY = go is not None
 
 # from spectrochempy.utils import deprecated
 
+
 # ======================================================================================
 # Management of the preferences for datasets
 # ======================================================================================
-
-
 class PreferencesSet(Meta):
     """
     Preferences setting.
@@ -340,8 +339,6 @@ class PreferencesSet(Meta):
 # ======================================================================================
 # Class NDPlot to handle plotting of datasets
 # ======================================================================================
-
-
 class NDPlot(HasTraits):
     """
     Plotting interface for |NDDataset|.
@@ -443,7 +440,6 @@ class NDPlot(HasTraits):
 
         # Execute the plotter
         # --------------------
-
         return _plotter(**kwargs)
 
     # ----------------------------------------------------------------------------------
@@ -490,7 +486,6 @@ class NDPlot(HasTraits):
 
         # Get current figure information
         # ------------------------------
-
         # should we use the previous figure?
         clear = kwargs.get("clear", True)
 
@@ -593,7 +588,6 @@ class NDPlot(HasTraits):
 
             # show projections (only useful for map or image)
             # ------------------------------------------------
-
             self.colorbar = colorbar = kwargs.get("colorbar", prefs.colorbar)
 
             proj = kwargs.get("proj", prefs.show_projections)
@@ -680,7 +674,6 @@ class NDPlot(HasTraits):
 
         # Additional matplotlib commands on the current plot
         # ---------------------------------------------------------------------
-
         commands = kwargs.get("commands", [])
         if commands:
             for command in commands:
@@ -712,14 +705,12 @@ class NDPlot(HasTraits):
     # ------------------------------------------------------------------------
     # Special attributes
     # ------------------------------------------------------------------------
-
     def __dir__(self):
         return ["fignum", "ndaxes", "divider"]
 
     # ------------------------------------------------------------------------
     # Properties
     # ------------------------------------------------------------------------
-
     @default("_preferences")
     def _preferences_default(self):
         # Reset all preferences

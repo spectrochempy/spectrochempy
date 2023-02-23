@@ -9,7 +9,6 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.7.1
 # ---
-
 # %%
 """autodoc extension for configurable traitlets
 

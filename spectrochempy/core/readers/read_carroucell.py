@@ -94,8 +94,6 @@ def read_carroucell(directory=None, **kwargs):
 # --------------------------------------------------------------------------------------
 # Private methods
 # --------------------------------------------------------------------------------------
-
-
 @_importer_method
 def _read_carroucell(*args, **kwargs):
 

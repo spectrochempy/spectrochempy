@@ -64,9 +64,9 @@ class PlotPreferences(MetaConfigurable):
     _groups = Set(Unicode())
     _subgroups = Set(Unicode())
     _members = Set(Unicode())
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     # Configuration entries based on the classic matplotlib style
-    # ------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     #
     # LINES
     # See http://matplotlib.org/api/artist_api.html#module-matplotlib.lines for more
