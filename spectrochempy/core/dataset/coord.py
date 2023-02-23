@@ -803,7 +803,7 @@ class Coord(NDMath, NDArray):
         # if new._linear:
         #     # try to make it linear as well
         #     new._linearize()
-        #     if not new._linear and new.implements("LinearCoord"):
+        #     if not new._linear and new._implements("LinearCoord"):
         #         # can't be linearized -> Coord
         #         if inplace:
         #             raise Exception(

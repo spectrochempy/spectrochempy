@@ -139,11 +139,11 @@ class Script(HasTraits):
     # Public methods
     # ----------------------------------------------------------------------------------
     @staticmethod
-    def implements(self, name=None):
+    def _implements(name=None):
         """
         Utility to check if the current object implement `Project`.
 
-        Rather than isinstance(obj, Project) use object.implements('Project').
+        Rather than isinstance(obj, Project) use object._implements('Project').
         This is useful to check type without importing the module
 
         Parameters

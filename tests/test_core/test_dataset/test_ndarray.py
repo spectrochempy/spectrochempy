@@ -31,8 +31,8 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
 
     d0 = NDArray(description="testing ndarray")
 
-    assert d0.implements("NDArray")
-    assert d0.implements() == "NDArray"
+    assert d0._implements("NDArray")
+    assert d0._implements() == "NDArray"
 
     assert isinstance(d0, NDArray)
 

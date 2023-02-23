@@ -28,7 +28,7 @@ __all__ = [
 
 
 def pstr(object, **kwargs):
-    if hasattr(object, "implements") and object.implements() in [
+    if hasattr(object, "_implements") and object._implements() in [
         "NDArray",
         "NDComplexArrray",
         "NDDataset",

@@ -18,7 +18,7 @@ def test_compare_ndarrays(IR_dataset_1D):
     nda1 = NDArray(IR_dataset_1D)
     nda2 = nda1.copy()
 
-    assert not nda1.implements("NDDataset")
+    assert not nda1._implements("NDDataset")
     testing.assert_ndarray_equal(nda1, nda2)
 
     # equality does not depend on title
@@ -53,13 +53,13 @@ def test_compare_coords(IR_dataset_2D):
     x1 = IR_dataset_2D.x
     x2 = x1.copy()
 
-    assert x1.implements("LinearCoord")
+    assert x1._implements("LinearCoord")
     testing.assert_coord_equal(x1, x2)
 
     y1 = IR_dataset_2D.y
     y2 = y1.copy()
 
-    assert y2.implements("Coord")
+    assert y2._implements("Coord")
     testing.assert_coord_equal(y1, y2)
 
     # equality do depend on title for coordinates

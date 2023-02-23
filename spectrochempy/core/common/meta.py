@@ -176,7 +176,7 @@ class Meta(object):  # HasTraits):
     # public methods
     # ----------------------------------------------------------------------------------
     @staticmethod
-    def implements(name=None):
+    def _implements(name=None):
         if name is None:
             return "Meta"
         else:

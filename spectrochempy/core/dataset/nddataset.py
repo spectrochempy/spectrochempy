@@ -738,7 +738,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
                 # check the validity of the given coordinates in terms of size (if it correspond to one of the dims)
                 size = coord.size
 
-                if self.implements("NDDataset"):
+                if self._implements("NDDataset"):
                     idx = self._get_dims_index(coord.name)[0]  # idx in self.dims
                     if size != self._data.shape[idx]:
                         raise ValueError(
