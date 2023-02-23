@@ -42,6 +42,7 @@ dependencies:
     - scipy
     - tqdm
     - traitlets
+    - traittypes
     - scikit-learn
     - xlrd
     - pyyaml
@@ -92,6 +93,5 @@ dependencies:
 
     - pip
     - pip:
-        - traittypes@git+https://github.com/spectrochempy/traittypes.git
         - autodoc_traits
 #EOF

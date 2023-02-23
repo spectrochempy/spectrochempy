@@ -33,6 +33,7 @@ or updated accordingly
     - scipy
     - tqdm
     - traitlets
+    - traittypes
     - scikit-learn
     - xlrd
     - pyyaml
@@ -90,10 +91,9 @@ or updated accordingly
     - jupyter-dash
     - plotly
 {%- endif %}
+{%- if DEV %}
     - pip
     - pip:
-        - traittypes@git+https://github.com/spectrochempy/traittypes.git
-{%- if DEV %}
         - autodoc_traits
 {%- endif %}
 {%- if DASH %}
