@@ -13,7 +13,6 @@ import warnings
 
 import numpy as np
 import traitlets as tr
-from traittypes import Array
 
 from spectrochempy.analysis._analysisutils import (
     NotFittedError,
@@ -22,6 +21,7 @@ from spectrochempy.analysis._analysisutils import (
 from spectrochempy.core import app, set_loglevel
 from spectrochempy.core.common.meta import Meta
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils import MASKED, NOMASK, exceptions
 from spectrochempy.utils.traits import MetaConfigurable, NDDatasetType
 

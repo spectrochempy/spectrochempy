@@ -16,7 +16,6 @@ import logging
 import numpy as np
 import traitlets as tr
 from sklearn import decomposition
-from traittypes import Array
 
 from spectrochempy.analysis._analysisutils import (
     NotFittedError,
@@ -24,6 +23,7 @@ from spectrochempy.analysis._analysisutils import (
 )
 from spectrochempy.analysis.abstractanalysis import DecompositionAnalysisConfigurable
 from spectrochempy.core import info_
+from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils import exceptions
 
 # Developper notes
