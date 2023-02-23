@@ -68,7 +68,8 @@ class SciType(TraitType):
             def shape(*dimensions):
                 def validator(trait, value):
                     if value.shape != dimensions:
-                        raise TraitError('Expected an of shape %s and got and array with shape %s' % (dimensions, value.shape))
+                        raise TraitError('Expected an of shape %s and got and array with
+                         shape %s' % (dimensions, value.shape))
                     else:
                         return value
                 return validator

@@ -11,12 +11,10 @@ from datetime import datetime, timezone
 
 import numpy as np
 from numpy.linalg import svd
-from traitlets import Float, HasTraits, Instance
+from traitlets import Float, HasTraits
 
-from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core.dataset.coordset import CoordSet
-from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import MASKED
+from spectrochempy.utils.traits import NDDatasetType
 
 __all__ = ["EFA"]
 
@@ -38,25 +36,17 @@ class EFA(HasTraits):
         in each IR spectrum).
     """
 
-    _f_ev = Instance(NDDataset)
-    _b_ev = Instance(NDDataset)
+    _X = NDDatasetType()
+    _f_ev = NDDatasetType()
+    _b_ev = NDDatasetType()
     _cutoff = Float(allow_none=True)
 
     def __init__(self, dataset):
         super().__init__()
 
-        # check if we have the correct input
-        # ----------------------------------
         X = dataset
-
-        if isinstance(X, NDDataset):
-            self._X = X
-            M, N = X.shape
-        else:
-            raise TypeError(
-                f"An object of type NDDataset is expected as input, but an object of type"
-                f" {type(X).__name__} has been provided"
-            )
+        self._X = X  # Validation is done automatically
+        M, N = X.shape
 
         # max number of components
         K = min(M, N)
@@ -74,6 +64,9 @@ class EFA(HasTraits):
         # ------------------------------------------------------------------------------
         # forward analysis
         # ------------------------------------------------------------------------------
+        from spectrochempy.core.dataset.coord import Coord
+        from spectrochempy.core.dataset.nddataset import NDDataset
+
         f = NDDataset(
             np.zeros((M, K)),
             coordset=[X.y, Coord(range(K))],
@@ -174,6 +167,10 @@ class EFA(HasTraits):
         concentrations
             Concentration profile.
         """
+        from spectrochempy.core.dataset.coord import Coord
+        from spectrochempy.core.dataset.coordset import CoordSet
+        from spectrochempy.core.dataset.nddataset import NDDataset
+
         M, K = self.f_ev.shape
         if n_pc is None:
             n_pc = K

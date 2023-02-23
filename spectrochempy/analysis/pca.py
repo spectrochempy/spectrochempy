@@ -16,14 +16,14 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 from scipy import special
-from traitlets import HasTraits, Instance
+from traitlets import HasTraits
 
 from spectrochempy.analysis.svd import SVD
 from spectrochempy.core import info_
 from spectrochempy.core.dataset.arraymixins.npy import dot
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import NBlue, NRed
+from spectrochempy.utils.traits import NDDatasetType
 
 
 # ======================================================================================
@@ -73,17 +73,17 @@ class PCA(HasTraits):
        Performs MCR-ALS of a |NDDataset| knowing the initial C or St matrix.
     """
 
-    _LT = Instance(NDDataset)
-    _S = Instance(NDDataset)
-    _X = Instance(NDDataset)
+    _LT = NDDatasetType()
+    _S = NDDatasetType()
+    _X = NDDatasetType()
 
-    _ev = Instance(NDDataset)
+    _ev = NDDatasetType()
     """|NDDataset| - Explained variances (The eigenvalues of the covariance matrix)."""
 
-    _ev_ratio = Instance(NDDataset)
+    _ev_ratio = NDDatasetType()
     """|NDDataset| - Explained variance per singular values."""
 
-    _ev_cum = Instance(NDDataset)
+    _ev_cum = NDDatasetType()
     """|NDDataset| - Cumulative Explained Variances."""
 
     def __init__(self, dataset, centered=True, standardized=False, scaled=False):

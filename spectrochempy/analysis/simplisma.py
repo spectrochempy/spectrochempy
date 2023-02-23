@@ -15,12 +15,13 @@ __dataset_methods__ = []
 import warnings
 
 import numpy as np
-from traitlets import HasTraits, Instance, Unicode
+from traitlets import HasTraits, Unicode
 
 from spectrochempy.core import INFO, info_, set_loglevel
 from spectrochempy.core.dataset.arraymixins.npy import dot
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import exceptions
+from spectrochempy.utils.traits import NDDatasetType
 
 
 # ======================================================================================
@@ -55,11 +56,11 @@ class SIMPLISMA(HasTraits):
         15 - large offset).
     """
 
-    _St = Instance(NDDataset)
-    _C = Instance(NDDataset)
-    _X = Instance(NDDataset)
-    _Pt = Instance(NDDataset)
-    _s = Instance(NDDataset)
+    _St = NDDatasetType()
+    _C = NDDatasetType()
+    _X = NDDatasetType()
+    _Pt = NDDatasetType()
+    _s = NDDatasetType()
     _logs = Unicode()
 
     def __init__(self, dataset, **kwargs):

@@ -15,14 +15,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.interpolate
 from matplotlib.widgets import SpanSelector
-from traitlets import Float, HasTraits, Instance, Int, List, Tuple, Unicode
+from traitlets import Float, HasTraits, Int, List, Tuple, Unicode
 
 from spectrochempy.core import debug_, warning_
-from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.plotters.multiplot import multiplot
 from spectrochempy.core.processors.smooth import smooth
 from spectrochempy.core.processors.utils import _units_agnostic_method
 from spectrochempy.utils import TYPE_FLOAT, TYPE_INTEGER, trim_ranges
+from spectrochempy.utils.traits import NDDatasetType
 
 
 class BaselineCorrection(HasTraits):
@@ -65,8 +65,8 @@ class BaselineCorrection(HasTraits):
         show()
     """
 
-    dataset = Instance(NDDataset)
-    corrected = Instance(NDDataset)
+    dataset = NDDatasetType()
+    corrected = NDDatasetType()
     method = Unicode("sequential")
     interpolation = Unicode("polynomial")
     axis = Int(-1)
@@ -204,6 +204,8 @@ class BaselineCorrection(HasTraits):
                 continue
 
             s.append(sect)
+
+        from spectrochempy.core.dataset.nddataset import NDDataset
 
         sbase = NDDataset.concatenate(s, axis=-1)
         # TODO: probably we could use masked data instead of concatenating - could be faster
