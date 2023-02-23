@@ -679,7 +679,7 @@ class DecompositionAnalysisConfigurable(AnalysisConfigurable):
         res = X - X_hat
         ax = X.plot()
         ma = max(X.max(), X_hat.max())
-        if X.x.data is not None:
+        if X.x is not None and X.x.data is not None:
             ax.plot(X.x.data, X_hat.T.masked_data - ma, color=colXhat)
             ax.plot(X.x.data, res.T.masked_data - 1.2 * ma, color=colRes)
         else:
