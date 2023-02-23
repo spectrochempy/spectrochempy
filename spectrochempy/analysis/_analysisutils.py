@@ -114,7 +114,7 @@ class _set_output(object):
 
         # restore eventually masked rows and columns
         axis = "both"
-        if self.typex is not None and self.typex != "feature":
+        if self.typex is not None and self.typex != "features":
             axis = 0
         elif self.typey is not None:
             axis = 1
@@ -155,7 +155,7 @@ class _set_output(object):
                         title="components",
                     ),
                 )
-            if self.typex == "feature":
+            if self.typex == "features":
                 X_transf.set_coordset(
                     y=Coord(
                         None,
