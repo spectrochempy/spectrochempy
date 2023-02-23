@@ -66,30 +66,8 @@ from spectrochempy.application import app  # noqa: E402
 __all__ += ["app"]
 
 from spectrochempy.application import (
-    __version__ as version,
-    __release__ as release,
-    __copyright__ as copyright,
-    __license__ as license,
-    __release_date__ as release_date,
-    __author__ as authors,
-    __contributor__ as contributors,
-    __url__ as url,
-    DEBUG,
     WARNING,
-    ERROR,
-    CRITICAL,
-    INFO,
-    error_,
-    warning_,
-    debug_,
-    info_,
     preferences,
-    plot_preferences,
-    description,
-    long_description,
-    config_dir,
-    config_manager,
-    reset_preferences,
 )  # noqa: E402
 
 
@@ -147,14 +125,6 @@ _pbar_update()
 
 # constants
 # ---------
-from spectrochempy.utils import (
-    show,
-    MASKED,
-    NOMASK,
-    EPSILON,
-    INPLACE,
-    show_versions,
-)
 
 __all__ += ["show", "MASKED", "NOMASK", "EPSILON", "INPLACE", "show_versions"]
 
@@ -203,14 +173,6 @@ __all__ += api.__all__
 _pbar_update()
 from spectrochempy.core.units import api  # noqa: E402
 from spectrochempy.core.units.api import *  # noqa: E402,F403,F401
-
-__all__ += api.__all__
-
-# databases
-# ---------
-_pbar_update()
-from spectrochempy.databases import api  # noqa: E402
-from spectrochempy.databases.api import *  # noqa: E402,F403,F401
 
 __all__ += api.__all__
 
