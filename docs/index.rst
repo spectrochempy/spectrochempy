@@ -90,7 +90,6 @@ User's Guide
 * :doc:`userguide/processing/processing`
 * :doc:`userguide/analysis/analysis`
 * :doc:`userguide/units/units`
-* :doc:`userguide/databases/databases`
 * :doc:`userguide/api/api`
 
 .. toctree::
