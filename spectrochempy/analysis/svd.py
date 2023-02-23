@@ -21,6 +21,7 @@ from spectrochempy.analysis._analysisutils import _svd_flip
 from spectrochempy.core.dataset.basearrays.ndarray import MASKED
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.utils.traits import NDDatasetType
 
 
 # ------------------------------------------------------------------
@@ -63,13 +64,13 @@ class SVD(tr.HasTraits):
     [   94.54    5.059 ... 8.687e-06 7.779e-06]
     """
 
-    U = tr.Instance(NDDataset, allow_none=True)
+    U = NDDatasetType(allow_none=True)
     """|NDDataset| - Contains the left unitary matrix. Its shape depends on `full_matrices`"""
 
-    s = tr.Instance(NDDataset)
+    s = NDDatasetType()
     """|NDDataset| - Vector of singular values"""
 
-    VT = tr.Instance(NDDataset, allow_none=True)
+    VT = NDDatasetType(allow_none=True)
     """|NDDataset| - Contains a transpose matrix of the Loadings. Its shape depends on `full_matrices`"""
 
     def __init__(self, dataset, full_matrices=False, compute_uv=True):
