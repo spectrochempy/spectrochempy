@@ -505,14 +505,17 @@ for reproducible results across multiple function calls.""",
             else:
                 colors = np.array(range(scores.shape[0]))
 
-        elif color_mapping == "labels":
-            labels = list(set(scores.y.labels))
+        elif color_mapping == "labels" and scores.y.labels is not None:
+            if scores.y.labels.ndim == 1:
+                labels = list(set(scores.y.labels))
+            else:
+                labels = list(set(scores.y.labels[:, labels_column]))
             colors = [labels.index(lab) for lab in scores.y.labels]
 
         # labels
-        labels = None
+        scatterlabels = None
         if show_labels:
-            labels = scores.y.labels[:, labels_column]
+            scatterlabels = scores.y.labels[:, labels_column]
 
         if len(pcs) == 2:
             # bidimensional score plot
@@ -531,8 +534,8 @@ for reproducible results across multiple function calls.""",
             y = scores.masked_data[:, pcs[1]]
             axsc = ax.scatter(x, y, s=30, c=colors, cmap=colormap)
 
-            if labels is not None:
-                for idx, lab in enumerate(labels):
+            if scatterlabels is not None:
+                for idx, lab in enumerate(scatterlabels):
                     ax.annotate(
                         lab,
                         xy=(x[idx], y[idx]),
@@ -576,7 +579,7 @@ for reproducible results across multiple function calls.""",
                 depthshade=True,
             )
 
-        if color_mapping == "labels":
+        if color_mapping == "labels" and scores.y.labels is not None:
             import matplotlib.patches as mpatches
 
             leg = []
