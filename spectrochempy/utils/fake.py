@@ -61,7 +61,7 @@ def generate_fake():
     """
 
     # define properties of the spectra and concentration profiles
-    # ----------------------------------------------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
     from spectrochempy.analysis import models
     from spectrochempy.core.dataset.arraymixins.npy import dot
 

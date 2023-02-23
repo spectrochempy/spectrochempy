@@ -22,11 +22,10 @@ from spectrochempy.utils.testing import (
     raises,
 )
 
+
 # --------------------------------------------------------------------------------------
 #  NDARRAY INITIALIZATION
 # --------------------------------------------------------------------------------------
-
-
 def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     # initialisation with null array
 
