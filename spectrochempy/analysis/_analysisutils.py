@@ -114,7 +114,7 @@ class _set_output(object):
 
         # restore eventually masked rows and columns
         axis = "both"
-        if self.typex is not None:
+        if self.typex is not None and self.typex != "feature":
             axis = 0
         elif self.typey is not None:
             axis = 1
