@@ -875,7 +875,7 @@ class NDArray(HasTraits):
 
                 dtype = self.dtype
                 data = ""
-                if self.implements("Coord") or self.implements("LinearCoord"):
+                if self._implements("Coord") or self._implements("LinearCoord"):
                     size = f" (size: {self.data.size})"
                 units = " " + self._repr_units()
             else:
@@ -1398,11 +1398,11 @@ class NDArray(HasTraits):
     def imag(self):
         return None
 
-    def implements(self, name=None):
+    def _implements(self, name=None):
         """
         Utility to check if the current object implements a given class.
 
-        Rather than isinstance(obj, <class>) use object.implements('<classname>').
+        Rather than isinstance(obj, <class>) use object._implements('<classname>').
         This is useful to check type without importing the module.
 
         Parameters
@@ -1414,11 +1414,11 @@ class NDArray(HasTraits):
         --------
         >>> from spectrochempy import NDArray
         >>> ar = NDArray([1., 2., 3.])
-        >>> ar.implements('NDDataset')
+        >>> ar._implements('NDDataset')
         False
-        >>> ar.implements('NDArray')
+        >>> ar._implements('NDArray')
         True
-        >>> ar.implements()
+        >>> ar._implements()
         'NDArray'
         """
         if name is None:

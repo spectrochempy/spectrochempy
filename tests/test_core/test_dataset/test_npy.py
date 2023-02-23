@@ -35,7 +35,7 @@ def test_npy(ds1):
     assert df.size == d.x.size**2
 
     df = diag(ds.data)
-    assert df.implements("NDDataset")
+    assert df._implements("NDDataset")
 
     # DOT
     a = ds  # 2D dataset

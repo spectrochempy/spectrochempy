@@ -537,21 +537,21 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
     ds = NDDataset(x).full_like(2.5, title="empty")
     ds = scp.full_like(x, 2)
     assert np.all(ds.data == np.full((3,), 2))
-    assert ds.implements("NDDataset")
+    assert ds._implements("NDDataset")
 
     # _like as a classmethod
     ds = NDDataset.full_like(x, 2)
     assert np.all(ds.data == np.full((3,), 2))
-    assert ds.implements("NDDataset")
+    assert ds._implements("NDDataset")
 
     # _like as an instance method
     ds = NDDataset(x).full_like(2)
     assert np.all(ds.data == np.full((3,), 2))
-    assert ds.implements("NDDataset")
+    assert ds._implements("NDDataset")
 
     # _like as an instance method
     ds = NDDataset(x).empty_like(title="empty")
-    assert ds.implements("NDDataset")
+    assert ds._implements("NDDataset")
     assert ds.title == "empty"
 
     # from an array
@@ -559,13 +559,13 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
 
     ds = NDDataset(x).full_like(2)
     assert np.all(ds.data == np.full((3,), 2))
-    assert ds.implements("NDDataset")
+    assert ds._implements("NDDataset")
 
     # from a NDArray subclass with units
     x = NDDataset([1, 2, 3], units="km")
     ds = scp.full_like(x, 2)
     assert np.all(ds.data == np.full((3,), 2))
-    assert ds.implements("NDDataset")
+    assert ds._implements("NDDataset")
     assert ds.units == ur.km
 
     ds1 = scp.full_like(ds, np.nan, dtype=np.double, units="m")

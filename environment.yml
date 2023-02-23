@@ -29,6 +29,7 @@ dependencies:
     - cffconvert
     - colorama
     - dill
+    - docrep
     - ipython
     - jinja2
     - matplotlib
@@ -41,7 +42,6 @@ dependencies:
     - scipy
     - tqdm
     - traitlets
-    - traittypes
     - scikit-learn
     - xlrd
     - pyyaml
@@ -60,4 +60,7 @@ dependencies:
     - nodejs
 
 
+    - pip
+    - pip:
+        - traittypes@git+https://github.com/spectrochempy/traittypes.git
 #EOF

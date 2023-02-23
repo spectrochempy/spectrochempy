@@ -175,8 +175,8 @@ class Importer(HasTraits):
         args = list(args)
         if (
             args
-            and hasattr(args[0], "implements")
-            and args[0].implements() in ["NDDataset"]
+            and hasattr(args[0], "_implements")
+            and args[0]._implements() in ["NDDataset"]
         ):
             # the first arg is an instance of NDDataset
             object = args.pop(0)

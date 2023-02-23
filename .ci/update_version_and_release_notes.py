@@ -73,7 +73,7 @@ class Citation:
         }
         if key in self._outputformat.keys():
             return self.format(key)
-        raise AttributeError(f"`{key}` attribute not found in the `Citation` object.")
+        raise AttributeError
 
     def load(self):
         """
