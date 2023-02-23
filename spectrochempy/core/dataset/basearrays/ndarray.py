@@ -31,7 +31,6 @@ from traitlets import (
     default,
     validate,
 )
-from traittypes import Array
 
 from spectrochempy.core import error_, info_
 from spectrochempy.core.common.meta import Meta
@@ -42,6 +41,7 @@ from spectrochempy.core.units import (
     set_nmr_context,
     ur,
 )
+from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils import (
     INPLACE,
     MASKED,
