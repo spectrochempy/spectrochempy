@@ -29,7 +29,6 @@ from traitlets import (
     observe,
     validate,
 )
-from traittypes import Array
 
 from spectrochempy.core import error_, warning_
 from spectrochempy.core.dataset.arraymixins.ndio import NDIO
@@ -41,6 +40,7 @@ from spectrochempy.core.dataset.basearrays.ndcomplex import NDComplexArray
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.project.baseproject import AbstractProject
+from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils import colored_output, get_user_and_node
 from spectrochempy.utils.exceptions import SpectroChemPyError, UnknownTimeZoneError
 from spectrochempy.utils.optional import import_optional_dependency
