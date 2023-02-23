@@ -13,13 +13,14 @@ __all__ = ["MCRALS"]
 __dataset_methods__ = []
 
 import numpy as np
-from traitlets import Dict, HasTraits, Instance, Unicode
+from traitlets import Dict, HasTraits, Unicode
 
 from spectrochempy.analysis.pca import PCA
 from spectrochempy.core import INFO, info_, set_loglevel
 from spectrochempy.core.dataset.arraymixins.npy import dot
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import exceptions
+from spectrochempy.utils.traits import NDDatasetType
 
 
 class MCRALS(HasTraits):
@@ -192,9 +193,9 @@ class MCRALS(HasTraits):
     (NDDataset: [float64] unitless (shape: (y:4, x:96)), NDDataset: [float64] unitless (shape: (y:4, x:96)))
     """
 
-    _X = Instance(NDDataset)
-    _C = Instance(NDDataset, allow_none=True)
-    _St = Instance(NDDataset, allow_none=True)
+    _X = NDDatasetType()
+    _C = NDDatasetType(allow_none=True)
+    _St = NDDatasetType(allow_none=True)
     _log = Unicode()
     _params = Dict()
 

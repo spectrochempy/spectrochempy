@@ -18,6 +18,7 @@ from spectrochempy.core.common.meta import Meta
 from spectrochempy.core.dataset.nddataset import NDIO, NDDataset
 from spectrochempy.core.project.baseproject import AbstractProject
 from spectrochempy.core.scripts.script import Script
+from spectrochempy.utils.traits import NDDatasetType
 
 # from collections import OrderedDict
 
@@ -73,7 +74,7 @@ class Project(AbstractProject, NDIO):
 
     _parent = This()
     _projects = Dict(This())
-    _datasets = Dict(Instance(NDDataset))
+    _datasets = Dict(NDDatasetType())
     _scripts = Dict(Instance(Script))
     _others = Dict()
     _meta = Instance(Meta)

@@ -60,7 +60,7 @@ def generate_api(api_path, configurables=False):
         try:
             pkg = import_item(pkg)
         except Exception as exc:
-            debug_(str(exc))
+            debug_(f"When trying to load:{pkg} : {exc}")
             if not hasattr(pkg, "__all__"):
                 continue
             raise ImportError(pkg)

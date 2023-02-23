@@ -16,6 +16,7 @@ from traitlets import HasTraits, Instance
 from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units import Quantity
+from spectrochempy.utils.traits import NDDatasetType
 
 
 class LSTSQ(HasTraits):
@@ -37,7 +38,7 @@ class LSTSQ(HasTraits):
     """
 
     X = Instance(NDArray)
-    Y = Instance(NDDataset)
+    Y = NDDatasetType()
 
     def __init__(self, *datasets):
 
@@ -147,7 +148,7 @@ class NNLS(HasTraits):
     """
 
     X = Instance(NDArray)
-    Y = Instance(NDDataset)
+    Y = NDDatasetType()
 
     def __init__(self, *datasets):
 
@@ -262,7 +263,7 @@ class CurveFit(HasTraits):
     # Probably a mistake to correct...
 
     X = Instance(NDArray)
-    Y = Instance(NDDataset)
+    Y = NDDatasetType()
 
     def __init__(self, *datasets):
 

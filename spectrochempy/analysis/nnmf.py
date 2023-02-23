@@ -17,10 +17,10 @@ from time import time
 
 import numpy as np
 from numpy.linalg import norm
-from traitlets import Float, HasTraits, Instance, Int
+from traitlets import Float, HasTraits, Int
 
 from spectrochempy.core import INFO, debug_, get_loglevel, info_, set_loglevel
-from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.utils.traits import NDDatasetType
 
 
 class NNMF(HasTraits):
@@ -73,8 +73,8 @@ class NNMF(HasTraits):
     tol = Float()
     maxtime = Float()
     maxit = Int()
-    C = Instance(NDDataset)
-    St = Instance(NDDataset)
+    C = NDDatasetType()
+    St = NDDatasetType()
 
     def __init__(self, dataset, Ci, Sti, **kwargs):
         super().__init__()
