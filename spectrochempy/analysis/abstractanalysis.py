@@ -169,11 +169,11 @@ class AnalysisConfigurable(MetaConfigurable):
 
         rowsize, colsize = self._shape
         masked_rows, masked_columns = self._get_masked_rc(self._X_mask)
-        M, N = D.shape
 
         Dtemp = None
         # Put back masked columns in D
         # ----------------------------
+        M, N = D.shape
         if axis == -1 or axis == 1 or axis == "both":  # and D.shape[0] == rowsize:
             if np.any(masked_columns):
                 Dtemp = np.ma.zeros((M, colsize))  # note np.ma, not np.
@@ -183,6 +183,7 @@ class AnalysisConfigurable(MetaConfigurable):
 
         # Put back masked rows in D
         # -------------------------
+        M, N = D.shape  # may have ben modified above
         if axis == -2 or axis == 0 or axis == "both":  # and D.shape[1] == colsize:
             if np.any(masked_rows):
                 Dtemp = np.ma.zeros((rowsize, N))
