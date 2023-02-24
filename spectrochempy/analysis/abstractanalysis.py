@@ -53,7 +53,7 @@ class AnalysisConfigurable(MetaConfigurable):
 
     # ----------------------------------------------------------------------------------
     # Configuration parameters (mostly defined in subclass
-    # as they depends on the model estimator)
+    # as they depend on the model estimator)
     # ----------------------------------------------------------------------------------
 
     # write traits like e.g.,  A = Unicode("A", help='description").tag(config=True)
@@ -212,7 +212,7 @@ class AnalysisConfigurable(MetaConfigurable):
     # ----------------------------------------------------------------------------------
     @tr.default("name")
     def _name_default(self):
-        # this ensure a name has been defined for the subclassed model estimators
+        # this ensures a name has been defined for the subclassed model estimators
         # or an error is returned
         raise NameError("The name of the object was not defined.")
 
