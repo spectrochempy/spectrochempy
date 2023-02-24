@@ -146,7 +146,7 @@ class SVD(DecompositionAnalysisConfigurable):
     # ----------------------------------------------------------------------------------
     @property
     @_wrap_ndarray_output_to_nddataset(
-        keepunits=None, keeptitle=False, typesingle="components"
+        units=None, title="Singular values", typesingle="components"
     )
     def singular_values(self):
         """

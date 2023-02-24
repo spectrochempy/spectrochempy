@@ -76,15 +76,15 @@ class _set_output(object):
         self,
         method,
         *args,
-        keepunits=True,
-        keeptitle=True,
+        units="keep",
+        title="keep",
         typex=None,
         typey=None,
         typesingle=None,
     ):
         self.method = method
-        self.keepunits = keepunits
-        self.keeptitle = keeptitle
+        self.units = units
+        self.title = title
         self.typex = typex
         self.typey = typey
         self.typesingle = typesingle
@@ -124,12 +124,18 @@ class _set_output(object):
         # make a new dataset with this data
         X_transf = NDDataset(data)
         # Now set the NDDataset attributes
-        if self.keepunits:
-            X_transf.units = X.units
+        if self.units is not None:
+            if self.units == "keep":
+                X_transf.units = X.units
+            else:
+                X_transf.units = self.units
         X_transf.name = f"{X.name}_{obj.name}.{self.method.__name__}"
         X_transf.history = f"Created using method {obj.name}.{self.method.__name__}"
-        if self.keeptitle:
-            X_transf.title = X.title
+        if self.title is not None:
+            if self.title == "keep":
+                X_transf.title = X.title
+            else:
+                X_transf.title = self.title
         # make coordset
         M, N = X.shape
         if X_transf.shape == X.shape:
@@ -176,7 +182,7 @@ class _set_output(object):
 
 # wrap _set_output to allow for deferred calling
 def _wrap_ndarray_output_to_nddataset(
-    method=None, keepunits=True, keeptitle=True, typex=None, typey=None, typesingle=None
+    method=None, units="keep", title="keep", typex=None, typey=None, typesingle=None
 ):
     if method:
         # case of the decorator without argument
@@ -186,8 +192,8 @@ def _wrap_ndarray_output_to_nddataset(
         def wrapper(method):
             return _set_output(
                 method,
-                keepunits=keepunits,
-                keeptitle=keeptitle,
+                units=units,
+                title=title,
                 typex=typex,
                 typey=typey,
                 typesingle=typesingle,

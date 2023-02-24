@@ -423,9 +423,7 @@ profile #j,
 
         return Cdata, Stdata
 
-    @_wrap_ndarray_output_to_nddataset(
-        keepunits=False, keeptitle=False, typex="components"
-    )
+    @_wrap_ndarray_output_to_nddataset(units=None, title=None, typex="components")
     def _C_2_NDDataset(self, C):
         # getconc takes the C NDDataset as first argument (to take advantage
         # of useful metadata). But the current C in fit method is a ndarray (without
@@ -826,9 +824,7 @@ profile #j,
         return St
 
     @property
-    @_wrap_ndarray_output_to_nddataset(
-        keepunits=False, keeptitle=False, typex="components"
-    )
+    @_wrap_ndarray_output_to_nddataset(units=None, title=None, typex="components")
     def C_hard(self):
         """
         The hard concentration profiles.
@@ -836,9 +832,7 @@ profile #j,
         return self._outfit[2]
 
     @property
-    @_wrap_ndarray_output_to_nddataset(
-        keepunits=None, keeptitle=False, typey="components"
-    )
+    @_wrap_ndarray_output_to_nddataset(units=None, title=None, typey="components")
     def St_soft(self):
         """
         The soft spectra profiles.

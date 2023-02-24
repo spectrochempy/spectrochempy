@@ -467,9 +467,7 @@ class DecompositionAnalysisConfigurable(AnalysisConfigurable):
         Y = self._Y
         return Y
 
-    @_wrap_ndarray_output_to_nddataset(
-        keepunits=False, keeptitle=False, typex="components"
-    )
+    @_wrap_ndarray_output_to_nddataset(units=None, title=None, typex="components")
     def transform(self, X=None, **kwargs):
         """
         Apply dimensionality reduction to X.
@@ -624,9 +622,7 @@ class DecompositionAnalysisConfigurable(AnalysisConfigurable):
 
     fit_reduce.__doc__ = fit_transform.__doc__
 
-    @_wrap_ndarray_output_to_nddataset(
-        keepunits=None, keeptitle=False, typey="components"
-    )
+    @_wrap_ndarray_output_to_nddataset(units=None, title=None, typey="components")
     def get_components(self, n_components=None):
         """
         Returns the components dataset: (selected n_components, n_features).
@@ -651,7 +647,7 @@ class DecompositionAnalysisConfigurable(AnalysisConfigurable):
         return components
 
     @property
-    @_wrap_ndarray_output_to_nddataset(keepunits=None, keeptitle=True, typex="features")
+    @_wrap_ndarray_output_to_nddataset(units=None, title="keep", typex="features")
     def components(self):
         """
         Return a NDDataset with the components in feature space.
