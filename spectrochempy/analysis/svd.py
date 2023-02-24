@@ -7,25 +7,23 @@
 """
 This module implements the Singular Value Decomposition (SVD) class.
 """
-
-__all__ = ["SVD"]
-
-__dataset_methods__ = []
-
 import numpy as np
 import traitlets as tr
 
-from spectrochempy.analysis._analysisutils import _svd_flip
+from spectrochempy.analysis._analysisutils import (
+    _svd_flip,
+    _wrap_ndarray_output_to_nddataset,
+)
+from spectrochempy.analysis.abstractanalysis import DecompositionAnalysisConfigurable
 
-# from spectrochempy.analysis.abstractanalysis import AnalysisConfigurable
-from spectrochempy.core.dataset.basearrays.ndarray import MASKED
-from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils.traits import NDDatasetType
+__all__ = ["SVD"]
+__configurables__ = ["SVD"]
 
 
-# ------------------------------------------------------------------
-class SVD(tr.HasTraits):
+# ======================================================================================
+# class PCA
+# ======================================================================================
+class SVD(DecompositionAnalysisConfigurable):
     """
     Performs a Singular Value Decomposition of a dataset.
 
@@ -37,25 +35,37 @@ class SVD(tr.HasTraits):
     ignored in the calculation.
 
     Parameters
-    -----------
-    dataset : |NDDataset| object
-        The input dataset has shape (M, N). M is the number of
-        observations (for examples a series of IR spectra) while N
-        is the number of features (for example the wavenumbers measured
-        in each IR spectrum).
-    full_matrices : bool, optional, default=False.
-        If False , U and VT have the shapes (M,  k) and
-        (k, N), respectively, where k = min(M, N).
-        Otherwise the shapes will be (M, M) and (N, N),
-        respectively.
-    compute_uv : bool, optional, default: True.
-        Whether or not to compute U and VT in addition to s.
+    ----------
+    log_level : ["INFO", "DEBUG", "WARNING", "ERROR"], optional, default:"WARNING"
+        The log level at startup
+    config : Config object, optional
+        By default the configuration is determined by the MCRALS.py
+        file in the configuration directory. A traitlets.config.Config() object can
+        eventually be used here.
+    warm_start : bool, optional, default: false
+        When fitting with SIMPLISMA repeatedly on the same dataset, but for multiple
+        parameter values (such as to find the value maximizing performance),
+        it may be possible to reuse previous model learned from the previous parameter
+        value, saving time.
+        When warm_start is true, the existing fitted model attributes is used to
+        initialize the new model in a subsequent call to fit.
+    **kwargs
+        Optional configuration  parameters.
+
+    See Also
+    --------
+    PCA : Perform MCR-ALS of a |NDDataset| knowing the initial C or St matrix.
+    NNMF : Perform a Non-Negative Matrix Factorization of a |NDDataset|.
+    EFA : Perform an Evolving Factor Analysis (forward and reverse) of the input
+          |NDDataset|.
+    MCRALS : Perform MCR-ALS of a dataset knowing the initial C or St matrix.
+    SIMPLISMA :
 
     Examples
     --------
-
     >>> dataset = scp.read('irdata/nh4y-activation.spg')
-    >>> svd = scp.SVD(dataset)
+    >>> svd = scp.SVD()
+    >>> svd.fit(dataset)
     >>> print(svd.ev.data)
     [1.185e+04      634 ... 0.001089 0.000975]
     >>> print(svd.ev_cum.data)
@@ -64,188 +74,119 @@ class SVD(tr.HasTraits):
     [   94.54    5.059 ... 8.687e-06 7.779e-06]
     """
 
-    U = NDDatasetType(allow_none=True)
-    """|NDDataset| - Contains the left unitary matrix. Its shape depends on `full_matrices`"""
+    name = tr.Unicode("SVD")
+    description = tr.Unicode("Singular Value Decomposition")
 
-    s = NDDatasetType()
-    """|NDDataset| - Vector of singular values"""
+    # ----------------------------------------------------------------------------------
+    # Configuration parameters
+    # ----------------------------------------------------------------------------------
+    full_matrices = tr.Bool(
+        default_value=False,
+        help="If False , U and VT have the shapes (M,  k) and (k, N), respectively, "
+        "where k = min(M, N). Otherwise the shapes will be (M, M) and (N, N), "
+        "respectively.",
+    ).tag(config=True)
+    compute_uv = tr.Bool(
+        default_value=True, help="Whether or not to compute U and VT in addition to s."
+    ).tag(config=True)
 
-    VT = NDDatasetType(allow_none=True)
-    """|NDDataset| - Contains a transpose matrix of the Loadings. Its shape depends on `full_matrices`"""
+    # ----------------------------------------------------------------------------------
+    # Initialization
+    # ----------------------------------------------------------------------------------
+    def __init__(
+        self,
+        *,
+        log_level="WARNING",
+        config=None,
+        warm_start=False,
+        copy=True,
+        **kwargs,
+    ):
 
-    def __init__(self, dataset, full_matrices=False, compute_uv=True):
-
-        super().__init__()
-
-        self._compute_uv = compute_uv
-
-        # check if we have the correct input
-        # ----------------------------------
-        X = dataset
-
-        if isinstance(X, NDDataset):
-            # As seen below, we cannot performs SVD on the masked array
-            # so let's take the ndarray only.
-            # Warning: we need to take the hidden values, to handle the
-            # case of dim 1 axis. Of course, svd will work only for real
-            # data, not complex or hypercomplex.
-            data = X._data
-            M, N = X._data.shape
-            units = X.units
-
-        else:
-            raise TypeError(
-                f"A dataset of type NDDataset is expected as a dataset of data, but an object of type"
-                f" {type(X).__name__} has been provided"
-            )
-
-        # Retains only valid rows and columns
-        # -----------------------------------
-        # unfortunately, the present SVD implementation in linalg library
-        # doesn't support numpy masked arrays as input. So we will have to
-        # remove the masked values ourselves
-
-        # the following however assumes that entire rows or columns are masked,
-        # not only some individual data (if this is what you wanted, this
-        # will fail)
-
-        if np.any(X._mask):
-            masked_columns = np.all(X._mask, axis=-2)
-            masked_rows = np.all(X._mask, axis=-1)
-        else:
-            masked_columns = np.zeros(X._data.shape[-1], dtype=bool)
-            masked_rows = np.zeros(X._data.shape[-2], dtype=bool)
-
-        data = data[:, ~masked_columns]
-        data = data[~masked_rows]
-
-        # Performs the SVD
-        # ----------------
-        if data.size == 0 and np.product(data.shape[-2:]) == 0:
-            raise np.linalg.LinAlgError(
-                "Arrays cannot be empty. You may " "want to check the masked data. "
-            )
-
-        res = np.linalg.svd(data, full_matrices, compute_uv)
-        if compute_uv:
-            U, s, VT = res
-        else:
-            s = res
-
-        # Returns the diagonal sigma matrix as a NDDataset object
-        # -------------------------------------------------------
-        s = NDDataset(s)
-        s.title = "singular values of " + X.name
-        s.name = "sigma"
-        s.history = "Created by SVD \n"
-        s.description = (
-            "Vector of singular values obtained  by SVD " "decomposition of " + X.name
+        # call the super class for initialisation of the configuration parameters
+        # to do before anything else!
+        super().__init__(
+            log_level=log_level,
+            warm_start=warm_start,
+            config=config,
+            copy=copy,
+            **kwargs,
         )
-        self.s = s
 
-        if compute_uv:
-            # Put back masked columns in  VT
-            # ------------------------------
-            # Note that it is very important to use here the ma version of zeros
-            # array constructor
-            KV = VT.shape[0]
-            if np.any(masked_columns):
-                Vtemp = np.ma.zeros((KV, N))  # note np.ma, not np.
-                Vtemp[:, ~masked_columns] = VT
-                Vtemp[:, masked_columns] = MASKED
-                VT = Vtemp
-
-            # Put back masked rows in U
-            # -------------------------
-            KU = U.shape[1]
-            if np.any(masked_rows):
-                Utemp = np.ma.zeros((M, KU))
-                Utemp[~masked_rows] = U
-                Utemp[masked_rows] = MASKED
-                U = Utemp
-
-            # Sign correction to ensure deterministic output from SVD.
-            # This doesn't work will full_matrices=True.
-            if not full_matrices:
-                U, VT = _svd_flip(U, VT)
-
-            # Returns U as a NDDataset object
-            # --------------------------------
-            U = NDDataset(U)
-            U.name = "U"
-            U.title = "left singular vectors of " + X.name
-            U.set_coordset(
-                x=Coord(labels=[f"#{i + 1}" for i in range(KU)], title="Components"),
-                y=X.y,
-            )
-            U.description = "left singular vectors of " + X.name
-            U.history = "Created by SVD \n"
-
-            # Returns the loadings (VT) as a NDDataset object
-            # ------------------------------------------------
-            VT = NDDataset(VT)
-            VT.name = "V.T"
-            VT.title = "loadings (V.t) of " + X.name
-            VT.set_coordset(
-                x=X.x,
-                y=Coord(labels=[f"#{i + 1}" for i in range(KV)], title="Components"),
-            )
-            VT.description = (
-                "Loadings obtained by singular value decomposition of " + X.name
-            )
-            VT.history = str(VT.modified) + ": Created by SVD \n"
-            # loadings keep the units of the original data
-            VT.units = units
-
-            self.U = U
-            self.VT = VT
-        else:
-            self.U = None
-            self.VT = None
+    # ----------------------------------------------------------------------------------
+    # Private methods (overloading abstract classes)
+    # ----------------------------------------------------------------------------------
+    def _fit(self, X, Y=None):
+        # this method is called by the abstract class fit.
+        # Input X is a np.ndarray
+        # Y is ignored in this model
+        full_matrices = self.full_matrices
+        compute_uv = self.compute_uv
+        _outfit = np.linalg.svd(X, full_matrices, compute_uv)
+        # Sign correction to ensure deterministic output from SVD.
+        # This doesn't work will full_matrices=True.
+        if compute_uv and not full_matrices:
+            U, s, VT = _outfit
+            U, VT = _svd_flip(U, VT)
+            _outfit = U, s, VT
+        return _outfit
 
     # ----------------------------------------------------------------------------------
     # special methods
     # ----------------------------------------------------------------------------------
     def __repr__(self):
-        if self._compute_uv:
-            return f"<svd: U{self.U.shape}, s({self.s.size}), VT{self.VT.shape}>"
-        return f"<svd: s({self.s.size}), U, VT:not computed>"
+        if self.compute_uv:
+            U, s, VT = self._outfit
+            return f"<svd: U{U.shape}, s({s.size}), VT{VT.shape}>"
+        s = self._outfit
+        return f"<svd: s({s.size}), U and VT not computed>"
 
     # ----------------------------------------------------------------------------------
-    #  Properties
+    # Public method and properties
     # ----------------------------------------------------------------------------------
     @property
-    def sv(self):
+    @_wrap_ndarray_output_to_nddataset(
+        keepunits=None, keeptitle=False, typesingle="components"
+    )
+    def singular_values(self):
         """
-        Singular values (|NDDataset|).
+        Return a NDDataset containing singular values
         """
-        size = self.s.size
-        sv = self.s.copy()
-        sv.name = "sv"
-        sv.title = "singular values"
-        sv.set_coordset(
-            Coord(None, labels=[f"#{(i + 1)}" for i in range(size)], title="Components")
-        )
-        return sv
+        s = self._outfit[1]
+        return s
+
+    sv = singular_values
 
     @property
-    def ev(self):
+    def explained_variance(self):
         """
-        Explained variance (|NDDataset|).
+        Return a NDDataset of the explained variance.
         """
-        size = self.s.size
-        ev = self.s**2 / (size - 1)
+        size = self.sv.size
+        ev = self.sv**2 / (size - 1)
         ev.name = "ev"
         ev.title = "explained variance"
-        ev.set_coordset(
-            Coord(None, labels=[f"#{(i + 1)}" for i in range(size)], title="Components")
-        )
         return ev
 
+    ev = explained_variance
+
     @property
-    def ev_cum(self):
+    def explained_variance_ratio(self):
         """
-        Cumulative Explained Variance (|NDDataset|).
+        Return Explained Variance per singular values.
+        """
+        ratio = self.ev * 100.0 / np.sum(self.ev)
+        ratio.name = "ev_ratio"
+        ratio.title = "explained variance ratio"
+        ratio.units = "percent"
+        return ratio
+
+    ev_ratio = explained_variance_ratio
+
+    @property
+    def cumulative_explained_variance(self):
+        """
+        Return Cumulative Explained Variance.
         """
         ev_cum = np.cumsum(self.ev_ratio)
         ev_cum.name = "ev_cum"
@@ -253,16 +194,35 @@ class SVD(tr.HasTraits):
         ev_cum.units = "percent"
         return ev_cum
 
+    ev_cum = cumulative_explained_variance
+
+    # TODO: return masked array for U,s,VT
     @property
-    def ev_ratio(self):
+    def U(self):
         """
-        Explained Variance per singular values |NDDataset|).
+        Return the left unitary matrix.
+
+        Its shape depends on `full_matrices`.
         """
-        ratio = self.ev * 100.0 / np.sum(self.ev)
-        ratio.name = "ev_ratio"
-        ratio.title = "explained variance"
-        ratio.units = "percent"
-        return ratio
+        if self.compute_uv:
+            return self._outfit[0]
+
+    @property
+    def VT(self):
+        """
+        Return a transpose matrix of the Loadings.
+
+        Its shape depends on `full_matrices`
+        """
+        if self.compute_uv:
+            return self._outfit[2]
+
+    @property
+    def s(self):
+        """
+        Return Vector of singular values .
+        """
+        return self._outfit[1]
 
 
 # ======================================================================================

@@ -57,6 +57,7 @@ class SIMPLISMA(DecompositionAnalysisConfigurable):
     EFA : Perform an Evolving Factor Analysis (forward and reverse) of the input
           |NDDataset|.
     MCRALS : Perform MCR-ALS of a dataset knowing the initial C or St matrix.
+    SVD :
     """
 
     # TODO : adapt to 3DDataset ?
