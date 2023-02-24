@@ -171,22 +171,32 @@ class AnalysisConfigurable(MetaConfigurable):
         masked_rows, masked_columns = self._get_masked_rc(self._X_mask)
 
         Dtemp = None
-        # Put back masked columns in D
-        # ----------------------------
-        M, N = D.shape
-        if axis == -1 or axis == 1 or axis == "both":  # and D.shape[0] == rowsize:
-            if np.any(masked_columns):
-                Dtemp = np.ma.zeros((M, colsize))  # note np.ma, not np.
-                Dtemp[:, ~masked_columns] = D
-                Dtemp[:, masked_columns] = MASKED
-                D = Dtemp
+        if D.ndim == 2:
+            # Put back masked columns in D
+            # ----------------------------
+            M, N = D.shape
+            if axis == -1 or axis == 1 or axis == "both":  # and D.shape[0] == rowsize:
+                if np.any(masked_columns):
+                    Dtemp = np.ma.zeros((M, colsize))  # note np.ma, not np.
+                    Dtemp[:, ~masked_columns] = D
+                    Dtemp[:, masked_columns] = MASKED
+                    D = Dtemp
 
-        # Put back masked rows in D
-        # -------------------------
-        M, N = D.shape  # may have ben modified above
-        if axis == -2 or axis == 0 or axis == "both":  # and D.shape[1] == colsize:
+            # Put back masked rows in D
+            # -------------------------
+            M, N = D.shape  # may have ben modified above
+            if axis == -2 or axis == 0 or axis == "both":  # and D.shape[1] == colsize:
+                if np.any(masked_rows):
+                    Dtemp = np.ma.zeros((rowsize, N))
+                    Dtemp[~masked_rows] = D
+                    Dtemp[masked_rows] = MASKED
+                    D = Dtemp
+
+        elif D.ndim == 1:
+            # we assume here that the only case it happens is for array as explained
+            # variance so that we deal with masked rows
             if np.any(masked_rows):
-                Dtemp = np.ma.zeros((rowsize, N))
+                Dtemp = np.ma.zeros((rowsize,))  # note np.ma, not np.
                 Dtemp[~masked_rows] = D
                 Dtemp[masked_rows] = MASKED
                 D = Dtemp

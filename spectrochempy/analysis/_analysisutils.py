@@ -119,9 +119,7 @@ class _set_output(object):
         elif self.typey is not None:
             axis = 1
 
-        if self.typesingle is None:
-            # not applicable for single array such as pca.ev
-            data = obj._restore_masked_data(data, axis=axis)
+        data = obj._restore_masked_data(data, axis=axis)
 
         # make a new dataset with this data
         X_transf = NDDataset(data)
