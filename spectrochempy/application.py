@@ -1167,7 +1167,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
 
             else:
                 if "/bin/scpy" not in sys.argv[0]:  # deactivate for console scripts
-                    info_(info_string.strip())
+                    print(info_string.strip())
 
         # force update of rcParams
         for rckey in mpl.rcParams.keys():
