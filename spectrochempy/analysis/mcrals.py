@@ -788,6 +788,7 @@ profile #j,
                 info_("Stop ALS optimization.")
 
         # return _fit results
+        self._components = St
         _outfit = (C, St, C_hard, St_soft, extOutput)
         return _outfit
 

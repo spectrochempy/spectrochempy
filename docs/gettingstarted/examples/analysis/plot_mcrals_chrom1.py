@@ -17,9 +17,11 @@ and Jaumot et al. Chemolab, 140 (2015) pp. 1-12,
 `DOI: 10.1016/j.chemolab.2014.10.003 <https://doi.org/10.1016/j.chemolab.2014.10.003>`_ .
 
 This dataset (and others) can be loaded from the
-`Multivariate Curve Resolution Homepage <https://mcrals.wordpress.com/download/example-data-sets>`_ .
+`Multivariate Curve Resolution Homepage
+<https://mcrals.wordpress.com/download/example-data-sets>`_ .
 
-For the user convenience, this dataset is present in the `datadir` of SpectroChemPy as 'als2004dataset.MAT' .
+For the user convenience, this dataset is present in the `datadir` of SpectroChemPy as
+'als2004dataset.MAT' .
 
 """
 # %%
@@ -35,11 +37,14 @@ datasets = scp.read_matlab("matlabdata/als2004dataset.MAT")
 print("\n NDDataset names: " + str([ds.name for ds in datasets]))
 
 # %%
-# We are interested in the last dataset ('m1') that contains a single HPLS-DAD run (51x96)  dataset.
-# As usual, the 51 rows correspond to the 'time axis' of the HPLC run, and the 96 columns to the 'wavelength' axis
-# of the UV spectra. The original dataset does not contain information as to the actual time and wavelength coordinates.
+# We are interested in the last dataset ('m1') that contains a single HPLS-DAD run
+# (51x96)  dataset.
+# As usual, the 51 rows correspond to the 'time axis' of the HPLC run, and the 96
+# columns to the 'wavelength' axis of the UV spectra. The original dataset does not
+# contain information as to the actual time and wavelength coordinates.
 #
-# MCR-ALS needs also an initial guess for either concentration profiles or pure spectra concentration profiles.
+# MCR-ALS needs also an initial guess for either concentration profiles or pure spectra
+# concentration profiles.
 # The 4th dataset 'spure' is a (4x96) guess of spectral profiles.
 #
 # Load the experimental data as X and the guess:

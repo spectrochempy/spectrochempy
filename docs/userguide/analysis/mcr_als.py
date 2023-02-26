@@ -29,6 +29,7 @@
 # %%
 from spectrochempy import read_matlab, MCRALS, PCA, EFA
 
+
 # %% [markdown]
 # ## Introduction
 #
@@ -219,20 +220,21 @@ mcr.fit(X, St0)
 mcr = MCRALS(tol=0.001, log_level="INFO")
 mcr.fit(X, St0)
 
-
 # %%
 mcr1 = MCRALS(tol=0.1, log_level="INFO")
 mcr1.fit(X, St0)
 
 # %%
 mcr1.tol = 0.01
-mcr1.fit(X, (mcr1.C, mcr1.St))  # reuse C and ST computed at the previous run
-print("second run with the ouput of the first")
+mcr1.fit(
+    X, (mcr1.C.copy(), mcr1.St.copy())
+)  # reuse C and ST computed at the previous run
+print("second run with the output of the first")
 
 # %%
 mcr1.tol = 0.001
 mcr1.fit(X, (mcr1.C, mcr1.St))
-print("third run with the ouput of the second")
+print("third run with the output of the second")
 
 # %%
 import numpy as np
@@ -330,12 +332,12 @@ _ = mcr3.C.T.plot()
 # %%
 pca = PCA()
 pca.fit(X)
-pca.printev(n_pc=10)
-_ = pca.screeplot(n_pc=8)
+pca.printev(n_components=10)
+_ = pca.screeplot(n_components=8)
 
 # %% [markdown]
 # The number of significant PC's is clearly larger or equal to 2. It is, however,
-# difficult tto determine whether
+# difficult to determine whether
 # it should be set to 3 or 4...  Let's look at the score and loading matrices:
 #
 

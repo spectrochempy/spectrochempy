@@ -647,10 +647,10 @@ class DecompositionAnalysisConfigurable(AnalysisConfigurable):
         return components
 
     @property
-    @_wrap_ndarray_output_to_nddataset(units=None, title="keep", typex="features")
+    @_wrap_ndarray_output_to_nddataset(units=None, title="keep", typey="components")
     def components(self):
         """
-        Return a NDDataset with the components in feature space.
+        Return a NDDataset with the components in feature space (n_components, n_features).
 
         See Also
         --------
