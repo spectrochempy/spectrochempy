@@ -16,44 +16,65 @@ In this example, we perform the Evolving Factor Analysis
 # sphinx_gallery_thumbnail_number = 2
 
 # %%
-
 import os
 import spectrochempy as scp
 
 # %%
 # Upload and preprocess a dataset
-
 datadir = scp.preferences.datadir
 dataset = scp.read_omnic(os.path.join(datadir, "irdata", "nh4y-activation.spg"))
 
 # %%
 # columns masking
-
 dataset[:, 1230.0:920.0] = scp.MASKED  # do not forget to use float in slicing
 dataset[:, 5997.0:5993.0] = scp.MASKED
 
 # %%
 # difference spectra
+# dataset -= dataset[-1]
+dataset.plot_stack(title="NH4_Y activation dataset")
 
-dataset -= dataset[-1]
-dataset.plot_stack()
-
-# %%
-# column masking for bad columns
-
-dataset[10:12] = scp.MASKED
 
 # %%
 #  Evolving Factor Analysis
-
-efa = scp.EFA()
-efa.fit(dataset)
+efa1 = scp.EFA()
+efa1.fit(dataset)
 
 # %%
-# Show results
+# Forward evolution of the 5 first components
+f = efa1.f_ev[:, :5]
+f.T.plot(yscale="log", legend=f.x.labels)
 
-efa.used_components = 4
-c = efa.transform()
-c.T.plot()
+# Backward evolution
+b = efa1.b_ev[:, :5]
+b.T[:5].plot(yscale="log", legend=b.x.labels)
 
-# scp.show()  # Uncomment to show plot if needed (not necessary in jupyter notebook)
+# %%
+# Show results with 3 components (which seems to already explain a large part of the dataset)
+# we use the magnitude of the 4th component for the cut-off value (assuming it
+# corresponds mostly to noise)
+efa1.used_components = 3
+efa1.cutoff = efa1.f_ev[:, 3].max()
+
+# get concentration
+C1 = efa1.transform()
+C1.T.plot(title="EFA determined concentrations", legend=C1.x.labels)
+
+scp.show()  # Uncomment to show plot if needed (not necessary in jupyter notebook)
+
+# %%
+# Fit transform : Get the concentration in too commands
+# The number of desired components can be passed to the EFA model,
+# followed by the fit_transform method:
+
+efa2 = scp.EFA(used_components=3)
+C2 = efa2.fit_transform(dataset)
+assert C1 == C2
+
+# %%
+# Get components
+#
+St = efa2.components
+St.plot(title="components", legend=St.y.labels)
+
+scp.show()

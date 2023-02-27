@@ -544,7 +544,6 @@ class SIMPLISMA(DecompositionAnalysisConfigurable):
         Pt.name = "Purity spectra"
         Pt.y.title = "# pure compound"
         Pt.description = "Purity spectra from SIMPLISMA:"  # + logs
-
         return Pt
 
     @property

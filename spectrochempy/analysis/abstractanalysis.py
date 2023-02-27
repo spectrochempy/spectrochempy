@@ -536,7 +536,7 @@ class DecompositionAnalysisConfigurable(AnalysisConfigurable):
         X_transform : array-like of shape (n_observations, n_components), optional
             Reduced X data, where `n_observations` is the number of observations
             and `n_components` is the number of components. If X_transform is not
-            provided, but a starsform of X provided in fit is performed first.
+            provided, a transform of X provided in fit is performed first.
         **kwargs
             Additional keyword parameters. See Other Parameters
 
@@ -544,7 +544,7 @@ class DecompositionAnalysisConfigurable(AnalysisConfigurable):
         ----------------
         n_components : int, optional
             The number of components to use for the inverse_transformation. If not given
-            The number of compopnents is eventually the one specified or determined
+            The number of components is eventually the one specified or determined
             in the fit process.
 
         Returns

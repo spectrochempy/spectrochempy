@@ -182,6 +182,11 @@ class EFA(DecompositionAnalysisConfigurable):
             c[i] = np.min((f[i, :K], b[i, :K][::-1]), axis=0)
         return c
 
+    def _get_components(self):
+        # compute the components from the original dataset and the EFA concentrations
+        St = np.dot(self._get_conc().T, self._X_preprocessed)
+        return St
+
     # ----------------------------------------------------------------------------------
     # Public methods/properties
     # ----------------------------------------------------------------------------------
