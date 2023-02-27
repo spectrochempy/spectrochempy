@@ -330,10 +330,10 @@ _ = mcr3.C.T.plot()
 # Let's first analyse our dataset using PCA and plot a screeplot:
 
 # %%
-pca = PCA()
+pca = PCA(used_components=8)
 pca.fit(X)
-pca.printev(n_components=10)
-_ = pca.screeplot(n_components=8)
+pca.printev()
+_ = pca.screeplot()
 
 # %% [markdown]
 # The number of significant PC's is clearly larger or equal to 2. It is, however,
@@ -342,32 +342,14 @@ _ = pca.screeplot(n_components=8)
 #
 
 # %%
-S, LT = pca.reduce(n_pc=8)
-_ = S.T.plot()
-_ = LT.plot()
+scores = pca.transform()
+_ = pca.loadings.plot()
+_ = scores.T.plot()
 
 # %% [markdown]
 # Examination of the scores and loadings indicate that the 4th component has structured,
 # nonrandom scores and loadings.
 # Hence, we will fix the number of pure species to 4.
-#
-# NB: The PCA.transform() can also be used with n_pc='auto' to determine automatically
-# the number of components using
-# the method of
-# Thomas P. Minka (Automatic Choice of Dimensionality for PCA. NIPS 2000: 598-604).
-# This type of methods,
-# however, often lead to too many PC's for the chemist because they recover all
-# contributions to the data variance:
-# chemical AND non-chemical, thus including non-gaussian noise, baseline changes,
-# background absorption...
-#
-# 29 in the present case:
-
-# %%
-pca = PCA()
-pca.fit(X)
-S3, LT3 = pca.reduce(n_pc="auto")
-S3.shape
 
 # %% [markdown]
 # #### Determination of initial concentrations using EFA
