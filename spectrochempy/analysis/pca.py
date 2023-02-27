@@ -19,7 +19,6 @@ from spectrochempy.analysis._analysisutils import (
     _wrap_ndarray_output_to_nddataset,
 )
 from spectrochempy.analysis.abstractanalysis import DecompositionAnalysisConfigurable
-from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils.plots import NBlue, NRed
 
 __all__ = ["PCA"]
@@ -495,7 +494,7 @@ for reproducible results across multiple function calls.""",
         self.prefs = self.X.preferences
 
         # checks args
-        if not isinstance(scores, NDDataset):
+        if hasattr(scores, "_implements") and not scores._implements("NDDataset"):
             raise ValueError(
                 "The fist argument of scoreplot must be the score NDDataset"
             )

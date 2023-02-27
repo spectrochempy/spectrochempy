@@ -138,7 +138,7 @@ class _set_output(object):
                 X_transf.title = self.title
         # make coordset
         M, N = X.shape
-        if X_transf.shape == X.shape:
+        if X_transf.shape == X.shape and self.typex is None and self.typey is None:
             X_transf.set_coordset(y=X.y, x=X.x)
         else:
             if self.typey == "components":

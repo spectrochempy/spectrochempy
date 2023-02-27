@@ -7,21 +7,17 @@
 """
 This module implement the EFA (Evolving Factor Analysis) class.
 """
-from datetime import datetime, timezone
-
 import numpy as np
-from numpy.linalg import svd
-from traitlets import Float, HasTraits
+import traitlets as tr
 
-from spectrochempy.utils import MASKED
-from spectrochempy.utils.traits import NDDatasetType
+from spectrochempy.analysis._analysisutils import _wrap_ndarray_output_to_nddataset
+from spectrochempy.analysis.abstractanalysis import DecompositionAnalysisConfigurable
 
 __all__ = ["EFA"]
+__configurables__ = ["EFA"]
 
-__dataset_methods__ = []
 
-
-class EFA(HasTraits):
+class EFA(DecompositionAnalysisConfigurable):
     """
     Evolving Factor Analysis.
 
@@ -29,176 +25,187 @@ class EFA(HasTraits):
 
     Parameters
     ----------
-    dataset : |NDDataset| object
-        The input dataset has shape (M, N). M is the number of
-        observations (for example a series of IR spectra) while N
-        is the number of features (for example the wavenumbers measured
-        in each IR spectrum).
+    log_level : ["INFO", "DEBUG", "WARNING", "ERROR"], optional, default:"WARNING"
+        The log level at startup
+    config : Config object, optional
+        By default the configuration is determined by the MCRALS.py
+        file in the configuration directory. A traitlets.config.Config() object can
+        eventually be used here.
+    warm_start : bool, optional, default: false
+        When fitting with SIMPLISMA repeatedly on the same dataset, but for multiple
+        parameter values (such as to find the value maximizing performance),
+        it may be possible to reuse previous model learned from the previous parameter
+        value, saving time.
+        When warm_start is true, the existing fitted model attributes is used to
+        initialize the new model in a subsequent call to fit.
+    **kwargs
+        Optional configuration  parameters.
+
+    See Also
+    --------
+    PCA : Principal Component Analysis.
+    NNMF : Perform a Non-Negative Matrix Factorization of a |NDDataset|.
+    MCRALS : Perform MCR-ALS of a dataset knowing the initial C or St matrix.
+    SVD :
+    SIMPLISMA :
     """
 
-    _X = NDDatasetType()
-    _f_ev = NDDatasetType()
-    _b_ev = NDDatasetType()
-    _cutoff = Float(allow_none=True)
+    name = tr.Unicode("EFA")
+    description = tr.Unicode("Evolving factor analysis model")
 
-    def __init__(self, dataset):
-        super().__init__()
+    # ----------------------------------------------------------------------------------
+    # Runtime Parameters,
+    # only those specific to PCA, the other being defined in AnalysisConfigurable.
+    # ----------------------------------------------------------------------------------
+    # define here only the variable that you use in fit or transform functions
 
-        X = dataset
-        self._X = X  # Validation is done automatically
-        M, N = X.shape
+    # _X = NDDatasetType()
+    # _f_ev = NDDatasetType()
+    # _b_ev = NDDatasetType()
+
+    # ----------------------------------------------------------------------------------
+    # Configuration parameters (mostly defined in subclass
+    # as they depend on the model estimator)
+    # ----------------------------------------------------------------------------------
+    cutoff = tr.Float(default_value=None, allow_none=True, help="Cut-off value").tag(
+        config=True
+    )
+
+    used_components = tr.Int(
+        allow_none=True, default_value=None, help="Number of components to keep."
+    ).tag(config=True)
+
+    # ----------------------------------------------------------------------------------
+    # Initialization
+    # ----------------------------------------------------------------------------------
+    def __init__(
+        self,
+        *,
+        log_level="WARNING",
+        config=None,
+        warm_start=False,
+        copy=True,
+        **kwargs,
+    ):
+        # we have changed the name n_components use in sklearn by
+        # used_components (in order  to avoid conflict with the rest of the progrma)
+        # warn th user:
+        if "n_components" in kwargs:
+            raise KeyError(
+                "`n_components` is not a valid parameter. Did-you mean "
+                "`used_components`?"
+            )
+
+        # call the super class for initialisation of the configuration parameters
+        # to do before anything else!
+        super().__init__(
+            log_level=log_level,
+            warm_start=warm_start,
+            config=config,
+            copy=copy,
+            **kwargs,
+        )
+
+    def _fit(self, X, Y=None):
+        # Y is ignored but necessary to corresponds to the signature in abstractanalysis
+        # X has already been validated and eventually
+        # preprocessed. X is now a nd-array with masked elements removed.
+        # and this method shoud return _outfit
 
         # max number of components
+        M, N = X.shape
         K = min(M, N)
-
-        # in case some row are masked, we need to take this into account
-        if X.is_masked:
-            masked_rows = np.all(X.mask, axis=-1)
-            Xdata = np.delete(X.data, np.where(masked_rows), 0)
-        else:
-            masked_rows = np.array([False] * M)
-            Xdata = X.data
-
-        K = min(K, len(np.where(~masked_rows)[0]))
 
         # ------------------------------------------------------------------------------
         # forward analysis
         # ------------------------------------------------------------------------------
-        from spectrochempy.core.dataset.coord import Coord
-        from spectrochempy.core.dataset.nddataset import NDDataset
 
-        f = NDDataset(
-            np.zeros((M, K)),
-            coordset=[X.y, Coord(range(K))],
-            title="EigenValues",
-            description="Forward EFA of " + X.name,
-            history=str(datetime.now(timezone.utc)) + ": created by spectrochempy ",
-        )
+        # f = NDDataset(
+        #     np.zeros((M, K)),
+        #     coordset=[X.y, Coord(range(K))],
+        #     title="EigenValues",
+        #     description="Forward EFA of " + X.name,
+        #     history=str(datetime.now(timezone.utc)) + ": created by spectrochempy ",
+        # )
 
-        # in case some row are masked, take this into account, by masking
-        # the corresponding rows of f
-        f[masked_rows] = MASKED
-
-        # performs the analysis
+        f = np.zeros((M, K))
         for i in range(M):
-            # if some rows are masked, we must skip them
-            if not masked_rows[i]:
-                s = svd(Xdata[: i + 1], compute_uv=False)
-                k = s.size
-                # print(i, k)
-                f.data[i, :k] = s**2
-                f[i, k:] = MASKED
-            else:
-                f[i] = MASKED
+            s = np.linalg.svd(X[: i + 1], compute_uv=False)
+            k = s.size
+            f[i, :k] = s**2
             print(f"Evolving Factor Analysis: {int(i / (2 * M) * 100)}% \r", end="")
 
         # ------------------------------------------------------------------------------
         # backward analysis
         # ------------------------------------------------------------------------------
-        b = NDDataset(
-            np.zeros((M, K)),
-            coordset=[X.y, Coord(range(K))],
-            title="EigenValues",
-            name="Backward EFA of " + X.name,
-            history=str(datetime.now(timezone.utc)) + ": created by spectrochempy ",
-        )
+        # b = NDDataset(
+        #     np.zeros((M, K)),
+        #     coordset=[X.y, Coord(range(K))],
+        #     title="EigenValues",
+        #     name="Backward EFA of " + X.name,
+        #     history=str(datetime.now(timezone.utc)) + ": created by spectrochempy ",
+        # )
 
-        b[masked_rows] = MASKED
-
+        b = np.zeros((M, K))
         for i in range(M - 1, -1, -1):
             # if some rows are masked, we must skip them
-            if not masked_rows[i]:
-                s = svd(Xdata[i:M], compute_uv=False)
-                k = s.size
-                b.data[i, :k] = s**2
-                b[i, k:] = MASKED
-            else:
-                b[i] = MASKED
+            s = np.linalg.svd(X[i:M], compute_uv=False)
+            k = s.size
+            b[i, :k] = s**2
             print(
                 f"Evolving Factor Analysis: {int(100 - i / (2 * M) * 100)} % \r", end=""
             )
 
-        self._f_ev = f
-        self._b_ev = b
+        # store the components number (real or desired)
+        self._n_components = K
 
+        # return results
+        _outfit = f, b
+        return _outfit
+
+    # ----------------------------------------------------------------------------------
+    # Private methods that should be most of the time overloaded in subclass
+    # ----------------------------------------------------------------------------------
+    def _transform(self, X=None):
+        # X is ignored for EFA
+        # Return concentration profile
+        return self._get_conc()
+
+    def _get_conc(self):
+        f, b = self._outfit
+        M = f.shape[0]
+        K = self._n_components
+        if self.used_components is not None:
+            K = min(K, self.used_components)
+        c = np.zeros((M, K))
+        for i in range(M):
+            c[i] = np.min((f[i, :K], b[i, :K][::-1]), axis=0)
+        return c
+
+    # ----------------------------------------------------------------------------------
+    # Public methods/properties
+    # ----------------------------------------------------------------------------------
     @property
-    def cutoff(self):
-        """
-        Cutoff value (float).
-        """
-        return self._cutoff
-
-    @cutoff.setter
-    def cutoff(self, val):
-        self._cutoff = val
-
-    @property
+    @_wrap_ndarray_output_to_nddataset(units=None, title="keep", typex="components")
     def f_ev(self):
         """
         Eigenvalues for the forward analysis (|NDDataset|).
         """
-        f = self._f_ev
-        if self._cutoff is not None:
-            f.data = np.max((f.data, np.ones_like(f.data) * self._cutoff), axis=0)
+        f = self._outfit[0]
+        if self.cutoff is not None:
+            f = np.max((f, np.ones_like(f) * self.cutoff), axis=0)
         return f
 
     @property
+    @_wrap_ndarray_output_to_nddataset(units=None, title="keep", typex="components")
     def b_ev(self):
         """
         Eigenvalues for the backward analysis (|NDDataset|).
         """
-        b = self._b_ev
+        b = self._outfit[1]
         if self.cutoff is not None:
-            b.data = np.max((b.data, np.ones_like(b.data) * self.cutoff), axis=0)
+            b = np.max((b, np.ones_like(b) * self.cutoff), axis=0)
         return b
-
-    def get_conc(self, n_pc=None):
-        """
-        Computes abstract concentration profile (first in - first out).
-
-        Parameters
-        ----------
-        n_pc : int, optional, default:3
-            Number of pure species for which the concentration profile must be
-            computed.
-
-        Returns
-        --------
-        concentrations
-            Concentration profile.
-        """
-        from spectrochempy.core.dataset.coord import Coord
-        from spectrochempy.core.dataset.coordset import CoordSet
-        from spectrochempy.core.dataset.nddataset import NDDataset
-
-        M, K = self.f_ev.shape
-        if n_pc is None:
-            n_pc = K
-        n_pc = min(K, n_pc)
-
-        f = self.f_ev
-        b = self.b_ev
-
-        xcoord = Coord(range(n_pc), title="PS#")
-        c = NDDataset(
-            np.zeros((M, n_pc)),
-            coordset=CoordSet(y=self._X.y, x=xcoord),
-            name=f"C_EFA[{self._X.name}]",
-            title="relative concentration",
-            description="Concentration profile from EFA",
-            history=f"{datetime.now(timezone.utc)}: created by spectrochempy",
-        )
-        if self._X.is_masked:
-            masked_rows = np.all(self._X.mask, axis=-1)
-        else:
-            masked_rows = np.array([False] * M)
-
-        for i in range(M):
-            if masked_rows[i]:
-                c[i] = MASKED
-                continue
-            c[i] = np.min((f.data[i, :n_pc], b.data[i, :n_pc][::-1]), axis=0)
-        return c
 
 
 # ======================================================================================

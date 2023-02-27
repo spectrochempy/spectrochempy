@@ -46,7 +46,8 @@ dataset[10:12] = scp.MASKED
 # %%
 #  Evolving Factor Analysis
 
-efa = scp.EFA(dataset)
+efa = scp.EFA()
+efa.fit(dataset)
 
 # %%
 # Show results

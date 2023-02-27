@@ -55,18 +55,19 @@ def test_EFA(IR_dataset_2D):
     # 3) simulated data matrix
     # ************************
 
-    dataset = scp.dot(dsc.T, dss)
-    dataset.data = np.random.normal(dataset.data, 0.2)
+    dataset = scp.dot(dss.T, dsc)
+    dataset.data = np.random.normal(dataset.data, 0.01)
     dataset.title = "intensity"
 
-    dataset.plot()
+    dataset.plot_map()
     show()
 
     ########################################################################################################################
     # 4) evolving factor analysis (EFA)
     # *********************************
 
-    efa = scp.EFA(dataset)
+    efa = scp.EFA()
+    efa.fit(dataset)
 
     ########################################################################################################################
     # Plots of the log(EV) for the forward and backward analysis

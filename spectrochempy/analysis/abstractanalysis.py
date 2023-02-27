@@ -489,7 +489,7 @@ class DecompositionAnalysisConfigurable(AnalysisConfigurable):
         ----------------
         n_components : int, optional
             The number of components to use for the transformation. If not given
-            Thhe number of compopnents is eventually the one specified or determined
+            The number of compopnents is eventually the one specified or determined
             in the fit process.
 
         Returns
