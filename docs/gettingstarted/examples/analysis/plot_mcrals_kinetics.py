@@ -43,8 +43,10 @@ _ = D.plot()
 # A first estimate of the concentrations can be obtained by EFA
 # %%
 print("compute EFA...")
-efa = scp.EFA(D[:, 300.0:500.0])
-C0 = efa.get_conc(3)
+efa = scp.EFA()
+efa.fitD[:, 300.0:500.0]
+efa.used_components = 3
+C0 = efa.transform()
 C0 = C0 / C0.max(dim="y") * 5.0
 _ = C0.T.plot()
 

@@ -52,8 +52,8 @@ efa.fit(dataset)
 # %%
 # Show results
 
-npc = 4
-c = efa.get_conc(npc)
+efa.used_components = 4
+c = efa.transform()
 c.T.plot()
 
 # scp.show()  # Uncomment to show plot if needed (not necessary in jupyter notebook)

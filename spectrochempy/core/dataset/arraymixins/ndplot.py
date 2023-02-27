@@ -673,7 +673,7 @@ class NDPlot(HasTraits):
             isinstance(loc, tuple) and len(loc) == 2 and isinstance(loc[0], float)
         ):
             origin.ndaxes["main"].legend(loc=loc)
-        elif loc is not None:
+        elif loc is not None and not isinstance(loc, bool):
             origin.ndaxes["main"].legend(loc)
 
         # Additional matplotlib commands on the current plot

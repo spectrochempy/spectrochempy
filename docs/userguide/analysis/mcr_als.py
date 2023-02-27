@@ -359,8 +359,10 @@ _ = scores.T.plot()
 #
 
 # %%
-efa = EFA(X)
-C0 = efa.get_conc(n_pc=4)
+efa = EFA()
+efa.fit(X)
+efa.used_components = 4
+C0 = efa.transform()
 _ = C0.T.plot()
 
 # %% [markdown]
