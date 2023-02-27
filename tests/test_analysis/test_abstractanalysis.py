@@ -6,7 +6,10 @@
 # ======================================================================================
 import pytest
 import traitlets as tr
-from abstractanalysis import AnalysisConfigurable  # , DecompositionAnalysisConfigurable
+
+from spectrochempy.analysis.abstractanalysis import (
+    AnalysisConfigurable,  # , DecompositionAnalysisConfigurable
+)
 
 
 def test_analysisconfigurable():
