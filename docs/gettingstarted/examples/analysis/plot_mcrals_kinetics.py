@@ -44,7 +44,7 @@ _ = D.plot()
 # %%
 print("compute EFA...")
 efa = scp.EFA()
-efa.fitD[:, 300.0:500.0]
+efa.fit(D[:, 300.0:500.0])
 efa.used_components = 3
 C0 = efa.transform()
 C0 = C0 / C0.max(dim="y") * 5.0
