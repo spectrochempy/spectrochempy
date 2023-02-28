@@ -141,7 +141,8 @@ def test_pca():
     s = pca.__str__(n_components=4)
 
     # Another valid way to get the dimensionality reduction
-    scores2 = PCA().fit_transform(dataset, n_components=2)
+    pca2 = PCA()
+    scores2 = pca2.fit_transform(dataset, n_components=2)
     testing.assert_array_almost_equal(
         scores2.data,
         scores.data,

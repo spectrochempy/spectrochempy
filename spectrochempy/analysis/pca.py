@@ -273,7 +273,7 @@ for reproducible results across multiple function calls.""",
         # _outfit is a tuple handle the eventual output of _fit for further processing.
 
         # The _outfit members are np.ndarrays
-        _outfit = self._pca._fit(X)
+        _outfit = self._pca.fit(X)
 
         # get the calculated attribute
         self._components = self._pca.components_

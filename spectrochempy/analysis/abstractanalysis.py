@@ -501,15 +501,15 @@ class DecompositionAnalysisConfigurable(AnalysisConfigurable):
         if not self._fitted:
             raise NotFittedError()
 
-        # fire the validation and preprocessing
+        # Fire the validation and preprocessing
         self._X = X if X is not None else self.X
 
-        # get the processed ndarray data
+        # Get the processed ndarray data
         newX = self._X_preprocessed
 
         X_transform = self._transform(newX)
 
-        # slice according to n_components
+        # Slice according to n_components
         n_components = kwargs.pop(
             "n_components", kwargs.pop("n_pc", self._n_components)
         )
@@ -593,6 +593,9 @@ class DecompositionAnalysisConfigurable(AnalysisConfigurable):
         ----------
         X : NDDataset
             Input dataset of shape (n_observation, n_feature) to fit
+        Y : array_like, optional
+            For example Y is not used in PCA, but corresponds to the guess profiles in
+            MCRALS
         **kwargs :
             Additional optional keywords parameters as for the `transform` method.
 
