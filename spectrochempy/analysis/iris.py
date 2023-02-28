@@ -7,7 +7,7 @@
 """
 This module implements the IRIS class.
 """
-__all__ = ["IRIS", "kern"]
+__all__ = ["IRIS"]
 __dataset_methods__ = []
 
 from collections.abc import Iterable

@@ -249,7 +249,7 @@ For 0 < l1_ratio < 1, the penalty is a combination of L1 and L2.""",
         return self._components
 
     # ----------------------------------------------------------------------------------
-    # Public methods and properties specific to FastICA
+    # Public methods and properties specific to NMF
     # ----------------------------------------------------------------------------------
     @property
     def n_components(self):
