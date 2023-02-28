@@ -18,12 +18,13 @@ import warnings
 from collections.abc import Iterable
 
 import numpy as np
+import traitlets as tr
 from scipy.integrate import solve_ivp
 from scipy.optimize import differential_evolution, least_squares, minimize
 
-from spectrochempy.analysis.abstractanalysis import AnalysisConfigurable
 from spectrochempy.core import error_
 from spectrochempy.core.dataset.nddataset import Coord, NDDataset
+from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.optional import import_optional_dependency
 
 __all__ = [
@@ -34,53 +35,84 @@ __all__ = [
 R = 8.314
 
 
-class ActionMassKinetics(AnalysisConfigurable):
-    """A class which stores a reaction network of elementary reactions, its rate parameterization,
-    initial concentrations, temperature profile, with methods for evaluating production rates and concentration
-    profiles asssuming action mass kinetic and closed reactor.
+class ActionMassKinetics(tr.HasTraits):
+    """
+    A class which stores a reaction network of elementary reactions.
+
+    It stores its rate parameterization, initial concentrations, temperature profile,
+    with methods for evaluating production rates and concentration profiles assuming
+    action mass kinetic and closed reactor.
 
     Parameters
     ----------
     equations: iterable object of `n_r` strings
-         Strings giving the `n_r` chemical equation of the network. Reactants and products must be separated by a "->"
-         symbol, stoichiometric coefficients, species names and "+" symbols must be separated by at leat one space *
+         Strings giving the `n_r` chemical equation of the network. Reactants and
+         products must be separated by a "->" symbol, stoichiometric coefficients,
+         species names and "+" symbols must be separated by at leat one space *
          (" "). The name of each species should match a key of the `species` dict.
 
          "A + B -> C"
          "2 A -> D"
-
     species : dict of `n_s` float, optional
          Dict of initial concentrations of the `n_s` species.
     k : iterable of shape n_reactions x 2
-         Arrhenius rate parameters ((A_1, Ea_1), ... (A_n, Ea_n))
+         Arrhenius rate parameters ((A_1, Ea_1), ... (A_n, Ea_n)).
     T : float or callable T(t)
-         Temperature
+         Temperature.
     """
 
-    def __init__(
-        self, equations: Iterable, species_concentrations: dict, k: Iterable, T=298.0
-    ):
+    equations = tr.List(tr.Unicode())
+    species_concentrations = tr.Dict()
+    k = Array()
+    T = tr.Union((tr.Float(), tr.Callable()), default_value=298.0)
+
+    def __init__(self, equations, species_concentrations, k, T=298.0):
         self.equations = equations
         self.species_concentrations = species_concentrations
-        self.species = list(species_concentrations.keys())
-        self.concentrations = list(species_concentrations.values())
-        self.k = k
-        if isinstance(T, float):
-            self.T = lambda t: T
-        else:
-            self.T = T
-        self.n_r = len(self.equations)
-        self.n_s = len(self.species)
-        self.A, self.B = self.stoichio_matrices
-        self.BmAt = (self.B - self.A).T
 
-    @property
-    def stoichio_matrices(self):
-        """Stoechiometry matrices
+        # self.species = list(species_concentrations.keys()) : This is now provided
+        # by a property
+        # self.concentrations = list(species_concentrations.values()) : This is now
+        # provided by a property
+        # self.n_r = len(self.equations)  # again a property
+        # self.n_s = len(self.species)  # and a property
+
+        self.k = k  # a validation method is added (see below)
+        self.T = T  # a validation method has been added
+
+    # ----------------------------------------------------------------------------------
+    # Private methods
+    # ----------------------------------------------------------------------------------
+    @tr.validate("k")
+    def _k_validate(self, proposal):
+        # k must be an iterable of pairs (A_1, Ea_1)
+        k = proposal.value
+        # k is an array (even if a list or tuple has been initialy provided (Array)
+        if k.shape[-1] != 2:
+            raise ValueError("k must be an iterable of pairs: shape=(n_reactions, 2)")
+        # Add more validation?
+        # ...
+        return k
+
+    @tr.validate("T")
+    def _T_validate(self, proposal):
+        Tp = proposal.value
+        if isinstance(Tp, float):
+            # if T float, transform it to a callable
+            T = lambda t: Tp
+        else:
+            T = Tp
+        return T
+
+    def _stoichio_matrices(self):
+        """
+        Stoichiometry matrices.
 
         Generates stoichiometry matrices from the chemical equations
-        Stoichiometry matrices A and B are defined in Chellaboina et al., "Modeling and analysis of
-        mass-action kinetics", IEEE control systems (2009), DOI: 10.1109/MCS.2009.932926"""
+        Stoichiometry matrices A and B are defined in Chellaboina et al., "Modeling and
+        analysis of mass-action kinetics", IEEE control systems (2009),
+        DOI: 10.1109/MCS.2009.932926.
+        """
 
         A = np.zeros((self.n_r, self.n_s))
         B = np.zeros_like(A)
@@ -88,7 +120,8 @@ class ActionMassKinetics(AnalysisConfigurable):
             rp = rxn.split("->")
             if len(rp) != 2:
                 raise ValueError(
-                    f'in reaction #{i}, reactants and products must be separated by "->" '
+                    f"in reaction #{i}, reactants and products must be separated "
+                    f'by "->" '
                 )
             r = rp[0].split("+")  # reactants
             p = rp[1].split("+")  # products
@@ -103,7 +136,8 @@ class ActionMassKinetics(AnalysisConfigurable):
                         n = int(n)
                     except ValueError:
                         raise ValueError(
-                            f'syntax error in reaction {i}: a stoichimetric coefficient is expected, not "{n}"'
+                            f"syntax error in reaction {i}: a stoichimetric coefficient"
+                            f' is expected, not "{n}"'
                         )
                     s = ns.split()[1]
 
@@ -112,7 +146,7 @@ class ActionMassKinetics(AnalysisConfigurable):
                         f'reactant "{s}" in reaction {i} is not listed in species'
                     )
 
-                A[i, list(self.species_concentrations).index(s)] = n
+                A[i, self.species.index(s)] = n
 
             for ns in p:
                 if len(ns.split()) == 1:
@@ -124,7 +158,8 @@ class ActionMassKinetics(AnalysisConfigurable):
                         n = int(n)
                     except ValueError:
                         raise ValueError(
-                            f'syntax error in reaction {i}: a stoichimetric coefficient is expected, not "{n}"'
+                            f"syntax error in reaction {i}: a stoichimetric coefficient"
+                            f' is expected, not "{n}"'
                         )
                     s = ns.split()[1]
 
@@ -133,25 +168,46 @@ class ActionMassKinetics(AnalysisConfigurable):
                         f'product "{s}" in reaction {i} is not listed in species'
                     )
 
-                B[i, list(self.species_concentrations).index(s)] = n
+                B[i, self.species.index(s)] = n
         return A, B
 
+    # ----------------------------------------------------------------------------------
+    # Public properties
+    # ----------------------------------------------------------------------------------
+    @property
+    def n_r(self):
+        return len(self.equations)
+
+    @property
+    def n_s(self):
+        return len(self.species)
+
+    @property
+    def species(self):
+        """Return components names."""
+        return list(self.species_concentrations.keys())
+
+    @property
+    def concentrations(self):
+        """Return concentrations."""
+        return list(self.species_concentrations.values())
+
     def integrate(self, t, method="RK45", return_NDDataset=True, **kwargs):
-        """Integrate the kinetic equations at times t.
+        """
+        Integrate the kinetic equations at times t.
 
         This function computes and integrates the set of n_s kinetic differential
         equations given the initial concentration values::
         $$ dC / dt =  (B - A).T  K C^A $$
         $$ C(t0) = C0 $$
 
-        where $A$ and $B$ are the stoichiometry matrices, $K$ is the diagonal matrix of rate constants
-        and $C^A$ is the vector-matrix exponentiation of C by A
+        where $A$ and $B$ are the stoichiometry matrices, $K$ is the diagonal matrix of
+        rate constants and $C^A$ is the vector-matrix exponentiation of C by A
 
         Parameters
         ----------
         t: iterable of length t_points
             time values at which the concentrations are computed
-
         method : string or `OdeSolver`, optional
             Integration method to use:
 
@@ -166,17 +222,17 @@ class ActionMassKinetics(AnalysisConfigurable):
             * 'LSODA': Adams/BDF method with automatic stiffness detection and
               switching
 
-        Explicit Runge-Kutta methods ('RK23', 'RK45', 'DOP853') should be used
-        for non-stiff problems and implicit methods ('Radau', 'BDF') for
-        stiff problems. Among Runge-Kutta methods, 'DOP853' is recommended
-        for solving with high precision (low values of `rtol` and `atol`).
-        If not sure, first try to run 'RK45'. If it makes unusually many
-        iterations, diverges, or fails, your problem is likely to be stiff and
-        you should use 'Radau' or 'BDF'. 'LSODA' can also be a good universal
-        choice, but it might be somewhat less convenient to work with as it
-        wraps old Fortran code.
-        You can also pass an arbitrary class derived from `OdeSolver` which
-        implements the solver.
+            Explicit Runge-Kutta methods ('RK23', 'RK45', 'DOP853') should be used
+            for non-stiff problems and implicit methods ('Radau', 'BDF') for
+            stiff problems. Among Runge-Kutta methods, 'DOP853' is recommended
+            for solving with high precision (low values of `rtol` and `atol`).
+            If not sure, first try to run 'RK45'. If it makes unusually many
+            iterations, diverges, or fails, your problem is likely to be stiff and
+            you should use 'Radau' or 'BDF'. 'LSODA' can also be a good universal
+            choice, but it might be somewhat less convenient to work with as it
+            wraps old Fortran code.
+            You can also pass an arbitrary class derived from `OdeSolver` which
+            implements the solver.
 
         Returns
         -------
@@ -210,7 +266,6 @@ class ActionMassKinetics(AnalysisConfigurable):
         success : bool
             True if the solver reached the interval end or a termination event
             occurred (``status >= 0``).
-
         """
 
         def production_rates(ti, Ci):
@@ -220,8 +275,8 @@ class ActionMassKinetics(AnalysisConfigurable):
             $$ dC / dt =  (B - A).T  K Ci^A $$
             $$ Ci = C(ti) $$
 
-            where $A$ and $B$ are the soichiometry matrices, $K$ is the diagonal matrix of rate constants
-            and $Ci^A$ is the vector-matrix exponentiation of Ci by A
+            where $A$ and $B$ are the stoichiometry matrices, $K$ is the diagonal matrix
+            of rate constants and $Ci^A$ is the vector-matrix exponentiation of Ci by A.
 
             parameters:
             ----------
@@ -232,7 +287,9 @@ class ActionMassKinetics(AnalysisConfigurable):
             """
             beta = 1 / R / self.T(ti)
             K = np.diag(self.k[:, 0] * np.exp(-beta * self.k[:, 1]))
-            return np.dot(np.dot(self.BmAt, K), _vm_exp(Ci, self.A))
+            A, B = self._stoichio_matrices()
+            BmAt = (B - A).T
+            return np.dot(np.dot(BmAt, K), _vm_exp(Ci, A))
 
         bunch = solve_ivp(
             production_rates,
@@ -272,15 +329,13 @@ class ActionMassKinetics(AnalysisConfigurable):
             elif p == "Ea":
                 self.k[int(i_r), 1] = dict_param[item]
             else:
-                raise ValueError(
-                    "something went wrong in parsing the dhe dict of params"
-                )
+                raise ValueError("something went wrong in parsing the dict of params")
 
     def fit_to_concentrations(
         self, Cexp, iexp, i2iexp, dict_param_to_optimize, **kwargs
     ):
         """
-        Function fitting rate parameters and concentrations to a given concentration profile.
+        Function fitting rate parameters and concentrations to a concentration profile.
 
         Parameters
         ------------
@@ -289,13 +344,14 @@ class ActionMassKinetics(AnalysisConfigurable):
             Experimental concentration profiles on which to fit the model.
             Cexp can contain more concentration profiles than those to fit.
         iexp:
-            Indexes of experimental concentration profiles on which the model will be fitted
+            Indexes of experimental concentration profiles on which the model will be
+            fitted
         iexp_to_i:
-            Correspondence between optimized (external) concentration profile and experimental
-            concentration profile.
+            Correspondence between optimized (external) concentration profile and
+            experimental concentration profile.
         param_to_optimize: dict
-            rate parameters to optimize. Keys should be 'k[i].A' and 'k[i].Ea' for preexponential
-            factor
+            rate parameters to optimize. Keys should be 'k[i].A' and 'k[i].Ea' for
+            preexponential factor
 
         **kwargs
             Parameters for the optimization (see scipy.optimize.minimize).
@@ -374,10 +430,10 @@ def _vm_exp(x: Iterable, A: Iterable):
 
     References:
     ----------
-    [1] Chellaboina et al., "Modeling and analysis of mass-action kinetics", IEEE control systems (2009),
-    DOI: 10.1109/MCS.2009.932926
-    [2] Gjerrit Meinsma, "Dimensional and Scaling Analysis" SIAM review, Vol. 61, No. 1, pp. 159–184 (2009),
-    DOI: 10.1137/16M1107127
+    [1] Chellaboina et al., "Modeling and analysis of mass-action kinetics", IEEE
+        control systems (2009),DOI: 10.1109/MCS.2009.932926
+    [2] Gjerrit Meinsma, "Dimensional and Scaling Analysis" SIAM review, Vol. 61, No. 1,
+        pp. 159–184 (2009), DOI: 10.1137/16M1107127
     """
     out = [1] * len(A)
     for i, A_i in enumerate(A):
@@ -489,7 +545,8 @@ class PFR:
     Parameters
     ----------
     cti_file: str
-        The cti file must contain a gas phase named 'gas' and optionally a reactive surface named 'surface'.
+        The cti file must contain a gas phase named 'gas' and optionally a reactive
+        surface named 'surface'.
     init_X: dict, array or list of them
         Initial composition of the reactors.
     """
@@ -577,7 +634,8 @@ class PFR:
             if not callable(F):
                 self._mfc[-1].set_mass_flow_rate(F * inlet_gas.density)
             else:
-                # it is tricky to pass non explicit lambda functions to MassFlowControllers
+                # it is tricky to pass non explicit lambda functions to
+                # MassFlowControllers
                 # the following works while use of self._inlet_F[i](t) generate an error
                 # when using reactorNet.advance()
 
@@ -608,7 +666,8 @@ class PFR:
                         "five MFC(s)"
                     )
 
-        # create other cstrs and link them with the previous one through a pressure controller
+        # create other cstrs and link them with the previous one through a pressure
+        # controller
 
         for i in range(1, len(volume)):
             initial_gas = ct.Solution(self._cti, "gas")
@@ -803,7 +862,8 @@ class PFR:
                 if optimizer == "differential_evolution":
                     integrationError = True
                     warnings.warn(
-                        "model could not be integrated with these parameters. Objective function set to Inf",
+                        "model could not be integrated with these parameters. "
+                        "Objective function set to Inf",
                         UserWarning,
                     )
                 else:
@@ -838,12 +898,14 @@ class PFR:
                             )
                             if gen == 1:
                                 logging.info(
-                                    f"                      Minimum SSE: {min_sse:.3e} (Eval # {it_min_sse})"
+                                    f"                      Minimum SSE: {min_sse:.3e} "
+                                    f"(Eval # {it_min_sse})"
                                 )
                             else:
                                 logging.info(
                                     f"                      Minimum SSE: {min_sse:.3e} "
-                                    f"({(min_sse - prev_min_sse) / prev_min_sse:+.3%}, Eval # {it_min_sse})"
+                                    f"({(min_sse - prev_min_sse) / prev_min_sse:+.3%},"
+                                    f" Eval # {it_min_sse})"
                                 )
                             logging.info(
                                 f"Execution time for the population: {toc - tic}"
@@ -1093,7 +1155,8 @@ class PFR:
         else:
             if popsize:
                 logging.info(
-                    "Optimization did not end successfully. You might want to restart an optimization with the"
+                    "Optimization did not end successfully. You might want to restart "
+                    "an optimization with the"
                 )
                 logging.info("following array specifying the last population:\n")
                 print(f"it: {it}")
