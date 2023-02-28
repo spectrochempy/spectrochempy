@@ -78,3 +78,14 @@ St = efa2.components
 St.plot(title="components", legend=St.y.labels)
 
 scp.show()
+
+# %%
+# Compare with PCA
+pca = scp.PCA(used_components=3)
+C3 = pca.fit_transform(dataset)
+
+C3.T.plot(title="PCA scores")
+LT = pca.loadings
+LT.plot(title="PCA components", legend=LT.y.labels)
+
+scp.show()

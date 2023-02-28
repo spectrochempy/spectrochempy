@@ -1228,8 +1228,22 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
         """
         Formatted error message.
         """
-        etype = args[0] if args else kwargs.get("type", None)
-        emessage = args[1] if args and len(args) > 1 else kwargs.get("message", None)
+        if isinstance(args[0], Exception):
+            e = args[0]
+            etype = type(e)
+            emessage = str(e)
+        elif len(args) == 1 and isinstance(args[0], str):
+            from spectrochempy.utils import exceptions
+
+            etype = exceptions.SpectroChemPyError
+            emessage = str(args[0])
+        elif len(args) == 2:
+            etype = args[0] if args else kwargs.get("type", None)
+            emessage = (
+                args[1] if args and len(args) > 1 else kwargs.get("message", None)
+            )
+        else:
+            raise KeyError("wrong argiments have been passed to error_")
         self._catch_exceptions(etype, emessage, None)
 
     def warning_(self, msg, *args, **kwargs):

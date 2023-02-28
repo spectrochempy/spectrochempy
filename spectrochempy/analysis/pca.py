@@ -5,7 +5,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-This module implement several wrapper to scikit-learn model and estimators
+Implementation of Principal Component Analysis (using scikit-learn library)
 """
 import matplotlib.pyplot as plt
 import numpy as np

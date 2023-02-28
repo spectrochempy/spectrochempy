@@ -37,7 +37,6 @@ def list_packages(package):
 
 def generate_api(api_path, configurables=False):
 
-    from spectrochempy.application import debug_
     from spectrochempy.core.dataset.nddataset import NDDataset
 
     # name of the package
@@ -57,13 +56,13 @@ def generate_api(api_path, configurables=False):
     for pkg in pkgs:
         if pkg.endswith("api") or "test" in pkg:
             continue
-        try:
-            pkg = import_item(pkg)
-        except Exception as exc:
-            debug_(f"When trying to load:{pkg} : {exc}")
-            if not hasattr(pkg, "__all__"):
-                continue
-            raise ImportError(pkg)
+        # try:
+        pkg = import_item(pkg)
+        # except AttributeError as exc:
+        #     # error_(exc)
+        #     if not hasattr(pkg, "__all__"):
+        #         continue
+        #     raise exc
         if not hasattr(pkg, "__all__"):
             continue
 
