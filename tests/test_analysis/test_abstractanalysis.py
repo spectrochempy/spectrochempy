@@ -8,7 +8,7 @@ import pytest
 import traitlets as tr
 
 from spectrochempy.analysis.abstractanalysis import (
-    AnalysisConfigurable,  # , DecompositionAnalysisConfigurable
+    AnalysisConfigurable,  # , DecompositionAnalysis
 )
 
 

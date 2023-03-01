@@ -16,16 +16,18 @@ from warnings import warn
 import numpy as np
 import traitlets as tr
 
-from spectrochempy.analysis.abstractanalysis import DecompositionAnalysisConfigurable
+from spectrochempy.analysis.abstractanalysis import DecompositionAnalysis
 from spectrochempy.core import info_
 from spectrochempy.utils import exceptions
+from spectrochempy.utils.docstrings import _docstring
 
 
 # ======================================================================================
 # class SIMPLISMA
 # ======================================================================================
-class SIMPLISMA(DecompositionAnalysisConfigurable):
-    """
+class SIMPLISMA(DecompositionAnalysis):
+    __doc__ = _docstring.dedent(
+        """
     SIMPLe to use Interactive Self-modeling Mixture Analysis.
 
     This class performs a SIMPLISMA analysis of a 2D |NDDataset|.
@@ -34,31 +36,17 @@ class SIMPLISMA(DecompositionAnalysisConfigurable):
 
     Parameters
     ----------
-    log_level : ["INFO", "DEBUG", "WARNING", "ERROR"], optional, default:"WARNING"
-        The log level at startup
-    config : Config object, optional
-        By default the configuration is determined by the MCRALS.py
-        file in the configuration directory. A traitlets.config.Config() object can
-        eventually be used here.
-    warm_start : bool, optional, default: false
-        When fitting with SIMPLISMA repeatedly on the same dataset, but for multiple
-        parameter values (such as to find the value maximizing performance),
-        it may be possible to reuse previous model learned from the previous parameter
-        value, saving time.
-        When warm_start is true, the existing fitted model attributes is used to
-        initialize the new model in a subsequent call to fit.
-    **kwargs
-        Optional configuration  parameters.
+    %(AnalysisConfigurable.parameters)s
 
     See Also
     --------
-    PCA : Perform MCR-ALS of a |NDDataset| knowing the initial C or St matrix.
-    NNMF : Perform a Non-Negative Matrix Factorization of a |NDDataset|.
-    EFA : Perform an Evolving Factor Analysis (forward and reverse) of the input
-          |NDDataset|.
+    PCA : Perform Principal Components Analysis.
     MCRALS : Perform MCR-ALS of a dataset knowing the initial C or St matrix.
-    SVD :
+    NMF : Non-Negative Matrix Factorization (NMF).
+    EFA : Perform an Evolving Factor Analysis (forward and reverse).
+    SVD : Perform a Singular Value Decomposition.
     """
+    )
 
     # TODO : adapt to 3DDataset ?
 

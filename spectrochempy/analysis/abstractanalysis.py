@@ -23,6 +23,7 @@ from spectrochempy.core.common.meta import Meta
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils import MASKED, NOMASK, exceptions
+from spectrochempy.utils.docstrings import _docstring
 from spectrochempy.utils.traits import MetaConfigurable, NDDatasetType
 
 
@@ -31,11 +32,34 @@ class AnalysisConfigurable(MetaConfigurable):
     Abstract class to write analysis estimators.
 
     Subclass this to get a minimal structure
+
+    Parameters
+    ----------
+    log_level : ["INFO", "DEBUG", "WARNING", "ERROR"], optional, default:"WARNING"
+        The log level at startup
+    copy : bool, optional, default:True
+        Whether to copy input data to avoid overriding.
+    config : Config object, optional
+        By default the configuration is determined by the object configuration
+        file in the configuration directory. A traitlets.config.Config() object can
+        eventually be used here.
+    warm_start : bool, optional, default:False
+        When fitting repeatedly on the same dataset, but for multiple
+        parameter values (such as to find the value maximizing performance),
+        it may be possible to reuse previous model learned from the previous parameter
+        value, saving time.
+        When warm_start is true, the existing fitted model attributes is used to
+        initialize the new model in a subsequent call to fit.
+    **kwargs
+        Optional configuration  parameters.
     """
 
     name = tr.Unicode(help="name of the implemented model")
     # name must be defined in subclass with the name of the model: PCA, MCRALS, ...
     description = tr.Unicode(help="optional description of the implemented model")
+
+    # get doc sections for reuse
+    _docstring.get_sections(_docstring.dedent(__doc__), base="AnalysisConfigurable")
 
     # ----------------------------------------------------------------------------------
     # Runtime Parameters
@@ -160,7 +184,7 @@ class AnalysisConfigurable(MetaConfigurable):
         return X
 
     def _restore_masked_data(self, D, axis=-1):
-        # by default we restore columns, put axis=0 to restore rows instead
+        # by default, we restore columns, put axis=0 to restore rows instead
         # Note that it is very important to use here the ma version of zeros
         # array constructor or both if both axis should be restored
         if not np.any(self._X_mask):
@@ -372,7 +396,7 @@ class AnalysisConfigurable(MetaConfigurable):
         return app.log.handlers[2].stream.getvalue().rstrip()
 
 
-class DecompositionAnalysisConfigurable(AnalysisConfigurable):
+class DecompositionAnalysis(AnalysisConfigurable):
     """
     Abstract class to write analysis decomposition model such as PCA, ...
 

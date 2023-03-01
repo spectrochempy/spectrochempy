@@ -197,7 +197,7 @@ def test_MCRALS(model, data):
         monoDecConc=[1],
         closureConc=[0, 1],
         normSpec="max",
-        maxit=1,
+        max_iter=1,
     )
     set_loglevel("WARNING")
     mcr.fit(D, C0)
@@ -207,7 +207,7 @@ def test_MCRALS(model, data):
         normSpec="euclid",
         closureConc=[0, 1],
         closureMethod="constantSum",
-        maxit=1,
+        max_iter=1,
     )
     mcr.fit(D, C0.data)
     assert "Convergence criterion ('tol')" in mcr.log[-100:]
@@ -230,7 +230,7 @@ def test_MCRALS_errors(model, data):
 
     # inexistant keyword parameters
     try:
-        _ = MCRALS(maxit=25, inexistant=0, log_level="DEBUG")
+        _ = MCRALS(max_iter=25, inexistant=0, log_level="DEBUG")
     except KeyError as exc:
         assert "'inexistant' is not a valid" in exc.args[0]
 

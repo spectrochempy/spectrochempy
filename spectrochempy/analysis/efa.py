@@ -11,44 +11,33 @@ import numpy as np
 import traitlets as tr
 
 from spectrochempy.analysis._analysisutils import _wrap_ndarray_output_to_nddataset
-from spectrochempy.analysis.abstractanalysis import DecompositionAnalysisConfigurable
+from spectrochempy.analysis.abstractanalysis import DecompositionAnalysis
+from spectrochempy.utils.docstrings import _docstring
 
 __all__ = ["EFA"]
 __configurables__ = ["EFA"]
 
 
-class EFA(DecompositionAnalysisConfigurable):
-    """
+class EFA(DecompositionAnalysis):
+    __doc__ = _docstring.dedent(
+        """
     Evolving Factor Analysis.
 
     Perform an Evolving Factor Analysis (forward and reverse) of the input |NDDataset|.
 
     Parameters
     ----------
-    log_level : ["INFO", "DEBUG", "WARNING", "ERROR"], optional, default:"WARNING"
-        The log level at startup
-    config : Config object, optional
-        By default the configuration is determined by the MCRALS.py
-        file in the configuration directory. A traitlets.config.Config() object can
-        eventually be used here.
-    warm_start : bool, optional, default: false
-        When fitting with SIMPLISMA repeatedly on the same dataset, but for multiple
-        parameter values (such as to find the value maximizing performance),
-        it may be possible to reuse previous model learned from the previous parameter
-        value, saving time.
-        When warm_start is true, the existing fitted model attributes is used to
-        initialize the new model in a subsequent call to fit.
-    **kwargs
-        Optional configuration  parameters.
+    %(AnalysisConfigurable.parameters)s
 
     See Also
     --------
-    PCA : Principal Component Analysis.
-    NNMF : Perform a Non-Negative Matrix Factorization of a |NDDataset|.
+    PCA : Perform Principal Components Analysis.
+    NMF : Non-Negative Matrix Factorization (NMF).
     MCRALS : Perform MCR-ALS of a dataset knowing the initial C or St matrix.
-    SVD :
-    SIMPLISMA :
+    SVD : Perform a Singular Value Decomposition.
+    SIMPLISMA : SIMPLe to use Interactive Self-modeling Mixture Analysis.
     """
+    )
 
     name = tr.Unicode("EFA")
     description = tr.Unicode("Evolving factor analysis model")

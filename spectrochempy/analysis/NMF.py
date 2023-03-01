@@ -14,19 +14,22 @@ from numpy.random import RandomState
 from sklearn import decomposition
 
 from spectrochempy.analysis._analysisutils import NotFittedError
-from spectrochempy.analysis.abstractanalysis import DecompositionAnalysisConfigurable
+from spectrochempy.analysis.abstractanalysis import DecompositionAnalysis
+from spectrochempy.utils.docstrings import _docstring
 
 __all__ = ["NMF"]
 __configurables__ = ["NMF"]
 
 
 # ======================================================================================
-# class FastICA
+# class NMF
 # ======================================================================================
-class NMF(DecompositionAnalysisConfigurable):
-    """Non-Negative Matrix Factorization (NMF)
+class NMF(DecompositionAnalysis):
+    __doc__ = _docstring.dedent(
+        """
+    Non-Negative Matrix Factorization (NMF)
 
-    Use `~sklearn.NMF` .
+    Use `~sklearn.decomposition.NMF` .
 
     Find two non-negative matrices, i.e. matrices with all non-negative elements, (W, H)
     whose product approximates the non-negative matrix X. This factorization can be used
@@ -34,21 +37,7 @@ class NMF(DecompositionAnalysisConfigurable):
 
     Parameters
     ----------
-    log_level : ["INFO", "DEBUG", "WARNING", "ERROR"], optional, default:"WARNING"
-        The log level at startup
-    config : Config object, optional
-        By default the configuration is determined by the NMF.cfg.py
-        file in the configuration directory. A traitlets.config.Config() object can
-        eventually be used here.
-    warm_start : bool, optional, default: false
-        When fitting with NMF repeatedly on the same dataset, but for multiple
-        parameter values (such as to find the value maximizing performance),
-        it may be possible to reuse previous model learned from the previous parameter
-        value, saving time.
-        When warm_start is true, the existing fitted model attributes is used to
-        initialize the new model in a subsequent call to fit.
-    **kwargs
-        Optional configuration  parameters.
+    %(AnalysisConfigurable.parameters)s
 
     See Also
     --------
@@ -58,6 +47,7 @@ class NMF(DecompositionAnalysisConfigurable):
     SVD : Perform a Singular Value Decomposition.
     SIMPLISMA : SIMPLe to use Interactive Self-modeling Mixture Analysis.
     """
+    )
 
     name = tr.Unicode("NMF")
     description = tr.Unicode("Scikit-learn NMF model")
@@ -86,45 +76,51 @@ class NMF(DecompositionAnalysisConfigurable):
         ["random", "nndsvd", "nndsvda", "nndsvdar", "custom"],
         default_value=None,
         allow_none=True,
-        help="""Method used to initialize the procedure.
-Valid options:
-- `None`: 'nndsvda' if n_components <= min(n_samples, n_features),
-  otherwise random.
-- `'random'`: non-negative random matrices, scaled with:
-  sqrt(X.mean() / n_components)
-- `'nndsvd'`: Nonnegative Double Singular Value Decomposition (NNDSVD)
-  initialization (better for sparseness)
-- `'nndsvda'`: NNDSVD with zeros filled with the average of X
-  (better when sparsity is not desired)
-- `'nndsvdar'` NNDSVD with zeros filled with small random values
-  (generally faster, less accurate alternative to NNDSVDa
-  for when sparsity is not desired)
-- `'custom'`: use custom matrices W and H""",
+        help=(
+            "Method used to initialize the procedure.\n"
+            "Valid options:\n"
+            "- `None`: 'nndsvda' if n_components <= min(n_samples, n_features), "
+            "otherwise random.\n"
+            "- `'random'`: non-negative random matrices, scaled with:\n"
+            "  sqrt(X.mean() / n_components)\n"
+            "- `'nndsvd'`: Nonnegative Double Singular Value Decomposition (NNDSVD) "
+            "initialization (better for sparseness)\n"
+            "- `'nndsvda'`: NNDSVD with zeros filled with the average of X "
+            "(better when sparsity is not desired)\n"
+            "- `'nndsvdar'` NNDSVD with zeros filled with small random values "
+            "(generally faster, less accurate alternative to NNDSVDa "
+            "for when sparsity is not desired)\n"
+            "- `'custom'`: use custom matrices W and H"
+        ),
     ).tag(config=True)
 
     solver = tr.Enum(
         ["cd", "mu"],
         default_value="cd",
-        help="""Numerical solver to use:
-    - 'cd' is a Coordinate Descent solver.
-    - 'mu' is a Multiplicative Update solver.""",
+        help=(
+            "Numerical solver to use:\n"
+            "- 'cd' is a Coordinate Descent solver.\n"
+            "- 'mu' is a Multiplicative Update solver."
+        ),
     ).tag(config=True)
 
     beta_loss = tr.Union(
         (tr.Float(), tr.Enum(["frobenius", "kullback-leibler", "itakura-saito"])),
         default_value="frobenius",
-        help="""Beta divergence to be minimized, measuring the distance between X
-and the dot product WH. Note that values different from 'frobenius' (or 2) and
-'kullback-leibler' (or 1) lead to significantly slower fits.
-Note that for beta_loss <= 0 (or 'itakura-saito'), the input matrix X cannot contain
-zeros. Used only in 'mu' solver.""",
+        help=(
+            "Beta divergence to be minimized, measuring the distance between X"
+            "and the dot product WH. Note that values different from 'frobenius' "
+            "(or 2) and 'kullback-leibler' (or 1) lead to significantly slower fits.\n"
+            "Note that for beta_loss <= 0 (or 'itakura-saito'), the input matrix X "
+            "cannot contain zeros. Used only in 'mu' solver."
+        ),
     ).tag(config=True)
 
     tol = tr.Float(default_value=1e-4, help="Tolerance of the stopping condition.").tag(
         config=True
     )
 
-    maxit = tr.Integer(
+    max_iter = tr.Integer(
         default_value=200, help="Maximum number of iterations before timing out."
     ).tag(config=True)
 
@@ -132,9 +128,11 @@ zeros. Used only in 'mu' solver.""",
         (tr.Integer(), tr.Instance(RandomState)),
         allow_none=True,
         default_value=None,
-        help="""Used for initialisation (when ``init`` == 'nndsvdar' or 'random'), and
-in Coordinate Descent. Pass an int, for reproducible results across multiple function
-calls.""",
+        help=(
+            "Used for initialisation (when ``init`` == 'nndsvdar' or 'random'), and "
+            "in Coordinate Descent. Pass an int, for reproducible results across "
+            "multiple function calls."
+        ),
     ).tag(config=True)
 
     alpha_W = tr.Float(
@@ -146,22 +144,23 @@ calls.""",
     alpha_H = tr.Union(
         (tr.Float(), tr.Unicode("same")),
         default_value="same",
-        help="""Constant that multiplies the regularization terms of `H`. Set it to zero
-to have no regularization on `H`. If "same" (default), it takes the same value as
-`alpha_W`.""",
+        help=(
+            "Constant that multiplies the regularization terms of `H`. Set it to zero"
+            'to have no regularization on `H`. If "same" (default), it takes the same'
+            "value as `alpha_W`."
+        ),
     ).tag(config=True)
 
     l1_ratio = tr.Float(
         default_value=0.0,
-        help="""The regularization mixing parameter, with 0 <= l1_ratio <= 1.
-For l1_ratio = 0 the penalty is an elementwise L2 penalty (aka Frobenius Norm).
-For l1_ratio = 1 it is an elementwise L1 penalty.
-For 0 < l1_ratio < 1, the penalty is a combination of L1 and L2.""",
+        help=(
+            "The regularization mixing parameter, with 0 <= l1_ratio <= 1.\n"
+            "- For l1_ratio = 0 the penalty is an elementwise L2 penalty (aka Frobenius "
+            "Norm).\n"
+            "- For l1_ratio = 1 it is an elementwise L1 penalty.\n"
+            "- For 0 < l1_ratio < 1, the penalty is a combination of L1 and L2."
+        ),
     ).tag(config=True)
-
-    # Probably log_level is enough
-    # verbose = tr.Integer(default_value=0,
-    #     help="Whether to be verbose.").tag(config=True)
 
     shuffle = tr.Bool(
         default_value=False,
@@ -205,7 +204,7 @@ For 0 < l1_ratio < 1, the penalty is a combination of L1 and L2.""",
             init=self.init,
             beta_loss=self.beta_loss,
             tol=self.tol,
-            max_iter=self.maxit,
+            max_iter=self.max_iter,
             random_state=self.random_state,
             alpha_W=self.alpha_W,
             alpha_H=self.alpha_H,

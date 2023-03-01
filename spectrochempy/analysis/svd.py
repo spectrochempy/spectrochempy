@@ -14,7 +14,8 @@ from spectrochempy.analysis._analysisutils import (
     _svd_flip,
     _wrap_ndarray_output_to_nddataset,
 )
-from spectrochempy.analysis.abstractanalysis import DecompositionAnalysisConfigurable
+from spectrochempy.analysis.abstractanalysis import DecompositionAnalysis
+from spectrochempy.utils.docstrings import _docstring
 
 __all__ = ["SVD"]
 __configurables__ = ["SVD"]
@@ -23,8 +24,9 @@ __configurables__ = ["SVD"]
 # ======================================================================================
 # class PCA
 # ======================================================================================
-class SVD(DecompositionAnalysisConfigurable):
-    """
+class SVD(DecompositionAnalysis):
+    __doc__ = _docstring.dedent(
+        """
     Performs a Singular Value Decomposition of a dataset.
 
     The SVD is commonly written as :math:`X = U \\Sigma V^{T}`.
@@ -36,30 +38,15 @@ class SVD(DecompositionAnalysisConfigurable):
 
     Parameters
     ----------
-    log_level : ["INFO", "DEBUG", "WARNING", "ERROR"], optional, default:"WARNING"
-        The log level at startup
-    config : Config object, optional
-        By default the configuration is determined by the MCRALS.py
-        file in the configuration directory. A traitlets.config.Config() object can
-        eventually be used here.
-    warm_start : bool, optional, default: false
-        When fitting with SIMPLISMA repeatedly on the same dataset, but for multiple
-        parameter values (such as to find the value maximizing performance),
-        it may be possible to reuse previous model learned from the previous parameter
-        value, saving time.
-        When warm_start is true, the existing fitted model attributes is used to
-        initialize the new model in a subsequent call to fit.
-    **kwargs
-        Optional configuration  parameters.
+    %(AnalysisConfigurable.parameters)s
 
     See Also
     --------
-    PCA : Perform MCR-ALS of a |NDDataset| knowing the initial C or St matrix.
-    NNMF : Perform a Non-Negative Matrix Factorization of a |NDDataset|.
-    EFA : Perform an Evolving Factor Analysis (forward and reverse) of the input
-          |NDDataset|.
+    PCA : Perform Principal Components Analysis.
     MCRALS : Perform MCR-ALS of a dataset knowing the initial C or St matrix.
-    SIMPLISMA :
+    NMF : Non-Negative Matrix Factorization (NMF).
+    EFA : Perform an Evolving Factor Analysis (forward and reverse).
+    SIMPLISMA : SIMPLe to use Interactive Self-modeling Mixture Analysis.
 
     Examples
     --------
@@ -73,6 +60,7 @@ class SVD(DecompositionAnalysisConfigurable):
     >>> print(svd.ev_ratio.data)
     [   94.54    5.059 ... 8.687e-06 7.779e-06]
     """
+    )
 
     name = tr.Unicode("SVD")
     description = tr.Unicode("Singular Value Decomposition")

@@ -198,7 +198,7 @@ mcr.fit(X, St0)
 # it is no converging.
 # If for instance the 'tol' is set very low, the optimization will be stopped when
 # either the maximum number
-# of iterations is reached (maxit, 50 by default) or when no improvement is during 5
+# of iterations is reached (max_iter, 50 by default) or when no improvement is during 5
 # successive iterations (maxdiv).
 
 # %%
@@ -369,7 +369,7 @@ _ = C0.T.plot()
 # The MCR ALS can then be launched using this new guess:
 
 # %%
-mcr4 = MCRALS(maxit=100, normSpec="euclid")
+mcr4 = MCRALS(max_iter=100, normSpec="euclid")
 mcr4.fit(X, C0)
 
 # %%

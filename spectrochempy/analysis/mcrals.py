@@ -21,10 +21,11 @@ from spectrochempy.analysis._analysisutils import (
     NotFittedError,
     _wrap_ndarray_output_to_nddataset,
 )
-from spectrochempy.analysis.abstractanalysis import DecompositionAnalysisConfigurable
+from spectrochempy.analysis.abstractanalysis import DecompositionAnalysis
 from spectrochempy.core import info_
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils import exceptions
+from spectrochempy.utils.docstrings import _docstring
 
 # Developper notes
 # ----------------
@@ -35,8 +36,9 @@ from spectrochempy.utils import exceptions
 # some parameters.
 
 
-class MCRALS(DecompositionAnalysisConfigurable):
-    """
+class MCRALS(DecompositionAnalysis):
+    __doc__ = _docstring.dedent(
+        """
     Perform MCR-ALS of a dataset knowing the initial C or St matrix.
 
     MCR-ALS (Multivariate Curve Resolution - Alternating Least Squares) resolve"s a set
@@ -48,30 +50,17 @@ class MCRALS(DecompositionAnalysisConfigurable):
 
     Parameters
     ----------
-    log_level : ["INFO", "DEBUG", "WARNING", "ERROR"], optional, default:"WARNING"
-        The log level at startup
-    config : Config object, optional
-        By default the configuration is determined by the MCRALS.py
-        file in the configuration directory. A traitlets.config.Config() object can
-        eventually be used here.
-    warm_start : bool, optional, default: false
-        When fitting with MCRALS repeatedly on the same dataset, but for multiple
-        parameter values (such as to find the value maximizing performance),
-        it may be possible to reuse previous model learned from the previous parameter
-        value, saving time.
-        When warm_start is true, the existing fitted model attributes is used to
-        initialize the new model in a subsequent call to fit.
-    **kwargs
-        Optional configuration  parameters.
+    %(AnalysisConfigurable.parameters)s
 
     See Also
     --------
-    PCA : Performs MCR-ALS of a |NDDataset| knowing the initial C or St matrix.
-    NNMF : Performs a Non-Negative Matrix Factorization of a |NDDataset|.
-    EFA : Perform an Evolving Factor Analysis (forward and reverse) of the input
-          |NDDataset|.
+    PCA : Perform Principal Components Analysis.
+    NMF : Non-Negative Matrix Factorization (NMF).
+    EFA : Perform an Evolving Factor Analysis (forward and reverse).
+    SVD : Perform a Singular Value Decomposition.
     SIMPLISMA : SIMPLe to use Interactive Self-modeling Mixture Analysis.
     """
+    )
 
     # Developer notes
     # ----------------
@@ -93,7 +82,7 @@ class MCRALS(DecompositionAnalysisConfigurable):
 standard deviation of residuals).""",
     ).tag(config=True)
 
-    maxit = tr.Integer(50, help="Maximum number of ALS iteration").tag(config=True)
+    max_iter = tr.Integer(50, help="Maximum number of ALS iteration").tag(config=True)
 
     maxdiv = tr.Integer(
         5, help="Maximum number of successive non-converging iterations."
@@ -629,7 +618,7 @@ profile #j,
         Xtransf = pca.fit_transform(X)
         Xpca = pca.inverse_transform(Xtransf)
 
-        while change >= self.tol and niter < self.maxit and ndiv < self.maxdiv:
+        while change >= self.tol and niter < self.max_iter and ndiv < self.maxdiv:
             C = np.linalg.lstsq(St.T, X.T, rcond=None)[0].T
             niter += 1
 
@@ -780,10 +769,10 @@ profile #j,
                 )
                 info_("Stop ALS optimization.")
 
-            if niter == self.maxit:
+            if niter == self.max_iter:
                 info_(
                     f"Convergence criterion ('tol') not reached after "
-                    f"{ self.maxit:d} iterations."
+                    f"{ self.max_iter:d} iterations."
                 )
                 info_("Stop ALS optimization.")
 

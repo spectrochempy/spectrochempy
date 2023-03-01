@@ -31,7 +31,7 @@ class LSTSQ(HasTraits):
     ----------
     *datasets : one or two |NDDataset|'s or array-like objects
         If a single dataset `Y` is provided, the `X` data will be the `x`
-        coordinates of the `Y` dataset, or the index of the data if not
+        coordinates of the `Y` dataset, or the index of the data if no
         coordinates exists.
         If two datasets `X`, and `Y` are given, the `x` coordinates of `Y`
         are ignored and replaced by the `X` data.
