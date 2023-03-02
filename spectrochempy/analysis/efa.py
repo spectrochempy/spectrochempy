@@ -99,7 +99,7 @@ class EFA(DecompositionAnalysis):
         # Y is ignored but necessary to corresponds to the signature in abstractanalysis
         # X has already been validated and eventually
         # preprocessed. X is now a nd-array with masked elements removed.
-        # and this method shoud return _outfit
+        # and this method should return _outfit
 
         # max number of components
         M, N = X.shape

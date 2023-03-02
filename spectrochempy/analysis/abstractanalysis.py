@@ -64,16 +64,23 @@ class AnalysisConfigurable(MetaConfigurable):
     # ----------------------------------------------------------------------------------
     # Runtime Parameters
     # ----------------------------------------------------------------------------------
-    _warm_start = tr.Bool(False, help="If True previous execution state " "is reused")
+    _warm_start = tr.Bool(False, help="If True previous execution state is reused")
     _fitted = tr.Bool(False, help="False if the model was not yet fitted")
     _masked_rc = tr.Tuple(allow_none=True, help="List of masked rows and columns")
-
     _X = NDDatasetType(allow_none=True, help="Data to fit a model")
-    _X_mask = Array(allow_none=True, help="mask information of the " "input data")
-    _X_preprocessed = Array(help="preprocessed inital X input data")
-    _shape = tr.Tuple(help="original shape of the data, before any transformation")
+    _X_mask = Array(allow_none=True, help="Mask information of the input X data")
+    _X_preprocessed = Array(help="Preprocessed inital input X data")
+    _shape = tr.Tuple(
+        help="Original shape of the input X data, " "before any transformation"
+    )
+    _is_dataset = tr.Bool(help="True if the input X data is a NDDataset")
     _outfit = tr.Any(help="the output of the _fit method - generally a tuple")
-    _copy = tr.Bool(default_value=True, help="If True passed X data are copied")
+    _copy = tr.Bool(default_value=True, help="If True, input X data are copied")
+    _output_type = tr.Enum(
+        ["NDDataset", "ndarray"],
+        default_value="NDDataset",
+        help="Whether the output is a NDDataset or a ndarray",
+    )
 
     # ----------------------------------------------------------------------------------
     # Configuration parameters (mostly defined in subclass
@@ -146,7 +153,7 @@ class AnalysisConfigurable(MetaConfigurable):
 
     def _get_masked_rc(self, mask):
         if np.any(mask):
-            masked_columns = np.all(mask, axis=-2)
+            masked_columns = np.all(mask, axis=-2)  # if mask.ndim == 2 else None
             masked_rows = np.all(mask, axis=-1)
         else:
             masked_columns = np.zeros(self._shape[-1], dtype=bool)
@@ -248,9 +255,17 @@ class AnalysisConfigurable(MetaConfigurable):
     def _X_validate(self, proposal):
         # validation fired when self._X is assigned
         X = proposal.value
-        # we need a dataset with eventually  a copy of the original data (default being
-        # to copy them)
-        X = self._make_dataset(X)
+        # for the following we need X with two dimension (even if the last is of size 1)
+        # So let's generate the un-squeezed X (coordinate x become y)
+        if X.ndim == 1:
+            coordset = X.coordset
+            X._data = X._data[:, np.newaxis]
+            if np.any(X.mask):
+                X._mask = X._mask[:, np.newaxis]
+            X.dims = ["x", "a"]
+            coordx = coordset[0] if coordset is not None else None
+            X.set_coordset(x=coordx, a=None)
+
         # as in fit methods we often use np.linalg library, we cannot handle directly
         # masked data (so we remove them here and they will be restored at the end of
         # the process during transform or inverse transform methods
@@ -268,6 +283,7 @@ class AnalysisConfigurable(MetaConfigurable):
                 return True
         except NotFittedError:
             return True
+        return False
 
     # ----------------------------------------------------------------------------------
     # Private methods that should be most of the time overloaded in subclass
@@ -276,8 +292,10 @@ class AnalysisConfigurable(MetaConfigurable):
     def _preprocess_as_X_changed(self, change):
         # to be optionally replaced by user defined function (with the same name)
         X = change.new
-        # .... preprocessing as scaling, centering, ...
-        # set a np.ndarray
+        # .... preprocessing as scaling, centering, ... must return a ndarray with
+        #  same shape a X.data
+
+        # Set a X.data by default
         self._X_preprocessed = X.data
 
     def _fit(self, X, Y=None):
@@ -301,9 +319,12 @@ class AnalysisConfigurable(MetaConfigurable):
         if np.any(self._X_mask):
             # restore masked row and column if necessary
             X.data = self._restore_masked_data(X.data, axis="both")
-        return X
+        if self._is_dataset or self._output_type == "NDDataset":
+            return X
+        else:
+            return np.asarray(X)
 
-    def fit(self, X, Y=None, **kwargs):
+    def fit(self, X, Y=None):
         """
         Fit the model with X and optional Y data
 
@@ -320,15 +341,15 @@ class AnalysisConfigurable(MetaConfigurable):
         Returns
         -------
         self : object
-            Returns the instance itself.
+            Returns the fitted instance itself.
         """
         self._fitted = False  # reiniit this flag
 
         # fire the X and eventually Y validation and preprocessing.
         # X and Y are epected to be resp. NDDataset and NDDataset or list of NDDataset.
-        self._X = self._make_dataset(X)
+        self._X = X  # self._make_dataset(X)
         if Y is not None:
-            self._Y = self._make_dataset(Y)
+            self._Y = Y  # self._make_dataset(Y)
 
         # _X_preprocessed has been computed when X was set, as well as _Y_preprocessed.
         # At this stage they should be simple ndarrays
@@ -444,6 +465,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
                 return True
         except NotFittedError:
             return True
+        return False
 
     @tr.default("_n_components")
     def _n_components_default(self):
@@ -627,7 +649,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
         -------
         NDDataset(n_observations, n_components)
         """
-        self.fit(X, Y, **kwargs)
+        self.fit(X, Y)
         X_transform = self.transform(X, **kwargs)
         return X_transform
 
