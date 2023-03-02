@@ -54,7 +54,7 @@ def func(t, v, var):
     return d
 
 
-time = scp.LinearCoord.linspace(0, 10, 20, title="time", units="hour")
+time = scp.Coord.linspace(0, 10, 20, title="time", units="hour")
 d = scp.NDDataset.fromfunction(
     func,
     v=100.0 * ur("km/hr"),
@@ -71,7 +71,7 @@ d = scp.NDDataset.fromfunction(
 # %%
 prefs = d.preferences
 prefs.figure.figsize = (7, 3)
-d.plot_scatter(markersize=7, mfc="red")
+d.plot_scatter(markersize=7, mfc="red", label="Original data")
 
 # %% [markdown]
 # We want to fit a line through these data-points of equation
@@ -84,10 +84,15 @@ d.plot_scatter(markersize=7, mfc="red")
 # Using LSTSQ, the solution is found very easily:
 
 # %%
-lst = scp.LSTSQ(time, d)
+lst = scp.LSTSQ()
+lst.fit(time, d)
 
-v, d0 = lst.transform()
+v, d0 = lst.coef, lst.intercept
 print("speed : {:.3fK},  distance at time 0 : {:.3fK}".format(v, d0))
+
+dfit = lst.predict()
+dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
+
 
 # %% [markdown]
 # <div class="alert alert-info">
@@ -99,10 +104,9 @@ print("speed : {:.3fK},  distance at time 0 : {:.3fK}".format(v, d0))
 # </div>
 
 # %%
-lst = scp.LSTSQ(d)
-
-v, d0 = lst.transform()
-print("speed : {:.3fK},  distance at time 0 : {:.3fK}".format(v, d0))
+lst = scp.LSTSQ()
+lst.fit(d)
+v, d0 = lst.coef, lst.intercept
 
 # %% [markdown]
 # and the final plot
@@ -113,10 +117,9 @@ d.plot_scatter(
     mfc="red",
     mec="black",
     label="Original data",
-    title="Least-square fitting " "example",
+    title=f"Linear regression, $r^2={lst.score():.3f} ",
 )
-dfit = lst.inverse_transform()
-
+dfit = lst.predict()
 dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
 
 
@@ -151,9 +154,10 @@ d2.plot_scatter(markersize=7, mfc="red")
 
 # %%
 X = time**2
-lst = scp.LSTSQ(X, d2)
+lst = scp.LSTSQ()
+lst.fit(X, d2)
 
-v, d0 = lst.transform()
+v, d0 = lst.coef, lst.intercept
 print("acceleration : {:.3fK},  distance at time 0 : {:.3fK}".format(v, d0))
 
 # %%
@@ -164,7 +168,7 @@ d2.plot_scatter(
     label="Original data",
     title="Least-square fitting " "example on quadratic data",
 )
-dfit = lst.inverse_transform()
+dfit = lst.predict()
 
 dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
 
@@ -180,9 +184,10 @@ dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
 
 # %%
 X = time**2
-lst = scp.NNLS(X, d2)
+nls = scp.NNLS()
+nls.fit(X, d2)
 
-v, d0 = lst.transform()
+v, d0 = lst.coef, lst.intercept
 print("acceleration : {:.3fK},  distance at time 0 : {:.3fK}".format(v, d0))
 
 # %%
@@ -191,14 +196,14 @@ d2.plot_scatter(
     mfc="red",
     mec="black",
     label="Original data",
-    title="Non-negative Least-square fitting " "example",
+    title="Non-negative Least-square fitting example",
 )
-dfit = lst.inverse_transform()
+dfit = lst.predict()
 
 dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
 
 # %% [markdown]
-# ## NDDataset modelling using the Fit method
+# ## NDDataset modelling using non-linear optimisation method
 
 # %% [markdown]
 # First we will load an IR dataset
@@ -253,7 +258,7 @@ pks.plot_scatter(
     marker="v",
     color="black",
     clear=False,  # we need to keep the previous output on ax
-    data_only=True,  # we dont need to redraw all things like labels, etc...
+    data_only=True,  # we don't need to redraw all things like labels, etc...
     ylim=(-0.05, 1.3),
 )
 
@@ -286,7 +291,7 @@ $ gasym: 0.1, 0, 1
 MODEL: LINE_1
 shape: asymmetricvoigtmodel
     * ampl:  1.0, 0.0, none
-    $ pos:   3624.61, 3520.0, 3570.0
+    $ pos:   3624.61, 3610.0, 3640.0
     > ratio: gratio
     > asym: gasym
     $ width: 200, 0, 1000
@@ -294,7 +299,7 @@ shape: asymmetricvoigtmodel
 MODEL: LINE_2
 shape: asymmetricvoigtmodel
     $ ampl:  0.2, 0.0, none
-    $ pos:   3541.68, 3400.0, 3700.0
+    $ pos:   3541.68, 3520.0, 3560.0
     > ratio: gratio
     > asym: gasym
     $ width: 200, 0, 1000
@@ -430,7 +435,7 @@ shape: asymmetricvoigtmodel
 
 # %%
 f1 = scp.Fit(ndOHcorr, script, silent=False)
-f1.run(maxiter=10000, every=100)
+f1.run(maxiter=2000, every=100)
 ndOHcorr.plot(plot_model=True, lw=2)
 
 # %% [markdown]

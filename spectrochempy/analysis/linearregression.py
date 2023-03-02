@@ -13,6 +13,7 @@ from sklearn import linear_model
 
 from spectrochempy.analysis._analysisutils import NotFittedError
 from spectrochempy.analysis.abstractanalysis import AnalysisConfigurable
+from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.docstrings import _docstring
 from spectrochempy.utils.traits import NDDatasetType
@@ -163,8 +164,9 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         """
         self._fitted = False  # reiniit this flag
 
-        # store if the original input type is a dataset
-        self._is_dataset = hasattr(X, "_implements") and X._implements("NDDataset")
+        # store if the original input type is a dataset (or at least a subclass instance
+        # of NDArray)
+        self._is_dataset = isinstance(X, NDArray)
 
         # fire the X and Y validation and preprocessing.
         if Y is not None:
@@ -224,15 +226,24 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
             # this is the result of the single equation, so only one value
             # should be returned
             A = float(self._linear_regression.coef_)
-            if self._is_dataset and self.Y.has_units and self.X.has_units:
-                A = A * self.Y.units / self.X.units
+            if self._is_dataset and self._Y.has_units and self._X.has_units:
+                A = A * self._Y.units / self._X.units
         elif self._is_dataset:
-            A = type(self.X)(
+
+            unitsX = self._X.units if self._X.units is not None else 1.0
+            unitsY = self._Y.units if self._Y.units is not None else 1.0
+            if unitsX != 1 or unitsY != 1:
+                units = self._Y.units / self._X.units
+            else:
+                units = None
+
+            A = type(self._X)(
                 data=self._linear_regression.coef_,
-                coordset=self.Y.coordset,
-                dims=self.Y.T.dims,
-                units=self.Y.units / self.X.units,
-                title=f"{self.Y.title} / {self.X.title}",
+                coordset=self._Y.coordset,
+                dims=self._Y.T.dims,
+                units=units,
+                title=f"{self._Y.title} / {self._X.title}",
+                history="Computed from the LSTSQ model",
             )
         return A
 
@@ -247,16 +258,17 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         if self._linear_regression.intercept_.size == 1:
             # A single value, return the associated quantity
             B = self._linear_regression.intercept_
-            if self._is_dataset and self.Y.has_units:
-                B = B * self.Y.units
+            if self._is_dataset and self._Y.has_units:
+                B = B * self._Y.units
         elif self._is_dataset:
             # else, return a NDDataset with the same units has Y
-            B = type(self.X)(
+            B = type(self._X)(
                 data=self._linear_regression.intercept_,
-                coordset=self.Y.coordset,
-                units=self.Y.units,
-                title=f"{self.Y.title} at origin",
-                history="Computed from the LSTSQ",
+                coordset=self._Y.coordset,
+                dims=self._Y.dims,
+                units=self._Y.units,
+                title=f"{self._Y.title} at origin",
+                history="Computed from the LSTSQ model",
             )
         return B
 
@@ -286,6 +298,17 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         newX = self._X_preprocessed
 
         predicted = self._linear_regression.predict(newX)
+
+        if self._is_dataset:
+            predicted = type(self._X)(
+                predicted,
+                coordset=self._Y.coordset,
+                dims=self._Y._dims,
+                units=self._Y.units,
+                title=self._Y.title,
+                history="Computed from a LSTSQ model",
+            )
+
         return predicted
 
     def score(self, X=None, Y=None, sample_weight=None):
