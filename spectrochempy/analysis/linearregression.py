@@ -7,6 +7,8 @@
 """
 Implementation of least squares Linear Regression.
 """
+import traitlets as tr
+
 from spectrochempy.analysis.abstractanalysis import LinearRegressionAnalysis
 
 __all__ = ["LSTSQ", "NNLS"]
@@ -28,3 +30,9 @@ class LSTSQ(LinearRegressionAnalysis):
 class NNLS(LinearRegressionAnalysis):
     name = "NNLS"
     description = "Non-Negative Least Squares Linear Regression"
+
+    positive = tr.Bool(
+        default_value=True,
+        help="When set to ``True``, forces the coefficients to be positive. This"
+        "option is only supported for dense arrays.",
+    ).tag(config=True)
