@@ -10,10 +10,8 @@
 =========================
 
 In this example, we perform the 2D IRIS analysis of CO adsorption on a sulfide catalyst.
-
 """
 # %%
-
 import spectrochempy as scp
 
 # %%
