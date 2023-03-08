@@ -2226,9 +2226,11 @@ class NDArray(HasTraits):
             new._mask = np.transpose(new._mask, axis)
         new._meta = new._meta.permute(*axis, inplace=False)
 
+        new._transposed = not new._transposed  # change the transposed flag
+        # we change it before the dims because
+        # we need it in tr.observe(_dims)
         new._dims = list(np.take(self._dims, axis))
 
-        new._transposed = not new._transposed  # change the transposed flag
         return new
 
     @property

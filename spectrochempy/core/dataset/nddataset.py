@@ -583,6 +583,11 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
             return
         old = change.old
         new = change.new
+        if sorted(old) == sorted(new) and self.transposed:
+            # we are probably in a transpose process:
+            # do nothing on the coordinates names
+            return
+
         # we should change the name of the corresponding coord in CoordSet
         for i in range(len(self._dims)):
             j = self.coordset.names.index(old[i])
