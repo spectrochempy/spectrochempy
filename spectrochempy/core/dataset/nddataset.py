@@ -538,47 +538,58 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     # Private methods and properties
     # ----------------------------------------------------------------------------------
     @default("_coordset")
-    def __coordset_default(self):
+    def _coordset_default(self):
         return None
 
     @default("_modeldata")
-    def __modeldata_default(self):
+    def _modeldata_default(self):
         return None
 
     # @default("_processeddata")
-    # def __processeddata_default(self):
+    # def _processeddata_default(self):
     #     return None
     #
     # @default("_baselinedata")
-    # def __baselinedata_default(self):
+    # def _baselinedata_default(self):
     #     return None
     #
     # @default("_referencedata")
-    # def __referencedata_default(self):
+    # def _referencedata_default(self):
     #     return None
     #
     # @default("_ranges")
-    # def __ranges_default(self):
+    # def _ranges_default(self):
     #     ranges = Meta()
     #     for dim in self.dims:
     #         ranges[dim] = dict(masks={}, baselines={}, integrals={}, others={})
     #     return ranges
 
     @default("_timezone")
-    def __timezone_default(self):
+    def _timezone_default(self):
         # Return the default timezone (UTC)
         return datetime.utcnow().astimezone().tzinfo
 
     @validate("_created")
-    def __created_validate(self, proposal):
+    def _created_validate(self, proposal):
         date = proposal["value"]
         if date.tzinfo is not None:
             # make the date utc naive
             date = date.replace(tzinfo=None)
         return date
 
+    @observe("_dims")
+    def _dims_observe(self, change):
+        if self.coordset is None:
+            return
+        old = change.old
+        new = change.new
+        # we should change the name of the corresponding coord in CoordSet
+        for i in range(len(self._dims)):
+            j = self.coordset.names.index(old[i])
+            self.coordset[j].name = new[i]
+
     @validate("_history")
-    def __history_validate(self, proposal):
+    def _history_validate(self, proposal):
         history = proposal["value"]
         if isinstance(history, list) or history is None:
             # reset
@@ -586,7 +597,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         return history
 
     @validate("_modified")
-    def __modified_validate(self, proposal):
+    def _modified_validate(self, proposal):
         date = proposal["value"]
         if date.tzinfo is not None:
             # make the date utc naive
