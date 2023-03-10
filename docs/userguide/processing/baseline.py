@@ -95,7 +95,7 @@ _ = X.detrend(type="constant").plot()
 # ## Automatic linear baseline correction `abc`
 
 # %% [markdown]
-# When the baseline to remove is a simple linear correction, one can use ``abc``.
+# When the baseline to remove is a simple linear correction, one can use ``abc`` .
 # This performs an automatic baseline correction.
 
 # %%
@@ -121,7 +121,7 @@ _ = scp.abc(X).plot()
 # select the 4500-3500 cm$^{-1}$ range. Note that the ordering has no importance and
 # using `[3500.0, 4500.]` would
 # lead to exactly the same result. It is also possible to formally pick a single
-# wavenumber `3750.`.
+# wavenumber `3750.` .
 #
 # The first step is then to select the various regions that we expect to belong to
 # the baseline
@@ -327,7 +327,7 @@ blc.show_regions(axes["axe21"])
 # see above for details.
 #
 # `Ranges` must be entered as a tuple of digits or wave numbers,
-# e.g. `([5900.0, 5400.0], 2000.0, [1550.0, 1555.0],)`.
+# e.g. `([5900.0, 5400.0], 2000.0, [1550.0, 1555.0],)` .
 
 # %%
 X = scp.read_omnic("irdata/nh4y-activation.spg")

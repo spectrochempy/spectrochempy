@@ -91,11 +91,11 @@ creation of the container, the image containing these componrents will be downlo
 **Description of the parameters**
 
 * ``-v`` or ``--volume`` allows to bind a local directory with the Docker application. For instance if you
-  want to works on files located in ``C:\Users\toto\mywork``, you can use:
+  want to works on files located in ``C:\Users\toto\mywork`` , you can use:
 
-  ``-v //C:/Users/myaccount/mywork:/home/jovyan/work``.
+  ``-v //C:/Users/myaccount/mywork:/home/jovyan/work`` .
 
-  Note that ``backslash (\)`` separator of windows path must be replaced by simple ``slash (/)``.
+  Note that ``backslash (\)`` separator of windows path must be replaced by simple ``slash (/)`` .
 
   The container will be unable to access directories at upper levels than those specified in ``-v`` bindings. Thus if
   for instance you need to access to a directory where you your data are savec you will need to write a binding
@@ -143,7 +143,7 @@ address at the end:
 
 Go to you browser and paste ``http://127.0.0.1:8888/lab?token=45bf716d7cf02f1b7157448de04db163df5e80eb78920004`` in
 the address bar to display the application interface.
-It your port binding is different, for example ``-p 10000:8888``, then you will have to change this address to:
+It your port binding is different, for example ``-p 10000:8888`` , then you will have to change this address to:
 ``http://127.0.0.1:10000/lab?token=45bf716d7cf02f1b7157448de04db163df5e80eb78920004``. The token string is necessary
 for security reason, but can be replaced by a password.
 

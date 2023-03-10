@@ -52,7 +52,7 @@ import spectrochempy as scp
 # To do so, we can use the
 # `read` function which open a dialog, allowing the selection of data file form various
 # origin. By default,
-# the native SCPy type of data is proposed (file suffix: `.scp`). The desired type of
+# the native SCPy type of data is proposed (file suffix: `.scp` ). The desired type of
 # files to display can be chosen
 # in a dropdown field.
 
@@ -139,7 +139,7 @@ print(X)
 #
 # If only a directory is indicated, the dialog box will open in this directory.
 #
-# Note that on Windows the path separator is a backslash `\`. However, in many contexts,
+# Note that on Windows the path separator is a backslash `\` . However, in many contexts,
 # backslash is also used as an escape character in order to represent non-printable
 # characters. To avoid problems,
 # either it has to be escaped itself,  a double backslash or one can also use raw
@@ -163,7 +163,7 @@ print(X)
 # and will open the dialog box at the root directory of the ``C:`` drive.
 #
 # You can avoid using the form ``\\`` or the use of raw strings by using conventional
-# slash ``/``. In python, they play the path separator role, as well in Windows than in
+# slash ``/`` . In python, they play the path separator role, as well in Windows than in
 # other UNIX-based system (Linux, OSX, ...)
 #
 # ```ipython3
@@ -176,7 +176,7 @@ print(X)
 # X = scp.read_omnic('wodger.spg', directory='C:/')
 # ```
 # then SpectroChemPy will attempt opening a file named ``wodger.spg`` supposedly located
-# in `C:\`.
+# in `C:\ ` .
 #
 #
 # Imagine now that the file of interest is actually located in

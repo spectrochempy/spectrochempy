@@ -51,7 +51,7 @@ environment or an existing environment
         (base)  ~ $ conda create -n scpy
 
     Switch to this environment. At this point, `(scpy)` should
-    appear before the prompt instead of `(base)`.
+    appear before the prompt instead of `(base)` .
 
     .. sourcecode:: bash
 
@@ -189,4 +189,4 @@ Spectrochempy is likely functional !
     SpectroChemPy's API - v.0.1.17
     © Copyright 2014-2020 - A.Travert & C.Fernandez @ LCS
 
-The recommended next step is to proceed to the :ref:`userguide`.
+The recommended next step is to proceed to the :ref:`userguide` .

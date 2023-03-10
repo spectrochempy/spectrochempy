@@ -5,8 +5,8 @@ Release notes
 *************
 
 This is the list of changes to SpectroChemPy between each release. For full details,
-see the `commit logs <https://github.com/spectrochempy/spectrochempy/commits/>`_.
-For install and upgrade instructions, see :ref:`installation`.
+see the `commit logs <https://github.com/spectrochempy/spectrochempy/commits/>`_ .
+For install and upgrade instructions, see :ref:`installation` .
 
 Version 0.5
 --------------

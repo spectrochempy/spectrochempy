@@ -109,7 +109,7 @@ backticks. The following are considered inline code:
 
 .. note::
     To display only the last component of the linked class, method or
-    function, prefix it with ``~``. For example, ``:class:`~spectrochempy.Series```
+    function, prefix it with ``~`` . For example, ``:class:`~spectrochempy.Series```
     will link to ``spectrochempy.NDDataset`` but only display the last part, ``NDDataset``
     as the link text. See `Sphinx cross-referencing syntax
     <https://www.sphinx-doc.org/en/stable/domains.html#cross-referencing-syntax>`_
@@ -121,9 +121,9 @@ backticks. The following are considered inline code:
 
     def add_values(arr):
         """
-        Add the values in ``arr``.
+        Add the values in ``arr`` .
 
-        This is equivalent to Python ``sum`` of :meth:`spectrochempy.Series.sum`.
+        This is equivalent to Python ``sum`` of :meth:`spectrochempy.Series.sum` .
 
         Some sections are omitted here for simplicity.
         """
@@ -139,13 +139,13 @@ backticks. The following are considered inline code:
 
         With several mistakes in the docstring.
 
-        It has a blank like after the signature ``def func():``.
+        It has a blank like after the signature ``def func():`` .
 
         The text 'Some function' should go in the line after the
         opening quotes of the docstring, not in the same line.
 
         There is a blank line between the docstring and the first line
-        of code ``foo = 1``.
+        of code ``foo = 1`` .
 
         The closing quotes should be in the next line, not in this one."""
 
@@ -264,11 +264,11 @@ after, and not between the line with the word "Parameters" and the one with
 the hyphens.
 
 After the title, each parameter in the signature must be documented, including
-``*args`` and ``**kwargs``, but not ``self``.
+``*args`` and ``**kwargs``, but not ``self`` .
 
 The parameters are defined by their name, followed by a space, a colon, another
 space, and the type (or types). Note that the space between the name and the
-colon is important. Types are not defined for ``*args`` and ``**kwargs``, but must
+colon is important. Types are not defined for ``*args`` and ``**kwargs`` , but must
 be defined for all other parameters. After the parameter definition, it is
 required to have a line with the parameter description, which is indented, and
 can have multiple lines. The description must start with a capital letter, and
@@ -280,12 +280,12 @@ comma at the end of the type. The exact form of the type in this case will be
 argument means, which can be added after a comma "int, default -1, meaning all
 cpus".
 
-In cases where the default value is ``None``, meaning that the value will not be
-used. Instead of ``"str, default None"``, it is preferred to write ``"str, optional"``.
+In cases where the default value is ``None`` , meaning that the value will not be
+used. Instead of ``"str, default None"``, it is preferred to write ``"str, optional"`` .
 When ``None`` is a value being used, we will keep the form "str, default None".
-For example, in ``df.to_csv(compression=None)``, ``None`` is not a value being used,
+For example, in ``df.to_csv(compression=None)`` , ``None`` is not a value being used,
 but means that compression is optional, and no compression is being used if not
-provided. In this case we will use ``"str, optional"``. Only in cases like
+provided. In this case we will use ``"str, optional"`` . Only in cases like
 ``func(value=None)`` and ``None`` is being used in the same way as ``0`` or ``foo``
 would be used, then we will specify "str, int or None, default None".
 
@@ -643,7 +643,7 @@ A simple example could be
 
 The examples should be as concise as possible. In cases where the complexity of
 the function requires long examples, it is recommended to use blocks with headers
-in bold. Use double stars ``**`` to make a text bold, like in ``**this example**``.
+in bold. Use double stars ``**`` to make a text bold, like in ``**this example**`` .
 
 .. _docstring.example_conventions:
 
@@ -664,7 +664,7 @@ the standard library go first, followed by third-party libraries (like
 matplotlib).
 
 When calling the method, keywords arguments ``head(n=3)`` are preferred to
-positional arguments ``head(3)``.
+positional arguments ``head(3)`` .
 
 
 .. _docstring.doctest_tips:

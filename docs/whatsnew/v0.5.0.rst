@@ -13,4 +13,4 @@ Breaking changes
 ~~~~~~~~~~~~~~~~
 
 -  numpy ufunc function can no longer be called as
-   ``scp.ufunc(nddataset)``, use ``np.ufunc(nddataset)`` instead.
+   ``scp.ufunc(nddataset)`` , use ``np.ufunc(nddataset)`` instead.

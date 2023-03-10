@@ -7,7 +7,7 @@ including other versions of SpectroChemPy.
 New features
 ~~~~~~~~~~~~
 
--  Added a baseline correction method: ``basc``.
+-  Added a baseline correction method: ``basc`` .
 -  Baseline ranges can be stored in meta.regions[‘baseline’] - basc will
    recognize them.
 
