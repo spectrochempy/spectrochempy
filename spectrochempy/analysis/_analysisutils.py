@@ -107,8 +107,6 @@ class _set_output(object):
         if args and type(args[0]) == type(obj):
             args = args[1:]
 
-        # determine the input X dataset
-        X = obj.X
         # get the sklearn data output
         data = self.method(obj, *args, **kwargs)
 
@@ -119,11 +117,14 @@ class _set_output(object):
         elif self.typey is not None:
             axis = 1
 
-        data = obj._restore_masked_data(data, axis=axis)
-
         # make a new dataset with this data
         X_transf = NDDataset(data)
-        # Now set the NDDataset attributes
+
+        # Now set the NDDataset attributes from the original X
+
+        # determine the input X dataset
+        X = obj._X
+
         if self.units is not None:
             if self.units == "keep":
                 X_transf.units = X.units
@@ -177,6 +178,10 @@ class _set_output(object):
                         title="components",
                     ),
                 )
+
+        # eventually restore masks
+        X_transf = obj._restore_masked_data(X_transf, axis=axis)
+
         return X_transf
 
 

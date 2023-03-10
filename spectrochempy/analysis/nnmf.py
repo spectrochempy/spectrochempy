@@ -142,7 +142,7 @@ class NMF(DecompositionAnalysis):
     ).tag(config=True)
 
     alpha_H = tr.Union(
-        (tr.Float(), tr.Unicode("same")),
+        (tr.Float(), tr.Enum(["same"])),
         default_value="same",
         help=(
             "Constant that multiplies the regularization terms of `H`. Set it to zero"

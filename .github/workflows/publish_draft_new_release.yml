@@ -14,9 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     if: |
         github.event.pull_request.merged == true
-        && github.repository == 'spectrochempy/spectrochempy'
-        && (startsWith(github.event.pull_request.head.ref, 'release/') || startsWith(github.event.pull_request.head.ref, 'hotfix/'))
-    # only merged pull requests must trigger this job
+        && startsWith(github.event.pull_request.head.ref, 'release/')
+    # only merged pull requests from a release branch must trigger this job
+    # to trigger this only from spectrochempy master add this : && github.repository == 'spectrochempy/spectrochempy'
 
     steps:
       - name: Extract version from branch name (for release branches)
@@ -24,13 +24,6 @@ jobs:
         run: |
           BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
           VERSION=${BRANCH_NAME#release/}
-          echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
-
-      - name: Extract version from branch name (for hotfix branches)
-        if: startsWith(github.event.pull_request.head.ref, 'hotfix/')
-        run: |
-          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
-          VERSION=${BRANCH_NAME#hotfix/}
           echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Create Release

@@ -350,15 +350,15 @@ profile #j,
 
         # check the dimensions compatibility
         # however as the dimension of profile should match the initial shape
-        # of X we use self._shape not self._X.shape (because for this masked columns or
+        # of X we use self._X_shape not self._X.shape (because for this masked columns or
         # rows have already been removed
-        if (self._shape[1] != profile.shape[1]) and (
-            self._shape[0] != profile.shape[0]
+        if (self._X_shape[1] != profile.shape[1]) and (
+            self._X_shape[0] != profile.shape[0]
         ):
             raise ValueError(
                 f"None of the dimensions of the given profile "
                 f"[{profile.shape}] correspond to any of those "
-                f"of X [{self._shape}]."
+                f"of X [{self._X_shape}]."
             )
 
         # data array

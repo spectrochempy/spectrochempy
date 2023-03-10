@@ -10,6 +10,7 @@ This module implements the base abstract class to define estimators such as PCA,
 
 import logging
 import warnings
+from copy import copy
 
 import numpy as np
 import traitlets as tr
@@ -22,6 +23,7 @@ from spectrochempy.analysis._analysisutils import (
 from spectrochempy.core import app, set_loglevel
 from spectrochempy.core.common.meta import Meta
 from spectrochempy.core.dataset.basearrays.ndarray import NDArray
+from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils import MASKED, NOMASK, exceptions
@@ -75,9 +77,10 @@ class AnalysisConfigurable(MetaConfigurable):
     _X = NDDatasetType(allow_none=True, help="Data to fit a model")
     _X_mask = Array(allow_none=True, help="Mask information of the input X data")
     _X_preprocessed = Array(help="Preprocessed inital input X data")
-    _shape = tr.Tuple(
+    _X_shape = tr.Tuple(
         help="Original shape of the input X data, " "before any transformation"
     )
+    _X_coordset = tr.Instance(CoordSet, allow_none=True)
     _is_dataset = tr.Bool(help="True if the input X data is a NDDataset")
     _outfit = tr.Any(help="the output of the _fit method - generally a tuple")
     _copy = tr.Bool(default_value=True, help="If True, input X data are copied")
@@ -161,8 +164,8 @@ class AnalysisConfigurable(MetaConfigurable):
             masked_columns = np.all(mask, axis=-2)  # if mask.ndim == 2 else None
             masked_rows = np.all(mask, axis=-1)
         else:
-            masked_columns = np.zeros(self._shape[-1], dtype=bool)
-            masked_rows = np.zeros(self._shape[-2], dtype=bool)
+            masked_columns = np.zeros(self._X_shape[-1], dtype=bool)
+            masked_rows = np.zeros(self._X_shape[-2], dtype=bool)
         return masked_rows, masked_columns
 
     def _remove_masked_data(self, X):
@@ -179,21 +182,17 @@ class AnalysisConfigurable(MetaConfigurable):
         if not hasattr(X, "mask"):
             return X
 
-        # store the mask because it will be destroyed
-        self._X_mask = X._mask
-
         # remove masked rows and columns
         masked_rows, masked_columns = self._get_masked_rc(X._mask)
 
-        data = X.data[:, ~masked_columns]
-        data = data[~masked_rows]
+        Xc = X[:, ~masked_columns]
+        Xrc = Xc[~masked_rows]
 
         # destroy the mask
-        X._mask = NOMASK
+        Xrc._mask = NOMASK
 
         # return the modified X dataset
-        X.data = data
-        return X
+        return Xrc
 
     def _restore_masked_data(self, D, axis=-1):
         # by default, we restore columns, put axis=0 to restore rows instead
@@ -203,7 +202,7 @@ class AnalysisConfigurable(MetaConfigurable):
             # return it inchanged as wa had no mask originally
             return D
 
-        rowsize, colsize = self._shape
+        rowsize, colsize = self._X_shape
         masked_rows, masked_columns = self._get_masked_rc(self._X_mask)
 
         Dtemp = None
@@ -216,7 +215,12 @@ class AnalysisConfigurable(MetaConfigurable):
                     Dtemp = np.ma.zeros((M, colsize))  # note np.ma, not np.
                     Dtemp[:, ~masked_columns] = D
                     Dtemp[:, masked_columns] = MASKED
-                    D = Dtemp
+                    D.data = Dtemp
+                    try:
+                        D.coordset[D.dims[-1]] = self._X_coordset[D.dims[-1]]
+                    except TypeError:
+                        # probably no coordset
+                        pass
 
             # Put back masked rows in D
             # -------------------------
@@ -226,8 +230,12 @@ class AnalysisConfigurable(MetaConfigurable):
                     Dtemp = np.ma.zeros((rowsize, N))
                     Dtemp[~masked_rows] = D
                     Dtemp[masked_rows] = MASKED
-                    D = Dtemp
-
+                    D.data = Dtemp
+                    try:
+                        D.coordset[D.dims[-2]] = self._X_coordset[D.dims[-2]]
+                    except TypeError:
+                        # probably no coordset
+                        pass
         elif D.ndim == 1:
             # we assume here that the only case it happens is for array as explained
             # variance so that we deal with masked rows
@@ -235,7 +243,7 @@ class AnalysisConfigurable(MetaConfigurable):
                 Dtemp = np.ma.zeros((rowsize,))  # note np.ma, not np.
                 Dtemp[~masked_rows] = D
                 Dtemp[masked_rows] = MASKED
-                D = Dtemp
+                D.data = Dtemp
 
         # if Dtemp is None and np.any(self._X_mask):
         #     raise IndexError("Can not restore mask. Please check the given index")
@@ -274,8 +282,14 @@ class AnalysisConfigurable(MetaConfigurable):
         # as in fit methods we often use np.linalg library, we cannot handle directly
         # masked data (so we remove them here and they will be restored at the end of
         # the process during transform or inverse transform methods
-        # store the original shape as it will be eventually modified
-        self._shape = X.shape
+        # store the original shape as it will be eventually modified as welle- as the
+        # original coordset
+        self._X_shape = X.shape
+        # store the mask because it may be destroyed
+        self._X_mask = X._mask.copy()
+        # and the original coordset
+        self._X_coordset = copy(X._coordset)
+
         # remove masked data and return modified dataset
         X = self._remove_masked_data(X)
         return X
@@ -323,7 +337,8 @@ class AnalysisConfigurable(MetaConfigurable):
         X = self._X.copy()
         if np.any(self._X_mask):
             # restore masked row and column if necessary
-            X.data = self._restore_masked_data(X.data, axis="both")
+            # X.data = self._restore_masked_data(X.data, axis="both")
+            X = self._restore_masked_data(X, axis="both")
         if self._is_dataset or self._output_type == "NDDataset":
             return X
         else:
@@ -351,7 +366,7 @@ class AnalysisConfigurable(MetaConfigurable):
         self._fitted = False  # reiniit this flag
 
         # fire the X and eventually Y validation and preprocessing.
-        # X and Y are epected to be resp. NDDataset and NDDataset or list of NDDataset.
+        # X and Y are expected to be resp. NDDataset and NDDataset or list of NDDataset.
         self._X = X  # self._make_dataset(X)
         if Y is not None:
             self._Y = Y  # self._make_dataset(Y)
@@ -432,7 +447,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     Subclass this to get a minimal structure
     """
 
-    # THis class is subclass Analysisonfigurable so we define only additional
+    # This class is subclass AnalysisConfigurable, so we define only additional
     # attributes and methods necessary for decomposition model.
 
     # ----------------------------------------------------------------------------------

@@ -232,7 +232,6 @@ for reproducible results across multiple function calls.""",
             X /= self._ampl
             X.name = "scaled %s" % X.name
 
-        # we keep only the data
         self._X_preprocessed = X.data
 
         # final check on the configuration used_components parameter
