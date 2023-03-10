@@ -54,10 +54,10 @@ jupytext
 sphinx==5.3
 sphinx_rtd_theme==1.1
 autodocsumm
-sphinx-gallery
+sphinx-gallery==0.7.0
 nbsphinx
 jupyter_sphinx
 json5
 sphinx-copybutton
 pandoc
-autodoc_traits
+autodoc-traits
