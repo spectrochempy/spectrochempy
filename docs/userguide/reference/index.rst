@@ -659,7 +659,6 @@ Logging
     get_loglevel
     debug_
     info_
-    print_
     warning_
     error_
 
