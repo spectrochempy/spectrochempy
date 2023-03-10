@@ -117,7 +117,7 @@ today_fmt = "%B %d, %Y"
 exclude_patterns = ["_templates", "_static", "**.ipynb_checkpoints", "gallery", "~temp"]
 
 #
-# The reST default role (used for this markup: `text`) to use for all
+# The reST default role (used for this markup: `text` ) to use for all
 # documents.
 default_role = "obj"
 

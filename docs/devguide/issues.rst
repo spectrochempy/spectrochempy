@@ -28,7 +28,7 @@ Bug reports should :
 
         >>> nd = NDDataset()
 
-#.  Include the full version string of |scpy|. You can use the built in property
+#.  Include the full version string of |scpy| . You can use the built in property
 
     .. sourcecode:: ipython3
 

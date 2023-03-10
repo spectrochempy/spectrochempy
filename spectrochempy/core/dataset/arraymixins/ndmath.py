@@ -1505,7 +1505,7 @@ class NDMath(object):
     @_from_numpy_method
     def empty_like(cls, dataset, dtype=None, **kwargs):
         """
-        Return a new uninitialized |NDDataset|.
+        Return a new uninitialized |NDDataset| .
 
         The returned |NDDataset| have the same shape and type as a given array. Units,
         coordset, ... can be added in
@@ -1630,7 +1630,7 @@ class NDMath(object):
             When None, units will be determined from the function results.
         coordset : |Coordset| instance, optional
             If provided, this determine the shape and coordinates of each dimension of
-            the returned |NDDataset|. If shape is also passed it will be ignored.
+            the returned |NDDataset| . If shape is also passed it will be ignored.
         **kwargs
             Other kwargs are passed to the final object constructor.
 
@@ -2241,7 +2241,7 @@ class NDMath(object):
         Parameters
         ----------
         func : function
-            Function to apply to the |NDDataset|.
+            Function to apply to the |NDDataset| .
             `*args`, and `**kwargs` are passed into `func`.
             Alternatively a `(callable, data_keyword)` tuple where
             `data_keyword` is a string indicating the keyword of
@@ -2259,7 +2259,7 @@ class NDMath(object):
         Notes
         -----
         Use ``.pipe`` when chaining together functions that expect
-        a |NDDataset|.
+        a |NDDataset| .
         """
         if isinstance(func, tuple):
             func, target = func

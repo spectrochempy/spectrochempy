@@ -20,7 +20,7 @@ Building the environment image locally
 =======================================
 
 To build a |scpy| image you can do it using the ``Docker build`` command in the directory where is located the
-``Dockerfile``:
+``Dockerfile`` :
 
 .. sourcecode:: bash
 

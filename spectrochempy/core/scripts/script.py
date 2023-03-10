@@ -34,7 +34,7 @@ class Script(HasTraits):
 
     See Also
     --------
-    Project: Object containing |NDDataset|s, sub-|Project|s and |Scripts|.
+    Project: Object containing |NDDataset|s, sub-|Project|s and |Scripts| .
 
     Examples
     --------

@@ -70,7 +70,7 @@ There are several ways to load datafiles on the server:
 * By connecting the notebook to your Google Drive (this of course requires that your
   local files are synchronized with Google drive), using the file-explorer pane.
 
-* By cloning a GitHub repository using `git clone`.
+* By cloning a GitHub repository using `git clone` .
 
 .. image:: images/colab_2.png
        :alt: Colab windows

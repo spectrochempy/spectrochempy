@@ -53,7 +53,7 @@ def read_jcamp(*paths, **kwargs):
     Returns
     --------
     read_jcamp
-        |NDDataset| or list of |NDDataset|.
+        |NDDataset| or list of |NDDataset| .
 
     Other Parameters
     ----------------

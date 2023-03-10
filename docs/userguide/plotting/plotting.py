@@ -100,12 +100,15 @@ dataset[:, 1290.0:920.0] = scp.MASKED
 # ```ipython3
 #     %matplotlib widget
 # ```
-# However, this suffers (at least for us) some incompatibilities in `jupyter lab`... it is worth to try!
-# If you can not get it working in `jupyter lab` and you need interactivity, you can use the following:
+# However, this suffers (at least for us) some incompatibilities in `jupyter lab` ...
+# it is worth to try!
+# If you can not get it working in `jupyter lab` and you need interactivity, you can
+# use the following:
 # ```ipython3
 #     %matplotlib
 # ```
-# which has the effect of displaying the figures in independent windows using default matplotlib backend (e.g.,
+# which has the effect of displaying the figures in independent windows using default
+# matplotlib backend (e.g.,
 # `Tk`), with all the interactivity of matplotlib.
 #
 # But you can explicitly request a different GUI backend:
@@ -432,7 +435,7 @@ prefs
 # %% [markdown]
 # **Warning**: Note that with respect to matplotlib,the parameters in the `dataset.preferences` dictionary
 # have a slightly different name, e.g. `figure_figsize` (SpectroChemPy) instead of `figure.figsize` (matplotlib syntax)
-# (this is because in SpectroChemPy, dot (`.`) cannot be used in parameter name,
+# (this is because in SpectroChemPy, dot (`.` ) cannot be used in parameter name,
 # and thus it is replaced by an underscore (`_`))
 #
 

@@ -335,9 +335,9 @@ _ = ax.legend()
 #
 # If the concept of "peak height" is pretty clear, it is worth examining further some
 # peak properties as defined and
-# used in `find_peaks()`. They can be obtained (and used) by passing the parameters
+# used in `find_peaks()` . They can be obtained (and used) by passing the parameters
 # `height`, `prominence`,
-# `threshold`  and `width`. Then `find_peaks()` will return the corresponding properties
+# `threshold`  and `width` . Then `find_peaks()` will return the corresponding properties
 # of the detected peaks in the
 # `properties` dictionary.
 #

@@ -37,13 +37,13 @@ environment or an existing environment
         (base)  ~ $ conda config --add channels cantera
 
     Note that the last line about cantera is only require if you intend to work
-    the kinetics modules of |scpy|.
+    the kinetics modules of |scpy| .
 
 #.  **Recommended**: you should create a dedicated environment in order to
     isolate the changes made on the installed library from any other previous
     installation for another application.
 
-    We will name this new environment `scpy` in this example
+    We will name this new environment ``scpy`` in this example
     but of course you can use whatever name you want.
 
     .. sourcecode:: bash
@@ -51,7 +51,7 @@ environment or an existing environment
         (base)  ~ $ conda create -n scpy
 
     Switch to this environment. At this point, `(scpy)` should
-    appear before the prompt instead of `(base)`.
+    appear before the prompt instead of `(base)` .
 
     .. sourcecode:: bash
 
@@ -189,4 +189,4 @@ Spectrochempy is likely functional !
     SpectroChemPy's API - v.0.1.17
     © Copyright 2014-2020 - A.Travert & C.Fernandez @ LCS
 
-The recommended next step is to proceed to the :ref:`userguide`.
+The recommended next step is to proceed to the :ref:`userguide` .

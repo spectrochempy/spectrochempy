@@ -196,7 +196,7 @@ def make_release_note_index(revision):
         cleaned_sections.append(content)
 
     changelog_content = "\n".join(cleaned_sections)
-    changelog_content = changelog_content.strip() + "\n"  # end of file
+    # changelog_content = changelog_content.strip() + "\n"  # end of file
     changelog_content = changelog_content.replace("{{ revision }}", revision)
 
     if ".dev" in revision:
@@ -246,7 +246,6 @@ Breaking changes
 Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
-
 """
         )
     # Create the new index.rst file

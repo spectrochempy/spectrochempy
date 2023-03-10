@@ -79,7 +79,7 @@
 #
 # * Then you can click on the `+` sign to create a new cell. This cell is by default a Code cell which can contain
 # Python code, but you can also enter some text, in Markdown format. Choose the content type of the cell in the
-# dropdown menu, or by typing `ESC+M`.
+# dropdown menu, or by typing `ESC+M` .
 # <img src='images/enter_md.png' />
 #
 # ## Markdown cheat sheet
