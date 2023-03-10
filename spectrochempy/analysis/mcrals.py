@@ -180,9 +180,9 @@ class MCRALS(HasTraits):
     PCA
        Performs MCR-ALS of a |NDDataset| knowing the initial C or St matrix.
     NNMF
-       Performs a Non Negative Matrix Factorization of a |NDDataset|.
+       Performs a Non Negative Matrix Factorization of a |NDDataset| .
     EFA
-       Perform an Evolving Factor Analysis (forward and reverse) of the input |NDDataset|.
+       Perform an Evolving Factor Analysis (forward and reverse) of the input |NDDataset| .
 
     Examples
     --------

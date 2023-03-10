@@ -51,7 +51,7 @@ from spectrochempy.utils.optional import import_optional_dependency
 # ======================================================================================
 class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     """
-    The main N-dimensional dataset class used by |scpy|.
+    The main N-dimensional dataset class used by |scpy| .
 
     The NDDataset is the main object use by SpectroChemPy. Like numpy
     ndarrays, NDDataset have the capability to be
@@ -72,8 +72,8 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     ----------
     data : array of floats
         Data array contained in the object. The data can be a list, a tuple,
-        a |ndarray|, a ndarray-like,
-        a |NDArray| or any subclass of |NDArray|. Any size or shape of data
+        a |ndarray| , a ndarray-like,
+        a |NDArray| or any subclass of |NDArray| . Any size or shape of data
         is accepted. If not given, an empty
         |NDArray| will be inited.
         At the initialisation the provided data will be eventually casted to
@@ -86,7 +86,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         for `data` input, but will be passed by reference, so you should
         make a copy of the `data` before passing
         them if that's the desired behavior or set the `copy` argument to True.
-    coordset : An instance of |CoordSet|, optional
+    coordset : An instance of |CoordSet| , optional
         `coords` contains the coordinates for the different dimensions of
         the `data`. if `coords` is provided,
         it must specified the `coord` and `labels` for all dimensions of the
@@ -121,13 +121,13 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         Labels for the `data`. labels can be used only for 1D-datasets.
         The labels array may have an additional dimension, meaning several
         series of labels for the same data.
-        The given array can be a list, a tuple, a |ndarray|, a ndarray-like,
+        The given array can be a list, a tuple, a |ndarray| , a ndarray-like,
         a |NDArray| or any subclass of
-        |NDArray|.
+        |NDArray| .
     mask : array of bool or `NOMASK`, optional
         Mask for the data. The mask array must have the same shape as the
         data. The given array can be a list,
-        a tuple, or a |ndarray|. Each values in the array must be `False`
+        a tuple, or a |ndarray| . Each values in the array must be `False`
         where the data are *valid* and True when
         they are not (like in numpy masked arrays). If `data` is already a
         :class:`~numpy.ma.MaskedArray`, or any
@@ -177,7 +177,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     Notes
     -----
     The underlying array in a |NDDataset| object can be accessed through the
-    `data` attribute, which will return a conventional |ndarray|.
+    `data` attribute, which will return a conventional |ndarray| .
     """
 
     # Examples
@@ -1263,7 +1263,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     @property
     def T(self):
         """
-        Transposed |NDDataset|.
+        Transposed |NDDataset| .
 
         The same object is returned if `ndim` is less than 2.
         """

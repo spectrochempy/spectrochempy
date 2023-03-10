@@ -81,7 +81,7 @@ class NDArray(HasTraits):
     as its basic functionalities may be quite limited, but to be subclassed.
 
     Indeed, both the classes |NDDataset| and |Coord| which respectively implement a full dataset (with
-    coordinates) and the coordinates in a given dimension, are derived from |NDArray| in |scpy|.
+    coordinates) and the coordinates in a given dimension, are derived from |NDArray| in |scpy| .
 
     The key distinction from raw numpy |ndarray| is the presence of optional properties such as dimension names,
     labels, masks, units and/or extensible metadata dictionary.
@@ -89,8 +89,8 @@ class NDArray(HasTraits):
     Parameters
     ----------
     data : array of floats
-        Data array contained in the object. The data can be a list, a tuple, a |ndarray|, a ndarray-like,
-        a |NDArray| or any subclass of |NDArray|. Any size or shape of data is accepted. If not given, an empty
+        Data array contained in the object. The data can be a list, a tuple, a |ndarray| , a ndarray-like,
+        a |NDArray| or any subclass of |NDArray| . Any size or shape of data is accepted. If not given, an empty
         |NDArray| will be inited.
         At the initialisation the provided data will be eventually cast to a numpy-ndarray.
         If a subclass of |NDArray| is passed which already contains some mask, labels, or units, these elements
@@ -115,11 +115,11 @@ class NDArray(HasTraits):
     labels : array of objects, optional
         Labels for the `data`. Note that the labels can be used only for 1D-datasets.
         The labels array may have an additional dimension, meaning several series of labels for the same data.
-        The given array can be a list, a tuple, a |ndarray|, a ndarray-like, a |NDArray| or any subclass of
-        |NDArray|.
+        The given array can be a list, a tuple, a |ndarray| , a ndarray-like, a |NDArray| or any subclass of
+        |NDArray| .
     mask : array of bool or `NOMASK`, optional
         Mask for the data. The mask array must have the same shape as the data. The given array can be a list,
-        a tuple, or a |ndarray|. Each values in the array must be `False` where the data are *valid* and True when
+        a tuple, or a |ndarray| . Each values in the array must be `False` where the data are *valid* and True when
         they are not (like in numpy masked arrays). If `data` is already a :class:`~numpy.ma.MaskedArray`, or any
         array object (such as a |NDArray| or subclass of it), providing a `mask` here will cause the mask from the
         masked array to be ignored.
@@ -1533,7 +1533,7 @@ class NDArray(HasTraits):
 
         Parameters
         ----------
-        other : |Unit|, |Quantity| or str
+        other : |Unit| , |Quantity| or str
             Destination units.
         force : bool, optional, default=`False`
             If True the change of units is forced, even for incompatible units.
@@ -1877,7 +1877,7 @@ class NDArray(HasTraits):
 
     def swapdims(self, dim1, dim2, inplace=False):
         """
-        Interchange a two dims of a |NDArray|.
+        Interchange a two dims of a |NDArray| .
 
         Parameters
         ----------

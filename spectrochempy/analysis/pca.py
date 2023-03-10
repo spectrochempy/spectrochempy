@@ -66,9 +66,9 @@ class PCA(HasTraits):
     See Also
     --------
     EFA
-       Perform an Evolving Factor Analysis (forward and reverse) of the input |NDDataset|.
+       Perform an Evolving Factor Analysis (forward and reverse) of the input |NDDataset| .
     NNMF
-       Performs a Non Negative Matrix Factorization of a |NDDataset|.
+       Performs a Non Negative Matrix Factorization of a |NDDataset| .
     MCRALS
        Performs MCR-ALS of a |NDDataset| knowing the initial C or St matrix.
     """

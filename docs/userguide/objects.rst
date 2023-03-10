@@ -4,7 +4,7 @@ Data structures
 ###############
 
 
-The NDDataset is the main object used by |scpy|.
+The NDDataset is the main object used by |scpy| .
 
 Like numpy ndarrays, NDDataset have the capability to be sliced, sorted and subjected to mathematical operations.
 

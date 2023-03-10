@@ -50,9 +50,9 @@ import spectrochempy as scp
 # Boxes. While we do not recommend
 # this procedure for advanced usage (see below), it is quite easy to do that with SCPy.
 # To do so, we can use the
-# `read` function which open a dialog, allowing the selection of data file form various
+# ``read`` function which open a dialog, allowing the selection of data file form various
 # origin. By default,
-# the native SCPy type of data is proposed (file suffix: `.scp` ). The desired type of
+# the native SCPy type of data is proposed (file suffix: ``.scp`` ). The desired type of
 # files to display can be chosen
 # in a dropdown field.
 
@@ -65,7 +65,7 @@ X = scp.read()
 # <center><img id='drawings' width='600px'  src='./images/read.png'></img></center>
 #
 # The dialog Box allows selecting the file which data will be loaded in the variable
-# ``X``\. Try for instance to run the
+# ``X`` . Try for instance to run the
 # cell below, and select an omnic spg datafile (select the .spg extension), which you
 # can find in the ``irdata`` directory.
 #
@@ -76,16 +76,16 @@ X = scp.read()
 # </div>
 #
 # Printing the returned NDDataset object X should read like this, with indication of
-# the dataset ``shape``, *i.e., * the `y` and  `x` dimension sizes:
+# the dataset ``shape`` , *i.e., * the ``y`` and  ``x`` dimension sizes:
 
 # %%
 print(X)
 
 # %% [markdown]
-# The size of the `y` and `x` dimension will depend, of course, of the file that you
+# The size of the ``y`` and ``x`` dimension will depend, of course, of the file that you
 # have selected ! If you did not
 # select any file (*e.g.,* by pressing 'cancel' in th Dialog Box), the result will be
-# ``None``\, as nothing has been loaded in ``X``\.
+# ``None`` , as nothing has been loaded in ``X`` .
 #
 # <div class='alert alert-info'>
 # <b>Note</b>
@@ -180,7 +180,7 @@ print(X)
 #
 #
 # Imagine now that the file of interest is actually located in
-# ``C:\users\Brian\s\Life``\. The following
+# ``C:\users\Brian\s\Life`` . The following
 # commands are all equivalent and will allow opening the file:
 #
 # - using only the full pathname of the file:
@@ -201,9 +201,9 @@ print(X)
 #
 # The above directives require explicitly writing the absolute pathnames, which are
 # virtually always computer specific.
-# If, for instance, Brian has a project organised in a folder (`s`) with a directory
-# dedicated to input data (`Life`)
-# and a notebook for preprocessing (`welease.ipynb`) as illustrate below:
+# If, for instance, Brian has a project organised in a folder (``s`` ) with a directory
+# dedicated to input data (``Life`` )
+# and a notebook for preprocessing (``welease.ipynb`` ) as illustrate below:
 #
 # ```
 # C:\users
@@ -215,7 +215,7 @@ print(X)
 #
 # ```
 #
-# Then running this project in John's Linux computer (e.g. in ``\home\john\s_copy``)
+# Then running this project in John's Linux computer (e.g. in ``\home\john\s_copy`` )
 # will certainly result in execution
 # errors if absolute paths are used in the notebook:
 # ```text
@@ -225,7 +225,7 @@ print(X)
 # notebooks.
 # Fortunately, SpectroChemPy readers use relative paths. If the given path is not
 # absolute, then SpectroChemPy will search in the current directory. Hence, the opening
-# of the `spg` file from scripts in ``welease.ipynb`` can be made
+# of the ``spg`` file from scripts in ``welease.ipynb`` can be made
 # by the command:
 # ```ipython3
 # X = scp.read_omnic('Life/wodger.spg')
@@ -235,7 +235,7 @@ print(X)
 # X = scp.read_omnic('wodger.spg', directory='Life')
 # ```
 #
-# ### Good practice: use `os` or `pathlib` modules
+# ### Good practice: use ``os`` or ``pathlib`` modules
 #
 # In python, working with pathnames is classically done with dedicated modules such as
 # ``os`` or ``pathlib`` python modules.
@@ -251,7 +251,7 @@ print(X)
 #                          # using the system separator (``/`` or ``\\``\)
 # ```
 #
-# Using `Pathlib` is even simpler:
+# Using ``Pathlib`` is even simpler:
 # ```ipython3
 # from pathlib import Path
 # Path.cwd()               # returns the absolute path of the current working directory

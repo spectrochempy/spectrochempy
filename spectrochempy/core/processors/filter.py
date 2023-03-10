@@ -181,7 +181,7 @@ def detrend(dataset, type="linear", bp=0, **kwargs):
     Returns
     -------
     detrended
-        The detrended |NDDataset|.
+        The detrended |NDDataset| .
 
     Other Parameters
     ----------------

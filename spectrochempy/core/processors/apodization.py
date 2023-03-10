@@ -180,7 +180,7 @@ def em(dataset, lb=1, shifted=0, **kwargs):
     ----------
     dataset : Dataset
         Input dataset.
-    lb : float or |Quantity|, optional, default=1 Hz
+    lb : float or |Quantity| , optional, default=1 Hz
         Exponential line broadening,
         If it is not a quantity with units, it is assumed to be a broadening expressed in Hz.
     shifted : float or `quantity`, optional, default=0 us

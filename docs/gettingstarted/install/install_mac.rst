@@ -37,13 +37,13 @@ environment or an existing environment
         (base)  ~ $ conda config --add channels cantera
 
     Note that the last line about cantera is only require if you intend to work
-    the kinetics modules of |scpy|.
+    the kinetics modules of |scpy| .
 
 #.  **Recommended**: you should create a dedicated environment in order to
     isolate the changes made on the installed library from any other previous
     installation for another application.
 
-    We will name this new environment `scpy` in this example
+    We will name this new environment ``scpy`` in this example
     but of course you can use whatever name you want.
 
     .. sourcecode:: bash
