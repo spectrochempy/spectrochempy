@@ -17,14 +17,16 @@ See :ref:`release` for a full changelog including other versions of SpectroChemP
 New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
-
+* EFA speed optimization.
 
 .. section
 
 Bug fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
-
+* many code fixes.
+* fix some examples.
+* code cleaning.
 
 .. section
 
