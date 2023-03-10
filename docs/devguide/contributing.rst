@@ -36,8 +36,8 @@ The reason we use `Git <https://git-scm.com/>`__ for version control of our code
 
 However, working with `Git <https://git-scm.com/>`__ is unfortunately not the easiest step for a newcomer when trying to contribute to open-source software. But learning this versioning system along with developing with Python can be very rewarding for your daily work.
 
-To learn `Git <https://git-scm.com/>`__, you may want to check out the `GitHub help pages <https://help.github.com/>`_ or the
-`NumPy's documentation <https://numpy.org/doc/stable/dev/index.html>`__. There is no shortage of resources on the web on this subject and many tutorials are available.
+To learn `Git <https://git-scm.com/>`__ , you may want to check out the `GitHub help pages <https://help.github.com/>`_ or the
+`NumPy's documentation <https://numpy.org/doc/stable/dev/index.html>`__ . There is no shortage of resources on the web on this subject and many tutorials are available.
 
 Below we give some essential information to get you started with **Git**, but, of course, if you encounter difficulties, don't hesitate to ask for help. This may help to solve your problems faster, but it also allows us to improve this part of our documentation based on your feedback.
 
@@ -47,22 +47,22 @@ Installing git
 `GitHub <https://help.github.com/set-up-git-redirect>`__ has instructions for installing and configuring git.  All these steps need to be completed before you can work seamlessly between your local repository and GitHub.
 
 Git is a free and open source distributed control system used in well-known software repositories, such as
-`GitHub <https://github.com>`__ or `Bitbucket <https://bitbucket.org>`__. For this project, we use a GitHub
+`GitHub <https://github.com>`__ or `Bitbucket <https://bitbucket.org>`__ . For this project, we use a GitHub
 repository: `spectrochempy repository <https://github.com/spectrochempy/spectrochempy>`__.
 
 Depending on your operating system, you may refer to these pages for installation instructions:
 
 -  `Download Git for macOS <https://git-scm.com/download/mac>`__ (One trivial option is to install `XCode <https://developer.apple.com/xcode/>`__ which is shipped with the git system).
 
--  `Download Git for Windows <https://git-scm.com/download/win>`__.
+-  `Download Git for Windows <https://git-scm.com/download/win>`__ .
 
--  `Download for Linux and Unix <https://git-scm.com/download/linux>`__. For the common Debian/Ubuntu distribution, it is as simple as typing in the Terminal:
+-  `Download for Linux and Unix <https://git-scm.com/download/linux>`__ . For the common Debian/Ubuntu distribution, it is as simple as typing in the Terminal:
 
    .. sourcecode:: bash
 
        sudo apt-get install git
 
--  Alternatively, once miniconda or anaconda is installed (see :ref:`contributing_environment`), one can use conda to install
+-  Alternatively, once miniconda or anaconda is installed (see :ref:`contributing_environment` ), one can use conda to install
    git:
 
    .. sourcecode:: bash
@@ -115,7 +115,7 @@ To test out code and documentation changes, you'll need to build |scpy| from sou
 
 * Install either `Anaconda <https://www.anaconda.com/download/>`_, `miniconda
   <https://conda.io/miniconda.html>`_, or `miniforge <https://github.com/conda-forge/miniforge>`_
-* Make sure your conda is up to date (``conda update conda``)
+* Make sure your conda is up to date (``conda update conda`` )
 * Make sure that you have :ref:`cloned the repository <contributing.forking>`
 
 * ``cd`` to the |scpy| source directory (*i.e.,* ``localfolder`` created previously)
@@ -228,7 +228,7 @@ When creating this branch, make sure your master branch is up to date with the l
 
 When you want to update the feature branch with changes in the master after you have created the
 you have created the branch, see the section on
-:ref:`updating a PR <contributing.update-pr>`.
+:ref:`updating a PR <contributing.update-pr>` .
 
 Contributing your changes to SpectroChemPy
 ==========================================
@@ -335,10 +335,10 @@ regarding code style, testing, performance testing and documentation. You should
 check the changes in your branch against the branch on which it was based:
 
 #. Navigate to your repository on GitHub -- https://github.com/your-user-name/spectrochempy
-#. Click on ``Branches``.
+#. Click on ``Branches`` .
 #. Click on the ``Compare`` button for your feature branch.
 #. Select the ``base`` and ``compare`` branches, if necessary. This will be ``master`` and
-   and ``my-new-feature``, respectively.
+   and ``my-new-feature`` , respectively.
 
 Make the pull request (PR)
 ------------------------------
@@ -352,7 +352,7 @@ will eventually be integrated into the master branch and available in the next r
 #. Click the ``Pull Request`` button.
 #. You can then click on ``Commits`` and ``Files Changed`` to make sure that everything is fine one last time
 #. Write a description of your changes in the ``Preview Discussion`` tab.
-#. Click on ``Send Pull Request``.
+#. Click on ``Send Pull Request`` .
 
 This request will then be sent to the repository maintainers, and they will review
 the code.
@@ -413,7 +413,7 @@ On that pull request. This will trigger a workflow that will automatically corre
 
 To automatically correct formatting errors on every commit you make, you can
 configure the pre-commit yourself. First, create a Python environment :ref:`environment
-<contributing_environment>`, then configure :ref:`pre-commit <contributing.pre-commit>`.
+<contributing_environment>` , then configure :ref:`pre-commit <contributing.pre-commit>` .
 
 Delete your merged branch (optional)
 ------------------------------------

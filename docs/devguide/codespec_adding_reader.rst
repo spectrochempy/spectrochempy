@@ -6,7 +6,7 @@ Adding a Reader
 =============================
 
 Import of spectroscopic data with their meta data from various file formats is a key feature of SpectroChemPy. Data
-import is made through the generic ``read()`` function (in ``core.readers.importer``) which handles
+import is made through the generic ``read()`` function (in ``core.readers.importer`` ) which handles
 the determination of filetype, search locations,  etc...).
 
 In the following, we describe the steps to add a specific reader - with the example of Grams/Thermo .spc files.
@@ -29,7 +29,7 @@ the types of file format types you want the reader to handle.
 For consistency add your test in ``tests/test_core/test_readers/test_xxx.py`` where ``xxx`` is an alias for the
 file format or reader protocol.
 
-The sample file(s) should be grouped in a subdirectory (e.g., ``galacticdata/``) of the ``spectrochempy_data/testdata``
+The sample file(s) should be grouped in a subdirectory (e.g., ``galacticdata/`` ) of the ``spectrochempy_data/testdata``
 folder forked from the `spectrochempy_data repository <https://github.com/spectrochempy/spectrochempy_data/>`_.
 
 A minimum test could be, for instance
@@ -42,7 +42,7 @@ A minimum test could be, for instance
 
 This will ensure that a dataset with the expected shape has been returned.
 
-For local testing, ensure that the default ``datadir`` correctly points to your local git repo of ``spectrochempy_data``, e.g.,
+For local testing, ensure that the default ``datadir`` correctly points to your local git repo of ``spectrochempy_data`` , e.g.,
 
 .. sourcecode:: python
 
@@ -58,8 +58,8 @@ for galactic files:
     ("galactic", "GRAMS/Thermo Galactic files (*.spc)") #  filetype description to add in FILETYPES
     ("galactic", "spc") #  alias to add in ALIAS
 
-The alias (``spc``) will be used to design the specific protocol to read the files.
-It must be used to name the public and private reader functions, e.g. ``scp.read_spc()`` and ``_read_spc()``).
+The alias (``spc`` ) will be used to design the specific protocol to read the files.
+It must be used to name the public and private reader functions, e.g. ``scp.read_spc()`` and ``_read_spc()`` ).
 
 3. Create the reader_xxx.py file
 ================================
@@ -85,7 +85,7 @@ As illustrated below for the .spc example, the minimal file should contain:
     # ======================================================================================================================
     def read_spc(*paths, **kwargs):
         """
-        Open a spc file or a list of files with extension ``.spc``.
+        Open a spc file or a list of files with extension ``.spc`` .
 
         Parameters
         -----------

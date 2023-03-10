@@ -93,10 +93,10 @@ X
 #
 # - `author` is that of the creator of the NDDataset (not of the .spg file, which, to our knowledge, does not have
 # this type of attribute). The string is composed of the username and of the machine name as given by the OS:
-# username@machinename. It can be accessed and changed using `X.author`.
+# username@machinename. It can be accessed and changed using `X.author` .
 #
 # - `created` is the creation date of the NDDataset (again not that of the .spg file). It can be accessed (or even
-# changed) using `X.created`.
+# changed) using `X.created` .
 #
 # - `description` indicates the complete pathname of the .spg file. As the pathname is also given in the history (below)
 # , it can be a good practice to give a self explaining description of the group, for instance:

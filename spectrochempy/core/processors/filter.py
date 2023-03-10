@@ -14,7 +14,7 @@ import scipy.signal
 
 
 # Todo:
-# find_peaks_cwt(vector, widths[, wavelet, ...]) 	Attempt to find the peaks in a 1-D array.
+# find_peaks_cwt(vector, widths[, wavelet, ...]) Attempt to find the peaks in a 1-D array.
 # argrelmin(data[, axis, order, mode]) 	Calculate the relative minima of data.
 # argrelmax(data[, axis, order, mode]) 	Calculate the relative maxima of data.
 # argrelextrema(data, comparator[, axis, ...]) 	Calculate the relative extrema of data.
@@ -91,28 +91,28 @@ def savgol_filter(
 
     Details on the `mode` options:
 
-    * `mirror`:
+    * `mirror` :
       Repeats the values at the edges in reverse order.  The value
       closest to the edge is not included.
-    * `nearest`:
+    * `nearest` :
       The extension contains the nearest input value.
-    * `constant`:
+    * `constant` :
       The extension contains the value given by the `cval` argument.
-    * `wrap`:
+    * `wrap` :
       The extension contains the values from the other end of the array.
 
     For example, if the input is [1, 2, 3, 4, 5, 6, 7, 8], and
     `window_length` is 7, the following shows the extended data for
     the various `mode` options (assuming `cval` is 0)
 
-    +-----------+---------+------------------------+---------+
-    | mode      |   Ext   |         Input          |   Ext
-    *-----------+---------+------------------------+---------+
-    | 'mirror'  | 4  3  2 | 1  2  3  4  5  6  7  8 | 7  6  5 |
-    | 'nearest' | 1  1  1 | 1  2  3  4  5  6  7  8 | 8  8  8 |
-    | 'constant'| 0  0  0 | 1  2  3  4  5  6  7  8 | 0  0  0 |
-    | 'wrap'    | 6  7  8 | 1  2  3  4  5  6  7  8 | 1  2  3 |
-    +-----------+---------+------------------------+---------+
+    +------------+---------+------------------------+---------+
+    | mode       |   Ext   |         Input          |   Ext   |
+    *------------+---------+------------------------+---------+
+    | 'mirror'   | 4  3  2 | 1  2  3  4  5  6  7  8 | 7  6  5 |
+    | 'nearest'  | 1  1  1 | 1  2  3  4  5  6  7  8 | 8  8  8 |
+    | 'constant' | 0  0  0 | 1  2  3  4  5  6  7  8 | 0  0  0 |
+    | 'wrap'     | 6  7  8 | 1  2  3  4  5  6  7  8 | 1  2  3 |
+    +------------+---------+------------------------+---------+
 
     See Also
     ---------
@@ -169,12 +169,12 @@ def detrend(dataset, type="linear", bp=0, **kwargs):
         The input data.
     type : str among ['linear', 'constant'}, optional, default='linear'
         The type of detrending. If ``type == 'linear'`` (default),
-        the result of a linear least-squares fit to `data` is subtracted from `data`.
-        If ``type == 'constant'``, only the mean of `data` is subtracted.
+        the result of a linear least-squares fit to `data` is subtracted from `data` .
+        If ``type == 'constant'`` , only the mean of `data` is subtracted.
     bp : array_like of ints, optional
         A sequence of break points. If given, an individual linear fit is
         performed for each part of `data` between two break points.
-        Break points are specified as indices into `data`.
+        Break points are specified as indices into `data` .
     **kwargs
         Optional keyword parameters (see Other Parameters).
 
@@ -186,10 +186,11 @@ def detrend(dataset, type="linear", bp=0, **kwargs):
     Other Parameters
     ----------------
     dim : str or int, optional, default='x'.
-        Specify on which dimension to apply this method. If `dim` is specified as an integer it is equivalent
-        to the usual `axis` numpy parameter.
+        Specify on which dimension to apply this method. If `dim` is specified as an
+        integer it is equivalent to the usual `axis` numpy parameter.
     inplace : bool, optional, default=False.
-        True if we make the transform inplace.  If False, the function return a new object
+        True if we make the transform inplace.  If False, the function return a new
+        object
 
     See Also
     --------

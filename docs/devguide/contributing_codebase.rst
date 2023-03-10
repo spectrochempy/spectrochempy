@@ -24,7 +24,7 @@ Some extra checks can be run by
 ``pre-commit`` - see :ref:`here <contributing.pre-commit>` for how to
 run them.
 
-Additional standards are outlined on the :ref:`spectrochempy code style guide <code_style>`.
+Additional standards are outlined on the :ref:`spectrochempy code style guide <code_style>` .
 
 .. _contributing.pre-commit:
 
@@ -32,8 +32,8 @@ Pre-commit
 ----------
 
 We encourage you to use `pre-commit hooks <https://pre-commit.com/>`
-to automatically run ``black``, ``flake8`` when you make a git commit. This
-can be done by installing ``pre-commit``::
+to automatically run ``black`` , ``flake8`` when you make a git commit. This
+can be done by installing ``pre-commit`` ::
 
     pip install pre-commit
 
@@ -48,7 +48,7 @@ run each time you commit changes without your needing to run each one manually.
 In addition, using ``pre-commit`` will also allow you to more easily
 remain up to date with our code checks as they change.
 
-Note that if needed, you can skip these checks with ``git commit --no-verify``.
+Note that if needed, you can skip these checks with ``git commit --no-verify`` .
 
 If you don't want to use ``pre-commit`` as part of your workflow, you can still use it
 to run its checks with::
@@ -68,7 +68,7 @@ Optional dependencies
 ---------------------
 
 Optional dependencies (e.g., cantera, nmrglue, ...) should be imported with the private helper
-``spectrochempy.optional.import_optional_dependency``. This ensures a
+``spectrochempy.optional.import_optional_dependency`` . This ensures a
 consistent error message when the dependency is not met.
 
 All methods using an optional dependency should include a test asserting that an
@@ -88,7 +88,7 @@ Python (PEP8 / black)
 spectrochempy follows the `PEP8 <https://www.python.org/dev/peps/pep-0008/>`_ standard
 and uses `Black <https://black.readthedocs.io/en/stable/>`_ and
 `Flake8 <http://flake8.pycqa.org/en/latest/>`_ to ensure a consistent code
-format throughout the project. We encourage you to use :ref:`pre-commit <contributing.pre-commit>`.
+format throughout the project. We encourage you to use :ref:`pre-commit <contributing.pre-commit>` .
 
 :ref:`Continuous Integration <contributing.ci>` will run those tools and
 report any stylistic errors in your code. Therefore, it is helpful before
@@ -100,7 +100,7 @@ submitting code to run the check yourself::
 to auto-format your code. Additionally, many editors have plugins that will
 apply ``black`` as you edit files.
 
-One caveat about ``git diff upstream/master -u -- "*.py" | flake8 --diff``: this
+One caveat about ``git diff upstream/master -u -- "*.py" | flake8 --diff`` : this
 command will catch any stylistic errors in your changes specifically, but
 beware it may not catch all of them. For example, if you delete the only
 usage of an imported function, it is stylistically incorrect to import an
@@ -124,7 +124,7 @@ behavior as follows::
 This will get all the files being changed by the PR (and ending with ``.py``),
 and run ``flake8`` on them, one after the other.
 
-Note that these commands can be run analogously with ``black``.
+Note that these commands can be run analogously with ``black`` .
 
 Backwards compatibility
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -213,10 +213,10 @@ Using ``pytest``
 Here is an example of a self-contained set of tests that illustrate multiple features that we like to use.
 
 * functional style: tests are like ``test_*`` and *only* take arguments that are either fixtures or parameters
-* ``pytest.mark`` can be used to set metadata on test functions, e.g. ``skip`` or ``xfail``.
-* using ``parametrize``: allow testing of multiple cases
+* ``pytest.mark`` can be used to set metadata on test functions, e.g. ``skip`` or ``xfail`` .
+* using ``parametrize`` : allow testing of multiple cases
 * to set a mark on a parameter, ``pytest.param(..., marks=...)`` syntax should be used
-* ``fixture``, code for object construction, on a per-test basis
+* ``fixture`` , code for object construction, on a per-test basis
 * using bare ``assert`` for scalars and truth-testing
 * ``assert_dataset_equal`` for spectrochempy object comparisons.
 * the typical pattern of constructing an ``expected`` and comparing versus the ``result``
