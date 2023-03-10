@@ -10,6 +10,6 @@ New features
 
 Bug fixes
 ~~~~~~~~~
-* many code fixes.
-* fix some examples.
-* code cleaning.
+* Many code fixes.
+* Fix some examples.
+* Code cleaning.

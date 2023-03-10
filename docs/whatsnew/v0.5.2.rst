@@ -7,8 +7,8 @@ See :ref:`release` for a full changelog including other versions of SpectroChemP
 New features
 ~~~~~~~~~~~~
 
-* Compatibility with matplotlib 3.7
-* Refactoring of the configuration files
+* Compatibility with matplotlib 3.7.
+* Refactoring of the configuration files.
 
 Bug fixes
 ~~~~~~~~~
