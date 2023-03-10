@@ -87,8 +87,10 @@ class BuildDocumentation(object):
         # determine if we are in the development branch (latest) or master (stable)
 
         if "dev" in version:
+            print("\n\nWe are creating the latest (dev) documentation.\n")
             self._doc_version = "latest"
         else:
+            print("\n\nWe are creating the stable documentation.\n")
             self._doc_version = "stable"
 
     def __call__(self):
