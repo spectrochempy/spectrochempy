@@ -24,8 +24,7 @@ New features
 Bug fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
-* Documentation building fix.
-* Update check warning corrected.
+
 
 .. section
 
