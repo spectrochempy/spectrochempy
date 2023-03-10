@@ -55,7 +55,6 @@ or updated accordingly
     # ----------------
     # From here, the dependencies are essentially for development.
     # They should not be necessary for the user of  spectrochempy.
-
     - pytest
     - pytest-doctestplus
     - pytest-flake8
@@ -72,7 +71,7 @@ or updated accordingly
     - sphinx=5.3
     - sphinx_rtd_theme=1.1
     - autodocsumm
-    - sphinx-gallery
+    - sphinx-gallery=0.7.0
     - nbsphinx
     - jupyter_sphinx
     - json5
@@ -81,22 +80,6 @@ or updated accordingly
     - conda-build
     - conda-verify
     - anaconda-client
+    - autodoc-traits
 {% endif %}
-{%- if DASH %}
-    # dash dependencies
-    - dash
-    - dash-bootstrap-components
-    - dash-daq
-    - jupyter-dash
-    - plotly
-{%- endif %}
-{%- if DEV %}
-    - pip
-    - pip:
-        - autodoc_traits
-{%- endif %}
-{%- if DASH %}
-        - dash_defer_js_import
-        - dash-ace
-{%- endif %}
 #EOF
