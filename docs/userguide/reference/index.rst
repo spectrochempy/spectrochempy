@@ -9,7 +9,7 @@ Public API reference
 
 The |scpy| API publicly exposes many objects and functions.
 They are listed below exhaustively.
-What is not listed here is reserved for developers and should not normally be necessary for normal use of |scpy|.
+What is not listed here is reserved for developers and should not normally be necessary for normal use of |scpy| .
 
 .. contents:: Table of Contents
 
@@ -39,7 +39,7 @@ highly recommended.
 The NDDataset Object
 *********************
 
-The NDDataset is the main object use by |scpy|.
+The NDDataset is the main object use by |scpy| .
 
 Like numpy ndarrays, NDDataset have the capability to be sliced, sorted and subject to mathematical operations.
 
@@ -64,8 +64,8 @@ Coordinates-related objects
 ***************************
 
 |NDDataset| in |scpy| in contrast to numpy nd-arrays can have coordinates for each dimension.
-The individual coordinates are represented by a specific object: |Coord|.
-All coordinates of a |NDDataset| are grouped in a particular object: |CoordSet|.
+The individual coordinates are represented by a specific object: |Coord| .
+All coordinates of a |NDDataset| are grouped in a particular object: |CoordSet| .
 
 .. autosummary::
     :nosignatures:

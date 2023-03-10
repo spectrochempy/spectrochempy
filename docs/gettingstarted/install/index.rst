@@ -20,11 +20,11 @@ distribution.
 Miniconda is lighter (400 MB disk space) while Anaconda (3 GB minimum disk space
 to download and install)
 is much more complete for scientific applications if you intend using python
-beyond |scpy|. Important packages in Anaconda are also required for |scpy|
+beyond |scpy| . Important packages in Anaconda are also required for |scpy|
 (e.g., `Matplotib <https://matplotlib.org>`_,
 `Numpy <https://numpy.org>`_, `Scipy <https://www.scipy.org>`_,
 `Jupyter <https://jupyter.org>`_, …). They are not
-included in Miniconda and will be installed anyway when installing |scpy|.
+included in Miniconda and will be installed anyway when installing |scpy| .
 So overall, the difference in installation time/disc space won’t be that big
 whether you choose Miniconda or Anaconda…
 

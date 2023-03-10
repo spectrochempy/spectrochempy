@@ -93,7 +93,7 @@ def align(dataset, *others, **kwargs):
           this number of points.
         * float : If a float value is provided, it determines the interval
         between the interpolated data.
-    coord : |Coord|, optional, default=None
+    coord : |Coord| , optional, default=None
         Coordinates to use for alignment. Ignore those corresponding to the
         dimensions to align.
     copy : bool, optional, default=True

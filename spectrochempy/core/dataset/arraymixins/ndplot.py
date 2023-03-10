@@ -341,9 +341,9 @@ class PreferencesSet(Meta):
 # ======================================================================================
 class NDPlot(HasTraits):
     """
-    Plotting interface for |NDDataset|.
+    Plotting interface for |NDDataset| .
 
-    This class is used as basic plotting interface of the |NDDataset|.
+    This class is used as basic plotting interface of the |NDDataset| .
     """
 
     # Instance of the current matplotlib axis defined for a NDArray object.

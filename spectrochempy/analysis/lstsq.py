@@ -224,7 +224,7 @@ class NNLS(HasTraits):
         Returns
         -------
         dataset
-            |NDDataset|.
+            |NDDataset| .
         """
         A, B = self.transform()
 

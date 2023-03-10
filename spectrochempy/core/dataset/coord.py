@@ -5,7 +5,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-This module implements the class |Coord|.
+This module implements the class |Coord| .
 """
 
 __all__ = ["Coord", "LinearCoord"]
@@ -44,7 +44,7 @@ class Coord(NDMath, NDArray):
     data : ndarray, tuple or list
         The actual data array contained in the |Coord| object.
         The given array (with a single dimension) can be a list,
-        a tuple, a |ndarray|, or a |ndarray|-like object.
+        a tuple, a |ndarray| , or a |ndarray|-like object.
         If an object is passed that contains labels, or units,
         these elements will be used to accordingly set those of the
         created object.
@@ -74,9 +74,9 @@ class Coord(NDMath, NDArray):
         Labels for the `data`. labels can be used only for 1D-datasets.
         The labels array may have an additional dimension, meaning
         several series of labels for the same data.
-        The given array can be a list, a tuple, a |ndarray|,
+        The given array can be a list, a tuple, a |ndarray| ,
         a ndarray-like, a |NDArray| or any subclass of
-        |NDArray|.
+        |NDArray| .
     units : |Unit| instance or str, optional
         Units of the data. If data is a |Quantity| then `units` is set
         to the unit of the `data`; if a unit is also
@@ -904,9 +904,9 @@ class LinearCoord(Coord):
         Labels for the `data`. labels can be used only for 1D-datasets.
         The labels array may have an additional dimension, meaning
         several series of labels for the same data.
-        The given array can be a list, a tuple, a |ndarray|,
+        The given array can be a list, a tuple, a |ndarray| ,
         a ndarray-like, a |NDArray| or any subclass of
-        |NDArray|.
+        |NDArray| .
     units : |Unit| instance or str, optional
         Units of the data. If data is a |Quantity| then `units` is set
         to the unit of the `data`; if a unit is also

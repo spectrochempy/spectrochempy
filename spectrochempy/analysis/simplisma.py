@@ -31,7 +31,7 @@ class SIMPLISMA(HasTraits):
     """
     SIMPLe to use Interactive Self-modeling Mixture Analysis.
 
-    This class performs a SIMPLISMA analysis of a 2D |NDDataset|. The algorithm is adapted from Windig's paper,
+    This class performs a SIMPLISMA analysis of a 2D |NDDataset| . The algorithm is adapted from Windig's paper,
     Chemometrics and Intelligent Laboratory Systems, 36, 1997, 3-16.
 
     TODO : adapt to 3DDataset ?

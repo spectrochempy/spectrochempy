@@ -39,7 +39,7 @@ def read_zip(*paths, **kwargs):
     Returns
     --------
     read_zip
-        |NDDataset| or list of |NDDataset|.
+        |NDDataset| or list of |NDDataset| .
 
     Other Parameters
     ----------------

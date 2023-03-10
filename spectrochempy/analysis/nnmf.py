@@ -25,7 +25,7 @@ from spectrochempy.utils.traits import NDDatasetType
 
 class NNMF(HasTraits):
     """
-    Performs a Non Negative Matrix Factorization of a |NDDataset|.
+    Performs a Non Negative Matrix Factorization of a |NDDataset| .
 
     Parameters
     ----------
