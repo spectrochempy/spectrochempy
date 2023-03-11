@@ -69,5 +69,6 @@ jobs:
             I've updated the CHANGELOG.md, CITATION.cff, .zenodo.json plus eventual
             changes on the requirements/environment files:
             ${{ steps.make-commit.outputs.commit }}.
-            Merging this PR will be followed by the creation of the corresponding
-            release and publishing on pypi, anaconda and zenodo.
+            Merging this PR should be followed by the creation of the corresponding
+            draft release.
+            Publishing this release will trigger publishing on pypi, anaconda and zenodo.
