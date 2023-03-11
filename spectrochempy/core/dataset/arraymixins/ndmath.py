@@ -2912,6 +2912,24 @@ class NDMath(object):
                             decimal=3,
                             data_only=True,
                         )  # we compare only data for this operation
+                    except TypeError:
+                        # This happen when coord are None or empty
+                        xobc = (
+                            None
+                            if obc is None or obc[obj.dims[-1]].is_empty
+                            else obc[obj.dims[-1]]
+                        )
+                        xotc = (
+                            None
+                            if otc is None or otc[obj.dims[-1]].is_empty
+                            else otc[obj.dims[-1]]
+                        )
+                        if xobc is None and xotc is None:
+                            pass
+                        else:
+                            raise CoordinatesMismatchError(
+                                obc[obj.dims[-1]].data, otc[obj.dims[-1]].data
+                            )
                     except AssertionError:
                         raise CoordinatesMismatchError(
                             obc[obj.dims[-1]].data, otc[obj.dims[-1]].data

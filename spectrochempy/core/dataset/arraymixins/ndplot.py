@@ -669,8 +669,12 @@ class NDPlot(HasTraits):
         origin._fig = self._fig
 
         loc = kwargs.get("legend", None)
-        if loc:
+        if isinstance(loc, str) or (
+            isinstance(loc, tuple) and len(loc) == 2 and isinstance(loc[0], float)
+        ):
             origin.ndaxes["main"].legend(loc=loc)
+        elif loc is not None and not isinstance(loc, bool):
+            origin.ndaxes["main"].legend(loc)
 
         # Additional matplotlib commands on the current plot
         # ---------------------------------------------------------------------

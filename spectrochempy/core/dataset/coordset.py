@@ -831,10 +831,22 @@ class CoordSet(HasTraits):
             raise KeyError(f"Could not find `{index}` in coordinates names or titles")
 
         try:
+            multi = False
             self._coords.__getitem__(index)
         except TypeError:
-            print()
-        res = self._coords.__getitem__(index)
+            # It can be that we are dealing with slicing of multicoordinates
+            if self.is_same_dim:
+                multi = True
+            else:
+                raise
+
+        if not multi:
+            res = self._coords.__getitem__(index)
+        else:
+            res = []
+            for c in self._coords:
+                res.append(c.__getitem__(index))
+
         if isinstance(index, slice):
             if isinstance(res, CoordSet):
                 res = (res,)
