@@ -24,6 +24,8 @@ New features
 Bug fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
+* Masks handling.
+* Multicoordinates slicing work correctly.
 
 
 .. section

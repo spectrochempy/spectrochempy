@@ -429,13 +429,16 @@ class NDArray(HasTraits):
                 value = True
             if not np.any(self._mask):
                 self._mask = np.zeros(self._data.shape).astype(np.bool_)
-            # Note that we can't mask single element, but row and/or column
-            for i, key in enumerate(keys):
-                if key == slice(None) or key == slice(None, None, 1):
-                    continue
-                m = self._mask.swapaxes(i, 0)
-                m[key] = value
-                self._mask = m.swapaxes(i, 0)
+            if isinstance(keys, np.ndarray):
+                self._mask[keys] = value
+            else:
+                # Note that we can't mask single element, but row and/or column
+                for i, key in enumerate(keys):
+                    if key == slice(None) or key == slice(None, None, 1):
+                        continue
+                    m = self._mask.swapaxes(i, 0)
+                    m[key] = value
+                    self._mask = m.swapaxes(i, 0)
             return self._mask
 
         elif isinstance(value, Quantity):
@@ -1419,8 +1422,7 @@ class NDArray(HasTraits):
 
         Examples
         --------
-        >>> from spectrochempy import NDArray
-        >>> ar = NDArray([1., 2., 3.])
+        >>> ar = scp.NDArray([1., 2., 3.])
         >>> ar._implements('NDDataset')
         False
         >>> ar._implements('NDArray')

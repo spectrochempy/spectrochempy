@@ -9,7 +9,7 @@ import numpy as np
 
 import spectrochempy as scp
 from spectrochempy.analysis.models import asymmetricvoigtmodel
-from spectrochempy.utils import MASKED, show
+from spectrochempy.utils import show
 
 
 def test_EFA(IR_dataset_2D):
@@ -96,6 +96,7 @@ def test_EFA(IR_dataset_2D):
     # ##################################################################################
     # # Get the abstract concentration profile based on the FIFO EFA analysis
     # #
+    
     c = efa.transform()
     c.T.plot()
 

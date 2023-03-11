@@ -10,9 +10,11 @@ This module implement the EFA (Evolving Factor Analysis) class.
 import numpy as np
 import traitlets as tr
 
+
 from spectrochempy.analysis._analysisutils import _wrap_ndarray_output_to_nddataset
 from spectrochempy.analysis.abstractanalysis import DecompositionAnalysis
 from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.core import info_
 
 __all__ = ["EFA"]
 __configurables__ = ["EFA"]
@@ -109,31 +111,17 @@ class EFA(DecompositionAnalysis):
         # forward analysis
         # ------------------------------------------------------------------------------
 
-        # f = NDDataset(
-        #     np.zeros((M, K)),
-        #     coordset=[X.y, Coord(range(K))],
-        #     title="EigenValues",
-        #     description="Forward EFA of " + X.name,
-        #     history=str(datetime.now(timezone.utc)) + ": created by spectrochempy ",
-        # )
-
         f = np.zeros((M, K))
         for i in range(M):
+
             s = np.linalg.svd(X[: i + 1], compute_uv=False)
             k = s.size
             f[i, :k] = s**2
-            print(f"Evolving Factor Analysis: {int(i / (2 * M) * 100)}% \r", end="")
+            info_(f"Evolving Factor Analysis: {int(i / (2 * M) * 100)}% \r", end="")
 
         # ------------------------------------------------------------------------------
         # backward analysis
         # ------------------------------------------------------------------------------
-        # b = NDDataset(
-        #     np.zeros((M, K)),
-        #     coordset=[X.y, Coord(range(K))],
-        #     title="EigenValues",
-        #     name="Backward EFA of " + X.name,
-        #     history=str(datetime.now(timezone.utc)) + ": created by spectrochempy ",
-        # )
 
         b = np.zeros((M, K))
         for i in range(M - 1, -1, -1):
@@ -141,7 +129,7 @@ class EFA(DecompositionAnalysis):
             s = np.linalg.svd(X[i:M], compute_uv=False)
             k = s.size
             b[i, :k] = s**2
-            print(
+            info_(
                 f"Evolving Factor Analysis: {int(100 - i / (2 * M) * 100)} % \r", end=""
             )
 
