@@ -18,9 +18,15 @@ from pathlib import Path
 
 repo = Path(__file__).parent.parent.parent
 
-scripts = list((repo / "docs" / "gettingstarted" / "examples").glob("**/*.py"))
+scripts = list((repo / "docs").glob("**/*.py"))
+
 for item in scripts[:]:
-    if "checkpoints" in str(item):
+    if (
+        "checkpoints" in str(item)
+        or "make.py" in str(item)
+        or "conf.py" in str(item)
+        or "autodoc_traitlets.py" in str(item)
+    ):
         scripts.remove(item)
 
 
@@ -50,6 +56,7 @@ def test_example(example):
         print(example, " ---> test skipped - DO IT MANUALLY")
         return
 
+    print("Testing ", example)
     if example.suffix == ".py":
         e, message, err = example_run(example)
         print(e, message.decode("utf8"), err)

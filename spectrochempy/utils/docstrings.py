@@ -10,22 +10,23 @@ Analyze docstrings to detect errors.
 Adapted from Pandas (see License in the root directory)
 """
 import doctest
+import functools
 import inspect
 import io
 import os
 import pathlib
+import re
 import subprocess
 import tempfile
 import textwrap
 import traceback
 
 # import matplotlib
+import docrep
 import matplotlib.pyplot as plt
 import numpy
 from numpydoc.docscrape import get_doc_object
 from numpydoc.validate import Validator, error, validate
-
-__all__ = ["check_docstrings", "add_docstring"]
 
 # With template backend, matplotlib plots nothing
 # matplotlib.use("template")
@@ -49,6 +50,63 @@ ERROR_MSGS = {
 }
 
 
+common_doc = """
+copy : bool, optional, Default: True
+    Perform a copy of the passed object.
+inplace : bool, optional, default: False
+    By default, the method returns a newly allocated object.
+    If `inplace` is set to True, the input object is returned.
+**kwargs : keyword parameters, optional
+    See Other Parameters.
+"""
+
+
+class DocstringProcessor(docrep.DocstringProcessor):
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        regex = re.compile(r"(?=^[*]{0,2}\b\w+\b\s?:?\s?)", re.MULTILINE | re.DOTALL)
+        plist = regex.split(common_doc.strip())[1:]
+        params = {
+            k.strip("*"): f"{k.strip()} : {v.strip()}"
+            for k, v in (re.split(r"\s?:\s?", p, maxsplit=1) for p in plist)
+        }
+        self.params.update(params)
+        self.params.update(
+            {
+                "out": "object\n"
+                "    Input object or a newly allocated object\n"
+                "    depending on the `inplace` flag.",
+                "new": "object\n" "    Newly allocated object.",
+            }
+        )
+
+    def dedent(self, s, stacklevel=3):
+        s_ = s
+        start = ""
+        end = ""
+        string = True
+        if not isinstance(s, str) and hasattr(s, "__doc__"):
+            string = False
+            s_ = s.__doc__
+        if s_.startswith("\n"):  # restore the first blank line
+            start = "\n"
+        if s_.strip(" ").endswith("\n"):  # restore the last return before quote
+            end = "\n"
+        s_mod = super().dedent(s, stacklevel=stacklevel)
+        if string:
+            s_mod = f"{start}{s_mod}{end}"
+        else:
+            s_mod.__doc__ = f"{start}{s_mod.__doc__}{end}"
+        return s_mod
+
+
+# Docstring substitution (docrep)
+# --------------------------------------------------------------------------------------
+_docstring = DocstringProcessor()
+
+
 def check_docstrings(module, obj, exclude=[]):
     members = [f"{module}.{obj.__name__}"]
     print(module)
@@ -69,7 +127,7 @@ def check_docstrings(module, obj, exclude=[]):
         result = spectrochempy_validate(member, exclude=exclude)
         if result["errors"]:
             result["member_name"] = member
-            DocstringError(result)
+            raise DocstringError(result)
 
 
 def spectrochempy_error(code, **kwargs):
@@ -310,6 +368,7 @@ class DocstringError(Exception):
         print(traceback_template % traceback_details)
 
 
+# TODO replace this in module where it is used by docrep
 def add_docstring(*args):
     """
     Decorator which add a docstring to the actual func doctring.
@@ -324,3 +383,55 @@ def add_docstring(*args):
         return func
 
     return new_doc
+
+
+def getdocfrom(origin):
+    def decorated(func):
+        func.__doc__ = origin.__doc__
+
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            response = func(*args, **kwargs)
+            return response
+
+        return wrapper
+
+    return decorated
+
+
+def htmldoc(text):
+    """
+    Format docstring in html for a nice display in IPython.
+
+    Parameters
+    ----------
+    text : str
+        The string to convert to html.
+
+    Returns
+    -------
+    out : str
+        The html string.
+    """
+    p = re.compile("^(?P<name>.*:)(.*)", re.MULTILINE)  # To get the keywords
+    html = p.sub(r"<b>\1</b>\2", text)
+    html = html.replace("-", "")
+    html = html.split("\n")
+    while html[0].strip() == "":
+        html = html[1:]  # suppress initial blank lines
+
+    for i in range(len(html)):
+        html[i] = html[i].strip()
+        if i == 0:
+            html[i] = "<h3>%s</h3>" % html[i]
+        html[i] = html[i].replace("Parameters", "<h4>Parameters</h4>")
+        html[i] = html[i].replace("Properties", "<h4>Properties</h4>")
+        html[i] = html[i].replace("Methods", "<h4>Methods</h4>")
+        if html[i] != "":
+            if "</h" not in html[i]:
+                html[i] = html[i] + "<br/>"
+            if not html[i].strip().startswith("<"):
+                html[i] = "&nbsp;&nbsp;&nbsp;&nbsp;" + html[i]
+    html = "".join(html)
+
+    return html

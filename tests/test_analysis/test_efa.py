@@ -9,7 +9,7 @@ import numpy as np
 
 import spectrochempy as scp
 from spectrochempy.analysis.models import asymmetricvoigtmodel
-from spectrochempy.utils import MASKED, show
+from spectrochempy.utils import show
 
 
 def test_EFA(IR_dataset_2D):
@@ -41,7 +41,7 @@ def test_EFA(IR_dataset_2D):
     dsc.plot()
     show()
 
-    ########################################################################################################################
+    ####################################################################################
     # 2) absorption spectra
     # **********************
 
@@ -51,7 +51,7 @@ def test_EFA(IR_dataset_2D):
     dss = scp.NDDataset(data=spec, coords=[c, w])
     dss.plot()
 
-    ########################################################################################################################
+    #####################################################################################
     # 3) simulated data matrix
     # ************************
 
@@ -62,13 +62,13 @@ def test_EFA(IR_dataset_2D):
     dataset.plot()
     show()
 
-    ########################################################################################################################
+    ####################################################################################
     # 4) evolving factor analysis (EFA)
     # *********************************
 
     efa = scp.EFA(dataset)
 
-    ########################################################################################################################
+    ####################################################################################
     # Plots of the log(EV) for the forward and backward analysis
     #
 
@@ -76,7 +76,7 @@ def test_EFA(IR_dataset_2D):
 
     efa.b_ev.T.plot(yscale="log")
 
-    ########################################################################################################################
+    ####################################################################################
     # Looking at these EFA curves, it is quite obvious that only two components
     # are really significant, and this corresponds to the data that we have in
     # input.
@@ -93,34 +93,9 @@ def test_EFA(IR_dataset_2D):
     both = scp.concatenate(f2, b2)
     both.T.plot(yscale="log")
 
-    # TODO: add "legend" keyword in NDDataset.plot()
-
     # ##################################################################################
     # # Get the abstract concentration profile based on the FIFO EFA analysis
     # #
-    # efa.cutoff = None
-    # c = efa.get_conc(n_pc)
-    # c.T.plot()
-    #
-    # # scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
-    #
-    # ds = IR_dataset_2D.copy()
-    #
-    # # columns masking
-    # ds[:, 1230.0:920.0] = MASKED  # do not forget to use float in slicing
-    # ds[:, 5900.0:5890.0] = MASKED
-    #
-    # # difference spectra
-    # ds -= ds[-1]
-    #
-    # # column masking for bad columns
-    # ds[10:12] = MASKED
-    #
-    # efa = EFA(ds)
-    #
-    # n_pc = 4
-    # c = efa.get_conc(n_pc)
-    # c.T.plot()
-    #
-
-    show()
+    c = efa.get_conc(n_pc)
+    c.T.plot()
+    scp.show()
