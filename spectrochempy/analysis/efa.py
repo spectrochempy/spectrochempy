@@ -10,11 +10,10 @@ This module implement the EFA (Evolving Factor Analysis) class.
 import numpy as np
 import traitlets as tr
 
-
 from spectrochempy.analysis._analysisutils import _wrap_ndarray_output_to_nddataset
 from spectrochempy.analysis.abstractanalysis import DecompositionAnalysis
-from spectrochempy.utils.docstrings import _docstring
 from spectrochempy.core import info_
+from spectrochempy.utils.docstrings import _docstring
 
 __all__ = ["EFA"]
 __configurables__ = ["EFA"]
@@ -117,7 +116,7 @@ class EFA(DecompositionAnalysis):
             s = np.linalg.svd(X[: i + 1], compute_uv=False)
             k = s.size
             f[i, :k] = s**2
-            info_(f"Evolving Factor Analysis: {int(i / (2 * M) * 100)}% \r", end="")
+            info_(f"Evolving Factor Analysis: {int(i / (2 * M) * 100)}% \r")
 
         # ------------------------------------------------------------------------------
         # backward analysis
@@ -129,9 +128,7 @@ class EFA(DecompositionAnalysis):
             s = np.linalg.svd(X[i:M], compute_uv=False)
             k = s.size
             b[i, :k] = s**2
-            info_(
-                f"Evolving Factor Analysis: {int(100 - i / (2 * M) * 100)} % \r", end=""
-            )
+            info_(f"Evolving Factor Analysis: {int(100 - i / (2 * M) * 100)} % \r")
 
         # store the components number (real or desired)
         self._n_components = K

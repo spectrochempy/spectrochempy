@@ -96,7 +96,7 @@ def test_EFA(IR_dataset_2D):
     # ##################################################################################
     # # Get the abstract concentration profile based on the FIFO EFA analysis
     # #
-    
+
     c = efa.transform()
     c.T.plot()
 
