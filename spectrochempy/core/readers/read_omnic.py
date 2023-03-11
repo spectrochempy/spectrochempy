@@ -699,13 +699,20 @@ def _read_spg(*args, **kwargs):
     # _x = Coord(np.around(np.linspace(firstx[0], lastx[0], nx[0]), 3),
     #           title=xtitles[0], units=xunits[0])
     spacing = (lastx[0] - firstx[0]) / int(nx[0] - 1)
-    _x = Coord.linspace(
-        firstx[0],
-        lastx[0],
-        int(nx[0]),
+    _x = LinearCoord(
+        offset=firstx[0],
+        increment=spacing,
+        size=int(nx[0]),
         title=xtitles[0],
         units=xunits[0],
     )
+    # _x = Coord.linspace(
+    #     firstx[0],
+    #     lastx[0],
+    #     int(nx[0]),
+    #     title=xtitles[0],
+    #     units=xunits[0],
+    # )
 
     _y = Coord(
         timestamps,
@@ -883,12 +890,15 @@ def _read_spa(*args, **kwargs):
 
         spacing = (lastx - firstx) / (nx - 1)
 
-        _x = Coord.linspace(
-            firstx,
-            lastx,
-            int(nx),
-            title=xtitle,
-            units=xunit,
+        # _x = Coord.linspace(
+        #     firstx,
+        #     lastx,
+        #     int(nx),
+        #     title=xtitle,
+        #     units=xunit,
+        # )
+        _x = LinearCoord(
+            offset=firstx, increment=spacing, size=nx, title=xtitle, units=xunit
         )
 
     else:  # interferogram
@@ -901,11 +911,19 @@ def _read_spa(*args, **kwargs):
         spa_name += ": Sample IFG"
         dataset.units = "V"
         dataset.title = "detector signal"
-        _x = Coord.arange(
-            len(intensities),
+        _x = LinearCoord(
+            offset=0,
+            increment=1,
+            size=len(intensities),
             title="data points",
             units=None,
         )
+        #
+        # _x = Coord.arange(
+        #     len(intensities),
+        #     title="data points",
+        #     units=None,
+        # )
 
     dataset.set_coordset(y=_y, x=_x)
     dataset.name = spa_name  # to be consistent with omnic behaviour
@@ -1066,10 +1084,17 @@ def _read_srs(*args, **kwargs):
 
     # now add coordinates
     spacing = (info["lastx"] - info["firstx"]) / (info["nx"] - 1)
-    _x = Coord.linspace(
-        info["firstx"],
-        info["lastx"],
-        int(info["nx"]),
+    # _x = Coord.linspace(
+    #     info["firstx"],
+    #     info["lastx"],
+    #     int(info["nx"]),
+    #     title=info["xtitle"],
+    #     units=info["xunits"],
+    # )
+    _x = LinearCoord(
+        offset=info["firstx"],
+        increment=spacing,
+        size=info["nx"],
         title=info["xtitle"],
         units=info["xunits"],
     )

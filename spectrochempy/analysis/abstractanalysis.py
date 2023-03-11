@@ -210,7 +210,19 @@ class AnalysisConfigurable(MetaConfigurable):
             # Put back masked columns in D
             # ----------------------------
             M, N = D.shape
-            if axis == -1 or axis == 1 or axis == "both":  # and D.shape[0] == rowsize:
+            if axis == "both":  # and D.shape[0] == rowsize:
+                if np.any(masked_columns) or np.any(masked_rows):
+                    Dtemp = np.ma.zeros((rowsize, colsize))  # note np.ma, not np.
+                    Dtemp[~self._X_mask] = D.data.flatten()
+                    Dtemp[self._X_mask] = MASKED
+                    D.data = Dtemp
+                    try:
+                        D.coordset[D.dims[-1]] = self._X_coordset[D.dims[-1]]
+                        D.coordset[D.dims[-2]] = self._X_coordset[D.dims[-2]]
+                    except TypeError:
+                        # probably no coordset
+                        pass
+            elif axis == -1 or axis == 1:
                 if np.any(masked_columns):
                     Dtemp = np.ma.zeros((M, colsize))  # note np.ma, not np.
                     Dtemp[:, ~masked_columns] = D
@@ -224,8 +236,7 @@ class AnalysisConfigurable(MetaConfigurable):
 
             # Put back masked rows in D
             # -------------------------
-            M, N = D.shape  # may have ben modified above
-            if axis == -2 or axis == 0 or axis == "both":  # and D.shape[1] == colsize:
+            elif axis == -2 or axis == 0:
                 if np.any(masked_rows):
                     Dtemp = np.ma.zeros((rowsize, N))
                     Dtemp[~masked_rows] = D
@@ -245,8 +256,23 @@ class AnalysisConfigurable(MetaConfigurable):
                 Dtemp[masked_rows] = MASKED
                 D.data = Dtemp
 
-        # if Dtemp is None and np.any(self._X_mask):
-        #     raise IndexError("Can not restore mask. Please check the given index")
+        elif D.ndim == 3:
+            # CASE of IRIS for instance
+
+            # Put back masked columns in D
+            # ----------------------------
+            J, M, N = D.shape
+            if axis == -1 or axis == 2:
+                if np.any(masked_columns):
+                    Dtemp = np.ma.zeros((J, M, colsize))  # note np.ma, not np.
+                    Dtemp[..., ~masked_columns] = D
+                    Dtemp[..., masked_columns] = MASKED
+                    D.data = Dtemp
+                    try:
+                        D.coordset[D.dims[-1]] = self._X_coordset[D.dims[-1]]
+                    except TypeError:
+                        # probably no coordset
+                        pass
 
         # return the D array with restored masked data
         return D
@@ -722,7 +748,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     @_wrap_ndarray_output_to_nddataset(units=None, title="keep", typey="components")
     def components(self):
         """
-        Return a NDDataset with the components in feature space (n_components, n_features).
+        Return a NDDataset with components in feature space (n_components, n_features).
 
         See Also
         --------

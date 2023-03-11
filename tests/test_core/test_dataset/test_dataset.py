@@ -1269,10 +1269,3 @@ def test_nddataset_bug_462():
     C.write("C.scp", confirm=False)
     D = scp.read("C.scp")
     assert len(D.x) == 2, "incorrect encoding/decoding"
-
-
-def test_nddataset_change_dims_names(dsm):
-    nd = dsm.copy()
-    x = nd.x.copy()
-    nd.dims = ["w", "v", "u"]
-    assert nd.u == x

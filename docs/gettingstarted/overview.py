@@ -159,5 +159,7 @@ _ = ds.plot(colormap="magma")
 
 # %% jupyter={"source_hidden": true} pycharm={"name": "#%%\n"}
 
-iris = scp.IRIS(ds, "langmuir", q=[-8, -1, 50], reg_par=[-10, 1, 12])
+iris = scp.IRIS(reg_par=[-10, 1, 12])
+K = scp.IrisKernel(ds, "langmuir", q=[-8, -1, 50])
+iris.fit(ds, K)
 _ = iris.plotdistribution(-7, colormap="magma")
