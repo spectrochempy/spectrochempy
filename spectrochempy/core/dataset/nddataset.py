@@ -357,7 +357,10 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
 
         if self._coordset is not None:
             names = self._coordset.names  # all names of the current coordinates
-            new_coords = [None] * len(names)
+            new_coords = self._coordset.copy()  # [None] * len(names)
+            if isinstance(items, np.ndarray):
+                # probably a fancy indexing
+                items = (items,)
             for i, item in enumerate(items):
                 # get the corresponding dimension name in the dims list
                 name = self.dims[i]
@@ -366,7 +369,8 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
                 if self._coordset[idx].is_empty:
                     new_coords[idx] = Coord(None, name=name)
                 elif isinstance(item, slice):
-                    # add the slice on the corresponding coordinates on the dim to the new list of coordinates
+                    # add the slice on the corresponding coordinates on the dim to the
+                    # new list of coordinates
                     if not isinstance(self._coordset[idx], CoordSet):
                         new_coords[idx] = self._coordset[idx][item]
                     else:
@@ -538,39 +542,39 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     # Private methods and properties
     # ----------------------------------------------------------------------------------
     @default("_coordset")
-    def __coordset_default(self):
+    def _coordset_default(self):
         return None
 
     @default("_modeldata")
-    def __modeldata_default(self):
+    def _modeldata_default(self):
         return None
 
     # @default("_processeddata")
-    # def __processeddata_default(self):
+    # def _processeddata_default(self):
     #     return None
     #
     # @default("_baselinedata")
-    # def __baselinedata_default(self):
+    # def _baselinedata_default(self):
     #     return None
     #
     # @default("_referencedata")
-    # def __referencedata_default(self):
+    # def _referencedata_default(self):
     #     return None
     #
     # @default("_ranges")
-    # def __ranges_default(self):
+    # def _ranges_default(self):
     #     ranges = Meta()
     #     for dim in self.dims:
     #         ranges[dim] = dict(masks={}, baselines={}, integrals={}, others={})
     #     return ranges
 
     @default("_timezone")
-    def __timezone_default(self):
+    def _timezone_default(self):
         # Return the default timezone (UTC)
         return datetime.utcnow().astimezone().tzinfo
 
     @validate("_created")
-    def __created_validate(self, proposal):
+    def _created_validate(self, proposal):
         date = proposal["value"]
         if date.tzinfo is not None:
             # make the date utc naive
@@ -578,7 +582,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         return date
 
     @validate("_history")
-    def __history_validate(self, proposal):
+    def _history_validate(self, proposal):
         history = proposal["value"]
         if isinstance(history, list) or history is None:
             # reset
@@ -586,7 +590,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         return history
 
     @validate("_modified")
-    def __modified_validate(self, proposal):
+    def _modified_validate(self, proposal):
         date = proposal["value"]
         if date.tzinfo is not None:
             # make the date utc naive

@@ -336,9 +336,11 @@ def plot_2D(dataset, method=None, **kwargs):
         # ---------------
         if yscale == "log" and min(zlim) <= 0:
             # set the limits wrt smallest and largest strictly positive values
+            mi = np.amin(np.abs(zdata))
+            ma = np.amax(np.abs(zdata))
             ax.set_ylim(
-                10 ** (int(np.log10(np.amin(np.abs(zdata)))) - 1),
-                10 ** (int(np.log10(np.amax(np.abs(zdata)))) + 1),
+                10 ** (int(np.log10(mi + (ma - mi) * 0.001)) - 1),
+                10 ** (int(np.log10(ma)) + 1),
             )
         else:
             ax.set_ylim(zlim)
@@ -733,7 +735,6 @@ def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwa
     # labels
     # ------------------------------------------------------------------------
     # x label
-    # ------------------------------------------------------------------------
     xlabel = kwargs.get("xlabel", None)
     if not xlabel:
         xlabel = make_label(new.x, "x")

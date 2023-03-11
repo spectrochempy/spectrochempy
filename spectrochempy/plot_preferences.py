@@ -23,7 +23,6 @@ from traitlets import (
     observe,
 )
 
-from spectrochempy.utils import get_pkg_path, pathclean
 from spectrochempy.utils.traits import MetaConfigurable
 
 # from spectrochempy.core import warning_
@@ -41,6 +40,8 @@ def available_styles():
     -------
     A list of matplotlib styles
     """
+    from spectrochempy.utils import pathclean
+
     # Todo: Make this list extensible programmatically (adding files to stylelib)
     cfgdir = mpl.get_configdir()
     stylelib = pathclean(cfgdir) / "stylelib"
@@ -972,6 +973,8 @@ class PlotPreferences(MetaConfigurable):
     @default("stylesheets")
     def _get_stylesheets_default(self):
         # the spectra path in package data
+        from spectrochempy.utils import get_pkg_path
+
         return get_pkg_path("stylesheets", "scp_data")
 
     @observe("style")
@@ -1019,6 +1022,8 @@ class PlotPreferences(MetaConfigurable):
             return f"{color}"
 
     def _apply_style(self, _style):
+        from spectrochempy.utils import pathclean
+
         f = (pathclean(self.stylesheets) / _style).with_suffix(".mplstyle")
         if not f.exists():
             # we have to look matplotlib predetermined style.
