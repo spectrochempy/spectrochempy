@@ -13,6 +13,7 @@ import numpy as np
 from numpy.linalg import svd
 from traitlets import Float, HasTraits
 
+from spectrochempy.core import info_
 from spectrochempy.utils import MASKED
 from spectrochempy.utils.traits import NDDatasetType
 
@@ -77,7 +78,8 @@ class EFA(HasTraits):
 
         # in case some row are masked, take this into account, by masking
         # the corresponding rows of f
-        f[masked_rows] = MASKED
+        if np.any(masked_rows):
+            f[masked_rows] = MASKED
 
         # performs the analysis
         for i in range(M):
@@ -87,10 +89,10 @@ class EFA(HasTraits):
                 k = s.size
                 # print(i, k)
                 f.data[i, :k] = s**2
-                f[i, k:] = MASKED
-            else:
-                f[i] = MASKED
-            print(f"Evolving Factor Analysis: {int(i / (2 * M) * 100)}% \r", end="")
+                # f[i, k:] = MASKED <- this doesn't work anymore as masking element
+                # propagate on the whole column
+
+            info_(f"Evolving Factor Analysis: {int(i / (2 * M) * 100)}%")
 
         # ------------------------------------------------------------------------------
         # backward analysis
@@ -103,7 +105,8 @@ class EFA(HasTraits):
             history=str(datetime.now(timezone.utc)) + ": created by spectrochempy ",
         )
 
-        b[masked_rows] = MASKED
+        if np.any(masked_rows):
+            b[masked_rows] = MASKED
 
         for i in range(M - 1, -1, -1):
             # if some rows are masked, we must skip them
@@ -111,12 +114,10 @@ class EFA(HasTraits):
                 s = svd(Xdata[i:M], compute_uv=False)
                 k = s.size
                 b.data[i, :k] = s**2
-                b[i, k:] = MASKED
-            else:
-                b[i] = MASKED
-            print(
-                f"Evolving Factor Analysis: {int(100 - i / (2 * M) * 100)} % \r", end=""
-            )
+                # b[i, k:] = MASKED <- this doesn't work anymore as masking element
+                # propagate on the whole column
+
+            info_(f"Evolving Factor Analysis: {int(100 - i / (2 * M) * 100)} %" "")
 
         self._f_ev = f
         self._b_ev = b

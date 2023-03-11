@@ -203,6 +203,23 @@ class NDDatasetType(SpectroChemPyType):
         )
 
 
+class CoordType(SpectroChemPyType):
+    """
+    A NDDataset trait type.
+    """
+
+    info_text = "a SpectroChemPy coordinates object"
+
+    def __init__(self, default_value=Empty, allow_none=False, dtype=None, **kwargs):
+        if "klass" not in kwargs and self.klass is None:
+            from spectrochempy.core.dataset.coord import Coord
+
+            kwargs["klass"] = Coord
+        super().__init__(
+            default_value=default_value, allow_none=allow_none, dtype=dtype, **kwargs
+        )
+
+
 class ProjectType(SpectroChemPyType):
     """
     A NDDataset trait type.

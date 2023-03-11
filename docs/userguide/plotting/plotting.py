@@ -392,7 +392,7 @@ d1D = dataset[-1]  # select the last row of the previous 2D dataset
 _ = d1D.plot(color="r")
 
 # %%
-prefs.style = "seaborn-paper"
+prefs.style = "seaborn-v0_8-paper"
 _ = dataset[3].plot(scatter=True, pen=False, me=30, ms=5)
 
 # %% [markdown]

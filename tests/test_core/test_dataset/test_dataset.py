@@ -61,7 +61,7 @@ def test_nddataset_docstring():
 
 
 @pytest.mark.parametrize("a", adata)
-def test_1D_NDDataset(a):
+def test_nddataset_1D_NDDataset(a):
     # 1D
     for arr in [a, np.array(a)]:
         ds = scp.NDDataset(arr)
@@ -96,7 +96,7 @@ arrdata = (
 
 
 @pytest.mark.parametrize("arr", arrdata)
-def test_2D_NDDataset(arr):
+def test_nddataset_2D_NDDataset(arr):
     # 2D
     ds = scp.NDDataset(arr)
     assert ds.size == arr.size
@@ -334,7 +334,7 @@ def test_nddataset_units(nd1d):
     assert nd2.units == ur.m**0.5
 
 
-def test_bugs_units_change():
+def test_nddataset_bugs_units_change():
     # check for bug on transmittance conversion
     X = scp.NDDataset([0.0, 0.3, 1.3, 5.0], units="absorbance")
 
@@ -1253,7 +1253,7 @@ def test_take(dsm):
     pass
 
 
-def test_bug_462():
+def test_nddataset_bug_462():
 
     A = scp.random((10, 100))
     A.x = scp.Coord(np.arange(0.0, 100.0, 1), title="coord1")
