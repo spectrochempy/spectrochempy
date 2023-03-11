@@ -14,6 +14,5 @@ Processing
    td_baseline
    fourier
    interferogram
-   fourier2d
    baseline
    alignment

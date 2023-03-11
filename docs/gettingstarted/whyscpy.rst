@@ -46,9 +46,9 @@ Powered by Python
 
 Python is probably the most popular open-source language used by Data Scientists. It is extensible and cross-platform, which allows |scpy| to be used in an entirely free software environment. |scpy| uses state-of-the-art libraries for numerical computation (`numpy <https://numpy.org/>`__, `scipy <https://www.scipy.org/>`__) and visualization (`matplotlib <https://matplotlib.org/>`__).
 
-The Python community being extremely dynamic, all users should easily find resources to solve specific needs that are not (yet) directly or completely satisfied by |scpy|.
+The Python community being extremely dynamic, all users should easily find resources to solve specific needs that are not (yet) directly or completely satisfied by |scpy| .
 
-We also count on motivated members of this community (of which you are a part), to contribute to the improvement of |scpy| through (:ref:`contributing.bugs_report`), or contributions to the code (:ref:`develguide`).
+We also count on motivated members of this community (of which you are a part), to contribute to the improvement of |scpy| through (:ref:`contributing.bugs_report` ), or contributions to the code (:ref:`develguide` ).
 
 Why NOT |scpy| ?
 ================

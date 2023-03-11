@@ -68,7 +68,7 @@ prefs.figure.figsize = (7, 3)
 prefs.contour_start = 0.05
 
 # %% [markdown]
-# and now plotting of contours using `plot_map`.
+# and now plotting of contours using `plot_map` .
 
 # %%
 _ = ser.plot_map()

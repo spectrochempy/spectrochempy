@@ -81,8 +81,8 @@ ax = X.smooth().plot()
 # %% [markdown]
 # ### Window length
 #
-# The following code compares the influence of the window size on the smoothing of the first spectrum of the
-# NDDataset `X[0]`.
+# The following code compares the influence of the window size on the smoothing of the
+# first spectrum of the NDDataset `X[0]` .
 
 # %% [markdown]
 # Loop over window lengths.
@@ -115,8 +115,10 @@ ax = scp.plot_multiple(
 # ### Window function
 #
 # Besides the window `length` (default=11 points), the user can also choose the type of
-# window (`window`) from `flat`, `hanning` (i.e. Hann window), `hamming`, `bartlett` or `blackman`.  The `flat`
-# window - which is the default shown above - should be fine for the vast majority of cases.
+# window (`window`) from `flat`, `hanning` (i.e. Hann window), `hamming`, `bartlett` or
+# `blackman` .  The `flat`
+# window - which is the default shown above - should be fine for the vast majority of
+# cases.
 #
 # The code below compares the effect of the type of window:
 

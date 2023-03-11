@@ -31,7 +31,7 @@ Cantera
 Cantera is a suite of tools for problems involving chemical kinetics, thermodynamics and transport process
 (see `cantera documentation <https://cantera.org>`__).
 
-We provide some functionalities based on cantera in |scpy|. If you want to use it you need first to install cantera:
+We provide some functionalities based on cantera in |scpy| . If you want to use it you need first to install cantera:
 
 .. sourcecode:: bash
 

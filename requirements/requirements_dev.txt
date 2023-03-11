@@ -60,4 +60,4 @@ jupyter_sphinx
 json5
 sphinx-copybutton
 pandoc
-autodoc_traits
+autodoc-traits

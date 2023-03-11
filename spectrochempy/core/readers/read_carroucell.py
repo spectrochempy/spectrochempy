@@ -56,7 +56,7 @@ def read_carroucell(directory=None, **kwargs):
     Returns
     --------
     nddataset
-        |NDDataset| or list of |NDDataset|.
+        |NDDataset| or list of |NDDataset| .
 
     See Also
     --------

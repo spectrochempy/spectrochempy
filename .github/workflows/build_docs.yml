@@ -55,7 +55,7 @@ jobs:
 
       - name: Install spectrochempy
         run: |
-          python3 -m pip install  -e .
+          python3 -m pip install .
 
       - name: Install optional libraries
         run: |

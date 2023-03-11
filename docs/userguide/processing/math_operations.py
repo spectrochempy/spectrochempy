@@ -554,7 +554,7 @@ _ = out.plot(figsize=(6, 2.5))
 #
 #
 # NDDataset objects with complex data are handled differently than in
-# `numpy.ndarray`.
+# `numpy.ndarray` .
 #
 # Instead, complex data are stored by interlacing the real and imaginary part.
 # This allows the definition of data that can be complex in several axis, and *e

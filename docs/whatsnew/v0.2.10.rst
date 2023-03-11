@@ -8,7 +8,7 @@ New features
 ~~~~~~~~~~~~
 
 -  All data for tests and examples are now external. They are now
-   located in a separate conda package: ``spectrochempy_data``.
+   located in a separate conda package: ``spectrochempy_data`` .
 -  Installation in Colab with Examples is now supported.
 
 

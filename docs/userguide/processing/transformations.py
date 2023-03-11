@@ -127,8 +127,9 @@ d = dataset.to("meter", force=True)
 print(d.units)
 
 # %% [markdown]
-# When units are compatible there is no problem to modify it. For instance, we can change the `y` dimension units (
-# Time) to hours. Her we use the inplace transformation `ito`.
+# When units are compatible there is no problem to modify it. For instance, we can
+# change the `y` dimension units (
+# Time) to hours. Her we use the inplace transformation `ito` .
 
 # %%
 dataset.y.ito("hours")

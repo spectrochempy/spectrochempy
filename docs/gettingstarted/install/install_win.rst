@@ -43,7 +43,7 @@ We highly recommend that all new users install |scpy| interface via Conda. You c
         (base) C:\<yourDefaultPath>> conda create --name scpy
 
     Switch to this environment. At this point, `(scpy)` should
-    appear before the prompt instead of `(base)`.
+    appear before the prompt instead of `(base)` .
 
     .. sourcecode:: bat
 
@@ -173,4 +173,4 @@ Spectrochempy is likely functional !
     © Copyright 2014-2021 - A.Travert & C.Fernandez @ LCS
 
 
-The recommended next step is to proceed to the :ref:`userguide`.
+The recommended next step is to proceed to the :ref:`userguide` .

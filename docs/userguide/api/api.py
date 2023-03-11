@@ -100,8 +100,8 @@ scp.set_loglevel(scp.INFO)  # set loglevel to 'INFO'
 
 
 # %% [markdown]
-# We see that the API then delivers the INFO message: `changed default log_level to
-# INFO`.
+# We see that the API then delivers the INFO message: "changed default log_level to
+# INFO" .
 
 # %% [markdown]
 # And  finally, the next instructions reset the loglevel to `WARNING` level (default),

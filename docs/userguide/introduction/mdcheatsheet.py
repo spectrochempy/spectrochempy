@@ -77,7 +77,7 @@
 # ```
 # `string`
 # ```
-# You can use the monospace font for `file paths`, `file names`,`message text`...
+# You can use the monospace font for `file paths`, `file names`,`message text` ...
 
 # %% [markdown]
 # ## Line breaks

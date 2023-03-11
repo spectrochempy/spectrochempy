@@ -63,7 +63,6 @@ dependencies:
     # ----------------
     # From here, the dependencies are essentially for development.
     # They should not be necessary for the user of  spectrochempy.
-
     - pytest
     - pytest-doctestplus
     - pytest-flake8
@@ -89,8 +88,6 @@ dependencies:
     - conda-build
     - conda-verify
     - anaconda-client
+    - autodoc-traits
 
-    - pip
-    - pip:
-        - autodoc_traits
 #EOF

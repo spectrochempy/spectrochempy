@@ -77,7 +77,7 @@ Create a conda environment
      $ mamba env create -n scpy -f environment.yml
      $ conda activate scpy
 
-  If you prefer to work with ``3.7`` or ``3.8`` python version, you just change ``-v 3.9`` by ``-v 3.8`` or ``3.7``.
+  If you prefer to work with ``3.7`` or ``3.8`` python version, you just change ``-v 3.9`` by ``-v 3.8`` or ``3.7`` .
   Of course, you can also name your environment differently by replacing ``scpy`` by the name of your choice.
 
 Install |scpy| in this environment
@@ -135,4 +135,4 @@ and if some changes are notified, run pip again:
    (scpy) $ python -m pip install .
 
 
-To go further and eventually contribute to the code on the upstream, you can consult the :ref:`develguide`.
+To go further and eventually contribute to the code on the upstream, you can consult the :ref:`develguide` .

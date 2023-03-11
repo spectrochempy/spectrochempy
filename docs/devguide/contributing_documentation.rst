@@ -25,7 +25,7 @@ complex changes to the documentation as well.
 It worth to note that:
 
 * The spectrochempy documentation consists of two parts: the docstrings in the code itself
-  and the content of the``docs/`` folder.
+  and the content of the ``docs/`` folder.
 
   The docstrings provide an explanation of the usage of the individual
   functions, while the documentation in the ``docs`` folder consists of tutorial-like
@@ -90,7 +90,7 @@ Navigate to your local ``docs/`` directory in the console and run::
 
     python make.py html
 
-Then you can find the HTML output in the folder ``doc/build/html/``.
+Then you can find the HTML output in the folder ``doc/build/html/`` .
 
 The first time you build the docs, it will take quite a while because it has to run
 all the code examples and build all the generated docstring pages. In subsequent

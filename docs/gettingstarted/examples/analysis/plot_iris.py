@@ -68,7 +68,7 @@ X.y = [c_times, c_pressures]
 print(X.y)
 
 # %%
-# In a terminal You can use the `print_` method instead of `print` to get a detailed
+# To get a detailed
 # a rich display of these coordinates. In a jupyter notebook, just type:
 
 X.coordset
