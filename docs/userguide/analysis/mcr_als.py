@@ -27,8 +27,7 @@
 # # MCR ALS
 
 # %%
-from spectrochempy import read_matlab, MCRALS, PCA, EFA
-
+import spectrochempy as scp
 
 # %% [markdown]
 # ## Introduction
@@ -63,7 +62,7 @@ from spectrochempy import read_matlab, MCRALS, PCA, EFA
 # 'datadir' of spectrochempy in 'als2004dataset.MAT' and can be read as follows in Scpy:
 
 # %%
-A = read_matlab("matlabdata/als2004dataset.MAT")
+A = scp.read_matlab("matlabdata/als2004dataset.MAT")
 
 # %% [markdown]
 # The .mat file contains 6 matrices which are thus returned in A as a list of 6
@@ -153,7 +152,7 @@ _ = St0.plot()
 # First, we create an instance of a MCRALS object:
 
 # %%
-mcr = MCRALS(log_level="INFO")
+mcr = scp.MCRALS(log_level="INFO")
 
 
 # %% [markdown]
@@ -217,11 +216,11 @@ mcr.fit(X, St0)
 # It is possible to chain fit runs, without recomputing everything for example for
 # optimization of some parameters
 
-mcr = MCRALS(tol=0.001, log_level="INFO")
+mcr = scp.MCRALS(tol=0.001, log_level="INFO")
 mcr.fit(X, St0)
 
 # %%
-mcr1 = MCRALS(tol=0.1, log_level="INFO")
+mcr1 = scp.MCRALS(tol=0.1, log_level="INFO")
 mcr1.fit(X, St0)
 
 # %%
@@ -253,7 +252,7 @@ assert np.max(np.abs(mcr.St - mcr1.St)) < 1e-13
 #  the default log_level is "WARNING" so we do not see any output here.
 
 # %%
-mcr1 = MCRALS()
+mcr1 = scp.MCRALS()
 mcr1.fit(X, St0)
 
 # %% [markdown]
@@ -291,10 +290,10 @@ _ = mcr1.St.plot()
 # both normalizations:
 
 # %%
-mcr2 = MCRALS(normSpec="euclid")
+mcr2 = scp.MCRALS(normSpec="euclid")
 mcr2.fit(X, St0)
 
-mcr3 = MCRALS(normSpec="max")
+mcr3 = scp.MCRALS(normSpec="max")
 mcr3.fit(X, St0)
 
 _ = mcr1.St.plot()
@@ -330,7 +329,7 @@ _ = mcr3.C.T.plot()
 # Let's first analyse our dataset using PCA and plot a screeplot:
 
 # %%
-pca = PCA(used_components=8)
+pca = scp.PCA(used_components=8)
 pca.fit(X)
 pca.printev()
 _ = pca.screeplot()
@@ -359,7 +358,7 @@ _ = scores.T.plot()
 #
 
 # %%
-efa = EFA()
+efa = scp.EFA()
 efa.fit(X)
 efa.used_components = 4
 C0 = efa.transform()
@@ -369,7 +368,7 @@ _ = C0.T.plot()
 # The MCR ALS can then be launched using this new guess:
 
 # %%
-mcr4 = MCRALS(max_iter=100, normSpec="euclid")
+mcr4 = scp.MCRALS(max_iter=100, normSpec="euclid")
 mcr4.fit(X, C0)
 
 # %%
@@ -398,7 +397,7 @@ surf = X2.plot_surface(colorbar=True, linewidth=0.2, ccount=100, figsize=(10, 5)
 _ = X2.plot(method="map")
 
 # %%
-mcr5 = MCRALS(unimodConc=[])
+mcr5 = scp.MCRALS(unimodConc=[])
 mcr5.fit(X2, St0)
 
 # %%
@@ -409,5 +408,3 @@ _ = mcr5.St.plot()
 
 # %% [markdown]
 # [To be continued...]
-
-# %%
