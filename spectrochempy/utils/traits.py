@@ -15,7 +15,7 @@ from traitlets.config.loader import LazyConfigValue
 
 from spectrochempy.extern.traittypes import Empty, SciType
 
-__all__ = ["MetaConfigurable", "Range"]
+__all__ = []
 
 
 class MetaConfigurable(Configurable):
@@ -87,50 +87,6 @@ class MetaConfigurable(Configurable):
             )
 
             self.updated = True
-
-
-# ======================================================================================
-# Range trait type
-# ======================================================================================
-class Range(tr.List):
-    """
-    The trait-type Range.
-
-    Create a trait with two values defining an ordered range of values.
-
-    Parameters
-    ----------
-    default_value : SequenceType [ optional ]
-        The default value for the Trait.  Must be list/tuple/set, and
-        will be cast to the container type.
-    """
-
-    # Describe the trait type
-    info_text = "An ordered interval trait."
-
-    def length_error(self, obj, value):
-        e = (
-            "The '%s' trait of '%s' instance must be of length 2 exactly,"
-            " but a value of %s was specified." % (self.name, type(obj), value)
-        )
-        raise tr.TraitError(e)
-
-    def validate_elements(self, obj, value):
-        if value is None or len(value) == 0:
-            return
-        length = len(value)
-        if length != 2:
-            self.length_error(obj, value)
-        value.sort()
-        value = super().validate_elements(obj, value)
-        return value
-
-    def validate(self, obj, value):
-
-        value = super().validate(object, value)
-        value = self.validate_elements(obj, value)
-
-        return value
 
 
 class SpectroChemPyType(SciType):

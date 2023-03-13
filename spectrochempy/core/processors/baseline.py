@@ -71,6 +71,7 @@ class BaselineCorrection(HasTraits):
     interpolation = Unicode("polynomial")
     axis = Int(-1)
     dim = Unicode("")
+    ranges = List(List(minlen=2, maxlen=2))
     order = Int(1, min=1, allow_none=True)
     npc = Int(5, min=1, allow_none=True)
     zoompreview = Float(1.0)
