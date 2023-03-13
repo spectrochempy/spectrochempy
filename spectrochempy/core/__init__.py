@@ -17,9 +17,6 @@ __all__ = []  # modified below
 
 from os import environ
 import sys
-import warnings
-
-warnings.filterwarnings("ignore")
 
 # ======================================================================================
 # Progress bar
@@ -262,8 +259,6 @@ _pbar_update()
 _pbar_update(close=True)
 
 _started = app.start()
-
-warnings.filterwarnings(action="ignore", module="matplotlib", category=UserWarning)
 
 # ======================================================================================
 if __name__ == "__main__":

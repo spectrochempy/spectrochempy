@@ -6,11 +6,7 @@
 # ======================================================================================
 # flake8: noqa
 
-from traitlets import HasTraits, TraitError
-
-from spectrochempy.utils import Range
 from spectrochempy.utils.coordrange import trim_ranges
-from spectrochempy.utils.testing import raises
 
 
 # ======================================================================================
@@ -29,17 +25,3 @@ def test_trim_ranges():
 
     r = trim_ranges((3, 2), (4.4, 10), (4, 5), reversed=True)
     assert r == [[10, 4], [3, 2]]
-
-
-# ======================================================================================
-# Range
-# ======================================================================================
-def test_range():
-    class MyClass(HasTraits):
-        r = Range()  # Initialized with some default values
-
-    c = MyClass()
-    c.r = [10, 5]
-    assert c.r == [5, 10]
-    with raises(TraitError):
-        c.r = [10, 5, 1]

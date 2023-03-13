@@ -124,11 +124,6 @@ DATADIR = pathclean(preferences.datadir)
 
 __all__ = ["pathclean", "DATADIR"] + ALL
 
-import warnings
-
-warnings.filterwarnings(action="ignore", module="matplotlib")  # , category=UserWarning)
-# warnings.filterwarnings(action="error", category=DeprecationWarning)
-
 if NO_DISPLAY:
     mpl.use("agg", force=True)
 
