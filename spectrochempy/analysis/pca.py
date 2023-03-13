@@ -457,6 +457,7 @@ for reproducible results across multiple function calls.""",
         color_mapping="index",
         show_labels=False,
         labels_column=0,
+        labels_every=1,
         **kwargs,
     ):
         """
@@ -479,7 +480,10 @@ for reproducible results across multiple function calls.""",
         labels_column : int, optional, default:0
             If several columns of labels are present indicates which column has to be
             used to show labels.
+        labels_every : int, optional, default: 1
+        `   Do not label all points, but only every value indicated by this parameter.
         """
+
         self.prefs = self.X.preferences
 
         # checks args
@@ -532,10 +536,12 @@ for reproducible results across multiple function calls.""",
 
             if scatterlabels is not None:
                 for idx, lab in enumerate(scatterlabels):
+                    if idx % labels_every != 0:
+                        continue
                     ax.annotate(
                         lab,
                         xy=(x[idx], y[idx]),
-                        xytext=(-10, 10),
+                        xytext=(-20, 20),
                         textcoords="offset pixels",
                         color=axsc.to_rgba(colors[idx]),
                     )
