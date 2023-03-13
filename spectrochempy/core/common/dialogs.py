@@ -11,7 +11,7 @@ This module implement File I/O Dialogs
 from os import environ
 
 from spectrochempy.core import error_, preferences
-from spectrochempy.utils import import_optional_dependency
+from spectrochempy.utils.optional import import_optional_dependency
 
 __all__ = ["open_dialog", "save_dialog"]
 
@@ -224,7 +224,7 @@ class _TKFileDialogs:  # pragma: no cover
         filters=None,
     ):
 
-        from spectrochempy.utils import pathclean
+        from spectrochempy.utils.file import pathclean
 
         dftext = ""
         directory = "."
@@ -283,7 +283,7 @@ def save_dialog(
             filename=filename, caption=caption, filters=filters
         )
 
-    from spectrochempy.utils import pathclean
+    from spectrochempy.utils.file import pathclean
 
     return pathclean(f)
 
@@ -318,6 +318,6 @@ def open_dialog(
     else:
         f = klass._open_multiple_filenames(parent=parent, filters=filters)
 
-    from spectrochempy.utils import pathclean
+    from spectrochempy.utils.file import pathclean
 
     return pathclean(f)

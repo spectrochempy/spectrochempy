@@ -16,7 +16,9 @@ import numpy as np
 
 from spectrochempy.core import error_, warning_
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.utils import MASKED, UnitsCompatibilityError, get_n_decimals
+from spectrochempy.utils import exceptions
+from spectrochempy.utils.constants import MASKED
+from spectrochempy.utils.misc import get_n_decimals
 
 
 def can_merge_or_align(coord1, coord2):
@@ -228,7 +230,7 @@ def align(dataset, *others, **kwargs):
 
             if not coord.is_units_compatible(ref_coord):
                 # not compatible, stop everything
-                raise UnitsCompatibilityError(
+                raise exceptions.UnitsCompatibilityError(
                     "NDataset to align must have compatible units!"
                 )
 

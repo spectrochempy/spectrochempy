@@ -25,8 +25,8 @@ from spectrochempy.core.dataset.arraymixins.ndmath import (
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.units.units import Quantity, Unit, ur
-from spectrochempy.utils import MASKED
+from spectrochempy.core.units import Quantity, Unit, ur
+from spectrochempy.utils.constants import MASKED
 from spectrochempy.utils.exceptions import CoordinatesMismatchError
 from spectrochempy.utils.testing import (
     RandomSeedContext,

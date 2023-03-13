@@ -35,7 +35,7 @@ class _Axes(maxes.Axes):
     Subclass of matplotlib Axes class
     """
 
-    from spectrochempy.core.units.units import remove_args_units
+    from spectrochempy.core.units import remove_args_units
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -290,7 +290,7 @@ class _Axes(maxes.Axes):
 
 
 class _Axes3D(maxes3D.Axes3D):
-    from spectrochempy.core.units.units import remove_args_units
+    from spectrochempy.core.units import remove_args_units
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -380,7 +380,7 @@ def cmyk2rgb(C, M, Y, K):
     # The blue color (B) is calculated from the yellow (Y) and black (K) colors:
     B = (1.0 - Y) * (1.0 - K)
 
-    return (R, G, B)
+    return R, G, B
 
 
 # Constants
@@ -409,7 +409,7 @@ def figure(preferences=None, **kwargs):
         Per object saved plot configuration.
     """
 
-    from spectrochempy.core.common.meta import Meta
+    from spectrochempy.core.dataset.baseobjects.meta import Meta
 
     if preferences is None:
         preferences = Meta()

@@ -13,13 +13,9 @@ from warnings import warn
 
 import numpy as np
 
-from spectrochempy.core.dataset.basearrays.ndarray import DEFAULT_DIM_NAME
+from spectrochempy.core.dataset.baseobjects.ndarray import DEFAULT_DIM_NAME
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.utils import (
-    DimensionsCompatibilityError,
-    UnitsCompatibilityError,
-    exceptions,
-)
+from spectrochempy.utils import exceptions
 from spectrochempy.utils.orderedset import OrderedSet
 
 
@@ -95,7 +91,9 @@ def concatenate(*datasets, **kwargs):
     # check shapes, except for dim along which concatenation will be done
     shapes = {ds.shape[:axis] + ds.shape[axis + 1 :] for ds in datasets}
     if len(shapes) != 1:
-        raise DimensionsCompatibilityError("all input arrays must have the same shape")
+        raise exceptions.DimensionsCompatibilityError(
+            "all input arrays must have the same shape"
+        )
 
     # check units
     units = tuple(set(ds.units for ds in datasets))
@@ -106,7 +104,7 @@ def concatenate(*datasets, **kwargs):
         for i, u1 in enumerate(units[:-1]):
             for u2 in units[i + 1 :]:
                 if u1.dimensionality != u2.dimensionality:
-                    raise UnitsCompatibilityError(
+                    raise exceptions.UnitsCompatibilityError(
                         f"Units of the data are {[str(u) for u in units]}. The datasets can't be concatenated"
                     )
         # should be compatible, so convert
@@ -228,7 +226,9 @@ def stack(*datasets):
 
     shapes = {ds.shape for ds in datasets}
     if len(shapes) != 1:
-        raise DimensionsCompatibilityError("all input arrays must have the same shape")
+        raise exceptions.DimensionsCompatibilityError(
+            "all input arrays must have the same shape"
+        )
 
     # prepend a new dimension
     for i, dataset in enumerate(datasets):

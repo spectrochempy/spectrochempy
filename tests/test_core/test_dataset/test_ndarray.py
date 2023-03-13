@@ -12,9 +12,10 @@ import numpy as np
 import pytest
 from pint.errors import DimensionalityError
 
-from spectrochempy.core.dataset.basearrays.ndarray import NDArray
+from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
 from spectrochempy.core.units import Quantity, ur
-from spectrochempy.utils import INPLACE, MASKED, TYPE_FLOAT, TYPE_INTEGER
+from spectrochempy.utils.constants import INPLACE, MASKED
+from spectrochempy.utils.misc import TYPE_FLOAT, TYPE_INTEGER
 from spectrochempy.utils.testing import (
     assert_array_equal,
     assert_equal,

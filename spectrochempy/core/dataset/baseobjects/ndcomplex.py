@@ -17,17 +17,17 @@ import numpy as np
 from quaternion import as_float_array, as_quat_array
 from traitlets import Bool, validate
 
-from spectrochempy.core.dataset.basearrays.ndarray import NDArray
+from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
 from spectrochempy.core.units import Quantity
-from spectrochempy.utils import (
-    NOMASK,
+from spectrochempy.utils.constants import NOMASK
+from spectrochempy.utils.misc import (
     TYPE_COMPLEX,
     TYPE_FLOAT,
     as_quaternion,
     get_component,
-    insert_masked_print,
     typequaternion,
 )
+from spectrochempy.utils.print import insert_masked_print
 
 
 # ======================================================================================

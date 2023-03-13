@@ -16,7 +16,7 @@ import pytest
 
 from spectrochempy.core import preferences as prefs
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils import pathclean
+from spectrochempy.utils.file import pathclean
 from spectrochempy.utils.testing import assert_array_equal, assert_dataset_equal
 
 irdatadir = pathclean(prefs.datadir) / "irdata"

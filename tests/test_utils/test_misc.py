@@ -6,7 +6,7 @@
 # ======================================================================================
 # flake8: noqa
 
-from spectrochempy.utils import dict_compare
+from spectrochempy.utils.misc import dict_compare
 
 
 def test_dict_compare():

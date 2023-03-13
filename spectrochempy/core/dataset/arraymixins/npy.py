@@ -13,7 +13,7 @@ __all__ = ["dot"]
 import numpy as np
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils import make_new_object
+from spectrochempy.utils.misc import make_new_object
 
 
 def dot(a, b, strict=True, out=None):

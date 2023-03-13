@@ -7,8 +7,8 @@
 # flake8: noqa
 import pytest
 
-from spectrochempy.core.dataset.basearrays.ndarray import NDArray
-from spectrochempy.core.scripts.script import Script
+from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
+from spectrochempy.core.script import Script
 from spectrochempy.core.units import ur
 from spectrochempy.utils import testing
 

@@ -16,7 +16,7 @@ from spectrochempy.core.plotters.multiplot import multiplot
 from spectrochempy.core.processors.baseline import BaselineCorrection
 from spectrochempy.core.processors.concatenate import concatenate
 from spectrochempy.core.readers.importer import read
-from spectrochempy.utils import show
+from spectrochempy.utils.plots import show
 
 __all__ = ["BaselineCorrector"]
 

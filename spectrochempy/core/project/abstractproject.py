@@ -4,10 +4,17 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-from spectrochempy.utils import generate_api
+__all__ = []
 
-__all__ = generate_api(__file__)
+import traitlets as tr
+
 
 # ======================================================================================
-if __name__ == "__main__":
-    pass
+# AbstractProject class
+# ======================================================================================
+class AbstractProject(tr.HasTraits):
+    """
+    Project class will subclass it.
+
+    It is mainly used for avoiding circular imports
+    """

@@ -30,7 +30,7 @@ __all__ = [
 def download_testdata():
     from spectrochempy.core import preferences
     from spectrochempy.core.readers.importer import read_remote
-    from spectrochempy.utils import pathclean
+    from spectrochempy.utils.file import pathclean
 
     datadir = pathclean(preferences.datadir)
     # this process is relatively long, so we do not want to do it several time:

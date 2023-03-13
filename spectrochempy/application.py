@@ -38,27 +38,19 @@ from IPython.core.magics.code import extract_symbols
 from IPython.display import clear_output, publish_display_data
 from IPython.utils.text import get_text_list
 from jinja2 import Template
-from matplotlib import pyplot as plt
 from pkg_resources import DistributionNotFound, get_distribution, parse_version
 from setuptools_scm import get_version
 from traitlets.config.application import Application
 from traitlets.config.configurable import Config
 from traitlets.config.manager import BaseJSONConfigManager
 
-from spectrochempy.plot_preferences import PlotPreferences
 from spectrochempy.utils.file import pathclean
-
-# from spectrochempy.utils.packages import get_pkg_path
 from spectrochempy.utils.traits import MetaConfigurable
 from spectrochempy.utils.version import Version
 
 # ======================================================================================
 # Setup
 # ======================================================================================
-# --------------------------------------------------------------------------------------
-# set the default style
-# --------------------------------------------------------------------------------------
-plt.style.use(["classic"])
 
 # --------------------------------------------------------------------------------------
 # Log levels
@@ -471,7 +463,7 @@ class SpectroChemPyMagics(Magics):
             contents += "\n" + cell
 
         # import delayed to avoid circular import error
-        from spectrochempy.core.scripts.script import Script
+        from spectrochempy.core.script import Script
 
         script = Script(name, content=contents)
         projobj[name] = script
@@ -921,10 +913,6 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
     )
 
     classes = tr.List(
-        [
-            GeneralPreferences,
-            PlotPreferences,
-        ],
         help="List of configurables",
     )
 
@@ -1021,7 +1009,17 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
             DataDir()
         )  # config=self.config)  -- passing args deprecated in traitlets 4.2
         self.preferences = GeneralPreferences(config=self.config, parent=self)
+        from spectrochempy.plot_preferences import (
+            PlotPreferences,  # slow : delayed import
+        )
+
         self.plot_preferences = PlotPreferences(config=self.config, parent=self)
+        self.classes.extend(
+            [
+                GeneralPreferences,
+                PlotPreferences,
+            ]
+        )
 
     # ----------------------------------------------------------------------------------
     # Public methods and properties
@@ -1192,6 +1190,12 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
         # Eventually write the default config file
         # --------------------------------------
         self._make_default_config_file()
+
+        # set the default style
+        # --------------------------------------------------------------------------------------
+        from matplotlib import pyplot as plt  # <-- slow!  delayed import
+
+        plt.style.use(["classic"])
 
         debug_("API loaded - application is ready")
         self.running = True

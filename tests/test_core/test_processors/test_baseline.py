@@ -15,7 +15,7 @@ from spectrochempy.core.processors.baseline import BaselineCorrection
 from spectrochempy.core.units import ur
 
 # noinspection PyUnresolvedReferences
-from spectrochempy.utils import show
+from spectrochempy.utils.plots import show
 from spectrochempy.utils.testing import (
     assert_dataset_almost_equal,
     assert_dataset_equal,

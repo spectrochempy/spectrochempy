@@ -33,7 +33,7 @@ from traitlets import (
 )
 
 from spectrochempy.core import error_, info_
-from spectrochempy.core.common.meta import Meta
+from spectrochempy.core.dataset.baseobjects.meta import Meta
 from spectrochempy.core.units import (
     DimensionalityError,
     Quantity,
@@ -42,20 +42,19 @@ from spectrochempy.core.units import (
     ur,
 )
 from spectrochempy.extern.traittypes import Array
-from spectrochempy.utils import (
-    INPLACE,
-    MASKED,
-    NOMASK,
+from spectrochempy.utils.constants import INPLACE, MASKED, NOMASK, MaskedConstant
+from spectrochempy.utils.file import pathclean
+from spectrochempy.utils.misc import (
     TYPE_FLOAT,
     TYPE_INTEGER,
-    MaskedConstant,
-    convert_to_html,
-    insert_masked_print,
     is_number,
     is_sequence,
     make_new_object,
+)
+from spectrochempy.utils.print import (
+    convert_to_html,
+    insert_masked_print,
     numpyprintoptions,
-    pathclean,
 )
 
 # ======================================================================================

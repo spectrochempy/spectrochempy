@@ -14,7 +14,7 @@ from numpy.linalg import svd
 from traitlets import Float, HasTraits
 
 from spectrochempy.core import info_
-from spectrochempy.utils import MASKED
+from spectrochempy.utils.constants import MASKED
 from spectrochempy.utils.traits import NDDatasetType
 
 __all__ = ["EFA"]

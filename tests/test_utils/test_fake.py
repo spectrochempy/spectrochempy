@@ -5,7 +5,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # flake8: noqa
-from spectrochempy.utils import generate_fake  # , show
+from spectrochempy.utils.fake import generate_fake  # , show
 
 
 def test_fake():

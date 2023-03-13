@@ -28,9 +28,10 @@ from traitlets import (
     validate,
 )
 
-from spectrochempy.core.dataset.basearrays.ndarray import DEFAULT_DIM_NAME, NDArray
+from spectrochempy.core.dataset.baseobjects.ndarray import DEFAULT_DIM_NAME, NDArray
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
-from spectrochempy.utils import colored_output, convert_to_html, is_sequence
+from spectrochempy.utils.misc import is_sequence
+from spectrochempy.utils.print import colored_output, convert_to_html
 
 
 # ======================================================================================

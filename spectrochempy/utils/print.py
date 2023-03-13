@@ -328,7 +328,7 @@ def insert_masked_print(ds, mask_string="--"):
     ds : |NDDataset| instance
     mask_string : str
     """
-    from spectrochempy.utils import NOMASK
+    from spectrochempy.utils.constants import NOMASK
 
     mask = ds._mask
     if mask is NOMASK:

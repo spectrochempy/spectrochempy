@@ -9,7 +9,7 @@
 import os
 
 from spectrochempy import NDDataset
-from spectrochempy.utils import show
+from spectrochempy.utils.plots import show
 
 # TODO: from spectrochempy.utils.testing import figures_dir, same_images
 

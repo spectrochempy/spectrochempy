@@ -9,7 +9,7 @@
 import pytest
 
 from spectrochempy import Fit
-from spectrochempy.utils import show
+from spectrochempy.utils.plots import show
 from spectrochempy.utils.testing import assert_approx_equal
 
 

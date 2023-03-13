@@ -35,7 +35,7 @@ from contextlib import contextmanager
 import IPython
 from IPython.core.interactiveshell import InteractiveShell
 
-from spectrochempy.utils import pathclean
+from spectrochempy.utils.file import pathclean
 
 __all__ = ["FileSelector"]
 

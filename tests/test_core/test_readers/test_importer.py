@@ -22,7 +22,7 @@ from spectrochempy.core.readers.importer import (
     read,
     read_dir,
 )
-from spectrochempy.utils import pathclean
+from spectrochempy.utils.file import pathclean
 
 DATADIR = prefs.datadir
 

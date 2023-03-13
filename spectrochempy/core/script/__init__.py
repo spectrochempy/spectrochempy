@@ -10,7 +10,7 @@ import re
 from traitlets import Float, HasTraits, Instance, TraitError, Unicode, validate
 
 from spectrochempy.core import error_
-from spectrochempy.core.project.baseproject import AbstractProject
+from spectrochempy.core.project.abstractproject import AbstractProject
 
 __all__ = ["Script", "run_script", "run_all_scripts"]
 
@@ -98,7 +98,7 @@ class Script(HasTraits):
         if p.match(pv) and p.match(pv).group() == pv:
             return pv
         raise TraitError(
-            "Not a valid script name : only _ letters and numbers "
+            "Not a valid script name : only _, letters and numbers "
             "are valids. For the fist character, numbers are "
             "not allowed"
         )

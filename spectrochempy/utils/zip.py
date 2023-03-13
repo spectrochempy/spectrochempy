@@ -115,7 +115,7 @@ class ScpFile(Mapping):  # lgtm[py/missing-equals]
         return len(self.files)
 
     def __getitem__(self, key):
-        from spectrochempy.utils import json_decoder
+        from spectrochempy.utils.jsonutils import json_decoder
 
         member = False
         ext = None
