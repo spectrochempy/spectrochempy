@@ -407,7 +407,7 @@ def JDX_2D():
 # --------------------------------------------------------------------------------------
 # fixture Project
 # --------------------------------------------------------------------------------------
-@pytest.yield_fixture(scope="function")
+@pytest.fixture(scope="function")
 def simple_project():
 
     proj = Project(
