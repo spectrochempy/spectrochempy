@@ -10,18 +10,17 @@ This module implements the class _CoordRange.
 
 __all__ = ["trim_ranges"]
 
-from traitlets import Bool, HasTraits, List
+import traitlets as tr
 
 
 # ======================================================================================
 # _CoordRange
 # ======================================================================================
-class _CoordRange(HasTraits):
+class _CoordRange(tr.HasTraits):
     # TODO: May use also units ???
-    from spectrochempy.utils.traits import Range
 
-    ranges = List(Range())
-    reversed = Bool()
+    ranges = tr.List(tr.List(minlen=2, maxlen=2))
+    reversed = tr.Bool()
 
     def __init__(self, *ranges, reversed=False):
 
@@ -43,6 +42,13 @@ class _CoordRange(HasTraits):
     # ----------------------------------------------------------------------------------
     # private methods
     # ----------------------------------------------------------------------------------
+    @tr.validate("ranges")
+    def _ranges_validate(self, proposal):
+        value = proposal.value
+        for item in value:
+            item.sort()
+        return value
+
     def _clean_ranges(self, ranges):
         """Sort and merge overlapping ranges
         It works as follows::
