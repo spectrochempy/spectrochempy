@@ -387,7 +387,7 @@ class MCRALS(HasTraits):
 
             # Force unimodal concentration
             # ----------------------------
-            if unimodConc != []:
+            if len(unimodConc) > 0:
                 C.data = _unimodal_2D(
                     C.data,
                     idxes=unimodConc,

@@ -48,6 +48,16 @@ for Chemistry with Python.
 It is a cross-platform software, running on Linux, Windows or OS X.
 """
 
+import warnings
+
+# warnings.filterwarnings(action="error", category=DeprecationWarning)
+# warnings.filterwarnings(action="ignore", module="matplotlib")  # , category=UserWarning)
+warnings.filterwarnings(
+    action="once", module="spectrochempy", category=DeprecationWarning
+)
+warnings.filterwarnings(action="ignore", module="jupyter")  # , category=UserWarning)
+warnings.filterwarnings(action="ignore", module="pykwalify")  # , category=UserWarning)
+
 from spectrochempy import api
 from spectrochempy.api import *  # noqa: F401
 from spectrochempy.core.dataset.coord import Coord
