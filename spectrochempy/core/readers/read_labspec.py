@@ -15,7 +15,7 @@ import datetime
 
 import numpy as np
 
-from spectrochempy.core.common.meta import Meta
+from spectrochempy.core.dataset.baseobjects.meta import Meta
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.readers.importer import Importer, _importer_method
 

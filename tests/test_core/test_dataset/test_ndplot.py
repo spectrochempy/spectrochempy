@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import pytest
 
 from spectrochempy import preferences
-from spectrochempy.utils import show
+from spectrochempy.utils.plots import show
 
 
 def test_plot_generic_1D(IR_dataset_1D):

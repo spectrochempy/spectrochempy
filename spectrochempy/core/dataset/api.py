@@ -4,6 +4,9 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-from spectrochempy.utils import generate_api
 
-__all__ = generate_api(__file__)
+__all__ = ["Coord", "LinearCoord", "CoordSet", "NDDataset"]
+
+from spectrochempy.core.dataset.coord import Coord, LinearCoord
+from spectrochempy.core.dataset.coordset import CoordSet
+from spectrochempy.core.dataset.nddataset import NDDataset

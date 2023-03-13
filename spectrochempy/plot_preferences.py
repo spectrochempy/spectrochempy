@@ -40,7 +40,7 @@ def available_styles():
     -------
     A list of matplotlib styles
     """
-    from spectrochempy.utils import pathclean
+    from spectrochempy.utils.file import pathclean
 
     # Todo: Make this list extensible programmatically (adding files to stylelib)
     cfgdir = mpl.get_configdir()
@@ -973,7 +973,7 @@ class PlotPreferences(MetaConfigurable):
     @default("stylesheets")
     def _get_stylesheets_default(self):
         # the spectra path in package data
-        from spectrochempy.utils import get_pkg_path
+        from spectrochempy.utils.packages import get_pkg_path
 
         return get_pkg_path("stylesheets", "scp_data")
 
@@ -1022,7 +1022,7 @@ class PlotPreferences(MetaConfigurable):
             return f"{color}"
 
     def _apply_style(self, _style):
-        from spectrochempy.utils import pathclean
+        from spectrochempy.utils.file import pathclean
 
         f = (pathclean(self.stylesheets) / _style).with_suffix(".mplstyle")
         if not f.exists():

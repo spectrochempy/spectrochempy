@@ -6,18 +6,18 @@
 # ======================================================================================
 __all__ = ["Project"]
 
+import copy as cpy
 import pathlib
 import uuid
-from copy import deepcopy as cpy
 from functools import wraps
 
 import dill
-from traitlets import Dict, Instance, This, Unicode, default
+import traitlets as tr
 
-from spectrochempy.core.common.meta import Meta
-from spectrochempy.core.dataset.nddataset import NDIO, NDDataset
-from spectrochempy.core.project.baseproject import AbstractProject
-from spectrochempy.core.scripts.script import Script
+from spectrochempy.core.dataset.baseobjects.meta import Meta
+from spectrochempy.core.dataset.nddataset import NDIO
+from spectrochempy.core.project.abstractproject import AbstractProject
+from spectrochempy.core.script import Script
 from spectrochempy.utils.traits import NDDatasetType
 
 # from collections import OrderedDict
@@ -33,7 +33,7 @@ class Project(AbstractProject, NDIO):
     """
     A manager for projects, datasets and scripts.
 
-    It can handle multiple datasets, sub-projects, and scripts in a main
+    It can handle multiple datasets, subprojects, and scripts in a main
     project.
 
     Parameters
@@ -44,14 +44,14 @@ class Project(AbstractProject, NDIO):
         This is optional, as they can be added later.
     argnames : list, optional
         If not None, this list gives the names associated to each
-        objects passed as args. It MUST be the same length that the
+        object passed as args. It MUST be the same length that the
         number of args, or an error will be raised.
         If None, the internal name of each object will be used instead.
     name : str, optional
         The name of the project.  If the name is not provided, it will be
         generated automatically.
     **meta : dict
-        Any other attributes to described the project.
+        Any other attributes to describe the project.
 
     See Also
     --------
@@ -69,21 +69,20 @@ class Project(AbstractProject, NDIO):
         ⤷ dataset_1 (dataset)
     """
 
-    _id = Unicode()
-    _name = Unicode(allow_none=True)
+    _id = tr.Unicode()
+    _name = tr.Unicode(allow_none=True)
 
-    _parent = This()
-    _projects = Dict(This())
-    _datasets = Dict(NDDatasetType())
-    _scripts = Dict(Instance(Script))
-    _others = Dict()
-    _meta = Instance(Meta)
+    _parent = tr.This()
+    _projects = tr.Dict(tr.This())
+    _datasets = tr.Dict(NDDatasetType())
+    _scripts = tr.Dict(tr.Instance(Script))
+    _others = tr.Dict()
+    _meta = tr.Instance(Meta)
 
-    _filename = Instance(pathlib.Path, allow_none=True)
-    _directory = Instance(pathlib.Path, allow_none=True)
+    _filename = tr.Instance(pathlib.Path, allow_none=True)
+    _directory = tr.Instance(pathlib.Path, allow_none=True)
 
     def __init__(self, *args, argnames=None, name=None, **meta):
-
         super().__init__()
 
         self.parent = None
@@ -102,6 +101,8 @@ class Project(AbstractProject, NDIO):
     # Private methods
     # ----------------------------------------------------------------------------------
     def _set_from_type(self, obj, name=None):
+        from spectrochempy.core.dataset.nddataset import NDDataset
+        from spectrochempy.core.script import Script
 
         if isinstance(obj, NDDataset):
             # add it to the _datasets dictionary
@@ -126,7 +127,6 @@ class Project(AbstractProject, NDIO):
         pass  # TODO: ???
 
     def _repr_html_(self):
-
         h = self.__str__()
         h = h.replace("\n", "<br/>\n")
         h = h.replace(" ", "&nbsp;")
@@ -137,7 +137,6 @@ class Project(AbstractProject, NDIO):
     # Special methods
     # ----------------------------------------------------------------------------------
     def __getitem__(self, key):
-
         if not isinstance(key, str):
             raise KeyError("The key must be a string.")
 
@@ -162,7 +161,6 @@ class Project(AbstractProject, NDIO):
             raise KeyError(f"{key}: This object name does not exist in this project.")
 
     def __setitem__(self, key, value):
-
         if not isinstance(key, str):
             raise KeyError("The key must be a string.")
 
@@ -182,13 +180,12 @@ class Project(AbstractProject, NDIO):
             value.parent = self
             self._scripts[key] = value
         else:
-            # the key does not exists
+            # the key does not exist
             self._set_from_type(value, name=key)
 
     def __getattr__(self, item):
-
         if "_validate" in item or "_changed" in item:
-            # this avoid infinite recursion due to the traits management
+            # this avoids infinite recursion due to the traits management
             return super().__getattribute__(item)
 
         elif item in self.allnames:
@@ -200,16 +197,13 @@ class Project(AbstractProject, NDIO):
             return self.meta[item]
 
         else:
-            raise AttributeError(
-                "`%s` has no attribute `%s`" % (type(self).__name__, item)
-            )
+            raise AttributeError
 
     def __iter__(self):
         for items in self.allitems:
             yield items
 
     def __str__(self):
-
         s = "Project {}:\n".format(self.name)
 
         lens = len(s)
@@ -248,24 +242,16 @@ class Project(AbstractProject, NDIO):
 
     def __copy__(self):
         new = Project()
-        # new.name = self.name + '*'
         for item in self.__dir__():
-            # if item == 'name':
-            #     continue
             item = "_" + item
             data = getattr(self, item)
-            # if isinstance(data, (Project,NDDataset, Script)):
-            #     setattr(new, item, data.copy())
-            # elif item in ['_datasets', '_projects', '_scripts']:
-            #
-            # else:
-            setattr(new, item, cpy(data))
+            setattr(new, item, cpy.copy(data))
         return new
 
     # ----------------------------------------------------------------------------------
     # properties
     # ----------------------------------------------------------------------------------
-    @default("_id")
+    @tr.default("_id")
     def _id_default(self):
         # a unique id
         return f"{type(self).__name__}_{str(uuid.uuid1()).split('-')[0]}"
@@ -280,7 +266,7 @@ class Project(AbstractProject, NDIO):
     @property
     def name(self):
         """
-        An user friendly name for the project.
+        A user-friendly name for the project.
 
         The default is automatically generated (str).
         """
@@ -305,18 +291,18 @@ class Project(AbstractProject, NDIO):
     @parent.setter
     def parent(self, value):
         if self._parent is not None:
-            # A parent project already exists for this sub-project but the
+            # A parent project already exists for this subproject but the
             # entered values gives a different parent. This is not allowed,
             # as it can produce impredictable results. We will first remove it
             # from the current project.
             self._parent.remove_project(self.name)
         self._parent = value
 
-    @default("_parent")
+    @tr.default("_parent")
     def _get_parent(self):
         return None
 
-    @default("_meta")
+    @tr.default("_meta")
     def _meta_default(self):
         return Meta()
 
@@ -356,7 +342,6 @@ class Project(AbstractProject, NDIO):
 
     @datasets.setter
     def datasets(self, datasets):
-
         self.add_datasets(*datasets)
 
     @property
@@ -379,7 +364,6 @@ class Project(AbstractProject, NDIO):
 
     @projects.setter
     def projects(self, projects):
-
         self.add_projects(*projects)
 
     @property
@@ -402,7 +386,6 @@ class Project(AbstractProject, NDIO):
 
     @scripts.setter
     def scripts(self, scripts):
-
         self.add_scripts(*scripts)
 
     @property

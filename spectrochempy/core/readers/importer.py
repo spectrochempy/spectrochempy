@@ -19,13 +19,13 @@ import yaml
 from traitlets import Dict, HasTraits, List, Type, Unicode
 
 from spectrochempy.core import info_, warning_
-from spectrochempy.utils import (
+from spectrochempy.utils.exceptions import DimensionsCompatibilityError, ProtocolError
+from spectrochempy.utils.file import (
     check_filename_to_open,
     get_directory_name,
     get_filenames,
     pathclean,
 )
-from spectrochempy.utils.exceptions import DimensionsCompatibilityError, ProtocolError
 
 FILETYPES = [
     ("scp", "SpectroChemPy files (*.scp)"),

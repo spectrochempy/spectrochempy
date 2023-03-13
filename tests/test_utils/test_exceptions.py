@@ -11,7 +11,7 @@ import pathlib
 import pytest
 
 import spectrochempy as scp
-from spectrochempy.utils import ProtocolError, deprecated, ignored
+from spectrochempy.utils.exceptions import ProtocolError, deprecated, ignored
 
 
 def test_protocolerror():

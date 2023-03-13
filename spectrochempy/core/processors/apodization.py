@@ -27,7 +27,7 @@ from scipy.signal import windows
 
 from spectrochempy.core import error_
 from spectrochempy.core.units import Quantity
-from spectrochempy.utils import EPSILON
+from spectrochempy.utils.constants import EPSILON
 
 pi = np.pi
 

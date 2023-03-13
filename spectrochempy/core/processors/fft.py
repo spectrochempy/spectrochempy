@@ -19,7 +19,7 @@ from spectrochempy.core.dataset.coord import LinearCoord
 from spectrochempy.core.processors.utils import _units_agnostic_method
 from spectrochempy.core.processors.zero_filling import zf_size
 from spectrochempy.core.units import ur
-from spectrochempy.utils import (
+from spectrochempy.utils.misc import (
     as_quaternion,
     get_component,
     largest_power_of_2,

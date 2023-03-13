@@ -66,6 +66,14 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 
 __all__ = api.__all__
 
+
+def __getattr__(name):
+    # NDDataset method accessible from the API
+    if hasattr(NDDataset, name):
+        return getattr(NDDataset, name)
+    raise AttributeError
+
+
 # ======================================================================================
 if __name__ == "__main__":
     pass

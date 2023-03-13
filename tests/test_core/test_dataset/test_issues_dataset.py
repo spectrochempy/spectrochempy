@@ -11,7 +11,7 @@ import numpy as np
 
 from spectrochempy import read_omnic
 from spectrochempy.core.units import ur
-from spectrochempy.utils import show
+from spectrochempy.utils.plots import show
 
 typequaternion = np.dtype(np.quaternion)
 

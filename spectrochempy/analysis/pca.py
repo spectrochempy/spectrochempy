@@ -22,7 +22,7 @@ from spectrochempy.analysis.svd import SVD
 from spectrochempy.core import info_
 from spectrochempy.core.dataset.arraymixins.npy import dot
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.utils import NBlue, NRed
+from spectrochempy.utils.plots import NBlue, NRed
 from spectrochempy.utils.traits import NDDatasetType
 
 
