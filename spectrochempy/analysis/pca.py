@@ -462,7 +462,16 @@ class PCA(HasTraits):
         ax1.set_title("Scree plot")
         return ax1, ax2
 
-    def scoreplot(self, *pcs, colormap="viridis", color_mapping="index", **kwargs):
+    def scoreplot(
+        self,
+        *pcs,
+        colormap="viridis",
+        color_mapping="index",
+        show_labels=False,
+        labels_column=0,
+        labels_every=1,
+        **kwargs,
+    ):
         """
         2D or 3D scoreplot of samples.
 
@@ -474,9 +483,18 @@ class PCA(HasTraits):
             A matplotlib colormap.
         color_mapping : 'index' or 'labels'
             If 'index', then the colors of each n_scores is mapped sequentially
-            on the colormap. If labels, the labels of the n_observation are
+            on the colormap. If labels, the labels of the n_observations are
             used for color mapping.
+        show_labels : bool, optional, default: False
+            If True each observation will be annotated with its label.
+        labels_column : int, optional, default:0
+            If several columns of labels are present indicates which column has to be
+            used to show labels.
+        labels_every : int, optional, default: 1
+        `   Do not label all points, but only every value indicated by this parameter.
         """
+        self.prefs = self.X.preferences
+        scores = self._S
 
         if isinstance(pcs[0], (list, tuple, set)):
             pcs = pcs[0]
@@ -486,37 +504,51 @@ class PCA(HasTraits):
 
         # colors
         if color_mapping == "index":
-
-            if np.any(self._S.y.data):
-                colors = self._S.y.data
+            if np.any(scores.y.data):
+                colors = scores.y.data
             else:
-                colors = np.array(range(self._S.shape[0]))
+                colors = np.array(range(scores.shape[0]))
 
-        elif color_mapping == "labels":
+        elif color_mapping == "labels" and scores.y.labels is not None:
+            if scores.y.labels.ndim == 1:
+                labels = list(set(scores.y.labels))
+            else:
+                labels = list(set(scores.y.labels[:, labels_column]))
+            colors = [labels.index(lab) for lab in scores.y.labels]
 
-            labels = list(set(self._S.y.labels))
-            colors = [labels.index(lab) for lab in self._S.y.labels]
+        # labels
+        scatterlabels = None
+        if show_labels:
+            scatterlabels = scores.y.labels[:, labels_column]
 
         if len(pcs) == 2:
-            # bidimentional score plot
+            # bidimensional score plot
 
             fig = plt.figure(**kwargs)
             ax = fig.add_subplot(111)
             ax.set_title("Score plot")
 
             ax.set_xlabel(
-                "PC# {} ({:.3f}%)".format(pcs[0] + 1, self._ev_ratio.data[pcs[0]])
+                "PC# {} ({:.3f}%)".format(pcs[0] + 1, self.ev_ratio.data[pcs[0]])
             )
             ax.set_ylabel(
-                "PC# {} ({:.3f}%)".format(pcs[1] + 1, self._ev_ratio.data[pcs[1]])
+                "PC# {} ({:.3f}%)".format(pcs[1] + 1, self.ev_ratio.data[pcs[1]])
             )
-            axsc = ax.scatter(
-                self._S.masked_data[:, pcs[0]],
-                self._S.masked_data[:, pcs[1]],
-                s=30,
-                c=colors,
-                cmap=colormap,
-            )
+            x = scores.masked_data[:, pcs[0]]
+            y = scores.masked_data[:, pcs[1]]
+            axsc = ax.scatter(x, y, s=30, c=colors, cmap=colormap)
+
+            if scatterlabels is not None:
+                for idx, lab in enumerate(scatterlabels):
+                    if idx % labels_every != 0:
+                        continue
+                    ax.annotate(
+                        lab,
+                        xy=(x[idx], y[idx]),
+                        xytext=(-20, 20),
+                        textcoords="offset pixels",
+                        color=axsc.to_rgba(colors[idx]),
+                    )
 
             number_x_labels = self.prefs.number_of_x_labels  # get from config
             number_y_labels = self.prefs.number_of_y_labels
@@ -543,9 +575,9 @@ class PCA(HasTraits):
                 "PC# {} ({:.3f}%)".format(pcs[2] + 1, self._ev_ratio.data[pcs[2]])
             )
             axsc = ax.scatter(
-                self._S.masked_data[:, pcs[0]],
-                self._S.masked_data[:, pcs[1]],
-                self._S.masked_data[:, pcs[2]],
+                scores.masked_data[:, pcs[0]],
+                scores.masked_data[:, pcs[1]],
+                scores.masked_data[:, pcs[2]],
                 zdir="z",
                 s=30,
                 c=colors,
@@ -553,7 +585,7 @@ class PCA(HasTraits):
                 depthshade=True,
             )
 
-        if color_mapping == "labels":
+        if color_mapping == "labels" and scores.y.labels is not None:
             import matplotlib.patches as mpatches
 
             leg = []
@@ -579,6 +611,9 @@ class PCA(HasTraits):
         S.
         """
         return self._S
+
+    def labels(self, value):
+        self._S.y.labels = value
 
     @property
     def X(self):
