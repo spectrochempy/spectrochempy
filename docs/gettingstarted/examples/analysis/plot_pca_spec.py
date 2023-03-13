@@ -20,6 +20,7 @@ import spectrochempy as scp
 # Load a dataset
 
 dataset = scp.read_omnic("irdata/nh4y-activation.spg")
+dataset = dataset[:, 2000.0:4000.0]  # remember float number to slice from coordinates
 print(dataset)
 dataset.plot_stack()
 
@@ -48,9 +49,24 @@ _ = pca.scoreplot(1, 2)
 # Score Plot for 3 PC's in 3D
 _ = pca.scoreplot(1, 2, 3)
 
+# %% labeling scoreplot with spectra labels
+# Our dataset has already two columns of labels for the spectra but there are little
+# too long for display on plots.
+S.y.labels
+
+# %%
+# So we define some short labels for each component, and add them as a third column:
+labels = [lab[:6] for lab in dataset.y.labels[:, 1]]
+# we cannot change directly the label as S is read-only, but use the method `labels`
+pca.labels(labels)  # Note this does not replace previous labels, but adds a column.
+
+# %%
+# now display thse
+_ = pca.scoreplot(1, 2, show_labels=True, labels_column=2, labels_every=5)
+
 # %%
 # Displays the 4-first loadings
 
 LT[:4].plot_stack()
 
-# scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
+scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
