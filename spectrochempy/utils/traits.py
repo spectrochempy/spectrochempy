@@ -94,7 +94,7 @@ class SpectroChemPyType(SciType):
     A SpectroChemPy trait type.
     """
 
-    info_text = "a NDDataset"
+    info_text = "a Spectrochempy object"
 
     klass = None
 
@@ -155,8 +155,11 @@ class NDDatasetType(SpectroChemPyType):
 
             kwargs["klass"] = NDDataset
         super().__init__(
-            default_value=default_value, allow_none=allow_none, dtype=dtype, **kwargs
+            default_value=default_value,
+            allow_none=allow_none,
+            **kwargs,
         )
+        self.metadata.update({"dtype": dtype})
 
 
 class CoordType(SpectroChemPyType):
@@ -171,9 +174,8 @@ class CoordType(SpectroChemPyType):
             from spectrochempy.core.dataset.coord import Coord
 
             kwargs["klass"] = Coord
-        super().__init__(
-            default_value=default_value, allow_none=allow_none, dtype=dtype, **kwargs
-        )
+        super().__init__(default_value=default_value, allow_none=allow_none, **kwargs)
+        self.metadata.update({"dtype": dtype})
 
 
 class ProjectType(SpectroChemPyType):
@@ -188,9 +190,24 @@ class ProjectType(SpectroChemPyType):
             from spectrochempy.core.project.project import Project
 
             kwargs["klass"] = Project
-        super().__init__(
-            default_value=default_value, allow_none=allow_none, dtype=dtype, **kwargs
-        )
+        super().__init__(default_value=default_value, allow_none=allow_none, **kwargs)
+        self.metadata.update({"dtype": dtype})
+
+
+class ScriptType(SpectroChemPyType):
+    """
+    A NDDataset trait type.
+    """
+
+    info_text = "a SpectroChemPy Script"
+
+    def __init__(self, default_value=Empty, allow_none=False, dtype=None, **kwargs):
+        if "klass" not in kwargs and self.klass is None:
+            from spectrochempy.core.script import Script
+
+            kwargs["klass"] = Script
+        super().__init__(default_value=default_value, allow_none=allow_none, **kwargs)
+        self.metadata.update({"dtype": dtype})
 
 
 # ======================================================================================
