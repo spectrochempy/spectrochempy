@@ -23,7 +23,7 @@ prefs = preferences
 def test_multiplot():
     dataset = NDDataset.read_omnic(
         os.path.join(prefs.datadir, "irdata", "nh4y-activation.spg")
-    )[:, 0:20]
+    )[:, 0:100]
 
     datasets = [dataset, dataset * 1.1, dataset * 1.2, dataset * 1.3]
     labels = ["sample {}".format(label) for label in ["1", "2", "3", "4"]]

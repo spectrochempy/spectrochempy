@@ -24,8 +24,9 @@ __dataset_methods__ = []
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.tight_layout import (
-    get_renderer,
+
+# TODO: tight_layout module is deprecated
+from matplotlib._tight_layout import (  # get_renderer,
     get_subplotspec_list,
     get_tight_layout_figure,
 )
@@ -398,7 +399,7 @@ def multiplot(
     def do_tight_layout(fig, axes, suptitle, **kwargs):
 
         # tight_layout
-        renderer = get_renderer(fig)
+        renderer = fig.canvas.get_renderer()
         axeslist = list(axes.values())
         subplots_list = list(get_subplotspec_list(axeslist))
         kw = get_tight_layout_figure(
