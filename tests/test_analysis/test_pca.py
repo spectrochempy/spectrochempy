@@ -16,7 +16,9 @@ import numpy as np
 from spectrochempy.analysis._analysisutils import NotFittedError
 from spectrochempy.analysis.pca import PCA
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils import MASKED, exceptions, show, testing
+from spectrochempy.utils import exceptions, testing
+from spectrochempy.utils.constants import MASKED
+from spectrochempy.utils.plots import show
 
 
 # test pca

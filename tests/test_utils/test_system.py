@@ -8,7 +8,13 @@
 
 import pytest
 
-from spectrochempy.utils import get_node, get_user, get_user_and_node, is_kernel, sh
+from spectrochempy.utils.system import (
+    get_node,
+    get_user,
+    get_user_and_node,
+    is_kernel,
+    sh,
+)
 
 
 def test_get_user():

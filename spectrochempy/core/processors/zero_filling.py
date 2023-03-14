@@ -14,7 +14,7 @@ import numpy as np
 
 from spectrochempy.core import error_
 from spectrochempy.core.dataset.coord import LinearCoord
-from spectrochempy.utils import largest_power_of_2
+from spectrochempy.utils.misc import largest_power_of_2
 
 
 # ======================================================================================

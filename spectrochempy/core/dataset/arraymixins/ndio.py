@@ -22,14 +22,11 @@ from traitlets import HasTraits, Instance, Unicode, Union
 
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.coordset import CoordSet
-from spectrochempy.utils import (
-    TYPE_BOOL,
-    ScpFile,
-    SpectroChemPyError,
-    check_filename_to_save,
-    json_serialiser,
-    pathclean,
-)
+from spectrochempy.utils import exceptions
+from spectrochempy.utils.file import check_filename_to_save, pathclean
+from spectrochempy.utils.jsonutils import json_serialiser
+from spectrochempy.utils.misc import TYPE_BOOL
+from spectrochempy.utils.zip import ScpFile
 
 SCPY_SUFFIX = {"NDDataset": ".scp", "Project": ".pscp"}
 
@@ -302,11 +299,13 @@ class NDIO(HasTraits):
         try:
             obj = ScpFile(fid)
         except FileNotFoundError:
-            raise SpectroChemPyError(f"File {filename} doesn't exist!")
+            raise exceptions.SpectroChemPyError(f"File {filename} doesn't exist!")
         except Exception as e:
             if str(e) == "File is not a zip file":
-                raise SpectroChemPyError("File not in 'scp' or 'pscp' format!")
-            raise SpectroChemPyError("Undefined error!")
+                raise exceptions.SpectroChemPyError(
+                    "File not in 'scp' or 'pscp' format!"
+                )
+            raise exceptions.SpectroChemPyError("Undefined error!")
 
         js = obj[obj.files[0]]
         if kwargs.get("json", False):
@@ -333,7 +332,7 @@ class NDIO(HasTraits):
 
         from spectrochempy.core.dataset.nddataset import NDDataset
         from spectrochempy.core.project.project import Project
-        from spectrochempy.core.scripts.script import Script
+        from spectrochempy.core.script import Script
 
         # .........................
         def item_to_attr(obj, dic):

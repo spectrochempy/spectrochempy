@@ -15,7 +15,7 @@ import textwrap
 from datetime import datetime, tzinfo
 
 import numpy as np
-import pytz  # TODO: for py>=3.9, we could use builtin zoneinfo library instead of pyt but we need compatibility with 3.7 (Colab).
+import pytz  # TODO: for py>=3.9, we could use builtin zoneinfo library instead of pyt
 from traitlets import (
     All,
     Bool,
@@ -35,15 +35,17 @@ from spectrochempy.core.dataset.arraymixins.ndio import NDIO
 from spectrochempy.core.dataset.arraymixins.ndmath import NDMath  # _set_ufuncs,
 from spectrochempy.core.dataset.arraymixins.ndmath import _set_operators
 from spectrochempy.core.dataset.arraymixins.ndplot import NDPlot
-from spectrochempy.core.dataset.basearrays.ndarray import DEFAULT_DIM_NAME, NDArray
-from spectrochempy.core.dataset.basearrays.ndcomplex import NDComplexArray
+from spectrochempy.core.dataset.baseobjects.ndarray import DEFAULT_DIM_NAME, NDArray
+from spectrochempy.core.dataset.baseobjects.ndcomplex import NDComplexArray
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.coordset import CoordSet
-from spectrochempy.core.project.baseproject import AbstractProject
 from spectrochempy.extern.traittypes import Array
-from spectrochempy.utils import colored_output, get_user_and_node
 from spectrochempy.utils.exceptions import SpectroChemPyError, UnknownTimeZoneError
 from spectrochempy.utils.optional import import_optional_dependency
+from spectrochempy.utils.print import colored_output
+from spectrochempy.utils.system import get_user_and_node
+
+#       but we need compatibility with 3.7 (Colab).
 
 
 # ======================================================================================
@@ -105,13 +107,13 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     Other Parameters
     ----------------
     dtype : str or dtype, optional, default=np.float64
-        If specified, the data will be casted to this dtype, else the data
-        will be casted to float64 or complex128.
+        If specified, the data will be cast to this dtype, else the data
+        will be cast to float64 or complex128.
     dims : list of chars, optional
         If specified the list must have a length equal to the number od data
         dimensions (ndim) and the chars
         must be
-        taken among among x,y,z,u,v,w or t. If not specified, the dimension
+        taken among x,y,z,u,v,w or t. If not specified, the dimension
         names are automatically attributed in
         this order.
     name : str, optional
@@ -144,7 +146,8 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         The timezone where the data were created. If not specified, the local timezone
         is assumed.
     title : str, optional
-        The title of the data dimension. The `title` attribute should not be confused with the `name`.
+        The title of the data dimension. The `title` attribute should not be confused
+        with the `name` .
         The `title` attribute is used for instance for labelling plots of the data.
         It is optional but recommended to give a title to each ndarray data.
     dlabel :  str, optional
@@ -201,6 +204,8 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
 
     # dataset can be members of a project.
     # we use the abstract class to avoid circular imports.
+    from spectrochempy.core.project.abstractproject import AbstractProject
+
     _parent = Instance(AbstractProject, allow_none=True)
 
     # For the GUI interface
@@ -1570,7 +1575,12 @@ api_funcs = [
 
 for funcname in api_funcs:
     setattr(thismodule, funcname, getattr(NDDataset, funcname))
-    thismodule.__all__.append(funcname)
+    __all__.append(funcname)
+
+# import also npy functions  # TODO: this will be changed with __array_functions__
+from spectrochempy.core.dataset.arraymixins.npy import dot
+
+NDDataset.dot = dot
 
 # ======================================================================================
 # Set the operators

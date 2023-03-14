@@ -11,7 +11,7 @@ Tests for the SVD class
 from numpy.testing import assert_allclose
 
 from spectrochempy.analysis.svd import SVD
-from spectrochempy.utils import MASKED
+from spectrochempy.utils.constants import MASKED
 
 
 # test svd

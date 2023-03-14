@@ -21,12 +21,13 @@ from spectrochempy.analysis._analysisutils import (
     _wrap_ndarray_output_to_nddataset,
 )
 from spectrochempy.core import app, set_loglevel
-from spectrochempy.core.common.meta import Meta
-from spectrochempy.core.dataset.basearrays.ndarray import NDArray
+from spectrochempy.core.dataset.baseobjects.meta import Meta
+from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
-from spectrochempy.utils import MASKED, NOMASK, exceptions
+from spectrochempy.utils import exceptions
+from spectrochempy.utils.constants import MASKED, NOMASK
 from spectrochempy.utils.docstrings import _docstring
 from spectrochempy.utils.traits import MetaConfigurable, NDDatasetType
 

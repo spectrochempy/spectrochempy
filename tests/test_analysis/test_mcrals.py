@@ -14,7 +14,9 @@ from spectrochempy.analysis.mcrals import MCRALS
 from spectrochempy.core import set_loglevel
 from spectrochempy.core.dataset.arraymixins.npy import dot
 from spectrochempy.core.dataset.nddataset import Coord, NDDataset
-from spectrochempy.utils import MASKED, show, testing
+from spectrochempy.utils import testing
+from spectrochempy.utils.constants import MASKED
+from spectrochempy.utils.plots import show
 
 
 def gaussian(x, h, c, w, noise):

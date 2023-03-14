@@ -180,7 +180,7 @@ def dict_compare(d1, d2, check_equal_only=True):
     Examples
     --------
 
-        >>> from spectrochempy.utils import dict_compare
+        >>> from spectrochempy.utils.compare import dict_compare
         >>>
         >>> x = dict(a=1, b=2)
         >>> y = dict(a=2, b=2)

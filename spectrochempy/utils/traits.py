@@ -178,38 +178,6 @@ class CoordType(SpectroChemPyType):
         self.metadata.update({"dtype": dtype})
 
 
-class ProjectType(SpectroChemPyType):
-    """
-    A NDDataset trait type.
-    """
-
-    info_text = "a SpectroChemPy Project"
-
-    def __init__(self, default_value=Empty, allow_none=False, dtype=None, **kwargs):
-        if "klass" not in kwargs and self.klass is None:
-            from spectrochempy.core.project.project import Project
-
-            kwargs["klass"] = Project
-        super().__init__(default_value=default_value, allow_none=allow_none, **kwargs)
-        self.metadata.update({"dtype": dtype})
-
-
-class ScriptType(SpectroChemPyType):
-    """
-    A NDDataset trait type.
-    """
-
-    info_text = "a SpectroChemPy Script"
-
-    def __init__(self, default_value=Empty, allow_none=False, dtype=None, **kwargs):
-        if "klass" not in kwargs and self.klass is None:
-            from spectrochempy.core.script import Script
-
-            kwargs["klass"] = Script
-        super().__init__(default_value=default_value, allow_none=allow_none, **kwargs)
-        self.metadata.update({"dtype": dtype})
-
-
 # ======================================================================================
 if __name__ == "__main__":
     pass

@@ -11,7 +11,7 @@ import pickle
 
 import numpy as np
 
-from spectrochempy.utils import json_decoder, json_serialiser
+from spectrochempy.utils.jsonutils import json_decoder, json_serialiser
 
 
 def test_json_serialiser_decoder(IR_dataset_2D):

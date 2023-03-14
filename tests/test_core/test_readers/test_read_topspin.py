@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 
 import spectrochempy as scp
-from spectrochempy.utils import show
+from spectrochempy.utils.plots import show
 
 nmrdir = Path("nmrdata/bruker/tests/nmr")
 

@@ -22,7 +22,7 @@ __all__ = ["show_versions"]
 def _get_sys_info():
     """Returns system information as a dict"""
     # copied from XArray
-    from spectrochempy.utils import pathclean
+    from spectrochempy.utils.file import pathclean
 
     REPOS = pathclean(__file__).parent.parent.parent
 

@@ -118,7 +118,7 @@ if IN_IPYTHON and KERNEL and not NO_DISPLAY:  # pragma: no cover
         IP.run_line_magic("matplotlib", "qt")
 
 # a useful utilities for dealing with path
-from spectrochempy.utils import pathclean
+from spectrochempy.utils.file import pathclean
 
 DATADIR = pathclean(preferences.datadir)
 

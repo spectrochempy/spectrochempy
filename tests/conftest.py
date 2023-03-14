@@ -20,15 +20,14 @@ except ModuleNotFoundError:  # pragma: no cover
     )
 
 from spectrochempy.core import preferences as prefs
-from spectrochempy.core.dataset.basearrays.ndarray import NDArray
-from spectrochempy.core.dataset.basearrays.ndcomplex import NDComplexArray
+from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
+from spectrochempy.core.dataset.baseobjects.ndcomplex import NDComplexArray
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.project.project import Project
-from spectrochempy.core.scripts.script import Script
-from spectrochempy.utils import pathclean
-from spectrochempy.utils.file import download_testdata
+from spectrochempy.core.script import Script
+from spectrochempy.utils.file import download_testdata, pathclean
 from spectrochempy.utils.testing import RandomSeedContext
 
 # first download missing data

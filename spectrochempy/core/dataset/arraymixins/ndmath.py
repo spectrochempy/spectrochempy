@@ -24,14 +24,10 @@ import numpy as np
 from quaternion import as_float_array
 
 from spectrochempy.core import error_, warning_
-from spectrochempy.core.units.units import DimensionalityError, Quantity, ur
-from spectrochempy.utils import (
-    NOMASK,
-    TYPE_COMPLEX,
-    as_quaternion,
-    quat_as_complex_array,
-)
+from spectrochempy.core.units import DimensionalityError, Quantity, ur
+from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.exceptions import CoordinatesMismatchError
+from spectrochempy.utils.misc import TYPE_COMPLEX, as_quaternion, quat_as_complex_array
 from spectrochempy.utils.orderedset import OrderedSet
 from spectrochempy.utils.testing import assert_coord_almost_equal
 
@@ -71,7 +67,7 @@ class _from_numpy_method:
         def func(*args, **kwargs):
 
             # Delayed import to avoid circular reference
-            from spectrochempy.core.dataset.basearrays.ndarray import NDArray
+            from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
             from spectrochempy.core.dataset.coord import Coord
             from spectrochempy.core.dataset.nddataset import NDDataset
 
@@ -537,7 +533,7 @@ class NDMath(object):
         #        # If this reached, data are not complex or hypercomplex
         #        if fname in ['absolute', 'abs']:
         #            f = np.fabs
-        from spectrochempy.core.dataset.basearrays.ndarray import NDArray
+        from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
 
         # set history string
         history = f"Ufunc {fname} applied."

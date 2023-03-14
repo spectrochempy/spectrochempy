@@ -10,7 +10,7 @@ import os
 
 from spectrochempy.analysis.simplisma import SIMPLISMA
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils import show
+from spectrochempy.utils.plots import show
 
 
 def test_simplisma():
