@@ -17,7 +17,8 @@ See :ref:`release` for a full changelog including other versions of SpectroChemP
 New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
-
+* PCA score plot labelling (issue #543).
+* Improved loading time
 
 .. section
 
@@ -27,13 +28,11 @@ Bug fixes
 * Masks handling.
 * Multicoordinates slicing work correctly.
 
-
 .. section
 
 Breaking changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
-
 
 .. section
 
