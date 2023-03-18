@@ -13,14 +13,14 @@ __all__ = ["generate_fake"]
 # Create fake data to be used by analysis routine for testing
 # --------------------------------------------------------------------------------------
 def _make_spectra_matrix(modelname, ampl, pos, width, ratio=None, asym=None):
-    from spectrochempy.analysis import models
+    from spectrochempy.analysis.fitting import _models
     from spectrochempy.core.dataset.coord import Coord
     from spectrochempy.core.dataset.nddataset import NDDataset
 
     x = Coord(np.linspace(6000.0, 1000.0, 4000), units="cm^-1", title="wavenumbers")
     s = []
     for arg in zip(modelname, ampl, pos, width, ratio, asym):
-        model = getattr(models, arg[0] + "model")()
+        model = getattr(_models, arg[0] + "model")()
         kwargs = {argname: arg[index + 1] for index, argname in enumerate(model.args)}
         s.append(model.f(x.data, **kwargs))
 
@@ -61,7 +61,7 @@ def generate_fake():
 
     # define properties of the spectra and concentration profiles
     # ----------------------------------------------------------------------------------
-    from spectrochempy.analysis import models
+    from spectrochempy.analysis.fitting import _models
     from spectrochempy.core.dataset.arraymixins.npy import dot
 
     # data for four peaks (one very broad)
@@ -76,10 +76,10 @@ def generate_fake():
         return t * 0.05 + 0.01  # linear evolution of the baseline
 
     def C2(t):
-        return models.sigmoidmodel().f(t, 1.0, max(t) / 2.0, 1, 2)
+        return _models.sigmoidmodel().f(t, 1.0, max(t) / 2.0, 1, 2)
 
     def C3(t):
-        return models.sigmoidmodel().f(t, 1.0, max(t) / 5.0, 1, -2)
+        return _models.sigmoidmodel().f(t, 1.0, max(t) / 5.0, 1, -2)
 
     def C4(t):
         return 1.0 - C2(t) - C3(t)
