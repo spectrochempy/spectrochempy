@@ -295,7 +295,8 @@ class AnalysisConfigurable(MetaConfigurable):
     def _X_validate(self, proposal):
         # validation fired when self._X is assigned
         X = proposal.value
-        # for the following we need X with two dimension (even if the last is of size 1)
+
+        # for the following we need X with two dimensions (even if the last is of size 1)
         # So let's generate the un-squeezed X (coordinate x become y)
         if X.ndim == 1:
             coordset = X.coordset
@@ -757,6 +758,16 @@ class DecompositionAnalysis(AnalysisConfigurable):
         """
         return self._get_components()
 
+    @property
+    def n_components(self):
+        """
+        Return the number of components that were fitted.
+        """
+        if self._fitted:
+            return self._n_components
+        else:
+            raise NotFittedError("n_components")
+
     # ----------------------------------------------------------------------------------
     # Plot methods
     # ----------------------------------------------------------------------------------
@@ -873,7 +884,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
 
         # unlike decomposition methods, we output ndarray when the input
         # is not a dataset
-        self._output_type == "ndarray"
+        self._output_type = "ndarray"
 
     # ----------------------------------------------------------------------------------
     # Private validation and default getter methods

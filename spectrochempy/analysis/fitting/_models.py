@@ -75,7 +75,6 @@ def make_units_compatibility(func):
             ampl_units = newargs[0].units
             newargs[0] = newargs[0].m
 
-        print(newargs)
         _data = func(cls, x, *newargs)
 
         if returntype == "NDDataset":

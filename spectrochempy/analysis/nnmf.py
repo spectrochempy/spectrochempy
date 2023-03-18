@@ -13,7 +13,6 @@ import traitlets as tr
 from numpy.random import RandomState
 from sklearn import decomposition
 
-from spectrochempy.analysis._analysisutils import NotFittedError
 from spectrochempy.analysis.abstractanalysis import DecompositionAnalysis
 from spectrochempy.utils.docstrings import _docstring
 
@@ -250,12 +249,3 @@ class NMF(DecompositionAnalysis):
     # ----------------------------------------------------------------------------------
     # Public methods and properties specific to NMF
     # ----------------------------------------------------------------------------------
-    @property
-    def n_components(self):
-        """
-        Return the number of components that were fitted.
-        """
-        if self._fitted:
-            return self._n_components
-        else:
-            raise NotFittedError("n_components")

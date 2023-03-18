@@ -304,16 +304,6 @@ for reproducible results across multiple function calls.""",
     # Public methods and properties specific to PCA
     # ----------------------------------------------------------------------------------
     @property
-    def n_components(self):
-        """
-        Return the number of components that were fitted.
-        """
-        if self._fitted:
-            return self._n_components
-        else:
-            raise NotFittedError("n_components")
-
-    @property
     def loadings(self):
         """
         Return PCA loadings.
