@@ -183,6 +183,8 @@ def plot_2D(dataset, method=None, **kwargs):
     # Other properties that can be passed as arguments
     # ------------------------------------------------------------------------
     lw = kwargs.get("linewidth", kwargs.get("lw", prefs.lines_linewidth))
+    ls = kwargs.get("linestyle", kwargs.get("ls", prefs.lines_linestyle))
+
     alpha = kwargs.get("calpha", prefs.contour_alpha)
 
     number_x_labels = prefs.number_of_x_labels
@@ -369,7 +371,9 @@ def plot_2D(dataset, method=None, **kwargs):
     ax.grid(prefs.axes_grid)
 
     normalize = kwargs.get("normalize", None)
-    cmap = kwargs.get("colormap", kwargs.get("cmap", prefs.colormap))
+    cmap = kwargs.get("colormap", "Undefined")
+    if cmap == "Undefined":
+        cmap = kwargs.get("cmap", prefs.colormap)
 
     if method in ["map", "image", "surface"]:
         zmin, zmax = zlim
@@ -450,17 +454,23 @@ def plot_2D(dataset, method=None, **kwargs):
         # stack plot
         # ----------
         # now plot the collection of lines
-        # map colors using the colormap
+        # map colors
+        if cmap is None:
+            color = kwargs.get("color")
+            if color is None:
+                colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
+            else:
+                colors = [color]
+        else:
+            vmin, vmax = ylim
+            norm = mpl.colors.Normalize(
+                vmin=vmin, vmax=vmax
+            )  # we normalize to the max time
+            if normalize is not None:
+                norm.vmax = normalize
 
-        vmin, vmax = ylim
-        norm = mpl.colors.Normalize(
-            vmin=vmin, vmax=vmax
-        )  # we normalize to the max time
-        if normalize is not None:
-            norm.vmax = normalize
-
-        _colormap = plt.get_cmap(cmap)
-        scalarMap = mpl.cm.ScalarMappable(norm=norm, cmap=_colormap)
+            _colormap = plt.get_cmap(cmap)
+            scalarMap = mpl.cm.ScalarMappable(norm=norm, cmap=_colormap)
 
         # we display the line in the reverse order, so that the last
         # are behind the first.
@@ -470,10 +480,8 @@ def plot_2D(dataset, method=None, **kwargs):
         if not clear and not transposed:
             lines.extend(ax.lines)  # keep the old lines
 
-        line0 = mpl.lines.Line2D(xdata, zdata[0], lw=lw, picker=True)
+        line0 = mpl.lines.Line2D(xdata, zdata[0], lw=lw, ls=ls, picker=True)
 
-        if cmap is None:
-            colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
         for i in range(zdata.shape[0]):
             li = cpy(line0)
             li.set_ydata(zdata[i])
@@ -482,6 +490,7 @@ def plot_2D(dataset, method=None, **kwargs):
                 li.set_color(scalarMap.to_rgba(ydata[i]))
             else:
                 li.set_color(colors[i % len(colors)])
+
             fmt = kwargs.get("label_fmt", "{:.5f}")
             li.set_label(fmt.format(ydata[i]))
             li.set_zorder(zdata.shape[0] + 1 - i)

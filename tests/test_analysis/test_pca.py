@@ -135,7 +135,7 @@ def test_pca():
     # score is optional
     X_hat = pca.inverse_transform()
 
-    pca.plotmerit(dataset, X_hat)
+    pca.plotmerit(dataset, X_hat, offset=0, nb_traces=10)
     plt.show()
 
     # printev

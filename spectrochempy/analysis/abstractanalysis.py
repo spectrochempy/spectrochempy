@@ -771,42 +771,83 @@ class DecompositionAnalysis(AnalysisConfigurable):
     # ----------------------------------------------------------------------------------
     # Plot methods
     # ----------------------------------------------------------------------------------
+    @_docstring.get_sections(base="plotmerit")
+    @_docstring.dedent
     def plotmerit(self, X, X_hat, **kwargs):
         """
-        Plots the input dataset, reconstructed dataset and residuals.
+        Plots the input dataset (X), reconstructed (X_hat) and residuals (E) datasets.
 
         Parameters
         ----------
-        **kwargs
-            optional "colors" argument: tuple or array of 3 colors
-            for :math:`X`, :math:`\hat X` and :math:`E`.
+        X : NDDataset
+            Original dataset.
+        X_hat : NDDataset
+            Inverse_transform (reconstructed) dataset from a decomposition model.
+        %(kwargs)s
+
+        Other Parameters
+        ----------------
+        colors : tuple or array of 3 colors, optional, default: ["blue", "orange", "red"]
+            Colors for :math:`X`, :math:`\hat X` and :math:`E`.
+            in the case of 2D, The default colormap is used for X.
+        offset : float, optional, default: None
+            Specify the separation (%%) between the X, X_hat and E.
+        nb_traces : int, optional
+            Number of lines to display. Default is all
+        **others : Other keywords parameters that are passed to
+            the internal plot method of the X dataset.
 
         Returns
         -------
-        ax
-            subplot.
+        mpl.Axe
         """
         if not self._fitted:
             raise NotFittedError(
-                "The fit method must be used " "before using this method"
+                "The fit method must be used before using this method."
             )
 
-        colX, colXhat, colRes = kwargs.pop("colors", ["blue", "green", "red"])
+        colX, colXhat, colRes = kwargs.pop("colors", ["blue", "orange", "red"])
 
-        if X.ndim == 1:
+        if X._squeeze_ndim == 1:
             # normally this was done before, but if needed.
             X = X.squeeze()
             X_hat = X_hat.squeeze()
 
+        # Number of traces to keep
+        nb_traces = kwargs.pop("nb_traces", "all")
+        if X.ndim == 2 and nb_traces != "all":
+            inc = int(X.shape[0] / nb_traces)
+            X = X[::inc]
+            X_hat = X_hat[::inc]
+
         res = X - X_hat
-        ax = X.plot()
+
+        # separation between traces
+        offset = kwargs.pop("offset", 0)
+
         ma = max(X.max(), X_hat.max())
-        if X.x is not None and X.x.data is not None:
-            ax.plot(X.x.data, X_hat.T.masked_data - ma, color=colXhat)
-            ax.plot(X.x.data, res.T.masked_data - 1.2 * ma, color=colRes)
-        else:
-            ax.plot(X_hat.T.masked_data - ma, color=colXhat)
-            ax.plot(res.T.masked_data - 1.2 * ma, color=colRes)
+        mao = ma * offset / 100
+        mad = ma * offset / 100 + ma / 10
+        _ = (X - X.min()).plot(color=colX, **kwargs)
+        _ = (X_hat - X_hat.min() - mao).plot(
+            clear=False, ls="dashed", cmap=None, color=colXhat
+        )
+        ax = (res - res.min() - mad).plot(clear=False, cmap=None, color=colRes)
+
+        #             color=colXhat)
+        #     ax.plot(res.T.masked_data - 1.2 * ma,
+        #             color=colRes)
+
+        # if X.x is not None and X.x.data is not None:
+        #     ax.plot(X.x.data, X_hat.T.masked_data - ma, '-',
+        #             color=colXhat)
+        #     ax.plot(X.x.data, res.T.masked_data - 1.2 * ma, '-',
+        #             color=colRes)
+        # else:
+        #     ax.plot(X_hat.T.masked_data - ma,
+        #             color=colXhat)
+        #     ax.plot(res.T.masked_data - 1.2 * ma,
+        #             color=colRes)
         ax.autoscale(enable=True, axis="y")
         ax.set_title(f"{self.name} plot of merit")
         ax.yaxis.set_visible(False)

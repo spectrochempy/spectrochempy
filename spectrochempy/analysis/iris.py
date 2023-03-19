@@ -19,7 +19,7 @@ from matplotlib import pyplot as plt
 from scipy import optimize
 
 from spectrochempy.analysis._analysisutils import NotFittedError
-from spectrochempy.analysis.abstractanalysis import AnalysisConfigurable
+from spectrochempy.analysis.abstractanalysis import DecompositionAnalysis
 from spectrochempy.core import info_, warning_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
@@ -287,7 +287,7 @@ class IrisKernel(tr.HasTraits):
         return out
 
 
-class IRIS(AnalysisConfigurable):
+class IRIS(DecompositionAnalysis):
     __doc__ = _docstring.dedent(
         """
     Integral inversion solver for spectroscopic data.
@@ -800,6 +800,7 @@ class IRIS(AnalysisConfigurable):
             ax.set_yscale("log")
         return ax
 
+    @_docstring.dedent
     def plotmerit(self, index=None, **kwargs):
         """
         Plot the input dataset, reconstructed dataset and residuals.
@@ -809,19 +810,18 @@ class IRIS(AnalysisConfigurable):
         index : int, list or tuple of int, optional, default: None
             Index(es) of the inversions (i.e. of the lambda values) to consider.
             If 'None': plots for all indices.
+        %(kwargs)s
 
-        **kwargs
-            Keywords arguments passed to the plot() function.
+        Other Parameters
+        ----------------
+        %(plotmerit.other_parameters)s
 
         Returns
         -------
-            list of axes
-                The axes.
+        list of mpl.Axes
         """
         if not self._fitted:
             raise NotFittedError("The fit method must be used before using this method")
-
-        colX, colXhat, colRes = kwargs.get("colors", ["blue", "green", "red"])
 
         X = self.X
         X_hat = self.reconstruct()
@@ -836,17 +836,14 @@ class IRIS(AnalysisConfigurable):
                 X_hat_ = X_hat[i].squeeze()
             else:
                 X_hat_ = X_hat  # if single lambda or no regularization
-            res = X - X_hat_
-            ax = X.plot()
-            ma = max(X.max(), X_hat_.max())
-            ax.plot(X.x.data, X_hat_.T.masked_data - ma, color=colXhat)
-            ax.plot(X.x.data, res.T.masked_data - 1.2 * ma, color=colRes)
+
+            ax = super().plotmerit(X, X_hat_, **kwargs)
+
             ax.set_title(
                 f"2D IRIS merit plot, $\lambda$ = {self._lambdas[i].value:.2e}"
             )
-            ax.autoscale(enable=True, axis="y")
-            ax.yaxis.set_visible(False)
             axeslist.append(ax)
+
         return axeslist
 
     def plotdistribution(self, index=None, **kwargs):

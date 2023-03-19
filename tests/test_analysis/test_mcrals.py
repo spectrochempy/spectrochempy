@@ -148,7 +148,7 @@ def test_MCRALS(model, data):
     # test plot
     mcr.C.T.plot(title="Concentration")
     mcr.St.plot(title="Components")
-    mcr.plotmerit(D, X_hat)
+    mcr.plotmerit(D, X_hat, offset=0, nb_traces=5)
     show()
 
     # reset to default

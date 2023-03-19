@@ -54,7 +54,8 @@ _ = simpl.components.plot(title="Components")
 # Show the plot of merit
 # after reconstruction oto the original data space
 X_hat = simpl.inverse_transform()
-simpl.plotmerit(ds, X_hat)
+simpl.plotmerit(ds, X_hat, offset=0, nb_traces=5)
+
 
 # %%
 # uncomment the line below to see plot if needed (not necessary in jupyter notebook)
