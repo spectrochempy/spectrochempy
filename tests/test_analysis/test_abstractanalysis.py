@@ -70,14 +70,14 @@ def test_analysisconfigurable_validation():
     X = [1.0, 2.0, 3.0]
     foo.fit(X)
     # A column has been added
-    assert repr(foo.X) == "NDDataset: [float64] unitless (shape: (x:3, a:1))"
+    assert repr(foo.X) == "NDDataset: [float64] unitless (shape: (y:1, x:3))"
 
     X = scp.NDDataset(np.arange(3) + 1.5, coordset=[range(3)], units="m")
     foo.fit(X)
-    assert repr(foo.X) == "NDDataset: [float64] m (shape: (x:3, a:1))"
+    assert repr(foo.X) == "NDDataset: [float64] m (shape: (y:1, x:3))"
 
     X = scp.NDDataset(np.arange(3) + 1.5, coordset=[range(3)], units="m")
     # with a mask
     X[1] = scp.MASKED
     foo.fit(X)
-    assert repr(foo.X) == "NDDataset: [float64] m (shape: (x:3, a:1))"
+    assert repr(foo.X) == "NDDataset: [float64] m (shape: (y:1, x:3))"

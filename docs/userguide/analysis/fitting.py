@@ -434,9 +434,20 @@ shape: asymmetricvoigtmodel
 #   ```
 
 # %%
-f1 = scp.Fit(ndOHcorr, script, silent=False)
-f1.run(maxiter=2000, every=100)
-ndOHcorr.plot(plot_model=True, lw=2)
+f1 = scp.Optimize(log_level="INFO")
+f1.script = script
+f1.max_iter = 2000
+# f1.autobase = True
+f1.fit(ndOHcorr)
+
+# Show the result
+ndOHcorr.plot()
+ax = (f1.components[:]).plot(clear=False)
+ax.autoscale(enable=True, axis="y")
+
+# plotmerit
+som = f1.inverse_transform()
+f1.plotmerit(ndOHcorr, som)
 
 # %% [markdown]
 # <div class='alert alert-warning'>

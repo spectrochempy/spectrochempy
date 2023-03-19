@@ -182,7 +182,7 @@ class _set_output(object):
         # eventually restore masks
         X_transf = obj._restore_masked_data(X_transf, axis=axis)
 
-        return X_transf
+        return X_transf.squeeze()
 
 
 # wrap _set_output to allow for deferred calling

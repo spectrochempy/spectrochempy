@@ -545,7 +545,7 @@ class Optimize(DecompositionAnalysis):
             # nD data
             raise NotImplementedError("Fit not implemented for nD data yet!")
 
-        # weneed to keep track of the x axis before masking
+        # we need to keep track of the x axis before masking
         axis, dim = self._X.get_axis(-1)
         _xaxis = self._X_coordset[dim].data
 

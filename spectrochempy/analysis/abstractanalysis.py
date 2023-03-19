@@ -296,16 +296,16 @@ class AnalysisConfigurable(MetaConfigurable):
         # validation fired when self._X is assigned
         X = proposal.value
 
-        # for the following we need X with two dimensions (even if the last is of size 1)
-        # So let's generate the un-squeezed X (coordinate x become y)
+        # for the following we need X with two dimensions
+        # So let's generate the un-squeezed X
         if X.ndim == 1:
             coordset = X.coordset
-            X._data = X._data[:, np.newaxis]
+            X._data = X._data[np.newaxis]
             if np.any(X.mask):
-                X._mask = X._mask[:, np.newaxis]
-            X.dims = ["x", "a"]
+                X._mask = X._mask[np.newaxis]
+            X.dims = ["y", "x"]  # "y" is the new dimension
             coordx = coordset[0] if coordset is not None else None
-            X.set_coordset(x=coordx, a=None)
+            X.set_coordset(x=coordx, y=None)
 
         # as in fit methods we often use np.linalg library, we cannot handle directly
         # masked data (so we remove them here and they will be restored at the end of
@@ -793,6 +793,11 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         colX, colXhat, colRes = kwargs.pop("colors", ["blue", "green", "red"])
 
+        if X.ndim == 1:
+            # normally this was done before, but if needed.
+            X = X.squeeze()
+            X_hat = X_hat.squeeze()
+
         res = X - X_hat
         ax = X.plot()
         ma = max(X.max(), X_hat.max())
@@ -954,9 +959,23 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         # of NDArray)
         self._is_dataset = isinstance(X, NDArray)
 
+        def _make2D(X):
+            # For regression analysis we need X as a NDDataset with two dimensions
+            # IF X is 1D, then we add a dimension at the end.
+            X = self._make_dataset(X)
+            if X.ndim == 1:
+                coordset = X.coordset
+                X._data = X._data[:, np.newaxis]
+                if np.any(X.mask):
+                    X._mask = X._mask[:, np.newaxis]
+                X.dims = ["x", "a"]
+                coordx = coordset[0] if coordset is not None else None
+                X.set_coordset(x=coordx, a=None)
+            return X
+
         # fire the X and Y validation and preprocessing.
         if Y is not None:
-            self._X = X
+            self._X = _make2D(X)
             self._Y = Y
         else:
             # X should contain the X and Y information (X being the coord and Y the data)
@@ -965,7 +984,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
                     "The passed argument must have a x coordinates,"
                     "or X input and Y target must be passed separately"
                 )
-            self._X = X.coord(0)
+            self._X = _make2D(X.coord(0))
             self._Y = X
 
         # _X_preprocessed has been computed when X was set, as well as _Y_preprocessed.
