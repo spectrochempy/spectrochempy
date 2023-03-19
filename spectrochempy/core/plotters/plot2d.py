@@ -455,6 +455,13 @@ def plot_2D(dataset, method=None, **kwargs):
         # ----------
         # now plot the collection of lines
         # map colors
+        vmin, vmax = ylim
+        norm = mpl.colors.Normalize(
+            vmin=vmin, vmax=vmax
+        )  # we normalize to the max time
+        if normalize is not None:
+            norm.vmax = normalize
+
         if cmap is None:
             color = kwargs.get("color")
             if color is None:
@@ -462,12 +469,6 @@ def plot_2D(dataset, method=None, **kwargs):
             else:
                 colors = [color]
         else:
-            vmin, vmax = ylim
-            norm = mpl.colors.Normalize(
-                vmin=vmin, vmax=vmax
-            )  # we normalize to the max time
-            if normalize is not None:
-                norm.vmax = normalize
 
             _colormap = plt.get_cmap(cmap)
             scalarMap = mpl.cm.ScalarMappable(norm=norm, cmap=_colormap)
