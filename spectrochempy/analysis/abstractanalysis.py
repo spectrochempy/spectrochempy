@@ -1003,7 +1003,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         def _make2D(X):
             # For regression analysis we need X as a NDDataset with two dimensions
             # IF X is 1D, then we add a dimension at the end.
-            X = self._make_dataset(X)
+            X = NDDataset(X)
             if X.ndim == 1:
                 coordset = X.coordset
                 X._data = X._data[:, np.newaxis]
