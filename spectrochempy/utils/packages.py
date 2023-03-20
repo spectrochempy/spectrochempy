@@ -36,7 +36,6 @@ def list_packages(package):
 
 
 def generate_api(api_path, configurables=False):
-
     # from spectrochempy.application import debug_
     from spectrochempy.core.dataset.nddataset import NDDataset
 

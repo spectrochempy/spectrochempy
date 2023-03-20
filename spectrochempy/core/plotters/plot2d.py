@@ -323,7 +323,6 @@ def plot_2D(dataset, method=None, **kwargs):
     zlim = kwargs.get("zlim", (np.ma.min(zdata), np.ma.max(zdata)))
 
     if method in ["stack", "waterfall"]:
-
         # the z axis info
         # ---------------
         # zl = (np.min(np.ma.min(ys)), np.max(np.ma.max(ys)))
@@ -349,7 +348,6 @@ def plot_2D(dataset, method=None, **kwargs):
             ax.set_ylim(zlim)
 
     else:
-
         # the y axis info
         # ----------------
         if data_only:
@@ -411,7 +409,6 @@ def plot_2D(dataset, method=None, **kwargs):
         _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwargs)
 
     elif method in ["image"]:
-
         cmap = kwargs.get("cmap", kwargs.get("image_cmap", prefs.image_cmap))
         if discrete_data:
             method = "map"
@@ -426,7 +423,6 @@ def plot_2D(dataset, method=None, **kwargs):
 
     elif method in ["map"]:
         if discrete_data:
-
             _colormap = plt.get_cmap(cmap)
             scalarMap = mpl.cm.ScalarMappable(norm=norm, cmap=_colormap)
 
@@ -450,7 +446,6 @@ def plot_2D(dataset, method=None, **kwargs):
             c.set_norm(norm)
 
     elif method in ["stack"]:
-
         # stack plot
         # ----------
         # now plot the collection of lines
@@ -469,7 +464,6 @@ def plot_2D(dataset, method=None, **kwargs):
             else:
                 colors = [color]
         else:
-
             _colormap = plt.get_cmap(cmap)
             scalarMap = mpl.cm.ScalarMappable(norm=norm, cmap=_colormap)
 
