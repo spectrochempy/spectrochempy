@@ -490,7 +490,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
         allow_none=True,
         help="Target/profiles taken into account to fit a model",
     )
-    _Y_preprocessed = Array(help="preprocessed Y")
+    _Y_preprocessed = tr.Union((tr.List(Array()), Array()), help="preprocessed Y")
     _n_components = tr.Integer(help="""The actual number of components.""")
     _components = Array(help="the array of (n_components, n_features) components")
 

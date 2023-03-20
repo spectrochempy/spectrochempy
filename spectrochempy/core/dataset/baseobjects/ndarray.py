@@ -347,7 +347,7 @@ class NDArray(HasTraits):
 
         # choose, if we keep the same or create new object
         inplace = False
-        if isinstance(items, tuple) and items[-1] == INPLACE:
+        if isinstance(items, tuple) and np.any(str(items[-1]) == INPLACE):
             items = items[:-1]
             inplace = True
 

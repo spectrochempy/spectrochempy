@@ -55,8 +55,17 @@ import warnings
 warnings.filterwarnings(
     action="once", module="spectrochempy", category=DeprecationWarning
 )
+import numpy as np
+
+warnings.filterwarnings(
+    action="error", module="spectrochempy", category=np.VisibleDeprecationWarning
+)
+
 warnings.filterwarnings(action="ignore", module="jupyter")  # , category=UserWarning)
 warnings.filterwarnings(action="ignore", module="pykwalify")  # , category=UserWarning)
+warnings.filterwarnings(
+    action="error", category=FutureWarning
+)  # , category=UserWarning)
 
 from spectrochempy import api
 from spectrochempy.api import *  # noqa: F401

@@ -12,6 +12,7 @@ __all__ = ["MCRALS"]
 __configurables__ = ["MCRALS"]
 
 import logging
+import warnings
 
 import numpy as np
 import traitlets as tr
@@ -544,12 +545,14 @@ profile #j,
             # Indeed, if not forced here these parameters are validated only when they
             # are set explicitely.
             # Here is an ugly trick to force this validation. # TODO: better way?
-            self.closureTarget = self.closureTarget
-            self.hardC_to_C_idx = self.hardC_to_C_idx
-            self.nonnegConc = self.nonnegConc
-            self.nonnegSpec = self.nonnegSpec
-            self.unimodConc = self.unimodConc
-            self.unimodSpec = self.unimodSpec
+            with warnings.catch_warnings():
+                warnings.simplefilter(action="ignore", category=FutureWarning)
+                self.closureTarget = self.closureTarget
+                self.hardC_to_C_idx = self.hardC_to_C_idx
+                self.nonnegConc = self.nonnegConc
+                self.nonnegSpec = self.nonnegSpec
+                self.unimodConc = self.unimodConc
+                self.unimodSpec = self.unimodSpec
 
     @tr.default("_components")
     def _components_default(self):
@@ -727,7 +730,7 @@ profile #j,
                 )
 
             # recompute C for consistency(soft modeling)
-            C = np.linalg.lstsq(St.T, X.T)[0].T
+            C = np.linalg.lstsq(St.T, X.T, rcond=-1)[0].T
 
             # rescale spectra & concentrations
             if self.normSpec == "max":
