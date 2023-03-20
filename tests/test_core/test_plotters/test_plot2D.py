@@ -30,16 +30,18 @@ def test_plot2D():
     A.plot()
     A.plot(style=["sans", "paper", "grayscale"], colorbar=False)
 
+    # set ls and lw
+    prefs.reset()
+    A.plot(lw=0.1)
+    A.plot(ls="dashed")
+
+    # use a cyclecolor
+    A.plot(cmap=None)
+
+    # use a single color
+    A.plot(cmap=None, color="red")
+
     show()
-
-
-def test_plotly2D():
-    A = NDDataset.read_omnic("irdata/nh4y-activation.spg", directory=prefs.datadir)
-    A.y -= A.y[0]
-    A.y.to("hour", inplace=True)
-    A.y.title = "Acquisition time"
-
-    # TODO: A.copy().plot(use_plotly=True)
 
 
 # ======================================================================================
